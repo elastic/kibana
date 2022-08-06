@@ -6,7 +6,6 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { getAvailableShapes, Shape } from '@kbn/expression-shape-plugin/common';
 import { ShapePickerPopover } from '../shape_picker_popover';
@@ -27,20 +26,39 @@ class Interactive extends React.Component<{}, { value: string }> {
   }
 }
 
-storiesOf('components/Shapes/ShapePickerPopover', module)
-  .add('default', () => (
-    <ShapePickerPopover shapes={getAvailableShapes()} onChange={action('onChange')} />
-  ))
-  .add('shape selected', () => (
-    <ShapePickerPopover
-      shapes={getAvailableShapes()}
-      onChange={action('onChange')}
-      value={Shape.SQUARE}
-    />
-  ))
-  .add('interactive', () => <Interactive />, {
+export default {
+  title: 'components/Shapes/ShapePickerPopover',
+};
+
+export const Default = () => (
+  <ShapePickerPopover shapes={getAvailableShapes()} onChange={action('onChange')} />
+);
+
+Default.story = {
+  name: 'default',
+};
+
+export const ShapeSelected = () => (
+  <ShapePickerPopover
+    shapes={getAvailableShapes()}
+    onChange={action('onChange')}
+    value={Shape.SQUARE}
+  />
+);
+
+ShapeSelected.story = {
+  name: 'shape selected',
+};
+
+export const _Interactive = () => <Interactive />;
+
+_Interactive.story = {
+  name: 'interactive',
+
+  parameters: {
     info: {
       source: false,
       propTablesExclude: [Interactive],
     },
-  });
+  },
+};

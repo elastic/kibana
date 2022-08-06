@@ -6,29 +6,45 @@
  */
 
 import React from 'react';
-import { storiesOf } from '@storybook/react';
 
 import { CanvasRenderedPage } from '../../../types';
 import { ExampleContext } from '../../../test/context_example';
 import { Scrubber, ScrubberComponent } from '../scrubber';
 import { workpads } from '../../../../__fixtures__/workpads';
 
-storiesOf('shareables/Footer/Scrubber', module)
-  .add('contextual: hello', () => (
-    <ExampleContext source="hello" style={{ height: 172 }} isScrubberVisible={true}>
-      <Scrubber />
-    </ExampleContext>
-  ))
-  .add('contextual: austin', () => (
-    <ExampleContext source="austin" style={{ height: 172 }} isScrubberVisible={true}>
-      <Scrubber />
-    </ExampleContext>
-  ))
-  .add('component', () => (
-    <ExampleContext style={{ height: 172 }}>
-      <ScrubberComponent
-        isScrubberVisible={true}
-        pages={workpads[0].pages as unknown as CanvasRenderedPage[]}
-      />
-    </ExampleContext>
-  ));
+export default {
+  title: 'shareables/Footer/Scrubber',
+};
+
+export const ContextualHello = () => (
+  <ExampleContext source="hello" style={{ height: 172 }} isScrubberVisible={true}>
+    <Scrubber />
+  </ExampleContext>
+);
+
+ContextualHello.story = {
+  name: 'contextual: hello',
+};
+
+export const ContextualAustin = () => (
+  <ExampleContext source="austin" style={{ height: 172 }} isScrubberVisible={true}>
+    <Scrubber />
+  </ExampleContext>
+);
+
+ContextualAustin.story = {
+  name: 'contextual: austin',
+};
+
+export const Component = () => (
+  <ExampleContext style={{ height: 172 }}>
+    <ScrubberComponent
+      isScrubberVisible={true}
+      pages={workpads[0].pages as unknown as CanvasRenderedPage[]}
+    />
+  </ExampleContext>
+);
+
+Component.story = {
+  name: 'component',
+};

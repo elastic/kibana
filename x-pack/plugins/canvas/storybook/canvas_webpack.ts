@@ -66,6 +66,6 @@ export const canvasWebpack = {
 
 export const canvasStorybookConfig: StorybookConfig = {
   ...defaultConfig,
-  addons: [...(defaultConfig.addons || []), './addon/target/register'],
+  // addons: [...(defaultConfig.addons || []), './addon/target/register'],
   ...mergeWebpackFinal(canvasWebpack),
 };

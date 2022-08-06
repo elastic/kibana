@@ -7,7 +7,14 @@
  */
 
 import React from 'react';
-import { storiesOf } from '@storybook/react';
 import { Demo } from './test_samples/demo';
 
-storiesOf('UrlDrilldownCollectConfig', module).add('default', () => <Demo />);
+export default {
+  title: 'UrlDrilldownCollectConfig',
+};
+
+export const Default = () => <Demo />;
+
+Default.story = {
+  name: 'default',
+};

@@ -1,11 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-
-import { storiesOf } from '@storybook/react';
 import React from 'react';
 import moment from 'moment';
 import { FiltersGroup } from '../filters_group.component';
@@ -39,9 +31,21 @@ const filtersGroup: FiltersGroupType = {
   ],
 };
 
-storiesOf('components/WorkpadFilters/FiltersGroupComponent', module)
-  .addDecorator((story) => <div className="canvasLayout__sidebar">{story()}</div>)
-  .add('default', () => <FiltersGroup filtersGroup={filtersGroup} id="0" />)
-  .add('empty group', () => (
-    <FiltersGroup filtersGroup={{ name: 'Group 1', filters: [] }} id="0" />
-  ));
+export default {
+  title: 'components/WorkpadFilters/FiltersGroupComponent',
+  decorators: [(story) => <div className="canvasLayout__sidebar">{story()}</div>],
+};
+
+export const Default = () => <FiltersGroup filtersGroup={filtersGroup} id="0" />;
+
+Default.story = {
+  name: 'default',
+};
+
+export const EmptyGroup = () => (
+  <FiltersGroup filtersGroup={{ name: 'Group 1', filters: [] }} id="0" />
+);
+
+EmptyGroup.story = {
+  name: 'empty group',
+};

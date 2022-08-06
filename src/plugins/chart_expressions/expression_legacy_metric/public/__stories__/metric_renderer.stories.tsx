@@ -7,7 +7,6 @@
  */
 
 import React from 'react';
-import { storiesOf } from '@storybook/react';
 import { from } from 'rxjs';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
@@ -145,221 +144,269 @@ const metricVisRenderer = () =>
     getStartDeps,
   });
 
-storiesOf('renderers/visMetric', module)
-  .add('Default', () => {
-    return <Render renderer={metricVisRenderer} config={config} {...containerSize} />;
-  })
-  .add('Without labels', () => {
-    return (
-      <Render
-        renderer={metricVisRenderer}
-        config={{
-          ...config,
-          visConfig: {
-            ...config.visConfig,
-            metric: {
-              ...config.visConfig.metric,
-              labels: {
-                show: false,
-                style: { spec: {}, type: 'style', css: '' },
-                position: LabelPosition.BOTTOM,
-              },
+export default {
+  title: 'renderers/visMetric',
+};
+
+export const Default = () => {
+  return <Render renderer={metricVisRenderer} config={config} {...containerSize} />;
+};
+
+export const WithoutLabels = () => {
+  return (
+    <Render
+      renderer={metricVisRenderer}
+      config={{
+        ...config,
+        visConfig: {
+          ...config.visConfig,
+          metric: {
+            ...config.visConfig.metric,
+            labels: {
+              show: false,
+              style: { spec: {}, type: 'style', css: '' },
+              position: LabelPosition.BOTTOM,
             },
           },
-        }}
-        {...containerSize}
-      />
-    );
-  })
-  .add('With custom font size', () => {
-    return (
-      <Render
-        renderer={metricVisRenderer}
-        config={{
-          ...config,
-          visConfig: {
-            ...config.visConfig,
-            metric: {
-              ...config.visConfig.metric,
-              style: {
-                ...config.visConfig.metric.style,
-                spec: { ...config.visConfig.metric.style.spec, fontSize: '120px' },
-              },
+        },
+      }}
+      {...containerSize}
+    />
+  );
+};
+
+WithoutLabels.story = {
+  name: 'Without labels',
+};
+
+export const WithCustomFontSize = () => {
+  return (
+    <Render
+      renderer={metricVisRenderer}
+      config={{
+        ...config,
+        visConfig: {
+          ...config.visConfig,
+          metric: {
+            ...config.visConfig.metric,
+            style: {
+              ...config.visConfig.metric.style,
+              spec: { ...config.visConfig.metric.style.spec, fontSize: '120px' },
             },
           },
-        }}
-        {...containerSize}
-      />
-    );
-  })
-  .add('With label position is top and custom font for label', () => {
-    return (
-      <Render
-        renderer={metricVisRenderer}
-        config={{
-          ...config,
-          visConfig: {
-            ...config.visConfig,
-            metric: {
-              ...config.visConfig.metric,
-              style: {
-                ...config.visConfig.metric.style,
-                spec: { ...config.visConfig.metric.style.spec, fontSize: '80px' },
-              },
-              labels: {
-                show: false,
-                style: { spec: { fontSize: '60px', align: 'left' }, type: 'style', css: '' },
-                position: LabelPosition.TOP,
-              },
+        },
+      }}
+      {...containerSize}
+    />
+  );
+};
+
+WithCustomFontSize.story = {
+  name: 'With custom font size',
+};
+
+export const WithLabelPositionIsTopAndCustomFontForLabel = () => {
+  return (
+    <Render
+      renderer={metricVisRenderer}
+      config={{
+        ...config,
+        visConfig: {
+          ...config.visConfig,
+          metric: {
+            ...config.visConfig.metric,
+            style: {
+              ...config.visConfig.metric.style,
+              spec: { ...config.visConfig.metric.style.spec, fontSize: '80px' },
+            },
+            labels: {
+              show: false,
+              style: { spec: { fontSize: '60px', align: 'left' }, type: 'style', css: '' },
+              position: LabelPosition.TOP,
             },
           },
-        }}
-        {...containerSize}
-      />
-    );
-  })
-  .add('With color ranges, background color mode', () => {
-    return (
-      <Render
-        renderer={metricVisRenderer}
-        config={{
-          ...config,
-          visConfig: {
-            ...config.visConfig,
-            metric: {
-              ...config.visConfig.metric,
-              palette,
-              metricColorMode: ColorMode.Background,
-              style: {
-                ...config.visConfig.metric.style,
-                bgColor: true,
-              },
+        },
+      }}
+      {...containerSize}
+    />
+  );
+};
+
+WithLabelPositionIsTopAndCustomFontForLabel.story = {
+  name: 'With label position is top and custom font for label',
+};
+
+export const WithColorRangesBackgroundColorMode = () => {
+  return (
+    <Render
+      renderer={metricVisRenderer}
+      config={{
+        ...config,
+        visConfig: {
+          ...config.visConfig,
+          metric: {
+            ...config.visConfig.metric,
+            palette,
+            metricColorMode: ColorMode.Background,
+            style: {
+              ...config.visConfig.metric.style,
+              bgColor: true,
             },
           },
-        }}
-        {...containerSize}
-      />
-    );
-  })
-  .add('With color ranges, labels color mode', () => {
-    return (
-      <Render
-        renderer={metricVisRenderer}
-        config={{
-          ...config,
-          visConfig: {
-            ...config.visConfig,
-            metric: {
-              ...config.visConfig.metric,
-              palette,
-              metricColorMode: ColorMode.Labels,
-              style: {
-                ...config.visConfig.metric.style,
-                labelColor: true,
-              },
+        },
+      }}
+      {...containerSize}
+    />
+  );
+};
+
+WithColorRangesBackgroundColorMode.story = {
+  name: 'With color ranges, background color mode',
+};
+
+export const WithColorRangesLabelsColorMode = () => {
+  return (
+    <Render
+      renderer={metricVisRenderer}
+      config={{
+        ...config,
+        visConfig: {
+          ...config.visConfig,
+          metric: {
+            ...config.visConfig.metric,
+            palette,
+            metricColorMode: ColorMode.Labels,
+            style: {
+              ...config.visConfig.metric.style,
+              labelColor: true,
             },
           },
-        }}
-        {...containerSize}
-      />
-    );
-  })
-  .add('With color ranges, labels color mode, reverse mode', () => {
-    return (
-      <Render
-        renderer={metricVisRenderer}
-        config={{
-          ...config,
-          visConfig: {
-            ...config.visConfig,
-            metric: {
-              ...config.visConfig.metric,
-              palette,
-              metricColorMode: ColorMode.Labels,
-              style: {
-                ...config.visConfig.metric.style,
-                labelColor: true,
-              },
+        },
+      }}
+      {...containerSize}
+    />
+  );
+};
+
+WithColorRangesLabelsColorMode.story = {
+  name: 'With color ranges, labels color mode',
+};
+
+export const WithColorRangesLabelsColorModeReverseMode = () => {
+  return (
+    <Render
+      renderer={metricVisRenderer}
+      config={{
+        ...config,
+        visConfig: {
+          ...config.visConfig,
+          metric: {
+            ...config.visConfig.metric,
+            palette,
+            metricColorMode: ColorMode.Labels,
+            style: {
+              ...config.visConfig.metric.style,
+              labelColor: true,
             },
           },
-        }}
-        {...containerSize}
-      />
-    );
-  })
-  .add('With bucket', () => {
-    return (
-      <Render
-        renderer={metricVisRenderer}
-        config={{
-          ...config,
-          visData: {
-            ...(config.visData as Datatable),
-            columns: [...(config.visData as Datatable).columns, dayColumn],
-            rows: dataWithBuckets,
+        },
+      }}
+      {...containerSize}
+    />
+  );
+};
+
+WithColorRangesLabelsColorModeReverseMode.story = {
+  name: 'With color ranges, labels color mode, reverse mode',
+};
+
+export const WithBucket = () => {
+  return (
+    <Render
+      renderer={metricVisRenderer}
+      config={{
+        ...config,
+        visData: {
+          ...(config.visData as Datatable),
+          columns: [...(config.visData as Datatable).columns, dayColumn],
+          rows: dataWithBuckets,
+        },
+        visConfig: {
+          ...config.visConfig,
+          dimensions: { ...config.visConfig.dimensions, bucket: dayAccessor },
+        },
+      }}
+      {...containerSize}
+    />
+  );
+};
+
+WithBucket.story = {
+  name: 'With bucket',
+};
+
+export const WithEmptyResults = () => {
+  return (
+    <Render
+      renderer={metricVisRenderer}
+      config={{ ...config, visData: { ...config.visData, rows: [] } as Datatable }}
+      {...containerSize}
+    />
+  );
+};
+
+WithEmptyResults.story = {
+  name: 'With empty results',
+};
+
+export const WithColorizingFullContainer = () => {
+  return (
+    <Render
+      renderer={metricVisRenderer}
+      config={{
+        ...config,
+        visData: {
+          type: 'datatable',
+          rows: [{ 'col-0-1': 85 }],
+          columns: [
+            {
+              id: 'col-0-1',
+              name: 'Max products count',
+              meta: { type: 'number', params: {} },
+            },
+          ],
+        },
+        visConfig: {
+          ...config.visConfig,
+          metric: {
+            ...config.visConfig.metric,
+            palette,
+            metricColorMode: ColorMode.Background,
+            style: {
+              ...config.visConfig.metric.style,
+              bgColor: true,
+            },
+            colorFullBackground: true,
           },
-          visConfig: {
-            ...config.visConfig,
-            dimensions: { ...config.visConfig.dimensions, bucket: dayAccessor },
-          },
-        }}
-        {...containerSize}
-      />
-    );
-  })
-  .add('With empty results', () => {
-    return (
-      <Render
-        renderer={metricVisRenderer}
-        config={{ ...config, visData: { ...config.visData, rows: [] } as Datatable }}
-        {...containerSize}
-      />
-    );
-  })
-  .add('With colorizing full container', () => {
-    return (
-      <Render
-        renderer={metricVisRenderer}
-        config={{
-          ...config,
-          visData: {
-            type: 'datatable',
-            rows: [{ 'col-0-1': 85 }],
-            columns: [
+          dimensions: {
+            metrics: [
               {
-                id: 'col-0-1',
-                name: 'Max products count',
-                meta: { type: 'number', params: {} },
+                accessor: 0,
+                format: {
+                  id: 'number',
+                  params: {},
+                },
+                type: 'vis_dimension',
               },
             ],
           },
-          visConfig: {
-            ...config.visConfig,
-            metric: {
-              ...config.visConfig.metric,
-              palette,
-              metricColorMode: ColorMode.Background,
-              style: {
-                ...config.visConfig.metric.style,
-                bgColor: true,
-              },
-              colorFullBackground: true,
-            },
-            dimensions: {
-              metrics: [
-                {
-                  accessor: 0,
-                  format: {
-                    id: 'number',
-                    params: {},
-                  },
-                  type: 'vis_dimension',
-                },
-              ],
-            },
-          },
-        }}
-        {...containerSize}
-      />
-    );
-  });
+        },
+      }}
+      {...containerSize}
+    />
+  );
+};
+
+WithColorizingFullContainer.story = {
+  name: 'With colorizing full container',
+};

@@ -1,12 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
- */
-
-import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { DataViewField } from '@kbn/data-views-plugin/public';
@@ -61,34 +52,51 @@ const dataView = new DataView({
   fieldFormats: fieldFormat,
 });
 
-storiesOf('components/sidebar/DiscoverFieldDetails', module)
-  .add('default', () => (
-    <div style={{ width: '50%' }}>
-      <DiscoverFieldDetails
-        field={field}
-        dataView={dataView}
-        details={details}
-        onAddFilter={() => {
-          alert('On add filter clicked');
-        }}
-      />
-    </div>
-  ))
-  .add('scripted', () => (
-    <div style={{ width: '50%' }}>
-      <DiscoverFieldDetails
-        field={scriptedField}
-        dataView={dataView}
-        details={details}
-        onAddFilter={() => {}}
-      />
-    </div>
-  ))
-  .add('error', () => (
+export default {
+  title: 'components/sidebar/DiscoverFieldDetails',
+};
+
+export const Default = () => (
+  <div style={{ width: '50%' }}>
     <DiscoverFieldDetails
       field={field}
       dataView={dataView}
-      details={{ buckets: [], error: 'An error occurred', exists: 1, total: 2, columns: [] }}
+      details={details}
+      onAddFilter={() => {
+        alert('On add filter clicked');
+      }}
+    />
+  </div>
+);
+
+Default.story = {
+  name: 'default',
+};
+
+export const Scripted = () => (
+  <div style={{ width: '50%' }}>
+    <DiscoverFieldDetails
+      field={scriptedField}
+      dataView={dataView}
+      details={details}
       onAddFilter={() => {}}
     />
-  ));
+  </div>
+);
+
+Scripted.story = {
+  name: 'scripted',
+};
+
+export const Error = () => (
+  <DiscoverFieldDetails
+    field={field}
+    dataView={dataView}
+    details={{ buckets: [], error: 'An error occurred', exists: 1, total: 2, columns: [] }}
+    onAddFilter={() => {}}
+  />
+);
+
+Error.story = {
+  name: 'error',
+};

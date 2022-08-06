@@ -7,12 +7,15 @@
  */
 
 import React from 'react';
-import { storiesOf } from '@storybook/react';
 import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
 import { getShapeRenderer } from '..';
 import { Shape } from '../../../common/types';
 
-storiesOf('renderers/shape', module).add('default', () => {
+export default {
+  title: 'renderers/shape',
+};
+
+export const Default = () => {
   const config = {
     type: 'shape' as 'shape',
     border: '#FFEEDD',
@@ -23,4 +26,8 @@ storiesOf('renderers/shape', module).add('default', () => {
   };
 
   return <Render renderer={getShapeRenderer()} config={config} />;
-});
+};
+
+Default.story = {
+  name: 'default',
+};

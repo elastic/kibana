@@ -7,7 +7,6 @@
 
 import React, { FC, useState } from 'react';
 import { action } from '@storybook/addon-actions';
-import { storiesOf } from '@storybook/react';
 import { PalettePicker } from '..';
 
 import { paulTor14, ColorPalette } from '../../../../../common/lib/palettes';
@@ -18,10 +17,27 @@ const Interactive: FC = () => {
   return <PalettePicker palette={palette} onChange={setPalette} clearable={true} />;
 };
 
-storiesOf('components/Color/PalettePicker', module)
-  .addDecorator((fn) => <div style={{ width: '350px' }}>{fn()}</div>)
-  .add('default', () => <PalettePicker palette={paulTor14} onChange={action('onChange')} />)
-  .add('clearable', () => (
-    <PalettePicker palette={null} onChange={action('onChange')} clearable={true} />
-  ))
-  .add('interactive', () => <Interactive />);
+export default {
+  title: 'components/Color/PalettePicker',
+  decorators: [(fn) => <div style={{ width: '350px' }}>{fn()}</div>],
+};
+
+export const Default = () => <PalettePicker palette={paulTor14} onChange={action('onChange')} />;
+
+Default.story = {
+  name: 'default',
+};
+
+export const Clearable = () => (
+  <PalettePicker palette={null} onChange={action('onChange')} clearable={true} />
+);
+
+Clearable.story = {
+  name: 'clearable',
+};
+
+export const _Interactive = () => <Interactive />;
+
+_Interactive.story = {
+  name: 'interactive',
+};

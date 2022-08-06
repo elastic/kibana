@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { storiesOf } from '@storybook/react';
 import { pie } from '..';
 import { Render } from '../../__stories__/render';
 
@@ -42,34 +41,46 @@ const data = [
   },
 ];
 
-storiesOf('renderers/pie', module)
-  .add('default', () => {
-    const config = {
-      data,
-      options: pieOptions,
-      font: {
-        css: '',
-        spec: {},
-        type: 'style' as 'style',
-      },
-    };
-    return <Render renderer={pie} config={config} />;
-  })
-  .add('with legend', () => {
-    const options = {
-      ...pieOptions,
-      legend: { show: true },
-    };
+export default {
+  title: 'renderers/pie',
+};
 
-    const config = {
-      data,
-      options,
-      font: {
-        css: '',
-        spec: {},
-        type: 'style' as 'style',
-      },
-    };
+export const Default = () => {
+  const config = {
+    data,
+    options: pieOptions,
+    font: {
+      css: '',
+      spec: {},
+      type: 'style' as 'style',
+    },
+  };
+  return <Render renderer={pie} config={config} />;
+};
 
-    return <Render renderer={pie} config={config} />;
-  });
+Default.story = {
+  name: 'default',
+};
+
+export const WithLegend = () => {
+  const options = {
+    ...pieOptions,
+    legend: { show: true },
+  };
+
+  const config = {
+    data,
+    options,
+    font: {
+      css: '',
+      spec: {},
+      type: 'style' as 'style',
+    },
+  };
+
+  return <Render renderer={pie} config={config} />;
+};
+
+WithLegend.story = {
+  name: 'with legend',
+};

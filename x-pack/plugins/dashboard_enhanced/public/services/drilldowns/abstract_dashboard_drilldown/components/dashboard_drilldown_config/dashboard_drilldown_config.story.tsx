@@ -8,7 +8,6 @@
 /* eslint-disable no-console */
 
 import * as React from 'react';
-import { storiesOf } from '@storybook/react';
 import { DashboardDrilldownConfig } from './dashboard_drilldown_config';
 
 export const dashboards = [
@@ -37,28 +36,44 @@ const InteractiveDemo: React.FC = () => {
   );
 };
 
-storiesOf(
-  'services/drilldowns/dashboard_to_dashboard_drilldown/components/dashboard_drilldown_config',
-  module
-)
-  .add('default', () => (
-    <DashboardDrilldownConfig
-      activeDashboardId={'dashboard2'}
-      dashboards={dashboards}
-      onDashboardSelect={(e) => console.log('onDashboardSelect', e)}
-      onSearchChange={() => {}}
-      isLoading={false}
-    />
-  ))
-  .add('with switches', () => (
-    <DashboardDrilldownConfig
-      activeDashboardId={'dashboard2'}
-      dashboards={dashboards}
-      onDashboardSelect={(e) => console.log('onDashboardSelect', e)}
-      onCurrentFiltersToggle={() => console.log('onCurrentFiltersToggle')}
-      onKeepRangeToggle={() => console.log('onKeepRangeToggle')}
-      onSearchChange={() => {}}
-      isLoading={false}
-    />
-  ))
-  .add('interactive demo', () => <InteractiveDemo />);
+export default {
+  title:
+    'services/drilldowns/dashboard_to_dashboard_drilldown/components/dashboard_drilldown_config',
+  excludeStories: ['dashboards'],
+};
+
+export const Default = () => (
+  <DashboardDrilldownConfig
+    activeDashboardId={'dashboard2'}
+    dashboards={dashboards}
+    onDashboardSelect={(e) => console.log('onDashboardSelect', e)}
+    onSearchChange={() => {}}
+    isLoading={false}
+  />
+);
+
+Default.story = {
+  name: 'default',
+};
+
+export const WithSwitches = () => (
+  <DashboardDrilldownConfig
+    activeDashboardId={'dashboard2'}
+    dashboards={dashboards}
+    onDashboardSelect={(e) => console.log('onDashboardSelect', e)}
+    onCurrentFiltersToggle={() => console.log('onCurrentFiltersToggle')}
+    onKeepRangeToggle={() => console.log('onKeepRangeToggle')}
+    onSearchChange={() => {}}
+    isLoading={false}
+  />
+);
+
+WithSwitches.story = {
+  name: 'with switches',
+};
+
+export const _InteractiveDemo = () => <InteractiveDemo />;
+
+_InteractiveDemo.story = {
+  name: 'interactive demo',
+};

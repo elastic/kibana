@@ -6,26 +6,42 @@
  */
 
 import React from 'react';
-import { storiesOf } from '@storybook/react';
 
 import { ExampleContext } from '../../../test/context_example';
 import { Title, TitleComponent } from '../title';
 
 const style = { background: '#333', padding: 10 };
 
-storiesOf('shareables/Footer/Title', module)
-  .add('contextual: hello', () => (
-    <ExampleContext source="hello" {...{ style }}>
-      <Title />
-    </ExampleContext>
-  ))
-  .add('contextual: austin', () => (
-    <ExampleContext source="austin" {...{ style }}>
-      <Title />
-    </ExampleContext>
-  ))
-  .add('component', () => (
-    <ExampleContext {...{ style }}>
-      <TitleComponent title="This is a test title." />
-    </ExampleContext>
-  ));
+export default {
+  title: 'shareables/Footer/Title',
+};
+
+export const ContextualHello = () => (
+  <ExampleContext source="hello" {...{ style }}>
+    <Title />
+  </ExampleContext>
+);
+
+ContextualHello.story = {
+  name: 'contextual: hello',
+};
+
+export const ContextualAustin = () => (
+  <ExampleContext source="austin" {...{ style }}>
+    <Title />
+  </ExampleContext>
+);
+
+ContextualAustin.story = {
+  name: 'contextual: austin',
+};
+
+export const Component = () => (
+  <ExampleContext {...{ style }}>
+    <TitleComponent title="This is a test title." />
+  </ExampleContext>
+);
+
+Component.story = {
+  name: 'component',
+};

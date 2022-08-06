@@ -7,7 +7,6 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { monaco as monacoEditor } from '@kbn/monaco';
 import { CodeEditor } from './code_editor';
@@ -33,209 +32,225 @@ const logs = `[Sun Mar 7 20:54:27 2004] [notice] [client xx.xx.xx.xx] This is a 
 [Sun Mar 7 21:16:17 2004] [error] [client xx.xx.xx.xx] File does not exist: /home/httpd/twiki/view/Main/WebHome
 `;
 
-storiesOf('CodeEditor', module)
-  .addParameters({
+export default {
+  title: 'CodeEditor',
+
+  parameters: {
     info: {
       // CodeEditor has no PropTypes set so this table will show up
       // as blank. I'm just disabling it to reduce confusion
       propTablesExclude: [CodeEditor],
     },
-  })
-  .add(
-    'default',
-    () => (
-      <div>
-        <CodeEditor
-          languageId="plaintext"
-          height={250}
-          value="Hello!"
-          onChange={action('onChange')}
-        />
-      </div>
-    ),
-    {
-      info: {
-        text: 'Plaintext Monaco Editor',
-      },
-    }
-  )
-  .add(
-    'dark mode',
-    () => (
-      <div>
-        <CodeEditor
-          languageId="plaintext"
-          height={250}
-          value="Hello!"
-          onChange={action('onChange')}
-          useDarkTheme={true}
-        />
-      </div>
-    ),
-    {
-      info: {
-        text: 'The dark theme is automatically used when dark mode is enabled in Kibana',
-      },
-    }
-  )
-  .add(
-    'transparent background',
-    () => (
-      <div>
-        <CodeEditor
-          languageId="plaintext"
-          height={250}
-          value="Hello!"
-          onChange={action('onChange')}
-          transparentBackground
-        />
-      </div>
-    ),
-    {
-      info: {
-        text: 'Plaintext Monaco Editor',
-      },
-    }
-  )
-  .add(
-    'custom log language',
-    () => (
-      <div>
-        <CodeEditor languageId="loglang" height={250} value={logs} onChange={action('onChange')} />
-      </div>
-    ),
-    {
-      info: {
-        text: 'Custom language example. Language definition taken from [here](https://microsoft.github.io/monaco-editor/playground.html#extending-language-services-custom-languages)',
-      },
-    }
-  )
-  .add(
-    'hide minimap',
-    () => (
-      <div>
-        <CodeEditor
-          languageId="loglang"
-          height={250}
-          value={logs}
-          onChange={action('onChange')}
-          options={{
-            minimap: {
-              enabled: false,
-            },
-          }}
-        />
-      </div>
-    ),
-    {
-      info: {
-        text: 'The minimap (on left side of editor) can be disabled to save space',
-      },
-    }
-  )
-  .add(
-    'suggestion provider',
-    () => {
-      const provideSuggestions = (
-        model: monacoEditor.editor.ITextModel,
-        position: monacoEditor.Position,
-        context: monacoEditor.languages.CompletionContext
-      ) => {
-        const wordRange = new monacoEditor.Range(
-          position.lineNumber,
-          position.column,
-          position.lineNumber,
-          position.column
-        );
+  },
+};
 
-        return {
-          suggestions: [
-            {
-              label: 'Hello, World',
-              kind: monacoEditor.languages.CompletionItemKind.Variable,
-              documentation: {
-                value: '*Markdown* can be used in autocomplete help',
-                isTrusted: true,
-              },
-              insertText: 'Hello, World',
-              range: wordRange,
-            },
-            {
-              label: 'You know, for search',
-              kind: monacoEditor.languages.CompletionItemKind.Variable,
-              documentation: { value: 'Thanks `Monaco`', isTrusted: true },
-              insertText: 'You know, for search',
-              range: wordRange,
-            },
-          ],
-        };
-      };
+export const Default = () => (
+  <div>
+    <CodeEditor languageId="plaintext" height={250} value="Hello!" onChange={action('onChange')} />
+  </div>
+);
 
-      return (
-        <div>
-          <CodeEditor
-            languageId="loglang"
-            height={250}
-            value={logs}
-            onChange={action('onChange')}
-            suggestionProvider={{
-              triggerCharacters: ['.'],
-              provideCompletionItems: provideSuggestions,
-            }}
-            options={{
-              quickSuggestions: true,
-            }}
-          />
-        </div>
-      );
+Default.story = {
+  name: 'default',
+
+  parameters: {
+    info: {
+      text: 'Plaintext Monaco Editor',
     },
-    {
-      info: {
-        text: 'Example suggestion provider is triggered by the `.` character',
-      },
-    }
-  )
-  .add(
-    'hover provider',
-    () => {
-      const provideHover = (
-        model: monacoEditor.editor.ITextModel,
-        position: monacoEditor.Position
-      ) => {
-        const word = model.getWordAtPosition(position);
+  },
+};
 
-        if (!word) {
-          return {
-            contents: [],
-          };
-        }
+export const DarkMode = () => (
+  <div>
+    <CodeEditor
+      languageId="plaintext"
+      height={250}
+      value="Hello!"
+      onChange={action('onChange')}
+      useDarkTheme={true}
+    />
+  </div>
+);
 
-        return {
-          contents: [
-            {
-              value: `You're hovering over **${word.word}**`,
-            },
-          ],
-        };
-      };
+DarkMode.story = {
+  name: 'dark mode',
 
-      return (
-        <div>
-          <CodeEditor
-            languageId="loglang"
-            height={250}
-            value={logs}
-            onChange={action('onChange')}
-            hoverProvider={{
-              provideHover,
-            }}
-          />
-        </div>
-      );
+  parameters: {
+    info: {
+      text: 'The dark theme is automatically used when dark mode is enabled in Kibana',
     },
-    {
-      info: {
-        text: 'Hover dialog example can be triggered by hovering over a word',
-      },
-    }
+  },
+};
+
+export const TransparentBackground = () => (
+  <div>
+    <CodeEditor
+      languageId="plaintext"
+      height={250}
+      value="Hello!"
+      onChange={action('onChange')}
+      transparentBackground
+    />
+  </div>
+);
+
+TransparentBackground.story = {
+  name: 'transparent background',
+
+  parameters: {
+    info: {
+      text: 'Plaintext Monaco Editor',
+    },
+  },
+};
+
+export const CustomLogLanguage = () => (
+  <div>
+    <CodeEditor languageId="loglang" height={250} value={logs} onChange={action('onChange')} />
+  </div>
+);
+
+CustomLogLanguage.story = {
+  name: 'custom log language',
+
+  parameters: {
+    info: {
+      text: 'Custom language example. Language definition taken from [here](https://microsoft.github.io/monaco-editor/playground.html#extending-language-services-custom-languages)',
+    },
+  },
+};
+
+export const HideMinimap = () => (
+  <div>
+    <CodeEditor
+      languageId="loglang"
+      height={250}
+      value={logs}
+      onChange={action('onChange')}
+      options={{
+        minimap: {
+          enabled: false,
+        },
+      }}
+    />
+  </div>
+);
+
+HideMinimap.story = {
+  name: 'hide minimap',
+
+  parameters: {
+    info: {
+      text: 'The minimap (on left side of editor) can be disabled to save space',
+    },
+  },
+};
+
+export const SuggestionProvider = () => {
+  const provideSuggestions = (
+    model: monacoEditor.editor.ITextModel,
+    position: monacoEditor.Position,
+    context: monacoEditor.languages.CompletionContext
+  ) => {
+    const wordRange = new monacoEditor.Range(
+      position.lineNumber,
+      position.column,
+      position.lineNumber,
+      position.column
+    );
+
+    return {
+      suggestions: [
+        {
+          label: 'Hello, World',
+          kind: monacoEditor.languages.CompletionItemKind.Variable,
+          documentation: {
+            value: '*Markdown* can be used in autocomplete help',
+            isTrusted: true,
+          },
+          insertText: 'Hello, World',
+          range: wordRange,
+        },
+        {
+          label: 'You know, for search',
+          kind: monacoEditor.languages.CompletionItemKind.Variable,
+          documentation: { value: 'Thanks `Monaco`', isTrusted: true },
+          insertText: 'You know, for search',
+          range: wordRange,
+        },
+      ],
+    };
+  };
+
+  return (
+    <div>
+      <CodeEditor
+        languageId="loglang"
+        height={250}
+        value={logs}
+        onChange={action('onChange')}
+        suggestionProvider={{
+          triggerCharacters: ['.'],
+          provideCompletionItems: provideSuggestions,
+        }}
+        options={{
+          quickSuggestions: true,
+        }}
+      />
+    </div>
   );
+};
+
+SuggestionProvider.story = {
+  name: 'suggestion provider',
+
+  parameters: {
+    info: {
+      text: 'Example suggestion provider is triggered by the `.` character',
+    },
+  },
+};
+
+export const HoverProvider = () => {
+  const provideHover = (model: monacoEditor.editor.ITextModel, position: monacoEditor.Position) => {
+    const word = model.getWordAtPosition(position);
+
+    if (!word) {
+      return {
+        contents: [],
+      };
+    }
+
+    return {
+      contents: [
+        {
+          value: `You're hovering over **${word.word}**`,
+        },
+      ],
+    };
+  };
+
+  return (
+    <div>
+      <CodeEditor
+        languageId="loglang"
+        height={250}
+        value={logs}
+        onChange={action('onChange')}
+        hoverProvider={{
+          provideHover,
+        }}
+      />
+    </div>
+  );
+};
+
+HoverProvider.story = {
+  name: 'hover provider',
+
+  parameters: {
+    info: {
+      text: 'Hover dialog example can be triggered by hovering over a word',
+    },
+  },
+};

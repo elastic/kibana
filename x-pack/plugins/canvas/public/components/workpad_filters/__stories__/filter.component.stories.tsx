@@ -6,7 +6,6 @@
  */
 
 import { EuiText, EuiTextColor } from '@elastic/eui';
-import { storiesOf } from '@storybook/react';
 import React, { FC } from 'react';
 import { FormattedFilterViewInstance } from '../../../../types';
 import { Filter } from '../filter.component';
@@ -38,16 +37,33 @@ const component: FC<any> = ({ value }) => (
   </EuiText>
 );
 
-storiesOf('components/WorkpadFilters/FilterComponent', module)
-  .add('default', () => <Filter filter={filter} />)
-  .add('with component field', () => (
-    <Filter filter={{ ...filter, value: { ...filter.value, component } }} />
-  ))
-  .add('with custom filter fields', () => (
-    <Filter
-      filter={{
-        ...filter,
-        customField: { label: 'Custom Field', formattedValue: 'Some unknown field' },
-      }}
-    />
-  ));
+export default {
+  title: 'components/WorkpadFilters/FilterComponent',
+};
+
+export const Default = () => <Filter filter={filter} />;
+
+Default.story = {
+  name: 'default',
+};
+
+export const WithComponentField = () => (
+  <Filter filter={{ ...filter, value: { ...filter.value, component } }} />
+);
+
+WithComponentField.story = {
+  name: 'with component field',
+};
+
+export const WithCustomFilterFields = () => (
+  <Filter
+    filter={{
+      ...filter,
+      customField: { label: 'Custom Field', formattedValue: 'Some unknown field' },
+    }}
+  />
+);
+
+WithCustomFilterFields.story = {
+  name: 'with custom filter fields',
+};

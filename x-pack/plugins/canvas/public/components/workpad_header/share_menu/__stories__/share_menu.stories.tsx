@@ -6,18 +6,32 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { reduxDecorator } from '../../../../../storybook';
 import { ShareMenu } from '../share_menu.component';
 
-storiesOf('components/WorkpadHeader/ShareMenu', module)
-  .addDecorator(reduxDecorator())
-  .add('minimal', () => <ShareMenu onExport={action('onExport')} ReportingComponent={null} />);
+export default {
+  title: 'components/WorkpadHeader/ShareMenu',
+  decorators: [reduxDecorator()],
+};
 
-storiesOf('components/WorkpadHeader/ShareMenu', module).add('with Reporting', () => (
+export const Minimal = () => <ShareMenu onExport={action('onExport')} ReportingComponent={null} />;
+
+Minimal.story = {
+  name: 'minimal',
+};
+
+export default {
+  title: 'components/WorkpadHeader/ShareMenu',
+};
+
+export const WithReporting = () => (
   <ShareMenu
     onExport={action('onExport')}
     ReportingComponent={() => <div>Provided Reporting Component</div>}
   />
-));
+);
+
+WithReporting.story = {
+  name: 'with Reporting',
+};

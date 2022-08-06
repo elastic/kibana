@@ -9,7 +9,6 @@
 import React from 'react';
 import { action } from '@storybook/addon-actions';
 import type { Query } from '@kbn/es-query';
-import { storiesOf } from '@storybook/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
@@ -197,359 +196,446 @@ function wrapSearchBarInContext(testProps: SearchBarProps<Query>) {
   );
 }
 
-storiesOf('SearchBar', module)
-  .add('default', () => wrapSearchBarInContext({ showQueryInput: true } as SearchBarProps))
-  .add('with dataviewPicker', () =>
-    wrapSearchBarInContext({
-      dataViewPickerComponentProps: {
-        currentDataViewId: '1234',
-        trigger: {
-          'data-test-subj': 'dataView-switch-link',
-          label: 'logstash-*',
-          title: 'logstash-*',
-        },
-        onChangeDataView: action('onChangeDataView'),
+export default {
+  title: 'SearchBar',
+};
+
+export const Default = () => wrapSearchBarInContext({ showQueryInput: true } as SearchBarProps);
+
+Default.story = {
+  name: 'default',
+};
+
+export const WithDataviewPicker = () =>
+  wrapSearchBarInContext({
+    dataViewPickerComponentProps: {
+      currentDataViewId: '1234',
+      trigger: {
+        'data-test-subj': 'dataView-switch-link',
+        label: 'logstash-*',
+        title: 'logstash-*',
       },
-    } as SearchBarProps)
-  )
-  .add('with dataviewPicker enhanced', () =>
-    wrapSearchBarInContext({
-      dataViewPickerComponentProps: {
-        currentDataViewId: '1234',
-        trigger: {
-          'data-test-subj': 'dataView-switch-link',
-          label: 'logstash-*',
-          title: 'logstash-*',
-        },
-        onChangeDataView: action('onChangeDataView'),
-        onAddField: action('onAddField'),
-        onDataViewCreated: action('onDataViewCreated'),
+      onChangeDataView: action('onChangeDataView'),
+    },
+  } as SearchBarProps);
+
+WithDataviewPicker.story = {
+  name: 'with dataviewPicker',
+};
+
+export const WithDataviewPickerEnhanced = () =>
+  wrapSearchBarInContext({
+    dataViewPickerComponentProps: {
+      currentDataViewId: '1234',
+      trigger: {
+        'data-test-subj': 'dataView-switch-link',
+        label: 'logstash-*',
+        title: 'logstash-*',
       },
-    } as SearchBarProps)
-  )
-  .add('with filterBar off', () =>
-    wrapSearchBarInContext({
-      showFilterBar: false,
-    } as SearchBarProps)
-  )
-  .add('with query input off', () =>
-    wrapSearchBarInContext({
-      showQueryInput: false,
-    } as SearchBarProps)
-  )
-  .add('with date picker off', () =>
-    wrapSearchBarInContext({
-      showDatePicker: false,
-    } as SearchBarProps)
-  )
-  .add('with date picker off', () =>
-    wrapSearchBarInContext({
-      showDatePicker: false,
-    } as SearchBarProps)
-  )
-  .add('with only the date picker on', () =>
-    wrapSearchBarInContext({
-      showDatePicker: true,
-      showFilterBar: false,
-      showQueryInput: false,
-    } as SearchBarProps)
-  )
-  .add('with only the filter bar on', () =>
-    wrapSearchBarInContext({
-      showDatePicker: false,
-      showFilterBar: true,
-      showQueryInput: false,
-      filters: [
-        {
-          meta: {
-            index: '1234',
-            alias: null,
-            negate: false,
-            disabled: false,
-            type: 'phrase',
-            key: 'category.keyword',
-            params: {
-              query: "Men's Accessories",
-            },
-          },
-          query: {
-            match_phrase: {
-              'category.keyword': "Men's Accessories",
-            },
-          },
-          $state: {
-            store: 'appState',
-          },
-        },
-      ],
-    } as unknown as SearchBarProps)
-  )
-  .add('with only the query bar on', () =>
-    wrapSearchBarInContext({
-      showDatePicker: false,
-      showFilterBar: false,
-      showQueryInput: true,
-      query: { query: 'Test: miaou', language: 'kuery' },
-    } as unknown as SearchBarProps)
-  )
-  .add('with only the filter bar and the date picker on', () =>
-    wrapSearchBarInContext({
-      showDatePicker: true,
-      showFilterBar: true,
-      showQueryInput: false,
-      filters: [
-        {
-          meta: {
-            index: '1234',
-            alias: null,
-            negate: false,
-            disabled: false,
-            type: 'phrase',
-            key: 'category.keyword',
-            params: {
-              query: "Men's Accessories",
-            },
-          },
-          query: {
-            match_phrase: {
-              'category.keyword': "Men's Accessories",
-            },
-          },
-          $state: {
-            store: 'appState',
+      onChangeDataView: action('onChangeDataView'),
+      onAddField: action('onAddField'),
+      onDataViewCreated: action('onDataViewCreated'),
+    },
+  } as SearchBarProps);
+
+WithDataviewPickerEnhanced.story = {
+  name: 'with dataviewPicker enhanced',
+};
+
+export const WithFilterBarOff = () =>
+  wrapSearchBarInContext({
+    showFilterBar: false,
+  } as SearchBarProps);
+
+WithFilterBarOff.story = {
+  name: 'with filterBar off',
+};
+
+export const WithQueryInputOff = () =>
+  wrapSearchBarInContext({
+    showQueryInput: false,
+  } as SearchBarProps);
+
+WithQueryInputOff.story = {
+  name: 'with query input off',
+};
+
+export const WithDatePickerOff = () =>
+  wrapSearchBarInContext({
+    showDatePicker: false,
+  } as SearchBarProps);
+
+WithDatePickerOff.story = {
+  name: 'with date picker off',
+};
+
+export const _WithDatePickerOff = () =>
+  wrapSearchBarInContext({
+    showDatePicker: false,
+  } as SearchBarProps);
+
+_WithDatePickerOff.story = {
+  name: 'with date picker off',
+};
+
+export const WithOnlyTheDatePickerOn = () =>
+  wrapSearchBarInContext({
+    showDatePicker: true,
+    showFilterBar: false,
+    showQueryInput: false,
+  } as SearchBarProps);
+
+WithOnlyTheDatePickerOn.story = {
+  name: 'with only the date picker on',
+};
+
+export const WithOnlyTheFilterBarOn = () =>
+  wrapSearchBarInContext({
+    showDatePicker: false,
+    showFilterBar: true,
+    showQueryInput: false,
+    filters: [
+      {
+        meta: {
+          index: '1234',
+          alias: null,
+          negate: false,
+          disabled: false,
+          type: 'phrase',
+          key: 'category.keyword',
+          params: {
+            query: "Men's Accessories",
           },
         },
-      ],
-    } as unknown as SearchBarProps)
-  )
-  .add('with loaded saved query without changes', () =>
-    wrapSearchBarInContext({
-      savedQuery: {
-        id: '0173d0d0-b19a-11ec-8323-837d6b231b82',
-        attributes: {
-          title: 'test',
-          description: '',
-          query: {
-            query: '',
-            language: 'kuery',
+        query: {
+          match_phrase: {
+            'category.keyword': "Men's Accessories",
           },
-          filters: [
-            {
-              meta: {
-                index: '1234',
-                alias: null,
-                negate: false,
-                disabled: false,
-                type: 'phrase',
-                key: 'category.keyword',
-                params: {
-                  query: "Men's Accessories",
-                },
-              },
-              query: {
-                match_phrase: {
-                  'category.keyword': "Men's Accessories",
-                },
-              },
-              $state: {
-                store: 'appState',
-              },
-            },
-          ],
+        },
+        $state: {
+          store: 'appState',
         },
       },
-      filters: [
-        {
-          meta: {
-            index: '1234',
-            alias: null,
-            negate: false,
-            disabled: false,
-            type: 'phrase',
-            key: 'category.keyword',
-            params: {
-              query: "Men's Accessories",
-            },
-          },
-          query: {
-            match_phrase: {
-              'category.keyword': "Men's Accessories",
-            },
-          },
-          $state: {
-            store: 'appState',
+    ],
+  } as unknown as SearchBarProps);
+
+WithOnlyTheFilterBarOn.story = {
+  name: 'with only the filter bar on',
+};
+
+export const WithOnlyTheQueryBarOn = () =>
+  wrapSearchBarInContext({
+    showDatePicker: false,
+    showFilterBar: false,
+    showQueryInput: true,
+    query: { query: 'Test: miaou', language: 'kuery' },
+  } as unknown as SearchBarProps);
+
+WithOnlyTheQueryBarOn.story = {
+  name: 'with only the query bar on',
+};
+
+export const WithOnlyTheFilterBarAndTheDatePickerOn = () =>
+  wrapSearchBarInContext({
+    showDatePicker: true,
+    showFilterBar: true,
+    showQueryInput: false,
+    filters: [
+      {
+        meta: {
+          index: '1234',
+          alias: null,
+          negate: false,
+          disabled: false,
+          type: 'phrase',
+          key: 'category.keyword',
+          params: {
+            query: "Men's Accessories",
           },
         },
-      ],
-    } as unknown as SearchBarProps)
-  )
-  .add('with loaded saved query with changes', () =>
-    wrapSearchBarInContext({
-      savedQuery: {
-        id: '0173d0d0-b19a-11ec-8323-837d6b231b82',
-        attributes: {
-          title: 'test',
-          description: '',
-          query: {
-            query: '',
-            language: 'kuery',
+        query: {
+          match_phrase: {
+            'category.keyword': "Men's Accessories",
           },
-          filters: [
-            {
-              meta: {
-                index: '1234',
-                alias: null,
-                negate: false,
-                disabled: false,
-                type: 'phrase',
-                key: 'category.keyword',
-                params: {
-                  query: "Men's Accessories",
-                },
-              },
-              query: {
-                match_phrase: {
-                  'category.keyword': "Men's Accessories",
-                },
-              },
-              $state: {
-                store: 'appState',
+        },
+        $state: {
+          store: 'appState',
+        },
+      },
+    ],
+  } as unknown as SearchBarProps);
+
+WithOnlyTheFilterBarAndTheDatePickerOn.story = {
+  name: 'with only the filter bar and the date picker on',
+};
+
+export const WithLoadedSavedQueryWithoutChanges = () =>
+  wrapSearchBarInContext({
+    savedQuery: {
+      id: '0173d0d0-b19a-11ec-8323-837d6b231b82',
+      attributes: {
+        title: 'test',
+        description: '',
+        query: {
+          query: '',
+          language: 'kuery',
+        },
+        filters: [
+          {
+            meta: {
+              index: '1234',
+              alias: null,
+              negate: false,
+              disabled: false,
+              type: 'phrase',
+              key: 'category.keyword',
+              params: {
+                query: "Men's Accessories",
               },
             },
-          ],
-        },
-      },
-    } as unknown as SearchBarProps)
-  )
-  .add('show only query bar without submit', () =>
-    wrapSearchBarInContext({
-      showDatePicker: false,
-      showFilterBar: false,
-      showAutoRefreshOnly: false,
-      showQueryInput: true,
-      showSubmitButton: false,
-    } as SearchBarProps)
-  )
-  .add('show only datepicker without submit', () =>
-    wrapSearchBarInContext({
-      showDatePicker: true,
-      showFilterBar: false,
-      showAutoRefreshOnly: false,
-      showQueryInput: false,
-      showSubmitButton: false,
-    } as SearchBarProps)
-  )
-  .add('show only query bar and timepicker without submit', () =>
-    wrapSearchBarInContext({
-      showDatePicker: true,
-      showFilterBar: false,
-      showAutoRefreshOnly: false,
-      showQueryInput: true,
-      showSubmitButton: false,
-    } as SearchBarProps)
-  )
-  .add('with filter bar on but pinning option is hidden from menus', () =>
-    wrapSearchBarInContext({
-      showDatePicker: false,
-      showFilterBar: true,
-      showQueryInput: true,
-      hiddenFilterPanelOptions: ['pinFilter'],
-      filters: [
-        {
-          meta: {
-            index: '1234',
-            alias: null,
-            negate: false,
-            disabled: false,
-            type: 'phrase',
-            key: 'category.keyword',
-            params: {
-              query: "Men's Accessories",
+            query: {
+              match_phrase: {
+                'category.keyword': "Men's Accessories",
+              },
+            },
+            $state: {
+              store: 'appState',
             },
           },
-          query: {
-            match_phrase: {
-              'category.keyword': "Men's Accessories",
+        ],
+      },
+    },
+    filters: [
+      {
+        meta: {
+          index: '1234',
+          alias: null,
+          negate: false,
+          disabled: false,
+          type: 'phrase',
+          key: 'category.keyword',
+          params: {
+            query: "Men's Accessories",
+          },
+        },
+        query: {
+          match_phrase: {
+            'category.keyword': "Men's Accessories",
+          },
+        },
+        $state: {
+          store: 'appState',
+        },
+      },
+    ],
+  } as unknown as SearchBarProps);
+
+WithLoadedSavedQueryWithoutChanges.story = {
+  name: 'with loaded saved query without changes',
+};
+
+export const WithLoadedSavedQueryWithChanges = () =>
+  wrapSearchBarInContext({
+    savedQuery: {
+      id: '0173d0d0-b19a-11ec-8323-837d6b231b82',
+      attributes: {
+        title: 'test',
+        description: '',
+        query: {
+          query: '',
+          language: 'kuery',
+        },
+        filters: [
+          {
+            meta: {
+              index: '1234',
+              alias: null,
+              negate: false,
+              disabled: false,
+              type: 'phrase',
+              key: 'category.keyword',
+              params: {
+                query: "Men's Accessories",
+              },
+            },
+            query: {
+              match_phrase: {
+                'category.keyword': "Men's Accessories",
+              },
+            },
+            $state: {
+              store: 'appState',
             },
           },
-          $state: {
-            store: 'appState',
+        ],
+      },
+    },
+  } as unknown as SearchBarProps);
+
+WithLoadedSavedQueryWithChanges.story = {
+  name: 'with loaded saved query with changes',
+};
+
+export const ShowOnlyQueryBarWithoutSubmit = () =>
+  wrapSearchBarInContext({
+    showDatePicker: false,
+    showFilterBar: false,
+    showAutoRefreshOnly: false,
+    showQueryInput: true,
+    showSubmitButton: false,
+  } as SearchBarProps);
+
+ShowOnlyQueryBarWithoutSubmit.story = {
+  name: 'show only query bar without submit',
+};
+
+export const ShowOnlyDatepickerWithoutSubmit = () =>
+  wrapSearchBarInContext({
+    showDatePicker: true,
+    showFilterBar: false,
+    showAutoRefreshOnly: false,
+    showQueryInput: false,
+    showSubmitButton: false,
+  } as SearchBarProps);
+
+ShowOnlyDatepickerWithoutSubmit.story = {
+  name: 'show only datepicker without submit',
+};
+
+export const ShowOnlyQueryBarAndTimepickerWithoutSubmit = () =>
+  wrapSearchBarInContext({
+    showDatePicker: true,
+    showFilterBar: false,
+    showAutoRefreshOnly: false,
+    showQueryInput: true,
+    showSubmitButton: false,
+  } as SearchBarProps);
+
+ShowOnlyQueryBarAndTimepickerWithoutSubmit.story = {
+  name: 'show only query bar and timepicker without submit',
+};
+
+export const WithFilterBarOnButPinningOptionIsHiddenFromMenus = () =>
+  wrapSearchBarInContext({
+    showDatePicker: false,
+    showFilterBar: true,
+    showQueryInput: true,
+    hiddenFilterPanelOptions: ['pinFilter'],
+    filters: [
+      {
+        meta: {
+          index: '1234',
+          alias: null,
+          negate: false,
+          disabled: false,
+          type: 'phrase',
+          key: 'category.keyword',
+          params: {
+            query: "Men's Accessories",
           },
         },
-      ],
-    } as unknown as SearchBarProps)
-  )
-  .add('with dataviewPicker with SQL', () =>
-    wrapSearchBarInContext({
-      dataViewPickerComponentProps: {
-        currentDataViewId: '1234',
-        trigger: {
-          'data-test-subj': 'dataView-switch-link',
-          label: 'logstash-*',
-          title: 'logstash-*',
+        query: {
+          match_phrase: {
+            'category.keyword': "Men's Accessories",
+          },
         },
-        onChangeDataView: action('onChangeDataView'),
-        onAddField: action('onAddField'),
-        onDataViewCreated: action('onDataViewCreated'),
-        textBasedLanguages: ['SQL'],
-      },
-    } as SearchBarProps)
-  )
-  .add('with dataviewPicker with SQL and sql query', () =>
-    wrapSearchBarInContext({
-      dataViewPickerComponentProps: {
-        currentDataViewId: '1234',
-        trigger: {
-          'data-test-subj': 'dataView-switch-link',
-          label: 'SQL',
-          title: 'SQL',
+        $state: {
+          store: 'appState',
         },
-        onChangeDataView: action('onChangeDataView'),
-        onAddField: action('onAddField'),
-        onDataViewCreated: action('onDataViewCreated'),
-        textBasedLanguages: ['SQL'],
       },
-      query: { sql: 'SELECT field1, field2 FROM DATAVIEW' },
-    } as unknown as SearchBarProps<Query>)
-  )
-  .add('with dataviewPicker with SQL and large sql query', () =>
-    wrapSearchBarInContext({
-      dataViewPickerComponentProps: {
-        currentDataViewId: '1234',
-        trigger: {
-          'data-test-subj': 'dataView-switch-link',
-          label: 'SQL',
-          title: 'SQL',
-        },
-        onChangeDataView: action('onChangeDataView'),
-        onAddField: action('onAddField'),
-        onDataViewCreated: action('onDataViewCreated'),
-        textBasedLanguages: ['SQL'],
+    ],
+  } as unknown as SearchBarProps);
+
+WithFilterBarOnButPinningOptionIsHiddenFromMenus.story = {
+  name: 'with filter bar on but pinning option is hidden from menus',
+};
+
+export const WithDataviewPickerWithSql = () =>
+  wrapSearchBarInContext({
+    dataViewPickerComponentProps: {
+      currentDataViewId: '1234',
+      trigger: {
+        'data-test-subj': 'dataView-switch-link',
+        label: 'logstash-*',
+        title: 'logstash-*',
       },
-      query: {
-        sql: 'SELECT field1, field2, field 3, field 4, field 5 FROM DATAVIEW WHERE field5 IS NOT NULL AND field4 IS NULL',
+      onChangeDataView: action('onChangeDataView'),
+      onAddField: action('onAddField'),
+      onDataViewCreated: action('onDataViewCreated'),
+      textBasedLanguages: ['SQL'],
+    },
+  } as SearchBarProps);
+
+WithDataviewPickerWithSql.story = {
+  name: 'with dataviewPicker with SQL',
+};
+
+export const WithDataviewPickerWithSqlAndSqlQuery = () =>
+  wrapSearchBarInContext({
+    dataViewPickerComponentProps: {
+      currentDataViewId: '1234',
+      trigger: {
+        'data-test-subj': 'dataView-switch-link',
+        label: 'SQL',
+        title: 'SQL',
       },
-    } as unknown as SearchBarProps<Query>)
-  )
-  .add('with dataviewPicker with SQL and errors in sql query', () =>
-    wrapSearchBarInContext({
-      dataViewPickerComponentProps: {
-        currentDataViewId: '1234',
-        trigger: {
-          'data-test-subj': 'dataView-switch-link',
-          label: 'SQL',
-          title: 'SQL',
-        },
-        onChangeDataView: action('onChangeDataView'),
-        onAddField: action('onAddField'),
-        onDataViewCreated: action('onDataViewCreated'),
-        textBasedLanguages: ['SQL'],
+      onChangeDataView: action('onChangeDataView'),
+      onAddField: action('onAddField'),
+      onDataViewCreated: action('onDataViewCreated'),
+      textBasedLanguages: ['SQL'],
+    },
+    query: { sql: 'SELECT field1, field2 FROM DATAVIEW' },
+  } as unknown as SearchBarProps<Query>);
+
+WithDataviewPickerWithSqlAndSqlQuery.story = {
+  name: 'with dataviewPicker with SQL and sql query',
+};
+
+export const WithDataviewPickerWithSqlAndLargeSqlQuery = () =>
+  wrapSearchBarInContext({
+    dataViewPickerComponentProps: {
+      currentDataViewId: '1234',
+      trigger: {
+        'data-test-subj': 'dataView-switch-link',
+        label: 'SQL',
+        title: 'SQL',
       },
-      textBasedLanguageModeErrors: [
-        new Error(
-          '[essql] > Unexpected error from Elasticsearch: verification_exception - Found 1 problem line 1:16: Unknown column [field10]'
-        ),
-      ],
-      query: { sql: 'SELECT field1, field10 FROM DATAVIEW' },
-    } as unknown as SearchBarProps<Query>)
-  );
+      onChangeDataView: action('onChangeDataView'),
+      onAddField: action('onAddField'),
+      onDataViewCreated: action('onDataViewCreated'),
+      textBasedLanguages: ['SQL'],
+    },
+    query: {
+      sql: 'SELECT field1, field2, field 3, field 4, field 5 FROM DATAVIEW WHERE field5 IS NOT NULL AND field4 IS NULL',
+    },
+  } as unknown as SearchBarProps<Query>);
+
+WithDataviewPickerWithSqlAndLargeSqlQuery.story = {
+  name: 'with dataviewPicker with SQL and large sql query',
+};
+
+export const WithDataviewPickerWithSqlAndErrorsInSqlQuery = () =>
+  wrapSearchBarInContext({
+    dataViewPickerComponentProps: {
+      currentDataViewId: '1234',
+      trigger: {
+        'data-test-subj': 'dataView-switch-link',
+        label: 'SQL',
+        title: 'SQL',
+      },
+      onChangeDataView: action('onChangeDataView'),
+      onAddField: action('onAddField'),
+      onDataViewCreated: action('onDataViewCreated'),
+      textBasedLanguages: ['SQL'],
+    },
+    textBasedLanguageModeErrors: [
+      new Error(
+        '[essql] > Unexpected error from Elasticsearch: verification_exception - Found 1 problem line 1:16: Unknown column [field10]'
+      ),
+    ],
+    query: { sql: 'SELECT field1, field10 FROM DATAVIEW' },
+  } as unknown as SearchBarProps<Query>);
+
+WithDataviewPickerWithSqlAndErrorsInSqlQuery.story = {
+  name: 'with dataviewPicker with SQL and errors in sql query',
+};

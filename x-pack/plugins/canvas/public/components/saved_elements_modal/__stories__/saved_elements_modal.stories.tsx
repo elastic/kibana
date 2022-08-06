@@ -6,50 +6,60 @@
  */
 
 import React from 'react';
-import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { waitFor } from '@kbn/presentation-util-plugin/public/__stories__';
 import { SavedElementsModal } from '../saved_elements_modal.component';
 import { getTestCustomElements } from './fixtures/test_elements';
 import { CustomElement } from '../../../../types';
 
-storiesOf('components/SavedElementsModal', module)
-  .add('no custom elements', () => (
-    <SavedElementsModal
-      customElements={[] as CustomElement[]}
-      onAddCustomElement={action('onAddCustomElement')}
-      onSearch={action('onSearch')}
-      onUpdateCustomElement={action('onUpdateCustomElement')}
-      onRemoveCustomElement={action('onRemoveCustomElement')}
-      onClose={action('onClose')}
-    />
-  ))
-  .add(
-    'with custom elements',
-    (_, props) => (
-      <SavedElementsModal
-        customElements={props?.testCustomElements}
-        onAddCustomElement={action('onAddCustomElement')}
-        onSearch={action('onSearch')}
-        onUpdateCustomElement={action('onUpdateCustomElement')}
-        onRemoveCustomElement={action('onRemoveCustomElement')}
-        onClose={action('onClose')}
-      />
-    ),
-    { decorators: [waitFor(getTestCustomElements())] }
-  )
-  .add(
-    'with text filter',
-    (_, props) => (
-      <SavedElementsModal
-        customElements={props?.testCustomElements}
-        initialSearch="Element 2"
-        onAddCustomElement={action('onAddCustomElement')}
-        onSearch={action('onSearch')}
-        onUpdateCustomElement={action('onUpdateCustomElement')}
-        onRemoveCustomElement={action('onRemoveCustomElement')}
-        onClose={action('onClose')}
-      />
-    ),
-    { decorators: [waitFor(getTestCustomElements())] }
-  );
+export default {
+  title: 'components/SavedElementsModal',
+};
+
+export const NoCustomElements = () => (
+  <SavedElementsModal
+    customElements={[] as CustomElement[]}
+    onAddCustomElement={action('onAddCustomElement')}
+    onSearch={action('onSearch')}
+    onUpdateCustomElement={action('onUpdateCustomElement')}
+    onRemoveCustomElement={action('onRemoveCustomElement')}
+    onClose={action('onClose')}
+  />
+);
+
+NoCustomElements.story = {
+  name: 'no custom elements',
+};
+
+export const WithCustomElements = (_, props) => (
+  <SavedElementsModal
+    customElements={props?.testCustomElements}
+    onAddCustomElement={action('onAddCustomElement')}
+    onSearch={action('onSearch')}
+    onUpdateCustomElement={action('onUpdateCustomElement')}
+    onRemoveCustomElement={action('onRemoveCustomElement')}
+    onClose={action('onClose')}
+  />
+);
+
+WithCustomElements.story = {
+  name: 'with custom elements',
+  decorators: [waitFor(getTestCustomElements())],
+};
+
+export const WithTextFilter = (_, props) => (
+  <SavedElementsModal
+    customElements={props?.testCustomElements}
+    initialSearch="Element 2"
+    onAddCustomElement={action('onAddCustomElement')}
+    onSearch={action('onSearch')}
+    onUpdateCustomElement={action('onUpdateCustomElement')}
+    onRemoveCustomElement={action('onRemoveCustomElement')}
+    onClose={action('onClose')}
+  />
+);
+
+WithTextFilter.story = {
+  name: 'with text filter',
+  decorators: [waitFor(getTestCustomElements())],
+};

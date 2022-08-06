@@ -1,11 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-
-import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import React from 'react';
 import { EmbeddableFactoryDefinition, IEmbeddable } from '@kbn/embeddable-plugin/public';
@@ -85,23 +77,35 @@ const testVisTypeAliases: VisTypeAlias[] = [
   },
 ];
 
-storiesOf('components/WorkpadHeader/EditorMenu', module)
-  .add('default', () => (
-    <EditorMenu
-      factories={testFactories}
-      promotedVisTypes={testVisTypes}
-      visTypeAliases={testVisTypeAliases}
-      createNewVisType={() => action('createNewVisType')}
-      createNewEmbeddable={() => action('createNewEmbeddable')}
-    />
-  ))
-  .add('dark mode', () => (
-    <EditorMenu
-      factories={testFactories}
-      isDarkThemeEnabled
-      promotedVisTypes={testVisTypes}
-      visTypeAliases={testVisTypeAliases}
-      createNewVisType={() => action('createNewVisType')}
-      createNewEmbeddable={() => action('createNewEmbeddable')}
-    />
-  ));
+export default {
+  title: 'components/WorkpadHeader/EditorMenu',
+};
+
+export const Default = () => (
+  <EditorMenu
+    factories={testFactories}
+    promotedVisTypes={testVisTypes}
+    visTypeAliases={testVisTypeAliases}
+    createNewVisType={() => action('createNewVisType')}
+    createNewEmbeddable={() => action('createNewEmbeddable')}
+  />
+);
+
+Default.story = {
+  name: 'default',
+};
+
+export const DarkMode = () => (
+  <EditorMenu
+    factories={testFactories}
+    isDarkThemeEnabled
+    promotedVisTypes={testVisTypes}
+    visTypeAliases={testVisTypeAliases}
+    createNewVisType={() => action('createNewVisType')}
+    createNewEmbeddable={() => action('createNewEmbeddable')}
+  />
+);
+
+DarkMode.story = {
+  name: 'dark mode',
+};

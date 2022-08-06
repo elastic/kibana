@@ -6,7 +6,6 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { storiesOf } from '@storybook/react';
 import React from 'react';
 // @ts-expect-error untyped local
 import { getDefaultWorkpad } from '../../../../state/defaults';
@@ -50,17 +49,29 @@ class Interactive extends React.Component<{}, { argValue: ExpressionAstExpressio
   }
 }
 
-storiesOf('arguments/SeriesStyle', module)
-  .addDecorator((story) => (
-    <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>
-  ))
-  .add('simple', () => <Interactive />);
+export default {
+  title: 'arguments/SeriesStyle',
 
-storiesOf('arguments/SeriesStyle/components', module)
-  .addDecorator((story) => (
-    <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>
-  ))
-  .add('simple: no labels', () => (
+  decorators: [(story) => (
+      <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>
+    )],
+};
+
+export const Simple = () => <Interactive />;
+
+Simple.story = {
+  name: 'simple',
+};
+
+export default {
+  title: 'arguments/SeriesStyle/components',
+
+  decorators: [(story) => (
+      <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>
+    )],
+};
+
+export const SimpleNoLabels = () => (
     <SimpleTemplate
       argValue={defaultExpression}
       onValueChange={action('onValueChange')}
@@ -70,8 +81,13 @@ storiesOf('arguments/SeriesStyle/components', module)
         name: 'defaultStyle',
       }}
     />
-  ))
-  .add('simple: defaults', () => (
+  );
+
+SimpleNoLabels.story = {
+  name: 'simple: no labels',
+};
+
+export const SimpleDefaults = () => (
     <SimpleTemplate
       argValue={defaultExpression}
       resolved={{ labels: ['label1', 'label2'] }}
@@ -81,8 +97,13 @@ storiesOf('arguments/SeriesStyle/components', module)
         name: 'defaultStyle',
       }}
     />
-  ))
-  .add('simple: no series', () => (
+  );
+
+SimpleDefaults.story = {
+  name: 'simple: defaults',
+};
+
+export const SimpleNoSeries = () => (
     <SimpleTemplate
       argValue={defaultExpression}
       resolved={{ labels: [] }}
@@ -92,8 +113,13 @@ storiesOf('arguments/SeriesStyle/components', module)
         name: 'unknown',
       }}
     />
-  ))
-  .add('simple: with series', () => (
+  );
+
+SimpleNoSeries.story = {
+  name: 'simple: no series',
+};
+
+export const SimpleWithSeries = () => (
     <SimpleTemplate
       argValue={defaultExpression}
       onValueChange={action('onValueChange')}
@@ -103,4 +129,8 @@ storiesOf('arguments/SeriesStyle/components', module)
         name: 'unknown',
       }}
     />
-  ));
+  );
+
+SimpleWithSeries.story = {
+  name: 'simple: with series',
+};
