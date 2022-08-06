@@ -38,6 +38,9 @@ export class LoadEndpointsScreen extends ScreenBaseClass {
         this.hide();
         return;
 
+      case '':
+        this.throwUnknownChoiceError(choice);
+
       default:
         const count: number = Number(choice);
 
@@ -52,27 +55,21 @@ export class LoadEndpointsScreen extends ScreenBaseClass {
           isDone: false,
         };
 
-        this.show();
+        this.reRender();
         this.loadEndpoints();
     }
   }
 
   private async loadEndpoints() {
-    await new Promise((r) => setTimeout(r, 2000));
-    this.runInfo?.progress.setProgress(20);
-    this.show();
+    const sleep = (ms = 10000) => new Promise((r) => setTimeout(r, ms));
 
-    await new Promise((r) => setTimeout(r, 2000));
-    this.runInfo?.progress.setProgress(40);
-    this.show();
+    const steps = Array.from({ length: 10 }).map((_, index) => (index + 1) * 10);
 
-    await new Promise((r) => setTimeout(r, 2000));
-    this.runInfo?.progress.setProgress(80);
-    this.show();
-
-    await new Promise((r) => setTimeout(r, 2000));
-    this.runInfo?.progress.setProgress(100);
-    this.show();
+    for (const step of steps) {
+      this.runInfo?.progress.setProgress(step);
+      this.reRender();
+      await sleep();
+    }
   }
 
   private promptView(): string | DataFormatter {

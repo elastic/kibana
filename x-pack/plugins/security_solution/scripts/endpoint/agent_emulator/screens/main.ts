@@ -11,6 +11,8 @@ import { ScreenBaseClass, ChoiceListFormatter } from '../../common/screen';
 import type { DataFormatter } from '../../common/screen/data_formatter';
 
 export class MainScreen extends ScreenBaseClass {
+  private readonly loadEndpointsScreen = new LoadEndpointsScreen();
+
   protected header(title: string = '', subTitle: string = ''): string | DataFormatter {
     return super.header(TOOL_TITLE);
   }
@@ -32,8 +34,9 @@ export class MainScreen extends ScreenBaseClass {
     switch (choice.toUpperCase().trim()) {
       // Load endpoints
       case '1':
-        new LoadEndpointsScreen().show().then(() => {
-          this.show();
+        this.pause();
+        this.loadEndpointsScreen.show({ resume: true }).then(() => {
+          this.show({ resume: true });
         });
         return;
 
