@@ -15,9 +15,7 @@ export interface MarkdownSimpleProps {
 
 // Render markdown string into JSX inside of a Fragment.
 export const MarkdownSimple = ({ children }: MarkdownSimpleProps) => (
-  <>
     <ReactMarkdown>{children}</ReactMarkdown>
-  </>
 );
 
 // Needed for React.lazy
