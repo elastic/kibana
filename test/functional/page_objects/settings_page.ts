@@ -717,7 +717,7 @@ export class SettingsPageObject extends FtrService {
     await this.clickAddField();
     await this.setFieldName(name);
     await this.setFieldTypeComposite();
-    await this.setFieldScript(script);
+    await this.setCompositeScript(script);
     if (subfieldCount > 0) {
       await this.testSubjects.find(`typeField_${subfieldCount - 1}`);
     }
