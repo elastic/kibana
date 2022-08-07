@@ -26,7 +26,6 @@ interface TransformActionParamsOptions<
   alert: Alert<State, Context, ActionGroupIds>;
   action: RuleAction;
   actionsPlugin: ActionsPluginStartContract;
-  actionTypeId: string;
   kibanaBaseUrl?: string;
   spaceId: string;
   ruleType: string;
@@ -51,7 +50,6 @@ interface TransformSummaryActionParamsOptions<
   };
   action: RuleAction;
   actionsPlugin: ActionsPluginStartContract;
-  actionTypeId: string;
   kibanaBaseUrl?: string;
   spaceId: string;
   ruleType: string;
@@ -67,7 +65,6 @@ export function transformActionParams<
   alert,
   action,
   actionsPlugin,
-  actionTypeId,
   kibanaBaseUrl,
   spaceId,
   ruleType,
@@ -99,7 +96,7 @@ export function transformActionParams<
     },
   };
   return actionsPlugin.renderActionParameterTemplates(
-    actionTypeId,
+    action.actionTypeId,
     action.id,
     action.params,
     variables
@@ -117,7 +114,6 @@ export function transformSummarizedActionParams<
   alerts,
   action,
   actionsPlugin,
-  actionTypeId,
   kibanaBaseUrl,
   spaceId,
   ruleType,
@@ -142,7 +138,7 @@ export function transformSummarizedActionParams<
     alerts,
   };
   return actionsPlugin.renderActionParameterTemplates(
-    actionTypeId,
+    action.actionTypeId,
     action.id,
     action.params,
     variables

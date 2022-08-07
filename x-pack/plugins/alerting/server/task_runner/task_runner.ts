@@ -32,8 +32,8 @@ import {
   ruleExecutionStatusToRaw,
 } from '../lib';
 import {
+  ActionGroup,
   ActionsCompletion,
-  ActionsStore,
   IntervalSchedule,
   NotifyWhen,
   RawAlertInstance,
@@ -664,8 +664,6 @@ export class TaskRunner<
     let actionsToReturn: Array<Omit<RuleAction, 'id'>> = [];
 
     if (!ruleIsSnoozed && this.shouldLogAndScheduleActionsForAlerts()) {
-      const actionsStore: ActionsStore = {};
-
       const allAlerts = this.getExecutableAlerts({
         rule,
         alerts: [...Object.values(activeAlerts), ...Object.values(recoveredAlerts)],
@@ -677,7 +675,10 @@ export class TaskRunner<
 
       const actionsToTrigger: RuleAction[] = [];
       const ruleTypeActionGroups = new Map(
-        ruleType.actionGroups.map((group) => [group.id, group.name])
+        ruleType.actionGroups.map((group: ActionGroup<ActionGroupIds | RecoveryActionGroupId>) => [
+          group.id,
+          group.name,
+        ])
       );
 
       for (const action of rule.actions) {
@@ -695,19 +696,7 @@ export class TaskRunner<
           continue;
         }
 
-        if (action.isSummary) {
-          if (action.notifyWhen === NotifyWhen.ON_EVERY_RUN) {
-            this.logger.debug(
-              `skipping action "${action.actionRef}" of "${ruleType.id}" as it is a summary and not supposed to run on every rule run`
-            );
-            continue;
-          }
-          if (action.notifyWhen === NotifyWhen.ONCE) {
-            this.logger.debug(
-              `skipping action "${action.actionRef}" of "${ruleType.id}" as it is a summary and not supposed to run on status change`
-            );
-            continue;
-          }
+        if (action.isSummary && action.notifyWhen === NotifyWhen.ON_INTERVAL) {
           const actionParams = transformSummarizedActionParams({
             actionsPlugin: this.context.actionsPlugin,
             rule,
@@ -750,97 +739,58 @@ export class TaskRunner<
           alert.unscheduleActions();
 
           if (action.group !== actionGroup) {
-            continue;
-          }
-
-          if (!ruleTypeActionGroups.has(actionGroup)) {
-            this.logger.error(`Invalid action group "${actionGroup}" for rule "${ruleType.id}".`);
-            continue;
-          }
-
-          if (
-            action.notifyWhen === NotifyWhen.ONCE &&
-            !alert.scheduledActionGroupOrSubgroupHasChanged()
-          ) {
-            this.logger.debug(
-              `skipping scheduling of actions for '${alert.getId()}' in rule ${ruleLabel}: alert is active but action group has not changed`
-            );
-            continue;
-          }
-
-          ruleRunMetricsStore.incrementNumberOfGeneratedActions(1);
-          ruleRunMetricsStore.incrementNumberOfGeneratedActionsByConnectorType(action.actionTypeId);
-
-          if (
-            ruleRunMetricsStore.hasReachedTheExecutableActionsLimit(this.context.actionsConfigMap)
-          ) {
-            ruleRunMetricsStore.setTriggeredActionsStatusByConnectorType({
-              actionTypeId: action.actionTypeId,
-              status: ActionsCompletion.PARTIAL,
-            });
-            this.logger.debug(
-              `Rule "${rule.id}" skipped scheduling action "${action.id}" because the maximum number of allowed actions has been reached.`
-            );
-            break;
-          }
-
-          if (
-            ruleRunMetricsStore.hasReachedTheExecutableActionsLimitByConnectorType({
-              actionTypeId: action.actionTypeId,
-              actionsConfigMap: this.context.actionsConfigMap,
-            })
-          ) {
-            if (!ruleRunMetricsStore.hasConnectorTypeReachedTheLimit(action.actionTypeId)) {
-              this.logger.debug(
-                `Rule "${ruleId}" skipped scheduling action "${action.id}" because the maximum number of allowed actions for connector type ${action.actionTypeId} has been reached.`
-              );
+            if (!ruleTypeActionGroups.has(actionGroup)) {
+              this.logger.error(`Invalid action group "${actionGroup}" for rule "${ruleType.id}".`);
+              continue;
             }
-            ruleRunMetricsStore.setTriggeredActionsStatusByConnectorType({
-              actionTypeId: action.actionTypeId,
-              status: ActionsCompletion.PARTIAL,
+
+            if (
+              action.notifyWhen === NotifyWhen.ONCE &&
+              !alert.scheduledActionGroupOrSubgroupHasChanged()
+            ) {
+              this.logger.debug(
+                `skipping scheduling of actions for '${alert.getId()}' in rule ${ruleLabel}: alert is active but action group has not changed`
+              );
+              continue;
+            }
+
+            const actionParams = transformActionParams({
+              actionsPlugin: this.context.actionsPlugin,
+              rule,
+              alert: alert as Alert<State, Context, ActionGroupIds>,
+              action,
+              ruleType: ruleType.id,
+              spaceId,
+              alertActionGroup: actionGroup,
+              alertActionGroupName: ruleTypeActionGroups.get(actionGroup)! as string,
+              alertActionSubgroup: actionSubgroup,
+              kibanaBaseUrl: this.context.kibanaBaseUrl,
             });
-            continue;
+
+            actionsToTrigger.push({
+              ...action,
+              params: {
+                ...injectActionParams({
+                  ruleId: rule.id,
+                  spaceId,
+                  actionParams,
+                  actionTypeId: action.actionTypeId,
+                }),
+              },
+            });
+
+            if (alert.getState().end) {
+              alert.scheduleActions(actionGroup);
+            }
+
+            this.alertingEventLogger.logAction({
+              id: action.id,
+              typeId: action.actionTypeId,
+              alertId: alert.getId(),
+              alertGroup: actionGroup,
+              alertSubgroup: actionSubgroup,
+            });
           }
-
-          ruleRunMetricsStore.incrementNumberOfTriggeredActions();
-          ruleRunMetricsStore.incrementNumberOfTriggeredActionsByConnectorType(action.actionTypeId);
-
-          const actionParams = transformActionParams({
-            actionsPlugin: this.context.actionsPlugin,
-            rule,
-            alert: alert as Alert<State, Context, ActionGroupIds>,
-            action,
-            ruleType: ruleType.id,
-            spaceId,
-            alertActionGroup: actionGroup,
-            alertActionGroupName: ruleTypeActionGroups.get(actionGroup)!,
-            alertActionSubgroup: actionSubgroup,
-            kibanaBaseUrl: this.context.kibanaBaseUrl,
-          });
-
-          actionsToTrigger.push({
-            ...action,
-            params: {
-              ...injectActionParams({
-                ruleId: rule.id,
-                spaceId,
-                actionParams,
-                actionTypeId: action.actionTypeId,
-              }),
-            },
-          });
-
-          if (alert.getState().end) {
-            alert.scheduleActions(actionGroup);
-          }
-
-          this.alertingEventLogger.logAction({
-            id: action.id,
-            typeId: action.actionTypeId,
-            alertId: alert.getId(),
-            alertGroup: actionGroup,
-            alertSubgroup: actionSubgroup,
-          });
         }
       }
 
@@ -848,23 +798,13 @@ export class TaskRunner<
       /////////////////////////////////////////////////////////////////////////
       /////////////////////////////////////////////////////////////////////////
 
-      await this.triggerActions({
+      actionsToReturn = await this.triggerActions({
         actions: actionsToTrigger,
         spaceId,
         apiKey,
         ruleId,
         fakeRequest,
-      });
-
-      actionsToReturn = rule.actions.map((action) => {
-        return omit(
-          {
-            ...action,
-            lastTriggerDate:
-              actionsStore[action.actionRef]?.lastTriggerDate || action.lastTriggerDate,
-          },
-          ['id']
-        );
+        ruleRunMetricsStore,
       });
     } else {
       if (ruleIsSnoozed) {
@@ -931,18 +871,62 @@ export class TaskRunner<
     apiKey,
     ruleId,
     fakeRequest,
+    ruleRunMetricsStore,
   }: {
     actions: RuleAction[];
     spaceId: string;
     apiKey: string | null;
     ruleId: string;
     fakeRequest: KibanaRequest;
-  }): Promise<void> {
+    ruleRunMetricsStore: RuleRunMetricsStore;
+  }): Promise<RuleAction[]> {
     const actionsClient = await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest);
     let ephemeralActionsToSchedule = this.context.maxEphemeralActionsPerRule;
 
+    ruleRunMetricsStore.setNumberOfGeneratedActions(actions.length);
+
+    const actionsToTrigger: RuleAction[] = [];
+
+    for (const action of actions) {
+      ruleRunMetricsStore.incrementNumberOfGeneratedActionsByConnectorType(action.actionTypeId);
+
+      if (ruleRunMetricsStore.hasReachedTheExecutableActionsLimit(this.context.actionsConfigMap)) {
+        ruleRunMetricsStore.setTriggeredActionsStatusByConnectorType({
+          actionTypeId: action.actionTypeId,
+          status: ActionsCompletion.PARTIAL,
+        });
+        this.logger.debug(
+          `Rule "${ruleId}" skipped scheduling action "${action.id}" because the maximum number of allowed actions has been reached.`
+        );
+        break;
+      }
+
+      if (
+        ruleRunMetricsStore.hasReachedTheExecutableActionsLimitByConnectorType({
+          actionTypeId: action.actionTypeId,
+          actionsConfigMap: this.context.actionsConfigMap,
+        })
+      ) {
+        if (!ruleRunMetricsStore.hasConnectorTypeReachedTheLimit(action.actionTypeId)) {
+          this.logger.debug(
+            `Rule "${ruleId}" skipped scheduling action "${action.id}" because the maximum number of allowed actions for connector type ${action.actionTypeId} has been reached.`
+          );
+        }
+        ruleRunMetricsStore.setTriggeredActionsStatusByConnectorType({
+          actionTypeId: action.actionTypeId,
+          status: ActionsCompletion.PARTIAL,
+        });
+        continue;
+      }
+
+      ruleRunMetricsStore.incrementNumberOfTriggeredActions();
+      ruleRunMetricsStore.incrementNumberOfTriggeredActionsByConnectorType(action.actionTypeId);
+
+      actionsToTrigger.push(action);
+    }
+
     await Promise.all(
-      actions.map(async (action) => {
+      actionsToTrigger.map(async (action) => {
         const enqueueOptions = {
           id: action.id,
           params: action.params,
@@ -978,6 +962,8 @@ export class TaskRunner<
         }
       })
     );
+
+    return actionsToTrigger;
   }
 
   shouldActionBeThrottled(action: RuleAction) {
