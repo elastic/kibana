@@ -11,6 +11,7 @@ import {
   type EuiBasicTableProps,
   type Pagination,
   type CriteriaWithPagination,
+  EuiToolTip,
 } from '@elastic/eui';
 import React from 'react';
 import moment from 'moment';
@@ -134,7 +135,11 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
     }),
     dataType: 'date',
     truncateText: true,
-    render: (date: Benchmark['package_policy']['created_at']) => moment(date).fromNow(),
+    render: (timestamp: Benchmark['package_policy']['created_at']) => (
+      <EuiToolTip position="top" content={timestamp}>
+        <span>{moment(timestamp).fromNow()}</span>
+      </EuiToolTip>
+    ),
     sortable: true,
     'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.CREATED_AT,
   },

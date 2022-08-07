@@ -13,6 +13,7 @@ import {
   EuiBasicTable,
   EuiBasicTableProps,
   useEuiTheme,
+  EuiToolTip,
 } from '@elastic/eui';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
@@ -144,7 +145,11 @@ const getColumns = ({
       defaultMessage: 'Last Modified',
     }),
     width: '15%',
-    render: (timestamp) => moment(timestamp).fromNow(),
+    render: (timestamp) => (
+      <EuiToolTip position="top" content={timestamp}>
+        <span>{moment(timestamp).fromNow()}</span>
+      </EuiToolTip>
+    ),
   },
   {
     field: 'attributes.enabled',
