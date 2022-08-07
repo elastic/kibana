@@ -10,7 +10,8 @@ import {
   createCallerCalleeIntermediateNode,
   fromCallerCalleeIntermediateNode,
 } from './callercallee';
-import { createStackFrameMetadata, hashFrameGroup } from './profiling';
+import { hashFrameGroup } from './frame_group';
+import { createStackFrameMetadata } from './profiling';
 
 import { events, stackTraces, stackFrames, executables } from './__fixtures__/stacktraces';
 

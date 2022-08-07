@@ -8,14 +8,16 @@
 import { clone } from 'lodash';
 import {
   compareFrameGroup,
-  createStackFrameMetadata,
   defaultGroupBy,
-  Executable,
-  FileID,
   FrameGroup,
   FrameGroupID,
-  groupStackFrameMetadataByStackTrace,
   hashFrameGroup,
+} from './frame_group';
+import {
+  createStackFrameMetadata,
+  Executable,
+  FileID,
+  groupStackFrameMetadataByStackTrace,
   StackFrame,
   StackFrameID,
   StackFrameMetadata,

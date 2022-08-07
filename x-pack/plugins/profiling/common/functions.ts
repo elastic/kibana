@@ -8,12 +8,14 @@ import * as t from 'io-ts';
 import {
   compareFrameGroup,
   defaultGroupBy,
-  Executable,
-  FileID,
   FrameGroup,
   FrameGroupID,
-  groupStackFrameMetadataByStackTrace,
   hashFrameGroup,
+} from './frame_group';
+import {
+  Executable,
+  FileID,
+  groupStackFrameMetadataByStackTrace,
   StackFrame,
   StackFrameID,
   StackFrameMetadata,
