@@ -11,6 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useEuiTheme } from '@elastic/eui';
 import { generatePath } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
+import { CloudPosturePageTitle } from '../../../../components/cloud_posture_page_title';
 import * as TEST_SUBJECTS from '../../test_subjects';
 import { PageTitle, PageTitleText } from '../../layout/findings_layout';
 import { findingsNavigation } from '../../../../common/navigation/constants';
@@ -98,10 +99,15 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
         <PageTitleText
           title={
             <div style={{ padding: euiTheme.size.s }}>
-              <FormattedMessage
-                id="xpack.csp.findings.resourceFindings.resourceFindingsPageTitle"
-                defaultMessage="{resourceId} - Findings"
-                values={{ resourceId: params.resourceId }}
+              <CloudPosturePageTitle
+                isBeta
+                title={i18n.translate(
+                  'xpack.csp.findings.resourceFindings.resourceFindingsPageTitle',
+                  {
+                    defaultMessage: '{resourceId} - Findings',
+                    values: { resourceId: params.resourceId },
+                  }
+                )}
               />
             </div>
           }
