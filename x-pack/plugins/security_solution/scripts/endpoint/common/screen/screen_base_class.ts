@@ -81,7 +81,7 @@ export class ScreenBaseClass {
   protected footer(choices: Choice[] = [QuitChoice]): string | DataFormatter {
     const displayChoices =
       choices && choices.length
-        ? new ChoiceListFormatter(choices, { layout: 'horizontal' }).output
+        ? `\n${new ChoiceListFormatter(choices, { layout: 'horizontal' }).output}\n`
         : '';
 
     return `
