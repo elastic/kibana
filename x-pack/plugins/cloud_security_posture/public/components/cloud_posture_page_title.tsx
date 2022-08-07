@@ -19,9 +19,16 @@ export const CloudPosturePageTitle = ({ title, isBeta }: { title: string; isBeta
     {isBeta && (
       <EuiFlexItem grow={false}>
         <EuiBetaBadge
-          label={i18n.translate('xpack.csp.common.cloudPosturePageTitle.BetaTagLabel', {
+          label={i18n.translate('xpack.csp.common.cloudPosturePageTitle.BetaBadgeLabel', {
             defaultMessage: 'Beta',
           })}
+          tooltipContent={i18n.translate(
+            'xpack.csp.common.cloudPosturePageTitle.BetaBadgeTooltip',
+            {
+              defaultMessage:
+                'This functionality is in beta and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in beta are not subject to the support SLA of official GA features.',
+            }
+          )}
         />
       </EuiFlexItem>
     )}
