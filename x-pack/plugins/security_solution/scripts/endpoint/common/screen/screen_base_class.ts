@@ -81,7 +81,7 @@ export class ScreenBaseClass {
   protected footer(choices: Choice[] = [QuitChoice]): string | DataFormatter {
     const displayChoices =
       choices && choices.length
-        ? `\n${new ChoiceListFormatter(choices, { layout: 'horizontal' }).output}\n`
+        ? `\n${this.leftPad(new ChoiceListFormatter(choices, { layout: 'horizontal' }).output)}\n`
         : '';
 
     return `
@@ -128,6 +128,18 @@ export class ScreenBaseClass {
       this.readlineInstance.close();
       this.readlineInstance = undefined;
     }
+  }
+
+  protected leftPad(content: string, padWith: string = '  ') {
+    return content
+      .split('\n')
+      .map((contentLine) => {
+        if (!contentLine.startsWith(padWith)) {
+          return padWith + contentLine;
+        }
+        return contentLine;
+      })
+      .join('\n');
   }
 
   private showMessage(message: string, color: 'blue' | 'red' | 'green' = 'blue') {
@@ -222,7 +234,7 @@ export class ScreenBaseClass {
 
     const screenRenderInfo = new RenderedScreen(
       this.getOutputContent(headerContent) +
-        this.getOutputContent(bodyContent) +
+        this.leftPad(this.getOutputContent(bodyContent)) +
         this.getOutputContent(footerContent)
     );
     this.screenRenderInfo = screenRenderInfo;
