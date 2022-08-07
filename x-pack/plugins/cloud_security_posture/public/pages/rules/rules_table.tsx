@@ -13,10 +13,9 @@ import {
   EuiBasicTable,
   EuiBasicTableProps,
   useEuiTheme,
-  EuiToolTip,
 } from '@elastic/eui';
-import moment from 'moment';
 import { i18n } from '@kbn/i18n';
+import { CspTimestampTableCell } from '../../components/csp_timestamp_table_cell';
 import type { RulesState } from './rules_container';
 import * as TEST_SUBJECTS from './test_subjects';
 import type { RuleSavedObject } from './use_csp_rules';
@@ -145,11 +144,7 @@ const getColumns = ({
       defaultMessage: 'Last Modified',
     }),
     width: '15%',
-    render: (timestamp) => (
-      <EuiToolTip position="top" content={timestamp}>
-        <span>{moment(timestamp).fromNow()}</span>
-      </EuiToolTip>
-    ),
+    render: (timestamp) => <CspTimestampTableCell timestamp={timestamp} />,
   },
   {
     field: 'attributes.enabled',
