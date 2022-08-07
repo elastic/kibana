@@ -26,6 +26,10 @@ export class LoadEndpointsScreen extends ScreenBaseClass {
 
   protected body(): string | DataFormatter {
     if (this.runInfo) {
+      if (this.runInfo.isDone) {
+        return this.doneView();
+      }
+
       return this.loadingView();
     }
 
@@ -33,42 +37,57 @@ export class LoadEndpointsScreen extends ScreenBaseClass {
   }
 
   protected onEnterChoice(choice: string) {
-    switch (choice.toUpperCase()) {
-      case 'Q':
-        this.hide();
-        return;
+    const choiceValue = choice.trim().toUpperCase();
 
-      case '':
-        this.throwUnknownChoiceError(choice);
-
-      default:
-        const count: number = Number(choice);
-
-        if (!Number.isFinite(count)) {
-          throw new Error(`Invalid number: ${choice}`);
-        }
-
-        this.runInfo = {
-          count,
-          progress: new ProgressFormatter(),
-          isRunning: false,
-          isDone: false,
-        };
-
-        this.reRender();
-        this.loadEndpoints();
+    if (choiceValue === 'Q') {
+      this.hide();
+      return;
     }
+
+    if (!choiceValue) {
+      if (this.runInfo?.isDone) {
+        this.runInfo = undefined;
+        this.reRender();
+        return;
+      }
+
+      this.throwUnknownChoiceError(choice);
+    }
+
+    const count: number = Number(choiceValue);
+
+    if (!Number.isFinite(count)) {
+      throw new Error(`Invalid number: ${choice}`);
+    }
+
+    this.runInfo = {
+      count,
+      progress: new ProgressFormatter(),
+      isRunning: false,
+      isDone: false,
+    };
+
+    this.reRender();
+    this.loadEndpoints();
   }
 
   private async loadEndpoints() {
-    const sleep = (ms = 10000) => new Promise((r) => setTimeout(r, ms));
+    const runInfo = this.runInfo;
 
-    const steps = Array.from({ length: 10 }).map((_, index) => (index + 1) * 10);
+    if (runInfo) {
+      const sleep = (ms = 1000) => new Promise((r) => setTimeout(r, ms));
 
-    for (const step of steps) {
-      this.runInfo?.progress.setProgress(step);
+      const steps = Array.from({ length: 10 }).map((_, index) => (index + 1) * 10);
+
+      for (const step of steps) {
+        this.runInfo?.progress.setProgress(step);
+        this.reRender();
+        await sleep();
+      }
+
+      runInfo.isDone = true;
+      runInfo.isRunning = false;
       this.reRender();
-      await sleep();
     }
   }
 
@@ -84,10 +103,17 @@ export class LoadEndpointsScreen extends ScreenBaseClass {
       return `
 
   Creating ${this.runInfo.count} endpoint(s):
-  ${this.runInfo.progress.output}
-`;
+
+  ${this.runInfo.progress.output}`;
     }
 
     return 'Unknown state';
+  }
+
+  private doneView(): string {
+    return `${this.loadingView()}
+
+  Done. Endpoint(s) have been loaded into Elastic/Kibana.
+  Press Enter to continue`;
   }
 }
