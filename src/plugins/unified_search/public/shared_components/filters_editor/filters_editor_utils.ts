@@ -31,7 +31,7 @@ const buildOrFilter = (filters: FilterItem) => {
 };
 
 /** to: @kbn/es-query **/
-export const isOrFilter = (filter: Filter) => Boolean(filter.meta?.type === 'OR');
+export const isOrFilter = (filter: Filter) => Boolean(filter?.meta?.type === 'OR');
 
 export const getConditionalOperationType = (filter: FilterItem) => {
   if (Array.isArray(filter)) {
@@ -44,7 +44,7 @@ export const getConditionalOperationType = (filter: FilterItem) => {
 export const getPathInArray = (path: string) => path.split(PATH_SEPARATOR).map((i) => +i);
 
 const getGroupedFilters = (filter: FilterItem) =>
-  Array.isArray(filter) ? filter : filter.meta.params;
+  Array.isArray(filter) ? filter : filter?.meta?.params;
 
 const doForFilterByPath = <T>(
   filters: FilterItem[],
@@ -156,7 +156,7 @@ export const removeFilter = (filters: Filter[], path: string) => {
   const { targetArray } = getContainerMetaByPath(newFilters, pathInArray);
   const selector = pathInArray[pathInArray.length - 1];
 
-  targetArray.splice(selector, 1);
+  targetArray?.splice(selector, 1);
 
   return normalizeFilters(newFilters);
 };

@@ -77,11 +77,7 @@ export function FiltersEditor({
     []
   );
 
-  const onDragActive: DragDropContextProps['onDragUpdate'] = ({
-    draggableId,
-    destination,
-    combine,
-  }) => {
+  const onDragActive: DragDropContextProps['onDragUpdate'] = ({ destination, combine }) => {
     if (destination) {
       setDropTarget(destination.droppableId);
     }

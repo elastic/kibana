@@ -22,7 +22,6 @@ import { DataViewField } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid';
 
-import { DropOperationSwitcher } from './drop_operation_swither';
 import { FieldInput } from './filters_editor_filter_item_field_input';
 import { OperatorInput } from './filters_editor_filter_item_operator_input';
 import { ParamsEditor } from './filters_editor_filter_item_params_editor';
@@ -174,13 +173,11 @@ export function FilterItem({
                 responsive={false}
                 alignItems="center"
                 justifyContent="center"
+                style={{
+                  cursor: dropTarget === path ? `copy` : 'auto',
+                }}
               >
-                {dropTarget === path && currentDragElement !== dropTarget ? (
-                  <EuiFlexItem grow={1}>
-                    <DropOperationSwitcher />
-                  </EuiFlexItem>
-                ) : null}
-                <EuiFlexItem grow={9}>
+                <EuiFlexItem>
                   <EuiPanel color={color} paddingSize={'none'} hasShadow={false} key={uuid()}>
                     <EuiFlexGroup
                       gutterSize="m"
