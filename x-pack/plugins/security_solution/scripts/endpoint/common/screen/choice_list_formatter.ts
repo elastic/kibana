@@ -35,7 +35,7 @@ export class ChoiceListFormatter extends DataFormatter {
 
     const list = this.buildList();
 
-    this.outputContent = `\n${list.join(this.options.layout === 'horizontal' ? '   ' : '\n')}\n`;
+    this.outputContent = `${list.join(this.options.layout === 'horizontal' ? '   ' : '\n')}`;
   }
 
   protected getOutput(): string {

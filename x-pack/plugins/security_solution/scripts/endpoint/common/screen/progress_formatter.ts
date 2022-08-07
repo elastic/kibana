@@ -20,6 +20,6 @@ export class ProgressFormatter extends DataFormatter {
   protected getOutput(): string {
     const repeatValue = Math.ceil(MAX_WIDTH * (this.percentDone / 100));
 
-    return `\n  [ ${'='.repeat(repeatValue).padEnd(MAX_WIDTH)} ] ${this.percentDone}%\n`;
+    return `[ ${'='.repeat(repeatValue).padEnd(MAX_WIDTH)} ] ${this.percentDone}%`;
   }
 }
