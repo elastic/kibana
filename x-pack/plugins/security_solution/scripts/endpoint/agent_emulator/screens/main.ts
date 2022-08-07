@@ -18,7 +18,9 @@ export class MainScreen extends ScreenBaseClass {
   }
 
   protected body(): string | DataFormatter {
-    return new ChoiceListFormatter(['Load endpoints']);
+    return `
+
+${new ChoiceListFormatter(['Load endpoints']).output}\n`;
   }
 
   protected footer(): string | DataFormatter {
