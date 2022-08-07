@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { green } from 'chalk';
 import { HORIZONTAL_LINE } from '../constants';
 import { DataFormatter } from './data_formatter';
 
@@ -18,8 +18,12 @@ export class ProgressFormatter extends DataFormatter {
   }
 
   protected getOutput(): string {
-    const repeatValue = Math.ceil(MAX_WIDTH * (this.percentDone / 100));
+    const prctDone = Math.min(100, this.percentDone);
+    const repeatValue = Math.ceil(MAX_WIDTH * (prctDone / 100));
+    const progressPrct = `${prctDone}%`;
 
-    return `[ ${'='.repeat(repeatValue).padEnd(MAX_WIDTH)} ] ${this.percentDone}%`;
+    return `[ ${'='.repeat(repeatValue).padEnd(MAX_WIDTH)} ] ${
+      prctDone === 100 ? green(progressPrct) : progressPrct
+    }`;
   }
 }
