@@ -152,7 +152,7 @@ const LogstashInstructionSteps = () => {
           <>
             <FormattedMessage
               id="xpack.fleet.settings.logstashInstructions.addPipelineStepDescription"
-              defaultMessage="Next, open the {pipelineConfFile} file and insert the following content:"
+              defaultMessage="In your Logstash configuration directory, open the {pipelineFile} file and add the following configuration. Replace the path to your file."
               values={{
                 pipelineFile: <EuiCode>pipelines.yml</EuiCode>,
               }}
@@ -169,7 +169,7 @@ const LogstashInstructionSteps = () => {
           <>
             <FormattedMessage
               id="xpack.fleet.settings.logstashInstructions.editPipelineStepDescription"
-              defaultMessage="In your Logstash configuration directory, open the {pipelineFile} file and add the following configuration. Replace the path to your file."
+              defaultMessage="Next, open the {pipelineConfFile} file and insert the following content:"
               values={{
                 pipelineConfFile: <EuiCode>elastic-agent-pipeline.conf</EuiCode>,
               }}
