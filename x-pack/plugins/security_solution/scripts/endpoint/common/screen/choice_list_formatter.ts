@@ -54,7 +54,7 @@ export class ChoiceListFormatter extends DataFormatter {
         title = choice;
       }
 
-      return `  [${key}] ${title}`;
+      return `[${key}] ${title}`;
     });
   }
 }
