@@ -46,6 +46,7 @@ describe('getActionRoute', () => {
       name: 'action name',
       config: {},
       isPreconfigured: false,
+      isDeprecated: false,
     };
 
     const actionsClient = actionsClientMock.create();
@@ -65,6 +66,7 @@ describe('getActionRoute', () => {
           "actionTypeId": "2",
           "config": Object {},
           "id": "1",
+          "isDeprecated": false,
           "isPreconfigured": false,
           "name": "action name",
         },
@@ -94,6 +96,7 @@ describe('getActionRoute', () => {
       name: 'action name',
       config: {},
       isPreconfigured: false,
+      isDeprecated: false,
     });
 
     const [context, req, res] = mockHandlerArguments(
@@ -128,6 +131,7 @@ describe('getActionRoute', () => {
       name: 'action name',
       config: {},
       isPreconfigured: false,
+      isDeprecated: false,
     });
 
     const [context, req, res] = mockHandlerArguments(

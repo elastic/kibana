@@ -5,14 +5,15 @@
  * 2.0.
  */
 
+import { CaseSeverity } from '@kbn/cases-plugin/common/api';
 import uuid from 'uuid';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function CasesCreateViewServiceProvider({ getService, getPageObject }: FtrProviderContext) {
+  const common = getPageObject('common');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const comboBox = getService('comboBox');
-  const config = getService('config');
 
   return {
     /**
@@ -33,16 +34,19 @@ export function CasesCreateViewServiceProvider({ getService, getPageObject }: Ft
      * and leaves the navigation in the case view page
      *
      * Doesn't do navigation. Only works if you are already inside a cases app page.
-     * Does not work with the cases flyout.
      */
-    async createCaseFromCreateCasePage({
+    async createCase({
       title = 'test-' + uuid.v4(),
       description = 'desc' + uuid.v4(),
       tag = 'tagme',
+      severity = CaseSeverity.LOW,
+      owner,
     }: {
-      title: string;
-      description: string;
-      tag: string;
+      title?: string;
+      description?: string;
+      tag?: string;
+      severity?: CaseSeverity;
+      owner?: string;
     }) {
       // case name
       await testSubjects.setValue('input', title);
@@ -55,12 +59,19 @@ export function CasesCreateViewServiceProvider({ getService, getPageObject }: Ft
       await descriptionArea.focus();
       await descriptionArea.type(description);
 
+      if (severity !== CaseSeverity.LOW) {
+        await common.clickAndValidate(
+          'case-severity-selection',
+          `case-severity-selection-${severity}`
+        );
+      }
+
+      if (owner) {
+        await testSubjects.click(`${owner}RadioButton`);
+      }
+
       // save
       await testSubjects.click('create-case-submit');
-
-      await testSubjects.existOrFail('case-view-title', {
-        timeout: config.get('timeouts.waitFor'),
-      });
     },
   };
 }

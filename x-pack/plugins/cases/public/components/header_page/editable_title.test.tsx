@@ -9,7 +9,12 @@ import { shallow } from 'enzyme';
 import React from 'react';
 
 import '../../common/mock/match_media';
-import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../common/mock';
+import {
+  AppMockRenderer,
+  createAppMockRenderer,
+  readCasesPermissions,
+  TestProviders,
+} from '../../common/mock';
 import { EditableTitle, EditableTitleProps } from './editable_title';
 import { useMountAppended } from '../../utils/use_mount_appended';
 
@@ -20,7 +25,6 @@ describe('EditableTitle', () => {
     title: 'Test title',
     onSubmit: submitTitle,
     isLoading: false,
-    userCanCrud: true,
   };
 
   beforeEach(() => {
@@ -39,8 +43,8 @@ describe('EditableTitle', () => {
 
   it('does not show the edit icon when the user does not have edit permissions', () => {
     const wrapper = mount(
-      <TestProviders>
-        <EditableTitle {...{ ...defaultProps, userCanCrud: false }} />
+      <TestProviders permissions={readCasesPermissions()}>
+        <EditableTitle {...defaultProps} />
       </TestProviders>
     );
 

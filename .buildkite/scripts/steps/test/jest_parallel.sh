@@ -1,37 +1,60 @@
 #!/bin/bash
 
-set -uo pipefail
+set -euo pipefail
 
-JOB=$BUILDKITE_PARALLEL_JOB
-JOB_COUNT=$BUILDKITE_PARALLEL_JOB_COUNT
+export JOB=${BUILDKITE_PARALLEL_JOB:-0}
 
 # a jest failure will result in the script returning an exit code of 10
-
-i=0
 exitCode=0
+results=()
 
-# run unit tests in parallel
 if [[ "$1" == 'jest.config.js' ]]; then
+  # run unit tests in parallel
   parallelism="-w2"
+  TEST_TYPE="unit"
 else
+  # run integration tests in-band
   parallelism="--runInBand"
+  TEST_TYPE="integration"
 fi
 
-while read -r config; do
-  if [ "$((i % JOB_COUNT))" -eq "$JOB" ]; then
-    echo "--- $ node scripts/jest --config $config"
-    node --max-old-space-size=14336 ./scripts/jest --config="$config" "$parallelism" --coverage=false --passWithNoTests
-    lastCode=$?
+export TEST_TYPE
+echo "--- downloading jest test run order"
+buildkite-agent artifact download jest_run_order.json .
+configs=$(jq -r 'getpath([env.TEST_TYPE]) | .groups[env.JOB | tonumber].names | .[]' jest_run_order.json)
 
-    if [ $lastCode -ne 0 ]; then
-      exitCode=10
-      echo "Jest exited with code $lastCode"
-      echo "^^^ +++"
-    fi
+while read -r config; do
+  echo "--- $ node scripts/jest --config $config"
+  start=$(date +%s)
+
+  # prevent non-zero exit code from breaking the loop
+  set +e;
+  NODE_OPTIONS="--max-old-space-size=14336" node ./scripts/jest --config="$config" "$parallelism" --coverage=false --passWithNoTests
+  lastCode=$?
+  set -e;
+
+  timeSec=$(($(date +%s)-start))
+  if [[ $timeSec -gt 60 ]]; then
+    min=$((timeSec/60))
+    sec=$((timeSec-(min*60)))
+    duration="${min}m ${sec}s"
+  else
+    duration="${timeSec}s"
   fi
 
-  ((i=i+1))
-# uses heredoc to avoid the while loop being in a sub-shell thus unable to overwrite exitCode
-done <<< "$(find src x-pack packages -name "$1" -not -path "*/__fixtures__/*" | sort)"
+  results+=("- $config
+    duration: ${duration}
+    result: ${lastCode}")
+
+  if [ $lastCode -ne 0 ]; then
+    exitCode=10
+    echo "Jest exited with code $lastCode"
+    echo "^^^ +++"
+  fi
+done <<< "$configs"
+
+echo "--- Jest configs complete"
+printf "%s\n" "${results[@]}"
+echo ""
 
 exit $exitCode

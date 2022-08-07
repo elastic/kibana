@@ -6,7 +6,8 @@
  */
 
 import React, { useMemo } from 'react';
-import { Redirect, Route, Switch } from 'react-router-dom';
+import { Redirect, Switch } from 'react-router-dom';
+import { Route } from '@kbn/kibana-react-plugin/public';
 
 import { useMlCapabilities } from '../../common/components/ml/hooks/use_ml_capabilities';
 import { hasMlUserPermissions } from '../../../common/machine_learning/has_ml_user_permissions';
@@ -16,10 +17,18 @@ import { Network } from './network';
 import { getNetworkRoutePath } from './navigation';
 import { NetworkRouteType } from './navigation/types';
 import { MlNetworkConditionalContainer } from '../../common/components/ml/conditional_links/ml_network_conditional_container';
-import { FlowTarget } from '../../../common/search_strategy';
 import { NETWORK_PATH } from '../../../common/constants';
+import { FlowTargetSourceDest } from '../../../common/search_strategy';
+import {
+  FLOW_TARGET_PARAM,
+  NETWORK_DETAILS_PAGE_PATH,
+  NETWORK_DETAILS_TAB_PATH,
+} from './constants';
 
-const ipDetailsPageBasePath = `${NETWORK_PATH}/ip/:detailName`;
+const getPathWithFlowType = (detailName: string, flowTarget?: FlowTargetSourceDest) =>
+  `${NETWORK_PATH}/ip/${detailName}/${flowTarget || FlowTargetSourceDest.source}/${
+    NetworkRouteType.flows
+  }`;
 
 const NetworkContainerComponent = () => {
   const capabilities = useMlCapabilities();
@@ -52,25 +61,32 @@ const NetworkContainerComponent = () => {
           hasMlUserPermissions={userHasMlUserPermissions}
         />
       </Route>
-      <Route path={`${ipDetailsPageBasePath}/:flowTarget`}>
+      <Route path={NETWORK_DETAILS_TAB_PATH}>
         <NetworkDetails />
       </Route>
       <Route
-        path={ipDetailsPageBasePath}
+        path={`${NETWORK_DETAILS_PAGE_PATH}/:flowTarget(${FLOW_TARGET_PARAM})?`}
         render={({
-          location: { search = '' },
           match: {
-            params: { detailName },
+            params: { detailName, flowTarget },
           },
+          location: { search = '' },
         }) => (
           <Redirect
             to={{
-              pathname: `${NETWORK_PATH}/ip/${detailName}/${FlowTarget.source}`,
+              pathname: getPathWithFlowType(detailName, flowTarget),
               search,
             }}
           />
         )}
       />
+      <Route>
+        <Redirect
+          to={{
+            pathname: NETWORK_PATH,
+          }}
+        />
+      </Route>
     </Switch>
   );
 };

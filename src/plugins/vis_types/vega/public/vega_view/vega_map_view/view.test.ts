@@ -116,7 +116,6 @@ describe('vega_map_view/view', () => {
     let vegaParser: VegaParser;
 
     setInjectedVars({
-      emsTileLayerId: {},
       enableExternalUrls: true,
     });
     setData(dataPluginStart);
@@ -150,7 +149,6 @@ describe('vega_map_view/view', () => {
           search: dataPluginStart.search,
           indexPatterns: dataViewsStart,
           uiSettings: coreStart.uiSettings,
-          injectedMetadata: coreStart.injectedMetadata,
         }),
         new TimeCache(dataPluginStart.query.timefilter.timefilter, 0),
         {},

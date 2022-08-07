@@ -7,6 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { Logger } from '@kbn/logging';
 import { isPromise } from '@kbn/std';
 import { ObservableLike, UnwrapObservable } from '@kbn/utility-types';
 import { keys, last, mapValues, reduce, zipObject } from 'lodash';
@@ -187,7 +188,7 @@ export class Execution<
     return this.context.inspectorAdapters;
   }
 
-  constructor(public readonly execution: ExecutionParams) {
+  constructor(public readonly execution: ExecutionParams, private readonly logger?: Logger) {
     const { executor } = execution;
 
     this.contract = new ExecutionContract<Input, Output, InspectorAdapters>(this);
@@ -224,6 +225,7 @@ export class Execution<
         inspectorAdapters.tables[name] = datatable;
       },
       isSyncColorsEnabled: () => execution.params.syncColors!,
+      isSyncTooltipsEnabled: () => execution.params.syncTooltips!,
       ...execution.executor.context,
       getExecutionContext: () => execution.params.executionContext,
     };
@@ -328,6 +330,10 @@ export class Execution<
                 },
               }),
             });
+          }
+
+          if (fn.deprecated) {
+            this.logger?.warn(`Function '${fnName}' is deprecated`);
           }
 
           if (this.execution.params.debug) {
@@ -447,12 +453,16 @@ export class Execution<
   }
 
   validate<Type = unknown>(value: Type, argDef: ExpressionFunctionParameter<Type>): void {
-    if (argDef.strict && argDef.options?.length && !argDef.options.includes(value)) {
-      throw new Error(
-        `Value '${value}' is not among the allowed options for argument '${
-          argDef.name
-        }': '${argDef.options.join("', '")}'`
-      );
+    if (argDef.options?.length && !argDef.options.includes(value)) {
+      const message = `Value '${value}' is not among the allowed options for argument '${
+        argDef.name
+      }': '${argDef.options.join("', '")}'`;
+
+      if (argDef.strict) {
+        throw new Error(message);
+      }
+
+      this.logger?.warn(message);
     }
   }
 
@@ -473,6 +483,9 @@ export class Execution<
           if (!argDef) {
             throw new Error(`Unknown argument '${argName}' passed to function '${fnDef.name}'`);
           }
+          if (argDef.deprecated && !acc[argDef.name]) {
+            this.logger?.warn(`Argument '${argName}' is deprecated in function '${fnDef.name}'`);
+          }
           acc[argDef.name] = (acc[argDef.name] || []).concat(argAst);
           return acc;
         },
@@ -480,7 +493,7 @@ export class Execution<
       );
 
       // Check for missing required arguments.
-      for (const { aliases, default: argDefault, name, required } of Object.values(argDefs)) {
+      for (const { default: argDefault, name, required } of Object.values(argDefs)) {
         if (!(name in dealiasedArgAsts) && typeof argDefault !== 'undefined') {
           dealiasedArgAsts[name] = [parse(argDefault as string, 'argument')];
         }
@@ -489,13 +502,7 @@ export class Execution<
           continue;
         }
 
-        if (!aliases?.length) {
-          throw new Error(`${fnDef.name} requires an argument`);
-        }
-
-        // use an alias if _ is the missing arg
-        const errorArg = name === '_' ? aliases[0] : name;
-        throw new Error(`${fnDef.name} requires an "${errorArg}" argument`);
+        throw new Error(`${fnDef.name} requires the "${name}" argument`);
       }
 
       // Create the functions to resolve the argument ASTs into values

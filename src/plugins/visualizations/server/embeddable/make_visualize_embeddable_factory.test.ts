@@ -9,9 +9,8 @@
 import semverGte from 'semver/functions/gte';
 import { makeVisualizeEmbeddableFactory } from './make_visualize_embeddable_factory';
 import { getAllMigrations } from '../migrations/visualization_saved_object_migrations';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { SerializedSearchSourceFields } from '@kbn/data-plugin/public';
-import { GetMigrationFunctionObjectFn } from '@kbn/kibana-utils-plugin/common';
+import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import type { GetMigrationFunctionObjectFn } from '@kbn/kibana-utils-plugin/common';
 
 describe('embeddable migrations', () => {
   test('should have same versions registered as saved object migrations versions (>7.13.0)', () => {

@@ -1,0 +1,15 @@
+{
+  "id": "openTelemetryInstrumentedPlugin",
+  "owner": {
+    "name": "Stack Monitoring",
+    "githubTeam": "stack-monitoring-ui"
+  },
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "requiredPlugins": [
+    "monitoringCollection"
+  ],
+  "optionalPlugins": [],
+  "server": true,
+  "ui": false
+}

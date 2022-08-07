@@ -81,7 +81,12 @@ const TabComponent = (props: TabProps) => {
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <LogStream startTimestamp={startTimestamp} endTimestamp={endTimestamp} query={filter} />
+      <LogStream
+        logView={{ type: 'log-view-reference', logViewId: 'default' }}
+        startTimestamp={startTimestamp}
+        endTimestamp={endTimestamp}
+        query={filter}
+      />
     </TabContent>
   );
 };

@@ -12,18 +12,19 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { setHeaderActionMenuMounter } from '../../../../kibana_services';
 import { esHits } from '../../../../__mocks__/es_hits';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
-import { GetStateReturn } from '../../services/discover_state';
-import { DataDocuments$ } from '../../utils/use_saved_search';
+import { AppState, GetStateReturn } from '../../services/discover_state';
+import { DataDocuments$ } from '../../hooks/use_saved_search';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
-import { DiscoverDocuments } from './discover_documents';
-import { indexPatternMock } from '../../../../__mocks__/index_pattern';
-import { ElasticSearchHit } from '../../../../types';
+import { DiscoverDocuments, onResize } from './discover_documents';
+import { dataViewMock } from '../../../../__mocks__/data_view';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { buildDataTableRecord } from '../../../../utils/build_data_record';
+import { EsHitRecord } from '../../../../types';
 
 setHeaderActionMenuMounter(jest.fn());
 
-function mountComponent(fetchStatus: FetchStatus, hits: ElasticSearchHit[]) {
+function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
   const services = discoverServiceMock;
   services.data.query.timefilter.timefilter.getTime = () => {
     return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
@@ -31,12 +32,12 @@ function mountComponent(fetchStatus: FetchStatus, hits: ElasticSearchHit[]) {
 
   const documents$ = new BehaviorSubject({
     fetchStatus,
-    result: hits,
+    result: hits.map((hit) => buildDataTableRecord(hit, dataViewMock)),
   }) as DataDocuments$;
 
   const props = {
     expandedDoc: undefined,
-    indexPattern: indexPatternMock,
+    dataView: dataViewMock,
     onAddFilter: jest.fn(),
     savedSearch: savedSearchMock,
     documents$,
@@ -45,6 +46,7 @@ function mountComponent(fetchStatus: FetchStatus, hits: ElasticSearchHit[]) {
     state: { columns: [] },
     stateContainer: { setAppState: () => {} } as unknown as GetStateReturn,
     navigateTo: jest.fn(),
+    onFieldEdited: jest.fn(),
   };
 
   return mountWithIntl(
@@ -62,14 +64,36 @@ describe('Discover documents layout', () => {
   });
 
   test('render complete when loading but documents were already fetched', () => {
-    const component = mountComponent(FetchStatus.LOADING, esHits as ElasticSearchHit[]);
+    const component = mountComponent(FetchStatus.LOADING, esHits);
     expect(component.find('.dscDocuments__loading').exists()).toBeFalsy();
     expect(component.find('.dscTable').exists()).toBeTruthy();
   });
 
   test('render complete', () => {
-    const component = mountComponent(FetchStatus.COMPLETE, esHits as ElasticSearchHit[]);
+    const component = mountComponent(FetchStatus.COMPLETE, esHits);
     expect(component.find('.dscDocuments__loading').exists()).toBeFalsy();
     expect(component.find('.dscTable').exists()).toBeTruthy();
+  });
+
+  test('should set rounded width to state on resize column', () => {
+    let state = {
+      grid: { columns: { timestamp: { width: 173 }, someField: { width: 197 } } },
+    } as AppState;
+    const stateContainer = {
+      setAppState: (newState: Partial<AppState>) => {
+        state = { ...state, ...newState };
+      },
+    } as unknown as GetStateReturn;
+
+    onResize(
+      {
+        columnId: 'someField',
+        width: 205.5435345534,
+      },
+      stateContainer,
+      state
+    );
+
+    expect(state.grid?.columns?.someField.width).toEqual(206);
   });
 });

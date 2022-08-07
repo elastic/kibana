@@ -33,7 +33,7 @@ describe('Transactions Overview', () => {
   });
 
   beforeEach(() => {
-    cy.loginAsReadOnlyUser();
+    cy.loginAsViewerUser();
   });
 
   it('has no detectable a11y violations on load', () => {

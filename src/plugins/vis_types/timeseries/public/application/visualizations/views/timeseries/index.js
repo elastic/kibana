@@ -9,8 +9,11 @@
 import React, { useRef, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { labelDateFormatter } from '../../../components/lib/label_date_formatter';
-
+import {
+  MULTILAYER_TIME_AXIS_STYLE,
+  renderEndzoneTooltip,
+  useActiveCursor,
+} from '@kbn/charts-plugin/public';
 import {
   Axis,
   Chart,
@@ -20,6 +23,7 @@ import {
   LineAnnotation,
   TooltipType,
   StackMode,
+  Placement,
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { getTimezone } from '../../../lib/get_timezone';
@@ -32,11 +36,6 @@ import { getBaseTheme, getChartClasses } from './utils/theme';
 import { TOOLTIP_MODES } from '../../../../../common/enums';
 import { getValueOrEmpty } from '../../../../../common/empty_label';
 import { getSplitByTermsColor } from '../../../lib/get_split_by_terms_color';
-import {
-  MULTILAYER_TIME_AXIS_STYLE,
-  renderEndzoneTooltip,
-  useActiveCursor,
-} from '@kbn/charts-plugin/public';
 import { getAxisLabelString } from '../../../components/lib/get_axis_label_string';
 import { calculateDomainForSeries } from './utils/series_domain_calculation';
 
@@ -73,11 +72,13 @@ export const TimeSeries = ({
   xAxisFormatter,
   annotations,
   syncColors,
+  syncTooltips,
   palettesService,
   interval,
   isLastBucketDropped,
   useLegacyTimeAxis,
   ignoreDaylightTime,
+  initialRender,
 }) => {
   // If the color isn't configured by the user, use the color mapping service
   // to assign a color from the Kibana palette. Colors will be shared across the
@@ -94,6 +95,15 @@ export const TimeSeries = ({
   const hasVisibleAnnotations = useMemo(
     () => (annotations ?? []).some((annotation) => Boolean(annotation.data?.length)),
     [annotations]
+  );
+
+  const onRenderChange = useCallback(
+    (isRendered) => {
+      if (isRendered) {
+        initialRender();
+      }
+    },
+    [initialRender]
   );
 
   let tooltipFormatter = decorateFormatter(xAxisFormatter);
@@ -163,6 +173,7 @@ export const TimeSeries = ({
         debugState={window._echDebugStateFlag ?? false}
         showLegend={legend}
         showLegendExtra={true}
+        onRenderChange={onRenderChange}
         allowBrushingLastHistogramBin={true}
         legendPosition={legendPosition}
         onBrushEnd={onBrushEndListener}
@@ -213,7 +224,9 @@ export const TimeSeries = ({
           boundary: document.getElementById('app-fixed-viewport') ?? undefined,
           headerFormatter: tooltipFormatter,
         }}
-        externalPointerEvents={{ tooltip: { visible: false } }}
+        externalPointerEvents={{
+          tooltip: { visible: syncTooltips, placement: Placement.Right },
+        }}
       />
 
       {annotations.map(({ id, data, icon, color }) => {
@@ -239,7 +252,6 @@ export const TimeSeries = ({
             id,
             seriesId,
             label,
-            labelFormatted,
             bars,
             lines,
             data,
@@ -262,10 +274,8 @@ export const TimeSeries = ({
           const isPercentage = stack === STACKED_OPTIONS.PERCENT;
           const isStacked = stack !== STACKED_OPTIONS.NONE;
           const key = `${id}-${label}`;
-          let seriesName = label.toString();
-          if (labelFormatted) {
-            seriesName = labelDateFormatter(labelFormatted);
-          }
+          const seriesName = label.toString();
+
           // The colors from the paletteService should be applied only when the timeseries is split by terms
           const splitColor = getSeriesColor(seriesName, seriesId, id);
           const finalColor = isSplitByTerms && splitColor ? splitColor : color;

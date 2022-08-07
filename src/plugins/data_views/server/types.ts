@@ -17,42 +17,74 @@ import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import { DataViewsService } from '../common';
 
+/**
+ * Data Views service factory
+ */
 type ServiceFactory = (
+  /**
+   * Saved objects client
+   */
   savedObjectsClient: SavedObjectsClientContract,
+  /**
+   * Elasticsearch client
+   */
   elasticsearchClient: ElasticsearchClient,
+  /**
+   * Kibana request object
+   */
   request?: KibanaRequest,
+  /**
+   * Ignore capabilities
+   */
   byPassCapabilities?: boolean
 ) => Promise<DataViewsService>;
+
+/**
+ * DataViews server plugin start api
+ */
 export interface DataViewsServerPluginStart {
-  dataViewsServiceFactory: ServiceFactory;
   /**
-   * @deprecated Renamed to dataViewsServiceFactory
+   * Returns a DataViews service instance
    */
-  indexPatternsServiceFactory: ServiceFactory;
+  dataViewsServiceFactory: ServiceFactory;
 }
 
-export interface IndexPatternsServiceSetupDeps {
-  expressions: ExpressionsServerSetup;
-  usageCollection?: UsageCollectionSetup;
-}
-
-export interface IndexPatternsServiceStartDeps {
-  fieldFormats: FieldFormatsStart;
-  logger: Logger;
-}
-
+/**
+ * DataViews server plugin setup api
+ */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DataViewsServerPluginSetup {}
 
-export type IndexPatternsServiceStart = DataViewsServerPluginStart;
-
+/**
+ * Data Views server setup dependencies
+ * @public
+ */
 export interface DataViewsServerPluginSetupDependencies {
+  /**
+   * File formats
+   */
   fieldFormats: FieldFormatsSetup;
+  /**
+   * Expressions
+   */
   expressions: ExpressionsServerSetup;
+  /**
+   * Usage collection
+   */
   usageCollection?: UsageCollectionSetup;
 }
 
+/**
+ * Data Views server start dependencies
+ * @public
+ */
 export interface DataViewsServerPluginStartDependencies {
+  /**
+   * Field formats
+   */
   fieldFormats: FieldFormatsStart;
+  /**
+   * Logger
+   */
   logger: Logger;
 }

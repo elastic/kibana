@@ -6,7 +6,7 @@
  */
 
 import { isEqual } from './aabb';
-import { AABB } from '../types';
+import type { AABB } from '../types';
 
 describe('AABB', () => {
   const minimumX = 0;

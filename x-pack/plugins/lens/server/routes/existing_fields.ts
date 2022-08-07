@@ -11,7 +11,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
 import { RequestHandlerContext, ElasticsearchClient } from '@kbn/core/server';
 import { CoreSetup, Logger } from '@kbn/core/server';
-import { RuntimeField } from '@kbn/data-plugin/common';
+import { RuntimeField } from '@kbn/data-views-plugin/common';
 import { DataViewsService, DataView, FieldSpec } from '@kbn/data-views-plugin/common';
 import { UI_SETTINGS } from '@kbn/data-plugin/server';
 import { BASE_API_URL } from '../../common';

@@ -52,7 +52,7 @@ In this example, you will use the {kib} <<add-sample-data, sample weblog dataset
 
 .  Open the main menu, then click **Stack Management > Rules and Connectors**.
 
-.  Create a new rule that is checked every four hours and executes actions when the rule status changes.
+.  Create a new rule that is checked every four hours and triggers actions when the rule status changes.
 +
 [role="screenshot"]
 image::user/alerting/images/rule-types-index-threshold-select.png[Choosing an index threshold rule type]

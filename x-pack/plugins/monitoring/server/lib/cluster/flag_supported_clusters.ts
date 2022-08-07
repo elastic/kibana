@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-// @ts-ignore
-import { checkParam } from '../error_missing_required';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
+import { TimeRange } from '../../../common/http_api/shared';
 import { ElasticsearchResponse } from '../../../common/types/es';
-import { LegacyRequest, Cluster } from '../../types';
-import { getNewIndexPatterns } from './get_index_patterns';
 import { Globals } from '../../static_globals';
+import { Cluster, LegacyRequest } from '../../types';
+import { getNewIndexPatterns } from './get_index_patterns';
+
+export interface FindSupportClusterRequestPayload {
+  timeRange: TimeRange;
+}
 
 async function findSupportedBasicLicenseCluster(
-  req: LegacyRequest,
+  req: LegacyRequest<unknown, unknown, FindSupportClusterRequestPayload>,
   clusters: Cluster[],
   ccs: string,
   kibanaUuid: string,
@@ -55,7 +58,7 @@ async function findSupportedBasicLicenseCluster(
               },
             },
             { term: { 'kibana_stats.kibana.uuid': kibanaUuid } },
-            { range: { timestamp: { gte, lte, format: 'strict_date_optional_time' } } },
+            { range: { timestamp: { gte, lte, format: 'epoch_millis' } } },
           ],
         },
       },
@@ -88,7 +91,10 @@ async function findSupportedBasicLicenseCluster(
  * Non-Basic license clusters and any cluster in a single-cluster environment
  * are also flagged as supported in this method.
  */
-export function flagSupportedClusters(req: LegacyRequest, ccs: string) {
+export function flagSupportedClusters(
+  req: LegacyRequest<unknown, unknown, FindSupportClusterRequestPayload>,
+  ccs: string
+) {
   const serverLog = (message: string) => req.getLogger('supported-clusters').debug(message);
   const flagAllSupported = (clusters: Cluster[]) => {
     clusters.forEach((cluster) => {

@@ -15,7 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const a11y = getService('a11y');
   const esArchiver = getService('esArchiver');
 
-  describe('Accessibility Search Profiler Editor', () => {
+  describe('Search Profiler Editor Accessibility', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await PageObjects.common.navigateToApp('searchProfiler');

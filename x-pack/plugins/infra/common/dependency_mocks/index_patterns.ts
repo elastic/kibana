@@ -84,6 +84,6 @@ export const createIndexPatternsStartMock = (
   indexPatterns: IndexPatternMock[]
 ): any => {
   return {
-    indexPatternsServiceFactory: async () => createIndexPatternsMock(asyncDelay, indexPatterns),
+    dataViewsServiceFactory: async () => createIndexPatternsMock(asyncDelay, indexPatterns),
   };
 };

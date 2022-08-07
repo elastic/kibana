@@ -7,11 +7,11 @@
 
 import {
   CustomRequestHandlerContext,
-  RequestHandlerContextProvider,
+  IContextProvider,
   SavedObject,
   SavedObjectsResolveResponse,
 } from '@kbn/core/server';
-import { ExpressionsServiceStart } from '@kbn/expressions-plugin';
+import { ExpressionsServiceStart } from '@kbn/expressions-plugin/common';
 import { WorkpadAttributes } from './routes/workpad/workpad_attributes';
 import { CANVAS_TYPE } from '../common/lib/constants';
 import { injectReferences, extractReferences } from './saved_objects/workpad_references';
@@ -39,7 +39,7 @@ interface Deps {
 
 export const createWorkpadRouteContext: (
   deps: Deps
-) => RequestHandlerContextProvider<CanvasRouteHandlerContext, 'canvas'> = ({ expressions }) => {
+) => IContextProvider<CanvasRouteHandlerContext, 'canvas'> = ({ expressions }) => {
   return async (context) => {
     const soClient = (await context.core).savedObjects.client;
     return {

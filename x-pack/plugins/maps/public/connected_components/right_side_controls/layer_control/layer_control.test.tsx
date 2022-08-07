@@ -11,6 +11,12 @@ jest.mock('./layer_toc', () => ({
   },
 }));
 
+jest.mock('../../../kibana_services', () => ({
+  isScreenshotMode: () => {
+    return false;
+  },
+}));
+
 import React from 'react';
 import { shallow } from 'enzyme';
 

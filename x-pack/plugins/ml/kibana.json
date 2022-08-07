@@ -7,6 +7,8 @@
     "ml"
   ],
   "requiredPlugins": [
+    "aiops",
+    "charts",
     "cloud",
     "data",
     "dataViews",
@@ -24,9 +26,9 @@
   ],
   "optionalPlugins": [
     "alerting",
-    "charts",
     "dashboard",
     "home",
+    "lens",
     "licenseManagement",
     "management",
     "maps",
@@ -43,6 +45,7 @@
     "fieldFormats",
     "kibanaReact",
     "kibanaUtils",
+    "lens",
     "maps",
     "savedObjects",
     "usageCollection",

@@ -55,7 +55,10 @@ export const AuditLogsModal: React.FC = () => {
         </EuiText>
         <EuiSpacer size="m" />
         <EntSearchLogStream
-          sourceId={ENTERPRISE_SEARCH_AUDIT_LOGS_SOURCE_ID}
+          logView={{
+            type: 'log-view-reference',
+            logViewId: ENTERPRISE_SEARCH_AUDIT_LOGS_SOURCE_ID,
+          }}
           columns={[
             {
               type: 'timestamp',
@@ -92,7 +95,7 @@ export const AuditLogsModal: React.FC = () => {
             },
             {
               type: 'field',
-              field: 'outcome',
+              field: 'event.outcome',
               header: i18n.translate(
                 'xpack.enterpriseSearch.appSearch.engines.auditLogsModal.headers.outcome',
                 {
@@ -101,7 +104,8 @@ export const AuditLogsModal: React.FC = () => {
               ),
             },
             {
-              type: 'message',
+              type: 'field',
+              field: 'message',
               width: '50%',
             },
           ]}

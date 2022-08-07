@@ -79,6 +79,10 @@ export const useStyles = (minimal = false, isInvestigated = false) => {
       minWidth: 0,
     };
 
+    const alertCountArrowPad: CSSObject = {
+      marginRight: size.xs,
+    };
+
     const processPanel: CSSObject = {
       border: `${borderThickness} solid ${colors.lightShade}`,
       fontFamily: font.familyCode,
@@ -103,6 +107,12 @@ export const useStyles = (minimal = false, isInvestigated = false) => {
       float: 'right',
     };
 
+    const firstAlertPad: CSSObject = {
+      '&:first-child': {
+        paddingTop: size.base,
+      },
+    };
+
     const minimalHR: CSSObject = {
       marginBottom: 0,
     };
@@ -114,9 +124,11 @@ export const useStyles = (minimal = false, isInvestigated = false) => {
       alertTitle,
       alertIcon,
       alertAccordionButton,
+      alertCountArrowPad,
       processPanel,
       investigatedLabel,
       minimalContextMenu,
+      firstAlertPad,
       minimalHR,
     };
   }, [euiTheme, isInvestigated, minimal]);

@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { asyncForEach } from '@kbn/std';
 import { getUrlPrefix } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
@@ -81,6 +82,23 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       expect(connectorWithoutService.status).to.eql(200);
       expect(connectorWithoutService.body.config).key('service');
       expect(connectorWithoutService.body.config.service).to.eql('other');
+    });
+
+    it('8.3.0 migrates service now connectors to have `isOAuth` property', async () => {
+      const serviceNowConnectorIds = [
+        '7d04bc30-c4c0-11ec-ae29-917aa31a5b75',
+        '8a9331b0-c4c0-11ec-ae29-917aa31a5b75',
+        '6d3a1250-c4c0-11ec-ae29-917aa31a5b75',
+      ];
+
+      await asyncForEach(serviceNowConnectorIds, async (serviceNowConnectorId) => {
+        const connectorResponse = await supertest.get(
+          `${getUrlPrefix(``)}/api/actions/action/${serviceNowConnectorId}`
+        );
+
+        expect(connectorResponse.status).to.eql(200);
+        expect(connectorResponse.body.config.isOAuth).to.eql(false);
+      });
     });
 
     it('decryption error during migration', async () => {

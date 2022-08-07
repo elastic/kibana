@@ -16,7 +16,6 @@ import {
   getFindResultWithSingleHit,
   nonRuleFindResult,
   getEmptySavedObjectsResponse,
-  getRuleExecutionSummarySucceeded,
   resolveRuleMock,
 } from '../__mocks__/request_responses';
 import { requestMock, requestContextMock, serverMock } from '../__mocks__';
@@ -35,9 +34,6 @@ describe('read_rules', () => {
 
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
     clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse()); // successful transform
-    clients.ruleExecutionLog.getExecutionSummary.mockResolvedValue(
-      getRuleExecutionSummarySucceeded()
-    );
 
     clients.rulesClient.resolve.mockResolvedValue({
       ...resolveRuleMock({

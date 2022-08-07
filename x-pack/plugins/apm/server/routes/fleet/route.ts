@@ -15,7 +15,7 @@ import {
 } from '../../../common/apm_saved_object_constants';
 import { createCloudApmPackgePolicy } from './create_cloud_apm_package_policy';
 import { getFleetAgents } from './get_agents';
-import { getApmPackgePolicies } from './get_apm_package_policies';
+import { getApmPackagePolicies } from './get_apm_package_policies';
 import {
   getApmPackagePolicy,
   getCloudAgentPolicy,
@@ -26,6 +26,7 @@ import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_sa
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getLatestApmPackage } from './get_latest_apm_package';
+import { getJavaAgentVersionsFromRegistry } from './get_java_agent_versions';
 
 const hasFleetDataRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/fleet/has_apm_policies',
@@ -35,7 +36,7 @@ const hasFleetDataRoute = createApmServerRoute({
     if (!fleetPluginStart) {
       return { hasApmPolicies: false };
     }
-    const packagePolicies = await getApmPackgePolicies({
+    const packagePolicies = await getApmPackagePolicies({
       core,
       fleetPluginStart,
     });
@@ -89,7 +90,7 @@ const fleetAgentsRoute = createApmServerRoute({
       return { cloudStandaloneSetup, fleetAgents: [], isFleetEnabled: false };
     }
     // fetches package policies that contains APM integrations
-    const packagePolicies = await getApmPackgePolicies({
+    const packagePolicies = await getApmPackagePolicies({
       core,
       fleetPluginStart,
     });
@@ -198,7 +199,7 @@ const getMigrationCheckRoute = createApmServerRoute({
         })
       : undefined;
     const apmPackagePolicy = getApmPackagePolicy(cloudAgentPolicy);
-    const packagePolicies = await getApmPackgePolicies({
+    const packagePolicies = await getApmPackagePolicies({
       core,
       fleetPluginStart,
     });
@@ -260,6 +261,17 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
   },
 });
 
+const javaAgentVersions = createApmServerRoute({
+  endpoint: 'GET /internal/apm/fleet/java_agent_versions',
+  options: { tags: [] },
+  handler: async (): Promise<{ versions: string[] | undefined }> => {
+    const versions = await getJavaAgentVersionsFromRegistry();
+    return {
+      versions,
+    };
+  },
+});
+
 export const apmFleetRouteRepository = {
   ...hasFleetDataRoute,
   ...fleetAgentsRoute,
@@ -267,6 +279,7 @@ export const apmFleetRouteRepository = {
   ...getUnsupportedApmServerSchemaRoute,
   ...getMigrationCheckRoute,
   ...createCloudApmPackagePolicyRoute,
+  ...javaAgentVersions,
 };
 
 const FLEET_SECURITY_REQUIRED_MESSAGE = i18n.translate(

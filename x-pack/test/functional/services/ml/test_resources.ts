@@ -230,15 +230,15 @@ export function MachineLearningTestResourcesProvider(
       await this.createSavedSearchIfNeeded(savedSearches.farequoteFilter, indexPatternTitle);
     },
 
-    async createMLTestDashboardIfNeeded() {
-      await this.createDashboardIfNeeded(dashboards.mlTestDashboard);
+    async createMLTestDashboardIfNeeded(): Promise<string> {
+      return await this.createDashboardIfNeeded(dashboards.mlTestDashboard);
     },
 
     async deleteMLTestDashboard() {
       await this.deleteDashboardByTitle(dashboards.mlTestDashboard.requestBody.attributes.title);
     },
 
-    async createDashboardIfNeeded(dashboard: any) {
+    async createDashboardIfNeeded(dashboard: { requestBody: any }): Promise<string> {
       const title = dashboard.requestBody.attributes.title;
       const dashboardId = await this.getDashboardId(title);
       if (dashboardId !== undefined) {
@@ -483,6 +483,10 @@ export function MachineLearningTestResourcesProvider(
         SavedObjectType.ML_TRAINED_MODEL_SAVED_OBJECT_TYPE
       );
       for (const id of savedObjectIds) {
+        if (id === 'lang_ident_model_1') {
+          log.debug('> Skipping internal lang_ident_model_1');
+          continue;
+        }
         await this.deleteSavedObjectById(
           id,
           SavedObjectType.ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,

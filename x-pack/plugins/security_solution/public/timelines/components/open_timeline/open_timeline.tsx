@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBasicTable } from '@elastic/eui';
+import type { EuiBasicTable } from '@elastic/eui';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -29,7 +29,7 @@ import { SearchRow } from './search_row';
 import { TimelinesTable } from './timelines_table';
 import * as i18n from './translations';
 import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
-import { OpenTimelineProps, OpenTimelineResult, ActionTimelineToShow } from './types';
+import type { OpenTimelineProps, OpenTimelineResult, ActionTimelineToShow } from './types';
 
 const QueryText = styled.span`
   white-space: normal;

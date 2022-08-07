@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { INSPECT_BUTTON_ICON, InspectButtonMetadata } from '../screens/inspect';
+import type { InspectButtonMetadata } from '../screens/inspect';
+import { INSPECT_BUTTON_ICON } from '../screens/inspect';
 
 export const closesModal = () => {
   cy.get('[data-test-subj="modal-inspect-close"]').click();

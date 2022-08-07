@@ -7,9 +7,19 @@
 
 export { Console } from './console';
 export { ConsoleManager, useConsoleManager } from './components/console_manager';
-export type { CommandServiceInterface, CommandDefinition, Command, ConsoleProps } from './types';
+export type {
+  CommandDefinition,
+  Command,
+  ConsoleProps,
+  CommandExecutionComponentProps,
+} from './types';
 export type {
   ConsoleRegistrationInterface,
+  ManagedConsoleExtensionComponentProps,
   RegisteredConsoleClient,
   ConsoleManagerClient,
 } from './components/console_manager/types';
+export type {
+  CommandExecutionResultProps,
+  CommandExecutionResultComponent,
+} from './components/command_execution_result';

@@ -11,14 +11,14 @@ import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 
 import { inspectStringifyObject } from '../../../../../utils/build_query';
-import { SecuritySolutionFactory } from '../../types';
+import type { SecuritySolutionFactory } from '../../types';
 import { buildUsersQuery } from './query.all_users.dsl';
-import { UsersQueries } from '../../../../../../common/search_strategy/security_solution/users';
-import {
+import type { UsersQueries } from '../../../../../../common/search_strategy/security_solution/users';
+import type {
   UsersRequestOptions,
   UsersStrategyResponse,
 } from '../../../../../../common/search_strategy/security_solution/users/all';
-import { AllUsersAggEsItem } from '../../../../../../common/search_strategy/security_solution/users/common';
+import type { AllUsersAggEsItem } from '../../../../../../common/search_strategy/security_solution/users/common';
 
 export const allUsers: SecuritySolutionFactory<UsersQueries.users> = {
   buildDsl: (options: UsersRequestOptions) => {
@@ -50,7 +50,7 @@ export const allUsers: SecuritySolutionFactory<UsersQueries.users> = {
       (bucket: AllUsersAggEsItem) => ({
         name: bucket.key,
         lastSeen: getOr(null, `lastSeen.value_as_string`, bucket),
-        domain: getOr(null, `domain.hits.hits[0]._source.user.domain`, bucket),
+        domain: getOr(null, `domain.hits.hits[0].fields['user.domain']`, bucket),
       }),
       {}
     );

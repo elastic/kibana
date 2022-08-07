@@ -9,8 +9,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('graph app', function () {
-    this.tags('ciGroup12');
-
     loadTestFile(require.resolve('./feature_controls'));
     loadTestFile(require.resolve('./graph'));
   });

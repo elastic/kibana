@@ -114,6 +114,13 @@ export const ALERT_ERROR_DISABLED_REASON = i18n.translate(
   }
 );
 
+export const ALERT_ERROR_VALIDATE_REASON = i18n.translate(
+  'xpack.triggersActionsUI.sections.rulesList.ruleErrorReasonValidate',
+  {
+    defaultMessage: 'An error occurred when validating the rule parameters.',
+  }
+);
+
 export const ALERT_WARNING_MAX_EXECUTABLE_ACTIONS_REASON = i18n.translate(
   'xpack.triggersActionsUI.sections.rulesList.ruleWarningReasonMaxExecutableActions',
   {
@@ -136,6 +143,7 @@ export const rulesErrorReasonTranslationsMapping = {
   license: ALERT_ERROR_LICENSE_REASON,
   timeout: ALERT_ERROR_TIMEOUT_REASON,
   disabled: ALERT_ERROR_DISABLED_REASON,
+  validate: ALERT_ERROR_VALIDATE_REASON,
 };
 
 export const rulesWarningReasonTranslationsMapping = {

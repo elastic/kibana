@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HostsKpiUniqueIpsRequestOptions } from '../../../../../../../common/search_strategy/security_solution/hosts';
+import type { HostsKpiUniqueIpsRequestOptions } from '../../../../../../../common/search_strategy/security_solution/hosts';
 import { createQueryFilterClauses } from '../../../../../../utils/build_query';
 
 export const buildHostsKpiUniqueIpsQuery = ({
@@ -75,6 +75,15 @@ export const buildHostsKpiUniqueIpsQuery = ({
           filter,
         },
       },
+      _source: false,
+      fields: [
+        'destination.ip',
+        'source.ip',
+        {
+          field: '@timestamp',
+          format: 'strict_date_optional_time',
+        },
+      ],
       size: 0,
     },
   };

@@ -5,20 +5,14 @@
  * 2.0.
  */
 
-import { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import { Direction } from '../../../../../../../common/search_strategy';
 import { UsersQueries } from '../../../../../../../common/search_strategy/security_solution/users';
-import { UsersRequestOptions } from '../../../../../../../common/search_strategy/security_solution/users/all';
+import type { UsersRequestOptions } from '../../../../../../../common/search_strategy/security_solution/users/all';
 import { UsersFields } from '../../../../../../../common/search_strategy/security_solution/users/common';
 
 export const mockOptions: UsersRequestOptions = {
   defaultIndex: ['test_indices*'],
-  docValueFields: [
-    {
-      field: '@timestamp',
-      format: 'date_time',
-    },
-  ],
   factoryQueryType: UsersQueries.users,
   filterQuery:
     '{"bool":{"must":[],"filter":[{"match_all":{}},{"match_phrase":{"user.name":{"query":"test_user"}}}],"should":[],"must_not":[]}}',
@@ -78,10 +72,12 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                     _index: 'endgame-00001',
                     _id: 'inT0934BjUd1_U2597Vf',
                     _score: null,
-                    _source: {
-                      user: {
-                        domain: 'ENDPOINT-W-8-03',
-                      },
+                    fields: {
+                      'user.name': ['jose52'],
+                      '@timestamp': ['2022-04-13T17:16:34.540Z'],
+                      'user.id': ['17'],
+                      'user.email': ['jose52@barrett.com'],
+                      'user.domain': ['ENDPOINT-W-8-03'],
                     },
                     sort: [1644837532000],
                   },

@@ -10,7 +10,7 @@ yarn storybook --site ci_composite
 yarn storybook --site custom_integrations
 yarn storybook --site dashboard
 yarn storybook --site dashboard_enhanced
-yarn storybook --site data_enhanced
+yarn storybook --site data
 yarn storybook --site embeddable
 yarn storybook --site expression_error
 yarn storybook --site expression_image

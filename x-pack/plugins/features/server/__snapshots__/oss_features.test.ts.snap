@@ -530,7 +530,11 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
+        "create": Array [],
+        "delete": Array [],
+        "push": Array [],
         "read": Array [],
+        "update": Array [],
       },
       "catalogue": Array [
         "dashboard",
@@ -682,7 +686,11 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
+        "create": Array [],
+        "delete": Array [],
+        "push": Array [],
         "read": Array [],
+        "update": Array [],
       },
       "catalogue": Array [
         "discover",
@@ -893,7 +901,11 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
+        "create": Array [],
+        "delete": Array [],
+        "push": Array [],
         "read": Array [],
+        "update": Array [],
       },
       "catalogue": Array [
         "visualize",
@@ -1026,7 +1038,11 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
+        "create": Array [],
+        "delete": Array [],
+        "push": Array [],
         "read": Array [],
+        "update": Array [],
       },
       "catalogue": Array [
         "dashboard",
@@ -1178,7 +1194,11 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
+        "create": Array [],
+        "delete": Array [],
+        "push": Array [],
         "read": Array [],
+        "update": Array [],
       },
       "catalogue": Array [
         "discover",
@@ -1389,7 +1409,11 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
+        "create": Array [],
+        "delete": Array [],
+        "push": Array [],
         "read": Array [],
+        "update": Array [],
       },
       "catalogue": Array [
         "visualize",

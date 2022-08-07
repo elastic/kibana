@@ -37,6 +37,7 @@ type MetricsSubClientMock = jest.Mocked<MetricsSubClient>;
 const createMetricsSubClientMock = (): MetricsSubClientMock => {
   return {
     getCaseMetrics: jest.fn(),
+    getCasesMetrics: jest.fn(),
     getStatusTotalsByType: jest.fn(),
   };
 };

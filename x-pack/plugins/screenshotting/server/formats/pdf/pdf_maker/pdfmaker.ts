@@ -33,6 +33,7 @@ export class PdfMaker {
 
   private worker?: Worker;
   private pageCount: number = 0;
+  private transferList: ArrayBuffer[] = [];
 
   protected workerModulePath: string;
 
@@ -79,19 +80,19 @@ export class PdfMaker {
     );
   }
 
-  _addContents(contents: Content[]) {
-    const groupCount = this.content.length;
-
-    // inject a page break for every 2 groups on the page
-    if (groupCount > 0 && groupCount % this.layout.groupCount === 0) {
-      contents = [
-        {
-          text: '',
-          pageBreak: 'after',
-        } as ContentText as Content,
-      ].concat(contents);
-    }
-    this.content.push(contents);
+  private addPageContents(contents: Content[]) {
+    this.content.push(
+      // Insert a page break after each content item
+      (this.content.length > 1
+        ? [
+            {
+              text: '',
+              pageBreak: 'after',
+            } as ContentText as Content,
+          ]
+        : []
+      ).concat(contents)
+    );
   }
 
   addBrandedImage(img: ContentImage, { title = '', description = '' }) {
@@ -124,7 +125,7 @@ export class PdfMaker {
 
     contents.push(wrappedImg);
 
-    this._addContents(contents);
+    this.addPageContents(contents);
   }
 
   addImage(
@@ -134,17 +135,21 @@ export class PdfMaker {
     this.logger.debug(`Adding image to PDF. Image size: ${image.byteLength}`); // prettier-ignore
     const size = this.layout.getPdfImageSize();
     const img = {
-      image: `data:image/png;base64,${image.toString('base64')}`,
+      // The typings are incomplete for the image property.
+      // It's possible to pass a Buffer as the image data.
+      // @see https://github.com/bpampuch/pdfmake/blob/0.2/src/printer.js#L654
+      image,
       alignment: 'center' as 'center',
       height: size.height,
       width: size.width,
-    };
+    } as unknown as ContentImage;
+    this.transferList.push(image.buffer);
 
     if (this.layout.useReportingBranding) {
       return this.addBrandedImage(img, opts);
     }
 
-    this._addContents([img]);
+    this.addPageContents([img]);
   }
 
   setTitle(title: string) {
@@ -230,7 +235,7 @@ export class PdfMaker {
         const generatePdfRequest: GeneratePdfRequest = {
           data: this.getGeneratePdfRequestData(),
         };
-        myPort.postMessage(generatePdfRequest);
+        myPort.postMessage(generatePdfRequest, this.transferList);
       });
     } finally {
       await this.cleanupWorker();

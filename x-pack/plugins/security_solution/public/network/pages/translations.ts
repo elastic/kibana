@@ -7,10 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const KQL_PLACEHOLDER = i18n.translate('xpack.securitySolution.network.kqlPlaceholder', {
-  defaultMessage: 'e.g. source.ip: "foo"',
-});
-
 export const PAGE_TITLE = i18n.translate('xpack.securitySolution.network.pageTitle', {
   defaultMessage: 'Network',
 });
@@ -29,10 +25,10 @@ export const NAVIGATION_DNS_TITLE = i18n.translate(
   }
 );
 
-export const ERROR_FETCHING_DNS_DATA = i18n.translate(
-  'xpack.securitySolution.hosts.navigation.dns.histogram.errorFetchingDnsData',
+export const NAVIGATION_USERS_TITLE = i18n.translate(
+  'xpack.securitySolution.network.navigation.usersTitle',
   {
-    defaultMessage: 'Failed to query DNS data',
+    defaultMessage: 'Users',
   }
 );
 
@@ -57,15 +53,9 @@ export const NAVIGATION_ANOMALIES_TITLE = i18n.translate(
   }
 );
 
-export const NAVIGATION_ALERTS_TITLE = i18n.translate(
-  'xpack.securitySolution.network.navigation.alertsTitle',
+export const NAVIGATION_EVENTS_TITLE = i18n.translate(
+  'xpack.securitySolution.network.navigation.eventsTitle',
   {
-    defaultMessage: 'External alerts',
+    defaultMessage: 'Events',
   }
 );
-
-export const DOMAINS_COUNT_BY = (groupByField: string) =>
-  i18n.translate('xpack.securitySolution.network.dns.stackByUniqueSubdomain', {
-    values: { groupByField },
-    defaultMessage: 'Top domains by {groupByField}',
-  });

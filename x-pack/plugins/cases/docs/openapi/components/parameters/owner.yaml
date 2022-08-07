@@ -1,0 +1,13 @@
+in: query
+name: owner
+description: >
+  A filter to limit the response to a specific set of applications. If this
+  parameter is omitted, the response contains information about all the cases
+  that the user has access to read.
+schema:
+  oneOf:
+    - $ref: '../schemas/owners.yaml'
+    - type: array
+      items:
+        $ref: '../schemas/owners.yaml'
+example: cases

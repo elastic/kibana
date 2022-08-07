@@ -10,6 +10,7 @@ import { INDEX_PATTERN_BEATS } from '../../../../../common/constants';
 import {
   postApmInstanceRequestParamsRT,
   postApmInstanceRequestPayloadRT,
+  postApmInstanceResponsePayloadRT,
 } from '../../../../../common/http_api/apm';
 import { getApmInfo } from '../../../../lib/apm';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
@@ -19,12 +20,15 @@ import { MonitoringCore } from '../../../../types';
 import { metricSet } from './metric_set_instance';
 
 export function apmInstanceRoute(server: MonitoringCore) {
+  const validateParams = createValidationFunction(postApmInstanceRequestParamsRT);
+  const validateBody = createValidationFunction(postApmInstanceRequestPayloadRT);
+
   server.route({
     method: 'post',
     path: '/api/monitoring/v1/clusters/{clusterUuid}/apm/{apmUuid}',
     validate: {
-      params: createValidationFunction(postApmInstanceRequestParamsRT),
-      body: createValidationFunction(postApmInstanceRequestPayloadRT),
+      params: validateParams,
+      body: validateBody,
     },
     async handler(req) {
       const apmUuid = req.params.apmUuid;
@@ -47,10 +51,10 @@ export function apmInstanceRoute(server: MonitoringCore) {
           getApmInfo(req, apmIndexPattern, { clusterUuid, apmUuid }),
         ]);
 
-        return {
+        return postApmInstanceResponsePayloadRT.encode({
           metrics,
           apmSummary,
-        };
+        });
       } catch (err) {
         return handleError(err, req);
       }

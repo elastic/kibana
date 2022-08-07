@@ -11,15 +11,10 @@ import moment from 'moment-timezone';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { IUiSettingsClient, SavedObjectReference } from '@kbn/core/public';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
-import { search } from '@kbn/data-plugin/public';
+import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
+import { BrushTriggerEvent, ClickTriggerEvent } from '@kbn/charts-plugin/public';
 import type { Document } from './persistence/saved_object_store';
-import type {
-  Datasource,
-  DatasourceMap,
-  LensBrushEvent,
-  LensFilterEvent,
-  Visualization,
-} from './types';
+import type { Datasource, DatasourceMap, Visualization, StateSetter } from './types';
 import type { DatasourceStates, VisualizationState } from './state_management';
 
 export function getVisualizeGeoFieldMessage(fieldType: string) {
@@ -63,6 +58,43 @@ export const getInitialDatasourceId = (datasourceMap: DatasourceMap, doc?: Docum
   return (doc && getActiveDatasourceIdFromDoc(doc)) || Object.keys(datasourceMap)[0] || null;
 };
 
+export function handleIndexPatternChange({
+  activeDatasources,
+  datasourceStates,
+  indexPatternId,
+  setDatasourceState,
+}: {
+  activeDatasources: Record<string, Datasource>;
+  datasourceStates: DatasourceStates;
+  indexPatternId: string;
+  setDatasourceState: StateSetter<unknown>;
+}): void {
+  Object.entries(activeDatasources).forEach(([id, datasource]) => {
+    datasource?.updateCurrentIndexPatternId?.({
+      state: datasourceStates[id].state,
+      indexPatternId,
+      setState: setDatasourceState,
+    });
+  });
+}
+
+export function refreshIndexPatternsList({
+  activeDatasources,
+  indexPatternId,
+  setDatasourceState,
+}: {
+  activeDatasources: Record<string, Datasource>;
+  indexPatternId: string;
+  setDatasourceState: StateSetter<unknown>;
+}): void {
+  Object.entries(activeDatasources).forEach(([id, datasource]) => {
+    datasource?.refreshIndexPatternsList?.({
+      indexPatternId,
+      setState: setDatasourceState,
+    });
+  });
+}
+
 export function getIndexPatternsIds({
   activeDatasources,
   datasourceStates,
@@ -70,17 +102,21 @@ export function getIndexPatternsIds({
   activeDatasources: Record<string, Datasource>;
   datasourceStates: DatasourceStates;
 }): string[] {
+  let currentIndexPatternId: string | undefined;
   const references: SavedObjectReference[] = [];
   Object.entries(activeDatasources).forEach(([id, datasource]) => {
     const { savedObjectReferences } = datasource.getPersistableState(datasourceStates[id].state);
+    const indexPatternId = datasource.getCurrentIndexPatternId(datasourceStates[id].state);
+    currentIndexPatternId = indexPatternId;
     references.push(...savedObjectReferences);
   });
-
-  const uniqueFilterableIndexPatternIds = uniq(
-    references.filter(({ type }) => type === 'index-pattern').map(({ id }) => id)
-  );
-
-  return uniqueFilterableIndexPatternIds;
+  const referencesIds = references
+    .filter(({ type }) => type === 'index-pattern')
+    .map(({ id }) => id);
+  if (currentIndexPatternId) {
+    referencesIds.unshift(currentIndexPatternId);
+  }
+  return uniq(referencesIds);
 }
 
 export async function getIndexPatternsObjects(
@@ -111,7 +147,10 @@ export function getRemoveOperation(
   return layerCount === 1 ? 'clear' : 'remove';
 }
 
-export function inferTimeField(context: LensBrushEvent['data'] | LensFilterEvent['data']) {
+export function inferTimeField(
+  datatableUtilities: DatatableUtilitiesService,
+  context: BrushTriggerEvent['data'] | ClickTriggerEvent['data']
+) {
   const tablesAndColumns =
     'table' in context
       ? [{ table: context.table, column: context.column }]
@@ -123,7 +162,7 @@ export function inferTimeField(context: LensBrushEvent['data'] | LensFilterEvent
     .map(({ table, column }) => {
       const tableColumn = table.columns[column];
       const hasTimeRange = Boolean(
-        tableColumn && search.aggs.getDateHistogramMetaDataByDatatableColumn(tableColumn)?.timeRange
+        tableColumn && datatableUtilities.getDateHistogramMeta(tableColumn)?.timeRange
       );
       if (hasTimeRange) {
         return tableColumn.meta.field;

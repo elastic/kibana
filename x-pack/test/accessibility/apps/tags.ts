@@ -13,10 +13,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'settings', 'header', 'home', 'tagManagement']);
   const a11y = getService('a11y');
   const testSubjects = getService('testSubjects');
-  const retry = getService('retry');
-  const toasts = getService('toasts');
 
-  describe('Kibana tags page meets a11y validations', () => {
+  describe('Kibana Tags Page Accessibility', () => {
     before(async () => {
       await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
@@ -71,22 +69,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('tag assignment panel meets a11y requirements', async () => {
+    it('tag assignment panel & tag management page with populated connections meets a11y requirements', async () => {
       await testSubjects.click('euiCollapsedItemActionsButton');
       const actionOnTag = 'assign';
       await PageObjects.tagManagement.clickActionItem(actionOnTag);
       await a11y.testAppSnapshot();
-    });
-
-    it('tag management page with connections column populated meets a11y requirements', async () => {
-      await testSubjects.click('assignFlyout-selectAllButton');
-
-      await testSubjects.click('assignFlyoutConfirmButton');
-      await toasts.dismissAllToasts();
-
-      await retry.try(async () => {
-        await a11y.testAppSnapshot();
-      });
+      await testSubjects.click('euiFlyoutCloseButton');
+      await testSubjects.waitForDeleted('euiFlyoutCloseButton');
+      await a11y.testAppSnapshot();
     });
 
     it('bulk actions panel meets a11y requirements', async () => {

@@ -12,7 +12,7 @@ import { useLocation } from 'react-router-dom';
 
 import styled from 'styled-components';
 import { EuiFlexItem } from '@elastic/eui';
-import {
+import type {
   Threats,
   Type,
   SeverityMapping,
@@ -20,19 +20,20 @@ import {
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import type { Filter } from '@kbn/es-query';
-import { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { normalizeThresholdField } from '../../../../../common/detection_engine/utils';
-import { RuleAlertAction } from '../../../../../common/detection_engine/types';
+import type { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import { transformRuleToAlertAction } from '../../../../../common/detection_engine/transform_actions';
-import { Rule } from '../../../containers/detection_engine/rules';
-import {
+import type { Rule } from '../../../containers/detection_engine/rules';
+import type {
   AboutStepRule,
   AboutStepRuleDetails,
   DefineStepRule,
   ScheduleStepRule,
   ActionsStepRule,
 } from './types';
+import { DataSourceType } from './types';
 import { severityOptions } from '../../../components/rules/step_about_rule/data';
 
 export interface GetStepsData {
@@ -78,23 +79,27 @@ export const getActionsStepsData = (
   };
 };
 
+/* eslint-disable complexity */
 export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
   ruleType: rule.type,
   anomalyThreshold: rule.anomaly_threshold ?? 50,
   machineLearningJobId: rule.machine_learning_job_id ?? [],
   index: rule.index ?? [],
+  dataViewId: rule.data_view_id,
   threatIndex: rule.threat_index ?? [],
   threatQueryBar: {
     query: { query: rule.threat_query ?? '', language: rule.threat_language ?? '' },
     filters: (rule.threat_filters ?? []) as Filter[],
-    saved_id: undefined,
+    saved_id: null,
   },
   threatMapping: rule.threat_mapping ?? [],
   queryBar: {
     query: { query: rule.query ?? '', language: rule.language ?? '' },
     filters: (rule.filters ?? []) as Filter[],
-    saved_id: rule.saved_id,
+    saved_id: rule.saved_id ?? null,
   },
+  relatedIntegrations: rule.related_integrations ?? [],
+  requiredFields: rule.required_fields ?? [],
   timeline: {
     id: rule.timeline_id ?? null,
     title: rule.timeline_title ?? null,
@@ -111,7 +116,25 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
         }
       : {}),
   },
+  eqlOptions: {
+    timestampField: rule.timestamp_field,
+    eventCategoryField: rule.event_category_override,
+    tiebreakerField: rule.tiebreaker_field,
+  },
+  dataSourceType: rule.data_view_id ? DataSourceType.DataView : DataSourceType.IndexPatterns,
+  newTermsFields: rule.new_terms_fields ?? [],
+  historyWindowSize: rule.history_window_start
+    ? convertHistoryStartToSize(rule.history_window_start)
+    : '7d',
 });
+
+const convertHistoryStartToSize = (relativeTime: string) => {
+  if (relativeTime.startsWith('now-')) {
+    return relativeTime.substring(4);
+  } else {
+    return relativeTime;
+  }
+};
 
 export const getScheduleStepsData = (rule: Rule): ScheduleStepRule => {
   const { interval, from } = rule;
@@ -156,6 +179,7 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
     rule_name_override: ruleNameOverride,
     severity_mapping: severityMapping,
     timestamp_override: timestampOverride,
+    timestamp_override_fallback_disabled: timestampOverrideFallbackDisabled,
     references,
     severity,
     false_positives: falsePositives,
@@ -172,6 +196,7 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
     license: license ?? '',
     ruleNameOverride: ruleNameOverride ?? '',
     timestampOverride: timestampOverride ?? '',
+    timestampOverrideFallbackDisabled,
     name,
     description,
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -227,6 +252,7 @@ export const determineDetailsValue = (
 export const getModifiedAboutDetailsData = (rule: Rule): AboutStepRuleDetails => ({
   note: rule.note ?? '',
   description: rule.description,
+  setup: rule.setup ?? '',
 });
 
 export const useQuery = () => new URLSearchParams(useLocation().search);
@@ -246,9 +272,9 @@ export type PrePackagedTimelineStatus =
   | 'unknown';
 
 export const getPrePackagedRuleStatus = (
-  rulesInstalled: number | null,
-  rulesNotInstalled: number | null,
-  rulesNotUpdated: number | null
+  rulesInstalled?: number,
+  rulesNotInstalled?: number,
+  rulesNotUpdated?: number
 ): PrePackagedRuleStatus => {
   if (
     rulesNotInstalled != null &&
@@ -285,9 +311,9 @@ export const getPrePackagedRuleStatus = (
   return 'unknown';
 };
 export const getPrePackagedTimelineStatus = (
-  timelinesInstalled: number | null,
-  timelinesNotInstalled: number | null,
-  timelinesNotUpdated: number | null
+  timelinesInstalled?: number,
+  timelinesNotInstalled?: number,
+  timelinesNotUpdated?: number
 ): PrePackagedTimelineStatus => {
   if (
     timelinesNotInstalled != null &&
@@ -343,6 +369,7 @@ const getRuleSpecificRuleParamKeys = (ruleType: Type) => {
       return ['anomaly_threshold', 'machine_learning_job_id'];
     case 'threshold':
       return ['threshold', ...queryRuleParams];
+    case 'new_terms':
     case 'threat_match':
     case 'query':
     case 'saved_query':

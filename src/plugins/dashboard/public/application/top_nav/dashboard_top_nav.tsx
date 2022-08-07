@@ -48,6 +48,7 @@ import {
   setSavedQueryId,
   setStateFromSaveModal,
   setSyncColors,
+  setSyncTooltips,
   setUseMargins,
   setViewMode,
   useDashboardDispatch,
@@ -81,6 +82,7 @@ export interface DashboardTopNavProps {
   dashboardAppState: CompleteDashboardAppState;
   embedSettings?: DashboardEmbedSettings;
   redirectTo: DashboardRedirect;
+  printMode: boolean;
 }
 
 const LabsFlyout = withSuspense(LazyLabsFlyout, null);
@@ -89,6 +91,7 @@ export function DashboardTopNav({
   dashboardAppState,
   embedSettings,
   redirectTo,
+  printMode,
 }: DashboardTopNavProps) {
   const {
     core,
@@ -281,14 +284,16 @@ export function DashboardTopNav({
     };
 
     const lastDashboardId = dashboardAppState.savedDashboard.id;
-    const currentTags = savedObjectsTagging?.ui.hasTagDecoration(dashboardAppState.savedDashboard)
+    const savedTags = savedObjectsTagging?.ui.hasTagDecoration(dashboardAppState.savedDashboard)
       ? dashboardAppState.savedDashboard.getTags()
       : [];
+    const currentTagsSet = new Set([...savedTags, ...currentState.tags]);
+
     const dashboardSaveModal = (
       <DashboardSaveModal
         onSave={onSave}
         onClose={() => {}}
-        tags={currentTags}
+        tags={Array.from(currentTagsSet)}
         title={currentState.title}
         timeRestore={currentState.timeRestore}
         description={currentState.description}
@@ -396,6 +401,10 @@ export function DashboardTopNav({
         onSyncColorsChange: (isChecked: boolean) => {
           dispatchDashboardStateChange(setSyncColors(isChecked));
         },
+        syncTooltips: Boolean(currentState.options.syncTooltips),
+        onSyncTooltipsChange: (isChecked: boolean) => {
+          dispatchDashboardStateChange(setSyncTooltips(isChecked));
+        },
         hidePanelTitles: currentState.options.hidePanelTitles,
         onHidePanelTitlesChange: (isChecked: boolean) => {
           dispatchDashboardStateChange(setHidePanelTitles(isChecked));
@@ -483,10 +492,12 @@ export function DashboardTopNav({
 
     const isFullScreenMode = dashboardState.fullScreenMode;
     const showTopNavMenu = shouldShowNavBarComponent(Boolean(embedSettings?.forceShowTopNavMenu));
-    const showQueryInput = shouldShowNavBarComponent(Boolean(embedSettings?.forceShowQueryInput));
+    const showQueryInput = shouldShowNavBarComponent(
+      Boolean(embedSettings?.forceShowQueryInput || printMode)
+    );
     const showDatePicker = shouldShowNavBarComponent(Boolean(embedSettings?.forceShowDatePicker));
     const showFilterBar = shouldShowFilterBar(Boolean(embedSettings?.forceHideFilterBar));
-    const showQueryBar = showQueryInput || showDatePicker;
+    const showQueryBar = showQueryInput || showDatePicker || showFilterBar;
     const showSearchBar = showQueryBar || showFilterBar;
     const screenTitle = dashboardState.title;
 
@@ -530,6 +541,7 @@ export function DashboardTopNav({
       useDefaultBehaviors: true,
       savedQuery: state.savedQuery,
       savedQueryId: dashboardState.savedQuery,
+      visible: printMode !== true,
       onQuerySubmit: (_payload, isUpdate) => {
         if (isUpdate === false) {
           dashboardAppState.$triggerDashboardRefresh.next({ force: true });
@@ -580,10 +592,10 @@ export function DashboardTopNav({
   return (
     <>
       <TopNavMenu {...getNavBarProps()} />
-      {isLabsEnabled && isLabsShown ? (
+      {!printMode && isLabsEnabled && isLabsShown ? (
         <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
       ) : null}
-      {dashboardState.viewMode !== ViewMode.VIEW ? (
+      {dashboardState.viewMode !== ViewMode.VIEW && !printMode ? (
         <>
           <EuiHorizontalRule margin="none" />
           <SolutionToolbar isDarkModeEnabled={IS_DARK_THEME}>

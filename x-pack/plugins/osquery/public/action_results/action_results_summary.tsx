@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
 import { i18n } from '@kbn/i18n';
 import { EuiInMemoryTable, EuiCodeBlock } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -33,10 +31,8 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
   expirationDate,
   agentIds,
 }) => {
-  // @ts-expect-error update types
-  const [pageIndex, setPageIndex] = useState(0);
-  // @ts-expect-error update types
-  const [pageSize, setPageSize] = useState(50);
+  const [pageIndex] = useState(0);
+  const [pageSize] = useState(50);
   const expired = useMemo(
     () => (!expirationDate ? false : new Date(expirationDate) < new Date()),
     [expirationDate]

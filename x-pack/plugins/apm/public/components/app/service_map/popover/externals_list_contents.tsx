@@ -13,6 +13,7 @@ import {
 } from '@elastic/eui';
 import React, { Fragment } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { NodeDataDefinition } from 'cytoscape';
 import { ContentsProps } from '.';
 import {
   SPAN_DESTINATION_SERVICE_RESOURCE,
@@ -26,7 +27,8 @@ const ExternalResourcesList = euiStyled.section`
   overflow: auto;
 `;
 
-export function ExternalsListContents({ nodeData }: ContentsProps) {
+export function ExternalsListContents({ elementData }: ContentsProps) {
+  const nodeData = elementData as NodeDataDefinition;
   return (
     <EuiFlexItem>
       <ExternalResourcesList>

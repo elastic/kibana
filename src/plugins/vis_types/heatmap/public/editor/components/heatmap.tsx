@@ -26,7 +26,7 @@ import {
   LegendSizeSettings,
 } from '@kbn/vis-default-editor-plugin/public';
 import { colorSchemas } from '@kbn/charts-plugin/public';
-import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
+import { LegendSize, VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import { HeatmapVisParams, HeatmapTypeProps, ValueAxis } from '../../types';
 import { LabelsPanel } from './labels_panel';
 import { legendPositions, scaleTypes } from '../collections';
@@ -41,6 +41,9 @@ const HeatmapOptions = (props: HeatmapOptionsProps) => {
   const [valueAxis] = stateParams.valueAxes;
   const isColorsNumberInvalid = stateParams.colorsNumber < 2 || stateParams.colorsNumber > 10;
   const [isColorRangesValid, setIsColorRangesValid] = useState(false);
+
+  const legendSize = stateParams.legendSize;
+  const [hadAutoLegendSize] = useState(() => legendSize === LegendSize.AUTO);
 
   const setValueAxisScale = useCallback(
     <T extends keyof ValueAxis['scale']>(paramName: T, value: ValueAxis['scale'][T]) =>
@@ -91,12 +94,13 @@ const HeatmapOptions = (props: HeatmapOptionsProps) => {
               setValue={setValue}
             />
             <LegendSizeSettings
-              legendSize={stateParams.legendSize}
+              legendSize={legendSize}
               onLegendSizeChange={handleLegendSizeChange}
               isVerticalLegend={
                 stateParams.legendPosition === Position.Left ||
                 stateParams.legendPosition === Position.Right
               }
+              showAutoOption={hadAutoLegendSize}
             />
           </>
         )}

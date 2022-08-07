@@ -21,10 +21,13 @@ Having trouble? Here are solutions to common problems you might encounter while 
 [float]
 [[reporting-diagnostics]]
 === Reporting diagnostics
-Reporting comes with a built-in utility to try to automatically find common issues.
-When {kib} is running, navigate to the Report Listing page, and click *Run reporting diagnostics*.
-This will open up a diagnostic tool that checks various parts of the {kib} deployment and
-come up with any relevant recommendations.
+Reporting comes with a built-in utility to try to automatically find common issues. When {kib} is running,
+navigate to the Report Listing page, and click *Run reporting diagnostics*. This will open up a diagnostic tool
+that checks various parts of the {kib} deployment and come up with any relevant recommendations.
+
+If the diagnostic information doesn't reveal the problem, you can troubleshoot further by starting the Kibana
+server with an environment variable for revealing additional debugging logs. Refer to
+<<reporting-troubleshooting-puppeteer-debug-logs>>.
 
 [float]
 [[reporting-troubleshooting-text-incorrect]]

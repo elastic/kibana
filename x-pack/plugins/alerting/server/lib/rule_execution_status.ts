@@ -11,19 +11,27 @@ import {
   RuleExecutionStatusValues,
   RuleExecutionStatusWarningReasons,
   RawRuleExecutionStatus,
-  RuleExecutionState,
 } from '../types';
 import { getReasonFromError } from './error_with_reason';
 import { getEsErrorMessage } from './errors';
-import { RuleExecutionStatuses } from '../../common';
+import { ActionsCompletion, RuleExecutionStatuses } from '../../common';
 import { translations } from '../constants/translations';
-import { ActionsCompletion } from '../task_runner/types';
+import { RuleTaskStateAndMetrics } from '../task_runner/types';
+import { RuleRunMetrics } from './rule_run_metrics_store';
 
-export function executionStatusFromState(state: RuleExecutionState): RuleExecutionStatus {
-  const alertIds = Object.keys(state.alertInstances ?? {});
+export interface IExecutionStatusAndMetrics {
+  status: RuleExecutionStatus;
+  metrics: RuleRunMetrics | null;
+}
+
+export function executionStatusFromState(
+  stateWithMetrics: RuleTaskStateAndMetrics,
+  lastExecutionDate?: Date
+): IExecutionStatusAndMetrics {
+  const alertIds = Object.keys(stateWithMetrics.alertInstances ?? {});
 
   const hasIncompleteAlertExecution =
-    state.alertExecutionMetrics.triggeredActionsStatus === ActionsCompletion.PARTIAL;
+    stateWithMetrics.metrics.triggeredActionsStatus === ActionsCompletion.PARTIAL;
 
   let status: RuleExecutionStatuses =
     alertIds.length === 0 ? RuleExecutionStatusValues[0] : RuleExecutionStatusValues[1];
@@ -33,28 +41,34 @@ export function executionStatusFromState(state: RuleExecutionState): RuleExecuti
   }
 
   return {
-    metrics: state.metrics,
-    numberOfTriggeredActions: state.alertExecutionMetrics.numberOfTriggeredActions,
-    numberOfGeneratedActions: state.alertExecutionMetrics.numberOfGeneratedActions,
-    lastExecutionDate: new Date(),
-    status,
-    ...(hasIncompleteAlertExecution && {
-      warning: {
-        reason: RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
-        message: translations.taskRunner.warning.maxExecutableActions,
-      },
-    }),
+    status: {
+      lastExecutionDate: lastExecutionDate ?? new Date(),
+      status,
+      ...(hasIncompleteAlertExecution && {
+        warning: {
+          reason: RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
+          message: translations.taskRunner.warning.maxExecutableActions,
+        },
+      }),
+    },
+    metrics: stateWithMetrics.metrics,
   };
 }
 
-export function executionStatusFromError(error: Error): RuleExecutionStatus {
+export function executionStatusFromError(
+  error: Error,
+  lastExecutionDate?: Date
+): IExecutionStatusAndMetrics {
   return {
-    lastExecutionDate: new Date(),
-    status: 'error',
-    error: {
-      reason: getReasonFromError(error),
-      message: getEsErrorMessage(error),
+    status: {
+      lastExecutionDate: lastExecutionDate ?? new Date(),
+      status: 'error',
+      error: {
+        reason: getReasonFromError(error),
+        message: getEsErrorMessage(error),
+      },
     },
+    metrics: null,
   };
 }
 

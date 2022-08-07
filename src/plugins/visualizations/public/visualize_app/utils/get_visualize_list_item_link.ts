@@ -8,7 +8,7 @@
 
 import { ApplicationStart } from '@kbn/core/public';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { QueryState } from '@kbn/data-plugin/public';
+import { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { getUISettings } from '../../services';
 import { GLOBAL_STATE_STORAGE_KEY, VISUALIZE_APP_NAME } from '../../../common/constants';
@@ -24,8 +24,14 @@ export const getVisualizeListItemLink = (
     path: editApp ? editUrl : `#${editUrl}`,
   });
   const useHash = getUISettings().get('state:storeInSessionStorage');
-  const globalStateInUrl = kbnUrlStateStorage.get<QueryState>(GLOBAL_STATE_STORAGE_KEY) || {};
+  const globalStateInUrl =
+    kbnUrlStateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_STORAGE_KEY) || {};
 
-  url = setStateToKbnUrl<QueryState>(GLOBAL_STATE_STORAGE_KEY, globalStateInUrl, { useHash }, url);
+  url = setStateToKbnUrl<GlobalQueryStateFromUrl>(
+    GLOBAL_STATE_STORAGE_KEY,
+    globalStateInUrl,
+    { useHash },
+    url
+  );
   return url;
 };

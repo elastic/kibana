@@ -118,7 +118,6 @@ exports[`Paginated Table Component rendering it renders the default load more ta
         >
           <EuiContextMenuPanel
             data-test-subj="loadingMorePickSizeRow"
-            hasFocus={true}
             items={
               Array [
                 <EuiContextMenuItem

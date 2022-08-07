@@ -113,8 +113,6 @@ function SparkPlotItem({
     width: compact ? unit * 4 : unit * 5,
   };
 
-  const Sparkline = hasComparisonSeries ? LineSeries : AreaSeries;
-
   if (isLoading) {
     return (
       <div
@@ -138,7 +136,7 @@ function SparkPlotItem({
           showLegend={false}
           tooltip="none"
         />
-        <Sparkline
+        <LineSeries
           id="Sparkline"
           xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}

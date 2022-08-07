@@ -1,0 +1,55 @@
+get:
+  summary: Agent Download Sources
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              items:
+                type: array
+                items:
+                  $ref: ../components/schemas/download_sources.yaml
+              total:
+                type: integer
+              page:
+                type: integer
+              perPage:
+                type: integer
+  operationId: get-download-sources
+post:
+  summary: Agent Download Sources
+  description: 'Create a new agent download source'
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              item:
+                $ref: ../components/schemas/download_sources.yaml
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+            is_default:
+              type: boolean
+            host:
+              type: string
+          required:
+            - name
+            - host
+            - is_default
+  operationId: post-download-sources

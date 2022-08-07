@@ -250,7 +250,10 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
       <MlPageHeader>
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <AnomalyResultsViewSelector viewId="explorer" />
+            <AnomalyResultsViewSelector
+              viewId="explorer"
+              selectedJobs={explorerState.selectedJobs}
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <FormattedMessage id="xpack.ml.explorer.pageTitle" defaultMessage="Anomaly Explorer" />

@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { normalizeDataTypeDifferences } from '../normalize_data_type_differences';
+import { setIndicesFound } from '../set_indices_found';
 import instanceFixture from './fixtures/instance.json';
 import { getLifecycleMethods } from '../data_stream';
 
@@ -40,6 +41,7 @@ export default function ({ getService }) {
         .expect(200);
 
       body.metrics = normalizeDataTypeDifferences(body.metrics, instanceFixture);
+      instanceFixture.metrics = setIndicesFound(instanceFixture.metrics, true);
       expect(body).to.eql(instanceFixture);
     });
   });

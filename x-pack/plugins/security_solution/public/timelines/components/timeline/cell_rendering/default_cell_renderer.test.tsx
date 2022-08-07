@@ -16,8 +16,8 @@ import { DroppableWrapper } from '../../../../common/components/drag_and_drop/dr
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { defaultHeaders, mockTimelineData, TestProviders } from '../../../../common/mock';
 import { DefaultCellRenderer } from './default_cell_renderer';
-import { BrowserFields } from '@kbn/timelines-plugin/common/search_strategy';
-import { Ecs } from '../../../../../common/ecs';
+import type { BrowserFields } from '@kbn/timelines-plugin/common/search_strategy';
+import type { Ecs } from '../../../../../common/ecs';
 
 jest.mock('../../../../common/lib/kibana');
 

@@ -7,16 +7,18 @@
  */
 
 import { convertIntervalToUnit } from '../../helpers/unit_to_seconds';
+import { getLastMetric } from '../../helpers/get_last_metric';
 import { SERIES_SEPARATOR } from '../../../../../common/constants';
 
 const percentileValueMatch = /\[([0-9\.]+)\]$/;
 import { startsWith, flatten, values, first, last } from 'lodash';
 import { getDefaultDecoration, getSiblingAggValue, getSplits, mapEmptyToZero } from '../../helpers';
 import { evaluate } from '@kbn/tinymath';
+import { TSVB_METRIC_TYPES } from '../../../../../common/enums';
 
 export function mathAgg(resp, panel, series, meta, extractFields) {
   return (next) => async (results) => {
-    const mathMetric = last(series.metrics);
+    const mathMetric = getLastMetric(series);
     if (mathMetric.type !== 'math') return next(results);
     // Filter the results down to only the ones that match the series.id. Sometimes
     // there will be data from other series mixed in.
@@ -41,7 +43,13 @@ export function mathAgg(resp, panel, series, meta, extractFields) {
             });
           } else {
             const percentileMatch = v.field.match(percentileValueMatch);
-            const m = percentileMatch ? { ...metric, percent: percentileMatch[1] } : { ...metric };
+            const m = percentileMatch
+              ? {
+                  ...metric,
+                  [metric.type === TSVB_METRIC_TYPES.PERCENTILE ? 'percent' : 'value']:
+                    percentileMatch[1],
+                }
+              : { ...metric };
             acc[v.name] = mapEmptyToZero(m, split.timeseries.buckets);
           }
           return acc;

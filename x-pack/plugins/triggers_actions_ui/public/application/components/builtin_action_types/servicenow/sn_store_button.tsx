@@ -14,11 +14,11 @@ const getStoreURL = (appId: string): string =>
   `https://store.servicenow.com/sn_appstore_store.do#!/store/application/${appId}`;
 
 interface Props {
-  appId: string;
+  appId?: string;
   color: EuiButtonProps['color'];
 }
 
-const SNStoreButtonComponent: React.FC<Props> = ({ color, appId }) => {
+const SNStoreButtonComponent: React.FC<Props> = ({ color, appId = '' }) => {
   return (
     <EuiButton
       href={getStoreURL(appId)}
@@ -34,7 +34,7 @@ const SNStoreButtonComponent: React.FC<Props> = ({ color, appId }) => {
 
 export const SNStoreButton = memo(SNStoreButtonComponent);
 
-const SNStoreLinkComponent: React.FC<Pick<Props, 'appId'>> = ({ appId }) => (
+const SNStoreLinkComponent: React.FC<Pick<Props, 'appId'>> = ({ appId = '' }) => (
   <EuiLink href={getStoreURL(appId)} target="_blank">
     {i18n.VISIT_SN_STORE}
   </EuiLink>

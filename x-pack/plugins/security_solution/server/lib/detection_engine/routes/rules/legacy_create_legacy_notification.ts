@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 // eslint-disable-next-line no-restricted-imports
@@ -14,9 +14,7 @@ import { legacyUpdateOrCreateRuleActionsSavedObject } from '../../rule_actions/l
 // eslint-disable-next-line no-restricted-imports
 import { legacyReadNotifications } from '../../notifications/legacy_read_notifications';
 // eslint-disable-next-line no-restricted-imports
-import { LegacyRuleNotificationAlertTypeParams } from '../../notifications/legacy_types';
-// eslint-disable-next-line no-restricted-imports
-import { legacyAddTags } from '../../notifications/legacy_add_tags';
+import type { LegacyRuleNotificationAlertTypeParams } from '../../notifications/legacy_types';
 // eslint-disable-next-line no-restricted-imports
 import { legacyCreateNotifications } from '../../notifications/legacy_create_notifications';
 
@@ -72,7 +70,7 @@ export const legacyCreateLegacyNotificationRoute = (
           await rulesClient.update<LegacyRuleNotificationAlertTypeParams>({
             id: notification.id,
             data: {
-              tags: legacyAddTags([], ruleAlertId),
+              tags: [],
               name,
               schedule: {
                 interval,

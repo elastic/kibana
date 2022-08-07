@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Ecs } from '../../../common/ecs';
-import { TimelineItem } from '../../../common/search_strategy/timeline';
+import type { Ecs } from '../../../common/ecs';
+import type { TimelineItem } from '../../../common/search_strategy/timeline';
 
 export const mockTimelineData: TimelineItem[] = [
   {
@@ -640,6 +640,7 @@ export const mockTimelineData: TimelineItem[] = [
       { field: '@timestamp', value: ['2019-03-13T05:42:11.815Z'] },
       { field: 'event.category', value: ['audit-rule'] },
       { field: 'host.name', value: ['zeek-sanfran'] },
+      { field: 'process.args', value: ['gpgconf', '--list-dirs', 'agent-socket'] },
     ],
     ecs: {
       _id: '20',

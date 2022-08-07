@@ -7,22 +7,18 @@
 
 import {
   KibanaContextProvider,
-  KibanaReactContextValue,
   useKibana,
   useUiSetting,
   useUiSetting$,
   withKibana,
 } from '@kbn/kibana-react-plugin/public';
-import { StartServices } from '../../../types';
-
-export type KibanaContext = KibanaReactContextValue<StartServices>;
-export interface WithKibanaProps {
-  kibana: KibanaContext;
-}
+import type { ApmBase } from '@elastic/apm-rum';
+import type { StartServices } from '../../../types';
 
 const useTypedKibana = () => useKibana<StartServices>();
 
 export {
+  ApmBase,
   KibanaContextProvider,
   useTypedKibana as useKibana,
   useUiSetting,

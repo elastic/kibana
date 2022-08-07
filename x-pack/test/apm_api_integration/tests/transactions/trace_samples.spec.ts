@@ -6,37 +6,36 @@
  */
 
 import expect from '@kbn/expect';
-import qs from 'querystring';
 import { sortBy } from 'lodash';
-import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
+import archives from '../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
-  const supertest = getService('legacySupertestAsApmReadUser');
+  const apmApiClient = getService('apmApiClient');
 
   const archiveName = 'apm_8.0.0';
-  const metadata = archives_metadata[archiveName];
-
-  const url = `/internal/apm/services/opbeans-java/transactions/traces/samples?${qs.stringify({
-    environment: 'ENVIRONMENT_ALL',
-    kuery: '',
-    start: metadata.start,
-    end: metadata.end,
-    transactionName: 'APIRestController#stats',
-    transactionType: 'request',
-  })}`;
+  const { start, end } = archives[archiveName];
 
   registry.when(
     'Transaction trace samples response structure when data is not loaded',
     { config: 'basic', archives: [] },
     () => {
       it('handles empty state', async () => {
-        const response: {
-          body: APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/traces/samples'>;
-          status: number;
-        } = await supertest.get(url);
+        const response = await apmApiClient.readUser({
+          endpoint: 'GET /internal/apm/services/{serviceName}/transactions/traces/samples',
+          params: {
+            path: { serviceName: 'opbeans-java' },
+            query: {
+              start,
+              end,
+              transactionType: 'request',
+              environment: 'ENVIRONMENT_ALL',
+              transactionName: 'APIRestController#stats',
+              kuery: '',
+            },
+          },
+        });
 
         expect(response.status).to.be(200);
 
@@ -49,27 +48,26 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     'Transaction trace samples response structure when data is loaded',
     { config: 'basic', archives: [archiveName] },
     () => {
-      let response: {
-        body: APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/traces/samples'>;
-        status: number;
-      };
+      it('returns the correct samples', async () => {
+        const response = await apmApiClient.readUser({
+          endpoint: 'GET /internal/apm/services/{serviceName}/transactions/traces/samples',
+          params: {
+            path: { serviceName: 'opbeans-java' },
+            query: {
+              start,
+              end,
+              transactionType: 'request',
+              environment: 'ENVIRONMENT_ALL',
+              transactionName: 'APIRestController#stats',
+              kuery: '',
+            },
+          },
+        });
 
-      before(async () => {
-        response = await supertest.get(url);
-      });
-
-      it('returns the correct metadata', () => {
-        expect(response.status).to.be(200);
-        expect(response.body.traceSamples.length).to.be.greaterThan(0);
-      });
-
-      it('returns the correct number of samples', () => {
-        expectSnapshot(response.body.traceSamples.length).toMatchInline(`15`);
-      });
-
-      it('returns the correct samples', () => {
         const { traceSamples } = response.body;
 
+        expect(response.status).to.be(200);
+        expectSnapshot(response.body.traceSamples.length).toMatchInline(`15`);
         expectSnapshot(sortBy(traceSamples, (sample) => sample.traceId)).toMatchInline(`
           Array [
             Object {

@@ -8,10 +8,10 @@
 import expect from '@kbn/expect';
 import uuid from 'uuid';
 import { CaseStatuses } from '@kbn/cases-plugin/common';
+import { CaseSeverity } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
-  const common = getPageObject('common');
   const header = getPageObject('header');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
@@ -181,11 +181,60 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('deletes the case successfully', async () => {
-        await common.clickAndValidate('property-actions-ellipses', 'property-actions-trash');
-        await common.clickAndValidate('property-actions-trash', 'confirmModalConfirmButton');
-        await testSubjects.click('confirmModalConfirmButton');
-        await testSubjects.existOrFail('cases-all-title', { timeout: 2000 });
+        await cases.singleCase.deleteCase();
         await cases.casesTable.validateCasesTableHasNthRows(0);
+      });
+    });
+
+    describe('Severity field', () => {
+      before(async () => {
+        await cases.navigation.navigateToApp();
+        await cases.api.createNthRandomCases(1);
+        await cases.casesTable.waitForCasesToBeListed();
+        await cases.casesTable.goToFirstListedCase();
+        await header.waitUntilLoadingHasFinished();
+      });
+
+      after(async () => {
+        await cases.api.deleteAllCases();
+      });
+
+      it('shows the severity field on the sidebar', async () => {
+        await testSubjects.existOrFail('case-severity-selection');
+      });
+      it('changes the severity level from the selector', async () => {
+        await cases.common.selectSeverity(CaseSeverity.MEDIUM);
+        await header.waitUntilLoadingHasFinished();
+        await testSubjects.existOrFail('case-severity-selection-' + CaseSeverity.MEDIUM);
+
+        // validate user action
+        await find.byCssSelector('[data-test-subj*="severity-update-action"]');
+      });
+    });
+
+    describe('Tabs', () => {
+      // create the case to test on
+      before(async () => {
+        await cases.navigation.navigateToApp();
+        await cases.api.createNthRandomCases(1);
+        await cases.casesTable.waitForCasesToBeListed();
+        await cases.casesTable.goToFirstListedCase();
+        await header.waitUntilLoadingHasFinished();
+      });
+
+      after(async () => {
+        await cases.api.deleteAllCases();
+      });
+
+      it('shows the "activity" tab by default', async () => {
+        await testSubjects.existOrFail('case-view-tab-title-activity');
+        await testSubjects.existOrFail('case-view-tab-content-activity');
+      });
+
+      // there are no alerts in stack management yet
+      it.skip("shows the 'alerts' tab when clicked", async () => {
+        await testSubjects.click('case-view-tab-title-alerts');
+        await testSubjects.existOrFail('case-view-tab-content-alerts');
       });
     });
   });

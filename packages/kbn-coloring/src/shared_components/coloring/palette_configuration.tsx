@@ -76,10 +76,8 @@ export const CustomizablePalette = ({
   const styles = useMemo(
     () => css`
       padding: ${euiTheme.size.base};
-      background-color: ${euiTheme.colors.lightestShade};
-      border-bottom: ${euiTheme.border.thin};
     `,
-    [euiTheme.size.base, euiTheme.colors.lightestShade, euiTheme.border.thin]
+    [euiTheme.size.base]
   );
 
   return (
@@ -110,6 +108,7 @@ export const CustomizablePalette = ({
       </EuiFormRow>
       {showRangeTypeSelector && (
         <EuiFormRow
+          fullWidth
           label={
             <>
               {i18n.translate('coloring.dynamicColoring.rangeType.label', {
@@ -131,6 +130,7 @@ export const CustomizablePalette = ({
           display="rowCompressed"
         >
           <EuiButtonGroup
+            isFullWidth
             legend={i18n.translate('coloring.dynamicColoring.rangeType.label', {
               defaultMessage: 'Value type',
             })}
@@ -169,7 +169,6 @@ export const CustomizablePalette = ({
                 payload: { rangeType: newRangeType, dataBounds, palettes },
               });
             }}
-            isFullWidth
           />
         </EuiFormRow>
       )}

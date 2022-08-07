@@ -6,13 +6,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
-// @ts-ignore
+import { CommonAlertFilter } from '../../../../../common/types/alerts';
+import { fetchStatus } from '../../../../lib/alerts/fetch_status';
 import { handleError } from '../../../../lib/errors';
 import { RouteDependencies } from '../../../../types';
-import { fetchStatus } from '../../../../lib/alerts/fetch_status';
-import { CommonAlertFilter } from '../../../../../common/types/alerts';
 
-export function alertStatusRoute(server: any, npRoute: RouteDependencies) {
+export function alertStatusRoute(npRoute: RouteDependencies) {
   npRoute.router.post(
     {
       path: '/api/monitoring/v1/alert/{clusterUuid}/status',

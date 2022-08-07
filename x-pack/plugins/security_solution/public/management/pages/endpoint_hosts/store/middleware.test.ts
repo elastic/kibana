@@ -5,37 +5,35 @@
  * 2.0.
  */
 
-import { CoreStart, HttpSetup } from '@kbn/core/public';
-import { applyMiddleware, createStore, Store } from 'redux';
+import type { CoreStart, HttpSetup } from '@kbn/core/public';
+import type { Store } from 'redux';
+import { applyMiddleware, createStore } from 'redux';
 import { coreMock } from '@kbn/core/public/mocks';
-import { History, createBrowserHistory } from 'history';
-import { DepsStartMock, depsStartMock } from '../../../../common/mock/endpoint';
-import {
-  createSpyMiddleware,
-  MiddlewareActionSpyHelper,
-} from '../../../../common/store/test_utils';
-import {
+import type { History } from 'history';
+import { createBrowserHistory } from 'history';
+import type { DepsStartMock } from '../../../../common/mock/endpoint';
+import { depsStartMock } from '../../../../common/mock/endpoint';
+import type { MiddlewareActionSpyHelper } from '../../../../common/store/test_utils';
+import { createSpyMiddleware } from '../../../../common/store/test_utils';
+import type {
   Immutable,
   HostIsolationResponse,
   ISOLATION_ACTIONS,
-  ActivityLog,
   MetadataListResponse,
 } from '../../../../../common/endpoint/types';
-import { AppAction } from '../../../../common/store/actions';
+import type { AppAction } from '../../../../common/store/actions';
 import { mockEndpointResultList } from './mock_endpoint_result_list';
 import { listData } from './selectors';
-import { EndpointState, TransformStats } from '../types';
+import type { EndpointState, TransformStats } from '../types';
 import { endpointListReducer } from './reducer';
 import { endpointMiddlewareFactory } from './middleware';
 import { getEndpointListPath, getEndpointDetailsPath } from '../../../common/routing';
 import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
+import type { FailedResourceState, LoadedResourceState } from '../../../state';
 import {
-  createLoadingResourceState,
-  FailedResourceState,
   isFailedResourceState,
   isLoadedResourceState,
   isLoadingResourceState,
-  LoadedResourceState,
 } from '../../../state';
 import { KibanaServices } from '../../../../common/lib/kibana';
 import {
@@ -236,175 +234,6 @@ describe('endpoint list middleware', () => {
     });
   });
 
-  describe('handle ActivityLog State Change actions', () => {
-    let mockedApis: ReturnType<typeof endpointPageHttpMock>;
-
-    beforeEach(() => {
-      mockedApis = endpointPageHttpMock(fakeHttpServices);
-    });
-
-    const endpointList = getEndpointListApiResponse();
-    const agentId = endpointList.data[0].metadata.agent.id;
-    const search = getEndpointDetailsPath({
-      name: 'endpointActivityLog',
-      selected_endpoint: agentId,
-    });
-    const dispatchUserChangedUrl = () => {
-      dispatchUserChangedUrlToEndpointList({ search: `?${search.split('?').pop()}` });
-    };
-
-    const dispatchGetActivityLogLoading = () => {
-      dispatch({
-        type: 'endpointDetailsActivityLogChanged',
-        payload: createLoadingResourceState(),
-      });
-    };
-
-    const dispatchGetActivityLogPaging = ({ page = 1 }: { page: number }) => {
-      dispatch({
-        type: 'endpointDetailsActivityLogUpdatePaging',
-        payload: {
-          page,
-          pageSize: 50,
-          startDate: 'now-1d',
-          endDate: 'now',
-        },
-      });
-    };
-
-    const dispatchGetActivityLogUpdateInvalidDateRange = ({
-      isInvalidDateRange = false,
-    }: {
-      isInvalidDateRange: boolean;
-    }) => {
-      dispatch({
-        type: 'endpointDetailsActivityLogUpdateIsInvalidDateRange',
-        payload: {
-          isInvalidDateRange,
-        },
-      });
-    };
-
-    it('should set ActivityLog state to loading', async () => {
-      dispatchUserChangedUrl();
-
-      const loadingDispatched = waitForAction('endpointDetailsActivityLogChanged', {
-        validate(action) {
-          return isLoadingResourceState(action.payload);
-        },
-      });
-      dispatchGetActivityLogLoading();
-
-      const loadingDispatchedResponse = await loadingDispatched;
-      expect(loadingDispatchedResponse.payload.type).toEqual('LoadingResourceState');
-    });
-
-    it('should set ActivityLog state to loaded when fetching activity log is successful', async () => {
-      dispatchUserChangedUrl();
-
-      const loadedDispatched = waitForAction('endpointDetailsActivityLogChanged', {
-        validate(action) {
-          return isLoadedResourceState(action.payload);
-        },
-      });
-
-      const activityLogResponse = await loadedDispatched;
-      expect(mockedApis.responseProvider.activityLogResponse).toHaveBeenCalledWith({
-        path: expect.any(String),
-        query: {
-          end_date: 'now',
-          start_date: 'now-1d',
-          page: 1,
-          page_size: 50,
-        },
-      });
-      expect(activityLogResponse.payload.type).toEqual('LoadedResourceState');
-    });
-
-    it('should set ActivityLog to Failed if API call fails', async () => {
-      dispatchUserChangedUrl();
-
-      const apiError = new Error('oh oh');
-      const failedDispatched = waitForAction('endpointDetailsActivityLogChanged', {
-        validate(action) {
-          return isFailedResourceState(action.payload);
-        },
-      });
-
-      mockedApis.responseProvider.activityLogResponse.mockImplementation(() => {
-        throw apiError;
-      });
-
-      const failedAction = (await failedDispatched).payload as FailedResourceState<ActivityLog>;
-      expect(failedAction.error).toBe(apiError);
-    });
-
-    it('should not call API again if it fails', async () => {
-      dispatchUserChangedUrl();
-
-      const apiError = new Error('oh oh');
-      const failedDispatched = waitForAction('endpointDetailsActivityLogChanged', {
-        validate(action) {
-          return isFailedResourceState(action.payload);
-        },
-      });
-
-      mockedApis.responseProvider.activityLogResponse.mockImplementation(() => {
-        throw apiError;
-      });
-
-      await failedDispatched;
-
-      expect(mockedApis.responseProvider.activityLogResponse).toHaveBeenCalledTimes(1);
-    });
-
-    it('should not fetch Activity Log with invalid date ranges', async () => {
-      dispatchUserChangedUrl();
-
-      const updateInvalidDateRangeDispatched = waitForAction(
-        'endpointDetailsActivityLogUpdateIsInvalidDateRange'
-      );
-      dispatchGetActivityLogUpdateInvalidDateRange({ isInvalidDateRange: true });
-      await updateInvalidDateRangeDispatched;
-
-      expect(mockedApis.responseProvider.activityLogResponse).not.toHaveBeenCalled();
-    });
-
-    it('should call get Activity Log API with valid date ranges', async () => {
-      dispatchUserChangedUrl();
-
-      const updatePagingDispatched = waitForAction('endpointDetailsActivityLogUpdatePaging');
-      dispatchGetActivityLogPaging({ page: 1 });
-
-      const updateInvalidDateRangeDispatched = waitForAction(
-        'endpointDetailsActivityLogUpdateIsInvalidDateRange'
-      );
-      dispatchGetActivityLogUpdateInvalidDateRange({ isInvalidDateRange: false });
-      await updateInvalidDateRangeDispatched;
-      await updatePagingDispatched;
-
-      expect(mockedApis.responseProvider.activityLogResponse).toHaveBeenCalled();
-    });
-
-    it('should call get Activity Log API with correct paging options', async () => {
-      dispatchUserChangedUrl();
-      const updatePagingDispatched = waitForAction('endpointDetailsActivityLogUpdatePaging');
-      dispatchGetActivityLogPaging({ page: 3 });
-
-      await updatePagingDispatched;
-
-      expect(mockedApis.responseProvider.activityLogResponse).toHaveBeenCalledWith({
-        path: expect.any(String),
-        query: {
-          page: 3,
-          page_size: 50,
-          start_date: 'now-1d',
-          end_date: 'now',
-        },
-      });
-    });
-  });
-
   describe('handle Endpoint Pending Actions state actions', () => {
     let mockedApis: ReturnType<typeof endpointPageHttpMock>;
 
@@ -424,16 +253,16 @@ describe('endpoint list middleware', () => {
         path: expect.any(String),
         query: {
           agent_ids: [
-            '6db499e5-4927-4350-abb8-d8318e7d0eec',
-            'c082dda9-1847-4997-8eda-f1192d95bec3',
-            '8aa1cd61-cc25-4783-afb5-0eefc4919c07',
-            '47fe24c1-7370-419a-9732-3ff38bf41272',
-            '0d2b2fa7-a9cd-49fc-ad5f-0252c642290e',
-            'f480092d-0445-4bf3-9c96-8a3d5cb97824',
-            '3850e676-0940-4c4b-aaca-571bd1bc66d9',
-            '46efcc7a-086a-47a3-8f09-c4ecd6d2d917',
-            'afa55826-b81b-4440-a2ac-0644d77a3fc6',
-            '25b49e50-cb5c-43df-824f-67b8cf697d9d',
+            '0dc3661d-6e67-46b0-af39-6f12b025fcb0',
+            'a8e32a61-2685-47f0-83eb-edf157b8e616',
+            '37e219a8-fe16-4da9-bf34-634c5824b484',
+            '2484eb13-967e-4491-bf83-dffefdfe607c',
+            '0bc08ef6-6d6a-4113-92f2-b97811187c63',
+            'f4127d87-b567-4a6e-afa6-9a1c7dc95f01',
+            'f9ab5b8c-a43e-4e80-99d6-11570845a697',
+            '406c4b6a-ca57-4bd1-bc66-d9d999df3e70',
+            '2da1dd51-f7af-4f0e-b64c-e7751c74b0e7',
+            '89a94ea4-073c-4cb6-90a2-500805837027',
           ],
         },
       });
@@ -528,7 +357,7 @@ describe('endpoint list middleware', () => {
     it('triggers the endpoint details related actions when the url is changed', async () => {
       dispatchUserChangedUrl();
 
-      // Note: these are left intenationally in sequence
+      // Note: these are left intentionally in sequence
       // to test specific race conditions that currently exist in the middleware
       await waitForAction('serverCancelledPolicyItemsLoading');
 

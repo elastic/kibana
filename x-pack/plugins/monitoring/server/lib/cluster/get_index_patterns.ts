@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { LegacyServer } from '../../types';
 import { prefixIndexPatternWithCcs } from '../../../common/ccs_utils';
 import {
   INDEX_PATTERN_ELASTICSEARCH,
@@ -20,14 +19,13 @@ import {
   INDEX_PATTERN_ENTERPRISE_SEARCH,
   CCS_REMOTE_PATTERN,
 } from '../../../common/constants';
-import { MonitoringConfig } from '../..';
+import { MonitoringConfig } from '../../config';
 
 export function getIndexPatterns(
-  server: LegacyServer,
+  config: MonitoringConfig,
   additionalPatterns: Record<string, string> = {},
   ccs: string = CCS_REMOTE_PATTERN
 ) {
-  const config = server.config;
   const esIndexPattern = prefixIndexPatternWithCcs(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
   const kbnIndexPattern = prefixIndexPatternWithCcs(config, INDEX_PATTERN_KIBANA, ccs);
   const lsIndexPattern = prefixIndexPatternWithCcs(config, INDEX_PATTERN_LOGSTASH, ccs);

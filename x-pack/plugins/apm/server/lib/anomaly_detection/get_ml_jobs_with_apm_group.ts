@@ -59,6 +59,7 @@ export function getMlJobsWithAPMGroup(
           version: Number(job.custom_settings?.job_tags?.apm_ml_version ?? 1),
           datafeedId: datafeedStats?.datafeed_id,
           datafeedState: datafeedStats?.state as ApmMlJob['datafeedState'],
+          bucketSpan: job.analysis_config?.bucket_span,
         };
       });
     } catch (e) {

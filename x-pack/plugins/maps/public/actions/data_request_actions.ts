@@ -13,6 +13,7 @@ import bbox from '@turf/bbox';
 import uuid from 'uuid/v4';
 import { multiPoint } from '@turf/helpers';
 import { FeatureCollection } from 'geojson';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { MapStoreState } from '../reducers/store';
 import {
   KBN_IS_CENTROID_FEATURE,
@@ -24,15 +25,16 @@ import {
   getDataRequestDescriptor,
   getLayerById,
   getLayerList,
+  getEditState,
 } from '../selectors/map_selectors';
 import {
   cancelRequest,
   registerCancelCallback,
   unregisterCancelCallback,
   getEventHandlers,
+  getInspectorAdapters,
   ResultMeta,
 } from '../reducers/non_serializable_instances';
-import { updateTooltipStateForLayer } from './tooltip_actions';
 import {
   LAYER_DATA_LOAD_ENDED,
   LAYER_DATA_LOAD_ERROR,
@@ -67,6 +69,8 @@ export type DataRequestContext = {
   dataFilters: DataFilters;
   forceRefreshDueToDrawing: boolean; // Boolean signaling data request triggered by a user updating layer features via drawing tools. When true, layer will re-load regardless of "source.applyForceRefresh" flag.
   isForceRefresh: boolean; // Boolean signaling data request triggered by auto-refresh timer or user clicking refresh button. When true, layer will re-load only when "source.applyForceRefresh" flag is set to true.
+  isFeatureEditorOpenForLayer: boolean; // Boolean signaling that feature editor menu is open for a layer. When true, layer will ignore all global and layer filtering so drawn features are displayed and not filtered out.
+  inspectorAdapters: Adapters;
 };
 
 export function clearDataRequests(layer: ILayer) {
@@ -145,6 +149,8 @@ function getDataRequestContext(
       dispatch(registerCancelCallback(requestToken, callback)),
     forceRefreshDueToDrawing,
     isForceRefresh,
+    isFeatureEditorOpenForLayer: getEditState(getState())?.layerId === layerId,
+    inspectorAdapters: getInspectorAdapters(getState()),
   };
 }
 
@@ -280,30 +286,24 @@ function endDataLoad(
       throw new DataRequestAbortError();
     }
 
-    if (dataId === SOURCE_DATA_REQUEST_ID) {
-      const features = data && 'features' in data ? (data as FeatureCollection).features : [];
-      const layer = getLayerById(layerId, getState());
+    const features = data && 'features' in data ? (data as FeatureCollection).features : [];
+    const layer = getLayerById(layerId, getState());
 
-      const eventHandlers = getEventHandlers(getState());
-      if (eventHandlers && eventHandlers.onDataLoadEnd) {
-        const resultMeta: ResultMeta = {};
-        if (layer && layer.getType() === LAYER_TYPE.GEOJSON_VECTOR) {
-          const featuresWithoutCentroids = features.filter((feature) => {
-            return feature.properties ? !feature.properties[KBN_IS_CENTROID_FEATURE] : true;
-          });
-          resultMeta.featuresCount = featuresWithoutCentroids.length;
-        }
-
-        eventHandlers.onDataLoadEnd({
-          layerId,
-          dataId,
-          resultMeta,
+    const eventHandlers = getEventHandlers(getState());
+    if (eventHandlers && eventHandlers.onDataLoadEnd) {
+      const resultMeta: ResultMeta = {};
+      if (layer && layer.getType() === LAYER_TYPE.GEOJSON_VECTOR) {
+        const featuresWithoutCentroids = features.filter((feature) => {
+          return feature.properties ? !feature.properties[KBN_IS_CENTROID_FEATURE] : true;
         });
+        resultMeta.featuresCount = featuresWithoutCentroids.length;
       }
 
-      if (layer) {
-        dispatch(updateTooltipStateForLayer(layer, features));
-      }
+      eventHandlers.onDataLoadEnd({
+        layerId,
+        dataId,
+        resultMeta,
+      });
     }
 
     dispatch({
@@ -336,20 +336,13 @@ function onDataLoadError(
   ) => {
     dispatch(unregisterCancelCallback(requestToken));
 
-    if (dataId === SOURCE_DATA_REQUEST_ID) {
-      const eventHandlers = getEventHandlers(getState());
-      if (eventHandlers && eventHandlers.onDataLoadError) {
-        eventHandlers.onDataLoadError({
-          layerId,
-          dataId,
-          errorMessage,
-        });
-      }
-
-      const layer = getLayerById(layerId, getState());
-      if (layer) {
-        dispatch(updateTooltipStateForLayer(layer));
-      }
+    const eventHandlers = getEventHandlers(getState());
+    if (eventHandlers && eventHandlers.onDataLoadError) {
+      eventHandlers.onDataLoadError({
+        layerId,
+        dataId,
+        errorMessage,
+      });
     }
 
     dispatch({
@@ -374,13 +367,6 @@ export function updateSourceDataRequest(layerId: string, newData: object) {
       layerId,
       newData,
     });
-
-    if ('features' in newData) {
-      const layer = getLayerById(layerId, getState());
-      if (layer) {
-        dispatch(updateTooltipStateForLayer(layer, (newData as FeatureCollection).features));
-      }
-    }
 
     dispatch(updateStyleMeta(layerId));
   };

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import {
+import type {
   AppMountParameters,
   CoreSetup,
   Plugin,
   PluginInitializerContext,
   CoreStart,
-  DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import {
+import type {
   OsqueryPluginSetup,
   OsqueryPluginStart,
   StartPlugins,
@@ -45,6 +45,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       title: PLUGIN_NAME,
       order: 9030,
       category: DEFAULT_APP_CATEGORIES.management,
+      euiIconType: 'logoOsquery',
       async mount(params: AppMountParameters) {
         // Get start services as specified in kibana.json
         const [coreStart, depsStart] = await core.getStartServices();

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Threats } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { Threats } from '@kbn/securitysolution-io-ts-alerting-types';
 import { getMockThreatData } from './mitre_tactics_techniques';
 
 const { tactic, technique, subtechnique } = getMockThreatData();

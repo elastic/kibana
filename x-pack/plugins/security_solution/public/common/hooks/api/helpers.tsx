@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndexPatternSavedObject } from '../types';
+import type { IndexPatternSavedObject } from '../types';
 
 /**
  * Returns a string array of Index Pattern Titles

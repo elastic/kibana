@@ -7,23 +7,17 @@
 
 import React, { memo, useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
-import { encode, RisonValue } from 'rison-node';
-import styled from 'styled-components';
+import type { RisonValue } from 'rison-node';
+import { encode } from 'rison-node';
 import type { Query } from '@kbn/es-query';
 import { TimeHistory } from '@kbn/data-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { SearchBar } from '@kbn/unified-search-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { urlFromQueryParams } from '../url_from_query_params';
 import { useEndpointSelector } from '../hooks';
 import * as selectors from '../../store/selectors';
 import { clone } from '../../models/index_pattern';
-
-const AdminQueryBar = styled.div`
-  .globalQueryBar {
-    padding: 0;
-  }
-`;
 
 export const AdminSearchBar = memo(() => {
   const history = useHistory();
@@ -57,7 +51,7 @@ export const AdminSearchBar = memo(() => {
   return (
     <div>
       {searchBarIndexPatterns && searchBarIndexPatterns.length > 0 && (
-        <AdminQueryBar>
+        <div>
           <SearchBar
             dataTestSubj="adminSearchBar"
             query={searchBarQuery}
@@ -72,7 +66,7 @@ export const AdminSearchBar = memo(() => {
             showQueryBar={true}
             showQueryInput={true}
           />
-        </AdminQueryBar>
+        </div>
       )}
     </div>
   );

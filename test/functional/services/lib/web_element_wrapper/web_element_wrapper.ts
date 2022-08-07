@@ -686,17 +686,23 @@ export class WebElementWrapper {
    * @param {string} className
    * @return {Promise<void>}
    */
-  public async waitForDeletedByCssSelector(selector: string): Promise<void> {
-    await this.driver.manage().setTimeouts({ implicit: 1000 });
-    await this.driver.wait(
-      async () => {
-        const found = await this._webElement.findElements(this.By.css(selector));
-        return found.length === 0;
-      },
-      this.timeout,
-      `The element with ${selector} selector was still present after ${this.timeout} sec.`
-    );
-    await this.driver.manage().setTimeouts({ implicit: this.timeout });
+  public async waitForDeletedByCssSelector(
+    selector: string,
+    implicitTimeout = 1000
+  ): Promise<void> {
+    try {
+      await this.driver.manage().setTimeouts({ implicit: implicitTimeout });
+      await this.driver.wait(
+        async () => {
+          const found = await this._webElement.findElements(this.By.css(selector));
+          return found.length === 0;
+        },
+        this.timeout,
+        `The element with ${selector} selector was still present after ${this.timeout} sec.`
+      );
+    } finally {
+      await this.driver.manage().setTimeouts({ implicit: this.timeout });
+    }
   }
 
   /**

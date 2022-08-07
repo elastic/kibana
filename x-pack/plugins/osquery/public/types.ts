@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { DiscoverStart } from '@kbn/discover-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { FleetStart } from '@kbn/fleet-plugin/public';
-import { LensPublicStart } from '@kbn/lens-plugin/public';
-import { SecurityPluginStart } from '@kbn/security-plugin/public';
-import { CoreStart } from '@kbn/core/public';
-import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import {
+import type { DiscoverStart } from '@kbn/discover-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { FleetStart } from '@kbn/fleet-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { SecurityPluginStart } from '@kbn/security-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { getLazyOsqueryAction } from './shared_components';
+import type { getLazyOsqueryAction } from './shared_components';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface OsqueryPluginSetup {}

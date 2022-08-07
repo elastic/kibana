@@ -333,8 +333,8 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     dispatch({ type: ACTION.SWITCH_TO_FORM });
   };
 
-  const setEstimatedModelMemoryLimit = (value: State['estimatedModelMemoryLimit']) => {
-    dispatch({ type: ACTION.SET_ESTIMATED_MODEL_MEMORY_LIMIT, value });
+  const setEstimatedModelMemoryLimit = (value: State['estimatedModelMemoryLimit'] | undefined) => {
+    dispatch({ type: ACTION.SET_ESTIMATED_MODEL_MEMORY_LIMIT, value: value ?? '' });
   };
 
   const setJobClone = async (cloneJob: DeepReadonly<DataFrameAnalyticsConfig>) => {

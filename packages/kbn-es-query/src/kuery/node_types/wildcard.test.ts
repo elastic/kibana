@@ -8,11 +8,12 @@
 
 import {
   buildNode,
-  wildcardSymbol,
+  KQL_WILDCARD_SYMBOL,
   hasLeadingWildcard,
   toElasticsearchQuery,
   test as testNode,
   toQueryStringQuery,
+  KQL_NODE_TYPE_WILDCARD,
   // @ts-ignore
 } from './wildcard';
 
@@ -22,18 +23,18 @@ describe('kuery node types', () => {
   describe('wildcard', () => {
     describe('buildNode', () => {
       test('should accept a string argument representing a wildcard string', () => {
-        const wildcardValue = `foo${wildcardSymbol}bar`;
+        const wildcardValue = `foo${KQL_WILDCARD_SYMBOL}bar`;
         const result = buildNode(wildcardValue);
 
-        expect(result).toHaveProperty('type', 'wildcard');
+        expect(result).toHaveProperty('type', KQL_NODE_TYPE_WILDCARD);
         expect(result).toHaveProperty('value', wildcardValue);
       });
 
       test('should accept and parse a wildcard string', () => {
         const result = buildNode('foo*bar');
 
-        expect(result).toHaveProperty('type', 'wildcard');
-        expect(result.value).toBe(`foo${wildcardSymbol}bar`);
+        expect(result).toHaveProperty('type', KQL_NODE_TYPE_WILDCARD);
+        expect(result.value).toBe(`foo${KQL_WILDCARD_SYMBOL}bar`);
       });
     });
 

@@ -14,10 +14,12 @@ import {
   SCREENSHOTTING_EXPRESSION,
   SCREENSHOTTING_EXPRESSION_INPUT,
 } from '../../common';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { HeadlessChromiumDriverFactory } from '../browsers';
 import { createMockBrowserDriver, createMockBrowserDriverFactory } from '../browsers/mock';
 import type { ConfigType } from '../config';
 import type { PngScreenshotOptions } from '../formats';
+import * as errors from '../../common/errors';
 import * as Layouts from '../layouts/create_layout';
 import { createMockLayout } from '../layouts/mock';
 import { CONTEXT_ELEMENTATTRIBUTES } from './constants';
@@ -34,9 +36,15 @@ describe('Screenshot Observable Pipeline', () => {
   let packageInfo: Readonly<PackageInfo>;
   let options: ScreenshotOptions;
   let screenshots: Screenshots;
+  let cloud: CloudSetup;
   let config: ConfigType;
 
   beforeEach(async () => {
+    cloud = {
+      isCloudEnabled: false,
+      instanceSizeMb: 1024, // 1GB
+      apm: {},
+    } as CloudSetup;
     driver = createMockBrowserDriver();
     driverFactory = createMockBrowserDriverFactory(driver);
     http = httpServiceMock.createSetupContract();
@@ -71,7 +79,7 @@ describe('Screenshot Observable Pipeline', () => {
       browser: {} as ConfigType['browser'],
     };
 
-    screenshots = new Screenshots(driverFactory, logger, packageInfo, http, config);
+    screenshots = new Screenshots(driverFactory, logger, packageInfo, http, config, cloud);
 
     jest.spyOn(Layouts, 'createLayout').mockReturnValue(layout);
 
@@ -161,7 +169,7 @@ describe('Screenshot Observable Pipeline', () => {
       driverFactory.createPage.mockReturnValue(
         of({
           driver,
-          unexpectedExit$: throwError('Instant timeout has fired!'),
+          error$: throwError('Instant timeout has fired!'),
           close: () => of({}),
         })
       );
@@ -183,6 +191,43 @@ describe('Screenshot Observable Pipeline', () => {
 
       expect(result).toHaveProperty('results');
       expect(result.results).toMatchSnapshot();
+    });
+  });
+
+  describe('cloud', () => {
+    beforeEach(() => {
+      cloud.isCloudEnabled = true;
+    });
+
+    afterEach(() => {
+      jest.resetAllMocks();
+    });
+
+    it('throws an error when OS memory is under 1GB on cloud', async () => {
+      await expect(
+        lastValueFrom(
+          screenshots.getScreenshots({
+            ...options,
+            expression: 'kibana',
+            input: 'something',
+          } as PngScreenshotOptions)
+        )
+      ).rejects.toEqual(new errors.InsufficientMemoryAvailableOnCloudError());
+
+      expect(driver.open).toHaveBeenCalledTimes(0);
+    });
+
+    it('generates a report when OS memory is 2GB on cloud', async () => {
+      cloud.instanceSizeMb = 2048;
+      await lastValueFrom(
+        screenshots.getScreenshots({
+          ...options,
+          expression: 'kibana',
+          input: 'something',
+        } as PngScreenshotOptions)
+      );
+
+      expect(driver.open).toHaveBeenCalledTimes(1);
     });
   });
 });

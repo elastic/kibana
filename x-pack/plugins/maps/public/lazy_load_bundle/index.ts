@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndexPatternsContract } from '@kbn/data-plugin/public';
+import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { AppMountParameters } from '@kbn/core/public';
 import { IContainer } from '@kbn/embeddable-plugin/public';
 import { LayerDescriptor } from '../../common/descriptor_types';
@@ -27,7 +27,7 @@ export interface LazyLoadedMapModules {
     initialInput: MapEmbeddableInput,
     parent?: IContainer
   ) => MapEmbeddableType;
-  getIndexPatternService: () => IndexPatternsContract;
+  getIndexPatternService: () => DataViewsContract;
   getMapsCapabilities: () => any;
   renderApp: (params: AppMountParameters, AppUsageTracker: React.FC) => Promise<() => void>;
   createSecurityLayerDescriptors: (

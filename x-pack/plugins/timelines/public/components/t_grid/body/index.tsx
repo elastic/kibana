@@ -18,7 +18,7 @@ import {
   EuiFlexItem,
   EuiProgress,
 } from '@elastic/eui';
-import { getOr, isEmpty } from 'lodash/fp';
+import { getOr } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import React, {
   ComponentType,
@@ -37,6 +37,8 @@ import styled, { ThemeContext } from 'styled-components';
 import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER } from '@kbn/rule-data-utils';
 import { Filter } from '@kbn/es-query';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import { FieldBrowserOptions } from '@kbn/triggers-actions-ui-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   TGridCellAction,
   BulkActionsProp,
@@ -54,7 +56,7 @@ import {
 
 import type { TimelineItem, TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
 
-import { getColumnHeaders } from './column_headers/helpers';
+import { getColumnHeader, getColumnHeaders } from './column_headers/helpers';
 import {
   addBuildingBlockStyle,
   getEventIdToDataMapping,
@@ -65,11 +67,9 @@ import {
 
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
 import type { OnRowSelected, OnSelectAll } from '../types';
-import type { FieldBrowserOptions } from '../../../../common/types';
 import type { Refetch } from '../../../store/t_grid/inputs';
 import { getPageRowIndex } from '../../../../common/utils/pagination';
 import { StatefulEventContext } from '../../stateful_event_context';
-import { StatefulFieldsBrowser } from '../toolbar/fields_browser';
 import { tGridActions, TGridModel, tGridSelectors, TimelineState } from '../../../store/t_grid';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { RowAction } from './row_action';
@@ -79,10 +79,9 @@ import { checkBoxControlColumn } from './control_columns';
 import { ViewSelection } from '../event_rendered_view/selector';
 import { EventRenderedView } from '../event_rendered_view';
 import { REMOVE_COLUMN } from './column_headers/translations';
+import { TimelinesStartPlugins } from '../../../types';
 
-const StatefulAlertStatusBulkActions = lazy(
-  () => import('../toolbar/bulk_actions/alert_status_bulk_actions')
-);
+const StatefulAlertBulkActions = lazy(() => import('../toolbar/bulk_actions/alert_bulk_actions'));
 
 interface OwnProps {
   activePage: number;
@@ -339,11 +338,13 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     trailingControlColumns = EMPTY_CONTROL_COLUMNS,
     unit = defaultUnit,
   }) => {
+    const { triggersActionsUi } = useKibana<TimelinesStartPlugins>().services;
+
     const dataGridRef = useRef<EuiDataGridRefProps>(null);
 
     const dispatch = useDispatch();
     const getManageTimeline = useMemo(() => tGridSelectors.getManageTimelineById(), []);
-    const { queryFields, selectAll } = useDeepEqualSelector((state) =>
+    const { queryFields, selectAll, defaultColumns } = useDeepEqualSelector((state) =>
       getManageTimeline(state, id)
     );
 
@@ -399,20 +400,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       }
     }, [isSelectAllChecked, onSelectPage, selectAll]);
 
-    // Clean any removed custom field that may still be present in stored columnHeaders
-    useEffect(() => {
-      if (!isEmpty(browserFields) && !isEmpty(columnHeaders)) {
-        columnHeaders.forEach(({ id: columnId }) => {
-          if (browserFields.base?.fields?.[columnId] == null) {
-            const [category] = columnId.split('.');
-            if (browserFields[category]?.fields?.[columnId] == null) {
-              dispatch(tGridActions.removeColumn({ id, columnId }));
-            }
-          }
-        });
-      }
-    }, [browserFields, columnHeaders, dispatch, id]);
-
     const onAlertStatusActionSuccess = useMemo(() => {
       if (bulkActions && bulkActions !== true) {
         return bulkActions.onAlertStatusActionSuccess;
@@ -425,6 +412,32 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       }
     }, [bulkActions]);
 
+    const additionalBulkActions = useMemo(() => {
+      if (bulkActions && bulkActions !== true && bulkActions.customBulkActions !== undefined) {
+        return bulkActions.customBulkActions.map((action) => {
+          return {
+            ...action,
+            onClick: (eventIds: string[]) => {
+              const items = data.filter((item) => {
+                return eventIds.find((event) => item._id === event);
+              });
+              action.onClick(items);
+            },
+          };
+        });
+      }
+    }, [bulkActions, data]);
+
+    const showAlertStatusActions = useMemo(() => {
+      if (!hasAlertsCrud) {
+        return false;
+      }
+      if (typeof bulkActions === 'boolean') {
+        return bulkActions;
+      }
+      return bulkActions.alertStatusActions ?? true;
+    }, [bulkActions, hasAlertsCrud]);
+
     const showBulkActions = useMemo(() => {
       if (!hasAlertsCrud) {
         return false;
@@ -436,8 +449,34 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       if (typeof bulkActions === 'boolean') {
         return bulkActions;
       }
-      return bulkActions.alertStatusActions ?? true;
+      return (bulkActions?.customBulkActions?.length || bulkActions?.alertStatusActions) ?? true;
     }, [hasAlertsCrud, selectedCount, showCheckboxes, bulkActions]);
+
+    const onResetColumns = useCallback(() => {
+      dispatch(tGridActions.updateColumns({ id, columns: defaultColumns }));
+    }, [defaultColumns, dispatch, id]);
+
+    const onToggleColumn = useCallback(
+      (columnId: string) => {
+        if (columnHeaders.some(({ id: columnHeaderId }) => columnId === columnHeaderId)) {
+          dispatch(
+            tGridActions.removeColumn({
+              columnId,
+              id,
+            })
+          );
+        } else {
+          dispatch(
+            tGridActions.upsertColumn({
+              column: getColumnHeader(columnId, defaultColumns),
+              id,
+              index: 1,
+            })
+          );
+        }
+      },
+      [columnHeaders, dispatch, id, defaultColumns]
+    );
 
     const alertToolbar = useMemo(
       () => (
@@ -447,7 +486,8 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
           </EuiFlexItem>
           {showBulkActions && (
             <Suspense fallback={<EuiLoadingSpinner />}>
-              <StatefulAlertStatusBulkActions
+              <StatefulAlertBulkActions
+                showAlertStatusActions={showAlertStatusActions}
                 data-test-subj="bulk-actions"
                 id={id}
                 totalItems={totalSelectAllAlerts ?? totalItems}
@@ -456,6 +496,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
                 indexName={indexNames.join()}
                 onActionSuccess={onAlertStatusActionSuccess}
                 onActionFailure={onAlertStatusActionFailure}
+                customBulkActions={additionalBulkActions}
                 refetch={refetch}
               />
             </Suspense>
@@ -463,6 +504,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         </EuiFlexGroup>
       ),
       [
+        additionalBulkActions,
         alertCountText,
         filterQuery,
         filterStatus,
@@ -471,6 +513,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         onAlertStatusActionFailure,
         onAlertStatusActionSuccess,
         refetch,
+        showAlertStatusActions,
         showBulkActions,
         totalItems,
         totalSelectAllAlerts,
@@ -486,7 +529,8 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
             {showBulkActions ? (
               <>
                 <Suspense fallback={<EuiLoadingSpinner />}>
-                  <StatefulAlertStatusBulkActions
+                  <StatefulAlertBulkActions
+                    showAlertStatusActions={showAlertStatusActions}
                     data-test-subj="bulk-actions"
                     id={id}
                     totalItems={totalSelectAllAlerts ?? totalItems}
@@ -495,6 +539,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
                     indexName={indexNames.join()}
                     onActionSuccess={onAlertStatusActionSuccess}
                     onActionFailure={onAlertStatusActionFailure}
+                    customBulkActions={additionalBulkActions}
                     refetch={refetch}
                   />
                 </Suspense>
@@ -503,13 +548,13 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
             ) : (
               <>
                 {additionalControls ?? null}
-                <StatefulFieldsBrowser
-                  data-test-subj="field-browser"
-                  browserFields={browserFields}
-                  options={fieldBrowserOptions}
-                  timelineId={id}
-                  columnHeaders={columnHeaders}
-                />
+                {triggersActionsUi.getFieldBrowser({
+                  browserFields,
+                  options: fieldBrowserOptions,
+                  columnIds: columnHeaders.map(({ id: columnId }) => columnId),
+                  onResetColumns,
+                  onToggleColumn,
+                })}
               </>
             )}
           </>
@@ -528,21 +573,26 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         showDisplaySelector: false,
       }),
       [
+        isLoading,
         alertCountText,
         showBulkActions,
+        showAlertStatusActions,
         id,
         totalSelectAllAlerts,
         totalItems,
-        fieldBrowserOptions,
         filterStatus,
         filterQuery,
         indexNames,
         onAlertStatusActionSuccess,
         onAlertStatusActionFailure,
+        onResetColumns,
+        onToggleColumn,
+        triggersActionsUi,
+        additionalBulkActions,
         refetch,
-        isLoading,
         additionalControls,
         browserFields,
+        fieldBrowserOptions,
         columnHeaders,
       ]
     );

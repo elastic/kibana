@@ -25,7 +25,7 @@ const ERROR_MESSAGE = i18n.translate(
 );
 
 interface Props {
-  appId: string;
+  appId?: string;
   message?: string | null;
 }
 

@@ -6,10 +6,10 @@
  */
 
 import moment from 'moment';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import type { Datatable } from '@kbn/expressions-plugin/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import type { TimeRange } from '@kbn/data-plugin/public';
+import type { Datatable } from '@kbn/expressions-plugin/common';
+
+import type { TimeRange } from '@kbn/es-query';
+import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
 import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
 
 // mock the specific inner variable:
@@ -29,7 +29,7 @@ import type { TimeScaleArgs } from './types';
 
 describe('time_scale', () => {
   let timeScaleWrapped: (input: Datatable, args: TimeScaleArgs) => Promise<Datatable>;
-  const timeScale = getTimeScale(() => 'UTC');
+  const timeScale = getTimeScale(createDatatableUtilitiesMock, () => 'UTC');
 
   const emptyTable: Datatable = {
     type: 'datatable',
@@ -397,7 +397,7 @@ describe('time_scale', () => {
       resolveTimezonePromise = res;
     });
     const timeScaleResolved = jest.fn((x) => x);
-    const delayedTimeScale = getTimeScale(() => timezonePromise);
+    const delayedTimeScale = getTimeScale(createDatatableUtilitiesMock, () => timezonePromise);
     const delayedTimeScaleWrapper = functionWrapper(delayedTimeScale);
     const result = delayedTimeScaleWrapper(
       {

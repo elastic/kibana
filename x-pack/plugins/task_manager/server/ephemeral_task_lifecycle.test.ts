@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import { Subject } from 'rxjs';
 
 import { TaskLifecycleEvent } from './polling_lifecycle';

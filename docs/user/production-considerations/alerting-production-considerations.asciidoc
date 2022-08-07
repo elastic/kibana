@@ -64,3 +64,50 @@ Because {kib} uses the documents to display historic data, you should set the de
 
 For more information on index lifecycle management, see:
 {ref}/index-lifecycle-management.html[Index Lifecycle Policies].
+
+[float]
+[[alerting-circuit-breakers]]
+=== Circuit breakers
+
+There are several scenarios where running alerting rules and actions can start to negatively impact the overall health of a {kib} instance either by clogging up Task Manager throughput or by consuming so much CPU/memory that other operations cannot complete in a reasonable amount of time. There are several <<alert-settings,configurable>> circuit breakers to help minimize these effects.
+
+[float]
+==== Rules with very short intervals
+
+Running large numbers of rules at very short intervals can quickly clog up Task Manager throughput, leading to higher schedule drift. Use `xpack.alerting.rules.minimumScheduleInterval.value` to set a minimum schedule interval for rules. The default (and recommended) value for this configuration is `1m`. Use `xpack.alerting.rules.minimumScheduleInterval.enforce` to specify whether to strictly enforce this minimum. While the default value for this setting is `false` to maintain backwards compatibility with existing rules, set this to `true` to prevent new and updated rules from running at an interval below the minimum.
+
+[float]
+==== Rules that run for a long time
+
+Rules that run for a long time typically do so because they are issuing resource-intensive {es} queries or performing CPU-intensive processing. This can block the event loop, making {kib} inaccessible while the rule runs. By default, rule processing is cancelled after `5m` but this can be overriden using the `xpack.alerting.rules.run.timeout` configuration. This value can also be configured per rule type using `xpack.alerting.rules.run.ruleTypeOverrides`. For example, the following configuration sets the global timeout value to `1m` while allowing *Index Threshold* rules to run for `10m` before being cancelled.
+
+[source,yaml]
+--
+xpack.alerting.rules.run:
+  timeout: '1m'
+  ruleTypeOverrides:
+    - id: '.index-threshold'
+      timeout: '10m'
+--
+
+When a rule run is cancelled, any alerts and actions that were generated during the run are discarded. This behavior is controlled by the `xpack.alerting.cancelAlertsOnRuleTimeout` configuration, which defaults to `true`. Set this to `false` to receive alerts and actions after the timeout, although be aware that these may be incomplete and possibly inaccurate.
+
+[float]
+==== Rules that spawn too many actions
+
+Rules that spawn too many actions can quickly clog up Task Manager throughput. This can occur if:
+
+* A rule configured with a single action generates many alerts. For example, if a rule configured to run a single email action generates 100,000 alerts, then 100,000 actions will be scheduled during a run.
+* A rule configured with multiple actions generates alerts. For example, if a rule configured to run an email action, a server log action and a webhook action generates 30,000 alerts, then 90,000 actions will be scheduled during a run.
+
+Use `xpack.alerting.rules.run.actions.max` to limit the maximum number of actions a rule can generate per run. This value can also be configured by connector type using `xpack.alerting.rules.run.actions.connectorTypeOverrides`. For example, the following config sets the global maximum number of actions to 100 while allowing rules with *Email* actions to generate up to 200 actions.
+
+[source,yaml]
+--
+xpack.alerting.rules.run:
+  actions:
+    max: 100
+    connectorTypeOverrides:
+      - id: '.email'
+        max: 200
+--

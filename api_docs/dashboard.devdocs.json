@@ -1219,7 +1219,13 @@
             "label": "controlGroupInput",
             "description": [],
             "signature": [
-              "DashboardContainerControlGroupInput",
+              {
+                "pluginId": "controls",
+                "scope": "common",
+                "docId": "kibControlsPluginApi",
+                "section": "def-common.PersistableControlGroupInput",
+                "text": "PersistableControlGroupInput"
+              },
               " | undefined"
             ],
             "path": "src/plugins/dashboard/public/types.ts",
@@ -1333,6 +1339,19 @@
             "type": "CompoundType",
             "tags": [],
             "label": "syncColors",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/dashboard/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-public.DashboardContainerInput.syncTooltips",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "syncTooltips",
             "description": [],
             "signature": [
               "boolean | undefined"
@@ -1712,7 +1731,7 @@
                 "section": "def-common.SearchSourceFields",
                 "text": "SearchSourceFields"
               },
-              "[K]; getOwnField: <K extends keyof ",
+              "[K]; getActiveIndexFilter: () => string[]; getOwnField: <K extends keyof ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -1836,7 +1855,15 @@
               },
               "; serialize: () => { searchSourceJSON: string; references: ",
               "SavedObjectReference",
-              "[]; }; }"
+              "[]; }; toExpressionAst: ({ asDatatable }?: ExpressionAstOptions) => ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionAstExpression",
+                "text": "ExpressionAstExpression"
+              },
+              "; parseActiveIndexPatternFromQueryString: (queryString: string) => string[]; }"
             ],
             "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
             "deprecated": false
@@ -1952,7 +1979,13 @@
             "description": [],
             "signature": [
               "Omit<",
-              "RawControlGroupAttributes",
+              {
+                "pluginId": "controls",
+                "scope": "common",
+                "docId": "kibControlsPluginApi",
+                "section": "def-common.RawControlGroupAttributes",
+                "text": "RawControlGroupAttributes"
+              },
               ", \"id\"> | undefined"
             ],
             "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
@@ -2018,13 +2051,7 @@
         ],
         "signature": [
           "{ dashboardId?: string | undefined; timeRange?: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.TimeRange",
-            "text": "TimeRange"
-          },
+          "TimeRange",
           " | undefined; refreshInterval?: ",
           {
             "pluginId": "data",
@@ -2053,8 +2080,16 @@
             "section": "def-common.SavedDashboardPanel730ToLatest",
             "text": "SavedDashboardPanel730ToLatest"
           },
-          "[] | undefined; savedQuery?: string | undefined; options?: ",
+          "[] | undefined; savedQuery?: string | undefined; tags?: string[] | undefined; options?: ",
           "DashboardOptions",
+          " | undefined; controlGroupInput?: ",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.SerializableControlGroupInput",
+            "text": "SerializableControlGroupInput"
+          },
           " | undefined; }"
         ],
         "path": "src/plugins/dashboard/public/locator.ts",
@@ -2079,7 +2114,7 @@
             "section": "def-common.RawSavedDashboardPanel730ToLatest",
             "text": "RawSavedDashboardPanel730ToLatest"
           },
-          ", \"type\" | \"title\" | \"panelIndex\" | \"gridData\" | \"version\" | \"embeddableConfig\" | \"panelRefName\"> & { readonly id?: string | undefined; readonly type: string; }"
+          ", \"type\" | \"version\" | \"title\" | \"panelIndex\" | \"gridData\" | \"embeddableConfig\" | \"panelRefName\"> & { readonly id?: string | undefined; readonly type: string; }"
         ],
         "path": "src/plugins/dashboard/common/types.ts",
         "deprecated": false,
@@ -2342,13 +2377,7 @@
         "description": [],
         "signature": [
           "(savedObjectClient: Pick<",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-server.ISavedObjectsRepository",
-            "text": "ISavedObjectsRepository"
-          },
+          "ISavedObjectsRepository",
           ", \"find\">, embeddableType: string) => Promise<{ [key: string]: ",
           "Serializable",
           "; }[]>"
@@ -2365,13 +2394,7 @@
             "description": [],
             "signature": [
               "Pick<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.ISavedObjectsRepository",
-                "text": "ISavedObjectsRepository"
-              },
+              "ISavedObjectsRepository",
               ", \"find\">"
             ],
             "path": "src/plugins/dashboard/server/usage/find_by_value_embeddables.ts",
@@ -2431,78 +2454,6 @@
   "common": {
     "classes": [],
     "functions": [
-      {
-        "parentPluginId": "dashboard",
-        "id": "def-common.controlGroupInputToRawAttributes",
-        "type": "Function",
-        "tags": [],
-        "label": "controlGroupInputToRawAttributes",
-        "description": [],
-        "signature": [
-          "(controlGroupInput: Omit<",
-          {
-            "pluginId": "controls",
-            "scope": "common",
-            "docId": "kibControlsPluginApi",
-            "section": "def-common.ControlGroupInput",
-            "text": "ControlGroupInput"
-          },
-          ", \"id\">) => ",
-          "RawControlGroupAttributes"
-        ],
-        "path": "src/plugins/dashboard/common/embeddable/dashboard_control_group.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "dashboard",
-            "id": "def-common.controlGroupInputToRawAttributes.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "controlGroupInput",
-            "description": [],
-            "signature": [
-              "Omit<",
-              {
-                "pluginId": "controls",
-                "scope": "common",
-                "docId": "kibControlsPluginApi",
-                "section": "def-common.ControlGroupInput",
-                "text": "ControlGroupInput"
-              },
-              ", \"id\">"
-            ],
-            "path": "src/plugins/dashboard/common/embeddable/dashboard_control_group.ts",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "dashboard",
-        "id": "def-common.getDefaultDashboardControlGroupInput",
-        "type": "Function",
-        "tags": [],
-        "label": "getDefaultDashboardControlGroupInput",
-        "description": [],
-        "signature": [
-          "() => Omit<",
-          {
-            "pluginId": "controls",
-            "scope": "common",
-            "docId": "kibControlsPluginApi",
-            "section": "def-common.ControlGroupInput",
-            "text": "ControlGroupInput"
-          },
-          ", \"id\">"
-        ],
-        "path": "src/plugins/dashboard/common/embeddable/dashboard_control_group.ts",
-        "deprecated": false,
-        "returnComment": [],
-        "children": [],
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "dashboard",
         "id": "def-common.migratePanelsTo730",
@@ -2677,118 +2628,6 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "dashboard",
-        "id": "def-common.rawAttributesToControlGroupInput",
-        "type": "Function",
-        "tags": [],
-        "label": "rawAttributesToControlGroupInput",
-        "description": [],
-        "signature": [
-          "(rawControlGroupAttributes: ",
-          "RawControlGroupAttributes",
-          ") => Omit<",
-          {
-            "pluginId": "controls",
-            "scope": "common",
-            "docId": "kibControlsPluginApi",
-            "section": "def-common.ControlGroupInput",
-            "text": "ControlGroupInput"
-          },
-          ", \"id\"> | undefined"
-        ],
-        "path": "src/plugins/dashboard/common/embeddable/dashboard_control_group.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "dashboard",
-            "id": "def-common.rawAttributesToControlGroupInput.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "rawControlGroupAttributes",
-            "description": [],
-            "signature": [
-              "RawControlGroupAttributes"
-            ],
-            "path": "src/plugins/dashboard/common/embeddable/dashboard_control_group.ts",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "dashboard",
-        "id": "def-common.rawAttributesToSerializable",
-        "type": "Function",
-        "tags": [],
-        "label": "rawAttributesToSerializable",
-        "description": [],
-        "signature": [
-          "(rawControlGroupAttributes: Omit<",
-          "RawControlGroupAttributes",
-          ", \"id\">) => ",
-          "SerializableRecord"
-        ],
-        "path": "src/plugins/dashboard/common/embeddable/dashboard_control_group.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "dashboard",
-            "id": "def-common.rawAttributesToSerializable.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "rawControlGroupAttributes",
-            "description": [],
-            "signature": [
-              "Omit<",
-              "RawControlGroupAttributes",
-              ", \"id\">"
-            ],
-            "path": "src/plugins/dashboard/common/embeddable/dashboard_control_group.ts",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "dashboard",
-        "id": "def-common.serializableToRawAttributes",
-        "type": "Function",
-        "tags": [],
-        "label": "serializableToRawAttributes",
-        "description": [],
-        "signature": [
-          "(serializable: ",
-          "SerializableRecord",
-          ") => Omit<",
-          "RawControlGroupAttributes",
-          ", \"type\" | \"id\">"
-        ],
-        "path": "src/plugins/dashboard/common/embeddable/dashboard_control_group.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "dashboard",
-            "id": "def-common.serializableToRawAttributes.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "serializable",
-            "description": [],
-            "signature": [
-              "SerializableRecord"
-            ],
-            "path": "src/plugins/dashboard/common/embeddable/dashboard_control_group.ts",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -2850,7 +2689,13 @@
             "label": "controlGroupInput",
             "description": [],
             "signature": [
-              "DashboardContainerControlGroupInput",
+              {
+                "pluginId": "controls",
+                "scope": "common",
+                "docId": "kibControlsPluginApi",
+                "section": "def-common.PersistableControlGroupInput",
+                "text": "PersistableControlGroupInput"
+              },
               " | undefined"
             ],
             "path": "src/plugins/dashboard/common/types.ts",
@@ -2928,7 +2773,7 @@
         "signature": [
           "Pick<",
           "RawSavedDashboardPanel640To720",
-          ", \"title\" | \"panelIndex\" | \"gridData\" | \"version\" | \"embeddableConfig\"> & { readonly type?: string | undefined; readonly name?: string | undefined; panelIndex: string; panelRefName?: string | undefined; }"
+          ", \"version\" | \"title\" | \"panelIndex\" | \"gridData\" | \"embeddableConfig\"> & { readonly type?: string | undefined; readonly name?: string | undefined; panelIndex: string; panelRefName?: string | undefined; }"
         ],
         "path": "src/plugins/dashboard/common/bwc/types.ts",
         "deprecated": false,
@@ -2944,7 +2789,7 @@
         "signature": [
           "Pick<",
           "RawSavedDashboardPanel610",
-          ", \"columns\" | \"title\" | \"sort\" | \"panelIndex\" | \"gridData\" | \"version\"> & { readonly id: string; readonly type: string; }"
+          ", \"version\" | \"title\" | \"columns\" | \"sort\" | \"panelIndex\" | \"gridData\"> & { readonly id: string; readonly type: string; }"
         ],
         "path": "src/plugins/dashboard/common/types.ts",
         "deprecated": false,
@@ -2960,7 +2805,7 @@
         "signature": [
           "Pick<",
           "RawSavedDashboardPanel620",
-          ", \"columns\" | \"title\" | \"sort\" | \"panelIndex\" | \"gridData\" | \"version\" | \"embeddableConfig\"> & { readonly id: string; readonly type: string; }"
+          ", \"version\" | \"title\" | \"columns\" | \"sort\" | \"panelIndex\" | \"gridData\" | \"embeddableConfig\"> & { readonly id: string; readonly type: string; }"
         ],
         "path": "src/plugins/dashboard/common/types.ts",
         "deprecated": false,
@@ -2976,7 +2821,7 @@
         "signature": [
           "Pick<",
           "RawSavedDashboardPanel620",
-          ", \"columns\" | \"title\" | \"sort\" | \"panelIndex\" | \"gridData\" | \"version\" | \"embeddableConfig\"> & { readonly id: string; readonly type: string; }"
+          ", \"version\" | \"title\" | \"columns\" | \"sort\" | \"panelIndex\" | \"gridData\" | \"embeddableConfig\"> & { readonly id: string; readonly type: string; }"
         ],
         "path": "src/plugins/dashboard/common/types.ts",
         "deprecated": false,
@@ -2992,7 +2837,7 @@
         "signature": [
           "Pick<",
           "RawSavedDashboardPanel640To720",
-          ", \"title\" | \"panelIndex\" | \"gridData\" | \"version\" | \"embeddableConfig\"> & { readonly id: string; readonly type: string; }"
+          ", \"version\" | \"title\" | \"panelIndex\" | \"gridData\" | \"embeddableConfig\"> & { readonly id: string; readonly type: string; }"
         ],
         "path": "src/plugins/dashboard/common/types.ts",
         "deprecated": false,
@@ -3014,7 +2859,7 @@
             "section": "def-common.RawSavedDashboardPanel730ToLatest",
             "text": "RawSavedDashboardPanel730ToLatest"
           },
-          ", \"type\" | \"title\" | \"panelIndex\" | \"gridData\" | \"version\" | \"embeddableConfig\" | \"panelRefName\"> & { readonly id?: string | undefined; readonly type: string; }"
+          ", \"type\" | \"version\" | \"title\" | \"panelIndex\" | \"gridData\" | \"embeddableConfig\" | \"panelRefName\"> & { readonly id?: string | undefined; readonly type: string; }"
         ],
         "path": "src/plugins/dashboard/common/types.ts",
         "deprecated": false,
@@ -3030,7 +2875,7 @@
         "signature": [
           "Pick<",
           "RawSavedDashboardPanelTo60",
-          ", \"columns\" | \"title\" | \"sort\" | \"size_x\" | \"size_y\" | \"row\" | \"col\" | \"panelIndex\"> & { readonly id: string; readonly type: string; }"
+          ", \"title\" | \"row\" | \"columns\" | \"sort\" | \"size_x\" | \"size_y\" | \"col\" | \"panelIndex\"> & { readonly id: string; readonly type: string; }"
         ],
         "path": "src/plugins/dashboard/common/types.ts",
         "deprecated": false,

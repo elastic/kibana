@@ -5,32 +5,22 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiPopover,
-  EuiSpacer,
-  EuiSteps,
-  EuiText,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiSteps, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { ELASTICSEARCH_GUIDE_PATH } from '../../enterprise_search_overview/routes';
+import { ELASTICSEARCH_PLUGIN } from '../../../../common/constants';
 
 import { EuiLinkTo } from '../react_router_helpers';
 
 import { IconRow } from './icon_row';
 
-export const GettingStartedSteps: React.FC = () => {
-  // TODO replace with logic file
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+export interface GettingStartedStepsProps {
+  step?: 'first' | 'second';
+}
 
+export const GettingStartedSteps: React.FC<GettingStartedStepsProps> = ({ step = 'first' }) => {
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
@@ -39,17 +29,17 @@ export const GettingStartedSteps: React.FC = () => {
             {
               title: i18n.translate(
                 'xpack.enterpriseSearch.overview.gettingStartedSteps.addData.title',
-                { defaultMessage: 'Add your documents and data to Enterprise Search' }
+                { defaultMessage: 'Add your documents to Enterprise Search' }
               ),
               children: (
                 <>
-                  <EuiText>
+                  <EuiText color="subdued">
                     <p>
                       {i18n.translate(
                         'xpack.enterpriseSearch.overview.gettingStartedSteps.addData.message',
                         {
                           defaultMessage:
-                            'Get started by adding your data to Enterprise Search. You can use the Elastic Web Crawler, API endpoints, existing Elasticsearch indices or third party connectors like Google Drive, Microsoft Sharepoint and more.',
+                            'Add your data to Enterprise Search. You can crawl website content with the Elastic web crawler, connect your existing application with Elasticsearch API endpoints, or use connectors to directly add third party content from providers like Google Drive, Microsoft Sharepoint and more.',
                         }
                       )}
                     </p>
@@ -58,7 +48,7 @@ export const GettingStartedSteps: React.FC = () => {
                   <IconRow />
                 </>
               ),
-              status: 'current',
+              status: (step === 'first' && 'current') || 'complete',
             },
             {
               title: i18n.translate(
@@ -67,13 +57,13 @@ export const GettingStartedSteps: React.FC = () => {
               ),
               children: (
                 <>
-                  <EuiText>
+                  <EuiText color="subdued">
                     <p>
                       {i18n.translate(
                         'xpack.enterpriseSearch.overview.gettingStartedSteps.buildSearchExperience.message',
                         {
                           defaultMessage:
-                            'You can use Search Engines to build customized search experiences for your customers or internal teams with App Search or Workplace Search. Or you can use Search UI to connect directly to an Elasticsearch index to build client-side search experinces for your users.',
+                            'Create a search engine with App Search for a prebuild set of search management tools, or deeply customize your own tools by searching directly against Elasticsearch. Then build beautiful client-side search experiences with Search UI - available for Elasticsearch, App Search, and Workplace Search.',
                         }
                       )}
                     </p>
@@ -81,65 +71,7 @@ export const GettingStartedSteps: React.FC = () => {
                   <EuiSpacer size="m" />
                   <EuiFlexGroup alignItems="center" gutterSize="s">
                     <EuiFlexItem grow={false}>
-                      <EuiPopover
-                        button={
-                          <EuiButton
-                            iconType="arrowDown"
-                            iconSide="right"
-                            fill
-                            onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-                          >
-                            {i18n.translate(
-                              'xpack.enterpriseSearch.overview.gettingStartedSteps.createASearchEngineButton',
-                              { defaultMessage: 'Create a search engine' }
-                            )}
-                          </EuiButton>
-                        }
-                        isOpen={isPopoverOpen}
-                        closePopover={() => setIsPopoverOpen(false)}
-                      >
-                        {/* TODO add onclick for these links*/}
-                        <EuiContextMenuPanel
-                          items={[
-                            <EuiContextMenuItem key="" onClick={() => {}}>
-                              <EuiText size="s">
-                                <h4>
-                                  {i18n.translate(
-                                    'xpack.enterpriseSearch.overview.gettingStartedSteps.createAppSearchEngine.title',
-                                    { defaultMessage: 'Create an App Search engine' }
-                                  )}
-                                </h4>
-                                {i18n.translate(
-                                  'xpack.enterpriseSearch.overview.gettingStartedSteps.createAppSearchEngine.description',
-                                  {
-                                    defaultMessage:
-                                      'All the power of Elasticsearch, without the learning curve.',
-                                  }
-                                )}
-                              </EuiText>
-                            </EuiContextMenuItem>,
-                            <EuiContextMenuItem key="" onClick={() => {}}>
-                              <EuiText size="s">
-                                <h4>
-                                  {i18n.translate(
-                                    'xpack.enterpriseSearch.overview.gettingStartedSteps.createWorkplaceSearchGroup.title',
-                                    { defaultMessage: 'Create a Workplace Search group' }
-                                  )}
-                                </h4>
-                                {i18n.translate(
-                                  'xpack.enterpriseSearch.overview.gettingStartedSteps.createWorkplaceSearchGroup.description',
-                                  {
-                                    defaultMessage: 'A secure search experience for internal teams',
-                                  }
-                                )}
-                              </EuiText>
-                            </EuiContextMenuItem>,
-                          ]}
-                        />
-                      </EuiPopover>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiLinkTo to={ELASTICSEARCH_GUIDE_PATH}>
+                      <EuiLinkTo shouldNotCreateHref to={ELASTICSEARCH_PLUGIN.URL}>
                         <EuiIcon type="iInCircle" />
                         &nbsp;
                         {i18n.translate(
@@ -151,7 +83,7 @@ export const GettingStartedSteps: React.FC = () => {
                   </EuiFlexGroup>
                 </>
               ),
-              status: 'incomplete',
+              status: (step === 'second' && 'current') || 'incomplete',
             },
             {
               title: i18n.translate(
@@ -159,13 +91,13 @@ export const GettingStartedSteps: React.FC = () => {
                 { defaultMessage: 'Tune your search relevance' }
               ),
               children: (
-                <EuiText>
+                <EuiText color="subdued">
                   <p>
                     {i18n.translate(
                       'xpack.enterpriseSearch.overview.gettingStartedSteps.tuneSearchExperience.message',
                       {
                         defaultMessage:
-                          "Dive into analytics and tune the result settings to help your users find exactly what they're looking for",
+                          "Refine your search results by adjusting your search settings, including weighting certain fields or creating curations and synonyms. Then implement, measure, and dive into analytics to continue helping your users find exactly what they're looking for.",
                       }
                     )}
                   </p>

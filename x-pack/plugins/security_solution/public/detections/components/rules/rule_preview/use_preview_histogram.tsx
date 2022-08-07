@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useMemo } from 'react';
-import { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { useMatrixHistogramCombined } from '../../../../common/containers/matrix_histogram';
 import { MatrixHistogramType } from '../../../../../common/search_strategy';
@@ -37,7 +37,7 @@ export const usePreviewHistogram = ({
     config: getEsQueryConfig(uiSettings),
     indexPattern: {
       fields: [],
-      title: index.join(),
+      title: index == null ? '' : index.join(),
     },
     queries: [{ query: `kibana.alert.rule.uuid:${previewId}`, language: 'kuery' }],
     filters: [],

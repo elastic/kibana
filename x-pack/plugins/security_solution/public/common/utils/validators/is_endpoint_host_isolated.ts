@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HostMetadata } from '../../../../common/endpoint/types';
+import type { HostMetadata } from '../../../../common/endpoint/types';
 
 /**
  * Given an endpoint host metadata record (`HostMetadata`), this utility will validate if

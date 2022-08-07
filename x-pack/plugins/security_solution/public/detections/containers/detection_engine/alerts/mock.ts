@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { HostIsolationResponse } from '../../../../../common/endpoint/types/actions';
-import { AlertSearchResponse, AlertsIndex, Privilege, CasesFromAlertsResponse } from './types';
+import type { HostIsolationResponse } from '../../../../../common/endpoint/types/actions';
+import type { AlertSearchResponse, AlertsIndex, Privilege, CasesFromAlertsResponse } from './types';
 
 export const alertsMock: AlertSearchResponse<unknown, unknown> = {
   took: 7,
@@ -188,12 +188,7 @@ export const alertsMock: AlertSearchResponse<unknown, unknown> = {
               query: 'host.name : *',
               references: ['https://google.com'],
               severity: 'high',
-              tags: [
-                'host.name exists',
-                'for testing',
-                '__internal_rule_id:82b2b065-a2ee-49fc-9d6d-781a75c3d280',
-                '__internal_immutable:false',
-              ],
+              tags: ['host.name exists', 'for testing'],
               type: 'query',
               to: 'now',
               enabled: true,
@@ -428,12 +423,7 @@ export const alertsMock: AlertSearchResponse<unknown, unknown> = {
               query: 'host.name : *',
               references: ['https://google.com'],
               severity: 'high',
-              tags: [
-                'host.name exists',
-                'for testing',
-                '__internal_rule_id:82b2b065-a2ee-49fc-9d6d-781a75c3d280',
-                '__internal_immutable:false',
-              ],
+              tags: ['host.name exists', 'for testing'],
               type: 'query',
               to: 'now',
               enabled: true,
@@ -634,12 +624,7 @@ export const alertsMock: AlertSearchResponse<unknown, unknown> = {
               query: 'host.name : *',
               references: ['https://google.com'],
               severity: 'high',
-              tags: [
-                'host.name exists',
-                'for testing',
-                '__internal_rule_id:82b2b065-a2ee-49fc-9d6d-781a75c3d280',
-                '__internal_immutable:false',
-              ],
+              tags: ['host.name exists', 'for testing'],
               type: 'query',
               to: 'now',
               enabled: true,
@@ -838,12 +823,7 @@ export const alertsMock: AlertSearchResponse<unknown, unknown> = {
               query: 'host.name : *',
               references: ['https://google.com'],
               severity: 'high',
-              tags: [
-                'host.name exists',
-                'for testing',
-                '__internal_rule_id:82b2b065-a2ee-49fc-9d6d-781a75c3d280',
-                '__internal_immutable:false',
-              ],
+              tags: ['host.name exists', 'for testing'],
               type: 'query',
               to: 'now',
               enabled: true,
@@ -942,6 +922,24 @@ export const alertsMock: AlertSearchResponse<unknown, unknown> = {
         },
       ],
     },
+  },
+};
+
+export const alertMockEmptyResults: AlertSearchResponse<unknown, unknown> = {
+  took: 3,
+  timeout: false,
+  _shards: {
+    total: 1,
+    successful: 1,
+    skipped: 1,
+    failed: 0,
+  },
+  hits: {
+    total: {
+      value: 0,
+      relation: 'gte',
+    },
+    hits: [],
   },
 };
 

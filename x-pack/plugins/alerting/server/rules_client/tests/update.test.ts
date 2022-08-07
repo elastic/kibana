@@ -12,16 +12,16 @@ import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mock
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
-import { IntervalSchedule, InvalidatePendingApiKey } from '../../types';
+import { IntervalSchedule } from '../../types';
 import { RecoveredActionGroup } from '../../../common';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import { AlertingAuthorization } from '../../authorization/alerting_authorization';
-import { resolvable } from '../../test_utils';
 import { ActionsAuthorization, ActionsClient } from '@kbn/actions-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
+import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 
 jest.mock('@kbn/core/server/saved_objects/service/lib/utils', () => ({
   SavedObjectsUtils: {
@@ -29,6 +29,11 @@ jest.mock('@kbn/core/server/saved_objects/service/lib/utils', () => ({
   },
 }));
 
+jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
+  bulkMarkApiKeysForInvalidation: jest.fn(),
+}));
+
+const bulkMarkApiKeysForInvalidationMock = bulkMarkApiKeysForInvalidation as jest.Mock;
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
@@ -122,6 +127,7 @@ describe('update()', () => {
         isMissingSecrets: false,
         name: 'email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
     ]);
     rulesClientParams.getActionsClient.mockResolvedValue(actionsClient);
@@ -160,6 +166,7 @@ describe('update()', () => {
         isMissingSecrets: false,
         name: 'email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
       {
         id: '2',
@@ -175,6 +182,7 @@ describe('update()', () => {
         isMissingSecrets: false,
         name: 'email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
     ]);
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
@@ -234,15 +242,6 @@ describe('update()', () => {
           id: '2',
         },
       ],
-    });
-    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
-      id: '1',
-      type: 'api_key_pending_invalidation',
-      attributes: {
-        apiKeyId: '234',
-        createdAt: '2019-02-12T21:01:22.479Z',
-      },
-      references: [],
     });
     const result = await rulesClient.update({
       id: '1',
@@ -328,7 +327,8 @@ describe('update()', () => {
       namespace: 'default',
     });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
-    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(2);
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect(bulkMarkApiKeysForInvalidationMock).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toHaveLength(3);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][0]).toEqual('alert');
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][1]).toMatchInlineSnapshot(`
@@ -435,6 +435,7 @@ describe('update()', () => {
         isMissingSecrets: false,
         name: 'email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
       {
         id: '2',
@@ -450,6 +451,7 @@ describe('update()', () => {
         isMissingSecrets: false,
         name: 'another email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
       {
         id: 'preconfigured',
@@ -465,6 +467,7 @@ describe('update()', () => {
         isMissingSecrets: false,
         name: 'preconfigured email connector',
         isPreconfigured: true,
+        isDeprecated: false,
       },
     ]);
     actionsClient.isPreconfigured.mockReset();
@@ -869,24 +872,6 @@ describe('update()', () => {
         },
       ],
     });
-    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
-      id: '1',
-      type: 'api_key_pending_invalidation',
-      attributes: {
-        apiKeyId: '234',
-        createdAt: '2019-02-12T21:01:22.479Z',
-      },
-      references: [],
-    });
-    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
-      id: '1',
-      type: 'api_key_pending_invalidation',
-      attributes: {
-        apiKeyId: '234',
-        createdAt: '2019-02-12T21:01:22.479Z',
-      },
-      references: [],
-    });
     const result = await rulesClient.update({
       id: '1',
       data: {
@@ -936,7 +921,15 @@ describe('update()', () => {
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
-    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(2);
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect(bulkMarkApiKeysForInvalidationMock).toHaveBeenCalledTimes(1);
+    expect(bulkMarkApiKeysForInvalidationMock).toHaveBeenCalledWith(
+      {
+        apiKeys: ['MTIzOmFiYw=='],
+      },
+      expect.any(Object),
+      expect.any(Object)
+    );
     expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toHaveLength(3);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][0]).toEqual('alert');
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][1]).toMatchInlineSnapshot(`
@@ -1034,15 +1027,6 @@ describe('update()', () => {
         },
       ],
     });
-    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
-      id: '1',
-      type: 'api_key_pending_invalidation',
-      attributes: {
-        apiKeyId: '234',
-        createdAt: '2019-02-12T21:01:22.479Z',
-      },
-      references: [],
-    });
     const result = await rulesClient.update({
       id: '1',
       data: {
@@ -1093,7 +1077,7 @@ describe('update()', () => {
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
-    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(2);
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toHaveLength(3);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][0]).toEqual('alert');
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][1]).toMatchInlineSnapshot(`
@@ -1316,7 +1300,7 @@ describe('update()', () => {
         },
       ],
     });
-    unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('Fail')); // add ApiKey to invalidate
+    bulkMarkApiKeysForInvalidationMock.mockImplementationOnce(() => new Error('Fail'));
     await rulesClient.update({
       id: '1',
       data: {
@@ -1339,8 +1323,12 @@ describe('update()', () => {
         ],
       },
     });
-    expect(rulesClientParams.logger.error).toHaveBeenCalledWith(
-      'Failed to mark for API key [id="MTIzOmFiYw=="] for invalidation: Fail'
+    expect(bulkMarkApiKeysForInvalidationMock).toHaveBeenCalledWith(
+      {
+        apiKeys: ['MTIzOmFiYw=='],
+      },
+      expect.any(Object),
+      expect.any(Object)
     );
   });
 
@@ -1362,6 +1350,7 @@ describe('update()', () => {
         isMissingSecrets: false,
         name: 'email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
       {
         id: '2',
@@ -1377,6 +1366,7 @@ describe('update()', () => {
         isMissingSecrets: false,
         name: 'email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
     ]);
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
@@ -1508,9 +1498,14 @@ describe('update()', () => {
         },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail"`);
-    expect(
-      (unsecuredSavedObjectsClient.create.mock.calls[1][1] as InvalidatePendingApiKey).apiKeyId
-    ).toBe('234');
+    expect(bulkMarkApiKeysForInvalidationMock).toHaveBeenCalledTimes(1);
+    expect(bulkMarkApiKeysForInvalidationMock).toHaveBeenCalledWith(
+      {
+        apiKeys: ['MjM0OmFiYw=='],
+      },
+      expect.any(Object),
+      expect.any(Object)
+    );
   });
 
   describe('updating an alert schedule', () => {
@@ -1586,10 +1581,10 @@ describe('update()', () => {
         ],
       });
 
-      taskManager.runNow.mockReturnValueOnce(Promise.resolve({ id: alertId }));
+      taskManager.runSoon.mockReturnValueOnce(Promise.resolve({ id: alertId }));
     }
 
-    test('updating the alert schedule should rerun the task immediately', async () => {
+    test('updating the alert schedule should call taskManager.bulkUpdateSchedules', async () => {
       const alertId = uuid.v4();
       const taskId = uuid.v4();
 
@@ -1618,10 +1613,10 @@ describe('update()', () => {
         },
       });
 
-      expect(taskManager.runNow).toHaveBeenCalledWith(taskId);
+      expect(taskManager.bulkUpdateSchedules).toHaveBeenCalledWith([taskId], { interval: '1m' });
     });
 
-    test('updating the alert without changing the schedule should not rerun the task', async () => {
+    test('updating the alert without changing the schedule should not call taskManager.bulkUpdateSchedules', async () => {
       const alertId = uuid.v4();
       const taskId = uuid.v4();
 
@@ -1650,19 +1645,17 @@ describe('update()', () => {
         },
       });
 
-      expect(taskManager.runNow).not.toHaveBeenCalled();
+      expect(taskManager.bulkUpdateSchedules).not.toHaveBeenCalled();
     });
 
-    test('updating the alert should not wait for the rerun the task to complete', async () => {
+    test('logs when update of schedule of an alerts underlying task fails', async () => {
       const alertId = uuid.v4();
       const taskId = uuid.v4();
 
       mockApiCalls(alertId, taskId, { interval: '1m' }, { interval: '30s' });
 
-      const resolveAfterAlertUpdatedCompletes = resolvable<{ id: string }>();
-
-      taskManager.runNow.mockReset();
-      taskManager.runNow.mockReturnValue(resolveAfterAlertUpdatedCompletes);
+      taskManager.bulkUpdateSchedules.mockReset();
+      taskManager.bulkUpdateSchedules.mockRejectedValue(new Error('Failed to run alert'));
 
       await rulesClient.update({
         id: alertId,
@@ -1687,46 +1680,10 @@ describe('update()', () => {
         },
       });
 
-      expect(taskManager.runNow).toHaveBeenCalled();
-      resolveAfterAlertUpdatedCompletes.resolve({ id: alertId });
-    });
-
-    test('logs when the rerun of an alerts underlying task fails', async () => {
-      const alertId = uuid.v4();
-      const taskId = uuid.v4();
-
-      mockApiCalls(alertId, taskId, { interval: '1m' }, { interval: '30s' });
-
-      taskManager.runNow.mockReset();
-      taskManager.runNow.mockRejectedValue(new Error('Failed to run alert'));
-
-      await rulesClient.update({
-        id: alertId,
-        data: {
-          schedule: { interval: '1m' },
-          name: 'abc',
-          tags: ['foo'],
-          params: {
-            bar: true,
-          },
-          throttle: null,
-          notifyWhen: null,
-          actions: [
-            {
-              group: 'default',
-              id: '1',
-              params: {
-                foo: true,
-              },
-            },
-          ],
-        },
-      });
-
-      expect(taskManager.runNow).toHaveBeenCalled();
+      expect(taskManager.bulkUpdateSchedules).toHaveBeenCalled();
 
       expect(rulesClientParams.logger.error).toHaveBeenCalledWith(
-        `Alert update failed to run its underlying task. TaskManager runNow failed with Error: Failed to run alert`
+        `Rule update failed to run its underlying task. TaskManager bulkUpdateSchedules failed with Error: Failed to run alert`
       );
     });
   });
@@ -1749,6 +1706,7 @@ describe('update()', () => {
         isMissingSecrets: false,
         name: 'email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
       {
         id: '2',
@@ -1764,6 +1722,7 @@ describe('update()', () => {
         isMissingSecrets: true,
         name: 'another connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
     ]);
 
@@ -1826,6 +1785,7 @@ describe('update()', () => {
         isMissingSecrets: false,
         name: 'email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
       {
         id: '2',
@@ -1841,6 +1801,7 @@ describe('update()', () => {
         isMissingSecrets: false,
         name: 'email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
     ]);
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
@@ -1900,15 +1861,6 @@ describe('update()', () => {
           id: '2',
         },
       ],
-    });
-    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
-      id: '1',
-      type: 'api_key_pending_invalidation',
-      attributes: {
-        apiKeyId: '234',
-        createdAt: '2019-02-12T21:01:22.479Z',
-      },
-      references: [],
     });
     await rulesClient.update({
       id: '1',

@@ -28,11 +28,23 @@ export const MonitorStatusTranslations = {
       defaultMessage:
         'Monitor {monitorName} with url {monitorUrl} from {observerLocation} {statusMessage} The latest error message is {latestErrorMessage}',
       values: {
-        monitorName: '{{state.monitorName}}',
-        monitorUrl: '{{{state.monitorUrl}}}',
-        statusMessage: '{{{state.statusMessage}}}',
-        latestErrorMessage: '{{{state.latestErrorMessage}}}',
-        observerLocation: '{{state.observerLocation}}',
+        monitorName: '{{context.monitorName}}',
+        monitorUrl: '{{{context.monitorUrl}}}',
+        statusMessage: '{{{context.statusMessage}}}',
+        latestErrorMessage: '{{{context.latestErrorMessage}}}',
+        observerLocation: '{{context.observerLocation}}',
+      },
+    }
+  ),
+  defaultRecoveryMessage: i18n.translate(
+    'xpack.synthetics.alerts.monitorStatus.defaultRecoveryMessage',
+    {
+      defaultMessage:
+        'Alert for monitor {monitorName} with url {monitorUrl} from {observerLocation} has recovered',
+      values: {
+        monitorName: '{{context.monitorName}}',
+        monitorUrl: '{{{context.monitorUrl}}}',
+        observerLocation: '{{context.observerLocation}}',
       },
     }
   ),
@@ -46,13 +58,19 @@ export const MonitorStatusTranslations = {
 
 export const TlsTranslations = {
   defaultActionMessage: i18n.translate('xpack.synthetics.alerts.tls.defaultActionMessage', {
-    defaultMessage: `Detected TLS certificate {commonName} from issuer {issuer} is {status}. Certificate {summary}
-`,
+    defaultMessage: `Detected TLS certificate {commonName} from issuer {issuer} is {status}. Certificate {summary}`,
     values: {
-      commonName: '{{state.commonName}}',
-      issuer: '{{state.issuer}}',
-      summary: '{{state.summary}}',
-      status: '{{state.status}}',
+      commonName: '{{context.commonName}}',
+      issuer: '{{context.issuer}}',
+      summary: '{{context.summary}}',
+      status: '{{context.status}}',
+    },
+  }),
+  defaultRecoveryMessage: i18n.translate('xpack.synthetics.alerts.tls.defaultRecoveryMessage', {
+    defaultMessage: `Alert for TLS certificate {commonName} from issuer {issuer} has recovered`,
+    values: {
+      commonName: '{{context.commonName}}',
+      issuer: '{{context.issuer}}',
     },
   }),
   name: i18n.translate('xpack.synthetics.alerts.tls.clientName', {
@@ -103,14 +121,27 @@ export const DurationAnomalyTranslations = {
       defaultMessage: `Abnormal ({severity} level) response time detected on {monitor} with url {monitorUrl} at {anomalyStartTimestamp}. Anomaly severity score is {severityScore}.
 Response times as high as {slowestAnomalyResponse} have been detected from location {observerLocation}. Expected response time is {expectedResponseTime}.`,
       values: {
-        severity: '{{state.severity}}',
-        anomalyStartTimestamp: '{{state.anomalyStartTimestamp}}',
-        monitor: '{{state.monitor}}',
-        monitorUrl: '{{{state.monitorUrl}}}',
-        slowestAnomalyResponse: '{{state.slowestAnomalyResponse}}',
-        expectedResponseTime: '{{state.expectedResponseTime}}',
-        severityScore: '{{state.severityScore}}',
-        observerLocation: '{{state.observerLocation}}',
+        severity: '{{context.severity}}',
+        anomalyStartTimestamp: '{{context.anomalyStartTimestamp}}',
+        monitor: '{{context.monitor}}',
+        monitorUrl: '{{{context.monitorUrl}}}',
+        slowestAnomalyResponse: '{{context.slowestAnomalyResponse}}',
+        expectedResponseTime: '{{context.expectedResponseTime}}',
+        severityScore: '{{context.severityScore}}',
+        observerLocation: '{{context.observerLocation}}',
+      },
+    }
+  ),
+  defaultRecoveryMessage: i18n.translate(
+    'xpack.synthetics.alerts.durationAnomaly.defaultRecoveryMessage',
+    {
+      defaultMessage: `Alert for abnormal ({severity} level) response time detected on monitor {monitor} with url {monitorUrl} from location {observerLocation} at {anomalyStartTimestamp} has recovered`,
+      values: {
+        severity: '{{context.severity}}',
+        anomalyStartTimestamp: '{{context.anomalyStartTimestamp}}',
+        monitor: '{{context.monitor}}',
+        monitorUrl: '{{{context.monitorUrl}}}',
+        observerLocation: '{{context.observerLocation}}',
       },
     }
   ),

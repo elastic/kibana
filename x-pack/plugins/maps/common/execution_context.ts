@@ -6,9 +6,14 @@
  */
 
 import { isUndefined, omitBy } from 'lodash';
+import type { KibanaExecutionContext } from '@kbn/core/public';
 import { APP_ID } from './constants';
 
-export function makeExecutionContext(context: { id?: string; url?: string; description?: string }) {
+export function makeExecutionContext(context: {
+  id?: string;
+  url?: string;
+  description?: string;
+}): KibanaExecutionContext {
   return omitBy(
     {
       name: APP_ID,

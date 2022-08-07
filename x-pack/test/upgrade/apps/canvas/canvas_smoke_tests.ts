@@ -14,7 +14,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
 
-  describe('canvas smoke tests', function describeIndexTests() {
+  describe('upgrade canvas smoke tests', function describeIndexTests() {
     const spaces = [
       { space: 'default', basePath: '' },
       { space: 'automation', basePath: 's/automation' },
@@ -28,25 +28,27 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     ];
 
     spaces.forEach(({ space, basePath }) => {
-      describe('space ' + space, () => {
-        beforeEach(async () => {
-          await PageObjects.common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
-            basePath,
-          });
-          await PageObjects.header.waitUntilLoadingHasFinished();
-        });
-        canvasTests.forEach(({ name, numElements, page }) => {
-          it('renders elements on workpad ' + name + ' page ' + page, async () => {
+      canvasTests.forEach(({ name, numElements, page }) => {
+        describe('space: ' + space, () => {
+          before(async () => {
+            await PageObjects.common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
+              basePath,
+            });
+            await PageObjects.header.waitUntilLoadingHasFinished();
             await PageObjects.home.launchSampleCanvas(name);
             await PageObjects.header.waitUntilLoadingHasFinished();
-            const currentUrl = await browser.getCurrentUrl();
-            const [, hash] = currentUrl.split('#/');
-            if (hash.length === 0) {
+          });
+          it('renders elements on workpad ' + name + ' page ' + page, async () => {
+            const browserUrl = await browser.getCurrentUrl();
+            const currentUrl = new URL(browserUrl);
+            const pathname = currentUrl.pathname;
+            const hash = currentUrl.hash;
+            if (hash.length === 0 && pathname.replace(/\/$/, '') === basePath + '/app/canvas') {
               throw new Error('Did not launch canvas sample data for ' + name);
             }
             if (name === 'ecommerce') {
-              if (!currentUrl.includes('page/' + page)) {
-                await browser.get(currentUrl.replace(/\/[^\/]*$/, '/' + page), false);
+              if (!browserUrl.includes('page/' + page)) {
+                await browser.get(browserUrl.replace(/\/[^\/]*$/, '/' + page), false);
                 await PageObjects.header.waitUntilLoadingHasFinished();
               }
             }

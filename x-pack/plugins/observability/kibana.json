@@ -30,7 +30,9 @@
     "timelines",
     "triggersActionsUi",
     "inspector",
-    "unifiedSearch"
+    "unifiedSearch",
+    "sharedUX",
+    "security"
   ],
   "ui": true,
   "server": true,
@@ -41,7 +43,8 @@
     "embeddable",
     "kibanaReact",
     "kibanaUtils",
-    "lens"
+    "lens",
+    "usageCollection"
   ],
   "extraPublicDirs": [
     "common"

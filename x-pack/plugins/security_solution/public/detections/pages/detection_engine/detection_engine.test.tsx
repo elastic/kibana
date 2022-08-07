@@ -20,7 +20,8 @@ import {
 import { DetectionEnginePage } from './detection_engine';
 import { useUserData } from '../../components/user_info';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
-import { createStore, State } from '../../../common/store';
+import type { State } from '../../../common/store';
+import { createStore } from '../../../common/store';
 import { mockHistory, Router } from '../../../common/mock/router';
 import { mockTimelines } from '../../../common/mock/mock_timelines_plugin';
 import { mockBrowserFields } from '../../../common/containers/source/mock';
@@ -55,10 +56,6 @@ jest.mock('react-router-dom', () => {
     useHistory: jest.fn(),
   };
 });
-jest.mock('../../components/alerts_info', () => ({
-  useAlertInfo: jest.fn().mockReturnValue([]),
-}));
-
 jest.mock('../../../common/lib/kibana', () => {
   const original = jest.requireActual('../../../common/lib/kibana');
 
@@ -92,12 +89,17 @@ jest.mock('../../../common/lib/kibana', () => {
             },
           },
         },
+        storage: {
+          get: jest.fn(),
+          set: jest.fn(),
+        },
       },
     }),
     useToasts: jest.fn().mockReturnValue({
       addError: jest.fn(),
       addSuccess: jest.fn(),
       addWarning: jest.fn(),
+      remove: jest.fn(),
     }),
   };
 });
@@ -135,6 +137,20 @@ describe('DetectionEnginePageComponent', () => {
     );
     await waitFor(() => {
       expect(wrapper.find('FiltersGlobal').exists()).toBe(true);
+    });
+  });
+
+  it('renders the chart panels', async () => {
+    const wrapper = mount(
+      <TestProviders store={store}>
+        <Router history={mockHistory}>
+          <DetectionEnginePage />
+        </Router>
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="chartPanels"]').exists()).toBe(true);
     });
   });
 });

@@ -11,6 +11,7 @@ export type {
   DataViewBase,
   DataViewFieldBase,
   EsQueryConfig,
+  EsQueryFiltersConfig,
   IFieldSubType,
   IFieldSubTypeMulti,
   IFieldSubTypeNested,
@@ -28,12 +29,14 @@ export type {
   PhraseFilter,
   PhrasesFilter,
   Query,
+  AggregateQuery,
   QueryStringFilter,
   RangeFilter,
   RangeFilterMeta,
   RangeFilterParams,
   ScriptedPhraseFilter,
   ScriptedRangeFilter,
+  TimeRange,
 } from './filters';
 
 export type {
@@ -42,7 +45,6 @@ export type {
   KueryNode,
   KueryParseOptions,
   KueryQueryOptions,
-  NodeTypes,
 } from './kuery';
 
 export {
@@ -51,6 +53,10 @@ export {
   decorateQuery,
   luceneStringToDsl,
   migrateFilter,
+  isOfQueryType,
+  isOfAggregateQueryType,
+  getAggregateQueryMode,
+  getIndexPatternFromSQLQuery,
 } from './es_query';
 
 export {
@@ -96,6 +102,9 @@ export {
   toggleFilterPinned,
   uniqFilters,
   unpinFilter,
+  extractTimeFilter,
+  extractTimeRange,
+  convertRangeFilterToTimeRange,
 } from './filters';
 
 export {

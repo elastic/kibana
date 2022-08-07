@@ -10,13 +10,8 @@ import React, { useMemo, useCallback } from 'react';
 import { findLast } from 'lodash';
 import { EuiSpacer } from '@elastic/eui';
 
-import {
-  AggGroupNames,
-  IAggConfig,
-  IMetricAggType,
-  search,
-  TimeRange,
-} from '@kbn/data-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
+import { AggGroupNames, IAggConfig, IMetricAggType, search } from '@kbn/data-plugin/public';
 import type { ISchemas } from '@kbn/visualizations-plugin/public';
 import { DefaultEditorAggGroup } from '../agg_group';
 import {

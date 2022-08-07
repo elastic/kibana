@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react'
 import { i18n } from '@kbn/i18n';
 import datemath from '@kbn/datemath';
 import {
-  EuiDataGrid,
+  EuiFieldSearch,
   EuiFlexItem,
   EuiFlexGroup,
   EuiProgress,
@@ -17,22 +17,20 @@ import {
   EuiDataGridSorting,
   Pagination,
   EuiSuperDatePicker,
-  EuiDataGridCellValueElementProps,
   OnTimeChangeProps,
 } from '@elastic/eui';
-import {
-  IExecutionLog,
-  executionLogSortableColumns,
-  ExecutionLogSortFields,
-} from '@kbn/alerting-plugin/common';
+import { IExecutionLog } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
-import { RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS } from '../../../constants';
+import { RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS, LOCKED_COLUMNS } from '../../../constants';
 import { RuleEventLogListStatusFilter } from './rule_event_log_list_status_filter';
-import { RuleEventLogListCellRenderer, ColumnId } from './rule_event_log_list_cell_renderer';
+import { RuleEventLogDataGrid } from './rule_event_log_data_grid';
+import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
+import { RuleExecutionSummaryAndChartWithApi } from './rule_execution_summary_and_chart';
+import { RuleActionErrorLogFlyout } from './rule_action_error_log_flyout';
 
 import { RefineSearchPrompt } from '../refine_search_prompt';
 import { LoadExecutionLogAggregationsProps } from '../../../lib/rule_api';
-import { Rule } from '../../../../types';
+import { Rule, RuleSummary, RuleType } from '../../../../types';
 import {
   ComponentOpts as RuleApis,
   withBulkRuleOperations,
@@ -45,176 +43,6 @@ const getParsedDate = (date: string) => {
   return date;
 };
 
-const getIsColumnSortable = (columnId: string) => {
-  return executionLogSortableColumns.includes(columnId as ExecutionLogSortFields);
-};
-
-const columns = [
-  {
-    id: 'id',
-    displayAsText: i18n.translate(
-      'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.id',
-      {
-        defaultMessage: 'Id',
-      }
-    ),
-    isSortable: getIsColumnSortable('id'),
-  },
-  {
-    id: 'timestamp',
-    displayAsText: i18n.translate(
-      'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.timestamp',
-      {
-        defaultMessage: 'Timestamp',
-      }
-    ),
-    isSortable: getIsColumnSortable('timestamp'),
-    initialWidth: 250,
-  },
-  {
-    id: 'execution_duration',
-    displayAsText: i18n.translate(
-      'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.duration',
-      {
-        defaultMessage: 'Duration',
-      }
-    ),
-    isSortable: getIsColumnSortable('execution_duration'),
-    initialWidth: 100,
-  },
-  {
-    id: 'status',
-    displayAsText: i18n.translate(
-      'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.status',
-      {
-        defaultMessage: 'Status',
-      }
-    ),
-    isSortable: getIsColumnSortable('status'),
-    initialWidth: 100,
-  },
-  {
-    id: 'message',
-    displayAsText: i18n.translate(
-      'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.message',
-      {
-        defaultMessage: 'Message',
-      }
-    ),
-    isSortable: getIsColumnSortable('message'),
-  },
-  {
-    id: 'num_active_alerts',
-    displayAsText: i18n.translate(
-      'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.activeAlerts',
-      {
-        defaultMessage: 'Active alerts',
-      }
-    ),
-    isSortable: getIsColumnSortable('num_active_alerts'),
-  },
-  {
-    id: 'num_new_alerts',
-    displayAsText: i18n.translate(
-      'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.newAlerts',
-      {
-        defaultMessage: 'New alerts',
-      }
-    ),
-    isSortable: getIsColumnSortable('num_new_alerts'),
-  },
-  {
-    id: 'num_recovered_alerts',
-    displayAsText: i18n.translate(
-      'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.recoveredAlerts',
-      {
-        defaultMessage: 'Recovered alerts',
-      }
-    ),
-    isSortable: getIsColumnSortable('num_recovered_alerts'),
-  },
-  {
-    id: 'num_triggered_actions',
-    displayAsText: i18n.translate(
-      'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.triggeredActions',
-      {
-        defaultMessage: 'Triggered actions',
-      }
-    ),
-    isSortable: getIsColumnSortable('num_triggered_actions'),
-  },
-  {
-    id: 'num_generated_actions',
-    displayAsText: i18n.translate(
-      'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.scheduledActions',
-      {
-        defaultMessage: 'Generated actions',
-      }
-    ),
-    isSortable: getIsColumnSortable('num_generated_actions'),
-  },
-  {
-    id: 'num_succeeded_actions',
-    displayAsText: i18n.translate(
-      'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.succeededActions',
-      {
-        defaultMessage: 'Succeeded actions',
-      }
-    ),
-    isSortable: getIsColumnSortable('num_succeeded_actions'),
-  },
-  {
-    id: 'num_errored_actions',
-    displayAsText: i18n.translate(
-      'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.erroredActions',
-      {
-        defaultMessage: 'Errored actions',
-      }
-    ),
-    isSortable: getIsColumnSortable('num_errored_actions'),
-  },
-  {
-    id: 'total_search_duration',
-    displayAsText: i18n.translate(
-      'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.totalSearchDuration',
-      {
-        defaultMessage: 'Total search duration',
-      }
-    ),
-    isSortable: getIsColumnSortable('total_search_duration'),
-  },
-  {
-    id: 'es_search_duration',
-    displayAsText: i18n.translate(
-      'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.esSearchDuration',
-      {
-        defaultMessage: 'ES search duration',
-      }
-    ),
-    isSortable: getIsColumnSortable('es_search_duration'),
-  },
-  {
-    id: 'schedule_delay',
-    displayAsText: i18n.translate(
-      'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.scheduleDelay',
-      {
-        defaultMessage: 'Schedule delay',
-      }
-    ),
-    isSortable: getIsColumnSortable('schedule_delay'),
-  },
-  {
-    id: 'timed_out',
-    displayAsText: i18n.translate(
-      'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.timedOut',
-      {
-        defaultMessage: 'Timed out',
-      }
-    ),
-    isSortable: getIsColumnSortable('timed_out'),
-  },
-];
-
 const API_FAILED_MESSAGE = i18n.translate(
   'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.apiError',
   {
@@ -222,42 +50,93 @@ const API_FAILED_MESSAGE = i18n.translate(
   }
 );
 
+const SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.searchPlaceholder',
+  {
+    defaultMessage: 'Search event log message',
+  }
+);
+
 const RULE_EVENT_LOG_LIST_STORAGE_KEY = 'xpack.triggersActionsUI.ruleEventLogList.initialColumns';
 
-const PAGE_SIZE_OPTION = [10, 50, 100];
+const getDefaultColumns = (columns: string[]) => {
+  const columnsWithoutLockedColumn = columns.filter((column) => !LOCKED_COLUMNS.includes(column));
+  return [...LOCKED_COLUMNS, ...columnsWithoutLockedColumn];
+};
 
 const updateButtonProps = {
   iconOnly: true,
   fill: false,
 };
 
-export type RuleEventLogListProps = {
+const MAX_RESULTS = 1000;
+
+const ruleEventListContainerStyle = { minHeight: 400 };
+
+export type RuleEventLogListOptions = 'stackManagement' | 'default';
+
+export interface RuleEventLogListCommonProps {
   rule: Rule;
+  ruleType: RuleType;
   localStorageKey?: string;
   refreshToken?: number;
   requestRefresh?: () => Promise<void>;
-} & Pick<RuleApis, 'loadExecutionLogAggregations'>;
+  loadExecutionLogAggregations?: RuleApis['loadExecutionLogAggregations'];
+  fetchRuleSummary?: boolean;
+}
 
-export const RuleEventLogList = (props: RuleEventLogListProps) => {
+export interface RuleEventLogListStackManagementProps {
+  ruleSummary: RuleSummary;
+  onChangeDuration: (duration: number) => void;
+  numberOfExecutions: number;
+  isLoadingRuleSummary?: boolean;
+}
+
+export type RuleEventLogListProps<T extends RuleEventLogListOptions = 'default'> =
+  T extends 'default'
+    ? RuleEventLogListCommonProps
+    : T extends 'stackManagement'
+    ? RuleEventLogListStackManagementProps & RuleEventLogListCommonProps
+    : never;
+
+export const RuleEventLogList = <T extends RuleEventLogListOptions>(
+  props: RuleEventLogListProps<T>
+) => {
   const {
     rule,
+    ruleType,
     localStorageKey = RULE_EVENT_LOG_LIST_STORAGE_KEY,
-    loadExecutionLogAggregations,
     refreshToken,
+    requestRefresh,
+    fetchRuleSummary = true,
+    loadExecutionLogAggregations,
   } = props;
+
+  const {
+    ruleSummary,
+    numberOfExecutions,
+    onChangeDuration,
+    isLoadingRuleSummary = false,
+  } = props as RuleEventLogListStackManagementProps;
 
   const { uiSettings, notifications } = useKibana().services;
 
+  const [searchText, setSearchText] = useState<string>('');
+  const [search, setSearch] = useState<string>('');
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState<boolean>(false);
+  const [selectedRunLog, setSelectedRunLog] = useState<IExecutionLog | undefined>();
+
   // Data grid states
-  const [logs, setLogs] = useState<IExecutionLog[]>([]);
+  const [logs, setLogs] = useState<IExecutionLog[]>();
   const [visibleColumns, setVisibleColumns] = useState<string[]>(() => {
-    return (
+    return getDefaultColumns(
       JSON.parse(localStorage.getItem(localStorageKey) ?? 'null') ||
-      RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS
+        RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS
     );
   });
   const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([]);
   const [filter, setFilter] = useState<string[]>([]);
+  const [actualTotalItemCount, setActualTotalItemCount] = useState<number>(0);
   const [pagination, setPagination] = useState<Pagination>({
     pageIndex: 0,
     pageSize: 10,
@@ -283,29 +162,10 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
 
   const isInitialized = useRef(false);
 
-  // Main cell renderer, renders durations, statuses, etc.
-  const renderCell = ({ rowIndex, columnId }: EuiDataGridCellValueElementProps) => {
+  const isOnLastPage = useMemo(() => {
     const { pageIndex, pageSize } = pagination;
-    const pagedRowIndex = rowIndex - pageIndex * pageSize;
-
-    const value = logs?.[pagedRowIndex]?.[columnId as keyof IExecutionLog] as string;
-    return (
-      <RuleEventLogListCellRenderer
-        columnId={columnId as ColumnId}
-        value={value}
-        dateFormat={dateFormat}
-      />
-    );
-  };
-
-  // Computed data grid props
-  const sortingProps = useMemo(
-    () => ({
-      onSort: setSortingColumns,
-      columns: sortingColumns,
-    }),
-    [sortingColumns]
-  );
+    return (pageIndex + 1) * pageSize >= MAX_RESULTS;
+  }, [pagination]);
 
   // Formats the sort columns to be consumed by the API endpoint
   const formattedSort = useMemo(() => {
@@ -317,12 +177,16 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
   }, [sortingColumns]);
 
   const loadEventLogs = async () => {
+    if (!loadExecutionLogAggregations) {
+      return;
+    }
     setIsLoading(true);
     try {
       const result = await loadExecutionLogAggregations({
         id: rule.id,
         sort: formattedSort as LoadExecutionLogAggregationsProps['sort'],
-        filter,
+        outcomeFilter: filter,
+        message: searchText,
         dateStart: getParsedDate(dateStart),
         dateEnd: getParsedDate(dateEnd),
         page: pagination.pageIndex,
@@ -331,8 +195,9 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
       setLogs(result.data);
       setPagination({
         ...pagination,
-        totalItemCount: result.total,
+        totalItemCount: Math.min(result.total, MAX_RESULTS),
       });
+      setActualTotalItemCount(result.total);
     } catch (e) {
       notifications.toasts.addDanger({
         title: API_FAILED_MESSAGE,
@@ -363,24 +228,6 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
     [setPagination]
   );
 
-  const paginationProps = useMemo(
-    () => ({
-      ...pagination,
-      pageSizeOptions: PAGE_SIZE_OPTION,
-      onChangeItemsPerPage,
-      onChangePage,
-    }),
-    [pagination, onChangeItemsPerPage, onChangePage]
-  );
-
-  const columnVisibilityProps = useMemo(
-    () => ({
-      visibleColumns,
-      setVisibleColumns,
-    }),
-    [visibleColumns, setVisibleColumns]
-  );
-
   const onTimeChange = useCallback(
     ({ start, end, isInvalid }: OnTimeChangeProps) => {
       if (isInvalid) {
@@ -407,10 +254,74 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
     [setPagination, setFilter]
   );
 
+  const onFlyoutOpen = useCallback((runLog: IExecutionLog) => {
+    setIsFlyoutOpen(true);
+    setSelectedRunLog(runLog);
+  }, []);
+
+  const onFlyoutClose = useCallback(() => {
+    setIsFlyoutOpen(false);
+    setSelectedRunLog(undefined);
+  }, []);
+
+  const onSearchChange = useCallback(
+    (e) => {
+      if (e.target.value === '') {
+        setSearchText('');
+      }
+      setSearch(e.target.value);
+    },
+    [setSearchText, setSearch]
+  );
+
+  const onKeyUp = useCallback(
+    (e) => {
+      if (e.key === 'Enter') {
+        setSearchText(search);
+      }
+    },
+    [search, setSearchText]
+  );
+
+  const renderList = () => {
+    if (!logs) {
+      return <CenterJustifiedSpinner />;
+    }
+    return (
+      <>
+        {isLoading && (
+          <EuiProgress size="xs" color="accent" data-test-subj="ruleEventLogListProgressBar" />
+        )}
+        <RuleEventLogDataGrid
+          logs={logs}
+          pagination={pagination}
+          sortingColumns={sortingColumns}
+          visibleColumns={visibleColumns}
+          dateFormat={dateFormat}
+          selectedRunLog={selectedRunLog}
+          onChangeItemsPerPage={onChangeItemsPerPage}
+          onChangePage={onChangePage}
+          onFlyoutOpen={onFlyoutOpen}
+          onFilterChange={setFilter}
+          setVisibleColumns={setVisibleColumns}
+          setSortingColumns={setSortingColumns}
+        />
+      </>
+    );
+  };
+
   useEffect(() => {
     loadEventLogs();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sortingColumns, dateStart, dateEnd, filter, pagination.pageIndex, pagination.pageSize]);
+  }, [
+    sortingColumns,
+    dateStart,
+    dateEnd,
+    filter,
+    pagination.pageIndex,
+    pagination.pageSize,
+    searchText,
+  ]);
 
   useEffect(() => {
     if (isInitialized.current) {
@@ -425,9 +336,30 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
   }, [localStorageKey, visibleColumns]);
 
   return (
-    <div>
+    <div style={ruleEventListContainerStyle} data-test-subj="ruleEventLogListContainer">
       <EuiSpacer />
+      <RuleExecutionSummaryAndChartWithApi
+        rule={rule}
+        ruleType={ruleType}
+        ruleSummary={ruleSummary}
+        numberOfExecutions={numberOfExecutions}
+        isLoadingRuleSummary={isLoadingRuleSummary}
+        refreshToken={refreshToken}
+        onChangeDuration={onChangeDuration}
+        requestRefresh={requestRefresh}
+        fetchRuleSummary={fetchRuleSummary}
+      />
       <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiFieldSearch
+            fullWidth
+            isClearable
+            value={search}
+            onChange={onSearchChange}
+            onKeyUp={onKeyUp}
+            placeholder={SEARCH_PLACEHOLDER}
+          />
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <RuleEventLogListStatusFilter selectedOptions={filter} onChange={onFilterChange} />
         </EuiFlexItem>
@@ -447,23 +379,22 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
-      {isLoading && (
-        <EuiProgress size="xs" color="accent" data-test-subj="ruleEventLogListProgressBar" />
+      {renderList()}
+      {isOnLastPage && (
+        <RefineSearchPrompt
+          documentSize={actualTotalItemCount}
+          visibleDocumentSize={MAX_RESULTS}
+          backToTopAnchor="rule_event_log_list"
+        />
       )}
-      <EuiDataGrid
-        aria-label="rule event log"
-        data-test-subj="ruleEventLogList"
-        columns={columns}
-        rowCount={pagination.totalItemCount}
-        renderCellValue={renderCell}
-        columnVisibility={columnVisibilityProps}
-        sorting={sortingProps}
-        pagination={paginationProps}
-      />
-      <RefineSearchPrompt
-        documentSize={pagination.totalItemCount}
-        backToTopAnchor="rule_event_log_list"
-      />
+      {isFlyoutOpen && selectedRunLog && (
+        <RuleActionErrorLogFlyout
+          rule={rule}
+          runLog={selectedRunLog}
+          refreshToken={refreshToken}
+          onClose={onFlyoutClose}
+        />
+      )}
     </div>
   );
 };

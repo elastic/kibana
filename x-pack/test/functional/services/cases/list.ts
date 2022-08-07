@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { CaseStatuses } from '@kbn/cases-plugin/common';
+import { CaseSeverityWithAll } from '@kbn/cases-plugin/common/ui';
 import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -126,6 +127,11 @@ export function CasesTableServiceProvider({ getService, getPageObject }: FtrProv
       await testSubjects.click(`case-status-filter-${status}`);
     },
 
+    async filterBySeverity(severity: CaseSeverityWithAll) {
+      await common.clickAndValidate('case-severity-filter', `case-severity-filter-${severity}`);
+      await testSubjects.click(`case-severity-filter-${severity}`);
+    },
+
     async filterByReporter(reporter: string) {
       await common.clickAndValidate(
         'options-filter-popover-button-Reporter',
@@ -133,6 +139,15 @@ export function CasesTableServiceProvider({ getService, getPageObject }: FtrProv
       );
 
       await testSubjects.click(`options-filter-popover-item-${reporter}`);
+    },
+
+    async filterByOwner(owner: string) {
+      await common.clickAndValidate(
+        'options-filter-popover-button-Solution',
+        `options-filter-popover-item-${owner}`
+      );
+
+      await testSubjects.click(`options-filter-popover-item-${owner}`);
     },
 
     async refreshTable() {

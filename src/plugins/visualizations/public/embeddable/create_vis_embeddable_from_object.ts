@@ -50,7 +50,11 @@ export const createVisEmbeddableFromObject =
       let indexPatterns: DataView[] = [];
 
       if (vis.type.getUsedIndexPattern) {
-        indexPatterns = await vis.type.getUsedIndexPattern(vis.params);
+        try {
+          indexPatterns = await vis.type.getUsedIndexPattern(vis.params);
+        } catch (e) {
+          // nothing to be here
+        }
       } else if (vis.data.indexPattern) {
         indexPatterns = [vis.data.indexPattern];
       }

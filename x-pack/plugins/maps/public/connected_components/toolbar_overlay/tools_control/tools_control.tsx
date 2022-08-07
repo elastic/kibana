@@ -226,6 +226,7 @@ export class ToolsControl extends Component<Props, State> {
         closePopover={this._closePopover}
         panelPaddingSize="none"
         anchorPosition="leftUp"
+        data-test-subj="mapToolsControlPopover"
       >
         <EuiContextMenu initialPanelId={0} panels={this._getDrawPanels()} />
       </EuiPopover>

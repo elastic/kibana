@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import type { Capabilities, HttpSetup, ThemeServiceStart } from '@kbn/core/public';
+import type {
+  Capabilities,
+  HttpSetup,
+  IUiSettingsClient,
+  ThemeServiceStart,
+} from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { Ast } from '@kbn/interpreter';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { FilterManager, TimefilterContract } from '@kbn/data-plugin/public';
+import { DataPublicPluginStart, FilterManager, TimefilterContract } from '@kbn/data-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
 import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
@@ -26,6 +31,7 @@ import { extract, inject } from '../../common/embeddable_factory';
 import { DatasourceMap, VisualizationMap } from '../types';
 
 export interface LensEmbeddableStartServices {
+  data: DataPublicPluginStart;
   timefilter: TimefilterContract;
   coreHttp: HttpSetup;
   inspector: InspectorStart;
@@ -43,6 +49,7 @@ export interface LensEmbeddableStartServices {
   datasourceMap: DatasourceMap;
   spaces?: SpacesPluginStart;
   theme: ThemeServiceStart;
+  uiSettings: IUiSettingsClient;
 }
 
 export class EmbeddableFactory implements EmbeddableFactoryDefinition {
@@ -85,6 +92,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
 
   async create(input: LensEmbeddableInput, parent?: IContainer) {
     const {
+      data,
       timefilter,
       expressionRenderer,
       documentToExpression,
@@ -100,6 +108,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
       theme,
       inspector,
       spaces,
+      uiSettings,
     } = await this.getStartServices();
 
     const { Embeddable } = await import('../async_services');
@@ -107,6 +116,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
     return new Embeddable(
       {
         attributeService,
+        data,
         indexPatternService,
         timefilter,
         inspector,
@@ -127,6 +137,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
         usageCollection,
         theme,
         spaces,
+        uiSettings,
       },
       input,
       parent

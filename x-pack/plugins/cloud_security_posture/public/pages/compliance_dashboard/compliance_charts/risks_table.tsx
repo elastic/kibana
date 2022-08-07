@@ -8,68 +8,30 @@
 import React, { useMemo } from 'react';
 import {
   EuiBasicTable,
+  EuiBasicTableColumn,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
   EuiText,
 } from '@elastic/eui';
-import { ComplianceDashboardData, ResourceType } from '../../../../common/types';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { ComplianceDashboardData, GroupedFindingsEvaluation } from '../../../../common/types';
 import { CompactFormattedNumber } from '../../../components/compact_formatted_number';
-import * as TEXT from '../translations';
-import { INTERNAL_FEATURE_FLAGS } from '../../../../common/constants';
-
-const mockData = [
-  {
-    name: 'pods',
-    totalFindings: 2,
-    totalPassed: 1,
-    totalFailed: 1,
-  },
-  {
-    name: 'etcd',
-    totalFindings: 5,
-    totalPassed: 0,
-    totalFailed: 5,
-  },
-  {
-    name: 'cluster',
-    totalFindings: 2,
-    totalPassed: 2,
-    totalFailed: 0,
-  },
-  {
-    name: 'system',
-    totalFindings: 10,
-    totalPassed: 6,
-    totalFailed: 4,
-  },
-  {
-    name: 'api',
-    totalFindings: 19100,
-    totalPassed: 2100,
-    totalFailed: 17000,
-  },
-  {
-    name: 'server',
-    totalFindings: 7,
-    totalPassed: 4,
-    totalFailed: 3,
-  },
-];
 
 export interface RisksTableProps {
-  data: ComplianceDashboardData['resourcesTypes'];
+  data: ComplianceDashboardData['groupedFindingsEvaluation'];
   maxItems: number;
-  onCellClick: (resourceTypeName: string) => void;
+  onCellClick: (name: string) => void;
   onViewAllClick: () => void;
 }
 
 export const getTopRisks = (
-  resourcesTypes: ComplianceDashboardData['resourcesTypes'],
+  groupedFindingsEvaluation: ComplianceDashboardData['groupedFindingsEvaluation'],
   maxItems: number
 ) => {
-  const filtered = resourcesTypes.filter((x) => x.totalFailed > 0);
+  const filtered = groupedFindingsEvaluation.filter((x) => x.totalFailed > 0);
   const sorted = filtered.slice().sort((first, second) => second.totalFailed - first.totalFailed);
 
   return sorted.slice(0, maxItems);
@@ -81,19 +43,29 @@ export const RisksTable = ({
   onCellClick,
   onViewAllClick,
 }: RisksTableProps) => {
-  const columns = useMemo(
+  const columns: Array<EuiBasicTableColumn<GroupedFindingsEvaluation>> = useMemo(
     () => [
       {
         field: 'name',
-        name: TEXT.RESOURCE_TYPE,
-        render: (resourceTypeName: ResourceType['name']) => (
-          <EuiLink onClick={() => onCellClick(resourceTypeName)}>{resourceTypeName}</EuiLink>
+        truncateText: true,
+        name: i18n.translate('xpack.csp.dashboard.risksTable.cisSectionColumnLabel', {
+          defaultMessage: 'CIS Section',
+        }),
+        render: (name: GroupedFindingsEvaluation['name']) => (
+          <EuiLink onClick={() => onCellClick(name)} className="eui-textTruncate">
+            {name}
+          </EuiLink>
         ),
       },
       {
         field: 'totalFailed',
-        name: TEXT.FINDINGS,
-        render: (totalFailed: ResourceType['totalFailed'], resource: ResourceType) => (
+        name: i18n.translate('xpack.csp.dashboard.risksTable.findingsColumnLabel', {
+          defaultMessage: 'Findings',
+        }),
+        render: (
+          totalFailed: GroupedFindingsEvaluation['totalFailed'],
+          resource: GroupedFindingsEvaluation
+        ) => (
           <>
             <EuiText size="s" color="danger">
               <CompactFormattedNumber number={resource.totalFailed} />
@@ -114,9 +86,9 @@ export const RisksTable = ({
   return (
     <EuiFlexGroup direction="column" justifyContent="spaceBetween" gutterSize="s">
       <EuiFlexItem>
-        <EuiBasicTable<ResourceType>
+        <EuiBasicTable<GroupedFindingsEvaluation>
           rowHeader="name"
-          items={INTERNAL_FEATURE_FLAGS.showRisksMock ? getTopRisks(mockData, maxItems) : items}
+          items={items}
           columns={columns}
         />
       </EuiFlexItem>
@@ -124,7 +96,10 @@ export const RisksTable = ({
         <EuiFlexGroup justifyContent="center" gutterSize="none">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty onClick={onViewAllClick} iconType="search">
-              {TEXT.VIEW_ALL_FAILED_FINDINGS}
+              <FormattedMessage
+                id="xpack.csp.dashboard.risksTable.viewAllButtonTitle"
+                defaultMessage="View all failed findings"
+              />
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>

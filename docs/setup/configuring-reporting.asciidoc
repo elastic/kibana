@@ -41,12 +41,8 @@ If you are using Ubuntu/Debian systems, install the following packages:
 * `libfontconfig1`
 * `libnss3`
 
-If the system is missing dependencies, a screenshot report job may fail in a non-deterministic way. {kib} runs a self-test at server startup, and
-if it encounters errors, logs them in the Console. The error message does not include
-information about why Chromium failed to run. The most common error message is `Error: connect ECONNREFUSED`, which indicates
-that {kib} could not connect to the Chromium process.
-
-To troubleshoot the problem, start the {kib} server with environment variables that tell Chromium to print verbose logs. For more information, refer to <<reporting-troubleshooting-puppeteer-debug-logs>>.
+The reporting plugin has a built-in utility to check for common issues, such as missing dependencies. See
+<<reporting-diagnostics>> for more information.
 
 [float]
 [[grant-user-access]]

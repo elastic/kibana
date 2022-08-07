@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { UpdateDateRange } from '../../../common/components/charts/common';
-import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
+import type { UpdateDateRange } from '../../../common/components/charts/common';
+import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 
 export interface HostsKpiProps {
   filterQuery?: string;
@@ -19,8 +19,6 @@ export interface HostsKpiProps {
 }
 
 export enum HostsKpiChartColors {
-  authenticationsSuccess = '#54B399',
-  authenticationsFailure = '#E7664C',
   uniqueSourceIps = '#D36086',
   uniqueDestinationIps = '#9170B8',
   hosts = '#6092C0',

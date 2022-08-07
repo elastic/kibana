@@ -6,7 +6,7 @@
  */
 
 import { Direction } from '../../../../../../common/search_strategy/common';
-import { AggregationRequest } from '../../../../../../common/search_strategy/security_solution/hosts';
+import type { AggregationRequest } from '../../../../../../common/search_strategy/security_solution/hosts';
 import { buildFieldsTermAggregation } from './helpers';
 
 describe('#buildFieldsTermAggregation', () => {

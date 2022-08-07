@@ -1,0 +1,341 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Tooltip should render plain tooltip 1`] = `
+<div
+  className="detailedTooltip"
+>
+  <table>
+    <tbody>
+      <TooltipRow
+        key="x-title-formatted-number-some value-0"
+        label="x-title"
+        value="formatted-number-some value"
+      />
+      <TooltipRow
+        key="y-title-formatted-string-some value-1"
+        label="y-title"
+        value="formatted-string-some value"
+      />
+      <TooltipRow
+        key="split-series-title-formatted-date-10-2"
+        label="split-series-title"
+        value="formatted-date-10"
+      />
+      <TooltipRow
+        key="split-column-title-d-3"
+        label="split-column-title"
+        value="d"
+      />
+      <TooltipRow
+        key="split-row-title-d-4"
+        label="split-row-title"
+        value="d"
+      />
+    </tbody>
+  </table>
+</div>
+`;
+
+exports[`Tooltip should render tooltip with partial buckets 1`] = `
+<div
+  className="detailedTooltip"
+>
+  <div
+    className="detailedTooltip__header"
+  >
+    <EndzoneTooltipHeader />
+  </div>
+  <table>
+    <tbody>
+      <TooltipRow
+        key="x-title-formatted-number-10-0"
+        label="x-title"
+        value="formatted-number-10"
+      />
+      <TooltipRow
+        key="y-title-formatted-string-10-1"
+        label="y-title"
+        value="formatted-string-10"
+      />
+      <TooltipRow
+        key="split-series-title-formatted-date-10-2"
+        label="split-series-title"
+        value="formatted-date-10"
+      />
+      <TooltipRow
+        key="split-column-title-d-3"
+        label="split-column-title"
+        value="d"
+      />
+      <TooltipRow
+        key="split-row-title-d-4"
+        label="split-row-title"
+        value="d"
+      />
+    </tbody>
+  </table>
+</div>
+`;
+
+exports[`Tooltip should render tooltip with partial buckets 2`] = `
+<div
+  className="detailedTooltip"
+>
+  <div
+    className="detailedTooltip__header"
+  >
+    <EndzoneTooltipHeader />
+  </div>
+  <table>
+    <tbody>
+      <TooltipRow
+        key="x-title-formatted-number-10-0"
+        label="x-title"
+        value="formatted-number-10"
+      />
+      <TooltipRow
+        key="y-title-formatted-string-10-1"
+        label="y-title"
+        value="formatted-string-10"
+      />
+      <TooltipRow
+        key="split-series-title-formatted-date-10-2"
+        label="split-series-title"
+        value="formatted-date-10"
+      />
+      <TooltipRow
+        key="split-column-title-d-3"
+        label="split-column-title"
+        value="d"
+      />
+      <TooltipRow
+        key="split-row-title-d-4"
+        label="split-row-title"
+        value="d"
+      />
+    </tbody>
+  </table>
+</div>
+`;
+
+exports[`Tooltip should render tooltip with xDomain 1`] = `
+<div
+  className="detailedTooltip"
+>
+  <table>
+    <tbody>
+      <TooltipRow
+        key="x-title-formatted-number-10-0"
+        label="x-title"
+        value="formatted-number-10"
+      />
+      <TooltipRow
+        key="y-title-formatted-string-10-1"
+        label="y-title"
+        value="formatted-string-10"
+      />
+      <TooltipRow
+        key="split-series-title-formatted-date-10-2"
+        label="split-series-title"
+        value="formatted-date-10"
+      />
+      <TooltipRow
+        key="split-column-title-d-3"
+        label="split-column-title"
+        value="d"
+      />
+      <TooltipRow
+        key="split-row-title-d-4"
+        label="split-row-title"
+        value="d"
+      />
+    </tbody>
+  </table>
+</div>
+`;
+
+exports[`Tooltip should render tooltip without split-column-values 1`] = `
+<div
+  className="detailedTooltip"
+>
+  <table>
+    <tbody>
+      <TooltipRow
+        key="x-title-formatted-number-10-0"
+        label="x-title"
+        value="formatted-number-10"
+      />
+      <TooltipRow
+        key="y-title-formatted-string-10-1"
+        label="y-title"
+        value="formatted-string-10"
+      />
+      <TooltipRow
+        key="split-series-title-formatted-date-10-2"
+        label="split-series-title"
+        value="formatted-date-10"
+      />
+      <TooltipRow
+        key="split-row-title-d-3"
+        label="split-row-title"
+        value="d"
+      />
+    </tbody>
+  </table>
+</div>
+`;
+
+exports[`Tooltip should render tooltip without split-row-values 1`] = `
+<div
+  className="detailedTooltip"
+>
+  <table>
+    <tbody>
+      <TooltipRow
+        key="x-title-formatted-number-10-0"
+        label="x-title"
+        value="formatted-number-10"
+      />
+      <TooltipRow
+        key="y-title-formatted-string-10-1"
+        label="y-title"
+        value="formatted-string-10"
+      />
+      <TooltipRow
+        key="split-series-title-formatted-date-10-2"
+        label="split-series-title"
+        value="formatted-date-10"
+      />
+      <TooltipRow
+        key="split-column-title-d-3"
+        label="split-column-title"
+        value="d"
+      />
+    </tbody>
+  </table>
+</div>
+`;
+
+exports[`Tooltip should render tooltip without splitAccessors-values 1`] = `
+<div
+  className="detailedTooltip"
+>
+  <table>
+    <tbody>
+      <TooltipRow
+        key="x-title-formatted-number-10-0"
+        label="x-title"
+        value="formatted-number-10"
+      />
+      <TooltipRow
+        key="y-title-formatted-string-10-1"
+        label="y-title"
+        value="formatted-string-10"
+      />
+      <TooltipRow
+        key="split-column-title-d-2"
+        label="split-column-title"
+        value="d"
+      />
+      <TooltipRow
+        key="split-row-title-d-3"
+        label="split-row-title"
+        value="d"
+      />
+    </tbody>
+  </table>
+</div>
+`;
+
+exports[`Tooltip should render tooltip without x-value 1`] = `
+<div
+  className="detailedTooltip"
+>
+  <table>
+    <tbody>
+      <TooltipRow
+        key="y-title-formatted-string-10-0"
+        label="y-title"
+        value="formatted-string-10"
+      />
+      <TooltipRow
+        key="split-series-title-formatted-date-10-1"
+        label="split-series-title"
+        value="formatted-date-10"
+      />
+      <TooltipRow
+        key="split-column-title-d-2"
+        label="split-column-title"
+        value="d"
+      />
+      <TooltipRow
+        key="split-row-title-d-3"
+        label="split-row-title"
+        value="d"
+      />
+    </tbody>
+  </table>
+</div>
+`;
+
+exports[`Tooltip should render tooltip without x-value 2`] = `
+<div
+  className="detailedTooltip"
+>
+  <table>
+    <tbody>
+      <TooltipRow
+        key="y-title-formatted-string-10-0"
+        label="y-title"
+        value="formatted-string-10"
+      />
+      <TooltipRow
+        key="split-series-title-formatted-date-10-1"
+        label="split-series-title"
+        value="formatted-date-10"
+      />
+      <TooltipRow
+        key="split-column-title-d-2"
+        label="split-column-title"
+        value="d"
+      />
+      <TooltipRow
+        key="split-row-title-d-3"
+        label="split-row-title"
+        value="d"
+      />
+    </tbody>
+  </table>
+</div>
+`;
+
+exports[`Tooltip should render tooltip without y-value 1`] = `
+<div
+  className="detailedTooltip"
+>
+  <table>
+    <tbody>
+      <TooltipRow
+        key="x-title-formatted-number-10-0"
+        label="x-title"
+        value="formatted-number-10"
+      />
+      <TooltipRow
+        key="split-series-title-formatted-date-10-1"
+        label="split-series-title"
+        value="formatted-date-10"
+      />
+      <TooltipRow
+        key="split-column-title-d-2"
+        label="split-column-title"
+        value="d"
+      />
+      <TooltipRow
+        key="split-row-title-d-3"
+        label="split-row-title"
+        value="d"
+      />
+    </tbody>
+  </table>
+</div>
+`;

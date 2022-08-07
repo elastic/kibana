@@ -6,7 +6,7 @@
  */
 import type { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
-import { IValidatedEvent } from '@kbn/event-log-plugin/server';
+import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
 import { Spaces } from '../../scenarios';
 import {
   ESTestIndexTool,
@@ -16,8 +16,6 @@ import {
   getEventLog,
 } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-
-const NANOS_IN_MILLIS = 1000 * 1000;
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
@@ -133,7 +131,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response.body).to.eql({
         connector_id: createdAction.id,
         status: 'error',
-        message: 'an error occurred while running the action executor',
+        message: 'an error occurred while running the action',
         service_message: `expected failure for ${ES_TEST_INDEX_NAME} ${reference}`,
         retry: false,
       });
@@ -144,7 +142,7 @@ export default function ({ getService }: FtrProviderContext) {
         actionTypeId: 'test.failing',
         outcome: 'failure',
         message: `action execution failure: test.failing:${createdAction.id}: failing action`,
-        errorMessage: `an error occurred while running the action executor: expected failure for .kibana-alerting-test-data actions-failure-1:space1`,
+        errorMessage: `an error occurred while running the action: expected failure for .kibana-alerting-test-data actions-failure-1:space1`,
       });
     });
 
@@ -327,7 +325,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(response.body).to.eql({
           actionId: createdAction.id,
           status: 'error',
-          message: 'an error occurred while running the action executor',
+          message: 'an error occurred while running the action',
           serviceMessage: `expected failure for ${ES_TEST_INDEX_NAME} ${reference}`,
           retry: false,
         });
@@ -372,14 +370,12 @@ export default function ({ getService }: FtrProviderContext) {
     const executeEventEnd = Date.parse(executeEvent?.event?.end || 'undefined');
     const dateNow = Date.now();
 
-    expect(typeof duration).to.be('number');
+    expect(typeof duration).to.be('string');
     expect(executeEventStart).to.be.ok();
     expect(startExecuteEventStart).to.equal(executeEventStart);
     expect(executeEventEnd).to.be.ok();
 
-    const durationDiff = Math.abs(
-      Math.round(duration! / NANOS_IN_MILLIS) - (executeEventEnd - executeEventStart)
-    );
+    const durationDiff = Math.abs(nanosToMillis(duration!) - (executeEventEnd - executeEventStart));
 
     // account for rounding errors
     expect(durationDiff < 1).to.equal(true);

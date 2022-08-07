@@ -219,7 +219,7 @@ export class KibanaFramework {
     elasticsearchClient: ElasticsearchClient
   ) {
     const [, startPlugins] = await this.core.getStartServices();
-    return startPlugins.data.indexPatterns.indexPatternsServiceFactory(
+    return startPlugins.data.indexPatterns.dataViewsServiceFactory(
       savedObjectsClient,
       elasticsearchClient
     );

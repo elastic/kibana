@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { MonitoringConfig } from '../server/config';
 
 /**
@@ -23,7 +22,7 @@ export function prefixIndexPatternWithCcs(
   config: MonitoringConfig,
   indexPattern: string,
   ccs?: string
-) {
+): string {
   const ccsEnabled = config.ui.ccs.enabled;
   if (!ccsEnabled || !ccs) {
     return indexPattern;
@@ -67,7 +66,7 @@ export function prefixIndexPatternWithCcs(
  * @param  {String} indexName The index's name, possibly including the cross-cluster prefix
  * @return {String} {@code null} if none. Otherwise the cluster prefix.
  */
-export function parseCrossClusterPrefix(indexName: string) {
+export function parseCrossClusterPrefix(indexName: string): string | null {
   const colonIndex = indexName.indexOf(':');
 
   if (colonIndex === -1) {

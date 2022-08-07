@@ -41,7 +41,6 @@ describe('AllRules', () => {
       <AllRules
         createPrePackagedRules={jest.fn()}
         hasPermissions
-        loading={false}
         loadingCreatePrePackagedRules={false}
         rulesCustomInstalled={0}
         rulesInstalled={0}
@@ -60,7 +59,6 @@ describe('AllRules', () => {
           <AllRules
             createPrePackagedRules={jest.fn()}
             hasPermissions
-            loading={false}
             loadingCreatePrePackagedRules={false}
             rulesCustomInstalled={1}
             rulesInstalled={0}
@@ -83,7 +81,6 @@ describe('AllRules', () => {
         <AllRules
           createPrePackagedRules={jest.fn()}
           hasPermissions
-          loading={false}
           loadingCreatePrePackagedRules={false}
           rulesCustomInstalled={1}
           rulesInstalled={0}

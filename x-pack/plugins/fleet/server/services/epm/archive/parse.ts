@@ -8,6 +8,8 @@
 import { merge } from '@kbn/std';
 import yaml from 'js-yaml';
 import { pick, uniq } from 'lodash';
+import semverMajor from 'semver/functions/major';
+import semverPrerelease from 'semver/functions/prerelease';
 
 import type {
   ArchivePackage,
@@ -93,7 +95,6 @@ const requiredArchivePackageProps: readonly RequiredPackageProp[] = [
   'description',
   'title',
   'format_version',
-  'release',
   'owner',
 ] as const;
 
@@ -108,6 +109,7 @@ const optionalArchivePackageProps: readonly OptionalPackageProp[] = [
   'screenshots',
   'icons',
   'policy_templates',
+  'release',
 ] as const;
 
 const registryInputProps = Object.values(RegistryInputKeys);
@@ -204,6 +206,14 @@ function parseAndVerifyArchive(paths: string[]): ArchivePackage {
   const readme = parseAndVerifyReadme(paths, parsed.name, parsed.version);
   if (readme) {
     parsed.readme = readme;
+  }
+
+  // If no `release` is specified, fall back to a value based on the `version` of the integration
+  // to maintain backwards comptability. This is a temporary measure until the `release` field is
+  // completely deprecated elsewhere in Fleet/Agent. See https://github.com/elastic/package-spec/issues/225
+  if (!parsed.release) {
+    parsed.release =
+      semverPrerelease(parsed.version) || semverMajor(parsed.version) < 1 ? 'beta' : 'ga';
   }
 
   return parsed;

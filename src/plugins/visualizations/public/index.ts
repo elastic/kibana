@@ -56,6 +56,9 @@ export {
   VISUALIZE_ENABLE_LABS_SETTING,
   SAVED_OBJECTS_LIMIT_SETTING,
   SAVED_OBJECTS_PER_PAGE_SETTING,
+  LegendSize,
+  LegendSizeToPixels,
+  DEFAULT_LEGEND_SIZE,
 } from '../common/constants';
 export type { SavedVisState, VisParams, Dimension } from '../common';
 export { prepareLogTable } from '../common';

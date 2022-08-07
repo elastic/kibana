@@ -6,15 +6,7 @@
  * Side Public License, v 1.
  */
 
-export type {
-  BaseDeprecationDetails,
-  DeprecationsDetails,
-  ConfigDeprecationDetails,
-  FeatureDeprecationDetails,
-  GetDeprecationsContext,
-  RegisterDeprecationsConfig,
-  DeprecationsGetResponse,
-} from './types';
+export type { GetDeprecationsContext, RegisterDeprecationsConfig } from './types';
 
 export type {
   DeprecationsServiceSetup,
@@ -25,3 +17,5 @@ export type {
 
 export { DeprecationsService } from './deprecations_service';
 export { config } from './deprecation_config';
+export { CoreDeprecationsRouteHandlerContext } from './deprecations_route_handler_context';
+export type { DeprecationsRequestHandlerContext } from './deprecations_route_handler_context';

@@ -30,6 +30,8 @@ export const HostWorkingDir = React.memo<Props>(
           field="host.name"
           value={hostName}
           isDraggable={isDraggable}
+          fieldType="keyword"
+          isAggregatable={true}
         />
       </TokensFlexItem>
       {workingDirectory != null && (
@@ -45,6 +47,8 @@ export const HostWorkingDir = React.memo<Props>(
           value={workingDirectory}
           iconType="folderOpen"
           isDraggable={isDraggable}
+          fieldType="keyword"
+          isAggregatable={true}
         />
       </TokensFlexItem>
     </>

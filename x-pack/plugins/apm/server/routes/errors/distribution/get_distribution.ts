@@ -55,8 +55,8 @@ export async function getErrorDistribution({
   };
   const currentPeriodPromise = getBuckets({
     ...commonProps,
-    start: startWithOffset,
-    end: endWithOffset,
+    start,
+    end,
   });
 
   const previousPeriodPromise = offset

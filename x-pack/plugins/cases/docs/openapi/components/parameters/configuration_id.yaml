@@ -1,0 +1,7 @@
+in: path
+name: configurationId
+description: An identifier for the configuration.
+required: true
+schema:
+  type: string
+  example: 3297a0f0-b5ec-11ec-b141-0fdb20a7f9a9

@@ -87,7 +87,7 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
 
   filter = ({ values: data }: LegendItem, negate: boolean) => {
     this.props.fireEvent({
-      name: 'filterBucket',
+      name: 'filter',
       data: {
         data,
         negate,

@@ -8,9 +8,11 @@
 
 import deepEqual from 'fast-deep-equal';
 
+import { lazyLoadReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
 import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
-import { OptionsListEditor } from './options_list_editor';
-import { ControlEmbeddable, IEditableControlFactory } from '../../types';
+
+import { OptionsListEditorOptions } from './options_list_editor_options';
+import { ControlEmbeddable, DataControlField, IEditableControlFactory } from '../../types';
 import { OptionsListEmbeddableInput, OPTIONS_LIST_CONTROL } from './types';
 import {
   createOptionsListExtract,
@@ -27,8 +29,11 @@ export class OptionsListEmbeddableFactory
   constructor() {}
 
   public async create(initialInput: OptionsListEmbeddableInput, parent?: IContainer) {
+    const reduxEmbeddablePackage = await lazyLoadReduxEmbeddablePackage();
     const { OptionsListEmbeddable } = await import('./options_list_embeddable');
-    return Promise.resolve(new OptionsListEmbeddable(initialInput, {}, parent));
+    return Promise.resolve(
+      new OptionsListEmbeddable(reduxEmbeddablePackage, initialInput, {}, parent)
+    );
   }
 
   public presaveTransformFunction = (
@@ -46,7 +51,16 @@ export class OptionsListEmbeddableFactory
     return newInput;
   };
 
-  public controlEditorComponent = OptionsListEditor;
+  public isFieldCompatible = (dataControlField: DataControlField) => {
+    if (
+      (dataControlField.field.aggregatable && dataControlField.field.type === 'string') ||
+      dataControlField.field.type === 'boolean'
+    ) {
+      dataControlField.compatibleControlTypes.push(this.type);
+    }
+  };
+
+  public controlEditorOptionsComponent = OptionsListEditorOptions;
 
   public isEditable = () => Promise.resolve(false);
 

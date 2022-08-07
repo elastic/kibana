@@ -34,7 +34,7 @@ import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { PluginSetupContract as FeaturesPluginSetupContract } from '@kbn/features-plugin/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { CloudSetup } from '@kbn/cloud-plugin/server';
-import { RouteConfig, RouteMethod } from '@kbn/core/server';
+import { RouteConfig, RouteMethod, Headers } from '@kbn/core/server';
 import { ElasticsearchModifiedSource } from '../common/types/es';
 import { RulesByType } from '../common/types/alerts';
 import { configSchema, MonitoringConfig } from './config';
@@ -80,16 +80,22 @@ export interface RouteDependencies {
   logger: Logger;
 }
 
-export type MonitoringRouteConfig<Params, Query, Body, Method extends RouteMethod> = {
-  method: RouteMethod;
-} & RouteConfig<Params, Query, Body, Method> & {
-    handler: (request: LegacyRequest) => any;
-  };
+type LegacyHandler<Params, Query, Body> = (req: LegacyRequest<Params, Query, Body>) => Promise<any>;
+
+export type MonitoringRouteConfig<Params, Query, Body, Method extends RouteMethod> = RouteConfig<
+  Params,
+  Query,
+  Body,
+  Method
+> & {
+  method: Method;
+  handler: LegacyHandler<Params, Query, Body>;
+};
 
 export interface MonitoringCore {
   config: MonitoringConfig;
   log: Logger;
-  route: <Params = any, Query = any, Body = any, Method extends RouteMethod = any>(
+  route: <Params, Query, Body, Method extends RouteMethod>(
     options: MonitoringRouteConfig<Params, Query, Body, Method>
   ) => void;
 }
@@ -112,15 +118,13 @@ export interface MonitoringPluginSetup {
   getKibanaStats: IBulkUploader['getKibanaStats'];
 }
 
-export interface LegacyRequest {
+export interface LegacyRequest<Params = any, Query = any, Body = any> {
   logger: Logger;
   getLogger: (...scopes: string[]) => Logger;
-  payload: {
-    [key: string]: any;
-  };
-  params: {
-    [key: string]: string;
-  };
+  payload: Body;
+  params: Params;
+  query: Query;
+  headers: Headers;
   getKibanaStatsCollector: () => any;
   getUiSettingsService: () => any;
   getActionTypeRegistry: () => any;
@@ -195,11 +199,7 @@ export type Pipeline = {
   [key in PipelineMetricKey]?: number;
 };
 
-export type PipelineMetricKey =
-  | 'logstash_cluster_pipeline_throughput'
-  | 'logstash_cluster_pipeline_node_count'
-  | 'logstash_node_pipeline_node_count'
-  | 'logstash_node_pipeline_throughput';
+export type PipelineMetricKey = PipelineThroughputMetricKey | PipelineNodeCountMetricKey;
 
 export type PipelineThroughputMetricKey =
   | 'logstash_cluster_pipeline_throughput'
@@ -207,16 +207,18 @@ export type PipelineThroughputMetricKey =
 
 export type PipelineNodeCountMetricKey =
   | 'logstash_cluster_pipeline_node_count'
-  | 'logstash_node_pipeline_node_count';
+  | 'logstash_cluster_pipeline_nodes_count'
+  | 'logstash_node_pipeline_node_count'
+  | 'logstash_node_pipeline_nodes_count';
 
 export interface PipelineWithMetrics {
   id: string;
-  metrics: {
-    logstash_cluster_pipeline_throughput?: PipelineMetricsProcessed;
-    logstash_cluster_pipeline_node_count?: PipelineMetricsProcessed;
-    logstash_node_pipeline_throughput?: PipelineMetricsProcessed;
-    logstash_node_pipeline_node_count?: PipelineMetricsProcessed;
-  };
+  metrics:
+    | {
+        [key in PipelineMetricKey]: PipelineMetricsProcessed | undefined;
+      }
+    // backward compat with references that don't properly type the metric keys
+    | { [key: string]: PipelineMetricsProcessed | undefined };
 }
 
 export interface PipelineResponse {

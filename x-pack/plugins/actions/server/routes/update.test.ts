@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { updateActionRoute } from './update';
+import { bodySchema, updateActionRoute } from './update';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './legacy/_mock_handler_arguments';
@@ -38,6 +38,7 @@ describe('updateActionRoute', () => {
       name: 'My name',
       config: { foo: true },
       isPreconfigured: false,
+      isDeprecated: false,
     };
 
     const actionsClient = actionsClientMock.create();
@@ -65,6 +66,7 @@ describe('updateActionRoute', () => {
         name: 'My name',
         config: { foo: true },
         is_preconfigured: false,
+        is_deprecated: false,
       },
     });
 
@@ -103,6 +105,7 @@ describe('updateActionRoute', () => {
       name: 'My name',
       config: { foo: true },
       isPreconfigured: false,
+      isDeprecated: false,
     };
 
     const actionsClient = actionsClientMock.create();
@@ -146,6 +149,7 @@ describe('updateActionRoute', () => {
       name: 'My name',
       config: { foo: true },
       isPreconfigured: false,
+      isDeprecated: false,
     };
 
     const actionsClient = actionsClientMock.create();
@@ -169,5 +173,16 @@ describe('updateActionRoute', () => {
     expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
 
     expect(verifyAccessAndContext).toHaveBeenCalledWith(licenseState, expect.any(Function));
+  });
+
+  test('validates body to prevent empty strings', async () => {
+    const body = {
+      name: ' ',
+      config: { foo: true },
+      secrets: { key: 'i8oh34yf9783y39' },
+    };
+    expect(() => bodySchema.validate(body)).toThrowErrorMatchingInlineSnapshot(
+      `"[name]: value '' is not valid"`
+    );
   });
 });

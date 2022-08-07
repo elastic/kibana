@@ -7,7 +7,7 @@
 
 import { getOr, noop, sortBy } from 'lodash/fp';
 import { EuiInMemoryTable } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { rgba } from 'polished';
 import styled from 'styled-components';
@@ -21,14 +21,15 @@ import {
 
 import { ADD_TIMELINE_BUTTON_CLASS_NAME } from '../../../timelines/components/flyout/add_timeline_button';
 import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
-import { BrowserFields, getAllFieldsByName } from '../../containers/source';
-import { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
+import type { BrowserFields } from '../../containers/source';
+import { getAllFieldsByName } from '../../containers/source';
+import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 import { getColumnHeaders } from '../../../timelines/components/timeline/body/column_headers/helpers';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { getColumns } from './columns';
 import { EVENT_FIELDS_TABLE_CLASS_NAME, onEventDetailsTabKeyPressed, search } from './helpers';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
-import { ColumnHeaderOptions, TimelineTabs } from '../../../../common/types/timeline';
+import type { ColumnHeaderOptions, TimelineTabs } from '../../../../common/types/timeline';
 
 interface Props {
   browserFields: BrowserFields;
@@ -59,6 +60,7 @@ const TableWrapper = styled.div`
 const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
   flex: 1;
   overflow: auto;
+  overflow-x: hidden;
   &::-webkit-scrollbar {
     height: ${({ theme }) => theme.eui.euiScrollBar};
     width: ${({ theme }) => theme.eui.euiScrollBar};
@@ -130,6 +132,32 @@ const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
     vertical-align: top;
   }
 `;
+
+// Match structure in discover
+const COUNT_PER_PAGE_OPTIONS = [25, 50, 100];
+
+// Encapsulating the pagination logic for the table.
+const useFieldBrowserPagination = () => {
+  const [pagination, setPagination] = useState<{ pageIndex: number }>({
+    pageIndex: 0,
+  });
+
+  const onTableChange = useCallback(({ page: { index } }: { page: { index: number } }) => {
+    setPagination({ pageIndex: index });
+  }, []);
+  const paginationTableProp = useMemo(
+    () => ({
+      ...pagination,
+      pageSizeOptions: COUNT_PER_PAGE_OPTIONS,
+    }),
+    [pagination]
+  );
+
+  return {
+    onTableChange,
+    paginationTableProp,
+  };
+};
 
 /**
  * This callback, invoked via `EuiInMemoryTable`'s `rowProps, assigns
@@ -274,6 +302,9 @@ export const EventFieldsBrowser = React.memo<Props>(
       focusSearchInput();
     }, [focusSearchInput]);
 
+    // Pagination
+    const { onTableChange, paginationTableProp } = useFieldBrowserPagination();
+
     return (
       <TableWrapper onKeyDown={onKeyDown} ref={containerElement}>
         <StyledEuiInMemoryTable
@@ -281,7 +312,8 @@ export const EventFieldsBrowser = React.memo<Props>(
           items={items}
           itemId="field"
           columns={columns}
-          pagination={false}
+          onTableChange={onTableChange}
+          pagination={paginationTableProp}
           rowProps={onSetRowProps}
           search={search}
           sorting={false}

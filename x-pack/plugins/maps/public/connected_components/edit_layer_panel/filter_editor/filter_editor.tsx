@@ -35,6 +35,7 @@ export interface Props {
   layer: ILayer;
   setLayerQuery: (id: string, query: Query) => void;
   updateSourceProp: (layerId: string, propName: string, value: unknown) => void;
+  isFeatureEditorOpenForLayer: boolean;
 }
 
 interface State {
@@ -157,6 +158,15 @@ export class FilterEditor extends Component<Props, State> {
   }
 
   _renderQuery() {
+    if (this.props.isFeatureEditorOpenForLayer) {
+      return (
+        <FormattedMessage
+          id="xpack.maps.layerPanel.filterEditor.isLayerFilterNotApplied"
+          defaultMessage="Layer filter is not applied while editing features"
+        />
+      );
+    }
+
     const query = this.props.layer.getQuery();
     if (!query || !query.query) {
       return (
@@ -199,6 +209,7 @@ export class FilterEditor extends Component<Props, State> {
         onClick={this._toggle}
         data-test-subj="mapLayerPanelOpenFilterEditorButton"
         iconType={openButtonIcon}
+        disabled={this.props.isFeatureEditorOpenForLayer}
       >
         {openButtonLabel}
       </EuiButtonEmpty>
@@ -213,6 +224,7 @@ export class FilterEditor extends Component<Props, State> {
         })}
         applyGlobalTime={this.props.layer.getSource().getApplyGlobalTime()}
         setApplyGlobalTime={this._onApplyGlobalTimeChange}
+        isFeatureEditorOpenForLayer={this.props.isFeatureEditorOpenForLayer}
       />
     ) : null;
 
@@ -244,6 +256,7 @@ export class FilterEditor extends Component<Props, State> {
           })}
           applyGlobalQuery={this.props.layer.getSource().getApplyGlobalQuery()}
           setApplyGlobalQuery={this._onApplyGlobalQueryChange}
+          isFeatureEditorOpenForLayer={this.props.isFeatureEditorOpenForLayer}
         />
 
         {globalTimeCheckbox}

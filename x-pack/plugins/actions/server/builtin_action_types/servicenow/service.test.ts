@@ -147,64 +147,240 @@ describe('ServiceNow service', () => {
   let service: ExternalService;
 
   beforeEach(() => {
-    service = createExternalService(
-      {
+    jest.clearAllMocks();
+    service = createExternalService({
+      credentials: {
         // The trailing slash at the end of the url is intended.
         // All API calls need to have the trailing slash removed.
-        config: { apiUrl: 'https://example.com/' },
+        config: { apiUrl: 'https://example.com/', isOAuth: false },
         secrets: { username: 'admin', password: 'admin' },
       },
       logger,
       configurationUtilities,
-      snExternalServiceConfig['.servicenow']
-    );
-  });
-
-  beforeEach(() => {
-    jest.clearAllMocks();
+      serviceConfig: snExternalServiceConfig['.servicenow'],
+      axiosInstance: axios,
+    });
   });
 
   describe('createExternalService', () => {
     test('throws without url', () => {
       expect(() =>
-        createExternalService(
-          {
-            config: { apiUrl: null },
+        createExternalService({
+          credentials: {
+            config: { apiUrl: null, isOAuth: false },
             secrets: { username: 'admin', password: 'admin' },
           },
           logger,
           configurationUtilities,
-          snExternalServiceConfig['.servicenow']
-        )
+          serviceConfig: snExternalServiceConfig['.servicenow'],
+          axiosInstance: axios,
+        })
       ).toThrow();
     });
 
-    test('throws without username', () => {
-      expect(() =>
-        createExternalService(
-          {
-            config: { apiUrl: 'test.com' },
-            secrets: { username: '', password: 'admin' },
-          },
-          logger,
-          configurationUtilities,
-          snExternalServiceConfig['.servicenow']
-        )
-      ).toThrow();
+    test('throws when isOAuth is false and basic auth required values are falsy', () => {
+      const badBasicCredentials = [
+        {
+          config: { apiUrl: 'test.com', isOAuth: false },
+          secrets: { username: '', password: 'admin' },
+        },
+        {
+          config: { apiUrl: 'test.com', isOAuth: false },
+          secrets: { username: null, password: 'admin' },
+        },
+        {
+          config: { apiUrl: 'test.com', isOAuth: false },
+          secrets: { password: 'admin' },
+        },
+        {
+          config: { apiUrl: 'test.com', isOAuth: false },
+          secrets: { username: 'admin', password: '' },
+        },
+        {
+          config: { apiUrl: 'test.com', isOAuth: false },
+          secrets: { username: 'admin', password: null },
+        },
+        {
+          config: { apiUrl: 'test.com', isOAuth: false },
+          secrets: { username: 'admin' },
+        },
+      ];
+
+      badBasicCredentials.forEach((badCredentials) => {
+        expect(() =>
+          createExternalService({
+            credentials: badCredentials,
+            logger,
+            configurationUtilities,
+            serviceConfig: snExternalServiceConfig['.servicenow'],
+            axiosInstance: axios,
+          })
+        ).toThrow();
+      });
     });
 
-    test('throws without password', () => {
-      expect(() =>
-        createExternalService(
-          {
-            config: { apiUrl: 'test.com' },
-            secrets: { username: '', password: undefined },
+    test('throws when isOAuth is true and OAuth required values are falsy', () => {
+      const badOAuthCredentials = [
+        {
+          config: {
+            apiUrl: 'test.com',
+            isOAuth: true,
+            clientId: '',
+            jwtKeyId: 'jwtKeyId',
+            userIdentifierValue: 'user@email.com',
           },
-          logger,
-          configurationUtilities,
-          snExternalServiceConfig['.servicenow']
-        )
-      ).toThrow();
+          secrets: { clientSecret: 'clientSecret', privateKey: 'privateKey' },
+        },
+        {
+          config: {
+            apiUrl: 'test.com',
+            isOAuth: true,
+            clientId: null,
+            jwtKeyId: 'jwtKeyId',
+            userIdentifierValue: 'user@email.com',
+          },
+          secrets: { clientSecret: 'clientSecret', privateKey: 'privateKey' },
+        },
+        {
+          config: {
+            apiUrl: 'test.com',
+            isOAuth: true,
+            jwtKeyId: 'jwtKeyId',
+            userIdentifierValue: 'user@email.com',
+          },
+          secrets: { clientSecret: 'clientSecret', privateKey: 'privateKey' },
+        },
+        {
+          config: {
+            apiUrl: 'test.com',
+            isOAuth: true,
+            clientId: 'clientId',
+            jwtKeyId: '',
+            userIdentifierValue: 'user@email.com',
+          },
+          secrets: { clientSecret: 'clientSecret', privateKey: 'privateKey' },
+        },
+        {
+          config: {
+            apiUrl: 'test.com',
+            isOAuth: true,
+            clientId: 'clientId',
+            jwtKeyId: null,
+            userIdentifierValue: 'user@email.com',
+          },
+          secrets: { clientSecret: 'clientSecret', privateKey: 'privateKey' },
+        },
+        {
+          config: {
+            apiUrl: 'test.com',
+            isOAuth: true,
+            clientId: 'clientId',
+            userIdentifierValue: 'user@email.com',
+          },
+          secrets: { clientSecret: 'clientSecret', privateKey: 'privateKey' },
+        },
+        {
+          config: {
+            apiUrl: 'test.com',
+            isOAuth: true,
+            clientId: 'clientId',
+            jwtKeyId: 'jwtKeyId',
+            userIdentifierValue: '',
+          },
+          secrets: { clientSecret: 'clientSecret', privateKey: 'privateKey' },
+        },
+        {
+          config: {
+            apiUrl: 'test.com',
+            isOAuth: true,
+            clientId: 'clientId',
+            jwtKeyId: 'jwtKeyId',
+            userIdentifierValue: null,
+          },
+          secrets: { clientSecret: 'clientSecret', privateKey: 'privateKey' },
+        },
+        {
+          config: {
+            apiUrl: 'test.com',
+            isOAuth: true,
+            clientId: 'clientId',
+            jwtKeyId: 'jwtKeyId',
+          },
+          secrets: { clientSecret: 'clientSecret', privateKey: 'privateKey' },
+        },
+        {
+          config: {
+            apiUrl: 'test.com',
+            isOAuth: true,
+            clientId: 'clientId',
+            jwtKeyId: 'jwtKeyId',
+            userIdentifierValue: 'user@email.com',
+          },
+          secrets: { clientSecret: '', privateKey: 'privateKey' },
+        },
+        {
+          config: {
+            apiUrl: 'test.com',
+            isOAuth: true,
+            clientId: 'clientId',
+            jwtKeyId: 'jwtKeyId',
+            userIdentifierValue: 'user@email.com',
+          },
+          secrets: { clientSecret: null, privateKey: 'privateKey' },
+        },
+        {
+          config: {
+            apiUrl: 'test.com',
+            isOAuth: true,
+            clientId: 'clientId',
+            jwtKeyId: 'jwtKeyId',
+            userIdentifierValue: 'user@email.com',
+          },
+          secrets: { privateKey: 'privateKey' },
+        },
+        {
+          config: {
+            apiUrl: 'test.com',
+            isOAuth: true,
+            clientId: 'clientId',
+            jwtKeyId: 'jwtKeyId',
+            userIdentifierValue: 'user@email.com',
+          },
+          secrets: { clientSecret: 'clientSecret', privateKey: '' },
+        },
+        {
+          config: {
+            apiUrl: 'test.com',
+            isOAuth: true,
+            clientId: 'clientId',
+            jwtKeyId: 'jwtKeyId',
+            userIdentifierValue: 'user@email.com',
+          },
+          secrets: { clientSecret: 'clientSecret', privateKey: null },
+        },
+        {
+          config: {
+            apiUrl: 'test.com',
+            isOAuth: true,
+            clientId: 'clientId',
+            jwtKeyId: 'jwtKeyId',
+            userIdentifierValue: 'user@email.com',
+          },
+          secrets: { clientSecret: 'clientSecret' },
+        },
+      ];
+
+      badOAuthCredentials.forEach((badCredentials) => {
+        expect(() =>
+          createExternalService({
+            credentials: badCredentials,
+            logger,
+            configurationUtilities,
+            serviceConfig: snExternalServiceConfig['.servicenow'],
+            axiosInstance: axios,
+          })
+        ).toThrow();
+      });
     });
   });
 
@@ -233,15 +409,16 @@ describe('ServiceNow service', () => {
     });
 
     test('it should call request with correct arguments when table changes', async () => {
-      service = createExternalService(
-        {
-          config: { apiUrl: 'https://example.com/' },
+      service = createExternalService({
+        credentials: {
+          config: { apiUrl: 'https://example.com/', isOAuth: false },
           secrets: { username: 'admin', password: 'admin' },
         },
         logger,
         configurationUtilities,
-        { ...snExternalServiceConfig['.servicenow'], table: 'sn_si_incident' }
-      );
+        serviceConfig: { ...snExternalServiceConfig['.servicenow'], table: 'sn_si_incident' },
+        axiosInstance: axios,
+      });
 
       requestMock.mockImplementation(() => ({
         data: { result: { sys_id: '1', number: 'INC01' } },
@@ -298,15 +475,16 @@ describe('ServiceNow service', () => {
       });
 
       test('it should call request with correct arguments when table changes', async () => {
-        service = createExternalService(
-          {
-            config: { apiUrl: 'https://example.com/' },
+        service = createExternalService({
+          credentials: {
+            config: { apiUrl: 'https://example.com/', isOAuth: false },
             secrets: { username: 'admin', password: 'admin' },
           },
           logger,
           configurationUtilities,
-          snExternalServiceConfig['.servicenow-sir']
-        );
+          serviceConfig: snExternalServiceConfig['.servicenow-sir'],
+          axiosInstance: axios,
+        });
 
         const res = await createIncident(service);
 
@@ -382,15 +560,16 @@ describe('ServiceNow service', () => {
     // old connectors
     describe('table API', () => {
       beforeEach(() => {
-        service = createExternalService(
-          {
-            config: { apiUrl: 'https://example.com/' },
+        service = createExternalService({
+          credentials: {
+            config: { apiUrl: 'https://example.com/', isOAuth: false },
             secrets: { username: 'admin', password: 'admin' },
           },
           logger,
           configurationUtilities,
-          { ...snExternalServiceConfig['.servicenow'], useImportAPI: false }
-        );
+          serviceConfig: { ...snExternalServiceConfig['.servicenow'], useImportAPI: false },
+          axiosInstance: axios,
+        });
       });
 
       test('it creates the incident correctly', async () => {
@@ -418,15 +597,16 @@ describe('ServiceNow service', () => {
       });
 
       test('it should call request with correct arguments when table changes', async () => {
-        service = createExternalService(
-          {
-            config: { apiUrl: 'https://example.com/' },
+        service = createExternalService({
+          credentials: {
+            config: { apiUrl: 'https://example.com/', isOAuth: false },
             secrets: { username: 'admin', password: 'admin' },
           },
           logger,
           configurationUtilities,
-          { ...snExternalServiceConfig['.servicenow-sir'], useImportAPI: false }
-        );
+          serviceConfig: { ...snExternalServiceConfig['.servicenow-sir'], useImportAPI: false },
+          axiosInstance: axios,
+        });
 
         mockIncidentResponse(false);
 
@@ -468,15 +648,16 @@ describe('ServiceNow service', () => {
       });
 
       test('it should call request with correct arguments when table changes', async () => {
-        service = createExternalService(
-          {
-            config: { apiUrl: 'https://example.com/' },
+        service = createExternalService({
+          credentials: {
+            config: { apiUrl: 'https://example.com/', isOAuth: false },
             secrets: { username: 'admin', password: 'admin' },
           },
           logger,
           configurationUtilities,
-          snExternalServiceConfig['.servicenow-sir']
-        );
+          serviceConfig: snExternalServiceConfig['.servicenow-sir'],
+          axiosInstance: axios,
+        });
 
         const res = await updateIncident(service);
         expect(requestMock).toHaveBeenNthCalledWith(1, {
@@ -554,15 +735,16 @@ describe('ServiceNow service', () => {
     // old connectors
     describe('table API', () => {
       beforeEach(() => {
-        service = createExternalService(
-          {
-            config: { apiUrl: 'https://example.com/' },
+        service = createExternalService({
+          credentials: {
+            config: { apiUrl: 'https://example.com/', isOAuth: false },
             secrets: { username: 'admin', password: 'admin' },
           },
           logger,
           configurationUtilities,
-          { ...snExternalServiceConfig['.servicenow'], useImportAPI: false }
-        );
+          serviceConfig: { ...snExternalServiceConfig['.servicenow'], useImportAPI: false },
+          axiosInstance: axios,
+        });
       });
 
       test('it updates the incident correctly', async () => {
@@ -591,15 +773,16 @@ describe('ServiceNow service', () => {
       });
 
       test('it should call request with correct arguments when table changes', async () => {
-        service = createExternalService(
-          {
-            config: { apiUrl: 'https://example.com/' },
+        service = createExternalService({
+          credentials: {
+            config: { apiUrl: 'https://example.com/', isOAuth: false },
             secrets: { username: 'admin', password: 'admin' },
           },
           logger,
           configurationUtilities,
-          { ...snExternalServiceConfig['.servicenow-sir'], useImportAPI: false }
-        );
+          serviceConfig: { ...snExternalServiceConfig['.servicenow-sir'], useImportAPI: false },
+          axiosInstance: axios,
+        });
 
         mockIncidentResponse(false);
 
@@ -646,15 +829,16 @@ describe('ServiceNow service', () => {
     });
 
     test('it should call request with correct arguments when table changes', async () => {
-      service = createExternalService(
-        {
-          config: { apiUrl: 'https://example.com/' },
+      service = createExternalService({
+        credentials: {
+          config: { apiUrl: 'https://example.com/', isOAuth: false },
           secrets: { username: 'admin', password: 'admin' },
         },
         logger,
         configurationUtilities,
-        { ...snExternalServiceConfig['.servicenow'], table: 'sn_si_incident' }
-      );
+        serviceConfig: { ...snExternalServiceConfig['.servicenow'], table: 'sn_si_incident' },
+        axiosInstance: axios,
+      });
 
       requestMock.mockImplementation(() => ({
         data: { result: serviceNowCommonFields },
@@ -714,15 +898,16 @@ describe('ServiceNow service', () => {
     });
 
     test('it should call request with correct arguments when table changes', async () => {
-      service = createExternalService(
-        {
-          config: { apiUrl: 'https://example.com/' },
+      service = createExternalService({
+        credentials: {
+          config: { apiUrl: 'https://example.com/', isOAuth: false },
           secrets: { username: 'admin', password: 'admin' },
         },
         logger,
         configurationUtilities,
-        { ...snExternalServiceConfig['.servicenow'], table: 'sn_si_incident' }
-      );
+        serviceConfig: { ...snExternalServiceConfig['.servicenow'], table: 'sn_si_incident' },
+        axiosInstance: axios,
+      });
 
       requestMock.mockImplementation(() => ({
         data: { result: serviceNowChoices },
@@ -818,15 +1003,16 @@ describe('ServiceNow service', () => {
       });
 
       test('it does not log if useOldApi = true', async () => {
-        service = createExternalService(
-          {
-            config: { apiUrl: 'https://example.com/' },
+        service = createExternalService({
+          credentials: {
+            config: { apiUrl: 'https://example.com/', isOAuth: false },
             secrets: { username: 'admin', password: 'admin' },
           },
           logger,
           configurationUtilities,
-          { ...snExternalServiceConfig['.servicenow'], useImportAPI: false }
-        );
+          serviceConfig: { ...snExternalServiceConfig['.servicenow'], useImportAPI: false },
+          axiosInstance: axios,
+        });
         await service.checkIfApplicationIsInstalled();
         expect(requestMock).not.toHaveBeenCalled();
         expect(logger.debug).not.toHaveBeenCalled();

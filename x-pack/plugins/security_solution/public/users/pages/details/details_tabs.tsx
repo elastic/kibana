@@ -6,21 +6,22 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
+import { Route } from '@kbn/kibana-react-plugin/public';
 
 import { UsersTableType } from '../../store/model';
 import { AnomaliesUserTable } from '../../../common/components/ml/tables/anomalies_user_table';
-import { UsersDetailsTabsProps } from './types';
+import type { UsersDetailsTabsProps } from './types';
 import { AnomaliesQueryTabBody } from '../../../common/containers/anomalies/anomalies_query_tab_body';
 import { scoreIntervalToDateTime } from '../../../common/components/ml/score/score_interval_to_datetime';
-import { UpdateDateRange } from '../../../common/components/charts/common';
-import { Anomaly } from '../../../common/components/ml/types';
+import type { UpdateDateRange } from '../../../common/components/charts/common';
+import type { Anomaly } from '../../../common/components/ml/types';
 import { usersDetailsPagePath } from '../constants';
 import { TimelineId } from '../../../../common/types';
-import { EventsQueryTabBody } from '../../../common/components/events_tab/events_query_tab_body';
-import { AlertsView } from '../../../common/components/alerts_viewer';
+import { EventsQueryTabBody } from '../../../common/components/events_tab';
 import { userNameExistsFilter } from './helpers';
 import { AuthenticationsQueryTabBody } from '../navigation';
+import { UserRiskTabBody } from '../navigation/user_risk_tab_body';
 
 export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
   ({
@@ -34,7 +35,7 @@ export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
     type,
     setAbsoluteRangeDatePicker,
     detailName,
-    pageFilters,
+    pageFilters = [],
   }) => {
     const narrowDateRange = useCallback(
       (score: Anomaly, interval: string) => {
@@ -63,12 +64,6 @@ export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
       [setAbsoluteRangeDatePicker]
     );
 
-    const alertsPageFilters = useMemo(
-      () =>
-        pageFilters != null ? [...userNameExistsFilter, ...pageFilters] : userNameExistsFilter,
-      [pageFilters]
-    );
-
     const tabProps = {
       deleteQuery,
       endDate: to,
@@ -83,6 +78,11 @@ export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
       userName: detailName,
     };
 
+    const externalAlertPageFilters = useMemo(
+      () => [...userNameExistsFilter, ...pageFilters],
+      [pageFilters]
+    );
+
     return (
       <Switch>
         <Route path={`${usersDetailsPagePath}/:tabName(${UsersTableType.authentications})`}>
@@ -96,16 +96,11 @@ export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
             {...tabProps}
             pageFilters={pageFilters}
             timelineId={TimelineId.usersPageEvents}
+            externalAlertPageFilters={externalAlertPageFilters}
           />
         </Route>
-
-        <Route path={`${usersDetailsPagePath}/:tabName(${UsersTableType.alerts})`}>
-          <AlertsView
-            entityType="events"
-            timelineId={TimelineId.usersPageExternalAlerts}
-            pageFilters={alertsPageFilters}
-            {...tabProps}
-          />
+        <Route path={`${usersDetailsPagePath}/:tabName(${UsersTableType.risk})`}>
+          <UserRiskTabBody {...tabProps} />
         </Route>
       </Switch>
     );

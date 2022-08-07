@@ -7,22 +7,22 @@
 
 import { ALERT_UUID } from '@kbn/rule-data-utils';
 
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 
 import type { ConfigType } from '../../../../../config';
-import { Ancestor, SignalSource, SignalSourceHit } from '../../../signals/types';
+import type { Ancestor, SignalSource, SignalSourceHit } from '../../../signals/types';
 import { buildAlert, buildAncestors, generateAlertId } from './build_alert';
 import { buildBulkBody } from './build_bulk_body';
-import { EqlSequence } from '../../../../../../common/detection_engine/types';
+import type { EqlSequence } from '../../../../../../common/detection_engine/types';
 import { generateBuildingBlockIds } from './generate_building_block_ids';
-import { BuildReasonMessage } from '../../../signals/reason_formatters';
-import { CompleteRule, RuleParams } from '../../../schemas/rule_schemas';
+import type { BuildReasonMessage } from '../../../signals/reason_formatters';
+import type { CompleteRule, RuleParams } from '../../../schemas/rule_schemas';
 import {
   ALERT_BUILDING_BLOCK_TYPE,
   ALERT_GROUP_ID,
   ALERT_GROUP_INDEX,
 } from '../../../../../../common/field_maps/field_names';
-import {
+import type {
   BaseFieldsLatest,
   EqlBuildingBlockFieldsLatest,
   EqlShellFieldsLatest,
@@ -42,7 +42,8 @@ export const buildAlertGroupFromSequence = (
   completeRule: CompleteRule<RuleParams>,
   mergeStrategy: ConfigType['alertMergeStrategy'],
   spaceId: string | null | undefined,
-  buildReasonMessage: BuildReasonMessage
+  buildReasonMessage: BuildReasonMessage,
+  indicesToQuery: string[]
 ): Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest | EqlShellFieldsLatest>> => {
   const ancestors: Ancestor[] = sequence.events.flatMap((event) => buildAncestors(event));
   if (ancestors.some((ancestor) => ancestor?.rule === completeRule.alertId)) {
@@ -54,7 +55,16 @@ export const buildAlertGroupFromSequence = (
   let baseAlerts: BaseFieldsLatest[] = [];
   try {
     baseAlerts = sequence.events.map((event) =>
-      buildBulkBody(spaceId, completeRule, event, mergeStrategy, [], false, buildReasonMessage)
+      buildBulkBody(
+        spaceId,
+        completeRule,
+        event,
+        mergeStrategy,
+        [],
+        false,
+        buildReasonMessage,
+        indicesToQuery
+      )
     );
   } catch (error) {
     logger.error(error);
@@ -78,7 +88,13 @@ export const buildAlertGroupFromSequence = (
   // Now that we have an array of building blocks for the events in the sequence,
   // we can build the signal that links the building blocks together
   // and also insert the group id (which is also the "shell" signal _id) in each building block
-  const shellAlert = buildAlertRoot(wrappedBaseFields, completeRule, spaceId, buildReasonMessage);
+  const shellAlert = buildAlertRoot(
+    wrappedBaseFields,
+    completeRule,
+    spaceId,
+    buildReasonMessage,
+    indicesToQuery
+  );
   const sequenceAlert: WrappedFieldsLatest<EqlShellFieldsLatest> = {
     _id: shellAlert[ALERT_UUID],
     _index: '',
@@ -105,7 +121,8 @@ export const buildAlertRoot = (
   wrappedBuildingBlocks: Array<WrappedFieldsLatest<BaseFieldsLatest>>,
   completeRule: CompleteRule<RuleParams>,
   spaceId: string | null | undefined,
-  buildReasonMessage: BuildReasonMessage
+  buildReasonMessage: BuildReasonMessage,
+  indicesToQuery: string[]
 ): EqlShellFieldsLatest => {
   const mergedAlerts = objectArrayIntersection(wrappedBuildingBlocks.map((alert) => alert._source));
   const reason = buildReasonMessage({
@@ -113,7 +130,7 @@ export const buildAlertRoot = (
     severity: completeRule.ruleParams.severity,
     mergedDoc: mergedAlerts as SignalSourceHit,
   });
-  const doc = buildAlert(wrappedBuildingBlocks, completeRule, spaceId, reason);
+  const doc = buildAlert(wrappedBuildingBlocks, completeRule, spaceId, reason, indicesToQuery);
   const alertId = generateAlertId(doc);
   return {
     ...mergedAlerts,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
 export const findExistingIndices = async (
   indices: string[],
@@ -14,8 +14,11 @@ export const findExistingIndices = async (
   Promise.all(
     indices
       .map(async (index) => {
+        const indexToQuery = index.trim().startsWith('-')
+          ? index.trim().substring(1)
+          : index.trim();
         const searchResponse = await esClient.fieldCaps({
-          index,
+          index: indexToQuery,
           fields: '_id',
           ignore_unavailable: true,
           allow_no_indices: false,

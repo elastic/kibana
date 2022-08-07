@@ -11,12 +11,12 @@
  */
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import * as Either from 'fp-ts/lib/Either';
-import {
+import type {
   SavedObjectSanitizedDoc,
   SavedObjectsRawDoc,
-  SavedObjectsSerializer,
   SavedObjectUnsanitizedDoc,
-} from '../../serialization';
+} from '@kbn/core-saved-objects-server';
+import { SavedObjectsSerializer } from '../../serialization';
 import { MigrateAndConvertFn } from './document_migrator';
 import { TransformSavedObjectDocumentError } from '.';
 
@@ -24,6 +24,7 @@ export interface DocumentsTransformFailed {
   readonly type: string;
   readonly corruptDocumentIds: string[];
   readonly transformErrors: TransformErrorObjects[];
+  readonly processedDocs: SavedObjectsRawDoc[];
 }
 
 export interface DocumentsTransformSuccess {
@@ -139,6 +140,7 @@ export function migrateRawDocsSafely({
         type: 'documents_transform_failed',
         corruptDocumentIds: [...corruptSavedObjectIds],
         transformErrors,
+        processedDocs,
       });
     }
     return Either.right({ processedDocs });

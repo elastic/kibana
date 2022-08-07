@@ -8,11 +8,16 @@
 import { schema } from '@kbn/config-schema';
 
 import type { RouteDefinitionParams } from '../..';
+import { transformElasticsearchRoleToRole } from '../../../authorization';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
-import { transformElasticsearchRoleToRole } from './model';
 
-export function defineGetRolesRoutes({ router, authz, getFeatures }: RouteDefinitionParams) {
+export function defineGetRolesRoutes({
+  router,
+  authz,
+  getFeatures,
+  logger,
+}: RouteDefinitionParams) {
   router.get(
     {
       path: '/api/security/role/{name}',
@@ -38,7 +43,8 @@ export function defineGetRolesRoutes({ router, authz, getFeatures }: RouteDefini
               // @ts-expect-error `SecurityIndicesPrivileges.names` expected to be `string[]`
               elasticsearchRole,
               request.params.name,
-              authz.applicationName
+              authz.applicationName,
+              logger
             ),
           });
         }

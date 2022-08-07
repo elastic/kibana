@@ -9,8 +9,9 @@
 import deepEqual from 'fast-deep-equal';
 
 import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
-import { RangeSliderEditor } from './range_slider_editor';
-import { ControlEmbeddable, IEditableControlFactory } from '../../types';
+import { lazyLoadReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
+
+import { ControlEmbeddable, DataControlField, IEditableControlFactory } from '../../types';
 import { RangeSliderEmbeddableInput, RANGE_SLIDER_CONTROL } from './types';
 import {
   createRangeSliderExtract,
@@ -27,8 +28,11 @@ export class RangeSliderEmbeddableFactory
   constructor() {}
 
   public async create(initialInput: RangeSliderEmbeddableInput, parent?: IContainer) {
+    const reduxEmbeddablePackage = await lazyLoadReduxEmbeddablePackage();
     const { RangeSliderEmbeddable } = await import('./range_slider_embeddable');
-    return Promise.resolve(new RangeSliderEmbeddable(initialInput, {}, parent));
+    return Promise.resolve(
+      new RangeSliderEmbeddable(reduxEmbeddablePackage, initialInput, {}, parent)
+    );
   }
 
   public presaveTransformFunction = (
@@ -46,7 +50,11 @@ export class RangeSliderEmbeddableFactory
     return newInput;
   };
 
-  public controlEditorComponent = RangeSliderEditor;
+  public isFieldCompatible = (dataControlField: DataControlField) => {
+    if (dataControlField.field.aggregatable && dataControlField.field.type === 'number') {
+      dataControlField.compatibleControlTypes.push(this.type);
+    }
+  };
 
   public isEditable = () => Promise.resolve(false);
 

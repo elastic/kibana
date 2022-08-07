@@ -32,11 +32,7 @@ function isTimeBased(state: LensState, datasourceMap: DatasourceMap) {
 }
 
 export const contextMiddleware = (storeDeps: LensStoreDeps) => (store: MiddlewareAPI) => {
-  const unsubscribeFromExternalContext = subscribeToExternalContext(
-    storeDeps.lensServices.data,
-    store.getState,
-    store.dispatch
-  );
+  let unsubscribeFromExternalContext: (() => void) | undefined;
   return (next: Dispatch) => (action: PayloadAction<unknown>) => {
     if (
       !(action.payload as Partial<LensAppState>)?.searchSessionId &&
@@ -46,10 +42,18 @@ export const contextMiddleware = (storeDeps: LensStoreDeps) => (store: Middlewar
     ) {
       updateTimeRange(storeDeps.lensServices.data, store.dispatch);
     }
-    if (navigateAway.match(action)) {
+    if (navigateAway.match(action) && unsubscribeFromExternalContext) {
       return unsubscribeFromExternalContext();
     }
     next(action);
+    // store stopped loading and external context is not subscribed to yet - do it now
+    if (!store.getState().lens.isLoading && !unsubscribeFromExternalContext) {
+      unsubscribeFromExternalContext = subscribeToExternalContext(
+        storeDeps.lensServices.data,
+        store.getState,
+        store.dispatch
+      );
+    }
   };
 };
 

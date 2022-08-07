@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import { Subject, of, firstValueFrom } from 'rxjs';
 import { fakeSchedulers } from 'rxjs-marbles/jest';
 import { sleep } from '../test_utils';

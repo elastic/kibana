@@ -5,6 +5,7 @@
   "requiredPlugins": [
     "features",
     "data",
+    "dataViews",
     "licensing",
     "triggersActionsUi",
     "embeddable",
@@ -20,7 +21,8 @@
     "alerts",
     "observability",
     "security",
-    "maps"
+    "maps",
+    "lens"
   ],
   "server": false,
   "ui": true,

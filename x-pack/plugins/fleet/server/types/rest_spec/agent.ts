@@ -6,6 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import moment from 'moment';
+import semverIsValid from 'semver/functions/valid';
 
 import { NewAgentActionSchema } from '../models';
 
@@ -16,6 +18,8 @@ export const GetAgentsRequestSchema = {
     kuery: schema.maybe(schema.string()),
     showInactive: schema.boolean({ defaultValue: false }),
     showUpgradeable: schema.boolean({ defaultValue: false }),
+    sortField: schema.maybe(schema.string()),
+    sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
   }),
 };
 
@@ -31,6 +35,12 @@ export const PostNewAgentActionRequestSchema = {
   }),
   params: schema.object({
     agentId: schema.string(),
+  }),
+};
+
+export const PostCancelActionRequestSchema = {
+  params: schema.object({
+    actionId: schema.string(),
   }),
 };
 
@@ -51,8 +61,15 @@ export const PostBulkAgentUnenrollRequestSchema = {
     agents: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
     force: schema.maybe(schema.boolean()),
     revoke: schema.maybe(schema.boolean()),
+    batchSize: schema.maybe(schema.number()),
   }),
 };
+
+function validateVersion(s: string) {
+  if (!semverIsValid(s)) {
+    return 'not a valid semver';
+  }
+}
 
 export const PostAgentUpgradeRequestSchema = {
   params: schema.object({
@@ -60,7 +77,9 @@ export const PostAgentUpgradeRequestSchema = {
   }),
   body: schema.object({
     source_uri: schema.maybe(schema.string()),
-    version: schema.string(),
+    version: schema.string({
+      validate: validateVersion,
+    }),
     force: schema.maybe(schema.boolean()),
   }),
 };
@@ -69,8 +88,19 @@ export const PostBulkAgentUpgradeRequestSchema = {
   body: schema.object({
     agents: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
     source_uri: schema.maybe(schema.string()),
-    version: schema.string(),
+    version: schema.string({ validate: validateVersion }),
     force: schema.maybe(schema.boolean()),
+    rollout_duration_seconds: schema.maybe(schema.number({ min: 600 })),
+    start_time: schema.maybe(
+      schema.string({
+        validate: (v: string) => {
+          if (!moment(v).isValid()) {
+            return 'not a valid date';
+          }
+        },
+      })
+    ),
+    batchSize: schema.maybe(schema.number()),
   }),
 };
 
@@ -87,6 +117,7 @@ export const PostBulkAgentReassignRequestSchema = {
   body: schema.object({
     policy_id: schema.string(),
     agents: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
+    batchSize: schema.maybe(schema.number()),
   }),
 };
 
@@ -101,7 +132,17 @@ export const UpdateAgentRequestSchema = {
     agentId: schema.string(),
   }),
   body: schema.object({
-    user_provided_metadata: schema.recordOf(schema.string(), schema.any()),
+    user_provided_metadata: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+    tags: schema.maybe(schema.arrayOf(schema.string())),
+  }),
+};
+
+export const PostBulkUpdateAgentTagsRequestSchema = {
+  body: schema.object({
+    agents: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
+    tagsToAdd: schema.maybe(schema.arrayOf(schema.string())),
+    tagsToRemove: schema.maybe(schema.arrayOf(schema.string())),
+    batchSize: schema.maybe(schema.number()),
   }),
 };
 
@@ -115,5 +156,6 @@ export const GetAgentStatusRequestSchema = {
 export const GetAgentDataRequestSchema = {
   query: schema.object({
     agentsIds: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
+    previewData: schema.boolean({ defaultValue: false }),
   }),
 };

@@ -48,6 +48,7 @@ const pureTransitions = {
       filters: union(state.filters, parentFilters),
       linked: false,
     }),
+  updateDataView: (state) => (dataViewId) => ({ ...state, dataView: dataViewId }),
   updateVisState: (state) => (newVisState) => ({ ...state, vis: toObject(newVisState) }),
   updateSavedQuery: (state) => (savedQueryId) => {
     const updatedState = {

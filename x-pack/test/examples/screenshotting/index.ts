@@ -22,7 +22,6 @@ export default function ({
 
   describe('Screenshotting Example', function () {
     before(async () => {
-      this.tags('ciGroup13');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/visualize.json');
       await PageObjects.common.navigateToApp('screenshottingExample');
@@ -36,7 +35,7 @@ export default function ({
               aggs={aggCount id="1" enabled=true schema="metric"}
               aggs={aggMax id="1" enabled=true schema="metric" field="bytes"}
               aggs={aggTerms id="2" enabled=true schema="segment" field="response.raw" size=4 order="desc" orderBy="1"}
-          | metricVis metric={visdimension 0}
+          | legacyMetricVis metric={visdimension 0}
         `
       );
       await testSubjects.click('run');
@@ -71,7 +70,7 @@ export default function ({
       const memory = await testSubjects.find('cpu');
       const text = await memory.getVisibleText();
 
-      expect(text).to.match(/\d+\.\d+%/);
+      expect(text).to.match(/\d+(\.\d+)?%/);
     });
 
     it('should show an error message', async () => {

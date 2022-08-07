@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { Redirect } from 'react-router-dom';
 import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import { getUrlTracker } from '../../kibana_services';
-import { useDiscoverServices } from '../../utils/use_discover_services';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
 
 let bannerId: string | undefined;
 

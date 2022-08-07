@@ -31,7 +31,6 @@ describe('Host Summary Component', () => {
     const mockProps = {
       anomaliesData: mockAnomalies,
       data: mockData.Hosts.edges[0].node,
-      docValueFields: [],
       endDate: '2019-06-18T06:00:00.000Z',
       id: 'hostOverview',
       indexNames: [],

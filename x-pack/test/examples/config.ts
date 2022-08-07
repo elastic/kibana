@@ -8,11 +8,12 @@
 import { FtrConfigProviderContext } from '@kbn/test';
 import { resolve } from 'path';
 import fs from 'fs';
-// @ts-expect-error https://github.com/elastic/kibana/issues/95679
-import { KIBANA_ROOT } from '@kbn/test';
+import { REPO_ROOT as KIBANA_ROOT } from '@kbn/utils';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const xpackFunctionalConfig = await readConfigFile(require.resolve('../functional/config'));
+  const xpackFunctionalConfig = await readConfigFile(
+    require.resolve('../functional/config.base.js')
+  );
 
   // Find all folders in /examples and /x-pack/examples since we treat all them as plugin folder
   const examplesFiles = fs.readdirSync(resolve(KIBANA_ROOT, 'examples'));
@@ -38,6 +39,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./embedded_lens'),
       require.resolve('./reporting_examples'),
       require.resolve('./screenshotting'),
+      require.resolve('./triggers_actions_ui_examples'),
     ],
 
     kbnTestServer: {

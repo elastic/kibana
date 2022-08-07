@@ -6,88 +6,46 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
-import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import { FillStyles, IconPositions, LineStyles, YAxisModes, Y_CONFIG } from '../constants';
-import { YConfig, YConfigResult } from '../types';
+import { Position } from '@elastic/charts';
+import { strings } from '../i18n';
+import { Y_AXIS_CONFIG, AxisModes, YScaleTypes } from '../constants';
+import { YAxisConfigFn } from '../types';
+import { commonAxisConfigArgs } from './common_axis_args';
 
-export const yAxisConfigFunction: ExpressionFunctionDefinition<
-  typeof Y_CONFIG,
-  null,
-  YConfig,
-  YConfigResult
-> = {
-  name: Y_CONFIG,
+export const yAxisConfigFunction: YAxisConfigFn = {
+  name: Y_AXIS_CONFIG,
   aliases: [],
-  type: Y_CONFIG,
-  help: i18n.translate('expressionXY.yConfig.help', {
-    defaultMessage: `Configure the behavior of a xy chart's y axis metric`,
-  }),
+  type: Y_AXIS_CONFIG,
+  help: strings.getYAxisConfigFnHelp(),
   inputTypes: ['null'],
   args: {
-    forAccessor: {
+    ...commonAxisConfigArgs,
+    mode: {
       types: ['string'],
-      help: i18n.translate('expressionXY.yConfig.forAccessor.help', {
-        defaultMessage: 'The accessor this configuration is for',
-      }),
+      options: [...Object.values(AxisModes)],
+      help: strings.getAxisModeHelp(),
     },
-    axisMode: {
-      types: ['string'],
-      options: [...Object.values(YAxisModes)],
-      help: i18n.translate('expressionXY.yConfig.axisMode.help', {
-        defaultMessage: 'The axis mode of the metric',
-      }),
-    },
-    color: {
-      types: ['string'],
-      help: i18n.translate('expressionXY.yConfig.color.help', {
-        defaultMessage: 'The color of the series',
-      }),
-    },
-    lineStyle: {
-      types: ['string'],
-      options: [...Object.values(LineStyles)],
-      help: i18n.translate('expressionXY.yConfig.lineStyle.help', {
-        defaultMessage: 'The style of the reference line',
-      }),
-    },
-    lineWidth: {
+    boundsMargin: {
       types: ['number'],
-      help: i18n.translate('expressionXY.yConfig.lineWidth.help', {
-        defaultMessage: 'The width of the reference line',
-      }),
+      help: strings.getAxisBoundsMarginHelp(),
     },
-    icon: {
+    scaleType: {
+      options: [...Object.values(YScaleTypes)],
+      help: strings.getAxisScaleTypeHelp(),
+      default: YScaleTypes.LINEAR,
+    },
+    position: {
       types: ['string'],
-      help: i18n.translate('expressionXY.yConfig.icon.help', {
-        defaultMessage: 'An optional icon used for reference lines',
-      }),
-    },
-    iconPosition: {
-      types: ['string'],
-      options: [...Object.values(IconPositions)],
-      help: i18n.translate('expressionXY.yConfig.iconPosition.help', {
-        defaultMessage: 'The placement of the icon for the reference line',
-      }),
-    },
-    textVisibility: {
-      types: ['boolean'],
-      help: i18n.translate('expressionXY.yConfig.textVisibility.help', {
-        defaultMessage: 'Visibility of the label on the reference line',
-      }),
-    },
-    fill: {
-      types: ['string'],
-      options: [...Object.values(FillStyles)],
-      help: i18n.translate('expressionXY.yConfig.fill.help', {
-        defaultMessage: 'Fill',
-      }),
+      options: [Position.Right, Position.Left],
+      help: strings.getAxisPositionHelp(),
+      strict: true,
     },
   },
   fn(input, args) {
     return {
-      type: Y_CONFIG,
+      type: Y_AXIS_CONFIG,
       ...args,
+      position: args.position ?? Position.Left,
     };
   },
 };

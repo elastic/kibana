@@ -3,6 +3,9 @@
 exports[`Fleet preconfiguration reset Preconfigured cloud policy With a full preconfigured cloud policy Create correct .fleet-policies 1`] = `
 Object {
   "agent": Object {
+    "download": Object {
+      "source_uri": "https://artifacts.elastic.co/downloads/",
+    },
     "monitoring": Object {
       "enabled": false,
       "logs": false,
@@ -68,6 +71,7 @@ Object {
         "max_connections": 0,
         "max_event_size": 307200,
         "max_header_size": 1048576,
+        "pprof.enabled": false,
         "read_timeout": "3600s",
         "response_headers": null,
         "rum": Object {
@@ -89,6 +93,7 @@ Object {
                 "sample_rate": 0.1,
               },
             ],
+            "storage_limit": "3GB",
           },
         },
         "shutdown_timeout": "30s",
@@ -100,9 +105,9 @@ Object {
           "key": "/app/config/certs/node.key",
           "key_passphrase": null,
           "supported_protocols": Array [
-            "TLSv1.0",
             "TLSv1.1",
             "TLSv1.2",
+            "TLSv1.3",
           ],
         },
         "write_timeout": "30s",
@@ -124,7 +129,15 @@ Object {
   ],
   "output_permissions": Object {
     "es-containerhost": Object {
-      "Elastic APM": Object {
+      "_elastic_agent_checks": Object {
+        "cluster": Array [
+          "monitor",
+        ],
+      },
+      "_elastic_agent_monitoring": Object {
+        "indices": Array [],
+      },
+      "elastic-cloud-apm": Object {
         "cluster": Array [
           "cluster:monitor/main",
         ],
@@ -205,14 +218,6 @@ Object {
             ],
           },
         ],
-      },
-      "_elastic_agent_checks": Object {
-        "cluster": Array [
-          "monitor",
-        ],
-      },
-      "_elastic_agent_monitoring": Object {
-        "indices": Array [],
       },
     },
   },
