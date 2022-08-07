@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 
 export const CloudPosturePageTitle = ({ title, isBeta }: { title: string; isBeta: boolean }) => (
@@ -17,7 +18,11 @@ export const CloudPosturePageTitle = ({ title, isBeta }: { title: string; isBeta
     </EuiFlexItem>
     {isBeta && (
       <EuiFlexItem grow={false}>
-        <EuiBetaBadge label={'Beta'} />
+        <EuiBetaBadge
+          label={i18n.translate('xpack.csp.common.cloudPosturePageTitle.BetaTagLabel', {
+            defaultMessage: 'Beta',
+          })}
+        />
       </EuiFlexItem>
     )}
   </EuiFlexGroup>
