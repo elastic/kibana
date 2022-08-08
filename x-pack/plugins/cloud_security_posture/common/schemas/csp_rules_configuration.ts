@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { schema as rt, TypeOf } from '@kbn/config-schema';
-import { benchmarkIdSchema } from './csp_rule_metadata';
 
 // cspRulesConfigSchema has to match the 'RuntimeCfg' struct in https://github.com/elastic/cloudbeat/blob/main/config/config.go#L45-L51
 export const cspRulesConfigSchema = rt.object({
