@@ -42,6 +42,6 @@ export const DATA_VIEW_ALERTS_ON_ALERTS_WARNING_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.stepDefineRule.dataViewIncludesAlertsIndexDescription',
   {
     defaultMessage:
-      'The default Security data view includes the alerts index. This could result in redundant alerts off of existing alerts.',
+      'The default Security data view includes the alerts index. This could result in redundant alerts being generated from existing alerts.',
   }
 );
