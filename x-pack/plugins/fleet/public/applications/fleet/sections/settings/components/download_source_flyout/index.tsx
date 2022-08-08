@@ -116,6 +116,7 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
                 defaultMessage="Host"
               />
             }
+            {...inputs.hostInput.formRowProps}
           >
             <EuiFieldText
               data-test-subj="editDownloadSourcesFlyout.hostInput"
