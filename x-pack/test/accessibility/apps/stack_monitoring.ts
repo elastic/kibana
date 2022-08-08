@@ -51,7 +51,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('a11y tests for Kibana Overview', async function () {
       await clusterOverview.clickKibanaOverview();
       expect(await kibanaOverview.isOnOverview()).to.be(true);
-      await a11y.testAppSnapshot();
+      await retry.try(async () => {
+        await a11y.testAppSnapshot();
+      });
     });
 
     it('a11y tests for Kibana Instances Page', async function () {
