@@ -123,7 +123,7 @@ function validateName(value: string) {
 
 export function validateHost(value: string) {
   try {
-    if (!value || value === '') {
+    if (!value) {
       return [
         i18n.translate('xpack.fleet.settings.dowloadSourceFlyoutForm.HostIsRequiredErrorMessage', {
           defaultMessage: 'Host is required',
