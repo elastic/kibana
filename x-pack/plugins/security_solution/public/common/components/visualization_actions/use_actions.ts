@@ -11,13 +11,12 @@ import { useKibana } from '../../lib/kibana/kibana_react';
 import { useAddToExistingCase } from './use_add_to_existing_case';
 import { useAddToNewCase } from './use_add_to_new_case';
 
-import { useGetUserCasesPermissions } from '../../lib/kibana';
 import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE, OPEN_IN_LENS } from './translations';
 import type { LensAttributes } from './types';
 
 export type ActionTypes = 'addToExistingCase' | 'addToNewCase' | 'openInLens';
 
-export function useActions({
+export const useActions = ({
   withActions,
   attributes,
   timeRange,
@@ -27,11 +26,9 @@ export function useActions({
   attributes: LensAttributes | null;
 
   timeRange: { from: string; to: string };
-}) {
+}) => {
   const { lens } = useKibana().services;
   const { navigateToPrefilledEditor } = lens;
-  const userPermissions = useGetUserCasesPermissions();
-  const userCanCrud = userPermissions?.crud ?? false;
   const [defaultActions, setDefaultActions] = useState([
     'openInLens',
     'addToNewCase',
@@ -67,23 +64,33 @@ export function useActions({
     useAddToExistingCase({
       lensAttributes: attributes,
       timeRange,
-      userCanCrud,
     });
 
   const { onAddToNewCaseClicked, disabled: isAddToNewCaseDisabled } = useAddToNewCase({
     timeRange,
     lensAttributes: attributes,
-    userCanCrud,
   });
 
   const actions = useMemo(
     () =>
       defaultActions.reduce<Action[]>((acc, action) => {
         if (action === 'addToExistingCase') {
-          return [...acc, getAddToExistingCaseAction({ callback: onAddToExistingCaseClicked })];
+          return [
+            ...acc,
+            getAddToExistingCaseAction({
+              callback: onAddToExistingCaseClicked,
+              disabled: isAddToExistingCaseDisabled,
+            }),
+          ];
         }
         if (action === 'addToNewCase') {
-          return [...acc, getAddToNewCaseAction({ callback: onAddToNewCaseClicked })];
+          return [
+            ...acc,
+            getAddToNewCaseAction({
+              callback: onAddToNewCaseClicked,
+              disabled: isAddToNewCaseDisabled,
+            }),
+          ];
         }
         if (action === 'openInLens') {
           return [...acc, getOpenInLensAction({ callback: onOpenInLens })];
@@ -91,11 +98,18 @@ export function useActions({
 
         return acc;
       }, []),
-    [defaultActions, onAddToExistingCaseClicked, onAddToNewCaseClicked, onOpenInLens]
+    [
+      defaultActions,
+      onAddToExistingCaseClicked,
+      onAddToNewCaseClicked,
+      onOpenInLens,
+      isAddToExistingCaseDisabled,
+      isAddToNewCaseDisabled,
+    ]
   );
 
   return actions;
-}
+};
 
 const getOpenInLensAction = ({ callback }: { callback: () => void }): Action => {
   return {
@@ -117,7 +131,13 @@ const getOpenInLensAction = ({ callback }: { callback: () => void }): Action => 
   };
 };
 
-const getAddToNewCaseAction = ({ callback }: { callback: () => void }): Action => {
+const getAddToNewCaseAction = ({
+  callback,
+  disabled,
+}: {
+  callback: () => void;
+  disabled?: boolean;
+}): Action => {
   return {
     id: 'addToNewCase',
     getDisplayName(context: ActionExecutionContext<object>): string {
@@ -133,11 +153,17 @@ const getAddToNewCaseAction = ({ callback }: { callback: () => void }): Action =
     async execute(context: ActionExecutionContext<object>): Promise<void> {
       callback();
     },
-    order: 48,
+    disabled,
   };
 };
 
-const getAddToExistingCaseAction = ({ callback }: { callback: () => void }): Action => {
+const getAddToExistingCaseAction = ({
+  callback,
+  disabled,
+}: {
+  callback: () => void;
+  disabled?: boolean;
+}): Action => {
   return {
     id: 'addToExistingCase',
     getDisplayName(context: ActionExecutionContext<object>): string {
@@ -153,6 +179,6 @@ const getAddToExistingCaseAction = ({ callback }: { callback: () => void }): Act
     async execute(context: ActionExecutionContext<object>): Promise<void> {
       callback();
     },
-    order: 48,
+    disabled,
   };
 };
