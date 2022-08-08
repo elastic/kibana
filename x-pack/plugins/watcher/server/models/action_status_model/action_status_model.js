@@ -7,11 +7,12 @@
 
 import { get } from 'lodash';
 import { badRequest } from '@hapi/boom';
-import { getMoment } from '../../../common/lib/get_moment';
-import { ACTION_STATES } from '../../../common/constants';
 import { i18n } from '@kbn/i18n';
 
-export class ActionStatus {
+import { getMoment } from '../../../common/lib/get_moment';
+import { ACTION_STATES } from '../../../common/constants';
+
+export class ActionStatusModel {
   constructor(props) {
     this.id = props.id;
     this.actionStatusJson = props.actionStatusJson;
@@ -119,7 +120,7 @@ export class ActionStatus {
       throw badRequest(missingPropertyError('actionStatusJson'));
     }
 
-    return new ActionStatus(json);
+    return new ActionStatusModel(json);
   }
 
   /*
