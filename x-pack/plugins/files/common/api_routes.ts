@@ -100,7 +100,10 @@ export type UploadFileKindHttpEndpoint = HttpApiInterfaceEntryDefinition<
   { id: string },
   unknown,
   any,
-  { ok: true }
+  {
+    ok: true;
+    size: number;
+  }
 >;
 
 export type FindFilesHttpEndpoint = HttpApiInterfaceEntryDefinition<

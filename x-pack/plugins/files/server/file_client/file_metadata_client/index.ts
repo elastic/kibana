@@ -13,7 +13,6 @@ export type {
   GetArg as GetMetadataArg,
   GetUsageMetricsArgs,
   ListArg as ListMetadataArg,
-  Pagination,
   UpdateArgs as UpdateMetadataArg,
 } from './file_metadata_client';
 export { SavedObjectsFileMetadataClient, EsIndexFilesMetadataClient } from './adapters';

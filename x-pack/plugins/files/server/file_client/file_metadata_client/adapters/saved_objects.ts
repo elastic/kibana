@@ -17,12 +17,11 @@ import { escapeKuery } from '@kbn/es-query';
 
 import { FindFileArgs } from '../../../file_service/file_action_types';
 import { ES_FIXED_SIZE_INDEX_BLOB_STORE } from '../../../../common/constants';
-import type { FileMetadata, FilesMetrics, FileStatus } from '../../../../common/types';
+import type { FileMetadata, FilesMetrics, FileStatus, Pagination } from '../../../../common/types';
 import type {
   FileMetadataClient,
   UpdateArgs,
   FileDescriptor,
-  Pagination,
   GetUsageMetricsArgs,
 } from '../file_metadata_client';
 
@@ -62,11 +61,9 @@ export class SavedObjectsFileMetadataClient implements FileMetadataClient {
       metadata: result.attributes as FileDescriptor['metadata'],
     };
   }
-  async list({
-    fileKind,
-    page,
-    perPage,
-  }: { fileKind: string } & Pagination): Promise<FileDescriptor[]> {
+  async list({ fileKind, page, perPage }: { fileKind?: string } & Pagination = {}): Promise<
+    FileDescriptor[]
+  > {
     let filter = `NOT ${this.soType}.attributes.Status: DELETED`;
     if (fileKind) {
       filter = `${this.soType}.attributes.FileKind: ${escapeKuery(fileKind)} AND ${filter}`;
@@ -86,7 +83,7 @@ export class SavedObjectsFileMetadataClient implements FileMetadataClient {
   async find({ page, perPage, ...filterArgs }: FindFileArgs): Promise<FileDescriptor[]> {
     const result = await this.soClient.find({
       type: this.soType,
-      filter: filterArgsToKuery({ ...filterArgs, attrPrefix: `${this.soType}.attributes.` }),
+      filter: filterArgsToKuery({ ...filterArgs, attrPrefix: `${this.soType}.attributes` }),
       page,
       perPage,
       sortOrder: 'desc',

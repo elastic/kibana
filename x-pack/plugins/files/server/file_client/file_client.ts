@@ -4,9 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { FileKind } from '../../common/types';
+import { Readable } from 'stream';
+import cuid from 'cuid';
+import { FileKind, FileMetadata } from '../../common/types';
 import type { FileMetadataClient } from './file_metadata_client';
-import type { BlobStorageClient } from '../blob_storage_service';
+import type {
+  BlobStorageClient,
+  UploadOptions as BlobUploadOptions,
+} from '../blob_storage_service';
 import { enforceMaxByteSizeTransform } from './stream_transforms';
 
 export interface DeleteArgs {
@@ -19,6 +24,22 @@ export interface DeleteArgs {
    */
   hasContent?: boolean;
 }
+
+/**
+ * Args to create a file
+ */
+export interface CreateArgs {
+  /**
+   * Unique file ID
+   */
+  id?: string;
+  /**
+   * The file's metadata
+   */
+  metadata: Omit<FileMetadata, 'FileKind'> & { FileKind?: string };
+}
+
+export type UploadOptions = Omit<BlobUploadOptions, 'id'>;
 
 /**
  * Wraps the {@link FileMetadataClient} and {@link BlobStorageClient} client
@@ -35,7 +56,7 @@ export interface FileClient {
    *
    * @param arg - Arg to create a file.
    * */
-  create: FileMetadataClient['create'];
+  create(arg: CreateArgs): ReturnType<FileMetadataClient['create']>;
 
   /**
    * See {@link FileMetadataClient.get}
@@ -72,12 +93,20 @@ export interface FileClient {
   list: FileMetadataClient['list'];
 
   /**
+   * See {@link FileMetadataClient.find}.
+   *
+   * @param arg - Argument to find files
+   */
+  find: FileMetadataClient['find'];
+
+  /**
    * See {@link BlobStorageClient.upload}
    *
-   * @param content - Readable stream to upload
+   * @param id - Readable stream to upload
+   * @param rs - Readable stream to upload
    * @param opts - Argument for uploads
    */
-  upload: BlobStorageClient['upload'];
+  upload(id: string, rs: Readable, opts?: UploadOptions): ReturnType<BlobStorageClient['upload']>;
 
   /**
    * See {@link BlobStorageClient.download}
@@ -97,8 +126,17 @@ export class FileClientImpl implements FileClient {
     return this.fileKindDescriptor.id;
   }
 
-  public create: FileMetadataClient['create'] = async (arg) => {
-    return this.metadataClient.create(arg);
+  public create = async ({
+    id,
+    metadata,
+  }: CreateArgs): ReturnType<FileMetadataClient['create']> => {
+    return this.metadataClient.create({
+      id: id || cuid(),
+      metadata: {
+        FileKind: this.fileKind,
+        ...metadata,
+      },
+    });
   };
 
   public get: FileMetadataClient['get'] = async (arg) => {
@@ -107,6 +145,10 @@ export class FileClientImpl implements FileClient {
 
   public update: FileMetadataClient['update'] = (arg) => {
     return this.metadataClient.update(arg);
+  };
+
+  public find: FileMetadataClient['find'] = (arg) => {
+    return this.metadataClient.find(arg);
   };
 
   public async delete({ id, hasContent = true }: DeleteArgs) {
@@ -122,10 +164,24 @@ export class FileClientImpl implements FileClient {
     return this.metadataClient.list(arg);
   };
 
-  public upload: BlobStorageClient['upload'] = (rs, options) => {
+  /**
+   * Upload a blob
+   * @param id - The ID of the file content is associated with
+   * @param rs - The readable stream of the file content
+   * @param options - Options for the upload
+   */
+  public upload = async (
+    id: string,
+    rs: Readable,
+    options?: UploadOptions
+  ): ReturnType<BlobStorageClient['upload']> => {
     return this.blobStorageClient.upload(rs, {
       ...options,
-      transforms: [enforceMaxByteSizeTransform(this.fileKindDescriptor.maxSizeBytes ?? Infinity)],
+      transforms: [
+        ...(options?.transforms || []),
+        enforceMaxByteSizeTransform(this.fileKindDescriptor.maxSizeBytes ?? Infinity),
+      ],
+      id,
     });
   };
 

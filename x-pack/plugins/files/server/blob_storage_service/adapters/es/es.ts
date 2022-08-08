@@ -48,15 +48,15 @@ export class ElasticsearchBlobStorageClient implements BlobStorageClient {
    * This is only an issue for the very first time the index is being created.
    */
   private createIndexIfNotExists = once(async (): Promise<void> => {
-    const index = this.index;
-    if (await this.esClient.indices.exists({ index })) {
-      this.logger.debug(`${index} already exists.`);
-      return;
-    }
-
-    this.logger.info(`Creating ${index} for Elasticsearch blob store.`);
-
     try {
+      const index = this.index;
+      if (await this.esClient.indices.exists({ index })) {
+        this.logger.debug(`${index} already exists.`);
+        return;
+      }
+
+      this.logger.info(`Creating ${index} for Elasticsearch blob store.`);
+
       await this.esClient.indices.create({
         index,
         body: {
@@ -71,7 +71,7 @@ export class ElasticsearchBlobStorageClient implements BlobStorageClient {
       if (e instanceof errors.ResponseError && e.statusCode === 400) {
         this.logger.warn('Unable to create blob storage index, it may have been created already.');
       }
-      throw e;
+      // best effort
     }
   });
 

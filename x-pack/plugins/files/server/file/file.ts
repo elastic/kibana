@@ -6,7 +6,6 @@
  */
 
 import { Logger } from '@kbn/core/server';
-import cuid from 'cuid';
 import mimeType from 'mime';
 import { Readable } from 'stream';
 import type { FileCompression, FileShareJSON, FileShareJSONWithToken } from '../../common/types';
@@ -96,9 +95,7 @@ export class File<M = unknown> implements IFile {
     });
 
     try {
-      const { size } = await this.fileClient.upload(content, {
-        id: this.id, // By sharing this ID with the blob content we can retrieve the content later
-      });
+      const { size } = await this.fileClient.upload(this.id, content);
       await this.updateFileState({
         action: 'uploaded',
         payload: { size },
@@ -245,7 +242,6 @@ export class File<M = unknown> implements IFile {
     fileClient: FileClientImpl
   ) {
     const fileMeta = await fileClient.create({
-      id: cuid(),
       metadata: {
         ...createDefaultFileAttributes(),
         name,
