@@ -30,6 +30,7 @@ import {
 } from '@kbn/alerting-plugin/server';
 import { Logger, ElasticsearchClient, EcsEventOutcome } from '@kbn/core/server';
 import { AuditLogger } from '@kbn/security-plugin/server';
+import { FieldDescriptor, IndexPatternsFetcher } from '@kbn/data-plugin/server';
 import { alertAuditEvent, operationAlertAuditActionMap } from './audit_events';
 import {
   ALERT_WORKFLOW_STATUS,
@@ -715,5 +716,12 @@ export class AlertsClient {
       this.logger.error(errMessage);
       throw Boom.failedDependency(errMessage);
     }
+  }
+
+  async getFieldCapabilities({ indices }: { indices: string[] }): Promise<FieldDescriptor[]> {
+    const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(this.esClient);
+    return indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
+      pattern: indices,
+    });
   }
 }

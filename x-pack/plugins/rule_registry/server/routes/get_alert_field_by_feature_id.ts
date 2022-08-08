@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
+import { ElasticsearchClient, IRouter } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { schema } from '@kbn/config-schema';
 
@@ -32,22 +32,20 @@ export const getAlertFieldByFeatureId = (router: IRouter<RacRequestHandlerContex
         const alertsClient = await racContext.getAlertsClient();
 
         const { featureIds } = request.query;
-        const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(alertsClient);
-
         const indices = await alertsClient.getAuthorizedAlertsIndices(featureIds.split(','));
 
-        // for now working with the first one, but should be working for an array of element
-        let fieldCaps;
-        if (indices && indices[0].startsWith('.alerts-observability')) {
-          fieldCaps = indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
-            pattern: indices[0],
-          });
+        if (!indices) {
+          throw new Error('fix me');
         }
+
+        const o11yIndices = indices.filter((index) => index.startsWith('.alerts-observability'));
+        const fieldCaps = alertsClient.getFieldCapabilities({ indices: o11yIndices });
 
         return response.ok({
           body: {
             featureIds,
-            indices,
+            authAlertIndices: indices,
+            o11yIndices,
             fieldCaps,
           },
         });
