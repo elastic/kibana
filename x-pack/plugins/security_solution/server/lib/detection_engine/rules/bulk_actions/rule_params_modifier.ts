@@ -36,7 +36,7 @@ const applyBulkActionEditToRuleParams = (
         "Index patterns can't be added. Machine learning rule doesn't have index patterns property"
       );
 
-      if (!isMachineLearningParams(ruleParams) && action.overwriteDataViews) {
+      if (!isMachineLearningParams(ruleParams) && action.overwrite_data_views) {
         ruleParams.dataViewId = undefined;
       }
 
