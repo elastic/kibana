@@ -6,10 +6,10 @@
  */
 
 import React, { VFC } from 'react';
-import { EMPTY_VALUE } from '../../../common/constants';
-import { unwrapValue } from '../../modules/indicators/lib/unwrap_value';
-import { Indicator, RawIndicatorFieldId } from '../../../common/types/indicator';
-import { DateFormatter } from '../date_formatter';
+import { EMPTY_VALUE } from '../../../../../common/constants';
+import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
+import { DateFormatter } from '../../../../components/date_formatter';
+import { unwrapValue } from '../../lib/unwrap_value';
 
 export interface IndicatorFieldProps {
   indicator: Indicator;

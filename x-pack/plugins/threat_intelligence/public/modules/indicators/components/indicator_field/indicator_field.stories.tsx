@@ -8,9 +8,9 @@
 import React from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_FORMAT_TZ } from '../../../common/constants';
+import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_FORMAT_TZ } from '../../../../../common/constants';
+import { generateMockIndicator } from '../../../../../common/types/indicator';
 import { IndicatorField } from './indicator_field';
-import { generateMockIndicator } from '../../../common/types/indicator';
 
 export default {
   component: IndicatorField,

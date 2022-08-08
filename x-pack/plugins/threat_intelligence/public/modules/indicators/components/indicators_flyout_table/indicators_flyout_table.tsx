@@ -8,8 +8,8 @@
 import { EuiEmptyPrompt, EuiInMemoryTable } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { VFC } from 'react';
-import { IndicatorField } from '../../../../components/indicator_field/indicator_field';
 import { Indicator } from '../../../../../common/types/indicator';
+import { IndicatorField } from '../indicator_field/indicator_field';
 
 export const EMPTY_PROMPT_TEST_ID = 'tiFlyoutTableEmptyPrompt';
 export const TABLE_TEST_ID = 'tiFlyoutTableMemoryTable';
@@ -48,12 +48,9 @@ export const IndicatorsFlyoutTable: VFC<IndicatorsFlyoutTableProps> = ({
           defaultMessage="Value"
         />
       ),
-      render: (field: string) =>
-        IndicatorField({
-          indicator,
-          field,
-          fieldTypesMap,
-        }),
+      render: (field: string) => (
+        <IndicatorField indicator={indicator} field={field} fieldTypesMap={fieldTypesMap} />
+      ),
     },
   ];
 
