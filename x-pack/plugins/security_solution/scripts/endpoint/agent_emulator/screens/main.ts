@@ -5,13 +5,19 @@
  * 2.0.
  */
 
+import type { EmulatorRunContext } from '../services/emulator_run_context';
 import { LoadEndpointsScreen } from './load_endpoints';
 import { TOOL_TITLE } from '../constants';
 import { ScreenBaseClass, ChoiceListFormatter } from '../../common/screen';
 import type { DataFormatter } from '../../common/screen/data_formatter';
 
 export class MainScreen extends ScreenBaseClass {
-  private readonly loadEndpointsScreen = new LoadEndpointsScreen();
+  private readonly loadEndpointsScreen;
+
+  constructor(private readonly emulatorContext: EmulatorRunContext) {
+    super();
+    this.loadEndpointsScreen = new LoadEndpointsScreen(this.emulatorContext);
+  }
 
   protected header(title: string = '', subTitle: string = ''): string | DataFormatter {
     return super.header(TOOL_TITLE);
