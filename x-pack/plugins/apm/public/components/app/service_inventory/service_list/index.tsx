@@ -243,6 +243,7 @@ interface Props {
   isFailure?: boolean;
   displayHealthStatus: boolean;
   initialSortField: ServiceInventoryFieldName;
+  initialPageSize: number;
   initialSortDirection: 'asc' | 'desc';
   sortFn: (
     sortItems: ServiceListItem[],
@@ -261,6 +262,7 @@ export function ServiceList({
   displayHealthStatus,
   initialSortField,
   initialSortDirection,
+  initialPageSize,
   sortFn,
 }: Props) {
   const breakpoints = useBreakpoints();
@@ -353,7 +355,7 @@ export function ServiceList({
           noItemsMessage={noItemsMessage}
           initialSortField={initialSortField}
           initialSortDirection={initialSortDirection}
-          initialPageSize={25}
+          initialPageSize={initialPageSize}
           sortFn={(itemsToSort, sortField, sortDirection) =>
             sortFn(
               itemsToSort,
