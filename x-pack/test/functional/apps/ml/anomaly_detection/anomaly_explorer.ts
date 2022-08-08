@@ -63,7 +63,8 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const elasticChart = getService('elasticChart');
 
-  describe('anomaly explorer', function () {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/138293
+  describe.skip('anomaly explorer', function () {
     // FAILING ES FORWARDS COMPATIBILITY TESTS: https://github.com/elastic/kibana/issues/137602
     this.onlyEsVersion('<8');
 
