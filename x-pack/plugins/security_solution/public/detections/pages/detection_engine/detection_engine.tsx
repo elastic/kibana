@@ -76,7 +76,6 @@ import {
 import { EmptyPage } from '../../../common/components/empty_page';
 import { HeaderPage } from '../../../common/components/header_page';
 import { LandingPageComponent } from '../../../common/components/landing_page';
-import { usePrePackagedRules } from '../../containers/detection_engine/rules';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -113,6 +112,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const query = useDeepEqualSelector(getGlobalQuerySelector);
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
+
   const { to, from } = useGlobalTime();
   const { globalFullScreen } = useGlobalFullScreen();
   const [
@@ -120,8 +120,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
       loading: userInfoLoading,
       isAuthenticated: isUserAuthenticated,
       hasEncryptionKey,
-      canUserCRUD,
-      isSignalIndexExists,
       signalIndexName,
       hasIndexWrite = false,
       hasIndexMaintenance = false,
@@ -138,13 +136,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
     loading: isLoadingIndexPattern,
   } = useSourcererDataView(SourcererScopeName.detections);
 
-  const { rulesCustomInstalled, rulesNotInstalled } = usePrePackagedRules({
-    canUserCRUD,
-    hasIndexWrite,
-    isSignalIndexExists,
-    isAuthenticated: isUserAuthenticated,
-    hasEncryptionKey,
-  });
   const { formatUrl } = useFormatUrl(SecurityPageName.rules);
   const [showBuildingBlockAlerts, setShowBuildingBlockAlerts] = useState(false);
   const [showOnlyThreatIndicatorAlerts, setShowOnlyThreatIndicatorAlerts] = useState(false);
