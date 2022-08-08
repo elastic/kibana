@@ -33,7 +33,7 @@ export interface FileClient {
   /**
    * See {@link FileMetadataClient.create}.
    *
-   * @param args - Arg to create a file.
+   * @param arg - Arg to create a file.
    * */
   create: FileMetadataClient['create'];
 
@@ -60,7 +60,7 @@ export interface FileClient {
   /**
    * See {@link BlobStorageClient.delete}
    *
-   * @param arg - Argument to delete a file
+   * @param id - Argument to delete a file
    */
   deleteContent: BlobStorageClient['delete'];
 
@@ -74,8 +74,8 @@ export interface FileClient {
   /**
    * See {@link BlobStorageClient.upload}
    *
-   * @param rs - Readable stream to upload
-   * @param options - Argument for uploads
+   * @param content - Readable stream to upload
+   * @param opts - Argument for uploads
    */
   upload: BlobStorageClient['upload'];
 

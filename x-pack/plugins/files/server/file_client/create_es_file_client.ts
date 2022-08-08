@@ -44,15 +44,10 @@ export interface CreateEsFileClientArgs {
  *
  * @note This client is not intended to be aware of {@link FileKind}s.
  *
- * @param param0 - Arguments to create an {@link FileClient}
+ * @param arg - See {@link CreateEsFileClientArgs}
  */
-export function createEsFileClient({
-  metadataIndex,
-  blobStorageIndex,
-  maxSizeBytes,
-  elasticsearchClient,
-  logger,
-}: CreateEsFileClientArgs): FileClientImpl {
+export function createEsFileClient(arg: CreateEsFileClientArgs): FileClientImpl {
+  const { blobStorageIndex, elasticsearchClient, logger, metadataIndex, maxSizeBytes } = arg;
   return new FileClientImpl(
     {
       id: NO_FILE_KIND,

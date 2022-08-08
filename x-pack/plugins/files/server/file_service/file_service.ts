@@ -67,14 +67,14 @@ export interface FileServiceStart {
   /**
    * Get an instance of a share object
    *
-   * @param args - get share args
+   * @param arg - get share args
    */
   getShareObject: FileShareServiceStart['get'];
 
   /**
    * List share objects
    *
-   * @param args - list share objects args
+   * @param arg - list share objects args
    */
   listShareObjects: FileShareServiceStart['list'];
 
