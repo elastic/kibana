@@ -193,9 +193,9 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
                       )};\n${content}`;
                     },
                     webpackImporter: false,
+                    sourceMap: !worker.dist,
                     implementation: require('node-sass'),
                     sassOptions: {
-                      outputStyle: worker.dist ? 'compressed' : 'nested',
                       includePaths: [Path.resolve(worker.repoRoot, 'node_modules')],
                       sourceMapRoot: `/${bundle.type}:${bundle.id}`,
                     },
