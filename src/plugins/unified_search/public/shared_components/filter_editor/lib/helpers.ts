@@ -10,7 +10,7 @@ import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { isEmpty } from 'lodash';
-import { validateParams } from '../filter_bar/filter_editor/lib/filter_editor_utils';
+import { validateParams } from './filter_editor_utils';
 
 export const getFieldValidityAndErrorMessage = (
   field: DataViewField,

@@ -11,9 +11,8 @@ import { i18n } from '@kbn/i18n';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 
 // todo: {start} should be refactored cause shared component cannot be linked with non-shared components
-import type { Operator } from '../../../filter_bar/filter_editor/lib/filter_operators';
-import { getOperatorOptions } from '../../../filter_bar/filter_editor/lib/filter_editor_utils';
-import { GenericComboBox } from '../../../filter_bar/filter_editor/generic_combo_box';
+import type { Operator } from '../../filter_editor';
+import { getOperatorOptions, GenericComboBox } from '../../filter_editor';
 // todo: {end}
 
 interface OperatorInputProps<TParams = unknown> {

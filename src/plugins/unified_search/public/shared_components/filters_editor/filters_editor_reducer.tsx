@@ -10,7 +10,6 @@ import type { Reducer } from 'react';
 import type { Filter } from '@kbn/es-query';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { Path } from './filter_editors_types';
-import type { Operator } from '../../filter_bar/filter_editor/lib/filter_operators';
 import type { ConditionTypes } from './filters_editor_condition_types';
 import {
   addFilter,
@@ -19,6 +18,10 @@ import {
   updateFilter,
   updateFilterParams,
 } from './filters_editor_utils';
+
+// todo: {start} should be refactored cause shared component cannot be linked with non-shared components
+import type { Operator } from '../filter_editor';
+// todo: {end}
 
 /** @internal **/
 export interface FiltersEditorState {

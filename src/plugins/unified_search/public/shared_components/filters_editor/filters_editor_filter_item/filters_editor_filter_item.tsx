@@ -35,11 +35,8 @@ import { getConditionalOperationType } from '../filters_editor_utils';
 import type { Path } from '../filter_editors_types';
 
 // @todo: {start} should be refactored cause shared component cannot be linked with non-shared components
-import {
-  getFieldFromFilter,
-  getOperatorFromFilter,
-} from '../../../filter_bar/filter_editor/lib/filter_editor_utils';
-import { Operator } from '../../../filter_bar/filter_editor/lib/filter_operators';
+import { getFieldFromFilter, getOperatorFromFilter } from '../../filter_editor';
+import { Operator } from '../../filter_editor';
 // @todo: {end}
 
 export interface FilterItemProps {

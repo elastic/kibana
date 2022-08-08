@@ -20,4 +20,17 @@ export const FiltersEditorLazy = React.lazy(() => import('./filters_editor'));
  * be used directly by consumers and will load the `FiltersEditorLazy` component lazily with
  * a predefined fallback and error boundary.
  */
-export const CustomizablePalette = withSuspense(FiltersEditorLazy);
+export const FiltersEditor = withSuspense(FiltersEditorLazy);
+
+/**
+ * The Lazily-loaded `FilterEditor` component.  Consumers should use `React.Suspense` or
+ * the withSuspense` HOC to load this component.
+ */
+export const FilterEditorLazy = React.lazy(() => import('./filter_editor'));
+
+/**
+ * A `FilterEditor` component that is wrapped by the `withSuspense` HOC. This component can
+ * be used directly by consumers and will load the `FilterEditor` component lazily with
+ * a predefined fallback and error boundary.
+ */
+export const FilterEditor = withSuspense(FilterEditorLazy);

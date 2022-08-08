@@ -48,9 +48,9 @@ import { Operator } from './lib/filter_operators';
 import { PhraseValueInput } from './phrase_value_input';
 import { PhrasesValuesInput } from './phrases_values_input';
 import { RangeValueInput } from './range_value_input';
-import { getFieldValidityAndErrorMessage } from '../../utils/helpers';
+import { getFieldValidityAndErrorMessage } from './lib/helpers';
 
-export interface Props {
+export interface FilterEditorProps {
   filter: Filter;
   indexPatterns: DataView[];
   onSubmit: (filter: Filter) => void;
@@ -85,8 +85,8 @@ const updateButtonLabel = i18n.translate('unifiedSearch.filter.filterEditor.upda
   defaultMessage: 'Update filter',
 });
 
-class FilterEditorUI extends Component<Props, State> {
-  constructor(props: Props) {
+class FilterEditorUI extends Component<FilterEditorProps, State> {
+  constructor(props: FilterEditorProps) {
     super(props);
     this.state = {
       selectedIndexPattern: this.getIndexPatternFromFilter(),

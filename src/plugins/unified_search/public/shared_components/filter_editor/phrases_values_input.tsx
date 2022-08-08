@@ -13,7 +13,7 @@ import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
 import { PhraseSuggestorUI, PhraseSuggestorProps } from './phrase_suggestor';
 
-interface Props extends PhraseSuggestorProps {
+export interface PhrasesSuggestorProps extends PhraseSuggestorProps {
   values?: string[];
   onChange: (values: string[]) => void;
   onParamsUpdate: (value: string) => void;
@@ -22,7 +22,7 @@ interface Props extends PhraseSuggestorProps {
   compressed?: boolean;
 }
 
-class PhrasesValuesInputUI extends PhraseSuggestorUI<Props> {
+class PhrasesValuesInputUI extends PhraseSuggestorUI<PhrasesSuggestorProps> {
   public render() {
     const { suggestions } = this.state;
     const { values, intl, onChange, fullWidth, onParamsUpdate, compressed } = this.props;

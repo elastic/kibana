@@ -8,7 +8,7 @@
 
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { buildEmptyFilter, Filter } from '@kbn/es-query';
-import { Operator } from '../../filter_bar/filter_editor/lib/filter_operators';
+import { Operator } from '../filter_editor';
 import { ConditionTypes } from './filters_editor_condition_types';
 
 const PATH_SEPARATOR = '.';

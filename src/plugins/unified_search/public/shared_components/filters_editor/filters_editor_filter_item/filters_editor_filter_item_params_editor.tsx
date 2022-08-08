@@ -11,13 +11,13 @@ import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { EuiFormRow } from '@elastic/eui';
 
 // @todo: {start} should be refactored cause shared component cannot be linked with non-shared components
-import { Operator } from '../../../filter_bar/filter_editor/lib/filter_operators';
-import { PhraseValueInput } from '../../../filter_bar/filter_editor/phrase_value_input';
-import { PhrasesValuesInput } from '../../../filter_bar/filter_editor/phrases_values_input';
+import type { Operator } from '../../filter_editor';
 import {
+  PhraseValueInput,
+  PhrasesValuesInput,
   RangeValueInput,
   isRangeParams,
-} from '../../../filter_bar/filter_editor/range_value_input';
+} from '../../filter_editor';
 // @todo: {end}
 
 interface ParamsEditorProps<TParams = unknown> {
