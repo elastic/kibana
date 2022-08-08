@@ -83,18 +83,17 @@ const getAnnotationsStyle = (color = 'gray'): LineAnnotationStyle => ({
   },
 });
 
-// TODO Revisit this approach since it actually manipulates the numbers
-// showing in the chart and its tooltips.
-const CHART_PLACEHOLDER_VALUE = 0.0001;
+// With a log axis, Elastic Charts would not draw a continuous line for values that are 0.
+// By replacing the 0s with a minimum domain value of >0 the line will be drawn as intended.
+// This is just to visually fix the line, for tooltips, that number will be again rounded down to 0.
+const Y_AXIS_MIN_DOMAIN = 0.5;
 
-// Elastic charts will show any lone bin (i.e. a populated bin followed by empty bin)
-// as a circular marker instead of a bar
-// This provides a workaround by making the next bin not empty
-// TODO Find a way to get rid of this workaround since it alters original values of the data.
-export const replaceHistogramDotsWithBars = (histogramItems: HistogramItem[]) =>
+export const replaceHistogramZeroesWithMinimumDomainValue = (
+  histogramItems: HistogramItem[]
+) =>
   histogramItems.reduce((histogramItem, _, i) => {
     if (histogramItem[i].doc_count === 0) {
-      histogramItem[i].doc_count = CHART_PLACEHOLDER_VALUE;
+      histogramItem[i].doc_count = Y_AXIS_MIN_DOMAIN;
     }
     return histogramItem;
   }, histogramItems);
@@ -141,7 +140,7 @@ export function DurationDistributionChart({
     ) ?? 0;
   const yTicks = Math.max(1, Math.ceil(Math.log10(yMax)));
   const yAxisDomain = {
-    min: 0.5,
+    min: Y_AXIS_MIN_DOMAIN,
     max: Math.pow(10, yTicks),
   };
 
@@ -177,6 +176,10 @@ export function DurationDistributionChart({
                 areaSeriesStyle: {
                   line: {
                     visible: true,
+                  },
+                  point: {
+                    visible: false,
+                    radius: 0,
                   },
                 },
                 axes: {
@@ -266,26 +269,28 @@ export function DurationDistributionChart({
             ticks={yTicks}
             gridLine={{ visible: true }}
           />
-          {data.map((d, i) => (
+          {data.map((d) => (
             <AreaSeries
               key={d.id}
               id={d.id}
               xScaleType={ScaleType.Log}
               yScaleType={ScaleType.Log}
-              data={replaceHistogramDotsWithBars(d.histogram)}
+              data={replaceHistogramZeroesWithMinimumDomainValue(d.histogram)}
               curve={CurveType.CURVE_STEP_AFTER}
               xAccessor="key"
               yAccessors={['doc_count']}
               color={d.areaSeriesColor}
-              fit="lookahead"
-              // To make the area appear without the orphaned points technique,
-              // we changed the original data to replace values of 0 with 0.0001.
+              fit="linear"
+              areaSeriesStyle={{
+                fit: {
+                  line: { visible: true },
+                },
+              }}
+              // To make the area appear with a continuous line,
+              // we changed the original data to replace values of 0 with Y_AXIS_MIN_DOMAIN.
               // To show the correct values again in tooltips, we use a custom tickFormat to round values.
               // We can safely do this because all duration values above 0 are without decimal points anyway.
-              // An update for Elastic Charts is in the works to be able to customize the above "fit"
-              // attribute. Once that is available we can get rid of the full workaround.
-              // Elastic Charts issue: https://github.com/elastic/elastic-charts/issues/1489
-              tickFormat={(p) => `${Math.round(p)}`}
+              tickFormat={(p) => `${Math.floor(p)}`}
             />
           ))}
         </Chart>
