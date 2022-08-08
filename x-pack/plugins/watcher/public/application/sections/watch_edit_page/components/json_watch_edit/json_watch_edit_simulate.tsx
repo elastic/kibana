@@ -39,7 +39,7 @@ import {
 import { ErrableFormRow } from '../../../../components';
 import { executeWatch } from '../../../../lib/api';
 import { WatchContext } from '../../watch_context';
-import { JsonWatchEditSimulateResults } from './json_watch_edit_simulate_results';
+import { SimulateWatchResultsFlyout } from './simulate_watch_results_flyout';
 import { getTimeUnitLabel } from '../../../../lib/get_time_unit_label';
 import { useAppContext } from '../../../../app_context';
 
@@ -150,15 +150,6 @@ export const JsonWatchEditSimulate = ({
 
   return (
     <Fragment>
-      <JsonWatchEditSimulateResults
-        executeResults={executeResults}
-        executeDetails={executeDetails}
-        error={executeResultsError}
-        onCloseFlyout={() => {
-          setExecuteResults(null);
-          setExecuteResultsError(null);
-        }}
-      />
       <EuiText>
         <p>
           {i18n.translate('xpack.watcher.sections.watchEdit.simulate.pageDescription', {
@@ -429,6 +420,16 @@ export const JsonWatchEditSimulate = ({
           })}
         </EuiButton>
       </EuiForm>
+
+      <SimulateWatchResultsFlyout
+        executeResults={executeResults}
+        executeDetails={executeDetails}
+        error={executeResultsError}
+        onCloseFlyout={() => {
+          setExecuteResults(null);
+          setExecuteResultsError(null);
+        }}
+      />
     </Fragment>
   );
 };

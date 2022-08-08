@@ -27,7 +27,7 @@ import { getTypeFromAction } from '../../watch_edit_actions';
 import { WatchContext } from '../../watch_context';
 import { WatchStatus, SectionError } from '../../../../components';
 
-export const JsonWatchEditSimulateResults = ({
+export const SimulateWatchResultsFlyout = ({
   executeResults,
   executeDetails,
   onCloseFlyout,

@@ -36,7 +36,7 @@ interface ActionStatus {
   errors: ActionError[];
 }
 
-export const WatchDetail = () => {
+export const ActionStatusesPanel = () => {
   const { toasts } = useAppContext();
   const { watchDetail } = useContext(WatchDetailsContext);
 

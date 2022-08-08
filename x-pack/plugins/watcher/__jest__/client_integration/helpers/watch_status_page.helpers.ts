@@ -16,7 +16,7 @@ import {
 import { HttpSetup } from '@kbn/core/public';
 
 import { registerRouter } from '../../../public/application/lib/navigation';
-import { WatchStatus } from '../../../public/application/sections/watch_status/components/watch_status';
+import { WatchStatusPage } from '../../../public/application/sections/watch_status_page';
 import { ROUTES } from '../../../common/constants';
 import { WATCH_ID } from './jest_constants';
 import { WithAppDependencies } from './setup_environment';
@@ -41,7 +41,10 @@ export interface WatchStatusTestBed extends TestBed<WatchStatusTestSubjects> {
 }
 
 export const setup = async (httpSetup: HttpSetup): Promise<WatchStatusTestBed> => {
-  const initTestBed = registerTestBed(WithAppDependencies(WatchStatus, httpSetup), testBedConfig);
+  const initTestBed = registerTestBed(
+    WithAppDependencies(WatchStatusPage, httpSetup),
+    testBedConfig
+  );
   const testBed = await initTestBed();
 
   /**
