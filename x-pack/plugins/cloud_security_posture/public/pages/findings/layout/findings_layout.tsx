@@ -18,7 +18,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
 import type { Serializable } from '@kbn/utility-types';
-import { CspTimestampTableCell } from '../../../components/csp_timestamp_table_cell';
+import { TimestampTableCell } from '../../../components/timestamp_table_cell';
 import { ColumnNameWithTooltip } from '../../../components/column_name_with_tooltip';
 import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
 import {
@@ -152,7 +152,7 @@ const baseColumns = [
     ),
     truncateText: true,
     sortable: true,
-    render: (timestamp: number) => <CspTimestampTableCell timestamp={timestamp} />,
+    render: (timestamp: number) => <TimestampTableCell timestamp={timestamp} />,
   },
 ] as const;
 

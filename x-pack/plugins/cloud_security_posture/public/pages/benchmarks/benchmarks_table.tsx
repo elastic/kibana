@@ -17,7 +17,7 @@ import { Link, useHistory, generatePath } from 'react-router-dom';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { CspTimestampTableCell } from '../../components/csp_timestamp_table_cell';
+import { TimestampTableCell } from '../../components/timestamp_table_cell';
 import type { Benchmark } from '../../../common/types';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { cloudPosturePages } from '../../common/navigation/constants';
@@ -135,7 +135,7 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
     dataType: 'date',
     truncateText: true,
     render: (timestamp: Benchmark['package_policy']['created_at']) => (
-      <CspTimestampTableCell timestamp={timestamp} />
+      <TimestampTableCell timestamp={timestamp} />
     ),
     sortable: true,
     'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.CREATED_AT,
