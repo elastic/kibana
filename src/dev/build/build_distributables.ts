@@ -78,8 +78,6 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     if (options.buildCanvasShareableRuntime) {
       await run(Tasks.BuildCanvasShareableRuntime);
     }
-
-    await run(Tasks.BuildXpack);
     await run(Tasks.BuildKibanaPlatformPlugins);
     await run(Tasks.TranspileBabel);
     await run(Tasks.CreatePackageJson);
@@ -96,6 +94,7 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await run(Tasks.CleanEmptyFolders);
     await run(Tasks.FleetDownloadElasticGpgKey);
     await run(Tasks.BundleFleetPackages);
+    await run(Tasks.FetchAgentVersionsList);
   }
 
   /**
