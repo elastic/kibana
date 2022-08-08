@@ -28,14 +28,4 @@ export interface LayerMappingCollection {
   [indexPatternTitle: string]: LayerMapping;
 }
 
-export interface MapFeature {
-  id: number;
-  layerId: string;
-}
-
-export interface FeatureGeometry {
-  coordinates: [number];
-  type: string;
-}
-
 export type MapToolTipProps = Partial<RenderTooltipContentParams>;

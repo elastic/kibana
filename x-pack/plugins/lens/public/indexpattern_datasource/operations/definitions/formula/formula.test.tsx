@@ -674,14 +674,6 @@ describe('formula', () => {
       }
     });
 
-    it('returns no change but error if an argument is passed to count operation', () => {
-      const formulas = ['count(7)', 'count("bytes")', 'count(bytes)'];
-
-      for (const formula of formulas) {
-        testIsBrokenFormula(formula);
-      }
-    });
-
     it('returns no change but error if a required parameter is not passed to the operation in formula', () => {
       const formula = 'moving_average(average(bytes))';
       testIsBrokenFormula(formula);
@@ -1124,19 +1116,15 @@ invalid: "
       }
     });
 
-    it('returns an error if an argument is passed to count() operation', () => {
-      const formulas = ['count(7)', 'count("bytes")', 'count(bytes)'];
-
-      for (const formula of formulas) {
-        expect(
-          formulaOperation.getErrorMessage!(
-            getNewLayerWithFormula(formula),
-            'col1',
-            indexPattern,
-            operationDefinitionMap
-          )
-        ).toEqual(['The operation count does not accept any field as argument']);
-      }
+    it('does not return an error if count() is called without a field', () => {
+      expect(
+        formulaOperation.getErrorMessage!(
+          getNewLayerWithFormula('count()'),
+          'col1',
+          indexPattern,
+          operationDefinitionMap
+        )
+      ).toEqual(undefined);
     });
 
     it('returns an error if an operation with required parameters does not receive them', () => {

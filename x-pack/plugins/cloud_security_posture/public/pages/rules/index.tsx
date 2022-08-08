@@ -5,30 +5,56 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useContext, useMemo } from 'react';
 import { generatePath, Link, type RouteComponentProps } from 'react-router-dom';
 import { EuiTextColor, EuiButtonEmpty, EuiFlexGroup, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { CloudPosturePageTitle } from '../../components/cloud_posture_page_title';
+import type { BreadcrumbEntry } from '../../common/navigation/types';
 import { RulesContainer, type PageUrlParams } from './rules_container';
 import { cloudPosturePages } from '../../common/navigation/constants';
 import { useCspBreadcrumbs } from '../../common/navigation/use_csp_breadcrumbs';
-import type { CspPageNavigationItem } from '../../common/navigation/types';
 import { useCspIntegrationInfo } from './use_csp_integration';
-import { CspPageTemplate } from '../../components/csp_page_template';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { CloudPosturePage } from '../../components/cloud_posture_page';
+import { SecuritySolutionContext } from '../../application/security_solution_context';
 
-const getRulesBreadcrumbs = (name?: string): CspPageNavigationItem[] =>
-  [cloudPosturePages.benchmarks, { ...cloudPosturePages.rules, name }].filter(
-    (breadcrumb): breadcrumb is CspPageNavigationItem => !!breadcrumb.name
-  );
+const getRulesBreadcrumbs = (
+  name?: string,
+  manageBreadcrumb?: BreadcrumbEntry
+): BreadcrumbEntry[] => {
+  const breadCrumbs: BreadcrumbEntry[] = [];
+  if (manageBreadcrumb) {
+    breadCrumbs.push(manageBreadcrumb);
+  }
 
-export const RulesNoPageTemplate = ({ match: { params } }: RouteComponentProps<PageUrlParams>) => {
+  breadCrumbs.push(cloudPosturePages.benchmarks);
+
+  if (name) {
+    breadCrumbs.push({ ...cloudPosturePages.rules, name });
+  } else {
+    breadCrumbs.push(cloudPosturePages.rules);
+  }
+
+  return breadCrumbs;
+};
+
+export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>) => {
   const { http } = useKibana().services;
   const integrationInfo = useCspIntegrationInfo(params);
+  const securitySolutionContext = useContext(SecuritySolutionContext);
 
   const [packageInfo, agentInfo] = integrationInfo.data || [];
+
+  const breadcrumbs = useMemo(
+    () =>
+      getRulesBreadcrumbs(packageInfo?.name, securitySolutionContext?.getManageBreadcrumbEntry()),
+    [packageInfo?.name, securitySolutionContext]
+  );
+
+  useCspBreadcrumbs(breadcrumbs);
 
   return (
     <CloudPosturePage query={integrationInfo}>
@@ -56,12 +82,14 @@ export const RulesNoPageTemplate = ({ match: { params } }: RouteComponentProps<P
                 />
               </EuiButtonEmpty>
             </Link>
-            <FormattedMessage
-              id="xpack.csp.rules.rulePageHeader.pageHeaderTitle"
-              defaultMessage="Rules - {integrationName}"
-              values={{
-                integrationName: packageInfo?.name,
-              }}
+            <CloudPosturePageTitle
+              isBeta
+              title={i18n.translate('xpack.csp.rules.rulePageHeader.pageHeaderTitle', {
+                defaultMessage: 'Rules - {integrationName}',
+                values: {
+                  integrationName: packageInfo?.name,
+                },
+              })}
             />
           </EuiFlexGroup>
         }
@@ -85,26 +113,5 @@ export const RulesNoPageTemplate = ({ match: { params } }: RouteComponentProps<P
       <EuiSpacer />
       <RulesContainer />
     </CloudPosturePage>
-  );
-};
-
-export const Rules = (props: RouteComponentProps<PageUrlParams>) => {
-  const { params } = props.match;
-  const integrationInfo = useCspIntegrationInfo(params);
-
-  const [packageInfo] = integrationInfo.data || [];
-
-  const breadcrumbs = useMemo(
-    // TODO: make benchmark breadcrumb navigable
-    () => getRulesBreadcrumbs(packageInfo?.name),
-    [packageInfo?.name]
-  );
-
-  useCspBreadcrumbs(breadcrumbs);
-
-  return (
-    <CspPageTemplate>
-      <RulesNoPageTemplate {...props} />
-    </CspPageTemplate>
   );
 };

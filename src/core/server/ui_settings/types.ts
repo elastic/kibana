@@ -5,12 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import {
   UiSettingsParams,
   UserProvidedValues,
   PublicUiSettingsParams,
 } from '@kbn/core-ui-settings-common';
-import { SavedObjectsClientContract } from '../saved_objects/types';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
 export type {
   UiSettingsParams,

@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ConnectorTypes } from './api';
 import { CasesFeaturesAllRequired } from './ui/types';
 
 export const DEFAULT_DATE_FORMAT = 'dateFormat' as const;
@@ -79,6 +78,8 @@ export const CASE_METRICS_DETAILS_URL = `${CASES_URL}/metrics/{case_id}` as cons
 export const CASES_INTERNAL_URL = '/internal/cases' as const;
 export const INTERNAL_BULK_CREATE_ATTACHMENTS_URL =
   `${CASES_INTERNAL_URL}/{case_id}/attachments/_bulk_create` as const;
+export const INTERNAL_SUGGEST_USER_PROFILES_URL =
+  `${CASES_INTERNAL_URL}/_suggest_user_profiles` as const;
 
 /**
  * Action routes
@@ -87,14 +88,6 @@ export const INTERNAL_BULK_CREATE_ATTACHMENTS_URL =
 export const ACTION_URL = '/api/actions' as const;
 export const ACTION_TYPES_URL = `${ACTION_URL}/connector_types` as const;
 export const CONNECTORS_URL = `${ACTION_URL}/connectors` as const;
-
-export const SUPPORTED_CONNECTORS = [
-  `${ConnectorTypes.serviceNowITSM}`,
-  `${ConnectorTypes.serviceNowSIR}`,
-  `${ConnectorTypes.jira}`,
-  `${ConnectorTypes.resilient}`,
-  `${ConnectorTypes.swimlane}`,
-];
 
 /**
  * Alerts
@@ -140,7 +133,7 @@ export const MAX_TITLE_LENGTH = 64 as const;
  */
 
 export const DEFAULT_FEATURES: CasesFeaturesAllRequired = Object.freeze({
-  alerts: { sync: true, enabled: true },
+  alerts: { sync: true, enabled: true, isExperimental: false },
   metrics: [],
 });
 
@@ -164,3 +157,9 @@ export const READ_CASES_CAPABILITY = 'read_cases' as const;
 export const UPDATE_CASES_CAPABILITY = 'update_cases' as const;
 export const DELETE_CASES_CAPABILITY = 'delete_cases' as const;
 export const PUSH_CASES_CAPABILITY = 'push_cases' as const;
+
+/**
+ * User profiles
+ */
+
+export const DEFAULT_USER_SIZE = 10;

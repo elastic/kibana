@@ -7,12 +7,9 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { TimelineTabs } from '../../../../../common/types/timeline';
-
 import { navTabsHostDetails } from '../../../../hosts/pages/details/nav_tabs';
 import { HostsTableType } from '../../../../hosts/store/model';
 import type { RouteSpyState } from '../../../utils/route/types';
-import { CONSTANTS } from '../../url_state/constants';
 import { TabNavigationComponent } from '.';
 import type { TabNavigationProps } from './types';
 import { SecurityPageName } from '../../../../app/types';
@@ -65,12 +62,6 @@ describe('Table Navigation', () => {
       hasMlUserPermissions: mockHasMlUserPermissions,
       isRiskyHostsEnabled: mockRiskyHostEnabled,
     }),
-    [CONSTANTS.timeline]: {
-      activeTab: TimelineTabs.query,
-      id: '',
-      isOpen: false,
-      graphEventId: '',
-    },
   };
   test('it mounts with correct tab highlighted', () => {
     const wrapper = mount(<TabNavigationComponent {...mockProps} />);
@@ -98,7 +89,7 @@ describe('Table Navigation', () => {
       `EuiTab[data-test-subj="navigation-${HostsTableType.authentications}"]`
     );
     expect(firstTab.props().href).toBe(
-      `/app/securitySolutionUI/hosts/siem-window/authentications${SEARCH_QUERY}`
+      `/app/securitySolutionUI/hosts/name/siem-window/authentications${SEARCH_QUERY}`
     );
   });
 

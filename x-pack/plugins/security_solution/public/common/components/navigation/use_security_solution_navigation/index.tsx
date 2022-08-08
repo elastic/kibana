@@ -10,10 +10,8 @@ import { omit } from 'lodash/fp';
 import { usePrimaryNavigation } from './use_primary_navigation';
 import { useKibana } from '../../../lib/kibana';
 import { useSetBreadcrumbs } from '../breadcrumbs';
-import { makeMapStateToProps } from '../../url_state/helpers';
 import { useRouteSpy } from '../../../utils/route/use_route_spy';
 import { navTabs } from '../../../../app/home/home_navigations';
-import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 import type { GenericNavRecord } from '../types';
 
@@ -23,8 +21,7 @@ import type { GenericNavRecord } from '../types';
  */
 export const useSecuritySolutionNavigation = () => {
   const [routeProps] = useRouteSpy();
-  const urlMapState = makeMapStateToProps();
-  const { urlState } = useDeepEqualSelector(urlMapState);
+
   const {
     chrome,
     application: { getUrlForApp, navigateToUrl },
@@ -74,7 +71,5 @@ export const useSecuritySolutionNavigation = () => {
   return usePrimaryNavigation({
     navTabs: enabledNavTabs,
     pageName,
-    tabName,
-    timeline: urlState.timeline,
   });
 };
