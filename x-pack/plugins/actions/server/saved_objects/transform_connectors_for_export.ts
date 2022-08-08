@@ -28,29 +28,31 @@ function transformConnectorForExport(
   actionType: ActionType
 ): SavedObject<RawAction> {
   let isMissingSecrets = false;
+
   try {
     // If connector requires secrets, this will throw an error
     validateSecrets(actionType, {});
-  } catch (err) {
-    isMissingSecrets = true;
-    return {
-      ...connector,
-      attributes: {
-        ...connector.attributes,
-        secrets: {},
-        isMissingSecrets,
-      },
-    };
-  }
 
-  try {
+    const hasAuth = connector?.attributes?.config?.hasAuth;
+
     // If connector has optional (or no) secrets, set isMissingSecrets value to value of hasAuth
     // If connector doesn't have hasAuth value, default to isMissingSecrets: false
-    isMissingSecrets = (connector?.attributes?.config?.hasAuth as boolean) ?? false;
+    isMissingSecrets = (hasAuth as boolean) ?? false;
 
-    // If connector requires secrets to be defined, this will throw an error
-    validateSecrets(actionType, null);
+    // If hasAuth is not equal to null or undefined, then we know it's defined and
+    // we should set secrets to {}
+    if (hasAuth != null) {
+      return {
+        ...connector,
+        attributes: {
+          ...connector.attributes,
+          secrets: {},
+          isMissingSecrets,
+        },
+      };
+    }
   } catch (err) {
+    isMissingSecrets = true;
     return {
       ...connector,
       attributes: {
