@@ -30,7 +30,7 @@ const DEFAULT_VALUES = {
   data: undefined,
   hasNoIndices: false,
   indices: [],
-  isLoading: false,
+  isLoading: true,
   meta: DEFAULT_META,
   status: Status.IDLE,
 };

@@ -97,9 +97,7 @@ export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
     ],
     isLoading: [
       () => [selectors.status],
-      (status) => {
-        return status === Status.LOADING;
-      },
+      (status) => [Status.LOADING, Status.IDLE].includes(status),
     ],
   }),
 });
