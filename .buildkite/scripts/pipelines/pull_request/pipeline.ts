@@ -122,7 +122,11 @@ const uploadPipeline = (pipelineContent: string | object) => {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/ux_plugin_e2e.yml'));
     }
 
-    if (GITHUB_PR_LABELS.includes('ci:deploy-cloud')) {
+    if (
+      GITHUB_PR_LABELS.includes('ci:deploy-cloud') ||
+      GITHUB_PR_LABELS.includes('ci:cloud-deploy') ||
+      GITHUB_PR_LABELS.includes('ci:cloud-redeploy')
+    ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/deploy_cloud.yml'));
     }
 
