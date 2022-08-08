@@ -242,6 +242,7 @@ export const userActions: CaseUserActionsResponse = [
       status: 'open',
       severity: 'low',
       owner: SECURITY_SOLUTION_OWNER,
+      assignees: [],
     },
     action_id: 'fd830c60-6646-11eb-a291-51bf6b175a53',
     case_id: 'fcdedd20-6646-11eb-a291-51bf6b175a53',
