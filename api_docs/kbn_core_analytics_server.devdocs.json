@@ -26,7 +26,7 @@
         "signature": [
           "{ optIn: (optInConfig: ",
           "OptInConfig",
-          ") => void; reportEvent: <EventTypeData extends Record<string, unknown>>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
+          ") => void; reportEvent: <EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
           "Observable",
           "<",
           "TelemetryCounter",
@@ -58,7 +58,7 @@
         "signature": [
           "{ optIn: (optInConfig: ",
           "OptInConfig",
-          ") => void; reportEvent: <EventTypeData extends Record<string, unknown>>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
+          ") => void; reportEvent: <EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
           "Observable",
           "<",
           "TelemetryCounter",
@@ -90,7 +90,7 @@
         "signature": [
           "{ optIn: (optInConfig: ",
           "OptInConfig",
-          ") => void; reportEvent: <EventTypeData extends Record<string, unknown>>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
+          ") => void; reportEvent: <EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
           "Observable",
           "<",
           "TelemetryCounter",
