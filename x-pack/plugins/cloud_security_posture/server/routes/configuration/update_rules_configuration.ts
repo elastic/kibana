@@ -91,7 +91,7 @@ export const convertRulesConfigToYaml = (config: CspRulesConfiguration): string 
 
 export const setVarToPackagePolicy = (
   packagePolicy: PackagePolicy,
-  runtimeCfg: CspRulesConfiguration
+  runtimeCfg: string
 ): PackagePolicy => {
   const configFile: PackagePolicyConfigRecord = {
     runtimeCfg: { type: 'yaml', value: runtimeCfg },
