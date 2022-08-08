@@ -7,10 +7,11 @@
 
 import { get, map, forEach, maxBy } from 'lodash';
 import { badRequest } from '@hapi/boom';
-import { getMoment } from '../../../common/lib/get_moment';
-import { ActionStatus } from '../action_status';
-import { ACTION_STATES, WATCH_STATES, WATCH_STATE_COMMENTS } from '../../../common/constants';
 import { i18n } from '@kbn/i18n';
+
+import { ACTION_STATES, WATCH_STATES, WATCH_STATE_COMMENTS } from '../../../common/constants';
+import { getMoment } from '../../../common/lib/get_moment';
+import { ActionStatusModel } from '../action_status_model';
 
 function getActionStatusTotals(watchStatus) {
   const result = {};
@@ -27,7 +28,7 @@ function getActionStatusTotals(watchStatus) {
 
 const WATCH_STATE_FAILED = 'failed';
 
-export class WatchStatus {
+export class WatchStatusModel {
   constructor(props) {
     this.id = props.id;
     this.watchState = props.state;
@@ -46,7 +47,7 @@ export class WatchStatus {
         errors: this.watchErrors.actions && this.watchErrors.actions[id],
         lastCheckedRawFormat: get(this.watchStatusJson, 'last_checked'),
       };
-      return ActionStatus.fromUpstreamJson(json);
+      return ActionStatusModel.fromUpstreamJson(json);
     });
   }
 
@@ -168,7 +169,7 @@ export class WatchStatus {
       );
     }
 
-    return new WatchStatus(json);
+    return new WatchStatusModel(json);
   }
 
   /*
