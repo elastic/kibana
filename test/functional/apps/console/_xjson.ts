@@ -7,15 +7,15 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
 import { rgbToHex } from '@elastic/eui';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const retry = getService('retry');
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'console', 'header']);
 
-  describe("Console's XJSON features", function testXjson() {
+  describe('XJSON', function testXjson() {
     this.tags('includeFirefox');
     before(async () => {
       log.debug('navigateTo console');
@@ -29,13 +29,22 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await PageObjects.console.clearTextArea();
     });
 
-    describe('with inline http requests', () => {
-      it('should issue a successful request', async () => {
-        await PageObjects.console.enterRequest();
-        await PageObjects.console.clickPlay();
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        const status = await PageObjects.console.getResponseStatus();
-        expect(parseInt(status, 10)).to.be(200);
+    describe('inline HTTP requests', () => {
+      it('should not trigger validation errors with a valid request', async () => {
+        await PageObjects.console.enterRequest('\nGET test/doc/1 \n{\n "foo": "bar"');
+        expect(await PageObjects.console.hasInvalidSyntax()).to.be(false);
+        expect(await PageObjects.console.hasErrorMarker()).to.be(false);
+      });
+
+      it('should trigger validation errors with an invalid request', async () => {
+        await PageObjects.console.enterRequest('\nGET test/doc/1 \n{\n "foo": \'\'');
+        expect(await PageObjects.console.hasInvalidSyntax()).to.be(true);
+        expect(await PageObjects.console.hasErrorMarker()).to.be(true);
+      });
+
+      it('should trigger validation errors with an invalid syntax', async () => {
+        await PageObjects.console.enterRequest('\nGET test/doc/1 \n{\n "foo": \'\'');
+        expect(await PageObjects.console.hasInvalidSyntax()).to.be(true);
       });
 
       it('should be correctly syntax highlighted', async () => {
@@ -48,25 +57,9 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         expect(rgbToHex(methodTokenColorRGB)).to.eql(methodTokenColor);
         expect(rgbToHex(urlColorRGB)).to.eql(urlTokenColor);
       });
-
-      describe('with valid request', () => {
-        it('should not trigger validation errors', async () => {
-          await PageObjects.console.enterRequest('\nGET test/doc/1 \n{\n "foo": "bar"');
-          expect(await PageObjects.console.hasInvalidSyntax()).to.be(false);
-          expect(await PageObjects.console.hasErrorMarker()).to.be(false);
-        });
-      });
-
-      describe('with invalid request', () => {
-        it('should trigger validation errors', async () => {
-          await PageObjects.console.enterRequest('\nGET test/doc/1 \n{\n "foo": \'\'');
-          expect(await PageObjects.console.hasInvalidSyntax()).to.be(true);
-          expect(await PageObjects.console.hasErrorMarker()).to.be(true);
-        });
-      });
     });
 
-    describe('with multiple bodies for msearch requests', () => {
+    describe('multiple bodies for msearch requests', () => {
       it('should not trigger validation errors', async () => {
         await PageObjects.console.enterRequest(
           '\nGET foo/_msearch \n{}\n{"query": {"match_all": {}}}\n{"index": "bar"}\n{"query": {"match_all": {}}}'
@@ -75,7 +68,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       });
     });
 
-    describe('with multiple JSON blocks', () => {
+    describe('multiple JSON blocks', () => {
       it('should not trigger validation errors', async () => {
         await PageObjects.console.enterRequest('\nPOST test/doc/1 \n{\n "foo": "bar"');
         await PageObjects.console.enterRequest('\nPOST test/doc/1 \n{\n "foo": "bar"');
@@ -84,7 +77,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       });
     });
 
-    describe('with triple quoted strings', () => {
+    describe('triple quoted strings', () => {
       it('should allow escaping quotation mark by wrapping it in triple quotes', async () => {
         await PageObjects.console.enterRequest(
           '\nPOST test/_doc/1 \n{\n "foo": """look "escaped" quotes"""'
@@ -95,20 +88,12 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       });
     });
 
-    describe('with invalid syntax', () => {
-      it('should trigger validation errors', async () => {
-        await PageObjects.console.enterRequest('\nGET test/doc/1 \n{\n "foo": \'\'');
-        expect(await PageObjects.console.hasInvalidSyntax()).to.be(true);
-        expect(await PageObjects.console.hasErrorMarker()).to.be(true);
-        expect(await PageObjects.console.hasErrorMarker()).to.be(false);
-      });
-    });
-
-    describe('with inline comments', () => {
+    describe('inline comments', () => {
       it('should be correctly syntax highlighted', async () => {
         const commentTokenColor = '#41755c';
         await PageObjects.console.enterRequest('\n GET _search // inline comment');
         const commentTokenColorRGB = await PageObjects.console.getTokenColor('ace_comment');
+        // getTokenColor returns rgb value of css color property, we need to convert rgb to hex to compare it to the actual value
         expect(rgbToHex(commentTokenColorRGB)).to.eql(commentTokenColor);
       });
 
