@@ -435,6 +435,7 @@
     "intl-messageformat": "^2.2.0",
     "intl-messageformat-parser": "^1.4.0",
     "intl-relativeformat": "^2.1.0",
+    "inversify": "^6.0.1",
     "io-ts": "^2.0.5",
     "ipaddr.js": "2.0.0",
     "isbinaryfile": "4.0.2",
