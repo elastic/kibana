@@ -105,7 +105,8 @@ export const AddComment = React.memo(
           }
           createAttachments({
             caseId,
-            data: [{ ...data, type: CommentType.user, owner: owner[0] }],
+            caseOwner: owner[0],
+            data: [{ ...data, type: CommentType.user }],
             updateCase: onCommentPosted,
           });
           reset();

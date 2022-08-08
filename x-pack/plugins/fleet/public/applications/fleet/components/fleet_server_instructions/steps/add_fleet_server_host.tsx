@@ -106,7 +106,6 @@ export const AddFleetServerHostStepContent = ({
       <EuiSpacer size="m" />
       <EuiFlexGroup wrap>
         <EuiFlexItem
-          grow={false}
           css={`
             max-width: 100%;
           `}
