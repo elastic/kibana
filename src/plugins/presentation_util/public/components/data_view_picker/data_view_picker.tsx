@@ -85,11 +85,11 @@ export function DataViewPicker({
           {...selectableProps}
           searchable
           singleSelection="always"
-          options={dataViews.map(({ title, id }) => ({
+          options={dataViews.map(({ name, id, title }) => ({
             key: id,
-            label: title,
+            label: name ?? title,
             value: id,
-            'data-test-subj': `data-view-picker-${title}`,
+            'data-test-subj': `data-view-picker-${name ?? title}`,
             checked: id === selectedDataViewId ? 'on' : undefined,
           }))}
           onChange={(choices) => {
