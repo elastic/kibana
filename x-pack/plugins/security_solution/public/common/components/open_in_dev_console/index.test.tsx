@@ -40,7 +40,7 @@ describe('OpenInDevConsoleButton', () => {
       </TestProviders>
     );
     expect(screen.getByTestId('open-in-console-button').getAttribute('href')).toEqual(
-      '/s/myspace/app/dev_tools#/console?load_from=http://localhost:1234/test'
+      '/s/myspace/app/dev_tools#/console?load_from=http://localhost:1234/s/myspace/test'
     );
   });
 
