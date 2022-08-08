@@ -9,20 +9,23 @@ import { ES_FIXED_SIZE_INDEX_BLOB_STORE } from '../../../common/constants';
 import type { FileMetadata, FilesMetrics } from '../../../common/types';
 import type { FindFileArgs } from '../../file_service/file_action_types';
 
+/**
+ * Args to get usage metrics
+ */
 export interface GetUsageMetricsArgs {
   /**
    * The ES backed fixed size storage
    */
   [ES_FIXED_SIZE_INDEX_BLOB_STORE]: {
     /**
-     * Use this number to caculate free space when calculating metrics
+     * Use this number to calculate free space when calculating metrics
      */
     capacity: number;
   };
 }
 
 /**
- * Meta description a file.
+ * Meta description of a file.
  */
 export interface FileDescriptor<M = unknown> {
   /**
@@ -35,6 +38,9 @@ export interface FileDescriptor<M = unknown> {
   metadata: FileMetadata<M>;
 }
 
+/**
+ * Update a file args
+ */
 export interface UpdateArgs<M = unknown> {
   /**
    * A unique file ID.
@@ -46,6 +52,9 @@ export interface UpdateArgs<M = unknown> {
   metadata: Partial<FileMetadata<M>>;
 }
 
+/**
+ * Args for pagination
+ */
 export interface Pagination {
   /**
    * The current page.
@@ -57,6 +66,9 @@ export interface Pagination {
   perPage?: number;
 }
 
+/**
+ * Get a file
+ */
 export interface GetArg {
   /**
    * Unique ID of file metadata

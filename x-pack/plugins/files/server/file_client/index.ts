@@ -6,9 +6,18 @@
  */
 
 export { EsIndexFilesMetadataClient, SavedObjectsFileMetadataClient } from './file_metadata_client';
-export type { FileMetadataClient } from './file_metadata_client';
+export type {
+  FileMetadataClient,
+  DeleteMetedataArg,
+  FileDescriptor,
+  FindMetadataArg,
+  GetMetadataArg,
+  GetUsageMetricsArgs,
+  ListMetadataArg,
+  Pagination,
+  UpdateMetadataArg,
+} from './file_metadata_client';
 export { FileClientImpl } from './file_client';
 export type { FileClient } from './file_client';
 export { createEsFileClient } from './create_es_file_client';
 export type { CreateEsFileClientArgs } from './create_es_file_client';
-export type { FileDescriptor } from './file_metadata_client';

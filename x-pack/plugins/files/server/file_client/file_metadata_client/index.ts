@@ -5,5 +5,15 @@
  * 2.0.
  */
 
-export type { FileMetadataClient, FileDescriptor } from './file_metadata_client';
+export type {
+  FileMetadataClient,
+  FileDescriptor,
+  DeleteArg as DeleteMetedataArg,
+  FindArg as FindMetadataArg,
+  GetArg as GetMetadataArg,
+  GetUsageMetricsArgs,
+  ListArg as ListMetadataArg,
+  Pagination,
+  UpdateArgs as UpdateMetadataArg,
+} from './file_metadata_client';
 export { SavedObjectsFileMetadataClient, EsIndexFilesMetadataClient } from './adapters';
