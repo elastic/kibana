@@ -22,16 +22,14 @@ export function ResizableButton({
   const setFocus = (e: React.MouseEvent<HTMLButtonElement>) => e.currentTarget.focus();
 
   return (
-    <div className="unifiedTextLangEditor--resizableButtonWrapper">
-      <div className="unifiedTextLangEditor--resizableButtonContainer">
-        <button
-          data-test-subj="unifiedTextLangEditor-resize"
-          className="unifiedTextLangEditor--resizableButton"
-          onMouseDown={onMouseDownResizeHandler}
-          onKeyDown={onKeyDownResizeHandler}
-          onClick={setFocus}
-        />
-      </div>
+    <div className="unifiedTextLangEditor--resizableButtonContainer">
+      <button
+        data-test-subj="unifiedTextLangEditor-resize"
+        className="unifiedTextLangEditor--resizableButton"
+        onMouseDown={onMouseDownResizeHandler}
+        onKeyDown={onKeyDownResizeHandler}
+        onClick={setFocus}
+      />
     </div>
   );
 }
