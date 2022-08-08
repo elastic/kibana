@@ -74,5 +74,5 @@ export interface Ecs {
   Target?: Target;
   dll?: DllEcs;
   'kibana.alert.workflow_status'?: 'open' | 'acknowledged' | 'in-progress' | 'closed';
-  'kibana.alert.rule.parameters'?: { index: string[]; data_view_id: string };
+  'kibana.alert.rule.parameters'?: { index: string[]; data_view_id?: string };
 }
