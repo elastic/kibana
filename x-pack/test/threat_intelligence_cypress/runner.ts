@@ -59,8 +59,6 @@ export async function ThreatIntelligenceConfigurableCypressTestRunner(
     log.info(`PUT pipeline ${pipeline.name}: ${res.statusCode}`);
   }
 
-  await esArchiver.load('x-pack/test/threat_intelligence_cypress/es_archives/threat_intelligence');
-
   await withProcRunner(log, async (procs) => {
     await procs.run('cypress', {
       cmd: 'yarn',
