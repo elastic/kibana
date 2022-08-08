@@ -716,4 +716,13 @@ export class AlertsClient {
       throw Boom.failedDependency(errMessage);
     }
   }
+
+  private async getFieldCabapilities(featureIds: string[]): Promise<string[]> {
+    if (index.startsWith('.alerts-observability')) {
+      return indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
+        pattern: index,
+      });
+    }
+    return Promise.resolve(['1']);
+  }
 }
