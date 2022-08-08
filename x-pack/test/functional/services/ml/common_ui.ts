@@ -32,6 +32,7 @@ export function MachineLearningCommonUIProvider({
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const browser = getService('browser');
+  const toasts = getService('toasts');
 
   return {
     async setValueWithChecks(
@@ -357,29 +358,32 @@ export function MachineLearningCommonUIProvider({
       });
     },
 
-    async selectButtonGroupValue(inputTestSubj: string, label: string) {
+    async selectButtonGroupValue(inputTestSubj: string, value: string) {
       await retry.tryForTime(5000, async () => {
         // The input element can not be clicked directly.
         // Instead, we need to click the corresponding label
-        const inputId: string = await testSubjects.getAttribute(inputTestSubj, 'id', 1000);
-        const labelElement = await find.byCssSelector(
-          `[for="${inputId}"] [label="${label}"]`,
-          1000
-        );
+
+        const fieldSetElement = await testSubjects.find(inputTestSubj);
+
+        const labelElement = await fieldSetElement.findByCssSelector(`label[title="${value}"]`);
         await labelElement.click();
 
-        // sometimes the checked attribute of the input is set but it's not actually
-        // selected, so we're also checking the class of the corresponding label
-        const updatedLabelElement = await find.byCssSelector(
-          `[for="${inputId}"] [label="${label}"]`,
-          1000
-        );
-        const labelClasses = await updatedLabelElement.getAttribute('class');
+        const labelClasses = await labelElement.getAttribute('class');
         expect(labelClasses).to.contain(
           'euiButtonGroupButton-isSelected',
           `Label for '${inputTestSubj}' should be selected`
         );
       });
+    },
+
+    async assertLastToastHeader(expectedHeader: string) {
+      const resultToast = await toasts.getToastElement(1);
+      const titleElement = await testSubjects.findDescendant('euiToastHeader', resultToast);
+      const title: string = await titleElement.getVisibleText();
+      expect(title).to.eql(
+        expectedHeader,
+        `Expected the toast header to equal "${expectedHeader}" (got "${title}")`
+      );
     },
   };
 }

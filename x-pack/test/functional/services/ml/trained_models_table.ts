@@ -27,6 +27,7 @@ export function TrainedModelsTableProvider(
 ) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const toasts = getService('toasts');
 
   return new (class ModelsTable {
     public async parseModelsTable() {
@@ -256,11 +257,25 @@ export function TrainedModelsTableProvider(
 
       await testSubjects.click('mlModelsStartDeploymentModalStartButton');
       await this.assertStartDeploymentModalExists(false);
+
+      await mlCommonUI.assertLastToastHeader(
+        `Deployment for "${modelId}" has been started successfully.`
+      );
+
+      await toasts.dismissAllToasts();
+    }
+
+    public async stopDeployment(modelId: string) {
+      await toasts.dismissAllToasts();
+      await this.clickStopDeploymentAction(modelId);
+      await mlCommonUI.assertLastToastHeader(
+        `Deployment for "${modelId}" has been stopped successfully.`
+      );
     }
 
     public async openStartDeploymentModal(modelId: string) {
       await testSubjects.click(this.rowSelector(modelId, 'mlModelsTableRowStartDeploymentAction'));
-      await this.assertStartDeploymentModalExists();
+      await this.assertStartDeploymentModalExists(true);
     }
 
     public async clickStopDeploymentAction(modelId: string) {
