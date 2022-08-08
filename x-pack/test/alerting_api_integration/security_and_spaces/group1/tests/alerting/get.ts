@@ -84,7 +84,8 @@ const getTestUtils = (
                 ...(describeType === 'internal'
                   ? {
                       monitoring: response.body.monitoring,
-                      snooze_end_time: response.body.snooze_end_time,
+                      snooze_schedule: response.body.snooze_schedule,
+                      is_snoozed_until: response.body.is_snoozed_until,
                     }
                   : {}),
               });

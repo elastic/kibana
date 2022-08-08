@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RiskSeverity } from '../../../../common/search_strategy';
+import type { RiskSeverity } from '../../../../common/search_strategy';
 
 export type SeverityCount = {
   [k in RiskSeverity]: number;

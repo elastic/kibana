@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { InPortal } from 'react-reverse-portal';
-import { ActionBarPortalNode } from '../../../pages/monitor_management/action_bar_portal_node';
+import { ActionBarPortalNode } from '../../../pages/monitor_management/portals';
 
 import { ActionBar, ActionBarProps } from './action_bar';
 

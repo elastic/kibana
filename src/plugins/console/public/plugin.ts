@@ -15,8 +15,10 @@ import {
   ConsolePluginSetup,
   ConsoleUILocatorParams,
 } from './types';
+import { AutocompleteInfo, setAutocompleteInfo } from './services';
 
 export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDependencies> {
+  private readonly autocompleteInfo = new AutocompleteInfo();
   constructor(private ctx: PluginInitializerContext) {}
 
   public setup(
@@ -26,6 +28,9 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
     const {
       ui: { enabled: isConsoleUiEnabled },
     } = this.ctx.config.get<ClientConfigType>();
+
+    this.autocompleteInfo.setup(http);
+    setAutocompleteInfo(this.autocompleteInfo);
 
     if (isConsoleUiEnabled) {
       if (home) {
@@ -70,6 +75,7 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
             usageCollection,
             element,
             theme$,
+            autocompleteInfo: this.autocompleteInfo,
           });
         },
       });

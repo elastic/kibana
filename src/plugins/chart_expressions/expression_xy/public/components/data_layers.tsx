@@ -15,23 +15,29 @@ import {
 import React, { FC } from 'react';
 import { PaletteRegistry } from '@kbn/coloring';
 import { FormatFactory } from '@kbn/field-formats-plugin/common';
+import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
+
 import {
   CommonXYDataLayerConfig,
   EndValue,
   FittingFunction,
   ValueLabelMode,
   XYCurveType,
+  XScaleType,
 } from '../../common';
-import { SeriesTypes, ValueLabelModes } from '../../common/constants';
+import { SeriesTypes, ValueLabelModes, AxisModes } from '../../common/constants';
 import {
   getColorAssignments,
   getFitOptions,
   GroupsConfiguration,
   getSeriesProps,
   DatatablesWithFormatInfo,
+  LayersAccessorsTitles,
+  LayersFieldFormats,
 } from '../helpers';
 
 interface Props {
+  titles?: LayersAccessorsTitles;
   layers: CommonXYDataLayerConfig[];
   formatFactory: FormatFactory;
   chartHasMoreThanOneBarSeries?: boolean;
@@ -47,9 +53,12 @@ interface Props {
   fillOpacity?: number;
   shouldShowValueLabels?: boolean;
   valueLabels: ValueLabelMode;
+  defaultXScaleType: XScaleType;
+  fieldFormats: LayersFieldFormats;
 }
 
 export const DataLayers: FC<Props> = ({
+  titles = {},
   layers,
   endValue,
   timeZone,
@@ -65,13 +74,16 @@ export const DataLayers: FC<Props> = ({
   shouldShowValueLabels,
   formattedDatatables,
   chartHasMoreThanOneBarSeries,
+  defaultXScaleType,
+  fieldFormats,
 }) => {
-  const colorAssignments = getColorAssignments(layers, formatFactory);
+  const colorAssignments = getColorAssignments(layers, titles, fieldFormats, formattedDatatables);
   return (
     <>
       {layers.flatMap((layer) =>
         layer.accessors.map((accessor, accessorIndex) => {
-          const { seriesType, columnToLabel, layerId } = layer;
+          const { seriesType, columnToLabel, layerId, table } = layer;
+          const yColumnId = getAccessorByDimension(accessor, table.columns);
           const columnToLabelMap: Record<string, string> = columnToLabel
             ? JSON.parse(columnToLabel)
             : {};
@@ -81,15 +93,18 @@ export const DataLayers: FC<Props> = ({
           // In order to do it we need to make a copy of the table as the raw one is required for more features (filters, etc...) later on
           const formattedDatatableInfo = formattedDatatables[layerId];
 
-          const isPercentage = seriesType.includes('percentage');
-
           const yAxis = yAxesConfiguration.find((axisConfiguration) =>
-            axisConfiguration.series.find((currentSeries) => currentSeries.accessor === accessor)
+            axisConfiguration.series.find((currentSeries) => currentSeries.accessor === yColumnId)
           );
+
+          const isPercentage = yAxis?.mode
+            ? yAxis?.mode === AxisModes.PERCENTAGE
+            : layer.isPercentage;
 
           const seriesProps = getSeriesProps({
             layer,
-            accessor,
+            titles: titles[layer.layerId],
+            accessor: yColumnId,
             chartHasMoreThanOneBarSeries,
             colorAssignments,
             formatFactory,
@@ -101,6 +116,8 @@ export const DataLayers: FC<Props> = ({
             timeZone,
             emphasizeFitting,
             fillOpacity,
+            defaultXScaleType,
+            fieldFormats,
           });
 
           const index = `${layer.layerId}-${accessorIndex}`;
@@ -118,11 +135,6 @@ export const DataLayers: FC<Props> = ({
                 />
               );
             case SeriesTypes.BAR:
-            case SeriesTypes.BAR_STACKED:
-            case SeriesTypes.BAR_PERCENTAGE_STACKED:
-            case SeriesTypes.BAR_HORIZONTAL:
-            case SeriesTypes.BAR_HORIZONTAL_STACKED:
-            case SeriesTypes.BAR_HORIZONTAL_PERCENTAGE_STACKED:
               const valueLabelsSettings = {
                 displayValueSettings: {
                   // This format double fixes two issues in elastic-chart
@@ -139,22 +151,12 @@ export const DataLayers: FC<Props> = ({
                 },
               };
               return <BarSeries key={index} {...seriesProps} {...valueLabelsSettings} />;
-            case SeriesTypes.AREA_STACKED:
-            case SeriesTypes.AREA_PERCENTAGE_STACKED:
-              return (
-                <AreaSeries
-                  key={index}
-                  {...seriesProps}
-                  fit={isPercentage ? 'zero' : getFitOptions(fittingFunction, endValue)}
-                  curve={curve}
-                />
-              );
             case SeriesTypes.AREA:
               return (
                 <AreaSeries
                   key={index}
                   {...seriesProps}
-                  fit={getFitOptions(fittingFunction, endValue)}
+                  fit={isPercentage ? 'zero' : getFitOptions(fittingFunction, endValue)}
                   curve={curve}
                 />
               );

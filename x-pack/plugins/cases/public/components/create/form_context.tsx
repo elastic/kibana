@@ -12,7 +12,6 @@ import { getNoneConnector, normalizeActionConnector } from '../configure_cases/u
 import { usePostCase } from '../../containers/use_post_case';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 
-import { useConnectors } from '../../containers/configure/use_connectors';
 import { Case } from '../../containers/types';
 import { CaseSeverity, NONE_CONNECTOR_ID } from '../../../common/api';
 import {
@@ -22,7 +21,8 @@ import {
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesFeatures } from '../cases_context/use_cases_features';
 import { getConnectorById } from '../utils';
-import { CaseAttachments } from '../../types';
+import { CaseAttachmentsWithoutOwner } from '../../types';
+import { useGetConnectors } from '../../containers/configure/use_connectors';
 
 const initialCaseValue: FormProps = {
   description: '',
@@ -33,6 +33,7 @@ const initialCaseValue: FormProps = {
   fields: null,
   syncAlerts: true,
   selectedOwner: null,
+  assignees: [],
 };
 
 interface Props {
@@ -42,7 +43,7 @@ interface Props {
   ) => Promise<void>;
   children?: JSX.Element | JSX.Element[];
   onSuccess?: (theCase: Case) => Promise<void>;
-  attachments?: CaseAttachments;
+  attachments?: CaseAttachmentsWithoutOwner;
 }
 
 export const FormContext: React.FC<Props> = ({
@@ -51,7 +52,7 @@ export const FormContext: React.FC<Props> = ({
   onSuccess,
   attachments,
 }) => {
-  const { connectors, loading: isLoadingConnectors } = useConnectors();
+  const { data: connectors = [], isLoading: isLoadingConnectors } = useGetConnectors();
   const { owner } = useCasesContext();
   const { isSyncAlertsEnabled } = useCasesFeatures();
   const { postCase } = usePostCase();
@@ -87,6 +88,7 @@ export const FormContext: React.FC<Props> = ({
         if (updatedCase && Array.isArray(attachments) && attachments.length > 0) {
           await createAttachments({
             caseId: updatedCase.id,
+            caseOwner: updatedCase.owner,
             data: attachments,
           });
         }

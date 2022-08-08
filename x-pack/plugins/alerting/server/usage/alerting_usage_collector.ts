@@ -68,6 +68,8 @@ const byReasonSchema: MakeSchemaFrom<AlertingUsage>['count_rules_executions_fail
     unknown: { type: 'long' },
   };
 
+export const NUM_ALERTING_EXECUTION_FAILURE_REASON_TYPES = Object.keys(byReasonSchema).length;
+
 const byPercentileSchema: MakeSchemaFrom<AlertingUsage>['percentile_num_generated_actions_per_day'] =
   {
     p50: { type: 'long' },

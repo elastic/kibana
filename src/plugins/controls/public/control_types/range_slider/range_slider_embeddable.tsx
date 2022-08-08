@@ -6,41 +6,37 @@
  * Side Public License, v 1.
  */
 
-import { isEmpty } from 'lodash';
 import {
   compareFilters,
   buildRangeFilter,
   COMPARE_ALL_OPTIONS,
   RangeFilterParams,
+  Filter,
+  Query,
 } from '@kbn/es-query';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { isEmpty } from 'lodash';
+import { batch } from 'react-redux';
 import { get, isEqual } from 'lodash';
 import deepEqual from 'fast-deep-equal';
-import { Subscription, BehaviorSubject } from 'rxjs';
+import { Subscription, lastValueFrom } from 'rxjs';
 import { debounceTime, distinctUntilChanged, skip, map } from 'rxjs/operators';
 
-import {
-  withSuspense,
-  LazyReduxEmbeddableWrapper,
-  ReduxEmbeddableWrapperPropsWithChildren,
-} from '@kbn/presentation-util-plugin/public';
+import { ReduxEmbeddableTools, ReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
-import { ControlsDataViewsService } from '../../services/data_views';
-import { ControlsDataService } from '../../services/data';
-import { ControlInput, ControlOutput } from '../..';
 import { pluginServices } from '../../services';
+import { ControlInput, ControlOutput } from '../..';
+import { ControlsDataService } from '../../services/data';
+import { ControlsDataViewsService } from '../../services/data_views';
 
-import { RangeSliderComponent, RangeSliderComponentState } from './range_slider.component';
-import { rangeSliderReducers } from './range_slider_reducers';
 import { RangeSliderStrings } from './range_slider_strings';
-import { RangeSliderEmbeddableInput, RANGE_SLIDER_CONTROL } from './types';
-
-const RangeSliderReduxWrapper = withSuspense<
-  ReduxEmbeddableWrapperPropsWithChildren<RangeSliderEmbeddableInput>
->(LazyReduxEmbeddableWrapper);
+import { RangeSliderComponent } from './range_slider.component';
+import { getDefaultComponentState, rangeSliderReducers } from './range_slider_reducers';
+import { RangeSliderEmbeddableInput, RangeSliderReduxState, RANGE_SLIDER_CONTROL } from './types';
 
 const diffDataFetchProps = (
   current?: RangeSliderDataFetchProps,
@@ -59,6 +55,7 @@ interface RangeSliderDataFetchProps {
   dataViewId: string;
   query?: ControlInput['query'];
   filters?: ControlInput['filters'];
+  validate?: boolean;
 }
 
 const fieldMissingError = (fieldName: string) =>
@@ -79,28 +76,30 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
   private dataView?: DataView;
   private field?: DataViewField;
 
-  // State to be passed down to component
-  private componentState: RangeSliderComponentState;
-  private componentStateSubject$ = new BehaviorSubject<RangeSliderComponentState>({
-    min: '',
-    max: '',
-    loading: true,
-    fieldFormatter: (value: string) => value,
-  });
+  private reduxEmbeddableTools: ReduxEmbeddableTools<
+    RangeSliderReduxState,
+    typeof rangeSliderReducers
+  >;
 
-  constructor(input: RangeSliderEmbeddableInput, output: ControlOutput, parent?: IContainer) {
+  constructor(
+    reduxEmbeddablePackage: ReduxEmbeddablePackage,
+    input: RangeSliderEmbeddableInput,
+    output: ControlOutput,
+    parent?: IContainer
+  ) {
     super(input, output, parent); // get filters for initial output...
 
     // Destructure controls services
     ({ data: this.dataService, dataViews: this.dataViewsService } = pluginServices.getServices());
 
-    this.componentState = {
-      min: '',
-      max: '',
-      loading: true,
-      fieldFormatter: (value: string) => value,
-    };
-    this.updateComponentState(this.componentState);
+    this.reduxEmbeddableTools = reduxEmbeddablePackage.createTools<
+      RangeSliderReduxState,
+      typeof rangeSliderReducers
+    >({
+      embeddable: this,
+      reducers: rangeSliderReducers,
+      initialComponentState: getDefaultComponentState(),
+    });
 
     this.initialize();
   }
@@ -111,7 +110,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
       this.setInitializationFinished();
     }
 
-    this.fetchMinMax().then(async () => {
+    this.runRangeSliderQuery().then(async () => {
       if (initialValue) {
         this.setInitializationFinished();
       }
@@ -122,6 +121,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
   private setupSubscriptions = () => {
     const dataFetchPipe = this.getInput$().pipe(
       map((newInput) => ({
+        validate: !Boolean(newInput.ignoreParentSettings?.ignoreValidations),
         lastReloadRequestTime: newInput.lastReloadRequestTime,
         dataViewId: newInput.dataViewId,
         fieldName: newInput.fieldName,
@@ -134,7 +134,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     );
 
     // fetch available min/max when input changes
-    this.subscriptions.add(dataFetchPipe.subscribe(this.fetchMinMax));
+    this.subscriptions.add(dataFetchPipe.subscribe(this.runRangeSliderQuery));
 
     // build filters when value change
     this.subscriptions.add(
@@ -149,78 +149,60 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
   };
 
   private getCurrentDataViewAndField = async (): Promise<{
-    dataView: DataView;
-    field: DataViewField;
+    dataView?: DataView;
+    field?: DataViewField;
   }> => {
-    const { dataViewId, fieldName } = this.getInput();
+    const {
+      getState,
+      dispatch,
+      actions: { setField, setDataViewId },
+    } = this.reduxEmbeddableTools;
+    const {
+      explicitInput: { dataViewId, fieldName },
+    } = getState();
+
     if (!this.dataView || this.dataView.id !== dataViewId) {
-      this.dataView = await this.dataViewsService.get(dataViewId);
-      if (this.dataView === undefined) {
-        this.onFatalError(
-          new Error(RangeSliderStrings.errors.getDataViewNotFoundError(dataViewId))
-        );
+      try {
+        this.dataView = await this.dataViewsService.get(dataViewId);
+        if (!this.dataView)
+          throw new Error(RangeSliderStrings.errors.getDataViewNotFoundError(dataViewId));
+        dispatch(setDataViewId(this.dataView.id));
+      } catch (e) {
+        this.onFatalError(e);
       }
     }
 
     if (!this.field || this.field.name !== fieldName) {
-      this.field = this.dataView.getFieldByName(fieldName);
+      this.field = this.dataView?.getFieldByName(fieldName);
       if (this.field === undefined) {
         this.onFatalError(new Error(RangeSliderStrings.errors.getDataViewNotFoundError(fieldName)));
       }
 
-      this.updateComponentState({
-        field: this.field,
-        fieldFormatter: this.field
-          ? this.dataView.getFormatterForField(this.field).getConverterFor('text')
-          : (value: string) => value,
-      });
+      dispatch(setField(this.field?.toSpec()));
     }
 
     return { dataView: this.dataView, field: this.field! };
   };
 
-  private updateComponentState(changes: Partial<RangeSliderComponentState>) {
-    this.componentState = {
-      ...this.componentState,
-      ...changes,
-    };
-    this.componentStateSubject$.next(this.componentState);
-  }
+  private runRangeSliderQuery = async () => {
+    const {
+      dispatch,
+      actions: { setLoading, publishFilters, setMinMax },
+    } = this.reduxEmbeddableTools;
 
-  private minMaxAgg = (field?: DataViewField) => {
-    const aggBody: any = {};
-    if (field) {
-      if (field.scripted) {
-        aggBody.script = {
-          source: field.script,
-          lang: field.lang,
-        };
-      } else {
-        aggBody.field = field.name;
-      }
-    }
-
-    return {
-      maxAgg: {
-        max: aggBody,
-      },
-      minAgg: {
-        min: aggBody,
-      },
-    };
-  };
-
-  private fetchMinMax = async () => {
-    this.updateComponentState({ loading: true });
-    this.updateOutput({ loading: true });
+    dispatch(setLoading(true));
     const { dataView, field } = await this.getCurrentDataViewAndField();
+    if (!dataView || !field) return;
+
     const embeddableInput = this.getInput();
     const { ignoreParentSettings, fieldName, query, timeRange } = embeddableInput;
     let { filters = [] } = embeddableInput;
 
     if (!field) {
-      this.updateComponentState({ loading: false });
-      this.updateOutput({ loading: false });
+      batch(() => {
+        dispatch(setLoading(false));
+        dispatch(publishFilters([]));
+      });
       throw fieldMissingError(fieldName);
     }
 
@@ -235,59 +217,109 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
       }
     }
 
-    const searchSource = await this.dataService.searchSource.create();
-    searchSource.setField('size', 0);
-    searchSource.setField('index', dataView);
-
-    const aggs = this.minMaxAgg(field);
-    searchSource.setField('aggs', aggs);
-
-    searchSource.setField('filter', filters);
-
-    if (!ignoreParentSettings?.ignoreQuery) {
-      searchSource.setField('query', query);
-    }
-
-    const resp = await searchSource.fetch$().toPromise();
-
-    const min = get(resp, 'rawResponse.aggregations.minAgg.value', '');
-    const max = get(resp, 'rawResponse.aggregations.maxAgg.value', '');
-
-    this.updateComponentState({
-      min: `${min ?? ''}`,
-      max: `${max ?? ''}`,
+    const { min, max } = await this.fetchMinMax({
+      dataView,
+      field,
+      filters,
+      query,
     });
+
+    dispatch(
+      setMinMax({
+        min: `${min ?? ''}`,
+        max: `${max ?? ''}`,
+      })
+    );
 
     // build filter with new min/max
     await this.buildFilter();
   };
 
+  private fetchMinMax = async ({
+    dataView,
+    field,
+    filters,
+    query,
+  }: {
+    dataView: DataView;
+    field: DataViewField;
+    filters: Filter[];
+    query?: Query;
+  }) => {
+    const searchSource = await this.dataService.searchSource.create();
+    searchSource.setField('size', 0);
+    searchSource.setField('index', dataView);
+
+    searchSource.setField('filter', filters);
+
+    if (query) {
+      searchSource.setField('query', query);
+    }
+
+    const aggBody: any = {};
+
+    if (field) {
+      if (field.scripted) {
+        aggBody.script = {
+          source: field.script,
+          lang: field.lang,
+        };
+      } else {
+        aggBody.field = field.name;
+      }
+    }
+
+    const aggs = {
+      maxAgg: {
+        max: aggBody,
+      },
+      minAgg: {
+        min: aggBody,
+      },
+    };
+
+    searchSource.setField('aggs', aggs);
+
+    const resp = await lastValueFrom(searchSource.fetch$());
+
+    const min = get(resp, 'rawResponse.aggregations.minAgg.value', '');
+    const max = get(resp, 'rawResponse.aggregations.maxAgg.value', '');
+
+    return { min, max };
+  };
+
   private buildFilter = async () => {
-    const { value: [selectedMin, selectedMax] = ['', ''], ignoreParentSettings } = this.getInput();
-    const availableMin = this.componentState.min;
-    const availableMax = this.componentState.max;
+    const {
+      dispatch,
+      getState,
+      actions: { setLoading, setIsInvalid, setDataViewId, publishFilters },
+    } = this.reduxEmbeddableTools;
+    const {
+      componentState: { min: availableMin, max: availableMax },
+      explicitInput: {
+        query,
+        timeRange,
+        filters = [],
+        ignoreParentSettings,
+        value: [selectedMin, selectedMax] = ['', ''],
+      },
+    } = getState();
 
     const hasData = !isEmpty(availableMin) && !isEmpty(availableMax);
     const hasLowerSelection = !isEmpty(selectedMin);
     const hasUpperSelection = !isEmpty(selectedMax);
     const hasEitherSelection = hasLowerSelection || hasUpperSelection;
-    const hasBothSelections = hasLowerSelection && hasUpperSelection;
-    const hasInvalidSelection =
-      !ignoreParentSettings?.ignoreValidations &&
-      hasBothSelections &&
-      parseFloat(selectedMin) > parseFloat(selectedMax);
-    const isLowerSelectionOutOfRange =
-      hasLowerSelection && parseFloat(selectedMin) > parseFloat(availableMax);
-    const isUpperSelectionOutOfRange =
-      hasUpperSelection && parseFloat(selectedMax) < parseFloat(availableMin);
-    const isSelectionOutOfRange =
-      (!ignoreParentSettings?.ignoreValidations && hasData && isLowerSelectionOutOfRange) ||
-      isUpperSelectionOutOfRange;
-    const { dataView, field } = await this.getCurrentDataViewAndField();
 
-    if (!hasData || !hasEitherSelection || hasInvalidSelection || isSelectionOutOfRange) {
-      this.updateComponentState({ loading: false });
-      this.updateOutput({ filters: [], dataViews: [dataView], loading: false });
+    const { dataView, field } = await this.getCurrentDataViewAndField();
+    if (!dataView || !field) return;
+
+    if (!hasData || !hasEitherSelection) {
+      batch(() => {
+        dispatch(setLoading(false));
+        dispatch(setIsInvalid(!ignoreParentSettings?.ignoreValidations && hasEitherSelection));
+        dispatch(setDataViewId(dataView.id));
+        dispatch(publishFilters([]));
+      });
       return;
     }
 
@@ -307,28 +339,79 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     rangeFilter.meta.type = 'range';
     rangeFilter.meta.params = params;
 
-    this.updateComponentState({ loading: false });
-    this.updateOutput({ filters: [rangeFilter], dataViews: [dataView], loading: false });
+    // Check if new range filter results in no data
+    if (!ignoreParentSettings?.ignoreValidations) {
+      const searchSource = await this.dataService.searchSource.create();
+
+      filters.push(rangeFilter);
+
+      const timeFilter = this.dataService.timefilter.createFilter(dataView, timeRange);
+
+      if (timeFilter) {
+        filters.push(timeFilter);
+      }
+
+      searchSource.setField('size', 0);
+      searchSource.setField('index', dataView);
+
+      searchSource.setField('filter', filters);
+
+      if (query) {
+        searchSource.setField('query', query);
+      }
+
+      const {
+        rawResponse: {
+          hits: { total },
+        },
+      } = await lastValueFrom(searchSource.fetch$());
+
+      const docCount = typeof total === 'number' ? total : total?.value;
+
+      if (!docCount) {
+        batch(() => {
+          dispatch(setLoading(false));
+          dispatch(setIsInvalid(true));
+          dispatch(setDataViewId(dataView.id));
+          dispatch(publishFilters([]));
+        });
+        return;
+      }
+    }
+
+    batch(() => {
+      dispatch(setLoading(false));
+      dispatch(setIsInvalid(false));
+      dispatch(setDataViewId(dataView.id));
+      dispatch(publishFilters([rangeFilter]));
+    });
   };
 
   public reload = () => {
-    this.fetchMinMax();
+    this.runRangeSliderQuery();
   };
 
   public destroy = () => {
     super.destroy();
     this.subscriptions.unsubscribe();
+    this.reduxEmbeddableTools.cleanup();
   };
 
   public render = (node: HTMLElement) => {
     if (this.node) {
       ReactDOM.unmountComponentAtNode(this.node);
     }
+    const { Wrapper: RangeSliderReduxWrapper } = this.reduxEmbeddableTools;
     this.node = node;
+    const ControlsServicesProvider = pluginServices.getContextProvider();
     ReactDOM.render(
-      <RangeSliderReduxWrapper embeddable={this} reducers={rangeSliderReducers}>
-        <RangeSliderComponent componentStateSubject={this.componentStateSubject$} />
-      </RangeSliderReduxWrapper>,
+      <KibanaThemeProvider theme$={pluginServices.getServices().theme.theme$}>
+        <ControlsServicesProvider>
+          <RangeSliderReduxWrapper>
+            <RangeSliderComponent />
+          </RangeSliderReduxWrapper>
+        </ControlsServicesProvider>
+      </KibanaThemeProvider>,
       node
     );
   };

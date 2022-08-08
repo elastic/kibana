@@ -40,9 +40,9 @@ describe('ConnectInstance', () => {
     redirectFormCreated();
   });
 
-  const credentialsSourceData = staticSourceData[15]; // salesforce_sandbox
+  const credentialsSourceData = staticSourceData[15]; // service_now
   const oauthSourceData = staticSourceData[0]; // box
-  const subdomainSourceData = staticSourceData[21]; // zendesk
+  const subdomainSourceData = staticSourceData[20]; // zendesk
 
   const props = {
     ...credentialsSourceData,
@@ -65,6 +65,7 @@ describe('ConnectInstance', () => {
     subdomainValue: 'foo',
     isOrganization: true,
     hasPlatinumLicense: true,
+    sourceConfigData: {},
   };
 
   beforeEach(() => {
@@ -85,7 +86,7 @@ describe('ConnectInstance', () => {
     expect(wrapper.find('form')).toHaveLength(1);
   });
 
-  it('handles form submission with credentials source', () => {
+  it('handles form submission with no redirect', () => {
     const wrapper = shallow(<ConnectInstance {...props} />);
 
     const preventDefault = jest.fn();
@@ -134,6 +135,13 @@ describe('ConnectInstance', () => {
     expect(preventDefault).toHaveBeenCalled();
     expect(getSourceConnectData).toHaveBeenCalled();
     expect(mockReplace).toHaveBeenCalled();
+  });
+
+  it('displays credentials fields for connectors that need them', () => {
+    const wrapper = shallow(<ConnectInstance {...props} />);
+
+    expect(wrapper.find('[data-test-subj="LoginField"]')).toHaveLength(1);
+    expect(wrapper.find('[data-test-subj="PasswordField"]')).toHaveLength(1);
   });
 
   it('renders documentLevelPermissionsCallout', () => {

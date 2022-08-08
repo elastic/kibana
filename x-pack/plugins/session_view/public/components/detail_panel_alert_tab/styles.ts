@@ -30,10 +30,16 @@ export const useStyles = () => {
       margin: size.base,
     };
 
+    const loadMoreBtn: CSSObject = {
+      margin: size.m,
+      width: `calc(100% - ${size.m} * 2)`,
+    };
+
     return {
       container,
       stickyItem,
       viewMode,
+      loadMoreBtn,
     };
   }, [euiTheme]);
 

@@ -9,6 +9,7 @@ import { uniq } from 'lodash';
 import Boom from '@hapi/boom';
 import { IScopedClusterClient } from '@kbn/core/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import {
   getSingleMetricViewerJobErrorMessage,
   parseTimeIntervalForJob,
@@ -47,7 +48,6 @@ import {
 } from '../../../common/util/job_utils';
 import { groupsProvider } from './groups';
 import type { MlClient } from '../../lib/ml_client';
-import { isPopulatedObject } from '../../../common/util/object_utils';
 import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
 import { MlAnomalyDetectionAlertParams } from '../../routes/schemas/alerting_schema';
 import type { AuthorizationHeader } from '../../lib/request_authorization';
@@ -499,10 +499,13 @@ export function jobsProvider(
   async function blockingJobTasks() {
     const jobs: Array<Record<string, JobAction>> = [];
     try {
-      const body = await asInternalUser.tasks.list({
-        actions: JOB_ACTION_TASKS,
-        detailed: true,
-      });
+      const body = await asInternalUser.tasks.list(
+        {
+          actions: JOB_ACTION_TASKS,
+          detailed: true,
+        },
+        { maxRetries: 0 }
+      );
 
       if (body.nodes !== undefined) {
         Object.values(body.nodes).forEach(({ tasks }) => {

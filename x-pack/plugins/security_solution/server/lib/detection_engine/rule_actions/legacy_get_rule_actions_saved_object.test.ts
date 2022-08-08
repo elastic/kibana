@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import { SavedObjectsFindOptions, SavedObjectsFindResult } from '@kbn/core/server';
+import type { SavedObjectsFindOptions, SavedObjectsFindResult } from '@kbn/core/server';
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 // eslint-disable-next-line no-restricted-imports
-import {
-  legacyGetRuleActionsSavedObject,
-  LegacyRulesActionsSavedObject,
-} from './legacy_get_rule_actions_saved_object';
+import type { LegacyRulesActionsSavedObject } from './legacy_get_rule_actions_saved_object';
+// eslint-disable-next-line no-restricted-imports
+import { legacyGetRuleActionsSavedObject } from './legacy_get_rule_actions_saved_object';
 // eslint-disable-next-line no-restricted-imports
 import { legacyRuleActionsSavedObjectType } from './legacy_saved_object_mappings';
 // eslint-disable-next-line no-restricted-imports
-import { LegacyIRuleActionsAttributesSavedObjectAttributes } from './legacy_types';
+import type { LegacyIRuleActionsAttributesSavedObjectAttributes } from './legacy_types';
 
 describe('legacy_get_rule_actions_saved_object', () => {
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;

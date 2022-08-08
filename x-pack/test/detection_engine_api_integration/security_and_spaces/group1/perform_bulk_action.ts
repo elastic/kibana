@@ -28,6 +28,8 @@ import {
   removeServerGeneratedProperties,
   createLegacyRuleAction,
   getLegacyActionSO,
+  installPrePackagedRules,
+  getSimpleMlRule,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -453,18 +455,16 @@ export default ({ getService }: FtrProviderContext): void => {
           ruleToDuplicate.id
         );
 
-        const { body: setTagsBody } = await postBulkAction()
-          .send({
-            query: '',
-            action: BulkAction.edit,
-            [BulkAction.edit]: [
-              {
-                type: BulkActionEditType.set_tags,
-                value: ['reset-tag'],
-              },
-            ],
-          })
-          .expect(200);
+        const { body: setTagsBody } = await postBulkAction().send({
+          query: '',
+          action: BulkAction.edit,
+          [BulkAction.edit]: [
+            {
+              type: BulkActionEditType.set_tags,
+              value: ['reset-tag'],
+            },
+          ],
+        });
 
         expect(setTagsBody.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
 
@@ -562,6 +562,42 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(deleteIndexRule.index).to.eql(['initial-index-*', 'index2-*']);
       });
 
+      it('should add an index pattern to a rule and overwrite the data view', async () => {
+        const ruleId = 'ruleId';
+        const dataViewId = 'index1-*';
+        const simpleRule = {
+          ...getSimpleRule(ruleId),
+          index: undefined,
+          data_view_id: dataViewId,
+        };
+        await createRule(supertest, log, simpleRule);
+
+        const { body: setIndexBody } = await postBulkAction()
+          .send({
+            query: '',
+            action: BulkAction.edit,
+            [BulkAction.edit]: [
+              {
+                type: BulkActionEditType.add_index_patterns,
+                value: ['initial-index-*'],
+                overwriteDataViews: true,
+              },
+            ],
+          })
+          .expect(200);
+
+        expect(setIndexBody.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
+
+        // Check that the updated rule is returned with the response
+        expect(setIndexBody.attributes.results.updated[0].index).to.eql(['initial-index-*']);
+        expect(setIndexBody.attributes.results.updated[0].data_view_id).to.eql(undefined);
+
+        // Check that the updates have been persisted
+        const { body: setIndexRule } = await fetchRule(ruleId).expect(200);
+
+        expect(setIndexRule.index).to.eql(['initial-index-*']);
+      });
+
       it('should set timeline values in rule', async () => {
         const ruleId = 'ruleId';
         const timelineId = '91832785-286d-4ebe-b884-1a208d111a70';
@@ -595,6 +631,171 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(rule.timeline_id).to.eql(timelineId);
         expect(rule.timeline_title).to.eql(timelineTitle);
+      });
+
+      it('should correctly remove timeline', async () => {
+        const timelineId = 'test-id';
+        const timelineTitle = 'Test timeline template';
+        const ruleId = 'ruleId';
+        const createdRule = await createRule(supertest, log, {
+          ...getSimpleRule(ruleId),
+          timeline_id: 'test-id',
+          timeline_title: 'Test timeline template',
+        });
+
+        // ensure rule has been created with timeline properties
+        expect(createdRule.timeline_id).to.be(timelineId);
+        expect(createdRule.timeline_title).to.be(timelineTitle);
+
+        const { body } = await postBulkAction()
+          .send({
+            query: '',
+            action: BulkAction.edit,
+            [BulkAction.edit]: [
+              {
+                type: BulkActionEditType.set_timeline,
+                value: {
+                  timeline_id: '',
+                  timeline_title: '',
+                },
+              },
+            ],
+          })
+          .expect(200);
+
+        expect(body.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
+
+        // Check that the updated rule is returned with the response
+        expect(body.attributes.results.updated[0].timeline_id).to.be(undefined);
+        expect(body.attributes.results.updated[0].timeline_title).to.be(undefined);
+
+        // Check that the updates have been persisted
+        const { body: rule } = await fetchRule(ruleId).expect(200);
+
+        expect(rule.timeline_id).to.be(undefined);
+        expect(rule.timeline_title).to.be(undefined);
+      });
+
+      it('should return error when trying to bulk edit immutable rule', async () => {
+        await installPrePackagedRules(supertest, log);
+        const { body: findBody } = await supertest
+          .get(
+            `${DETECTION_ENGINE_RULES_URL}/_find?per_page=1&filter=alert.attributes.params.immutable: true`
+          )
+          .set('kbn-xsrf', 'true')
+          .send();
+        const immutableRule = findBody.data[0];
+
+        const { body } = await postBulkAction()
+          .send({
+            ids: [immutableRule.id],
+            action: BulkAction.edit,
+            [BulkAction.edit]: [
+              {
+                type: BulkActionEditType.add_tags,
+                value: ['new-tag'],
+              },
+            ],
+          })
+          .expect(500);
+
+        expect(body.attributes.summary).to.eql({ failed: 1, succeeded: 0, total: 1 });
+        expect(body.attributes.errors[0]).to.eql({
+          message: "Mutated params invalid: Elastic rule can't be edited",
+          status_code: 500,
+          rules: [
+            {
+              id: immutableRule.id,
+              name: immutableRule.name,
+            },
+          ],
+        });
+      });
+
+      it('should return error if index patterns action is applied to machine learning rule', async () => {
+        const mlRule = await createRule(supertest, log, getSimpleMlRule());
+
+        const { body } = await postBulkAction()
+          .send({
+            ids: [mlRule.id],
+            action: BulkAction.edit,
+            [BulkAction.edit]: [
+              {
+                type: BulkActionEditType.add_index_patterns,
+                value: ['index-*'],
+              },
+            ],
+          })
+          .expect(500);
+
+        expect(body.attributes.summary).to.eql({ failed: 1, succeeded: 0, total: 1 });
+        expect(body.attributes.errors[0]).to.eql({
+          message:
+            "Index patterns can't be added. Machine learning rule doesn't have index patterns property",
+          status_code: 500,
+          rules: [
+            {
+              id: mlRule.id,
+              name: mlRule.name,
+            },
+          ],
+        });
+      });
+
+      it('should return error if all index patterns removed from a rule', async () => {
+        const rule = await createRule(supertest, log, {
+          ...getSimpleRule(),
+          index: ['simple-index-*'],
+        });
+
+        const { body } = await postBulkAction()
+          .send({
+            ids: [rule.id],
+            action: BulkAction.edit,
+            [BulkAction.edit]: [
+              {
+                type: BulkActionEditType.delete_index_patterns,
+                value: ['simple-index-*'],
+              },
+            ],
+          })
+          .expect(500);
+
+        expect(body.attributes.summary).to.eql({ failed: 1, succeeded: 0, total: 1 });
+        expect(body.attributes.errors[0]).to.eql({
+          message: "Mutated params invalid: Index patterns can't be empty",
+          status_code: 500,
+          rules: [
+            {
+              id: rule.id,
+              name: rule.name,
+            },
+          ],
+        });
+      });
+
+      it('should increment version on rule bulk edit', async () => {
+        const ruleId = 'ruleId';
+        const rule = await createRule(supertest, log, getSimpleRule(ruleId));
+        const { body } = await postBulkAction()
+          .send({
+            ids: [rule.id],
+            action: BulkAction.edit,
+            [BulkAction.edit]: [
+              {
+                type: BulkActionEditType.add_tags,
+                value: ['test'],
+              },
+            ],
+          })
+          .expect(200);
+
+        expect(body.attributes.results.updated[0].version).to.be(rule.version + 1);
+
+        // Check that the updates have been persisted
+        const { body: updatedRule } = await fetchRule(ruleId).expect(200);
+
+        expect(updatedRule.version).to.be(rule.version + 1);
       });
     });
 

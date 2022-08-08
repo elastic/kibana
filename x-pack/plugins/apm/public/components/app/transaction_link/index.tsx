@@ -21,7 +21,7 @@ const CentralizedContainer = euiStyled.div`
 export function TransactionLink() {
   const {
     path: { transactionId },
-    query: { rangeFrom, rangeTo },
+    query: { rangeFrom, rangeTo, waterfallItemId },
   } = useApmParams('/link-to/transaction/{transactionId}');
 
   const { data = { transaction: null }, status } = useFetcher(
@@ -46,6 +46,7 @@ export function TransactionLink() {
             transaction: data.transaction,
             rangeFrom,
             rangeTo,
+            waterfallItemId,
           })}
         />
       );

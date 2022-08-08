@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-/* eslint-disable */
+/* eslint-disable prettier/prettier,no-console,@typescript-eslint/ban-ts-comment,@typescript-eslint/no-var-requires,import/no-extraneous-dependencies,padding-line-between-statements */
 
 // / <reference types="cypress" />
 // @ts-check

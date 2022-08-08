@@ -13,21 +13,23 @@ import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { createFilter } from '../../../common/containers/helpers';
 
+import type {
+  KpiRiskScoreRequestOptions,
+  KpiRiskScoreStrategyResponse,
+  RiskScoreAggByFields,
+} from '../../../../common/search_strategy';
 import {
   getHostRiskIndex,
   getUserRiskIndex,
-  KpiRiskScoreRequestOptions,
-  KpiRiskScoreStrategyResponse,
   RiskQueries,
-  RiskScoreAggByFields,
   RiskSeverity,
 } from '../../../../common/search_strategy';
 
 import { useKibana } from '../../../common/lib/kibana';
 import { isIndexNotFoundError } from '../../../common/utils/exceptions';
-import { ESTermQuery } from '../../../../common/typed_json';
+import type { ESTermQuery } from '../../../../common/typed_json';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { SeverityCount } from '../../../common/components/severity/types';
+import type { SeverityCount } from '../../../common/components/severity/types';
 import { useSpaceId } from '../common';
 
 type GetHostsRiskScoreProps = KpiRiskScoreRequestOptions & {
@@ -35,7 +37,7 @@ type GetHostsRiskScoreProps = KpiRiskScoreRequestOptions & {
   signal: AbortSignal;
 };
 
-const getRiskyHosts = ({
+const getRiskScoreKpi = ({
   data,
   defaultIndex,
   signal,
@@ -55,19 +57,19 @@ const getRiskyHosts = ({
     }
   );
 
-const getRiskyHostsComplete = (
+const getRiskScoreKpiComplete = (
   props: GetHostsRiskScoreProps
 ): Observable<KpiRiskScoreStrategyResponse> => {
-  return getRiskyHosts(props).pipe(
+  return getRiskScoreKpi(props).pipe(
     filter((response) => {
       return isErrorResponse(response) || isCompleteResponse(response);
     })
   );
 };
 
-const getRiskyHostsWithOptionalSignal = withOptionalSignal(getRiskyHostsComplete);
+const getRiskScoreKpiWithOptionalSignal = withOptionalSignal(getRiskScoreKpiComplete);
 
-const useRiskyHostsComplete = () => useObservable(getRiskyHostsWithOptionalSignal);
+const useRiskScoreKpiComplete = () => useObservable(getRiskScoreKpiWithOptionalSignal);
 
 interface RiskScoreKpi {
   error: unknown;
@@ -91,14 +93,14 @@ export const useUserRiskScoreKpi = ({
 }: UseUserRiskScoreKpiProps): RiskScoreKpi => {
   const spaceId = useSpaceId();
   const defaultIndex = spaceId ? getUserRiskIndex(spaceId) : undefined;
-  const usersFeatureEnabled = useIsExperimentalFeatureEnabled('usersEnabled');
+  const riskyUsersFeatureEnabled = useIsExperimentalFeatureEnabled('riskyUsersEnabled');
 
   return useRiskScoreKpi({
     filterQuery,
     skip,
     defaultIndex,
     aggBy: 'user.name',
-    featureEnabled: usersFeatureEnabled,
+    featureEnabled: riskyUsersFeatureEnabled,
   });
 };
 
@@ -134,7 +136,7 @@ const useRiskScoreKpi = ({
   aggBy,
   featureEnabled,
 }: UseRiskScoreKpiProps): RiskScoreKpi => {
-  const { error, result, start, loading } = useRiskyHostsComplete();
+  const { error, result, start, loading } = useRiskScoreKpiComplete();
   const { data } = useKibana().services;
   const isModuleDisabled = !!error && isIndexNotFoundError(error);
 

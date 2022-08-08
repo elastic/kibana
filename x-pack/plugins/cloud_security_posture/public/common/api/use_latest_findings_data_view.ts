@@ -7,6 +7,7 @@
 
 import { useQuery } from 'react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { DataView } from '@kbn/data-plugin/common';
 import { CSP_LATEST_FINDINGS_DATA_VIEW } from '../../../common/constants';
 import { CspClientPluginStartDeps } from '../../types';
 
@@ -18,8 +19,14 @@ export const useLatestFindingsDataView = () => {
     data: { dataViews },
   } = useKibana<CspClientPluginStartDeps>().services;
 
-  // TODO: use `dataViews.get(ID)`
-  const findDataView = async () => (await dataViews.find(CSP_LATEST_FINDINGS_DATA_VIEW))?.[0];
+  const findDataView = async (): Promise<DataView> => {
+    const dataView = (await dataViews.find(CSP_LATEST_FINDINGS_DATA_VIEW))?.[0];
+    if (!dataView) {
+      throw new Error('Findings data view not found');
+    }
 
-  return useQuery(['latest_findings_dataview'], findDataView);
+    return dataView;
+  };
+
+  return useQuery(['latest_findings_data_view'], findDataView);
 };

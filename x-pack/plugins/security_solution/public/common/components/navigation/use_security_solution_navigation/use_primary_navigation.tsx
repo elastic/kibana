@@ -8,35 +8,36 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { KibanaPageTemplateProps } from '@kbn/shared-ux-components';
-import { PrimaryNavigationProps } from './types';
+import type { KibanaPageTemplateProps } from '@kbn/shared-ux-components';
+import { SecurityPageName } from '../../../../../common/constants';
+import type { PrimaryNavigationProps } from './types';
 import { usePrimaryNavigationItems } from './use_navigation_items';
-import { SolutionGroupedNav } from '../solution_grouped_nav';
-import { useNavItems } from '../solution_grouped_nav/solution_grouped_nav_item';
 import { useIsGroupedNavigationEnabled } from '../helpers';
+import { SecuritySideNav } from '../security_side_nav';
+import { useTourContext } from '../../guided_onboarding';
 
 const translatedNavTitle = i18n.translate('xpack.securitySolution.navigation.mainLabel', {
   defaultMessage: 'Security',
 });
 
 export const usePrimaryNavigation = ({
-  filters,
-  query,
   navTabs,
   pageName,
-  savedQuery,
-  sourcerer,
   tabName,
-  timeline,
-  timerange,
 }: PrimaryNavigationProps): KibanaPageTemplateProps['solutionNav'] => {
   const isGroupedNavigationEnabled = useIsGroupedNavigationEnabled();
-  const mapLocationToTab = useCallback(
-    (): string => ((tabName && navTabs[tabName]) || navTabs[pageName])?.id ?? '',
-    [pageName, tabName, navTabs]
-  );
+  const mapLocationToTab = useCallback((): string => {
+    if (pageName === SecurityPageName.administration) {
+      // revist with ticket #137625. consider using tab Ids instead of tab Name for matching
+      return ((tabName && navTabs[tabName]) || navTabs[pageName])?.id ?? '';
+    } else {
+      return (navTabs[pageName] || (tabName && navTabs[tabName]))?.id ?? '';
+    }
+  }, [pageName, tabName, navTabs]);
 
   const [selectedTabId, setSelectedTabId] = useState(mapLocationToTab());
+
+  const { isTourShown } = useTourContext();
 
   useEffect(() => {
     const currentTabSelected = mapLocationToTab();
@@ -48,24 +49,18 @@ export const usePrimaryNavigation = ({
     // we do need navTabs in case the selectedTabId appears after initial load (ex. checking permissions for anomalies)
   }, [pageName, navTabs, mapLocationToTab, selectedTabId]);
 
-  const navLinkItems = useNavItems();
   const navItems = usePrimaryNavigationItems({
     navTabs,
     selectedTabId,
-    filters,
-    query,
-    savedQuery,
-    sourcerer,
-    timeline,
-    timerange,
   });
 
   return {
+    canBeCollapsed: !isTourShown,
     name: translatedNavTitle,
     icon: 'logoSecurity',
     ...(isGroupedNavigationEnabled
       ? {
-          children: <SolutionGroupedNav items={navLinkItems} selectedId={selectedTabId} />,
+          children: <SecuritySideNav />,
           closeFlyoutButtonPosition: 'inside',
         }
       : { items: navItems }),

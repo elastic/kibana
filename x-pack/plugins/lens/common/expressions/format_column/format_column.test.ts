@@ -160,6 +160,33 @@ describe('format_column', () => {
       });
     });
 
+    it('applies suffix formatter even if there is a parent format', async () => {
+      datatable.columns[0].meta.params = {
+        id: 'wrapper',
+        params: { wrapperParam: 0, id: 'myformatter', params: { innerParam: 456 } },
+      };
+      const result = await fn(datatable, {
+        columnId: 'test',
+        format: '',
+        suffix: 'abc',
+        parentFormat: JSON.stringify({ id: 'wrapper', params: { wrapperParam: 123 } }),
+      });
+      expect(result.columns[0].meta.params).toEqual({
+        id: 'suffix',
+        params: {
+          suffixString: 'abc',
+          id: 'wrapper',
+          params: {
+            wrapperParam: 123,
+            id: 'myformatter',
+            params: {
+              innerParam: 456,
+            },
+          },
+        },
+      });
+    });
+
     it('double-nests suffix formatters', async () => {
       datatable.columns[0].meta.params = {
         id: 'suffix',

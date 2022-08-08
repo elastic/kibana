@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { TransportResult } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/elasticsearch';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import { ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN } from '../../../../common/endpoint/constants';
-import { SecuritySolutionRequestHandlerContext } from '../../../types';
-import {
+import type { SecuritySolutionRequestHandlerContext } from '../../../types';
+import type {
   ActivityLog,
   ActivityLogEntry,
   EndpointAction,
@@ -22,15 +22,21 @@ import {
 } from '../../../../common/endpoint/types';
 import {
   catchAndWrapError,
-  categorizeActionResults,
-  categorizeResponseResults,
   getActionRequestsResult,
   getActionResponsesResult,
   getTimeSortedData,
-  getUniqueLogData,
 } from '../../utils';
-import { EndpointMetadataService } from '../metadata';
+import type { EndpointMetadataService } from '../metadata';
 import { ACTIONS_SEARCH_PAGE_SIZE } from './constants';
+
+import {
+  categorizeActionResults,
+  categorizeResponseResults,
+  hasAckInResponse,
+  getUniqueLogData,
+  hasNoEndpointResponse,
+  hasNoFleetResponse,
+} from './utils';
 
 const PENDING_ACTION_RESPONSE_MAX_LAPSED_TIME = 300000; // 300k ms === 5 minutes
 
@@ -148,41 +154,6 @@ const getActivityLog = async ({
   return sortedData;
 };
 
-const hasAckInResponse = (response: EndpointActionResponse): boolean => {
-  return response.action_response?.endpoint?.ack ?? false;
-};
-
-// return TRUE if for given action_id/agent_id
-// there is no doc in .logs-endpoint.action.response-default
-const hasNoEndpointResponse = ({
-  action,
-  agentId,
-  indexedActionIds,
-}: {
-  action: EndpointAction;
-  agentId: string;
-  indexedActionIds: string[];
-}): boolean => {
-  return action.agents.includes(agentId) && !indexedActionIds.includes(action.action_id);
-};
-
-// return TRUE if for given action_id/agent_id
-// there is no doc in .fleet-actions-results
-const hasNoFleetResponse = ({
-  action,
-  agentId,
-  agentResponses,
-}: {
-  action: EndpointAction;
-  agentId: string;
-  agentResponses: EndpointActionResponse[];
-}): boolean => {
-  return (
-    action.agents.includes(agentId) &&
-    !agentResponses.map((e) => e.action_id).includes(action.action_id)
-  );
-};
-
 export const getPendingActionCounts = async (
   esClient: ElasticsearchClient,
   metadataService: EndpointMetadataService,
@@ -225,15 +196,16 @@ export const getPendingActionCounts = async (
   );
 
   const pending: EndpointPendingActions[] = [];
+
   for (const agentId of agentIDs) {
     const agentResponses = responses[agentId];
 
-    // get response actionIds for responses with ACKs
+    // get response actionIds for responses with ACKs from the fleet agent
     const ackResponseActionIdList: string[] = agentResponses
       .filter(hasAckInResponse)
       .map((response) => response.action_id);
 
-    // actions Ids that are indexed in new response index
+    // actions Ids that are indexed in new endpoint response index
     const indexedActionIds = await hasEndpointResponseDoc({
       agentId,
       actionIds: ackResponseActionIdList,
@@ -379,20 +351,30 @@ const fetchActionResponses = async (
   );
 
   for (const actionResponse of actionResponses) {
-    const lastEndpointMetadataEventTimestamp = endpointLastEventCreated[actionResponse.agent_id];
-    const actionCompletedAtTimestamp = new Date(actionResponse.completed_at);
-    // If enough time has lapsed in checking for updated Endpoint metadata doc so that we don't keep
-    // checking it forever.
-    // It uses the `@timestamp` in order to ensure we are looking at times that were set by the server
-    const enoughTimeHasLapsed =
-      Date.now() - new Date(actionResponse['@timestamp']).getTime() >
-      PENDING_ACTION_RESPONSE_MAX_LAPSED_TIME;
+    const actionCommand = actionResponse.action_data.command;
 
-    if (
-      !lastEndpointMetadataEventTimestamp ||
-      enoughTimeHasLapsed ||
-      lastEndpointMetadataEventTimestamp > actionCompletedAtTimestamp
-    ) {
+    // We only (possibly) withhold fleet action responses for `isolate` and `unisolate`.
+    // All others should just return the responses and not wait until a metadata
+    // document update is received.
+    if (actionCommand === 'unisolate' || actionCommand === 'isolate') {
+      const lastEndpointMetadataEventTimestamp = endpointLastEventCreated[actionResponse.agent_id];
+      const actionCompletedAtTimestamp = new Date(actionResponse.completed_at);
+
+      // If enough time has lapsed in checking for updated Endpoint metadata doc so that we don't keep
+      // checking it forever.
+      // It uses the `@timestamp` in order to ensure we are looking at times that were set by the server
+      const enoughTimeHasLapsed =
+        Date.now() - new Date(actionResponse['@timestamp']).getTime() >
+        PENDING_ACTION_RESPONSE_MAX_LAPSED_TIME;
+
+      if (
+        !lastEndpointMetadataEventTimestamp ||
+        enoughTimeHasLapsed ||
+        lastEndpointMetadataEventTimestamp > actionCompletedAtTimestamp
+      ) {
+        actionResponsesByAgentId[actionResponse.agent_id].push(actionResponse);
+      }
+    } else {
       actionResponsesByAgentId[actionResponse.agent_id].push(actionResponse);
     }
   }

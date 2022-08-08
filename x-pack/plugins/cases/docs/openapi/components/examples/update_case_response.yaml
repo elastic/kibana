@@ -7,31 +7,29 @@ value:
       "comments": [],
       "totalComment": 0,
       "totalAlerts": 0,
-      "title": "This case will self-destruct in 5 seconds",
-      "tags": [
-        "phishing",
-        "social engineering",
-        "bubblegum"
-      ],
+      "title": "Case title 1",
+      "tags": [ "tag-1" ],
       "settings": {
         "syncAlerts": true
       },
-      "owner": "securitySolution",
-      "description": "James Bond clicked on a highly suspicious email banner advertising cheap holidays for underpaid civil servants. Operation bubblegum is active. Repeat - operation bubblegum is now active!",
+      "owner": "cases",
+      "description": "A case description.",
+      "duration": null,
+      "severity": "low",
       "closed_at": null,
       "closed_by": null,
       "created_at": "2022-05-13T09:16:17.416Z",
       "created_by": {
-        "email": "ahunley@imf.usa.gov",
-        "full_name": "Alan Hunley",
-        "username": "ahunley"
+        "email": null,
+        "full_name": null,
+        "username": "elastic"
       },
       "status": "open",
       "updated_at": "2022-05-13T09:48:33.043Z",
       "updated_by": {
-        "email": "classified@hms.oo.gov.uk",
-        "full_name": "Classified",
-        "username": "M"
+        "email": null,
+        "full_name": null,
+        "username": "elastic"
       },
       "connector": {
         "id": "131d4448-abe0-4789-939d-8ef60680b498",
@@ -46,9 +44,9 @@ value:
       "external_service": {
         "external_title": "IS-4",
         "pushed_by": {
-          "full_name": "Classified",
-          "email": "classified@hms.oo.gov.uk",
-          "username": "M"
+          "full_name": null,
+          "email": null,
+          "username": "elastic"
         },
         "external_url": "https://hms.atlassian.net/browse/IS-4",
         "pushed_at": "2022-05-13T09:20:40.672Z",

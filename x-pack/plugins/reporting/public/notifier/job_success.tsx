@@ -37,12 +37,5 @@ export const getSuccessToast = (
     </>,
     { theme$: theme.theme$ }
   ),
-  /**
-   * If timeout is an Infinity value, a Not-a-Number (NaN) value, or negative, then timeout will be zero.
-   * And we cannot use `Number.MAX_SAFE_INTEGER` because EUI's Timer implementation
-   * subtracts it from the current time to evaluate the remainder.
-   * @see https://www.w3.org/TR/2011/WD-html5-20110525/timers.html
-   */
-  toastLifeTimeMs: Number.MAX_SAFE_INTEGER - Date.now(),
   'data-test-subj': 'completeReportSuccess',
 });

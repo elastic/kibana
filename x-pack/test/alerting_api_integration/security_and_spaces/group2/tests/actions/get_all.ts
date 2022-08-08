@@ -96,6 +96,14 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   referenced_by_count: 0,
                 },
                 {
+                  connector_type_id: '.servicenow',
+                  id: 'my-deprecated-servicenow-default',
+                  is_preconfigured: true,
+                  is_deprecated: true,
+                  name: 'ServiceNow#xyz',
+                  referenced_by_count: 0,
+                },
+                {
                   id: 'my-slack1',
                   is_preconfigured: true,
                   is_deprecated: false,
@@ -223,6 +231,14 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   referenced_by_count: 0,
                 },
                 {
+                  connector_type_id: '.servicenow',
+                  id: 'my-deprecated-servicenow-default',
+                  is_preconfigured: true,
+                  is_deprecated: true,
+                  name: 'ServiceNow#xyz',
+                  referenced_by_count: 0,
+                },
+                {
                   id: 'my-slack1',
                   is_preconfigured: true,
                   is_deprecated: false,
@@ -308,6 +324,14 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                 {
                   connector_type_id: '.servicenow',
                   id: 'my-deprecated-servicenow',
+                  is_preconfigured: true,
+                  is_deprecated: true,
+                  name: 'ServiceNow#xyz',
+                  referenced_by_count: 0,
+                },
+                {
+                  connector_type_id: '.servicenow',
+                  id: 'my-deprecated-servicenow-default',
                   is_preconfigured: true,
                   is_deprecated: true,
                   name: 'ServiceNow#xyz',

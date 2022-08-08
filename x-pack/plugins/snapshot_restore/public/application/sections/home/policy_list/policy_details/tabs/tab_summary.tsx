@@ -27,6 +27,7 @@ import { SlmPolicy } from '../../../../../../../common/types';
 import { useServices } from '../../../../../app_context';
 import { FormattedDateTime, CollapsibleIndicesList } from '../../../../../components';
 import { linkToSnapshots, linkToRepository } from '../../../../../services/navigation';
+import { PolicyFeatureStatesSummary } from '../../../../../components/summaries';
 
 interface Props {
   policy: SlmPolicy;
@@ -48,8 +49,9 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
     retention,
     isManagedPolicy,
   } = policy;
-  const { includeGlobalState, ignoreUnavailable, indices, partial } = config || {
+  const { includeGlobalState, featureStates, ignoreUnavailable, indices, partial } = config || {
     includeGlobalState: undefined,
+    featureStates: [],
     ignoreUnavailable: undefined,
     indices: undefined,
     partial: undefined,
@@ -247,7 +249,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
             </EuiDescriptionListDescription>
           </EuiFlexItem>
 
-          <EuiFlexItem data-test-subj="includeGlobalState">
+          <EuiFlexItem data-test-subj="ignoreUnavailable">
             <EuiDescriptionListTitle data-test-subj="title">
               <FormattedMessage
                 id="xpack.snapshotRestore.policyDetails.ignoreUnavailableLabel"
@@ -272,6 +274,38 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
         </EuiFlexGroup>
 
         <EuiFlexGroup>
+          <EuiFlexItem data-test-subj="includeGlobalState">
+            <EuiDescriptionListTitle data-test-subj="title">
+              <FormattedMessage
+                id="xpack.snapshotRestore.policyDetails.includeGlobalStateLabel"
+                defaultMessage="Include global state"
+              />
+            </EuiDescriptionListTitle>
+
+            <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
+              {includeGlobalState === false ? (
+                <FormattedMessage
+                  data-test-subj="withoutGlobalState"
+                  id="xpack.snapshotRestore.policyDetails.includeGlobalStateFalseLabel"
+                  defaultMessage="No"
+                />
+              ) : (
+                <FormattedMessage
+                  data-test-subj="withGlobalStateAndFeatureStates"
+                  id="xpack.snapshotRestore.policyDetails.includeGlobalStateTrueLabel"
+                  defaultMessage="Yes"
+                />
+              )}
+            </EuiDescriptionListDescription>
+          </EuiFlexItem>
+
+          <PolicyFeatureStatesSummary
+            includeGlobalState={includeGlobalState}
+            featureStates={featureStates}
+          />
+        </EuiFlexGroup>
+
+        <EuiFlexGroup>
           <EuiFlexItem data-test-subj="partial">
             <EuiDescriptionListTitle data-test-subj="title">
               <FormattedMessage
@@ -290,29 +324,6 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
                 <FormattedMessage
                   id="xpack.snapshotRestore.policyDetails.partialFalseLabel"
                   defaultMessage="No"
-                />
-              )}
-            </EuiDescriptionListDescription>
-          </EuiFlexItem>
-
-          <EuiFlexItem data-test-subj="includeGlobalState">
-            <EuiDescriptionListTitle data-test-subj="title">
-              <FormattedMessage
-                id="xpack.snapshotRestore.policyDetails.includeGlobalStateLabel"
-                defaultMessage="Include global state"
-              />
-            </EuiDescriptionListTitle>
-
-            <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
-              {includeGlobalState === false ? (
-                <FormattedMessage
-                  id="xpack.snapshotRestore.policyDetails.includeGlobalStateFalseLabel"
-                  defaultMessage="No"
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.snapshotRestore.policyDetails.includeGlobalStateTrueLabel"
-                  defaultMessage="Yes"
                 />
               )}
             </EuiDescriptionListDescription>

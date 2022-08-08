@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from '@kbn/core/public';
 import { TelemetryPluginConfig } from '../plugin';
-import { getTelemetryChannelEndpoint } from '../../common/telemetry_config';
+import { getTelemetryChannelEndpoint } from '../../common/telemetry_config/get_telemetry_channel_endpoint';
 import type { UnencryptedTelemetryPayload, EncryptedTelemetryPayload } from '../../common/types';
 import { PAYLOAD_CONTENT_ENCODING } from '../../common/constants';
 

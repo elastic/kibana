@@ -114,8 +114,8 @@
     {
       "groupName": "platform security modules",
       "matchPackageNames": [
-        "broadcast-channel",
         "node-forge",
+        "formik",
         "@types/node-forge",
         "require-in-the-middle",
         "tough-cookie",
@@ -156,6 +156,29 @@
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "release_note:skip"],
+      "enabled": true
+    },
+    {
+      "groupName": "@storybook",
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "matchPackagePatterns": ["^@storybook"],
+      "labels": ["Team:Operations", "release_note:skip"],
+      "enabled": true
+    },
+    {
+      "groupName": "react-query",
+      "packageNames": ["react-query"],
+      "reviewers": [
+        "team:response-ops",
+        "team:kibana-cloud-security-posture",
+        "team:security-asset-management",
+        "team:fleet",
+        "team:awp-platform",
+        "team:security-onboarding-and-lifecycle-mgt"
+      ],
+      "matchBaseBranches": ["main"],
+      "labels": ["release_note:skip", "backport:skip", "ci:all-cypress-suites"],
       "enabled": true
     }
   ]

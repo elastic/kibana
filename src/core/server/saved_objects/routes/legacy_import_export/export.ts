@@ -8,12 +8,13 @@
 
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
+import type { Logger } from '@kbn/logging';
 import { InternalCoreUsageDataSetup } from '../../../core_usage_data';
-import { IRouter, Logger } from '../../..';
+import type { InternalSavedObjectRouter } from '../../internal_types';
 import { exportDashboards } from './lib';
 
 export const registerLegacyExportRoute = (
-  router: IRouter,
+  router: InternalSavedObjectRouter,
   {
     kibanaVersion,
     coreUsageData,

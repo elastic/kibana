@@ -38,7 +38,7 @@ app.config['ELASTIC_APM'] = {
     defaultMessage: 'a-z, A-Z, 0-9, -, _, and space',
   }
 )}
-'SERVICE_NAME': 'my_python_service',
+#'SERVICE_NAME': 'unknown-python-service',
 
 # ${i18n.translate(
   'xpack.apm.tutorial.flaskClient.configure.commands.useIfApmServerRequiresTokenComment',

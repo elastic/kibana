@@ -37,7 +37,6 @@ NPM_MODULE_EXTRA_FILES = [
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
   "@npm//rxjs",
-  "//packages/analytics/client",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -84,6 +83,7 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
+  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
   root_dir = "src",

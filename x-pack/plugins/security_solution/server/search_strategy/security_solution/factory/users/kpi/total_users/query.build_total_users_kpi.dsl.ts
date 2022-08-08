@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HostsKpiHostsRequestOptions } from '../../../../../../../common/search_strategy/security_solution/hosts';
+import type { HostsKpiHostsRequestOptions } from '../../../../../../../common/search_strategy/security_solution/hosts';
 import { createQueryFilterClauses } from '../../../../../../utils/build_query';
 
 export const buildTotalUsersKpiQuery = ({

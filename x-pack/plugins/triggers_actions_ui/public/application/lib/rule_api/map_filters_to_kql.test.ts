@@ -45,30 +45,28 @@ describe('mapFiltersToKql', () => {
       mapFiltersToKql({
         ruleStatusesFilter: ['enabled'],
       })
-    ).toEqual([
-      'alert.attributes.enabled:(true) and not (alert.attributes.muteAll:true OR alert.attributes.snoozeEndTime > now)',
-    ]);
+    ).toEqual(['alert.attributes.enabled: true']);
 
     expect(
       mapFiltersToKql({
         ruleStatusesFilter: ['disabled'],
       })
-    ).toEqual([
-      'alert.attributes.enabled:(false) and not (alert.attributes.muteAll:true OR alert.attributes.snoozeEndTime > now)',
-    ]);
+    ).toEqual(['alert.attributes.enabled: false']);
 
     expect(
       mapFiltersToKql({
         ruleStatusesFilter: ['snoozed'],
       })
-    ).toEqual(['(alert.attributes.muteAll:true OR alert.attributes.snoozeEndTime > now)']);
+    ).toEqual([
+      '(alert.attributes.muteAll:true OR alert.attributes.snoozeSchedule: { duration > 0 })',
+    ]);
 
     expect(
       mapFiltersToKql({
         ruleStatusesFilter: ['enabled', 'snoozed'],
       })
     ).toEqual([
-      'alert.attributes.enabled:(true) or (alert.attributes.muteAll:true OR alert.attributes.snoozeEndTime > now)',
+      'alert.attributes.enabled: true and (alert.attributes.muteAll:true OR alert.attributes.snoozeSchedule: { duration > 0 })',
     ]);
 
     expect(
@@ -76,7 +74,7 @@ describe('mapFiltersToKql', () => {
         ruleStatusesFilter: ['disabled', 'snoozed'],
       })
     ).toEqual([
-      'alert.attributes.enabled:(false) or (alert.attributes.muteAll:true OR alert.attributes.snoozeEndTime > now)',
+      'alert.attributes.enabled: false and (alert.attributes.muteAll:true OR alert.attributes.snoozeSchedule: { duration > 0 })',
     ]);
 
     expect(
@@ -84,7 +82,7 @@ describe('mapFiltersToKql', () => {
         ruleStatusesFilter: ['enabled', 'disabled', 'snoozed'],
       })
     ).toEqual([
-      'alert.attributes.enabled:(true or false) or (alert.attributes.muteAll:true OR alert.attributes.snoozeEndTime > now)',
+      'alert.attributes.enabled: true and alert.attributes.enabled: false and (alert.attributes.muteAll:true OR alert.attributes.snoozeSchedule: { duration > 0 })',
     ]);
   });
 

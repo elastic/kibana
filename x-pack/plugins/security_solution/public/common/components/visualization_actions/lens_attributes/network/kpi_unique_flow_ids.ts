@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LensAttributes } from '../../types';
+import type { LensAttributes } from '../../types';
 
 export const kpiUniqueFlowIdsLensAttributes: LensAttributes = {
   title: '[Network] Unique flow IDs',

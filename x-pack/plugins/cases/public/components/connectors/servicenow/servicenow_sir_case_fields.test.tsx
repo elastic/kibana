@@ -169,18 +169,18 @@ describe('ServiceNowSIR Fields', () => {
     ]);
   });
 
-  test('it shows the deprecated callout when the connector uses the table API', async () => {
-    const tableApiConnector = { ...connector, config: { usesTableApi: true } };
+  test('shows the deprecated callout if the connector is deprecated', async () => {
+    const tableApiConnector = { ...connector, isDeprecated: true };
     render(<Fields fields={fields} onChange={onChange} connector={tableApiConnector} />);
     expect(screen.getByTestId('deprecated-connector-warning-callout')).toBeInTheDocument();
   });
 
-  test('it does not show the deprecated callout when the connector does not uses the table API', async () => {
+  test('does not show the deprecated callout when the connector is not deprecated', async () => {
     render(<Fields fields={fields} onChange={onChange} connector={connector} />);
     expect(screen.queryByTestId('deprecated-connector-warning-callout')).not.toBeInTheDocument();
   });
 
-  it('does not show the deprecated callout when the connector is preconfigured', async () => {
+  it('does not show the deprecated callout when the connector is preconfigured and not deprecated', async () => {
     render(
       <Fields
         fields={fields}
@@ -191,12 +191,15 @@ describe('ServiceNowSIR Fields', () => {
     expect(screen.queryByTestId('deprecated-connector-warning-callout')).not.toBeInTheDocument();
   });
 
-  it('does not show the deprecated callout when the config of the connector is undefined', async () => {
+  it('shows the deprecated callout when the connector is preconfigured and deprecated', async () => {
     render(
-      // @ts-expect-error
-      <Fields fields={fields} onChange={onChange} connector={{ ...connector, config: undefined }} />
+      <Fields
+        fields={fields}
+        onChange={onChange}
+        connector={{ ...connector, isPreconfigured: true, isDeprecated: true }}
+      />
     );
-    expect(screen.queryByTestId('deprecated-connector-warning-callout')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('deprecated-connector-warning-callout')).toBeInTheDocument();
   });
 
   test('it should hide subcategory if selecting a category without subcategories', async () => {

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
 import { getLogstashForClusters } from './get_logstash_for_clusters';
 import { LegacyRequest } from '../../types';
 
@@ -20,7 +19,7 @@ import { LegacyRequest } from '../../types';
  */
 export function getClusterStatus(req: LegacyRequest, { clusterUuid }: { clusterUuid: string }) {
   const clusters = [{ cluster_uuid: clusterUuid }];
-  return getLogstashForClusters(req, clusters).then((clusterStatus) =>
-    get(clusterStatus, '[0].stats')
+  return getLogstashForClusters(req, clusters).then(
+    (clusterStatus) => clusterStatus && clusterStatus[0]?.stats
   );
 }

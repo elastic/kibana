@@ -3,7 +3,7 @@
     "cluster": ["manage"],
     "indices": [
       {
-        "names": [".items-*", ".lists-*", ".alerts-security.alerts-*", ".siem-signals-*"],
+        "names": [".items-*", ".lists-*", ".alerts-security.alerts-*", ".siem-signals-*", "logs-*"],
         "privileges": ["manage", "read", "write", "view_index_metadata", "maintenance"]
       },
       {

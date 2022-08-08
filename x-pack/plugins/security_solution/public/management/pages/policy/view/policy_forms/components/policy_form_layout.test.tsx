@@ -11,9 +11,10 @@ import { mount } from 'enzyme';
 import { PolicyFormLayout } from './policy_form_layout';
 import '../../../../../../common/mock/match_media';
 import { EndpointDocGenerator } from '../../../../../../../common/endpoint/generate_data';
+import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import {
-  AppContextTestRender,
   createAppRootMockRenderer,
+  resetReactDomCreatePortalMock,
 } from '../../../../../../common/mock/endpoint';
 import { getPolicyDetailPath, getEndpointListPath } from '../../../../../common/routing';
 import { policyListApiPathHandlers } from '../../../store/test_mock_utils';
@@ -35,6 +36,8 @@ describe('Policy Form Layout', () => {
   let render: (ui: Parameters<typeof mount>[0]) => ReturnType<typeof mount>;
   let policyPackagePolicy: ReturnType<typeof generator.generatePolicyPackagePolicy>;
   let policyFormLayoutView: ReturnType<typeof render>;
+
+  beforeAll(() => resetReactDomCreatePortalMock());
 
   beforeEach(() => {
     const appContextMockRenderer = createAppRootMockRenderer();
@@ -317,9 +320,9 @@ describe('Policy Form Layout', () => {
         expect(ransomware).toHaveLength(0);
       });
 
-      it('shows the locked card in place of 1 paid feature', () => {
+      it('shows the locked card in place of paid features', () => {
         const lockedCard = policyFormLayoutView.find('EuiCard[data-test-subj="lockedPolicyCard"]');
-        expect(lockedCard).toHaveLength(3);
+        expect(lockedCard).toHaveLength(4);
       });
     });
   });

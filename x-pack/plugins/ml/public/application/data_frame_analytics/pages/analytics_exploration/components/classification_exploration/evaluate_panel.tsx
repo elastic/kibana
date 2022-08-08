@@ -119,7 +119,7 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
     columns.map(({ id }: { id: string }) => id)
   );
 
-  const resultsField = jobConfig.dest.results_field;
+  const resultsField = jobConfig.dest.results_field!;
   const isTraining = isTrainingFilter(searchQuery, resultsField);
 
   const {

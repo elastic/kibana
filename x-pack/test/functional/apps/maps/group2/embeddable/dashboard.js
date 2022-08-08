@@ -61,6 +61,10 @@ export default function ({ getPageObjects, getService }) {
       expect(title).to.be('join example');
     });
 
+    it('should display tools control', async () => {
+      await PageObjects.maps.expectExistsToolsControl();
+    });
+
     it('should pass index patterns to container', async () => {
       const indexPatterns = await filterBar.getIndexPatterns();
       expect(indexPatterns).to.equal('meta_for_geo_shapes*,logstash-*');

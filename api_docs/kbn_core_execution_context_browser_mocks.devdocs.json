@@ -1,0 +1,128 @@
+{
+  "id": "@kbn/core-execution-context-browser-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-execution-context-browser-mocks",
+        "id": "def-common.executionContextServiceMock",
+        "type": "Object",
+        "tags": [],
+        "label": "executionContextServiceMock",
+        "description": [],
+        "path": "packages/core/execution-context/core-execution-context-browser-mocks/src/execution_context_service.mock.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-execution-context-browser-mocks",
+            "id": "def-common.executionContextServiceMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "PublicMethodsOf",
+              "<",
+              "ExecutionContextService",
+              ">>"
+            ],
+            "path": "packages/core/execution-context/core-execution-context-browser-mocks/src/execution_context_service.mock.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-execution-context-browser-mocks",
+            "id": "def-common.executionContextServiceMock.createSetupContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createSetupContract",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "ExecutionContextSetup",
+              ">"
+            ],
+            "path": "packages/core/execution-context/core-execution-context-browser-mocks/src/execution_context_service.mock.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-execution-context-browser-mocks",
+            "id": "def-common.executionContextServiceMock.createStartContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createStartContract",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "ExecutionContextSetup",
+              ">"
+            ],
+            "path": "packages/core/execution-context/core-execution-context-browser-mocks/src/execution_context_service.mock.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-execution-context-browser-mocks",
+            "id": "def-common.executionContextServiceMock.createInternalSetupContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createInternalSetupContract",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "ExecutionContextSetup",
+              ">"
+            ],
+            "path": "packages/core/execution-context/core-execution-context-browser-mocks/src/execution_context_service.mock.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-execution-context-browser-mocks",
+            "id": "def-common.executionContextServiceMock.createInternalStartContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createInternalStartContract",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "ExecutionContextSetup",
+              ">"
+            ],
+            "path": "packages/core/execution-context/core-execution-context-browser-mocks/src/execution_context_service.mock.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

@@ -15,12 +15,11 @@ import {
   isObject,
   toString as fpToString,
 } from 'lodash/fp';
-import { Action } from 'redux';
-import { Epic } from 'redux-observable';
+import type { Action } from 'redux';
+import type { Epic } from 'redux-observable';
 import { from, empty, merge } from 'rxjs';
+import type { Filter, MatchAllFilter } from '@kbn/es-query';
 import {
-  Filter,
-  MatchAllFilter,
   isScriptedRangeFilter,
   isExistsFilter,
   isRangeFilter,
@@ -41,15 +40,14 @@ import {
   takeUntil,
 } from 'rxjs/operators';
 
-import {
-  TimelineStatus,
+import type {
   TimelineErrorResponse,
-  TimelineType,
   ResponseTimeline,
   TimelineResult,
   ColumnHeaderOptions,
 } from '../../../../common/types/timeline';
-import { inputsModel } from '../../../common/store/inputs';
+import { TimelineStatus, TimelineType } from '../../../../common/types/timeline';
+import type { inputsModel } from '../../../common/store/inputs';
 import { addError } from '../../../common/store/app/actions';
 
 import { persistTimeline } from '../../containers/api';
@@ -88,15 +86,15 @@ import {
   showCallOutUnauthorizedMsg,
   saveTimeline,
 } from './actions';
-import { TimelineModel } from './model';
+import type { TimelineModel } from './model';
 import { epicPersistNote, timelineNoteActionsType } from './epic_note';
 import { epicPersistPinnedEvent, timelinePinnedEventActionsType } from './epic_pinned_event';
 import { epicPersistTimelineFavorite, timelineFavoriteActionsType } from './epic_favorite';
 import { isNotNull } from './helpers';
 import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persistence_queue';
 import { myEpicTimelineId } from './my_epic_timeline_id';
-import { ActionTimeline, TimelineEpicDependencies } from './types';
-import { TimelineInput } from '../../../../common/search_strategy';
+import type { ActionTimeline, TimelineEpicDependencies } from './types';
+import type { TimelineInput } from '../../../../common/search_strategy';
 
 const timelineActionsType = [
   applyKqlFilterQuery.type,
@@ -368,7 +366,7 @@ export const convertTimelineAsInput = (
         return set(
           key,
           get(key, timeline).map((col: ColumnHeaderOptions) =>
-            omit(['initialWidth', 'width', '__typename'], col)
+            omit(['initialWidth', 'width', '__typename', 'esTypes'], col)
           ),
           acc
         );

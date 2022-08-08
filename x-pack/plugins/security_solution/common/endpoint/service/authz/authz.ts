@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { FleetAuthz } from '@kbn/fleet-plugin/common';
-import { LicenseService } from '../../../license';
-import { EndpointAuthz } from '../../types/authz';
-import { MaybeImmutable } from '../../types';
+import type { FleetAuthz } from '@kbn/fleet-plugin/common';
+import type { LicenseService } from '../../../license';
+import type { EndpointAuthz } from '../../types/authz';
+import type { MaybeImmutable } from '../../types';
 
 /**
  * Used by both the server and the UI to generate the Authorization for access to Endpoint related
@@ -20,18 +20,24 @@ import { MaybeImmutable } from '../../types';
  */
 export const calculateEndpointAuthz = (
   licenseService: LicenseService,
-  fleetAuthz: FleetAuthz,
+  fleetAuthz: FleetAuthz | undefined, // TODO: Remove `undefined` type when `fleetAuthz` is needed and used.
   userRoles: MaybeImmutable<string[]>
 ): EndpointAuthz => {
   const isPlatinumPlusLicense = licenseService.isPlatinumPlus();
-  const hasAllAccessToFleet = userRoles.includes('superuser');
+  const isEnterpriseLicense = licenseService.isEnterprise();
+  const hasEndpointManagementAccess = userRoles.includes('superuser');
 
   return {
-    canAccessFleet: hasAllAccessToFleet,
-    canAccessEndpointManagement: hasAllAccessToFleet,
-    canCreateArtifactsByPolicy: hasAllAccessToFleet && isPlatinumPlusLicense,
-    canIsolateHost: isPlatinumPlusLicense && hasAllAccessToFleet,
-    canUnIsolateHost: hasAllAccessToFleet,
+    canAccessFleet: fleetAuthz?.fleet.all ?? userRoles.includes('superuser'),
+    canAccessEndpointManagement: hasEndpointManagementAccess,
+    canCreateArtifactsByPolicy: hasEndpointManagementAccess && isPlatinumPlusLicense,
+    // Response Actions
+    canIsolateHost: isPlatinumPlusLicense && hasEndpointManagementAccess,
+    canUnIsolateHost: hasEndpointManagementAccess,
+    canKillProcess: hasEndpointManagementAccess && isEnterpriseLicense,
+    canSuspendProcess: hasEndpointManagementAccess && isEnterpriseLicense,
+    canGetRunningProcesses: hasEndpointManagementAccess && isEnterpriseLicense,
+    canAccessResponseConsole: hasEndpointManagementAccess && isEnterpriseLicense,
   };
 };
 
@@ -42,5 +48,9 @@ export const getEndpointAuthzInitialState = (): EndpointAuthz => {
     canCreateArtifactsByPolicy: false,
     canIsolateHost: false,
     canUnIsolateHost: true,
+    canKillProcess: false,
+    canSuspendProcess: false,
+    canGetRunningProcesses: false,
+    canAccessResponseConsole: false,
   };
 };

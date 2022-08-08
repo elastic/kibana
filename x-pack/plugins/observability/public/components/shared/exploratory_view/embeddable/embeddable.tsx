@@ -5,12 +5,19 @@
  * 2.0.
  */
 
+import { Position } from '@elastic/charts';
 import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
-import { LensEmbeddableInput, LensPublicStart, XYState } from '@kbn/lens-plugin/public';
+import {
+  FormulaPublicApi,
+  LensEmbeddableInput,
+  LensPublicStart,
+  XYState,
+} from '@kbn/lens-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/common';
-import { AllSeries, useTheme } from '../../../..';
+import { SingleMetricLensAttributes } from '../configurations/lens_attributes/single_metric_attributes';
+import { AllSeries, ReportTypes, useTheme } from '../../../..';
 import { LayerConfig, LensAttributes } from '../configurations/lens_attributes';
 import { AppDataType, ReportViewType } from '../types';
 import { getLayerConfigs } from '../hooks/use_lens_attributes';
@@ -34,6 +41,8 @@ export interface ExploratoryEmbeddableProps {
   dataTypesIndexPatterns?: Partial<Record<AppDataType, string>>;
   isSingleMetric?: boolean;
   legendIsVisible?: boolean;
+  legendPosition?: Position;
+  hideTicks?: boolean;
   onBrushEnd?: (param: { range: number[] }) => void;
   caseOwner?: string;
   reportConfigMap?: ReportConfigMap;
@@ -42,11 +51,13 @@ export interface ExploratoryEmbeddableProps {
   singleMetricOptions?: SingleMetricOptions;
   title?: string | JSX.Element;
   withActions?: boolean | ActionTypes[];
+  align?: 'left' | 'right' | 'center';
 }
 
 export interface ExploratoryEmbeddableComponentProps extends ExploratoryEmbeddableProps {
   lens: LensPublicStart;
   indexPatterns: DataViewState;
+  lensFormulaHelper?: FormulaPublicApi;
 }
 
 // eslint-disable-next-line import/no-default-export
@@ -61,6 +72,7 @@ export default function Embeddable({
   indexPatterns,
   isSingleMetric = false,
   legendIsVisible,
+  legendPosition,
   lens,
   onBrushEnd,
   caseOwner = observabilityFeatureId,
@@ -70,6 +82,9 @@ export default function Embeddable({
   singleMetricOptions,
   title,
   withActions = true,
+  lensFormulaHelper,
+  align,
+  hideTicks,
 }: ExploratoryEmbeddableComponentProps) {
   const LensComponent = lens?.EmbeddableComponent;
   const LensSaveModalComponent = lens?.SaveModalComponent;
@@ -92,7 +107,11 @@ export default function Embeddable({
 
   let lensAttributes;
   try {
-    lensAttributes = new LensAttributes(layerConfigs);
+    if (reportType === ReportTypes.SINGLE_METRIC) {
+      lensAttributes = new SingleMetricLensAttributes(layerConfigs, reportType, lensFormulaHelper!);
+    } else {
+      lensAttributes = new LensAttributes(layerConfigs, reportType, lensFormulaHelper);
+    }
     // eslint-disable-next-line no-empty
   } catch (error) {}
 
@@ -105,6 +124,17 @@ export default function Embeddable({
 
   if (typeof legendIsVisible !== 'undefined') {
     (attributesJSON.state.visualization as XYState).legend.isVisible = legendIsVisible;
+  }
+  if (typeof legendPosition !== 'undefined') {
+    (attributesJSON.state.visualization as XYState).legend.position = legendPosition;
+  }
+
+  if (hideTicks) {
+    (attributesJSON.state.visualization as XYState).tickLabelsVisibilitySettings = {
+      x: false,
+      yRight: false,
+      yLeft: false,
+    };
   }
 
   const actions = useActions({
@@ -127,7 +157,7 @@ export default function Embeddable({
   }
 
   return (
-    <Wrapper $customHeight={customHeight}>
+    <Wrapper $customHeight={customHeight} align={align}>
       <EuiFlexGroup alignItems="center" gutterSize="none">
         {title && (
           <EuiFlexItem data-test-subj="exploratoryView-title">
@@ -161,6 +191,9 @@ export default function Embeddable({
             withDefaultActions={Boolean(withActions)}
             extraActions={actions}
             viewMode={ViewMode.VIEW}
+            executionContext={{
+              type: 'observability_exploratory_view_embeddable',
+            }}
           />
         </SingleMetric>
       )}
@@ -200,6 +233,7 @@ export default function Embeddable({
 
 const Wrapper = styled.div<{
   $customHeight?: string | number;
+  align?: 'left' | 'right' | 'center';
 }>`
   height: 100%;
   &&& {
@@ -219,10 +253,25 @@ const Wrapper = styled.div<{
     .embPanel__optionsMenuPopover {
       visibility: collapse;
     }
+    .expExpressionRenderer__expression {
+      padding-top: 0;
+    }
 
     &&&:hover {
       .embPanel__optionsMenuPopover {
         visibility: visible;
+      }
+    }
+    .legacyMtrVis > :first-child {
+      justify-content: ${(props) =>
+        props.align === 'left' ? `flex-start;` : props.align === 'right' ? `flex-end;` : 'center;'};
+      .legacyMtrVis__container {
+        padding-top: 4px;
+        padding-left: ${(props) => (props.align === 'left' ? `0` : '16px;')};
+        padding-right: ${(props) => (props.align === 'right' ? `0` : '16px;')};
+      }
+      > :first-child {
+        transform: none !important;
       }
     }
   }

@@ -45,7 +45,8 @@ describe('Shard Delay Agg', () => {
         typesRegistry: {
           get: getShardDelayBucketAgg,
         } as any,
-      }
+      },
+      jest.fn()
     );
   };
 

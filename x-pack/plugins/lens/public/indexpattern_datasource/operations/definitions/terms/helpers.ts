@@ -19,6 +19,8 @@ import type { FrameDatasourceAPI } from '../../../../types';
 import type { FiltersIndexPatternColumn } from '..';
 import type { TermsIndexPatternColumn } from './types';
 import { LastValueIndexPatternColumn } from '../last_value';
+import type { PercentileRanksIndexPatternColumn } from '../percentile_ranks';
+import type { PercentileIndexPatternColumn } from '../percentile';
 
 import type { IndexPatternLayer, IndexPattern, IndexPatternField } from '../../../types';
 import { MULTI_KEY_VISUAL_SEPARATOR, supportedTypes } from './constants';
@@ -213,12 +215,48 @@ function checkLastValue(column: GenericIndexPatternColumn) {
   );
 }
 
+export function isPercentileRankSortable(column: GenericIndexPatternColumn) {
+  // allow the rank by metric only if the percentile rank value is integer
+  // https://github.com/elastic/elasticsearch/issues/66677
+  return (
+    column.operationType !== 'percentile_rank' ||
+    (column.operationType === 'percentile_rank' &&
+      Number.isInteger((column as PercentileRanksIndexPatternColumn).params.value))
+  );
+}
+
+export function computeOrderForMultiplePercentiles(
+  column: GenericIndexPatternColumn,
+  layer: IndexPatternLayer,
+  orderedColumnIds: string[]
+) {
+  // compute the percentiles orderBy correctly for multiple percentiles
+  if (column.operationType === 'percentile') {
+    const percentileColumns = [];
+    for (const [key, value] of Object.entries(layer.columns)) {
+      if (
+        value.operationType === 'percentile' &&
+        (value as PercentileIndexPatternColumn).sourceField ===
+          (column as PercentileIndexPatternColumn).sourceField
+      ) {
+        percentileColumns.push(key);
+      }
+    }
+    if (percentileColumns.length > 1) {
+      const parentColumn = String(orderedColumnIds.indexOf(percentileColumns[0]));
+      return `${parentColumn}.${(column as PercentileIndexPatternColumn).params?.percentile}`;
+    }
+  }
+  return null;
+}
+
 export function isSortableByColumn(layer: IndexPatternLayer, columnId: string) {
   const column = layer.columns[columnId];
   return (
     column &&
     !column.isBucketed &&
     checkLastValue(column) &&
+    isPercentileRankSortable(column) &&
     !('references' in column) &&
     !isReferenced(layer, columnId)
   );

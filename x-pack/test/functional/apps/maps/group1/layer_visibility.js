@@ -10,6 +10,7 @@ import expect from '@kbn/expect';
 export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps']);
   const inspector = getService('inspector');
+  const testSubjects = getService('testSubjects');
   const security = getService('security');
 
   describe('layer visibility', () => {
@@ -31,6 +32,7 @@ export default function ({ getPageObjects, getService }) {
 
     it('should fetch layer data when layer is made visible', async () => {
       await PageObjects.maps.toggleLayerVisibility('logstash');
+      await testSubjects.click('mapLayerTOC'); // Tooltip blocks clicks otherwise
       const hits = await PageObjects.maps.getHits();
       expect(hits).to.equal('5');
     });

@@ -6,8 +6,14 @@
  */
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
-import { Maybe, CursorType, Inspect, PageInfoPaginated, GenericBuckets } from '../../../common';
-import { RequestOptionsPaginated } from '../..';
+import type {
+  Maybe,
+  CursorType,
+  Inspect,
+  PageInfoPaginated,
+  GenericBuckets,
+} from '../../../common';
+import type { RequestOptionsPaginated } from '../..';
 
 export enum NetworkHttpFields {
   domains = 'domains',

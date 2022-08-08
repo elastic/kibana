@@ -13,23 +13,23 @@
 
 import { BehaviorSubject } from 'rxjs';
 import Semver from 'semver';
-import { ElasticsearchClient } from '../../elasticsearch';
-import { Logger } from '../../logging';
-import { IndexMapping, SavedObjectsTypeMappingDefinitions } from '../mappings';
-import {
+import type { Logger } from '@kbn/logging';
+import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import type {
   SavedObjectUnsanitizedDoc,
-  SavedObjectsSerializer,
   SavedObjectsRawDoc,
-} from '../serialization';
+  ISavedObjectTypeRegistry,
+} from '@kbn/core-saved-objects-server';
+import { IndexMapping, SavedObjectsTypeMappingDefinitions } from '../mappings';
+import { SavedObjectsSerializer } from '../serialization';
 import { buildActiveMappings, MigrationResult, MigrationStatus } from './core';
 import { DocumentMigrator, VersionedTransformer } from './core/document_migrator';
 import { createIndexMap } from './core/build_index_map';
 import { SavedObjectsMigrationConfigType } from '../saved_objects_config';
-import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
-import { SavedObjectsType } from '../types';
 import { runResilientMigrator } from './run_resilient_migrator';
 import { migrateRawDocsSafely } from './core/migrate_raw_docs';
-import { DocLinksServiceStart } from '../../doc_links';
 
 export interface KibanaMigratorOptions {
   client: ElasticsearchClient;
@@ -118,9 +118,7 @@ export class KibanaMigrator {
    *    The promise resolves with an array of migration statuses, one for each
    *    elasticsearch index which was migrated.
    */
-  public runMigrations({ rerun = false }: { rerun?: boolean } = {}): Promise<
-    Array<{ status: string }>
-  > {
+  public runMigrations({ rerun = false }: { rerun?: boolean } = {}): Promise<MigrationResult[]> {
     if (this.migrationResult === undefined || rerun) {
       // Reruns are only used by CI / EsArchiver. Publishing status updates on reruns results in slowing down CI
       // unnecessarily, so we skip it in this case.
@@ -147,7 +145,7 @@ export class KibanaMigrator {
     return this.status$.asObservable();
   }
 
-  private runMigrationsInternal() {
+  private runMigrationsInternal(): Promise<MigrationResult[]> {
     const indexMap = createIndexMap({
       kibanaIndexName: this.kibanaIndex,
       indexMap: this.mappingProperties,

@@ -37,18 +37,5 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./dashboard_unsaved_state'));
     loadTestFile(require.resolve('./dashboard_unsaved_listing'));
     loadTestFile(require.resolve('./edit_visualizations'));
-    loadTestFile(require.resolve('./dashboard_options'));
-    loadTestFile(require.resolve('./data_shared_attributes'));
-    loadTestFile(require.resolve('./share'));
-    loadTestFile(require.resolve('./embed_mode'));
-    loadTestFile(require.resolve('./dashboard_back_button'));
-    loadTestFile(require.resolve('./dashboard_error_handling'));
-    loadTestFile(require.resolve('./legacy_urls'));
-    loadTestFile(require.resolve('./saved_search_embeddable'));
-
-    // Note: This one must be last because it unloads some data for one of its tests!
-    // No, this isn't ideal, but loading/unloading takes so much time and these are all bunched
-    // to improve efficiency...
-    loadTestFile(require.resolve('./dashboard_query_bar'));
   });
 }

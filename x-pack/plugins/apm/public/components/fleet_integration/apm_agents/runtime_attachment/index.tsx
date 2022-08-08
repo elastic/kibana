@@ -52,7 +52,7 @@ export interface Operation {
   types: Option[];
 }
 
-const versionRegex = new RegExp(/^\d+\.\d+\.\d+$/);
+const versionRegex = new RegExp(/latest|^\d+\.\d+\.\d+(\.\w+)?$/);
 export function validateVersion(version: RuntimeAttachmentSettings['version']) {
   if (version) {
     return versionRegex.test(version);

@@ -147,6 +147,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   data,
   unit,
   showCheckboxes = true,
+  bulkActions = {},
   queryFields = [],
 }) => {
   const dispatch = useDispatch();
@@ -203,10 +204,11 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
 
   const sortField = useMemo(
     () =>
-      sortStore.map(({ columnId, columnType, sortDirection }) => ({
+      sortStore.map(({ columnId, columnType, esTypes, sortDirection }) => ({
         field: columnId,
         type: columnType,
         direction: sortDirection as Direction,
+        esTypes: esTypes ?? [],
       })),
     [sortStore]
   );
@@ -216,7 +218,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     { consumers, events, updatedAt, loadPage, pageInfo, refetch, totalCount = 0, inspect },
   ] = useTimelineEvents({
     dataViewId,
-    docValueFields: [],
     entityType,
     excludeEcsData: true,
     fields,
@@ -386,6 +387,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
                       filterStatus={filterStatus}
                       trailingControlColumns={trailingControlColumns}
                       showCheckboxes={showCheckboxes}
+                      bulkActions={bulkActions}
                     />
                   </ScrollableFlexItem>
                 </FullWidthFlexGroup>

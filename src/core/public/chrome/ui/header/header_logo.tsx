@@ -12,9 +12,9 @@ import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import Url from 'url';
-import { ChromeNavLink } from '../..';
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { ChromeNavLink } from '../..';
 import { ElasticMark } from './elastic_mark';
-import { HttpStart } from '../../../http';
 import { LoadingIndicator } from '../loading_indicator';
 
 function findClosestAnchor(element: HTMLElement): HTMLAnchorElement | void {

@@ -6,15 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { ExecutionContext } from '@kbn/expressions-plugin';
+import { ExecutionContext } from '@kbn/expressions-plugin/common';
 import { Dimension, prepareLogTable } from '@kbn/visualizations-plugin/common/utils';
-import { LayerTypes } from '../constants';
+import { LayerTypes, REFERENCE_LINE } from '../constants';
 import { strings } from '../i18n';
-import {
-  CommonXYDataLayerConfig,
-  CommonXYLayerConfig,
-  CommonXYReferenceLineLayerConfig,
-} from '../types';
+import { CommonXYDataLayerConfig, CommonXYLayerConfig, ReferenceLineLayerConfig } from '../types';
 
 export const logDatatables = (layers: CommonXYLayerConfig[], handlers: ExecutionContext) => {
   if (!handlers?.inspectorAdapters?.tables) {
@@ -25,22 +21,23 @@ export const logDatatables = (layers: CommonXYLayerConfig[], handlers: Execution
   handlers.inspectorAdapters.tables.allowCsvExport = true;
 
   layers.forEach((layer) => {
-    if (layer.layerType === LayerTypes.ANNOTATIONS) {
+    if (layer.layerType === LayerTypes.ANNOTATIONS || layer.type === REFERENCE_LINE) {
       return;
     }
+
     const logTable = prepareLogTable(layer.table, getLayerDimensions(layer), true);
     handlers.inspectorAdapters.tables.logDatatable(layer.layerId, logTable);
   });
 };
 
 export const getLayerDimensions = (
-  layer: CommonXYDataLayerConfig | CommonXYReferenceLineLayerConfig
+  layer: CommonXYDataLayerConfig | ReferenceLineLayerConfig
 ): Dimension[] => {
   let xAccessor;
-  let splitAccessor;
+  let splitAccessors;
   if (layer.layerType === LayerTypes.DATA) {
     xAccessor = layer.xAccessor;
-    splitAccessor = layer.splitAccessor;
+    splitAccessors = layer.splitAccessors;
   }
 
   const { accessors, layerType } = layer;
@@ -50,6 +47,6 @@ export const getLayerDimensions = (
       layerType === LayerTypes.DATA ? strings.getMetricHelp() : strings.getReferenceLineHelp(),
     ],
     [xAccessor ? [xAccessor] : undefined, strings.getXAxisHelp()],
-    [splitAccessor ? [splitAccessor] : undefined, strings.getBreakdownHelp()],
+    [splitAccessors ? splitAccessors : undefined, strings.getBreakdownHelp()],
   ];
 };

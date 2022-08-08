@@ -171,17 +171,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('with filters', function () {
-      it('should allow filtering without buckets', async function () {
-        let filterCount = 0;
-        await retry.try(async function tryingForTime() {
-          // click first metric bucket
-          await PageObjects.visEditor.clickMetricByIndex(0);
-          filterCount = await filterBar.getFilterCount();
-        });
-        await filterBar.removeAllFilters();
-        expect(filterCount).to.equal(1);
-      });
-
       it('should allow filtering with buckets', async function () {
         log.debug('Bucket = Split Group');
         await PageObjects.visEditor.clickBucket('Split group');

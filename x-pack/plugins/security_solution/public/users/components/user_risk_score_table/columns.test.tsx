@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { render } from '@testing-library/react';
-import { UserRiskScoreColumns } from '.';
+import type { UserRiskScoreColumns } from '.';
 import { getUserRiskScoreColumns } from './columns';
 import { TestProviders } from '../../../common/mock';
 

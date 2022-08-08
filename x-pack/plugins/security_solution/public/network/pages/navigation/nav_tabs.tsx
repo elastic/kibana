@@ -7,7 +7,8 @@
 
 import { omit } from 'lodash/fp';
 import * as i18n from '../translations';
-import { NetworkNavTab, NetworkRouteType } from './types';
+import type { NetworkNavTab } from './types';
+import { NetworkRouteType } from './types';
 import { NETWORK_PATH } from '../../../../common/constants';
 
 const getTabsOnNetworkUrl = (tabName: NetworkRouteType) => `${NETWORK_PATH}/${tabName}`;
@@ -44,10 +45,10 @@ export const navTabsNetwork = (hasMlUserPermissions: boolean): NetworkNavTab => 
       href: getTabsOnNetworkUrl(NetworkRouteType.anomalies),
       disabled: false,
     },
-    [NetworkRouteType.alerts]: {
-      id: NetworkRouteType.alerts,
-      name: i18n.NAVIGATION_ALERTS_TITLE,
-      href: getTabsOnNetworkUrl(NetworkRouteType.alerts),
+    [NetworkRouteType.events]: {
+      id: NetworkRouteType.events,
+      name: i18n.NAVIGATION_EVENTS_TITLE,
+      href: getTabsOnNetworkUrl(NetworkRouteType.events),
       disabled: false,
     },
   };

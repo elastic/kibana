@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HistogramBucket } from '../common';
+import type { HistogramBucket } from '../common';
 
 export interface PreviewHistogramGroupData {
   key: string;

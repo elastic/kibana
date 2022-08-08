@@ -5,12 +5,10 @@
  * 2.0.
  */
 
+import { getSecuritySolutionNavTab } from '@kbn/cloud-security-posture-plugin/public';
 import * as i18n from '../translations';
-import {
-  SecurityNav,
-  SecurityNavGroup,
-  SecurityNavGroupKey,
-} from '../../common/components/navigation/types';
+import type { SecurityNav, SecurityNavGroup } from '../../common/components/navigation/types';
+import { SecurityNavGroupKey } from '../../common/components/navigation/types';
 import {
   APP_OVERVIEW_PATH,
   APP_DETECTION_RESPONSE_PATH,
@@ -30,7 +28,11 @@ import {
   SecurityPageName,
   APP_HOST_ISOLATION_EXCEPTIONS_PATH,
   APP_USERS_PATH,
+  APP_KUBERNETES_PATH,
   APP_LANDING_PATH,
+  APP_RESPONSE_ACTIONS_PATH,
+  APP_THREAT_INTELLIGENCE_PATH,
+  APP_PATH,
 } from '../../../common/constants';
 
 export const navTabs: SecurityNav = {
@@ -97,6 +99,13 @@ export const navTabs: SecurityNav = {
     disabled: false,
     urlKey: 'network',
   },
+  [SecurityPageName.kubernetes]: {
+    id: SecurityPageName.kubernetes,
+    name: i18n.KUBERNETES,
+    href: APP_KUBERNETES_PATH,
+    disabled: false,
+    urlKey: 'kubernetes',
+  },
   [SecurityPageName.timelines]: {
     id: SecurityPageName.timelines,
     name: i18n.TIMELINES,
@@ -160,12 +169,50 @@ export const navTabs: SecurityNav = {
     disabled: false,
     urlKey: 'administration',
   },
+  [SecurityPageName.responseActions]: {
+    id: SecurityPageName.responseActions,
+    name: i18n.RESPONSE_ACTIONS,
+    href: APP_RESPONSE_ACTIONS_PATH,
+    disabled: false,
+    urlKey: 'administration',
+  },
+  [SecurityPageName.threatIntelligence]: {
+    id: SecurityPageName.threatIntelligence,
+    name: i18n.THREAT_INTELLIGENCE,
+    href: APP_THREAT_INTELLIGENCE_PATH,
+    disabled: false,
+    urlKey: 'threat_intelligence',
+  },
+  [SecurityPageName.cloudSecurityPostureFindings]: {
+    ...getSecuritySolutionNavTab<SecurityPageName>('findings', APP_PATH),
+    urlKey: 'findings',
+  },
+  [SecurityPageName.cloudSecurityPostureDashboard]: {
+    ...getSecuritySolutionNavTab<SecurityPageName>('dashboard', APP_PATH),
+    urlKey: 'cloud_posture',
+  },
+  [SecurityPageName.cloudSecurityPostureBenchmarks]: {
+    ...getSecuritySolutionNavTab<SecurityPageName>('benchmarks', APP_PATH),
+    urlKey: 'administration',
+  },
+  [SecurityPageName.cloudSecurityPostureRules]: {
+    ...getSecuritySolutionNavTab<SecurityPageName>('rules', APP_PATH),
+    urlKey: 'administration',
+  },
 };
 
 export const securityNavGroup: SecurityNavGroup = {
+  [SecurityNavGroupKey.dashboards]: {
+    id: SecurityNavGroupKey.dashboards,
+    name: i18n.DASHBOARDS,
+  },
   [SecurityNavGroupKey.detect]: {
     id: SecurityNavGroupKey.detect,
     name: i18n.DETECT,
+  },
+  [SecurityNavGroupKey.findings]: {
+    id: SecurityNavGroupKey.findings,
+    name: i18n.FINDINGS,
   },
   [SecurityNavGroupKey.explore]: {
     id: SecurityNavGroupKey.explore,

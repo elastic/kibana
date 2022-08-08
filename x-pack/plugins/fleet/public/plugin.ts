@@ -27,9 +27,8 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { once } from 'lodash';
 
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-
+import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
-
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 
 import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '@kbn/core/public';
@@ -43,20 +42,12 @@ import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/public';
 
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
-import {
-  PLUGIN_ID,
-  INTEGRATIONS_PLUGIN_ID,
-  setupRouteService,
-  appRoutesService,
-  calculateAuthz,
-  parseExperimentalConfigValue,
-} from '../common';
-import type {
-  CheckPermissionsResponse,
-  PostFleetSetupResponse,
-  FleetAuthz,
-  ExperimentalFeatures,
-} from '../common';
+import { PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, setupRouteService, appRoutesService } from '../common';
+import { calculateAuthz } from '../common/authz';
+import { parseExperimentalConfigValue } from '../common/experimental_features';
+import type { CheckPermissionsResponse, PostFleetSetupResponse } from '../common/types';
+import type { FleetAuthz } from '../common';
+import type { ExperimentalFeatures } from '../common/experimental_features';
 
 import type { FleetConfigType } from '../common/types';
 
@@ -112,6 +103,7 @@ export interface FleetStartServices extends CoreStart, Exclude<FleetStartDeps, '
   storage: Storage;
   share: SharePluginStart;
   cloud?: CloudSetup & CloudStart;
+  discover?: DiscoverStart;
   spaces?: SpacesPluginStart;
   authz: FleetAuthz;
 }

@@ -59,7 +59,7 @@ export const AIOPS_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
   text: i18n.translate('xpack.ml.aiopsBreadcrumbLabel', {
     defaultMessage: 'AIOps',
   }),
-  href: '/aiops',
+  href: '/aiops/explain_log_rate_spikes_index_select',
 });
 
 export const CREATE_JOB_BREADCRUMB: ChromeBreadcrumb = Object.freeze({

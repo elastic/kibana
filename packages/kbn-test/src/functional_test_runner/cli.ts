@@ -9,7 +9,8 @@
 import Path from 'path';
 import { inspect } from 'util';
 
-import { run, createFlagError, Flags } from '@kbn/dev-utils';
+import { run, Flags } from '@kbn/dev-cli-runner';
+import { createFlagError } from '@kbn/dev-cli-errors';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import exitHook from 'exit-hook';

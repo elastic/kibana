@@ -20,7 +20,6 @@ import { SplitTooltip } from './split_tooltip';
 export const getHeatmapVisTypeDefinition = ({
   showElasticChartsOptions = false,
   palettes,
-  trackUiMetric,
 }: HeatmapTypeProps): VisTypeDefinition<HeatmapVisParams> => ({
   name: 'heatmap',
   title: i18n.translate('visTypeHeatmap.heatmap.heatmapTitle', { defaultMessage: 'Heat map' }),
@@ -28,6 +27,7 @@ export const getHeatmapVisTypeDefinition = ({
   description: i18n.translate('visTypeHeatmap.heatmap.heatmapDescription', {
     defaultMessage: 'Display values as colors in a matrix.',
   }),
+  fetchDatatable: true,
   toExpressionAst,
   getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter],
   visConfig: {
@@ -63,10 +63,10 @@ export const getHeatmapVisTypeDefinition = ({
     },
   },
   editorConfig: {
+    enableDataViewChange: true,
     optionsTemplate: getHeatmapOptions({
       showElasticChartsOptions,
       palettes,
-      trackUiMetric,
     }),
     schemas: [
       {
@@ -87,6 +87,7 @@ export const getHeatmapVisTypeDefinition = ({
           'top_hits',
           '!filtered_metric',
           '!single_percentile',
+          '!single_percentile_rank',
         ],
         defaults: [{ schema: 'metric', type: 'count' }],
       },

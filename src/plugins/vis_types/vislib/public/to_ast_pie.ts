@@ -11,7 +11,6 @@ import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugi
 
 import { PieVisParams } from './pie';
 import { vislibPieName, VisTypeVislibPieExpressionFunctionDefinition } from './pie_fn';
-import { getEsaggsFn } from './to_ast_esaggs';
 
 export const toExpressionAst: VisToExpressionAst<PieVisParams> = async (vis, params) => {
   const schemas = getVisSchemas(vis, params);
@@ -32,7 +31,7 @@ export const toExpressionAst: VisToExpressionAst<PieVisParams> = async (vis, par
     }
   );
 
-  const ast = buildExpression([getEsaggsFn(vis), visTypePie]);
+  const ast = buildExpression([visTypePie]);
 
   return ast.toAst();
 };

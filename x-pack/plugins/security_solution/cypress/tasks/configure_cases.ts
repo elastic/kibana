@@ -18,7 +18,7 @@ import {
 } from '../screens/configure_cases';
 import { MAIN_PAGE } from '../screens/security_main';
 
-import { Connector } from '../objects/case';
+import type { Connector } from '../objects/case';
 
 export const addServiceNowConnector = (connector: Connector) => {
   cy.get(SERVICE_NOW_CONNECTOR_CARD).click();

@@ -4,8 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { Criteria } from '@elastic/eui';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { BoolQuery, Filter, Query } from '@kbn/es-query';
-import { UseQueryResult } from 'react-query';
+import type { CspRuleMetadata } from '../../../common/schemas';
 
 export type FindingsGroupByKind = 'default' | 'resource';
 
@@ -14,17 +16,14 @@ export interface FindingsBaseURLQuery {
   filters: Filter[];
 }
 
+export interface FindingsBaseProps {
+  dataView: DataView;
+}
+
 export interface FindingsBaseEsQuery {
-  index: string;
   query?: {
     bool: BoolQuery;
   };
-}
-
-export interface FindingsQueryResult<TData = unknown, TError = unknown> {
-  loading: UseQueryResult['isLoading'];
-  error: TError;
-  data: TData;
 }
 
 // TODO: this needs to be defined in a versioned schema
@@ -33,27 +32,12 @@ export interface CspFinding {
   cycle_id: string;
   result: CspFindingResult;
   resource: CspFindingResource;
-  rule: CspRule;
+  rule: CspRuleMetadata;
   host: CspFindingHost;
   agent: CspFindingAgent;
   ecs: {
     version: string;
   };
-}
-
-interface CspRule {
-  benchmark: { name: string; version: string };
-  section: string;
-  audit: string;
-  references: string;
-  profile_applicability: string;
-  description: string;
-  impact: string;
-  default_value: string;
-  rationale: string;
-  name: string;
-  remediation: string;
-  tags: string[];
 }
 
 interface CspFindingResult {
@@ -63,11 +47,10 @@ interface CspFindingResult {
 }
 
 interface CspFindingResource {
-  uid: string;
-  filename: string;
-  // gid: string;
-  mode: string;
-  path: string;
+  name: string;
+  sub_type: string;
+  raw: object;
+  id: string;
   type: string;
   [other_keys: string]: unknown;
 }
@@ -99,3 +82,10 @@ interface CspFindingAgent {
   name: string;
   type: string;
 }
+
+export interface CspFindingsQueryData {
+  page: CspFinding[];
+  total: number;
+}
+
+export type Sort<T> = NonNullable<Criteria<T>['sort']>;

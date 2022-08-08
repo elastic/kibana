@@ -6,9 +6,10 @@
  */
 
 import { transformValidate, transformValidateBulkError } from './validate';
-import { BulkError } from '../utils';
-import { RulesSchema } from '../../../../../common/detection_engine/schemas/response';
-import { getRuleMock, getRuleExecutionSummarySucceeded } from '../__mocks__/request_responses';
+import type { BulkError } from '../utils';
+import type { RulesSchema } from '../../../../../common/detection_engine/schemas/response';
+import { getRuleMock } from '../__mocks__/request_responses';
+import { ruleExecutionSummaryMock } from '../../../../../common/detection_engine/rule_monitoring/mocks';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
@@ -63,6 +64,9 @@ export const ruleOutput = (): RulesSchema => ({
   note: '# Investigative notes',
   timeline_title: 'some-timeline-title',
   timeline_id: 'some-timeline-id',
+  related_integrations: [],
+  required_fields: [],
+  setup: '',
 });
 
 describe('validate', () => {
@@ -108,7 +112,7 @@ describe('validate', () => {
 
     test('it should do a validation correctly of a rule id with rule execution summary passed in', () => {
       const rule = getRuleMock(getQueryRuleParams());
-      const ruleExecutionSumary = getRuleExecutionSummarySucceeded();
+      const ruleExecutionSumary = ruleExecutionSummaryMock.getSummarySucceeded();
       const validatedOrError = transformValidateBulkError('rule-1', rule, ruleExecutionSumary);
       const expected: RulesSchema = {
         ...ruleOutput(),

@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { CoreSetup, SavedObjectsClient } from '@kbn/core/server';
-import { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
+import type { CoreSetup } from '@kbn/core/server';
+import { SavedObjectsClient } from '@kbn/core/server';
+import type { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
 import { getBeatUsage, getLiveQueryUsage, getPolicyLevelUsage } from './fetchers';
-import { CollectorDependencies, usageSchema, UsageData } from './types';
+import type { CollectorDependencies, UsageData } from './types';
+import { usageSchema } from './types';
 
 export type RegisterCollector = (deps: CollectorDependencies) => void;
 export const getInternalSavedObjectsClient = async (

@@ -8,7 +8,7 @@
 import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiCallOut, EuiCheckbox, EuiConfirmModal } from '@elastic/eui';
 
 import { PolicyFromES } from '../../../../../common/types';
 import { toasts } from '../../../services/notification';
@@ -21,6 +21,16 @@ interface Props {
   onCancel: () => void;
 }
 export class ConfirmDelete extends Component<Props> {
+  public state = {
+    isDeleteConfirmed: false,
+  };
+
+  setIsDeleteConfirmed = (confirmed: boolean) => {
+    this.setState({
+      isDeleteConfirmed: confirmed,
+    });
+  };
+
   deletePolicy = async () => {
     const { policyToDelete, callback } = this.props;
     const policyName = policyToDelete.name;
@@ -43,8 +53,12 @@ export class ConfirmDelete extends Component<Props> {
       callback();
     }
   };
+  isPolicyPolicy = true;
   render() {
     const { policyToDelete, onCancel } = this.props;
+    const { isDeleteConfirmed } = this.state;
+    const isManagedPolicy = policyToDelete.policy?._meta?.managed;
+
     const title = i18n.translate('xpack.indexLifecycleMgmt.confirmDelete.title', {
       defaultMessage: 'Delete policy "{name}"',
       values: { name: policyToDelete.name },
@@ -68,13 +82,47 @@ export class ConfirmDelete extends Component<Props> {
           />
         }
         buttonColor="danger"
+        confirmButtonDisabled={isManagedPolicy ? !isDeleteConfirmed : false}
       >
-        <div>
-          <FormattedMessage
-            id="xpack.indexLifecycleMgmt.confirmDelete.undoneWarning"
-            defaultMessage="You can't recover a deleted policy."
-          />
-        </div>
+        {isManagedPolicy ? (
+          <EuiCallOut
+            title={
+              <FormattedMessage
+                id="xpack.indexLifecycleMgmt.deletePolicyModal.proceedWithCautionCallOutTitle"
+                defaultMessage="Deleting a managed policy can break Kibana"
+              />
+            }
+            color="danger"
+            iconType="alert"
+            data-test-subj="deleteManagedPolicyCallOut"
+          >
+            <p>
+              <FormattedMessage
+                id="xpack.indexLifecycleMgmt.deletePolicyModal.proceedWithCautionCallOutDescription"
+                defaultMessage="Managed policies are critical for internal operations.
+                  If you delete this managed policy, you can’t recover it."
+              />
+            </p>
+            <EuiCheckbox
+              id="confirmDeletePolicyCheckbox"
+              label={
+                <FormattedMessage
+                  id="xpack.indexLifecycleMgmt.deletePolicyModal.confirmDeleteCheckboxLabel"
+                  defaultMessage="I understand the consequences of deleting a managed policy"
+                />
+              }
+              checked={isDeleteConfirmed}
+              onChange={(e) => this.setIsDeleteConfirmed(e.target.checked)}
+            />
+          </EuiCallOut>
+        ) : (
+          <div>
+            <FormattedMessage
+              id="xpack.indexLifecycleMgmt.confirmDelete.undoneWarning"
+              defaultMessage="You can't recover a deleted policy."
+            />
+          </div>
+        )}
       </EuiConfirmModal>
     );
   }

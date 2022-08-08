@@ -50,9 +50,10 @@ export default function ({ getPageObjects, getService }) {
 
         expect(searchParams).to.eql({
           geometryFieldName: 'geometry',
+          hasLabels: 'false',
           index: 'geo_shapes*',
           requestBody:
-            '(_source:!f,docvalue_fields:!(prop1),query:(bool:(filter:!(),must:!(),must_not:!(),should:!())),runtime_mappings:(),script_fields:(),size:10001,stored_fields:!(geometry,prop1))',
+            '(_source:!f,fields:!(prop1),query:(bool:(filter:!(),must:!(),must_not:!(),should:!())),runtime_mappings:(),size:10001)',
         });
       });
 

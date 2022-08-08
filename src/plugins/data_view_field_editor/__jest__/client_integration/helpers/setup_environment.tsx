@@ -117,6 +117,8 @@ export const WithFieldEditorDependencies =
     const dependencies: Context = {
       dataView: {
         title: indexPatternNameForTest,
+        name: indexPatternNameForTest,
+        getName: () => indexPatternNameForTest,
         fields: { getAll: spyIndexPatternGetAllFields },
       } as any,
       uiSettings: uiSettingsServiceMock.createStartContract(),

@@ -11,7 +11,7 @@ import type { PaletteOutput } from '@kbn/coloring';
 import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
-import { LegendSize } from '@kbn/visualizations-plugin/public';
+import type { LegendSize } from '@kbn/visualizations-plugin/public';
 import { ChartTypes, ExpressionValuePartitionLabels } from './expression_functions';
 
 export enum EmptySizeRatios {
@@ -24,7 +24,7 @@ export interface Dimension {
   accessor: number;
   format: {
     id?: string;
-    params?: SerializedFieldFormat<object>;
+    params?: SerializedFieldFormat;
   };
 }
 
@@ -129,7 +129,7 @@ export enum LegendDisplay {
 export interface BucketColumns extends DatatableColumn {
   format?: {
     id?: string;
-    params?: SerializedFieldFormat<object>;
+    params?: SerializedFieldFormat;
   };
 }
 

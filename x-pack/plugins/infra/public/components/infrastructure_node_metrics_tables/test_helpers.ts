@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { DeepPartial } from 'utility-types';
 import type { HttpFetchOptions } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
+import { I18nProvider } from '@kbn/i18n-react';
+import { DeepPartial } from 'utility-types';
 import type { MetricsExplorerResponse } from '../../../common/http_api/metrics_explorer';
 import type { MetricsSourceConfigurationResponse } from '../../../common/metrics_sources';
 import type { CoreProvidersProps } from '../../apps/common_providers';
@@ -28,6 +29,7 @@ export function createStartServicesAccessorMock(fetchMock: NodeMetricsTableFetch
   const core = coreMock.createStart();
   // @ts-expect-error core.http.fetch has overloads, Jest/TypeScript only picks the first definition when mocking
   core.http.fetch.mockImplementation(fetchMock);
+  core.i18n.Context.mockImplementation(I18nProvider as () => JSX.Element);
 
   const coreProvidersPropsMock: CoreProvidersProps = {
     core,

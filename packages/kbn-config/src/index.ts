@@ -10,6 +10,7 @@ export type {
   ConfigDeprecationFactory,
   AddConfigDeprecation,
   ConfigDeprecationProvider,
+  DeprecatedConfigDetails,
   ConfigDeprecationWithContext,
   ConfigDeprecation,
   ConfigDeprecationCommand,
@@ -27,6 +28,6 @@ export { ConfigService } from './config_service';
 export type { Config, ConfigPath } from './config';
 export { isConfigPath, hasConfigPathIntersection } from './config';
 export { ObjectToConfigAdapter } from './object_to_config_adapter';
-export type { CliArgs, RawPackageInfo } from './env';
+export type { CliArgs, RawPackageInfo, EnvOptions } from './env';
 export { Env } from './env';
 export type { EnvironmentMode, PackageInfo } from './types';

@@ -16,13 +16,14 @@ export const DEFAULT_CORRELATION_ID = '{{rule.id}}:{{alert.id}}';
 export const choicesToEuiOptions = (choices: Choice[]): EuiSelectOption[] =>
   choices.map((choice) => ({ value: choice.value, text: choice.label }));
 
-export const isRESTApiError = (res: AppInfo | RESTApiError): res is RESTApiError =>
-  (res as RESTApiError).error != null || (res as RESTApiError).status === 'failure';
+export const isRESTApiError = (res: AppInfo | RESTApiError | undefined): res is RESTApiError =>
+  res != null &&
+  ((res as RESTApiError).error != null || (res as RESTApiError).status === 'failure');
 
 export const isFieldInvalid = (
   field: string | undefined | null,
   error: string | IErrorObject | string[]
-): boolean => error !== undefined && error.length > 0 && field != null;
+): boolean => error !== undefined && error.length > 0 && field !== undefined;
 
 export const getConnectorDescriptiveTitle = (connector: ActionConnector) => {
   let title = connector.name;

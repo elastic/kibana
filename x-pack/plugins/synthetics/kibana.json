@@ -20,7 +20,8 @@
     "taskManager",
     "triggersActionsUi",
     "usageCollection",
-    "unifiedSearch"
+    "unifiedSearch",
+    "spaces"
   ],
   "server": true,
   "ui": true,

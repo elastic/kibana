@@ -104,7 +104,6 @@ export const Overview: React.FC = () => {
     hasPermissions,
     isFederatedSource,
     isIndexedSource,
-    name,
     serviceType,
     baseServiceType,
   } = contentSource;
@@ -566,8 +565,7 @@ export const Overview: React.FC = () => {
                       'xpack.enterpriseSearch.workplaceSearch.sources.feedbackCallOutText',
                       {
                         defaultMessage:
-                          'Have feedback about deploying a {name} Connector Package? Let us know.',
-                        values: { name },
+                          'Have feedback about deploying a connector package? Let us know.',
                       }
                     )}
                   </EuiLink>

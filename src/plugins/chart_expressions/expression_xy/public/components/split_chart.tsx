@@ -9,8 +9,12 @@
 import React, { useCallback } from 'react';
 import { GroupBy, SmallMultiples, Predicate } from '@elastic/charts';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
-import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import {
+  getAccessorByDimension,
+  getColumnByAccessor,
+} from '@kbn/visualizations-plugin/common/utils';
 import { Datatable } from '@kbn/expressions-plugin/public';
+import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { FormatFactory } from '../types';
 
 interface SplitChartProps {
@@ -18,6 +22,7 @@ interface SplitChartProps {
   splitRowAccessor?: ExpressionValueVisDimension | string;
   columns: Datatable['columns'];
   formatFactory: FormatFactory;
+  fieldFormats: Record<string, SerializedFieldFormat | undefined>;
 }
 
 const SPLIT_COLUMN = '__split_column__';
@@ -27,15 +32,16 @@ export const SplitChart = ({
   splitColumnAccessor,
   splitRowAccessor,
   columns,
+  fieldFormats,
   formatFactory,
 }: SplitChartProps) => {
   const format = useCallback(
     (value: unknown, accessor: ExpressionValueVisDimension | string) => {
-      const formatParams = getFormatByAccessor(accessor, columns);
-      const formatter = formatParams ? formatFactory(formatParams) : formatFactory();
+      const formatParams = fieldFormats[getAccessorByDimension(accessor, columns)];
+      const formatter = formatFactory(formatParams);
       return formatter.convert(value);
     },
-    [columns, formatFactory]
+    [columns, formatFactory, fieldFormats]
   );
 
   const getData = useCallback(

@@ -8,7 +8,7 @@
 
 import Path from 'path';
 
-import { run } from '@kbn/dev-utils';
+import { run } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/utils';
 
 import { OptimizerConfig } from '../optimizer';

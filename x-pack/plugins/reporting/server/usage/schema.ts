@@ -8,6 +8,7 @@
 import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
 import {
   AppCounts,
+  ExecutionTimes,
   AvailableTotal,
   ByAppCounts,
   JobTypes,
@@ -17,6 +18,7 @@ import {
   RangeStats,
   ReportingUsageType,
   SizePercentiles,
+  QueueTimes,
 } from './types';
 
 const appCountsSchema: MakeSchemaFrom<AppCounts> = {
@@ -24,6 +26,18 @@ const appCountsSchema: MakeSchemaFrom<AppCounts> = {
   'canvas workpad': { type: 'long' },
   dashboard: { type: 'long' },
   visualization: { type: 'long' },
+};
+
+const executionTimesSchema: MakeSchemaFrom<ExecutionTimes> = {
+  min: { type: 'long' },
+  max: { type: 'long' },
+  avg: { type: 'float' },
+};
+
+const queueTimesSchema: MakeSchemaFrom<QueueTimes> = {
+  min: { type: 'long' },
+  max: { type: 'long' },
+  avg: { type: 'float' },
 };
 
 const layoutCountsSchema: MakeSchemaFrom<LayoutCounts> = {
@@ -89,6 +103,7 @@ const errorCodesSchemaPng: MakeSchemaFrom<JobTypes['PNGV2']['error_codes']> = {
   browser_unexpectedly_closed_error: { type: 'long' },
   browser_screenshot_error: { type: 'long' },
   visual_reporting_soft_disabled_error: { type: 'long' },
+  invalid_layout_parameters_error: { type: 'long' },
 };
 const errorCodesSchemaPdf: MakeSchemaFrom<JobTypes['printable_pdf_v2']['error_codes']> = {
   pdf_worker_out_of_memory_error: { type: 'long' },
@@ -100,6 +115,7 @@ const errorCodesSchemaPdf: MakeSchemaFrom<JobTypes['printable_pdf_v2']['error_co
   browser_unexpectedly_closed_error: { type: 'long' },
   browser_screenshot_error: { type: 'long' },
   visual_reporting_soft_disabled_error: { type: 'long' },
+  invalid_layout_parameters_error: { type: 'long' },
 };
 
 const availableTotalSchema: MakeSchemaFrom<AvailableTotal> = {
@@ -108,6 +124,7 @@ const availableTotalSchema: MakeSchemaFrom<AvailableTotal> = {
   deprecated: { type: 'long' },
   output_size: sizesSchema,
   app: appCountsSchema,
+  execution_times: executionTimesSchema,
 };
 
 const jobTypesSchema: MakeSchemaFrom<JobTypes> = {
@@ -155,6 +172,7 @@ const rangeStatsSchema: MakeSchemaFrom<RangeStats> = {
     processing: byAppCountsSchema,
   },
   output_size: sizesSchema,
+  queue_times: queueTimesSchema,
 };
 
 export const reportingSchema: MakeSchemaFrom<ReportingUsageType> = {

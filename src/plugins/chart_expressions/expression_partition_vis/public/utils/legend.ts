@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DatatableColumn } from '@kbn/expressions-plugin';
+import { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { BucketColumns, ChartTypes, LegendDisplay } from '../../common/types';
 
 type GetLegendIsFlatFn = (splitChartDimension: DatatableColumn | undefined) => boolean;

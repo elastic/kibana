@@ -7,15 +7,67 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AxisExtentModes, ValueLabelModes } from '../constants';
+import { isValidInterval } from '@kbn/data-plugin/common';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import { AxisExtentModes, ValueLabelModes, SeriesTypes } from '../constants';
 import {
+  SeriesType,
   AxisExtentConfigResult,
   DataLayerConfigResult,
+  CommonXYDataLayerConfigResult,
   ValueLabelMode,
   CommonXYDataLayerConfig,
+  YAxisConfigResult,
+  ExtendedDataLayerConfigResult,
+  XAxisConfigResult,
 } from '../types';
+import { isTimeChart } from '../helpers';
 
-const errors = {
+export const errors = {
+  markSizeAccessorForNonLineOrAreaChartsError: () =>
+    i18n.translate(
+      'expressionXY.reusable.function.dataLayer.errors.markSizeAccessorForNonLineOrAreaChartsError',
+      {
+        defaultMessage:
+          "`markSizeAccessor` can't be used. Dots are applied only for line or area charts",
+      }
+    ),
+  markSizeRatioLimitsError: () =>
+    i18n.translate('expressionXY.reusable.function.xyVis.errors.markSizeLimitsError', {
+      defaultMessage: 'Mark size ratio must be greater or equal to 1 and less or equal to 100',
+    }),
+  lineWidthForNonLineOrAreaChartError: () =>
+    i18n.translate(
+      'expressionXY.reusable.function.xyVis.errors.lineWidthForNonLineOrAreaChartError',
+      {
+        defaultMessage: '`lineWidth` can be applied only for line or area charts',
+      }
+    ),
+  showPointsForNonLineOrAreaChartError: () =>
+    i18n.translate(
+      'expressionXY.reusable.function.xyVis.errors.showPointsForNonLineOrAreaChartError',
+      {
+        defaultMessage: '`showPoints` can be applied only for line or area charts',
+      }
+    ),
+  pointsRadiusForNonLineOrAreaChartError: () =>
+    i18n.translate(
+      'expressionXY.reusable.function.xyVis.errors.pointsRadiusForNonLineOrAreaChartError',
+      {
+        defaultMessage: '`pointsRadius` can be applied only for line or area charts',
+      }
+    ),
+  linesVisibilityForNonLineChartError: () =>
+    i18n.translate(
+      'expressionXY.reusable.function.xyVis.errors.linesVisibilityForNonLineChartError',
+      {
+        defaultMessage: 'Lines visibility can be controlled only at line charts',
+      }
+    ),
+  markSizeRatioWithoutAccessor: () =>
+    i18n.translate('expressionXY.reusable.function.xyVis.errors.markSizeRatioWithoutAccessor', {
+      defaultMessage: 'Mark size ratio can be applied only with `markSizeAccessor`',
+    }),
   extendBoundsAreInvalidError: () =>
     i18n.translate('expressionXY.reusable.function.xyVis.errors.extendBoundsAreInvalidError', {
       defaultMessage:
@@ -37,19 +89,47 @@ const errors = {
     i18n.translate('expressionXY.reusable.function.xyVis.errors.dataBoundsForNotLineChartError', {
       defaultMessage: 'Only line charts can be fit to the data bounds',
     }),
+  extentFullModeIsInvalidError: () =>
+    i18n.translate('expressionXY.reusable.function.xyVis.errors.extentFullModeIsInvalid', {
+      defaultMessage: 'For x axis extent, the full mode is not supported.',
+    }),
+  extentModeNotSupportedError: () =>
+    i18n.translate('expressionXY.reusable.function.xyVis.errors.extentModeNotSupportedError', {
+      defaultMessage: 'X axis extent is only supported for numeric histograms.',
+    }),
+  timeMarkerForNotTimeChartsError: () =>
+    i18n.translate('expressionXY.reusable.function.xyVis.errors.timeMarkerForNotTimeChartsError', {
+      defaultMessage: 'Only time charts can have current time marker',
+    }),
+  isInvalidIntervalError: () =>
+    i18n.translate('expressionXY.reusable.function.xyVis.errors.isInvalidIntervalError', {
+      defaultMessage:
+        'Provided x-axis interval is invalid. The interval should include quantity and unit names. Examples: 1d, 24h, 1w.',
+    }),
+  minTimeBarIntervalNotForTimeBarChartError: () =>
+    i18n.translate(
+      'expressionXY.reusable.function.xyVis.errors.minTimeBarIntervalNotForTimeBarChartError',
+      {
+        defaultMessage: '`minTimeBarInterval` argument is applicable only for time bar charts.',
+      }
+    ),
+  axisIsNotAssignedError: (axisId: string) =>
+    i18n.translate('expressionXY.reusable.function.xyVis.errors.axisIsNotAssignedError', {
+      defaultMessage:
+        'Axis with id: "{axisId}" is not assigned to any accessor. Please assign axis using the following construction: `decorations=\\{dataDecorationConfig forAccessor="your-accessor" axisId="{axisId}"\\}`',
+      values: { axisId },
+    }),
 };
 
 export const hasBarLayer = (layers: Array<DataLayerConfigResult | CommonXYDataLayerConfig>) =>
-  layers.filter(({ seriesType }) => seriesType.includes('bar')).length > 0;
+  layers.some(({ seriesType }) => seriesType === SeriesTypes.BAR);
 
 export const hasAreaLayer = (layers: Array<DataLayerConfigResult | CommonXYDataLayerConfig>) =>
-  layers.filter(({ seriesType }) => seriesType.includes('area')).length > 0;
+  layers.some(({ seriesType }) => seriesType === SeriesTypes.AREA);
 
 export const hasHistogramBarLayer = (
   layers: Array<DataLayerConfigResult | CommonXYDataLayerConfig>
-) =>
-  layers.filter(({ seriesType, isHistogram }) => seriesType.includes('bar') && isHistogram).length >
-  0;
+) => layers.some(({ seriesType, isHistogram }) => seriesType === SeriesTypes.BAR && isHistogram);
 
 export const isValidExtentWithCustomMode = (extent: AxisExtentConfigResult) => {
   const isValidLowerBound =
@@ -64,26 +144,66 @@ export const validateExtentForDataBounds = (
   extent: AxisExtentConfigResult,
   layers: Array<DataLayerConfigResult | CommonXYDataLayerConfig>
 ) => {
-  const lineSeries = layers.filter(({ seriesType }) => seriesType.includes('line'));
-  if (!lineSeries.length && extent.mode === AxisExtentModes.DATA_BOUNDS) {
+  const hasLineSeries = layers.some(({ seriesType }) => seriesType === SeriesTypes.LINE);
+  if (!hasLineSeries && extent.mode === AxisExtentModes.DATA_BOUNDS) {
     throw new Error(errors.dataBoundsForNotLineChartError());
   }
 };
 
-export const validateExtent = (
-  extent: AxisExtentConfigResult,
-  hasBarOrArea: boolean,
+export const validateXExtent = (
+  extent: AxisExtentConfigResult | undefined,
   dataLayers: Array<DataLayerConfigResult | CommonXYDataLayerConfig>
 ) => {
-  if (
-    extent.mode === AxisExtentModes.CUSTOM &&
-    hasBarOrArea &&
-    !isValidExtentWithCustomMode(extent)
-  ) {
-    throw new Error(errors.extendBoundsAreInvalidError());
+  if (extent) {
+    if (extent.mode === AxisExtentModes.FULL) {
+      throw new Error(errors.extentFullModeIsInvalidError());
+    }
+    if (isTimeChart(dataLayers) || dataLayers.every(({ isHistogram }) => !isHistogram)) {
+      throw new Error(errors.extentModeNotSupportedError());
+    }
   }
+};
 
-  validateExtentForDataBounds(extent, dataLayers);
+export const validateExtents = (
+  dataLayers: Array<DataLayerConfigResult | CommonXYDataLayerConfig>,
+  hasBarOrArea: boolean,
+  yAxisConfigs?: YAxisConfigResult[],
+  xAxisConfig?: XAxisConfigResult
+) => {
+  yAxisConfigs?.forEach((axis) => {
+    if (!axis.extent) {
+      return;
+    }
+    if (
+      hasBarOrArea &&
+      axis.extent?.mode === AxisExtentModes.CUSTOM &&
+      !isValidExtentWithCustomMode(axis.extent)
+    ) {
+      throw new Error(errors.extendBoundsAreInvalidError());
+    }
+
+    validateExtentForDataBounds(axis.extent, dataLayers);
+  });
+
+  validateXExtent(xAxisConfig?.extent, dataLayers);
+};
+
+export const validateAxes = (
+  dataLayers: Array<DataLayerConfigResult | CommonXYDataLayerConfig>,
+  yAxisConfigs?: YAxisConfigResult[]
+) => {
+  yAxisConfigs?.forEach((axis) => {
+    if (
+      axis.id &&
+      dataLayers.every(
+        (layer) =>
+          !layer.decorations ||
+          layer.decorations?.every((decorationConfig) => decorationConfig.axisId !== axis.id)
+      )
+    ) {
+      throw new Error(errors.axisIsNotAssignedError(axis.id));
+    }
+  });
 };
 
 export const validateFillOpacity = (fillOpacity: number | undefined, hasArea: boolean) => {
@@ -99,5 +219,93 @@ export const validateValueLabels = (
 ) => {
   if ((!hasBar || !hasNotHistogramBars) && valueLabels !== ValueLabelModes.HIDE) {
     throw new Error(errors.valueLabelsForNotBarsOrHistogramBarsChartsError());
+  }
+};
+
+const isAreaOrLineChart = (seriesType: SeriesType) =>
+  seriesType === SeriesTypes.LINE || seriesType === SeriesTypes.AREA;
+
+export const validateAddTimeMarker = (
+  dataLayers: Array<DataLayerConfigResult | ExtendedDataLayerConfigResult>,
+  addTimeMarker?: boolean
+) => {
+  if (addTimeMarker && !isTimeChart(dataLayers)) {
+    throw new Error(errors.timeMarkerForNotTimeChartsError());
+  }
+};
+
+export const validateMarkSizeForChartType = (
+  markSizeAccessor: ExpressionValueVisDimension | string | undefined,
+  seriesType: SeriesType
+) => {
+  if (markSizeAccessor && !isAreaOrLineChart(seriesType)) {
+    throw new Error(errors.markSizeAccessorForNonLineOrAreaChartsError());
+  }
+};
+
+export const validateMarkSizeRatioLimits = (markSizeRatio?: number) => {
+  if (markSizeRatio !== undefined && (markSizeRatio < 1 || markSizeRatio > 100)) {
+    throw new Error(errors.markSizeRatioLimitsError());
+  }
+};
+
+export const validateLineWidthForChartType = (
+  lineWidth: number | undefined,
+  seriesType: SeriesType
+) => {
+  if (lineWidth !== undefined && !isAreaOrLineChart(seriesType)) {
+    throw new Error(errors.lineWidthForNonLineOrAreaChartError());
+  }
+};
+
+export const validateShowPointsForChartType = (
+  showPoints: boolean | undefined,
+  seriesType: SeriesType
+) => {
+  if (showPoints !== undefined && !isAreaOrLineChart(seriesType)) {
+    throw new Error(errors.showPointsForNonLineOrAreaChartError());
+  }
+};
+
+export const validatePointsRadiusForChartType = (
+  pointsRadius: number | undefined,
+  seriesType: SeriesType
+) => {
+  if (pointsRadius !== undefined && !isAreaOrLineChart(seriesType)) {
+    throw new Error(errors.pointsRadiusForNonLineOrAreaChartError());
+  }
+};
+
+export const validateLinesVisibilityForChartType = (
+  showLines: boolean | undefined,
+  seriesType: SeriesType
+) => {
+  if (showLines && !isAreaOrLineChart(seriesType)) {
+    throw new Error(errors.linesVisibilityForNonLineChartError());
+  }
+};
+
+export const validateMarkSizeRatioWithAccessor = (
+  markSizeRatio: number | undefined,
+  markSizeAccessor: ExpressionValueVisDimension | string | undefined
+) => {
+  if (markSizeRatio !== undefined && !markSizeAccessor) {
+    throw new Error(errors.markSizeRatioWithoutAccessor());
+  }
+};
+
+export const validateMinTimeBarInterval = (
+  dataLayers: CommonXYDataLayerConfigResult[],
+  hasBar: boolean,
+  minTimeBarInterval?: string
+) => {
+  if (minTimeBarInterval) {
+    if (!isValidInterval(minTimeBarInterval)) {
+      throw new Error(errors.isInvalidIntervalError());
+    }
+
+    if (!hasBar || !isTimeChart(dataLayers)) {
+      throw new Error(errors.minTimeBarIntervalNotForTimeBarChartError());
+    }
   }
 };

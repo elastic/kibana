@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { defaultConfig } from '@kbn/storybook';
+import { defaultConfig, StorybookConfig } from '@kbn/storybook';
 
-export const discoverStorybookConfig = {
+export const discoverStorybookConfig: StorybookConfig = {
   ...defaultConfig,
   stories: ['../**/*.stories.tsx'],
   addons: [...(defaultConfig.addons || []), './addon/target/register'],

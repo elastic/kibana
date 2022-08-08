@@ -8,9 +8,9 @@
 import { schema } from '@kbn/config-schema';
 
 import type { RouteDefinitionParams } from '../..';
+import { transformElasticsearchRoleToRole } from '../../../authorization';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
-import { transformElasticsearchRoleToRole } from './model';
 
 export function defineGetRolesRoutes({
   router,

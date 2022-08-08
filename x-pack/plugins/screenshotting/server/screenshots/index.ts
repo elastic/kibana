@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { HttpServiceSetup, KibanaRequest, Logger, PackageInfo } from '@kbn/core/server';
 import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import type { Optional } from '@kbn/utility-types';
@@ -22,16 +23,15 @@ import {
   tap,
   toArray,
 } from 'rxjs/operators';
-import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import {
+  errors,
   LayoutParams,
   SCREENSHOTTING_APP_ID,
   SCREENSHOTTING_EXPRESSION,
   SCREENSHOTTING_EXPRESSION_INPUT,
-  errors,
 } from '../../common';
+import { HeadlessChromiumDriverFactory, PerformanceMetrics } from '../browsers';
 import { systemHasInsufficientMemory } from '../cloud';
-import type { HeadlessChromiumDriverFactory, PerformanceMetrics } from '../browsers';
 import type { ConfigType } from '../config';
 import { durationToNumber } from '../config';
 import {
@@ -42,8 +42,7 @@ import {
   toPdf,
   toPng,
 } from '../formats';
-import type { Layout } from '../layouts';
-import { createLayout } from '../layouts';
+import { createLayout, Layout } from '../layouts';
 import { EventLogger, Transactions } from './event_logger';
 import type { ScreenshotObservableOptions, ScreenshotObservableResult } from './observable';
 import { ScreenshotObservableHandler, UrlOrUrlWithContext } from './observable';
@@ -109,13 +108,6 @@ export class Screenshots {
     this.semaphore = new Semaphore(config.poolSize);
   }
 
-  private createLayout(options: CaptureOptions): Layout {
-    const layout = createLayout(options.layout ?? {});
-    this.logger.debug(`Layout: width=${layout.width} height=${layout.height}`);
-
-    return layout;
-  }
-
   private captureScreenshots(
     eventLogger: EventLogger,
     layout: Layout,
@@ -128,14 +120,14 @@ export class Screenshots {
         {
           browserTimezone,
           openUrlTimeout: durationToNumber(this.config.capture.timeouts.openUrl),
-          defaultViewport: { height: layout.height, width: layout.width },
+          defaultViewport: { width: layout.width },
         },
         this.logger
       )
       .pipe(
         this.semaphore.acquire(),
-        mergeMap(({ driver, unexpectedExit$, close }) => {
-          const screen = new ScreenshotObservableHandler(
+        mergeMap(({ driver, error$, close }) => {
+          const screen: ScreenshotObservableHandler = new ScreenshotObservableHandler(
             driver,
             this.config,
             eventLogger,
@@ -151,9 +143,9 @@ export class Screenshots {
 
                   this.logger.error(error);
                   eventLogger.error(error, Transactions.SCREENSHOTTING);
-                  return of({ ...DEFAULT_SETUP_RESULT, error }); // allow failover screenshot capture
+                  return of({ ...DEFAULT_SETUP_RESULT, error }); // allow "as-is" screenshot with injected warning message
                 }),
-                takeUntil(unexpectedExit$),
+                takeUntil(error$),
                 screen.getScreenshots()
               )
             ),
@@ -233,7 +225,7 @@ export class Screenshots {
     const eventLogger = new EventLogger(this.logger, this.config);
     const transactionEnd = eventLogger.startTransaction(Transactions.SCREENSHOTTING);
 
-    const layout = this.createLayout(options);
+    const layout = createLayout(options.layout ?? {});
     const captureOptions = this.getCaptureOptions(options);
 
     return this.captureScreenshots(eventLogger, layout, captureOptions).pipe(

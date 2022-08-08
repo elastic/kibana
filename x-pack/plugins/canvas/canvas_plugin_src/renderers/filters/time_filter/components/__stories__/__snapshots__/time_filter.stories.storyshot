@@ -195,16 +195,16 @@ exports[`Storyshots renderers/TimeFilter with absolute time bounds 1`] = `
                   </button>
                 </div>
               </div>
-              <div
-                className="euiText euiText--small euiDatePickerRange__delimeter"
+              <span
+                className="euiDatePickerRange__delimeter"
               >
-                <div
-                  className="euiTextColor euiTextColor--subdued"
-                  style={Object {}}
+                <span
+                  color="subdued"
+                  data-euiicon-type="sortRight"
                 >
-                  →
-                </div>
-              </div>
+                  
+                </span>
+              </span>
               <div
                 className="euiPopover euiPopover--anchorDownRight euiPopover--displayBlock"
               >
@@ -573,16 +573,16 @@ exports[`Storyshots renderers/TimeFilter with relative time bounds 1`] = `
                   </button>
                 </div>
               </div>
-              <div
-                className="euiText euiText--small euiDatePickerRange__delimeter"
+              <span
+                className="euiDatePickerRange__delimeter"
               >
-                <div
-                  className="euiTextColor euiTextColor--subdued"
-                  style={Object {}}
+                <span
+                  color="subdued"
+                  data-euiicon-type="sortRight"
                 >
-                  →
-                </div>
-              </div>
+                  
+                </span>
+              </span>
               <div
                 className="euiPopover euiPopover--anchorDownRight euiPopover--displayBlock"
               >

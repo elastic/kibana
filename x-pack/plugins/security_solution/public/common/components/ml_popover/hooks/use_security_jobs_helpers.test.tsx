@@ -39,7 +39,7 @@ describe('useSecurityJobsHelpers', () => {
         description: 'SIEM Auditbeat: Detect unusually rare processes on Linux (beta)',
         groups: ['auditbeat', 'process', 'siem'],
         hasDatafeed: false,
-        id: 'rare_process_by_host_linux_ecs',
+        id: 'rare_process_by_host_linux',
         isCompatible: false,
         isElasticJob: true,
         isInstalled: false,
@@ -47,38 +47,38 @@ describe('useSecurityJobsHelpers', () => {
         jobState: 'closed',
         jobTags: {},
         memory_status: '',
-        moduleId: 'siem_auditbeat',
+        moduleId: 'security_linux_v3',
         processed_record_count: 0,
       });
     });
 
     describe('getAugmentedFields', () => {
       test('return correct augmented fields for given matching compatible modules', () => {
-        const moduleJobs = getModuleJobs(mockGetModuleResponse, ['siem_auditbeat']);
-        const augmentedFields = getAugmentedFields('rare_process_by_host_linux_ecs', moduleJobs, [
-          'siem_auditbeat',
+        const moduleJobs = getModuleJobs(mockGetModuleResponse, ['security_linux_v3']);
+        const augmentedFields = getAugmentedFields('rare_process_by_host_linux', moduleJobs, [
+          'security_linux_v3',
         ]);
         expect(augmentedFields).toEqual({
           defaultIndexPattern: 'auditbeat-*',
           isCompatible: true,
           isElasticJob: true,
-          moduleId: 'siem_auditbeat',
+          moduleId: 'security_linux_v3',
         });
       });
     });
 
     describe('getModuleJobs', () => {
       test('returns all jobs within a module for a compatible moduleId', () => {
-        const moduleJobs = getModuleJobs(mockGetModuleResponse, ['siem_auditbeat']);
+        const moduleJobs = getModuleJobs(mockGetModuleResponse, ['security_linux_v3']);
         expect(moduleJobs.length).toEqual(3);
       });
     });
 
     describe('getInstalledJobs', () => {
       test('returns all jobs from jobSummary for a compatible moduleId', () => {
-        const moduleJobs = getModuleJobs(mockGetModuleResponse, ['siem_auditbeat']);
+        const moduleJobs = getModuleJobs(mockGetModuleResponse, ['security_linux_v3']);
         const installedJobs = getInstalledJobs(mockJobsSummaryResponse, moduleJobs, [
-          'siem_auditbeat',
+          'security_linux_v3',
         ]);
         expect(installedJobs.length).toEqual(3);
       });
@@ -86,9 +86,9 @@ describe('useSecurityJobsHelpers', () => {
 
     describe('composeModuleAndInstalledJobs', () => {
       test('returns correct number of jobs when composing separate module and installed jobs', () => {
-        const moduleJobs = getModuleJobs(mockGetModuleResponse, ['siem_auditbeat']);
+        const moduleJobs = getModuleJobs(mockGetModuleResponse, ['security_linux_v3']);
         const installedJobs = getInstalledJobs(mockJobsSummaryResponse, moduleJobs, [
-          'siem_auditbeat',
+          'security_linux_v3',
         ]);
         const securityJobs = composeModuleAndInstalledJobs(installedJobs, moduleJobs);
         expect(securityJobs.length).toEqual(6);

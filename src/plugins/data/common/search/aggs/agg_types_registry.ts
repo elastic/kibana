@@ -6,21 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { BucketAggType } from './buckets/bucket_agg_type';
-import { MetricAggType } from './metrics/metric_agg_type';
-import { AggTypesDependencies } from './agg_types';
+import type { BucketAggType } from './buckets/bucket_agg_type';
+import type { MetricAggType } from './metrics/metric_agg_type';
+import type { AggTypesDependencies } from './agg_types';
 
 export type AggTypesRegistrySetup = ReturnType<AggTypesRegistry['setup']>;
-/**
- * AggsCommonStart returns the _unitialized_ agg type providers, but in our
- * real start contract we will need to return the initialized versions.
- * So we need to provide the correct typings so they can be overwritten
- * on client/server.
- */
-export interface AggTypesRegistryStart {
-  get: (id: string) => BucketAggType<any> | MetricAggType<any>;
-  getAll: () => { buckets: Array<BucketAggType<any>>; metrics: Array<MetricAggType<any>> };
-}
+export type AggTypesRegistryStart = ReturnType<AggTypesRegistry['start']>;
 
 export class AggTypesRegistry {
   private readonly bucketAggs = new Map();
@@ -38,6 +29,7 @@ export class AggTypesRegistry {
         if (this.bucketAggs.get(name) || this.metricAggs.get(name)) {
           throw new Error(`Agg has already been registered with name: ${name}`);
         }
+
         this.bucketAggs.set(name, type);
       },
       registerMetric: <
@@ -55,17 +47,32 @@ export class AggTypesRegistry {
     };
   };
 
-  start = () => {
+  start = (aggTypesDependencies: AggTypesDependencies) => {
+    const initializedAggTypes = new Map();
+
+    const getInitializedFromCache = <T = unknown>(key: string, agg: any): T => {
+      if (initializedAggTypes.has(key)) {
+        return initializedAggTypes.get(key);
+      }
+      const initialized = agg(aggTypesDependencies);
+      initializedAggTypes.set(key, initialized);
+      return initialized;
+    };
+
     return {
-      get: (name: string) => {
-        return this.bucketAggs.get(name) || this.metricAggs.get(name);
-      },
-      getAll: () => {
-        return {
-          buckets: Array.from(this.bucketAggs.values()),
-          metrics: Array.from(this.metricAggs.values()),
-        };
-      },
+      get: (name: string) =>
+        getInitializedFromCache<BucketAggType<any> | MetricAggType<any>>(
+          name,
+          this.bucketAggs.get(name) || this.metricAggs.get(name)
+        ),
+      getAll: () => ({
+        buckets: Array.from(this.bucketAggs.entries()).map(([key, value]) =>
+          getInitializedFromCache<BucketAggType<any>>(key, value)
+        ),
+        metrics: Array.from(this.metricAggs.entries()).map(([key, value]) =>
+          getInitializedFromCache<MetricAggType<any>>(key, value)
+        ),
+      }),
     };
   };
 }

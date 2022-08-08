@@ -131,7 +131,7 @@ export function checksFactory(
     );
 
     const dfaJobsCreateTimeMap = dfaJobs.data_frame_analytics.reduce((acc, cur) => {
-      acc.set(cur.id, cur.create_time);
+      acc.set(cur.id, cur.create_time!);
       return acc;
     }, new Map<string, number>());
 
@@ -404,5 +404,37 @@ export function checksFactory(
     }, {} as DeleteMLSpaceAwareItemsCheckResponse);
   }
 
-  return { checkStatus, canDeleteMLSpaceAwareItems };
+  async function jobsSpaces() {
+    const savedObjects = (await checkStatus()).savedObjects;
+    return (
+      Object.entries(savedObjects)
+        .filter(([type]) => type === 'anomaly-detector' || type === 'data-frame-analytics')
+        .map(([, status]) => status)
+        .flat() as JobSavedObjectStatus[]
+    )
+      .filter((s) => s.checks.jobExists)
+      .reduce((acc, cur) => {
+        const type = cur.type;
+        if (acc[type] === undefined) {
+          acc[type] = {};
+        }
+        acc[type][cur.jobId] = cur.namespaces;
+        return acc;
+      }, {} as { [id: string]: { [id: string]: string[] | undefined } });
+  }
+
+  async function trainedModelsSpaces() {
+    const savedObjects = (await checkStatus()).savedObjects;
+    return savedObjects['trained-model']
+      .filter((s) => s.checks.trainedModelExists)
+      .reduce(
+        (acc, cur) => {
+          acc.trainedModels[cur.modelId] = cur.namespaces;
+          return acc;
+        },
+        { trainedModels: {} } as { trainedModels: { [id: string]: string[] | undefined } }
+      );
+  }
+
+  return { checkStatus, canDeleteMLSpaceAwareItems, jobsSpaces, trainedModelsSpaces };
 }

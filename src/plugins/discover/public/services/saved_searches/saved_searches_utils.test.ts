@@ -27,6 +27,7 @@ describe('saved_searches_utils', () => {
         description: 'foo',
         grid: {},
         hideChart: true,
+        isTextBasedQuery: false,
       };
 
       expect(fromSavedSearchAttributes('id', attributes, createSearchSourceMock(), {}))
@@ -41,9 +42,14 @@ describe('saved_searches_utils', () => {
           "hideAggregatedPreview": undefined,
           "hideChart": true,
           "id": "id",
+          "isTextBasedQuery": false,
           "rowHeight": undefined,
+          "rowsPerPage": undefined,
           "searchSource": SearchSource {
             "dependencies": Object {
+              "aggs": Object {
+                "createAggConfigs": [MockFunction],
+              },
               "getConfig": [MockFunction],
               "onResponse": [MockFunction],
               "search": [MockFunction],
@@ -100,6 +106,7 @@ describe('saved_searches_utils', () => {
         description: 'description',
         grid: {},
         hideChart: true,
+        isTextBasedQuery: true,
       };
 
       expect(toSavedSearchAttributes(savedSearch, '{}')).toMatchInlineSnapshot(`
@@ -112,10 +119,12 @@ describe('saved_searches_utils', () => {
           "grid": Object {},
           "hideAggregatedPreview": undefined,
           "hideChart": true,
+          "isTextBasedQuery": true,
           "kibanaSavedObjectMeta": Object {
             "searchSourceJSON": "{}",
           },
           "rowHeight": undefined,
+          "rowsPerPage": undefined,
           "sort": Array [
             Array [
               "a",

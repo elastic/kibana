@@ -4,32 +4,88 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 import React from 'react';
-import { i18n } from '@kbn/i18n';
+import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common/types';
+import { DashboardConstants } from '@kbn/dashboard-plugin/public';
 import { SecurityPageName } from '../../app/types';
-import { HeaderPage } from '../../common/components/header_page';
+import { DashboardsTable } from '../../common/components/dashboards/dashboards_table';
+import { Title } from '../../common/components/header_page/title';
+import { useAppRootNavLink } from '../../common/components/navigation/nav_links';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
+import { useCreateSecurityDashboardLink } from '../../common/containers/dashboards/use_create_security_dashboard_link';
+import { useCapabilities, useNavigateTo } from '../../common/lib/kibana';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { LandingLinksImages, NavItem } from '../components/landing_links_images';
-import { DASHBOARDS_PAGE_TITLE } from './translations';
-import overviewPageImg from '../../common/images/overview_page.png';
-import { OVERVIEW } from '../../app/translations';
+import { LandingImageCards } from '../components/landing_links_images';
+import * as i18n from './translations';
 
-const items: NavItem[] = [
-  {
-    id: SecurityPageName.overview,
-    label: OVERVIEW,
-    description: i18n.translate('xpack.securitySolution.landing.dashboards.overviewDescription', {
-      defaultMessage: 'What is going in your secuity environment',
-    }),
-    image: overviewPageImg,
-  },
-];
+/* eslint-disable @elastic/eui/href-or-on-click */
+const Header: React.FC<{ canCreateDashboard: boolean }> = ({ canCreateDashboard }) => {
+  const { isLoading, url } = useCreateSecurityDashboardLink();
+  const { navigateTo } = useNavigateTo();
+  return (
+    <EuiFlexGroup gutterSize="none" direction="row">
+      <EuiFlexItem>
+        <Title title={i18n.DASHBOARDS_PAGE_TITLE} />
+      </EuiFlexItem>
+      {canCreateDashboard && (
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            isDisabled={isLoading}
+            color="primary"
+            fill
+            iconType="plusInCircle"
+            href={url}
+            onClick={(ev) => {
+              ev.preventDefault();
+              navigateTo({ url });
+            }}
+            data-test-subj="createDashboardButton"
+          >
+            {i18n.DASHBOARDS_PAGE_CREATE_BUTTON}
+          </EuiButton>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
+  );
+};
 
-export const DashboardsLandingPage = () => (
-  <SecuritySolutionPageWrapper>
-    <HeaderPage title={DASHBOARDS_PAGE_TITLE} />
-    <LandingLinksImages items={items} />
-    <SpyRoute pageName={SecurityPageName.dashboardsLanding} />
-  </SecuritySolutionPageWrapper>
-);
+export const DashboardsLandingPage = () => {
+  const dashboardLinks = useAppRootNavLink(SecurityPageName.dashboardsLanding)?.links ?? [];
+  const { show: canReadDashboard, createNew: canCreateDashboard } =
+    useCapabilities<DashboardCapabilities>(DashboardConstants.DASHBOARD_ID);
+
+  return (
+    <SecuritySolutionPageWrapper>
+      <Header canCreateDashboard={canCreateDashboard} />
+      <EuiSpacer size="xl" />
+
+      <EuiTitle size="xxxs">
+        <h2>{i18n.DASHBOARDS_PAGE_SECTION_DEFAULT}</h2>
+      </EuiTitle>
+      <EuiHorizontalRule margin="s" />
+      <LandingImageCards items={dashboardLinks} />
+      <EuiSpacer size="xxl" />
+
+      {canReadDashboard && (
+        <>
+          <EuiTitle size="xxxs">
+            <h2>{i18n.DASHBOARDS_PAGE_SECTION_CUSTOM}</h2>
+          </EuiTitle>
+          <EuiHorizontalRule margin="s" />
+          <EuiSpacer size="m" />
+          <DashboardsTable />
+        </>
+      )}
+
+      <SpyRoute pageName={SecurityPageName.dashboardsLanding} />
+    </SecuritySolutionPageWrapper>
+  );
+};

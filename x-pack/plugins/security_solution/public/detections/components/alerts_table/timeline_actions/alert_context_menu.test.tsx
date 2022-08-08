@@ -10,7 +10,7 @@ import { AlertContextMenu } from './alert_context_menu';
 import { TimelineId } from '../../../../../common/types';
 import { TestProviders } from '../../../../common/mock';
 import React from 'react';
-import { Ecs } from '../../../../../common/ecs';
+import type { Ecs } from '../../../../../common/ecs';
 import { mockTimelines } from '../../../../common/mock/mock_timelines_plugin';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '../../../../common/components/user_privileges/user_privileges_context';
@@ -29,6 +29,9 @@ const ecsRowData: Ecs = {
         uuid: ['testId'],
       },
     },
+  },
+  event: {
+    kind: ['signal'],
   },
 };
 
@@ -60,8 +63,12 @@ jest.mock('../../../../common/lib/kibana', () => ({
     },
   }),
   useGetUserCasesPermissions: jest.fn().mockReturnValue({
-    crud: true,
+    all: true,
+    create: true,
     read: true,
+    update: true,
+    delete: true,
+    push: true,
   }),
 }));
 
@@ -188,6 +195,36 @@ describe('InvestigateInResolverAction', () => {
         expect(wrapper.find(addEndpointEventFilterButton).first().exists()).toEqual(true);
         expect(wrapper.find(addEndpointEventFilterButton).first().props().disabled).toEqual(true);
       });
+
+      test('it enables AddEndpointEventFilter when timeline id is user events page', () => {
+        const wrapper = mount(
+          <AlertContextMenu {...endpointEventProps} timelineId={TimelineId.usersPageEvents} />,
+          {
+            wrappingComponent: TestProviders,
+          }
+        );
+
+        wrapper.find(actionMenuButton).simulate('click');
+        expect(wrapper.find(addEndpointEventFilterButton).first().exists()).toEqual(true);
+        expect(wrapper.find(addEndpointEventFilterButton).first().props().disabled).toEqual(false);
+      });
+
+      test('it disables AddEndpointEventFilter when timeline id is user events page but is not from endpoint', () => {
+        const customProps = {
+          ...props,
+          ecsRowData: { ...ecsRowData, agent: { type: ['other'] }, event: { kind: ['event'] } },
+        };
+        const wrapper = mount(
+          <AlertContextMenu {...customProps} timelineId={TimelineId.usersPageEvents} />,
+          {
+            wrappingComponent: TestProviders,
+          }
+        );
+
+        wrapper.find(actionMenuButton).simulate('click');
+        expect(wrapper.find(addEndpointEventFilterButton).first().exists()).toEqual(true);
+        expect(wrapper.find(addEndpointEventFilterButton).first().props().disabled).toEqual(true);
+      });
     });
     describe('when users can NOT access endpoint management', () => {
       beforeEach(() => {
@@ -200,6 +237,19 @@ describe('InvestigateInResolverAction', () => {
       test('it disables AddEndpointEventFilter when timeline id is host events page but cannot acces endpoint management', () => {
         const wrapper = mount(
           <AlertContextMenu {...endpointEventProps} timelineId={TimelineId.hostsPageEvents} />,
+          {
+            wrappingComponent: TestProviders,
+          }
+        );
+
+        wrapper.find(actionMenuButton).simulate('click');
+        expect(wrapper.find(addEndpointEventFilterButton).first().exists()).toEqual(true);
+        expect(wrapper.find(addEndpointEventFilterButton).first().props().disabled).toEqual(true);
+      });
+
+      test('it disables AddEndpointEventFilter when timeline id is user events page but cannot acces endpoint management', () => {
+        const wrapper = mount(
+          <AlertContextMenu {...endpointEventProps} timelineId={TimelineId.usersPageEvents} />,
           {
             wrappingComponent: TestProviders,
           }

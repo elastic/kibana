@@ -96,6 +96,15 @@ export class SenseEditor {
       return;
     }
 
+    if (parsedReq.data.some((doc) => utils.hasComments(doc))) {
+      /**
+       * Comments require different approach for indentation and do not have condensed format
+       * We need to delegate indentation logic to coreEditor since it has access to session and other methods used for formatting and indenting the comments
+       */
+      this.coreEditor.autoIndent(parsedReq.range);
+      return;
+    }
+
     if (parsedReq.data && parsedReq.data.length > 0) {
       let indent = parsedReq.data.length === 1; // unindent multi docs by default
       let formattedData = utils.formatRequestBodyDoc(parsedReq.data, indent);
@@ -239,7 +248,7 @@ export class SenseEditor {
 
     request.url = '';
 
-    while (t && t.type && t.type.indexOf('url') === 0) {
+    while (t && t.type && (t.type.indexOf('url') === 0 || t.type === 'variable.template')) {
       request.url += t.value;
       t = tokenIter.stepForward();
     }
@@ -247,6 +256,12 @@ export class SenseEditor {
       // if the url row ends with some spaces, skip them.
       t = this.parser.nextNonEmptyToken(tokenIter);
     }
+
+    // If the url row ends with a comment, skip it
+    while (this.parser.isCommentToken(t)) {
+      t = tokenIter.stepForward();
+    }
+
     let bodyStartLineNumber = (t ? 0 : 1) + tokenIter.getCurrentPosition().lineNumber; // artificially increase end of docs.
     let dataEndPos: Position;
     while (
@@ -282,7 +297,6 @@ export class SenseEditor {
     }
 
     const expandedRange = await this.expandRangeToRequestEdges(range);
-
     if (!expandedRange) {
       return [];
     }

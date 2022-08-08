@@ -17,6 +17,16 @@ const MASK = '[MASK]';
 
 export class FillMaskInference extends InferenceBase<TextClassificationResponse> {
   protected inferenceType = SUPPORTED_PYTORCH_TASKS.FILL_MASK;
+  protected inferenceTypeLabel = i18n.translate(
+    'xpack.ml.trainedModels.testModelsFlyout.fillMask.label',
+    { defaultMessage: 'Fill mask' }
+  );
+
+  protected info = [
+    i18n.translate('xpack.ml.trainedModels.testModelsFlyout.fillMask.info1', {
+      defaultMessage: 'Test how well the model predicts a missing word in a phrase.',
+    }),
+  ];
 
   public async infer() {
     try {
@@ -55,9 +65,10 @@ export class FillMaskInference extends InferenceBase<TextClassificationResponse>
 
   public getInputComponent(): JSX.Element {
     const placeholder = i18n.translate(
-      'xpack.ml.trainedModels.testModelsFlyout.langIdent.inputText',
+      'xpack.ml.trainedModels.testModelsFlyout.fillMask.inputText',
       {
-        defaultMessage: 'Mask token: [MASK]. e.g. Paris is the [MASK] of France.',
+        defaultMessage:
+          'Enter a phrase to test. Use [MASK] as a placeholder for the missing words.',
       }
     );
 

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Reducer } from 'redux';
-import { DataState } from '../../types';
-import { ResolverAction } from '../actions';
+import type { Reducer } from 'redux';
+import type { DataState } from '../../types';
+import type { ResolverAction } from '../actions';
 import * as treeFetcherParameters from '../../models/tree_fetcher_parameters';
 import * as selectors from './selectors';
 import * as nodeEventsInCategoryModel from './node_events_in_category_model';

@@ -9,18 +9,30 @@
 import { FtrService } from '../ftr_provider_context';
 
 export class UnifiedSearchPageObject extends FtrService {
-  private readonly browser = this.ctx.getService('browser');
+  private readonly retry = this.ctx.getService('retry');
   private readonly testSubjects = this.ctx.getService('testSubjects');
 
-  public async closeTour() {
-    const tourPopoverIsOpen = await this.testSubjects.exists('dataViewPickerTourLink');
-    if (tourPopoverIsOpen) {
-      await this.testSubjects.click('dataViewPickerTourLink');
-    }
+  public async switchDataView(switchButtonSelector: string, dataViewTitle: string) {
+    await this.testSubjects.click(switchButtonSelector);
+
+    const indexPatternSwitcher = await this.testSubjects.find('indexPattern-switcher', 500);
+    await this.testSubjects.setValue('indexPattern-switcher--input', dataViewTitle);
+    await (await indexPatternSwitcher.findByCssSelector(`[title="${dataViewTitle}"]`)).click();
+
+    await this.retry.waitFor(
+      'wait for updating switcher',
+      async () => (await this.getSelectedDataView(switchButtonSelector)) === dataViewTitle
+    );
   }
 
-  public async closeTourPopoverByLocalStorage() {
-    await this.browser.setLocalStorageItem('data.newDataViewMenu', 'true');
-    await this.browser.refresh();
+  public async getSelectedDataView(switchButtonSelector: string) {
+    let visibleText = '';
+
+    await this.retry.waitFor('wait for updating switcher', async () => {
+      visibleText = await this.testSubjects.getVisibleText(switchButtonSelector);
+      return Boolean(visibleText);
+    });
+
+    return visibleText;
   }
 }

@@ -6,9 +6,10 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { DeepPartial } from 'utility-types';
+import type { DeepPartial } from 'utility-types';
 import { merge } from 'lodash';
-import { Agent, AGENTS_INDEX, AgentStatus, FleetServerAgent } from '@kbn/fleet-plugin/common';
+import type { Agent, AgentStatus, FleetServerAgent } from '@kbn/fleet-plugin/common';
+import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import { BaseDataGenerator } from './base_data_generator';
 
 const agentStatusList: readonly AgentStatus[] = [

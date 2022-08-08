@@ -16,7 +16,10 @@ import { layerTypes } from '@kbn/lens-plugin/public';
 import type { RotatingNumberState } from '../common/types';
 import { DEFAULT_COLOR } from '../common/constants';
 
-const toExpression = (state: RotatingNumberState): Ast | null => {
+const toExpression = (
+  state: RotatingNumberState,
+  datasourceExpressionsByLayers?: Record<string, Ast>
+): Ast | null => {
   if (!state.accessor) {
     return null;
   }
@@ -24,6 +27,7 @@ const toExpression = (state: RotatingNumberState): Ast | null => {
   return {
     type: 'expression',
     chain: [
+      ...Object.values(datasourceExpressionsByLayers || {})[0].chain,
       {
         type: 'function',
         function: 'rotating_number',
@@ -149,8 +153,10 @@ export const getRotatingNumberVisualization = ({
     }
   },
 
-  toExpression: (state) => toExpression(state),
-  toPreviewExpression: (state) => toExpression(state),
+  toExpression: (state, _layers, _attributes, datasourceExpression) =>
+    toExpression(state, datasourceExpression),
+  toPreviewExpression: (state, _layers, datasourceExpression) =>
+    toExpression(state, datasourceExpression),
 
   setDimension({ prevState, columnId }) {
     return { ...prevState, accessor: columnId };

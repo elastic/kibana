@@ -27,12 +27,12 @@ pageLoadAssetSize:
   indexLifecycleManagement: 107090
   indexManagement: 140608
   infra: 184320
-  fleet: 250000
+  fleet: 126917
   ingestPipelines: 58003
   inputControlVis: 172675
   inspector: 148711
   kibanaOverview: 56279
-  lens: 35000
+  lens: 36000
   licenseManagement: 41817
   licensing: 29004
   lists: 22900
@@ -52,13 +52,13 @@ pageLoadAssetSize:
   savedObjectsTagging: 59482
   savedObjectsTaggingOss: 20590
   searchprofiler: 67080
-  security: 95864
+  security: 65433
   snapshotRestore: 79032
   spaces: 57868
   telemetry: 51957
   telemetryManagementSection: 38586
   transform: 41007
-  triggersActionsUi: 104400
+  triggersActionsUi: 119000
   upgradeAssistant: 81241
   urlForwarding: 32579
   usageCollection: 39762
@@ -96,6 +96,7 @@ pageLoadAssetSize:
   securitySolution: 273763
   customIntegrations: 28810
   expressionMetricVis: 23121
+  expressionLegacyMetricVis: 23121
   expressionHeatmap: 27505
   visTypeMetric: 23332
   bfetch: 22837
@@ -128,5 +129,7 @@ pageLoadAssetSize:
   eventAnnotation: 19334
   screenshotting: 22870
   synthetics: 40958
-  expressionXY: 30000
+  expressionXY: 36000
   kibanaUsageCollection: 16463
+  kubernetesSecurity: 77234
+  threatIntelligence: 29195

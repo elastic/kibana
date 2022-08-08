@@ -6,7 +6,7 @@
  */
 
 import { useConsoleStore } from '../../components/console_state/console_state';
-import { ConsoleDataState } from '../../components/console_state/types';
+import type { ConsoleDataState } from '../../components/console_state/types';
 
 export const useWithCustomHelpComponent = (): ConsoleDataState['HelpComponent'] => {
   return useConsoleStore().state.HelpComponent;

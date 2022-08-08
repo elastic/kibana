@@ -11,11 +11,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import * as i18n from '../../../translations';
 import { caseInsensitiveSort } from '../../helpers';
-import {
-  BulkActionEditType,
-  BulkActionEditPayload,
-} from '../../../../../../../../common/detection_engine/schemas/common/schemas';
+import type { BulkActionEditPayload } from '../../../../../../../../common/detection_engine/schemas/common/schemas';
+import { BulkActionEditType } from '../../../../../../../../common/detection_engine/schemas/common/schemas';
 
+import type { FormSchema } from '../../../../../../../shared_imports';
 import {
   useForm,
   Field,
@@ -23,7 +22,6 @@ import {
   useFormData,
   FIELD_TYPES,
   fieldValidators,
-  FormSchema,
 } from '../../../../../../../shared_imports';
 
 import { BulkEditFormWrapper } from './bulk_edit_form_wrapper';

@@ -16,14 +16,14 @@ import {
 } from './embeddable';
 import { ReactExpressionRendererProps } from '@kbn/expressions-plugin/public';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
-import { Filter } from '@kbn/es-query';
-import { Query, TimeRange, FilterManager } from '@kbn/data-plugin/public';
+import { Filter, Query, TimeRange } from '@kbn/es-query';
+import { FilterManager } from '@kbn/data-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { Document } from '../persistence';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public/embeddable';
 import { coreMock, httpServiceMock, themeServiceMock } from '@kbn/core/public/mocks';
-import { IBasePath } from '@kbn/core/public';
+import { IBasePath, IUiSettingsClient } from '@kbn/core/public';
 import { AttributeService, ViewMode } from '@kbn/embeddable-plugin/public';
 import { LensAttributeService } from '../lens_attribute_service';
 import { OnSaveProps } from '@kbn/saved-objects-plugin/public/save_modal';
@@ -107,6 +107,8 @@ const attributeServiceMockFromSavedVis = (document: Document): LensAttributeServ
   return service;
 };
 
+const dataMock = dataPluginMock.createStartContract();
+
 describe('embeddable', () => {
   let mountpoint: HTMLDivElement;
   let expressionRenderer: jest.Mock<null, [ReactExpressionRendererProps]>;
@@ -139,6 +141,7 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        data: dataMock,
         expressionRenderer,
         basePath,
         indexPatternService: {} as DataViewsContract,
@@ -165,6 +168,7 @@ describe('embeddable', () => {
             },
             errors: undefined,
           }),
+        uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
       },
       {
         timeRange: {
@@ -188,6 +192,8 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        data: dataMock,
+        uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
         basePath,
         indexPatternService: {} as DataViewsContract,
@@ -238,6 +244,8 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        data: dataMock,
+        uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
@@ -298,6 +306,8 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        data: dataMock,
+        uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         inspector: inspectorPluginMock.createStartContract(),
         expressionRenderer,
         basePath,
@@ -347,6 +357,8 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        data: dataMock,
+        uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
@@ -396,6 +408,8 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        data: dataMock,
+        uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
@@ -443,6 +457,8 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        data: dataMock,
+        uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
@@ -494,6 +510,8 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        data: dataMock,
+        uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
@@ -549,6 +567,8 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        data: dataMock,
+        uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
@@ -602,6 +622,8 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        data: dataMock,
+        uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
@@ -662,6 +684,8 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        data: dataMock,
+        uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
@@ -723,6 +747,8 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        data: dataMock,
+        uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
@@ -787,6 +813,8 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        data: dataMock,
+        uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
@@ -836,6 +864,8 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        data: dataMock,
+        uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
@@ -887,6 +917,8 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        data: dataMock,
+        uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
@@ -935,6 +967,8 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        data: dataMock,
+        uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
@@ -998,6 +1032,8 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        data: dataMock,
+        uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
@@ -1080,6 +1116,8 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        data: dataMock,
+        uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
@@ -1137,6 +1175,8 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        data: dataMock,
+        uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
@@ -1191,6 +1231,8 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        data: dataMock,
+        uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
@@ -1266,6 +1308,8 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService: attributeServiceMockFromSavedVis(visDocument),
+        data: dataMock,
+        uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),

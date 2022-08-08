@@ -1638,6 +1638,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   id3: expect.objectContaining({
                     operationType: 'terms',
                     sourceField: 'source',
+                    label: 'Top 10 values of source',
                     params: expect.objectContaining({
                       size: 10,
                       otherBucket: false,
@@ -3029,7 +3030,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   operation: {
                     dataType: 'number',
                     isBucketed: false,
-                    label: 'Cumulative sum of Records label',
+                    label: 'Cumulative sum of Records',
                     scale: undefined,
                     isStaticValue: false,
                     hasTimeShift: false,

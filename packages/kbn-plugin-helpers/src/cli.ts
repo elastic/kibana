@@ -8,7 +8,8 @@
 
 import Path from 'path';
 
-import { RunWithCommands, createFlagError, createFailError } from '@kbn/dev-utils';
+import { RunWithCommands } from '@kbn/dev-cli-runner';
+import { createFlagError, createFailError } from '@kbn/dev-cli-errors';
 
 import { findKibanaJson } from './find_kibana_json';
 import { loadKibanaPlatformPlugin } from './load_kibana_platform_plugin';

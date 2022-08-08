@@ -7,12 +7,11 @@
 
 import { FC } from 'react';
 
-import { History } from 'history';
 import { kea, MakeLogicType } from 'kea';
 
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
-import { ApplicationStart, ChromeBreadcrumb } from '@kbn/core/public';
+import { ApplicationStart, ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
 
 import { HttpLogic } from '../http';
@@ -24,7 +23,7 @@ type RequiredFieldsOnly<T> = {
 interface KibanaLogicProps {
   config: { host?: string };
   // Kibana core
-  history: History;
+  history: ScopedHistory;
   navigateToUrl: RequiredFieldsOnly<ApplicationStart['navigateToUrl']>;
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
   setChromeIsVisible(isVisible: boolean): void;

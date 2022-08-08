@@ -23,8 +23,8 @@ export const createTestIndexStats = (index?: Partial<IndicesStatsIndicesStats>) 
     health: 'green',
     status: 'open',
     uuid: 'test_index',
-    total: { docs: { count: 1, deleted: 0 }, store: { size_in_bytes: 100 } },
-    primaries: { store: { size_in_bytes: 100 } },
+    total: { docs: { count: 111, deleted: 110 }, store: { size_in_bytes: 100 } },
+    primaries: { docs: { count: 1, deleted: 0 }, store: { size_in_bytes: 100 } },
     ...index,
   };
 };

@@ -334,13 +334,6 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
               } catch (e) {
                 expect(e.meta.statusCode).to.eql(404);
               }
-              // Ensure AAD isn't broken
-              await checkAAD({
-                supertest,
-                spaceId: space.id,
-                type: 'alert',
-                id: createdAlert.id,
-              });
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);

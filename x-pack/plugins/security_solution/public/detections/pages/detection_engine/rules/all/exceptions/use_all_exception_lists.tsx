@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { Rule } from '../../../../../containers/detection_engine/rules';
+import type { Rule } from '../../../../../containers/detection_engine/rules';
 import { fetchRules } from '../../../../../containers/detection_engine/rules/api';
 export interface ExceptionListInfo extends ExceptionListSchema {
   rules: Rule[];

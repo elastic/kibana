@@ -10,14 +10,12 @@ import useIntersection from 'react-use/lib/useIntersection';
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
-import { useFetcher, FETCH_STATUS } from '@kbn/observability-plugin/public';
+import { useInProgressImage } from './use_in_progress_image';
 import {
   isScreenshotImageBlob,
   isScreenshotRef,
-  ScreenshotImageBlob,
   ScreenshotRefImageData,
 } from '../../../../../../../common/runtime_types';
-import { getJourneyScreenshot } from '../../../../../state/api/journey';
 import { UptimeSettingsContext } from '../../../../../contexts';
 
 import { NoImageDisplay } from './no_image_display';
@@ -38,9 +36,16 @@ interface Props {
   label?: string;
   stepStatus?: string;
   initialStepNo?: number;
+  allStepsLoaded?: boolean;
 }
 
-export const PingTimestamp = ({ label, checkGroup, stepStatus, initialStepNo = 1 }: Props) => {
+export const PingTimestamp = ({
+  label,
+  checkGroup,
+  stepStatus,
+  allStepsLoaded,
+  initialStepNo = 1,
+}: Props) => {
   const [stepNumber, setStepNumber] = useState(initialStepNo);
   const [isImagePopoverOpen, setIsImagePopoverOpen] = useState(false);
 
@@ -58,18 +63,15 @@ export const PingTimestamp = ({ label, checkGroup, stepStatus, initialStepNo = 1
     threshold: 1,
   });
 
-  const { data, status } = useFetcher(() => {
-    if (stepStatus === 'skipped') {
-      return new Promise<ScreenshotImageBlob | ScreenshotRefImageData | null>((resolve) =>
-        resolve(null)
-      );
-    }
-
-    if (intersection && intersection.intersectionRatio === 1 && !stepImages[stepNumber - 1])
-      return getJourneyScreenshot(imgPath);
-  }, [intersection?.intersectionRatio, stepNumber, imgPath]);
-
   const [screenshotRef, setScreenshotRef] = useState<ScreenshotRefImageData | undefined>(undefined);
+
+  const { data, loading } = useInProgressImage({
+    hasImage: Boolean(stepImages[stepNumber - 1]) || Boolean(screenshotRef),
+    hasIntersected: Boolean(intersection && intersection.intersectionRatio === 1),
+    stepStatus,
+    imgPath,
+  });
+
   useEffect(() => {
     if (isScreenshotRef(data)) {
       setScreenshotRef(data);
@@ -95,7 +97,7 @@ export const PingTimestamp = ({ label, checkGroup, stepStatus, initialStepNo = 1
       maxSteps={data?.maxSteps}
       setStepNumber={setStepNumber}
       stepNumber={stepNumber}
-      isLoading={status === FETCH_STATUS.LOADING || status === FETCH_STATUS.PENDING}
+      isLoading={Boolean(loading)}
       label={label}
       onVisible={(val) => setNumberOfCaptions((prevVal) => (val ? prevVal + 1 : prevVal - 1))}
     />
@@ -131,11 +133,7 @@ export const PingTimestamp = ({ label, checkGroup, stepStatus, initialStepNo = 1
             />
           )}
           {!imgSrc && !screenshotRef && (
-            <NoImageDisplay
-              imageCaption={ImageCaption}
-              isLoading={status === FETCH_STATUS.LOADING}
-              isPending={status === FETCH_STATUS.PENDING}
-            />
+            <NoImageDisplay imageCaption={ImageCaption} isLoading={loading || !allStepsLoaded} />
           )}
         </StepDiv>
       </EuiFlexItem>

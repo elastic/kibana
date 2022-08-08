@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Filter, FilterStateStore } from '../../../../common';
+import { Filter, FilterStateStore } from '@kbn/es-query';
 
 export function getFilter(
   store: FilterStateStore,

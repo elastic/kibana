@@ -86,6 +86,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
         name: i18n.translate('xpack.ml.navMenu.anomalyDetectionTabLinkText', {
           defaultMessage: 'Anomaly Detection',
         }),
+        disabled: disableLinks,
         items: [
           {
             id: 'anomaly_detection',
@@ -226,10 +227,11 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
         name: i18n.translate('xpack.ml.navMenu.aiopsTabLinkText', {
           defaultMessage: 'AIOps',
         }),
+        disabled: disableLinks,
         items: [
           {
             id: 'explainlogratespikes',
-            pathId: ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES,
+            pathId: ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT,
             name: i18n.translate('xpack.ml.navMenu.explainLogRateSpikesLinkText', {
               defaultMessage: 'Explain log rate spikes',
             }),

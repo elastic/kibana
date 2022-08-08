@@ -9,10 +9,18 @@
     "objects": []
   },
   "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/field-types",
-        "id": "def-server.KbnFieldType",
+        "id": "def-common.KbnFieldType",
         "type": "Class",
         "tags": [],
         "label": "KbnFieldType",
@@ -22,7 +30,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/field-types",
-            "id": "def-server.KbnFieldType.name",
+            "id": "def-common.KbnFieldType.name",
             "type": "string",
             "tags": [],
             "label": "name",
@@ -32,7 +40,7 @@
           },
           {
             "parentPluginId": "@kbn/field-types",
-            "id": "def-server.KbnFieldType.sortable",
+            "id": "def-common.KbnFieldType.sortable",
             "type": "boolean",
             "tags": [],
             "label": "sortable",
@@ -42,7 +50,7 @@
           },
           {
             "parentPluginId": "@kbn/field-types",
-            "id": "def-server.KbnFieldType.filterable",
+            "id": "def-common.KbnFieldType.filterable",
             "type": "boolean",
             "tags": [],
             "label": "filterable",
@@ -52,7 +60,7 @@
           },
           {
             "parentPluginId": "@kbn/field-types",
-            "id": "def-server.KbnFieldType.esTypes",
+            "id": "def-common.KbnFieldType.esTypes",
             "type": "Object",
             "tags": [],
             "label": "esTypes",
@@ -61,9 +69,9 @@
               "readonly ",
               {
                 "pluginId": "@kbn/field-types",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-server.ES_FIELD_TYPES",
+                "section": "def-common.ES_FIELD_TYPES",
                 "text": "ES_FIELD_TYPES"
               },
               "[]"
@@ -73,7 +81,7 @@
           },
           {
             "parentPluginId": "@kbn/field-types",
-            "id": "def-server.KbnFieldType.Unnamed",
+            "id": "def-common.KbnFieldType.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -86,7 +94,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/field-types",
-                "id": "def-server.KbnFieldType.Unnamed.$1",
+                "id": "def-common.KbnFieldType.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -95,9 +103,9 @@
                   "Partial<",
                   {
                     "pluginId": "@kbn/field-types",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnFieldTypesPluginApi",
-                    "section": "def-server.KbnFieldTypeOptions",
+                    "section": "def-common.KbnFieldTypeOptions",
                     "text": "KbnFieldTypeOptions"
                   },
                   ">"
@@ -116,7 +124,7 @@
     "functions": [
       {
         "parentPluginId": "@kbn/field-types",
-        "id": "def-server.castEsToKbnFieldTypeName",
+        "id": "def-common.castEsToKbnFieldTypeName",
         "type": "Function",
         "tags": [
           "return"
@@ -129,9 +137,9 @@
           "(esType: string) => ",
           {
             "pluginId": "@kbn/field-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnFieldTypesPluginApi",
-            "section": "def-server.KBN_FIELD_TYPES",
+            "section": "def-common.KBN_FIELD_TYPES",
             "text": "KBN_FIELD_TYPES"
           }
         ],
@@ -140,7 +148,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/field-types",
-            "id": "def-server.castEsToKbnFieldTypeName.$1",
+            "id": "def-common.castEsToKbnFieldTypeName.$1",
             "type": "string",
             "tags": [],
             "label": "esType",
@@ -158,7 +166,7 @@
       },
       {
         "parentPluginId": "@kbn/field-types",
-        "id": "def-server.getFilterableKbnTypeNames",
+        "id": "def-common.getFilterableKbnTypeNames",
         "type": "Function",
         "tags": [
           "return"
@@ -178,7 +186,7 @@
       },
       {
         "parentPluginId": "@kbn/field-types",
-        "id": "def-server.getKbnFieldType",
+        "id": "def-common.getKbnFieldType",
         "type": "Function",
         "tags": [
           "return"
@@ -191,9 +199,9 @@
           "(typeName: string) => ",
           {
             "pluginId": "@kbn/field-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnFieldTypesPluginApi",
-            "section": "def-server.KbnFieldType",
+            "section": "def-common.KbnFieldType",
             "text": "KbnFieldType"
           }
         ],
@@ -202,7 +210,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/field-types",
-            "id": "def-server.getKbnFieldType.$1",
+            "id": "def-common.getKbnFieldType.$1",
             "type": "string",
             "tags": [],
             "label": "typeName",
@@ -220,7 +228,7 @@
       },
       {
         "parentPluginId": "@kbn/field-types",
-        "id": "def-server.getKbnTypeNames",
+        "id": "def-common.getKbnTypeNames",
         "type": "Function",
         "tags": [
           "return"
@@ -242,7 +250,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/field-types",
-        "id": "def-server.KbnFieldTypeOptions",
+        "id": "def-common.KbnFieldTypeOptions",
         "type": "Interface",
         "tags": [],
         "label": "KbnFieldTypeOptions",
@@ -252,7 +260,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/field-types",
-            "id": "def-server.KbnFieldTypeOptions.sortable",
+            "id": "def-common.KbnFieldTypeOptions.sortable",
             "type": "boolean",
             "tags": [],
             "label": "sortable",
@@ -262,7 +270,7 @@
           },
           {
             "parentPluginId": "@kbn/field-types",
-            "id": "def-server.KbnFieldTypeOptions.filterable",
+            "id": "def-common.KbnFieldTypeOptions.filterable",
             "type": "boolean",
             "tags": [],
             "label": "filterable",
@@ -272,7 +280,7 @@
           },
           {
             "parentPluginId": "@kbn/field-types",
-            "id": "def-server.KbnFieldTypeOptions.name",
+            "id": "def-common.KbnFieldTypeOptions.name",
             "type": "string",
             "tags": [],
             "label": "name",
@@ -282,7 +290,7 @@
           },
           {
             "parentPluginId": "@kbn/field-types",
-            "id": "def-server.KbnFieldTypeOptions.esTypes",
+            "id": "def-common.KbnFieldTypeOptions.esTypes",
             "type": "Array",
             "tags": [],
             "label": "esTypes",
@@ -290,9 +298,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/field-types",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-server.ES_FIELD_TYPES",
+                "section": "def-common.ES_FIELD_TYPES",
                 "text": "ES_FIELD_TYPES"
               },
               "[]"
@@ -307,7 +315,7 @@
     "enums": [
       {
         "parentPluginId": "@kbn/field-types",
-        "id": "def-server.ES_FIELD_TYPES",
+        "id": "def-common.ES_FIELD_TYPES",
         "type": "Enum",
         "tags": [],
         "label": "ES_FIELD_TYPES",
@@ -318,7 +326,7 @@
       },
       {
         "parentPluginId": "@kbn/field-types",
-        "id": "def-server.KBN_FIELD_TYPES",
+        "id": "def-common.KBN_FIELD_TYPES",
         "type": "Enum",
         "tags": [],
         "label": "KBN_FIELD_TYPES",
@@ -328,14 +336,6 @@
         "initialIsOpen": false
       }
     ],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
     "misc": [],
     "objects": []
   }

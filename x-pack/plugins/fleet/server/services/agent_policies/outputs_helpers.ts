@@ -8,7 +8,7 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import type { AgentPolicySOAttributes } from '../../types';
-import { LICENCE_FOR_PER_POLICY_OUTPUT, outputType } from '../../../common';
+import { LICENCE_FOR_PER_POLICY_OUTPUT, outputType } from '../../../common/constants';
 import { appContextService } from '..';
 import { outputService } from '../output';
 import { OutputInvalidError, OutputLicenceError } from '../../errors';

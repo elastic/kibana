@@ -8,7 +8,7 @@
 import { getPivotDropdownOptions } from '.';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { FilterAggForm } from './filter_agg/components';
-import type { RuntimeField } from '@kbn/data-plugin/common';
+import type { RuntimeField } from '@kbn/data-views-plugin/common';
 
 describe('Transform: Define Pivot Common', () => {
   test('getPivotDropdownOptions()', () => {

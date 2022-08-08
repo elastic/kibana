@@ -20,13 +20,7 @@ export default function ({ loadTestFile, getService }) {
     loadTestFile(require.resolve('./fleet_setup'));
 
     // Agents
-    loadTestFile(require.resolve('./agents/delete'));
-    loadTestFile(require.resolve('./agents/list'));
-    loadTestFile(require.resolve('./agents/unenroll'));
-    loadTestFile(require.resolve('./agents/actions'));
-    loadTestFile(require.resolve('./agents/upgrade'));
-    loadTestFile(require.resolve('./agents/reassign'));
-    loadTestFile(require.resolve('./agents/status'));
+    loadTestFile(require.resolve('./agents'));
 
     // Enrollment API keys
     loadTestFile(require.resolve('./enrollment_api_keys/crud'));
@@ -55,6 +49,9 @@ export default function ({ loadTestFile, getService }) {
 
     // Outputs
     loadTestFile(require.resolve('./outputs'));
+
+    // Download sources
+    loadTestFile(require.resolve('./download_sources'));
 
     // Telemetry
     loadTestFile(require.resolve('./fleet_telemetry'));

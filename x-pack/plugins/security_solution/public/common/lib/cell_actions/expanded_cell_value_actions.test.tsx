@@ -8,26 +8,18 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 import { ExpandedCellValueActions } from './expanded_cell_value_actions';
+import type { ColumnHeaderType } from '@kbn/timelines-plugin/common/types';
 
 jest.mock('../kibana');
 
 describe('ExpandedCellValueActions', () => {
   const props = {
-    browserFields: {
-      host: {
-        fields: {
-          'host.name': {
-            aggregatable: true,
-            category: 'host',
-            description:
-              'Name of the host. It can contain what `hostname` returns on Unix systems, the fully qualified domain name, or a name specified by the user. The sender decides which value to use.',
-            type: 'string',
-            name: 'host.name',
-          },
-        },
-      },
+    field: {
+      id: 'host.name',
+      type: 'keyword',
+      columnHeaderType: 'not-filtered' as ColumnHeaderType,
+      aggregatable: true,
     },
-    field: 'host.name',
     globalFilters: [],
     onFilterAdded: () => {},
     timelineId: 'mockTimelineId',

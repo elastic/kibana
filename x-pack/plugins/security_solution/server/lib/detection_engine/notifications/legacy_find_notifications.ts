@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { RuleTypeParams, FindResult } from '@kbn/alerting-plugin/server';
+import type { RuleTypeParams, FindResult } from '@kbn/alerting-plugin/server';
 import { LEGACY_NOTIFICATIONS_ID } from '../../../../common/constants';
 // eslint-disable-next-line no-restricted-imports
-import { LegacyFindNotificationParams } from './legacy_types';
+import type { LegacyFindNotificationParams } from './legacy_types';
 
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function

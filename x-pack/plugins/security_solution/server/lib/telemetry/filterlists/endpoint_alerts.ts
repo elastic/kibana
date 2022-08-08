@@ -42,6 +42,7 @@ const baseAllowlistFields: AllowlistFields = {
 
 // Allow list for event-related fields, which can also be nested under events[]
 const allowlistBaseEventFields: AllowlistFields = {
+  credential_access: true,
   dll: {
     name: true,
     path: true,
@@ -75,6 +76,7 @@ const allowlistBaseEventFields: AllowlistFields = {
       quarantine_message: true,
     },
   },
+  message: true,
   process: {
     parent: baseAllowlistFields,
     ...baseAllowlistFields,

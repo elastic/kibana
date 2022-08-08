@@ -74,6 +74,10 @@ describe('useVulnerableHostsCounters', () => {
       items: [],
       isLoading: false,
       updatedAt: dateNow,
+      pagination: expect.objectContaining({
+        currentPage: 0,
+        pageCount: 0,
+      }),
     });
 
     expect(mockUseQueryAlerts).toBeCalledWith(mockQuery());
@@ -91,6 +95,10 @@ describe('useVulnerableHostsCounters', () => {
       items: parsedVulnerableHostsAlertsResult,
       isLoading: false,
       updatedAt: dateNow,
+      pagination: expect.objectContaining({
+        currentPage: 0,
+        pageCount: 1,
+      }),
     });
   });
 
@@ -110,6 +118,10 @@ describe('useVulnerableHostsCounters', () => {
       items: parsedVulnerableHostsAlertsResult,
       isLoading: false,
       updatedAt: newDateNow,
+      pagination: expect.objectContaining({
+        currentPage: 0,
+        pageCount: 1,
+      }),
     });
   });
 
@@ -122,6 +134,10 @@ describe('useVulnerableHostsCounters', () => {
       items: [],
       isLoading: false,
       updatedAt: dateNow,
+      pagination: expect.objectContaining({
+        currentPage: 0,
+        pageCount: 0,
+      }),
     });
   });
 });

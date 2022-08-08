@@ -35,6 +35,9 @@ describe('<PolicyEdit />', () => {
       httpRequestsMockHelpers.setLoadRepositoriesResponse({
         repositories: [{ name: POLICY_EDIT.repository }],
       });
+      httpRequestsMockHelpers.setLoadFeaturesResponse({
+        features: [{ name: 'kibana' }, { name: 'tasks' }],
+      });
 
       testBed = await setup(httpSetup);
 
@@ -151,6 +154,8 @@ describe('<PolicyEdit />', () => {
               schedule,
               repository,
               config: {
+                featureStates: ['kibana'],
+                includeGlobalState: true,
                 ignoreUnavailable: true,
               },
               retention: {
@@ -182,7 +187,7 @@ describe('<PolicyEdit />', () => {
           await nextTick();
         });
 
-        const { name, isManagedPolicy, schedule, repository, retention, config, snapshotName } =
+        const { name, isManagedPolicy, schedule, repository, retention, snapshotName } =
           POLICY_EDIT;
 
         expect(httpSetup.put).toHaveBeenLastCalledWith(
@@ -193,7 +198,10 @@ describe('<PolicyEdit />', () => {
               snapshotName,
               schedule,
               repository,
-              config,
+              config: {
+                featureStates: ['kibana'],
+                includeGlobalState: true,
+              },
               retention: {
                 ...retention,
                 expireAfterUnit: TIME_UNITS.DAY, // default value

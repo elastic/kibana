@@ -55,24 +55,26 @@ export const AliasTable: FunctionComponent<Props> = ({ spaces, aliasesToDisable 
 
   return (
     <>
-      <EuiCallOut
-        size="s"
-        title={
+      <EuiFlexItem grow={false}>
+        <EuiCallOut
+          size="s"
+          title={
+            <FormattedMessage
+              id="xpack.spaces.shareToSpace.aliasTableCalloutTitle"
+              defaultMessage="Legacy URL conflict"
+            />
+          }
+          color="warning"
+        >
           <FormattedMessage
-            id="xpack.spaces.shareToSpace.aliasTableCalloutTitle"
-            defaultMessage="Legacy URL conflict"
+            id="xpack.spaces.shareToSpace.aliasTableCalloutBody"
+            defaultMessage="{aliasesToDisableCount, plural, one {# legacy URL} other {# legacy URLs}} will be disabled."
+            values={{ aliasesToDisableCount }}
           />
-        }
-        color="warning"
-      >
-        <FormattedMessage
-          id="xpack.spaces.shareToSpace.aliasTableCalloutBody"
-          defaultMessage="{aliasesToDisableCount, plural, one {# legacy URL} other {# legacy URLs}} will be disabled."
-          values={{ aliasesToDisableCount }}
-        />
-      </EuiCallOut>
+        </EuiCallOut>
 
-      <EuiSpacer size="m" />
+        <EuiSpacer size="m" />
+      </EuiFlexItem>
 
       <EuiFlexItem>
         <Suspense fallback={<EuiLoadingSpinner />}>

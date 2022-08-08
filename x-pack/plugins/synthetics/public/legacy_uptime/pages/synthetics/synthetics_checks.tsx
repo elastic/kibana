@@ -38,7 +38,7 @@ export const SyntheticsCheckSteps: React.FC = () => {
 
   return (
     <>
-      <StepsList data={steps} loading={loading} error={error} />
+      <StepsList data={steps} loading={loading} allStepsLoaded={!loading} error={error} />
       {(!steps || steps.length === 0) && !loading && <EmptyJourney checkGroup={checkGroup} />}
     </>
   );

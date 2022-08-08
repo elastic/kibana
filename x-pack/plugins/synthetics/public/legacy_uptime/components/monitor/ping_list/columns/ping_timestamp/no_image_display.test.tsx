@@ -16,20 +16,11 @@ describe('NoImageDisplay', () => {
     defaultProps = {
       imageCaption: <div>test caption</div>,
       isLoading: false,
-      isPending: false,
     };
   });
 
   it('renders a loading spinner for loading state', () => {
     defaultProps.isLoading = true;
-    const { getByText, getByLabelText } = render(<NoImageDisplay {...defaultProps} />);
-
-    expect(getByLabelText(imageLoadingSpinnerAriaLabel));
-    expect(getByText('test caption'));
-  });
-
-  it('renders a loading spinner for pending state', () => {
-    defaultProps.isPending = true;
     const { getByText, getByLabelText } = render(<NoImageDisplay {...defaultProps} />);
 
     expect(getByLabelText(imageLoadingSpinnerAriaLabel));

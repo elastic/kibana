@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { useQuery } from 'react-query';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { type QueryObserverOptions, useQuery } from 'react-query';
+import { useKibana } from '../hooks/use_kibana';
 import { ComplianceDashboardData } from '../../../common/types';
 import { STATS_ROUTE_PATH } from '../../../common/constants';
 
-const getStatsKey = 'csp_dashboard_stats';
+const getStatsKey = ['csp_dashboard_stats'];
 
-export const useComplianceDashboardDataApi = () => {
+export const useComplianceDashboardDataApi = (
+  options: QueryObserverOptions<unknown, unknown, ComplianceDashboardData, unknown, string[]>
+) => {
   const { http } = useKibana().services;
-  return useQuery([getStatsKey], () => http!.get<ComplianceDashboardData>(STATS_ROUTE_PATH));
+  return useQuery(getStatsKey, () => http.get<ComplianceDashboardData>(STATS_ROUTE_PATH), options);
 };

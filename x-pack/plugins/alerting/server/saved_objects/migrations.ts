@@ -7,6 +7,8 @@
 
 import { isRuleType, ruleTypeMappings } from '@kbn/securitysolution-rules';
 import { isString } from 'lodash/fp';
+import { omit } from 'lodash';
+import moment from 'moment-timezone';
 import { gte } from 'semver';
 import {
   LogMeta,
@@ -164,7 +166,7 @@ export function getMigrations(
   const migrationRules830 = createEsoMigration(
     encryptedSavedObjects,
     (doc: SavedObjectUnsanitizedDoc<RawRule>): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
-    pipeMigrations(addSearchType, removeInternalTags)
+    pipeMigrations(addSearchType, removeInternalTags, convertSnoozes)
   );
 
   return mergeSavedObjectMigrationMaps(
@@ -886,6 +888,33 @@ function addMappedParams(
   }
 
   return doc;
+}
+
+function convertSnoozes(
+  doc: SavedObjectUnsanitizedDoc<RawRule>
+): SavedObjectUnsanitizedDoc<RawRule> {
+  const {
+    attributes: { snoozeEndTime },
+  } = doc;
+
+  return {
+    ...doc,
+    attributes: {
+      ...(omit(doc.attributes, ['snoozeEndTime']) as RawRule),
+      snoozeSchedule: snoozeEndTime
+        ? [
+            {
+              duration: Date.parse(snoozeEndTime as string) - Date.now(),
+              rRule: {
+                dtstart: new Date().toISOString(),
+                tzid: moment.tz.guess(),
+                count: 1,
+              },
+            },
+          ]
+        : [],
+    },
+  };
 }
 
 function getCorrespondingAction(
