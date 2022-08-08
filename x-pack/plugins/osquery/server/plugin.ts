@@ -13,7 +13,6 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
-import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
@@ -27,7 +26,7 @@ import { initUsageCollectors } from './usage';
 import type { OsqueryAppContext } from './lib/osquery_app_context_services';
 import { OsqueryAppContextService } from './lib/osquery_app_context_services';
 import type { ConfigType } from './config';
-import { OSQUERY_INTEGRATION_NAME, PLUGIN_ID } from '../common';
+import { OSQUERY_INTEGRATION_NAME } from '../common';
 import { getPackagePolicyDeleteCallback } from './lib/fleet_integration';
 import { TelemetryEventsSender } from './lib/telemetry/sender';
 import { TelemetryReceiver } from './lib/telemetry/receiver';
@@ -43,8 +42,6 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
   private readonly osqueryAppContextService = new OsqueryAppContextService();
   private readonly telemetryReceiver: TelemetryReceiver;
   private readonly telemetryEventsSender: TelemetryEventsSender;
-
-  private telemetryUsageCounter?: UsageCounter;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.context = initializerContext;
@@ -76,8 +73,6 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       osqueryContext,
       usageCollection: plugins.usageCollection,
     });
-
-    this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(PLUGIN_ID);
 
     core.getStartServices().then(([{ elasticsearch }, depsStart]) => {
       const osquerySearchStrategy = osquerySearchStrategyProvider(
