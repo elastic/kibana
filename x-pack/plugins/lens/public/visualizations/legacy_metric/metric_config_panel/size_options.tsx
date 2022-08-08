@@ -81,7 +81,7 @@ export const SizeOptions: React.FC<TitlePositionProps> = ({ state, setState }) =
           isDisabled={currSizeIndex === 0}
         />
       }
-      data-test-subj="lnsMetricSizeSelect"
+      data-test-subj="lnsLegacyMetricSizeSelect"
       compressed
       options={titleSizes.map((position) => {
         return {

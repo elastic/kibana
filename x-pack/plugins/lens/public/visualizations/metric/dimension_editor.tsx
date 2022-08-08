@@ -389,7 +389,6 @@ function StaticColorControls({ state, setState }: Pick<Props, 'state' | 'setStat
     <EuiFormRow display="columnCompressed" fullWidth label={colorLabel}>
       <EuiColorPicker
         fullWidth
-        data-test-subj="lnsMetric_colorpicker"
         compressed
         isClearable={false}
         onChange={(color: string) => handleColorChange(color)}
