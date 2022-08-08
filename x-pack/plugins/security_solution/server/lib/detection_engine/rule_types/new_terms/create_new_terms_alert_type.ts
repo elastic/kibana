@@ -207,7 +207,7 @@ export const createNewTermsAlertType = (
         });
         const searchResultWithAggs = searchResult as RecentTermsAggResult;
         if (!searchResultWithAggs.aggregations) {
-          throw new Error('expected to find aggregations on search result');
+          throw new Error('Aggregations were missing on recent terms search result');
         }
         logger.debug(`Time spent on composite agg: ${searchDuration}`);
 
@@ -264,7 +264,7 @@ export const createNewTermsAlertType = (
 
         const pageSearchResultWithAggs = pageSearchResult as NewTermsAggResult;
         if (!pageSearchResultWithAggs.aggregations) {
-          throw new Error('expected to find aggregations on page search result');
+          throw new Error('Aggregations were missing on new terms search result');
         }
 
         // PHASE 3: For each term that is not in the history window, fetch the oldest document in
@@ -308,7 +308,7 @@ export const createNewTermsAlertType = (
           const docFetchResultWithAggs = docFetchSearchResult as DocFetchAggResult;
 
           if (!docFetchResultWithAggs.aggregations) {
-            throw new Error('expected to find aggregations on page search result');
+            throw new Error('Aggregations were missing on document fetch search result');
           }
 
           const eventsAndTerms: Array<{
