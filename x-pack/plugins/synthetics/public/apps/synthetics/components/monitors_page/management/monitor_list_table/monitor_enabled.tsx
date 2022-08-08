@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { EuiSwitch, EuiSwitchEvent, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useMemo } from 'react';
+import { EuiSwitch, EuiSwitchEvent, EuiLoadingSpinner } from '@elastic/eui';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { FETCH_STATUS } from '@kbn/observability-plugin/public';
 import { useCanEditSynthetics } from '../../../../../../hooks/use_capabilities';
 import { ConfigKey, EncryptedSyntheticsMonitor } from '../../../../../../../common/runtime_types';
@@ -18,9 +19,16 @@ interface Props {
   monitor: EncryptedSyntheticsMonitor;
   reloadPage: () => void;
   initialLoading?: boolean;
+  isSwitchable?: boolean;
 }
 
-export const MonitorEnabled = ({ id, monitor, reloadPage, initialLoading }: Props) => {
+export const MonitorEnabled = ({
+  id,
+  monitor,
+  reloadPage,
+  initialLoading = false,
+  isSwitchable = true,
+}: Props) => {
   const isDisabled = !useCanEditSynthetics();
 
   const monitorName = monitor[ConfigKey.NAME];
@@ -51,7 +59,7 @@ export const MonitorEnabled = ({ id, monitor, reloadPage, initialLoading }: Prop
       {isLoading || initialLoading ? (
         <EuiLoadingSpinner size="m" />
       ) : (
-        <EuiSwitch
+        <SwitchWithCursor
           compressed={true}
           checked={enabled}
           disabled={isLoading || isDisabled}
@@ -59,9 +67,16 @@ export const MonitorEnabled = ({ id, monitor, reloadPage, initialLoading }: Prop
           label={enabled ? labels.DISABLE_MONITOR_LABEL : labels.ENABLE_MONITOR_LABEL}
           title={enabled ? labels.DISABLE_MONITOR_LABEL : labels.ENABLE_MONITOR_LABEL}
           data-test-subj="syntheticsIsMonitorEnabled"
+          isSwitchable={isSwitchable}
           onChange={handleEnabledChange}
         />
       )}
     </>
   );
 };
+
+const SwitchWithCursor = euiStyled(EuiSwitch)<{ isSwitchable: boolean }>`
+  & > button {
+    cursor: ${({ isSwitchable }) => (isSwitchable ? undefined : 'not-allowed')};
+  }
+`;
