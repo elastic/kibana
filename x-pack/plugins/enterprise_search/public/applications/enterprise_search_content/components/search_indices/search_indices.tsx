@@ -104,27 +104,25 @@ export const SearchIndices: React.FC = () => {
     />
   );
 
-  const pageTitle =
-    indices.length !== 0
-      ? i18n.translate('xpack.enterpriseSearch.content.searchIndices.searchIndices.pageTitle', {
-          defaultMessage: 'Elasticsearch Indices',
-        })
-      : i18n.translate(
-          'xpack.enterpriseSearch.content.searchIndices.searchIndices.emptyPageTitle',
-          {
-            defaultMessage: 'Welcome to Enterprise Search',
-          }
-        );
+  const pageTitle = isLoading
+    ? ''
+    : indices.length !== 0
+    ? i18n.translate('xpack.enterpriseSearch.content.searchIndices.searchIndices.pageTitle', {
+        defaultMessage: 'Elasticsearch indices',
+      })
+    : i18n.translate('xpack.enterpriseSearch.content.searchIndices.searchIndices.emptyPageTitle', {
+        defaultMessage: 'Welcome to Enterprise Search',
+      });
 
   return (
     <>
       <EnterpriseSearchContentPageTemplate
         pageChrome={baseBreadcrumbs}
         pageViewTelemetry="Search indices"
-        isLoading={false}
+        isLoading={isLoading}
         pageHeader={{
           pageTitle,
-          rightSideItems: [createNewIndexButton],
+          rightSideItems: isLoading ? [] : [createNewIndexButton],
         }}
       >
         {!hasNoIndices ? (
@@ -208,12 +206,7 @@ export const SearchIndices: React.FC = () => {
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem>
-              <IndicesTable
-                indices={indices}
-                meta={meta}
-                onChange={handlePageChange(onPaginate)}
-                isLoading={isLoading}
-              />
+              <IndicesTable indices={indices} meta={meta} onChange={handlePageChange(onPaginate)} />
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : (
