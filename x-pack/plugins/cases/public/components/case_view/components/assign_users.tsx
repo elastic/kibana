@@ -22,6 +22,7 @@ import * as i18n from '../translations';
 import { SuggestUsers } from '../../user_profiles/suggest_users';
 import { SidebarTitle } from './sidebar_title';
 import { UserRepresentation } from '../../user_profiles/user_representation';
+import { useCasesContext } from '../../cases_context/use_cases_context';
 
 interface AssignUsersProps {
   assignees: CaseAssignees;
@@ -55,14 +56,32 @@ const AssignUsersComponent: React.FC<AssignUsersProps> = ({
   }, []);
 
   const onClosePopover = useCallback(() => {
+    console.log('selected assignees', selectedAssignees);
     setIsPopoverOpen(false);
 
-    onAssigneesChanged(selectedAssignees.map((assignee) => ({ uid: assignee.uid })));
+    onAssigneesChanged(selectedAssignees);
   }, [onAssigneesChanged, selectedAssignees]);
+
+  const onAssigneeRemoved = useCallback(
+    (removedAssigneeUID: string) => {
+      const remainingAssignees = selectedAssignees.filter(
+        (assignee) => assignee.uid !== removedAssigneeUID
+      );
+      setSelectedAssignees(remainingAssignees);
+      onAssigneesChanged(remainingAssignees);
+    },
+    [onAssigneesChanged, selectedAssignees]
+  );
+
+  const onUsersChange = useCallback((users: UserProfile[]) => {
+    setSelectedAssignees(users.map((user) => ({ uid: user.uid })));
+  }, []);
+
+  const { permissions } = useCasesContext();
 
   const button = (
     <EuiButtonIcon
-      data-test-subj="assignees-edit-button"
+      data-test-subj="case-view-assignees-edit-button"
       aria-label={i18n.EDIT_ASSIGNEES_ARIA_LABEL}
       iconType={'pencil'}
       onClick={togglePopOver}
@@ -81,21 +100,23 @@ const AssignUsersComponent: React.FC<AssignUsersProps> = ({
         <EuiFlexItem grow={false}>
           <SidebarTitle title={i18n.ASSIGNEES} />
         </EuiFlexItem>
-        <EuiFlexItem data-test-subj="assignees-edit" grow={false}>
-          <EuiToolTip position="left" content={i18n.EDIT_ASSIGNEES}>
-            <EuiPopover
-              button={button}
-              isOpen={isPopoverOpen}
-              closePopover={onClosePopover}
-              anchorPosition="downRight"
-              panelStyle={{
-                minWidth: 520,
-              }}
-            >
-              <SuggestUsers onUsersChange={setSelectedAssignees} selectedUsers={assigneeProfiles} />
-            </EuiPopover>
-          </EuiToolTip>
-        </EuiFlexItem>
+        {!isLoading && permissions.update && (
+          <EuiFlexItem data-test-subj="case-view-assignees-edit" grow={false}>
+            <EuiToolTip position="left" content={i18n.EDIT_ASSIGNEES}>
+              <EuiPopover
+                button={button}
+                isOpen={isPopoverOpen}
+                closePopover={onClosePopover}
+                anchorPosition="downRight"
+                panelStyle={{
+                  minWidth: 520,
+                }}
+              >
+                <SuggestUsers onUsersChange={onUsersChange} selectedUsers={assigneeProfiles} />
+              </EuiPopover>
+            </EuiToolTip>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
       {assigneeProfiles.length === 0 ? (
         <EuiFlexGroup direction="column" gutterSize="none">
@@ -116,8 +137,8 @@ const AssignUsersComponent: React.FC<AssignUsersProps> = ({
         <EuiFlexGroup direction="column" gutterSize="s">
           {assigneeProfiles.map((profile) => {
             return (
-              <EuiFlexItem grow={false}>
-                <UserRepresentation key={profile.uid} profile={profile} />
+              <EuiFlexItem key={profile.uid} grow={false}>
+                <UserRepresentation profile={profile} onRemoveAssignee={onAssigneeRemoved} />
               </EuiFlexItem>
             );
           })}

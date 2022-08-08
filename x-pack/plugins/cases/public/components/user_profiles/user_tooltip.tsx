@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { CaseUserAvatar } from './user_avatar';
-import * as i18n from '../../common/translations';
+import { getName } from './display_name';
 
 interface UserFullRepresentationProps {
   profile: UserProfileWithAvatar;
@@ -44,13 +44,7 @@ const UserFullInformation: React.FC<{ profile: UserProfileWithAvatar }> = React.
         className="eui-textBreakWord"
         data-test-subj="user-profile-tooltip-single-name"
       >
-        <strong>
-          {profile.user.display_name ??
-            profile.user.full_name ??
-            profile.user.email ??
-            profile.user.username ??
-            i18n.UNKNOWN}
-        </strong>
+        <strong>{getName(profile.user)}</strong>
       </EuiText>
     );
   }
@@ -76,7 +70,7 @@ const UserFullRepresentationComponent: React.FC<UserFullRepresentationProps> = (
                 className="eui-textBreakWord"
                 data-test-subj="user-profile-tooltip-email"
               >
-                {profile.user.email ?? i18n.UNKNOWN}
+                {profile.user.email}
               </EuiText>
             </EuiFlexItem>
           )}
