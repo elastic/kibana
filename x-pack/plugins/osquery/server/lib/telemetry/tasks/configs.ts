@@ -6,17 +6,16 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { TELEMETRY_CHANNEL_CONFIGS } from '../constants';
+import { TELEMETRY_EBT_CONFIG_EVENT } from '../constants';
 import { templateConfigs } from '../helpers';
 import type { TelemetryEventsSender } from '../sender';
 import type { TelemetryReceiver } from '../receiver';
-import type { ESClusterInfo, ESLicense } from '../types';
 
 export function createTelemetryConfigsTaskConfig() {
   return {
     type: 'osquery:telemetry-configs',
     title: 'Osquery Configs Telemetry',
-    interval: '5m',
+    interval: '24h',
     timeout: '10m',
     version: '1.0.0',
     runTask: async (
@@ -25,33 +24,19 @@ export function createTelemetryConfigsTaskConfig() {
       receiver: TelemetryReceiver,
       sender: TelemetryEventsSender
     ) => {
-      const [clusterInfoPromise, licenseInfoPromise] = await Promise.allSettled([
-        receiver.fetchClusterInfo(),
-        receiver.fetchLicenseInfo(),
-      ]);
-
-      const clusterInfo =
-        clusterInfoPromise.status === 'fulfilled'
-          ? clusterInfoPromise.value
-          : ({} as ESClusterInfo);
-      const licenseInfo =
-        licenseInfoPromise.status === 'fulfilled'
-          ? licenseInfoPromise.value
-          : ({} as ESLicense | undefined);
-
       const configsResponse = await receiver.fetchConfigs();
 
       if (!configsResponse?.total) {
         logger.debug('no configs found');
 
-        return 0;
+        return;
       }
 
-      const configsJson = templateConfigs(configsResponse?.items, clusterInfo, licenseInfo);
+      const configsJson = templateConfigs(configsResponse?.items);
 
-      sender.sendOnDemand(TELEMETRY_CHANNEL_CONFIGS, configsJson);
-
-      return configsResponse.total;
+      configsJson.forEach((config) => {
+        sender.reportEvent(TELEMETRY_EBT_CONFIG_EVENT, config);
+      });
     },
   };
 }
