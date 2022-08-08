@@ -517,7 +517,15 @@ export class DataViewsService {
       const fieldsWithSavedAttrs = Object.values(
         this.fieldArrayToMap([...fields, ...scripted], fieldAttrs)
       );
-      indexPattern.fields.replaceAll(fieldsWithSavedAttrs);
+      const runtimeFieldsMap = this.getRuntimeFields(
+        indexPattern.getRuntimeMappings() as Record<string, RuntimeFieldSpec>,
+        indexPattern.getFieldAttrs()
+      );
+      const runtimeFieldsArray = Object.values(runtimeFieldsMap).filter(
+        (runtimeField) =>
+          !fieldsWithSavedAttrs.find((mappedField) => mappedField.name === runtimeField.name)
+      );
+      indexPattern.fields.replaceAll([...runtimeFieldsArray, ...fieldsWithSavedAttrs]);
     } catch (err) {
       if (err instanceof DataViewMissingIndices) {
         this.onNotification(
@@ -699,38 +707,9 @@ export class DataViewsService {
         spec.fieldAttrs
       );
 
-      const addRuntimeFieldToSpecFields = (
-        name: string,
-        fieldType: RuntimeType,
-        runtimeField: RuntimeFieldSpec
-      ) => {
-        spec.fields![name] = {
-          name,
-          type: castEsToKbnFieldTypeName(fieldType),
-          esTypes: [fieldType],
-          runtimeField,
-          aggregatable: true,
-          searchable: true,
-          readFromDocValues: false,
-          customLabel: spec.fieldAttrs?.[name]?.customLabel,
-          count: spec.fieldAttrs?.[name]?.count,
-        };
-      };
-
-      // CREATE RUNTIME FIELDS
-      for (const [name, runtimeField] of Object.entries(runtimeFieldMap || {})) {
-        // do not create runtime field if mapped field exists
-        if (!spec.fields[name]) {
-          // For composite runtime field we add the subFields, **not** the composite
-          if (runtimeField.type === 'composite') {
-            Object.entries(runtimeField.fields!).forEach(([subFieldName, subField]) => {
-              addRuntimeFieldToSpecFields(`${name}.${subFieldName}`, subField.type, runtimeField);
-            });
-          } else {
-            addRuntimeFieldToSpecFields(name, runtimeField.type, runtimeField);
-          }
-        }
-      }
+      const runtimeFieldSpecs = this.getRuntimeFields(runtimeFieldMap, spec.fieldAttrs);
+      // mapped fields overwrite runtime fields
+      spec.fields = { ...runtimeFieldSpecs, ...spec.fields };
     } catch (err) {
       if (err instanceof DataViewMissingIndices) {
         this.onNotification(
@@ -762,6 +741,45 @@ export class DataViewsService {
     const indexPattern = await this.create(spec, true);
     indexPattern.resetOriginalSavedObjectBody();
     return indexPattern;
+  };
+
+  private getRuntimeFields = (
+    runtimeFieldMap: Record<string, RuntimeFieldSpec> | undefined = {},
+    fieldAttrs: FieldAttrs | undefined = {}
+  ) => {
+    const spec: DataViewFieldMap = {};
+
+    const addRuntimeFieldToSpecFields = (
+      name: string,
+      fieldType: RuntimeType,
+      runtimeField: RuntimeFieldSpec
+    ) => {
+      spec[name] = {
+        name,
+        type: castEsToKbnFieldTypeName(fieldType),
+        esTypes: [fieldType],
+        runtimeField,
+        aggregatable: true,
+        searchable: true,
+        readFromDocValues: false,
+        customLabel: fieldAttrs?.[name]?.customLabel,
+        count: fieldAttrs?.[name]?.count,
+      };
+    };
+
+    // CREATE RUNTIME FIELDS
+    for (const [name, runtimeField] of Object.entries(runtimeFieldMap || {})) {
+      // For composite runtime field we add the subFields, **not** the composite
+      if (runtimeField.type === 'composite') {
+        Object.entries(runtimeField.fields!).forEach(([subFieldName, subField]) => {
+          addRuntimeFieldToSpecFields(`${name}.${subFieldName}`, subField.type, runtimeField);
+        });
+      } else {
+        addRuntimeFieldToSpecFields(name, runtimeField.type, runtimeField);
+      }
+    }
+
+    return spec;
   };
 
   /**
