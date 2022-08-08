@@ -4,7 +4,6 @@ exports[`Storyshots components/WorkpadHeader/ShareMenu minimal 1`] = `
 <div>
   <div
     className="euiPopover euiPopover--anchorDownLeft"
-    offset={10}
   >
     <div
       className="euiPopover__anchor"
@@ -36,7 +35,6 @@ exports[`Storyshots components/WorkpadHeader/ShareMenu with Reporting 1`] = `
 <div>
   <div
     className="euiPopover euiPopover--anchorDownLeft"
-    offset={10}
   >
     <div
       className="euiPopover__anchor"
