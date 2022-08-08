@@ -98,3 +98,10 @@ export const SOURCE = i18n.translate(
     defaultMessage: 'Source',
   }
 );
+
+export const RULE_PREVIEW = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.rulePreview',
+  {
+    defaultMessage: 'Rule Preview',
+  }
+);
