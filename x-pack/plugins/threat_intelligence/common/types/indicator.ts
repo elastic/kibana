@@ -18,19 +18,23 @@ export enum RawIndicatorFieldId {
   UrlDomain = 'threat.indicator.url.domain',
   FileMd5 = 'threat.indicator.file.hash.md5',
   FileSha256 = 'threat.indicator.file.hash.sha256',
+  TimeStamp = '@timestamp',
 }
 
 export interface Indicator {
+  _id?: unknown;
   fields: Partial<Record<RawIndicatorFieldId, unknown[]>>;
 }
 
 export const generateMockIndicator = (): Indicator => ({
   fields: {
+    '@timestamp': ['2022-01-01T01:01:01.000Z'],
     'threat.indicator.type': ['ipv4-addr'],
     'threat.indicator.ip': ['12.68.554.87'],
     'threat.indicator.first_seen': ['2022-01-01T01:01:01.000Z'],
-    'threat.feed.name': ['Abuse_CH'],
+    'threat.feed.name': ['[Filebeat] AbuseCH Malware'],
   },
+  _id: Math.random(),
 });
 
 export const generateMockUrlIndicator = (): Indicator => {
