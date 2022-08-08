@@ -176,7 +176,7 @@ export function LayerSettings(props: Props) {
       return (
         <EuiFormRow display="columnCompressedSwitch">
           <EuiSwitch
-            label={i18n.translate('xpack-maps.layerPanel.settingsPanel.showTooltips', {
+            label={i18n.translate('xpack.maps.layerPanel.settingsPanel.showTooltips', {
               defaultMessage: `Show tooltips`,
             })}
             disabled={!layer.canShowTooltip()}
