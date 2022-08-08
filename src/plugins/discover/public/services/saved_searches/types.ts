@@ -7,7 +7,7 @@
  */
 
 import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
-import type { ISearchSource } from '@kbn/data-plugin/public';
+import type { ISearchSource, RefreshInterval } from '@kbn/data-plugin/public';
 import { DiscoverGridSettingsColumn } from '../../components/discover_grid/types';
 import { VIEW_MODE } from '../../components/view_mode_toggle';
 
@@ -28,6 +28,13 @@ export interface SavedSearchAttributes {
   viewMode?: VIEW_MODE;
   hideAggregatedPreview?: boolean;
   rowHeight?: number;
+
+  // for storing time range with a saved search
+  timeRestore?: boolean;
+  timeTo?: string;
+  timeFrom?: string;
+  refreshInterval?: RefreshInterval;
+
   rowsPerPage?: number;
 }
 
@@ -56,5 +63,12 @@ export interface SavedSearch {
   hideAggregatedPreview?: boolean;
   rowHeight?: number;
   isTextBasedQuery?: boolean;
+
+  // for storing time range with a saved search
+  timeRestore?: boolean;
+  timeTo?: string;
+  timeFrom?: string;
+  refreshInterval?: RefreshInterval;
+
   rowsPerPage?: number;
 }

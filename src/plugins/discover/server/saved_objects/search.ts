@@ -51,6 +51,17 @@ export function getSavedSearchObjectType(
         grid: { type: 'object', enabled: false },
         version: { type: 'integer' },
         rowHeight: { type: 'text' },
+        timeRestore: { type: 'boolean', index: false, doc_values: false },
+        timeFrom: { type: 'keyword', index: false, doc_values: false },
+        timeTo: { type: 'keyword', index: false, doc_values: false },
+        refreshInterval: {
+          properties: {
+            display: { type: 'keyword', index: false, doc_values: false },
+            pause: { type: 'boolean', index: false, doc_values: false },
+            section: { type: 'integer', index: false, doc_values: false },
+            value: { type: 'integer', index: false, doc_values: false },
+          },
+        },
         rowsPerPage: { type: 'integer', index: false, doc_values: false },
       },
     },
