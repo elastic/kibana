@@ -24,6 +24,7 @@ import { Attribution } from '../../../../common/descriptor_types';
 import { AUTOSELECT_EMS_LOCALE, NO_EMS_LOCALE, MAX_ZOOM } from '../../../../common/constants';
 import { AlphaSlider } from '../../../components/alpha_slider';
 import { ILayer } from '../../../classes/layers/layer';
+import { isVectorLayer, IVectorLayer } from '../../../classes/layers/vector_layer';
 import { AttributionFormRow } from './attribution_form_row';
 
 export interface Props {
@@ -37,6 +38,7 @@ export interface Props {
   updateAlpha: (layerId: string, alpha: number) => void;
   updateLabelsOnTop: (layerId: string, areLabelsOnTop: boolean) => void;
   updateIncludeInFitToBounds: (layerId: string, includeInFitToBounds: boolean) => void;
+  updateShowTooltips: (layerId: string, showTooltips: boolean) => void;
   supportsFitToBounds: boolean;
 }
 
@@ -66,6 +68,10 @@ export function LayerSettings(props: Props) {
 
   const onLabelsOnTopChange = (event: EuiSwitchEvent) => {
     props.updateLabelsOnTop(layerId, event.target.checked);
+  };
+
+  const onShowTooltipsChange = (event: EuiSwitchEvent) => {
+    props.updateShowTooltips(layerId, event.target.checked);
   };
 
   const includeInFitToBoundsChange = (event: EuiSwitchEvent) => {
@@ -162,6 +168,26 @@ export function LayerSettings(props: Props) {
     );
   };
 
+  const renderShowTooltips = () => {
+    if (!isVectorLayer(props.layer)) {
+      return null;
+    } else {
+      const layer = props.layer as unknown as IVectorLayer;
+      return (
+        <EuiFormRow display="columnCompressedSwitch">
+          <EuiSwitch
+            label={i18n.translate('xpack-maps.layerPanel.settingsPanel.showTooltips', {
+              defaultMessage: `Show tooltips`,
+            })}
+            checked={layer.canShowTooltip() && layer.isShowTooltip()}
+            onChange={onShowTooltipsChange}
+            compressed
+          />
+        </EuiFormRow>
+      );
+    }
+  };
+
   const renderShowLocaleSelector = () => {
     if (!props.layer.supportsLabelLocales()) {
       return null;
@@ -234,6 +260,7 @@ export function LayerSettings(props: Props) {
         {renderShowLocaleSelector()}
         <AttributionFormRow layer={props.layer} onChange={onAttributionChange} />
         {renderIncludeInFitToBounds()}
+        {renderShowTooltips()}
       </EuiPanel>
 
       <EuiSpacer size="s" />

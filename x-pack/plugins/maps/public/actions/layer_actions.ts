@@ -554,6 +554,15 @@ export function updateFittableFlag(id: string, includeInFitToBounds: boolean) {
   };
 }
 
+export function updateShowTooltips(id: string, showTooltips: boolean) {
+  return {
+    type: UPDATE_LAYER_PROP,
+    id,
+    propName: 'showTooltips',
+    newValue: showTooltips,
+  };
+}
+
 export function setLayerQuery(id: string, query: Query) {
   return (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
     dispatch({

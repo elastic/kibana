@@ -75,6 +75,7 @@ describe('createLayerDescriptor', () => {
       label: '[Performance] Duration',
       maxZoom: 24,
       minZoom: 0,
+      showTooltips: true,
       sourceDescriptor: {
         id: emsWorldLayerId,
         tooltipProperties: ['name', 'iso2'],
@@ -173,6 +174,7 @@ describe('createLayerDescriptor', () => {
       label: '[Performance] Duration',
       maxZoom: 24,
       minZoom: 0,
+      showTooltips: true,
       query: {
         language: 'kuery',
         query: 'processor.event:"transaction"',

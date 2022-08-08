@@ -98,6 +98,7 @@ export interface IVectorLayer extends ILayer {
   hasJoins(): boolean;
   showJoinEditor(): boolean;
   canShowTooltip(): boolean;
+  isShowTooltip(): boolean;
   supportsFeatureEditing(): boolean;
   getLeftJoinFields(): Promise<IField[]>;
   addFeature(geometry: Geometry | Position[]): Promise<void>;
@@ -131,6 +132,8 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     if (!options.joins) {
       layerDescriptor.joins = [];
     }
+
+    layerDescriptor.showTooltips = options.showTooltips ?? true;
 
     return layerDescriptor;
   }
@@ -934,6 +937,10 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
 
   canShowTooltip() {
     return this.getSource().hasTooltipProperties() || this.getJoins().length > 0;
+  }
+
+  isShowTooltip(): boolean {
+    return this._descriptor.showTooltips ?? true;
   }
 
   getFeatureId(feature: Feature): string | number | undefined {
