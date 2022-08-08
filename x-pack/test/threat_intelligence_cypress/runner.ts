@@ -39,7 +39,6 @@ export async function ThreatIntelligenceConfigurableCypressTestRunner(
 ) {
   const log = getService('log');
   const config = getService('config');
-  const esArchiver = getService('esArchiver');
   const es = getService('es');
 
   const pipelines = [tiAbusechMalware, tiAbusechMalwareBazaar, tiAbusechUrl];
