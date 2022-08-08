@@ -186,11 +186,31 @@ export const handleExecuteCommand: ConsoleStoreReducer<
 
   // If args were entered, then validate them
   if (parsedInput.hasArgs) {
+    // Show command help
+    if (parsedInput.hasArg('help')) {
+      if (Object.keys(parsedInput.args).length > 1 || parsedInput.args.help.length) {
+        return updateStateWithNewCommandHistoryItem(
+          state,
+          createCommandHistoryEntry(
+            cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
+            undefined,
+            false
+          )
+        );
+      }
+
+      return updateStateWithNewCommandHistoryItem(
+        state,
+        createCommandHistoryEntry(
+          cloneCommandDefinitionWithNewRenderComponent(command, HelpCommandArgument),
+          undefined,
+          false
+        )
+      );
+    }
+
     // Command supports no arguments
-    if (
-      !parsedInput.hasArg('help') &&
-      (!commandDefinition.args || Object.keys(commandDefinition.args).length === 0)
-    ) {
+    if (!commandDefinition.args || Object.keys(commandDefinition.args).length === 0) {
       return updateStateWithNewCommandHistoryItem(
         state,
         createCommandHistoryEntry(
@@ -239,18 +259,6 @@ export const handleExecuteCommand: ConsoleStoreReducer<
               </ConsoleCodeBlock>
             ),
           }),
-          false
-        )
-      );
-    }
-
-    // Show command help
-    if (parsedInput.hasArg('help')) {
-      return updateStateWithNewCommandHistoryItem(
-        state,
-        createCommandHistoryEntry(
-          cloneCommandDefinitionWithNewRenderComponent(command, HelpCommandArgument),
-          undefined,
           false
         )
       );

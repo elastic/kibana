@@ -150,8 +150,19 @@ describe('When a Console command is entered by the user', () => {
     enterCommand('cmd2 one two three --help');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
-        'The following cmd2 argument is not supported by this command: --one'
+      expect(renderResult.getByTestId('test-badArgument').textContent).toMatch(
+        /Unsupported argument/
+      );
+    });
+  });
+
+  it('should show error if values are given to the `--help` argument', async () => {
+    render();
+    enterCommand('cmd2 --help one --help');
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('test-badArgument').textContent).toMatch(
+        /Unsupported argument/
       );
     });
   });
