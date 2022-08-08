@@ -292,7 +292,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     [permissions.readSavedQueries, permissions.runSavedQueries]
   );
 
-  const { data: packsData } = usePacks({});
+  const { data: packsData, isFetched: isPackDataFetched } = usePacks({});
 
   const selectedPackData = useMemo(
     () => (packId?.length ? find(packsData?.data, { id: packId[0] }) : null),
@@ -439,12 +439,19 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
 
   useEffect(() => {
     if (defaultValue) {
+      if (defaultValue.agentSelection) {
+        updateFieldValues({
+          agentSelection: defaultValue.agentSelection,
+        });
+      }
+
       if (defaultValue?.packId && canRunPacks) {
         setQueryType('pack');
+
+        if (!isPackDataFetched) return;
         const selectedPackOption = find(packsData?.data, ['id', defaultValue.packId]);
         if (selectedPackOption) {
           updateFieldValues({
-            agentSelection: defaultValue.agentSelection,
             packId: [defaultValue.packId],
           });
         }
@@ -454,7 +461,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
 
       if (defaultValue?.query && canRunSingleQuery) {
         updateFieldValues({
-          agentSelection: defaultValue.agentSelection,
           query: defaultValue.query,
           savedQueryId: defaultValue.savedQueryId,
           ecs_mapping: defaultValue.ecs_mapping
@@ -479,7 +485,14 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
         return setQueryType('pack');
       }
     }
-  }, [canRunPacks, canRunSingleQuery, defaultValue, packsData?.data, updateFieldValues]);
+  }, [
+    canRunPacks,
+    canRunSingleQuery,
+    defaultValue,
+    isPackDataFetched,
+    packsData?.data,
+    updateFieldValues,
+  ]);
 
   const queryCardSelectable = useMemo(
     () => ({
