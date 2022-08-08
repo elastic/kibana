@@ -905,6 +905,7 @@ export class SearchSource {
       body.highlight = getHighlightRequest(getConfig(UI_SETTINGS.DOC_HIGHLIGHT));
       delete searchRequest.highlightAll;
     }
+
     return searchRequest;
   }
 
