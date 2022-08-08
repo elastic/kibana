@@ -20,6 +20,7 @@ import {
 import { buildEmptyFilter, FieldFilter, Filter, getFilterParams } from '@kbn/es-query';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import uuid from 'uuid';
 
 import returnKey from './assets/return_key.svg';
@@ -160,9 +161,9 @@ export function FilterItem({
           droppableId={path}
           spacing="s"
           isCombineEnabled={!disableOr}
-          style={{
-            cursor: dropTarget === path ? `url(${plus}), auto` : 'auto',
-          }}
+          css={css`
+            cursor: ${dropTarget === path ? `url(${plus}), auto` : `auto`};
+          `}
         >
           <EuiDraggable
             spacing="m"
@@ -178,9 +179,9 @@ export function FilterItem({
                 responsive={false}
                 alignItems="center"
                 justifyContent="center"
-                style={{
-                  cursor: dropTarget === path && !disableOr ? `url(${returnKey}), auto` : 'auto',
-                }}
+                css={css`
+                  cursor: ${dropTarget === path && !disableOr ? `url(${returnKey}), auto` : `auto`};
+                `}
               >
                 <EuiFlexItem>
                   <EuiPanel color={color} paddingSize={'none'} hasShadow={false} key={uuid()}>
