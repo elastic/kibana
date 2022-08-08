@@ -350,10 +350,7 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
       enrichedAlert['kibana.alert.rule.parameters']?.data_view_id != null
     ) {
       return enrichedAlert['kibana.alert.rule.parameters'].data_view_id;
-    } else if (enrichedAlert != null && enrichedAlert?.signal?.rule?.data_view_id != null) {
-      return enrichedAlert.signal.rule.data_view_id;
     }
-    return '';
   }, [enrichedAlert]);
 
   const isLoading = isLoadingAlertData && isSignalIndexLoading;
