@@ -31,7 +31,7 @@ import { SessionViewDeps } from '../../types';
 import { SessionViewDetailPanel } from '../session_view_detail_panel';
 import { SessionViewSearchBar } from '../session_view_search_bar';
 import { SessionViewDisplayOptions } from '../session_view_display_options';
-import { TTYOutput } from '../tty_output';
+import { TTYPlayer } from '../tty_player';
 import { useStyles } from './styles';
 import {
   useFetchAlertStatus,
@@ -282,8 +282,8 @@ export const SessionView = ({
               iconType="videoPlayer"
               onClick={onToggleTTY}
               size="m"
-              aria-label="View TTY output for the session"
-              data-test-subj="sessionView:sessionViewTTYOutputToggle"
+              aria-label="Opens TTY player"
+              data-test-subj="sessionView:sessionViewTTYPlayerToggle"
             />
           </EuiFlexItem>
 
@@ -394,7 +394,7 @@ export const SessionView = ({
         }}
       </EuiResizableContainer>
       {showTTY && (
-        <TTYOutput
+        <TTYPlayer
           sessionEntityId={sessionEntityId}
           onClose={onToggleTTY}
           isFullscreen={isFullScreen}
