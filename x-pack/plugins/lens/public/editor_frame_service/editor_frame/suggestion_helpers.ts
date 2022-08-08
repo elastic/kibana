@@ -8,6 +8,7 @@
 import { Datatable } from '@kbn/expressions-plugin/common';
 import type { PaletteOutput } from '@kbn/coloring';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import { showMemoizedErrorNotification } from '../../lens_ui_errors';
 import {
   Visualization,
   Datasource,
@@ -233,6 +234,7 @@ function getVisualizationSuggestions(
         changeType: table.changeType,
       }));
   } catch (e) {
+    showMemoizedErrorNotification(e);
     return [];
   }
 }

@@ -17,6 +17,7 @@ interface ErrorBoundaryState {
   originalError?: Error;
 }
 
+/** @internal **/
 const RecallError = ({ error }: { error: Error }) => {
   throw error;
 };

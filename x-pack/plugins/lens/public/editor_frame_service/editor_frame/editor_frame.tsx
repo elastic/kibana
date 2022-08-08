@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import React, { useCallback, useRef, useMemo } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import { DatasourceMap, FramePublicAPI, VisualizationMap, Suggestion } from '../../types';
 import { DataPanelWrapper } from './data_panel_wrapper';
@@ -30,7 +28,7 @@ import {
   selectVisualization,
 } from '../../state_management';
 import type { LensInspector } from '../../lens_inspector_service';
-import { ErrorBoundary } from '../error_boundary';
+import { ErrorBoundary, showMemoizedErrorNotification } from '../../lens_ui_errors';
 
 export interface EditorFrameProps {
   datasourceMap: DatasourceMap;
@@ -89,24 +87,9 @@ export function EditorFrame(props: EditorFrameProps) {
     [getSuggestionForField, dispatchLens]
   );
 
-  const onError = useMemo(() => {
-    const showedErrors = new Map<string, boolean>();
-    return (error: Error) => {
-      const { message } = error;
-
-      if (!showedErrors.has(message)) {
-        props.core.notifications.toasts.addDanger({
-          title: i18n.translate('xpack.lens.editorFrame.unexpectedError', {
-            defaultMessage: 'An unexpected error occurred.',
-          }),
-          text: toMountPoint(message, {
-            theme$: props.core.theme.theme$,
-          }),
-        });
-        showedErrors.set(message, true);
-      }
-    };
-  }, [props.core.notifications.toasts, props.core.theme.theme$]);
+  const onError = useCallback((error: Error) => {
+    showMemoizedErrorNotification(error);
+  }, []);
 
   return (
     <RootDragDropProvider>

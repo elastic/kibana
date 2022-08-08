@@ -30,6 +30,7 @@ import {
   Suggestion,
 } from '../../../types';
 import { getSuggestions, switchToSuggestion } from '../suggestion_helpers';
+import { showMemoizedErrorNotification } from '../../../lens_ui_errors';
 import {
   insertLayer,
   removeLayers,
@@ -110,6 +111,7 @@ function safeFnCall<TReturn>(action: () => TReturn, defaultReturnValue: TReturn)
   try {
     return action();
   } catch (error) {
+    showMemoizedErrorNotification(error);
     return defaultReturnValue;
   }
 }

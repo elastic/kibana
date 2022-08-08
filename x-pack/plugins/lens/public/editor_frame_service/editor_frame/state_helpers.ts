@@ -20,6 +20,7 @@ import {
   VisualizeEditorContext,
 } from '../../types';
 import { buildExpression } from './expression_helpers';
+import { showMemoizedErrorNotification } from '../../lens_ui_errors';
 import { Document } from '../../persistence/saved_object_store';
 import { getActiveDatasourceIdFromDoc } from '../../utils';
 import { ErrorMessage } from '../types';
@@ -209,6 +210,7 @@ export const validateDatasourceAndVisualization = (
       return [...(datasourceValidationErrors || []), ...(visualizationValidationErrors || [])];
     }
   } catch (e) {
+    showMemoizedErrorNotification(e);
     if (e.message) {
       return [
         {
