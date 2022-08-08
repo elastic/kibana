@@ -19,31 +19,27 @@ import {
 } from '@kbn/fleet-plugin/common';
 import { createCspRuleSearchFilterByPackagePolicy } from '../../common/utils/helpers';
 import {
-  CLOUDBEAT_VANILLA,
-  CIS_INTEGRATION_INPUTS_MAP,
+  INTEGRATION_CIS_K8S,
   CSP_RULE_SAVED_OBJECT_TYPE,
   CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
 } from '../../common/constants';
 import type { CspRule, CspRuleTemplate } from '../../common/schemas';
 import type { BenchmarkId } from '../../common/types';
 
-type CloudbeatInputType = keyof typeof CIS_INTEGRATION_INPUTS_MAP;
-
 const getBenchmarkTypeFilter = (type: BenchmarkId): string =>
   `${CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id: "${type}"`;
 
-const isEnabledBenchmarkInputType = (input: PackagePolicyInput) =>
-  input.type in CIS_INTEGRATION_INPUTS_MAP && !!input.enabled;
+const isEnabledBenchmarkInputType = (input: PackagePolicyInput) => !!input.type && input.enabled;
 
 export const getBenchmarkInputType = (inputs: PackagePolicy['inputs']): BenchmarkId => {
   const enabledInputs = inputs.filter(isEnabledBenchmarkInputType);
 
   // Use the only enabled input
-  if (enabledInputs.length === 1)
-    return CIS_INTEGRATION_INPUTS_MAP[enabledInputs[0].type as CloudbeatInputType];
+  // Get the last part of the input type, input type structure: cloudbeat/<benchmark_id>
+  if (enabledInputs.length === 1) return enabledInputs[0].type.split('/')[1];
 
-  // Use the the default input for multiple/none selected
-  return CIS_INTEGRATION_INPUTS_MAP[CLOUDBEAT_VANILLA];
+  // Use the default benchmark id for multiple/none selected
+  return INTEGRATION_CIS_K8S;
 };
 
 /**
