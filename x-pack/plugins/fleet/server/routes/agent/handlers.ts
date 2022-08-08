@@ -6,7 +6,9 @@
  */
 
 import { readFile } from 'fs/promises';
+import Path from 'path';
 
+import { REPO_ROOT } from '@kbn/utils';
 import { uniq } from 'lodash';
 import semverGte from 'semver/functions/gte';
 import semverGt from 'semver/functions/gt';
@@ -337,7 +339,7 @@ export const getAvailableVersionsHandler: RequestHandler = async (context, reque
   const kibanaVersionCoerced = semverCoerce(kibanaVersion)?.version ?? kibanaVersion;
 
   try {
-    const file = await readFile(AGENT_VERSION_BUILD_FILE, 'utf-8');
+    const file = await readFile(Path.join(REPO_ROOT, AGENT_VERSION_BUILD_FILE), 'utf-8');
 
     // Exclude versions older than MINIMUM_SUPPORTED_VERSION and pre-release versions (SNAPSHOT, rc..)
     // De-dup and sort in descending order
