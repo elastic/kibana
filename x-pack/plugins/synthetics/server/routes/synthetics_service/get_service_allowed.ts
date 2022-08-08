@@ -14,7 +14,7 @@ export const getServiceAllowedRoute: SyntheticsRestApiRouteFactory = () => ({
   validate: {},
   handler: async ({ syntheticsMonitorClient }): Promise<any> => {
     return {
-      serviceAllowed: true,
+      serviceAllowed: syntheticsMonitorClient.syntheticsService.isAllowed,
       signupUrl: syntheticsMonitorClient.syntheticsService.signupUrl,
     };
   },
