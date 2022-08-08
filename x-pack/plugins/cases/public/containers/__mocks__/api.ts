@@ -74,6 +74,7 @@ export const getCases = async ({
   filterOptions = {
     severity: SeverityAll,
     search: '',
+    searchFields: [],
     reporters: [],
     status: CaseStatuses.open,
     tags: [],

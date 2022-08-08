@@ -108,6 +108,21 @@ module.exports = {
           to: '@kbn/utility-types-jest',
           disallowedMessage: `import from @kbn/utility-types-jest instead`
         },
+        {
+          from: '@kbn/inspector-plugin',
+          to: '@kbn/inspector-plugin/common',
+          exact: true,
+        },
+        {
+          from: '@kbn/expressions-plugin',
+          to: '@kbn/expressions-plugin/common',
+          exact: true,
+        },
+        {
+          from: '@kbn/kibana-utils-plugin',
+          to: '@kbn/kibana-utils-plugin/common',
+          exact: true,
+        },
       ],
     ],
 
@@ -233,6 +248,7 @@ module.exports = {
       },
     ]],
 
+    '@kbn/disable/no_protected_eslint_disable': 'error',
     '@kbn/disable/no_naked_eslint_disable': 'error',
     '@kbn/eslint/no_async_promise_body': 'error',
     '@kbn/eslint/no_async_foreach': 'error',
@@ -242,5 +258,6 @@ module.exports = {
     '@kbn/imports/no_unresolvable_imports': 'error',
     '@kbn/imports/uniform_imports': 'error',
     '@kbn/imports/no_unused_imports': 'error',
+    '@kbn/imports/no_boundary_crossing': 'error',
   },
 };

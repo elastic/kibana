@@ -186,22 +186,6 @@
       },
       {
         "parentPluginId": "@kbn/dev-utils",
-        "id": "def-server.runUpdateVscodeConfigCli",
-        "type": "Function",
-        "tags": [],
-        "label": "runUpdateVscodeConfigCli",
-        "description": [],
-        "signature": [
-          "() => void"
-        ],
-        "path": "packages/kbn-dev-utils/src/vscode_config/update_vscode_config_cli.ts",
-        "deprecated": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/dev-utils",
         "id": "def-server.shipCiStatsCli",
         "type": "Function",
         "tags": [],

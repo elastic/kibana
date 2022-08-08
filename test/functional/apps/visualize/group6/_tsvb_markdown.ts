@@ -55,7 +55,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         const variables = await visualBuilder.getMarkdownTableVariables();
         expect(variables).not.to.be.empty();
-        expect(variables).to.have.length(5);
+        expect(variables).to.have.length(6);
       });
 
       it('should allow printing raw timestamp of data', async () => {
@@ -117,7 +117,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         table.forEach((row, index) => {
           // exception: last index for variable is always: {{count.label}}
-          if (index === table.length - 1) {
+          if (index >= table.length - 2) {
             expect(row.key).to.not.include.string(VARIABLE);
           } else {
             expect(row.key).to.include.string(VARIABLE);

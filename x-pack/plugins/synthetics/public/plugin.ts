@@ -52,6 +52,8 @@ import {
   alertTypeInitializers,
   legacyAlertTypeInitializers,
 } from './legacy_uptime/lib/alert_types';
+import { monitorDetailNavigatorParams } from './apps/locators/monitor_detail';
+import { editMonitorNavigatorParams } from './apps/locators/edit_monitor';
 
 export interface ClientPluginsSetup {
   home?: HomePublicPluginSetup;
@@ -112,13 +114,15 @@ export class UptimePlugin
     };
 
     plugins.share.url.locators.create(uptimeOverviewNavigatorParams);
+    plugins.share.url.locators.create(monitorDetailNavigatorParams);
+    plugins.share.url.locators.create(editMonitorNavigatorParams);
 
     plugins.observability.dashboard.register({
       appName: 'synthetics',
       hasData: async () => {
         const dataHelper = await getUptimeDataHelper();
         const status = await dataHelper.indexStatus();
-        return { hasData: status.docCount > 0, indices: status.indices };
+        return { hasData: status.indexExists, indices: status.indices };
       },
       fetchData: async (params: FetchDataParams) => {
         const dataHelper = await getUptimeDataHelper();

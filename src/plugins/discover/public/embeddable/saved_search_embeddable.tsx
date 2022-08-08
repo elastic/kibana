@@ -27,6 +27,7 @@ import { ISearchSource } from '@kbn/data-plugin/public';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { RecordRawType } from '../application/main/hooks/use_saved_search';
 import { buildDataTableRecord } from '../utils/build_data_record';
 import { DataTableRecord } from '../types';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
@@ -52,6 +53,8 @@ import { SortOrder } from '../components/doc_table/components/table_header/helpe
 import { VIEW_MODE } from '../components/view_mode_toggle';
 import { updateSearchSource } from './utils/update_search_source';
 import { FieldStatisticsTable } from '../application/main/components/field_stats_table';
+import { getRawRecordType } from '../application/main/utils/get_raw_record_type';
+import { fetchSql } from '../application/main/utils/fetch_sql';
 
 export type SearchProps = Partial<DiscoverGridProps> &
   Partial<DocTableProps> & {
@@ -162,13 +165,14 @@ export class SavedSearchEmbeddable
 
     const { searchSource } = this.savedSearch;
 
+    const prevAbortController = this.abortController;
     // Abort any in-progress requests
     if (this.abortController) this.abortController.abort();
     this.abortController = new AbortController();
 
     updateSearchSource(
       searchSource,
-      this.searchProps!.indexPattern,
+      this.searchProps!.dataView,
       this.searchProps!.sort,
       useNewFieldsApi,
       {
@@ -204,8 +208,36 @@ export class SavedSearchEmbeddable
         }
       : child;
 
+    const query = this.savedSearch.searchSource.getField('query');
+    const recordRawType = getRawRecordType(query);
+    const useSql = recordRawType === RecordRawType.PLAIN;
+
     try {
-      // Make the request
+      // Request SQL data
+      if (useSql && query) {
+        const result = await fetchSql(
+          this.savedSearch.searchSource.getField('query')!,
+          this.services.dataViews,
+          this.services.data,
+          this.services.expressions,
+          this.input.filters,
+          this.input.query
+        );
+        this.updateOutput({
+          ...this.getOutput(),
+          loading: false,
+        });
+
+        this.searchProps!.rows = result;
+        this.searchProps!.totalHitCount = result.length;
+        this.searchProps!.isLoading = false;
+        this.searchProps!.isPlainRecord = true;
+        this.searchProps!.showTimeCol = false;
+        this.searchProps!.isSortEnabled = false;
+        return;
+      }
+
+      // Request document data
       const { rawResponse: resp } = await lastValueFrom(
         searchSource.fetch$({
           abortSignal: this.abortController.signal,
@@ -230,12 +262,13 @@ export class SavedSearchEmbeddable
       });
 
       this.searchProps!.rows = resp.hits.hits.map((hit) =>
-        buildDataTableRecord(hit, this.searchProps!.indexPattern)
+        buildDataTableRecord(hit, this.searchProps!.dataView)
       );
       this.searchProps!.totalHitCount = resp.hits.total as number;
       this.searchProps!.isLoading = false;
     } catch (error) {
-      if (!this.destroyed) {
+      const cancelled = !!prevAbortController?.signal.aborted;
+      if (!this.destroyed && !cancelled) {
         this.updateOutput({
           ...this.getOutput(),
           loading: false,
@@ -256,21 +289,21 @@ export class SavedSearchEmbeddable
   private initializeSearchEmbeddableProps() {
     const { searchSource } = this.savedSearch;
 
-    const indexPattern = searchSource.getField('index');
+    const dataView = searchSource.getField('index');
 
-    if (!indexPattern) {
+    if (!dataView) {
       return;
     }
 
     if (!this.savedSearch.sort || !this.savedSearch.sort.length) {
-      this.savedSearch.sort = this.getDefaultSort(indexPattern);
+      this.savedSearch.sort = this.getDefaultSort(dataView);
     }
 
     const props: SearchProps = {
       columns: this.savedSearch.columns,
-      indexPattern,
+      dataView,
       isLoading: false,
-      sort: this.getDefaultSort(indexPattern),
+      sort: this.getDefaultSort(dataView),
       rows: [],
       searchDescription: this.savedSearch.description,
       description: this.savedSearch.description,
@@ -316,7 +349,7 @@ export class SavedSearchEmbeddable
           field,
           value,
           operator,
-          indexPattern
+          dataView
         );
         filters = filters.map((filter) => ({
           ...filter,
@@ -344,7 +377,7 @@ export class SavedSearchEmbeddable
     const timeRangeSearchSource = searchSource.create();
     timeRangeSearchSource.setField('filter', () => {
       if (!this.searchProps || !this.input.timeRange) return;
-      return this.services.timefilter.createFilter(indexPattern, this.input.timeRange);
+      return this.services.timefilter.createFilter(dataView, this.input.timeRange);
     });
 
     this.filtersSearchSource = searchSource.create();
@@ -397,7 +430,7 @@ export class SavedSearchEmbeddable
     const savedSearchSort =
       this.savedSearch.sort && this.savedSearch.sort.length
         ? this.savedSearch.sort
-        : this.getDefaultSort(this.searchProps?.indexPattern);
+        : this.getDefaultSort(this.searchProps?.dataView);
     searchProps.sort = this.input.sort || savedSearchSort;
     searchProps.sharedItemTitle = this.panelTitle;
     searchProps.rowHeightState = this.input.rowHeight || this.savedSearch.rowHeight;
@@ -449,7 +482,7 @@ export class SavedSearchEmbeddable
       this.services.uiSettings.get(SHOW_FIELD_STATISTICS) === true &&
       this.savedSearch.viewMode === VIEW_MODE.AGGREGATED_LEVEL &&
       searchProps.services &&
-      searchProps.indexPattern &&
+      searchProps.dataView &&
       Array.isArray(searchProps.columns)
     ) {
       ReactDOM.render(
@@ -457,7 +490,7 @@ export class SavedSearchEmbeddable
           <KibanaThemeProvider theme$={searchProps.services.core.theme.theme$}>
             <KibanaContextProvider services={searchProps.services}>
               <FieldStatisticsTable
-                indexPattern={searchProps.indexPattern}
+                dataView={searchProps.dataView}
                 columns={searchProps.columns}
                 savedSearch={this.savedSearch}
                 filters={this.input.filters}

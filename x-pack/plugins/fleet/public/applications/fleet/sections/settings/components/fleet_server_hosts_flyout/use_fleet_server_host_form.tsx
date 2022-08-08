@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { sendPutSettings, useComboInput, useStartServices } from '../../../../hooks';
-import { isDiffPathProtocol } from '../../../../../../../common';
+import { isDiffPathProtocol } from '../../../../../../../common/services';
 import { useConfirmModal } from '../../hooks/use_confirm_modal';
 import { getAgentAndPolicyCount } from '../../services/agent_and_policies_count';
 

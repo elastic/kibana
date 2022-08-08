@@ -10,6 +10,7 @@ import { ElasticsearchIndexWithIngestion } from '../../../../common/types/indice
 
 export const indices: ElasticsearchIndexWithIngestion[] = [
   {
+    count: 1,
     name: 'api',
     total: {
       docs: {
@@ -22,7 +23,7 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
   {
     connector: {
       api_key_id: null,
-      configuration: {},
+      configuration: { foo: { label: 'bar', value: 'barbar' } },
       id: '2',
       index_name: 'connector',
       language: 'en',
@@ -30,7 +31,7 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
       last_sync_error: null,
       last_sync_status: SyncStatus.COMPLETED,
       last_synced: null,
-
+      name: 'connector',
       scheduling: {
         enabled: false,
         interval: '',
@@ -39,6 +40,7 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
       status: ConnectorStatus.CONFIGURED,
       sync_now: false,
     },
+    count: 1,
     name: 'connector',
     total: {
       docs: {
@@ -49,6 +51,7 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
     },
   },
   {
+    count: 1,
     crawler: {
       id: '3',
       index_name: 'crawler',

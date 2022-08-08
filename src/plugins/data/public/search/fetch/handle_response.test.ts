@@ -9,8 +9,7 @@
 import { handleResponse } from './handle_response';
 
 // Temporary disable eslint, will be removed after moving to new platform folder
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { notificationServiceMock } from '@kbn/core/public/notifications/notifications_service.mock';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { setNotifications } from '../../services';
 import { IKibanaSearchResponse } from '../../../common';
 import { themeServiceMock } from '@kbn/core/public/mocks';
