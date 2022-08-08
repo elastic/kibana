@@ -14,11 +14,11 @@ import { debounce, isEmpty } from 'lodash';
 
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 import { OptionsListStrings } from './options_list_strings';
-import { optionsListReducers } from './options_list_reducers';
-import { OptionsListPopover } from './options_list_popover_component';
+import { optionsListReducers } from '../options_list_reducers';
+import { OptionsListPopover } from './options_list_popover';
 
 import './options_list.scss';
-import { OptionsListReduxState } from './types';
+import { OptionsListReduxState } from '../types';
 
 export const OptionsListComponent = ({
   typeaheadSubject,

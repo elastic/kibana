@@ -31,12 +31,12 @@ import {
   OptionsListField,
   OptionsListReduxState,
   OPTIONS_LIST_CONTROL,
-} from './types';
-import { OptionsListComponent } from './options_list_component';
+} from '../types';
+import { OptionsListComponent } from '../components/options_list_control';
 import { ControlsOptionsListService } from '../../services/options_list';
 import { ControlsDataViewsService } from '../../services/data_views';
-import { optionsListReducers } from './options_list_reducers';
-import { OptionsListStrings } from './options_list_strings';
+import { optionsListReducers } from '../options_list_reducers';
+import { OptionsListStrings } from '../components/options_list_strings';
 import { ControlInput, ControlOutput } from '../..';
 import { pluginServices } from '../../services';
 

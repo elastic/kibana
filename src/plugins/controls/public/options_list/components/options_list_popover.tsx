@@ -24,9 +24,9 @@ import {
 import { isEmpty } from 'lodash';
 
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
-import { optionsListReducers } from './options_list_reducers';
+import { optionsListReducers } from '../options_list_reducers';
 import { OptionsListStrings } from './options_list_strings';
-import { OptionsListReduxState } from './types';
+import { OptionsListReduxState } from '../types';
 
 export const OptionsListPopover = ({
   width,
