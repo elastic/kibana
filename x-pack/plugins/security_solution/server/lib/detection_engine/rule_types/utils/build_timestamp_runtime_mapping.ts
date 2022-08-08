@@ -6,8 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
-
-export const TIMESTAMP_RUNTIME_FIELD = 'kibana.combined_timestamp' as const;
+import { TIMESTAMP_RUNTIME_FIELD } from '../constants';
 
 export const buildTimestampRuntimeMapping = ({
   timestampOverride,
