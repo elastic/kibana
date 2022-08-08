@@ -73,12 +73,6 @@ interface Props {
   anomalyTimeseriesColor?: string;
 }
 
-interface XDomain {
-  min?: number;
-  max?: number;
-  minInterval?: number;
-}
-
 const END_ZONE_LABEL = i18n.translate('xpack.apm.timeseries.endzone', {
   defaultMessage:
     'The selected time range does not include this entire bucket. It might contain partial data.',
