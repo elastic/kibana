@@ -148,7 +148,7 @@ describe('Service Overview', () => {
       );
     });
 
-    it('persists transaction type selected when clicking on View Transactions link', () => {
+    it.skip('persists transaction type selected when clicking on View Transactions link', () => {
       cy.intercept(
         'GET',
         '/internal/apm/services/opbeans-node/transaction_types?*'
@@ -213,7 +213,7 @@ describe('Service Overview', () => {
       });
     });
 
-    it('with the correct environment when changing the environment', () => {
+    it.skip('with the correct environment when changing the environment', () => {
       cy.wait(aliasNames, { requestTimeout: 10000 });
 
       cy.intercept('GET', 'internal/apm/suggestions?*').as(
@@ -244,7 +244,7 @@ describe('Service Overview', () => {
       cy.wait(aliasNames, { requestTimeout: 10000 });
     });
 
-    it('when selecting a different time range and clicking the update button', () => {
+    it.skip('when selecting a different time range and clicking the update button', () => {
       cy.wait(aliasNames, { requestTimeout: 10000 });
 
       const timeStart = moment(start).subtract(5, 'm').toISOString();

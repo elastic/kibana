@@ -6,7 +6,7 @@
  */
 
 // eslint-disable-next-line import/no-nodejs-modules
-import querystring from 'querystring';
+import type querystring from 'querystring';
 import { MANAGEMENT_DEFAULT_PAGE_SIZE, MANAGEMENT_PAGE_SIZE_OPTIONS } from '../constants';
 
 /**

@@ -21,7 +21,7 @@ import {
 import { serverMock, requestContextMock, requestMock } from '../__mocks__';
 import { patchRulesBulkRoute } from './patch_rules_bulk_route';
 import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
-import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
+import { getMlRuleParams, getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { legacyMigrate } from '../../rules/utils';
 
@@ -80,6 +80,12 @@ describe('patch_rules_bulk', () => {
     });
 
     test('allows ML Params to be patched', async () => {
+      clients.rulesClient.get.mockResolvedValueOnce(getRuleMock(getMlRuleParams()));
+      clients.rulesClient.find.mockResolvedValueOnce({
+        ...getFindResultWithSingleHit(),
+        data: [getRuleMock(getMlRuleParams())],
+      });
+      (legacyMigrate as jest.Mock).mockResolvedValueOnce(getRuleMock(getMlRuleParams()));
       const request = requestMock.create({
         method: 'patch',
         path: `${DETECTION_ENGINE_RULES_URL}/bulk_update`,
@@ -201,7 +207,7 @@ describe('patch_rules_bulk', () => {
       const result = server.validate(request);
 
       expect(result.badRequest).toHaveBeenCalledWith(
-        'Invalid value "unknown_type" supplied to "type"'
+        'Invalid value "unknown_type" supplied to "type",Invalid value "kuery" supplied to "language"'
       );
     });
 

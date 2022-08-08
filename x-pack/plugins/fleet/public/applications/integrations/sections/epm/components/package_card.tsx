@@ -7,9 +7,11 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { EuiCard, EuiFlexItem, EuiBadge, EuiToolTip, EuiSpacer } from '@elastic/eui';
+import { EuiBadge, EuiCard, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
+
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { CardIcon } from '../../../../../components/package_icon';
 import type { IntegrationCardItem } from '../../../../../../common/types/models/epm';
@@ -17,7 +19,7 @@ import type { IntegrationCardItem } from '../../../../../../common/types/models/
 import { useStartServices } from '../../../hooks';
 import { INTEGRATIONS_BASE_PATH, INTEGRATIONS_PLUGIN_ID } from '../../../constants';
 
-import { RELEASE_BADGE_DESCRIPTION, RELEASE_BADGE_LABEL } from './release_badge';
+import { CardReleaseBadge } from './release_badge';
 
 export type PackageCardProps = IntegrationCardItem;
 
@@ -38,6 +40,8 @@ export function PackageCard({
   release,
   id,
   fromIntegrations,
+  isUnverified,
+  showLabels = true,
 }: PackageCardProps) {
   let releaseBadge: React.ReactNode | null = null;
 
@@ -46,9 +50,25 @@ export function PackageCard({
       <EuiFlexItem grow={false}>
         <EuiSpacer size="xs" />
         <span>
-          <EuiToolTip display="inlineBlock" content={RELEASE_BADGE_DESCRIPTION[release]}>
-            <EuiBadge color="hollow">{RELEASE_BADGE_LABEL[release]}</EuiBadge>
-          </EuiToolTip>
+          <CardReleaseBadge release={release} />
+        </span>
+      </EuiFlexItem>
+    );
+  }
+
+  let verifiedBadge: React.ReactNode | null = null;
+
+  if (isUnverified && showLabels) {
+    verifiedBadge = (
+      <EuiFlexItem grow={false}>
+        <EuiSpacer size="xs" />
+        <span>
+          <EuiBadge color="warning">
+            <FormattedMessage
+              id="xpack.fleet.packageCard.unverifiedLabel"
+              defaultMessage="Unverified"
+            />
+          </EuiBadge>
         </span>
       </EuiFlexItem>
     );
@@ -90,7 +110,10 @@ export function PackageCard({
         }
         onClick={onCardClick}
       >
-        {releaseBadge}
+        <EuiFlexGroup gutterSize="xs">
+          {verifiedBadge}
+          {releaseBadge}
+        </EuiFlexGroup>
       </Card>
     </TrackApplicationView>
   );

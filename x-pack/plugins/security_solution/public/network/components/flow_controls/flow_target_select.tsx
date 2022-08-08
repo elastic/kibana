@@ -7,11 +7,8 @@
 
 import { EuiSuperSelect } from '@elastic/eui';
 import React from 'react';
-import {
-  FlowTarget,
-  FlowTargetSourceDest,
-  FlowDirection,
-} from '../../../../common/search_strategy';
+import type { FlowTargetSourceDest } from '../../../../common/search_strategy';
+import { FlowTarget, FlowDirection } from '../../../../common/search_strategy';
 
 import * as i18n from './translations';
 

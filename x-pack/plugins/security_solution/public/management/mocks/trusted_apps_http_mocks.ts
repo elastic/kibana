@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { HttpFetchOptionsWithPath } from '@kbn/core/public';
+import type { HttpFetchOptionsWithPath } from '@kbn/core/public';
 import {
   ENDPOINT_TRUSTED_APPS_LIST_ID,
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_URL,
 } from '@kbn/securitysolution-list-constants';
-import {
+import type {
   ExceptionListItemSchema,
   FoundExceptionListItemSchema,
   FindExceptionListItemSchema,
@@ -22,17 +22,19 @@ import {
   ExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { getTrustedAppsListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
+import type { ResponseProvidersInterface } from '../../common/mock/endpoint/http_handler_mock_factory';
 import {
   composeHttpHandlerMocks,
   httpHandlerMockFactory,
-  ResponseProvidersInterface,
 } from '../../common/mock/endpoint/http_handler_mock_factory';
 import { ExceptionsListItemGenerator } from '../../../common/endpoint/data_generators/exceptions_list_item_generator';
+import type {
+  FleetGetAgentPolicyListHttpMockInterface,
+  FleetGetEndpointPackagePolicyListHttpMockInterface,
+} from './fleet_mocks';
 import {
   fleetGetAgentPolicyListHttpMock,
-  FleetGetAgentPolicyListHttpMockInterface,
   fleetGetEndpointPackagePolicyListHttpMock,
-  FleetGetEndpointPackagePolicyListHttpMockInterface,
 } from './fleet_mocks';
 import {
   BY_POLICY_ARTIFACT_TAG_PREFIX,

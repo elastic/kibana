@@ -8,7 +8,7 @@
 
 import fn from './carry';
 import moment from 'moment';
-const expect = require('chai').expect;
+import expect from '@kbn/expect';
 import _ from 'lodash';
 
 describe('carry.js', function () {
@@ -71,7 +71,7 @@ describe('carry.js', function () {
         fn(data, target);
         expect.fail('Success. Doh.');
       } catch (e) {
-        expect(e).to.be.an('error');
+        expect(e).to.be.an(Error);
       }
     });
   });

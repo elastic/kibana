@@ -1,0 +1,9 @@
+{
+  "description": "Tiny/Dummy PyTorch model (zero_shot)",
+  "model_type": "pytorch",
+  "inference_config": {
+    "zero_shot_classification": {
+      "classification_labels": ["entailment", "neutral", "contradiction"]
+    }
+  }
+}

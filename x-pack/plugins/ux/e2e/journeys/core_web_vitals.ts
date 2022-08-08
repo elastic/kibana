@@ -29,7 +29,7 @@ journey('Core Web Vitals', async ({ page, params }) => {
     });
     await loginToKibana({
       page,
-      user: { username: 'viewer_user', password: 'changeme' },
+      user: { username: 'viewer', password: 'changeme' },
     });
   });
 
@@ -42,15 +42,11 @@ journey('Core Web Vitals', async ({ page, params }) => {
     expect(await page.$('text=Largest contentful paint'));
     expect(await page.$('text=First input delay'));
     expect(await page.$('text=Cumulative layout shift'));
+    const cwvSummary = await page.innerText('text=traffic represented');
     expect(
-      await page.innerText('text=1.93 s', {
-        strict: true,
-        timeout: 29000,
-      })
-    ).toEqual('1.93 s');
-    expect(await page.innerText('text=5 ms', { strict: true })).toEqual('5 ms');
-    expect(await page.innerText('text=0.003', { strict: true })).toEqual(
-      '0.003'
-    );
+      // match any three digits followed by string constant
+      // note this regex is suceptible to accepting values > 100
+      new RegExp('[0-9]{1,3}% of the traffic represented').test(cwvSummary)
+    ).toBe(true);
   });
 });

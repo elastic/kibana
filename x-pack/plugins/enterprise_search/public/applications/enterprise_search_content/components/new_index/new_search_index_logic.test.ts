@@ -7,20 +7,32 @@
 
 import { LogicMounter } from '../../../__mocks__/kea_logic';
 
-import { DEFAULT_LANGUAGE } from './constants';
-import { NewSearchIndexLogic } from './new_search_index_logic';
+import { nextTick } from '@kbn/test-jest-helpers';
 
-const DEFAULT_VALUES = {
-  searchEngines: [],
-  searchEngineSelectOptions: [],
+import { IndexExistsApiLogic } from '../../api/index/index_exists_api_logic';
+
+import { UNIVERSAL_LANGUAGE_VALUE } from './constants';
+import { flashIndexCreatedToast } from './new_index_created_toast';
+import { NewSearchIndexLogic, NewSearchIndexValues } from './new_search_index_logic';
+
+jest.mock('./new_index_created_toast', () => ({ flashIndexCreatedToast: jest.fn() }));
+
+const DEFAULT_VALUES: NewSearchIndexValues = {
+  data: undefined as any,
+  fullIndexName: 'search-',
+  fullIndexNameExists: false,
+  fullIndexNameIsValid: true,
+  language: null,
+  languageSelectValue: UNIVERSAL_LANGUAGE_VALUE,
   rawName: '',
-  name: '',
-  language: DEFAULT_LANGUAGE,
-  selectedSearchEngines: [],
 };
 
 describe('NewSearchIndexLogic', () => {
   const { mount } = new LogicMounter(NewSearchIndexLogic);
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mount();
+  });
 
   it('has expected default values', () => {
     mount();
@@ -28,33 +40,96 @@ describe('NewSearchIndexLogic', () => {
   });
 
   describe('actions', () => {
-    describe('setLanguage', () => {
+    describe('setLanguageSelectValue', () => {
       it('sets language to the provided value', () => {
         mount();
-        NewSearchIndexLogic.actions.setLanguage('English');
+        NewSearchIndexLogic.actions.setLanguageSelectValue('en');
         expect(NewSearchIndexLogic.values).toEqual({
           ...DEFAULT_VALUES,
-          language: 'English',
+          language: 'en',
+          languageSelectValue: 'en',
+        });
+      });
+
+      it('sets language to null when the universal language option is picked', () => {
+        mount({
+          language: 'en',
+          languageSelectValue: 'en',
+        });
+        NewSearchIndexLogic.actions.setLanguageSelectValue(UNIVERSAL_LANGUAGE_VALUE);
+        expect(NewSearchIndexLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          language: null,
+          languageSelectValue: UNIVERSAL_LANGUAGE_VALUE,
         });
       });
     });
 
     describe('setRawName', () => {
-      beforeAll(() => {
-        mount();
-        NewSearchIndexLogic.actions.setRawName('Name__With#$&*%Special--Characters');
+      it('sets correct values for valid index name', () => {
+        NewSearchIndexLogic.actions.setRawName('rawname');
+        expect(NewSearchIndexLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          fullIndexName: 'search-rawname',
+          fullIndexNameIsValid: true,
+          rawName: 'rawname',
+        });
       });
 
-      afterAll(() => {
-        jest.clearAllMocks();
+      it('sets correct values for invalid index name', () => {
+        NewSearchIndexLogic.actions.setRawName('invalid/name');
+        expect(NewSearchIndexLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          fullIndexName: 'search-invalid/name',
+          fullIndexNameIsValid: false,
+          rawName: 'invalid/name',
+        });
       });
-
-      it('sets rawName to provided value', () => {
-        expect(NewSearchIndexLogic.values.rawName).toEqual('Name__With#$&*%Special--Characters');
+      it('calls makeRequest on whether API exists with a 150ms debounce', async () => {
+        jest.useFakeTimers();
+        NewSearchIndexLogic.actions.makeRequest = jest.fn();
+        NewSearchIndexLogic.actions.setRawName('indexname');
+        await nextTick();
+        jest.advanceTimersByTime(150);
+        await nextTick();
+        expect(NewSearchIndexLogic.actions.makeRequest).toHaveBeenCalledWith({
+          indexName: 'search-indexname',
+        });
+        jest.useRealTimers();
       });
-
-      it('sets name to a sanitized value', () => {
-        expect(NewSearchIndexLogic.values.name).toEqual('name-with-special-characters');
+    });
+    describe('apiSuccess', () => {
+      it('sets correct values for existing index', () => {
+        NewSearchIndexLogic.actions.setRawName('indexname');
+        IndexExistsApiLogic.actions.apiSuccess({ exists: true, indexName: 'search-indexname' });
+        expect(NewSearchIndexLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          data: { exists: true, indexName: 'search-indexname' },
+          fullIndexName: 'search-indexname',
+          fullIndexNameExists: true,
+          rawName: 'indexname',
+        });
+      });
+    });
+    describe('apiIndexCreated', () => {
+      it('calls flash index created toast', () => {
+        NewSearchIndexLogic.actions.apiIndexCreated({ indexName: 'indexName' });
+        expect(flashIndexCreatedToast).toHaveBeenCalled();
+      });
+    });
+    describe('connectorIndexCreated', () => {
+      it('calls flash index created toast', () => {
+        NewSearchIndexLogic.actions.connectorIndexCreated({
+          id: 'connectorId',
+          indexName: 'indexName',
+        });
+        expect(flashIndexCreatedToast).toHaveBeenCalled();
+      });
+    });
+    describe('crawlerIndexCreated', () => {
+      it('calls flash index created toast', () => {
+        NewSearchIndexLogic.actions.crawlerIndexCreated({ created: 'indexName' });
+        expect(flashIndexCreatedToast).toHaveBeenCalled();
       });
     });
   });

@@ -14,14 +14,15 @@ import { defaultHeaders, mockTimelineData } from '../../../../common/mock';
 import '../../../../common/mock/match_media';
 import { TestProviders } from '../../../../common/mock/test_providers';
 import { defaultRowRenderers } from '../body/renderers';
-import { Sort } from '../body/sort';
+import type { Sort } from '../body/sort';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { useTimelineEvents } from '../../../containers';
 import { useTimelineEventsDetails } from '../../../containers/details';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { mockSourcererScope } from '../../../../common/containers/sourcerer/mocks';
-import { PinnedTabContentComponent, Props as PinnedTabContentComponentProps } from '.';
+import type { Props as PinnedTabContentComponentProps } from '.';
+import { PinnedTabContentComponent } from '.';
 import { Direction } from '../../../../../common/search_strategy';
 import { useDraggableKeyboardWrapper as mockUseDraggableKeyboardWrapper } from '@kbn/timelines-plugin/public/components';
 import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
@@ -71,6 +72,7 @@ jest.mock('../../../../common/lib/kibana', () => {
           getFieldBrowser: jest.fn(),
           getUseDraggableKeyboardWrapper: () => mockUseDraggableKeyboardWrapper,
         },
+        triggersActionsUi: { getFieldBrowser: jest.fn() },
       },
     }),
     useGetUserSavedObjectPermissions: jest.fn(),

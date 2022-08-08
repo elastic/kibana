@@ -71,15 +71,17 @@ export function ApmMainTemplate({
       [shouldBypassNoDataScreen, data?.hasData]
     );
 
+  const isLoading =
+    status === FETCH_STATUS.LOADING ||
+    fleetApmPoliciesStatus === FETCH_STATUS.LOADING;
+
   const noDataConfig = getNoDataConfig({
     basePath,
     docsLink: docLinks!.links.observability.guide,
     hasApmData: data?.hasData,
     hasApmIntegrations: fleetApmPoliciesData?.hasApmPolicies,
     shouldBypassNoDataScreen,
-    loading:
-      status === FETCH_STATUS.LOADING ||
-      fleetApmPoliciesStatus === FETCH_STATUS.LOADING,
+    loading: isLoading,
   });
 
   const {
@@ -96,6 +98,7 @@ export function ApmMainTemplate({
   const pageTemplate = (
     <ObservabilityPageTemplate
       noDataConfig={shouldBypassNoDataScreen ? undefined : noDataConfig}
+      isPageDataLoaded={isLoading === false}
       pageHeader={{
         pageTitle,
         rightSideItems,

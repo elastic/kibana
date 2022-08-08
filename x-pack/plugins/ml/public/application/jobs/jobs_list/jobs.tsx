@@ -20,7 +20,6 @@ import { JobsActionMenu } from '../components/jobs_action_menu';
 
 interface JobsPageProps {
   blockRefresh?: boolean;
-  isManagementTable?: boolean;
   isMlEnabledInSpace?: boolean;
   lastRefresh?: number;
 }

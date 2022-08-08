@@ -6,33 +6,29 @@
  * Side Public License, v 1.
  */
 
-import type { CommonXYLayerConfig, SeriesType, ExtendedYConfig, YConfig } from '../../common';
+import type {
+  CommonXYLayerConfig,
+  ReferenceLineDecorationConfig,
+  DataDecorationConfig,
+} from '../../common';
 import { getDataLayers, isAnnotationsLayer, isDataLayer, isReferenceLine } from './visualization';
 
-export function isHorizontalSeries(seriesType: SeriesType) {
-  return (
-    seriesType === 'bar_horizontal' ||
-    seriesType === 'bar_horizontal_stacked' ||
-    seriesType === 'bar_horizontal_percentage_stacked'
-  );
-}
-
-export function isStackedChart(seriesType: SeriesType) {
-  return seriesType.includes('stacked');
-}
-
 export function isHorizontalChart(layers: CommonXYLayerConfig[]) {
-  return getDataLayers(layers).every((l) => isHorizontalSeries(l.seriesType));
+  return getDataLayers(layers).every((l) => l.isHorizontal);
 }
 
 export const getSeriesColor = (layer: CommonXYLayerConfig, accessor: string) => {
   if (
-    (isDataLayer(layer) && layer.splitAccessor) ||
+    (isDataLayer(layer) && layer.splitAccessors) ||
     isAnnotationsLayer(layer) ||
     isReferenceLine(layer)
   ) {
     return null;
   }
-  const yConfig: Array<YConfig | ExtendedYConfig> | undefined = layer?.yConfig;
-  return yConfig?.find((yConf) => yConf.forAccessor === accessor)?.color || null;
+  const decorations: Array<DataDecorationConfig | ReferenceLineDecorationConfig> | undefined =
+    layer?.decorations;
+  return (
+    decorations?.find((decorationConfig) => decorationConfig.forAccessor === accessor)?.color ||
+    null
+  );
 };

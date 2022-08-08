@@ -15,6 +15,7 @@ SOURCE_FILES = glob(
   ],
   exclude = [
     "**/*.test.*",
+    "**/*.stories.*",
   ],
 )
 
@@ -61,7 +62,6 @@ RUNTIME_DEPS = [
 #  References to NPM packages work the same as RUNTIME_DEPS
 TYPES_DEPS = [
   "@npm//@elastic/eui",
-  "@npm//@storybook/addon-actions",
   "@npm//@types/classnames",
   "@npm//@types/enzyme",
   "@npm//@types/jest",
@@ -77,12 +77,14 @@ jsts_transpiler(
   name = "target_node",
   srcs = SRCS,
   build_pkg_name = package_name(),
+  root_input_dir = "src",
 )
 
 jsts_transpiler(
   name = "target_web",
   srcs = SRCS,
   build_pkg_name = package_name(),
+  root_input_dir = "src",
   web = True,
   additional_args = [
     "--copy-files",
@@ -105,6 +107,7 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
+  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
   root_dir = "src",

@@ -7,17 +7,17 @@
 
 // TODO: https://github.com/elastic/kibana/issues/110895
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { PluginInitializerContext } from '@kbn/core/server';
+import type { PluginInitializerContext } from '@kbn/core/server';
 import { Plugin } from './plugin';
 
 export type {
   RuleAction,
   Rule,
   RuleType,
-  RuleTypeIndex,
   RuleTypeModel,
+  RuleStatusFilterProps,
   RuleStatus,
+  RuleTableItem,
   ActionType,
   ActionTypeRegistryContract,
   RuleTypeRegistryContract,
@@ -29,9 +29,7 @@ export type {
   RuleFlyoutCloseReason,
   RuleTypeParams,
   AsApiContract,
-  RuleTableItem,
   AlertsTableProps,
-  BulkActionsObjectProp,
   RuleSummary,
   AlertStatus,
   AlertsTableConfigurationRegistryContract,
@@ -39,14 +37,16 @@ export type {
   RuleEventLogListProps,
   AlertTableFlyoutComponent,
   GetRenderCellValue,
+  FieldBrowserOptions,
+  FieldBrowserProps,
+  RuleDefinitionProps,
+  RulesListVisibleColumns,
 } from './types';
-
-export { AlertsTableFlyoutState } from './types';
 
 export {
   ActionForm,
-  ConnectorAddFlyout,
-  ConnectorEditFlyout,
+  CreateConnectorFlyout,
+  EditConnectorFlyout,
 } from './application/sections/action_connector_form';
 
 export type { ActionGroupWithCondition } from './application/sections';
@@ -84,7 +84,8 @@ export { Plugin } from './plugin';
 // TODO remove this import when we expose the Rules tables as a component
 export { loadRules } from './application/lib/rule_api/rules';
 export { loadExecutionLogAggregations } from './application/lib/rule_api/load_execution_log_aggregations';
-export { loadRuleTypes } from './application/lib/rule_api';
+export { loadActionErrorLog } from './application/lib/rule_api/load_action_error_log';
+export { loadRuleTypes } from './application/lib/rule_api/rule_types';
 export { loadRuleSummary } from './application/lib/rule_api/rule_summary';
 export { deleteRules } from './application/lib/rule_api/delete';
 export { enableRule } from './application/lib/rule_api/enable';

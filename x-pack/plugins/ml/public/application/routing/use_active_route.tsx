@@ -11,6 +11,7 @@ import React, { useEffect, useMemo, useRef } from 'react';
 import { toMountPoint, useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { PLUGIN_ID } from '../../../common/constants/app';
 import { useMlKibana } from '../contexts/kibana';
 import type { MlRoute } from './router';
 
@@ -90,7 +91,7 @@ export const useActiveRoute = (routesList: MlRoute[]): MlRoute => {
   );
 
   useExecutionContext(executionContext, {
-    name: 'Machine Learning',
+    name: PLUGIN_ID,
     type: 'application',
     page: activeRoute?.path ?? '/overview',
   });

@@ -9,11 +9,7 @@ import React, { lazy } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import TestConnectorForm from './test_connector_form';
 import { none, some } from 'fp-ts/lib/Option';
-import {
-  ActionConnector,
-  ConnectorValidationResult,
-  GenericValidationResult,
-} from '../../../types';
+import { ActionConnector, GenericValidationResult } from '../../../types';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { EuiFormRow, EuiFieldText, EuiText, EuiLink, EuiForm, EuiSelect } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
@@ -53,9 +49,6 @@ const actionType = {
   id: 'my-action-type',
   iconClass: 'test',
   selectMessage: 'test',
-  validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
-    return Promise.resolve({});
-  },
   validateParams: (): Promise<GenericValidationResult<unknown>> => {
     const validationResult = { errors: {} };
     return Promise.resolve(validationResult);
@@ -81,10 +74,7 @@ describe('test_connector_form', () => {
           actionParams={{}}
           setActionParams={() => {}}
           isExecutingAction={false}
-          onExecutAction={async () => ({
-            actionId: '',
-            status: 'ok',
-          })}
+          onExecutionAction={async () => {}}
           executionResult={none}
           actionTypeRegistry={actionTypeRegistry}
         />
@@ -112,10 +102,7 @@ describe('test_connector_form', () => {
           actionParams={{}}
           setActionParams={() => {}}
           isExecutingAction={false}
-          onExecutAction={async () => ({
-            actionId: '',
-            status: 'ok',
-          })}
+          onExecutionAction={async () => {}}
           executionResult={some({
             actionId: '',
             status: 'ok',
@@ -142,11 +129,7 @@ describe('test_connector_form', () => {
           actionParams={{}}
           setActionParams={() => {}}
           isExecutingAction={false}
-          onExecutAction={async () => ({
-            actionId: '',
-            status: 'error',
-            message: 'Error Message',
-          })}
+          onExecutionAction={async () => {}}
           executionResult={some({
             actionId: '',
             status: 'error',

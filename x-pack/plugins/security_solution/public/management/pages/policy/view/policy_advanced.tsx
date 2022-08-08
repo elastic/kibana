@@ -95,7 +95,7 @@ const warningMessage = i18n.translate(
   }
 );
 
-export const AdvancedPolicyForms = React.memo(() => {
+export const AdvancedPolicyForms = React.memo(({ isPlatinumPlus }: { isPlatinumPlus: boolean }) => {
   return (
     <>
       <EuiCallOut title={calloutTitle} color="warning" iconType="alert">
@@ -113,14 +113,17 @@ export const AdvancedPolicyForms = React.memo(() => {
       <EuiPanel data-test-subj="advancedPolicyPanel" paddingSize="s">
         {AdvancedPolicySchema.map((advancedField, index) => {
           const configPath = advancedField.key.split('.');
+          const failsPlatinumLicenseCheck = !isPlatinumPlus && advancedField.license === 'platinum';
           return (
-            <PolicyAdvanced
-              key={index}
-              configPath={configPath}
-              firstSupportedVersion={advancedField.first_supported_version}
-              lastSupportedVersion={advancedField.last_supported_version}
-              documentation={advancedField.documentation}
-            />
+            !failsPlatinumLicenseCheck && (
+              <PolicyAdvanced
+                key={index}
+                configPath={configPath}
+                firstSupportedVersion={advancedField.first_supported_version}
+                lastSupportedVersion={advancedField.last_supported_version}
+                documentation={advancedField.documentation}
+              />
+            )
           );
         })}
       </EuiPanel>

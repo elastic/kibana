@@ -13,18 +13,23 @@ import { convertECSMappingToArray, convertECSMappingToObject } from '../utils';
 export const convertPackQueriesToSO = (queries) =>
   reduce(
     queries,
-    (acc, value, key) => {
+    (acc, value, key: string) => {
       const ecsMapping = value.ecs_mapping && convertECSMappingToArray(value.ecs_mapping);
       acc.push({
         id: key,
-        ...pick(value, ['query', 'interval', 'platform', 'version']),
+        ...pick(value, ['name', 'query', 'interval', 'platform', 'version']),
         ...(ecsMapping ? { ecs_mapping: ecsMapping } : {}),
       });
 
       return acc;
     },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [] as Array<Record<string, any>>
+    [] as Array<{
+      id: string;
+      name: string;
+      query: string;
+      interval: number;
+      ecs_mapping?: Record<string, unknown>;
+    }>
   );
 
 // @ts-expect-error update types

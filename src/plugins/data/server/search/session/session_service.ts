@@ -85,9 +85,7 @@ interface UpdateOrCreateQueueEntry {
 function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
 }
-export class SearchSessionService
-  implements ISearchSessionService<SearchSessionSavedObjectAttributes>
-{
+export class SearchSessionService implements ISearchSessionService {
   private sessionConfig: SearchSessionsConfigSchema;
   private readonly updateOrCreateBatchQueue: UpdateOrCreateQueueEntry[] = [];
   private security?: SecurityPluginSetup;

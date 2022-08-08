@@ -7,7 +7,7 @@
  */
 
 import { mapSpatialFilter } from './map_spatial_filter';
-import { FilterMeta, Filter, FILTERS } from '../../../../../common';
+import { FilterMeta, Filter, FILTERS } from '@kbn/es-query';
 
 describe('mapSpatialFilter()', () => {
   test('should return the key for matching multi polygon filter', async () => {

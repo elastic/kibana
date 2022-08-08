@@ -7,52 +7,51 @@
 
 import React, { memo } from 'react';
 import styled from 'styled-components';
-import { EuiButton, EuiCallOut, EuiText, EuiSpacer } from '@elastic/eui';
-import { HostPolicyResponseActionStatus } from '../../../../common/endpoint/types';
+import { EuiLink, EuiCallOut, EuiText } from '@elastic/eui';
+import type { PolicyResponseActionFormatter } from './policy_response_friendly_names';
 
 const StyledEuiCallout = styled(EuiCallOut)`
-  padding: ${({ theme }) => theme.eui.paddingSizes.s};
-  .action-message {
-    white-space: break-spaces;
-    text-align: left;
-  }
+  padding: ${({ theme }) => theme.eui.euiSizeS};
+`;
+
+const StyledEuiText = styled(EuiText)`
+  white-space: break-spaces;
+  text-align: left;
+  line-height: inherit;
 `;
 
 interface PolicyResponseActionItemProps {
-  status: HostPolicyResponseActionStatus;
-  actionTitle: string;
-  actionMessage: string;
-  actionButtonLabel?: string;
-  actionButtonOnClick?: () => void;
+  policyResponseActionFormatter: PolicyResponseActionFormatter;
 }
 /**
  * A policy response action item
  */
 export const PolicyResponseActionItem = memo(
-  ({
-    status,
-    actionTitle,
-    actionMessage,
-    actionButtonLabel,
-    actionButtonOnClick,
-  }: PolicyResponseActionItemProps) => {
-    return status !== HostPolicyResponseActionStatus.success &&
-      status !== HostPolicyResponseActionStatus.unsupported ? (
-      <StyledEuiCallout title={actionTitle} color="danger" iconType="alert">
-        <EuiText size="s" className="action-message" data-test-subj="endpointPolicyResponseMessage">
-          {actionMessage}
-        </EuiText>
-        <EuiSpacer size="s" />
-        {actionButtonLabel && actionButtonOnClick && (
-          <EuiButton onClick={actionButtonOnClick} color="danger">
-            {actionButtonLabel}
-          </EuiButton>
-        )}
+  ({ policyResponseActionFormatter }: PolicyResponseActionItemProps) => {
+    return policyResponseActionFormatter.hasError ? (
+      <StyledEuiCallout
+        title={policyResponseActionFormatter.errorTitle}
+        color="danger"
+        iconType="alert"
+        data-test-subj="endpointPolicyResponseErrorCallOut"
+      >
+        <StyledEuiText size="s" data-test-subj="endpointPolicyResponseMessage">
+          {policyResponseActionFormatter.errorDescription}
+          {policyResponseActionFormatter.linkText && policyResponseActionFormatter.linkUrl && (
+            <EuiLink
+              target="_blank"
+              href={policyResponseActionFormatter.linkUrl}
+              data-test-subj="endpointPolicyResponseErrorCallOutLink"
+            >
+              {policyResponseActionFormatter.linkText}
+            </EuiLink>
+          )}
+        </StyledEuiText>
       </StyledEuiCallout>
     ) : (
-      <EuiText size="xs" data-test-subj="endpointPolicyResponseMessage">
-        {actionMessage}
-      </EuiText>
+      <StyledEuiText size="xs" data-test-subj="endpointPolicyResponseMessage">
+        {policyResponseActionFormatter.description || policyResponseActionFormatter.title}
+      </StyledEuiText>
     );
   }
 );

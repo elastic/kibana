@@ -4,10 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
-import { AssetReference } from '@kbn/fleet-plugin/common';
+import { AssetReference } from '@kbn/fleet-plugin/common/types';
+import { FLEET_INSTALL_FORMAT_VERSION } from '@kbn/fleet-plugin/server/constants';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
@@ -526,6 +528,12 @@ const expectAssetsInstalled = ({
     // during a reinstall the items can change
     const sortedRes = {
       ...res.attributes,
+      // verification_key_id can be null or undefined for install or reinstall cases,
+      // kbn/expect only does strict equality so undefined is normalised to null
+      verification_key_id:
+        res.attributes.verification_key_id === undefined
+          ? null
+          : res.attributes.verification_key_id,
       installed_kibana: sortBy(res.attributes.installed_kibana, (o: AssetReference) => o.type),
       installed_es: sortBy(res.attributes.installed_es, (o: AssetReference) => o.type),
       package_assets: sortBy(res.attributes.package_assets, (o: AssetReference) => o.type),
@@ -629,6 +637,10 @@ const expectAssetsInstalled = ({
         },
         {
           id: 'logs-all_assets.test_logs-0.1.0-pipeline2',
+          type: 'ingest_pipeline',
+        },
+        {
+          id: 'metrics-all_assets.test_metrics-0.1.0',
           type: 'ingest_pipeline',
         },
         {
@@ -760,6 +772,9 @@ const expectAssetsInstalled = ({
       install_status: 'installed',
       install_started_at: res.attributes.install_started_at,
       install_source: 'registry',
+      install_format_schema_version: FLEET_INSTALL_FORMAT_VERSION,
+      verification_status: 'unknown',
+      verification_key_id: null,
     });
   });
 };

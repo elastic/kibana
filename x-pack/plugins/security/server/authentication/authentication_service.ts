@@ -26,7 +26,7 @@ import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import { ROUTE_TAG_AUTH_FLOW } from '../routes/tags';
 import type { Session } from '../session_management';
-import type { UserProfileServiceStart } from '../user_profile';
+import type { UserProfileServiceStartInternal } from '../user_profile';
 import { APIKeys } from './api_keys';
 import type { AuthenticationResult } from './authentication_result';
 import type { ProviderLoginAttempt } from './authenticator';
@@ -49,7 +49,7 @@ interface AuthenticationServiceStartParams {
   clusterClient: IClusterClient;
   audit: AuditServiceSetup;
   featureUsageService: SecurityFeatureUsageServiceStart;
-  userProfileService: UserProfileServiceStart;
+  userProfileService: UserProfileServiceStartInternal;
   session: PublicMethodsOf<Session>;
   loggers: LoggerFactory;
   applicationName: string;

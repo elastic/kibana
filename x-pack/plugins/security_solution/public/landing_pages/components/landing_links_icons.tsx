@@ -12,7 +12,7 @@ import {
   SecuritySolutionLinkAnchor,
   withSecuritySolutionLink,
 } from '../../common/components/links';
-import { NavLinkItem } from '../../common/components/navigation/types';
+import type { NavLinkItem } from '../../common/components/navigation/types';
 
 interface LandingLinksImagesProps {
   items: NavLinkItem[];
@@ -29,8 +29,8 @@ const Description = styled(EuiFlexItem)`
 `;
 
 const StyledEuiTitle = styled(EuiTitle)`
-  margin-top: ${({ theme }) => theme.eui.paddingSizes.m};
-  margin-bottom: ${({ theme }) => theme.eui.paddingSizes.xs};
+  margin-top: ${({ theme }) => theme.eui.euiSizeM};
+  margin-bottom: ${({ theme }) => theme.eui.euiSizeXS};
 `;
 
 export const LandingLinksIcons: React.FC<LandingLinksImagesProps> = ({ items }) => (

@@ -4,7 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { UMRestApiRouteFactory } from '../../legacy_uptime/routes/types';
+import {
+  SyntheticsRestApiRouteFactory,
+  UMRestApiRouteFactory,
+} from '../../legacy_uptime/routes/types';
 import { API_URLS } from '../../../common/constants';
 import { SyntheticsForbiddenError } from '../../synthetics_service/get_api_key';
 
@@ -27,12 +30,19 @@ export const getSyntheticsEnablementRoute: UMRestApiRouteFactory = (libs) => ({
   },
 });
 
-export const disableSyntheticsRoute: UMRestApiRouteFactory = (libs) => ({
+export const disableSyntheticsRoute: SyntheticsRestApiRouteFactory = (libs) => ({
   method: 'DELETE',
   path: API_URLS.SYNTHETICS_ENABLEMENT,
   validate: {},
-  handler: async ({ response, request, server, savedObjectsClient }): Promise<any> => {
-    const { syntheticsService, security } = server;
+  handler: async ({
+    response,
+    request,
+    server,
+    savedObjectsClient,
+    syntheticsMonitorClient,
+  }): Promise<any> => {
+    const { security } = server;
+    const { syntheticsService } = syntheticsMonitorClient;
     try {
       const { canEnable } = await libs.requests.getSyntheticsEnablement({ request, server });
       if (!canEnable) {

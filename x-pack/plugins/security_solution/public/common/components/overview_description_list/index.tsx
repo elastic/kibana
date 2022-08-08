@@ -8,7 +8,7 @@
 import { EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 
-import { DescriptionList } from '../../../../common/utility_types';
+import type { DescriptionList } from '../../../../common/utility_types';
 import { DescriptionListStyled } from '../page';
 
 export const OverviewDescriptionList = ({

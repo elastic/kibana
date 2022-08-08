@@ -48,7 +48,7 @@ export const loadTestFiles = ({
       const testModule = require(path); // eslint-disable-line import/no-dynamic-require
       const testProvider = testModule.__esModule ? testModule.default : testModule;
 
-      runTestProvider(testProvider, path); // eslint-disable-line
+      runTestProvider(testProvider, path); // eslint-disable-line no-use-before-define
     });
   };
 

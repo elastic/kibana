@@ -7,7 +7,8 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { ISearchSource, Query } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
+import { ISearchSource } from '@kbn/data-plugin/public';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import {
   AGG_TYPE,

@@ -50,18 +50,6 @@
         "children": [
           {
             "parentPluginId": "telemetry",
-            "id": "def-public.TelemetryPluginConfig.enabled",
-            "type": "boolean",
-            "tags": [],
-            "label": "enabled",
-            "description": [
-              "Is the plugin enabled?"
-            ],
-            "path": "src/plugins/telemetry/public/plugin.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "telemetry",
             "id": "def-public.TelemetryPluginConfig.banner",
             "type": "boolean",
             "tags": [],
@@ -170,6 +158,21 @@
             ],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "src/plugins/telemetry/public/plugin.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "telemetry",
+            "id": "def-public.TelemetryPluginConfig.labels",
+            "type": "Object",
+            "tags": [],
+            "label": "labels",
+            "description": [
+              "Extra labels to add to the telemetry context"
+            ],
+            "signature": [
+              "{ [x: string]: unknown; }"
             ],
             "path": "src/plugins/telemetry/public/plugin.ts",
             "deprecated": false

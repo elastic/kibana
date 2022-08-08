@@ -5,22 +5,21 @@
  * 2.0.
  */
 
+import type { DocLinksServiceSetup, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import type { Logger } from '@kbn/core/server';
 import { lastValueFrom } from 'rxjs';
+import type { DiagnosticResponse } from '.';
+import { incrementApiUsageCounter } from '..';
 import type { ReportingCore } from '../..';
 import { API_DIAGNOSE_URL } from '../../../common/constants';
 import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
-import type { DiagnosticResponse } from '.';
 
-const logsToHelpMap = {
+const logsToHelpMapFactory = (docLinks: DocLinksServiceSetup) => ({
   'error while loading shared libraries': i18n.translate(
     'xpack.reporting.diagnostic.browserMissingDependency',
     {
       defaultMessage: `The browser couldn't start properly due to missing system dependencies. Please see {url}`,
-      values: {
-        url: 'https://www.elastic.co/guide/en/kibana/current/reporting-troubleshooting.html#reporting-troubleshooting-system-dependencies',
-      },
+      values: { url: docLinks.links.reporting.browserSystemDependencies },
     }
   ),
 
@@ -28,29 +27,28 @@ const logsToHelpMap = {
     'xpack.reporting.diagnostic.browserMissingFonts',
     {
       defaultMessage: `The browser couldn't locate a default font. Please see {url} to fix this issue.`,
-      values: {
-        url: 'https://www.elastic.co/guide/en/kibana/current/reporting-troubleshooting.html#reporting-troubleshooting-system-dependencies',
-      },
+      values: { url: docLinks.links.reporting.browserSystemDependencies },
     }
   ),
 
   'No usable sandbox': i18n.translate('xpack.reporting.diagnostic.noUsableSandbox', {
     defaultMessage: `Unable to use Chromium sandbox. This can be disabled at your own risk with 'xpack.screenshotting.browser.chromium.disableSandbox'. Please see {url}`,
-    values: {
-      url: 'https://www.elastic.co/guide/en/kibana/current/reporting-troubleshooting.html#reporting-troubleshooting-sandbox-dependency',
-    },
+    values: { url: docLinks.links.reporting.browserSandboxDependencies },
   }),
-};
+});
+
+const path = `${API_DIAGNOSE_URL}/browser`;
 
 export const registerDiagnoseBrowser = (reporting: ReportingCore, logger: Logger) => {
   const { router } = reporting.getPluginSetupDeps();
 
   router.post(
-    {
-      path: `${API_DIAGNOSE_URL}/browser`,
-      validate: {},
-    },
-    authorizedUserPreRouting(reporting, async (_user, _context, _req, res) => {
+    { path: `${path}`, validate: {} },
+    authorizedUserPreRouting(reporting, async (_user, _context, req, res) => {
+      incrementApiUsageCounter(req.route.method, path, reporting.getUsageCounter());
+      const { docLinks } = reporting.getPluginSetupDeps();
+
+      const logsToHelpMap = logsToHelpMapFactory(docLinks);
       try {
         const { screenshotting } = await reporting.getPluginStartDeps();
         const logs = await lastValueFrom(screenshotting.diagnose());

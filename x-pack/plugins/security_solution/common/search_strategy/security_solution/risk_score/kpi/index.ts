@@ -6,10 +6,10 @@
  */
 
 import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/data-plugin/common';
-import { FactoryQueryTypes, RiskScoreAggByFields, RiskSeverity } from '../..';
-import { ESQuery } from '../../../../typed_json';
+import type { FactoryQueryTypes, RiskScoreAggByFields, RiskSeverity } from '../..';
+import type { ESQuery } from '../../../../typed_json';
 
-import { Inspect, Maybe } from '../../../common';
+import type { Inspect, Maybe } from '../../../common';
 
 export interface KpiRiskScoreRequestOptions extends IEsSearchRequest {
   defaultIndex: string[];

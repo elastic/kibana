@@ -19,29 +19,15 @@ import {
   EuiText,
 } from '@elastic/eui';
 import * as i18n from './translations';
-import { CtiEnrichment } from '../../../../../common/search_strategy/security_solution/cti';
+import type { CtiEnrichment } from '../../../../../common/search_strategy/security_solution/cti';
 
-import { FieldsData } from '../types';
-
-import {
-  BrowserField,
+import type {
   BrowserFields,
   TimelineEventsDetailsItem,
 } from '../../../../../common/search_strategy';
 import { HostRiskSummary } from './host_risk_summary';
 import { EnrichmentSummary } from './enrichment_summary';
-import { HostRisk } from '../../../../risk_score/containers';
-
-export interface ThreatSummaryDescription {
-  browserField: BrowserField;
-  data: FieldsData | undefined;
-  eventId: string;
-  index: number;
-  provider: string | undefined;
-  timelineId: string;
-  value: string | undefined;
-  isDraggable?: boolean;
-}
+import type { HostRisk } from '../../../../risk_score/containers';
 
 const UppercaseEuiTitle = styled(EuiTitle)`
   text-transform: uppercase;

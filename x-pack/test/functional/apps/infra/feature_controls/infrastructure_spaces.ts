@@ -39,15 +39,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await spacesService.delete('custom_space');
       });
 
-      it('shows Metrics navlink', async () => {
+      it('shows Infrastructure navlink', async () => {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.contain('Metrics');
+        expect(navLinks).to.contain('Infrastructure');
       });
 
-      it(`Metrics app is accessible`, async () => {
+      it(`Infrastructure app is accessible`, async () => {
         await PageObjects.common.navigateToApp('infraOps', {
           basePath: '/s/custom_space',
         });
@@ -72,15 +72,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
       });
 
-      it(`doesn't show metrics navlink`, async () => {
+      it(`doesn't show infrastructure navlink`, async () => {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).not.to.contain('Metrics');
+        expect(navLinks).not.to.contain('Infrastructure');
       });
 
-      it(`metrics app is inaccessible and Application Not Found message is rendered`, async () => {
+      it(`infrastructure app is inaccessible and Application Not Found message is rendered`, async () => {
         await PageObjects.common.navigateToActualUrl('infraOps', '', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
@@ -114,7 +114,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
       });
 
-      it(`Metrics app is accessible`, async () => {
+      it(`Infrastructure app is accessible`, async () => {
         await PageObjects.common.navigateToApp('infraOps', {
           basePath: '/s/custom_space',
         });
@@ -139,7 +139,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
       });
 
-      it(`Metrics app is accessible`, async () => {
+      it(`Infrastructure app is accessible`, async () => {
         await PageObjects.common.navigateToApp('infraOps', {
           basePath: '/s/custom_space',
         });

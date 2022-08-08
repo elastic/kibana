@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { PolicyConfig, ProtectionModes } from '../types';
+import type { PolicyConfig } from '../types';
+import { ProtectionModes } from '../types';
 
 /**
  * Return a new default `PolicyConfig` for platinum and above licenses
@@ -61,6 +62,11 @@ export const policyFactory = (): PolicyConfig => {
       },
       antivirus_registration: {
         enabled: false,
+      },
+      attack_surface_reduction: {
+        credential_hardening: {
+          enabled: true,
+        },
       },
     },
     mac: {
@@ -145,10 +151,33 @@ export const policyFactory = (): PolicyConfig => {
 export const policyFactoryWithoutPaidFeatures = (
   policy: PolicyConfig = policyFactory()
 ): PolicyConfig => {
+  const rollbackConfig = {
+    rollback: {
+      self_healing: {
+        enabled: false,
+      },
+    },
+  };
+
   return {
     ...policy,
     windows: {
       ...policy.windows,
+      advanced:
+        policy.windows.advanced === undefined
+          ? undefined
+          : {
+              ...policy.windows.advanced,
+              alerts:
+                policy.windows.advanced.alerts === undefined
+                  ? {
+                      ...rollbackConfig,
+                    }
+                  : {
+                      ...policy.windows.advanced.alerts,
+                      ...rollbackConfig,
+                    },
+            },
       ransomware: {
         mode: ProtectionModes.off,
         supported: false,
@@ -160,6 +189,11 @@ export const policyFactoryWithoutPaidFeatures = (
       behavior_protection: {
         mode: ProtectionModes.off,
         supported: false,
+      },
+      attack_surface_reduction: {
+        credential_hardening: {
+          enabled: false,
+        },
       },
       popup: {
         ...policy.windows.popup,

@@ -14,10 +14,12 @@ export const UI_ACTION_NAME = {
 export type UiActionName = typeof UI_ACTION_NAME[keyof typeof UI_ACTION_NAME];
 
 export interface StreamState {
+  errors: string[];
   progress: number;
   entities: Record<string, number>;
 }
 export const initialState: StreamState = {
+  errors: [],
   progress: 0,
   entities: {},
 };
@@ -63,6 +65,11 @@ export function reducerStreamReducer(
       return {
         ...state,
         entities: addToEntities,
+      };
+    case API_ACTION_NAME.ERROR:
+      return {
+        ...state,
+        errors: [...state.errors, action.payload],
       };
     case UI_ACTION_NAME.RESET:
       return initialState;

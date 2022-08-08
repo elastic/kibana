@@ -8,9 +8,9 @@ with the new version.
 ==== Saved object migration failures
 
 If {kib} unexpectedly terminates while migrating a saved object index, {kib} automatically attempts to
-perform the migration again when the process restarts. Do not delete any saved objects indices to
-to fix a failed migration. Unlike previous versions, {kib} 7.12.0 and
-later does not require deleting indices to release a failed migration lock.
+perform the migration again when the process restarts. Do not delete any saved objects indices to 
+fix a failed migration. Unlike previous versions, {kib} 7.12.0 and later does not require deleting 
+indices to release a failed migration lock.
 
 If upgrade migrations fail repeatedly, refer to
 <<preventing-migration-failures, preparing for migration>>.
@@ -177,7 +177,7 @@ If the cluster exceeded the low watermark for disk usage, the output should cont
 --------------------------------------------
 "The node is above the low watermark cluster setting [cluster.routing.allocation.disk.watermark.low=85%], using more disk space than the maximum allowed [85.0%], actual free: [11.692661332965082%]"
 --------------------------------------------
-Refer to the {es} guide for how to {ref}/fix-common-cluster-issues.html#_error_disk_usage_exceeded_flood_stage_watermark_index_has_read_only_allow_delete_block[fix common cluster issues].
+Refer to the {es} guide for how to {ref}/disk-usage-exceeded.html[fix common cluster issues].
 
 If routing allocation is the issue, the `_cluster/allocation/explain` API will return an entry similar to this:
 

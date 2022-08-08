@@ -8,13 +8,13 @@
 import React, { memo, useMemo, useCallback, useState, useEffect } from 'react';
 
 import { isEqual } from 'lodash';
+import type { EuiSuperSelectOption } from '@elastic/eui';
 import {
   EuiFieldText,
   EuiSpacer,
   EuiForm,
   EuiFormRow,
   EuiSuperSelect,
-  EuiSuperSelectOption,
   EuiText,
   EuiHorizontalRule,
   EuiTextArea,
@@ -28,13 +28,13 @@ import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { OnChangeProps } from '@kbn/lists-plugin/public';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
-import { PolicyData } from '../../../../../../common/endpoint/types';
+import type { PolicyData } from '../../../../../../common/endpoint/types';
 import { AddExceptionComments } from '../../../../../common/components/exceptions/add_exception_comments';
 import { useFetchIndex } from '../../../../../common/containers/source';
 import { Loader } from '../../../../../common/components/loader';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { useKibana } from '../../../../../common/lib/kibana';
-import { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
+import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
 import { filterIndexPatterns } from '../../../../../common/components/exceptions/helpers';
 import {
   isArtifactGlobal,
@@ -54,10 +54,8 @@ import {
 import { OS_TITLES } from '../../../../common/translations';
 import { ENDPOINT_EVENT_FILTERS_LIST_ID, EVENT_FILTER_LIST_TYPE } from '../../constants';
 
-import {
-  EffectedPolicySelect,
-  EffectedPolicySelection,
-} from '../../../../components/effected_policy_select';
+import type { EffectedPolicySelection } from '../../../../components/effected_policy_select';
+import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
 import { isGlobalPolicyEffected } from '../../../../components/effected_policy_select/utils';
 
 const OPERATING_SYSTEMS: readonly OperatingSystem[] = [

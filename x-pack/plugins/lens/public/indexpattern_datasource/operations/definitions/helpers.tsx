@@ -12,7 +12,7 @@ import {
   FormattedIndexPatternColumn,
   ReferenceBasedIndexPatternColumn,
 } from './column_types';
-import { IndexPattern, IndexPatternField } from '../../types';
+import { IndexPattern, IndexPatternField, IndexPatternLayer } from '../../types';
 import { hasField } from '../../pure_utils';
 
 export function getInvalidFieldMessage(
@@ -127,6 +127,15 @@ export function isColumnOfType<C extends GenericIndexPatternColumn>(
 ): column is C {
   return column.operationType === type;
 }
+
+export const isColumn = (
+  setter:
+    | GenericIndexPatternColumn
+    | IndexPatternLayer
+    | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
+): setter is GenericIndexPatternColumn => {
+  return 'operationType' in setter;
+};
 
 export function isColumnFormatted(
   column: GenericIndexPatternColumn

@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-import {
-  TimelineType,
-  TimelineTypeLiteral,
-  TimelineSavedObject,
-  TimelineStatus,
-} from '../../../../common/types/timeline';
-import { FrameworkRequest } from '../../framework';
+import type { TimelineTypeLiteral, TimelineSavedObject } from '../../../../common/types/timeline';
+import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
+import type { FrameworkRequest } from '../../framework';
 import { getTimelineOrNull, getTimelineTemplateOrNull } from '../saved_object/timelines';
 
 interface TimelineObjectProps {

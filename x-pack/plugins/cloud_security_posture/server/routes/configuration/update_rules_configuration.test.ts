@@ -4,14 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
-import {
-  savedObjectsClientMock,
-  httpServiceMock,
-  loggingSystemMock,
-  httpServerMock,
-} from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { savedObjectsClientMock, httpServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 import {
   createRulesConfig,
   defineUpdateRulesConfigRoute,
@@ -20,46 +14,36 @@ import {
   updateAgentConfiguration,
 } from './update_rules_configuration';
 
-import { CspAppService } from '../../lib/csp_app_services';
-import { CspAppContext } from '../../plugin';
 import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import { createPackagePolicyServiceMock } from '@kbn/fleet-plugin/server/mocks';
 
-import { cspRuleAssetSavedObjectType } from '../../../common/constants';
-import { CspRuleSchema } from '../../../common/schemas/csp_rule';
+import { CSP_RULE_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import type { CspRule } from '../../../common/schemas';
 
 import {
   ElasticsearchClient,
-  KibanaRequest,
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
 } from '@kbn/core/server';
 import { Chance } from 'chance';
 import { PackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
-import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { mockAuthenticatedUser } from '@kbn/security-plugin/common/model/authenticated_user.mock';
+import { DeepPartial } from 'utility-types';
+import { createCspRequestHandlerContextMock } from '../../mocks';
 
 describe('Update rules configuration API', () => {
-  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
   let mockSoClient: jest.Mocked<SavedObjectsClientContract>;
   const chance = new Chance();
 
   beforeEach(() => {
-    logger = loggingSystemMock.createLogger();
     jest.clearAllMocks();
   });
 
   it('validate the API route path', async () => {
     const router = httpServiceMock.createRouter();
-    const cspAppContextService = new CspAppService();
 
-    const cspContext: CspAppContext = {
-      logger,
-      service: cspAppContextService,
-      security: securityMock.createSetup(),
-    };
-    defineUpdateRulesConfigRoute(router, cspContext);
+    defineUpdateRulesConfigRoute(router);
 
     const [config, _] = router.post.mock.calls[0];
 
@@ -68,20 +52,12 @@ describe('Update rules configuration API', () => {
 
   it('should accept to a user with fleet.all privilege', async () => {
     const router = httpServiceMock.createRouter();
-    const cspAppContextService = new CspAppService();
 
-    const cspContext: CspAppContext = {
-      logger,
-      service: cspAppContextService,
-      security: securityMock.createSetup(),
-    };
-    defineUpdateRulesConfigRoute(router, cspContext);
+    defineUpdateRulesConfigRoute(router);
+
     const [_, handler] = router.post.mock.calls[0];
 
-    const mockContext = {
-      fleet: { authz: { fleet: { all: true } } },
-    } as unknown as KibanaRequest;
-
+    const mockContext = createCspRequestHandlerContextMock();
     const mockResponse = httpServerMock.createResponseFactory();
     const mockRequest = httpServerMock.createKibanaRequest();
     const [context, req, res] = [mockContext, mockRequest, mockResponse];
@@ -93,20 +69,11 @@ describe('Update rules configuration API', () => {
 
   it('should reject to a user without fleet.all privilege', async () => {
     const router = httpServiceMock.createRouter();
-    const cspAppContextService = new CspAppService();
 
-    const cspContext: CspAppContext = {
-      logger,
-      service: cspAppContextService,
-      security: securityMock.createSetup(),
-    };
-    defineUpdateRulesConfigRoute(router, cspContext);
+    defineUpdateRulesConfigRoute(router);
     const [_, handler] = router.post.mock.calls[0];
 
-    const mockContext = {
-      fleet: { authz: { fleet: { all: true } } },
-    } as unknown as KibanaRequest;
-
+    const mockContext = createCspRequestHandlerContextMock();
     const mockResponse = httpServerMock.createResponseFactory();
     const mockRequest = httpServerMock.createKibanaRequest();
     const [context, req, res] = [mockContext, mockRequest, mockResponse];
@@ -123,59 +90,93 @@ describe('Update rules configuration API', () => {
     await getCspRules(mockSoClient, packagePolicy);
     expect(mockSoClient.find).toBeCalledTimes(1);
     expect(mockSoClient.find).toHaveBeenCalledWith(
-      expect.objectContaining({ type: cspRuleAssetSavedObjectType })
+      expect.objectContaining({ type: CSP_RULE_SAVED_OBJECT_TYPE })
     );
   });
 
   it('create csp rules config based on activated csp rules', async () => {
-    const cspRules = {
+    const cspRules: DeepPartial<SavedObjectsFindResponse<CspRule>> = {
       page: 1,
       per_page: 1000,
       total: 2,
       saved_objects: [
         {
           type: 'csp_rule',
-          rego_rule_id: '1.1.1',
-          attributes: { enabled: true, rego_rule_id: 'cis_1_1_1' },
+          attributes: {
+            enabled: true,
+            metadata: {
+              rego_rule_id: 'cis_1_1_1',
+              benchmark: { id: 'cis_k8s' },
+            },
+          },
         },
         {
           type: 'csp_rule',
-          attributes: { enabled: false, rego_rule_id: 'cis_1_1_2' },
+          attributes: {
+            enabled: false,
+            metadata: {
+              rego_rule_id: 'cis_1_1_2',
+              benchmark: { id: 'cis_k8s' },
+            },
+          },
         },
         {
           type: 'csp_rule',
-          attributes: { enabled: true, rego_rule_id: 'cis_1_1_3' },
+          attributes: {
+            enabled: true,
+            metadata: {
+              rego_rule_id: 'cis_1_1_3',
+              benchmark: { id: 'cis_k8s' },
+            },
+          },
         },
       ],
-    } as unknown as SavedObjectsFindResponse<CspRuleSchema>;
-    const cspConfig = await createRulesConfig(cspRules);
+    };
+    const cspConfig = await createRulesConfig(cspRules as SavedObjectsFindResponse<CspRule>);
     expect(cspConfig).toMatchObject({
       data_yaml: { activated_rules: { cis_k8s: ['cis_1_1_1', 'cis_1_1_3'] } },
     });
   });
 
   it('create empty csp rules config when all rules are disabled', async () => {
-    const cspRules = {
+    const cspRules: DeepPartial<SavedObjectsFindResponse<CspRule>> = {
       page: 1,
       per_page: 1000,
       total: 2,
       saved_objects: [
         {
           type: 'csp_rule',
-          rego_rule_id: '1.1.1',
-          attributes: { enabled: false, rego_rule_id: 'cis_1_1_1' },
+          attributes: {
+            enabled: false,
+            metadata: {
+              rego_rule_id: 'cis_1_1_1',
+              benchmark: { id: 'cis_k8s' },
+            },
+          },
         },
         {
           type: 'csp_rule',
-          attributes: { enabled: false, rego_rule_id: 'cis_1_1_2' },
+          attributes: {
+            enabled: false,
+            metadata: {
+              rego_rule_id: 'cis_1_1_2',
+              benchmark: { id: 'cis_k8s' },
+            },
+          },
         },
         {
           type: 'csp_rule',
-          attributes: { enabled: false, rego_rule_id: 'cis_1_1_3' },
+          attributes: {
+            enabled: false,
+            metadata: {
+              rego_rule_id: 'cis_1_1_3',
+              benchmark: { id: 'cis_k8s' },
+            },
+          },
         },
       ],
-    } as unknown as SavedObjectsFindResponse<CspRuleSchema>;
-    const cspConfig = await createRulesConfig(cspRules);
+    };
+    const cspConfig = await createRulesConfig(cspRules as SavedObjectsFindResponse<CspRule>);
     expect(cspConfig).toMatchObject({ data_yaml: { activated_rules: { cis_k8s: [] } } });
   });
 
@@ -213,26 +214,44 @@ describe('Update rules configuration API', () => {
       }
     );
 
-    mockSoClient.find.mockResolvedValueOnce({
+    const cspRules: DeepPartial<SavedObjectsFindResponse<CspRule>> = {
       page: 1,
       per_page: 1000,
       total: 2,
       saved_objects: [
         {
           type: 'csp_rule',
-          rego_rule_id: '1.1.1',
-          attributes: { enabled: false, rego_rule_id: 'cis_1_1_1' },
+          attributes: {
+            enabled: false,
+            metadata: {
+              rego_rule_id: 'cis_1_1_1',
+              benchmark: { id: 'cis_k8s' },
+            },
+          },
         },
         {
           type: 'csp_rule',
-          attributes: { enabled: false, rego_rule_id: 'cis_1_1_2' },
+          attributes: {
+            enabled: false,
+            metadata: {
+              rego_rule_id: 'cis_1_1_2',
+              benchmark: { id: 'cis_k8s' },
+            },
+          },
         },
         {
           type: 'csp_rule',
-          attributes: { enabled: false, rego_rule_id: 'cis_1_1_3' },
+          attributes: {
+            enabled: false,
+            metadata: {
+              rego_rule_id: 'cis_1_1_3',
+              benchmark: { id: 'cis_k8s' },
+            },
+          },
         },
       ],
-    } as unknown as SavedObjectsFindResponse<CspRuleSchema>);
+    };
+    mockSoClient.find.mockResolvedValueOnce(cspRules as SavedObjectsFindResponse<CspRule>);
 
     const mockPackagePolicy = createPackagePolicyMock();
     mockPackagePolicy.vars = { dataYaml: { type: 'foo' } };
@@ -260,26 +279,44 @@ describe('Update rules configuration API', () => {
     mockSoClient = savedObjectsClientMock.create();
     const mockPackagePolicyService = createPackagePolicyServiceMock();
 
-    mockSoClient.find.mockResolvedValueOnce({
+    const cspRules: DeepPartial<SavedObjectsFindResponse<CspRule>> = {
       page: 1,
       per_page: 1000,
       total: 2,
       saved_objects: [
         {
           type: 'csp_rule',
-          rego_rule_id: '1.1.1',
-          attributes: { enabled: false, rego_rule_id: 'cis_1_1_1' },
+          attributes: {
+            enabled: false,
+            metadata: {
+              rego_rule_id: 'cis_1_1_1',
+              benchmark: { id: 'cis_k8s' },
+            },
+          },
         },
         {
           type: 'csp_rule',
-          attributes: { enabled: false, rego_rule_id: 'cis_1_1_2' },
+          attributes: {
+            enabled: false,
+            metadata: {
+              rego_rule_id: 'cis_1_1_2',
+              benchmark: { id: 'cis_k8s' },
+            },
+          },
         },
         {
           type: 'csp_rule',
-          attributes: { enabled: false, rego_rule_id: 'cis_1_1_3' },
+          attributes: {
+            enabled: false,
+            metadata: {
+              rego_rule_id: 'cis_1_1_3',
+              benchmark: { id: 'cis_k8s' },
+            },
+          },
         },
       ],
-    } as unknown as SavedObjectsFindResponse<CspRuleSchema>);
+    };
+    mockSoClient.find.mockResolvedValueOnce(cspRules as SavedObjectsFindResponse<CspRule>);
 
     const mockPackagePolicy = createPackagePolicyMock();
     const packagePolicyId1 = chance.guid();
@@ -319,18 +356,24 @@ describe('Update rules configuration API', () => {
     const mockPackagePolicy = createPackagePolicyMock();
     const user = mockAuthenticatedUser();
 
-    mockSoClient.find.mockResolvedValueOnce({
+    const cspRules: DeepPartial<SavedObjectsFindResponse<CspRule>> = {
       page: 1,
       per_page: 1000,
       total: 2,
       saved_objects: [
         {
           type: 'csp_rule',
-          rego_rule_id: '1.1.1',
-          attributes: { enabled: false, rego_rule_id: 'cis_1_1_1' },
+          attributes: {
+            enabled: false,
+            metadata: {
+              rego_rule_id: 'cis_1_1_1',
+              benchmark: { id: 'cis_k8s' },
+            },
+          },
         },
       ],
-    } as unknown as SavedObjectsFindResponse<CspRuleSchema>);
+    };
+    mockSoClient.find.mockResolvedValueOnce(cspRules as SavedObjectsFindResponse<CspRule>);
 
     mockPackagePolicy.vars = { dataYaml: { type: 'yaml' } };
 

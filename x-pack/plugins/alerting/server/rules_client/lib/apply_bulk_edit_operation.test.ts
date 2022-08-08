@@ -168,4 +168,58 @@ describe('applyBulkEditOperation', () => {
       ]);
     });
   });
+
+  describe('throttle operations', () => {
+    test('should rewrite throttle', () => {
+      const ruleMock = {
+        actions: [{ id: 'mock-action-id', group: 'default', params: {} }],
+      };
+      expect(
+        applyBulkEditOperation(
+          {
+            field: 'throttle',
+            value: '1d',
+            operation: 'set',
+          },
+          ruleMock
+        )
+      ).toHaveProperty('throttle', '1d');
+    });
+  });
+
+  describe('notifyWhen operations', () => {
+    test('should rewrite notifyWhen', () => {
+      const ruleMock = {
+        actions: [{ id: 'mock-action-id', group: 'default', params: {} }],
+      };
+      expect(
+        applyBulkEditOperation(
+          {
+            field: 'notifyWhen',
+            value: 'onThrottleInterval',
+            operation: 'set',
+          },
+          ruleMock
+        )
+      ).toHaveProperty('notifyWhen', 'onThrottleInterval');
+    });
+  });
+
+  describe('schedule operations', () => {
+    test('should rewrite schedule', () => {
+      const ruleMock = {
+        actions: [{ id: 'mock-action-id', group: 'default', params: {} }],
+      };
+      expect(
+        applyBulkEditOperation(
+          {
+            field: 'schedule',
+            value: { interval: '1d' },
+            operation: 'set',
+          },
+          ruleMock
+        )
+      ).toHaveProperty('schedule', { interval: '1d' });
+    });
+  });
 });

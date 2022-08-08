@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { REFERENCE_LINE_LAYER, EXTENDED_Y_CONFIG } from '../constants';
+import { REFERENCE_LINE_LAYER, REFERENCE_LINE_DECORATION_CONFIG } from '../constants';
 import { ReferenceLineLayerFn } from '../types';
 import { strings } from '../i18n';
 
@@ -22,9 +22,9 @@ export const referenceLineLayerFunction: ReferenceLineLayerFn = {
       help: strings.getRLAccessorsHelp(),
       multi: true,
     },
-    yConfig: {
-      types: [EXTENDED_Y_CONFIG],
-      help: strings.getRLYConfigHelp(),
+    decorations: {
+      types: [REFERENCE_LINE_DECORATION_CONFIG],
+      help: strings.getRLDecorationConfigHelp(),
       multi: true,
     },
     columnToLabel: {

@@ -10,6 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiSelectable,
   EuiFilterButton,
+  EuiFilterGroup,
   EuiPopover,
   EuiSelectableProps,
   EuiSelectableOption,
@@ -19,6 +20,7 @@ import {
 export interface RuleTagFilterProps {
   tags: string[];
   selectedTags: string[];
+  isGrouped?: boolean; // Whether or not this should appear as the child of a EuiFilterGroup
   isLoading?: boolean;
   loadingMessage?: EuiSelectableProps['loadingMessage'];
   noMatchesMessage?: EuiSelectableProps['noMatchesMessage'];
@@ -37,6 +39,7 @@ export const RuleTagFilter = (props: RuleTagFilterProps) => {
   const {
     tags = [],
     selectedTags = [],
+    isGrouped = false,
     isLoading = false,
     loadingMessage,
     noMatchesMessage,
@@ -101,33 +104,42 @@ export const RuleTagFilter = (props: RuleTagFilterProps) => {
     );
   };
 
+  const Container = useMemo(() => {
+    if (isGrouped) {
+      return React.Fragment;
+    }
+    return EuiFilterGroup;
+  }, [isGrouped]);
+
   return (
-    <EuiPopover
-      data-test-subj={dataTestSubj}
-      isOpen={isPopoverOpen}
-      closePopover={onClosePopover}
-      button={renderButton()}
-    >
-      <EuiSelectable
-        searchable
-        data-test-subj={selectableDataTestSubj}
-        isLoading={isLoading}
-        options={options}
-        loadingMessage={loadingMessage}
-        noMatchesMessage={noMatchesMessage}
-        emptyMessage={emptyMessage}
-        errorMessage={errorMessage}
-        onChange={onChangeInternal}
+    <Container>
+      <EuiPopover
+        data-test-subj={dataTestSubj}
+        isOpen={isPopoverOpen}
+        closePopover={onClosePopover}
+        button={renderButton()}
       >
-        {(list, search) => (
-          <>
-            {search}
-            <EuiSpacer size="xs" />
-            {list}
-          </>
-        )}
-      </EuiSelectable>
-    </EuiPopover>
+        <EuiSelectable
+          searchable
+          data-test-subj={selectableDataTestSubj}
+          isLoading={isLoading}
+          options={options}
+          loadingMessage={loadingMessage}
+          noMatchesMessage={noMatchesMessage}
+          emptyMessage={emptyMessage}
+          errorMessage={errorMessage}
+          onChange={onChangeInternal}
+        >
+          {(list, search) => (
+            <>
+              {search}
+              <EuiSpacer size="xs" />
+              {list}
+            </>
+          )}
+        </EuiSelectable>
+      </EuiPopover>
+    </Container>
   );
 };
 

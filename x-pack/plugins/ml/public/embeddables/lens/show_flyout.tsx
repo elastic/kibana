@@ -77,7 +77,7 @@ export async function showLensVisToADJobFlyout(
           )
         ),
         {
-          'data-test-subj': 'mlFlyoutJobSelector',
+          'data-test-subj': 'mlFlyoutLensLayerSelector',
           ownFocus: true,
           closeButtonAriaLabel: 'jobSelectorFlyout',
           onClose: onFlyoutClose,

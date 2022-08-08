@@ -46,7 +46,7 @@ export const Template: FunctionComponent<Props> = ({
         {/* Inject EUI reset and global styles before all other component styles */}
         <meta name={EUI_STYLES_GLOBAL} />
         <Styles darkMode={darkMode} stylesheetPaths={stylesheetPaths} />
-
+        <meta name="emotion" />
         {/* Inject stylesheets into the <head> before scripts so that KP plugins with bundled styles will override them */}
         <meta name="add-styles-here" />
         <meta name="add-scripts-here" />

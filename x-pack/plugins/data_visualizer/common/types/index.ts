@@ -6,8 +6,8 @@
  */
 
 import type { SimpleSavedObject } from '@kbn/core/public';
-import { isPopulatedObject } from '../utils/object_utils';
-export type { JobFieldType } from './job_field_type';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+export type { SupportedFieldType } from './job_field_type';
 export type {
   FieldRequestConfig,
   DocumentCountBuckets,

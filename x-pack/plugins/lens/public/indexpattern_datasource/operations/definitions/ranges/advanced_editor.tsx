@@ -246,6 +246,7 @@ export const AdvancedRangeEditor = ({
 
   return (
     <EuiFormRow
+      fullWidth
       label={i18n.translate('xpack.lens.indexPattern.ranges.customRanges', {
         defaultMessage: 'Ranges',
       })}

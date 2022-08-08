@@ -26,7 +26,7 @@ export const getSelectAgentPolicyStep = ({
 }): EuiStepProps => {
   return {
     title:
-      eligibleFleetServerPolicies.length === 0
+      eligibleFleetServerPolicies.length === 0 && !policyId
         ? i18n.translate('xpack.fleet.fleetServerSetup.stepCreateAgentPolicyTitle', {
             defaultMessage: 'Create a policy for Fleet Server',
           })

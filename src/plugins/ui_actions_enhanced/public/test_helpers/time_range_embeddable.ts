@@ -12,7 +12,7 @@ import {
   EmbeddableInput,
   IContainer,
 } from '@kbn/embeddable-plugin/public';
-import { TimeRange } from '@kbn/data-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
 
 interface EmbeddableTimeRangeInput extends EmbeddableInput {
   timeRange: TimeRange;

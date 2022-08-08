@@ -36,6 +36,8 @@ NPM_MODULE_EXTRA_FILES = [
 #    "@npm//name-of-package"
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
+  "@npm//fp-ts",
+  "@npm//io-ts",
   "@npm//rxjs",
 ]
 
@@ -51,6 +53,8 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
+  "@npm//fp-ts",
+  "@npm//io-ts",
   "@npm//rxjs",
   "//packages/kbn-logging:npm_module_types",
   "//packages/kbn-logging-mocks:npm_module_types",
@@ -60,12 +64,14 @@ jsts_transpiler(
   name = "target_node",
   srcs = SRCS,
   build_pkg_name = package_name(),
+  root_input_dir = "src",
 )
 
 jsts_transpiler(
   name = "target_web",
   srcs = SRCS,
   build_pkg_name = package_name(),
+  root_input_dir = "src",
   web = True,
 )
 
@@ -84,6 +90,7 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
+  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
   root_dir = "src",

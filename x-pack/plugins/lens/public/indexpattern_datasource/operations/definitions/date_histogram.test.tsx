@@ -106,6 +106,14 @@ const defaultOptions = {
   isFullscreen: false,
   toggleFullscreen: jest.fn(),
   setIsCloseable: jest.fn(),
+  existingFields: {
+    my_index_pattern: {
+      timestamp: true,
+      bytes: true,
+      memory: true,
+      source: true,
+    },
+  },
 };
 
 describe('date_histogram', () => {
@@ -310,7 +318,7 @@ describe('date_histogram', () => {
         <InlineOptions
           {...defaultOptions}
           layer={layer}
-          updateLayer={updateLayerSpy}
+          paramEditorUpdater={updateLayerSpy}
           columnId="col1"
           currentColumn={layer.columns.col1 as DateHistogramIndexPatternColumn}
         />
@@ -346,7 +354,7 @@ describe('date_histogram', () => {
         <InlineOptions
           {...defaultOptions}
           layer={secondLayer}
-          updateLayer={updateLayerSpy}
+          paramEditorUpdater={updateLayerSpy}
           columnId="col2"
           currentColumn={secondLayer.columns.col2 as DateHistogramIndexPatternColumn}
           indexPattern={indexPattern2}
@@ -382,7 +390,7 @@ describe('date_histogram', () => {
         <InlineOptions
           {...defaultOptions}
           layer={thirdLayer}
-          updateLayer={jest.fn()}
+          paramEditorUpdater={jest.fn()}
           columnId="col1"
           currentColumn={thirdLayer.columns.col1 as DateHistogramIndexPatternColumn}
           indexPattern={indexPattern1}
@@ -418,9 +426,10 @@ describe('date_histogram', () => {
         <InlineOptions
           {...defaultOptions}
           layer={thirdLayer}
-          updateLayer={updateLayerSpy}
+          paramEditorUpdater={updateLayerSpy}
           columnId="col1"
           currentColumn={thirdLayer.columns.col1 as DateHistogramIndexPatternColumn}
+          indexPattern={{ ...indexPattern1, timeFieldName: '@timestamp' }}
         />
       );
       instance
@@ -459,7 +468,7 @@ describe('date_histogram', () => {
         <InlineOptions
           {...defaultOptions}
           layer={thirdLayer}
-          updateLayer={updateLayerSpy}
+          paramEditorUpdater={updateLayerSpy}
           columnId="col1"
           currentColumn={thirdLayer.columns.col1 as DateHistogramIndexPatternColumn}
           indexPattern={{ ...indexPattern1, timeFieldName: undefined }}
@@ -502,7 +511,7 @@ describe('date_histogram', () => {
         <InlineOptions
           {...defaultOptions}
           layer={thirdLayer}
-          updateLayer={updateLayerSpy}
+          paramEditorUpdater={updateLayerSpy}
           columnId="col1"
           currentColumn={thirdLayer.columns.col1 as DateHistogramIndexPatternColumn}
           indexPattern={{ ...indexPattern1, timeFieldName: undefined }}
@@ -544,13 +553,15 @@ describe('date_histogram', () => {
         <InlineOptions
           {...defaultOptions}
           layer={thirdLayer}
-          updateLayer={updateLayerSpy}
+          paramEditorUpdater={updateLayerSpy}
           columnId="col1"
           currentColumn={thirdLayer.columns.col1 as DateHistogramIndexPatternColumn}
           indexPattern={{ ...indexPattern1, timeFieldName: 'other_timestamp' }}
         />
       );
-      expect(instance.find(EuiSwitch).first().prop('disabled')).toBeTruthy();
+      expect(
+        instance.find('[data-test-subj="lensDropPartialIntervals"]').prop('disabled')
+      ).toBeTruthy();
     });
 
     it('should force calendar values to 1', () => {
@@ -559,7 +570,7 @@ describe('date_histogram', () => {
         <InlineOptions
           {...defaultOptions}
           layer={layer}
-          updateLayer={updateLayerSpy}
+          paramEditorUpdater={updateLayerSpy}
           columnId="col1"
           currentColumn={layer.columns.col1 as DateHistogramIndexPatternColumn}
         />
@@ -581,7 +592,7 @@ describe('date_histogram', () => {
         <InlineOptions
           {...defaultOptions}
           layer={testLayer}
-          updateLayer={updateLayerSpy}
+          paramEditorUpdater={updateLayerSpy}
           columnId="col1"
           currentColumn={testLayer.columns.col1 as DateHistogramIndexPatternColumn}
         />
@@ -598,7 +609,7 @@ describe('date_histogram', () => {
         <InlineOptions
           {...defaultOptions}
           layer={testLayer}
-          updateLayer={updateLayerSpy}
+          paramEditorUpdater={updateLayerSpy}
           columnId="col1"
           currentColumn={testLayer.columns.col1 as DateHistogramIndexPatternColumn}
         />
@@ -615,7 +626,7 @@ describe('date_histogram', () => {
         <InlineOptions
           {...defaultOptions}
           layer={testLayer}
-          updateLayer={updateLayerSpy}
+          paramEditorUpdater={updateLayerSpy}
           columnId="col1"
           currentColumn={testLayer.columns.col1 as DateHistogramIndexPatternColumn}
         />
@@ -631,7 +642,7 @@ describe('date_histogram', () => {
         <InlineOptions
           {...defaultOptions}
           layer={layer}
-          updateLayer={updateLayerSpy}
+          paramEditorUpdater={updateLayerSpy}
           columnId="col1"
           currentColumn={layer.columns.col1 as DateHistogramIndexPatternColumn}
         />
@@ -655,7 +666,7 @@ describe('date_histogram', () => {
         <InlineOptions
           {...defaultOptions}
           layer={testLayer}
-          updateLayer={updateLayerSpy}
+          paramEditorUpdater={updateLayerSpy}
           columnId="col1"
           currentColumn={testLayer.columns.col1 as DateHistogramIndexPatternColumn}
         />
@@ -707,7 +718,7 @@ describe('date_histogram', () => {
           {...defaultOptions}
           layer={layer}
           indexPattern={indexPattern}
-          updateLayer={updateLayerSpy}
+          paramEditorUpdater={updateLayerSpy}
           columnId="col1"
           currentColumn={layer.columns.col1 as DateHistogramIndexPatternColumn}
         />
@@ -741,17 +752,14 @@ describe('date_histogram', () => {
         <InlineOptions
           {...defaultOptions}
           layer={thirdLayer}
-          updateLayer={updateLayerSpy}
+          paramEditorUpdater={updateLayerSpy}
           columnId="col1"
           currentColumn={thirdLayer.columns.col1 as DateHistogramIndexPatternColumn}
         />
       );
-      instance
-        .find(EuiSwitch)
-        .first()
-        .simulate('change', {
-          target: { checked: true },
-        });
+      instance.find('[data-test-subj="lensDropPartialIntervals"]').simulate('change', {
+        target: { checked: true },
+      });
       expect(updateLayerSpy).toHaveBeenCalled();
       const newLayer = updateLayerSpy.mock.calls[0][0](layer);
       expect(newLayer).toHaveProperty('columns.col1.params.dropPartials', true);

@@ -10,6 +10,7 @@ import type { IRouter, Logger } from '@kbn/core/server';
 import { streamFactory } from '@kbn/aiops-utils';
 
 import {
+  errorAction,
   reducerStreamRequestBodySchema,
   updateProgressAction,
   addToEntityAction,
@@ -38,8 +39,9 @@ export const defineReducerStreamRoute = (router: IRouter, logger: Logger) => {
         shouldStop = true;
       });
 
-      const { end, error, push, responseWithHeaders } = streamFactory<ReducerStreamApiAction>(
-        request.headers
+      const { end, push, responseWithHeaders } = streamFactory<ReducerStreamApiAction>(
+        request.headers,
+        logger
       );
 
       const entities = [
@@ -84,18 +86,17 @@ export const defineReducerStreamRoute = (router: IRouter, logger: Logger) => {
               push(deleteEntityAction(randomEntity));
             } else if (randomAction === 'throw-error') {
               // Throw an error. It should not crash Kibana!
-              // It should be caught, logged and passed on as a stream error.
+              // It should be caught and logged to the Kibana server console.
               throw new Error('There was a (simulated) server side error!');
             } else if (randomAction === 'emit-error') {
-              // Directly emit an error to the stream, this will not be logged.
-              error('Error pushed to the stream');
+              // Emit an error as a stream action.
+              push(errorAction('(Simulated) error pushed to the stream'));
               return;
             }
 
             pushStreamUpdate();
           } catch (e) {
             logger.error(e);
-            error(e);
           }
         }, Math.floor(Math.random() * maxTimeoutMs));
       }

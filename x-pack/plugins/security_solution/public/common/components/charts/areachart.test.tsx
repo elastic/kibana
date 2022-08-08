@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { ShallowWrapper, shallow } from 'enzyme';
+import type { ShallowWrapper } from 'enzyme';
+import { shallow } from 'enzyme';
 import React from 'react';
 
 import { AreaChartBaseComponent, AreaChartComponent } from './areachart';
-import { ChartSeriesData } from './common';
+import type { ChartSeriesData } from './common';
 import { ScaleType, AreaSeries, Axis } from '@elastic/charts';
 
 jest.mock('../../lib/kibana');

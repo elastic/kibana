@@ -7,6 +7,7 @@
 
 import { isEmpty } from 'lodash/fp';
 import React, { useMemo } from 'react';
+import { EuiFlexItem } from '@elastic/eui';
 import * as i18n from '../case_view/translations';
 import { useDeleteCases } from '../../containers/use_delete_cases';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
@@ -14,6 +15,7 @@ import { PropertyActions } from '../property_actions';
 import { Case } from '../../../common/ui/types';
 import { CaseService } from '../../containers/use_get_case_user_actions';
 import { useAllCasesNavigation } from '../../common/navigation';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 interface CaseViewActions {
   caseData: Case;
@@ -25,14 +27,19 @@ const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternal
   const { handleToggleModal, handleOnDeleteConfirm, isDeleted, isDisplayConfirmDeleteModal } =
     useDeleteCases();
   const { navigateToAllCases } = useAllCasesNavigation();
+  const { permissions } = useCasesContext();
 
   const propertyActions = useMemo(
     () => [
-      {
-        iconType: 'trash',
-        label: i18n.DELETE_CASE(),
-        onClick: handleToggleModal,
-      },
+      ...(permissions.delete
+        ? [
+            {
+              iconType: 'trash',
+              label: i18n.DELETE_CASE(),
+              onClick: handleToggleModal,
+            },
+          ]
+        : []),
       ...(currentExternalIncident != null && !isEmpty(currentExternalIncident?.externalUrl)
         ? [
             {
@@ -43,15 +50,20 @@ const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternal
           ]
         : []),
     ],
-    [handleToggleModal, currentExternalIncident]
+    [handleToggleModal, currentExternalIncident, permissions.delete]
   );
 
   if (isDeleted) {
     navigateToAllCases();
     return null;
   }
+
+  if (propertyActions.length === 0) {
+    return null;
+  }
+
   return (
-    <>
+    <EuiFlexItem grow={false} data-test-subj="case-view-actions">
       <PropertyActions propertyActions={propertyActions} />
       <ConfirmDeleteCaseModal
         caseTitle={caseData.title}
@@ -59,7 +71,7 @@ const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternal
         onCancel={handleToggleModal}
         onConfirm={handleOnDeleteConfirm.bind(null, [{ id: caseData.id, title: caseData.title }])}
       />
-    </>
+    </EuiFlexItem>
   );
 };
 ActionsComponent.displayName = 'Actions';

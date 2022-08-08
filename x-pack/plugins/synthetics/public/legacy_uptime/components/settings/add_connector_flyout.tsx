@@ -11,11 +11,7 @@ import { useDispatch } from 'react-redux';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useFetcher } from '@kbn/observability-plugin/public';
 import { getConnectorsAction } from '../../state/alerts/alerts';
-import { fetchActionTypes } from '../../state/api/alerts';
-
-import { ActionTypeId } from './types';
 
 interface Props {
   focusInput: () => void;
@@ -25,18 +21,6 @@ interface Props {
 interface KibanaDeps {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }
-
-export const ALLOWED_ACTION_TYPES: ActionTypeId[] = [
-  '.slack',
-  '.pagerduty',
-  '.server-log',
-  '.index',
-  '.teams',
-  '.servicenow',
-  '.jira',
-  '.webhook',
-  '.email',
-];
 
 export const AddConnectorFlyout = ({ focusInput, isDisabled }: Props) => {
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
@@ -51,23 +35,18 @@ export const AddConnectorFlyout = ({ focusInput, isDisabled }: Props) => {
 
   const dispatch = useDispatch();
 
-  const { data: actionTypes } = useFetcher(() => fetchActionTypes(), []);
-
   const ConnectorAddFlyout = useMemo(
     () =>
       getAddConnectorFlyout({
-        consumer: 'uptime',
         onClose: () => {
           dispatch(getConnectorsAction.get());
           setAddFlyoutVisibility(false);
           focusInput();
         },
-        actionTypes: (actionTypes ?? []).filter((actionType) =>
-          ALLOWED_ACTION_TYPES.includes(actionType.id as ActionTypeId)
-        ),
+        featureId: 'uptime',
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [actionTypes]
+    []
   );
 
   return (

@@ -114,7 +114,9 @@
           "\nA factory function for creating a Storybook implementation of `SharedUxEditorsService`."
         ],
         "signature": [
-          "() => { openDataViewEditor: (options: DataViewEditorOptions) => () => void; }"
+          "() => { openDataViewEditor: (options: ",
+          "DataViewEditorOptions",
+          ") => () => void; }"
         ],
         "path": "packages/kbn-shared-ux-storybook/src/services/editors.ts",
         "deprecated": false,

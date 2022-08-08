@@ -7,7 +7,6 @@
  */
 
 import type { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
-import type { TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
 import { ReplaySubject, Subject, type Subscription } from 'rxjs';
 import type {
   PluginInitializerContext,
@@ -48,7 +47,6 @@ import {
 
 interface KibanaUsageCollectionPluginsDepsSetup {
   usageCollection: UsageCollectionSetup;
-  telemetry?: TelemetryPluginSetup;
 }
 
 type SavedObjectsRegisterType = SavedObjectsServiceSetup['registerType'];
@@ -72,14 +70,7 @@ export class KibanaUsageCollectionPlugin implements Plugin {
     this.subscriptions = [];
   }
 
-  public setup(
-    coreSetup: CoreSetup,
-    { usageCollection, telemetry }: KibanaUsageCollectionPluginsDepsSetup
-  ) {
-    if (!telemetry) {
-      // If the telemetry plugin is disabled, let's set optIn false to flush the queues.
-      coreSetup.analytics.optIn({ global: { enabled: false } });
-    }
+  public setup(coreSetup: CoreSetup, { usageCollection }: KibanaUsageCollectionPluginsDepsSetup) {
     registerEbtCounters(coreSetup.analytics, usageCollection);
     usageCollection.createUsageCounter('uiCounters');
     this.eventLoopUsageCounter = usageCollection.createUsageCounter('eventLoop');
@@ -148,7 +139,16 @@ export class KibanaUsageCollectionPlugin implements Plugin {
 
     registerOpsStatsCollector(usageCollection, metric$);
     registerKibanaUsageCollector(usageCollection, kibanaIndex);
-    registerSavedObjectsCountUsageCollector(usageCollection, kibanaIndex);
+
+    const coreStartPromise = coreSetup.getStartServices().then(([coreStart]) => coreStart);
+    const getAllSavedObjectTypes = async () => {
+      const coreStart = await coreStartPromise;
+      return coreStart.savedObjects
+        .getTypeRegistry()
+        .getAllTypes()
+        .map(({ name }) => name);
+    };
+    registerSavedObjectsCountUsageCollector(usageCollection, kibanaIndex, getAllSavedObjectTypes);
     registerManagementUsageCollector(usageCollection, getUiSettingsClient);
     registerUiMetricUsageCollector(usageCollection, registerType, getSavedObjectsClient);
     registerApplicationUsageCollector(

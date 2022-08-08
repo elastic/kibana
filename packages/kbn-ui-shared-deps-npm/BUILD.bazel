@@ -31,6 +31,7 @@ RUNTIME_DEPS = [
   "@npm//@elastic/charts",
   "@npm//@elastic/eui",
   "@npm//@elastic/numeral",
+  "@npm//@emotion/cache",
   "@npm//@emotion/react",
   "@npm//babel-loader",
   "@npm//core-js",
@@ -68,6 +69,7 @@ TYPES_DEPS = [
   "@npm//@elastic/charts",
   "@npm//@elastic/eui",
   "@npm//@elastic/numeral",
+  "@npm//@emotion/cache",
   "@npm//@emotion/react",
   "@npm//babel-loader",
   "@npm//core-js",
@@ -100,6 +102,7 @@ jsts_transpiler(
   name = "target_node",
   srcs = SRCS,
   build_pkg_name = package_name(),
+  root_input_dir = "src",
 )
 
 ts_config(
@@ -118,6 +121,7 @@ ts_project(
   deps = TYPES_DEPS,
   allow_js = True,
   declaration = True,
+  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
   root_dir = "src",
@@ -138,7 +142,7 @@ webpack(
     "$(location webpack.config.js)",
     "--output-path",
     "$(@D)",
-    "--display=minimal"
+    "--no-stats"
   ],
 )
 

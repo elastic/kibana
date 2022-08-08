@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UseAppToasts } from './use_app_toasts';
+import type { UseAppToasts } from './use_app_toasts';
 
 const createAppToastsMock = (): jest.Mocked<UseAppToasts> => ({
   addError: jest.fn(),

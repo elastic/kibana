@@ -34,6 +34,7 @@ export const InferenceInputForm: FC<Props> = ({ inferrer }) => {
   const inputText = useObservable(inferrer.inputText$);
   const inputComponent = useMemo(() => inferrer.getInputComponent(), []);
   const outputComponent = useMemo(() => inferrer.getOutputComponent(), []);
+  const infoComponent = useMemo(() => inferrer.getInfoComponent(), []);
 
   async function run() {
     setErrorText(null);
@@ -46,6 +47,7 @@ export const InferenceInputForm: FC<Props> = ({ inferrer }) => {
 
   return (
     <>
+      <>{infoComponent}</>
       <>{inputComponent}</>
       <EuiSpacer size="m" />
       <div>

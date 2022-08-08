@@ -27,6 +27,7 @@ import { ServiceProfiling } from '../../app/service_profiling';
 import { ServiceDependencies } from '../../app/service_dependencies';
 import { ServiceLogs } from '../../app/service_logs';
 import { InfraOverview } from '../../app/infra_overview';
+import { AlertsOverview } from '../../app/alerts_overview';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { offsetRt } from '../../../../common/comparison_rt';
 import { TimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
@@ -284,6 +285,16 @@ export const serviceDetail = {
           showKueryBar: false,
           showTimeComparison: false,
           showTransactionTypeSelector: false,
+        },
+      }),
+      '/services/{serviceName}/alerts': page({
+        tab: 'alerts',
+        title: i18n.translate('xpack.apm.views.alerts.title', {
+          defaultMessage: 'Alerts',
+        }),
+        element: <AlertsOverview />,
+        searchBarOptions: {
+          hidden: true,
         },
       }),
       '/services/{serviceName}/': {

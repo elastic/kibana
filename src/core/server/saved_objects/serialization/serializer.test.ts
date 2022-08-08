@@ -7,8 +7,8 @@
  */
 
 import _ from 'lodash';
+import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import { SavedObjectsSerializer } from './serializer';
-import { SavedObjectsRawDoc } from './types';
 import { typeRegistryMock } from '../saved_objects_type_registry.mock';
 import { encodeVersion } from '../version';
 import { LEGACY_URL_ALIAS_TYPE } from '../object_types';
@@ -498,7 +498,7 @@ describe('#rawToSavedObject', () => {
         _id: 'foo:bar',
         _source: {
           // @ts-expect-error expects a string
-          // eslint-disable-next-line
+          // eslint-disable-next-line no-new-wrappers
           type: new String('foo'),
         },
       })
@@ -527,7 +527,7 @@ describe('#rawToSavedObject', () => {
     expect(() =>
       singleNamespaceSerializer.rawToSavedObject({
         // @ts-expect-error expects a string
-        // eslint-disable-next-line
+        // eslint-disable-next-line no-new-wrappers
         _id: new String('foo:bar'),
         _source: {
           type: 'foo',

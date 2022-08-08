@@ -139,7 +139,9 @@ export default function ({ getService }: FtrProviderContext) {
         expect(startEvent).to.be.greaterThan(setupEvent);
 
         // This helps us to also test the helpers
-        const events = await ebtServerHelper.getEvents(2, ['test-plugin-lifecycle']);
+        const events = await ebtServerHelper.getEvents(2, {
+          eventTypes: ['test-plugin-lifecycle'],
+        });
         expect(events).to.eql([
           {
             timestamp: reportTestPluginLifecycleEventsAction!.meta[setupEvent].timestamp,
@@ -157,10 +159,46 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('it should extend the contexts with pid injected by "analytics_plugin_a"', async () => {
-        const [event] = await ebtServerHelper.getEvents(1, ['test-plugin-lifecycle']);
+        const [event] = await ebtServerHelper.getEvents(1, {
+          eventTypes: ['test-plugin-lifecycle'],
+        });
         // Validating the remote PID because that's the only field that it's added by the FTR plugin.
         expect(event.context).to.have.property('pid');
         expect(event.context.pid).to.be.a('number');
+      });
+
+      describe('Test helpers capabilities', () => {
+        it('should return the count of the events', async () => {
+          const eventCount = await ebtServerHelper.getEventCount({
+            withTimeoutMs: 500,
+            eventTypes: ['test-plugin-lifecycle'],
+          });
+          expect(eventCount).to.be(2);
+        });
+
+        it('should return 0 events when filtering by timestamp', async () => {
+          const eventCount = await ebtServerHelper.getEventCount({
+            withTimeoutMs: 500,
+            eventTypes: ['test-plugin-lifecycle'],
+            fromTimestamp: new Date().toISOString(),
+          });
+          expect(eventCount).to.be(0);
+        });
+        it('should return 1 event when filtering by the latest timestamp', async () => {
+          const events = await ebtServerHelper.getEvents(Number.MAX_SAFE_INTEGER, {
+            withTimeoutMs: 500,
+            eventTypes: ['test-plugin-lifecycle'],
+          });
+          expect(events.length).to.be.greaterThan(0);
+          const lastEvent = events[events.length - 1];
+          const fromTimestamp = new Date(new Date(lastEvent.timestamp).getTime() - 1).toISOString();
+          const eventCount = await ebtServerHelper.getEventCount({
+            withTimeoutMs: 500,
+            eventTypes: ['test-plugin-lifecycle'],
+            fromTimestamp,
+          });
+          expect(eventCount).to.be(1);
+        });
       });
     });
   });

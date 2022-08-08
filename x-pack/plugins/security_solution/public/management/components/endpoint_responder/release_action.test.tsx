@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { AppContextTestRender, createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import {
   ConsoleManagerTestComponent,
   getConsoleManagerMockRenderResultQueriesAndActions,
@@ -15,6 +16,7 @@ import { getEndpointResponseActionsConsoleCommands } from './endpoint_response_a
 import { enterConsoleCommand } from '../console/mocks';
 import { waitFor } from '@testing-library/react';
 import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mocks';
+import { getDeferred } from '../mocks';
 
 describe('When using the release action from response actions console', () => {
   let render: () => Promise<ReturnType<AppContextTestRender['render']>>;
@@ -116,6 +118,30 @@ describe('When using the release action from response actions console', () => {
       expect(renderResult.getByTestId('releaseErrorCallout').textContent).toMatch(
         /error one \| error two/
       );
+    });
+  });
+
+  it('should create action request and store id even if console is closed prior to request api response', async () => {
+    const deferrable = getDeferred();
+    apiMocks.responseProvider.releaseHost.mockDelay.mockReturnValue(deferrable.promise);
+    await render();
+
+    // enter command
+    enterConsoleCommand(renderResult, 'release');
+    // hide console
+    await consoleManagerMockAccess.hideOpenedConsole();
+
+    // Release API response
+    deferrable.resolve();
+    await waitFor(() => {
+      expect(apiMocks.responseProvider.releaseHost).toHaveBeenCalledTimes(1);
+    });
+
+    // open console
+    await consoleManagerMockAccess.openRunningConsole();
+    // status should be updating
+    await waitFor(() => {
+      expect(apiMocks.responseProvider.actionDetails.mock.calls.length).toBeGreaterThan(0);
     });
   });
 

@@ -28,6 +28,7 @@ import {
 } from '../../../../../../common/types/anomaly_detection_jobs';
 import { Aggregation, Field, RuntimeMappings } from '../../../../../../common/types/fields';
 import { combineFieldsAndAggs } from '../../../../../../common/util/fields_utils';
+import { addExcludeFrozenToQuery } from '../../../../../../common/util/query_utils';
 import { createEmptyJob, createEmptyDatafeed } from './util/default_configs';
 import { mlJobService } from '../../../../services/job_service';
 import { JobRunner, ProgressSubscriber } from '../job_runner';
@@ -765,15 +766,16 @@ export class JobCreator {
 
   // load the start and end times for the selected index
   // and apply them to the job creator
-  public async autoSetTimeRange() {
+  public async autoSetTimeRange(excludeFrozenData = true) {
     const { start, end } = await ml.getTimeFieldRange({
       index: this._indexPatternTitle,
       timeFieldName: this.timeFieldName,
-      query: this.query,
+      query: excludeFrozenData ? addExcludeFrozenToQuery(this.query) : this.query,
       runtimeMappings: this.datafeedConfig.runtime_mappings,
       indicesOptions: this.datafeedConfig.indices_options,
     });
-    this.setTimeRange(start.epoch, end.epoch);
+
+    this.setTimeRange(start, end);
   }
 
   protected _overrideConfigs(job: Job, datafeed: Datafeed) {

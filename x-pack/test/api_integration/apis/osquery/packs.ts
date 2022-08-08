@@ -81,9 +81,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
       hostedPolicy = agentPolicy;
 
-      const {
-        body: { item: packagePolicy },
-      } = await supertest
+      const packagePolicyResponse = await supertest
         .post('/api/fleet/package_policies')
         .set('kbn-xsrf', 'true')
         .send({
@@ -101,20 +99,28 @@ export default function ({ getService }: FtrProviderContext) {
           description: '123',
           id: '123',
         });
-      packagePolicyId = packagePolicy.id;
+
+      if (!packagePolicyResponse.body.item) {
+        // eslint-disable-next-line no-console
+        console.error({ MISSING: packagePolicyResponse });
+      }
+
+      expect(packagePolicyResponse.status).to.be(200);
+
+      packagePolicyId = packagePolicyResponse.body.item.id;
 
       const createPackResponse = await supertest
-        .post('/internal/osquery/packs')
+        .post('/api/osquery/packs')
         .set('kbn-xsrf', 'true')
         .send(getDefaultPack({ policyIds: [hostedPolicy.id] }));
 
-      packId = createPackResponse.body.id;
+      packId = createPackResponse.body.data.id;
       expect(createPackResponse.status).to.be(200);
 
-      const pack = await supertest.get('/internal/osquery/packs/' + packId).set('kbn-xsrf', 'true');
+      const pack = await supertest.get('/api/osquery/packs/' + packId).set('kbn-xsrf', 'true');
 
       expect(pack.status).to.be(200);
-      expect(pack.body.queries.testQuery.query).to.be(multiLineQuery);
+      expect(pack.body.data.queries.testQuery.query).to.be(multiLineQuery);
 
       const {
         body: {
@@ -129,15 +135,15 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('update route should return 200 and multi line query, but single line query in packs config', async () => {
       const updatePackResponse = await supertest
-        .put('/internal/osquery/packs/' + packId)
+        .put('/api/osquery/packs/' + packId)
         .set('kbn-xsrf', 'true')
         .send(getDefaultPack({ policyIds: [hostedPolicy.id] }));
 
       expect(updatePackResponse.status).to.be(200);
-      expect(updatePackResponse.body.id).to.be(packId);
-      const pack = await supertest.get('/internal/osquery/packs/' + packId).set('kbn-xsrf', 'true');
+      expect(updatePackResponse.body.data.id).to.be(packId);
+      const pack = await supertest.get('/api/osquery/packs/' + packId).set('kbn-xsrf', 'true');
 
-      expect(pack.body.queries.testQuery.query).to.be(multiLineQuery);
+      expect(pack.body.data.queries.testQuery.query).to.be(multiLineQuery);
       const {
         body: {
           item: { inputs },

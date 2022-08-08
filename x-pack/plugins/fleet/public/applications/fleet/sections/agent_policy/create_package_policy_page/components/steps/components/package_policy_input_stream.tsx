@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, Fragment, memo, useMemo } from 'react';
+import React, { useState, Fragment, memo, useMemo, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -18,54 +18,89 @@ import {
   EuiSpacer,
   EuiButtonEmpty,
 } from '@elastic/eui';
+import { useRouteMatch } from 'react-router-dom';
 
 import type {
+  NewPackagePolicy,
   NewPackagePolicyInputStream,
+  PackageInfo,
   RegistryStream,
   RegistryVarsEntry,
 } from '../../../../../../types';
 import type { PackagePolicyConfigValidationResults } from '../../../services';
 import { isAdvancedVar, validationHasErrors } from '../../../services';
+import { PackagePolicyEditorDatastreamPipelines } from '../../datastream_pipelines';
+import { PackagePolicyEditorDatastreamMappings } from '../../datastream_mappings';
 
 import { PackagePolicyInputVarField } from './package_policy_input_var_field';
+import { useDataStreamId } from './hooks';
 
 const FlexItemWithMaxWidth = styled(EuiFlexItem)`
   max-width: calc(50% - ${(props) => props.theme.eui.euiSizeL});
 `;
 
+const ScrollAnchor = styled.div`
+  scroll-margin-top: ${(props) => parseFloat(props.theme.eui.euiHeaderHeightCompensation) * 2}px;
+`;
+
 export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
-  packageInputStream: RegistryStream;
+  packagePolicy: NewPackagePolicy;
+  packageInputStream: RegistryStream & { data_stream: { dataset: string; type: string } };
+  packageInfo: PackageInfo;
   packagePolicyInputStream: NewPackagePolicyInputStream;
   updatePackagePolicyInputStream: (updatedStream: Partial<NewPackagePolicyInputStream>) => void;
   inputStreamValidationResults: PackagePolicyConfigValidationResults;
   forceShowErrors?: boolean;
 }> = memo(
   ({
+    packagePolicy,
     packageInputStream,
+    packageInfo,
     packagePolicyInputStream,
     updatePackagePolicyInputStream,
     inputStreamValidationResults,
     forceShowErrors,
   }) => {
+    const {
+      params: { packagePolicyId },
+    } = useRouteMatch<{ packagePolicyId?: string }>();
+    const defaultDataStreamId = useDataStreamId();
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    const isDefaultDatstream =
+      !!defaultDataStreamId &&
+      !!packagePolicyInputStream.id &&
+      packagePolicyInputStream.id === defaultDataStreamId;
+    const isPackagePolicyEdit = !!packagePolicyId;
+
+    useEffect(() => {
+      if (isDefaultDatstream && containerRef.current) {
+        containerRef.current.scrollIntoView();
+      }
+    }, [isDefaultDatstream, containerRef]);
+
     // Showing advanced options toggle state
-    const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>();
+    const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(isDefaultDatstream);
 
     // Errors state
     const hasErrors = forceShowErrors && validationHasErrors(inputStreamValidationResults);
 
-    const requiredVars: RegistryVarsEntry[] = [];
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const advancedVars: RegistryVarsEntry[] = [];
+    const [requiredVars, advancedVars] = useMemo(() => {
+      const _requiredVars: RegistryVarsEntry[] = [];
+      const _advancedVars: RegistryVarsEntry[] = [];
 
-    if (packageInputStream.vars && packageInputStream.vars.length) {
-      packageInputStream.vars.forEach((varDef) => {
-        if (isAdvancedVar(varDef)) {
-          advancedVars.push(varDef);
-        } else {
-          requiredVars.push(varDef);
-        }
-      });
-    }
+      if (packageInputStream.vars && packageInputStream.vars.length) {
+        packageInputStream.vars.forEach((varDef) => {
+          if (isAdvancedVar(varDef)) {
+            _advancedVars.push(varDef);
+          } else {
+            _requiredVars.push(varDef);
+          }
+        });
+      }
+
+      return [_requiredVars, _advancedVars];
+    }, [packageInputStream.vars]);
 
     const advancedVarsWithErrorsCount: number = useMemo(
       () =>
@@ -76,7 +111,8 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
     );
 
     return (
-      <EuiFlexGrid columns={2}>
+      <EuiFlexGrid columns={2} id={isDefaultDatstream ? 'test123' : 'asas'}>
+        <ScrollAnchor ref={containerRef} />
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="none" alignItems="flexStart">
             <EuiFlexItem grow={1} />
@@ -135,7 +171,8 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
                 </EuiFlexItem>
               );
             })}
-            {advancedVars.length ? (
+            {/* Advanced section */}
+            {(isPackagePolicyEdit || !!advancedVars.length) && (
               <Fragment>
                 <EuiFlexItem>
                   <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -165,8 +202,9 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
                     ) : null}
                   </EuiFlexGroup>
                 </EuiFlexItem>
-                {isShowingAdvanced
-                  ? advancedVars.map((varDef) => {
+                {isShowingAdvanced ? (
+                  <>
+                    {advancedVars.map((varDef) => {
                       if (!packagePolicyInputStream.vars) return null;
                       const { name: varName, type: varType } = varDef;
                       const value = packagePolicyInputStream.vars?.[varName]?.value;
@@ -192,10 +230,28 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
                           />
                         </EuiFlexItem>
                       );
-                    })
-                  : null}
+                    })}
+                    {/* Only show datastream pipelines and mappings on edit */}
+                    {isPackagePolicyEdit && (
+                      <>
+                        <EuiFlexItem>
+                          <PackagePolicyEditorDatastreamPipelines
+                            packageInputStream={packagePolicyInputStream}
+                            packageInfo={packageInfo}
+                          />
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <PackagePolicyEditorDatastreamMappings
+                            packageInputStream={packagePolicyInputStream}
+                            packageInfo={packageInfo}
+                          />
+                        </EuiFlexItem>
+                      </>
+                    )}
+                  </>
+                ) : null}
               </Fragment>
-            ) : null}
+            )}
           </EuiFlexGroup>
         </FlexItemWithMaxWidth>
       </EuiFlexGrid>

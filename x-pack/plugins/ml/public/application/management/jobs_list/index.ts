@@ -17,8 +17,6 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { MlStartDependencies } from '../../../plugin';
 import { JobsListPage } from './components';
 import { getJobsListBreadcrumbs } from '../breadcrumbs';
-import { setDependencyCache, clearCache } from '../../util/dependency_cache';
-import './_index.scss';
 
 const renderApp = (
   element: HTMLElement,
@@ -44,7 +42,6 @@ const renderApp = (
   );
   return () => {
     unmountComponentAtNode(element);
-    clearCache();
   };
 };
 
@@ -54,13 +51,6 @@ export async function mountApp(
   deps: { usageCollection?: UsageCollectionSetup }
 ) {
   const [coreStart, pluginsStart] = await core.getStartServices();
-
-  setDependencyCache({
-    docLinks: coreStart.docLinks!,
-    basePath: coreStart.http.basePath,
-    http: coreStart.http,
-    i18n: coreStart.i18n,
-  });
 
   params.setBreadcrumbs(getJobsListBreadcrumbs());
   return renderApp(

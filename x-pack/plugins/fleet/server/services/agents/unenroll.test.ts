@@ -10,8 +10,13 @@ import type { SavedObject } from '@kbn/core/server';
 
 import type { AgentPolicy } from '../../types';
 import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
+import { invalidateAPIKeys } from '../api_keys';
 
-import { unenrollAgent, unenrollAgents } from './unenroll';
+import { invalidateAPIKeysForAgents, unenrollAgent, unenrollAgents } from './unenroll';
+
+jest.mock('../api_keys');
+
+const mockedInvalidateAPIKeys = invalidateAPIKeys as jest.MockedFunction<typeof invalidateAPIKeys>;
 
 const agentInHostedDoc = {
   _id: 'agent-in-hosted-policy',
@@ -226,6 +231,37 @@ describe('unenrollAgents (plural)', () => {
     for (const doc of docs!) {
       expect(doc).toHaveProperty('unenrolled_at');
     }
+  });
+});
+
+describe('invalidateAPIKeysForAgents', () => {
+  beforeEach(() => {
+    mockedInvalidateAPIKeys.mockReset();
+  });
+  it('revoke all the agents API keys', async () => {
+    await invalidateAPIKeysForAgents([
+      {
+        id: 'agent1',
+        default_api_key_id: 'defaultApiKey1',
+        access_api_key_id: 'accessApiKey1',
+        default_api_key_history: [
+          {
+            id: 'defaultApiKeyHistory1',
+          },
+          {
+            id: 'defaultApiKeyHistory2',
+          },
+        ],
+      } as any,
+    ]);
+
+    expect(mockedInvalidateAPIKeys).toBeCalledTimes(1);
+    expect(mockedInvalidateAPIKeys).toBeCalledWith([
+      'accessApiKey1',
+      'defaultApiKey1',
+      'defaultApiKeyHistory1',
+      'defaultApiKeyHistory2',
+    ]);
   });
 });
 

@@ -13,7 +13,7 @@ Array [
     TLS Certificate
   </dt>,
   <div
-    class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />,
   .c0.c0.c0 {
   width: 70%;
@@ -37,7 +37,7 @@ Array [
         class="euiToolTipAnchor"
       >
         <div
-          class="euiText euiText--small"
+          class="euiText emotion-euiText-s"
         >
           <span
             color="success"
@@ -68,7 +68,7 @@ Array [
     TLS Certificate
   </dt>,
   <div
-    class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />,
   .c0.c0.c0 {
   width: 70%;

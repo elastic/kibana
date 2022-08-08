@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { EuiPopover, PanelPaddingSize, EuiButtonEmpty } from '@elastic/eui';
+import type { PanelPaddingSize } from '@elastic/eui';
+import { EuiPopover, EuiButtonEmpty } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import styled, { css } from 'styled-components';
 
-import { LinkIcon, LinkIconProps } from '../link_icon';
+import type { LinkIconProps } from '../link_icon';
+import { LinkIcon } from '../link_icon';
 import { BarAction } from './styles';
 
 const LoadingButtonEmpty = styled(EuiButtonEmpty)`

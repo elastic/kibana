@@ -24,12 +24,22 @@ export async function getDataStreamsQueryMetadata({
     esClient.search({
       size: 1,
       index: dataStreamName,
-      sort: {
-        // @ts-expect-error Type '{ 'event.ingested': string; }' is not assignable to type 'string | string[] | undefined'.
-        'event.ingested': 'desc',
-      },
       _source: false,
       fields: ['event.ingested'],
+      // We need to use `body` to control the `sort` value here, because otherwise
+      // it's just appended as a query string to the search operation and we can't
+      // set `unmapped_type` for cases where `event.ingested` is not defiend, e.g.
+      // in custom logs or custom HTTPJSON integrations
+      body: {
+        sort: {
+          'event.ingested': {
+            order: 'desc',
+            // Necessary because of https://github.com/elastic/elasticsearch/issues/81960
+            missing: 0,
+            unmapped_type: 'long',
+          },
+        },
+      },
     }),
     esClient.termsEnum({
       index: dataStreamName,
@@ -55,9 +65,10 @@ export async function getDataStreamsQueryMetadata({
     }),
   ]);
 
-  const maxIngested = new Date(
-    maxEventIngestedResponse.hits.hits[0]?.fields!['event.ingested']
-  ).getTime();
+  const maxIngested =
+    maxEventIngestedResponse.hits.hits[0]?.fields !== undefined
+      ? new Date(maxEventIngestedResponse.hits.hits[0].fields['event.ingested']).getTime()
+      : undefined;
 
   const namespace = namespaceResponse.terms[0] ?? '';
   const dataset = datasetResponse.terms[0] ?? '';

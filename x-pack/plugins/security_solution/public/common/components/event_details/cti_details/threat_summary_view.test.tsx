@@ -12,7 +12,7 @@ import { TestProviders } from '../../../mock';
 import { render } from '@testing-library/react';
 import { buildEventEnrichmentMock } from '../../../../../common/search_strategy/security_solution/cti/index.mock';
 import { mockAlertDetailsData } from '../__mocks__';
-import { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { mockBrowserFields } from '../../../containers/source/mock';
 import { mockTimelines } from '../../../mock/mock_timelines_plugin';
 

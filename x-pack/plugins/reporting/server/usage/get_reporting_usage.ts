@@ -6,10 +6,15 @@
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { get } from 'lodash';
+import { get, pick } from 'lodash';
+import type { GetLicense } from '.';
 import { REPORTING_SYSTEM_INDEX } from '../../common/constants';
 import type { ExportTypesRegistry } from '../lib/export_types_registry';
-import type { GetLicense } from '.';
+import {
+  FIELD_EXECUTION_TIME_MS,
+  FIELD_QUEUE_TIME_MS,
+  runtimeFields,
+} from '../lib/store/runtime_fields';
 import { getExportStats } from './get_export_stats';
 import { getExportTypesHandler } from './get_export_type_handler';
 import type {
@@ -17,10 +22,12 @@ import type {
   AggregationResultBuckets,
   AvailableTotal,
   ErrorCodeStats,
+  ExecutionTimes,
   JobTypes,
   KeyCountBucket,
   LayoutCounts,
   MetricsStats,
+  QueueTimes,
   RangeStats,
   ReportingUsageType,
   SizePercentiles,
@@ -35,6 +42,8 @@ enum keys {
   STATUS = 'statusTypes',
   OUTPUT_SIZE = 'output_size',
   ERROR_CODE = 'errorCodes',
+  EXECUTION_TIMES = 'executionTimes',
+  QUEUE_TIMES = 'queue_times',
   IS_DEPRECATED = 'meta.isDeprecated',
   CSV_ROWS = 'csv_rows',
   PDF_CPU = 'pdf_cpu',
@@ -94,12 +103,10 @@ type JobType = Omit<AvailableTotal, 'available'> & {
   error_codes?: ErrorCodeStats;
 };
 
-function getAggStats(
-  aggs: AggregationResultBuckets,
-  metrics?: { [K in keyof JobTypes]: MetricsStats }
-): Partial<RangeStats> {
-  const { buckets: jobBuckets } = aggs[keys.JOB_TYPE] as AggregationBuckets;
-  const jobTypes = jobBuckets.reduce((accum: JobTypes, bucket) => {
+type JobTypeMetrics = { [K in keyof JobTypes]: MetricsStats };
+
+function normalizeJobtypes(jobBuckets: KeyCountBucket[], jobTypeMetrics?: JobTypeMetrics) {
+  return jobBuckets.reduce((accum: JobTypes, bucket) => {
     const {
       key,
       doc_count: count,
@@ -111,18 +118,29 @@ function getAggStats(
     } = bucket;
     const deprecatedCount = isDeprecated?.doc_count;
 
+    const executionTimes = bucket.execution_times ?? ({} as ExecutionTimes);
+
     // format the search results into the telemetry schema
     const jobType: JobType = {
       total: count,
       deprecated: deprecatedCount,
       app: getKeyCount(get(objectTypes, 'buckets', [])),
-      metrics: (metrics && metrics[key]) || undefined,
+      metrics: (jobTypeMetrics && jobTypeMetrics[key]) || undefined,
       output_size: get(outputSizes, 'values', {} as SizePercentiles),
       error_codes: getKeyCount(get(errorCodes, 'buckets', [])),
       layout: getKeyCount(get(layoutTypes, 'buckets', [])),
+      execution_times: pick(executionTimes ?? {}, ['min', 'max', 'avg']),
     };
     return { ...accum, [key]: jobType };
   }, {} as JobTypes);
+}
+
+function getAggStats(
+  aggs: AggregationResultBuckets,
+  jobTypeMetrics?: JobTypeMetrics
+): Partial<RangeStats> {
+  const { buckets: jobBuckets } = aggs[keys.JOB_TYPE] as AggregationBuckets;
+  const jobTypes = normalizeJobtypes(jobBuckets, jobTypeMetrics);
 
   const all = aggs.doc_count;
   let statusTypes = {};
@@ -137,11 +155,14 @@ function getAggStats(
     statusByApp = getAppStatuses(statusAppBuckets);
   }
 
+  const queueTimes = aggs[keys.QUEUE_TIMES] ?? ({} as QueueTimes);
+
   return {
     _all: all,
     status: statusTypes,
     statuses: statusByApp,
     output_size: get(aggs[keys.OUTPUT_SIZE], 'values') ?? undefined,
+    queue_times: pick(queueTimes, ['min', 'max', 'avg']),
     ...jobTypes,
   };
 }
@@ -185,10 +206,10 @@ async function handleResponse(response: ESResponse): Promise<RangeStatSets> {
     last7DaysUsage = last7Days ? getAggStats(last7Days) : {};
 
     // calculate metrics per job type for the stats covering all-time
-    const metrics = normalizeMetrics(
+    const jobTypeMetrics = normalizeMetrics(
       response.aggregations?.metrics as estypes.AggregationsStringTermsAggregate
     );
-    allUsage = all ? getAggStats(all, metrics) : {};
+    allUsage = all ? getAggStats(all, jobTypeMetrics) : {};
   }
   return { last7Days: last7DaysUsage, ...allUsage };
 }
@@ -207,6 +228,7 @@ export async function getReportingUsage(
     filter_path: 'aggregations.*.buckets,aggregations.metrics_*',
     body: {
       size: 0,
+      runtime_mappings: runtimeFields, // queue_time_ms, execution_time_ms
       aggs: {
         ranges: {
           filters: {
@@ -238,6 +260,8 @@ export async function getReportingUsage(
                 [keys.ERROR_CODE]: {
                   terms: { field: fields.ERROR_CODE, size: DEFAULT_TERMS_SIZE },
                 },
+                // runtime fields
+                [keys.EXECUTION_TIMES]: { stats: { field: FIELD_EXECUTION_TIME_MS } },
               },
             },
             [keys.STATUS]: { terms: { field: fields.STATUS, size: DEFAULT_TERMS_SIZE } },
@@ -245,6 +269,8 @@ export async function getReportingUsage(
             [keys.OUTPUT_SIZE]: { percentiles: { field: fields.OUTPUT_SIZE } },
             // overall error codes
             [keys.ERROR_CODE]: { terms: { field: fields.ERROR_CODE, size: DEFAULT_TERMS_SIZE } },
+
+            [keys.QUEUE_TIMES]: { stats: { field: FIELD_QUEUE_TIME_MS } },
           },
         },
         metrics: {

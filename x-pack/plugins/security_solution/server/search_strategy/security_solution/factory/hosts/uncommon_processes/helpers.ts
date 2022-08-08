@@ -8,12 +8,12 @@
 import { get } from 'lodash/fp';
 import { set } from '@elastic/safer-lodash-set/fp';
 
-import {
+import type {
   ProcessHits,
   HostsUncommonProcessesEdges,
   HostsUncommonProcessHit,
 } from '../../../../../../common/search_strategy/security_solution/hosts/uncommon_processes';
-import { HostHits } from '../../../../../../common/search_strategy';
+import type { HostHits } from '../../../../../../common/search_strategy';
 import { getFlattenedFields } from '../../../../helpers/get_flattened_fields';
 
 export const UNCOMMON_PROCESSES_FIELDS = [

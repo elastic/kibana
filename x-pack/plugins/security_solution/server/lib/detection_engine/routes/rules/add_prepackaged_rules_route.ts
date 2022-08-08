@@ -8,17 +8,15 @@
 import moment from 'moment';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
-import { RulesClient } from '@kbn/alerting-plugin/server';
-import { ExceptionListClient } from '@kbn/lists-plugin/server';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type {
   SecuritySolutionApiRequestHandlerContext,
   SecuritySolutionPluginRouter,
 } from '../../../../types';
 
-import {
-  PrePackagedRulesAndTimelinesSchema,
-  prePackagedRulesAndTimelinesSchema,
-} from '../../../../../common/detection_engine/schemas/response/prepackaged_rules_schema';
+import type { PrePackagedRulesAndTimelinesSchema } from '../../../../../common/detection_engine/schemas/response/prepackaged_rules_schema';
+import { prePackagedRulesAndTimelinesSchema } from '../../../../../common/detection_engine/schemas/response/prepackaged_rules_schema';
 import { importTimelineResultSchema } from '../../../../../common/types/timeline';
 import { DETECTION_ENGINE_PREPACKAGED_URL } from '../../../../../common/constants';
 
@@ -33,6 +31,7 @@ import { ruleAssetSavedObjectsClientFactory } from '../../rules/rule_asset/rule_
 import { buildSiemResponse } from '../utils';
 
 import { installPrepackagedTimelines } from '../../../timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
+import { rulesToMap } from '../../rules/utils';
 
 export const addPrepackedRulesRoute = (router: SecuritySolutionPluginRouter) => {
   router.put(
@@ -108,19 +107,16 @@ export const createPrepackagedRules = async (
     await exceptionsListClient.createEndpointList();
   }
 
-  const latestPrepackagedRules = await getLatestPrepackagedRules(
+  const latestPrepackagedRulesMap = await getLatestPrepackagedRules(
     ruleAssetsClient,
     prebuiltRulesFromFileSystem,
     prebuiltRulesFromSavedObjects
   );
-  const prepackagedRules = await getExistingPrepackagedRules({
-    rulesClient,
-  });
-  const rulesToInstall = getRulesToInstall(latestPrepackagedRules, prepackagedRules);
-  const rulesToUpdate = getRulesToUpdate(latestPrepackagedRules, prepackagedRules);
-  const signalsIndex = siemClient.getSignalsIndex();
+  const installedPrePackagedRules = rulesToMap(await getExistingPrepackagedRules({ rulesClient }));
+  const rulesToInstall = getRulesToInstall(latestPrepackagedRulesMap, installedPrePackagedRules);
+  const rulesToUpdate = getRulesToUpdate(latestPrepackagedRulesMap, installedPrePackagedRules);
 
-  await Promise.all(installPrepackagedRules(rulesClient, rulesToInstall, signalsIndex));
+  await installPrepackagedRules(rulesClient, rulesToInstall);
   const timeline = await installPrepackagedTimelines(
     maxTimelineImportExportSize,
     frameworkRequest,
@@ -134,7 +130,6 @@ export const createPrepackagedRules = async (
     rulesClient,
     savedObjectsClient,
     rulesToUpdate,
-    signalsIndex,
     context.getRuleExecutionLog()
   );
 

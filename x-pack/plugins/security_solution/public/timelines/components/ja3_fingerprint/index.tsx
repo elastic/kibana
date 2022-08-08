@@ -44,9 +44,7 @@ export const Ja3Fingerprint = React.memo<{
     isAggregatable={true}
     fieldType="keyword"
   >
-    <Ja3FingerprintLabel data-test-subj="ja3-fingerprint-label">
-      {i18n.JA3_FINGERPRINT_LABEL}
-    </Ja3FingerprintLabel>
+    <Ja3FingerprintLabel>{i18n.JA3_FINGERPRINT_LABEL}</Ja3FingerprintLabel>
     <Ja3FingerprintLink data-test-subj="ja3-hash-link" ja3Fingerprint={value || ''} />
   </DraggableBadge>
 ));

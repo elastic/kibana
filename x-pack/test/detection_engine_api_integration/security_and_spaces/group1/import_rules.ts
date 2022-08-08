@@ -236,7 +236,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(body.errors[0]).to.eql({
           rule_id: '(unknown id)',
           error: {
-            message: 'when "type" is "threshold", "threshold" is required',
+            message: 'Invalid value "undefined" supplied to "threshold"',
             status_code: 400,
           },
         });

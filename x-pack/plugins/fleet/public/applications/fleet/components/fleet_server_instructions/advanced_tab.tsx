@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiSteps } from '@elastic/eui';
 import React from 'react';
+import { EuiLoadingContent, EuiSteps } from '@elastic/eui';
 
 import { useAdvancedForm } from './hooks';
 
@@ -24,6 +24,7 @@ interface AdvancedTabProps {
 
 export const AdvancedTab: React.FunctionComponent<AdvancedTabProps> = ({ selectedPolicyId }) => {
   const {
+    isSelectFleetServerPolicyLoading,
     eligibleFleetServerPolicies,
     refreshEligibleFleetServerPolicies,
     fleetServerPolicyId,
@@ -47,9 +48,12 @@ export const AdvancedTab: React.FunctionComponent<AdvancedTabProps> = ({ selecte
     getSetDeploymentModeStep({
       deploymentMode,
       setDeploymentMode,
-      disabled: !Boolean(fleetServerPolicyId),
+      disabled: !Boolean(fleetServerPolicyId || selectedPolicyId),
     }),
-    getAddFleetServerHostStep({ fleetServerHostForm, disabled: !Boolean(fleetServerPolicyId) }),
+    getAddFleetServerHostStep({
+      fleetServerHostForm,
+      disabled: !Boolean(fleetServerPolicyId || selectedPolicyId),
+    }),
     getGenerateServiceTokenStep({
       serviceToken,
       generateServiceToken,
@@ -60,12 +64,16 @@ export const AdvancedTab: React.FunctionComponent<AdvancedTabProps> = ({ selecte
       isFleetServerReady,
       serviceToken,
       fleetServerHost: fleetServerHostForm.fleetServerHost,
-      fleetServerPolicyId,
+      fleetServerPolicyId: fleetServerPolicyId || selectedPolicyId,
       deploymentMode,
       disabled: !Boolean(serviceToken),
     }),
     getConfirmFleetServerConnectionStep({ isFleetServerReady, disabled: !Boolean(serviceToken) }),
   ];
 
-  return <EuiSteps steps={steps} className="eui-textLeft" />;
+  return isSelectFleetServerPolicyLoading ? (
+    <EuiLoadingContent />
+  ) : (
+    <EuiSteps steps={steps} className="eui-textLeft" />
+  );
 };

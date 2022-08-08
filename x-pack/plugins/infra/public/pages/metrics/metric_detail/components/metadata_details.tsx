@@ -169,13 +169,13 @@ border-top: ${(props) => props.theme.eui.euiBorderWidthThin} solid ${(props) =>
   props.theme.eui.euiBorderColor};
 border-bottom: ${(props) => props.theme.eui.euiBorderWidthThin} solid ${(props) =>
   props.theme.eui.euiBorderColor};
-padding: ${(props) => props.theme.eui.paddingSizes.m} 0;
-margin-bottom: ${(props) => props.theme.eui.paddingSizes.m};
+padding: ${(props) => props.theme.eui.euiSizeM} 0;
+margin-bottom: ${(props) => props.theme.eui.euiSizeM};
 display: flex;
 `;
 
 const Controls = euiStyled.div`
 flex-grow: 0;
-margin-right: ${(props) => props.theme.eui.paddingSizes.m};
+margin-right: ${(props) => props.theme.eui.euiSizeM};
 min-width: 0px;
 `;
