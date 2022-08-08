@@ -98,18 +98,16 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
         <BackToResourcesButton />
         <PageTitleText
           title={
-            <div style={{ padding: euiTheme.size.s }}>
-              <CloudPosturePageTitle
-                isBeta
-                title={i18n.translate(
-                  'xpack.csp.findings.resourceFindings.resourceFindingsPageTitle',
-                  {
-                    defaultMessage: '{resourceId} - Findings',
-                    values: { resourceId: params.resourceId },
-                  }
-                )}
-              />
-            </div>
+            <CloudPosturePageTitle
+              isBeta
+              title={i18n.translate(
+                'xpack.csp.findings.resourceFindings.resourceFindingsPageTitle',
+                {
+                  defaultMessage: '{resourceId} - Findings',
+                  values: { resourceId: params.resourceId },
+                }
+              )}
+            />
           }
         />
       </PageTitle>
