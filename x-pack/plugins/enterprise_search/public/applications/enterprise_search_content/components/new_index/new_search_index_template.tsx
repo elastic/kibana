@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-/**
- * TODO:
- * - Need to add documentation URLs (search for `#`s)
- * - Bind create index button
- */
-
 import React, { ChangeEvent } from 'react';
 
 import { useValues, useActions } from 'kea';

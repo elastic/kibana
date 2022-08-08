@@ -17,6 +17,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { ChartTitleToolTip } from '../../../app/correlations/chart_title_tool_tip';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import {
@@ -25,7 +26,6 @@ import {
 } from '../duration_distribution_chart';
 import { TotalDocCountLabel } from '../duration_distribution_chart/total_doc_count_label';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
-import { ProcessorEvent } from '../../../../../common/processor_event';
 
 // Format the selected latency range for the "Clear selection" badge.
 // If the two values share the same unit, it will only displayed once.
