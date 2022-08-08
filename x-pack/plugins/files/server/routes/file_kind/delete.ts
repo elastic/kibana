@@ -39,13 +39,7 @@ export const handler: FileKindsRequestHandler<Params> = async ({ files, fileKind
     ) {
       return res.badRequest({ body: { message: e.message } });
     }
-    return res.customError({
-      statusCode: 500,
-      body: {
-        message:
-          'Something went wrong while deleting the file. Check server logs for more details.',
-      },
-    });
+    throw e;
   }
   const body: Response = {
     ok: true,

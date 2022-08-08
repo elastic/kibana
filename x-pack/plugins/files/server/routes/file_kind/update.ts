@@ -43,18 +43,7 @@ export const handler: FileKindsRequestHandler<Params, unknown, Body> = async (
   } = req;
   const { error, result: file } = await getById(fileService.asCurrentUser(), id, fileKind);
   if (error) return error;
-  try {
-    await file.update(attrs);
-  } catch (e) {
-    fileService.logger.error(e);
-    return res.customError({
-      statusCode: 500,
-      body: {
-        message:
-          'Something went wrong while updating file attributes. Check server logs for more details.',
-      },
-    });
-  }
+  await file.update(attrs);
   const body: Response = {
     file: file.toJSON(),
   };
