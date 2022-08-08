@@ -26,7 +26,7 @@ import {
 import { createAuditEvent } from '../audit_events';
 import { InternalFileService } from '../file_service/internal_file_service';
 import { InternalFileShareService } from '../file_share_service';
-import type { FileClient } from '../file_client/file_client';
+import type { FileClientImpl } from '../file_client/file_client';
 import { toJSON } from './to_json';
 import {
   AlreadyDeletedError,
@@ -47,7 +47,7 @@ export class File<M = unknown> implements IFile {
   constructor(
     public readonly id: string,
     private fileMetadata: FileMetadata,
-    private readonly fileClient: FileClient,
+    private readonly fileClient: FileClientImpl,
     private readonly internalFileService: InternalFileService,
     private readonly fileShareService: InternalFileShareService,
     private readonly logger: Logger
@@ -242,7 +242,7 @@ export class File<M = unknown> implements IFile {
       mime,
     }: { name: string; fileKind: FileKind; alt?: string; meta?: unknown; mime?: string },
     internalFileService: InternalFileService,
-    fileClient: FileClient
+    fileClient: FileClientImpl
   ) {
     const fileMeta = await fileClient.create({
       id: cuid(),

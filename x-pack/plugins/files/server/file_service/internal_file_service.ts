@@ -23,7 +23,7 @@ import type {
   GetByIdArgs,
   ListFilesArgs,
 } from './file_action_types';
-import { FileClient } from '../file_client/file_client';
+import { FileClientImpl } from '../file_client/file_client';
 /**
  * Service containing methods for working with files.
  *
@@ -46,7 +46,7 @@ export class InternalFileService {
     return await File.create(
       { ...args, fileKind },
       this,
-      new FileClient(
+      new FileClientImpl(
         fileKind,
         this.metadataClient,
         this.blobStorageService.createBlobStorageClient(fileKind.blobStoreSettings)
@@ -115,13 +115,13 @@ export class InternalFileService {
     id: string,
     fileMetadata: FileMetadata,
     fileKind: FileKind,
-    fileClient?: FileClient
+    fileClient?: FileClientImpl
   ): IFile {
     return new File(
       id,
       fileMetadata,
       fileClient ??
-        new FileClient(
+        new FileClientImpl(
           fileKind,
           this.metadataClient,
           this.blobStorageService.createBlobStorageClient(fileKind.blobStoreSettings)

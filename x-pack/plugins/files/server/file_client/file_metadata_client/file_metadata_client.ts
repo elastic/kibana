@@ -132,6 +132,8 @@ export interface FileMetadataClient {
   find(arg: FindFileArgs): Promise<FileDescriptor[]>;
   /**
    * Prepare a set of metrics based on the file metadata.
+   *
+   * @param arg - Argument to get usage metrics
    */
   getUsageMetrics(arg: GetUsageMetricsArgs): Promise<FilesMetrics>;
 }
