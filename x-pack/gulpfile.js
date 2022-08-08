@@ -7,11 +7,9 @@
 
 require('../src/setup_node_env');
 
-const { buildTask } = require('./tasks/build');
 const { downloadChromium } = require('./tasks/download_chromium');
 
 // export the tasks that are runnable from the CLI
 module.exports = {
-  build: buildTask,
   downloadChromium,
 };

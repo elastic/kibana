@@ -23,7 +23,7 @@ interface TotalStatsProps {
 
 export const TotalStats: React.FC<TotalStatsProps> = ({ ingestionType, additionalItems = [] }) => {
   const { indexData, isError, isLoading } = useValues(OverviewLogic);
-  const documentCount = indexData?.total.docs.count ?? 0;
+  const documentCount = indexData?.count ?? 0;
   const hideStats = isLoading || isError;
 
   const stats: EuiStatProps[] = [
