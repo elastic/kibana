@@ -22,15 +22,16 @@ export const RUNTIME_FIELD_TYPES = [
 ] as const;
 
 /**
- * Used to determine if the instance has some user created index patterns by filtering index patterns
- * that are created and backed only by Fleet server data
- * Should be revised after https://github.com/elastic/kibana/issues/82851 is fixed
- * For more background see: https://github.com/elastic/kibana/issues/107020
+ * Used to optimize on-boarding experience to determine if the instance has some user created data views or data indices/streams by filtering data sources
+ * that are created by default by elastic in ese.
+ * We should somehow prevent creating initial data for the users without their explicit action
+ * instead of relying on these hardcoded assets
  */
 export const DEFAULT_ASSETS_TO_IGNORE = {
-  LOGS_INDEX_PATTERN: 'logs-*',
-  LOGS_DATA_STREAM_TO_IGNORE: 'logs-elastic_agent', // ignore ds created by Fleet server itself
-  ENT_SEARCH_LOGS_DATA_STREAM_TO_IGNORE: 'logs-enterprise_search.api-default', // ignore ds created by enterprise search
+  DATA_STREAMS_TO_IGNORE: [
+    'logs-enterprise_search.api-default', // https://github.com/elastic/kibana/issues/134918
+    `logs-enterprise_search.audit-default`, // https://github.com/elastic/kibana/issues/134918
+  ],
 };
 
 /**
