@@ -57,4 +57,5 @@ export interface ConstructQueryParams {
   authorizationFilter?: KueryNode;
   from?: string;
   to?: string;
+  assignees?: string | string[];
 }
