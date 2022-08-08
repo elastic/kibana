@@ -104,7 +104,7 @@ export const findThresholdSignals = async ({
 
       const searchResultWithAggs = searchResult as ThresholdMultiBucketAggregationResult;
       if (!searchResultWithAggs.aggregations) {
-        throw new Error('expected to find aggregations on search result');
+        throw new Error('Aggregations were missing on threshold rule search result');
       }
 
       searchAfterResults.searchDurations.push(searchDuration);
@@ -140,7 +140,7 @@ export const findThresholdSignals = async ({
 
     const searchResultWithAggs = searchResult as ThresholdSingleBucketAggregationResult;
     if (!searchResultWithAggs.aggregations) {
-      throw new Error('expected to find aggregations on search result');
+      throw new Error('Aggregations were missing on threshold rule search result');
     }
 
     searchAfterResults.searchDurations.push(searchDuration);
