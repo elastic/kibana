@@ -7,6 +7,8 @@
 
 import React, { useState } from 'react';
 
+import { generatePath } from 'react-router-dom';
+
 import { useActions, useValues } from 'kea';
 
 import {
@@ -27,13 +29,17 @@ import { i18n } from '@kbn/i18n';
 import { Status } from '../../../../../../common/types/api';
 import { ConnectorStatus } from '../../../../../../common/types/connectors';
 import { ConnectorIndex } from '../../../../../../common/types/indices';
+import { EuiButtonTo } from '../../../../shared/react_router_helpers';
 import { UnsavedChangesPrompt } from '../../../../shared/unsaved_changes_prompt';
 import { UpdateConnectorSchedulingApiLogic } from '../../../api/connector_package/update_connector_scheduling_api_logic';
 
+import { SEARCH_INDEX_TAB_PATH } from '../../../routes';
 import { IngestionStatus } from '../../../types';
 import { isConnectorIndex } from '../../../utils/indices';
 
 import { IndexViewLogic } from '../index_view_logic';
+
+import { SearchIndexTabId } from '../search_index';
 
 import { ConnectorSchedulingLogic } from './connector_scheduling_logic';
 
@@ -60,40 +66,51 @@ export const ConnectorSchedulingComponent: React.FC = () => {
     return <></>;
   }
 
-  if (index.connector.status === ConnectorStatus.CREATED) {
+  if (
+    index.connector.status === ConnectorStatus.CREATED ||
+    index.connector.status === ConnectorStatus.NEEDS_CONFIGURATION
+  ) {
     return (
-      <EuiText size="s">
-        {i18n.translate(
-          'xpack.enterpriseSearch.content.indices.connectorScheduling.notConnected.title',
-          {
-            defaultMessage:
-              'Configure and deploy your connector, then return here to set your sync schedule. This schedule will dictate the interval that the connector will sync with your data source for updated documents.',
-          }
-        )}
-      </EuiText>
+      <>
+        <EuiSpacer />
+        <EuiCallOut
+          iconType="iInCircle"
+          title={i18n.translate(
+            'xpack.enterpriseSearch.content.indices.connectorScheduling.notConnected.title',
+            {
+              defaultMessage: 'Configure your connector to schedule a sync',
+            }
+          )}
+        >
+          <EuiText size="s">
+            {i18n.translate(
+              'xpack.enterpriseSearch.content.indices.connectorScheduling.notConnected.description',
+              {
+                defaultMessage:
+                  'Configure and deploy your connector, then return here to set your sync schedule. This schedule will dictate the interval that the connector will sync with your data source for updated documents.',
+              }
+            )}
+          </EuiText>
+          <EuiSpacer size="s" />
+          <EuiButtonTo
+            to={generatePath(SEARCH_INDEX_TAB_PATH, {
+              indexName: index.name,
+              tabId: SearchIndexTabId.CONFIGURATION,
+            })}
+            fill
+            size="s"
+          >
+            {i18n.translate(
+              'xpack.enterpriseSearch.content.indices.connectorScheduling.notConnected.button.label',
+              {
+                defaultMessage: 'Configure',
+              }
+            )}
+          </EuiButtonTo>
+        </EuiCallOut>
+      </>
     );
   }
-
-  const editor = (
-    <CronEditor
-      fieldToPreferredValueMap={fieldToPreferredValueMap}
-      cronExpression={simpleCron.expression}
-      frequency={simpleCron.frequency}
-      onChange={({
-        cronExpression: expression,
-        frequency,
-        fieldToPreferredValueMap: newFieldToPreferredValueMap,
-      }) => {
-        setSimpleCron({
-          expression,
-          frequency,
-        });
-        setFieldToPreferredValueMap(newFieldToPreferredValueMap);
-        setScheduling({ ...scheduling, interval: expression });
-        setHasChanges(true);
-      }}
-    />
-  );
 
   return (
     <>
@@ -105,7 +122,7 @@ export const ConnectorSchedulingComponent: React.FC = () => {
         )}
       />
       <EuiSpacer />
-      <EuiPanel hasShadow={false} hasBorder>
+      <EuiPanel hasShadow={false} hasBorder className="schedulingPanel">
         <EuiFlexGroup direction="column">
           {ingestionStatus === IngestionStatus.ERROR ? (
             <EuiCallOut
@@ -143,7 +160,26 @@ export const ConnectorSchedulingComponent: React.FC = () => {
               )}
             </EuiText>
           </EuiFlexItem>
-          <EuiFlexItem>{editor}</EuiFlexItem>
+          <EuiFlexItem>
+            <CronEditor
+              fieldToPreferredValueMap={fieldToPreferredValueMap}
+              cronExpression={simpleCron.expression}
+              frequency={simpleCron.frequency}
+              onChange={({
+                cronExpression: expression,
+                frequency,
+                fieldToPreferredValueMap: newFieldToPreferredValueMap,
+              }) => {
+                setSimpleCron({
+                  expression,
+                  frequency,
+                });
+                setFieldToPreferredValueMap(newFieldToPreferredValueMap);
+                setScheduling({ ...scheduling, interval: expression });
+                setHasChanges(true);
+              }}
+            />
+          </EuiFlexItem>
           <EuiFlexItem>
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>

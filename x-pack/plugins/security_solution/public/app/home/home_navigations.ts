@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getSecuritySolutionNavTab } from '@kbn/cloud-security-posture-plugin/public';
 import * as i18n from '../translations';
 import type { SecurityNav, SecurityNavGroup } from '../../common/components/navigation/types';
 import { SecurityNavGroupKey } from '../../common/components/navigation/types';
@@ -18,7 +19,6 @@ import {
   APP_NETWORK_PATH,
   APP_TIMELINES_PATH,
   APP_CASES_PATH,
-  APP_MANAGEMENT_PATH,
   APP_ENDPOINTS_PATH,
   APP_POLICIES_PATH,
   APP_TRUSTED_APPS_PATH,
@@ -31,6 +31,7 @@ import {
   APP_LANDING_PATH,
   APP_RESPONSE_ACTIONS_PATH,
   APP_THREAT_INTELLIGENCE_PATH,
+  APP_PATH,
 } from '../../../common/constants';
 
 export const navTabs: SecurityNav = {
@@ -118,13 +119,6 @@ export const navTabs: SecurityNav = {
     disabled: false,
     urlKey: 'cases',
   },
-  [SecurityPageName.administration]: {
-    id: SecurityPageName.administration,
-    name: i18n.ADMINISTRATION,
-    href: APP_MANAGEMENT_PATH,
-    disabled: false,
-    urlKey: 'administration',
-  },
   [SecurityPageName.endpoints]: {
     id: SecurityPageName.endpoints,
     name: i18n.ENDPOINTS,
@@ -181,6 +175,22 @@ export const navTabs: SecurityNav = {
     disabled: false,
     urlKey: 'threat_intelligence',
   },
+  [SecurityPageName.cloudSecurityPostureFindings]: {
+    ...getSecuritySolutionNavTab<SecurityPageName>('findings', APP_PATH),
+    urlKey: 'findings',
+  },
+  [SecurityPageName.cloudSecurityPostureDashboard]: {
+    ...getSecuritySolutionNavTab<SecurityPageName>('dashboard', APP_PATH),
+    urlKey: 'cloud_posture',
+  },
+  [SecurityPageName.cloudSecurityPostureBenchmarks]: {
+    ...getSecuritySolutionNavTab<SecurityPageName>('benchmarks', APP_PATH),
+    urlKey: 'administration',
+  },
+  [SecurityPageName.cloudSecurityPostureRules]: {
+    ...getSecuritySolutionNavTab<SecurityPageName>('rules', APP_PATH),
+    urlKey: 'administration',
+  },
 };
 
 export const securityNavGroup: SecurityNavGroup = {
@@ -191,6 +201,10 @@ export const securityNavGroup: SecurityNavGroup = {
   [SecurityNavGroupKey.detect]: {
     id: SecurityNavGroupKey.detect,
     name: i18n.DETECT,
+  },
+  [SecurityNavGroupKey.findings]: {
+    id: SecurityNavGroupKey.findings,
+    name: i18n.FINDINGS,
   },
   [SecurityNavGroupKey.explore]: {
     id: SecurityNavGroupKey.explore,

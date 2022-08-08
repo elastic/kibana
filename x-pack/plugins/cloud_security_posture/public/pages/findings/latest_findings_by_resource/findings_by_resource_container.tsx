@@ -6,9 +6,9 @@
  */
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { CloudPosturePageTitle } from '../../../components/cloud_posture_page_title';
 import { FindingsSearchBar } from '../layout/findings_search_bar';
 import * as TEST_SUBJECTS from '../test_subjects';
 import { useUrlQuery } from '../../../common/hooks/use_url_query';
@@ -22,8 +22,8 @@ import {
   getPaginationTableParams,
   useBaseEsQuery,
   usePersistedQuery,
-} from '../utils';
-import { PageTitle, PageTitleText, PageWrapper } from '../layout/findings_layout';
+} from '../utils/utils';
+import { PageTitle, PageTitleText } from '../layout/findings_layout';
 import { FindingsGroupBySelector } from '../layout/findings_group_by_selector';
 import { findingsNavigation } from '../../../common/navigation/constants';
 import { ResourceFindings } from './resource_findings/resource_findings_container';
@@ -89,73 +89,74 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
         }}
         loading={findingsGroupByResource.isFetching}
       />
-      <PageWrapper>
-        <PageTitle>
-          <PageTitleText
-            title={
-              <FormattedMessage
-                id="xpack.csp.findings.findingsByResource.findingsByResourcePageTitle"
-                defaultMessage="Findings"
-              />
+      <PageTitle>
+        <PageTitleText
+          title={
+            <CloudPosturePageTitle
+              isBeta
+              title={i18n.translate(
+                'xpack.csp.findings.findingsByResource.findingsByResourcePageTitle',
+                { defaultMessage: 'Findings' }
+              )}
+            />
+          }
+        />
+      </PageTitle>
+      {error && <ErrorCallout error={error} />}
+      {!error && (
+        <>
+          <FindingsGroupBySelector type="resource" />
+          {findingsGroupByResource.isSuccess && !!findingsGroupByResource.data.page.length && (
+            <FindingsDistributionBar
+              {...{
+                type: i18n.translate('xpack.csp.findings.findingsByResource.tableRowTypeLabel', {
+                  defaultMessage: 'Resources',
+                }),
+                total: findingsGroupByResource.data.total,
+                passed: findingsGroupByResource.data.count.passed,
+                failed: findingsGroupByResource.data.count.failed,
+                ...getFindingsPageSizeInfo({
+                  pageIndex: urlQuery.pageIndex,
+                  pageSize: urlQuery.pageSize,
+                  currentPageSize: findingsGroupByResource.data.page.length,
+                }),
+              }}
+            />
+          )}
+          <EuiSpacer />
+          <FindingsByResourceTable
+            loading={findingsGroupByResource.isFetching}
+            items={findingsGroupByResource.data?.page || []}
+            pagination={getPaginationTableParams({
+              pageSize: urlQuery.pageSize,
+              pageIndex: urlQuery.pageIndex,
+              totalItemCount: findingsGroupByResource.data?.total || 0,
+            })}
+            setTableOptions={({ sort, page }) =>
+              setUrlQuery({
+                sortDirection: sort?.direction,
+                pageIndex: page.index,
+                pageSize: page.size,
+              })
+            }
+            sorting={{
+              sort: { field: 'failed_findings', direction: urlQuery.sortDirection },
+            }}
+            onAddFilter={(field, value, negate) =>
+              setUrlQuery({
+                pageIndex: 0,
+                filters: getFilters({
+                  filters: urlQuery.filters,
+                  dataView,
+                  field,
+                  value,
+                  negate,
+                }),
+              })
             }
           />
-        </PageTitle>
-        {error && <ErrorCallout error={error} />}
-        {!error && (
-          <>
-            <FindingsGroupBySelector type="resource" />
-            {findingsGroupByResource.isSuccess && !!findingsGroupByResource.data.page.length && (
-              <FindingsDistributionBar
-                {...{
-                  type: i18n.translate('xpack.csp.findings.findingsByResource.tableRowTypeLabel', {
-                    defaultMessage: 'Resources',
-                  }),
-                  total: findingsGroupByResource.data.total,
-                  passed: findingsGroupByResource.data.count.passed,
-                  failed: findingsGroupByResource.data.count.failed,
-                  ...getFindingsPageSizeInfo({
-                    pageIndex: urlQuery.pageIndex,
-                    pageSize: urlQuery.pageSize,
-                    currentPageSize: findingsGroupByResource.data.page.length,
-                  }),
-                }}
-              />
-            )}
-            <EuiSpacer />
-            <FindingsByResourceTable
-              loading={findingsGroupByResource.isFetching}
-              items={findingsGroupByResource.data?.page || []}
-              pagination={getPaginationTableParams({
-                pageSize: urlQuery.pageSize,
-                pageIndex: urlQuery.pageIndex,
-                totalItemCount: findingsGroupByResource.data?.total || 0,
-              })}
-              setTableOptions={({ sort, page }) =>
-                setUrlQuery({
-                  sortDirection: sort?.direction,
-                  pageIndex: page.index,
-                  pageSize: page.size,
-                })
-              }
-              sorting={{
-                sort: { field: 'failed_findings', direction: urlQuery.sortDirection },
-              }}
-              onAddFilter={(field, value, negate) =>
-                setUrlQuery({
-                  pageIndex: 0,
-                  filters: getFilters({
-                    filters: urlQuery.filters,
-                    dataView,
-                    field,
-                    value,
-                    negate,
-                  }),
-                })
-              }
-            />
-          </>
-        )}
-      </PageWrapper>
+        </>
+      )}
     </div>
   );
 };

@@ -45,6 +45,9 @@ import type {
 import type { UiSettingsState, IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { DeprecationsServiceStart } from '@kbn/core-deprecations-browser';
 import type { Capabilities } from '@kbn/core-capabilities-common';
+import type { OverlayStart } from '@kbn/core-overlays-browser';
+import type { SavedObjectsStart } from '@kbn/core-saved-objects-browser';
+import type { NotificationsSetup, NotificationsStart } from '@kbn/core-notifications-browser';
 import type {
   ChromeBadge,
   ChromeBreadcrumb,
@@ -67,8 +70,6 @@ import type {
   NavType,
   ChromeHelpMenuActions,
 } from './chrome';
-import type { NotificationsSetup, NotificationsStart } from './notifications';
-import type { OverlayStart } from './overlays';
 import type {
   Plugin,
   PluginInitializer,
@@ -76,7 +77,6 @@ import type {
   PluginOpaqueId,
 } from './plugins';
 import type { ApplicationSetup, ApplicationStart } from './application';
-import type { SavedObjectsStart } from './saved_objects';
 
 export type { PackageInfo, EnvironmentMode } from '@kbn/config';
 export type { DomainDeprecationDetails } from '@kbn/core-deprecations-common';
@@ -86,6 +86,7 @@ export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '../utils';
 export type { AppCategory } from '../types';
 export type {
   UiSettingsParams,
+  PublicUiSettingsParams,
   UserProvidedValues,
   UiSettingsType,
 } from '@kbn/core-ui-settings-common';
@@ -127,8 +128,6 @@ export type {
   NavigateToAppOptions,
   NavigateToUrlOptions,
 } from './application';
-
-export { SimpleSavedObjectImpl } from './saved_objects';
 export type {
   SavedObjectsClientContract,
   SimpleSavedObject,
@@ -194,25 +193,25 @@ export type { IHttpFetchError } from '@kbn/core-http-browser';
 export type {
   OverlayStart,
   OverlayBannersStart,
-  OverlayRef,
   OverlayFlyoutStart,
   OverlayFlyoutOpenOptions,
   OverlayModalOpenOptions,
   OverlayModalConfirmOptions,
   OverlayModalStart,
-} from './overlays';
+} from '@kbn/core-overlays-browser';
 
 export type {
   Toast,
   ToastInput,
   IToasts,
-  ToastsApi,
   ToastInputFields,
   ToastsSetup,
   ToastsStart,
   ToastOptions,
   ErrorToastOptions,
-} from './notifications';
+} from '@kbn/core-notifications-browser';
+
+export type { ToastsApi } from '@kbn/core-notifications-browser-internal';
 
 export type { ThemeServiceSetup, ThemeServiceStart, CoreTheme } from '@kbn/core-theme-browser';
 
@@ -221,7 +220,7 @@ export type {
   ResolveDeprecationResponse,
 } from '@kbn/core-deprecations-browser';
 
-export type { MountPoint, UnmountCallback, PublicUiSettingsParams } from './types';
+export type { MountPoint, UnmountCallback, OverlayRef } from '@kbn/core-mount-utils-browser';
 
 export { URL_MAX_LENGTH } from './core_app';
 

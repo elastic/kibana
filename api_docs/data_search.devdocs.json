@@ -12396,7 +12396,9 @@
         "label": "getFilterBucketAgg",
         "description": [],
         "signature": [
-          "({ getConfig }: { getConfig: <T = any>(key: string) => any; }) => ",
+          "({ getConfig, calculateBounds, }: { getConfig: <T = any>(key: string) => T; calculateBounds: ",
+          "CalculateBoundsFn",
+          "; }) => ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -12422,7 +12424,7 @@
             "id": "def-common.getFilterBucketAgg.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ getConfig }",
+            "label": "{\n  getConfig,\n  calculateBounds,\n}",
             "description": [],
             "path": "src/plugins/data/common/search/aggs/buckets/filter.ts",
             "deprecated": false,
@@ -12435,7 +12437,7 @@
                 "label": "getConfig",
                 "description": [],
                 "signature": [
-                  "<T = any>(key: string) => any"
+                  "<T = any>(key: string) => T"
                 ],
                 "path": "src/plugins/data/common/search/aggs/buckets/filter.ts",
                 "deprecated": false,
@@ -12456,6 +12458,44 @@
                   }
                 ],
                 "returnComment": []
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-common.getFilterBucketAgg.$1.calculateBounds",
+                "type": "Function",
+                "tags": [],
+                "label": "calculateBounds",
+                "description": [],
+                "signature": [
+                  "(timeRange: ",
+                  "TimeRange",
+                  ") => ",
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataQueryPluginApi",
+                    "section": "def-common.TimeRangeBounds",
+                    "text": "TimeRangeBounds"
+                  }
+                ],
+                "path": "src/plugins/data/common/search/aggs/buckets/filter.ts",
+                "deprecated": false,
+                "returnComment": [],
+                "children": [
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-common.getFilterBucketAgg.$1.calculateBounds.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "timeRange",
+                    "description": [],
+                    "signature": [
+                      "{ from: string; to: string; mode?: \"absolute\" | \"relative\" | undefined; }"
+                    ],
+                    "path": "src/plugins/data/common/search/aggs/buckets/date_histogram.ts",
+                    "deprecated": false
+                  }
+                ]
               }
             ]
           }
@@ -18441,6 +18481,19 @@
                 "text": "QueryFilter"
               },
               " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/filter.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsFilter.timeWindow",
+            "type": "string",
+            "tags": [],
+            "label": "timeWindow",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/buckets/filter.ts",
             "deprecated": false
@@ -27224,12 +27277,8 @@
           "[] | undefined; query?: ",
           "Query",
           " | ",
-          "AggregateQuery",
-          " | (",
           "Query",
-          " | ",
-          "AggregateQuery",
-          ")[] | undefined; timeRange?: ",
+          "[] | undefined; timeRange?: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -34871,12 +34920,8 @@
               "[]; type: \"kibana_context\"; query?: ",
               "Query",
               " | ",
-              "AggregateQuery",
-              " | (",
               "Query",
-              " | ",
-              "AggregateQuery",
-              ")[] | undefined; timeRange?: ",
+              "[] | undefined; timeRange?: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -35178,12 +35223,8 @@
               "[]; type: \"kibana_context\"; query?: ",
               "Query",
               " | ",
-              "AggregateQuery",
-              " | (",
               "Query",
-              " | ",
-              "AggregateQuery",
-              ")[] | undefined; timeRange?: ",
+              "[] | undefined; timeRange?: ",
               {
                 "pluginId": "data",
                 "scope": "common",
