@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiTourStep } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { MlJobUpgradeModal } from '../../../components/modals/ml_job_upgrade_modal';
 import { affectedJobIds } from '../../../components/callouts/ml_job_compatibility_callout/affected_job_ids';
@@ -42,7 +42,6 @@ import { useInvalidateRules } from '../../../containers/detection_engine/rules/u
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
 import { RULES_TABLE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
-import { TourContextProvider } from './tour';
 
 const RulesPageComponent: React.FC = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
