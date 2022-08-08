@@ -353,6 +353,7 @@ export function ServiceList({
           noItemsMessage={noItemsMessage}
           initialSortField={initialSortField}
           initialSortDirection={initialSortDirection}
+          initialPageSize={25}
           sortFn={(itemsToSort, sortField, sortDirection) =>
             sortFn(
               itemsToSort,
