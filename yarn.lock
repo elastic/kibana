@@ -3609,7 +3609,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/kibana-json-schema@link:bazel-bin/packages/kbn-kibana-json-schema":
+"@kbn/jsonc@link:bazel-bin/packages/kbn-jsonc":
+  version "0.0.0"
+  uid ""
+
+"@kbn/kibana-manifest-parser@link:bazel-bin/packages/kbn-kibana-manifest-parser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/kibana-manifest-schema@link:bazel-bin/packages/kbn-kibana-manifest-schema":
   version "0.0.0"
   uid ""
 
@@ -3618,6 +3626,14 @@
   uid ""
 
 "@kbn/logging@link:bazel-bin/packages/kbn-logging":
+  version "0.0.0"
+  uid ""
+
+"@kbn/managed-vscode-config-cli@link:bazel-bin/packages/kbn-managed-vscode-config-cli":
+  version "0.0.0"
+  uid ""
+
+"@kbn/managed-vscode-config@link:bazel-bin/packages/kbn-managed-vscode-config":
   version "0.0.0"
   uid ""
 
@@ -3938,6 +3954,10 @@
   uid ""
 
 "@kbn/ui-theme@link:bazel-bin/packages/kbn-ui-theme":
+  version "0.0.0"
+  uid ""
+
+"@kbn/user-profile-components@link:bazel-bin/packages/kbn-user-profile-components":
   version "0.0.0"
   uid ""
 
@@ -6207,6 +6227,13 @@
   dependencies:
     "@babel/types" "^7.0.0"
 
+"@types/babel__generator@^7.6.4":
+  version "7.6.4"
+  resolved "https://registry.yarnpkg.com/@types/babel__generator/-/babel__generator-7.6.4.tgz#1f20ce4c5b1990b37900b63f050182d28c2439b7"
+  integrity sha512-tFkciB9j2K755yrTALxD44McOrk+gfpIpvC3sxHjRawj6PfnQxrse4Clq5y/Rq+G3mrBurMax/lG8Qn2t9mSsg==
+  dependencies:
+    "@babel/types" "^7.0.0"
+
 "@types/babel__helper-plugin-utils@^7.10.0":
   version "7.10.0"
   resolved "https://registry.yarnpkg.com/@types/babel__helper-plugin-utils/-/babel__helper-plugin-utils-7.10.0.tgz#dcd2416f9c189d5837ab2a276368cf67134efe78"
@@ -6818,6 +6845,11 @@
   version "7.0.9"
   resolved "https://registry.yarnpkg.com/@types/json-schema/-/json-schema-7.0.9.tgz#97edc9037ea0c38585320b28964dde3b39e4660d"
   integrity sha512-qcUXuemtEu+E5wZSJHNxUXeCZhAfXKQ41D+duX+VYPde7xyEVZci+/oXKJL13tnRs9lR2pr4fod59GT6/X1/yQ==
+
+"@types/json-schema@^7":
+  version "7.0.11"
+  resolved "https://registry.yarnpkg.com/@types/json-schema/-/json-schema-7.0.11.tgz#d421b6c527a3037f7c84433fd2c4229e016863d3"
+  integrity sha512-wOuvG1SN4Us4rez+tylwwwCV1psiNVOkJeM3AUWUNWg/jDQY2+HE/444y5gc+jBmRqASOm2Oeh5c1axHobwRKQ==
 
 "@types/json-stable-stringify@^1.0.32":
   version "1.0.32"
@@ -7489,11 +7521,19 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__jsonc@link:bazel-bin/packages/kbn-jsonc/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__kbn-ci-stats-performance-metrics@link:bazel-bin/packages/kbn-kbn-ci-stats-performance-metrics/npm_module_types":
   version "0.0.0"
   uid ""
 
-"@types/kbn__kibana-json-schema@link:bazel-bin/packages/kbn-kibana-json-schema/npm_module_types":
+"@types/kbn__kibana-manifest-parser@link:bazel-bin/packages/kbn-kibana-manifest-parser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__kibana-manifest-schema@link:bazel-bin/packages/kbn-kibana-manifest-schema/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -7502,6 +7542,14 @@
   uid ""
 
 "@types/kbn__logging@link:bazel-bin/packages/kbn-logging/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__managed-vscode-config-cli@link:bazel-bin/packages/kbn-managed-vscode-config-cli/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__managed-vscode-config@link:bazel-bin/packages/kbn-managed-vscode-config/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -7798,6 +7846,10 @@
   uid ""
 
 "@types/kbn__ui-theme@link:bazel-bin/packages/kbn-ui-theme/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__user-profile-components@link:bazel-bin/packages/kbn-user-profile-components/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -9320,10 +9372,10 @@ ajv@^6.1.0, ajv@^6.10.0, ajv@^6.10.2, ajv@^6.11.0, ajv@^6.12.2, ajv@^6.12.4, ajv
     json-schema-traverse "^0.4.1"
     uri-js "^4.2.2"
 
-ajv@^8.0.0, ajv@^8.0.1, ajv@^8.8.0:
-  version "8.9.0"
-  resolved "https://registry.yarnpkg.com/ajv/-/ajv-8.9.0.tgz#738019146638824dea25edcf299dcba1b0e7eb18"
-  integrity sha512-qOKJyNj/h+OWx7s5DePL6Zu1KeM9jPZhwBqs+7DzP6bGOvqzVCSf0xueYmVuaC/oQ/VtS2zLMLHdQFbkka+XDQ==
+ajv@^8.0.0, ajv@^8.0.1, ajv@^8.11.0, ajv@^8.8.0:
+  version "8.11.0"
+  resolved "https://registry.yarnpkg.com/ajv/-/ajv-8.11.0.tgz#977e91dd96ca669f54a11e23e378e33b884a565f"
+  integrity sha512-wGgprdCvMalC0BztXvitD2hC04YffAvtsUn93JbGXYLAtCUO4xd17mCCZQxUOItiBwZvJScWo8NIvQMQ71rdpg==
   dependencies:
     fast-deep-equal "^3.1.1"
     json-schema-traverse "^1.0.0"
@@ -19391,10 +19443,10 @@ json-schema-traverse@^1.0.0:
   resolved "https://registry.yarnpkg.com/json-schema-traverse/-/json-schema-traverse-1.0.0.tgz#ae7bcb3656ab77a73ba5c49bf654f38e6b6860e2"
   integrity sha512-NM8/P9n3XjXhIZn1lLhkFaACTOURQXjWhV4BA/RnOv8xvgqtqpAX9IO4mRQxSx1Rlo4tqzeqb0sOlruaOy3dug==
 
-json-schema-typed@^7.0.3:
-  version "7.0.3"
-  resolved "https://registry.yarnpkg.com/json-schema-typed/-/json-schema-typed-7.0.3.tgz#23ff481b8b4eebcd2ca123b4fa0409e66469a2d9"
-  integrity sha512-7DE8mpG+/fVw+dTpjbxnx47TaMnDfOI1jwft9g1VybltZCduyRQPJPvc+zzKY9WPHxhPWczyFuYa6I8Mw4iU5A==
+json-schema-typed@^8.0.1:
+  version "8.0.1"
+  resolved "https://registry.yarnpkg.com/json-schema-typed/-/json-schema-typed-8.0.1.tgz#826ee39e3b6cef536f85412ff048d3ff6f19dfa0"
+  integrity sha512-XQmWYj2Sm4kn4WeTYvmpKEbyPsL7nBsb647c7pMe6l02/yx2+Jfc4dT6UZkEXnIUb5LhD55r2HPsJ1milQ4rDg==
 
 json-schema@0.2.3, json-schema@0.4.0, json-schema@^0.4.0:
   version "0.4.0"

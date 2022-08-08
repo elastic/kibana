@@ -5,19 +5,13 @@
  * 2.0.
  */
 
-import type { SearchNavTab, UrlStateType } from './types';
 import { useUiSetting$ } from '../../lib/kibana';
+import type { SecurityPageName } from '../../../../common/constants';
 import { ENABLE_GROUPED_NAVIGATION } from '../../../../common/constants';
+import { needsUrlState } from '../../links';
 
-export const getSearch = (tab: SearchNavTab, globalQueryString: string): string => {
-  if (tab && tab.urlKey != null && !isAdministration(tab.urlKey)) {
-    return globalQueryString.length > 0 ? `?${globalQueryString}` : '';
-  }
-
-  return '';
-};
-
-export const isAdministration = (urlKey: UrlStateType): boolean => 'administration' === urlKey;
+export const getSearch = (pageName: SecurityPageName, globalQueryString: string): string =>
+  needsUrlState(pageName) && globalQueryString.length > 0 ? `?${globalQueryString}` : '';
 
 /**
  * Hook to check if the new grouped navigation is enabled on both experimental flag and advanced settings
