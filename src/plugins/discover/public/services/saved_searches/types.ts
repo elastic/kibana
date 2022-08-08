@@ -8,6 +8,7 @@
 
 import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
 import type { ISearchSource, RefreshInterval } from '@kbn/data-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
 import { DiscoverGridSettingsColumn } from '../../components/discover_grid/types';
 import { VIEW_MODE } from '../../components/view_mode_toggle';
 
@@ -29,10 +30,8 @@ export interface SavedSearchAttributes {
   hideAggregatedPreview?: boolean;
   rowHeight?: number;
 
-  // for storing time range with a saved search
   timeRestore?: boolean;
-  timeTo?: string;
-  timeFrom?: string;
+  timeRange?: TimeRange;
   refreshInterval?: RefreshInterval;
 
   rowsPerPage?: number;
@@ -64,10 +63,9 @@ export interface SavedSearch {
   rowHeight?: number;
   isTextBasedQuery?: boolean;
 
-  // for storing time range with a saved search
+  // for restoring time range with a saved search
   timeRestore?: boolean;
-  timeTo?: string;
-  timeFrom?: string;
+  timeRange?: TimeRange;
   refreshInterval?: RefreshInterval;
 
   rowsPerPage?: number;
