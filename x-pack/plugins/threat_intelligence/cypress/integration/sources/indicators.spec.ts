@@ -19,6 +19,7 @@ import {
   TABLE_CONTROLS,
   INDICATOR_TYPE_CELL,
   EMPTY_STATE,
+  FIELD_SELECTOR,
 } from '../../screens/indicators';
 import { login } from '../../tasks/login';
 
@@ -49,6 +50,8 @@ describe('Indicators page basics', () => {
     cy.get(FILTERS_GLOBAL_CONTAINER).should('exist');
 
     cy.get(`${FILTERS_GLOBAL_CONTAINER} ${TIME_RANGE_PICKER}`).should('exist');
+
+    cy.get(`${FIELD_SELECTOR}`).should('exist');
   });
 
   it('should show the indicator flyout on ioc click', () => {
@@ -110,5 +113,19 @@ describe('Indicator page search', () => {
 
       cy.get(EMPTY_STATE).should('exist').and('contain.text', 'No results');
     });
+  });
+
+  it('should have the default selected field, then update when user selects', () => {
+    const threatFeedName = 'threat.feed.name';
+    cy.get(`${FIELD_SELECTOR}`).should('have.value', threatFeedName);
+
+    const threatIndicatorIp: string = 'threat.indicator.ip';
+
+    cy.get(`${FIELD_SELECTOR}`)
+      .should('exist')
+      .select(threatIndicatorIp)
+      .should('have.value', threatIndicatorIp);
+
+    cy.get(`${FIELD_SELECTOR}`).should('have.value', threatIndicatorIp);
   });
 });
