@@ -79,14 +79,25 @@ export async function loadDataView(
   dataViews: DataViewsContract,
   config: IUiSettingsClient
 ): Promise<DataViewData> {
-  const dataViewList = (await dataViews.getCache()) as unknown as DataViewSavedObject[];
+  let loadedDataView: DataView | undefined;
+  try {
+    // fetch hoc data view
+    loadedDataView = await dataViews.get(id);
+    // eslint-disable-next-line no-empty
+  } catch (e) {}
 
-  const actualId = getDataViewId(id, dataViewList, config.get('defaultIndex'));
+  const dataViewList = (await dataViews.getCache()) as unknown as DataViewSavedObject[];
+  let actualId: string | undefined;
+  if (!loadedDataView) {
+    actualId = getDataViewId(id, dataViewList, config.get('defaultIndex'));
+    loadedDataView = await dataViews.get(actualId);
+  }
+
   return {
     list: dataViewList || [],
-    loaded: await dataViews.get(actualId),
+    loaded: loadedDataView,
     stateVal: id,
-    stateValFound: !!id && actualId === id,
+    stateValFound: !!id && (actualId ? actualId === id : true),
   };
 }
 

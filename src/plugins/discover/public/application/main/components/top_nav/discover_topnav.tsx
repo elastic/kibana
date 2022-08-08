@@ -128,6 +128,7 @@ export const DiscoverTopNav = ({
                   onChangeDataView(dataViewToSave.id);
                 }
               },
+              allowAdHocDataView: true,
             });
           }
         : undefined,
