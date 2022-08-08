@@ -8,4 +8,3 @@
 
 export { coreDeprecationProvider } from './deprecation';
 export { ensureValidConfiguration } from './ensure_valid_configuration';
-export { getDeprecationsFor, getDeprecationsForGlobalSettings } from './test_utils';
