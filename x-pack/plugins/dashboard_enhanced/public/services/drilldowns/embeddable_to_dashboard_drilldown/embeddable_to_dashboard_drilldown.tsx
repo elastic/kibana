@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { type Filter, isFilters, isFilterPinned } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import { isFilters, isFilterPinned } from '@kbn/es-query';
 import type { KibanaLocation } from 'src/plugins/share/public';
 import {
   DashboardAppLocatorParams,
