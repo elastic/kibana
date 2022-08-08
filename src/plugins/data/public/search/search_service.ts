@@ -55,6 +55,7 @@ import {
   SearchSourceService,
   selectFilterFunction,
   eqlRawResponse,
+  SearchSourceSearchOptions,
 } from '../../common/search';
 import { AggsService } from './aggs';
 import { IKibanaSearchResponse, SearchRequest } from '..';
@@ -238,8 +239,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       aggs,
       getConfig: uiSettings.get.bind(uiSettings),
       search,
-      onResponse: (request: SearchRequest, response: IKibanaSearchResponse) =>
-        handleResponse(request, response, theme),
+      onResponse: (...args: [SearchRequest, IKibanaSearchResponse, SearchSourceSearchOptions]) =>
+        handleResponse(...args, theme),
     };
 
     const config = this.initializerContext.config.get();

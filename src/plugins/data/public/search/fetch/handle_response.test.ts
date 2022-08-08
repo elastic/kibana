@@ -11,13 +11,13 @@ import { handleResponse } from './handle_response';
 // Temporary disable eslint, will be removed after moving to new platform folder
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { setNotifications } from '../../services';
-import { IKibanaSearchResponse } from '../../../common';
+import { SearchSourceSearchOptions } from '../../../common';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 
 jest.mock('@kbn/i18n', () => {
   return {
     i18n: {
-      translate: (id: string, { defaultMessage }: { defaultMessage: string }) => defaultMessage,
+      translate: (_id: string, { defaultMessage }: { defaultMessage: string }) => defaultMessage,
     },
   };
 });
@@ -26,10 +26,12 @@ const theme = themeServiceMock.createStartContract();
 
 describe('handleResponse', () => {
   const notifications = notificationServiceMock.createStartContract();
+  let options: SearchSourceSearchOptions;
 
   beforeEach(() => {
     setNotifications(notifications);
     (notifications.toasts.addWarning as jest.Mock).mockReset();
+    options = { disableShardFailureWarning: false };
   });
 
   test('should notify if timed out', () => {
@@ -38,8 +40,8 @@ describe('handleResponse', () => {
       rawResponse: {
         timed_out: true,
       },
-    } as IKibanaSearchResponse<any>;
-    const result = handleResponse(request, response, theme);
+    };
+    const result = handleResponse(request, response, options, theme);
     expect(result).toBe(response);
     expect(notifications.toasts.addWarning).toBeCalled();
     expect((notifications.toasts.addWarning as jest.Mock).mock.calls[0][0].title).toMatch(
@@ -58,8 +60,8 @@ describe('handleResponse', () => {
           skipped: 1,
         },
       },
-    } as IKibanaSearchResponse<any>;
-    const result = handleResponse(request, response, theme);
+    };
+    const result = handleResponse(request, response, options, theme);
     expect(result).toBe(response);
     expect(notifications.toasts.addWarning).toBeCalled();
     expect((notifications.toasts.addWarning as jest.Mock).mock.calls[0][0].title).toMatch(
@@ -67,12 +69,31 @@ describe('handleResponse', () => {
     );
   });
 
+  test('should not notify of shards failed if disableShardFailureWarning is true', () => {
+    options.disableShardFailureWarning = true;
+
+    const request = { body: {} };
+    const response = {
+      rawResponse: {
+        _shards: {
+          failed: 1,
+          total: 2,
+          successful: 1,
+          skipped: 1,
+        },
+      },
+    };
+    const result = handleResponse(request, response, options, theme);
+    expect(result).toBe(response);
+    expect(notifications.toasts.addWarning).not.toBeCalled();
+  });
+
   test('returns the response', () => {
     const request = {};
     const response = {
       rawResponse: {},
-    } as IKibanaSearchResponse<any>;
-    const result = handleResponse(request, response, theme);
+    };
+    const result = handleResponse(request, response, options, theme);
     expect(result).toBe(response);
   });
 });
