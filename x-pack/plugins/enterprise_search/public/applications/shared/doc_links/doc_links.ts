@@ -57,6 +57,7 @@ class DocLinks {
   public clientsRubyOverview: string;
   public clientsRustOverview: string;
   public cloudIndexManagement: string;
+  public connectors: string;
   public crawlerGettingStarted: string;
   public crawlerManaging: string;
   public crawlerOverview: string;
@@ -161,6 +162,7 @@ class DocLinks {
     this.clientsRubyOverview = '';
     this.clientsRustOverview = '';
     this.cloudIndexManagement = '';
+    this.connectors = '';
     this.crawlerGettingStarted = '';
     this.crawlerManaging = '';
     this.crawlerOverview = '';
@@ -267,6 +269,7 @@ class DocLinks {
     this.clientsRubyOverview = docLinks.links.clients.rubyOverview;
     this.clientsRustOverview = docLinks.links.clients.rustOverview;
     this.cloudIndexManagement = docLinks.links.cloud.indexManagement;
+    this.connectors = docLinks.links.enterpriseSearch.connectors;
     this.crawlerGettingStarted = docLinks.links.enterpriseSearch.crawlerGettingStarted;
     this.crawlerManaging = docLinks.links.enterpriseSearch.crawlerManaging;
     this.crawlerOverview = docLinks.links.enterpriseSearch.crawlerOverview;
