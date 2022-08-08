@@ -173,6 +173,8 @@ describe('useFailedTransactionsCorrelations', () => {
         jest.advanceTimersByTime(100);
         await waitFor(() => expect(result.current.progress.loaded).toBe(0));
         jest.advanceTimersByTime(100);
+        await waitFor(() => expect(result.current.progress.loaded).toBe(0));
+        jest.advanceTimersByTime(100);
         await waitFor(() => expect(result.current.progress.loaded).toBe(0.05));
 
         expect(result.current.progress).toEqual({
