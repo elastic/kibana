@@ -53,7 +53,7 @@ const StyledEuiCard = styled(EuiCard)`
     color: ${(props) => props.theme.eui.euiTextSubduedColor};
   }
 
-  button[role='switch'] {
+  > button[role='switch'] {
     left: auto;
     height: 100% !important;
     width: 80px;
@@ -61,9 +61,10 @@ const StyledEuiCard = styled(EuiCard)`
     border-radius: 0 5px 5px 0;
 
     > span {
-      svg {
+      > svg {
         width: 18px;
         height: 18px;
+        display: inline-block !important;
       }
 
       // hide the label
@@ -129,9 +130,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   const [advancedContentState, setAdvancedContentState] =
     useState<EuiAccordionProps['forceState']>('closed');
   const [showSavedQueryFlyout, setShowSavedQueryFlyout] = useState(false);
-  const [queryType, setQueryType] = useState<string>(() =>
-    defaultValue?.packId && canRunPacks ? 'pack' : 'query'
-  );
+  const [queryType, setQueryType] = useState<string>('query');
   const [isLive, setIsLive] = useState(false);
 
   const handleShowSaveQueryFlyout = useCallback(() => setShowSavedQueryFlyout(true), []);
@@ -472,7 +471,13 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
         return;
       }
 
-      setQueryType(!canRunPacks ? 'query' : 'pack');
+      if (canRunSingleQuery) {
+        return setQueryType('query');
+      }
+
+      if (canRunPacks) {
+        return setQueryType('pack');
+      }
     }
   }, [canRunPacks, canRunSingleQuery, defaultValue, packsData?.data, updateFieldValues]);
 
