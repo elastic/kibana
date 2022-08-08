@@ -88,7 +88,7 @@ const getAnnotationsStyle = (color = 'gray'): LineAnnotationStyle => ({
 // This is just to visually fix the line, for tooltips, that number will be again rounded down to 0.
 const Y_AXIS_MIN_DOMAIN = 0.5;
 
-export const replaceHistogramZeroesWithMinimumDomainValue = (
+export const replaceHistogramZerosWithMinimumDomainValue = (
   histogramItems: HistogramItem[]
 ) =>
   histogramItems.reduce((histogramItem, _, i) => {
@@ -275,7 +275,7 @@ export function DurationDistributionChart({
               id={d.id}
               xScaleType={ScaleType.Log}
               yScaleType={ScaleType.Log}
-              data={replaceHistogramZeroesWithMinimumDomainValue(d.histogram)}
+              data={replaceHistogramZerosWithMinimumDomainValue(d.histogram)}
               curve={CurveType.CURVE_STEP_AFTER}
               xAccessor="key"
               yAccessors={['doc_count']}
