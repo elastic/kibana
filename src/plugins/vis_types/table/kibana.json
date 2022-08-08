@@ -6,7 +6,7 @@
   "requiredPlugins": [
     "expressions",
     "visualizations",
-    "data"
+    "fieldFormats"
   ],
   "requiredBundles": [
     "kibanaUtils",
