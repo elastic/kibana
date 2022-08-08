@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { useKibana } from '../../lib/kibana';
@@ -43,6 +43,12 @@ export const useRefetchByRestartingSession = ({
       })
     );
   }, [dispatch, queryId, selectedInspectIndex]);
+
+  useEffect(() => {
+    return () => {
+      data.search.session.clear();
+    };
+  });
 
   return { searchSessionId, session, refetchByRestartingSession };
 };
