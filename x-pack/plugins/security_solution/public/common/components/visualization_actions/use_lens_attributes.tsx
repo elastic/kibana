@@ -47,7 +47,7 @@ export const useLensAttributes = ({
       return hostNameExistsFilter;
     }
 
-    if (pageName === SecurityPageName.network && tabName === NetworkRouteType.alerts) {
+    if (pageName === SecurityPageName.network && tabName === NetworkRouteType.events) {
       return filterNetworkExternalAlertData;
     }
 
