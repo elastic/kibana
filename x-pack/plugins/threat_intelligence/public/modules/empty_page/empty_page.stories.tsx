@@ -8,7 +8,7 @@
 import React from 'react';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { CoreStart } from '@kbn/core/public';
-import { EmptyPage } from './index';
+import { EmptyPage } from '.';
 
 export default {
   component: BasicEmptyPage,
