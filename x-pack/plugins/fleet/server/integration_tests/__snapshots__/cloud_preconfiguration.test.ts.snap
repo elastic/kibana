@@ -93,6 +93,7 @@ Object {
                 "sample_rate": 0.1,
               },
             ],
+            "storage_limit": "3GB",
           },
         },
         "shutdown_timeout": "30s",
@@ -104,9 +105,9 @@ Object {
           "key": "/app/config/certs/node.key",
           "key_passphrase": null,
           "supported_protocols": Array [
-            "TLSv1.0",
             "TLSv1.1",
             "TLSv1.2",
+            "TLSv1.3",
           ],
         },
         "write_timeout": "30s",

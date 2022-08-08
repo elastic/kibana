@@ -129,7 +129,7 @@ export function hitsToGeoJson(
 
 // Parse geo_point fields API response
 export function geoPointToGeometry(
-  value: Point[] | Point | undefined,
+  value: Point[] | Point | string | undefined,
   accumulator: Geometry[]
 ): void {
   if (!value) {
@@ -143,6 +143,20 @@ export function geoPointToGeometry(
     return;
   }
 
+  // runtime geo_point field returns value as "lat,lon" string instead of GeoJSON
+  // This is a workaround for a bug - https://github.com/elastic/elasticsearch/issues/85245
+  if (typeof value === 'string') {
+    const commaSplit = value.split(',');
+    const lat = parseFloat(commaSplit[0]);
+    const lon = parseFloat(commaSplit[1]);
+    accumulator.push({
+      type: GEO_JSON_TYPE.POINT,
+      coordinates: [lon, lat],
+    } as Point);
+    return;
+  }
+
+  // geo_point fields API returns GeoJSON
   accumulator.push(value as Point);
 }
 
