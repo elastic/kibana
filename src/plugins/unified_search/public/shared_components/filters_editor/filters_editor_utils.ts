@@ -156,7 +156,7 @@ export const removeFilter = (filters: Filter[], path: string) => {
   const { targetArray } = getContainerMetaByPath(newFilters, pathInArray);
   const selector = pathInArray[pathInArray.length - 1];
 
-  targetArray?.splice(selector, 1);
+  targetArray.splice(selector, 1);
 
   return normalizeFilters(newFilters);
 };

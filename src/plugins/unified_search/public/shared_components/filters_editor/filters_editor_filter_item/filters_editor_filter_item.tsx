@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useContext, useRef } from 'react';
+import React, { useCallback, useContext } from 'react';
 import {
   EuiButtonIcon,
   EuiDraggable,
@@ -21,6 +21,9 @@ import { buildEmptyFilter, FieldFilter, Filter, getFilterParams } from '@kbn/es-
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid';
+
+import returnKey from './assets/return_key.svg';
+import plus from './assets/plus.svg';
 
 import { FieldInput } from './filters_editor_filter_item_field_input';
 import { OperatorInput } from './filters_editor_filter_item_operator_input';
@@ -62,10 +65,8 @@ export function FilterItem({
   color,
   index,
 }: FilterItemProps) {
-  const { dispatch, dataView, dropTarget, currentDragElement } =
-    useContext(FiltersEditorContextType);
+  const { dispatch, dataView, dropTarget } = useContext(FiltersEditorContextType);
   const conditionalOperationType = getConditionalOperationType(filter);
-  const panelRef = useRef<HTMLDivElement | null>(null);
 
   let field: DataViewField | undefined;
   let operator: Operator | undefined;
@@ -148,7 +149,7 @@ export function FilterItem({
   }
 
   return (
-    <div ref={panelRef}>
+    <>
       {conditionalOperationType ? (
         <FilterGroup
           path={path}
@@ -158,7 +159,14 @@ export function FilterItem({
           reverseBackground={!reverseBackground}
         />
       ) : (
-        <EuiDroppable droppableId={path} spacing="s" isCombineEnabled>
+        <EuiDroppable
+          droppableId={path}
+          spacing="s"
+          isCombineEnabled
+          style={{
+            cursor: dropTarget === path ? `url(${plus}), auto` : 'auto',
+          }}
+        >
           <EuiDraggable
             spacing="m"
             key={path}
@@ -174,7 +182,7 @@ export function FilterItem({
                 alignItems="center"
                 justifyContent="center"
                 style={{
-                  cursor: dropTarget === path ? `copy` : 'auto',
+                  cursor: dropTarget === path ? `url(${returnKey}), auto` : 'auto',
                 }}
               >
                 <EuiFlexItem>
@@ -283,6 +291,6 @@ export function FilterItem({
           </EuiDraggable>
         </EuiDroppable>
       )}
-    </div>
+    </>
   );
 }
