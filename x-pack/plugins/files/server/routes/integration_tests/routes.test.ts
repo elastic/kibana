@@ -163,12 +163,16 @@ describe('File HTTP API', () => {
         });
       }
 
-      await request
+      const {
+        body: { size: size1 },
+      } = await request
         .put(root, `/api/files/files/${fileKind}/${file1.id}/blob`)
         .set('Content-Type', 'application/octet-stream')
         .send('what have you')
         .expect(200);
-      await request
+      const {
+        body: { size: size2 },
+      } = await request
         .put(root, `/api/files/files/${fileKind}/${file2.id}/blob`)
         .set('Content-Type', 'application/octet-stream')
         .send('what have you')
@@ -187,8 +191,8 @@ describe('File HTTP API', () => {
           storage: {
             esFixedSizeIndex: {
               capacity: esMaxCapacity,
-              available: 52428774,
-              used: 26,
+              available: esMaxCapacity - size1 - size2,
+              used: size1 + size2,
             },
           },
         });
