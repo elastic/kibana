@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+/* eslint-disable require-atomic-updates */
+
+import { loadEndpoints } from '../services/endpoint_loader';
+import type { EmulatorRunContext } from '../services/emulator_run_context';
 import { ProgressFormatter } from '../../common/screen/progress_formatter';
 import type { DataFormatter } from '../../common/screen';
 import { ScreenBaseClass } from '../../common/screen';
@@ -19,6 +23,10 @@ interface LoadOptions {
 
 export class LoadEndpointsScreen extends ScreenBaseClass {
   private runInfo: LoadOptions | undefined = undefined;
+
+  constructor(private readonly emulatorContext: EmulatorRunContext) {
+    super();
+  }
 
   protected header() {
     return super.header(TOOL_TITLE, 'Endpoint loader');
@@ -74,16 +82,19 @@ export class LoadEndpointsScreen extends ScreenBaseClass {
   private async loadEndpoints() {
     const runInfo = this.runInfo;
 
-    if (runInfo) {
-      const sleep = (ms = 1000) => new Promise((r) => setTimeout(r, ms));
+    if (runInfo && !runInfo.isDone && !runInfo.isRunning) {
+      runInfo.isRunning = true;
 
-      const steps = Array.from({ length: 10 }).map((_, index) => (index + 1) * 10);
-
-      for (const step of steps) {
-        this.runInfo?.progress.setProgress(step);
-        this.reRender();
-        await sleep();
-      }
+      await loadEndpoints(
+        runInfo.count,
+        this.emulatorContext.getEsClient(),
+        this.emulatorContext.getKbnClient(),
+        this.emulatorContext.getLogger(),
+        (progress) => {
+          runInfo.progress.setProgress(progress.percent);
+          this.reRender();
+        }
+      );
 
       runInfo.isDone = true;
       runInfo.isRunning = false;

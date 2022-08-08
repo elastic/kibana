@@ -38,7 +38,7 @@ export const loadEndpointsIfNoneExist = async (
 };
 
 interface LoadEndpointsProgress {
-  percent: string;
+  percent: number;
   total: number;
   created: number;
 }
@@ -69,7 +69,7 @@ export const loadEndpoints = async (
   let progress: LoadEndpointsProgress = {
     total: count,
     created: 0,
-    percent: '0%',
+    percent: 0,
   };
 
   const updateProgress = () => {
@@ -77,7 +77,7 @@ export const loadEndpoints = async (
     progress = {
       ...progress,
       created,
-      percent: `${Math.ceil((created / count) * 100)}%`,
+      percent: Math.ceil((created / count) * 100),
     };
 
     if (onProgress) {
