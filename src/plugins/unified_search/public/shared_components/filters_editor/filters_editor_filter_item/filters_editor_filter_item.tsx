@@ -162,7 +162,7 @@ export function FilterItem({
         <EuiDroppable
           droppableId={path}
           spacing="s"
-          isCombineEnabled
+          isCombineEnabled={!disableOr}
           style={{
             cursor: dropTarget === path ? `url(${plus}), auto` : 'auto',
           }}
@@ -182,7 +182,7 @@ export function FilterItem({
                 alignItems="center"
                 justifyContent="center"
                 style={{
-                  cursor: dropTarget === path ? `url(${returnKey}), auto` : 'auto',
+                  cursor: dropTarget === path && !disableOr ? `url(${returnKey}), auto` : 'auto',
                 }}
               >
                 <EuiFlexItem>
