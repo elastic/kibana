@@ -30,8 +30,8 @@ import { Moment } from 'moment';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
-import { REFRESH_INTERVALS, PAGINATION, WATCH_TYPES } from '../../../../../common/constants';
-import { listBreadcrumb } from '../../../lib/breadcrumbs';
+import { REFRESH_INTERVALS, PAGINATION, WATCH_TYPES } from '../../../../common/constants';
+import { listBreadcrumb } from '../../lib/breadcrumbs';
 import {
   getPageErrorCode,
   PageError,
@@ -39,13 +39,13 @@ import {
   WatchStatus,
   SectionLoading,
   Error,
-} from '../../../components';
-import { useLoadWatches } from '../../../lib/api';
-import { goToCreateThresholdAlert, goToCreateAdvancedWatch } from '../../../lib/navigation';
-import { useAppContext } from '../../../app_context';
-import { PageError as GenericPageError } from '../../../shared_imports';
+} from '../../components';
+import { useLoadWatches } from '../../lib/api';
+import { goToCreateThresholdAlert, goToCreateAdvancedWatch } from '../../lib/navigation';
+import { useAppContext } from '../../app_context';
+import { PageError as GenericPageError } from '../../shared_imports';
 
-export const WatchList = () => {
+export const WatchListPage = () => {
   // hooks
   const {
     setBreadcrumbs,
