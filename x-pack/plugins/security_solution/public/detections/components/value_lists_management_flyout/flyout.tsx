@@ -19,8 +19,11 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+//FOR NOW
+import { useFindLists } from './find-list-hook';
+
 import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { useFindLists, useDeleteList, useCursor } from '@kbn/securitysolution-list-hooks';
+import { useDeleteList, useCursor } from '@kbn/securitysolution-list-hooks';
 
 import { exportList } from '@kbn/securitysolution-list-api';
 
@@ -51,6 +54,10 @@ const referenceModalInitialState: ReferenceFlyoutState = {
   valueListId: '',
 };
 
+const sortDescByCreatedDate = (a: ListSchema, b: ListSchema) =>
+  new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+
+
 export const ValueListsFlyoutComponent: React.FC<ValueListsFlyoutProps> = ({
   onClose,
   showFlyout,
@@ -63,7 +70,7 @@ export const ValueListsFlyoutComponent: React.FC<ValueListsFlyoutProps> = ({
   const { start: deleteList, result: deleteResult, error: deleteError } = useDeleteList();
   const [deletingListIds, setDeletingListIds] = useState<string[]>([]);
   const [exportingListIds, setExportingListIds] = useState<string[]>([]);
-  const [exportDownload, setExportDownload] = useState<{ name?: string; blob?: Blob }>({});
+  const [exportDownload, setExportDownload] = useState<{ name?: string; blob?: Blob; }>({});
   const { addError, addSuccess } = useAppToasts();
   const [showReferenceErrorModal, setShowReferenceErrorModal] = useState<boolean>(false);
   const [referenceFlyoutState, setReferenceFlyoutState] = useState<ReferenceFlyoutState>(
@@ -71,7 +78,8 @@ export const ValueListsFlyoutComponent: React.FC<ValueListsFlyoutProps> = ({
   );
 
   const fetchLists = useCallback(() => {
-    findLists({ cursor, http, pageIndex: pageIndex + 1, pageSize });
+    // Where should I define constant values like sortField:'created_at'
+    findLists({ cursor, http, pageIndex: pageIndex + 1, pageSize, sortOrder: "desc", sortField: 'created_at' });
   }, [cursor, http, findLists, pageIndex, pageSize]);
 
   const handleDelete = useCallback(
@@ -127,7 +135,7 @@ export const ValueListsFlyoutComponent: React.FC<ValueListsFlyoutProps> = ({
   }, [deleteError]);
 
   const handleExport = useCallback(
-    async ({ id }: { id: string }) => {
+    async ({ id }: { id: string; }) => {
       try {
         setExportingListIds((ids) => [...ids, id]);
         const blob = await exportList({ http, listId: id, signal: new AbortController().signal });
@@ -142,7 +150,7 @@ export const ValueListsFlyoutComponent: React.FC<ValueListsFlyoutProps> = ({
   );
 
   const handleTableChange = useCallback(
-    ({ page: { index, size } }: { page: { index: number; size: number } }) => {
+    ({ page: { index, size } }: { page: { index: number; size: number; }; }) => {
       setPageIndex(index);
       setPageSize(size);
     },
@@ -163,6 +171,7 @@ export const ValueListsFlyoutComponent: React.FC<ValueListsFlyoutProps> = ({
         title: i18n.UPLOAD_SUCCESS_TITLE,
       });
       fetchLists();
+      setPageIndex(0);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [addSuccess]
@@ -176,7 +185,7 @@ export const ValueListsFlyoutComponent: React.FC<ValueListsFlyoutProps> = ({
 
   useEffect(() => {
     if (!lists.loading && lists.result?.cursor) {
-      setCursor(lists.result.cursor);
+      setCursor(lists.result?.cursor);
     }
   }, [lists.loading, lists.result, setCursor]);
 
@@ -199,7 +208,8 @@ export const ValueListsFlyoutComponent: React.FC<ValueListsFlyoutProps> = ({
     ...item,
     isDeleting: deletingListIds.includes(item.id),
     isExporting: exportingListIds.includes(item.id),
-  }));
+  })).sort(sortDescByCreatedDate);
+
 
   const pagination = {
     pageIndex,

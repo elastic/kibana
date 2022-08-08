@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Type } from '@kbn/securitysolution-io-ts-list-types';
+import type { SortOrderOrUndefined, Type } from '@kbn/securitysolution-io-ts-list-types';
 import { HttpStart } from '@kbn/core/public';
 
 export interface ApiParams {
@@ -18,6 +18,8 @@ export interface FindListsParams extends ApiParams {
   cursor?: string | undefined;
   pageSize: number | undefined;
   pageIndex: number | undefined;
+  sortOrder?: SortOrderOrUndefined;
+  sortField?: string | undefined;
 }
 
 export interface ImportListParams extends ApiParams {
