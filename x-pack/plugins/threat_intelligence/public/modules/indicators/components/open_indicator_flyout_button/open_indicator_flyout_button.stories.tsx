@@ -21,9 +21,7 @@ export default {
 const mockIndicator: Indicator = generateMockIndicator();
 
 const Template: ComponentStory<typeof OpenIndicatorFlyoutButton> = (args) => {
-  return (
-      <OpenIndicatorFlyoutButton {...args} />
-  );
+  return <OpenIndicatorFlyoutButton {...args} />;
 };
 
 export const Default = Template.bind({});
