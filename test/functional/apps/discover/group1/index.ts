@@ -16,8 +16,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await browser.setWindowSize(1300, 800);
     });
 
-    // this is a change to trigger build reuse, TODO remove before merge
-
     after(async function unloadMakelogs() {
       await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
     });
