@@ -23,6 +23,7 @@ import {
   useEuiTheme,
   EuiToolTip,
   EuiText,
+  EuiIcon,
 } from '@elastic/eui';
 import {
   IExecutionLog,
@@ -65,6 +66,90 @@ export interface RuleEventLogDataGrid {
   setVisibleColumns: (visibleColumns: string[]) => void;
   setSortingColumns: (sortingColumns: EuiDataGridSorting['columns']) => void;
 }
+
+const numTriggeredActionsDisplay = i18n.translate(
+  'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.triggeredActions',
+  {
+    defaultMessage: 'Triggered actions',
+  }
+);
+const numTriggeredActionsToolTip = i18n.translate(
+  'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.triggeredActionsToolTip',
+  {
+    defaultMessage: 'The subset of generated actions that will run.',
+  }
+);
+
+const numGeneratedActionsDisplay = i18n.translate(
+  'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.scheduledActions',
+  {
+    defaultMessage: 'Generated actions',
+  }
+);
+const numGeneratedActionsToolTip = i18n.translate(
+  'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.scheduledActionsToolTip',
+  {
+    defaultMessage: 'The total number of actions generated when the rule ran.',
+  }
+);
+
+const numSucceededActionsDisplay = i18n.translate(
+  'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.succeededActions',
+  {
+    defaultMessage: 'Succeeded actions',
+  }
+);
+const numSucceededActionsToolTip = i18n.translate(
+  'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.succeededActionsToolTip',
+  {
+    defaultMessage: 'The number of actions that were completed successfully.',
+  }
+);
+
+const numErroredActionsDisplay = i18n.translate(
+  'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.erroredActions',
+  {
+    defaultMessage: 'Errored actions',
+  }
+);
+const numErroredActionsToolTip = i18n.translate(
+  'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.erroredActionsToolTip',
+  {
+    defaultMessage: 'The number of failed actions.',
+  }
+);
+
+const columnsWithToolTipMap: Record<string, Record<string, string>> = {
+  num_triggered_actions: {
+    display: numTriggeredActionsDisplay,
+    toolTip: numTriggeredActionsToolTip,
+  },
+  num_generated_actions: {
+    display: numGeneratedActionsDisplay,
+    toolTip: numGeneratedActionsToolTip,
+  },
+  num_succeeded_actions: {
+    display: numSucceededActionsDisplay,
+    toolTip: numSucceededActionsToolTip,
+  },
+  num_errored_actions: {
+    display: numErroredActionsDisplay,
+    toolTip: numErroredActionsToolTip,
+  },
+};
+
+const ColumnHeaderWithToolTip = ({ id }: { id: string }) => {
+  return (
+    <EuiToolTip content={columnsWithToolTipMap[id].toolTip}>
+      <EuiFlexGroup gutterSize="xs" alignItems="center">
+        <EuiFlexItem>{columnsWithToolTipMap[id].display}</EuiFlexItem>
+        <EuiFlexItem>
+          <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiToolTip>
+  );
+};
 
 export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
   const {
@@ -242,32 +327,20 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
       },
       {
         id: 'num_triggered_actions',
-        displayAsText: i18n.translate(
-          'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.triggeredActions',
-          {
-            defaultMessage: 'Triggered actions',
-          }
-        ),
+        displayAsText: numTriggeredActionsDisplay,
+        display: <ColumnHeaderWithToolTip id="num_triggered_actions" />,
         isSortable: getIsColumnSortable('num_triggered_actions'),
       },
       {
         id: 'num_generated_actions',
-        displayAsText: i18n.translate(
-          'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.scheduledActions',
-          {
-            defaultMessage: 'Generated actions',
-          }
-        ),
+        displayAsText: numGeneratedActionsDisplay,
+        display: <ColumnHeaderWithToolTip id="num_generated_actions" />,
         isSortable: getIsColumnSortable('num_generated_actions'),
       },
       {
         id: 'num_succeeded_actions',
-        displayAsText: i18n.translate(
-          'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.succeededActions',
-          {
-            defaultMessage: 'Succeeded actions',
-          }
-        ),
+        displayAsText: numSucceededActionsDisplay,
+        display: <ColumnHeaderWithToolTip id="num_succeeded_actions" />,
         isSortable: getIsColumnSortable('num_succeeded_actions'),
       },
       {
@@ -276,12 +349,8 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
           showSortAsc: false,
           showSortDesc: false,
         },
-        displayAsText: i18n.translate(
-          'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.erroredActions',
-          {
-            defaultMessage: 'Errored actions',
-          }
-        ),
+        displayAsText: numErroredActionsDisplay,
+        display: <ColumnHeaderWithToolTip id="num_errored_actions" />,
         isSortable: getIsColumnSortable('num_errored_actions'),
       },
       {
