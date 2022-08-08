@@ -344,6 +344,18 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
     return ruleIndices;
   }, [enrichedAlert, ruleIndices]);
 
+  const useRuleDataViewId = useMemo(() => {
+    if (
+      enrichedAlert != null &&
+      enrichedAlert['kibana.alert.rule.parameters']?.data_view_id != null
+    ) {
+      return enrichedAlert['kibana.alert.rule.parameters'].data_view_id;
+    } else if (enrichedAlert != null && enrichedAlert?.signal?.rule?.data_view_id != null) {
+      return enrichedAlert.signal.rule.data_view_id;
+    }
+    return '';
+  }, [enrichedAlert]);
+
   const isLoading = isLoadingAlertData && isSignalIndexLoading;
 
   return (
@@ -351,6 +363,7 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
       ruleName={ruleName}
       ruleId={ruleId}
       ruleIndices={useRuleIndices}
+      dataViewId={useRuleDataViewId}
       exceptionListType={exceptionListType}
       alertData={enrichedAlert}
       isAlertDataLoading={isLoading}
