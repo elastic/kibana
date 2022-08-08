@@ -519,7 +519,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     currentTourStep: 1,
     isTourActive: true,
     tourPopoverWidth: 300,
-    tourSubtitle: 'Demo tour',
+    tourSubtitle: i18n.DATA_SOURCE_GUIDE_SUB_TITLE,
   };
 
   const [tourState, setTourState] = useState(() => {
@@ -540,10 +540,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     const demoTourSteps = [
       {
         step: 1,
-        title: 'Step 1',
+        title: i18n.DATA_SOURCE_GUIDE_TITLE,
         content: (
           <span>
-            <p>{'Copy and paste this sample query.'}</p>
+            <p>{i18n.DATA_SOURCE_GUIDE_CONTENT}</p>
             <EuiSpacer />
           </span>
         ),
