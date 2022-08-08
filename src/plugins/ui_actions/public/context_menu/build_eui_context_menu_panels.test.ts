@@ -16,11 +16,13 @@ const createTestAction = ({
   dispayName,
   order,
   grouping = undefined,
+  disabled,
 }: {
   type?: string;
   dispayName: string;
   order?: number;
   grouping?: PresentableGrouping;
+  disabled?: boolean;
 }) =>
   createAction({
     id: type as string,
@@ -29,11 +31,15 @@ const createTestAction = ({
     order,
     execute: async () => {},
     grouping,
+    disabled: disabled ?? false,
   });
 
 const resultMapper = (panel: EuiContextMenuPanelDescriptor) => ({
   items: panel.items
-    ? panel.items.map((item) => ({ name: item.isSeparator ? 'SEPARATOR' : item.name }))
+    ? panel.items.map((item) => ({
+        name: item.isSeparator ? 'SEPARATOR' : item.name,
+        ...(!item.isSeparator ? { disabled: item.disabled } : {}),
+      }))
     : [],
 });
 
@@ -421,6 +427,36 @@ test('does not add separator for first grouping if there are no main items', asy
       },
       Object {
         "items": Array [
+          Object {
+            "name": "Foo 5",
+          },
+        ],
+      },
+    ]
+  `);
+});
+
+test('it creates disabled actions', async () => {
+  const actions = [
+    createTestAction({
+      dispayName: 'Foo 4',
+      disabled: true,
+    }),
+    createTestAction({
+      dispayName: 'Foo 5',
+    }),
+  ];
+  const menu = await buildContextMenuForActions({
+    actions: actions.map((action) => ({ action, context: {}, trigger: { id: 'TEST' } })),
+  });
+
+  expect(menu.map(resultMapper)).toMatchInlineSnapshot(`
+    Array [
+      Object {
+        "items": Array [
+          Object {
+            "name": "Foo 4",
+          },
           Object {
             "name": "Foo 5",
           },
