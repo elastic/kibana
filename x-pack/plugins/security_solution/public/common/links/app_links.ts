@@ -6,7 +6,7 @@
  */
 import type { CoreStart } from '@kbn/core/public';
 import type { AppLinkItems } from './types';
-import { links as indicatorsLinks } from '../../threat_intelligence/links';
+import { indicatorsLinks } from '../../threat_intelligence/links';
 import { links as detectionLinks } from '../../detections/links';
 import { links as timelinesLinks } from '../../timelines/links';
 import { getCasesLinkItems } from '../../cases/links';

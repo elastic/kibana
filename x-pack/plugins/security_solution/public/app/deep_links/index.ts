@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 import { getSecuritySolutionLink } from '@kbn/cloud-security-posture-plugin/public';
+import { getSecuritySolutionDeepLink } from '@kbn/threat-intelligence-plugin/public';
 import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 import { getCasesDeepLinks } from '@kbn/cases-plugin/public';
 import {
@@ -35,7 +36,6 @@ import {
   GETTING_STARTED,
   HOST_ISOLATION_EXCEPTIONS,
   HOSTS,
-  INDICATORS,
   INVESTIGATE,
   KUBERNETES,
   MANAGE,
@@ -44,7 +44,6 @@ import {
   POLICIES,
   RESPONSE_ACTIONS,
   RULES,
-  THREAT_INTELLIGENCE,
   TIMELINES,
   TRUSTED_APPLICATIONS,
   USERS,
@@ -60,7 +59,6 @@ import {
   EXCEPTIONS_PATH,
   HOST_ISOLATION_EXCEPTIONS_PATH,
   HOSTS_PATH,
-  INDICATORS_PATH,
   KUBERNETES_PATH,
   LANDING_PATH,
   NETWORK_PATH,
@@ -378,30 +376,10 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         ],
       },
       {
-        id: SecurityPageName.threatIntelligence,
-        title: THREAT_INTELLIGENCE,
-        path: INDICATORS_PATH,
+        ...getSecuritySolutionDeepLink<SecurityPageName>('indicators'),
         navLinkStatus: AppNavLinkStatus.visible,
         order: 9006,
-        searchable: false,
         features: [FEATURE.general],
-        keywords: [
-          i18n.translate('xpack.securitySolution.search.threatIntelligence', {
-            defaultMessage: 'Intelligence',
-          }),
-        ],
-        deepLinks: [
-          {
-            id: SecurityPageName.indicators,
-            title: INDICATORS,
-            path: INDICATORS_PATH,
-            keywords: [
-              i18n.translate('xpack.securitySolution.search.threatIntelligence.indicators', {
-                defaultMessage: 'Indicators',
-              }),
-            ],
-          },
-        ],
       },
       {
         id: SecurityPageName.kubernetes,

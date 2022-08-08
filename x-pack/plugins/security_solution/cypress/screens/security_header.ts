@@ -49,7 +49,7 @@ export const NETWORK = '[data-test-subj="groupedNavPanelLink-network"]';
 
 export const USERS = '[data-test-subj="groupedNavPanelLink-users"]';
 
-export const INDICATORS = '[data-test-subj="groupedNavItemLink-indicators"]';
+export const INDICATORS = '[data-test-subj="groupedNavItemLink-threat_intelligence-indicators"]';
 
 export const RULES = '[data-test-subj="groupedNavPanelLink-rules"]';
 

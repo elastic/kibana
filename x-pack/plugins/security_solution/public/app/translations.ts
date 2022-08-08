@@ -148,10 +148,3 @@ export const THREAT_INTELLIGENCE = i18n.translate(
     defaultMessage: 'Intelligence',
   }
 );
-
-export const INDICATORS = i18n.translate(
-  'xpack.securitySolution.navigation.threatIntelligence.indicators',
-  {
-    defaultMessage: 'Indicators',
-  }
-);

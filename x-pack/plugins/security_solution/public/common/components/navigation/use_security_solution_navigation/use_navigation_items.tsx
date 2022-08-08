@@ -117,7 +117,7 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
             },
             {
               ...securityNavGroup[SecurityNavGroupKey.intelligence],
-              items: [navTabs[SecurityPageName.indicators]],
+              items: [navTabs[SecurityPageName.threatIntelligenceIndicators]],
             },
             {
               ...securityNavGroup[SecurityNavGroupKey.investigate],
