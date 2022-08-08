@@ -61,6 +61,8 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     }
   );
 
+  console.log('browserFields', browserFields);
+
   const {
     isolateAction,
     isHostIsolationPanelOpen,

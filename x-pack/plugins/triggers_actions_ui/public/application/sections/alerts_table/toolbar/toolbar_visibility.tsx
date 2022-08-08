@@ -10,15 +10,59 @@ import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strat
 import React, { lazy, Suspense } from 'react';
 import { BulkActionsConfig } from '../../../../types';
 import { LastUpdatedAt } from './components/last_updated_at';
+import { FieldBrowser, FieldBrowserProps } from '../../field_browser';
 
 const BulkActionsToolbar = lazy(() => import('../bulk_actions/components/toolbar'));
 
-const getDefaultVisibility = (updatedAt: number) => {
+const getDefaultVisibility = (
+  updatedAt: number,
+  columnIds: string[]
+): EuiDataGridToolBarVisibilityOptions => {
+  const fieldBrowserProps: FieldBrowserProps = {
+    columnIds,
+    browserFields: [
+      {
+        fields: {
+          'elastic.agent.id': {
+            aggregatable: true,
+            category: 'elastic',
+            description: 'test description',
+            format: 'string',
+            indexes: [
+              '-*elastic-cloud-logs-*',
+              '.alerts-security.alerts-default',
+              'apm-*-transaction*',
+              'auditbeat-*',
+              'endgame-*',
+              'filebeat-*',
+              'logs-*',
+              'packetbeat-*',
+              'traces-apm*',
+              'winlogbeat-*',
+            ],
+
+            name: 'elastic.agent.id',
+            readFromDocValues: true,
+            searchable: true,
+            type: 'string',
+          },
+        },
+      },
+    ],
+    onResetColumns: () => console.log('reset columns clicked'),
+    onToggleColumn: () => console.log('onToggleColumn clicked'),
+    options: {},
+    width: 55,
+  };
+
   return {
     showColumnSelector: true,
     showSortSelector: true,
     additionalControls: {
       right: <LastUpdatedAt updatedAt={updatedAt} />,
+      left: {
+        append: <FieldBrowser {...fieldBrowserProps} />,
+      },
     },
   };
 };
@@ -30,6 +74,7 @@ export const getToolbarVisibility = ({
   alerts,
   isLoading,
   updatedAt,
+  columnIds,
 }: {
   bulkActions: BulkActionsConfig[];
   alertsCount: number;
@@ -37,12 +82,14 @@ export const getToolbarVisibility = ({
   alerts: EcsFieldsResponse[];
   isLoading: boolean;
   updatedAt: number;
+  columnIds: string[];
 }): EuiDataGridToolBarVisibilityOptions => {
   const selectedRowsCount = rowSelection.size;
-  const defaultVisibility = getDefaultVisibility(updatedAt);
+  const defaultVisibility = getDefaultVisibility(updatedAt, columnIds);
+  const isBulkActionsActive =
+    selectedRowsCount === 0 || selectedRowsCount === undefined || bulkActions.length === 0;
 
-  if (selectedRowsCount === 0 || selectedRowsCount === undefined || bulkActions.length === 0)
-    return defaultVisibility;
+  if (isBulkActionsActive) return defaultVisibility;
 
   const options = {
     showColumnSelector: false,
