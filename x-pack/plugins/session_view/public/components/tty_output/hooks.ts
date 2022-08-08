@@ -7,17 +7,17 @@
 import { Terminal } from 'xterm';
 import 'xterm/css/xterm.css';
 import { FitAddon } from 'xterm-addon-fit';
-import { SearchAddon } from './search';
 import { useMemo, useState, useEffect, useCallback } from 'react';
 import { useInfiniteQuery } from 'react-query';
 import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { SearchAddon } from './search';
 import { useEuiTheme } from '../../hooks';
 import {
   IOLine,
   ProcessEvent,
   ProcessEventResults,
-  ProcessEventsPage
+  ProcessEventsPage,
 } from '../../../common/types/process_tree';
 import {
   IO_EVENTS_ROUTE,
@@ -68,10 +68,10 @@ export const useFetchIOEvents = (sessionEntityId: string) => {
  */
 export const useIOLines = (pages: ProcessEventsPage[] | undefined) => {
   const lines: IOLine[] = useMemo(() => {
-    const lines: IOLine[] = [];
+    const newLines: IOLine[] = [];
 
     if (!pages) {
-      return lines;
+      return newLines;
     }
 
     return pages.reduce((previous, current) => {
@@ -82,8 +82,8 @@ export const useIOLines = (pages: ProcessEventsPage[] | undefined) => {
               return {
                 value: line,
 
-                //TODO: other process meta
-              }
+                // TODO: other process meta
+              };
             });
 
             previous = previous.concat(data);
@@ -92,8 +92,8 @@ export const useIOLines = (pages: ProcessEventsPage[] | undefined) => {
       }
 
       return previous;
-    }, lines);
-  }, [pages?.length]);
+    }, newLines);
+  }, [pages]);
 
   return lines;
 };
@@ -103,7 +103,8 @@ export const useXtermPlayer = (
   isPlaying: boolean,
   lines: IOLine[],
   hasNextPage?: boolean,
-  fetchNextPage?: () => void
+  fetchNextPage?: () => void,
+  isFullscreen?: boolean
 ) => {
   const { euiTheme } = useEuiTheme();
   const { font, colors } = euiTheme;
@@ -129,36 +130,46 @@ export const useXtermPlayer = (
     term.loadAddon(searchInstance);
 
     return [term, fitInstance, searchInstance];
-  }, []);
+  }, [colors, font]);
 
   useEffect(() => {
     if (ref.current) {
       terminal.open(ref.current);
+    }
+  }, [terminal, ref]);
+
+  useEffect(() => {
+    // isFullscreen check is there just to avoid the necessary "unnecessary" react-hook dep
+    // When isFullscreen changes, e.g goes from false to true and vice versa, we need to call fit.
+    if (isFullscreen !== undefined) {
       fitAddon.fit();
     }
-  }, [fitAddon, terminal]);
+  }, [isFullscreen, fitAddon]);
 
-  const render = useCallback((lineNumber: number) => {
-    if (lines.length === 0) {
-      return;
-    }
-
-    let linesToPrint;
-
-    if (userSeeked) {
-      linesToPrint = lines.slice(0, lineNumber);
-      terminal.clear();
-      setUserSeeked(false);
-    } else {
-      linesToPrint = [lines[lineNumber]];
-    }
-
-    linesToPrint.forEach((line) => {
-      if (line?.value !== undefined) {
-        terminal.writeln(line.value);
+  const render = useCallback(
+    (lineNumber: number) => {
+      if (lines.length === 0) {
+        return;
       }
-    });
-  }, [terminal, lines, userSeeked]);
+
+      let linesToPrint;
+
+      if (userSeeked) {
+        linesToPrint = lines.slice(0, lineNumber);
+        terminal.clear();
+        setUserSeeked(false);
+      } else {
+        linesToPrint = [lines[lineNumber]];
+      }
+
+      linesToPrint.forEach((line) => {
+        if (line?.value !== undefined) {
+          terminal.writeln(line.value);
+        }
+      });
+    },
+    [terminal, lines, userSeeked]
+  );
 
   useEffect(() => {
     if (isPlaying) {
@@ -174,7 +185,7 @@ export const useXtermPlayer = (
 
       return () => {
         clearInterval(timer);
-      }
+      };
     }
   }, [lines, currentLine, isPlaying, playSpeed]);
 
@@ -184,16 +195,19 @@ export const useXtermPlayer = (
     if (hasNextPage && fetchNextPage && currentLine === lines.length - 1) {
       fetchNextPage();
     }
-  }, [currentLine]);
+  }, [fetchNextPage, currentLine, lines, render, hasNextPage]);
 
   const seekToLine = useCallback((line) => {
     setUserSeeked(true);
     setCurrentLine(line);
   }, []);
 
-  const search = useCallback((query) => {
-    return searchAddon.findNext(query, { caseSensitive: false, lastLineOnly: true });
-  }, [searchAddon]);
+  const search = useCallback(
+    (query) => {
+      return searchAddon.findNext(query, { caseSensitive: false, lastLineOnly: true });
+    },
+    [searchAddon]
+  );
 
   const fit = useCallback(() => {
     fitAddon.fit();
@@ -206,5 +220,5 @@ export const useXtermPlayer = (
     seekToLine,
     search,
     fit,
-  }
+  };
 };

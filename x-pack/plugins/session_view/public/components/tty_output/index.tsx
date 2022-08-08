@@ -13,15 +13,14 @@ import React, {
   ChangeEvent,
   MouseEvent,
 } from 'react';
-import { throttle } from 'lodash';
 import { EuiPanel, EuiRange, EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
 import { SessionViewSearchBar } from '../session_view_search_bar';
 import { useStyles } from './styles';
 import { useFetchIOEvents, useIOLines, useXtermPlayer } from './hooks';
 import { IOLine } from '../../../common/types/process_tree';
 
-export interface TTYOutputDeps {
-  sessionEntityId: string;
+export interface TTYPlayerDeps {
+  sessionEntityId: string; // TODO: we should not load by session id, but instead a combo of process.tty.major+minor, session time range, and host.boot_id (see Rabbitholes section of epic).
   onClose(): void;
   isFullscreen: boolean;
 }
@@ -31,12 +30,11 @@ interface SearchResult {
   matches: string[];
 }
 
-export const TTYOutput = ({ sessionEntityId, onClose, isFullscreen }: TTYOutputDeps) => {
+export const TTYPlayer = ({ sessionEntityId, onClose, isFullscreen }: TTYPlayerDeps) => {
   const styles = useStyles();
   const ref = useRef(null);
 
   const { data, error, fetchNextPage, hasNextPage, isFetching } = useFetchIOEvents(sessionEntityId);
-
   const lines = useIOLines(data?.pages);
   const [isPlaying, setIsPlaying] = useState(false);
   const { search, fit, currentLine, seekToLine } = useXtermPlayer(
@@ -44,7 +42,8 @@ export const TTYOutput = ({ sessionEntityId, onClose, isFullscreen }: TTYOutputD
     isPlaying,
     lines,
     hasNextPage,
-    fetchNextPage
+    fetchNextPage,
+    isFullscreen
   );
 
   const [currentMatch, setCurrentMatch] = useState<{ match: SearchResult; index: number } | null>(
@@ -59,20 +58,8 @@ export const TTYOutput = ({ sessionEntityId, onClose, isFullscreen }: TTYOutputD
       setCurrentMatch(null);
       setIsPlaying(false);
     },
-    [lines, hasNextPage, fetchNextPage]
+    [seekToLine]
   );
-
-  useEffect(() => {
-    if (fit) {
-      fit();
-    }
-  }, [isFullscreen]);
-
-  useEffect(() => {
-    if (!isFetching && hasNextPage && currentLine === lines.length - 1) {
-      fetchNextPage();
-    }
-  }, [currentLine, lines]);
 
   const onSearch = useCallback((query) => {
     setSearchQuery(query);
@@ -91,7 +78,7 @@ export const TTYOutput = ({ sessionEntityId, onClose, isFullscreen }: TTYOutputD
         clearTimeout(timeout);
       };
     }
-  }, [currentMatch, currentLine, searchQuery]);
+  }, [currentMatch, currentLine, searchQuery, lines, search, seekToLine]);
 
   const searchResults = useMemo(() => {
     if (searchQuery) {
@@ -100,9 +87,9 @@ export const TTYOutput = ({ sessionEntityId, onClose, isFullscreen }: TTYOutputD
 
       lines.reduce((previous: SearchResult[], current: IOLine) => {
         if (current.value) {
-          const matches = current.value.match(regex);
-          if (matches) {
-            previous.push({ line: current, matches });
+          const match = current.value.match(regex);
+          if (match) {
+            previous.push({ line: current, matches: match });
           }
         }
 
@@ -119,7 +106,7 @@ export const TTYOutput = ({ sessionEntityId, onClose, isFullscreen }: TTYOutputD
     }
 
     return [];
-  }, [searchQuery]);
+  }, [searchQuery, lines]);
 
   const totalMatches = useMemo(() => {
     return searchResults.reduce((previous: number, current: SearchResult) => {
@@ -171,64 +158,9 @@ export const TTYOutput = ({ sessionEntityId, onClose, isFullscreen }: TTYOutputD
     [currentMatch, getMatchByIndex]
   );
 
-  const alerts = useMemo(() => {
-    const stuff = [];
-
-    if (lines.length > 150) {
-      stuff.push({
-        min: 150,
-        max: 152,
-        color: 'danger',
-      });
-    }
-    if (lines.length > 200) {
-      stuff.push({
-        min: 200,
-        max: 204,
-        color: 'danger',
-      });
-    }
-
-    return stuff;
-  }, [lines.length]);
-
-  const levels = useMemo(
-    () => [
-      ...alerts,
-      ...searchResults.map((value: SearchResult) => {
-        const lineIndex = lines.indexOf(value.line);
-
-        return {
-          min: lineIndex,
-          max: lineIndex + 1,
-          color: 'warning',
-        };
-      }),
-    ],
-    [searchResults, alerts]
-  );
-
   const onTogglePlayback = useCallback(() => {
     setIsPlaying(!isPlaying);
   }, [isPlaying]);
-
-  const ticks = useMemo(() => {
-    const processes = [];
-
-    if (lines.length > 0) {
-      processes.push({ value: 0, label: 'bash' });
-    }
-
-    if (lines.length > 17) {
-      processes.push({ value: 17, label: 'vim' });
-    }
-
-    if (lines.length > 283) {
-      processes.push({ value: 283, label: 'bash' });
-    }
-
-    return processes;
-  }, [lines.length]);
 
   return (
     <div css={styles.container}>
@@ -276,10 +208,7 @@ export const TTYOutput = ({ sessionEntityId, onClose, isFullscreen }: TTYOutputD
               max={lines.length}
               onChange={onLineChange}
               fullWidth
-              levels={levels}
-              ticks={ticks}
               showInput
-              showTicks
             />
           </EuiFlexItem>
         </EuiFlexGroup>
