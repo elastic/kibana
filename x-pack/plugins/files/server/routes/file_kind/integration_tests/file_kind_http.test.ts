@@ -50,7 +50,7 @@ describe('File kind HTTP API', () => {
       .set('Content-Type', 'application/octet-stream')
       .send('what have you')
       .expect(200);
-    expect(result.body).toEqual({ ok: true });
+    expect(result.body).toEqual({ ok: true, size: 13 });
   });
 
   test('download a file with the expected header values', async () => {
