@@ -193,6 +193,7 @@ export class VisualizeEmbeddable
   }
 
   /**
+   * Gets the Visualize embeddable's local filters
    * @returns Local/panel-level array of filters for Visualize embeddable
    */
   public async getFilters() {
@@ -206,6 +207,7 @@ export class VisualizeEmbeddable
   }
 
   /**
+   * Gets the Visualize embeddable's local query
    * @returns Local/panel-level query for Visualize embeddable
    */
   public async getQuery() {

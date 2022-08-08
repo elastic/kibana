@@ -874,6 +874,7 @@ export class Embeddable
   }
 
   /**
+   * Gets the Lens embeddable's local filters
    * @returns Local/panel-level array of filters for Lens embeddable
    */
   public async getFilters() {
@@ -886,6 +887,7 @@ export class Embeddable
   }
 
   /**
+   * Gets the Lens embeddable's local query
    * @returns Local/panel-level query for Lens embeddable
    */
   public async getQuery() {
