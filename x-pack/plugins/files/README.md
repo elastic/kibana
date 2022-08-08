@@ -4,7 +4,7 @@ Bringing blob storage to Kibana
 
 ## Status
 
-The files plugin is currently still under development. If you want to use files please reach out to the (App Services team)[https://github.com/orgs/elastic/teams/kibana-stack-management] and let's talk about your use case and share our current roadmap.
+The files plugin is currently still under development. If you want to use files please reach out to the (App Services team)[https://github.com/orgs/elastic/teams/kibana-app-services] and let's talk about your use case and share our current roadmap.
 
 ---
 
