@@ -106,9 +106,7 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     'data-test-subj': 'hostSeverityAlertsTable-hostName',
     render: (hostName: string) => (
       <EuiToolTip position="left" title={i18n.OPEN_HOST_DETAIL_TOOLTIP} content={hostName}>
-        <div style={{ maxWidth: 50 }}>
-          <HostDetailsLink hostName={hostName} />
-        </div>
+        <HostDetailsLink hostName={hostName} />
       </EuiToolTip>
     ),
   },
