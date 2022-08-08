@@ -21,15 +21,15 @@ import { REPO_ROOT } from '@kbn/utils';
  */
 export const BAZEL_PACKAGE_DIRS = [
   'packages',
+  'packages/shared-ux',
+  'packages/shared-ux/*',
+  'packages/shared-ux/*/*',
   'packages/analytics',
   'packages/analytics/shippers',
   'packages/analytics/shippers/elastic_v3',
   'packages/core/*',
   'packages/home',
   'packages/kbn-content-management',
-  'packages/kbn-content-management/*',
-  'packages/shared-ux',
-  'packages/shared-ux/*',
   'x-pack/packages/ml',
 ];
 

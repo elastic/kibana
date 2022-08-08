@@ -23,7 +23,7 @@ export const useIndicatorsTotalCount = () => {
     },
   } = useKibana();
   const [count, setCount] = useState<number>(0);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const defaultThreatIndex = uiSettings.get<string[]>(DEFAULT_THREAT_INDEX_KEY);
@@ -57,7 +57,6 @@ export const useIndicatorsTotalCount = () => {
       },
     };
 
-    setIsLoading(true);
     searchService
       .search<IEsSearchRequest, IKibanaSearchResponse<RawIndicatorsResponse>>(req)
       .subscribe({

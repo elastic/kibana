@@ -989,5 +989,89 @@ describe('UserProfileService', () => {
         kibana: ['privilege-1', 'privilege-2'],
       });
     });
+
+    it('properly handles privileges checks when privileges have to be checked in multiple steps and user requested less users than have required privileges', async () => {
+      // In this test we'd like to simulate the following case:
+      // 1. User requests 2 results with privileges check
+      // 2. Kibana will fetch 10 (min batch) results
+      // 3. Only UID-0, UID-1 and UID-8 profiles will have necessary privileges
+      mockStartParams.clusterClient.asInternalUser.security.suggestUserProfiles.mockResolvedValue({
+        profiles: Array.from({ length: 10 }).map((_, index) =>
+          userProfileMock.createWithSecurity({
+            uid: `UID-${index}`,
+            data: { some: 'data', kibana: { some: `kibana-data-${index}` } },
+          })
+        ),
+      } as unknown as SecuritySuggestUserProfilesResponse);
+
+      const mockAtSpacePrivilegeCheck = { atSpace: jest.fn() };
+      mockAtSpacePrivilegeCheck.atSpace.mockResolvedValue({
+        hasPrivilegeUids: ['UID-0', 'UID-1', 'UID-8'],
+        errorUids: [],
+      });
+      mockAuthz.checkUserProfilesPrivileges.mockReturnValue(mockAtSpacePrivilegeCheck);
+
+      const startContract = userProfileService.start(mockStartParams);
+      await expect(
+        startContract.suggest({
+          name: 'some',
+          size: 2,
+          dataPath: '*',
+          requiredPrivileges: {
+            spaceId: 'some-space',
+            privileges: { kibana: ['privilege-1', 'privilege-2'] },
+          },
+        })
+      ).resolves.toMatchInlineSnapshot(`
+              Array [
+                Object {
+                  "data": Object {
+                    "some": "kibana-data-0",
+                  },
+                  "enabled": true,
+                  "uid": "UID-0",
+                  "user": Object {
+                    "display_name": undefined,
+                    "email": "some@email",
+                    "full_name": undefined,
+                    "username": "some-username",
+                  },
+                },
+                Object {
+                  "data": Object {
+                    "some": "kibana-data-1",
+                  },
+                  "enabled": true,
+                  "uid": "UID-1",
+                  "user": Object {
+                    "display_name": undefined,
+                    "email": "some@email",
+                    "full_name": undefined,
+                    "username": "some-username",
+                  },
+                },
+              ]
+            `);
+      expect(
+        mockStartParams.clusterClient.asInternalUser.security.suggestUserProfiles
+      ).toHaveBeenCalledTimes(1);
+      expect(
+        mockStartParams.clusterClient.asInternalUser.security.suggestUserProfiles
+      ).toHaveBeenCalledWith({
+        name: 'some',
+        size: 10,
+        data: 'kibana.*',
+      });
+
+      expect(mockAuthz.checkUserProfilesPrivileges).toHaveBeenCalledTimes(1);
+      expect(mockAuthz.checkUserProfilesPrivileges).toHaveBeenCalledWith(
+        new Set(Array.from({ length: 10 }).map((_, index) => `UID-${index}`))
+      );
+
+      expect(mockAtSpacePrivilegeCheck.atSpace).toHaveBeenCalledTimes(1);
+      expect(mockAtSpacePrivilegeCheck.atSpace).toHaveBeenCalledWith('some-space', {
+        kibana: ['privilege-1', 'privilege-2'],
+      });
+    });
   });
 });
