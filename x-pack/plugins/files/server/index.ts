@@ -10,7 +10,6 @@ import { FilesPlugin } from './plugin';
 
 export type {
   FileClient,
-  Pagination,
   FileDescriptor,
   GetMetadataArg,
   FindMetadataArg,

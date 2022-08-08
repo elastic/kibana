@@ -14,7 +14,6 @@ export type {
   GetMetadataArg,
   GetUsageMetricsArgs,
   ListMetadataArg,
-  Pagination,
   UpdateMetadataArg,
 } from './file_metadata_client';
 export { FileClientImpl } from './file_client';

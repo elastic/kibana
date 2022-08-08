@@ -17,12 +17,11 @@ import { escapeKuery } from '@kbn/es-query';
 
 import { FindFileArgs } from '../../../file_service/file_action_types';
 import { ES_FIXED_SIZE_INDEX_BLOB_STORE } from '../../../../common/constants';
-import type { FileMetadata, FilesMetrics, FileStatus } from '../../../../common/types';
+import type { FileMetadata, FilesMetrics, FileStatus, Pagination } from '../../../../common/types';
 import type {
   FileMetadataClient,
   UpdateArgs,
   FileDescriptor,
-  Pagination,
   GetUsageMetricsArgs,
 } from '../file_metadata_client';
 
