@@ -147,10 +147,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await testSubjects.click('discoverAlertsButton');
     await testSubjects.click('discoverCreateAlertButton');
 
-    await testSubjects.setValue('ruleNameInput', alertName);
+    await retry.waitFor('rule name value is correct', async () => {
+      await testSubjects.setValue('ruleNameInput', alertName);
+      const ruleName = await testSubjects.getAttribute('ruleNameInput', 'value');
+      return ruleName === alertName;
+    });
     await testSubjects.click('thresholdPopover');
     await testSubjects.setValue('alertThresholdInput', '3');
-    await testSubjects.click('.index-alerting-ActionTypeSelectOption');
+    await retry.waitFor('actions accordion to exist', async () => {
+      await testSubjects.click('.index-alerting-ActionTypeSelectOption');
+      return await testSubjects.exists('alertActionAccordion-0');
+    });
 
     await monacoEditor.setCodeEditorValue(`{
       "rule_id": "{{ruleId}}",
