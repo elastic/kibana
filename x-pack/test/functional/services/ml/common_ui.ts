@@ -384,6 +384,7 @@ export function MachineLearningCommonUIProvider({
         expectedHeader,
         `Expected the toast header to equal "${expectedHeader}" (got "${title}")`
       );
+      await toasts.dismissAllToasts();
     },
   };
 }

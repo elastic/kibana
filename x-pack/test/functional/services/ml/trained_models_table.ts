@@ -27,7 +27,6 @@ export function TrainedModelsTableProvider(
 ) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const toasts = getService('toasts');
 
   return new (class ModelsTable {
     public async parseModelsTable() {
@@ -262,15 +261,15 @@ export function TrainedModelsTableProvider(
         `Deployment for "${modelId}" has been started successfully.`
       );
 
-      await toasts.dismissAllToasts();
+      await mlCommonUI.waitForRefreshButtonEnabled();
     }
 
     public async stopDeployment(modelId: string) {
-      await toasts.dismissAllToasts();
       await this.clickStopDeploymentAction(modelId);
       await mlCommonUI.assertLastToastHeader(
         `Deployment for "${modelId}" has been stopped successfully.`
       );
+      await mlCommonUI.waitForRefreshButtonEnabled();
     }
 
     public async openStartDeploymentModal(modelId: string) {
