@@ -21,6 +21,8 @@ import { useHostRiskScore } from '../../../../risk_score/containers';
 import { useHostIsolationTools } from './use_host_isolation_tools';
 import { FlyoutBody, FlyoutHeader, FlyoutFooter } from './flyout';
 import { useBasicDataFromDetailsData } from './helpers';
+import { useSpaceId } from '../../../../common/hooks/use_space_id';
+import { DEFAULT_ALERTS_INDEX } from '../../../../../common/constants';
 
 interface EventDetailsPanelProps {
   browserFields: BrowserFields;
@@ -51,10 +53,18 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   timelineId,
   isReadOnly,
 }) => {
+  // The referenced alert _index is .internal.alerts-security.alerts-spaceId,
+  // but we always want to use the alias .alerts-security.alerts-spaceId.
+
+  const currentSpaceId = useSpaceId();
+  const eventIndex = expandedEvent.indexName.includes(DEFAULT_ALERTS_INDEX)
+    ? `${DEFAULT_ALERTS_INDEX}-${currentSpaceId}`
+    : expandedEvent.indexName;
+
   const [loading, detailsData, rawEventData, ecsData, refetchFlyoutData] = useTimelineEventsDetails(
     {
       entityType,
-      indexName: expandedEvent.indexName ?? '',
+      indexName: eventIndex ?? '',
       eventId: expandedEvent.eventId ?? '',
       runtimeMappings,
       skip: !expandedEvent.eventId,
