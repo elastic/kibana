@@ -291,6 +291,7 @@ function PrimaryMetricEditor(props: Props) {
                   };
             setState({
               ...state,
+              color: undefined,
               ...params,
             });
           }}
