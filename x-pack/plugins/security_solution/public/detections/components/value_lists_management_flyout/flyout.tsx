@@ -19,13 +19,13 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-//FOR NOW
-import { useFindLists } from './find-list-hook';
+// FOR NOW
 
 import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { useDeleteList, useCursor } from '@kbn/securitysolution-list-hooks';
 
 import { exportList } from '@kbn/securitysolution-list-api';
+import { useFindLists } from './find-list-hook';
 
 import { useKibana } from '../../../common/lib/kibana';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
@@ -57,7 +57,6 @@ const referenceModalInitialState: ReferenceFlyoutState = {
 const sortDescByCreatedDate = (a: ListSchema, b: ListSchema) =>
   new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
 
-
 export const ValueListsFlyoutComponent: React.FC<ValueListsFlyoutProps> = ({
   onClose,
   showFlyout,
@@ -70,7 +69,7 @@ export const ValueListsFlyoutComponent: React.FC<ValueListsFlyoutProps> = ({
   const { start: deleteList, result: deleteResult, error: deleteError } = useDeleteList();
   const [deletingListIds, setDeletingListIds] = useState<string[]>([]);
   const [exportingListIds, setExportingListIds] = useState<string[]>([]);
-  const [exportDownload, setExportDownload] = useState<{ name?: string; blob?: Blob; }>({});
+  const [exportDownload, setExportDownload] = useState<{ name?: string; blob?: Blob }>({});
   const { addError, addSuccess } = useAppToasts();
   const [showReferenceErrorModal, setShowReferenceErrorModal] = useState<boolean>(false);
   const [referenceFlyoutState, setReferenceFlyoutState] = useState<ReferenceFlyoutState>(
@@ -79,7 +78,14 @@ export const ValueListsFlyoutComponent: React.FC<ValueListsFlyoutProps> = ({
 
   const fetchLists = useCallback(() => {
     // Where should I define constant values like sortField:'created_at'
-    findLists({ cursor, http, pageIndex: pageIndex + 1, pageSize, sortOrder: "desc", sortField: 'created_at' });
+    findLists({
+      cursor,
+      http,
+      pageIndex: pageIndex + 1,
+      pageSize,
+      sortOrder: 'desc',
+      sortField: 'created_at',
+    });
   }, [cursor, http, findLists, pageIndex, pageSize]);
 
   const handleDelete = useCallback(
@@ -135,7 +141,7 @@ export const ValueListsFlyoutComponent: React.FC<ValueListsFlyoutProps> = ({
   }, [deleteError]);
 
   const handleExport = useCallback(
-    async ({ id }: { id: string; }) => {
+    async ({ id }: { id: string }) => {
       try {
         setExportingListIds((ids) => [...ids, id]);
         const blob = await exportList({ http, listId: id, signal: new AbortController().signal });
@@ -150,7 +156,7 @@ export const ValueListsFlyoutComponent: React.FC<ValueListsFlyoutProps> = ({
   );
 
   const handleTableChange = useCallback(
-    ({ page: { index, size } }: { page: { index: number; size: number; }; }) => {
+    ({ page: { index, size } }: { page: { index: number; size: number } }) => {
       setPageIndex(index);
       setPageSize(size);
     },
@@ -204,12 +210,13 @@ export const ValueListsFlyoutComponent: React.FC<ValueListsFlyoutProps> = ({
     return null;
   }
 
-  const tableItems = (lists.result?.data ?? []).map((item) => ({
-    ...item,
-    isDeleting: deletingListIds.includes(item.id),
-    isExporting: exportingListIds.includes(item.id),
-  })).sort(sortDescByCreatedDate);
-
+  const tableItems = (lists.result?.data ?? [])
+    .map((item) => ({
+      ...item,
+      isDeleting: deletingListIds.includes(item.id),
+      isExporting: exportingListIds.includes(item.id),
+    }))
+    .sort(sortDescByCreatedDate);
 
   const pagination = {
     pageIndex,

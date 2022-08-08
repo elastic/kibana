@@ -1,16 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { chain, fromEither, map, tryCatch } from 'fp-ts/lib/TaskEither';
 import { flow } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { validateEither } from '@kbn/securitysolution-io-ts-utils';
-import {
+import type {
   AcknowledgeSchema,
   DeleteListSchemaEncoded,
   ExportListItemQuerySchemaEncoded,
@@ -20,6 +19,8 @@ import {
   ImportListItemSchemaEncoded,
   ListItemIndexExistSchema,
   ListSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+import {
   acknowledgeSchema,
   deleteListSchema,
   exportListItemQuerySchema,
@@ -38,7 +39,7 @@ import {
 } from '@kbn/securitysolution-list-constants';
 import { toError, toPromise } from './fp_utils';
 
-import {
+import type {
   ApiParams,
   DeleteListParams,
   ExportListParams,
@@ -62,7 +63,7 @@ const findLists = async ({
   per_page,
   signal,
   sort_field,
-  sort_order
+  sort_order,
 }: ApiParams & FindListSchemaEncoded): Promise<FoundListSchema> => {
   return http.fetch(`${LIST_URL}/_find`, {
     method: 'GET',
@@ -71,7 +72,7 @@ const findLists = async ({
       page,
       per_page,
       sort_field,
-      sort_order
+      sort_order,
     },
     signal,
   });
@@ -84,7 +85,7 @@ const findListsWithValidation = async ({
   pageSize,
   signal,
   sortField,
-  sortOrder
+  sortOrder,
 }: FindListsParams): Promise<FoundListSchema> =>
   pipe(
     {
