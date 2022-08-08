@@ -60,5 +60,15 @@ module.exports = (_, options = {}) => ({
         allowDeclareFields: true,
       },
     ],
+
+    {
+      plugins: [
+        require.resolve('babel-plugin-transform-typescript-metadata'),
+
+        // Need this for TypeScript decorators support
+        // @see https://babeljs.io/docs/en/babel-plugin-transform-typescript#typescript-compiler-options
+        [require.resolve('@babel/plugin-proposal-decorators'), { version: 'legacy' }],
+      ],
+    },
   ],
 });
