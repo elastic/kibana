@@ -244,7 +244,6 @@
 /packages/kbn-optimizer/ @elastic/kibana-operations
 /packages/kbn-plugin-discovery/ @elastic/kibana-operations
 /packages/kbn-pm/ @elastic/kibana-operations
-/packages/kbn-shared-svg/ @elastic/kibana-operations
 /packages/kbn-test/ @elastic/kibana-operations
 /packages/kbn-type-summarizer*/ @elastic/kibana-operations
 /packages/kbn-ui-shared-deps-npm/ @elastic/kibana-operations
