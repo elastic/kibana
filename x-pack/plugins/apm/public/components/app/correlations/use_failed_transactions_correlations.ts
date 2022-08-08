@@ -85,48 +85,54 @@ export function useFailedTransactionsCorrelations() {
         fallbackResult: undefined,
       };
 
-      const [overallHistogramResponse, errorHistogramRespone] =
-        await Promise.all([
-          // Initial call to fetch the overall distribution for the log-log plot.
-          callApmApi(
-            'POST /internal/apm/latency/overall_distribution/transactions',
-            {
-              signal: abortCtrl.current.signal,
-              params: {
-                body: {
-                  ...fetchParams,
-                  percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
-                  chartType:
-                    LatencyDistributionChartType.failedTransactionsCorrelations,
-                },
-              },
-            }
-          ),
-          callApmApi(
-            'POST /internal/apm/latency/overall_distribution/transactions',
-            {
-              signal: abortCtrl.current.signal,
-              params: {
-                body: {
-                  ...fetchParams,
-                  percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
-                  termFilters: [
-                    {
-                      fieldName: EVENT_OUTCOME,
-                      fieldValue: EventOutcome.failure,
-                    },
-                  ],
-                  chartType:
-                    LatencyDistributionChartType.failedTransactionsCorrelations,
-                },
-              },
-            }
-          ),
-        ]);
+      // Initial call to fetch the overall distribution for the log-log plot.
+      const overallHistogramResponse = await callApmApi(
+        'POST /internal/apm/latency/overall_distribution/transactions',
+        {
+          signal: abortCtrl.current.signal,
+          params: {
+            body: {
+              ...fetchParams,
+              percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
+              chartType:
+                LatencyDistributionChartType.failedTransactionsCorrelations,
+            },
+          },
+        }
+      );
 
-      const { overallHistogram, totalDocCount, percentileThresholdValue } =
-        overallHistogramResponse;
-      const { overallHistogram: errorHistogram } = errorHistogramRespone;
+      const {
+        overallHistogram,
+        totalDocCount,
+        percentileThresholdValue,
+        durationMin,
+        durationMax,
+      } = overallHistogramResponse;
+
+      const errorHistogramResponse = await callApmApi(
+        'POST /internal/apm/latency/overall_distribution/transactions',
+        {
+          signal: abortCtrl.current.signal,
+          params: {
+            body: {
+              ...fetchParams,
+              percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
+              termFilters: [
+                {
+                  fieldName: EVENT_OUTCOME,
+                  fieldValue: EventOutcome.failure,
+                },
+              ],
+              durationMin,
+              durationMax,
+              chartType:
+                LatencyDistributionChartType.failedTransactionsCorrelations,
+            },
+          },
+        }
+      );
+
+      const { overallHistogram: errorHistogram } = errorHistogramResponse;
 
       responseUpdate.errorHistogram = errorHistogram;
       responseUpdate.overallHistogram = overallHistogram;
@@ -179,7 +185,12 @@ export function useFailedTransactionsCorrelations() {
           {
             signal: abortCtrl.current.signal,
             params: {
-              body: { ...fetchParams, fieldCandidates: fieldCandidatesChunk },
+              body: {
+                ...fetchParams,
+                fieldCandidates: fieldCandidatesChunk,
+                durationMin,
+                durationMax,
+              },
             },
           }
         );

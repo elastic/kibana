@@ -34,9 +34,13 @@ export const fetchSignificantCorrelations = async ({
   environment,
   kuery,
   query,
+  durationMinOverride,
+  durationMaxOverride,
   fieldValuePairs,
 }: CommonCorrelationsQueryParams & {
   setup: Setup;
+  durationMinOverride?: number;
+  durationMaxOverride?: number;
   fieldValuePairs: FieldValuePair[];
 }) => {
   // Create an array of ranges [2, 4, 6, ..., 98]
@@ -75,7 +79,7 @@ export const fetchSignificantCorrelations = async ({
     ranges,
   });
 
-  const histogramRangeSteps = await fetchDurationHistogramRangeSteps({
+  const { rangeSteps } = await fetchDurationHistogramRangeSteps({
     setup,
     chartType,
     start,
@@ -84,6 +88,8 @@ export const fetchSignificantCorrelations = async ({
     kuery,
     query,
     searchMetrics,
+    durationMinOverride,
+    durationMaxOverride,
   });
 
   const { fulfilled, rejected } = splitAllSettledPromises(
@@ -100,7 +106,7 @@ export const fetchSignificantCorrelations = async ({
           expectations,
           ranges,
           fractions,
-          histogramRangeSteps,
+          histogramRangeSteps: rangeSteps,
           totalDocCount,
           fieldValuePair,
         })
@@ -147,7 +153,7 @@ export const fetchSignificantCorrelations = async ({
           filter: [query, ...termQuery(fieldName, fieldValue)],
         },
       },
-      rangeSteps: histogramRangeSteps,
+      rangeSteps,
       searchMetrics,
     });
 
