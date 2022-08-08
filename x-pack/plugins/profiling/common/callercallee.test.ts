@@ -10,7 +10,7 @@ import {
   createCallerCalleeIntermediateNode,
   fromCallerCalleeIntermediateNode,
 } from './callercallee';
-import { hashFrameGroup } from './frame_group';
+import { createFrameGroupID } from './frame_group';
 import { createStackFrameMetadata } from './profiling';
 
 import { events, stackTraces, stackFrames, executables } from './__fixtures__/stacktraces';
@@ -40,8 +40,8 @@ describe('Caller-callee operations', () => {
     const child = createCallerCalleeIntermediateNode(childFrame, 10, 'child');
 
     const root = createCallerCalleeIntermediateNode(createStackFrameMetadata(), 10, 'root');
-    root.callees.set(hashFrameGroup(child.frameGroup), child);
-    root.callees.set(hashFrameGroup(parent.frameGroup), parent);
+    root.callees.set(createFrameGroupID(child.frameGroup), child);
+    root.callees.set(createFrameGroupID(parent.frameGroup), parent);
 
     const graph = fromCallerCalleeIntermediateNode(root);
 

@@ -5,73 +5,159 @@
  * 2.0.
  */
 
-import jsonStableStringify from 'json-stable-stringify';
-
 import { StackFrameMetadata } from './profiling';
 
-export type FrameGroup = Pick<
-  StackFrameMetadata,
-  'FileID' | 'ExeFileName' | 'FunctionName' | 'AddressOrLine' | 'SourceFilename'
->;
+export type FrameGroupID = string;
 
-// This is a convenience function to create a FrameGroup value with
-// defaults for missing fields
-export function createFrameGroup(options: Partial<FrameGroup> = {}): FrameGroup {
-  const frameGroup = {} as FrameGroup;
-
-  frameGroup.FileID = options.FileID ?? '';
-  frameGroup.ExeFileName = options.ExeFileName ?? '';
-  frameGroup.FunctionName = options.FunctionName ?? '';
-  frameGroup.AddressOrLine = options.AddressOrLine ?? 0;
-  frameGroup.SourceFilename = options.SourceFilename ?? '';
-
-  return frameGroup;
+enum FrameGroupName {
+  EMPTY = 'empty',
+  ELF = 'elf',
+  FULL = 'full',
 }
 
-export function compareFrameGroup(a: FrameGroup, b: FrameGroup): number {
-  if (a.ExeFileName < b.ExeFileName) return -1;
-  if (a.ExeFileName > b.ExeFileName) return 1;
-  if (a.SourceFilename < b.SourceFilename) return -1;
-  if (a.SourceFilename > b.SourceFilename) return 1;
-  if (a.FunctionName < b.FunctionName) return -1;
-  if (a.FunctionName > b.FunctionName) return 1;
-  if (a.FileID < b.FileID) return -1;
-  if (a.FileID > b.FileID) return 1;
-  if (a.AddressOrLine < b.AddressOrLine) return -1;
-  if (a.AddressOrLine > b.AddressOrLine) return 1;
-  return 0;
+interface BaseFrameGroup {
+  readonly name: FrameGroupName;
 }
 
-// defaultGroupBy is the "standard" way of grouping frames, by commonly
+interface EmptyFrameGroup extends BaseFrameGroup {
+  readonly name: FrameGroupName.EMPTY;
+  readonly fileID: StackFrameMetadata['FileID'];
+  readonly addressOrLine: StackFrameMetadata['AddressOrLine'];
+}
+
+interface ElfFrameGroup extends BaseFrameGroup {
+  readonly name: FrameGroupName.ELF;
+  readonly fileID: StackFrameMetadata['FileID'];
+  readonly functionName: StackFrameMetadata['FunctionName'];
+}
+
+interface FullFrameGroup extends BaseFrameGroup {
+  readonly name: FrameGroupName.FULL;
+  readonly exeFilename: StackFrameMetadata['ExeFileName'];
+  readonly functionName: StackFrameMetadata['FunctionName'];
+  readonly sourceFilename: StackFrameMetadata['SourceFilename'];
+}
+
+export type FrameGroup = EmptyFrameGroup | ElfFrameGroup | FullFrameGroup;
+
+// createFrameGroup is the "standard" way of grouping frames, by commonly
 // shared group identifiers.
 //
 // For ELF-symbolized frames, group by FunctionName and FileID.
 // For non-symbolized frames, group by FileID and AddressOrLine.
-// Otherwise group by ExeFileName, SourceFilename and FunctionName.
-export function defaultGroupBy(frame: StackFrameMetadata): FrameGroup {
-  const frameGroup = createFrameGroup();
-
+// otherwise group by ExeFileName, SourceFilename and FunctionName.
+export function createFrameGroup(frame: StackFrameMetadata): FrameGroup {
   if (frame.FunctionName === '') {
-    // Non-symbolized frame where we only have FileID and AddressOrLine
-    frameGroup.FileID = frame.FileID;
-    frameGroup.AddressOrLine = frame.AddressOrLine;
-  } else if (frame.SourceFilename === '') {
-    // Non-symbolized frame with FunctionName set from ELF data
-    frameGroup.FunctionName = frame.FunctionName;
-    frameGroup.FileID = frame.FileID;
-  } else {
-    // This is a symbolized frame
-    frameGroup.ExeFileName = frame.ExeFileName;
-    frameGroup.SourceFilename = frame.SourceFilename;
-    frameGroup.FunctionName = frame.FunctionName;
+    return {
+      name: FrameGroupName.EMPTY,
+      fileID: frame.FileID,
+      addressOrLine: frame.AddressOrLine,
+    } as EmptyFrameGroup;
   }
 
-  return frameGroup;
+  if (frame.SourceFilename === '') {
+    return {
+      name: FrameGroupName.ELF,
+      fileID: frame.FileID,
+      functionName: frame.FunctionName,
+    } as ElfFrameGroup;
+  }
+
+  return {
+    name: FrameGroupName.FULL,
+    exeFilename: frame.ExeFileName,
+    functionName: frame.FunctionName,
+    sourceFilename: frame.SourceFilename,
+  } as FullFrameGroup;
 }
 
-export type FrameGroupID = string;
+// compareFrameGroup compares any two frame groups
+//
+// In general, frame groups are ordered using the following steps:
+//
+//   * If frame groups are the same type, then we compare using their same
+//     properties
+//   * If frame groups have different types, then we compare using overlapping
+//     properties
+//   * If frame groups do not share properties, then we compare using the frame
+//     group type
+//
+// The union of the properties across all frame group types are ordered below
+// from highest to lowest. For instance, given any two frame groups, shared
+// properties are compared in the given order:
+//
+//   * exeFilename
+//   * sourceFilename
+//   * functionName
+//   * fileID
+//   * addressOrLine
+//
+// Frame group types are ordered according to how much symbolization metadata
+// is available, starting from most to least:
+//
+//   * Symbolized frame group
+//   * ELF-symbolized frame group
+//   * Unsymbolized frame group
+export function compareFrameGroup(a: FrameGroup, b: FrameGroup): number {
+  if (a.name === FrameGroupName.EMPTY) {
+    if (b.name === FrameGroupName.EMPTY) {
+      if (a.fileID < b.fileID) return -1;
+      if (a.fileID > b.fileID) return 1;
+      if (a.addressOrLine < b.addressOrLine) return -1;
+      if (a.addressOrLine > b.addressOrLine) return 1;
+      return 0;
+    }
+    if (b.name === FrameGroupName.ELF) {
+      if (a.fileID < b.fileID) return -1;
+      if (a.fileID > b.fileID) return 1;
+    }
+    return -1;
+  }
 
-export function hashFrameGroup(frameGroup: FrameGroup): FrameGroupID {
-  // We use serialized JSON as the unique value of a frame group for now
-  return jsonStableStringify(frameGroup);
+  if (a.name === FrameGroupName.ELF) {
+    if (b.name === FrameGroupName.EMPTY) {
+      if (a.fileID < b.fileID) return -1;
+      if (a.fileID > b.fileID) return 1;
+      return 1;
+    }
+    if (b.name === FrameGroupName.ELF) {
+      if (a.functionName < b.functionName) return -1;
+      if (a.functionName > b.functionName) return 1;
+      if (a.fileID < b.fileID) return -1;
+      if (a.fileID > b.fileID) return 1;
+      return 0;
+    }
+    if (a.functionName < b.functionName) return -1;
+    if (a.functionName > b.functionName) return 1;
+    return -1;
+  }
+
+  if (b.name === FrameGroupName.FULL) {
+    if (a.exeFilename < b.exeFilename) return -1;
+    if (a.exeFilename > b.exeFilename) return 1;
+    if (a.sourceFilename < b.sourceFilename) return -1;
+    if (a.sourceFilename > b.sourceFilename) return 1;
+    if (a.functionName < b.functionName) return -1;
+    if (a.functionName > b.functionName) return 1;
+    return 0;
+  }
+  if (b.name === FrameGroupName.ELF) {
+    if (a.functionName < b.functionName) return -1;
+    if (a.functionName > b.functionName) return 1;
+  }
+  return 1;
+}
+
+export function createFrameGroupID(frameGroup: FrameGroup): FrameGroupID {
+  switch (frameGroup.name) {
+    case FrameGroupName.EMPTY:
+      return `${frameGroup.name}:${frameGroup.fileID}:${frameGroup.addressOrLine}`;
+      break;
+    case FrameGroupName.ELF:
+      return `${frameGroup.name}:${frameGroup.fileID}:${frameGroup.functionName}`;
+      break;
+    case FrameGroupName.FULL:
+      return `${frameGroup.name}:${frameGroup.exeFilename}:${frameGroup.functionName}:${frameGroup.sourceFilename}`;
+      break;
+  }
 }

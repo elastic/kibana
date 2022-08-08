@@ -5,56 +5,173 @@
  * 2.0.
  */
 
-import { compareFrameGroup, createFrameGroup, defaultGroupBy, hashFrameGroup } from './frame_group';
+import { compareFrameGroup, createFrameGroup, createFrameGroupID } from './frame_group';
 import { createStackFrameMetadata } from './profiling';
 
-describe('Frame group operations', () => {
-  test('check if a frame group is less than another', () => {
-    const a = createFrameGroup({ ExeFileName: 'chrome' });
-    const b = createFrameGroup({ ExeFileName: 'dockerd' });
-    expect(compareFrameGroup(a, b)).toEqual(-1);
-  });
-
-  test('check if a frame group is greater than another', () => {
-    const a = createFrameGroup({ ExeFileName: 'oom_reaper' });
-    const b = createFrameGroup({ ExeFileName: 'dockerd' });
-    expect(compareFrameGroup(a, b)).toEqual(1);
-  });
-
-  test('check if frame groups are equal', () => {
-    const a = createFrameGroup({ AddressOrLine: 1234 });
-    const b = createFrameGroup({ AddressOrLine: 1234 });
-    expect(compareFrameGroup(a, b)).toEqual(0);
-  });
-
-  test('check serialized non-symbolized frame', () => {
-    const metadata = createStackFrameMetadata({
+const nonSymbolizedFrameGroups = [
+  createFrameGroup(
+    createStackFrameMetadata({
       FileID: '0x0123456789ABCDEF',
       AddressOrLine: 102938,
-    });
-    expect(hashFrameGroup(defaultGroupBy(metadata))).toEqual(
-      '{"AddressOrLine":102938,"ExeFileName":"","FileID":"0x0123456789ABCDEF","FunctionName":"","SourceFilename":""}'
-    );
-  });
-
-  test('check serialized non-symbolized ELF frame', () => {
-    const metadata = createStackFrameMetadata({
-      FunctionName: 'strlen()',
+    })
+  ),
+  createFrameGroup(
+    createStackFrameMetadata({
       FileID: '0x0123456789ABCDEF',
-    });
-    expect(hashFrameGroup(defaultGroupBy(metadata))).toEqual(
-      '{"AddressOrLine":0,"ExeFileName":"","FileID":"0x0123456789ABCDEF","FunctionName":"strlen()","SourceFilename":""}'
-    );
-  });
+      AddressOrLine: 1234,
+    })
+  ),
+  createFrameGroup(
+    createStackFrameMetadata({
+      FileID: '0x0102030405060708',
+      AddressOrLine: 1234,
+    })
+  ),
+];
 
-  test('check serialized symbolized frame', () => {
-    const metadata = createStackFrameMetadata({
+const elfSymbolizedFrameGroups = [
+  createFrameGroup(
+    createStackFrameMetadata({
+      FileID: '0x0123456789ABCDEF',
+      FunctionName: 'strlen()',
+    })
+  ),
+  createFrameGroup(
+    createStackFrameMetadata({
+      FileID: '0xFEDCBA9876543210',
+      FunctionName: 'strtok()',
+    })
+  ),
+  createFrameGroup(
+    createStackFrameMetadata({
+      FileID: '0xFEDCBA9876543210',
+      FunctionName: 'main()',
+    })
+  ),
+];
+
+const symbolizedFrameGroups = [
+  createFrameGroup(
+    createStackFrameMetadata({
       ExeFileName: 'chrome',
       SourceFilename: 'strlen()',
       FunctionName: 'strlen()',
+    })
+  ),
+  createFrameGroup(
+    createStackFrameMetadata({
+      ExeFileName: 'dockerd',
+      SourceFilename: 'main()',
+      FunctionName: 'createTask()',
+    })
+  ),
+  createFrameGroup(
+    createStackFrameMetadata({
+      ExeFileName: 'oom_reaper',
+      SourceFilename: 'main()',
+      FunctionName: 'crash()',
+    })
+  ),
+];
+
+describe('Frame group operations', () => {
+  describe('check if a non-symbolized frame group is', () => {
+    test('less than another non-symbolized frame group', () => {
+      expect(compareFrameGroup(nonSymbolizedFrameGroups[1], nonSymbolizedFrameGroups[0])).toEqual(
+        -1
+      );
     });
-    expect(hashFrameGroup(defaultGroupBy(metadata))).toEqual(
-      '{"AddressOrLine":0,"ExeFileName":"chrome","FileID":"","FunctionName":"strlen()","SourceFilename":"strlen()"}'
-    );
+
+    test('equal to another non-symbolized frame group', () => {
+      expect(compareFrameGroup(nonSymbolizedFrameGroups[0], nonSymbolizedFrameGroups[0])).toEqual(
+        0
+      );
+    });
+
+    test('greater than another non-symbolized frame group', () => {
+      expect(compareFrameGroup(nonSymbolizedFrameGroups[1], nonSymbolizedFrameGroups[2])).toEqual(
+        1
+      );
+    });
+
+    test('less than an ELF-symbolized frame group', () => {
+      expect(compareFrameGroup(nonSymbolizedFrameGroups[1], elfSymbolizedFrameGroups[0])).toEqual(
+        -1
+      );
+    });
+
+    test('less than a symbolized frame group', () => {
+      expect(compareFrameGroup(nonSymbolizedFrameGroups[1], symbolizedFrameGroups[0])).toEqual(-1);
+    });
+  });
+
+  describe('check if an ELF-symbolized frame group is', () => {
+    test('less than another ELF-symbolized frame group', () => {
+      expect(compareFrameGroup(elfSymbolizedFrameGroups[0], elfSymbolizedFrameGroups[1])).toEqual(
+        -1
+      );
+    });
+
+    test('equal to another ELF-symbolized frame group', () => {
+      expect(compareFrameGroup(elfSymbolizedFrameGroups[0], elfSymbolizedFrameGroups[0])).toEqual(
+        0
+      );
+    });
+
+    test('greater than another ELF-symbolized frame group', () => {
+      expect(compareFrameGroup(elfSymbolizedFrameGroups[1], elfSymbolizedFrameGroups[0])).toEqual(
+        1
+      );
+    });
+
+    test('greater than a non-symbolized frame group', () => {
+      expect(compareFrameGroup(elfSymbolizedFrameGroups[0], nonSymbolizedFrameGroups[0])).toEqual(
+        1
+      );
+    });
+
+    test('less than a symbolized frame group', () => {
+      expect(compareFrameGroup(elfSymbolizedFrameGroups[2], symbolizedFrameGroups[0])).toEqual(-1);
+    });
+  });
+
+  describe('check if a symbolized frame group is', () => {
+    test('less than another symbolized frame group', () => {
+      expect(compareFrameGroup(symbolizedFrameGroups[0], symbolizedFrameGroups[1])).toEqual(-1);
+    });
+
+    test('equal to another symbolized frame group', () => {
+      expect(compareFrameGroup(symbolizedFrameGroups[0], symbolizedFrameGroups[0])).toEqual(0);
+    });
+
+    test('greater than another symbolized frame group', () => {
+      expect(compareFrameGroup(symbolizedFrameGroups[1], symbolizedFrameGroups[0])).toEqual(1);
+    });
+
+    test('greater than a non-symbolized frame group', () => {
+      expect(compareFrameGroup(symbolizedFrameGroups[0], nonSymbolizedFrameGroups[0])).toEqual(1);
+    });
+
+    test('greater than an ELF-symbolized frame group', () => {
+      expect(compareFrameGroup(symbolizedFrameGroups[0], elfSymbolizedFrameGroups[2])).toEqual(1);
+    });
+  });
+
+  describe('check serialization for', () => {
+    test('non-symbolized frame', () => {
+      expect(createFrameGroupID(nonSymbolizedFrameGroups[0])).toEqual(
+        'empty:0x0123456789ABCDEF:102938'
+      );
+    });
+
+    test('non-symbolized ELF frame', () => {
+      expect(createFrameGroupID(elfSymbolizedFrameGroups[0])).toEqual(
+        'elf:0x0123456789ABCDEF:strlen()'
+      );
+    });
+
+    test('symbolized frame', () => {
+      expect(createFrameGroupID(symbolizedFrameGroups[0])).toEqual('full:chrome:strlen():strlen()');
+    });
   });
 });
