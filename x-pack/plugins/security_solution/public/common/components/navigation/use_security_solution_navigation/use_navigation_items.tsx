@@ -33,7 +33,7 @@ export const usePrimaryNavigationItems = ({
     (tab: NavTab) => {
       const { id, name, disabled } = tab;
       const isSelected = selectedTabId === id;
-      const urlSearch = getSearch(tab, globalQueryString);
+      const urlSearch = getSearch(tab.id as SecurityPageName, globalQueryString);
 
       const handleClick = (ev: React.MouseEvent) => {
         ev.preventDefault();

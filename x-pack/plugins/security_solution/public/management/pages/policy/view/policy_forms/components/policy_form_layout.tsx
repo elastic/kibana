@@ -31,8 +31,6 @@ import {
 
 import { useToasts, useKibana } from '../../../../../../common/lib/kibana';
 import type { AppAction } from '../../../../../../common/store/actions';
-import { SpyRoute } from '../../../../../../common/utils/route/spy_routes';
-import { SecurityPageName } from '../../../../../../app/types';
 import { getEndpointListPath } from '../../../../../common/routing';
 import { useNavigateToAppEventHandler } from '../../../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { APP_UI_ID } from '../../../../../../../common/constants';
@@ -137,7 +135,6 @@ export const PolicyFormLayout = React.memo(() => {
     return (
       <SecuritySolutionPageWrapper noTimeline>
         {isPolicyLoading ? <EuiLoadingSpinner size="xl" /> : null}
-        <SpyRoute pageName={SecurityPageName.administration} />
       </SecuritySolutionPageWrapper>
     );
   }

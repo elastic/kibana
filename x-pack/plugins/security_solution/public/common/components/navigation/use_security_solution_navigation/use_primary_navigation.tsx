@@ -9,7 +9,6 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-components';
-import { SecurityPageName } from '../../../../../common/constants';
 import type { PrimaryNavigationProps } from './types';
 import { usePrimaryNavigationItems } from './use_navigation_items';
 import { useIsGroupedNavigationEnabled } from '../helpers';
@@ -23,17 +22,12 @@ const translatedNavTitle = i18n.translate('xpack.securitySolution.navigation.mai
 export const usePrimaryNavigation = ({
   navTabs,
   pageName,
-  tabName,
 }: PrimaryNavigationProps): KibanaPageTemplateProps['solutionNav'] => {
   const isGroupedNavigationEnabled = useIsGroupedNavigationEnabled();
-  const mapLocationToTab = useCallback((): string => {
-    if (pageName === SecurityPageName.administration) {
-      // revist with ticket #137625. consider using tab Ids instead of tab Name for matching
-      return ((tabName && navTabs[tabName]) || navTabs[pageName])?.id ?? '';
-    } else {
-      return (navTabs[pageName] || (tabName && navTabs[tabName]))?.id ?? '';
-    }
-  }, [pageName, tabName, navTabs]);
+  const mapLocationToTab = useCallback(
+    (): string => navTabs[pageName]?.id ?? '',
+    [pageName, navTabs]
+  );
 
   const [selectedTabId, setSelectedTabId] = useState(mapLocationToTab());
 

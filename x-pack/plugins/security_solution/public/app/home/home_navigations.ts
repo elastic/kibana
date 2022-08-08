@@ -19,7 +19,6 @@ import {
   APP_NETWORK_PATH,
   APP_TIMELINES_PATH,
   APP_CASES_PATH,
-  APP_MANAGEMENT_PATH,
   APP_ENDPOINTS_PATH,
   APP_POLICIES_PATH,
   APP_TRUSTED_APPS_PATH,
@@ -119,13 +118,6 @@ export const navTabs: SecurityNav = {
     href: APP_CASES_PATH,
     disabled: false,
     urlKey: 'cases',
-  },
-  [SecurityPageName.administration]: {
-    id: SecurityPageName.administration,
-    name: i18n.ADMINISTRATION,
-    href: APP_MANAGEMENT_PATH,
-    disabled: false,
-    urlKey: 'administration',
   },
   [SecurityPageName.endpoints]: {
     id: SecurityPageName.endpoints,
