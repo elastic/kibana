@@ -11,12 +11,12 @@ import { getExecuteDetails } from '../../__fixtures__';
 import { API_BASE_PATH } from '../../common/constants';
 import { defaultWatch } from '../../public/application/models/watch';
 import { setupEnvironment, pageHelpers } from './helpers';
-import { WatchCreateJsonTestBed } from './helpers/watch_create_json.helpers';
+import { WatchCreateJsonTestBed } from './helpers/watch_create_json_page.helpers';
 import { WATCH } from './helpers/jest_constants';
 
-const { setup } = pageHelpers.watchCreateJson;
+const { setup } = pageHelpers.watchCreateJsonPage;
 
-describe('<JsonWatchEdit /> create route', () => {
+describe('<JsonWatchEditPage /> create route', () => {
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: WatchCreateJsonTestBed;
 

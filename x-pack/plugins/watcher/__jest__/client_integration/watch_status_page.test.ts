@@ -10,11 +10,11 @@ import moment from 'moment';
 import { getWatchHistory } from '../../__fixtures__';
 import { WATCH_STATES, ACTION_STATES } from '../../common/constants';
 import { setupEnvironment, pageHelpers } from './helpers';
-import { WatchStatusTestBed } from './helpers/watch_status.helpers';
+import { WatchStatusTestBed } from './helpers/watch_status_page.helpers';
 import { WATCH, WATCH_ID } from './helpers/jest_constants';
 import { API_BASE_PATH } from '../../common/constants';
 
-const { setup } = pageHelpers.watchStatus;
+const { setup } = pageHelpers.watchStatusPage;
 
 const watchHistory1 = getWatchHistory({ startTime: '2019-06-04T01:11:11.294' });
 const watchHistory2 = getWatchHistory({ startTime: '2019-06-04T01:10:10.987Z' });
@@ -38,7 +38,7 @@ const watch = {
   },
 };
 
-describe('<WatchStatus />', () => {
+describe('<WatchStatusPage />', () => {
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: WatchStatusTestBed;
 

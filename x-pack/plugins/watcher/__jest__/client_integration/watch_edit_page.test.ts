@@ -10,13 +10,13 @@ import { act } from 'react-dom/test-utils';
 import { getWatch } from '../../__fixtures__';
 import { defaultWatch } from '../../public/application/models/watch';
 import { setupEnvironment, pageHelpers } from './helpers';
-import { WatchEditTestBed } from './helpers/watch_edit.helpers';
+import { WatchEditTestBed } from './helpers/watch_edit_page.helpers';
 import { WATCH, WATCH_ID } from './helpers/jest_constants';
 import { API_BASE_PATH } from '../../common/constants';
 
-const { setup } = pageHelpers.watchEdit;
+const { setup } = pageHelpers.watchEditPage;
 
-describe('<WatchEdit />', () => {
+describe('<WatchEditPage />', () => {
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: WatchEditTestBed;
 
