@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import { useUpdateTags } from '../hooks';
 
@@ -38,15 +39,17 @@ describe('TagsAddRemove', () => {
 
   const renderComponent = (agentId?: string, agents?: string | string[]) => {
     return render(
-      <TagsAddRemove
-        agentId={agentId}
-        agents={agents}
-        allTags={allTags}
-        selectedTags={selectedTags}
-        button={button}
-        onTagsUpdated={onTagsUpdated}
-        onClosePopover={onClosePopover}
-      />
+      <I18nProvider>
+        <TagsAddRemove
+          agentId={agentId}
+          agents={agents}
+          allTags={allTags}
+          selectedTags={selectedTags}
+          button={button}
+          onTagsUpdated={onTagsUpdated}
+          onClosePopover={onClosePopover}
+        />
+      </I18nProvider>
     );
   };
 
@@ -83,6 +86,25 @@ describe('TagsAddRemove', () => {
       expect.anything(),
       undefined,
       undefined
+    );
+  });
+
+  it('should show add new tag when not exactly found in search and allow to add the tag', () => {
+    const result = renderComponent('agent1');
+    const searchInput = result.getByRole('combobox');
+
+    fireEvent.input(searchInput, {
+      target: { value: 'tag' },
+    });
+
+    fireEvent.click(result.getByTestId('createTagBtn'));
+
+    expect(mockUpdateTags).toHaveBeenCalledWith(
+      'agent1',
+      ['tag1', 'tag'],
+      expect.anything(),
+      'Tag created',
+      'Tag creation failed'
     );
   });
 
