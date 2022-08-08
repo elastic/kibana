@@ -12,11 +12,19 @@ import { ConfigKey, DataStream, MonitorFields } from '../runtime_types';
 export const formatSyntheticsPolicy = (
   newPolicy: NewPackagePolicy,
   monitorType: DataStream,
-  config: Partial<MonitorFields & { location_name: string }>
+  config: Partial<
+    MonitorFields & {
+      location_name: string;
+      'monitor.project.name': string;
+      'monitor.project.id': string;
+    }
+  >,
+  isLegacy?: boolean
 ) => {
   const configKeys = Object.keys(config) as ConfigKey[];
 
   const formattedPolicy = { ...newPolicy };
+
   const currentInput = formattedPolicy.inputs.find(
     (input) => input.type === `synthetics/${monitorType}`
   );
@@ -38,6 +46,8 @@ export const formatSyntheticsPolicy = (
     if (configItem) {
       if (formatters[key]) {
         configItem.value = formatters[key]?.(config);
+      } else if (key === ConfigKey.MONITOR_SOURCE_TYPE && isLegacy) {
+        configItem.value = undefined;
       } else {
         configItem.value = config[key] === undefined || config[key] === null ? null : config[key];
       }

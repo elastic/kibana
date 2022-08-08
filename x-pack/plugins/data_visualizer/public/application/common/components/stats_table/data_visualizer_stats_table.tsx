@@ -27,7 +27,7 @@ import { EuiTableComputedColumnType } from '@elastic/eui/src/components/basic_ta
 import { throttle } from 'lodash';
 import { css } from '@emotion/react';
 import { SUPPORTED_FIELD_TYPES } from '../../../../../common/constants';
-import type { JobFieldType, DataVisualizerTableState } from '../../../../../common/types';
+import type { SupportedFieldType, DataVisualizerTableState } from '../../../../../common/types';
 import { DocumentStat } from './components/field_data_row/document_stats';
 import { IndexBasedNumberContentPreview } from './components/field_data_row/number_content_preview';
 
@@ -188,7 +188,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
         name: i18n.translate('xpack.dataVisualizer.dataGrid.typeColumnName', {
           defaultMessage: 'Type',
         }),
-        render: (fieldType: JobFieldType) => {
+        render: (fieldType: SupportedFieldType) => {
           return <FieldTypeIcon type={fieldType} tooltipEnabled={true} />;
         },
         width: dimensions.type,

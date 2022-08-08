@@ -49,7 +49,8 @@ const getFilter = ({ outcomeFilter, message }: { outcomeFilter?: string[]; messa
   }
 
   if (message) {
-    filter.push(`message: "${message}"`);
+    const escapedMessage = message.replace(/([\)\(\<\>\}\{\"\:\\])/gm, '\\$&');
+    filter.push(`message: "${escapedMessage}" OR error.message: "${escapedMessage}"`);
   }
 
   return filter;

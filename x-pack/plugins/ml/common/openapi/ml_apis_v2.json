@@ -29,43 +29,16 @@
     "/s/{spaceId}/api/ml/saved_objects/sync" : {
       "get" : {
         "tags" : [ "ml" ],
-        "summary" : "Sync machine learning saved objects",
+        "summary" : "Sync machine learning objects",
         "description" : "Synchronizes Kibana saved objects for machine learning jobs and trained models. You must have `all` privileges for the **Machine Learning** feature in the **Analytics** section of the Kibana feature privileges. This API runs automatically when you start Kibana and periodically thereafter.",
         "operationId" : "ml-sync",
         "parameters" : [ {
           "name" : "spaceId",
           "in" : "path",
-          "description" : "An identifier for the space.",
+          "description" : "An identifier for the space. If you omit `/s/` and this identifier from the path, the default space is used.",
           "required" : true,
           "type" : "string"
         }, {
-          "name" : "simulate",
-          "in" : "query",
-          "description" : "When true, simulates the synchronization by returning only the list actions that would be performed.",
-          "required" : false,
-          "type" : "boolean",
-          "default" : false
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "Indicates a successful call.",
-            "schema" : {
-              "$ref" : "#/definitions/MLSyncResponse"
-            }
-          }
-        },
-        "x-doc" : {
-          "tag" : "Machine learning APIs"
-        }
-      }
-    },
-    "/api/ml/saved_objects/sync" : {
-      "get" : {
-        "tags" : [ "ml" ],
-        "summary" : "Sync machine learning saved objects in the default space",
-        "description" : "Synchronizes Kibana saved objects for machine learning jobs and trained models in the default space. You must have `all` privileges for the **Machine Learning** feature in the **Analytics** section of the Kibana feature privileges. This API runs automatically when you start Kibana and periodically thereafter.",
-        "operationId" : "ml-sync-default",
-        "parameters" : [ {
           "name" : "simulate",
           "in" : "query",
           "description" : "When true, simulates the synchronization by returning only the list actions that would be performed.",
