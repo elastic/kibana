@@ -6,7 +6,7 @@
  */
 
 import { ES_FIXED_SIZE_INDEX_BLOB_STORE } from '../../../common/constants';
-import type { FileMetadata, FilesMetrics } from '../../../common/types';
+import type { FileMetadata, FilesMetrics, Pagination } from '../../../common/types';
 import type { FindFileArgs } from '../../file_service/file_action_types';
 
 /**
@@ -50,20 +50,6 @@ export interface UpdateArgs<M = unknown> {
    * The file's metadata.
    */
   metadata: Partial<FileMetadata<M>>;
-}
-
-/**
- * Args for pagination
- */
-export interface Pagination {
-  /**
-   * The current page.
-   */
-  page?: number;
-  /**
-   * The number of results to include per page.
-   */
-  perPage?: number;
 }
 
 /**

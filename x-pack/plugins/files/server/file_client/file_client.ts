@@ -56,7 +56,7 @@ export interface FileClient {
    *
    * @param arg - Arg to create a file.
    * */
-  create: FileMetadataClient['create'];
+  create(arg: CreateArgs): ReturnType<FileMetadataClient['create']>;
 
   /**
    * See {@link FileMetadataClient.get}
@@ -93,12 +93,20 @@ export interface FileClient {
   list: FileMetadataClient['list'];
 
   /**
+   * See {@link FileMetadataClient.find}.
+   *
+   * @param arg - Argument to find files
+   */
+  find: FileMetadataClient['find'];
+
+  /**
    * See {@link BlobStorageClient.upload}
    *
-   * @param content - Readable stream to upload
+   * @param id - Readable stream to upload
+   * @param rs - Readable stream to upload
    * @param opts - Argument for uploads
    */
-  upload: BlobStorageClient['upload'];
+  upload(id: string, rs: Readable, opts?: UploadOptions): ReturnType<BlobStorageClient['upload']>;
 
   /**
    * See {@link BlobStorageClient.download}

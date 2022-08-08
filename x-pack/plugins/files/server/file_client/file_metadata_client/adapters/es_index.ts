@@ -10,7 +10,7 @@ import { Logger } from '@kbn/core/server';
 import { toElasticsearchQuery } from '@kbn/es-query';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
-import type { FilesMetrics, FileMetadata } from '../../../../common';
+import type { FilesMetrics, FileMetadata, Pagination } from '../../../../common';
 import type { FindFileArgs } from '../../../file_service';
 import type {
   DeleteArg,
@@ -20,7 +20,6 @@ import type {
   GetUsageMetricsArgs,
   ListArg,
   UpdateArgs,
-  Pagination,
 } from '../file_metadata_client';
 import { filterArgsToKuery } from './filter_args_to_kuery';
 import { fileObjectType } from '../../../saved_objects/file';
