@@ -30,6 +30,10 @@ export const LOADING_ENDPOINT_DATA_TOOLTIP = i18n.translate(
   'xpack.securitySolution.endpoint.detections.takeAction.responseActionConsole.loadingTooltip',
   { defaultMessage: 'Loading' }
 );
+export const METADATA_API_ERROR_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.endpoint.detections.takeAction.responseActionConsole.generalMetadataErrorTooltip',
+  { defaultMessage: 'Failed to retrieve Endpoint metadata' }
+);
 
 export interface ResponderContextMenuItemProps {
   endpointId: string;
@@ -62,14 +66,19 @@ export const ResponderContextMenuItem = memo<ResponderContextMenuItemProps>(
         return [true, LOADING_ENDPOINT_DATA_TOOLTIP];
       }
 
-      // if we got an error and it's a 400 (alerts can exist for endpoint that are no longer around)
+      // if we got an error and it's a 400 with unenrolled in the error message (alerts can exist for endpoint that are no longer around)
       // or,
       // the Host status is `unenrolled`
       if (
-        (error && error.body?.statusCode === 400) ||
+        (error && error.body?.statusCode === 400 && error.body?.message.includes('unenrolled')) ||
         endpointHostInfo?.host_status === HostStatus.UNENROLLED
       ) {
         return [true, HOST_ENDPOINT_UNENROLLED_TOOLTIP];
+      }
+
+      // return general error tooltip
+      if (error) {
+        return [true, METADATA_API_ERROR_TOOLTIP];
       }
 
       return [false, undefined];

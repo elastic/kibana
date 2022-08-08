@@ -15,6 +15,7 @@ import { HOST_METADATA_GET_ROUTE } from '../../../../common/endpoint/constants';
 
 interface HttpResponse {
   statusCode: number;
+  message: string;
 }
 
 /**
