@@ -58,8 +58,8 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
       setIsloading(true);
 
       const data: PostDownloadSourceRequest['body'] = {
-        name: nameInput.value,
-        host: hostInput.value,
+        name: nameInput.value.trim(),
+        host: hostInput.value.trim(),
         is_default: defaultDownloadSourceInput.value,
       };
 
