@@ -72,7 +72,7 @@ const columns: Array<EuiBasicTableColumn<ElasticsearchViewIndex>> = [
     width: '10%',
   },
   {
-    field: 'total.docs.count',
+    field: 'count',
     name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.docsCount.columnTitle', {
       defaultMessage: 'Docs count',
     }),
@@ -151,7 +151,7 @@ const columns: Array<EuiBasicTableColumn<ElasticsearchViewIndex>> = [
 
 interface IndicesTableProps {
   indices: ElasticsearchViewIndex[];
-  isLoading: boolean;
+  isLoading?: boolean;
   meta: Meta;
   onChange: (criteria: CriteriaWithPagination<ElasticsearchViewIndex>) => void;
 }
