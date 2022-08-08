@@ -34,7 +34,7 @@ export const DATA_VIEW_NOT_FOUND_WARNING_DESCRIPTION = (dataView: string) =>
 export const DDATA_VIEW_ALERTS_ON_ALERTS_WARNING_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.stepDefineRule.dataViewIncludesAlertsIndexLabel',
   {
-    defaultMessage: 'Default security data view',
+    defaultMessage: 'Default Security data view',
   }
 );
 
@@ -42,6 +42,6 @@ export const DATA_VIEW_ALERTS_ON_ALERTS_WARNING_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.stepDefineRule.dataViewIncludesAlertsIndexDescription',
   {
     defaultMessage:
-      'The default security data view includes the alerts index. This could result in getting alerts off of existing alerts.',
+      'The default Security data view includes the alerts index. This could result in redundant alerts off of existing alerts.',
   }
 );

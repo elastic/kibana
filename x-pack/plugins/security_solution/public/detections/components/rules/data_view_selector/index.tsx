@@ -61,11 +61,7 @@ export const DataViewSelector = ({ kibanaDataViews, field }: DataViewSelectorPro
       const dataViewsTitle = kibanaDataViews[dataViewId].title;
       const dataViewsId = kibanaDataViews[dataViewId].id;
 
-      if (dataViewsId === 'security-solution-default') {
-        setShowDataViewAlertsOnAlertsWarning(true);
-      } else {
-        setShowDataViewAlertsOnAlertsWarning(false);
-      }
+      setShowDataViewAlertsOnAlertsWarning(dataViewsId === 'security-solution-default');
 
       setSelectedOption([{ id: dataViewsId, label: dataViewsTitle }]);
     } else {
