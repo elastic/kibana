@@ -179,7 +179,8 @@ export function LayerSettings(props: Props) {
             label={i18n.translate('xpack-maps.layerPanel.settingsPanel.showTooltips', {
               defaultMessage: `Show tooltips`,
             })}
-            checked={layer.canShowTooltip() && layer.isShowTooltip()}
+            disabled={!layer.canShowTooltip()}
+            checked={layer.isShowTooltip()}
             onChange={onShowTooltipsChange}
             compressed
           />
