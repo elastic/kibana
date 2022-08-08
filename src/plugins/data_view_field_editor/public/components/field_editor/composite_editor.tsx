@@ -35,7 +35,7 @@ export const CompositeEditor = ({ value, setValue }: CompositeEditorProps) => {
   const fields = Object.entries(value);
 
   return (
-    <div>
+    <div data-test-subj="compositeEditor">
       <ScriptField existingConcreteFields={existingConcreteFields} links={links} />
       <EuiSpacer size="xl" />
       <>

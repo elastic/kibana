@@ -815,4 +815,17 @@ describe('Field editor Preview panel', () => {
       expect(exists('previewNotAvailableCallout')).toBe(true);
     });
   });
+
+  describe('composite runtime field', () => {
+    test('should display composite editor when composite type is selected', async () => {
+      testBed = await setup();
+      const {
+        exists,
+        actions: { fields, waitForUpdates },
+      } = testBed;
+      fields.updateType('composite', 'Composite');
+      await waitForUpdates();
+      expect(exists('compositeEditor')).toBe(true);
+    });
+  });
 });
