@@ -142,14 +142,15 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           // If we have a timestampOverride, we'll compute a runtime field that emits the override for each document if it exists,
           // otherwise it emits @timestamp. If we don't have a timestamp override we don't want to pay the cost of using a
           // runtime field, so we just use @timestamp directly.
-          const { aggregatableTimestampField, timestampRuntimeMappings } = params.timestampOverride
-            ? {
-                aggregatableTimestampField: TIMESTAMP_RUNTIME_FIELD,
-                timestampRuntimeMappings: buildTimestampRuntimeMapping({
-                  timestampOverride: params.timestampOverride,
-                }),
-              }
-            : { aggregatableTimestampField: '@timestamp', timestampRuntimeMappings: undefined };
+          const { aggregatableTimestampField, timestampRuntimeMappings } =
+            secondaryTimestamp && timestampOverride
+              ? {
+                  aggregatableTimestampField: TIMESTAMP_RUNTIME_FIELD,
+                  timestampRuntimeMappings: buildTimestampRuntimeMapping({
+                    timestampOverride,
+                  }),
+                }
+              : { aggregatableTimestampField: TIMESTAMP, timestampRuntimeMappings: undefined };
 
           /**
            * Data Views Logic
