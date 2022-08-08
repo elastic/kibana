@@ -12,18 +12,16 @@ import { EuiPageContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { WATCH_TYPES } from '../../../../../common/constants';
-import { BaseWatch } from '../../../../../common/types/watch_types';
-import { getPageErrorCode, PageError, SectionLoading } from '../../../components';
-import { loadWatch } from '../../../lib/api';
-import { listBreadcrumb, editBreadcrumb, createBreadcrumb } from '../../../lib/breadcrumbs';
-import { useAppContext } from '../../../app_context';
-import { Watch } from '../../../models/watch';
-import { PageError as GenericPageError } from '../../../shared_imports';
-import { WatchContext } from '../watch_context';
-import { JsonWatchEdit } from './json_watch_edit';
-import { ThresholdWatchEdit } from './threshold_watch_edit';
-import { MonitoringWatchEdit } from './monitoring_watch_edit';
+import { WATCH_TYPES } from '../../../../common/constants';
+import { BaseWatch } from '../../../../common/types/watch_types';
+import { getPageErrorCode, PageError, SectionLoading } from '../../components';
+import { loadWatch } from '../../lib/api';
+import { listBreadcrumb, editBreadcrumb, createBreadcrumb } from '../../lib/breadcrumbs';
+import { useAppContext } from '../../app_context';
+import { Watch } from '../../models/watch';
+import { PageError as GenericPageError } from '../../shared_imports';
+import { WatchContext } from './watch_context';
+import { JsonWatchEdit, ThresholdWatchEdit, MonitoringWatchEdit } from './components';
 
 const getTitle = (watch: BaseWatch) => {
   if (watch.isNew) {
@@ -85,7 +83,7 @@ const watchReducer = (state: any, action: any) => {
   }
 };
 
-export const WatchEdit = ({
+export const WatchEditPage = ({
   match: {
     params: { id, type },
   },

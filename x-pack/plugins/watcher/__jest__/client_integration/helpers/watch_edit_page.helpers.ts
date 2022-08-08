@@ -8,7 +8,7 @@
 import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
 import { HttpSetup } from '@kbn/core/public';
 
-import { WatchEdit } from '../../../public/application/sections/watch_edit/components/watch_edit';
+import { WatchEditPage } from '../../../public/application/sections/watch_edit_page';
 import { registerRouter } from '../../../public/application/lib/navigation';
 import { ROUTES } from '../../../common/constants';
 import { WATCH_ID } from './jest_constants';
@@ -30,7 +30,7 @@ export interface WatchEditTestBed extends TestBed<WatchEditSubjects> {
 }
 
 export const setup = async (httpSetup: HttpSetup): Promise<WatchEditTestBed> => {
-  const initTestBed = registerTestBed(WithAppDependencies(WatchEdit, httpSetup), testBedConfig);
+  const initTestBed = registerTestBed(WithAppDependencies(WatchEditPage, httpSetup), testBedConfig);
   const testBed = await initTestBed();
 
   /**

@@ -68,7 +68,7 @@ const watchHistoryTimeSpanOptions = [
   },
 ];
 
-export const WatchHistory = () => {
+export const ExecutionHistoryPanel = () => {
   const { watchDetail: loadedWatch } = useContext(WatchDetailsContext);
 
   const [isActivated, setIsActivated] = useState<boolean | undefined>(undefined);

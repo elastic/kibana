@@ -8,7 +8,7 @@
 import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
 import { HttpSetup } from '@kbn/core/public';
 
-import { WatchEdit } from '../../../public/application/sections/watch_edit/components/watch_edit';
+import { WatchEditPage } from '../../../public/application/sections/watch_edit_page';
 import { registerRouter } from '../../../public/application/lib/navigation';
 import { ROUTES, WATCH_TYPES } from '../../../common/constants';
 import { WithAppDependencies } from './setup_environment';
@@ -34,7 +34,7 @@ export interface WatchCreateThresholdTestBed extends TestBed<WatchCreateThreshol
 }
 
 export const setup = async (httpSetup: HttpSetup): Promise<WatchCreateThresholdTestBed> => {
-  const initTestBed = registerTestBed(WithAppDependencies(WatchEdit, httpSetup), testBedConfig);
+  const initTestBed = registerTestBed(WithAppDependencies(WatchEditPage, httpSetup), testBedConfig);
   const testBed = await initTestBed();
 
   /**
