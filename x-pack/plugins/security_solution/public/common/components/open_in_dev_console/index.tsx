@@ -6,6 +6,7 @@
  */
 import React from 'react';
 import { EuiButton, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { useSpaceId } from '../../../risk_score/containers/common';
 
 interface OpenInDevConsoleButtonProps {
   enableButton: boolean;
@@ -20,7 +21,8 @@ const OpenInDevConsoleButtonComponent: React.FC<OpenInDevConsoleButtonProps> = (
   tooltipContent,
   title,
 }) => {
-  const href = `/app/dev_tools#/console?load_from=${loadFromUrl}`;
+  const spaceId = useSpaceId() ?? 'default';
+  const href = `/s/${spaceId}/app/dev_tools#/console?load_from=${loadFromUrl}`;
 
   return (
     <EuiFlexItem>
