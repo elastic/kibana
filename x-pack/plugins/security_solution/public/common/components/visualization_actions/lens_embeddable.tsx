@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useRef, useEffect, useState } from 'react';
+import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
@@ -31,30 +31,19 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   stackByField,
   timerange,
 }) => {
-  const { lens, data } = useKibana().services;
+  const { lens } = useKibana().services;
   const dispatch = useDispatch();
-  const session = useRef(data.search.session);
 
   const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();
-  const { isRefreshing } = useDeepEqualSelector((state) => getGlobalQuery(state, id));
-  const [searchSessionId, setSearchSessionId] = useState<string>();
+  const { searchSessionId } = useDeepEqualSelector((state) => getGlobalQuery(state, id));
   const { attributes } = useLensAttributes({
     lensAttributes,
     getLensAttributes,
     stackByField,
     title: '',
   });
+
   const LensComponent = lens.EmbeddableComponent;
-
-  useEffect(() => {
-    setSearchSessionId(session.current.start());
-  }, []);
-
-  useEffect(() => {
-    if (isRefreshing) {
-      setSearchSessionId(session.current.start());
-    }
-  }, [isRefreshing]);
 
   const actions = useActions({
     withActions: true,

@@ -166,7 +166,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
 
               <EuiHorizontalRule />
 
-              <HostsDetailsKpiComponent from={from} to={to} />
+              <HostsDetailsKpiComponent from={from} to={to} setQuery={setQuery} />
 
               <EuiSpacer />
 

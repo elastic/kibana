@@ -7,60 +7,49 @@
 
 import type { Position } from '@elastic/charts';
 import { omit } from 'lodash/fp';
-import React, { useCallback, useEffect } from 'react';
+import React, { useEffect } from 'react';
 
-import { useDispatch } from 'react-redux';
 import type { inputsModel } from '../../store';
 import type { GlobalTimeArgs } from '../../containers/use_global_time';
-import { inputsActions } from '../../store/actions';
+import { useRefetchByRestartingSession } from './use_refetch_by_session';
+import type { InputsModelId } from '../../store/inputs/constants';
 
 export interface OwnProps extends Pick<GlobalTimeArgs, 'deleteQuery' | 'setQuery'> {
   headerChildren?: React.ReactNode;
   id: string;
+  inputId?: InputsModelId;
+  inspect?: inputsModel.InspectQuery;
   legendPosition?: Position;
   loading: boolean;
   refetch?: inputsModel.Refetch;
-  inspect?: inputsModel.InspectQuery;
 }
 
 export function manageQuery<T>(
   WrappedComponent: React.ComponentClass<T> | React.ComponentType<T>
 ): React.FC<OwnProps & T> {
   const ManageQuery = (props: OwnProps & T) => {
-    const { loading, id, refetch, setQuery, deleteQuery, inspect = null } = props;
-    const dispatch = useDispatch();
-
-    const refetchByToggleComponent = useCallback(() => {
-      dispatch(
-        inputsActions.setInspectionParameter({
-          id,
-          selectedInspectIndex: 0,
-          isRefreshing: true,
-          isInspected: false,
-          inputId: 'global',
-        })
-      );
-
-      setTimeout(() => {
-        dispatch(
-          inputsActions.setInspectionParameter({
-            id,
-            selectedInspectIndex: 0,
-            isRefreshing: false,
-            isInspected: false,
-            inputId: 'global',
-          })
-        );
-      }, 100);
-    }, [dispatch, id]);
+    const {
+      deleteQuery,
+      id,
+      inputId = 'global',
+      inspect = null,
+      loading,
+      refetch,
+      setQuery,
+    } = props;
+    const { searchSessionId, refetchByRestartingSession } = useRefetchByRestartingSession({
+      inputId,
+      queryId: id,
+    });
 
     useQueryInspector({
-      queryId: id,
-      loading,
-      refetch: refetch ?? refetchByToggleComponent,
-      setQuery,
       deleteQuery,
       inspect,
+      loading,
+      queryId: id,
+      refetch: refetch ?? refetchByRestartingSession, // refetchByRestartingSession is for refetching Lens Embeddables
+      searchSessionId,
+      setQuery,
     });
 
     const otherProps = omit(['refetch', 'setQuery'], props);
@@ -77,6 +66,7 @@ interface UseQueryInspectorTypes extends Pick<GlobalTimeArgs, 'deleteQuery' | 's
   loading: boolean;
   refetch: inputsModel.Refetch;
   inspect?: inputsModel.InspectQuery | null;
+  searchSessionId?: string;
 }
 
 export const useQueryInspector = ({
@@ -86,10 +76,11 @@ export const useQueryInspector = ({
   inspect,
   loading,
   queryId,
+  searchSessionId,
 }: UseQueryInspectorTypes) => {
   useEffect(() => {
-    setQuery({ id: queryId, inspect: inspect ?? null, loading, refetch });
-  }, [deleteQuery, setQuery, queryId, refetch, inspect, loading]);
+    setQuery({ id: queryId, inspect: inspect ?? null, loading, refetch, searchSessionId });
+  }, [deleteQuery, setQuery, queryId, refetch, inspect, loading, searchSessionId]);
 
   useEffect(() => {
     return () => {

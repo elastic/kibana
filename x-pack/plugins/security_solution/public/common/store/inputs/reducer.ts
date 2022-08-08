@@ -183,8 +183,8 @@ export const inputsReducer = reducerWithInitialState(initialInputsState)
       queries: state.global.queries.slice(state.global.queries.length),
     },
   }))
-  .case(setQuery, (state, { inputId, id, inspect, loading, refetch }) =>
-    upsertQuery({ inputId, id, inspect, loading, refetch, state })
+  .case(setQuery, (state, { inputId, id, inspect, loading, refetch, searchSessionId }) =>
+    upsertQuery({ inputId, id, inspect, loading, refetch, state, searchSessionId })
   )
   .case(deleteOneQuery, (state, { inputId, id }) => helperDeleteOneQuery({ inputId, id, state }))
   .case(setDuration, (state, { id, duration }) => ({
@@ -220,8 +220,8 @@ export const inputsReducer = reducerWithInitialState(initialInputsState)
   .case(toggleTimelineLinkTo, (state, { linkToId }) => toggleLockTimeline(linkToId, state))
   .case(
     setInspectionParameter,
-    (state, { id, inputId, isInspected, selectedInspectIndex, isRefreshing }) =>
-      setIsInspected({ id, inputId, isInspected, selectedInspectIndex, state, isRefreshing })
+    (state, { id, inputId, isInspected, selectedInspectIndex, searchSessionId }) =>
+      setIsInspected({ id, inputId, isInspected, selectedInspectIndex, state, searchSessionId })
   )
   .case(removeGlobalLinkTo, (state) => removeGlobalLink(state))
   .case(addGlobalLinkTo, (state, { linkToId }) => addGlobalLink(linkToId, state))
