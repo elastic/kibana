@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { BfetchPublicSetup } from '@kbn/bfetch-plugin/public';
 import {
   CoreSetup,
   CoreStart,
@@ -13,24 +14,23 @@ import {
   PluginInitializerContext,
   StartServicesAccessor,
 } from '@kbn/core/public';
-import { BehaviorSubject } from 'rxjs';
-import React from 'react';
-import moment from 'moment';
-import { BfetchPublicSetup } from '@kbn/bfetch-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { ResponseWarning } from '@kbn/inspector-plugin/common';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
-import { DataViewsContract } from '@kbn/data-views-plugin/common';
-import type { ISearchSetup, ISearchStart } from './types';
-
-import { handleResponse } from './fetch';
+import { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import moment from 'moment';
+import React from 'react';
+import { BehaviorSubject } from 'rxjs';
+import { IKibanaSearchResponse, SearchRequest } from '..';
 import {
   cidrFunction,
   dateRangeFunction,
+  eqlRawResponse,
   esRawResponse,
   existsFilterFunction,
   extendedBoundsFunction,
@@ -52,29 +52,28 @@ import {
   rangeFunction,
   removeFilterFunction,
   SearchSourceDependencies,
+  SearchSourceSearchOptions,
   SearchSourceService,
   selectFilterFunction,
-  eqlRawResponse,
-  SearchSourceSearchOptions,
 } from '../../common/search';
-import { AggsService } from './aggs';
-import { IKibanaSearchResponse, SearchRequest } from '..';
-import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
-import { createUsageCollector, SearchUsageCollector } from './collectors';
-import { getEsaggs, getEsdsl, getEssql, getEql } from './expressions';
-import { ISessionsClient, ISessionService, SessionsClient, SessionService } from './session';
-import { ConfigSchema } from '../../config';
 import {
   getShardDelayBucketAgg,
   SHARD_DELAY_AGG_NAME,
 } from '../../common/search/aggs/buckets/shard_delay';
 import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
-import { DataPublicPluginStart, DataStartDependencies } from '../types';
+import { ConfigSchema } from '../../config';
 import { NowProviderInternalContract } from '../now_provider';
+import { DataPublicPluginStart, DataStartDependencies } from '../types';
+import { AggsService } from './aggs';
+import { createUsageCollector, SearchUsageCollector } from './collectors';
+import { getEql, getEsaggs, getEsdsl, getEssql } from './expressions';
 import { getKibanaContext } from './expressions/kibana_context';
-import { createConnectedSearchSessionIndicator } from './session/session_indicator';
-
+import { handleResponse } from './fetch';
+import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
+import { ISessionsClient, ISessionService, SessionsClient, SessionService } from './session';
 import { registerSearchSessionsMgmt } from './session/sessions_mgmt';
+import { createConnectedSearchSessionIndicator } from './session/session_indicator';
+import type { ISearchSetup, ISearchStart } from './types';
 
 /** @internal */
 export interface SearchServiceSetupDependencies {
@@ -270,6 +269,9 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       search,
       showError: (e: Error) => {
         this.searchInterceptor.showError(e);
+      },
+      showWarnings: (warning: ResponseWarning) => {
+        this.searchInterceptor.showWarning(warning);
       },
       session: this.sessionService,
       sessionsClient: this.sessionsClient,

@@ -6,48 +6,47 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-
 import {
   EuiButtonEmpty,
+  EuiCheckbox,
+  EuiCode,
   EuiCodeBlock,
+  EuiComboBox,
+  EuiFieldNumber,
+  EuiFlexGrid,
+  EuiFlexItem,
+  EuiFormLabel,
   EuiPageBody,
   EuiPageContent,
   EuiPageContentBody,
   EuiPageHeader,
-  EuiTitle,
-  EuiText,
-  EuiFlexGrid,
-  EuiFlexItem,
-  EuiCheckbox,
-  EuiSpacer,
-  EuiCode,
-  EuiComboBox,
-  EuiFormLabel,
-  EuiFieldNumber,
   EuiProgress,
+  EuiSpacer,
   EuiTabbedContent,
   EuiTabbedContentTab,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
-
-import { lastValueFrom } from 'rxjs';
 import { CoreStart } from '@kbn/core/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-
+import { IInspectorInfo } from '@kbn/data-plugin/common';
 import {
   DataPublicPluginStart,
   IKibanaSearchResponse,
   isCompleteResponse,
   isErrorResponse,
 } from '@kbn/data-plugin/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { ResponseWarning } from '@kbn/inspector-plugin/common';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
-import { AbortError } from '@kbn/kibana-utils-plugin/common';
-import { IMyStrategyResponse } from '../../common/types';
+import React, { useEffect, useState } from 'react';
+import { lastValueFrom } from 'rxjs';
 import { PLUGIN_ID, PLUGIN_NAME, SERVER_SEARCH_ROUTE_PATH } from '../../common';
+import { IMyStrategyResponse } from '../../common/types';
 
 interface SearchExamplesAppDeps {
   notifications: CoreStart['notifications'];
@@ -109,6 +108,7 @@ export const SearchExamplesApp = ({
   const [currentAbortController, setAbortController] = useState<AbortController>();
   const [rawResponse, setRawResponse] = useState<Record<string, any>>({});
   const [selectedTab, setSelectedTab] = useState(0);
+  const [searchSourceWarnings, setSearchSourceWarnings] = useState<ResponseWarning[] | undefined>();
 
   function setResponse(response: IKibanaSearchResponse) {
     setRawResponse(response.rawResponse);
@@ -251,21 +251,17 @@ export const SearchExamplesApp = ({
         },
         error: (e) => {
           setIsLoading(false);
-          if (e instanceof AbortError) {
-            notifications.toasts.addWarning({
-              title: e.message,
-            });
-          } else {
-            notifications.toasts.addDanger({
-              title: 'Failed to run search',
-              text: e.message,
-            });
-          }
+          setRawResponse(e.body);
+          data.search.showError(e);
         },
       });
   };
 
-  const doSearchSourceSearch = async (otherBucket: boolean) => {
+  const doSearchSourceSearch = async (
+    otherBucket: boolean,
+    addWarning = false,
+    warningsShown = true
+  ) => {
     if (!dataView) return;
 
     const query = data.query.queryString.getQuery();
@@ -273,6 +269,23 @@ export const SearchExamplesApp = ({
     const timefilter = data.query.timefilter.timefilter.createFilter(dataView);
     if (timefilter) {
       filters.push(timefilter);
+    }
+    if (addWarning) {
+      // use a special ES query type called "error_query" for debugging
+      filters.push({
+        meta: { index: dataView.title, params: {} },
+        query: {
+          bool: {
+            must: [
+              {
+                error_query: {
+                  indices: [{ name: dataView.title, error_type: 'warning', message: 'Watch out!' }],
+                },
+              },
+            ],
+          },
+        },
+      });
     }
 
     try {
@@ -304,14 +317,36 @@ export const SearchExamplesApp = ({
 
       setRequest(searchSource.getSearchRequestBody());
       const abortController = new AbortController();
+      const inspector: IInspectorInfo = {
+        adapter: new RequestAdapter(),
+        title: 'Example App Inspector!',
+        id: 'greatest-example-app-inspector',
+        description: 'Use the `description` field for more info about the inspector.',
+      };
       setAbortController(abortController);
       setIsLoading(true);
-      const { rawResponse: res } = await lastValueFrom(
-        searchSource.fetch$({ abortSignal: abortController.signal })
+      const result = await lastValueFrom(
+        searchSource.fetch$({
+          abortSignal: abortController.signal,
+          disableShardFailureWarning: !warningsShown,
+          inspector,
+        })
       );
-      setRawResponse(res);
+      setRawResponse(result.rawResponse);
 
-      const message = <EuiText>Searched {res.hits.total} documents.</EuiText>;
+      const warnings = inspector.adapter?.extractWarnings();
+      if (warnings) {
+        setSearchSourceWarnings(warnings);
+
+        if (warningsShown) {
+          data.search.showWarnings({
+            title: 'ResponseWarning',
+            text: result.warning,
+          });
+        }
+      }
+
+      const message = <EuiText>Searched {result.rawResponse.hits.total} documents.</EuiText>;
       notifications.toasts.addSuccess(
         {
           title: 'Query result',
@@ -323,19 +358,19 @@ export const SearchExamplesApp = ({
       );
     } catch (e) {
       setRawResponse(e.body);
-      if (e instanceof AbortError) {
-        notifications.toasts.addWarning({
-          title: e.message,
-        });
-      } else {
-        notifications.toasts.addDanger({
-          title: 'Failed to run search',
-          text: e.message,
-        });
-      }
+      data.search.showError(e);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const showSearchSourceSearchWarnings = () => {
+    if (searchSourceWarnings) {
+      for (const warning of searchSourceWarnings) {
+        data.search.showWarnings(warning);
+      }
+    }
+    setSearchSourceWarnings([]);
   };
 
   const onClickHandler = () => {
@@ -390,16 +425,8 @@ export const SearchExamplesApp = ({
         },
         error: (e) => {
           setIsLoading(false);
-          if (e instanceof AbortError) {
-            notifications.toasts.addWarning({
-              title: e.message,
-            });
-          } else {
-            notifications.toasts.addDanger({
-              title: 'Failed to run search',
-              text: e.message,
-            });
-          }
+          setRawResponse(e.body);
+          data.search.showError(e);
         },
       });
   };
@@ -424,23 +451,23 @@ export const SearchExamplesApp = ({
 
       notifications.toasts.addSuccess(`Server returned ${JSON.stringify(res)}`);
     } catch (e) {
-      if (e?.name === 'AbortError') {
-        notifications.toasts.addWarning({
-          title: e.message,
-        });
-      } else {
-        notifications.toasts.addDanger({
-          title: 'Failed to run search',
-          text: e.message,
-        });
-      }
+      setRawResponse(e.body);
+      data.search.showError(e);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const onSearchSourceClickHandler = (withOtherBucket: boolean) => {
-    doSearchSourceSearch(withOtherBucket);
+  const onSearchSourceClickHandler = ({
+    withOtherBucket,
+    addWarning,
+    withWarningsShown,
+  }: {
+    withOtherBucket: boolean;
+    addWarning?: boolean;
+    withWarningsShown?: boolean;
+  }) => {
+    doSearchSourceSearch(withOtherBucket, addWarning, withWarningsShown);
   };
 
   const reqTabs: EuiTabbedContentTab[] = [
@@ -613,7 +640,7 @@ export const SearchExamplesApp = ({
                 </EuiText>
                 <EuiButtonEmpty
                   size="xs"
-                  onClick={() => onSearchSourceClickHandler(true)}
+                  onClick={() => onSearchSourceClickHandler({ withOtherBucket: true })}
                   iconType="play"
                   data-test-subj="searchSourceWithOther"
                 >
@@ -630,7 +657,7 @@ export const SearchExamplesApp = ({
                 </EuiText>
                 <EuiButtonEmpty
                   size="xs"
-                  onClick={() => onSearchSourceClickHandler(false)}
+                  onClick={() => onSearchSourceClickHandler({ withOtherBucket: false })}
                   iconType="play"
                   data-test-subj="searchSourceWithoutOther"
                 >
@@ -677,6 +704,37 @@ export const SearchExamplesApp = ({
                     defaultMessage="Request with an error in response"
                   />
                 </EuiButtonEmpty>
+                <EuiText />
+                <EuiButtonEmpty
+                  size="xs"
+                  onClick={() =>
+                    onSearchSourceClickHandler({
+                      withOtherBucket: false,
+                      addWarning: true,
+                      withWarningsShown: false,
+                    })
+                  }
+                  iconType="play"
+                  data-test-subj="searchSourceWithoutWarningsShown"
+                >
+                  <FormattedMessage
+                    id="searchExamples.searchSource.buttonText"
+                    defaultMessage="Request with a warning in response, automatic warnings not shown."
+                  />
+                </EuiButtonEmpty>
+                <EuiText size="xs" color="subdued" className="searchExampleStepDsc">
+                  <EuiButtonEmpty
+                    size="xs"
+                    onClick={showSearchSourceSearchWarnings}
+                    iconType="play"
+                    data-test-subj="searchSourceSeeWarnings"
+                  >
+                    <FormattedMessage
+                      id="searchExamples.searchSource.buttonText"
+                      defaultMessage="See warnings"
+                    />
+                  </EuiButtonEmpty>
+                </EuiText>
               </EuiText>
               <EuiSpacer />
               <EuiTitle size="xs">

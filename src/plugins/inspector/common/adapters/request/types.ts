@@ -55,3 +55,7 @@ export interface Response {
   json?: object;
   time?: number;
 }
+export interface ResponseWarning {
+  title?: string;
+  text?: string;
+}

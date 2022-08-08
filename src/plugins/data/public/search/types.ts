@@ -7,13 +7,15 @@
  */
 
 import type { PackageInfo } from '@kbn/core/server';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { DataViewsContract } from '@kbn/data-views-plugin/common';
-import { SearchUsageCollector } from './collectors';
-import { AggsSetup, AggsSetupDependencies, AggsStartDependencies, AggsStart } from './aggs';
+import { ResponseWarning } from '@kbn/inspector-plugin/common';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { ISearchGeneric, ISearchStartSearchSource } from '../../common/search';
+import { AggsSetup, AggsSetupDependencies, AggsStart, AggsStartDependencies } from './aggs';
+import { SearchUsageCollector } from './collectors';
 import { ISessionsClient, ISessionService } from './session';
 
+export { SEARCH_EVENT_TYPE } from './collectors';
 export type { ISearchStartSearchSource, SearchUsageCollector };
 
 /**
@@ -53,6 +55,8 @@ export interface ISearchStart {
   search: ISearchGeneric;
 
   showError: (e: Error) => void;
+
+  showWarnings: (warning: ResponseWarning) => void;
   /**
    * high level search
    * {@link ISearchStartSearchSource}
@@ -69,8 +73,6 @@ export interface ISearchStart {
    */
   sessionsClient: ISessionsClient;
 }
-
-export { SEARCH_EVENT_TYPE } from './collectors';
 
 /** @internal */
 export interface SearchServiceSetupDependencies {

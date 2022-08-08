@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import { EventEmitter } from 'events';
 import uuid from 'uuid/v4';
 import { RequestResponder } from './request_responder';
-import { Request, RequestParams, RequestStatus } from './types';
+import { Request, RequestParams, RequestStatus, ResponseWarning } from './types';
 
 /**
  * An generic inspector adapter to log requests.
@@ -66,6 +67,24 @@ export class RequestAdapter extends EventEmitter {
 
   public getRequests(): Request[] {
     return Array.from(this.requests.values());
+  }
+
+  public extractWarnings(): ResponseWarning[] | undefined {
+    const response = Array.from(this.requests.values())
+      .filter((req) => {
+        const warning = (req.response?.json as { warning: string } | undefined)?.warning;
+        return warning != null;
+      })
+      .map((req) => {
+        return {
+          title: i18n.translate('inspector.responseWarningTitle', {
+            defaultMessage: 'Warning',
+          }),
+          text: (req.response?.json as { warning: string } | undefined)?.warning,
+        };
+      });
+
+    return response;
   }
 
   private _onChange(): void {

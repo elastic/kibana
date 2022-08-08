@@ -37,6 +37,7 @@ import { i18n } from '@kbn/i18n';
 import { BatchedFunc, BfetchPublicSetup, DISABLE_BFETCH } from '@kbn/bfetch-plugin/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { AbortError, KibanaServerError } from '@kbn/kibana-utils-plugin/public';
+import { ResponseWarning } from '@kbn/inspector-plugin/common';
 import {
   ENHANCED_ES_SEARCH_STRATEGY,
   IAsyncSearchOptions,
@@ -420,7 +421,7 @@ export class SearchInterceptor {
     );
   }
 
-  private showTimeoutErrorToast = (e: SearchTimeoutError, sessionId?: string) => {
+  private showTimeoutErrorToast = (e: SearchTimeoutError, _sessionId?: string) => {
     this.deps.toasts.addDanger({
       title: 'Timed out',
       text: toMountPoint(e.getErrorMessage(this.application), { theme$: this.deps.theme.theme$ }),
@@ -434,7 +435,7 @@ export class SearchInterceptor {
     }
   );
 
-  private showRestoreWarningToast = (sessionId?: string) => {
+  private showRestoreWarningToast = (_sessionId?: string) => {
     this.deps.toasts.addWarning(
       {
         title: 'Your search session is still running',
@@ -461,6 +462,10 @@ export class SearchInterceptor {
       this.showTimeoutErrorToast(e, sessionId);
     }
   };
+
+  public showWarning({ title, text }: ResponseWarning) {
+    this.deps.toasts.addWarning({ title, text });
+  }
 
   public showError(e: Error) {
     if (e instanceof AbortError || e instanceof SearchTimeoutError) {
