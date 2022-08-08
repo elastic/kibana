@@ -7,13 +7,13 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { Meta } from '../../../../../../../common/types';
 import { flashAPIErrors } from '../../../../../shared/flash_messages';
 import { HttpLogic } from '../../../../../shared/http';
-import { GetCrawlerApiLogic } from '../../../../api/crawler/get_crawler_api_logic';
 import { DomainConfig, DomainConfigFromServer } from '../../../../api/crawler/types';
 import { domainConfigServerToClient } from '../../../../api/crawler/utils';
 import { IndexNameLogic } from '../../index_name_logic';
-import { CrawlerLogic, CrawlRequestOverrides } from '../crawler_logic';
+import { CrawlerActions, CrawlerLogic, CrawlRequestOverrides } from '../crawler_logic';
 import { extractDomainAndEntryPointFromUrl } from '../domain_management/add_domain/utils';
 
 export interface CrawlCustomSettingsFlyoutLogicValues {
@@ -48,6 +48,7 @@ export interface CrawlCustomSettingsFlyoutLogicActions {
   onSelectSitemapUrls(sitemapUrls: string[]): { sitemapUrls: string[] };
   showFlyout(): void;
   startCustomCrawl(): void;
+  startCrawl: CrawlerActions['startCrawl'];
   toggleIncludeSitemapsInRobotsTxt(): void;
 }
 
@@ -68,7 +69,7 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
 >({
   path: ['enterprise_search', 'crawler', 'crawl_custom_settings_flyout_logic'],
   connect: {
-    actions: [GetCrawlerApiLogic, ['apiSuccess', 'apiError', 'makeRequest']],
+    actions: [CrawlerLogic, ['startCrawl']],
   },
   actions: () => ({
     fetchDomainConfigData: true,
@@ -123,9 +124,8 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
     isFormSubmitting: [
       false,
       {
-        makeRequest: () => true,
-        apiSuccess: () => false,
-        apiError: () => false,
+        startCustomCrawl: () => true,
+        startCrawl: () => false,
       },
     ],
     isFlyoutVisible: [
@@ -133,8 +133,7 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
       {
         showFlyout: () => true,
         hideFlyout: () => false,
-        apiSuccess: () => false,
-        apiError: () => false,
+        startCrawl: () => false,
       },
     ],
     maxCrawlDepth: [
@@ -202,12 +201,31 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
     fetchDomainConfigData: async () => {
       const { http } = HttpLogic.values;
       const { indexName } = IndexNameLogic.values;
-      try {
-        const { results } = await http.get<{
-          results: DomainConfigFromServer[];
-        }>(`/internal/enterprise_search/indices/${indexName}/crawler/domain_configs`);
 
-        const domainConfigs = results.map(domainConfigServerToClient);
+      let domainConfigs: DomainConfig[] = [];
+      let totalPages: number = 1;
+      let nextPage: number = 1;
+      let pageSize: number = 100;
+
+      try {
+        while (nextPage <= totalPages) {
+          const {
+            results,
+            meta: { page },
+          } = await http.get<{
+            meta: Meta;
+            results: DomainConfigFromServer[];
+          }>(`/internal/enterprise_search/indices/${indexName}/crawler/domain_configs`, {
+            query: { 'page[current]': nextPage, 'page[size]': pageSize },
+          });
+
+          domainConfigs = [...domainConfigs, ...results.map(domainConfigServerToClient)];
+
+          nextPage = page.current + 1;
+          totalPages = page.total_pages;
+          pageSize = page.size;
+        }
+
         actions.onRecieveDomainConfigData(domainConfigs);
       } catch (e) {
         flashAPIErrors(e);
@@ -233,7 +251,7 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
         overrides.sitemap_urls = sitemapUrls;
       }
 
-      CrawlerLogic.actions.startCrawl(overrides);
+      actions.startCrawl(overrides);
     },
   }),
 });
