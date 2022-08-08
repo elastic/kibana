@@ -100,21 +100,21 @@ export const SOURCE = i18n.translate(
 );
 
 export const DATA_SOURCE_GUIDE_SUB_TITLE = i18n.translate(
-  'securitySolution.detections.dataSource.popover.title',
+  'xpack.securitySolution.detections.dataSource.popover.title',
   {
     defaultMessage: 'Select a data source',
   }
 );
 
 export const DATA_SOURCE_GUIDE_TITLE = i18n.translate(
-  'securitySolution.detections.dataSource.popover.subTitle',
+  'xpack.securitySolution.detections.dataSource.popover.subTitle',
   {
     defaultMessage: 'Data sources',
   }
 );
 
 export const DATA_SOURCE_GUIDE_CONTENT = i18n.translate(
-  'securitySolution.detections.dataSource.popover.content',
+  'xpack.securitySolution.detections.dataSource.popover.content',
   {
     defaultMessage: 'Rules can now query index patterns or data views!',
   }
