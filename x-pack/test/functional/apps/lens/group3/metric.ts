@@ -63,7 +63,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should render a metric', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
-      // await elasticChart.setNewChartUiDebugFlag(true);
       await PageObjects.lens.goToTimeRange();
 
       await PageObjects.lens.switchToVisualization('lnsMetricNew', 'Metric');
@@ -158,8 +157,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const title = '93.28.27.24';
       await clickMetric(title);
 
-      await PageObjects.common.sleep(1000);
-
       retry.try(async () => {
         const labels = await filterBar.getFiltersLabel();
         expect(labels.length).to.be(1);
@@ -178,7 +175,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const colorPicker = await testSubjects.find('euiColorPickerAnchor');
       await colorPicker.type('#000000');
 
-      await PageObjects.common.sleep(1000); // allow new tiles to render
+      await PageObjects.lens.waitForVisualization('mtrVis');
 
       const data = await getMetricData();
 
@@ -197,7 +194,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('applies dynamic color', async () => {
       await testSubjects.click('lnsMetric_color_mode_dynamic');
 
-      await PageObjects.common.sleep(1000); // allow new tiles to render
+      await PageObjects.lens.waitForVisualization('mtrVis');
 
       const data = await getMetricData();
       expect(data.map(({ color }) => color)).to.eql(expectedDynamicColors);
@@ -211,7 +208,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.getAttribute('lnsPalettePanel_dynamicColoring_range_value_2', 'value'),
       ]).to.be.eql(['10400.18', '15077.59']);
 
-      await PageObjects.common.sleep(1000); // allow new tiles to render
+      await PageObjects.lens.waitForVisualization('mtrVis');
 
       expect((await getMetricData()).map(({ color }) => color)).to.eql(expectedDynamicColors); // colors shouldn't change
     });
