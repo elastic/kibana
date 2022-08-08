@@ -78,6 +78,7 @@ describe('threshold_executor', () => {
         runtimeMappings: {},
         inputIndex: ['auditbeat-*'],
         primaryTimestamp: TIMESTAMP,
+        aggregatableTimestampField: TIMESTAMP,
         listClient: getListClientMock(),
       });
       expect(response.warningMessages.length).toEqual(1);
@@ -134,6 +135,7 @@ describe('threshold_executor', () => {
         inputIndex: ['auditbeat-*'],
         primaryTimestamp: TIMESTAMP,
         aggregatableTimestampField: TIMESTAMP,
+        listClient: getListClientMock(),
       });
       expect(response.state).toEqual({
         initialized: true,
