@@ -8,5 +8,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-lens-icons'],
+  roots: ['<rootDir>/x-pack/packages/lens/icons'],
 };

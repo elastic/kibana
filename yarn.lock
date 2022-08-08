@@ -3591,7 +3591,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/lens-icons@link:bazel-bin/x-pack/packages/kbn-lens-icons":
+"@kbn/lens-icons@link:bazel-bin/x-pack/packages/lens/icons":
   version "0.0.0"
   uid ""
 
@@ -7511,7 +7511,7 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__lens-icons@link:bazel-bin/x-pack/packages/kbn-lens-icons/npm_module_types":
+"@types/kbn__lens-icons@link:bazel-bin/x-pack/packages/lens/icons/npm_module_types":
   version "0.0.0"
   uid ""
 
