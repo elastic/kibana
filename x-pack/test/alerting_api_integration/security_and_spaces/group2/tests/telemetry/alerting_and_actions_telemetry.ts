@@ -6,38 +6,27 @@
  */
 
 import expect from '@kbn/expect';
-import { TaskRunning, TaskRunningStage } from '@kbn/task-manager-plugin/server/task_running';
-import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { Spaces, Superuser } from '../../../scenarios';
 import {
   getUrlPrefix,
   getEventLog,
   getTestRuleData,
   ESTestIndexTool,
+  TaskManagerDoc,
 } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { setupSpacesAndUsers } from '../../../setup';
 
 // eslint-disable-next-line import/no-default-export
-export default function createAlertingTelemetryTests({ getService }: FtrProviderContext) {
+export default function createAlertingAndActionsTelemetryTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
+  const logger = getService('log');
   const retry = getService('retry');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
-  const esArchiver = getService('esArchiver');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/136679
-  describe.skip('alerting telemetry', () => {
+  describe('telemetry', () => {
     const alwaysFiringRuleId: { [key: string]: string } = {};
-
-    before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/event_log_telemetry');
-      await setupSpacesAndUsers(getService);
-    });
-    after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/event_log_telemetry');
-    });
 
     beforeEach(async () => {
       await esTestIndexTool.destroy();
@@ -79,10 +68,15 @@ export default function createAlertingTelemetryTests({ getService }: FtrProvider
           space: space.id,
           connectorTypeId: 'test.noop',
         });
-        await createConnector({
+        const failingConnectorId = await createConnector({
           name: 'connector that errors',
           space: space.id,
           connectorTypeId: 'test.throw',
+        });
+        await createConnector({
+          name: 'unused connector',
+          space: space.id,
+          connectorTypeId: 'test.excluded',
         });
         await createRule({
           space: space.id,
@@ -109,7 +103,7 @@ export default function createAlertingTelemetryTests({ getService }: FtrProvider
             params: {},
             actions: [
               {
-                id: noopConnectorId,
+                id: failingConnectorId,
                 group: 'default',
                 params: {},
               },
@@ -139,6 +133,7 @@ export default function createAlertingTelemetryTests({ getService }: FtrProvider
             rule_type_id: 'example.always-firing',
             schedule: { interval: '3s' },
             throttle: null,
+            notify_when: 'onActiveAlert',
             params: {},
             actions: [
               {
@@ -147,12 +142,12 @@ export default function createAlertingTelemetryTests({ getService }: FtrProvider
                 params: {},
               },
               {
-                id: noopConnectorId,
+                id: 'my-slack1',
                 group: 'medium',
                 params: {},
               },
               {
-                id: noopConnectorId,
+                id: failingConnectorId,
                 group: 'large',
                 params: {},
               },
@@ -189,9 +184,10 @@ export default function createAlertingTelemetryTests({ getService }: FtrProvider
             rule_type_id: 'test.cumulative-firing',
             schedule: { interval: '61s' },
             throttle: '2s',
+            notify_when: 'onActiveAlert',
             actions: [
               {
-                id: noopConnectorId,
+                id: failingConnectorId,
                 group: 'default',
                 params: {},
               },
@@ -201,50 +197,59 @@ export default function createAlertingTelemetryTests({ getService }: FtrProvider
       }
     }
 
-    it('should retrieve telemetry data in the expected format', async () => {
-      await setup();
+    function verifyActionsTelemetry(telemetry: any) {
+      logger.info(`actions telemetry - ${JSON.stringify(telemetry)}`);
+      // total number of active connectors (used by a rule)
+      expect(telemetry.count_active_total).to.equal(7);
 
-      // let it run for a bit
-      await retry.try(async () => {
-        return await getEventLog({
-          getService,
-          spaceId: Spaces[0].id,
-          type: 'alert',
-          id: alwaysFiringRuleId[Spaces[0].id],
-          provider: 'alerting',
-          actions: new Map([['execute', { gte: 8 }]]),
-        });
-      });
+      // total number of connectors broken down by connector type
+      expect(telemetry.count_by_type['test.throw']).to.equal(3);
+      expect(telemetry.count_by_type['test.excluded']).to.equal(3);
+      expect(telemetry.count_by_type['test.noop']).to.equal(3);
+      expect(telemetry.count_by_type.__slack).to.equal(1);
+      expect(telemetry.count_by_type.__servicenow).to.equal(2);
+      expect(telemetry.count_by_type['system-abc-action-type']).to.equal(1);
+      expect(telemetry.count_by_type.__index).to.equal(1);
+      expect(telemetry.count_by_type['test.index-record']).to.equal(1);
+      expect(telemetry.count_by_type.__webhook).to.equal(4);
 
-      // request telemetry task to run
-      await supertest
-        .post('/api/alerting_actions_telemetry/run_soon')
-        .set('kbn-xsrf', 'xxx')
-        .send({ taskId: 'Alerting-alerting_telemetry' })
-        .expect(200);
+      // total number of active connectors broken down by connector type
+      expect(telemetry.count_active_by_type['test.throw']).to.equal(3);
+      expect(telemetry.count_active_by_type['test.noop']).to.equal(3);
+      expect(telemetry.count_active_by_type.__slack).to.equal(1);
 
-      let telemetry: any;
+      // total number of rules using the alert history connector
+      expect(telemetry.count_active_alert_history_connectors).to.equal(0);
 
-      await retry.try(async () => {
-        const resp = await es.search<TaskRunning<TaskRunningStage.RAN, ConcreteTaskInstance>>({
-          index: '.kibana_task_manager',
-          body: {
-            query: {
-              term: {
-                _id: `task:Alerting-alerting_telemetry`,
-              },
-            },
-          },
-        });
-        const task = resp.hits.hits[0]?._source?.task;
-        expect(task?.status).to.be('idle');
-        const taskState = task?.state;
-        expect(taskState).not.to.be(undefined);
-        telemetry = JSON.parse(String(taskState!));
-        // total number of rules
-        expect(telemetry.count_total).to.equal(21);
-      });
+      // total number of email connectors used by rules broken down by service type
+      // testing for existence of this field but we don't have any rules using email
+      // connectors in this test
+      expect(telemetry.count_active_email_connectors_by_service_type).to.be.empty();
 
+      // number of spaces with connectors
+      expect(telemetry.count_actions_namespaces).to.equal(3);
+
+      // number of action executions - just checking for non-zero as we can't set an exact number
+      expect(telemetry.count_actions_executions_per_day > 0).to.be(true);
+
+      // number of action executions broken down by connector type
+      expect(telemetry.count_actions_executions_by_type_per_day['test.throw'] > 0).to.be(true);
+
+      // average execution time - just checking for non-zero as we can't set an exact number
+      expect(telemetry.avg_execution_time_per_day > 0).to.be(true);
+
+      // average execution time broken down by rule type
+      expect(telemetry.avg_execution_time_by_type_per_day['test.throw'] > 0).to.be(true);
+
+      // number of failed executions
+      expect(telemetry.count_actions_executions_failed_per_day > 0).to.be(true);
+      expect(telemetry.count_actions_executions_failed_by_type_per_day['test.throw'] > 0).to.be(
+        true
+      );
+    }
+
+    function verifyAlertingTelemetry(telemetry: any) {
+      logger.info(`alerting telemetry - ${JSON.stringify(telemetry)}`);
       // total number of enabled rules
       expect(telemetry.count_active_total).to.equal(18);
 
@@ -252,20 +257,20 @@ export default function createAlertingTelemetryTests({ getService }: FtrProvider
       expect(telemetry.count_disabled_total).to.equal(3);
 
       // total number of rules broken down by rule type
-      expect(telemetry.count_by_type.test__onlyContextVariables).to.equal(3);
-      expect(telemetry.count_by_type['example__always-firing']).to.equal(3);
-      expect(telemetry.count_by_type.test__throw).to.equal(3);
       expect(telemetry.count_by_type.test__noop).to.equal(6);
-      expect(telemetry.count_by_type.test__multipleSearches).to.equal(3);
+      expect(telemetry.count_by_type['example__always-firing']).to.equal(3);
       expect(telemetry.count_by_type['test__cumulative-firing']).to.equal(3);
+      expect(telemetry.count_by_type.test__multipleSearches).to.equal(3);
+      expect(telemetry.count_by_type.test__onlyContextVariables).to.equal(3);
+      expect(telemetry.count_by_type.test__throw).to.equal(3);
 
       // total number of enabled rules broken down by rule type
-      expect(telemetry.count_active_by_type.test__onlyContextVariables).to.equal(3);
       expect(telemetry.count_active_by_type['example__always-firing']).to.equal(3);
-      expect(telemetry.count_active_by_type.test__throw).to.equal(3);
-      expect(telemetry.count_active_by_type.test__noop).to.equal(3);
-      expect(telemetry.count_active_by_type.test__multipleSearches).to.equal(3);
       expect(telemetry.count_active_by_type['test__cumulative-firing']).to.equal(3);
+      expect(telemetry.count_active_by_type.test__multipleSearches).to.equal(3);
+      expect(telemetry.count_active_by_type.test__noop).to.equal(3);
+      expect(telemetry.count_active_by_type.test__onlyContextVariables).to.equal(3);
+      expect(telemetry.count_active_by_type.test__throw).to.equal(3);
 
       // throttle time stats
       expect(telemetry.throttle_time.min).to.equal('0s');
@@ -296,45 +301,45 @@ export default function createAlertingTelemetryTests({ getService }: FtrProvider
       expect(telemetry.count_rules_executions_per_day >= 21).to.be(true);
 
       // number of rule executions broken down by rule type
-      expect(telemetry.count_by_type.test__onlyContextVariables >= 3).to.be(true);
       expect(telemetry.count_by_type['example__always-firing'] >= 3).to.be(true);
-      expect(telemetry.count_by_type.test__throw >= 3).to.be(true);
+      expect(telemetry.count_by_type.test__onlyContextVariables >= 3).to.be(true);
+      expect(telemetry.count_by_type['test__cumulative-firing'] >= 3).to.be(true);
       expect(telemetry.count_by_type.test__noop >= 3).to.be(true);
       expect(telemetry.count_by_type.test__multipleSearches >= 3).to.be(true);
-      expect(telemetry.count_by_type['test__cumulative-firing'] >= 3).to.be(true);
+      expect(telemetry.count_by_type.test__throw >= 3).to.be(true);
 
       // average execution time - just checking for non-zero as we can't set an exact number
       expect(telemetry.avg_execution_time_per_day > 0).to.be(true);
 
       // average execution time broken down by rule type
-      expect(telemetry.avg_execution_time_by_type_per_day.test__onlyContextVariables > 0).to.be(
-        true
-      );
       expect(telemetry.avg_execution_time_by_type_per_day['example__always-firing'] > 0).to.be(
         true
       );
-      expect(telemetry.avg_execution_time_by_type_per_day.test__throw > 0).to.be(true);
-      expect(telemetry.avg_execution_time_by_type_per_day.test__noop > 0).to.be(true);
-      expect(telemetry.avg_execution_time_by_type_per_day.test__multipleSearches > 0).to.be(true);
+      expect(telemetry.avg_execution_time_by_type_per_day.test__onlyContextVariables > 0).to.be(
+        true
+      );
       expect(telemetry.avg_execution_time_by_type_per_day['test__cumulative-firing'] > 0).to.be(
         true
       );
+      expect(telemetry.avg_execution_time_by_type_per_day.test__noop > 0).to.be(true);
+      expect(telemetry.avg_execution_time_by_type_per_day.test__multipleSearches > 0).to.be(true);
+      expect(telemetry.avg_execution_time_by_type_per_day.test__throw > 0).to.be(true);
 
       // average es search time - just checking for non-zero as we can't set an exact number
       expect(telemetry.avg_es_search_duration_per_day > 0).to.be(true);
 
       // average es search time broken down by rule type, most of these rule types don't perform ES queries
       expect(
+        telemetry.avg_es_search_duration_by_type_per_day['example__always-firing'] === 0
+      ).to.be(true);
+      expect(
         telemetry.avg_es_search_duration_by_type_per_day.test__onlyContextVariables === 0
       ).to.be(true);
       expect(
-        telemetry.avg_es_search_duration_by_type_per_day['example__always-firing'] === 0
-      ).to.be(true);
-      expect(telemetry.avg_es_search_duration_by_type_per_day.test__throw === 0).to.be(true);
-      expect(telemetry.avg_es_search_duration_by_type_per_day.test__noop === 0).to.be(true);
-      expect(
         telemetry.avg_es_search_duration_by_type_per_day['test__cumulative-firing'] === 0
       ).to.be(true);
+      expect(telemetry.avg_es_search_duration_by_type_per_day.test__noop === 0).to.be(true);
+      expect(telemetry.avg_es_search_duration_by_type_per_day.test__throw === 0).to.be(true);
 
       // rule type that performs ES search
       expect(telemetry.avg_es_search_duration_by_type_per_day.test__multipleSearches > 0).to.be(
@@ -346,16 +351,16 @@ export default function createAlertingTelemetryTests({ getService }: FtrProvider
 
       // average total search time broken down by rule type, most of these rule types don't perform ES queries
       expect(
+        telemetry.avg_total_search_duration_by_type_per_day['example__always-firing'] === 0
+      ).to.be(true);
+      expect(
         telemetry.avg_total_search_duration_by_type_per_day.test__onlyContextVariables === 0
       ).to.be(true);
       expect(
-        telemetry.avg_total_search_duration_by_type_per_day['example__always-firing'] === 0
-      ).to.be(true);
-      expect(telemetry.avg_total_search_duration_by_type_per_day.test__throw === 0).to.be(true);
-      expect(telemetry.avg_total_search_duration_by_type_per_day.test__noop === 0).to.be(true);
-      expect(
         telemetry.avg_total_search_duration_by_type_per_day['test__cumulative-firing'] === 0
       ).to.be(true);
+      expect(telemetry.avg_total_search_duration_by_type_per_day.test__noop === 0).to.be(true);
+      expect(telemetry.avg_total_search_duration_by_type_per_day.test__throw === 0).to.be(true);
 
       // rule type that performs ES search
       expect(telemetry.avg_total_search_duration_by_type_per_day.test__multipleSearches > 0).to.be(
@@ -384,7 +389,7 @@ export default function createAlertingTelemetryTests({ getService }: FtrProvider
 
       // percentile calculations for number of scheduled actions
       expect(telemetry.percentile_num_generated_actions_per_day.p50 >= 0).to.be(true);
-      expect(telemetry.percentile_num_generated_actions_per_day.p90).to.be.greaterThan(0);
+      expect(telemetry.percentile_num_generated_actions_per_day.p90 >= 0).to.be(true);
       expect(telemetry.percentile_num_generated_actions_per_day.p99).to.be.greaterThan(0);
 
       // percentile calculations by rule type. most of these rule types don't schedule actions so they should all be 0
@@ -445,7 +450,7 @@ export default function createAlertingTelemetryTests({ getService }: FtrProvider
 
       // percentile calculations for number of alerts
       expect(telemetry.percentile_num_alerts_per_day.p50 >= 0).to.be(true);
-      expect(telemetry.percentile_num_alerts_per_day.p90).to.be.greaterThan(0);
+      expect(telemetry.percentile_num_alerts_per_day.p90 >= 0).to.be(true);
       expect(telemetry.percentile_num_alerts_per_day.p99).to.be.greaterThan(0);
 
       // percentile calculations by rule type. most of these rule types don't generate alerts so they should all be 0
@@ -497,6 +502,67 @@ export default function createAlertingTelemetryTests({ getService }: FtrProvider
       expect(
         telemetry.percentile_num_alerts_by_type_per_day.p99['test__cumulative-firing']
       ).to.be.greaterThan(0);
+    }
+
+    it('should retrieve telemetry data in the expected format', async () => {
+      await setup();
+
+      // let it run for a bit
+      await retry.try(async () => {
+        return await getEventLog({
+          getService,
+          spaceId: Spaces[0].id,
+          type: 'alert',
+          id: alwaysFiringRuleId[Spaces[0].id],
+          provider: 'alerting',
+          actions: new Map([['execute', { gte: 10 }]]),
+        });
+      });
+
+      // request actions telemetry task to run
+      await supertest
+        .post('/api/alerting_actions_telemetry/run_soon')
+        .set('kbn-xsrf', 'xxx')
+        .send({ taskId: 'Actions-actions_telemetry' })
+        .expect(200);
+
+      let actionsTelemetry: any;
+      await retry.try(async () => {
+        const telemetryTask = await es.get<TaskManagerDoc>({
+          id: `task:Actions-actions_telemetry`,
+          index: '.kibana_task_manager',
+        });
+        expect(telemetryTask!._source!.task?.status).to.be('idle');
+        const taskState = telemetryTask!._source!.task?.state;
+        expect(taskState).not.to.be(undefined);
+        actionsTelemetry = JSON.parse(taskState!);
+        expect(actionsTelemetry.runs).to.equal(2);
+        expect(actionsTelemetry.count_total).to.equal(19);
+      });
+
+      // request alerting telemetry task to run
+      await supertest
+        .post('/api/alerting_actions_telemetry/run_soon')
+        .set('kbn-xsrf', 'xxx')
+        .send({ taskId: 'Alerting-alerting_telemetry' })
+        .expect(200);
+
+      let alertingTelemetry: any;
+      await retry.try(async () => {
+        const telemetryTask = await es.get<TaskManagerDoc>({
+          id: `task:Alerting-alerting_telemetry`,
+          index: '.kibana_task_manager',
+        });
+        expect(telemetryTask!._source!.task?.status).to.be('idle');
+        const taskState = telemetryTask!._source!.task?.state;
+        expect(taskState).not.to.be(undefined);
+        alertingTelemetry = JSON.parse(taskState!);
+        expect(alertingTelemetry.runs).to.equal(2);
+        expect(alertingTelemetry.count_total).to.equal(21);
+      });
+
+      verifyActionsTelemetry(actionsTelemetry);
+      verifyAlertingTelemetry(alertingTelemetry);
     });
   });
 }
