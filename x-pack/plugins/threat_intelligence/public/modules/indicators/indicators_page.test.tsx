@@ -15,7 +15,7 @@ import {
   TABLE_TEST_ID as INDICATORS_TABLE_TEST_ID,
   TABLE_TEST_ID,
 } from './components/indicators_table/indicators_table';
-import { EMPTY_PROMPT_TEST_ID } from '../../components/empty_page';
+import { EMPTY_PROMPT_TEST_ID } from '../empty_page';
 import { useIntegrationsPageLink } from '../../hooks/use_integrations_page_link';
 import { useTIDocumentationLink } from '../../hooks/use_documentation_link';
 import { useFilters } from './hooks/use_filters';

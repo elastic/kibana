@@ -9,7 +9,7 @@ import React, { VFC } from 'react';
 import { IndicatorsBarChartWrapper } from './components/indicators_barchart_wrapper/indicators_barchart_wrapper';
 import { IndicatorsTable } from './components/indicators_table/indicators_table';
 import { useIndicators } from './hooks/use_indicators';
-import { EmptyPage } from '../../components/empty_page';
+import { EmptyPage } from '../empty_page';
 import { useIndicatorsTotalCount } from './hooks/use_indicators_total_count';
 import { DefaultPageLayout } from '../../components/layout';
 import { useFilters } from './hooks/use_filters';
