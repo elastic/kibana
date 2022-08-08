@@ -16,7 +16,8 @@ import * as GetStoredAnnotations from './get_stored_annotations';
 import { Annotation, AnnotationType } from '../../../../common/annotations';
 import { errors } from '@elastic/elasticsearch';
 
-describe('getServiceAnnotations', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/138039
+describe.skip('getServiceAnnotations', () => {
   const storedAnnotations = [
     {
       type: AnnotationType.VERSION,
