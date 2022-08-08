@@ -546,6 +546,47 @@ describe('UserActionBuilder', () => {
     `);
   });
 
+  it('builds an assign user action correctly', () => {
+    const builder = builderFactory.getBuilder(ActionTypes.assignees)!;
+    const userAction = builder.build({
+      payload: { assignees: [{ uid: '1' }, { uid: '2' }] },
+      ...commonArgs,
+    });
+
+    expect(userAction).toMatchInlineSnapshot(`
+      Object {
+        "attributes": Object {
+          "action": "add",
+          "created_at": "2022-01-09T22:00:00.000Z",
+          "created_by": Object {
+            "email": "elastic@elastic.co",
+            "full_name": "Elastic User",
+            "username": "elastic",
+          },
+          "owner": "securitySolution",
+          "payload": Object {
+            "assignees": Array [
+              Object {
+                "uid": "1",
+              },
+              Object {
+                "uid": "2",
+              },
+            ],
+          },
+          "type": "assignees",
+        },
+        "references": Array [
+          Object {
+            "id": "123",
+            "name": "associated-cases",
+            "type": "cases",
+          },
+        ],
+      }
+    `);
+  });
+
   it('builds a settings user action correctly', () => {
     const builder = builderFactory.getBuilder(ActionTypes.settings)!;
     const userAction = builder.build({
@@ -601,6 +642,11 @@ describe('UserActionBuilder', () => {
           },
           "owner": "securitySolution",
           "payload": Object {
+            "assignees": Array [
+              Object {
+                "uid": "1",
+              },
+            ],
             "connector": Object {
               "fields": Object {
                 "category": "Denial of Service",
