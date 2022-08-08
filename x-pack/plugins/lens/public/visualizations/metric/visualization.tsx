@@ -19,18 +19,27 @@ import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { LayerType } from '../../../common';
 import { getSuggestions } from './suggestions';
 import { LensIconChartMetric } from '../../assets/chart_metric';
-import { Visualization, OperationMetadata, DatasourceLayers } from '../../types';
+import {
+  Visualization,
+  OperationMetadata,
+  DatasourceLayers,
+  VisualizationConfigProps,
+  VisualizationDimensionGroupConfig,
+} from '../../types';
 import { layerTypes } from '../../../common';
 import { GROUP_ID, LENS_METRIC_ID } from './constants';
 import { DimensionEditor } from './dimension_editor';
 import { Toolbar } from './toolbar';
 import { generateId } from '../../id_generator';
+import { StaticHeader } from '../../shared_components';
 
 export const DEFAULT_MAX_COLUMNS = 3;
 
 export interface MetricVisualizationState {
   layerId: string;
   layerType: LayerType;
+  trendlineLayerId?: string;
+  trendlineLayerType?: LayerType;
   metricAccessor?: string;
   secondaryMetricAccessor?: string;
   maxAccessor?: string;
@@ -148,6 +157,174 @@ const toExpression = (
   };
 };
 
+const getMetricLayerConfiguration = (
+  props: VisualizationConfigProps<MetricVisualizationState>
+): {
+  groups: VisualizationDimensionGroupConfig[];
+} => {
+  const hasColoring = props.state.palette != null;
+  const stops = props.state.palette?.params?.stops || [];
+  const isSupportedMetric = (op: OperationMetadata) =>
+    !op.isBucketed && supportedDataTypes.has(op.dataType);
+
+  const isSupportedDynamicMetric = (op: OperationMetadata) =>
+    !op.isBucketed && supportedDataTypes.has(op.dataType) && !op.isStaticValue;
+
+  const isBucketed = (op: OperationMetadata) => op.isBucketed;
+  return {
+    groups: [
+      {
+        groupId: GROUP_ID.METRIC,
+        groupLabel: i18n.translate('xpack.lens.primaryMetric.label', {
+          defaultMessage: 'Primary metric',
+        }),
+        paramEditorCustomProps: {
+          headingLabel: i18n.translate('xpack.lens.primaryMetric.headingLabel', {
+            defaultMessage: 'Value',
+          }),
+        },
+        accessors: props.state.metricAccessor
+          ? [
+              {
+                columnId: props.state.metricAccessor,
+                triggerIcon: hasColoring ? 'colorBy' : undefined,
+                palette: hasColoring ? stops.map(({ color }) => color) : undefined,
+              },
+            ]
+          : [],
+        supportsMoreColumns: !props.state.metricAccessor,
+        filterOperations: isSupportedDynamicMetric,
+        enableDimensionEditor: true,
+        supportFieldFormat: false,
+        required: true,
+      },
+      {
+        groupId: GROUP_ID.SECONDARY_METRIC,
+        groupLabel: i18n.translate('xpack.lens.metric.secondaryMetric', {
+          defaultMessage: 'Secondary metric',
+        }),
+        paramEditorCustomProps: {
+          headingLabel: i18n.translate('xpack.lens.primaryMetric.headingLabel', {
+            defaultMessage: 'Value',
+          }),
+        },
+        accessors: props.state.secondaryMetricAccessor
+          ? [
+              {
+                columnId: props.state.secondaryMetricAccessor,
+              },
+            ]
+          : [],
+        supportsMoreColumns: !props.state.secondaryMetricAccessor,
+        filterOperations: isSupportedDynamicMetric,
+        enableDimensionEditor: true,
+        supportFieldFormat: false,
+        required: false,
+      },
+      {
+        groupId: GROUP_ID.MAX,
+        groupLabel: i18n.translate('xpack.lens.metric.max', { defaultMessage: 'Maximum value' }),
+        paramEditorCustomProps: {
+          headingLabel: i18n.translate('xpack.lens.primaryMetric.headingLabel', {
+            defaultMessage: 'Value',
+          }),
+        },
+        accessors: props.state.maxAccessor
+          ? [
+              {
+                columnId: props.state.maxAccessor,
+              },
+            ]
+          : [],
+        supportsMoreColumns: !props.state.maxAccessor,
+        filterOperations: isSupportedMetric,
+        enableDimensionEditor: true,
+        supportFieldFormat: false,
+        supportStaticValue: true,
+        required: false,
+        groupTooltip: i18n.translate('xpack.lens.metric.maxTooltip', {
+          defaultMessage: 'If the maximum value is specified, the minimum value is fixed at zero.',
+        }),
+      },
+      {
+        groupId: GROUP_ID.BREAKDOWN_BY,
+        groupLabel: i18n.translate('xpack.lens.metric.breakdownBy', {
+          defaultMessage: 'Break down by',
+        }),
+        accessors: props.state.breakdownByAccessor
+          ? [
+              {
+                columnId: props.state.breakdownByAccessor,
+                triggerIcon: props.state.collapseFn ? ('aggregate' as const) : undefined,
+              },
+            ]
+          : [],
+        supportsMoreColumns: !props.state.breakdownByAccessor,
+        filterOperations: isBucketed,
+        enableDimensionEditor: true,
+        supportFieldFormat: false,
+      },
+    ],
+  };
+};
+
+const getTrendlineLayerConfiguration = (
+  props: VisualizationConfigProps<MetricVisualizationState>
+): {
+  groups: VisualizationDimensionGroupConfig[];
+} => {
+  return {
+    groups: [
+      {
+        groupId: GROUP_ID.METRIC,
+        groupLabel: i18n.translate('xpack.lens.primaryMetric.label', {
+          defaultMessage: 'Primary metric',
+        }),
+        paramEditorCustomProps: {
+          headingLabel: i18n.translate('xpack.lens.primaryMetric.headingLabel', {
+            defaultMessage: 'Value',
+          }),
+        },
+        accessors: props.state.metricAccessor
+          ? [
+              {
+                columnId: props.state.metricAccessor,
+              },
+            ]
+          : [],
+        supportsMoreColumns: !props.state.metricAccessor,
+        filterOperations: () => false,
+        enableDimensionEditor: true,
+        supportFieldFormat: false,
+        required: true,
+      },
+      {
+        groupId: GROUP_ID.MAX,
+        groupLabel: i18n.translate('xpack.lens.metric.timeField', { defaultMessage: 'Time field' }),
+        paramEditorCustomProps: {
+          headingLabel: i18n.translate('xpack.lens.primaryMetric.headingLabel', {
+            defaultMessage: 'Value',
+          }),
+        },
+        accessors: props.state.maxAccessor
+          ? [
+              {
+                columnId: props.state.maxAccessor,
+              },
+            ]
+          : [],
+        supportsMoreColumns: !props.state.maxAccessor,
+        filterOperations: () => false,
+        enableDimensionEditor: true,
+        required: true,
+        groupTooltip: i18n.translate('xpack.lens.metric.timeFieldTooltip', {
+          defaultMessage: 'This is the time axis for the trend line',
+        }),
+      },
+    ],
+  };
+};
+
 export const metricLabel = i18n.translate('xpack.lens.metric.label', {
   defaultMessage: 'Metric',
 });
@@ -193,7 +370,7 @@ export const getMetricVisualization = ({
   },
 
   getLayerIds(state) {
-    return [state.layerId];
+    return [state.layerId, ...(state.trendlineLayerId ? [state.trendlineLayerId] : [])];
   },
 
   getDescription() {
@@ -217,116 +394,9 @@ export const getMetricVisualization = ({
   triggers: [VIS_EVENT_TO_TRIGGER.filter],
 
   getConfiguration(props) {
-    const hasColoring = props.state.palette != null;
-    const stops = props.state.palette?.params?.stops || [];
-    const isSupportedMetric = (op: OperationMetadata) =>
-      !op.isBucketed && supportedDataTypes.has(op.dataType);
-
-    const isSupportedDynamicMetric = (op: OperationMetadata) =>
-      !op.isBucketed && supportedDataTypes.has(op.dataType) && !op.isStaticValue;
-
-    const isBucketed = (op: OperationMetadata) => op.isBucketed;
-    return {
-      groups: [
-        {
-          groupId: GROUP_ID.METRIC,
-          groupLabel: i18n.translate('xpack.lens.primaryMetric.label', {
-            defaultMessage: 'Primary metric',
-          }),
-          paramEditorCustomProps: {
-            headingLabel: i18n.translate('xpack.lens.primaryMetric.headingLabel', {
-              defaultMessage: 'Value',
-            }),
-          },
-          layerId: props.state.layerId,
-          accessors: props.state.metricAccessor
-            ? [
-                {
-                  columnId: props.state.metricAccessor,
-                  triggerIcon: hasColoring ? 'colorBy' : undefined,
-                  palette: hasColoring ? stops.map(({ color }) => color) : undefined,
-                },
-              ]
-            : [],
-          supportsMoreColumns: !props.state.metricAccessor,
-          filterOperations: isSupportedDynamicMetric,
-          enableDimensionEditor: true,
-          supportFieldFormat: false,
-          required: true,
-        },
-        {
-          groupId: GROUP_ID.SECONDARY_METRIC,
-          groupLabel: i18n.translate('xpack.lens.metric.secondaryMetric', {
-            defaultMessage: 'Secondary metric',
-          }),
-          paramEditorCustomProps: {
-            headingLabel: i18n.translate('xpack.lens.primaryMetric.headingLabel', {
-              defaultMessage: 'Value',
-            }),
-          },
-          layerId: props.state.layerId,
-          accessors: props.state.secondaryMetricAccessor
-            ? [
-                {
-                  columnId: props.state.secondaryMetricAccessor,
-                },
-              ]
-            : [],
-          supportsMoreColumns: !props.state.secondaryMetricAccessor,
-          filterOperations: isSupportedDynamicMetric,
-          enableDimensionEditor: true,
-          supportFieldFormat: false,
-          required: false,
-        },
-        {
-          groupId: GROUP_ID.MAX,
-          groupLabel: i18n.translate('xpack.lens.metric.max', { defaultMessage: 'Maximum value' }),
-          paramEditorCustomProps: {
-            headingLabel: i18n.translate('xpack.lens.primaryMetric.headingLabel', {
-              defaultMessage: 'Value',
-            }),
-          },
-          layerId: props.state.layerId,
-          accessors: props.state.maxAccessor
-            ? [
-                {
-                  columnId: props.state.maxAccessor,
-                },
-              ]
-            : [],
-          supportsMoreColumns: !props.state.maxAccessor,
-          filterOperations: isSupportedMetric,
-          enableDimensionEditor: true,
-          supportFieldFormat: false,
-          supportStaticValue: true,
-          required: false,
-          groupTooltip: i18n.translate('xpack.lens.metric.maxTooltip', {
-            defaultMessage:
-              'If the maximum value is specified, the minimum value is fixed at zero.',
-          }),
-        },
-        {
-          groupId: GROUP_ID.BREAKDOWN_BY,
-          groupLabel: i18n.translate('xpack.lens.metric.breakdownBy', {
-            defaultMessage: 'Break down by',
-          }),
-          layerId: props.state.layerId,
-          accessors: props.state.breakdownByAccessor
-            ? [
-                {
-                  columnId: props.state.breakdownByAccessor,
-                  triggerIcon: props.state.collapseFn ? ('aggregate' as const) : undefined,
-                },
-              ]
-            : [],
-          supportsMoreColumns: !props.state.breakdownByAccessor,
-          filterOperations: isBucketed,
-          enableDimensionEditor: true,
-          supportFieldFormat: false,
-          required: false,
-        },
-      ],
-    };
+    return props.layerId === props.state.layerId
+      ? getMetricLayerConfiguration(props)
+      : getTrendlineLayerConfiguration(props);
   },
 
   getSupportedLayers(state) {
@@ -345,13 +415,38 @@ export const getMetricVisualization = ({
               },
             ]
           : undefined,
+        disabled: true,
+      },
+      {
+        type: layerTypes.METRIC_TRENDLINE,
+        label: i18n.translate('xpack.lens.metric.layerType.trendLine', {
+          defaultMessage: 'Trendline',
+        }),
+        initialDimensions: [],
+        disabled: Boolean(state?.trendlineLayerId),
       },
     ];
+  },
+
+  appendLayer(state, layerId, layerType) {
+    if (layerType !== layerTypes.METRIC_TRENDLINE) {
+      throw new Error(`Metric vis only supports layers of type ${layerTypes.METRIC_TRENDLINE}!`);
+    }
+
+    return { ...state, trendlineLayerId: layerId, trendlineLayerType: layerType };
+  },
+
+  removeLayer(state) {
+    return { ...state, trendlineLayerId: undefined, trendlineLayerType: undefined };
   },
 
   getLayerType(layerId, state) {
     if (state?.layerId === layerId) {
       return state.layerType;
+    }
+
+    if (state?.trendlineLayerId === layerId) {
+      return state.trendlineLayerType;
     }
   },
 
@@ -399,6 +494,25 @@ export const getMetricVisualization = ({
     }
 
     return updated;
+  },
+
+  renderLayerHeader(domElement, props) {
+    render(
+      <KibanaThemeProvider theme$={theme.theme$}>
+        <I18nProvider>
+          {props.layerId === props.state.layerId ? (
+            <StaticHeader icon={LensIconChartMetric} label={metricLabel} />
+          ) : (
+            <StaticHeader
+              label={i18n.translate('xpack.lens.metric.trendlineLayerLabel', {
+                defaultMessage: 'Trendline',
+              })}
+            />
+          )}
+        </I18nProvider>
+      </KibanaThemeProvider>,
+      domElement
+    );
   },
 
   renderToolbar(domElement, props) {
