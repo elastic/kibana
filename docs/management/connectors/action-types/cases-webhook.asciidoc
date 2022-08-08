@@ -315,7 +315,7 @@ Next we'll need to look at {jira}'s https://developer.atlassian.com/cloud/jira/p
 }
 --
 
-To make the Get Case URL, we see we need `/rest/api/2/issue/{issueIdOrKey}`. We will fill in the value with the issue id, which we stored in the last step as *Create Case Response - Case ID Key*. Using the variable selector on the Get Case URL input, we can see the issue id is stored as a mustache value `{{{external.system.id}}}`. So our value for *Get Case URL* will be `https://testing-jira.atlassian.net/rest/api/2/issue/{{{external.system.id}}}`.
+To make the Get Case URL, we need `/rest/api/2/issue/{issueIdOrKey}`. We will fill in the value with the issue ID, which we stored in the last step as *Create Case Response - Case ID Key*. Using the variable selector on the Get Case URL input, we can see the issue ID is stored as a mustache value `{{{external.system.id}}}`. So our value for *Get Case URL* will be `https://testing-jira.atlassian.net/rest/api/2/issue/{{{external.system.id}}}`.
 
 In the response JSON we can see the title of the case is "ROC-538". The key for this value is `key` so we enter `key` as the *Get Case Response External Title Key* value.
 
@@ -326,7 +326,7 @@ image::management/connectors/images/cases-webhook-step3.gif[Webhook - Case Manag
 [float]
 ====  Step 4 - Comments and updates
 
-In Step 4 we need to set the REST API data for updates and comments. Let's look at {jira}'s https://developer.atlassian.com/cloud/jira/platform/rest/v2/api-group-issues/#api-rest-api-2-issue-issueidorkey-put[Edit issue documentation].
+During this step, we need to set the REST API data for updates and comments. Let's look at {jira}'s https://developer.atlassian.com/cloud/jira/platform/rest/v2/api-group-issues/#api-rest-api-2-issue-issueidorkey-put[Edit issue documentation].
 
 {jira} update issue request method: `PUT`
 
