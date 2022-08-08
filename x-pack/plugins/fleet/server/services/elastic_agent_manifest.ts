@@ -37,7 +37,6 @@ spec:
           args: [
             "-c", "/etc/agent.yml",
             "-e",
-            "-d", "'*'",
           ]
           env:
             # The basic authentication username used to connect to Elasticsearch
@@ -46,7 +45,10 @@ spec:
               value: "elastic"
             # The basic authentication password used to connect to Elasticsearch
             - name: ES_PASSWORD
-              value: "changeme"
+              value: ""
+            # The Elasticsearch host to communicate with
+            - name: ES_HOST
+              value: ""
             - name: NODE_NAME
               valueFrom:
                 fieldRef:
@@ -59,10 +61,10 @@ spec:
             runAsUser: 0
           resources:
             limits:
-              memory: 500Mi
+              memory: 700Mi
             requests:
               cpu: 100m
-              memory: 200Mi
+              memory: 400Mi
           volumeMounts:
             - name: datastreams
               mountPath: /etc/agent.yml
@@ -70,12 +72,6 @@ spec:
               subPath: agent.yml
             - name: proc
               mountPath: /hostfs/proc
-              readOnly: true
-            - name: etc-kubernetes
-              mountPath: /hostfs/etc/kubernetes
-              readOnly: true
-            - name: var-lib
-              mountPath: /hostfs/var/lib
               readOnly: true
             - name: cgroup
               mountPath: /hostfs/sys/fs/cgroup
@@ -85,6 +81,12 @@ spec:
               readOnly: true
             - name: varlog
               mountPath: /var/log
+              readOnly: true
+            - name: etc-kubernetes
+              mountPath: /hostfs/etc/kubernetes
+              readOnly: true
+            - name: var-lib
+              mountPath: /hostfs/var/lib
               readOnly: true
             - name: passwd
               mountPath: /hostfs/etc/passwd
@@ -103,6 +105,15 @@ spec:
         - name: proc
           hostPath:
             path: /proc
+        - name: cgroup
+          hostPath:
+            path: /sys/fs/cgroup
+        - name: varlibdockercontainers
+          hostPath:
+            path: /var/lib/docker/containers
+        - name: varlog
+          hostPath:
+            path: /var/log
         # Needed for cloudbeat
         - name: etc-kubernetes
           hostPath:
@@ -119,15 +130,6 @@ spec:
         - name: group
           hostPath:
             path: /etc/group
-        - name: cgroup
-          hostPath:
-            path: /sys/fs/cgroup
-        - name: varlibdockercontainers
-          hostPath:
-            path: /var/lib/docker/containers
-        - name: varlog
-          hostPath:
-            path: /var/log
         # Needed for cloudbeat
         - name: etcsysmd
           hostPath:
@@ -234,7 +236,7 @@ rules:
       - rolebindings
       - roles
     verbs: ["get", "list", "watch"]
-    # Needed for cloudbeat
+  # Needed for cloudbeat
   - apiGroups: ["policy"]
     resources:
       - podsecuritypolicies
@@ -326,7 +328,7 @@ spec:
             # Elasticsearch API key used to enroll Elastic Agents in Fleet (https://www.elastic.co/guide/en/fleet/current/fleet-enrollment-tokens.html#fleet-enrollment-tokens)
             # If FLEET_ENROLLMENT_TOKEN is empty then KIBANA_HOST, KIBANA_FLEET_USERNAME, KIBANA_FLEET_PASSWORD are needed
             - name: FLEET_ENROLLMENT_TOKEN
-              value: "token-id"
+              value: ""
             - name: KIBANA_HOST
               value: "http://kibana:5601"
             # The basic authentication username used to connect to Kibana and retrieve a service_token to enable Fleet
@@ -355,12 +357,6 @@ spec:
             - name: proc
               mountPath: /hostfs/proc
               readOnly: true
-            - name: etc-kubernetes
-              mountPath: /hostfs/etc/kubernetes
-              readOnly: true
-            - name: var-lib
-              mountPath: /hostfs/var/lib
-              readOnly: true
             - name: cgroup
               mountPath: /hostfs/sys/fs/cgroup
               readOnly: true
@@ -369,6 +365,12 @@ spec:
               readOnly: true
             - name: varlog
               mountPath: /var/log
+              readOnly: true
+            - name: etc-kubernetes
+              mountPath: /hostfs/etc/kubernetes
+              readOnly: true
+            - name: var-lib
+              mountPath: /hostfs/var/lib
               readOnly: true
             - name: passwd
               mountPath: /hostfs/etc/passwd
