@@ -13,10 +13,8 @@ import * as single_search_after from '../single_search_after';
 import { findThresholdSignals } from './find_threshold_signals';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
-import {
-  buildTimestampRuntimeMapping,
-  TIMESTAMP_RUNTIME_FIELD,
-} from '../../rule_types/new_terms/build_timestamp_runtime_mapping';
+import { buildTimestampRuntimeMapping } from '../../rule_types/utils';
+import { TIMESTAMP_RUNTIME_FIELD } from '../../rule_types/constants';
 
 const queryFilter = getQueryFilter('', 'kuery', [], ['*'], []);
 const mockSingleSearchAfter = jest.fn(async () => ({
@@ -58,8 +56,7 @@ describe('findThresholdSignals', () => {
       runtimeMappings: undefined,
       primaryTimestamp: TIMESTAMP,
       secondaryTimestamp: undefined,
-      timestampField: TIMESTAMP,
-      timestampRuntimeMappings: undefined,
+      aggregatableTimestampField: TIMESTAMP,
     });
     expect(mockSingleSearchAfter).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -95,8 +92,7 @@ describe('findThresholdSignals', () => {
       runtimeMappings: undefined,
       primaryTimestamp: TIMESTAMP,
       secondaryTimestamp: undefined,
-      timestampField: TIMESTAMP,
-      timestampRuntimeMappings: undefined,
+      aggregatableTimestampField: TIMESTAMP,
     });
     expect(mockSingleSearchAfter).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -158,8 +154,7 @@ describe('findThresholdSignals', () => {
       runtimeMappings: undefined,
       primaryTimestamp: TIMESTAMP,
       secondaryTimestamp: undefined,
-      timestampField: TIMESTAMP,
-      timestampRuntimeMappings: undefined,
+      aggregatableTimestampField: TIMESTAMP,
     });
     expect(mockSingleSearchAfter).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -233,8 +228,7 @@ describe('findThresholdSignals', () => {
       runtimeMappings: undefined,
       primaryTimestamp: TIMESTAMP,
       secondaryTimestamp: undefined,
-      timestampField: TIMESTAMP,
-      timestampRuntimeMappings: undefined,
+      aggregatableTimestampField: TIMESTAMP,
     });
     expect(mockSingleSearchAfter).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -321,8 +315,7 @@ describe('findThresholdSignals', () => {
       runtimeMappings: undefined,
       primaryTimestamp: TIMESTAMP,
       secondaryTimestamp: undefined,
-      timestampField: TIMESTAMP,
-      timestampRuntimeMappings: undefined,
+      aggregatableTimestampField: TIMESTAMP,
     });
     expect(mockSingleSearchAfter).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -349,8 +342,8 @@ describe('findThresholdSignals', () => {
 
   it('should generate a threshold signal query with timestamp override', async () => {
     const timestampOverride = 'event.ingested';
-    const { timestampField, timestampRuntimeMappings } = {
-      timestampField: TIMESTAMP_RUNTIME_FIELD,
+    const { aggregatableTimestampField, timestampRuntimeMappings } = {
+      aggregatableTimestampField: TIMESTAMP_RUNTIME_FIELD,
       timestampRuntimeMappings: buildTimestampRuntimeMapping({
         timestampOverride,
       }),
@@ -374,11 +367,10 @@ describe('findThresholdSignals', () => {
         field: [],
         value: 200,
       },
-      runtimeMappings: undefined,
+      runtimeMappings: timestampRuntimeMappings,
       primaryTimestamp: timestampOverride,
       secondaryTimestamp: TIMESTAMP,
-      timestampField,
-      timestampRuntimeMappings,
+      aggregatableTimestampField,
     });
     expect(mockSingleSearchAfter).toHaveBeenCalledWith(
       expect.objectContaining({

@@ -17,7 +17,7 @@ describe('build_threshold_aggregation', () => {
     it('Generates aggregation without cardinality', async () => {
       const aggs = buildThresholdMultiBucketAggregation({
         threshold,
-        timestampField: TIMESTAMP,
+        aggregatableTimestampField: TIMESTAMP,
         sortKeys: undefined,
       });
       expect(aggs).toStrictEqual({
@@ -73,7 +73,7 @@ describe('build_threshold_aggregation', () => {
       };
       const aggs = buildThresholdMultiBucketAggregation({
         threshold: thresholdWithCardinality,
-        timestampField: TIMESTAMP,
+        aggregatableTimestampField: TIMESTAMP,
         sortKeys: undefined,
       });
       expect(aggs).toStrictEqual({
@@ -140,7 +140,10 @@ describe('build_threshold_aggregation', () => {
     const threshold = { field: [], value: 3 };
 
     it('Generates aggregation without cardinality', async () => {
-      const aggs = buildThresholdSingleBucketAggregation({ threshold, timestampField: TIMESTAMP });
+      const aggs = buildThresholdSingleBucketAggregation({
+        threshold,
+        aggregatableTimestampField: TIMESTAMP,
+      });
       expect(aggs).toStrictEqual({
         max_timestamp: {
           max: {
@@ -162,7 +165,7 @@ describe('build_threshold_aggregation', () => {
       };
       const aggs = buildThresholdSingleBucketAggregation({
         threshold: thresholdWithCardinality,
-        timestampField: TIMESTAMP,
+        aggregatableTimestampField: TIMESTAMP,
       });
       expect(aggs).toStrictEqual({
         cardinality_count: {

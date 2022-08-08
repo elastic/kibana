@@ -35,10 +35,6 @@ import { createSearchAfterReturnType } from '../utils';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { buildThresholdSignalHistory } from '../threshold/build_signal_history';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
-import {
-  buildTimestampRuntimeMapping,
-  TIMESTAMP_RUNTIME_FIELD,
-} from '../../rule_types/new_terms/build_timestamp_runtime_mapping';
 
 export const thresholdExecutor = async ({
   inputIndex,
@@ -56,6 +52,7 @@ export const thresholdExecutor = async ({
   ruleDataReader,
   primaryTimestamp,
   secondaryTimestamp,
+  aggregatableTimestampField,
 }: {
   inputIndex: string[];
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
@@ -72,6 +69,7 @@ export const thresholdExecutor = async ({
   ruleDataReader: IRuleDataReader;
   primaryTimestamp: string;
   secondaryTimestamp?: string;
+  aggregatableTimestampField: string;
 }): Promise<SearchAfterAndBulkCreateReturnType & { state: ThresholdAlertState }> => {
   let result = createSearchAfterReturnType();
   const ruleParams = completeRule.ruleParams;
@@ -125,18 +123,6 @@ export const thresholdExecutor = async ({
       lists: exceptionItems,
     });
 
-    // If we have a timestampOverride, we'll compute a runtime field that emits the override for each document if it exists,
-    // otherwise it emits @timestamp. If we don't have a timestamp override we don't want to pay the cost of using a
-    // runtime field, so we just use @timestamp directly.
-    const { timestampField, timestampRuntimeMappings } = ruleParams.timestampOverride
-      ? {
-          timestampField: TIMESTAMP_RUNTIME_FIELD,
-          timestampRuntimeMappings: buildTimestampRuntimeMapping({
-            timestampOverride: ruleParams.timestampOverride,
-          }),
-        }
-      : { timestampField: '@timestamp', timestampRuntimeMappings: undefined };
-
     // Look for new events over threshold
     const { buckets, searchErrors, searchDurations } = await findThresholdSignals({
       inputIndexPattern: inputIndex,
@@ -150,8 +136,7 @@ export const thresholdExecutor = async ({
       runtimeMappings,
       primaryTimestamp,
       secondaryTimestamp,
-      timestampField,
-      timestampRuntimeMappings,
+      aggregatableTimestampField,
     });
 
     // Build and index new alerts

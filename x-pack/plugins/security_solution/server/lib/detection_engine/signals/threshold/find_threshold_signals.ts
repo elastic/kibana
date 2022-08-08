@@ -44,8 +44,7 @@ interface FindThresholdSignalsParams {
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   primaryTimestamp: TimestampOverride;
   secondaryTimestamp: TimestampOverrideOrUndefined;
-  timestampField: string;
-  timestampRuntimeMappings: estypes.MappingRuntimeFields | undefined;
+  aggregatableTimestampField: string;
 }
 
 const hasThresholdFields = (threshold: ThresholdNormalized) => !!threshold.field.length;
@@ -67,8 +66,7 @@ export const findThresholdSignals = async ({
   runtimeMappings,
   primaryTimestamp,
   secondaryTimestamp,
-  timestampField,
-  timestampRuntimeMappings,
+  aggregatableTimestampField,
 }: FindThresholdSignalsParams): Promise<{
   buckets: ThresholdBucket[];
   searchDurations: string[];
@@ -89,7 +87,7 @@ export const findThresholdSignals = async ({
       const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
         aggregations: buildThresholdMultiBucketAggregation({
           threshold,
-          timestampField,
+          aggregatableTimestampField,
           sortKeys,
         }),
         index: inputIndexPattern,
@@ -125,7 +123,7 @@ export const findThresholdSignals = async ({
     const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
       aggregations: buildThresholdSingleBucketAggregation({
         threshold,
-        timestampField,
+        aggregatableTimestampField,
       }),
       searchAfterSortIds: undefined,
       index: inputIndexPattern,
@@ -137,10 +135,7 @@ export const findThresholdSignals = async ({
       pageSize: 0,
       sortOrder: 'desc',
       trackTotalHits: true,
-      runtimeMappings: {
-        ...runtimeMappings,
-        ...timestampRuntimeMappings,
-      },
+      runtimeMappings,
       primaryTimestamp,
       secondaryTimestamp,
     });
