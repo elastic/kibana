@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonGroupOptionProps, EuiTourStep, useEuiTour } from '@elastic/eui';
+import type { EuiButtonGroupOptionProps } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -14,13 +14,14 @@ import {
   EuiSpacer,
   EuiButtonGroup,
   EuiText,
+  EuiTourStep,
 } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { memo, useCallback, useState, useEffect, useMemo } from 'react';
 
 import styled from 'styled-components';
 import { i18n as i18nCore } from '@kbn/i18n';
-import { isEqual, isEmpty, omit, noop } from 'lodash';
+import { isEqual, isEmpty, omit } from 'lodash';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import usePrevious from 'react-use/lib/usePrevious';
 
@@ -80,7 +81,6 @@ import { getIsRulePreviewDisabled } from '../rule_preview/helpers';
 import { NewTermsFields } from '../new_terms_fields';
 import { ScheduleItem } from '../schedule_item_form';
 import { DocLink } from '../../../../common/components/links_to_docs/doc_link';
-import { TourContextProvider } from '../../../pages/detection_engine/rules/tour';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -514,10 +514,54 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       />
     );
   }, [kibanaDataViews]);
+
+  const tourConfig = {
+    currentTourStep: 1,
+    isTourActive: true,
+    tourPopoverWidth: 300,
+    tourSubtitle: 'Demo tour',
+  };
+
+  const [tourState, setTourState] = useState(() => {
+    const tourStateString = localStorage.getItem(DATA_VIEW_TOUR_ACTIVE_KEY);
+
+    if (tourStateString != null) {
+      return JSON.parse(tourStateString);
+    }
+    return tourConfig;
+  });
+
+  useEffect(() => {
+    // Store the tour data
+    localStorage.setItem(DATA_VIEW_TOUR_ACTIVE_KEY, JSON.stringify(tourState));
+  }, [tourState]);
+
   const DataSource = useMemo(() => {
+    const demoTourSteps = [
+      {
+        step: 1,
+        title: 'Step 1',
+        content: (
+          <span>
+            <p>{'Copy and paste this sample query.'}</p>
+            <EuiSpacer />
+          </span>
+        ),
+      },
+    ];
+    const finishTour = () => {
+      setTourState({
+        ...tourState,
+        isTourActive: false,
+      });
+    };
     return (
       <RuleTypeEuiFormRow label={i18n.SOURCE} $isVisible={true} fullWidth>
-        <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="s"
+          data-test-subj="dataViewIndexPatternButtonGroupFlexGroup"
+        >
           <EuiFlexItem>
             <EuiText size="xs">
               <FormattedMessage
@@ -534,25 +578,25 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 docPath="index-patterns-api-create.html"
                 linkText="index patterns"
               />
-              <FormattedMessage
-                id="xpack.securitySolution.dataViewSelectorText3"
-                defaultMessage=" as your rule's data source to be searched."
-              />
+              <EuiTourStep
+                content={demoTourSteps[0].content}
+                isStepOpen={tourState.currentTourStep === 1 && tourState.isTourActive}
+                minWidth={tourState.tourPopoverWidth}
+                onFinish={finishTour}
+                step={1}
+                stepsTotal={demoTourSteps.length}
+                subtitle={tourState.tourSubtitle}
+                title={demoTourSteps[0].title}
+                anchorPosition="rightUp" // the tour is not obeying any of these options..
+              >
+                <FormattedMessage
+                  id="xpack.securitySolution.dataViewSelectorText3"
+                  defaultMessage=" as your rule's data source to be searched."
+                />
+              </EuiTourStep>
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
-            {/* <EuiTourStep
-              title={'hello world'}
-              content={'my description'}
-              isStepOpen={isOpen}
-              onFinish={() => setIsOpen(false)}
-              step={1}
-              stepsTotal={1}
-              repositionOnScroll
-              display="block"
-            > */}
-            {/* <EuiTourStep {...euiTourStepOne}> */}
-            {/* <EuiTourStep {...euiTourStepOne} /> */}
             <RuleTypeEuiFormRow $isVisible={true}>
               <EuiButtonGroup
                 isFullWidth={true}
@@ -564,7 +608,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 color="primary"
               />
             </RuleTypeEuiFormRow>
-            {/* </EuiTourStep> */}
           </EuiFlexItem>
 
           <EuiFlexItem>
@@ -603,62 +646,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     DataViewSelectorMemo,
     indexModified,
     handleResetIndices,
+    tourState,
   ]);
-
-  const [isOpen, setIsOpen] = useState(true);
-
-  const demoTourSteps = [
-    {
-      step: 1,
-      title: 'Step 1',
-      content: (
-        <span>
-          <p>{'Copy and paste this sample query.'}</p>
-          <EuiSpacer />
-        </span>
-      ),
-      children: <>{DataSource}</>,
-      onFinish: noop,
-      stepsTotal: 1,
-      anchorPosition: 'rightDown' as 'rightDown',
-    },
-  ];
-
-  const tourStateString = localStorage.getItem(DATA_VIEW_TOUR_ACTIVE_KEY);
-  let tourState;
-
-  const tourConfig = {
-    currentTourStep: 1,
-    isTourActive: true,
-    tourPopoverWidth: 300,
-    tourSubtitle: 'Demo tour',
-  };
-
-  if (tourStateString != null) {
-    tourState = JSON.parse(tourStateString);
-  } else {
-    tourState = tourConfig;
-  }
-
-  const [[euiTourStepOne], actions, reducerState] = useEuiTour(demoTourSteps, tourState);
-
-  useEffect(() => {
-    localStorage.setItem(DATA_VIEW_TOUR_ACTIVE_KEY, JSON.stringify(reducerState));
-  }, [reducerState]);
-
-  const handleClick = () => {
-    actions.finishTour();
-  };
-
-  const resetTour = () => {
-    actions.resetTour();
-  };
-
-  const onChange = (e) => {
-    if (reducerState.currentTourStep < 2) {
-      actions.incrementStep();
-    }
-  };
 
   const QueryBarMemo = useMemo(
     () => (
@@ -775,8 +764,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           <RuleTypeEuiFormRow $isVisible={!isMlRule(ruleType)} fullWidth>
             <>
               <EuiSpacer size="s" />
-              <EuiTourStep {...euiTourStepOne} />
-              {/* {DataSource} */}
+              {DataSource}
               <EuiSpacer size="s" />
               {isEqlRule(ruleType) ? (
                 <UseField
