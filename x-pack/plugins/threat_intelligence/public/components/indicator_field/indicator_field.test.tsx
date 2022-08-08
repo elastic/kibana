@@ -13,7 +13,7 @@ import { EMPTY_VALUE } from '../../../common/constants';
 import { TestProvidersComponent } from '../../common/mocks/test_providers';
 
 const mockIndicator = generateMockIndicator();
-const mockFieldTypesMap = {
+const mockFieldTypesMap: { [id: string]: string } = {
   'threat.indicator.ip': 'ip',
   'threat.indicator.first_seen': 'date',
 };

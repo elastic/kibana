@@ -12,15 +12,15 @@ import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_FORMAT_TZ } from '../../../common/con
 import { IndicatorField } from './indicator_field';
 import { generateMockIndicator } from '../../../common/types/indicator';
 
-const mockIndicator = generateMockIndicator();
-const mockFieldTypesMap = {
-  'threat.indicator.ip': 'ip',
-  'threat.indicator.first_seen': 'date',
-};
-
 export default {
   component: IndicatorField,
   title: 'IndicatorField',
+};
+
+const mockIndicator = generateMockIndicator();
+const mockFieldTypesMap: { [id: string]: string } = {
+  'threat.indicator.ip': 'ip',
+  'threat.indicator.first_seen': 'date',
 };
 
 export function Default() {

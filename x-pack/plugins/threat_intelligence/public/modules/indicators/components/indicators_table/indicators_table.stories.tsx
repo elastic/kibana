@@ -8,6 +8,7 @@
 import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_FORMAT_TZ } from '../../../../../common/constants';
 import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
 import { IndicatorsTable } from './indicators_table';
@@ -18,6 +19,7 @@ export default {
 };
 
 const indicatorsFixture: Indicator[] = Array(10).fill(generateMockIndicator());
+const mockIndexPattern: DataView[] = [];
 
 const stub = () => void 0;
 
@@ -51,6 +53,7 @@ export function WithIndicators() {
         onChangePage={stub}
         onChangeItemsPerPage={stub}
         indicatorCount={indicatorsFixture.length * 2}
+        indexPatterns={mockIndexPattern}
       />
     </KibanaReactContext.Provider>
   );
@@ -70,6 +73,7 @@ export function WithNoIndicators() {
       onChangeItemsPerPage={stub}
       indicatorCount={0}
       loading={false}
+      indexPatterns={[]}
     />
   );
 }
