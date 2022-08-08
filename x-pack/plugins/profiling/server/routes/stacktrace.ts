@@ -47,11 +47,11 @@ export interface EncodedStackTrace {
   // +----------------+--------+----------------+--------+----
   // |     File ID    |  Addr  |     File ID    |  Addr  |
   // +----------------+--------+----------------+--------+----
-  FrameID: string;
+  FrameIDs: string;
 
   // This field is a run-length encoding of a list of uint8s. The order is
   // reversed from the original input.
-  Type: string;
+  Types: string;
 }
 
 // runLengthEncodeReverse encodes the reversed input array using a
@@ -127,7 +127,7 @@ export function runLengthDecodeReverse(input: Buffer, outputSize?: number): numb
 
 // decodeStackTrace unpacks an encoded stack trace from Elasticsearch
 export function decodeStackTrace(input: EncodedStackTrace): StackTrace {
-  const countsFrameIDs = input.FrameID.length / BASE64_FRAME_ID_LENGTH;
+  const countsFrameIDs = input.FrameIDs.length / BASE64_FRAME_ID_LENGTH;
 
   const fileIDs: string[] = new Array(countsFrameIDs);
   const frameIDs: string[] = new Array(countsFrameIDs);
@@ -141,8 +141,8 @@ export function decodeStackTrace(input: EncodedStackTrace): StackTrace {
   // However, since the file ID is base64-encoded using 21.33 bytes
   // (16 * 4 / 3), then the 22 bytes have an extra 4 bits from the
   // address (see diagram in definition of EncodedStackTrace).
-  for (let i = 0; i < input.FrameID.length; i += BASE64_FRAME_ID_LENGTH) {
-    const frameID = input.FrameID.slice(i, i + BASE64_FRAME_ID_LENGTH);
+  for (let i = 0; i < input.FrameIDs.length; i += BASE64_FRAME_ID_LENGTH) {
+    const frameID = input.FrameIDs.slice(i, i + BASE64_FRAME_ID_LENGTH);
     const fileIDChunk = frameID.slice(0, BASE64_FILE_ID_LENGTH);
     const fileID = fileIDChunkToFileIDCache.get(fileIDChunk) as string;
 
@@ -162,13 +162,13 @@ export function decodeStackTrace(input: EncodedStackTrace): StackTrace {
   }
 
   // Step 2: Convert the run-length byte encoding into a list of uint8s.
-  const types = Buffer.from(input.Type, 'base64url');
+  const types = Buffer.from(input.Types, 'base64url');
   const typeIDs = runLengthDecodeReverse(types, countsFrameIDs);
 
   return {
-    FileID: fileIDs,
-    FrameID: frameIDs,
-    Type: typeIDs,
+    FileIDs: fileIDs,
+    FrameIDs: frameIDs,
+    Types: typeIDs,
   } as StackTrace;
 }
 
@@ -254,13 +254,13 @@ export async function mgetStackTraces({
   const stackResponses = await withProfilingSpan('mget_stacktraces', () =>
     Promise.all(
       chunks.map((ids) => {
-        return client.mget<Pick<ProfilingStackTrace, 'FrameID' | 'Type'>>(
+        return client.mget<Pick<ProfilingStackTrace, 'FrameIDs' | 'Types'>>(
           'mget_stacktraces_chunk',
           {
             index: INDEX_TRACES,
             ids,
             realtime: false,
-            _source_includes: ['FrameID', 'Type'],
+            _source_includes: ['FrameIDs', 'Types'],
           }
         );
       })
@@ -287,12 +287,12 @@ export async function mgetStackTraces({
             traceLRU.set(traceid, stackTrace);
           }
 
-          totalFrames += stackTrace.FrameID.length;
+          totalFrames += stackTrace.FrameIDs.length;
           stackTraces.set(traceid, stackTrace);
-          for (const frameID of stackTrace.FrameID) {
+          for (const frameID of stackTrace.FrameIDs) {
             stackFrameDocIDs.add(frameID);
           }
-          for (const fileID of stackTrace.FileID) {
+          for (const fileID of stackTrace.FileIDs) {
             executableDocIDs.add(fileID);
           }
         }
