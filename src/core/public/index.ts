@@ -46,6 +46,7 @@ import type { UiSettingsState, IUiSettingsClient } from '@kbn/core-ui-settings-b
 import type { DeprecationsServiceStart } from '@kbn/core-deprecations-browser';
 import type { Capabilities } from '@kbn/core-capabilities-common';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
+import type { SavedObjectsStart } from '@kbn/core-saved-objects-browser';
 import type { NotificationsSetup, NotificationsStart } from '@kbn/core-notifications-browser';
 import type {
   ChromeBadge,
@@ -76,7 +77,6 @@ import type {
   PluginOpaqueId,
 } from './plugins';
 import type { ApplicationSetup, ApplicationStart } from './application';
-import type { SavedObjectsStart } from './saved_objects';
 
 export type { PackageInfo, EnvironmentMode } from '@kbn/config';
 export type { DomainDeprecationDetails } from '@kbn/core-deprecations-common';
@@ -128,8 +128,6 @@ export type {
   NavigateToAppOptions,
   NavigateToUrlOptions,
 } from './application';
-
-export { SimpleSavedObjectImpl } from './saved_objects';
 export type {
   SavedObjectsClientContract,
   SimpleSavedObject,

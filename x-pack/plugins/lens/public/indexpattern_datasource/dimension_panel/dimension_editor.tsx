@@ -46,6 +46,7 @@ import { FormatSelector } from './format_selector';
 import { ReferenceEditor } from './reference_editor';
 import { TimeScaling } from './time_scaling';
 import { Filtering } from './filtering';
+import { Window } from './window';
 import { AdvancedOptions } from './advanced_options';
 import { TimeShift } from './time_shift';
 import type { LayerType } from '../../../common';
@@ -914,6 +915,18 @@ export function DimensionEditor(props: DimensionEditorProps) {
                       ? selectedOperationDefinition.filterable.helpMessage
                       : null
                   }
+                />
+              ) : null,
+            },
+            {
+              dataTestSubj: 'indexPattern-window-enable',
+              inlineElement: selectedOperationDefinition.windowable ? (
+                <Window
+                  selectedColumn={selectedColumn}
+                  columnId={columnId}
+                  indexPattern={currentIndexPattern}
+                  layer={state.layers[layerId]}
+                  updateLayer={setStateWrapper}
                 />
               ) : null,
             },
