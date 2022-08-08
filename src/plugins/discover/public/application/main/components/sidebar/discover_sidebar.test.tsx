@@ -20,8 +20,6 @@ import { discoverServiceMock as mockDiscoverServices } from '../../../../__mocks
 import { stubLogstashDataView } from '@kbn/data-plugin/common/stubs';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { BehaviorSubject } from 'rxjs';
-import { FetchStatus } from '../../../types';
 
 const mockGetActions = jest.fn<Promise<Array<Action<object>>>, [string, { fieldName: string }]>(
   () => Promise.resolve([])

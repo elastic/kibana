@@ -16,7 +16,6 @@ import { AppState } from '../services/discover_state';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { fetchAll } from './fetch_all';
 import {
-  DataAvailableFieldsMsg,
   DataChartsMessage,
   DataDocumentsMsg,
   DataMainMsg,
