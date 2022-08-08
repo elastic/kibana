@@ -9,7 +9,7 @@ import { EuiSpacer, EuiPanel } from '@elastic/eui';
 import { isEqual } from 'lodash/fp';
 import React, { useMemo } from 'react';
 
-import type { ColumnHeaderOptions, RowRenderer } from '../../../../../../common/types';
+import { ColumnHeaderOptions, RowRenderer, TimelineId } from '../../../../../../common/types';
 import type { Ecs } from '../../../../../../common/ecs';
 import { eventRendererNames } from '../../../row_renderers_browser/catalog/constants';
 import type { ColumnRenderer } from './column_renderer';
@@ -82,6 +82,7 @@ const ReasonCell: React.FC<{
 
   const rowRender = useMemo(() => {
     return (
+      timelineId === TimelineId.rulePreview &&
       rowRenderer &&
       rowRenderer.renderRow({
         data: ecsData,
