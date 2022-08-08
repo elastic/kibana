@@ -16,6 +16,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiTablePagination,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { FormattedCount } from '../../../../common/components/formatted_number';
@@ -103,7 +104,11 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     truncateText: true,
     textOnly: true,
     'data-test-subj': 'hostSeverityAlertsTable-hostName',
-    render: (hostName: string) => <HostDetailsLink hostName={hostName} />,
+    render: (hostName: string) => (
+      <EuiToolTip title={i18n.OPEN_HOST_DETAIL_TOOLTIP} content={hostName}>
+        <HostDetailsLink hostName={hostName} />
+      </EuiToolTip>
+    ),
   },
   {
     field: 'totalAlerts',

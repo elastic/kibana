@@ -100,10 +100,10 @@ export function DualBrush({
           const xMax = x(max) ?? 0;
           const minExtentPx = Math.round((xMax - xMin) / 100);
 
-          const baselineBrush = d3.select('#brush-baseline');
+          const baselineBrush = d3.select('#aiops-brush-baseline');
           const baselineSelection = d3.brushSelection(baselineBrush.node() as SVGGElement);
 
-          const deviationBrush = d3.select('#brush-deviation');
+          const deviationBrush = d3.select('#aiops-brush-deviation');
           const deviationSelection = d3.brushSelection(deviationBrush.node() as SVGGElement);
 
           if (!isBrushXSelection(deviationSelection) || !isBrushXSelection(baselineSelection)) {
@@ -221,7 +221,7 @@ export function DualBrush({
           .insert('g', '.brush')
           .attr('class', 'brush')
           .attr('id', (b: DualBrush) => {
-            return 'brush-' + b.id;
+            return 'aiops-brush-' + b.id;
           })
           .each((brushObject: DualBrush, i, n) => {
             const x = d3.scaleLinear().domain([min, max]).rangeRound([0, widthRef.current]);
