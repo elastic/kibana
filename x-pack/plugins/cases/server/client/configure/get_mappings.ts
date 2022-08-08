@@ -16,7 +16,11 @@ export const getMappings = async (
   { connector }: MappingsArgs,
   clientArgs: CasesClientArgs
 ): Promise<SavedObjectsFindResponse<ConnectorMappings>['saved_objects']> => {
-  const { unsecuredSavedObjectsClient, connectorMappingsService, logger } = clientArgs;
+  const {
+    unsecuredSavedObjectsClient,
+    services: { connectorMappingsService },
+    logger,
+  } = clientArgs;
 
   try {
     const myConnectorMappings = await connectorMappingsService.find({

@@ -48,6 +48,7 @@ describe('SavedObjectsFinder', () => {
       name: 'Search',
       getIconForSavedObject: () => 'search' as IconType,
       showSavedObject: () => true,
+      defaultSearchField: 'name',
     },
   ];
 
@@ -73,7 +74,7 @@ describe('SavedObjectsFinder', () => {
       search: undefined,
       page: 1,
       perPage: 10,
-      searchFields: ['title^3', 'description'],
+      searchFields: ['title^3', 'description', 'name'],
       defaultSearchOperator: 'AND',
     });
   });
@@ -228,7 +229,7 @@ describe('SavedObjectsFinder', () => {
         search: 'abc*',
         page: 1,
         perPage: 10,
-        searchFields: ['title^3', 'description'],
+        searchFields: ['title^3', 'description', 'name'],
         defaultSearchOperator: 'AND',
       });
     });

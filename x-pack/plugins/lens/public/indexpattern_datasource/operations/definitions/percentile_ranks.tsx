@@ -25,6 +25,7 @@ import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { useDebouncedValue } from '../../../shared_components';
 import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 import { FormRow } from './shared_components';
+import { getColumnWindowError } from '../../window_utils';
 
 export interface PercentileRanksIndexPatternColumn extends FieldBasedIndexPatternColumn {
   operationType: 'percentile_rank';
@@ -33,7 +34,12 @@ export interface PercentileRanksIndexPatternColumn extends FieldBasedIndexPatter
   };
 }
 
-function ofName(name: string, value: number, timeShift: string | undefined) {
+function ofName(
+  name: string,
+  value: number,
+  timeShift: string | undefined,
+  window: string | undefined
+) {
   return adjustTimeScaleLabelSuffix(
     i18n.translate('xpack.lens.indexPattern.percentileRanksOf', {
       defaultMessage: 'Percentile rank ({value}) of {name}',
@@ -42,7 +48,9 @@ function ofName(name: string, value: number, timeShift: string | undefined) {
     undefined,
     undefined,
     undefined,
-    timeShift
+    timeShift,
+    undefined,
+    window
   );
 }
 
@@ -72,6 +80,7 @@ export const percentileRanksOperation: OperationDefinition<
   ],
   filterable: true,
   shiftable: true,
+  windowable: true,
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type: fieldType }) => {
     if (supportedFieldTypes.includes(fieldType) && aggregatable && !aggregationRestrictions) {
       return {
@@ -92,7 +101,12 @@ export const percentileRanksOperation: OperationDefinition<
     );
   },
   getDefaultLabel: (column, indexPattern, columns) =>
-    ofName(getSafeName(column.sourceField, indexPattern), column.params.value, column.timeShift),
+    ofName(
+      getSafeName(column.sourceField, indexPattern),
+      column.params.value,
+      column.timeShift,
+      column.window
+    ),
   buildColumn: ({ field, previousColumn, indexPattern }, columnParams) => {
     const existingPercentileRanksParam =
       previousColumn &&
@@ -104,7 +118,8 @@ export const percentileRanksOperation: OperationDefinition<
       label: ofName(
         getSafeName(field.name, indexPattern),
         newPercentileRanksParam,
-        previousColumn?.timeShift
+        previousColumn?.timeShift,
+        previousColumn?.window
       ),
       dataType: 'number',
       operationType: 'percentile_rank',
@@ -113,6 +128,7 @@ export const percentileRanksOperation: OperationDefinition<
       scale: 'ratio',
       filter: getFilter(previousColumn, columnParams),
       timeShift: columnParams?.shift || previousColumn?.timeShift,
+      window: columnParams?.window || previousColumn?.window,
       params: {
         value: newPercentileRanksParam,
         ...getFormatFromPreviousColumn(previousColumn),
@@ -122,7 +138,12 @@ export const percentileRanksOperation: OperationDefinition<
   onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
-      label: ofName(field.displayName, oldColumn.params.value, oldColumn.timeShift),
+      label: ofName(
+        field.displayName,
+        oldColumn.params.value,
+        oldColumn.timeShift,
+        oldColumn.window
+      ),
       sourceField: field.name,
     };
   },
@@ -144,6 +165,7 @@ export const percentileRanksOperation: OperationDefinition<
     combineErrorMessages([
       getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
       getDisallowedPreviousShiftMessage(layer, columnId),
+      getColumnWindowError(layer, columnId, indexPattern),
     ]),
   paramEditor: function PercentileParamEditor({
     paramEditorUpdater,
@@ -170,7 +192,8 @@ export const percentileRanksOperation: OperationDefinition<
                 indexPattern.getFieldByName(currentColumn.sourceField)?.displayName ||
                   currentColumn.sourceField,
                 Number(value),
-                currentColumn.timeShift
+                currentColumn.timeShift,
+                currentColumn.window
               ),
           params: {
             ...currentColumn.params,
