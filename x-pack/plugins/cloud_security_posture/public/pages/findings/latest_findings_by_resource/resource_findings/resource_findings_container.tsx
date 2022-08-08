@@ -8,7 +8,6 @@ import React from 'react';
 import { EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
 import { Link, useParams } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useEuiTheme } from '@elastic/eui';
 import { generatePath } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { CloudPosturePageTitle } from '../../../../components/cloud_posture_page_title';
@@ -54,9 +53,7 @@ const BackToResourcesButton = () => (
 );
 
 export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
-  const { euiTheme } = useEuiTheme();
   const params = useParams<{ resourceId: string }>();
-
   const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
   const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
 
