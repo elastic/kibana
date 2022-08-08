@@ -364,6 +364,7 @@ export const getNewTermsRule = (): NewTermsRule => ({
   note: '# test markdown',
   newTermsFields: ['host.name'],
   historyWindowSize: {
+    // historyWindowSize needs to be larger than the rule's lookback value
     interval: '51000',
     timeType: 'Hours',
     type: 'h',
