@@ -5,7 +5,14 @@
  * 2.0.
  */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiButton,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+} from '@elastic/eui';
 import type { ShapeTreeNode } from '@elastic/charts';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
@@ -38,6 +45,7 @@ import { useUserRiskScore, useUserRiskScoreKpi } from '../../../../risk_score/co
 import { UsersTableType } from '../../../../users/store/model';
 import { useRiskDonutChart } from '../host_risk_score';
 import { getTabsOnUsersUrl } from '../../../../common/components/link_to/redirect_to_users';
+import { RISKY_USERS_DOC_LINK } from '../../../../users/components/constants';
 
 const TABLE_QUERY_ID = 'userRiskDashboardTable';
 const DONUT_HEIGHT = 120;
@@ -85,7 +93,7 @@ export const EntityAnalyticsUserRiskScores = () => {
     }
   `;
 
-  const [isTableLoading, { data, inspect, refetch }] = useUserRiskScore({
+  const [isTableLoading, { data, inspect, refetch, isModuleEnabled }] = useUserRiskScore({
     filterQuery: severityFilter,
     skip: !toggleStatus,
     pagination: {
@@ -131,6 +139,11 @@ export const EntityAnalyticsUserRiskScores = () => {
     () => formatUrl(getTabsOnUsersUrl(UsersTableType.risk)),
     [formatUrl]
   );
+
+  if (!isModuleEnabled) {
+    return <EntityAnalyticsUserRiskScoresDisable />;
+  }
+
   return (
     <InspectButtonContainer>
       <EuiPanel hasBorder>
@@ -208,3 +221,18 @@ export const EntityAnalyticsUserRiskScores = () => {
     </InspectButtonContainer>
   );
 };
+
+const EntityAnalyticsUserRiskScoresDisable = () => (
+  <EuiPanel hasBorder>
+    <HeaderSection title={<h2>{i18n.USER_RISK_TITLE}</h2>} titleSize="s" />
+    <EuiEmptyPrompt
+      title={<h2>{i18n.ENABLE_USER_RISK_SCORE}</h2>}
+      body={i18n.ENABLE_USER_RISK_SCORE_DESCRIPTION}
+      actions={
+        <EuiButton color="primary" fill href={RISKY_USERS_DOC_LINK}>
+          {i18n.ENABLE_USER_RISK_SCORE}
+        </EuiButton>
+      }
+    />
+  </EuiPanel>
+);

@@ -5,7 +5,14 @@
  * 2.0.
  */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiButton,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+} from '@elastic/eui';
 import type { ShapeTreeNode } from '@elastic/charts';
 import styled from 'styled-components';
 import { sum } from 'lodash/fp';
@@ -37,6 +44,8 @@ import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { InspectButtonContainer } from '../../../../common/components/inspect';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { hostsActions } from '../../../../hosts/store';
+import { useEnableHostRiskFromUrl } from '../../overview_risky_host_links/risky_hosts_disabled_module';
+import { useCheckSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_check_signal_index';
 
 const TABLE_QUERY_ID = 'hostRiskDashboardTable';
 const DONUT_HEIGHT = 120;
@@ -86,7 +95,7 @@ export const EntityAnalyticsHostRiskScores = () => {
     }
   `;
 
-  const [isTableLoading, { data, inspect, refetch }] = useHostRiskScore({
+  const [isTableLoading, { data, inspect, refetch, isModuleEnabled }] = useHostRiskScore({
     filterQuery: severityFilter,
     skip: !toggleStatus,
     pagination: {
@@ -133,6 +142,11 @@ export const EntityAnalyticsHostRiskScores = () => {
     () => formatUrl(getTabsOnHostsUrl(HostsTableType.risk)),
     [formatUrl]
   );
+
+  if (!isModuleEnabled) {
+    return <EntityAnalyticsHostRiskScoresDisable />;
+  }
+
   return (
     <InspectButtonContainer>
       <EuiPanel hasBorder>
@@ -232,4 +246,24 @@ export const useRiskDonutChart = (
   }, [severityCount]);
 
   return [donutChartData, legendItems, total];
+};
+
+const EntityAnalyticsHostRiskScoresDisable = () => {
+  const loadFromUrl = useEnableHostRiskFromUrl();
+  const { signalIndexExists } = useCheckSignalIndex();
+
+  return (
+    <EuiPanel hasBorder>
+      <HeaderSection title={<h2>{i18n.HOST_RISK_TITLE}</h2>} titleSize="s" />
+      <EuiEmptyPrompt
+        title={<h2>{i18n.ENABLE_HOST_RISK_SCORE}</h2>}
+        body={i18n.ENABLE_HOST_RISK_SCORE_DESCRIPTION}
+        actions={
+          <EuiButton color="primary" fill href={loadFromUrl} isDisabled={!signalIndexExists}>
+            {i18n.ENABLE_HOST_RISK_SCORE}
+          </EuiButton>
+        }
+      />
+    </EuiPanel>
+  );
 };

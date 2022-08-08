@@ -14,7 +14,7 @@ import { RiskyHostsEnabledModule } from './risky_hosts_enabled_module';
 import { ENABLE_VIA_DEV_TOOLS } from './translations';
 import { devToolPrebuiltContentUrl } from '../../../../common/constants';
 import { OpenInDevConsoleButton } from '../../../common/components/open_in_dev_console';
-import { useChcekSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_check_signal_index';
+import { useCheckSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_check_signal_index';
 import type { LinkPanelListItem } from '../link_panel';
 import { useSpaceId } from '../../../risk_score/containers/common';
 
@@ -24,18 +24,9 @@ export const RISKY_HOSTS_DOC_LINK =
 const emptyList: LinkPanelListItem[] = [];
 
 export const RiskyHostsDisabledModuleComponent = () => {
-  const hostRiskScoreConsoleId = 'enable_host_risk_score';
-  const spaceId = useSpaceId();
-  const loadFromUrl = useMemo(() => {
-    const protocol = window.location.protocol;
-    const hostname = window.location.hostname;
-    const port = window.location.port;
-    return `${protocol}//${hostname}:${port}${devToolPrebuiltContentUrl(
-      spaceId ?? 'default',
-      hostRiskScoreConsoleId
-    )}`;
-  }, [spaceId]);
-  const { signalIndexExists } = useChcekSignalIndex();
+  const loadFromUrl = useEnableHostRiskFromUrl();
+  const { signalIndexExists } = useCheckSignalIndex();
+
   return (
     <DisabledLinkPanel
       bodyCopy={i18n.DANGER_BODY}
@@ -46,7 +37,7 @@ export const RiskyHostsDisabledModuleComponent = () => {
       LinkPanelViewComponent={RiskyHostsPanelView}
       moreButtons={
         <OpenInDevConsoleButton
-          loadFromUrl={loadFromUrl}
+          href={loadFromUrl}
           enableButton={!!signalIndexExists}
           title={ENABLE_VIA_DEV_TOOLS}
           tooltipContent={i18n.ENABLE_RISK_SCORE_POPOVER}
@@ -54,6 +45,21 @@ export const RiskyHostsDisabledModuleComponent = () => {
       }
     />
   );
+};
+
+export const useEnableHostRiskFromUrl = () => {
+  const spaceId = useSpaceId();
+  const hostRiskScoreConsoleId = 'enable_host_risk_score';
+  const loadFromUrl = useMemo(() => {
+    const protocol = window.location.protocol;
+    const hostname = window.location.hostname;
+    const port = window.location.port;
+    return `/s/${spaceId}/app/dev_tools#/console?load_from=${protocol}//${hostname}:${port}${devToolPrebuiltContentUrl(
+      spaceId ?? 'default',
+      hostRiskScoreConsoleId
+    )}`;
+  }, [spaceId]);
+  return loadFromUrl;
 };
 
 export const RiskyHostsDisabledModule = React.memo(RiskyHostsDisabledModuleComponent);

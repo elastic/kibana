@@ -44,3 +44,18 @@ export const TOTAL_LABEL = i18n.translate('xpack.securitySolution.usersRiskDashb
 export const VIEW_ALL = i18n.translate('xpack.securitySolution.usersRiskDashboard.viewAllLabel', {
   defaultMessage: 'View all',
 });
+
+export const ENABLE_USER_RISK_SCORE = i18n.translate(
+  'xpack.securitySolution.usersRiskDashboard.enableUserRiskScore',
+  {
+    defaultMessage: 'Enable User Risk Score',
+  }
+);
+
+export const ENABLE_USER_RISK_SCORE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.usersRiskDashboard.enableUserRiskScoreDescription',
+  {
+    defaultMessage:
+      'Once you have enabled this feature you can get quick access to the user risk scores in this section.',
+  }
+);

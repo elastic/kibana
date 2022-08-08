@@ -25,7 +25,7 @@ interface ReturnSignalIndex {
  *
  *
  */
-export const useChcekSignalIndex = (): ReturnSignalIndex => {
+export const useCheckSignalIndex = (): ReturnSignalIndex => {
   const [loading, setLoading] = useState(true);
   const [signalIndex, setSignalIndex] = useState<Omit<ReturnSignalIndex, 'loading'>>({
     signalIndexExists: null,

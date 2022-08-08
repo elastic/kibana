@@ -44,3 +44,18 @@ export const TOTAL_LABEL = i18n.translate('xpack.securitySolution.hostsRiskDashb
 export const VIEW_ALL = i18n.translate('xpack.securitySolution.hostsRiskDashboard.viewAllLabel', {
   defaultMessage: 'View all',
 });
+
+export const ENABLE_HOST_RISK_SCORE = i18n.translate(
+  'xpack.securitySolution.hostsRiskDashboard.enableHostRiskScore',
+  {
+    defaultMessage: 'Enable Host Risk Score',
+  }
+);
+
+export const ENABLE_HOST_RISK_SCORE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.hostsRiskDashboard.enableHostRiskScoreDescription',
+  {
+    defaultMessage:
+      'Once you have enabled this feature you can get quick access to the host risk scores in this section.',
+  }
+);
