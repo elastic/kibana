@@ -83,7 +83,7 @@ const ReasonCell: React.FC<{
 
   const rowRender = useMemo(() => {
     return (
-      timelineId === TimelineId.rulePreview &&
+      timelineId !== TimelineId.rulePreview &&
       rowRenderer &&
       rowRenderer.renderRow({
         data: ecsData,
