@@ -582,11 +582,10 @@ export class Embeddable
           errors={this.errors}
           lensInspector={this.lensInspector}
           searchContext={this.getMergedSearchContext()}
-          variables={
-            input.palette
-              ? { theme: { palette: input.palette }, embeddableTitle: this.getTitle() }
-              : { embeddableTitle: this.getTitle() }
-          }
+          variables={{
+            embeddableTitle: this.getTitle(),
+            ...(input.palette ? { theme: { palette: input.palette } } : {}),
+          }}
           searchSessionId={this.externalSearchContext.searchSessionId}
           handleEvent={this.handleEvent}
           onData$={this.updateActiveData}

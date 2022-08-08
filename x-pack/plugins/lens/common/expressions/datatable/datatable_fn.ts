@@ -115,7 +115,10 @@ export const datatableFn =
       value: {
         data: table,
         untransposedData,
-        args,
+        args: {
+          ...args,
+          title: (context.variables.embeddableTitle as string) ?? args.title,
+        },
       },
     };
   };

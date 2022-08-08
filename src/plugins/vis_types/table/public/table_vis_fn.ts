@@ -166,13 +166,17 @@ export const createTableVisFn = (): TableExpressionFunctionDefinition => ({
       const logTable = prepareLogTable(inspectorData, argsTable);
       handlers.inspectorAdapters.tables.logDatatable('default', logTable);
     }
+
     return {
       type: 'render',
       as: 'table_vis',
       value: {
         visData: convertedData,
         visType: VIS_TYPE_TABLE,
-        visConfig: args,
+        visConfig: {
+          ...args,
+          title: (handlers.variables.embeddableTitle as string) ?? args.title,
+        },
       },
     };
   },
