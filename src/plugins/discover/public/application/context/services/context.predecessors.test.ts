@@ -41,8 +41,8 @@ describe('context predecessors', function () {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockSearchSource: any;
-  const indexPattern = {
-    id: 'INDEX_PATTERN_ID',
+  const dataView = {
+    id: 'DATA_VIEW_ID',
     timeFieldName: '@timestamp',
     isTimeNanosBased: () => false,
     popularizeField: () => {},
@@ -66,17 +66,17 @@ describe('context predecessors', function () {
         const anchor = buildDataTableRecord(
           {
             _source: {
-              [indexPattern.timeFieldName!]: timeValIso,
+              [dataView.timeFieldName!]: timeValIso,
             },
             sort: [timeValNr, tieBreakerValue],
           } as EsHitRecord,
-          indexPattern,
+          dataView,
           true
         );
 
         return fetchSurroundingDocs(
           SurrDocType.PREDECESSORS,
-          indexPattern,
+          dataView,
           anchor,
           tieBreakerField,
           SortDirection.desc,
@@ -100,7 +100,7 @@ describe('context predecessors', function () {
         (hits) => {
           expect(mockSearchSource.fetch$.calledOnce).toBe(true);
           expect(hits).toEqual(
-            buildDataTableRecordList(mockSearchSource._stubHits.slice(0, 3), indexPattern)
+            buildDataTableRecordList(mockSearchSource._stubHits.slice(0, 3), dataView)
           );
         }
       );
@@ -132,7 +132,7 @@ describe('context predecessors', function () {
           expect(Object.keys(last(intervals) ?? {})).toEqual(['format', 'gte']);
           expect(intervals.length).toBeGreaterThan(1);
           expect(hits).toEqual(
-            buildDataTableRecordList(mockSearchSource._stubHits.slice(0, 3), indexPattern)
+            buildDataTableRecordList(mockSearchSource._stubHits.slice(0, 3), dataView)
           );
         }
       );
@@ -168,7 +168,7 @@ describe('context predecessors', function () {
           expect(intervals.length).toBeGreaterThan(1);
 
           expect(hits).toEqual(
-            buildDataTableRecordList(mockSearchSource._stubHits.slice(-3), indexPattern)
+            buildDataTableRecordList(mockSearchSource._stubHits.slice(-3), dataView)
           );
         }
       );
@@ -216,17 +216,17 @@ describe('context predecessors', function () {
         const anchor = buildDataTableRecord(
           {
             _source: {
-              [indexPattern.timeFieldName!]: timeValIso,
+              [dataView.timeFieldName!]: timeValIso,
             },
             sort: [timeValNr, tieBreakerValue],
           } as EsHitRecord,
-          indexPattern,
+          dataView,
           true
         );
 
         return fetchSurroundingDocs(
           SurrDocType.PREDECESSORS,
-          indexPattern,
+          dataView,
           anchor,
           tieBreakerField,
           SortDirection.desc,
@@ -255,7 +255,7 @@ describe('context predecessors', function () {
           expect(removeFieldsSpy.calledOnce).toBe(true);
           expect(setFieldsSpy.calledOnce).toBe(true);
           expect(hits).toEqual(
-            buildDataTableRecordList(mockSearchSource._stubHits.slice(0, 3), indexPattern)
+            buildDataTableRecordList(mockSearchSource._stubHits.slice(0, 3), dataView)
           );
         }
       );
