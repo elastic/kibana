@@ -7,10 +7,36 @@
  */
 
 import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import { LogExplorerEntry } from '../types';
+import { LogExplorerChunk, LogExplorerEntry } from '../types';
 import { getCursorFromHitSort, getPositionFromCursor } from './cursor';
 
 export const getEntryFromHit = (searchHit: SearchHit): LogExplorerEntry => ({
-  position: getPositionFromCursor(getCursorFromHitSort(searchHit.sort)),
   fields: searchHit.fields ?? {},
+  id: searchHit._id,
+  index: searchHit._index,
+  position: getPositionFromCursor(getCursorFromHitSort(searchHit.sort)),
 });
+
+export const getEntriesFromChunk = (chunk: LogExplorerChunk): LogExplorerEntry[] =>
+  chunk.status === 'loaded' ? chunk.entries : [];
+
+export const areSameEntries =
+  (firstEntry: LogExplorerEntry) =>
+  (secondEntry: LogExplorerEntry): boolean =>
+    firstEntry.id === secondEntry.id && firstEntry.index === secondEntry.index;
+
+export const countAddedEntries = (
+  previousEntries: LogExplorerEntry[],
+  newEntries: LogExplorerEntry[]
+): number => {
+  const newestPreviousEntry: LogExplorerEntry | undefined =
+    previousEntries[previousEntries.length - 1];
+
+  if (newestPreviousEntry == null) {
+    return newEntries.length;
+  }
+
+  const indexInNewEntries = newEntries.findIndex(areSameEntries(newestPreviousEntry));
+
+  return newEntries.length - indexInNewEntries - 1;
+};

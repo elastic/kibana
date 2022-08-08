@@ -42,8 +42,10 @@ export interface LogExplorerEmptyRow {
 }
 
 export interface LogExplorerEntry {
-  position: LogExplorerPosition;
   fields: Record<string, unknown>;
+  id: string;
+  index: string;
+  position: LogExplorerPosition;
 }
 
 // totally incomplete

@@ -17,7 +17,7 @@ type GridOnItemsRenderedProps = Parameters<
   NonNullable<NonNullable<EuiDataGridProps['virtualizationOptions']>['onItemsRendered']>
 >[0];
 
-const SEND_THROTTLE_DELAY = 500;
+const SEND_THROTTLE_DELAY = 1000;
 
 export const useOnItemsRendered = ({
   imperativeGridRef,
