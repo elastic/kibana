@@ -11,13 +11,12 @@ import type { SecurityPageName } from '../../../app/types';
 import { useGlobalQueryString } from '../../utils/global_query_string';
 
 import { getSearch } from './helpers';
-import type { SearchNavTab } from './types';
 
-export const useGetUrlSearch = (pageName: SecurityPageName, tab?: SearchNavTab) => {
+export const useGetUrlSearch = (pageName: SecurityPageName) => {
   const globalQueryString = useGlobalQueryString();
   const urlSearch = useMemo(
-    () => (tab ? getSearch(pageName, globalQueryString) : ''),
-    [tab, globalQueryString, pageName]
+    () => getSearch(pageName, globalQueryString),
+    [globalQueryString, pageName]
   );
 
   return urlSearch;
