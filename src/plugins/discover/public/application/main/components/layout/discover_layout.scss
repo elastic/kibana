@@ -11,6 +11,8 @@ discover-app {
 .dscPage {
   @include euiBreakpoint('m', 'l', 'xl') {
     @include kibanaFullBodyHeight();
+    //assign minimal height since else document explorer is hard to use
+    min-height: 550px;
   }
 
   flex-direction: column;
