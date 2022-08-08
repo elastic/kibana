@@ -8,7 +8,7 @@
 import { act } from 'react-dom/test-utils';
 import * as fixtures from '../../__fixtures__';
 import { setupEnvironment, pageHelpers, getRandomString, findTestSubject } from './helpers';
-import { WatchListTestBed } from './helpers/watch_list_page.helpers';
+import type { WatchListTestBed } from './helpers/watch_list_page.helpers';
 import { API_BASE_PATH } from '../../common/constants';
 
 const { setup } = pageHelpers.watchListPage;

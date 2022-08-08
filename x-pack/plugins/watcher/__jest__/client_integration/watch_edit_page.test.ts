@@ -10,7 +10,7 @@ import { act } from 'react-dom/test-utils';
 import { getWatch } from '../../__fixtures__';
 import { defaultWatch } from '../../public/application/models/watch';
 import { setupEnvironment, pageHelpers } from './helpers';
-import { WatchEditTestBed } from './helpers/watch_edit_page.helpers';
+import type { WatchEditTestBed } from './helpers/watch_edit_page.helpers';
 import { WATCH, WATCH_ID } from './helpers/jest_constants';
 import { API_BASE_PATH } from '../../common/constants';
 
