@@ -7,9 +7,9 @@
 
 import { IRouter } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-// import { validFeatureIds } from '@kbn/rule-data-utils';
 import { schema } from '@kbn/config-schema';
 
+import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
 import { RacRequestHandlerContext } from '../types';
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
 
@@ -19,35 +19,40 @@ export const getAlertFieldByFeatureId = (router: IRouter<RacRequestHandlerContex
       path: `${BASE_RAC_ALERTS_API_PATH}/field_caps`,
       validate: {
         query: schema.object({
-          featureId: schema.string(),
+          featureIds: schema.string(),
         }),
       },
       options: {
-        /**
-         * Additional metadata tag strings to attach to the route.
-         */
         tags: ['access:rac'],
       },
     },
     async (context, request, response) => {
       try {
         const racContext = await context.rac;
-        console.log('###################################################', racContext);
         const alertsClient = await racContext.getAlertsClient();
-        const { featureId } = request.query;
 
-        const alert = await alertsClient.get({ id, index });
-        if (alert == null) {
-          return response.notFound({
-            body: { message: `no categories` },
+        const { featureIds } = request.query;
+        const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(alertsClient);
+
+        const indices = await alertsClient.getAuthorizedAlertsIndices(featureIds.split(','));
+
+        // for now working with the first one, but should be working for an array of element
+        let fieldCaps;
+        if (indices && indices[0].startsWith('.alerts-observability')) {
+          fieldCaps = indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
+            pattern: indices[0],
           });
         }
 
         return response.ok({
-          body: featureId,
+          body: {
+            featureIds,
+            indices,
+            fieldCaps,
+          },
         });
-      } catch (exc) {
-        const err = transformError(exc);
+      } catch (error) {
+        const formatedError = transformError(error);
         const contentType = {
           'content-type': 'application/json',
         };
@@ -57,9 +62,9 @@ export const getAlertFieldByFeatureId = (router: IRouter<RacRequestHandlerContex
 
         return response.customError({
           headers: defaultedHeaders,
-          statusCode: err.statusCode,
+          statusCode: formatedError.statusCode,
           body: {
-            message: err.message,
+            message: formatedError.message,
             attributes: {
               success: false,
             },
