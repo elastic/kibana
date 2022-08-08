@@ -13,8 +13,7 @@ export default function ({ getService }) {
   const supertest = getService('supertest');
   const { setup, tearDown } = getLifecycleMethods(getService);
 
-  describe('overview', function () {
-    this.tags(['skipCloud']);
+  describe('overview', () => {
     const archive = 'x-pack/test/functional/es_archives/monitoring/kibana/rules_and_actions';
     const timeRange = {
       min: '2022-05-31T18:44:19.267Z',
@@ -29,13 +28,14 @@ export default function ({ getService }) {
       return tearDown();
     });
 
-    it('should get data for the entire cluster', async () => {
+    it('should get kibana rules at cluster level', async () => {
       const { body } = await supertest
         .post('/api/monitoring/v1/clusters/SvjwrFv6Rvuqjm9-cSSVEg')
         .set('kbn-xsrf', 'xxx')
         .send({ timeRange, codePaths: ['all'] })
         .expect(200);
-      expect(body).to.eql(fixture);
+
+      expect(body[0].kibana.rules).to.eql(fixture[0].kibana.rules);
     });
   });
 }
