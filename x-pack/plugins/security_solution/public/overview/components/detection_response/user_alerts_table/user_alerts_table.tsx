@@ -105,7 +105,7 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     textOnly: true,
     'data-test-subj': 'userSeverityAlertsTable-userName',
     render: (userName: string) => (
-      <EuiToolTip title={i18n.OPEN_USER_DETAIL_TOOLTIP} content={userName}>
+      <EuiToolTip position="left" title={i18n.OPEN_USER_DETAIL_TOOLTIP} content={userName}>
         <UserDetailsLink userName={userName} />
       </EuiToolTip>
     ),
