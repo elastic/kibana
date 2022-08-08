@@ -15,6 +15,30 @@ steps:
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
     timeout_in_minutes: 60
 
+  - command: .buildkite/scripts/steps/build_api_docs.sh
+    label: 'Build API Docs'
+    agents:
+      queue: n2-4-spot
+    key: build_api_docs
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
+  - command: .buildkite/scripts/steps/ci_stats_ready.sh
+    label: Mark CI Stats as ready
+    agents:
+      queue: kibana-default
+    timeout_in_minutes: 10
+    depends_on:
+      - build
+      - build_api_docs
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
   - command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
     label: 'Pick Test Group Run Order'
     agents:
@@ -61,14 +85,3 @@ steps:
     agents:
       queue: c2-8
     timeout_in_minutes: 60
-
-  - command: .buildkite/scripts/steps/build_api_docs.sh
-    label: 'Build API Docs'
-    agents:
-      queue: n2-4-spot
-    key: build_api_docs
-    timeout_in_minutes: 60
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
