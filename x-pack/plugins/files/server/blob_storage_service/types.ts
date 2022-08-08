@@ -48,6 +48,9 @@ export interface BlobStorageClient {
    *
    * Generates a random file ID and returns it upon successfully uploading a
    * file. The file size can be used when downloading the file later.
+   *
+   * @param content - The readable stream to upload.
+   * @param opts - Optional options to use when uploading the file.
    */
   upload(content: Readable, opts?: UploadOptions): Promise<{ id: string; size: number }>;
 
@@ -56,11 +59,15 @@ export interface BlobStorageClient {
    *
    * Given an ID, and optional file size, retrieve the file contents as a readable
    * stream.
+   *
+   * @param args - Arguments to download a file
    */
   download(args: { id: string; size?: number }): Promise<Readable>;
 
   /**
    * Delete a file given a unique ID.
+   *
+   * @param id - The ID of the file to delete.
    */
   delete(id: string): Promise<void>;
 }

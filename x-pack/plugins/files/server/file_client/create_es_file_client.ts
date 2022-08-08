@@ -12,6 +12,9 @@ import { EsIndexFilesMetadataClient } from './file_metadata_client';
 
 const NO_FILE_KIND = 'no-file-kind';
 
+/**
+ * Arguments to create an ES file client.
+ */
 export interface CreateEsFileClientArgs {
   /**
    * The name of the ES index that will store file metadata.
@@ -40,6 +43,8 @@ export interface CreateEsFileClientArgs {
  * that will speak with ES indices only for file functionality.
  *
  * @note This client is not intended to be aware of {@link FileKind}s.
+ *
+ * @param param0 - Arguments to create an {@link FileClient}
  */
 export function createEsFileClient({
   metadataIndex,
