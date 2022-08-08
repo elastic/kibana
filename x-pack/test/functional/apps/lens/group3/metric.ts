@@ -59,7 +59,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     }
   };
 
-  describe('lens metric', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/138295
+  describe.skip('lens metric', () => {
     it('should render a metric', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
