@@ -31,7 +31,7 @@ export const useLensAttributes = ({
   getLensAttributes?: GetLensAttributes;
   stackByField?: string;
   title?: string;
-}): { attributes: LensAttributes | null; indexPattern: string[] } => {
+}): LensAttributes | null => {
   const { selectedPatterns, dataViewId } = useSourcererDataView();
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const getGlobalFiltersQuerySelector = useMemo(
@@ -103,8 +103,5 @@ export const useLensAttributes = ({
     dataViewId,
   ]);
 
-  return useMemo(
-    () => ({ attributes: lensAttrsWithInjectedData, indexPattern: selectedPatterns }),
-    [lensAttrsWithInjectedData, selectedPatterns]
-  );
+  return lensAttrsWithInjectedData;
 };

@@ -36,7 +36,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
 
   const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();
   const { searchSessionId } = useDeepEqualSelector((state) => getGlobalQuery(state, id));
-  const { attributes } = useLensAttributes({
+  const attributes = useLensAttributes({
     lensAttributes,
     getLensAttributes,
     stackByField,
