@@ -248,7 +248,7 @@ The API returns the {data-source} object:
 (Optional, object) Map of field formats by field name.
 
 `allowNoIndex`::
-(Optional, boolean) Allows the data view saved object to exist before data is present.
+(Optional, boolean) Allows the {data-source} saved object to exist before the data is available.
 
 `namespaces`::
 (Optional, string[]) Array of {kibana-ref}/xpack-spaces.html[space] IDs for sharing the {data-source} between multiple spaces.
