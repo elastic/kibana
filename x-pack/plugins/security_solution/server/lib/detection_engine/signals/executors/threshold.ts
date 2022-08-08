@@ -109,6 +109,7 @@ export const thresholdExecutor = async ({
     // Eliminate dupes
     const bucketFilters = await getThresholdBucketFilters({
       signalHistory,
+      aggregatableTimestampField,
     });
 
     // Combine dupe filter with other filters
@@ -178,6 +179,8 @@ export const thresholdExecutor = async ({
 
     const newSignalHistory = buildThresholdSignalHistory({
       alerts: createdAlerts,
+      primaryTimestamp,
+      secondaryTimestamp,
     });
 
     return {

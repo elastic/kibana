@@ -7,7 +7,6 @@
 
 import type { Filter } from '@kbn/es-query';
 import type { ESFilter } from '@kbn/core/types/elasticsearch';
-import { TIMESTAMP } from '@kbn/rule-data-utils';
 import type { ThresholdSignalHistory, ThresholdSignalHistoryRecord } from '../types';
 
 /*
@@ -16,8 +15,10 @@ import type { ThresholdSignalHistory, ThresholdSignalHistoryRecord } from '../ty
  */
 export const getThresholdBucketFilters = async ({
   signalHistory,
+  aggregatableTimestampField,
 }: {
   signalHistory: ThresholdSignalHistory;
+  aggregatableTimestampField: string;
 }): Promise<Filter[]> => {
   const filters = Object.values(signalHistory).reduce(
     (acc: ESFilter[], bucket: ThresholdSignalHistoryRecord): ESFilter[] => {
@@ -26,7 +27,7 @@ export const getThresholdBucketFilters = async ({
           filter: [
             {
               range: {
-                [TIMESTAMP]: {
+                [aggregatableTimestampField]: {
                   // Timestamp of last event signaled on for this set of terms.
                   lte: new Date(bucket.lastSignalTimestamp).toISOString(),
                 },
