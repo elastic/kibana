@@ -42,7 +42,7 @@ import {
  * @note Instantiation should not happen outside of this plugin
  */
 export class File<M = unknown> implements IFile {
-  private readonly logAuditEvent: InternalFileService['createAuditLog'];
+  private readonly logAuditEvent: InternalFileService['writeAuditLog'];
 
   constructor(
     public readonly id: string,
@@ -52,7 +52,7 @@ export class File<M = unknown> implements IFile {
     private readonly fileShareService: InternalFileShareService,
     private readonly logger: Logger
   ) {
-    this.logAuditEvent = this.internalFileService.createAuditLog.bind(this.internalFileService);
+    this.logAuditEvent = this.internalFileService.writeAuditLog.bind(this.internalFileService);
   }
 
   private async updateFileState(action: Action) {
@@ -149,7 +149,7 @@ export class File<M = unknown> implements IFile {
     validUntil?: number;
   }): Promise<FileShareJSONWithToken> {
     const shareObject = await this.fileShareService.share({ file: this, name, validUntil });
-    this.internalFileService.createAuditLog(
+    this.internalFileService.writeAuditLog(
       createAuditEvent({
         action: 'create',
         message: `Shared file "${this.name}" with id "${this.id}"`,
@@ -165,7 +165,7 @@ export class File<M = unknown> implements IFile {
 
   async unshare(opts: { shareId: string }): Promise<void> {
     await this.fileShareService.delete({ id: opts.shareId });
-    this.internalFileService.createAuditLog(
+    this.internalFileService.writeAuditLog(
       createAuditEvent({
         action: 'delete',
         message: `Removed share for "${this.name}" with id "${this.id}"`,
@@ -259,7 +259,7 @@ export class File<M = unknown> implements IFile {
 
     const file = internalFileService.toFile(fileMeta.id, fileMeta.metadata, fileKind, fileClient);
 
-    internalFileService.createAuditLog(
+    internalFileService.writeAuditLog(
       createAuditEvent({
         action: 'create',
         message: `Created file "${file.name}" of kind "${file.fileKind}" and id "${file.id}"`,

@@ -54,7 +54,7 @@ export class InternalFileService {
     );
   }
 
-  public createAuditLog(event: AuditEvent) {
+  public writeAuditLog(event: AuditEvent) {
     if (this.auditLogger) {
       this.auditLogger.log(event);
     } else {
