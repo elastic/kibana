@@ -72,7 +72,7 @@ describe('EQL rules', () => {
     const expectedTags = getEqlRule().tags.join('');
     const expectedMitre = formatMitreAttackDescription(getEqlRule().mitre);
     const expectedNumberOfRules = 1;
-    const expectedNumberOfAlerts = '1 alert';
+    const expectedNumberOfAlerts = '2 alerts';
 
     beforeEach(() => {
       createTimeline(getEqlRule().timeline).then((response) => {
