@@ -178,8 +178,6 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       describe('with imported models', function () {
-        this.tags(['dima']);
-
         for (const model of trainedModels) {
           it(`renders expanded row content correctly for imported tiny model ${model.id} without pipelines`, async () => {
             await ml.trainedModelsTable.ensureRowIsExpanded(model.id);
@@ -189,14 +187,14 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.trainedModelsTable.assertPipelinesTabContent(false);
           });
 
-          it('starts deployment of the imported model', async () => {
+          it(`starts deployment of the imported model ${model.id}`, async () => {
             await ml.trainedModelsTable.startDeploymentWithParams(model.id, {
               numOfAllocations: 1,
               threadsPerAllocation: 2,
             });
           });
 
-          it('stops deployment of the imported model', async () => {
+          it(`stops deployment of the imported model ${model.id}`, async () => {
             await ml.trainedModelsTable.stopDeployment(model.id);
           });
         }

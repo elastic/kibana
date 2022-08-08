@@ -257,19 +257,19 @@ export function TrainedModelsTableProvider(
       await testSubjects.click('mlModelsStartDeploymentModalStartButton');
       await this.assertStartDeploymentModalExists(false);
 
+      await mlCommonUI.waitForRefreshButtonEnabled();
+
       await mlCommonUI.assertLastToastHeader(
         `Deployment for "${modelId}" has been started successfully.`
       );
-
-      await mlCommonUI.waitForRefreshButtonEnabled();
     }
 
     public async stopDeployment(modelId: string) {
       await this.clickStopDeploymentAction(modelId);
+      await mlCommonUI.waitForRefreshButtonEnabled();
       await mlCommonUI.assertLastToastHeader(
         `Deployment for "${modelId}" has been stopped successfully.`
       );
-      await mlCommonUI.waitForRefreshButtonEnabled();
     }
 
     public async openStartDeploymentModal(modelId: string) {
