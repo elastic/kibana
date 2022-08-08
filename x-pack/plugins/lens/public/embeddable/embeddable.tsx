@@ -485,8 +485,6 @@ export class Embeddable
       this.input.onLoad(false);
     }
 
-    // TODO this should be calling into the datasource
-
     const { type, error } = data as { type: string; error: ErrorLike };
     this.updateOutput({
       ...this.getOutput(),

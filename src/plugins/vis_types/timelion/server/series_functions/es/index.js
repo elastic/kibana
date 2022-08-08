@@ -100,19 +100,28 @@ export default new Datasource('es', {
       index: tlConfig.settings['timelion:es.default_index'],
       timefield: tlConfig.settings['timelion:es.timefield'],
       interval: tlConfig.time.interval,
+      timezone: tlConfig.time.timezone,
       kibana: true,
       fit: 'nearest',
     });
     const indexPatternsService = tlConfig.getIndexPatternsService();
-    const indexPatternSpec = (await indexPatternsService.find(config.index, 1)).find(
-      (index) => index.title === config.index
-    );
-    // TODO check time field for tsdb rollup and switch to UTC
+    const indexPatternSpec =
+      (await indexPatternsService.find(config.index, 1)).find(
+        (index) => index.title === config.index
+      ) || (await indexPatternsService.create({ title: config.index }));
+    const timeField = indexPatternSpec && indexPatternSpec.getFieldByName(config.timefield);
+    if (timeField && timeField.timeZone?.[0]) {
+      config.timezone = timeField?.timeZone?.[0];
+    }
+    if (timeField && timeField.timeZone?.[0]) {
+      config.forceFixedInterval = Boolean(timeField?.fixedInterval?.[0]);
+    }
 
     const { scriptFields = {}, runtimeFields = {} } = indexPatternSpec?.getComputedFields() ?? {};
     const esShardTimeout = tlConfig.esShardTimeout;
 
     const body = buildRequest(config, tlConfig, scriptFields, runtimeFields, esShardTimeout);
+    console.log(JSON.stringify(body, null, 2));
 
     // User may abort the request without waiting for the results
     // we need to handle this scenario by aborting underlying server requests

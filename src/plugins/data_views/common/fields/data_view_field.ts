@@ -280,6 +280,20 @@ export class DataViewField implements DataViewFieldBase {
   }
 
   /**
+   * returns list of alloeed fixed intervals
+   */
+  public get fixedInterval() {
+    return this.spec.fixedInterval;
+  }
+
+  /**
+   * return list of allowed time zones
+   */
+  public get timeZone() {
+    return this.spec.timeZone;
+  }
+
+  /**
    * Returns true if field is subtype nested
    */
   public isSubtypeNested() {

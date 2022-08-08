@@ -419,6 +419,8 @@ export type FieldSpec = DataViewFieldBase & {
    */
   timeSeriesRollup?: boolean;
 
+  fixedInterval?: string[];
+  timeZone?: string[];
   // not persisted
 
   /**
