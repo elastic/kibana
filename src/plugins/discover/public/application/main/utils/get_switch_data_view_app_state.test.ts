@@ -32,6 +32,7 @@ const getDataView = (id: string, timeFieldName: string, fields: string[]) => {
           .find((field) => field.name === name);
       },
     },
+    isPersisted: () => true,
   } as DataView;
 };
 
