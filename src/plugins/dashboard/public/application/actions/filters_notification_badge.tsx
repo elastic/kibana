@@ -38,7 +38,7 @@ export class FiltersNotificationBadge implements Action<FiltersNotificationActio
 
   constructor(
     private application: CoreStart['application'],
-    private embeddable: EmbeddableStart,
+    private embeddableService: EmbeddableStart,
     private overlays: OverlayStart,
     private theme: CoreStart['theme'],
     private uiSettings: CoreStart['uiSettings']
@@ -79,10 +79,10 @@ export class FiltersNotificationBadge implements Action<FiltersNotificationActio
   };
 
   public execute = async (context: FiltersNotificationActionContext) => {
-    const { embeddable: contextEmbeddable } = context;
+    const { embeddable } = context;
 
-    const isCompatible = await this.isCompatible({ embeddable: contextEmbeddable });
-    if (!isCompatible || !isFilterableEmbeddable(contextEmbeddable)) {
+    const isCompatible = await this.isCompatible({ embeddable });
+    if (!isCompatible || !isFilterableEmbeddable(embeddable)) {
       throw new IncompatibleActionError();
     }
 
@@ -90,9 +90,9 @@ export class FiltersNotificationBadge implements Action<FiltersNotificationActio
       uiSettings: this.uiSettings,
     });
     const editPanelAction = new EditPanelAction(
-      this.embeddable.getEmbeddableFactory,
+      this.embeddableService.getEmbeddableFactory,
       this.application,
-      this.embeddable.getStateTransfer()
+      this.embeddableService.getStateTransfer()
     );
     const FiltersNotificationModal = await import('./filters_notification_modal').then(
       (m) => m.FiltersNotificationModal

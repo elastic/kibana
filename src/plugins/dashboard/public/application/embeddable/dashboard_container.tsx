@@ -119,7 +119,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   private allDataViews: DataView[] = [];
 
   /**
-   * Gets all he dataviews that are actively being used in the dashboard
+   * Gets all the dataviews that are actively being used in the dashboard
    * @returns An array of dataviews
    */
   public getAllDataViews = () => {

@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import useMount from 'react-use/lib/useMount';
+
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -21,9 +23,8 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
 } from '@elastic/eui';
-import { FilterItems } from '@kbn/unified-search-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/public';
 import { css } from '@emotion/react';
+import { DataView } from '@kbn/data-views-plugin/public';
 import {
   EditPanelAction,
   FilterableEmbeddable,
@@ -36,9 +37,11 @@ import {
   getAggregateQueryMode,
   isOfQueryType,
 } from '@kbn/es-query';
+import { FilterItems } from '@kbn/unified-search-plugin/public';
+
 import { FiltersNotificationActionContext } from './filters_notification_badge';
-import { dashboardFilterNotificationBadge } from '../../dashboard_strings';
 import { DashboardContainer } from '../embeddable';
+import { dashboardFilterNotificationBadge } from '../../dashboard_strings';
 
 export interface FiltersNotificationProps {
   context: FiltersNotificationActionContext;
@@ -61,7 +64,7 @@ export function FiltersNotificationModal({
   const [queryString, setQueryString] = useState<string>('');
   const [queryLanguage, setQueryLanguage] = useState<'sql' | 'esql' | undefined>();
 
-  useEffect(() => {
+  useMount(() => {
     Promise.all([
       (embeddable as IEmbeddable & FilterableEmbeddable).getFilters(),
       (embeddable as IEmbeddable & FilterableEmbeddable).getQuery(),
@@ -78,7 +81,7 @@ export function FiltersNotificationModal({
       }
       setIsLoading(false);
     });
-  }, [embeddable]);
+  });
 
   const dataViewList: DataView[] = (embeddable.getRoot() as DashboardContainer)?.getAllDataViews();
   const viewMode = embeddable.getInput().viewMode;
