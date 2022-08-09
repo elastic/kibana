@@ -18,7 +18,11 @@ import { PLUGIN_ID } from '../common/constants';
 import { BlobStorageService } from './blob_storage_service';
 import { FileServiceFactory } from './file_service';
 import type { FilesPluginSetupDependencies, FilesSetup, FilesStart } from './types';
-import { fileKindsRegistry } from './file_kinds_registry';
+import {
+  setFileKindsRegistry,
+  getFileKindsRegistry,
+  FileKindsRegistryImpl,
+} from './file_kinds_registry';
 import type { FilesRequestHandlerContext, FilesRouter } from './routes/types';
 import { registerRoutes } from './routes';
 
@@ -50,6 +54,8 @@ export class FilesPlugin implements Plugin<FilesSetup, FilesStart, FilesPluginSe
 
     const router: FilesRouter = core.http.createRouter();
 
+    setFileKindsRegistry(new FileKindsRegistryImpl(router));
+
     core
       .getStartServices()
       .then(() => {
@@ -63,7 +69,7 @@ export class FilesPlugin implements Plugin<FilesSetup, FilesStart, FilesPluginSe
 
     return {
       registerFileKind(fileKind) {
-        fileKindsRegistry.register(fileKind);
+        getFileKindsRegistry().register(fileKind);
       },
     };
   }
@@ -79,7 +85,7 @@ export class FilesPlugin implements Plugin<FilesSetup, FilesStart, FilesPluginSe
       savedObjects,
       blobStorageService,
       this.securitySetup,
-      fileKindsRegistry,
+      getFileKindsRegistry(),
       this.logger.get('files-service')
     );
 

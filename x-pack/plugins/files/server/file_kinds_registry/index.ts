@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { IRouter } from '@kbn/core-http-server';
+import { createGetterSetter } from '@kbn/kibana-utils-plugin/common';
 import assert from 'assert';
 import { FileKind } from '../../common';
 
@@ -27,7 +29,9 @@ export interface FileKindsRegistry {
 /**
  * @internal
  */
-class FileKindsRegistryImpl implements FileKindsRegistry {
+export class FileKindsRegistryImpl implements FileKindsRegistry {
+  constructor(private readonly router: IRouter) {}
+
   private readonly fileKinds = new Map<string, FileKind>();
 
   register(fileKind: FileKind) {
@@ -55,4 +59,5 @@ class FileKindsRegistryImpl implements FileKindsRegistry {
   }
 }
 
-export const fileKindsRegistry = new FileKindsRegistryImpl();
+export const [getFileKindsRegistry, setFileKindsRegistry] =
+  createGetterSetter<FileKindsRegistry>('fileKindsRegistry');

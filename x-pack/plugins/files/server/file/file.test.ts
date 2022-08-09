@@ -10,6 +10,7 @@ import {
   elasticsearchServiceMock,
   loggingSystemMock,
   savedObjectsServiceMock,
+  httpServiceMock,
 } from '@kbn/core/server/mocks';
 import { Readable } from 'stream';
 import { promisify } from 'util';
@@ -18,7 +19,11 @@ const setImmediate = promisify(global.setImmediate);
 
 import { BlobStorageService } from '../blob_storage_service';
 import { InternalFileService } from '../file_service/internal_file_service';
-import { fileKindsRegistry } from '../file_kinds_registry';
+import {
+  FileKindsRegistryImpl,
+  getFileKindsRegistry,
+  setFileKindsRegistry,
+} from '../file_kinds_registry';
 import { InternalFileShareService } from '../file_share_service';
 import { FileMetadataClient } from '../file_client';
 import { SavedObjectsFileMetadataClient } from '../file_client/file_metadata_client/adapters/saved_objects';
@@ -35,7 +40,8 @@ describe('File', () => {
   const fileKind = 'fileKind';
 
   beforeAll(() => {
-    fileKindsRegistry.register({ http: {}, id: fileKind });
+    setFileKindsRegistry(new FileKindsRegistryImpl(httpServiceMock.createRouter()));
+    getFileKindsRegistry().register({ http: {}, id: fileKind });
   });
 
   beforeEach(() => {
@@ -50,7 +56,7 @@ describe('File', () => {
       blobStorageService,
       fileShareService,
       undefined,
-      fileKindsRegistry,
+      getFileKindsRegistry(),
       logger
     );
   });

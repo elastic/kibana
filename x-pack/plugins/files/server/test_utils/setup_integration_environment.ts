@@ -13,7 +13,7 @@ import {
 } from '@kbn/core/test_helpers/kbn_server';
 import pRetry from 'p-retry';
 import { FileJSON } from '../../common';
-import { fileKindsRegistry } from '../file_kinds_registry';
+import { getFileKindsRegistry } from '../file_kinds_registry';
 
 export type TestEnvironmentUtils = Awaited<ReturnType<typeof setupIntegrationEnvironment>>;
 
@@ -62,7 +62,7 @@ export async function setupIntegrationEnvironment() {
    * Register a test file type
    */
   const testHttpConfig = { tags: ['access:myapp'] };
-  fileKindsRegistry.register({
+  getFileKindsRegistry().register({
     id: fileKind,
     blobStoreSettings: {
       esFixedSizeIndex: { index: testIndex },
