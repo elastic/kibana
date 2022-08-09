@@ -70,6 +70,7 @@ export const useOnUpdateField = ({ caseData, caseId }: { caseData: Case; caseId:
           if (caseData.severity !== value) {
             callUpdate('severity', severityUpdate);
           }
+          break;
         case 'assignees':
           const assigneesUpdate = getTypedPayload<CaseAttributes['assignees']>(value);
           if (!deepEqual(caseData.assignees, value)) {

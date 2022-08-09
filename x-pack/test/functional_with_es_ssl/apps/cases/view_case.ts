@@ -202,6 +202,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       it('shows the severity field on the sidebar', async () => {
         await testSubjects.existOrFail('case-severity-selection');
       });
+
       it('changes the severity level from the selector', async () => {
         await cases.common.selectSeverity(CaseSeverity.MEDIUM);
         await header.waitUntilLoadingHasFinished();
