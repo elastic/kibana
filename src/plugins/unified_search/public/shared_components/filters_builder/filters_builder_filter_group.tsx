@@ -10,11 +10,11 @@ import React, { useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText, EuiPanel } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import type { Path } from './filter_editors_types';
-import { ConditionTypes } from './filters_editor_condition_types';
-import { FilterItem } from './filters_editor_filter_item';
-import { FiltersEditorContextType } from './filters_editor_context';
-import { getPathInArray } from './filters_editor_utils';
+import type { Path } from './filters_builder_types';
+import { ConditionTypes } from './filters_builder_condition_types';
+import { FilterItem } from './filters_builder_filter_item';
+import { FiltersEditorContextType } from './filters_builder_context';
+import { getPathInArray } from './filters_builder_utils';
 
 export interface FilterGroupProps {
   filters: Filter[];

@@ -10,10 +10,10 @@ import React, { useEffect, useReducer, useCallback, useState } from 'react';
 import { EuiDragDropContext, DragDropContextProps } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
-import { FiltersEditorContextType } from './filters_editor_context';
-import { ConditionTypes } from './filters_editor_condition_types';
-import { FilterGroup } from './filters_editor_filter_group';
-import { filtersEditorReducer } from './filters_editor_reducer';
+import { FiltersEditorContextType } from './filters_builder_context';
+import { ConditionTypes } from './filters_builder_condition_types';
+import { FilterGroup } from './filters_builder_filter_group';
+import { filtersEditorReducer } from './filters_builder_reducer';
 
 export interface FiltersEditorProps {
   filters: Filter[];

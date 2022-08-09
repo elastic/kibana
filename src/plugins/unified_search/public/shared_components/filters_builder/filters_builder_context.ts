@@ -8,7 +8,7 @@
 
 import React, { Dispatch } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { FiltersEditorActions } from './filters_editor_reducer';
+import type { FiltersEditorActions } from './filters_builder_reducer';
 
 interface FiltersEditorContextType {
   dataView: DataView;

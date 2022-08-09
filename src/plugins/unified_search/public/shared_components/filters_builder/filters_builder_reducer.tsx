@@ -9,15 +9,15 @@
 import type { Reducer } from 'react';
 import type { Filter } from '@kbn/es-query';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import type { Path } from './filter_editors_types';
-import type { ConditionTypes } from './filters_editor_condition_types';
+import type { Path } from './filters_builder_types';
+import type { ConditionTypes } from './filters_builder_condition_types';
 import {
   addFilter,
   moveFilter,
   removeFilter,
   updateFilter,
   updateFilterParams,
-} from './filters_editor_utils';
+} from './filters_builder_utils';
 
 // todo: {start} should be refactored cause shared component cannot be linked with non-shared components
 import type { Operator } from '../filter_editor';

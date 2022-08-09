@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { FiltersEditor } from './filters_editor';
+import { FiltersEditor } from './filters_builder';
 
-export type { FiltersEditorProps } from './filters_editor';
+export type { FiltersEditorProps } from './filters_builder';
 // React.lazy support
 // eslint-disable-next-line import/no-default-export
 export default FiltersEditor;

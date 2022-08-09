@@ -10,17 +10,17 @@ import React from 'react';
 import { withSuspense } from '@kbn/shared-ux-utility';
 
 /**
- * The Lazily-loaded `FiltersEditor` component.  Consumers should use `React.Suspense` or
+ * The Lazily-loaded `FiltersBuilder` component.  Consumers should use `React.Suspense` or
  * the withSuspense` HOC to load this component.
  */
-export const FiltersEditorLazy = React.lazy(() => import('./filters_editor'));
+export const FiltersBuilderLazy = React.lazy(() => import('./filters_builder'));
 
 /**
- * A `FiltersEditor` component that is wrapped by the `withSuspense` HOC. This component can
- * be used directly by consumers and will load the `FiltersEditorLazy` component lazily with
+ * A `FiltersBuilder` component that is wrapped by the `withSuspense` HOC. This component can
+ * be used directly by consumers and will load the `FiltersBuilderLazy` component lazily with
  * a predefined fallback and error boundary.
  */
-export const FiltersEditor = withSuspense(FiltersEditorLazy);
+export const FiltersBuilder = withSuspense(FiltersBuilderLazy);
 
 /**
  * The Lazily-loaded `FilterEditor` component.  Consumers should use `React.Suspense` or

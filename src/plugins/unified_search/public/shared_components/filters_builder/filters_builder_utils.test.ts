@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { getFilterByPath } from './filters_editor_utils';
+import { getFilterByPath } from './filters_builder_utils';
 
 import { getFiltersMock } from './__mock__/filters';
-describe('filters_editor_utils', () => {
+describe('filters_builder_utils', () => {
   describe('getFilterByPath', () => {
     const filters = getFiltersMock();
 

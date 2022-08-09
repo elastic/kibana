@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { FilterItem } from './filters_editor_filter_item';
+export { FilterItem } from './filters_builder_filter_item';

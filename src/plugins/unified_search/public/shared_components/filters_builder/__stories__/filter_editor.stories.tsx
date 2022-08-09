@@ -15,7 +15,7 @@ import { action } from '@storybook/addon-actions';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import { getFiltersMock } from '../__mock__/filters';
-import { FiltersEditor, FiltersEditorProps } from '../filters_editor';
+import { FiltersEditor, FiltersEditorProps } from '../filters_builder';
 
 export default {
   title: 'Filters Editor',

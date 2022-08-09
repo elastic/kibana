@@ -23,17 +23,17 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import uuid from 'uuid';
 
-import returnKey from './assets/return_key.svg';
-import plus from './assets/plus.svg';
+import returnKey from '../assets/return_key.svg';
+import plus from '../assets/plus.svg';
 
-import { FieldInput } from './filters_editor_filter_item_field_input';
-import { OperatorInput } from './filters_editor_filter_item_operator_input';
-import { ParamsEditor } from './filters_editor_filter_item_params_editor';
-import { ConditionTypes } from '../filters_editor_condition_types';
-import { FiltersEditorContextType } from '../filters_editor_context';
-import { FilterGroup } from '../filters_editor_filter_group';
-import { getConditionalOperationType } from '../filters_editor_utils';
-import type { Path } from '../filter_editors_types';
+import { FieldInput } from './filters_builder_filter_item_field_input';
+import { OperatorInput } from './filters_builder_filter_item_operator_input';
+import { ParamsEditor } from './filters_builder_filter_item_params_editor';
+import { ConditionTypes } from '../filters_builder_condition_types';
+import { FiltersEditorContextType } from '../filters_builder_context';
+import { FilterGroup } from '../filters_builder_filter_group';
+import { getConditionalOperationType } from '../filters_builder_utils';
+import type { Path } from '../filters_builder_types';
 
 // @todo: {start} should be refactored cause shared component cannot be linked with non-shared components
 import { getFieldFromFilter, getOperatorFromFilter } from '../../filter_editor';
