@@ -831,7 +831,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           />
         </Form>
         <EuiSpacer size="m" />
-        <RuleTypeEuiFormRow label={i18n.RULE_PREVIEW} $isVisible={true} fullWidth>
+        <RuleTypeEuiFormRow label={i18n.RULE_PREVIEW_TITLE} $isVisible={true} fullWidth>
           <RulePreview
             index={index}
             dataViewId={formDataViewId}
