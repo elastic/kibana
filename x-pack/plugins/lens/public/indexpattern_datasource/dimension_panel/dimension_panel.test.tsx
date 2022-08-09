@@ -19,6 +19,7 @@ import {
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import {
   IndexPatternDimensionEditorComponent,
   IndexPatternDimensionEditorProps,
@@ -216,6 +217,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       uiSettings: {} as IUiSettingsClient,
       savedObjectsClient: {} as SavedObjectsClientContract,
       http: {} as HttpSetup,
+      fieldFormats: fieldFormatsServiceMock.createStartContract(),
       unifiedSearch: unifiedSearchPluginMock.createStartContract(),
       dataViews: dataViewPluginMocks.createStartContract(),
       data: {
