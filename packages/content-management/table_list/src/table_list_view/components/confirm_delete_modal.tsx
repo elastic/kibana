@@ -9,7 +9,46 @@
 
 import React from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+
+function getI18nTexts(items: unknown[], entityName: string, entityNamePlural: string) {
+  return {
+    deleteBtnLabel: i18n.translate(
+      'contentManagement.tableList.listing.deleteSelectedItemsConfirmModal.confirmButtonLabel',
+      {
+        defaultMessage: 'Delete',
+      }
+    ),
+    deletingBtnLabel: i18n.translate(
+      'contentManagement.tableList.listing.deleteSelectedItemsConfirmModal.confirmButtonLabelDeleting',
+      {
+        defaultMessage: 'Deleting',
+      }
+    ),
+    title: i18n.translate('contentManagement.tableList.listing.deleteSelectedConfirmModal.title', {
+      defaultMessage: 'Delete {itemCount} {entityName}?',
+      values: {
+        itemCount: items.length,
+        entityName: items.length === 1 ? entityName : entityNamePlural,
+      },
+    }),
+    description: i18n.translate(
+      'contentManagement.tableList.listing.deleteConfirmModalDescription',
+      {
+        defaultMessage: `You can't recover deleted {entityNamePlural}.`,
+        values: {
+          entityNamePlural,
+        },
+      }
+    ),
+    cancelBtnLabel: i18n.translate(
+      'contentManagement.tableList.listing.deleteSelectedItemsConfirmModal.cancelButtonLabel',
+      {
+        defaultMessage: 'Cancel',
+      }
+    ),
+  };
+}
 
 interface Props<T> {
   /** Flag to indicate if the items are being deleted */
@@ -34,53 +73,25 @@ export function ConfirmDeleteModal<T>({
   onCancel,
   onConfirm,
 }: Props<T>) {
-  let deleteButton = (
-    <FormattedMessage
-      id="contentManagement.tableList.listing.deleteSelectedItemsConfirmModal.confirmButtonLabel"
-      defaultMessage="Delete"
-    />
+  const { deleteBtnLabel, deletingBtnLabel, title, description, cancelBtnLabel } = getI18nTexts(
+    items,
+    entityName,
+    entityNamePlural
   );
 
-  if (isDeletingItems) {
-    deleteButton = (
-      <FormattedMessage
-        id="contentManagement.tableList.listing.deleteSelectedItemsConfirmModal.confirmButtonLabelDeleting"
-        defaultMessage="Deleting"
-      />
-    );
-  }
+  const deleteButton = isDeletingItems ? deletingBtnLabel : deleteBtnLabel;
 
   return (
     <EuiConfirmModal
-      title={
-        <FormattedMessage
-          id="contentManagement.tableList.listing.deleteSelectedConfirmModal.title"
-          defaultMessage="Delete {itemCount} {entityName}?"
-          values={{
-            itemCount: items.length,
-            entityName: items.length === 1 ? entityName : entityNamePlural,
-          }}
-        />
-      }
+      title={title}
       buttonColor="danger"
       onCancel={onCancel}
       onConfirm={onConfirm}
-      cancelButtonText={
-        <FormattedMessage
-          id="contentManagement.tableList.listing.deleteSelectedItemsConfirmModal.cancelButtonLabel"
-          defaultMessage="Cancel"
-        />
-      }
+      cancelButtonText={cancelBtnLabel}
       confirmButtonText={deleteButton}
       defaultFocusedButton="cancel"
     >
-      <p>
-        <FormattedMessage
-          id="contentManagement.tableList.listing.deleteConfirmModalDescription"
-          defaultMessage="You can't recover deleted {entityNamePlural}."
-          values={{ entityNamePlural }}
-        />
-      </p>
+      <p>{description}</p>
     </EuiConfirmModal>
   );
 }
