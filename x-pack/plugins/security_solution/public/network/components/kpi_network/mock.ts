@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { NetworkKpiStrategyResponse } from '../../../../common/search_strategy';
 import type { StatItems } from '../../../common/components/stat_items';
 import { kpiUniquePrivateIpsAreaLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_private_ips_area';
 import { kpiUniquePrivateIpsBarLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_private_ips_bar';
@@ -12,6 +13,35 @@ import { kpiUniquePrivateIpsDestinationMetricLensAttributes } from '../../../com
 import { kpiUniquePrivateIpsSourceMetricLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_private_ips_source_metric';
 
 export const mockNarrowDateRange = jest.fn();
+
+export const mockData: NetworkKpiStrategyResponse = {
+  networkEvents: 16,
+  uniqueFlowId: 10277307,
+  uniqueSourcePrivateIps: 383,
+  uniqueSourcePrivateIpsHistogram: [
+    {
+      x: new Date('2019-02-09T16:00:00.000Z').valueOf(),
+      y: 8,
+    },
+    {
+      x: new Date('2019-02-09T19:00:00.000Z').valueOf(),
+      y: 0,
+    },
+  ],
+  uniqueDestinationPrivateIps: 18,
+  uniqueDestinationPrivateIpsHistogram: [
+    {
+      x: new Date('2019-02-09T16:00:00.000Z').valueOf(),
+      y: 8,
+    },
+    {
+      x: new Date('2019-02-09T19:00:00.000Z').valueOf(),
+      y: 0,
+    },
+  ],
+  dnsQueries: 278,
+  tlsHandshakes: 10000,
+};
 
 const mockMappingItems: StatItems = {
   key: 'UniqueIps',
