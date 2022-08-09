@@ -36,7 +36,7 @@ export const AssertFileTime: Task = {
           }
 
           throw new Error(
-            'Archive errors occur with file stats with timestamps before 1980.  The following files have errors:' +
+            'Archive errors occur with file times before 1980.  The following files have errors:' +
               '\n - ' +
               invalidDates.join('\n - ')
           );
