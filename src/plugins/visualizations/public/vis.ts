@@ -26,7 +26,7 @@ import {
   getSavedSearch,
   SavedSearch,
   throwErrorOnSavedSearchUrlConflict,
-} from '@kbn/discover-plugin/public';
+} from '@kbn/saved-search-plugin/public';
 import { PersistedState } from './persisted_state';
 import {
   getTypes,

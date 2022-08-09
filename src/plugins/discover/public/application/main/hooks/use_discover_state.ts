@@ -16,10 +16,10 @@ import {
   AggregateQuery,
   Query,
 } from '@kbn/es-query';
+import { SavedSearch, getSavedSearch } from '@kbn/saved-search-plugin/public';
 import { getState } from '../services/discover_state';
 import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../build_services';
-import { SavedSearch, getSavedSearch } from '../../../services/saved_searches';
 import { loadDataView } from '../utils/resolve_data_view';
 import { useSavedSearch as useSavedSearchData, DataDocumentsMsg } from './use_saved_search';
 import {

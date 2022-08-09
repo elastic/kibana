@@ -14,7 +14,7 @@ import {
 } from './discover_state';
 import { createBrowserHistory, History } from 'history';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import type { SavedSearch } from '../../../services/saved_searches';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../common';
 
 let history: History;

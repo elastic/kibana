@@ -8,13 +8,13 @@
 import { useMemo, useEffect } from 'react';
 import { History } from 'history';
 import { noSearchSessionStorageCapabilityMessage } from '@kbn/data-plugin/public';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { DiscoverSearchSessionManager } from '../services/discover_search_session';
 import {
   createSearchSessionRestorationDataProvider,
   GetStateReturn,
 } from '../services/discover_state';
 import { DiscoverServices } from '../../../build_services';
-import { SavedSearch } from '../../../services/saved_searches';
 
 export function useSearchSession({
   services,

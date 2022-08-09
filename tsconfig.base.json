@@ -145,6 +145,8 @@
       "@kbn/saved-objects-tagging-oss-plugin/*": ["src/plugins/saved_objects_tagging_oss/*"],
       "@kbn/saved-objects-plugin": ["src/plugins/saved_objects"],
       "@kbn/saved-objects-plugin/*": ["src/plugins/saved_objects/*"],
+      "@kbn/saved-search-plugin": ["src/plugins/saved_search"],
+      "@kbn/saved-search-plugin/*": ["src/plugins/saved_search/*"],
       "@kbn/screenshot-mode-plugin": ["src/plugins/screenshot_mode"],
       "@kbn/screenshot-mode-plugin/*": ["src/plugins/screenshot_mode/*"],
       "@kbn/share-plugin": ["src/plugins/share"],
