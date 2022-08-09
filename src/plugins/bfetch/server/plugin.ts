@@ -116,7 +116,7 @@ export class BfetchServerPlugin
       router: ReturnType<CoreSetup['http']['createRouter']>;
       logger: Logger;
     }): BfetchServerSetup['addStreamingResponseRoute'] =>
-    (path, handler, method = 'PUT', pluginRouter) => {
+    (path, handler, method = 'POST', pluginRouter) => {
       const httpRouter = pluginRouter || router;
       const routeDefinition = {
         path: `/${removeLeadingSlash(path)}`,

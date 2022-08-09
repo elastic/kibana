@@ -32,41 +32,46 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsStreamingRouteFactory =
     syntheticsMonitorClient,
     subject,
   }): Promise<any> => {
-    const monitors = (request.body?.monitors as ProjectBrowserMonitor[]) || [];
-    const spaceId = server.spaces.spacesService.getSpaceId(request);
-    const { keep_stale: keepStale, project: projectId } = request.body || {};
-    const { publicLocations, privateLocations } = await getAllLocations(
-      server,
-      syntheticsMonitorClient,
-      savedObjectsClient
-    );
-    const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
+    try {
+      const monitors = (request.body?.monitors as ProjectBrowserMonitor[]) || [];
+      const spaceId = server.spaces.spacesService.getSpaceId(request);
+      const { keep_stale: keepStale, project: projectId } = request.body || {};
+      const { publicLocations, privateLocations } = await getAllLocations(
+        server,
+        syntheticsMonitorClient,
+        savedObjectsClient
+      );
+      const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
 
-    const pushMonitorFormatter = new ProjectMonitorFormatter({
-      projectId,
-      spaceId,
-      keepStale,
-      locations: publicLocations,
-      privateLocations,
-      encryptedSavedObjectsClient,
-      savedObjectsClient,
-      monitors,
-      server,
-      syntheticsMonitorClient,
-      request,
-      subject,
-    });
+      const pushMonitorFormatter = new ProjectMonitorFormatter({
+        projectId,
+        spaceId,
+        keepStale,
+        locations: publicLocations,
+        privateLocations,
+        encryptedSavedObjectsClient,
+        savedObjectsClient,
+        monitors,
+        server,
+        syntheticsMonitorClient,
+        request,
+        subject,
+      });
 
-    await pushMonitorFormatter.configureAllProjectMonitors();
+      await pushMonitorFormatter.configureAllProjectMonitors();
 
-    subject?.next({
-      createdMonitors: pushMonitorFormatter.createdMonitors,
-      updatedMonitors: pushMonitorFormatter.updatedMonitors,
-      staleMonitors: pushMonitorFormatter.staleMonitors,
-      deletedMonitors: pushMonitorFormatter.deletedMonitors,
-      failedMonitors: pushMonitorFormatter.failedMonitors,
-      failedStaleMonitors: pushMonitorFormatter.failedStaleMonitors,
-    });
-    subject?.complete();
+      subject?.next({
+        createdMonitors: pushMonitorFormatter.createdMonitors,
+        updatedMonitors: pushMonitorFormatter.updatedMonitors,
+        staleMonitors: pushMonitorFormatter.staleMonitors,
+        deletedMonitors: pushMonitorFormatter.deletedMonitors,
+        failedMonitors: pushMonitorFormatter.failedMonitors,
+        failedStaleMonitors: pushMonitorFormatter.failedStaleMonitors,
+      });
+    } catch (error) {
+      subject?.error(error);
+    } finally {
+      subject?.complete();
+    }
   },
 });
