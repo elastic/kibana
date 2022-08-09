@@ -7,7 +7,7 @@
  */
 
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
-import { ReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
+import { ReduxEmbeddableTools, ReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Subscription } from 'rxjs';
@@ -16,7 +16,9 @@ import { TimeSliderControlEmbeddableInput } from '../../../common/control_types/
 import { pluginServices } from '../../services';
 import { ControlsSettingsService } from '../../services/settings';
 import { ControlOutput } from '../../types';
-import { TimeSlider as TimeSliderComponent } from './time_slider';
+import { TimeSliderComponent } from './time_slider_component';
+import { timeSliderReducers } from './time_slider_reducers';
+import { TimeSliderReduxState } from './types';
 
 export class TimeSliderControlEmbeddable extends Embeddable<
   TimeSliderControlEmbeddableInput,
@@ -30,6 +32,11 @@ export class TimeSliderControlEmbeddable extends Embeddable<
 
   private getDateFormat: ControlsSettingsService['getDateFormat'];
   private getTimezone: ControlsSettingsService['getTimezone'];
+
+  private reduxEmbeddableTools: ReduxEmbeddableTools<
+    TimeSliderReduxState,
+    typeof timeSliderReducers
+  >;
 
   constructor(
     reduxEmbeddablePackage: ReduxEmbeddablePackage,
@@ -46,8 +53,21 @@ export class TimeSliderControlEmbeddable extends Embeddable<
     this.getDateFormat = getDateFormat;
     this.getTimezone = getTimezone;
 
+    this.reduxEmbeddableTools = reduxEmbeddablePackage.createTools<
+      TimeSliderReduxState,
+      typeof timeSliderReducers
+    >({
+      embeddable: this,
+      reducers: timeSliderReducers,
+    });
+
     this.initialize();
   }
+
+  public destroy = () => {
+    super.destroy();
+    this.reduxEmbeddableTools.cleanup();
+  };
 
   private initialize() {
     return;
@@ -63,8 +83,12 @@ export class TimeSliderControlEmbeddable extends Embeddable<
     }
     this.node = node;
 
+    const { Wrapper: TimeSliderControlReduxWrapper } = this.reduxEmbeddableTools;
+
     ReactDOM.render(
-      <TimeSliderComponent dateFormat={this.getDateFormat()} timezone={this.getTimezone()} />,
+      <TimeSliderControlReduxWrapper>
+        <TimeSliderComponent dateFormat={this.getDateFormat()} timezone={this.getTimezone()} />
+      </TimeSliderControlReduxWrapper>,
       node
     );
   };

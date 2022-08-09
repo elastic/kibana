@@ -24,6 +24,7 @@ import { ControlsService } from './services/controls';
 export interface CommonControlOutput {
   filters?: Filter[];
   dataViewId?: string;
+  timeslice?: [number | null, number | null];
 }
 
 export type ControlOutput = EmbeddableOutput & CommonControlOutput;
