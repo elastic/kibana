@@ -6,12 +6,13 @@
  */
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
-import CspCreatePolicyExtension from './create_policy_extension';
-import { eksVars } from './eks_form';
-import Chance from 'chance';
+import CspEditPolicyExtension from './policy_extension_edit';
 import { TestProvider } from '../../test/test_provider';
-import userEvent from '@testing-library/user-event';
-import { getCspNewPolicyMock } from './mocks';
+import { getCspNewPolicyMock, getCspPolicyMock } from './mocks';
+import Chance from 'chance';
+import { eksVars } from './eks_form';
+
+const chance = new Chance();
 
 // ensures that fields appropriately match to their label
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
@@ -25,14 +26,12 @@ jest.mock('@elastic/eui/lib/services/accessibility', () => ({
   useGeneratedHtmlId: () => `id-${Math.random()}`,
 }));
 
-const chance = new Chance();
-
-describe('<CspCreatePolicyExtension />', () => {
+describe('<CspEditPolicyExtension />', () => {
   const onChange = jest.fn();
 
-  const WrappedComponent = ({ newPolicy = getCspNewPolicyMock() }) => (
+  const WrappedComponent = ({ policy = getCspPolicyMock(), newPolicy = getCspNewPolicyMock() }) => (
     <TestProvider>
-      <CspCreatePolicyExtension newPolicy={newPolicy} onChange={onChange} />
+      <CspEditPolicyExtension policy={policy} newPolicy={newPolicy} onChange={onChange} />
     </TestProvider>
   );
 
@@ -40,14 +39,14 @@ describe('<CspCreatePolicyExtension />', () => {
     onChange.mockClear();
   });
 
-  it('renders non-disabled <DeploymentTypeSelect/>', () => {
+  it('renders disabled <DeploymentTypeSelect/>', () => {
     const { getByLabelText } = render(<WrappedComponent />);
     const input = getByLabelText('Kubernetes Deployment') as HTMLInputElement;
     expect(input).toBeInTheDocument();
-    expect(input).not.toBeDisabled();
+    expect(input).toBeDisabled();
   });
 
-  it('renders editable <EksForm/>', () => {
+  it('renders non-disabled <EksForm/>', () => {
     const { getByLabelText } = render(
       <WrappedComponent newPolicy={getCspNewPolicyMock('cis_eks')} />
     );
@@ -55,18 +54,6 @@ describe('<CspCreatePolicyExtension />', () => {
     eksVars.forEach((eksVar) => {
       expect(getByLabelText(eksVar.label)).toBeInTheDocument();
       expect(getByLabelText(eksVar.label)).not.toBeDisabled();
-    });
-  });
-
-  it('handles updating deployment type', () => {
-    const { getByLabelText } = render(<WrappedComponent />);
-    const input = getByLabelText('Kubernetes Deployment') as HTMLInputElement;
-
-    userEvent.type(input, 'EKS (Elastic Kubernetes Service){enter}');
-
-    expect(onChange).toBeCalledWith({
-      isValid: true,
-      updatedPolicy: getCspNewPolicyMock('cis_eks'),
     });
   });
 

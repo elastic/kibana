@@ -6,7 +6,7 @@
  */
 import type { NewPackagePolicy, NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
 import { CLOUDBEAT_EKS, CLOUDBEAT_VANILLA } from '../../../common/constants';
-import { InputType } from './deployment_type_select';
+import type { InputType } from './deployment_type_select';
 
 export const isEksInput = (input: NewPackagePolicyInput) => input.type === CLOUDBEAT_EKS;
 

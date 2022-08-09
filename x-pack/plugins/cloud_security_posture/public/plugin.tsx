@@ -18,9 +18,9 @@ import type {
 } from './types';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
 
-const LazyCspEditPolicy = lazy(() => import('./components/fleet_extensions/edit_policy_extension'));
+const LazyCspEditPolicy = lazy(() => import('./components/fleet_extensions/policy_extension_edit'));
 const LazyCspCreatePolicy = lazy(
-  () => import('./components/fleet_extensions/create_policy_extension')
+  () => import('./components/fleet_extensions/policy_extension_create')
 );
 
 const CspRouterLazy = lazy(() => import('./application/csp_router'));

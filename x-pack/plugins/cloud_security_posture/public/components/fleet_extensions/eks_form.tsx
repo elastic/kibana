@@ -5,14 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import {
-  EuiFormRow,
-  EuiFieldText,
-  EuiDescribedFormGroup,
-  EuiLink,
-  EuiText,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiFormRow, EuiFieldText, EuiDescribedFormGroup, EuiText, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
 import { i18n } from '@kbn/i18n';
@@ -81,23 +74,6 @@ const EksForm = ({ onChange, inputs }: Props) => {
 
   const eksFormDescription = (
     <>
-      <FormattedMessage
-        id="xpack.csp.createPackagePolicy.eksIntegrationSettingsSection.awsCredentialsDescription"
-        defaultMessage="In order to run some of the rules in the benchmark, we need elevated access. You can follow {link} to generate the necessary credentials."
-        values={{
-          // TODO: add link
-          link: (
-            <EuiLink href="#">
-              <FormattedMessage
-                id="xpack.csp.createPackagePolicy.eksIntegrationSettingsSection.awsCredentialsInstructionsLink"
-                defaultMessage="these instructions"
-              />
-            </EuiLink>
-          ),
-        }}
-      />
-      <br />
-      <br />
       <FormattedMessage
         id="xpack.csp.createPackagePolicy.eksIntegrationSettingsSection.awsCredentialsNote"
         defaultMessage="If you choose not to provide credentials, only a subset of the benchmark rules will be evaluated against your cluster(s)."
