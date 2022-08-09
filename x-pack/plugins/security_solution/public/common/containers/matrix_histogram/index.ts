@@ -104,7 +104,7 @@ export const useMatrixHistogram = ({
     buckets: [],
   });
 
-  const hostsSearch = useCallback(
+  const search = useCallback(
     (request: MatrixHistogramRequestOptions) => {
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
@@ -193,13 +193,13 @@ export const useMatrixHistogram = ({
   useEffect(() => {
     // We want to search if it is not skipped, stackByField ends with ip and include missing data
     if (!skip) {
-      hostsSearch(matrixHistogramRequest);
+      search(matrixHistogramRequest);
     }
     return () => {
       searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
     };
-  }, [matrixHistogramRequest, hostsSearch, skip]);
+  }, [matrixHistogramRequest, search, skip]);
 
   useEffect(() => {
     if (skip) {
@@ -211,7 +211,7 @@ export const useMatrixHistogram = ({
 
   const runMatrixHistogramSearch = useCallback(
     (to: string, from: string) => {
-      hostsSearch({
+      search({
         ...matrixHistogramRequest,
         timerange: {
           interval: '12h',
@@ -220,7 +220,7 @@ export const useMatrixHistogram = ({
         },
       });
     },
-    [matrixHistogramRequest, hostsSearch]
+    [matrixHistogramRequest, search]
   );
 
   return [loading, matrixHistogramResponse, runMatrixHistogramSearch];
