@@ -48,9 +48,12 @@ export async function cypressStart(
 
   const esRequestTimeout = config.get('timeouts.esRequestTimeout');
   const archiveName = 'apm_mappings_only_8.0.0';
+  const metricsArchiveName = 'metrics_8.0.0';
 
   console.log(`Creating APM mappings`);
   await esArchiverLoad(archiveName);
+  console.log(`Creating Metrics mappings`);
+  await esArchiverLoad(metricsArchiveName);
 
   const spec = argv.grep as string | undefined;
   const res = await cypressExecution({
@@ -66,6 +69,8 @@ export async function cypressStart(
 
   console.log('Removing APM mappings');
   await esArchiverUnload(archiveName);
+  console.log('Removing Metrics mappings');
+  await esArchiverUnload(metricsArchiveName);
 
   return res;
 }
