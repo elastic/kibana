@@ -8,7 +8,7 @@
 
 import { IEsSearchResponse, ISearchSource, QueryStart } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { TimeRange } from '@kbn/es-query';
+import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { Observable, pipe } from 'rxjs';
 import { LogExplorerPosition, SortCriteria } from '../types';
 import { getCursorFromPosition, getSuccessorPosition } from '../utils/cursor';
@@ -16,9 +16,10 @@ import { invertSortCriteria, normalizeSortCriteriaForDataView } from '../utils/s
 import { copyWithCommonParameters } from './common';
 
 export interface FetchEntriesBeforeParameters {
+  beforeEndPosition: LogExplorerPosition; // inclusive end of the "past" interval
   chunkSize: number;
-  // inclusive end of the "past" interval
-  beforeEndPosition: LogExplorerPosition;
+  filters: Filter[];
+  query: Query | AggregateQuery | undefined;
   sortCriteria: SortCriteria;
   timeRange: TimeRange;
 }
@@ -26,7 +27,9 @@ export interface FetchEntriesBeforeParameters {
 export const fetchEntriesBefore =
   ({
     dataView,
-    query,
+    query: {
+      timefilter: { timefilter },
+    },
     searchSource,
   }: {
     dataView: DataView;
@@ -34,16 +37,18 @@ export const fetchEntriesBefore =
     searchSource: ISearchSource;
   }) =>
   ({
-    chunkSize,
     beforeEndPosition,
+    chunkSize,
+    filters,
+    query,
     sortCriteria,
     timeRange,
   }: FetchEntriesBeforeParameters): Observable<IEsSearchResponse> => {
-    const timeRangeFilter = query.timefilter.timefilter.createFilter(dataView, timeRange);
+    const timeRangeFilter = timefilter.createFilter(dataView, timeRange);
 
     // TODO: create and use point-in-time, not currently possible from client?
     const response$ = pipe(
-      copyWithCommonParameters({ chunkSize, timeRangeFilter }),
+      copyWithCommonParameters({ chunkSize, filters, query, timeRangeFilter }),
       applyBeforeParameters({ dataView, beforeEndPosition, sortCriteria })
     )(searchSource).fetch$();
 

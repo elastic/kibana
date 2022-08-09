@@ -7,6 +7,7 @@
  */
 
 import { assign, createMachine, InterpreterFrom } from 'xstate';
+import { updateFilters } from './filters_actions';
 import { appendNewBottomChunk, updateChunksFromLoadAfter } from './load_after_service';
 import { updateChunksFromLoadAround } from './load_around_service';
 import { prependNewTopChunk, updateChunksFromLoadBefore } from './load_before_service';
@@ -355,6 +356,7 @@ export const dataAccessStateMachine = createMachine<
       updateChunksFromLoadBefore,
       updateChunksFromLoadAfter,
       updateChunksFromLoadTail,
+      updateFilters,
       updateTimeRange,
       prependNewTopChunk,
       appendNewBottomChunk,

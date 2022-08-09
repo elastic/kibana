@@ -7,19 +7,31 @@
  */
 
 import { ISearchSource } from '@kbn/data-plugin/public';
-import { MatchAllRangeFilter, RangeFilter, ScriptedRangeFilter } from '@kbn/es-query';
+import {
+  AggregateQuery,
+  Filter,
+  MatchAllRangeFilter,
+  Query,
+  RangeFilter,
+  ScriptedRangeFilter,
+} from '@kbn/es-query';
 
 export const copyWithCommonParameters =
   ({
     chunkSize,
+    filters,
+    query,
     timeRangeFilter,
   }: {
     chunkSize: number;
+    filters: Filter[];
+    query: Query | AggregateQuery | undefined;
     timeRangeFilter: RangeFilter | ScriptedRangeFilter | MatchAllRangeFilter | undefined;
   }) =>
   (searchSource: ISearchSource) =>
     searchSource
       .createCopy()
-      .setField('filter', timeRangeFilter)
+      .setField('filter', [...(timeRangeFilter != null ? [timeRangeFilter] : []), ...filters])
       .setField('size', chunkSize)
-      .setField('fields', ['*']); // NOTE: Requests all fields to help assist with populating "Available fields". This can likely be changed after the Lens / Discover field list consolidation efforts.
+      .setField('fields', ['*']) // NOTE: Requests all fields to help assist with populating "Available fields". This can likely be changed after the Lens / Discover field list consolidation efforts.
+      .setField('query', query);

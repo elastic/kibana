@@ -42,18 +42,24 @@ export type LoadBeforeEvent =
 
 export const loadBefore = ({
   dataView,
-  query,
+  query: queryService,
   searchSource,
 }: {
   dataView: DataView;
   query: QueryStart;
   searchSource: ISearchSource;
 }) => {
-  const boundFetchEntriesBefore = fetchEntriesBefore({ dataView, query, searchSource });
+  const boundFetchEntriesBefore = fetchEntriesBefore({
+    dataView,
+    query: queryService,
+    searchSource,
+  });
 
   return (context: LogExplorerContext): Observable<LoadBeforeEvent> => {
     const {
       configuration: { chunkSize },
+      filters,
+      query,
       timeRange,
       topChunk,
     } = context;
@@ -76,6 +82,8 @@ export const loadBefore = ({
         ['_doc', 'asc'], // _shard_doc is only available when used inside a PIT
       ],
       timeRange,
+      filters,
+      query,
     };
 
     const eventRequestParameters: LoadBeforeParameters = {

@@ -7,7 +7,7 @@
  */
 
 import { DataView } from '@kbn/data-views-plugin/public';
-import { TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { LogExplorerChunk, LogExplorerPosition } from '../../types';
 import { LoadAfterEvent } from './load_after_service';
 import { LoadAroundEvent } from './load_around_service';
@@ -22,10 +22,14 @@ export interface LogExplorerContext {
   dataView: DataView;
   position: LogExplorerPosition;
   timeRange: TimeRange;
+  filters: Filter[];
+  query: LogExplorerQuery | undefined;
 
   topChunk: LogExplorerChunk;
   bottomChunk: LogExplorerChunk;
 }
+
+export type LogExplorerQuery = Query | AggregateQuery;
 
 export type LogExplorerLoadedChunkState = 'empty' | 'loaded' | 'failed';
 
@@ -56,6 +60,8 @@ export type LogExplorerExternalEvent =
     }
   | {
       type: 'filtersChanged';
+      filters: Filter[];
+      query: LogExplorerQuery;
     }
   | {
       type: 'dataViewChanged';

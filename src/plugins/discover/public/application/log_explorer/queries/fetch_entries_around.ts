@@ -8,7 +8,7 @@
 
 import { IEsSearchResponse, ISearchSource, QueryStart } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { TimeRange } from '@kbn/es-query';
+import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { forkJoin, Observable } from 'rxjs';
 import { LogExplorerPosition, SortCriteria } from '../types';
 import { copyWithCommonParameters } from './common';
@@ -17,18 +17,20 @@ import { applyBeforeParameters } from './fetch_entries_before';
 
 export interface FetchEntriesAroundParameters {
   chunkSize: number;
-  // inclusive start of the "future" interval
-  afterStartPosition: LogExplorerPosition;
-  // inclusive end of the "past" interval
-  beforeEndPosition: LogExplorerPosition;
+  afterStartPosition: LogExplorerPosition; // inclusive start of the "future" interval
+  beforeEndPosition: LogExplorerPosition; // inclusive end of the "past" interval
   sortCriteria: SortCriteria;
   timeRange: TimeRange;
+  filters: Filter[];
+  query: Query | AggregateQuery | undefined;
 }
 
 export const fetchEntriesAround =
   ({
     dataView,
-    query,
+    query: {
+      timefilter: { timefilter },
+    },
     searchSource,
   }: {
     dataView: DataView;
@@ -36,19 +38,23 @@ export const fetchEntriesAround =
     searchSource: ISearchSource;
   }) =>
   ({
-    chunkSize,
     afterStartPosition,
     beforeEndPosition,
+    chunkSize,
+    filters,
+    query,
     sortCriteria,
     timeRange,
   }: FetchEntriesAroundParameters): Observable<{
     beforeResponse: IEsSearchResponse;
     afterResponse: IEsSearchResponse;
   }> => {
-    const timeRangeFilter = query.timefilter.timefilter.createFilter(dataView, timeRange);
+    const timeRangeFilter = timefilter.createFilter(dataView, timeRange);
 
     const commonSearchSource = copyWithCommonParameters({
       chunkSize,
+      filters,
+      query,
       timeRangeFilter,
     })(searchSource);
 

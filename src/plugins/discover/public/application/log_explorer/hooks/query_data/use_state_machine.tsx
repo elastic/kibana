@@ -13,6 +13,7 @@ import { useInterpret } from '@xstate/react';
 import createContainer from 'constate';
 import moment from 'moment';
 import { useMemo } from 'react';
+import { merge } from 'rxjs';
 import {
   dataAccessStateMachine,
   loadAfter,
@@ -35,6 +36,8 @@ export const useStateMachineService = ({
 }) => {
   const {
     timefilter: { timefilter },
+    filterManager,
+    queryString,
   } = query;
   const centerRowIndex = useMemo(() => Math.floor(virtualRowCount / 2), [virtualRowCount]);
 
@@ -49,6 +52,8 @@ export const useStateMachineService = ({
         },
         dataView,
         timeRange: initialTimeRange,
+        filters: filterManager.getFilters(),
+        query: queryString.getQuery(),
         position: {
           timestamp: getMiddleOfTimeRange(initialTimeRange),
           tiebreaker: 0,
@@ -121,6 +126,26 @@ export const useStateMachineService = ({
             type: 'startTailing',
           });
         }
+      },
+    }
+  );
+
+  // react to filter and query changes
+  useSubscription(
+    useMemo(
+      () => merge(filterManager.getUpdates$(), queryString.getUpdates$()),
+      [filterManager, queryString]
+    ),
+    {
+      next: () => {
+        const filters = filterManager.getFilters();
+        const esQuery = queryString.getQuery();
+
+        dataAccessService.send({
+          type: 'filtersChanged',
+          filters,
+          query: esQuery,
+        });
       },
     }
   );
