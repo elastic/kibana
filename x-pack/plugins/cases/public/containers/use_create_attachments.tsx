@@ -6,12 +6,12 @@
  */
 
 import { useReducer, useCallback, useRef, useEffect } from 'react';
-import { BulkCreateCommentRequest } from '../../common/api';
 
 import { createAttachments } from './api';
 import * as i18n from './translations';
 import { Case } from './types';
 import { useToasts } from '../common/lib/kibana';
+import { CaseAttachmentsWithoutOwner } from '../types';
 
 interface NewCommentState {
   isLoading: boolean;
@@ -43,7 +43,8 @@ const dataFetchReducer = (state: NewCommentState, action: Action): NewCommentSta
 
 export interface PostComment {
   caseId: string;
-  data: BulkCreateCommentRequest;
+  caseOwner: string;
+  data: CaseAttachmentsWithoutOwner;
   updateCase?: (newCase: Case) => void;
   throwOnError?: boolean;
 }
@@ -61,14 +62,15 @@ export const useCreateAttachments = (): UseCreateAttachments => {
   const abortCtrlRef = useRef(new AbortController());
 
   const fetch = useCallback(
-    async ({ caseId, data, updateCase, throwOnError }: PostComment) => {
+    async ({ caseId, caseOwner, data, updateCase, throwOnError }: PostComment) => {
       try {
         isCancelledRef.current = false;
         abortCtrlRef.current.abort();
         abortCtrlRef.current = new AbortController();
         dispatch({ type: 'FETCH_INIT' });
 
-        const response = await createAttachments(data, caseId, abortCtrlRef.current.signal);
+        const attachments = data.map((attachment) => ({ ...attachment, owner: caseOwner }));
+        const response = await createAttachments(attachments, caseId, abortCtrlRef.current.signal);
 
         if (!isCancelledRef.current) {
           dispatch({ type: 'FETCH_SUCCESS' });

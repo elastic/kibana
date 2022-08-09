@@ -48,7 +48,7 @@ export const useTreeView = ({ globalFilter, indexPattern }: UseTreeViewProps) =>
   }, [filterQueryWithTimeRange]);
 
   useEffect(() => {
-    if (!!treeNavSelection[KubernetesCollection.cluster]) {
+    if (!!treeNavSelection[KubernetesCollection.clusterId]) {
       setHasSelection(true);
       setTreeNavSelection(treeNavSelection);
     }
