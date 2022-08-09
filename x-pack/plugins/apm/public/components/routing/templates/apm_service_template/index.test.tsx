@@ -42,7 +42,7 @@ describe('APM service template', () => {
     });
   });
   describe('isMetricsJVMsTabHidden', () => {
-    describe('hides JVMs tab', () => {
+    describe('hides metrics JVMs tab', () => {
       [
         { agentName: undefined },
         { agentName: 'ruby', runtimeName: 'ruby' },
@@ -59,7 +59,7 @@ describe('APM service template', () => {
         });
       });
     });
-    describe('shows JVMs tab', () => {
+    describe('shows metrics JVMs tab', () => {
       [
         { agentName: 'java' },
         { agentName: 'opentelemetry/java' },
