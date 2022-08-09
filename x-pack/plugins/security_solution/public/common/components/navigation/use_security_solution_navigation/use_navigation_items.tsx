@@ -113,7 +113,9 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
                 ...(navTabs[SecurityPageName.users] != null
                   ? [navTabs[SecurityPageName.users]]
                   : []),
-                navTabs[SecurityPageName.threatIntelligence],
+                ...(navTabs[SecurityPageName.threatIntelligence] != null
+                  ? [navTabs[SecurityPageName.threatIntelligence]]
+                  : []),
               ],
             },
             {
