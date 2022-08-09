@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-export { getSnappedWindowParameters, getWindowParameters } from './get_window_parameters';
-export type { WindowParameters } from './get_window_parameters';
-export { streamFactory } from './stream_factory';
-export { useFetchStream } from './use_fetch_stream';
+export { getSnappedWindowParameters, getWindowParameters } from './src/get_window_parameters';
+export type { WindowParameters } from './src/get_window_parameters';
+export { streamFactory } from './src/stream_factory';
+export { useFetchStream } from './src/use_fetch_stream';
 export type {
   UseFetchStreamCustomReducerParams,
   UseFetchStreamParamsDefault,
-} from './use_fetch_stream';
+} from './src/use_fetch_stream';

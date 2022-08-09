@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { isPopulatedObject } from './is_populated_object';
+export { stringHash } from './src/string_hash';

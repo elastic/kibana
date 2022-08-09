@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { DualBrush, DualBrushAnnotation } from './dual_brush';
-export { ProgressControls } from './progress_controls';
+export { isPopulatedObject } from './src/is_populated_object';
