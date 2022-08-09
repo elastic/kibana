@@ -24,18 +24,18 @@ import type {
   UserContentCommonSchema,
 } from '../table_list_view';
 
-interface Props<T extends UserContentCommonSchema> {
+type State<T extends UserContentCommonSchema> = Pick<
+  TableListViewState<T>,
+  'items' | 'selectedIds' | 'searchQuery' | 'tableSort' | 'pagination'
+>;
+
+interface Props<T extends UserContentCommonSchema> extends State<T> {
   dispatch: Dispatch<Action<T>>;
   entityName: string;
   entityNamePlural: string;
   isFetchingItems: boolean;
   tableCaption: string;
-  items: TableListViewState<T>['items'];
-  selectedIds: TableListViewState<T>['selectedIds'];
-  searchQuery: TableListViewState<T>['searchQuery'];
   tableColumns: Array<EuiBasicTableColumn<T>>;
-  tableSort: TableListViewState<T>['tableSort'];
-  pagination: TableListViewState<T>['pagination'];
   deleteItems: TableListViewProps<T>['deleteItems'];
 }
 
