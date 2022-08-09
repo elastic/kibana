@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewsContract, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { ISearchSource } from '@kbn/data-plugin/public';
 import type { IUiSettingsClient, SavedObject, ToastsStart } from '@kbn/core/public';
 export type DataViewSavedObject = SavedObject & { title: string };
@@ -75,18 +75,27 @@ export function getDataViewId(
  * Function to load the given data view by id, providing a fallback if it doesn't exist
  */
 export async function loadDataView(
-  id: string,
+  id: string | DataViewSpec,
   dataViews: DataViewsContract,
   config: IUiSettingsClient
 ): Promise<DataViewData> {
   const dataViewList = (await dataViews.getCache()) as unknown as DataViewSavedObject[];
+  if (typeof id === 'string') {
+    const actualId = getDataViewId(id, dataViewList, config.get('defaultIndex'));
+    return {
+      list: dataViewList || [],
+      loaded: await dataViews.get(actualId),
+      stateVal: id,
+      stateValFound: !!id && actualId === id,
+    };
+  }
+  const dataView = await dataViews.create(id);
 
-  const actualId = getDataViewId(id, dataViewList, config.get('defaultIndex'));
   return {
     list: dataViewList || [],
-    loaded: await dataViews.get(actualId),
-    stateVal: id,
-    stateValFound: !!id && actualId === id,
+    loaded: dataView,
+    stateVal: dataView.id!,
+    stateValFound: true,
   };
 }
 

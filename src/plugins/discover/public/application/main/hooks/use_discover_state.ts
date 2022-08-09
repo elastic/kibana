@@ -9,7 +9,7 @@ import { useMemo, useEffect, useState, useCallback } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import { isEqual } from 'lodash';
 import { History } from 'history';
-import { DataViewType } from '@kbn/data-views-plugin/public';
+import { DataViewType, DataView } from '@kbn/data-views-plugin/public';
 import {
   isOfAggregateQueryType,
   getIndexPatternFromSQLQuery,
@@ -150,8 +150,14 @@ export function useDiscoverState({
          *  That's because appState is updated before savedSearchData$
          *  The following line of code catches this, but should be improved
          */
-        const nextDataView = await loadDataView(nextState.index, dataViews, config);
-        savedSearch.searchSource.setField('index', nextDataView.loaded);
+        if (typeof nextState.index === 'string') {
+          const nextDataView = await loadDataView(nextState.index, dataViews, config);
+          savedSearch.searchSource.setField('index', nextDataView.loaded);
+        } else {
+          const { runtimeFieldMap, ...nextStateIndex } = nextState.index;
+          const nextDataView = await dataViews.create(nextStateIndex);
+          savedSearch.searchSource.setField('index', nextDataView);
+        }
 
         reset();
       }
@@ -203,8 +209,8 @@ export function useDiscoverState({
    * Function triggered when user changes data view in the sidebar
    */
   const onChangeDataView = useCallback(
-    async (id: string) => {
-      const nextDataView = await dataViews.get(id);
+    async (id: string | DataView) => {
+      const nextDataView = typeof id === 'string' ? await dataViews.get(id) : id;
       if (nextDataView && dataView) {
         const nextAppState = getDataViewAppState(
           dataView,

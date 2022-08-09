@@ -57,7 +57,7 @@ export function getDataViewAppState(
   }
 
   return {
-    index: nextDataView.id,
+    index: nextDataView.isPersisted() ? nextDataView.id : nextDataView.toSpec(),
     columns,
     sort: nextSort,
   };

@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
-import { DataViewType } from '@kbn/data-views-plugin/public';
+import { DataViewType, type DataView } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { ENABLE_SQL } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -31,7 +31,7 @@ export type DiscoverTopNavProps = Pick<
   ) => void;
   stateContainer: GetStateReturn;
   resetSavedSearch: () => void;
-  onChangeDataView: (dataView: string) => void;
+  onChangeDataView: (dataView: string | DataView) => void;
   isPlainRecord: boolean;
   textBasedLanguageModeErrors?: Error;
   onFieldEdited: () => void;
@@ -125,9 +125,10 @@ export const DiscoverTopNav = ({
             closeDataViewEditor.current = dataViewEditor.openEditor({
               onSave: async (dataViewToSave) => {
                 if (dataViewToSave.id) {
-                  onChangeDataView(dataViewToSave.id);
+                  onChangeDataView(dataViewToSave);
                 }
               },
+              allowAdHocDataView: true,
             });
           }
         : undefined,

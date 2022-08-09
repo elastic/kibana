@@ -13,6 +13,7 @@ import {
   DataViewAttributes,
   DataViewSavedObjectConflictError,
 } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { redirectWhenMissing } from '@kbn/kibana-utils-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import {
@@ -111,69 +112,73 @@ export function DiscoverMainRoute(props: Props) {
     [config, data.dataViews, history, isDev, toastNotifications]
   );
 
-  const loadSavedSearch = useCallback(async () => {
-    try {
-      const currentSavedSearch = await getSavedSearch(id, {
-        search: services.data.search,
-        savedObjectsClient: core.savedObjects.client,
-        spaces: services.spaces,
-      });
+  const loadSavedSearch = useCallback(
+    async (dataview?: DataView) => {
+      try {
+        const currentSavedSearch = await getSavedSearch(id, {
+          search: services.data.search,
+          savedObjectsClient: core.savedObjects.client,
+          spaces: services.spaces,
+        });
 
-      const currentDataView = await loadDefaultOrCurrentDataView(currentSavedSearch.searchSource);
+        const currentDataView =
+          dataview ?? (await loadDefaultOrCurrentDataView(currentSavedSearch.searchSource));
 
-      if (!currentDataView) {
-        return;
-      }
+        if (!currentDataView) {
+          return;
+        }
 
-      if (!currentSavedSearch.searchSource.getField('index')) {
-        currentSavedSearch.searchSource.setField('index', currentDataView);
-      }
+        if (!currentSavedSearch.searchSource.getField('index')) {
+          currentSavedSearch.searchSource.setField('index', currentDataView);
+        }
 
-      setSavedSearch(currentSavedSearch);
+        setSavedSearch(currentSavedSearch);
 
-      if (currentSavedSearch.id) {
-        chrome.recentlyAccessed.add(
-          getSavedSearchFullPathUrl(currentSavedSearch.id),
-          currentSavedSearch.title ?? '',
-          currentSavedSearch.id
-        );
-      }
-    } catch (e) {
-      if (e instanceof DataViewSavedObjectConflictError) {
-        setError(e);
-      } else {
-        redirectWhenMissing({
-          history,
-          navigateToApp: core.application.navigateToApp,
-          basePath,
-          mapping: {
-            search: '/',
-            'index-pattern': {
-              app: 'management',
-              path: `kibana/objects/savedSearches/${id}`,
+        if (currentSavedSearch.id) {
+          chrome.recentlyAccessed.add(
+            getSavedSearchFullPathUrl(currentSavedSearch.id),
+            currentSavedSearch.title ?? '',
+            currentSavedSearch.id
+          );
+        }
+      } catch (e) {
+        if (e instanceof DataViewSavedObjectConflictError) {
+          setError(e);
+        } else {
+          redirectWhenMissing({
+            history,
+            navigateToApp: core.application.navigateToApp,
+            basePath,
+            mapping: {
+              search: '/',
+              'index-pattern': {
+                app: 'management',
+                path: `kibana/objects/savedSearches/${id}`,
+              },
             },
-          },
-          toastNotifications,
-          onBeforeRedirect() {
-            getUrlTracker().setTrackedUrl('/');
-          },
-          theme: core.theme,
-        })(e);
+            toastNotifications,
+            onBeforeRedirect() {
+              getUrlTracker().setTrackedUrl('/');
+            },
+            theme: core.theme,
+          })(e);
+        }
       }
-    }
-  }, [
-    id,
-    services.data.search,
-    services.spaces,
-    core.savedObjects.client,
-    core.application.navigateToApp,
-    core.theme,
-    loadDefaultOrCurrentDataView,
-    chrome.recentlyAccessed,
-    history,
-    basePath,
-    toastNotifications,
-  ]);
+    },
+    [
+      id,
+      services.data.search,
+      services.spaces,
+      core.savedObjects.client,
+      core.application.navigateToApp,
+      core.theme,
+      loadDefaultOrCurrentDataView,
+      chrome.recentlyAccessed,
+      history,
+      basePath,
+      toastNotifications,
+    ]
+  );
 
   const onDataViewCreated = useCallback(
     async (nextDataView: unknown) => {
