@@ -7,7 +7,7 @@
  */
 
 import type { SavedObjectsStart } from '@kbn/core/public';
-import type { DataPublicPluginStart, TimefilterContract } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { injectSearchSourceReferences, parseSearchSourceJSON } from '@kbn/data-plugin/public';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
@@ -15,7 +15,6 @@ import type { SavedSearchAttributes, SavedSearch } from './types';
 
 import { SAVED_SEARCH_TYPE } from './constants';
 import { fromSavedSearchAttributes } from './saved_searches_utils';
-import { isRefreshIntervalValid, isTimeRangeValid } from '../../utils/validate_time';
 
 interface GetSavedSearchDependencies {
   search: DataPublicPluginStart['search'];
@@ -83,27 +82,4 @@ export const getSavedSearch = async (
   return savedSearchId
     ? findSavedSearch(savedSearchId, dependencies)
     : getEmptySavedSearch(dependencies);
-};
-
-export const restoreStateFromSavedSearch = ({
-  savedSearch,
-  timefilter,
-}: {
-  savedSearch: SavedSearch;
-  timefilter: TimefilterContract;
-}) => {
-  if (!savedSearch) {
-    return;
-  }
-
-  if (savedSearch.timeRestore && savedSearch.timeRange && isTimeRangeValid(savedSearch.timeRange)) {
-    timefilter.setTime(savedSearch.timeRange);
-  }
-  if (
-    savedSearch.timeRestore &&
-    savedSearch.refreshInterval &&
-    isRefreshIntervalValid(savedSearch.refreshInterval)
-  ) {
-    timefilter.setRefreshInterval(savedSearch.refreshInterval);
-  }
 };

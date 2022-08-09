@@ -32,7 +32,7 @@ import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { DiscoverError } from '../../components/common/error_alert';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getUrlTracker } from '../../kibana_services';
-import { restoreStateFromSavedSearch } from '../../services/saved_searches/get_saved_searches';
+import { restoreStateFromSavedSearch } from '../../services/saved_searches/restore_from_saved_search';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
