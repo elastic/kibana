@@ -97,7 +97,7 @@ const AssignUsersComponent: React.FC<AssignUsersProps> = ({
     setSelectedAssignees(assigneesWithProfiles);
   }, [assigneesWithProfiles]);
 
-  const button = (
+  const popOverButton = (
     <EuiToolTip position="left" content={i18n.EDIT_ASSIGNEES}>
       <EuiButtonIcon
         data-test-subj="case-view-assignees-edit-button"
@@ -124,7 +124,7 @@ const AssignUsersComponent: React.FC<AssignUsersProps> = ({
         {!isLoading && permissions.update && (
           <EuiFlexItem data-test-subj="case-view-assignees-edit" grow={false}>
             <EuiPopover
-              button={button}
+              button={popOverButton}
               isOpen={isPopoverOpen}
               closePopover={onClosePopover}
               anchorPosition="downRight"
@@ -158,13 +158,11 @@ const AssignUsersComponent: React.FC<AssignUsersProps> = ({
         </EuiFlexGroup>
       ) : (
         <EuiFlexGroup direction="column" gutterSize="s">
-          {selectedAssignees.map((profile) => {
-            return (
-              <EuiFlexItem key={profile.uid} grow={false}>
-                <UserRepresentation profile={profile} onRemoveAssignee={onAssigneeRemoved} />
-              </EuiFlexItem>
-            );
-          })}
+          {selectedAssignees.map((profile) => (
+            <EuiFlexItem key={profile.uid} grow={false}>
+              <UserRepresentation profile={profile} onRemoveAssignee={onAssigneeRemoved} />
+            </EuiFlexItem>
+          ))}
         </EuiFlexGroup>
       )}
     </>

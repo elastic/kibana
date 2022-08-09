@@ -67,16 +67,33 @@ describe('AssignUsers', () => {
   it('shows the suggest users edit button when the user has update permissions', () => {
     appMockRender.render(<AssignUsers {...defaultProps} />);
 
-    expect(screen.queryByTestId('case-view-assignees-edit')).toBeInTheDocument();
+    expect(screen.getByTestId('case-view-assignees-edit')).toBeInTheDocument();
   });
 
-  it('shows the two assigned users', () => {
+  it('shows the two initially assigned users', () => {
     const props = {
       ...defaultProps,
       assignees: userProfiles.slice(0, 2),
       userProfiles: userProfilesMap,
     };
     appMockRender.render(<AssignUsers {...props} />);
+
+    expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
+    expect(screen.getByText('Physical Dinosaur')).toBeInTheDocument();
+    expect(screen.queryByText('Wet Dingo')).not.toBeInTheDocument();
+    expect(screen.queryByText('No users have been assigned.')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('case-view-assignees-loading')).not.toBeInTheDocument();
+  });
+
+  it('shows the rerendered assignees', () => {
+    const { rerender } = appMockRender.render(<AssignUsers {...defaultProps} />);
+
+    const props = {
+      ...defaultProps,
+      assignees: userProfiles.slice(0, 2),
+      userProfiles: userProfilesMap,
+    };
+    rerender(<AssignUsers {...props} />);
 
     expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
     expect(screen.getByText('Physical Dinosaur')).toBeInTheDocument();
