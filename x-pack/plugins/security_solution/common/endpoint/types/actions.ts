@@ -18,9 +18,7 @@ export type ISOLATION_ACTIONS = 'isolate' | 'unisolate';
 /** The output provided by some of the Endpoint responses */
 export interface ActionResponseOutput<TOutputContent extends object = object> {
   type: 'json' | 'text';
-  content: {
-    entries: TOutputContent[];
-  };
+  content: TOutputContent;
 }
 
 export interface ProcessesEntry {
@@ -28,6 +26,24 @@ export interface ProcessesEntry {
   pid: string;
   entity_id: string;
   user: string;
+}
+
+export interface GetProcessesActionOutputContent {
+  entries: ProcessesEntry[];
+}
+
+export interface SuspendProcessActionOutputContent {
+  code: string;
+  command?: string;
+  pid?: number;
+  entity_id?: string;
+}
+
+export interface KillProcessActionOutputContent {
+  code: string;
+  command?: string;
+  pid?: number;
+  entity_id?: string;
 }
 
 export const RESPONSE_ACTION_COMMANDS = [
@@ -275,9 +291,7 @@ export interface ActionDetails<TOutputContent extends object = object> {
   startedAt: string;
   /** The date when the action was completed (a response by the endpoint (not fleet) was received) */
   completedAt: string | undefined;
-  /**
-   * The output data from an action
-   */
+  /** The output data from an action stored in an object where the key is the agent id */
   outputs?: Record<string, ActionResponseOutput<TOutputContent>>;
   /** user that created the action */
   createdBy: string;

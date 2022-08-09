@@ -16,7 +16,7 @@ import { FetchDeps } from './fetch_all';
 import { fetchTotalHits } from './fetch_total_hits';
 import type { EsHitRecord } from '../../../types';
 import { buildDataTableRecord } from '../../../utils/build_data_record';
-import { indexPatternMock } from '../../../__mocks__/index_pattern';
+import { dataViewMock } from '../../../__mocks__/data_view';
 
 const getDeps = () =>
   ({
@@ -34,18 +34,18 @@ describe('test fetchDocuments', () => {
       { _id: '1', foo: 'bar' },
       { _id: '2', foo: 'baz' },
     ] as unknown as EsHitRecord[];
-    const documents = hits.map((hit) => buildDataTableRecord(hit, indexPatternMock));
-    savedSearchMock.searchSource.fetch$ = () =>
-      of({ rawResponse: { hits: { hits } } } as unknown as IKibanaSearchResponse<SearchResponse>);
+    const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
+    savedSearchMock.searchSource.fetch$ = <T>() =>
+      of({ rawResponse: { hits: { hits } } } as IKibanaSearchResponse<SearchResponse<T>>);
     expect(fetchDocuments(savedSearchMock.searchSource, getDeps())).resolves.toEqual(documents);
   });
 
   test('rejects on query failure', () => {
-    savedSearchMock.searchSource.fetch$ = () => throwErrorRx({ msg: 'Oh noes!' });
+    savedSearchMock.searchSource.fetch$ = () => throwErrorRx(() => new Error('Oh noes!'));
 
-    expect(fetchDocuments(savedSearchMock.searchSource, getDeps())).rejects.toEqual({
-      msg: 'Oh noes!',
-    });
+    expect(fetchDocuments(savedSearchMock.searchSource, getDeps())).rejects.toEqual(
+      new Error('Oh noes!')
+    );
   });
 
   test('fetch$ is called with execution context containing savedSearch id', async () => {
