@@ -12,7 +12,7 @@ import { tap, filter, map, toArray } from 'rxjs/operators';
 
 import { scan$, Task } from '../lib';
 
-export const PathLength: Task = {
+export const AssertPathLength: Task = {
   description: 'Checking Windows for paths > 200 characters',
 
   async run(config, log, build) {
