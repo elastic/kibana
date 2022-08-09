@@ -50,7 +50,8 @@ describe('ruleParamsModifier', () => {
     expect(editedRuleParams).toHaveProperty('version', ruleParamsMock.version + 1);
   });
 
-  describe('index_patterns', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/138409
+  describe.skip('index_patterns', () => {
     test('should add new index pattern to rule', () => {
       const editedRuleParams = ruleParamsModifier(ruleParamsMock, [
         {
