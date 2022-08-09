@@ -68,6 +68,8 @@ export async function fetchEsQuery(
     searchAfterSortId: undefined,
     timeField: params.timeField,
     track_total_hits: true,
+    fields: parsedQuery.fields,
+    runtime_mappings: parsedQuery.runtime_mappings
   });
 
   logger.debug(`es query rule ${ES_QUERY_ID}:${ruleId} "${name}" query - ${JSON.stringify(query)}`);
