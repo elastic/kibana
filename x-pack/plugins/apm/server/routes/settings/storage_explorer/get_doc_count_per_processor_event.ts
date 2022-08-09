@@ -20,6 +20,7 @@ import {
   SERVICE_ENVIRONMENT,
   TIER,
   TRANSACTION_SAMPLED,
+  AGENT_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
 import {
   IndexLifecyclePhaseSelectOption,
@@ -27,6 +28,7 @@ import {
 } from '../../../../common/storage_explorer_types';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { ApmPluginRequestHandlerContext } from '../../typings';
+import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 
 export async function getDocCountPerProcessorEvent({
   setup,
@@ -97,6 +99,15 @@ export async function getDocCountPerProcessorEvent({
                   size: 500,
                 },
                 aggs: {
+                  sample: {
+                    top_hits: {
+                      size: 1,
+                      _source: [AGENT_NAME],
+                      sort: {
+                        '@timestamp': 'desc',
+                      },
+                    },
+                  },
                   indices: {
                     terms: {
                       field: '_index',
@@ -182,6 +193,7 @@ export async function getDocCountPerProcessorEvent({
         environments,
         sampledTransactionDocs,
         size: estimatedSize,
+        agentName: bucket.sample.hits.hits[0]?._source.agent.name as AgentName,
         transactionDocs: docsPerProcessorEvent.transaction,
         spanDocs: docsPerProcessorEvent.span,
         metricDocs: docsPerProcessorEvent.metric,

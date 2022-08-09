@@ -34,7 +34,6 @@ import { EnvironmentBadge } from '../../../shared/environment_badge';
 import { IndexLifecyclePhaseSelectOption } from '../../../../../common/storage_explorer_types';
 import { asDynamicBytes } from '../../../../../common/utils/formatters';
 import { asPercent } from '../../../../../common/utils/formatters';
-import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { IndexLifecyclePhaseSelect } from './index_lifecycle_phase_select';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { ApmDatePicker } from '../../../shared/date_picker/apm_date_picker';
@@ -42,6 +41,11 @@ import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { ApmEnvironmentFilter } from '../../../shared/environment_filter';
 import { KueryBar } from '../../../shared/kuery_bar';
+import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
+import { ServiceLink } from '../../../shared/service_link';
+import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
+import { getComparisonEnabled } from '../../../shared/time_comparison/get_comparison_enabled';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 type StorageExplorerItem =
   APIReturnType<'GET /internal/apm/storage_explorer'>['serviceStatistics'][0];
@@ -56,6 +60,9 @@ export function StorageExplorer() {
   const groupedPalette = euiPaletteColorBlind({
     rotations: euiPaletteColorBlindRotations,
   });
+
+  const { core } = useApmPluginContext();
+  const comparisonEnabled = getComparisonEnabled({ core });
 
   const {
     query: { rangeFrom, rangeTo, environment, kuery },
@@ -92,6 +99,30 @@ export function StorageExplorer() {
         }
       ),
       sortable: true,
+      render: (_, { serviceName, agentName }) => {
+        const serviceLinkQuery = {
+          comparisonEnabled,
+          environment,
+          kuery,
+          rangeFrom,
+          rangeTo,
+          serviceGroup: '',
+        };
+
+        return (
+          <TruncateWithTooltip
+            data-test-subj="apmStorageExplorerServiceLink"
+            text={serviceName || NOT_AVAILABLE_LABEL}
+            content={
+              <ServiceLink
+                query={serviceLinkQuery}
+                serviceName={serviceName}
+                agentName={agentName}
+              />
+            }
+          />
+        );
+      },
     },
     {
       field: 'environment',

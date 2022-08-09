@@ -19,6 +19,7 @@ import {
   kueryRt,
   rangeRt,
 } from '../../default_api_types';
+import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 
 const storageExplorerRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/storage_explorer',
@@ -39,11 +40,12 @@ const storageExplorerRoute = createApmServerRoute({
     serviceStatistics: Array<{
       serviceName: string;
       environments: string[];
+      size?: number;
+      agentName: AgentName;
       transactionDocs: number;
       spanDocs: number;
       errorDocs: number;
       metricDocs: number;
-      size?: number;
       sampling: number;
     }>;
   }> => {
