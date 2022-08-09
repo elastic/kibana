@@ -17,7 +17,7 @@ import { OptionsListEmbeddableInput, OPTIONS_LIST_CONTROL } from '../types';
 import {
   createOptionsListExtract,
   createOptionsListInject,
-} from '../../../common/control_types/options_list/options_list_persistable_state';
+} from '../../../common/options_list/options_list_persistable_state';
 import { OptionsListStrings } from '../components/options_list_strings';
 
 export class OptionsListEmbeddableFactory
