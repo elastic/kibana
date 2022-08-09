@@ -110,7 +110,7 @@ describe('Dashboards table', () => {
     expect(result.queryByText(DASHBOARD_TABLE_ITEMS[0].description)).toBeInTheDocument();
   });
 
-  it.only('should filter out special characters except hyphens & underscores', () => {
+  it('should filter out special characters except hyphens & underscores', () => {
     const result = renderDashboardTable();
 
     const input = result.getByRole('searchbox');
