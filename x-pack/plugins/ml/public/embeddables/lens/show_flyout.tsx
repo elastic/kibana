@@ -77,6 +77,7 @@ export async function showLensVisToADJobFlyout(
                 layerResults={layerResults}
                 share={share}
                 data={data}
+                application={coreStart.application}
                 kibanaConfig={coreStart.uiSettings}
                 ml={ml}
               />

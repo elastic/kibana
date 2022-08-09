@@ -9,7 +9,7 @@ import React, { FC } from 'react';
 import type { Embeddable } from '@kbn/lens-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { IUiSettingsClient } from '@kbn/core/public';
+import type { IUiSettingsClient, ApplicationStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 import {
@@ -33,6 +33,7 @@ interface Props {
   embeddable: Embeddable;
   share: SharePluginStart;
   data: DataPublicPluginStart;
+  application: ApplicationStart;
   kibanaConfig: IUiSettingsClient;
   ml: MlApiServices;
   onClose: () => void;
@@ -44,6 +45,7 @@ export const LensLayerSelectionFlyout: FC<Props> = ({
   embeddable,
   share,
   data,
+  application,
   ml,
   kibanaConfig,
 }) => {
@@ -73,6 +75,7 @@ export const LensLayerSelectionFlyout: FC<Props> = ({
           embeddable={embeddable}
           share={share}
           data={data}
+          application={application}
           kibanaConfig={kibanaConfig}
           ml={ml}
         />

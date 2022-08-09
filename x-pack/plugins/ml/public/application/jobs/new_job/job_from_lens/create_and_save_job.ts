@@ -52,7 +52,13 @@ export async function createAndSaveJob(
   const createdJob = await ml.addJob({ jobId: job.job_id, job });
   const createdDatafeed = await ml.addDatafeed({ datafeedId, datafeedConfig: datafeed });
   if (startJob) {
-    await ml.openJob({ jobId });
+    try {
+      await ml.openJob({ jobId });
+    } catch (error) {
+      if (error.body.statusCode !== 409) {
+        throw error;
+      }
+    }
     await ml.startDatafeed({ datafeedId, start, ...(runInRealTime ? {} : { end }) });
   }
 
