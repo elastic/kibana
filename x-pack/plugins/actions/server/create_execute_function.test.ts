@@ -552,13 +552,17 @@ describe('bulkExecute()', () => {
       isESOCanEncrypt: true,
       preconfiguredActions: [],
     });
-    savedObjectsClient.get.mockResolvedValueOnce({
-      id: '123',
-      type: 'action',
-      attributes: {
-        actionTypeId: 'mock-action',
-      },
-      references: [],
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '123',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'mock-action',
+          },
+          references: [],
+        },
+      ],
     });
     savedObjectsClient.bulkCreate.mockResolvedValueOnce({
       saved_objects: [
@@ -600,7 +604,7 @@ describe('bulkExecute()', () => {
         ],
       ]
     `);
-    expect(savedObjectsClient.get).toHaveBeenCalledWith('action', '123');
+    expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith([{ id: '123', type: 'action' }]);
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith([
       {
         type: 'action_task_params',
@@ -632,13 +636,17 @@ describe('bulkExecute()', () => {
       isESOCanEncrypt: true,
       preconfiguredActions: [],
     });
-    savedObjectsClient.get.mockResolvedValueOnce({
-      id: '123',
-      type: 'action',
-      attributes: {
-        actionTypeId: 'mock-action',
-      },
-      references: [],
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '123',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'mock-action',
+          },
+          references: [],
+        },
+      ],
     });
     savedObjectsClient.bulkCreate.mockResolvedValueOnce({
       saved_objects: [
@@ -682,7 +690,7 @@ describe('bulkExecute()', () => {
         ],
       ]
     `);
-    expect(savedObjectsClient.get).toHaveBeenCalledWith('action', '123');
+    expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith([{ id: '123', type: 'action' }]);
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith([
       {
         type: 'action_task_params',
@@ -715,13 +723,17 @@ describe('bulkExecute()', () => {
       isESOCanEncrypt: true,
       preconfiguredActions: [],
     });
-    savedObjectsClient.get.mockResolvedValueOnce({
-      id: '123',
-      type: 'action',
-      attributes: {
-        actionTypeId: 'mock-action',
-      },
-      references: [],
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '123',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'mock-action',
+          },
+          references: [],
+        },
+      ],
     });
     savedObjectsClient.bulkCreate.mockResolvedValueOnce({
       saved_objects: [
@@ -803,13 +815,17 @@ describe('bulkExecute()', () => {
     });
     const source = { type: 'alert', id: uuid.v4() };
 
-    savedObjectsClient.get.mockResolvedValueOnce({
-      id: '123',
-      type: 'action',
-      attributes: {
-        actionTypeId: 'mock-action',
-      },
-      references: [],
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '123',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'mock-action',
+          },
+          references: [],
+        },
+      ],
     });
     savedObjectsClient.bulkCreate.mockResolvedValueOnce({
       saved_objects: [
@@ -891,13 +907,17 @@ describe('bulkExecute()', () => {
     });
     const source = { type: 'alert', id: uuid.v4() };
 
-    savedObjectsClient.get.mockResolvedValueOnce({
-      id: '123',
-      type: 'action',
-      attributes: {
-        actionTypeId: 'mock-action',
-      },
-      references: [],
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '123',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'mock-action',
+          },
+          references: [],
+        },
+      ],
     });
     savedObjectsClient.bulkCreate.mockResolvedValueOnce({
       saved_objects: [
@@ -1010,15 +1030,19 @@ describe('bulkExecute()', () => {
       actionTypeRegistry: actionTypeRegistryMock.create(),
       preconfiguredActions: [],
     });
-    savedObjectsClient.get.mockResolvedValueOnce({
-      id: '123',
-      type: 'action',
-      attributes: {
-        name: 'mock-action',
-        isMissingSecrets: true,
-        actionTypeId: 'mock-action',
-      },
-      references: [],
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '123',
+          type: 'action',
+          attributes: {
+            name: 'mock-action',
+            isMissingSecrets: true,
+            actionTypeId: 'mock-action',
+          },
+          references: [],
+        },
+      ],
     });
     await expect(
       executeFn(savedObjectsClient, [
@@ -1046,13 +1070,17 @@ describe('bulkExecute()', () => {
     mockedActionTypeRegistry.ensureActionTypeEnabled.mockImplementation(() => {
       throw new Error('Fail');
     });
-    savedObjectsClient.get.mockResolvedValueOnce({
-      id: '123',
-      type: 'action',
-      attributes: {
-        actionTypeId: 'mock-action',
-      },
-      references: [],
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '123',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'mock-action',
+          },
+          references: [],
+        },
+      ],
     });
 
     await expect(
@@ -1087,13 +1115,17 @@ describe('bulkExecute()', () => {
       ],
     });
     mockedActionTypeRegistry.isActionExecutable.mockImplementation(() => true);
-    savedObjectsClient.get.mockResolvedValueOnce({
-      id: '123',
-      type: 'action',
-      attributes: {
-        actionTypeId: 'mock-action',
-      },
-      references: [],
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '123',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'mock-action',
+          },
+          references: [],
+        },
+      ],
     });
     savedObjectsClient.bulkCreate.mockResolvedValueOnce({
       saved_objects: [

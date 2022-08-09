@@ -118,6 +118,7 @@ export function createExecutionHandler<
     let ephemeralActionsToSchedule = maxEphemeralActionsPerRule;
 
     const bulkActions = [];
+    const logActions = [];
     for (const action of actions) {
       const { actionTypeId } = action;
 
@@ -197,8 +198,7 @@ export function createExecutionHandler<
       } else {
         bulkActions.push(enqueueOptions);
       }
-
-      alertingEventLogger.logAction({
+      logActions.push({
         id: action.id,
         typeId: actionTypeId,
         alertId,
@@ -209,6 +209,10 @@ export function createExecutionHandler<
 
     for (const c of chunk(bulkActions, CHUNK_SIZE)) {
       await actionsClient.bulkEnqueueExecution(c);
+    }
+
+    for (const action of logActions) {
+      alertingEventLogger.logAction(action);
     }
   };
 }

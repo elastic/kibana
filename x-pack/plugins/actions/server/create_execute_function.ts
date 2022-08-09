@@ -42,6 +42,12 @@ export interface ActionTaskParams extends Pick<ActionExecutorOptions, 'params'> 
   relatedSavedObjects?: RelatedSavedObjects;
 }
 
+export interface GetConnectorsResult {
+  connector: PreConfiguredAction | RawAction;
+  isPreconfigured: boolean;
+  id: string;
+}
+
 export type ExecutionEnqueuer<T> = (
   unsecuredSavedObjectsClient: SavedObjectsClientContract,
   options: ExecuteOptions
@@ -49,7 +55,7 @@ export type ExecutionEnqueuer<T> = (
 
 export type BulkExecutionEnqueuer<T> = (
   unsecuredSavedObjectsClient: SavedObjectsClientContract,
-  options: ExecuteOptions[]
+  actionsToExectute: ExecuteOptions[]
 ) => Promise<T>;
 
 export function createExecutionEnqueuerFunction({
@@ -140,7 +146,7 @@ export function createBulkExecutionEnqueuerFunction({
 }: CreateExecuteFunctionOptions): BulkExecutionEnqueuer<void> {
   return async function execute(
     unsecuredSavedObjectsClient: SavedObjectsClientContract,
-    options: ExecuteOptions[]
+    actionsToExecute: ExecuteOptions[]
   ) {
     if (!isESOCanEncrypt) {
       throw new Error(
@@ -150,29 +156,37 @@ export function createBulkExecutionEnqueuerFunction({
 
     const actionTypeIds: { [key: string]: string } = {};
     const spaceIds: { [key: string]: string } = {};
+    const connectorIsPreconfigured: { [key: string]: boolean } = {};
+    const connectorIds = [...new Set(actionsToExecute.map((action) => action.id))];
+    const connectors = await getConnectors(
+      unsecuredSavedObjectsClient,
+      preconfiguredActions,
+      connectorIds
+    );
+    connectors.forEach((c) => {
+      const { id, connector, isPreconfigured } = c;
+      validateCanActionBeUsed(connector);
+
+      const { actionTypeId } = connector;
+      if (!actionTypeRegistry.isActionExecutable(id, actionTypeId, { notifyUsage: true })) {
+        actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+      }
+
+      actionTypeIds[id] = actionTypeId;
+      connectorIsPreconfigured[id] = isPreconfigured;
+    });
+
     const actions = await Promise.all(
-      options.map(async (option) => {
-        const { action, isPreconfigured } = await getAction(
-          unsecuredSavedObjectsClient,
-          preconfiguredActions,
-          option.id
-        );
-        validateCanActionBeUsed(action);
-
-        const { actionTypeId } = action;
-        if (
-          !actionTypeRegistry.isActionExecutable(option.id, actionTypeId, { notifyUsage: true })
-        ) {
-          actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
-        }
-
+      actionsToExecute.map(async (actionToExecute) => {
         // Get saved object references from action ID and relatedSavedObjects
         const { references, relatedSavedObjectWithRefs } = extractSavedObjectReferences(
-          option.id,
-          isPreconfigured,
-          option.relatedSavedObjects
+          actionToExecute.id,
+          connectorIsPreconfigured[actionToExecute.id],
+          actionToExecute.relatedSavedObjects
         );
-        const executionSourceReference = executionSourceAsSavedObjectReferences(option.source);
+        const executionSourceReference = executionSourceAsSavedObjectReferences(
+          actionToExecute.source
+        );
 
         const taskReferences = [];
         if (executionSourceReference.references) {
@@ -182,17 +196,16 @@ export function createBulkExecutionEnqueuerFunction({
           taskReferences.push(...references);
         }
 
-        actionTypeIds[option.id] = actionTypeId;
-        spaceIds[option.id] = option.spaceId;
+        spaceIds[actionToExecute.id] = actionToExecute.spaceId;
 
         return {
           type: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
           attributes: {
-            actionId: option.id,
-            params: option.params,
-            apiKey: option.apiKey,
-            executionId: option.executionId,
-            consumer: option.consumer,
+            actionId: actionToExecute.id,
+            params: actionToExecute.params,
+            apiKey: actionToExecute.apiKey,
+            executionId: actionToExecute.executionId,
+            consumer: actionToExecute.consumer,
             relatedSavedObjects: relatedSavedObjectWithRefs,
           },
           references: taskReferences,
@@ -293,3 +306,42 @@ async function getAction(
   const { attributes } = await unsecuredSavedObjectsClient.get<RawAction>('action', actionId);
   return { action: attributes, isPreconfigured: false };
 }
+
+async function getConnectors(
+  unsecuredSavedObjectsClient: SavedObjectsClientContract,
+  preconfiguredConnectors: PreConfiguredAction[],
+  connectorIds: string[]
+): Promise<GetConnectorsResult[]> {
+  const result: GetConnectorsResult[] = [];
+
+  const connectorIdsToFetch = [];
+  for (const connectorId of connectorIds) {
+    const pcConnector = preconfiguredConnectors.find((connector) => connector.id === connectorId);
+    if (pcConnector) {
+      result.push({ connector: pcConnector, isPreconfigured: true, id: connectorId });
+    } else {
+      connectorIdsToFetch.push(connectorId);
+    }
+  }
+
+  if (connectorIdsToFetch.length > 0) {
+    const bulkGetResult = await unsecuredSavedObjectsClient.bulkGet<RawAction>(
+      connectorIdsToFetch.map((id) => ({
+        id,
+        type: 'action',
+      }))
+    );
+
+    for (const item of bulkGetResult.saved_objects) {
+      if (item.error) throw item.error;
+      result.push({
+        isPreconfigured: false,
+        connector: item.attributes,
+        id: item.id,
+      });
+    }
+  }
+
+  return result;
+}
+
