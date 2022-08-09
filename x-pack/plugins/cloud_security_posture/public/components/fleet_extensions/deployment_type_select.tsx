@@ -23,10 +23,8 @@ export type InputType = keyof typeof CIS_INTEGRATION_INPUTS_MAP;
 
 interface Props {
   type: InputType;
-  /**
-   * Input will be disabled when onChange is undefined
-   */
   onChange?: (type: InputType) => void;
+  isDisabled?: boolean;
 }
 
 const kubeDeployOptions: Array<EuiComboBoxOptionOption<InputType>> = [
@@ -68,15 +66,15 @@ const KubernetesDeploymentFieldLabel = () => (
   </EuiToolTip>
 );
 
-export const DeploymentTypeSelect = ({ type, onChange }: Props) => (
+export const DeploymentTypeSelect = ({ type, isDisabled, onChange }: Props) => (
   <EuiDescribedFormGroup title={<div />}>
     <EuiFormRow label={<KubernetesDeploymentFieldLabel />}>
       <EuiComboBox
         singleSelection={{ asPlainText: true }}
         options={kubeDeployOptions}
         selectedOptions={kubeDeployOptions.filter((o) => o.value === type)}
-        isDisabled={!onChange}
-        onChange={(options) => onChange?.(options[0].value!)}
+        isDisabled={isDisabled}
+        onChange={(options) => !isDisabled && onChange?.(options[0].value!)}
       />
     </EuiFormRow>
   </EuiDescribedFormGroup>
