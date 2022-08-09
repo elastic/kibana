@@ -18,7 +18,10 @@ import { SCALING_TYPES } from '../../../../common/constants';
 import { getGeoFields } from '../../../index_pattern_util';
 
 interface Props {
-  onSourceConfigChange: (sourceConfig: Partial<ESSearchSourceDescriptor> | null) => void;
+  onSourceConfigChange: (
+    sourceConfig: Partial<ESSearchSourceDescriptor> | null,
+    isPointsOnly: boolean
+  ) => void;
 }
 
 interface State {
@@ -84,7 +87,8 @@ export class CreateSourceEditor extends Component<Props, State> {
             scalingType: field && field.isRuntimeField ? SCALING_TYPES.LIMIT : SCALING_TYPES.MVT,
           }
         : null;
-    this.props.onSourceConfigChange(sourceConfig);
+    const isPointsOnly = field ? field.type === 'geo_point' : false;
+    this.props.onSourceConfigChange(sourceConfig, isPointsOnly);
   };
 
   _renderGeoSelect() {
