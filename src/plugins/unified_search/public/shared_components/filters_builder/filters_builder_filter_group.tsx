@@ -13,7 +13,7 @@ import type { Filter } from '@kbn/es-query';
 import type { Path } from './filters_builder_types';
 import { ConditionTypes } from './filters_builder_condition_types';
 import { FilterItem } from './filters_builder_filter_item';
-import { FiltersEditorContextType } from './filters_builder_context';
+import { FiltersBuilderContextType } from './filters_builder_context';
 import { getPathInArray } from './filters_builder_utils';
 
 export interface FilterGroupProps {
@@ -32,7 +32,7 @@ const Delimiter = ({ conditionType }: { conditionType: ConditionTypes }) =>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiText size="s" color="subdued">
-          {i18n.translate('unifiedSearch.filter.filtersEditor.orDelimiterLabel', {
+          {i18n.translate('unifiedSearch.filter.FiltersBuilder.orDelimiterLabel', {
             defaultMessage: 'OR',
           })}
         </EuiText>
@@ -52,7 +52,7 @@ export const FilterGroup = ({
 }: FilterGroupProps) => {
   const {
     globalParams: { maxDepth, hideOr },
-  } = useContext(FiltersEditorContextType);
+  } = useContext(FiltersBuilderContextType);
 
   const pathInArray = getPathInArray(path);
 

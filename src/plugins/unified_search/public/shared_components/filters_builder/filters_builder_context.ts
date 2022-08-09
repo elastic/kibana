@@ -8,11 +8,11 @@
 
 import React, { Dispatch } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { FiltersEditorActions } from './filters_builder_reducer';
+import type { FiltersBuilderActions } from './filters_builder_reducer';
 
-interface FiltersEditorContextType {
+interface FiltersBuilderContextType {
   dataView: DataView;
-  dispatch: Dispatch<FiltersEditorActions>;
+  dispatch: Dispatch<FiltersBuilderActions>;
   globalParams: {
     maxDepth: number;
     hideOr: boolean;
@@ -21,6 +21,6 @@ interface FiltersEditorContextType {
   currentDragElement: string;
 }
 
-export const FiltersEditorContextType = React.createContext<FiltersEditorContextType>(
-  {} as FiltersEditorContextType
+export const FiltersBuilderContextType = React.createContext<FiltersBuilderContextType>(
+  {} as FiltersBuilderContextType
 );

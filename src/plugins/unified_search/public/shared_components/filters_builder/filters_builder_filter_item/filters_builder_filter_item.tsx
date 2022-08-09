@@ -30,7 +30,7 @@ import { FieldInput } from './filters_builder_filter_item_field_input';
 import { OperatorInput } from './filters_builder_filter_item_operator_input';
 import { ParamsEditor } from './filters_builder_filter_item_params_editor';
 import { ConditionTypes } from '../filters_builder_condition_types';
-import { FiltersEditorContextType } from '../filters_builder_context';
+import { FiltersBuilderContextType } from '../filters_builder_context';
 import { FilterGroup } from '../filters_builder_filter_group';
 import { getConditionalOperationType } from '../filters_builder_utils';
 import type { Path } from '../filters_builder_types';
@@ -65,7 +65,7 @@ export function FilterItem({
   color,
   index,
 }: FilterItemProps) {
-  const { dispatch, dataView, dropTarget } = useContext(FiltersEditorContextType);
+  const { dispatch, dataView, dropTarget } = useContext(FiltersBuilderContextType);
   const conditionalOperationType = getConditionalOperationType(filter);
 
   let field: DataViewField | undefined;

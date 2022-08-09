@@ -24,7 +24,7 @@ import type { Operator } from '../filter_editor';
 // todo: {end}
 
 /** @internal **/
-export interface FiltersEditorState {
+export interface FiltersBuilderState {
   filters: Filter[];
 }
 
@@ -70,14 +70,14 @@ export interface MoveFilterPayload {
 }
 
 /** @internal **/
-export type FiltersEditorActions =
+export type FiltersBuilderActions =
   | { type: 'addFilter'; payload: AddFilterPayload }
   | { type: 'removeFilter'; payload: RemoveFilterPayload }
   | { type: 'moveFilter'; payload: MoveFilterPayload }
   | { type: 'updateFilter'; payload: UpdateFilterPayload }
   | { type: 'updateFilterParams'; payload: UpdateFilterParamsPayload };
 
-export const filtersEditorReducer: Reducer<FiltersEditorState, FiltersEditorActions> = (
+export const FiltersBuilderReducer: Reducer<FiltersBuilderState, FiltersBuilderActions> = (
   state,
   action
 ) => {

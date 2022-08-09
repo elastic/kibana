@@ -10,12 +10,12 @@ import React, { useEffect, useReducer, useCallback, useState } from 'react';
 import { EuiDragDropContext, DragDropContextProps } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
-import { FiltersEditorContextType } from './filters_builder_context';
+import { FiltersBuilderContextType } from './filters_builder_context';
 import { ConditionTypes } from './filters_builder_condition_types';
 import { FilterGroup } from './filters_builder_filter_group';
-import { filtersEditorReducer } from './filters_builder_reducer';
+import { FiltersBuilderReducer } from './filters_builder_reducer';
 
-export interface FiltersEditorProps {
+export interface FiltersBuilderProps {
   filters: Filter[];
   dataView: DataView;
   onChange: (filters: Filter[]) => void;
@@ -27,15 +27,15 @@ export interface FiltersEditorProps {
 const rootLevelConditionType = ConditionTypes.AND;
 const DEFAULT_MAX_DEPTH = 10;
 
-export function FiltersEditor({
+export function FiltersBuilder({
   onChange,
   dataView,
   filters,
   timeRangeForSuggestionsOverride,
   maxDepth = DEFAULT_MAX_DEPTH,
   hideOr = false,
-}: FiltersEditorProps) {
-  const [state, dispatch] = useReducer(filtersEditorReducer, { filters });
+}: FiltersBuilderProps) {
+  const [state, dispatch] = useReducer(FiltersBuilderReducer, { filters });
   const [dropTarget, setDropTarget] = useState('');
   const [currentDragElement, setCurrentDragElement] = useState('');
 
@@ -90,7 +90,7 @@ export function FiltersEditor({
   };
 
   return (
-    <FiltersEditorContextType.Provider
+    <FiltersBuilderContextType.Provider
       value={{
         globalParams: { hideOr, maxDepth },
         dataView,
@@ -111,6 +111,6 @@ export function FiltersEditor({
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
         />
       </EuiDragDropContext>
-    </FiltersEditorContextType.Provider>
+    </FiltersBuilderContextType.Provider>
   );
 }
