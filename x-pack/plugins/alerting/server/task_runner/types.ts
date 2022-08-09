@@ -30,7 +30,7 @@ export interface RuleTaskRunResult {
 // This is the state of the alerting task after rule execution, which includes run metrics plus the task state
 export type RuleTaskStateAndMetrics = RuleTaskState & {
   metrics: RuleRunMetrics;
-  actions: Array<Omit<RuleAction, 'id' | 'ref'>>;
+  actions: Array<Omit<RuleAction, 'id'>>;
 };
 
 export type RuleRunResult = Pick<RuleTaskRunResult, 'monitoring' | 'schedule'> & {

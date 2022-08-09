@@ -661,7 +661,7 @@ export class TaskRunner<
       await this.markRuleAsSnoozed(rule.id, rulesClient);
     }
 
-    let actionsToReturn: Array<Omit<RuleAction, 'id'>> = [];
+    let triggeredActions: RuleAction[] = [];
 
     if (!ruleIsSnoozed && this.shouldLogAndScheduleActionsForAlerts()) {
       const allAlerts = this.getExecutableAlerts({
@@ -795,16 +795,14 @@ export class TaskRunner<
       /////////////////////////////////////////////////////////////////////////
       /////////////////////////////////////////////////////////////////////////
 
-      actionsToReturn = (
-        await this.triggerActions({
-          actions: actionsToTrigger,
-          spaceId,
-          apiKey,
-          ruleId,
-          fakeRequest,
-          ruleRunMetricsStore,
-        })
-      ).map((act) => omit(act, ['id']));
+      triggeredActions = await this.triggerActions({
+        actions: actionsToTrigger,
+        spaceId,
+        apiKey,
+        ruleId,
+        fakeRequest,
+        ruleRunMetricsStore,
+      });
     } else {
       if (ruleIsSnoozed) {
         this.logger.debug(`no scheduling of actions for rule ${ruleLabel}: rule is snoozed.`);
@@ -834,7 +832,19 @@ export class TaskRunner<
       metrics: ruleRunMetricsStore.getMetrics(),
       alertTypeState: updatedRuleTypeState || undefined,
       alertInstances: alertsToReturn,
-      actions: actionsToReturn,
+      actions: rule.actions.map((action) => {
+        const isActionTriggered = triggeredActions.find(
+          (triggeredAction) => triggeredAction.actionRef === action.actionRef
+        );
+        const act = omit(action, ['id']);
+        if (isActionTriggered) {
+          return {
+            ...act,
+            lastTriggerDate: new Date().toISOString(),
+          };
+        }
+        return act;
+      }),
     };
   }
 
