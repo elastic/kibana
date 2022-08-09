@@ -175,7 +175,7 @@ Additional comments:: Additional information for the client, such as how to trou
 
 [float]
 [[cases-webhook-connector-full-example]]
-== Full Example with Third-Party System
+== Full example with third-party system
 
 In the following example, we connect the Webhook - Case Management Connector with a demo instance of {jira} (a third-party case management system). Refer to their https://developer.atlassian.com/cloud/jira/platform/rest/v2/api-group-issues/[API documentation] to learn how to create an issue.
 
