@@ -6,4 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { AbstractStorybookMock } from './mocks';
+export { getServicesMock as getAnalyticsNoDataPageServicesMock } from './src/jest';
+
+export { StorybookMock as AnalyticsNoDataPageStorybookMock } from './src/storybook';
+export type { Params as AnalyticsNoDataPageStorybookParams } from './src/storybook';

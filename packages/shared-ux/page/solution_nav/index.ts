@@ -6,10 +6,7 @@
  * Side Public License, v 1.
  */
 
-export {
-  getServicesMock as getNoDataCardServicesMock,
-  getKibanaDependenciesMock as getNoDataCardKibanaDependenciesMock,
-} from './jest';
+export { SolutionNav } from './src/solution_nav';
+export type { SolutionNavProps } from './src/solution_nav';
 
-export { StorybookMock as NoDataCardStorybookMock } from './storybook';
-export type { Params as NoDataCardStorybookParams } from './storybook';
+export { withSolutionNav } from './src/with_solution_nav';

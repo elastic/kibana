@@ -6,12 +6,10 @@
  * Side Public License, v 1.
  */
 
-export type {
-  NoDataCardKibanaDependencies,
-  NoDataCardProps,
-  NoDataCardComponentProps,
-  NoDataCardServices,
-} from '@kbn/shared-ux-card-no-data-types';
+export {
+  getServicesMock as getNoDataCardServicesMock,
+  getKibanaDependenciesMock as getNoDataCardKibanaDependenciesMock,
+} from './src/jest';
 
-export { NoDataCard } from './no_data_card';
-export { NoDataCardKibanaProvider, NoDataCardProvider } from './services';
+export { StorybookMock as NoDataCardStorybookMock } from './src/storybook';
+export type { Params as NoDataCardStorybookParams } from './src/storybook';

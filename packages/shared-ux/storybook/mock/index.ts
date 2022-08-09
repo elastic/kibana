@@ -6,10 +6,4 @@
  * Side Public License, v 1.
  */
 
-export type {
-  KibanaNoDataPageServices,
-  KibanaNoDataPageKibanaDependencies,
-} from '@kbn/shared-ux-page-kibana-no-data-types';
-
-export { KibanaNoDataPage } from './kibana_no_data_page';
-export { KibanaNoDataPageKibanaProvider, KibanaNoDataPageProvider } from './services';
+export { AbstractStorybookMock } from './src/mocks';

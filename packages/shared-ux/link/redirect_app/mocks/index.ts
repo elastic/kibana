@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { KibanaSolutionAvatar } from './solution_avatar';
-export type { KibanaSolutionAvatarProps } from './solution_avatar';
+export { getRedirectAppLinksServicesMock, getRedirectAppLinksKibanaDependenciesMock } from './src/jest';
+export { StorybookMock as RedirectAppLinksStorybookMock } from './src/storybook';

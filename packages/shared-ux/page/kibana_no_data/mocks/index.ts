@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { ExitFullScreenButtonKibanaProvider, ExitFullScreenButtonProvider } from './services';
-export { ExitFullScreenButton as ExitFullScreenButtonComponent } from './exit_full_screen_button.component';
-export { ExitFullScreenButton } from './exit_full_screen_button';
+export { getServicesMock as getKibanaNoDataPageServicesMock } from './src/jest';
+
+export { StorybookMock as KibanaNoDataPageStorybookMock } from './src/storybook';
+export type { Params as KibanaNoDataPageStorybookParams } from './src/storybook';

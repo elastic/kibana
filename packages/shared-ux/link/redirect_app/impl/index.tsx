@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { RedirectAppLinks as RedirectAppLinksContainer } from './redirect_app_links.container';
-export { RedirectAppLinks as RedirectAppLinksComponent } from './redirect_app_links.component';
-export { RedirectAppLinks } from './redirect_app_links';
-export { RedirectAppLinksKibanaProvider, RedirectAppLinksProvider } from './services';
+export { RedirectAppLinks as RedirectAppLinksContainer } from './src/redirect_app_links.container';
+export { RedirectAppLinks as RedirectAppLinksComponent } from './src/redirect_app_links.component';
+export { RedirectAppLinks } from './src/redirect_app_links';
+export { RedirectAppLinksKibanaProvider, RedirectAppLinksProvider } from './src/services';
 
 export type {
   RedirectAppLinksServices,

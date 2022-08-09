@@ -6,13 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { PrimaryButton, IconButtonGroup, AddFromLibraryButton } from './buttons';
-export type {
-  AddFromLibraryButtonProps,
-  IconButtonGroupProps,
-  IconButton,
-  PrimaryButtonProps,
-} from './buttons';
-
-export { ToolbarPopover } from './popover';
-export type { ToolbarPopoverProps } from './popover';
+export { KibanaSolutionAvatar } from './src/solution_avatar';
+export type { KibanaSolutionAvatarProps } from './src/solution_avatar';

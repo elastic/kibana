@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { getNoDataViewsPromptServicesMock } from './jest';
+export {
+  getKibanaDependenciesMock as getExitFullScreenButtonKibanaDependenciesMock,
+  getServicesMock as getExitFullScreenButtonServicesMock,
+} from './src/jest';
 
-export { StorybookMock as NoDataViewsPromptStorybookMock } from './storybook';
-export type { Params as NoDataViewsPromptStorybookParams } from './storybook';
+export { StorybookMock as ExitFullScreenButtonStorybookMock } from './src/storybook';
+export type { Params as ExitFullScreenButtonStorybookParams } from './src/storybook';

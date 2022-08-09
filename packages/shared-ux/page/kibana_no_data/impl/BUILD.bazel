@@ -12,8 +12,17 @@ SOURCE_FILES = glob(
     "src/**/*.mdx",
   ],
   exclude = [
+    "**/*.config.js",
+    "**/*.mock.*",
     "**/*.test.*",
     "**/*.stories.*",
+    "**/__snapshots__",
+    "**/integration_tests",
+    "**/mocks",
+    "**/scripts",
+    "**/storybook",
+    "**/test_fixtures",
+    "**/test_helpers",
   ],
 )
 

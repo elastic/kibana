@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { SolutionNav } from './solution_nav';
-export type { SolutionNavProps } from './solution_nav';
+export type {
+  KibanaNoDataPageServices,
+  KibanaNoDataPageKibanaDependencies,
+} from '@kbn/shared-ux-page-kibana-no-data-types';
 
-export { withSolutionNav } from './with_solution_nav';
+export { KibanaNoDataPage } from './src/kibana_no_data_page';
+export { KibanaNoDataPageKibanaProvider, KibanaNoDataPageProvider } from './src/services';

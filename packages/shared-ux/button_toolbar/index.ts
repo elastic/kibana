@@ -6,7 +6,13 @@
  * Side Public License, v 1.
  */
 
-export { getServicesMock as getAnalyticsNoDataPageServicesMock } from './jest';
+export { PrimaryButton, IconButtonGroup, AddFromLibraryButton } from './src/buttons';
+export type {
+  AddFromLibraryButtonProps,
+  IconButtonGroupProps,
+  IconButton,
+  PrimaryButtonProps,
+} from './src/buttons';
 
-export { StorybookMock as AnalyticsNoDataPageStorybookMock } from './storybook';
-export type { Params as AnalyticsNoDataPageStorybookParams } from './storybook';
+export { ToolbarPopover } from './src/popover';
+export type { ToolbarPopoverProps } from './src/popover';
