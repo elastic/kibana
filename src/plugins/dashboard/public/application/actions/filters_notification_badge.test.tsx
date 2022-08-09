@@ -10,7 +10,7 @@ import { getSampleDashboardInput } from '../test_helpers';
 import { DashboardContainer } from '../embeddable/dashboard_container';
 
 import { coreMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
-import { CoreStart } from '@kbn/core/public';
+import { ApplicationStart, CoreStart } from '@kbn/core/public';
 import { FiltersNotificationBadge } from '.';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { type Query, type AggregateQuery, Filter } from '@kbn/es-query';
@@ -45,7 +45,6 @@ let embeddable: ContactCardEmbeddable & FilterableEmbeddable;
 const mockGetFilters = jest.fn(async () => [] as Filter[]);
 const mockGetQuery = jest.fn(async () => undefined as Query | AggregateQuery | undefined);
 let coreStart: CoreStart;
-let editAction: EditPanelAction;
 
 const getMockPhraseFilter = (key: string, value: string) => {
   return {
@@ -100,14 +99,12 @@ beforeEach(async () => {
     throw new Error('Failed to create embeddable');
   }
 
-  editAction = {
-    execute: jest.fn(),
-  } as unknown as EditPanelAction;
   action = new FiltersNotificationBadge(
-    coreStart.theme,
+    coreStart.application,
+    embeddablePluginMock.createStartContract(),
     coreStart.overlays,
-    coreStart.uiSettings,
-    editAction
+    coreStart.theme,
+    coreStart.uiSettings
   );
   embeddable = embeddablePluginMock.mockFilterableEmbeddable(contactCardEmbeddable, {
     getFilters: () => mockGetFilters(),
