@@ -17,7 +17,7 @@ export function createTelemetryConfigsTaskConfig() {
     title: 'Osquery Configs Telemetry',
     interval: '24h',
     timeout: '10m',
-    version: '1.0.0',
+    version: '1.1.0',
     runTask: async (
       taskId: string,
       logger: Logger,
