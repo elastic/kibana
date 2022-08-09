@@ -5,16 +5,8 @@
  * 2.0.
  */
 import React, { useEffect, useMemo, useState } from 'react';
-import {
-  EuiBasicTable,
-  EuiButton,
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-} from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 
-import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 import { SeverityFilterGroup } from '../../../../common/components/severity/severity_filter_group';
 import { LinkButton, useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
@@ -37,6 +29,7 @@ import { hostsActions } from '../../../../hosts/store';
 import { useEnableHostRiskFromUrl } from '../../overview_risky_host_links/risky_hosts_disabled_module';
 import { useCheckSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_check_signal_index';
 import { RiskScoreDonutChart } from '../common/risk_score_donut_chart';
+import { BasicTableWithoutBorderBottom } from '../common/basic_table_without_border_bottom';
 
 const TABLE_QUERY_ID = 'hostRiskDashboardTable';
 
@@ -59,15 +52,6 @@ export const EntityAnalyticsHostRiskScores = () => {
     filterQuery: severityFilter,
     skip: !toggleStatus,
   });
-
-  // @ts-expect-error TS2769
-  const StyledEuiBasicTable = styled(EuiBasicTable)`
-    .euiTableRow {
-      .euiTableRowCell {
-        border-bottom: none !important;
-      }
-    }
-  `;
 
   const [isTableLoading, { data, inspect, refetch, isModuleEnabled }] = useHostRiskScore({
     filterQuery: severityFilter,
@@ -147,7 +131,7 @@ export const EntityAnalyticsHostRiskScores = () => {
           )}
         </HeaderSection>
         {toggleStatus && (
-          <EuiFlexGroup>
+          <EuiFlexGroup data-test-subj="entity_analytics_content">
             <EuiFlexItem grow={false}>
               <RiskScoreDonutChart
                 severityCount={severityCount}
@@ -156,7 +140,7 @@ export const EntityAnalyticsHostRiskScores = () => {
               />
             </EuiFlexItem>
             <EuiFlexItem>
-              <StyledEuiBasicTable
+              <BasicTableWithoutBorderBottom
                 responsive={false}
                 items={data ?? []}
                 columns={columns}
@@ -182,7 +166,13 @@ const EntityAnalyticsHostRiskScoresDisable = () => {
         title={<h2>{i18n.ENABLE_HOST_RISK_SCORE}</h2>}
         body={i18n.ENABLE_HOST_RISK_SCORE_DESCRIPTION}
         actions={
-          <EuiButton color="primary" fill href={loadFromUrl} isDisabled={!signalIndexExists}>
+          <EuiButton
+            color="primary"
+            fill
+            href={loadFromUrl}
+            isDisabled={!signalIndexExists}
+            data-test-subj="enable_host_risk_score"
+          >
             {i18n.ENABLE_HOST_RISK_SCORE}
           </EuiButton>
         }

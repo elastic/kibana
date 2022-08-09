@@ -5,15 +5,7 @@
  * 2.0.
  */
 import React, { useEffect, useMemo, useState } from 'react';
-import {
-  EuiBasicTable,
-  EuiButton,
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-} from '@elastic/eui';
-import styled from 'styled-components';
+import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { SeverityFilterGroup } from '../../../../common/components/severity/severity_filter_group';
 import { LinkButton, useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
@@ -35,6 +27,7 @@ import { UsersTableType } from '../../../../users/store/model';
 import { getTabsOnUsersUrl } from '../../../../common/components/link_to/redirect_to_users';
 import { RISKY_USERS_DOC_LINK } from '../../../../users/components/constants';
 import { RiskScoreDonutChart } from '../common/risk_score_donut_chart';
+import { BasicTableWithoutBorderBottom } from '../common/basic_table_without_border_bottom';
 
 const TABLE_QUERY_ID = 'userRiskDashboardTable';
 
@@ -57,15 +50,6 @@ export const EntityAnalyticsUserRiskScores = () => {
     filterQuery: severityFilter,
     skip: !toggleStatus,
   });
-
-  // @ts-expect-error TS2769
-  const StyledEuiBasicTable = styled(EuiBasicTable)`
-    .euiTableRow {
-      .euiTableRowCell {
-        border-bottom: none !important;
-      }
-    }
-  `;
 
   const [isTableLoading, { data, inspect, refetch, isModuleEnabled }] = useUserRiskScore({
     filterQuery: severityFilter,
@@ -144,7 +128,7 @@ export const EntityAnalyticsUserRiskScores = () => {
           )}
         </HeaderSection>
         {toggleStatus && (
-          <EuiFlexGroup>
+          <EuiFlexGroup data-test-subj="entity_analytics_content">
             <EuiFlexItem grow={false}>
               <RiskScoreDonutChart
                 severityCount={severityCount}
@@ -153,7 +137,7 @@ export const EntityAnalyticsUserRiskScores = () => {
               />
             </EuiFlexItem>
             <EuiFlexItem>
-              <StyledEuiBasicTable
+              <BasicTableWithoutBorderBottom
                 responsive={false}
                 items={data ?? []}
                 columns={columns}
@@ -175,7 +159,12 @@ const EntityAnalyticsUserRiskScoresDisable = () => (
       title={<h2>{i18n.ENABLE_USER_RISK_SCORE}</h2>}
       body={i18n.ENABLE_USER_RISK_SCORE_DESCRIPTION}
       actions={
-        <EuiButton color="primary" fill href={RISKY_USERS_DOC_LINK}>
+        <EuiButton
+          color="primary"
+          fill
+          href={RISKY_USERS_DOC_LINK}
+          data-test-subj="enable_user_risk_score"
+        >
           {i18n.ENABLE_USER_RISK_SCORE}
         </EuiButton>
       }

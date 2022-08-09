@@ -81,15 +81,15 @@ export const EntityAnalyticsHeader = () => {
         <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="s">
             <EuiFlexItem>
-              <StyledEuiTitle size="l">
+              <StyledEuiTitle data-test-subj="critical_hosts_quantity" size="l">
                 <span>{hostsSeverityCount[RiskSeverity.critical]}</span>
               </StyledEuiTitle>
             </EuiFlexItem>
             <EuiFlexItem>
               <LinkAnchor
-                data-test-subj="critical_hosts"
                 onClick={goToHostRiskTabFilterdByCritical}
                 href={hostRiskTabUrl}
+                data-test-subj="critical_hosts_link"
               >
                 {i18n.CRITICAL_HOSTS}
               </LinkAnchor>
@@ -99,15 +99,15 @@ export const EntityAnalyticsHeader = () => {
         <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="s">
             <EuiFlexItem>
-              <StyledEuiTitle size="l">
+              <StyledEuiTitle data-test-subj="critical_users_quantity" size="l">
                 <span>{usersSeverityCount[RiskSeverity.critical]}</span>
               </StyledEuiTitle>
             </EuiFlexItem>
             <EuiFlexItem>
               <LinkAnchor
-                data-test-subj="critical_users"
                 onClick={goToUserRiskTabFilterdByCritical}
                 href={userRiskTabUrl}
+                data-test-subj="critical_users_link"
               >
                 {i18n.CRITICAL_USERS}
               </LinkAnchor>
