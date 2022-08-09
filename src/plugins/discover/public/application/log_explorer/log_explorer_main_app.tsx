@@ -48,26 +48,16 @@ export function LogExplorerMainApp(props: LogExplorerMainAppProps) {
 
   const dataView = savedSearch.searchSource.getField('index')!; // TODO: get the data view in a safer way
 
-  // TODO: We will want to rewrite the bulk of the query fetching logic in useDiscoverState > useSavedSearch (which returns data$)
   /**
    * State related logic
    */
-  const {
-    data$,
-    inspectorAdapters,
-    onChangeDataView,
-    onUpdateQuery,
-    refetch$,
-    resetSavedSearch,
-    searchSource,
-    state,
-    stateContainer,
-  } = useDiscoverState({
-    services,
-    history: usedHistory,
-    savedSearch,
-    setExpandedDoc,
-  });
+  const { onChangeDataView, resetSavedSearch, searchSource, state, stateContainer } =
+    useDiscoverState({
+      services,
+      history: usedHistory,
+      savedSearch,
+      setExpandedDoc,
+    });
 
   /**
    * Url / Routing logic
@@ -84,7 +74,7 @@ export function LogExplorerMainApp(props: LogExplorerMainAppProps) {
     return () => {
       data.search.session.clear();
     };
-  }, [savedSearch, chrome, docLinks, refetch$, stateContainer, data, config]);
+  }, [savedSearch, chrome, docLinks, stateContainer, data, config]);
 
   /**
    * Initializing syncing with state and help menu
@@ -109,16 +99,16 @@ export function LogExplorerMainApp(props: LogExplorerMainAppProps) {
       <LogExplorerLayoutMemoized
         dataView={dataView}
         dataViewList={dataViewList}
-        inspectorAdapters={inspectorAdapters}
+        // inspectorAdapters={inspectorAdapters}
         expandedDoc={expandedDoc}
         onChangeDataView={onChangeDataView}
-        onUpdateQuery={onUpdateQuery}
+        // onUpdateQuery={onUpdateQuery}
         resetSavedSearch={resetCurrentSavedSearch}
         setExpandedDoc={setExpandedDoc}
         navigateTo={navigateTo}
         savedSearch={savedSearch}
-        savedSearchData$={data$}
-        savedSearchRefetch$={refetch$}
+        // savedSearchData$={data$}
+        // savedSearchRefetch$={refetch$}
         searchSource={searchSource}
         state={state}
         stateContainer={stateContainer}

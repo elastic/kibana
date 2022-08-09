@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import classNames from 'classnames';
 import { generateFilters } from '@kbn/data-plugin/public';
-import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { InspectorSession } from '@kbn/inspector-plugin/public';
 import { useActor } from '@xstate/react';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
@@ -31,20 +31,15 @@ import { DiscoverNoResults } from '../../../main/components/no_results';
 import { LoadingSpinner } from '../../../main/components/loading_spinner/loading_spinner';
 import { DiscoverSidebarResponsive } from '../../../main/components/sidebar';
 import { DiscoverLayoutProps } from '../../../main/components/layout/types';
-import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../../common';
 import { popularizeField } from '../../../../utils/popularize_field';
 import { DiscoverTopNav } from '../../../main/components/top_nav/discover_topnav';
 import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
 import { DiscoverUninitialized } from '../../../main/components/uninitialized/uninitialized';
-import { DataMainMsg } from '../../../main/hooks/use_saved_search';
 import { useColumns } from '../../../../hooks/use_data_grid_columns';
-import { useDataState } from '../../../main/hooks/use_data_state';
 import { SavedSearchURLConflictCallout } from '../../../../services/saved_searches';
 import { hasActiveFilter } from '../../../main/components/layout/utils';
 import { LogExplorer } from './log_explorer';
 import { useStateMachineContext } from '../../hooks/query_data/use_state_machine';
-import { RecordRawType } from '../../../main/hooks/use_saved_search';
-import { getRawRecordType } from '../../../main/utils/get_raw_record_type';
 import { useFieldCounts } from '../../hooks/use_field_counts';
 
 /**
@@ -84,50 +79,24 @@ export function LogExplorerLayout({
     spaces,
     inspector,
   } = useDiscoverServices();
-  const { main$ } = savedSearchData$;
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
 
   const stateMachine = useStateMachineContext();
   const [dataAccessState] = useActor(stateMachine);
   const fieldCounts = useFieldCounts(stateMachine);
-  const dataState: DataMainMsg = useDataState(main$);
-
-  // We treat rollup v1 data views as non time based in Discover, since we query them
-  // in a non time based way using the regular _search API, since the internal
-  // representation of those documents does not have the time field that _field_caps
-  // reports us.
-  const isTimeBased = useMemo(() => {
-    return dataView.type !== DataViewType.ROLLUP && dataView.isTimeBased();
-  }, [dataView]);
+  // const dataState: DataMainMsg = useDataState(main$);
 
   const initialSidebarClosed = Boolean(storage.get(SIDEBAR_CLOSED_KEY));
   const [isSidebarClosed, setIsSidebarClosed] = useState(initialSidebarClosed);
-  const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
 
-  const isPlainRecord = useMemo(
-    () => getRawRecordType(state.query) === RecordRawType.PLAIN,
-    [state.query]
-  );
-
-  const textBasedLanguageModeErrors = useMemo(() => {
-    if (isPlainRecord) {
-      return dataState.error;
-    }
-  }, [dataState.error, isPlainRecord]);
-
-  // const resultState = useMemo(
-  //   () => getResultState(dataState.fetchStatus, dataState.foundDocuments!),
-  //   [dataState.fetchStatus, dataState.foundDocuments]
-  // );
-
-  const onOpenInspector = useCallback(() => {
-    // prevent overlapping
-    setExpandedDoc(undefined);
-    const session = inspector.open(inspectorAdapters, {
-      title: savedSearch.title,
-    });
-    setInspectorSession(session);
-  }, [setExpandedDoc, inspectorAdapters, savedSearch, inspector]);
+  // const onOpenInspector = useCallback(() => {
+  //   // prevent overlapping
+  //   setExpandedDoc(undefined);
+  //   const session = inspector.open(inspectorAdapters, {
+  //     title: savedSearch.title,
+  //   });
+  //   setInspectorSession(session);
+  // }, [setExpandedDoc, inspectorAdapters, savedSearch, inspector]);
 
   useEffect(() => {
     return () => {
@@ -145,7 +114,7 @@ export function LogExplorerLayout({
     dataViews,
     setAppState: stateContainer.setAppState,
     state,
-    useNewFieldsApi,
+    useNewFieldsApi: true,
   });
 
   const onAddFilter = useCallback(
@@ -179,14 +148,15 @@ export function LogExplorerLayout({
 
   const contentCentered =
     dataAccessState.matches('uninitialized') || dataAccessState.matches('failedNoData');
-  const onDataViewCreated = useCallback(
-    (newDataView: DataView) => {
-      if (newDataView.id) {
-        onChangeDataView(newDataView.id);
-      }
-    },
-    [onChangeDataView]
-  );
+
+  // const onDataViewCreated = useCallback(
+  //   (newDataView: DataView) => {
+  //     if (newDataView.id) {
+  //       onChangeDataView(newDataView.id);
+  //     }
+  //   },
+  //   [onChangeDataView]
+  // );
 
   const savedSearchTitle = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
@@ -215,7 +185,7 @@ export function LogExplorerLayout({
       </h1>
       <TopNavMemoized
         dataView={dataView}
-        onOpenInspector={onOpenInspector}
+        // onOpenInspector={onOpenInspector}
         query={state.query}
         navigateTo={navigateTo}
         savedQuery={state.savedQuery}
@@ -226,8 +196,8 @@ export function LogExplorerLayout({
         resetSavedSearch={resetSavedSearch}
         onChangeDataView={onChangeDataView}
         onFieldEdited={onFieldEdited}
-        isPlainRecord={isPlainRecord}
-        textBasedLanguageModeErrors={textBasedLanguageModeErrors}
+        // isPlainRecord={isPlainRecord}
+        // textBasedLanguageModeErrors={textBasedLanguageModeErrors}
       />
       <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
         <SavedSearchURLConflictCallout
@@ -248,7 +218,7 @@ export function LogExplorerLayout({
               state={state}
               isClosed={isSidebarClosed}
               trackUiMetric={trackUiMetric}
-              useNewFieldsApi={useNewFieldsApi}
+              useNewFieldsApi={true}
               onFieldEdited={onFieldEdited}
               onDataViewCreated={onDataViewCreated}
               viewMode={VIEW_MODE.LOG_EXPLORER}
@@ -289,9 +259,9 @@ export function LogExplorerLayout({
             >
               {dataAccessState.matches('failedNoData') ? (
                 <DiscoverNoResults
-                  isTimeBased={isTimeBased}
+                  isTimeBased={true}
                   data={data}
-                  error={dataState.error}
+                  // error={dataState.error}
                   hasQuery={isOfQueryType(state.query) && !!state.query?.query}
                   hasFilters={hasActiveFilter(state.filters)}
                   onDisableFilters={onDisableFilters}

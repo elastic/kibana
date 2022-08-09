@@ -6,37 +6,17 @@
  * Side Public License, v 1.
  */
 import { useMemo, useEffect, useState, useCallback } from 'react';
-import usePrevious from 'react-use/lib/usePrevious';
 import { isEqual } from 'lodash';
 import { History } from 'history';
-import { DataViewType } from '@kbn/data-views-plugin/public';
-import {
-  isOfAggregateQueryType,
-  getIndexPatternFromSQLQuery,
-  AggregateQuery,
-  Query,
-} from '@kbn/es-query';
 import { getState } from '../../main/services/discover_state';
 import { getStateDefaults } from '../../main/utils/get_state_defaults';
 import { DiscoverServices } from '../../../build_services';
 import { SavedSearch, getSavedSearch } from '../../../services/saved_searches';
 import { loadDataView } from '../../main/utils/resolve_data_view';
-import { DataDocumentsMsg } from '../../main/hooks/use_saved_search';
-import {
-  MODIFY_COLUMNS_ON_SWITCH,
-  SEARCH_FIELDS_FROM_SOURCE,
-  SEARCH_ON_PAGE_LOAD_SETTING,
-  SORT_DEFAULT_ORDER_SETTING,
-} from '../../../../common';
-import { useSearchSession } from '../../main/hooks/use_search_session';
-import { useDataState } from '../../main/hooks/use_data_state';
-import { FetchStatus } from '../../types';
+import { MODIFY_COLUMNS_ON_SWITCH, SORT_DEFAULT_ORDER_SETTING } from '../../../../common';
 import { getDataViewAppState } from '../../main/utils/get_switch_data_view_app_state';
 import { SortPairArr } from '../../../components/doc_table/utils/get_sort';
 import { DataTableRecord } from '../../../types';
-import { useQueryData } from './query_data/use_query_data';
-
-const MAX_NUM_OF_COLUMNS = 50;
 
 export function useDiscoverState({
   services,
@@ -50,8 +30,6 @@ export function useDiscoverState({
   setExpandedDoc: (doc?: DataTableRecord) => void;
 }) {
   const { uiSettings: config, data, filterManager, dataViews, storage } = services;
-  const useNewFieldsApi = useMemo(() => !config.get(SEARCH_FIELDS_FROM_SOURCE), [config]);
-  const { timefilter } = data.query.timefilter;
 
   const dataView = savedSearch.searchSource.getField('index')!;
 
@@ -81,45 +59,6 @@ export function useDiscoverState({
   const { appStateContainer } = stateContainer;
 
   const [state, setState] = useState(appStateContainer.getState());
-  const [documentStateCols, setDocumentStateCols] = useState<string[]>([]);
-  const [sqlQuery] = useState<AggregateQuery | Query | undefined>(state.query);
-  const prevQuery = usePrevious(state.query);
-
-  /**
-   * Search session logic
-   */
-  const searchSessionManager = useSearchSession({ services, history, stateContainer, savedSearch });
-
-  const initialFetchStatus: FetchStatus = useMemo(() => {
-    // A saved search is created on every page load, so we check the ID to see if we're loading a
-    // previously saved search or if it is just transient
-    const shouldSearchOnPageLoad =
-      config.get<boolean>(SEARCH_ON_PAGE_LOAD_SETTING) ||
-      savedSearch.id !== undefined ||
-      timefilter.getRefreshInterval().pause === false ||
-      searchSessionManager.hasSearchSessionIdInURL();
-    return shouldSearchOnPageLoad ? FetchStatus.LOADING : FetchStatus.UNINITIALIZED;
-  }, [config, savedSearch.id, searchSessionManager, timefilter]);
-
-  /**
-   * Data fetching logic
-   */
-  const { data$, refetch$, reset, inspectorAdapters } = useQueryData({
-    initialFetchStatus,
-    searchSessionManager,
-    savedSearch,
-    searchSource,
-    services,
-    stateContainer,
-    useNewFieldsApi,
-  });
-
-  const documentState: DataDocumentsMsg = useDataState(data$.documents$);
-
-  /**
-   * Reset to display loading spinner when savedSearch is changing
-   */
-  useEffect(() => reset(), [savedSearch.id, reset]);
 
   /**
    * Sync URL state with local app state on saved search load
@@ -137,11 +76,7 @@ export function useDiscoverState({
    */
   useEffect(() => {
     const unsubscribe = appStateContainer.subscribe(async (nextState) => {
-      const { hideChart, interval, sort, index } = state;
-      // chart was hidden, now it should be displayed, so data is needed
-      const chartDisplayChanged = nextState.hideChart !== hideChart && hideChart;
-      const chartIntervalChanged = nextState.interval !== interval;
-      const docTableSortChanged = !isEqual(nextState.sort, sort);
+      const { index } = state;
       const dataViewChanged = !isEqual(nextState.index, index);
       // NOTE: this is also called when navigating from discover app to context app
       if (nextState.index && dataViewChanged) {
@@ -153,27 +88,12 @@ export function useDiscoverState({
          */
         const nextDataView = await loadDataView(nextState.index, dataViews, config);
         savedSearch.searchSource.setField('index', nextDataView.loaded);
-
-        reset();
       }
 
-      if (chartDisplayChanged || chartIntervalChanged || docTableSortChanged) {
-        refetch$.next(undefined);
-      }
       setState(nextState);
     });
     return () => unsubscribe();
-  }, [
-    config,
-    dataViews,
-    appStateContainer,
-    setState,
-    state,
-    refetch$,
-    data$,
-    reset,
-    savedSearch.searchSource,
-  ]);
+  }, [config, dataViews, appStateContainer, setState, state, savedSearch.searchSource]);
 
   /**
    * function to revert any changes to a given saved search
@@ -231,87 +151,11 @@ export function useDiscoverState({
       stateContainer,
     ]
   );
-  /**
-   * Function triggered when the user changes the query in the search bar
-   */
-  const onUpdateQuery = useCallback(
-    (_payload, isUpdate?: boolean) => {
-      if (isUpdate === false) {
-        searchSessionManager.removeSearchSessionIdFromURL({ replace: false });
-        refetch$.next(undefined);
-      }
-    },
-    [refetch$, searchSessionManager]
-  );
-
-  /**
-   * Trigger data fetching on dataView or savedSearch changes
-   */
-  useEffect(() => {
-    if (!isEqual(state.query, prevQuery)) {
-      setDocumentStateCols([]);
-    }
-  }, [state.query, prevQuery]);
-
-  useEffect(() => {
-    if (dataView) {
-      refetch$.next(undefined);
-    }
-  }, [initialFetchStatus, refetch$, dataView, savedSearch.id]);
-
-  /**
-   * We need to make sure the auto refresh interval is disabled for
-   * non-time series data or rollups since we don't show the date picker
-   */
-  useEffect(() => {
-    if (dataView && (!dataView.isTimeBased() || dataView.type === DataViewType.ROLLUP)) {
-      stateContainer.pauseAutoRefreshInterval();
-    }
-  }, [dataView, stateContainer]);
-
-  const getResultColumns = useCallback(() => {
-    if (documentState.result?.length && documentState.fetchStatus === FetchStatus.COMPLETE) {
-      const firstRow = documentState.result[0];
-      const columns = Object.keys(firstRow.raw).slice(0, MAX_NUM_OF_COLUMNS);
-      if (!isEqual(columns, documentStateCols) && !isEqual(state.query, sqlQuery)) {
-        return columns;
-      }
-      return [];
-    }
-    return [];
-  }, [documentState, documentStateCols, sqlQuery, state.query]);
-
-  useEffect(() => {
-    async function fetchDataview() {
-      if (state.query && isOfAggregateQueryType(state.query) && 'sql' in state.query) {
-        const indexPatternFromQuery = getIndexPatternFromSQLQuery(state.query.sql);
-        const idsTitles = await dataViews.getIdsWithTitle();
-        const dataViewObj = idsTitles.find(({ title }) => title === indexPatternFromQuery);
-        if (dataViewObj) {
-          const columns = getResultColumns();
-          if (columns.length) {
-            setDocumentStateCols(columns);
-          }
-          const nextState = {
-            index: dataViewObj.id,
-            ...(columns.length && { columns }),
-          };
-          stateContainer.replaceUrlAppState(nextState);
-        }
-      }
-    }
-    fetchDataview();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [config, documentState, dataViews]);
 
   return {
-    data$,
     dataView,
-    inspectorAdapters,
-    refetch$,
     resetSavedSearch,
     onChangeDataView,
-    onUpdateQuery,
     searchSource,
     setState,
     state,
