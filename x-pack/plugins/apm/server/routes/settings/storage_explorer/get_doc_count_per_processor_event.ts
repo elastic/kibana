@@ -17,7 +17,7 @@ import {
   TRANSACTION_SAMPLED,
 } from '../../../../common/elasticsearch_fieldnames';
 import {
-  IndexLifecyclePhase,
+  IndexLifecyclePhaseSelectOption,
   indexLifeCyclePhaseToDataTier,
 } from '../../../../common/storage_explorer_types';
 
@@ -27,7 +27,7 @@ export async function getDocCountPerProcessorEvent({
   probability,
 }: {
   setup: Setup;
-  indexLifecyclePhase: IndexLifecyclePhase;
+  indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
   probability: number;
 }) {
   const { apmEventClient } = setup;
@@ -48,10 +48,12 @@ export async function getDocCountPerProcessorEvent({
         query: {
           bool: {
             filter: [
-              ...termQuery(
-                TIER,
-                indexLifeCyclePhaseToDataTier[indexLifecyclePhase]
-              ),
+              ...(indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All
+                ? termQuery(
+                    TIER,
+                    indexLifeCyclePhaseToDataTier[indexLifecyclePhase]
+                  )
+                : []),
             ] as QueryDslQueryContainer[],
           },
         },

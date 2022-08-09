@@ -6,63 +6,113 @@
  */
 
 import React from 'react';
-import { EuiSelect } from '@elastic/eui';
+import { EuiSuperSelect, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IndexLifecyclePhase } from '../../../../../common/storage_explorer_types';
+import { IndexLifecyclePhaseSelectOption } from '../../../../../common/storage_explorer_types';
 
 interface Props {
-  indexLifecyclePhase: IndexLifecyclePhase;
-  onChange: (indexLifecyclePhase: IndexLifecyclePhase) => void;
+  indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
+  onChange: (indexLifecyclePhase: IndexLifecyclePhaseSelectOption) => void;
 }
-
 export function IndexLifecyclePhaseSelect({
   indexLifecyclePhase,
   onChange,
 }: Props) {
-  const options: Array<{
-    value: IndexLifecyclePhase;
-    text: string;
-  }> = [
+  const options = [
     {
-      value: IndexLifecyclePhase.Hot,
-      text: i18n.translate(
-        'xpack.apm.settings.storageExplorer.indexLifecyclePhase.hot',
+      value: IndexLifecyclePhaseSelectOption.All,
+      label: i18n.translate(
+        'xpack.apm.settings.storageExplorer.indexLifecyclePhase.all.label',
+        {
+          defaultMessage: 'All',
+        }
+      ),
+      description: i18n.translate(
+        'xpack.apm.settings.storageExplorer.indexLifecyclePhase.all.description',
+        {
+          defaultMessage: 'Search data in all lifecycle phases.',
+        }
+      ),
+    },
+    {
+      value: IndexLifecyclePhaseSelectOption.Hot,
+      label: i18n.translate(
+        'xpack.apm.settings.storageExplorer.indexLifecyclePhase.hot.label',
         {
           defaultMessage: 'Hot',
         }
       ),
+      description: i18n.translate(
+        'xpack.apm.settings.storageExplorer.indexLifecyclePhase.hot.description',
+        {
+          defaultMessage:
+            'Holds your most-recent, most-frequently-searched data.',
+        }
+      ),
     },
     {
-      value: IndexLifecyclePhase.Warm,
-      text: i18n.translate(
-        'xpack.apm.settings.storageExplorer.indexLifecyclePhase.warm',
+      value: IndexLifecyclePhaseSelectOption.Warm,
+      label: i18n.translate(
+        'xpack.apm.settings.storageExplorer.indexLifecyclePhase.warm.label',
         {
           defaultMessage: 'Warm',
         }
       ),
+      description: i18n.translate(
+        'xpack.apm.settings.storageExplorer.indexLifecyclePhase.warm.description',
+        {
+          defaultMessage:
+            'Holds data from recent weeks. Updates are still allowed, but likely infrequent.',
+        }
+      ),
     },
     {
-      value: IndexLifecyclePhase.Cold,
-      text: i18n.translate(
-        'xpack.apm.settings.storageExplorer.indexLifecyclePhase.cold',
+      value: IndexLifecyclePhaseSelectOption.Cold,
+      label: i18n.translate(
+        'xpack.apm.settings.storageExplorer.indexLifecyclePhase.cold.label',
         {
           defaultMessage: 'Cold',
         }
       ),
+      description: i18n.translate(
+        'xpack.apm.settings.storageExplorer.indexLifecyclePhase.cold.description',
+        {
+          defaultMessage:
+            'While still searchable, this tier is typically optimized for lower storage costs rather than search speed.',
+        }
+      ),
     },
     {
-      value: IndexLifecyclePhase.Frozen,
-      text: i18n.translate(
-        'xpack.apm.settings.storageExplorer.indexLifecyclePhase.frozen',
+      value: IndexLifecyclePhaseSelectOption.Frozen,
+      label: i18n.translate(
+        'xpack.apm.settings.storageExplorer.indexLifecyclePhase.frozen.label',
         {
           defaultMessage: 'Frozen',
         }
       ),
+      description: i18n.translate(
+        'xpack.apm.settings.storageExplorer.indexLifecyclePhase.frozen.description',
+        {
+          defaultMessage:
+            'Holds data that are no longer being queried, or being queried rarely.',
+        }
+      ),
     },
-  ];
+  ].map(({ value, label, description }) => ({
+    value,
+    inputDisplay: label,
+    dropdownDisplay: (
+      <>
+        <strong>{label}</strong>
+        <EuiText size="s" color="subdued">
+          <p>{description}</p>
+        </EuiText>
+      </>
+    ),
+  }));
 
   return (
-    <EuiSelect
+    <EuiSuperSelect
       prepend={i18n.translate(
         'xpack.apm.settings.storageExplorer.indexLifecyclePhase.label',
         {
@@ -70,8 +120,9 @@ export function IndexLifecyclePhaseSelect({
         }
       )}
       options={options}
-      value={indexLifecyclePhase}
-      onChange={(e) => onChange(e.target.value as IndexLifecyclePhase)}
+      valueOfSelected={indexLifecyclePhase}
+      onChange={(value) => onChange(value as IndexLifecyclePhaseSelectOption)}
+      hasDividers
       style={{ minWidth: 200 }}
     />
   );

@@ -28,7 +28,7 @@ import { useChartTheme } from '@kbn/observability-plugin/public';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useProgressiveFetcher } from '../../../../hooks/use_progressive_fetcher';
 import { EnvironmentBadge } from '../../../shared/environment_badge';
-import { IndexLifecyclePhase } from '../../../../../common/storage_explorer_types';
+import { IndexLifecyclePhaseSelectOption } from '../../../../../common/storage_explorer_types';
 import { asDynamicBytes } from '../../../../../common/utils/formatters';
 import { asPercent } from '../../../../../common/utils/formatters';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
@@ -40,7 +40,7 @@ type StorageExplorerItem =
 
 export function StorageExplorer() {
   const [indexLifecyclePhase, setIndexLifecyclePhase] = useState(
-    IndexLifecyclePhase.Hot
+    IndexLifecyclePhaseSelectOption.Hot
   );
 
   const euiPaletteColorBlindRotations = 3;

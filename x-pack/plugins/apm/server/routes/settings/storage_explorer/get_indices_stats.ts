@@ -8,7 +8,7 @@ import { uniq, pickBy, sumBy, keyBy } from 'lodash';
 import { IlmExplainLifecycleLifecycleExplainManaged } from '@elastic/elasticsearch/lib/api/types';
 import { Setup } from '../../../lib/helpers/setup_request';
 import { ApmPluginRequestHandlerContext } from '../../typings';
-import { IndexLifecyclePhase } from '../../../../common/storage_explorer_types';
+import { IndexLifecyclePhaseSelectOption } from '../../../../common/storage_explorer_types';
 
 export async function getIndicesStats({
   context,
@@ -17,7 +17,7 @@ export async function getIndicesStats({
 }: {
   context: ApmPluginRequestHandlerContext;
   setup: Setup;
-  indexLifecyclePhase: IndexLifecyclePhase;
+  indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
 }) {
   const {
     indices: { transaction, span, metric, error },
@@ -59,7 +59,7 @@ async function getApmIndicesForIndexLifecyclePhase({
 }: {
   context: ApmPluginRequestHandlerContext;
   index: string;
-  indexLifecyclePhase: IndexLifecyclePhase;
+  indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
 }) {
   const esClient = (await context.core).elasticsearch.client;
   const { indices } = await esClient.asCurrentUser.ilm.explainLifecycle({

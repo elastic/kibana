@@ -7,7 +7,8 @@
 
 import * as t from 'io-ts';
 
-export enum IndexLifecyclePhase {
+export enum IndexLifecyclePhaseSelectOption {
+  All = 'all',
   Hot = 'hot',
   Warm = 'warm',
   Cold = 'cold',
@@ -15,17 +16,18 @@ export enum IndexLifecyclePhase {
 }
 
 export const indexLifeCyclePhaseToDataTier = {
-  [IndexLifecyclePhase.Hot]: 'data_hot',
-  [IndexLifecyclePhase.Warm]: 'data_warm',
-  [IndexLifecyclePhase.Cold]: 'data_cold',
-  [IndexLifecyclePhase.Frozen]: 'data_frozen',
+  [IndexLifecyclePhaseSelectOption.Hot]: 'data_hot',
+  [IndexLifecyclePhaseSelectOption.Warm]: 'data_warm',
+  [IndexLifecyclePhaseSelectOption.Cold]: 'data_cold',
+  [IndexLifecyclePhaseSelectOption.Frozen]: 'data_frozen',
 };
 
 export const indexLifecyclePhaseRt = t.type({
   indexLifecyclePhase: t.union([
-    t.literal(IndexLifecyclePhase.Hot),
-    t.literal(IndexLifecyclePhase.Warm),
-    t.literal(IndexLifecyclePhase.Cold),
-    t.literal(IndexLifecyclePhase.Frozen),
+    t.literal(IndexLifecyclePhaseSelectOption.All),
+    t.literal(IndexLifecyclePhaseSelectOption.Hot),
+    t.literal(IndexLifecyclePhaseSelectOption.Warm),
+    t.literal(IndexLifecyclePhaseSelectOption.Cold),
+    t.literal(IndexLifecyclePhaseSelectOption.Frozen),
   ]),
 });

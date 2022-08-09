@@ -16,7 +16,7 @@ import {
   TIER,
 } from '../../../../common/elasticsearch_fieldnames';
 import {
-  IndexLifecyclePhase,
+  IndexLifecyclePhaseSelectOption,
   indexLifeCyclePhaseToDataTier,
 } from '../../../../common/storage_explorer_types';
 
@@ -28,7 +28,7 @@ export async function getTotalTransactionsPerService({
 }: {
   setup: Setup;
   searchAggregatedTransactions: boolean;
-  indexLifecyclePhase: IndexLifecyclePhase;
+  indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
   probability: number;
 }) {
   const { apmEventClient } = setup;
@@ -49,10 +49,12 @@ export async function getTotalTransactionsPerService({
               ...getDocumentTypeFilterForTransactions(
                 searchAggregatedTransactions
               ),
-              ...termQuery(
-                TIER,
-                indexLifeCyclePhaseToDataTier[indexLifecyclePhase]
-              ),
+              ...(indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All
+                ? termQuery(
+                    TIER,
+                    indexLifeCyclePhaseToDataTier[indexLifecyclePhase]
+                  )
+                : []),
             ] as QueryDslQueryContainer[],
           },
         },
