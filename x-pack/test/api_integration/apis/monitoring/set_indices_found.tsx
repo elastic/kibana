@@ -7,13 +7,13 @@
 export function setIndicesFound(metrics: any, setFromMetricbeat: boolean = false) {
   return Object.keys(metrics).reduce((accum: any, metricName) => {
     accum[metricName] = metrics[metricName].map(
-      (item: { indices_found: { internal: boolean; metricbeat: boolean } }, index: number) => {
+      (item: { indices_found: { internal: boolean; ecs: boolean } }, index: number) => {
         if (item.indices_found) {
           return {
             ...item,
             indices_found: {
               internal: !setFromMetricbeat,
-              metricbeat: setFromMetricbeat,
+              ecs: setFromMetricbeat,
             },
           };
         }

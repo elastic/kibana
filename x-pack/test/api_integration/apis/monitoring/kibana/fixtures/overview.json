@@ -208,7 +208,7 @@
         },
         "indices_found": {
           "internal": true,
-          "metricbeat": false
+          "ecs": false
         },
         "data": [
           [
@@ -272,7 +272,7 @@
         },
         "indices_found": {
           "internal": true,
-          "metricbeat": false
+          "ecs": false
         },
         "data": [
           [
@@ -334,7 +334,7 @@
         },
         "indices_found": {
           "internal": true,
-          "metricbeat": false
+          "ecs": false
         },
         "data": [
           [
@@ -397,7 +397,7 @@
         },
         "indices_found": {
           "internal": true,
-          "metricbeat": false
+          "ecs": false
         },
         "data": [
           [
@@ -461,7 +461,7 @@
         },
         "indices_found": {
           "internal": true,
-          "metricbeat": false
+          "ecs": false
         },
         "data": [
           [
@@ -523,7 +523,7 @@
         },
         "indices_found": {
           "internal": true,
-          "metricbeat": false
+          "ecs": false
         },
         "data": [
           [
