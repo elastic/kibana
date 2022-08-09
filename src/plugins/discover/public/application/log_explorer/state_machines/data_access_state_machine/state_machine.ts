@@ -301,6 +301,7 @@ export const dataAccessStateMachine = createMachine<
         initial: 'loading',
         states: {
           loading: {
+            entry: 'updateTimeRange',
             invoke: {
               src: 'loadTail',
             },
@@ -313,8 +314,7 @@ export const dataAccessStateMachine = createMachine<
           },
           loaded: {
             after: {
-              loadTrailDelay: {
-                actions: 'updateTimeRange',
+              loadTailDelay: {
                 target: 'loading',
               },
             },
