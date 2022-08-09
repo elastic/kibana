@@ -23,6 +23,12 @@ import { FramePublicAPI } from '../types';
 
 export const timeShiftOptions = [
   {
+    label: i18n.translate('xpack.lens.indexPattern.timeShift.none', {
+      defaultMessage: 'None',
+    }),
+    value: '',
+  },
+  {
     label: i18n.translate('xpack.lens.indexPattern.timeShift.hour', {
       defaultMessage: '1 hour ago (1h)',
     }),
