@@ -8,20 +8,27 @@
 import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import { firstValueFrom } from 'rxjs';
+
 import type { validateTree } from '../../../../../common/endpoint/schema/resolver';
-import type { ConfigType } from '../../../../config';
+import { featureUsageService } from '../../../services/feature_usage';
 import { Fetcher } from './utils/fetch';
 
 export function handleTree(
   ruleRegistry: RuleRegistryPluginStartContract,
-  config: ConfigType
+  licensing: LicensingPluginStart
 ): RequestHandler<unknown, unknown, TypeOf<typeof validateTree.body>> {
   return async (context, req, res) => {
     const client = (await context.core).elasticsearch.client;
-    const {
-      experimentalFeatures: { insightsRelatedAlertsByProcessAncestry },
-    } = config;
-    const alertsClient = insightsRelatedAlertsByProcessAncestry
+    const license = await firstValueFrom(licensing.license$);
+    const hasAccessToInsightsRelatedByProcessAncestry = license.hasAtLeast('platinum');
+
+    if (hasAccessToInsightsRelatedByProcessAncestry) {
+      featureUsageService.notifyUsage('ALERTS_BY_PROCESS_ANCESTRY');
+    }
+
+    const alertsClient = hasAccessToInsightsRelatedByProcessAncestry
       ? await ruleRegistry.getRacClientWithRequest(req)
       : undefined;
     const fetcher = new Fetcher(client, alertsClient);

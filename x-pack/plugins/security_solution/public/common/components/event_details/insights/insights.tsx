@@ -14,11 +14,12 @@ import * as i18n from './translations';
 import type { BrowserFields } from '../../../containers/source';
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
 import { useGetUserCasesPermissions } from '../../../lib/kibana';
-import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
+import { useLicense } from '../../../hooks/use_license';
 import { RelatedAlertsByProcessAncestry } from './related_alerts_by_process_ancestry';
 import { RelatedCases } from './related_cases';
 import { RelatedAlertsBySourceEvent } from './related_alerts_by_source_event';
 import { RelatedAlertsBySession } from './related_alerts_by_session';
+import { RelatedAlertsUpsell } from './related_alerts_upsell';
 
 interface Props {
   browserFields: BrowserFields;
@@ -33,9 +34,7 @@ interface Props {
  */
 export const Insights = React.memo<Props>(
   ({ browserFields, eventId, data, isReadOnly, timelineId }) => {
-    const isRelatedAlertsByProcessAncestryEnabled = useIsExperimentalFeatureEnabled(
-      'insightsRelatedAlertsByProcessAncestry'
-    );
+    const hasAtLeastPlatinum = useLicense().isPlatinumPlus() && false;
     const processEntityField = find({ category: 'process', field: 'process.entity_id' }, data);
     const originalDocumentId = find(
       { category: 'kibana', field: 'kibana.alert.ancestors.id' },
@@ -45,8 +44,7 @@ export const Insights = React.memo<Props>(
       { category: 'kibana', field: 'kibana.alert.rule.parameters.index' },
       data
     );
-    const hasProcessEntityInfo =
-      isRelatedAlertsByProcessAncestryEnabled && processEntityField && processEntityField.values;
+    const hasProcessEntityInfo = processEntityField && processEntityField.values;
 
     const processSessionField = find(
       { category: 'process', field: 'process.entry_leader.entity_id' },
@@ -73,7 +71,6 @@ export const Insights = React.memo<Props>(
       hasProcessSessionInfo;
 
     const canShowAncestryInsight =
-      isRelatedAlertsByProcessAncestryEnabled &&
       processEntityField &&
       processEntityField.values &&
       originalDocumentId &&
@@ -122,17 +119,22 @@ export const Insights = React.memo<Props>(
             </EuiFlexItem>
           )}
 
-          {canShowAncestryInsight && (
-            <EuiFlexItem data-test-subj="related-alerts-by-ancestry">
-              <RelatedAlertsByProcessAncestry
-                data={processEntityField}
-                originalDocumentId={originalDocumentId}
-                index={originalDocumentIndex}
-                eventId={eventId}
-                timelineId={timelineId}
-              />
-            </EuiFlexItem>
-          )}
+          {canShowAncestryInsight &&
+            (hasAtLeastPlatinum ? (
+              <EuiFlexItem data-test-subj="related-alerts-by-ancestry">
+                <RelatedAlertsByProcessAncestry
+                  data={processEntityField}
+                  originalDocumentId={originalDocumentId}
+                  index={originalDocumentIndex}
+                  eventId={eventId}
+                  timelineId={timelineId}
+                />
+              </EuiFlexItem>
+            ) : (
+              <EuiFlexItem data-test-subj="related-alerts-upsell">
+                <RelatedAlertsUpsell />
+              </EuiFlexItem>
+            ))}
         </EuiFlexGroup>
       </div>
     );
