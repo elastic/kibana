@@ -74,7 +74,7 @@ export function getJobsItemsFromEmbeddable(embeddable: Embeddable) {
   };
 }
 
-export function lensOperationToMlFunction(operationType: string) {
+export function lensOperationToMlFunction(operationType?: string) {
   switch (operationType) {
     case 'average':
       return ML_JOB_AGGREGATION.MEAN;
@@ -96,7 +96,7 @@ export function lensOperationToMlFunction(operationType: string) {
   }
 }
 
-export function getMlFunction(operationType: string) {
+export function getMlFunction(operationType?: string) {
   const func = lensOperationToMlFunction(operationType);
   if (func === null) {
     throw Error(

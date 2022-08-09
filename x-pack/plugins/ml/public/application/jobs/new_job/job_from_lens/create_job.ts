@@ -352,10 +352,10 @@ function getColumns(
     const col = columns[a];
     // fail early if any of the cols being used as accessors
     // contain functions we don't support
-    return col.dataType !== 'date' && getMlFunction(col.operationType);
+    return col?.dataType !== 'date' && getMlFunction(col?.operationType);
   });
 
-  if (Object.values(columns).some((c) => hasSourceField(c) === false)) {
+  if (Object.values(columns).some((c) => c && hasSourceField(c) === false)) {
     throw Error(
       i18n.translate('xpack.ml.newJob.fromLens.createJob.error.colsNoSourceField', {
         defaultMessage: 'Some columns do not contain a source field.',
@@ -363,7 +363,7 @@ function getColumns(
     );
   }
 
-  if (Object.values(columns).some((c) => hasIncompatibleProperties(c) === true)) {
+  if (Object.values(columns).some((c) => c && hasIncompatibleProperties(c) === true)) {
     throw Error(
       i18n.translate('xpack.ml.newJob.fromLens.createJob.error.colsUsingFilterTimeSift', {
         defaultMessage:
