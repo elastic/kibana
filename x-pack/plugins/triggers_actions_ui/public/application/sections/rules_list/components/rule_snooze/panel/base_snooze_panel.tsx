@@ -189,8 +189,7 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
                 {i18n.translate(
                   'xpack.triggersActionsUI.sections.rulesList.addScheduleDescription',
                   {
-                    defaultMessage:
-                      'Silence actions immediately or schedule downtimes.',
+                    defaultMessage: 'Silence actions immediately or schedule downtimes.',
                   }
                 )}
               </EuiText>
