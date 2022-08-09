@@ -40,8 +40,8 @@ export function WithIndicators() {
   return (
     <KibanaReactContext.Provider>
       <IndicatorsTable
-        loadData={stub}
         firstLoad={false}
+        loading={false}
         pagination={{
           pageSize: 10,
           pageIndex: 0,
@@ -53,5 +53,23 @@ export function WithIndicators() {
         indicatorCount={indicatorsFixture.length * 2}
       />
     </KibanaReactContext.Provider>
+  );
+}
+
+export function WithNoIndicators() {
+  return (
+    <IndicatorsTable
+      firstLoad={false}
+      pagination={{
+        pageSize: 10,
+        pageIndex: 0,
+        pageSizeOptions: [10, 25, 50],
+      }}
+      indicators={[]}
+      onChangePage={stub}
+      onChangeItemsPerPage={stub}
+      indicatorCount={0}
+      loading={false}
+    />
   );
 }

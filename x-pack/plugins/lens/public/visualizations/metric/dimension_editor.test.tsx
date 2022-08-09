@@ -22,6 +22,7 @@ import { act } from 'react-dom/test-utils';
 import { EuiColorPickerOutput } from '@elastic/eui/src/components/color_picker/color_picker';
 import { createMockFramePublicAPI } from '../../mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { euiLightVars } from '@kbn/ui-theme';
 
 jest.mock('lodash', () => {
   const original = jest.requireActual('lodash');
@@ -162,13 +163,13 @@ describe('dimension editor', () => {
         expect(harnessNoPalette.colorPicker.exists()).toBeTruthy();
       });
 
-      it('fills placeholder with default value', () => {
+      it('fills with default value', () => {
         const localHarness = getHarnessWithState({
           ...fullState,
           palette: undefined,
           color: undefined,
         });
-        expect(localHarness.colorPicker.props().placeholder).toBe('Auto');
+        expect(localHarness.colorPicker.props().color).toBe(euiLightVars.euiColorPrimary);
       });
 
       it('sets color', () => {

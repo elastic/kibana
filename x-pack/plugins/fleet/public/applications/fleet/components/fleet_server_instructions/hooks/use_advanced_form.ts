@@ -19,6 +19,7 @@ import { useWaitForFleetServer } from './use_wait_for_fleet_server';
  */
 export const useAdvancedForm = (defaultAgentPolicyId?: string) => {
   const {
+    isSelectFleetServerPolicyLoading,
     eligibleFleetServerPolicies,
     refreshEligibleFleetServerPolicies,
     fleetServerPolicyId,
@@ -31,6 +32,7 @@ export const useAdvancedForm = (defaultAgentPolicyId?: string) => {
   const [deploymentMode, setDeploymentMode] = useState<DeploymentMode>('quickstart');
 
   return {
+    isSelectFleetServerPolicyLoading,
     eligibleFleetServerPolicies,
     refreshEligibleFleetServerPolicies,
     fleetServerPolicyId,
