@@ -45,7 +45,7 @@ Reason:
     defaultSummaryActionMessage: i18n.translate(
       'xpack.infra.metrics.alerting.threshold.defaultSummaryActionMessage',
       {
-        defaultMessage: `Summary of \\{\\{alerts.length\\}\\} alerts`,
+        defaultMessage: `There were \\{\\{alerts.new.length\\}\\} new, \\{\\{alerts.ongoing.length\\}\\} ongoing and \\{\\{alerts.recovered.length\\}\\} recovered alerts`,
       }
     ),
     requiresAppContext: false,

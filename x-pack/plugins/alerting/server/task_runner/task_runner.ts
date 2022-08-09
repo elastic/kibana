@@ -675,10 +675,7 @@ export class TaskRunner<
 
       const actionsToTrigger: RuleAction[] = [];
       const ruleTypeActionGroups = new Map(
-        ruleType.actionGroups.map((group: ActionGroup<ActionGroupIds | RecoveryActionGroupId>) => [
-          group.id,
-          group.name,
-        ])
+        ruleType.actionGroups.map((group: ActionGroup<string>) => [group.id, group.name])
       );
 
       for (const action of rule.actions) {
@@ -798,14 +795,16 @@ export class TaskRunner<
       /////////////////////////////////////////////////////////////////////////
       /////////////////////////////////////////////////////////////////////////
 
-      actionsToReturn = await this.triggerActions({
-        actions: actionsToTrigger,
-        spaceId,
-        apiKey,
-        ruleId,
-        fakeRequest,
-        ruleRunMetricsStore,
-      });
+      actionsToReturn = (
+        await this.triggerActions({
+          actions: actionsToTrigger,
+          spaceId,
+          apiKey,
+          ruleId,
+          fakeRequest,
+          ruleRunMetricsStore,
+        })
+      ).map((act) => omit(act, ['id']));
     } else {
       if (ruleIsSnoozed) {
         this.logger.debug(`no scheduling of actions for rule ${ruleLabel}: rule is snoozed.`);

@@ -176,8 +176,8 @@ export const ActionTypeForm = ({
 
   useEffect(() => {
     setActionProperty('isSummary', isSummary, index);
-    if (isSummary && notifyWhen === NotifyWhen.ON_EVERY_RUN) {
-      setNotifyWhen(NotifyWhen.ONCE);
+    if (isSummary && (notifyWhen === NotifyWhen.ON_EVERY_RUN || notifyWhen === NotifyWhen.ONCE)) {
+      setNotifyWhen(NotifyWhen.ON_INTERVAL);
     }
     setActionProperty('notifyWhen', notifyWhen, index);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -243,6 +243,7 @@ export const ActionTypeForm = ({
   const notifyWhenOptions = [
     {
       value: NotifyWhen.ONCE,
+      disabled: isSummary,
       inputDisplay: isSummary
         ? 'Only on status change'
         : `Once rule is in "${selectedActionGroup?.name}" status`,
