@@ -30,12 +30,8 @@ export default {
   },
 };
 
-const argTypes = getStoryArgTypes();
-
-let mockItems: UserContentCommonSchema[];
-const itemTypes = ['foo', 'bar', 'baz', 'elastic'];
 const createMockItems = (total: number) => {
-  mockItems = [...Array(total)].map((_, i) => {
+  return [...Array(total)].map((_, i) => {
     const type = itemTypes[Math.floor(Math.random() * 4)];
 
     return {
@@ -51,7 +47,9 @@ const createMockItems = (total: number) => {
   });
 };
 
-createMockItems(500);
+const argTypes = getStoryArgTypes();
+const itemTypes = ['foo', 'bar', 'baz', 'elastic'];
+const mockItems: UserContentCommonSchema[] = createMockItems(500);
 
 export const ConnectedComponent = (params: Params) => {
   return (
