@@ -228,7 +228,7 @@ export interface Datasource<T = unknown, P = unknown> {
   getPersistableState: (state: T) => { state: P; savedObjectReferences: SavedObjectReference[] };
   getCurrentIndexPatternId: (state: T) => string;
 
-  insertLayer: (state: T, newLayerId: string) => T;
+  insertLayer: (state: T, newLayerId: string, linkToLayerId?: string) => T;
   removeLayer: (state: T, layerId: string) => T;
   clearLayer: (state: T, layerId: string) => T;
   getLayers: (state: T) => string[];
@@ -819,6 +819,8 @@ export interface Visualization<T = unknown> {
   removeLayer?: (state: T, layerId: string) => T;
   /** Track added layers in internal state */
   appendLayer?: (state: T, layerId: string, type: LayerType) => T;
+  /** Returns a list of layers the new layer ID should be linked to? */
+  reportLinkedLayers?: (state: T, newLayerId: string) => string[];
 
   /** Retrieve a list of supported layer types with initialization data */
   getSupportedLayers: (

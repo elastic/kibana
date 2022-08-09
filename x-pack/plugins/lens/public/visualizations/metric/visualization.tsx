@@ -428,6 +428,12 @@ export const getMetricVisualization = ({
     ];
   },
 
+  reportLinkedLayers(state, newLayerId: string): string[] {
+    return newLayerId === state.trendlineLayerId ? [state.layerId] : [];
+  },
+
+  // reportLinkedDimensions()
+
   appendLayer(state, layerId, layerType) {
     if (layerType !== layerTypes.METRIC_TRENDLINE) {
       throw new Error(`Metric vis only supports layers of type ${layerTypes.METRIC_TRENDLINE}!`);

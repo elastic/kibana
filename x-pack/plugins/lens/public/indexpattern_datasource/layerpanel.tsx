@@ -8,6 +8,7 @@
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { EuiSpacer } from '@elastic/eui';
 import { DatasourceLayerPanelProps } from '../types';
 import { IndexPatternPrivateState } from './types';
 import { ChangeIndexPattern } from './change_indexpattern';
@@ -25,8 +26,9 @@ export function LayerPanel({ state, layerId, onChangeIndexPattern }: IndexPatter
   const notFoundTitleLabel = i18n.translate('xpack.lens.layerPanel.missingDataView', {
     defaultMessage: 'Data view not found',
   });
-  return (
+  return Boolean(layer.linkToLayer) ? null : (
     <I18nProvider>
+      <EuiSpacer size="s" />
       <ChangeIndexPattern
         data-test-subj="indexPattern-switcher"
         trigger={{

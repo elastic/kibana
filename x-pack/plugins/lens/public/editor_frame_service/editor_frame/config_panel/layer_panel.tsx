@@ -8,15 +8,7 @@
 import './layer_panel.scss';
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import {
-  EuiPanel,
-  EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiText,
-  EuiIconTip,
-} from '@elastic/eui';
+import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiText, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { NativeRenderer } from '../../../native_renderer';
 import {
@@ -320,7 +312,6 @@ export function LayerPanel(
             </EuiFlexGroup>
             {layerDatasource && (
               <>
-                <EuiSpacer size="s" />
                 <NativeRenderer
                   render={layerDatasource.renderLayerPanel}
                   nativeProps={{

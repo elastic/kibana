@@ -72,6 +72,7 @@ import {
   IndexPatternPrivateState,
   IndexPatternPersistedState,
   IndexPattern,
+  IndexPatternLayer,
 } from './types';
 import { mergeLayer } from './state_helpers';
 import { Datasource, StateSetter, VisualizeEditorContext } from '../types';
@@ -190,12 +191,12 @@ export function getIndexPatternDatasource({
       return state.currentIndexPatternId;
     },
 
-    insertLayer(state: IndexPatternPrivateState, newLayerId: string) {
+    insertLayer(state: IndexPatternPrivateState, newLayerId: string, linkToLayerId?: string) {
       return {
         ...state,
         layers: {
           ...state.layers,
-          [newLayerId]: blankLayer(state.currentIndexPatternId),
+          [newLayerId]: blankLayer(state.currentIndexPatternId, linkToLayerId),
         },
       };
     },
@@ -400,12 +401,18 @@ export function getIndexPatternDatasource({
       render(
         <KibanaThemeProvider theme$={core.theme.theme$}>
           <LayerPanel
-            onChangeIndexPattern={(indexPatternId) => {
-              changeLayerIndexPattern({
+            onChangeIndexPattern={async (indexPatternId) => {
+              const layersToChange = [
+                props.layerId,
+                ...Object.entries(props.state.layers)
+                  .map(([layerId, layer]) => (layer.linkToLayer === props.layerId ? layerId : ''))
+                  .filter(Boolean),
+              ];
+              await changeLayerIndexPattern({
                 indexPatternId,
                 setState: props.setState,
                 state: props.state,
-                layerId: props.layerId,
+                layerIds: layersToChange,
                 onError: onIndexPatternLoadError,
                 replaceIfPossible: true,
                 storage,
@@ -712,9 +719,10 @@ export function getIndexPatternDatasource({
   return indexPatternDatasource;
 }
 
-function blankLayer(indexPatternId: string) {
+function blankLayer(indexPatternId: string, linkToLayerId?: string): IndexPatternLayer {
   return {
     indexPatternId,
+    linkToLayer: linkToLayerId,
     columns: {},
     columnOrder: [],
   };

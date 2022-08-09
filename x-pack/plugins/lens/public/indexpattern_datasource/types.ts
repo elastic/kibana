@@ -73,6 +73,8 @@ export interface IndexPatternLayer {
   columns: Record<string, GenericIndexPatternColumn>;
   // Each layer is tied to the index pattern that created it
   indexPatternId: string;
+  // Layers can be linked to other layers so the their dataviews are kept in sync
+  linkToLayer?: string;
   // Partial columns represent the temporary invalid states
   incompleteColumns?: Record<string, IncompleteColumn>;
 }

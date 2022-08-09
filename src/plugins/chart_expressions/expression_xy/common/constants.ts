@@ -27,6 +27,7 @@ export const LayerTypes = {
   DATA: 'data',
   REFERENCELINE: 'referenceLine',
   ANNOTATIONS: 'annotations',
+  METRIC_TRENDLINE: 'metricTrendline',
 } as const;
 
 export const FittingFunctions = {

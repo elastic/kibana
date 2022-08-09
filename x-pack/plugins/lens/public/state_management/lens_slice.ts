@@ -628,6 +628,9 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         layerType
       );
 
+      const linkedLayers =
+        activeVisualization.reportLinkedLayers?.(visualizationState, layerId) ?? [];
+
       const framePublicAPI = {
         // any better idea to avoid `as`?
         activeData: state.activeData
@@ -647,7 +650,8 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         !noDatasource && activeDatasource
           ? activeDatasource.insertLayer(
               state.datasourceStates[state.activeDatasourceId].state,
-              layerId
+              layerId,
+              linkedLayers[0] // TODO - support multiple?
             )
           : state.datasourceStates[state.activeDatasourceId].state;
 

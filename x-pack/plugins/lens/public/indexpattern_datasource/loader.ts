@@ -340,7 +340,7 @@ export async function changeIndexPattern({
 
 export async function changeLayerIndexPattern({
   indexPatternId,
-  layerId,
+  layerIds,
   state,
   setState,
   onError,
@@ -350,7 +350,7 @@ export async function changeLayerIndexPattern({
   uiActions,
 }: {
   indexPatternId: string;
-  layerId: string;
+  layerIds: string[];
   state: IndexPatternPrivateState;
   setState: SetState;
   onError: ErrorHandler;
@@ -359,12 +359,14 @@ export async function changeLayerIndexPattern({
   indexPatternsService: IndexPatternsService;
   uiActions: UiActionsStart;
 }) {
-  const fromDataView = state.layers[layerId].indexPatternId;
   const toDataView = indexPatternId;
+
+  const fromDataView = state.layers[layerIds[0]].indexPatternId;
 
   const trigger = uiActions.getTrigger(UPDATE_FILTER_REFERENCES_TRIGGER);
   const action = uiActions.getAction(UPDATE_FILTER_REFERENCES_ACTION);
 
+  // TODO - check if I broke this
   action?.execute({
     trigger,
     fromDataView,
@@ -383,18 +385,28 @@ export async function changeLayerIndexPattern({
   }
 
   try {
-    setState((s) => ({
-      ...s,
-      layers: {
+    setState((s) => {
+      const newLayers = {
         ...s.layers,
-        [layerId]: updateLayerIndexPattern(s.layers[layerId], indexPatterns[indexPatternId]),
-      },
-      indexPatterns: {
-        ...s.indexPatterns,
-        [indexPatternId]: indexPatterns[indexPatternId],
-      },
-      currentIndexPatternId: replaceIfPossible ? indexPatternId : s.currentIndexPatternId,
-    }));
+      };
+
+      layerIds.forEach((layerId) => {
+        newLayers[layerId] = updateLayerIndexPattern(
+          s.layers[layerId],
+          indexPatterns[indexPatternId]
+        );
+      });
+
+      return {
+        ...s,
+        layers: newLayers,
+        indexPatterns: {
+          ...s.indexPatterns,
+          [indexPatternId]: indexPatterns[indexPatternId],
+        },
+        currentIndexPatternId: replaceIfPossible ? indexPatternId : s.currentIndexPatternId,
+      };
+    });
     setLastUsedIndexPatternId(storage, indexPatternId);
   } catch (err) {
     onError(err);
