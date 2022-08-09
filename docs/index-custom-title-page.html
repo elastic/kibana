@@ -14,68 +14,85 @@
       </p>
     </td>
     <td>
-      <img src="https://i.imgur.com/MRFFBxD.png" , style="width: 75%" />
+      <img src="https://i.imgur.com/MRFFBxD.png", style="width: 100%" />
     </td>
   </tr>
 </table>
-
 
 <p>&nbsp;</p>
 
-<table>
-  <tr>
-    <td bgcolor="#F6F6F6">
-      <p>
-        <img src="https://i.imgur.com/e8Zu260.png" style="width: 24px" />
-        <a href="https://www.elastic.co/guide/en/kibana/current/introduction.html">
-          Kibana overview</a
-        >
-      </p>
-      <p>A summary of our features and what's right for your use case.</p>
-    </td>
-    <td bgcolor="#F6F6F6">
-      <p>
-        <img src="https://i.imgur.com/e8Zu260.png" style="width: 24px" />
-        <a href="https://www.elastic.co/guide/en/kibana/current/discover.html"> Search your data</a>
-      </p>
-      <p style="text-align: center">Find hidden insights and relationships in your data.</p>
-    </td>
-    <td bgcolor="#F6F6F6">
-      <p>
-        <img src="https://i.imgur.com/e8Zu260.png" style="width: 24px" />
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Float four columns side by side */
+.column {
+  float: left;
+  width: 33%;
+  padding: 0 10px;
+}
+
+/* Remove extra left and right margins, due to padding */
+.row {margin: 0 -5px;}
+
+/* Clear floats after the columns */
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+/* Responsive columns */
+@media screen and (max-width: 600px) {
+  .column {
+    width: 100%;
+    display: block;
+    margin-bottom: 20px;
+  }
+}
+
+/* Style the counter cards */
+.card {
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+  padding: 16px;
+  text-align: left;
+}
+</style>
+
+<div class="row">
+  <div class="column">
+    <div class="card">
+      <img src="https://i.imgur.com/e8Zu260.png" style="width: 24px" align="absbottom"/>
         <a href="https://www.elastic.co/guide/en/kibana/current/dashboard.html">
-          Visualize your data</a
-        >
-      </p>
-      <p>Create charts and display them on a dashboard.</p>
-    </td>
-  </tr>
-  <tr>
-    <td bgcolor="#F6F6F6">
-      <p>
-        <img src="https://i.imgur.com/e8Zu260.png" style="width: 24px" />
-        <a href="https://www.elastic.co/videos/training-how-to-series-stack"> How-to videos</a>
-      </p>
+          How-to videos</a>
       <p>Watch step-by-step instructions for common use cases.</p>
-    </td>
-    <td bgcolor="#F6F6F6">
-      <p>
-        <img src="https://i.imgur.com/e8Zu260.png" style="width: 24px" />
-        <a href="https://www.elastic.co/guide/en/kibana/current/whats-new.html"> What's new</a>
-      </p>
-      <p>Get highlights of the new features we recently rolled out.</p>
-    </td>
-    <td bgcolor="#F6F6F6">
-      <p>
-        <img src="https://i.imgur.com/e8Zu260.png" style="width: 24px" />
-        <a href="https://www.elastic.co/guide/en/kibana/current/release-notes.html">
-          Release notes</a
-        >
-      </p>
-      <p>Learn about the hard work going on under the hood.</p>
-    </td>
-  </tr>
-</table>
+    </div>
+  </div>
+
+  <div class="column">
+    <div class="card">
+      <img src="https://i.imgur.com/e8Zu260.png" style="width: 24px" align="absbottom"/>
+        <a href="https://www.elastic.co/guide/en/kibana/current/dashboard.html">
+          What's new</a>
+      <p>Get highlights of features we recently rolled out.</p>
+    </div>
+  </div>
+
+  <div class="column">
+    <div class="card">
+      <img src="https://i.imgur.com/e8Zu260.png" style="width: 24px" align="absbottom"/>
+        <a href="https://www.elastic.co/guide/en/kibana/current/dashboard.html">
+          Release notes</a>
+      <p>The hard work going on under the hood.</p>
+    </div>
+  </div>
+
+</div>
 
 
 <table style="width: 100%">
@@ -227,4 +244,32 @@
       </td>
     </tr>
     </table>
-</div>
+
+    <div class="row">
+      <div class="column">
+        <div class="card">
+          <img src="https://i.imgur.com/e8Zu260.png" style="width: 24px" align="absbottom"/>
+            <a href="https://www.elastic.co/guide/en/kibana/current/dashboard.html">
+              Kibana overview</a>
+          <p>A summary of our features and what's right for your use case.</p>
+        </div>
+      </div>
+
+      <div class="column">
+        <div class="card">
+          <img src="https://i.imgur.com/e8Zu260.png" style="width: 24px" align="absbottom"/>
+          <a href="https://www.elastic.co/guide/en/kibana/current/dashboard.html">
+              Search your data</a>
+          <p>Find hidden insights and relationships in your data.</p>
+        </div>
+      </div>
+
+      <div class="column">
+        <div class="card">
+          <img src="https://i.imgur.com/e8Zu260.png" style="width: 24px" align="absbottom"/>
+            <a href="https://www.elastic.co/guide/en/kibana/current/dashboard.html">
+              Visualize your data</a>
+          <p>Create charts and display them on a dashboard.</p>
+        </div>
+      </div>
+    </div>
