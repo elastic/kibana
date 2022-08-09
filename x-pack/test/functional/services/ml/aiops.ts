@@ -56,28 +56,6 @@ export function MachineLearningAiopsProvider({ getService }: FtrProviderContext)
       await testSubjects.existOrFail(`aiopsNoWindowParametersEmptyPrompt`);
     },
 
-    async assertFilterBarFilterContent(filter: {
-      key: string;
-      value: string;
-      enabled?: boolean;
-      pinned?: boolean;
-      negated?: boolean;
-    }) {
-      await retry.waitForWithTimeout(
-        `filter ${JSON.stringify(filter)} to exist`,
-        2000,
-        async () => {
-          return await filterBar.hasFilter(
-            filter.key,
-            filter.value,
-            filter.enabled,
-            filter.pinned,
-            filter.negated
-          );
-        }
-      );
-    },
-
     async navigateToIndexPatternSelection() {
       await testSubjects.click('mlMainTab explainLogRateSpikes');
       await testSubjects.existOrFail('mlPageSourceSelection');

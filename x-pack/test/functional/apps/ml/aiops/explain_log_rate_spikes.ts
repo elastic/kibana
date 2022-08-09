@@ -49,13 +49,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
       await ml.aiops.assertSearchPanelExist();
 
-      if (testData.expected.filters) {
-        await ml.testExecution.logTestStep('displays filters in filter bar correctly');
-        for (const filter of testData.expected.filters!) {
-          await ml.aiops.assertFilterBarFilterContent(filter);
-        }
-      }
-
       await ml.testExecution.logTestStep('displays empty prompt');
       await ml.aiops.assertNoWindowParametersEmptyPromptExist();
     });
