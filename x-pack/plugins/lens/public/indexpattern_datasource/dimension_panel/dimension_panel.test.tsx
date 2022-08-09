@@ -8,6 +8,7 @@
 import { ReactWrapper, ShallowWrapper } from 'enzyme';
 import React, { ChangeEvent } from 'react';
 import { act } from 'react-dom/test-utils';
+import { findTestSubject } from '@elastic/eui/lib/test';
 import {
   EuiComboBox,
   EuiListGroupItemProps,
@@ -18,6 +19,7 @@ import {
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import {
   IndexPatternDimensionEditorComponent,
   IndexPatternDimensionEditorProps,
@@ -44,6 +46,7 @@ import { DateHistogramIndexPatternColumn } from '../operations/definitions/date_
 import { getFieldByNameFactory } from '../pure_helpers';
 import { Filtering, setFilter } from './filtering';
 import { TimeShift } from './time_shift';
+import { Window } from './window';
 import { DimensionEditor } from './dimension_editor';
 import { AdvancedOptions } from './advanced_options';
 import { layerTypes } from '../../../common';
@@ -214,6 +217,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       uiSettings: {} as IUiSettingsClient,
       savedObjectsClient: {} as SavedObjectsClientContract,
       http: {} as HttpSetup,
+      fieldFormats: fieldFormatsServiceMock.createStartContract(),
       unifiedSearch: unifiedSearchPluginMock.createStartContract(),
       dataViews: dataViewPluginMocks.createStartContract(),
       data: {
@@ -1108,7 +1112,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
     it('should default to None if time scaling is not set', () => {
       wrapper = mount(<IndexPatternDimensionEditorComponent {...getProps({})} />);
-      wrapper.find('[data-test-subj="indexPattern-advanced-accordion"]').first().simulate('click');
+      findTestSubject(wrapper, 'indexPattern-advanced-accordion').simulate('click');
       expect(wrapper.find('[data-test-subj="indexPattern-time-scaling-enable"]')).toHaveLength(1);
       expect(
         wrapper
@@ -1120,7 +1124,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
     it('should show current time scaling if set', () => {
       wrapper = mount(<IndexPatternDimensionEditorComponent {...getProps({ timeScale: 'd' })} />);
-      wrapper.find('[data-test-subj="indexPattern-advanced-accordion"]').first().simulate('click');
+      findTestSubject(wrapper, 'indexPattern-advanced-accordion').simulate('click');
       expect(
         wrapper
           .find('[data-test-subj="indexPattern-time-scaling-unit"]')
@@ -1132,7 +1136,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
     it('should allow to set time scaling initially', () => {
       const props = getProps({});
       wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
-      wrapper.find('[data-test-subj="indexPattern-advanced-accordion"]').first().simulate('click');
+      findTestSubject(wrapper, 'indexPattern-advanced-accordion').simulate('click');
       wrapper
         .find('[data-test-subj="indexPattern-time-scaling-unit"]')
         .find(EuiSelect)
@@ -1214,7 +1218,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
     it('should allow to change time scaling', () => {
       const props = getProps({ timeScale: 's', label: 'Count of records per second' });
       wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
-      wrapper.find('[data-test-subj="indexPattern-advanced-accordion"]').first().simulate('click');
+      findTestSubject(wrapper, 'indexPattern-advanced-accordion').simulate('click');
 
       wrapper.find('[data-test-subj="indexPattern-time-scaling-unit"] select').simulate('change', {
         target: { value: 'h' },
@@ -1260,6 +1264,145 @@ describe('IndexPatternDimensionEditorPanel', () => {
           },
         },
       });
+    });
+  });
+
+  describe('window', () => {
+    function getProps(colOverrides: Partial<GenericIndexPatternColumn>) {
+      return {
+        ...defaultProps,
+        state: getStateWithColumns({
+          col2: {
+            dataType: 'number',
+            isBucketed: false,
+            label: 'Count of records',
+            operationType: 'count',
+            sourceField: '___records___',
+            ...colOverrides,
+          } as GenericIndexPatternColumn,
+        }),
+        columnId: 'col2',
+      };
+    }
+
+    it('should not show the window component if window is not available', () => {
+      const props = {
+        ...defaultProps,
+        state: getStateWithColumns({
+          datecolumn: {
+            dataType: 'date',
+            isBucketed: true,
+            label: '',
+            customLabel: true,
+            operationType: 'date_histogram',
+            sourceField: 'ts',
+            params: {
+              interval: '1d',
+            },
+          } as DateHistogramIndexPatternColumn,
+          col2: {
+            dataType: 'number',
+            isBucketed: false,
+            label: 'Count of records',
+            operationType: 'count',
+            sourceField: '___records___',
+          } as GenericIndexPatternColumn,
+        }),
+        columnId: 'col2',
+      };
+      wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
+      findTestSubject(wrapper, 'indexPattern-advanced-accordion').simulate('click');
+      expect(wrapper.find('[data-test-subj="indexPattern-dimension-window-row"]')).toHaveLength(0);
+    });
+
+    it('should show current window if set', () => {
+      wrapper = mount(<IndexPatternDimensionEditorComponent {...getProps({ window: '5m' })} />);
+      expect(wrapper.find(Window).find(EuiComboBox).prop('selectedOptions')[0].value).toEqual('5m');
+    });
+
+    it('should allow to set window initially', () => {
+      const props = getProps({});
+      wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
+      findTestSubject(wrapper, 'indexPattern-advanced-accordion').simulate('click');
+      wrapper.find(Window).find(EuiComboBox).prop('onChange')!([{ value: '1h', label: '' }]);
+      expect((props.setState as jest.Mock).mock.calls[0][0](props.state)).toEqual({
+        ...props.state,
+        layers: {
+          first: {
+            ...props.state.layers.first,
+            columns: {
+              ...props.state.layers.first.columns,
+              col2: expect.objectContaining({
+                window: '1h',
+              }),
+            },
+          },
+        },
+      });
+    });
+
+    it('should carry over window to other operation if possible', () => {
+      const props = getProps({
+        window: '1d',
+        sourceField: 'bytes',
+        operationType: 'sum',
+        label: 'Sum of bytes per hour',
+      });
+      wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
+      wrapper.find('button[data-test-subj="lns-indexPatternDimension-count"]').simulate('click');
+      expect((props.setState as jest.Mock).mock.calls[0][0](props.state)).toEqual({
+        ...props.state,
+        layers: {
+          first: {
+            ...props.state.layers.first,
+            columns: {
+              ...props.state.layers.first.columns,
+              col2: expect.objectContaining({
+                window: '1d',
+              }),
+            },
+          },
+        },
+      });
+    });
+
+    it('should allow to change window', () => {
+      const props = getProps({
+        timeShift: '1d',
+      });
+      wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
+      wrapper.find(Window).find(EuiComboBox).prop('onCreateOption')!('7m', []);
+      expect((props.setState as jest.Mock).mock.calls[0][0](props.state)).toEqual({
+        ...props.state,
+        layers: {
+          first: {
+            ...props.state.layers.first,
+            columns: {
+              ...props.state.layers.first.columns,
+              col2: expect.objectContaining({
+                window: '7m',
+              }),
+            },
+          },
+        },
+      });
+    });
+
+    it('should report a generic error for invalid window string', () => {
+      const props = getProps({
+        window: '5 months',
+      });
+      wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
+
+      expect(wrapper.find(Window).find(EuiComboBox).prop('isInvalid')).toBeTruthy();
+
+      expect(
+        wrapper
+          .find(Window)
+          .find('[data-test-subj="indexPattern-dimension-window-row"]')
+          .first()
+          .prop('error')
+      ).toBe('Time range value is not valid.');
     });
   });
 
@@ -1320,7 +1463,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           }}
         />
       );
-      wrapper.find('[data-test-subj="indexPattern-advanced-accordion"]').first().simulate('click');
+      findTestSubject(wrapper, 'indexPattern-advanced-accordion').simulate('click');
       expect(wrapper.find('[data-test-subj="indexPattern-time-shift-enable"]')).toHaveLength(1);
       expect(wrapper.find(TimeShift)).toHaveLength(0);
     });
@@ -1347,7 +1490,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
     it('should allow to set time shift initially', () => {
       const props = getProps({});
       wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
-      wrapper.find('[data-test-subj="indexPattern-advanced-accordion"]').first().simulate('click');
+      findTestSubject(wrapper, 'indexPattern-advanced-accordion').simulate('click');
       wrapper.find(TimeShift).find(EuiComboBox).prop('onChange')!([{ value: '1h', label: '' }]);
       expect((props.setState as jest.Mock).mock.calls[0][0](props.state)).toEqual({
         ...props.state,
@@ -1480,7 +1623,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
     it('should show custom options if filtering is available', () => {
       wrapper = mount(<IndexPatternDimensionEditorComponent {...getProps({})} />);
-      wrapper.find('[data-test-subj="indexPattern-advanced-accordion"]').first().simulate('click');
+      findTestSubject(wrapper, 'indexPattern-advanced-accordion').simulate('click');
       expect(
         wrapper.find('[data-test-subj="indexPattern-filter-by-enable"]').hostNodes()
       ).toHaveLength(1);
@@ -1778,23 +1921,23 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
     const items: EuiListGroupItemProps[] = wrapper.find(EuiListGroup).prop('listItems') || [];
 
-    expect(items.map(({ label }: { label: React.ReactNode }) => label)).toEqual([
-      'Average',
-      'Count',
-      'Counter rate',
-      'Cumulative sum',
-      'Differences',
-      'Last value',
-      'Maximum',
-      'Median',
-      'Minimum',
-      'Moving average',
-      'Percentile',
-      'Percentile rank',
-      'Standard deviation',
-      'Sum',
-      'Unique count',
-      ' ',
+    expect(items.map(({ id }) => id)).toEqual([
+      'average',
+      'count',
+      'counter_rate',
+      'cumulative_sum',
+      'differences',
+      'last_value',
+      'max',
+      'median',
+      'min',
+      'moving_average',
+      'percentile',
+      'percentile_rank',
+      'standard_deviation',
+      'sum',
+      'unique_count',
+      undefined,
     ]);
   });
 
