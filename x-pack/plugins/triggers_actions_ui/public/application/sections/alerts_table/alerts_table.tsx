@@ -156,7 +156,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
                   </EuiFlexItem>
                 )}
                 {renderCustomActionsRow &&
-                  renderCustomActionsRow(alerts[visibleRowIndex], handleFlyoutAlert)}
+                  renderCustomActionsRow(alerts[visibleRowIndex], handleFlyoutAlert, props.id)}
               </EuiFlexGroup>
             );
           },
@@ -173,9 +173,10 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   }, [
     actionsColumnWidth,
     alerts,
-    handleFlyoutAlert,
     getBulkActionsLeadingControlColumn,
+    handleFlyoutAlert,
     isBulkActionsColumnActive,
+    props.id,
     props.leadingControlColumns,
     props.showExpandToDetails,
     renderCustomActionsRow,
@@ -242,6 +243,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
             flyoutIndex={flyoutAlertIndex + pagination.pageIndex * pagination.pageSize}
             onPaginate={onPaginateFlyout}
             isLoading={isLoading}
+            id={props.id}
           />
         )}
       </Suspense>
