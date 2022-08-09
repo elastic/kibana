@@ -44,6 +44,7 @@ import {
   getDocumentationSections,
 } from './helpers';
 import { EditorFooter } from './editor_footer';
+import { ResizableButton } from './resizable_button';
 
 import './overwrite.scss';
 
@@ -60,6 +61,9 @@ const MAX_COMPACT_VIEW_LENGTH = 250;
 const FONT_WIDTH = 8;
 const EDITOR_ONE_LINER_UNUSED_SPACE = 180;
 const EDITOR_ONE_LINER_UNUSED_SPACE_WITH_ERRORS = 220;
+
+const KEYCODE_ARROW_UP = 38;
+const KEYCODE_ARROW_DOWN = 40;
 
 const languageId = (language: string) => {
   switch (language) {
@@ -95,7 +99,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [isCompactFocused, setIsCompactFocused] = useState(isCodeEditorExpanded);
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
   const [isWordWrapped, setIsWordWrapped] = useState(true);
-  const [userDrags, setUserDrags] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState<boolean>(false);
   const [editorErrors, setEditorErrors] = useState<
     Array<{ startLineNumber: number; message: string }>
@@ -125,7 +128,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
 
   // When the editor is on full size mode, the user can resize the height of the editor.
   const onMouseDownResizeHandler = useCallback(
-    (mouseDownEvent: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    (mouseDownEvent) => {
       const startSize = editorHeight;
       const startPosition = mouseDownEvent.pageY;
 
@@ -133,15 +136,29 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         const height = startSize - startPosition + mouseMoveEvent.pageY;
         const validatedHeight = Math.min(Math.max(height, EDITOR_MIN_HEIGHT), EDITOR_MAX_HEIGHT);
         setEditorHeight(validatedHeight);
-        setUserDrags(true);
       }
       function onMouseUp() {
         document.body.removeEventListener('mousemove', onMouseMove);
-        setUserDrags(false);
       }
 
       document.body.addEventListener('mousemove', onMouseMove);
       document.body.addEventListener('mouseup', onMouseUp, { once: true });
+    },
+    [editorHeight]
+  );
+
+  const onKeyDownResizeHandler = useCallback(
+    (keyDownEvent) => {
+      let height = editorHeight;
+      if (
+        keyDownEvent.keyCode === KEYCODE_ARROW_UP ||
+        keyDownEvent.keyCode === KEYCODE_ARROW_DOWN
+      ) {
+        const step = keyDownEvent.keyCode === KEYCODE_ARROW_UP ? -10 : 10;
+        height = height + step;
+        const validatedHeight = Math.min(Math.max(height, EDITOR_MIN_HEIGHT), EDITOR_MAX_HEIGHT);
+        setEditorHeight(validatedHeight);
+      }
     },
     [editorHeight]
   );
@@ -601,17 +618,10 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         <EditorFooter lines={lines} containerCSS={styles.bottomContainer} errors={editorErrors} />
       )}
       {isCodeEditorExpanded && (
-        <div css={styles.dragResizeContainer} onMouseDown={onMouseDownResizeHandler}>
-          {!userDrags && (
-            <EuiButtonIcon
-              color="primary"
-              iconType="grab"
-              aria-label="Resize editor"
-              data-test-subj="unifiedTextLangEditor-resize"
-              css={styles.dragResizeButton}
-            />
-          )}
-        </div>
+        <ResizableButton
+          onMouseDownResizeHandler={onMouseDownResizeHandler}
+          onKeyDownResizeHandler={onKeyDownResizeHandler}
+        />
       )}
     </>
   );
