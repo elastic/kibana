@@ -46,6 +46,7 @@ export interface FilterItemProps {
   timeRangeForSuggestionsOverride?: boolean;
   reverseBackground?: boolean;
   disableOr: boolean;
+  hideOr: boolean;
   disableAnd: boolean;
   disableRemove: boolean;
   color: 'plain' | 'subdued';
@@ -57,6 +58,7 @@ export function FilterItem({
   path,
   timeRangeForSuggestionsOverride,
   reverseBackground,
+  hideOr,
   disableOr,
   disableAnd,
   disableRemove,
@@ -180,7 +182,7 @@ export function FilterItem({
                 alignItems="center"
                 justifyContent="center"
                 css={css`
-                  cursor: ${dropTarget === path && !disableOr ? `url(${returnKey}), auto` : `auto`};
+                  cursor: ${dropTarget === path && !hideOr ? `url(${returnKey}), auto` : `auto`};
                 `}
               >
                 <EuiFlexItem>
@@ -232,20 +234,22 @@ export function FilterItem({
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <EuiFlexGroup responsive={false} justifyContent="center">
-                          <EuiFlexItem grow={false}>
-                            <EuiButtonIcon
-                              onClick={onOrButtonClick}
-                              isDisabled={disableOr}
-                              iconType="returnKey"
-                              size="s"
-                              aria-label={i18n.translate(
-                                'unifiedSearch.filter.filterEditor.addOrFilterGroupButttonIcon',
-                                {
-                                  defaultMessage: 'Add filter group with OR',
-                                }
-                              )}
-                            />
-                          </EuiFlexItem>
+                          {!hideOr && (
+                            <EuiFlexItem grow={false}>
+                              <EuiButtonIcon
+                                onClick={onOrButtonClick}
+                                isDisabled={disableOr}
+                                iconType="returnKey"
+                                size="s"
+                                aria-label={i18n.translate(
+                                  'unifiedSearch.filter.filterEditor.addOrFilterGroupButttonIcon',
+                                  {
+                                    defaultMessage: 'Add filter group with OR',
+                                  }
+                                )}
+                              />
+                            </EuiFlexItem>
+                          )}
 
                           <EuiFlexItem grow={false}>
                             <EuiButtonIcon
