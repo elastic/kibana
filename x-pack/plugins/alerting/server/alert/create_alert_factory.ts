@@ -7,13 +7,9 @@
 
 import { Logger } from '@kbn/core/server';
 import { cloneDeep } from 'lodash';
-import {
-  AlertInstanceContext,
-  AlertInstanceState,
-  RuleExecutionStatusErrorReasons,
-} from '../types';
+import { AlertInstanceContext, AlertInstanceState } from '../types';
 import { Alert, PublicAlert } from './alert';
-import { ErrorWithReason, processAlerts } from '../lib';
+import { processAlerts } from '../lib';
 
 export interface AlertFactoryDoneUtils<
   State extends AlertInstanceState,
@@ -58,10 +54,7 @@ export function createAlertFactory<
 
       if (numAlertsCreated++ >= maxAlerts) {
         logger.warn(`Rule run generated greater than ${maxAlerts} alerts.`);
-        throw new ErrorWithReason(
-          RuleExecutionStatusErrorReasons.MaxAlerts,
-          new Error(`Rule reporter more than ${maxAlerts} alerts.`)
-        );
+        throw new Error(`Rule reporteD more than ${maxAlerts} alerts.`);
       }
 
       if (!alerts[id]) {

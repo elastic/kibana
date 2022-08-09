@@ -41,7 +41,6 @@ export enum RuleExecutionStatusErrorReasons {
   Timeout = 'timeout',
   Disabled = 'disabled',
   Validate = 'validate',
-  MaxAlerts = 'maxAlerts',
 }
 
 export enum RuleExecutionStatusWarningReasons {
