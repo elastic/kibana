@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isArray, isEmpty, pickBy } from 'lodash';
+import { isArray, isEmpty, pickBy, map } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
   EuiBasicTable,
@@ -23,6 +23,7 @@ import { useAllLiveQueries } from './use_all_live_queries';
 import type { SearchHit } from '../../common/search_strategy';
 import { Direction } from '../../common/search_strategy';
 import { useRouterNavigate, useKibana } from '../common/lib/kibana';
+import { usePacks } from '../packs/use_packs';
 
 const EMPTY_ARRAY: SearchHit[] = [];
 
@@ -43,6 +44,8 @@ const ActionsTableComponent = () => {
   const { push } = useHistory();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(20);
+
+  const { data: packsData } = usePacks({});
 
   const { data: actionsData } = useAllLiveQueries({
     activePage: pageIndex,
@@ -131,9 +134,22 @@ const ActionsTableComponent = () => {
     },
     [push]
   );
+
+  const existingPackIds = useMemo(() => map(packsData?.data ?? [], 'id'), [packsData]);
+
   const isPlayButtonAvailable = useCallback(
-    () => !!(permissions.runSavedQueries || permissions.writeLiveQueries),
-    [permissions.runSavedQueries, permissions.writeLiveQueries]
+    (item) => {
+      if (item.fields.pack_id?.length) {
+        return (
+          existingPackIds.includes(item.fields.pack_id[0]) &&
+          permissions.runSavedQueries &&
+          permissions.readPacks
+        );
+      }
+
+      return !!(permissions.runSavedQueries || permissions.writeLiveQueries);
+    },
+    [permissions, existingPackIds]
   );
 
   const columns = useMemo(
