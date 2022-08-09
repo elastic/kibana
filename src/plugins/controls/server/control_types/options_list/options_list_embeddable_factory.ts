@@ -11,7 +11,7 @@ import { OPTIONS_LIST_CONTROL } from '../../../common';
 import {
   createOptionsListExtract,
   createOptionsListInject,
-} from '../../../common/control_types/options_list/options_list_persistable_state';
+} from '../../../common/options_list/options_list_persistable_state';
 
 export const optionsListPersistableStateServiceFactory = (): EmbeddableRegistryDefinition => {
   return {

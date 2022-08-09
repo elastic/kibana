@@ -9,7 +9,7 @@
 import type { Filter, Query, BoolQuery, TimeRange } from '@kbn/es-query';
 import { FieldSpec, DataView } from '@kbn/data-views-plugin/common';
 
-import { DataControlInput } from '../../types';
+import { DataControlInput } from '../types';
 
 export const OPTIONS_LIST_CONTROL = 'optionsListControl';
 
