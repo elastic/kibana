@@ -12,7 +12,6 @@ import { LOGS_INDEX_PATTERN } from '..';
 
 export default function ({ getPageObject, getService }: FtrProviderContext) {
   const header = getPageObject('header');
-  const maps = getPageObject('maps');
   const ml = getService('ml');
   const mlScreenshots = getService('mlScreenshots');
   const renderable = getService('renderable');
