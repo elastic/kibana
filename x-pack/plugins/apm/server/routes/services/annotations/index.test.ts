@@ -210,40 +210,4 @@ describe('getServiceAnnotations', () => {
       })
     ).rejects.toThrow('BOOM');
   });
-
-  it('returns stored annotations when derived annotations throws RequestAbortedError', async () => {
-    jest
-      .spyOn(GetDerivedServiceAnnotations, 'getDerivedServiceAnnotations')
-      .mockImplementation(
-        () =>
-          new Promise((resolve, reject) => {
-            reject(
-              new WrappedElasticsearchClientError(
-                new errors.RequestAbortedError('foo')
-              )
-            );
-          })
-      );
-    jest.spyOn(GetStoredAnnotations, 'getStoredAnnotations').mockImplementation(
-      async () =>
-        new Promise((resolve) => {
-          resolve(storedAnnotations);
-        })
-    );
-
-    const annotations = await getServiceAnnotations({
-      serviceName: 'foo',
-      environment: 'bar',
-      searchAggregatedTransactions: false,
-      start: Date.now(),
-      end: Date.now(),
-      client: {} as ElasticsearchClient,
-      logger: {} as Logger,
-      annotationsClient: {} as ScopedAnnotationsClient,
-      setup: {} as Setup,
-    });
-    expect(annotations).toEqual({
-      annotations: storedAnnotations,
-    });
-  });
 });
