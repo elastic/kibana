@@ -183,12 +183,7 @@ export const dateHistogramOperation: OperationDefinition<
       field!.aggregationRestrictions && field!.aggregationRestrictions.date_histogram;
 
     const [intervalInput, setIntervalInput] = useState(currentColumn?.params.interval);
-    const interval =
-      intervalInput === autoInterval
-        ? autoInterval
-        : intervalInput
-        ? parseInterval(intervalInput)
-        : undefined;
+    const interval = intervalInput === autoInterval ? autoInterval : parseInterval(intervalInput);
 
     // We force the interval value to 1 if it's empty, since that is the ES behavior,
     // and the isValidInterval function doesn't handle the empty case properly. Fixing
@@ -197,7 +192,6 @@ export const dateHistogramOperation: OperationDefinition<
       (!currentColumn?.params.ignoreTimeRange && intervalInput === autoInterval) ||
       (interval !== autoInterval &&
         intervalInput !== '' &&
-        interval &&
         isValidInterval(
           `${interval.value === '' ? '1' : interval.value}${interval.unit}`,
           restrictedInterval(field!.aggregationRestrictions)
@@ -223,13 +217,11 @@ export const dateHistogramOperation: OperationDefinition<
     const setInterval = useCallback(
       (newInterval: typeof interval) => {
         const isCalendarInterval =
-          newInterval &&
-          newInterval !== autoInterval &&
-          calendarOnlyIntervals.has(newInterval.unit);
+          newInterval !== autoInterval && calendarOnlyIntervals.has(newInterval.unit);
         const value =
           newInterval === autoInterval
             ? autoInterval
-            : `${isCalendarInterval ? '1' : newInterval?.value}${newInterval?.unit || 'd'}`;
+            : `${isCalendarInterval ? '1' : newInterval.value}${newInterval.unit || 'd'}`;
 
         paramEditorUpdater((newLayer) =>
           updateColumnParam({ layer: newLayer, columnId, paramName: 'interval', value })
@@ -530,7 +522,7 @@ export const dateHistogramOperation: OperationDefinition<
   },
 };
 
-function parseInterval(currentInterval: string) {
+function parseInterval(currentInterval?: string) {
   const interval = currentInterval || '';
   const valueMatch = interval.match(/[\d]+/) || [];
   const unitMatch = interval.match(/[\D]+/) || [];

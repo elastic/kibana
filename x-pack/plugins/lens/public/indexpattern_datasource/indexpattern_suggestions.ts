@@ -636,8 +636,7 @@ function createAlternativeMetricSuggestions(
 
   topLevelMetricColumns.forEach((columnId) => {
     const column = layer.columns[columnId];
-    if (!column) return;
-    if (!hasField(column)) {
+    if (!column || !hasField(column)) {
       return;
     }
     const field = indexPattern.getFieldByName(column.sourceField);

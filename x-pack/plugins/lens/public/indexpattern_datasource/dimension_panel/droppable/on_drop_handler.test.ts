@@ -27,7 +27,7 @@ const dimensionGroups = [
     supportsMoreColumns: true,
     hideGrouping: true,
     groupLabel: '',
-    filterOperations: (op?: OperationMetadata) => Boolean(op?.isBucketed),
+    filterOperations: (op: OperationMetadata) => op.isBucketed,
   },
   {
     accessors: [{ columnId: 'col1' }, { columnId: 'col2' }, { columnId: 'col3' }],
@@ -35,7 +35,7 @@ const dimensionGroups = [
     supportsMoreColumns: true,
     hideGrouping: true,
     groupLabel: '',
-    filterOperations: (op?: OperationMetadata) => Boolean(op?.isBucketed),
+    filterOperations: (op: OperationMetadata) => op.isBucketed,
   },
   {
     accessors: [{ columnId: 'col4' }],
@@ -43,7 +43,7 @@ const dimensionGroups = [
     supportsMoreColumns: true,
     hideGrouping: true,
     groupLabel: '',
-    filterOperations: (op?: OperationMetadata) => op?.isBucketed === false,
+    filterOperations: (op: OperationMetadata) => op.isBucketed === false,
   },
 ];
 
@@ -245,7 +245,7 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
         dropType: 'field_add',
         target: {
           ...defaultProps.target,
-          filterOperations: (op?: OperationMetadata) => op?.dataType === 'number',
+          filterOperations: (op: OperationMetadata) => op.dataType === 'number',
           groupId: 'a',
           columnId: 'newCol',
         },
@@ -1477,7 +1477,7 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
           accessors: [],
           supportsMoreColumns: true,
           dataTestSubj: 'lnsXY_xDimensionPanel',
-          filterOperations: (op?: OperationMetadata) => Boolean(op?.isBucketed),
+          filterOperations: (op: OperationMetadata) => op.isBucketed,
         },
         {
           groupId: 'y',
@@ -1487,7 +1487,7 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
           required: true,
           dataTestSubj: 'lnsXY_yDimensionPanel',
           enableDimensionEditor: true,
-          filterOperations: (op?: OperationMetadata) => !Boolean(op?.isBucketed),
+          filterOperations: (op: OperationMetadata) => !op.isBucketed,
         },
         {
           groupId: 'breakdown',
@@ -1497,7 +1497,7 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
           dataTestSubj: 'lnsXY_splitDimensionPanel',
           required: false,
           enableDimensionEditor: true,
-          filterOperations: (op?: OperationMetadata) => Boolean(op?.isBucketed),
+          filterOperations: (op: OperationMetadata) => op.isBucketed,
         },
       ];
       describe('simple operations', () => {
@@ -1531,10 +1531,10 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
               columnId: 'col1',
               groupId: 'x',
               layerId: 'first',
-              filterOperations: (op?: OperationMetadata) => Boolean(op?.isBucketed),
+              filterOperations: (op: OperationMetadata) => op.isBucketed,
             },
             target: {
-              filterOperations: (op?: OperationMetadata) => Boolean(op?.isBucketed),
+              filterOperations: (op: OperationMetadata) => op.isBucketed,
               columnId: 'newCol',
               groupId: 'x',
               layerId: 'second',
