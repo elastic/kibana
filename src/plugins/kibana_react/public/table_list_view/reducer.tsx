@@ -112,7 +112,7 @@ export function reducer<T extends { id?: string }>(state: State<T>, action: Acti
         tableSort,
       };
     }
-    case 'onClickDeleteItems': {
+    case 'showConfirmDeleteItemsModal': {
       return {
         ...state,
         showDeleteModal: true,
