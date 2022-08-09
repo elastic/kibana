@@ -9,8 +9,8 @@
 import type {
   AnalyticsClientInitContext,
   IAnalyticsClient as AnalyticsClient,
-} from './analytics_client';
-import { AnalyticsClient as AnalyticsClientClass } from './analytics_client';
+} from './src/analytics_client';
+import { AnalyticsClient as AnalyticsClientClass } from './src/analytics_client';
 
 /**
  * Creates an {@link AnalyticsClient}.
@@ -35,7 +35,7 @@ export type {
   ContextProviderOpts,
   // Types for the registerEventType API
   EventTypeOpts,
-} from './analytics_client';
+} from './src/analytics_client';
 
 export type {
   Event,
@@ -43,7 +43,7 @@ export type {
   EventType,
   TelemetryCounter,
   TelemetryCounterType,
-} from './events';
+} from './src/events';
 
 export type {
   RootSchema,
@@ -58,6 +58,6 @@ export type {
   AllowedSchemaNumberTypes,
   AllowedSchemaStringTypes,
   AllowedSchemaTypes,
-} from './schema';
+} from './src/schema';
 
-export type { IShipper } from './shippers';
+export type { IShipper } from './src/shippers';

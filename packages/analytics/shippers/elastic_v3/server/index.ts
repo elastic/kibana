@@ -6,6 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { FullStoryShipper } from './fullstory_shipper';
-export type { FullStoryShipperConfig } from './fullstory_shipper';
-export type { FullStorySnippetConfig } from './load_snippet';
+export type { ElasticV3ShipperOptions } from '@kbn/analytics-shippers-elastic-v3-common';
+export { ElasticV3ServerShipper } from './src/server_shipper';
