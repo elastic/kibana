@@ -7,7 +7,7 @@ PKG_REQUIRE_NAME = "@kbn/shared-ux-card-no-data-mocks"
 
 SOURCE_FILES = glob(
   [
-    "*.ts",
+    "**/*.ts",
   ],
   exclude = [
     "**/*.config.js",
