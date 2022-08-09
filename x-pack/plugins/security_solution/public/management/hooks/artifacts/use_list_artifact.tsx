@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { HttpFetchError } from '@kbn/core/public';
-import { QueryObserverResult, useQuery, UseQueryOptions } from 'react-query';
+import type { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
+import type { QueryObserverResult, UseQueryOptions } from 'react-query';
+import { useQuery } from 'react-query';
 import { useMemo } from 'react';
 import {
   MANAGEMENT_DEFAULT_PAGE,
@@ -15,9 +16,9 @@ import {
   MANAGEMENT_DEFAULT_SORT_ORDER,
 } from '../../common/constants';
 import { parsePoliciesAndFilterToKql, parseQueryFilterToKQL } from '../../common/utils';
-import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
+import type { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
 import { DEFAULT_EXCEPTION_LIST_ITEM_SEARCHABLE_FIELDS } from '../../../../common/endpoint/service/artifacts/constants';
-import { MaybeImmutable } from '../../../../common/endpoint/types';
+import type { MaybeImmutable } from '../../../../common/endpoint/types';
 
 const DEFAULT_OPTIONS = Object.freeze({});
 
@@ -31,9 +32,9 @@ export function useListArtifact(
     excludedPolicies: string[];
   }> = DEFAULT_OPTIONS,
   searchableFields: MaybeImmutable<string[]> = DEFAULT_EXCEPTION_LIST_ITEM_SEARCHABLE_FIELDS,
-  customQueryOptions?: Partial<UseQueryOptions<FoundExceptionListItemSchema, HttpFetchError>>,
+  customQueryOptions?: Partial<UseQueryOptions<FoundExceptionListItemSchema, IHttpFetchError>>,
   customQueryIds: string[] = []
-): QueryObserverResult<FoundExceptionListItemSchema, HttpFetchError> {
+): QueryObserverResult<FoundExceptionListItemSchema, IHttpFetchError> {
   const {
     filter = '',
     page = MANAGEMENT_DEFAULT_PAGE + 1,
@@ -49,7 +50,7 @@ export function useListArtifact(
     });
   }, [filter, searchableFields, policies, excludedPolicies]);
 
-  return useQuery<FoundExceptionListItemSchema, HttpFetchError>(
+  return useQuery<FoundExceptionListItemSchema, IHttpFetchError>(
     [...customQueryIds, 'list', exceptionListApiClient, filterKuery, page, perPage],
     async () => {
       const result = await exceptionListApiClient.find({

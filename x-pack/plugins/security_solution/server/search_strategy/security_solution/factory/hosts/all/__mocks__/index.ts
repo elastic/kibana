@@ -5,20 +5,18 @@
  * 2.0.
  */
 
-import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import { allowedExperimentalValues } from '../../../../../../../common/experimental_features';
 
-import {
-  Direction,
+import type {
   HostAggEsItem,
-  HostsFields,
-  HostsQueries,
   HostsRequestOptions,
 } from '../../../../../../../common/search_strategy';
-import { EndpointAppContextService } from '../../../../../../endpoint/endpoint_app_context_services';
-import { EndpointAppContext } from '../../../../../../endpoint/types';
+import { Direction, HostsFields, HostsQueries } from '../../../../../../../common/search_strategy';
+import type { EndpointAppContextService } from '../../../../../../endpoint/endpoint_app_context_services';
+import type { EndpointAppContext } from '../../../../../../endpoint/types';
 
 export const mockOptions: HostsRequestOptions = {
   defaultIndex: [

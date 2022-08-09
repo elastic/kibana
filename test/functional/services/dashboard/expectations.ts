@@ -191,7 +191,7 @@ export class DashboardExpectService extends FtrService {
 
   async metricValuesExist(values: string[]) {
     this.log.debug(`DashboardExpect.metricValuesExist(${values})`);
-    await this.textWithinCssElementExists(values, '.mtrVis__value');
+    await this.textWithinCssElementExists(values, '.legacyMtrVis__value');
   }
 
   async tsvbMetricValuesExist(values: string[]) {

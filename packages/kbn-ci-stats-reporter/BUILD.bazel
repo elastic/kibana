@@ -58,12 +58,14 @@ TYPES_DEPS = [
   "@npm//@types/jest",
   "//packages/kbn-tooling-log:npm_module_types",
   "//packages/kbn-ci-stats-core:npm_module_types",
+  "//packages/kbn-some-dev-log:npm_module_types",
 ]
 
 jsts_transpiler(
   name = "target_node",
   srcs = SRCS,
   build_pkg_name = package_name(),
+  root_input_dir = "src",
 )
 
 ts_config(

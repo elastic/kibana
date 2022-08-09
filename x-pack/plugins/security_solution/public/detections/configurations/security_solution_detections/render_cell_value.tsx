@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import React from 'react';
 import { TimelineId } from '../../../../common/types';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 
-import { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
+import type { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 
 /**

@@ -191,10 +191,11 @@ export default function ({ getService }: FtrProviderContext) {
           });
           expect(events.length).to.be.greaterThan(0);
           const lastEvent = events[events.length - 1];
+          const fromTimestamp = new Date(new Date(lastEvent.timestamp).getTime() - 1).toISOString();
           const eventCount = await ebtServerHelper.getEventCount({
             withTimeoutMs: 500,
             eventTypes: ['test-plugin-lifecycle'],
-            fromTimestamp: lastEvent.timestamp,
+            fromTimestamp,
           });
           expect(eventCount).to.be(1);
         });

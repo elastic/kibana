@@ -24,7 +24,7 @@ import { AddLayerPanel } from '../add_layer_panel';
 import { getData, isScreenshotMode } from '../../kibana_services';
 import { RawValue } from '../../../common/constants';
 import { FLYOUT_STATE } from '../../reducers/ui';
-import { MapSettings } from '../../reducers/map';
+import { MapSettings } from '../../../common/descriptor_types';
 import { MapSettingsPanel } from '../map_settings_panel';
 import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import { ILayer } from '../../classes/layers/layer';

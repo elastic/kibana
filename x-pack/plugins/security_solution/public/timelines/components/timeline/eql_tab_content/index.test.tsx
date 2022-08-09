@@ -15,7 +15,8 @@ import { defaultHeaders, mockTimelineData } from '../../../../common/mock';
 import '../../../../common/mock/match_media';
 import { TestProviders } from '../../../../common/mock/test_providers';
 
-import { EqlTabContentComponent, Props as EqlTabContentComponentProps } from '.';
+import type { Props as EqlTabContentComponentProps } from '.';
+import { EqlTabContentComponent } from '.';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { useTimelineEvents } from '../../../containers';

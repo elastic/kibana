@@ -6,10 +6,10 @@
  */
 
 import { noop, startsWith, endsWith } from 'lodash/fp';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButton,
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,9 +20,10 @@ import {
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import styled from 'styled-components';
 
-import { BrowserFields } from '../../../common/containers/source';
-import { OnDataProviderEdited } from '../timeline/events';
-import { DataProviderType, QueryOperator } from '../timeline/data_providers/data_provider';
+import type { BrowserFields } from '../../../common/containers/source';
+import type { OnDataProviderEdited } from '../timeline/events';
+import type { QueryOperator } from '../timeline/data_providers/data_provider';
+import { DataProviderType } from '../timeline/data_providers/data_provider';
 
 import {
   getCategorizedFieldNames,

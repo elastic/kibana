@@ -8,10 +8,11 @@ import React, { useMemo, useState } from 'react';
 import {
   EuiEmptyPrompt,
   EuiBasicTable,
-  CriteriaWithPagination,
-  Pagination,
-  EuiBasicTableColumn,
-  EuiTableActionsColumnType,
+  type CriteriaWithPagination,
+  type Pagination,
+  type EuiBasicTableColumn,
+  type EuiTableActionsColumnType,
+  type EuiBasicTableProps,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -27,6 +28,7 @@ interface Props {
   items: CspFinding[];
   loading: boolean;
   pagination: Pagination;
+  sorting: Required<EuiBasicTableProps<CspFinding>>['sorting'];
   setTableOptions(options: CriteriaWithPagination<CspFinding>): void;
   onAddFilter: OnAddFilter;
 }
@@ -35,6 +37,7 @@ const ResourceFindingsTableComponent = ({
   items,
   loading,
   pagination,
+  sorting,
   setTableOptions,
   onAddFilter,
 }: Props) => {
@@ -48,8 +51,14 @@ const ResourceFindingsTableComponent = ({
       getExpandColumn<CspFinding>({ onClick: setSelectedFinding }),
       baseFindingsColumns['resource.id'],
       createColumnWithFilters(baseFindingsColumns['result.evaluation'], { onAddFilter }),
-      createColumnWithFilters(baseFindingsColumns['resource.sub_type'], { onAddFilter }),
-      createColumnWithFilters(baseFindingsColumns['resource.name'], { onAddFilter }),
+      createColumnWithFilters(
+        { ...baseFindingsColumns['resource.sub_type'], sortable: false },
+        { onAddFilter }
+      ),
+      createColumnWithFilters(
+        { ...baseFindingsColumns['resource.name'], sortable: false },
+        { onAddFilter }
+      ),
       createColumnWithFilters(baseFindingsColumns['rule.name'], { onAddFilter }),
       baseFindingsColumns['rule.section'],
       createColumnWithFilters(baseFindingsColumns.cluster_id, { onAddFilter }),
@@ -80,6 +89,7 @@ const ResourceFindingsTableComponent = ({
         columns={columns}
         onChange={setTableOptions}
         pagination={pagination}
+        sorting={sorting}
       />
       {selectedFinding && (
         <FindingsRuleFlyout

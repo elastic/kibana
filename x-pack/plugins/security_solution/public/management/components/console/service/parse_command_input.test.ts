@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  parseCommandInput,
-  ParsedCommandInterface,
-  parsedPidOrEntityIdParameter,
-} from './parsed_command_input';
+import type { ParsedCommandInterface } from './parsed_command_input';
+import { parseCommandInput, parsedPidOrEntityIdParameter } from './parsed_command_input';
 
 describe('when using parsed command input utils', () => {
   describe('when using parseCommandInput()', () => {

@@ -23,7 +23,6 @@ import {
   NodeMetricsTableData,
   NumberCell,
   StepwisePagination,
-  UptimeCell,
 } from '../shared';
 import type { ContainerNodeMetricsRow } from './use_container_metrics_table';
 
@@ -132,14 +131,6 @@ function containerNodeColumns(
           />
         );
       },
-    },
-    {
-      name: i18n.translate('xpack.infra.metricsTable.container.uptimeColumnHeader', {
-        defaultMessage: 'Uptime',
-      }),
-      field: 'uptime',
-      align: 'right',
-      render: (uptime: number) => <UptimeCell uptimeMs={uptime} />,
     },
     {
       name: i18n.translate(

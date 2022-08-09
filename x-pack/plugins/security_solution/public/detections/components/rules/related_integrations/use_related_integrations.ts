@@ -7,8 +7,9 @@
 
 import { useMemo } from 'react';
 
-import { RelatedIntegrationArray } from '../../../../../common/detection_engine/schemas/common';
-import { calculateIntegrationDetails, IntegrationDetails } from './integration_details';
+import type { RelatedIntegrationArray } from '../../../../../common/detection_engine/schemas/common';
+import type { IntegrationDetails } from './integration_details';
+import { calculateIntegrationDetails } from './integration_details';
 import { useInstalledIntegrations } from './use_installed_integrations';
 
 export interface UseRelatedIntegrationsResult {

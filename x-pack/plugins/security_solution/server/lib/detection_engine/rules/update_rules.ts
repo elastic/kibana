@@ -6,13 +6,13 @@
  */
 
 /* eslint-disable complexity */
-import { PartialRule } from '@kbn/alerting-plugin/server';
+import type { PartialRule } from '@kbn/alerting-plugin/server';
 import { DEFAULT_MAX_SIGNALS } from '../../../../common/constants';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 
-import { UpdateRulesOptions } from './types';
+import type { UpdateRulesOptions } from './types';
 import { typeSpecificSnakeToCamel } from '../schemas/rule_converters';
-import { InternalRuleUpdate, RuleParams } from '../schemas/rule_schemas';
+import type { InternalRuleUpdate, RuleParams } from '../schemas/rule_schemas';
 import { maybeMute, transformToAlertThrottle, transformToNotifyWhen } from './utils';
 
 export const updateRules = async ({
@@ -54,6 +54,7 @@ export const updateRules = async ({
       severityMapping: ruleUpdate.severity_mapping ?? [],
       threat: ruleUpdate.threat ?? [],
       timestampOverride: ruleUpdate.timestamp_override,
+      timestampOverrideFallbackDisabled: ruleUpdate.timestamp_override_fallback_disabled,
       to: ruleUpdate.to ?? 'now',
       references: ruleUpdate.references ?? [],
       namespace: ruleUpdate.namespace,

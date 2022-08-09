@@ -12,13 +12,14 @@ import { i18n } from '@kbn/i18n';
 
 import { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 import { NavigateToAppOptions } from '@kbn/core/public';
-import { CasesPermissions, getUICapabilities } from '../../../client/helpers/capabilities';
+import { getUICapabilities } from '../../../client/helpers/capabilities';
 import { convertToCamelCase } from '../../../api/utils';
 import {
   FEATURE_ID,
   DEFAULT_DATE_FORMAT,
   DEFAULT_DATE_FORMAT_TZ,
 } from '../../../../common/constants';
+import { CasesPermissions } from '../../../../common';
 import { StartServices } from '../../../types';
 import { useUiSetting, useKibana } from './kibana_react';
 
@@ -187,7 +188,11 @@ export const useApplicationCapabilities = (): UseApplicationCapabilities => {
       actions: { crud: !!capabilities.actions?.save, read: !!capabilities.actions?.show },
       generalCases: {
         all: permissions.all,
+        create: permissions.create,
         read: permissions.read,
+        update: permissions.update,
+        delete: permissions.delete,
+        push: permissions.push,
       },
       visualize: { crud: !!capabilities.visualize?.save, read: !!capabilities.visualize?.show },
       dashboard: {
@@ -203,7 +208,11 @@ export const useApplicationCapabilities = (): UseApplicationCapabilities => {
       capabilities.visualize?.save,
       capabilities.visualize?.show,
       permissions.all,
+      permissions.create,
       permissions.read,
+      permissions.update,
+      permissions.delete,
+      permissions.push,
     ]
   );
 };

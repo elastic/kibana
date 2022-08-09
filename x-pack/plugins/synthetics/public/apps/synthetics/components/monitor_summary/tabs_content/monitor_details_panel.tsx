@@ -71,7 +71,7 @@ export const MonitorDetailsPanel = () => {
           <LocationsStatus />
         </EuiDescriptionListDescription>
         <EuiDescriptionListTitle>{URL_LABEL}</EuiDescriptionListTitle>
-        <EuiDescriptionListDescription>
+        <EuiDescriptionListDescription style={{ wordBreak: 'break-all' }}>
           <EuiLink href={data.url?.full} external>
             {data.url?.full}
           </EuiLink>

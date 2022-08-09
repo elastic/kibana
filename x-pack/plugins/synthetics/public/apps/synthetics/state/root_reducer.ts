@@ -14,6 +14,7 @@ import { indexStatusReducer } from './index_status';
 import { syntheticsEnablementReducer } from './synthetics_enablement';
 import { monitorListReducer } from './monitor_list';
 import { serviceLocationsReducer } from './service_locations';
+import { monitorOverviewReducer } from './overview';
 
 export const rootReducer = combineReducers({
   ui: uiReducer,
@@ -23,6 +24,7 @@ export const rootReducer = combineReducers({
   serviceLocations: serviceLocationsReducer,
   monitorStatus: monitorStatusReducer,
   syntheticsMonitor: syntheticsMonitorReducer,
+  overview: monitorOverviewReducer,
 });
 
 export type SyntheticsAppState = ReturnType<typeof rootReducer>;

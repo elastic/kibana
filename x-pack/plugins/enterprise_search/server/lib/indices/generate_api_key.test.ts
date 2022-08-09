@@ -14,10 +14,10 @@ import { generateApiKey } from './generate_api_key';
 describe('generateApiKey lib function', () => {
   const mockClient = {
     asCurrentUser: {
+      index: jest.fn(),
       indices: {
         create: jest.fn(),
       },
-      index: jest.fn(),
       search: jest.fn(),
       security: {
         createApiKey: jest.fn(),
@@ -44,13 +44,13 @@ describe('generateApiKey lib function', () => {
       _source: 'Document',
     }));
     mockClient.asCurrentUser.security.createApiKey.mockImplementation(() => ({
-      id: 'apiKeyId',
       encoded: 'encoded',
+      id: 'apiKeyId',
     }));
 
     await expect(
       generateApiKey(mockClient as unknown as IScopedClusterClient, 'index_name')
-    ).resolves.toEqual({ id: 'apiKeyId', encoded: 'encoded' });
+    ).resolves.toEqual({ encoded: 'encoded', id: 'apiKeyId' });
     expect(mockClient.asCurrentUser.index).not.toHaveBeenCalled();
     expect(mockClient.asCurrentUser.security.createApiKey).toHaveBeenCalledWith({
       name: 'index_name-connector',
@@ -59,7 +59,7 @@ describe('generateApiKey lib function', () => {
           cluster: [],
           index: [
             {
-              names: ['index_name', CONNECTORS_INDEX],
+              names: ['index_name', `${CONNECTORS_INDEX}*`],
               privileges: ['all'],
             },
           ],
@@ -71,7 +71,7 @@ describe('generateApiKey lib function', () => {
     mockClient.asCurrentUser.search.mockImplementation(() =>
       Promise.resolve({
         hits: {
-          hits: [{ _source: { doc: 'doc' }, _id: 'connectorId' }],
+          hits: [{ _id: 'connectorId', _source: { doc: 'doc' } }],
         },
       })
     );
@@ -80,13 +80,13 @@ describe('generateApiKey lib function', () => {
       _source: 'Document',
     }));
     mockClient.asCurrentUser.security.createApiKey.mockImplementation(() => ({
-      id: 'apiKeyId',
       encoded: 'encoded',
+      id: 'apiKeyId',
     }));
 
     await expect(
       generateApiKey(mockClient as unknown as IScopedClusterClient, 'index_name')
-    ).resolves.toEqual({ id: 'apiKeyId', encoded: 'encoded' });
+    ).resolves.toEqual({ encoded: 'encoded', id: 'apiKeyId' });
     expect(mockClient.asCurrentUser.security.createApiKey).toHaveBeenCalledWith({
       name: 'index_name-connector',
       role_descriptors: {
@@ -94,7 +94,7 @@ describe('generateApiKey lib function', () => {
           cluster: [],
           index: [
             {
-              names: ['index_name', CONNECTORS_INDEX],
+              names: ['index_name', `${CONNECTORS_INDEX}*`],
               privileges: ['all'],
             },
           ],
@@ -102,9 +102,9 @@ describe('generateApiKey lib function', () => {
       },
     });
     expect(mockClient.asCurrentUser.index).toHaveBeenCalledWith({
-      index: CONNECTORS_INDEX,
+      document: { api_key_id: 'apiKeyId', doc: 'doc' },
       id: 'connectorId',
-      document: { doc: 'doc', api_key_id: 'apiKeyId' },
+      index: CONNECTORS_INDEX,
     });
     expect(mockClient.asCurrentUser.security.invalidateApiKey).not.toHaveBeenCalled();
   });
@@ -114,8 +114,8 @@ describe('generateApiKey lib function', () => {
         hits: {
           hits: [
             {
-              _source: { doc: 'doc', api_key_id: '1' },
               _id: 'connectorId',
+              _source: { api_key_id: '1', doc: 'doc' },
               fields: { api_key_id: '1' },
             },
           ],
@@ -127,13 +127,13 @@ describe('generateApiKey lib function', () => {
       _source: 'Document',
     }));
     mockClient.asCurrentUser.security.createApiKey.mockImplementation(() => ({
-      id: 'apiKeyId',
       encoded: 'encoded',
+      id: 'apiKeyId',
     }));
 
     await expect(
       generateApiKey(mockClient as unknown as IScopedClusterClient, 'index_name')
-    ).resolves.toEqual({ id: 'apiKeyId', encoded: 'encoded' });
+    ).resolves.toEqual({ encoded: 'encoded', id: 'apiKeyId' });
     expect(mockClient.asCurrentUser.security.createApiKey).toHaveBeenCalledWith({
       name: 'index_name-connector',
       role_descriptors: {
@@ -141,7 +141,7 @@ describe('generateApiKey lib function', () => {
           cluster: [],
           index: [
             {
-              names: ['index_name', CONNECTORS_INDEX],
+              names: ['index_name', `${CONNECTORS_INDEX}*`],
               privileges: ['all'],
             },
           ],
@@ -149,9 +149,9 @@ describe('generateApiKey lib function', () => {
       },
     });
     expect(mockClient.asCurrentUser.index).toHaveBeenCalledWith({
-      index: CONNECTORS_INDEX,
+      document: { api_key_id: 'apiKeyId', doc: 'doc' },
       id: 'connectorId',
-      document: { doc: 'doc', api_key_id: 'apiKeyId' },
+      index: CONNECTORS_INDEX,
     });
     expect(mockClient.asCurrentUser.security.invalidateApiKey).toHaveBeenCalledWith({
       id: '1',

@@ -13,14 +13,14 @@ import {
   type CriteriaWithPagination,
 } from '@elastic/eui';
 import React from 'react';
-import moment from 'moment';
 import { Link, useHistory, generatePath } from 'react-router-dom';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { TimestampTableCell } from '../../components/timestamp_table_cell';
 import type { Benchmark } from '../../../common/types';
 import { useKibana } from '../../common/hooks/use_kibana';
-import { allNavigationItems } from '../../common/navigation/constants';
+import { cloudPosturePages } from '../../common/navigation/constants';
 import * as TEST_SUBJ from './test_subjects';
 
 interface BenchmarksTableProps
@@ -57,7 +57,7 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
     }),
     render: (packageName, benchmark) => (
       <Link
-        to={generatePath(allNavigationItems.rules.path, {
+        to={generatePath(cloudPosturePages.rules.path, {
           packagePolicyId: benchmark.package_policy.id,
           policyId: benchmark.package_policy.policy_id,
         })}
@@ -134,7 +134,9 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
     }),
     dataType: 'date',
     truncateText: true,
-    render: (date: Benchmark['package_policy']['created_at']) => moment(date).fromNow(),
+    render: (timestamp: Benchmark['package_policy']['created_at']) => (
+      <TimestampTableCell timestamp={timestamp} />
+    ),
     sortable: true,
     'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.CREATED_AT,
   },
@@ -157,7 +159,7 @@ export const BenchmarksTable = ({
   const getRowProps: EuiBasicTableProps<Benchmark>['rowProps'] = (benchmark) => ({
     onClick: () =>
       history.push(
-        generatePath(allNavigationItems.rules.path, {
+        generatePath(cloudPosturePages.rules.path, {
           packagePolicyId: benchmark.package_policy.id,
           policyId: benchmark.package_policy.policy_id,
         })

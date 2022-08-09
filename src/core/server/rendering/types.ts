@@ -9,9 +9,12 @@
 import { i18n } from '@kbn/i18n';
 import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 import type { InjectedMetadata } from '@kbn/core-injected-metadata-common-internal';
-import { InternalElasticsearchServiceSetup } from '../elasticsearch';
-import { ICspConfig } from '../http';
-import { InternalHttpServicePreboot, InternalHttpServiceSetup, KibanaRequest } from '../http';
+import type { KibanaRequest, ICspConfig } from '@kbn/core-http-server';
+import type {
+  InternalHttpServicePreboot,
+  InternalHttpServiceSetup,
+} from '@kbn/core-http-server-internal';
+import type { InternalElasticsearchServiceSetup } from '@kbn/core-elasticsearch-server-internal';
 import { UiPlugins } from '../plugins';
 import { IUiSettingsClient } from '../ui_settings';
 import type { InternalStatusServiceSetup } from '../status';

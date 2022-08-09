@@ -146,7 +146,7 @@ exports[`Event Details Overview Cards renders rows and spacers correctly 1`] = `
                   class="c6"
                 >
                   <p
-                    class="euiScreenReaderOnly"
+                    class="emotion-euiScreenReaderOnly"
                   >
                     You are in a dialog, containing options for field kibana.alert.workflow_status. Press tab to navigate options. Press escape to exit.
                   </p>
@@ -215,7 +215,7 @@ exports[`Event Details Overview Cards renders rows and spacers correctly 1`] = `
                   class="c6"
                 >
                   <p
-                    class="euiScreenReaderOnly"
+                    class="emotion-euiScreenReaderOnly"
                   >
                     You are in a dialog, containing options for field kibana.alert.risk_score. Press tab to navigate options. Press escape to exit.
                   </p>
@@ -296,7 +296,7 @@ exports[`Event Details Overview Cards renders rows and spacers correctly 1`] = `
                   class="c6"
                 >
                   <p
-                    class="euiScreenReaderOnly"
+                    class="emotion-euiScreenReaderOnly"
                   >
                     You are in a dialog, containing options for field kibana.alert.rule.name. Press tab to navigate options. Press escape to exit.
                   </p>

@@ -22,7 +22,6 @@ import {
   APMPluginSetupDependencies,
   APMPluginStartDependencies,
 } from '../types';
-import { UxUIFilters } from '../../common/ux_ui_filter';
 
 export type ApmPluginRequestHandlerContext = CustomRequestHandlerContext<{
   licensing: LicensingApiRequestHandlerContext;
@@ -56,7 +55,6 @@ export interface APMRouteHandlerResources {
       _inspect: boolean;
       start?: number;
       end?: number;
-      uiFilters?: UxUIFilters;
     };
   };
   config: APMConfig;

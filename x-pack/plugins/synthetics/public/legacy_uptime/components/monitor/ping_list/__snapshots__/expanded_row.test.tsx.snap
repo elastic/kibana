@@ -182,7 +182,7 @@ exports[`PingListExpandedRow renders link to docs if body is not recorded but it
                   External link
                 </span>
                 <span
-                  class="euiScreenReaderOnly"
+                  class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
                 >
                   (opens in a new tab or window)
                 </span>

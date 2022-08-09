@@ -10,9 +10,10 @@ import querystring from 'querystring';
 import { createSelector } from 'reselect';
 import { matchPath } from 'react-router-dom';
 import { decode } from 'rison-node';
-import { Query } from '@kbn/es-query';
-import { Immutable, HostStatus, HostMetadata } from '../../../../../common/endpoint/types';
-import { EndpointState, EndpointIndexUIQueryParams } from '../types';
+import type { Query } from '@kbn/es-query';
+import type { Immutable, HostMetadata } from '../../../../../common/endpoint/types';
+import { HostStatus } from '../../../../../common/endpoint/types';
+import type { EndpointState, EndpointIndexUIQueryParams } from '../types';
 import { extractListPaginationParams } from '../../../common/routing';
 import {
   MANAGEMENT_DEFAULT_PAGE,
@@ -26,9 +27,9 @@ import {
   isUninitialisedResourceState,
 } from '../../../state';
 
-import { ServerApiError } from '../../../../common/types';
+import type { ServerApiError } from '../../../../common/types';
 import { isEndpointHostIsolated } from '../../../../common/utils/validators';
-import { EndpointHostIsolationStatusProps } from '../../../../common/components/endpoint/host_isolation';
+import type { EndpointHostIsolationStatusProps } from '../../../../common/components/endpoint/host_isolation';
 import { EndpointDetailsTabsTypes } from '../view/details/components/endpoint_details_tabs';
 
 export const listData = (state: Immutable<EndpointState>) => state.hosts;
@@ -238,7 +239,7 @@ export const searchBarQuery: (state: Immutable<EndpointState>) => Query = create
 export const getCurrentIsolationRequestState = (
   state: Immutable<EndpointState>
 ): EndpointState['isolationRequestState'] => {
-  return state.isolationRequestState;
+  return state.isolationRequestState as EndpointState['isolationRequestState'];
 };
 
 export const getIsIsolationRequestPending: (state: Immutable<EndpointState>) => boolean =
@@ -286,6 +287,9 @@ export const getEndpointHostIsolationStatusPropsCallback: (
     return (endpoint: HostMetadata) => {
       let pendingIsolate = 0;
       let pendingUnIsolate = 0;
+      let pendingKillProcess = 0;
+      let pendingSuspendProcess = 0;
+      let pendingRunningProcesses = 0;
 
       if (isLoadedResourceState(pendingActionsState)) {
         const endpointPendingActions = pendingActionsState.data.get(endpoint.elastic.agent.id);
@@ -293,13 +297,21 @@ export const getEndpointHostIsolationStatusPropsCallback: (
         if (endpointPendingActions) {
           pendingIsolate = endpointPendingActions?.isolate ?? 0;
           pendingUnIsolate = endpointPendingActions?.unisolate ?? 0;
+          pendingKillProcess = endpointPendingActions?.['kill-process'] ?? 0;
+          pendingSuspendProcess = endpointPendingActions?.['suspend-process'] ?? 0;
+          pendingRunningProcesses = endpointPendingActions?.['running-processes'] ?? 0;
         }
       }
 
       return {
         isIsolated: isEndpointHostIsolated(endpoint),
-        pendingIsolate,
-        pendingUnIsolate,
+        pendingActions: {
+          pendingIsolate,
+          pendingUnIsolate,
+          pendingKillProcess,
+          pendingSuspendProcess,
+          pendingRunningProcesses,
+        },
       };
     };
   }

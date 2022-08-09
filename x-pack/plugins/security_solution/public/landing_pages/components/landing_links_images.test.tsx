@@ -7,16 +7,25 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
+import { BETA } from '@kbn/kubernetes-security-plugin/common/translations';
 import { SecurityPageName } from '../../app/types';
-import { NavLinkItem } from '../../common/components/navigation/types';
+import type { NavLinkItem } from '../../common/components/navigation/types';
 import { TestProviders } from '../../common/mock';
-import { LandingLinksImages } from './landing_links_images';
+import { LandingLinksImages, LandingImageCards } from './landing_links_images';
 
 const DEFAULT_NAV_ITEM: NavLinkItem = {
   id: SecurityPageName.overview,
   title: 'TEST LABEL',
   description: 'TEST DESCRIPTION',
   image: 'TEST_IMAGE.png',
+};
+
+const BETA_NAV_ITEM: NavLinkItem = {
+  id: SecurityPageName.kubernetes,
+  title: 'TEST LABEL',
+  description: 'TEST DESCRIPTION',
+  image: 'TEST_IMAGE.png',
+  isBeta: true,
 };
 
 jest.mock('../../common/lib/kibana/kibana_react', () => {
@@ -55,5 +64,72 @@ describe('LandingLinksImages', () => {
     );
 
     expect(getByTestId('LandingLinksImage')).toHaveAttribute('src', image);
+  });
+
+  it('renders beta tag when isBeta is true', () => {
+    const { queryByText } = render(
+      <TestProviders>
+        <LandingLinksImages items={[BETA_NAV_ITEM]} />
+      </TestProviders>
+    );
+
+    expect(queryByText(BETA)).toBeInTheDocument();
+  });
+
+  it('does not render beta tag when isBeta is false', () => {
+    const { queryByText } = render(
+      <TestProviders>
+        <LandingLinksImages items={[DEFAULT_NAV_ITEM]} />
+      </TestProviders>
+    );
+
+    expect(queryByText(BETA)).not.toBeInTheDocument();
+  });
+});
+
+describe('LandingImageCards', () => {
+  it('renders', () => {
+    const title = 'test label';
+
+    const { queryByText } = render(
+      <TestProviders>
+        <LandingImageCards items={[{ ...DEFAULT_NAV_ITEM, title }]} />
+      </TestProviders>
+    );
+
+    expect(queryByText(title)).toBeInTheDocument();
+  });
+
+  it('renders image', () => {
+    const image = 'test_image.jpeg';
+    const title = 'TEST_LABEL';
+
+    const { getByTestId } = render(
+      <TestProviders>
+        <LandingImageCards items={[{ ...DEFAULT_NAV_ITEM, image, title }]} />
+      </TestProviders>
+    );
+
+    expect(getByTestId('LandingImageCard-image')).toHaveAttribute('src', image);
+  });
+
+  it('renders beta tag when isBeta is true', () => {
+    const { queryByText } = render(
+      <TestProviders>
+        <LandingImageCards items={[BETA_NAV_ITEM]} />
+      </TestProviders>
+    );
+
+    expect(queryByText(BETA)).toBeInTheDocument();
+  });
+
+  it('does not render beta tag when isBeta is false', () => {
+    const { queryByText } = render(
+      <TestProviders>
+        <LandingImageCards items={[DEFAULT_NAV_ITEM]} />
+      </TestProviders>
+    );
+
+    expect(queryByText(BETA)).not.toBeInTheDocument();
   });
 });

@@ -13,21 +13,28 @@ import { useWithShowEndpointResponder } from '../../../../hooks';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { APP_UI_ID } from '../../../../../../common/constants';
 import { getEndpointDetailsPath } from '../../../../common/routing';
-import { HostMetadata, MaybeImmutable } from '../../../../../../common/endpoint/types';
+import type { HostMetadata, MaybeImmutable } from '../../../../../../common/endpoint/types';
 import { useEndpointSelector } from './hooks';
 import { agentPolicies, uiQueryParams } from '../../store/selectors';
 import { useAppUrl } from '../../../../../common/lib/kibana/hooks';
-import { ContextMenuItemNavByRouterProps } from '../../../../components/context_menu_with_router_support/context_menu_item_nav_by_router';
+import type { ContextMenuItemNavByRouterProps } from '../../../../components/context_menu_with_router_support/context_menu_item_nav_by_router';
 import { isEndpointHostIsolated } from '../../../../../common/utils/validators';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { isIsolationSupported } from '../../../../../../common/endpoint/service/host_isolation/utils';
+import { useDoesEndpointSupportResponder } from '../../../../../common/hooks/endpoint/use_does_endpoint_support_responder';
+import { UPGRADE_ENDPOINT_FOR_RESPONDER } from '../../../../../common/translations';
+
+interface Options {
+  isEndpointList: boolean;
+}
 
 /**
  * Returns a list (array) of actions for an individual endpoint
  * @param endpointMetadata
  */
 export const useEndpointActionItems = (
-  endpointMetadata: MaybeImmutable<HostMetadata> | undefined
+  endpointMetadata: MaybeImmutable<HostMetadata> | undefined,
+  options?: Options
 ): ContextMenuItemNavByRouterProps[] => {
   const isPlatinumPlus = useLicense().isPlatinumPlus();
   const { getAppUrl } = useAppUrl();
@@ -38,6 +45,7 @@ export const useEndpointActionItems = (
     'responseActionsConsoleEnabled'
   );
   const canAccessResponseConsole = useUserPrivileges().endpointPrivileges.canAccessResponseConsole;
+  const isResponderCapabilitiesEnabled = useDoesEndpointSupportResponder(endpointMetadata);
 
   return useMemo<ContextMenuItemNavByRouterProps[]>(() => {
     if (endpointMetadata) {
@@ -56,6 +64,11 @@ export const useEndpointActionItems = (
         selected_endpoint: _selectedEndpoint,
         ...currentUrlParams
       } = allCurrentUrlParams;
+      const endpointActionsPath = getEndpointDetailsPath({
+        name: 'endpointActivityLog',
+        ...currentUrlParams,
+        selected_endpoint: endpointId,
+      });
       const endpointIsolatePath = getEndpointDetailsPath({
         name: 'endpointIsolate',
         ...currentUrlParams,
@@ -115,6 +128,7 @@ export const useEndpointActionItems = (
                 'data-test-subj': 'console',
                 icon: 'console',
                 key: 'consoleLink',
+                disabled: !isResponderCapabilitiesEnabled,
                 onClick: (ev: React.MouseEvent) => {
                   ev.preventDefault();
                   showEndpointResponseActionsConsole(endpointMetadata);
@@ -123,6 +137,27 @@ export const useEndpointActionItems = (
                   <FormattedMessage
                     id="xpack.securitySolution.endpoint.actions.console"
                     defaultMessage="Launch responder"
+                  />
+                ),
+                toolTipContent: !isResponderCapabilitiesEnabled
+                  ? UPGRADE_ENDPOINT_FOR_RESPONDER
+                  : '',
+              },
+            ]
+          : []),
+        ...(options?.isEndpointList
+          ? [
+              {
+                'data-test-subj': 'actionsLink',
+                icon: 'logoSecurity',
+                key: 'actionsLogLink',
+                navigateAppId: APP_UI_ID,
+                navigateOptions: { path: endpointActionsPath },
+                href: getAppUrl({ path: endpointActionsPath }),
+                children: (
+                  <FormattedMessage
+                    id="xpack.securitySolution.endpoint.actions.actionsLog"
+                    defaultMessage="View actions log"
                   />
                 ),
               },
@@ -228,5 +263,7 @@ export const useEndpointActionItems = (
     isPlatinumPlus,
     isResponseActionsConsoleEnabled,
     showEndpointResponseActionsConsole,
+    options?.isEndpointList,
+    isResponderCapabilitiesEnabled,
   ]);
 };

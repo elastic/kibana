@@ -6,13 +6,12 @@
  */
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
-import {
-  Direction,
-  HostsQueries,
+import type {
   HostDetailsRequestOptions,
   SortField,
   HostsFields,
 } from '../../../../../../../common/search_strategy';
+import { Direction, HostsQueries } from '../../../../../../../common/search_strategy';
 
 export const mockOptions: HostDetailsRequestOptions = {
   defaultIndex: [

@@ -8,11 +8,10 @@ import { useCallback, useMemo } from 'react';
 
 import { CommentType } from '@kbn/cases-plugin/common';
 
-import { APP_ID } from '../../../../common/constants';
 import { useKibana, useGetUserCasesPermissions } from '../../lib/kibana';
 import { ADD_TO_CASE_SUCCESS } from './translations';
 
-import { LensAttributes } from './types';
+import type { LensAttributes } from './types';
 
 export interface UseAddToNewCaseProps {
   onClick?: () => void;
@@ -20,10 +19,8 @@ export interface UseAddToNewCaseProps {
   lensAttributes: LensAttributes | null;
 }
 
-const owner = APP_ID;
-
 export const useAddToNewCase = ({ onClick, timeRange, lensAttributes }: UseAddToNewCaseProps) => {
-  const userPermissions = useGetUserCasesPermissions();
+  const userCasesPermissions = useGetUserCasesPermissions();
   const { cases } = useKibana().services;
   const attachments = useMemo(() => {
     return [
@@ -32,7 +29,6 @@ export const useAddToNewCase = ({ onClick, timeRange, lensAttributes }: UseAddTo
           timeRange,
           attributes: lensAttributes,
         })}}`,
-        owner,
         type: CommentType.user as const,
       },
     ];
@@ -52,6 +48,10 @@ export const useAddToNewCase = ({ onClick, timeRange, lensAttributes }: UseAddTo
 
   return {
     onAddToNewCaseClicked,
-    disabled: lensAttributes == null || timeRange == null || !userPermissions.crud,
+    disabled:
+      lensAttributes == null ||
+      timeRange == null ||
+      !userCasesPermissions.create ||
+      !userCasesPermissions.read,
   };
 };

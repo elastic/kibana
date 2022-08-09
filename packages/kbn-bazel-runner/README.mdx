@@ -9,29 +9,38 @@ tags: ['kibana', 'dev', 'contributor', 'operations', 'bazel', 'runner']
 
 This is a package with helpers for invoking bazel and iBazel commands, used everywhere we programmatically run bazel.
 
-## async runBazel(options: BazelRunOptions)
+## API
+
+### async runBazel(args: string[], options: BazelRunOptions)
 
 It runs bazel on the background with the given options
 
-## async runIBazel(options: BazelRunOptions)
+### async runIBazel(args: string[], options: BazelRunOptions)
 
 It runs a IBazel on the background with the given options
 
-### BazelRunOptions
+#### BazelRunOptions
 
 ```
 {
   // a logger to print the command output
-  log: ToolingLog;
-  // the arguments to run the bazel or ibazel with
-  bazelArgs: string[];
+  log: SomeDevLog;
   // run bazel with the no connection compatible config or not
   offline?: boolean;
-  // additional options to pass into execa process
-  execaOpts?: execa.Options;
+  // environment variables to set in process running Bazel
+  env?: Record<string, string>;
+  // directory to run bazel in
+  cwd?: string;
+  // text to include at the beginning on each line of log output produced by bazel
+  logPrefix?: string;
+  // handler to implement custom error handling
+  onErrorExit?: (code: number) => void;
 }
 ```
 
-### execa.Options
 
-Info around available execa options can be found [here](https://github.com/sindresorhus/execa/blob/9a157b3bc247b19d55cc6fbec77800a5ac348d19/readme.md#options)
+## NOTE:
+
+This code is needed in order to properly bootstrap the repository. As such, it can't have any NPM dependencies or require being built. This code is loaded directly into the node.js process that boostraps the repository from source while also being built into a package and exposed to the rest of the package system. Please consider this when making any changes to the source.
+
+The code is still type-checked as JS with JSDoc comments, and a single .ts file which provides interfaces to the JS validation and are publically available to package consumers.

@@ -360,6 +360,7 @@ describe('editor_frame', () => {
         getVisualDefaults: jest.fn(),
         getSourceId: jest.fn(),
         getFilters: jest.fn(),
+        getMaxPossibleNumValues: jest.fn(),
       };
       mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
 
@@ -728,7 +729,7 @@ describe('editor_frame', () => {
         instance.find('[data-test-subj="lnsSuggestion"]').at(2).simulate('click');
       });
 
-      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(2);
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(1);
       expect(mockVisualization.getConfiguration).toHaveBeenLastCalledWith(
         expect.objectContaining({
           state: suggestionVisState,

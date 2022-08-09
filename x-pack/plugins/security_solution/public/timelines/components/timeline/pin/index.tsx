@@ -9,7 +9,8 @@ import { EuiButtonIcon } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React from 'react';
 
-import { TimelineType, TimelineTypeLiteral } from '../../../../../common/types/timeline';
+import type { TimelineTypeLiteral } from '../../../../../common/types/timeline';
+import { TimelineType } from '../../../../../common/types/timeline';
 
 import * as i18n from '../body/translations';
 

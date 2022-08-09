@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { memo, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React, { memo } from 'react';
 import { EuiText, EuiTextColor } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 

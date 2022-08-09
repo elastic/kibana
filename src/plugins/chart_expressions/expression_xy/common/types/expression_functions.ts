@@ -9,8 +9,8 @@
 import { HorizontalAlignment, Position, VerticalAlignment } from '@elastic/charts';
 import { $Values } from '@kbn/utility-types';
 import type { PaletteOutput } from '@kbn/coloring';
-import { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin';
-import { LegendSize } from '@kbn/visualizations-plugin/public';
+import { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import { LegendSize } from '@kbn/visualizations-plugin/common';
 import { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 
@@ -115,8 +115,8 @@ export interface DataLayerArgs {
   accessors: Array<ExpressionValueVisDimension | string>;
   seriesType: SeriesType;
   xAccessor?: string | ExpressionValueVisDimension;
-  hide?: boolean;
-  splitAccessor?: string | ExpressionValueVisDimension;
+  simpleView?: boolean;
+  splitAccessors?: Array<ExpressionValueVisDimension | string>;
   markSizeAccessor?: string | ExpressionValueVisDimension;
   lineWidth?: number;
   showPoints?: boolean;
@@ -141,8 +141,8 @@ export interface ExtendedDataLayerArgs {
   accessors: string[];
   seriesType: SeriesType;
   xAccessor?: string;
-  hide?: boolean;
-  splitAccessor?: string;
+  simpleView?: boolean;
+  splitAccessors?: string[];
   markSizeAccessor?: string;
   lineWidth?: number;
   showPoints?: boolean;
@@ -280,7 +280,7 @@ export interface XYProps {
 
 export interface AnnotationLayerArgs {
   annotations: EventAnnotationOutput[];
-  hide?: boolean;
+  simpleView?: boolean;
 }
 
 export type ExtendedAnnotationLayerArgs = AnnotationLayerArgs & {

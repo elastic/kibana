@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
-import { ITelemetryEventsSender } from '../sender';
-import { ITelemetryReceiver } from '../receiver';
-import type { ESClusterInfo, ESLicense } from '../types';
-import { TaskExecutionPeriod } from '../task';
+import type { Logger } from '@kbn/core/server';
+import type { ITelemetryEventsSender } from '../sender';
+import type { ITelemetryReceiver } from '../receiver';
+import type { ESClusterInfo, ESLicense, TelemetryEvent } from '../types';
+import type { TaskExecutionPeriod } from '../task';
 import { TELEMETRY_CHANNEL_DETECTION_ALERTS } from '../constants';
 import { batchTelemetryRecords } from '../helpers';
-import { TelemetryEvent } from '../types';
 import { copyAllowlistedFields, prebuiltRuleAllowlistFields } from '../filterlists';
 
 export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: number) {
@@ -44,7 +43,15 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
             ? licenseInfoPromise.value
             : ({} as ESLicense | undefined);
 
-        const telemetryEvents = await receiver.fetchPrebuiltRuleAlerts();
+        const { events: telemetryEvents, count: totalPrebuiltAlertCount } =
+          await receiver.fetchPrebuiltRuleAlerts();
+
+        sender.getTelemetryUsageCluster()?.incrementCounter({
+          counterName: 'telemetry_prebuilt_rule_alerts',
+          counterType: 'prebuilt_alert_count',
+          incrementBy: totalPrebuiltAlertCount,
+        });
+
         if (telemetryEvents.length === 0) {
           logger.debug('no prebuilt rule alerts retrieved');
           return 0;

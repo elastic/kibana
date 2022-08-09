@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   useGeneratedHtmlId,
   EuiFlyout,
@@ -20,7 +21,6 @@ import {
   EuiFlyoutFooter,
   EuiButton,
   EuiSpacer,
-  EuiBasicTableColumn,
   EuiButtonEmpty,
 } from '@elastic/eui';
 

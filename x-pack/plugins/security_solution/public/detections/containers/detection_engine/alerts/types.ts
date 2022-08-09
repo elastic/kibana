@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
+import type { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 
 export interface BasicSignals {
   signal: AbortSignal;
@@ -33,6 +33,7 @@ export interface AlertSearchResponse<Hit = {}, Aggregations = {} | undefined>
       value: number;
       relation: string;
     };
+    max_score?: number | null;
     hits: Hit[];
   };
 }
@@ -46,6 +47,12 @@ export interface UpdateAlertStatusProps {
 export interface AlertsIndex {
   name: string;
   index_mapping_outdated: boolean;
+}
+
+export interface CheckSignalIndex {
+  name: string;
+  index_mapping_outdated: boolean;
+  indexExists: boolean;
 }
 
 export type CasesFromAlertsResponse = Array<{ id: string; title: string }>;

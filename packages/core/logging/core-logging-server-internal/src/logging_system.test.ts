@@ -6,12 +6,7 @@
  * Side Public License, v 1.
  */
 
-const mockStreamWrite = jest.fn();
-jest.mock('fs', () => ({
-  ...(jest.requireActual('fs') as any),
-  constants: {},
-  createWriteStream: jest.fn(() => ({ write: mockStreamWrite })),
-}));
+import { mockStreamWrite, mockGetFlattenedObject } from './logging_system.test.mocks';
 
 const dynamicProps = { process: { pid: expect.any(Number) } };
 
@@ -34,6 +29,7 @@ afterEach(() => {
   jest.restoreAllMocks();
   mockCreateWriteStream.mockClear();
   mockStreamWrite.mockClear();
+  mockGetFlattenedObject.mockClear();
 });
 
 test('uses default memory buffer logger until config is provided', () => {
@@ -520,4 +516,116 @@ test('buffers log records for appenders created during config upgrade', async ()
 
   await upgradePromise;
   expect(JSON.parse(mockConsoleLog.mock.calls[0][0]).message).toBe('message to a new context');
+});
+
+test('setGlobalContext() applies meta to new and existing loggers', async () => {
+  await system.upgrade(
+    config.schema.validate({
+      appenders: { default: { type: 'console', layout: { type: 'json' } } },
+      root: { level: 'info' },
+    })
+  );
+
+  const existingLogger = system.get('some-existing-context');
+  // @ts-expect-error Custom ECS field
+  system.setGlobalContext({ a: { b: { c: true } } });
+  const newLogger = system.get('some-new-context');
+
+  existingLogger.info('You know, just for your info.');
+  newLogger.info('You know, just for your info.');
+  // @ts-expect-error Custom ECS field
+  existingLogger.warn('You have been warned.', { someMeta: 'goes here' });
+  // @ts-expect-error Custom ECS field
+  newLogger.warn('You have been warned.', { someMeta: 'goes here' });
+
+  expect(mockConsoleLog).toHaveBeenCalledTimes(4);
+  expect(JSON.parse(mockConsoleLog.mock.calls[0][0])).toMatchObject({
+    log: { logger: 'some-existing-context' },
+    message: 'You know, just for your info.',
+    a: { b: { c: true } },
+  });
+  expect(JSON.parse(mockConsoleLog.mock.calls[1][0])).toMatchObject({
+    log: { logger: 'some-new-context' },
+    message: 'You know, just for your info.',
+    a: { b: { c: true } },
+  });
+  expect(JSON.parse(mockConsoleLog.mock.calls[2][0])).toMatchObject({
+    log: { logger: 'some-existing-context' },
+    message: 'You have been warned.',
+    someMeta: 'goes here',
+    a: { b: { c: true } },
+  });
+  expect(JSON.parse(mockConsoleLog.mock.calls[3][0])).toMatchObject({
+    log: { logger: 'some-new-context' },
+    message: 'You have been warned.',
+    someMeta: 'goes here',
+    a: { b: { c: true } },
+  });
+});
+
+test('new global context always overwrites existing context', async () => {
+  await system.upgrade(
+    config.schema.validate({
+      appenders: { default: { type: 'console', layout: { type: 'json' } } },
+      root: { level: 'info' },
+    })
+  );
+
+  const logger = system.get('some-context');
+
+  // @ts-expect-error Custom ECS field
+  system.setGlobalContext({ a: { b: { c: true } }, d: false });
+  logger.info('You know, just for your info.');
+
+  // @ts-expect-error Custom ECS field
+  system.setGlobalContext({ a: false, d: true });
+  logger.info('You know, just for your info, again.');
+
+  expect(mockConsoleLog).toHaveBeenCalledTimes(2);
+  expect(JSON.parse(mockConsoleLog.mock.calls[0][0])).toMatchObject({
+    log: { logger: 'some-context' },
+    message: 'You know, just for your info.',
+    a: { b: { c: true } },
+    d: false,
+  });
+  expect(JSON.parse(mockConsoleLog.mock.calls[1][0])).toMatchObject({
+    log: { logger: 'some-context' },
+    message: 'You know, just for your info, again.',
+    a: false,
+    d: true,
+  });
+});
+
+test('flattens global context objects before passing to LoggerAdapter', async () => {
+  await system.upgrade(
+    config.schema.validate({
+      appenders: { default: { type: 'console', layout: { type: 'json' } } },
+      root: { level: 'info' },
+    })
+  );
+
+  // @ts-expect-error Custom ECS field
+  system.setGlobalContext({ a: { b: { c: true } }, d: false });
+
+  const logger = system.get('some-context');
+
+  // @ts-expect-error Custom ECS field
+  system.setGlobalContext({ d: true, e: false });
+
+  logger.info('You know, just for your info.');
+
+  expect(mockGetFlattenedObject).toHaveBeenCalledTimes(3);
+  expect(mockGetFlattenedObject.mock.calls[0][0]).toEqual({
+    a: { b: { c: true } },
+    d: false,
+  });
+  expect(mockGetFlattenedObject.mock.calls[1][0]).toEqual({
+    a: { b: { c: true } },
+    d: false,
+  });
+  expect(mockGetFlattenedObject.mock.calls[2][0]).toEqual({
+    a: { b: { c: true } },
+    d: true,
+    e: false,
+  });
 });

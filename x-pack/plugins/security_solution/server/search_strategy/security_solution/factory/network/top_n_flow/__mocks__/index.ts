@@ -7,12 +7,14 @@
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
+import type {
+  NetworkTopNFlowRequestOptions,
+  NetworkTopNFlowStrategyResponse,
+} from '../../../../../../../common/search_strategy';
 import {
   Direction,
   FlowTargetSourceDest,
   NetworkQueries,
-  NetworkTopNFlowRequestOptions,
-  NetworkTopNFlowStrategyResponse,
   NetworkTopTablesFields,
 } from '../../../../../../../common/search_strategy';
 

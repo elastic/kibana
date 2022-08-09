@@ -5,22 +5,23 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '@kbn/core/server';
-import {
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type {
   ImportExceptionsListSchema,
   ImportExceptionListItemSchema,
   ExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import { RulesClient } from '@kbn/alerting-plugin/server';
-import { ExceptionListClient } from '@kbn/lists-plugin/server';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { legacyMigrate } from '../../../rules/utils';
-import { createBulkErrorObject, ImportRuleResponse } from '../../utils';
+import type { ImportRuleResponse } from '../../utils';
+import { createBulkErrorObject } from '../../utils';
 import { createRules } from '../../../rules/create_rules';
 import { readRules } from '../../../rules/read_rules';
 import { patchRules } from '../../../rules/patch_rules';
-import { ImportRulesSchema } from '../../../../../../common/detection_engine/schemas/request/import_rules_schema';
-import { MlAuthz } from '../../../../machine_learning/authz';
+import type { ImportRulesSchema } from '../../../../../../common/detection_engine/schemas/request/import_rules_schema';
+import type { MlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
 import { checkRuleExceptionReferences } from './check_rule_exception_references';
 

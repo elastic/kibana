@@ -8,7 +8,10 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import { chunk, debounce } from 'lodash';
 
-import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import type {
+  IHttpFetchError,
+  ResponseErrorBody,
+} from '@kbn/core-http-browser';
 
 import { EVENT_OUTCOME } from '../../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../../common/event_outcome';
@@ -20,6 +23,7 @@ import type {
   FailedTransactionsCorrelation,
   FailedTransactionsCorrelationsResponse,
 } from '../../../../common/correlations/failed_transactions_correlations/types';
+import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
 
 import { callApmApi } from '../../../services/rest/create_call_apm_api';
 
@@ -66,6 +70,7 @@ export function useFailedTransactionsCorrelations() {
       failedTransactionsCorrelations: undefined,
       percentileThresholdValue: undefined,
       overallHistogram: undefined,
+      totalDocCount: undefined,
       errorHistogram: undefined,
       fieldStats: undefined,
     });
@@ -91,6 +96,8 @@ export function useFailedTransactionsCorrelations() {
                 body: {
                   ...fetchParams,
                   percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
+                  chartType:
+                    LatencyDistributionChartType.failedTransactionsCorrelations,
                 },
               },
             }
@@ -109,18 +116,21 @@ export function useFailedTransactionsCorrelations() {
                       fieldValue: EventOutcome.failure,
                     },
                   ],
+                  chartType:
+                    LatencyDistributionChartType.failedTransactionsCorrelations,
                 },
               },
             }
           ),
         ]);
 
-      const { overallHistogram, percentileThresholdValue } =
+      const { overallHistogram, totalDocCount, percentileThresholdValue } =
         overallHistogramResponse;
       const { overallHistogram: errorHistogram } = errorHistogramRespone;
 
       responseUpdate.errorHistogram = errorHistogram;
       responseUpdate.overallHistogram = overallHistogram;
+      responseUpdate.totalDocCount = totalDocCount;
       responseUpdate.percentileThresholdValue = percentileThresholdValue;
 
       if (abortCtrl.current.signal.aborted) {

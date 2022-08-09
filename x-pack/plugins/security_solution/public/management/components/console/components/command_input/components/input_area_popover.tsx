@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { CSSProperties, memo, ReactElement, useCallback, useEffect, useMemo } from 'react';
+import type { CSSProperties, ReactElement } from 'react';
+import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { EuiFocusTrap, EuiPopover } from '@elastic/eui';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { CommandInputHistory } from './command_input_history';

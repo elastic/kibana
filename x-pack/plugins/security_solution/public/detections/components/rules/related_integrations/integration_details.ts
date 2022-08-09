@@ -7,7 +7,7 @@
 
 import { capitalize } from 'lodash';
 import semver from 'semver';
-import {
+import type {
   InstalledIntegration,
   InstalledIntegrationArray,
   RelatedIntegration,

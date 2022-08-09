@@ -7,7 +7,8 @@
 
 import { rgba } from 'polished';
 import React, { useCallback } from 'react';
-import { Droppable, DraggableChildrenFn } from 'react-beautiful-dnd';
+import type { DraggableChildrenFn } from 'react-beautiful-dnd';
+import { Droppable } from 'react-beautiful-dnd';
 import styled from 'styled-components';
 
 interface Props {

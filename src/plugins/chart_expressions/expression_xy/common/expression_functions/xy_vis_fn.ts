@@ -42,7 +42,7 @@ const createDataLayer = (args: XYArgs, table: Datatable): DataLayerConfigResult 
   return {
     type: DATA_LAYER,
     seriesType: args.seriesType,
-    hide: args.hide,
+    simpleView: args.simpleView,
     columnToLabel: args.columnToLabel,
     xScaleType: args.xScaleType,
     isHistogram: args.isHistogram,
@@ -72,8 +72,8 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
     seriesType,
     accessors,
     xAccessor,
-    hide,
-    splitAccessor,
+    simpleView,
+    splitAccessors,
     columnToLabel,
     xScaleType,
     isHistogram,
@@ -96,7 +96,7 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
   const dataLayers: DataLayerConfigResult[] = [createDataLayer({ ...args, showLines }, data)];
 
   validateAccessor(dataLayers[0].xAccessor, data.columns);
-  validateAccessor(dataLayers[0].splitAccessor, data.columns);
+  dataLayers[0].splitAccessors?.forEach((accessor) => validateAccessor(accessor, data.columns));
   dataLayers[0].accessors.forEach((accessor) => validateAccessor(accessor, data.columns));
 
   validateMarkSizeForChartType(dataLayers[0].markSizeAccessor, args.seriesType);

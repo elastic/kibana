@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SavedObjectReference } from '@kbn/core/server';
+import type { SavedObjectReference } from '@kbn/core/server';
 
-import {
+import type {
   EqlRuleParams,
   QueryRuleParams,
   ThreatRuleParams,

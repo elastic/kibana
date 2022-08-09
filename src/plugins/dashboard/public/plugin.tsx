@@ -172,6 +172,7 @@ export class DashboardPlugin
         application: coreStart.application,
         uiSettings: coreStart.uiSettings,
         overlays: coreStart.overlays,
+        analytics: coreStart.analytics,
         embeddable: deps.embeddable,
         uiActions: deps.uiActions,
         inspector: deps.inspector,

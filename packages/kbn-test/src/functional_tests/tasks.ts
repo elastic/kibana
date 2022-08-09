@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { relative } from 'path';
-import * as Rx from 'rxjs';
+import Path from 'path';
 import { setTimeout } from 'timers/promises';
+
+import * as Rx from 'rxjs';
 import { startWith, switchMap, take } from 'rxjs/operators';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 import { ToolingLog } from '@kbn/tooling-log';
@@ -16,17 +17,17 @@ import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { REPO_ROOT } from '@kbn/utils';
 import dedent from 'dedent';
 
+import { readConfigFile, EsVersion } from '../functional_test_runner/lib';
 import {
   runElasticsearch,
   runKibanaServer,
   runFtr,
   assertNoneExcluded,
   hasTests,
-  KIBANA_FTR_SCRIPT,
   CreateFtrOptions,
 } from './lib';
 
-import { readConfigFile, EsVersion } from '../functional_test_runner/lib';
+const FTR_SCRIPT_PATH = Path.resolve(REPO_ROOT, 'scripts/functional_test_runner');
 
 const makeSuccessMessage = (options: StartServerOptions) => {
   const installDirFlag = options.installDir ? ` --kibana-install-dir=${options.installDir}` : '';
@@ -34,7 +35,7 @@ const makeSuccessMessage = (options: StartServerOptions) => {
   const pathsMessage = options.useDefaultConfig
     ? ''
     : configPaths
-        .map((path) => relative(process.cwd(), path))
+        .map((path) => Path.relative(process.cwd(), path))
         .map((path) => ` --config ${path}`)
         .join('');
 
@@ -44,7 +45,7 @@ const makeSuccessMessage = (options: StartServerOptions) => {
       Elasticsearch and Kibana are ready for functional testing. Start the functional tests
       in another terminal session by running this command from this directory:
 
-          node ${relative(process.cwd(), KIBANA_FTR_SCRIPT)}${installDirFlag}${pathsMessage}
+          node ${Path.relative(process.cwd(), FTR_SCRIPT_PATH)}${installDirFlag}${pathsMessage}
     ` +
     '\n\n'
   );
@@ -96,7 +97,7 @@ export async function runTests(options: RunTestsParams) {
     await log.indent(0, async () => {
       if (options.configs.length > 1) {
         const progress = `${i + 1}/${options.configs.length}`;
-        log.write(`--- [${progress}] Running ${relative(REPO_ROOT, configPath)}`);
+        log.write(`--- [${progress}] Running ${Path.relative(REPO_ROOT, configPath)}`);
       }
 
       if (!(await hasTests({ configPath, options: { ...options, log } }))) {

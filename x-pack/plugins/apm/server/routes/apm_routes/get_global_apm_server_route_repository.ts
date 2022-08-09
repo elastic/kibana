@@ -12,7 +12,7 @@ import type {
 import { PickByValue } from 'utility-types';
 import { agentKeysRouteRepository } from '../agent_keys/route';
 import { alertsChartPreviewRouteRepository } from '../alerts/route';
-import { backendsRouteRepository } from '../backends/route';
+import { dependencisRouteRepository } from '../dependencies/route';
 import { correlationsRouteRepository } from '../correlations/route';
 import { dataViewRouteRepository } from '../data_view/route';
 import { debugTelemetryRoute } from '../debug_telemetry/route';
@@ -26,7 +26,6 @@ import { infrastructureRouteRepository } from '../infrastructure/route';
 import { latencyDistributionRouteRepository } from '../latency_distribution/route';
 import { metricsRouteRepository } from '../metrics/route';
 import { observabilityOverviewRouteRepository } from '../observability_overview/route';
-import { rumRouteRepository } from '../rum_client/route';
 import { serviceRouteRepository } from '../services/route';
 import { serviceGroupRouteRepository } from '../service_groups/route';
 import { serviceMapRouteRepository } from '../service_map/route';
@@ -51,7 +50,6 @@ function getTypedGlobalApmServerRouteRepository() {
     ...latencyDistributionRouteRepository,
     ...metricsRouteRepository,
     ...observabilityOverviewRouteRepository,
-    ...rumRouteRepository,
     ...serviceMapRouteRepository,
     ...serviceNodeRouteRepository,
     ...serviceRouteRepository,
@@ -66,7 +64,7 @@ function getTypedGlobalApmServerRouteRepository() {
     ...customLinkRouteRepository,
     ...sourceMapsRouteRepository,
     ...apmFleetRouteRepository,
-    ...backendsRouteRepository,
+    ...dependencisRouteRepository,
     ...correlationsRouteRepository,
     ...fallbackToTransactionsRouteRepository,
     ...historicalDataRouteRepository,

@@ -10,9 +10,8 @@ import React from 'react';
 import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../../common/constants';
 import { SetEnterpriseSearchChrome } from '../../../shared/kibana_chrome';
 import { EnterpriseSearchPageTemplateWrapper, PageTemplateProps } from '../../../shared/layout';
+import { useEnterpriseSearchNav } from '../../../shared/layout';
 import { SendEnterpriseSearchTelemetry } from '../../../shared/telemetry';
-
-import { useEnterpriseSearchContentNav } from './nav';
 
 export const EnterpriseSearchContentPageTemplate: React.FC<PageTemplateProps> = ({
   children,
@@ -24,9 +23,10 @@ export const EnterpriseSearchContentPageTemplate: React.FC<PageTemplateProps> = 
     <EnterpriseSearchPageTemplateWrapper
       {...pageTemplateProps}
       solutionNav={{
+        items: useEnterpriseSearchNav(),
         name: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAME,
-        items: useEnterpriseSearchContentNav(),
       }}
+      restrictWidth
       setPageChrome={pageChrome && <SetEnterpriseSearchChrome trail={pageChrome} />}
     >
       {pageViewTelemetry && (

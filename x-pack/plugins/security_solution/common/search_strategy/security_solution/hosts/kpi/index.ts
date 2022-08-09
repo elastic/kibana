@@ -10,9 +10,9 @@ export * from './common';
 export * from './hosts';
 export * from './unique_ips';
 
-import { UsersKpiAuthenticationsStrategyResponse } from '../../users/kpi/authentications';
-import { HostsKpiHostsStrategyResponse } from './hosts';
-import { HostsKpiUniqueIpsStrategyResponse } from './unique_ips';
+import type { UsersKpiAuthenticationsStrategyResponse } from '../../users/kpi/authentications';
+import type { HostsKpiHostsStrategyResponse } from './hosts';
+import type { HostsKpiUniqueIpsStrategyResponse } from './unique_ips';
 
 export enum HostsKpiQueries {
   kpiHosts = 'hostsKpiHosts',

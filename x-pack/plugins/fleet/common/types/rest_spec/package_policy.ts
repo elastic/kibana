@@ -33,7 +33,7 @@ export interface GetOnePackagePolicyResponse {
 }
 
 export interface CreatePackagePolicyRequest {
-  body: NewPackagePolicy;
+  body: NewPackagePolicy & { force?: boolean };
 }
 
 export interface CreatePackagePolicyResponse {

@@ -28,7 +28,6 @@ import {
 } from '../../../types';
 import { DragDropIdentifier, ReorderProvider } from '../../../drag_drop';
 import { LayerSettings } from './layer_settings';
-import { trackUiEvent } from '../../../lens_ui_telemetry';
 import { LayerPanelProps, ActiveDimensionState } from './types';
 import { DimensionContainer } from './dimension_container';
 import { RemoveLayerButton } from './remove_layer_button';
@@ -315,6 +314,7 @@ export function LayerPanel(
                   layerIndex={layerIndex}
                   isOnlyLayer={isOnlyLayer}
                   activeVisualization={activeVisualization}
+                  layerType={activeVisualization.getLayerType(layerId, visualizationState)}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -455,7 +455,6 @@ export function LayerPanel(
                                   });
                                 }}
                                 onRemoveClick={(id: string) => {
-                                  trackUiEvent('indexpattern_dimension_removed');
                                   if (datasourceId && layerDatasource) {
                                     props.updateAll(
                                       datasourceId,
@@ -555,7 +554,7 @@ export function LayerPanel(
         panelRef={(el) => (panelRef.current = el)}
         isOpen={isDimensionPanelOpen}
         isFullscreen={isFullscreen}
-        groupLabel={activeGroup?.groupLabel || ''}
+        groupLabel={activeGroup?.dimensionEditorGroupLabel ?? (activeGroup?.groupLabel || '')}
         handleClose={() => {
           if (layerDatasource) {
             if (
@@ -583,7 +582,7 @@ export function LayerPanel(
           return true;
         }}
         panel={
-          <div>
+          <>
             {activeGroup && activeId && layerDatasource && (
               <NativeRenderer
                 render={layerDatasource.renderDimensionEditor}
@@ -602,6 +601,7 @@ export function LayerPanel(
                   paramEditorCustomProps: activeGroup.paramEditorCustomProps,
                   supportFieldFormat: activeGroup.supportFieldFormat !== false,
                   layerType: activeVisualization.getLayerType(layerId, visualizationState),
+                  activeData: layerVisualizationConfigProps.activeData,
                 }}
               />
             )}
@@ -611,20 +611,34 @@ export function LayerPanel(
               !activeDimension.isNew &&
               activeVisualization.renderDimensionEditor &&
               activeGroup?.enableDimensionEditor && (
-                <div className="lnsLayerPanel__styleEditor">
-                  <NativeRenderer
-                    render={activeVisualization.renderDimensionEditor}
-                    nativeProps={{
-                      ...layerVisualizationConfigProps,
-                      groupId: activeGroup.groupId,
-                      accessor: activeId,
-                      setState: props.updateVisualization,
-                      panelRef,
-                    }}
-                  />
-                </div>
+                <>
+                  <div className="lnsLayerPanel__styleEditor">
+                    <NativeRenderer
+                      render={activeVisualization.renderDimensionEditor}
+                      nativeProps={{
+                        ...layerVisualizationConfigProps,
+                        groupId: activeGroup.groupId,
+                        accessor: activeId,
+                        setState: props.updateVisualization,
+                        panelRef,
+                      }}
+                    />
+                  </div>
+                  {activeVisualization.renderDimensionEditorAdditionalSection && (
+                    <NativeRenderer
+                      render={activeVisualization.renderDimensionEditorAdditionalSection}
+                      nativeProps={{
+                        ...layerVisualizationConfigProps,
+                        groupId: activeGroup.groupId,
+                        accessor: activeId,
+                        setState: props.updateVisualization,
+                        panelRef,
+                      }}
+                    />
+                  )}
+                </>
               )}
-          </div>
+          </>
         }
       />
     </>

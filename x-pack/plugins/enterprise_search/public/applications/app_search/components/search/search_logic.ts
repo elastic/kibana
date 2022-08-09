@@ -12,7 +12,7 @@ import type { SearchResult } from '@elastic/search-ui';
 import { flashAPIErrors } from '../../../shared/flash_messages';
 
 import { HttpLogic } from '../../../shared/http';
-import { flattenDocument } from '../../utils/results';
+import { formatResult } from '../../utils/results';
 import { EngineLogic } from '../engine';
 
 interface SearchValues {
@@ -50,7 +50,7 @@ export const SearchLogic = kea<MakeLogicType<SearchValues, SearchActions>>({
     searchResults: [
       [],
       {
-        onSearch: (_, { results }) => results.map((res) => flattenDocument(res) as SearchResult),
+        onSearch: (_, { results }) => results.map((res) => formatResult(res) as SearchResult),
       },
     ],
   }),

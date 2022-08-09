@@ -10,11 +10,8 @@ import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
-import {
-  TimelineTypeLiteral,
-  TimelineType,
-  TimelineStatus,
-} from '../../../../../common/types/timeline';
+import type { TimelineTypeLiteral } from '../../../../../common/types/timeline';
+import { TimelineType, TimelineStatus } from '../../../../../common/types/timeline';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 

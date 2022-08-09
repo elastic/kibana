@@ -8,17 +8,16 @@
 import React, { memo, useCallback } from 'react';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DocLinksStart } from '@kbn/core/public';
 import { EuiHealth, EuiText, EuiTreeView, EuiNotificationBadge } from '@elastic/eui';
 import { useKibana } from '../../../common/lib/kibana';
-import {
-  HostPolicyResponseActionStatus,
+import type {
   HostPolicyResponseAppliedAction,
   HostPolicyResponseConfiguration,
   Immutable,
   ImmutableArray,
   ImmutableObject,
 } from '../../../../common/endpoint/types';
+import { HostPolicyResponseActionStatus } from '../../../../common/endpoint/types';
 import { formatResponse, PolicyResponseActionFormatter } from './policy_response_friendly_names';
 import { PolicyResponseActionItem } from './policy_response_action_item';
 
@@ -26,6 +25,8 @@ import { PolicyResponseActionItem } from './policy_response_action_item';
 const StyledEuiTreeView = styled(EuiTreeView)`
   .policy-response-action-item-expanded {
     height: auto;
+    padding-top: ${({ theme }) => theme.eui.euiSizeS};
+    padding-bottom: ${({ theme }) => theme.eui.euiSizeS};
     .euiTreeView__nodeLabel {
       width: 100%;
     }
@@ -39,14 +40,24 @@ const StyledEuiTreeView = styled(EuiTreeView)`
       .euiTreeView__node {
         // When response action item displays a callout, this needs to be overwritten to remove the default max height of EuiTreeView
         max-height: none !important;
-        padding-top: ${({ theme }) => theme.eui.euiSizeS};
-        padding-bottom: ${({ theme }) => theme.eui.euiSizeS};
+      }
+    }
+  }
+  .euiTreeView__node {
+    max-height: none !important;
+    .euiNotificationBadge {
+      margin-right: 5px;
+    }
+    .euiTreeView__nodeLabel {
+      .euiText {
+        font-size: ${({ theme }) => theme.eui.euiFontSize};
       }
     }
   }
 `;
 
 interface PolicyResponseProps {
+  hostOs: string;
   policyResponseConfig: Immutable<HostPolicyResponseConfiguration>;
   policyResponseActions: Immutable<HostPolicyResponseAppliedAction[]>;
   policyResponseAttentionCount: Map<string, number>;
@@ -57,6 +68,7 @@ interface PolicyResponseProps {
  */
 export const PolicyResponse = memo(
   ({
+    hostOs,
     policyResponseConfig,
     policyResponseActions,
     policyResponseAttentionCount,
@@ -93,9 +105,8 @@ export const PolicyResponse = memo(
 
           const policyResponseActionFormatter = new PolicyResponseActionFormatter(
             action || {},
-            docLinks.links.securitySolution.policyResponseTroubleshooting[
-              action.name as keyof DocLinksStart['links']['securitySolution']['policyResponseTroubleshooting']
-            ]
+            docLinks.links.securitySolution.policyResponseTroubleshooting,
+            hostOs
           );
           return {
             label: (
@@ -130,11 +141,7 @@ export const PolicyResponse = memo(
                 ),
                 id: `action_message_${actionKey}`,
                 isExpanded: true,
-                className:
-                  action.status !== HostPolicyResponseActionStatus.success &&
-                  action.status !== HostPolicyResponseActionStatus.unsupported
-                    ? 'policy-response-action-item-expanded'
-                    : '',
+                className: 'policy-response-action-item-expanded',
               },
             ],
           };
@@ -144,6 +151,7 @@ export const PolicyResponse = memo(
         docLinks.links.securitySolution.policyResponseTroubleshooting,
         getEntryIcon,
         policyResponseActions,
+        hostOs,
       ]
     );
 

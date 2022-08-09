@@ -6,13 +6,13 @@
  */
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { patchRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request/patch_rules_bulk_schema';
 import { buildRouteValidationNonExact } from '../../../../utils/build_validation/route_validation';
 import { rulesBulkSchema } from '../../../../../common/detection_engine/schemas/response/rules_bulk_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_BULK_UPDATE } from '../../../../../common/constants';
-import { SetupPlugins } from '../../../../plugin';
+import type { SetupPlugins } from '../../../../plugin';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { throwAuthzError } from '../../../machine_learning/validation';
 import { transformBulkError, buildSiemResponse } from '../utils';

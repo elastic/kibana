@@ -11,8 +11,8 @@ import { getOr } from 'lodash/fp';
 import React, { useCallback, Fragment, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
-import { HostEcs } from '../../../../common/ecs/host';
-import {
+import type { HostEcs } from '../../../../common/ecs/host';
+import type {
   AutonomousSystem,
   FlowTarget,
   FlowTargetSourceDest,
@@ -25,7 +25,8 @@ import { FormattedRelativePreferenceDate } from '../../../common/components/form
 import { HostDetailsLink, ReputationLink, WhoIsLink } from '../../../common/components/links';
 import { Spacer } from '../../../common/components/page';
 import * as i18n from '../../../network/components/details/translations';
-import { IS_OPERATOR, QueryOperator } from '../../../../common/types';
+import type { QueryOperator } from '../../../../common/types';
+import { IS_OPERATOR } from '../../../../common/types';
 import { DraggableWrapper } from '../../../common/components/drag_and_drop/draggable_wrapper';
 
 const DraggableContainerFlexGroup = styled(EuiFlexGroup)`

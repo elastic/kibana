@@ -28,7 +28,7 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 RUNTIME_DEPS = [
-  "//packages/kbn-dev-utils:build",
+  "//packages/kbn-dev-utils",
   "@npm//node-forge",
 ]
 
@@ -44,6 +44,7 @@ jsts_transpiler(
   name = "target_node",
   srcs = SRCS,
   build_pkg_name = package_name(),
+  root_input_dir = "src",
 )
 
 ts_config(

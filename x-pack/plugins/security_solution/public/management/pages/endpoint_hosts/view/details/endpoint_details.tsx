@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { ResponseActionsList } from '../../../../components/endpoint_response_actions_list/response_actions_list';
 import { PolicyResponseWrapper } from '../../../../components/policy_response';
-import { HostMetadata } from '../../../../../../common/endpoint/types';
+import type { HostMetadata } from '../../../../../../common/endpoint/types';
 import { useToasts } from '../../../../../common/lib/kibana';
 import { getEndpointDetailsPath } from '../../../../common/routing';
 import {

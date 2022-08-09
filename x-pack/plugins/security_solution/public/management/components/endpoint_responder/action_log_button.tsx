@@ -8,7 +8,7 @@
 import React, { memo, useCallback, useState } from 'react';
 import { EuiButton, EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EndpointResponderExtensionComponentProps } from './types';
+import type { EndpointResponderExtensionComponentProps } from './types';
 import { ResponseActionsList } from '../endpoint_response_actions_list/response_actions_list';
 import { UX_MESSAGES } from '../endpoint_response_actions_list/translations';
 
@@ -22,14 +22,24 @@ export const ActionLogButton = memo<EndpointResponderExtensionComponentProps>((p
 
   return (
     <>
-      <EuiButton onClick={toggleActionLog} disabled={showActionLogFlyout} iconType="list">
+      <EuiButton
+        onClick={toggleActionLog}
+        disabled={showActionLogFlyout}
+        iconType="list"
+        data-test-subj="responderShowActionLogButton"
+      >
         <FormattedMessage
           id="xpack.securitySolution.actionLogButton.label"
           defaultMessage="Action log"
         />
       </EuiButton>
       {showActionLogFlyout && (
-        <EuiFlyout onClose={toggleActionLog} size="m" paddingSize="l">
+        <EuiFlyout
+          onClose={toggleActionLog}
+          size="m"
+          paddingSize="l"
+          data-test-subj="responderActionLogFlyout"
+        >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
               <h1>{UX_MESSAGES.flyoutTitle(props.meta.endpoint.host.hostname)}</h1>

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { act, renderHook, RenderHookResult } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react-hooks';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaServices } from '../../lib/kibana';
@@ -23,12 +24,12 @@ import type {
   UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { TestProviders } from '../../mock';
-import {
-  useAddOrUpdateException,
+import type {
   UseAddOrUpdateExceptionProps,
   ReturnUseAddOrUpdateException,
   AddOrUpdateExceptionItemsFunc,
 } from './use_add_exception';
+import { useAddOrUpdateException } from './use_add_exception';
 
 const mockKibanaHttpService = coreMock.createStart().http;
 const mockKibanaServices = KibanaServices.get as jest.Mock;

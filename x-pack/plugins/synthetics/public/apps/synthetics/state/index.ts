@@ -16,3 +16,4 @@ export * from './synthetics_enablement';
 export * from './service_locations';
 export * from './monitor_list';
 export * from './monitor_summary';
+export * from './overview';

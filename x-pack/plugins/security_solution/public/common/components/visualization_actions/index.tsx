@@ -15,7 +15,7 @@ import { useInspect } from '../inspect/use_inspect';
 import { useLensAttributes } from './use_lens_attributes';
 import { useAddToExistingCase } from './use_add_to_existing_case';
 import { useAddToNewCase } from './use_add_to_new_case';
-import { VisualizationActionsProps } from './types';
+import type { VisualizationActionsProps } from './types';
 import {
   ADD_TO_EXISTING_CASE,
   ADD_TO_NEW_CASE,

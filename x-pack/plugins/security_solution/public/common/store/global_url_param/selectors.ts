@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GlobalUrlParam } from '.';
-import { State } from '../types';
+import type { GlobalUrlParam } from '.';
+import type { State } from '../types';
 
 export const selectGlobalUrlParam = (state: State): GlobalUrlParam => state.globalUrlParam;

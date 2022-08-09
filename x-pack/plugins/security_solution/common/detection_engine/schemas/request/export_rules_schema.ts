@@ -9,7 +9,8 @@ import * as t from 'io-ts';
 
 import { DefaultExportFileName } from '@kbn/securitysolution-io-ts-alerting-types';
 import { DefaultStringBooleanFalse } from '@kbn/securitysolution-io-ts-types';
-import { rule_id, FileName, ExcludeExportDetails } from '../common/schemas';
+import type { FileName, ExcludeExportDetails } from '../common/schemas';
+import { rule_id } from '../common/schemas';
 
 const objects = t.array(t.exact(t.type({ rule_id })));
 export const exportRulesSchema = t.union([t.exact(t.type({ objects })), t.null]);

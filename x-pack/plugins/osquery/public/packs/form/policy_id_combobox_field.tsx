@@ -7,12 +7,14 @@
 
 import { reduce } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem, EuiTextColor, EuiComboBoxOptionOption } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTextColor } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
-import { GetAgentPoliciesResponseItem } from '@kbn/fleet-plugin/common';
-import { ComboBoxField, FieldHook } from '../../shared_imports';
+import type { GetAgentPoliciesResponseItem } from '@kbn/fleet-plugin/common';
+import type { FieldHook } from '../../shared_imports';
+import { ComboBoxField } from '../../shared_imports';
 
 // Custom styling for drop down list items due to:
 //  1) the max-width and overflow properties is added to prevent long agent policy

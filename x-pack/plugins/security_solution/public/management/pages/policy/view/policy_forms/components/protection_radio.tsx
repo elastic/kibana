@@ -9,15 +9,12 @@ import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { cloneDeep } from 'lodash';
 import { htmlIdGenerator, EuiRadio } from '@elastic/eui';
-import {
-  ImmutableArray,
-  ProtectionModes,
-  UIPolicyConfig,
-} from '../../../../../../../common/endpoint/types';
-import { MacPolicyProtection, LinuxPolicyProtection, PolicyProtection } from '../../../types';
+import type { ImmutableArray, UIPolicyConfig } from '../../../../../../../common/endpoint/types';
+import { ProtectionModes } from '../../../../../../../common/endpoint/types';
+import type { MacPolicyProtection, LinuxPolicyProtection, PolicyProtection } from '../../../types';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
 import { policyConfig } from '../../../store/policy_details/selectors';
-import { AppAction } from '../../../../../../common/store/actions';
+import type { AppAction } from '../../../../../../common/store/actions';
 import { useLicense } from '../../../../../../common/hooks/use_license';
 
 export const ProtectionRadio = React.memo(

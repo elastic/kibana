@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PatchRulesSchema } from './patch_rules_schema';
+import type { PatchRulesSchema } from './patch_rules_schema';
 
 export const validateTimelineId = (rule: PatchRulesSchema): string[] => {
   if (rule.timeline_id != null) {

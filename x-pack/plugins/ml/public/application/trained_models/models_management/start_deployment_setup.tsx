@@ -32,12 +32,9 @@ import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import type { Observable } from 'rxjs';
 import type { CoreTheme, OverlayStart } from '@kbn/core/public';
 import { css } from '@emotion/react';
+import { numberValidator } from '@kbn/ml-agg-utils';
 import { isCloud } from '../../services/ml_server_info';
-import {
-  composeValidators,
-  numberValidator,
-  requiredValidator,
-} from '../../../../common/util/validators';
+import { composeValidators, requiredValidator } from '../../../../common/util/validators';
 
 interface StartDeploymentSetup {
   config: ThreadingParams;
@@ -49,7 +46,7 @@ export interface ThreadingParams {
   threadsPerAllocations: number;
 }
 
-const THREADS_MAX_EXPONENT = 6;
+const THREADS_MAX_EXPONENT = 4;
 
 /**
  * Form for setting threading params.

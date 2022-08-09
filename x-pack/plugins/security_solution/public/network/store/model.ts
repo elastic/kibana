@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   Direction,
   FlowTarget,
   NetworkDnsFields,
@@ -45,8 +45,6 @@ export type TopCountriesTableType =
 
 export type TopTlsTableType = NetworkDetailsTableType.tls | NetworkTableType.tls;
 
-export type HttpTableType = NetworkDetailsTableType.http | NetworkTableType.http;
-
 export enum NetworkDetailsTableType {
   http = 'http',
   tls = 'tls',
@@ -56,8 +54,6 @@ export enum NetworkDetailsTableType {
   topNFlowSource = 'topNFlowSource',
   users = 'users',
 }
-
-export type AllNetworkTables = NetworkTableType | NetworkDetailsTableType;
 
 export interface BasicQueryPaginated {
   activePage: number;

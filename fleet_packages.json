@@ -19,7 +19,7 @@
   },
   {
     "name": "elastic_agent",
-    "version": "1.3.3"
+    "version": "1.3.4"
   },
   {
     "name": "endpoint",
@@ -31,6 +31,6 @@
   },
   {
     "name": "synthetics",
-    "version": "0.9.4"
+    "version": "0.10.1"
   }
 ]

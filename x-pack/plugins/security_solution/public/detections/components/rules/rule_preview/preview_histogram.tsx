@@ -7,10 +7,10 @@
 
 import React, { useEffect, useMemo } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
-import { Unit } from '@kbn/datemath';
+import type { Unit } from '@kbn/datemath';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer, EuiLoadingChart } from '@elastic/eui';
 import styled from 'styled-components';
-import { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { useDispatch, useSelector } from 'react-redux';
 import { eventsViewerSelector } from '../../../../common/components/events_viewer/selectors';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
@@ -18,7 +18,10 @@ import { useKibana } from '../../../../common/lib/kibana';
 import * as i18n from './translations';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { getHistogramConfig, isNoisy } from './helpers';
-import { ChartSeriesConfigs, ChartSeriesData } from '../../../../common/components/charts/common';
+import type {
+  ChartSeriesConfigs,
+  ChartSeriesData,
+} from '../../../../common/components/charts/common';
 import { Panel } from '../../../../common/components/panel';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { BarChart } from '../../../../common/components/charts/barchart';
@@ -37,7 +40,8 @@ import { getPreviewTableControlColumn } from './preview_table_control_columns';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
 import { InspectButtonContainer } from '../../../../common/components/inspect';
 import { timelineActions } from '../../../../timelines/store/timeline';
-import { State } from '../../../../common/store';
+import type { State } from '../../../../common/store';
+import type { AdvancedPreviewOptions } from '../../../pages/detection_engine/rules/types';
 
 const LoadingChart = styled(EuiLoadingChart)`
   display: block;
@@ -60,6 +64,7 @@ interface PreviewHistogramProps {
   spaceId: string;
   ruleType: Type;
   index: string[];
+  advancedOptions?: AdvancedPreviewOptions;
 }
 
 const DEFAULT_HISTOGRAM_HEIGHT = 300;
@@ -71,14 +76,21 @@ export const PreviewHistogram = ({
   spaceId,
   ruleType,
   index,
+  advancedOptions,
 }: PreviewHistogramProps) => {
   const dispatch = useDispatch();
   const { setQuery, isInitializing } = useGlobalTime();
   const { timelines: timelinesUi } = useKibana().services;
   const from = useMemo(() => `now-1${timeFrame}`, [timeFrame]);
   const to = useMemo(() => 'now', []);
-  const startDate = useMemo(() => formatDate(from), [from]);
-  const endDate = useMemo(() => formatDate(to), [to]);
+  const startDate = useMemo(
+    () => (advancedOptions ? advancedOptions.timeframeStart.toISOString() : formatDate(from)),
+    [from, advancedOptions]
+  );
+  const endDate = useMemo(
+    () => (advancedOptions ? advancedOptions.timeframeEnd.toISOString() : formatDate(to)),
+    [to, advancedOptions]
+  );
   const isEqlRule = useMemo(() => ruleType === 'eql', [ruleType]);
   const isMlRule = useMemo(() => ruleType === 'machine_learning', [ruleType]);
 
@@ -106,7 +118,6 @@ export const PreviewHistogram = ({
 
   const {
     browserFields,
-    docValueFields,
     indexPattern,
     runtimeMappings,
     dataViewId: selectedDataViewId,
@@ -202,8 +213,12 @@ export const PreviewHistogram = ({
             dataProviders,
             deletedEventIds,
             disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
-            docValueFields,
-            end: endDate,
+            // Fix for https://github.com/elastic/kibana/issues/135511, until we start writing proper
+            // simulated @timestamp values to the preview alerts. The preview alerts will have @timestamp values
+            // close to the server's `now` time, but the client clock could be out of sync with the server. So we
+            // avoid computing static dates for this time range filter and instead pass in a small relative time window.
+            end: 'now+5m',
+            start: 'now-5m',
             entityType: 'events',
             filters: [],
             globalFullScreen,
@@ -222,7 +237,6 @@ export const PreviewHistogram = ({
             runtimeMappings,
             setQuery: () => {},
             sort,
-            start: startDate,
             tGridEventRenderedViewEnabled,
             type: 'embedded',
             leadingControlColumns: getPreviewTableControlColumn(1.5),
@@ -232,7 +246,6 @@ export const PreviewHistogram = ({
       <DetailsPanel
         browserFields={browserFields}
         entityType={'events'}
-        docValueFields={docValueFields}
         isFlyoutView
         runtimeMappings={runtimeMappings}
         timelineId={TimelineId.rulePreview}

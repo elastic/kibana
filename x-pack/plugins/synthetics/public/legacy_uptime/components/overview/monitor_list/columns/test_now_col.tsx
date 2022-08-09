@@ -9,19 +9,30 @@ import { EuiButtonIcon, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { Ping } from '../../../../../../common/runtime_types';
 import { testNowMonitorAction } from '../../../../state/actions';
 import { testNowRunSelector, TestRunStats } from '../../../../state/reducers/test_now_runs';
 
 export const TestNowColumn = ({
   monitorId,
   configId,
+  selectedMonitor,
 }: {
   monitorId: string;
   configId?: string;
+  selectedMonitor: Ping;
 }) => {
   const dispatch = useDispatch();
 
   const testNowRun = useSelector(testNowRunSelector(configId));
+
+  if (selectedMonitor.monitor.fleet_managed) {
+    return (
+      <EuiToolTip content={PRIVATE_AVAILABLE_LABEL}>
+        <>--</>
+      </EuiToolTip>
+    );
+  }
 
   if (!configId) {
     return (
@@ -65,6 +76,13 @@ export const TEST_NOW_AVAILABLE_LABEL = i18n.translate(
   'xpack.synthetics.monitorList.testNow.available',
   {
     defaultMessage: 'Test now is only available for monitors added via Monitor Management.',
+  }
+);
+
+export const PRIVATE_AVAILABLE_LABEL = i18n.translate(
+  'xpack.synthetics.monitorList.testNow.available.private',
+  {
+    defaultMessage: 'For now, Test now is disabled for private locations monitors.',
   }
 );
 

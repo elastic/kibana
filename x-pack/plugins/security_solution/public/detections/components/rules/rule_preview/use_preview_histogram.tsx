@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useMemo } from 'react';
-import { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { useMatrixHistogramCombined } from '../../../../common/containers/matrix_histogram';
 import { MatrixHistogramType } from '../../../../../common/search_strategy';

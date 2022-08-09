@@ -35,6 +35,8 @@ export const ELASTIC_RULES_BTN = '[data-test-subj="showElasticRulesFilterButton"
 
 export const EXPORT_ACTION_BTN = '[data-test-subj="exportRuleAction"]';
 
+export const BULK_EXPORT_ACTION_BTN = '[data-test-subj="exportRuleBulk"]';
+
 export const FIRST_RULE = 0;
 
 export const FOURTH_RULE = 3;
@@ -102,8 +104,6 @@ export const MODAL_CONFIRMATION_BODY = '[data-test-subj="confirmModalBodyText"]'
 
 export const RULE_DETAILS_DELETE_BTN = '[data-test-subj="rules-details-delete-rule"]';
 
-export const ALERT_DETAILS_CELLS = '[data-test-subj="dataGridRowCell"]';
-
 export const SERVER_SIDE_EVENT_COUNT = '[data-test-subj="server-side-event-count"]';
 
 export const SELECT_ALL_RULES_ON_PAGE_CHECKBOX = '[data-test-subj="checkboxSelectAll"]';
@@ -130,3 +130,11 @@ export const RULES_TAGS_POPOVER_WRAPPER = '[data-test-subj="tagsDisplayPopoverWr
 export const RULES_TAGS_FILTER_BTN = '[data-test-subj="tags-filter-popover-button"]';
 
 export const SELECTED_RULES_NUMBER_LABEL = '[data-test-subj="selectedRules"]';
+
+export const REFRESH_SETTINGS_POPOVER = '[data-test-subj="refreshSettings-popover"]';
+
+export const REFRESH_SETTINGS_SWITCH = '[data-test-subj="refreshSettingsSwitch"]';
+
+export const REFRESH_SETTINGS_SELECTION_NOTE = '[data-test-subj="refreshSettingsSelectionNote"]';
+
+export const REFRESH_RULES_STATUS = '[data-test-subj="refreshRulesStatus"]';

@@ -7,7 +7,8 @@
  */
 
 import { EuiPageTemplateProps } from '@elastic/eui';
-import { KibanaPageTemplateSolutionNavProps } from './solution_nav';
+import { SolutionNavProps } from '@kbn/shared-ux-page-solution-nav';
+
 import { NoDataPageProps } from './no_data_page';
 
 export type KibanaPageTemplateProps = EuiPageTemplateProps & {
@@ -21,7 +22,7 @@ export type KibanaPageTemplateProps = EuiPageTemplateProps & {
   /**
    * Quick creation of EuiSideNav. Hooks up mobile instance too
    */
-  solutionNav?: KibanaPageTemplateSolutionNavProps;
+  solutionNav?: SolutionNavProps;
   /**
    * Accepts a configuration object, that when provided, ignores pageHeader and children and instead
    * displays Agent, Beats, and custom cards to direct users to the right ingest location

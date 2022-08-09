@@ -10,7 +10,12 @@ import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 
 import { AllCases } from '.';
-import { TestProviders } from '../../common/mock';
+import {
+  AppMockRenderer,
+  createAppMockRenderer,
+  noCreateCasesPermissions,
+  TestProviders,
+} from '../../common/mock';
 import { useGetReporters } from '../../containers/use_get_reporters';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { casesStatus, connectorsMock, useGetCasesMockState } from '../../containers/mock';
@@ -79,8 +84,39 @@ describe('AllCases', () => {
     useGetCasesMock.mockReturnValue(defaultGetCases);
   });
 
+  let appMockRender: AppMockRenderer;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    appMockRender = createAppMockRenderer();
+  });
+
+  describe('empty table', () => {
+    beforeEach(() => {
+      useGetCasesMock.mockReturnValue({
+        ...defaultGetCases,
+        data: {
+          ...defaultGetCases.data,
+          cases: [],
+          total: 0,
+        },
+      });
+    });
+
+    it('should render the create new case link when the user has create privileges', async () => {
+      const result = appMockRender.render(<AllCases />);
+      await waitFor(() => {
+        expect(result.getByTestId('cases-table-add-case')).toBeInTheDocument();
+      });
+    });
+
+    it('should not render the create new case link when the user does not have create privileges', async () => {
+      appMockRender = createAppMockRenderer({ permissions: noCreateCasesPermissions() });
+      const result = appMockRender.render(<AllCases />);
+      await waitFor(() => {
+        expect(result.queryByTestId('cases-table-add-case')).not.toBeInTheDocument();
+      });
+    });
   });
 
   it('should render the stats', async () => {

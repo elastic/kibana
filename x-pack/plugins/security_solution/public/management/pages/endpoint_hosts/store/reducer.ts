@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   EndpointPackageInfoStateChanged,
   EndpointPendingActionsStateChanged,
   MetadataTransformStatsChanged,
@@ -17,11 +17,11 @@ import {
   getIsOnEndpointDetailsActivityLog,
   getCurrentIsolationRequestState,
 } from './selectors';
-import { EndpointState } from '../types';
+import type { EndpointState } from '../types';
 import { initialEndpointPageState } from './builders';
-import { AppAction } from '../../../../common/store/actions';
-import { ImmutableReducer } from '../../../../common/store';
-import { Immutable } from '../../../../../common/endpoint/types';
+import type { AppAction } from '../../../../common/store/actions';
+import type { ImmutableReducer } from '../../../../common/store';
+import type { Immutable } from '../../../../../common/endpoint/types';
 import { createUninitialisedResourceState, isUninitialisedResourceState } from '../../../state';
 
 type StateReducer = ImmutableReducer<EndpointState, AppAction>;
