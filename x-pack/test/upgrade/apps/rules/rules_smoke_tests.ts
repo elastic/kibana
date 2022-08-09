@@ -45,7 +45,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await testSubjects.click('rulesTab');
         });
         it('shows created rule with no errors', async () => {
-          const createdRuleName = 'Upgrade Rule';
+          const createdRuleName = 'UpgradeRule';
           await testSubjects.click('rulesTab');
           await rulesHelper.searchRules('"' + createdRuleName + '"');
           const workAround = process.env.TEST_RULE_WORKAROUND ? true : false;
