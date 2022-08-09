@@ -164,8 +164,8 @@ export const appendNewBottomChunk = assign(
       status: 'loading-bottom',
       chunkSize: context.configuration.chunkSize,
       startPosition: getSuccessorPosition(bottomChunk.endPosition),
-      startRowIndex: bottomChunk.startRowIndex + 1,
-      endRowIndex: bottomChunk.startRowIndex + 1,
+      startRowIndex: bottomChunk.endRowIndex + 1,
+      endRowIndex: bottomChunk.endRowIndex + 1,
     };
 
     return {

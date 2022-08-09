@@ -10,6 +10,7 @@ import { assign, createMachine, InterpreterFrom } from 'xstate';
 import { appendNewBottomChunk, updateChunksFromLoadAfter } from './load_after_service';
 import { updateChunksFromLoadAround } from './load_around_service';
 import { prependNewTopChunk, updateChunksFromLoadBefore } from './load_before_service';
+import { updateChunksFromLoadTail } from './load_tail_service';
 import { LogExplorerContext, LogExplorerEvent, LogExplorerState } from './types';
 import { areVisibleEntriesNearEnd, areVisibleEntriesNearStart } from './visible_entry_guards';
 
@@ -59,11 +60,14 @@ export const dataAccessStateMachine = createMachine<
               start: {
                 always: [
                   {
-                    cond: 'succeededTop',
+                    cond: 'hasLoadedTopChunk',
                     target: 'loaded',
                   },
                   {
-                    cond: '!succeededTop',
+                    cond: 'hasEmptyTopChunk',
+                    target: 'empty',
+                  },
+                  {
                     target: 'failed',
                   },
                 ],
@@ -87,6 +91,7 @@ export const dataAccessStateMachine = createMachine<
                   },
                 },
               },
+              empty: {},
             },
           },
           bottom: {
@@ -95,11 +100,14 @@ export const dataAccessStateMachine = createMachine<
               start: {
                 always: [
                   {
-                    cond: 'succeededBottom',
+                    cond: 'hasLoadedBottomChunk',
                     target: 'loaded',
                   },
                   {
-                    cond: '!succeededBottom',
+                    cond: 'hasEmptyBottomChunk',
+                    target: 'empty',
+                  },
+                  {
                     target: 'failed',
                   },
                 ],
@@ -123,6 +131,7 @@ export const dataAccessStateMachine = createMachine<
                   },
                 },
               },
+              empty: {},
             },
           },
         },
@@ -282,6 +291,34 @@ export const dataAccessStateMachine = createMachine<
           },
         },
       },
+      tailing: {
+        initial: 'loading',
+        states: {
+          loading: {
+            invoke: {
+              src: 'loadTail',
+            },
+            on: {
+              loadTailSucceeded: {
+                actions: 'updateChunksFromLoadTail',
+                target: 'loaded',
+              },
+            },
+          },
+          loaded: {
+            after: {
+              loadTailDelay: {
+                target: 'loading',
+              },
+            },
+          },
+        },
+        on: {
+          stopTailing: {
+            target: 'loaded',
+          },
+        },
+      },
     },
     on: {
       filtersChanged: {
@@ -289,6 +326,9 @@ export const dataAccessStateMachine = createMachine<
       },
       dataViewChanged: {
         target: '.loadingAround',
+      },
+      startTailing: {
+        target: '.tailing',
       },
     },
   },
@@ -306,14 +346,17 @@ export const dataAccessStateMachine = createMachine<
       updateChunksFromLoadAround,
       updateChunksFromLoadBefore,
       updateChunksFromLoadAfter,
+      updateChunksFromLoadTail,
       prependNewTopChunk,
       appendNewBottomChunk,
     },
     guards: {
       areVisibleEntriesNearStart,
       areVisibleEntriesNearEnd,
-      succeededTop: constantGuard(true),
-      succeededBottom: constantGuard(true),
+      hasEmptyTopChunk: constantGuard(false),
+      hasEmptyBottomChunk: constantGuard(false),
+      hasLoadedTopChunk: constantGuard(true),
+      hasLoadedBottomChunk: constantGuard(true),
       isPositionNearStart: constantGuard(false),
       isPositionNearEnd: constantGuard(false),
       isWithinLoadedChunks: constantGuard(false),

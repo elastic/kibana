@@ -22,6 +22,7 @@ import React, { useRef } from 'react';
 import { LOG_EXPLORER_VIRTUAL_GRID_ROWS } from '../../constants';
 import { LogExplorerCell } from './log_explorer_grid_cell';
 import { useOnItemsRendered } from './use_on_items_rendered';
+import { useScrollInteractions } from './use_scroll_interactions';
 
 const EuiDataGridMemoized = React.memo(EuiDataGrid);
 
@@ -29,6 +30,7 @@ export function LogExplorerGrid() {
   const imperativeGridRef = useRef<EuiDataGridRefProps | null>(null);
 
   const onItemsRendered = useOnItemsRendered({ imperativeGridRef });
+  useScrollInteractions({ imperativeGridRef });
 
   return (
     <span className="dscDiscoverGrid__inner">

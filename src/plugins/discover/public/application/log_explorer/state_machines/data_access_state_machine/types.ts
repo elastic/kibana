@@ -12,6 +12,7 @@ import { LogExplorerChunk, LogExplorerPosition } from '../../types';
 import { LoadAfterEvent } from './load_after_service';
 import { LoadAroundEvent } from './load_around_service';
 import { LoadBeforeEvent } from './load_before_service';
+import { LoadTailEvent } from './load_tail_service';
 
 export interface LogExplorerContext {
   configuration: {
@@ -26,16 +27,21 @@ export interface LogExplorerContext {
   bottomChunk: LogExplorerChunk;
 }
 
+export type LogExplorerLoadedChunkState = 'empty' | 'loaded' | 'failed';
+
 export interface LogExplorerState {
   value:
     | 'uninitialized' // not used yet, but there's a setting that disables automatic initial search
     | 'loadingAround'
     | 'failedNoData'
     | 'loaded'
+    | { loaded: { top: LogExplorerLoadedChunkState; bottom: LogExplorerLoadedChunkState } }
     | 'loadingTop'
     | 'loadingBottom'
     | 'extendingTop'
-    | 'extendingBottom';
+    | 'extendingBottom'
+    | 'tailing'
+    | { tailing: 'loading' | 'loaded' };
   context: LogExplorerContext;
 }
 
@@ -78,6 +84,7 @@ export type LogExplorerInternalEvent =
   | LoadAroundEvent
   | LoadBeforeEvent
   | LoadAfterEvent
+  | LoadTailEvent
   | {
       // the following event types will be moved to their respective services
       // once these exist
@@ -97,6 +104,15 @@ export type LogExplorerInternalEvent =
     }
   | {
       type: 'reloadFailed';
+    }
+  | {
+      type: 'startTailing';
+    }
+  | {
+      type: 'stopTailing';
+    }
+  | {
+      type: 'reloadTail';
     };
 
 export type LogExplorerEvent = LogExplorerExternalEvent | LogExplorerInternalEvent;
