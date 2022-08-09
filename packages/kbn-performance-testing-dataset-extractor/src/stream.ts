@@ -8,7 +8,7 @@
 
 import { Request, Stream } from './types';
 
-const getTime = (date: string) => new Date(date).getTime();
+export const getTime = (date: string) => new Date(date).getTime();
 
 /**
  * Combines concurrent requests into the streams and returns it as Array

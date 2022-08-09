@@ -15,7 +15,7 @@ import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { ESClient, Document, TransactionDocument } from './es_client';
 import { getESRequests, getKibanaRequests } from './request';
 import { requestsToStreams } from './stream';
-import { CLIParams, KibanaRequest, Request } from './types';
+import { CLIParams, Request } from './types';
 import { DATE_FORMAT } from './constants';
 
 const calculateTransactionTimeRage = (hit: SearchHit<Document>) => {
@@ -78,7 +78,7 @@ export const extractor = async ({ param, client, log }: CLIParams) => {
     `Found ${kibanaRequests.length} Kibana server and ${esRequests.length} Elasticsearch requests`
   );
   const esStreams = requestsToStreams<Request>(esRequests);
-  const kibanaStreams = requestsToStreams<KibanaRequest>(kibanaRequests);
+  const kibanaStreams = requestsToStreams<Request>(kibanaRequests);
 
   const outputDir = path.resolve('target/scalability_traces');
   const fileName = `${journeyName.replace(/ /g, '')}-${buildId}.json`;

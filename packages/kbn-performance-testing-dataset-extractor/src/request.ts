@@ -8,11 +8,11 @@
 
 import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { ESClient, SpanDocument, TransactionDocument, Headers } from './es_client';
-import { KibanaRequest, Request } from './types';
+import { Request } from './types';
 
 const httpMethodRegExp = /(GET|POST|DELETE|HEAD|PUT|OPTIONS)/;
 const httpPathRegExp = /(?<=GET|POST|DELETE|HEAD|PUT|OPTIONS).*/;
-const staticResourcesRegExp = /\.(css|ico|js|json|jpeg|jpg|gif|png|otf|ttf|woff|woff2)$/;
+const staticResourcesRegExp = /\.(css|ico|js|json|jpeg|jpg|gif|png|svg|otf|ttf|woff|woff2)$/;
 
 const strToJSON = (str: string): JSON | undefined => {
   try {
@@ -49,7 +49,7 @@ const combineHeaderFieldValues = (headers: Headers): { [key: string]: string } =
 export const getKibanaRequests = (
   hits: Array<SearchHit<TransactionDocument>>,
   withoutStaticResources: boolean
-): KibanaRequest[] => {
+): Request[] => {
   const data = hits
     .map((hit) => hit!._source as TransactionDocument)
     .map((hit) => {
@@ -75,9 +75,9 @@ export const getKibanaRequests = (
     : data;
 };
 
-export const getESRequests = async (esClient: ESClient, requests: KibanaRequest[]) => {
+export const getESRequests = async (esClient: ESClient, requests: Request[]) => {
   const esRequests = new Array<Request>();
-  for (const request of requests.filter((r) => r.spanCount > 0)) {
+  for (const request of requests.filter((r) => r.spanCount && r?.spanCount > 0)) {
     const hits = await esClient.getSpans(request.transactionId);
     for (const hit of hits.map((i) => i!._source as SpanDocument)) {
       const query = hit?.span.db?.statement ? parseQueryStatement(hit?.span.db?.statement) : {};

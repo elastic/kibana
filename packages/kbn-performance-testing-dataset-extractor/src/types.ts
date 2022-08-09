@@ -17,20 +17,11 @@ export interface Request {
   http: {
     method: string;
     path: string;
+    headers?: { [key: string]: string };
     params?: string;
     body?: JSON | string;
   };
-}
-
-export interface KibanaRequest extends Omit<Request, 'http'> {
-  http: {
-    method: string;
-    path: string;
-    headers: { [key: string]: string };
-    body?: string;
-    statusCode: number;
-  };
-  spanCount: number;
+  spanCount?: number;
 }
 
 export interface Stream<T extends Request> {
