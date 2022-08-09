@@ -38,8 +38,6 @@ export const DEFAULT_MAX_COLUMNS = 3;
 export interface MetricVisualizationState {
   layerId: string;
   layerType: LayerType;
-  trendlineLayerId?: string;
-  trendlineLayerType?: LayerType;
   metricAccessor?: string;
   secondaryMetricAccessor?: string;
   maxAccessor?: string;
@@ -53,6 +51,11 @@ export interface MetricVisualizationState {
   color?: string;
   palette?: PaletteOutput<CustomPaletteParams>;
   maxCols?: number;
+
+  trendlineLayerId?: string;
+  trendlineLayerType?: LayerType;
+  trendlineTimeAccessor?: string;
+  trendlineMetricAccessor?: string;
 }
 
 export const supportedDataTypes = new Set(['number']);
@@ -276,7 +279,7 @@ const getTrendlineLayerConfiguration = (
   return {
     groups: [
       {
-        groupId: GROUP_ID.METRIC,
+        groupId: GROUP_ID.TREND_METRIC,
         groupLabel: i18n.translate('xpack.lens.primaryMetric.label', {
           defaultMessage: 'Primary metric',
         }),
@@ -285,22 +288,47 @@ const getTrendlineLayerConfiguration = (
             defaultMessage: 'Value',
           }),
         },
-        accessors: props.state.metricAccessor
+        accessors: props.state.trendlineMetricAccessor
           ? [
               {
-                columnId: props.state.metricAccessor,
+                columnId: props.state.trendlineMetricAccessor,
               },
             ]
           : [],
-        supportsMoreColumns: !props.state.metricAccessor,
-        filterOperations: () => false,
+        supportsMoreColumns: !props.state.trendlineMetricAccessor,
+        filterOperations: () => true,
         enableDimensionEditor: true,
         supportFieldFormat: false,
         required: true,
       },
       {
-        groupId: GROUP_ID.MAX,
+        groupId: GROUP_ID.TREND_TIME,
         groupLabel: i18n.translate('xpack.lens.metric.timeField', { defaultMessage: 'Time field' }),
+        paramEditorCustomProps: {
+          headingLabel: i18n.translate('xpack.lens.primaryMetric.headingLabel', {
+            defaultMessage: 'Value',
+          }),
+        },
+        accessors: props.state.trendlineTimeAccessor
+          ? [
+              {
+                columnId: props.state.trendlineTimeAccessor,
+              },
+            ]
+          : [],
+        supportsMoreColumns: !props.state.trendlineTimeAccessor,
+        filterOperations: (op) => op.isBucketed && op.dataType === 'date',
+        enableDimensionEditor: true,
+        required: true,
+        groupTooltip: i18n.translate('xpack.lens.metric.timeFieldTooltip', {
+          defaultMessage: 'This is the time axis for the trend line',
+        }),
+      },
+      {
+        groupId: GROUP_ID.TREND_BREAKDOWN_BY,
+        groupLabel: i18n.translate('xpack.lens.metric.breakdownBy', {
+          defaultMessage: 'Break down by',
+        }),
         paramEditorCustomProps: {
           headingLabel: i18n.translate('xpack.lens.primaryMetric.headingLabel', {
             defaultMessage: 'Value',
@@ -432,7 +460,25 @@ export const getMetricVisualization = ({
     return newLayerId === state.trendlineLayerId ? [state.layerId] : [];
   },
 
-  // reportLinkedDimensions()
+  reportLinkedDimensions(state) {
+    if (state.trendlineLayerId && state.metricAccessor) {
+      return [
+        {
+          from: {
+            columnId: state.metricAccessor,
+            groupId: GROUP_ID.METRIC,
+            layerId: state.layerId,
+          },
+          to: {
+            columnId: state.trendlineMetricAccessor,
+            groupId: GROUP_ID.TREND_METRIC,
+            layerId: state.trendlineLayerId,
+          },
+        },
+      ];
+    }
+    return [];
+  },
 
   appendLayer(state, layerId, layerType) {
     if (layerType !== layerTypes.METRIC_TRENDLINE) {
@@ -475,6 +521,12 @@ export const getMetricVisualization = ({
       case GROUP_ID.BREAKDOWN_BY:
         updated.breakdownByAccessor = columnId;
         break;
+      case GROUP_ID.TREND_TIME:
+        updated.trendlineTimeAccessor = columnId;
+        break;
+      case GROUP_ID.TREND_METRIC:
+        updated.trendlineMetricAccessor = columnId;
+        break;
     }
 
     return updated;
@@ -497,6 +549,12 @@ export const getMetricVisualization = ({
     if (prevState.breakdownByAccessor === columnId) {
       delete updated.breakdownByAccessor;
       delete updated.collapseFn;
+    }
+    if (prevState.trendlineTimeAccessor === columnId) {
+      delete updated.trendlineTimeAccessor;
+    }
+    if (prevState.trendlineMetricAccessor === columnId) {
+      delete updated.trendlineMetricAccessor;
     }
 
     return updated;

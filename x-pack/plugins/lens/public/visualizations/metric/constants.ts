@@ -12,4 +12,7 @@ export const GROUP_ID = {
   SECONDARY_METRIC: 'secondaryMetric',
   MAX: 'max',
   BREAKDOWN_BY: 'breakdownBy',
+  TREND_METRIC: 'trendMetric',
+  TREND_TIME: 'trendTime',
+  TREND_BREAKDOWN_BY: 'trendBreakdownBy',
 } as const;

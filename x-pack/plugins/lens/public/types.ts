@@ -821,6 +821,14 @@ export interface Visualization<T = unknown> {
   appendLayer?: (state: T, layerId: string, type: LayerType) => T;
   /** Returns a list of layers the new layer ID should be linked to? */
   reportLinkedLayers?: (state: T, newLayerId: string) => string[];
+  reportLinkedDimensions?: (state: T) => Array<{
+    from: { columnId: string; groupId: string; layerId: string };
+    to: {
+      columnId?: string;
+      groupId: string;
+      layerId: string;
+    };
+  }>;
 
   /** Retrieve a list of supported layer types with initialization data */
   getSupportedLayers: (

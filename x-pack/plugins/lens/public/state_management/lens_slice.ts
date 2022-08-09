@@ -13,7 +13,7 @@ import { History } from 'history';
 import { LensEmbeddableInput } from '..';
 import { getDatasourceLayers } from '../editor_frame_service/editor_frame';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
-import type { VisualizeEditorContext, Suggestion } from '../types';
+import type { VisualizeEditorContext, Suggestion, VisualizationMap, DatasourceMap } from '../types';
 import { getInitialDatasourceId, getResolvedDateRange, getRemoveOperation } from '../utils';
 import { LensAppState, LensStoreDeps, VisualizationState } from './types';
 import { Datasource, Visualization } from '../types';
@@ -22,6 +22,7 @@ import type { LayerType } from '../../common/types';
 import { getLayerType } from '../editor_frame_service/editor_frame/config_panel/add_layer';
 import { getVisualizeFieldSuggestions } from '../editor_frame_service/editor_frame/suggestion_helpers';
 import { FramePublicAPI, LensEditContextMapping, LensEditEvent } from '../types';
+import { selectFramePublicAPI } from './selectors';
 
 export const initialState: LensAppState = {
   persistedDoc: undefined,
@@ -294,7 +295,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         };
       }
     ) => {
-      return {
+      const newAppState = {
         ...state,
         datasourceStates: {
           ...state.datasourceStates,
@@ -307,6 +308,25 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           },
         },
         stagedPreview: payload.clearStagedPreview ? undefined : state.stagedPreview,
+      };
+
+      const updatedDatasourceState = syncLinkedDimensions(
+        newAppState,
+        payload.datasourceId,
+        visualizationMap,
+        datasourceMap
+      );
+
+      return {
+        ...newAppState,
+        datasourceStates: {
+          ...newAppState.datasourceStates,
+          [payload.datasourceId]: {
+            state:
+              updatedDatasourceState ?? newAppState.datasourceStates[payload.datasourceId].state,
+            isLoading: false,
+          },
+        },
       };
     },
     [updateVisualizationState.type]: (
@@ -774,4 +794,42 @@ function addInitialValueIfAvailable({
     activeDatasourceState: datasourceState,
     activeVisualizationState: visualizationState,
   };
+}
+
+function syncLinkedDimensions(
+  state: LensAppState,
+  datasourceId: string,
+  visualizationMap: VisualizationMap,
+  datasourceMap: DatasourceMap
+) {
+  let updatedDatasourceState: unknown;
+  const activeVisualization = visualizationMap[state.visualization.activeId!];
+  const linkedDimensions = activeVisualization.reportLinkedDimensions?.(state.visualization.state);
+  const frame = selectFramePublicAPI({ lens: state }, datasourceMap);
+  linkedDimensions?.forEach(({ from, to }) => {
+    datasourceMap[datasourceId].onDrop({
+      source: {
+        ...from,
+        id: from.columnId,
+        // don't need to worry about accessibility here
+        humanData: { label: '' },
+      },
+      target: {
+        ...to,
+        columnId: to.columnId ?? generateId(),
+        filterOperations: () => true,
+      },
+      state: state.datasourceStates[datasourceId].state,
+      setState: (s) => {
+        updatedDatasourceState = s;
+      },
+      dimensionGroups: activeVisualization.getConfiguration({
+        state: state.visualization.state,
+        layerId: to.layerId,
+        frame,
+      }).groups,
+      dropType: 'duplicate_compatible',
+    });
+  });
+  return updatedDatasourceState;
 }
