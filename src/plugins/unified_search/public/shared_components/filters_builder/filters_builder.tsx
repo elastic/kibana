@@ -21,8 +21,7 @@ export interface FiltersEditorProps {
   onChange: (filters: Filter[]) => void;
   timeRangeForSuggestionsOverride?: boolean;
   maxDepth?: number;
-  disableOr?: boolean;
-  disableAnd?: boolean;
+  hideOr?: boolean;
 }
 
 const rootLevelConditionType = ConditionTypes.AND;
@@ -34,8 +33,7 @@ export function FiltersEditor({
   filters,
   timeRangeForSuggestionsOverride,
   maxDepth = DEFAULT_MAX_DEPTH,
-  disableOr = false,
-  disableAnd = false,
+  hideOr = false,
 }: FiltersEditorProps) {
   const [state, dispatch] = useReducer(filtersEditorReducer, { filters });
   const [dropTarget, setDropTarget] = useState('');
@@ -94,7 +92,7 @@ export function FiltersEditor({
   return (
     <FiltersEditorContextType.Provider
       value={{
-        globalParams: { disableOr, disableAnd, maxDepth },
+        globalParams: { hideOr, maxDepth },
         dataView,
         dispatch,
         dropTarget,

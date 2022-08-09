@@ -51,14 +51,14 @@ export const FilterGroup = ({
   reverseBackground = false,
 }: FilterGroupProps) => {
   const {
-    globalParams: { maxDepth, disableOr, disableAnd },
+    globalParams: { maxDepth, hideOr },
   } = useContext(FiltersEditorContextType);
 
   const pathInArray = getPathInArray(path);
 
   const isDepthReached = maxDepth === pathInArray.length;
-  const orDisabled = disableOr || (isDepthReached && conditionType === ConditionTypes.AND);
-  const andDisabled = disableAnd || (isDepthReached && conditionType === ConditionTypes.OR);
+  const orDisabled = hideOr || (isDepthReached && conditionType === ConditionTypes.AND);
+  const andDisabled = isDepthReached && conditionType === ConditionTypes.OR;
   const removeDisabled = pathInArray.length <= 1 && filters.length === 1;
   const color = !reverseBackground ? 'plain' : 'subdued';
 
@@ -73,6 +73,7 @@ export const FilterGroup = ({
                 path={`${path}${path ? '.' : ''}${index}`}
                 timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
                 reverseBackground={reverseBackground}
+                hideOr={hideOr}
                 disableOr={orDisabled}
                 disableAnd={andDisabled}
                 disableRemove={removeDisabled}

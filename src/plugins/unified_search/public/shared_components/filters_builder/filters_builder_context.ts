@@ -15,8 +15,7 @@ interface FiltersEditorContextType {
   dispatch: Dispatch<FiltersEditorActions>;
   globalParams: {
     maxDepth: number;
-    disableOr: boolean;
-    disableAnd: boolean;
+    hideOr: boolean;
   };
   dropTarget: string;
   currentDragElement: string;
