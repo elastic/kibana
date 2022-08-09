@@ -6,12 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../test/functional/ftr_provider_context';
 
-export default ({ getPageObjects, getService }: FtrProviderContext) => {
+// eslint-disable-next-line import/no-default-export
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
+  const PageObjects = getPageObjects(['common', 'header']);
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
   const find = getService('find');
@@ -20,8 +21,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
     });
+
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
+    });
+
+    beforeEach(async () => {
+      await PageObjects.common.navigateToApp('triggersActionsUiExample/alerts_table');
+      await waitTableIsLoaded();
     });
 
     afterEach(async () => {
@@ -29,12 +36,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should load the table', async () => {
-      await PageObjects.common.navigateToUrlWithBrowserHistory('triggersActions', '/alerts');
-      const headingText = await PageObjects.triggersActionsUI.getSectionHeadingText();
-      expect(headingText).to.be('Rules and Connectors');
-
-      await waitTableIsLoaded();
-
       const rows = await getRows();
       expect(rows.length).to.be(10);
       expect(rows[0].status).to.be('active');
@@ -46,12 +47,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should sort properly', async () => {
-      await PageObjects.common.navigateToUrlWithBrowserHistory('triggersActions', '/alerts');
-      const headingText = await PageObjects.triggersActionsUI.getSectionHeadingText();
-      expect(headingText).to.be('Rules and Connectors');
-
-      await waitTableIsLoaded();
-
       await find.clickDisplayedByCssSelector(
         '[data-test-subj="dataGridHeaderCell-event.action"] .euiDataGridHeaderCell__button'
       );
@@ -72,12 +67,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should paginate properly', async () => {
-      await PageObjects.common.navigateToUrlWithBrowserHistory('triggersActions', '/alerts');
-      const headingText = await PageObjects.triggersActionsUI.getSectionHeadingText();
-      expect(headingText).to.be('Rules and Connectors');
-
-      await waitTableIsLoaded();
-
       await testSubjects.click('pagination-button-1');
 
       await waitTableIsLoaded();
@@ -93,8 +82,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should open a flyout and paginate through the flyout', async () => {
-      await PageObjects.common.navigateToUrlWithBrowserHistory('triggersActions', '/alerts');
-      await waitTableIsLoaded();
       await testSubjects.click('expandColumnCellOpenFlyoutButton-0');
       await waitFlyoutOpen();
       await waitFlyoutIsLoaded();
@@ -174,4 +161,4 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       return rows;
     }
   });
-};
+}
