@@ -39,7 +39,7 @@ jest.mock('@kbn/securitysolution-list-api', () => {
 describe('ValueListsFlyout', () => {
   beforeEach(() => {
     // Do not resolve the export in tests as it causes unexpected state updates
-    (exportList as jest.Mock).mockImplementation(() => new Promise(() => { }));
+    (exportList as jest.Mock).mockImplementation(() => new Promise(() => {}));
     (useFindLists as jest.Mock).mockReturnValue({
       start: jest.fn(),
       result: { data: Array<ListSchema>(3).fill(getListResponseMock()), total: 3 },
@@ -63,8 +63,9 @@ describe('ValueListsFlyout', () => {
       </TestProviders>
     );
 
-    expect(findListMock).toHaveBeenCalledWith(expect.objectContaining({ sortField: 'created_at', sort_order: 'desc' }));
-
+    expect(findListMock).toHaveBeenCalledWith(
+      expect.objectContaining({ sortField: 'created_at', sort_order: 'desc' })
+    );
   });
   it('renders nothing if showFlyout is false', () => {
     const container = mount(

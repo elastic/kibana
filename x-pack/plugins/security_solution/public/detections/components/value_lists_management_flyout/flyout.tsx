@@ -66,7 +66,7 @@ export const ValueListsFlyoutComponent: React.FC<ValueListsFlyoutProps> = ({
   const { start: deleteList, result: deleteResult, error: deleteError } = useDeleteList();
   const [deletingListIds, setDeletingListIds] = useState<string[]>([]);
   const [exportingListIds, setExportingListIds] = useState<string[]>([]);
-  const [exportDownload, setExportDownload] = useState<{ name?: string; blob?: Blob; }>({});
+  const [exportDownload, setExportDownload] = useState<{ name?: string; blob?: Blob }>({});
   const { addError, addSuccess } = useAppToasts();
   const [showReferenceErrorModal, setShowReferenceErrorModal] = useState<boolean>(false);
   const [referenceFlyoutState, setReferenceFlyoutState] = useState<ReferenceFlyoutState>(
@@ -138,7 +138,7 @@ export const ValueListsFlyoutComponent: React.FC<ValueListsFlyoutProps> = ({
   }, [deleteError]);
 
   const handleExport = useCallback(
-    async ({ id }: { id: string; }) => {
+    async ({ id }: { id: string }) => {
       try {
         setExportingListIds((ids) => [...ids, id]);
         const blob = await exportList({ http, listId: id, signal: new AbortController().signal });
@@ -153,7 +153,7 @@ export const ValueListsFlyoutComponent: React.FC<ValueListsFlyoutProps> = ({
   );
 
   const handleTableChange = useCallback(
-    ({ page: { index, size } }: { page: { index: number; size: number; }; }) => {
+    ({ page: { index, size } }: { page: { index: number; size: number } }) => {
       setPageIndex(index);
       setPageSize(size);
     },
@@ -212,7 +212,6 @@ export const ValueListsFlyoutComponent: React.FC<ValueListsFlyoutProps> = ({
     isDeleting: deletingListIds.includes(item.id),
     isExporting: exportingListIds.includes(item.id),
   }));
-
 
   const pagination = {
     pageIndex,

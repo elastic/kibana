@@ -13,7 +13,13 @@ import {
   importList,
   readListIndex,
 } from '@kbn/securitysolution-list-api';
-import { ApiPayload, DeleteListParams, ExportListParams, FindListsParams, ImportListParams } from './types';
+import {
+  ApiPayload,
+  DeleteListParams,
+  ExportListParams,
+  FindListsParams,
+  ImportListParams,
+} from './types';
 
 import { HttpFetchOptions } from '@kbn/core-http-browser';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
@@ -24,7 +30,6 @@ import { getListItemIndexExistSchemaResponseMock } from './mocks/response/list_i
 import { getAcknowledgeSchemaResponseMock } from './mocks/response/acknowledge_schema.mock';
 
 describe('Value Lists API', () => {
-
   let httpMock: ReturnType<typeof httpServiceMock.createStartContract>;
 
   beforeEach(() => {
