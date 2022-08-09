@@ -12,12 +12,9 @@ import { ThemeProvider } from 'styled-components';
 
 import type { StatItemsProps, StatItems } from '.';
 import { StatItemsComponent, useKpiMatrixStatus } from '.';
-import { BarChart } from '../charts/barchart';
-import { AreaChart } from '../charts/areachart';
-import { EuiHorizontalRule } from '@elastic/eui';
 import { fieldsMapping as fieldTitleChartMapping } from '../../../network/components/kpi_network/unique_private_ips';
 import {
-  mockEnableChartsData,
+  mockEmbeddablesData,
   mockNoChartMappings,
   mockNarrowDateRange,
 } from '../../../network/components/kpi_network/mock';
@@ -33,24 +30,20 @@ import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { getMockTheme } from '../../lib/kibana/kibana_react.mock';
 import * as module from '../../containers/query_toggle';
+import type { LensAttributes } from '../visualization_actions/types';
 
 const from = '2019-06-15T06:00:00.000Z';
 const to = '2019-06-18T06:00:00.000Z';
 
-jest.mock('../charts/areachart', () => {
-  return { AreaChart: () => <div className="areachart" /> };
-});
-
-jest.mock('../charts/barchart', () => {
-  return { BarChart: () => <div className="barchart" /> };
-});
-
 const mockSetToggle = jest.fn();
+
+jest.mock('../visualization_actions/lens_embeddable', () => {
+  return { LensEmbeddable: () => <div /> };
+});
 
 jest
   .spyOn(module, 'useQueryToggle')
   .mockImplementation(() => ({ toggleStatus: true, setToggleStatus: mockSetToggle }));
-const mockSetQuerySkip = jest.fn();
 describe('Stat Items Component', () => {
   const mockTheme = getMockTheme({ eui: { euiColorMediumShade: '#ece' } });
   const state: State = mockGlobalState;
@@ -58,12 +51,19 @@ describe('Stat Items Component', () => {
   const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   const testProps = {
     description: 'HOSTS',
-    fields: [{ key: 'hosts', value: null, color: '#6092C0', icon: 'cross' }],
+    fields: [
+      {
+        key: 'hosts',
+        value: null,
+        color: '#6092C0',
+        icon: 'cross',
+        description: 'mock description',
+      },
+    ],
     from,
     id: 'statItems',
     key: 'mock-keys',
     loading: false,
-    setQuerySkip: mockSetQuerySkip,
     to,
     narrowDateRange: mockNarrowDateRange,
   };
@@ -94,20 +94,16 @@ describe('Stat Items Component', () => {
       expect(wrapper.find('[data-test-subj="stat-title"]')).toBeTruthy();
     });
 
-    test('should not render icons', () => {
-      expect(wrapper.find('[data-test-subj="stat-icon"]').filter('EuiIcon')).toHaveLength(0);
-    });
-
     test('should not render barChart', () => {
-      expect(wrapper.find(BarChart)).toHaveLength(0);
+      expect(wrapper.find('[data-test-subj="embeddable-bar-chart"]')).toHaveLength(0);
     });
 
     test('should not render areaChart', () => {
-      expect(wrapper.find(AreaChart)).toHaveLength(0);
+      expect(wrapper.find('[data-test-subj="embeddable-area-chart"]')).toHaveLength(0);
     });
 
     test('should not render spliter', () => {
-      expect(wrapper.find(EuiHorizontalRule)).toHaveLength(0);
+      expect(wrapper.find('EuiHorizontalRule')).toHaveLength(0);
     });
   });
 
@@ -116,20 +112,22 @@ describe('Stat Items Component', () => {
     description: 'UNIQUE_PRIVATE_IPS',
     enableAreaChart: true,
     enableBarChart: true,
+    barChartLensAttributes: {} as LensAttributes,
+    areaChartLensAttributes: {} as LensAttributes,
     fields: [
       {
         key: 'uniqueSourceIps',
         description: 'Source',
-        value: 1714,
         color: '#D36086',
         icon: 'cross',
+        lensAttributes: {} as LensAttributes,
       },
       {
         key: 'uniqueDestinationIps',
         description: 'Dest.',
-        value: 2359,
         color: '#9170B8',
         icon: 'cross',
+        lensAttributes: {} as LensAttributes,
       },
     ],
   };
@@ -144,8 +142,8 @@ describe('Stat Items Component', () => {
       );
     });
 
-    test('should handle multiple titles', () => {
-      expect(wrapper.find('[data-test-subj="stat-title"]').find('p')).toHaveLength(2);
+    test('should handle multiple metrics', () => {
+      expect(wrapper.find('[data-test-subj="embeddable-metric"]')).toHaveLength(2);
     });
 
     test('should render kpi icons', () => {
@@ -153,15 +151,15 @@ describe('Stat Items Component', () => {
     });
 
     test('should render barChart', () => {
-      expect(wrapper.find(BarChart)).toHaveLength(1);
+      expect(wrapper.find('[data-test-subj="embeddable-bar-chart"]')).toHaveLength(1);
     });
 
     test('should render areaChart', () => {
-      expect(wrapper.find(AreaChart)).toHaveLength(1);
+      expect(wrapper.find('[data-test-subj="embeddable-area-chart"]')).toHaveLength(1);
     });
 
     test('should render separator', () => {
-      expect(wrapper.find(EuiHorizontalRule)).toHaveLength(1);
+      expect(wrapper.find('EuiHorizontalRule')).toHaveLength(1);
     });
   });
   describe('Toggle query', () => {
@@ -173,7 +171,6 @@ describe('Stat Items Component', () => {
       );
       wrapper.find('[data-test-subj="query-toggle-stat"]').first().simulate('click');
       expect(mockSetToggle).toBeCalledWith(false);
-      expect(mockSetQuerySkip).toBeCalledWith(true);
     });
     test('toggleStatus=true, render all', () => {
       wrapper = mount(
@@ -181,9 +178,9 @@ describe('Stat Items Component', () => {
           <StatItemsComponent {...mockStatItemsData} />
         </ReduxStoreProvider>
       );
-
-      expect(wrapper.find('[data-test-subj="inspect-icon-button"]').first().exists()).toEqual(true);
-      expect(wrapper.find('[data-test-subj="stat-title"]').first().exists()).toEqual(true);
+      expect(wrapper.find('[data-test-subj="embeddable-metric"]')).toHaveLength(2);
+      expect(wrapper.find('[data-test-subj="embeddable-bar-chart"]')).toHaveLength(1);
+      expect(wrapper.find('[data-test-subj="embeddable-area-chart"]')).toHaveLength(1);
     });
     test('toggleStatus=false, render none', () => {
       jest
@@ -195,10 +192,9 @@ describe('Stat Items Component', () => {
         </ReduxStoreProvider>
       );
 
-      expect(wrapper.find('[data-test-subj="inspect-icon-button"]').first().exists()).toEqual(
-        false
-      );
-      expect(wrapper.find('[data-test-subj="stat-title"]').first().exists()).toEqual(false);
+      expect(wrapper.find('[data-test-subj="embeddable-metric"]').exists()).toBeFalsy();
+      expect(wrapper.find('[data-test-subj="embeddable-bar-chart"]').exists()).toBeFalsy();
+      expect(wrapper.find('[data-test-subj="embeddable-area-chart"]').exists()).toBeFalsy();
     });
   });
 });
@@ -235,7 +231,7 @@ describe('useKpiMatrixStatus', () => {
     );
     const result = { ...wrapper.find('MockChildComponent').get(0).props };
     const { setQuerySkip, ...restResult } = result;
-    const { setQuerySkip: a, ...restExpect } = mockEnableChartsData;
+    const { setQuerySkip: _, ...restExpect } = mockEmbeddablesData;
     expect(restResult).toEqual(restExpect);
   });
 
