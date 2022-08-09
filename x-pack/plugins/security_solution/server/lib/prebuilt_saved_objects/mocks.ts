@@ -328,7 +328,7 @@ export const expectedSavedObjectTemplate = [
                     operationType: 'last_value',
                     params: { sortField: '@timestamp' },
                     scale: 'ordinal',
-                    sourceField: 'risk',
+                    sourceField: 'risk.keyword',
                   },
                 },
                 incompleteColumns: {},
