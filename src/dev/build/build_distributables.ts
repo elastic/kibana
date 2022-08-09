@@ -70,6 +70,7 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
    */
   if (options.createGenericFolders) {
     await run(Tasks.CopySource);
+    await run(Tasks.TranspileBabel);
     await run(Tasks.CopyBinScripts);
     await run(Tasks.ReplaceFavicon);
     await run(Tasks.CreateEmptyDirsAndFiles);
@@ -79,7 +80,6 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
       await run(Tasks.BuildCanvasShareableRuntime);
     }
     await run(Tasks.BuildKibanaPlatformPlugins);
-    await run(Tasks.TranspileBabel);
     await run(Tasks.CreatePackageJson);
     await run(Tasks.InstallDependencies);
     await run(Tasks.GeneratePackagesOptimizedAssets);

@@ -6,73 +6,40 @@
  * Side Public License, v 1.
  */
 
-import { discoverBazelPackages } from '@kbn/bazel-packages';
-import { pipeline } from 'stream';
-import { promisify } from 'util';
+import globby from 'globby';
+import { writeFile } from 'fs/promises';
+import { transformFileAsync } from '@babel/core';
 
-// @ts-expect-error @types/gulp-babel is outdated and doesn't work for gulp-babel v8
-import gulpBabel from 'gulp-babel';
-import vfs from 'vinyl-fs';
-
-import { Task, Build } from '../lib';
-
-const asyncPipeline = promisify(pipeline);
-
-const transpileWithBabel = async (srcGlobs: string[], build: Build, preset: string) => {
-  const buildRoot = build.resolvePath();
-
-  await asyncPipeline(
-    vfs.src(
-      srcGlobs.concat([
-        '!**/*.d.ts',
-        '!**/node_modules/**',
-        '!**/bower_components/**',
-        '!**/__tests__/**',
-        ...(await discoverBazelPackages()).map((pkg) => `!${pkg.normalizedRepoRelativeDir}/**`),
-      ]),
-      {
-        cwd: buildRoot,
-      }
-    ),
-
-    gulpBabel({
-      babelrc: false,
-      presets: [
-        [
-          preset,
-          {
-            // we pass this so that @kbn/babel-plugin-synthetic-packages can correct absolute imports
-            // for packages to relative requests, without having to discover the Kibana repo root, which
-            // it can't do because at this point in the build there isn't a package.json file for the
-            // plugin to find.
-            'kibana/rootDir': build.resolvePath('.'),
-          },
-        ],
-      ],
-    }),
-
-    vfs.dest(buildRoot)
-  );
-};
+import { Task } from '../lib';
 
 export const TranspileBabel: Task = {
-  description: 'Transpiling sources with babel',
+  description: 'Transpile node files with babel',
 
   async run(config, log, build) {
-    // Transpile server code
-    await transpileWithBabel(
-      ['**/*.{js,ts,tsx}', '!**/public/**'],
-      build,
-      require.resolve('@kbn/babel-preset/node_preset')
-    );
-
-    // Transpile client code
-    // NOTE: For the client, as we have the optimizer, we are only
-    // pre-transpiling the typescript based files
-    await transpileWithBabel(
-      ['**/public/**/*.{ts,tsx}'],
-      build,
-      require.resolve('@kbn/babel-preset/webpack_preset')
-    );
+    const files = globby.stream(['{x-pack,src}/**/*.{js,ts,tsx}', '!{x-pack,src}/**/*.d.ts'], {
+      cwd: build.resolvePath('.'),
+      absolute: true,
+    });
+    const options = {
+      presets: [
+        [
+          require.resolve('@kbn/babel-preset/node_preset'),
+          { 'kibana/rootDir': build.resolvePath('.') },
+        ],
+      ],
+      cwd: build.resolvePath('.'),
+      babelrc: false,
+      sourceMaps: false,
+      ast: false,
+      minified: true,
+    };
+    for await (const file of files) {
+      const input = file.toString();
+      const output = await transformFileAsync(input, options);
+      if (output?.code) {
+        const dest = input.substring(0, input.lastIndexOf('.')) + '.js';
+        await writeFile(dest, output.code);
+      }
+    }
   },
 };
