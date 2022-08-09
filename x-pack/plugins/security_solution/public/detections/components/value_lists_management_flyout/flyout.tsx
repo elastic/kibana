@@ -54,10 +54,6 @@ const referenceModalInitialState: ReferenceFlyoutState = {
   valueListId: '',
 };
 
-const sortDescByCreatedDate = (a: ListSchema, b: ListSchema) =>
-  new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-
-
 export const ValueListsFlyoutComponent: React.FC<ValueListsFlyoutProps> = ({
   onClose,
   showFlyout,
@@ -208,7 +204,7 @@ export const ValueListsFlyoutComponent: React.FC<ValueListsFlyoutProps> = ({
     ...item,
     isDeleting: deletingListIds.includes(item.id),
     isExporting: exportingListIds.includes(item.id),
-  })).sort(sortDescByCreatedDate);
+  }));
 
 
   const pagination = {

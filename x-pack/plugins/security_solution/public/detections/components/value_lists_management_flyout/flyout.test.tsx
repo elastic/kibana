@@ -39,7 +39,7 @@ jest.mock('@kbn/securitysolution-list-api', () => {
 describe('ValueListsFlyout', () => {
   beforeEach(() => {
     // Do not resolve the export in tests as it causes unexpected state updates
-    (exportList as jest.Mock).mockImplementation(() => new Promise(() => {}));
+    (exportList as jest.Mock).mockImplementation(() => new Promise(() => { }));
     (useFindLists as jest.Mock).mockReturnValue({
       start: jest.fn(),
       result: { data: Array<ListSchema>(3).fill(getListResponseMock()), total: 3 },
@@ -50,6 +50,22 @@ describe('ValueListsFlyout', () => {
     });
   });
 
+  // FOR NOW
+  it('should get value lists sorted desc by created_at', async () => {
+    const findListMock = jest.fn();
+    (useFindLists as jest.Mock).mockReturnValue({
+      start: findListMock,
+      result: getListResponseMock(),
+    });
+    mount(
+      <TestProviders>
+        <ValueListsFlyout showFlyout={true} onClose={jest.fn()} />
+      </TestProviders>
+    );
+
+    expect(findListMock).toHaveBeenCalledWith(expect.objectContaining({ sortField: 'created_at', sort_order: 'desc' }));
+
+  });
   it('renders nothing if showFlyout is false', () => {
     const container = mount(
       <TestProviders>
@@ -132,6 +148,29 @@ describe('ValueListsFlyout', () => {
       });
 
       expect(deleteListMock).toHaveBeenCalledWith(expect.objectContaining({ id: 'some-list-id' }));
+    });
+
+    // FOR NOW
+    it('should render the first page after importing new file', async () => {
+      const findListMock = jest.fn();
+      (useFindLists as jest.Mock).mockReturnValue({
+        start: findListMock,
+        result: { data: Array<ListSchema>(6).fill(getListResponseMock()), total: 6 },
+      });
+      const container = mount(
+        <TestProviders>
+          <ValueListsFlyout showFlyout={true} onClose={jest.fn()} />
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        container
+          .find('button[data-test-subj="value-lists-form-import-action"]')
+          .first()
+          .simulate('click');
+      });
+
+      expect(findListMock).toHaveBeenCalledWith(expect.objectContaining({ pageIndex: 1 }));
     });
   });
 });
