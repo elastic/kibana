@@ -130,13 +130,16 @@ export class FilterBarService extends FtrService {
     await this.testSubjects.click('addFilter');
     await this.testSubjects.existOrFail('addFilterPopover');
     await this.comboBox.set('filterFieldSuggestionList', field);
+    await this.testSubjects.existOrFail('addFilterPopover');
     await this.comboBox.set('filterOperatorList', operator);
+    await this.testSubjects.existOrFail('addFilterPopover');
     const params = await this.testSubjects.find('filterParams');
     const paramsComboBoxes = await params.findAllByCssSelector(
       '[data-test-subj~="filterParamsComboBox"]',
       1000
     );
     const paramFields = await params.findAllByTagName('input', 1000);
+    await this.testSubjects.existOrFail('addFilterPopover');
     for (let i = 0; i < values.length; i++) {
       let fieldValues = values[i];
       if (!Array.isArray(fieldValues)) {
@@ -152,8 +155,8 @@ export class FilterBarService extends FtrService {
           await paramFields[i].type(fieldValues[j]);
         }
       }
+      await this.testSubjects.existOrFail('addFilterPopover');
     }
-    await this.testSubjects.existOrFail('addFilterPopover');
     await this.common.sleep(500); // Stale element errors occur without this wait
     await this.testSubjects.clickWhenNotDisabled('saveFilter');
     await this.header.awaitGlobalLoadingIndicatorHidden();
