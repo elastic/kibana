@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type {
+import {
   CoreStart,
   PluginInitializerContext,
   CoreSetup,
@@ -16,6 +16,7 @@ import type {
   StartServicesAccessor,
   RequestHandlerContext,
   RequestHandler,
+  KibanaResponseFactory,
 } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { map$ } from '@kbn/std';
@@ -66,6 +67,9 @@ const streamingHeaders = {
   'Transfer-Encoding': 'chunked',
 };
 
+interface Query {
+  compress: boolean;
+}
 export class BfetchServerPlugin
   implements
     Plugin<
@@ -121,7 +125,11 @@ export class BfetchServerPlugin
           query: schema.object({ compress: schema.boolean({ defaultValue: false }) }),
         },
       };
-      const routeHandler: RequestHandler<any, any, any> = async (context, request, response) => {
+      const routeHandler: RequestHandler<unknown, Query> = async (
+        context: RequestHandlerContext,
+        request: KibanaRequest<unknown, Query, any>,
+        response: KibanaResponseFactory
+      ) => {
         const handlerInstance = handler(request, context);
         const data = request.body;
         const compress = request.query.compress;
