@@ -580,7 +580,7 @@ export default ({ getService }: FtrProviderContext): void => {
               {
                 type: BulkActionEditType.add_index_patterns,
                 value: ['initial-index-*'],
-                overwriteDataViews: true,
+                overwrite_data_views: true,
               },
             ],
           })
