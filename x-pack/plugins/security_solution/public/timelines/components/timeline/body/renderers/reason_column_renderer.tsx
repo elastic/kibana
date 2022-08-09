@@ -83,7 +83,6 @@ const ReasonCell: React.FC<{
 
   const rowRender = useMemo(() => {
     return (
-      timelineId !== TimelineId.rulePreview &&
       rowRenderer &&
       rowRenderer.renderRow({
         data: ecsData,
@@ -93,9 +92,12 @@ const ReasonCell: React.FC<{
     );
   }, [rowRenderer, ecsData, timelineId]);
 
+  // We don't currently show enriched renders for rule preview table
+  const isPlainText = useMemo(() => timelineId === TimelineId.rulePreview, [timelineId]);
+
   return (
     <>
-      {rowRenderer && rowRender ? (
+      {rowRenderer && rowRender && !isPlainText ? (
         <>
           {value}
           <h4>{i18n.REASON_RENDERER_TITLE(eventRendererNames[rowRenderer.id] ?? '')}</h4>
