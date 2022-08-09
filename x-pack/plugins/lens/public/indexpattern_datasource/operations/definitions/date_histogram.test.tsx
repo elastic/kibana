@@ -11,6 +11,7 @@ import { dateHistogramOperation } from '.';
 import { mount, shallow } from 'enzyme';
 import { EuiSwitch } from '@elastic/eui';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
@@ -98,6 +99,7 @@ const defaultOptions = {
     toDate: 'now',
   },
   data: dataStart,
+  fieldFormats: fieldFormatsServiceMock.createStartContract(),
   unifiedSearch: unifiedSearchStart,
   dataViews: dataViewsStart,
   http: {} as HttpSetup,

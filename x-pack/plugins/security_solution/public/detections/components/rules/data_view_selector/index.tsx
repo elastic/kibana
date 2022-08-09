@@ -16,7 +16,7 @@ import { getFieldValidityAndErrorMessage } from '../../../../shared_imports';
 import * as i18n from './translations';
 import type { DefineStepRule } from '../../../pages/detection_engine/rules/types';
 
-interface DataViewSelectorProps {
+export interface DataViewSelectorProps {
   kibanaDataViews: Record<string, DataViewListItem>;
   field: FieldHook<DefineStepRule['dataViewId']>;
 }
@@ -25,6 +25,7 @@ export const DataViewSelector = ({ kibanaDataViews, field }: DataViewSelectorPro
   let isInvalid;
   let errorMessage;
   let dataViewId: string | null | undefined;
+
   if (field != null) {
     const fieldAndError = getFieldValidityAndErrorMessage(field);
     isInvalid = fieldAndError.isInvalid;
@@ -53,15 +54,26 @@ export const DataViewSelector = ({ kibanaDataViews, field }: DataViewSelectorPro
       : []
   );
 
+  const [showDataViewAlertsOnAlertsWarning, setShowDataViewAlertsOnAlertsWarning] = useState(false);
+
   useEffect(() => {
     if (!selectedDataViewNotFound && dataViewId) {
-      setSelectedOption([
-        { id: kibanaDataViews[dataViewId].id, label: kibanaDataViews[dataViewId].title },
-      ]);
+      const dataViewsTitle = kibanaDataViews[dataViewId].title;
+      const dataViewsId = kibanaDataViews[dataViewId].id;
+
+      setShowDataViewAlertsOnAlertsWarning(dataViewsId === 'security-solution-default');
+
+      setSelectedOption([{ id: dataViewsId, label: dataViewsTitle }]);
     } else {
       setSelectedOption([]);
     }
-  }, [dataViewId, field, kibanaDataViews, selectedDataViewNotFound]);
+  }, [
+    dataViewId,
+    field,
+    kibanaDataViews,
+    selectedDataViewNotFound,
+    setShowDataViewAlertsOnAlertsWarning,
+  ]);
 
   // TODO: optimize this, pass down array of data view ids
   // at the same time we grab the data views in the top level form component
@@ -76,7 +88,6 @@ export const DataViewSelector = ({ kibanaDataViews, field }: DataViewSelectorPro
 
   const onChangeDataViews = (options: Array<EuiComboBoxOptionOption<string>>) => {
     const selectedDataViewOption = options;
-
     setSelectedOption(selectedDataViewOption ?? []);
 
     if (
@@ -101,6 +112,19 @@ export const DataViewSelector = ({ kibanaDataViews, field }: DataViewSelectorPro
             iconType="help"
           >
             <p>{i18n.DATA_VIEW_NOT_FOUND_WARNING_DESCRIPTION(dataViewId)}</p>
+          </EuiCallOut>
+          <EuiSpacer size="s" />
+        </>
+      )}
+      {showDataViewAlertsOnAlertsWarning && (
+        <>
+          <EuiCallOut
+            title={i18n.DDATA_VIEW_ALERTS_ON_ALERTS_WARNING_LABEL}
+            color="warning"
+            iconType="help"
+            data-test-subj="defaultSecurityDataViewWarning"
+          >
+            <p>{i18n.DATA_VIEW_ALERTS_ON_ALERTS_WARNING_DESCRIPTION}</p>
           </EuiCallOut>
           <EuiSpacer size="s" />
         </>
