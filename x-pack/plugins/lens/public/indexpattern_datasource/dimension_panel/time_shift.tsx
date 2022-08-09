@@ -45,7 +45,9 @@ export function setTimeShift(
         currentColumn.timeScale,
         currentColumn.timeScale,
         currentColumn.timeShift,
-        trimmedTimeShift
+        trimmedTimeShift,
+        currentColumn.window,
+        currentColumn.window
       );
   return {
     ...layer,
@@ -108,13 +110,16 @@ export function TimeShift({
   const localValueNotMultiple = parsedLocalValue && isValueNotMultiple(parsedLocalValue);
 
   function getSelectedOption() {
-    if (!localValue) return [];
     const goodPick = timeShiftOptions.filter(({ value }) => value === localValue);
     if (goodPick.length > 0) return goodPick;
     return [
       {
-        value: localValue,
-        label: localValue,
+        value: localValue ?? '',
+        label:
+          localValue ??
+          i18n.translate('xpack.lens.timeShift.none', {
+            defaultMessage: 'None',
+          }),
       },
     ];
   }
@@ -180,7 +185,7 @@ export function TimeShift({
                 }
               }}
               onChange={(choices) => {
-                if (choices.length === 0) {
+                if (choices.length === 0 || (choices.length && choices[0].value === '')) {
                   updateLayer(setTimeShift(columnId, layer, ''));
                   setLocalValue('');
                   return;

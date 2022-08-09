@@ -1516,13 +1516,14 @@ export function isOperationAllowedAsReference({
   let hasValidMetadata = true;
   if (field && operationDefinition.input === 'field') {
     const metadata = operationDefinition.getPossibleOperationForField(field);
-    hasValidMetadata = Boolean(metadata) && validation.validateMetadata(metadata!);
+    hasValidMetadata =
+      Boolean(metadata) && validation.validateMetadata(metadata!, operationType, field.name);
   } else if (operationDefinition.input === 'none') {
     const metadata = operationDefinition.getPossibleOperation();
-    hasValidMetadata = Boolean(metadata) && validation.validateMetadata(metadata!);
+    hasValidMetadata = Boolean(metadata) && validation.validateMetadata(metadata!, operationType);
   } else if (operationDefinition.input === 'fullReference') {
     const metadata = operationDefinition.getPossibleOperation(indexPattern);
-    hasValidMetadata = Boolean(metadata) && validation.validateMetadata(metadata!);
+    hasValidMetadata = Boolean(metadata) && validation.validateMetadata(metadata!, operationType);
   } else {
     // TODO: How can we validate the metadata without a specific field?
   }
@@ -1598,7 +1599,11 @@ export function isColumnValidAsReference({
       column,
       validation,
     }) &&
-    validation.validateMetadata(column)
+    validation.validateMetadata(
+      column,
+      operationType,
+      'sourceField' in column ? column.sourceField : undefined
+    )
   );
 }
 
