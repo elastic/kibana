@@ -15,10 +15,10 @@ import {
   PropsOf,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
 import type { Serializable } from '@kbn/utility-types';
+import { TimestampTableCell } from '../../../components/timestamp_table_cell';
 import { ColumnNameWithTooltip } from '../../../components/column_name_with_tooltip';
 import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
 import {
@@ -152,11 +152,7 @@ const baseColumns = [
     ),
     truncateText: true,
     sortable: true,
-    render: (timestamp: number) => (
-      <EuiToolTip position="top" content={timestamp}>
-        <span>{moment(timestamp).fromNow()}</span>
-      </EuiToolTip>
-    ),
+    render: (timestamp: number) => <TimestampTableCell timestamp={timestamp} />,
   },
 ] as const;
 

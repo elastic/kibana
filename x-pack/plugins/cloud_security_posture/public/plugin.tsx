@@ -22,6 +22,9 @@ const LazyCspEditPolicy = lazy(() => import('./components/fleet_extensions/polic
 const LazyCspCreatePolicy = lazy(
   () => import('./components/fleet_extensions/policy_extension_create')
 );
+const LazyCspCustomAssets = lazy(
+  () => import('./components/fleet_extensions/custom_assets_extension')
+);
 
 const CspRouterLazy = lazy(() => import('./application/csp_router'));
 const CspRouter = (props: CspRouterProps) => (
@@ -58,6 +61,12 @@ export class CspPlugin
       package: CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
       view: 'package-policy-edit',
       Component: LazyCspEditPolicy,
+    });
+
+    plugins.fleet.registerExtension({
+      package: CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
+      view: 'package-detail-assets',
+      Component: LazyCspCustomAssets,
     });
 
     return {

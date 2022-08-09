@@ -46,7 +46,7 @@ const getUnknownArguments = (
   const response: string[] = [];
 
   Object.keys(inputArgs).forEach((argName) => {
-    if (!argDefinitions || !argDefinitions[argName]) {
+    if (argName !== 'help' && (!argDefinitions || !argDefinitions[argName])) {
       response.push(argName);
     }
   });
@@ -188,6 +188,17 @@ export const handleExecuteCommand: ConsoleStoreReducer<
   if (parsedInput.hasArgs) {
     // Show command help
     if (parsedInput.hasArg('help')) {
+      if (Object.keys(parsedInput.args).length > 1 || parsedInput.args.help.length) {
+        return updateStateWithNewCommandHistoryItem(
+          state,
+          createCommandHistoryEntry(
+            cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
+            undefined,
+            false
+          )
+        );
+      }
+
       return updateStateWithNewCommandHistoryItem(
         state,
         createCommandHistoryEntry(
@@ -217,7 +228,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
       );
     }
 
-    // no unknown arguments allowed?
+    // no unknown arguments allowed
     const unknownInputArgs = getUnknownArguments(parsedInput.args, commandDefinition.args);
 
     if (unknownInputArgs.length) {
@@ -299,7 +310,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
 
     // Validate each argument given to the command
     for (const argName of Object.keys(parsedInput.args)) {
-      const argDefinition = commandDefinition.args[argName];
+      const argDefinition = commandDefinition.args?.[argName];
       const argInput = parsedInput.args[argName];
 
       // Unknown argument
