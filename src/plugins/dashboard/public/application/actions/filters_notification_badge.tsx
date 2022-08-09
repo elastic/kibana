@@ -9,7 +9,11 @@
 import React from 'react';
 
 import { CoreStart, OverlayStart } from '@kbn/core/public';
-import { EditPanelAction, isFilterableEmbeddable } from '@kbn/embeddable-plugin/public';
+import {
+  EditPanelAction,
+  EmbeddableStart,
+  isFilterableEmbeddable,
+} from '@kbn/embeddable-plugin/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 
 import { type AggregateQuery } from '@kbn/es-query';
@@ -33,10 +37,11 @@ export class FiltersNotificationBadge implements Action<FiltersNotificationActio
   private icon = 'filter';
 
   constructor(
-    private theme: CoreStart['theme'],
+    private application: CoreStart['application'],
+    private embeddable: EmbeddableStart,
     private overlays: OverlayStart,
-    private uiSettings: CoreStart['uiSettings'],
-    private editPanelAction: EditPanelAction
+    private theme: CoreStart['theme'],
+    private uiSettings: CoreStart['uiSettings']
   ) {}
 
   public getDisplayName({ embeddable }: FiltersNotificationActionContext) {
@@ -74,17 +79,21 @@ export class FiltersNotificationBadge implements Action<FiltersNotificationActio
   };
 
   public execute = async (context: FiltersNotificationActionContext) => {
-    const { embeddable } = context;
+    const { embeddable: contextEmbeddable } = context;
 
-    const isCompatible = await this.isCompatible({ embeddable });
-    if (!isCompatible || !isFilterableEmbeddable(embeddable)) {
+    const isCompatible = await this.isCompatible({ embeddable: contextEmbeddable });
+    if (!isCompatible || !isFilterableEmbeddable(contextEmbeddable)) {
       throw new IncompatibleActionError();
     }
 
     const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
       uiSettings: this.uiSettings,
     });
-
+    const editPanelAction = new EditPanelAction(
+      this.embeddable.getEmbeddableFactory,
+      this.application,
+      this.embeddable.getStateTransfer()
+    );
     const FiltersNotificationModal = await import('./filters_notification_modal').then(
       (m) => m.FiltersNotificationModal
     );
@@ -96,7 +105,7 @@ export class FiltersNotificationBadge implements Action<FiltersNotificationActio
             context={context}
             displayName={this.displayName}
             id={this.id}
-            editPanelAction={this.editPanelAction}
+            editPanelAction={editPanelAction}
             onClose={() => session.close()}
           />
         </KibanaReactContextProvider>,

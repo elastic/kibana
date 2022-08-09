@@ -367,16 +367,12 @@ export class DashboardPlugin
     uiActions.registerAction(clonePanelAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, clonePanelAction.id);
 
-    const editPanelAction = new EditPanelAction(
-      embeddable.getEmbeddableFactory,
-      application,
-      embeddable.getStateTransfer()
-    );
     const panelLevelFiltersNotification = new FiltersNotificationBadge(
-      theme,
+      application,
+      embeddable,
       overlays,
-      uiSettings,
-      editPanelAction
+      theme,
+      uiSettings
     );
     uiActions.registerAction(panelLevelFiltersNotification);
     uiActions.attachAction(PANEL_BADGE_TRIGGER, panelLevelFiltersNotification.id);
