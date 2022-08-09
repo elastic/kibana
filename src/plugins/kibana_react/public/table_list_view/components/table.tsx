@@ -62,7 +62,7 @@ export function Table<T>({
       <EuiButton
         color="danger"
         iconType="trash"
-        onClick={() => dispatch({ type: 'showConfirmDeleteItemsModal' })}
+        onClick={() => dispatch({ type: 'onClickDeleteItems' })}
         data-test-subj="deleteSelectedItems"
       >
         <FormattedMessage
