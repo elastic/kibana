@@ -7,6 +7,6 @@
  */
 
 export const AUTO_GENERATED_WARNING = `####
-  This document is auto-generated and is meant to be viewed inside our experimental, new docs system.
-  Reach out in #docs-engineering for more info.
+#### This document is auto-generated and is meant to be viewed inside our experimental, new docs system.
+#### Reach out in #docs-engineering for more info.
 ####`;
