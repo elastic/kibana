@@ -44,8 +44,6 @@ export type FileCompression = 'br' | 'gzip' | 'deflate' | 'none';
  * https://www.elastic.co/guide/en/ecs/current/ecs-file.html
  *
  * Custom fields are named according to the custom field convention: "CustomFieldName".
- *
- * TODO: Consider moving this to a commonly shareable package
  */
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type BaseFileMetadata = {
@@ -139,7 +137,7 @@ export type BaseFileMetadata = {
 };
 
 /**
- * Metadata of a file object
+ * Extra metadata on a file object specific to Kibana implementation.
  */
 export type FileMetadata<Meta = unknown> = Required<
   Pick<BaseFileMetadata, 'created' | 'name' | 'Status' | 'Updated'>
@@ -234,7 +232,7 @@ export type FileSavedObject<Meta = unknown> = SavedObject<FileMetadata<Meta>>;
 export type UpdatableFileMetadata<Meta = unknown> = Pick<FileJSON<Meta>, 'meta' | 'alt' | 'name'>;
 
 /**
- * The set of file metadata that can be updated on a file share instance.
+ * Data stored with a file share object
  */
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type FileShare = {
