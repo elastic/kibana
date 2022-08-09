@@ -1043,6 +1043,37 @@ export default ({ getService }: FtrProviderContext) => {
             },
           });
         });
+
+        describe('Timestamp override and fallback', async () => {
+          before(async () => {
+            await esArchiver.load(
+              'x-pack/test/functional/es_archives/security_solution/timestamp_fallback'
+            );
+          });
+
+          after(async () => {
+            await esArchiver.unload(
+              'x-pack/test/functional/es_archives/security_solution/timestamp_fallback'
+            );
+          });
+
+          it('applies timestamp override when using single field', async () => {
+            const rule: ThresholdCreateSchema = {
+              ...getThresholdRuleForSignalTesting(['timestamp-fallback-test']),
+              threshold: {
+                field: 'host.name',
+                value: 1,
+              },
+              timestamp_override: 'event.ingested',
+            };
+            const { id } = await createRule(supertest, log, rule);
+            await waitForRuleSuccessOrStatus(supertest, log, id);
+            await waitForSignalsToBePresent(supertest, log, 2, [id]);
+            const signalsOpen = await getSignalsByIds(supertest, log, [id]);
+            expect(signalsOpen.hits.hits.length).eql(4);
+            // TODO
+          });
+        });
       });
     });
 
