@@ -10,7 +10,7 @@ import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/serve
 import { GetFieldsOptions, IDataViewsApiClient } from '../common/types';
 import { DataViewMissingIndices } from '../common/lib';
 import { IndexPatternsFetcher } from './fetcher';
-import { hasUserIndexPattern } from './has_user_index_pattern';
+import { hasUserDataView } from './has_user_data_view';
 
 export class IndexPatternsApiServer implements IDataViewsApiClient {
   esClient: ElasticsearchClient;
@@ -52,8 +52,8 @@ export class IndexPatternsApiServer implements IDataViewsApiClient {
   /**
    * Is there a user created data view?
    */
-  async hasUserIndexPattern() {
-    return hasUserIndexPattern({
+  async hasUserDataView() {
+    return hasUserDataView({
       esClient: this.esClient,
       soClient: this.savedObjectsClient,
     });

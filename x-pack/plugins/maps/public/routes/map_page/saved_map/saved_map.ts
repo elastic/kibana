@@ -332,6 +332,14 @@ export class SavedMap {
     return this._originatingApp ? this.getAppNameFromId(this._originatingApp) : undefined;
   }
 
+  public hasOriginatingApp(): boolean {
+    return !!this._originatingApp;
+  }
+
+  public getOriginatingPath(): string | undefined {
+    return this._originatingPath;
+  }
+
   public getAppNameFromId = (appId: string): string | undefined => {
     return this._getStateTransfer().getAppNameFromId(appId);
   };
@@ -341,7 +349,7 @@ export class SavedMap {
   }
 
   public hasSaveAndReturnConfig() {
-    const hasOriginatingApp = !!this._originatingApp;
+    const hasOriginatingApp = this.hasOriginatingApp();
     const isNewMap = !this.getSavedObjectId();
     return getIsAllowByValueEmbeddables() ? hasOriginatingApp : !isNewMap && hasOriginatingApp;
   }
