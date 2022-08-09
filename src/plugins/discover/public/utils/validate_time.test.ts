@@ -10,18 +10,10 @@ import type { RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
 import { isTimeRangeValid, isRefreshIntervalValid } from './validate_time';
 
 describe('discover validate time', () => {
-  test('should validate a given time ranges correctly', async () => {
-    [
-      { from: '', to: '', result: false },
-      { from: 'now', to: 'now+1h', result: true },
-      { from: 'now', to: 'lala+1h', result: false },
-      { from: '', to: 'now', result: false },
-      { from: 'now', to: '', result: false },
-      { from: ' 2020-06-02T13:36:13.689Z', to: 'now', result: true },
-      { from: ' 2020-06-02T13:36:13.689Z', to: '2020-06-02T13:36:13.690Z', result: true },
-    ].map((test) => {
-      expect(isTimeRangeValid({ from: test.from, to: test.to })).toEqual(test.result);
-    });
+  test('should validate time ranges correctly', async () => {
+    expect(isTimeRangeValid({ from: '2020-06-02T13:36:13.689Z', to: 'now' })).toEqual(true);
+    expect(isTimeRangeValid({ from: 'now', to: 'now+1h' })).toEqual(true);
+    expect(isTimeRangeValid({ from: '', to: '' })).toEqual(false);
     expect(isTimeRangeValid({} as unknown as TimeRange)).toEqual(false);
     expect(isTimeRangeValid(undefined)).toEqual(false);
   });
