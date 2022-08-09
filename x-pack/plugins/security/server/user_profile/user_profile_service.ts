@@ -493,7 +493,7 @@ export class UserProfileService {
         // but still iterate through entire batch to collect and report all unknown uids.
         if (filteredProfile && filteredProfiles.length < requiredSize) {
           filteredProfiles.push(filteredProfile);
-        } else {
+        } else if (!filteredProfile) {
           unknownUids.push(profileUid);
         }
       }
