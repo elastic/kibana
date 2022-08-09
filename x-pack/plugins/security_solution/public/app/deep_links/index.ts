@@ -326,11 +326,18 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
           },
           {
             id: SecurityPageName.networkAnomalies,
-            title: i18n.translate('xpack.securitySolution.search.hosts.anomalies', {
+            title: i18n.translate('xpack.securitySolution.search.network.anomalies', {
               defaultMessage: 'Anomalies',
             }),
             path: `${NETWORK_PATH}/anomalies`,
             isPremium: true,
+          },
+          {
+            id: SecurityPageName.networkEvents,
+            title: i18n.translate('xpack.securitySolution.search.network.events', {
+              defaultMessage: 'Events',
+            }),
+            path: `${NETWORK_PATH}/events`,
           },
         ],
       },
