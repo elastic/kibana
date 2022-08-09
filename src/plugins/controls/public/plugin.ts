@@ -26,6 +26,10 @@ import {
   RangeSliderEmbeddableInput,
 } from './control_types/range_slider';
 import {
+  TimeSliderEmbeddableFactory,
+  TimeSliderControlEmbeddableInput,
+} from './control_types/time_slider_2';
+import {
   ControlGroupContainerFactory,
   CONTROL_GROUP_TYPE,
   OPTIONS_LIST_CONTROL,
@@ -39,6 +43,7 @@ import {
 } from './control_types/time_slider';
 */
 import { controlsService } from './services/kibana/controls';
+import { TIME_SLIDER_CONTROL } from '../common';
 
 export class ControlsPlugin
   implements
@@ -106,9 +111,7 @@ export class ControlsPlugin
       );
       registerControlType(rangeSliderFactory);
 
-      // Time Slider Control Factory Setup
-      /* Temporary disabling Time Slider
-      const timeSliderFactoryDef = new TimesliderEmbeddableFactory();
+      const timeSliderFactoryDef = new TimeSliderEmbeddableFactory();
       const timeSliderFactory = embeddable.registerEmbeddableFactory(
         TIME_SLIDER_CONTROL,
         timeSliderFactoryDef
@@ -117,10 +120,7 @@ export class ControlsPlugin
         timeSliderFactoryDef,
         timeSliderFactory
       );
-      
-
       registerControlType(timeSliderFactory);
-      */
     });
 
     return {

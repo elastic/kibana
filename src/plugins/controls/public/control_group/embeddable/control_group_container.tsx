@@ -119,6 +119,30 @@ export class ControlGroupContainer extends Container<
           closePopover={closePopover}
           getRelevantDataViewId={() => this.getMostRelevantDataViewId()}
           setLastUsedDataViewId={(newId) => this.setLastUsedDataViewId(newId)}
+          controlType="field"
+        />
+      </ControlsServicesProvider>
+    );
+  };
+
+  public getCreateTimeSliderControlButton = (
+    buttonType: CreateControlButtonTypes,
+    closePopover?: () => void
+  ) => {
+    const ControlsServicesProvider = pluginServices.getContextProvider();
+    return (
+      <ControlsServicesProvider>
+        <CreateControlButton
+          buttonType={buttonType}
+          defaultControlWidth={this.getInput().defaultControlWidth}
+          defaultControlGrow={this.getInput().defaultControlGrow}
+          updateDefaultWidth={(defaultControlWidth) => this.updateInput({ defaultControlWidth })}
+          updateDefaultGrow={(defaultControlGrow: boolean) =>
+            this.updateInput({ defaultControlGrow })
+          }
+          addNewEmbeddable={(type, input) => this.addNewEmbeddable(type, input)}
+          closePopover={closePopover}
+          controlType="timeslider"
         />
       </ControlsServicesProvider>
     );
@@ -152,6 +176,7 @@ export class ControlGroupContainer extends Container<
           <EuiContextMenuPanel
             items={[
               this.getCreateControlButton('toolbar', closePopover),
+              this.getCreateTimeSliderControlButton('toolbar', closePopover),
               this.getEditControlGroupButton(closePopover),
             ]}
           />

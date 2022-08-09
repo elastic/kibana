@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export * from './options_list';
-export * from './range_slider';
-export * from './time_slider_2';
+export { TimeSliderEmbeddableFactory } from './time_slider_embeddable_factory';
+export type { TimeSliderControlEmbeddableInput } from '../../../common/control_types/time_slider/types';
+export {} from '../../../common';

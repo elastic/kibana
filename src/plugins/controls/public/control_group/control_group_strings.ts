@@ -31,6 +31,10 @@ export const ControlGroupStrings = {
       i18n.translate('controls.controlGroup.emptyState.addControlButtonTitle', {
         defaultMessage: 'Add control',
       }),
+    getAddTimeSliderControlButtonTitle: () =>
+      i18n.translate('controls.controlGroup.emptyState.addGlobalControlButtonTitle', {
+        defaultMessage: 'Add time slider',
+      }),
     getTwoLineLoadingTitle: () =>
       i18n.translate('controls.controlGroup.emptyState.twoLineLoadingTitle', {
         defaultMessage: '...',

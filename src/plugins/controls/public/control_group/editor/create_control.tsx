@@ -20,8 +20,11 @@ import {
   DEFAULT_CONTROL_GROW,
 } from '../../../common/control_group/control_group_constants';
 import { setFlyoutRef } from '../embeddable/control_group_container';
+import { TIME_SLIDER_CONTROL } from '../../control_types/time_slider/types';
 
 export type CreateControlButtonTypes = 'toolbar' | 'callout';
+
+export type CreateControlTypes = 'field' | 'timeslider';
 export interface CreateControlButtonProps {
   defaultControlWidth?: ControlWidth;
   defaultControlGrow?: boolean;
@@ -31,6 +34,7 @@ export interface CreateControlButtonProps {
   setLastUsedDataViewId?: (newDataViewId: string) => void;
   getRelevantDataViewId?: () => string | undefined;
   buttonType: CreateControlButtonTypes;
+  controlType: CreateControlTypes;
   closePopover?: () => void;
 }
 
@@ -41,6 +45,7 @@ interface CreateControlResult {
 
 export const CreateControlButton = ({
   buttonType,
+  controlType,
   defaultControlWidth,
   defaultControlGrow,
   addNewEmbeddable,
@@ -61,6 +66,11 @@ export const CreateControlButton = ({
 
     const initialInputPromise = new Promise<CreateControlResult>((resolve, reject) => {
       let inputToReturn: Partial<DataControlInput> = {};
+
+      if (controlType === 'timeslider') {
+        resolve({ type: TIME_SLIDER_CONTROL, controlInput: {} });
+        return;
+      }
 
       const onCancel = (ref: OverlayRef) => {
         if (Object.keys(inputToReturn).length === 0) {
@@ -151,13 +161,18 @@ export const CreateControlButton = ({
     'aria-label': ControlGroupStrings.management.getManageButtonTitle(),
   };
 
+  const createControlButtonTitle =
+    controlType === 'timeslider'
+      ? ControlGroupStrings.emptyState.getAddTimeSliderControlButtonTitle()
+      : ControlGroupStrings.emptyState.getAddControlButtonTitle();
+
   return buttonType === 'callout' ? (
     <EuiButton {...commonButtonProps} color="primary" size="s">
-      {ControlGroupStrings.emptyState.getAddControlButtonTitle()}
+      {createControlButtonTitle}
     </EuiButton>
   ) : (
     <EuiContextMenuItem {...commonButtonProps} icon="plusInCircle">
-      {ControlGroupStrings.emptyState.getAddControlButtonTitle()}
+      {createControlButtonTitle}
     </EuiContextMenuItem>
   );
 };
