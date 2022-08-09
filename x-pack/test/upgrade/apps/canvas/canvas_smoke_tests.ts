@@ -56,7 +56,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               const elements = await testSubjects.findAll(
                 'canvasWorkpadPage > canvasWorkpadPageElementContent'
               );
-              expect(elements).to.be.greaterThan(numElements);
+              expect(elements.length).to.be.greaterThan(numElements);
             });
           });
         });
