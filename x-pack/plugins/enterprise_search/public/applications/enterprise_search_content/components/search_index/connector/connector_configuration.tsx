@@ -33,12 +33,12 @@ import { generateEncodedPath } from '../../../../shared/encode_path_params';
 import { EuiButtonTo, EuiLinkTo } from '../../../../shared/react_router_helpers';
 
 import { GenerateConnectorApiKeyApiLogic } from '../../../api/connector_package/generate_connector_api_key_api_logic';
-import { FetchIndexApiLogic } from '../../../api/index/fetch_index_api_logic';
 import { SEARCH_INDEX_TAB_PATH } from '../../../routes';
 import { isConnectorIndex } from '../../../utils/indices';
 
 import { IndexNameLogic } from '../index_name_logic';
 
+import { IndexViewLogic } from '../index_view_logic';
 import { SearchIndexTabId } from '../search_index';
 
 import { ApiKeyConfig } from './api_key_configuration';
@@ -46,10 +46,9 @@ import { ConnectorConfigurationConfig } from './connector_configuration_config';
 
 export const ConnectorConfiguration: React.FC = () => {
   const { data: apiKeyData } = useValues(GenerateConnectorApiKeyApiLogic);
-  const { data: indexData } = useValues(FetchIndexApiLogic);
+  const { index: indexData, recheckIndexLoading } = useValues(IndexViewLogic);
   const { indexName } = useValues(IndexNameLogic);
-  const { makeRequest: fetchIndex } = useActions(FetchIndexApiLogic);
-
+  const { recheckIndex } = useActions(IndexViewLogic);
   if (!isConnectorIndex(indexData)) {
     return <></>;
   }
@@ -192,7 +191,11 @@ export const ConnectorConfiguration: React.FC = () => {
             }
           )}
           <EuiSpacer size="s" />
-          <EuiButton iconType="refresh" onClick={() => fetchIndex({ indexName })}>
+          <EuiButton
+            iconType="refresh"
+            onClick={() => recheckIndex()}
+            isLoading={recheckIndexLoading}
+          >
             {i18n.translate(
               'xpack.enterpriseSearch.content.indices.configurationConnector.connectorPackage.waitingForConnector.button.label',
               {
