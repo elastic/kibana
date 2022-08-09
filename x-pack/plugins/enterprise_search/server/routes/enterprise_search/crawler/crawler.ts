@@ -39,6 +39,7 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
       const indexExists = await client.asCurrentUser.indices.exists({
         index: request.body.index_name,
       });
+
       if (indexExists) {
         return createError({
           errorCode: ErrorCode.INDEX_ALREADY_EXISTS,
@@ -52,7 +53,9 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
           statusCode: 409,
         });
       }
+
       const crawler = await fetchCrawlerByIndexName(client, request.body.index_name);
+
       if (crawler) {
         return createError({
           errorCode: ErrorCode.CRAWLER_ALREADY_EXISTS,

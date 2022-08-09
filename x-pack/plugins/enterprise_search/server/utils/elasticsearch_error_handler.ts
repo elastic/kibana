@@ -5,41 +5,67 @@
  * 2.0.
  */
 
-import { IKibanaResponse, RequestHandler } from '@kbn/core/server';
+import { RequestHandler } from '@kbn/core/server';
 import { Logger } from '@kbn/core/server';
+
 import { i18n } from '@kbn/i18n';
 
 import { ErrorCode } from '../../common/types/error_codes';
 
-import { createError } from './create_error';
+import { createError, EnterpriseSearchError } from './create_error';
+import { isUnauthorizedException } from './identify_exceptions';
 
-export function elasticsearchErrorHandler(
+export function elasticsearchErrorHandler<ContextType, RequestType, ResponseType>(
   log: Logger,
-  requestHandler: RequestHandler
-): RequestHandler {
+  requestHandler: RequestHandler<ContextType, RequestType, ResponseType>
+): RequestHandler<ContextType, RequestType, ResponseType> {
   return async (context, request, response) => {
     try {
       return await requestHandler(context, request, response);
     } catch (error) {
-      let kibanaResponse: IKibanaResponse | undefined;
+      let enterpriseSearchError: EnterpriseSearchError | undefined;
 
-      if (error.meta.statusCode === 403) {
-        kibanaResponse = createError({
+      if (isUnauthorizedException(error)) {
+        enterpriseSearchError = {
           errorCode: ErrorCode.UNAUTHORIZED,
-          message: i18n.translate(
-            'xpack.enterpriseSearch.server.routes.addCrawler.unauthorizedError',
-            {
-              defaultMessage: 'This account does not have permission to do this.',
-            }
-          ),
-          response,
-          statusCode: 409,
-        });
+          message: i18n.translate('xpack.enterpriseSearch.server.routes.unauthorizedError', {
+            defaultMessage: 'You do not have sufficient permissions.',
+          }),
+          statusCode: 403,
+        };
+      } else {
+        enterpriseSearchError = {
+          errorCode: ErrorCode.UNCAUGHT_EXCEPTION,
+          message: i18n.translate('xpack.enterpriseSearch.server.routes.uncaughtExceptionError', {
+            defaultMessage: 'Enterprise Search encountered an error.',
+          }),
+          statusCode: 502,
+        };
       }
 
-      if (typeof kibanaResponse !== 'undefined') {
+      if (typeof enterpriseSearchError !== 'undefined') {
+        log.error(
+          i18n.translate('xpack.enterpriseSearch.server.routes.errorLogMessage', {
+            defaultMessage:
+              'An error occured while resolving request to {requestUrl}: {errorMessage}',
+            values: {
+              errorMessage: enterpriseSearchError.message,
+              requestUrl: request.url.toString(),
+            },
+          })
+        );
         log.error(error);
-        return kibanaResponse;
+        return createError({
+          ...enterpriseSearchError,
+          message: i18n.translate('xpack.enterpriseSearch.server.routes.checkKibanaLogsMessage', {
+            defaultMessage: '{errorMessage} Check Kibana Server logs for details.',
+            values: {
+              errorMessage: enterpriseSearchError.message,
+              requestUrl: request.url.toString(),
+            },
+          }),
+          response,
+        });
       }
 
       throw error;
