@@ -21,7 +21,7 @@ export interface DiscoverLayoutProps {
   dataViewList: Array<SavedObject<DataViewAttributes>>;
   inspectorAdapters: { requests: RequestAdapter };
   navigateTo: (url: string) => void;
-  onChangeDataView: (id: string) => void;
+  onChangeDataView: (id: string | DataView) => void;
   onUpdateQuery: (
     payload: { dateRange: TimeRange; query?: Query | AggregateQuery },
     isUpdate?: boolean
