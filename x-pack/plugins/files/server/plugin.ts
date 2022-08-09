@@ -24,6 +24,7 @@ import {
   FileKindsRegistryImpl,
 } from './file_kinds_registry';
 import type { FilesRequestHandlerContext, FilesRouter } from './routes/types';
+import { registerRoutes } from './routes';
 
 export class FilesPlugin implements Plugin<FilesSetup, FilesStart, FilesPluginSetupDependencies> {
   private readonly logger: Logger;
@@ -52,7 +53,7 @@ export class FilesPlugin implements Plugin<FilesSetup, FilesStart, FilesPluginSe
     );
 
     const router: FilesRouter = core.http.createRouter();
-
+    registerRoutes(router);
     setFileKindsRegistry(new FileKindsRegistryImpl(router));
 
     return {
