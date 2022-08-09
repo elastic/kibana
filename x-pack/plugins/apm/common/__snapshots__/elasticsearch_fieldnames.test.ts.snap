@@ -438,13 +438,8 @@ exports[`Span SPAN_SUBTYPE 1`] = `"my subtype"`;
 
 exports[`Span SPAN_TYPE 1`] = `"span type"`;
 
-<<<<<<< HEAD
-exports[`Span TBT_FIELD 1`] = `undefined`;
-
 exports[`Span TIER 1`] = `undefined`;
 
-=======
->>>>>>> upstream/main
 exports[`Span TRACE_ID 1`] = `"trace id"`;
 
 exports[`Span TRANSACTION_DURATION 1`] = `undefined`;
@@ -690,13 +685,8 @@ exports[`Transaction SPAN_SUBTYPE 1`] = `undefined`;
 
 exports[`Transaction SPAN_TYPE 1`] = `undefined`;
 
-<<<<<<< HEAD
-exports[`Transaction TBT_FIELD 1`] = `undefined`;
-
 exports[`Transaction TIER 1`] = `undefined`;
 
-=======
->>>>>>> upstream/main
 exports[`Transaction TRACE_ID 1`] = `"trace id"`;
 
 exports[`Transaction TRANSACTION_DURATION 1`] = `1337`;
