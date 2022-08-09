@@ -1,3 +1,4 @@
+////
 [[cases-api]]
 == Cases APIs
 
@@ -24,7 +25,7 @@ these APIs:
 * <<cases-api-update>>
 * <<cases-api-update-comment>>
 * <<cases-api-update-configuration>>
-
+////
 //ADD
 include::cases/cases-api-add-comment.asciidoc[leveloffset=+1]
 //CREATE
@@ -40,7 +41,7 @@ include::cases/cases-api-get-alerts.asciidoc[leveloffset=+1]
 include::cases/cases-api-get-case-activity.asciidoc[leveloffset=+1]
 include::cases/cases-api-get-case.asciidoc[leveloffset=+1]
 include::cases/cases-api-get-status.asciidoc[leveloffset=+1]
-include::cases/cases-api-get-cases-by-alert.asciidoc[leveloffset=+1]
+//include::cases/cases-api-get-cases-by-alert.asciidoc[leveloffset=+1]
 include::cases/cases-api-get-comments.asciidoc[leveloffset=+1]
 include::cases/cases-api-get-configuration.asciidoc[leveloffset=+1]
 include::cases/cases-api-get-reporters.asciidoc[leveloffset=+1]
