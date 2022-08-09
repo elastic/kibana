@@ -169,7 +169,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             threshold: [-1],
           });
         },
-      ] as const
+      ] as const,
     ].forEach(([searchType, initData]) =>
       it(`runs correctly: runtime field for ${searchType} search type`, async () => {
         // write documents from now to the future end date in groups
@@ -191,8 +191,8 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             expect(hit.fields.testedValueSquared).not.to.be.empty();
             // fields returns as an array of values
             const [testedValueSquared] = hit.fields.testedValueSquared;
-            expect(hit['_source'].testedValue * hit['_source'].testedValue).to.be(testedValueSquared);
-          })
+            expect(hit._source.testedValue * hit._source.testedValue).to.be(testedValueSquared);
+          });
         }
       })
     );
