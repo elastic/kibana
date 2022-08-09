@@ -249,8 +249,7 @@ function onMoveIncompatible(
   const indexPattern = state.indexPatterns[sourceLayer.indexPatternId];
   const sourceColumn = sourceLayer.columns[source.columnId];
   const sourceField = getField(sourceColumn, indexPattern);
-  const newOperation =
-    targetColumn && getNewOperation(sourceField, target.filterOperations, targetColumn);
+  const newOperation = getNewOperation(sourceField, target.filterOperations, targetColumn);
   if (!newOperation) {
     return false;
   }

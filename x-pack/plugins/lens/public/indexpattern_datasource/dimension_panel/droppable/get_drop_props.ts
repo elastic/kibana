@@ -41,7 +41,7 @@ const operationDisplay = getOperationDisplay();
 export function getNewOperation(
   field: IndexPatternField | undefined | false,
   filterOperations: (meta: OperationMetadata) => boolean,
-  targetColumn?: GenericIndexPatternColumn,
+  targetColumn?: GenericIndexPatternColumn | null,
   prioritizedOperation?: GenericIndexPatternColumn['operationType']
 ) {
   if (!field) {
