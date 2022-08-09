@@ -7,9 +7,13 @@
 
 import { Logger } from '@kbn/core/server';
 import { cloneDeep } from 'lodash';
-import { AlertInstanceContext, AlertInstanceState } from '../types';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  RuleExecutionStatusErrorReasons,
+} from '../types';
 import { Alert, PublicAlert } from './alert';
-import { processAlerts } from '../lib';
+import { ErrorWithReason, processAlerts } from '../lib';
 
 export interface AlertFactoryDoneUtils<
   State extends AlertInstanceState,
@@ -25,6 +29,7 @@ export interface CreateAlertFactoryOpts<
 > {
   alerts: Record<string, Alert<State, Context>>;
   logger: Logger;
+  maxAlerts: number;
   canSetRecoveryContext?: boolean;
 }
 
@@ -32,21 +37,40 @@ export function createAlertFactory<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string
->({ alerts, logger, canSetRecoveryContext = false }: CreateAlertFactoryOpts<State, Context>) {
+>({
+  alerts,
+  logger,
+  maxAlerts,
+  canSetRecoveryContext = false,
+}: CreateAlertFactoryOpts<State, Context>) {
   // Keep track of which alerts we started with so we can determine which have recovered
   const originalAlerts = cloneDeep(alerts);
+
+  // Keep track of the number of alerts reported
+  let numAlertsCreated = 0;
+
   let isDone = false;
   return {
     create: (id: string): PublicAlert<State, Context, ActionGroupIds> => {
       if (isDone) {
         throw new Error(`Can't create new alerts after calling done() in AlertsFactory.`);
       }
+
+      if (numAlertsCreated++ >= maxAlerts) {
+        logger.warn(`Rule run generated greater than ${maxAlerts} alerts.`);
+        throw new ErrorWithReason(
+          RuleExecutionStatusErrorReasons.MaxAlerts,
+          new Error(`Rule reporter more than ${maxAlerts} alerts.`)
+        );
+      }
+
       if (!alerts[id]) {
         alerts[id] = new Alert<State, Context>(id);
       }
 
       return alerts[id];
     },
+
     done: (): AlertFactoryDoneUtils<State, Context, ActionGroupIds> => {
       isDone = true;
       return {
@@ -59,8 +83,12 @@ export function createAlertFactory<
           }
 
           const { recoveredAlerts } = processAlerts<State, Context, ActionGroupIds, ActionGroupIds>(
-            alerts,
-            originalAlerts
+            {
+              alerts,
+              existingAlerts: originalAlerts,
+              hasReachedAlertLimit: false,
+              alertLimit: maxAlerts,
+            }
           );
           return Object.keys(recoveredAlerts ?? {}).map(
             (alertId: string) => recoveredAlerts[alertId]

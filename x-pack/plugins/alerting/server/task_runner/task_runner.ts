@@ -108,6 +108,7 @@ export class TaskRunner<
   private readonly executionId: string;
   private readonly ruleTypeRegistry: RuleTypeRegistry;
   private readonly inMemoryMetrics: InMemoryMetrics;
+  private readonly maxAlerts: number;
   private alertingEventLogger: AlertingEventLogger;
   private usageCounter?: UsageCounter;
   private searchAbortController: AbortController;
@@ -138,6 +139,7 @@ export class TaskRunner<
     this.cancelled = false;
     this.executionId = uuid.v4();
     this.inMemoryMetrics = inMemoryMetrics;
+    this.maxAlerts = context.maxAlerts;
     this.alertingEventLogger = new AlertingEventLogger(this.context.eventLogger);
   }
 
@@ -356,6 +358,7 @@ export class TaskRunner<
             >({
               alerts,
               logger: this.logger,
+              maxAlerts: this.maxAlerts,
               canSetRecoveryContext: ruleType.doesSetRecoveryContext ?? false,
             }),
             shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
@@ -426,7 +429,12 @@ export class TaskRunner<
       Context,
       ActionGroupIds,
       RecoveryActionGroupId
-    >(alerts, originalAlerts);
+    >({
+      alerts,
+      existingAlerts: originalAlerts,
+      hasReachedAlertLimit: false,
+      alertLimit: this.maxAlerts,
+    });
 
     logAlerts({
       logger: this.logger,

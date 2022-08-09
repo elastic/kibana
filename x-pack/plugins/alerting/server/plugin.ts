@@ -442,6 +442,7 @@ export class AlertingPlugin {
       supportsEphemeralTasks: plugins.taskManager.supportsEphemeralTasks(),
       maxEphemeralActionsPerRule: this.config.maxEphemeralActionsPerAlert,
       cancelAlertsOnRuleTimeout: this.config.cancelAlertsOnRuleTimeout,
+      maxAlerts: this.config.rules.run.alerts.max,
       actionsConfigMap: getActionsConfigMap(this.config.rules.run.actions),
       usageCounter: this.usageCounter,
     });
