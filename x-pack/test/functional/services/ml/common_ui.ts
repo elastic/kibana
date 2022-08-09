@@ -32,6 +32,7 @@ export function MachineLearningCommonUIProvider({
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const browser = getService('browser');
+  const toasts = getService('toasts');
 
   return {
     async setValueWithChecks(
@@ -355,6 +356,37 @@ export function MachineLearningCommonUIProvider({
           `Expected one element of the following list to exist: ${JSON.stringify(subjectsToCheck)}`
         );
       });
+    },
+
+    async selectButtonGroupValue(inputTestSubj: string, value: string) {
+      await retry.tryForTime(5000, async () => {
+        // The input element can not be clicked directly.
+        // Instead, we need to click the corresponding label
+
+        const fieldSetElement = await testSubjects.find(inputTestSubj);
+
+        const labelElement = await fieldSetElement.findByCssSelector(`label[title="${value}"]`);
+        await labelElement.click();
+
+        const labelClasses = await labelElement.getAttribute('class');
+        expect(labelClasses).to.contain(
+          'euiButtonGroupButton-isSelected',
+          `Label for '${inputTestSubj}' should be selected`
+        );
+      });
+    },
+
+    async assertLastToastHeader(expectedHeader: string, timeout: number = 5000) {
+      await retry.tryForTime(timeout, async () => {
+        const resultToast = await toasts.getToastElement(1);
+        const titleElement = await testSubjects.findDescendant('euiToastHeader', resultToast);
+        const title: string = await titleElement.getVisibleText();
+        expect(title).to.eql(
+          expectedHeader,
+          `Expected the toast header to equal "${expectedHeader}" (got "${title}")`
+        );
+      });
+      await toasts.dismissAllToasts();
     },
   };
 }
