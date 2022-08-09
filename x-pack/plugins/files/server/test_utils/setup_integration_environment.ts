@@ -58,6 +58,37 @@ export async function setupIntegrationEnvironment() {
     return result.body.file;
   };
 
+  const { startES } = createTestServers({
+    adjustTimeout: jest.setTimeout,
+    settings: {
+      es: {
+        license: 'basic',
+      },
+    },
+  });
+
+  /**
+   * Clean up methods
+   */
+  const cleanupAfterEach = async () => {
+    await Promise.all(disposables.map((dispose) => dispose()));
+    disposables = [];
+    await esClient.indices.delete({ index: testIndex, ignore_unavailable: true });
+  };
+  const cleanupAfterAll = async () => {
+    await root.shutdown();
+    await manageES.stop();
+  };
+
+  /**
+   * Start the servers and set them up
+   */
+  const manageES = await startES();
+
+  const root = createRootWithCorePlugins(testConfig, { oss: false });
+  await root.preboot();
+  await root.setup();
+
   /**
    * Register a test file type
    */
@@ -77,38 +108,6 @@ export async function setupIntegrationEnvironment() {
       share: testHttpConfig,
     },
   });
-
-  const { startES } = createTestServers({
-    adjustTimeout: jest.setTimeout,
-    settings: {
-      es: {
-        license: 'basic',
-      },
-    },
-  });
-
-  /**
-   * Clean up methods
-   */
-  const cleanupAfterEach = async () => {
-    await Promise.all(disposables.map((dispose) => dispose()));
-    disposables = [];
-    await esClient.indices.delete({ index: testIndex, ignore_unavailable: true });
-  };
-
-  const cleanupAfterAll = async () => {
-    await root.shutdown();
-    await manageES.stop();
-  };
-
-  /**
-   * Start the servers and set them up
-   */
-  const manageES = await startES();
-
-  const root = createRootWithCorePlugins(testConfig, { oss: false });
-  await root.preboot();
-  await root.setup();
   const coreStart = await root.start();
   const esClient = coreStart.elasticsearch.client.asInternalUser;
 

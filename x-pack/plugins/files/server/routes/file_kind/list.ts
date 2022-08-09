@@ -7,7 +7,9 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import type { Ensure } from '@kbn/utility-types';
 import type { ListFileKindHttpEndpoint } from '../../../common/api_routes';
-import type { FileKindsRequestHandler } from './types';
+import type { FileKind } from '../../../common/types';
+import { FILES_API_ROUTES } from '../api_routes';
+import type { FileKindRouter, FileKindsRequestHandler } from './types';
 
 export const method = 'get' as const;
 
@@ -35,3 +37,20 @@ export const handler: FileKindsRequestHandler<unknown, Query> = async (
   };
   return res.ok({ body });
 };
+
+export function register(fileKindRouter: FileKindRouter, fileKind: FileKind) {
+  if (fileKind.http.list) {
+    fileKindRouter[method](
+      {
+        path: FILES_API_ROUTES.fileKind.getListRoute(fileKind.id),
+        validate: {
+          query: querySchema,
+        },
+        options: {
+          tags: fileKind.http.list.tags,
+        },
+      },
+      handler
+    );
+  }
+}

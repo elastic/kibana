@@ -8,10 +8,12 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import type { Ensure } from '@kbn/utility-types';
 import { Readable } from 'stream';
+import type { FileKind } from '../../../common/types';
 import type { UploadFileKindHttpEndpoint } from '../../../common/api_routes';
+import { FILES_API_ROUTES } from '../api_routes';
 import { fileErrors } from '../../file';
 import { getById } from './helpers';
-import type { FileKindsRequestHandler } from './types';
+import type { FileKindRouter, FileKindsRequestHandler } from './types';
 
 export const method = 'put' as const;
 
@@ -51,3 +53,26 @@ export const handler: FileKindsRequestHandler<Params, unknown, Body> = async (
   const body: Response = { ok: true, size: file.size! };
   return res.ok({ body });
 };
+
+export function register(fileKindRouter: FileKindRouter, fileKind: FileKind) {
+  if (fileKind.http.create) {
+    fileKindRouter[method](
+      {
+        path: FILES_API_ROUTES.fileKind.getUploadRoute(fileKind.id),
+        validate: {
+          body: bodySchema,
+          params: paramsSchema,
+        },
+        options: {
+          tags: fileKind.http.create.tags,
+          body: {
+            output: 'stream',
+            parse: false,
+            accepts: fileKind.allowedMimeTypes ?? 'application/octet-stream',
+          },
+        },
+      },
+      handler
+    );
+  }
+}

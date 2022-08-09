@@ -8,7 +8,9 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { Ensure } from '@kbn/utility-types';
 import type { CreateFileKindHttpEndpoint } from '../../../common/api_routes';
-import type { FileKindsRequestHandler } from './types';
+import type { FileKind } from '../../../common/types';
+import { FILES_API_ROUTES } from '../api_routes';
+import type { FileKindRouter, FileKindsRequestHandler } from './types';
 import * as commonSchemas from '../common_schemas';
 
 export const method = 'post' as const;
@@ -41,3 +43,20 @@ export const handler: FileKindsRequestHandler<unknown, unknown, Body> = async (
   };
   return res.ok({ body });
 };
+
+export function register(fileKindRouter: FileKindRouter, fileKind: FileKind) {
+  if (fileKind.http.create) {
+    fileKindRouter[method](
+      {
+        path: FILES_API_ROUTES.fileKind.getCreateFileRoute(fileKind.id),
+        validate: {
+          body: bodySchema,
+        },
+        options: {
+          tags: fileKind.http.create.tags,
+        },
+      },
+      handler
+    );
+  }
+}

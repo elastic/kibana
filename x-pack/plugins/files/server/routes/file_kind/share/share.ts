@@ -8,9 +8,10 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import type { Ensure } from '@kbn/utility-types';
 
 import { ExpiryDateInThePastError } from '../../../file_share_service/errors';
-import { FileKindsRequestHandler } from '../types';
+import { FileKindRouter, FileKindsRequestHandler } from '../types';
 
-import { FileShareHttpEndpoint } from '../../api_routes';
+import { FileShareHttpEndpoint, FILES_API_ROUTES } from '../../api_routes';
+import type { FileKind } from '../../../../common/types';
 import { getById } from '../helpers';
 
 export const method = 'post' as const;
@@ -74,3 +75,21 @@ export const handler: FileKindsRequestHandler<Params, unknown, Body> = async (
     throw e;
   }
 };
+
+export function register(fileKindRouter: FileKindRouter, fileKind: FileKind) {
+  if (fileKind.http.share) {
+    fileKindRouter[method](
+      {
+        path: FILES_API_ROUTES.fileKind.getShareRoute(fileKind.id),
+        validate: {
+          params: paramsSchema,
+          body: bodySchema,
+        },
+        options: {
+          tags: fileKind.http.share.tags,
+        },
+      },
+      handler
+    );
+  }
+}

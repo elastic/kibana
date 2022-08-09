@@ -8,8 +8,10 @@ import type { Ensure } from '@kbn/utility-types';
 import { schema, TypeOf } from '@kbn/config-schema';
 
 import { FileShareNotFoundError } from '../../../file_share_service/errors';
-import type { FileGetShareHttpEndpoint } from '../../api_routes';
-import { FileKindsRequestHandler } from '../types';
+import { FileGetShareHttpEndpoint, FILES_API_ROUTES } from '../../api_routes';
+import type { FileKind } from '../../../../common/types';
+
+import { FileKindRouter, FileKindsRequestHandler } from '../types';
 
 export const method = 'get' as const;
 
@@ -43,3 +45,20 @@ export const handler: FileKindsRequestHandler<Params, unknown, unknown> = async 
     throw e;
   }
 };
+
+export function register(fileKindRouter: FileKindRouter, fileKind: FileKind) {
+  if (fileKind.http.share) {
+    fileKindRouter[method](
+      {
+        path: FILES_API_ROUTES.fileKind.getGetShareRoute(fileKind.id),
+        validate: {
+          params: paramsSchema,
+        },
+        options: {
+          tags: fileKind.http.share.tags,
+        },
+      },
+      handler
+    );
+  }
+}
