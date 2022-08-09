@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { existsSync } from 'fs';
-import Fs from 'fs/promises';
+import Fs from 'fs';
 import Path from 'path';
 
 import { run } from '@kbn/dev-cli-runner';
@@ -59,18 +58,18 @@ export function runBuildApiDocsCli() {
       const plugins = findPlugins();
 
       const outputFolder = Path.resolve(REPO_ROOT, 'api_docs');
-      if (!existsSync(outputFolder)) {
-        await Fs.mkdir(outputFolder);
+      if (!Fs.existsSync(outputFolder)) {
+        await Fs.promises.mkdir(outputFolder);
 
         // Don't delete all the files if a plugin filter is being used.
       } else if (!pluginFilter) {
         // Delete all files except the README that warns about the auto-generated nature of
         // the folder.
-        const files = await Fs.readdir(outputFolder);
+        const files = await Fs.promises.readdir(outputFolder);
         await Promise.all(
           files
             .filter((file) => file.indexOf('README.md') < 0)
-            .map((file) => Fs.rm(Path.resolve(outputFolder, file)))
+            .map((file) => Fs.promises.rm(Path.resolve(outputFolder, file)))
         );
       }
       const collectReferences = flags.references as boolean;

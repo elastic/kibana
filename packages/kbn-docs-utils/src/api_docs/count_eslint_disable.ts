@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-// import { exec } from 'child_process';
-// import { promisify } from 'util';
 import Fs from 'fs';
 import Path from 'path';
 
@@ -15,8 +13,6 @@ export interface EslintDisableCounts {
   eslintDisableLineCount: number;
   eslintDisableFileCount: number;
 }
-
-// const execAsync = promisify(exec);
 
 async function fetchAllFilePaths(path: string): Promise<string[]> {
   if ((await Fs.promises.stat(path)).isFile()) {
