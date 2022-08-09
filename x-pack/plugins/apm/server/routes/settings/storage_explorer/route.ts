@@ -7,20 +7,30 @@
 
 import * as t from 'io-ts';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
-import { getIndicesStats } from './get_indices_stats';
 import { getSearchAggregatedTransactions } from '../../../lib/helpers/transactions';
 import { setupRequest } from '../../../lib/helpers/setup_request';
 import { getDocCountPerProcessorEvent } from './get_doc_count_per_processor_event';
 import { indexLifecyclePhaseRt } from '../../../../common/storage_explorer_types';
 import { getServiceStatistics } from './get_service_statistics';
 import { getTotalTransactionsPerService } from './get_total_transactions_per_service';
-import { probabilityRt } from '../../default_api_types';
+import {
+  probabilityRt,
+  environmentRt,
+  kueryRt,
+  rangeRt,
+} from '../../default_api_types';
 
 const storageExplorerRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/storage_explorer',
   options: { tags: ['access:apm'] },
   params: t.type({
-    query: t.intersection([indexLifecyclePhaseRt, probabilityRt]),
+    query: t.intersection([
+      indexLifecyclePhaseRt,
+      probabilityRt,
+      environmentRt,
+      kueryRt,
+      rangeRt,
+    ]),
   }),
   handler: async (
     resources
@@ -40,7 +50,14 @@ const storageExplorerRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
     const { params, context } = resources;
     const {
-      query: { indexLifecyclePhase, probability },
+      query: {
+        indexLifecyclePhase,
+        probability,
+        environment,
+        kuery,
+        start,
+        end,
+      },
     } = params;
 
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
@@ -49,26 +66,33 @@ const storageExplorerRoute = createApmServerRoute({
       kuery: '',
     });
 
-    const [docCountPerProcessorEvent, diskUsage, totalTransactionsPerService] =
+    const [docCountPerProcessorEvent, totalTransactionsPerService] =
       await Promise.all([
         getDocCountPerProcessorEvent({
           setup,
+          context,
           indexLifecyclePhase,
           probability,
+          environment,
+          kuery,
+          start,
+          end,
         }),
-        getIndicesStats({ context, setup, indexLifecyclePhase }),
         getTotalTransactionsPerService({
           setup,
           searchAggregatedTransactions,
           indexLifecyclePhase,
           probability,
+          environment,
+          kuery,
+          start,
+          end,
         }),
       ]);
 
     const serviceStatistics = getServiceStatistics({
       docCountPerProcessorEvent,
       totalTransactionsPerService,
-      ...diskUsage,
     });
 
     return {

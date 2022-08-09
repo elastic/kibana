@@ -14,6 +14,9 @@ import {
   euiPaletteColorBlind,
   EuiSpacer,
   EuiTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -34,6 +37,11 @@ import { asPercent } from '../../../../../common/utils/formatters';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { IndexLifecyclePhaseSelect } from './index_lifecycle_phase_select';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import { ApmDatePicker } from '../../../shared/date_picker/apm_date_picker';
+import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useTimeRange } from '../../../../hooks/use_time_range';
+import { ApmEnvironmentFilter } from '../../../shared/environment_filter';
+import { KueryBar } from '../../../shared/kuery_bar';
 
 type StorageExplorerItem =
   APIReturnType<'GET /internal/apm/storage_explorer'>['serviceStatistics'][0];
@@ -49,17 +57,27 @@ export function StorageExplorer() {
     rotations: euiPaletteColorBlindRotations,
   });
 
+  const {
+    query: { rangeFrom, rangeTo, environment, kuery },
+  } = useApmParams('/settings/storage-explorer');
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
   const { data, status } = useProgressiveFetcher(
     (callApmApi) => {
       return callApmApi('GET /internal/apm/storage_explorer', {
         params: {
           query: {
             indexLifecyclePhase,
+            start,
+            end,
+            environment,
+            kuery,
           },
         },
       });
     },
-    [indexLifecyclePhase]
+    [indexLifecyclePhase, start, end, environment, kuery]
   );
 
   const items = data?.serviceStatistics ?? [];
@@ -152,18 +170,6 @@ export function StorageExplorer() {
     },
   ];
 
-  const search = {
-    box: {
-      incremental: true,
-    },
-    toolsRight: [
-      <IndexLifecyclePhaseSelect
-        indexLifecyclePhase={indexLifecyclePhase}
-        onChange={setIndexLifecyclePhase}
-      />,
-    ],
-  };
-
   const loading =
     isEmpty(items) &&
     (status === FETCH_STATUS.NOT_INITIATED || status === FETCH_STATUS.LOADING);
@@ -217,7 +223,9 @@ export function StorageExplorer() {
         </h2>
       </EuiTitle>
 
-      {items && !isEmpty(items) && (
+      <EuiHorizontalRule />
+
+      {items && false && !isEmpty(items) && (
         <>
           <Chart size={{ height: 240 }}>
             <Settings theme={chartTheme} />
@@ -249,6 +257,27 @@ export function StorageExplorer() {
         </>
       )}
 
+      <EuiFlexGroup>
+        <EuiFlexItem grow={5}>
+          <KueryBar />,
+        </EuiFlexItem>
+        <EuiFlexItem grow={1}>
+          <ApmDatePicker />,
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexItem grow={false}>
+          <ApmEnvironmentFilter />,
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <IndexLifecyclePhaseSelect
+            indexLifecyclePhase={indexLifecyclePhase}
+            onChange={setIndexLifecyclePhase}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
       <EuiInMemoryTable
         tableCaption={i18n.translate(
           'xpack.apm.settings.storageExplorer.tableCaption',
@@ -259,7 +288,6 @@ export function StorageExplorer() {
         items={items ?? []}
         columns={columns}
         pagination={true}
-        search={search}
         sorting={true}
       />
     </>

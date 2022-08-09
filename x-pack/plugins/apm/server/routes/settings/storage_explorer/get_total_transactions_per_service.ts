@@ -5,7 +5,11 @@
  * 2.0.
  */
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { termQuery } from '@kbn/observability-plugin/server';
+import {
+  termQuery,
+  kqlQuery,
+  rangeQuery,
+} from '@kbn/observability-plugin/server';
 import { Setup } from '../../../lib/helpers/setup_request';
 import {
   getProcessorEventForTransactions,
@@ -19,17 +23,26 @@ import {
   IndexLifecyclePhaseSelectOption,
   indexLifeCyclePhaseToDataTier,
 } from '../../../../common/storage_explorer_types';
+import { environmentQuery } from '../../../../common/utils/environment_query';
 
 export async function getTotalTransactionsPerService({
   setup,
   searchAggregatedTransactions,
   indexLifecyclePhase,
   probability,
+  start,
+  end,
+  environment,
+  kuery,
 }: {
   setup: Setup;
   searchAggregatedTransactions: boolean;
   indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
   probability: number;
+  start: number;
+  end: number;
+  environment: string;
+  kuery: string;
 }) {
   const { apmEventClient } = setup;
 
@@ -49,6 +62,9 @@ export async function getTotalTransactionsPerService({
               ...getDocumentTypeFilterForTransactions(
                 searchAggregatedTransactions
               ),
+              ...environmentQuery(environment),
+              ...kqlQuery(kuery),
+              ...rangeQuery(start, end),
               ...(indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All
                 ? termQuery(
                     TIER,

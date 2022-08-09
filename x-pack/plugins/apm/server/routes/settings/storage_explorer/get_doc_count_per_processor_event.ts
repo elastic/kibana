@@ -6,8 +6,13 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { termQuery } from '@kbn/observability-plugin/server';
+import {
+  termQuery,
+  kqlQuery,
+  rangeQuery,
+} from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { uniq } from 'lodash';
 import { Setup } from '../../../lib/helpers/setup_request';
 import {
   PROCESSOR_EVENT,
@@ -20,17 +25,37 @@ import {
   IndexLifecyclePhaseSelectOption,
   indexLifeCyclePhaseToDataTier,
 } from '../../../../common/storage_explorer_types';
+import { environmentQuery } from '../../../../common/utils/environment_query';
+import { ApmPluginRequestHandlerContext } from '../../typings';
 
 export async function getDocCountPerProcessorEvent({
   setup,
+  context,
   indexLifecyclePhase,
   probability,
+  start,
+  end,
+  environment,
+  kuery,
 }: {
   setup: Setup;
+  context: ApmPluginRequestHandlerContext;
   indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
   probability: number;
+  start: number;
+  end: number;
+  environment: string;
+  kuery: string;
 }) {
   const { apmEventClient } = setup;
+
+  const {
+    indices: { transaction, span, metric, error },
+  } = setup;
+  const index = uniq([transaction, span, metric, error]).join();
+  const esClient = (await context.core).elasticsearch.client;
+  const indicesStats = (await esClient.asCurrentUser.indices.stats({ index }))
+    .indices;
 
   const response = await apmEventClient.search(
     'get_doc_count_per_processor_event',
@@ -48,6 +73,9 @@ export async function getDocCountPerProcessorEvent({
         query: {
           bool: {
             filter: [
+              ...environmentQuery(environment),
+              ...kqlQuery(kuery),
+              ...rangeQuery(start, end),
               ...(indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All
                 ? termQuery(
                     TIER,
@@ -69,10 +97,15 @@ export async function getDocCountPerProcessorEvent({
                   size: 500,
                 },
                 aggs: {
+                  indices: {
+                    terms: {
+                      field: '_index',
+                      size: 500,
+                    },
+                  },
                   environments: {
                     terms: {
                       field: SERVICE_ENVIRONMENT,
-                      size: 500,
                     },
                   },
                   processor_event: {
@@ -101,7 +134,6 @@ export async function getDocCountPerProcessorEvent({
   const serviceStats = response.aggregations?.sample.services.buckets.map(
     (bucket) => {
       const serviceName = bucket.key as string;
-      const totalServiceDocs = bucket.doc_count;
       const environments = bucket.environments.buckets.map(
         ({ key }) => key as string
       );
@@ -127,11 +159,29 @@ export async function getDocCountPerProcessorEvent({
         }
       );
 
+      const estimatedSize = indicesStats
+        ? bucket.indices.buckets.reduce((prev, curr) => {
+            const indexName = curr.key as string;
+            const indexDocCountForQuery = curr.doc_count;
+
+            const indexStats = indicesStats[indexName];
+            const indexSize = indexStats?.total?.store?.size_in_bytes;
+            const indexTotalDocCount = indexStats?.total?.docs?.count;
+
+            return (
+              prev +
+              (indexSize && indexTotalDocCount
+                ? (indexDocCountForQuery / indexTotalDocCount) * indexSize
+                : 0)
+            );
+          }, 0)
+        : undefined;
+
       return {
         serviceName,
         environments,
-        totalServiceDocs,
         sampledTransactionDocs,
+        size: estimatedSize,
         transactionDocs: docsPerProcessorEvent.transaction,
         spanDocs: docsPerProcessorEvent.span,
         metricDocs: docsPerProcessorEvent.metric,

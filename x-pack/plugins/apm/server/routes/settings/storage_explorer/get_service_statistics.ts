@@ -9,8 +9,6 @@ import { DocCountPerProcessorEventResponse } from './get_doc_count_per_processor
 export function getServiceStatistics({
   docCountPerProcessorEvent,
   totalTransactionsPerService,
-  totalApmDocs,
-  totalSizeInBytes,
 }: {
   docCountPerProcessorEvent: DocCountPerProcessorEventResponse;
   totalTransactionsPerService: Record<string, number>;
@@ -18,12 +16,7 @@ export function getServiceStatistics({
   totalSizeInBytes?: number;
 }) {
   const serviceStatistics = docCountPerProcessorEvent.map(
-    ({ serviceName, totalServiceDocs, sampledTransactionDocs, ...rest }) => {
-      const size =
-        totalSizeInBytes && totalApmDocs
-          ? (totalServiceDocs / totalApmDocs) * totalSizeInBytes
-          : undefined;
-
+    ({ serviceName, sampledTransactionDocs, ...rest }) => {
       const sampling =
         sampledTransactionDocs && totalTransactionsPerService[serviceName]
           ? Math.min(
@@ -36,7 +29,6 @@ export function getServiceStatistics({
         ...rest,
         serviceName,
         sampledTransactionDocs,
-        size,
         sampling,
       };
     }
