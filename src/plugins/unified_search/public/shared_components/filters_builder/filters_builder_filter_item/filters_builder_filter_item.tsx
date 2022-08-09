@@ -166,6 +166,7 @@ export function FilterItem({
           css={css`
             cursor: ${dropTarget === path ? `url(${plus}), auto` : `auto`};
           `}
+          isDropDisabled={disableAnd}
         >
           <EuiDraggable
             spacing="m"
