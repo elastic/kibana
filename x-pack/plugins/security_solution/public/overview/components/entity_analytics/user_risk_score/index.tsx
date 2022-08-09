@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiBasicTable,
   EuiButton,
@@ -13,55 +13,30 @@ import {
   EuiFlexItem,
   EuiPanel,
 } from '@elastic/eui';
-import type { ShapeTreeNode } from '@elastic/charts';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 import { SeverityFilterGroup } from '../../../../common/components/severity/severity_filter_group';
-import { LinkAnchor, LinkButton } from '../../../../common/components/links';
-
-import { useNavigation } from '../../../../common/lib/kibana';
-import { useFormatUrl } from '../../../../common/components/link_to';
-
+import { LinkButton, useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
 import { LastUpdatedAt } from '../../detection_response/utils';
 import { HeaderSection } from '../../../../common/components/header_section';
-import { DonutChart } from '../../../../common/components/charts/donutchart';
-import { Legend } from '../../../../common/components/charts/legend';
-import type { FillColor } from '../../../../common/components/charts/donutchart';
-import { emptyDonutColor } from '../../../../common/components/charts/donutchart_empty';
-import { RISK_SEVERITY_COLOUR } from '../../../../common/components/severity/common';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { SecurityPageName } from '../../../../app/types';
 import * as i18n from './translations';
 import { generateSeverityFilter } from '../../../../hosts/store/helpers';
-import { ChartLabel } from '../../detection_response/alerts_by_status/chart_label';
+
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { InspectButtonContainer } from '../../../../common/components/inspect';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
-
 import { usersActions } from '../../../../users/store';
 import { getUserRiskScoreColumns } from './columns';
 import { useUserRiskScore, useUserRiskScoreKpi } from '../../../../risk_score/containers';
 import { UsersTableType } from '../../../../users/store/model';
-import { useRiskDonutChart } from '../host_risk_score';
 import { getTabsOnUsersUrl } from '../../../../common/components/link_to/redirect_to_users';
 import { RISKY_USERS_DOC_LINK } from '../../../../users/components/constants';
+import { RiskScoreDonutChart } from '../common/risk_score_donut_chart';
 
 const TABLE_QUERY_ID = 'userRiskDashboardTable';
-const DONUT_HEIGHT = 120;
-
-const fillColor: FillColor = (d: ShapeTreeNode) => {
-  return RISK_SEVERITY_COLOUR[d.dataName as RiskSeverity] ?? emptyDonutColor;
-};
-
-const DonutContainer = styled(EuiFlexItem)`
-  padding-right: ${({ theme }) => theme.eui.euiSizeXXL};
-  padding-left: ${({ theme }) => theme.eui.euiSizeM};
-`;
-
-const StyledLegendItems = styled(EuiFlexItem)`
-  justify-content: center;
-`;
 
 export const EntityAnalyticsUserRiskScores = () => {
   const { deleteQuery, setQuery } = useGlobalTime();
@@ -69,8 +44,7 @@ export const EntityAnalyticsUserRiskScores = () => {
   const { toggleStatus, setToggleStatus } = useQueryToggle(TABLE_QUERY_ID);
   const columns = useMemo(() => getUserRiskScoreColumns(), []);
   const [selectedSeverity, setSelectedSeverity] = useState<RiskSeverity[]>([]);
-  const { formatUrl, search } = useFormatUrl(SecurityPageName.users);
-  const { navigateTo } = useNavigation();
+  const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
   const dispatch = useDispatch();
 
   const severityFilter = useMemo(() => {
@@ -111,34 +85,24 @@ export const EntityAnalyticsUserRiskScores = () => {
     inspect,
   });
 
-  const [donutChartData, legendItems, total] = useRiskDonutChart(severityCount);
-
-  const goToUserRiskTab = useCallback(
-    (ev) => {
-      ev.preventDefault();
-
-      dispatch(
-        usersActions.updateUserRiskScoreSeverityFilter({
-          severitySelection: [],
-        })
-      );
-
-      navigateTo({
-        deepLinkId: SecurityPageName.users,
-        path: getTabsOnUsersUrl(UsersTableType.risk, search),
-      });
-    },
-    [navigateTo, search, dispatch]
-  );
-
   useEffect(() => {
     setUpdatedAt(Date.now());
   }, [isTableLoading, isKpiLoading]); // Update the time when data loads
 
-  const userRiskTabUrl = useMemo(
-    () => formatUrl(getTabsOnUsersUrl(UsersTableType.risk)),
-    [formatUrl]
-  );
+  const [goToUserRiskTab, userRiskTabUrl] = useMemo(() => {
+    const { onClick, href } = getSecuritySolutionLinkProps({
+      deepLinkId: SecurityPageName.users,
+      path: getTabsOnUsersUrl(UsersTableType.risk),
+      onClick: () => {
+        dispatch(
+          usersActions.updateUserRiskScoreSeverityFilter({
+            severitySelection: [],
+          })
+        );
+      },
+    });
+    return [onClick, href];
+  }, [dispatch, getSecuritySolutionLinkProps]);
 
   if (!isModuleEnabled) {
     return <EntityAnalyticsUserRiskScoresDisable />;
@@ -182,29 +146,11 @@ export const EntityAnalyticsUserRiskScores = () => {
         {toggleStatus && (
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup responsive={false}>
-                <StyledLegendItems grow={false}>
-                  {legendItems.length > 0 && <Legend legendItems={legendItems} />}
-                </StyledLegendItems>
-                <DonutContainer grow={false} className="eui-textCenter">
-                  <DonutChart
-                    data={donutChartData ?? null}
-                    fillColor={fillColor}
-                    height={DONUT_HEIGHT}
-                    label={
-                      <LinkAnchor
-                        data-test-subj="view-total-button"
-                        onClick={goToUserRiskTab}
-                        href={userRiskTabUrl}
-                      >
-                        {i18n.TOTAL_LABEL}
-                      </LinkAnchor>
-                    }
-                    title={<ChartLabel count={total} />}
-                    totalCount={total}
-                  />
-                </DonutContainer>
-              </EuiFlexGroup>
+              <RiskScoreDonutChart
+                severityCount={severityCount}
+                onClick={goToUserRiskTab}
+                href={userRiskTabUrl}
+              />
             </EuiFlexItem>
             <EuiFlexItem>
               <StyledEuiBasicTable

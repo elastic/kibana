@@ -4,18 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback } from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 import { useHostRiskScoreKpi, useUserRiskScoreKpi } from '../../../../risk_score/containers';
-import { LinkAnchor } from '../../../../common/components/links';
+import { LinkAnchor, useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
 import { Direction, RiskScoreFields, RiskSeverity } from '../../../../../common/search_strategy';
 import * as i18n from './translations';
 import { getTabsOnHostsUrl } from '../../../../common/components/link_to/redirect_to_hosts';
-import { useFormatUrl } from '../../../../common/components/link_to';
 import { SecurityPageName } from '../../../../app/types';
-import { useNavigation } from '../../../../common/lib/kibana';
 import { HostsTableType, HostsType } from '../../../../hosts/store/model';
 import { hostsActions } from '../../../../hosts/store';
 import { usersActions } from '../../../../users/store';
@@ -27,64 +25,55 @@ const StyledEuiTitle = styled(EuiTitle)`
 `;
 
 export const EntityAnalyticsHeader = () => {
-  const { formatUrl, search } = useFormatUrl(SecurityPageName.hosts);
-  const { navigateTo } = useNavigation();
   const { severityCount: hostsSeverityCount } = useHostRiskScoreKpi({});
   const { severityCount: usersSeverityCount } = useUserRiskScoreKpi({});
   const dispatch = useDispatch();
+  const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
 
-  const goToHostRiskTabFilterdByCritical = useCallback(
-    (ev) => {
-      ev.preventDefault();
+  const [goToHostRiskTabFilterdByCritical, hostRiskTabUrl] = useMemo(() => {
+    const { onClick, href } = getSecuritySolutionLinkProps({
+      deepLinkId: SecurityPageName.hosts,
+      path: getTabsOnHostsUrl(HostsTableType.risk),
+      onClick: () => {
+        dispatch(
+          hostsActions.updateHostRiskScoreSeverityFilter({
+            severitySelection: [RiskSeverity.critical],
+            hostsType: HostsType.page,
+          })
+        );
 
-      dispatch(
-        hostsActions.updateHostRiskScoreSeverityFilter({
-          severitySelection: [RiskSeverity.critical],
-          hostsType: HostsType.page,
-        })
-      );
+        dispatch(
+          hostsActions.updateHostRiskScoreSort({
+            sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
+            hostsType: HostsType.page,
+          })
+        );
+      },
+    });
+    return [onClick, href];
+  }, [dispatch, getSecuritySolutionLinkProps]);
 
-      dispatch(
-        hostsActions.updateHostRiskScoreSort({
-          sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
-          hostsType: HostsType.page,
-        })
-      );
+  const [goToUserRiskTabFilterdByCritical, userRiskTabUrl] = useMemo(() => {
+    const { onClick, href } = getSecuritySolutionLinkProps({
+      deepLinkId: SecurityPageName.users,
+      path: getTabsOnUsersUrl(UsersTableType.risk),
+      onClick: () => {
+        dispatch(
+          usersActions.updateUserRiskScoreSeverityFilter({
+            severitySelection: [RiskSeverity.critical],
+          })
+        );
 
-      navigateTo({
-        deepLinkId: SecurityPageName.hosts,
-        path: getTabsOnHostsUrl(HostsTableType.risk, search),
-      });
-    },
-    [navigateTo, search, dispatch]
-  );
-  const hostRiskTabUrl = formatUrl(getTabsOnHostsUrl(HostsTableType.risk));
-
-  const goToUserRiskTabFilterdByCritical = useCallback(
-    (ev) => {
-      ev.preventDefault();
-
-      dispatch(
-        usersActions.updateUserRiskScoreSeverityFilter({
-          severitySelection: [RiskSeverity.critical],
-        })
-      );
-
-      dispatch(
-        usersActions.updateTableSorting({
-          sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
-          tableType: UsersTableType.risk,
-        })
-      );
-
-      navigateTo({
-        deepLinkId: SecurityPageName.users,
-        path: getTabsOnUsersUrl(UsersTableType.risk, search),
-      });
-    },
-    [navigateTo, search, dispatch]
-  );
-  const userRiskTabUrl = formatUrl(getTabsOnHostsUrl(HostsTableType.risk));
+        dispatch(
+          usersActions.updateTableSorting({
+            sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
+            tableType: UsersTableType.risk,
+          })
+        );
+      },
+    });
+    return [onClick, href];
+  }, [dispatch, getSecuritySolutionLinkProps]);
 
   return (
     <EuiPanel hasBorder paddingSize="l">

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiBasicTable,
   EuiButton,
@@ -13,32 +13,22 @@ import {
   EuiFlexItem,
   EuiPanel,
 } from '@elastic/eui';
-import type { ShapeTreeNode } from '@elastic/charts';
+
 import styled from 'styled-components';
-import { sum } from 'lodash/fp';
 import { useDispatch } from 'react-redux';
 import { SeverityFilterGroup } from '../../../../common/components/severity/severity_filter_group';
-import { LinkAnchor, LinkButton } from '../../../../common/components/links';
+import { LinkButton, useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
 import { getTabsOnHostsUrl } from '../../../../common/components/link_to/redirect_to_hosts';
 import { HostsTableType, HostsType } from '../../../../hosts/store/model';
-import { useNavigation } from '../../../../common/lib/kibana';
-import { useFormatUrl } from '../../../../common/components/link_to';
 import { getHostRiskScoreColumns } from './columns';
 import { LastUpdatedAt } from '../../detection_response/utils';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { useHostRiskScore, useHostRiskScoreKpi } from '../../../../risk_score/containers';
-import { DonutChart } from '../../../../common/components/charts/donutchart';
-import { Legend } from '../../../../common/components/charts/legend';
-import type { FillColor, DonutChartProps } from '../../../../common/components/charts/donutchart';
-import { emptyDonutColor } from '../../../../common/components/charts/donutchart_empty';
-import type { LegendItem } from '../../../../common/components/charts/legend_item';
-import { RISK_SEVERITY_COLOUR } from '../../../../common/components/severity/common';
+
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { SecurityPageName } from '../../../../app/types';
 import * as i18n from './translations';
-import type { SeverityCount } from '../../../../common/components/severity/types';
 import { generateSeverityFilter } from '../../../../hosts/store/helpers';
-import { ChartLabel } from '../../detection_response/alerts_by_status/chart_label';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { InspectButtonContainer } from '../../../../common/components/inspect';
@@ -46,24 +36,9 @@ import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { hostsActions } from '../../../../hosts/store';
 import { useEnableHostRiskFromUrl } from '../../overview_risky_host_links/risky_hosts_disabled_module';
 import { useCheckSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_check_signal_index';
+import { RiskScoreDonutChart } from '../common/risk_score_donut_chart';
 
 const TABLE_QUERY_ID = 'hostRiskDashboardTable';
-const DONUT_HEIGHT = 120;
-
-const fillColor: FillColor = (d: ShapeTreeNode) => {
-  return RISK_SEVERITY_COLOUR[d.dataName as RiskSeverity] ?? emptyDonutColor;
-};
-
-const legendField = 'kibana.alert.severity';
-
-const DonutContainer = styled(EuiFlexItem)`
-  padding-right: ${({ theme }) => theme.eui.euiSizeXXL};
-  padding-left: ${({ theme }) => theme.eui.euiSizeM};
-`;
-
-const StyledLegendItems = styled(EuiFlexItem)`
-  justify-content: center;
-`;
 
 export const EntityAnalyticsHostRiskScores = () => {
   const { deleteQuery, setQuery } = useGlobalTime();
@@ -71,8 +46,7 @@ export const EntityAnalyticsHostRiskScores = () => {
   const { toggleStatus, setToggleStatus } = useQueryToggle(TABLE_QUERY_ID);
   const columns = useMemo(() => getHostRiskScoreColumns(), []);
   const [selectedSeverity, setSelectedSeverity] = useState<RiskSeverity[]>([]);
-  const { formatUrl, search } = useFormatUrl(SecurityPageName.hosts);
-  const { navigateTo } = useNavigation();
+  const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
   const dispatch = useDispatch();
 
   const severityFilter = useMemo(() => {
@@ -113,35 +87,25 @@ export const EntityAnalyticsHostRiskScores = () => {
     inspect,
   });
 
-  const [donutChartData, legendItems, total] = useRiskDonutChart(severityCount);
-
-  const goToHostRiskTab = useCallback(
-    (ev) => {
-      ev.preventDefault();
-
-      dispatch(
-        hostsActions.updateHostRiskScoreSeverityFilter({
-          severitySelection: [],
-          hostsType: HostsType.page,
-        })
-      );
-
-      navigateTo({
-        deepLinkId: SecurityPageName.hosts,
-        path: getTabsOnHostsUrl(HostsTableType.risk, search),
-      });
-    },
-    [navigateTo, search, dispatch]
-  );
-
   useEffect(() => {
     setUpdatedAt(Date.now());
   }, [isTableLoading, isKpiLoading]); // Update the time when data loads
 
-  const hostRiskTabUrl = useMemo(
-    () => formatUrl(getTabsOnHostsUrl(HostsTableType.risk)),
-    [formatUrl]
-  );
+  const [goToHostRiskTab, hostRiskTabUrl] = useMemo(() => {
+    const { onClick, href } = getSecuritySolutionLinkProps({
+      deepLinkId: SecurityPageName.hosts,
+      path: getTabsOnHostsUrl(HostsTableType.risk),
+      onClick: () => {
+        dispatch(
+          hostsActions.updateHostRiskScoreSeverityFilter({
+            severitySelection: [],
+            hostsType: HostsType.page,
+          })
+        );
+      },
+    });
+    return [onClick, href];
+  }, [dispatch, getSecuritySolutionLinkProps]);
 
   if (!isModuleEnabled) {
     return <EntityAnalyticsHostRiskScoresDisable />;
@@ -185,29 +149,11 @@ export const EntityAnalyticsHostRiskScores = () => {
         {toggleStatus && (
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup responsive={false}>
-                <StyledLegendItems grow={false}>
-                  {legendItems.length > 0 && <Legend legendItems={legendItems} />}
-                </StyledLegendItems>
-                <DonutContainer grow={false} className="eui-textCenter">
-                  <DonutChart
-                    data={donutChartData ?? null}
-                    fillColor={fillColor}
-                    height={DONUT_HEIGHT}
-                    label={
-                      <LinkAnchor
-                        data-test-subj="view-total-button"
-                        onClick={goToHostRiskTab}
-                        href={hostRiskTabUrl}
-                      >
-                        {i18n.TOTAL_LABEL}
-                      </LinkAnchor>
-                    }
-                    title={<ChartLabel count={total} />}
-                    totalCount={total}
-                  />
-                </DonutContainer>
-              </EuiFlexGroup>
+              <RiskScoreDonutChart
+                severityCount={severityCount}
+                onClick={goToHostRiskTab}
+                href={hostRiskTabUrl}
+              />
             </EuiFlexItem>
             <EuiFlexItem>
               <StyledEuiBasicTable
@@ -223,29 +169,6 @@ export const EntityAnalyticsHostRiskScores = () => {
       </EuiPanel>
     </InspectButtonContainer>
   );
-};
-
-export const useRiskDonutChart = (
-  severityCount: SeverityCount
-): [DonutChartProps['data'], LegendItem[], number] => {
-  const [donutChartData, legendItems, total] = useMemo(() => {
-    const severities = Object.keys(RISK_SEVERITY_COLOUR) as RiskSeverity[];
-
-    return [
-      severities.map((status) => ({
-        key: status,
-        value: severityCount[status],
-      })),
-      severities.map((status) => ({
-        color: RISK_SEVERITY_COLOUR[status],
-        field: legendField,
-        value: status,
-      })),
-      sum(Object.values(severityCount)),
-    ];
-  }, [severityCount]);
-
-  return [donutChartData, legendItems, total];
 };
 
 const EntityAnalyticsHostRiskScoresDisable = () => {
