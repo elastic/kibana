@@ -760,7 +760,7 @@ describe('last_value', () => {
               operationType: 'min', // not terms
             },
           },
-        };
+        } as IndexPatternLayer;
         const instance = shallow(
           <InlineOptions
             {...defaultProps}

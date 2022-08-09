@@ -48,9 +48,9 @@ export function checkForDataLayerType(layerType: LayerType, name: string) {
  * Checks whether the current layer includes a date histogram and returns an error otherwise
  */
 export function checkForDateHistogram(layer: IndexPatternLayer, name: string) {
-  const buckets = layer.columnOrder.filter((colId) => layer.columns[colId].isBucketed);
+  const buckets = layer.columnOrder.filter((colId) => layer.columns[colId]?.isBucketed);
   const hasDateHistogram = buckets.some(
-    (colId) => layer.columns[colId].operationType === 'date_histogram'
+    (colId) => layer.columns[colId]?.operationType === 'date_histogram'
   );
   if (hasDateHistogram) {
     return undefined;
@@ -70,6 +70,7 @@ const getFullyManagedColumnIds = memoizeOne((layer: IndexPatternLayer) => {
   const managedColumnIds = new Set<string>();
   Object.entries(layer.columns).forEach(([id, column]) => {
     if (
+      column &&
       'references' in column &&
       operationDefinitionMap[column.operationType].input === 'managedReference'
     ) {
@@ -153,9 +154,9 @@ export function dateBasedOperationToExpression(
   additionalArgs: Record<string, unknown[]> = {}
 ): AstFunction[] {
   const currentColumn = layer.columns[columnId] as unknown as ReferenceBasedIndexPatternColumn;
-  const buckets = layer.columnOrder.filter((colId) => layer.columns[colId].isBucketed);
+  const buckets = layer.columnOrder.filter((colId) => layer.columns[colId]?.isBucketed);
   const dateColumnIndex = buckets.findIndex(
-    (colId) => layer.columns[colId].operationType === 'date_histogram'
+    (colId) => layer.columns[colId]?.operationType === 'date_histogram'
   )!;
   buckets.splice(dateColumnIndex, 1);
 
@@ -184,11 +185,11 @@ export function optionallHistogramBasedOperationToExpression(
   additionalArgs: Record<string, unknown[]> = {}
 ): AstFunction[] {
   const currentColumn = layer.columns[columnId] as unknown as ReferenceBasedIndexPatternColumn;
-  const buckets = layer.columnOrder.filter((colId) => layer.columns[colId].isBucketed);
+  const buckets = layer.columnOrder.filter((colId) => layer.columns[colId]?.isBucketed);
   const nonHistogramColumns = buckets.filter(
     (colId) =>
-      layer.columns[colId].operationType !== 'date_histogram' &&
-      layer.columns[colId].operationType !== 'range'
+      layer.columns[colId]?.operationType !== 'date_histogram' &&
+      layer.columns[colId]?.operationType !== 'range'
   )!;
 
   return [

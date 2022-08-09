@@ -26,7 +26,12 @@ import {
 import { mergeLayer, mergeLayers } from '../../state_helpers';
 import { isDraggedField } from '../../pure_utils';
 import { getNewOperation, getField } from './get_drop_props';
-import { IndexPatternPrivateState, DraggedField, DataViewDragDropOperation } from '../../types';
+import {
+  IndexPatternPrivateState,
+  DraggedField,
+  DataViewDragDropOperation,
+  IndexPatternLayer,
+} from '../../types';
 
 interface DropHandlerProps<T = DataViewDragDropOperation> {
   state: IndexPatternPrivateState;
@@ -121,28 +126,30 @@ function onFieldDrop(props: DropHandlerProps<DraggedField>, shouldAddField?: boo
   const indexPattern = state.indexPatterns[layer.indexPatternId];
   const targetColumn = layer.columns[target.columnId];
   const newOperation = shouldAddField
-    ? targetColumn.operationType
+    ? targetColumn?.operationType
     : getNewOperation(source.field, target.filterOperations, targetColumn, prioritizedOperation);
 
   if (
     !isDraggedField(source) ||
     !newOperation ||
     (shouldAddField &&
+      targetColumn &&
       !hasOperationSupportForMultipleFields(indexPattern, targetColumn, undefined, source.field))
   ) {
     return false;
   }
   const field = shouldAddField ? getField(targetColumn, indexPattern) : source.field;
-  const initialParams = shouldAddField
-    ? {
-        params:
-          getOperationHelperForMultipleFields(targetColumn.operationType)?.({
-            targetColumn,
-            field: source.field,
-            indexPattern,
-          }) || {},
-      }
-    : undefined;
+  const initialParams =
+    shouldAddField && targetColumn
+      ? {
+          params:
+            getOperationHelperForMultipleFields(targetColumn.operationType)?.({
+              targetColumn,
+              field: source.field,
+              indexPattern,
+            }) || {},
+        }
+      : undefined;
 
   const newLayer = insertOrReplaceColumn({
     layer,
@@ -242,7 +249,8 @@ function onMoveIncompatible(
   const indexPattern = state.indexPatterns[sourceLayer.indexPatternId];
   const sourceColumn = sourceLayer.columns[source.columnId];
   const sourceField = getField(sourceColumn, indexPattern);
-  const newOperation = getNewOperation(sourceField, target.filterOperations, targetColumn);
+  const newOperation =
+    targetColumn && getNewOperation(sourceField, target.filterOperations, targetColumn);
   if (!newOperation) {
     return false;
   }
@@ -396,7 +404,7 @@ function onSwapCompatible({
       ...layer.columns,
       [target.columnId]: { ...layer.columns[source.columnId] },
       [source.columnId]: { ...layer.columns[target.columnId] },
-    };
+    } as IndexPatternLayer['columns'];
 
     let updatedColumnOrder = swapColumnOrder(layer.columnOrder, source.columnId, target.columnId);
     updatedColumnOrder = reorderByGroups(
@@ -463,7 +471,7 @@ function onCombine({
   const sourceColumn = sourceLayer.columns[source.columnId];
   const sourceField = getField(sourceColumn, indexPattern);
   // extract the field from the source column
-  if (!sourceField || !targetField) {
+  if (!sourceField || !targetField || !targetColumn) {
     return false;
   }
   // pass it to the target column and delete the source column

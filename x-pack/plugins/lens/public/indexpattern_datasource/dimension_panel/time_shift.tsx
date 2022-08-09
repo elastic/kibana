@@ -38,16 +38,16 @@ export function setTimeShift(
 ) {
   const trimmedTimeShift = timeShift?.trim();
   const currentColumn = layer.columns[columnId];
-  const label = currentColumn.customLabel
+  const label = currentColumn?.customLabel
     ? currentColumn.label
     : adjustTimeScaleLabelSuffix(
-        currentColumn.label,
-        currentColumn.timeScale,
-        currentColumn.timeScale,
-        currentColumn.timeShift,
+        currentColumn?.label ?? '',
+        currentColumn?.timeScale,
+        currentColumn?.timeScale,
+        currentColumn?.timeShift,
         trimmedTimeShift,
-        currentColumn.window,
-        currentColumn.window
+        currentColumn?.window,
+        currentColumn?.window
       );
   return {
     ...layer,
@@ -59,7 +59,7 @@ export function setTimeShift(
         timeShift: trimmedTimeShift,
       },
     },
-  };
+  } as IndexPatternLayer;
 }
 
 export function TimeShift({

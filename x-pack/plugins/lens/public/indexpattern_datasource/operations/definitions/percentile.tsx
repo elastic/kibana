@@ -304,6 +304,7 @@ export const percentileOperation: OperationDefinition<
       (value) => {
         if (
           !isValidNumber(value, true, 99, 1) ||
+          !currentColumn ||
           Number(value) === currentColumn.params.percentile
         ) {
           return;
@@ -331,7 +332,7 @@ export const percentileOperation: OperationDefinition<
       string | undefined
     >({
       onChange,
-      value: String(currentColumn.params.percentile),
+      value: String(currentColumn?.params.percentile),
     });
     const inputValueIsValid = isValidNumber(inputValue, true, 99, 1);
 

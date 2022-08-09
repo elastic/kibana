@@ -23,15 +23,15 @@ import { windowOptions } from '../window_utils';
 export function setWindow(columnId: string, layer: IndexPatternLayer, window: string | undefined) {
   const trimmedWindow = window?.trim();
   const currentColumn = layer.columns[columnId];
-  const label = currentColumn.customLabel
+  const label = currentColumn?.customLabel
     ? currentColumn.label
     : adjustTimeScaleLabelSuffix(
-        currentColumn.label,
-        currentColumn.timeScale,
-        currentColumn.timeScale,
-        currentColumn.timeShift,
-        currentColumn.timeShift,
-        currentColumn.window,
+        currentColumn?.label ?? '',
+        currentColumn?.timeScale,
+        currentColumn?.timeScale,
+        currentColumn?.timeShift,
+        currentColumn?.timeShift,
+        currentColumn?.window,
         trimmedWindow
       );
   return {
@@ -44,7 +44,7 @@ export function setWindow(columnId: string, layer: IndexPatternLayer, window: st
         label,
       },
     },
-  };
+  } as IndexPatternLayer;
 }
 
 function isInvalid(value: Duration | 'previous' | 'invalid') {
@@ -70,7 +70,7 @@ export function Window({
   }, [selectedColumn.window]);
   const selectedOperation = operationDefinitionMap[selectedColumn.operationType];
   const hasDateHistogram = Object.values(layer.columns).some(
-    (c) => c.operationType === 'date_histogram'
+    (c) => c?.operationType === 'date_histogram'
   );
   if (
     !selectedOperation.windowable ||

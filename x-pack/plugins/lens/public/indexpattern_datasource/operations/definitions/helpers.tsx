@@ -123,9 +123,9 @@ export function isValidNumber(
 
 export function isColumnOfType<C extends GenericIndexPatternColumn>(
   type: C['operationType'],
-  column: GenericIndexPatternColumn
+  column?: GenericIndexPatternColumn
 ): column is C {
-  return column.operationType === type;
+  return column?.operationType === type;
 }
 
 export const isColumn = (

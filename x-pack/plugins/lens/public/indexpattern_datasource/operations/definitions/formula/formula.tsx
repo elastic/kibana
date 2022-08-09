@@ -86,14 +86,14 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
           return [];
         })
         .filter((marker) => marker);
-      const hasBuckets = layer.columnOrder.some((colId) => layer.columns[colId].isBucketed);
+      const hasBuckets = layer.columnOrder.some((colId) => layer.columns[colId]?.isBucketed);
       const hasOtherMetrics = layer.columnOrder.some((colId) => {
         const col = layer.columns[colId];
         return (
-          !col.isBucketed &&
-          !col.isStaticValue &&
-          col.operationType !== 'math' &&
-          col.operationType !== 'formula'
+          !col?.isBucketed &&
+          !col?.isStaticValue &&
+          col?.operationType !== 'math' &&
+          col?.operationType !== 'formula'
         );
       });
 

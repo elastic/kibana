@@ -76,7 +76,7 @@ function extractColumns(
   label: string
 ): Array<{ column: GenericIndexPatternColumn; location?: TinymathLocation }> {
   const columns: Array<{ column: GenericIndexPatternColumn; location?: TinymathLocation }> = [];
-  const globalFilter = layer.columns[idPrefix].filter;
+  const globalFilter = layer.columns[idPrefix]?.filter;
 
   function parseNode(node: TinymathAST) {
     if (typeof node === 'number' || node.type !== 'function') {
@@ -208,7 +208,7 @@ interface ExpandColumnProperties {
 }
 
 const getEmptyColumnsWithFormulaMeta = (): {
-  columns: Record<string, GenericIndexPatternColumn>;
+  columns: Partial<Record<string, GenericIndexPatternColumn>>;
   meta: {
     locations: Record<string, TinymathLocation>;
   };
@@ -285,7 +285,7 @@ export function insertOrReplaceFormulaColumn(
   const { columns: updatedColumns, meta } = Object.entries(layer.columns).reduce(
     (acc, [currentColumnId, currentColumn]) => {
       if (currentColumnId.startsWith(id)) {
-        if (currentColumnId === id && isFormulaIndexPatternColumn(currentColumn)) {
+        if (currentColumnId === id && currentColumn && isFormulaIndexPatternColumn(currentColumn)) {
           const formulaColumns = generateFormulaColumns(
             currentColumnId,
             currentColumn,
@@ -296,7 +296,9 @@ export function insertOrReplaceFormulaColumn(
           acc.meta = { ...acc.meta, ...formulaColumns.meta };
         }
       } else {
-        acc.columns[currentColumnId] = { ...currentColumn };
+        if (currentColumn) {
+          acc.columns[currentColumnId] = { ...currentColumn };
+        }
       }
       return acc;
     },

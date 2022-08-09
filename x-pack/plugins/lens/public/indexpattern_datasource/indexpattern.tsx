@@ -310,6 +310,7 @@ export function getIndexPatternDatasource({
           return;
         }
         Object.entries(layer.columns).forEach(([columnId, column]) => {
+          if (!column) return;
           columnLabelMap[columnId] = makeUnique(column.label);
         });
       });
@@ -467,13 +468,13 @@ export function getIndexPatternDatasource({
       const operations = flatten(
         Object.values(state.layers ?? {}).map((l) =>
           Object.values(l.columns).map((c) => {
-            if (c.timeShift) {
+            if (c?.timeShift) {
               additionalEvents.time_shift = true;
             }
-            if (c.filter) {
+            if (c?.filter) {
               additionalEvents.filter = true;
             }
-            return c.operationType;
+            return c?.operationType;
           })
         )
       );
@@ -544,7 +545,7 @@ export function getIndexPatternDatasource({
                 ...[column.sourceField].concat(column.params.secondaryFields ?? [])
               );
             }
-            if ('sourceField' in column && column.sourceField !== DOCUMENT_FIELD_NAME) {
+            if (column && 'sourceField' in column && column.sourceField !== DOCUMENT_FIELD_NAME) {
               fieldsPerColumn[visibleColumnId].push(column.sourceField);
             }
           });
@@ -554,10 +555,11 @@ export function getIndexPatternDatasource({
           }));
         },
         getOperationForColumnId: (columnId: string) => {
-          if (layer && layer.columns[columnId]) {
+          const column = layer.columns[columnId];
+          if (layer && column) {
             if (!isReferenced(layer, columnId)) {
               return columnToOperation(
-                layer.columns[columnId],
+                column,
                 columnLabelMap[columnId],
                 state.indexPatterns[layer.indexPatternId]
               );
@@ -576,8 +578,8 @@ export function getIndexPatternDatasource({
           ),
         getVisualDefaults: () => getVisualDefaultsForLayer(layer),
         getMaxPossibleNumValues: (columnId) => {
-          if (layer && layer.columns[columnId]) {
-            const column = layer.columns[columnId];
+          const column = layer.columns[columnId];
+          if (layer && column) {
             return (
               operationDefinitionMap[column.operationType].getMaxPossibleNumValues?.(column) ?? null
             );
@@ -682,7 +684,7 @@ export function getIndexPatternDatasource({
           return (
             Boolean(indexPatterns[layer.indexPatternId]?.timeFieldName) ||
             layer.columnOrder
-              .filter((colId) => layer.columns[colId].isBucketed)
+              .filter((colId) => layer.columns[colId]?.isBucketed)
               .some((colId) => {
                 const column = layer.columns[colId];
                 return (

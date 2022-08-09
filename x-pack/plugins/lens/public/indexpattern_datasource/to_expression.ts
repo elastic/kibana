@@ -60,10 +60,11 @@ function getExpressionForLayer(
   const columns = { ...layer.columns };
   Object.keys(columns).forEach((columnId) => {
     const column = columns[columnId];
-    const rootDef = operationDefinitionMap[column.operationType];
+    const rootDef = column && operationDefinitionMap[column.operationType];
     if (
+      column &&
       'references' in column &&
-      rootDef.filterable &&
+      rootDef?.filterable &&
       rootDef.input === 'fullReference' &&
       column.filter
     ) {
@@ -72,14 +73,17 @@ function getExpressionForLayer(
         const referencedColumn = columns[referenceColumnId];
         const referenceDef = operationDefinitionMap[column.operationType];
         if (referenceDef.filterable) {
-          columns[referenceColumnId] = { ...referencedColumn, filter: column.filter };
+          if (referencedColumn) {
+            columns[referenceColumnId] = { ...referencedColumn, filter: column.filter };
+          }
         }
       });
     }
 
     if (
+      column &&
       'references' in column &&
-      rootDef.shiftable &&
+      rootDef?.shiftable &&
       rootDef.input === 'fullReference' &&
       column.timeShift
     ) {
@@ -88,7 +92,9 @@ function getExpressionForLayer(
         const referencedColumn = columns[referenceColumnId];
         const referenceDef = operationDefinitionMap[column.operationType];
         if (referenceDef.shiftable) {
-          columns[referenceColumnId] = { ...referencedColumn, timeShift: column.timeShift };
+          if (referencedColumn) {
+            columns[referenceColumnId] = { ...referencedColumn, timeShift: column.timeShift };
+          }
         }
       });
     }
@@ -99,10 +105,11 @@ function getExpressionForLayer(
   const [referenceEntries, esAggEntries] = partition(
     columnEntries,
     ([, col]) =>
-      operationDefinitionMap[col.operationType]?.input === 'fullReference' ||
-      operationDefinitionMap[col.operationType]?.input === 'managedReference'
+      col &&
+      (operationDefinitionMap[col.operationType]?.input === 'fullReference' ||
+        operationDefinitionMap[col.operationType]?.input === 'managedReference')
   );
-  const hasDateHistogram = columnEntries.some(([, c]) => c.operationType === 'date_histogram');
+  const hasDateHistogram = columnEntries.some(([, c]) => c?.operationType === 'date_histogram');
 
   if (referenceEntries.length || esAggEntries.length) {
     let aggs: ExpressionAstExpressionBuilder[] = [];
@@ -110,8 +117,8 @@ function getExpressionForLayer(
 
     sortedReferences(referenceEntries).forEach((colId) => {
       const col = columns[colId];
-      const def = operationDefinitionMap[col.operationType];
-      if (def.input === 'fullReference' || def.input === 'managedReference') {
+      const def = col && operationDefinitionMap[col.operationType];
+      if (def && (def.input === 'fullReference' || def.input === 'managedReference')) {
         expressions.push(...def.toExpression(layer, colId, indexPattern));
       }
     });
@@ -120,8 +127,8 @@ function getExpressionForLayer(
     let esAggsIdMap: Record<string, OriginalColumn[]> = {};
     const aggExpressionToEsAggsIdMap: Map<ExpressionAstExpressionBuilder, string> = new Map();
     esAggEntries.forEach(([colId, col], index) => {
-      const def = operationDefinitionMap[col.operationType];
-      if (def.input !== 'fullReference' && def.input !== 'managedReference') {
+      const def = col && operationDefinitionMap[col.operationType];
+      if (def && def.input !== 'fullReference' && def.input !== 'managedReference') {
         const aggId = String(index);
 
         const wrapInFilter = Boolean(def.filterable && col.filter);
@@ -196,10 +203,9 @@ function getExpressionForLayer(
       );
     }
 
-    uniq(esAggEntries.map(([_, column]) => column.operationType)).forEach((type) => {
-      const optimizeAggs = operationDefinitionMap[type].optimizeEsAggs?.bind(
-        operationDefinitionMap[type]
-      );
+    uniq(esAggEntries.map(([_, column]) => column?.operationType)).forEach((type) => {
+      const optimizeAggs =
+        type && operationDefinitionMap[type].optimizeEsAggs?.bind(operationDefinitionMap[type]);
       if (optimizeAggs) {
         const { aggs: newAggs, esAggsIdMap: newIdMap } = optimizeAggs(
           aggs,
@@ -255,8 +261,10 @@ function getExpressionForLayer(
 
     const columnsWithFormatters = columnEntries.filter(
       ([, col]) =>
-        (isColumnOfType<RangeIndexPatternColumn>('range', col) && col.params?.parentFormat) ||
-        (isColumnFormatted(col) && col.params?.format)
+        (col &&
+          isColumnOfType<RangeIndexPatternColumn>('range', col) &&
+          col.params?.parentFormat) ||
+        (col && isColumnFormatted(col) && col.params?.format)
     ) as Array<[string, RangeIndexPatternColumn | FormattedIndexPatternColumn]>;
     const formatterOverrides: ExpressionAstFunction[] = columnsWithFormatters.map(([id, col]) => {
       // TODO: improve the type handling here
@@ -282,13 +290,13 @@ function getExpressionForLayer(
     });
 
     const firstDateHistogramColumn = columnEntries.find(
-      ([, col]) => col.operationType === 'date_histogram'
+      ([, col]) => col?.operationType === 'date_histogram'
     );
 
     const columnsWithTimeScale = firstDateHistogramColumn
       ? columnEntries.filter(
           ([, col]) =>
-            col.timeScale &&
+            col?.timeScale &&
             operationDefinitionMap[col.operationType].timeScalingMode &&
             operationDefinitionMap[col.operationType].timeScalingMode !== 'disabled'
         )
@@ -302,8 +310,8 @@ function getExpressionForLayer(
             dateColumnId: [firstDateHistogramColumn![0]],
             inputColumnId: [id],
             outputColumnId: [id],
-            outputColumnName: [col.label],
-            targetUnit: [col.timeScale!],
+            outputColumnName: [col?.label ?? ''],
+            targetUnit: [col?.timeScale!],
           },
         };
 
@@ -313,7 +321,7 @@ function getExpressionForLayer(
           arguments: {
             format: [''],
             columnId: [id],
-            parentFormat: [JSON.stringify({ id: 'suffix', params: { unit: col.timeScale } })],
+            parentFormat: [JSON.stringify({ id: 'suffix', params: { unit: col?.timeScale } })],
           },
         };
 
@@ -343,6 +351,7 @@ function getExpressionForLayer(
 
     const allDateHistogramFields = Object.values(columns)
       .map((column) =>
+        column &&
         isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', column) &&
         !column.params.ignoreTimeRange
           ? column.sourceField
@@ -384,9 +393,12 @@ function getExpressionForLayer(
 }
 
 // Topologically sorts references so that we can execute them in sequence
-function sortedReferences(columns: Array<readonly [string, GenericIndexPatternColumn]>) {
+function sortedReferences(
+  columns: Array<readonly [string, GenericIndexPatternColumn | undefined]>
+) {
   const allNodes: Record<string, string[]> = {};
   columns.forEach(([id, col]) => {
+    if (!col) return [];
     allNodes[id] = 'references' in col ? col.references : [];
   });
   // remove real metric references

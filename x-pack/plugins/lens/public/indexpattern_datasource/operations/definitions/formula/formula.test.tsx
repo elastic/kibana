@@ -201,7 +201,7 @@ describe('formula', () => {
             ...layer.columns.col1,
             dataType: 'date',
             filter: { language: 'kuery', query: 'ABC: DEF' },
-          },
+          } as GenericIndexPatternColumn,
           layer,
           indexPattern,
         })

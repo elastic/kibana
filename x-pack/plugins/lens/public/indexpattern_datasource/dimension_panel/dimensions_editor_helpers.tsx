@@ -25,8 +25,8 @@ export const nonQuickFunctions = new Set([formulaOperationName, staticValueOpera
 
 export type TemporaryState = typeof quickFunctionsName | typeof staticValueOperationName | 'none';
 
-export function isQuickFunction(operationType: string) {
-  return !nonQuickFunctions.has(operationType);
+export function isQuickFunction(operationType?: string) {
+  return operationType && !nonQuickFunctions.has(operationType);
 }
 
 export function getParamEditor(

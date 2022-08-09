@@ -163,7 +163,7 @@ export const staticValueOperation: OperationDefinition<
     const onChange = useCallback(
       (newValue) => {
         // even if debounced it's triggering for empty string with the previous valid value
-        if (currentColumn.params.value === newValue) {
+        if (!currentColumn || currentColumn.params.value === newValue) {
           return;
         }
         // Because of upstream specific UX flows, we need fresh layer state here
@@ -186,7 +186,7 @@ export const staticValueOperation: OperationDefinition<
           };
         });
       },
-      [columnId, paramEditorUpdater, currentColumn?.params?.value]
+      [columnId, paramEditorUpdater, currentColumn]
     );
 
     // Pick the data from the current activeData (to be used when the current operation is not static_value)

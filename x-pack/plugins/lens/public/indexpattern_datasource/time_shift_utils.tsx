@@ -112,7 +112,7 @@ export function getDateHistogramInterval(
   layerId: string
 ) {
   const dateHistogramColumn = layer.columnOrder.find(
-    (colId) => layer.columns[colId].operationType === 'date_histogram'
+    (colId) => layer.columns[colId]?.operationType === 'date_histogram'
   );
   if (!dateHistogramColumn && !indexPattern.timeFieldName) {
     return { canShift: false, hasDateHistogram: false };
@@ -169,12 +169,12 @@ export function getDisallowedPreviousShiftMessage(
 ): string[] | undefined {
   const currentColumn = layer.columns[columnId];
   const hasPreviousShift =
-    currentColumn.timeShift && parseTimeShift(currentColumn.timeShift) === 'previous';
+    currentColumn?.timeShift && parseTimeShift(currentColumn.timeShift) === 'previous';
   if (!hasPreviousShift) {
     return;
   }
   const hasDateHistogram = Object.values(layer.columns).some(
-    (column) => column.operationType === 'date_histogram'
+    (column) => column?.operationType === 'date_histogram'
   );
   if (!hasDateHistogram) {
     return;
@@ -217,9 +217,9 @@ export function getStateTimeShiftWarningMessages(
     let timeShifts: number[] = [];
     const timeShiftMap: Record<number, string[]> = {};
     Object.entries(layer.columns).forEach(([columnId, column]) => {
-      if (column.isBucketed) return;
+      if (column?.isBucketed) return;
       let duration: number = 0;
-      if (column.timeShift) {
+      if (column?.timeShift) {
         const parsedTimeShift = parseTimeShift(column.timeShift);
         if (parsedTimeShift === 'previous' || parsedTimeShift === 'invalid') {
           return;
@@ -248,9 +248,9 @@ export function getStateTimeShiftWarningMessages(
               id="xpack.lens.indexPattern.timeShiftSmallWarning"
               defaultMessage="{label} uses a time shift of {columnTimeShift} which is smaller than the date histogram interval of {interval}. To prevent mismatched data, use a multiple of {interval} as time shift."
               values={{
-                label: <strong>{layer.columns[columnId].label}</strong>,
+                label: <strong>{layer.columns[columnId]?.label}</strong>,
                 interval: <strong>{dateHistogramIntervalExpression}</strong>,
-                columnTimeShift: <strong>{layer.columns[columnId].timeShift}</strong>,
+                columnTimeShift: <strong>{layer.columns[columnId]?.timeShift}</strong>,
               }}
             />
           );
@@ -263,9 +263,9 @@ export function getStateTimeShiftWarningMessages(
               id="xpack.lens.indexPattern.timeShiftMultipleWarning"
               defaultMessage="{label} uses a time shift of {columnTimeShift} which is not a multiple of the date histogram interval of {interval}. To prevent mismatched data, use a multiple of {interval} as time shift."
               values={{
-                label: <strong>{layer.columns[columnId].label}</strong>,
+                label: <strong>{layer.columns[columnId]?.label}</strong>,
                 interval: <strong>{dateHistogramIntervalExpression}</strong>,
-                columnTimeShift: <strong>{layer.columns[columnId].timeShift!}</strong>,
+                columnTimeShift: <strong>{layer.columns[columnId]?.timeShift!}</strong>,
               }}
             />
           );

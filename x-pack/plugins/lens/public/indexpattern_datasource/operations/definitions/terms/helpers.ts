@@ -94,8 +94,8 @@ export function getDisallowedTermsMessage(
   const hasMultipleShifts =
     uniq(
       Object.values(layer.columns)
-        .filter((col) => operationDefinitionMap[col.operationType].shiftable)
-        .map((col) => col.timeShift || '')
+        .filter((col) => col && operationDefinitionMap[col.operationType].shiftable)
+        .map((col) => col?.timeShift || '')
     ).length > 1;
   if (!hasMultipleShifts) {
     return undefined;
@@ -173,7 +173,7 @@ export function getDisallowedTermsMessage(
                 },
               }),
               customLabel: true,
-              isBucketed: layer.columns[columnId].isBucketed,
+              isBucketed: layer.columns[columnId]?.isBucketed,
               dataType: 'string',
               operationType: 'filters',
               params: {
@@ -226,16 +226,16 @@ export function isPercentileRankSortable(column: GenericIndexPatternColumn) {
 }
 
 export function computeOrderForMultiplePercentiles(
-  column: GenericIndexPatternColumn,
+  column: GenericIndexPatternColumn | undefined,
   layer: IndexPatternLayer,
   orderedColumnIds: string[]
 ) {
   // compute the percentiles orderBy correctly for multiple percentiles
-  if (column.operationType === 'percentile') {
+  if (column?.operationType === 'percentile') {
     const percentileColumns = [];
     for (const [key, value] of Object.entries(layer.columns)) {
       if (
-        value.operationType === 'percentile' &&
+        value?.operationType === 'percentile' &&
         (value as PercentileIndexPatternColumn).sourceField ===
           (column as PercentileIndexPatternColumn).sourceField
       ) {

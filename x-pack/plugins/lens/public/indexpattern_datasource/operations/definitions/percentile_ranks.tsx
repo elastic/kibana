@@ -181,12 +181,16 @@ export const percentileRanksOperation: OperationDefinition<
       });
     const onChange = useCallback(
       (value) => {
-        if (!isValidNumber(value) || Number(value) === currentColumn.params.value) {
+        if (
+          !isValidNumber(value) ||
+          Number(value) === currentColumn?.params.value ||
+          !currentColumn
+        ) {
           return;
         }
         paramEditorUpdater({
           ...currentColumn,
-          label: currentColumn.customLabel
+          label: currentColumn?.customLabel
             ? currentColumn.label
             : ofName(
                 indexPattern.getFieldByName(currentColumn.sourceField)?.displayName ||
@@ -208,7 +212,7 @@ export const percentileRanksOperation: OperationDefinition<
     >(
       {
         onChange,
-        value: String(currentColumn.params.value),
+        value: String(currentColumn?.params.value),
       },
       { allowFalsyValue: true }
     );

@@ -62,9 +62,9 @@ export const timeScaleOperation: OperationDefinition<TimeScaleIndexPatternColumn
     },
     toExpression: (layer, columnId) => {
       const currentColumn = layer.columns[columnId] as unknown as TimeScaleIndexPatternColumn;
-      const buckets = layer.columnOrder.filter((colId) => layer.columns[colId].isBucketed);
+      const buckets = layer.columnOrder.filter((colId) => layer.columns[colId]?.isBucketed);
       const dateColumn = buckets.find(
-        (colId) => layer.columns[colId].operationType === 'date_histogram'
+        (colId) => layer.columns[colId]?.operationType === 'date_histogram'
       )!;
       return [
         {

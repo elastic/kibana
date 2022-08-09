@@ -174,7 +174,7 @@ export interface ParamEditorProps<
   C,
   U = IndexPatternLayer | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
 > {
-  currentColumn: C;
+  currentColumn: C | undefined;
   layer: IndexPatternLayer;
   paramEditorUpdater: (setter: U) => void;
   ReferenceEditor?: (props: ReferenceEditorProps) => JSX.Element | null;
@@ -260,7 +260,7 @@ interface BaseOperationDefinitionProps<
   getDefaultLabel: (
     column: C,
     indexPattern: IndexPattern,
-    columns: Record<string, GenericIndexPatternColumn>
+    columns: Partial<Record<string, GenericIndexPatternColumn>>
   ) => string;
   /**
    * This function is called if another column in the same layer changed or got added/removed.
@@ -292,7 +292,7 @@ interface BaseOperationDefinitionProps<
    * adjust operation specific settings such as reacting to aggregation restrictions
    * present on the new index pattern.
    */
-  transfer?: (column: C, newIndexPattern: IndexPattern) => C;
+  transfer?: (column: C | undefined, newIndexPattern: IndexPattern) => C;
   /**
    * if there is some reason to display the operation in the operations list
    * but disable it from usage, this function returns the string describing

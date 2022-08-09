@@ -399,7 +399,7 @@ export function runASTValidation(
   layer: IndexPatternLayer,
   indexPattern: IndexPattern,
   operations: Record<string, GenericOperationDefinition>,
-  currentColumn: GenericIndexPatternColumn
+  currentColumn?: GenericIndexPatternColumn
 ) {
   return [
     ...checkMissingVariableOrFunctions(ast, layer, indexPattern, operations),

@@ -205,7 +205,8 @@ function createNewTimeseriesLayerWithMetricAggregationFromVizEditor(
       layer.label
     );
     // static values layers do not need a date histogram column
-    if (Object.values(computedLayer.columns)[0].isStaticValue) {
+    const computedLayerColumns = Object.values(computedLayer.columns);
+    if (computedLayerColumns.length && computedLayerColumns[0]?.isStaticValue) {
       return computedLayer;
     }
 
@@ -262,17 +263,17 @@ function getExistingLayerSuggestionsForField(
   const operations = getOperationTypesForField(field);
   const usableAsBucketOperation = getBucketOperation(field);
   const fieldInUse = Object.values(layer.columns).some(
-    (column) => hasField(column) && column.sourceField === field.name
+    (column) => column && hasField(column) && column.sourceField === field.name
   );
   const suggestions: IndexPatternSuggestion[] = [];
 
   if (usableAsBucketOperation && !fieldInUse) {
     if (
       usableAsBucketOperation === 'date_histogram' &&
-      layer.columnOrder.some((colId) => layer.columns[colId].operationType === 'date_histogram')
+      layer.columnOrder.some((colId) => layer.columns[colId]?.operationType === 'date_histogram')
     ) {
       const previousDate = layer.columnOrder.find(
-        (colId) => layer.columns[colId].operationType === 'date_histogram'
+        (colId) => layer.columns[colId]?.operationType === 'date_histogram'
       )!;
       suggestions.push(
         buildSuggestion({
@@ -499,14 +500,14 @@ export function getDatasourceSuggestionsFromCurrentState(
         const [buckets, metrics, references] = getExistingColumnGroups(layer);
         const timeDimension = layer.columnOrder.find(
           (columnId) =>
-            layer.columns[columnId].isBucketed && layer.columns[columnId].dataType === 'date'
+            layer.columns[columnId]?.isBucketed && layer.columns[columnId]?.dataType === 'date'
         );
         const timeField =
           indexPattern?.timeFieldName && indexPattern.getFieldByName(indexPattern.timeFieldName);
 
         const hasNumericDimension =
           buckets.length === 1 &&
-          buckets.some((columnId) => layer.columns[columnId].dataType === 'number');
+          buckets.some((columnId) => layer.columns[columnId]?.dataType === 'number');
 
         const suggestions: Array<DatasourceSuggestion<IndexPatternPrivateState>> = [];
 
@@ -560,12 +561,14 @@ function createChangedNestingSuggestion(state: IndexPatternPrivateState, layerId
   const indexPattern = state.indexPatterns[state.currentIndexPatternId];
   const firstBucketColumn = layer.columns[firstBucket];
   const firstBucketLabel =
-    (hasField(firstBucketColumn) &&
+    (firstBucketColumn &&
+      hasField(firstBucketColumn) &&
       indexPattern.getFieldByName(firstBucketColumn.sourceField)?.displayName) ||
     '';
   const secondBucketColumn = layer.columns[secondBucket];
   const secondBucketLabel =
-    (hasField(secondBucketColumn) &&
+    (secondBucketColumn &&
+      hasField(secondBucketColumn) &&
       indexPattern.getFieldByName(secondBucketColumn.sourceField)?.displayName) ||
     '';
 
@@ -633,6 +636,7 @@ function createAlternativeMetricSuggestions(
 
   topLevelMetricColumns.forEach((columnId) => {
     const column = layer.columns[columnId];
+    if (!column) return;
     if (!hasField(column)) {
       return;
     }
@@ -698,7 +702,7 @@ function createSimplifiedTableSuggestions(state: IndexPatternPrivateState, layer
 
   const [availableBucketedColumns, availableMetricColumns] = partition(
     layer.columnOrder,
-    (colId) => layer.columns[colId].isBucketed
+    (colId) => layer.columns[colId]?.isBucketed
   );
   const topLevelMetricColumns = availableMetricColumns.filter(
     (columnId) => !isReferenced(layer, columnId)
@@ -758,11 +762,14 @@ function createSimplifiedTableSuggestions(state: IndexPatternPrivateState, layer
 }
 
 function getMetricSuggestionTitle(layer: IndexPatternLayer, onlySimpleMetric: boolean) {
-  const { operationType, label } = layer.columns[layer.columnOrder[0]];
+  const column = layer.columns[layer.columnOrder[0]];
   return i18n.translate('xpack.lens.indexpattern.suggestions.overallLabel', {
     defaultMessage: '{operation} overall',
     values: {
-      operation: onlySimpleMetric ? operationDefinitionMap[operationType].displayName : label,
+      operation:
+        onlySimpleMetric && column?.operationType
+          ? operationDefinitionMap[column?.operationType].displayName
+          : column?.label,
     },
     description:
       'Title of a suggested chart containing only a single numerical metric calculated over all available data',

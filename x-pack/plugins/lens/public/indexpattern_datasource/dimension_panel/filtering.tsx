@@ -44,7 +44,7 @@ export function setFilter(columnId: string, layer: IndexPatternLayer, query: Que
         filter: query,
       },
     },
-  };
+  } as IndexPatternLayer;
 }
 
 export function Filtering({

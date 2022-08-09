@@ -75,7 +75,9 @@ function getReferencesErrors(
 ) {
   return column.references?.map((referenceId: string) => {
     const referencedOperation = layer.columns[referenceId]?.operationType;
-    const referencedDefinition = operationDefinitionMap[referencedOperation];
+    const referencedDefinition = referencedOperation
+      ? operationDefinitionMap[referencedOperation]
+      : undefined;
     return referencedDefinition?.getErrorMessage?.(
       layer,
       referenceId,
@@ -419,7 +421,7 @@ function collectFiltersFromMetrics(layer: IndexPatternLayer, columnIds: string[]
   // mind to ignore non-filterable columns and formula columns
   const metricColumns = Object.keys(layer.columns).filter((colId) => {
     const column = layer.columns[colId];
-    const operationDefinition = operationDefinitionMap[column?.operationType];
+    const operationDefinition = column && operationDefinitionMap[column?.operationType];
     return (
       !column?.isBucketed &&
       // global filters for formulas are picked up by referenced columns

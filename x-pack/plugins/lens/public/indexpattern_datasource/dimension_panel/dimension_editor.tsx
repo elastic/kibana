@@ -444,7 +444,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
             });
             if (
               temporaryQuickFunction &&
-              isQuickFunction(newLayer.columns[columnId].operationType)
+              isQuickFunction(newLayer.columns[columnId]?.operationType)
             ) {
               // Only switch the tab once the "non quick function" is fully removed
               setTemporaryState('none');
@@ -479,7 +479,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
             }
             if (
               temporaryQuickFunction &&
-              isQuickFunction(newLayer.columns[columnId].operationType)
+              isQuickFunction(newLayer.columns[columnId]?.operationType)
             ) {
               // Only switch the tab once the "non quick function" is fully removed
               setTemporaryState('none');
@@ -564,7 +564,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
     existingFields: state.existingFields,
     ...services,
   };
-
+  const layer = state.layers[layerId];
+  const currentColumn = layer.columns[columnId];
   const quickFunctions = (
     <>
       <EuiFormRow
@@ -590,7 +591,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
         <>
           {selectedColumn.references.map((referenceId, index) => {
             const validation = selectedOperationDefinition.requiredReferences[index];
-            const layer = state.layers[layerId];
             return (
               <ReferenceEditor
                 operationDefinitionMap={operationDefinitionMap}
@@ -641,11 +641,12 @@ export function DimensionEditor(props: DimensionEditorProps) {
                     | IndexPatternLayer
                     | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
                     | GenericIndexPatternColumn
+                    | undefined
                 ) => {
-                  let newLayer: IndexPatternLayer;
+                  let newLayer: IndexPatternLayer | undefined;
                   if (typeof setter === 'function') {
                     newLayer = setter(layer);
-                  } else if (isColumn(setter)) {
+                  } else if (setter && isColumn(setter)) {
                     newLayer = {
                       ...layer,
                       columns: {
@@ -656,18 +657,23 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   } else {
                     newLayer = setter;
                   }
-                  return updateLayer(adjustColumnReferencesForChangedColumn(newLayer, referenceId));
+                  return newLayer
+                    ? updateLayer(adjustColumnReferencesForChangedColumn(newLayer, referenceId))
+                    : null;
                 }}
                 validation={validation}
                 currentIndexPattern={currentIndexPattern}
                 existingFields={state.existingFields}
                 selectionStyle={selectedOperationDefinition.selectionStyle}
                 dateRange={dateRange}
-                labelAppend={selectedOperationDefinition?.getHelpMessage?.({
-                  data: props.data,
-                  uiSettings: props.uiSettings,
-                  currentColumn: layer.columns[columnId],
-                })}
+                labelAppend={
+                  currentColumn &&
+                  selectedOperationDefinition?.getHelpMessage?.({
+                    data: props.data,
+                    uiSettings: props.uiSettings,
+                    currentColumn,
+                  })
+                }
                 isFullscreen={isFullscreen}
                 toggleFullscreen={toggleFullscreen}
                 setIsCloseable={setIsCloseable}
@@ -698,11 +704,14 @@ export function DimensionEditor(props: DimensionEditorProps) {
           incompleteOperation={incompleteOperation}
           incompleteParams={incompleteParams}
           currentFieldIsInvalid={currentFieldIsInvalid}
-          helpMessage={selectedOperationDefinition?.getHelpMessage?.({
-            data: props.data,
-            uiSettings: props.uiSettings,
-            currentColumn: state.layers[layerId].columns[columnId],
-          })}
+          helpMessage={
+            currentColumn &&
+            selectedOperationDefinition?.getHelpMessage?.({
+              data: props.data,
+              uiSettings: props.uiSettings,
+              currentColumn,
+            })
+          }
           dimensionGroups={dimensionGroups}
           groupId={props.groupId}
           operationDefinitionMap={operationDefinitionMap}
@@ -936,7 +945,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 selectedOperationDefinition.shiftable &&
                   (currentIndexPattern.timeFieldName ||
                     Object.values(state.layers[layerId].columns).some(
-                      (col) => col.operationType === 'date_histogram'
+                      (col) => col?.operationType === 'date_histogram'
                     ))
               ) ? (
                 <TimeShift

@@ -48,11 +48,11 @@ interface GaugeVisualizationDeps {
   theme: ThemeServiceStart;
 }
 
-export const isNumericMetric = (op: OperationMetadata) =>
-  !op.isBucketed && op.dataType === 'number';
+export const isNumericMetric = (op?: OperationMetadata) =>
+  !op?.isBucketed && op?.dataType === 'number';
 
-export const isNumericDynamicMetric = (op: OperationMetadata) =>
-  isNumericMetric(op) && !op.isStaticValue;
+export const isNumericDynamicMetric = (op?: OperationMetadata) =>
+  isNumericMetric(op) && !op?.isStaticValue;
 
 export const CHART_NAMES = {
   horizontalBullet: {

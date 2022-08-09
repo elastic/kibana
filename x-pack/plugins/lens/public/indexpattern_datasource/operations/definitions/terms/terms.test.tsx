@@ -322,7 +322,7 @@ describe('terms', () => {
         },
         'col1',
         {} as IndexPattern,
-        newLayer,
+        newLayer as IndexPatternLayer,
         uiSettingsMock,
         ['col1', 'col2']
       );
@@ -365,7 +365,7 @@ describe('terms', () => {
         },
         'col1',
         {} as IndexPattern,
-        newLayer,
+        newLayer as IndexPatternLayer,
         uiSettingsMock,
         ['col1', 'col2', 'col3']
       );
@@ -2377,7 +2377,7 @@ describe('terms', () => {
             },
           },
         },
-      };
+      } as unknown as IndexPatternLayer;
       const instance = shallow(
         <InlineOptions
           {...defaultProps}
@@ -2441,7 +2441,7 @@ describe('terms', () => {
             },
           },
         },
-      };
+      } as unknown as IndexPatternLayer;
       const instance = mount(
         <InlineOptions
           {...defaultProps}
@@ -2507,7 +2507,7 @@ describe('terms', () => {
             },
           },
         },
-      };
+      } as unknown as IndexPatternLayer;
       const instance = mount(
         <InlineOptions
           {...defaultProps}
@@ -2589,7 +2589,7 @@ describe('terms', () => {
             },
           },
         },
-      };
+      } as unknown as IndexPatternLayer;
       const instance = mount(
         <InlineOptions
           {...defaultProps}

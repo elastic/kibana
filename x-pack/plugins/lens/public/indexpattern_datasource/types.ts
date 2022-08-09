@@ -70,7 +70,7 @@ export type IndexPatternField = FieldSpec & {
 
 export interface IndexPatternLayer {
   columnOrder: string[];
-  columns: Record<string, GenericIndexPatternColumn>;
+  columns: Partial<Record<string, GenericIndexPatternColumn>>;
   // Each layer is tied to the index pattern that created it
   indexPatternId: string;
   // Partial columns represent the temporary invalid states

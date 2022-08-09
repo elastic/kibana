@@ -22,10 +22,10 @@ function nestColumn(columnOrder: string[], outer: string, inner: string) {
 }
 
 function getFieldName(
-  column: GenericIndexPatternColumn,
+  column: GenericIndexPatternColumn | undefined,
   getFieldByName: (name: string) => IndexPatternField | undefined
 ) {
-  return hasField(column)
+  return column && hasField(column)
     ? getFieldByName(column.sourceField)?.displayName || column.sourceField
     : '';
 }
@@ -44,12 +44,12 @@ export function BucketNestingEditor({
   const column = layer.columns[columnId];
   const columns = Object.entries(layer.columns);
   const aggColumns = columns
-    .filter(([id, c]) => id !== columnId && c.isBucketed)
+    .filter(([id, c]) => id !== columnId && c?.isBucketed)
     .map(([value, c]) => ({
       value,
-      text: c.label,
+      text: c?.label,
       fieldName: getFieldName(c, getFieldByName),
-      operationType: c.operationType,
+      operationType: c?.operationType,
     }));
 
   if (!column || !column.isBucketed || !aggColumns.length) {

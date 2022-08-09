@@ -88,8 +88,8 @@ export const IndexPatternDimensionEditorComponent = function IndexPatternDimensi
   }
   const operationSupportMatrix = getOperationSupportMatrix(props);
 
-  const selectedColumn: GenericIndexPatternColumn | null =
-    props.state.layers[layerId].columns[props.columnId] || null;
+  const selectedColumn: GenericIndexPatternColumn | undefined =
+    props.state.layers[layerId].columns[props.columnId] || undefined;
   return (
     <DimensionEditor
       {...props}

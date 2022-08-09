@@ -114,7 +114,7 @@ function createCopiedColumn(
   const sourceColumn = sourceLayer.columns[source.columnId];
   const targetLayer = layers[target.layerId];
   let columns = { ...targetLayer.columns };
-  if ('references' in sourceColumn) {
+  if (sourceColumn && 'references' in sourceColumn) {
     const def = operationDefinitionMap[sourceColumn.operationType];
     if ('createCopy' in def) {
       return def.createCopy(layers, source, target, operationDefinitionMap); // Allow managed references to recursively insert new columns
@@ -135,7 +135,7 @@ function createCopiedColumn(
   } else {
     columns = {
       ...columns,
-      [target.columnId]: { ...sourceColumn },
+      ...(sourceColumn && { [target.columnId]: { ...sourceColumn } }),
     };
   }
 
@@ -200,10 +200,15 @@ export function insertNewColumn({
   if (layer.columns[columnId]) {
     throw new Error(`Can't insert a column with an ID that is already in use`);
   }
+  const previousColumn = {
+    ...incompleteParams,
+    ...initialParams,
+    ...layer.columns[columnId],
+  } as GenericIndexPatternColumn;
 
   const baseOptions = {
     indexPattern,
-    previousColumn: { ...incompleteParams, ...initialParams, ...layer.columns[columnId] },
+    ...(Object.keys(previousColumn).length === 0 && { previousColumn }),
   };
 
   if (operationDefinition.input === 'none' || operationDefinition.input === 'managedReference') {
@@ -448,8 +453,11 @@ export function replaceColumn({
         previousColumn.label !==
           previousDefinition.getDefaultLabel(previousColumn, indexPattern, tempLayer.columns)
       ) {
-        hypotheticalLayer.columns[columnId].customLabel = true;
-        hypotheticalLayer.columns[columnId].label = previousColumn.label;
+        const column = hypotheticalLayer.columns[columnId];
+        if (column) {
+          column.customLabel = true;
+          column.label = previousColumn.label;
+        }
       }
       if (hypotheticalLayer.incompleteColumns && hypotheticalLayer.incompleteColumns[columnId]) {
         return {
@@ -562,6 +570,7 @@ export function replaceColumn({
       const regeneratedColumn = newLayer.columns[columnId];
       if (
         !shouldResetLabel &&
+        regeneratedColumn &&
         regeneratedColumn.operationType !== previousColumn.operationType &&
         previousColumn.customLabel
       ) {
@@ -736,7 +745,7 @@ export function canTransition({
   filterOperations,
   visualizationGroups,
 }: ColumnChange & {
-  filterOperations: (meta: OperationMetadata) => boolean;
+  filterOperations: (meta?: OperationMetadata) => boolean;
 }): boolean {
   const previousColumn = layer.columns[columnId];
   if (!previousColumn) {
@@ -1025,11 +1034,11 @@ function addBucket(
 ): IndexPatternLayer {
   const [buckets, metrics] = partition(
     layer.columnOrder,
-    (colId) => layer.columns[colId].isBucketed
+    (colId) => layer.columns[colId]?.isBucketed
   );
 
   const oldDateHistogramIndex = layer.columnOrder.findIndex(
-    (columnId) => layer.columns[columnId].operationType === 'date_histogram'
+    (columnId) => layer.columns[columnId]?.operationType === 'date_histogram'
   );
 
   let updatedColumnOrder: string[] = [];
@@ -1156,7 +1165,7 @@ export function updateColumnLabel<C extends GenericIndexPatternColumn>({
       ...layer.columns,
       [columnId]: {
         ...oldColumn,
-        label: customLabel ? customLabel : oldColumn.label,
+        label: customLabel ? customLabel : oldColumn?.label,
         customLabel: Boolean(customLabel),
       },
     } as Record<string, GenericIndexPatternColumn>,
@@ -1182,7 +1191,7 @@ export function updateColumnParam({
       [columnId]: {
         ...currentColumn,
         params: {
-          ...('params' in currentColumn ? currentColumn.params : {}),
+          ...(currentColumn && 'params' in currentColumn ? currentColumn.params : {}),
           [paramName]: value,
         },
       },
@@ -1218,8 +1227,9 @@ export function adjustColumnReferencesForChangedColumn(
   Object.keys(newColumns).forEach((currentColumnId) => {
     if (currentColumnId !== changedColumnId) {
       const currentColumn = newColumns[currentColumnId];
-      const operationDefinition = operationDefinitionMap[currentColumn.operationType];
-      newColumns[currentColumnId] = operationDefinition.onOtherColumnChanged
+      const operationDefinition =
+        currentColumn && operationDefinitionMap[currentColumn.operationType];
+      newColumns[currentColumnId] = operationDefinition?.onOtherColumnChanged
         ? operationDefinition.onOtherColumnChanged(
             { ...layer, columns: newColumns },
             currentColumnId
@@ -1303,17 +1313,17 @@ export function getColumnOrder(layer: IndexPatternLayer): string[] {
     }
   });
 
-  const [aggregations, metrics] = partition(entries, ([, col]) => col.isBucketed);
+  const [aggregations, metrics] = partition(entries, ([, col]) => col?.isBucketed);
 
   return aggregations.map(([id]) => id).concat(metrics.map(([id]) => id));
 }
 
 // Splits existing columnOrder into the three categories
 export function getExistingColumnGroups(layer: IndexPatternLayer): [string[], string[], string[]] {
-  const [direct, referenced] = partition(
-    layer.columnOrder,
-    (columnId) => layer.columns[columnId] && !('references' in layer.columns[columnId])
-  );
+  const [direct, referenced] = partition(layer.columnOrder, (columnId) => {
+    const column = layer.columns[columnId];
+    return column && !('references' in column);
+  });
   return [...partition(direct, (columnId) => layer.columns[columnId]?.isBucketed), referenced];
 }
 
@@ -1321,10 +1331,11 @@ export function getExistingColumnGroups(layer: IndexPatternLayer): [string[], st
  * Returns true if the given column can be applied to the given index pattern
  */
 export function isColumnTransferable(
-  column: GenericIndexPatternColumn,
+  column: GenericIndexPatternColumn | undefined,
   newIndexPattern: IndexPattern,
   layer: IndexPatternLayer
 ): boolean {
+  if (!column) return false;
   return (
     operationDefinitionMap[column.operationType].isTransferable(
       column,
@@ -1346,8 +1357,8 @@ export function updateLayerIndexPattern(
     return isColumnTransferable(column, newIndexPattern, layer);
   });
   const newColumns: IndexPatternLayer['columns'] = mapValues(keptColumns, (column) => {
-    const operationDefinition = operationDefinitionMap[column.operationType];
-    return operationDefinition.transfer
+    const operationDefinition = column && operationDefinitionMap[column.operationType];
+    return operationDefinition?.transfer
       ? operationDefinition.transfer(column, newIndexPattern)
       : column;
   });
@@ -1389,6 +1400,7 @@ export function getErrorMessages(
   const visibleManagedReferences = columns.filter(
     ([columnId, column]) =>
       !isReferenced(layer, columnId) &&
+      column &&
       operationDefinitionMap[column.operationType].input === 'managedReference'
   );
   const skippedColumns = visibleManagedReferences.flatMap(([columnId]) =>
@@ -1399,8 +1411,8 @@ export function getErrorMessages(
       if (skippedColumns.includes(columnId)) {
         return;
       }
-      const def = operationDefinitionMap[column.operationType];
-      if (def.getErrorMessage) {
+      const def = column && operationDefinitionMap[column.operationType];
+      if (def?.getErrorMessage) {
         return def.getErrorMessage(layer, columnId, indexPattern, operationDefinitionMap);
       }
     })
@@ -1438,7 +1450,7 @@ export function getErrorMessages(
 
 export function isReferenced(layer: IndexPatternLayer, columnId: string): boolean {
   const allReferences = Object.values(layer.columns).flatMap((col) =>
-    'references' in col ? col.references : []
+    col && 'references' in col ? col.references : []
   );
   return allReferences.includes(columnId);
 }
@@ -1447,7 +1459,7 @@ const computeReferenceLookup = memoizeOne((layer: IndexPatternLayer): Record<str
   // speed up things for deep chains as in formula
   const refLookup: Record<string, string> = {};
   for (const [parentId, col] of Object.entries(layer.columns)) {
-    if ('references' in col) {
+    if (col && 'references' in col) {
       for (const colId of col.references) {
         refLookup[colId] = parentId;
       }
@@ -1543,7 +1555,7 @@ export function updateDefaultLabels(
   const copiedColumns = { ...layer.columns };
   layer.columnOrder.forEach((id) => {
     const col = copiedColumns[id];
-    if (!col.customLabel) {
+    if (col && !col.customLabel) {
       copiedColumns[id] = {
         ...col,
         label: operationDefinitionMap[col.operationType].getDefaultLabel(
@@ -1584,7 +1596,7 @@ export function isColumnValidAsReference({
   column,
   validation,
 }: {
-  column: GenericIndexPatternColumn;
+  column: GenericIndexPatternColumn | undefined;
   validation: RequiredReference;
 }): boolean {
   if (!column) return false;
@@ -1609,10 +1621,11 @@ export function isColumnValidAsReference({
 
 export function getManagedColumnsFrom(
   columnId: string,
-  columns: Record<string, GenericIndexPatternColumn>
+  columns: Partial<Record<string, GenericIndexPatternColumn>>
 ): Array<[string, GenericIndexPatternColumn]> {
   const allNodes: Record<string, string[]> = {};
   Object.entries(columns).forEach(([id, col]) => {
+    if (!col) return [];
     allNodes[id] = 'references' in col ? [...col.references] : [];
   });
   const queue: string[] = allNodes[columnId];
@@ -1620,8 +1633,11 @@ export function getManagedColumnsFrom(
 
   while (queue.length > 0) {
     const nextId = queue.shift()!;
-    store.push([nextId, columns[nextId]]);
-    queue.push(...allNodes[nextId]);
+    const column = columns[nextId];
+    if (column) {
+      store.push([nextId, column]);
+      queue.push(...allNodes[nextId]);
+    }
   }
   return store.filter(([, column]) => column);
 }
@@ -1719,7 +1735,7 @@ export function computeLayerFromContext(
     }
 
     // for percentiles I want to update all columns with the custom label
-    if (customLabel && column.operationType === 'percentile') {
+    if (column && customLabel && column.operationType === 'percentile') {
       layer = updateColumnLabel({
         layer,
         columnId,

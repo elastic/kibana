@@ -55,11 +55,11 @@ export function getColumnWindowError(
   indexPattern: IndexPattern
 ): string[] | undefined {
   const currentColumn = layer.columns[columnId];
-  if (!currentColumn.window) {
+  if (!currentColumn?.window) {
     return;
   }
   const hasDateHistogram = Object.values(layer.columns).some(
-    (column) => column.operationType === 'date_histogram'
+    (column) => column?.operationType === 'date_histogram'
   );
   const hasTimeField = Boolean(indexPattern.timeFieldName);
   return [

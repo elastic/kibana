@@ -176,14 +176,14 @@ function buildMetricOperation<T extends MetricColumn<string>>({
                   fontWeight: euiThemeVars.euiFontWeightMedium,
                 },
               }}
-              checked={Boolean(currentColumn.params?.emptyAsNull)}
+              checked={Boolean(currentColumn?.params?.emptyAsNull)}
               onChange={() => {
                 paramEditorUpdater(
                   updateColumnParam({
                     layer,
                     columnId,
                     paramName: 'emptyAsNull',
-                    value: !currentColumn.params?.emptyAsNull,
+                    value: !currentColumn?.params?.emptyAsNull,
                   })
                 );
               }}

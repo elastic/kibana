@@ -258,9 +258,10 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
 
     if (column.params?.orderBy.type === 'column') {
       const orderColumn = layer.columns[column.params.orderBy.columnId];
+
       orderBy = String(orderedColumnIds.indexOf(column.params.orderBy.columnId));
       // percentile rank with non integer value should default to alphabetical order
-      if (!isPercentileRankSortable(orderColumn)) {
+      if (!orderColumn || !isPercentileRankSortable(orderColumn)) {
         orderBy = '_key';
       }
 
@@ -570,6 +571,9 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     const [incompleteColumn, setIncompleteColumn] = useState<IncompleteColumn | undefined>(
       undefined
     );
+    const { euiTheme } = useEuiTheme();
+
+    if (!currentColumn) return null;
 
     const hasRestrictions = indexPattern.hasRestrictions;
 
@@ -603,7 +607,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       .map(([sortId, column]) => {
         return {
           value: toValue({ type: 'column', columnId: sortId }),
-          text: column.label,
+          text: column?.label,
         };
       });
     orderOptions.push({
@@ -613,6 +617,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       }),
     });
     if (
+      currentColumn &&
       !currentColumn.params.secondaryFields?.length &&
       supportsRarityRanking(indexPattern.getFieldByName(currentColumn.sourceField))
     ) {
@@ -630,11 +635,10 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       }),
     });
 
-    const secondaryFieldsCount = currentColumn.params.secondaryFields
-      ? currentColumn.params.secondaryFields.length
-      : 0;
-
-    const { euiTheme } = useEuiTheme();
+    const secondaryFieldsCount =
+      currentColumn && currentColumn.params.secondaryFields
+        ? currentColumn.params.secondaryFields.length
+        : 0;
 
     return (
       <>

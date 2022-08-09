@@ -52,13 +52,13 @@ export interface DateHistogramIndexPatternColumn extends FieldBasedIndexPatternC
 
 function getMultipleDateHistogramsErrorMessage(layer: IndexPatternLayer, columnId: string) {
   const usesTimeShift = Object.values(layer.columns).some(
-    (col) => col.timeShift && col.timeShift !== ''
+    (col) => col && col.timeShift && col.timeShift !== ''
   );
   if (!usesTimeShift) {
     return undefined;
   }
   const dateHistograms = layer.columnOrder.filter(
-    (colId) => layer.columns[colId].operationType === 'date_histogram'
+    (colId) => layer.columns[colId]?.operationType === 'date_histogram'
   );
   if (dateHistograms.length < 2) {
     return undefined;
@@ -67,7 +67,7 @@ function getMultipleDateHistogramsErrorMessage(layer: IndexPatternLayer, columnI
     defaultMessage:
       '"{dimensionLabel}" is not the only date histogram. When using time shifts, make sure to only use one date histogram.',
     values: {
-      dimensionLabel: layer.columns[columnId].label,
+      dimensionLabel: layer.columns[columnId]?.label,
     },
   });
 }
@@ -182,16 +182,22 @@ export const dateHistogramOperation: OperationDefinition<
     const intervalIsRestricted =
       field!.aggregationRestrictions && field!.aggregationRestrictions.date_histogram;
 
-    const [intervalInput, setIntervalInput] = useState(currentColumn.params.interval);
-    const interval = intervalInput === autoInterval ? autoInterval : parseInterval(intervalInput);
+    const [intervalInput, setIntervalInput] = useState(currentColumn?.params.interval);
+    const interval =
+      intervalInput === autoInterval
+        ? autoInterval
+        : intervalInput
+        ? parseInterval(intervalInput)
+        : undefined;
 
     // We force the interval value to 1 if it's empty, since that is the ES behavior,
     // and the isValidInterval function doesn't handle the empty case properly. Fixing
     // isValidInterval involves breaking changes in other areas.
     const isValid =
-      (!currentColumn.params.ignoreTimeRange && intervalInput === autoInterval) ||
+      (!currentColumn?.params.ignoreTimeRange && intervalInput === autoInterval) ||
       (interval !== autoInterval &&
         intervalInput !== '' &&
+        interval &&
         isValidInterval(
           `${interval.value === '' ? '1' : interval.value}${interval.unit}`,
           restrictedInterval(field!.aggregationRestrictions)
@@ -217,11 +223,13 @@ export const dateHistogramOperation: OperationDefinition<
     const setInterval = useCallback(
       (newInterval: typeof interval) => {
         const isCalendarInterval =
-          newInterval !== autoInterval && calendarOnlyIntervals.has(newInterval.unit);
+          newInterval &&
+          newInterval !== autoInterval &&
+          calendarOnlyIntervals.has(newInterval.unit);
         const value =
           newInterval === autoInterval
             ? autoInterval
-            : `${isCalendarInterval ? '1' : newInterval.value}${newInterval.unit || 'd'}`;
+            : `${isCalendarInterval ? '1' : newInterval?.value}${newInterval?.unit || 'd'}`;
 
         paramEditorUpdater((newLayer) =>
           updateColumnParam({ layer: newLayer, columnId, paramName: 'interval', value })
@@ -253,16 +261,21 @@ export const dateHistogramOperation: OperationDefinition<
     const definedOption = options.find((o) => o.key === intervalInput);
     const selectedOptions = definedOption
       ? [definedOption]
-      : [{ label: intervalInput, key: intervalInput }];
+      : [{ label: intervalInput ?? '', key: intervalInput ?? '' }];
 
     useEffect(() => {
-      if (isValid && intervalInput !== currentColumn.params.interval) {
+      if (
+        isValid &&
+        currentColumn &&
+        intervalInput &&
+        intervalInput !== currentColumn.params.interval
+      ) {
         setInterval(parseInterval(intervalInput));
       }
-    }, [intervalInput, isValid, currentColumn.params.interval, setInterval]);
+    }, [intervalInput, isValid, setInterval, currentColumn]);
 
     const bindToGlobalTimePickerValue =
-      indexPattern.timeFieldName === field?.name || !currentColumn.params.ignoreTimeRange;
+      indexPattern.timeFieldName === field?.name || !currentColumn?.params.ignoreTimeRange;
 
     return (
       <>
@@ -276,7 +289,7 @@ export const dateHistogramOperation: OperationDefinition<
                 })}
               </EuiText>
             }
-            checked={Boolean(currentColumn.params.includeEmptyRows)}
+            checked={Boolean(currentColumn?.params.includeEmptyRows)}
             data-test-subj="indexPattern-include-empty-rows"
             onChange={() => {
               paramEditorUpdater(
@@ -284,7 +297,7 @@ export const dateHistogramOperation: OperationDefinition<
                   layer,
                   columnId,
                   paramName: 'includeEmptyRows',
-                  value: !currentColumn.params.includeEmptyRows,
+                  value: !currentColumn?.params.includeEmptyRows,
                 })
               );
             }}
@@ -329,11 +342,11 @@ export const dateHistogramOperation: OperationDefinition<
                     layer,
                     columnId,
                     paramName: 'ignoreTimeRange',
-                    value: !currentColumn.params.ignoreTimeRange,
+                    value: !currentColumn?.params.ignoreTimeRange,
                   });
                   if (
-                    !currentColumn.params.ignoreTimeRange &&
-                    currentColumn.params.interval === autoInterval
+                    !currentColumn?.params.ignoreTimeRange &&
+                    currentColumn?.params.interval === autoInterval
                   ) {
                     const newFixedInterval =
                       data.search.aggs.calculateAutoTimeExpression({
@@ -401,7 +414,7 @@ export const dateHistogramOperation: OperationDefinition<
               onChange={(opts) => {
                 const newValue = opts.length ? opts[0].key! : '';
                 setIntervalInput(newValue);
-                if (newValue === autoInterval && currentColumn.params.ignoreTimeRange) {
+                if (newValue === autoInterval && currentColumn?.params.ignoreTimeRange) {
                   paramEditorUpdater(
                     updateColumnParam({
                       layer,
@@ -446,7 +459,7 @@ export const dateHistogramOperation: OperationDefinition<
                 </EuiText>
               }
               data-test-subj="lensDropPartialIntervals"
-              checked={Boolean(currentColumn.params.dropPartials)}
+              checked={Boolean(currentColumn?.params.dropPartials)}
               onChange={onChangeDropPartialBuckets}
               compressed
               disabled={!bindToGlobalTimePickerValue}

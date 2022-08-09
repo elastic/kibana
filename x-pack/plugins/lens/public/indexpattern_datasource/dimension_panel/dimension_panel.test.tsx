@@ -417,7 +417,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             sourceField: 'source,',
           },
         })}
-        filterOperations={(meta) => meta.dataType === 'number' && !meta.isBucketed}
+        filterOperations={(meta) => meta?.dataType === 'number' && !meta.isBucketed}
       />
     );
 
@@ -1913,7 +1913,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
     wrapper = mount(
       <IndexPatternDimensionEditorComponent
         {...defaultProps}
-        filterOperations={(op: OperationMetadata) => !op.isBucketed && op.dataType === 'number'}
+        filterOperations={(op?: OperationMetadata) => !op?.isBucketed && op?.dataType === 'number'}
       />
     );
 

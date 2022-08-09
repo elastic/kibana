@@ -185,6 +185,7 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
     uiSettings,
     data,
   }) => {
+    if (!currentColumn) return null;
     const currentField = indexPattern.getFieldByName(currentColumn.sourceField);
     const numberFormat = currentColumn.params.format;
     const numberFormatterPattern =

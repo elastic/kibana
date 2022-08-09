@@ -55,7 +55,10 @@ describe('time_shift_utils', () => {
         getDisallowedPreviousShiftMessage(
           {
             ...layer,
-            columns: { ...layer.columns, c: { ...layer.columns.c, timeShift: 'previous' } },
+            columns: {
+              ...layer.columns,
+              c: { ...layer.columns.c, timeShift: 'previous' },
+            } as IndexPatternLayer['columns'],
           },
           'c'
         )
@@ -71,7 +74,7 @@ describe('time_shift_utils', () => {
               ...layer.columns,
               a: { ...layer.columns.a, operationType: 'terms' },
               c: { ...layer.columns.c, timeShift: 'previous' },
-            },
+            } as IndexPatternLayer['columns'],
           },
           'c'
         )

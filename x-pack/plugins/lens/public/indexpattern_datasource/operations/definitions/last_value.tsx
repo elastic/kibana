@@ -62,8 +62,11 @@ const supportedTypes = new Set([
   'date_range',
 ]);
 
-export function getInvalidSortFieldMessage(sortField: string, indexPattern?: IndexPattern) {
-  if (!indexPattern) {
+export function getInvalidSortFieldMessage(
+  sortField: string | undefined,
+  indexPattern?: IndexPattern
+) {
+  if (!indexPattern || !sortField) {
     return;
   }
   const field = indexPattern.getFieldByName(sortField);
@@ -283,19 +286,19 @@ export const lastValueOperation: OperationDefinition<
 
     const dateFields = getDateFields(indexPattern);
     const isSortFieldInvalid = !!getInvalidSortFieldMessage(
-      currentColumn.params.sortField,
+      currentColumn?.params.sortField,
       indexPattern
     );
 
     const usingTopValues = Object.keys(layer.columns).some(
-      (_columnId) => layer.columns[_columnId].operationType === 'terms'
+      (_columnId) => layer.columns[_columnId]?.operationType === 'terms'
     );
 
     const setShowArrayValues = (use: boolean) => {
       return paramEditorUpdater({
         ...currentColumn,
         params: {
-          ...currentColumn.params,
+          ...currentColumn?.params,
           showArrayValues: use,
         },
       } as LastValueIndexPatternColumn);
@@ -312,7 +315,7 @@ export const lastValueOperation: OperationDefinition<
                   'When you show array values, you are unable to use this field to rank top values.',
               }
             )}
-            isInvalid={currentColumn.params.showArrayValues && usingTopValues}
+            isInvalid={currentColumn?.params.showArrayValues && usingTopValues}
             display="rowCompressed"
             fullWidth
             data-test-subj="lns-indexPattern-lastValue-showArrayValues"
@@ -336,9 +339,9 @@ export const lastValueOperation: OperationDefinition<
                   </EuiText>
                 }
                 compressed={true}
-                checked={Boolean(currentColumn.params.showArrayValues)}
-                disabled={isScriptedField(currentColumn.sourceField, indexPattern)}
-                onChange={() => setShowArrayValues(!currentColumn.params.showArrayValues)}
+                checked={Boolean(currentColumn?.params.showArrayValues)}
+                disabled={currentColumn && isScriptedField(currentColumn.sourceField, indexPattern)}
+                onChange={() => setShowArrayValues(!currentColumn?.params.showArrayValues)}
               />
             </EuiToolTip>
           </EuiFormRow>
@@ -377,13 +380,13 @@ export const lastValueOperation: OperationDefinition<
               return paramEditorUpdater({
                 ...currentColumn,
                 params: {
-                  ...currentColumn.params,
+                  ...currentColumn?.params,
                   sortField: choices[0].value,
                 },
               } as LastValueIndexPatternColumn);
             }}
             selectedOptions={
-              (currentColumn.params?.sortField
+              (currentColumn?.params?.sortField
                 ? [
                     {
                       label:

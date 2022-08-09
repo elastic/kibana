@@ -177,7 +177,7 @@ function MovingAverageParamEditor({
   currentColumn,
   columnId,
 }: ParamEditorProps<MovingAverageIndexPatternColumn>) {
-  const [inputValue, setInputValue] = useState(String(currentColumn.params.window));
+  const [inputValue, setInputValue] = useState(String(currentColumn?.params.window));
 
   useDebounceWithOptions(
     () => {

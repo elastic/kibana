@@ -31,16 +31,16 @@ export function setTimeScaling(
   timeScale: TimeScaleUnit | undefined
 ) {
   const currentColumn = layer.columns[columnId];
-  const label = currentColumn.customLabel
+  const label = currentColumn?.customLabel
     ? currentColumn.label
     : adjustTimeScaleLabelSuffix(
-        currentColumn.label,
-        currentColumn.timeScale,
+        currentColumn?.label ?? '',
+        currentColumn?.timeScale,
         timeScale,
-        currentColumn.timeShift,
-        currentColumn.timeShift,
-        currentColumn.window,
-        currentColumn.window
+        currentColumn?.timeShift,
+        currentColumn?.timeShift,
+        currentColumn?.window,
+        currentColumn?.window
       );
   return {
     ...layer,
@@ -52,7 +52,7 @@ export function setTimeScaling(
         timeScale,
       },
     },
-  };
+  } as IndexPatternLayer;
 }
 
 export function TimeScaling({
@@ -67,7 +67,7 @@ export function TimeScaling({
   updateLayer: (newLayer: IndexPatternLayer) => void;
 }) {
   const hasDateHistogram = layer.columnOrder.some(
-    (colId) => layer.columns[colId].operationType === 'date_histogram'
+    (colId) => layer.columns[colId]?.operationType === 'date_histogram'
   );
   const selectedOperation = operationDefinitionMap[selectedColumn.operationType];
   if (

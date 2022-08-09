@@ -103,7 +103,7 @@ export function FormulaEditor({
   dateHistogramInterval: ReturnType<typeof getDateHistogramInterval>;
   hasData: boolean;
 }) {
-  const [text, setText] = useState(currentColumn.params.formula);
+  const [text, setText] = useState(currentColumn?.params.formula ?? '');
   const [warnings, setWarnings] = useState<
     Array<{ severity: monaco.MarkerSeverity; message: string }>
   >([]);
@@ -156,7 +156,7 @@ export function FormulaEditor({
   useUnmount(() => {
     setIsCloseable(true);
     // If the text is not synced, update the column.
-    if (text !== currentColumn.params.formula) {
+    if (currentColumn && text !== currentColumn.params.formula) {
       paramEditorUpdater(
         (prevLayer) =>
           insertOrReplaceFormulaColumn(
@@ -185,7 +185,7 @@ export function FormulaEditor({
       if (!text) {
         setWarnings([]);
         monaco.editor.setModelMarkers(editorModel.current, 'LENS', []);
-        if (currentColumn.params.formula) {
+        if (currentColumn && currentColumn.params.formula) {
           // Only submit if valid
           paramEditorUpdater(
             insertOrReplaceFormulaColumn(
@@ -229,13 +229,13 @@ export function FormulaEditor({
 
       if (errors.length) {
         // Replace the previous error with the new one
-        const previousFormulaWasBroken = currentColumn.params.isFormulaBroken;
+        const previousFormulaWasBroken = currentColumn?.params.isFormulaBroken;
         // If the user is changing a previous formula and there are currently no result
         // show the most up-to-date state with the error message.
-        const previousFormulaWasOkButNoData = !currentColumn.params.isFormulaBroken && !hasData;
+        const previousFormulaWasOkButNoData = !currentColumn?.params.isFormulaBroken && !hasData;
         if (previousFormulaWasBroken || previousFormulaWasOkButNoData) {
           // If the formula is already broken, show the latest error message in the workspace
-          if (currentColumn.params.formula !== text) {
+          if (currentColumn && currentColumn.params.formula !== text) {
             paramEditorUpdater(
               insertOrReplaceFormulaColumn(
                 columnId,
@@ -297,7 +297,7 @@ export function FormulaEditor({
         setWarnings(markers.map(({ severity, message }) => ({ severity, message })));
       } else {
         monaco.editor.setModelMarkers(editorModel.current, 'LENS', []);
-
+        if (!currentColumn) return;
         // Only submit if valid
         const {
           layer: newLayer,
@@ -372,7 +372,7 @@ export function FormulaEditor({
     // from a previous edit
     { skipFirstRender: false },
     256,
-    [text, currentColumn.filter]
+    [text, currentColumn?.filter]
   );
 
   const errorCount = warnings.filter(

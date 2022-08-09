@@ -148,7 +148,8 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'n
   },
 
   paramEditor: ({ layer, columnId, currentColumn, indexPattern, paramEditorUpdater }) => {
-    const filters = currentColumn.params.filters;
+    const filters = currentColumn?.params.filters;
+    if (!filters) return null;
 
     const setFilters = (newFilters: Filter[]) =>
       paramEditorUpdater(
