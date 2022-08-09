@@ -118,7 +118,7 @@ const IndexPatternsFormComponent = ({
     const payload = {
       value: data.index,
       type: data.overwrite ? BulkActionEditType.set_index_patterns : editAction,
-      overwrite_data_views: data.overwriteDataViews,
+      overwriteDataViews: data.overwriteDataViews,
     };
 
     onConfirm(payload);
