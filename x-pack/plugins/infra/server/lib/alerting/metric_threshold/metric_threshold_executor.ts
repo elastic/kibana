@@ -327,8 +327,8 @@ const formatAlertResult = <AlertResult>(
   const thresholdToFormat = useWarningThreshold ? warningThreshold! : threshold;
   const comparatorToUse = useWarningThreshold ? warningComparator! : comparator;
 
-  if (!metric.endsWith('.pct')) {
-    const formatter = createFormatter('highPrecision');
+  if (metric.endsWith('.pct')) {
+    const formatter = createFormatter('percent');
     return {
       ...alertResult,
       currentValue:
@@ -340,7 +340,7 @@ const formatAlertResult = <AlertResult>(
     };
   }
 
-  const formatter = createFormatter('percent');
+  const formatter = createFormatter('highPrecision');
   return {
     ...alertResult,
     currentValue:
