@@ -100,6 +100,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
   } = props;
   const services = {
     data: props.data,
+    fieldFormats: props.fieldFormats,
     uiSettings: props.uiSettings,
     savedObjectsClient: props.savedObjectsClient,
     http: props.http,

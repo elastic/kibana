@@ -6,13 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
-import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
+import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+
 import { EditorController, TSVB_EDITOR_NAME } from './application/editor_controller';
 
 import { createMetricsFn } from './metrics_fn';
@@ -38,6 +40,7 @@ export interface MetricsPluginSetupDependencies {
 /** @internal */
 export interface MetricsPluginStartDependencies {
   data: DataPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
   dataViews: DataViewsPublicPluginStart;
   charts: ChartsPluginStart;
   usageCollection?: UsageCollectionStart;
@@ -66,11 +69,11 @@ export class MetricsPlugin implements Plugin<void, void> {
 
   public start(
     core: CoreStart,
-    { data, charts, dataViews, usageCollection }: MetricsPluginStartDependencies
+    { data, charts, dataViews, usageCollection, fieldFormats }: MetricsPluginStartDependencies
   ) {
     setCharts(charts);
     setI18n(core.i18n);
-    setFieldFormats(data.fieldFormats);
+    setFieldFormats(fieldFormats);
     setDataStart(data);
     setDataViewsStart(dataViews);
     setCoreStart(core);

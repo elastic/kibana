@@ -10,6 +10,7 @@ import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/c
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DatasourceDimensionTriggerProps, DatasourceDimensionEditorProps } from '../../types';
 import { GenericIndexPatternColumn } from '../indexpattern';
@@ -33,6 +34,7 @@ export type IndexPatternDimensionEditorProps =
     layerId: string;
     http: HttpSetup;
     data: DataPublicPluginStart;
+    fieldFormats: FieldFormatsStart;
     unifiedSearch: UnifiedSearchPublicPluginStart;
     dataViews: DataViewsPublicPluginStart;
     uniqueLabel: string;

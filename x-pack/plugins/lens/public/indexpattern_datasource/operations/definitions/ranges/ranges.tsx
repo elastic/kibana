@@ -183,7 +183,7 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
     paramEditorUpdater,
     indexPattern,
     uiSettings,
-    data,
+    fieldFormats,
   }) => {
     const currentField = indexPattern.getFieldByName(currentColumn.sourceField);
     const numberFormat = currentColumn.params.format;
@@ -192,7 +192,7 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
       supportedFormats[numberFormat.id] &&
       supportedFormats[numberFormat.id].decimalsToPattern(numberFormat.params?.decimals || 0);
 
-    const rangeFormatter = data.fieldFormats.deserialize({
+    const rangeFormatter = fieldFormats.deserialize({
       ...(currentColumn.params.parentFormat || { id: 'range' }),
       params: {
         ...currentColumn.params.parentFormat?.params,
