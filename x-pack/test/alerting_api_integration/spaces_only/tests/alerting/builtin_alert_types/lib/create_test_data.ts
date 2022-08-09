@@ -21,7 +21,8 @@ export async function createEsDocuments(
   endDate: string = END_DATE,
   intervals: number = 1,
   intervalMillis: number = 1000,
-  groups: number = 2
+  groups: number = 2,
+  indexName: string = ES_TEST_INDEX_NAME
 ) {
   const endDateMillis = Date.parse(endDate) - intervalMillis / 2;
 
@@ -32,7 +33,7 @@ export async function createEsDocuments(
 
     // don't need await on these, wait at the end of the function
     times(groups, () => {
-      promises.push(createEsDocument(es, date, testedValue++));
+      promises.push(createEsDocument(es, date, testedValue++, indexName));
     });
   });
   await Promise.all(promises);
@@ -41,23 +42,71 @@ export async function createEsDocuments(
   await esTestIndexTool.waitForDocs(DOCUMENT_SOURCE, DOCUMENT_REFERENCE, totalDocuments);
 }
 
-async function createEsDocument(es: Client, epochMillis: number, testedValue: number) {
+async function createEsDocument(
+  es: Client,
+  epochMillis: number,
+  testedValue: number,
+  indexName: string
+) {
   const document = {
     source: DOCUMENT_SOURCE,
     reference: DOCUMENT_REFERENCE,
     date: new Date(epochMillis).toISOString(),
     date_epoch_millis: epochMillis,
     testedValue,
+    '@timestamp': new Date(epochMillis).toISOString(),
   };
 
   const response = await es.index({
     id: uuid(),
-    index: ES_TEST_INDEX_NAME,
+    index: indexName,
     refresh: 'wait_for',
+    op_type: 'create',
     body: document,
   });
 
   if (response.result !== 'created') {
     throw new Error(`document not created: ${JSON.stringify(response)}`);
   }
+}
+
+export async function createDataStream(es: Client, name: string) {
+  // A data stream requires an index template before it can be created.
+  await es.indices.putIndexTemplate({
+    name,
+    body: {
+      index_patterns: [name + '*'],
+      template: {
+        mappings: {
+          properties: {
+            '@timestamp': {
+              type: 'date',
+            },
+            source: {
+              type: 'keyword',
+            },
+            reference: {
+              type: 'keyword',
+            },
+            params: {
+              enabled: false,
+              type: 'object',
+            },
+          },
+        },
+      },
+      data_stream: {},
+    },
+  });
+
+  await es.indices.createDataStream({ name });
+}
+
+async function deleteComposableIndexTemplate(es: Client, name: string) {
+  await es.indices.deleteIndexTemplate({ name });
+}
+
+export async function deleteDataStream(es: Client, name: string) {
+  await es.indices.deleteDataStream({ name });
+  await deleteComposableIndexTemplate(es, name);
 }
