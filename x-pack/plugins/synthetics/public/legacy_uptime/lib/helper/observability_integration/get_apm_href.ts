@@ -14,13 +14,20 @@ export const getLegacyApmHref = (
   dateRangeStart: string,
   dateRangeEnd: string
 ) => {
-  const clause = summary?.state?.service?.name
-    ? `service.name: "${summary.state.service.name}"`
-    : `url.domain: "${summary.state.url?.domain}"`;
+  const serviceName = summary?.state?.service?.name;
+
+  if (serviceName) {
+    return addBasePath(
+      basePath,
+      `/app/apm/services/${serviceName}/overview/?rangeFrom=${dateRangeStart}&rangeTo=${dateRangeEnd}`
+    );
+  }
+
+  const clause = `url.domain: "${summary.state.url?.domain}"`;
 
   return addBasePath(
     basePath,
-    `/app/apm#/services?kuery=${encodeURI(
+    `/app/apm/services?kuery=${encodeURI(
       clause
     )}&rangeFrom=${dateRangeStart}&rangeTo=${dateRangeEnd}`
   );
