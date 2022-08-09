@@ -32,6 +32,8 @@ export const ADVANCED_FLEET_SERVER_ADD_HOST_BUTTON = 'fleetServerAddHostBtn';
 export const ADVANCED_FLEET_SERVER_GENERATE_SERVICE_TOKEN_BUTTON =
   'fleetServerGenerateServiceTokenBtn';
 export const AGENT_POLICIES_CREATE_AGENT_POLICY_BUTTON = 'createAgentPolicyButton';
+export const AGENT_POLICIES_CREATE_AGENT_POLICY_FLYOUT_TITLE = 'createAgentPolicyFlyoutTitle'
+export const AGENT_POLICY_CREATE_AGENT_POLICY_NAME_FIELD = 'createAgentPolicyNameField'
 
 export const AGENT_BINARY_SOURCES_TABLE = 'AgentDownloadSourcesTable';
 export const AGENT_BINARY_SOURCES_TABLE_ACTIONS = {
