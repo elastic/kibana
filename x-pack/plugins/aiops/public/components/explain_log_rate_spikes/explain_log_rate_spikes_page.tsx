@@ -171,7 +171,7 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
   }
 
   return (
-    <EuiPageBody data-test-subj="aiopsIndexPage" paddingSize="none" panelled={false}>
+    <EuiPageBody data-test-subj="aiopsExplainLogRateSpikesPage" paddingSize="none" panelled={false}>
       <EuiFlexGroup gutterSize="none">
         <EuiFlexItem>
           <EuiPageContentHeader className="aiopsPageHeader">
@@ -268,6 +268,7 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
                       />
                     </p>
                   }
+                  data-test-subj="aiopsNoWindowParametersEmptyPrompt"
                 />
               )}
             </EuiPanel>

@@ -42,5 +42,9 @@ export function MachineLearningJobSourceSelectionProvider({ getService }: FtrPro
     async selectSourceForIndexBasedDataVisualizer(sourceName: string) {
       await this.selectSource(sourceName, 'dataVisualizerIndexPage');
     },
+
+    async selectSourceForExplainLogRateSpikes(sourceName: string) {
+      await this.selectSource(sourceName, 'aiopsExplainLogRateSpikesPage');
+    },
   };
 }

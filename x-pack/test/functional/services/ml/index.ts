@@ -7,6 +7,7 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+import { MachineLearningAiopsProvider } from './aiops';
 import { MachineLearningAnomaliesTableProvider } from './anomalies_table';
 import { MachineLearningAnomalyExplorerProvider } from './anomaly_explorer';
 import { MachineLearningAPIProvider } from './api';
@@ -127,8 +128,10 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const trainedModels = TrainedModelsProvider(context, commonUI);
   const trainedModelsTable = TrainedModelsTableProvider(context, commonUI);
   const mlNodesPanel = MlNodesPanelProvider(context);
+  const aiops = MachineLearningAiopsProvider(context);
 
   return {
+    aiops,
     anomaliesTable,
     anomalyExplorer,
     alerting,
