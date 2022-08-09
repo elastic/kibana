@@ -98,28 +98,28 @@ describe('ruleParamsModifier', () => {
       expect(editedRuleParams).toHaveProperty('index', ['index']);
     });
 
-    test('should set dataViewId to undefined if overwriteDataViews=true on set_index_patterns action', () => {
+    test('should set dataViewId to undefined if overwrite_data_views=true on set_index_patterns action', () => {
       const editedRuleParams = ruleParamsModifier(
         { dataViewId: 'test-data-view', index: ['test-*'] } as RuleAlertType['params'],
         [
           {
             type: BulkActionEditType.set_index_patterns,
             value: ['index'],
-            overwriteDataViews: true,
+            overwrite_data_views: true,
           },
         ]
       );
       expect(editedRuleParams).toHaveProperty('dataViewId', undefined);
     });
 
-    test('should set dataViewId to undefined if overwriteDataViews=true on add_index_patterns action', () => {
+    test('should set dataViewId to undefined if overwrite_data_views=true on add_index_patterns action', () => {
       const editedRuleParams = ruleParamsModifier(
         { dataViewId: 'test-data-view', index: ['test-*'] } as RuleAlertType['params'],
         [
           {
             type: BulkActionEditType.add_index_patterns,
             value: ['index'],
-            overwriteDataViews: true,
+            overwrite_data_views: true,
           },
         ]
       );
