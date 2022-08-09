@@ -10,10 +10,8 @@ import React, { Fragment } from 'react';
 import { EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Filter, FILTERS } from '@kbn/es-query';
-import type { FilterLabelStatus } from '../../filter_item/filter_item';
-
-// todo
-import { existsOperator, isOneOfOperator } from '../../../shared_components/filter_editor';
+import type { FilterLabelStatus } from '../filter_item/filter_item';
+import { existsOperator, isOneOfOperator } from '../../shared_components/filter_editor';
 
 export interface FilterLabelProps {
   filter: Filter;
