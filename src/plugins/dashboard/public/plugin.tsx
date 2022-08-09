@@ -50,7 +50,6 @@ import {
 } from './services/saved_objects';
 import {
   CONTEXT_MENU_TRIGGER,
-  EditPanelAction,
   EmbeddableSetup,
   EmbeddableStart,
   PANEL_BADGE_TRIGGER,
