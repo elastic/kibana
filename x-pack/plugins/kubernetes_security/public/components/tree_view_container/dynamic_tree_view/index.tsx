@@ -316,6 +316,7 @@ const DynamicTreeViewItem = ({
         onClick={onButtonToggle}
         onKeyDown={onKeyDown}
         ref={(el) => (buttonRef.current[aggData.key] = el)}
+        css={isLastNode ? styles.leafNodeButton : undefined}
       >
         {!isLastNode && (
           <EuiIcon

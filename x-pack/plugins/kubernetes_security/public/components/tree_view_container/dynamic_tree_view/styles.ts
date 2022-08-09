@@ -41,6 +41,11 @@ export const useStyles = (depth: number) => {
     const loadMoreTextLeft: CSSObject = {
       marginLeft: size.s,
     };
+    const leafNodeButton: CSSObject = {
+      marginLeft: size.l,
+      width: `calc(100% - ${size.l})`,
+      paddingLeft: 0,
+    };
     const labelIcon: CSSObject = {
       marginRight: size.s,
       marginLeft: size.s,
@@ -61,6 +66,7 @@ export const useStyles = (depth: number) => {
       loadMoreButtonWrapper,
       loadMoreText,
       loadMoreTextLeft,
+      leafNodeButton,
       labelIcon,
       treeViewWrapper,
     };

@@ -85,16 +85,6 @@ export const useStyles = () => {
       fontWeight: font.weight.bold,
     };
 
-    const widgetHolder: CSSObject = {
-      position: 'relative',
-      width: '332px',
-      height: '235px',
-      borderRadius: border.radius.medium,
-      fontWeight: font.weight.bold,
-      fontSize: size.m,
-      lineHeight: size.base,
-    };
-
     const widgetsGroup: CSSObject = {
       [`@media (max-width:${euiTheme.breakpoint.xl}px)`]: {
         flexDirection: 'column',
@@ -117,7 +107,6 @@ export const useStyles = () => {
       rightWidgetsGroup,
       widgetsBottomSpacing,
       percentageChartTitle,
-      widgetHolder,
       widgetsGroup,
       betaBadge,
     };
