@@ -48,7 +48,7 @@ export const FilterEditorForm: FilterAggConfigEditor['aggTypeConfig']['FilterAgg
             />
           </EuiCallOut>
         </>
-      ) : undefined}
+      ) : null}
     </>
   );
 };

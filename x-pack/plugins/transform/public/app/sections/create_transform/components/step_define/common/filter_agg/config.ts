@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { jsonStringValidator } from '../../../../../../common/validators';
 import {
   isPivotAggsConfigWithUiSupport,
   PivotAggsConfigBase,
@@ -189,16 +190,7 @@ export function getFilterAggTypeConfig(
           2
         ),
         isValid() {
-          if (typeof this.filterAggConfig === 'string') {
-            try {
-              return !!JSON.parse(this.filterAggConfig);
-            } catch (e) {
-              // eslint-disable-next-line no-console
-              console.error(`Invalid JSON for aggregation definition.\n${e}`);
-              return false;
-            }
-          }
-          return true;
+          return jsonStringValidator(this.filterAggConfig);
         },
         getEsAggConfig(fieldName) {
           return JSON.parse(this.filterAggConfig!);
@@ -212,16 +204,7 @@ export function getFilterAggTypeConfig(
           return this.filterAggConfig !== undefined ? JSON.parse(this.filterAggConfig!) : {};
         },
         isValid() {
-          if (typeof this.filterAggConfig === 'string') {
-            try {
-              return !!JSON.parse(this.filterAggConfig);
-            } catch (e) {
-              // eslint-disable-next-line no-console
-              console.error(`Invalid JSON for aggregation definition.\n${e}`);
-              return false;
-            }
-          }
-          return true;
+          return jsonStringValidator(this.filterAggConfig);
         },
       };
   }

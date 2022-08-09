@@ -224,13 +224,6 @@ export interface PivotAggsConfigWithExtra<T> extends PivotAggsConfigWithUiBase {
   helperText?: () => string | undefined;
 }
 
-export const isPivotAggsConfigWithExtra = <T>(arg: unknown): arg is PivotAggsConfigWithExtra<T> => {
-  return (
-    isPopulatedObject(arg, ['AggFormComponent', 'aggConfig']) &&
-    isPopulatedObject(arg.aggConfig, ['aggTypeConfig'])
-  );
-};
-
 interface PivotAggsConfigPercentiles extends PivotAggsConfigWithUiBase {
   agg: typeof PIVOT_SUPPORTED_AGGS.PERCENTILES;
   percents: number[];
@@ -322,13 +315,3 @@ export function getEsAggFromAggConfig(
 
   return result;
 }
-
-export const isFilterBooleanAgg = (config: PivotAggsConfig) => {
-  return (
-    config.agg === 'filter' &&
-    isPopulatedObject(config.subAggs) &&
-    isPopulatedObject(config, ['aggConfig']) &&
-    isPopulatedObject(config.aggConfig, ['filterAgg']) &&
-    config.aggConfig.filterAgg === 'bool'
-  );
-};
