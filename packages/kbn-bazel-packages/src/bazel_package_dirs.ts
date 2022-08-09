@@ -29,7 +29,7 @@ export const BAZEL_PACKAGE_DIRS = [
   'packages/analytics/shippers/elastic_v3',
   'packages/core/*',
   'packages/home',
-  'packages/kbn-content-management',
+  'packages/content-management',
   'x-pack/packages/ml',
 ];
 
