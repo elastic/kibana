@@ -18,7 +18,7 @@ import type { FileChunkDocument } from '../mappings';
 /**
  * @note The Elasticsearch `http.max_content_length` is including the whole POST body.
  * But the update/index request also contains JSON-serialized query parameters.
- * 1Kb span should be enough for that.
+ * 1KiB span should be enough for that.
  */
 const REQUEST_SPAN_SIZE_IN_BYTES = 1024;
 
