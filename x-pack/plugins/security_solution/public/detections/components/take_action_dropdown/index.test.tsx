@@ -24,8 +24,8 @@ import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '..
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import {
-  HOST_ENDPOINT_UNENROLLED_TOOLTIP,
   NOT_FROM_ENDPOINT_HOST_TOOLTIP,
+  HOST_ENDPOINT_UNENROLLED_TOOLTIP,
 } from '../endpoint_responder/responder_context_menu_item';
 import { endpointMetadataHttpMocks } from '../../../management/pages/endpoint_hosts/mocks';
 import type { HttpSetup } from '@kbn/core/public';

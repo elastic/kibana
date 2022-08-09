@@ -47,6 +47,13 @@ export const useLogsDataView = (payload?: UseLogsDataView) => {
         }
       }
 
+      if (!dataView) {
+        dataView = await dataViews.create({
+          title: 'logs-osquery_manager.result*',
+          timeFieldName: '@timestamp',
+        });
+      }
+
       return dataView as LogsDataView;
     },
     {
