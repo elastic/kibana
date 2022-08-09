@@ -13,6 +13,7 @@ import styled from 'styled-components';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { useDispatch, useSelector } from 'react-redux';
 import { eventsViewerSelector } from '../../../../common/components/events_viewer/selectors';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../../common/lib/kibana';
 import * as i18n from './translations';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
@@ -125,6 +126,9 @@ export const PreviewHistogram = ({
 
   const { globalFullScreen } = useGlobalFullScreen();
   const previousPreviewId = usePrevious(previewId);
+  const tGridEventRenderedViewEnabled = useIsExperimentalFeatureEnabled(
+    'tGridEventRenderedViewEnabled'
+  );
 
   useEffect(() => {
     if (previousPreviewId !== previewId && totalCount > 0) {
@@ -233,7 +237,7 @@ export const PreviewHistogram = ({
             runtimeMappings,
             setQuery: () => {},
             sort,
-            tGridEventRenderedViewEnabled: true,
+            tGridEventRenderedViewEnabled,
             type: 'embedded',
             leadingControlColumns: getPreviewTableControlColumn(1.5),
           })}
