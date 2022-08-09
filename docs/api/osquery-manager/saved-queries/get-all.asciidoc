@@ -1,0 +1,99 @@
+[[osquery-manager-saved-queries-api-get-all]]
+=== Get saved-queries API
+++++
+<titleabbrev>Get saved-queries</titleabbrev>
+++++
+
+experimental[] Get saved queries.
+
+
+[[osquery-manager-saved-queries-api-get-all-request]]
+==== Request
+
+`GET <kibana host>:<port>/api/osquery/saved_queries`
+
+`GET <kibana host>:<port>/s/<space_id>/api/osquery/saved_queries`
+
+
+[[osquery-manager-saved-queries-api-get-all-params]]
+==== Path parameters
+
+`space_id`::
+(Optional, string) The space identifier. When `space_id` is not provided in the URL, the default space is used.
+
+
+=== Query parameters
+
+`page`::
+(Optional, integer) The page number to return. The default is `1`.
+
+`perPage`::
+(Optional, integer) The number of rules to return per page. The default is `20`.
+
+`sortField`::
+(Optional, string) Specifies the field that sorts the results.
+Options include `createdAt` or `updatedAt`. The default is `createdAt`.
++
+NOTE: Even though the JSON case object uses the `created_at` and `updated_at`
+fields, you must use `createdAt` and `updatedAt` fields in the URL
+query.
+
+`sortOrder`::
+(Optional, string) Determines the sort order. Options include `desc` or `asc`.
+The default is `desc`.
+
+
+[[osquery-manager-saved-queries-api-get-all-codes]]
+==== Response code
+
+`200`::
+Indicates a successful call.
+
+
+[[osquery-manager-saved-queries-api-get-all-example]]
+==== Example
+
+Retrieve the first 10 saved queries:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X GET api/osquery/saved-queries?page=1&perPage=10&sortField=updatedAt&sortOrder=asc
+--------------------------------------------------
+// KIBANA
+
+The API returns a JSON object of the retrieved saved queries:
+
+[source,sh]
+--------------------------------------------------
+{
+  "page": 1,
+  "per_page": 100,
+  "total": 11,
+  "data": [
+    {
+      "type": "osquery-saved-query",
+      "id": "42ba9c50-0cc5-11ed-aa1d-2b27890bc90d",
+      "namespaces": ["default"],
+      "attributes": {
+        "id": "saved_query_id",
+        "description": "Saved query description",
+        "query": "select * from uptime;",
+        "platform": "linux,darwin",
+        "version": "2.8.0",
+        "interval": "60",
+        "ecs_mapping": {
+          "host.uptime": {
+            "field": "total_seconds"
+          }
+        },
+        "created_by": "elastic",
+        "created_at": "2022-07-26T09:28:08.597Z",
+        "updated_by": "elastic",
+        "updated_at": "2022-07-26T09:28:08.597Z",
+        "prebuilt": false
+      },
+    },
+    {...}
+  ]
+}
+--------------------------------------------------

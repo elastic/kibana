@@ -1,0 +1,45 @@
+[[osquery-manager-saved-queries-api-delete]]
+=== Delete saved query API
+++++
+<titleabbrev>Delete saved query</titleabbrev>
+++++
+
+experimental[] Delete saved queries.
+
+WARNING: Once you delete a saved query, _it cannot be recovered_.
+
+
+[[osquery-manager-saved-queries-api-delete-request]]
+==== Request
+
+`DELETE <kibana host>:<port>/api/osquery/saved_queries/<id>`
+
+`DELETE <kibana host>:<port>/s/<space_id>/api/osquery/saved_queries/<id>`
+
+
+[[osquery-manager-saved-queries-api-delete-path-params]]
+==== Path parameters
+
+`space_id`::
+  (Optional, string) The space identifier. When `space_id` is not provided in the URL, the default space is used.
+
+`id`::
+  (Required, string) The ID of the saved query you want to delete.
+
+
+[[osquery-manager-saved-queries-api-delete-response-codes]]
+==== Response code
+
+`200`::
+  Indicates the saved query is deleted. Returns an empty response body. 
+
+
+==== Example
+
+Delete a saved query object with the `42ba9c50-0cc5-11ed-aa1d-2b27890bc90d` ID:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X DELETE api/osquery/saved_queries/42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
+--------------------------------------------------
+// KIBANA
