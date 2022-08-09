@@ -168,7 +168,7 @@ const PaginatedTableComponent: FC<SiemTables> = ({
 }) => {
   const [myLoading, setMyLoading] = useState(loading);
   const [myActivePage, setActivePage] = useState(activePage);
-  const [loadingInitial, setLoadingInitial] = useState(headerCount == null || headerCount === -1); // Todo: remove headerCount === -1 once all the headerCount have been updated
+  const [loadingInitial, setLoadingInitial] = useState(headerCount == null);
   const [isPopoverOpen, setPopoverOpen] = useState(false);
 
   const pageCount = totalCount != null ? Math.ceil(totalCount / limit) : undefined;
