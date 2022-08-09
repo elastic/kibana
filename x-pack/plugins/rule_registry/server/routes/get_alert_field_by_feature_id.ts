@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, IRouter } from '@kbn/core/server';
+import { IRouter } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { schema } from '@kbn/config-schema';
 
-import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
 import { RacRequestHandlerContext } from '../types';
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
 
