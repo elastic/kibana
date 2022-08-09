@@ -18,6 +18,7 @@ import { ChartSelect } from './chart_select';
 import { TABLE, TREEMAP, TREND } from './chart_select/translations';
 import { AlertsTreemapPanel } from '../../../../common/components/alerts_treemap_panel';
 import type { UpdateDateRange } from '../../../../common/components/charts/common';
+import { useEuiComboBoxReset } from '../../../../common/components/use_combo_box_reset';
 import { AlertsHistogramPanel } from '../../../components/alerts_kpis/alerts_histogram_panel';
 import {
   DEFAULT_STACK_BY_FIELD,
@@ -91,17 +92,35 @@ const ChartPanelsComponent: React.FC<Props> = ({
     [setCountTableStackBy1, setRiskChartStackBy1]
   );
 
+  const {
+    comboboxRef: stackByField0ComboboxRef,
+    onReset: onResetStackByField0,
+    setComboboxInputRef: setStackByField0ComboboxInputRef,
+  } = useEuiComboBoxReset();
+
+  const {
+    comboboxRef: stackByField1ComboboxRef,
+    onReset: onResetStackByField1,
+    setComboboxInputRef: setStackByField1ComboboxInputRef,
+  } = useEuiComboBoxReset();
+
+  const onReset = useCallback(() => {
+    onResetStackByField0();
+    onResetStackByField1();
+  }, [onResetStackByField0, onResetStackByField1]);
+
   const chartOptionsContextMenu = useCallback(
     (queryId: string) => (
       <ChartContextMenu
         defaultStackByField={DEFAULT_STACK_BY_FIELD}
         defaultStackByField1={DEFAULT_STACK_BY_FIELD1}
+        onReset={onReset}
         queryId={queryId}
         setStackBy={updateCommonStackBy0}
         setStackByField1={updateCommonStackBy1}
       />
     ),
-    [updateCommonStackBy0, updateCommonStackBy1]
+    [onReset, updateCommonStackBy0, updateCommonStackBy1]
   );
 
   const title = useMemo(
@@ -127,9 +146,11 @@ const ChartPanelsComponent: React.FC<Props> = ({
               alignHeader="flexStart"
               chartHeight={TRENT_CHART_HEIGHT}
               chartOptionsContextMenu={chartOptionsContextMenu}
+              comboboxRef={stackByField0ComboboxRef}
               defaultStackByOption={trendChartStackBy}
               filters={alertsHistogramDefaultFilters}
               inspectTitle={TREND}
+              setComboboxInputRef={setStackByField0ComboboxInputRef}
               onFieldSelected={updateCommonStackBy0}
               panelHeight={TREND_CHART_PANEL_HEIGHT}
               query={query}
@@ -161,7 +182,11 @@ const ChartPanelsComponent: React.FC<Props> = ({
               query={query}
               runtimeMappings={runtimeMappings}
               setStackByField0={updateCommonStackBy0}
+              setStackByField0ComboboxInputRef={setStackByField0ComboboxInputRef}
+              stackByField0ComboboxRef={stackByField0ComboboxRef}
               setStackByField1={updateCommonStackBy1}
+              setStackByField1ComboboxInputRef={setStackByField1ComboboxInputRef}
+              stackByField1ComboboxRef={stackByField1ComboboxRef}
               signalIndexName={signalIndexName}
               stackByField0={countTableStackBy0}
               stackByField1={countTableStackBy1}
@@ -186,7 +211,11 @@ const ChartPanelsComponent: React.FC<Props> = ({
               query={query}
               setIsPanelExpanded={setIsTreemapPanelExpanded}
               setStackByField0={updateCommonStackBy0}
+              setStackByField0ComboboxInputRef={setStackByField0ComboboxInputRef}
+              stackByField0ComboboxRef={stackByField0ComboboxRef}
               setStackByField1={updateCommonStackBy1}
+              setStackByField1ComboboxInputRef={setStackByField1ComboboxInputRef}
+              stackByField1ComboboxRef={stackByField1ComboboxRef}
               signalIndexName={signalIndexName}
               stackByField0={riskChartStackBy0}
               stackByField1={riskChartStackBy1}
