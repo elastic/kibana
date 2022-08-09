@@ -26,7 +26,7 @@ describe('filter manager persistable state tests', () => {
       const updatedFilters = inject(filters, [
         { type: DATA_VIEW_SAVED_OBJECT_TYPE, name: 'test123', id: '123' },
       ]);
-      expect(updatedFilters[0]).toHaveProperty('meta.index', undefined);
+      expect(updatedFilters[0]).toHaveProperty('meta.index', 'test');
     });
   });
 
