@@ -24,7 +24,6 @@ import {
   FileKindsRegistryImpl,
 } from './file_kinds_registry';
 import type { FilesRequestHandlerContext, FilesRouter } from './routes/types';
-import { registerRoutes } from './routes';
 
 export class FilesPlugin implements Plugin<FilesSetup, FilesStart, FilesPluginSetupDependencies> {
   private readonly logger: Logger;
@@ -55,17 +54,6 @@ export class FilesPlugin implements Plugin<FilesSetup, FilesStart, FilesPluginSe
     const router: FilesRouter = core.http.createRouter();
 
     setFileKindsRegistry(new FileKindsRegistryImpl(router));
-
-    core
-      .getStartServices()
-      .then(() => {
-        // File routes can only be registered during start phase because we need
-        // to give plugins a chance to register file kinds.
-        registerRoutes(router);
-      })
-      .catch(() => {
-        this.logger.error('Failed to register routes, file services may not function properly.');
-      });
 
     return {
       registerFileKind(fileKind) {

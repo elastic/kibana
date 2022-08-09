@@ -4,10 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { IRouter } from '@kbn/core-http-server';
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/common';
 import assert from 'assert';
 import { FileKind } from '../../common';
+
+import { registerFileKindRoutes } from '../routes/file_kind';
+import { FilesRouter } from '../routes/types';
 
 export interface FileKindsRegistry {
   /**
@@ -30,7 +32,7 @@ export interface FileKindsRegistry {
  * @internal
  */
 export class FileKindsRegistryImpl implements FileKindsRegistry {
-  constructor(private readonly router: IRouter) {}
+  constructor(private readonly router: FilesRouter) {}
 
   private readonly fileKinds = new Map<string, FileKind>();
 
@@ -46,6 +48,7 @@ export class FileKindsRegistryImpl implements FileKindsRegistry {
     }
 
     this.fileKinds.set(fileKind.id, fileKind);
+    registerFileKindRoutes(this.router, fileKind);
   }
 
   get(id: string): FileKind {
