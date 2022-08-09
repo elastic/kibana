@@ -580,7 +580,7 @@ export default ({ getService }: FtrProviderContext): void => {
               {
                 type: BulkActionEditType.add_index_patterns,
                 value: ['initial-index-*'],
-                overwriteDataViews: true,
+                overwrite_data_views: true,
               },
             ],
           })
@@ -596,6 +596,42 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body: setIndexRule } = await fetchRule(ruleId).expect(200);
 
         expect(setIndexRule.index).to.eql(['initial-index-*']);
+      });
+
+      it('should not delete data view in a rule when delete index pattern action applied', async () => {
+        const ruleId = 'ruleId';
+        const dataViewId = 'index1-*';
+        const simpleRule = {
+          ...getSimpleRule(ruleId),
+          index: undefined,
+          data_view_id: dataViewId,
+        };
+        await createRule(supertest, log, simpleRule);
+
+        const { body: bulkActionResponse } = await postBulkAction()
+          .send({
+            query: '',
+            action: BulkAction.edit,
+            [BulkAction.edit]: [
+              {
+                type: BulkActionEditType.delete_index_patterns,
+                value: ['initial-index-*'],
+              },
+            ],
+          })
+          .expect(200);
+
+        expect(bulkActionResponse.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
+
+        // Check that the updated rule is returned with the response
+        expect(bulkActionResponse.attributes.results.updated[0].data_view_id).to.be(dataViewId);
+        expect(bulkActionResponse.attributes.results.updated[0].index).to.be(undefined);
+
+        // Check that the updates have been persisted
+        const { body: updatedRule } = await fetchRule(ruleId).expect(200);
+
+        expect(updatedRule.data_view_id).to.be(dataViewId);
+        expect(updatedRule.index).to.be(undefined);
       });
 
       it('should set timeline values in rule', async () => {
