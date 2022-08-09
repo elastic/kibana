@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { getConfiguration } from './config_loader';
+export { loadConfiguration, getConfiguration } from './config_loader';
 export { initApm } from './init_apm';
 export { shouldInstrumentClient } from './rum_agent_configuration';
 export type { ApmConfiguration } from './config';
