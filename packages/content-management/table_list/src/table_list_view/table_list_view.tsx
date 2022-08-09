@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-/* eslint react-hooks/exhaustive-deps: 2 */
-
 import React, { useReducer, useCallback, useEffect, useRef, useMemo, ReactNode } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import {
