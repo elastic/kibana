@@ -123,6 +123,7 @@ export const DATA_DATASETS_INDEX_PATTERNS = [
 
   // experimental ml
   { pattern: 'ml_host_risk_score_latest_*', patternName: 'host_risk_score' },
+  { pattern: 'ml_user_risk_score_latest_*', patternName: 'user_risk_score' },
 ] as const;
 
 // Get the unique list of index patterns (some are duplicated for documentation purposes)
