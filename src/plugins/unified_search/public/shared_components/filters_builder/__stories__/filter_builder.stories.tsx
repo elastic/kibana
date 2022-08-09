@@ -14,7 +14,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { action } from '@storybook/addon-actions';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { Filter } from '@kbn/es-query';
-import { getFiltersMock } from '../__mock__/filters';
+import { getFiltersMock, getFiltersMockOrHide } from '../__mock__/filters';
 import { FiltersBuilder, FiltersBuilderProps } from '../filters_builder';
 
 export default {
@@ -53,6 +53,26 @@ const mockedDataView = {
 } as DataView;
 
 const filters = getFiltersMock();
+
+Default.args = {
+  filters,
+  dataView: mockedDataView,
+  onChange: (f: Filter[]) => {},
+  hideOr: false,
+};
+
+export const filterBuilderWithOrHide = Template.bind({});
+filterBuilderWithOrHide.args = { ...Default.args, filters: getFiltersMockOrHide(), hideOr: true };
+
+filterBuilderWithOrHide.decorators = [
+  (Story) => (
+    <IntlProvider locale="en">
+      <KibanaContextProvider services={services}>
+        <Story />
+      </KibanaContextProvider>
+    </IntlProvider>
+  ),
+];
 
 const createMockWebStorage = () => ({
   clear: action('clear'),
@@ -157,11 +177,4 @@ const services = {
       ],
     },
   },
-};
-
-Default.args = {
-  filters,
-  dataView: mockedDataView,
-  onChange: (f: Filter[]) => {},
-  hideOr: false,
 };
