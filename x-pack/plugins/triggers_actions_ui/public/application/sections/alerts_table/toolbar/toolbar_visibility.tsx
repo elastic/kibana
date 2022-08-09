@@ -11,6 +11,7 @@ import React, { lazy, Suspense } from 'react';
 import { BulkActionsConfig } from '../../../../types';
 import { LastUpdatedAt } from './components/last_updated_at';
 import { FieldBrowser, FieldBrowserProps } from '../../field_browser';
+import browserFields from './browserFields';
 
 const BulkActionsToolbar = lazy(() => import('../bulk_actions/components/toolbar'));
 
@@ -20,35 +21,7 @@ const getDefaultVisibility = (
 ): EuiDataGridToolBarVisibilityOptions => {
   const fieldBrowserProps: FieldBrowserProps = {
     columnIds,
-    browserFields: [
-      {
-        fields: {
-          'elastic.agent.id': {
-            aggregatable: true,
-            category: 'elastic',
-            description: 'test description',
-            format: 'string',
-            indexes: [
-              '-*elastic-cloud-logs-*',
-              '.alerts-security.alerts-default',
-              'apm-*-transaction*',
-              'auditbeat-*',
-              'endgame-*',
-              'filebeat-*',
-              'logs-*',
-              'packetbeat-*',
-              'traces-apm*',
-              'winlogbeat-*',
-            ],
-
-            name: 'elastic.agent.id',
-            readFromDocValues: true,
-            searchable: true,
-            type: 'string',
-          },
-        },
-      },
-    ],
+    browserFields,
     onResetColumns: () => console.log('reset columns clicked'),
     onToggleColumn: () => console.log('onToggleColumn clicked'),
     options: {},

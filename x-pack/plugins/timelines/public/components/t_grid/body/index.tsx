@@ -338,6 +338,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     trailingControlColumns = EMPTY_CONTROL_COLUMNS,
     unit = defaultUnit,
   }) => {
+    console.log('t_grid body', browserFields);
     const { triggersActionsUi } = useKibana<TimelinesStartPlugins>().services;
 
     const dataGridRef = useRef<EuiDataGridRefProps>(null);
