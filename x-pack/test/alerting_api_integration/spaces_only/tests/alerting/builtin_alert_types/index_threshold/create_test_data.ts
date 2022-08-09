@@ -63,6 +63,7 @@ async function createEsDocument(
     date: new Date(epochMillis).toISOString(),
     date_epoch_millis: epochMillis,
     testedValue,
+    testedValueUnsigned: '18446744073709551615',
     group,
   };
 
