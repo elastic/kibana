@@ -74,7 +74,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       it(`${farequoteDataViewTestData.suiteTitle} loads the explain log rate spikes page`, async () => {
         // Start navigation from the base of the ML app.
         await ml.navigation.navigateToMl();
-        await ml.navigation.navigateToDataVisualizer();
       });
 
       runTests(farequoteDataViewTestData);
