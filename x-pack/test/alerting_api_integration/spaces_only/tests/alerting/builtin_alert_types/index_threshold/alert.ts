@@ -549,7 +549,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         });
 
       // will print the error body, if an error occurred
-      // if (status !== 200) console.log(createdRule);
+      // if (statusCode !== 200) console.log(createdRule);
 
       expect(status).to.be(200);
 
