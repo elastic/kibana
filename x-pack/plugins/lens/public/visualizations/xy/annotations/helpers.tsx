@@ -13,6 +13,7 @@ import {
   isRangeAnnotation,
 } from '@kbn/event-annotation-plugin/public';
 import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
+import { LensIconChartBarAnnotations } from '@kbn/lens-icons';
 import { layerTypes } from '../../../../common';
 import type { FramePublicAPI, Visualization } from '../../../types';
 import { isHorizontalChart } from '../state_helpers';
@@ -24,7 +25,6 @@ import {
   getDataLayers,
   isAnnotationsLayer,
 } from '../visualization_helpers';
-import { LensIconChartBarAnnotations } from '../../../assets/chart_bar_annotations';
 import { generateId } from '../../../id_generator';
 
 const MAX_DATE = 8640000000000000;

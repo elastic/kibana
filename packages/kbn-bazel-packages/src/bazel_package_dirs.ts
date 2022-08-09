@@ -30,6 +30,7 @@ export const BAZEL_PACKAGE_DIRS = [
   'packages/core/*',
   'packages/home',
   'x-pack/packages/ml',
+  'x-pack/packages/lens',
 ];
 
 /**

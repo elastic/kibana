@@ -19,7 +19,7 @@ import { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
 import { SuggestionPanel, SuggestionPanelProps, SuggestionPanelWrapper } from './suggestion_panel';
 import { getSuggestions } from './suggestion_helpers';
 import { EuiIcon, EuiPanel, EuiToolTip, EuiAccordion } from '@elastic/eui';
-import { LensIconChartDatatable } from '../../assets/chart_datatable';
+import { LensIconChartDatatable } from '@kbn/lens-icons';
 import { mountWithProvider } from '../../mocks';
 import {
   applyChanges,
