@@ -10,7 +10,7 @@ results=()
 
 if [[ "$1" == 'jest.config.js' ]]; then
   # run unit tests in parallel
-  parallelism="-w3"
+  parallelism="-w2"
   TEST_TYPE="unit"
 else
   # run integration tests in-band
