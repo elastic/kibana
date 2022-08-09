@@ -46,7 +46,7 @@ export const DashboardsTable: React.FC = () => {
       setFilteredItems(
         items.filter(({ title, description }) => {
           const normalizedName = `${title} ${description}`.toLowerCase();
-          return normalizedName.includes(searchQuery);
+          return normalizedName.includes(searchQuery.replace(/-_[^\w ]/g, ''));
         })
       );
     }
