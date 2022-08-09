@@ -136,7 +136,7 @@ describe('reasonColumnRenderer', () => {
       expect(wrapper.queryByTestId('reason-cell-renderer')).toBeInTheDocument();
     });
 
-    it('doesn\'t render reason renderers when timeline id is for the rule preview page', () => {
+    it("doesn't render reason renderers when timeline id is for the rule preview page", () => {
       const renderedColumn = reasonColumnRenderer.renderColumn({
         ...defaultProps,
         isDetails: true,
