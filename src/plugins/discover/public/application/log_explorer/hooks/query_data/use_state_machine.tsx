@@ -116,7 +116,7 @@ export const useStateMachineService = ({
           dataAccessService.send({
             type: 'stopTailing',
           });
-        } else if (query) {
+        } else if (timefilter.getTime().to === 'now') {
           dataAccessService.send({
             type: 'startTailing',
           });
