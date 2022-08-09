@@ -430,3 +430,8 @@ This page has been deleted. Refer to <<Machine_learning_APIs>>.
 == Get cases by alert API
 
 This page has been deleted. Refer to <<getCasesByAlert>>.
+
+[role="exclude",id="cases-api"]
+== Cases APIs
+
+This page has been deleted. Refer to <<Case_APIs>>.
