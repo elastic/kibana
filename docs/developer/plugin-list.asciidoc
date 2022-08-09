@@ -456,7 +456,7 @@ activities.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/files/README.md[files]
-|Bringing blob storage to Kibana
+|File upload, download, sharing, and serving over HTTP implementation in Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/file_upload[fileUpload]
