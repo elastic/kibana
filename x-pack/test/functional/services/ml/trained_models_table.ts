@@ -180,6 +180,13 @@ export function TrainedModelsTableProvider(
       );
     }
 
+    public async deleteModel(modelId: string) {
+      await this.clickDeleteAction(modelId);
+      await this.confirmDeleteModel();
+      await mlCommonUI.waitForRefreshButtonEnabled();
+      await this.assertModelDisplayedInTable(modelId, false);
+    }
+
     public async assertModelDeleteActionButtonEnabled(modelId: string, expectedValue: boolean) {
       await this.assertModelDeleteActionButtonExists(modelId, true);
       const isEnabled = await testSubjects.isEnabled(
@@ -218,7 +225,11 @@ export function TrainedModelsTableProvider(
     }
 
     public async clickDeleteAction(modelId: string) {
-      await testSubjects.click(this.rowSelector(modelId, 'mlModelsTableRowDeleteAction'));
+      await mlCommonUI.invokeTableRowAction(
+        this.rowSelector(modelId),
+        'mlModelsTableRowDeleteAction'
+      );
+
       await this.assertDeleteModalExists();
     }
 
