@@ -59,7 +59,6 @@ interface StatItem {
   icon?: IconType;
   key: string;
   name?: string;
-  value: number | undefined | null;
   lensAttributes?: LensAttributes;
 }
 
@@ -219,6 +218,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
                       <FlexItem>
                         {field.lensAttributes && (
                           <LensEmbeddable
+                            data-test-subj="embeddable-metric"
                             height="100px"
                             id={id}
                             lensAttributes={field.lensAttributes}
@@ -226,7 +226,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
                           />
                         )}
                       </FlexItem>
-                      {field.description && (
+                      {field.description != null && (
                         <FlexItem>
                           <EuiStat title={field.description} description={null} titleSize="s" />
                         </FlexItem>
@@ -236,11 +236,14 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
                 ))}
               </EuiFlexGroup>
 
-              {(enableAreaChart || enableBarChart) && <EuiHorizontalRule />}
+              {(enableAreaChart || enableBarChart) && (
+                <EuiHorizontalRule data-test-subj="stat-item-separator" />
+              )}
               <EuiFlexGroup>
                 {enableBarChart && barChartLensAttributes && (
                   <FlexItem>
                     <LensEmbeddable
+                      data-test-subj="embeddable-bar-chart"
                       lensAttributes={barChartLensAttributes}
                       timerange={timerange}
                       id={id}
@@ -253,6 +256,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
                   <FlexItem>
                     {areaChartLensAttributes && (
                       <LensEmbeddable
+                        data-test-subj="embeddable-area-chart"
                         lensAttributes={areaChartLensAttributes}
                         timerange={timerange}
                         id={id}
