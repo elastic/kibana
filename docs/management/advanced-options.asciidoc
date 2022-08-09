@@ -450,7 +450,7 @@ Users must opt-in to include frozen indices.
 
 [[search-timeout]]`search:timeout`:: Change the maximum timeout for a search
 session or set to 0 to disable the timeout and allow queries to run to
-completion.
+completion. The default is 600,000 miliseconds, or 10 minutes.
 
 [float]
 [[kibana-siem-settings]]
