@@ -24,8 +24,8 @@ describe('Install unverified package assets', () => {
 
       req.reply({
         items: [
-          { id: 'nginx-1234', type: 'dashboard' },
-          { id: 'nginx-5678', type: 'dashboard' },
+          { id: 'fleet_server-1234', type: 'dashboard' },
+          { id: 'fleet_server-5678', type: 'dashboard' },
         ],
         _meta: { install_source: 'registry' },
       });
