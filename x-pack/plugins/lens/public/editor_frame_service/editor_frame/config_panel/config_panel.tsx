@@ -94,9 +94,7 @@ export function LayerPanels(
       // React will synchronously update if this is triggered from a third party component,
       // which we don't want. The timeout lets user interaction have priority, then React updates.
       setTimeout(() => {
-        if (datasourceId) {
-          updateDatasource(datasourceId, newState);
-        }
+        updateDatasource(datasourceId, newState);
       }, 0);
     },
     [updateDatasource]
