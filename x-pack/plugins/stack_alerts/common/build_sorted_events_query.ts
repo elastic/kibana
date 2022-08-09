@@ -21,8 +21,8 @@ export interface BuildSortedEventsQuery extends BuildSortedEventsQueryOpts {
   sortOrder?: 'asc' | 'desc';
   searchAfterSortId: string | number | undefined;
   timeField: string;
-  fields: string[];
-  runtime_mappings: unknown;
+  fields?: string[];
+  runtime_mappings?: unknown;
 }
 
 export const buildSortedEventsQuery = ({
