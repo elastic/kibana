@@ -63,9 +63,7 @@ export const filterOperationsAxis = (op: OperationMetadata) =>
   isBucketed(op) || op.scale === 'interval';
 
 export const isCellValueSupported = (op: OperationMetadata) => {
-  return (
-    !isBucketed(op) && (op?.scale === 'ordinal' || op?.scale === 'ratio') && isNumericMetric(op)
-  );
+  return !isBucketed(op) && (op.scale === 'ordinal' || op.scale === 'ratio') && isNumericMetric(op);
 };
 
 function getInitialState(): Omit<HeatmapVisualizationState, 'layerId' | 'layerType'> {

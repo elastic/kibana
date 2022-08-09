@@ -217,10 +217,10 @@ export const getMetricVisualization = ({
 
   getConfiguration(props) {
     const isSupportedMetric = (op: OperationMetadata) =>
-      !op?.isBucketed && supportedDataTypes.has(op.dataType);
+      !op.isBucketed && supportedDataTypes.has(op.dataType);
 
     const isSupportedDynamicMetric = (op: OperationMetadata) =>
-      !op?.isBucketed && supportedDataTypes.has(op.dataType) && !op.isStaticValue;
+      !op.isBucketed && supportedDataTypes.has(op.dataType) && !op.isStaticValue;
 
     const getPrimaryAccessorDisplayConfig = (): Partial<AccessorConfig> => {
       const stops = props.state.palette?.params?.stops || [];
