@@ -10,7 +10,6 @@ import { EuiFlexGroup, EuiFlexItem, IconType } from '@elastic/eui';
 import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
-import { EuiIconAxisLeft, EuiIconAxisBottom } from '@kbn/lens-icons';
 import type { VisualizationToolbarProps } from '../../types';
 import {
   LegendSettingsPopover,
@@ -19,6 +18,8 @@ import {
   AxisTitleSettings,
   TooltipWrapper,
 } from '../../shared_components';
+import { EuiIconAxisLeft } from '../../assets/axis_left';
+import { EuiIconAxisBottom } from '../../assets/axis_bottom';
 import type { HeatmapVisualizationState } from './types';
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
 import './toolbar_component.scss';

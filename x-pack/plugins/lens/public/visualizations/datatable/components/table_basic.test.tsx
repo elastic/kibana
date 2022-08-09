@@ -14,7 +14,7 @@ import { IAggType } from '@kbn/data-plugin/public';
 import { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { VisualizationContainer } from '../../../visualization_container';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
-import { LensIconChartDatatable } from '@kbn/lens-icons';
+import { LensIconChartDatatable } from '../../../assets/chart_datatable';
 import { DataContext, DatatableComponent } from './table_basic';
 import { DatatableProps } from '../../../../common/expressions';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
