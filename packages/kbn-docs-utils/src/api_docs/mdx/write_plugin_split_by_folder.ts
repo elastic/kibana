@@ -11,18 +11,20 @@ import { PluginApi, ApiDeclaration } from '../types';
 import { writePluginDoc } from './write_plugin_mdx_docs';
 import { WritePluginDocsOpts } from './types';
 
-export function writePluginDocSplitByFolder(
+export async function writePluginDocSplitByFolder(
   folder: string,
   { doc, plugin, pluginStats, log }: WritePluginDocsOpts
 ) {
   const apisByFolder = splitApisByFolder(doc);
 
   log.debug(`Split ${doc.id} into ${apisByFolder.length} services`);
-  apisByFolder.forEach((docDef) => {
-    // TODO: we should probably see if we can break down these stats by service folder. As it is, they will represent stats for
-    // the entire plugin.
-    writePluginDoc(folder, { doc: docDef, plugin, pluginStats, log });
-  });
+  await Promise.all(
+    apisByFolder.map((docDef) => {
+      // TODO: we should probably see if we can break down these stats by service folder. As it is, they will represent stats for
+      // the entire plugin.
+      return writePluginDoc(folder, { doc: docDef, plugin, pluginStats, log });
+    })
+  );
 }
 
 export function splitApisByFolder(pluginDoc: PluginApi): PluginApi[] {

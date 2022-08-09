@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import Fs from 'fs';
+import { existsSync } from 'fs';
+import Fs from 'fs/promises';
 import Path from 'path';
 
 import { run } from '@kbn/dev-cli-runner';
@@ -58,23 +59,18 @@ export function runBuildApiDocsCli() {
       const plugins = findPlugins();
 
       const outputFolder = Path.resolve(REPO_ROOT, 'api_docs');
-      if (!Fs.existsSync(outputFolder)) {
-        Fs.mkdirSync(outputFolder);
+      if (!existsSync(outputFolder)) {
+        await Fs.mkdir(outputFolder);
 
         // Don't delete all the files if a plugin filter is being used.
       } else if (!pluginFilter) {
         // Delete all files except the README that warns about the auto-generated nature of
         // the folder.
-        const files = Fs.readdirSync(outputFolder);
+        const files = await Fs.readdir(outputFolder);
         await Promise.all(
           files
             .filter((file) => file.indexOf('README.md') < 0)
-            .map(
-              (file) =>
-                new Promise<void>((resolve, reject) =>
-                  Fs.rm(Path.resolve(outputFolder, file), (err) => (err ? reject(err) : resolve()))
-                )
-            )
+            .map((file) => Fs.rm(Path.resolve(outputFolder, file)))
         );
       }
       const collectReferences = flags.references as boolean;
@@ -101,9 +97,9 @@ export function runBuildApiDocsCli() {
         };
       }
 
-      writePluginDirectoryDoc(outputFolder, pluginApiMap, allPluginStats, log);
+      await writePluginDirectoryDoc(outputFolder, pluginApiMap, allPluginStats, log);
 
-      plugins.forEach((plugin) => {
+      for (const plugin of plugins) {
         // Note that the filtering is done here, and not above because the entire public plugin API has to
         // be parsed in order to correctly determine reference links, and ensure that `removeBrokenLinks`
         // doesn't remove more links than necessary.
@@ -251,19 +247,19 @@ export function runBuildApiDocsCli() {
 
         if (pluginStats.apiCount > 0) {
           log.info(`Writing public API doc for plugin ${pluginApi.id}.`);
-          writePluginDocs(outputFolder, { doc: pluginApi, plugin, pluginStats, log });
+          await writePluginDocs(outputFolder, { doc: pluginApi, plugin, pluginStats, log });
         } else {
           log.info(`Plugin ${pluginApi.id} has no public API.`);
         }
-        writeDeprecationDocByPlugin(outputFolder, referencedDeprecations, log);
-        writeDeprecationDueByTeam(outputFolder, referencedDeprecations, plugins, log);
-        writeDeprecationDocByApi(
+        await writeDeprecationDocByPlugin(outputFolder, referencedDeprecations, log);
+        await writeDeprecationDueByTeam(outputFolder, referencedDeprecations, plugins, log);
+        await writeDeprecationDocByApi(
           outputFolder,
           referencedDeprecations,
           unreferencedDeprecations,
           log
         );
-      });
+      }
       if (Object.values(pathsOutsideScopes).length > 0) {
         log.warning(`Found paths outside of normal scope folders:`);
         log.warning(pathsOutsideScopes);

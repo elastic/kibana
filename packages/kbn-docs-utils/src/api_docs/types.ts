@@ -198,6 +198,11 @@ export interface ApiDeclaration {
    * Is this API deprecated or not?
    */
   deprecated?: boolean;
+
+  /**
+   * Are we interested in tracking adoption of this API?
+   */
+  trackAdoption?: boolean;
 }
 
 /**

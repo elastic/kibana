@@ -6,29 +6,88 @@
  * Side Public License, v 1.
  */
 
-import { execSync } from 'child_process';
+// import { exec } from 'child_process';
+// import { promisify } from 'util';
+import Fs from 'fs';
+import Path from 'path';
 
 export interface EslintDisableCounts {
   eslintDisableLineCount: number;
   eslintDisableFileCount: number;
 }
 
+// const execAsync = promisify(exec);
+
+async function fetchAllFilePaths(path: string): Promise<string[]> {
+  const filePaths: string[] = [];
+  const dirContent = await Fs.promises.readdir(path, { withFileTypes: true });
+  for (const item of dirContent) {
+    const itemPath = Path.resolve(path, item.name);
+    if (item.isDirectory()) {
+      filePaths.push(...(await fetchAllFilePaths(itemPath)));
+    } else if (item.isFile()) {
+      filePaths.push(itemPath);
+    }
+  }
+  return filePaths;
+}
+
+function findOccurrences(fileContent: string, regexp: RegExp): number {
+  // using the flag 'g' returns an array of found occurrences.
+  const matchingResults = fileContent.toString().match(new RegExp(regexp, 'g')) || [];
+  return matchingResults.length;
+}
+
+async function countEsLintDisableInFile(path: string): Promise<EslintDisableCounts> {
+  const fileContent = await Fs.promises.readFile(path, { encoding: 'utf8' }).catch((err) => {
+    console.error(`Error reading contents of file ${path}`, err);
+    return '';
+  });
+
+  return {
+    eslintDisableLineCount:
+      findOccurrences(fileContent, /eslint-disable-next-line/) +
+      findOccurrences(fileContent, /eslint-disable-line/),
+    eslintDisableFileCount: findOccurrences(fileContent, /eslint-disable/),
+  };
+}
+
 export async function countEslintDisableLine(path: string): Promise<EslintDisableCounts> {
-  const disableCountOutputs = await Promise.all([
-    execSync(`grep -rE 'eslint-disable-next-line|eslint-disable-line' ${path} | wc -l`),
-    execSync(`grep -rE 'eslint-disable ' ${path} | wc -l`),
-  ]);
-  const eslintDisableLineCount = Number.parseInt(disableCountOutputs[0].toString(), 10);
+  const filePaths = await fetchAllFilePaths(path);
 
-  if (eslintDisableLineCount === undefined || isNaN(eslintDisableLineCount)) {
-    throw new Error(`Parsing ${disableCountOutputs[0]} failed to product a valid number`);
-  }
+  const allEslintDisableCounts = await Promise.all(
+    filePaths.map((filePath) => countEsLintDisableInFile(filePath))
+  );
 
-  const eslintDisableFileCount = Number.parseInt(disableCountOutputs[1].toString(), 10);
+  return allEslintDisableCounts.reduce(
+    (acc, fileEslintDisableCounts) => {
+      return {
+        eslintDisableFileCount:
+          acc.eslintDisableFileCount + fileEslintDisableCounts.eslintDisableFileCount,
+        eslintDisableLineCount:
+          acc.eslintDisableLineCount + fileEslintDisableCounts.eslintDisableLineCount,
+      };
+    },
+    { eslintDisableFileCount: 0, eslintDisableLineCount: 0 }
+  );
 
-  if (eslintDisableFileCount === undefined || isNaN(eslintDisableFileCount)) {
-    throw new Error(`Parsing ${disableCountOutputs[1]} failed to product a valid number`);
-  }
-
-  return { eslintDisableFileCount, eslintDisableLineCount };
+  // const disableCountOutputs = false
+  //   ? await Promise.all([
+  //       execAsync(`grep -rE 'eslint-disable-next-line|eslint-disable-line' ${path} | wc -l`),
+  //       execAsync(`grep -rE 'eslint-disable ' ${path} | wc -l`),
+  //     ])
+  //   : [{ stdout: '0' }, { stdout: '0' }];
+  // const eslintDisableLineCount = Number.parseInt(disableCountOutputs[0].stdout.toString(), 10);
+  //
+  // if (eslintDisableLineCount === undefined || isNaN(eslintDisableLineCount)) {
+  //   throw new Error(`Parsing ${disableCountOutputs[0]} failed to product a valid number`);
+  // }
+  //
+  // const eslintDisableFileCount = Number.parseInt(disableCountOutputs[1].stdout.toString(), 10);
+  //
+  // if (eslintDisableFileCount === undefined || isNaN(eslintDisableFileCount)) {
+  //   throw new Error(`Parsing ${disableCountOutputs[1]} failed to product a valid number`);
+  // }
+  //
+  // return { eslintDisableFileCount, eslintDisableLineCount };
 }

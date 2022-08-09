@@ -9,7 +9,7 @@
 import moment from 'moment';
 import { ToolingLog } from '@kbn/tooling-log';
 import dedent from 'dedent';
-import fs from 'fs';
+import fs from 'fs/promises';
 import Path from 'path';
 import {
   ApiReference,
@@ -19,12 +19,12 @@ import {
 } from '../types';
 import { getPluginApiDocId } from '../utils';
 
-export function writeDeprecationDocByApi(
+export async function writeDeprecationDocByApi(
   folder: string,
   deprecationsByPlugin: ReferencedDeprecationsByPlugin,
   unReferencedDeprecations: UnreferencedDeprecationsByPlugin,
   log: ToolingLog
-): void {
+): Promise<void> {
   const deprecationReferencesByApi = Object.values(deprecationsByPlugin).reduce(
     (acc, deprecations) => {
       deprecations.forEach((deprecation) => {
@@ -87,7 +87,7 @@ warning: This document is auto-generated and is meant to be viewed inside our ex
 
 ## Referenced deprecated APIs
 
-${tableMdx}   
+${tableMdx}
 
 ## Unreferenced deprecated APIs
 
@@ -110,5 +110,5 @@ ${Object.values(unReferencedDeprecations)
 
 `);
 
-  fs.writeFileSync(Path.resolve(folder, 'deprecations_by_api.mdx'), mdx);
+  await fs.writeFile(Path.resolve(folder, 'deprecations_by_api.mdx'), mdx);
 }

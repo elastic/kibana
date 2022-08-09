@@ -8,7 +8,7 @@
 import moment from 'moment';
 import { ToolingLog } from '@kbn/tooling-log';
 import dedent from 'dedent';
-import fs from 'fs';
+import fs from 'fs/promises';
 import Path from 'path';
 import {
   ApiDeclaration,
@@ -18,12 +18,12 @@ import {
 } from '../types';
 import { getPluginApiDocId } from '../utils';
 
-export function writeDeprecationDueByTeam(
+export async function writeDeprecationDueByTeam(
   folder: string,
   deprecationsByPlugin: ReferencedDeprecationsByPlugin,
   plugins: PluginOrPackage[],
   log: ToolingLog
-): void {
+): Promise<void> {
   const groupedByTeam: ReferencedDeprecationsByPlugin = Object.keys(deprecationsByPlugin).reduce(
     (teamMap: ReferencedDeprecationsByPlugin, pluginId: string) => {
       const dueDeprecations = deprecationsByPlugin[pluginId].filter(
@@ -58,7 +58,7 @@ export function writeDeprecationDueByTeam(
 
       return `
     ## ${key}
-    
+
     | Plugin | Deprecated API | Reference location(s) | Remove By |
     | --------|-------|-----------|-----------|
     ${Object.keys(groupedDeprecationReferences)
@@ -106,9 +106,9 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 warning: This document is auto-generated and is meant to be viewed inside our experimental, new docs system.
 ---
 
-${tableMdx}   
+${tableMdx}
 
 `);
 
-  fs.writeFileSync(Path.resolve(folder, 'deprecations_by_team.mdx'), mdx);
+  await fs.writeFile(Path.resolve(folder, 'deprecations_by_team.mdx'), mdx);
 }

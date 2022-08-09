@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import moment from 'moment';
-import fs from 'fs';
+import fs from 'fs/promises';
 import Path from 'path';
 import dedent from 'dedent';
 import { ToolingLog } from '@kbn/tooling-log';
@@ -30,12 +30,12 @@ interface TotalStats {
 /**
  * @param folder The location the mdx file will be written too.
  */
-export function writePluginDirectoryDoc(
+export async function writePluginDirectoryDoc(
   folder: string,
   pluginApiMap: { [key: string]: PluginApi },
   pluginStatsMap: { [key: string]: PluginMetaInfo },
   log: ToolingLog
-): void {
+): Promise<void> {
   log.debug(`Writing plugin directory file`);
 
   const uniqueTeams: string[] = [];
@@ -85,13 +85,13 @@ warning: This document is auto-generated and is meant to be viewed inside our ex
 
 ### Overall stats
 
-| Count | Plugins or Packages with a <br /> public API | Number of teams | 
+| Count | Plugins or Packages with a <br /> public API | Number of teams |
 |--------------|----------|------------------------|
 | ${totalStats.pluginCnt} | ${totalStats.pluginCntWithPublicApi} | ${totalStats.teamCnt} |
 
 ### Public API health stats
 
-| API Count | Any Count | Missing comments | Missing exports | 
+| API Count | Any Count | Missing comments | Missing exports |
 |--------------|----------|-----------------|--------|
 | ${totalStats.totalApiCnt} | ${totalStats.anyCnt} | ${totalStats.missingCommentCnt} | ${
       totalStats.missingExportCnt
@@ -99,19 +99,19 @@ warning: This document is auto-generated and is meant to be viewed inside our ex
 
 ## Plugin Directory
 
-| Plugin name &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  | Maintaining team | Description | API Cnt | Any Cnt | Missing<br />comments | Missing<br />exports | 
+| Plugin name &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  | Maintaining team | Description | API Cnt | Any Cnt | Missing<br />comments | Missing<br />exports |
 |--------------|----------------|-----------|--------------|----------|---------------|--------|
 ${getDirectoryTable(pluginApiMap, pluginStatsMap, true)}
 
 ## Package Directory
 
-| Package name &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  | Maintaining team | Description | API Cnt | Any Cnt | Missing<br />comments | Missing<br />exports | 
+| Package name &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  | Maintaining team | Description | API Cnt | Any Cnt | Missing<br />comments | Missing<br />exports |
 |--------------|----------------|-----------|--------------|----------|---------------|--------|
 ${getDirectoryTable(pluginApiMap, pluginStatsMap, false)}
 
 `) + '\n\n';
 
-  fs.writeFileSync(Path.resolve(folder, 'plugin_directory.mdx'), mdx);
+  await fs.writeFile(Path.resolve(folder, 'plugin_directory.mdx'), mdx);
 }
 
 function getDirectoryTable(
