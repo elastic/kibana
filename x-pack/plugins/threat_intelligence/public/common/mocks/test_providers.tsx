@@ -97,6 +97,11 @@ const mockSecurityContext: ThreatIntelligenceSecuritySolutionContext = {
     () =>
     ({ children }) =>
       <div>{children}</div>,
+  licenseService: {
+    isEnterprise() {
+      return true;
+    },
+  },
 };
 
 mockCoreStart.uiSettings.get.mockImplementation(mockUiSetting);

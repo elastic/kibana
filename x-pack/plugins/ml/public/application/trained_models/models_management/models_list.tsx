@@ -345,6 +345,7 @@ export const ModelsList: FC<Props> = ({
       description: i18n.translate('xpack.ml.inference.modelsList.startModelDeploymentActionLabel', {
         defaultMessage: 'Start deployment',
       }),
+      'data-test-subj': 'mlModelsTableRowStartDeploymentAction',
       icon: 'play',
       type: 'icon',
       isPrimary: true,
@@ -399,6 +400,7 @@ export const ModelsList: FC<Props> = ({
       description: i18n.translate('xpack.ml.inference.modelsList.stopModelDeploymentActionLabel', {
         defaultMessage: 'Stop deployment',
       }),
+      'data-test-subj': 'mlModelsTableRowStopDeploymentAction',
       icon: 'stop',
       type: 'icon',
       isPrimary: true,
@@ -497,6 +499,7 @@ export const ModelsList: FC<Props> = ({
       description: i18n.translate('xpack.ml.inference.modelsList.testModelActionLabel', {
         defaultMessage: 'Test model',
       }),
+      'data-test-subj': 'mlModelsTableRowTestAction',
       icon: 'inputOutput',
       type: 'icon',
       isPrimary: true,
