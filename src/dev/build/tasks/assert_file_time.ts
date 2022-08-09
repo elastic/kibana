@@ -26,7 +26,7 @@ export const AssertFileTime: Task = {
           // tarred files with timestamps before 1970 throw errors
           // zipped files with timestamps before 1980 throw errors
           // round up to 1981 to avoid timezones
-          const invalidDate = new Date(1980, 0, 1).getTime();
+          const invalidDate = new Date(1981, 0, 1).getTime();
           return invalidDate > atimeMs || invalidDate > mtimeMs || invalidDate > ctimeMs;
         }),
         toArray(),
