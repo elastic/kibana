@@ -61,7 +61,6 @@ export function elasticsearchErrorHandler<ContextType, RequestType, ResponseType
             defaultMessage: '{errorMessage} Check Kibana Server logs for details.',
             values: {
               errorMessage: enterpriseSearchError.message,
-              requestUrl: request.url.toString(),
             },
           }),
           response,

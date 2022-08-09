@@ -5,9 +5,18 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+
 import { callEnterpriseSearchConfigAPI } from '../../lib/enterprise_search_config_api';
 import { RouteDependencies } from '../../plugin';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
+
+const errorMessage = i18n.translate(
+  'xpack.enterpriseSearch.server.routes.configData.errorMessage',
+  {
+    defaultMessage: 'Error fetching data from Enterprise Search',
+  }
+);
 
 export function registerConfigDataRoute({ router, config, log }: RouteDependencies) {
   router.get(
@@ -20,12 +29,12 @@ export function registerConfigDataRoute({ router, config, log }: RouteDependenci
 
       if ('responseStatus' in data) {
         return response.customError({
-          body: 'Error fetching data from Enterprise Search', // TODO i18n
+          body: errorMessage,
           statusCode: data.responseStatus,
         });
       } else if (!Object.keys(data).length) {
         return response.customError({
-          body: 'Error fetching data from Enterprise Search', // TODO i18n
+          body: errorMessage,
           statusCode: 502,
         });
       } else {
