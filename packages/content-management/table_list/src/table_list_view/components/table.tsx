@@ -65,7 +65,7 @@ export function Table<T extends UserContentCommonSchema>({
       <EuiButton
         color="danger"
         iconType="trash"
-        onClick={() => dispatch({ type: 'onClickDeleteItems' })}
+        onClick={() => dispatch({ type: 'showConfirmDeleteItemsModal' })}
         data-test-subj="deleteSelectedItems"
       >
         <FormattedMessage

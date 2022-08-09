@@ -8,10 +8,12 @@
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { CriteriaWithPagination } from '@elastic/eui';
 
+/** Action to trigger a fetch of the table items */
 export interface OnFetchItemsAction {
   type: 'onFetchItems';
 }
 
+/** Action to return the fetched table items */
 export interface OnFetchItemsSuccessAction<T> {
   type: 'onFetchItemsSuccess';
   data: {
@@ -22,30 +24,41 @@ export interface OnFetchItemsSuccessAction<T> {
   };
 }
 
+/** Action to return any error while fetching the table items */
 export interface OnFetchItemsErrorAction {
   type: 'onFetchItemsError';
   data: IHttpFetchError<Error>;
 }
 
+/**
+ * Actions to update the state of items deletions
+ * - onDeleteItems: emit before deleting item(s)
+ * - onItemsDeleted: emit after deleting item(s)
+ * - onCancelDeleteItems: emit to cancel deleting items (and close the modal)
+ */
 export interface DeleteItemsActions {
   type: 'onCancelDeleteItems' | 'onDeleteItems' | 'onItemsDeleted';
 }
 
+/** Action to update the selection of items in the table (for batch operations) */
 export interface OnSelectionChangeAction<T> {
   type: 'onSelectionChange';
   data: T[];
 }
 
+/** Action to update the state of the table whenever the sort or page size changes */
 export interface OnTableChangeAction<T> {
   type: 'onTableChange';
   data: CriteriaWithPagination<T>;
 }
 
-export interface OnClickDeleteItemsAction {
-  type: 'onClickDeleteItems';
+/** Action to display the delete confirmation modal  */
+export interface ShowConfirmDeleteItemsModalAction {
+  type: 'showConfirmDeleteItemsModal';
 }
 
-export interface OnFilterChangeAction {
+/** Action to update the search bar query text */
+export interface OnSearchQueryChangeAction {
   type: 'onSearchQueryChange';
   data: string;
 }
@@ -57,5 +70,5 @@ export type Action<T> =
   | DeleteItemsActions
   | OnSelectionChangeAction<T>
   | OnTableChangeAction<T>
-  | OnClickDeleteItemsAction
-  | OnFilterChangeAction;
+  | ShowConfirmDeleteItemsModalAction
+  | OnSearchQueryChangeAction;

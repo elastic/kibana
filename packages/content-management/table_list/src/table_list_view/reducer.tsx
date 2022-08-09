@@ -106,7 +106,7 @@ export function reducer<T extends UserContentCommonSchema>(
         tableSort,
       };
     }
-    case 'onClickDeleteItems': {
+    case 'showConfirmDeleteItemsModal': {
       return {
         ...state,
         showDeleteModal: true,
