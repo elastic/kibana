@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-export { SampleDataCard } from './sample_data_card';
-export type { Props as SampleDataCardProps } from './sample_data_card';
+export { SampleDataCard } from './src/sample_data_card';
+export type { Props as SampleDataCardProps } from './src/sample_data_card';
 
-export { SampleDataCardKibanaProvider, SampleDataCardProvider } from './services';
+export { SampleDataCardKibanaProvider, SampleDataCardProvider } from './src/services';
 export type {
   Services as SampleDataCardServices,
   KibanaDependencies as SampleDataCardKibanaDependencies,
-} from './services';
+} from './src/services';
 
 // TODO: clintandrewhall - convert to new Storybook mock when published.
 export {
@@ -21,5 +21,5 @@ export {
   getStoryServices as getSampleDataCardStoryServices,
   getMockDataSet as getSampleDataCardMockDataSet,
   // eslint-disable-next-line @kbn/imports/no_boundary_crossing
-} from './mocks';
-export type { Params as SampleDataCardStorybookParams } from './mocks';
+} from './src/mocks';
+export type { Params as SampleDataCardStorybookParams } from './src/mocks';

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { SampleDataTab } from './sample_data_tab';
-export { SampleDataTabKibanaProvider, SampleDataTabProvider } from './services';
+export { SampleDataTab } from './src/sample_data_tab';
+export { SampleDataTabKibanaProvider, SampleDataTabProvider } from './src/services';
 export {
   DATA_TEST_SUBJ_DEMO_ENV_BUTTON,
   DATA_TEST_SUBJ_SHOW_SAMPLE_DATA_BUTTON,
   DATA_TEST_SUBJ_SHOW_SAMPLE_DATA_ACCORDION,
-} from './constants';
+} from './src/constants';
