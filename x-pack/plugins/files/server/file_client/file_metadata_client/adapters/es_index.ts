@@ -6,6 +6,7 @@
  */
 
 import { once } from 'lodash';
+import { pipe } from 'lodash/fp';
 import { Logger } from '@kbn/core/server';
 import { toElasticsearchQuery } from '@kbn/es-query';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
@@ -21,8 +22,10 @@ import type {
   ListArg,
   UpdateArgs,
 } from '../file_metadata_client';
-import { filterArgsToKuery } from './filter_args_to_kuery';
+import { filterArgsToKuery, filterDeletedFiles } from './query_filters';
 import { fileObjectType } from '../../../saved_objects/file';
+
+const filterArgsToESQuery = pipe(filterArgsToKuery, toElasticsearchQuery);
 
 const fileMappings: MappingProperty = {
   dynamic: false,
@@ -109,13 +112,13 @@ export class EsIndexFilesMetadataClient<M = unknown> implements FileMetadataClie
     };
   }
 
+  private attrPrefix: keyof FileDocument = 'file';
+
   async list({ page, perPage }: ListArg = {}): Promise<Array<FileDescriptor<M>>> {
     const result = await this.esClient.search<FileDocument<M>>({
       index: this.index,
       expand_wildcards: 'hidden',
-      query: {
-        match_all: {},
-      },
+      query: toElasticsearchQuery(filterDeletedFiles({ attrPrefix: this.attrPrefix })),
       ...this.paginationToES({ page, perPage }),
       sort: 'file.created',
     });
@@ -129,17 +132,10 @@ export class EsIndexFilesMetadataClient<M = unknown> implements FileMetadataClie
   }
 
   async find({ page, perPage, ...filterArgs }: FindFileArgs): Promise<Array<FileDescriptor<M>>> {
-    const attrPrefix: keyof FileDocument = 'file';
-    const kuery = filterArgsToKuery({ ...filterArgs, attrPrefix });
-
-    if (!kuery) {
-      return this.list({ page, perPage });
-    }
-
     const result = await this.esClient.search<FileDocument<M>>({
       index: this.index,
       expand_wildcards: 'hidden',
-      query: toElasticsearchQuery(kuery),
+      query: filterArgsToESQuery({ ...filterArgs, attrPrefix: this.attrPrefix }),
       ...this.paginationToES({ page, perPage }),
       sort: 'file.created',
     });

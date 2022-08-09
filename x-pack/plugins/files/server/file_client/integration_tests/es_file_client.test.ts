@@ -102,7 +102,7 @@ describe('ES-index-backed file client', () => {
         },
       },
     });
-    await fileClient.create({
+    const { id: id2 } = await fileClient.create({
       id: '1234',
       metadata: {
         Status: 'UPLOADING',
@@ -161,5 +161,47 @@ describe('ES-index-backed file client', () => {
         })
       );
     }
+
+    await Promise.all([
+      fileClient.delete({ id: id1 }),
+      fileClient.delete({ id: id2 }),
+      fileClient.delete({ id: id3 }),
+    ]);
+  });
+
+  test('does not list deleted files', async () => {
+    const { id: id1 } = await fileClient.create({
+      id: '123',
+      metadata: {
+        Status: 'AWAITING_UPLOAD',
+        created: new Date().toISOString(),
+        Updated: new Date().toISOString(),
+        name: 'cool name 1',
+        Meta: {
+          test: '1',
+        },
+      },
+    });
+    const { id: id2 } = await fileClient.create({
+      id: '1234',
+      metadata: {
+        Status: 'DELETED',
+        created: new Date().toISOString(),
+        Updated: new Date().toISOString(),
+        name: 'cool name 2',
+        Meta: {
+          test: '2',
+        },
+      },
+    });
+
+    const list = await fileClient.list();
+
+    expect(list).toHaveLength(1);
+    expect(list[0]).toEqual(
+      expect.objectContaining({ id: id1, metadata: { Status: 'AWAITING_UPLOAD' } })
+    );
+
+    await Promise.all([fileClient.delete({ id: id1 }), fileClient.delete({ id: id2 })]);
   });
 });

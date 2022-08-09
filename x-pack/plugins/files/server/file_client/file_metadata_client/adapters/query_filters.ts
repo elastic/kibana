@@ -5,11 +5,20 @@
  * 2.0.
  */
 import { pipe, forEach } from 'lodash/fp';
-import { escapeKuery, KueryNode, nodeBuilder } from '@kbn/es-query';
+import { escapeKuery, KueryNode, nodeBuilder, nodeTypes } from '@kbn/es-query';
+
 import { getFlattenedObject } from '@kbn/std';
 
-import { FileMetadata } from '../../../../common/types';
+import { FileMetadata, FileStatus } from '../../../../common/types';
 import { FindFileArgs } from '../../../file_service';
+
+const { buildNode } = nodeTypes.function;
+
+const deletedStatus: FileStatus = 'DELETED';
+
+export function filterDeletedFiles({ attrPrefix }: { attrPrefix: string }): KueryNode {
+  return buildNode('not', nodeBuilder.is(`${attrPrefix}.Status`, deletedStatus));
+}
 
 export function filterArgsToKuery({
   extension,
@@ -19,8 +28,8 @@ export function filterArgsToKuery({
   name,
   status,
   attrPrefix = '',
-}: Omit<FindFileArgs, 'page' | 'perPage'> & { attrPrefix?: string }): undefined | KueryNode {
-  const kueryExpressions: KueryNode[] = [];
+}: Omit<FindFileArgs, 'page' | 'perPage'> & { attrPrefix?: string }): KueryNode {
+  const kueryExpressions: KueryNode[] = [filterDeletedFiles({ attrPrefix })];
 
   const addFilters = (fieldName: keyof FileMetadata, values: string[] = []): void => {
     if (values.length) {
@@ -51,5 +60,5 @@ export function filterArgsToKuery({
     addMetaFilters(meta);
   }
 
-  return kueryExpressions.length ? nodeBuilder.and(kueryExpressions) : undefined;
+  return nodeBuilder.and(kueryExpressions);
 }

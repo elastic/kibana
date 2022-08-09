@@ -25,7 +25,7 @@ import type {
   GetUsageMetricsArgs,
 } from '../file_metadata_client';
 
-import { filterArgsToKuery } from './filter_args_to_kuery';
+import { filterArgsToKuery } from './query_filters';
 
 interface TermsAgg {
   buckets: Array<{ key: string; doc_count: number }>;
