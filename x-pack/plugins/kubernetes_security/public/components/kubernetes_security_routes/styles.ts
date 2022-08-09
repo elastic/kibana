@@ -13,7 +13,7 @@ export const useStyles = () => {
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
-    const { size, font, border } = euiTheme;
+    const { size, font } = euiTheme;
 
     const titleSection: CSSObject = {
       marginBottom: size.l,
