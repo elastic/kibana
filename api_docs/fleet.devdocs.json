@@ -14166,6 +14166,16 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-common.AGENT_API_ROUTES.AVAILABLE_VERSIONS_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "AVAILABLE_VERSIONS_PATTERN",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/constants/routes.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-common.AGENT_API_ROUTES.STATUS_PATTERN",
             "type": "string",
             "tags": [],
@@ -14975,6 +14985,21 @@
             "type": "Function",
             "tags": [],
             "label": "getListTagsPath",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/routes.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.agentRouteService.getAvailableVersionsPath",
+            "type": "Function",
+            "tags": [],
+            "label": "getAvailableVersionsPath",
             "description": [],
             "signature": [
               "() => string"
