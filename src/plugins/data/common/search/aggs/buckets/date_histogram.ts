@@ -220,16 +220,12 @@ export const getDateHistogramBucketAgg = ({
             return;
           }
 
-          const shouldForceFixedInterval = agg.params.field?.meta?.time_zone?.includes('UTC');
+          const shouldForceFixedInterval: boolean = agg.params.field?.meta?.fixed_interval?.length;
 
-          if (shouldForceFixedInterval) {
-            output.params.fixed_interval = interval.expression;
-          } else {
-            output.params = {
-              ...output.params,
-              ...dateHistogramInterval(interval.expression),
-            };
-          }
+          output.params = {
+            ...output.params,
+            ...dateHistogramInterval(interval.expression, shouldForceFixedInterval),
+          };
 
           const scaleMetrics =
             scaleMetricValues && interval.scaled && interval.scale && interval.scale < 1;
