@@ -7,7 +7,7 @@
 
 import { uniq, mapValues, difference } from 'lodash';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import type { CoreStart, HttpSetup, SavedObjectReference } from '@kbn/core/public';
+import type { CoreStart, SavedObjectReference } from '@kbn/core/public';
 import type {
   DataViewsContract,
   DataView,
@@ -434,7 +434,6 @@ export async function syncExistingFields({
   dataViews: DataViewsPublicPluginStart;
   dateRange: DateRange;
   indexPatterns: DataView[];
-  fetchJson: HttpSetup['post'];
   setState: SetState;
   isFirstExistenceFetch: boolean;
   currentIndexPatternTitle: string;

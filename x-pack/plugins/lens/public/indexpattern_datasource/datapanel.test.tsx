@@ -27,7 +27,7 @@ import { getFieldByNameFactory } from './pure_helpers';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { TermsIndexPatternColumn } from './operations';
 import { DOCUMENT_FIELD_NAME } from '../../common';
-import { DataViewField, FieldSpec } from '@kbn/data-views-plugin/common';
+import { DataViewField, FieldSpec, DataView } from '@kbn/data-views-plugin/common';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 
 const fieldsOne = [
@@ -243,8 +243,6 @@ const initialState: IndexPatternPrivateState = {
   isFirstExistenceFetch: false,
 };
 
-// const dslQuery = { bool: { must: [], filter: [], should: [], must_not: [] } };
-
 // @ts-expect-error Portal mocks are notoriously difficult to type
 ReactDOM.createPortal = jest.fn((element) => element);
 
@@ -371,9 +369,9 @@ describe('IndexPattern Data Panel', () => {
           getFieldsForIndexPattern,
           get: (id: string) => {
             if (id === 'a') {
-              return Promise.resolve(dataViewA);
+              return Promise.resolve(dataViewA as unknown as DataView);
             } else {
-              return Promise.resolve(dataViewB);
+              return Promise.resolve(dataViewB as unknown as DataView);
             }
           },
         },

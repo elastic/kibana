@@ -193,7 +193,6 @@ export function IndexPatternDataPanel({
             currentIndexPatternTitle: indexPatterns[currentIndexPatternId]?.title || '',
             showNoDataPopover,
             indexPatterns: actualIndexPatterns,
-            fetchJson: core.http.post,
             dslQuery,
           });
         }}
