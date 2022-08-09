@@ -51,6 +51,13 @@ export function getStateDefaults({
   const columns = getDefaultColumns(savedSearch, config);
   const chartHidden = storage.get(CHART_HIDDEN_KEY);
 
+  if (savedSearch.timeRestore && savedSearch.timeRange) {
+    data.query.timefilter.timefilter.setTime(savedSearch.timeRange);
+  }
+  if (savedSearch.timeRestore && savedSearch.refreshInterval) {
+    data.query.timefilter.timefilter.setRefreshInterval(savedSearch.refreshInterval);
+  }
+
   const defaultState: AppState = {
     query,
     sort: !sort.length
