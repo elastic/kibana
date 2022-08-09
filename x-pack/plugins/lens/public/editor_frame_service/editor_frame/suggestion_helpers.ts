@@ -269,7 +269,7 @@ export function getTopSuggestionForField(
   field: DragDropIdentifier
 ) {
   const hasData = Object.values(datasourceLayers).some(
-    (datasourceLayer) => datasourceLayer.getTableSpec().length > 0
+    (datasourceLayer) => datasourceLayer && datasourceLayer.getTableSpec().length > 0
   );
 
   const activeVisualization = visualization.activeId

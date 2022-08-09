@@ -65,13 +65,13 @@ export const getSeriesColor = (layer: XYLayerConfig, accessor: string) => {
 
 export const getColumnToLabelMap = (
   layer: XYDataLayerConfig | XYReferenceLineLayerConfig,
-  datasource: DatasourcePublicAPI
+  datasource?: DatasourcePublicAPI
 ) => {
   const columnToLabel: Record<string, string> = {};
   layer.accessors
     .concat(isDataLayer(layer) && layer.splitAccessor ? [layer.splitAccessor] : [])
     .forEach((accessor) => {
-      const operation = datasource.getOperationForColumnId(accessor);
+      const operation = datasource?.getOperationForColumnId(accessor);
       if (operation?.label) {
         columnToLabel[accessor] = operation.label;
       }
@@ -93,7 +93,7 @@ export function hasHistogramSeries(
       return false;
     }
 
-    const xAxisOperation = datasourceLayers[layerId].getOperationForColumnId(xAccessor);
+    const xAxisOperation = datasourceLayers[layerId]?.getOperationForColumnId(xAccessor);
     return (
       xAxisOperation &&
       xAxisOperation.isBucketed &&

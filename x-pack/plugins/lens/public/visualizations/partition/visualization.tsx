@@ -299,7 +299,7 @@ export const getPieVisualization = ({
         );
       }
 
-      const columnToLabel = frame.datasourceLayers[layerId].getOperationForColumnId(metric)?.label;
+      const columnToLabel = frame.datasourceLayers[layerId]?.getOperationForColumnId(metric)?.label;
       const hasArrayValues = rows.some((row) => Array.isArray(row[metric]));
       if (hasArrayValues) {
         warningMessages.push(

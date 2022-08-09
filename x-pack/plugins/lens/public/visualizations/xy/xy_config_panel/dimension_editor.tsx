@@ -104,7 +104,7 @@ export function DataDimensionEditor(
   const overwriteColor = getSeriesColor(layer, accessor);
   const assignedColor = useMemo(() => {
     const sortedAccessors: string[] = getSortedAccessors(
-      props.frame.datasourceLayers[layer.layerId] ?? layer.accessors,
+      props.frame.datasourceLayers[layer.layerId],
       layer
     );
     const colorAssignments = getColorAssignments(
