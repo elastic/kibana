@@ -50,7 +50,8 @@ describe('ruleParamsModifier', () => {
     expect(editedRuleParams).toHaveProperty('version', ruleParamsMock.version + 1);
   });
 
-  describe('index_patterns', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/138409
+  describe.skip('index_patterns', () => {
     test('should add new index pattern to rule', () => {
       const editedRuleParams = ruleParamsModifier(ruleParamsMock, [
         {
@@ -73,7 +74,22 @@ describe('ruleParamsModifier', () => {
       expect(editedRuleParams).toHaveProperty('index', ['initial-index-*']);
     });
 
-    test('should rewrite index  pattern in rule', () => {
+    test('should return undefined index patterns on remove action if rule has dataViewId only', () => {
+      const testDataViewId = 'test-data-view-id';
+      const editedRuleParams = ruleParamsModifier(
+        { dataViewId: testDataViewId } as RuleAlertType['params'],
+        [
+          {
+            type: BulkActionEditType.delete_index_patterns,
+            value: ['index-2-*'],
+          },
+        ]
+      );
+      expect(editedRuleParams).toHaveProperty('index', undefined);
+      expect(editedRuleParams).toHaveProperty('dataViewId', testDataViewId);
+    });
+
+    test('should rewrite index pattern in rule', () => {
       const editedRuleParams = ruleParamsModifier(ruleParamsMock, [
         {
           type: BulkActionEditType.set_index_patterns,
@@ -81,6 +97,34 @@ describe('ruleParamsModifier', () => {
         },
       ]);
       expect(editedRuleParams).toHaveProperty('index', ['index']);
+    });
+
+    test('should set dataViewId to undefined if overwrite_data_views=true on set_index_patterns action', () => {
+      const editedRuleParams = ruleParamsModifier(
+        { dataViewId: 'test-data-view', index: ['test-*'] } as RuleAlertType['params'],
+        [
+          {
+            type: BulkActionEditType.set_index_patterns,
+            value: ['index'],
+            overwrite_data_views: true,
+          },
+        ]
+      );
+      expect(editedRuleParams).toHaveProperty('dataViewId', undefined);
+    });
+
+    test('should set dataViewId to undefined if overwrite_data_views=true on add_index_patterns action', () => {
+      const editedRuleParams = ruleParamsModifier(
+        { dataViewId: 'test-data-view', index: ['test-*'] } as RuleAlertType['params'],
+        [
+          {
+            type: BulkActionEditType.add_index_patterns,
+            value: ['index'],
+            overwrite_data_views: true,
+          },
+        ]
+      );
+      expect(editedRuleParams).toHaveProperty('dataViewId', undefined);
     });
 
     test('should throw error on adding index pattern if rule is of machine learning type', () => {
