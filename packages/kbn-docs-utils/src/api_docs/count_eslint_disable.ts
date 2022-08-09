@@ -39,10 +39,7 @@ function findOccurrences(fileContent: string, regexp: RegExp): number {
 }
 
 async function countEsLintDisableInFile(path: string): Promise<EslintDisableCounts> {
-  const fileContent = await Fs.promises.readFile(path, { encoding: 'utf8' }).catch((err) => {
-    console.error(`Error reading contents of file ${path}`, err);
-    return '';
-  });
+  const fileContent = await Fs.promises.readFile(path, { encoding: 'utf8' });
 
   return {
     eslintDisableLineCount:
@@ -70,24 +67,4 @@ export async function countEslintDisableLine(path: string): Promise<EslintDisabl
     },
     { eslintDisableFileCount: 0, eslintDisableLineCount: 0 }
   );
-
-  // const disableCountOutputs = false
-  //   ? await Promise.all([
-  //       execAsync(`grep -rE 'eslint-disable-next-line|eslint-disable-line' ${path} | wc -l`),
-  //       execAsync(`grep -rE 'eslint-disable ' ${path} | wc -l`),
-  //     ])
-  //   : [{ stdout: '0' }, { stdout: '0' }];
-  // const eslintDisableLineCount = Number.parseInt(disableCountOutputs[0].stdout.toString(), 10);
-  //
-  // if (eslintDisableLineCount === undefined || isNaN(eslintDisableLineCount)) {
-  //   throw new Error(`Parsing ${disableCountOutputs[0]} failed to product a valid number`);
-  // }
-  //
-  // const eslintDisableFileCount = Number.parseInt(disableCountOutputs[1].stdout.toString(), 10);
-  //
-  // if (eslintDisableFileCount === undefined || isNaN(eslintDisableFileCount)) {
-  //   throw new Error(`Parsing ${disableCountOutputs[1]} failed to product a valid number`);
-  // }
-  //
-  // return { eslintDisableFileCount, eslintDisableLineCount };
 }
