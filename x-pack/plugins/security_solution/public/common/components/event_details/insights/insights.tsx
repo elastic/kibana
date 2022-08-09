@@ -34,7 +34,7 @@ interface Props {
  */
 export const Insights = React.memo<Props>(
   ({ browserFields, eventId, data, isReadOnly, timelineId }) => {
-    const hasAtLeastPlatinum = useLicense().isPlatinumPlus() && false;
+    const hasAtLeastPlatinum = useLicense().isPlatinumPlus();
     const processEntityField = find({ category: 'process', field: 'process.entity_id' }, data);
     const originalDocumentId = find(
       { category: 'kibana', field: 'kibana.alert.ancestors.id' },
@@ -131,7 +131,7 @@ export const Insights = React.memo<Props>(
                 />
               </EuiFlexItem>
             ) : (
-              <EuiFlexItem data-test-subj="related-alerts-upsell">
+              <EuiFlexItem>
                 <RelatedAlertsUpsell />
               </EuiFlexItem>
             ))}
