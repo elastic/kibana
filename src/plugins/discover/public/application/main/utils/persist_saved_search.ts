@@ -72,15 +72,17 @@ export async function persistSavedSearch(
 
   const { from, to } = services.timefilter.getTime();
   const refreshInterval = services.timefilter.getRefreshInterval();
-  savedSearch.timeRange = savedSearch.timeRestore
-    ? {
-        from,
-        to,
-      }
-    : undefined;
-  savedSearch.refreshInterval = savedSearch.timeRestore
-    ? { value: refreshInterval.value, pause: refreshInterval.pause }
-    : undefined;
+  savedSearch.timeRange =
+    savedSearch.timeRestore || savedSearch.timeRange
+      ? {
+          from,
+          to,
+        }
+      : undefined;
+  savedSearch.refreshInterval =
+    savedSearch.timeRestore || savedSearch.refreshInterval
+      ? { value: refreshInterval.value, pause: refreshInterval.pause }
+      : undefined;
 
   try {
     const id = await saveSavedSearch(savedSearch, saveOptions, services.core.savedObjects.client);
