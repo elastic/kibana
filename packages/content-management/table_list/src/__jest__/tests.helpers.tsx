@@ -12,7 +12,7 @@ import { TableListViewProvider, Services } from '../table_list_view/services';
 export const getMockServices = (overrides?: Partial<Services>) => {
   const services: Services = {
     canEditAdvancedSettings: true,
-    getUrlForListingLimitSettings: () => 'http://elastic.co',
+    getListingLimitSettingsUrl: () => 'http://elastic.co',
     notifyError: () => undefined,
     ...overrides,
   };
