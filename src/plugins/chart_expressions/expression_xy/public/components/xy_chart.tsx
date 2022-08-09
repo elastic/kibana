@@ -737,6 +737,7 @@ export function XYChart({
           formattedDatatables,
           titles,
           fieldFormats,
+          singleTable,
         }}
       >
         <Chart ref={chartRef}>
@@ -827,7 +828,8 @@ export function XYChart({
                     onClickValue,
                     fieldFormats,
                     formattedDatatables,
-                    titles
+                    titles,
+                    singleTable
                   )
                 : undefined
             }

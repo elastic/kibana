@@ -38,7 +38,7 @@ type SeriesSpec = LineSeriesProps & BarSeriesProps & AreaSeriesProps;
 type GetSeriesPropsFn = (config: {
   layer: CommonXYDataLayerConfig;
   titles?: LayerAccessorsTitles;
-  accessor: string;
+  accessor: string | string[];
   chartHasMoreThanOneBarSeries?: boolean;
   formatFactory: FormatFactory;
   colorAssignments: ColorAssignments;
@@ -74,7 +74,6 @@ type GetColorFn = (
   seriesIdentifier: XYChartSeriesIdentifier,
   config: {
     layer: CommonXYDataLayerConfig;
-    accessor: string;
     colorAssignments: ColorAssignments;
     paletteService: PaletteRegistry;
     getSeriesNameFn: (d: XYChartSeriesIdentifier) => SeriesName;
@@ -309,11 +308,11 @@ const getLineConfig: GetLineConfigFn = ({ showLines, lineWidth }) => ({
 
 const getColor: GetColorFn = (
   series,
-  { layer, accessor, colorAssignments, paletteService, syncColors, getSeriesNameFn },
+  { layer, colorAssignments, paletteService, syncColors, getSeriesNameFn },
   uiState,
   singleTable
 ) => {
-  const overwriteColor = getSeriesColor(layer, accessor);
+  const overwriteColor = getSeriesColor(layer, series.yAccessor as string);
   if (overwriteColor !== null) {
     return overwriteColor;
   }
@@ -348,6 +347,7 @@ const getColor: GetColorFn = (
 
 const EMPTY_ACCESSOR = '-';
 const SPLIT_CHAR = ':';
+const SPLIT_Y_ACCESSORS = '|';
 
 export const generateSeriesId = (
   { layerId }: Pick<CommonXYDataLayerConfig, 'layerId'>,
@@ -360,11 +360,11 @@ export const generateSeriesId = (
   );
 
 export const getMetaFromSeriesId = (seriesId: string) => {
-  const [layerId, xAccessor, yAccessor, ...splitAccessors] = seriesId.split(SPLIT_CHAR);
+  const [layerId, xAccessor, yAccessors, ...splitAccessors] = seriesId.split(SPLIT_CHAR);
   return {
     layerId,
     xAccessor: xAccessor === EMPTY_ACCESSOR ? undefined : xAccessor,
-    yAccessor,
+    yAccessors: yAccessors.split(SPLIT_Y_ACCESSORS),
     splitAccessor: splitAccessors[0] === EMPTY_ACCESSOR ? undefined : splitAccessors,
   };
 };
@@ -411,7 +411,9 @@ export const getSeriesProps: GetSeriesPropsFn = ({
     (isStacked || !splitColumnIds.length) &&
     (isStacked || !isBarChart || !chartHasMoreThanOneBarSeries);
 
-  const formatter = table?.columns.find((column) => column.id === accessor)?.meta?.params;
+  const formatter = table?.columns.find(
+    (column) => column.id === (Array.isArray(accessor) ? accessor[0] : accessor)
+  )?.meta?.params;
 
   const markSizeColumnId = markSizeAccessor
     ? getAccessorByDimension(markSizeAccessor, table.columns)
@@ -433,7 +435,9 @@ export const getSeriesProps: GetSeriesPropsFn = ({
       !(xColumnId && row[xColumnId] === undefined) &&
       !(
         splitColumnIds.some((splitColumnId) => row[splitColumnId] === undefined) &&
-        row[accessor] === undefined
+        (Array.isArray(accessor)
+          ? accessor.some((a) => row[a] === undefined)
+          : row[accessor] === undefined)
       )
   );
 
@@ -471,11 +475,11 @@ export const getSeriesProps: GetSeriesPropsFn = ({
     id: generateSeriesId(
       layer,
       splitColumnIds.length ? splitColumnIds : [EMPTY_ACCESSOR],
-      accessor,
+      Array.isArray(accessor) ? accessor.join(SPLIT_Y_ACCESSORS) : accessor,
       xColumnId
     ),
     xAccessor: xColumnId || 'unifiedX',
-    yAccessors: [accessor],
+    yAccessors: Array.isArray(accessor) ? accessor : [accessor],
     markSizeAccessor: markSizeColumnId,
     markFormat: (value) => markFormatter.convert(value),
     data: rows,
@@ -489,7 +493,6 @@ export const getSeriesProps: GetSeriesPropsFn = ({
         series,
         {
           layer,
-          accessor,
           colorAssignments,
           paletteService,
           getSeriesNameFn,

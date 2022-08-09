@@ -423,23 +423,35 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
     });
   }
 
+  const series = finalSeriesParams.reduce<Record<string, any>>((acc, param) => {
+    if (param.show && yAccessors[param.data.id]) {
+      if (param.valueAxis && acc[param.valueAxis]) {
+        acc[param.valueAxis].yAccessors.push(...yAccessors[param.data.id]);
+      } else {
+        acc[param.valueAxis] = {
+          ...param,
+          yAccessors: [...yAccessors[param.data.id]],
+        };
+      }
+    }
+    return acc;
+  }, {});
+
   const visTypeXy = buildExpressionFunction('layeredXyVis', {
     layers: [
-      ...finalSeriesParams
-        .filter((seriesParam) => seriesParam.show && yAccessors[seriesParam.data.id])
-        .map((seriesParam) =>
-          prepareLayers(
-            seriesParam,
-            isHistogram,
-            vis.params.valueAxes,
-            yAccessors[seriesParam.data.id],
-            dimensions.x,
-            dimensions.series,
-            dimensions.z ? dimensions.z[0] : undefined,
-            vis.params.palette,
-            xScale
-          )
-        ),
+      ...Object.keys(series).map((key) =>
+        prepareLayers(
+          series[key],
+          isHistogram,
+          vis.params.valueAxes,
+          series[key].yAccessors,
+          dimensions.x,
+          dimensions.series,
+          dimensions.z ? dimensions.z[0] : undefined,
+          vis.params.palette,
+          xScale
+        )
+      ),
       ...(vis.params.thresholdLine.show
         ? [prepareReferenceLine(vis.params.thresholdLine, vis.params.valueAxes[0].id)]
         : []),

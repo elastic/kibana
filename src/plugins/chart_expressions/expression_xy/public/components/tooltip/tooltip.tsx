@@ -56,7 +56,7 @@ export const Tooltip: FC<Props> = ({
 
   const data: TooltipData[] = [];
   const seriesIdentifier = pickedValue.seriesIdentifier as XYChartSeriesIdentifier;
-  const { layerId, xAccessor, yAccessor } = getMetaFromSeriesId(seriesIdentifier.specId);
+  const { layerId, xAccessor, yAccessors } = getMetaFromSeriesId(seriesIdentifier.specId);
   const { formattedColumns, table } = formattedDatatables[layerId];
   const layerTitles = titles[layerId];
   const layerFormats = fieldFormats[layerId];
@@ -75,7 +75,9 @@ export const Tooltip: FC<Props> = ({
     });
   }
 
-  const tooltipYAccessor = yAccessor === seriesIdentifier.yAccessor ? yAccessor : null;
+  const tooltipYAccessor = yAccessors.includes(seriesIdentifier.yAccessor as string)
+    ? (seriesIdentifier.yAccessor as string)
+    : null;
   if (tooltipYAccessor) {
     const yFormatter = formatFactory(layerFormats.yAccessors[tooltipYAccessor]);
     data.push({

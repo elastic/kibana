@@ -110,10 +110,22 @@ export const DataLayers: FC<Props> = ({
     : getColorAssignments(layers, titles, fieldFormats, formattedDatatables);
   return (
     <>
-      {layers.flatMap((layer) =>
-        layer.accessors.map((accessor, accessorIndex) => {
-          const { seriesType, columnToLabel, layerId, table } = layer;
-          const yColumnId = getAccessorByDimension(accessor, table.columns);
+      {layers.flatMap((layer) => {
+        const yPercentileAccessors: string[] = [];
+        const yAccessors: string[] = [];
+        layer.accessors.forEach((accessor) => {
+          const columnId = getAccessorByDimension(accessor, layer.table.columns);
+          if (columnId.includes('.')) {
+            yPercentileAccessors.push(columnId);
+          } else {
+            yAccessors.push(columnId);
+          }
+        });
+        return (
+          yPercentileAccessors.length ? [...yAccessors, yPercentileAccessors] : [...yAccessors]
+        ).map((accessor, accessorIndex) => {
+          const { seriesType, columnToLabel, layerId } = layer;
+          const yColumnId = Array.isArray(accessor) ? accessor[0] : accessor;
           const columnToLabelMap: Record<string, string> = columnToLabel
             ? JSON.parse(columnToLabel)
             : {};
@@ -134,7 +146,7 @@ export const DataLayers: FC<Props> = ({
           const seriesProps = getSeriesProps({
             layer,
             titles: titles[layer.layerId],
-            accessor: yColumnId,
+            accessor,
             chartHasMoreThanOneBarSeries,
             colorAssignments,
             formatFactory,
@@ -194,8 +206,8 @@ export const DataLayers: FC<Props> = ({
                 />
               );
           }
-        })
-      )}
+        });
+      })}
     </>
   );
 };

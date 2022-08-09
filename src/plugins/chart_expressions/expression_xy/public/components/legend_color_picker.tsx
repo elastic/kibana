@@ -43,6 +43,7 @@ export interface LegendColorPickerWrapperContextType {
   formattedDatatables: DatatablesWithFormatInfo;
   titles: LayersAccessorsTitles;
   fieldFormats: LayersFieldFormats;
+  singleTable?: boolean;
 }
 
 export const LegendColorPickerWrapperContext = createContext<
@@ -73,16 +74,18 @@ export const LegendColorPickerWrapper: LegendColorPicker = ({
     titles,
     formattedDatatables,
     fieldFormats,
+    singleTable,
   } = colorPickerWrappingContext;
   const { layerId } = getMetaFromSeriesId(seriesIdentifier.specId);
 
   const layer = dataLayers.find((dataLayer) => dataLayer.layerId === layerId);
+  const allYAccessors = dataLayers.flatMap((dataLayer) => dataLayer.accessors);
   const seriesName = layer
     ? getSeriesName(
         seriesIdentifier as XYChartSeriesIdentifier,
         {
           splitAccessors: layer.splitAccessors ?? [],
-          accessorsCount: layer.accessors.length,
+          accessorsCount: singleTable ? allYAccessors.length : layer.accessors.length,
           columns: formattedDatatables[layer.layerId].table.columns,
           splitAccessorsFormats: fieldFormats[layer.layerId].splitSeriesAccessors,
           alreadyFormattedColumns: formattedDatatables[layer.layerId].formattedColumns,
