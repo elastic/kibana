@@ -745,7 +745,7 @@ export function canTransition({
   filterOperations,
   visualizationGroups,
 }: ColumnChange & {
-  filterOperations: (meta?: OperationMetadata) => boolean;
+  filterOperations: (meta: OperationMetadata) => boolean;
 }): boolean {
   const previousColumn = layer.columns[columnId];
   if (!previousColumn) {
@@ -767,6 +767,9 @@ export function canTransition({
     });
     const newDefinition = operationDefinitionMap[op];
     const newColumn = newLayer.columns[columnId];
+    if (!newColumn) {
+      return false;
+    }
     return (
       Boolean(newColumn) &&
       !newLayer.incompleteColumns?.[columnId] &&

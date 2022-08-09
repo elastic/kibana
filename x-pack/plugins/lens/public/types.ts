@@ -421,7 +421,7 @@ interface SharedDimensionProps {
   /** Visualizations can restrict operations based on their own rules.
    * For example, limiting to only bucketed or only numeric operations.
    */
-  filterOperations: (operation?: OperationMetadata) => boolean;
+  filterOperations: (operation: OperationMetadata) => boolean;
 
   /** Some dimension editors will allow users to change the operation grouping
    * from the panel, and this lets the visualization hint that it doesn't want

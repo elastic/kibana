@@ -254,8 +254,8 @@ export const getLegacyMetricVisualization = ({
               ]
             : [],
           supportsMoreColumns: !props.state.accessor,
-          filterOperations: (op?: OperationMetadata) =>
-            Boolean(op && !op.isBucketed && legacyMetricSupportedTypes.has(op.dataType)),
+          filterOperations: (op: OperationMetadata) =>
+            !op.isBucketed && legacyMetricSupportedTypes.has(op.dataType),
           enableDimensionEditor: true,
           required: true,
         },

@@ -216,11 +216,11 @@ export const getMetricVisualization = ({
   triggers: [VIS_EVENT_TO_TRIGGER.filter],
 
   getConfiguration(props) {
-    const isSupportedMetric = (op?: OperationMetadata) =>
-      Boolean(op && !op?.isBucketed && supportedDataTypes.has(op.dataType));
+    const isSupportedMetric = (op: OperationMetadata) =>
+      !op?.isBucketed && supportedDataTypes.has(op.dataType);
 
-    const isSupportedDynamicMetric = (op?: OperationMetadata) =>
-      Boolean(op && !op?.isBucketed && supportedDataTypes.has(op.dataType) && !op.isStaticValue);
+    const isSupportedDynamicMetric = (op: OperationMetadata) =>
+      !op?.isBucketed && supportedDataTypes.has(op.dataType) && !op.isStaticValue;
 
     const getPrimaryAccessorDisplayConfig = (): Partial<AccessorConfig> => {
       const stops = props.state.palette?.params?.stops || [];
@@ -242,7 +242,7 @@ export const getMetricVisualization = ({
           };
     };
 
-    const isBucketed = (op?: OperationMetadata) => Boolean(op?.isBucketed);
+    const isBucketed = (op: OperationMetadata) => op.isBucketed;
 
     return {
       groups: [

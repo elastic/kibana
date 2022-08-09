@@ -56,13 +56,13 @@ function getAxisName(axis: 'x' | 'y') {
   return vertical;
 }
 
-export const isBucketed = (op?: OperationMetadata) => op?.isBucketed && op.scale === 'ordinal';
-const isNumericMetric = (op?: OperationMetadata) => op?.dataType === 'number' && !op.isStaticValue;
+export const isBucketed = (op: OperationMetadata) => op.isBucketed && op.scale === 'ordinal';
+const isNumericMetric = (op: OperationMetadata) => op.dataType === 'number' && !op.isStaticValue;
 
-export const filterOperationsAxis = (op?: OperationMetadata) =>
-  isBucketed(op) || op?.scale === 'interval';
+export const filterOperationsAxis = (op: OperationMetadata) =>
+  isBucketed(op) || op.scale === 'interval';
 
-export const isCellValueSupported = (op?: OperationMetadata) => {
+export const isCellValueSupported = (op: OperationMetadata) => {
   return (
     !isBucketed(op) && (op?.scale === 'ordinal' || op?.scale === 'ratio') && isNumericMetric(op)
   );

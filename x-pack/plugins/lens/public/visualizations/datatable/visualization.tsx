@@ -214,7 +214,7 @@ export const getDatatableVisualization = ({
                 : undefined,
             })),
           supportsMoreColumns: true,
-          filterOperations: (op) => Boolean(op?.isBucketed),
+          filterOperations: (op) => op.isBucketed,
           dataTestSubj: 'lnsDatatable_rows',
           enableDimensionEditor: true,
           hideGrouping: true,
@@ -241,7 +241,7 @@ export const getDatatableVisualization = ({
             )
             .map((accessor) => ({ columnId: accessor })),
           supportsMoreColumns: true,
-          filterOperations: (op) => Boolean(op?.isBucketed),
+          filterOperations: (op) => op.isBucketed,
           dataTestSubj: 'lnsDatatable_columns',
           enableDimensionEditor: true,
           hideGrouping: true,
@@ -279,7 +279,7 @@ export const getDatatableVisualization = ({
               };
             }),
           supportsMoreColumns: true,
-          filterOperations: (op) => !Boolean(op?.isBucketed),
+          filterOperations: (op) => !op.isBucketed,
           required: true,
           dataTestSubj: 'lnsDatatable_metrics',
           enableDimensionEditor: true,
