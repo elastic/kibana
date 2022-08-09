@@ -208,7 +208,7 @@ export function insertNewColumn({
 
   const baseOptions = {
     indexPattern,
-    ...(Object.keys(previousColumn).length === 0 && { previousColumn }),
+    previousColumn,
   };
 
   if (operationDefinition.input === 'none' || operationDefinition.input === 'managedReference') {
