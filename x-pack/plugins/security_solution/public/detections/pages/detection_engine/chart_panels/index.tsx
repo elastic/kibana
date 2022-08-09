@@ -18,7 +18,7 @@ import { ChartSelect } from './chart_select';
 import { TABLE, TREEMAP, TREND } from './chart_select/translations';
 import { AlertsTreemapPanel } from '../../../../common/components/alerts_treemap_panel';
 import type { UpdateDateRange } from '../../../../common/components/charts/common';
-import { useEuiComboBoxReset } from '../../../../common/components/combo_box_reset';
+import { useEuiComboBoxReset } from '../../../../common/components/use_combo_box_reset';
 import { AlertsHistogramPanel } from '../../../components/alerts_kpis/alerts_histogram_panel';
 import {
   DEFAULT_STACK_BY_FIELD,
