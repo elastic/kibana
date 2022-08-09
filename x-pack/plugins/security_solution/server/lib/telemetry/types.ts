@@ -363,3 +363,52 @@ export interface TimelineTelemetryTemplate {
   event_id: string;
   timeline: TimelineTelemetryEvent[];
 }
+
+export interface ValueListMetaData {
+  total_list_count: number;
+  types: Array<{
+    type: string;
+    count: number;
+  }>;
+  lists: Array<{
+    id: string;
+    count: number;
+  }>;
+  included_in_exception_lists_count: number;
+  used_in_indicator_match_rule_count: number;
+}
+
+export interface ValueListResponseAggregation {
+  aggregations: {
+    total_value_list_count: number;
+    type_breakdown: {
+      buckets: Array<{
+        key: string;
+        doc_count: number;
+      }>;
+    };
+  };
+}
+
+export interface ValueListItemsResponseAggregation {
+  aggregations: {
+    value_list_item_count: {
+      buckets: Array<{
+        key: string;
+        doc_count: number;
+      }>;
+    };
+  };
+}
+
+export interface ValueListExceptionListResponseAggregation {
+  aggregations: {
+    vl_included_in_exception_lists_count: { value: number };
+  };
+}
+
+export interface ValueListIndicatorMatchResponseAggregation {
+  aggregations: {
+    vl_used_in_indicator_match_rule_count: { value: number };
+  };
+}

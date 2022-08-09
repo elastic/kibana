@@ -41,24 +41,21 @@ const invalidJsonBoth = `{"fields":{"summary":"wrong","description":"wrong","pro
 const config = {
   createCommentJson: '{"body":{{{case.comment}}}}',
   createCommentMethod: 'post',
-  createCommentUrl:
-    'https://siem-kibana.atlassian.net/rest/api/2/issue/{{{external.system.id}}}/comment',
+  createCommentUrl: 'https://coolsite.net/rest/api/2/issue/{{{external.system.id}}}/comment',
   createIncidentJson:
     '{"fields":{"summary":{{{case.title}}},"description":{{{case.description}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
   createIncidentMethod: 'post',
   createIncidentResponseKey: 'id',
-  createIncidentUrl: 'https://siem-kibana.atlassian.net/rest/api/2/issue',
-  getIncidentResponseCreatedDateKey: 'fields.created',
+  createIncidentUrl: 'https://coolsite.net/rest/api/2/issue',
   getIncidentResponseExternalTitleKey: 'key',
-  getIncidentResponseUpdatedDateKey: 'fields.updated',
   hasAuth: true,
   headers: [{ key: 'content-type', value: 'text' }],
-  incidentViewUrl: 'https://siem-kibana.atlassian.net/browse/{{{external.system.title}}}',
-  getIncidentUrl: 'https://siem-kibana.atlassian.net/rest/api/2/issue/{{{external.system.id}}}',
+  viewIncidentUrl: 'https://coolsite.net/browse/{{{external.system.title}}}',
+  getIncidentUrl: 'https://coolsite.net/rest/api/2/issue/{{{external.system.id}}}',
   updateIncidentJson:
     '{"fields":{"summary":{{{case.title}}},"description":{{{case.description}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
   updateIncidentMethod: 'put',
-  updateIncidentUrl: 'https://siem-kibana.atlassian.net/rest/api/2/issue/{{{external.system.id}}}',
+  updateIncidentUrl: 'https://coolsite.net/rest/api/2/issue/{{{external.system.id}}}',
 };
 const actionConnector = {
   secrets: {
@@ -95,9 +92,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
     expect(getByTestId('createIncidentResponseKeyText')).toBeInTheDocument();
     expect(getByTestId('getIncidentUrlInput')).toBeInTheDocument();
     expect(getByTestId('getIncidentResponseExternalTitleKeyText')).toBeInTheDocument();
-    expect(getByTestId('getIncidentResponseCreatedDateKeyText')).toBeInTheDocument();
-    expect(getByTestId('getIncidentResponseUpdatedDateKeyText')).toBeInTheDocument();
-    expect(getByTestId('incidentViewUrlInput')).toBeInTheDocument();
+    expect(getByTestId('viewIncidentUrlInput')).toBeInTheDocument();
     expect(getByTestId('webhookUpdateMethodSelect')).toBeInTheDocument();
     expect(getByTestId('updateIncidentUrlInput')).toBeInTheDocument();
     expect(getByTestId('webhookUpdateIncidentJson')).toBeInTheDocument();
@@ -340,12 +335,10 @@ describe('CasesWebhookActionConnectorFields renders', () => {
       ['webhookCreateUrlText', 'not-valid'],
       ['webhookUserInput', ''],
       ['webhookPasswordInput', ''],
-      ['incidentViewUrlInput', 'https://missingexternalid.com'],
+      ['viewIncidentUrlInput', 'https://missingexternalid.com'],
       ['createIncidentResponseKeyText', ''],
       ['getIncidentUrlInput', 'https://missingexternalid.com'],
       ['getIncidentResponseExternalTitleKeyText', ''],
-      ['getIncidentResponseCreatedDateKeyText', ''],
-      ['getIncidentResponseUpdatedDateKeyText', ''],
       ['updateIncidentUrlInput', 'badurl.com'],
       ['createCommentUrlInput', 'badurl.com'],
     ];
@@ -357,7 +350,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
       ['updateIncidentJson', invalidJsonBoth, ['{{{case.title}}}', '{{{case.description}}}']],
       ['createCommentJson', invalidJsonBoth, ['{{{case.comment}}}']],
       [
-        'incidentViewUrl',
+        'viewIncidentUrl',
         'https://missingexternalid.com',
         ['{{{external.system.id}}}', '{{{external.system.title}}}'],
       ],

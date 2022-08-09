@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { get } from 'lodash';
 import { IScopedClusterClient } from '@kbn/core/server';
 // @ts-ignore
-import { WatchStatus } from '../../../../models/watch_status';
+import { WatchStatusModel } from '../../../../models/watch_status_model';
 import { RouteDependencies } from '../../../../types';
 
 const paramsSchema = schema.object({
@@ -48,7 +48,7 @@ export function registerAcknowledgeRoute({
           watchStatusJson,
         };
 
-        const watchStatus = WatchStatus.fromUpstreamJson(json);
+        const watchStatus = WatchStatusModel.fromUpstreamJson(json);
         return response.ok({
           body: { watchStatus: watchStatus.downstreamJson },
         });
