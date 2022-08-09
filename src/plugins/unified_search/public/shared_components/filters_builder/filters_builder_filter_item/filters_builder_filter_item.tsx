@@ -162,7 +162,7 @@ export function FilterItem({
         <EuiDroppable
           droppableId={path}
           spacing="s"
-          isCombineEnabled={!disableOr}
+          isCombineEnabled={!disableOr || !hideOr}
           css={css`
             cursor: ${dropTarget === path ? `url(${plus}), auto` : `auto`};
           `}
