@@ -7,13 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import React, { FC, useState, useCallback } from 'react';
+import React, { FC, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
 import type { Embeddable } from '@kbn/lens-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { IUiSettingsClient } from '@kbn/core/public';
+import type { IUiSettingsClient, ApplicationStart } from '@kbn/core/public';
 
 import './style.scss';
 import {
@@ -52,6 +52,7 @@ interface Props {
   embeddable: Embeddable;
   share: SharePluginStart;
   data: DataPublicPluginStart;
+  application: ApplicationStart;
   kibanaConfig: IUiSettingsClient;
   ml: MlApiServices;
   onClose: () => void;
@@ -71,6 +72,7 @@ export const FlyoutBody: FC<Props> = ({
   embeddable,
   share,
   data,
+  application,
   ml,
   kibanaConfig,
 }) => {
@@ -82,7 +84,6 @@ export const FlyoutBody: FC<Props> = ({
   const [jobIdValid, setJobIdValid] = useState<string>('');
   const [bucketSpanValid, setBucketSpanValid] = useState<string>('');
   const [state, setState] = useState<STATE>(STATE.DEFAULT);
-  const [resultsLink, setResultsLink] = useState<string | null>(null);
 
   function createADJobInWizard(layerIndex: number) {
     convertLensToADJob(embeddable, share, layerIndex);
@@ -104,31 +105,28 @@ export const FlyoutBody: FC<Props> = ({
         layerIndex
       );
       setState(STATE.SAVE_SUCCESS);
-      const url = await createJobResultHref(layerResults[layerIndex].jobWizardType);
-      if (url !== undefined) {
-        setResultsLink(url);
-      }
     } catch (error) {
       setState(STATE.SAVE_FAILED);
       // console.error(error);
     }
   }
 
-  const createJobResultHref = useCallback(
-    (jobType: CREATED_BY_LABEL | null) => {
-      const { timeRange } = embeddable.getInput();
-      const page = jobType === CREATED_BY_LABEL.MULTI_METRIC ? 'explorer' : 'timeseriesexplorer';
-      const locator = share.url.locators.get(ML_APP_LOCATOR);
-      return locator?.getUrl({
+  const viewResults = async (jobType: CREATED_BY_LABEL | null) => {
+    const { timeRange } = embeddable.getInput();
+    const page = jobType === CREATED_BY_LABEL.MULTI_METRIC ? 'explorer' : 'timeseriesexplorer';
+    const locator = share.url.locators.get(ML_APP_LOCATOR);
+    if (locator) {
+      const url = await locator!.getUrl({
         page,
         pageState: {
           jobIds: [jobId],
           timeRange,
         },
       });
-    },
-    [share, embeddable, jobId]
-  );
+
+      application.navigateToUrl(url);
+    }
+  };
 
   function setStartJobWrapper(start: boolean) {
     setStartJob(start);
@@ -188,10 +186,6 @@ export const FlyoutBody: FC<Props> = ({
     [jobId, bucketSpan]
   );
 
-  //   <EuiFormRow label={title} error={validation.message} isInvalid={validation.valid === false}>
-  //   <>{children}</>
-  // </EuiFormRow>
-
   return (
     <>
       {layerResults.map((layer, i) => (
@@ -243,6 +237,7 @@ export const FlyoutBody: FC<Props> = ({
                       <EuiForm>
                         <EuiFormRow label="Job ID" error={jobIdValid} isInvalid={jobIdValid !== ''}>
                           <EuiFieldText
+                            data-test-subj={`mlLensLayerJobIdInput_${i}`}
                             value={jobId}
                             onChange={(e) => {
                               setJobId(e.target.value);
@@ -253,6 +248,7 @@ export const FlyoutBody: FC<Props> = ({
 
                         <EuiSpacer size="s" />
                         <EuiAccordion
+                          data-test-subj={`mlLensLayerAdditionalSettingsButton_${i}`}
                           id="additional-section"
                           buttonContent={i18n.translate(
                             'xpack.ml.embeddables.lensLayerFlyout.createJobCallout.additionalSettings.title',
@@ -268,6 +264,7 @@ export const FlyoutBody: FC<Props> = ({
                             isInvalid={bucketSpanValid !== ''}
                           >
                             <EuiFieldText
+                              data-test-subj={`mlLensLayerBucketSpanInput_${i}`}
                               value={bucketSpan}
                               onChange={(e) => {
                                 setBucketSpan(e.target.value);
@@ -279,6 +276,7 @@ export const FlyoutBody: FC<Props> = ({
                           <EuiFormRow>
                             <EuiCheckbox
                               id="startJob"
+                              data-test-subj={`mlLensLayerStartJobCheckbox_${i}`}
                               checked={startJob}
                               onChange={(e) => setStartJobWrapper(e.target.checked)}
                               label={i18n.translate(
@@ -293,8 +291,9 @@ export const FlyoutBody: FC<Props> = ({
                           <EuiSpacer size="s" />
                           <EuiFormRow>
                             <EuiCheckbox
+                              id="realTime"
                               disabled={startJob === false}
-                              id="startJob"
+                              data-test-subj={`mlLensLayerRealTimeCheckbox_${i}`}
                               checked={runInRealTime}
                               onChange={(e) => setRunInRealTime(e.target.checked)}
                               label={i18n.translate(
@@ -320,7 +319,7 @@ export const FlyoutBody: FC<Props> = ({
                             }
                             onClick={createADJob.bind(null, i)}
                             size="s"
-                            data-test-subj={`mlLensLayerCompatibleButton_${i}`}
+                            data-test-subj={`mlLensLayerCreateJobButton_${i}`}
                           >
                             <FormattedMessage
                               id="xpack.ml.embeddables.lensLayerFlyout.createJobButton.saving"
@@ -335,7 +334,7 @@ export const FlyoutBody: FC<Props> = ({
                             size="s"
                             iconType="popout"
                             iconSide="right"
-                            data-test-subj={`mlLensLayerCompatibleButton_${i}`}
+                            data-test-subj={`mlLensLayerCreateWithWizardButton_${i}`}
                           >
                             <FormattedMessage
                               id="xpack.ml.embeddables.lensLayerFlyout.createJobButton"
@@ -349,7 +348,10 @@ export const FlyoutBody: FC<Props> = ({
 
                   {state === STATE.SAVE_SUCCESS ? (
                     <>
-                      <EuiFlexGroup gutterSize="s" data-test-subj="mlLensLayerCompatible">
+                      <EuiFlexGroup
+                        gutterSize="s"
+                        data-test-subj={`mlLensLayerCompatible.jobCreated.success_${i}`}
+                      >
                         <EuiFlexItem grow={false}>
                           <EuiText size="s">
                             <EuiIcon type="checkInCircleFilled" color="success" />
@@ -365,30 +367,24 @@ export const FlyoutBody: FC<Props> = ({
                         </EuiFlexItem>
                       </EuiFlexGroup>
 
-                      {resultsLink === null ? null : (
-                        <>
-                          <EuiSpacer size="s" />
-                          <EuiButtonEmpty
-                            href={resultsLink}
-                            iconType="popout"
-                            iconSide="right"
-                            target="_blank"
-                            flush="left"
-                          >
-                            {layer.jobWizardType === CREATED_BY_LABEL.MULTI_METRIC ? (
-                              <FormattedMessage
-                                id="xpack.ml.embeddables.lensLayerFlyout.saveSuccess.resultsLink.multiMetric"
-                                defaultMessage="View results in Anomaly Explorer"
-                              />
-                            ) : (
-                              <FormattedMessage
-                                id="xpack.ml.embeddables.lensLayerFlyout.saveSuccess.resultsLink.singleMetric"
-                                defaultMessage="View results in Single Metric Viewer"
-                              />
-                            )}
-                          </EuiButtonEmpty>
-                        </>
-                      )}
+                      <EuiSpacer size="s" />
+                      <EuiButtonEmpty
+                        onClick={viewResults.bind(null, layer.jobWizardType)}
+                        flush="left"
+                        data-test-subj={`mlLensLayerResultsButton_${i}`}
+                      >
+                        {layer.jobWizardType === CREATED_BY_LABEL.MULTI_METRIC ? (
+                          <FormattedMessage
+                            id="xpack.ml.embeddables.lensLayerFlyout.saveSuccess.resultsLink.multiMetric"
+                            defaultMessage="View results in Anomaly Explorer"
+                          />
+                        ) : (
+                          <FormattedMessage
+                            id="xpack.ml.embeddables.lensLayerFlyout.saveSuccess.resultsLink.singleMetric"
+                            defaultMessage="View results in Single Metric Viewer"
+                          />
+                        )}
+                      </EuiButtonEmpty>
                     </>
                   ) : null}
 
