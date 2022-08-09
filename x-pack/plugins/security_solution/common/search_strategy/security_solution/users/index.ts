@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { TotalUsersKpiStrategyResponse } from './kpi/total_users';
 
 export * from './all';
 export * from './common';
@@ -18,3 +19,5 @@ export enum UsersQueries {
   authentications = 'authentications',
   kpiAuthentications = 'usersKpiAuthentications',
 }
+
+export type UserskKpiStrategyResponse = Omit<TotalUsersKpiStrategyResponse, 'rawResponse'>;
