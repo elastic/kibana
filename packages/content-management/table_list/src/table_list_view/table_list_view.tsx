@@ -111,7 +111,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
 
   const {
     canEditAdvancedSettings,
-    getUrlForListingLimitSettings,
+    getListingLimitSettingsUrl,
     getTagsColumnDefinition,
     searchQueryParser,
     notifyError,
@@ -419,7 +419,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
       {showLimitError && (
         <ListingLimitWarning
           canEditAdvancedSettings={canEditAdvancedSettings}
-          advancedSettingsLink={getUrlForListingLimitSettings()}
+          advancedSettingsLink={getListingLimitSettingsUrl()}
           entityNamePlural={entityNamePlural}
           totalItems={totalItems}
           listingLimit={listingLimit}

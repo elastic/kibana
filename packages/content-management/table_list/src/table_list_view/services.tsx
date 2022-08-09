@@ -28,7 +28,7 @@ export type DateFormatter = (props: {
  */
 export interface Services {
   canEditAdvancedSettings: boolean;
-  getUrlForListingLimitSettings: () => string;
+  getListingLimitSettingsUrl: () => string;
   notifyError: NotifyFn;
   getTagsColumnDefinition?: () => EuiTableFieldDataColumnType<UserContentCommonSchema> | undefined;
   searchQueryParser?: (searchQuery: string) => {

@@ -19,7 +19,7 @@ type ActionFn = (name: string) => any;
 export const getStoryServices = (params: Params, action: ActionFn = () => {}) => {
   const services: Services = {
     canEditAdvancedSettings: true,
-    getUrlForListingLimitSettings: () => 'http://elastic.co',
+    getListingLimitSettingsUrl: () => 'http://elastic.co',
     notifyError: ({ title, text }) => {
       action('notifyError')({ title, text });
     },
