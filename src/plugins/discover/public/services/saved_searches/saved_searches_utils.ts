@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import { i18n } from '@kbn/i18n';
+import { validateTimeRange } from '@kbn/data-plugin/public/query';
 import type { SavedSearchAttributes, SavedSearch } from './types';
 
 export {
@@ -47,7 +48,7 @@ export const fromSavedSearchAttributes = (
   rowHeight: attributes.rowHeight,
   isTextBasedQuery: attributes.isTextBasedQuery,
   timeRestore: attributes.timeRestore,
-  timeRange: attributes.timeRange,
+  timeRange: validateTimeRange(attributes.timeRange) ? attributes.timeRange : undefined,
   refreshInterval: attributes.refreshInterval,
   rowsPerPage: attributes.rowsPerPage,
 });
