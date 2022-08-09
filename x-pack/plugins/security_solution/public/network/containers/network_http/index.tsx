@@ -30,6 +30,7 @@ import { useSearchStrategy } from '../../../common/containers/use_search_strateg
 export const ID = 'networkHttpQuery';
 
 export interface NetworkHttpArgs {
+  endDate: string;
   id: string;
   inspect: InspectResponse;
   ip?: string;
@@ -38,6 +39,7 @@ export interface NetworkHttpArgs {
   networkHttp: NetworkHttpEdges[];
   pageInfo: PageInfoPaginated;
   refetch: inputsModel.Refetch;
+  startDate: string;
   totalCount: number | null | undefined;
 }
 

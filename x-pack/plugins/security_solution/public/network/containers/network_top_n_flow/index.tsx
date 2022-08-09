@@ -29,13 +29,15 @@ import { useSearchStrategy } from '../../../common/containers/use_search_strateg
 export const ID = 'networkTopNFlowQuery';
 
 export interface NetworkTopNFlowArgs {
+  endDate: string;
   id: string;
   inspect: InspectResponse;
   isInspected: boolean;
   loadPage: (newActivePage: number) => void;
+  networkTopNFlow: NetworkTopNFlowEdges[];
   pageInfo: PageInfoPaginated;
   refetch: inputsModel.Refetch;
-  networkTopNFlow: NetworkTopNFlowEdges[];
+  startDate: string;
   totalCount: number | null | undefined;
 }
 

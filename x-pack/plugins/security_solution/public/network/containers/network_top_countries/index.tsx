@@ -29,6 +29,7 @@ import { useSearchStrategy } from '../../../common/containers/use_search_strateg
 export const ID = 'networkTopCountriesQuery';
 
 export interface NetworkTopCountriesArgs {
+  endDate: string;
   id: string;
   inspect: InspectResponse;
   isInspected: boolean;
@@ -36,6 +37,7 @@ export interface NetworkTopCountriesArgs {
   networkTopCountries: NetworkTopCountriesEdges[];
   pageInfo: PageInfoPaginated;
   refetch: inputsModel.Refetch;
+  startDate: string;
   totalCount: number | null | undefined;
 }
 

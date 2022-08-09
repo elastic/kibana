@@ -25,6 +25,16 @@ const props = {
   startDate: '2020-07-07T08:20:18.966Z',
 };
 
+const initialResult = {
+  edges: [],
+  totalCount: undefined,
+  pageInfo: {
+    activePage: 0,
+    fakeTotalCount: 0,
+    showMorePagesIndicator: false,
+  },
+};
+
 describe('useNetworkDns', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -50,7 +60,53 @@ describe('useNetworkDns', () => {
       wrapper: TestProviders,
     });
 
-    expect(mockSearch).toHaveBeenCalled();
+    expect(mockSearch).toHaveBeenCalledWith({
+      defaultIndex: props.indexNames,
+      docValueFields: [],
+      factoryQueryType: 'dns',
+      filterQuery: undefined,
+      isPtrIncluded: false,
+      pagination: {
+        activePage: 0,
+        cursorStart: 0,
+        fakePossibleCount: 50,
+        querySize: 10,
+      },
+      sort: {
+        direction: 'desc',
+        field: 'queryCount',
+      },
+      timerange: {
+        from: '2020-07-07T08:20:18.966Z',
+        interval: '12h',
+        to: '2020-07-08T08:20:18.966Z',
+      },
+    });
+  });
+
+  it('returns result', () => {
+    const mockInspect = {};
+    const mockRefetch = jest.fn();
+    mockUseSearchStrategy.mockReturnValue({
+      loading: true,
+      result: initialResult,
+      search: mockSearch,
+      refetch: mockRefetch,
+      inspect: mockInspect,
+    });
+
+    const { result } = renderHook(() => useNetworkDns(props), {
+      wrapper: TestProviders,
+    });
+    expect(result.current[0]).toEqual(true);
+
+    expect(result.current[1].id).toEqual(props.id);
+    expect(result.current[1].inspect).toEqual(mockInspect);
+    expect(typeof result.current[1].loadPage).toEqual('function');
+    expect(result.current[1].pageInfo).toEqual(initialResult.pageInfo);
+    expect(result.current[1].refetch).toEqual(mockRefetch);
+    expect(result.current[1].networkDns).toEqual(initialResult.edges);
+    expect(result.current[1].totalCount).toEqual(initialResult.totalCount);
   });
 
   it('does not run search when skip = true', () => {
