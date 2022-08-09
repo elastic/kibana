@@ -23,7 +23,8 @@ export const overviewLinks: LinkItem = {
   title: OVERVIEW,
   landingImage: overviewPageImg,
   description: i18n.translate('xpack.securitySolution.appLinks.overviewDescription', {
-    defaultMessage: 'What is going on in your security environment.',
+    defaultMessage:
+      'Summary of your security environment activity, including alerts, events, recent items, and a news feed!',
   }),
   path: OVERVIEW_PATH,
   capabilities: [`${SERVER_APP_ID}.show`],
@@ -54,7 +55,7 @@ export const detectionResponseLinks: LinkItem = {
   landingImage: detectionResponsePageImg,
   description: i18n.translate('xpack.securitySolution.appLinks.detectionAndResponseDescription', {
     defaultMessage:
-      "Monitor the impact of application and device performance from the end user's point of view.",
+      'Information about your Alerts and Cases within the Security Solution, including Hosts and Users with Alerts.',
   }),
   path: DETECTION_RESPONSE_PATH,
   capabilities: [`${SERVER_APP_ID}.show`],
