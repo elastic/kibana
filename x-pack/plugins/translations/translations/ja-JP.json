@@ -11591,7 +11591,6 @@
     "xpack.enterpriseSearch.content.searchIndices.searchIndices.stepsTitle": "エンタープライズ サーチで構築する優れた検索エクスペリエンス",
     "xpack.enterpriseSearch.content.searchIndices.searchIndices.tableTitle": "インデックスの検索",
     "xpack.enterpriseSearch.crawler.action.deleteDomain.confirmationPopupMessage": "ドメイン\"{domainUrl}\"とすべての設定を削除しますか？",
-    "xpack.enterpriseSearch.crawler.action.deleteDomain.successMessage": "ドメイン'{domainUrl}'が削除されました",
     "xpack.enterpriseSearch.crawler.addDomainFlyout.openButtonLabel": "ドメインを追加",
     "xpack.enterpriseSearch.crawler.addDomainFlyout.title": "新しいドメインを追加",
     "xpack.enterpriseSearch.crawler.addDomainForm.contentVerificationLabel": "コンテンツ検証",

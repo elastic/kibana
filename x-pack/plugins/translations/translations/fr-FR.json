@@ -11602,7 +11602,6 @@
     "xpack.enterpriseSearch.content.searchIndices.searchIndices.stepsTitle": "Créer de belles expériences de recherche avec Enterprise Search",
     "xpack.enterpriseSearch.content.searchIndices.searchIndices.tableTitle": "Rechercher dans les index",
     "xpack.enterpriseSearch.crawler.action.deleteDomain.confirmationPopupMessage": "Voulez-vous vraiment supprimer le domaine \"{domainUrl}\" et tous ses paramètres ?",
-    "xpack.enterpriseSearch.crawler.action.deleteDomain.successMessage": "Le domaine \"{domainUrl}\" a été supprimé",
     "xpack.enterpriseSearch.crawler.addDomainFlyout.openButtonLabel": "Ajouter un domaine",
     "xpack.enterpriseSearch.crawler.addDomainFlyout.title": "Ajouter un nouveau domaine",
     "xpack.enterpriseSearch.crawler.addDomainForm.contentVerificationLabel": "Vérification de contenu",
