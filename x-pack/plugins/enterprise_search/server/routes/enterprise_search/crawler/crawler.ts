@@ -35,55 +35,75 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
     },
     async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      const indexExists = await client.asCurrentUser.indices.exists({
-        index: request.body.index_name,
-      });
-      if (indexExists) {
-        return createError({
-          errorCode: ErrorCode.INDEX_ALREADY_EXISTS,
-          message: i18n.translate(
-            'xpack.enterpriseSearch.server.routes.addCrawler.indexExistsError',
-            {
-              defaultMessage: 'This index already exists',
-            }
-          ),
-          response,
-          statusCode: 409,
-        });
-      }
-      const crawler = await fetchCrawlerByIndexName(client, request.body.index_name);
-      if (crawler) {
-        return createError({
-          errorCode: ErrorCode.CRAWLER_ALREADY_EXISTS,
-          message: i18n.translate(
-            'xpack.enterpriseSearch.server.routes.addCrawler.crawlerExistsError',
-            {
-              defaultMessage: 'A crawler for this index already exists',
-            }
-          ),
-          response,
-          statusCode: 409,
-        });
-      }
 
-      const connector = await fetchConnectorByIndexName(client, request.body.index_name);
-
-      if (connector) {
-        return createError({
-          errorCode: ErrorCode.CONNECTOR_DOCUMENT_ALREADY_EXISTS,
-          message: i18n.translate(
-            'xpack.enterpriseSearch.server.routes.addCrawler.connectorExistsError',
-            {
-              defaultMessage: 'A connector for this index already exists',
-            }
-          ),
-          response,
-          statusCode: 409,
+      try {
+        const indexExists = await client.asCurrentUser.indices.exists({
+          index: request.body.index_name,
         });
+        if (indexExists) {
+          return createError({
+            errorCode: ErrorCode.INDEX_ALREADY_EXISTS,
+            message: i18n.translate(
+              'xpack.enterpriseSearch.server.routes.addCrawler.indexExistsError',
+              {
+                defaultMessage: 'This index already exists',
+              }
+            ),
+            response,
+            statusCode: 409,
+          });
+        }
+        const crawler = await fetchCrawlerByIndexName(client, request.body.index_name);
+        if (crawler) {
+          return createError({
+            errorCode: ErrorCode.CRAWLER_ALREADY_EXISTS,
+            message: i18n.translate(
+              'xpack.enterpriseSearch.server.routes.addCrawler.crawlerExistsError',
+              {
+                defaultMessage: 'A crawler for this index already exists',
+              }
+            ),
+            response,
+            statusCode: 409,
+          });
+        }
+
+        const connector = await fetchConnectorByIndexName(client, request.body.index_name);
+
+        if (connector) {
+          return createError({
+            errorCode: ErrorCode.CONNECTOR_DOCUMENT_ALREADY_EXISTS,
+            message: i18n.translate(
+              'xpack.enterpriseSearch.server.routes.addCrawler.connectorExistsError',
+              {
+                defaultMessage: 'A connector for this index already exists',
+              }
+            ),
+            response,
+            statusCode: 409,
+          });
+        }
+
+        return enterpriseSearchRequestHandler.createRequest({
+          path: '/api/ent/v1/internal/indices',
+        })(context, request, response);
+      } catch (e) {
+        // 403 UNAUTHORIZED
+        if (e.meta.statusCode === 403) {
+          return createError({
+            errorCode: ErrorCode.UNAUTHORIZED,
+            message: i18n.translate(
+              'xpack.enterpriseSearch.server.routes.addCrawler.unauthorizedError',
+              {
+                defaultMessage: 'This account does not have permission to do this.',
+              }
+            ),
+            response,
+            statusCode: 409,
+          });
+        }
+        throw e;
       }
-      return enterpriseSearchRequestHandler.createRequest({
-        path: '/api/ent/v1/internal/indices',
-      })(context, request, response);
     }
   );
 
