@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { defaultConfig } from '@kbn/storybook';
+const defaultConfig = require('@kbn/storybook').defaultConfig;
 
 module.exports = {
   ...defaultConfig,
+  stories: ['../**/*.stories.tsx'],
   reactOptions: {
     strictMode: true,
   },

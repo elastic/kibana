@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { addons } from '@storybook/addons';
-import { create } from '@storybook/theming';
-import { PANEL_ID } from '@storybook/addon-actions';
+const { addons } = require('@storybook/addons');
+const { create } = require('@storybook/theming');
+const { PANEL_ID } = require('@storybook/addon-actions');
 
 addons.setConfig({
   theme: create({

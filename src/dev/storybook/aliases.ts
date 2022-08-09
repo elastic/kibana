@@ -13,7 +13,7 @@ export const storybookAliases = {
   ci_composite: '.ci/.storybook',
   cloud: 'x-pack/plugins/cloud/.storybook',
   coloring: 'packages/kbn-coloring/.storybook',
-  content_management: 'packages/kbn-content-management/table_list/src/config',
+  content_management: 'packages/content-management/.storybook',
   controls: 'src/plugins/controls/storybook',
   custom_integrations: 'src/plugins/custom_integrations/storybook',
   dashboard_enhanced: 'x-pack/plugins/dashboard_enhanced/.storybook',
