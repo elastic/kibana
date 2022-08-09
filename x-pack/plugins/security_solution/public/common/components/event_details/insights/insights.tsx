@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+/* eslint-disable complexity */
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
@@ -14,6 +15,7 @@ import * as i18n from './translations';
 import type { BrowserFields } from '../../../containers/source';
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
 import { useGetUserCasesPermissions } from '../../../lib/kibana';
+import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 import { useLicense } from '../../../hooks/use_license';
 import { RelatedAlertsByProcessAncestry } from './related_alerts_by_process_ancestry';
 import { RelatedCases } from './related_cases';
@@ -34,6 +36,9 @@ interface Props {
  */
 export const Insights = React.memo<Props>(
   ({ browserFields, eventId, data, isReadOnly, timelineId }) => {
+    const isRelatedAlertsByProcessAncestryEnabled = useIsExperimentalFeatureEnabled(
+      'insightsRelatedAlertsByProcessAncestry'
+    );
     const hasAtLeastPlatinum = useLicense().isPlatinumPlus();
     const processEntityField = find({ category: 'process', field: 'process.entity_id' }, data);
     const originalDocumentId = find(
@@ -50,7 +55,8 @@ export const Insights = React.memo<Props>(
       { category: 'process', field: 'process.entry_leader.entity_id' },
       data
     );
-    const hasProcessSessionInfo = processSessionField && processSessionField.values;
+    const hasProcessSessionInfo =
+      isRelatedAlertsByProcessAncestryEnabled && processSessionField && processSessionField.values;
 
     const sourceEventField = find(
       { category: 'kibana', field: 'kibana.alert.original_event.id' },
@@ -71,6 +77,7 @@ export const Insights = React.memo<Props>(
       hasProcessSessionInfo;
 
     const canShowAncestryInsight =
+      isRelatedAlertsByProcessAncestryEnabled &&
       processEntityField &&
       processEntityField.values &&
       originalDocumentId &&

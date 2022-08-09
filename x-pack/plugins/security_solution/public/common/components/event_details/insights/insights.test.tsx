@@ -13,6 +13,7 @@ import { TestProviders } from '../../../mock';
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
 import { useKibana as mockUseKibana } from '../../../lib/kibana/__mocks__';
 import { useGetUserCasesPermissions } from '../../../lib/kibana';
+import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 import { licenseService } from '../../../hooks/use_license';
 import { noCasesPermissions, readCasesPermissions } from '../../../../cases_test_utils';
 import { Insights } from './insights';
@@ -54,6 +55,11 @@ jest.mock('../../../hooks/use_license', () => {
   };
 });
 const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
+
+jest.mock('../../../hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
+}));
+const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
 
 const data: TimelineEventsDetailsItem[] = [
   {
@@ -115,24 +121,41 @@ describe('Insights', () => {
     ).toBeInTheDocument();
   });
 
-  describe('without platinum license', () => {
-    it('should show an upsell', () => {
-      licenseServiceMock.isPlatinumPlus.mockReturnValue(false);
+  describe('with feature flag enabled', () => {
+    describe('with platinum license', () => {
+      it('should show insights for related alerts by process ancestry', () => {
+        licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
 
-      render(
-        <TestProviders>
-          <Insights browserFields={{}} eventId="test" data={data} timelineId="" />
-        </TestProviders>
-      );
+        render(
+          <TestProviders>
+            <Insights browserFields={{}} eventId="test" data={data} timelineId="" />
+          </TestProviders>
+        );
 
-      expect(screen.getByRole('link', { name: i18n.ALERT_UPSELL })).toBeInTheDocument();
-      expect(screen.queryByTestId('related-alerts-by-ancestry')).not.toBeInTheDocument();
+        expect(screen.getByTestId('related-alerts-by-ancestry')).toBeInTheDocument();
+        expect(screen.queryByRole('link', { name: i18n.ALERT_UPSELL })).not.toBeInTheDocument();
+      });
+    });
+
+    describe('without platinum license', () => {
+      it('should show an upsell for related alerts by process ancestry', () => {
+        licenseServiceMock.isPlatinumPlus.mockReturnValue(false);
+
+        render(
+          <TestProviders>
+            <Insights browserFields={{}} eventId="test" data={data} timelineId="" />
+          </TestProviders>
+        );
+
+        expect(screen.getByRole('link', { name: i18n.ALERT_UPSELL })).toBeInTheDocument();
+        expect(screen.queryByTestId('related-alerts-by-ancestry')).not.toBeInTheDocument();
+      });
     });
   });
 
-  describe('with platinum license', () => {
-    it('should show insights for related alerts', () => {
-      licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
+  describe('with feature flag disabled', () => {
+    it('should not render neither the upsell, nor the insights for alerts by process ancestry', () => {
+      useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
 
       render(
         <TestProviders>
@@ -140,7 +163,7 @@ describe('Insights', () => {
         </TestProviders>
       );
 
-      expect(screen.getByTestId('related-alerts-by-ancestry')).toBeInTheDocument();
+      expect(screen.queryByTestId('related-alerts-by-ancestry')).not.toBeInTheDocument();
       expect(screen.queryByRole('link', { name: i18n.ALERT_UPSELL })).not.toBeInTheDocument();
     });
   });

@@ -40,6 +40,11 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsConsoleEnabled: true,
 
   /**
+   * Enables the insights module for related alerts by process ancestry
+   */
+  insightsRelatedAlertsByProcessAncestry: false,
+
+  /**
    * Enables extended rule execution logging to Event Log. When this setting is enabled:
    * - Rules write their console error, info, debug, and trace messages to Event Log,
    *   in addition to other events they log there (status changes and execution metrics).
