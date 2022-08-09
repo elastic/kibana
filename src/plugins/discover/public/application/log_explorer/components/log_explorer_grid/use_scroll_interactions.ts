@@ -20,7 +20,8 @@ export const useScrollInteractions = ({
 
   useEffect(() => {
     stateMachine.subscribe((state) => {
-      if (state.matches({ tailing: 'loaded' }) && state.changed) {
+      // scroll to bottom when tailing starts or loading finishes
+      if (state.matches('tailing') && state.changed) {
         const { endRowIndex } = memoizedSelectRows(state);
 
         if (endRowIndex != null) {
