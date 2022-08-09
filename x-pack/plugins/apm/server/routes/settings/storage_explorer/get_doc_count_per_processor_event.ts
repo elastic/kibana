@@ -7,7 +7,7 @@
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { termQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '../../../../common/processor_event';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { Setup } from '../../../lib/helpers/setup_request';
 import {
   PROCESSOR_EVENT,
