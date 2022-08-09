@@ -8,7 +8,6 @@
 import { groupBy, partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Datatable } from '@kbn/expressions-plugin/public';
-import { LensIconChartBarReferenceLine } from '@kbn/lens-icons';
 import { layerTypes } from '../../../common';
 import type { DatasourceLayers, FramePublicAPI, Visualization } from '../../types';
 import { groupAxesByType } from './axes_configuration';
@@ -29,6 +28,7 @@ import {
   isReferenceLayer,
 } from './visualization_helpers';
 import { generateId } from '../../id_generator';
+import { LensIconChartBarReferenceLine } from '../../assets/chart_bar_reference_line';
 import { defaultReferenceLineColor } from './color_assignment';
 
 export interface ReferenceLineBase {
