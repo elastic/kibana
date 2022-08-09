@@ -19,13 +19,13 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-//FOR NOW
-import { useFindLists } from './find-list-hook';
+// FOR NOW
 
 import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { useDeleteList, useCursor } from '@kbn/securitysolution-list-hooks';
 
 import { exportList } from '@kbn/securitysolution-list-api';
+import { useFindLists } from './find-list-hook';
 
 import { useKibana } from '../../../common/lib/kibana';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
@@ -75,7 +75,14 @@ export const ValueListsFlyoutComponent: React.FC<ValueListsFlyoutProps> = ({
 
   const fetchLists = useCallback(() => {
     // Where should I define constant values like sortField:'created_at'
-    findLists({ cursor, http, pageIndex: pageIndex + 1, pageSize, sortOrder: "desc", sortField: 'created_at' });
+    findLists({
+      cursor,
+      http,
+      pageIndex: pageIndex + 1,
+      pageSize,
+      sortOrder: 'desc',
+      sortField: 'created_at',
+    });
   }, [cursor, http, findLists, pageIndex, pageSize]);
 
   const handleDelete = useCallback(
