@@ -921,14 +921,14 @@ export class TaskRunner<
       ruleRunMetricsStore.incrementNumberOfTriggeredActions();
       ruleRunMetricsStore.incrementNumberOfTriggeredActionsByConnectorType(action.actionTypeId);
 
-      actionsToTrigger.push(action);
+      actionsToTrigger.push({ ...action, lastTriggerDate: new Date().toISOString() });
     }
 
     await Promise.all(
       actionsToTrigger.map(async (action) => {
         const enqueueOptions = {
           id: action.id,
-          params: { ...action.params, lastTriggerDate: new Date().toISOString() },
+          params: action.params,
           spaceId,
           apiKey: apiKey ?? null,
           consumer: this.ruleConsumer!,
