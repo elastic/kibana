@@ -10,13 +10,12 @@ import { getSampleDashboardInput } from '../test_helpers';
 import { DashboardContainer } from '../embeddable/dashboard_container';
 
 import { coreMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
-import { ApplicationStart, CoreStart } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 import { FiltersNotificationBadge } from '.';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { type Query, type AggregateQuery, Filter } from '@kbn/es-query';
 
 import {
-  EditPanelAction,
   ErrorEmbeddable,
   FilterableEmbeddable,
   IContainer,
