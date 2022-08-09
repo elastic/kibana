@@ -928,7 +928,7 @@ export class TaskRunner<
       actionsToTrigger.map(async (action) => {
         const enqueueOptions = {
           id: action.id,
-          params: action.params,
+          params: { ...action.params, lastTriggerDate: new Date().toISOString() },
           spaceId,
           apiKey: apiKey ?? null,
           consumer: this.ruleConsumer!,
