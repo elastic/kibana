@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { LensIconChartMetric } from '@kbn/lens-icons';
 import { SuggestionRequest, VisualizationSuggestion, TableSuggestion } from '../../types';
 import type { MetricState } from '../../../common/types';
 import { layerTypes } from '../../../common';
-import { LensIconChartMetric } from '../../assets/chart_metric';
 import { legacyMetricSupportedTypes } from './visualization';
 
 /**

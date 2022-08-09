@@ -8,7 +8,7 @@
 import { getSuggestions } from './suggestions';
 import { layerTypes } from '../../../common';
 import { MetricVisualizationState } from './visualization';
-import { LensIconChartMetric } from '../../assets/chart_metric';
+import { LensIconChartMetric } from '@kbn/lens-icons';
 
 const metricColumn = {
   columnId: 'metric-column',
