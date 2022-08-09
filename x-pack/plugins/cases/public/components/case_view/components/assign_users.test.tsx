@@ -8,14 +8,14 @@
 import { useSuggestUserProfiles } from '../../../containers/user_profiles/use_suggest_user_profiles';
 import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_get_current_user_profile';
 import { userProfiles, userProfilesMap } from '../../../containers/user_profiles/api.mock';
-import { fireEvent, screen, waitFor } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 import React from 'react';
 import {
   AppMockRenderer,
   createAppMockRenderer,
   noUpdateCasesPermissions,
 } from '../../../common/mock';
-import { AssignUsers } from './assign_users';
+import { AssignUsers, AssignUsersProps } from './assign_users';
 
 jest.mock('../../../containers/user_profiles/use_suggest_user_profiles');
 jest.mock('../../../containers/user_profiles/use_get_current_user_profile');
@@ -23,70 +23,58 @@ jest.mock('../../../containers/user_profiles/use_get_current_user_profile');
 const useSuggestUserProfilesMock = useSuggestUserProfiles as jest.Mock;
 const useGetCurrentUserProfileMock = useGetCurrentUserProfile as jest.Mock;
 
+const currentUserProfile = userProfiles[0];
+
 describe('AssignUsers', () => {
   let appMockRender: AppMockRenderer;
+  let defaultProps: AssignUsersProps;
 
   beforeEach(() => {
-    useSuggestUserProfilesMock.mockReturnValue({ data: userProfiles, isLoading: false });
-    useGetCurrentUserProfileMock.mockReturnValue({ data: userProfiles[0], isLoading: false });
-    appMockRender = createAppMockRenderer();
-  });
-
-  it('does not show any assignees when there are no assigned', () => {
-    const props = {
+    defaultProps = {
       assignees: [],
+      currentUserProfile,
       userProfiles: new Map(),
       onAssigneesChanged: jest.fn(),
       isLoading: false,
     };
-    appMockRender.render(<AssignUsers {...props} />);
+
+    useSuggestUserProfilesMock.mockReturnValue({ data: userProfiles, isLoading: false });
+    useGetCurrentUserProfileMock.mockReturnValue({ data: currentUserProfile, isLoading: false });
+
+    appMockRender = createAppMockRenderer();
+  });
+
+  it('does not show any assignees when there are none assigned', () => {
+    appMockRender.render(<AssignUsers {...defaultProps} />);
 
     expect(screen.getByText('No users have been assigned.')).toBeInTheDocument();
   });
 
   it('does not show the suggest users edit button when the user does not have update permissions', () => {
-    const props = {
-      assignees: [],
-      userProfiles: new Map(),
-      onAssigneesChanged: jest.fn(),
-      isLoading: false,
-    };
     appMockRender = createAppMockRenderer({ permissions: noUpdateCasesPermissions() });
-    appMockRender.render(<AssignUsers {...props} />);
+    appMockRender.render(<AssignUsers {...defaultProps} />);
 
     expect(screen.queryByTestId('case-view-assignees-edit')).not.toBeInTheDocument();
   });
 
   it('does not show the suggest users edit button when the component is still loading', () => {
-    const props = {
-      assignees: [],
-      userProfiles: new Map(),
-      onAssigneesChanged: jest.fn(),
-      isLoading: true,
-    };
-    appMockRender.render(<AssignUsers {...props} />);
+    appMockRender.render(<AssignUsers {...{ ...defaultProps, isLoading: true }} />);
 
     expect(screen.queryByTestId('case-view-assignees-edit')).not.toBeInTheDocument();
+    expect(screen.getByTestId('case-view-assignees-loading')).toBeInTheDocument();
   });
 
   it('shows the suggest users edit button when the user has update permissions', () => {
-    const props = {
-      assignees: [],
-      userProfiles: new Map(),
-      onAssigneesChanged: jest.fn(),
-      isLoading: false,
-    };
-    appMockRender.render(<AssignUsers {...props} />);
+    appMockRender.render(<AssignUsers {...defaultProps} />);
 
     expect(screen.queryByTestId('case-view-assignees-edit')).toBeInTheDocument();
   });
 
   it('shows the two assigned users', () => {
     const props = {
+      ...defaultProps,
       assignees: userProfiles.slice(0, 2),
       userProfiles: userProfilesMap,
-      onAssigneesChanged: jest.fn(),
-      isLoading: false,
     };
     appMockRender.render(<AssignUsers {...props} />);
 
@@ -94,36 +82,83 @@ describe('AssignUsers', () => {
     expect(screen.getByText('Physical Dinosaur')).toBeInTheDocument();
     expect(screen.queryByText('Wet Dingo')).not.toBeInTheDocument();
     expect(screen.queryByText('No users have been assigned.')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('case-view-assignees-loading')).not.toBeInTheDocument();
   });
 
-  it.skip('calls onAssigneesChanged when a user is assigned', async () => {
-    const onAssigneesChanged = jest.fn();
+  it('shows the popover when the pencil is clicked', () => {
     const props = {
-      assignees: [],
+      ...defaultProps,
       userProfiles: userProfilesMap,
-      onAssigneesChanged,
-      isLoading: false,
     };
     appMockRender.render(<AssignUsers {...props} />);
 
     fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
-    fireEvent.click(screen.getByText('Wet Dingo'));
-    // close popover
-    // fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
-    // userEvent.keyboard('{Escape}');
 
-    // TODO: can't close the popover
-    fireEvent.keyDown(screen.getByTestId('case-view-assignees-edit-button'), {
-      key: 'Escape',
-      code: 'Escape',
-      keyCode: 27,
-      charCode: 27,
-    });
-    await waitFor(() => expect(screen.queryByText('Wet Dingo')).not.toBeInTheDocument());
+    expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
+  });
 
-    // screen.debug();
-    await waitFor(() =>
-      expect(onAssigneesChanged.mock.calls[0]).toMatchInlineSnapshot(`undefined`)
-    );
+  it('shows the popover when the assign a user link is clicked', () => {
+    const props = {
+      ...defaultProps,
+      userProfiles: userProfilesMap,
+    };
+    appMockRender.render(<AssignUsers {...props} />);
+
+    fireEvent.click(screen.getByText('Assign a user'));
+
+    expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
+  });
+
+  it('assigns the current user when the assign yourself link is clicked', () => {
+    const props = {
+      ...defaultProps,
+      userProfiles: userProfilesMap,
+    };
+    appMockRender.render(<AssignUsers {...props} />);
+
+    fireEvent.click(screen.getByText('assign yourself'));
+
+    expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
+  });
+
+  it('calls onAssigneesChanged with the self assigned user', () => {
+    const onAssigneesChanged = jest.fn();
+    const props = {
+      ...defaultProps,
+      onAssigneesChanged,
+      userProfiles: userProfilesMap,
+    };
+    appMockRender.render(<AssignUsers {...props} />);
+
+    fireEvent.click(screen.getByText('assign yourself'));
+
+    expect(onAssigneesChanged.mock.calls[0][0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "data": Object {},
+          "uid": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+          "user": Object {
+            "email": "damaged_raccoon@elastic.co",
+            "full_name": "Damaged Raccoon",
+            "username": "damaged_raccoon",
+          },
+        },
+      ]
+    `);
+  });
+
+  it('calls onAssigneesChanged with the deleted user', () => {
+    const onAssigneesChanged = jest.fn();
+    const props = {
+      ...defaultProps,
+      assignees: [{ uid: userProfiles[0].uid }],
+      onAssigneesChanged,
+      userProfiles: userProfilesMap,
+    };
+    appMockRender.render(<AssignUsers {...props} />);
+
+    fireEvent.click(screen.getByTestId('user-profile-assigned-user-cross'));
+
+    expect(onAssigneesChanged.mock.calls[0][0]).toMatchInlineSnapshot(`Array []`);
   });
 });

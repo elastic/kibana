@@ -7,9 +7,11 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
+import { UserProfile } from '@kbn/security-plugin/common';
+import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_get_current_user_profile';
 import { useBulkGetUserProfiles } from '../../../containers/user_profiles/use_bulk_get_user_profiles';
 import { useGetConnectors } from '../../../containers/configure/use_connectors';
-import { CaseAssignees, CaseSeverity } from '../../../../common/api';
+import { CaseSeverity } from '../../../../common/api';
 import { useCaseViewNavigation } from '../../../common/navigation';
 import { UseFetchAlertData } from '../../../../common/ui/types';
 import { Case, CaseStatuses } from '../../../../common';
@@ -54,6 +56,9 @@ export const CaseViewActivity = ({
     uids: caseData.assignees.map((assignee) => assignee.uid),
   });
 
+  const { data: currentUserProfile, isLoading: isLoadingCurrentUserProfile } =
+    useGetCurrentUserProfile();
+
   const onShowAlertDetails = useCallback(
     (alertId: string, index: string) => {
       if (showAlertDetails) {
@@ -67,6 +72,8 @@ export const CaseViewActivity = ({
     caseId: caseData.id,
     caseData,
   });
+
+  const isLoadingProfileData = isLoading || isLoadingUserProfiles || isLoadingCurrentUserProfile;
 
   const changeStatus = useCallback(
     (status: CaseStatuses) =>
@@ -96,7 +103,10 @@ export const CaseViewActivity = ({
   );
 
   const onUpdateAssignees = useCallback(
-    (newAssignees: CaseAssignees) => onUpdateField({ key: 'assignees', value: newAssignees }),
+    (newAssignees: UserProfile[]) => {
+      const value = newAssignees.map((assignee) => ({ uid: assignee.uid }));
+      onUpdateField({ key: 'assignees', value });
+    },
     [onUpdateField]
   );
 
@@ -163,8 +173,9 @@ export const CaseViewActivity = ({
         <SidebarSection>
           <AssignUsers
             assignees={caseData.assignees}
+            currentUserProfile={currentUserProfile}
             onAssigneesChanged={onUpdateAssignees}
-            isLoading={isLoading || isLoadingUserProfiles}
+            isLoading={isLoadingProfileData}
             userProfiles={userProfiles ?? new Map()}
           />
         </SidebarSection>

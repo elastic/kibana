@@ -6,7 +6,7 @@
  */
 
 import { useQuery, UseQueryResult } from 'react-query';
-import { UserProfile } from '@kbn/security-plugin/common';
+import { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import * as i18n from '../translations';
 import { useKibana, useToasts } from '../../common/lib/kibana';
 import { ServerError } from '../../types';
@@ -18,18 +18,18 @@ export const useBulkGetUserProfiles = ({ uids }: { uids: string[] }) => {
 
   const toasts = useToasts();
 
-  return useQuery<Map<string, UserProfile>, ServerError>(
+  return useQuery<Map<string, UserProfileWithAvatar>, ServerError>(
     [USER_PROFILES_CACHE_KEY, USER_PROFILES_BULK_GET_CACHE_KEY, uids],
     async () => {
       if (uids.length <= 0) {
-        return new Map<string, UserProfile>();
+        return new Map<string, UserProfileWithAvatar>();
       }
 
       const profiles = await bulkGetUserProfiles({ security, uids });
-      return profiles.reduce<Map<string, UserProfile>>((acc, profile) => {
+      return profiles.reduce<Map<string, UserProfileWithAvatar>>((acc, profile) => {
         acc.set(profile.uid, profile);
         return acc;
-      }, new Map<string, UserProfile>());
+      }, new Map<string, UserProfileWithAvatar>());
     },
     {
       onError: (error: ServerError) => {
@@ -46,4 +46,7 @@ export const useBulkGetUserProfiles = ({ uids }: { uids: string[] }) => {
   );
 };
 
-export type UseBulkGetUserProfiles = UseQueryResult<Map<string, UserProfile>, ServerError>;
+export type UseBulkGetUserProfiles = UseQueryResult<
+  Map<string, UserProfileWithAvatar>,
+  ServerError
+>;

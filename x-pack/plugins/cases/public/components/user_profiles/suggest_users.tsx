@@ -6,25 +6,25 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { UserProfilesSelectable } from '@kbn/user-profile-components';
+import { UserProfilesSelectable, UserProfileWithAvatar } from '@kbn/user-profile-components';
 
-import { UserProfile } from '@kbn/security-plugin/common';
 import { useSuggestUserProfiles } from '../../containers/user_profiles/use_suggest_user_profiles';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
 
 interface SuggestUsersProps {
-  selectedUsers: UserProfile[];
-  onUsersChange: (users: UserProfile[]) => void;
+  selectedUsers: UserProfileWithAvatar[];
+  onUsersChange: (users: UserProfileWithAvatar[]) => void;
 }
 
 const SuggestUsersComponent: React.FC<SuggestUsersProps> = ({ selectedUsers, onUsersChange }) => {
   const { owner } = useCasesContext();
   const [searchTerm, setSearchTerm] = useState('');
-  const [currentSelectedUsers, setCurrentSelectedUsers] = useState<UserProfile[]>(selectedUsers);
+  const [currentSelectedUsers, setCurrentSelectedUsers] =
+    useState<UserProfileWithAvatar[]>(selectedUsers);
 
   const onChange = useCallback(
-    (users: UserProfile[]) => {
+    (users: UserProfileWithAvatar[]) => {
       setCurrentSelectedUsers(users);
       onUsersChange(users);
     },
