@@ -344,4 +344,3 @@ async function getConnectors(
 
   return result;
 }
-
