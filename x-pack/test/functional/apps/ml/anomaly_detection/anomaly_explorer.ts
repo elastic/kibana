@@ -165,18 +165,11 @@ export default function ({ getService }: FtrProviderContext) {
             '2016-02-11 00:00',
             '2016-02-12 00:00',
           ]);
-          await ml.swimLane.assertAxisLabels(viewBySwimLaneTestSubj, 'y', [
-            'AAL',
-            'EGF',
-            'VRD',
-            'SWR',
-            'JZA',
-            'AMX',
-            'TRS',
-            'ACA',
-            'BAW',
-            'ASA',
-          ]);
+
+          const swimLaneYLabel = await ml.swimLane.getAxisLabels(viewBySwimLaneTestSubj, 'y');
+
+          expect(swimLaneYLabel[0]).to.eql('AAL');
+          expect(swimLaneYLabel.length).to.eql(10);
         });
 
         it('supports cell selection by click on Overall swim lane', async () => {
