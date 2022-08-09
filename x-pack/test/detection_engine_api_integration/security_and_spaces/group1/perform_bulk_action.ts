@@ -598,6 +598,42 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(setIndexRule.index).to.eql(['initial-index-*']);
       });
 
+      it('should not delete data view in a rule when delete index pattern action applied', async () => {
+        const ruleId = 'ruleId';
+        const dataViewId = 'index1-*';
+        const simpleRule = {
+          ...getSimpleRule(ruleId),
+          index: undefined,
+          data_view_id: dataViewId,
+        };
+        await createRule(supertest, log, simpleRule);
+
+        const { body: bulkActionResponse } = await postBulkAction()
+          .send({
+            query: '',
+            action: BulkAction.edit,
+            [BulkAction.edit]: [
+              {
+                type: BulkActionEditType.delete_index_patterns,
+                value: ['initial-index-*'],
+              },
+            ],
+          })
+          .expect(200);
+
+        expect(bulkActionResponse.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
+
+        // Check that the updated rule is returned with the response
+        expect(bulkActionResponse.attributes.results.updated[0].data_view_id).to.be(dataViewId);
+        expect(bulkActionResponse.attributes.results.updated[0].index).to.be(undefined);
+
+        // Check that the updates have been persisted
+        const { body: updatedRule } = await fetchRule(ruleId).expect(200);
+
+        expect(updatedRule.data_view_id).to.be(dataViewId);
+        expect(updatedRule.index).to.be(undefined);
+      });
+
       it('should set timeline values in rule', async () => {
         const ruleId = 'ruleId';
         const timelineId = '91832785-286d-4ebe-b884-1a208d111a70';
@@ -634,8 +670,18 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should correctly remove timeline', async () => {
+        const timelineId = 'test-id';
+        const timelineTitle = 'Test timeline template';
         const ruleId = 'ruleId';
-        await createRule(supertest, log, getSimpleRule(ruleId));
+        const createdRule = await createRule(supertest, log, {
+          ...getSimpleRule(ruleId),
+          timeline_id: 'test-id',
+          timeline_title: 'Test timeline template',
+        });
+
+        // ensure rule has been created with timeline properties
+        expect(createdRule.timeline_id).to.be(timelineId);
+        expect(createdRule.timeline_title).to.be(timelineTitle);
 
         const { body } = await postBulkAction()
           .send({

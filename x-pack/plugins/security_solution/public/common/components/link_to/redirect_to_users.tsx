@@ -9,10 +9,10 @@ import type { UsersTableType } from '../../../users/store/model';
 import { appendSearch } from './helpers';
 
 export const getUsersDetailsUrl = (detailName: string, search?: string) =>
-  `/${detailName}${appendSearch(search)}`;
+  `/name/${detailName}${appendSearch(search)}`;
 
 export const getTabsOnUsersDetailsUrl = (
   detailName: string,
   tabName: UsersTableType,
   search?: string
-) => `/${detailName}/${tabName}${appendSearch(search)}`;
+) => `/name/${detailName}/${tabName}${appendSearch(search)}`;
