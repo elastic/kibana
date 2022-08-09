@@ -25,7 +25,7 @@ import { writeDeprecationDocByApi } from './mdx/write_deprecations_doc_by_api';
 import { writeDeprecationDocByPlugin } from './mdx/write_deprecations_doc_by_plugin';
 import { writePluginDirectoryDoc } from './mdx/write_plugin_directory_doc';
 import { collectApiStatsForPlugin } from './stats';
-import { countEslintDisableLine, EslintDisableCounts } from './count_eslint_disable';
+import { countEslintDisableLines, EslintDisableCounts } from './count_eslint_disable';
 import { writeDeprecationDueByTeam } from './mdx/write_deprecations_due_by_team';
 
 function isStringArray(arr: unknown | string[]): arr is string[] {
@@ -89,7 +89,7 @@ export function runBuildApiDocsCli() {
         const pluginApi = pluginApiMap[id];
 
         allPluginStats[id] = {
-          ...(await countEslintDisableLine(plugin.directory)),
+          ...(await countEslintDisableLines(plugin.directory)),
           ...collectApiStatsForPlugin(pluginApi, missingApiItems, referencedDeprecations),
           owner: plugin.manifest.owner,
           description: plugin.manifest.description,

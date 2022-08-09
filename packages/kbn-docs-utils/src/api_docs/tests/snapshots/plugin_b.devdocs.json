@@ -31,6 +31,7 @@
         ],
         "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_b/public/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "pluginB",
@@ -51,6 +52,7 @@
             ],
             "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_b/public/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],

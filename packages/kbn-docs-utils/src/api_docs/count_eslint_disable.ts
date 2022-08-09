@@ -19,6 +19,9 @@ export interface EslintDisableCounts {
 // const execAsync = promisify(exec);
 
 async function fetchAllFilePaths(path: string): Promise<string[]> {
+  if ((await Fs.promises.stat(path)).isFile()) {
+    return [path];
+  }
   const filePaths: string[] = [];
   const dirContent = await Fs.promises.readdir(path, { withFileTypes: true });
   for (const item of dirContent) {
@@ -45,11 +48,11 @@ async function countEsLintDisableInFile(path: string): Promise<EslintDisableCoun
     eslintDisableLineCount:
       findOccurrences(fileContent, /eslint-disable-next-line/) +
       findOccurrences(fileContent, /eslint-disable-line/),
-    eslintDisableFileCount: findOccurrences(fileContent, /eslint-disable/),
+    eslintDisableFileCount: findOccurrences(fileContent, /eslint-disable\s/),
   };
 }
 
-export async function countEslintDisableLine(path: string): Promise<EslintDisableCounts> {
+export async function countEslintDisableLines(path: string): Promise<EslintDisableCounts> {
   const filePaths = await fetchAllFilePaths(path);
 
   const allEslintDisableCounts = await Promise.all(
