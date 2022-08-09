@@ -75,5 +75,6 @@ test('requests to stream', () => {
   expect(streams[0].startTime).toBe(streams[0].requests[0].date);
   expect(streams[0].startTime).toBe(sorted[0].date);
   expect(streams[1].requests.length).toBe(1);
+  expect(getTime(streams[1].startTime)).toBeGreaterThan(getTime(streams[0].endTime));
   expect(streams[2].requests.length).toBe(2);
 });
