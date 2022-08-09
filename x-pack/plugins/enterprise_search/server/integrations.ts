@@ -363,7 +363,7 @@ export const registerEnterpriseSearchIntegrations = (
       defaultMessage: 'API',
     }),
     description: i18n.translate('xpack.enterpriseSearch.integrations.apiDescription', {
-      defaultMessage: "Add search to your application with App Search's robust APIs.",
+      defaultMessage: "Add search to your application with Elasticsearch's robust APIs.",
     }),
     categories: ['enterprise_search', 'custom', 'elastic_stack'],
     uiInternalPath: '/app/enterprise_search/content/search_indices/new_index?method=api',
