@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { validateTimeRange, isRefreshIntervalValid } from './validate_time_range';
+import { validateTimeRange } from './validate_time_range';
 import { notificationServiceMock } from '@kbn/core/public/mocks';
-import { RefreshInterval } from '@kbn/data-plugin/common';
 
 describe('Discover validateTimeRange', () => {
   test('validates given time ranges correctly', async () => {
@@ -33,23 +32,5 @@ describe('Discover validateTimeRange', () => {
       title: 'Invalid time range',
       text: "The provided time range is invalid. (from: 'now', to: 'null')",
     });
-  });
-
-  test('should validate that refresh interval is valid', async () => {
-    expect(isRefreshIntervalValid({ value: 5000, pause: false })).toEqual(true);
-    expect(isRefreshIntervalValid({ value: 0, pause: false })).toEqual(true);
-    expect(isRefreshIntervalValid({ value: 4000, pause: true })).toEqual(true);
-  });
-
-  test('should validate that refresh interval is invalid', async () => {
-    expect(isRefreshIntervalValid({ value: -5000, pause: false })).toEqual(false);
-    expect(
-      isRefreshIntervalValid({ value: 'test', pause: false } as unknown as RefreshInterval)
-    ).toEqual(false);
-    expect(
-      isRefreshIntervalValid({ value: 4000, pause: 'test' } as unknown as RefreshInterval)
-    ).toEqual(false);
-    expect(isRefreshIntervalValid({} as unknown as RefreshInterval)).toEqual(false);
-    expect(isRefreshIntervalValid(undefined)).toEqual(false);
   });
 });

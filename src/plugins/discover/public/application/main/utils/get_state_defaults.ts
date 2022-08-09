@@ -21,7 +21,6 @@ import { SavedSearch } from '../../../services/saved_searches';
 import { AppState } from '../services/discover_state';
 import { getDefaultSort, getSortArray } from '../../../components/doc_table';
 import { CHART_HIDDEN_KEY } from '../components/chart/discover_chart';
-import { isTimeRangeValid, isRefreshIntervalValid } from './validate_time_range';
 
 function getDefaultColumns(savedSearch: SavedSearch, config: IUiSettingsClient) {
   if (savedSearch.columns && savedSearch.columns.length > 0) {
@@ -51,17 +50,6 @@ export function getStateDefaults({
   const sort = getSortArray(savedSearch.sort ?? [], dataView!);
   const columns = getDefaultColumns(savedSearch, config);
   const chartHidden = storage.get(CHART_HIDDEN_KEY);
-
-  if (savedSearch.timeRestore && savedSearch.timeRange && isTimeRangeValid(savedSearch.timeRange)) {
-    data.query.timefilter.timefilter.setTime(savedSearch.timeRange);
-  }
-  if (
-    savedSearch.timeRestore &&
-    savedSearch.refreshInterval &&
-    isRefreshIntervalValid(savedSearch.refreshInterval)
-  ) {
-    data.query.timefilter.timefilter.setRefreshInterval(savedSearch.refreshInterval);
-  }
 
   const defaultState: AppState = {
     query,
