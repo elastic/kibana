@@ -55,7 +55,7 @@ export async function runTypeCheckCli() {
         }
       }
 
-      const concurrencyArg = flags.concurrency && parseInt(flags.concurrency as string, 10);
+      const concurrencyArg = typeof flags.concurrency === 'string' && parseInt(flags.concurrency, 10);
       const concurrency =
         concurrencyArg && concurrencyArg > 0
           ? concurrencyArg
