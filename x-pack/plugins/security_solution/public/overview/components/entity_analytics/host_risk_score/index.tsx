@@ -26,10 +26,10 @@ import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { InspectButtonContainer } from '../../../../common/components/inspect';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { hostsActions } from '../../../../hosts/store';
-import { useEnableHostRiskFromUrl } from '../../overview_risky_host_links/risky_hosts_disabled_module';
 import { useCheckSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_check_signal_index';
 import { RiskScoreDonutChart } from '../common/risk_score_donut_chart';
 import { BasicTableWithoutBorderBottom } from '../common/basic_table_without_border_bottom';
+import { useEnableHostRiskFromUrl } from '../../../../common/hooks/use_enable_host_risk_from_url';
 
 const TABLE_QUERY_ID = 'hostRiskDashboardTable';
 

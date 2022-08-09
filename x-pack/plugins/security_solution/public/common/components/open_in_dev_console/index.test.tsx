@@ -33,7 +33,7 @@ describe('OpenInDevConsoleButton', () => {
       <TestProviders>
         <OpenInDevConsoleButton
           enableButton={true}
-          href="http://localhost:1234/s/myspace/test"
+          href="/s/myspace/app/dev_tools#/console?load_from=http://localhost:1234/s/myspace/test"
           tooltipContent="popover"
           title="open in dev console"
         />

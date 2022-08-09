@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 
 import * as i18n from './translations';
 import { DisabledLinkPanel } from '../link_panel/disabled_link_panel';
 import { RiskyHostsPanelView } from './risky_hosts_panel_view';
-import { RiskyHostsEnabledModule } from './risky_hosts_enabled_module';
+
 import { ENABLE_VIA_DEV_TOOLS } from './translations';
-import { devToolPrebuiltContentUrl } from '../../../../common/constants';
+
 import { OpenInDevConsoleButton } from '../../../common/components/open_in_dev_console';
 import { useCheckSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_check_signal_index';
 import type { LinkPanelListItem } from '../link_panel';
-import { useSpaceId } from '../../../risk_score/containers/common';
+import { useEnableHostRiskFromUrl } from '../../../common/hooks/use_enable_host_risk_from_url';
 
 export const RISKY_HOSTS_DOC_LINK =
   'https://www.github.com/elastic/detection-rules/blob/main/docs/experimental-machine-learning/host-risk-score.md';
@@ -47,20 +47,5 @@ export const RiskyHostsDisabledModuleComponent = () => {
   );
 };
 
-export const useEnableHostRiskFromUrl = () => {
-  const spaceId = useSpaceId();
-  const hostRiskScoreConsoleId = 'enable_host_risk_score';
-  const loadFromUrl = useMemo(() => {
-    const protocol = window.location.protocol;
-    const hostname = window.location.hostname;
-    const port = window.location.port;
-    return `/s/${spaceId}/app/dev_tools#/console?load_from=${protocol}//${hostname}:${port}${devToolPrebuiltContentUrl(
-      spaceId ?? 'default',
-      hostRiskScoreConsoleId
-    )}`;
-  }, [spaceId]);
-  return loadFromUrl;
-};
-
 export const RiskyHostsDisabledModule = React.memo(RiskyHostsDisabledModuleComponent);
-RiskyHostsEnabledModule.displayName = 'RiskyHostsDisabledModule';
+RiskyHostsDisabledModule.displayName = 'RiskyHostsDisabledModule';
