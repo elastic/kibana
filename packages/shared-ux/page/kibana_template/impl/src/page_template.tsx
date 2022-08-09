@@ -17,7 +17,6 @@ import { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template-typ
 import { KibanaPageTemplateInner, KibanaPageTemplateWithSolutionNav } from './page_template_inner';
 
 export const KibanaPageTemplate: FC<KibanaPageTemplateProps> = ({
-  template,
   className,
   children,
   solutionNav,
@@ -51,7 +50,6 @@ export const KibanaPageTemplate: FC<KibanaPageTemplateProps> = ({
   if (solutionNav) {
     return (
       <KibanaPageTemplateWithSolutionNav
-        template={template}
         className={className}
         solutionNav={solutionNav}
         children={children}
@@ -60,12 +58,5 @@ export const KibanaPageTemplate: FC<KibanaPageTemplateProps> = ({
     );
   }
 
-  return (
-    <KibanaPageTemplateInner
-      template={template}
-      className={className}
-      children={children}
-      {...rest}
-    />
-  );
+  return <KibanaPageTemplateInner className={className} children={children} {...rest} />;
 };
