@@ -151,6 +151,7 @@ enabled:
   - x-pack/test/functional_synthetics/config.js
   - x-pack/test/functional_with_es_ssl/config.ts
   - x-pack/test/functional/apps/advanced_settings/config.ts
+  - x-pack/test/functional/apps/aiops/config.ts
   - x-pack/test/functional/apps/api_keys/config.ts
   - x-pack/test/functional/apps/apm/config.ts
   - x-pack/test/functional/apps/canvas/config.ts
@@ -178,7 +179,6 @@ enabled:
   - x-pack/test/functional/apps/maps/group2/config.ts
   - x-pack/test/functional/apps/maps/group3/config.ts
   - x-pack/test/functional/apps/maps/group4/config.ts
-  - x-pack/test/functional/apps/ml/aiops/config.ts
   - x-pack/test/functional/apps/ml/anomaly_detection/config.ts
   - x-pack/test/functional/apps/ml/data_frame_analytics/config.ts
   - x-pack/test/functional/apps/ml/data_visualizer/config.ts

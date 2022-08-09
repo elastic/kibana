@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
-import { TestData } from './types';
-import { farequoteDataViewTestData } from '../data_visualizer/index_test_data';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { TestData } from './types';
+import { farequoteDataViewTestData } from '../ml/data_visualizer/index_test_data';
 
 export default function ({ getPageObject, getService }: FtrProviderContext) {
   const headerPage = getPageObject('header');
   const esArchiver = getService('esArchiver');
+  const aiops = getService('aiops');
   const ml = getService('ml');
 
   function runTests(testData: TestData) {
@@ -19,7 +20,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep(
         `${testData.suiteTitle} loads the saved search selection page`
       );
-      await ml.aiops.navigateToIndexPatternSelection();
+      await aiops.explainLogRateSpikes.navigateToIndexPatternSelection();
 
       await ml.testExecution.logTestStep(
         `${testData.suiteTitle} loads the explain log rate spikes page`
@@ -31,26 +32,28 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
     it(`${testData.suiteTitle} displays index details`, async () => {
       await ml.testExecution.logTestStep(`${testData.suiteTitle} displays the time range step`);
-      await ml.aiops.assertTimeRangeSelectorSectionExists();
+      await aiops.explainLogRateSpikes.assertTimeRangeSelectorSectionExists();
 
       await ml.testExecution.logTestStep(`${testData.suiteTitle} loads data for full time range`);
-      await ml.aiops.clickUseFullDataButton(testData.expected.totalDocCountFormatted);
+      await aiops.explainLogRateSpikes.clickUseFullDataButton(
+        testData.expected.totalDocCountFormatted
+      );
       await headerPage.waitUntilLoadingHasFinished();
 
       await ml.testExecution.logTestStep(
         `${testData.suiteTitle} displays elements in the doc count panel correctly`
       );
-      await ml.aiops.assertTotalDocCountHeaderExist();
-      await ml.aiops.assertTotalDocCountChartExist();
+      await aiops.explainLogRateSpikes.assertTotalDocCountHeaderExist();
+      await aiops.explainLogRateSpikes.assertTotalDocCountChartExist();
 
       await ml.testExecution.logTestStep(
         `${testData.suiteTitle} displays elements in the page correctly`
       );
 
-      await ml.aiops.assertSearchPanelExist();
+      await aiops.explainLogRateSpikes.assertSearchPanelExist();
 
       await ml.testExecution.logTestStep('displays empty prompt');
-      await ml.aiops.assertNoWindowParametersEmptyPromptExist();
+      await aiops.explainLogRateSpikes.assertNoWindowParametersEmptyPromptExist();
     });
   }
 
@@ -74,7 +77,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       it(`${farequoteDataViewTestData.suiteTitle} loads the explain log rate spikes page`, async () => {
         // Start navigation from the base of the ML app.
         await ml.navigation.navigateToMl();
-        await ml.navigation.navigateToDataVisualizer();
       });
 
       runTests(farequoteDataViewTestData);

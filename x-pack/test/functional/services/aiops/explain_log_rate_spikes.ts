@@ -7,9 +7,9 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
-export function MachineLearningAiopsProvider({ getService }: FtrProviderContext) {
+export function ExplainLogRateSpikesProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
