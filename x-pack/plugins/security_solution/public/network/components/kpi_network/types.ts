@@ -5,15 +5,10 @@
  * 2.0.
  */
 
-import type { UpdateDateRange } from '../../../common/components/charts/common';
 import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 
 export interface NetworkKpiProps {
-  filterQuery?: string;
   from: string;
-  indexNames: string[];
   to: string;
-  narrowDateRange: UpdateDateRange;
   setQuery: GlobalTimeArgs['setQuery'];
-  skip: boolean;
 }
