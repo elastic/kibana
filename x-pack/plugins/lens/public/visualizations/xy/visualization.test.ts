@@ -26,7 +26,7 @@ import type {
 import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
 import { layerTypes } from '../../../common';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
-import { LensIconChartBar } from '../../assets/chart_bar';
+import { LensIconChartBar } from '@kbn/lens-icons';
 import type { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
