@@ -14,7 +14,6 @@ import { renderMustacheStringNoEscape } from '../../lib/mustache_renderer';
 import {
   createServiceError,
   getObjectValueByKeyAsString,
-  getPushedDate,
   stringifyObjValues,
   removeSlash,
   throwDescriptiveErrorIfResponseIsNotValid,
@@ -49,9 +48,7 @@ export const createExternalService = (
     createIncidentMethod,
     createIncidentResponseKey,
     createIncidentUrl: createIncidentUrlConfig,
-    getIncidentResponseCreatedDateKey,
     getIncidentResponseExternalTitleKey,
-    getIncidentResponseUpdatedDateKey,
     getIncidentUrl,
     hasAuth,
     headers,
@@ -107,17 +104,11 @@ export const createExternalService = (
 
       throwDescriptiveErrorIfResponseIsNotValid({
         res,
-        requiredAttributesToBeInTheResponse: [
-          getIncidentResponseCreatedDateKey,
-          getIncidentResponseExternalTitleKey,
-          getIncidentResponseUpdatedDateKey,
-        ],
+        requiredAttributesToBeInTheResponse: [getIncidentResponseExternalTitleKey],
       });
 
       const title = getObjectValueByKeyAsString(res.data, getIncidentResponseExternalTitleKey)!;
-      const createdAt = getObjectValueByKeyAsString(res.data, getIncidentResponseCreatedDateKey)!;
-      const updatedAt = getObjectValueByKeyAsString(res.data, getIncidentResponseUpdatedDateKey)!;
-      return { id, title, createdAt, updatedAt };
+      return { id, title };
     } catch (error) {
       throw createServiceError(error, `Unable to get case with id ${id}`);
     }
@@ -180,7 +171,7 @@ export const createExternalService = (
         id: externalId,
         title: insertedIncident.title,
         url: normalizedViewUrl,
-        pushedDate: getPushedDate(insertedIncident.createdAt),
+        pushedDate: new Date().toISOString(),
       };
     } catch (error) {
       throw createServiceError(error, 'Unable to create case');
@@ -250,7 +241,7 @@ export const createExternalService = (
         id: incidentId,
         title: updatedIncident.title,
         url: normalizedViewUrl,
-        pushedDate: getPushedDate(updatedIncident.updatedAt),
+        pushedDate: new Date().toISOString(),
       };
     } catch (error) {
       throw createServiceError(error, `Unable to update case with id ${incidentId}`);
