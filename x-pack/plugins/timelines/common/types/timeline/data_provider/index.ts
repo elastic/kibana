@@ -55,7 +55,7 @@ export interface DataProvider {
   /**
    * Additional query clauses that are ANDed with this query to narrow results
    */
-  and: DataProvidersAnd[];
+  and?: DataProvidersAnd[];
   /**
    * Returns a DataProviderType
    */

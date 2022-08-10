@@ -158,7 +158,6 @@ export const useActionCellDataProvider = ({
   ]);
   if (alertsOnly && cellData) {
     const ensureOnlyRuleProviders: DataProvider = {
-      and: [],
       enabled: true,
       id: ALERT_RULE_UUID,
       name: ALERT_RULE_UUID,
