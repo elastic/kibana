@@ -128,13 +128,15 @@ beforeAll(async () => {
   );
 
   mdxOutputFolder = Path.resolve(__dirname, 'snapshots');
-  await writePluginDocs(mdxOutputFolder, { doc, plugin: pluginA, pluginStats: pluginAStats, log });
-  await writePluginDocs(mdxOutputFolder, {
-    doc: pluginApiMap.pluginB,
-    plugin: pluginB,
-    pluginStats: pluginBStats,
-    log,
-  });
+  await Promise.all([
+    writePluginDocs(mdxOutputFolder, { doc, plugin: pluginA, pluginStats: pluginAStats, log }),
+    writePluginDocs(mdxOutputFolder, {
+      doc: pluginApiMap.pluginB,
+      plugin: pluginB,
+      pluginStats: pluginBStats,
+      log,
+    }),
+  ]);
 });
 
 it('Stats', () => {
