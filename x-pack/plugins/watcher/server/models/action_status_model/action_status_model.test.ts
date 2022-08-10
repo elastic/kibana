@@ -8,12 +8,12 @@
 import moment from 'moment';
 
 import { ACTION_STATES } from '../../../common/constants';
-import { ActionStatusUpstreamJson } from '../../../common/types';
+import { ActionStatusModelEs } from '../../../common/types';
 import { buildServerActionStatusModel, buildClientActionStatusModel } from './action_status_model';
 
 describe('ActionStatusModel', () => {
   describe('buildServerActionStatusModel', () => {
-    let upstreamJson: ActionStatusUpstreamJson;
+    let upstreamJson: ActionStatusModelEs;
     beforeEach(() => {
       upstreamJson = {
         id: 'my-action',
@@ -84,7 +84,7 @@ describe('ActionStatusModel', () => {
   });
 
   describe('buildClientActionStatusModel', () => {
-    let upstreamJson: ActionStatusUpstreamJson;
+    let upstreamJson: ActionStatusModelEs;
     beforeEach(() => {
       upstreamJson = {
         id: 'my-action',

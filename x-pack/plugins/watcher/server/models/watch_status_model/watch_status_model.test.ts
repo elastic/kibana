@@ -7,10 +7,10 @@
 
 import moment from 'moment';
 
-import { WatchStatusUpstreamJson } from '../../../common/types';
+import { WatchStatusModelEs } from '../../../common/types';
 import { buildServerWatchStatusModel, buildClientWatchStatusModel } from './watch_status_model';
 
-const upstreamJson: WatchStatusUpstreamJson = {
+const upstreamJson: WatchStatusModelEs = {
   id: 'my-watch',
   watchStatusJson: {
     version: 1,

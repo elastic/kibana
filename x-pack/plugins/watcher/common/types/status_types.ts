@@ -10,7 +10,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { ACTION_STATES, WATCH_STATES, WATCH_STATE_COMMENTS } from '../constants';
 
-export interface ActionStatusUpstreamJson {
+export interface ActionStatusModelEs {
   id: string;
   actionStatusJson: estypes.WatcherActionStatus;
   errors?: any; // TODO
@@ -51,7 +51,7 @@ interface SerializedWatchStatus extends estypes.WatcherActivationStatus {
   last_met_condition?: string; // Timestamp TODO: Update ES JS client types with this.
 }
 
-export interface WatchStatusUpstreamJson {
+export interface WatchStatusModelEs {
   id: string;
   watchStatusJson: SerializedWatchStatus;
   state?: estypes.WatcherExecutionStatus; // e.g. 'execution_not_needed' or 'failed'
@@ -64,7 +64,7 @@ export interface ServerWatchStatusModel {
   id: string;
   watchState?: estypes.WatcherExecutionStatus; // e.g. 'execution_not_needed' or 'failed'
   watchStatusJson: SerializedWatchStatus;
-  watchErrors?: WatchStatusUpstreamJson['watchErrors'];
+  watchErrors?: WatchStatusModelEs['watchErrors'];
   isActive: boolean;
   lastChecked: Moment | null;
   lastMetCondition: Moment | null;

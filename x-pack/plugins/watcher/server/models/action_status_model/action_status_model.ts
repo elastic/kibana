@@ -8,15 +8,15 @@
 import { badRequest } from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 
-import { ActionStatusUpstreamJson, ServerActionStatusModel } from '../../../common/types';
+import { ActionStatusModelEs, ServerActionStatusModel } from '../../../common/types';
 import { getMoment } from '../../../common/lib/get_moment';
 import { deriveState, deriveIsAckable } from './action_status_model_utils';
 
 // Replaces fromUpstreamJson factory method.
 export const buildServerActionStatusModel = (
-  actionStatusUpstreamJson: ActionStatusUpstreamJson
+  actionStatusModelEs: ActionStatusModelEs
 ): ServerActionStatusModel => {
-  const { id, actionStatusJson, errors, lastCheckedRawFormat } = actionStatusUpstreamJson;
+  const { id, actionStatusJson, errors, lastCheckedRawFormat } = actionStatusModelEs;
 
   const missingPropertyError = (missingProperty: string) =>
     i18n.translate(

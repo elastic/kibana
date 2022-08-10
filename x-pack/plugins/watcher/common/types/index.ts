@@ -6,10 +6,10 @@
  */
 
 export type {
-  ActionStatusUpstreamJson,
+  ActionStatusModelEs,
   ServerActionStatusModel,
   ClientActionStatusModel,
-  WatchStatusUpstreamJson,
+  WatchStatusModelEs,
   ServerWatchStatusModel,
   ClientWatchStatusModel,
 } from './status_types';

@@ -8,7 +8,7 @@
 import { mergeWith, isObject } from 'lodash';
 
 import { ACTION_STATES } from '../../../common/constants';
-import { ActionStatusUpstreamJson } from '../../../common/types';
+import { ActionStatusModelEs } from '../../../common/types';
 import { buildServerActionStatusModel, buildClientActionStatusModel } from './action_status_model';
 
 // Treat all nested properties of type as optional.
@@ -19,7 +19,7 @@ type DeepPartial<T> = T extends object
   : T;
 
 const createModelWithActions = (
-  customActionStatusJson?: DeepPartial<ActionStatusUpstreamJson['actionStatusJson']>,
+  customActionStatusJson?: DeepPartial<ActionStatusModelEs['actionStatusJson']>,
   hasErrors: boolean = false
 ) => {
   // Set srcValue to {} to define an empty property.

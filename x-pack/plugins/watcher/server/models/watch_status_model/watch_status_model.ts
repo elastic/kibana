@@ -9,7 +9,7 @@ import { badRequest } from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 
 import {
-  WatchStatusUpstreamJson,
+  WatchStatusModelEs,
   ServerWatchStatusModel,
   ClientWatchStatusModel,
 } from '../../../common/types';
@@ -19,9 +19,9 @@ import { deriveState, deriveComment, deriveLastFired } from './watch_status_mode
 
 // Replaces fromUpstreamJson factory method.
 export const buildServerWatchStatusModel = (
-  watchStatusUpstreamJson: WatchStatusUpstreamJson
+  watchStatusModelEs: WatchStatusModelEs
 ): ServerWatchStatusModel => {
-  const { id, watchStatusJson, state, watchErrors } = watchStatusUpstreamJson;
+  const { id, watchStatusJson, state, watchErrors } = watchStatusModelEs;
 
   // TODO: Remove once all consumers and upstream dependencies are converted to TS.
   if (!id) {
