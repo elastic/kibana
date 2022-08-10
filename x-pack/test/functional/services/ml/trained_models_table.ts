@@ -181,7 +181,11 @@ export function TrainedModelsTableProvider(
     }
 
     public async deleteModel(modelId: string) {
-      await this.clickDeleteAction(modelId);
+      await mlCommonUI.invokeTableRowAction(
+        this.rowSelector(modelId),
+        'mlModelsTableRowDeleteAction'
+      );
+      await this.assertDeleteModalExists();
       await this.confirmDeleteModel();
       await mlCommonUI.waitForRefreshButtonEnabled();
       await this.assertModelDisplayedInTable(modelId, false);
@@ -225,11 +229,7 @@ export function TrainedModelsTableProvider(
     }
 
     public async clickDeleteAction(modelId: string) {
-      await mlCommonUI.invokeTableRowAction(
-        this.rowSelector(modelId),
-        'mlModelsTableRowDeleteAction'
-      );
-
+      await testSubjects.click(this.rowSelector(modelId, 'mlModelsTableRowDeleteAction'));
       await this.assertDeleteModalExists();
     }
 
