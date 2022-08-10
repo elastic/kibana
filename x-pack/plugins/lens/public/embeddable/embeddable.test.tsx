@@ -195,7 +195,7 @@ describe('embeddable', () => {
         data: dataMock,
         expressionRenderer,
         basePath,
-        indexPatternService: {} as DataViewsContract,
+        dataViews: {} as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,

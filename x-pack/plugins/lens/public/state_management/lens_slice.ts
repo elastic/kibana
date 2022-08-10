@@ -368,23 +368,26 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
               const nextTable = new Set(
                 nextPublicAPI.getTableSpec().map(({ columnId }) => columnId)
               );
-              const removed = datasourceLayers[layerId]
-                .getTableSpec()
-                .map(({ columnId }) => columnId)
-                .filter((columnId) => !nextTable.has(columnId));
-              const nextVisState = (newState.visualization || state.visualization).state;
-              const activeVisualization = visualizationMap[state.visualization.activeId];
-              removed.forEach((columnId) => {
-                newState.visualization = {
-                  ...state.visualization,
-                  state: activeVisualization.removeDimension({
-                    layerId,
-                    columnId,
-                    prevState: nextVisState,
-                    frame,
-                  }),
-                };
-              });
+              const datasourcePublicAPI = datasourceLayers[layerId];
+              if (datasourcePublicAPI) {
+                const removed = datasourcePublicAPI
+                  .getTableSpec()
+                  .map(({ columnId }) => columnId)
+                  .filter((columnId) => !nextTable.has(columnId));
+                const nextVisState = (newState.visualization || state.visualization).state;
+                const activeVisualization = visualizationMap[state.visualization.activeId];
+                removed.forEach((columnId) => {
+                  newState.visualization = {
+                    ...state.visualization,
+                    state: activeVisualization.removeDimension({
+                      layerId,
+                      columnId,
+                      prevState: nextVisState,
+                      frame,
+                    }),
+                  };
+                });
+              }
             }
           }
         }
