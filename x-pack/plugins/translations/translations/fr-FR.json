@@ -5799,7 +5799,6 @@
     "unifiedSearch.filter.filterBar.labelErrorText": "Erreur",
     "unifiedSearch.filter.filterBar.labelWarningInfo": "Le champ {fieldName} n'existe pas dans la vue en cours.",
     "unifiedSearch.filter.filterBar.labelWarningText": "Avertissement",
-    "unifiedSearch.filter.filterBar.moreFilterActionsMessage": "Filtre : {innerText}. Sélectionner pour plus d’actions de filtrage.",
     "unifiedSearch.filter.filterBar.negatedFilterPrefix": "NON ",
     "unifiedSearch.filter.filterBar.pinFilterButtonLabel": "Épingler dans toutes les applications",
     "unifiedSearch.filter.filterBar.pinnedFilterPrefix": "Épinglé",

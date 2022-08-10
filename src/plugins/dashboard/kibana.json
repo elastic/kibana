@@ -20,7 +20,8 @@
     "uiActions",
     "urlForwarding",
     "presentationUtil",
-    "visualizations"
+    "visualizations",
+    "unifiedSearch"
   ],
   "optionalPlugins": [
     "home",
