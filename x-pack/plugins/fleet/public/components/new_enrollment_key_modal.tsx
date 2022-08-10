@@ -115,7 +115,7 @@ export const NewEnrollmentTokenModal: React.FunctionComponent<Props> = ({
           })}
         >
           <EuiFieldText
-            data-test-subj='createEnrollmentTokenNameField'
+            data-test-subj="createEnrollmentTokenNameField"
             name="name"
             autoComplete="off"
             placeholder={i18n.translate('xpack.fleet.newEnrollmentKey.placeholder', {
