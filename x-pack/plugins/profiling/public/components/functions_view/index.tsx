@@ -138,7 +138,7 @@ export function FunctionsView({ children }: { children: React.ReactElement }) {
                           query: {
                             ...(query as TypeOf<
                               ProfilingRoutes,
-                              '/flamegraphs/differential'
+                              '/functions/differential'
                             >['query']),
                             sortField: nextSort.sortField,
                             sortDirection: nextSort.sortDirection,

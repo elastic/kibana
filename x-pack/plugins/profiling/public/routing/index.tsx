@@ -11,6 +11,7 @@ import * as t from 'io-ts';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { StackTracesDisplayOption, TopNType } from '../../common/stack_traces';
+import { FlameGraphComparisonMode } from '../../common/flamegraph';
 import { FlameGraphsView } from '../components/flame_graphs_view';
 import { FunctionsView } from '../components/functions_view';
 import { RouteBreadcrumb } from '../components/route_breadcrumb';
@@ -104,8 +105,17 @@ const routes = {
                     comparisonRangeFrom: t.string,
                     comparisonRangeTo: t.string,
                     comparisonKuery: t.string,
+                    comparisonMode: t.union([
+                      t.literal(FlameGraphComparisonMode.Absolute),
+                      t.literal(FlameGraphComparisonMode.Relative),
+                    ]),
                   }),
                 }),
+                defaults: {
+                  query: {
+                    comparisonMode: FlameGraphComparisonMode.Absolute,
+                  },
+                },
               },
             },
           },

@@ -24,6 +24,7 @@ interface ColumnarCallerCallee {
   Color: number[];
   CountInclusive: number[];
   CountExclusive: number[];
+  ID: string[];
 }
 
 export interface ElasticFlameGraph {
@@ -34,6 +35,12 @@ export interface ElasticFlameGraph {
   Color: number[];
   CountInclusive: number[];
   CountExclusive: number[];
+  ID: string[];
+}
+
+export enum FlameGraphComparisonMode {
+  Absolute = 'absolute',
+  Relative = 'relative',
 }
 
 /*
@@ -71,7 +78,7 @@ function frameTypeToRGB(frameType: number, x: number): number {
   return frameTypeToColors[frameType][x % 4];
 }
 
-function normalizeColor(rgb: number): number[] {
+export function normalizeColorForFlamegraph(rgb: number): number[] {
   return [
     Math.floor(rgb / 65536) / 255,
     (Math.floor(rgb / 256) % 256) / 255,
@@ -159,6 +166,7 @@ export class FlameGraph {
       Color: [],
       CountInclusive: [],
       CountExclusive: [],
+      ID: [],
     };
     const queue = [{ x: 0, depth: 1, node: root }];
 
@@ -177,6 +185,8 @@ export class FlameGraph {
 
       columnar.CountInclusive.push(node.CountInclusive);
       columnar.CountExclusive.push(node.CountExclusive);
+
+      columnar.ID.push(node.ID);
 
       node.Callees.sort((a: CallerCalleeNode, b: CallerCalleeNode) => b.Samples - a.Samples);
 
@@ -205,12 +215,14 @@ export class FlameGraph {
       Color: [],
       CountInclusive: [],
       CountExclusive: [],
+      ID: [],
     };
 
     graph.Label = columnar.Label;
     graph.Value = columnar.Value;
     graph.CountInclusive = columnar.CountInclusive;
     graph.CountExclusive = columnar.CountExclusive;
+    graph.ID = columnar.ID;
 
     const maxX = columnar.Value[0];
     const maxY = columnar.Y.reduce((max, n) => (n > max ? n : max), 0);
@@ -224,7 +236,7 @@ export class FlameGraph {
     graph.Size = graph.Value.map((n) => normalize(n, 0, maxX));
 
     for (const color of columnar.Color) {
-      graph.Color.push(...normalizeColor(color));
+      graph.Color.push(...normalizeColorForFlamegraph(color));
     }
 
     return graph;
