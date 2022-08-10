@@ -239,6 +239,8 @@ export function LayerPanel(
           // The datasource can indicate that the previously-valid column is no longer
           // complete, which clears the visualization. This keeps the flyout open and reuses
           // the previous columnId
+
+          // TODO - handle this in redux and cover the linked dimensions case
           updateAll(
             datasourceId,
             newState,

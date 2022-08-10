@@ -7,6 +7,7 @@
  */
 
 export const EXPRESSION_METRIC_NAME = 'metricVis';
+export const EXPRESSION_METRIC_TRENDLINE_NAME = 'metricTrendline';
 
 export const LabelPosition = {
   BOTTOM: 'bottom',

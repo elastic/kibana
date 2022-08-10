@@ -17,6 +17,7 @@ import { setFormatService, setPaletteService } from './services';
 import { getMetricVisRenderer } from './expression_renderers';
 import { setThemeService } from './services/theme_service';
 import { setUiSettingsService } from './services/ui_settings';
+import { metricTrendlineFunction } from '../common/expression_functions/metric_trendline_function';
 
 /** @internal */
 export interface ExpressionMetricPluginSetup {
@@ -45,6 +46,7 @@ export class ExpressionMetricPlugin implements Plugin {
     });
 
     expressions.registerFunction(metricVisFunction);
+    expressions.registerFunction(metricTrendlineFunction);
     expressions.registerRenderer(getMetricVisRenderer({ getStartDeps }));
 
     setUiSettingsService(core.uiSettings);

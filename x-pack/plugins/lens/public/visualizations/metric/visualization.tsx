@@ -16,6 +16,10 @@ import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { LayoutDirection } from '@elastic/charts';
 import { euiLightVars } from '@kbn/ui-theme';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import {
+  EXPRESSION_METRIC_NAME,
+  EXPRESSION_METRIC_TRENDLINE_NAME,
+} from '@kbn/expression-metric-vis-plugin/public';
 import { LayerType } from '../../../common';
 import { getSuggestions } from './suggestions';
 import { LensIconChartMetric } from '../../assets/chart_metric';
@@ -72,6 +76,46 @@ function computePaletteParams(params: CustomPaletteParams) {
   };
 }
 
+const getTrendlineExpression = (
+  state: MetricVisualizationState,
+  datasourceExpression?: Ast,
+  collapseExpression?: AstFunction
+): Ast | undefined => {
+  if (!state.trendlineMetricAccessor || !state.trendlineTimeAccessor) {
+    return;
+  }
+
+  return {
+    type: 'expression',
+    chain: [
+      {
+        type: 'function',
+        function: EXPRESSION_METRIC_TRENDLINE_NAME,
+        arguments: {
+          metric: [state.trendlineMetricAccessor],
+          timeField: [state.trendlineTimeAccessor],
+          breakdownBy: state.trendlineBreakdownByAccessor
+            ? [state.trendlineBreakdownByAccessor]
+            : [],
+          ...(datasourceExpression
+            ? {
+                table: [
+                  {
+                    ...datasourceExpression,
+                    chain: [
+                      ...datasourceExpression.chain,
+                      ...(collapseExpression ? [collapseExpression] : []),
+                    ],
+                  },
+                ],
+              }
+            : {}),
+        },
+      },
+    ],
+  };
+};
+
 const toExpression = (
   paletteService: PaletteRegistry,
   state: MetricVisualizationState,
@@ -116,22 +160,30 @@ const toExpression = (
     };
   };
 
+  const collapseExpressionFunction = state.collapseFn
+    ? ({
+        type: 'function',
+        function: 'lens_collapse',
+        arguments: getCollapseFnArguments(),
+      } as AstFunction)
+    : undefined;
+
+  const trendlineExpression = state.trendlineLayerId
+    ? getTrendlineExpression(
+        state,
+        datasourceExpressionsByLayers[state.trendlineLayerId],
+        collapseExpressionFunction
+      )
+    : undefined;
+
   return {
     type: 'expression',
     chain: [
       ...(datasourceExpression?.chain ?? []),
-      ...(state.collapseFn
-        ? [
-            {
-              type: 'function',
-              function: 'lens_collapse',
-              arguments: getCollapseFnArguments(),
-            } as AstFunction,
-          ]
-        : []),
+      ...(collapseExpressionFunction ? [collapseExpressionFunction] : []),
       {
         type: 'function',
-        function: 'metricVis', // TODO import from plugin
+        function: EXPRESSION_METRIC_NAME,
         arguments: {
           metric: state.metricAccessor ? [state.metricAccessor] : [],
           secondaryMetric: state.secondaryMetricAccessor ? [state.secondaryMetricAccessor] : [],
@@ -139,6 +191,7 @@ const toExpression = (
           max: state.maxAccessor ? [state.maxAccessor] : [],
           breakdownBy:
             state.breakdownByAccessor && !state.collapseFn ? [state.breakdownByAccessor] : [],
+          trendline: trendlineExpression ? [trendlineExpression] : [],
           subtitle: state.subtitle ? [state.subtitle] : [],
           progressDirection: state.progressDirection ? [state.progressDirection] : [],
           color: state.color

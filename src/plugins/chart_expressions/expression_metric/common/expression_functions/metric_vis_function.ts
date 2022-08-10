@@ -16,7 +16,7 @@ import {
 import { LayoutDirection } from '@elastic/charts';
 import { visType } from '../types';
 import { MetricVisExpressionFunctionDefinition } from '../types';
-import { EXPRESSION_METRIC_NAME } from '../constants';
+import { EXPRESSION_METRIC_NAME, EXPRESSION_METRIC_TRENDLINE_NAME } from '../constants';
 
 export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
   name: EXPRESSION_METRIC_NAME,
@@ -49,6 +49,12 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       types: ['vis_dimension', 'string'],
       help: i18n.translate('expressionMetricVis.function.breakdownBy.help', {
         defaultMessage: 'The dimension containing the labels for sub-categories.',
+      }),
+    },
+    trendline: {
+      types: [EXPRESSION_METRIC_TRENDLINE_NAME],
+      help: i18n.translate('expressionMetricVis.function.trendline.help', {
+        defaultMessage: 'An optional trendline configuration',
       }),
     },
     subtitle: {
@@ -163,6 +169,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
             progressDirection: args.progressDirection,
             maxCols: args.maxCols,
             minTiles: args.minTiles,
+            trends: args.trendline?.trends,
           },
           dimensions: {
             metric: args.metric,

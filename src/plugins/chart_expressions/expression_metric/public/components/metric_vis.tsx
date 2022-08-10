@@ -18,13 +18,14 @@ import {
   isMetricElementEvent,
   RenderChangeListener,
   Settings,
+  MetricBase,
+  MetricWTrend,
 } from '@elastic/charts';
 import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import type {
   Datatable,
   DatatableColumn,
-  DatatableRow,
   IInterpreterRenderHandlers,
   RenderMode,
 } from '@kbn/expressions-plugin/common';
@@ -223,17 +224,9 @@ export const MetricVis = ({
       .getConverterFor('text');
   }
 
-  let getProgressBarConfig = (_row: DatatableRow): Partial<MetricWProgress> => ({});
-
   const maxColId = config.dimensions.max
     ? getColumnByAccessor(config.dimensions.max, data.columns)?.id
     : undefined;
-  if (maxColId) {
-    getProgressBarConfig = (_row: DatatableRow): Partial<MetricWProgress> => ({
-      domainMax: _row[maxColId],
-      progressBarDirection: config.metric.progressDirection,
-    });
-  }
 
   const metricConfigs: MetricSpec['data'][number] = (
     breakdownByColumn ? data.rows : data.rows.slice(0, 1)
@@ -243,7 +236,7 @@ export const MetricVis = ({
       ? formatBreakdownValue(row[breakdownByColumn.id])
       : primaryMetricColumn.name;
     const subtitle = breakdownByColumn ? primaryMetricColumn.name : config.metric.subtitle;
-    return {
+    const baseMetric: MetricBase = {
       value,
       valueFormatter: formatPrimaryMetric,
       title,
@@ -272,8 +265,28 @@ export const MetricVis = ({
               rowIdx
             ) ?? defaultColor
           : config.metric.color ?? defaultColor,
-      ...getProgressBarConfig(row),
     };
+
+    if (config.metric.trends) {
+      const metricWTrend: MetricWTrend = {
+        ...baseMetric,
+        trend: config.metric.trends[breakdownByColumn ? row[breakdownByColumn.id] : 'default'],
+      };
+
+      return metricWTrend;
+    }
+
+    if (maxColId && config.metric.progressDirection) {
+      const metricWProgress: MetricWProgress = {
+        ...baseMetric,
+        domainMax: row[maxColId],
+        progressBarDirection: config.metric.progressDirection,
+      };
+
+      return metricWProgress;
+    }
+
+    return baseMetric;
   });
 
   if (config.metric.minTiles) {
