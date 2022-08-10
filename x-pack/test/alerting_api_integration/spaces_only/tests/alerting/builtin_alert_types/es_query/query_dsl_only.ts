@@ -60,44 +60,92 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       await deleteDataStream(es, ES_TEST_DATA_STREAM_NAME);
     });
 
-    [
-      [
-        'esQuery',
-        async () => {
-          await createRule({
-            name: 'always fire',
-            esQuery: `{\n  \"runtime_mappings\": {\n    \"testedValueSquared\": {\n      \"type\": \"long\",\n      \"script\": {\n        \"source\": \"emit(doc['testedValue'].value * doc['testedValue'].value);\"\n      }\n    }\n  },\n  \"fields\": [\"testedValueSquared\"],\n  \"query\": {\n    \"match_all\": {}\n  }\n}`,
-            size: 100,
-            thresholdComparator: '>',
-            threshold: [-1],
-          });
-        },
-      ] as const,
-    ].forEach(([searchType, initData]) =>
-      it(`runs correctly: numeric runtime field for ${searchType} search type`, async () => {
-        // write documents from now to the future end date in groups
-        await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
-        await initData();
+    it(`runs correctly: runtime fields for esQuery search type`, async () => {
+      // write documents from now to the future end date in groups
+      await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
+      await createRule({
+        name: 'always fire',
+        esQuery: `
+          {
+            "runtime_mappings": {
+                "testedValueSquared": {
+                    "type": "long",
+                    "script": {
+                        "source": "emit(doc['testedValue'].value * doc['testedValue'].value);"
+                    }
+                },
+                "evenOrOdd": {
+                    "type": "keyword",
+                    "script": {
+                        "source": "emit(doc['testedValue'].value % 2 == 0 ? 'even' : 'odd');"
+                    }
+                }
+            },
+            "fields": ["testedValueSquared", "evenOrOdd"],
+            "query": {
+                "match_all": { }
+            }
+        }`.replace(`"`, `\"`),
+        size: 100,
+        thresholdComparator: '>',
+        threshold: [-1],
+      });
 
-        const docs = await waitForDocs(2);
-        for (let i = 0; i < docs.length; i++) {
-          const doc = docs[i];
-          const { name, title } = doc._source.params;
-          expect(name).to.be('always fire');
-          expect(title).to.be(`rule 'always fire' matched query`);
+      const docs = await waitForDocs(2);
+      for (let i = 0; i < docs.length; i++) {
+        const doc = docs[i];
+        const { name, title } = doc._source.params;
+        expect(name).to.be('always fire');
+        expect(title).to.be(`rule 'always fire' matched query`);
 
-          const hits = JSON.parse(doc._source.hits);
-          expect(hits).not.to.be.empty();
-          hits.forEach((hit: any) => {
-            expect(hit.fields).not.to.be.empty();
-            expect(hit.fields.testedValueSquared).not.to.be.empty();
-            // fields returns as an array of values
-            const [testedValueSquared] = hit.fields.testedValueSquared;
+        const hits = JSON.parse(doc._source.hits);
+        expect(hits).not.to.be.empty();
+        hits.forEach((hit: any) => {
+          expect(hit.fields).not.to.be.empty();
+          expect(hit.fields.testedValueSquared).not.to.be.empty();
+          // fields returns as an array of values
+          hit.fields.testedValueSquared.forEach((testedValueSquared: number) => {
             expect(hit._source.testedValue * hit._source.testedValue).to.be(testedValueSquared);
           });
-        }
-      })
-    );
+          hit.fields.evenOrOdd.forEach((evenOrOdd: string) => {
+            expect(hit._source.testedValue % 2 === 0 ? 'even' : 'odd').to.be(evenOrOdd);
+          });
+        });
+      }
+    });
+
+    it(`runs correctly: fetches wildcard fields in esQuery search type`, async () => {
+      // write documents from now to the future end date in groups
+      await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
+      await createRule({
+        name: 'always fire',
+        esQuery: `
+          {
+            "fields": ["*"],
+            "query": {
+                "match_all": { }
+            }
+        }`.replace(`"`, `\"`),
+        size: 100,
+        thresholdComparator: '>',
+        threshold: [-1],
+      });
+
+      const docs = await waitForDocs(2);
+      for (let i = 0; i < docs.length; i++) {
+        const doc = docs[i];
+        const { name, title } = doc._source.params;
+        expect(name).to.be('always fire');
+        expect(title).to.be(`rule 'always fire' matched query`);
+
+        const hits = JSON.parse(doc._source.hits);
+        expect(hits).not.to.be.empty();
+        hits.forEach((hit: any) => {
+          expect(hit.fields).not.to.be.empty();
+          expect(Object.keys(hit.fields).sort()).to.eql(Object.keys(hit._source).sort());
+        });
+      }
+    });
 
     async function createRule(params: CreateRuleParams): Promise<string> {
       const action = {

@@ -162,46 +162,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         'esQuery',
         async () => {
           await createRule({
-            name: 'always fire',
-            esQuery: `{\n  \"runtime_mappings\": {\n    \"testedValueSquared\": {\n      \"type\": \"long\",\n      \"script\": {\n        \"source\": \"emit(doc['testedValue'].value * doc['testedValue'].value);\"\n      }\n    }\n  },\n  \"fields\": [\"testedValueSquared\"],\n  \"query\": {\n    \"match_all\": {}\n  }\n}`,
-            size: 100,
-            thresholdComparator: '>',
-            threshold: [-1],
-          });
-        },
-      ] as const,
-    ].forEach(([searchType, initData]) =>
-      it(`runs correctly: runtime field for ${searchType} search type`, async () => {
-        // write documents from now to the future end date in groups
-        await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
-        await initData();
-
-        const docs = await waitForDocs(2);
-        for (let i = 0; i < docs.length; i++) {
-          const doc = docs[i];
-          const { name, title } = doc._source.params;
-          expect(name).to.be('always fire');
-          expect(title).to.be(`rule 'always fire' matched query`);
-
-          // hits dumped as array but without brackets (I hate mustache)
-          const hits = JSON.parse(`[${doc._source.hits}]`);
-          expect(hits).not.to.be.empty();
-          hits.forEach((hit: any) => {
-            expect(hit.fields).not.to.be.empty();
-            expect(hit.fields.testedValueSquared).not.to.be.empty();
-            // fields returns as an array of values
-            const [testedValueSquared] = hit.fields.testedValueSquared;
-            expect(hit._source.testedValue * hit._source.testedValue).to.be(testedValueSquared);
-          });
-        }
-      })
-    );
-
-    [
-      [
-        'esQuery',
-        async () => {
-          await createRule({
             name: 'never fire',
             size: 100,
             thresholdComparator: '<',
