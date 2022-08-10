@@ -176,7 +176,10 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
             ))}
 
             {!loading && (!availableOptions || availableOptions.length === 0) && (
-              <div className="euiFilterSelect__note">
+              <div
+                className="euiFilterSelect__note"
+                data-test-subj="optionsList-control-noSelectionsMessage"
+              >
                 <div className="euiFilterSelect__noteContent">
                   <EuiIcon type="minusInCircle" />
                   <EuiSpacer size="xs" />
@@ -230,7 +233,10 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
                 </EuiFilterSelectItem>
               ))}
             {(!selectedOptions || selectedOptions.length === 0) && (
-              <div className="euiFilterSelect__note">
+              <div
+                className="euiFilterSelect__note"
+                data-test-subj="optionsList-control-selectionsEmptyMessage"
+              >
                 <div className="euiFilterSelect__noteContent">
                   <EuiIcon type="minusInCircle" />
                   <EuiSpacer size="xs" />

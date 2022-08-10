@@ -72,14 +72,22 @@ describe('Options list popover', () => {
   test('no available options', () => {
     const popover = mountComponent({ componentState: { availableOptions: [] } });
     const availableOptionsDiv = findTestSubject(popover, 'optionsList-control-available-options');
-    expect(availableOptionsDiv.text()).toBe('No options found');
+    const noOptionsDiv = findTestSubject(
+      availableOptionsDiv,
+      'optionsList-control-noSelectionsMessage'
+    );
+    expect(noOptionsDiv.exists()).toBeTruthy();
   });
 
   test('display error message when the show only selected toggle is true but there are no selections', () => {
     const popover = mountComponent();
     clickShowOnlySelections(popover);
     const availableOptionsDiv = findTestSubject(popover, 'optionsList-control-available-options');
-    expect(availableOptionsDiv.text()).toBe('You have no selections');
+    const noSelectionsDiv = findTestSubject(
+      availableOptionsDiv,
+      'optionsList-control-selectionsEmptyMessage'
+    );
+    expect(noSelectionsDiv.exists()).toBeTruthy();
   });
 
   test('show only selected options', () => {
