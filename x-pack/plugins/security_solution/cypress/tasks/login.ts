@@ -350,20 +350,29 @@ export const visit = (
 
 export const visitWithoutDateRange = (url: string, role?: ROLES) => {
   cy.visit(role ? getUrlWithRoute(role, url) : url, {
-    onBeforeLoad: disableFeatureTourForRuleManagementPage,
+    onBeforeLoad(win) {
+      disableFeatureTourForRuleManagementPage(win);
+      disableNewTermsFeatureTour(win);
+    },
   });
 };
 
 export const visitWithUser = (url: string, user: User) => {
   cy.visit(constructUrlWithUser(user, url), {
-    onBeforeLoad: disableFeatureTourForRuleManagementPage,
+    onBeforeLoad(win) {
+      disableFeatureTourForRuleManagementPage(win);
+      disableNewTermsFeatureTour(win);
+    },
   });
 };
 
 export const visitTimeline = (timelineId: string, role?: ROLES) => {
   const route = `/app/security/timelines?timeline=(id:'${timelineId}',isOpen:!t)`;
   cy.visit(role ? getUrlWithRoute(role, route) : route, {
-    onBeforeLoad: disableFeatureTourForRuleManagementPage,
+    onBeforeLoad(win) {
+      disableFeatureTourForRuleManagementPage(win);
+      disableNewTermsFeatureTour(win);
+    },
   });
   cy.get('[data-test-subj="headerGlobalNav"]');
   cy.get(TIMELINE_FLYOUT_BODY).should('be.visible');

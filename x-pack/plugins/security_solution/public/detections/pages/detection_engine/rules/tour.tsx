@@ -6,7 +6,7 @@
  */
 
 import { EuiSpacer, EuiTourStep } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { NEW_TERMS_TOUR_ACTIVE_KEY } from '../../../../../common/constants';
 import * as i18n from './translations';
 
@@ -42,12 +42,12 @@ export const RulesPageTourComponent: React.FC<Props> = ({ children }) => {
       ),
     },
   ];
-  const finishTour = () => {
+  const finishTour = useCallback(() => {
     setTourState({
       ...tourState,
       isTourActive: false,
     });
-  };
+  }, [tourState]);
 
   useEffect(() => {
     localStorage.setItem(NEW_TERMS_TOUR_ACTIVE_KEY, JSON.stringify(tourState));
