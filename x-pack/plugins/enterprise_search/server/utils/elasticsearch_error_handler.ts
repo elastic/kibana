@@ -43,7 +43,7 @@ export function elasticsearchErrorHandler<ContextType, RequestType, ResponseType
         };
       }
 
-      if (typeof enterpriseSearchError !== 'undefined') {
+      if (enterpriseSearchError !== undefined) {
         log.error(
           i18n.translate('xpack.enterpriseSearch.server.routes.errorLogMessage', {
             defaultMessage:
