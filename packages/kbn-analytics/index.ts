@@ -9,6 +9,7 @@
 // Export types separately to the actual run-time objects
 export type { ReportHTTP, ReporterConfig } from './src/reporter';
 export type { UiCounterMetricType } from './src/metrics';
+export type { UserAgentMetric } from './src/metrics/user_agent';
 export type { Report } from './src/report';
 export type { Storage } from './src/storage';
 
