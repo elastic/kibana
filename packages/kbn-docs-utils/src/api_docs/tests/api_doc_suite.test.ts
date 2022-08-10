@@ -93,7 +93,7 @@ function fnIsCorrect(fn: ApiDeclaration | undefined) {
   expect(p5?.description?.length).toBe(1);
 }
 
-beforeAll(async (done) => {
+beforeAll(async () => {
   const tsConfigFilePath = Path.resolve(__dirname, '__fixtures__/src/tsconfig.json');
   const project = new Project({
     tsConfigFilePath,
@@ -137,8 +137,7 @@ beforeAll(async (done) => {
       log,
     }),
   ]);
-  done();
-});
+}, 15000); // For some reason in local it takes a couple of ms, but in CI it times out :shrug:
 
 it('Stats', () => {
   // Type "imAnAny"
