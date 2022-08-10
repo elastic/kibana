@@ -267,10 +267,11 @@ export const MetricVis = ({
           : config.metric.color ?? defaultColor,
     };
 
-    if (config.metric.trends) {
+    const trendId = breakdownByColumn ? row[breakdownByColumn.id] : 'default';
+    if (config.metric.trends && config.metric.trends[trendId]) {
       const metricWTrend: MetricWTrend = {
         ...baseMetric,
-        trend: config.metric.trends[breakdownByColumn ? row[breakdownByColumn.id] : 'default'],
+        trend: config.metric.trends[trendId],
       };
 
       return metricWTrend;
