@@ -7,21 +7,12 @@ PKG_REQUIRE_NAME = "@kbn/shared-ux-router"
 
 SOURCE_FILES = glob(
   [
-    "**/*.ts",
-    "**/*.tsx",
+    "src/**/*.ts",
+    "src/**/*.tsx",
   ],
   exclude = [
-    "**/*.config.js",
-    "**/*.mock.*",
     "**/*.test.*",
     "**/*.stories.*",
-    "**/__snapshots__",
-    "**/integration_tests",
-    "**/mocks",
-    "**/scripts",
-    "**/storybook",
-    "**/test_fixtures",
-    "**/test_helpers",
   ],
 )
 
@@ -47,7 +38,10 @@ NPM_MODULE_EXTRA_FILES = [
 #    "@npm//name-of-package"
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
-  "@npm//react"
+  "@npm//react",
+  "@npm//react-router-dom",
+  "@npm//react-use",
+  "@npm//rxjs",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -62,7 +56,10 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
-  "@npm//@types/react"
+  "@npm//@types/react",
+  "@npm//@types/react-router-dom",
+  "@npm//react-use",
+  "@npm//rxjs",
 ]
 
 jsts_transpiler(
@@ -96,7 +93,7 @@ ts_project(
   declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  root_dir = ".",
+  root_dir = "src",
   tsconfig = ":tsconfig",
 )
 
