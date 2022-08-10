@@ -19,7 +19,7 @@ import {
   TABLE_ROWS,
   USERS_DONUT_CHART,
   USERS_TABLE,
-} from '../../screens/ENTITY_ANALYTICS';
+} from '../../screens/entity_analytics';
 import { openRiskTableFilterAndSelectTheLowOption } from '../../tasks/host_risk';
 
 describe('Entity Analytics Dashboard', () => {
