@@ -44,6 +44,7 @@ import {
   scheduleFindingsStatsTask,
   setupFindingsStatsTask,
 } from './tasks/findings_stats_task';
+import { registerMyPluginUsageCollector } from './collectors/register';
 
 export class CspPlugin
   implements
@@ -73,6 +74,8 @@ export class CspPlugin
 
     const coreStartServices = core.getStartServices();
     this.setupCspTasks(plugins.taskManager, coreStartServices, this.logger);
+
+    registerMyPluginUsageCollector(plugins.usageCollection);
 
     return {};
   }
