@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { EuiIconProps } from '@elastic/eui';
 import { cx } from '@emotion/css';
 import { noFill } from '../common_styles';
