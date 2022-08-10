@@ -289,11 +289,15 @@ export class ControlGroupContainer extends Container<
 
   private recalculateFilters = () => {
     const allFilters: Filter[] = [];
+    let timeslice = undefined;
     Object.values(this.children).map((child) => {
       const childOutput = child.getOutput() as ControlOutput;
       allFilters.push(...(childOutput?.filters ?? []));
+      if (childOutput.timeslice) {
+        timeslice = childOutput.timeslice;
+      }
     });
-    this.updateOutput({ filters: uniqFilters(allFilters) });
+    this.updateOutput({ filters: uniqFilters(allFilters), timeslice });
   };
 
   private recalculateDataViews = () => {

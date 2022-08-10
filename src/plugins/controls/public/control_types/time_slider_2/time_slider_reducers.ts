@@ -22,5 +22,6 @@ export const timeSliderReducers = {
     action: PayloadAction<{ value: [number, number] }>
   ) => {
     state.explicitInput.value = action.payload.value;
+    state.output.timeslice = action.payload.value;
   },
 };
