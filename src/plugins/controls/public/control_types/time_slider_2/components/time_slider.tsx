@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { Component, ReactNode, useCallback, useState } from 'react';
+import React, { Component, ReactNode, useCallback, useEffect, useState } from 'react';
 import moment from 'moment-timezone';
 import {
   EuiText,
@@ -24,6 +24,13 @@ import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public'
 import { timeSliderReducers } from '../time_slider_reducers';
 import { TimeSliderReduxState } from '../types';
 import { TimeSliderPopoverButton } from './time_slider_popover_button';
+import { TimeSliderPopoverContent } from './time_slider_popover_content';
+import { getInterval, getTicks } from './time_utils';
+
+import './index.scss';
+
+const FROM_INDEX = 0;
+const TO_INDEX = 1;
 
 export interface Props {
   dateFormat?: string;
@@ -36,7 +43,7 @@ export const TimeSlider: FC<Props> = (props) => {
     timezone: 'Browser',
     ...props,
   };
-  const { range, value, timezone, dateFormat, fieldName, ignoreValidation } = defaultProps;
+  const { timezone, dateFormat } = defaultProps;
 
   // Redux embeddable Context
   const {
@@ -47,16 +54,21 @@ export const TimeSlider: FC<Props> = (props) => {
   //const dispatch = useEmbeddableDispatch();
 
   const timeRangeBounds = select((state) => {
-    console.log(state);
     return state.componentState.timeRangeBounds;
   });
 
   if (!timeRangeBounds) {
     return <div>Select time range</div>;
   }
+  const timeRangeMin = timeRangeBounds[FROM_INDEX];
+  const timeRangeMax = timeRangeBounds[TO_INDEX];
 
-  const from = timeRangeBounds[0];
-  const to = timeRangeBounds[1];
+  const interval = getInterval(timeRangeMin, timeRangeMax);
+  const [range, setRange] = useState(interval);
+  const [ticks, setTicks] = useState([]);
+  useEffect(() => {
+    setTicks(getTicks(timeRangeMin, timeRangeMax, interval, timezone));
+  }, [interval, timezone]);
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const togglePopover = useCallback(() => {
@@ -76,6 +88,16 @@ export const TimeSlider: FC<Props> = (props) => {
     },
     [dateFormat, getTimezone]
   );
+
+  const onRangeSliderChange = useCallback(
+    (value: [number, number]) => {
+      setRange(value[TO_INDEX] - value[FROM_INDEX]);
+    },
+    []
+  );
+
+  const from = timeRangeMin;
+  const to = timeRangeMax;
   
   return (
     <EuiInputPopover
@@ -87,7 +109,14 @@ export const TimeSlider: FC<Props> = (props) => {
       disableFocusTrap
       attachToAnchor={false}
     >
-      <div>slider goes here</div>
+      <TimeSliderPopoverContent
+        key={`${timeRangeMin}_${timeRangeMax}`} // force new instance when time range changes to reset local state
+        initialValue={[from, to]}
+        onChange={onRangeSliderChange}
+        ticks={ticks}
+        timeRangeMin={timeRangeMin}
+        timeRangeMax={timeRangeMax}
+      />
     </EuiInputPopover>
   );
 };
