@@ -1,10 +1,10 @@
 1,11c1,21
 < global.handlebarsEnv = null;
-< 
+<
 < beforeEach(function() {
 <   global.handlebarsEnv = Handlebars.create();
 < });
-< 
+<
 < describe('basic context', function() {
 <   it('most basic', function() {
 <     expectTemplate('{{foo}}')
@@ -17,15 +17,15 @@
 >  * Elasticsearch B.V. licenses this file to you under the MIT License.
 >  * See `packages/kbn-handlebars/LICENSE` for more information.
 >  */
-> 
-> import Handlebars from '..';
+>
+> import Handlebars from '../..';
 > import { expectTemplate } from '../__jest__/test_bench';
-> 
+>
 > describe('basic context', () => {
 >   it('most basic', () => {
 >     expectTemplate('{{foo}}').withInput({ foo: 'foo' }).toCompileTo('foo');
 >   });
-> 
+>
 >   it('escaping', () => {
 >     expectTemplate('\\{{foo}}').withInput({ foo: 'food' }).toCompileTo('{{foo}}');
 >     expectTemplate('content \\{{foo}}').withInput({ foo: 'food' }).toCompileTo('content {{foo}}');
@@ -37,24 +37,24 @@
 <     expectTemplate('\\{{foo}}')
 <       .withInput({ foo: 'food' })
 <       .toCompileTo('{{foo}}');
-< 
+<
 <     expectTemplate('content \\{{foo}}')
 <       .withInput({ foo: 'food' })
 <       .toCompileTo('content {{foo}}');
-< 
+<
 <     expectTemplate('\\\\{{foo}}')
 <       .withInput({ foo: 'food' })
 <       .toCompileTo('\\food');
-< 
+<
 <     expectTemplate('content \\\\{{foo}}')
 <       .withInput({ foo: 'food' })
 <       .toCompileTo('content \\food');
-< 
+<
 <     expectTemplate('\\\\ {{foo}}')
 <       .withInput({ foo: 'food' })
 <       .toCompileTo('\\\\ food');
 <   });
-< 
+<
 <   it('compiling with a basic context', function() {
 ---
 >   it('compiling with a basic context', () => {
@@ -87,23 +87,23 @@
 68d52
 <       .withMessage('comments are ignored')
 72,76c56
-< 
+<
 <     expectTemplate('    {{~!-- long-comment --~}}      blah').toCompileTo(
 <       'blah'
 <     );
-< 
+<
 ---
 >     expectTemplate('    {{~!-- long-comment --~}}      blah').toCompileTo('blah');
 78,82c58
-< 
+<
 <     expectTemplate('    {{!-- long-comment --~}}      blah').toCompileTo(
 <       '    blah'
 <     );
-< 
+<
 ---
 >     expectTemplate('    {{!-- long-comment --~}}      blah').toCompileTo('    blah');
 84,87c60
-< 
+<
 <     expectTemplate('    {{~!-- long-comment --}}      blah').toCompileTo(
 <       '      blah'
 <     );
@@ -198,7 +198,7 @@
 ---
 >   it('newlines', () => {
 190d150
-< 
+<
 194,223c154,160
 <   it('escaping text', function() {
 <     expectTemplate("Awesome's")
@@ -206,25 +206,25 @@
 <         "text is escaped so that it doesn't get caught on single quotes"
 <       )
 <       .toCompileTo("Awesome's");
-< 
+<
 <     expectTemplate('Awesome\\')
 <       .withMessage("text is escaped so that the closing quote can't be ignored")
 <       .toCompileTo('Awesome\\');
-< 
+<
 <     expectTemplate('Awesome\\\\ foo')
 <       .withMessage("text is escaped so that it doesn't mess up backslashes")
 <       .toCompileTo('Awesome\\\\ foo');
-< 
+<
 <     expectTemplate('Awesome {{foo}}')
 <       .withInput({ foo: '\\' })
 <       .withMessage("text is escaped so that it doesn't mess up backslashes")
 <       .toCompileTo('Awesome \\');
-< 
+<
 <     expectTemplate(" ' ' ")
 <       .withMessage('double quotes never produce invalid javascript')
 <       .toCompileTo(" ' ' ");
 <   });
-< 
+<
 <   it('escaping expressions', function() {
 <     expectTemplate('{{{awesome}}}')
 <       .withInput({ awesome: "&'\\<>" })
@@ -246,7 +246,7 @@
 ---
 >   it('escaping expressions', () => {
 >     expectTemplate('{{{awesome}}}').withInput({ awesome: "&'\\<>" }).toCompileTo("&'\\<>");
-> 
+>
 >     expectTemplate('{{&awesome}}').withInput({ awesome: "&'\\<>" }).toCompileTo("&'\\<>");
 232d168
 <       .withMessage('by default expressions should be escaped')
@@ -540,7 +540,7 @@
 ---
 >   it('pass string literals', () => {
 538,541c440
-< 
+<
 <     expectTemplate('{{"foo"}}')
 <       .withInput({ foo: 'bar' })
 <       .toCompileTo('bar');
@@ -555,19 +555,19 @@
 ---
 >   it('pass number literals', () => {
 552,556c451
-< 
+<
 <     expectTemplate('{{12}}')
 <       .withInput({ '12': 'bar' })
 <       .toCompileTo('bar');
-< 
+<
 ---
 >     expectTemplate('{{12}}').withInput({ '12': 'bar' }).toCompileTo('bar');
 558,562c453
-< 
+<
 <     expectTemplate('{{12.34}}')
 <       .withInput({ '12.34': 'bar' })
 <       .toCompileTo('bar');
-< 
+<
 ---
 >     expectTemplate('{{12.34}}').withInput({ '12.34': 'bar' }).toCompileTo('bar');
 565c456
@@ -583,11 +583,11 @@
 ---
 >   it('pass boolean literals', () => {
 574,581c465,466
-< 
+<
 <     expectTemplate('{{true}}')
 <       .withInput({ '': 'foo' })
 <       .toCompileTo('');
-< 
+<
 <     expectTemplate('{{false}}')
 <       .withInput({ false: 'foo' })
 <       .toCompileTo('foo');

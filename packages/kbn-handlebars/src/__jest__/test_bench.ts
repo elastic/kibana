@@ -3,7 +3,7 @@
  * See `packages/kbn-handlebars/LICENSE` for more information.
  */
 
-import Handlebars, { ExtendedCompileOptions, ExtendedRuntimeOptions } from '..';
+import Handlebars, { ExtendedCompileOptions, ExtendedRuntimeOptions } from '../..';
 
 declare global {
   var kbnHandlebarsEnv: typeof Handlebars | null; // eslint-disable-line no-var

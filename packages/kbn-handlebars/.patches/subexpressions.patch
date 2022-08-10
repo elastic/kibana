@@ -8,10 +8,10 @@
 >  * Elasticsearch B.V. licenses this file to you under the MIT License.
 >  * See `packages/kbn-handlebars/LICENSE` for more information.
 >  */
-> 
+>
 > import Handlebars from '..';
 > import { expectTemplate } from '../__jest__/test_bench';
-> 
+>
 > describe('subexpressions', () => {
 >   it('arg-less helper', () => {
 5c15
@@ -219,7 +219,7 @@
 <       })
 <       .toCompileTo('<input aria-label="Name" placeholder="Example User" />');
 <   });
-< 
+<
 <   it('in string params mode,', function() {
 <     expectTemplate('{{snog (blorg foo x=y) yeah a=b}}')
 <       .withCompileOptions({ stringParams: true })
@@ -243,7 +243,7 @@
 <           );
 <           return a + b;
 214,231d182
-< 
+<
 <         blorg: function(a, options) {
 <           equals(
 <             options.types.length,
@@ -264,7 +264,7 @@
 233,248c184
 <       .toCompileTo('fooyeah');
 <   });
-< 
+<
 <   it('as hashes in string params mode', function() {
 <     expectTemplate('{{blog fun=(bork)}}')
 <       .withCompileOptions({ stringParams: true })

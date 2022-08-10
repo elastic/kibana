@@ -11,7 +11,7 @@
  */
 
 import Handlebars from '.';
-import { expectTemplate } from './__jest__/test_bench';
+import { expectTemplate } from './src/__jest__/test_bench';
 
 it('Handlebars.create', () => {
   expect(Handlebars.create()).toMatchSnapshot();
