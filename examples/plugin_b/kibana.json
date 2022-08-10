@@ -1,0 +1,14 @@
+{
+  "id": "pluginB",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "owner": {
+    "name": "",
+    "githubTeam": ""
+  },
+  "description": "",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["navigation"],
+  "optionalPlugins": []
+}
