@@ -101,7 +101,11 @@ export class TimeSliderControlEmbeddable extends Embeddable<
   }
 
   private initialize() {
-    return;
+    const input = this.getInput();
+    if (input.value) {
+      const { actions, dispatch, getState } = this.reduxEmbeddableTools;
+      dispatch(actions.publishValue({ value: input.value }));
+    }
   }
 
   public reload() {

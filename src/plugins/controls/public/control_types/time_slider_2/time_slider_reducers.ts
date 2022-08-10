@@ -11,6 +11,12 @@ import { WritableDraft } from 'immer/dist/types/types-external';
 import { TimeSliderReduxState } from './types';
 
 export const timeSliderReducers = {
+  publishValue: (
+    state: WritableDraft<TimeSliderReduxState>,
+    action: PayloadAction<{ value: [number, number] }>
+  ) => {
+    state.output.timeslice = action.payload.value;
+  },
   setTimeRangeBounds: (
     state: WritableDraft<TimeSliderReduxState>,
     action: PayloadAction<{ timeRangeBounds: [number, number] }>
@@ -22,6 +28,5 @@ export const timeSliderReducers = {
     action: PayloadAction<{ value: [number, number] }>
   ) => {
     state.explicitInput.value = action.payload.value;
-    state.output.timeslice = action.payload.value;
   },
 };
