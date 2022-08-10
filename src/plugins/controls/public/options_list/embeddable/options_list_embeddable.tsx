@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-/** External */
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { batch } from 'react-redux';
@@ -15,7 +14,6 @@ import { isEmpty, isEqual } from 'lodash';
 import { merge, Subject, Subscription } from 'rxjs';
 import { debounceTime, map, distinctUntilChanged, skip } from 'rxjs/operators';
 
-/** Internal */
 import { i18n } from '@kbn/i18n';
 import {
   Filter,
@@ -29,7 +27,6 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
-/** Local */
 import {
   OptionsListField,
   OPTIONS_LIST_CONTROL,

@@ -6,15 +6,12 @@
  * Side Public License, v 1.
  */
 
-/** External */
 import deepEqual from 'fast-deep-equal';
 
-/** Internal */
 import { i18n } from '@kbn/i18n';
 import { lazyLoadReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
 import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
 
-/** Local */
 import {
   createOptionsListExtract,
   createOptionsListInject,

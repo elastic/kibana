@@ -6,17 +6,14 @@
  * Side Public License, v 1.
  */
 
-/** External */
 import { EuiFilterButton, EuiFilterGroup, EuiPopover, useResizeObserver } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { debounce, isEmpty } from 'lodash';
 import classNames from 'classnames';
 import { Subject } from 'rxjs';
 
-/** Internal */
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
-/** Local */
 import { OptionsListStrings } from './options_list_strings';
 import { optionsListReducers } from '../options_list_reducers';
 import { OptionsListPopover } from './options_list_popover';
