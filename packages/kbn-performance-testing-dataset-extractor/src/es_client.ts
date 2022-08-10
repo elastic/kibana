@@ -7,8 +7,12 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { QueryDslQueryContainer, SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import {
+  SearchRequest,
+  MsearchRequestItem,
+  SearchResponse,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ToolingLog } from '@kbn/tooling-log';
 
 interface ClientOptions {
@@ -173,9 +177,72 @@ export class ESClient {
     return await this.getTransactions<TransactionDocument>(queryFilters);
   }
 
-  async getSpans(transactionId: string) {
-    const filters = [{ field: 'parent.id', value: transactionId }];
-    const queryFilters = filters.map((filter) => addBooleanFilter(filter));
-    return await this.getTransactions<SpanDocument>(queryFilters);
+  getSearchRequest = (queryFilters: QueryDslQueryContainer[]): SearchRequest => {
+    return {
+      body: {
+        sort: [
+          {
+            '@timestamp': {
+              order: 'asc',
+              unmapped_type: 'boolean',
+            },
+          },
+        ],
+        size: 10000,
+        query: {
+          bool: {
+            filter: [
+              {
+                bool: {
+                  filter: queryFilters,
+                },
+              },
+            ],
+          },
+        },
+      },
+    };
+  };
+
+  getMsearchRequestItem = (queryFilters: QueryDslQueryContainer[]): MsearchRequestItem => {
+    return {
+      query: {
+        bool: {
+          filter: [
+            {
+              bool: {
+                filter: queryFilters,
+              },
+            },
+          ],
+        },
+      },
+    };
+  };
+
+  async getSpans(transactionIds: string[]) {
+    const searches = new Array<MsearchRequestItem>();
+
+    for (const transactionId of transactionIds) {
+      const filters = [{ field: 'parent.id', value: transactionId }];
+      const queryFilters = filters.map((filter) => addBooleanFilter(filter));
+      const requestItem = this.getMsearchRequestItem(queryFilters);
+      searches.push({}, requestItem);
+    }
+    this.log.debug(`Msearch request: ${JSON.stringify(searches)}`);
+    const result = await this.client.msearch<SpanDocument>({
+      searches,
+    });
+    this.log.debug(`Msearch result: ${JSON.stringify(result)}`);
+    const hits = result.responses
+      .map((response) => response as SearchResponse<SpanDocument>)
+      .filter(
+        (response) => response.hits.total && (response.hits.total as SearchTotalHits).value > 0
+      )
+      .map((response) => response.hits.hits)
+      .reduce((acc, value) => {
+        return acc.concat(value);
+      });
+    return hits;
   }
 }

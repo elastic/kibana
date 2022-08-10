@@ -7,7 +7,7 @@
  */
 
 import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import { ESClient, SpanDocument, TransactionDocument, Headers } from './es_client';
+import { ESClient, TransactionDocument, Headers, SpanDocument } from './es_client';
 import { Request } from './types';
 
 const httpMethodRegExp = /(GET|POST|DELETE|HEAD|PUT|OPTIONS)/;
@@ -77,30 +77,30 @@ export const getKibanaRequests = (
 
 export const getESRequests = async (esClient: ESClient, requests: Request[]) => {
   const esRequests = new Array<Request>();
-  for (const request of requests.filter((r) => r.spanCount && r?.spanCount > 0)) {
-    const hits = await esClient.getSpans(request.transactionId);
-    for (const hit of hits.map((i) => i!._source as SpanDocument)) {
-      const query = hit?.span.db?.statement ? parseQueryStatement(hit?.span.db?.statement) : {};
-      const method = findFirstMatch(httpMethodRegExp, hit.span.name);
-      const path = findFirstMatch(httpPathRegExp, hit.span.name.replace(/\s+/g, ''));
-      // filter out requests without method, path and POST/PUT/DELETE without body
-      if (method && path && (method === 'GET' || query?.body)) {
-        esRequests.push({
-          transactionId: hit.transaction.id,
-          spanId: hit.span.id,
-          name: hit.span.name,
-          date: hit['@timestamp'],
-          duration: hit.span?.duration?.us,
-          http: {
-            method,
-            path,
-            params: query?.params,
-            body: query?.body,
-          },
-        });
-      }
+  const transactionIds = requests
+    .filter((r) => r.spanCount && r?.spanCount > 0)
+    .map((r) => r.transactionId);
+  const hits = await esClient.getSpans(transactionIds);
+  for (const hit of hits.map((i) => i!._source as SpanDocument)) {
+    const query = hit?.span.db?.statement ? parseQueryStatement(hit?.span.db?.statement) : {};
+    const method = findFirstMatch(httpMethodRegExp, hit.span.name);
+    const path = findFirstMatch(httpPathRegExp, hit.span.name.replace(/\s+/g, ''));
+    // filter out requests without method, path and POST/PUT/DELETE without body
+    if (method && path && (method === 'GET' || query?.body)) {
+      esRequests.push({
+        transactionId: hit.transaction.id,
+        spanId: hit.span.id,
+        name: hit.span.name,
+        date: hit['@timestamp'],
+        duration: hit.span?.duration?.us,
+        http: {
+          method,
+          path,
+          params: query?.params,
+          body: query?.body,
+        },
+      });
     }
   }
-
   return esRequests;
 };
