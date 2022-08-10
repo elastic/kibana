@@ -76,8 +76,6 @@ describe('WatchStatusModel', () => {
 
       expect(serverWatchStatusModel.actionStatuses!.length).toBe(2);
 
-      // TODO: Test for lastCheckedRawFormat, lastExecutionRawFormat, lastAcknowledged,
-      // and lastExecution, which are all Moment instances.
       expect(serverWatchStatusModel.actionStatuses![0]).toMatchObject({
         id: 'foo',
         actionStatusJson: {
@@ -95,6 +93,10 @@ describe('WatchStatusModel', () => {
         lastExecutionReason: undefined,
         lastThrottled: null,
         lastSuccessfulExecution: null,
+        lastExecutionRawFormat: '2017-07-05T00:00:00.000Z',
+        lastCheckedRawFormat: '2017-03-02T14:25:31.139Z',
+        lastAcknowledged: moment('2015-05-26T18:21:08.630Z'),
+        lastExecution: moment('2017-07-05T00:00:00.000Z'),
       });
 
       expect(serverWatchStatusModel.actionStatuses![1]).toMatchObject({
@@ -114,6 +116,10 @@ describe('WatchStatusModel', () => {
         lastExecutionReason: undefined,
         lastThrottled: null,
         lastSuccessfulExecution: null,
+        lastExecutionRawFormat: '2017-07-05T00:00:00.000Z',
+        lastCheckedRawFormat: '2017-03-02T14:25:31.139Z',
+        lastAcknowledged: moment('2015-05-26T18:21:08.630Z'),
+        lastExecution: moment('2017-07-05T00:00:00.000Z'),
       });
     });
   });
