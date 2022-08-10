@@ -49,8 +49,8 @@ export const loadTail = ({
   return (context: LogExplorerContext): Observable<LoadTailEvent> => {
     const {
       configuration: { chunkSize },
+      timeRange,
     } = context;
-    const timeRange = query.timefilter.timefilter.getAbsoluteTime();
 
     const fetchBeforeRequestParamters: FetchEntriesBeforeParameters = {
       chunkSize: chunkSize * 2,

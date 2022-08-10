@@ -39,20 +39,22 @@ export type LoadAfterEvent =
 
 export const loadAfter = ({
   dataView,
-  query,
+  query: queryService,
   searchSource,
 }: {
   dataView: DataView;
   query: QueryStart;
   searchSource: ISearchSource;
 }) => {
-  const boundFetchEntriesAfter = fetchEntriesAfter({ dataView, query, searchSource });
+  const boundFetchEntriesAfter = fetchEntriesAfter({ dataView, query: queryService, searchSource });
 
   return (context: LogExplorerContext): Observable<LoadAfterEvent> => {
     const {
-      configuration: { chunkSize },
-      timeRange,
       bottomChunk,
+      configuration: { chunkSize },
+      filters,
+      query,
+      timeRange,
     } = context;
 
     if (bottomChunk.status !== 'loading-bottom') {
@@ -73,6 +75,8 @@ export const loadAfter = ({
         ['_doc', 'asc'], // _shard_doc is only available when used inside a PIT
       ],
       timeRange,
+      filters,
+      query,
     };
 
     const eventRequestParameters: LoadAfterParameters = {

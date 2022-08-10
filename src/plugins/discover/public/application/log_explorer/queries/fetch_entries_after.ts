@@ -8,7 +8,7 @@
 
 import { IEsSearchResponse, ISearchSource, QueryStart } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { TimeRange } from '@kbn/es-query';
+import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { Observable, pipe } from 'rxjs';
 import { LogExplorerPosition, SortCriteria } from '../types';
 import { getCursorFromPosition, getPredecessorPosition } from '../utils/cursor';
@@ -16,9 +16,10 @@ import { normalizeSortCriteriaForDataView } from '../utils/sort_criteria';
 import { copyWithCommonParameters } from './common';
 
 export interface FetchEntriesAfterParameters {
+  afterStartPosition: LogExplorerPosition; // inclusive start of the "future" interval
   chunkSize: number;
-  // inclusive start of the "future" interval
-  afterStartPosition: LogExplorerPosition;
+  filters: Filter[];
+  query: Query | AggregateQuery | undefined;
   sortCriteria: SortCriteria;
   timeRange: TimeRange;
 }
@@ -26,7 +27,9 @@ export interface FetchEntriesAfterParameters {
 export const fetchEntriesAfter =
   ({
     dataView,
-    query,
+    query: {
+      timefilter: { timefilter },
+    },
     searchSource,
   }: {
     dataView: DataView;
@@ -34,16 +37,18 @@ export const fetchEntriesAfter =
     searchSource: ISearchSource;
   }) =>
   ({
-    chunkSize,
     afterStartPosition,
+    chunkSize,
+    filters,
+    query,
     sortCriteria,
     timeRange,
   }: FetchEntriesAfterParameters): Observable<IEsSearchResponse> => {
-    const timeRangeFilter = query.timefilter.timefilter.createFilter(dataView, timeRange);
+    const timeRangeFilter = timefilter.createFilter(dataView, timeRange);
 
     // TODO: create and use point-in-time, not currently possible from client?
     const response$ = pipe(
-      copyWithCommonParameters({ chunkSize, timeRangeFilter }),
+      copyWithCommonParameters({ chunkSize, filters, query, timeRangeFilter }),
       applyAfterParameters({
         dataView,
         afterStartPosition,

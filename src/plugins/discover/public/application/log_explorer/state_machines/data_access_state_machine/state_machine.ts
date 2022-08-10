@@ -7,10 +7,12 @@
  */
 
 import { assign, createMachine, InterpreterFrom } from 'xstate';
+import { updateFilters } from './filters_actions';
 import { appendNewBottomChunk, updateChunksFromLoadAfter } from './load_after_service';
 import { updateChunksFromLoadAround } from './load_around_service';
 import { prependNewTopChunk, updateChunksFromLoadBefore } from './load_before_service';
 import { updateChunksFromLoadTail } from './load_tail_service';
+import { updateTimeRange } from './time_range_actions';
 import { LogExplorerContext, LogExplorerEvent, LogExplorerState } from './types';
 import { areVisibleEntriesNearEnd, areVisibleEntriesNearStart } from './visible_entry_guards';
 
@@ -47,7 +49,9 @@ export const dataAccessStateMachine = createMachine<
           loadAroundFailed: {
             target: 'failedNoData',
           },
-          timeRangeChanged: {},
+          timeRangeChanged: {
+            actions: 'updateTimeRange',
+          },
           columnsChanged: {},
         },
       },
@@ -142,21 +146,21 @@ export const dataAccessStateMachine = createMachine<
           },
           timeRangeChanged: [
             {
-              actions: 'extendTopChunk',
+              actions: 'updateTimeRange',
               cond: 'startTimestampExtendsLoadedTop',
               target: 'extendingTop',
             },
             {
-              actions: 'reduceTopChunk',
+              actions: 'updateTimeRange',
               cond: 'startTimestampReducesLoadedTop',
             },
             {
-              actions: 'extendBottomChunk',
+              actions: 'updateTimeRange',
               cond: 'endTimestampExtendsLoadedBottom',
               target: 'extendingBottom',
             },
             {
-              actions: 'reduceBottomChunk',
+              actions: 'updateTimeRange',
               cond: 'endTimestampReducesLoadedBottom',
             },
             {
@@ -178,9 +182,11 @@ export const dataAccessStateMachine = createMachine<
             target: 'loadingAround',
           },
           filtersChanged: {
+            actions: 'updateFilters',
             target: 'loadingAround',
           },
           timeRangeChanged: {
+            actions: 'updateTimeRange',
             target: 'loadingAround',
           },
         },
@@ -284,6 +290,7 @@ export const dataAccessStateMachine = createMachine<
             target: 'loadingAround',
           },
           timeRangeChanged: {
+            actions: 'updateTimeRange',
             target: 'loadingAround',
           },
           columnsChanged: {
@@ -295,6 +302,7 @@ export const dataAccessStateMachine = createMachine<
         initial: 'loading',
         states: {
           loading: {
+            entry: 'updateTimeRange',
             invoke: {
               src: 'loadTail',
             },
@@ -322,6 +330,7 @@ export const dataAccessStateMachine = createMachine<
     },
     on: {
       filtersChanged: {
+        actions: 'updateFilters',
         target: '.loadingAround',
       },
       dataViewChanged: {
@@ -347,6 +356,8 @@ export const dataAccessStateMachine = createMachine<
       updateChunksFromLoadBefore,
       updateChunksFromLoadAfter,
       updateChunksFromLoadTail,
+      updateFilters,
+      updateTimeRange,
       prependNewTopChunk,
       appendNewBottomChunk,
     },

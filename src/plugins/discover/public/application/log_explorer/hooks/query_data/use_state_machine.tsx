@@ -13,6 +13,7 @@ import { useInterpret } from '@xstate/react';
 import createContainer from 'constate';
 import moment from 'moment';
 import { useMemo } from 'react';
+import { merge } from 'rxjs';
 import {
   dataAccessStateMachine,
   loadAfter,
@@ -33,11 +34,16 @@ export const useStateMachineService = ({
   query: QueryStart;
   searchSource: ISearchSource;
 }) => {
+  const {
+    timefilter: { timefilter },
+    filterManager,
+    queryString,
+  } = query;
   const centerRowIndex = useMemo(() => Math.floor(virtualRowCount / 2), [virtualRowCount]);
 
   const dataAccessService = useInterpret(
     () => {
-      const initialTimeRange = query.timefilter.timefilter.getAbsoluteTime();
+      const initialTimeRange = timefilter.getAbsoluteTime();
 
       return dataAccessStateMachine.withContext({
         configuration: {
@@ -46,6 +52,8 @@ export const useStateMachineService = ({
         },
         dataView,
         timeRange: initialTimeRange,
+        filters: filterManager.getFilters(),
+        query: queryString.getQuery(),
         position: {
           timestamp: getMiddleOfTimeRange(initialTimeRange),
           tiebreaker: 0,
@@ -83,7 +91,7 @@ export const useStateMachineService = ({
         }),
       },
       delays: {
-        loadTailDelay: () => query.timefilter.timefilter.getRefreshInterval().value,
+        loadTailDelay: () => timefilter.getRefreshInterval().value,
       },
       devTools: true,
     }
@@ -91,12 +99,12 @@ export const useStateMachineService = ({
 
   // react to time filter changes
   useSubscription(
-    useMemo(() => query.timefilter.timefilter.getFetch$(), [query.timefilter.timefilter]),
+    useMemo(() => timefilter.getFetch$(), [timefilter]),
     {
       next: () => {
         dataAccessService.send({
           type: 'timeRangeChanged',
-          timeRange: query.timefilter.timefilter.getAbsoluteTime(),
+          timeRange: timefilter.getAbsoluteTime(),
         });
       },
     }
@@ -104,23 +112,40 @@ export const useStateMachineService = ({
 
   // react to auto-refresh changes
   useSubscription(
-    useMemo(
-      () => query.timefilter.timefilter.getRefreshIntervalUpdate$(),
-      [query.timefilter.timefilter]
-    ),
+    useMemo(() => timefilter.getRefreshIntervalUpdate$(), [timefilter]),
     {
       next: () => {
-        const refreshInterval = query.timefilter.timefilter.getRefreshInterval();
+        const refreshInterval = timefilter.getRefreshInterval();
 
         if (refreshInterval.pause) {
           dataAccessService.send({
             type: 'stopTailing',
           });
-        } else {
+        } else if (timefilter.getTime().to === 'now') {
           dataAccessService.send({
             type: 'startTailing',
           });
         }
+      },
+    }
+  );
+
+  // react to filter and query changes
+  useSubscription(
+    useMemo(
+      () => merge(filterManager.getUpdates$(), queryString.getUpdates$()),
+      [filterManager, queryString]
+    ),
+    {
+      next: () => {
+        const filters = filterManager.getFilters();
+        const esQuery = queryString.getQuery();
+
+        dataAccessService.send({
+          type: 'filtersChanged',
+          filters,
+          query: esQuery,
+        });
       },
     }
   );

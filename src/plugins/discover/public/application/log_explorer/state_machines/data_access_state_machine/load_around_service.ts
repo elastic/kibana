@@ -40,7 +40,7 @@ export type LoadAroundEvent =
 export const loadAround = ({
   centerRowIndex,
   dataView,
-  query,
+  query: queryService,
   searchSource,
 }: {
   centerRowIndex: number;
@@ -48,13 +48,19 @@ export const loadAround = ({
   query: QueryStart;
   searchSource: ISearchSource;
 }) => {
-  const boundFetchEntriesAround = fetchEntriesAround({ dataView, query, searchSource });
+  const boundFetchEntriesAround = fetchEntriesAround({
+    dataView,
+    query: queryService,
+    searchSource,
+  });
 
   return (context: LogExplorerContext): Observable<LoadAroundEvent> => {
     // console.log(searchSource.getSearchRequestBody());
     const {
       configuration: { chunkSize },
+      filters,
       position,
+      query,
       timeRange,
     } = context;
 
@@ -68,6 +74,8 @@ export const loadAround = ({
         ['_doc', 'asc'], // _shard_doc is only available when used inside a PIT
       ],
       timeRange,
+      filters,
+      query,
     };
 
     const eventRequestParameters: LoadAroundParameters = {
