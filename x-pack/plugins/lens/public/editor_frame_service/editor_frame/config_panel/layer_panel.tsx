@@ -355,6 +355,10 @@ export function LayerPanel(
           </header>
 
           {groups.map((group, groupIndex) => {
+            if (group.hidden) {
+              return;
+            }
+
             let isMissing = false;
 
             if (!isEmptyLayer) {

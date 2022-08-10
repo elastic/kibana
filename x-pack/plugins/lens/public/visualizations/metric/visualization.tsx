@@ -354,6 +354,7 @@ const getTrendlineLayerConfiguration = (
         enableDimensionEditor: true,
         supportFieldFormat: false,
         required: true,
+        hidden: true,
       },
       {
         groupId: GROUP_ID.TREND_TIME,
@@ -399,6 +400,7 @@ const getTrendlineLayerConfiguration = (
         filterOperations: () => false,
         enableDimensionEditor: true,
         required: false,
+        hidden: true,
       },
     ],
   };
