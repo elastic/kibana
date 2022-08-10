@@ -579,18 +579,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   docPath="index-patterns-api-create.html"
                   linkText="index patterns"
                 />
-                {/* <EuiTourStep
-                content={demoTourSteps[0].content}
-                isStepOpen={tourState.currentTourStep === 1 && tourState.isTourActive}
-                minWidth={tourState.tourPopoverWidth}
-                onFinish={finishTour}
-                step={1}
-                stepsTotal={demoTourSteps.length}
-                subtitle={tourState.tourSubtitle}
-                title={demoTourSteps[0].title}
-                anchorPosition="rightUp" // the tour is not obeying any of these options..
-              > */}
-
                 <FormattedMessage
                   id="xpack.securitySolution.dataViewSelectorText3"
                   defaultMessage=" as your rule's data source to be searched."
