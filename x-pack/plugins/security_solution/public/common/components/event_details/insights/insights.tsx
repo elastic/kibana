@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable complexity */
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
@@ -14,6 +13,7 @@ import * as i18n from './translations';
 
 import type { BrowserFields } from '../../../containers/source';
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
+import { hasData } from './helpers';
 import { useGetUserCasesPermissions } from '../../../lib/kibana';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 import { useLicense } from '../../../hooks/use_license';
@@ -49,25 +49,20 @@ export const Insights = React.memo<Props>(
       { category: 'kibana', field: 'kibana.alert.rule.parameters.index' },
       data
     );
-    const hasProcessEntityInfo =
-      processEntityField && processEntityField.values && processEntityField.values.length;
+    const hasProcessEntityInfo = hasData(processEntityField);
 
     const processSessionField = find(
       { category: 'process', field: 'process.entry_leader.entity_id' },
       data
     );
     const hasProcessSessionInfo =
-      isRelatedAlertsByProcessAncestryEnabled &&
-      processSessionField &&
-      processSessionField.values &&
-      processSessionField.values.length;
+      isRelatedAlertsByProcessAncestryEnabled && hasData(processSessionField);
 
     const sourceEventField = find(
       { category: 'kibana', field: 'kibana.alert.original_event.id' },
       data
     );
-    const hasSourceEventInfo =
-      sourceEventField && sourceEventField.values && sourceEventField.values.length;
+    const hasSourceEventInfo = hasData(sourceEventField);
 
     const userCasesPermissions = useGetUserCasesPermissions();
     const hasCasesReadPermissions = userCasesPermissions.read;
@@ -83,9 +78,7 @@ export const Insights = React.memo<Props>(
 
     const canShowAncestryInsight =
       isRelatedAlertsByProcessAncestryEnabled &&
-      processEntityField &&
-      processEntityField.values &&
-      processEntityField.values.length &&
+      hasProcessEntityInfo &&
       originalDocumentId &&
       originalDocumentIndex;
 
