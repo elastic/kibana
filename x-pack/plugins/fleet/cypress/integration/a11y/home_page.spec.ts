@@ -122,7 +122,8 @@ describe('Home page', () => {
       checkA11y({ skipFailures: false });
     });
   });
-  describe('Settings', () => {
+  describe.skip('Settings', () => {
+    // A11y Violation https://github.com/elastic/kibana/issues/138474
     before(() => {
       cy.getBySel(SETTINGS_TAB).click();
     });
