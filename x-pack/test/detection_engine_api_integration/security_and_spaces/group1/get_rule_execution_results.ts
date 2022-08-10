@@ -100,7 +100,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should return execution events for a rule that has executed in a warning state', async () => {
-      const rule = getRuleForSignalTesting(['auditbeat-*', 'no-name-index']);
+      const rule = getRuleForSignalTesting(['no-name-index']);
       const { id } = await createRule(supertest, log, rule);
       await waitForRuleSuccessOrStatus(supertest, log, id, RuleExecutionStatus['partial failure']);
       await waitForEventLogExecuteComplete(es, log, id);
@@ -122,7 +122,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(response.body.events[0].security_status).to.eql('partial failure');
       expect(
         response.body.events[0].security_message.startsWith(
-          'Check privileges failed to execute ResponseError: index_not_found_exception: [index_not_found_exception] Reason: no such index [no-name-index]'
+          'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["no-name-index"] was found.'
         )
       ).to.eql(true);
     });

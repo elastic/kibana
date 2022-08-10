@@ -21,13 +21,13 @@ const DASHBOARD_TABLE_ITEMS = [
   },
   {
     id: 'id 2',
-    title: 'second dashboard title',
+    title: 'second dashboard_title',
     description: 'desc 2',
   },
   {
     id: 'id 3',
     title: 'different title',
-    description: 'different desc',
+    description: 'different-desc',
   },
 ];
 
@@ -108,5 +108,22 @@ describe('Dashboards table', () => {
     expect(result.queryAllByTestId('dashboardTableTitleCell')).toHaveLength(1);
     expect(result.queryByText(DASHBOARD_TABLE_ITEMS[0].title)).toBeInTheDocument();
     expect(result.queryByText(DASHBOARD_TABLE_ITEMS[0].description)).toBeInTheDocument();
+  });
+
+  it('should filter out special characters except hyphens & underscores', () => {
+    const result = renderDashboardTable();
+
+    const input = result.getByRole('searchbox');
+    fireEvent.change(input, { target: { value: '"_title"' } });
+
+    expect(result.queryAllByTestId('dashboardTableTitleCell')).toHaveLength(1);
+    expect(result.queryByText(DASHBOARD_TABLE_ITEMS[1].title)).toBeInTheDocument();
+    expect(result.queryByText(DASHBOARD_TABLE_ITEMS[1].description)).toBeInTheDocument();
+
+    fireEvent.change(input, { target: { value: "'-desc'" } });
+
+    expect(result.queryAllByTestId('dashboardTableTitleCell')).toHaveLength(1);
+    expect(result.queryByText(DASHBOARD_TABLE_ITEMS[2].title)).toBeInTheDocument();
+    expect(result.queryByText(DASHBOARD_TABLE_ITEMS[2].description)).toBeInTheDocument();
   });
 });
