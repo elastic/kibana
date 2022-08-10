@@ -87,7 +87,7 @@ export const AgentPolicyIntegrationForm: React.FunctionComponent<Props> = ({
         <EuiHorizontalRule />
         <EuiSpacer size="xs" />
         <StyledEuiAccordion
-          id="advancedOptions"
+          id="advancedOptionsChanged"
           buttonContent={
             <FormattedMessage
               id="xpack.fleet.agentPolicyForm.advancedOptionsToggleLabel"
