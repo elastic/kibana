@@ -15,13 +15,43 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "AWS Route53 private hosted zone associated with a VPC",
-  "note": "## Config\n\nThe AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
-  "query": "event.dataset:aws.cloudtrail and event.provider:route53.amazonaws.com and event.action:AssociateVPCWithHostedZone and \nevent.outcome:success\n",
+  "note": "",
+  "query": "event.dataset:aws.cloudtrail and event.provider:route53.amazonaws.com and event.action:AssociateVPCWithHostedZone and\nevent.outcome:success\n",
   "references": [
     "https://docs.aws.amazon.com/Route53/latest/APIReference/API_AssociateVPCWithHostedZone.html"
   ],
+  "related_integrations": [
+    {
+      "integration": "cloudtrail",
+      "package": "aws",
+      "version": "1.10.2"
+    }
+  ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.action",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.dataset",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.outcome",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.provider",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 21,
   "rule_id": "e3c27562-709a-42bd-82f2-3ed926cced19",
+  "setup": "The AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
   "severity": "low",
   "tags": [
     "Elastic",
@@ -50,5 +80,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 3
 }

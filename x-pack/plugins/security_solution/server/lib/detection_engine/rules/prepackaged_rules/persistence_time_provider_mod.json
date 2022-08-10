@@ -14,6 +14,23 @@
   "references": [
     "https://pentestlab.blog/2019/10/22/persistence-time-providers/"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "registry.data.strings",
+      "type": "wildcard"
+    },
+    {
+      "ecs": true,
+      "name": "registry.path",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 47,
   "rule_id": "14ed1aa9-ebfd-4cf9-a463-0ac59ec55204",
   "severity": "medium",
@@ -50,5 +67,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 3
+  "version": 4
 }

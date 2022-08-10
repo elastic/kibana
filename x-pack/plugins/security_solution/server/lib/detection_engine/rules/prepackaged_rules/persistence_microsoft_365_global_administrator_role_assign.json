@@ -11,13 +11,42 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Microsoft 365 Global Administrator Role Assigned",
-  "note": "## Config\n\nThe Office 365 Logs Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "note": "",
   "query": "event.dataset:o365.audit and event.code:\"AzureActiveDirectory\" and event.action:\"Add member to role.\" and\no365.audit.ModifiedProperties.Role_DisplayName.NewValue:\"Global Administrator\"\n",
   "references": [
     "https://docs.microsoft.com/en-us/azure/active-directory/roles/permissions-reference#global-administrator"
   ],
+  "related_integrations": [
+    {
+      "package": "o365",
+      "version": "1.3.0"
+    }
+  ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.action",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.code",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.dataset",
+      "type": "keyword"
+    },
+    {
+      "ecs": false,
+      "name": "o365.audit.ModifiedProperties.Role_DisplayName.NewValue",
+      "type": "unknown"
+    }
+  ],
   "risk_score": 47,
   "rule_id": "88671231-6626-4e1b-abb7-6e361a171fbb",
+  "setup": "The Office 365 Logs Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
   "severity": "medium",
   "tags": [
     "Elastic",
@@ -43,7 +72,7 @@
           "subtechnique": [
             {
               "id": "T1098.003",
-              "name": "Add Office 365 Global Administrator Role",
+              "name": "Additional Cloud Roles",
               "reference": "https://attack.mitre.org/techniques/T1098/003/"
             }
           ]
@@ -53,5 +82,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 2
+  "version": 4
 }

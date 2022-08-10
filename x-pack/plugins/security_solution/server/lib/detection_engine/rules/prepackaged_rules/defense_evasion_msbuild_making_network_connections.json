@@ -13,6 +13,28 @@
   "license": "Elastic License v2",
   "name": "MsBuild Making Network Connections",
   "query": "sequence by process.entity_id\n  [process where process.name : \"MSBuild.exe\" and event.type == \"start\"]\n  [network where process.name : \"MSBuild.exe\" and\n     not cidrmatch(destination.ip, \"127.0.0.1\", \"::1\")]\n",
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "destination.ip",
+      "type": "ip"
+    },
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.entity_id",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.name",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 47,
   "rule_id": "0e79980b-4250-4a50-a509-69294c14e84b",
   "severity": "medium",
@@ -48,5 +70,5 @@
     }
   ],
   "type": "eql",
-  "version": 8
+  "version": 9
 }

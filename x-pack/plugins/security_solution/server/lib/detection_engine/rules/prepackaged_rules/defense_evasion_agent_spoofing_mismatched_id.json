@@ -16,6 +16,13 @@
   "license": "Elastic License v2",
   "name": "Agent Spoofing - Mismatched Agent ID",
   "query": "event.agent_id_status:agent_id_mismatch\n",
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.agent_id_status",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 73,
   "rule_id": "3115bd2c-0baa-4df0-80ea-45e474b5ef93",
   "severity": "high",
@@ -43,5 +50,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 3
+  "version": 4
 }

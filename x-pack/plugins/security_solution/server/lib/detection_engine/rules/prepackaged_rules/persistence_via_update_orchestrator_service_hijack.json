@@ -12,20 +12,44 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Persistence via Update Orchestrator Service Hijack",
-  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
-  "query": "process where event.type == \"start\" and\n  process.parent.executable : \"C:\\\\Windows\\\\System32\\\\svchost.exe\" and\n  process.parent.args : \"UsoSvc\" and\n  not process.executable :\n         (\n          \"C:\\\\Windows\\\\System32\\\\UsoClient.exe\",\n          \"C:\\\\Windows\\\\System32\\\\MusNotification.exe\",\n          \"C:\\\\Windows\\\\System32\\\\MusNotificationUx.exe\",\n          \"C:\\\\Windows\\\\System32\\\\MusNotifyIcon.exe\",\n          \"C:\\\\Windows\\\\System32\\\\WerFault.exe\",\n          \"C:\\\\Windows\\\\System32\\\\WerMgr.exe\"\n          )\n",
+  "note": "",
+  "query": "process where event.type == \"start\" and\n  process.parent.executable : \"C:\\\\Windows\\\\System32\\\\svchost.exe\" and\n  process.parent.args : \"UsoSvc\" and\n  not process.executable :\n          (\"?:\\\\ProgramData\\\\Microsoft\\\\Windows\\\\UUS\\\\Packages\\\\*\\\\amd64\\\\MoUsoCoreWorker.exe\",\n          \"?:\\\\Windows\\\\System32\\\\UsoClient.exe\",\n          \"?:\\\\Windows\\\\System32\\\\MusNotification.exe\",\n          \"?:\\\\Windows\\\\System32\\\\MusNotificationUx.exe\",\n          \"?:\\\\Windows\\\\System32\\\\MusNotifyIcon.exe\",\n          \"?:\\\\Windows\\\\System32\\\\WerFault.exe\",\n          \"?:\\\\Windows\\\\System32\\\\WerMgr.exe\",\n          \"?:\\\\Windows\\\\UUS\\\\amd64\\\\MoUsoCoreWorker.exe\",\n          \"?:\\\\Windows\\\\System32\\\\MoUsoCoreWorker.exe\",\n          \"?:\\\\Windows\\\\UUS\\\\amd64\\\\UsoCoreWorker.exe\",\n          \"?:\\\\Windows\\\\System32\\\\UsoCoreWorker.exe\",\n          \"?:\\\\Program Files\\\\Common Files\\\\microsoft shared\\\\ClickToRun\\\\OfficeC2RClient.exe\")\n",
   "references": [
     "https://github.com/irsl/CVE-2020-1313"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.executable",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.parent.args",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.parent.executable",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 73,
   "rule_id": "265db8f5-fc73-4d0d-b434-6483b56372e2",
+  "setup": "If enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.",
   "severity": "high",
   "tags": [
     "Elastic",
     "Host",
     "Windows",
     "Threat Detection",
-    "Persistence"
+    "Persistence",
+    "CVE-2020-1313"
   ],
   "threat": [
     {
@@ -53,5 +77,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 5
+  "version": 7
 }

@@ -13,14 +13,33 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Suspicious Activity Reported by Okta User",
-  "note": "## Config\n\nThe Okta Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "note": "",
   "query": "event.dataset:okta.system and event.action:user.account.report_suspicious_activity_by_enduser\n",
   "references": [
     "https://developer.okta.com/docs/reference/api/system-log/",
     "https://developer.okta.com/docs/reference/api/event-types/"
   ],
+  "related_integrations": [
+    {
+      "package": "okta",
+      "version": "1.3.0"
+    }
+  ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.action",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.dataset",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 47,
   "rule_id": "f994964f-6fce-4d75-8e79-e16ccc412588",
+  "setup": "The Okta Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
   "severity": "medium",
   "tags": [
     "Elastic",
@@ -94,5 +113,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 6
+  "version": 8
 }

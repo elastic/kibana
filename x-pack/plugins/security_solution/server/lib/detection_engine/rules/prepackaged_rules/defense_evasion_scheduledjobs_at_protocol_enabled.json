@@ -12,13 +12,26 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Scheduled Tasks AT Command Enabled",
-  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
-  "query": "registry where \n registry.path : \"HKLM\\\\SOFTWARE\\\\Microsoft\\\\Windows NT\\\\CurrentVersion\\\\Schedule\\\\Configuration\\\\EnableAt\" and \n registry.data.strings : (\"1\", \"0x00000001\")\n",
+  "note": "",
+  "query": "registry where\n registry.path : \"HKLM\\\\SOFTWARE\\\\Microsoft\\\\Windows NT\\\\CurrentVersion\\\\Schedule\\\\Configuration\\\\EnableAt\" and\n registry.data.strings : (\"1\", \"0x00000001\")\n",
   "references": [
     "https://docs.microsoft.com/en-us/windows/win32/cimwin32prov/win32-scheduledjob"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "registry.data.strings",
+      "type": "wildcard"
+    },
+    {
+      "ecs": true,
+      "name": "registry.path",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 47,
   "rule_id": "9aa0e1f6-52ce-42e1-abb3-09657cee2698",
+  "setup": "If enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.",
   "severity": "medium",
   "tags": [
     "Elastic",
@@ -53,5 +66,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 5
+  "version": 7
 }

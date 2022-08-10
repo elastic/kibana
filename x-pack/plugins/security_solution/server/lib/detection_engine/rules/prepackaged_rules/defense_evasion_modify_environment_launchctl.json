@@ -11,9 +11,36 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Modification of Environment Variable via Launchctl",
-  "query": "event.category:process and event.type:start and\n  process.name:launchctl and\n  process.args:(setenv and not (JAVA*_HOME or\n                                RUNTIME_JAVA_HOME or\n                                DBUS_LAUNCHD_SESSION_BUS_SOCKET or\n                                ANT_HOME or\n                                LG_WEBOS_TV_SDK_HOME or\n                                WEBOS_CLI_TV or\n                                EDEN_ENV)\n                ) and\n  not process.parent.executable:(\"/Applications/NoMachine.app/Contents/Frameworks/bin/nxserver.bin\" or\n                                 \"/usr/local/bin/kr\" or\n                                 \"/Applications/NoMachine.app/Contents/Frameworks/bin/nxserver.bin\" or\n                                 \"/Applications/IntelliJ IDEA CE.app/Contents/jbr/Contents/Home/lib/jspawnhelper\")\n",
+  "query": "event.category:process and event.type:start and\n  process.name:launchctl and\n  process.args:(setenv and not (JAVA*_HOME or\n                                RUNTIME_JAVA_HOME or\n                                DBUS_LAUNCHD_SESSION_BUS_SOCKET or\n                                ANT_HOME or\n                                LG_WEBOS_TV_SDK_HOME or\n                                WEBOS_CLI_TV or\n                                EDEN_ENV)\n                ) and\n  not process.parent.executable:(\"/Applications/NoMachine.app/Contents/Frameworks/bin/nxserver.bin\" or\n                                 \"/usr/local/bin/kr\" or\n                                 \"/Applications/NoMachine.app/Contents/Frameworks/bin/nxserver.bin\" or\n                                 \"/Applications/IntelliJ IDEA CE.app/Contents/jbr/Contents/Home/lib/jspawnhelper\") and\n  not process.args : \"*.vmoptions\"\n",
   "references": [
     "https://github.com/rapid7/metasploit-framework/blob/master//modules/post/osx/escalate/tccbypass.rb"
+  ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.category",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.args",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.name",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.parent.executable",
+      "type": "keyword"
+    }
   ],
   "risk_score": 47,
   "rule_id": "7453e19e-3dbf-4e4e-9ae0-33d6c6ed15e1",
@@ -51,5 +78,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 2
+  "version": 4
 }

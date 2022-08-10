@@ -15,6 +15,18 @@
     "https://www.welivesecurity.com/2019/05/29/turla-powershell-usage/",
     "https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/network-access-restrict-anonymous-access-to-named-pipes-and-shares"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "registry.data.strings",
+      "type": "wildcard"
+    },
+    {
+      "ecs": true,
+      "name": "registry.path",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 47,
   "rule_id": "ddab1f5f-7089-44f5-9fda-de5b11322e77",
   "severity": "medium",
@@ -51,5 +63,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 3
 }

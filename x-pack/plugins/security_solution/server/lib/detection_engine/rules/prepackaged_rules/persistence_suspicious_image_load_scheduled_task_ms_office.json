@@ -12,14 +12,42 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Suspicious Image Load (taskschd.dll) from MS Office",
-  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
-  "query": "library where process.name : (\"WINWORD.EXE\", \"EXCEL.EXE\", \"POWERPNT.EXE\", \"MSPUB.EXE\", \"MSACCESS.EXE\") and\n  event.action : \"load\" and\n  event.category : \"library\" and\n  dll.name : \"taskschd.dll\"\n",
+  "note": "",
+  "query": "any where\n (event.category == \"library\" or (event.category == \"process\" and event.action : \"Image loaded*\")) and\n  process.name : (\"WINWORD.EXE\", \"EXCEL.EXE\", \"POWERPNT.EXE\", \"MSPUB.EXE\", \"MSACCESS.EXE\") and\n  (dll.name : \"taskschd.dll\" or file.name : \"taskschd.dll\")\n",
   "references": [
     "https://medium.com/threatpunter/detecting-adversary-tradecraft-with-image-load-event-logging-and-eql-8de93338c16",
     "https://www.clearskysec.com/wp-content/uploads/2020/10/Operation-Quicksand.pdf"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "dll.name",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.action",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.category",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "file.name",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.name",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 21,
   "rule_id": "baa5d22c-5e1c-4f33-bfc9-efa73bb53022",
+  "setup": "If enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.",
   "severity": "low",
   "tags": [
     "Elastic",
@@ -47,5 +75,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 4
+  "version": 6
 }

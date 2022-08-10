@@ -18,6 +18,33 @@
   "references": [
     "https://github.com/specterops/presentations/raw/master/Leo%20Pitt/Hey_Im_Still_in_Here_Modern_macOS_Persistence_SO-CON2020.pdf"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "host.id",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.args",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.name",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "user.id",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 47,
   "rule_id": "37f638ea-909d-4f94-9248-edd21e4a9906",
   "severity": "medium",
@@ -46,5 +73,5 @@
     }
   ],
   "type": "eql",
-  "version": 2
+  "version": 3
 }
