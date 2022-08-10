@@ -10,7 +10,7 @@ import Fs from 'fs';
 import { join } from 'path';
 
 import sinon from 'sinon';
-import glob from 'glob-all';
+import globby from 'globby';
 import del from 'del';
 
 import { Logger } from '../lib/logger';
@@ -71,18 +71,14 @@ describe('kibana cli', function () {
         await getPackData(settings, logger);
         await extract(settings, logger);
 
-        expect(glob.sync('**/*', { cwd: testWorkingPath })).toMatchInlineSnapshot(`
+        expect(globby.sync('**/*', { cwd: testWorkingPath }).sort()).toMatchInlineSnapshot(`
           Array [
             "archive.part",
-            "bin",
             "bin/executable",
             "bin/not-executable",
             "kibana.json",
-            "node_modules",
-            "node_modules/some-package",
             "node_modules/some-package/index.js",
             "node_modules/some-package/package.json",
-            "public",
             "public/index.js",
           ]
         `);
