@@ -22,7 +22,8 @@ type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
     | 'anomaly-detection'
     | 'apm-indices'
     | 'custom-links'
-    | 'schema';
+    | 'schema'
+    | 'experimental-features';
   hidden?: boolean;
 };
 
@@ -127,6 +128,17 @@ function getTabs({
         defaultMessage: 'Schema',
       }),
       href: getLegacyApmHref({ basePath, path: `/settings/schema`, search }),
+    },
+    {
+      key: 'experimental-features',
+      label: i18n.translate('xpack.apm.settings.experimentalFeatures', {
+        defaultMessage: 'Experimental features',
+      }),
+      href: getLegacyApmHref({
+        basePath,
+        path: `/settings/experimental-features`,
+        search,
+      }),
     },
   ];
 

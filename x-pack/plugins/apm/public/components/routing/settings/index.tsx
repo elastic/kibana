@@ -20,6 +20,7 @@ import { CustomLinkOverview } from '../../app/settings/custom_link';
 import { Schema } from '../../app/settings/schema';
 import { AnomalyDetection } from '../../app/settings/anomaly_detection';
 import { AgentKeys } from '../../app/settings/agent_keys';
+import { ExperimentalFeatures } from '../../app/settings/experimental_features';
 
 function page({
   title,
@@ -131,6 +132,14 @@ export const settings = {
         }),
         element: <AgentKeys />,
         tab: 'agent-keys',
+      }),
+      '/settings/experimental-features': page({
+        title: i18n.translate(
+          'xpack.apm.views.settings.experimentalFeatures.title',
+          { defaultMessage: 'Experimental features' }
+        ),
+        element: <ExperimentalFeatures />,
+        tab: 'experimental-features',
       }),
       '/settings': {
         element: <Redirect to="/settings/agent-configuration" />,
