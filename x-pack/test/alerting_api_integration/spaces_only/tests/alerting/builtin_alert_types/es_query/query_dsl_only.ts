@@ -1,0 +1,188 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import expect from '@kbn/expect';
+
+import { Spaces } from '../../../../scenarios';
+import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { ES_TEST_INDEX_NAME, getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
+import { createDataStream, deleteDataStream } from '../lib/create_test_data';
+import {
+  createConnector,
+  CreateRuleParams,
+  ES_GROUPS_TO_WRITE,
+  ES_TEST_DATA_STREAM_NAME,
+  ES_TEST_INDEX_REFERENCE,
+  ES_TEST_INDEX_SOURCE,
+  ES_TEST_OUTPUT_INDEX_NAME,
+  getRuleServices,
+  RULE_INTERVALS_TO_WRITE,
+  RULE_INTERVAL_MILLIS,
+  RULE_INTERVAL_SECONDS,
+  RULE_TYPE_ID,
+} from './common';
+
+// eslint-disable-next-line import/no-default-export
+export default function ruleTests({ getService }: FtrProviderContext) {
+  const supertest = getService('supertest');
+  const { es, esTestIndexTool, esTestIndexToolOutput, createEsDocumentsInGroups, waitForDocs } =
+    getRuleServices(getService);
+
+  describe('rule', async () => {
+    let endDate: string;
+    let connectorId: string;
+    const objectRemover = new ObjectRemover(supertest);
+
+    beforeEach(async () => {
+      await esTestIndexTool.destroy();
+      await esTestIndexTool.setup();
+
+      await esTestIndexToolOutput.destroy();
+      await esTestIndexToolOutput.setup();
+
+      connectorId = await createConnector(supertest, objectRemover, ES_TEST_OUTPUT_INDEX_NAME);
+
+      // write documents in the future, figure out the end date
+      const endDateMillis = Date.now() + (RULE_INTERVALS_TO_WRITE - 1) * RULE_INTERVAL_MILLIS;
+      endDate = new Date(endDateMillis).toISOString();
+
+      await createDataStream(es, ES_TEST_DATA_STREAM_NAME);
+    });
+
+    afterEach(async () => {
+      await objectRemover.removeAll();
+      await esTestIndexTool.destroy();
+      await esTestIndexToolOutput.destroy();
+      await deleteDataStream(es, ES_TEST_DATA_STREAM_NAME);
+    });
+
+    [
+      [
+        'esQuery',
+        async () => {
+          await createRule({
+            name: 'always fire',
+            esQuery: `{\n  \"runtime_mappings\": {\n    \"testedValueSquared\": {\n      \"type\": \"long\",\n      \"script\": {\n        \"source\": \"emit(doc['testedValue'].value * doc['testedValue'].value);\"\n      }\n    }\n  },\n  \"fields\": [\"testedValueSquared\"],\n  \"query\": {\n    \"match_all\": {}\n  }\n}`,
+            size: 100,
+            thresholdComparator: '>',
+            threshold: [-1],
+          });
+        },
+      ] as const,
+    ].forEach(([searchType, initData]) =>
+      it(`runs correctly: numeric runtime field for ${searchType} search type`, async () => {
+        // write documents from now to the future end date in groups
+        await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
+        await initData();
+
+        const docs = await waitForDocs(2);
+        for (let i = 0; i < docs.length; i++) {
+          const doc = docs[i];
+          const { name, title } = doc._source.params;
+          expect(name).to.be('always fire');
+          expect(title).to.be(`rule 'always fire' matched query`);
+
+          const hits = JSON.parse(doc._source.hits);
+          expect(hits).not.to.be.empty();
+          hits.forEach((hit: any) => {
+            expect(hit.fields).not.to.be.empty();
+            expect(hit.fields.testedValueSquared).not.to.be.empty();
+            // fields returns as an array of values
+            const [testedValueSquared] = hit.fields.testedValueSquared;
+            expect(hit._source.testedValue * hit._source.testedValue).to.be(testedValueSquared);
+          });
+        }
+      })
+    );
+
+    async function createRule(params: CreateRuleParams): Promise<string> {
+      const action = {
+        id: connectorId,
+        group: 'query matched',
+        params: {
+          documents: [
+            {
+              source: ES_TEST_INDEX_SOURCE,
+              reference: ES_TEST_INDEX_REFERENCE,
+              params: {
+                name: '{{{rule.name}}}',
+                value: '{{{context.value}}}',
+                title: '{{{context.title}}}',
+                message: '{{{context.message}}}',
+              },
+              // wrap in brackets
+              hits: '[{{context.hits}}]',
+              date: '{{{context.date}}}',
+              previousTimestamp: '{{{state.latestTimestamp}}}',
+            },
+          ],
+        },
+      };
+
+      const recoveryAction = {
+        id: connectorId,
+        group: 'recovered',
+        params: {
+          documents: [
+            {
+              source: ES_TEST_INDEX_SOURCE,
+              reference: ES_TEST_INDEX_REFERENCE,
+              params: {
+                name: '{{{rule.name}}}',
+                value: '{{{context.value}}}',
+                title: '{{{context.title}}}',
+                message: '{{{context.message}}}',
+              },
+              // wrap in brackets
+              hits: '[{{context.hits}}]',
+              date: '{{{context.date}}}',
+            },
+          ],
+        },
+      };
+
+      const ruleParams =
+        params.searchType === 'searchSource'
+          ? {
+              searchConfiguration: params.searchConfiguration,
+            }
+          : {
+              index: [params.indexName || ES_TEST_INDEX_NAME],
+              timeField: params.timeField || 'date',
+              esQuery: params.esQuery,
+            };
+
+      const { body: createdRule } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: params.name,
+          consumer: 'alerts',
+          enabled: true,
+          rule_type_id: RULE_TYPE_ID,
+          schedule: { interval: `${RULE_INTERVAL_SECONDS}s` },
+          actions: [action, recoveryAction],
+          notify_when: params.notifyWhen || 'onActiveAlert',
+          params: {
+            size: params.size,
+            timeWindowSize: params.timeWindowSize || RULE_INTERVAL_SECONDS * 5,
+            timeWindowUnit: 's',
+            thresholdComparator: params.thresholdComparator,
+            threshold: params.threshold,
+            searchType: params.searchType,
+            ...ruleParams,
+          },
+        })
+        .expect(200);
+
+      const ruleId = createdRule.id;
+      objectRemover.add(Spaces.space1.id, ruleId, 'rule', 'alerting');
+
+      return ruleId;
+    }
+  });
+}
