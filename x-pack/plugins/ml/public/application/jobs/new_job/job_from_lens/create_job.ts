@@ -362,9 +362,10 @@ function createDetectors(
   splitField: FieldBasedIndexPatternColumn | null
 ) {
   return fields.map(({ operationType, sourceField }) => {
+    const func = getMlFunction(operationType);
     return {
-      function: getMlFunction(operationType),
-      field_name: sourceField,
+      function: func,
+      ...(func === 'count' ? {} : { field_name: sourceField }),
       ...(splitField ? { partition_field_name: splitField.sourceField } : {}),
     };
   });
