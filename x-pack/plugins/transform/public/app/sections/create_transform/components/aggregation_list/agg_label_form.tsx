@@ -86,7 +86,7 @@ export const AggLabelForm: React.FC<Props> = ({
                 size="s"
                 iconType="pencil"
                 onClick={() => setPopoverVisibility(!isPopoverVisible)}
-                data-test-subj="transformAggregationEntryEditButton"
+                data-test-subj={`transformAggregationEntryEditButton_${item.aggName}`}
               />
             }
             isOpen={isPopoverVisible}
