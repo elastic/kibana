@@ -9,7 +9,10 @@ import { SavedObjectsType, SavedObjectsFieldMapping } from '@kbn/core/server';
 import { FILE_SO_TYPE } from '../../common';
 import type { FileMetadata } from '../../common';
 
-type Properties = Record<keyof FileMetadata, SavedObjectsFieldMapping>;
+type Properties = Record<
+  keyof Omit<FileMetadata, 'Alt' | 'Compression' | 'ChunkSize' | 'hash'>,
+  SavedObjectsFieldMapping
+>;
 
 const properties: Properties = {
   created: {
@@ -19,9 +22,6 @@ const properties: Properties = {
     type: 'date',
   },
   name: {
-    type: 'text',
-  },
-  Alt: {
     type: 'text',
   },
   Status: {
@@ -41,15 +41,6 @@ const properties: Properties = {
   },
   FileKind: {
     type: 'keyword',
-  },
-  ChunkSize: {
-    type: 'long',
-  },
-  Compression: {
-    type: 'keyword',
-  },
-  hash: {
-    type: 'flattened',
   },
 };
 

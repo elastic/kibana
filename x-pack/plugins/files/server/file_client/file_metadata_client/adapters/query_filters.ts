@@ -24,7 +24,6 @@ export function filterArgsToKuery({
   extension,
   kind,
   meta,
-  mimeType,
   name,
   status,
   attrPrefix = '',
@@ -43,7 +42,6 @@ export function filterArgsToKuery({
   addFilters('name', name);
   addFilters('FileKind', kind);
   addFilters('Status', status);
-  addFilters('mime_type', mimeType);
   addFilters('extension', extension);
 
   if (meta) {
