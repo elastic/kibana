@@ -6,4 +6,15 @@
  * Side Public License, v 1.
  */
 
-export const timeSliderReducers = {};
+import { PayloadAction } from '@reduxjs/toolkit';
+import { WritableDraft } from 'immer/dist/types/types-external';
+import { TimeSliderReduxState } from './types';
+
+export const timeSliderReducers = {
+  setTimeRangeBounds: (
+    state: WritableDraft<TimeSliderReduxState>,
+    action: PayloadAction<{ timeRangeBounds: [number, number] }>
+  ) => {
+    state.componentState.timeRangeBounds = action.payload.timeRangeBounds;
+  },
+};

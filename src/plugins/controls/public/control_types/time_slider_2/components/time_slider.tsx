@@ -21,15 +21,16 @@ import {
 } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
-import { timeSliderReducers } from './time_slider_reducers';
-import { TimeSliderReduxState } from './types';
+import { timeSliderReducers } from '../time_slider_reducers';
+import { TimeSliderReduxState } from '../types';
+import { TimeSliderPopoverButton } from './time_slider_popover_button';
 
 export interface Props {
   dateFormat?: string;
   timezone?: string;
 }
 
-export const TimeSliderComponent: FC<Props> = (props) => {
+export const TimeSlider: FC<Props> = (props) => {
   const defaultProps = {
     dateFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',
     timezone: 'Browser',
@@ -45,11 +46,17 @@ export const TimeSliderComponent: FC<Props> = (props) => {
   } = useReduxEmbeddableContext<TimeSliderReduxState, typeof timeSliderReducers>();
   //const dispatch = useEmbeddableDispatch();
 
-  const timeRange = select((state) => {
+  const timeRangeBounds = select((state) => {
     console.log(state);
-    return state.explicitInput.timeRange;
+    return state.componentState.timeRangeBounds;
   });
-  console.log(timeRange);
+
+  if (!timeRangeBounds) {
+    return <div>Select time range</div>;
+  }
+
+  const from = timeRangeBounds[0];
+  const to = timeRangeBounds[1];
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const togglePopover = useCallback(() => {
@@ -69,24 +76,10 @@ export const TimeSliderComponent: FC<Props> = (props) => {
     },
     [dateFormat, getTimezone]
   );
-
-  const button = (
-    <button
-      color="text"
-      onClick={togglePopover}
-    >
-      <EuiText className="eui-textTruncate" size="s">
-        <span>start</span>
-        &nbsp;&nbsp;→&nbsp;&nbsp;
-        <span>end</span>
-      </EuiText>
-    </button>
-  );
   
-
   return (
     <EuiInputPopover
-      input={button}
+      input={<TimeSliderPopoverButton onClick={togglePopover} formatDate={epochToKbnDateFormat} from={from} to={to} />}
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
       panelPaddingSize="s"

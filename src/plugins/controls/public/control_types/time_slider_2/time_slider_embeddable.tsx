@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
+import _ from 'lodash';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
 import { ReduxEmbeddableTools, ReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -15,8 +17,9 @@ import { TIME_SLIDER_CONTROL } from '../..';
 import { TimeSliderControlEmbeddableInput } from '../../../common/control_types/time_slider/types';
 import { pluginServices } from '../../services';
 import { ControlsSettingsService } from '../../services/settings';
+import { ControlsDataService } from '../../services/data';
 import { ControlOutput } from '../../types';
-import { TimeSliderComponent } from './time_slider_component';
+import { TimeSlider } from './components';
 import { timeSliderReducers } from './time_slider_reducers';
 import { TimeSliderReduxState } from './types';
 
@@ -27,11 +30,12 @@ export class TimeSliderControlEmbeddable extends Embeddable<
   public readonly type = TIME_SLIDER_CONTROL;
   public deferEmbeddedLoad = true;
 
-  private subscriptions: Subscription = new Subscription();
+  private inputSubscription: Subscription;
   private node?: HTMLElement;
 
   private getDateFormat: ControlsSettingsService['getDateFormat'];
   private getTimezone: ControlsSettingsService['getTimezone'];
+  private timefilter: ControlsDataService['timefilter'];
 
   private reduxEmbeddableTools: ReduxEmbeddableTools<
     TimeSliderReduxState,
@@ -47,11 +51,13 @@ export class TimeSliderControlEmbeddable extends Embeddable<
     super(input, output, parent);
 
     const {
+      data: { timefilter },
       settings: { getDateFormat, getTimezone },
     } = pluginServices.getServices();
 
     this.getDateFormat = getDateFormat;
     this.getTimezone = getTimezone;
+    this.timefilter = timefilter;
 
     this.reduxEmbeddableTools = reduxEmbeddablePackage.createTools<
       TimeSliderReduxState,
@@ -61,13 +67,30 @@ export class TimeSliderControlEmbeddable extends Embeddable<
       reducers: timeSliderReducers,
     });
 
+    this.inputSubscription = this.getInput$().subscribe(() => this.onInputChange());
+
     this.initialize();
   }
 
   public destroy = () => {
     super.destroy();
     this.reduxEmbeddableTools.cleanup();
+    if (this.inputSubscription) {
+      this.inputSubscription.unsubscribe();
+    }
   };
+
+  private onInputChange() {
+    const input = this.getInput();
+    if (input.timeRange) {
+      const timeRangeBounds = this.timefilter.calculateBounds(input.timeRange);
+      const nextBounds = [timeRangeBounds.min.valueOf(), timeRangeBounds.max.valueOf()];
+      const { actions, dispatch, getState } = this.reduxEmbeddableTools;
+      if (!_.isEqual(nextBounds, getState().componentState.timeRangeBounds)) {
+        dispatch(actions.setTimeRangeBounds({ timeRangeBounds: nextBounds }));
+      }
+    }
+  }
 
   private initialize() {
     return;
@@ -87,7 +110,7 @@ export class TimeSliderControlEmbeddable extends Embeddable<
 
     ReactDOM.render(
       <TimeSliderControlReduxWrapper>
-        <TimeSliderComponent dateFormat={this.getDateFormat()} timezone={this.getTimezone()} />
+        <TimeSlider dateFormat={this.getDateFormat()} timezone={this.getTimezone()} />
       </TimeSliderControlReduxWrapper>,
       node
     );
