@@ -562,42 +562,6 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(deleteIndexRule.index).to.eql(['initial-index-*', 'index2-*']);
       });
 
-      it('should add an index pattern to a rule and overwrite the data view', async () => {
-        const ruleId = 'ruleId';
-        const dataViewId = 'index1-*';
-        const simpleRule = {
-          ...getSimpleRule(ruleId),
-          index: undefined,
-          data_view_id: dataViewId,
-        };
-        await createRule(supertest, log, simpleRule);
-
-        const { body: setIndexBody } = await postBulkAction()
-          .send({
-            query: '',
-            action: BulkAction.edit,
-            [BulkAction.edit]: [
-              {
-                type: BulkActionEditType.add_index_patterns,
-                value: ['initial-index-*'],
-                overwriteDataViews: true,
-              },
-            ],
-          })
-          .expect(200);
-
-        expect(setIndexBody.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
-
-        // Check that the updated rule is returned with the response
-        expect(setIndexBody.attributes.results.updated[0].index).to.eql(['initial-index-*']);
-        expect(setIndexBody.attributes.results.updated[0].data_view_id).to.eql(undefined);
-
-        // Check that the updates have been persisted
-        const { body: setIndexRule } = await fetchRule(ruleId).expect(200);
-
-        expect(setIndexRule.index).to.eql(['initial-index-*']);
-      });
-
       it('should set timeline values in rule', async () => {
         const ruleId = 'ruleId';
         const timelineId = '91832785-286d-4ebe-b884-1a208d111a70';
@@ -634,8 +598,18 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should correctly remove timeline', async () => {
+        const timelineId = 'test-id';
+        const timelineTitle = 'Test timeline template';
         const ruleId = 'ruleId';
-        await createRule(supertest, log, getSimpleRule(ruleId));
+        const createdRule = await createRule(supertest, log, {
+          ...getSimpleRule(ruleId),
+          timeline_id: 'test-id',
+          timeline_title: 'Test timeline template',
+        });
+
+        // ensure rule has been created with timeline properties
+        expect(createdRule.timeline_id).to.be(timelineId);
+        expect(createdRule.timeline_title).to.be(timelineTitle);
 
         const { body } = await postBulkAction()
           .send({
@@ -786,6 +760,265 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body: updatedRule } = await fetchRule(ruleId).expect(200);
 
         expect(updatedRule.version).to.be(rule.version + 1);
+      });
+    });
+
+    describe('overwrite_data_views', () => {
+      it('should add an index pattern to a rule and overwrite the data view when overwrite_data_views is true', async () => {
+        const ruleId = 'ruleId';
+        const dataViewId = 'index1-*';
+        const simpleRule = {
+          ...getSimpleRule(ruleId),
+          index: undefined,
+          data_view_id: dataViewId,
+        };
+        await createRule(supertest, log, simpleRule);
+
+        const { body: setIndexBody } = await postBulkAction()
+          .send({
+            query: '',
+            action: BulkAction.edit,
+            [BulkAction.edit]: [
+              {
+                type: BulkActionEditType.add_index_patterns,
+                value: ['initial-index-*'],
+                overwrite_data_views: true,
+              },
+            ],
+          })
+          .expect(200);
+
+        expect(setIndexBody.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
+
+        // Check that the updated rule is returned with the response
+        expect(setIndexBody.attributes.results.updated[0].index).to.eql(['initial-index-*']);
+        expect(setIndexBody.attributes.results.updated[0].data_view_id).to.eql(undefined);
+
+        // Check that the updates have been persisted
+        const { body: setIndexRule } = await fetchRule(ruleId).expect(200);
+
+        expect(setIndexRule.index).to.eql(['initial-index-*']);
+      });
+
+      it('should NOT add an index pattern to a rule and overwrite the data view when overwrite_data_views is false', async () => {
+        const ruleId = 'ruleId';
+        const dataViewId = 'index1-*';
+        const simpleRule = {
+          ...getSimpleRule(ruleId),
+          index: undefined,
+          data_view_id: dataViewId,
+        };
+        await createRule(supertest, log, simpleRule);
+
+        const { body: setIndexBody } = await postBulkAction()
+          .send({
+            query: '',
+            action: BulkAction.edit,
+            [BulkAction.edit]: [
+              {
+                type: BulkActionEditType.add_index_patterns,
+                value: ['initial-index-*'],
+                overwrite_data_views: false,
+              },
+            ],
+          })
+          .expect(200);
+
+        expect(setIndexBody.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
+
+        // Check that the updated rule is returned with the response
+        expect(setIndexBody.attributes.results.updated[0].index).to.eql(undefined);
+        expect(setIndexBody.attributes.results.updated[0].data_view_id).to.eql(dataViewId);
+
+        // Check that the updates have been persisted
+        const { body: setIndexRule } = await fetchRule(ruleId).expect(200);
+
+        expect(setIndexRule.index).to.eql(undefined);
+        expect(setIndexRule.data_view_id).to.eql(dataViewId);
+      });
+
+      it('should set an index pattern to a rule and overwrite the data view when overwrite_data_views is true', async () => {
+        const ruleId = 'ruleId';
+        const dataViewId = 'index1-*';
+        const simpleRule = {
+          ...getSimpleRule(ruleId),
+          index: undefined,
+          data_view_id: dataViewId,
+        };
+        await createRule(supertest, log, simpleRule);
+
+        const { body: setIndexBody } = await postBulkAction()
+          .send({
+            query: '',
+            action: BulkAction.edit,
+            [BulkAction.edit]: [
+              {
+                type: BulkActionEditType.set_index_patterns,
+                value: ['initial-index-*'],
+                overwrite_data_views: true,
+              },
+            ],
+          })
+          .expect(200);
+
+        expect(setIndexBody.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
+
+        // Check that the updated rule is returned with the response
+        expect(setIndexBody.attributes.results.updated[0].index).to.eql(['initial-index-*']);
+        expect(setIndexBody.attributes.results.updated[0].data_view_id).to.eql(undefined);
+
+        // Check that the updates have been persisted
+        const { body: setIndexRule } = await fetchRule(ruleId).expect(200);
+
+        expect(setIndexRule.index).to.eql(['initial-index-*']);
+        expect(setIndexRule.data_view_id).to.eql(undefined);
+      });
+
+      it('should NOT set an index pattern to a rule and overwrite the data view when overwrite_data_views is false', async () => {
+        const ruleId = 'ruleId';
+        const dataViewId = 'index1-*';
+        const simpleRule = {
+          ...getSimpleRule(ruleId),
+          index: undefined,
+          data_view_id: dataViewId,
+        };
+        await createRule(supertest, log, simpleRule);
+
+        const { body: setIndexBody } = await postBulkAction()
+          .send({
+            query: '',
+            action: BulkAction.edit,
+            [BulkAction.edit]: [
+              {
+                type: BulkActionEditType.set_index_patterns,
+                value: ['initial-index-*'],
+                overwrite_data_views: false,
+              },
+            ],
+          })
+          .expect(200);
+
+        expect(setIndexBody.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
+
+        // Check that the updated rule is returned with the response
+        expect(setIndexBody.attributes.results.updated[0].index).to.eql(undefined);
+        expect(setIndexBody.attributes.results.updated[0].data_view_id).to.eql(dataViewId);
+
+        // Check that the updates have been persisted
+        const { body: setIndexRule } = await fetchRule(ruleId).expect(200);
+
+        expect(setIndexRule.index).to.eql(undefined);
+        expect(setIndexRule.data_view_id).to.eql(dataViewId);
+      });
+
+      // This rule will now not have a source defined - as has been the behavior of rules since the beginning
+      // this rule will use the default index patterns on rule run
+      it('should NOT error if all index patterns removed from a rule with data views when no index patterns exist on the rule and overwrite_data_views is true', async () => {
+        const dataViewId = 'index1-*';
+        const ruleId = 'ruleId';
+        const rule = await createRule(supertest, log, {
+          ...getSimpleRule(ruleId),
+          data_view_id: dataViewId,
+          index: undefined,
+        });
+
+        const { body } = await postBulkAction()
+          .send({
+            ids: [rule.id],
+            action: BulkAction.edit,
+            [BulkAction.edit]: [
+              {
+                type: BulkActionEditType.delete_index_patterns,
+                value: ['simple-index-*'],
+                overwrite_data_views: true,
+              },
+            ],
+          })
+          .expect(200);
+
+        expect(body.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
+
+        // Check that the updated rule is returned with the response
+        expect(body.attributes.results.updated[0].index).to.eql(undefined);
+        expect(body.attributes.results.updated[0].data_view_id).to.eql(undefined);
+
+        // Check that the updates have been persisted
+        const { body: setIndexRule } = await fetchRule(ruleId).expect(200);
+
+        expect(setIndexRule.index).to.eql(undefined);
+        expect(setIndexRule.data_view_id).to.eql(undefined);
+      });
+
+      it('should return error if all index patterns removed from a rule with data views and overwrite_data_views is true', async () => {
+        const dataViewId = 'index1-*';
+        const ruleId = 'ruleId';
+        const rule = await createRule(supertest, log, {
+          ...getSimpleRule(ruleId),
+          data_view_id: dataViewId,
+          index: ['simple-index-*'],
+        });
+
+        const { body } = await postBulkAction()
+          .send({
+            ids: [rule.id],
+            action: BulkAction.edit,
+            [BulkAction.edit]: [
+              {
+                type: BulkActionEditType.delete_index_patterns,
+                value: ['simple-index-*'],
+                overwrite_data_views: true,
+              },
+            ],
+          })
+          .expect(500);
+
+        expect(body.attributes.summary).to.eql({ failed: 1, succeeded: 0, total: 1 });
+        expect(body.attributes.errors[0]).to.eql({
+          message: "Mutated params invalid: Index patterns can't be empty",
+          status_code: 500,
+          rules: [
+            {
+              id: rule.id,
+              name: rule.name,
+            },
+          ],
+        });
+      });
+
+      it('should NOT return error if all index patterns removed from a rule with data views and overwrite_data_views is false', async () => {
+        const dataViewId = 'index1-*';
+        const ruleId = 'ruleId';
+        const rule = await createRule(supertest, log, {
+          ...getSimpleRule(ruleId),
+          data_view_id: dataViewId,
+          index: ['simple-index-*'],
+        });
+
+        const { body } = await postBulkAction()
+          .send({
+            ids: [rule.id],
+            action: BulkAction.edit,
+            [BulkAction.edit]: [
+              {
+                type: BulkActionEditType.delete_index_patterns,
+                value: ['simple-index-*'],
+                overwrite_data_views: false,
+              },
+            ],
+          })
+          .expect(200);
+
+        expect(body.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
+
+        // Check that the updated rule is returned with the response
+        expect(body.attributes.results.updated[0].index).to.eql(['simple-index-*']);
+        expect(body.attributes.results.updated[0].data_view_id).to.eql(dataViewId);
+
+        // Check that the updates have been persisted
+        const { body: setIndexRule } = await fetchRule(ruleId).expect(200);
+
+        expect(setIndexRule.index).to.eql(['simple-index-*']);
+        expect(setIndexRule.data_view_id).to.eql(dataViewId);
       });
     });
 

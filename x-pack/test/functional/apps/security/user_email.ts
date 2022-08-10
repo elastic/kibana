@@ -15,7 +15,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const kibanaServer = getService('kibanaServer');
 
-  describe('useremail', function () {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/138528
+  describe.skip('useremail', function () {
     before(async () => {
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/security/discover'
