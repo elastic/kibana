@@ -6,4 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { runBuildApiDocsCli } from './api_docs';
+export * from './src/run';
+export * from './src/run_with_commands';
+export * from './src/flags';
+export type { CleanupTask } from './src/cleanup';

@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { withProcRunner } from './with_proc_runner';
-export { ProcRunner } from './proc_runner';
+export { runBuildApiDocsCli } from './src/api_docs';

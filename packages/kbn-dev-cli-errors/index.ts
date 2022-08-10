@@ -6,6 +6,4 @@
  * Side Public License, v 1.
  */
 
-export type { DocLinks, DocLinksMeta } from './types';
-export { getDocLinks } from './get_doc_links';
-export { getDocLinksMeta } from './get_doc_meta';
+export { combineErrors, createFailError, createFlagError, isFailError } from './src/dev_cli_errors';

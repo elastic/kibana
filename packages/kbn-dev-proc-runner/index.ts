@@ -6,7 +6,5 @@
  * Side Public License, v 1.
  */
 
-export * from './run';
-export * from './run_with_commands';
-export * from './flags';
-export type { CleanupTask } from './cleanup';
+export { withProcRunner } from './src/with_proc_runner';
+export { ProcRunner } from './src/proc_runner';
