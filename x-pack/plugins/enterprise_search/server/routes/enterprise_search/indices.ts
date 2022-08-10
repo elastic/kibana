@@ -136,8 +136,22 @@ export function registerIndexRoutes({ router, log }: RouteDependencies) {
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { indexName } = request.params;
       const { client } = (await context.core).elasticsearch;
+      let indexExists: boolean;
 
-      const indexExists = await client.asCurrentUser.indices.exists({ index: indexName });
+      try {
+        indexExists = await client.asCurrentUser.indices.exists({ index: indexName });
+      } catch (e) {
+        log.warn(
+          i18n.translate('xpack.enterpriseSearch.server.routes.indices.existsErrorLogMessage', {
+            defaultMessage: 'An error occured while resolving request to {requestUrl}',
+            values: {
+              requestUrl: request.url.toString(),
+            },
+          })
+        );
+        log.warn(e);
+        indexExists = false;
+      }
 
       return response.ok({
         body: {
