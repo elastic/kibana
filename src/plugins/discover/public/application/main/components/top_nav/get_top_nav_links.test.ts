@@ -37,6 +37,7 @@ test('getTopNavLinks result', () => {
     searchSource: {} as ISearchSource,
     onOpenSavedSearch: () => {},
     isPlainRecord: false,
+    shouldPersistDataView: () => Promise.resolve(true),
   });
   expect(topNavLinks).toMatchInlineSnapshot(`
     Array [
@@ -99,6 +100,7 @@ test('getTopNavLinks result for sql mode', () => {
     searchSource: {} as ISearchSource,
     onOpenSavedSearch: () => {},
     isPlainRecord: true,
+    shouldPersistDataView: () => Promise.resolve(true),
   });
   expect(topNavLinks).toMatchInlineSnapshot(`
     Array [
