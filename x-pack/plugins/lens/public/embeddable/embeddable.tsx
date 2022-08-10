@@ -17,6 +17,7 @@ import {
   TimefilterContract,
   FilterManager,
   getEsQueryConfig,
+  mapAndFlattenFilters,
 } from '@kbn/data-plugin/public';
 import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 
@@ -41,6 +42,7 @@ import {
   SavedObjectEmbeddableInput,
   ReferenceOrValueEmbeddable,
   SelfStyledEmbeddable,
+  FilterableEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
@@ -213,7 +215,8 @@ export class Embeddable
   extends AbstractEmbeddable<LensEmbeddableInput, LensEmbeddableOutput>
   implements
     ReferenceOrValueEmbeddable<LensByValueInput, LensByReferenceInput>,
-    SelfStyledEmbeddable
+    SelfStyledEmbeddable,
+    FilterableEmbeddable
 {
   type = DOC_TYPE;
 
@@ -867,6 +870,27 @@ export class Embeddable
   public getDescription() {
     // mind that savedViz is loaded in async way here
     return this.savedVis && this.savedVis.description;
+  }
+
+  /**
+   * Gets the Lens embeddable's local filters
+   * @returns Local/panel-level array of filters for Lens embeddable
+   */
+  public async getFilters() {
+    return mapAndFlattenFilters(
+      this.deps.injectFilterReferences(
+        this.savedVis?.state.filters ?? [],
+        this.savedVis?.references ?? []
+      )
+    );
+  }
+
+  /**
+   * Gets the Lens embeddable's local query
+   * @returns Local/panel-level query for Lens embeddable
+   */
+  public async getQuery() {
+    return this.savedVis?.state.query;
   }
 
   public getSavedVis(): Readonly<Document | undefined> {
