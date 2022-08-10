@@ -6,18 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { EuiFilterButton, EuiFilterGroup, EuiPopover, useResizeObserver } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import { debounce, isEmpty } from 'lodash';
-import classNames from 'classnames';
 import { Subject } from 'rxjs';
+import classNames from 'classnames';
+import { debounce, isEmpty } from 'lodash';
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 
+import { EuiFilterButton, EuiFilterGroup, EuiPopover, useResizeObserver } from '@elastic/eui';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
 import { OptionsListStrings } from './options_list_strings';
-import { optionsListReducers } from '../options_list_reducers';
 import { OptionsListPopover } from './options_list_popover';
+import { optionsListReducers } from '../options_list_reducers';
 import { OptionsListReduxState } from '../types';
+
 import './options_list.scss';
 
 export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Subject<string> }) => {
