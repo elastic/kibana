@@ -12,7 +12,8 @@ export default function ({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const security = getService('security');
 
-  describe('Getting user profile for the current user', () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/138528
+  describe.skip('Getting user profile for the current user', () => {
     const testUserName = 'user_with_profile';
 
     async function login() {
