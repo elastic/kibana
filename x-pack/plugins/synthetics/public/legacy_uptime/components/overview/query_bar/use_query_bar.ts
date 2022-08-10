@@ -8,7 +8,7 @@
 import React, { useCallback, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { useDispatch } from 'react-redux';
-import { Query } from '@kbn/data-plugin/common';
+import type { Query } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   useGetUrlParams,

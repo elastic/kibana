@@ -26,6 +26,7 @@ export function registerAlertsTableConfiguration({
 }) {
   alertsTableConfigurationRegistry.register({
     id: PLUGIN_ID,
+    casesFeatureId: `${PLUGIN_ID}Cases`,
     columns: [
       {
         id: 'event.action',
@@ -48,10 +49,6 @@ export function registerAlertsTableConfiguration({
       },
     ],
     useInternalFlyout,
-    externalFlyout: {
-      header: AlertsPageFlyoutHeader,
-      body: AlertsPageFlyoutBody,
-    },
     getRenderCellValue: () => (props) => {
       const myProps = props as any;
       const value = myProps.data.find((d: any) => d.field === myProps.columnId)?.value ?? [];

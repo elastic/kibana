@@ -29,7 +29,7 @@ import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
 import { sampleDocNoSortIdWithTimestamp } from '../../../signals/__mocks__/es_results';
 import { buildAlert, buildParent, buildAncestors, additionalAlertFields } from './build_alert';
-import { Ancestor, SignalSourceHit } from '../../../signals/types';
+import type { Ancestor, SignalSourceHit } from '../../../signals/types';
 import { getListArrayMock } from '../../../../../../common/detection_engine/schemas/types/lists.mock';
 import { SERVER_APP_ID } from '../../../../../../common/constants';
 import { EVENT_DATASET } from '../../../../../../common/cti/constants';

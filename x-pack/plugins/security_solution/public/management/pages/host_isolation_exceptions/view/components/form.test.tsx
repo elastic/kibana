@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import {
+import type {
   ExceptionListItemSchema,
   FoundExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import {
-  AppContextTestRender,
-  createAppRootMockRenderer,
-} from '../../../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
 import { HostIsolationExceptionsList } from '../host_isolation_exceptions_list';
 import { act, waitFor } from '@testing-library/react';
 import { HOST_ISOLATION_EXCEPTIONS_PATH } from '../../../../../../common/constants';
@@ -27,7 +25,7 @@ import {
   isEffectedPolicySelected,
 } from '../../../../components/effected_policy_select/test_utils';
 import { BY_POLICY_ARTIFACT_TAG_PREFIX } from '../../../../../../common/endpoint/service/artifacts';
-import { HttpFetchOptionsWithPath } from '@kbn/core/public';
+import type { HttpFetchOptionsWithPath } from '@kbn/core/public';
 
 jest.mock('../../../../../common/components/user_privileges');
 
@@ -94,7 +92,9 @@ describe('When on the host isolation exceptions entry form', () => {
     });
   });
 
-  describe('and creating a new exception', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/136165
+  // FLAKY: https://github.com/elastic/kibana/issues/136166
+  describe.skip('and creating a new exception', () => {
     beforeEach(async () => {
       await render();
     });

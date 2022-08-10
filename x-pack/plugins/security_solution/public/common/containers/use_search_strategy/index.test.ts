@@ -9,7 +9,7 @@ import { useSearchStrategy } from '.';
 import { act, renderHook } from '@testing-library/react-hooks';
 
 import { useObservable } from '@kbn/securitysolution-hook-utils';
-import { FactoryQueryTypes } from '../../../../common/search_strategy';
+import type { FactoryQueryTypes } from '../../../../common/search_strategy';
 
 const mockAddToastError = jest.fn();
 

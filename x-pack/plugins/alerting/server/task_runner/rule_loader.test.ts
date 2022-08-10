@@ -6,7 +6,7 @@
  */
 
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { KibanaRequest } from '@kbn/core/server';
+import { CoreKibanaRequest } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 
 import { getDecryptedAttributes, getFakeKibanaRequest, loadRule } from './rule_loader';
@@ -234,12 +234,12 @@ describe('rule_loader', () => {
 
   describe('getFakeKibanaRequest()', () => {
     test('has API key, in default space', async () => {
-      const kibanaRequestFromMock = jest.spyOn(KibanaRequest, 'from');
+      const kibanaRequestFromMock = jest.spyOn(CoreKibanaRequest, 'from');
       const fakeRequest = getFakeKibanaRequest(context, 'default', apiKey);
 
       const bpsSetParams = mockBasePathService.set.mock.calls[0];
       expect(bpsSetParams).toEqual([fakeRequest, '/']);
-      expect(fakeRequest).toEqual(expect.any(KibanaRequest));
+      expect(fakeRequest).toEqual(expect.any(CoreKibanaRequest));
       expect(kibanaRequestFromMock.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
@@ -264,12 +264,12 @@ describe('rule_loader', () => {
     });
 
     test('has API key, in non-default space', async () => {
-      const kibanaRequestFromMock = jest.spyOn(KibanaRequest, 'from');
+      const kibanaRequestFromMock = jest.spyOn(CoreKibanaRequest, 'from');
       const fakeRequest = getFakeKibanaRequest(context, spaceId, apiKey);
 
       const bpsSetParams = mockBasePathService.set.mock.calls[0];
       expect(bpsSetParams).toEqual([fakeRequest, '/s/rule-spaceId']);
-      expect(fakeRequest).toEqual(expect.any(KibanaRequest));
+      expect(fakeRequest).toEqual(expect.any(CoreKibanaRequest));
       expect(kibanaRequestFromMock.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
@@ -294,13 +294,13 @@ describe('rule_loader', () => {
     });
 
     test('does not have API key, in default space', async () => {
-      const kibanaRequestFromMock = jest.spyOn(KibanaRequest, 'from');
+      const kibanaRequestFromMock = jest.spyOn(CoreKibanaRequest, 'from');
       const fakeRequest = getFakeKibanaRequest(context, 'default', null);
 
       const bpsSetParams = mockBasePathService.set.mock.calls[0];
       expect(bpsSetParams).toEqual([fakeRequest, '/']);
 
-      expect(fakeRequest).toEqual(expect.any(KibanaRequest));
+      expect(fakeRequest).toEqual(expect.any(CoreKibanaRequest));
       expect(kibanaRequestFromMock.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {

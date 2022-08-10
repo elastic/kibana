@@ -34,6 +34,7 @@ import { lastValueFrom, of } from 'rxjs';
 
 import { CoreStart } from '@kbn/core/public';
 import { mountReactNode } from '@kbn/core/public/utils';
+import type { TimeRange } from '@kbn/es-query';
 import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 
 import {
@@ -45,7 +46,6 @@ import {
   isErrorResponse,
   QueryState,
   SearchSessionState,
-  TimeRange,
 } from '@kbn/data-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';

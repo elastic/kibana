@@ -120,5 +120,3 @@ npm run build:antlr4ts
 ```
 
 *Note:* This script should only need to be run if a change has been made to `painless_lexer.g4` or `painless_parser.g4`.
-
-*Note:* There is a manual change made to the `sempred()` method in the generated `painless_lexer.ts`. This needs further investigation, but it appears there is an offset between the rule index and the token value. Without this manual change, ANTLR incorrectly reports an error when using a `/` or regex in a script. There is a comment in the generated code to this effect.

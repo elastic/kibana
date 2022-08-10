@@ -6,10 +6,13 @@
  */
 
 import { isEmpty } from 'lodash';
-import React, { SetStateAction, useEffect, useState } from 'react';
+import type { SetStateAction } from 'react';
+import type React from 'react';
+import { useEffect, useState } from 'react';
 
-import { fetchQueryAlerts, fetchQueryRuleRegistryAlerts } from './api';
-import { AlertSearchResponse } from './types';
+import type { fetchQueryRuleRegistryAlerts } from './api';
+import { fetchQueryAlerts } from './api';
+import type { AlertSearchResponse } from './types';
 
 type Func = () => Promise<void>;
 

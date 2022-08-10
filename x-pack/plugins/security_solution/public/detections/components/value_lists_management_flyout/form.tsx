@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useState, useEffect, useRef } from 'react';
+import type { EuiSelectOption } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -15,7 +16,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSelect,
-  EuiSelectOption,
 } from '@elastic/eui';
 
 import type { Type, ListSchema } from '@kbn/securitysolution-io-ts-list-types';

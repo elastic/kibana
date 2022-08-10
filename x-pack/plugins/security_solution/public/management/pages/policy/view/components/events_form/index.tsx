@@ -20,7 +20,10 @@ import {
 } from '@elastic/eui';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { ThemeContext } from 'styled-components';
-import { PolicyOperatingSystem, UIPolicyConfig } from '../../../../../../../common/endpoint/types';
+import type {
+  PolicyOperatingSystem,
+  UIPolicyConfig,
+} from '../../../../../../../common/endpoint/types';
 import { ConfigForm, ConfigFormHeading } from '../config_form';
 
 const OPERATING_SYSTEM_TO_TEST_SUBJ: { [K in OperatingSystem]: string } = {
@@ -119,7 +122,7 @@ const InnerEventsForm = <T extends OperatingSystem>({
       {supplementalOptions &&
         supplementalOptions.map(({ name, protectionField, tooltipText, beta }) => {
           return (
-            <div key={String(protectionField)} style={{ paddingLeft: theme.eui.paddingSizes.s }}>
+            <div key={String(protectionField)} style={{ paddingLeft: theme.eui.euiSizeS }}>
               <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
                 <EuiFlexItem grow={false}>
                   <EuiSpacer size="s" />

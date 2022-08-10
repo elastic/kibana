@@ -56,6 +56,7 @@ describe('validateMonitor', () => {
     testCommonFields = {
       [ConfigKey.MONITOR_TYPE]: DataStream.ICMP,
       [ConfigKey.NAME]: 'test-monitor-name',
+      [ConfigKey.CONFIG_ID]: 'test-monitor-id',
       [ConfigKey.ENABLED]: true,
       [ConfigKey.TAGS]: testTags,
       [ConfigKey.SCHEDULE]: testSchedule,
@@ -173,8 +174,8 @@ describe('validateMonitor', () => {
       [ConfigKey.SOURCE_ZIP_PASSWORD]: 'password',
       [ConfigKey.SOURCE_ZIP_PROXY_URL]: 'http://proxy-url.com',
       [ConfigKey.PARAMS]: '',
-      [ConfigKey.URLS]: undefined,
-      [ConfigKey.PORT]: undefined,
+      [ConfigKey.URLS]: null,
+      [ConfigKey.PORT]: null,
     };
 
     testBrowserAdvancedFields = {
@@ -309,7 +310,7 @@ describe('validateMonitor', () => {
       const testMonitor = {
         ...testHTTPFields,
         ...({
-          [ConfigKey.URLS]: undefined,
+          [ConfigKey.URLS]: null,
         } as unknown as Partial<HTTPFields>),
       } as MonitorFields;
 
@@ -434,6 +435,7 @@ function getJsonPayload() {
     '    "TLSv1.2"' +
     '  ],' +
     '  "name": "test-monitor-name",' +
+    '  "config_id": "test-monitor-id",' +
     '  "namespace": "testnamespace",' +
     '  "locations": [{' +
     '    "id": "eu-west-01",' +

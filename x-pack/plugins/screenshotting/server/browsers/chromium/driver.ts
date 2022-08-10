@@ -17,6 +17,8 @@ import { Subject } from 'rxjs';
 import { parse as parseUrl } from 'url';
 import { getDisallowedOutgoingUrlError } from '.';
 import { ConfigType } from '../../config';
+import { Layout } from '../../layouts';
+import { getPrintLayoutSelectors } from '../../layouts/print_layout';
 import { allowRequest } from '../network_policy';
 import { stripUnsafeHeaders } from './strip_unsafe_headers';
 import { getFooterTemplate, getHeaderTemplate } from './templates';
@@ -181,8 +183,57 @@ export class HeadlessChromiumDriver {
     }
   }
 
-  public async printA4Pdf({ title, logo }: { title: string; logo?: string }): Promise<Buffer> {
+  /**
+   * Timeout errors may occur when waiting for data or the brower render events to complete. This mutates the
+   * page, and has the drawback anything were to interact with the page after we ran this function, it may lead
+   * to issues. Ideally, timeout errors wouldn't occur because ES would return pre-loaded results data
+   * statically.
+   */
+  private async injectScreenshottingErrorHeader(error: Error, containerSelector: string) {
+    await this.page.evaluate(
+      (selector: string, text: string) => {
+        let container = document.querySelector(selector);
+        if (!container) {
+          container = document.querySelector('body');
+        }
+
+        const errorBoundary = document.createElement('div');
+        errorBoundary.className = 'euiErrorBoundary';
+
+        const divNode = document.createElement('div');
+        divNode.className = 'euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge';
+
+        const preNode = document.createElement('pre');
+        preNode.className = 'euiCodeBlock__pre euiCodeBlock__pre--whiteSpacePreWrap';
+
+        const codeNode = document.createElement('code');
+        codeNode.className = 'euiCodeBlock__code';
+
+        errorBoundary.appendChild(divNode);
+        divNode.appendChild(preNode);
+        preNode.appendChild(codeNode);
+        codeNode.appendChild(document.createTextNode(text));
+
+        container?.insertBefore(errorBoundary, container.firstChild);
+      },
+      containerSelector,
+      error.toString()
+    );
+  }
+
+  public async printA4Pdf({
+    title,
+    logo,
+    error,
+  }: {
+    title: string;
+    logo?: string;
+    error?: Error;
+  }): Promise<Buffer> {
     await this.workaroundWebGLDrivenCanvases();
+    if (error) {
+      await this.injectScreenshottingErrorHeader(error, getPrintLayoutSelectors().screenshot);
+    }
     return this.page.pdf({
       format: 'a4',
       preferCSSPageSize: true,
@@ -197,7 +248,19 @@ export class HeadlessChromiumDriver {
   /*
    * Receive a PNG buffer of the page screenshot from Chromium
    */
-  public async screenshot(elementPosition: ElementPosition): Promise<Buffer | undefined> {
+  public async screenshot({
+    elementPosition,
+    layout,
+    error,
+  }: {
+    elementPosition: ElementPosition;
+    layout: Layout;
+    error?: Error;
+  }): Promise<Buffer | undefined> {
+    if (error) {
+      await this.injectScreenshottingErrorHeader(error, layout.selectors.screenshot);
+    }
+
     const { boundingClientRect, scroll } = elementPosition;
     const screenshot = await this.page.screenshot({
       clip: {

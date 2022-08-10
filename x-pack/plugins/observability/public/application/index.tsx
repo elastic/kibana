@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
-import { KibanaFeature } from '@kbn/features-plugin/common';
 import { AppMountParameters, APP_WRAPPER_CLASS, CoreStart } from '@kbn/core/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import {
@@ -52,16 +51,16 @@ export const renderApp = ({
   appMountParameters,
   observabilityRuleTypeRegistry,
   ObservabilityPageTemplate,
-  kibanaFeatures,
   usageCollection,
+  isDev,
 }: {
   core: CoreStart;
   plugins: ObservabilityPublicPluginsStart;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
   appMountParameters: AppMountParameters;
   ObservabilityPageTemplate: React.ComponentType<LazyObservabilityPageTemplateProps>;
-  kibanaFeatures: KibanaFeature[];
   usageCollection: UsageCollectionSetup;
+  isDev?: boolean;
 }) => {
   const { element, history, theme$ } = appMountParameters;
   const i18nCore = core.i18n;
@@ -83,14 +82,13 @@ export const renderApp = ({
     <ApplicationUsageTrackingProvider>
       <KibanaThemeProvider theme$={theme$}>
         <KibanaContextProvider
-          services={{ ...core, ...plugins, storage: new Storage(localStorage) }}
+          services={{ ...core, ...plugins, storage: new Storage(localStorage), isDev }}
         >
           <PluginContext.Provider
             value={{
               appMountParameters,
               observabilityRuleTypeRegistry,
               ObservabilityPageTemplate,
-              kibanaFeatures,
             }}
           >
             <Router history={history}>

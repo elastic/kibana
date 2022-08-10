@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ReactElement, useCallback, useState, useMemo } from 'react';
+import type { ReactElement } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import {
   EuiContextMenuItem,
   EuiButtonEmpty,
@@ -17,7 +18,7 @@ import {
 } from '@elastic/eui';
 
 import * as i18n from '../translations';
-import { ExceptionsPagination, Filter } from '../types';
+import type { ExceptionsPagination, Filter } from '../types';
 
 interface ExceptionsViewerPaginationProps {
   pagination: ExceptionsPagination;

@@ -6,7 +6,7 @@
  */
 
 import { Subject } from 'rxjs';
-import { bufferTime, filter as rxFilter, switchMap } from 'rxjs/operators';
+import { bufferTime, filter as rxFilter, concatMap } from 'rxjs/operators';
 import { reject, isUndefined, isNumber, pick } from 'lodash';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger, ElasticsearchClient } from '@kbn/core/server';
@@ -87,7 +87,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
       .pipe(
         bufferTime(EVENT_BUFFER_TIME, null, EVENT_BUFFER_LENGTH),
         rxFilter((docs) => docs.length > 0),
-        switchMap(async (docs) => await this.indexDocuments(docs))
+        concatMap(async (docs) => await this.indexDocuments(docs))
       )
       .toPromise();
   }

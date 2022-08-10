@@ -9,7 +9,7 @@ import { schema, type TypeOf } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
 
 const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: false }),
+  enabled: schema.boolean({ defaultValue: true }),
 });
 type CloudSecurityPostureConfig = TypeOf<typeof configSchema>;
 

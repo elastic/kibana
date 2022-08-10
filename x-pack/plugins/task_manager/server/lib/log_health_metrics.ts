@@ -27,7 +27,8 @@ export function resetLastLogLevel() {
 export function logHealthMetrics(
   monitoredHealth: MonitoredHealth,
   logger: Logger,
-  config: TaskManagerConfig
+  config: TaskManagerConfig,
+  shouldRunTasks: boolean
 ) {
   let logLevel: LogLevel = LogLevel.Debug;
   const enabled = config.monitored_stats_health_verbose_log.enabled;
@@ -38,7 +39,12 @@ export function logHealthMetrics(
       capacity_estimation: undefined,
     },
   };
-  const statusWithoutCapacity = calculateHealthStatus(healthWithoutCapacity, config, logger);
+  const statusWithoutCapacity = calculateHealthStatus(
+    healthWithoutCapacity,
+    config,
+    shouldRunTasks,
+    logger
+  );
   if (statusWithoutCapacity === HealthStatus.Warning) {
     logLevel = LogLevel.Warn;
   } else if (statusWithoutCapacity === HealthStatus.Error && !isEmpty(monitoredHealth.stats)) {
@@ -51,7 +57,9 @@ export function logHealthMetrics(
 
   const docLink = `https://www.elastic.co/guide/en/kibana/${docsBranch}/task-manager-health-monitoring.html`;
   const detectedProblemMessage = `Task Manager detected a degradation in performance. This is usually temporary, and Kibana can recover automatically. If the problem persists, check the docs for troubleshooting information: ${docLink} .`;
-  if (enabled) {
+
+  // Drift looks at runtime stats which are not available when task manager is not running tasks
+  if (enabled && shouldRunTasks) {
     const driftInSeconds = (monitoredHealth.stats.runtime?.value.drift.p99 ?? 0) / 1000;
     if (
       driftInSeconds >= config.monitored_stats_health_verbose_log.warn_delayed_task_start_in_seconds

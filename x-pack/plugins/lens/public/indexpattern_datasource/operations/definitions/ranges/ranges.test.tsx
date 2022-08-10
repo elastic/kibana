@@ -13,6 +13,7 @@ import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/c
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import type { IndexPatternLayer, IndexPattern } from '../../../types';
 import { rangeOperation } from '..';
@@ -54,6 +55,7 @@ jest.mock('lodash', () => {
 
 const dataPluginMockValue = dataPluginMock.createStartContract();
 const unifiedSearchPluginMockValue = unifiedSearchPluginMock.createStartContract();
+const fieldFormatsPluginMockValue = fieldFormatsServiceMock.createStartContract();
 const dataViewsPluginMockValue = dataViewPluginMocks.createStartContract();
 // need to overwrite the formatter field first
 dataPluginMockValue.fieldFormats.deserialize = jest.fn().mockImplementation(({ id, params }) => {
@@ -83,11 +85,20 @@ const defaultOptions = {
   storage: {} as IStorageWrapper,
   uiSettings: uiSettingsMock,
   savedObjectsClient: {} as SavedObjectsClientContract,
+  existingFields: {
+    my_index_pattern: {
+      timestamp: true,
+      bytes: true,
+      memory: true,
+      source: true,
+    },
+  },
   dateRange: {
     fromDate: 'now-1y',
     toDate: 'now',
   },
   data: dataPluginMockValue,
+  fieldFormats: fieldFormatsPluginMockValue,
   unifiedSearch: unifiedSearchPluginMockValue,
   dataViews: dataViewsPluginMockValue,
   http: {} as HttpSetup,
@@ -374,7 +385,7 @@ describe('ranges', () => {
           <InlineOptions
             {...defaultOptions}
             layer={layer}
-            updateLayer={updateLayerSpy}
+            paramEditorUpdater={updateLayerSpy}
             columnId="col1"
             currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
           />
@@ -390,7 +401,7 @@ describe('ranges', () => {
           <InlineOptions
             {...defaultOptions}
             layer={layer}
-            updateLayer={updateLayerSpy}
+            paramEditorUpdater={updateLayerSpy}
             columnId="col1"
             currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
           />
@@ -433,7 +444,7 @@ describe('ranges', () => {
           <InlineOptions
             {...defaultOptions}
             layer={layer}
-            updateLayer={updateLayerSpy}
+            paramEditorUpdater={updateLayerSpy}
             columnId="col1"
             currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
           />
@@ -503,7 +514,7 @@ describe('ranges', () => {
           <InlineOptions
             {...defaultOptions}
             layer={layer}
-            updateLayer={updateLayerSpy}
+            paramEditorUpdater={updateLayerSpy}
             columnId="col1"
             currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
           />
@@ -519,7 +530,7 @@ describe('ranges', () => {
           <InlineOptions
             {...defaultOptions}
             layer={layer}
-            updateLayer={updateLayerSpy}
+            paramEditorUpdater={updateLayerSpy}
             columnId="col1"
             currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
           />
@@ -539,7 +550,7 @@ describe('ranges', () => {
           <InlineOptions
             {...defaultOptions}
             layer={layer}
-            updateLayer={updateLayerSpy}
+            paramEditorUpdater={updateLayerSpy}
             columnId="col1"
             currentColumn={
               {
@@ -565,7 +576,7 @@ describe('ranges', () => {
           <InlineOptions
             {...defaultOptions}
             layer={layer}
-            updateLayer={updateLayerSpy}
+            paramEditorUpdater={updateLayerSpy}
             columnId="col1"
             currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
           />
@@ -620,7 +631,7 @@ describe('ranges', () => {
           <InlineOptions
             {...defaultOptions}
             layer={layer}
-            updateLayer={updateLayerSpy}
+            paramEditorUpdater={updateLayerSpy}
             columnId="col1"
             currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
           />
@@ -675,7 +686,7 @@ describe('ranges', () => {
           <InlineOptions
             {...defaultOptions}
             layer={layer}
-            updateLayer={updateLayerSpy}
+            paramEditorUpdater={updateLayerSpy}
             columnId="col1"
             currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
           />
@@ -722,7 +733,7 @@ describe('ranges', () => {
           <InlineOptions
             {...defaultOptions}
             layer={layer}
-            updateLayer={updateLayerSpy}
+            paramEditorUpdater={updateLayerSpy}
             columnId="col1"
             currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
           />
@@ -772,7 +783,7 @@ describe('ranges', () => {
           <InlineOptions
             {...defaultOptions}
             layer={layer}
-            updateLayer={updateLayerSpy}
+            paramEditorUpdater={updateLayerSpy}
             columnId="col1"
             currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
           />
@@ -810,7 +821,7 @@ describe('ranges', () => {
           <InlineOptions
             {...defaultOptions}
             layer={layer}
-            updateLayer={updateLayerSpy}
+            paramEditorUpdater={updateLayerSpy}
             columnId="col1"
             currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
           />
@@ -842,7 +853,7 @@ describe('ranges', () => {
           <InlineOptions
             {...defaultOptions}
             layer={layer}
-            updateLayer={updateLayerSpy}
+            paramEditorUpdater={updateLayerSpy}
             columnId="col1"
             currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
             indexPattern={{
@@ -872,7 +883,7 @@ describe('ranges', () => {
           <InlineOptions
             {...defaultOptions}
             layer={layer}
-            updateLayer={updateLayerSpy}
+            paramEditorUpdater={updateLayerSpy}
             columnId="col1"
             currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
             indexPattern={{
@@ -896,7 +907,7 @@ describe('ranges', () => {
           <InlineOptions
             {...defaultOptions}
             layer={layer}
-            updateLayer={updateLayerSpy}
+            paramEditorUpdater={updateLayerSpy}
             columnId="col1"
             currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
           />
@@ -916,7 +927,7 @@ describe('ranges', () => {
           <InlineOptions
             {...defaultOptions}
             layer={layer}
-            updateLayer={updateLayerSpy}
+            paramEditorUpdater={updateLayerSpy}
             columnId="col1"
             currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
           />

@@ -19,6 +19,7 @@ import {
   INDEX_PATTERN_TYPES,
   STANDALONE_CLUSTER_CLUSTER_UUID,
   METRICBEAT_INDEX_NAME_UNIQUE_TOKEN,
+  DS_INDEX_PATTERN_METRICS,
 } from '../../../common/constants';
 import { formatUTCTimestampForTimezone } from '../format_timezone';
 import { getNewIndexPatterns } from '../cluster/get_index_patterns';
@@ -87,7 +88,7 @@ function createMetricAggs(metric: Metric) {
             derivative: {
               buckets_path: 'metric_mb',
               gap_policy: 'skip',
-              unit: NORMALIZED_DERIVATIVE_UNIT,
+              ...(metric.derivativeNormalizedUnits ? { unit: NORMALIZED_DERIVATIVE_UNIT } : {}),
             },
           },
         }
@@ -97,7 +98,7 @@ function createMetricAggs(metric: Metric) {
         derivative: {
           buckets_path: 'metric',
           gap_policy: 'skip',
-          unit: NORMALIZED_DERIVATIVE_UNIT,
+          ...(metric.derivativeNormalizedUnits ? { unit: NORMALIZED_DERIVATIVE_UNIT } : {}),
         },
       },
       ...mbDerivative,
@@ -275,7 +276,12 @@ function handleSeries(
   timezone: string,
   response: ElasticsearchResponse
 ) {
-  const { derivative, calculation: customCalculation, isNotSupportedInInternalCollection } = metric;
+  const {
+    derivative,
+    derivativeNormalizedUnits,
+    calculation: customCalculation,
+    isNotSupportedInInternalCollection,
+  } = metric;
 
   function getAggregatedData(buckets: SeriesBucket[]) {
     const firstUsableBucketIndex = findFirstUsableBucketIndex(buckets, min);
@@ -286,12 +292,16 @@ function handleSeries(
       bucketSizeInSeconds * 1000
     );
     let internalIndicesFound = false;
-    let mbIndicesFound = false;
+    let ecsIndicesFound = false;
     let data: Array<[string | number, number | null]> = [];
 
     if (firstUsableBucketIndex <= lastUsableBucketIndex) {
       // map buckets to values for charts
-      const key = derivative ? 'metric_deriv.normalized_value' : 'metric.value';
+      const key = derivative
+        ? derivativeNormalizedUnits
+          ? 'metric_deriv.normalized_value'
+          : 'metric_deriv.value'
+        : 'metric.value';
       const calculation = customCalculation !== undefined ? customCalculation : defaultCalculation;
       const usableBuckets = buckets.slice(firstUsableBucketIndex, lastUsableBucketIndex + 1); // take only the buckets we know are usable
 
@@ -299,8 +309,11 @@ function handleSeries(
         // map buckets to X/Y coords for Flot charting
         if (bucket.indices) {
           for (const indexBucket of bucket.indices.buckets) {
-            if (indexBucket.key.includes(METRICBEAT_INDEX_NAME_UNIQUE_TOKEN)) {
-              mbIndicesFound = true;
+            if (
+              indexBucket.key.includes(METRICBEAT_INDEX_NAME_UNIQUE_TOKEN) ||
+              indexBucket.key.includes(DS_INDEX_PATTERN_METRICS)
+            ) {
+              ecsIndicesFound = true;
             } else {
               internalIndicesFound = true;
             }
@@ -318,7 +331,7 @@ function handleSeries(
       ? {
           indices_found: {
             internal: internalIndicesFound,
-            metricbeat: mbIndicesFound,
+            ecs: ecsIndicesFound,
           },
         }
       : {};

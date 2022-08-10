@@ -60,7 +60,7 @@ export const CertificateFingerprint = React.memo<{
       isAggregatable={true}
       fieldType="keyword"
     >
-      <FingerprintLabel data-test-subj="fingerprint-label">
+      <FingerprintLabel>
         {certificateType === 'client' ? i18n.CLIENT_CERT : i18n.SERVER_CERT}
       </FingerprintLabel>
       <CertificateFingerprintLink certificateFingerprint={value || ''} />

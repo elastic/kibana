@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { Dictionary } from 'lodash';
 import { KibanaRequest, Logger } from '@kbn/core/server';
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
@@ -49,27 +48,6 @@ export interface RuleTaskInstance extends ConcreteTaskInstance {
   state: RuleTaskState;
 }
 
-export interface TrackAlertDurationsParams<
-  InstanceState extends AlertInstanceState,
-  InstanceContext extends AlertInstanceContext
-> {
-  originalAlerts: Dictionary<Alert<InstanceState, InstanceContext>>;
-  currentAlerts: Dictionary<Alert<InstanceState, InstanceContext>>;
-  recoveredAlerts: Dictionary<Alert<InstanceState, InstanceContext>>;
-}
-
-export interface GenerateNewAndRecoveredAlertEventsParams<
-  InstanceState extends AlertInstanceState,
-  InstanceContext extends AlertInstanceContext
-> {
-  alertingEventLogger: AlertingEventLogger;
-  originalAlerts: Dictionary<Alert<InstanceState, InstanceContext>>;
-  currentAlerts: Dictionary<Alert<InstanceState, InstanceContext>>;
-  recoveredAlerts: Dictionary<Alert<InstanceState, InstanceContext>>;
-  ruleLabel: string;
-  ruleRunMetricsStore: RuleRunMetricsStore;
-}
-
 export interface ScheduleActionsForRecoveredAlertsParams<
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext,
@@ -77,24 +55,11 @@ export interface ScheduleActionsForRecoveredAlertsParams<
 > {
   logger: Logger;
   recoveryActionGroup: ActionGroup<RecoveryActionGroupId>;
-  recoveredAlerts: Dictionary<Alert<InstanceState, InstanceContext, RecoveryActionGroupId>>;
-  executionHandler: ExecutionHandler<RecoveryActionGroupId | RecoveryActionGroupId>;
+  recoveredAlerts: Record<string, Alert<InstanceState, InstanceContext, RecoveryActionGroupId>>;
+  executionHandler: ExecutionHandler<RecoveryActionGroupId>;
   mutedAlertIdsSet: Set<string>;
   ruleLabel: string;
   ruleRunMetricsStore: RuleRunMetricsStore;
-}
-
-export interface LogActiveAndRecoveredAlertsParams<
-  InstanceState extends AlertInstanceState,
-  InstanceContext extends AlertInstanceContext,
-  ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
-> {
-  logger: Logger;
-  activeAlerts: Dictionary<Alert<InstanceState, InstanceContext, ActionGroupIds>>;
-  recoveredAlerts: Dictionary<Alert<InstanceState, InstanceContext, RecoveryActionGroupId>>;
-  ruleLabel: string;
-  canSetRecoveryContext: boolean;
 }
 
 // / ExecutionHandler

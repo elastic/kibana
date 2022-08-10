@@ -61,6 +61,8 @@ const findTestUtils = (
               expect(response.body.per_page).to.be.greaterThan(0);
               expect(response.body.total).to.be.greaterThan(0);
               const match = response.body.data.find((obj: any) => obj.id === createdAlert.id);
+              const activeSnoozes = match.active_snoozes;
+              const hasActiveSnoozes = !!(activeSnoozes || []).filter((obj: any) => obj).length;
               expect(match).to.eql({
                 id: createdAlert.id,
                 name: 'abc',
@@ -73,7 +75,6 @@ const findTestUtils = (
                 params: {},
                 created_by: 'elastic',
                 scheduled_task_id: match.scheduled_task_id,
-                snooze_schedule: match.snooze_schedule,
                 created_at: match.created_at,
                 updated_at: match.updated_at,
                 throttle: '1m',
@@ -83,7 +84,13 @@ const findTestUtils = (
                 mute_all: false,
                 muted_alert_ids: [],
                 execution_status: match.execution_status,
-                ...(describeType === 'internal' ? { monitoring: match.monitoring } : {}),
+                ...(describeType === 'internal'
+                  ? {
+                      monitoring: match.monitoring,
+                      snooze_schedule: match.snooze_schedule,
+                      ...(hasActiveSnoozes && { active_snoozes: activeSnoozes }),
+                    }
+                  : {}),
               });
               expect(Date.parse(match.created_at)).to.be.greaterThan(0);
               expect(Date.parse(match.updated_at)).to.be.greaterThan(0);
@@ -255,6 +262,8 @@ const findTestUtils = (
               expect(response.body.per_page).to.be.greaterThan(0);
               expect(response.body.total).to.be.greaterThan(0);
               const match = response.body.data.find((obj: any) => obj.id === createdAlert.id);
+              const activeSnoozes = match.active_snoozes;
+              const hasActiveSnoozes = !!(activeSnoozes || []).filter((obj: any) => obj).length;
               expect(match).to.eql({
                 id: createdAlert.id,
                 name: 'abc',
@@ -282,8 +291,13 @@ const findTestUtils = (
                 created_at: match.created_at,
                 updated_at: match.updated_at,
                 execution_status: match.execution_status,
-                snooze_schedule: match.snooze_schedule,
-                ...(describeType === 'internal' ? { monitoring: match.monitoring } : {}),
+                ...(describeType === 'internal'
+                  ? {
+                      monitoring: match.monitoring,
+                      snooze_schedule: match.snooze_schedule,
+                      ...(hasActiveSnoozes && { active_snoozes: activeSnoozes }),
+                    }
+                  : {}),
               });
               expect(Date.parse(match.created_at)).to.be.greaterThan(0);
               expect(Date.parse(match.updated_at)).to.be.greaterThan(0);
@@ -358,11 +372,17 @@ const findTestUtils = (
                 id: createdAlert.id,
                 actions: [],
                 tags: [myTag],
+                ...(describeType === 'internal' && {
+                  snooze_schedule: [],
+                }),
               });
               expect(omit(matchSecond, 'updatedAt')).to.eql({
                 id: createdSecondAlert.id,
                 actions: [],
                 tags: [myTag],
+                ...(describeType === 'internal' && {
+                  snooze_schedule: [],
+                }),
               });
               break;
             default:
@@ -436,12 +456,18 @@ const findTestUtils = (
                 actions: [],
                 tags: [myTag],
                 execution_status: matchFirst.execution_status,
+                ...(describeType === 'internal' && {
+                  snooze_schedule: [],
+                }),
               });
               expect(omit(matchSecond, 'updatedAt')).to.eql({
                 id: createdSecondAlert.id,
                 actions: [],
                 tags: [myTag],
                 execution_status: matchSecond.execution_status,
+                ...(describeType === 'internal' && {
+                  snooze_schedule: [],
+                }),
               });
               break;
             default:

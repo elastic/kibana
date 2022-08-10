@@ -12,7 +12,7 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
     className="euiFlexItem"
   >
     <div
-      className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow canvasAsset"
+      className="euiPanel euiPanel--plain euiPanel--paddingSmall canvasAsset emotion-euiPanel-grow-m-s-plain-hasShadow"
     >
       <div
         className="canvasAsset__thumb canvasCheckered"
@@ -29,10 +29,10 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
         </figure>
       </div>
       <div
-        className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
+        className="euiSpacer euiSpacer--s emotion-euiSpacer-s"
       />
       <div
-        className="euiText euiText--extraSmall eui-textBreakAll"
+        className="euiText eui-textBreakAll emotion-euiText-xs"
       >
         <p
           className="eui-textBreakAll"
@@ -42,7 +42,7 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
           </strong>
           <br />
           <span
-            className="euiTextColor euiTextColor--subdued"
+            className="emotion-euiTextColor-subdued"
             style={Object {}}
           >
             <small>
@@ -54,7 +54,7 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
         </p>
       </div>
       <div
-        className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
+        className="euiSpacer euiSpacer--s emotion-euiSpacer-s"
       />
       <div
         className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow"
@@ -199,7 +199,7 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
     className="euiFlexItem"
   >
     <div
-      className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow canvasAsset"
+      className="euiPanel euiPanel--plain euiPanel--paddingSmall canvasAsset emotion-euiPanel-grow-m-s-plain-hasShadow"
     >
       <div
         className="canvasAsset__thumb canvasCheckered"
@@ -216,10 +216,10 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
         </figure>
       </div>
       <div
-        className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
+        className="euiSpacer euiSpacer--s emotion-euiSpacer-s"
       />
       <div
-        className="euiText euiText--extraSmall eui-textBreakAll"
+        className="euiText eui-textBreakAll emotion-euiText-xs"
       >
         <p
           className="eui-textBreakAll"
@@ -229,7 +229,7 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
           </strong>
           <br />
           <span
-            className="euiTextColor euiTextColor--subdued"
+            className="emotion-euiTextColor-subdued"
             style={Object {}}
           >
             <small>
@@ -241,7 +241,7 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
         </p>
       </div>
       <div
-        className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
+        className="euiSpacer euiSpacer--s emotion-euiSpacer-s"
       />
       <div
         className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow"

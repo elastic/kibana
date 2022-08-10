@@ -55,6 +55,7 @@ import {
   SearchSourceService,
   selectFilterFunction,
   eqlRawResponse,
+  SearchSourceSearchOptions,
 } from '../../common/search';
 import { AggsService } from './aggs';
 import { IKibanaSearchResponse, SearchRequest } from '..';
@@ -89,7 +90,6 @@ export interface SearchServiceStartDependencies {
   fieldFormats: FieldFormatsStart;
   indexPatterns: DataViewsContract;
   screenshotMode: ScreenshotModePluginStart;
-  nowProvider: NowProviderInternalContract;
 }
 
 export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
@@ -191,6 +191,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     const aggs = this.aggsService.setup({
       uiSettings,
       registerFunction: expressions.registerFunction,
+      nowProvider,
     });
 
     if (this.initializerContext.config.get().search.aggs.shardDelay.enabled) {
@@ -223,7 +224,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   public start(
     { http, theme, uiSettings, chrome, application }: CoreStart,
-    { fieldFormats, indexPatterns, screenshotMode, nowProvider }: SearchServiceStartDependencies
+    { fieldFormats, indexPatterns, screenshotMode }: SearchServiceStartDependencies
   ): ISearchStart {
     const search = ((request, options = {}) => {
       return this.searchInterceptor.search(request, options);
@@ -232,14 +233,14 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     const loadingCount$ = new BehaviorSubject(0);
     http.addLoadingCountSource(loadingCount$);
 
-    const aggs = this.aggsService.start({ fieldFormats, indexPatterns, nowProvider });
+    const aggs = this.aggsService.start({ fieldFormats, indexPatterns });
 
     const searchSourceDependencies: SearchSourceDependencies = {
       aggs,
       getConfig: uiSettings.get.bind(uiSettings),
       search,
-      onResponse: (request: SearchRequest, response: IKibanaSearchResponse) =>
-        handleResponse(request, response, theme),
+      onResponse: (...args: [SearchRequest, IKibanaSearchResponse, SearchSourceSearchOptions]) =>
+        handleResponse(...args, theme),
     };
 
     const config = this.initializerContext.config.get();

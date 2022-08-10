@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SecurityTelemetryTaskConfig } from '../task';
+import type { SecurityTelemetryTaskConfig } from '../task';
 import { createTelemetryDiagnosticsTaskConfig } from './diagnostic';
 import { createTelemetryEndpointTaskConfig } from './endpoint';
 import { createTelemetrySecurityListTaskConfig } from './security_lists';

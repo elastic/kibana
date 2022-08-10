@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { getCase1, TestCase } from '../../objects/case';
+import type { TestCase } from '../../objects/case';
+import { getCase1 } from '../../objects/case';
 
 import {
   ALL_CASES_CLOSED_CASES_STATS,

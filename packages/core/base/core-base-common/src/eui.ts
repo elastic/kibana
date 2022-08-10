@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export const EUI_STYLES_GLOBAL = 'eui-styles-global';
+export const EUI_STYLES_GLOBAL = 'eui-global';

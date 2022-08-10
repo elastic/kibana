@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { initialUserPrivilegesState, UserPrivilegesState } from '../user_privileges_context';
+import type { UserPrivilegesState } from '../user_privileges_context';
+import { initialUserPrivilegesState } from '../user_privileges_context';
 import { getEndpointPrivilegesInitialStateMock } from '../endpoint/mocks';
 
 export const getUserPrivilegesMockDefaultValue = () => {

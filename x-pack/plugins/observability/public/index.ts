@@ -8,7 +8,7 @@
 // TODO: https://github.com/elastic/kibana/issues/110905
 /* eslint-disable @kbn/eslint/no_export_all */
 
-import { PluginInitializer } from '@kbn/core/public';
+import { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
 import { lazy } from 'react';
 import {
   Plugin,
@@ -30,6 +30,7 @@ export {
   enableInfrastructureView,
   enableServiceGroups,
   enableNewSyntheticsView,
+  apmServiceGroupMaxNumberOfServices,
 } from '../common/ui_settings_keys';
 export { uptimeOverviewLocatorID } from '../common';
 
@@ -38,8 +39,8 @@ export const plugin: PluginInitializer<
   ObservabilityPublicStart,
   ObservabilityPublicPluginsSetup,
   ObservabilityPublicPluginsStart
-> = () => {
-  return new Plugin();
+> = (initializerContext: PluginInitializerContext) => {
+  return new Plugin(initializerContext);
 };
 
 export * from './components/shared/action_menu';
@@ -86,7 +87,7 @@ export { NavigationWarningPromptProvider, Prompt } from './utils/navigation_warn
 export { getApmTraceUrl } from './utils/get_apm_trace_url';
 export { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/exploratory_view_url';
 export type { AllSeries } from './components/shared/exploratory_view/hooks/use_series_storage';
-export type { SeriesUrl } from './components/shared/exploratory_view/types';
+export type { SeriesUrl, UrlFilter } from './components/shared/exploratory_view/types';
 
 export type {
   ObservabilityRuleTypeFormatter,
@@ -104,6 +105,7 @@ export type { SeriesConfig, ConfigProps } from './components/shared/exploratory_
 export {
   ReportTypes,
   FILTER_RECORDS,
+  ENVIRONMENT_ALL,
   REPORT_METRIC_FIELD,
   USE_BREAK_DOWN_COLUMN,
   RECORDS_FIELD,

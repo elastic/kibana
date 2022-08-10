@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type {
   AlertsTableConfigurationRegistryContract,
   GetRenderCellValue,
 } from '@kbn/triggers-actions-ui-plugin/public';
 
-import { APP_ID } from '../../../../common/constants';
+import { APP_ID, CASES_FEATURE_ID } from '../../../../common/constants';
 import { getTimelinesInStorageByIds } from '../../../timelines/containers/local_storage';
 import { TimelineId } from '../../../../common/types';
 import { columns } from '../../../detections/configurations/security_solution_detections';
@@ -31,6 +31,7 @@ const registerAlertsTableConfiguration = (
 
   registry.register({
     id: APP_ID,
+    casesFeatureId: CASES_FEATURE_ID,
     columns: alertColumns,
     getRenderCellValue: useRenderCellValue as GetRenderCellValue,
     useInternalFlyout: () => {

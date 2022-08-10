@@ -6,7 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { SavedObjectReference } from '@kbn/core/server';
+import type { SavedObjectReference } from '@kbn/core/server';
 import { injectDataViewReferences } from './inject_data_view';
 
 describe('inject_data_view', () => {

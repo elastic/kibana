@@ -236,12 +236,10 @@ export const update = async (
 ): Promise<CasesResponse> => {
   const {
     unsecuredSavedObjectsClient,
-    caseService,
-    userActionService,
+    services: { caseService, userActionService, alertsService },
     user,
     logger,
     authorization,
-    alertsService,
   } = clientArgs;
   const query = pipe(
     excess(CasesPatchRequestRt).decode(cases),
@@ -339,6 +337,7 @@ export const update = async (
           version,
         };
       }),
+      refresh: false,
     });
 
     // If a status update occurred and the case is synced then we need to update all alerts' status

@@ -11,8 +11,8 @@ import { getOr } from 'lodash/fp';
 import React, { useCallback, Fragment, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
-import { HostEcs } from '../../../../common/ecs/host';
-import {
+import type { HostEcs } from '../../../../common/ecs/host';
+import type {
   AutonomousSystem,
   FlowTarget,
   FlowTargetSourceDest,
@@ -25,7 +25,8 @@ import { FormattedRelativePreferenceDate } from '../../../common/components/form
 import { HostDetailsLink, ReputationLink, WhoIsLink } from '../../../common/components/links';
 import { Spacer } from '../../../common/components/page';
 import * as i18n from '../../../network/components/details/translations';
-import { IS_OPERATOR, QueryOperator } from '../../../../common/types';
+import type { QueryOperator } from '../../../../common/types';
+import { IS_OPERATOR } from '../../../../common/types';
 import { DraggableWrapper } from '../../../common/components/drag_and_drop/draggable_wrapper';
 
 const DraggableContainerFlexGroup = styled(EuiFlexGroup)`
@@ -44,7 +45,7 @@ export const locationRenderer = (
   isDraggable?: boolean
 ): React.ReactElement =>
   fieldNames.length > 0 && fieldNames.every((fieldName) => getOr(null, fieldName, data)) ? (
-    <EuiFlexGroup alignItems="center" gutterSize="none" data-test-subj="location-field">
+    <EuiFlexGroup alignItems="center" gutterSize="none">
       {fieldNames.map((fieldName, index) => {
         const locationValue = getOr('', fieldName, data);
         return (
@@ -236,7 +237,12 @@ export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> 
     });
 
     return draggables.length > 0 ? (
-      <DraggableContainerFlexGroup alignItems="center" gutterSize="none" component="span">
+      <DraggableContainerFlexGroup
+        alignItems="center"
+        gutterSize="none"
+        component="span"
+        data-test-subj="DefaultFieldRendererComponent"
+      >
         <EuiFlexItem grow={false}>{draggables} </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <DefaultFieldRendererOverflow
@@ -397,7 +403,11 @@ export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverf
       () => (
         <>
           {' ,'}
-          <EuiButtonEmpty size="xs" onClick={togglePopover}>
+          <EuiButtonEmpty
+            size="xs"
+            onClick={togglePopover}
+            data-test-subj="DefaultFieldRendererOverflow-button"
+          >
             {`+${rowItems.length - overflowIndexStart} `}
             <FormattedMessage
               id="xpack.securitySolution.fieldRenderers.moreLabel"

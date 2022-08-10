@@ -9,8 +9,9 @@ import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { SecurityPageName } from '../../../../app/types';
 import { TestProviders } from '../../../mock';
-import { SolutionGroupedNav, SolutionGroupedNavProps } from './solution_grouped_nav';
-import { SideNavItem } from './types';
+import type { SolutionGroupedNavProps } from './solution_grouped_nav';
+import { SolutionGroupedNav } from './solution_grouped_nav';
+import type { SideNavItem } from './types';
 
 const mockItems: SideNavItem[] = [
   {

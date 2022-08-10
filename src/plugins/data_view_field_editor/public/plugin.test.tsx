@@ -113,7 +113,10 @@ describe('DataViewFieldEditorPlugin', () => {
     };
     const { openDeleteModal } = await plugin.start(coreStartMocked, pluginStartMocked);
 
-    const indexPatternMock = { removeRuntimeField: removeFieldSpy } as unknown as DataView;
+    const indexPatternMock = {
+      removeRuntimeField: removeFieldSpy,
+      isPersisted: () => true,
+    } as unknown as DataView;
 
     openDeleteModal({
       onDelete: onDeleteSpy,

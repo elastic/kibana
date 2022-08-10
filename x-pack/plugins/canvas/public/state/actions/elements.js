@@ -10,6 +10,7 @@ import immutable from 'object-path-immutable';
 import { get, pick, cloneDeep, without, last, debounce } from 'lodash';
 import { toExpression, safeElementFromExpression } from '@kbn/interpreter';
 import { createThunk } from '../../lib/create_thunk';
+import { isGroupId } from '../../lib/workpad';
 import {
   getPages,
   getWorkpadVariablesAsObject,
@@ -450,7 +451,8 @@ export const addElement = createThunk('addElement', ({ dispatch }, pageId, eleme
   // refresh all elements if there's a filter, otherwise just render the new element
   if (element.filter) {
     dispatch(fetchAllRenderables());
-  } else {
+    // element, which represents the group, should not be rendered. Its elements are rendered separately.
+  } else if (!isGroupId(newElement.id)) {
     dispatch(fetchRenderable(newElement));
   }
 

@@ -42,7 +42,7 @@ export const ConfigureStandaloneAgentStep = ({
     isK8s === 'IS_KUBERNETES' ? (
       <FormattedMessage
         id="xpack.fleet.agentEnrollment.stepConfigureAgentDescriptionk8s"
-        defaultMessage="Copy or download the Kubernetes manifest inside the Kubernetes cluster. Modify {ESUsernameVariable} and {ESPasswordVariable} in the Daemonset environment variables and apply the manifest."
+        defaultMessage="Copy or download the Kubernetes manifest inside the Kubernetes cluster. Update {ESUsernameVariable} and {ESPasswordVariable} environment variables in the Daemonset to match your Elasticsearch credentials."
         values={{
           ESUsernameVariable: <EuiCode>ES_USERNAME</EuiCode>,
           ESPasswordVariable: <EuiCode>ES_PASSWORD</EuiCode>,
@@ -103,7 +103,15 @@ export const ConfigureStandaloneAgentStep = ({
                 </EuiCopy>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton iconType="download" href={downloadLink} isDisabled={!downloadLink}>
+                {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+                <EuiButton
+                  iconType="download"
+                  href={downloadLink}
+                  onClick={() => {
+                    if (onCopy) onCopy();
+                  }}
+                  isDisabled={!downloadLink}
+                >
                   <>{downloadMsg}</>
                 </EuiButton>
               </EuiFlexItem>

@@ -54,10 +54,9 @@ export interface DataViewEditorProps {
    */
   editData?: DataView;
   /**
-   * If set to false, the screen for prompting a user to create a data view will be skipped, and the user will be taken directly
-   * to data view creation.
+   * if set to true user is presented with an option to create ad-hoc dataview without a saved object.
    */
-  showEmptyPrompt?: boolean;
+  allowAdHocDataView?: boolean;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -162,6 +161,7 @@ export interface IndexPatternConfig {
   id?: string;
   type: INDEX_PATTERN_TYPE;
   name?: string;
+  isAdHoc: boolean;
 }
 
 export interface FormInternal extends Omit<IndexPatternConfig, 'timestampField'> {

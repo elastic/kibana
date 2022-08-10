@@ -10,26 +10,20 @@ import moment from 'moment-timezone';
 import _, { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { Assign } from '@kbn/utility-types';
-import { isRangeFilter } from '@kbn/es-query';
+import { isRangeFilter, TimeRange, RangeFilter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IndexPatternLoadExpressionFunctionDefinition } from '@kbn/data-views-plugin/common';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 
-import type {
-  IEsSearchResponse,
-  ISearchOptions,
-  ISearchSource,
-  RangeFilter,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../public';
+import type { IEsSearchResponse, ISearchOptions, ISearchSource } from '../../../public';
 import type { EsaggsExpressionFunctionDefinition } from '../expressions';
 import { AggConfig, AggConfigSerialized, IAggConfig } from './agg_config';
 import type { IAggType } from './agg_type';
 import type { AggTypesRegistryStart } from './agg_types_registry';
 import { AggGroupNames } from './agg_groups';
 import { AggTypesDependencies, GetConfigFn, getUserTimeZone } from '../..';
-import { TimeRange, getTime, calculateBounds } from '../..';
+import { getTime, calculateBounds } from '../..';
 import type { IBucketAggConfig } from './buckets';
 import { insertTimeShiftSplit, mergeTimeShifts } from './utils/time_splits';
 

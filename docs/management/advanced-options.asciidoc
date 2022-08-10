@@ -215,7 +215,7 @@ When enabled, provides access to the experimental *Labs* features for *Canvas*.
 
 [[labs-dashboard-defer-below-fold]]`labs:dashboard:deferBelowFold`::
 When enabled, the panels that appear below the fold are loaded when they become visible on the dashboard.
-_Below the fold_ refers to panels that are not immediately visible when you open a dashboard, but become visible as you scroll. For additional information, refer to <<defer-loading-panels-below-the-fold,Improve dashboard loading time>>.
+_Below the fold_ refers to panels that are not immediately visible when you open a dashboard, but become visible as you scroll. For additional information, refer to <<dashboard-troubleshooting,Improve dashboard loading time>>.
 
 [[labs-dashboard-enable-ui]]`labs:dashboard:enable_ui`::
 When enabled, provides access to the experimental *Labs* features for *Dashboard*.
@@ -298,6 +298,9 @@ When enabled, removes the columns that are not in the new data view.
 [[discover-sample-size]]`discover:sampleSize`::
 Specifies the number of rows to display in the *Discover* table.
 
+[[discover-sampleRowsPerPage]]`discover:sampleRowsPerPage`::
+Specifies the number of rows to display per page in the *Discover* table.
+
 [[discover-searchFieldsFromSource]]`discover:searchFieldsFromSource`::
 Load fields from the original JSON {ref}/mapping-source-field.html[`_source`].
 When disabled, *Discover* loads fields using the {es} search API's
@@ -315,6 +318,9 @@ The default sort direction for time-based data views.
 
 [[doctable-hidetimecolumn]]`doc_table:hideTimeColumn`::
 Hides the "Time" column in *Discover* and in all saved searches on dashboards.
+
+[[discover:enableSql]]`discover:enableSql`::
+When enabled, allows SQL queries for search.
 
 [[doctable-highlight]]`doc_table:highlight`::
 Highlights results in *Discover* and saved searches on dashboards. Highlighting
@@ -374,8 +380,20 @@ value is 10000.
 [[apm-enable-service-overview]]`apm:enableServiceOverview`::
 When enabled, displays the *Overview* tab for services in *APM*.
 
+[[observability-apm-optimized-sort]]`observability:apmServiceInventoryOptimizedSorting`::
+preview:[] Sorts services without anomaly detection rules on the APM Service inventory page by service name.
+
+[[observability-apm-enable-comparison]]`observability:enableComparisonByDefault`::
+Enables the comparison feature in the APM app.
+
+[[observability-apm-enable-infra-view]]`observability:enableInfrastructureView`::
+Enables the Infrastructure view in the APM app.
+
 [[observability-enable-inspect-es-queries]]`observability:enableInspectEsQueries`::
 When enabled, allows you to inspect {es} queries in API responses.
+
+[[observability-apm-enable-service-groups]]`observability:enableServiceGroups`::
+preview:[] When enabled, allows users to create Service Groups from the APM Service Inventory page.
 
 [float]
 [[kibana-reporting-settings]]

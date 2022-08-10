@@ -8,7 +8,7 @@ APM agents automatically collect performance metrics on HTTP requests, database 
 [role="screenshot"]
 image::apm/images/apm-transactions-overview.png[Example view of transactions table in the APM app in Kibana]
 
-The *Latency*, *transactions per minute*, *Failed transaction rate*, and *Average duration by span type*
+The *Latency*, *Throughput*, *Failed transaction rate*, *Average duration by span type*, and *Cold start rate*
 charts display information on all transactions associated with the selected service:
 
 *Latency*::
@@ -47,6 +47,10 @@ The time a transaction took to complete is also recorded and displayed on the ch
 This could be a sign that the agent does not have auto-instrumentation for whatever was happening during that time.
 +
 It's important to note that if you have asynchronous spans, the sum of all span times may exceed the duration of the transaction.
+
+*Cold start rate*::
+Only applicable to serverless transactions, this chart displays the percentage of requests that trigger a cold start of a serverless function.
+See <<apm-lambda-cold-start-info>> for more information.
 
 [discrete]
 [[transactions-table]]
@@ -149,6 +153,7 @@ Learn more about a trace sample in the *Metadata* tab:
 * Agent information
 * URL
 * User - Requires additional configuration, but allows you to see which user experienced the current transaction.
+* FaaS information, like cold start, AWS request ID, trigger type, and trigger request ID
 
 TIP: All of this data is stored in documents in Elasticsearch.
 This means you can select "Actions - View transaction in Discover" to see the actual Elasticsearch document under the discover tab.

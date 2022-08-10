@@ -7,3 +7,4 @@
 
 export * from './label_input';
 export * from './buckets';
+export * from './form_row';

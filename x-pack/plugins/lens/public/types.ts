@@ -6,11 +6,7 @@
  */
 import { Ast } from '@kbn/interpreter';
 import type { IconType } from '@elastic/eui/src/components/icon/icon';
-import type {
-  CoreSetup,
-  SavedObjectReference,
-  SavedObjectsResolveResponse,
-} from '@kbn/core/public';
+import type { CoreSetup, SavedObjectReference, ResolvedSimpleSavedObject } from '@kbn/core/public';
 import type { PaletteOutput } from '@kbn/coloring';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import type { MutableRefObject } from 'react';
@@ -22,7 +18,7 @@ import type {
   Datatable,
 } from '@kbn/expressions-plugin/public';
 import type { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
-import type { Query } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
 import type {
   UiActionsStart,
   RowClickContext,
@@ -36,14 +32,14 @@ import type {
   LensResizeActionData,
   LensToggleActionData,
   LensPagesizeActionData,
-} from './datatable_visualization/components/types';
+} from './visualizations/datatable/components/types';
 
 import {
   LENS_EDIT_SORT_ACTION,
   LENS_EDIT_RESIZE_ACTION,
   LENS_TOGGLE_ACTION,
   LENS_EDIT_PAGESIZE_ACTION,
-} from './datatable_visualization/components/constants';
+} from './visualizations/datatable/components/constants';
 import type { LensInspector } from './lens_inspector_service';
 
 export type ErrorCallback = (e: { message: string }) => void;
@@ -199,11 +195,18 @@ interface ChartSettings {
   };
 }
 
-export type GetDropProps<T = unknown> = DatasourceDimensionDropProps<T> & {
-  groupId: string;
-  dragging: DragContextState['dragging'];
-  prioritizedOperation?: string;
-};
+export interface GetDropPropsArgs<T = unknown> {
+  state: T;
+  source?: DraggingIdentifier;
+  target: {
+    layerId: string;
+    groupId: string;
+    columnId: string;
+    filterOperations: (meta: OperationMetadata) => boolean;
+    prioritizedOperation?: string;
+    isNewColumn?: boolean;
+  };
+}
 
 /**
  * Interface for the datasource registry
@@ -257,9 +260,9 @@ export interface Datasource<T = unknown, P = unknown> {
     props: DatasourceLayerPanelProps<T>
   ) => ((cleanupElement: Element) => void) | void;
   getDropProps: (
-    props: GetDropProps<T>
+    props: GetDropPropsArgs<T>
   ) => { dropTypes: DropType[]; nextLabel?: string } | undefined;
-  onDrop: (props: DatasourceDimensionDropHandlerProps<T>) => false | true | { deleted: string };
+  onDrop: (props: DatasourceDimensionDropHandlerProps<T>) => boolean | undefined;
   /**
    * The datasource is allowed to cancel a close event on the dimension editor,
    * mainly used for formulas
@@ -346,6 +349,14 @@ export interface Datasource<T = unknown, P = unknown> {
     persistableState2: P,
     references2: SavedObjectReference[]
   ) => boolean;
+  /**
+   * Get RenderEventCounters events for telemetry
+   */
+  getRenderEventCounters?: (state: T) => string[];
+  /**
+   * Get the used DataView value from state
+   */
+  getUsedDataView: (state: T, layerId: string) => string;
 }
 
 export interface DatasourceFixAction<T> {
@@ -383,6 +394,13 @@ export interface DatasourcePublicAPI {
           lucene: Query[][];
         }
       >;
+
+  /**
+   * Returns the maximum possible number of values for this column when it can be known, otherwise null
+   * (e.g. with a top 5 values operation, we can be sure that there will never be more than 5 values returned
+   *       or 6 if the "Other" bucket is enabled)
+   */
+  getMaxPossibleNumValues: (columnId: string) => number | null;
 }
 
 export interface DatasourceDataPanelProps<T = unknown> {
@@ -423,7 +441,11 @@ export type DatasourceDimensionProps<T> = SharedDimensionProps & {
   invalid?: boolean;
   invalidMessage?: string;
 };
-export type ParamEditorCustomProps = Record<string, unknown> & { label?: string };
+export type ParamEditorCustomProps = Record<string, unknown> & {
+  labels?: string[];
+  isInline?: boolean;
+  headingLabel?: string;
+};
 // The only way a visualization has to restrict the query building
 export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionProps<T> & {
   // Not a StateSetter because we have this unique use case of determining valid columns
@@ -454,16 +476,14 @@ export interface DatasourceLayerPanelProps<T> {
   activeData?: Record<string, Datatable>;
 }
 
-export interface DraggedOperation extends DraggingIdentifier {
+export interface DragDropOperation {
   layerId: string;
   groupId: string;
   columnId: string;
   filterOperations: (operation: OperationMetadata) => boolean;
 }
 
-export function isDraggedOperation(
-  operationCandidate: unknown
-): operationCandidate is DraggedOperation {
+export function isOperation(operationCandidate: unknown): operationCandidate is DragDropOperation {
   return (
     typeof operationCandidate === 'object' &&
     operationCandidate !== null &&
@@ -471,10 +491,8 @@ export function isDraggedOperation(
   );
 }
 
-export type DatasourceDimensionDropProps<T> = SharedDimensionProps & {
-  layerId: string;
-  groupId: string;
-  columnId: string;
+export interface DatasourceDimensionDropProps<T> {
+  target: DragDropOperation;
   state: T;
   setState: StateSetter<
     T,
@@ -484,10 +502,10 @@ export type DatasourceDimensionDropProps<T> = SharedDimensionProps & {
     }
   >;
   dimensionGroups: VisualizationDimensionGroupConfig[];
-};
+}
 
-export type DatasourceDimensionDropHandlerProps<T> = DatasourceDimensionDropProps<T> & {
-  droppedItem: unknown;
+export type DatasourceDimensionDropHandlerProps<S> = DatasourceDimensionDropProps<S> & {
+  source: DragDropIdentifier;
   dropType: DropType;
 };
 
@@ -569,6 +587,7 @@ export interface AccessorConfig {
 
 export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   groupLabel: string;
+  dimensionEditorGroupLabel?: string;
   groupTooltip?: string;
 
   /** ID is passed back to visualization. For example, `x` */
@@ -608,6 +627,7 @@ export interface VisualizationDimensionChangeProps<T> {
   prevState: T;
   frame: FramePublicAPI;
 }
+
 export interface Suggestion {
   visualizationId: string;
   datasourceState?: unknown;
@@ -698,7 +718,7 @@ export interface VisualizationSuggestion<T = unknown> {
   previewIcon: IconType;
 }
 
-export type DatasourceLayers = Record<string, DatasourcePublicAPI>;
+export type DatasourceLayers = Partial<Record<string, DatasourcePublicAPI>>;
 
 export interface FramePublicAPI {
   datasourceLayers: DatasourceLayers;
@@ -710,6 +730,7 @@ export interface FramePublicAPI {
    */
   activeData?: Record<string, Datatable>;
 }
+
 export interface FrameDatasourceAPI extends FramePublicAPI {
   query: Query;
   filters: Filter[];
@@ -748,6 +769,11 @@ export interface VisualizationType {
    * Indicates if visualization is in the experimental stage.
    */
   showExperimentalBadge?: boolean;
+}
+
+export interface VisualizationDisplayOptions {
+  noPanelTitle?: boolean;
+  noPadding?: boolean;
 }
 
 export interface Visualization<T = unknown> {
@@ -851,7 +877,17 @@ export interface Visualization<T = unknown> {
    * look at its internal state to determine which dimension is being affected.
    */
   removeDimension: (props: VisualizationDimensionChangeProps<T>) => T;
-
+  /**
+   * Allow defining custom behavior for the visualization when the drop action occurs.
+   */
+  onDrop?: (props: {
+    prevState: T;
+    target: DragDropOperation;
+    source: DragDropIdentifier;
+    frame: FramePublicAPI;
+    dropType: DropType;
+    group?: VisualizationDimensionGroupConfig;
+  }) => T;
   /**
    * Update the configuration for the visualization. This is used to update the state
    */
@@ -870,6 +906,14 @@ export interface Visualization<T = unknown> {
    * This can be used to configure dimension-specific options
    */
   renderDimensionEditor?: (
+    domElement: Element,
+    props: VisualizationDimensionEditorProps<T>
+  ) => ((cleanupElement: Element) => void) | void;
+  /**
+   * Additional editor that gets rendered inside the dimension popover.
+   * This can be used to configure dimension-specific options
+   */
+  renderDimensionEditorAdditionalSection?: (
     domElement: Element,
     props: VisualizationDimensionEditorProps<T>
   ) => ((cleanupElement: Element) => void) | void;
@@ -936,6 +980,16 @@ export interface Visualization<T = unknown> {
    * On Edit events the frame will call this to know what's going to be the next visualization state
    */
   onEditAction?: (state: T, event: LensEditEvent<LensEditSupportedActions>) => T;
+
+  /**
+   * Gets custom display options for showing the visualization.
+   */
+  getDisplayOptions?: () => VisualizationDisplayOptions;
+
+  /**
+   * Get RenderEventCounters events for telemetry
+   */
+  getRenderEventCounters?: (state: T) => string[];
 }
 
 // Use same technique as TriggerContext
@@ -1000,9 +1054,9 @@ export interface ILensInterpreterRenderHandlers extends IInterpreterRenderHandle
 }
 
 export interface SharingSavedObjectProps {
-  outcome?: SavedObjectsResolveResponse['outcome'];
-  aliasTargetId?: SavedObjectsResolveResponse['alias_target_id'];
-  aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
+  outcome?: ResolvedSimpleSavedObject['outcome'];
+  aliasTargetId?: ResolvedSimpleSavedObject['alias_target_id'];
+  aliasPurpose?: ResolvedSimpleSavedObject['alias_purpose'];
   sourceId?: string;
 }
 

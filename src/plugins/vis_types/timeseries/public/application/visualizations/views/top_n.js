@@ -10,6 +10,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { getLastValue, isEmptyValue } from '../../../../common/last_value_utils';
 import { getValueOrEmpty } from '../../../../common/empty_label';
+import { RenderCounter } from '../../components/render_counter';
 
 import './_top_n.scss';
 
@@ -163,11 +164,13 @@ export class TopN extends Component {
     }
 
     return (
-      <div className={className}>
-        <table className="tvbVisTopN__table" data-test-subj="tvbVisTopNTable" ref={this.tableRef}>
-          <tbody>{rows}</tbody>
-        </table>
-      </div>
+      <RenderCounter initialRender={this.props.initialRender}>
+        <div className={className}>
+          <table className="tvbVisTopN__table" data-test-subj="tvbVisTopNTable" ref={this.tableRef}>
+            <tbody>{rows}</tbody>
+          </table>
+        </div>
+      </RenderCounter>
     );
   }
 }

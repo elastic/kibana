@@ -120,9 +120,13 @@ class PackageClientImpl implements PackageClient {
     return fetchFindLatestPackageOrThrow(packageName);
   }
 
-  public async getRegistryPackage(packageName: string, packageVersion: string) {
+  public async getRegistryPackage(
+    packageName: string,
+    packageVersion: string,
+    options?: Parameters<typeof getRegistryPackage>['2']
+  ) {
     await this.#runPreflight();
-    return getRegistryPackage(packageName, packageVersion);
+    return getRegistryPackage(packageName, packageVersion, options);
   }
 
   public async reinstallEsAssets(

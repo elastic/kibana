@@ -8,7 +8,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { EuiIconTip } from '@elastic/eui';
-import { IntegrationDetails } from '../integration_details';
+import type { IntegrationDetails } from '../integration_details';
 import * as i18n from '../translations';
 
 const VersionWarningIconContainer = styled.span`

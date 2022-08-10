@@ -7,12 +7,16 @@
 
 import { getOr } from 'lodash/fp';
 
-import { SavedObjectsClientContract, SavedObjectsFindOptions } from '@kbn/core/server';
-import { AuthenticatedUser } from '@kbn/security-plugin/server';
-import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
-import { NoteSavedObject } from '../../../../../common/types/timeline/note';
-import { PinnedEventSavedObject } from '../../../../../common/types/timeline/pinned_event';
 import {
+  type SavedObjectsClientContract,
+  type SavedObjectsFindOptions,
+  SavedObjectsErrorHelpers,
+} from '@kbn/core/server';
+import type { AuthenticatedUser } from '@kbn/security-plugin/server';
+import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
+import type { NoteSavedObject } from '../../../../../common/types/timeline/note';
+import type { PinnedEventSavedObject } from '../../../../../common/types/timeline/pinned_event';
+import type {
   AllTimelinesResponse,
   ExportTimelineNotFoundError,
   PageInfoTimeline,
@@ -24,31 +28,22 @@ import {
   TimelineSavedObject,
   TimelineTypeLiteralWithNull,
   TimelineStatusLiteralWithNull,
-  TimelineType,
-  TimelineStatus,
   TimelineResult,
   TimelineWithoutExternalRefs,
   ResolvedTimelineWithOutcomeSavedObject,
 } from '../../../../../common/types/timeline';
-import { FrameworkRequest } from '../../../framework';
+import { TimelineType, TimelineStatus } from '../../../../../common/types/timeline';
+import type { FrameworkRequest } from '../../../framework';
 import * as note from '../notes/saved_object';
 import * as pinnedEvent from '../pinned_events';
 import { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
 import { pickSavedTimeline } from './pick_saved_timeline';
 import { timelineSavedObjectType } from '../../saved_object_mappings';
 import { draftTimelineDefaults } from '../../utils/default_timeline';
-import { Maybe } from '../../../../../common/search_strategy';
 import { timelineFieldsMigrator } from './field_migrator';
+
 export { pickSavedTimeline } from './pick_saved_timeline';
 export { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
-
-export interface ResponseTemplateTimeline {
-  code?: Maybe<number>;
-
-  message?: Maybe<string>;
-
-  templateTimeline: TimelineResult;
-}
 
 export const getTimeline = async (
   request: FrameworkRequest,
@@ -396,7 +391,7 @@ export const persistTimeline = async (
       version,
     });
   } catch (err) {
-    if (timelineId != null && savedObjectsClient.errors.isConflictError(err)) {
+    if (timelineId != null && SavedObjectsErrorHelpers.isConflictError(err)) {
       return {
         code: 409,
         message: err.message,
@@ -493,7 +488,7 @@ const updateTimeline = async ({
   };
 };
 
-const updatePartialSavedTimeline = async (
+export const updatePartialSavedTimeline = async (
   request: FrameworkRequest,
   timelineId: string,
   timeline: SavedTimeline
@@ -528,7 +523,7 @@ const updatePartialSavedTimeline = async (
 
   const populatedTimeline =
     timelineFieldsMigrator.populateFieldsFromReferencesForPatch<TimelineWithoutExternalRefs>({
-      dataBeforeRequest: timelineUpdateAttributes,
+      dataBeforeRequest: timeline,
       dataReturnedFromRequest: updatedTimeline,
     });
 
@@ -713,7 +708,7 @@ export const getSelectedTimelines = async (
 
   const savedObjects = await Promise.resolve(
     savedObjectsClient.bulkGet<TimelineWithoutExternalRefs>(
-      exportedIds?.reduce(
+      (exportedIds ?? []).reduce(
         (acc, timelineId) => [...acc, { id: timelineId, type: timelineSavedObjectType }],
         [] as Array<{ id: string; type: string }>
       )

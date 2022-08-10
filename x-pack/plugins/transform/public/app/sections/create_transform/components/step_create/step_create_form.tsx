@@ -30,6 +30,7 @@ import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/public';
 
 import { DuplicateDataViewError } from '@kbn/data-plugin/public';
 import type { RuntimeField } from '@kbn/data-views-plugin/common';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { PutTransformsResponseSchema } from '../../../../../../common/api_schemas/transforms';
 import {
   isGetTransformsStatsResponseSchema,
@@ -49,7 +50,6 @@ import {
   PutTransformsLatestRequestSchema,
   PutTransformsPivotRequestSchema,
 } from '../../../../../../common/api_schemas/transforms';
-import { isPopulatedObject } from '../../../../../../common/shared_imports';
 import { isContinuousTransform, isLatestTransform } from '../../../../../../common/types/transform';
 import { TransformAlertFlyout } from '../../../../../alerting/transform_alerting_flyout';
 

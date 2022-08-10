@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
 import { useBasePath } from '../../../../../common/lib/kibana';
-import { IntegrationDetails } from '../integration_details';
+import type { IntegrationDetails } from '../integration_details';
 
 interface IntegrationLinkProps {
   integration: IntegrationDetails;

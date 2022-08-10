@@ -20,7 +20,7 @@ import {
   ExecutionContract,
 } from '../common';
 
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/no-var-requires,import/no-commonjs
 const { __getLastExecution, __getLastRenderMode } = require('./services');
 
 const element = null as unknown as HTMLElement;

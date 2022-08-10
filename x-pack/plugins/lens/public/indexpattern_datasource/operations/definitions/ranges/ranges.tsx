@@ -180,10 +180,10 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
     layer,
     columnId,
     currentColumn,
-    updateLayer,
+    paramEditorUpdater,
     indexPattern,
     uiSettings,
-    data,
+    fieldFormats,
   }) => {
     const currentField = indexPattern.getFieldByName(currentColumn.sourceField);
     const numberFormat = currentColumn.params.format;
@@ -192,7 +192,7 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
       supportedFormats[numberFormat.id] &&
       supportedFormats[numberFormat.id].decimalsToPattern(numberFormat.params?.decimals || 0);
 
-    const rangeFormatter = data.fieldFormats.deserialize({
+    const rangeFormatter = fieldFormats.deserialize({
       ...(currentColumn.params.parentFormat || { id: 'range' }),
       params: {
         ...currentColumn.params.parentFormat?.params,
@@ -208,7 +208,7 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
 
     // Used to change one param at the time
     const setParam: UpdateParamsFnType = (paramName, value) => {
-      updateLayer(
+      paramEditorUpdater(
         updateColumnParam({
           layer,
           columnId,
@@ -226,7 +226,7 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
         newMode === MODES.Range
           ? { id: 'range', params: { template: 'arrow_right', replaceInfinity: true } }
           : undefined;
-      updateLayer({
+      paramEditorUpdater({
         ...layer,
         columns: {
           ...layer.columns,

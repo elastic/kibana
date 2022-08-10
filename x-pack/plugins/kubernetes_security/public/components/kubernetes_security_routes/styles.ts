@@ -6,14 +6,33 @@
  */
 
 import { useMemo } from 'react';
-import { CSSObject } from '@emotion/react';
+import type { CSSObject } from '@emotion/react';
 import { useEuiTheme } from '../../hooks';
 
 export const useStyles = () => {
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
-    const { size, font } = euiTheme;
+    const { size, font, border } = euiTheme;
+
+    const titleSection: CSSObject = {
+      marginBottom: size.l,
+    };
+
+    const titleText: CSSObject = {
+      display: 'flex',
+      alignItems: 'center',
+    };
+
+    const titleActions: CSSObject = {
+      marginLeft: 'auto',
+      flexDirection: 'row',
+      alignItems: 'center',
+    };
+
+    const updatedAt: CSSObject = {
+      marginRight: size.m,
+    };
 
     const widgetBadge: CSSObject = {
       position: 'absolute',
@@ -34,8 +53,30 @@ export const useStyles = () => {
       height: '500px',
     };
 
-    const percentageWidgets: CSSObject = {
-      marginBottom: size.l,
+    const widgetsBottomSpacing: CSSObject = {
+      marginBottom: size.m,
+    };
+
+    const countWidgetsGroup: CSSObject = {
+      ...widgetsBottomSpacing,
+      flexWrap: 'wrap',
+      [`@media (max-width:${euiTheme.breakpoint.xl}px)`]: {
+        flexDirection: 'column',
+      },
+    };
+
+    const leftWidgetsGroup: CSSObject = {
+      [`@media (max-width:${euiTheme.breakpoint.xl}px)`]: {
+        marginBottom: '0 !important',
+      },
+      minWidth: `calc(70% - ${size.xxxl})`,
+    };
+
+    const rightWidgetsGroup: CSSObject = {
+      [`@media (max-width:${euiTheme.breakpoint.xl}px)`]: {
+        marginTop: '0 !important',
+      },
+      minWidth: '30%',
     };
 
     const percentageChartTitle: CSSObject = {
@@ -44,11 +85,41 @@ export const useStyles = () => {
       fontWeight: font.weight.bold,
     };
 
+    const widgetHolder: CSSObject = {
+      position: 'relative',
+      width: '332px',
+      height: '235px',
+      borderRadius: border.radius.medium,
+      fontWeight: font.weight.bold,
+      fontSize: size.m,
+      lineHeight: size.base,
+    };
+
+    const widgetsGroup: CSSObject = {
+      [`@media (max-width:${euiTheme.breakpoint.xl}px)`]: {
+        flexDirection: 'column',
+      },
+    };
+
+    const betaBadge: CSSObject = {
+      marginLeft: size.m,
+    };
+
     return {
+      titleSection,
+      titleText,
+      titleActions,
+      updatedAt,
       widgetBadge,
       treeViewContainer,
-      percentageWidgets,
+      countWidgetsGroup,
+      leftWidgetsGroup,
+      rightWidgetsGroup,
+      widgetsBottomSpacing,
       percentageChartTitle,
+      widgetHolder,
+      widgetsGroup,
+      betaBadge,
     };
   }, [euiTheme]);
 

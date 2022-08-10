@@ -32,7 +32,9 @@ const initialData = {
   hasLegacyData: false,
 };
 
-function useServicesFetcher() {
+const INITIAL_PAGE_SIZE = 25;
+
+function useServicesMainStatisticsFetcher() {
   const {
     query: {
       rangeFrom,
@@ -40,8 +42,10 @@ function useServicesFetcher() {
       environment,
       kuery,
       serviceGroup,
-      offset,
-      comparisonEnabled,
+      page = 0,
+      pageSize = INITIAL_PAGE_SIZE,
+      sortDirection,
+      sortField,
     },
   } = useApmParams('/services');
 
@@ -85,36 +89,93 @@ function useServicesFetcher() {
         });
       }
     },
-    [environment, kuery, start, end, serviceGroup]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      environment,
+      kuery,
+      start,
+      end,
+      serviceGroup,
+      // not used, but needed to update the requestId to call the details statistics API when table is options are updated
+      page,
+      pageSize,
+      sortField,
+      sortDirection,
+    ]
   );
 
+  return {
+    sortedAndFilteredServicesFetch,
+    mainStatisticsFetch,
+  };
+}
+
+function useServicesDetailedStatisticsFetcher({
+  mainStatisticsFetch,
+  initialSortField,
+  initialSortDirection,
+  tiebreakerField,
+}: {
+  mainStatisticsFetch: ReturnType<
+    typeof useServicesMainStatisticsFetcher
+  >['mainStatisticsFetch'];
+  initialSortField: ServiceInventoryFieldName;
+  initialSortDirection: 'asc' | 'desc';
+  tiebreakerField: ServiceInventoryFieldName;
+}) {
+  const {
+    query: {
+      rangeFrom,
+      rangeTo,
+      environment,
+      kuery,
+      offset,
+      comparisonEnabled,
+      page = 0,
+      pageSize = INITIAL_PAGE_SIZE,
+      sortDirection = initialSortDirection,
+      sortField = initialSortField,
+    },
+  } = useApmParams('/services');
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
   const { data: mainStatisticsData = initialData } = mainStatisticsFetch;
+
+  const currentPageItems = orderServiceItems({
+    items: mainStatisticsData.items,
+    primarySortField: sortField as ServiceInventoryFieldName,
+    sortDirection,
+    tiebreakerField,
+  }).slice(page * pageSize, (page + 1) * pageSize);
 
   const comparisonFetch = useProgressiveFetcher(
     (callApmApi) => {
       if (
         start &&
         end &&
-        mainStatisticsData.items.length &&
+        currentPageItems.length &&
         mainStatisticsFetch.status === FETCH_STATUS.SUCCESS
       ) {
-        return callApmApi('GET /internal/apm/services/detailed_statistics', {
+        return callApmApi('POST /internal/apm/services/detailed_statistics', {
           params: {
             query: {
               environment,
               kuery,
               start,
               end,
-              serviceNames: JSON.stringify(
-                mainStatisticsData.items
-                  .map(({ serviceName }) => serviceName)
-                  // Service name is sorted to guarantee the same order every time this API is called so the result can be cached.
-                  .sort()
-              ),
               offset:
                 comparisonEnabled && isTimeComparison(offset)
                   ? offset
                   : undefined,
+            },
+            body: {
+              serviceNames: JSON.stringify(
+                currentPageItems
+                  .map(({ serviceName }) => serviceName)
+                  // Service name is sorted to guarantee the same order every time this API is called so the result can be cached.
+                  .sort()
+              ),
             },
           },
         });
@@ -126,19 +187,43 @@ function useServicesFetcher() {
     { preservePreviousData: false }
   );
 
-  return {
-    sortedAndFilteredServicesFetch,
-    mainStatisticsFetch,
-    comparisonFetch,
-  };
+  return { comparisonFetch };
 }
 
 export function ServiceInventory() {
-  const {
-    sortedAndFilteredServicesFetch,
+  const { sortedAndFilteredServicesFetch, mainStatisticsFetch } =
+    useServicesMainStatisticsFetcher();
+
+  const mainStatisticsItems = mainStatisticsFetch.data?.items ?? [];
+  const preloadedServices = sortedAndFilteredServicesFetch.data?.services || [];
+
+  const displayHealthStatus = [
+    ...mainStatisticsItems,
+    ...preloadedServices,
+  ].some((item) => 'healthStatus' in item);
+
+  const useOptimizedSorting =
+    useKibana().services.uiSettings?.get<boolean>(
+      apmServiceInventoryOptimizedSorting
+    ) || false;
+
+  const tiebreakerField = useOptimizedSorting
+    ? ServiceInventoryFieldName.ServiceName
+    : ServiceInventoryFieldName.Throughput;
+
+  const initialSortField = displayHealthStatus
+    ? ServiceInventoryFieldName.HealthStatus
+    : tiebreakerField;
+
+  const initialSortDirection =
+    initialSortField === ServiceInventoryFieldName.ServiceName ? 'asc' : 'desc';
+
+  const { comparisonFetch } = useServicesDetailedStatisticsFetcher({
     mainStatisticsFetch,
-    comparisonFetch,
-  } = useServicesFetcher();
+    initialSortField,
+    initialSortDirection,
+    tiebreakerField,
+  });
 
   const { anomalyDetectionSetupState } = useAnomalyDetectionJobsContext();
 
@@ -150,11 +235,6 @@ export function ServiceInventory() {
   const displayMlCallout =
     !userHasDismissedCallout &&
     shouldDisplayMlCallout(anomalyDetectionSetupState);
-
-  const useOptimizedSorting =
-    useKibana().services.uiSettings?.get<boolean>(
-      apmServiceInventoryOptimizedSorting
-    ) || false;
 
   let isLoading: boolean;
 
@@ -182,25 +262,6 @@ export function ServiceInventory() {
       titleSize="s"
     />
   );
-
-  const mainStatisticsItems = mainStatisticsFetch.data?.items ?? [];
-  const preloadedServices = sortedAndFilteredServicesFetch.data?.services || [];
-
-  const displayHealthStatus = [
-    ...mainStatisticsItems,
-    ...preloadedServices,
-  ].some((item) => 'healthStatus' in item);
-
-  const tiebreakerField = useOptimizedSorting
-    ? ServiceInventoryFieldName.ServiceName
-    : ServiceInventoryFieldName.Throughput;
-
-  const initialSortField = displayHealthStatus
-    ? ServiceInventoryFieldName.HealthStatus
-    : tiebreakerField;
-
-  const initialSortDirection =
-    initialSortField === ServiceInventoryFieldName.ServiceName ? 'asc' : 'desc';
 
   const items = joinByKey(
     [
@@ -234,8 +295,7 @@ export function ServiceInventory() {
             isFailure={isFailure}
             items={items}
             comparisonDataLoading={
-              comparisonFetch.status === FETCH_STATUS.LOADING ||
-              comparisonFetch.status === FETCH_STATUS.NOT_INITIATED
+              comparisonFetch.status === FETCH_STATUS.LOADING
             }
             displayHealthStatus={displayHealthStatus}
             initialSortField={initialSortField}
@@ -250,6 +310,7 @@ export function ServiceInventory() {
             }}
             comparisonData={comparisonFetch?.data}
             noItemsMessage={noItemsMessage}
+            initialPageSize={INITIAL_PAGE_SIZE}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

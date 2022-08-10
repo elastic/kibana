@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { FindResult } from '@kbn/alerting-plugin/server';
+import type { FindResult } from '@kbn/alerting-plugin/server';
 import { enrichFilterWithRuleTypeMapping } from './enrich_filter_with_rule_type_mappings';
 
-import { RuleParams } from '../schemas/rule_schemas';
-import { FindRuleOptions } from './types';
+import type { RuleParams } from '../schemas/rule_schemas';
+import type { FindRuleOptions } from './types';
 
 export const findRules = ({
   rulesClient,

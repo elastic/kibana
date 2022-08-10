@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { FC, memo } from 'react';
+import type { FC } from 'react';
+import React, { memo } from 'react';
 
-import { CallOutMessage } from './callout_types';
+import type { CallOutMessage } from './callout_types';
 import { CallOut } from './callout';
 
 export interface CallOutPersistentSwitcherProps {

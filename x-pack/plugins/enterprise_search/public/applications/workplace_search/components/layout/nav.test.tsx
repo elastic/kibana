@@ -30,7 +30,7 @@ describe('useWorkplaceSearchNav', () => {
           {
             id: 'root',
             name: 'Overview',
-            href: '/',
+            href: '',
           },
           {
             id: 'sources',

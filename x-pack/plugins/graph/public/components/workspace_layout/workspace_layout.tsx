@@ -18,13 +18,7 @@ import {
   workspaceInitializedSelector,
 } from '../../state_management';
 import { FieldManager } from '../field_manager';
-import {
-  ControlType,
-  IndexPatternProvider,
-  IndexPatternSavedObject,
-  TermIntersect,
-  WorkspaceNode,
-} from '../../types';
+import { ControlType, IndexPatternProvider, TermIntersect, WorkspaceNode } from '../../types';
 import { WorkspaceTopNavMenu } from './workspace_top_nav_menu';
 import { InspectPanel } from '../inspect_panel';
 import { GuidancePanel } from '../guidance_panel';
@@ -59,7 +53,6 @@ type WorkspaceLayoutProps = Pick<
   renderCounter: number;
   workspace?: Workspace;
   loading: boolean;
-  indexPatterns: IndexPatternSavedObject[];
   savedWorkspace: GraphWorkspaceSavedObject;
   indexPatternProvider: IndexPatternProvider;
   sharingSavedObjectProps?: SharingSavedObjectProps;
@@ -78,7 +71,6 @@ export const WorkspaceLayoutComponent = ({
   hasFields,
   overlays,
   workspaceInitialized,
-  indexPatterns,
   indexPatternProvider,
   capabilities,
   coreStart,
@@ -222,10 +214,7 @@ export const WorkspaceLayoutComponent = ({
       {getLegacyUrlConflictCallout()}
       {!isInitialized && (
         <div>
-          <GuidancePanelMemoized
-            noIndexPatterns={indexPatterns.length === 0}
-            onOpenFieldPicker={onOpenFieldPicker}
-          />
+          <GuidancePanelMemoized onOpenFieldPicker={onOpenFieldPicker} />
         </div>
       )}
 

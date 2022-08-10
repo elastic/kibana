@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { ESTermQuery } from '../../../../../common/typed_json';
-import { NarrowDateRange } from '../../../components/ml/types';
-import { UpdateDateRange } from '../../../components/charts/common';
-import { GlobalTimeArgs } from '../../use_global_time';
-import { HostsType } from '../../../../hosts/store/model';
-import { NetworkType } from '../../../../network/store/model';
-import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
-import { UsersType } from '../../../../users/store/model';
+import type { ESTermQuery } from '../../../../../common/typed_json';
+import type { NarrowDateRange } from '../../../components/ml/types';
+import type { UpdateDateRange } from '../../../components/charts/common';
+import type { GlobalTimeArgs } from '../../use_global_time';
+import type { HostsType } from '../../../../hosts/store/model';
+import type { NetworkType } from '../../../../network/store/model';
+import type { FlowTargetSourceDest } from '../../../../../common/search_strategy';
+import type { UsersType } from '../../../../users/store/model';
 
 interface QueryTabBodyProps {
   type: HostsType | NetworkType | UsersType;

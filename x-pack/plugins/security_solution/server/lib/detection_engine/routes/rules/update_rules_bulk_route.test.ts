@@ -17,7 +17,7 @@ import {
 } from '../__mocks__/request_responses';
 import { serverMock, requestContextMock, requestMock } from '../__mocks__';
 import { updateRulesBulkRoute } from './update_rules_bulk_route';
-import { BulkError } from '../utils';
+import type { BulkError } from '../utils';
 import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 import { loggingSystemMock } from '@kbn/core/server/mocks';

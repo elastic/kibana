@@ -7,9 +7,11 @@
 
 import { useQuery } from 'react-query';
 import { lastValueFrom } from 'rxjs';
-import { DataView, SortDirection } from '@kbn/data-plugin/common';
+import type { DataView } from '@kbn/data-plugin/common';
+import { SortDirection } from '@kbn/data-plugin/common';
 
 import { useKibana } from '../common/lib/kibana';
+import { useLogsDataView } from '../common/hooks/use_logs_data_view';
 
 interface UsePackQueryErrorsProps {
   actionId: string;
@@ -21,10 +23,10 @@ interface UsePackQueryErrorsProps {
 export const usePackQueryErrors = ({
   actionId,
   interval,
-  logsDataView,
   skip = false,
 }: UsePackQueryErrorsProps) => {
   const data = useKibana().services.data;
+  const { data: logsDataView } = useLogsDataView({ skip });
 
   return useQuery(
     ['scheduledQueryErrors', { actionId, interval }],

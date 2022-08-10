@@ -16,7 +16,7 @@ const timeRange = {
   rangeTo: end,
 };
 
-describe('Dependencies', () => {
+describe.skip('Dependencies', () => {
   before(async () => {
     await synthtrace.index(
       opbeans({
@@ -57,12 +57,12 @@ describe('Dependencies', () => {
     });
   });
 
-  describe('dependency overview page', () => {
+  describe.skip('dependency overview page', () => {
     it('shows dependency information and you can navigate to a page for an upstream service', () => {
       cy.visit(
-        `/app/apm/backends/overview?${new URLSearchParams({
+        `/app/apm/dependencies/overview?${new URLSearchParams({
           ...timeRange,
-          backendName: 'postgresql',
+          dependencyName: 'postgresql',
         })}`
       );
 
@@ -77,9 +77,9 @@ describe('Dependencies', () => {
 
     it('has no detectable a11y violations on load', () => {
       cy.visit(
-        `/app/apm/backends/overview?${new URLSearchParams({
+        `/app/apm/dependencies/overview?${new URLSearchParams({
           ...timeRange,
-          backendName: 'postgresql',
+          dependencyName: 'postgresql',
         })}`
       );
       cy.contains('h1', 'postgresql');

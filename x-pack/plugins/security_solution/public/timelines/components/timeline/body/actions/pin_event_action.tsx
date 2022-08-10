@@ -12,7 +12,8 @@ import { DEFAULT_ACTION_BUTTON_WIDTH } from '@kbn/timelines-plugin/public';
 import { EventsTdContent } from '../../styles';
 import { eventHasNotes, getPinTooltip } from '../helpers';
 import { Pin } from '../../pin';
-import { TimelineType } from '../../../../../../common/types/timeline';
+import type { TimelineType } from '../../../../../../common/types/timeline';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 
 interface PinEventActionProps {
   ariaLabel?: string;
@@ -31,6 +32,7 @@ const PinEventActionComponent: React.FC<PinEventActionProps> = ({
   eventIsPinned,
   timelineType,
 }) => {
+  const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
   const tooltipContent = useMemo(
     () =>
       getPinTooltip({
@@ -50,6 +52,7 @@ const PinEventActionComponent: React.FC<PinEventActionProps> = ({
             ariaLabel={ariaLabel}
             allowUnpinning={!eventHasNotes(noteIds)}
             data-test-subj="pin-event"
+            isDisabled={kibanaSecuritySolutionsPrivileges.crud === false}
             isAlert={isAlert}
             onClick={onPinClicked}
             pinned={eventIsPinned}

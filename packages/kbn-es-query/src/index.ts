@@ -11,6 +11,7 @@ export type {
   DataViewBase,
   DataViewFieldBase,
   EsQueryConfig,
+  EsQueryFiltersConfig,
   IFieldSubType,
   IFieldSubTypeMulti,
   IFieldSubTypeNested,
@@ -28,6 +29,7 @@ export type {
   PhraseFilter,
   PhrasesFilter,
   Query,
+  AggregateQuery,
   QueryStringFilter,
   RangeFilter,
   RangeFilterMeta,
@@ -51,6 +53,10 @@ export {
   decorateQuery,
   luceneStringToDsl,
   migrateFilter,
+  isOfQueryType,
+  isOfAggregateQueryType,
+  getAggregateQueryMode,
+  getIndexPatternFromSQLQuery,
 } from './es_query';
 
 export {

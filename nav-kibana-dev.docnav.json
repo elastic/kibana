@@ -101,6 +101,9 @@
       "label": "Tutorials",
       "items": [
         {
+          "id": "kibDevTutorialSetupWindowsDevWSL"
+        },
+        {
           "id": "kibDevTutorialTestingPlugins"
         },
         {
@@ -149,6 +152,12 @@
     {
       "label": "Contributors Newsletters",
       "items": [
+        {
+          "id": "kibJuly2022ContributorNewsletter"
+        },
+        {
+          "id": "kibJune2022ContributorNewsletter"
+        },
         {
           "id": "kibMay2022ContributorNewsletter"
         },
@@ -222,9 +231,6 @@
         },
         {
           "id": "kibCoreChromePluginApi"
-        },
-        {
-          "id": "kibCoreHttpPluginApi"
         },
         {
           "id": "kibCoreSavedObjectsPluginApi"
@@ -434,6 +440,14 @@
           "label": "Overview"
         },
         {
+          "label": "Initiatives",
+          "items": [
+            {
+              "id": "kibDevDocsOpsPackages"
+            }
+          ]
+        },
+        {
           "label": "CI",
           "items": [
             {
@@ -444,6 +458,9 @@
         {
           "label": "Build tooling",
           "items": [
+            {
+              "id": "kibDevDocsOpsKbnPm"
+            },
             {
               "id": "kibDevDocsOpsOptimizer"
             },
@@ -481,6 +498,12 @@
             },
             {
               "id": "kibDevDocsOpsEslintPluginImports"
+            },
+            {
+              "id": "kibDevDocsOpsEslintPluginDisable"
+            },
+            {
+              "id": "kibDevDocsOpsKbnYarnLockValidator"
             }
           ]
         },
@@ -513,6 +536,33 @@
             },
             {
               "id": "kibDevDocsOpsEs"
+            },
+            {
+              "id": "kibDevDocsOpsSomeDevLog"
+            },
+            {
+              "id": "kibDevDocsOpsDevCliRunner"
+            },
+            {
+              "id": "kibDevDocsOpsGetRepoFiles"
+            },
+            {
+              "id": "kibDevDocsOpsRepoSourceClassifier"
+            },
+            {
+              "id": "kibDevDocsOpsJsonc"
+            },
+            {
+              "id": "kibDevDocsOpsKibanaManifestParser"
+            },
+            {
+              "id": "kibDevDocsOpsKibanaManifestSchema"
+            },
+            {
+              "id": "kibDevDocsOpsManagedVscodeConfig"
+            },
+            {
+              "id": "kibDevDocsOpsManagedVscodeConfigCli"
             }
           ]
         }

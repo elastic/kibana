@@ -17,6 +17,7 @@ import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
@@ -45,6 +46,7 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   actions: ActionsPublicPluginSetup;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
+  dataViewEditor: DataViewEditorStart;
   charts: ChartsPluginStart;
   alerting?: AlertingStart;
   spaces?: SpacesPluginStart;
@@ -71,7 +73,7 @@ export const renderApp = (deps: TriggersAndActionsUiServices) => {
 
 export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
   const { dataViews, uiSettings, theme$ } = deps;
-  const sections: Section[] = ['rules', 'connectors', 'alerts', '__components_sandbox'];
+  const sections: Section[] = ['rules', 'connectors', 'alerts'];
   const isDarkMode = useObservable<boolean>(uiSettings.get$('theme:darkMode'));
 
   const sectionsRegex = sections.join('|');

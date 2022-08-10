@@ -9,7 +9,7 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { GenericBuckets } from '../../../../../common/search_strategy';
+import type { GenericBuckets } from '../../../../../common/search_strategy';
 import { useQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/use_query';
 import { getPageCount, ITEMS_PER_PAGE } from '../utils';
 

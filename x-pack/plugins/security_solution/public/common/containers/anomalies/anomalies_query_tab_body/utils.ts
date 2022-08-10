@@ -7,9 +7,9 @@
 
 import deepmerge from 'deepmerge';
 
-import { MlSummaryJob } from '@kbn/ml-plugin/public';
-import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
-import { ESTermQuery } from '../../../../../common/typed_json';
+import type { MlSummaryJob } from '@kbn/ml-plugin/public';
+import type { FlowTargetSourceDest } from '../../../../../common/search_strategy';
+import type { ESTermQuery } from '../../../../../common/typed_json';
 import { createFilter } from '../../helpers';
 
 export const getAnomaliesFilterQuery = (

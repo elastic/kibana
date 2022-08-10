@@ -8,14 +8,19 @@ import { Page } from '@elastic/synthetics';
 import { loginPageProvider } from './login';
 import { utilsPageProvider } from './utils';
 
+const SIXTY_SEC_TIMEOUT = {
+  timeout: 60 * 1000,
+};
+
 export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kibanaUrl: string }) {
   const remoteKibanaUrl = process.env.SYNTHETICS_REMOTE_KIBANA_URL;
   const remoteUsername = process.env.SYNTHETICS_REMOTE_KIBANA_USERNAME;
   const remotePassword = process.env.SYNTHETICS_REMOTE_KIBANA_PASSWORD;
   const isRemote = Boolean(process.env.SYNTHETICS_REMOTE_ENABLED);
   const basePath = isRemote ? remoteKibanaUrl : kibanaUrl;
-  const monitorManagement = `${basePath}/app/synthetics/manage-monitors`;
+  const monitorManagement = `${basePath}/app/synthetics/monitors`;
   const addMonitor = `${basePath}/app/uptime/add-monitor`;
+
   return {
     ...loginPageProvider({
       page,
@@ -40,7 +45,7 @@ export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kib
     },
 
     async getAddMonitorButton() {
-      return await this.findByTestSubj('syntheticsAddMonitorBtn');
+      return await this.findByText('Create monitor');
     },
 
     async navigateToAddMonitor() {
@@ -65,23 +70,46 @@ export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kib
 
     async selectLocations({ locations }: { locations: string[] }) {
       for (let i = 0; i < locations.length; i++) {
-        await page.click(this.byTestId(`syntheticsServiceLocation--${locations[i]}`));
+        await page.click(
+          this.byTestId(`syntheticsServiceLocation--${locations[i]}`),
+          SIXTY_SEC_TIMEOUT
+        );
       }
     },
 
-    async fillFirstMonitorDetails({
-      url,
-      apmServiceName,
-      locations,
-    }: {
-      url: string;
-      apmServiceName: string;
-      locations: string[];
-    }) {
+    async fillFirstMonitorDetails({ url, locations }: { url: string; locations: string[] }) {
       await this.fillByTestSubj('urls-input', url);
       await page.click(this.byTestId('comboBoxInput'));
       await this.selectLocations({ locations });
       await page.click(this.byTestId('urls-input'));
+    },
+
+    async enableMonitorManagement(shouldEnable: boolean = true) {
+      const isEnabled = await this.checkIsEnabled();
+      if (isEnabled === shouldEnable) {
+        return;
+      }
+      const [toggle, button] = await Promise.all([
+        page.$(this.byTestId('syntheticsEnableSwitch')),
+        page.$(this.byTestId('syntheticsEnableButton')),
+      ]);
+
+      if (toggle === null && button === null) {
+        return null;
+      }
+      if (toggle) {
+        if (isEnabled !== shouldEnable) {
+          await toggle.click();
+        }
+      } else {
+        await button?.click();
+      }
+    },
+    async checkIsEnabled() {
+      await page.waitForTimeout(5 * 1000);
+      const addMonitorBtn = await this.getAddMonitorButton();
+      const isDisabled = await addMonitorBtn.isDisabled();
+      return !isDisabled;
     },
   };
 }

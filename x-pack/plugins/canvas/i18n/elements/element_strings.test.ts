@@ -21,7 +21,9 @@ describe('ElementStrings', () => {
   });
 
   test('All string definitions should correspond to an existing element', () => {
-    stringKeys.forEach((key) => expect(elementNames).toContain(key));
+    stringKeys.forEach((key) => {
+      expect(elementNames).toContain(key);
+    });
   });
 
   const strings = Object.values(elementStrings);

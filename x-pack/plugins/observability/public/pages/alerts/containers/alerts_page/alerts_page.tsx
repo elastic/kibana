@@ -219,7 +219,7 @@ function AlertsPage() {
   const hasData = hasAnyData === true || (isAllRequestsComplete === false ? undefined : false);
 
   const CasesContext = cases.ui.getCasesContext();
-  const userPermissions = useGetUserCasesPermissions();
+  const userCasesPermissions = useGetUserCasesPermissions();
 
   if (!hasAnyData && !isAllRequestsComplete) {
     return <LoadingObservability />;
@@ -234,6 +234,7 @@ function AlertsPage() {
   return (
     <ObservabilityPageTemplate
       noDataConfig={noDataConfig}
+      isPageDataLoaded={isAllRequestsComplete}
       data-test-subj={noDataConfig ? 'noDataPage' : undefined}
       pageHeader={{
         pageTitle: (
@@ -264,7 +265,7 @@ function AlertsPage() {
         <EuiFlexItem>
           <CasesContext
             owner={[observabilityFeatureId]}
-            userCanCrud={userPermissions?.crud ?? false}
+            permissions={userCasesPermissions}
             features={{ alerts: { sync: false } }}
           >
             <AlertsTableTGrid

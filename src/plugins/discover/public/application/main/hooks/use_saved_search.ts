@@ -7,9 +7,10 @@
  */
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
+import type { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
 import { ISearchSource } from '@kbn/data-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
-import type { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
+import { getRawRecordType } from '../utils/get_raw_record_type';
 import { DiscoverServices } from '../../../build_services';
 import { DiscoverSearchSessionManager } from '../services/discover_search_session';
 import { GetStateReturn } from '../services/discover_state';
@@ -17,13 +18,12 @@ import { validateTimeRange } from '../utils/validate_time_range';
 import { Chart } from '../components/chart/point_series';
 import { useSingleton } from './use_singleton';
 import { FetchStatus } from '../../types';
-
 import { fetchAll } from '../utils/fetch_all';
 import { useBehaviorSubject } from './use_behavior_subject';
 import { sendResetMsg } from './use_saved_search_messages';
 import { getFetch$ } from '../utils/get_fetch_observable';
-import { ElasticSearchHit } from '../../../types';
 import { SavedSearch } from '../../../services/saved_searches';
+import type { DataTableRecord } from '../../../types';
 
 export interface SavedSearchData {
   main$: DataMain$;
@@ -54,11 +54,23 @@ export interface UseSavedSearch {
   inspectorAdapters: { requests: RequestAdapter };
 }
 
+export enum RecordRawType {
+  /**
+   * Documents returned Elasticsearch, nested structure
+   */
+  DOCUMENT = 'document',
+  /**
+   * Data returned e.g. SQL queries, flat structure
+   * */
+  PLAIN = 'plain',
+}
+
 export type DataRefetchMsg = 'reset' | undefined;
 
 export interface DataMsg {
   fetchStatus: FetchStatus;
   error?: Error;
+  recordRawType?: RecordRawType;
 }
 
 export interface DataMainMsg extends DataMsg {
@@ -66,7 +78,7 @@ export interface DataMainMsg extends DataMsg {
 }
 
 export interface DataDocumentsMsg extends DataMsg {
-  result?: ElasticSearchHit[];
+  result?: DataTableRecord[];
 }
 
 export interface DataTotalHitsMsg extends DataMsg {
@@ -107,6 +119,9 @@ export const useSavedSearch = ({
 }) => {
   const { data, filterManager } = services;
   const timefilter = data.query.timefilter.timefilter;
+  const { query } = stateContainer.appStateContainer.getState();
+
+  const recordRawType = useMemo(() => getRawRecordType(query), [query]);
 
   const inspectorAdapters = useMemo(() => ({ requests: new RequestAdapter() }), []);
 
@@ -114,17 +129,12 @@ export const useSavedSearch = ({
    * The observables the UI (aka React component) subscribes to get notified about
    * the changes in the data fetching process (high level: fetching started, data was received)
    */
-  const main$: DataMain$ = useBehaviorSubject({ fetchStatus: initialFetchStatus });
-
-  const documents$: DataDocuments$ = useBehaviorSubject({ fetchStatus: initialFetchStatus });
-
-  const totalHits$: DataTotalHits$ = useBehaviorSubject({ fetchStatus: initialFetchStatus });
-
-  const charts$: DataCharts$ = useBehaviorSubject({ fetchStatus: initialFetchStatus });
-
-  const availableFields$: AvailableFields$ = useBehaviorSubject({
-    fetchStatus: initialFetchStatus,
-  });
+  const initialState = { fetchStatus: initialFetchStatus, recordRawType };
+  const main$: DataMain$ = useBehaviorSubject(initialState) as DataMain$;
+  const documents$: DataDocuments$ = useBehaviorSubject(initialState) as DataDocuments$;
+  const totalHits$: DataTotalHits$ = useBehaviorSubject(initialState) as DataTotalHits$;
+  const charts$: DataCharts$ = useBehaviorSubject(initialState) as DataCharts$;
+  const availableFields$: AvailableFields$ = useBehaviorSubject(initialState) as AvailableFields$;
 
   const dataSubjects = useMemo(() => {
     return {

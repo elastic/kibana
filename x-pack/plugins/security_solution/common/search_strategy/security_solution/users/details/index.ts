@@ -7,9 +7,9 @@
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
-import { Inspect, Maybe, TimerangeInput } from '../../../common';
-import { UserItem } from '../common';
-import { RequestBasicOptions } from '../..';
+import type { Inspect, Maybe, TimerangeInput } from '../../../common';
+import type { UserItem } from '../common';
+import type { RequestBasicOptions } from '../..';
 
 export interface UserDetailsStrategyResponse extends IEsSearchResponse {
   userDetails: UserItem;

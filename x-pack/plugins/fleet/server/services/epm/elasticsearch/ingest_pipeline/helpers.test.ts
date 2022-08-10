@@ -12,7 +12,6 @@ import type { RegistryDataStream } from '../../../../types';
 
 import {
   addCustomPipelineProcessor,
-  getCustomPipelineNameForDatastream,
   getPipelineNameForInstallation,
   rewriteIngestPipeline,
 } from './helpers';
@@ -190,16 +189,5 @@ processors:
     expect(pipelineInstall.contentForInstallation).toMatchInlineSnapshot(
       `"{\\"processors\\":[{\\"set\\":{\\"field\\":\\"test\\",\\"value\\":\\"toto\\"}},{\\"pipeline\\":{\\"name\\":\\"logs-test@custom\\",\\"ignore_missing_pipeline\\":true}}]}"`
     );
-  });
-});
-
-describe('getCustomPipelineNameForDatastream', () => {
-  it('return the correct custom pipeline for datastream', () => {
-    const res = getCustomPipelineNameForDatastream({
-      type: 'logs',
-      dataset: 'test',
-    } as any);
-
-    expect(res).toBe('logs-test@custom');
   });
 });

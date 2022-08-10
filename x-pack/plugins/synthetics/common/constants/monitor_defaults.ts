@@ -37,6 +37,7 @@ export const DEFAULT_COMMON_FIELDS: CommonFields = {
     unit: ScheduleUnit.MINUTES,
   },
   [ConfigKey.APM_SERVICE_NAME]: '',
+  [ConfigKey.CONFIG_ID]: '',
   [ConfigKey.TAGS]: [],
   [ConfigKey.TIMEOUT]: '16',
   [ConfigKey.NAME]: '',
@@ -72,7 +73,7 @@ export const DEFAULT_BROWSER_SIMPLE_FIELDS: BrowserSimpleFields = {
   },
   [ConfigKey.MONITOR_TYPE]: DataStream.BROWSER,
   [ConfigKey.PARAMS]: '',
-  [ConfigKey.PORT]: undefined,
+  [ConfigKey.PORT]: null,
   [ConfigKey.SCHEDULE]: {
     unit: ScheduleUnit.MINUTES,
     number: '10',

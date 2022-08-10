@@ -172,11 +172,13 @@ To use saved search interactions, open the panel menu, then click *More > View s
 
 Panels have built-in interactive capabilities that apply filters to the dashboard data. For example, when you drag a time range or click a pie slice, a filter for the time range or pie slice is applied. Drilldowns let you customize the interactive behavior while keeping the context of the interaction. 
 
-There are two types of drilldowns you can add to dashboards:
+There are three types of drilldowns you can add to dashboards:
 
-* *Dashboard* &mdash; Navigates you from one dashboard to another dashboard. For example, when can create a drilldown for a *Lens* panel that navigates you from a summary dashboard to a dashboard with a filter for a specific host name.
+* *Dashboard* &mdash; Navigates you from one dashboard to another dashboard. For example, create a drilldown for a *Lens* panel that navigates you from a summary dashboard to a dashboard with a filter for a specific host name.
 
 * *URL* &mdash; Navigates you from a dashboard to an external website. For example, a website with the specific host name as a parameter. 
+
+* *Discover* &mdash; Navigates you from a *Lens* dashboard panel to *Discover*. For example, create a drilldown for a *Lens* visualization that opens the visualization data in *Discover* for further exploration. 
 
 Third-party developers can create drilldowns. To learn how to code drilldowns, refer to {kib-repo}blob/{branch}/x-pack/examples/ui_actions_enhanced_examples[this example plugin].
 
@@ -189,7 +191,7 @@ Dashboard drilldowns enable you to open a dashboard from another dashboard, taki
 For example, if you have a dashboard that shows the logs and metrics for multiple data centers, you can create a drilldown that navigates from the dashboard that shows multiple data centers, to a dashboard that shows a single data center or server.
 
 [role="screenshot"]
-image:images/drilldown_on_data_table.gif[Drilldown on data table that navigates to another dashboard]
+image:images/dashboard_drilldownOnDataTable_8.3.gif[Drilldown on data table that navigates to another dashboard]
 
 The panels you create using the following editors support dashboard drilldowns:
 
@@ -220,7 +222,7 @@ Use the <<gs-get-data-into-kibana,*Sample web logs*>> data to create a dashboard
 +
 [%hardbreaks]
 Search: `extension.keyword: ("gz" or "css" or "deb")`
-Filter: `geo.src: CN`
+Filter: `geo.src: US`
 
 [float]
 ===== Create the dashboard drilldown
@@ -244,7 +246,7 @@ Create a drilldown that opens the *Detailed logs* dashboard from the *[Logs] Web
 . In the data table panel, hover over a value, click *+*, then select `View details`.
 +
 [role="screenshot"]
-image::images/drilldown_on_panel.png[Drilldown on data table that navigates to another dashboard]
+image::images/dashboard_drilldownOnPanel_8.3.png[Drilldown on data table that navigates to another dashboard]
 
 [float]
 [[url-drilldowns]]
@@ -253,7 +255,7 @@ image::images/drilldown_on_panel.png[Drilldown on data table that navigates to a
 URL drilldowns enable you to navigate from a dashboard to external websites. Destination URLs can be dynamic, depending on the dashboard context or user interaction with a panel. To create URL drilldowns, you add <<variables,variables>> to a URL template, which configures the behavior of the drilldown. All panels that you create with the visualization editors support dashboard drilldowns.
 
 [role="screenshot"]
-image:images/url_drilldown_go_to_github.gif[Drilldown on pie chart that navigates to Github]
+image:images/dashboard_urlDrilldownGoToGitHub_8.3.gif[Drilldown on pie chart that navigates to Github]
 
 Some panels support multiple interactions, also known as triggers. 
 The <<url-template-variables,variables>> you use to create a <<url_templating-language, URL template>> depends on the trigger you choose. URL drilldowns support these types of triggers:
@@ -269,7 +271,7 @@ For example, *Single click* has `{{event.value}}` and *Range selection* has `{{e
 
 For example, if you have a dashboard that shows data from a Github repository, you can create a URL drilldown that opens Github from the dashboard panel.
 
-. Add the *Sample web logs* data.
+. Add the <<gs-get-data-into-kibana,*Sample web logs*>> data.
 
 . Open the *[Logs] Web Traffic* dashboard.
 
@@ -277,13 +279,11 @@ For example, if you have a dashboard that shows data from a Github repository, y
 
 . Create a donut chart
 
-.. In the toolbar, click *Edit*.
-
 .. Click *Create visualization*.
 
 .. From the *Chart type* dropdown, select *Donut*.
 
-.. From the *Available fields* list, drag and drop the *machine.os.keyword* field onto the visualization builder.
+.. From the *Available fields* list, drag *machine.os.keyword* to the workspace.
 
 .. Click *Save and return*.
 
@@ -311,12 +311,47 @@ https://github.com/elastic/kibana/issues?q=is:issue+is:open+{{event.value}}
 . On the donut chart panel, click any chart slice, then select *Show on Github*.
 +
 [role="screenshot"]
-image:images/url_drilldown_popup.png[URL drilldown popup]
+image:images/dashboard_urlDrilldownPopup_8.3.png[URL drilldown popup]
 
 . In the list of {kib} repository issues, verify that the slice value appears.
 +
 [role="screenshot"]
-image:images/url_drilldown_github.png[Github]
+image:images/dashboard_urlDrilldownGithub_8.3.png[Open ios issues in the elastic/kibana repository on Github]
+
+[float]
+[[discover-drilldowns]]
+==== Create Discover drilldowns
+
+Discover drilldowns enable you to open *Discover* from a *Lens* dashboard panel, taking the time range, filters, and other parameters with you so the context remains the same.
+
+For example, when you create a Discover drilldown for a pie chart, you can click a slice in the pie chart, and only the documents for the slice appear in *Discover*. 
+
+[role="screenshot"]
+image:images/dashboard_discoverDrilldown_8.3.gif[Drilldown on bar vertical stacked chart that navigates to Discover]
+
+NOTE: Discover drilldowns are supported only by *Lens* panels. To open all of the *Lens* dashboard panel data in *Discover*, check <<explore-the-underlying-documents, Open panel data in Discover>>.
+
+[float]
+===== Create the Discover drilldown
+
+Create a drilldown that opens *Discover* from the <<gs-get-data-into-kibana,*Sample web logs*>> data *[Logs] Web Traffic* dashboard.
+
+. Click *Edit*, open the panel menu for the *[Logs] Bytes distribution* bar vertical stacked chart, then select *Create drilldown*.
+
+. Click *Open in Discover*.
+
+. Give the drilldown a name. For example, `View bytes distribution in Discover`.
+
+. To open the Discover drilldown in a new tab, select *Open in new tab*.
+
+. Click *Create drilldown*.
+
+. Save the dashboard.
+
+. On the *[Logs] Bytes distribution* bar vertical stacked chart, click a bar, then select *View bytes distribution in Discover*.
++
+[role="screenshot"]
+image::images/dashboard_discoverDrilldown_8.3.png[Drilldown on bar vertical stacked chart that navigates to Discover]
 
 [float]
 [[manage-drilldowns]]

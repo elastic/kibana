@@ -23,7 +23,7 @@ export const extendedDataLayerFn: ExtendedDataLayerFn['fn'] = async (data, args,
   const accessors = getAccessors<string, ExtendedDataLayerArgs>(args, table);
 
   validateAccessor(accessors.xAccessor, table.columns);
-  validateAccessor(accessors.splitAccessor, table.columns);
+  accessors.splitAccessors?.forEach((accessor) => validateAccessor(accessor, table.columns));
   accessors.accessors.forEach((accessor) => validateAccessor(accessor, table.columns));
   validateMarkSizeForChartType(args.markSizeAccessor, args.seriesType);
   validateAccessor(args.markSizeAccessor, table.columns);

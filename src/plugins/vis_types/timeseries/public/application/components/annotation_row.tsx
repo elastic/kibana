@@ -21,7 +21,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { KBN_FIELD_TYPES, Query } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { getDataViewsStart } from '../../services';
 
 import { AddDeleteButtons } from './add_delete_buttons';

@@ -16,10 +16,11 @@ Create {kib} rules.
 
 === {api-prereq-title}
 
-You must have `all` privileges for the *Management* > *Stack Rules* feature or
-for the *{ml-app}*, *{observability}*, or *Security* features, depending on the
-`consumer` and `rule_type_id` of the rule you're creating. If the rule has
-`actions`, you must also have `read` privileges for the *Management* >
+You must have `all` privileges for the appropriate {kib} features, depending on
+the `consumer` and `rule_type_id` of the rules you're creating. For example, the
+*Management* > *Stack Rules* feature, *Analytics* > *Discover* and *{ml-app}*
+features, *{observability}*, and *Security* features. If the rule has `actions`,
+you must also have `read` privileges for the *Management* >
 *Actions and Connectors* feature. For more details, refer to
 <<kibana-feature-privileges>>.
 
@@ -207,7 +208,6 @@ The API returns the following:
   },
   "rule_type_id": ".index-threshold",
   "scheduled_task_id": "425b0800-6bca-11eb-9e0d-85d233e3ee35",
-  "snooze_schedule":[],
   "created_by": "elastic",
   "updated_by": "elastic",
   "created_at": "2022-06-08T17:20:31.632Z",

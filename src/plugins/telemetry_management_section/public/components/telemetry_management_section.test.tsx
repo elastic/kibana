@@ -26,11 +26,11 @@ describe('TelemetryManagementSectionComponent', () => {
     const telemetryService = new TelemetryService({
       config: {
         sendUsageTo: 'staging',
-        enabled: true,
         banner: true,
         allowChangingOptInStatus: true,
         optIn: true,
         sendUsageFrom: 'browser',
+        labels: {},
       },
       isScreenshotMode: false,
       reportOptInStatusChange: false,
@@ -57,12 +57,12 @@ describe('TelemetryManagementSectionComponent', () => {
     const onQueryMatchChange = jest.fn();
     const telemetryService = new TelemetryService({
       config: {
-        enabled: true,
         banner: true,
         allowChangingOptInStatus: true,
         optIn: false,
         sendUsageFrom: 'browser',
         sendUsageTo: 'staging',
+        labels: {},
       },
       isScreenshotMode: false,
       reportOptInStatusChange: false,
@@ -109,12 +109,12 @@ describe('TelemetryManagementSectionComponent', () => {
     const onQueryMatchChange = jest.fn();
     const telemetryService = new TelemetryService({
       config: {
-        enabled: true,
         banner: true,
         allowChangingOptInStatus: true,
         optIn: false,
         sendUsageTo: 'staging',
         sendUsageFrom: 'browser',
+        labels: {},
       },
       isScreenshotMode: false,
       reportOptInStatusChange: false,
@@ -155,12 +155,12 @@ describe('TelemetryManagementSectionComponent', () => {
     const onQueryMatchChange = jest.fn();
     const telemetryService = new TelemetryService({
       config: {
-        enabled: true,
         banner: true,
         allowChangingOptInStatus: false,
         optIn: true,
         sendUsageTo: 'staging',
         sendUsageFrom: 'browser',
+        labels: {},
       },
       isScreenshotMode: false,
       reportOptInStatusChange: false,
@@ -192,12 +192,12 @@ describe('TelemetryManagementSectionComponent', () => {
     const onQueryMatchChange = jest.fn();
     const telemetryService = new TelemetryService({
       config: {
-        enabled: true,
         banner: true,
         allowChangingOptInStatus: true,
         optIn: false,
         sendUsageTo: 'staging',
         sendUsageFrom: 'browser',
+        labels: {},
       },
       isScreenshotMode: false,
       reportOptInStatusChange: false,
@@ -233,12 +233,12 @@ describe('TelemetryManagementSectionComponent', () => {
     const onQueryMatchChange = jest.fn();
     const telemetryService = new TelemetryService({
       config: {
-        enabled: true,
         banner: true,
         allowChangingOptInStatus: true,
         optIn: false,
         sendUsageTo: 'staging',
         sendUsageFrom: 'browser',
+        labels: {},
       },
       isScreenshotMode: false,
       reportOptInStatusChange: false,
@@ -281,12 +281,12 @@ describe('TelemetryManagementSectionComponent', () => {
     const onQueryMatchChange = jest.fn();
     const telemetryService = new TelemetryService({
       config: {
-        enabled: true,
         banner: true,
         allowChangingOptInStatus: false,
         optIn: false,
         sendUsageTo: 'staging',
         sendUsageFrom: 'browser',
+        labels: {},
       },
       isScreenshotMode: false,
       reportOptInStatusChange: false,

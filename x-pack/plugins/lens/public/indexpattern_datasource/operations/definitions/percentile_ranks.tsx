@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFormRow, EuiFieldNumberProps, EuiFieldNumber } from '@elastic/eui';
+import { EuiFieldNumberProps, EuiFieldNumber } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
@@ -24,6 +24,8 @@ import { FieldBasedIndexPatternColumn } from './column_types';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { useDebouncedValue } from '../../../shared_components';
 import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
+import { FormRow } from './shared_components';
+import { getColumnWindowError } from '../../window_utils';
 
 export interface PercentileRanksIndexPatternColumn extends FieldBasedIndexPatternColumn {
   operationType: 'percentile_rank';
@@ -32,7 +34,12 @@ export interface PercentileRanksIndexPatternColumn extends FieldBasedIndexPatter
   };
 }
 
-function ofName(name: string, value: number, timeShift: string | undefined) {
+function ofName(
+  name: string,
+  value: number,
+  timeShift: string | undefined,
+  window: string | undefined
+) {
   return adjustTimeScaleLabelSuffix(
     i18n.translate('xpack.lens.indexPattern.percentileRanksOf', {
       defaultMessage: 'Percentile rank ({value}) of {name}',
@@ -41,7 +48,9 @@ function ofName(name: string, value: number, timeShift: string | undefined) {
     undefined,
     undefined,
     undefined,
-    timeShift
+    timeShift,
+    undefined,
+    window
   );
 }
 
@@ -52,9 +61,11 @@ const supportedFieldTypes = ['number', 'histogram'];
 export const percentileRanksOperation: OperationDefinition<
   PercentileRanksIndexPatternColumn,
   'field',
-  { value: number }
+  { value: number },
+  true
 > = {
   type: 'percentile_rank',
+  allowAsReference: true,
   displayName: i18n.translate('xpack.lens.indexPattern.percentileRank', {
     defaultMessage: 'Percentile rank',
   }),
@@ -69,6 +80,7 @@ export const percentileRanksOperation: OperationDefinition<
   ],
   filterable: true,
   shiftable: true,
+  windowable: true,
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type: fieldType }) => {
     if (supportedFieldTypes.includes(fieldType) && aggregatable && !aggregationRestrictions) {
       return {
@@ -89,7 +101,12 @@ export const percentileRanksOperation: OperationDefinition<
     );
   },
   getDefaultLabel: (column, indexPattern, columns) =>
-    ofName(getSafeName(column.sourceField, indexPattern), column.params.value, column.timeShift),
+    ofName(
+      getSafeName(column.sourceField, indexPattern),
+      column.params.value,
+      column.timeShift,
+      column.window
+    ),
   buildColumn: ({ field, previousColumn, indexPattern }, columnParams) => {
     const existingPercentileRanksParam =
       previousColumn &&
@@ -101,7 +118,8 @@ export const percentileRanksOperation: OperationDefinition<
       label: ofName(
         getSafeName(field.name, indexPattern),
         newPercentileRanksParam,
-        previousColumn?.timeShift
+        previousColumn?.timeShift,
+        previousColumn?.window
       ),
       dataType: 'number',
       operationType: 'percentile_rank',
@@ -110,6 +128,7 @@ export const percentileRanksOperation: OperationDefinition<
       scale: 'ratio',
       filter: getFilter(previousColumn, columnParams),
       timeShift: columnParams?.shift || previousColumn?.timeShift,
+      window: columnParams?.window || previousColumn?.window,
       params: {
         value: newPercentileRanksParam,
         ...getFormatFromPreviousColumn(previousColumn),
@@ -119,7 +138,12 @@ export const percentileRanksOperation: OperationDefinition<
   onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
-      label: ofName(field.displayName, oldColumn.params.value, oldColumn.timeShift),
+      label: ofName(
+        field.displayName,
+        oldColumn.params.value,
+        oldColumn.timeShift,
+        oldColumn.window
+      ),
       sourceField: field.name,
     };
   },
@@ -141,42 +165,43 @@ export const percentileRanksOperation: OperationDefinition<
     combineErrorMessages([
       getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
       getDisallowedPreviousShiftMessage(layer, columnId),
+      getColumnWindowError(layer, columnId, indexPattern),
     ]),
   paramEditor: function PercentileParamEditor({
-    layer,
-    updateLayer,
+    paramEditorUpdater,
     currentColumn,
-    columnId,
     indexPattern,
+    paramEditorCustomProps,
   }) {
+    const { labels, isInline } = paramEditorCustomProps || {};
+    const percentileRanksLabel =
+      labels?.[0] ||
+      i18n.translate('xpack.lens.indexPattern.percentile.percentileRanksValue', {
+        defaultMessage: 'Percentile ranks value',
+      });
     const onChange = useCallback(
       (value) => {
         if (!isValidNumber(value) || Number(value) === currentColumn.params.value) {
           return;
         }
-        updateLayer({
-          ...layer,
-          columns: {
-            ...layer.columns,
-            [columnId]: {
-              ...currentColumn,
-              label: currentColumn.customLabel
-                ? currentColumn.label
-                : ofName(
-                    indexPattern.getFieldByName(currentColumn.sourceField)?.displayName ||
-                      currentColumn.sourceField,
-                    Number(value),
-                    currentColumn.timeShift
-                  ),
-              params: {
-                ...currentColumn.params,
-                value: Number(value),
-              },
-            } as PercentileRanksIndexPatternColumn,
+        paramEditorUpdater({
+          ...currentColumn,
+          label: currentColumn.customLabel
+            ? currentColumn.label
+            : ofName(
+                indexPattern.getFieldByName(currentColumn.sourceField)?.displayName ||
+                  currentColumn.sourceField,
+                Number(value),
+                currentColumn.timeShift,
+                currentColumn.window
+              ),
+          params: {
+            ...currentColumn.params,
+            value: Number(value),
           },
-        });
+        } as PercentileRanksIndexPatternColumn);
       },
-      [updateLayer, layer, columnId, currentColumn, indexPattern]
+      [paramEditorUpdater, currentColumn, indexPattern]
     );
     const { inputValue, handleInputChange: handleInputChangeWithoutValidation } = useDebouncedValue<
       string | undefined
@@ -197,10 +222,9 @@ export const percentileRanksOperation: OperationDefinition<
     );
 
     return (
-      <EuiFormRow
-        label={i18n.translate('xpack.lens.indexPattern.percentile.percentileRanksValue', {
-          defaultMessage: 'Percentile ranks value',
-        })}
+      <FormRow
+        isInline={isInline}
+        label={percentileRanksLabel}
         data-test-subj="lns-indexPattern-percentile_ranks-form"
         display="rowCompressed"
         fullWidth
@@ -213,16 +237,15 @@ export const percentileRanksOperation: OperationDefinition<
         }
       >
         <EuiFieldNumber
+          fullWidth
           data-test-subj="lns-indexPattern-percentile_ranks-input"
           compressed
           value={inputValue ?? ''}
           onChange={handleInputChange}
           step="any"
-          aria-label={i18n.translate('xpack.lens.indexPattern.percentile.percentileRanksValue', {
-            defaultMessage: 'Percentile ranks value',
-          })}
+          aria-label={percentileRanksLabel}
         />
-      </EuiFormRow>
+      </FormRow>
     );
   },
   documentation: {

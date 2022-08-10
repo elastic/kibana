@@ -23,7 +23,7 @@ import { getHeight } from './get_height';
 interface SourceViewerProps {
   id: string;
   index: string;
-  indexPattern: DataView;
+  dataView: DataView;
   hasLineNumbers: boolean;
   width?: number;
 }
@@ -37,7 +37,7 @@ export const MARGIN_BOTTOM = 25;
 export const DocViewerSource = ({
   id,
   index,
-  indexPattern,
+  dataView,
   width,
   hasLineNumbers,
 }: SourceViewerProps) => {
@@ -50,13 +50,13 @@ export const DocViewerSource = ({
   const [reqState, hit, requestData] = useEsDocSearch({
     id,
     index,
-    indexPattern,
+    dataView,
     requestSource: useNewFieldsApi,
   });
 
   useEffect(() => {
     if (reqState === ElasticRequestState.Found && hit) {
-      setJsonValue(JSON.stringify(hit, undefined, 2));
+      setJsonValue(JSON.stringify(hit.raw, undefined, 2));
     }
   }, [reqState, hit]);
 

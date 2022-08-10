@@ -24,7 +24,7 @@ export function DetailViewHeader({
   title: string;
 }) {
   return (
-    <EuiFlexGroup direction="column" gutterSize="m" alignItems="flexStart">
+    <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
       <EuiFlexItem>
         <EuiLink href={backHref}>
           <EuiFlexGroup direction="row" gutterSize="xs">
@@ -36,7 +36,7 @@ export function DetailViewHeader({
         </EuiLink>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiTitle>
+        <EuiTitle size="xs">
           <EuiText>{title}</EuiText>
         </EuiTitle>
       </EuiFlexItem>

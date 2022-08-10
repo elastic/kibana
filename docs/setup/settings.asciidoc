@@ -311,6 +311,11 @@ Controls whether to enable the newsfeed
 system for the {kib} UI notification center. Set to `false` to disable the
 newsfeed system. *Default: `true`*
 
+`node.roles`::
+experimental[] Indicates which roles to configure the {kib} process with, which will effectively
+run {kib} in different modes. Valid options are `background_tasks` and `ui`,
+or `*` to select all roles. *Default: `*`*
+
 [[path-data]] `path.data`::
 The path where {kib} stores persistent data
 not saved in {es}. *Default: `data`*
@@ -533,23 +538,19 @@ server status API and status page. *Default: `false`*
 
 [[telemetry-allowChangingOptInStatus]] `telemetry.allowChangingOptInStatus`::
 When `true`, users are able to change the telemetry setting at a later time in
-<<advanced-options, Advanced Settings>>.  When `false`,
-{kib} looks at the value of <<settings-telemetry-optIn, `telemetry.optIn`>> to determine whether to send
-telemetry data or not. <<telemetry-allowChangingOptInStatus, `telemetry.allowChangingOptInStatus`>> and <<settings-telemetry-optIn, `telemetry.optIn`>>
-cannot be `false` at the same time. *Default: `true`*.
+<<advanced-options, Advanced Settings>>.  When `false`, users cannot change the opt-in status through *Advanced Settings*, and
+{kib} only looks at the value of <<settings-telemetry-optIn, `telemetry.optIn`>> to determine whether to send telemetry data or not. *Default: `true`*.
 
 [[settings-telemetry-optIn]] `telemetry.optIn`::
-When `true`, telemetry data is sent to Elastic.
-When `false`, collection of telemetry data is disabled.
-To enable telemetry and prevent users from disabling it,
-set <<telemetry-allowChangingOptInStatus, `telemetry.allowChangingOptInStatus`>> to `false` and <<settings-telemetry-optIn, `telemetry.optIn`>> to `true`.
-*Default: `true`*
-
-`telemetry.enabled`::
 Reporting your cluster statistics helps
-us improve your user experience. Your data is never shared with anyone. Set to
-`false` to disable telemetry capabilities entirely. You can alternatively opt
-out through *Advanced Settings*. *Default: `true`*
+us improve your user experience. Your data is never shared with anyone.
+Set to `true` to allow telemetry data to be sent to Elastic.
+When `false`, the telemetry data is never sent to Elastic. +
++
+This setting can be changed at any time in <<advanced-options, Advanced Settings>>.
+To prevent users from changing it,
+set <<telemetry-allowChangingOptInStatus, `telemetry.allowChangingOptInStatus`>> to `false`.
+*Default: `true`*
 
 `vis_type_vega.enableExternalUrls` {ess-icon}::
 Set this value to true to allow Vega to use any URL to access external data

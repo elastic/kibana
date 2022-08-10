@@ -28,14 +28,7 @@ interface Result {
 
 export function fetchChart(
   searchSource: ISearchSource,
-  {
-    abortController,
-    appStateContainer,
-    data,
-    inspectorAdapters,
-    searchSessionId,
-    savedSearch,
-  }: FetchDeps
+  { abortController, appStateContainer, data, inspectorAdapters, searchSessionId }: FetchDeps
 ): Promise<Result> {
   const interval = appStateContainer.getState().interval ?? 'auto';
   const chartAggConfigs = updateSearchSource(searchSource, interval, data);
@@ -86,8 +79,8 @@ export function updateSearchSource(
   interval: string,
   data: DataPublicPluginStart
 ) {
-  const indexPattern = searchSource.getField('index')!;
-  searchSource.setField('filter', data.query.timefilter.timefilter.createFilter(indexPattern));
+  const dataView = searchSource.getField('index')!;
+  searchSource.setField('filter', data.query.timefilter.timefilter.createFilter(dataView));
   searchSource.setField('size', 0);
   searchSource.setField('trackTotalHits', true);
   const chartAggConfigs = getChartAggConfigs(searchSource, interval, data);

@@ -8,7 +8,7 @@
 import { get, getOr } from 'lodash/fp';
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
-import {
+import type {
   NetworkHttpBuckets,
   NetworkHttpEdges,
 } from '../../../../../../common/search_strategy/security_solution/network';

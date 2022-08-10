@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TGridCellAction } from '@kbn/timelines-plugin/common/types';
+import type { TGridCellAction } from '@kbn/timelines-plugin/common/types';
 import { getFilterForCellAction } from './filter_for';
 import { getFilterOutCellAction } from './filter_out';
 import { getAddToTimelineCellAction } from './add_to_timeline';

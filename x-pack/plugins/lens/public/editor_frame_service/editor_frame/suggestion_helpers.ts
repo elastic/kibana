@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Datatable } from '@kbn/expressions-plugin';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import type { PaletteOutput } from '@kbn/coloring';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import {
@@ -269,7 +269,7 @@ export function getTopSuggestionForField(
   field: DragDropIdentifier
 ) {
   const hasData = Object.values(datasourceLayers).some(
-    (datasourceLayer) => datasourceLayer.getTableSpec().length > 0
+    (datasourceLayer) => datasourceLayer && datasourceLayer.getTableSpec().length > 0
   );
 
   const activeVisualization = visualization.activeId

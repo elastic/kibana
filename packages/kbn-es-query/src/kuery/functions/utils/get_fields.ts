@@ -19,7 +19,7 @@ export function getFields(node: KueryNode, indexPattern?: DataViewBase) {
       return [];
     }
     return [field];
-  } else if (node.type === 'wildcard') {
+  } else if (wildcard.isNode(node)) {
     const fields = indexPattern.fields.filter((fld) => wildcard.test(node, fld.name));
     return fields;
   }

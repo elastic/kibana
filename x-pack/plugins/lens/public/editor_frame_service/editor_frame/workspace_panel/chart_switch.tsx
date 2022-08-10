@@ -30,7 +30,6 @@ import {
   Suggestion,
 } from '../../../types';
 import { getSuggestions, switchToSuggestion } from '../suggestion_helpers';
-import { trackUiEvent } from '../../../lens_ui_telemetry';
 import {
   insertLayer,
   removeLayers,
@@ -124,8 +123,6 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
   const commitSelection = (selection: VisualizationSelection) => {
     setFlyoutOpen(false);
 
-    trackUiEvent(`chart_switch`);
-
     switchToSuggestion(
       dispatchLens,
       {
@@ -158,7 +155,7 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
       ((_type: string, initialState: unknown) => initialState);
     const layers = Object.entries(props.framePublicAPI.datasourceLayers);
     const containsData = layers.some(
-      ([_layerId, datasource]) => datasource.getTableSpec().length > 0
+      ([_layerId, datasource]) => datasource && datasource.getTableSpec().length > 0
     );
     // Always show the active visualization as a valid selection
     if (
@@ -193,7 +190,7 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
       dataLoss = 'everything';
     } else if (layers.length > 1 && layers.length !== topSuggestion.keptLayerIds.length) {
       dataLoss = 'layers';
-    } else if (topSuggestion.columns !== layers[0][1].getTableSpec().length) {
+    } else if (topSuggestion.columns !== layers[0][1]?.getTableSpec().length) {
       dataLoss = 'columns';
     } else {
       dataLoss = 'nothing';

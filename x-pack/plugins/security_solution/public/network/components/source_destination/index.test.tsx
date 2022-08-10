@@ -6,17 +6,15 @@
  */
 
 import numeral from '@elastic/numeral';
-import { shallow } from 'enzyme';
 import { get } from 'lodash/fp';
 import React from 'react';
+import { render, screen, within } from '@testing-library/react';
 
-import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
 import { asArrayIfExists } from '../../../common/lib/helpers';
 import { getMockNetflowData } from '../../../common/mock';
 import '../../../common/mock/match_media';
 import { TestProviders } from '../../../common/mock/test_providers';
 import { ID_FIELD_NAME } from '../../../common/components/event_details/event_id';
-import { useMountAppended } from '../../../common/utils/use_mount_appended';
 import { DESTINATION_IP_FIELD_NAME, SOURCE_IP_FIELD_NAME } from '../ip';
 import { DESTINATION_PORT_FIELD_NAME, SOURCE_PORT_FIELD_NAME } from '../port/helpers';
 import {
@@ -121,29 +119,25 @@ jest.mock('react-router-dom', () => {
 });
 
 describe('SourceDestination', () => {
-  const mount = useMountAppended();
-
   test('renders correctly against snapshot', () => {
-    const wrapper = shallow(<div>{getSourceDestinationInstance()}</div>);
-    expect(wrapper).toMatchSnapshot();
+    const { asFragment } = render(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    expect(asFragment).toMatchSnapshot();
   });
 
   test('it renders a destination label', () => {
-    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    render(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
-    expect(wrapper.find('[data-test-subj="destination-label"]').first().text()).toEqual(
-      i18n.DESTINATION
-    );
+    expect(screen.getByText(i18n.DESTINATION)).toBeInTheDocument();
   });
 
   test('it renders destination.bytes', () => {
-    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    render(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
-    expect(wrapper.find('[data-test-subj="destination-bytes"]').first().text()).toEqual('40B');
+    expect(screen.getByText('40B')).toBeInTheDocument();
   });
 
   test('it renders percent destination.bytes', () => {
-    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    render(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
     const destinationBytes = asArrayIfExists(
       get(DESTINATION_BYTES_FIELD_NAME, getMockNetflowData())
     );
@@ -153,127 +147,116 @@ describe('SourceDestination', () => {
       percent = `(${numeral((destinationBytes[0] / sumBytes[0]) * 100).format('0.00')}%)`;
     }
 
-    expect(wrapper.find('[data-test-subj="destination-bytes-percent"]').first().text()).toEqual(
-      percent
-    );
+    expect(screen.getByText(percent)).toBeInTheDocument();
   });
 
   test('it renders destination.geo.continent_name', () => {
-    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    render(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
-    expect(
-      wrapper.find('[data-test-subj="destination.geo.continent_name"]').first().text()
-    ).toEqual('North America');
+    expect(screen.getByTestId('draggable-content-destination.geo.continent_name').textContent).toBe(
+      'North America'
+    );
   });
 
   test('it renders destination.geo.country_name', () => {
-    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    render(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
-    expect(wrapper.find('[data-test-subj="destination.geo.country_name"]').first().text()).toEqual(
+    expect(screen.getByTestId('draggable-content-destination.geo.country_name').textContent).toBe(
       'United States'
     );
   });
 
   test('it renders destination.geo.country_iso_code', () => {
-    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    render(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
     expect(
-      wrapper.find('[data-test-subj="destination.geo.country_iso_code"]').first().text()
-    ).toEqual('US');
+      screen.getByTestId('draggable-content-destination.geo.country_iso_code').textContent
+    ).toBe('US');
   });
 
   test('it renders destination.geo.region_name', () => {
-    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    render(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
-    expect(wrapper.find('[data-test-subj="destination.geo.region_name"]').first().text()).toEqual(
+    expect(screen.getByTestId('draggable-content-destination.geo.region_name').textContent).toBe(
       'New York'
     );
   });
 
   test('it renders destination.geo.city_name', () => {
-    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    render(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
-    expect(wrapper.find('[data-test-subj="destination.geo.city_name"]').first().text()).toEqual(
+    expect(screen.getByTestId('draggable-content-destination.geo.city_name').textContent).toBe(
       'New York'
     );
   });
 
   test('it renders the destination ip and port, separated with a colon', () => {
-    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    render(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
-    expect(
-      removeExternalLinkText(
-        wrapper.find('[data-test-subj="destination-ip-and-port"]').first().text()
-      )
-    ).toContain('10.1.2.3:80');
+    expect(screen.getByTestId('destination-ip-badge').textContent).toContain('10.1.2.3:80');
   });
 
   test('it renders destination.packets', () => {
-    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    render(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
-    expect(wrapper.find('[data-test-subj="destination-packets"]').first().text()).toEqual('1 pkts');
+    expect(screen.getByText('1 pkts')).toBeInTheDocument();
   });
 
   test('it hyperlinks links destination.port to an external service that describes the purpose of the port', () => {
-    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    render(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
     expect(
-      wrapper
-        .find('[data-test-subj="destination-ip-and-port"]')
-        .find('[data-test-subj="port-or-service-name-link"]')
-        .first()
-        .props().href
-    ).toEqual(
+      within(screen.getByTestId('destination-ip-group')).getByTestId('port-or-service-name-link')
+    ).toHaveAttribute(
+      'href',
       'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=80'
     );
   });
 
   test('it renders network.bytes', () => {
-    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    render(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
-    expect(wrapper.find('[data-test-subj="network-bytes"]').first().text()).toEqual('100B');
+    expect(screen.getByText('100B')).toBeInTheDocument();
   });
 
   test('it renders network.community_id', () => {
-    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    render(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
-    expect(wrapper.find('[data-test-subj="network-community-id"]').first().text()).toEqual(
-      'we.live.in.a'
-    );
+    expect(screen.getByText('we.live.in.a')).toBeInTheDocument();
   });
 
   test('it renders network.direction', () => {
-    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    render(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
-    expect(wrapper.find('[data-test-subj="network-direction"]').first().text()).toEqual('outgoing');
+    expect(screen.getByText('outgoing')).toBeInTheDocument();
   });
 
   test('it renders network.packets', () => {
-    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    render(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
-    expect(wrapper.find('[data-test-subj="network-packets"]').first().text()).toEqual('3 pkts');
+    expect(screen.getByText('3 pkts')).toBeInTheDocument();
   });
 
   test('it renders network.protocol', () => {
-    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    render(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
-    expect(wrapper.find('[data-test-subj="network-protocol"]').first().text()).toEqual('http');
+    expect(screen.getByText('http')).toBeInTheDocument();
   });
 
   test('it renders a source label', () => {
-    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    render(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
-    expect(wrapper.find('[data-test-subj="source-label"]').first().text()).toEqual(i18n.SOURCE);
+    expect(screen.getByText(i18n.SOURCE)).toBeInTheDocument();
   });
 
   test('it renders source.bytes', () => {
-    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    render(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
-    expect(wrapper.find('[data-test-subj="source-bytes"]').first().text()).toEqual('60B');
+    expect(screen.getByText('60B')).toBeInTheDocument();
   });
 
   test('it renders percent source.bytes', () => {
-    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    render(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
     const sourceBytes = asArrayIfExists(get(SOURCE_BYTES_FIELD_NAME, getMockNetflowData()));
     const sumBytes = asArrayIfExists(get(NETWORK_BYTES_FIELD_NAME, getMockNetflowData()));
     let percent = '';
@@ -281,66 +264,64 @@ describe('SourceDestination', () => {
       percent = `(${numeral((sourceBytes[0] / sumBytes[0]) * 100).format('0.00')}%)`;
     }
 
-    expect(wrapper.find('[data-test-subj="source-bytes-percent"]').first().text()).toEqual(percent);
+    expect(screen.getByText(percent)).toBeInTheDocument();
   });
 
   test('it renders source.geo.continent_name', () => {
-    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    render(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
-    expect(wrapper.find('[data-test-subj="source.geo.continent_name"]').first().text()).toEqual(
+    expect(screen.getByTestId('draggable-content-source.geo.continent_name').textContent).toBe(
       'North America'
     );
   });
 
   test('it renders source.geo.country_name', () => {
-    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    render(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
-    expect(wrapper.find('[data-test-subj="source.geo.country_name"]').first().text()).toEqual(
+    expect(screen.getByTestId('draggable-content-source.geo.country_name').textContent).toBe(
       'United States'
     );
   });
 
   test('it renders source.geo.country_iso_code', () => {
-    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    render(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
-    expect(wrapper.find('[data-test-subj="source.geo.country_iso_code"]').first().text()).toEqual(
+    expect(screen.getByTestId('draggable-content-source.geo.country_iso_code').textContent).toBe(
       'US'
     );
   });
 
   test('it renders source.geo.region_name', () => {
-    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    render(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
-    expect(wrapper.find('[data-test-subj="source.geo.region_name"]').first().text()).toEqual(
+    expect(screen.getByTestId('draggable-content-source.geo.region_name').textContent).toBe(
       'Georgia'
     );
   });
 
   test('it renders source.geo.city_name', () => {
-    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    render(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
-    expect(wrapper.find('[data-test-subj="source.geo.city_name"]').first().text()).toEqual(
+    expect(screen.getByTestId('draggable-content-source.geo.city_name').textContent).toBe(
       'Atlanta'
     );
   });
 
   test('it renders the source ip and port, separated with a colon', () => {
-    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    render(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
-    expect(
-      removeExternalLinkText(wrapper.find('[data-test-subj="source-ip-and-port"]').first().text())
-    ).toContain('192.168.1.2:9987');
+    expect(screen.getByTestId('source-ip-badge').textContent).toContain('192.168.1.2:9987');
   });
 
   test('it renders source.packets', () => {
-    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    render(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
-    expect(wrapper.find('[data-test-subj="source-packets"]').first().text()).toEqual('2 pkts');
+    expect(screen.getByText('2 pkts')).toBeInTheDocument();
   });
 
   test('it renders network.transport', () => {
-    const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+    render(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
-    expect(wrapper.find('[data-test-subj="network-transport"]').first().text()).toEqual('tcp');
+    expect(screen.getByText('tcp')).toBeInTheDocument();
   });
 });

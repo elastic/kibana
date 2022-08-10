@@ -364,6 +364,7 @@ describe('CaseConfigureService', () => {
         expect(unsecuredSavedObjectsClient.update.mock.calls[0][3]).toMatchInlineSnapshot(`
           Object {
             "references": undefined,
+            "refresh": undefined,
           }
         `);
       });
@@ -469,6 +470,7 @@ describe('CaseConfigureService', () => {
                 "type": "action",
               },
             ],
+            "refresh": undefined,
           }
         `);
       });

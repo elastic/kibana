@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpFetchError } from '@kbn/core/public';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import Boom from '@hapi/boom';
 
 export interface EsErrorRootCause {
@@ -45,7 +45,7 @@ export interface MLErrorObject {
   fullError?: EsErrorBody;
 }
 
-export interface MLHttpFetchErrorBase<T> extends HttpFetchError {
+export interface MLHttpFetchErrorBase<T> extends IHttpFetchError<T> {
   body: T;
 }
 

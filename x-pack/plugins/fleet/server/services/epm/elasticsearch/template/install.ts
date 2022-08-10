@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { merge } from 'lodash';
+import { merge, concat, uniqBy, omit } from 'lodash';
 import Boom from '@hapi/boom';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import { ElasticsearchAssetType } from '../../../../types';
+import { getPipelineNameForDatastream } from '../../../../../common/services';
 import type {
   RegistryDataStream,
   IndexTemplateEntry,
@@ -22,9 +23,7 @@ import type {
   EsAssetReference,
   PackageInfo,
 } from '../../../../types';
-
 import { loadFieldsFromYaml, processFields } from '../../fields/field';
-import { getPipelineNameForDatastream } from '../ingest_pipeline';
 import { getAsset, getPathParts } from '../../archive';
 import {
   FLEET_COMPONENT_TEMPLATES,
@@ -242,6 +241,15 @@ function buildComponentTemplates(params: {
 
   const templateSettings = merge(defaultSettings, indexTemplateSettings);
 
+  const indexTemplateMappings = registryElasticsearch?.['index_template.mappings'] ?? {};
+
+  const mappingsProperties = merge(mappings.properties, indexTemplateMappings.properties ?? {});
+
+  const mappingsDynamicTemplates = uniqBy(
+    concat(mappings.dynamic_templates ?? [], indexTemplateMappings.dynamic_templates ?? []),
+    (dynampingTemplate) => Object.keys(dynampingTemplate)[0]
+  );
+
   templatesMap[packageTemplateName] = {
     template: {
       settings: {
@@ -257,7 +265,11 @@ function buildComponentTemplates(params: {
           },
         },
       },
-      mappings: merge(mappings, registryElasticsearch?.['index_template.mappings'] ?? {}),
+      mappings: {
+        properties: mappingsProperties,
+        dynamic_templates: mappingsDynamicTemplates.length ? mappingsDynamicTemplates : undefined,
+        ...omit(indexTemplateMappings, 'properties', 'dynamic_templates'),
+      },
     },
     _meta,
   };

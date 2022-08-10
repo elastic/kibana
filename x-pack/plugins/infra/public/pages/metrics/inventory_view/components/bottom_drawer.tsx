@@ -66,7 +66,7 @@ export const BottomDrawer: React.FC<{
 };
 
 const BottomActionContainer = euiStyled.div<{ isOpen: boolean; outerWidth: number }>`
-  padding: ${(props) => props.theme.eui.paddingSizes.m} 0;
+  padding: ${(props) => props.theme.eui.euiSizeM} 0;
   position: fixed;
   bottom: 0;
   right: 0;

@@ -46,18 +46,21 @@ TYPES_DEPS = [
   "//packages/core/base/core-base-common:npm_module_types",
   "//packages/core/injected-metadata/core-injected-metadata-browser-internal:npm_module_types",
   "//packages/core/theme/core-theme-browser:npm_module_types",
+  "//packages/core/i18n/core-i18n-browser:npm_module_types",
 ]
 
 jsts_transpiler(
   name = "target_node",
   srcs = SRCS,
   build_pkg_name = package_name(),
+  root_input_dir = "src",
 )
 
 jsts_transpiler(
   name = "target_web",
   srcs = SRCS,
   build_pkg_name = package_name(),
+  root_input_dir = "src",
   web = True,
 )
 
@@ -76,6 +79,7 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
+  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
   root_dir = "src",

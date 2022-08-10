@@ -14,7 +14,7 @@ import type { Query } from '@kbn/data-plugin/common';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common/adapters/request';
 import { lastValueFrom } from 'rxjs';
-import { TimeRange } from '@kbn/data-plugin/common';
+import type { TimeRange } from '@kbn/es-query';
 import { AbstractVectorSource, BoundsRequestMeta } from '../vector_source';
 import {
   getAutocompleteService,

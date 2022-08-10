@@ -9,9 +9,9 @@
 import { DeprecationsFactoryMock } from './deprecations_service.test.mocks';
 
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
 /* eslint-disable dot-notation */
 import { DeprecationsService, DeprecationsSetupDeps } from './deprecations_service';
-import { httpServiceMock } from '../http/http_service.mock';
 import { savedObjectsClientMock, elasticsearchServiceMock, configServiceMock } from '../mocks';
 import { mockDeprecationsFactory } from './deprecations_factory.mock';
 import { mockDeprecationsRegistry } from './deprecations_registry.mock';

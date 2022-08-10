@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await kibanaServer.uiSettings.replace({ defaultIndex: 'without-timefield' });
       await kibanaServer.uiSettings.update({
-        'doc_table:legacy': true,
+        'doc_table:legacy': false,
       });
     });
 

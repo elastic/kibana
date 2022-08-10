@@ -9,6 +9,7 @@
 import {
   isClusterShardLimitExceeded,
   isIncompatibleMappingException,
+  isIndexNotFoundException,
   isWriteBlockException,
 } from './es_errors';
 
@@ -37,6 +38,9 @@ describe('isWriteBlockError', () => {
       })
     ).toEqual(false);
   });
+  it('returns false undefined', () => {
+    expect(isWriteBlockException(undefined)).toEqual(false);
+  });
 });
 
 describe('isIncompatibleMappingExceptionError', () => {
@@ -57,6 +61,31 @@ describe('isIncompatibleMappingExceptionError', () => {
       })
     ).toEqual(true);
   });
+  it('returns false undefined', () => {
+    expect(isIncompatibleMappingException(undefined)).toEqual(false);
+  });
+});
+
+describe('isIndexNotFoundException', () => {
+  it('returns true with index_not_found_exception errors', () => {
+    expect(
+      isIndexNotFoundException({
+        type: 'index_not_found_exception',
+        reason: 'idk',
+      })
+    ).toEqual(true);
+  });
+  it('returns false for other errors', () => {
+    expect(
+      isIndexNotFoundException({
+        type: 'validation_exception',
+        reason: 'idk',
+      })
+    ).toEqual(false);
+  });
+  it('returns false undefined', () => {
+    expect(isIndexNotFoundException(undefined)).toEqual(false);
+  });
 });
 
 describe('isClusterShardLimitExceeded', () => {
@@ -76,5 +105,8 @@ describe('isClusterShardLimitExceeded', () => {
         reason: 'Validation Failed: 1: this action would do something its not allowed to do',
       })
     ).toEqual(false);
+  });
+  it('returns false undefined', () => {
+    expect(isClusterShardLimitExceeded(undefined)).toEqual(false);
   });
 });

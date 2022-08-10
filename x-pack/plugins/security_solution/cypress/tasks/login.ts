@@ -6,9 +6,10 @@
  */
 
 import * as yaml from 'js-yaml';
-import Url, { UrlObject } from 'url';
+import type { UrlObject } from 'url';
+import Url from 'url';
 
-import { ROLES } from '../../common/test';
+import type { ROLES } from '../../common/test';
 import { RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY } from '../../common/constants';
 import { TIMELINE_FLYOUT_BODY } from '../screens/timeline';
 import { hostDetailsUrl, LOGOUT_URL, userDetailsUrl } from '../urls/navigation';
@@ -311,9 +312,15 @@ export const waitForPage = (url: string) => {
   );
 };
 
-export const visit = (url: string, onBeforeLoadCallback?: (win: Cypress.AUTWindow) => void) => {
+export const visit = (
+  url: string,
+  onBeforeLoadCallback?: (win: Cypress.AUTWindow) => void,
+  role?: ROLES
+) => {
   cy.visit(
-    `${url}?timerange=(global:(linkTo:!(timeline),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)))`,
+    `${
+      role ? getUrlWithRoute(role, url) : url
+    }?timerange=(global:(linkTo:!(timeline),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)))`,
     {
       onBeforeLoad(win) {
         if (onBeforeLoadCallback) {

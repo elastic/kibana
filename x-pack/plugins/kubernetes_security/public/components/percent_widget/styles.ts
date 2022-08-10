@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { CSSObject } from '@emotion/react';
+import type { CSSObject } from '@emotion/react';
 import { useEuiTheme } from '../../hooks';
 
 export const useStyles = () => {
@@ -17,8 +17,8 @@ export const useStyles = () => {
 
     const container: CSSObject = {
       padding: size.base,
-      border: euiTheme.border.thin,
-      borderRadius: euiTheme.border.radius.medium,
+      border: border.thin,
+      borderRadius: border.radius.medium,
       overflow: 'auto',
       position: 'relative',
     };
