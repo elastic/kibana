@@ -31,6 +31,7 @@ import { i18n } from '@kbn/i18n';
 
 import { useChartTheme } from '@kbn/observability-plugin/public';
 
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import type { HistogramItem } from '../../../../../common/correlations/types';
 import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../../common/correlations/constants';
@@ -39,7 +40,6 @@ import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
 
 import { ChartContainer } from '../chart_container';
-import { ProcessorEvent } from '../../../../../common/processor_event';
 
 const NUMBER_OF_TRANSACTIONS_LABEL = i18n.translate(
   'xpack.apm.durationDistribution.chart.numberOfTransactionsLabel',

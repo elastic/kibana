@@ -33,7 +33,7 @@ export const usePrimaryNavigationItems = ({
     (tab: NavTab) => {
       const { id, name, disabled } = tab;
       const isSelected = selectedTabId === id;
-      const urlSearch = getSearch(tab, globalQueryString);
+      const urlSearch = getSearch(tab.id as SecurityPageName, globalQueryString);
 
       const handleClick = (ev: React.MouseEvent) => {
         ev.preventDefault();
@@ -113,7 +113,9 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
                 ...(navTabs[SecurityPageName.users] != null
                   ? [navTabs[SecurityPageName.users]]
                   : []),
-                navTabs[SecurityPageName.threatIntelligence],
+                ...(navTabs[SecurityPageName.threatIntelligence] != null
+                  ? [navTabs[SecurityPageName.threatIntelligence]]
+                  : []),
               ],
             },
             {
