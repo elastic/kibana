@@ -24,6 +24,7 @@ import {
   Embeddable,
   EmbeddableInput,
   EmbeddableOutput,
+  FilterableEmbeddable,
   IContainer,
   ReferenceOrValueEmbeddable,
   SavedObjectEmbeddableInput,
@@ -37,6 +38,7 @@ import {
 } from '@kbn/expressions-plugin/public';
 import type { RenderMode } from '@kbn/expressions-plugin/common';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
+import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
 import { isFallbackDataView } from '../visualize_app/utils';
 import { VisualizationMissedSavedObjectError } from '../components/visualization_missed_saved_object_error';
 import VisualizationError from '../components/visualization_error';
@@ -94,7 +96,9 @@ export type VisualizeByReferenceInput = SavedObjectEmbeddableInput & VisualizeIn
 
 export class VisualizeEmbeddable
   extends Embeddable<VisualizeInput, VisualizeOutput>
-  implements ReferenceOrValueEmbeddable<VisualizeByValueInput, VisualizeByReferenceInput>
+  implements
+    ReferenceOrValueEmbeddable<VisualizeByValueInput, VisualizeByReferenceInput>,
+    FilterableEmbeddable
 {
   private handler?: ExpressionLoader;
   private timefilter: TimefilterContract;
@@ -186,6 +190,32 @@ export class VisualizeEmbeddable
 
   public getDescription() {
     return this.vis.description;
+  }
+
+  /**
+   * Gets the Visualize embeddable's local filters
+   * @returns Local/panel-level array of filters for Visualize embeddable
+   */
+  public async getFilters() {
+    let input = this.getInput();
+    if (this.inputIsRefType(input)) {
+      input = await this.getInputAsValueType();
+    }
+    const filters = input.savedVis?.data.searchSource?.filter ?? [];
+    // must clone the filters so that it's not read only, because mapAndFlattenFilters modifies the array
+    return mapAndFlattenFilters(_.cloneDeep(filters));
+  }
+
+  /**
+   * Gets the Visualize embeddable's local query
+   * @returns Local/panel-level query for Visualize embeddable
+   */
+  public async getQuery() {
+    let input = this.getInput();
+    if (this.inputIsRefType(input)) {
+      input = await this.getInputAsValueType();
+    }
+    return input.savedVis?.data.searchSource?.query;
   }
 
   public getInspectorAdapters = () => {
