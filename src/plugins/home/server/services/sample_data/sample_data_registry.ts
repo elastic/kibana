@@ -19,7 +19,7 @@ import {
 import { sampleDataSchema } from './lib/sample_dataset_schema';
 
 import { flightsSpecProvider, logsSpecProvider, ecommerceSpecProvider } from './data_sets';
-import { createListRoute, createInstallRoute } from './routes';
+import { createListRoute, createInstallRoute, createInstallLargeDatasetRoute } from './routes';
 import { makeSampleDataUsageCollector, usage } from './usage';
 import { createUninstallRoute } from './routes/uninstall';
 import { registerSampleDatasetWithIntegration } from './lib/register_with_integrations';
@@ -74,6 +74,7 @@ export class SampleDataRegistry {
     createListRoute(router, this.sampleDatasets, this.appLinksMap, logger);
     createInstallRoute(router, this.sampleDatasets, logger, usageTracker);
     createUninstallRoute(router, this.sampleDatasets, logger, usageTracker);
+    createInstallLargeDatasetRoute(router, this.sampleDatasets, logger);
 
     this.registerSampleDataSet(flightsSpecProvider);
     this.registerSampleDataSet(logsSpecProvider);

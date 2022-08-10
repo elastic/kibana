@@ -34,6 +34,7 @@ interface Services {
   fetchSampleDataSets: () => Promise<SampleDataSet[]>;
   notifyError: NotifyFn;
   logClick: (metric: string) => void;
+  installLargeDataset: () => Promise<void>;
 }
 
 /**
@@ -47,7 +48,7 @@ const Context = React.createContext<Services | null>(null);
  * A Context Provider that provides services to the component and its dependencies.
  */
 export const SampleDataTabProvider: FC<SampleDataTabServices> = ({ children, ...services }) => {
-  const { fetchSampleDataSets, notifyError, logClick } = services;
+  const { fetchSampleDataSets, notifyError, logClick, installLargeDataset } = services;
 
   return (
     <Context.Provider
@@ -55,6 +56,7 @@ export const SampleDataTabProvider: FC<SampleDataTabServices> = ({ children, ...
         fetchSampleDataSets,
         notifyError,
         logClick,
+        installLargeDataset,
       }}
     >
       <SampleDataCardProvider {...services}>{children}</SampleDataCardProvider>
@@ -93,10 +95,15 @@ export const SampleDataTabKibanaProvider: FC<SampleDataTabKibanaDependencies> = 
   const { coreStart, trackUiMetric } = dependencies;
   const { http, notifications } = coreStart;
 
+  const installLargeDataset = async () => {
+    await http.post(`${URL_SAMPLE_DATA_API}/large_dataset`);
+  };
+
   const value: Services = {
     fetchSampleDataSets: async () => (await http.get(URL_SAMPLE_DATA_API)) as SampleDataSet[],
     notifyError: (input) => notifications.toasts.addDanger(input),
     logClick: (eventName) => trackUiMetric('click', eventName),
+    installLargeDataset,
   };
 
   return (

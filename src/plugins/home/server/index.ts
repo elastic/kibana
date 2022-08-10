@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-export type { HomeServerPluginSetup, HomeServerPluginStart } from './plugin';
+export type {
+  HomeServerPluginSetup,
+  HomeServerPluginStart,
+  startSampleDataProcess,
+} from './plugin';
 export { EmbeddableTypes, TutorialsCategory } from './services';
 export type {
   AppLinkData,

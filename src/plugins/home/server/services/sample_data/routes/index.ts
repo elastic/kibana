@@ -9,3 +9,4 @@
 export { createListRoute } from './list';
 export { createInstallRoute } from './install';
 export { createUninstallRoute } from './uninstall';
+export { createInstallLargeDatasetRoute } from './large_dataset';
