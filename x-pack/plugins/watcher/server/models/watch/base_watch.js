@@ -10,7 +10,7 @@ import { badRequest } from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 
 import { Action } from '../../../common/models/action';
-import { WatchStatusModel } from '../watch_status_model';
+import { buildServerWatchStatusModel, buildClientWatchStatusModel } from '../watch_status_model';
 import { WatchErrors } from '../watch_errors';
 
 export class BaseWatch {
@@ -60,7 +60,7 @@ export class BaseWatch {
       name: this.name,
       type: this.type,
       isSystemWatch: this.isSystemWatch,
-      watchStatus: this.watchStatus ? this.watchStatus.downstreamJson : undefined,
+      watchStatus: this.watchStatus ? buildClientWatchStatusModel(this.watchStatus) : undefined,
       watchErrors: this.watchErrors ? this.watchErrors.downstreamJson : undefined,
       actions: map(this.actions, (action) => action.downstreamJson),
     };
@@ -138,7 +138,7 @@ export class BaseWatch {
 
     const watchErrors = WatchErrors.fromUpstreamJson(this.getWatchErrors(actions));
 
-    const watchStatus = WatchStatusModel.fromUpstreamJson({
+    const watchStatus = buildServerWatchStatusModel({
       id,
       watchStatusJson,
       watchErrors,
