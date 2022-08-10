@@ -18,10 +18,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'header', 'discover', 'visualize', 'timePicker']);
   const defaultSettings = { defaultIndex: 'logstash-*' };
   const dataGrid = getService('dataGrid');
+  const security = getService('security');
 
   describe('discover data grid field data tests', function describeIndexTests() {
     this.tags('includeFirefox');
     before(async function () {
+      await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
