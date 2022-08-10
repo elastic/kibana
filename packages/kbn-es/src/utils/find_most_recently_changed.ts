@@ -8,7 +8,7 @@
 
 import path from 'path';
 import fs from 'fs';
-import glob from 'glob';
+import globby from 'globby';
 
 /**
  *  Find the most recently modified file that matches the pattern pattern
@@ -20,7 +20,7 @@ export function findMostRecentlyChanged(pattern: string) {
 
   const ctime = (p: string) => fs.statSync(p).ctime.getTime();
 
-  return glob
+  return globby
     .sync(pattern)
     .sort((a, b) => ctime(a) - ctime(b))
     .pop();

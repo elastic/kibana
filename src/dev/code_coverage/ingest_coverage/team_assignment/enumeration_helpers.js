@@ -8,14 +8,14 @@
 
 import { statSync } from 'fs';
 import isGlob from 'is-glob';
-import glob from 'glob';
+import globby from 'globby';
 import { left, right, tryCatch } from '../either';
 import { taMark } from '../utils';
 
 export const push = (xs) => (x) => xs.push(x);
 export const pathExists = (x) => tryCatch(() => statSync(x)).fold(left, right);
 export const isDir = (x) => statSync(x).isDirectory();
-export const prokGlob = (x) => glob.sync(x, { nonull: true });
+export const prokGlob = (x) => globby.sync(x, { nonull: true });
 export const trim = (ROOT) => (x) => x.replace(`${ROOT}/`, '');
 export const isFileAllowed = (x) => /.(j|t)(s|sx)$/gm.test(x);
 export const isRejectedDir = (x) =>

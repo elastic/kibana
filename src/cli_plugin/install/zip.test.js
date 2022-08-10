@@ -11,7 +11,7 @@ import os from 'os';
 import fs from 'fs';
 
 import del from 'del';
-import glob from 'glob';
+import globby from 'globby';
 
 import { analyzeArchive, extractArchive } from './zip';
 
@@ -53,7 +53,7 @@ describe('kibana cli', function () {
         const archive = path.resolve(repliesPath, 'test_plugin.zip');
         await extractArchive(archive, tempPath, 'kibana/test-plugin');
 
-        expect(glob.sync('**/*', { cwd: tempPath })).toMatchInlineSnapshot(`
+        expect(globby.sync('**/*', { cwd: tempPath })).toMatchInlineSnapshot(`
           Array [
             "bin",
             "bin/executable",
@@ -76,7 +76,7 @@ describe('kibana cli', function () {
 
         await extractArchive(archivePath, tempPath, 'kibana/test-plugin/bin');
 
-        expect(glob.sync('**/*', { cwd: tempPath })).toMatchInlineSnapshot(`
+        expect(globby.sync('**/*', { cwd: tempPath })).toMatchInlineSnapshot(`
           Array [
             "executable",
             "not-executable",
