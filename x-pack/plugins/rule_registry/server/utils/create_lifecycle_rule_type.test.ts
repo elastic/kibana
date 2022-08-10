@@ -73,6 +73,7 @@ function createRule(shouldWriteAlerts: boolean = true) {
         scheduleActions,
       } as any;
     },
+    hasReachedAlertLimit: () => false,
     done: () => ({ getRecoveredAlerts: () => [] }),
   };
 

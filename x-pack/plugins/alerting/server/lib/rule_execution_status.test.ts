@@ -9,6 +9,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   ActionsCompletion,
   RuleExecutionStatusErrorReasons,
+  RuleExecutionStatusOptions,
   RuleExecutionStatusWarningReasons,
 } from '../types';
 import {
@@ -31,6 +32,7 @@ const executionMetrics = {
   numberOfActiveAlerts: 2,
   numberOfNewAlerts: 3,
   numberOfRecoveredAlerts: 13,
+  hasReachedAlertLimit: false,
   triggeredActionsStatus: ActionsCompletion.COMPLETE,
 };
 
@@ -48,6 +50,7 @@ describe('RuleExecutionStatus', () => {
     expect(received.numberOfActiveAlerts).toEqual(expected.numberOfActiveAlerts);
     expect(received.numberOfRecoveredAlerts).toEqual(expected.numberOfRecoveredAlerts);
     expect(received.numberOfNewAlerts).toEqual(expected.numberOfNewAlerts);
+    expect(received.hasReachedAlertLimit).toEqual(expected.hasReachedAlertLimit);
     expect(received.triggeredActionsStatus).toEqual(expected.triggeredActionsStatus);
   }
 
@@ -89,7 +92,7 @@ describe('RuleExecutionStatus', () => {
       testExpectedMetrics(metrics!, executionMetrics);
     });
 
-    test('task state with warning', () => {
+    test('task state with max executable actions warning', () => {
       const { status, metrics } = executionStatusFromState({
         alertInstances: { a: {} },
         metrics: { ...executionMetrics, triggeredActionsStatus: ActionsCompletion.PARTIAL },
@@ -105,6 +108,25 @@ describe('RuleExecutionStatus', () => {
       testExpectedMetrics(metrics!, {
         ...executionMetrics,
         triggeredActionsStatus: ActionsCompletion.PARTIAL,
+      });
+    });
+
+    test('task state with max alerts warning', () => {
+      const { status, metrics } = executionStatusFromState({
+        alertInstances: { a: {} },
+        metrics: { ...executionMetrics, hasReachedAlertLimit: true },
+      });
+      checkDateIsNearNow(status.lastExecutionDate);
+      expect(status.warning).toEqual({
+        message: translations.taskRunner.warning.maxAlerts,
+        reason: RuleExecutionStatusWarningReasons.MAX_ALERTS,
+      });
+      expect(status.status).toBe('warning');
+      expect(status.error).toBe(undefined);
+
+      testExpectedMetrics(metrics!, {
+        ...executionMetrics,
+        hasReachedAlertLimit: true,
       });
     });
   });
@@ -139,7 +161,7 @@ describe('RuleExecutionStatus', () => {
 
   describe('ruleExecutionStatusToRaw()', () => {
     const date = new Date('2020-09-03T16:26:58Z');
-    const status = 'ok';
+    const status = RuleExecutionStatusOptions.Ok;
     const reason = RuleExecutionStatusErrorReasons.Decrypt;
     const error = { reason, message: 'wops' };
 
@@ -204,7 +226,7 @@ describe('RuleExecutionStatus', () => {
 
   describe('ruleExecutionStatusFromRaw()', () => {
     const date = new Date('2020-09-03T16:26:58Z').toISOString();
-    const status = 'active';
+    const status = RuleExecutionStatusOptions.Active;
     const reason = RuleExecutionStatusErrorReasons.Execute;
     const error = { reason, message: 'wops' };
 

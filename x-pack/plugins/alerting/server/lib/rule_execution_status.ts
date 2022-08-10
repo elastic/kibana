@@ -8,7 +8,7 @@
 import { Logger } from '@kbn/core/server';
 import {
   RuleExecutionStatus,
-  RuleExecutionStatusValues,
+  RuleExecutionStatusOptions,
   RuleExecutionStatusWarningReasons,
   RawRuleExecutionStatus,
 } from '../types';
@@ -30,26 +30,31 @@ export function executionStatusFromState(
 ): IExecutionStatusAndMetrics {
   const alertIds = Object.keys(stateWithMetrics.alertInstances ?? {});
 
-  const hasIncompleteAlertExecution =
-    stateWithMetrics.metrics.triggeredActionsStatus === ActionsCompletion.PARTIAL;
-
   let status: RuleExecutionStatuses =
-    alertIds.length === 0 ? RuleExecutionStatusValues[0] : RuleExecutionStatusValues[1];
+    alertIds.length === 0 ? RuleExecutionStatusOptions.Ok : RuleExecutionStatusOptions.Active;
 
-  if (hasIncompleteAlertExecution) {
-    status = RuleExecutionStatusValues[5];
+  // Check for warning states
+  let warning = null;
+  // We only have a single warning field so prioritizing the alert circuit breaker over the actions circuit breaker
+  if (stateWithMetrics.metrics.hasReachedAlertLimit) {
+    status = RuleExecutionStatusOptions.Warning;
+    warning = {
+      reason: RuleExecutionStatusWarningReasons.MAX_ALERTS,
+      message: translations.taskRunner.warning.maxAlerts,
+    };
+  } else if (stateWithMetrics.metrics.triggeredActionsStatus === ActionsCompletion.PARTIAL) {
+    status = RuleExecutionStatusOptions.Warning;
+    warning = {
+      reason: RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
+      message: translations.taskRunner.warning.maxExecutableActions,
+    };
   }
 
   return {
     status: {
       lastExecutionDate: lastExecutionDate ?? new Date(),
       status,
-      ...(hasIncompleteAlertExecution && {
-        warning: {
-          reason: RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
-          message: translations.taskRunner.warning.maxExecutableActions,
-        },
-      }),
+      ...(warning ? { warning } : {}),
     },
     metrics: stateWithMetrics.metrics,
   };
@@ -62,7 +67,7 @@ export function executionStatusFromError(
   return {
     status: {
       lastExecutionDate: lastExecutionDate ?? new Date(),
-      status: 'error',
+      status: RuleExecutionStatusOptions.Error,
       error: {
         reason: getReasonFromError(error),
         message: getEsErrorMessage(error),
@@ -99,7 +104,7 @@ export function ruleExecutionStatusFromRaw(
   const {
     lastExecutionDate,
     lastDuration,
-    status = 'unknown',
+    status = RuleExecutionStatusOptions.Unknown,
     error,
     warning,
   } = rawRuleExecutionStatus;

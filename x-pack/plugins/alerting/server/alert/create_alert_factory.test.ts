@@ -88,6 +88,25 @@ describe('createAlertFactory()', () => {
         `);
   });
 
+  test('throws error and sets flag when more alerts are created than allowed', () => {
+    const alertFactory = createAlertFactory({
+      alerts: {},
+      logger,
+      maxAlerts: 3,
+    });
+
+    expect(alertFactory.hasReachedAlertLimit()).toBe(false);
+    alertFactory.create('1');
+    alertFactory.create('2');
+    alertFactory.create('3');
+
+    expect(() => {
+      alertFactory.create('4');
+    }).toThrowErrorMatchingInlineSnapshot(`"Rule reported more than 3 alerts."`);
+
+    expect(alertFactory.hasReachedAlertLimit()).toBe(true);
+  });
+
   test('throws error when creating alerts after done() is called', () => {
     const alertFactory = createAlertFactory({
       alerts: {},

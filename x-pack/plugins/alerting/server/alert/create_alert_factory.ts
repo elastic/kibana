@@ -42,8 +42,11 @@ export function createAlertFactory<
   // Keep track of which alerts we started with so we can determine which have recovered
   const originalAlerts = cloneDeep(alerts);
 
-  // Keep track of the number of alerts reported
+  // Number of alerts reported
   let numAlertsCreated = 0;
+
+  // Whether the number of alerts reported has reached max allowed
+  let hasReachedAlertLimit = false;
 
   let isDone = false;
   return {
@@ -54,7 +57,8 @@ export function createAlertFactory<
 
       if (numAlertsCreated++ >= maxAlerts) {
         logger.warn(`Rule run generated greater than ${maxAlerts} alerts.`);
-        throw new Error(`Rule reporteD more than ${maxAlerts} alerts.`);
+        hasReachedAlertLimit = true;
+        throw new Error(`Rule reported more than ${maxAlerts} alerts.`);
       }
 
       if (!alerts[id]) {
@@ -63,7 +67,7 @@ export function createAlertFactory<
 
       return alerts[id];
     },
-
+    hasReachedAlertLimit: (): boolean => hasReachedAlertLimit,
     done: (): AlertFactoryDoneUtils<State, Context, ActionGroupIds> => {
       isDone = true;
       return {

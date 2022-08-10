@@ -18,7 +18,7 @@ import {
   RULE_DISK_USAGE,
   RULE_MEMORY_USAGE,
 } from '../../../common/constants';
-import { RuleExecutionStatusValues } from '@kbn/alerting-plugin/common';
+import { RuleExecutionStatusOptions } from '@kbn/alerting-plugin/common';
 import { AlertState } from '../../../common/types/alerts';
 
 jest.mock('../../legacy_shims', () => ({
@@ -54,7 +54,7 @@ const mockAlert = {
   muteAll: false,
   mutedInstanceIds: [],
   executionStatus: {
-    status: RuleExecutionStatusValues[0],
+    status: RuleExecutionStatusOptions.Ok,
     lastExecutionDate: new Date('2020-12-08'),
   },
   notifyWhen: null,

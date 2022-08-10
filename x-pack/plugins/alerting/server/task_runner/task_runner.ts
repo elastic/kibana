@@ -51,6 +51,7 @@ import {
   RuleTypeState,
   parseDuration,
   WithoutReservedActionGroups,
+  RuleExecutionStatusOptions,
 } from '../../common';
 import { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
@@ -281,6 +282,8 @@ export class TaskRunner<
       },
     } = this.taskInstance;
 
+    const ruleRunMetricsStore = new RuleRunMetricsStore();
+
     const executionHandler = this.getExecutionHandler(
       ruleId,
       rule.name,
@@ -327,6 +330,16 @@ export class TaskRunner<
       searchSourceClient,
     });
 
+    const alertFactory = createAlertFactory<
+      State,
+      Context,
+      WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
+    >({
+      alerts,
+      logger: this.logger,
+      maxAlerts: this.maxAlerts,
+      canSetRecoveryContext: ruleType.doesSetRecoveryContext ?? false,
+    });
     let updatedRuleTypeState: void | Record<string, unknown>;
     try {
       const ctx = {
@@ -351,16 +364,7 @@ export class TaskRunner<
             searchSourceClient: wrappedSearchSourceClient.searchSourceClient,
             uiSettingsClient: this.context.uiSettings.asScopedToClient(savedObjectsClient),
             scopedClusterClient: wrappedScopedClusterClient.client(),
-            alertFactory: createAlertFactory<
-              State,
-              Context,
-              WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
-            >({
-              alerts,
-              logger: this.logger,
-              maxAlerts: this.maxAlerts,
-              canSetRecoveryContext: ruleType.doesSetRecoveryContext ?? false,
-            }),
+            alertFactory,
             shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
             shouldStopExecution: () => this.cancelled,
           },
@@ -394,15 +398,20 @@ export class TaskRunner<
         })
       );
     } catch (err) {
-      this.alertingEventLogger.setExecutionFailed(
-        `rule execution failure: ${ruleLabel}`,
-        err.message
-      );
-      this.logger.error(err, {
-        tags: [this.ruleType.id, ruleId, 'rule-run-failed'],
-        error: { stack_trace: err.stack },
-      });
-      throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Execute, err);
+      // Check if this error is due to reaching the alert limit
+      if (alertFactory.hasReachedAlertLimit()) {
+        ruleRunMetricsStore.setHasReachedAlertLimit(true);
+      } else {
+        this.alertingEventLogger.setExecutionFailed(
+          `rule execution failure: ${ruleLabel}`,
+          err.message
+        );
+        this.logger.error(err, {
+          tags: [this.ruleType.id, ruleId, 'rule-run-failed'],
+          error: { stack_trace: err.stack },
+        });
+        throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Execute, err);
+      }
     }
 
     this.alertingEventLogger.setExecutionSucceeded(`rule executed: ${ruleLabel}`);
@@ -418,7 +427,6 @@ export class TaskRunner<
         scopedClusterClientMetrics.esSearchDurationMs +
         searchSourceClientMetrics.esSearchDurationMs,
     };
-    const ruleRunMetricsStore = new RuleRunMetricsStore();
 
     ruleRunMetricsStore.setNumSearches(searchMetrics.numSearches);
     ruleRunMetricsStore.setTotalSearchDurationMs(searchMetrics.totalSearchDurationMs);
@@ -780,7 +788,7 @@ export class TaskRunner<
     // Update the rule saved object with execution status
     const executionStatus: RuleExecutionStatus = {
       lastExecutionDate: new Date(),
-      status: 'error',
+      status: RuleExecutionStatusOptions.Error,
       error: {
         reason: RuleExecutionStatusErrorReasons.Timeout,
         message: `${this.ruleType.id}:${ruleId}: execution cancelled due to timeout - exceeded rule type timeout of ${this.ruleType.ruleTaskTimeout}`,
