@@ -83,7 +83,6 @@ export const RelatedAlertsBySession = React.memo<Props>(
         return SESSION_EMPTY;
       }
       const ensureOnlyRuleProviders: DataProvider = {
-        and: [],
         enabled: true,
         id: ALERT_RULE_UUID,
         name: ALERT_RULE_UUID,
