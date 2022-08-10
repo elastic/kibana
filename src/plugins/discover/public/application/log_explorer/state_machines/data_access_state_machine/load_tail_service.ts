@@ -37,18 +37,24 @@ export type LoadTailEvent =
 
 export const loadTail = ({
   dataView,
-  query,
+  query: queryService,
   searchSource,
 }: {
   dataView: DataView;
   query: QueryStart;
   searchSource: ISearchSource;
 }) => {
-  const boundFetchEntriesBefore = fetchEntriesBefore({ dataView, query, searchSource });
+  const boundFetchEntriesBefore = fetchEntriesBefore({
+    dataView,
+    query: queryService,
+    searchSource,
+  });
 
   return (context: LogExplorerContext): Observable<LoadTailEvent> => {
     const {
       configuration: { chunkSize },
+      filters,
+      query,
       timeRange,
     } = context;
 
@@ -61,6 +67,8 @@ export const loadTail = ({
         ['_doc', 'asc'], // _shard_doc is only available when used inside a PIT
       ],
       timeRange,
+      filters,
+      query,
     };
 
     return boundFetchEntriesBefore(fetchBeforeRequestParamters).pipe(

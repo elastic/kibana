@@ -8,7 +8,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { BehaviorSubject, Observable, OperatorFunction, PartialObserver, Subscription } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { share, switchMap, tap } from 'rxjs/operators';
 
 export const useLatest = <Value>(value: Value) => {
   const valueRef = useRef(value);
@@ -124,3 +124,34 @@ export const tapUnsubscribe =
       };
     });
   };
+
+export const createUnsubscriptionAbortSignal = () => {
+  const abortController = new AbortController();
+  let isAbortable = true;
+
+  const abortOnUnsubscribe =
+    <T>() =>
+    (observable: Observable<T>) =>
+      observable.pipe(
+        // avoid aborting failed or completed requests
+        tap({
+          error: () => {
+            isAbortable = false;
+          },
+          complete: () => {
+            isAbortable = false;
+          },
+        }),
+        tapUnsubscribe(() => {
+          if (isAbortable) {
+            abortController.abort();
+          }
+        }),
+        share()
+      );
+
+  return {
+    abortSignal: abortController.signal,
+    abortOnUnsubscribe,
+  };
+};
