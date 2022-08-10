@@ -10,6 +10,7 @@ import expect from '@kbn/expect';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import {
   CreateExceptionListSchema,
+  ExceptionListItemSchema,
   ExceptionListTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
@@ -75,7 +76,8 @@ export default ({ getService }: FtrProviderContext) => {
 
       const itemsWithoutServerGeneratedValues = items.map(
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        ({ item_id, ...restOfItem }) => removeExceptionListItemServerGeneratedProperties(restOfItem)
+        ({ item_id, ...restOfItem }: ExceptionListItemSchema) =>
+          removeExceptionListItemServerGeneratedProperties(restOfItem)
       );
       expect(itemsWithoutServerGeneratedValues).to.eql([
         {
@@ -129,7 +131,8 @@ export default ({ getService }: FtrProviderContext) => {
 
       const itemsWithoutServerGeneratedValues = items.map(
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        ({ item_id, ...restOfItem }) => removeExceptionListItemServerGeneratedProperties(restOfItem)
+        ({ item_id, ...restOfItem }: ExceptionListItemSchema) =>
+          removeExceptionListItemServerGeneratedProperties(restOfItem)
       );
       expect(udpatedRule.exceptions_list).to.eql([
         {
@@ -198,7 +201,8 @@ export default ({ getService }: FtrProviderContext) => {
 
       const itemsWithoutServerGeneratedValues = items.map(
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        ({ item_id, ...restOfItem }) => removeExceptionListItemServerGeneratedProperties(restOfItem)
+        ({ item_id, ...restOfItem }: ExceptionListItemSchema) =>
+          removeExceptionListItemServerGeneratedProperties(restOfItem)
       );
       expect(itemsWithoutServerGeneratedValues[0]).to.eql({
         comments: [],
