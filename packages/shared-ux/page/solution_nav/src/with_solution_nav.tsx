@@ -8,12 +8,8 @@
 
 import React, { ComponentType, useState } from 'react';
 import classNames from 'classnames';
-import {
-  useIsWithinBreakpoints,
-  EuiPageTemplateProps_Deprecated,
-  EuiPageSidebarProps,
-  useEuiTheme,
-} from '@elastic/eui';
+import { useIsWithinBreakpoints, useEuiTheme } from '@elastic/eui';
+import { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import { SolutionNav, SolutionNavProps } from './solution_nav';
 
 import './with_solution_nav.scss';
@@ -23,21 +19,16 @@ function getDisplayName(Component: ComponentType<any>) {
   return Component.displayName || Component.name || 'UnnamedComponent';
 }
 
-type TemplateProps = Pick<EuiPageTemplateProps_Deprecated, 'pageSideBar' | 'template' | 'children'>;
-
-type ComponentProps = TemplateProps & {
-  isEmptyState?: boolean;
-  pageSideBarProps?: EuiPageSidebarProps;
-};
+type TemplateProps = Pick<KibanaPageTemplateProps, 'pageSideBar' | 'pageSideBarProps' | 'children'>;
 
 type Props<P> = P &
-  ComponentProps & {
+  TemplateProps & {
     solutionNav: SolutionNavProps;
   };
 
 const SOLUTION_NAV_COLLAPSED_KEY = 'solutionNavIsCollapsed';
 
-export const withSolutionNav = <P extends ComponentProps>(WrappedComponent: ComponentType<P>) => {
+export const withSolutionNav = <P extends TemplateProps>(WrappedComponent: ComponentType<P>) => {
   const WithSolutionNav = (props: Props<P>) => {
     const isMediumBreakpoint = useIsWithinBreakpoints(['m']);
     const isLargerBreakpoint = useIsWithinBreakpoints(['l', 'xl']);
@@ -66,8 +57,6 @@ export const withSolutionNav = <P extends ComponentProps>(WrappedComponent: Comp
       props.pageSideBarProps?.className
     );
 
-    // const templateToUse = isEmptyState && !template ? 'centeredContent' : template;
-
     const pageSideBar = (
       <SolutionNav
         isOpenOnDesktop={isSideNavOpenOnDesktop}
@@ -76,7 +65,7 @@ export const withSolutionNav = <P extends ComponentProps>(WrappedComponent: Comp
       />
     );
 
-    const pageSideBarProps: EuiPageSidebarProps = {
+    const pageSideBarProps: KibanaPageTemplateProps['pageSideBarProps'] = {
       paddingSize: 'none' as 'none',
       ...props.pageSideBarProps,
       // TODO: `minWidth` isn't re-populating down on state change

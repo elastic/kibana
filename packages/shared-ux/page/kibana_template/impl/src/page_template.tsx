@@ -7,6 +7,7 @@
  */
 
 import React, { FC } from 'react';
+import { EuiPageTemplate } from '@elastic/eui';
 
 import {
   NoDataConfigPage,
@@ -16,7 +17,7 @@ import { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template-typ
 
 import { KibanaPageTemplateInner, KibanaPageTemplateWithSolutionNav } from './page_template_inner';
 
-export const KibanaPageTemplate: FC<KibanaPageTemplateProps> = ({
+export const _KibanaPageTemplate: FC<KibanaPageTemplateProps> = ({
   className,
   children,
   solutionNav,
@@ -60,3 +61,14 @@ export const KibanaPageTemplate: FC<KibanaPageTemplateProps> = ({
 
   return <KibanaPageTemplateInner className={className} children={children} {...rest} />;
 };
+
+/**
+ * Kibana-specific wrapper of EuiPageTemplate and it's namespaced components
+ */
+export const KibanaPageTemplate = Object.assign(_KibanaPageTemplate, {
+  Sidebar: EuiPageTemplate.Sidebar,
+  Header: EuiPageTemplate.Header,
+  Section: EuiPageTemplate.Section,
+  BottomBar: EuiPageTemplate.BottomBar,
+  EmptyPrompt: EuiPageTemplate.EmptyPrompt,
+});
