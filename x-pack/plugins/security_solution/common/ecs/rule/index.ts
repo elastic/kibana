@@ -20,6 +20,7 @@ export interface RuleEcs {
   from?: string[];
   immutable?: boolean[];
   index?: string[];
+  data_view_id?: string;
   interval?: string[];
   language?: string[];
   query?: string[];
