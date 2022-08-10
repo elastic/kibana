@@ -234,6 +234,9 @@ export function DualBrush({
           .attr('id', (b: DualBrush) => {
             return 'aiops-brush-' + b.id;
           })
+          .attr('data-test-subj', (b: DualBrush) => {
+            return 'aiopsBrush' + b.id.charAt(0).toUpperCase() + b.id.slice(1);
+          })
           .each((brushObject: DualBrush, i, n) => {
             const x = d3.scaleLinear().domain([min, max]).rangeRound([0, widthRef.current]);
             brushObject.brush(d3.select(n[i]));

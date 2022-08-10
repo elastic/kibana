@@ -11,8 +11,11 @@ import { farequoteDataViewTestData } from './test_data';
 
 export default function ({ getPageObject, getService }: FtrProviderContext) {
   const headerPage = getPageObject('header');
+  const browser = getService('browser');
+  const elasticChart = getService('elasticChart');
   const esArchiver = getService('esArchiver');
   const aiops = getService('aiops');
+  const testSubjects = getService('testSubjects');
 
   // aiops / Explain Log Rate Spikes lives in the ML UI so we need some related services.
   const ml = getService('ml');
@@ -56,6 +59,26 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
       await ml.testExecution.logTestStep('displays empty prompt');
       await aiops.explainLogRateSpikes.assertNoWindowParametersEmptyPromptExist();
+
+      await ml.testExecution.logTestStep('clicks the document count chart to start analysis');
+
+      await aiops.explainLogRateSpikes.clickDocumentCountChart();
+      await aiops.explainLogRateSpikes.assertAnalysisSectionExist();
+
+      await ml.testExecution.logTestStep('displays the no results found prompt');
+
+      await aiops.explainLogRateSpikes.assertNoResultsFoundEmptyPromptExist();
+
+      // #aiops-brush-deviation .handle--e
+      const brush = (await testSubjects.findAll('aiopsBrushDeviation'))[0];
+      const rightHandle = (await brush.findAllByClassName('handle--e'))[0];
+
+      await browser.dragAndDrop(
+        { location: rightHandle, offset: { x: 0, y: 0 } },
+        { location: rightHandle, offset: { x: 200, y: 0 } }
+      );
+
+      await aiops.explainLogRateSpikes.assertNoWindowParametersEmptyPromptExist();
     });
   }
 
@@ -71,12 +94,14 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
+      // await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
     });
 
     describe('with farequote', function () {
       // Run tests on full farequote index.
       it(`${farequoteDataViewTestData.suiteTitle} loads the explain log rate spikes page`, async () => {
+        await elasticChart.setNewChartUiDebugFlag();
+
         // Start navigation from the base of the ML app.
         await ml.navigation.navigateToMl();
       });

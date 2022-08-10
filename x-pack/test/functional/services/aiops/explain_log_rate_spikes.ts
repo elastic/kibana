@@ -10,6 +10,8 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export function ExplainLogRateSpikesProvider({ getService }: FtrProviderContext) {
+  const browser = getService('browser');
+  const elasticChart = getService('elasticChart');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
@@ -54,6 +56,29 @@ export function ExplainLogRateSpikesProvider({ getService }: FtrProviderContext)
 
     async assertNoWindowParametersEmptyPromptExist() {
       await testSubjects.existOrFail(`aiopsNoWindowParametersEmptyPrompt`);
+    },
+
+    async assertNoResultsFoundEmptyPromptExist() {
+      await testSubjects.existOrFail(`aiopsNoResultsFoundEmptyPrompt`);
+    },
+
+    async clickDocumentCountChart() {
+      await elasticChart.waitForRenderComplete();
+      const el = await elasticChart.getCanvas();
+
+      await browser.getActions().move({ x: 0, y: 0, origin: el._webElement }).click().perform();
+    },
+
+    async assertAnalysisSectionExist() {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.existOrFail(`aiopsExplainLogRateSpikesAnalysis`);
+      });
+    },
+
+    async assertRerunAnalysisButtonExit(shouldRerun: boolean) {
+      await testSubjects.existOrFail(
+        `aiopsRerunAnalysisButton${shouldRerun ? ' shouldRerun' : ''}`
+      );
     },
 
     async navigateToIndexPatternSelection() {
