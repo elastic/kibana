@@ -48,7 +48,7 @@ describe('RequestAdapter', () => {
       const req2 = adapter.start('req2');
 
       req1.finish(RequestStatus.OK, { json: { warning: 'this is a test of the unit' } });
-      req2.finish(RequestStatus.OK, { json: {} });
+      req2.finish(RequestStatus.OK, { json: { rawResponse: 'really good data' } });
 
       expect(adapter.extractWarnings()).toEqual([
         {
