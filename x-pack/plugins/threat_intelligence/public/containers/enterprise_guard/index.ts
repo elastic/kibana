@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-require('./_helpers').runGulpTask('canvas:test:common');
+export * from './enterprise_guard';
