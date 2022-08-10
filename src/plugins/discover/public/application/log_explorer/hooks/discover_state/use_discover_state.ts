@@ -76,11 +76,11 @@ export function useDiscoverState({
             storage,
           }),
         storeInSessionStorage: config.get('state:storeInSessionStorage'),
-        history,
+        history: usedHistory,
         toasts,
         uiSettings: config,
       }),
-    [config, data, history, savedSearch, toasts, storage]
+    [config, data, usedHistory, savedSearch, toasts, storage]
   );
 
   const { appStateContainer } = stateContainer;
