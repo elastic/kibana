@@ -6,6 +6,7 @@
  */
 
 import { CoreStart, ElasticsearchClient } from '@kbn/core/server';
+import { httpServiceMock } from '@kbn/core/server/mocks';
 import {
   createTestServers,
   createRootWithCorePlugins,
@@ -17,7 +18,11 @@ import { Readable } from 'stream';
 
 import type { FileStatus, File } from '../../common';
 
-import { fileKindsRegistry } from '../file_kinds_registry';
+import {
+  FileKindsRegistryImpl,
+  getFileKindsRegistry,
+  setFileKindsRegistry,
+} from '../file_kinds_registry';
 import { BlobStorageService } from '../blob_storage_service';
 import { FileServiceStart, FileServiceFactory } from '../file_service';
 import type { CreateFileArgs } from '../file_service/file_action_types';
@@ -46,6 +51,9 @@ describe('FileService', () => {
     await kbnRoot.preboot();
     coreSetup = await kbnRoot.setup();
     FileServiceFactory.setup(coreSetup.savedObjects);
+    coreStart = await kbnRoot.start();
+    setFileKindsRegistry(new FileKindsRegistryImpl(httpServiceMock.createRouter()));
+    const fileKindsRegistry = getFileKindsRegistry();
     fileKindsRegistry.register({
       id: fileKind,
       http: {},
@@ -60,7 +68,6 @@ describe('FileService', () => {
       maxSizeBytes: 10,
       http: {},
     });
-    coreStart = await kbnRoot.start();
     esClient = coreStart.elasticsearch.client.asInternalUser;
   });
 
@@ -79,7 +86,7 @@ describe('FileService', () => {
       coreStart.savedObjects,
       blobStorageService,
       security,
-      fileKindsRegistry,
+      getFileKindsRegistry(),
       kbnRoot.logger.get('test-file-service')
     );
     fileService = fileServiceFactory.asInternal();

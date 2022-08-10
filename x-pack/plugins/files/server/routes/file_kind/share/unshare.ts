@@ -7,8 +7,9 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import type { Ensure } from '@kbn/utility-types';
 
-import type { FileUnshareHttpEndpoint } from '../../api_routes';
-import { FileKindsRequestHandler } from '../types';
+import { FILES_API_ROUTES, FileUnshareHttpEndpoint } from '../../api_routes';
+import type { FileKind } from '../../../../common/types';
+import { FileKindRouter, FileKindsRequestHandler } from '../types';
 import { FileShareNotFoundError } from '../../../file_share_service/errors';
 
 export const method = 'delete' as const;
@@ -47,3 +48,20 @@ export const handler: FileKindsRequestHandler<Params, unknown, Body> = async (
     body,
   });
 };
+
+export function register(fileKindRouter: FileKindRouter, fileKind: FileKind) {
+  if (fileKind.http.share) {
+    fileKindRouter[method](
+      {
+        path: FILES_API_ROUTES.fileKind.getUnshareRoute(fileKind.id),
+        validate: {
+          params: paramsSchema,
+        },
+        options: {
+          tags: fileKind.http.share.tags,
+        },
+      },
+      handler
+    );
+  }
+}

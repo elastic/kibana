@@ -18,7 +18,11 @@ import { PLUGIN_ID } from '../common/constants';
 import { BlobStorageService } from './blob_storage_service';
 import { FileServiceFactory } from './file_service';
 import type { FilesPluginSetupDependencies, FilesSetup, FilesStart } from './types';
-import { fileKindsRegistry } from './file_kinds_registry';
+import {
+  setFileKindsRegistry,
+  getFileKindsRegistry,
+  FileKindsRegistryImpl,
+} from './file_kinds_registry';
 import type { FilesRequestHandlerContext, FilesRouter } from './routes/types';
 import { registerRoutes } from './routes';
 
@@ -49,21 +53,12 @@ export class FilesPlugin implements Plugin<FilesSetup, FilesStart, FilesPluginSe
     );
 
     const router: FilesRouter = core.http.createRouter();
-
-    core
-      .getStartServices()
-      .then(() => {
-        // File routes can only be registered during start phase because we need
-        // to give plugins a chance to register file kinds.
-        registerRoutes(router);
-      })
-      .catch(() => {
-        this.logger.error('Failed to register routes, file services may not function properly.');
-      });
+    registerRoutes(router);
+    setFileKindsRegistry(new FileKindsRegistryImpl(router));
 
     return {
       registerFileKind(fileKind) {
-        fileKindsRegistry.register(fileKind);
+        getFileKindsRegistry().register(fileKind);
       },
     };
   }
@@ -79,7 +74,7 @@ export class FilesPlugin implements Plugin<FilesSetup, FilesStart, FilesPluginSe
       savedObjects,
       blobStorageService,
       this.securitySetup,
-      fileKindsRegistry,
+      getFileKindsRegistry(),
       this.logger.get('files-service')
     );
 

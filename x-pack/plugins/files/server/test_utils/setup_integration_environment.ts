@@ -13,7 +13,7 @@ import {
 } from '@kbn/core/test_helpers/kbn_server';
 import pRetry from 'p-retry';
 import { FileJSON } from '../../common';
-import { fileKindsRegistry } from '../file_kinds_registry';
+import { getFileKindsRegistry } from '../file_kinds_registry';
 
 export type TestEnvironmentUtils = Awaited<ReturnType<typeof setupIntegrationEnvironment>>;
 
@@ -58,26 +58,6 @@ export async function setupIntegrationEnvironment() {
     return result.body.file;
   };
 
-  /**
-   * Register a test file type
-   */
-  const testHttpConfig = { tags: ['access:myapp'] };
-  fileKindsRegistry.register({
-    id: fileKind,
-    blobStoreSettings: {
-      esFixedSizeIndex: { index: testIndex },
-    },
-    http: {
-      create: testHttpConfig,
-      delete: testHttpConfig,
-      update: testHttpConfig,
-      download: testHttpConfig,
-      getById: testHttpConfig,
-      list: testHttpConfig,
-      share: testHttpConfig,
-    },
-  });
-
   const { startES } = createTestServers({
     adjustTimeout: jest.setTimeout,
     settings: {
@@ -95,7 +75,6 @@ export async function setupIntegrationEnvironment() {
     disposables = [];
     await esClient.indices.delete({ index: testIndex, ignore_unavailable: true });
   };
-
   const cleanupAfterAll = async () => {
     await root.shutdown();
     await manageES.stop();
@@ -109,6 +88,26 @@ export async function setupIntegrationEnvironment() {
   const root = createRootWithCorePlugins(testConfig, { oss: false });
   await root.preboot();
   await root.setup();
+
+  /**
+   * Register a test file type
+   */
+  const testHttpConfig = { tags: ['access:myapp'] };
+  getFileKindsRegistry().register({
+    id: fileKind,
+    blobStoreSettings: {
+      esFixedSizeIndex: { index: testIndex },
+    },
+    http: {
+      create: testHttpConfig,
+      delete: testHttpConfig,
+      update: testHttpConfig,
+      download: testHttpConfig,
+      getById: testHttpConfig,
+      list: testHttpConfig,
+      share: testHttpConfig,
+    },
+  });
   const coreStart = await root.start();
   const esClient = coreStart.elasticsearch.client.asInternalUser;
 

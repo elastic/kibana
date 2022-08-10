@@ -10,11 +10,13 @@ import { Ensure } from '@kbn/utility-types';
 import { Readable } from 'stream';
 
 import type { DownloadFileKindHttpEndpoint } from '../../../common/api_routes';
+import type { FileKind } from '../../../common/types';
 import { fileNameWithExt } from '../common_schemas';
 import { fileErrors } from '../../file';
 import { getDownloadHeadersForFile } from '../common';
 import { getById } from './helpers';
-import type { FileKindsRequestHandler } from './types';
+import type { FileKindRouter, FileKindsRequestHandler } from './types';
+import { FILES_API_ROUTES } from '../api_routes';
 
 export const method = 'get' as const;
 
@@ -51,3 +53,20 @@ export const handler: FileKindsRequestHandler<Params, unknown, Body> = async (
     throw e;
   }
 };
+
+export function register(fileKindRouter: FileKindRouter, fileKind: FileKind) {
+  if (fileKind.http.download) {
+    fileKindRouter[method](
+      {
+        path: FILES_API_ROUTES.fileKind.getDownloadRoute(fileKind.id),
+        validate: {
+          params: paramsSchema,
+        },
+        options: {
+          tags: fileKind.http.download.tags,
+        },
+      },
+      handler
+    );
+  }
+}

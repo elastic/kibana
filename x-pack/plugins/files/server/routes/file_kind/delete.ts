@@ -8,8 +8,10 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import type { Ensure } from '@kbn/utility-types';
 import type { DeleteFileKindHttpEndpoint } from '../../../common/api_routes';
+import type { FileKind } from '../../../common/types';
 import { fileErrors } from '../../file';
-import type { FileKindsRequestHandler } from './types';
+import { FILES_API_ROUTES } from '../api_routes';
+import type { FileKindRouter, FileKindsRequestHandler } from './types';
 
 import { getById } from './helpers';
 
@@ -46,3 +48,20 @@ export const handler: FileKindsRequestHandler<Params> = async ({ files, fileKind
   };
   return res.ok({ body });
 };
+
+export function register(fileKindRouter: FileKindRouter, fileKind: FileKind) {
+  if (fileKind.http.delete) {
+    fileKindRouter[method](
+      {
+        path: FILES_API_ROUTES.fileKind.getDeleteRoute(fileKind.id),
+        validate: {
+          params: paramsSchema,
+        },
+        options: {
+          tags: fileKind.http.delete.tags,
+        },
+      },
+      handler
+    );
+  }
+}
