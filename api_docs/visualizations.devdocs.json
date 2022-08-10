@@ -5157,7 +5157,11 @@
             "section": "def-public.ContainerOutput",
             "text": "ContainerOutput"
           },
-          "> | undefined; updateInput: (changes: Partial<",
+          "> | undefined; getQuery: () => Promise<",
+          "Query",
+          " | ",
+          "AggregateQuery",
+          " | undefined>; updateInput: (changes: Partial<",
           {
             "pluginId": "visualizations",
             "scope": "public",
@@ -5165,7 +5169,9 @@
             "section": "def-public.VisualizeInput",
             "text": "VisualizeInput"
           },
-          ">) => void; reportsEmbeddableLoad: () => boolean; getInspectorAdapters: () => ",
+          ">) => void; reportsEmbeddableLoad: () => boolean; getFilters: () => Promise<",
+          "Filter",
+          "[]>; getInspectorAdapters: () => ",
           {
             "pluginId": "inspector",
             "scope": "common",

@@ -54,6 +54,14 @@
             "docId": "kibEmbeddablePluginApi",
             "section": "def-public.SelfStyledEmbeddable",
             "text": "SelfStyledEmbeddable"
+          },
+          ",",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.FilterableEmbeddable",
+            "text": "FilterableEmbeddable"
           }
         ],
         "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
@@ -592,6 +600,48 @@
             "deprecated": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.Embeddable.getFilters",
+            "type": "Function",
+            "tags": [],
+            "label": "getFilters",
+            "description": [
+              "\nGets the Lens embeddable's local filters"
+            ],
+            "signature": [
+              "() => Promise<",
+              "Filter",
+              "[]>"
+            ],
+            "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": [
+              "Local/panel-level array of filters for Lens embeddable"
+            ]
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.Embeddable.getQuery",
+            "type": "Function",
+            "tags": [],
+            "label": "getQuery",
+            "description": [
+              "\nGets the Lens embeddable's local query"
+            ],
+            "signature": [
+              "() => Promise<",
+              "Query",
+              " | undefined>"
+            ],
+            "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": [
+              "Local/panel-level query for Lens embeddable"
+            ]
           },
           {
             "parentPluginId": "lens",
