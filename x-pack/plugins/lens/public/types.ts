@@ -721,7 +721,7 @@ export interface VisualizationSuggestion<T = unknown> {
   previewIcon: IconType;
 }
 
-export type DatasourceLayers = Record<string, DatasourcePublicAPI>;
+export type DatasourceLayers = Partial<Record<string, DatasourcePublicAPI>>;
 
 export interface FramePublicAPI {
   datasourceLayers: DatasourceLayers;
