@@ -253,13 +253,21 @@ export const LensTopNavMenu = ({
   );
   const dispatchChangeIndexPattern = React.useCallback(
     async (indexPatternId) => {
-      const newIndexPatterns = await indexPatternService.ensureIndexPattern({
-        id: indexPatternId,
-        cache: dataViews.indexPatterns,
-      });
+      const [newIndexPatternRefs, newIndexPatterns] = await Promise.all([
+        // Reload refs in case it's a new indexPattern created on the spot
+        dataViews.indexPatternRefs[indexPatternId]
+          ? dataViews.indexPatternRefs
+          : indexPatternService.loadIndexPatternRefs({
+              isFullEditor: true,
+            }),
+        indexPatternService.ensureIndexPattern({
+          id: indexPatternId,
+          cache: dataViews.indexPatterns,
+        }),
+      ]);
       dispatch(
         changeIndexPattern({
-          dataViews: { indexPatterns: newIndexPatterns },
+          dataViews: { indexPatterns: newIndexPatterns, indexPatternRefs: newIndexPatternRefs },
           datasourceIds: Object.keys(datasourceStates),
           visualizationIds: visualization.activeId ? [visualization.activeId] : [],
           indexPatternId,
@@ -267,6 +275,7 @@ export const LensTopNavMenu = ({
       );
     },
     [
+      dataViews.indexPatternRefs,
       dataViews.indexPatterns,
       datasourceStates,
       dispatch,
