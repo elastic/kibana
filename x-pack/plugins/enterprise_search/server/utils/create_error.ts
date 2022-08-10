@@ -9,16 +9,19 @@ import { KibanaResponseFactory } from '@kbn/core-http-server';
 
 import { ErrorCode } from '../../common/types/error_codes';
 
+export interface EnterpriseSearchError {
+  errorCode: ErrorCode;
+  message: string;
+  statusCode: number;
+}
+
 export function createError({
   errorCode,
   message,
   response,
   statusCode,
-}: {
-  errorCode: ErrorCode;
-  message: string;
+}: EnterpriseSearchError & {
   response: KibanaResponseFactory;
-  statusCode: number;
 }) {
   return response.customError({
     body: {
