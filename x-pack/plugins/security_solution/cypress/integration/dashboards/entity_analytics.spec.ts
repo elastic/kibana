@@ -13,6 +13,7 @@ import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { cleanKibana } from '../../tasks/common';
 import {
   ENABLE_HOST_RISK_SCORE_BUTTON,
+  ENABLE_USER_RISK_SCORE_BUTTON,
   HOSTS_DONUT_CHART,
   HOSTS_TABLE,
   TABLE_ROWS,
@@ -38,7 +39,7 @@ describe('Entity Analytics Dashboard', () => {
     });
 
     it('shows enable user risk button', () => {
-      cy.get(ENABLE_HOST_RISK_SCORE_BUTTON).should('be.visible');
+      cy.get(ENABLE_USER_RISK_SCORE_BUTTON).should('be.visible');
     });
   });
 
