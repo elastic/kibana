@@ -51,6 +51,7 @@ const UserRepresentationComponent: React.FC<UserRepresentationProps> = ({
 
   const onMouseEnter = useCallback(() => setIsHovering(true), []);
   const onMouseLeave = useCallback(() => setIsHovering(false), []);
+
   return (
     <EuiFlexGroup
       onMouseEnter={onMouseEnter}
@@ -58,7 +59,7 @@ const UserRepresentationComponent: React.FC<UserRepresentationProps> = ({
       alignItems="center"
       gutterSize="s"
       justifyContent="spaceBetween"
-      data-test-subj="user-profile-assigned-user-group"
+      data-test-subj={`user-profile-assigned-user-group-${profile.uid}`}
     >
       <EuiFlexItem grow={false}>
         <UserToolTip profile={profile}>
@@ -70,10 +71,10 @@ const UserRepresentationComponent: React.FC<UserRepresentationProps> = ({
           <EuiToolTip
             position="left"
             content={i18n.REMOVE_ASSIGNEE}
-            data-test-subj="user-profile-assigned-user-cross-tooltip"
+            data-test-subj={`user-profile-assigned-user-cross-tooltip-${profile.uid}`}
           >
             <EuiButtonIcon
-              data-test-subj="user-profile-assigned-user-cross"
+              data-test-subj={`user-profile-assigned-user-cross-${profile.uid}`}
               aria-label={i18n.REMOVE_ASSIGNEE_ARIA_LABEL}
               iconType="cross"
               color="danger"

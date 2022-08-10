@@ -20,7 +20,7 @@ const DEBOUNCE_MS = 500;
 
 export const useSuggestUserProfiles = ({
   name,
-  owner,
+  owners,
   size = DEFAULT_USER_SIZE,
 }: Omit<SuggestUserProfilesArgs, 'signal' | 'http'>) => {
   const { http } = useKibana().services;
@@ -34,14 +34,14 @@ export const useSuggestUserProfiles = ({
     [
       USER_PROFILES_CACHE_KEY,
       USER_PROFILES_SUGGEST_CACHE_KEY,
-      { name: debouncedName, owner, size },
+      { name: debouncedName, owners, size },
     ],
     () => {
       const abortCtrlRef = new AbortController();
       return suggestUserProfiles({
         http,
         name: debouncedName,
-        owner,
+        owners,
         size,
         signal: abortCtrlRef.signal,
       });

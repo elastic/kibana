@@ -12,6 +12,9 @@ import { userProfiles } from '../../containers/user_profiles/api.mock';
 import { AppMockRenderer, createAppMockRenderer } from '../../common/mock';
 
 describe('UserRepresentation', () => {
+  const dataTestSubjGroup = `user-profile-assigned-user-group-${userProfiles[0].uid}`;
+  const dataTestSubjCross = `user-profile-assigned-user-cross-${userProfiles[0].uid}`;
+
   let defaultProps: UserRepresentationProps;
   let appMockRender: AppMockRenderer;
 
@@ -27,24 +30,26 @@ describe('UserRepresentation', () => {
   it('does not show the cross button when the user is not hovering over the row', () => {
     appMockRender.render(<UserRepresentation {...defaultProps} />);
 
-    expect(screen.queryByTestId('user-profile-assigned-user-cross')).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId(`user-profile-assigned-user-cross-${userProfiles[0].uid}`)
+    ).not.toBeInTheDocument();
   });
 
-  it('does show the cross button when the user is hovering over the row', () => {
+  it('show the cross button when the user is hovering over the row', () => {
     appMockRender.render(<UserRepresentation {...defaultProps} />);
 
-    fireEvent.mouseEnter(screen.getByTestId('user-profile-assigned-user-group'));
+    fireEvent.mouseEnter(screen.getByTestId(dataTestSubjGroup));
 
-    expect(screen.getByTestId('user-profile-assigned-user-cross')).toBeInTheDocument();
+    expect(screen.getByTestId(dataTestSubjCross)).toBeInTheDocument();
   });
 
-  it('shows and then removes the cross button when the user hovers and removes the mouse over the row', () => {
+  it('shows and then removes the cross button when the user hovers and removes the mouse from over the row', () => {
     appMockRender.render(<UserRepresentation {...defaultProps} />);
 
-    fireEvent.mouseEnter(screen.getByTestId('user-profile-assigned-user-group'));
-    expect(screen.getByTestId('user-profile-assigned-user-cross')).toBeInTheDocument();
+    fireEvent.mouseEnter(screen.getByTestId(dataTestSubjGroup));
+    expect(screen.getByTestId(dataTestSubjCross)).toBeInTheDocument();
 
-    fireEvent.mouseLeave(screen.getByTestId('user-profile-assigned-user-group'));
-    expect(screen.queryByTestId('user-profile-assigned-user-cross')).not.toBeInTheDocument();
+    fireEvent.mouseLeave(screen.getByTestId(dataTestSubjGroup));
+    expect(screen.queryByTestId(dataTestSubjCross)).not.toBeInTheDocument();
   });
 });

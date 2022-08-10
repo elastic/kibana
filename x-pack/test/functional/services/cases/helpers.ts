@@ -23,6 +23,5 @@ export function generateRandomCaseWithoutConnector(): CasePostRequest {
       syncAlerts: false,
     },
     owner: 'cases',
-    assignees: [],
   };
 }

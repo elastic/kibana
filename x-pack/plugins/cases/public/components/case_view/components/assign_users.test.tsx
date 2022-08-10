@@ -64,6 +64,13 @@ describe('AssignUsers', () => {
     expect(screen.getByTestId('case-view-assignees-loading')).toBeInTheDocument();
   });
 
+  it('does not show the assign yourself link when the current profile is undefined', () => {
+    appMockRender.render(<AssignUsers {...{ ...defaultProps, currentUserProfile: undefined }} />);
+
+    expect(screen.queryByText('assign yourself')).not.toBeInTheDocument();
+    expect(screen.getByText('Assign a user')).toBeInTheDocument();
+  });
+
   it('shows the suggest users edit button when the user has update permissions', () => {
     appMockRender.render(<AssignUsers {...defaultProps} />);
 
@@ -174,7 +181,10 @@ describe('AssignUsers', () => {
     };
     appMockRender.render(<AssignUsers {...props} />);
 
-    fireEvent.click(screen.getByTestId('user-profile-assigned-user-cross'));
+    fireEvent.mouseEnter(
+      screen.getByTestId(`user-profile-assigned-user-group-${userProfiles[0].uid}`)
+    );
+    fireEvent.click(screen.getByTestId(`user-profile-assigned-user-cross-${userProfiles[0].uid}`));
 
     expect(onAssigneesChanged.mock.calls[0][0]).toMatchInlineSnapshot(`Array []`);
   });

@@ -76,6 +76,7 @@ export const useOnUpdateField = ({ caseData, caseId }: { caseData: Case; caseId:
           if (!deepEqual(caseData.assignees, value)) {
             callUpdate('assignees', assigneesUpdate);
           }
+          break;
         default:
           return null;
       }

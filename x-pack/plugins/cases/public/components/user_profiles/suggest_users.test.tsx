@@ -42,19 +42,17 @@ describe('SuggestUsers', () => {
 
     fireEvent.click(screen.getByText('Wet Dingo'));
 
-    expect(onUsersChange.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(onUsersChange.mock.calls[0][0]).toMatchInlineSnapshot(`
       Array [
-        Array [
-          Object {
-            "data": Object {},
-            "uid": "u_9xDEQqUqoYCnFnPPLq5mIRHKL8gBTo_NiKgOnd5gGk0_0",
-            "user": Object {
-              "email": "wet_dingo@elastic.co",
-              "full_name": "Wet Dingo",
-              "username": "wet_dingo",
-            },
+        Object {
+          "data": Object {},
+          "uid": "u_9xDEQqUqoYCnFnPPLq5mIRHKL8gBTo_NiKgOnd5gGk0_0",
+          "user": Object {
+            "email": "wet_dingo@elastic.co",
+            "full_name": "Wet Dingo",
+            "username": "wet_dingo",
           },
-        ],
+        },
       ]
     `);
   });

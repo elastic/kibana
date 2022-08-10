@@ -33,7 +33,7 @@ const SuggestUsersComponent: React.FC<SuggestUsersProps> = ({ selectedUsers, onU
 
   const { data: userProfiles, isLoading: isLoadingSuggest } = useSuggestUserProfiles({
     name: searchTerm,
-    owner,
+    owners: owner,
   });
   const { data: currentUserProfile, isLoading: isLoadingCurrentUser } = useGetCurrentUserProfile();
 
