@@ -3189,7 +3189,6 @@
     "discover.savedSearch.savedObjectName": "Recherche enregistrée",
     "discover.savedSearchAliasMatchRedirect.objectNoun": "Recherche {savedSearch}",
     "discover.savedSearchEmbeddable.action.viewSavedSearch.displayName": "Ouvrir dans Discover",
-    "discover.savedSearchEmbeddable.legacyURLConflict.errorMessage": "Cette recherche a la même URL qu'un alias hérité. Désactiver l'alias pour résoudre cette erreur : {json}",
     "discover.savedSearchURLConflictCallout.objectNoun": "Recherche {savedSearch}",
     "discover.searchGenerationWithDescription": "Tableau généré par la recherche {searchTitle}",
     "discover.searchGenerationWithDescriptionGrid": "Tableau généré par la recherche {searchTitle} ({searchDescription})",

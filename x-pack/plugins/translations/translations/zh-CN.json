@@ -3190,7 +3190,6 @@
     "discover.savedSearch.savedObjectName": "已保存搜索",
     "discover.savedSearchAliasMatchRedirect.objectNoun": "{savedSearch} 搜索",
     "discover.savedSearchEmbeddable.action.viewSavedSearch.displayName": "在 Discover 中打开",
-    "discover.savedSearchEmbeddable.legacyURLConflict.errorMessage": "此搜索具有与旧版别名相同的 URL。请禁用别名以解决此错误：{json}",
     "discover.savedSearchURLConflictCallout.objectNoun": "{savedSearch} 搜索",
     "discover.searchGenerationWithDescription": "搜索 {searchTitle} 生成的表",
     "discover.searchGenerationWithDescriptionGrid": "搜索 {searchTitle} 生成的表（{searchDescription}）",
