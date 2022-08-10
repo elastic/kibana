@@ -25,6 +25,7 @@ export async function findByName(client: SavedObjectsClientCommon, name: string)
       perPage: 10,
       search: `"${name}"`,
       searchFields: ['name.keyword'],
+      fields: ['name'],
     });
 
     return savedObjects ? savedObjects[0] : undefined;
