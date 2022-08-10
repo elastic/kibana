@@ -6,5 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { getRedirectAppLinksServicesMock, getRedirectAppLinksKibanaDependenciesMock } from './src/jest';
+export {
+  getRedirectAppLinksServicesMock,
+  getRedirectAppLinksKibanaDependenciesMock,
+} from './src/jest';
 export { StorybookMock as RedirectAppLinksStorybookMock } from './src/storybook';
