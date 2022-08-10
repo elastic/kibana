@@ -14,7 +14,7 @@ import { getCommonServices } from './get_common_services';
 import { LogLevel } from '../../lib/utils/create_logger';
 import { StreamProcessor } from '../../lib/stream_processor';
 import { Scenario } from '../scenario';
-import { EntityIterable, Fields } from '../..';
+import { EntityIterable, Fields } from '../../..';
 import { StreamAggregator } from '../../lib/stream_aggregator';
 import { ServiceLatencyAggregator } from '../../lib/apm/aggregators/service_latency_aggregator';
 
