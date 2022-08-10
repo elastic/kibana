@@ -500,7 +500,6 @@ export class DataViewsService {
     this.getFieldsForWildcard({
       type: indexPattern.type,
       rollupIndex: indexPattern?.typeMeta?.params?.rollup_index,
-      allowNoIndex: indexPattern.allowNoIndex,
       ...options,
       pattern: indexPattern.title as string,
     });

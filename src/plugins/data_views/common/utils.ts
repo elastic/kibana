@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { escapeKuery } from '@kbn/es-query';
 import type { DataViewSavedObjectAttrs } from './data_views';
 import type { SavedObjectsClientCommon } from './types';
 
@@ -24,8 +23,8 @@ export async function findByName(client: SavedObjectsClientCommon, name: string)
     const savedObjects = await client.find<DataViewSavedObjectAttrs>({
       type: DATA_VIEW_SAVED_OBJECT_TYPE,
       perPage: 10,
-      search: `"${escapeKuery(name)}"`,
-      searchFields: ['name.keyword'],
+      search: `"${name}"`,
+      searchFields: ['name'],
       fields: ['name'],
     });
 
