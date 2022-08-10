@@ -439,7 +439,7 @@ export class TaskRunner<
     >({
       alerts,
       existingAlerts: originalAlerts,
-      hasReachedAlertLimit: false,
+      hasReachedAlertLimit: alertFactory.hasReachedAlertLimit(),
       alertLimit: this.maxAlerts,
     });
 

@@ -83,7 +83,7 @@ export function createAlertFactory<
             {
               alerts,
               existingAlerts: originalAlerts,
-              hasReachedAlertLimit: false,
+              hasReachedAlertLimit,
               alertLimit: maxAlerts,
             }
           );
