@@ -617,7 +617,6 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       }),
     });
     if (
-      currentColumn &&
       !currentColumn.params.secondaryFields?.length &&
       supportsRarityRanking(indexPattern.getFieldByName(currentColumn.sourceField))
     ) {
@@ -635,10 +634,9 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       }),
     });
 
-    const secondaryFieldsCount =
-      currentColumn && currentColumn.params.secondaryFields
-        ? currentColumn.params.secondaryFields.length
-        : 0;
+    const secondaryFieldsCount = currentColumn.params.secondaryFields
+      ? currentColumn.params.secondaryFields.length
+      : 0;
 
     return (
       <>
