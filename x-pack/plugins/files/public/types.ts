@@ -30,8 +30,6 @@ export interface FilesClient {
   /**
    * Create a new file object with the provided metadata.
    *
-   * @note The file object that is created will be not have
-   *
    * @param args - create file args
    */
   create: ClientMethodFrom<CreateFileKindHttpEndpoint>;
