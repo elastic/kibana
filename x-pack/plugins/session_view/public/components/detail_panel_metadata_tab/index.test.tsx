@@ -86,14 +86,14 @@ const TEST_ORCHESTRATOR: ProcessEventOrchestrator = {
     name: TEST_ORCHESTRATOR_RESOURCE_NAME,
     type: TEST_ORCHESTRATOR_RESOURCE_TYPE,
     ip: TEST_ORCHESTRATOR_RESOURCE_IP,
+    parent: {
+      type: TEST_ORCHESTRATOR_PARENT_TYPE,
+    },
   },
   namespace: TEST_ORCHESTRATOR_NAMESPACE,
   cluster: {
     name: TEST_ORCHESTRATOR_CLUSTER_NAME,
     id: TEST_ORCHESTRATOR_CLUSTER_ID,
-  },
-  parent: {
-    type: TEST_ORCHESTRATOR_PARENT_TYPE,
   },
 };
 
@@ -215,7 +215,7 @@ describe('DetailPanelMetadataTab component', () => {
       expect(renderResult.queryByText('resource.type')).toBeVisible();
       expect(renderResult.queryByText('resource.ip')).toBeVisible();
       expect(renderResult.queryByText('namespace')).toBeVisible();
-      expect(renderResult.queryByText('parent.type')).toBeVisible();
+      expect(renderResult.queryByText('resource.parent.type')).toBeVisible();
       expect(renderResult.queryByText('cluster.id')).toBeVisible();
       expect(renderResult.queryByText('cluster.name')).toBeVisible();
       expect(renderResult.queryByText(TEST_ORCHESTRATOR_RESOURCE_NAME)).toBeVisible();

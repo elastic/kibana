@@ -472,15 +472,15 @@ export const DetailPanelMetadataTab = ({
                   </DetailPanelCopy>
                 ),
               },
-              {
-                title: <DetailPanelListItem>parent.type</DetailPanelListItem>,
-                description: (
+              { 
+                title: orchestratorData.resource.parent.type  && <DetailPanelListItem>resource.parent.type</DetailPanelListItem> ,
+                description: orchestratorData.resource.parent.type && (
                   <DetailPanelCopy
-                    textToCopy={`orchestrator.parent.type: "${orchestratorData.parent.type}"`}
-                    tooltipContent={orchestratorData.parent.type}
+                    textToCopy={`orchestrator.resource.parent.type: "${orchestratorData.resource.parent.type}"`}
+                    tooltipContent={orchestratorData.resource.parent.type}
                   >
                     <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                      {orchestratorData.parent.type}
+                      {orchestratorData.resource.parent.type}
                     </EuiTextColor>
                   </DetailPanelCopy>
                 ),
