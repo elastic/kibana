@@ -245,7 +245,6 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
 
   return (
     <>
-      <EuiSpacer />
       <EuiButtonGroup
         legend="Quick query or advanced query preview selector"
         data-test-subj="quickAdvancedToggleButtonGroup"
@@ -254,7 +253,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
         options={quickAdvancedToggleButtonOptions}
         color="primary"
       />
-      <EuiSpacer />
+      <EuiSpacer size="s" />
       {showAdvancedOptions && showInvocationCountWarning && (
         <>
           <EuiCallOut
