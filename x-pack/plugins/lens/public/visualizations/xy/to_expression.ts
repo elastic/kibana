@@ -35,7 +35,7 @@ import { layerTypes } from '../../../common';
 import { axisExtentConfigToExpression } from '../../shared_components';
 
 export const getSortedAccessors = (
-  datasource: DatasourcePublicAPI,
+  datasource: DatasourcePublicAPI | undefined,
   layer: XYDataLayerConfig | XYReferenceLineLayerConfig
 ) => {
   const originalOrder = datasource
@@ -66,7 +66,8 @@ export const toExpression = (
     const datasource = datasourceLayers[layer.layerId];
     if (datasource) {
       datasource.getTableSpec().forEach((column) => {
-        const operation = datasourceLayers[layer.layerId].getOperationForColumnId(column.columnId);
+        const operation =
+          datasourceLayers[layer.layerId]?.getOperationForColumnId(column.columnId) ?? null;
         metadata[layer.layerId][column.columnId] = operation;
       });
     }
@@ -375,7 +376,7 @@ const yAxisConfigsToExpression = (yAxisConfigs: AxisConfig[]): Ast[] => {
 
 const referenceLineLayerToExpression = (
   layer: XYReferenceLineLayerConfig,
-  datasourceLayer: DatasourcePublicAPI,
+  datasourceLayer: DatasourcePublicAPI | undefined,
   datasourceExpression: Ast
 ): Ast => {
   return {
@@ -425,7 +426,7 @@ const annotationLayerToExpression = (
 const dataLayerToExpression = (
   layer: ValidXYDataLayerConfig,
   yAxisConfigs: AxisConfig[],
-  datasourceLayer: DatasourcePublicAPI,
+  datasourceLayer: DatasourcePublicAPI | undefined,
   metadata: Record<string, Record<string, OperationMetadata | null>>,
   paletteService: PaletteRegistry,
   datasourceExpression: Ast

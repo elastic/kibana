@@ -30,7 +30,7 @@ import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-pl
 import { getSortForEmbeddable, SortPair } from '../utils/sorting';
 import { RecordRawType } from '../application/main/hooks/use_saved_search';
 import { buildDataTableRecord } from '../utils/build_data_record';
-import { DataTableRecord, SortPairArr } from '../types';
+import { DataTableRecord, SortPairArr, EsHitRecord } from '../types';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import { SavedSearch } from '../services/saved_searches';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
@@ -262,7 +262,7 @@ export class SavedSearchEmbeddable
       });
 
       this.searchProps!.rows = resp.hits.hits.map((hit) =>
-        buildDataTableRecord(hit, this.searchProps!.dataView)
+        buildDataTableRecord(hit as EsHitRecord, this.searchProps!.dataView)
       );
       this.searchProps!.totalHitCount = resp.hits.total as number;
       this.searchProps!.isLoading = false;
