@@ -30,6 +30,7 @@ RUNTIME_DEPS = [
   "//packages/kbn-config",
   "//packages/core/base/core-base-server-internal",
   "//packages/kbn-config-mocks",
+  "//packages/core/test-helpers/core-test-helpers-deprecations-getters",
 ]
 
 TYPES_DEPS = [
@@ -39,12 +40,14 @@ TYPES_DEPS = [
   "//packages/kbn-config:npm_module_types",
   "//packages/kbn-config-mocks:npm_module_types",
   "//packages/core/base/core-base-server-internal:npm_module_types",
+  "//packages/core/test-helpers/core-test-helpers-deprecations-getters:npm_module_types",
 ]
 
 jsts_transpiler(
   name = "target_node",
   srcs = SRCS,
   build_pkg_name = package_name(),
+  root_input_dir = "src",
 )
 
 ts_config(
