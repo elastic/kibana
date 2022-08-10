@@ -6,7 +6,6 @@
  */
 
 import { useSuggestUserProfiles } from '../../containers/user_profiles/use_suggest_user_profiles';
-import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
 import { AppMockRenderer, createAppMockRenderer } from '../../common/mock';
 import React from 'react';
 import { screen, fireEvent } from '@testing-library/react';
@@ -14,20 +13,17 @@ import { SuggestUsers } from './suggest_users';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
 
 jest.mock('../../containers/user_profiles/use_suggest_user_profiles');
-jest.mock('../../containers/user_profiles/use_get_current_user_profile');
 
 const useSuggestUserProfilesMock = useSuggestUserProfiles as jest.Mock;
-const useGetCurrentUserProfileMock = useGetCurrentUserProfile as jest.Mock;
+
+const currentUserProfile = userProfiles[0];
 
 describe('SuggestUsers', () => {
-  beforeEach(() => {
-    useSuggestUserProfilesMock.mockReturnValue({ data: userProfiles, isLoading: false });
-    useGetCurrentUserProfileMock.mockReturnValue({ data: userProfiles[0], isLoading: false });
-  });
-
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
+    useSuggestUserProfilesMock.mockReturnValue({ data: userProfiles, isLoading: false });
+
     appMockRender = createAppMockRenderer();
   });
 
@@ -35,6 +31,8 @@ describe('SuggestUsers', () => {
     const onUsersChange = jest.fn();
     const props = {
       onUsersChange,
+      currentUserProfile,
+      isLoading: false,
       selectedUsers: [],
     };
 

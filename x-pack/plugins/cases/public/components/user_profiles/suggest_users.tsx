@@ -10,14 +10,20 @@ import { UserProfilesSelectable, UserProfileWithAvatar } from '@kbn/user-profile
 
 import { useSuggestUserProfiles } from '../../containers/user_profiles/use_suggest_user_profiles';
 import { useCasesContext } from '../cases_context/use_cases_context';
-import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
 
 interface SuggestUsersProps {
   selectedUsers: UserProfileWithAvatar[];
+  isLoading: boolean;
+  currentUserProfile?: UserProfileWithAvatar;
   onUsersChange: (users: UserProfileWithAvatar[]) => void;
 }
 
-const SuggestUsersComponent: React.FC<SuggestUsersProps> = ({ selectedUsers, onUsersChange }) => {
+const SuggestUsersComponent: React.FC<SuggestUsersProps> = ({
+  selectedUsers,
+  isLoading,
+  currentUserProfile,
+  onUsersChange,
+}) => {
   const { owner } = useCasesContext();
   const [searchTerm, setSearchTerm] = useState('');
   const [currentSelectedUsers, setCurrentSelectedUsers] =
@@ -35,7 +41,6 @@ const SuggestUsersComponent: React.FC<SuggestUsersProps> = ({ selectedUsers, onU
     name: searchTerm,
     owners: owner,
   });
-  const { data: currentUserProfile, isLoading: isLoadingCurrentUser } = useGetCurrentUserProfile();
 
   const defaultOptions = currentUserProfile ? [currentUserProfile] : [];
 
@@ -46,7 +51,7 @@ const SuggestUsersComponent: React.FC<SuggestUsersProps> = ({ selectedUsers, onU
       options={userProfiles}
       selectedOptions={currentSelectedUsers}
       defaultOptions={defaultOptions}
-      isLoading={isLoadingSuggest || isLoadingCurrentUser}
+      isLoading={isLoadingSuggest || isLoading}
     />
   );
 };

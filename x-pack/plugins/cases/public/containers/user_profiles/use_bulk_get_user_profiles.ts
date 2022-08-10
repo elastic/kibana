@@ -32,6 +32,7 @@ export const useBulkGetUserProfiles = ({ uids }: { uids: string[] }) => {
       }, new Map<string, UserProfileWithAvatar>());
     },
     {
+      retry: false,
       onError: (error: ServerError) => {
         if (error.name !== 'AbortError') {
           toasts.addError(

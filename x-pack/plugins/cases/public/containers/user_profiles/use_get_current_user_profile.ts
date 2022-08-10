@@ -24,6 +24,7 @@ export const useGetCurrentUserProfile = () => {
       return getCurrentUserProfile({ security });
     },
     {
+      retry: false,
       onError: (error: ServerError) => {
         if (error.name !== 'AbortError') {
           toasts.addError(

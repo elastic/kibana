@@ -132,7 +132,12 @@ const AssignUsersComponent: React.FC<AssignUsersProps> = ({
                 minWidth: 520,
               }}
             >
-              <SuggestUsers onUsersChange={onUsersChange} selectedUsers={assigneesWithProfiles} />
+              <SuggestUsers
+                isLoading={isLoading}
+                currentUserProfile={currentUserProfile}
+                onUsersChange={onUsersChange}
+                selectedUsers={assigneesWithProfiles}
+              />
             </EuiPopover>
           </EuiFlexItem>
         )}
