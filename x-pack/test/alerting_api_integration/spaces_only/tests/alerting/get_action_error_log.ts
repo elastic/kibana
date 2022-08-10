@@ -26,8 +26,7 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
 
   const dateStart = new Date(Date.now() - 600000).toISOString();
 
-  // Failing: See https://github.com/elastic/kibana/issues/137004
-  describe.skip('getActionErrorLog', () => {
+  describe('getActionErrorLog', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     beforeEach(async () => {
@@ -126,7 +125,7 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
         .set('kbn-xsrf', 'foo')
         .send({
-          name: 'connector that throws',
+          name: 'throws_1',
           connector_type_id: 'test.throw',
           config: {},
           secrets: {},
@@ -138,7 +137,7 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
         .set('kbn-xsrf', 'foo')
         .send({
-          name: 'connector that throws',
+          name: 'throws_2',
           connector_type_id: 'test.throw',
           config: {},
           secrets: {},
@@ -152,6 +151,7 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
         .send(
           getTestRuleData({
             rule_type_id: 'test.cumulative-firing',
+            schedule: { interval: '5s' },
             actions: [
               {
                 id: createdConnector1.id,
@@ -183,7 +183,7 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
       const filteredResponse = await supertest.get(
         `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${
           createdRule.id
-        }/_action_error_log?filter=message:"${createdConnector1.id}"&date_start=${dateStart}`
+        }/_action_error_log?filter=message:"throws_1"&date_start=${dateStart}`
       );
 
       expect(filteredResponse.body.totalErrors).to.eql(1);
