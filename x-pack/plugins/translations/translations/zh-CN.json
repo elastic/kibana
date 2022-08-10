@@ -11606,7 +11606,6 @@
     "xpack.enterpriseSearch.content.searchIndices.searchIndices.stepsTitle": "通过 Enterprise Search 构建出色的搜索体验",
     "xpack.enterpriseSearch.content.searchIndices.searchIndices.tableTitle": "搜索索引",
     "xpack.enterpriseSearch.crawler.action.deleteDomain.confirmationPopupMessage": "确定要移除域“{domainUrl}”和其所有设置？",
-    "xpack.enterpriseSearch.crawler.action.deleteDomain.successMessage": "域“{domainUrl}”已删除",
     "xpack.enterpriseSearch.crawler.addDomainFlyout.openButtonLabel": "添加域",
     "xpack.enterpriseSearch.crawler.addDomainFlyout.title": "添加新域",
     "xpack.enterpriseSearch.crawler.addDomainForm.contentVerificationLabel": "内容验证",

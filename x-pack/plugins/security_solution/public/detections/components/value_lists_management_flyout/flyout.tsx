@@ -71,7 +71,14 @@ export const ValueListsFlyoutComponent: React.FC<ValueListsFlyoutProps> = ({
   );
 
   const fetchLists = useCallback(() => {
-    findLists({ cursor, http, pageIndex: pageIndex + 1, pageSize });
+    findLists({
+      cursor,
+      http,
+      pageIndex: pageIndex + 1,
+      pageSize,
+      sortOrder: 'desc',
+      sortField: 'created_at',
+    });
   }, [cursor, http, findLists, pageIndex, pageSize]);
 
   const handleDelete = useCallback(
@@ -163,6 +170,7 @@ export const ValueListsFlyoutComponent: React.FC<ValueListsFlyoutProps> = ({
         title: i18n.UPLOAD_SUCCESS_TITLE,
       });
       fetchLists();
+      setPageIndex(0);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [addSuccess]
