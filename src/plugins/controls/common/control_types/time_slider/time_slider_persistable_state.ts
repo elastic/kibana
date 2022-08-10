@@ -11,20 +11,13 @@ import {
   EmbeddablePersistableStateService,
 } from '@kbn/embeddable-plugin/common';
 import { SavedObjectReference } from '@kbn/core/types';
-import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import { TimeSliderControlEmbeddableInput } from './types';
 
 type TimeSliderInputWithType = Partial<TimeSliderControlEmbeddableInput> & { type: string };
-const dataViewReferenceName = 'timeSliderDataView';
 
 export const createTimeSliderInject = (): EmbeddablePersistableStateService['inject'] => {
   return (state: EmbeddableStateWithType, references: SavedObjectReference[]) => {
     const workingState = { ...state } as EmbeddableStateWithType | TimeSliderInputWithType;
-    references.forEach((reference) => {
-      if (reference.name === dataViewReferenceName) {
-        (workingState as TimeSliderInputWithType).dataViewId = reference.id;
-      }
-    });
     return workingState as EmbeddableStateWithType;
   };
 };
@@ -34,14 +27,6 @@ export const createTimeSliderExtract = (): EmbeddablePersistableStateService['ex
     const workingState = { ...state } as EmbeddableStateWithType | TimeSliderInputWithType;
     const references: SavedObjectReference[] = [];
 
-    if ('dataViewId' in workingState) {
-      references.push({
-        name: dataViewReferenceName,
-        type: DATA_VIEW_SAVED_OBJECT_TYPE,
-        id: workingState.dataViewId!,
-      });
-      delete workingState.dataViewId;
-    }
     return { state: workingState as EmbeddableStateWithType, references };
   };
 };

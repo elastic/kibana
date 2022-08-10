@@ -34,16 +34,9 @@ import {
   CONTROL_GROUP_TYPE,
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
-  // TIME_SLIDER_CONTROL,
+  TIME_SLIDER_CONTROL,
 } from '.';
-/*
-import {
-  TimesliderEmbeddableFactory,
-  TimeSliderControlEmbeddableInput,
-} from './control_types/time_slider';
-*/
 import { controlsService } from './services/kibana/controls';
-import { TIME_SLIDER_CONTROL } from '../common';
 
 export class ControlsPlugin
   implements
