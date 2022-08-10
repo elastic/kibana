@@ -15,13 +15,6 @@ import { Duplex, Writable, Readable } from 'stream';
 
 import type { FileChunkDocument } from '../mappings';
 
-/**
- * @note The Elasticsearch `http.max_content_length` is including the whole POST body.
- * But the update/index request also contains JSON-serialized query parameters.
- * 1Kb span should be enough for that.
- */
-const REQUEST_SPAN_SIZE_IN_BYTES = 1024;
-
 type Callback = (error?: Error) => void;
 
 export type ContentStreamEncoding = 'base64' | 'raw';
@@ -47,13 +40,6 @@ export interface ContentStreamParameters {
 }
 
 export class ContentStream extends Duplex {
-  /**
-   * @see https://en.wikipedia.org/wiki/Base64#Output_padding
-   */
-  private static getMaxBase64EncodedSize(max: number) {
-    return Math.floor(max / 4) * 3;
-  }
-
   private buffers: Buffer[] = [];
   private bytesBuffered = 0;
 
@@ -90,8 +76,7 @@ export class ContentStream extends Duplex {
 
   private getMaxChunkSize() {
     if (!this.maxChunkSize) {
-      const maxContentSize = this.getMaxContentSize() - REQUEST_SPAN_SIZE_IN_BYTES;
-      this.maxChunkSize = ContentStream.getMaxBase64EncodedSize(maxContentSize);
+      this.maxChunkSize = this.getMaxContentSize();
       this.logger.debug(`Chunk size is ${this.maxChunkSize} bytes.`);
     }
 

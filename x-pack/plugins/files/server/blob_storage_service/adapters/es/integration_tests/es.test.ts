@@ -99,8 +99,8 @@ describe('Elasticsearch blob storage', () => {
   });
 
   it('uploads and downloads a file of many chunks', async () => {
-    const fileString = 'upload this'.repeat(10);
-    esBlobStorage = createEsBlobStorage({ chunkSize: '1028B' });
+    const fileString = Buffer.alloc(36 * 1028, 'a');
+    esBlobStorage = createEsBlobStorage({ chunkSize: '1024B' });
     const { id } = await esBlobStorage.upload(Readable.from([fileString]));
     expect(await getAllDocCount()).toMatchObject({ count: 37 });
     const rs = await esBlobStorage.download({ id });
@@ -108,7 +108,7 @@ describe('Elasticsearch blob storage', () => {
     for await (const chunk of rs) {
       chunks.push(chunk);
     }
-    expect(chunks.join('')).toBe(fileString);
+    expect(chunks.join('')).toBe(fileString.toString('utf-8'));
   });
 
   const getAllDocCount = async () => {
@@ -127,20 +127,36 @@ describe('Elasticsearch blob storage', () => {
   });
 
   it('chunks files and then deletes all chunks when cleaning up', async () => {
-    const fileString = 'upload this'.repeat(10);
-    esBlobStorage = createEsBlobStorage({ chunkSize: '1028B' });
+    const oneMiB = 1024 * 1024;
+    const fileString = Buffer.alloc(31 * oneMiB, 'a');
+    const fileString2 = Buffer.alloc(8 * oneMiB, 'b');
+
+    esBlobStorage = createEsBlobStorage();
     const { id } = await esBlobStorage.upload(Readable.from([fileString]));
-    const fileString2 = 'another file'.repeat(10);
     const { id: id2 } = await esBlobStorage.upload(Readable.from([fileString2]));
-    expect(await getAllDocCount()).toMatchObject({ count: 77 });
+    expect(await getAllDocCount()).toMatchObject({ count: 10 });
     await esBlobStorage.delete(id);
-    expect(await getAllDocCount()).toMatchObject({ count: 40 });
+    expect(await getAllDocCount()).toMatchObject({ count: 2 });
     // Now we check that the other file is still intact
     const rs = await esBlobStorage.download({ id: id2 });
-    const chunks: string[] = [];
+    const chunks: Buffer[] = [];
     for await (const chunk of rs) {
       chunks.push(chunk);
     }
-    expect(chunks.join('')).toBe(fileString2);
+    const resultString = chunks.join('');
+    expect(resultString).toBe(fileString2.toString('utf-8'));
+  });
+
+  it('stores chunks at exactly max chunk size', async () => {
+    esBlobStorage = createEsBlobStorage({ chunkSize: '1024B' });
+    const fileBuffer = Buffer.alloc(2048, 'a');
+    const { id } = await esBlobStorage.upload(Readable.from([fileBuffer]));
+    expect(await getAllDocCount()).toMatchObject({ count: 2 });
+    const rs = await esBlobStorage.download({ id });
+    const chunks: Buffer[] = [];
+    for await (const chunk of rs) {
+      chunks.push(chunk);
+    }
+    expect(chunks.join('')).toEqual(fileBuffer.toString('utf-8'));
   });
 });

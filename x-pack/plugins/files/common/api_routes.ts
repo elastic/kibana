@@ -123,12 +123,7 @@ export type FindFilesHttpEndpoint = HttpApiInterfaceEntryDefinition<
     /**
      * Filter for set of meta attributes matching this object
      */
-    meta: {};
-
-    /**
-     * Filter for exact match on MIME types
-     */
-    mimeType?: string[];
+    meta?: {};
 
     /**
      * Filter for match on extensions

@@ -1,6 +1,6 @@
 # files
 
-Bringing blob storage to Kibana
+File upload, download, sharing, and serving over HTTP implementation in Kibana.
 
 ## Status
 

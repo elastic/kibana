@@ -6,7 +6,7 @@
     "name": "@elastic/kibana-app-services",
     "githubTeam": "team:AppServicesUx"
   },
-  "description": "Bringing blob storage to Kibana",
+  "description": "File upload, download, sharing, and serving over HTTP implementation in Kibana.",
   "server": true,
   "ui": true,
   "requiredPlugins": [],

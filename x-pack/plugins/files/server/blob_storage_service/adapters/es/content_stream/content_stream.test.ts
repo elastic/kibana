@@ -228,7 +228,7 @@ describe('ContentStream', () => {
     });
 
     it('should split data into chunks', async () => {
-      stream = getContentStream({ params: { maxChunkSize: '1028B' } });
+      stream = getContentStream({ params: { maxChunkSize: '3B' } });
       stream.end('123456789');
       await new Promise((resolve) => stream.once('finish', resolve));
 
@@ -269,7 +269,7 @@ describe('ContentStream', () => {
     });
 
     it('should encode every chunk separately', async () => {
-      stream = getContentStream({ params: { maxChunkSize: '1028B' } });
+      stream = getContentStream({ params: { maxChunkSize: '3B' } });
       stream.end('12345678');
       await new Promise((resolve) => stream.once('finish', resolve));
 
