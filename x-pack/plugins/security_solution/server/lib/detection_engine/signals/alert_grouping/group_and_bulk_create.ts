@@ -11,15 +11,16 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { AlertInstanceState, AlertInstanceContext } from '@kbn/alerting-plugin/common';
 import type { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 
-import { withSecuritySpan } from '../../../utils/with_security_span';
-import { buildTimeRangeFilter } from './build_events_query';
+import { withSecuritySpan } from '../../../../utils/with_security_span';
+import { buildTimeRangeFilter } from '../build_events_query';
 import type {
   EventGroupingMultiBucketAggregationResult,
   SearchAfterAndBulkCreateParams,
   SearchAfterAndBulkCreateReturnType,
   SignalSource,
-} from './types';
-import { createSearchAfterReturnType } from './utils';
+} from '../types';
+import { createSearchAfterReturnType } from '../utils';
+import { buildGroupByFieldAggregation } from './build_group_by_field_aggregation';
 
 interface BaseArgs {
   baseQuery: estypes.SearchRequest;
@@ -31,34 +32,6 @@ interface GetEventsByGroupArgs extends BaseArgs {
   maxSignals: number;
   sort: estypes.Sort;
 }
-
-interface GetGroupByFieldAggregationArgs {
-  groupByFields: string[];
-  maxSignals: number;
-  sort: estypes.Sort;
-}
-
-export const buildGroupByFieldAggregation = ({
-  groupByFields,
-  maxSignals,
-  sort,
-}: GetGroupByFieldAggregationArgs) => ({
-  eventGroups: {
-    terms: {
-      field: groupByFields[0],
-      size: maxSignals,
-      min_doc_count: 1,
-    },
-    aggs: {
-      topHits: {
-        top_hits: {
-          sort,
-          size: maxSignals,
-        },
-      },
-    },
-  },
-});
 
 const getEventsByGroup = async ({
   baseQuery,
