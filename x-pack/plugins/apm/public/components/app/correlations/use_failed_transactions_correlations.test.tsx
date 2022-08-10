@@ -168,6 +168,9 @@ describe('useFailedTransactionsCorrelations', () => {
       );
 
       try {
+        // Each simulated request takes 100ms. After an inital 50ms
+        // we track the internal requests the hook is running and
+        // check the expected progress after these requests.
         jest.advanceTimersByTime(50);
         await waitFor(() => expect(result.current.progress.loaded).toBe(0));
         jest.advanceTimersByTime(100);
