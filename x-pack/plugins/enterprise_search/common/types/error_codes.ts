@@ -12,4 +12,5 @@ export enum ErrorCode {
   INDEX_NOT_FOUND = 'index_not_found',
   RESOURCE_NOT_FOUND = 'resource_not_found',
   UNAUTHORIZED = 'unauthorized',
+  UNCAUGHT_EXCEPTION = 'uncaught_exception',
 }
