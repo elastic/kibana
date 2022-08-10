@@ -49,20 +49,25 @@ export const Insights = React.memo<Props>(
       { category: 'kibana', field: 'kibana.alert.rule.parameters.index' },
       data
     );
-    const hasProcessEntityInfo = processEntityField && processEntityField.values;
+    const hasProcessEntityInfo =
+      processEntityField && processEntityField.values && processEntityField.values.length;
 
     const processSessionField = find(
       { category: 'process', field: 'process.entry_leader.entity_id' },
       data
     );
     const hasProcessSessionInfo =
-      isRelatedAlertsByProcessAncestryEnabled && processSessionField && processSessionField.values;
+      isRelatedAlertsByProcessAncestryEnabled &&
+      processSessionField &&
+      processSessionField.values &&
+      processSessionField.values.length;
 
     const sourceEventField = find(
       { category: 'kibana', field: 'kibana.alert.original_event.id' },
       data
     );
-    const hasSourceEventInfo = sourceEventField && sourceEventField.values;
+    const hasSourceEventInfo =
+      sourceEventField && sourceEventField.values && sourceEventField.values.length;
 
     const userCasesPermissions = useGetUserCasesPermissions();
     const hasCasesReadPermissions = userCasesPermissions.read;
@@ -80,6 +85,7 @@ export const Insights = React.memo<Props>(
       isRelatedAlertsByProcessAncestryEnabled &&
       processEntityField &&
       processEntityField.values &&
+      processEntityField.values.length &&
       originalDocumentId &&
       originalDocumentIndex;
 
