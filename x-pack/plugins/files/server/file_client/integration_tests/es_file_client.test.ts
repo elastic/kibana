@@ -199,7 +199,17 @@ describe('ES-index-backed file client', () => {
 
     expect(list).toHaveLength(1);
     expect(list[0]).toEqual(
-      expect.objectContaining({ id: id1, metadata: { Status: 'AWAITING_UPLOAD' } })
+      expect.objectContaining({
+        id: '123',
+        metadata: {
+          FileKind: 'none',
+          Meta: { test: '1' },
+          Status: 'AWAITING_UPLOAD',
+          Updated: '2022-08-09T15:54:22.852Z',
+          created: '2022-08-09T15:54:22.852Z',
+          name: 'cool name 1',
+        },
+      })
     );
 
     await Promise.all([fileClient.delete({ id: id1 }), fileClient.delete({ id: id2 })]);
