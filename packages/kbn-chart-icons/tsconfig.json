@@ -1,0 +1,19 @@
+{
+  "extends": "../../tsconfig.bazel.json",
+  "compilerOptions": {
+    "declaration": true,
+    "declarationMap": true,
+    "emitDeclarationOnly": true,
+    "outDir": "target_types",
+    "rootDir": "src",
+    "types": [
+      "jest",
+      "node",
+      "react",
+      "@emotion/css/types"
+    ],
+  },
+  "include": [
+    "src/**/*",
+  ]
+}

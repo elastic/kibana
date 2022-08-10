@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TriangleIcon, CircleIcon } from '../icons';
+import { IconTriangle, IconCircle } from '@kbn/chart-icons';
 import { AvailableReferenceLineIcons } from '../../common/constants';
 
 export function hasIcon(icon: string | undefined): icon is string {
@@ -56,7 +56,7 @@ export const iconSet = [
     label: i18n.translate('expressionXY.xyChart.iconSelect.circleIconLabel', {
       defaultMessage: 'Circle',
     }),
-    icon: CircleIcon,
+    icon: IconCircle,
     canFill: true,
   },
 
@@ -105,7 +105,7 @@ export const iconSet = [
     label: i18n.translate('expressionXY.xyChart.iconSelect.triangleIconLabel', {
       defaultMessage: 'Triangle',
     }),
-    icon: TriangleIcon,
+    icon: IconTriangle,
     shouldRotate: true,
     canFill: true,
   },

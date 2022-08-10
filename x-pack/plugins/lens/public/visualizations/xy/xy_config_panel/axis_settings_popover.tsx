@@ -23,7 +23,7 @@ import {
   EuiIconAxisLeft,
   EuiIconAxisRight,
   EuiIconAxisTop,
-} from '@kbn/lens-icons';
+} from '@kbn/chart-icons';
 import { isHorizontalChart } from '../state_helpers';
 import {
   ToolbarPopover,

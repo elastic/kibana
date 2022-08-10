@@ -26,7 +26,7 @@ import type {
 import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
 import { layerTypes } from '../../../common';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
-import { LensIconChartBar } from '@kbn/lens-icons';
+import { IconChartBar } from '@kbn/chart-icons';
 import type { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
@@ -106,7 +106,7 @@ describe('xy_visualization', () => {
     it('should show the preferredSeriesType if there are no layers', () => {
       const desc = xyVisualization.getDescription(mixedState());
 
-      expect(desc.icon).toEqual(LensIconChartBar);
+      expect(desc.icon).toEqual(IconChartBar);
       expect(desc.label).toEqual('Bar vertical');
     });
 

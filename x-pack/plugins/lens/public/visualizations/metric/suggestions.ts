@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LensIconChartMetric } from '@kbn/lens-icons';
+import { IconChartMetric } from '@kbn/chart-icons';
 import type { TableSuggestion, Visualization } from '../../types';
 import { layerTypes } from '../../../common';
 import { metricLabel, MetricVisualizationState, supportedDataTypes } from './visualization';
@@ -59,7 +59,7 @@ export const getSuggestions: Visualization<MetricVisualizationState>['getSuggest
       layerType: layerTypes.DATA,
     },
     title: metricLabel,
-    previewIcon: LensIconChartMetric,
+    previewIcon: IconChartMetric,
     score: 0.5,
     // don't show suggestions since we're in tech preview
     hide: true,

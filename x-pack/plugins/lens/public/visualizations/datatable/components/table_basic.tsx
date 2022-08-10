@@ -29,7 +29,7 @@ import {
 } from '@elastic/eui';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { ClickTriggerEvent } from '@kbn/charts-plugin/public';
-import { LensIconChartDatatable } from '@kbn/lens-icons';
+import { IconChartDatatable } from '@kbn/chart-icons';
 import type { LensTableRowContextMenuEvent } from '../../../types';
 import type { FormatFactory } from '../../../../common';
 import type { LensGridDirection } from '../../../../common/expressions';
@@ -413,7 +413,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   if (isEmpty) {
     return (
       <VisualizationContainer className="lnsDataTableContainer">
-        <EmptyPlaceholder icon={LensIconChartDatatable} />
+        <EmptyPlaceholder icon={IconChartDatatable} />
       </VisualizationContainer>
     );
   }

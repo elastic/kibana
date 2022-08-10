@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, IconType } from '@elastic/eui';
 import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
-import { EuiIconAxisLeft, EuiIconAxisBottom } from '@kbn/lens-icons';
+import { EuiIconAxisLeft, EuiIconAxisBottom } from '@kbn/chart-icons';
 import type { VisualizationToolbarProps } from '../../types';
 import {
   LegendSettingsPopover,

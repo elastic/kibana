@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiIcon, EuiPopover, EuiSelectable, EuiText, EuiPopoverTitle } from '@elastic/eui';
 import { ToolbarButton } from '@kbn/kibana-react-plugin/public';
-import { LensIconChartBarReferenceLine, LensIconChartBarAnnotations } from '@kbn/lens-icons';
+import { IconChartBarReferenceLine, IconChartBarAnnotations } from '@kbn/chart-icons';
 import type { VisualizationLayerWidgetProps, VisualizationType } from '../../../types';
 import { State, visualizationTypes, SeriesType } from '../types';
 import { isHorizontalChart, isHorizontalSeries } from '../state_helpers';
@@ -33,7 +33,7 @@ export function LayerHeader(props: VisualizationLayerWidgetProps<State>) {
 function ReferenceLayerHeader() {
   return (
     <StaticHeader
-      icon={LensIconChartBarReferenceLine}
+      icon={IconChartBarReferenceLine}
       label={i18n.translate('xpack.lens.xyChart.layerReferenceLineLabel', {
         defaultMessage: 'Reference lines',
       })}
@@ -44,7 +44,7 @@ function ReferenceLayerHeader() {
 function AnnotationsLayerHeader() {
   return (
     <StaticHeader
-      icon={LensIconChartBarAnnotations}
+      icon={IconChartBarAnnotations}
       label={i18n.translate('xpack.lens.xyChart.layerAnnotationsLabel', {
         defaultMessage: 'Annotations',
       })}

@@ -2991,6 +2991,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/chart-icons@link:bazel-bin/packages/kbn-chart-icons":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ci-stats-core@link:bazel-bin/packages/kbn-ci-stats-core":
   version "0.0.0"
   uid ""
@@ -3588,10 +3592,6 @@
   uid ""
 
 "@kbn/kibana-manifest-schema@link:bazel-bin/packages/kbn-kibana-manifest-schema":
-  version "0.0.0"
-  uid ""
-
-"@kbn/lens-icons@link:bazel-bin/x-pack/packages/lens/icons":
   version "0.0.0"
   uid ""
 
@@ -6907,6 +6907,10 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__chart-icons@link:bazel-bin/packages/kbn-chart-icons/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__ci-stats-core@link:bazel-bin/packages/kbn-ci-stats-core/npm_module_types":
   version "0.0.0"
   uid ""
@@ -7508,10 +7512,6 @@
   uid ""
 
 "@types/kbn__kibana-manifest-schema@link:bazel-bin/packages/kbn-kibana-manifest-schema/npm_module_types":
-  version "0.0.0"
-  uid ""
-
-"@types/kbn__lens-icons@link:bazel-bin/x-pack/packages/lens/icons/npm_module_types":
   version "0.0.0"
   uid ""
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LensIconChartMetric } from '@kbn/lens-icons';
+import { IconChartMetric } from '@kbn/chart-icons';
 import { SuggestionRequest, VisualizationSuggestion, TableSuggestion } from '../../types';
 import type { MetricState } from '../../../common/types';
 import { layerTypes } from '../../../common';
@@ -49,7 +49,7 @@ function getSuggestion(table: TableSuggestion): VisualizationSuggestion<MetricSt
   return {
     title,
     score: 0.1,
-    previewIcon: LensIconChartMetric,
+    previewIcon: IconChartMetric,
     state: {
       layerId: table.layerId,
       accessor: col.columnId,
