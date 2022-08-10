@@ -30,8 +30,8 @@ export const DashboardsTable: React.FC = () => {
     const debouncedSetSearchQuery = debounce(setSearchQuery, INPUT_TIMEOUT);
 
     return {
-      onChange: ({ query }) => {
-        debouncedSetSearchQuery(query?.text.toLowerCase() ?? '');
+      onChange: ({ queryText }) => {
+        debouncedSetSearchQuery(queryText.toLowerCase() ?? '');
       },
       box: {
         incremental: true,
@@ -46,7 +46,7 @@ export const DashboardsTable: React.FC = () => {
       setFilteredItems(
         items.filter(({ title, description }) => {
           const normalizedName = `${title} ${description}`.toLowerCase();
-          return normalizedName.includes(searchQuery);
+          return normalizedName.includes(searchQuery.replace(/[^\w- ]/g, ''));
         })
       );
     }

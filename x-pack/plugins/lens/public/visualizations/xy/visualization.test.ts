@@ -7,7 +7,13 @@
 
 import { getXyVisualization } from './visualization';
 import { Position } from '@elastic/charts';
-import { Operation, VisualizeEditorContext, Suggestion, OperationDescriptor } from '../../types';
+import {
+  Operation,
+  VisualizeEditorContext,
+  Suggestion,
+  OperationDescriptor,
+  DatasourcePublicAPI,
+} from '../../types';
 import type {
   State,
   XYState,
@@ -272,7 +278,8 @@ describe('xy_visualization', () => {
         frame.datasourceLayers = {
           first: mockDatasource.publicAPIMock,
         };
-        frame.datasourceLayers.first.getOperationForColumnId = jest.fn((accessor) => {
+        const datasourceLayers = frame.datasourceLayers as Record<string, DatasourcePublicAPI>;
+        datasourceLayers.first.getOperationForColumnId = jest.fn((accessor) => {
           if (accessor === 'a') {
             return {
               dataType: 'date',
@@ -1551,7 +1558,8 @@ describe('xy_visualization', () => {
         (state.layers[0] as XYDataLayerConfig).accessors = [];
         (state.layers[1] as XYReferenceLineLayerConfig).yConfig = []; // empty the configuration
         // set the xAccessor as date_histogram
-        frame.datasourceLayers.referenceLine.getOperationForColumnId = jest.fn((accessor) => {
+        const datasourceLayers = frame.datasourceLayers as Record<string, DatasourcePublicAPI>;
+        datasourceLayers.referenceLine.getOperationForColumnId = jest.fn((accessor) => {
           if (accessor === 'b') {
             return {
               dataType: 'date',
@@ -1580,7 +1588,8 @@ describe('xy_visualization', () => {
         (state.layers[0] as XYDataLayerConfig).accessors = [];
         (state.layers[1] as XYReferenceLineLayerConfig).yConfig![0].axisMode = 'bottom';
         // set the xAccessor as date_histogram
-        frame.datasourceLayers.referenceLine.getOperationForColumnId = jest.fn((accessor) => {
+        const datasourceLayers = frame.datasourceLayers as Record<string, DatasourcePublicAPI>;
+        datasourceLayers.referenceLine.getOperationForColumnId = jest.fn((accessor) => {
           if (accessor === 'b') {
             return {
               dataType: 'date',
@@ -1622,8 +1631,9 @@ describe('xy_visualization', () => {
           { forAccessor: 'b', axisMode: 'right' },
           { forAccessor: 'a', axisMode: 'left' },
         ];
+        const datasourceLayers = frame.datasourceLayers as Record<string, DatasourcePublicAPI>;
         // set the xAccessor as number histogram
-        frame.datasourceLayers.referenceLine.getOperationForColumnId = jest.fn((accessor) => {
+        datasourceLayers.referenceLine.getOperationForColumnId = jest.fn((accessor) => {
           if (accessor === 'c') {
             return {
               dataType: 'number',
@@ -1654,7 +1664,8 @@ describe('xy_visualization', () => {
         (state.layers[0] as XYDataLayerConfig).accessors = [];
         (state.layers[1] as XYReferenceLineLayerConfig).yConfig = []; // empty the configuration
         // set the xAccessor as top values
-        frame.datasourceLayers.referenceLine.getOperationForColumnId = jest.fn((accessor) => {
+        const datasourceLayers = frame.datasourceLayers as Record<string, DatasourcePublicAPI>;
+        datasourceLayers.referenceLine.getOperationForColumnId = jest.fn((accessor) => {
           if (accessor === 'b') {
             return {
               dataType: 'string',
@@ -1683,7 +1694,8 @@ describe('xy_visualization', () => {
         (state.layers[0] as XYDataLayerConfig).accessors = [];
         (state.layers[1] as XYReferenceLineLayerConfig).yConfig![0].axisMode = 'bottom';
         // set the xAccessor as date_histogram
-        frame.datasourceLayers.referenceLine.getOperationForColumnId = jest.fn((accessor) => {
+        const datasourceLayers = frame.datasourceLayers as Record<string, DatasourcePublicAPI>;
+        datasourceLayers.referenceLine.getOperationForColumnId = jest.fn((accessor) => {
           if (accessor === 'b') {
             return {
               dataType: 'string',
@@ -1791,7 +1803,8 @@ describe('xy_visualization', () => {
         frame.datasourceLayers = {
           first: mockDatasource.publicAPIMock,
         };
-        frame.datasourceLayers.first.getOperationForColumnId = jest.fn((accessor) => {
+        const datasourceLayers = frame.datasourceLayers as Record<string, DatasourcePublicAPI>;
+        datasourceLayers.first.getOperationForColumnId = jest.fn((accessor) => {
           if (accessor === 'a') {
             return {
               dataType: 'date',
@@ -1939,7 +1952,8 @@ describe('xy_visualization', () => {
       });
 
       it('should pass name of current series along', () => {
-        (frame.datasourceLayers.first.getOperationForColumnId as jest.Mock).mockReturnValue({
+        const datasourceLayers = frame.datasourceLayers as Record<string, DatasourcePublicAPI>;
+        (datasourceLayers.first.getOperationForColumnId as jest.Mock).mockReturnValue({
           label: 'Overwritten label',
         });
         const palette = paletteServiceMock.get('default');
@@ -2422,7 +2436,8 @@ describe('xy_visualization', () => {
       };
     });
     it('should return a warning when numeric accessors contain array', () => {
-      (frame.datasourceLayers.first.getOperationForColumnId as jest.Mock).mockReturnValue({
+      const datasourceLayers = frame.datasourceLayers as Record<string, DatasourcePublicAPI>;
+      (datasourceLayers.first.getOperationForColumnId as jest.Mock).mockReturnValue({
         label: 'Label B',
       });
       const warningMessages = xyVisualization.getWarningMessages!(
