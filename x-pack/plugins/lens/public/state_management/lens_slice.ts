@@ -366,12 +366,12 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
                 nextPublicAPI.getTableSpec().map(({ columnId }) => columnId)
               );
               const removed = datasourceLayers[layerId]
-                .getTableSpec()
+                ?.getTableSpec()
                 .map(({ columnId }) => columnId)
                 .filter((columnId) => !nextTable.has(columnId));
               const nextVisState = (newState.visualization || state.visualization).state;
               const activeVisualization = visualizationMap[state.visualization.activeId];
-              removed.forEach((columnId) => {
+              removed?.forEach((columnId) => {
                 newState.visualization = {
                   ...state.visualization,
                   state: activeVisualization.removeDimension({
