@@ -7,9 +7,10 @@
 
 import { get, map, pick } from 'lodash';
 import { badRequest } from '@hapi/boom';
-import { Action } from '../../../common/models/action';
-import { WatchStatus } from '../watch_status';
 import { i18n } from '@kbn/i18n';
+
+import { Action } from '../../../common/models/action';
+import { WatchStatusModel } from '../watch_status_model';
 import { WatchErrors } from '../watch_errors';
 
 export class BaseWatch {
@@ -137,7 +138,7 @@ export class BaseWatch {
 
     const watchErrors = WatchErrors.fromUpstreamJson(this.getWatchErrors(actions));
 
-    const watchStatus = WatchStatus.fromUpstreamJson({
+    const watchStatus = WatchStatusModel.fromUpstreamJson({
       id,
       watchStatusJson,
       watchErrors,
