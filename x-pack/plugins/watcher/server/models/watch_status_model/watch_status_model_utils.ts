@@ -41,7 +41,7 @@ export const deriveState = (
   actionStatuses: ClientWatchStatusModel['actionStatuses']
 ) => {
   if (!isActive) {
-    return WATCH_STATES.DISABLED;
+    return WATCH_STATES.INACTIVE;
   }
 
   if (watchState === 'failed') {
@@ -58,16 +58,7 @@ export const deriveState = (
     return WATCH_STATES.CONFIG_ERROR;
   }
 
-  const firingTotal =
-    totals[ACTION_STATES.FIRING] +
-    totals[ACTION_STATES.ACKNOWLEDGED] +
-    totals[ACTION_STATES.THROTTLED];
-
-  if (firingTotal > 0) {
-    return WATCH_STATES.FIRING;
-  }
-
-  return WATCH_STATES.OK;
+  return WATCH_STATES.ACTIVE;
 };
 
 export const deriveComment = (

@@ -36,7 +36,7 @@ import {
   getPageErrorCode,
   PageError,
   DeleteWatchesModal,
-  WatchStatus,
+  WatchStateBadge,
   SectionLoading,
   Error,
 } from '../../components';
@@ -280,7 +280,7 @@ export const WatchListPage = () => {
         }),
         sortable: true,
         width: '130px',
-        render: (state: string) => <WatchStatus status={state} />,
+        render: (state: string) => <WatchStateBadge state={state} />,
       },
       {
         field: 'watchStatus.lastMetCondition',

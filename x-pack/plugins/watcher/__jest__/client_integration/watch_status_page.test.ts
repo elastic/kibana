@@ -26,12 +26,12 @@ const ACTION_ID = 'my_logging_action_1';
 const watch = {
   ...WATCH.watch,
   watchStatus: {
-    state: WATCH_STATES.FIRING,
+    state: WATCH_STATES.ACTIVE,
     isActive: true,
     actionStatuses: [
       {
         id: ACTION_ID,
-        state: ACTION_STATES.FIRING,
+        state: ACTION_STATES.OK,
         isAckable: true,
       },
     ],

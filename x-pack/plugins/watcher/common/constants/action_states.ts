@@ -23,11 +23,6 @@ export const ACTION_STATES: { [key: string]: string } = {
     defaultMessage: 'Throttled',
   }),
 
-  // Action has been completed
-  FIRING: i18n.translate('xpack.watcher.constants.actionStates.firingStateText', {
-    defaultMessage: 'Firing',
-  }),
-
   // Action has failed
   ERROR: i18n.translate('xpack.watcher.constants.actionStates.errorStateText', {
     defaultMessage: 'Error',

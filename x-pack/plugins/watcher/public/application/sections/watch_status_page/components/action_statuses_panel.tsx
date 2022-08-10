@@ -19,11 +19,12 @@ import {
   EuiFlyoutHeader,
   EuiFlyoutBody,
 } from '@elastic/eui';
-import { ackWatchAction } from '../../../lib/api';
-import { WatchStatus } from '../../../components';
+
 import { PAGINATION } from '../../../../../common/constants';
-import { WatchDetailsContext } from '../watch_details_context';
+import { ackWatchAction } from '../../../lib/api';
+import { ActionStateBadge } from '../../../components';
 import { useAppContext } from '../../../app_context';
+import { WatchDetailsContext } from '../watch_details_context';
 
 interface ActionError {
   code: string;
@@ -80,7 +81,7 @@ export const ActionStatusesPanel = () => {
       }),
       sortable: true,
       truncateText: true,
-      render: (state: string) => <WatchStatus status={state} />,
+      render: (state: string) => <ActionStateBadge state={state} />,
     },
   ];
 

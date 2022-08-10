@@ -25,7 +25,7 @@ import {
 } from '@elastic/eui';
 
 import { PAGINATION } from '../../../../../common/constants';
-import { WatchStatus, SectionError, Error } from '../../../components';
+import { WatchStateBadge, SectionError, Error } from '../../../components';
 import { useLoadWatchHistory, useLoadWatchHistoryDetail } from '../../../lib/api';
 import { WatchDetailsContext } from '../watch_details_context';
 
@@ -140,7 +140,7 @@ export const ExecutionHistoryPanel = () => {
       }),
       sortable: true,
       truncateText: true,
-      render: (state: string) => <WatchStatus status={state} />,
+      render: (state: string) => <WatchStateBadge state={state} />,
     },
     {
       field: 'watchStatus.comment',
@@ -211,7 +211,7 @@ export const ExecutionHistoryPanel = () => {
           }),
           sortable: true,
           truncateText: true,
-          render: (state: string) => <WatchStatus status={state} />,
+          render: (state: string) => <WatchStateBadge state={state} />,
         },
       ];
 
