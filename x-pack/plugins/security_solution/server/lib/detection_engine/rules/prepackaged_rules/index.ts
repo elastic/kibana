@@ -38,7 +38,6 @@ import rule25 from './command_and_control_rdp_remote_desktop_protocol_from_the_i
 import rule26 from './command_and_control_telnet_port_activity.json';
 import rule27 from './command_and_control_vnc_virtual_network_computing_from_the_internet.json';
 import rule28 from './command_and_control_vnc_virtual_network_computing_to_the_internet.json';
-<<<<<<< HEAD
 import rule29 from './credential_access_endgame_cred_dumping_detected.json';
 import rule30 from './credential_access_endgame_cred_dumping_prevented.json';
 import rule31 from './defense_evasion_adding_the_hidden_file_attribute_with_via_attribexe.json';
