@@ -25,7 +25,6 @@ const getDefaultVisibility = (
     onResetColumns: () => console.log('reset columns clicked'),
     onToggleColumn: () => console.log('onToggleColumn clicked'),
     options: {},
-    width: 55,
   };
 
   return {
