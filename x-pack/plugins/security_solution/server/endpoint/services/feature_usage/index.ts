@@ -7,7 +7,5 @@
 
 import { FeatureUsageService } from './service';
 export type { FeatureKeys } from './service';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-export { createFeatureUsageServiceMock, createMockPolicyData } from './mocks';
 
 export const featureUsageService = new FeatureUsageService();

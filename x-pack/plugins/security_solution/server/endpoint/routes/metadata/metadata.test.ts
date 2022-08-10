@@ -62,7 +62,7 @@ import { EndpointHostNotFoundError } from '../../services/metadata';
 import { FleetAgentGenerator } from '../../../../common/endpoint/data_generators/fleet_agent_generator';
 import { createMockAgentClient, createMockPackageService } from '@kbn/fleet-plugin/server/mocks';
 import type { TransformGetTransformStatsResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz';
+import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
 
 class IndexNotFoundException extends Error {
   meta: { body: { error: { type: string } } };

@@ -32,7 +32,7 @@ import type {
   SecuritySolutionRequestHandlerContext,
 } from '../../../../types';
 
-import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz';
+import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz/mocks';
 import type { EndpointAuthz } from '../../../../../common/endpoint/types/authz';
 
 export const createMockClients = () => {
