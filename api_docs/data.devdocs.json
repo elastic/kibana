@@ -11128,28 +11128,8 @@
               "path": "src/plugins/dashboard/public/application/actions/export_csv_action.tsx"
             },
             {
-              "plugin": "lens",
-              "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/ranges/ranges.tsx"
-            },
-            {
               "plugin": "stackAlerts",
               "path": "x-pack/plugins/stack_alerts/public/alert_types/threshold/expression.tsx"
-            },
-            {
-              "plugin": "visTypeTable",
-              "path": "src/plugins/vis_types/table/public/plugin.ts"
-            },
-            {
-              "plugin": "visTypeTimeseries",
-              "path": "src/plugins/vis_types/timeseries/public/plugin.ts"
-            },
-            {
-              "plugin": "visTypeXy",
-              "path": "src/plugins/vis_types/xy/public/plugin.ts"
-            },
-            {
-              "plugin": "visTypeVislib",
-              "path": "src/plugins/vis_types/vislib/public/plugin.ts"
             },
             {
               "plugin": "expressionPartitionVis",
@@ -16848,12 +16828,7 @@
           ],
           "path": "src/plugins/data/server/plugin.ts",
           "deprecated": true,
-          "references": [
-            {
-              "plugin": "visTypeTimeseries",
-              "path": "src/plugins/vis_types/timeseries/server/plugin.ts"
-            }
-          ]
+          "references": []
         },
         {
           "parentPluginId": "data",

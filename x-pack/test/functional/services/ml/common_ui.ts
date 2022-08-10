@@ -388,5 +388,27 @@ export function MachineLearningCommonUIProvider({
       });
       await toasts.dismissAllToasts();
     },
+
+    async ensureAllMenuPopoversClosed() {
+      await retry.tryForTime(5000, async () => {
+        await browser.pressKeys(browser.keys.ESCAPE);
+        const popoverExists = await find.existsByCssSelector('euiContextMenuPanel');
+        expect(popoverExists).to.eql(false, 'All popovers should be closed');
+      });
+    },
+
+    async invokeTableRowAction(rowSelector: string, actionTestSubject: string) {
+      await retry.tryForTime(30 * 1000, async () => {
+        await this.ensureAllMenuPopoversClosed();
+        await testSubjects.click(`${rowSelector} > euiCollapsedItemActionsButton`);
+        await find.existsByCssSelector('euiContextMenuPanel');
+
+        const isEnabled = await testSubjects.isEnabled(actionTestSubject);
+
+        expect(isEnabled).to.eql(true, `Expected action "${actionTestSubject}" to be enabled.`);
+
+        await testSubjects.click(actionTestSubject);
+      });
+    },
   };
 }
