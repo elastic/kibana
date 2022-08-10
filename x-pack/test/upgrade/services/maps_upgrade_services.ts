@@ -41,10 +41,10 @@ export function MapsHelper({ getPageObjects, getService }: FtrProviderContext) {
         throw new Error('Layer total requests not found');
       }
       if (isRequestByCountry) {
-        await PageObjects.maps.toggleLayerVisibility('Total Requests by Country');
+        await this.toggleLayerVisibility('Total Requests by Country');
       }
       if (isRequestByDestination) {
-        await PageObjects.maps.toggleLayerVisibility('Total Requests by Destination');
+        await this.toggleLayerVisibility('Total Requests by Destination');
       }
     },
   };
