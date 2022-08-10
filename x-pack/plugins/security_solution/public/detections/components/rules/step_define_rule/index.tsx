@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiButtonGroupOptionProps } from '@elastic/eui';
+import type { EuiButtonGroupOptionProps, EuiTourState } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -15,6 +15,7 @@ import {
   EuiButtonGroup,
   EuiText,
   EuiTourStep,
+  useEuiTour,
 } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { memo, useCallback, useState, useEffect, useMemo } from 'react';
@@ -519,66 +520,66 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     currentTourStep: 1,
     isTourActive: true,
     tourPopoverWidth: 300,
-    tourSubtitle: i18n.DATA_SOURCE_GUIDE_SUB_TITLE,
+    tourSubtitle: '',
   };
 
-  const [tourState, setTourState] = useState(() => {
-    const tourStateString = localStorage.getItem(DATA_VIEW_TOUR_ACTIVE_KEY);
+  let tourState: EuiTourState;
+  const tourStateString = localStorage.getItem(DATA_VIEW_TOUR_ACTIVE_KEY);
 
-    if (tourStateString != null) {
-      return JSON.parse(tourStateString);
-    }
-    return tourConfig;
-  });
+  if (tourStateString != null) {
+    tourState = JSON.parse(tourStateString);
+  } else {
+    tourState = tourConfig;
+  }
+
+  const demoTourSteps = [
+    {
+      step: 1,
+      title: i18n.DATA_SOURCE_GUIDE_TITLE,
+      content: (
+        <span>
+          <p>{i18n.DATA_SOURCE_GUIDE_CONTENT}</p>
+          <EuiSpacer />
+        </span>
+      ),
+      anchorPosition: 'rightCenter' as 'rightCenter',
+    },
+  ];
+
+  // @ts-expect-error
+  const [[euiTourStepOne], actions, reducerState] = useEuiTour(demoTourSteps, tourState);
 
   useEffect(() => {
-    // Store the tour data
-    localStorage.setItem(DATA_VIEW_TOUR_ACTIVE_KEY, JSON.stringify(tourState));
-  }, [tourState]);
+    localStorage.setItem(DATA_VIEW_TOUR_ACTIVE_KEY, JSON.stringify(reducerState));
+  }, [reducerState]);
 
   const DataSource = useMemo(() => {
-    const demoTourSteps = [
-      {
-        step: 1,
-        title: i18n.DATA_SOURCE_GUIDE_TITLE,
-        content: (
-          <span>
-            <p>{i18n.DATA_SOURCE_GUIDE_CONTENT}</p>
-            <EuiSpacer />
-          </span>
-        ),
-      },
-    ];
-    const finishTour = () => {
-      setTourState({
-        ...tourState,
-        isTourActive: false,
-      });
-    };
     return (
-      <RuleTypeEuiFormRow label={i18n.SOURCE} $isVisible={true} fullWidth>
-        <EuiFlexGroup
-          direction="column"
-          gutterSize="s"
-          data-test-subj="dataViewIndexPatternButtonGroupFlexGroup"
-        >
-          <EuiFlexItem>
-            <EuiText size="xs">
-              <FormattedMessage
-                id="xpack.securitySolution.dataViewSelectorText1"
-                defaultMessage="Use Kibana "
-              />
-              <DocLink guidePath="kibana" docPath="data-views.html" linkText="Data Views" />
-              <FormattedMessage
-                id="xpack.securitySolution.dataViewSelectorText2"
-                defaultMessage=" or specify individual "
-              />
-              <DocLink
-                guidePath="kibana"
-                docPath="index-patterns-api-create.html"
-                linkText="index patterns"
-              />
-              <EuiTourStep
+      // @ts-expect-error
+      <EuiTourStep {...euiTourStepOne}>
+        <RuleTypeEuiFormRow label={i18n.SOURCE} $isVisible={true} fullWidth>
+          <EuiFlexGroup
+            direction="column"
+            gutterSize="s"
+            data-test-subj="dataViewIndexPatternButtonGroupFlexGroup"
+          >
+            <EuiFlexItem>
+              <EuiText size="xs">
+                <FormattedMessage
+                  id="xpack.securitySolution.dataViewSelectorText1"
+                  defaultMessage="Use Kibana "
+                />
+                <DocLink guidePath="kibana" docPath="data-views.html" linkText="Data Views" />
+                <FormattedMessage
+                  id="xpack.securitySolution.dataViewSelectorText2"
+                  defaultMessage=" or specify individual "
+                />
+                <DocLink
+                  guidePath="kibana"
+                  docPath="index-patterns-api-create.html"
+                  linkText="index patterns"
+                />
+                {/* <EuiTourStep
                 content={demoTourSteps[0].content}
                 isStepOpen={tourState.currentTourStep === 1 && tourState.isTourActive}
                 minWidth={tourState.tourPopoverWidth}
@@ -588,56 +589,57 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 subtitle={tourState.tourSubtitle}
                 title={demoTourSteps[0].title}
                 anchorPosition="rightUp" // the tour is not obeying any of these options..
-              >
+              > */}
+
                 <FormattedMessage
                   id="xpack.securitySolution.dataViewSelectorText3"
                   defaultMessage=" as your rule's data source to be searched."
                 />
-              </EuiTourStep>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <RuleTypeEuiFormRow $isVisible={true}>
-              <EuiButtonGroup
-                isFullWidth={true}
-                legend="Rule index pattern or data view selector"
-                data-test-subj="dataViewIndexPatternButtonGroup"
-                idSelected={dataSourceType}
-                onChange={onChangeDataSource}
-                options={dataViewIndexPatternToggleButtonOptions}
-                color="primary"
-              />
-            </RuleTypeEuiFormRow>
-          </EuiFlexItem>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <RuleTypeEuiFormRow $isVisible={true}>
+                <EuiButtonGroup
+                  isFullWidth={true}
+                  legend="Rule index pattern or data view selector"
+                  data-test-subj="dataViewIndexPatternButtonGroup"
+                  idSelected={dataSourceType}
+                  onChange={onChangeDataSource}
+                  options={dataViewIndexPatternToggleButtonOptions}
+                  color="primary"
+                />
+              </RuleTypeEuiFormRow>
+            </EuiFlexItem>
 
-          <EuiFlexItem>
-            <StyledVisibleContainer isVisible={dataSourceType === DataSourceType.DataView}>
-              {DataViewSelectorMemo}
-            </StyledVisibleContainer>
-            <StyledVisibleContainer isVisible={dataSourceType === DataSourceType.IndexPatterns}>
-              <CommonUseField
-                path="index"
-                config={{
-                  ...omit(schema.index, 'label'),
-                  labelAppend: indexModified ? (
-                    <MyLabelButton onClick={handleResetIndices} iconType="refresh">
-                      {i18n.RESET_DEFAULT_INDEX}
-                    </MyLabelButton>
-                  ) : null,
-                }}
-                componentProps={{
-                  idAria: 'detectionEngineStepDefineRuleIndices',
-                  'data-test-subj': 'detectionEngineStepDefineRuleIndices',
-                  euiFieldProps: {
-                    fullWidth: true,
-                    placeholder: '',
-                  },
-                }}
-              />
-            </StyledVisibleContainer>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </RuleTypeEuiFormRow>
+            <EuiFlexItem>
+              <StyledVisibleContainer isVisible={dataSourceType === DataSourceType.DataView}>
+                {DataViewSelectorMemo}
+              </StyledVisibleContainer>
+              <StyledVisibleContainer isVisible={dataSourceType === DataSourceType.IndexPatterns}>
+                <CommonUseField
+                  path="index"
+                  config={{
+                    ...omit(schema.index, 'label'),
+                    labelAppend: indexModified ? (
+                      <MyLabelButton onClick={handleResetIndices} iconType="refresh">
+                        {i18n.RESET_DEFAULT_INDEX}
+                      </MyLabelButton>
+                    ) : null,
+                  }}
+                  componentProps={{
+                    idAria: 'detectionEngineStepDefineRuleIndices',
+                    'data-test-subj': 'detectionEngineStepDefineRuleIndices',
+                    euiFieldProps: {
+                      fullWidth: true,
+                      placeholder: '',
+                    },
+                  }}
+                />
+              </StyledVisibleContainer>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </RuleTypeEuiFormRow>
+      </EuiTourStep>
     );
   }, [
     dataSourceType,
@@ -646,7 +648,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     DataViewSelectorMemo,
     indexModified,
     handleResetIndices,
-    tourState,
+    euiTourStepOne,
   ]);
 
   const QueryBarMemo = useMemo(

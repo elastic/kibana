@@ -116,6 +116,6 @@ export const DATA_SOURCE_GUIDE_TITLE = i18n.translate(
 export const DATA_SOURCE_GUIDE_CONTENT = i18n.translate(
   'xpack.securitySolution.detections.dataSource.popover.content',
   {
-    defaultMessage: 'Rules can now query index patterns or data views!',
+    defaultMessage: 'Rules can now query index patterns or data views.',
   }
 );
