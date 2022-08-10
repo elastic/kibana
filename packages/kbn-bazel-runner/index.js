@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-const { runBazel, runIBazel } = require('./bazel_runner');
+const { runBazel, runIBazel } = require('./src/bazel_runner');
 
 module.exports = { runBazel, runIBazel };
