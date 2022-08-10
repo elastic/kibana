@@ -143,10 +143,8 @@ describe('Elasticsearch blob storage', () => {
     for await (const chunk of rs) {
       chunks.push(chunk);
     }
-
     const resultString = chunks.join('');
-    expect(resultString).toMatch(/^b+$/g);
-    expect(resultString.length).toBe(fileString2.toString('utf-8').length);
+    expect(resultString).toBe(fileString2.toString('utf-8'));
   });
 
   it('stores chunks at exactly max chunk size', async () => {
