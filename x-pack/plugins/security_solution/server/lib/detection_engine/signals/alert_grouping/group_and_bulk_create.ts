@@ -8,8 +8,6 @@
 import { identity } from 'lodash';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { AlertInstanceState, AlertInstanceContext } from '@kbn/alerting-plugin/common';
-import type { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { buildTimeRangeFilter } from '../build_events_query';
@@ -20,35 +18,7 @@ import type {
   SignalSource,
 } from '../types';
 import { createSearchAfterReturnType } from '../utils';
-import { buildGroupByFieldAggregation } from './build_group_by_field_aggregation';
-
-interface BaseArgs {
-  baseQuery: estypes.SearchRequest;
-  groupByFields: string[];
-  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
-}
-
-interface GetEventsByGroupArgs extends BaseArgs {
-  maxSignals: number;
-  sort: estypes.Sort;
-}
-
-const getEventsByGroup = async ({
-  baseQuery,
-  groupByFields,
-  services,
-  maxSignals,
-  sort,
-}: GetEventsByGroupArgs) => {
-  return services.scopedClusterClient.asCurrentUser.search({
-    ...baseQuery,
-    body: {
-      ...baseQuery.body,
-      track_total_hits: true,
-      aggs: buildGroupByFieldAggregation({ groupByFields, maxSignals, sort }),
-    },
-  });
-};
+import { getEventsByGroup } from './get_events_by_group';
 
 // search_after through grouped documents and re-index using bulk endpoint.
 export const groupAndBulkCreate = async ({
