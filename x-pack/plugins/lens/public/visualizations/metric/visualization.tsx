@@ -56,6 +56,7 @@ export interface MetricVisualizationState {
   trendlineLayerType?: LayerType;
   trendlineTimeAccessor?: string;
   trendlineMetricAccessor?: string;
+  trendlineBreakdownByAccessor?: string;
 }
 
 export const supportedDataTypes = new Set(['number']);
@@ -334,20 +335,17 @@ const getTrendlineLayerConfiguration = (
             defaultMessage: 'Value',
           }),
         },
-        accessors: props.state.maxAccessor
+        accessors: props.state.trendlineBreakdownByAccessor
           ? [
               {
-                columnId: props.state.maxAccessor,
+                columnId: props.state.trendlineBreakdownByAccessor,
               },
             ]
           : [],
-        supportsMoreColumns: !props.state.maxAccessor,
+        supportsMoreColumns: !props.state.trendlineBreakdownByAccessor,
         filterOperations: () => false,
         enableDimensionEditor: true,
-        required: true,
-        groupTooltip: i18n.translate('xpack.lens.metric.timeFieldTooltip', {
-          defaultMessage: 'This is the time axis for the trend line',
-        }),
+        required: false,
       },
     ],
   };
@@ -461,23 +459,48 @@ export const getMetricVisualization = ({
   },
 
   reportLinkedDimensions(state) {
-    if (state.trendlineLayerId && state.metricAccessor) {
-      return [
-        {
-          from: {
-            columnId: state.metricAccessor,
-            groupId: GROUP_ID.METRIC,
-            layerId: state.layerId,
-          },
-          to: {
-            columnId: state.trendlineMetricAccessor,
-            groupId: GROUP_ID.TREND_METRIC,
-            layerId: state.trendlineLayerId,
-          },
-        },
-      ];
+    if (!state.trendlineLayerId || !state.metricAccessor) {
+      return [];
     }
-    return [];
+
+    const links: Array<{
+      from: { columnId: string; groupId: string; layerId: string };
+      to: {
+        columnId?: string;
+        groupId: string;
+        layerId: string;
+      };
+    }> = [
+      {
+        from: {
+          columnId: state.metricAccessor,
+          groupId: GROUP_ID.METRIC,
+          layerId: state.layerId,
+        },
+        to: {
+          columnId: state.trendlineMetricAccessor,
+          groupId: GROUP_ID.TREND_METRIC,
+          layerId: state.trendlineLayerId,
+        },
+      },
+    ];
+
+    if (state.breakdownByAccessor) {
+      links.push({
+        from: {
+          columnId: state.breakdownByAccessor,
+          groupId: GROUP_ID.BREAKDOWN_BY,
+          layerId: state.layerId,
+        },
+        to: {
+          columnId: state.trendlineBreakdownByAccessor,
+          groupId: GROUP_ID.TREND_BREAKDOWN_BY,
+          layerId: state.trendlineLayerId,
+        },
+      });
+    }
+
+    return links;
   },
 
   appendLayer(state, layerId, layerType) {
@@ -527,6 +550,9 @@ export const getMetricVisualization = ({
       case GROUP_ID.TREND_METRIC:
         updated.trendlineMetricAccessor = columnId;
         break;
+      case GROUP_ID.TREND_BREAKDOWN_BY:
+        updated.trendlineBreakdownByAccessor = columnId;
+        break;
     }
 
     return updated;
@@ -555,6 +581,9 @@ export const getMetricVisualization = ({
     }
     if (prevState.trendlineMetricAccessor === columnId) {
       delete updated.trendlineMetricAccessor;
+    }
+    if (prevState.trendlineBreakdownByAccessor === columnId) {
+      delete updated.trendlineBreakdownByAccessor;
     }
 
     return updated;

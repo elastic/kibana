@@ -310,20 +310,21 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         stagedPreview: payload.clearStagedPreview ? undefined : state.stagedPreview,
       };
 
-      const updatedDatasourceState = syncLinkedDimensions(
-        newAppState,
-        payload.datasourceId,
-        visualizationMap,
-        datasourceMap
-      );
+      const {
+        datasourceState: syncedDatasourceState,
+        visualizationState: syncedVisualizationState,
+      } = syncLinkedDimensions(newAppState, payload.datasourceId, visualizationMap, datasourceMap);
 
       return {
         ...newAppState,
+        visualization: {
+          ...newAppState.visualization,
+          state: syncedVisualizationState,
+        },
         datasourceStates: {
           ...newAppState.datasourceStates,
           [payload.datasourceId]: {
-            state:
-              updatedDatasourceState ?? newAppState.datasourceStates[payload.datasourceId].state,
+            state: syncedDatasourceState,
             isLoading: false,
           },
         },
@@ -685,9 +686,22 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         layerType,
       });
 
-      state.visualization.state = activeVisualizationState;
       state.datasourceStates[state.activeDatasourceId].state = activeDatasourceState;
+      state.visualization.state = activeVisualizationState;
       state.stagedPreview = undefined;
+
+      const {
+        datasourceState: syncedDatasourceState,
+        visualizationState: syncedVisualizationState,
+      } = syncLinkedDimensions(
+        current(state),
+        state.activeDatasourceId,
+        visualizationMap,
+        datasourceMap
+      );
+
+      state.datasourceStates[state.activeDatasourceId].state = syncedDatasourceState;
+      state.visualization.state = syncedVisualizationState;
     },
     [setLayerDefaultDimension.type]: (
       state,
@@ -798,16 +812,22 @@ function addInitialValueIfAvailable({
 
 function syncLinkedDimensions(
   state: LensAppState,
-  datasourceId: string,
+  activeDatasourceId: string,
   visualizationMap: VisualizationMap,
   datasourceMap: DatasourceMap
 ) {
-  let updatedDatasourceState: unknown;
-  const activeVisualization = visualizationMap[state.visualization.activeId!];
-  const linkedDimensions = activeVisualization.reportLinkedDimensions?.(state.visualization.state);
+  let datasourceState: unknown = state.datasourceStates[activeDatasourceId].state;
+
+  let visualizationState: unknown = state.visualization.state;
+
+  const activeVisualization = visualizationMap[state.visualization.activeId!]; // TODO - double check the safety of this coercion
+  const linkedDimensions = activeVisualization.reportLinkedDimensions?.(visualizationState);
   const frame = selectFramePublicAPI({ lens: state }, datasourceMap);
+
   linkedDimensions?.forEach(({ from, to }) => {
-    datasourceMap[datasourceId].onDrop({
+    const columnId = to.columnId ?? generateId();
+
+    datasourceMap[activeDatasourceId].onDrop({
       source: {
         ...from,
         id: from.columnId,
@@ -816,20 +836,28 @@ function syncLinkedDimensions(
       },
       target: {
         ...to,
-        columnId: to.columnId ?? generateId(),
+        columnId,
         filterOperations: () => true,
       },
-      state: state.datasourceStates[datasourceId].state,
+      state: datasourceState,
       setState: (s) => {
-        updatedDatasourceState = s;
+        datasourceState = s;
       },
       dimensionGroups: activeVisualization.getConfiguration({
-        state: state.visualization.state,
+        state: visualizationState,
         layerId: to.layerId,
         frame,
       }).groups,
       dropType: 'duplicate_compatible',
     });
+
+    visualizationState = activeVisualization.setDimension({
+      prevState: visualizationState,
+      frame,
+      ...to,
+      columnId,
+    });
   });
-  return updatedDatasourceState;
+
+  return { datasourceState, visualizationState };
 }
