@@ -18,6 +18,7 @@ import {
   ThreatIntelligenceSecuritySolutionContext,
 } from './types';
 import { SecuritySolutionContext } from './containers/security_solution_context';
+import { EnterpriseGuard } from './containers/enterprise_guard';
 
 interface AppProps {
   securitySolutionContext: ThreatIntelligenceSecuritySolutionContext;
@@ -35,13 +36,15 @@ export const createApp =
   ({ securitySolutionContext }: AppProps) =>
     (
       <IntlProvider>
-        <KibanaContextProvider services={services}>
-          <SecuritySolutionContext.Provider value={securitySolutionContext}>
-            <Suspense fallback={<div />}>
-              <LazyIndicatorsPage />
-            </Suspense>
-          </SecuritySolutionContext.Provider>
-        </KibanaContextProvider>
+        <SecuritySolutionContext.Provider value={securitySolutionContext}>
+          <EnterpriseGuard>
+            <KibanaContextProvider services={services}>
+              <Suspense fallback={<div />}>
+                <LazyIndicatorsPage />
+              </Suspense>
+            </KibanaContextProvider>
+          </EnterpriseGuard>
+        </SecuritySolutionContext.Provider>
       </IntlProvider>
     );
 

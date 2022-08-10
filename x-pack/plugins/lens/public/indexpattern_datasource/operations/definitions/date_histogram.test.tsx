@@ -11,6 +11,7 @@ import { dateHistogramOperation } from '.';
 import { mount, shallow } from 'enzyme';
 import { EuiSwitch } from '@elastic/eui';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
@@ -98,6 +99,7 @@ const defaultOptions = {
     toDate: 'now',
   },
   data: dataStart,
+  fieldFormats: fieldFormatsServiceMock.createStartContract(),
   unifiedSearch: unifiedSearchStart,
   dataViews: dataViewsStart,
   http: {} as HttpSetup,
@@ -429,6 +431,7 @@ describe('date_histogram', () => {
           paramEditorUpdater={updateLayerSpy}
           columnId="col1"
           currentColumn={thirdLayer.columns.col1 as DateHistogramIndexPatternColumn}
+          indexPattern={{ ...indexPattern1, timeFieldName: '@timestamp' }}
         />
       );
       instance
@@ -558,7 +561,9 @@ describe('date_histogram', () => {
           indexPattern={{ ...indexPattern1, timeFieldName: 'other_timestamp' }}
         />
       );
-      expect(instance.find(EuiSwitch).first().prop('disabled')).toBeTruthy();
+      expect(
+        instance.find('[data-test-subj="lensDropPartialIntervals"]').prop('disabled')
+      ).toBeTruthy();
     });
 
     it('should force calendar values to 1', () => {
@@ -754,12 +759,9 @@ describe('date_histogram', () => {
           currentColumn={thirdLayer.columns.col1 as DateHistogramIndexPatternColumn}
         />
       );
-      instance
-        .find(EuiSwitch)
-        .first()
-        .simulate('change', {
-          target: { checked: true },
-        });
+      instance.find('[data-test-subj="lensDropPartialIntervals"]').simulate('change', {
+        target: { checked: true },
+      });
       expect(updateLayerSpy).toHaveBeenCalled();
       const newLayer = updateLayerSpy.mock.calls[0][0](layer);
       expect(newLayer).toHaveProperty('columns.col1.params.dropPartials', true);
