@@ -40,17 +40,12 @@ export const getAlertFieldByFeatureId = (router: IRouter<RacRequestHandlerContex
         const o11yIndices = indices.filter((index) => index.startsWith('.alerts-observability'));
         const fieldCaps = await alertsClient.getFieldCapabilities({
           indices: o11yIndices,
-          metaFields: ['_source', '_id', '_index', '_score'],
+          metaFields: ['_id', '_index'],
           allowNoIndex: true,
         });
 
         return response.ok({
-          body: {
-            featureIds,
-            authAlertIndices: indices,
-            o11yIndices,
-            fieldCaps,
-          },
+          body: fieldCaps,
         });
       } catch (error) {
         const formatedError = transformError(error);
