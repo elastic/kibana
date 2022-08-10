@@ -213,7 +213,8 @@ export const XyToolbar = memo(function XyToolbar(
     (layer) =>
       !layer.xAccessor ||
       getScaleType(
-        props.frame.datasourceLayers[layer.layerId].getOperationForColumnId(layer.xAccessor),
+        props.frame.datasourceLayers[layer.layerId]?.getOperationForColumnId(layer.xAccessor) ??
+          null,
         ScaleType.Linear
       ) !== 'ordinal'
   );
@@ -223,7 +224,8 @@ export const XyToolbar = memo(function XyToolbar(
     (layer) =>
       layer.xAccessor &&
       getScaleType(
-        props.frame.datasourceLayers[layer.layerId].getOperationForColumnId(layer.xAccessor),
+        props.frame.datasourceLayers[layer.layerId]?.getOperationForColumnId(layer.xAccessor) ??
+          null,
         ScaleType.Linear
       ) === 'time'
   )
@@ -295,7 +297,8 @@ export const XyToolbar = memo(function XyToolbar(
       if (!xAccessor) {
         return false;
       }
-      const xAccessorOp = props.frame.datasourceLayers[layerId].getOperationForColumnId(xAccessor);
+      const xAccessorOp =
+        props.frame.datasourceLayers[layerId]?.getOperationForColumnId(xAccessor) ?? null;
       return (
         getScaleType(xAccessorOp, ScaleType.Linear) === ScaleType.Time &&
         xAccessorOp?.isBucketed &&
