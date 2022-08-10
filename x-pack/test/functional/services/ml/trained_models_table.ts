@@ -180,6 +180,17 @@ export function TrainedModelsTableProvider(
       );
     }
 
+    public async deleteModel(modelId: string) {
+      await mlCommonUI.invokeTableRowAction(
+        this.rowSelector(modelId),
+        'mlModelsTableRowDeleteAction'
+      );
+      await this.assertDeleteModalExists();
+      await this.confirmDeleteModel();
+      await mlCommonUI.waitForRefreshButtonEnabled();
+      await this.assertModelDisplayedInTable(modelId, false);
+    }
+
     public async assertModelDeleteActionButtonEnabled(modelId: string, expectedValue: boolean) {
       await this.assertModelDeleteActionButtonExists(modelId, true);
       const isEnabled = await testSubjects.isEnabled(
