@@ -6,22 +6,23 @@
  * Side Public License, v 1.
  */
 
-import type { MockedKeys } from '@kbn/utility-types-jest';
+import { BfetchPublicSetup } from '@kbn/bfetch-plugin/public';
+import { bfetchPluginMock } from '@kbn/bfetch-plugin/public/mocks';
 import { CoreSetup, CoreStart } from '@kbn/core/public';
 import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
-import { IEsSearchRequest } from '../../../common/search';
-import { SearchInterceptor } from './search_interceptor';
+import { ResponseWarning } from '@kbn/inspector-plugin/common';
 import { AbortError } from '@kbn/kibana-utils-plugin/public';
-import { SearchTimeoutError, PainlessError, TimeoutErrorMode, EsError } from '../errors';
-import { ISessionService, SearchSessionState } from '..';
-import { bfetchPluginMock } from '@kbn/bfetch-plugin/public/mocks';
-import { BfetchPublicSetup } from '@kbn/bfetch-plugin/public';
-
-import * as searchPhaseException from '../../../common/search/test_data/search_phase_execution_exception.json';
-import * as resourceNotFoundException from '../../../common/search/test_data/resource_not_found_exception.json';
+import type { MockedKeys } from '@kbn/utility-types-jest';
 import { BehaviorSubject } from 'rxjs';
-import { dataPluginMock } from '../../mocks';
+import { ISessionService, SearchSessionState } from '..';
 import { UI_SETTINGS } from '../../../common';
+import { IEsSearchRequest } from '../../../common/search';
+import * as resourceNotFoundException from '../../../common/search/test_data/resource_not_found_exception.json';
+import * as searchPhaseException from '../../../common/search/test_data/search_phase_execution_exception.json';
+import { dataPluginMock } from '../../mocks';
+import { EsError, PainlessError, SearchTimeoutError, TimeoutErrorMode } from '../errors';
+import { SearchSessionIncompleteWarning } from '../errors/search_session_incomplete_warning';
+import { SearchInterceptor } from './search_interceptor';
 
 jest.mock('./utils', () => ({
   createRequestHash: jest.fn().mockImplementation((input) => {
@@ -32,9 +33,6 @@ jest.mock('./utils', () => ({
 jest.mock('../errors/search_session_incomplete_warning', () => ({
   SearchSessionIncompleteWarning: jest.fn(),
 }));
-
-import { SearchSessionIncompleteWarning } from '../errors/search_session_incomplete_warning';
-import { ResponseWarning } from '@kbn/inspector-plugin/common';
 
 let searchInterceptor: SearchInterceptor;
 let mockCoreSetup: MockedKeys<CoreSetup>;
