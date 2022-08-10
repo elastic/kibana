@@ -834,13 +834,16 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         <RuleTypeEuiFormRow label={i18n.RULE_PREVIEW_TITLE} $isVisible={true} fullWidth>
           <RulePreview
             index={index}
+            indexPattern={indexPattern}
             dataViewId={formDataViewId}
+            dataSourceType={dataSourceType}
             isDisabled={getIsRulePreviewDisabled({
               ruleType,
               isQueryBarValid,
               isThreatQueryBarValid,
               index,
               dataViewId: formDataViewId,
+              dataSourceType,
               threatIndex,
               threatMapping: formThreatMapping,
               machineLearningJobId,
