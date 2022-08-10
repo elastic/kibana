@@ -666,7 +666,7 @@
             "label": "reporting",
             "description": [],
             "signature": [
-              "{ readonly cloudMinimumRequirements: string; readonly browserSystemDependencies: string; readonly browserSandboxDependencies: string; }"
+              "{ readonly cloudMinimumRequirements: string; readonly grantUserAccess: string; readonly browserSystemDependencies: string; readonly browserSandboxDependencies: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false
