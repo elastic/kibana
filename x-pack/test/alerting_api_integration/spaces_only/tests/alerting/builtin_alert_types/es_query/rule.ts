@@ -15,13 +15,14 @@ import {
   getUrlPrefix,
   ObjectRemover,
 } from '../../../../../common/lib';
-import { createEsDocuments } from '../lib/create_test_data';
+import { createEsDocuments, createDataStream, deleteDataStream } from '../lib/create_test_data';
 
 const RULE_TYPE_ID = '.es-query';
 const CONNECTOR_TYPE_ID = '.index';
 const ES_TEST_INDEX_SOURCE = 'builtin-rule:es-query';
 const ES_TEST_INDEX_REFERENCE = '-na-';
 const ES_TEST_OUTPUT_INDEX_NAME = `${ES_TEST_INDEX_NAME}-output`;
+const ES_TEST_DATA_STREAM_NAME = 'test-data-stream';
 
 const RULE_INTERVALS_TO_WRITE = 5;
 const RULE_INTERVAL_SECONDS = 4;
@@ -36,6 +37,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
   const es = getService('es');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
   const esTestIndexToolOutput = new ESTestIndexTool(es, retry, ES_TEST_OUTPUT_INDEX_NAME);
+  const esTestIndexToolDataStream = new ESTestIndexTool(es, retry, ES_TEST_DATA_STREAM_NAME);
 
   describe('rule', async () => {
     let endDate: string;
@@ -54,12 +56,15 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       // write documents in the future, figure out the end date
       const endDateMillis = Date.now() + (RULE_INTERVALS_TO_WRITE - 1) * RULE_INTERVAL_MILLIS;
       endDate = new Date(endDateMillis).toISOString();
+
+      await createDataStream(es, ES_TEST_DATA_STREAM_NAME);
     });
 
     afterEach(async () => {
       await objectRemover.removeAll();
       await esTestIndexTool.destroy();
       await esTestIndexToolOutput.destroy();
+      await deleteDataStream(es, ES_TEST_DATA_STREAM_NAME);
     });
 
     [
@@ -499,14 +504,117 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       })
     );
 
-    async function createEsDocumentsInGroups(groups: number) {
+    [
+      [
+        'esQuery',
+        async () => {
+          await createRule({
+            name: 'never fire',
+            esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+            size: 100,
+            thresholdComparator: '<',
+            threshold: [0],
+            indexName: ES_TEST_DATA_STREAM_NAME,
+            timeField: '@timestamp',
+          });
+          await createRule({
+            name: 'always fire',
+            esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+            size: 100,
+            thresholdComparator: '>',
+            threshold: [-1],
+            indexName: ES_TEST_DATA_STREAM_NAME,
+            timeField: '@timestamp',
+          });
+        },
+      ] as const,
+      [
+        'searchSource',
+        async () => {
+          const esTestDataView = await indexPatterns.create(
+            { title: ES_TEST_DATA_STREAM_NAME, timeFieldName: 'date' },
+            { override: true },
+            getUrlPrefix(Spaces.space1.id)
+          );
+          await createRule({
+            name: 'never fire',
+            size: 100,
+            thresholdComparator: '<',
+            threshold: [0],
+            searchType: 'searchSource',
+            searchConfiguration: {
+              query: {
+                query: '',
+                language: 'kuery',
+              },
+              index: esTestDataView.id,
+              filter: [],
+            },
+          });
+          await createRule({
+            name: 'always fire',
+            size: 100,
+            thresholdComparator: '>',
+            threshold: [-1],
+            searchType: 'searchSource',
+            searchConfiguration: {
+              query: {
+                query: '',
+                language: 'kuery',
+              },
+              index: esTestDataView.id,
+              filter: [],
+            },
+          });
+        },
+      ] as const,
+    ].forEach(([searchType, initData]) =>
+      it(`runs correctly over a data stream: threshold on hit count < > for ${searchType} search type`, async () => {
+        // write documents from now to the future end date in groups
+        await createEsDocumentsInGroups(
+          ES_GROUPS_TO_WRITE,
+          esTestIndexToolDataStream,
+          ES_TEST_DATA_STREAM_NAME
+        );
+        await initData();
+
+        const docs = await waitForDocs(2);
+        for (let i = 0; i < docs.length; i++) {
+          const doc = docs[i];
+          const { previousTimestamp, hits } = doc._source;
+          const { name, title, message } = doc._source.params;
+
+          expect(name).to.be('always fire');
+          expect(title).to.be(`rule 'always fire' matched query`);
+          const messagePattern =
+            /rule 'always fire' is active:\n\n- Value: \d+\n- Conditions Met: Number of matching documents is greater than -1 over 20s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+          expect(message).to.match(messagePattern);
+          expect(hits).not.to.be.empty();
+
+          // during the first execution, the latestTimestamp value should be empty
+          // since this rule always fires, the latestTimestamp value should be updated each execution
+          if (!i) {
+            expect(previousTimestamp).to.be.empty();
+          } else {
+            expect(previousTimestamp).not.to.be.empty();
+          }
+        }
+      })
+    );
+
+    async function createEsDocumentsInGroups(
+      groups: number,
+      indexTool: ESTestIndexTool = esTestIndexTool,
+      indexName: string = ES_TEST_INDEX_NAME
+    ) {
       await createEsDocuments(
         es,
-        esTestIndexTool,
+        indexTool,
         endDate,
         RULE_INTERVALS_TO_WRITE,
         RULE_INTERVAL_MILLIS,
-        groups
+        groups,
+        indexName
       );
     }
 
@@ -529,6 +637,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       searchConfiguration?: unknown;
       searchType?: 'searchSource';
       notifyWhen?: string;
+      indexName?: string;
     }
 
     async function createRule(params: CreateRuleParams): Promise<string> {
@@ -581,7 +690,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
               searchConfiguration: params.searchConfiguration,
             }
           : {
-              index: [ES_TEST_INDEX_NAME],
+              index: [params.indexName || ES_TEST_INDEX_NAME],
               timeField: params.timeField || 'date',
               esQuery: params.esQuery,
             };
