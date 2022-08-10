@@ -17,4 +17,10 @@ export const timeSliderReducers = {
   ) => {
     state.componentState.timeRangeBounds = action.payload.timeRangeBounds;
   },
+  setValue: (
+    state: WritableDraft<TimeSliderReduxState>,
+    action: PayloadAction<{ value: [number, number] }>
+  ) => {
+    state.explicitInput.value = action.payload.value;
+  },
 };

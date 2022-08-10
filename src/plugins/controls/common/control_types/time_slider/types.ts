@@ -11,5 +11,5 @@ import type { ControlInput } from '../../types';
 export const TIME_SLIDER_CONTROL = 'timeSlider';
 
 export interface TimeSliderControlEmbeddableInput extends ControlInput {
-  value?: [number | null, number | null];
+  value?: [number, number];
 }

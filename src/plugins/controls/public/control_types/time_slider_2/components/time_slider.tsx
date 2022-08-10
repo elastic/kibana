@@ -51,10 +51,13 @@ export const TimeSlider: FC<Props> = (props) => {
     actions,
     useEmbeddableSelector: select,
   } = useReduxEmbeddableContext<TimeSliderReduxState, typeof timeSliderReducers>();
-  //const dispatch = useEmbeddableDispatch();
+  const dispatch = useEmbeddableDispatch();
 
   const timeRangeBounds = select((state) => {
     return state.componentState.timeRangeBounds;
+  });
+  const value = select((state) => {
+    return state.explicitInput.value;
   });
 
   if (!timeRangeBounds) {
@@ -92,12 +95,13 @@ export const TimeSlider: FC<Props> = (props) => {
   const onRangeSliderChange = useCallback(
     (value: [number, number]) => {
       setRange(value[TO_INDEX] - value[FROM_INDEX]);
+      dispatch(actions.setValue({ value }));
     },
     []
   );
 
-  const from = timeRangeMin;
-  const to = timeRangeMax;
+  const from = value ? value[FROM_INDEX] : timeRangeMin;
+  const to = value ? value[TO_INDEX] : timeRangeMax;
   
   return (
     <EuiInputPopover

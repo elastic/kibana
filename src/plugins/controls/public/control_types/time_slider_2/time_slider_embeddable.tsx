@@ -88,6 +88,11 @@ export class TimeSliderControlEmbeddable extends Embeddable<
       const { actions, dispatch, getState } = this.reduxEmbeddableTools;
       if (!_.isEqual(nextBounds, getState().componentState.timeRangeBounds)) {
         dispatch(actions.setTimeRangeBounds({ timeRangeBounds: nextBounds }));
+        const value = getState().explicitInput.value;
+        // unset value when its not valid for next time bounds
+        if (value && (value[0] < nextBounds[0] || value[1] > nextBounds[1])) {
+          dispatch(actions.setValue({ value: undefined }));
+        }
       }
     }
   }
