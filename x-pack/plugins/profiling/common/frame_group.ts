@@ -151,13 +151,13 @@ export function compareFrameGroup(a: FrameGroup, b: FrameGroup): number {
 export function createFrameGroupID(frameGroup: FrameGroup): FrameGroupID {
   switch (frameGroup.name) {
     case FrameGroupName.EMPTY:
-      return `${frameGroup.name}:${frameGroup.fileID}:${frameGroup.addressOrLine}`;
+      return `${frameGroup.name};${frameGroup.fileID};${frameGroup.addressOrLine}`;
       break;
     case FrameGroupName.ELF:
-      return `${frameGroup.name}:${frameGroup.fileID}:${frameGroup.functionName}`;
+      return `${frameGroup.name};${frameGroup.fileID};${frameGroup.functionName}`;
       break;
     case FrameGroupName.FULL:
-      return `${frameGroup.name}:${frameGroup.exeFilename}:${frameGroup.functionName}:${frameGroup.sourceFilename}`;
+      return `${frameGroup.name};${frameGroup.exeFilename};${frameGroup.functionName};${frameGroup.sourceFilename}`;
       break;
   }
 }

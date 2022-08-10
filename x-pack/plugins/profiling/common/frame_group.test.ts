@@ -160,18 +160,18 @@ describe('Frame group operations', () => {
   describe('check serialization for', () => {
     test('non-symbolized frame', () => {
       expect(createFrameGroupID(nonSymbolizedFrameGroups[0])).toEqual(
-        'empty:0x0123456789ABCDEF:102938'
+        'empty;0x0123456789ABCDEF;102938'
       );
     });
 
     test('non-symbolized ELF frame', () => {
       expect(createFrameGroupID(elfSymbolizedFrameGroups[0])).toEqual(
-        'elf:0x0123456789ABCDEF:strlen()'
+        'elf;0x0123456789ABCDEF;strlen()'
       );
     });
 
     test('symbolized frame', () => {
-      expect(createFrameGroupID(symbolizedFrameGroups[0])).toEqual('full:chrome:strlen():strlen()');
+      expect(createFrameGroupID(symbolizedFrameGroups[0])).toEqual('full;chrome;strlen();strlen()');
     });
   });
 });
