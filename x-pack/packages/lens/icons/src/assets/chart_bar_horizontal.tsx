@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiIconProps } from '@elastic/eui';
+import { colors } from './common_styles';
 
 export const LensIconChartBarHorizontal = ({
   title,
@@ -25,11 +26,11 @@ export const LensIconChartBarHorizontal = ({
     {title ? <title id={titleId}>{title}</title> : null}
     <path
       d="M29 16a1 1 0 011 1v4a1 1 0 01-1 1H1a1 1 0 01-1-1v-4a1 1 0 011-1h28zM22 0a1 1 0 011 1v4a1 1 0 01-1 1H1a1 1 0 01-1-1V1a1 1 0 011-1h21z"
-      className="lensChartIcon__subdued"
+      className={colors.subdued}
     />
     <path
       d="M0 9a1 1 0 011-1h15a1 1 0 011 1v4a1 1 0 01-1 1H1a1 1 0 01-1-1V9z"
-      className="lensChartIcon__accent"
+      className={colors.accent}
     />
   </svg>
 );

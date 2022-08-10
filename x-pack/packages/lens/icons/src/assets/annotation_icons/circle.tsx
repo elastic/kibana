@@ -7,7 +7,8 @@
 
 import * as React from 'react';
 import { EuiIconProps } from '@elastic/eui';
-import classnames from 'classnames';
+import { cx } from '@emotion/css';
+import { noFill } from '../common_styles';
 
 export const IconCircle = ({ title, titleId, ...props }: Omit<EuiIconProps, 'type'>) => (
   <svg
@@ -24,7 +25,7 @@ export const IconCircle = ({ title, titleId, ...props }: Omit<EuiIconProps, 'typ
       stroke="currentColor"
       cx="8"
       cy="8"
-      className={classnames('lensAnnotationIconNoFill', props.className)}
+      className={cx(noFill, props.className)}
       r="7"
     />
   </svg>
