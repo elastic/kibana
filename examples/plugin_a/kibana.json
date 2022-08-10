@@ -2,13 +2,13 @@
   "id": "pluginA",
   "version": "1.0.0",
   "kibanaVersion": "kibana",
-  "owner": {
-    "name": "",
-    "githubTeam": ""
-  },
   "description": "",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["navigation"],
-  "optionalPlugins": []
+  "requiredPlugins": ["navigation", "pluginB"],
+  "optionalPlugins": [],
+  "owner": {
+    "name": "App Services",
+    "githubTeam": "kibana-app-services"
+  }
 }

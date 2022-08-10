@@ -6,20 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { IRouter } from '@kbn/core/server';
+// import { schema } from '@kbn/config-schema';
+import * as trpc from '@trpc/server';
 
-export function defineRoutes(router: IRouter) {
-  router.get(
-    {
-      path: '/api/plugin_a/example',
-      validate: false,
-    },
-    async (context, request, response) => {
-      return response.ok({
-        body: {
-          time: new Date().toISOString(),
-        },
-      });
-    }
-  );
-}
+export const rpc = trpc.router().query('getSomething', {
+  resolve: async () => ({
+    ok: true,
+  }),
+});
+
+export type PluginARPC = typeof rpc;

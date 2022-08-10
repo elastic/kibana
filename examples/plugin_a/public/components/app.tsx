@@ -6,14 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { BrowserRouter as Router } from 'react-router-dom';
 
 import {
   EuiButton,
-  EuiHorizontalRule,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
@@ -28,6 +26,7 @@ import { CoreStart } from '@kbn/core/public';
 import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 
 import { PLUGIN_ID, PLUGIN_NAME } from '../../common';
+import { rpc } from '../rpc';
 
 interface PluginAAppDeps {
   basename: string;
@@ -36,21 +35,16 @@ interface PluginAAppDeps {
   navigation: NavigationPublicPluginStart;
 }
 
-export const PluginAApp = ({ basename, notifications, http, navigation }: PluginAAppDeps) => {
-  // Use React hooks to manage state.
-  const [timestamp, setTimestamp] = useState<string | undefined>();
+export const PluginAApp = ({ basename, notifications, navigation }: PluginAAppDeps) => {
+  const result = rpc.useQuery(['getSomething']);
+  const c = rpc.useContext();
 
   const onClickHandler = () => {
-    // Use the core http service to make a response to the server API.
-    http.get('/api/plugin_a/example').then((res) => {
-      setTimestamp(res.time);
-      // Use the core notifications service to display a success message.
-      notifications.toasts.addSuccess(
-        i18n.translate('pluginA.dataUpdated', {
-          defaultMessage: 'Data updated',
-        })
-      );
-    });
+    c.fetchQuery(['getSomething'])
+      .then((r) => {
+        notifications.toasts.addSuccess({ title: 'yeah!', text: JSON.stringify(r, null, 2) });
+      })
+      .catch((e) => notifications.toasts.addError(e, { title: 'oh no!' }));
   };
 
   // Render the application DOM.
@@ -96,14 +90,14 @@ export const PluginAApp = ({ basename, notifications, http, navigation }: Plugin
                         defaultMessage="Look through the generated code and check out the plugin development documentation."
                       />
                     </p>
-                    <EuiHorizontalRule />
-                    <p>
-                      <FormattedMessage
-                        id="pluginA.timestampText"
-                        defaultMessage="Last timestamp: {time}"
-                        values={{ time: timestamp ? timestamp : 'Unknown' }}
-                      />
-                    </p>
+                    {result.isSuccess ? (
+                      <pre>{JSON.stringify(result.data)}</pre>
+                    ) : result.isError ? (
+                      <pre>{result.error}</pre>
+                    ) : result.isLoading ? (
+                      <pre>Loading...</pre>
+                    ) : null}
+                    <p />
                     <EuiButton type="primary" size="s" onClick={onClickHandler}>
                       <FormattedMessage id="pluginA.buttonText" defaultMessage="Get data" />
                     </EuiButton>

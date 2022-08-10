@@ -9,7 +9,8 @@
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
 
 import { PluginAPluginSetup, PluginAPluginStart } from './types';
-import { defineRoutes } from './routes';
+
+import { rpc } from './rpc';
 
 export class PluginAPlugin implements Plugin<PluginAPluginSetup, PluginAPluginStart> {
   private readonly logger: Logger;
@@ -20,10 +21,8 @@ export class PluginAPlugin implements Plugin<PluginAPluginSetup, PluginAPluginSt
 
   public setup(core: CoreSetup) {
     this.logger.debug('plugin_a: Setup');
-    const router = core.http.createRouter();
 
-    // Register server side APIs
-    defineRoutes(router);
+    core.http.registerRPCDefinition(rpc);
 
     return {};
   }

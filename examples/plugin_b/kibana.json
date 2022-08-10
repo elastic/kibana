@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "kibanaVersion": "kibana",
   "owner": {
-    "name": "",
-    "githubTeam": ""
+    "name": "App Services",
+    "githubTeam": "kibana-app-services"
   },
   "description": "",
   "server": true,

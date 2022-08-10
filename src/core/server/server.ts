@@ -8,6 +8,9 @@
 
 import apm from 'elastic-apm-node';
 import { config as pathConfig } from '@kbn/utils';
+import { Request, ResponseToolkit, Server as HapiServer } from '@hapi/hapi';
+import { URLSearchParams } from 'url';
+import { AnyRouter, resolveHTTPResponse, router } from '@trpc/server';
 import type { Logger, LoggerFactory } from '@kbn/logging';
 import { ConfigService, Env, RawConfigurationProvider } from '@kbn/config';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
@@ -123,6 +126,8 @@ export class Server {
   private readonly logger: LoggerFactory;
 
   private readonly uptimePerStep: Partial<UptimeSteps> = {};
+
+  private readonly rpcDefinitions: AnyRouter[] = [];
 
   constructor(
     rawConfigProvider: RawConfigurationProvider,
@@ -341,10 +346,49 @@ export class Server {
       metrics: metricsSetup,
       deprecations: deprecationsSetup,
       coreUsageData: coreUsageDataSetup,
+      registerRPCDefinition: (def: AnyRouter) => {
+        this.rpcDefinitions.push(def);
+      },
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
     this.#pluginsInitialized = pluginsSetup.initialized;
+
+    const rpcMegaRouter = this.rpcDefinitions.reduce((acc, def) => {
+      return acc.merge(def);
+    }, router());
+
+    const rpcHandler = (method: string) => async (request: Request, h: ResponseToolkit) => {
+      const result = await resolveHTTPResponse({
+        req: {
+          headers: request.headers,
+          body: request.payload,
+          method,
+          query: new URLSearchParams(request.query),
+        },
+        path: request.paramsArray[0],
+        router: rpcMegaRouter,
+        // Can share the request context through this mechanism with handlers
+        createContext: async () => {},
+      });
+
+      let response = h.response(result.body).code(result.status);
+      for (const [key, value] of Object.entries(result.headers ?? {})) {
+        if (value) response = response.header(key, value as string);
+      }
+      return response;
+    };
+
+    (this.http.httpServer.server as unknown as HapiServer).route({
+      method: 'POST',
+      path: '/rpc/{fn}',
+      handler: rpcHandler('POST'),
+    });
+    (this.http.httpServer.server as unknown as HapiServer).route({
+      method: 'GET',
+      path: '/rpc/{fn}',
+      handler: rpcHandler('GET'),
+    });
 
     this.registerCoreContext(coreSetup);
     this.coreApp.setup(coreSetup, uiPlugins);
