@@ -17,13 +17,9 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import {
-  CIS_INTEGRATION_INPUTS_MAP,
-  CLOUDBEAT_EKS,
-  CLOUDBEAT_VANILLA,
-} from '../../../common/constants';
+import { CLOUDBEAT_EKS, CLOUDBEAT_VANILLA } from '../../../common/constants';
 
-export type InputType = keyof typeof CIS_INTEGRATION_INPUTS_MAP;
+export type InputType = typeof CLOUDBEAT_EKS | typeof CLOUDBEAT_VANILLA;
 
 interface Props {
   type: InputType;

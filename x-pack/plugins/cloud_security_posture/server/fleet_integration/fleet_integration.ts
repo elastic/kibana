@@ -19,7 +19,7 @@ import {
 } from '@kbn/fleet-plugin/common';
 import { createCspRuleSearchFilterByPackagePolicy } from '../../common/utils/helpers';
 import {
-  INTEGRATION_CIS_K8S,
+  CLOUDBEAT_VANILLA,
   CSP_RULE_SAVED_OBJECT_TYPE,
   CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
 } from '../../common/constants';
@@ -35,11 +35,12 @@ export const getBenchmarkInputType = (inputs: PackagePolicy['inputs']): Benchmar
   const enabledInputs = inputs.filter(isEnabledBenchmarkInputType);
 
   // Use the only enabled input
-  // Get the last part of the input type, input type structure: cloudbeat/<benchmark_id>
-  if (enabledInputs.length === 1) return enabledInputs[0].type.split('/')[1];
+  if (enabledInputs.length === 1) {
+    return getInputType(enabledInputs[0].type);
+  }
 
   // Use the default benchmark id for multiple/none selected
-  return INTEGRATION_CIS_K8S;
+  return getInputType(CLOUDBEAT_VANILLA);
 };
 
 /**
@@ -138,3 +139,8 @@ const generateRulesFromTemplates = (
       policy_id: policyId,
     },
   }));
+
+const getInputType = (inputType: string): string => {
+  // Get the last part of the input type, input type structure: cloudbeat/<benchmark_id>
+  return inputType.split('/')[1];
+};

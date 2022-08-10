@@ -69,7 +69,7 @@ const getEnabledRulesByBenchmark = (rules: SavedObjectsFindResponse<CspRule>['sa
   rules.reduce<CspRulesConfiguration['runtime_cfg']['activated_rules']>((benchmarks, rule) => {
     const benchmark = rule.attributes.metadata.benchmark.id;
     if (!rule.attributes.enabled || !benchmark) return benchmarks;
-    if (benchmarks[benchmark] == null) {
+    if (!benchmarks[benchmark]) {
       benchmarks[benchmark] = [];
     }
 
