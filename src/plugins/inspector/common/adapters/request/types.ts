@@ -55,6 +55,10 @@ export interface Response {
   json?: object;
   time?: number;
 }
+
+/**
+ * The format of a warning in an Elasticsearch search response.
+ */
 export interface ResponseWarning {
   title?: string;
   text?: string;
