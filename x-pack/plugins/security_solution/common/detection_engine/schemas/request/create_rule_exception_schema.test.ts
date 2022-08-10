@@ -78,20 +78,36 @@ describe('createRuleExceptionsSchema', () => {
     const decoded = createRuleExceptionsSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual(['invalid keys "list_id"']);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "some-list-id" supplied to "items,list_id"',
+    ]);
     expect(message.schema).toEqual({});
   });
 
   test('made up parameters do not validate', () => {
     const payload: Partial<CreateRuleExceptionSchema> & { madeUp: string } = {
-      items: [getCreateExceptionListItemSchemaMock()],
+      items: [
+        {
+          description: 'Exception item for rule default exception list',
+          entries: [
+            {
+              field: 'some.not.nested.field',
+              operator: 'included',
+              type: 'match',
+              value: 'some value',
+            },
+          ],
+          name: 'Sample exception item',
+          type: 'simple',
+        },
+      ],
       madeUp: 'invalid value',
     };
 
     const decoded = createRuleExceptionsSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual(['invalid keys "list_id,madeUp"']);
+    expect(getPaths(left(message.errors))).toEqual(['invalid keys "madeUp"']);
     expect(message.schema).toEqual({});
   });
 });

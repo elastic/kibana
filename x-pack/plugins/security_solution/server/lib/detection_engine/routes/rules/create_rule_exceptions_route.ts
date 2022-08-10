@@ -15,6 +15,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import type {
   CreateExceptionListSchema,
   CreateExceptionListSchemaDecoded,
+  CreateRuleExceptionListItemSchemaDecoded,
   ExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
@@ -27,7 +28,6 @@ import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type {
-  CreateRuleExceptionListItemSchemaDecoded,
   CreateRuleExceptionSchemaDecoded,
   QueryRuleByIdSchemaDecoded,
 } from '../../../../../common/detection_engine/schemas/request';

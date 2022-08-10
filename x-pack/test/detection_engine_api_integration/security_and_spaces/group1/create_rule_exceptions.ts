@@ -10,11 +10,11 @@ import expect from '@kbn/expect';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import {
   CreateExceptionListSchema,
+  CreateRuleExceptionListItemSchema,
   ExceptionListItemSchema,
   ExceptionListTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
-import { CreateRuleExceptionListItemSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request/create_rule_exception_schema';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   getRule,
