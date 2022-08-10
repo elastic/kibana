@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './cli';
+export { findUsedNodeModules } from './src/find_used_node_modules';

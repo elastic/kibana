@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-export { KbnFieldType } from './kbn_field_type';
+export { KbnFieldType } from './src/kbn_field_type';
 
 export {
   castEsToKbnFieldTypeName,
   getKbnFieldType,
   getKbnTypeNames,
   getFilterableKbnTypeNames,
-} from './kbn_field_types';
+} from './src/kbn_field_types';
 
-export type { KbnFieldTypeOptions } from './types';
-export { KBN_FIELD_TYPES, ES_FIELD_TYPES } from './types';
+export type { KbnFieldTypeOptions } from './src/types';
+export { KBN_FIELD_TYPES, ES_FIELD_TYPES } from './src/types';

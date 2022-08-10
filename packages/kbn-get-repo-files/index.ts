@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { findUsedNodeModules } from './find_used_node_modules';
+export { getRepoFiles } from './src/get_repo_files';

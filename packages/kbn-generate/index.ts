@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { getRepoFiles } from './get_repo_files';
+export * from './src/cli';
