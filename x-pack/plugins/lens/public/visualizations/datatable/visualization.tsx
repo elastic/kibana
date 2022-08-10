@@ -587,10 +587,10 @@ function getDataSourceAndSortedColumns(
   layerId: string
 ) {
   const datasource = datasourceLayers[state.layerId];
-  const originalOrder = datasource.getTableSpec().map(({ columnId }) => columnId);
+  const originalOrder = datasource?.getTableSpec().map(({ columnId }) => columnId);
   // When we add a column it could be empty, and therefore have no order
   const sortedColumns = Array.from(
-    new Set(originalOrder.concat(state.columns.map(({ columnId }) => columnId)))
+    new Set(originalOrder?.concat(state.columns.map(({ columnId }) => columnId)))
   );
   return { datasource, sortedColumns };
 }
