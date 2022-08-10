@@ -641,12 +641,11 @@ export function DimensionEditor(props: DimensionEditorProps) {
                     | IndexPatternLayer
                     | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
                     | GenericIndexPatternColumn
-                    | undefined
                 ) => {
-                  let newLayer: IndexPatternLayer | undefined;
+                  let newLayer: IndexPatternLayer;
                   if (typeof setter === 'function') {
                     newLayer = setter(layer);
-                  } else if (setter && isColumn(setter)) {
+                  } else if (isColumn(setter)) {
                     newLayer = {
                       ...layer,
                       columns: {
@@ -657,9 +656,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   } else {
                     newLayer = setter;
                   }
-                  return newLayer
-                    ? updateLayer(adjustColumnReferencesForChangedColumn(newLayer, referenceId))
-                    : null;
+                  return updateLayer(adjustColumnReferencesForChangedColumn(newLayer, referenceId));
                 }}
                 validation={validation}
                 currentIndexPattern={currentIndexPattern}
