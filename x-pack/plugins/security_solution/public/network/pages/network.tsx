@@ -8,14 +8,12 @@
 import { EuiPanel, EuiSpacer, EuiWindowEvent } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef } from 'react';
-import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { isTab } from '@kbn/timelines-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { SecurityPageName } from '../../app/types';
-import type { UpdateDateRange } from '../../common/components/charts/common';
 import { EmbeddedMap } from '../components/embeddables/embedded_map';
 import { FiltersGlobal } from '../../common/components/filters_global';
 import { HeaderPage } from '../../common/components/header_page';
@@ -65,7 +63,6 @@ const ID = 'NetworkQueryId';
 
 const NetworkComponent = React.memo<NetworkComponentProps>(
   ({ hasMlUserPermissions, capabilitiesFetched }) => {
-    const dispatch = useDispatch();
     const containerElement = useRef<HTMLDivElement | null>(null);
     const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
     const graphEventId = useShallowEqualSelector(
@@ -94,23 +91,6 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
       }
       return filters;
     }, [tabName, filters]);
-
-    const narrowDateRange = useCallback<UpdateDateRange>(
-      ({ x }) => {
-        if (!x) {
-          return;
-        }
-        const [min, max] = x;
-        dispatch(
-          setAbsoluteRangeDatePicker({
-            id: 'global',
-            from: new Date(min).toISOString(),
-            to: new Date(max).toISOString(),
-          })
-        );
-      },
-      [dispatch]
-    );
 
     const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
 
@@ -194,15 +174,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                   </>
                 )}
 
-                <NetworkKpiComponent
-                  filterQuery={filterQuery}
-                  from={from}
-                  indexNames={selectedPatterns}
-                  narrowDateRange={narrowDateRange}
-                  setQuery={setQuery}
-                  skip={isInitializing || filterQuery === undefined}
-                  to={to}
-                />
+                <NetworkKpiComponent from={from} setQuery={setQuery} to={to} />
               </Display>
 
               {capabilitiesFetched && !isInitializing ? (
