@@ -5068,9 +5068,15 @@
             "label": "toExpression",
             "description": [],
             "signature": [
-              "(state: T, datasourceLayers: ",
-              "DatasourceLayers",
-              ", attributes?: Partial<{ title: string; description: string; }> | undefined, datasourceExpressionsByLayers?: Record<string, ",
+              "(state: T, datasourceLayers: Partial<Record<string, ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.DatasourcePublicAPI",
+                "text": "DatasourcePublicAPI"
+              },
+              ">>, attributes?: Partial<{ title: string; description: string; }> | undefined, datasourceExpressionsByLayers?: Record<string, ",
               "Ast",
               "> | undefined) => string | ",
               {
@@ -5107,7 +5113,15 @@
                 "label": "datasourceLayers",
                 "description": [],
                 "signature": [
-                  "DatasourceLayers"
+                  "Partial<Record<string, ",
+                  {
+                    "pluginId": "lens",
+                    "scope": "public",
+                    "docId": "kibLensPluginApi",
+                    "section": "def-public.DatasourcePublicAPI",
+                    "text": "DatasourcePublicAPI"
+                  },
+                  ">>"
                 ],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
@@ -5156,9 +5170,15 @@
               "\nExpression to render a preview version of the chart in very constrained space.\nIf there is no expression provided, the preview icon is used."
             ],
             "signature": [
-              "((state: T, datasourceLayers: ",
-              "DatasourceLayers",
-              ", datasourceExpressionsByLayers?: Record<string, ",
+              "((state: T, datasourceLayers: Partial<Record<string, ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.DatasourcePublicAPI",
+                "text": "DatasourcePublicAPI"
+              },
+              ">>, datasourceExpressionsByLayers?: Record<string, ",
               "Ast",
               "> | undefined) => string | ",
               {
@@ -5195,7 +5215,15 @@
                 "label": "datasourceLayers",
                 "description": [],
                 "signature": [
-                  "DatasourceLayers"
+                  "Partial<Record<string, ",
+                  {
+                    "pluginId": "lens",
+                    "scope": "public",
+                    "docId": "kibLensPluginApi",
+                    "section": "def-public.DatasourcePublicAPI",
+                    "text": "DatasourcePublicAPI"
+                  },
+                  ">>"
                 ],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
@@ -5230,9 +5258,15 @@
               "\nThe frame will call this function on all visualizations at few stages (pre-build/build error) in order\nto provide more context to the error and show it to the user"
             ],
             "signature": [
-              "(state: T, datasourceLayers?: ",
-              "DatasourceLayers",
-              " | undefined) => { shortMessage: string; longMessage: React.ReactNode; }[] | undefined"
+              "(state: T, datasourceLayers?: Partial<Record<string, ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.DatasourcePublicAPI",
+                "text": "DatasourcePublicAPI"
+              },
+              ">> | undefined) => { shortMessage: string; longMessage: React.ReactNode; }[] | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
@@ -5259,8 +5293,15 @@
                 "label": "datasourceLayers",
                 "description": [],
                 "signature": [
-                  "DatasourceLayers",
-                  " | undefined"
+                  "Partial<Record<string, ",
+                  {
+                    "pluginId": "lens",
+                    "scope": "public",
+                    "docId": "kibLensPluginApi",
+                    "section": "def-public.DatasourcePublicAPI",
+                    "text": "DatasourcePublicAPI"
+                  },
+                  ">> | undefined"
                 ],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
