@@ -584,17 +584,18 @@ export class DataView implements DataViewBase {
    */
   getRuntimeMappings(): estypes.MappingRuntimeFields {
     const mappedFields = this.getMappedFieldNames();
-    return Object.keys(this.runtimeFieldMap).reduce((acc, fieldName) => {
-      // do not include fields that are mapped
-      if (mappedFields.includes(fieldName)) {
-        return acc;
-      }
+    const records = Object.keys(this.runtimeFieldMap).reduce<Record<string, RuntimeFieldSpec>>(
+      (acc, fieldName) => {
+        // do not include fields that are mapped
+        if (!mappedFields.includes(fieldName)) {
+          acc[fieldName] = this.runtimeFieldMap[fieldName];
+        }
 
-      return {
-        ...acc,
-        [fieldName]: this.runtimeFieldMap[fieldName],
-      };
-    }, {});
+        return acc;
+      },
+      {}
+    );
+    return records as estypes.MappingRuntimeFields;
   }
 
   /**
@@ -681,7 +682,7 @@ export class DataView implements DataViewBase {
   private getMappedFieldNames() {
     return this.fields.getAll().reduce<string[]>((acc, dataViewField) => {
       if (dataViewField.isMapped) {
-        return [...acc, dataViewField.name];
+        acc.push(dataViewField.name);
       }
       return acc;
     }, []);
