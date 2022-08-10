@@ -8,6 +8,7 @@
 import moment from 'moment';
 
 import { WatchStatusModelEs } from '../../../common/types';
+import { WATCH_STATES, WATCH_STATE_COMMENTS } from '../../../common/constants';
 import { buildServerWatchStatusModel, buildClientWatchStatusModel } from './watch_status_model';
 
 const upstreamJson: WatchStatusModelEs = {
@@ -134,6 +135,8 @@ describe('WatchStatusModel', () => {
       expect(serverWatchStatusModel.isActive).toBe(clientWatchStatusModel.isActive);
       expect(serverWatchStatusModel.lastChecked).toBe(clientWatchStatusModel.lastChecked);
       expect(serverWatchStatusModel.lastMetCondition).toBe(clientWatchStatusModel.lastMetCondition);
+      expect(clientWatchStatusModel.state).toBe(WATCH_STATES.OK);
+      expect(clientWatchStatusModel.comment).toBe(WATCH_STATE_COMMENTS.OK);
       expect(
         clientWatchStatusModel.actionStatuses && clientWatchStatusModel.actionStatuses.length
       ).toBe(2);
