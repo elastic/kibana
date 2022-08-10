@@ -47,7 +47,7 @@ import {
 } from '..';
 
 export default {
-  title: 'Lens Icons',
+  title: 'Chart Icons',
   decorators: [(story: Function) => <EuiForm>{story()}</EuiForm>],
 };
 
