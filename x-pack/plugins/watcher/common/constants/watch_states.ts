@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export const WATCH_STATES: { [key: string]: string } = {
   DISABLED: i18n.translate('xpack.watcher.constants.watchStates.disabledStateText', {
     defaultMessage: 'Disabled',
