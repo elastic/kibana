@@ -54,6 +54,7 @@ export function LayerPanel(
       newVisualizationState: unknown
     ) => void;
     onRemoveLayer: () => void;
+    onRemoveDimension: (props: { columnId: string; layerId: string }) => void;
     registerNewLayerRef: (layerId: string, instance: HTMLDivElement | null) => void;
     toggleFullscreen: () => void;
     onEmptyDimensionAdd: (columnId: string, group: { groupId: string }) => void;
@@ -446,31 +447,7 @@ export function LayerPanel(
                                   });
                                 }}
                                 onRemoveClick={(id: string) => {
-                                  if (datasourceId && layerDatasource) {
-                                    props.updateAll(
-                                      datasourceId,
-                                      layerDatasource.removeColumn({
-                                        layerId,
-                                        columnId: id,
-                                        prevState: layerDatasourceState,
-                                      }),
-                                      activeVisualization.removeDimension({
-                                        layerId,
-                                        columnId: id,
-                                        prevState: props.visualizationState,
-                                        frame: framePublicAPI,
-                                      })
-                                    );
-                                  } else {
-                                    props.updateVisualization(
-                                      activeVisualization.removeDimension({
-                                        layerId,
-                                        columnId: id,
-                                        prevState: props.visualizationState,
-                                        frame: framePublicAPI,
-                                      })
-                                    );
-                                  }
+                                  props.onRemoveDimension({ columnId: id, layerId });
                                   removeButtonRef(id);
                                 }}
                                 invalid={

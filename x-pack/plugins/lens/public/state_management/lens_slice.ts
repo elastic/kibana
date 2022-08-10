@@ -167,6 +167,12 @@ export const setLayerDefaultDimension = createAction<{
 
 export const syncLinkedDimensions = createAction<void>('lens/syncLinkedDimensions');
 
+export const removeDimension = createAction<{
+  layerId: string;
+  columnId: string;
+  datasourceId?: string;
+}>('lens/removeDimension');
+
 export const lensActions = {
   setState,
   onActiveDataChange,
@@ -193,6 +199,7 @@ export const lensActions = {
   addLayer,
   setLayerDefaultDimension,
   syncLinkedDimensions,
+  removeDimension,
 };
 
 export const makeLensReducer = (storeDeps: LensStoreDeps) => {
@@ -782,6 +789,40 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
 
       state.datasourceStates[state.activeDatasourceId].state = syncedDatasourceState;
       state.visualization.state = syncedVisualizationState;
+    },
+    [removeDimension.type]: (
+      state,
+      {
+        payload: { layerId, columnId, datasourceId },
+      }: {
+        payload: {
+          layerId: string;
+          columnId: string;
+          datasourceId?: string;
+        };
+      }
+    ) => {
+      if (!state.visualization.activeId) {
+        return state;
+      }
+
+      const datasource = datasourceId ? datasourceMap[datasourceId] : undefined;
+      if (datasource && datasourceId) {
+        state.datasourceStates[datasourceId].state = datasource?.removeColumn({
+          layerId,
+          columnId,
+          prevState: state.datasourceStates[datasourceId].state,
+        });
+      }
+
+      const activeVisualization = visualizationMap[state.visualization.activeId];
+
+      state.visualization.state = activeVisualization.removeDimension({
+        layerId,
+        columnId,
+        prevState: state.visualization.state,
+        frame: selectFramePublicAPI({ lens: state }, datasourceMap),
+      });
     },
   });
 };
