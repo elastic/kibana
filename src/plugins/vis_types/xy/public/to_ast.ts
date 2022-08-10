@@ -423,23 +423,25 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
     });
   }
 
+  const visibleSeries = finalSeriesParams.filter(
+    (param) => param.show && yAccessors[param.data.id]
+  );
+
   const visTypeXy = buildExpressionFunction('layeredXyVis', {
     layers: [
-      ...finalSeriesParams
-        .filter((param) => param.show && yAccessors[param.data.id])
-        .map((seriesParams) =>
-          prepareLayers(
-            seriesParams,
-            isHistogram,
-            vis.params.valueAxes,
-            yAccessors[seriesParams.data.id],
-            dimensions.x,
-            dimensions.series,
-            dimensions.z ? dimensions.z[0] : undefined,
-            vis.params.palette,
-            xScale
-          )
-        ),
+      ...visibleSeries.map((seriesParams) =>
+        prepareLayers(
+          seriesParams,
+          isHistogram,
+          vis.params.valueAxes,
+          yAccessors[seriesParams.data.id],
+          dimensions.x,
+          dimensions.series,
+          dimensions.z ? dimensions.z[0] : undefined,
+          vis.params.palette,
+          xScale
+        )
+      ),
       ...(vis.params.thresholdLine.show
         ? [prepareReferenceLine(vis.params.thresholdLine, vis.params.valueAxes[0].id)]
         : []),
@@ -454,9 +456,7 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
     showTooltip: vis.params.addTooltip,
     markSizeRatio:
       dimensions.z &&
-      finalSeriesParams.some(
-        (param) => param.type === ChartType.Area || param.type === ChartType.Line
-      )
+      visibleSeries.some((param) => param.type === ChartType.Area || param.type === ChartType.Line)
         ? vis.params.radiusRatio * 0.6 // NOTE: downscale ratio to match current vislib implementation
         : undefined,
     legend: prepareLengend(vis.params, legendSize),
@@ -471,13 +471,13 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
         : undefined
     ), // as we have only one x axis
     yAxisConfigs: vis.params.valueAxes
-      .filter((axis) => finalSeriesParams.some((seriesParam) => seriesParam.valueAxis === axis.id))
+      .filter((axis) => visibleSeries.some((seriesParam) => seriesParam.valueAxis === axis.id))
       .map((valueAxis) => prepareYAxis(valueAxis, vis.params.grid.valueAxis === valueAxis.id)),
     minTimeBarInterval:
       dimensions.x?.params &&
       isDateHistogramParams(dimensions.x?.params) &&
       dimensions.x?.params.date &&
-      finalSeriesParams.some((param) => param.type === ChartType.Histogram)
+      visibleSeries.some((param) => param.type === ChartType.Histogram)
         ? dimensions.x?.params.intervalESValue + dimensions.x?.params.intervalESUnit
         : undefined,
     splitColumnAccessor: dimensions.splitColumn?.map(prepareVisDimension),
