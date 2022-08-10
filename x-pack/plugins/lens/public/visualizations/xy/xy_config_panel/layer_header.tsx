@@ -72,7 +72,7 @@ function AnnotationLayerHeaderContent({
   frame,
   state,
   layerId,
-  setState,
+  onChangeIndexPattern,
   defaultIndexPatternId,
 }: VisualizationLayerHeaderContentProps<State>) {
   const notFoundTitleLabel = i18n.translate('xpack.lens.layerPanel.missingDataView', {
@@ -97,12 +97,7 @@ function AnnotationLayerHeaderContent({
       indexPatternId={indexPatternId}
       indexPatternRefs={frame.dataViews.indexPatternRefs}
       isMissingCurrent={false}
-      onChangeIndexPattern={(newIndexPatternId) => {
-        const newLayer = { ...layer, indexPatternId: newIndexPatternId };
-        const newLayers = [...state.layers];
-        newLayers[layerIndex] = newLayer;
-        setState({ ...state, layers: newLayers });
-      }}
+      onChangeIndexPattern={onChangeIndexPattern}
     />
   );
 }

@@ -639,12 +639,11 @@ export interface VisualizationConfigProps<T = unknown> {
 
 export type VisualizationLayerWidgetProps<T = unknown> = VisualizationConfigProps<T> & {
   setState: (newState: T) => void;
-  onChangeIndexPattern: (indexPatternId: string, layerId: string) => void;
-};
-
-export type VisualizationLayerHeaderContentProps<T = unknown> = VisualizationLayerWidgetProps<T> & {
+  onChangeIndexPattern: (indexPatternId: string) => void;
   defaultIndexPatternId: string;
 };
+
+export type VisualizationLayerHeaderContentProps<T = unknown> = VisualizationLayerWidgetProps<T>;
 
 export interface VisualizationToolbarProps<T = unknown> {
   setState: (newState: T) => void;

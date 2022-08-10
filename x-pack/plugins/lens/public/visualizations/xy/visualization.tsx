@@ -79,6 +79,7 @@ import { DimensionTrigger } from '../../shared_components/dimension_trigger';
 import { defaultAnnotationLabel } from './annotations/helpers';
 import { onDropForVisualization } from '../../editor_frame_service/editor_frame/config_panel/buttons/drop_targets_utils';
 
+const XY_ID = 'lnsXY';
 export const getXyVisualization = ({
   core,
   storage,
@@ -98,7 +99,7 @@ export const getXyVisualization = ({
   useLegacyTimeAxis: boolean;
   kibanaTheme: ThemeServiceStart;
 }): Visualization<State> => ({
-  id: 'lnsXY',
+  id: XY_ID,
   visualizationTypes,
   getVisualizationTypeId(state) {
     const type = getVisualizationType(state);
@@ -520,12 +521,16 @@ export const getXyVisualization = ({
   },
 
   renderLayerPanel(domElement, props) {
+    const { onChangeIndexPattern, ...otherProps } = props;
     render(
       <KibanaThemeProvider theme$={kibanaTheme.theme$}>
         <I18nProvider>
           <LayerHeaderContent
-            {...props}
-            defaultIndexPatternId={core.uiSettings.get('defaultIndex')}
+            {...otherProps}
+            onChangeIndexPattern={(indexPatternId) => {
+              // TODO: should it trigger an action as in the datasource?
+              onChangeIndexPattern(indexPatternId);
+            }}
           />
         </I18nProvider>
       </KibanaThemeProvider>,

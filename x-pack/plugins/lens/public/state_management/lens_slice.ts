@@ -321,15 +321,15 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         for (const visualizationId of visualizationIds) {
           const activeVisualization =
             visualizationId &&
-            state.visualization.activeId !== visualizationId &&
+            state.visualization.activeId === visualizationId &&
             visualizationMap[visualizationId];
           if (activeVisualization && layerId && activeVisualization?.onIndexPatternChange) {
             newState.visualization = {
               ...state.visualization,
               state: activeVisualization.onIndexPatternChange(
                 state.visualization.state,
-                layerId,
-                indexPatternId
+                indexPatternId,
+                layerId
               ),
             };
           }
