@@ -28,6 +28,7 @@ function transformConnectorForExport(
   actionType: ActionType
 ): SavedObject<RawAction> {
   let isMissingSecrets = false;
+
   try {
     // If connector requires secrets, this will throw an error
     validateSecrets(actionType, {});
@@ -39,11 +40,11 @@ function transformConnectorForExport(
     isMissingSecrets = true;
   }
 
-  // Skip connectors
   return {
     ...connector,
     attributes: {
       ...connector.attributes,
+      secrets: {},
       isMissingSecrets,
     },
   };
