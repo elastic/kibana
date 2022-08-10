@@ -17,8 +17,19 @@ import {
     AGENT_POLICIES_TAB,
     AGENT_POLICIES_CREATE_AGENT_POLICY_BUTTON,
     AGENT_POLICIES_CREATE_AGENT_POLICY_FLYOUT_TITLE,
-    AGENT_POLICY_CREATE_AGENT_POLICY_NAME_FIELD
+    AGENT_POLICY_CREATE_AGENT_POLICY_NAME_FIELD,
+    AGENT_POLICIES_FLYOUT_ADVANCED_DEFAULT_NAMESPACE_HEADER,
+    AGENT_POLICY_FLYOUT_CREATE_BUTTON,
+    ENROLLMENT_TOKENS_TAB,
+    ENROLLMENT_TOKENS_CREATE_TOKEN_BUTTON,
+    ENROLLMENT_TOKENS_CREATE_TOKEN_NAME_FIELD,
+    DATA_STREAMS_TAB,
+    SETTINGS_TAB,
+    SETTINGS_FLEET_SERVER_HOST_HEADING
+
 } from '../../screens/fleet';
+import { AGENT_POLICY_NAME_LINK } from '../../screens/integrations'
+import { cleanupAgentPolicies, unenrollAgent } from '../../tasks/cleanup';
 describe('Home page', () => {
     before(() => {
         navigateTo(FLEET);
@@ -69,6 +80,52 @@ describe('Home page', () => {
             cy.getBySel(AGENT_POLICIES_CREATE_AGENT_POLICY_BUTTON).click();
             cy.getBySel(AGENT_POLICIES_CREATE_AGENT_POLICY_FLYOUT_TITLE, { timeout: 15000 }).should('be.visible');
             cy.getBySel(AGENT_POLICY_CREATE_AGENT_POLICY_NAME_FIELD).type('testName');
+            cy.get('.ingest-active-button').click();
+            cy.getBySel(AGENT_POLICIES_FLYOUT_ADVANCED_DEFAULT_NAMESPACE_HEADER, { timeout: 15000 }).should('be.visible');
+            checkA11y({ skipFailures: false });
+        });
+        it('Agent Table After Adding Another Agent', () => {
+            cy.getBySel(AGENT_POLICY_FLYOUT_CREATE_BUTTON).click();
+            cy.getBySel(AGENT_POLICY_NAME_LINK, { timeout: 15000 }).should('be.visible');
+            checkA11y({ skipFailures: true });
+        })
+    });
+    describe('Enrollment Tokens', () => {
+        before(() => {
+            cy.getBySel(ENROLLMENT_TOKENS_TAB).click();
+        });
+        it('Enrollment Tokens Table', ()=> {
+            cy.getBySel('tableHeaderCell_name_0', { timeout: 15000 }).should('be.visible');
+            checkA11y({skipFailures: false});
+        })
+        it('Create Enrollment Token Modal', () => {
+            cy.getBySel(ENROLLMENT_TOKENS_CREATE_TOKEN_BUTTON).click();
+            cy.getBySel(ENROLLMENT_TOKENS_CREATE_TOKEN_NAME_FIELD, { timeout: 15000 }).should('be.visible');
+            checkA11y({ skipFailures: false });
         });
     });
+    describe('Data Streams', () => {
+        before(() => {
+            cy.getBySel('confirmModalCancelButton').click();
+            cy.getBySel(DATA_STREAMS_TAB, { timeout: 15000 }).should('be.visible');
+            cy.getBySel(DATA_STREAMS_TAB).click();
+        });
+        it('Datastreams Empty Table', () => {
+            cy.getBySel('tableHeaderSortButton', { timeout: 15000 }).should('be.visible');
+            checkA11y({ skipFailures: false });
+        });
+    });
+    describe('Settings', () => {
+        before(() => {
+            cy.getBySel(SETTINGS_TAB).click();
+        });
+        it('Settings Form', () => {
+            cy.getBySel(SETTINGS_FLEET_SERVER_HOST_HEADING, { timeout: 15000 }).should('be.visible');
+            checkA11y({ skipFailures: false });
+        });
+    });
+    after(() => {
+        unenrollAgent();
+        cleanupAgentPolicies();
+    })
 });

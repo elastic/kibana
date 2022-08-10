@@ -87,7 +87,7 @@ export const AgentPolicyIntegrationForm: React.FunctionComponent<Props> = ({
         <EuiHorizontalRule />
         <EuiSpacer size="xs" />
         <StyledEuiAccordion
-          id="advancedOptionsChanged"
+          id="advancedOptions"
           buttonContent={
             <FormattedMessage
               id="xpack.fleet.agentPolicyForm.advancedOptionsToggleLabel"
@@ -95,7 +95,6 @@ export const AgentPolicyIntegrationForm: React.FunctionComponent<Props> = ({
             />
           }
           buttonClassName="ingest-active-button"
-          data-test-subj="advancedOptionsBtn"
         >
           <EuiSpacer size="l" />
           <AgentPolicyAdvancedOptionsContent
