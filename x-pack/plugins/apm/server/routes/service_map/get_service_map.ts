@@ -8,7 +8,7 @@
 import { Logger } from '@kbn/core/server';
 import { chunk } from 'lodash';
 import { rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '../../../common/processor_event';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,

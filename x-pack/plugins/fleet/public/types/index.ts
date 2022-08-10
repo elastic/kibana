@@ -125,6 +125,7 @@ export type {
   GetDownloadSourceResponse,
   PostDownloadSourceRequest,
   PutDownloadSourceRequest,
+  GetAvailableVersionsResponse,
 } from '../../common/types';
 export {
   entries,

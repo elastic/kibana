@@ -191,7 +191,7 @@
             "signature": [
               "(events: ",
               "Event",
-              "[]) => void"
+              "<Record<string, unknown>>[]) => void"
             ],
             "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
             "deprecated": false,
@@ -207,7 +207,7 @@
                 ],
                 "signature": [
                   "Event",
-                  "[]"
+                  "<Record<string, unknown>>[]"
                 ],
                 "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
                 "deprecated": false,

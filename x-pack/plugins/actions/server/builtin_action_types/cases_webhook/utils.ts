@@ -7,7 +7,7 @@
 
 import { AxiosResponse, AxiosError } from 'axios';
 import { isEmpty, isObjectLike, get } from 'lodash';
-import { addTimeZoneToDate, getErrorMessage } from '../lib/axios_utils';
+import { getErrorMessage } from '../lib/axios_utils';
 import * as i18n from './translations';
 
 export const createServiceError = (error: AxiosError, message: string) => {
@@ -22,17 +22,6 @@ export const createServiceError = (error: AxiosError, message: string) => {
       }`
     )
   );
-};
-
-export const getPushedDate = (timestamp?: string) => {
-  if (timestamp != null && new Date(timestamp).getTime() > 0) {
-    try {
-      return new Date(timestamp).toISOString();
-    } catch (e) {
-      return new Date(addTimeZoneToDate(timestamp)).toISOString();
-    }
-  }
-  return new Date().toISOString();
 };
 
 export const getObjectValueByKeyAsString = (
