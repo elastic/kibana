@@ -5,15 +5,8 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiToolTip,
-  EuiTourStep,
-} from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
 import { MlJobUpgradeModal } from '../../../components/modals/ml_job_upgrade_modal';
 import { affectedJobIds } from '../../../components/callouts/ml_job_compatibility_callout/affected_job_ids';
 import { useInstalledSecurityJobs } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
@@ -41,7 +34,7 @@ import { SecuritySolutionLinkButton } from '../../../../common/components/links'
 import { NeedAdminForUpdateRulesCallOut } from '../../../components/callouts/need_admin_for_update_callout';
 import { MlJobCompatibilityCallout } from '../../../components/callouts/ml_job_compatibility_callout';
 import { MissingPrivilegesCallOut } from '../../../components/callouts/missing_privileges_callout';
-import { APP_UI_ID, NEW_TERMS_TOUR_ACTIVE_KEY } from '../../../../../common/constants';
+import { APP_UI_ID } from '../../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana';
 import { HeaderPage } from '../../../../common/components/header_page';
 import { RulesTableContextProvider } from './all/rules_table/rules_table_context';
@@ -49,6 +42,7 @@ import { useInvalidateRules } from '../../../containers/detection_engine/rules/u
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
 import { RULES_TABLE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
+import { RulesPageTourComponent } from './tour';
 
 const RulesPageComponent: React.FC = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
@@ -160,44 +154,6 @@ const RulesPageComponent: React.FC = () => {
     ]
   );
 
-  const tourConfig = {
-    currentTourStep: 1,
-    isTourActive: true,
-    tourPopoverWidth: 300,
-  };
-
-  const [tourState, setTourState] = useState(() => {
-    const tourStateString = localStorage.getItem(NEW_TERMS_TOUR_ACTIVE_KEY);
-
-    if (tourStateString != null) {
-      return JSON.parse(tourStateString);
-    }
-    return tourConfig;
-  });
-
-  const demoTourSteps = [
-    {
-      step: 1,
-      title: i18n.NEW_TERMS_TOUR_TITLE,
-      content: (
-        <span>
-          <p>{i18n.NEW_TERMS_TOUR_CONTENT}</p>
-          <EuiSpacer />
-        </span>
-      ),
-    },
-  ];
-  const finishTour = () => {
-    setTourState({
-      ...tourState,
-      isTourActive: false,
-    });
-  };
-
-  useEffect(() => {
-    localStorage.setItem(NEW_TERMS_TOUR_ACTIVE_KEY, JSON.stringify(tourState));
-  }, [tourState]);
-
   if (
     redirectToDetections(
       isSignalIndexExists,
@@ -275,17 +231,7 @@ const RulesPageComponent: React.FC = () => {
                   {i18n.IMPORT_RULE}
                 </EuiButton>
               </EuiFlexItem>
-              <EuiTourStep
-                content={demoTourSteps[0].content}
-                isStepOpen={tourState.currentTourStep === 1 && tourState.isTourActive}
-                minWidth={tourState.tourPopoverWidth}
-                onFinish={finishTour}
-                step={1}
-                stepsTotal={demoTourSteps.length}
-                subtitle={tourState.tourSubtitle}
-                title={demoTourSteps[0].title}
-                anchorPosition="rightUp"
-              >
+              <RulesPageTourComponent>
                 <EuiFlexItem grow={false}>
                   <SecuritySolutionLinkButton
                     data-test-subj="create-new-rule"
@@ -297,7 +243,7 @@ const RulesPageComponent: React.FC = () => {
                     {i18n.ADD_NEW_RULE}
                   </SecuritySolutionLinkButton>
                 </EuiFlexItem>
-              </EuiTourStep>
+              </RulesPageTourComponent>
             </EuiFlexGroup>
           </HeaderPage>
           {(prePackagedRuleStatus === 'ruleNeedUpdate' ||
