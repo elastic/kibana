@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import _ from 'lodash';
 import React, { Component, ReactNode, useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
@@ -48,6 +49,15 @@ export const TimeSlider: FC<Props> = (props) => {
   } = useReduxEmbeddableContext<TimeSliderReduxState, typeof timeSliderReducers>();
   const dispatch = useEmbeddableDispatch();
 
+  const dispatchPublishChange = _.debounce((value: [number, number]) => {
+    dispatch(actions.publishValue({ value }));
+  }, 500);
+
+  const dispatchChange = (value: [number, number]) => {
+    dispatch(actions.setValue({ value }));
+    dispatchPublishChange(value);
+  };
+
   const timeRangeBounds = select((state) => {
     return state.componentState.timeRangeBounds;
   });
@@ -56,24 +66,24 @@ export const TimeSlider: FC<Props> = (props) => {
   const value = select((state) => {
     return state.explicitInput.value;
   });
-  
-  const interval = getInterval(timeRangeMin, timeRangeMax);
-  const [range, setRange] = useState(interval);
-  const [ticks, setTicks] = useState([]);
-  useEffect(() => {
-    setTicks(getTicks(timeRangeMin, timeRangeMax, interval, timezone));
-  }, [interval, timezone]);
-
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const togglePopover = useCallback(() => {
-    setIsPopoverOpen(!isPopoverOpen);
-  }, [isPopoverOpen, setIsPopoverOpen]);
 
   const getTimezone = useCallback(() => {
     const detectedTimezone = moment.tz.guess();
 
     return timezone === 'Browser' ? detectedTimezone : timezone;
   }, [timezone]);
+  
+  const interval = getInterval(timeRangeMin, timeRangeMax);
+  const [range, setRange] = useState(interval);
+  const [ticks, setTicks] = useState([]);
+  useEffect(() => {
+    setTicks(getTicks(timeRangeMin, timeRangeMax, interval, getTimezone()));
+  }, [interval, getTimezone]);
+
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const togglePopover = useCallback(() => {
+    setIsPopoverOpen(!isPopoverOpen);
+  }, [isPopoverOpen, setIsPopoverOpen]);
 
   const epochToKbnDateFormat = useCallback(
     (epoch: number) => {
@@ -86,29 +96,31 @@ export const TimeSlider: FC<Props> = (props) => {
   const onRangeSliderChange = useCallback(
     (value: [number, number]) => {
       setRange(value[TO_INDEX] - value[FROM_INDEX]);
-      dispatch(actions.setValue({ value }));
+      dispatchChange(value)
     },
     []
   );
 
   const onNext  = useCallback(
     () => {
+      setIsPopoverOpen(true);
       const from = value === undefined || value[TO_INDEX] === timeRangeMax
         ? ticks[0].value
         : value[TO_INDEX];
       const to = from + range;
-      dispatch(actions.setValue({ value: [from, Math.min(to, timeRangeMax)] }));
+      dispatchChange([from, Math.min(to, timeRangeMax)]);
     },
     [ticks, timeRangeMax, value]
   );
 
   const onPrevious  = useCallback(
     () => {
+      setIsPopoverOpen(true);
       const to = value === undefined || value[FROM_INDEX] === timeRangeMin
         ? ticks[ticks.length - 1].value
         : value[FROM_INDEX];
-    const from = to - range;
-    dispatch(actions.setValue({ value: [Math.max(from, timeRangeMin), to] }));
+      const from = to - range;
+      dispatchChange([Math.max(from, timeRangeMin), to]);
     },
     [ticks, timeRangeMin, value]
   );
@@ -140,6 +152,7 @@ export const TimeSlider: FC<Props> = (props) => {
       </EuiFlexItem>
       <EuiFlexItem grow={true}>
         <EuiInputPopover
+          className="timeSlider__popoverOverride"
           input={<TimeSliderPopoverButton onClick={togglePopover} formatDate={epochToKbnDateFormat} from={from} to={to} />}
           isOpen={isPopoverOpen}
           closePopover={() => setIsPopoverOpen(false)}
@@ -150,7 +163,7 @@ export const TimeSlider: FC<Props> = (props) => {
         >
           <TimeSliderPopoverContent
             key={`${timeRangeMin}_${timeRangeMax}`} // force new instance when time range changes to reset local state
-            initialValue={[from, to]}
+            value={[from, to]}
             onChange={onRangeSliderChange}
             ticks={ticks}
             timeRangeMin={timeRangeMin}
