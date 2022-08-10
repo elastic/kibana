@@ -13,13 +13,37 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "GCP Pub/Sub Topic Deletion",
-  "note": "## Config\n\nThe GCP Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
-  "query": "event.dataset:(googlecloud.audit or gcp.audit) and event.action:google.pubsub.v*.Publisher.DeleteTopic and event.outcome:success\n",
+  "note": "",
+  "query": "event.dataset:gcp.audit and event.action:google.pubsub.v*.Publisher.DeleteTopic and event.outcome:success\n",
   "references": [
     "https://cloud.google.com/pubsub/docs/overview"
   ],
+  "related_integrations": [
+    {
+      "package": "gcp",
+      "version": "1.10.0"
+    }
+  ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.action",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.dataset",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.outcome",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 21,
   "rule_id": "3202e172-01b1-4738-a932-d024c514ba72",
+  "setup": "The GCP Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
   "severity": "low",
   "tags": [
     "Elastic",
@@ -48,5 +72,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 6
+  "version": 8
 }

@@ -13,6 +13,38 @@
   "license": "Elastic License v2",
   "name": "Mshta Making Network Connections",
   "query": "sequence by process.entity_id with maxspan=10m\n  [process where event.type in (\"start\", \"process_started\") and process.name : \"mshta.exe\" and\n     not process.parent.name : \"Microsoft.ConfigurationManagement.exe\" and\n     not (process.parent.executable : \"C:\\\\Amazon\\\\Amazon Assistant\\\\amazonAssistantService.exe\" or\n          process.parent.executable : \"C:\\\\TeamViewer\\\\TeamViewer.exe\") and\n     not process.args : \"ADSelfService_Enroll.hta\"]\n  [network where process.name : \"mshta.exe\"]\n",
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.args",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.entity_id",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.name",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.parent.executable",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.parent.name",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 21,
   "rule_id": "c2d90150-0133-451c-a783-533e736c12d7",
   "severity": "medium",
@@ -34,7 +66,7 @@
       "technique": [
         {
           "id": "T1218",
-          "name": "Signed Binary Proxy Execution",
+          "name": "System Binary Proxy Execution",
           "reference": "https://attack.mitre.org/techniques/T1218/",
           "subtechnique": [
             {
@@ -48,5 +80,5 @@
     }
   ],
   "type": "eql",
-  "version": 5
+  "version": 7
 }

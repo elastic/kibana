@@ -12,13 +12,36 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Lateral Movement via Startup Folder",
-  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
-  "query": "file where event.type in (\"creation\", \"change\") and\n /* via RDP TSClient mounted share or SMB */\n  (process.name : \"mstsc.exe\" or process.pid == 4) and\n   file.path : \"C:\\\\*\\\\Microsoft\\\\Windows\\\\Start Menu\\\\Programs\\\\Startup\\\\*\"\n",
+  "note": "",
+  "query": "file where event.type in (\"creation\", \"change\") and\n\n /* via RDP TSClient mounted share or SMB */\n  (process.name : \"mstsc.exe\" or process.pid == 4) and\n\n   file.path : (\"?:\\\\Users\\\\*\\\\AppData\\\\Roaming\\\\Microsoft\\\\Windows\\\\Start Menu\\\\Programs\\\\Startup\\\\*\",\n                \"?:\\\\ProgramData\\\\Microsoft\\\\Windows\\\\Start Menu\\\\Programs\\\\Startup\\\\*\")\n",
   "references": [
     "https://www.mdsec.co.uk/2017/06/rdpinception/"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "file.path",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.name",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.pid",
+      "type": "long"
+    }
+  ],
   "risk_score": 73,
   "rule_id": "25224a80-5a4a-4b8a-991e-6ab390465c4f",
+  "setup": "If enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.",
   "severity": "high",
   "tags": [
     "Elastic",
@@ -68,5 +91,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 4
+  "version": 6
 }

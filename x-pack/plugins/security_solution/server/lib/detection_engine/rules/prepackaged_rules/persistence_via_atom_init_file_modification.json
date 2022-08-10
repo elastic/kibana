@@ -16,6 +16,33 @@
     "https://github.com/D00MFist/PersistentJXA/blob/master/AtomPersist.js",
     "https://flight-manual.atom.io/hacking-atom/sections/the-init-file/"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.category",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "file.path",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.name",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "user.name",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 21,
   "rule_id": "b4449455-f986-4b5a-82ed-e36b129331f7",
   "severity": "low",
@@ -26,7 +53,24 @@
     "Threat Detection",
     "Persistence"
   ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1037",
+          "name": "Boot or Logon Initialization Scripts",
+          "reference": "https://attack.mitre.org/techniques/T1037/"
+        }
+      ]
+    }
+  ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 3
 }

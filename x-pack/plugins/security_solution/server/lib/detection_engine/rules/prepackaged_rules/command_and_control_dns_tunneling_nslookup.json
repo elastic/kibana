@@ -17,6 +17,28 @@
   "references": [
     "https://unit42.paloaltonetworks.com/dns-tunneling-in-the-wild-overview-of-oilrigs-dns-tunneling/"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.category",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.args",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.name",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 47,
   "rule_id": "3a59fc81-99d3-47ea-8cd6-d48d561fca20",
   "severity": "medium",
@@ -58,5 +80,5 @@
     "value": 15
   },
   "type": "threshold",
-  "version": 5
+  "version": 6
 }

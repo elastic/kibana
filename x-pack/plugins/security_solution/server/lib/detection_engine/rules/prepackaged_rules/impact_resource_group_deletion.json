@@ -14,13 +14,38 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Azure Resource Group Deletion",
-  "note": "## Config\n\nThe Azure Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "note": "",
   "query": "event.dataset:azure.activitylogs and azure.activitylogs.operation_name:\"MICROSOFT.RESOURCES/SUBSCRIPTIONS/RESOURCEGROUPS/DELETE\" and event.outcome:(Success or success)\n",
   "references": [
     "https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/manage-resource-groups-portal"
   ],
+  "related_integrations": [
+    {
+      "integration": "activitylogs",
+      "package": "azure",
+      "version": "0.12.0"
+    }
+  ],
+  "required_fields": [
+    {
+      "ecs": false,
+      "name": "azure.activitylogs.operation_name",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.dataset",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.outcome",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 47,
   "rule_id": "bb4fe8d2-7ae2-475c-8b5d-55b449e4264f",
+  "setup": "The Azure Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
   "severity": "medium",
   "tags": [
     "Elastic",
@@ -71,5 +96,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 5
+  "version": 7
 }

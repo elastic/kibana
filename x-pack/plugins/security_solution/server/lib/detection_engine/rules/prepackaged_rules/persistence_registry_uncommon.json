@@ -14,6 +14,28 @@
   "references": [
     "https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "process.executable",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.name",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "registry.data.strings",
+      "type": "wildcard"
+    },
+    {
+      "ecs": true,
+      "name": "registry.path",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 47,
   "rule_id": "54902e45-3467-49a4-8abc-529f2c8cfb80",
   "severity": "medium",
@@ -67,5 +89,5 @@
   "timeline_title": "Comprehensive Registry Timeline",
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 9
+  "version": 10
 }

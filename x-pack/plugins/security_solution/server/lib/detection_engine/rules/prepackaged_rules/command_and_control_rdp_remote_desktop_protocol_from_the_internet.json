@@ -20,6 +20,38 @@
   "references": [
     "https://www.iana.org/assignments/iana-ipv4-special-registry/iana-ipv4-special-registry.xhtml"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "destination.ip",
+      "type": "ip"
+    },
+    {
+      "ecs": true,
+      "name": "destination.port",
+      "type": "long"
+    },
+    {
+      "ecs": true,
+      "name": "event.category",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.dataset",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "network.transport",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "source.ip",
+      "type": "ip"
+    }
+  ],
   "risk_score": 47,
   "rule_id": "8c1bdde8-4204-45c0-9e0c-c85ca3902488",
   "severity": "medium",
@@ -76,5 +108,5 @@
   "timeline_title": "Comprehensive Network Timeline",
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 14
+  "version": 15
 }

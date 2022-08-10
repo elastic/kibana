@@ -9,14 +9,42 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Zoom Meeting with no Passcode",
-  "note": "## Config\n\nThe Zoom Filebeat module or similarly structured data is required to be compatible with this rule.",
+  "note": "",
   "query": "event.type:creation and event.module:zoom and event.dataset:zoom.webhook and\n  event.action:meeting.created and not zoom.meeting.password:*\n",
   "references": [
     "https://blog.zoom.us/a-message-to-our-users/",
     "https://www.fbi.gov/contact-us/field-offices/boston/news/press-releases/fbi-warns-of-teleconferencing-and-online-classroom-hijacking-during-covid-19-pandemic"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.action",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.dataset",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.module",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": false,
+      "name": "zoom.meeting.password",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 47,
   "rule_id": "58ac2aa5-6718-427c-a845-5f3ac5af00ba",
+  "setup": "The Zoom Filebeat module or similarly structured data is required to be compatible with this rule.",
   "severity": "medium",
   "tags": [
     "Elastic",
@@ -46,5 +74,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 4
+  "version": 6
 }

@@ -15,14 +15,44 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "AWS WAF Rule or Rule Group Deletion",
-  "note": "## Config\n\nThe AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "note": "",
   "query": "event.dataset:aws.cloudtrail and event.provider:(waf.amazonaws.com or waf-regional.amazonaws.com or wafv2.amazonaws.com) and event.action:(DeleteRule or DeleteRuleGroup) and event.outcome:success\n",
   "references": [
     "https://awscli.amazonaws.com/v2/documentation/api/latest/reference/waf/delete-rule-group.html",
     "https://docs.aws.amazon.com/waf/latest/APIReference/API_waf_DeleteRuleGroup.html"
   ],
+  "related_integrations": [
+    {
+      "integration": "cloudtrail",
+      "package": "aws",
+      "version": "1.10.2"
+    }
+  ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.action",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.dataset",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.outcome",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.provider",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 47,
   "rule_id": "5beaebc1-cc13-4bfc-9949-776f9e0dc318",
+  "setup": "The AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
   "severity": "medium",
   "tags": [
     "Elastic",
@@ -58,5 +88,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 8
+  "version": 10
 }

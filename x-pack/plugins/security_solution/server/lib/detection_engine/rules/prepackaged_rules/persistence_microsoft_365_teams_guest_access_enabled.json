@@ -14,13 +14,52 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Microsoft 365 Teams Guest Access Enabled",
-  "note": "## Config\n\nThe Office 365 Logs Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "note": "",
   "query": "event.dataset:o365.audit and event.provider:(SkypeForBusiness or MicrosoftTeams) and\nevent.category:web and event.action:\"Set-CsTeamsClientConfiguration\" and\no365.audit.Parameters.AllowGuestUser:True and event.outcome:success\n",
   "references": [
     "https://docs.microsoft.com/en-us/powershell/module/skype/get-csteamsclientconfiguration?view=skype-ps"
   ],
+  "related_integrations": [
+    {
+      "package": "o365",
+      "version": "1.3.0"
+    }
+  ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.action",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.category",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.dataset",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.outcome",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.provider",
+      "type": "keyword"
+    },
+    {
+      "ecs": false,
+      "name": "o365.audit.Parameters.AllowGuestUser",
+      "type": "unknown"
+    }
+  ],
   "risk_score": 47,
   "rule_id": "5e552599-ddec-4e14-bad1-28aa42404388",
+  "setup": "The Office 365 Logs Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
   "severity": "medium",
   "tags": [
     "Elastic",
@@ -49,5 +88,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 5
+  "version": 7
 }

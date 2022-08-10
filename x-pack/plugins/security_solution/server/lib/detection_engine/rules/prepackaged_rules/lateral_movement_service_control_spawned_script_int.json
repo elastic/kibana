@@ -12,10 +12,43 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Service Control Spawned via Script Interpreter",
-  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
+  "note": "",
   "query": "/* This rule is not compatible with Sysmon due to user.id issues */\n\nprocess where event.type == \"start\" and\n  (process.name : \"sc.exe\" or process.pe.original_file_name == \"sc.exe\") and\n  process.parent.name : (\"cmd.exe\", \"wscript.exe\", \"rundll32.exe\", \"regsvr32.exe\",\n                         \"wmic.exe\", \"mshta.exe\",\"powershell.exe\", \"pwsh.exe\") and\n  process.args:(\"config\", \"create\", \"start\", \"delete\", \"stop\", \"pause\") and\n  /* exclude SYSTEM SID - look for service creations by non-SYSTEM user */\n  not user.id : \"S-1-5-18\"\n",
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.args",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.name",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.parent.name",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.pe.original_file_name",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "user.id",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 21,
   "rule_id": "e8571d5f-bea1-46c2-9f56-998de2d3ed95",
+  "setup": "If enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.",
   "severity": "low",
   "tags": [
     "Elastic",
@@ -43,5 +76,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 11
+  "version": 13
 }

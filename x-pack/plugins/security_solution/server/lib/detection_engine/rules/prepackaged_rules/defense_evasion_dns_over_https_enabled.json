@@ -12,14 +12,32 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "DNS-over-HTTPS Enabled via Registry",
-  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
+  "note": "",
   "query": "registry where event.type in (\"creation\", \"change\") and\n  (registry.path : \"*\\\\SOFTWARE\\\\Policies\\\\Microsoft\\\\Edge\\\\BuiltInDnsClientEnabled\" and\n  registry.data.strings : \"1\") or\n  (registry.path : \"*\\\\SOFTWARE\\\\Google\\\\Chrome\\\\DnsOverHttpsMode\" and\n  registry.data.strings : \"secure\") or\n  (registry.path : \"*\\\\SOFTWARE\\\\Policies\\\\Mozilla\\\\Firefox\\\\DNSOverHTTPS\" and\n  registry.data.strings : \"1\")\n",
   "references": [
     "https://www.tenforums.com/tutorials/151318-how-enable-disable-dns-over-https-doh-microsoft-edge.html",
     "https://chromeenterprise.google/policies/?policy=DnsOverHttpsMode"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "registry.data.strings",
+      "type": "wildcard"
+    },
+    {
+      "ecs": true,
+      "name": "registry.path",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 21,
   "rule_id": "a22a09c2-2162-4df0-a356-9aacbeb56a04",
+  "setup": "If enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.",
   "severity": "low",
   "tags": [
     "Elastic",
@@ -47,5 +65,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 3
+  "version": 5
 }
