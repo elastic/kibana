@@ -6,20 +6,15 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiIcon, EuiText } from '@elastic/eui';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { ALERT_UPSELL } from './translations';
 
-const UpsellContainer = euiStyled.a`
+const UpsellContainer = euiStyled.div`
   border: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
   padding: 12px;
   border-radius: 6px;
-  color: ${({ theme }) => theme.eui.euiTextSubduedColor};
-
-  &:focus, &:hover {
-    text-decoration: underline;
-  }
 `;
 
 const StyledIcon = euiStyled(EuiIcon)`
@@ -28,13 +23,22 @@ const StyledIcon = euiStyled(EuiIcon)`
 
 export const RelatedAlertsUpsell = React.memo(() => {
   return (
-    <UpsellContainer href="https://www.elastic.co/pricing/" target="_blank">
+    <UpsellContainer>
       <EuiFlexGroup alignItems="center" gutterSize="none">
         <EuiFlexItem grow={false}>
           <StyledIcon size="m" type="lock" />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiText size="s">{ALERT_UPSELL}</EuiText>
+          <EuiText size="s">
+            <EuiLink
+              color="subdued"
+              href="https://www.elastic.co/pricing/"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              {ALERT_UPSELL}
+            </EuiLink>
+          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     </UpsellContainer>
