@@ -11,7 +11,7 @@ import { useMemo, useState, useEffect, useCallback } from 'react';
 import { useInfiniteQuery } from 'react-query';
 import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { SearchAddon } from './search';
+import { SearchAddon } from './xterm_search';
 import { useEuiTheme } from '../../hooks';
 import {
   IOLine,
@@ -78,7 +78,7 @@ export const useIOLines = (pages: ProcessEventsPage[] | undefined) => {
       if (current.events) {
         current.events.forEach((event) => {
           if (event?.process?.io?.text) {
-            const data: IOLine[] = event.process.io.text.split(/\n/).map((line) => {
+            const data: IOLine[] = event.process.io.text.split(/\n\r?/).map((line) => {
               return {
                 value: line,
 
@@ -162,7 +162,7 @@ export const useXtermPlayer = (
         linesToPrint = [lines[lineNumber]];
       }
 
-      linesToPrint.forEach((line) => {
+      linesToPrint.forEach((line, index) => {
         if (line?.value !== undefined) {
           terminal.writeln(line.value);
         }
@@ -203,8 +203,8 @@ export const useXtermPlayer = (
   }, []);
 
   const search = useCallback(
-    (query) => {
-      return searchAddon.findNext(query, { caseSensitive: false, lastLineOnly: true });
+    (query: string, startCol: number) => {
+      searchAddon.findNext(query, { caseSensitive: false, lastLineOnly: true, startCol });
     },
     [searchAddon]
   );

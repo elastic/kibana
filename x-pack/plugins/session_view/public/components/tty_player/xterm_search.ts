@@ -17,6 +17,7 @@ export interface ISearchOptions {
   caseSensitive?: boolean;
   incremental?: boolean;
   lastLineOnly?: boolean;
+  startCol?: number;
 }
 
 export interface ISearchPosition {
@@ -95,6 +96,7 @@ export class SearchAddon implements ITerminalAddon {
 
     if (searchOptions?.lastLineOnly) {
       startRow = this._terminal.buffer.active.cursorY - 1;
+      startCol = searchOptions?.startCol || 0;
     }
 
     this._initLinesCache();
