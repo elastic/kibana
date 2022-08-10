@@ -93,7 +93,7 @@ function fnIsCorrect(fn: ApiDeclaration | undefined) {
   expect(p5?.description?.length).toBe(1);
 }
 
-beforeAll(() => {
+beforeAll(async () => {
   const tsConfigFilePath = Path.resolve(__dirname, '__fixtures__/src/tsconfig.json');
   const project = new Project({
     tsConfigFilePath,
@@ -128,8 +128,8 @@ beforeAll(() => {
   );
 
   mdxOutputFolder = Path.resolve(__dirname, 'snapshots');
-  writePluginDocs(mdxOutputFolder, { doc, plugin: pluginA, pluginStats: pluginAStats, log });
-  writePluginDocs(mdxOutputFolder, {
+  await writePluginDocs(mdxOutputFolder, { doc, plugin: pluginA, pluginStats: pluginAStats, log });
+  await writePluginDocs(mdxOutputFolder, {
     doc: pluginApiMap.pluginB,
     plugin: pluginB,
     pluginStats: pluginBStats,
