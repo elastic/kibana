@@ -12,6 +12,7 @@ import {
   FramePublicAPI,
   OperationDescriptor,
   VisualizationDimensionEditorProps,
+  DatasourcePublicAPI,
 } from '../../../types';
 import { DatatableVisualizationState } from '../visualization';
 import { createMockDatasource, createMockFramePublicAPI } from '../../../mocks';
@@ -221,7 +222,8 @@ describe('data table dimension editor', () => {
 
   it('should not show the dynamic coloring option for a bucketed operation', () => {
     frame.activeData!.first.columns[0].meta.type = 'number';
-    frame.datasourceLayers.first.getOperationForColumnId = jest.fn(
+    const datasourceLayers = frame.datasourceLayers as Record<string, DatasourcePublicAPI>;
+    datasourceLayers.first.getOperationForColumnId = jest.fn(
       () => ({ isBucketed: true } as OperationDescriptor)
     );
     state.columns[0].colorMode = 'cell';
