@@ -18,6 +18,8 @@ type FilterAggForm<T> = FC<{
   onChange: (arg: Partial<{ config: Partial<T> }>) => void;
   /** Selected field for the aggregation */
   selectedField?: string;
+  /** Whether the configuration is valid */
+  isValid?: boolean;
 }>;
 
 interface FilterAggTypeConfig<U, R> {
