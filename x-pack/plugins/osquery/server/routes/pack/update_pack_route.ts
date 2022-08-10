@@ -21,7 +21,7 @@ import { packSavedObjectType } from '../../../common/types';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { PLUGIN_ID } from '../../../common';
 import { convertSOQueriesToPack, convertPackQueriesToSO } from './utils';
-import { getInternalSavedObjectsClient } from '../../usage/collector';
+import { getInternalSavedObjectsClient } from '../utils';
 import type { PackSavedObjectAttributes } from '../../common/types';
 
 export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
