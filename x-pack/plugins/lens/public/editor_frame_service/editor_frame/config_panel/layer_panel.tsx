@@ -55,10 +55,10 @@ export function LayerPanel(
     layerIndex: number;
     isOnlyLayer: boolean;
     updateVisualization: StateSetter<unknown>;
-    updateDatasource: (datasourceId: string, newState: unknown) => void;
-    updateDatasourceAsync: (datasourceId: string, newState: unknown) => void;
+    updateDatasource: (datasourceId: string | undefined, newState: unknown) => void;
+    updateDatasourceAsync: (datasourceId: string | undefined, newState: unknown) => void;
     updateAll: (
-      datasourceId: string,
+      datasourceId: string | undefined,
       newDatasourcestate: unknown,
       newVisualizationState: unknown
     ) => void;
@@ -121,8 +121,8 @@ export function LayerPanel(
 
   const datasourcePublicAPI = framePublicAPI.datasourceLayers?.[layerId];
   const datasourceId = datasourcePublicAPI?.datasourceId;
-  const layerDatasourceState = datasourceStates?.[datasourceId]?.state;
-  const layerDatasource = props.datasourceMap[datasourceId];
+  const layerDatasourceState = datasourceId ? datasourceStates?.[datasourceId]?.state : undefined;
+  const layerDatasource = datasourceId ? props.datasourceMap[datasourceId] : undefined;
 
   const layerDatasourceConfigProps = {
     state: layerDatasourceState,
@@ -442,7 +442,7 @@ export function LayerPanel(
                             groupIndex={groupIndex}
                             key={columnId}
                             state={layerDatasourceState}
-                            label={columnLabelMap?.[columnId]}
+                            label={columnLabelMap?.[columnId] ?? ''}
                             layerDatasource={layerDatasource}
                             datasourceLayers={framePublicAPI.datasourceLayers}
                             layerIndex={layerIndex}
@@ -455,7 +455,7 @@ export function LayerPanel(
                             <div className="lnsLayerPanel__dimension">
                               <DimensionButton
                                 accessorConfig={accessorConfig}
-                                label={columnLabelMap?.[accessorConfig.columnId]}
+                                label={columnLabelMap?.[accessorConfig.columnId] ?? ''}
                                 group={group}
                                 onClick={(id: string) => {
                                   setActiveDimension({
@@ -522,7 +522,7 @@ export function LayerPanel(
                                   <>
                                     {activeVisualization?.renderDimensionTrigger?.({
                                       columnId,
-                                      label: columnLabelMap[columnId],
+                                      label: columnLabelMap?.[columnId] ?? '',
                                       hideTooltip,
                                       invalid: group.invalid,
                                       invalidMessage: group.invalidMessage,
