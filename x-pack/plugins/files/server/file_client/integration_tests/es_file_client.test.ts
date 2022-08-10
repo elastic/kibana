@@ -205,8 +205,8 @@ describe('ES-index-backed file client', () => {
           FileKind: 'none',
           Meta: { test: '1' },
           Status: 'AWAITING_UPLOAD',
-          Updated: '2022-08-09T15:54:22.852Z',
-          created: '2022-08-09T15:54:22.852Z',
+          Updated: expect.any(String),
+          created: expect.any(String),
           name: 'cool name 1',
         },
       })
