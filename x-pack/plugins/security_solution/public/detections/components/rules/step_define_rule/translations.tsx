@@ -119,3 +119,10 @@ export const DATA_SOURCE_GUIDE_CONTENT = i18n.translate(
     defaultMessage: 'Rules can now query index patterns or data views.',
   }
 );
+
+export const RULE_PREVIEW_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.rulePreviewTitle',
+  {
+    defaultMessage: 'Rule Preview',
+  }
+);
