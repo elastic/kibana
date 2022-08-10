@@ -106,7 +106,7 @@ export const getMockConnectorsResponse = () => [
     actionTypeId: '.jira',
     name: 'Jira',
     config: {
-      apiUrl: 'https://siem-kibana.atlassian.net',
+      apiUrl: 'https://coolsite.net',
       projectKey: 'RJ',
     },
     isPreconfigured: false,
@@ -235,11 +235,11 @@ export const getExecuteResponses = () => ({
         issuetype: {
           allowedValues: [
             {
-              self: 'https://siem-kibana.atlassian.net/rest/api/2/issuetype/10006',
+              self: 'https://coolsite.net/rest/api/2/issuetype/10006',
               id: '10006',
               description: 'A small, distinct piece of work.',
               iconUrl:
-                'https://siem-kibana.atlassian.net/secure/viewavatar?size=medium&avatarId=10318&avatarType=issuetype',
+                'https://coolsite.net/secure/viewavatar?size=medium&avatarId=10318&avatarType=issuetype',
               name: 'Task',
               subtask: false,
               avatarId: 10318,
@@ -253,21 +253,20 @@ export const getExecuteResponses = () => ({
         project: {
           allowedValues: [
             {
-              self: 'https://siem-kibana.atlassian.net/rest/api/2/project/10011',
+              self: 'https://coolsite.net/rest/api/2/project/10011',
               id: '10011',
               key: 'RJ',
               name: 'Refactor Jira',
               projectTypeKey: 'business',
               simplified: false,
               avatarUrls: {
-                '48x48':
-                  'https://siem-kibana.atlassian.net/secure/projectavatar?pid=10011&avatarId=10423',
+                '48x48': 'https://coolsite.net/secure/projectavatar?pid=10011&avatarId=10423',
                 '24x24':
-                  'https://siem-kibana.atlassian.net/secure/projectavatar?size=small&s=small&pid=10011&avatarId=10423',
+                  'https://coolsite.net/secure/projectavatar?size=small&s=small&pid=10011&avatarId=10423',
                 '16x16':
-                  'https://siem-kibana.atlassian.net/secure/projectavatar?size=xsmall&s=xsmall&pid=10011&avatarId=10423',
+                  'https://coolsite.net/secure/projectavatar?size=xsmall&s=xsmall&pid=10011&avatarId=10423',
                 '32x32':
-                  'https://siem-kibana.atlassian.net/secure/projectavatar?size=medium&s=medium&pid=10011&avatarId=10423',
+                  'https://coolsite.net/secure/projectavatar?size=medium&s=medium&pid=10011&avatarId=10423',
               },
             },
           ],
@@ -277,39 +276,39 @@ export const getExecuteResponses = () => ({
         priority: {
           allowedValues: [
             {
-              self: 'https://siem-kibana.atlassian.net/rest/api/2/priority/1',
-              iconUrl: 'https://siem-kibana.atlassian.net/images/icons/priorities/highest.svg',
+              self: 'https://coolsite.net/rest/api/2/priority/1',
+              iconUrl: 'https://coolsite.net/images/icons/priorities/highest.svg',
               name: 'Highest',
               id: '1',
             },
             {
-              self: 'https://siem-kibana.atlassian.net/rest/api/2/priority/2',
-              iconUrl: 'https://siem-kibana.atlassian.net/images/icons/priorities/high.svg',
+              self: 'https://coolsite.net/rest/api/2/priority/2',
+              iconUrl: 'https://coolsite.net/images/icons/priorities/high.svg',
               name: 'High',
               id: '2',
             },
             {
-              self: 'https://siem-kibana.atlassian.net/rest/api/2/priority/3',
-              iconUrl: 'https://siem-kibana.atlassian.net/images/icons/priorities/medium.svg',
+              self: 'https://coolsite.net/rest/api/2/priority/3',
+              iconUrl: 'https://coolsite.net/images/icons/priorities/medium.svg',
               name: 'Medium',
               id: '3',
             },
             {
-              self: 'https://siem-kibana.atlassian.net/rest/api/2/priority/4',
-              iconUrl: 'https://siem-kibana.atlassian.net/images/icons/priorities/low.svg',
+              self: 'https://coolsite.net/rest/api/2/priority/4',
+              iconUrl: 'https://coolsite.net/images/icons/priorities/low.svg',
               name: 'Low',
               id: '4',
             },
             {
-              self: 'https://siem-kibana.atlassian.net/rest/api/2/priority/5',
-              iconUrl: 'https://siem-kibana.atlassian.net/images/icons/priorities/lowest.svg',
+              self: 'https://coolsite.net/rest/api/2/priority/5',
+              iconUrl: 'https://coolsite.net/images/icons/priorities/lowest.svg',
               name: 'Lowest',
               id: '5',
             },
           ],
           defaultValue: {
-            self: 'https://siem-kibana.atlassian.net/rest/api/2/priority/3',
-            iconUrl: 'https://siem-kibana.atlassian.net/images/icons/priorities/medium.svg',
+            self: 'https://coolsite.net/rest/api/2/priority/3',
+            iconUrl: 'https://coolsite.net/images/icons/priorities/medium.svg',
             name: 'Medium',
             id: '3',
           },

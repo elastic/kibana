@@ -28,7 +28,6 @@ import type {
   DatasourceDataPanelProps,
   DatasourceLayerPanelProps,
   PublicAPIProps,
-  InitializationOptions,
   OperationDescriptor,
   FramePublicAPI,
   IndexPatternField,
@@ -148,8 +147,7 @@ export function getIndexPatternDatasource({
       references?: SavedObjectReference[],
       initialContext?: VisualizeFieldContext | VisualizeEditorContext,
       indexPatternRefs?: IndexPatternRef[],
-      indexPatterns?: Record<string, IndexPattern>,
-      options?: InitializationOptions
+      indexPatterns?: Record<string, IndexPattern>
     ) {
       return loadInitialState({
         persistedState,
@@ -251,9 +249,6 @@ export function getIndexPatternDatasource({
         <KibanaThemeProvider theme$={core.theme.theme$}>
           <I18nProvider>
             <IndexPatternDataPanel
-              changeIndexPattern={(indexPattern) => {
-                onChangeIndexPattern(indexPattern, DATASOURCE_ID);
-              }}
               data={data}
               dataViews={dataViews}
               fieldFormats={fieldFormats}
@@ -363,6 +358,7 @@ export function getIndexPatternDatasource({
               <IndexPatternDimensionEditor
                 uiSettings={uiSettings}
                 storage={storage}
+                fieldFormats={fieldFormats}
                 savedObjectsClient={core.savedObjects.client}
                 http={core.http}
                 data={data}

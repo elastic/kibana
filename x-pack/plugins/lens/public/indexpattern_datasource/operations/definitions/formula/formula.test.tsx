@@ -10,7 +10,7 @@ import { formulaOperation, GenericOperationDefinition, GenericIndexPatternColumn
 import { FormulaIndexPatternColumn } from './formula';
 import { insertOrReplaceFormulaColumn } from './parse';
 import type { IndexPatternLayer } from '../../../types';
-import { IndexPattern, IndexPatternField } from '../../../../editor_frame_service/types';
+import { IndexPattern, IndexPatternField } from '../../../../types';
 import { tinymathFunctions } from './util';
 import { TermsIndexPatternColumn } from '../terms';
 import { MovingAverageIndexPatternColumn } from '../calculations';

@@ -8,7 +8,7 @@
 import type { DragDropIdentifier } from '../drag_drop/providers';
 import type { IncompleteColumn, GenericIndexPatternColumn } from './operations';
 import type { DragDropOperation } from '../types';
-import type { IndexPattern, IndexPatternField } from '../editor_frame_service/types';
+import type { IndexPattern, IndexPatternField } from '../types';
 
 export type {
   GenericIndexPatternColumn,
@@ -66,17 +66,6 @@ export type PersistedIndexPatternLayer = Omit<IndexPatternLayer, 'indexPatternId
 export interface IndexPatternPrivateState {
   currentIndexPatternId: string;
   layers: Record<string, IndexPatternLayer>;
-  // indexPatternRefs: IndexPatternRef[];
-  // indexPatterns: Record<string, IndexPattern>;
-
-  // /**
-  //  * indexPatternId -> fieldName -> boolean
-  //  */
-  // existingFields: Record<string, Record<string, boolean>>;
-  // isFirstExistenceFetch: boolean;
-  // existenceFetchFailed?: boolean;
-  // existenceFetchTimeout?: boolean;
-
   isDimensionClosePrevented?: boolean;
 }
 

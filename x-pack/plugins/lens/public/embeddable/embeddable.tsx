@@ -66,6 +66,7 @@ import {
   Visualization,
   DatasourceMap,
   Datasource,
+  IndexPatternMap,
 } from '../types';
 
 import { getEditPath, DOC_TYPE } from '../../common';
@@ -75,6 +76,7 @@ import { getLensInspectorService, LensInspector } from '../lens_inspector_servic
 import { SharingSavedObjectProps, VisualizationDisplayOptions } from '../types';
 import { getActiveDatasourceIdFromDoc, getIndexPatternsObjects, inferTimeField } from '../utils';
 import { getLayerMetaInfo, combineQueryAndFilters } from '../app_plugin/show_underlying_data';
+import { convertDataViewIntoLensIndexPattern } from '../indexpattern_service/loader';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 
@@ -169,6 +171,7 @@ function getViewUnderlyingDataArgs({
   filters,
   timeRange,
   esQueryConfig,
+  indexPatternsCache,
 }: {
   activeDatasource: Datasource;
   activeDatasourceState: unknown;
@@ -179,11 +182,13 @@ function getViewUnderlyingDataArgs({
   filters: Filter[];
   timeRange: TimeRange;
   esQueryConfig: EsQueryConfig;
+  indexPatternsCache: IndexPatternMap;
 }) {
   const { error, meta } = getLayerMetaInfo(
     activeDatasource,
     activeDatasourceState,
     activeData,
+    indexPatternsCache,
     timeRange,
     capabilities
   );
@@ -555,10 +560,10 @@ export class Embeddable
    */
   render(domNode: HTMLElement | Element) {
     this.domNode = domNode;
-    super.render(domNode as HTMLElement);
     if (!this.savedVis || !this.isInitialized || this.isDestroyed) {
       return;
     }
+    super.render(domNode as HTMLElement);
     if (this.input.onLoad) {
       this.input.onLoad(true);
     }
@@ -582,11 +587,10 @@ export class Embeddable
           errors={this.errors}
           lensInspector={this.lensInspector}
           searchContext={this.getMergedSearchContext()}
-          variables={
-            input.palette
-              ? { theme: { palette: input.palette }, embeddableTitle: this.getTitle() }
-              : { embeddableTitle: this.getTitle() }
-          }
+          variables={{
+            embeddableTitle: this.getTitle(),
+            ...(input.palette ? { theme: { palette: input.palette } } : {}),
+          }}
           searchSessionId={this.externalSearchContext.searchSessionId}
           handleEvent={this.handleEvent}
           onData$={this.updateActiveData}
@@ -749,7 +753,7 @@ export class Embeddable
   private async loadViewUnderlyingDataArgs(): Promise<boolean> {
     const mergedSearchContext = this.getMergedSearchContext();
 
-    if (!this.activeDataInfo.activeData || !mergedSearchContext.timeRange) {
+    if (!this.activeDataInfo.activeData || !mergedSearchContext.timeRange || !this.savedVis) {
       return false;
     }
 
@@ -761,12 +765,22 @@ export class Embeddable
     this.activeDataInfo.activeDatasource = this.deps.datasourceMap[activeDatasourceId];
     const docDatasourceState = this.savedVis?.state.datasourceStates[activeDatasourceId];
 
+    const indexPatternsCache = this.indexPatterns.reduce(
+      (acc, indexPattern) => ({
+        [indexPattern.id!]: convertDataViewIntoLensIndexPattern(indexPattern),
+        ...acc,
+      }),
+      {}
+    );
+
     if (!this.activeDataInfo.activeDatasourceState) {
-      this.activeDataInfo.activeDatasourceState =
-        await this.activeDataInfo.activeDatasource.initialize(
-          docDatasourceState,
-          this.savedVis?.references
-        );
+      this.activeDataInfo.activeDatasourceState = this.activeDataInfo.activeDatasource.initialize(
+        docDatasourceState,
+        this.savedVis?.references,
+        undefined,
+        undefined,
+        indexPatternsCache
+      );
     }
 
     const viewUnderlyingDataArgs = getViewUnderlyingDataArgs({
@@ -779,6 +793,7 @@ export class Embeddable
       filters: mergedSearchContext.filters || [],
       timeRange: mergedSearchContext.timeRange,
       esQueryConfig: getEsQueryConfig(this.deps.uiSettings),
+      indexPatternsCache,
     });
 
     const loaded = typeof viewUnderlyingDataArgs !== 'undefined';
@@ -875,8 +890,8 @@ export class Embeddable
   }
 
   destroy() {
-    super.destroy();
     this.isDestroyed = true;
+    super.destroy();
     if (this.inputReloadSubscriptions.length > 0) {
       this.inputReloadSubscriptions.forEach((reloadSub) => {
         reloadSub.unsubscribe();

@@ -28,17 +28,17 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ConnectorStatus } from '../../../../../../common/types/connectors';
+import { docLinks } from '../../../../shared/doc_links';
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
-import { HttpLogic } from '../../../../shared/http';
-import { EuiButtonTo } from '../../../../shared/react_router_helpers';
+import { EuiButtonTo, EuiLinkTo } from '../../../../shared/react_router_helpers';
 
 import { GenerateConnectorApiKeyApiLogic } from '../../../api/connector_package/generate_connector_api_key_api_logic';
-import { FetchIndexApiLogic } from '../../../api/index/fetch_index_api_logic';
 import { SEARCH_INDEX_TAB_PATH } from '../../../routes';
 import { isConnectorIndex } from '../../../utils/indices';
 
 import { IndexNameLogic } from '../index_name_logic';
 
+import { IndexViewLogic } from '../index_view_logic';
 import { SearchIndexTabId } from '../search_index';
 
 import { ApiKeyConfig } from './api_key_configuration';
@@ -46,10 +46,9 @@ import { ConnectorConfigurationConfig } from './connector_configuration_config';
 
 export const ConnectorConfiguration: React.FC = () => {
   const { data: apiKeyData } = useValues(GenerateConnectorApiKeyApiLogic);
-  const { data: indexData } = useValues(FetchIndexApiLogic);
+  const { index: indexData, recheckIndexLoading } = useValues(IndexViewLogic);
   const { indexName } = useValues(IndexNameLogic);
-  const { makeRequest: fetchIndex } = useActions(FetchIndexApiLogic);
-  const { http } = useValues(HttpLogic);
+  const { recheckIndex } = useActions(IndexViewLogic);
   if (!isConnectorIndex(indexData)) {
     return <></>;
   }
@@ -192,7 +191,11 @@ export const ConnectorConfiguration: React.FC = () => {
             }
           )}
           <EuiSpacer size="s" />
-          <EuiButton iconType="refresh" onClick={() => fetchIndex({ indexName })}>
+          <EuiButton
+            iconType="refresh"
+            onClick={() => recheckIndex()}
+            isLoading={recheckIndexLoading}
+          >
             {i18n.translate(
               'xpack.enterpriseSearch.content.indices.configurationConnector.connectorPackage.waitingForConnector.button.label',
               {
@@ -315,14 +318,24 @@ export const ConnectorConfiguration: React.FC = () => {
                     </EuiText>
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <EuiLink href={http.basePath.prepend('/app/management/security/api_keys')}>
+                    <EuiLink href={docLinks.connectors} target="_blank">
+                      {i18n.translate(
+                        'xpack.enterpriseSearch.content.indices.configurationConnector.support.viewDocumentation.label',
+                        {
+                          defaultMessage: 'View documentation',
+                        }
+                      )}
+                    </EuiLink>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiLinkTo to={'/app/management/security/api_keys'} shouldNotCreateHref>
                       {i18n.translate(
                         'xpack.enterpriseSearch.content.indices.configurationConnector.support.manageKeys.label',
                         {
                           defaultMessage: 'Manage keys',
                         }
                       )}
-                    </EuiLink>
+                    </EuiLinkTo>
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiLink
@@ -364,6 +377,16 @@ export const ConnectorConfiguration: React.FC = () => {
                     </EuiLink>
                   </EuiFlexItem>
                   <EuiFlexItem>
+                    <EuiLinkTo to={'/app/integrations/browse'} shouldNotCreateHref>
+                      {i18n.translate(
+                        'xpack.enterpriseSearch.content.indices.configurationConnector.support.dontSeeIntegration.label',
+                        {
+                          defaultMessage: 'Don’t see the integration you’re looking for?',
+                        }
+                      )}
+                    </EuiLinkTo>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
                     <EuiLink
                       href="https://docs.elastic.co/search-ui/tutorials/workplace-search"
                       target="_blank"
@@ -372,6 +395,16 @@ export const ConnectorConfiguration: React.FC = () => {
                         'xpack.enterpriseSearch.content.indices.configurationConnector.support.searchUI.label',
                         {
                           defaultMessage: 'Use Search UI for Workplace Search',
+                        }
+                      )}
+                    </EuiLink>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiLink href="https://www.elastic.co/kibana/feedback" target="_blank">
+                      {i18n.translate(
+                        'xpack.enterpriseSearch.content.indices.configurationConnector.support.connectorFeedback.label',
+                        {
+                          defaultMessage: 'Connector feedback',
                         }
                       )}
                     </EuiLink>

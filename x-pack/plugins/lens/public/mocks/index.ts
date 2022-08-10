@@ -32,6 +32,12 @@ export type FrameMock = jest.Mocked<FramePublicAPI>;
 export const createMockFramePublicAPI = (): FrameMock => ({
   datasourceLayers: {},
   dateRange: { fromDate: '2022-03-17T08:25:00.000Z', toDate: '2022-04-17T08:25:00.000Z' },
+  dataViews: {
+    indexPatterns: {},
+    indexPatternRefs: [],
+    isFirstExistenceFetch: true,
+    existingFields: {},
+  },
 });
 
 export type FrameDatasourceMock = jest.Mocked<FrameDatasourceAPI>;
@@ -41,4 +47,10 @@ export const createMockFrameDatasourceAPI = (): FrameDatasourceMock => ({
   dateRange: { fromDate: '2022-03-17T08:25:00.000Z', toDate: '2022-04-17T08:25:00.000Z' },
   query: { query: '', language: 'lucene' },
   filters: [],
+  dataViews: {
+    indexPatterns: {},
+    indexPatternRefs: [],
+    isFirstExistenceFetch: true,
+    existingFields: {},
+  },
 });

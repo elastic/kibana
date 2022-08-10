@@ -28,7 +28,7 @@ import { ACTION_VISUALIZE_LENS_FIELD } from '@kbn/ui-actions-plugin/public';
 import { ACTION_CONVERT_TO_LENS } from '@kbn/visualizations-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { syncQueryStateWithUrl } from '@kbn/data-plugin/public';
+import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 
 import { App } from './app';
 import { EditorFrameStart, LensTopNavMenuEntryGenerator } from '../types';
@@ -223,7 +223,7 @@ export async function mountApp(
   };
   const lensStore: LensRootStore = makeConfigureStore(storeDeps, {
     lens: getPreloadedState(storeDeps) as LensAppState,
-  } as PreloadedState<LensState>);
+  } as unknown as PreloadedState<LensState>);
 
   const EditorRenderer = React.memo(
     (props: { id?: string; history: History<unknown>; editByValue?: boolean }) => {
@@ -234,7 +234,7 @@ export async function mountApp(
           useHash: lensServices.uiSettings.get('state:storeInSessionStorage'),
           ...withNotifyOnErrors(lensServices.notifications.toasts),
         });
-        const { stop: stopSyncingQueryServiceStateWithUrl } = syncQueryStateWithUrl(
+        const { stop: stopSyncingQueryServiceStateWithUrl } = syncGlobalQueryStateWithUrl(
           data.query,
           kbnUrlStateStorage
         );

@@ -252,7 +252,8 @@ export function SuggestionPanel({
                             },
                           }
                         : {},
-                      datasourceMap
+                      datasourceMap,
+                      frame.dataViews.indexPatterns
                     ),
                   }
                 ) == null

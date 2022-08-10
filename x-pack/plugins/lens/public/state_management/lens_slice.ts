@@ -11,17 +11,17 @@ import { mapValues } from 'lodash';
 import { Query } from '@kbn/es-query';
 import { History } from 'history';
 import { LensEmbeddableInput } from '..';
-import { getDatasourceLayers } from '../editor_frame_service/editor_frame';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
 import type { VisualizeEditorContext, Suggestion } from '../types';
 import { getInitialDatasourceId, getResolvedDateRange, getRemoveOperation } from '../utils';
-import { DataViewsState, LensAppState, LensStoreDeps, VisualizationState } from './types';
-import { Datasource, Visualization } from '../types';
+import type { DataViewsState, LensAppState, LensStoreDeps, VisualizationState } from './types';
+import type { Datasource, Visualization } from '../types';
 import { generateId } from '../id_generator';
 import type { LayerType } from '../../common/types';
 import { getLayerType } from '../editor_frame_service/editor_frame/config_panel/add_layer';
 import { getVisualizeFieldSuggestions } from '../editor_frame_service/editor_frame/suggestion_helpers';
-import { FramePublicAPI, LensEditContextMapping, LensEditEvent } from '../types';
+import type { FramePublicAPI, LensEditContextMapping, LensEditEvent } from '../types';
+import { selectFramePublicAPI } from './selectors';
 
 export const initialState: LensAppState = {
   persistedDoc: undefined,
@@ -43,7 +43,7 @@ export const initialState: LensAppState = {
     indexPatternRefs: [],
     indexPatterns: {},
     existingFields: {},
-    isFirstExistenceFetch: false,
+    isFirstExistenceFetch: true,
   },
 };
 
@@ -80,7 +80,7 @@ export const getPreloadedState = ({
     activeDatasourceId: initialDatasourceId,
     datasourceStates,
     visualization: {
-      state: null as unknown,
+      state: null,
       activeId: Object.keys(visualizationMap)[0] || null,
     },
   };
@@ -316,6 +316,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       }
     ) => {
       const { visualizationIds, datasourceIds, layerId, indexPatternId, dataViews } = payload;
+      const newState: Partial<LensAppState> = { dataViews: { ...state.dataViews, ...dataViews } };
       if (visualizationIds?.length) {
         for (const visualizationId of visualizationIds) {
           const activeVisualization =
@@ -323,34 +324,76 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
             state.visualization.activeId !== visualizationId &&
             visualizationMap[visualizationId];
           if (activeVisualization && layerId && activeVisualization?.onIndexPatternChange) {
-            state.visualization.state = activeVisualization.onIndexPatternChange(
-              state.visualization.state,
-              layerId,
-              indexPatternId
-            );
+            newState.visualization = {
+              ...state.visualization,
+              state: activeVisualization.onIndexPatternChange(
+                state.visualization.state,
+                layerId,
+                indexPatternId
+              ),
+            };
           }
         }
       }
       if (datasourceIds?.length) {
+        newState.datasourceStates = { ...state.datasourceStates };
+        const frame = selectFramePublicAPI(
+          { lens: { ...current(state), dataViews: newState.dataViews! } },
+          datasourceMap
+        );
+        const datasourceLayers = frame.datasourceLayers;
+
         for (const datasourceId of datasourceIds) {
           const activeDatasource = datasourceId && datasourceMap[datasourceId];
           if (activeDatasource && activeDatasource?.onIndexPatternChange) {
-            state.datasourceStates = {
-              ...state.datasourceStates,
+            newState.datasourceStates = {
+              ...newState.datasourceStates,
               [datasourceId]: {
                 isLoading: false,
                 state: activeDatasource.onIndexPatternChange(
-                  state.datasourceStates[datasourceId].state,
+                  newState.datasourceStates[datasourceId].state,
                   dataViews.indexPatterns,
                   indexPatternId,
                   layerId
                 ),
               },
             };
+            // Update the visualization columns
+            if (layerId && state.visualization.activeId) {
+              const nextPublicAPI = activeDatasource.getPublicAPI({
+                state: newState.datasourceStates[datasourceId].state,
+                layerId,
+                indexPatterns: dataViews.indexPatterns,
+              });
+              const nextTable = new Set(
+                nextPublicAPI.getTableSpec().map(({ columnId }) => columnId)
+              );
+              const datasourcePublicAPI = datasourceLayers[layerId];
+              if (datasourcePublicAPI) {
+                const removed = datasourcePublicAPI
+                  .getTableSpec()
+                  .map(({ columnId }) => columnId)
+                  .filter((columnId) => !nextTable.has(columnId));
+                const nextVisState = (newState.visualization || state.visualization).state;
+                const activeVisualization = visualizationMap[state.visualization.activeId];
+                removed.forEach((columnId) => {
+                  newState.visualization = {
+                    ...state.visualization,
+                    state: activeVisualization.removeDimension({
+                      layerId,
+                      columnId,
+                      prevState: nextVisState,
+                      frame,
+                    }),
+                  };
+                });
+              }
+            }
           }
         }
       }
-      state.dataViews = { ...state.dataViews, ...dataViews };
+
+      return { ...state, ...newState };
     },
     [updateIndexPatterns.type]: (state, { payload }: { payload: Partial<DataViewsState> }) => {
       return {
@@ -705,15 +748,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         layerType
       );
 
-      const framePublicAPI = {
-        // any better idea to avoid `as`?
-        activeData: state.activeData
-          ? (current(state.activeData) as TableInspectorAdapter)
-          : undefined,
-        datasourceLayers: getDatasourceLayers(state.datasourceStates, datasourceMap),
-        dateRange: current(state.resolvedDateRange),
-        dataViews: current(state.dataViews),
-      };
+      const framePublicAPI = selectFramePublicAPI({ lens: current(state) }, datasourceMap);
 
       const activeDatasource = datasourceMap[state.activeDatasourceId];
       const { noDatasource } =
@@ -765,15 +800,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       const { activeDatasourceState, activeVisualizationState } = addInitialValueIfAvailable({
         datasourceState: state.datasourceStates[state.activeDatasourceId].state,
         visualizationState: state.visualization.state,
-        framePublicAPI: {
-          // any better idea to avoid `as`?
-          activeData: state.activeData
-            ? (current(state.activeData) as TableInspectorAdapter)
-            : undefined,
-          datasourceLayers: getDatasourceLayers(state.datasourceStates, datasourceMap),
-          dateRange: current(state.resolvedDateRange),
-          dataViews: current(state.dataViews),
-        },
+        framePublicAPI: selectFramePublicAPI({ lens: current(state) }, datasourceMap),
         activeVisualization,
         activeDatasource,
         layerId,

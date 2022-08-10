@@ -27,6 +27,7 @@ describe('getDropProps', () => {
           id: 'annotationColumn2',
           humanData: { label: 'Event' },
         },
+        indexPatterns: {},
       },
       mockDatasource
     );
@@ -50,6 +51,7 @@ describe('getDropProps', () => {
             id: 'annotationColumn2',
             humanData: { label: 'Event' },
           },
+          indexPatterns: {},
         })
       ).toEqual({ dropTypes: ['reorder'] });
     });
@@ -71,6 +73,7 @@ describe('getDropProps', () => {
             id: 'annotationColumn2',
             humanData: { label: 'Event' },
           },
+          indexPatterns: {},
         })
       ).toEqual({ dropTypes: ['duplicate_compatible'] });
     });
@@ -91,6 +94,7 @@ describe('getDropProps', () => {
             id: 'annotationColumn2',
             humanData: { label: 'Event' },
           },
+          indexPatterns: {},
         })
       ).toEqual({
         dropTypes: ['replace_compatible', 'replace_duplicate_compatible', 'swap_compatible'],
@@ -114,6 +118,7 @@ describe('getDropProps', () => {
             id: 'annotationColumn2',
             humanData: { label: 'Event' },
           },
+          indexPatterns: {},
         })
       ).toEqual({
         dropTypes: ['move_compatible', 'duplicate_compatible'],

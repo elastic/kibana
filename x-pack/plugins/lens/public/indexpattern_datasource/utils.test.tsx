@@ -41,11 +41,6 @@ describe('indexpattern_datasource utils', () => {
             },
           },
         },
-        indexPatterns: {
-          one: {
-            getFieldByName: (x: string) => ({ name: x, displayName: x }),
-          },
-        },
       } as unknown as IndexPatternPrivateState;
       framePublicAPI = {
         activeData: {
@@ -60,6 +55,13 @@ describe('indexpattern_datasource utils', () => {
                 },
               },
             ],
+          },
+        },
+        dataViews: {
+          indexPatterns: {
+            one: {
+              getFieldByName: (x: string) => ({ name: x, displayName: x }),
+            },
           },
         },
       } as unknown as FramePublicAPI;

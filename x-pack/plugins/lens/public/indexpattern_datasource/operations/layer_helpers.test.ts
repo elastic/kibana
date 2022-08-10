@@ -38,7 +38,7 @@ import {
 } from './definitions';
 import { TinymathAST } from '@kbn/tinymath';
 import { CoreStart } from '@kbn/core/public';
-import { IndexPattern } from '../../editor_frame_service/types';
+import { IndexPattern } from '../../types';
 
 jest.mock('.');
 jest.mock('../../id_generator');
@@ -1512,6 +1512,42 @@ describe('state_helpers', () => {
         expect(result.columns).toEqual(
           expect.objectContaining({
             id1: expectedColumn,
+            col1: expect.any(Object),
+          })
+        );
+      });
+
+      it('should not wrap around the previous operation as a reference if excluded by validateMetadata (case new1)', () => {
+        const layer: IndexPatternLayer = {
+          indexPatternId: '1',
+          columnOrder: ['col1'],
+          columns: {
+            col1: {
+              label: 'Count',
+              customLabel: true,
+              dataType: 'number' as const,
+              isBucketed: false,
+              sourceField: 'bytes',
+              operationType: 'count' as const,
+            },
+          },
+        };
+        const result = replaceColumn({
+          layer,
+          indexPattern,
+          columnId: 'col1',
+          op: 'cumulative_sum' as OperationType,
+          visualizationGroups: [],
+        });
+
+        expect(result.columnOrder).toEqual(['col1', 'id1']);
+        expect(result.columns).toEqual(
+          expect.objectContaining({
+            id1: expect.objectContaining({
+              label: 'Sum of bytes',
+              sourceField: 'bytes',
+              operationType: 'sum' as const,
+            }),
             col1: expect.any(Object),
           })
         );

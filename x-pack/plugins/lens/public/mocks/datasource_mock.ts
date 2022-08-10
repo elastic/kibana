@@ -25,21 +25,23 @@ export function createMockDatasource(id: string): DatasourceMock {
   return {
     id: 'testDatasource',
     clearLayer: jest.fn((state, _layerId) => state),
-    getDatasourceSuggestionsForField: jest.fn((_state, _item, filterFn) => []),
-    getDatasourceSuggestionsForVisualizeField: jest.fn((_state, _indexpatternId, _fieldName) => []),
-    getDatasourceSuggestionsForVisualizeCharts: jest.fn((_state, _context) => []),
-    getDatasourceSuggestionsFromCurrentState: jest.fn((_state) => []),
+    getDatasourceSuggestionsForField: jest.fn((_state, _item, filterFn, _indexPatterns) => []),
+    getDatasourceSuggestionsForVisualizeField: jest.fn(
+      (_state, _indexpatternId, _fieldName, _indexPatterns) => []
+    ),
+    getDatasourceSuggestionsForVisualizeCharts: jest.fn((_state, _context, _indexPatterns) => []),
+    getDatasourceSuggestionsFromCurrentState: jest.fn((_state, _indexPatterns) => []),
     getPersistableState: jest.fn((x) => ({
       state: x,
       savedObjectReferences: [{ type: 'index-pattern', id: 'mockip', name: 'mockip' }],
     })),
     getRenderEventCounters: jest.fn((_state) => []),
     getPublicAPI: jest.fn().mockReturnValue(publicAPIMock),
-    initialize: jest.fn((_state?) => Promise.resolve()),
+    initialize: jest.fn((_state?) => {}),
     renderDataPanel: jest.fn(),
     renderLayerPanel: jest.fn(),
     getCurrentIndexPatternId: jest.fn(),
-    toExpression: jest.fn((_frame, _state) => null),
+    toExpression: jest.fn((_frame, _state, _indexPatterns) => null),
     insertLayer: jest.fn((_state, _newLayerId) => ({})),
     removeLayer: jest.fn((_state, _layerId) => {}),
     removeColumn: jest.fn((props) => {}),
@@ -53,12 +55,13 @@ export function createMockDatasource(id: string): DatasourceMock {
     // this is an additional property which doesn't exist on real datasources
     // but can be used to validate whether specific API mock functions are called
     publicAPIMock,
-    getErrorMessages: jest.fn((_state) => undefined),
-    checkIntegrity: jest.fn((_state) => []),
+    getErrorMessages: jest.fn((_state, _indexPatterns) => undefined),
+    checkIntegrity: jest.fn((_state, _indexPatterns) => []),
     isTimeBased: jest.fn(),
     isValidColumn: jest.fn(),
     isEqual: jest.fn(),
     getUsedDataView: jest.fn(),
+    onRefreshIndexPattern: jest.fn(),
   };
 }
 

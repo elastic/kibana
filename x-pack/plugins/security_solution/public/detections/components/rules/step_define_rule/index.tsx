@@ -24,7 +24,7 @@ import { isEqual, isEmpty, omit } from 'lodash';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import usePrevious from 'react-use/lib/usePrevious';
 
-import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import type { DataViewBase } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   DEFAULT_INDEX_KEY,
@@ -73,7 +73,7 @@ import {
 import { EqlQueryBar } from '../eql_query_bar';
 import { DataViewSelector } from '../data_view_selector';
 import { ThreatMatchInput } from '../threatmatch_input';
-import type { BrowserField, BrowserFields } from '../../../../common/containers/source';
+import type { BrowserField } from '../../../../common/containers/source';
 import { useFetchIndex } from '../../../../common/containers/source';
 import { RulePreview } from '../rule_preview';
 import { getIsRulePreviewDisabled } from '../rule_preview/helpers';
@@ -297,11 +297,20 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     [form]
   );
 
-  const [aggFields, setAggregatableFields] = useState<DataViewFieldBase[]>([]);
+  const [aggFields, setAggregatableFields] = useState<BrowserField[]>([]);
 
   useEffect(() => {
     const { fields } = indexPattern;
-    setAggregatableFields(fields);
+    /**
+     * Typecasting to BrowserField because fields is
+     * typed as DataViewFieldBase[] which does not have
+     * the 'aggregatable' property, however the type is incorrect
+     *
+     * fields does contain elements with the aggregatable property.
+     * We will need to determine where these types are defined and
+     * figure out where the discrepency is.
+     */
+    setAggregatableFields(aggregatableFields(fields as BrowserField[]));
   }, [indexPattern]);
 
   const [
@@ -821,34 +830,39 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             }}
           />
         </Form>
-        <EuiSpacer size="s" />
-        <RulePreview
-          index={index}
-          dataViewId={formDataViewId}
-          isDisabled={getIsRulePreviewDisabled({
-            ruleType,
-            isQueryBarValid,
-            isThreatQueryBarValid,
-            index,
-            dataViewId: formDataViewId,
-            threatIndex,
-            threatMapping: formThreatMapping,
-            machineLearningJobId,
-            queryBar: formQuery ?? initialState.queryBar,
-            newTermsFields: formNewTermsFields,
-          })}
-          query={formQuery}
-          ruleType={ruleType}
-          threatIndex={threatIndex}
-          threatQuery={formThreatQuery}
-          threatMapping={formThreatMapping}
-          threshold={formThreshold}
-          machineLearningJobId={machineLearningJobId}
-          anomalyThreshold={anomalyThreshold}
-          eqlOptions={optionsSelected}
-          newTermsFields={newTermsFields}
-          historyWindowSize={historyWindowSize}
-        />
+        <EuiSpacer size="m" />
+        <RuleTypeEuiFormRow label={i18n.RULE_PREVIEW_TITLE} $isVisible={true} fullWidth>
+          <RulePreview
+            index={index}
+            indexPattern={indexPattern}
+            dataViewId={formDataViewId}
+            dataSourceType={dataSourceType}
+            isDisabled={getIsRulePreviewDisabled({
+              ruleType,
+              isQueryBarValid,
+              isThreatQueryBarValid,
+              index,
+              dataViewId: formDataViewId,
+              dataSourceType,
+              threatIndex,
+              threatMapping: formThreatMapping,
+              machineLearningJobId,
+              queryBar: formQuery ?? initialState.queryBar,
+              newTermsFields: formNewTermsFields,
+            })}
+            query={formQuery}
+            ruleType={ruleType}
+            threatIndex={threatIndex}
+            threatQuery={formThreatQuery}
+            threatMapping={formThreatMapping}
+            threshold={formThreshold}
+            machineLearningJobId={machineLearningJobId}
+            anomalyThreshold={anomalyThreshold}
+            eqlOptions={optionsSelected}
+            newTermsFields={newTermsFields}
+            historyWindowSize={historyWindowSize}
+          />
+        </RuleTypeEuiFormRow>
       </StepContentWrapper>
 
       {!isUpdateView && (
@@ -859,20 +873,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 };
 export const StepDefineRule = memo(StepDefineRuleComponent);
 
-export function aggregatableFields(browserFields: BrowserFields): BrowserFields {
-  const result: Record<string, Partial<BrowserField>> = {};
-  for (const [groupName, groupValue] of Object.entries(browserFields)) {
-    const fields: Record<string, Partial<BrowserField>> = {};
-    if (groupValue.fields) {
-      for (const [fieldName, fieldValue] of Object.entries(groupValue.fields)) {
-        if (fieldValue.aggregatable === true) {
-          fields[fieldName] = fieldValue;
-        }
-      }
-    }
-    result[groupName] = {
-      fields,
-    };
-  }
-  return result;
+export function aggregatableFields<T extends { aggregatable: boolean }>(browserFields: T[]): T[] {
+  return browserFields.filter((field) => field.aggregatable === true);
 }

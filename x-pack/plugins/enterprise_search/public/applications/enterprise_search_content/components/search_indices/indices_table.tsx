@@ -11,17 +11,16 @@ import { generatePath } from 'react-router-dom';
 
 import {
   CriteriaWithPagination,
-  EuiBadge,
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiIcon,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedRelative } from '@kbn/i18n-react';
 
 import { Meta } from '../../../../../common/types';
 import { EuiLinkTo, EuiButtonIconTo } from '../../../shared/react_router_helpers';
+import { EuiBadgeTo } from '../../../shared/react_router_helpers/eui_components';
 import { convertMetaToPagination } from '../../../shared/table_pagination';
 import { SEARCH_INDEX_PATH } from '../../routes';
 import { ElasticsearchViewIndex, IngestionMethod } from '../../types';
@@ -55,6 +54,7 @@ const columns: Array<EuiBasicTableColumn<ElasticsearchViewIndex>> = [
     ),
     sortable: true,
     truncateText: true,
+    width: '40%',
   },
   {
     field: 'health',
@@ -69,14 +69,16 @@ const columns: Array<EuiBasicTableColumn<ElasticsearchViewIndex>> = [
     ),
     sortable: true,
     truncateText: true,
+    width: '10%',
   },
   {
-    field: 'total.docs.count',
+    field: 'count',
     name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.docsCount.columnTitle', {
       defaultMessage: 'Docs count',
     }),
     sortable: true,
     truncateText: true,
+    width: '10%',
   },
   {
     field: 'ingestionMethod',
@@ -90,34 +92,7 @@ const columns: Array<EuiBasicTableColumn<ElasticsearchViewIndex>> = [
       <EuiText size="s">{ingestionMethodToText(ingestionMethod)}</EuiText>
     ),
     truncateText: true,
-  },
-  {
-    field: 'lastUpdated',
-    name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.lastUpdated.columnTitle', {
-      defaultMessage: 'Last updated',
-    }),
-    render: (dateString: string) => {
-      if (dateString === 'never') {
-        return (
-          <EuiText size="s">
-            {i18n.translate('xpack.enterpriseSearch.content.searchIndices.lastUpdated.never', {
-              defaultMessage: 'Never',
-            })}
-          </EuiText>
-        );
-      }
-      return dateString ? (
-        <FormattedRelative value={new Date(dateString)} />
-      ) : (
-        <EuiText size="s">
-          {i18n.translate('xpack.enterpriseSearch.content.searchIndices.lastUpdated.none', {
-            defaultMessage: 'Unknown',
-          })}
-        </EuiText>
-      );
-    },
-    sortable: true,
-    truncateText: true,
+    width: '10%',
   },
   {
     name: i18n.translate(
@@ -126,18 +101,31 @@ const columns: Array<EuiBasicTableColumn<ElasticsearchViewIndex>> = [
         defaultMessage: 'Ingestion status',
       }
     ),
-    render: (index: ElasticsearchViewIndex) =>
-      isCrawlerIndex(index) ? (
-        <EuiBadge color={crawlerStatusToColor(index.crawler?.most_recent_crawl_request_status)}>
-          {crawlerStatusToText(index.crawler?.most_recent_crawl_request_status)}
-        </EuiBadge>
-      ) : (
-        <EuiBadge color={ingestionStatusToColor(index.ingestionStatus)}>
-          {ingestionStatusToText(index.ingestionStatus)}
-        </EuiBadge>
-      ),
+    render: (index: ElasticsearchViewIndex) => {
+      const overviewPath = generatePath(SEARCH_INDEX_PATH, { indexName: index.name });
+      if (isCrawlerIndex(index)) {
+        const label = crawlerStatusToText(index.crawler?.most_recent_crawl_request_status);
 
+        return (
+          <EuiBadgeTo
+            to={overviewPath}
+            label={label}
+            color={crawlerStatusToColor(index.crawler?.most_recent_crawl_request_status)}
+          />
+        );
+      } else {
+        const label = ingestionStatusToText(index.ingestionStatus);
+        return (
+          <EuiBadgeTo
+            to={overviewPath}
+            label={label}
+            color={ingestionStatusToColor(index.ingestionStatus)}
+          />
+        );
+      }
+    },
     truncateText: true,
+    width: '10%',
   },
   {
     actions: [
@@ -157,12 +145,13 @@ const columns: Array<EuiBasicTableColumn<ElasticsearchViewIndex>> = [
     name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.actions.columnTitle', {
       defaultMessage: 'Actions',
     }),
+    width: '5%',
   },
 ];
 
 interface IndicesTableProps {
   indices: ElasticsearchViewIndex[];
-  isLoading: boolean;
+  isLoading?: boolean;
   meta: Meta;
   onChange: (criteria: CriteriaWithPagination<ElasticsearchViewIndex>) => void;
 }
@@ -178,7 +167,7 @@ export const IndicesTable: React.FC<IndicesTableProps> = ({
     columns={columns}
     onChange={onChange}
     pagination={{ ...convertMetaToPagination(meta), showPerPageOptions: false }}
-    tableLayout="auto"
+    tableLayout="fixed"
     loading={isLoading}
   />
 );

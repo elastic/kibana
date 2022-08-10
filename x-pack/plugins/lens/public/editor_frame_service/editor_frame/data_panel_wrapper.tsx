@@ -29,8 +29,9 @@ import {
   selectDatasourceStates,
 } from '../../state_management';
 import { initializeSources } from './state_helpers';
-import type { IndexPatternServiceAPI } from '../../data_views_service/service';
+import type { IndexPatternServiceAPI } from '../../indexpattern_service/service';
 import { changeIndexPattern } from '../../state_management/lens_slice';
+import { getInitialDataViewsObject } from '../../utils';
 
 interface DataPanelWrapperProps {
   datasourceMap: DatasourceMap;
@@ -83,8 +84,8 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
         {
           isFullEditor: true,
         }
-      ).then((result) => {
-        const newDatasourceStates = Object.entries(result).reduce(
+      ).then(({ states, indexPatterns, indexPatternRefs }) => {
+        const newDatasourceStates = Object.entries(states).reduce(
           (state, [datasourceId, datasourceState]) => ({
             ...state,
             [datasourceId]: {
@@ -94,7 +95,12 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
           }),
           {}
         );
-        dispatchLens(setState({ datasourceStates: newDatasourceStates }));
+        dispatchLens(
+          setState({
+            datasourceStates: newDatasourceStates,
+            dataViews: getInitialDataViewsObject(indexPatterns, indexPatternRefs),
+          })
+        );
       });
     }
   }, [
