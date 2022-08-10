@@ -91,7 +91,6 @@ export const PreviewHistogram = ({
     () => (advancedOptions ? advancedOptions.timeframeEnd.toISOString() : formatDate(to)),
     [to, advancedOptions]
   );
-  const alertsEndDate = useMemo(() => formatDate(to), [to]);
   const isEqlRule = useMemo(() => ruleType === 'eql', [ruleType]);
   const isMlRule = useMemo(() => ruleType === 'machine_learning', [ruleType]);
 
@@ -214,7 +213,12 @@ export const PreviewHistogram = ({
             dataProviders,
             deletedEventIds,
             disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
-            end: alertsEndDate,
+            // Fix for https://github.com/elastic/kibana/issues/135511, until we start writing proper
+            // simulated @timestamp values to the preview alerts. The preview alerts will have @timestamp values
+            // close to the server's `now` time, but the client clock could be out of sync with the server. So we
+            // avoid computing static dates for this time range filter and instead pass in a small relative time window.
+            end: 'now+5m',
+            start: 'now-5m',
             entityType: 'events',
             filters: [],
             globalFullScreen,
@@ -233,7 +237,6 @@ export const PreviewHistogram = ({
             runtimeMappings,
             setQuery: () => {},
             sort,
-            start: startDate,
             tGridEventRenderedViewEnabled,
             type: 'embedded',
             leadingControlColumns: getPreviewTableControlColumn(1.5),

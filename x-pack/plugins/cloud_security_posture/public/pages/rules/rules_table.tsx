@@ -14,8 +14,8 @@ import {
   EuiBasicTableProps,
   useEuiTheme,
 } from '@elastic/eui';
-import moment from 'moment';
 import { i18n } from '@kbn/i18n';
+import { TimestampTableCell } from '../../components/timestamp_table_cell';
 import type { RulesState } from './rules_container';
 import * as TEST_SUBJECTS from './test_subjects';
 import type { RuleSavedObject } from './use_csp_rules';
@@ -144,7 +144,7 @@ const getColumns = ({
       defaultMessage: 'Last Modified',
     }),
     width: '15%',
-    render: (timestamp) => moment(timestamp).fromNow(),
+    render: (timestamp) => <TimestampTableCell timestamp={timestamp} />,
   },
   {
     field: 'attributes.enabled',
