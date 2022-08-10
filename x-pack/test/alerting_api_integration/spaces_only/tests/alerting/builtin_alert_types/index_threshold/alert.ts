@@ -265,6 +265,45 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       expect(inGroup2).to.be.greaterThan(0);
     });
 
+    it('runs correctly: max grouped on unsigned long', async () => {
+      await createRule({
+        name: 'never fire',
+        aggType: 'max',
+        aggField: 'testedValueUnsigned',
+        groupBy: 'top',
+        termField: 'group',
+        termSize: 2,
+        thresholdComparator: '<',
+        threshold: [Number.MAX_SAFE_INTEGER],
+      });
+
+      await createRule({
+        name: 'always fire',
+        aggType: 'max',
+        aggField: 'testedValueUnsigned',
+        groupBy: 'top',
+        termField: 'group',
+        termSize: 2, // two actions will fire each interval
+        thresholdComparator: '>=',
+        threshold: [Number.MAX_SAFE_INTEGER],
+      });
+
+      // create some more documents in the first group
+      await createEsDocumentsInGroups(1);
+
+      const docs = await waitForDocs(4);
+
+      for (const doc of docs) {
+        const { name, message } = doc._source.params;
+
+        expect(name).to.be('always fire');
+
+        const messagePattern =
+          /alert 'always fire' is active for group \'group-\d\':\n\n- Value: \d+\n- Conditions Met: max\(testedValueUnsigned\) is greater than or equal to \d+ over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+        expect(message).to.match(messagePattern);
+      }
+    });
+
     it('runs correctly: min grouped', async () => {
       await createRule({
         name: 'never fire',
