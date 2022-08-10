@@ -150,7 +150,10 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     timestampOverride,
                   }),
                 }
-              : { aggregatableTimestampField: TIMESTAMP, timestampRuntimeMappings: undefined };
+              : {
+                  aggregatableTimestampField: primaryTimestamp,
+                  timestampRuntimeMappings: undefined,
+                };
 
           /**
            * Data Views Logic
