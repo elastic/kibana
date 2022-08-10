@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-// import { RiskSeverity } from '../../../../../common/search_strategy';
-// import type { SeverityCount } from '../../../../common/components/severity/types';
 import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
