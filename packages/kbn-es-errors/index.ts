@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export type { ElasticsearchErrorDetails } from './types';
-export { isUnauthorizedError, isResponseError } from './errors';
-export type { UnauthorizedError } from './errors';
+export type { ElasticsearchErrorDetails } from './src/types';
+export { isUnauthorizedError, isResponseError } from './src/errors';
+export type { UnauthorizedError } from './src/errors';

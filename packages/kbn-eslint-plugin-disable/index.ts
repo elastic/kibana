@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { NoNakedESLintDisableRule } from './rules/no_naked_eslint_disable';
-import { NoProtectedESLintDisableRule } from './rules/no_protected_eslint_disable';
+import { NoNakedESLintDisableRule } from './src/rules/no_naked_eslint_disable';
+import { NoProtectedESLintDisableRule } from './src/rules/no_protected_eslint_disable';
 
 /**
  * Custom ESLint rules, add `'@kbn/eslint-plugin-disable'` to your eslint config to use them

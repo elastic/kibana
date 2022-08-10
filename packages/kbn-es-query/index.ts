@@ -15,7 +15,7 @@ export type {
   IFieldSubType,
   IFieldSubTypeMulti,
   IFieldSubTypeNested,
-} from './es_query';
+} from './src/es_query';
 
 export type {
   CustomFilter,
@@ -37,7 +37,7 @@ export type {
   ScriptedPhraseFilter,
   ScriptedRangeFilter,
   TimeRange,
-} from './filters';
+} from './src/filters';
 
 export type {
   DslQuery,
@@ -45,7 +45,7 @@ export type {
   KueryNode,
   KueryParseOptions,
   KueryQueryOptions,
-} from './kuery';
+} from './src/kuery';
 
 export {
   buildEsQuery,
@@ -57,7 +57,7 @@ export {
   isOfAggregateQueryType,
   getAggregateQueryMode,
   getIndexPatternFromSQLQuery,
-} from './es_query';
+} from './src/es_query';
 
 export {
   COMPARE_ALL_OPTIONS,
@@ -105,7 +105,7 @@ export {
   extractTimeFilter,
   extractTimeRange,
   convertRangeFilterToTimeRange,
-} from './filters';
+} from './src/filters';
 
 export {
   KQLSyntaxError,
@@ -114,11 +114,11 @@ export {
   nodeTypes,
   toElasticsearchQuery,
   escapeKuery,
-} from './kuery';
+} from './src/kuery';
 
 export {
   getDataViewFieldSubtypeMulti,
   getDataViewFieldSubtypeNested,
   isDataViewFieldSubtypeMulti,
   isDataViewFieldSubtypeNested,
-} from './utils';
+} from './src/utils';

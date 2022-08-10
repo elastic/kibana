@@ -6,8 +6,5 @@
  * Side Public License, v 1.
  */
 
-// @ts-expect-error not typed yet
-export { run } from './cli';
-// @ts-expect-error not typed yet
-export { Cluster } from './cluster';
-export { SYSTEM_INDICES_SUPERUSER } from './utils';
+export { EsArchiver } from './src/es_archiver';
+export * from './src/cli';

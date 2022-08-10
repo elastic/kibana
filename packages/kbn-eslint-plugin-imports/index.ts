@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-export * from './get_import_resolver';
-import { NoUnresolvableImportsRule } from './rules/no_unresolvable_imports';
-import { UniformImportsRule } from './rules/uniform_imports';
-import { ExportsMovedPackagesRule } from './rules/exports_moved_packages';
-import { NoUnusedImportsRule } from './rules/no_unused_imports';
-import { NoBoundaryCrossingRule } from './rules/no_boundary_crossing';
+export * from './src/get_import_resolver';
+import { NoUnresolvableImportsRule } from './src/rules/no_unresolvable_imports';
+import { UniformImportsRule } from './src/rules/uniform_imports';
+import { ExportsMovedPackagesRule } from './src/rules/exports_moved_packages';
+import { NoUnusedImportsRule } from './src/rules/no_unused_imports';
+import { NoBoundaryCrossingRule } from './src/rules/no_boundary_crossing';
 
 /**
  * Custom ESLint rules, add `'@kbn/eslint-plugin-imports'` to your eslint config to use them
