@@ -76,6 +76,19 @@
             "deprecated": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "threatIntelligence",
+            "id": "def-public.ThreatIntelligenceSecuritySolutionContext.licenseService",
+            "type": "Object",
+            "tags": [],
+            "label": "licenseService",
+            "description": [],
+            "signature": [
+              "LicenseAware"
+            ],
+            "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
