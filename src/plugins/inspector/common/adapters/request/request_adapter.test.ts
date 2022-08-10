@@ -7,7 +7,7 @@
  */
 
 import { RequestAdapter } from './request_adapter';
-import { Request } from './types';
+import { Request, RequestStatus } from './types';
 
 describe('RequestAdapter', () => {
   let adapter: RequestAdapter;
@@ -41,6 +41,21 @@ describe('RequestAdapter', () => {
       adapter.reset();
       req.ok({ json: {} });
       expect(adapter.getRequests()).toEqual([]);
+    });
+
+    it('should return warnings from all requests', () => {
+      const req1 = adapter.start('req1');
+      const req2 = adapter.start('req2');
+
+      req1.finish(RequestStatus.OK, { json: { warning: 'this is a test of the unit' } });
+      req2.finish(RequestStatus.OK, { json: {} });
+
+      expect(adapter.extractWarnings()).toEqual([
+        {
+          text: 'this is a test of the unit',
+          title: 'Warning',
+        },
+      ]);
     });
   });
 

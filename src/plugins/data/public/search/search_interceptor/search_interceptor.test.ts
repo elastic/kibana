@@ -34,6 +34,7 @@ jest.mock('../errors/search_session_incomplete_warning', () => ({
 }));
 
 import { SearchSessionIncompleteWarning } from '../errors/search_session_incomplete_warning';
+import { ResponseWarning } from '@kbn/inspector-plugin/common';
 
 let searchInterceptor: SearchInterceptor;
 let mockCoreSetup: MockedKeys<CoreSetup>;
@@ -154,6 +155,22 @@ describe('SearchInterceptor', () => {
       searchInterceptor.showError(new Error('Oopsy'));
       expect(mockCoreSetup.notifications.toasts.addDanger).not.toBeCalled();
       expect(mockCoreSetup.notifications.toasts.addError).toBeCalledTimes(1);
+    });
+  });
+
+  describe('showWarning', () => {
+    test('Renders a ResponseWarning', () => {
+      const warning: ResponseWarning = {
+        title: 'this is a test warning',
+        text: 'this is a test warning message',
+      };
+      searchInterceptor.showWarning(warning);
+      expect(mockCoreSetup.notifications.toasts.addError).not.toBeCalled();
+      expect(mockCoreSetup.notifications.toasts.addWarning).toBeCalledTimes(1);
+      expect(mockCoreSetup.notifications.toasts.addWarning).toBeCalledWith({
+        text: 'this is a test warning message',
+        title: 'this is a test warning',
+      });
     });
   });
 

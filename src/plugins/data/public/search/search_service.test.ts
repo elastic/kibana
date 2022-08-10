@@ -66,6 +66,7 @@ describe('Search service', () => {
       expect(start).toHaveProperty('aggs');
       expect(start).toHaveProperty('search');
       expect(start).toHaveProperty('showError');
+      expect(start).toHaveProperty('showWarning');
       expect(start).toHaveProperty('searchSource');
       expect(start).toHaveProperty('sessionsClient');
       expect(start).toHaveProperty('session');
