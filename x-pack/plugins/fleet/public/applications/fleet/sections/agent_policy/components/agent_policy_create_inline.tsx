@@ -175,7 +175,7 @@ export const AgentPolicyCreateInlineForm: React.FunctionComponent<Props> = ({
         <EuiSpacer size="s" />
         <StyledEuiAccordion
           id="advancedOptionsJustChanged"
-          data-test-subj='advancedOptionsButton'
+          data-test-subj="advancedOptionsButton"
           buttonContent={
             <FormattedMessage
               id="xpack.fleet.agentPolicyForm.advancedOptionsToggleLabel"
@@ -190,7 +190,7 @@ export const AgentPolicyCreateInlineForm: React.FunctionComponent<Props> = ({
             updateAgentPolicy={updateNewAgentPolicy}
             validation={validation}
             isEditing={false}
-            onDelete={() => { }}
+            onDelete={() => {}}
           />
         </StyledEuiAccordion>
       </>
