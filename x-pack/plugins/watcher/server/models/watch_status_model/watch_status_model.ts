@@ -17,7 +17,6 @@ import { getMoment } from '../../../common/lib/get_moment';
 import { buildServerActionStatusModel, buildClientActionStatusModel } from '../action_status_model';
 import { deriveState, deriveComment, deriveLastFired } from './watch_status_model_utils';
 
-// Replaces fromUpstreamJson factory method.
 export const buildServerWatchStatusModel = (
   watchStatusModelEs: WatchStatusModelEs
 ): ServerWatchStatusModel => {
@@ -66,7 +65,6 @@ export const buildServerWatchStatusModel = (
   };
 };
 
-// Replaces downstreamJson getter method.
 export const buildClientWatchStatusModel = (
   serverWatchStatusModel: ServerWatchStatusModel
 ): ClientWatchStatusModel => {

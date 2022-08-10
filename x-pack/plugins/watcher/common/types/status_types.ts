@@ -13,14 +13,14 @@ import { ACTION_STATES, WATCH_STATES, WATCH_STATE_COMMENTS } from '../constants'
 export interface ActionStatusModelEs {
   id: string;
   actionStatusJson: estypes.WatcherActionStatus;
-  errors?: any; // TODO
+  errors?: any; // TODO: Type this more strictly.
   lastCheckedRawFormat?: string; // Date e.g. '2017-03-01T20:55:49.679Z'
 }
 
 export interface ServerActionStatusModel {
   id: string;
   actionStatusJson: estypes.WatcherActionStatus;
-  errors: any; // TODO
+  errors: any; // TODO: Type this more strictly.
   lastCheckedRawFormat?: string; // Date e.g. '2017-03-01T20:55:49.679Z'
   lastExecutionRawFormat?: string; // Date e.g. '2017-03-01T20:55:49.679Z'
   lastExecutionSuccessful?: boolean;
@@ -44,9 +44,10 @@ export interface ClientActionStatusModel {
 }
 
 interface SerializedWatchStatus extends estypes.WatcherActivationStatus {
-  // actions: WatcherActions // Record<IndexName, WatcherActionStatus>
-  // state: WatcherActivationState // { active, timestamp }
-  // version: VersionNumber
+  // Inherited from estypes.WatcherActivationStatus:
+  //  - actions: WatcherActions // Record<IndexName, WatcherActionStatus>
+  //  - state: WatcherActivationState // { active, timestamp }
+  //  - version: VersionNumber
   last_checked?: string; // Timestamp TODO: Update ES JS client types with this.
   last_met_condition?: string; // Timestamp TODO: Update ES JS client types with this.
 }
@@ -56,7 +57,7 @@ export interface WatchStatusModelEs {
   watchStatusJson: SerializedWatchStatus;
   state?: estypes.WatcherExecutionStatus; // e.g. 'execution_not_needed' or 'failed'
   watchErrors?: {
-    actions?: Record<string, any>; // TODO
+    actions?: Record<string, any>; // TODO: Type this more strictly.
   };
 }
 

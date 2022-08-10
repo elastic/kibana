@@ -40,6 +40,7 @@ describe('ActionStatusModel', () => {
       };
     });
 
+    // TODO: Remove once all consumers and upstream dependencies are converted to TS.
     it(`throws an error if no 'id' property in json`, () => {
       expect(() => {
         // @ts-ignore
@@ -47,6 +48,7 @@ describe('ActionStatusModel', () => {
       }).toThrow('JSON argument must contain an "id" property');
     });
 
+    // TODO: Remove once all consumers and upstream dependencies are converted to TS.
     it(`throws an error if no 'actionStatusJson' property in json`, () => {
       expect(() => {
         // @ts-ignore

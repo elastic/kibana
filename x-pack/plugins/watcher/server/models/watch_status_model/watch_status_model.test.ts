@@ -47,6 +47,7 @@ const upstreamJson: WatchStatusModelEs = {
 
 describe('WatchStatusModel', () => {
   describe('buildServerWatchStatusModel', () => {
+    // TODO: Remove once all consumers and upstream dependencies are converted to TS.
     it(`throws an error if no 'id' property in json`, () => {
       expect(() => {
         // @ts-ignore
@@ -54,6 +55,7 @@ describe('WatchStatusModel', () => {
       }).toThrow(/must contain an id property/i);
     });
 
+    // TODO: Remove once all consumers and upstream dependencies are converted to TS.
     it(`throws an error if no 'watchStatusJson' property in json`, () => {
       expect(() => {
         // @ts-ignore

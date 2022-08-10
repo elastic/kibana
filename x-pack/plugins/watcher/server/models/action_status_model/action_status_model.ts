@@ -12,7 +12,6 @@ import { ActionStatusModelEs, ServerActionStatusModel } from '../../../common/ty
 import { getMoment } from '../../../common/lib/get_moment';
 import { deriveState, deriveIsAckable } from './action_status_model_utils';
 
-// Replaces fromUpstreamJson factory method.
 export const buildServerActionStatusModel = (
   actionStatusModelEs: ActionStatusModelEs
 ): ServerActionStatusModel => {
@@ -52,7 +51,6 @@ export const buildServerActionStatusModel = (
   };
 };
 
-// Replaces downstreamJson getter method.
 export const buildClientActionStatusModel = (serverActionStatusModel: ServerActionStatusModel) => {
   const {
     id,
