@@ -26,18 +26,29 @@ import { HttpService } from '@kbn/core-http-browser-internal';
 import { UiSettingsService } from '@kbn/core-ui-settings-browser-internal';
 import { DeprecationsService } from '@kbn/core-deprecations-browser-internal';
 import { IntegrationsService } from '@kbn/core-integrations-browser-internal';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { OverlayService } from '@kbn/core-overlays-browser-internal';
 import { KBN_LOAD_MARKS } from '@kbn/core-mount-utils-browser-internal';
+import { SavedObjectsService } from '@kbn/core-saved-objects-browser-internal';
 import { NotificationsService } from '@kbn/core-notifications-browser-internal';
+import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
 import { CoreSetup, CoreStart } from '.';
 import { ChromeService } from './chrome';
 import { PluginsService } from './plugins';
 import { ApplicationService } from './application';
 import { RenderingService } from './rendering';
-import { SavedObjectsService } from './saved_objects';
 import { CoreApp } from './core_app';
 import type { InternalApplicationSetup, InternalApplicationStart } from './application/types';
-import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
+
+import {
+  LOAD_SETUP_DONE,
+  LOAD_START_DONE,
+  KIBANA_LOADED_EVENT,
+  LOAD_CORE_CREATED,
+  LOAD_FIRST_NAV,
+  LOAD_BOOTSTRAP_START,
+  LOAD_START,
+} from './events';
 
 interface Params {
   rootDomElement: HTMLElement;
@@ -129,12 +140,12 @@ export class CoreSystem {
     this.coreApp = new CoreApp(this.coreContext);
 
     performance.mark(KBN_LOAD_MARKS, {
-      detail: 'core_created',
+      detail: LOAD_CORE_CREATED,
     });
   }
 
-  private getLoadMarksInfo() {
-    if (!performance) return [];
+  private getLoadMarksInfo(): Record<string, number> {
+    if (!performance) return {};
     const reportData: Record<string, number> = {};
     const marks = performance.getEntriesByName(KBN_LOAD_MARKS);
     for (const mark of marks) {
@@ -145,11 +156,33 @@ export class CoreSystem {
   }
 
   private reportKibanaLoadedEvent(analytics: AnalyticsServiceStart) {
+    /**
+     * @deprecated here for backwards compatibility in FullStory
+     **/
     analytics.reportEvent('Loaded Kibana', {
       kibana_version: this.coreContext.env.packageInfo.version,
       protocol: window.location.protocol,
-      ...fetchOptionalMemoryInfo(),
-      ...this.getLoadMarksInfo(),
+    });
+
+    const timing = this.getLoadMarksInfo();
+    reportPerformanceMetricEvent(analytics, {
+      eventName: KIBANA_LOADED_EVENT,
+      meta: {
+        kibana_version: this.coreContext.env.packageInfo.version,
+        protocol: window.location.protocol,
+        ...fetchOptionalMemoryInfo(),
+      },
+      duration: timing[LOAD_FIRST_NAV],
+      key1: LOAD_START,
+      value1: timing[LOAD_START],
+      key2: LOAD_BOOTSTRAP_START,
+      value2: timing[LOAD_BOOTSTRAP_START],
+      key3: LOAD_CORE_CREATED,
+      value3: timing[LOAD_CORE_CREATED],
+      key4: LOAD_SETUP_DONE,
+      value4: timing[LOAD_SETUP_DONE],
+      key5: LOAD_START_DONE,
+      value5: timing[LOAD_START_DONE],
     });
     performance.clearMarks(KBN_LOAD_MARKS);
   }
@@ -170,6 +203,7 @@ export class CoreSystem {
       this.docLinks.setup();
 
       const analytics = this.analytics.setup({ injectedMetadata });
+
       this.registerLoadedKibanaEventType(analytics);
 
       const executionContext = this.executionContext.setup({ analytics });
@@ -200,7 +234,7 @@ export class CoreSystem {
       await this.plugins.setup(core);
 
       performance.mark(KBN_LOAD_MARKS, {
-        detail: 'setup_done',
+        detail: LOAD_SETUP_DONE,
       });
 
       return { fatalErrors: this.fatalErrorsSetup };
@@ -300,13 +334,13 @@ export class CoreSystem {
       });
 
       performance.mark(KBN_LOAD_MARKS, {
-        detail: 'start_done',
+        detail: LOAD_START_DONE,
       });
 
       // Wait for the first app navigation to report Kibana Loaded
       firstValueFrom(application.currentAppId$.pipe(filter(Boolean))).then(() => {
         performance.mark(KBN_LOAD_MARKS, {
-          detail: 'first_app_nav',
+          detail: LOAD_FIRST_NAV,
         });
         this.reportKibanaLoadedEvent(analytics);
       });
@@ -342,6 +376,9 @@ export class CoreSystem {
     this.rootDomElement.textContent = '';
   }
 
+  /**
+   * @deprecated
+   */
   private registerLoadedKibanaEventType(analytics: AnalyticsServiceSetup) {
     analytics.registerEventType({
       eventType: 'Loaded Kibana',
@@ -349,45 +386,6 @@ export class CoreSystem {
         kibana_version: {
           type: 'keyword',
           _meta: { description: 'The version of Kibana' },
-        },
-        memory_js_heap_size_limit: {
-          type: 'long',
-          _meta: { description: 'The maximum size of the heap', optional: true },
-        },
-        memory_js_heap_size_total: {
-          type: 'long',
-          _meta: { description: 'The total size of the heap', optional: true },
-        },
-        memory_js_heap_size_used: {
-          type: 'long',
-          _meta: { description: 'The used size of the heap', optional: true },
-        },
-        load_started: {
-          type: 'long',
-          _meta: { description: 'When the render template starts loading assets', optional: true },
-        },
-        bootstrap_started: {
-          type: 'long',
-          _meta: { description: 'When kbnBootstrap callback is called', optional: true },
-        },
-        core_created: {
-          type: 'long',
-          _meta: { description: 'When core system is created', optional: true },
-        },
-        setup_done: {
-          type: 'long',
-          _meta: { description: 'When core system setup is complete', optional: true },
-        },
-        start_done: {
-          type: 'long',
-          _meta: { description: 'When core system start is complete', optional: true },
-        },
-        first_app_nav: {
-          type: 'long',
-          _meta: {
-            description: 'When the application emits the first app navigation',
-            optional: true,
-          },
         },
         protocol: {
           type: 'keyword',

@@ -388,6 +388,7 @@ export function getIndexPatternDatasource({
               <IndexPatternDimensionEditor
                 uiSettings={uiSettings}
                 storage={storage}
+                fieldFormats={fieldFormats}
                 savedObjectsClient={core.savedObjects.client}
                 http={core.http}
                 data={data}

@@ -99,7 +99,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return retry.try(async () => {
         await testSubjects.click(`visListingTitleLink-${title}`);
         await this.isLensPageOrFail();
-        await PageObjects.unifiedSearch.closeTourPopoverByLocalStorage();
       });
     },
 
@@ -1080,20 +1079,20 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param title - expected title
      * @param count - expected count of metric
      */
-    async assertMetric(title: string, count: string) {
+    async assertLegacyMetric(title: string, count: string) {
       await this.assertExactText('[data-test-subj="metric_label"]', title);
       await this.assertExactText('[data-test-subj="metric_value"]', count);
     },
 
-    async clickMetric() {
+    async clickLegacyMetric() {
       await testSubjects.click('metric_label');
     },
 
-    async setMetricDynamicColoring(coloringType: 'none' | 'labels' | 'background') {
-      await testSubjects.click('lnsMetric_dynamicColoring_groups_' + coloringType);
+    async setLegacyMetricDynamicColoring(coloringType: 'none' | 'labels' | 'background') {
+      await testSubjects.click('lnsLegacyMetric_dynamicColoring_groups_' + coloringType);
     },
 
-    async getMetricStyle() {
+    async getLegacyMetricStyle() {
       const el = await testSubjects.find('metric_value');
       const styleString = await el.getAttribute('style');
       return styleString.split(';').reduce<Record<string, string>>((memo, cssLine) => {
@@ -1132,7 +1131,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await PageObjects.dashboard.switchToEditMode();
       }
       await dashboardAddPanel.clickCreateNewLink();
-      await PageObjects.unifiedSearch.closeTourPopoverByLocalStorage();
       await this.goToTimeRange();
       await this.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
