@@ -34,6 +34,7 @@ function isStringArray(arr: unknown | string[]): arr is string[] {
 export function runBuildApiDocsCli() {
   run(
     async ({ log, flags }) => {
+      const collectReferences = flags.references as boolean;
       const stats = flags.stats && typeof flags.stats === 'string' ? [flags.stats] : flags.stats;
       const pluginFilter =
         flags.plugin && typeof flags.plugin === 'string' ? [flags.plugin] : flags.plugin;
@@ -72,13 +73,17 @@ export function runBuildApiDocsCli() {
             .map((file) => Fs.promises.rm(Path.resolve(outputFolder, file)))
         );
       }
-      const collectReferences = flags.references as boolean;
 
-      const { pluginApiMap, missingApiItems, unreferencedDeprecations, referencedDeprecations } =
-        getPluginApiMap(project, plugins, log, {
-          collectReferences,
-          pluginFilter: pluginFilter as string[],
-        });
+      const {
+        pluginApiMap,
+        missingApiItems,
+        unreferencedDeprecations,
+        referencedDeprecations,
+        adoptionTrackedAPIs,
+      } = getPluginApiMap(project, plugins, log, {
+        collectReferences,
+        pluginFilter: pluginFilter as string[],
+      });
 
       const reporter = CiStatsReporter.fromEnv(log);
 
@@ -89,7 +94,12 @@ export function runBuildApiDocsCli() {
 
         allPluginStats[id] = {
           ...(await countEslintDisableLines(plugin.directory)),
-          ...collectApiStatsForPlugin(pluginApi, missingApiItems, referencedDeprecations),
+          ...collectApiStatsForPlugin(
+            pluginApi,
+            missingApiItems,
+            referencedDeprecations,
+            adoptionTrackedAPIs
+          ),
           owner: plugin.manifest.owner,
           description: plugin.manifest.description,
           isPlugin: plugin.isPlugin,
@@ -150,6 +160,29 @@ export function runBuildApiDocsCli() {
           },
           {
             id,
+            meta: {
+              pluginTeam,
+              // `meta` only allows primitives or string[]
+              // Also, each string is allowed to have a max length of 2056,
+              // so it's safer to stringify each element in the array over sending the entire array as stringified.
+              // My internal tests with 4 plugins using the same API gets to a length of 156 chars,
+              // so we should have enough room for tracking popular APIs.
+              // TODO: We can do a follow-up improvement to split the report if we find out we might hit the limit.
+              adoptionTrackedAPIs: pluginStats.adoptionTrackedAPIs.map((metric) =>
+                JSON.stringify(metric)
+              ),
+            },
+            group: 'Adoption-tracked APIs',
+            value: pluginStats.adoptionTrackedAPIsCount,
+          },
+          {
+            id,
+            meta: { pluginTeam },
+            group: 'Adoption-tracked APIs that are referenced at least once',
+            value: pluginStats.adoptionTrackedAPIsReferencedCount,
+          },
+          {
+            id,
             meta: { pluginTeam },
             group: 'ESLint disabled line counts',
             value: pluginStats.eslintDisableLineCount,
@@ -169,7 +202,7 @@ export function runBuildApiDocsCli() {
         ]);
 
         const getLink = (d: ApiDeclaration) =>
-          `https://github.com/elastic/kibana/tree/master/${d.path}#:~:text=${encodeURIComponent(
+          `https://github.com/elastic/kibana/tree/main/${d.path}#:~:text=${encodeURIComponent(
             d.label
           )}`;
 

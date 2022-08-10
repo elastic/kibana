@@ -7,18 +7,20 @@
  */
 
 import {
-  ApiDeclaration,
-  ApiStats,
-  MissingApiItemMap,
-  PluginApi,
-  ReferencedDeprecationsByPlugin,
+  type AdoptionTrackedAPIsByPlugin,
+  type ApiDeclaration,
+  type ApiStats,
+  type MissingApiItemMap,
+  type PluginApi,
+  type ReferencedDeprecationsByPlugin,
   TypeKind,
 } from './types';
 
 export function collectApiStatsForPlugin(
   doc: PluginApi,
   missingApiItems: MissingApiItemMap,
-  deprecations: ReferencedDeprecationsByPlugin
+  deprecations: ReferencedDeprecationsByPlugin,
+  adoptionTrackedAPIs: AdoptionTrackedAPIsByPlugin
 ): ApiStats {
   const stats: ApiStats = {
     missingComments: [],
@@ -26,6 +28,9 @@ export function collectApiStatsForPlugin(
     noReferences: [],
     deprecatedAPIsReferencedCount: 0,
     unreferencedDeprecatedApisCount: 0,
+    adoptionTrackedAPIs: [],
+    adoptionTrackedAPIsCount: 0,
+    adoptionTrackedAPIsReferencedCount: 0,
     apiCount: countApiForPlugin(doc),
     missingExports: Object.values(missingApiItems[doc.id] ?? {}).length,
   };
@@ -39,7 +44,22 @@ export function collectApiStatsForPlugin(
     collectStatsForApi(def, stats, doc);
   });
   stats.deprecatedAPIsReferencedCount = deprecations[doc.id] ? deprecations[doc.id].length : 0;
+
+  collectAdoptionTrackedAPIStats(doc, stats, adoptionTrackedAPIs);
+
   return stats;
+}
+
+function collectAdoptionTrackedAPIStats(
+  doc: PluginApi,
+  stats: ApiStats,
+  adoptionTrackedAPIs: AdoptionTrackedAPIsByPlugin
+) {
+  stats.adoptionTrackedAPIs = adoptionTrackedAPIs[doc.id] || [];
+  stats.adoptionTrackedAPIsCount = stats.adoptionTrackedAPIs.length;
+  stats.adoptionTrackedAPIsReferencedCount = stats.adoptionTrackedAPIs.filter(
+    ({ references }) => references.length
+  ).length;
 }
 
 function collectStatsForApi(doc: ApiDeclaration, stats: ApiStats, pluginApi: PluginApi): void {
@@ -59,7 +79,7 @@ function collectStatsForApi(doc: ApiDeclaration, stats: ApiStats, pluginApi: Plu
       collectStatsForApi(child, stats, pluginApi);
     });
   }
-  if (!doc.references || doc.references.length === 0) {
+  if (doc.references?.length === 0) {
     stats.noReferences.push(doc);
   }
 }

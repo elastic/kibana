@@ -169,6 +169,8 @@ export interface IAnalyticsClient {
    * Reports a telemetry event.
    * @param eventType The event type registered via the `registerEventType` API.
    * @param eventData The properties matching the schema declared in the `registerEventType` API.
+   *
+   * @track-adoption
    */
   reportEvent: <EventTypeData extends object>(
     eventType: EventType,
@@ -198,8 +200,10 @@ export interface IAnalyticsClient {
    */
   optIn: (optInConfig: OptInConfig) => void;
   /**
-   * Registers the context provider to enrich the any reported events.
+   * Registers the context provider to enrich any reported events.
    * @param contextProviderOpts {@link ContextProviderOpts}
+   *
+   * @track-adoption
    */
   registerContextProvider: <Context>(contextProviderOpts: ContextProviderOpts<Context>) => void;
   /**
