@@ -31431,8 +31431,6 @@
     "xpack.watcher.models.watchHistoryItem.idPropertyMissingBadRequestMessage": "json 引数には {id} プロパティが含まれている必要があります",
     "xpack.watcher.models.watchHistoryItem.watchHistoryItemJsonPropertyMissingBadRequestMessage": "json 引数には {watchHistoryItemJson} プロパティが含まれている必要があります",
     "xpack.watcher.models.watchHistoryItem.watchIdPropertyMissingBadRequestMessage": "json 引数には {watchId} プロパティが含まれている必要があります",
-    "xpack.watcher.models.watchStatus.idPropertyMissingBadRequestMessage": "json 引数には {id} プロパティが含まれている必要があります",
-    "xpack.watcher.models.watchStatus.watchStatusJsonPropertyMissingBadRequestMessage": "json 引数には {watchStatusJson} プロパティが含まれている必要があります",
     "xpack.watcher.models.webhookAction.selectMessageText": "Web サービスにリクエストを送信してください。",
     "xpack.watcher.models.webhookAction.simulateButtonLabel": "リクエストの送信",
     "xpack.watcher.models.webhookAction.simulateFailMessage": "{fullPath} へのリクエストの送信に失敗しました。",

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { ActionStatusModel } from './action_status_model';
+export { getMoment } from './get_moment';
