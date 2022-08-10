@@ -61,49 +61,49 @@ export const stackTraces = new Map([
   [
     stackTraceID.A,
     {
-      FileID: [fileID.A, fileID.B, fileID.C, fileID.D],
-      FrameID: [frameID.A, frameID.A, frameID.A, frameID.B],
-      Type: [3, 3, 3, 3],
+      FileIDs: [fileID.A, fileID.B, fileID.C, fileID.D],
+      FrameIDs: [frameID.A, frameID.A, frameID.A, frameID.B],
+      Types: [3, 3, 3, 3],
     },
   ],
   [
     stackTraceID.B,
     {
-      FileID: [fileID.E, fileID.E, fileID.E, fileID.E, fileID.E],
-      FrameID: [frameID.C, frameID.D, frameID.E, frameID.F, frameID.G],
-      Type: [3, 3, 3, 3, 3],
+      FileIDs: [fileID.E, fileID.E, fileID.E, fileID.E, fileID.E],
+      FrameIDs: [frameID.C, frameID.D, frameID.E, frameID.F, frameID.G],
+      Types: [3, 3, 3, 3, 3],
     },
   ],
   [
     stackTraceID.C,
     {
-      FileID: [fileID.F, fileID.F, fileID.F, fileID.F],
-      FrameID: [frameID.H, frameID.I, frameID.J, frameID.K],
-      Type: [3, 3, 3, 3],
+      FileIDs: [fileID.F, fileID.F, fileID.F, fileID.F],
+      FrameIDs: [frameID.H, frameID.I, frameID.J, frameID.K],
+      Types: [3, 3, 3, 3],
     },
   ],
   [
     stackTraceID.D,
     {
-      FileID: [fileID.G, fileID.H, fileID.I],
-      FrameID: [frameID.L, frameID.M, frameID.N],
-      Type: [3, 8, 8],
+      FileIDs: [fileID.G, fileID.H, fileID.I],
+      FrameIDs: [frameID.L, frameID.M, frameID.N],
+      Types: [3, 8, 8],
     },
   ],
   [
     stackTraceID.E,
     {
-      FileID: [fileID.F, fileID.F, fileID.F],
-      FrameID: [frameID.O, frameID.P, frameID.Q],
-      Type: [3, 3, 3],
+      FileIDs: [fileID.F, fileID.F, fileID.F],
+      FrameIDs: [frameID.O, frameID.P, frameID.Q],
+      Types: [3, 3, 3],
     },
   ],
   [
     stackTraceID.F,
     {
-      FileID: [fileID.E, fileID.E],
-      FrameID: [frameID.R, frameID.S],
-      Type: [3, 3],
+      FileIDs: [fileID.E, fileID.E],
+      FrameIDs: [frameID.R, frameID.S],
+      Types: [3, 3],
     },
   ],
 ]);

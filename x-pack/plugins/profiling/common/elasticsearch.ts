@@ -17,9 +17,9 @@ export interface ProfilingESEvent {
 }
 
 export interface ProfilingStackTrace {
-  FrameID: string[];
+  FrameIDs: string[];
   LastSeen: number;
-  Type: number;
+  Types: number;
 }
 
 export interface ProfilingStackFrame {
