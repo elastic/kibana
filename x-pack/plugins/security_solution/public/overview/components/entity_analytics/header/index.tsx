@@ -19,6 +19,7 @@ import { hostsActions } from '../../../../hosts/store';
 import { usersActions } from '../../../../users/store';
 import { getTabsOnUsersUrl } from '../../../../common/components/link_to/redirect_to_users';
 import { UsersTableType } from '../../../../users/store/model';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 const StyledEuiTitle = styled(EuiTitle)`
   color: ${({ theme: { eui } }) => eui.euiColorVis9};
@@ -29,6 +30,8 @@ export const EntityAnalyticsHeader = () => {
   const { severityCount: usersSeverityCount } = useUserRiskScoreKpi({});
   const dispatch = useDispatch();
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
+  const riskyUsersFeatureEnabled = useIsExperimentalFeatureEnabled('riskyUsersEnabled');
+  const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
 
   const [goToHostRiskTabFilterdByCritical, hostRiskTabUrl] = useMemo(() => {
     const { onClick, href } = getSecuritySolutionLinkProps({
@@ -78,42 +81,46 @@ export const EntityAnalyticsHeader = () => {
   return (
     <EuiPanel hasBorder paddingSize="l">
       <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiFlexGroup direction="column" gutterSize="s">
-            <EuiFlexItem>
-              <StyledEuiTitle data-test-subj="critical_hosts_quantity" size="l">
-                <span>{hostsSeverityCount[RiskSeverity.critical]}</span>
-              </StyledEuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <LinkAnchor
-                onClick={goToHostRiskTabFilterdByCritical}
-                href={hostRiskTabUrl}
-                data-test-subj="critical_hosts_link"
-              >
-                {i18n.CRITICAL_HOSTS}
-              </LinkAnchor>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFlexGroup direction="column" gutterSize="s">
-            <EuiFlexItem>
-              <StyledEuiTitle data-test-subj="critical_users_quantity" size="l">
-                <span>{usersSeverityCount[RiskSeverity.critical]}</span>
-              </StyledEuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <LinkAnchor
-                onClick={goToUserRiskTabFilterdByCritical}
-                href={userRiskTabUrl}
-                data-test-subj="critical_users_link"
-              >
-                {i18n.CRITICAL_USERS}
-              </LinkAnchor>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
+        {riskyHostsFeatureEnabled && (
+          <EuiFlexItem>
+            <EuiFlexGroup direction="column" gutterSize="s">
+              <EuiFlexItem>
+                <StyledEuiTitle data-test-subj="critical_hosts_quantity" size="l">
+                  <span>{hostsSeverityCount[RiskSeverity.critical]}</span>
+                </StyledEuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <LinkAnchor
+                  onClick={goToHostRiskTabFilterdByCritical}
+                  href={hostRiskTabUrl}
+                  data-test-subj="critical_hosts_link"
+                >
+                  {i18n.CRITICAL_HOSTS}
+                </LinkAnchor>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        )}
+        {riskyUsersFeatureEnabled && (
+          <EuiFlexItem>
+            <EuiFlexGroup direction="column" gutterSize="s">
+              <EuiFlexItem>
+                <StyledEuiTitle data-test-subj="critical_users_quantity" size="l">
+                  <span>{usersSeverityCount[RiskSeverity.critical]}</span>
+                </StyledEuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <LinkAnchor
+                  onClick={goToUserRiskTabFilterdByCritical}
+                  href={userRiskTabUrl}
+                  data-test-subj="critical_users_link"
+                >
+                  {i18n.CRITICAL_USERS}
+                </LinkAnchor>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </EuiPanel>
   );

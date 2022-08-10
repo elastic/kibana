@@ -59,3 +59,10 @@ export const ENABLE_HOST_RISK_SCORE_DESCRIPTION = i18n.translate(
       'Once you have enabled this feature you can get quick access to the host risk scores in this section.',
   }
 );
+
+export const ENABLE_RISK_SCORE_POPOVER = i18n.translate(
+  'xpack.securitySolution.hostsRiskDashboard.enableRiskScorePopoverTitle',
+  {
+    defaultMessage: 'Alerts need to be available before enabling module',
+  }
+);

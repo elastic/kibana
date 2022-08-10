@@ -5,7 +5,14 @@
  * 2.0.
  */
 import React, { useEffect, useMemo, useState } from 'react';
-import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiToolTip,
+} from '@elastic/eui';
 
 import { useDispatch } from 'react-redux';
 import { SeverityFilterGroup } from '../../../../common/components/severity/severity_filter_group';
@@ -30,6 +37,7 @@ import { useCheckSignalIndex } from '../../../../detections/containers/detection
 import { RiskScoreDonutChart } from '../common/risk_score_donut_chart';
 import { BasicTableWithoutBorderBottom } from '../common/basic_table_without_border_bottom';
 import { useEnableHostRiskFromUrl } from '../../../../common/hooks/use_enable_host_risk_from_url';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 const TABLE_QUERY_ID = 'hostRiskDashboardTable';
 
@@ -41,6 +49,7 @@ export const EntityAnalyticsHostRiskScores = () => {
   const [selectedSeverity, setSelectedSeverity] = useState<RiskSeverity[]>([]);
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
   const dispatch = useDispatch();
+  const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
 
   const severityFilter = useMemo(() => {
     const [filter] = generateSeverityFilter(selectedSeverity);
@@ -91,13 +100,17 @@ export const EntityAnalyticsHostRiskScores = () => {
     return [onClick, href];
   }, [dispatch, getSecuritySolutionLinkProps]);
 
+  if (!riskyHostsFeatureEnabled) {
+    return null;
+  }
+
   if (!isModuleEnabled) {
     return <EntityAnalyticsHostRiskScoresDisable />;
   }
 
   return (
     <InspectButtonContainer>
-      <EuiPanel hasBorder>
+      <EuiPanel hasBorder data-test-subj="entity_analytics_hosts">
         <HeaderSection
           title={i18n.HOST_RISK_TITLE}
           titleSize="s"
@@ -166,15 +179,17 @@ const EntityAnalyticsHostRiskScoresDisable = () => {
         title={<h2>{i18n.ENABLE_HOST_RISK_SCORE}</h2>}
         body={i18n.ENABLE_HOST_RISK_SCORE_DESCRIPTION}
         actions={
-          <EuiButton
-            color="primary"
-            fill
-            href={loadFromUrl}
-            isDisabled={!signalIndexExists}
-            data-test-subj="enable_host_risk_score"
-          >
-            {i18n.ENABLE_HOST_RISK_SCORE}
-          </EuiButton>
+          <EuiToolTip content={i18n.ENABLE_RISK_SCORE_POPOVER}>
+            <EuiButton
+              color="primary"
+              fill
+              href={loadFromUrl}
+              isDisabled={!signalIndexExists}
+              data-test-subj="enable_host_risk_score"
+            >
+              {i18n.ENABLE_HOST_RISK_SCORE}
+            </EuiButton>
+          </EuiToolTip>
         }
       />
     </EuiPanel>
