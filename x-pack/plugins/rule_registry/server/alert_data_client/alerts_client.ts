@@ -34,7 +34,6 @@ import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
 import { FieldSpec } from '@kbn/data-views-plugin/server';
 import { fieldsBeat } from '@kbn/timelines-plugin/server/utils/beat_schema/fields';
 import {
-  BeatFields,
   BrowserField,
   FieldInfo,
   IndexField,
@@ -69,6 +68,8 @@ const isValidAlert = (source?: estypes.SearchHit<ParsedTechnicalFields>): source
       source?.fields?.[SPACE_IDS][0] != null)
   );
 };
+
+const beatsMap = new Map(Object.entries(fieldsBeat));
 
 export interface ConstructorOptions {
   logger: Logger;
@@ -742,64 +743,62 @@ export class AlertsClient {
       fieldCapsOptions: { allow_no_indices: allowNoIndex },
     });
 
-    return await formatIndexFields(fieldsBeat, fieldDescriptor);
+    return await fieldDescriptorToIndexFieldMapper(fieldDescriptor);
   }
 }
 
-const entryFactory = (beat: FieldInfo, descriptor: FieldSpec) => {
+const populatedFieldInfoFactory = (descriptor: FieldSpec, beat: FieldInfo) => {
   const { category, description, example, name } = beat;
   const { aggregatable, readFromDocValues, searchable, type } = descriptor;
 
   return {
-    [name]: {
-      aggregatable,
-      category,
-      description,
-      example,
-      name,
-      readFromDocValues,
-      searchable,
-      type,
+    category,
+    field: {
+      [name]: {
+        aggregatable,
+        category,
+        description,
+        example,
+        name,
+        readFromDocValues,
+        searchable,
+        type,
+      },
     },
   };
 };
 
-const entryFactoryWithoutBeat = (descriptor: FieldSpec, category: string) => {
+const emptyFieldInfoFactory = (descriptor: FieldSpec) => {
+  const category = descriptor.name.split('.')[0];
   return {
-    [descriptor.name]: {
-      ...descriptor,
-      category,
+    category,
+    field: {
+      [descriptor.name]: {
+        ...descriptor,
+        category,
+      },
     },
   };
 };
 
-export const formatIndexFields = async (
-  beatFields: BeatFields,
+export const fieldDescriptorToIndexFieldMapper = async (
   fieldDescriptor: FieldSpec[]
 ): Promise<BrowserField[]> => {
   return new Promise((resolve) => {
     setTimeout(() => {
       const map = new Map();
-      const beatsMap = new Map(Object.entries(beatFields));
 
       fieldDescriptor.forEach((descriptor) => {
-        let currentCategory;
-        let newField;
         const beat = beatsMap.get(descriptor.name);
+        const { category, field } = beat
+          ? populatedFieldInfoFactory(descriptor, beat)
+          : emptyFieldInfoFactory(descriptor);
 
-        if (beat) {
-          currentCategory = beat.category;
-          newField = entryFactory(beat, descriptor);
+        if (map.has(category)) {
+          const { fields: currentFields } = map.get(category);
+          map.set(category, { fields: { ...currentFields, ...field } });
         } else {
-          currentCategory = descriptor.name.split('.')[0];
-          newField = entryFactoryWithoutBeat(descriptor, currentCategory);
-        }
-
-        if (map.has(currentCategory)) {
-          const { fields: currentFields } = map.get(currentCategory);
-          map.set(currentCategory, { fields: { ...currentFields, ...newField } });
-        } else {
-          map.set(currentCategory, { fields: newField });
+          map.set(category, { fields: field });
         }
       });
 
