@@ -19,6 +19,7 @@ export type HistogramCharts = Array<{
 
 export function TransformWizardProvider({ getService, getPageObjects }: FtrProviderContext) {
   const aceEditor = getService('aceEditor');
+  const browser = getService('browser');
   const canvasElement = getService('canvasElement');
   const log = getService('log');
   const testSubjects = getService('testSubjects');
@@ -1047,6 +1048,24 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
         await this.assertDiscoverCardExists();
         await this.assertStartButtonEnabled(false);
         await this.assertProgressbarExists();
+      });
+    },
+
+    async assertAggregationEntryEditPopoverValid(aggName: string) {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.click(`transformAggregationEntryEditButton_${aggName}`);
+
+        await testSubjects.existOrFail(`transformAggPopoverForm_${aggName}`);
+        const isApplyAggChangeEnabled = await testSubjects.isEnabled(
+          `~transformAggPopoverForm_${aggName} > ~transformApplyAggChanges`
+        );
+
+        expect(isApplyAggChangeEnabled).to.eql(
+          true,
+          'Expected Transform aggregation entry `Apply` to be enabled'
+        );
+        // escape popover
+        await browser.pressKeys(browser.keys.ESCAPE);
       });
     },
   };

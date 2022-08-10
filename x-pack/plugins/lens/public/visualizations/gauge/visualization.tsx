@@ -122,7 +122,7 @@ const toExpression = (
   const datasource = datasourceLayers[state.layerId];
   const datasourceExpression = datasourceExpressionsByLayers[state.layerId];
 
-  const originalOrder = datasource.getTableSpec().map(({ columnId }) => columnId);
+  const originalOrder = datasource?.getTableSpec().map(({ columnId }) => columnId);
   if (!originalOrder || !state.metricAccessor) {
     return null;
   }

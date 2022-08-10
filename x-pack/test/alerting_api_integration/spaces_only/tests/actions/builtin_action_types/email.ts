@@ -89,6 +89,33 @@ export default function emailTest({ getService }: FtrProviderContext) {
         );
       });
     });
+
+    describe('export, import, then execute email connector', () => {
+      afterEach(() => objectRemover.removeAll());
+
+      it('successfully executes with no auth', async () => {
+        const from = `bob@${EmailDomainAllowed}`;
+        const conn = await createConnector(from, false);
+        expect(conn.status).to.be(200);
+        const { id } = conn.body;
+
+        const text = await exportConnector(id);
+
+        const { body } = await importConnector(text);
+        const importId = body.successResults[0].id;
+
+        const to = EmailDomainsAllowed.map((domain) => `jeb@${domain}`).sort();
+        const cc = EmailDomainsAllowed.map((domain) => `jim@${domain}`).sort();
+        const bcc = EmailDomainsAllowed.map((domain) => `joe@${domain}`).sort();
+        const ccNames = cc.map((email) => `Jimmy Jack <${email}>`);
+        const run = await runConnector(importId, to, ccNames, bcc);
+
+        expect(run.status).to.be(200);
+
+        const { status } = run.body || {};
+        expect(status).to.be('ok');
+      });
+    });
   });
 
   /* returns the following `body`, for the special email __json service:
@@ -111,23 +138,29 @@ export default function emailTest({ getService }: FtrProviderContext) {
     ...
   }
   */
-  async function createConnector(from: string): Promise<{ status: number; body: any }> {
+  async function createConnector(
+    from: string,
+    hasAuth: boolean = true
+  ): Promise<{ status: number; body: any }> {
+    const connector: any = {
+      name: `An email connector from ${__filename}`,
+      connector_type_id: '.email',
+      config: {
+        service: '__json',
+        from,
+        hasAuth,
+      },
+    };
+    if (hasAuth) {
+      connector.secrets = {
+        user: 'bob',
+        password: 'changeme',
+      };
+    }
     const { status, body } = await supertest
       .post('/api/actions/connector')
       .set('kbn-xsrf', 'foo')
-      .send({
-        name: `An email connector from ${__filename}`,
-        connector_type_id: '.email',
-        config: {
-          service: '__json',
-          from,
-          hasAuth: true,
-        },
-        secrets: {
-          user: 'bob',
-          password: 'changeme',
-        },
-      });
+      .send(connector);
 
     if (status === 200) {
       objectRemover.add('default', body.id, 'connector', 'actions');
@@ -150,6 +183,30 @@ export default function emailTest({ getService }: FtrProviderContext) {
       .send({ params: { to, cc, bcc, subject, message } });
 
     return { status, body };
+  }
+
+  async function exportConnector(id: string) {
+    const { text } = await supertest
+      .post(`/api/saved_objects/_export`)
+      .send({
+        objects: [
+          {
+            id,
+            type: 'action',
+          },
+        ],
+        includeReferencesDeep: true,
+      })
+      .set('kbn-xsrf', 'true');
+    return text;
+  }
+
+  async function importConnector(text: any) {
+    return await supertest
+      .post('/api/saved_objects/_import')
+      .query({ overwrite: true })
+      .attach('file', Buffer.from(text), 'actions.ndjson')
+      .set('kbn-xsrf', 'true');
   }
 }
 
