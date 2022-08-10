@@ -10,6 +10,7 @@ import React, { useEffect, useState } from 'react';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 
+import { usePersistedDataView } from '../../../../hooks/use_persisted_data_view';
 import { triggerVisualizeActions, VisualizeInformation } from './lib/visualize_trigger_utils';
 import type { FieldDetails } from './types';
 import { getVisualizeInformation } from './lib/visualize_trigger_utils';
@@ -25,6 +26,7 @@ interface Props {
 
 export const DiscoverFieldVisualize: React.FC<Props> = React.memo(
   ({ field, dataView, details, trackUiMetric, multiFields }) => {
+    const shouldPersistDataView = usePersistedDataView(dataView);
     const [visualizeInfo, setVisualizeInfo] = useState<VisualizeInformation>();
 
     useEffect(() => {
@@ -37,11 +39,15 @@ export const DiscoverFieldVisualize: React.FC<Props> = React.memo(
       return null;
     }
 
-    const handleVisualizeLinkClick = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+    const handleVisualizeLinkClick = async (
+      event: React.MouseEvent<HTMLAnchorElement, MouseEvent>
+    ) => {
       // regular link click. let the uiActions code handle the navigation and show popup if needed
       event.preventDefault();
-      trackUiMetric?.(METRIC_TYPE.CLICK, 'visualize_link_click');
-      triggerVisualizeActions(visualizeInfo.field, dataView.id, details.columns);
+      if (await shouldPersistDataView()) {
+        trackUiMetric?.(METRIC_TYPE.CLICK, 'visualize_link_click');
+        triggerVisualizeActions(visualizeInfo.field, dataView.id, details.columns);
+      }
     };
 
     return (

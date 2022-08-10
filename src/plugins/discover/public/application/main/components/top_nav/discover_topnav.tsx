@@ -10,6 +10,7 @@ import { useHistory } from 'react-router-dom';
 import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
 import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
+import { usePersistedDataView } from '../../../../hooks/use_persisted_data_view';
 import { ENABLE_SQL } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverLayoutProps } from '../layout/types';
@@ -54,6 +55,7 @@ export const DiscoverTopNav = ({
   onFieldEdited,
 }: DiscoverTopNavProps) => {
   const history = useHistory();
+  const shouldPersistDataView = usePersistedDataView(dataView);
 
   const showDatePicker = useMemo(
     () => dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP,
@@ -147,6 +149,7 @@ export const DiscoverTopNav = ({
         searchSource,
         onOpenSavedSearch,
         isPlainRecord,
+        shouldPersistDataView,
       }),
     [
       dataView,
@@ -158,6 +161,7 @@ export const DiscoverTopNav = ({
       searchSource,
       onOpenSavedSearch,
       isPlainRecord,
+      shouldPersistDataView,
     ]
   );
 

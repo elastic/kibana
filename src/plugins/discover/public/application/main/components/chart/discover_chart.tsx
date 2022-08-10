@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { usePersistedDataView } from '../../../../hooks/use_persisted_data_view';
 import { HitsCounter } from '../hits_counter';
 import { SavedSearch } from '../../../../services/saved_searches';
 import { GetStateReturn } from '../../services/discover_state';
@@ -61,6 +62,7 @@ export function DiscoverChart({
   interval?: string;
 }) {
   const { uiSettings, data, storage } = useDiscoverServices();
+  const shouldPersistDataView = usePersistedDataView(dataView);
   const [showChartOptionsPopover, setShowChartOptionsPopover] = useState(false);
   const showViewModeToggle = uiSettings.get(SHOW_FIELD_STATISTICS) ?? false;
 
@@ -79,12 +81,12 @@ export function DiscoverChart({
     });
   }, [dataView, savedSearch.columns, timeField]);
 
-  const onEditVisualization = useCallback(() => {
-    if (!timeField) {
+  const onEditVisualization = useCallback(async () => {
+    if (!timeField || !(await shouldPersistDataView())) {
       return;
     }
     triggerVisualizeActions(timeField, dataView.id, savedSearch.columns || []);
-  }, [dataView.id, savedSearch, timeField]);
+  }, [dataView.id, savedSearch.columns, shouldPersistDataView, timeField]);
 
   const onShowChartOptions = useCallback(() => {
     setShowChartOptionsPopover(!showChartOptionsPopover);
