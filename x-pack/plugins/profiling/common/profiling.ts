@@ -161,7 +161,7 @@ export function groupStackFrameMetadataByStackTrace(
       const executable = executables.get(trace.FileIDs[i])!;
 
       const metadata = createStackFrameMetadata({
-        FileID: trace.FileID[i],
+        FileID: trace.FileIDs[i],
         FrameType: trace.Types[i],
         AddressOrLine: frame.LineNumber,
         FunctionName: frame.FunctionName,
