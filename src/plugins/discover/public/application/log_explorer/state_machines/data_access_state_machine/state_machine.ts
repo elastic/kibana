@@ -29,7 +29,7 @@ export const dataAccessStateMachine = createMachine<
 >(
   {
     id: 'logExplorerData',
-    initial: 'loadingAround',
+    initial: 'uninitialized',
     states: {
       loadingAround: {
         entry: 'resetChunks',
@@ -332,12 +332,15 @@ export const dataAccessStateMachine = createMachine<
       filtersChanged: {
         actions: 'updateFilters',
         target: '.loadingAround',
+        internal: false,
       },
       dataViewChanged: {
         target: '.loadingAround',
+        internal: false,
       },
       startTailing: {
         target: '.tailing',
+        internal: false,
       },
     },
   },
@@ -370,7 +373,6 @@ export const dataAccessStateMachine = createMachine<
       hasLoadedBottomChunk: constantGuard(true),
       isPositionNearStart: constantGuard(false),
       isPositionNearEnd: constantGuard(false),
-      isWithinLoadedChunks: constantGuard(false),
       startTimestampExtendsLoadedTop: constantGuard(false),
       startTimestampReducesLoadedTop: constantGuard(false),
       endTimestampExtendsLoadedBottom: constantGuard(false),

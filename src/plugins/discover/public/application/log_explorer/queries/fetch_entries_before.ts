@@ -10,6 +10,7 @@ import { IEsSearchResponse, ISearchSource, QueryStart } from '@kbn/data-plugin/p
 import { DataView } from '@kbn/data-views-plugin/public';
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { Observable, pipe } from 'rxjs';
+import { createUnsubscriptionAbortSignal } from '../hooks/use_observable';
 import { LogExplorerPosition, SortCriteria } from '../types';
 import { getCursorFromPosition, getSuccessorPosition } from '../utils/cursor';
 import { invertSortCriteria, normalizeSortCriteriaForDataView } from '../utils/sort_criteria';
@@ -47,10 +48,17 @@ export const fetchEntriesBefore =
     const timeRangeFilter = timefilter.createFilter(dataView, timeRange);
 
     // TODO: create and use point-in-time, not currently possible from client?
-    const response$ = pipe(
+    const fetchBeforeSearchSource = pipe(
       copyWithCommonParameters({ chunkSize, filters, query, timeRangeFilter }),
       applyBeforeParameters({ dataView, beforeEndPosition, sortCriteria })
-    )(searchSource).fetch$();
+    )(searchSource);
+
+    const { abortSignal, abortOnUnsubscribe } = createUnsubscriptionAbortSignal();
+    const response$ = fetchBeforeSearchSource
+      .fetch$({
+        abortSignal,
+      })
+      .pipe(abortOnUnsubscribe());
 
     return response$;
   };

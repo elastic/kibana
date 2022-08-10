@@ -12,7 +12,7 @@ import { useInterpret } from '@xstate/react';
 import createContainer from 'constate';
 import moment from 'moment';
 import { useMemo } from 'react';
-import { merge } from 'rxjs';
+import { merge, of } from 'rxjs';
 import {
   dataAccessStateMachine,
   loadAfter,
@@ -131,7 +131,12 @@ export const useStateMachineService = ({
   // react to filter and query changes
   useSubscription(
     useMemo(
-      () => merge(filterManager.getUpdates$(), queryString.getUpdates$()),
+      () =>
+        merge(
+          of(undefined), // trigger initial transition, since the query string observable doesn't emit initially
+          filterManager.getUpdates$(),
+          queryString.getUpdates$()
+        ),
       [filterManager, queryString]
     ),
     {
