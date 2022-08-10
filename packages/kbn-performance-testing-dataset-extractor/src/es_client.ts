@@ -177,33 +177,6 @@ export class ESClient {
     return await this.getTransactions<TransactionDocument>(queryFilters);
   }
 
-  getSearchRequest = (queryFilters: QueryDslQueryContainer[]): SearchRequest => {
-    return {
-      body: {
-        sort: [
-          {
-            '@timestamp': {
-              order: 'asc',
-              unmapped_type: 'boolean',
-            },
-          },
-        ],
-        size: 10000,
-        query: {
-          bool: {
-            filter: [
-              {
-                bool: {
-                  filter: queryFilters,
-                },
-              },
-            ],
-          },
-        },
-      },
-    };
-  };
-
   getMsearchRequestItem = (queryFilters: QueryDslQueryContainer[]): MsearchRequestItem => {
     return {
       query: {
