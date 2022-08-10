@@ -16,8 +16,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const kibanaServer = getService('kibanaServer');
     const defaultSettings = { defaultIndex: 'logstash-*' };
     const testSubjects = getService('testSubjects');
+    const security = getService('security');
 
     before(async function () {
+      await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
