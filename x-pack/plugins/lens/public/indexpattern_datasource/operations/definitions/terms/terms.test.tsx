@@ -9,7 +9,12 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { shallow, mount } from 'enzyme';
 import { EuiButtonGroup, EuiComboBox, EuiFieldNumber, EuiSelect, EuiSwitch } from '@elastic/eui';
-import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
+import type {
+  IUiSettingsClient,
+  SavedObjectsClientContract,
+  HttpSetup,
+  CoreStart,
+} from '@kbn/core/public';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
