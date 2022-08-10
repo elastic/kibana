@@ -565,7 +565,14 @@ export const getMetricVisualization = ({
   },
 
   removeLayer(state) {
-    return { ...state, trendlineLayerId: undefined, trendlineLayerType: undefined };
+    return {
+      ...state,
+      trendlineLayerId: undefined,
+      trendlineLayerType: undefined,
+      trendlineMetricAccessor: undefined,
+      trendlineTimeAccessor: undefined,
+      trendlineBreakdownByAccessor: undefined,
+    };
   },
 
   getLayerType(layerId, state) {
