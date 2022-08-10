@@ -848,7 +848,7 @@ function syncLinkedDimensions(
       frame,
     }).groups;
 
-    datasourceMap[activeDatasourceId].onDrop({
+    const success = datasourceMap[activeDatasourceId].onDrop({
       source: dropSource,
       target: dropTarget,
       state: datasourceState,
@@ -859,17 +859,19 @@ function syncLinkedDimensions(
       dropType,
     });
 
-    visualizationState = (activeVisualization.onDrop || onDropForVisualization)?.(
-      {
-        prevState: visualizationState,
-        frame,
-        target: dropTarget,
-        source: dropSource,
-        dropType,
-        group: dimensionGroups.find(({ groupId }) => groupId === dropTarget.groupId),
-      },
-      activeVisualization
-    );
+    if (success) {
+      visualizationState = (activeVisualization.onDrop || onDropForVisualization)?.(
+        {
+          prevState: visualizationState,
+          frame,
+          target: dropTarget,
+          source: dropSource,
+          dropType,
+          group: dimensionGroups.find(({ groupId }) => groupId === dropTarget.groupId),
+        },
+        activeVisualization
+      );
+    }
   });
 
   return { datasourceState, visualizationState };
