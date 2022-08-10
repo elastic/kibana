@@ -150,7 +150,7 @@ export function createBulkExecutionEnqueuerFunction({
   ) {
     if (!isESOCanEncrypt) {
       throw new Error(
-        `Unable to execute action because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
+        `Unable to execute actions because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
       );
     }
 
