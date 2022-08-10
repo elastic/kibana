@@ -16,45 +16,50 @@ import {
   EuiDataGridStyle,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { i18n } from '@kbn/i18n';
 import classnames from 'classnames';
-import React, { useRef } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { LOG_EXPLORER_VIRTUAL_GRID_ROWS } from '../../constants';
-import { LogExplorerCell } from './log_explorer_grid_cell';
+import { LogExplorerCell, LogExplorerCellContext } from './log_explorer_grid_cell';
 import { useOnItemsRendered } from './use_on_items_rendered';
 import { useScrollInteractions } from './use_scroll_interactions';
 
 const EuiDataGridMemoized = React.memo(EuiDataGrid);
 
-export function LogExplorerGrid() {
+export function LogExplorerGrid({ fieldFormats }: { fieldFormats: FieldFormatsStart }) {
   const imperativeGridRef = useRef<EuiDataGridRefProps | null>(null);
 
   const onItemsRendered = useOnItemsRendered({ imperativeGridRef });
   useScrollInteractions({ imperativeGridRef });
 
+  const cellContextValue = useMemo(() => ({ fieldFormats }), [fieldFormats]);
+
   return (
     <span className="dscDiscoverGrid__inner">
       <div data-test-subj="discoverDocTable" className={classnames('dscDiscoverGrid__table')}>
-        <EuiDataGridMemoized
-          aria-label="log explorer grid"
-          columns={columns}
-          columnVisibility={columnVisibility}
-          data-test-subj="logExplorerGrid"
-          gridStyle={gridStyle}
-          leadingControlColumns={controlColumns}
-          ref={imperativeGridRef}
-          rowCount={LOG_EXPLORER_VIRTUAL_GRID_ROWS}
-          rowHeightsOptions={{
-            defaultHeight: 34,
-          }}
-          renderCellValue={LogExplorerCell}
-          toolbarVisibility={{
-            showDisplaySelector: false,
-          }}
-          virtualizationOptions={{
-            onItemsRendered,
-          }}
-        />
+        <LogExplorerCellContext.Provider value={cellContextValue}>
+          <EuiDataGridMemoized
+            aria-label="log explorer grid"
+            columns={columns}
+            columnVisibility={columnVisibility}
+            data-test-subj="logExplorerGrid"
+            gridStyle={gridStyle}
+            leadingControlColumns={controlColumns}
+            ref={imperativeGridRef}
+            rowCount={LOG_EXPLORER_VIRTUAL_GRID_ROWS}
+            rowHeightsOptions={{
+              defaultHeight: 34,
+            }}
+            renderCellValue={LogExplorerCell}
+            toolbarVisibility={{
+              showDisplaySelector: false,
+            }}
+            virtualizationOptions={{
+              onItemsRendered,
+            }}
+          />
+        </LogExplorerCellContext.Provider>
       </div>
     </span>
   );
@@ -88,7 +93,8 @@ const controlColumns: EuiDataGridControlColumn[] = [
 const columns: EuiDataGridColumn[] = [
   {
     id: '@timestamp',
-    initialWidth: 200,
+    initialWidth: 250,
+    schema: 'datetime',
   },
   {
     id: 'message',

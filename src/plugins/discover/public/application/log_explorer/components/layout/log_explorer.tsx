@@ -59,7 +59,7 @@ function LogExplorerComponent({
   stateContainer: GetStateReturn;
   stateMachine: DataAccessService;
 }) {
-  const { capabilities, dataViews, uiSettings } = useDiscoverServices();
+  const { capabilities, dataViews, fieldFormats, uiSettings } = useDiscoverServices();
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
   const sampleSize = useMemo(() => uiSettings.get(SAMPLE_SIZE_SETTING), [uiSettings]);
 
@@ -132,7 +132,7 @@ function LogExplorerComponent({
         </h2>
       </EuiScreenReaderOnly>
       <div className="dscDiscoverGrid">
-        <LogExplorerGridMemoized />
+        <LogExplorerGridMemoized fieldFormats={fieldFormats} />
       </div>
     </EuiFlexItem>
   );

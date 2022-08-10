@@ -341,14 +341,13 @@ export const DiscoverGrid = ({
   const renderCellValue = useMemo(
     () =>
       getRenderCellValueFn(
-        dataView,
-        displayedRows,
         useNewFieldsApi,
         fieldsToShow,
         services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED),
-        () => dataGridRef.current?.closeCellPopover()
+        () => dataGridRef.current?.closeCellPopover(),
+        services.fieldFormats
       ),
-    [dataView, displayedRows, useNewFieldsApi, fieldsToShow, services.uiSettings]
+    [useNewFieldsApi, fieldsToShow, services.fieldFormats, services.uiSettings]
   );
 
   /**

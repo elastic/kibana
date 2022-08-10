@@ -7,6 +7,7 @@
  */
 
 import * as rt from 'io-ts';
+import { DataTableRecord } from '../../types';
 
 export type Timestamp = string;
 export type Tiebreaker = number;
@@ -41,8 +42,7 @@ export interface LogExplorerEmptyRow {
   type: 'empty';
 }
 
-export interface LogExplorerEntry {
-  fields: Record<string, unknown>;
+export interface LogExplorerEntry extends DataTableRecord {
   id: string;
   index: string;
   position: LogExplorerPosition;

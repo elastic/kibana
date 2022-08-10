@@ -10,11 +10,15 @@ import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { LogExplorerChunk, LogExplorerEntry } from '../types';
 import { getCursorFromHitSort, getPositionFromCursor } from './cursor';
 
-export const getEntryFromHit = (searchHit: SearchHit): LogExplorerEntry => ({
-  fields: searchHit.fields ?? {},
-  id: searchHit._id,
-  index: searchHit._index,
-  position: getPositionFromCursor(getCursorFromHitSort(searchHit.sort)),
+export const getEntryFromHit = ({
+  _source,
+  ...searchHitWithoutSource
+}: SearchHit): LogExplorerEntry => ({
+  flattened: searchHitWithoutSource.fields ?? {},
+  id: searchHitWithoutSource._id,
+  index: searchHitWithoutSource._index,
+  position: getPositionFromCursor(getCursorFromHitSort(searchHitWithoutSource.sort)),
+  raw: searchHitWithoutSource,
 });
 
 export const getEntriesFromChunk = (chunk: LogExplorerChunk): LogExplorerEntry[] =>
