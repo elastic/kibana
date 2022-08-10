@@ -16,11 +16,10 @@ import {
 
 import React, { useMemo, useState, useCallback } from 'react';
 
-import { CaseAttachments } from '@kbn/cases-plugin/public';
+import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { CommentType } from '@kbn/cases-plugin/common';
 import type { ActionProps } from '@kbn/timelines-plugin/common';
 import { useKibana } from '../../../utils/kibana_react';
-import { observabilityFeatureId } from '../../../../common';
 import { useGetUserCasesPermissions } from '../../../hooks/use_get_user_cases_permissions';
 import { parseAlert } from './parse_alert';
 import { translations, paths } from '../../../config';
@@ -75,13 +74,12 @@ export function ObservabilityActions({
     pageId !== RULE_DETAILS_PAGE_ID && ruleId
       ? http.basePath.prepend(paths.observability.ruleDetails(ruleId))
       : null;
-  const caseAttachments: CaseAttachments = useMemo(() => {
+  const caseAttachments: CaseAttachmentsWithoutOwner = useMemo(() => {
     return ecsData?._id
       ? [
           {
             alertId: ecsData?._id ?? '',
             index: ecsData?._index ?? '',
-            owner: observabilityFeatureId,
             type: CommentType.alert,
             rule: cases.helpers.getRuleIdFromEvent({ ecs: ecsData, data: data ?? [] }),
           },

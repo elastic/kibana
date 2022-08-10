@@ -205,3 +205,6 @@ export interface GetAgentIncomingDataResponse {
 export interface GetCurrentUpgradesResponse {
   items: CurrentUpgrade[];
 }
+export interface GetAvailableVersionsResponse {
+  items: string[];
+}
