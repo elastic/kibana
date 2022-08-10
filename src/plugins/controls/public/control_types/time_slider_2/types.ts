@@ -16,7 +16,7 @@ export * from '../../../common/control_types/time_slider/types';
 
 // Component state is only used by public components.
 export interface TimeSliderSubjectState {
-  timeRangeBounds?: [number, number];
+  timeRangeBounds: [number, number];
 }
 
 // public only - redux embeddable state type

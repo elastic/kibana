@@ -83,6 +83,7 @@ export interface InheritedChildInput extends IndexSignature {
   filters: Filter[];
   query: Query;
   timeRange: TimeRange;
+  timeslice?: [number, number];
   refreshConfig?: RefreshInterval;
   viewMode: ViewMode;
   hidePanelTitles?: boolean;
@@ -334,6 +335,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       viewMode,
       refreshConfig,
       timeRange,
+      timeslice,
       query,
       hidePanelTitles,
       filters,
@@ -342,6 +344,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       syncTooltips,
       executionContext,
     } = this.input;
+
     let combinedFilters = filters;
     if (this.controlGroup) {
       combinedFilters = combineDashboardFiltersWithControlGroupFilters(filters, this.controlGroup);
@@ -351,6 +354,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       hidePanelTitles,
       query,
       timeRange,
+      timeslice,
       refreshConfig,
       viewMode,
       id,

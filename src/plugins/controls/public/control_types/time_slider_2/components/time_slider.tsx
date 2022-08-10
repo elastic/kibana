@@ -41,7 +41,6 @@ export const TimeSlider: FC<Props> = (props) => {
   };
   const { timezone, dateFormat } = defaultProps;
 
-  // Redux embeddable Context
   const {
     useEmbeddableDispatch,
     actions,
@@ -52,16 +51,12 @@ export const TimeSlider: FC<Props> = (props) => {
   const timeRangeBounds = select((state) => {
     return state.componentState.timeRangeBounds;
   });
+  const timeRangeMin = timeRangeBounds[FROM_INDEX];
+  const timeRangeMax = timeRangeBounds[TO_INDEX];
   const value = select((state) => {
     return state.explicitInput.value;
   });
-
-  if (!timeRangeBounds) {
-    return <div>Select time range</div>;
-  }
-  const timeRangeMin = timeRangeBounds[FROM_INDEX];
-  const timeRangeMax = timeRangeBounds[TO_INDEX];
-
+  
   const interval = getInterval(timeRangeMin, timeRangeMax);
   const [range, setRange] = useState(interval);
   const [ticks, setTicks] = useState([]);

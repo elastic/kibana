@@ -52,7 +52,7 @@ export class TimeSliderControlEmbeddable extends Embeddable<
 
     const {
       data: { timefilter },
-      settings: { getDateFormat, getTimezone },
+      settings: { getDateFormat, getDefaultTimeRange, getTimezone },
     } = pluginServices.getServices();
 
     this.getDateFormat = getDateFormat;
@@ -65,6 +65,9 @@ export class TimeSliderControlEmbeddable extends Embeddable<
     >({
       embeddable: this,
       reducers: timeSliderReducers,
+      initialComponentState: {
+        timeRangeBounds: timefilter.calculateBounds(input.timeRange ? input.timeRange : getDefaultTimeRange()),
+      }
     });
 
     this.inputSubscription = this.getInput$().subscribe(() => this.onInputChange());
