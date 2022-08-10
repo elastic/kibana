@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { readYarnLock } from './yarn_lock';
-export type { YarnLock } from './yarn_lock';
-export { validateDependencies } from './validate_yarn_lock';
+export { readYarnLock } from './src/yarn_lock';
+export type { YarnLock } from './src/yarn_lock';
+export { validateDependencies } from './src/validate_yarn_lock';
