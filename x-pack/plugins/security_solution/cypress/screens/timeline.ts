@@ -267,3 +267,18 @@ export const USER_KPI = '[data-test-subj="siem-timeline-user-kpi"]';
 export const EDIT_TIMELINE_BTN = '[data-test-subj="save-timeline-button-icon"]';
 
 export const EDIT_TIMELINE_TOOLTIP = '[data-test-subj="save-timeline-btn-tooltip"]';
+
+export const ALERT_TABLE_SEVERITY_VALUES =
+  '[data-test-subj="formatted-field-kibana.alert.severity"]';
+
+export const ALERT_TABLE_FILE_NAME_HEADER = '[data-gridcell-column-id="file.name"]';
+
+export const ALERT_TABLE_FILE_NAME_VALUES =
+  '[data-gridcell-column-id="file.name"][data-test-subj="dataGridRowCell"]'; // empty column for the test data
+
+export const ALERT_TABLE_CELL_ACTIONS_ADD_TO_TIMELINE = '[data-test-subj="add-to-timeline"]';
+
+export const ACTIVE_TIMELINE_BOTTOM_BAR =
+  '[data-test-subj="flyoutBottomBar"]  .active-timeline-button';
+
+export const DATA_GRID_BODY = '[data-test-subj=body-data-grid] .euiDataGrid__virtualized';
