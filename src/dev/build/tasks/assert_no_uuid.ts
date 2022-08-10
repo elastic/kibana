@@ -8,7 +8,7 @@
 
 import { read, Task } from '../lib';
 
-export const UuidVerification: Task = {
+export const AssertNoUUID: Task = {
   description: 'Verify that no UUID file is baked into the build',
 
   async run(config, log, build) {
