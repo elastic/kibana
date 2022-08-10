@@ -19,6 +19,7 @@ import {
   getSlug,
 } from '../utils';
 import { writePluginDocSplitByFolder } from './write_plugin_split_by_folder';
+import { AUTO_GENERATED_WARNING } from '../auto_generated_warning';
 import { WritePluginDocsOpts } from './types';
 
 /**
@@ -75,14 +76,14 @@ export function writePluginDoc(
   let mdx =
     dedent(`
 ---
+${AUTO_GENERATED_WARNING}
 id: ${getPluginApiDocId(doc.id)}
 slug: /kibana-dev-docs/api/${slug}
 title: "${doc.id}"
 image: https://source.unsplash.com/400x175/?github
-summary: API docs for the ${doc.id} plugin
+description: API docs for the ${doc.id} plugin
 date: ${moment().format('YYYY-MM-DD')}
 tags: ['contributor', 'dev', 'apidocs', 'kibana', '${doc.id}']
-warning: This document is auto-generated and is meant to be viewed inside our experimental, new docs system. Reach out in #docs-engineering for more info.
 ---
 import ${json} from './${fileName}.devdocs.json';
 
