@@ -179,7 +179,7 @@ const EntityAnalyticsHostRiskScoresDisable = () => {
         title={<h2>{i18n.ENABLE_HOST_RISK_SCORE}</h2>}
         body={i18n.ENABLE_HOST_RISK_SCORE_DESCRIPTION}
         actions={
-          <EuiToolTip content={i18n.ENABLE_RISK_SCORE_POPOVER}>
+          <EuiToolTip content={!signalIndexExists ? i18n.ENABLE_RISK_SCORE_POPOVER : null}>
             <EuiButton
               color="primary"
               fill
