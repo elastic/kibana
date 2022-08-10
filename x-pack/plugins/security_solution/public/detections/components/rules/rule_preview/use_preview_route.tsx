@@ -14,12 +14,16 @@ import { formatPreviewRule } from '../../../pages/detection_engine/rules/create/
 import type { FieldValueThreshold } from '../threshold_input';
 import type { RulePreviewLogs } from '../../../../../common/detection_engine/schemas/request';
 import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
-import type { AdvancedPreviewOptions } from '../../../pages/detection_engine/rules/types';
+import type {
+  AdvancedPreviewOptions,
+  DataSourceType,
+} from '../../../pages/detection_engine/rules/types';
 
 interface PreviewRouteParams {
   isDisabled: boolean;
   index: string[];
   dataViewId?: string;
+  dataSourceType: DataSourceType;
   threatIndex: string[];
   query: FieldValueQueryBar;
   threatQuery: FieldValueQueryBar;
@@ -38,6 +42,7 @@ interface PreviewRouteParams {
 export const usePreviewRoute = ({
   index,
   dataViewId,
+  dataSourceType,
   isDisabled,
   query,
   threatIndex,
@@ -107,6 +112,7 @@ export const usePreviewRoute = ({
         formatPreviewRule({
           index,
           dataViewId,
+          dataSourceType,
           query,
           ruleType,
           threatIndex,
@@ -126,6 +132,7 @@ export const usePreviewRoute = ({
   }, [
     index,
     dataViewId,
+    dataSourceType,
     isRequestTriggered,
     query,
     rule,
