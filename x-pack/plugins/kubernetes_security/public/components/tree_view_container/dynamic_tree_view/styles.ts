@@ -59,6 +59,13 @@ export const useStyles = (depth: number) => {
       '.euiTreeView__node--expanded': {
         maxHeight: '100%',
       },
+      '.euiTreeView__nodeInner .euiToolTipAnchor': {
+        maxWidth: '100%',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
+        wordWrap: 'normal',
+      },
     });
 
     return {
