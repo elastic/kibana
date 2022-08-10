@@ -77,7 +77,7 @@ describe('ActionStatusModel states', () => {
   });
 
   describe(`ACTION_STATES.ERROR`, () => {
-    it('is set when lastExecutionSuccessful is equal to false and it is the most recent execution', () => {
+    it('is set when isLastExecutionSuccessful is equal to false and it is the most recent execution', () => {
       const clientActionStatusModel = createModelWithActions({
         last_execution: {
           successful: false,

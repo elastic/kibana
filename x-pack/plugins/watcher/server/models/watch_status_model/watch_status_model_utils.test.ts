@@ -18,7 +18,7 @@ const mockActionStatus = (opts: Partial<ClientActionStatusModel>): ClientActionS
   lastAcknowledged: null,
   lastThrottled: null,
   lastExecution: null,
-  lastExecutionSuccessful: true,
+  isLastExecutionSuccessful: true,
   lastExecutionReason: '',
   lastSuccessfulExecution: null,
   ...opts,

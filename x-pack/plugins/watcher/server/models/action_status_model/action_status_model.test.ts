@@ -69,7 +69,7 @@ describe('ActionStatusModel', () => {
       expect(serverActionStatusModel.lastExecution).toEqual(
         moment(upstreamJson.actionStatusJson.last_execution?.timestamp)
       );
-      expect(serverActionStatusModel.lastExecutionSuccessful).toEqual(
+      expect(serverActionStatusModel.isLastExecutionSuccessful).toEqual(
         upstreamJson.actionStatusJson.last_execution?.successful
       );
       expect(serverActionStatusModel.lastExecutionReason).toBe(
@@ -124,8 +124,8 @@ describe('ActionStatusModel', () => {
       );
       expect(clientActionStatusModel.lastThrottled).toBe(serverActionStatusModel.lastThrottled);
       expect(clientActionStatusModel.lastExecution).toBe(serverActionStatusModel.lastExecution);
-      expect(clientActionStatusModel.lastExecutionSuccessful).toBe(
-        serverActionStatusModel.lastExecutionSuccessful
+      expect(clientActionStatusModel.isLastExecutionSuccessful).toBe(
+        serverActionStatusModel.isLastExecutionSuccessful
       );
       expect(clientActionStatusModel.lastExecutionReason).toBe(
         serverActionStatusModel.lastExecutionReason

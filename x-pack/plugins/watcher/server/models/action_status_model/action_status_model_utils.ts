@@ -11,7 +11,7 @@ import { ServerActionStatusModel } from '../../../common/types';
 export const deriveState = (serverActionStatusModel: ServerActionStatusModel) => {
   const {
     actionStatusJson,
-    lastExecutionSuccessful,
+    isLastExecutionSuccessful,
     lastCheckedRawFormat,
     lastExecutionRawFormat,
     errors,
@@ -22,7 +22,7 @@ export const deriveState = (serverActionStatusModel: ServerActionStatusModel) =>
   } = serverActionStatusModel;
   const ackState = actionStatusJson.ack.state;
 
-  if (lastExecutionSuccessful === false && lastCheckedRawFormat === lastExecutionRawFormat) {
+  if (isLastExecutionSuccessful === false && lastCheckedRawFormat === lastExecutionRawFormat) {
     return ACTION_STATES.ERROR;
   }
 

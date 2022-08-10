@@ -23,7 +23,7 @@ export interface ServerActionStatusModel {
   errors: any; // TODO: Type this more strictly.
   lastCheckedRawFormat?: string; // Date e.g. '2017-03-01T20:55:49.679Z'
   lastExecutionRawFormat?: string; // Date e.g. '2017-03-01T20:55:49.679Z'
-  lastExecutionSuccessful?: boolean;
+  isLastExecutionSuccessful?: boolean;
   lastExecutionReason?: string;
   lastAcknowledged: Moment | null;
   lastExecution: Moment | null;
@@ -36,7 +36,7 @@ export interface ClientActionStatusModel {
   lastAcknowledged: Moment | null;
   lastThrottled: Moment | null;
   lastExecution: Moment | null;
-  lastExecutionSuccessful?: boolean;
+  isLastExecutionSuccessful?: boolean;
   lastExecutionReason?: string;
   lastSuccessfulExecution: Moment | null;
   state: keyof typeof ACTION_STATES;
