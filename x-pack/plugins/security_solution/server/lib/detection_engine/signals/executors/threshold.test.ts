@@ -77,6 +77,7 @@ describe('threshold_executor', () => {
         runtimeMappings: {},
         inputIndex: ['auditbeat-*'],
         primaryTimestamp: TIMESTAMP,
+        aggregatableTimestampField: TIMESTAMP,
       });
       expect(response.warningMessages.length).toEqual(1);
     });
@@ -131,6 +132,7 @@ describe('threshold_executor', () => {
         runtimeMappings: {},
         inputIndex: ['auditbeat-*'],
         primaryTimestamp: TIMESTAMP,
+        aggregatableTimestampField: TIMESTAMP,
       });
       expect(response.state).toEqual({
         initialized: true,
