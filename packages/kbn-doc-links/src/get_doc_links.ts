@@ -359,6 +359,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
         macos_system_ext: `${SECURITY_SOLUTION_DOCS}deploy-elastic-endpoint.html#system-extension-endpoint`,
         linux_deadlock: `${SECURITY_SOLUTION_DOCS}ts-management.html`,
       },
+      responseActions: `${SECURITY_SOLUTION_DOCS}response-actions.html`,
     },
     query: {
       eql: `${ELASTICSEARCH_DOCS}eql.html`,

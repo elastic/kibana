@@ -264,6 +264,7 @@ export interface DocLinks {
       linux_deadlock: string;
     };
     readonly threatIntelInt: string;
+    readonly responseActions: string;
   };
   readonly query: {
     readonly eql: string;
