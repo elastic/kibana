@@ -197,6 +197,10 @@ export default function ({ getService }: FtrProviderContext) {
           it(`stops deployment of the imported model ${model.id}`, async () => {
             await ml.trainedModelsTable.stopDeployment(model.id);
           });
+
+          it(`deletes the imported model ${model.id}`, async () => {
+            await ml.trainedModelsTable.deleteModel(model.id);
+          });
         }
       });
     });
