@@ -31,7 +31,7 @@ export const useTreeView = ({ globalFilter, indexPattern }: UseTreeViewProps) =>
     );
   }, [globalFilter.filterQuery, globalFilter.startDate, globalFilter.endDate]);
 
-  const onTreeNavSelect = useCallback((selection: KubernetesCollectionMap) => {
+  const onTreeNavSelect = useCallback((selection: Partial<KubernetesCollectionMap>) => {
     setHasSelection(false);
     setTreeNavSelection(selection);
   }, []);

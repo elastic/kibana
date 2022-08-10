@@ -20,7 +20,7 @@ interface BreadcrumbDeps {
 export const Breadcrumb = ({ treeNavSelection, onSelect }: BreadcrumbDeps) => {
   const styles = useStyles();
   const onBreadCrumbClick = useCallback(
-    (collectionType: string) => {
+    (collectionType: KubernetesCollection) => {
       const selectionCopy = { ...treeNavSelection };
       switch (collectionType) {
         case 'clusterId': {
