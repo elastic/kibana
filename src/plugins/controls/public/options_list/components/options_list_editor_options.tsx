@@ -6,9 +6,13 @@
  * Side Public License, v 1.
  */
 
+/** External */
 import React, { useState } from 'react';
+
+/** Internal */
 import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 
+/** Local */
 import { OptionsListEmbeddableInput } from '../types';
 import { OptionsListStrings } from './options_list_strings';
 import { ControlEditorProps } from '../..';

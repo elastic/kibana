@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
+/** External */
 import React, { useMemo, useState } from 'react';
+import { isEmpty } from 'lodash';
+
+/** Internal */
 import {
   EuiFilterSelectItem,
   EuiPopoverTitle,
@@ -21,9 +25,9 @@ import {
   EuiIcon,
   EuiTitle,
 } from '@elastic/eui';
-import { isEmpty } from 'lodash';
-
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
+
+/** Local */
 import { optionsListReducers } from '../options_list_reducers';
 import { OptionsListStrings } from './options_list_strings';
 import { OptionsListReduxState } from '../types';

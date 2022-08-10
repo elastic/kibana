@@ -9,37 +9,17 @@
 import { i18n } from '@kbn/i18n';
 
 export const OptionsListStrings = {
-  getDisplayName: () =>
-    i18n.translate('controls.optionsList.displayName', {
-      defaultMessage: 'Options list',
-    }),
-  getDescription: () =>
-    i18n.translate('controls.optionsList.description', {
-      defaultMessage: 'Add a menu for selecting field values.',
-    }),
-  summary: {
+  control: {
     getSeparator: () =>
-      i18n.translate('controls.optionsList.summary.separator', {
+      i18n.translate('controls.optionsList.control.separator', {
         defaultMessage: ', ',
       }),
     getPlaceholder: () =>
-      i18n.translate('controls.optionsList.summary.placeholder', {
+      i18n.translate('controls.optionsList.control.placeholder', {
         defaultMessage: 'Select...',
       }),
   },
   editor: {
-    getDataViewTitle: () =>
-      i18n.translate('controls.optionsList.editor.dataViewTitle', {
-        defaultMessage: 'Data view',
-      }),
-    getNoDataViewTitle: () =>
-      i18n.translate('controls.optionsList.editor.noDataViewTitle', {
-        defaultMessage: 'Select data view',
-      }),
-    getFieldTitle: () =>
-      i18n.translate('controls.optionsList.editor.fieldTitle', {
-        defaultMessage: 'Field',
-      }),
     getAllowMultiselectTitle: () =>
       i18n.translate('controls.optionsList.editor.allowMultiselectTitle', {
         defaultMessage: 'Allow multiple selections in dropdown',
@@ -105,18 +85,6 @@ export const OptionsListStrings = {
         defaultMessage:
           '{selectedOptions} selected {selectedOptions, plural, one {option} other {options}} {selectedOptions, plural, one {is} other {are}} ignored because {selectedOptions, plural, one {it is} other {they are}} no longer in the data.',
         values: { selectedOptions },
-      }),
-  },
-  errors: {
-    getDataViewNotFoundError: (dataViewId: string) =>
-      i18n.translate('controls.optionsList.errors.dataViewNotFound', {
-        defaultMessage: 'Could not locate data view: {dataViewId}',
-        values: { dataViewId },
-      }),
-    getfieldNotFoundError: (fieldId: string) =>
-      i18n.translate('controls.optionsList.errors.fieldNotFound', {
-        defaultMessage: 'Could not locate field: {fieldId}',
-        values: { fieldId },
       }),
   },
 };
