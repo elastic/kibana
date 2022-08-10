@@ -8,7 +8,12 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { validateAccessor, getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import {
+  validateAccessor,
+  getColumnByAccessor,
+  prepareLogTable,
+  Dimension,
+} from '@kbn/visualizations-plugin/common/utils';
 import { DatatableRow } from '@kbn/expressions-plugin/common';
 import { MetricWTrend } from '@elastic/charts';
 import type { TrendlineExpressionFunctionDefinition } from '../types';
@@ -56,7 +61,31 @@ export const metricTrendlineFunction = (): TrendlineExpressionFunctionDefinition
     validateAccessor(args.timeField, table.columns);
     validateAccessor(args.breakdownBy, table.columns);
 
-    // TODO - inspector
+    const argsTable: Dimension[] = [
+      [
+        [args.metric],
+        i18n.translate('expressionMetricVis.function.dimension.metric', {
+          defaultMessage: 'Metric',
+        }),
+      ],
+      [
+        [args.timeField],
+        i18n.translate('expressionMetricVis.function.dimension.timeField', {
+          defaultMessage: 'Time field',
+        }),
+      ],
+    ];
+
+    if (args.breakdownBy) {
+      argsTable.push([
+        [args.breakdownBy],
+        i18n.translate('expressionMetricVis.function.dimension.splitGroup', {
+          defaultMessage: 'Split group',
+        }),
+      ]);
+    }
+
+    const inspectorTable = prepareLogTable(table, argsTable, true);
 
     const metricColId = getColumnByAccessor(args.metric, table.columns)?.id;
     const timeColId = getColumnByAccessor(args.timeField, table.columns)?.id;
@@ -97,6 +126,6 @@ export const metricTrendlineFunction = (): TrendlineExpressionFunctionDefinition
       }
     }
 
-    return { type: EXPRESSION_METRIC_TRENDLINE_NAME, trends };
+    return { type: EXPRESSION_METRIC_TRENDLINE_NAME, trends, inspectorTable };
   },
 });

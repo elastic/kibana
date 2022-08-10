@@ -13,7 +13,7 @@ import {
   ExpressionFunctionDefinition,
   ExpressionValueRender,
 } from '@kbn/expressions-plugin/common';
-import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import { ExpressionValueVisDimension, prepareLogTable } from '@kbn/visualizations-plugin/common';
 import { CustomPaletteState } from '@kbn/charts-plugin/common';
 import { VisParams, visType } from './expression_renderers';
 import { EXPRESSION_METRIC_NAME, EXPRESSION_METRIC_TRENDLINE_NAME } from '../constants';
@@ -58,6 +58,7 @@ export interface TrendlineArguments {
 export interface TrendlineResult {
   type: typeof EXPRESSION_METRIC_TRENDLINE_NAME;
   trends: Record<string, MetricWTrend['trend']>;
+  inspectorTable: ReturnType<typeof prepareLogTable>;
 }
 
 export type TrendlineExpressionFunctionDefinition = ExpressionFunctionDefinition<

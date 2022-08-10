@@ -111,7 +111,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
     validateAccessor(args.breakdownBy, input.columns);
 
     if (handlers?.inspectorAdapters?.tables) {
-      handlers.inspectorAdapters.tables.reset();
+      // handlers.inspectorAdapters.tables.reset();
       handlers.inspectorAdapters.tables.allowCsvExport = true;
 
       const argsTable: Dimension[] = [
@@ -152,6 +152,9 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
 
       const logTable = prepareLogTable(input, argsTable, true);
       handlers.inspectorAdapters.tables.logDatatable('default', logTable);
+      if (args.trendline) {
+        handlers.inspectorAdapters.tables.logDatatable('trendline', args.trendline.inspectorTable);
+      }
     }
 
     return {
