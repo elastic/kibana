@@ -41,7 +41,7 @@ import { SecuritySolutionLinkButton } from '../../../../common/components/links'
 import { NeedAdminForUpdateRulesCallOut } from '../../../components/callouts/need_admin_for_update_callout';
 import { MlJobCompatibilityCallout } from '../../../components/callouts/ml_job_compatibility_callout';
 import { MissingPrivilegesCallOut } from '../../../components/callouts/missing_privileges_callout';
-import { APP_UI_ID } from '../../../../../common/constants';
+import { APP_UI_ID, NEW_TERMS_TOUR_ACTIVE_KEY } from '../../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana';
 import { HeaderPage } from '../../../../common/components/header_page';
 import { RulesTableContextProvider } from './all/rules_table/rules_table_context';
@@ -49,8 +49,6 @@ import { useInvalidateRules } from '../../../containers/detection_engine/rules/u
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
 import { RULES_TABLE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
-
-export const NEW_TERMS_TOUR_ACTIVE_KEY = 'security.newTermsTourActive';
 
 const RulesPageComponent: React.FC = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
