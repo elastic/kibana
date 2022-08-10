@@ -580,6 +580,7 @@ export const formatRule = <T>(
 export const formatPreviewRule = ({
   index,
   dataViewId,
+  dataSourceType,
   query,
   threatIndex,
   threatQuery,
@@ -596,6 +597,7 @@ export const formatPreviewRule = ({
 }: {
   index: string[];
   dataViewId?: string;
+  dataSourceType: DataSourceType;
   threatIndex: string[];
   query: FieldValueQueryBar;
   threatQuery: FieldValueQueryBar;
@@ -614,6 +616,7 @@ export const formatPreviewRule = ({
     ...stepDefineDefaultValue,
     index,
     dataViewId,
+    dataSourceType,
     queryBar: query,
     ruleType,
     threatIndex,
