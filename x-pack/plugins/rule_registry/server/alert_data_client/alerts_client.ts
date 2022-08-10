@@ -9,7 +9,6 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { Filter, buildEsQuery, EsQueryConfig } from '@kbn/es-query';
 import { decodeVersion, encodeHitVersion } from '@kbn/securitysolution-es-utils';
-import isEmpty from 'lodash/isEmpty';
 import {
   getEsQueryConfig,
   getSafeSortIds,
@@ -34,7 +33,12 @@ import { AuditLogger } from '@kbn/security-plugin/server';
 import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
 import { FieldSpec } from '@kbn/data-views-plugin/server';
 import { fieldsBeat } from '@kbn/timelines-plugin/server/utils/beat_schema/fields';
-import { BeatFields, IndexField } from '@kbn/timelines-plugin/common/search_strategy/index_fields';
+import {
+  BeatFields,
+  BrowserField,
+  FieldInfo,
+  IndexField,
+} from '@kbn/timelines-plugin/common/search_strategy/index_fields';
 import { alertAuditEvent, operationAlertAuditActionMap } from './audit_events';
 import {
   ALERT_WORKFLOW_STATUS,
@@ -732,120 +736,74 @@ export class AlertsClient {
     allowNoIndex: boolean;
   }): Promise<IndexField[]> {
     const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(this.esClient);
-    const fieldDescriptor = await Promise.all(
-      indices.map(async (index) => {
-        return indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
-          pattern: index,
-          metaFields,
-          fieldCapsOptions: { allow_no_indices: allowNoIndex },
-        });
-      })
-    );
+    const fieldDescriptor = await indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
+      pattern: indices,
+      metaFields,
+      fieldCapsOptions: { allow_no_indices: allowNoIndex },
+    });
 
-    return await formatIndexFields(fieldsBeat, fieldDescriptor, indices);
+    return await formatIndexFields(fieldsBeat, fieldDescriptor);
   }
 }
 
-const missingFields: FieldSpec[] = [
-  {
-    name: '_id',
-    type: 'string',
-    searchable: true,
-    aggregatable: false,
-    readFromDocValues: false,
-    esTypes: [],
-  },
-  {
-    name: '_index',
-    type: 'string',
-    searchable: true,
-    aggregatable: true,
-    readFromDocValues: false,
-    esTypes: [],
-  },
-];
+const entryFactory = (beat: FieldInfo, descriptor: FieldSpec) => {
+  const { category, description, example, name } = beat;
+  const { aggregatable, readFromDocValues, searchable, type } = descriptor;
 
-/**
- * Creates a single field item with category and indexes (index alias)
- *
- * This is a mutatious HOT CODE PATH function that will have array sizes up to 4.7 megs
- * in size at a time calling this function repeatedly. This function should be as optimized as possible
- * and should avoid any and all creation of new arrays, iterating over the arrays or performing
- * any n^2 operations.
- */
-export const createFieldItem = (
-  beatFields: BeatFields,
-  indexesAlias: string[],
-  index: FieldSpec,
-  indexesAliasIdx: number | null
-): IndexField => {
-  const alias = indexesAliasIdx != null ? [indexesAlias[indexesAliasIdx]] : indexesAlias;
-
-  const splitIndexName = index.name.split('.');
-  const indexName =
-    splitIndexName[splitIndexName.length - 1] === 'text'
-      ? splitIndexName.slice(0, splitIndexName.length - 1).join('.')
-      : index.name;
-  const beatIndex = beatFields[indexName] ?? {};
-  if (isEmpty(beatIndex.category)) {
-    beatIndex.category = splitIndexName[0];
-  }
   return {
-    ...beatIndex,
-    ...index,
-    // the format type on FieldSpec is SerializedFieldFormat
-    // and is a string on beatIndex
-    format: index.format?.id ?? beatIndex.format,
-    indexes: alias,
+    [name]: {
+      aggregatable,
+      category,
+      description,
+      example,
+      name,
+      readFromDocValues,
+      searchable,
+      type,
+    },
   };
 };
 
-/**
- * Iterates over each field, adds description, category, and indexes (index alias)
- *
- * This is a mutatious HOT CODE PATH function that will have array sizes up to 4.7 megs
- * in size at a time when being called. This function should be as optimized as possible
- * and should avoid any and all creation of new arrays, iterating over the arrays or performing
- * any n^2 operations. The `.push`, and `forEach` operations are expected within this function
- * to speed up performance.
- *
- * This intentionally waits for the next tick on the event loop to process as the large 4.7 megs
- * has already consumed a lot of the event loop processing up to this function and we want to give
- * I/O opportunity to occur by scheduling this on the next loop.
- */
+const entryFactoryWithoutBeat = (descriptor: FieldSpec, category: string) => {
+  return {
+    [descriptor.name]: {
+      ...descriptor,
+      category,
+    },
+  };
+};
+
 export const formatIndexFields = async (
   beatFields: BeatFields,
-  responsesFieldSpec: FieldSpec[][],
-  indexesAlias: string[]
-): Promise<IndexField[]> => {
+  fieldDescriptor: FieldSpec[]
+): Promise<BrowserField[]> => {
   return new Promise((resolve) => {
     setTimeout(() => {
-      const indexFieldNameHash: Record<string, number> = {};
-      resolve(
-        responsesFieldSpec.reduce(
-          (accumulator: IndexField[], fieldSpec: FieldSpec[], indexesAliasId: number) => {
-            const indexesAliasIdx = responsesFieldSpec.length > 1 ? indexesAliasId : null;
-            missingFields.concat(fieldSpec).forEach((index) => {
-              const item = createFieldItem(beatFields, indexesAlias, index, indexesAliasIdx);
-              const alreadyExistingIndexField = indexFieldNameHash[item.name];
-              if (alreadyExistingIndexField != null) {
-                const existingIndexField = accumulator[alreadyExistingIndexField];
-                if (isEmpty(accumulator[alreadyExistingIndexField].description)) {
-                  accumulator[alreadyExistingIndexField].description = item.description;
-                }
-                accumulator[alreadyExistingIndexField].indexes = Array.from(
-                  new Set(existingIndexField.indexes.concat(item.indexes))
-                );
-                return;
-              }
-              accumulator.push(item);
-              indexFieldNameHash[item.name] = accumulator.length - 1;
-            });
-            return accumulator;
-          },
-          []
-        )
-      );
+      const map = new Map();
+      const beatsMap = new Map(Object.entries(beatFields));
+
+      fieldDescriptor.forEach((descriptor) => {
+        let currentCategory;
+        let newField;
+        const beat = beatsMap.get(descriptor.name);
+
+        if (beat) {
+          currentCategory = beat.category;
+          newField = entryFactory(beat, descriptor);
+        } else {
+          currentCategory = descriptor.name.split('.')[0];
+          newField = entryFactoryWithoutBeat(descriptor, currentCategory);
+        }
+
+        if (map.has(currentCategory)) {
+          const { fields: currentFields } = map.get(currentCategory);
+          map.set(currentCategory, { fields: { ...currentFields, ...newField } });
+        } else {
+          map.set(currentCategory, { fields: newField });
+        }
+      });
+
+      resolve(Object.fromEntries(map));
     });
   });
 };
