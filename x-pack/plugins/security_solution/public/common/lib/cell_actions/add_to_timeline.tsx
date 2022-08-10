@@ -46,20 +46,8 @@ export const getAddToTimelineCellAction = ({
 
         const dataProvider: DataProvider[] = useMemo(() => {
           const queryIdPrefix = `${escapeDataProviderId(columnId)}-row-${rowIndex}-col-${columnId}`;
-          return (
-            value?.map((x) => ({
-              and: [],
-              enabled: true,
-              excluded: false,
-              kqlQuery: '',
-              id: `${queryIdPrefix}-val-${x}`,
-              name: x,
-              queryMatch: {
-                field: columnId,
-                value: x,
-                operator: IS_OPERATOR,
-              },
-            })) ?? [
+          if (!value) {
+            return [
               {
                 and: [],
                 enabled: true,
@@ -73,8 +61,21 @@ export const getAddToTimelineCellAction = ({
                   operator: EXISTS_OPERATOR,
                 },
               },
-            ]
-          );
+            ];
+          }
+          return value.map((x) => ({
+            and: [],
+            enabled: true,
+            excluded: false,
+            kqlQuery: '',
+            id: `${queryIdPrefix}-val-${x}`,
+            name: x,
+            queryMatch: {
+              field: columnId,
+              value: x,
+              operator: IS_OPERATOR,
+            },
+          }));
         }, [columnId, rowIndex, value]);
         const addToTimelineProps = useMemo(() => {
           return {
