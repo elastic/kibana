@@ -78,7 +78,7 @@ const toExpression = (
   const maxPossibleTiles =
     // if there's a collapse function, no need to calculate since we're dealing with a single tile
     state.breakdownByAccessor && !state.collapseFn
-      ? datasource.getMaxPossibleNumValues(state.breakdownByAccessor)
+      ? datasource?.getMaxPossibleNumValues(state.breakdownByAccessor)
       : null;
 
   const getCollapseFnArguments = () => {
@@ -91,7 +91,7 @@ const toExpression = (
         return state.collapseFn;
       } else {
         const isMaxStatic = Boolean(
-          datasource.getOperationForColumnId(state.maxAccessor!)?.isStaticValue
+          datasource?.getOperationForColumnId(state.maxAccessor!)?.isStaticValue
         );
         // we do this because the user expects the static value they set to be the same
         // even if they define a collapse on the breakdown by
@@ -248,6 +248,7 @@ export const getMetricVisualization = ({
       groups: [
         {
           groupId: GROUP_ID.METRIC,
+          dataTestSubj: 'lnsMetric_primaryMetricDimensionPanel',
           groupLabel: i18n.translate('xpack.lens.primaryMetric.label', {
             defaultMessage: 'Primary metric',
           }),
@@ -273,6 +274,7 @@ export const getMetricVisualization = ({
         },
         {
           groupId: GROUP_ID.SECONDARY_METRIC,
+          dataTestSubj: 'lnsMetric_secondaryMetricDimensionPanel',
           groupLabel: i18n.translate('xpack.lens.metric.secondaryMetric', {
             defaultMessage: 'Secondary metric',
           }),
@@ -297,6 +299,7 @@ export const getMetricVisualization = ({
         },
         {
           groupId: GROUP_ID.MAX,
+          dataTestSubj: 'lnsMetric_maxDimensionPanel',
           groupLabel: i18n.translate('xpack.lens.metric.max', { defaultMessage: 'Maximum value' }),
           paramEditorCustomProps: {
             headingLabel: i18n.translate('xpack.lens.primaryMetric.headingLabel', {
@@ -324,6 +327,7 @@ export const getMetricVisualization = ({
         },
         {
           groupId: GROUP_ID.BREAKDOWN_BY,
+          dataTestSubj: 'lnsMetric_breakdownByDimensionPanel',
           groupLabel: i18n.translate('xpack.lens.metric.breakdownBy', {
             defaultMessage: 'Break down by',
           }),
