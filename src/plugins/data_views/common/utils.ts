@@ -20,12 +20,14 @@ import { DATA_VIEW_SAVED_OBJECT_TYPE } from './constants';
  * @returns {SavedObject|undefined}
  */
 export async function findByName(client: SavedObjectsClientCommon, name: string) {
-  const savedObjects = await client.find<{ name: DataViewSavedObjectAttrs['name'] }>({
-    type: DATA_VIEW_SAVED_OBJECT_TYPE,
-    perPage: 10000,
-    search: `"${escapeKuery(name)}"`,
-    searchFields: ['name.keyword'],
-  });
+  if (name) {
+    const savedObjects = await client.find<{ name: DataViewSavedObjectAttrs['name'] }>({
+      type: DATA_VIEW_SAVED_OBJECT_TYPE,
+      perPage: 10000,
+      search: `"${escapeKuery(name)}"`,
+      searchFields: ['name.keyword'],
+    });
 
-  return savedObjects ? savedObjects[0] : undefined;
+    return savedObjects ? savedObjects[0] : undefined;
+  }
 }
