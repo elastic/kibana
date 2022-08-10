@@ -25,7 +25,6 @@ import { cleanFiltersForSerialize } from '.';
 
 type SyncDashboardFilterStateProps = DashboardBuildContext & {
   initialDashboardState: DashboardState;
-  savedDashboard: DashboardSavedObject;
 };
 
 /**
@@ -35,7 +34,6 @@ type SyncDashboardFilterStateProps = DashboardBuildContext & {
  */
 export const syncDashboardFilterState = ({
   search,
-  savedDashboard,
   kbnUrlStateStorage,
   query: queryService,
   initialDashboardState,
@@ -51,14 +49,12 @@ export const syncDashboardFilterState = ({
   applyDashboardFilterState({
     currentDashboardState: initialDashboardState,
     kbnUrlStateStorage,
-    savedDashboard,
     queryService,
   });
 
   // this callback will be used any time new filters and query need to be applied.
   const applyFilters = (query: Query, filters: Filter[]) => {
-    savedDashboard.searchSource.setField('query', query);
-    savedDashboard.searchSource.setField('filter', filters);
+    console.log('HEY! Try deleting me later and see what happens');
     dispatchDashboardStateChange(setQuery(query));
   };
 
@@ -140,25 +136,21 @@ interface ApplyDashboardFilterStateProps {
   kbnUrlStateStorage: DashboardBuildContext['kbnUrlStateStorage'];
   queryService: DashboardBuildContext['query'];
   currentDashboardState: DashboardState;
-  savedDashboard: DashboardSavedObject;
 }
 
 export const applyDashboardFilterState = ({
   currentDashboardState,
   kbnUrlStateStorage,
-  savedDashboard,
   queryService,
 }: ApplyDashboardFilterStateProps) => {
   const { filterManager, queryString, timefilter } = queryService;
   const { timefilter: timefilterService } = timefilter;
 
-  // apply filters to the query service and to the saved dashboard
+  // apply filters to the query service
   filterManager.setAppFilters(_.cloneDeep(currentDashboardState.filters));
-  savedDashboard.searchSource.setField('filter', currentDashboardState.filters);
 
-  // apply query to the query service and to the saved dashboard
+  // apply query to the query service
   queryString.setQuery(currentDashboardState.query);
-  savedDashboard.searchSource.setField('query', currentDashboardState.query);
 
   /**
    * If a global time range is not set explicitly and the time range was saved with the dashboard, apply
@@ -166,18 +158,11 @@ export const applyDashboardFilterState = ({
    */
   if (currentDashboardState.timeRestore) {
     const globalQueryState = kbnUrlStateStorage.get<GlobalQueryStateFromUrl>('_g');
-    if (!globalQueryState?.time) {
-      if (savedDashboard.timeFrom && savedDashboard.timeTo) {
-        timefilterService.setTime({
-          from: savedDashboard.timeFrom,
-          to: savedDashboard.timeTo,
-        });
-      }
+    if (!globalQueryState?.time && currentDashboardState.timeRange) {
+      timefilterService.setTime(currentDashboardState.timeRange);
     }
-    if (!globalQueryState?.refreshInterval) {
-      if (savedDashboard.refreshInterval) {
-        timefilterService.setRefreshInterval(savedDashboard.refreshInterval);
-      }
+    if (!globalQueryState?.refreshInterval && currentDashboardState.refreshInterval) {
+      timefilterService.setRefreshInterval(currentDashboardState.refreshInterval);
     }
   }
 };

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { createExtract, createInject } from './dashboard_container_persistable_state';
+import { createExtract, createInject } from './dashboard_container_references';
 import { createEmbeddablePersistableStateServiceMock } from '@kbn/embeddable-plugin/common/mocks';
 import { DashboardContainerStateWithType } from '../types';
 

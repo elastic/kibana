@@ -7,11 +7,38 @@
  */
 
 import { inspect } from 'util';
-import { SavedObjectMigrationContext } from '@kbn/core/server';
-import { DashboardDoc730ToLatest } from '../../common';
-import { isDashboardDoc } from './is_dashboard_doc';
+import { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+
 import { moveFiltersToQuery } from './move_filters_to_query';
-import { migratePanelsTo730, DashboardDoc700To720 } from '../../common';
+import { migratePanelsTo730 } from './migrate_to_730_panels';
+import { DashboardDoc730ToLatest, DashboardDoc700To720 } from '../types';
+
+function isDoc(
+  doc: { [key: string]: unknown } | SavedObjectUnsanitizedDoc
+): doc is SavedObjectUnsanitizedDoc {
+  return (
+    typeof doc.id === 'string' &&
+    typeof doc.type === 'string' &&
+    doc.attributes !== null &&
+    typeof doc.attributes === 'object' &&
+    doc.references !== null &&
+    typeof doc.references === 'object'
+  );
+}
+
+export function isDashboardDoc(
+  doc: { [key: string]: unknown } | DashboardDoc730ToLatest
+): doc is DashboardDoc730ToLatest {
+  if (!isDoc(doc)) {
+    return false;
+  }
+
+  if (typeof (doc as DashboardDoc730ToLatest).attributes.panelsJSON !== 'string') {
+    return false;
+  }
+
+  return true;
+}
 
 export const migrations730 = (doc: DashboardDoc700To720, { log }: SavedObjectMigrationContext) => {
   if (!isDashboardDoc(doc)) {

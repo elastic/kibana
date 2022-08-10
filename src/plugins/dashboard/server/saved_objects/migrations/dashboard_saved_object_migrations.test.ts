@@ -6,17 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectReference, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import { SerializableRecord } from '@kbn/utility-types';
 import { savedObjectsServiceMock } from '@kbn/core/server/mocks';
 import { createEmbeddableSetupMock } from '@kbn/embeddable-plugin/server/mocks';
-import { createDashboardSavedObjectTypeMigrations } from './dashboard_migrations';
-import { DashboardDoc730ToLatest } from '../../common';
-import {
-  createExtract,
-  createInject,
-} from '../../common/embeddable/dashboard_container_persistable_state';
+import { SavedObjectReference, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+
+import { createExtract, createInject } from '../../../common';
 import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
-import { SerializableRecord } from '@kbn/utility-types';
+import { createDashboardSavedObjectTypeMigrations } from './dashboard_saved_object_migrations';
+import { DashboardDoc730ToLatest } from './migrate_to_730/types';
 
 const embeddableSetupMock = createEmbeddableSetupMock();
 const extract = createExtract(embeddableSetupMock);

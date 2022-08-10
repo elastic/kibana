@@ -31,7 +31,6 @@ import {
 
 type BuildDashboardContainerProps = DashboardBuildContext & {
   data: DashboardAppServices['data']; // the whole data service is required here because it is required by getLocatorParams
-  savedDashboard: DashboardSavedObject;
   initialDashboardState: DashboardState;
   incomingEmbeddable?: EmbeddablePackageState;
   executionContext?: KibanaExecutionContext;
@@ -46,7 +45,6 @@ export const buildDashboardContainer = async ({
   isEmbeddedExternally,
   dashboardCapabilities,
   incomingEmbeddable,
-  savedDashboard,
   kibanaVersion,
   embeddable,
   history,
@@ -61,7 +59,6 @@ export const buildDashboardContainer = async ({
   enableDashboardSearchSessions({
     data,
     kibanaVersion,
-    savedDashboard,
     initialDashboardState,
     getLatestDashboardState,
     canStoreSearchSession: dashboardCapabilities.storeSearchSession,
@@ -103,7 +100,6 @@ export const buildDashboardContainer = async ({
     incomingEmbeddable,
     query: data.query,
     searchSessionId,
-    savedDashboard,
     executionContext,
   });
 

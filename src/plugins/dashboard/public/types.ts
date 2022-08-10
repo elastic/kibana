@@ -32,7 +32,7 @@ import { DashboardSessionStorage } from './application/lib';
 import { UsageCollectionSetup } from './services/usage_collection';
 import { NavigationPublicPluginStart } from './services/navigation';
 import { Query, RefreshInterval, TimeRange } from './services/data';
-import { DashboardPanelState, SavedDashboardPanel } from '../common/types';
+import { DashboardPanelMap, DashboardPanelState, SavedDashboardPanel } from '../common';
 import { SavedObjectsTaggingApi } from './services/saved_objects_tagging_oss';
 import { DataPublicPluginStart, DataViewsContract } from './services/data';
 import { ContainerInput, EmbeddableInput, ViewMode } from './services/embeddable';
@@ -46,13 +46,6 @@ import { SpacesPluginStart } from './services/spaces';
 export type { SavedDashboardPanel };
 
 export type NavAction = (anchorElement?: any) => void;
-export interface SavedDashboardPanelMap {
-  [key: string]: SavedDashboardPanel;
-}
-
-export interface DashboardPanelMap {
-  [key: string]: DashboardPanelState;
-}
 
 /**
  * DashboardState contains all pieces of tracked state for an individual dashboard
@@ -66,11 +59,13 @@ export interface DashboardState {
   description: string;
   savedQuery?: string;
   timeRestore: boolean;
+  timeRange?: TimeRange;
+  savedObjectId?: string;
   fullScreenMode: boolean;
   expandedPanelId?: string;
   options: DashboardOptions;
   panels: DashboardPanelMap;
-  timeRange?: TimeRange;
+  refreshInterval?: RefreshInterval;
 
   controlGroupInput?: PersistableControlGroupInput;
 }
@@ -112,7 +107,6 @@ export interface DashboardAppState {
   dataViews?: DataView[];
   updateLastSavedState?: () => void;
   resetToLastSavedState?: () => void;
-  savedDashboard?: DashboardSavedObject;
   dashboardContainer?: DashboardContainer;
   getLatestDashboardState?: () => DashboardState;
   $triggerDashboardRefresh: Subject<{ force?: boolean }>;

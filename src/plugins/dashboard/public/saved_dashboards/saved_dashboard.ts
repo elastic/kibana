@@ -16,7 +16,7 @@ import { SavedObject, SavedObjectsStart } from '../services/saved_objects';
 import { Filter, ISearchSource, Query, RefreshInterval } from '../services/data';
 
 import { createDashboardEditUrl } from '../dashboard_constants';
-import { extractReferences, injectReferences } from '../../common/saved_dashboard_references';
+import { extractReferences, injectReferences } from '../../common';
 
 import { DashboardOptions } from '../types';
 

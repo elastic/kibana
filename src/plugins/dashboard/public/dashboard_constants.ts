@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { ViewMode } from './services/embeddable';
+import { DashboardState } from './types';
+
 export const DASHBOARD_STATE_STORAGE_KEY = '_a';
 export const GLOBAL_STATE_STORAGE_KEY = '_g';
 
@@ -18,9 +21,28 @@ export const DashboardConstants = {
   ADD_EMBEDDABLE_TYPE: 'addEmbeddableType',
   DASHBOARDS_ID: 'dashboards',
   DASHBOARD_ID: 'dashboard',
+  DASHBOARD_SAVED_OBJECT_TYPE: 'dashboard',
   SEARCH_SESSION_ID: 'searchSessionId',
   CHANGE_CHECK_DEBOUNCE: 100,
   CHANGE_APPLY_DEBOUNCE: 50,
+};
+
+export const defaultDashboardState: DashboardState = {
+  viewMode: ViewMode.EDIT, // new dashboards start in  edit mode.
+  fullScreenMode: false,
+  timeRestore: false,
+  query: { query: '', language: 'kuery' },
+  description: '',
+  filters: [],
+  panels: {},
+  title: '',
+  tags: [],
+  options: {
+    useMargins: true,
+    syncColors: false,
+    syncTooltips: false,
+    hidePanelTitles: false,
+  },
 };
 
 export function createDashboardEditUrl(id?: string, editMode?: boolean) {

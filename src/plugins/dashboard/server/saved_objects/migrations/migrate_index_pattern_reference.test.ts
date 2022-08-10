@@ -7,7 +7,7 @@
  */
 import type { SavedObjectMigrationContext, SavedObjectMigrationFn } from '@kbn/core/server';
 
-import { replaceIndexPatternReference } from './replace_index_pattern_reference';
+import { replaceIndexPatternReference } from './migrate_index_pattern_reference';
 
 describe('replaceIndexPatternReference', () => {
   const savedObjectMigrationContext = null as unknown as SavedObjectMigrationContext;

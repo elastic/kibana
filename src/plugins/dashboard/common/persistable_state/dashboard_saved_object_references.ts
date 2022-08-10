@@ -6,22 +6,32 @@
  * Side Public License, v 1.
  */
 import semverGt from 'semver/functions/gt';
+
+import {
+  RawControlGroupAttributes,
+  PersistableControlGroupInput,
+} from '@kbn/controls-plugin/common';
 import { SavedObjectAttributes, SavedObjectReference } from '@kbn/core/types';
 import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common/types';
+
 import {
-  PersistableControlGroupInput,
-  RawControlGroupAttributes,
-} from '@kbn/controls-plugin/common';
-import { DashboardContainerStateWithType, DashboardPanelState } from './types';
+  SavedDashboardPanel,
+  DashboardPanelState,
+  DashboardContainerStateWithType,
+} from '../types';
 import {
   convertPanelStateToSavedDashboardPanel,
   convertSavedDashboardPanelToPanelState,
-} from './embeddable/embeddable_saved_object_converters';
-import { SavedDashboardPanel } from './types';
+} from '../lib/dashboard_panel_converters';
 
 export interface ExtractDeps {
   embeddablePersistableStateService: EmbeddablePersistableStateService;
 }
+
+export interface InjectDeps {
+  embeddablePersistableStateService: EmbeddablePersistableStateService;
+}
+
 export interface SavedObjectAttributesAndReferences {
   attributes: SavedObjectAttributes;
   references: SavedObjectReference[];
@@ -79,7 +89,7 @@ function panelStatesToPanels(
     let originalPanel = originalPanels.find((p) => p.panelIndex === id);
 
     if (!originalPanel) {
-      // Maybe original panel doesn't have a panel index and it's just straight up based on it's index
+      // Maybe original panel doesn't have a panel index and it's just straight up based on its index
       const numericId = parseInt(id, 10);
       originalPanel = isNaN(numericId) ? originalPanel : originalPanels[numericId];
     }
@@ -89,6 +99,45 @@ function panelStatesToPanels(
       originalPanel?.version ? originalPanel.version : ''
     );
   });
+}
+
+export function injectReferences(
+  { attributes, references = [] }: SavedObjectAttributesAndReferences,
+  deps: InjectDeps
+): SavedObjectAttributes {
+  // Skip if panelsJSON is missing otherwise this will cause saved object import to fail when
+  // importing objects without panelsJSON. At development time of this, there is no guarantee each saved
+  // object has panelsJSON in all previous versions of kibana.
+  if (typeof attributes.panelsJSON !== 'string') {
+    return attributes;
+  }
+  const parsedPanels = JSON.parse(attributes.panelsJSON);
+  // Same here, prevent failing saved object import if ever panels aren't an array.
+  if (!Array.isArray(parsedPanels)) {
+    return attributes;
+  }
+
+  const { panels, state } = dashboardAttributesToState(attributes);
+
+  const injectedState = deps.embeddablePersistableStateService.inject(
+    state,
+    references
+  ) as DashboardContainerStateWithType;
+  const injectedPanels = panelStatesToPanels(injectedState.panels, panels);
+
+  const newAttributes = {
+    ...attributes,
+    panelsJSON: JSON.stringify(injectedPanels),
+  } as SavedObjectAttributes;
+
+  if (injectedState.controlGroupInput) {
+    newAttributes.controlGroupInput = {
+      ...(attributes.controlGroupInput as SavedObjectAttributes),
+      panelsJSON: JSON.stringify(injectedState.controlGroupInput.panels),
+    };
+  }
+
+  return newAttributes;
 }
 
 export function extractReferences(
@@ -135,49 +184,6 @@ export function extractReferences(
     references: [...references, ...extractedReferences],
     attributes: newAttributes,
   };
-}
-
-export interface InjectDeps {
-  embeddablePersistableStateService: EmbeddablePersistableStateService;
-}
-
-export function injectReferences(
-  { attributes, references = [] }: SavedObjectAttributesAndReferences,
-  deps: InjectDeps
-): SavedObjectAttributes {
-  // Skip if panelsJSON is missing otherwise this will cause saved object import to fail when
-  // importing objects without panelsJSON. At development time of this, there is no guarantee each saved
-  // object has panelsJSON in all previous versions of kibana.
-  if (typeof attributes.panelsJSON !== 'string') {
-    return attributes;
-  }
-  const parsedPanels = JSON.parse(attributes.panelsJSON);
-  // Same here, prevent failing saved object import if ever panels aren't an array.
-  if (!Array.isArray(parsedPanels)) {
-    return attributes;
-  }
-
-  const { panels, state } = dashboardAttributesToState(attributes);
-
-  const injectedState = deps.embeddablePersistableStateService.inject(
-    state,
-    references
-  ) as DashboardContainerStateWithType;
-  const injectedPanels = panelStatesToPanels(injectedState.panels, panels);
-
-  const newAttributes = {
-    ...attributes,
-    panelsJSON: JSON.stringify(injectedPanels),
-  } as SavedObjectAttributes;
-
-  if (injectedState.controlGroupInput) {
-    newAttributes.controlGroupInput = {
-      ...(attributes.controlGroupInput as SavedObjectAttributes),
-      panelsJSON: JSON.stringify(injectedState.controlGroupInput.panels),
-    };
-  }
-
-  return newAttributes;
 }
 
 function pre730ExtractReferences(

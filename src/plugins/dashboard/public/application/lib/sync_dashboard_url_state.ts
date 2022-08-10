@@ -11,20 +11,14 @@ import { debounceTime } from 'rxjs/operators';
 
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/public';
 import { migrateAppState } from '.';
-import { DashboardSavedObject } from '../..';
 import { setDashboardState } from '../state';
 import { migrateLegacyQuery } from './migrate_legacy_query';
 import { applyDashboardFilterState } from './sync_dashboard_filter_state';
 import { DASHBOARD_STATE_STORAGE_KEY } from '../../dashboard_constants';
-import type {
-  DashboardBuildContext,
-  DashboardPanelMap,
-  DashboardState,
-  RawDashboardState,
-} from '../../types';
-import { convertSavedPanelsToPanelMap } from './convert_dashboard_panels';
+import type { DashboardBuildContext, DashboardState, RawDashboardState } from '../../types';
+import { convertSavedPanelsToPanelMap, DashboardPanelMap } from '../../../common';
 
-type SyncDashboardUrlStateProps = DashboardBuildContext & { savedDashboard: DashboardSavedObject };
+type SyncDashboardUrlStateProps = DashboardBuildContext;
 
 export const syncDashboardUrlState = ({
   dispatchDashboardStateChange,
@@ -32,7 +26,6 @@ export const syncDashboardUrlState = ({
   query: queryService,
   kbnUrlStateStorage,
   usageCollection,
-  savedDashboard,
   kibanaVersion,
 }: SyncDashboardUrlStateProps) => {
   /**
@@ -79,7 +72,6 @@ export const syncDashboardUrlState = ({
         currentDashboardState: updatedDashboardState,
         kbnUrlStateStorage,
         queryService,
-        savedDashboard,
       });
 
       if (Object.keys(stateFromUrl).length === 0) return;

@@ -28,17 +28,17 @@ import {
   loadDashboardHistoryLocationState,
   tryDestroyDashboardContainer,
   syncDashboardContainerInput,
-  savedObjectToDashboardState,
   syncDashboardDataViews,
   syncDashboardFilterState,
-  loadSavedDashboardState,
   buildDashboardContainer,
   syncDashboardUrlState,
   diffDashboardState,
   areTimeRangesEqual,
   areRefreshIntervalsEqual,
 } from '../lib';
+import { loadDashboardStateFromSavedObject } from '../../dashboard_saved_object';
 import { isDashboardAppInNoDataState } from '../dashboard_app_no_data';
+import { dashboardStateLoadWasSuccessful } from '../../dashboard_saved_object/load_dashboard_state_from_saved_object';
 
 export interface UseDashboardStateProps {
   history: History;
@@ -88,6 +88,7 @@ export const useDashboardAppState = ({
     dataViews,
     usageCollection,
     savedDashboards,
+    savedObjectsClient,
     initializerContext,
     savedObjectsTagging,
     dashboardCapabilities,
@@ -160,32 +161,21 @@ export const useDashboardAppState = ({
       /**
        * Load and unpack state from dashboard saved object.
        */
-      const loadSavedDashboardResult = await loadSavedDashboardState({
-        ...dashboardBuildContext,
-        savedDashboardId,
+      const loadSavedDashboardResult = await loadDashboardStateFromSavedObject({
+        isScreenshotMode: screenshotModeService?.isScreenshotMode(),
+        getScopedHistory: scopedHistory,
+        id: savedDashboardId,
+        savedObjectsTagging,
+        savedObjectsClient,
+        dataStart: data,
+        spacesService,
       });
       if (canceled || !loadSavedDashboardResult) return;
-      const { savedDashboard, savedDashboardState } = loadSavedDashboardResult;
-
-      // If the saved dashboard is an alias match, then we will redirect
-      if (savedDashboard.outcome === 'aliasMatch' && savedDashboard.id && savedDashboard.aliasId) {
-        // We want to keep the "query" params on our redirect.
-        // But, these aren't true query params, they are technically part of the hash
-        // So, to get the new path, we will just replace the current id in the hash
-        // with the alias id
-        const path = scopedHistory().location.hash.replace(
-          savedDashboard.id,
-          savedDashboard.aliasId
-        );
-        const aliasPurpose = savedDashboard.aliasPurpose;
-        if (screenshotModeService?.isScreenshotMode()) {
-          scopedHistory().replace(path);
-        } else {
-          await spacesService?.ui.redirectLegacyUrl({ path, aliasPurpose });
-        }
-        // Return so we don't run any more of the hook and let it rerun after the redirect that just happened
+      if (!dashboardStateLoadWasSuccessful(loadSavedDashboardResult)) {
+        // Early return if the saved object has an aliasMatch and has redirected to it.
         return;
       }
+      const { dashboardState: savedDashboardState } = loadSavedDashboardResult;
 
       /**
        * Combine initial state from the saved object, session storage, and URL, then dispatch it to Redux.
@@ -198,14 +188,13 @@ export const useDashboardAppState = ({
 
       const { initialDashboardStateFromUrl, stopWatchingAppStateInUrl } = syncDashboardUrlState({
         ...dashboardBuildContext,
-        savedDashboard,
       });
 
       const printLayoutDetected =
         screenshotModeService?.isScreenshotMode() &&
         screenshotModeService.getScreenshotContext('layout') === 'print';
 
-      const initialDashboardState = {
+      const initialDashboardState: DashboardState = {
         ...savedDashboardState,
         ...dashboardSessionStorageState,
         ...initialDashboardStateFromUrl,
@@ -224,7 +213,6 @@ export const useDashboardAppState = ({
       const { applyFilters, stopSyncingDashboardFilterState } = syncDashboardFilterState({
         ...dashboardBuildContext,
         initialDashboardState,
-        savedDashboard,
       });
 
       /**
@@ -235,11 +223,10 @@ export const useDashboardAppState = ({
         ...dashboardBuildContext,
         initialDashboardState,
         incomingEmbeddable,
-        savedDashboard,
         data,
         executionContext: {
           type: 'dashboard',
-          description: savedDashboard.title,
+          description: initialDashboardState.title,
         },
       });
 
@@ -271,7 +258,6 @@ export const useDashboardAppState = ({
       const stopSyncingContainerInput = syncDashboardContainerInput({
         ...dashboardBuildContext,
         dashboardContainer,
-        savedDashboard,
         applyFilters,
       });
 
@@ -298,15 +284,10 @@ export const useDashboardAppState = ({
                 if (observer.closed) return;
                 const savedTimeChanged =
                   lastSaved.timeRestore &&
-                  (!areTimeRangesEqual(
-                    {
-                      from: savedDashboard?.timeFrom,
-                      to: savedDashboard?.timeTo,
-                    },
-                    timefilter.getTime()
-                  ) ||
+                  lastSaved.timeRange &&
+                  (!areTimeRangesEqual(lastSaved.timeRange, timefilter.getTime()) ||
                     !areRefreshIntervalsEqual(
-                      savedDashboard?.refreshInterval,
+                      lastSaved?.refreshInterval,
                       timefilter.getRefreshInterval()
                     ));
 
@@ -334,15 +315,7 @@ export const useDashboardAppState = ({
       setLastSavedState(savedDashboardState);
       dashboardBuildContext.$checkForUnsavedChanges.next(undefined);
       const updateLastSavedState = () => {
-        setLastSavedState(
-          savedObjectToDashboardState({
-            showWriteControls: dashboardBuildContext.dashboardCapabilities.showWriteControls,
-            version: dashboardBuildContext.kibanaVersion,
-            savedObjectsTagging,
-            usageCollection,
-            savedDashboard,
-          })
-        );
+        setLastSavedState(dashboardBuildContext.getLatestDashboardState());
       };
 
       /**
@@ -352,7 +325,6 @@ export const useDashboardAppState = ({
       setDashboardAppState((s) => ({
         ...s,
         applyFilters,
-        savedDashboard,
         dashboardContainer,
         updateLastSavedState,
         getLatestDashboardState: dashboardBuildContext.getLatestDashboardState,
@@ -410,18 +382,14 @@ export const useDashboardAppState = ({
    *  rebuild reset to last saved state callback whenever last saved state changes
    */
   const resetToLastSavedState = useCallback(() => {
-    if (
-      !lastSavedState ||
-      !dashboardAppState.savedDashboard ||
-      !dashboardAppState.getLatestDashboardState
-    ) {
+    if (!lastSavedState || !dashboardAppState.getLatestDashboardState) {
       return;
     }
 
     if (dashboardAppState.getLatestDashboardState().timeRestore) {
       const { timefilter } = data.query.timefilter;
-      const { timeFrom: from, timeTo: to, refreshInterval } = dashboardAppState.savedDashboard;
-      if (from && to) timefilter.setTime({ from, to });
+      const { timeRange, refreshInterval } = lastSavedState;
+      if (timeRange) timefilter.setTime(timeRange);
       if (refreshInterval) timefilter.setRefreshInterval(refreshInterval);
     }
     dispatchDashboardStateChange(

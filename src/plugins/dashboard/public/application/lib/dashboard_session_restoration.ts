@@ -52,21 +52,19 @@ export function enableDashboardSearchSessions({
   canStoreSearchSession,
   initialDashboardState,
   getLatestDashboardState,
-  savedDashboard,
   kibanaVersion,
   data,
 }: {
   kibanaVersion: string;
   data: DataPublicPluginStart;
   canStoreSearchSession: boolean;
-  savedDashboard: DashboardSavedObject;
   initialDashboardState: DashboardState;
   getLatestDashboardState: () => DashboardState;
 }) {
   const dashboardTitle = getDashboardTitle(
     initialDashboardState.title,
     initialDashboardState.viewMode,
-    !savedDashboard.id
+    !getLatestDashboardState().savedObjectId
   );
 
   data.search.session.enableStorage(
@@ -74,7 +72,7 @@ export function enableDashboardSearchSessions({
       data,
       kibanaVersion,
       getDashboardTitle: () => dashboardTitle,
-      getDashboardId: () => savedDashboard?.id || '',
+      getDashboardId: () => getLatestDashboardState().savedObjectId ?? '',
       getAppState: getLatestDashboardState,
     }),
     {

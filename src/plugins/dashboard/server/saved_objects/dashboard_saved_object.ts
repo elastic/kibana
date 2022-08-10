@@ -10,7 +10,7 @@ import { SavedObjectsType } from '@kbn/core/server';
 import {
   createDashboardSavedObjectTypeMigrations,
   DashboardSavedObjectTypeMigrationsDeps,
-} from './dashboard_migrations';
+} from './migrations/dashboard_saved_object_migrations';
 
 export const createDashboardSavedObjectType = ({
   migrationDeps,

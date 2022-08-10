@@ -14,7 +14,7 @@ import { compareFilters, COMPARE_ALL_OPTIONS, type Filter } from '@kbn/es-query'
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/public';
 import { DashboardContainer } from '../embeddable';
 import { Query } from '../../services/data';
-import { DashboardConstants, DashboardSavedObject } from '../..';
+import { DashboardConstants } from '../..';
 import {
   setControlGroupState,
   setExpandedPanelId,
@@ -33,7 +33,6 @@ import {
 
 type SyncDashboardContainerCommon = DashboardBuildContext & {
   dashboardContainer: DashboardContainer;
-  savedDashboard: DashboardSavedObject;
 };
 
 type ApplyStateChangesToContainerProps = SyncDashboardContainerCommon & {
@@ -135,7 +134,6 @@ export const applyStateChangesToContainer = ({
   force,
   search,
   history,
-  savedDashboard,
   dashboardContainer,
   kbnUrlStateStorage,
   query: queryService,
@@ -152,7 +150,6 @@ export const applyStateChangesToContainer = ({
     isEmbeddedExternally,
     dashboardCapabilities,
     query: queryService,
-    savedDashboard,
   });
   const differences = diffDashboardContainerInput(
     dashboardContainer.getInput(),

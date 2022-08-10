@@ -8,7 +8,6 @@
 
 import _ from 'lodash';
 import type { KibanaExecutionContext } from '@kbn/core/public';
-import { ControlGroupInput } from '@kbn/controls-plugin/public';
 import {
   compareFilters,
   isFilterPinned,
@@ -16,34 +15,19 @@ import {
   COMPARE_ALL_OPTIONS,
   type Filter,
 } from '@kbn/es-query';
-import { DashboardSavedObject } from '../../saved_dashboards';
-import { getTagsFromSavedDashboard, migrateAppState } from '.';
-import { EmbeddablePackageState, ViewMode } from '../../services/embeddable';
-import { TimeRange } from '../../services/data';
-import { convertPanelStateToSavedDashboardPanel } from '../../../common/embeddable/embeddable_saved_object_converters';
+import { EmbeddablePackageState } from '../../services/embeddable';
+import { convertPanelStateToSavedDashboardPanel } from '../../../common';
 import {
   DashboardState,
   RawDashboardState,
-  DashboardAppServices,
   DashboardContainerInput,
   DashboardBuildContext,
 } from '../../types';
-import { convertSavedPanelsToPanelMap } from './convert_dashboard_panels';
-import { deserializeControlGroupFromDashboardSavedObject } from './dashboard_control_group';
-
-interface SavedObjectToDashboardStateProps {
-  version: string;
-  showWriteControls: boolean;
-  savedDashboard: DashboardSavedObject;
-  usageCollection: DashboardAppServices['usageCollection'];
-  savedObjectsTagging: DashboardAppServices['savedObjectsTagging'];
-}
 
 interface StateToDashboardContainerInputProps {
   searchSessionId?: string;
   isEmbeddedExternally?: boolean;
   dashboardState: DashboardState;
-  savedDashboard: DashboardSavedObject;
   query: DashboardBuildContext['query'];
   incomingEmbeddable?: EmbeddablePackageState;
   dashboardCapabilities: DashboardBuildContext['dashboardCapabilities'];
@@ -54,42 +38,6 @@ interface StateToRawDashboardStateProps {
   version: string;
   state: DashboardState;
 }
-/**
- * Converts a dashboard saved object to a dashboard state by extracting raw state from the given Dashboard
- * Saved Object migrating the panel states to the latest version, then converting each panel from a saved
- * dashboard panel to a panel state.
- */
-export const savedObjectToDashboardState = ({
-  version,
-  savedDashboard,
-  usageCollection,
-  showWriteControls,
-  savedObjectsTagging,
-}: SavedObjectToDashboardStateProps): DashboardState => {
-  const rawState = migrateAppState(
-    {
-      fullScreenMode: false,
-      title: savedDashboard.title,
-      query: savedDashboard.getQuery(),
-      filters: savedDashboard.getFilters(),
-      timeRestore: savedDashboard.timeRestore,
-      description: savedDashboard.description || '',
-      tags: getTagsFromSavedDashboard(savedDashboard, savedObjectsTagging),
-      panels: savedDashboard.panelsJSON ? JSON.parse(savedDashboard.panelsJSON) : [],
-      viewMode: savedDashboard.id || showWriteControls ? ViewMode.EDIT : ViewMode.VIEW,
-      options: savedDashboard.optionsJSON ? JSON.parse(savedDashboard.optionsJSON) : {},
-    },
-    version,
-    usageCollection
-  );
-  if (rawState.timeRestore) {
-    rawState.timeRange = { from: savedDashboard.timeFrom, to: savedDashboard.timeTo } as TimeRange;
-  }
-  rawState.controlGroupInput = deserializeControlGroupFromDashboardSavedObject(
-    savedDashboard
-  ) as ControlGroupInput;
-  return { ...rawState, panels: convertSavedPanelsToPanelMap(rawState.panels) };
-};
 
 /**
  * Converts a dashboard state object to dashboard container input
@@ -99,7 +47,6 @@ export const stateToDashboardContainerInput = ({
   isEmbeddedExternally,
   query: queryService,
   searchSessionId,
-  savedDashboard,
   dashboardState,
   executionContext,
 }: StateToDashboardContainerInputProps): DashboardContainerInput => {
@@ -132,7 +79,7 @@ export const stateToDashboardContainerInput = ({
           )
       ),
     isFullScreenMode: fullScreenMode,
-    id: savedDashboard.id || '',
+    id: dashboardState.savedObjectId ?? '',
     dashboardCapabilities,
     isEmbeddedExternally,
     ...(options || {}),

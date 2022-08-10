@@ -9,7 +9,7 @@
 import {
   convertSavedDashboardPanelToPanelState,
   convertPanelStateToSavedDashboardPanel,
-} from './embeddable_saved_object_converters';
+} from './dashboard_panel_converters';
 import { SavedDashboardPanel, DashboardPanelState } from '../types';
 import { EmbeddableInput } from '@kbn/embeddable-plugin/common/types';
 

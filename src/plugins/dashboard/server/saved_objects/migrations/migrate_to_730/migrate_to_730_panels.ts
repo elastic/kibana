@@ -6,25 +6,25 @@
  * Side Public License, v 1.
  */
 
+import uuid from 'uuid';
+import semverSatisfies from 'semver/functions/satisfies';
+
 import { i18n } from '@kbn/i18n';
 import type { SerializableRecord } from '@kbn/utility-types';
-import semverSatisfies from 'semver/functions/satisfies';
-import uuid from 'uuid';
+
 import {
-  GridData,
-  SavedDashboardPanelTo60,
   SavedDashboardPanel620,
   SavedDashboardPanel630,
   SavedDashboardPanel610,
-} from '.';
-import {
-  RawSavedDashboardPanelTo60,
+  SavedDashboardPanelTo60,
   RawSavedDashboardPanel630,
-  RawSavedDashboardPanel640To720,
-  RawSavedDashboardPanel730ToLatest,
   RawSavedDashboardPanel610,
   RawSavedDashboardPanel620,
-} from './bwc/types';
+  RawSavedDashboardPanelTo60,
+  RawSavedDashboardPanel640To720,
+  RawSavedDashboardPanel730ToLatest,
+} from '../types';
+import { GridData } from '../../../../common';
 
 const PANEL_HEIGHT_SCALE_FACTOR = 5;
 const PANEL_HEIGHT_SCALE_FACTOR_WITH_MARGINS = 4;
@@ -266,7 +266,6 @@ export function migratePanelsTo730(
     | RawSavedDashboardPanel620
     | RawSavedDashboardPanel630
     | RawSavedDashboardPanel640To720
-    // We run these on post processed panels too for url BWC
     | SavedDashboardPanelTo60
     | SavedDashboardPanel610
     | SavedDashboardPanel620

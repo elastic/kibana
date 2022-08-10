@@ -11,9 +11,9 @@ import {
   injectReferences,
   InjectDeps,
   ExtractDeps,
-} from './saved_dashboard_references';
+} from './dashboard_saved_object_references';
 
-import { createExtract, createInject } from './embeddable/dashboard_container_persistable_state';
+import { createExtract, createInject } from './dashboard_container_references';
 import { createEmbeddablePersistableStateServiceMock } from '@kbn/embeddable-plugin/common/mocks';
 
 const embeddablePersistableStateServiceMock = createEmbeddablePersistableStateServiceMock();
