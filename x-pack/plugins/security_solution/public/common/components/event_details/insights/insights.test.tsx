@@ -133,7 +133,9 @@ describe('Insights', () => {
         );
 
         expect(screen.getByTestId('related-alerts-by-ancestry')).toBeInTheDocument();
-        expect(screen.queryByRole('link', { name: i18n.ALERT_UPSELL })).not.toBeInTheDocument();
+        expect(
+          screen.queryByRole('link', { name: new RegExp(i18n.ALERT_UPSELL) })
+        ).not.toBeInTheDocument();
       });
     });
 
@@ -147,7 +149,9 @@ describe('Insights', () => {
           </TestProviders>
         );
 
-        expect(screen.getByRole('link', { name: i18n.ALERT_UPSELL })).toBeInTheDocument();
+        expect(
+          screen.getByRole('link', { name: new RegExp(i18n.ALERT_UPSELL) })
+        ).toBeInTheDocument();
         expect(screen.queryByTestId('related-alerts-by-ancestry')).not.toBeInTheDocument();
       });
     });
@@ -164,7 +168,9 @@ describe('Insights', () => {
       );
 
       expect(screen.queryByTestId('related-alerts-by-ancestry')).not.toBeInTheDocument();
-      expect(screen.queryByRole('link', { name: i18n.ALERT_UPSELL })).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole('link', { name: new RegExp(i18n.ALERT_UPSELL) })
+      ).not.toBeInTheDocument();
     });
   });
 });
