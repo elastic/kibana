@@ -7,9 +7,12 @@
 
 import React, { useCallback } from 'react';
 import { EuiSpacer } from '@elastic/eui';
+import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 
 import type { BrowserFields } from '../../../containers/source';
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
+import type { DataProvider } from '../../../../../common/types';
+import { EXISTS_OPERATOR } from '../../../../../common/types';
 import { useActionCellDataProvider } from '../table/use_action_cell_data_provider';
 import { useAlertPrevalence } from '../../../containers/alerts/use_alert_prevalence';
 import type { InsightAccordionState } from './insight_accordion';
@@ -79,13 +82,32 @@ export const RelatedAlertsBySession = React.memo<Props>(
       } else if (isEmpty && state !== 'loading') {
         return SESSION_EMPTY;
       }
+      const ensureOnlyRuleProviders: DataProvider = {
+        and: [],
+        enabled: true,
+        id: ALERT_RULE_UUID,
+        name: ALERT_RULE_UUID,
+        excluded: false,
+        kqlQuery: '',
+        queryMatch: {
+          field: ALERT_RULE_UUID,
+          value: '*',
+          operator: EXISTS_OPERATOR,
+        },
+      };
+      const dataProvidersWithAlertFilter = cellData.dataProviders.map((provider) => {
+        return {
+          ...provider,
+          and: [ensureOnlyRuleProviders],
+        };
+      });
       return (
         <>
           <SimpleAlertTable alertIds={alertIds} />
           <EuiSpacer />
           <InvestigateInTimelineButton
             asEmptyButton={false}
-            dataProviders={cellData?.dataProviders}
+            dataProviders={dataProvidersWithAlertFilter}
           >
             {ACTION_INVESTIGATE_IN_TIMELINE}
           </InvestigateInTimelineButton>

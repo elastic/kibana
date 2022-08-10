@@ -8,11 +8,7 @@
 import React from 'react';
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
-
-import { inputsActions } from '../../../store/inputs';
 import { updateProviders } from '../../../../timelines/store/timeline/actions';
-import { sourcererActions } from '../../../store/actions';
-import { SourcererScopeName } from '../../../store/sourcerer/model';
 import type { DataProvider } from '../../../../../common/types';
 import { TimelineId, TimelineType } from '../../../../../common/types/timeline';
 import { useCreateTimeline } from '../../../../timelines/components/timeline/properties/use_create_timeline';
@@ -40,17 +36,6 @@ export const InvestigateInTimelineButton: React.FunctionComponent<{
           providers: dataProviders,
         })
       );
-      // Only show detection alerts
-      // (This is required so the timeline event count matches the prevalence count)
-      dispatch(
-        sourcererActions.setSelectedDataView({
-          id: SourcererScopeName.timeline,
-          selectedDataViewId: 'security-solution-default',
-          selectedPatterns: ['.alerts-security.alerts-default'],
-        })
-      );
-      // Unlock the time range from the global time range
-      dispatch(inputsActions.removeGlobalLinkTo());
     }
   }, [dispatch, clearTimeline, dataProviders]);
 

@@ -7,6 +7,7 @@
 
 /* eslint-disable complexity */
 
+import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { escapeDataProviderId } from '@kbn/securitysolution-t-grid';
 import { isArray, isEmpty, isString } from 'lodash/fp';
 import { useMemo } from 'react';
@@ -29,7 +30,7 @@ import { PORT_NAMES } from '../../../../network/components/port/helpers';
 import { INDICATOR_REFERENCE } from '../../../../../common/cti/constants';
 import type { BrowserField } from '../../../containers/source';
 import type { DataProvider } from '../../../../../common/types';
-import { IS_OPERATOR } from '../../../../../common/types';
+import { IS_OPERATOR, EXISTS_OPERATOR } from '../../../../../common/types';
 
 export interface UseActionCellDataProvider {
   contextId?: string;
@@ -41,6 +42,7 @@ export interface UseActionCellDataProvider {
   isObjectArray?: boolean;
   linkValue?: string | null;
   values: string[] | null | undefined;
+  alertsOnly?: boolean;
 }
 
 export interface ActionCellValuesAndDataProvider {
@@ -72,6 +74,7 @@ export const useActionCellDataProvider = ({
   isObjectArray,
   linkValue,
   values,
+  alertsOnly = true,
 }: UseActionCellDataProvider): ActionCellValuesAndDataProvider | null => {
   const cellData = useMemo(() => {
     if (values === null || values === undefined) return null;
@@ -153,5 +156,28 @@ export const useActionCellDataProvider = ({
     linkValue,
     values,
   ]);
+  if (alertsOnly && cellData) {
+    const ensureOnlyRuleProviders: DataProvider = {
+      and: [],
+      enabled: true,
+      id: ALERT_RULE_UUID,
+      name: ALERT_RULE_UUID,
+      excluded: false,
+      kqlQuery: '',
+      queryMatch: {
+        field: ALERT_RULE_UUID,
+        value: '*',
+        operator: EXISTS_OPERATOR,
+      },
+    };
+    cellData.dataProviders = cellData?.dataProviders.map((provider) => {
+      const id = `${provider.id}-${ALERT_RULE_UUID}`;
+      return {
+        ...provider,
+        id,
+        and: [ensureOnlyRuleProviders],
+      };
+    });
+  }
   return cellData;
 };
