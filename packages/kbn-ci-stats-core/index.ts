@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export type { Config } from './ci_stats_config';
-export { parseConfig } from './ci_stats_config';
-export type { CiStatsMetadata } from './ci_stats_metadata';
+export type { Config } from './src/ci_stats_config';
+export { parseConfig } from './src/ci_stats_config';
+export type { CiStatsMetadata } from './src/ci_stats_metadata';

@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './palettes';
-export * from './shared_components';
+export { Sha256 } from './src/sha256';

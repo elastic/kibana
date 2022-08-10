@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { Sha256 } from './sha256';
+export { bootstrapDevMode } from './src/bootstrap';

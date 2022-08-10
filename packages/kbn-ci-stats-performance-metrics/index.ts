@@ -6,6 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { readPkcs12Keystore, readPkcs12Truststore } from './pkcs12';
-export type { Pkcs12ReadResult } from './pkcs12';
-export { createSHA256Hash } from './sha256';
+export { reporter } from './src/reporter';
+export { runCli } from './src/cli';

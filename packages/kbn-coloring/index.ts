@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { bootstrapDevMode } from './bootstrap';
+export * from './src/palettes';
+export * from './src/shared_components';

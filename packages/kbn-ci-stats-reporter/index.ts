@@ -12,12 +12,12 @@ export type {
   CiStatsTiming,
   MetricsOptions,
   TimingsOptions,
-} from './ci_stats_reporter';
-export { CiStatsReporter } from './ci_stats_reporter';
-export { getTimeReporter } from './report_time';
+} from './src/ci_stats_reporter';
+export { CiStatsReporter } from './src/ci_stats_reporter';
+export { getTimeReporter } from './src/report_time';
 export type {
   CiStatsTestGroupInfo,
   CiStatsTestResult,
   CiStatsTestRun,
   CiStatsTestType,
-} from './ci_stats_test_group_types';
+} from './src/ci_stats_test_group_types';

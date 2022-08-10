@@ -9,8 +9,8 @@
 import { Duration } from 'moment';
 import { Stream } from 'stream';
 
-import { ByteSizeValue } from './byte_size_value';
-import { ContextReference, Reference, SiblingReference } from './references';
+import { ByteSizeValue } from './src/byte_size_value';
+import { ContextReference, Reference, SiblingReference } from './src/references';
 import {
   AnyType,
   ArrayOptions,
@@ -48,13 +48,13 @@ import {
   URIOptions,
   URIType,
   StreamType,
-} from './types';
+} from './src/types';
 
 export type { AnyType, ConditionalType, TypeOf, Props, SchemaStructureEntry, NullableProps };
 export { ObjectType, Type };
-export { ByteSizeValue } from './byte_size_value';
-export { SchemaTypeError, ValidationError } from './errors';
-export { isConfigSchema } from './typeguards';
+export { ByteSizeValue } from './src/byte_size_value';
+export { SchemaTypeError, ValidationError } from './src/errors';
+export { isConfigSchema } from './src/typeguards';
 
 function any(options?: TypeOptions<any>) {
   return new AnyType(options);

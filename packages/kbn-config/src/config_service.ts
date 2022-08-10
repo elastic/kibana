@@ -14,7 +14,7 @@ import { distinctUntilChanged, first, map, shareReplay, tap } from 'rxjs/operato
 import { Logger, LoggerFactory } from '@kbn/logging';
 import { getDocLinks, DocLinks } from '@kbn/doc-links';
 
-import { Config, ConfigPath, Env } from '.';
+import { Config, ConfigPath, Env } from '..';
 import { hasConfigPathIntersection } from './config';
 import { RawConfigurationProvider } from './raw/raw_config_service';
 import {
