@@ -61,6 +61,7 @@ export const createSourcererDataViewRoute = (
         const { patternList } = request.body;
         const patternListAsTitle = ensurePatternFormat(patternList).join();
         const siemDataViewTitle = siemDataView ? siemDataView.title.split(',').sort().join() : '';
+
         if (siemDataView == null) {
           try {
             siemDataView = await dataViewService.createAndSave(
