@@ -7,17 +7,13 @@
  */
 
 import React, { Component, ReactNode, useCallback, useEffect, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
 import {
-  EuiText,
-  EuiLoadingSpinner,
-  EuiInputPopover,
-  EuiPopoverTitle,
-  EuiSpacer,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiToolTip,
   EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiInputPopover,
 } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
@@ -100,27 +96,73 @@ export const TimeSlider: FC<Props> = (props) => {
     []
   );
 
+  const onNext  = useCallback(
+    () => {
+      const from = value === undefined || value[TO_INDEX] === timeRangeMax
+        ? ticks[0].value
+        : value[TO_INDEX];
+      const to = from + range;
+      dispatch(actions.setValue({ value: [from, Math.min(to, timeRangeMax)] }));
+    },
+    [ticks, timeRangeMax, value]
+  );
+
+  const onPrevious  = useCallback(
+    () => {
+      const to = value === undefined || value[FROM_INDEX] === timeRangeMin
+        ? ticks[ticks.length - 1].value
+        : value[FROM_INDEX];
+    const from = to - range;
+    dispatch(actions.setValue({ value: [Math.max(from, timeRangeMin), to] }));
+    },
+    [ticks, timeRangeMin, value]
+  );
+
   const from = value ? value[FROM_INDEX] : timeRangeMin;
   const to = value ? value[TO_INDEX] : timeRangeMax;
   
   return (
-    <EuiInputPopover
-      input={<TimeSliderPopoverButton onClick={togglePopover} formatDate={epochToKbnDateFormat} from={from} to={to} />}
-      isOpen={isPopoverOpen}
-      closePopover={() => setIsPopoverOpen(false)}
-      panelPaddingSize="s"
-      anchorPosition="downCenter"
-      disableFocusTrap
-      attachToAnchor={false}
-    >
-      <TimeSliderPopoverContent
-        key={`${timeRangeMin}_${timeRangeMax}`} // force new instance when time range changes to reset local state
-        initialValue={[from, to]}
-        onChange={onRangeSliderChange}
-        ticks={ticks}
-        timeRangeMin={timeRangeMin}
-        timeRangeMax={timeRangeMax}
-      />
-    </EuiInputPopover>
+    <EuiFlexGroup>
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon
+          onClick={onPrevious}
+          iconType="framePrevious"
+          color="text"
+          aria-label={i18n.translate('xpack.maps.timeslider.previousTimeWindowLabel', {
+            defaultMessage: 'Previous time window',
+          })}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon
+          onClick={onNext}
+          iconType="frameNext"
+          color="text"
+          aria-label={i18n.translate('xpack.maps.timeslider.nextTimeWindowLabel', {
+            defaultMessage: 'Next time window',
+          })}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={true}>
+        <EuiInputPopover
+          input={<TimeSliderPopoverButton onClick={togglePopover} formatDate={epochToKbnDateFormat} from={from} to={to} />}
+          isOpen={isPopoverOpen}
+          closePopover={() => setIsPopoverOpen(false)}
+          panelPaddingSize="s"
+          anchorPosition="downCenter"
+          disableFocusTrap
+          attachToAnchor={false}
+        >
+          <TimeSliderPopoverContent
+            key={`${timeRangeMin}_${timeRangeMax}`} // force new instance when time range changes to reset local state
+            initialValue={[from, to]}
+            onChange={onRangeSliderChange}
+            ticks={ticks}
+            timeRangeMin={timeRangeMin}
+            timeRangeMax={timeRangeMax}
+          />
+        </EuiInputPopover>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
