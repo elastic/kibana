@@ -83,7 +83,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
   );
   const getFilters = () => [...hostDetailsPageFilters, ...filters];
 
-  const narrowDateRange = useCallback<UpdateDateRange>(
+  const updateDateRange = useCallback<UpdateDateRange>(
     ({ x }) => {
       if (!x) {
         return;
@@ -94,6 +94,19 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
           id: 'global',
           from: new Date(min).toISOString(),
           to: new Date(max).toISOString(),
+        })
+      );
+    },
+    [dispatch]
+  );
+  const narrowDateRange = useCallback(
+    (score, interval) => {
+      const fromTo = scoreIntervalToDateTime(score, interval);
+      dispatch(
+        setAbsoluteRangeDatePicker({
+          id: 'global',
+          from: fromTo.from,
+          to: fromTo.to,
         })
       );
     },
@@ -165,14 +178,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                     loading={loading}
                     startDate={from}
                     endDate={to}
-                    narrowDateRange={(score, interval) => {
-                      const fromTo = scoreIntervalToDateTime(score, interval);
-                      setAbsoluteRangeDatePicker({
-                        id: 'global',
-                        from: fromTo.from,
-                        to: fromTo.to,
-                      });
-                    }}
+                    narrowDateRange={narrowDateRange}
                     setQuery={setQuery}
                     refetch={refetch}
                     inspect={inspect}
@@ -190,7 +196,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                 indexNames={selectedPatterns}
                 setQuery={setQuery}
                 to={to}
-                narrowDateRange={narrowDateRange}
+                updateDateRange={updateDateRange}
                 skip={isInitializing}
               />
 
@@ -220,7 +226,6 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
               filterQuery={filterQuery}
               hostDetailsPagePath={hostDetailsPagePath}
               indexPattern={indexPattern}
-              setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
             />
           </SecuritySolutionPageWrapper>
         </>

@@ -35,7 +35,7 @@ const NetworkKpiDnsComponent: React.FC<NetworkKpiProps> = ({
   from,
   indexNames,
   to,
-  narrowDateRange,
+  updateDateRange,
   setQuery,
   skip,
 }) => {
@@ -61,7 +61,7 @@ const NetworkKpiDnsComponent: React.FC<NetworkKpiProps> = ({
       fieldsMapping={fieldsMapping}
       from={from}
       to={to}
-      narrowDateRange={narrowDateRange}
+      updateDateRange={updateDateRange}
       refetch={refetch}
       setQuery={setQuery}
       setQuerySkip={setQuerySkip}

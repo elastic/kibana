@@ -15,11 +15,6 @@ import type { KeyHostsNavTabWithoutMlPermission } from '../navigation/types';
 import type { hostsModel } from '../../store';
 
 interface HostBodyComponentDispatchProps {
-  setAbsoluteRangeDatePicker: ActionCreator<{
-    id: InputsModelId;
-    from: string;
-    to: string;
-  }>;
   detailName: string;
   hostDetailsPagePath: string;
 }
