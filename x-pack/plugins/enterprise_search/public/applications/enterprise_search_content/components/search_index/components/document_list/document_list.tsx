@@ -57,71 +57,9 @@ export const DocumentList: React.FC = () => {
     return [];
   };
 
-  const docsPerPageButton = (
-    <EuiButtonEmpty
-      size="s"
-      iconType="arrowDown"
-      iconSide="right"
-      onClick={() => {
-        setIsPopoverOpen(true);
-      }}
-    >
-      {i18n.translate(
-        'xpack.enterpriseSearch.content.searchIndex.documents.documentList.pagination.itemsPerPage',
-        {
-          defaultMessage: 'Documents per page: {docPerPage}',
-          values: { docPerPage: docsPerPage },
-        }
-      )}
-    </EuiButtonEmpty>
-  );
-
   const getIconType = (size: number) => {
     return size === docsPerPage ? 'check' : 'empty';
   };
-
-  const docsPerPageOptions = [
-    <EuiContextMenuItem
-      key="10 rows"
-      icon={getIconType(10)}
-      onClick={() => {
-        setIsPopoverOpen(false);
-        setDocsPerPage(10);
-      }}
-    >
-      {i18n.translate(
-        'xpack.enterpriseSearch.content.searchIndex.documents.documentList.paginationOptions.option',
-        { defaultMessage: '{docCount} documents', values: { docCount: 10 } }
-      )}
-    </EuiContextMenuItem>,
-
-    <EuiContextMenuItem
-      key="25 rows"
-      icon={getIconType(25)}
-      onClick={() => {
-        setIsPopoverOpen(false);
-        setDocsPerPage(25);
-      }}
-    >
-      {i18n.translate(
-        'xpack.enterpriseSearch.content.searchIndex.documents.documentList.paginationOptions.option',
-        { defaultMessage: '{docCount} documents', values: { docCount: 25 } }
-      )}
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="50 rows"
-      icon={getIconType(50)}
-      onClick={() => {
-        setIsPopoverOpen(false);
-        setDocsPerPage(50);
-      }}
-    >
-      {i18n.translate(
-        'xpack.enterpriseSearch.content.searchIndex.documents.documentList.paginationOptions.option',
-        { defaultMessage: '{docCount} documents', values: { docCount: 50 } }
-      )}
-    </EuiContextMenuItem>,
-  ];
 
   return (
     <>
@@ -175,7 +113,24 @@ export const DocumentList: React.FC = () => {
               'xpack.enterpriseSearch.content.searchIndex.documents.documentList.docsPerPage',
               { defaultMessage: 'Document count per page dropdown' }
             )}
-            button={docsPerPageButton}
+            button={
+              <EuiButtonEmpty
+                size="s"
+                iconType="arrowDown"
+                iconSide="right"
+                onClick={() => {
+                  setIsPopoverOpen(true);
+                }}
+              >
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.searchIndex.documents.documentList.pagination.itemsPerPage',
+                  {
+                    defaultMessage: 'Documents per page: {docPerPage}',
+                    values: { docPerPage: docsPerPage },
+                  }
+                )}
+              </EuiButtonEmpty>
+            }
             isOpen={isPopoverOpen}
             closePopover={() => {
               setIsPopoverOpen(false);
@@ -183,7 +138,51 @@ export const DocumentList: React.FC = () => {
             panelPaddingSize="none"
             anchorPosition="downLeft"
           >
-            <EuiContextMenuPanel size="s" items={docsPerPageOptions} />
+            <EuiContextMenuPanel
+              size="s"
+              items={[
+                <EuiContextMenuItem
+                  key="10 rows"
+                  icon={getIconType(10)}
+                  onClick={() => {
+                    setIsPopoverOpen(false);
+                    setDocsPerPage(10);
+                  }}
+                >
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.content.searchIndex.documents.documentList.paginationOptions.option',
+                    { defaultMessage: '{docCount} documents', values: { docCount: 10 } }
+                  )}
+                </EuiContextMenuItem>,
+
+                <EuiContextMenuItem
+                  key="25 rows"
+                  icon={getIconType(25)}
+                  onClick={() => {
+                    setIsPopoverOpen(false);
+                    setDocsPerPage(25);
+                  }}
+                >
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.content.searchIndex.documents.documentList.paginationOptions.option',
+                    { defaultMessage: '{docCount} documents', values: { docCount: 25 } }
+                  )}
+                </EuiContextMenuItem>,
+                <EuiContextMenuItem
+                  key="50 rows"
+                  icon={getIconType(50)}
+                  onClick={() => {
+                    setIsPopoverOpen(false);
+                    setDocsPerPage(50);
+                  }}
+                >
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.content.searchIndex.documents.documentList.paginationOptions.option',
+                    { defaultMessage: '{docCount} documents', values: { docCount: 50 } }
+                  )}
+                </EuiContextMenuItem>,
+              ]}
+            />
           </EuiPopover>
         </EuiFlexItem>
       </EuiFlexGroup>

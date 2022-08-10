@@ -26,13 +26,13 @@ import {
   EuiText,
   EuiSpacer,
   EuiLink,
+  EuiFormLabel,
+  EuiCodeBlock,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import { docLinks } from '../../../../../shared/doc_links';
-
-import { ApiKey } from '../../../api_key/api_key';
 
 import { GenerateApiKeyModalLogic } from './generate_api_key_modal.logic';
 
@@ -114,10 +114,21 @@ export const GenerateApiKeyModal: React.FC<GenerateApiKeyModalProps> = ({ indexN
                     </>
                   ) : (
                     <EuiFlexItem>
-                      <ApiKey
-                        apiKey={apiKey}
-                        label={keyName}
-                        actions={
+                      <EuiFormLabel>{keyName}</EuiFormLabel>
+                      <EuiSpacer size="xs" />
+                      <EuiFlexGroup alignItems="center">
+                        <EuiFlexItem>
+                          <EuiCodeBlock
+                            aria-label={keyName}
+                            fontSize="m"
+                            paddingSize="m"
+                            color="dark"
+                            isCopyable
+                          >
+                            {apiKey}
+                          </EuiCodeBlock>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
                           <EuiButtonIcon
                             aria-label={i18n.translate(
                               'xpack.enterpriseSearch.content.overview.generateApiKeyModal.csvDownloadButton',
@@ -127,8 +138,8 @@ export const GenerateApiKeyModal: React.FC<GenerateApiKeyModalProps> = ({ indexN
                             href={encodeURI(`data:text/csv;charset=utf-8,${apiKey}`)}
                             download={`${keyName}.csv`}
                           />
-                        }
-                      />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
                     </EuiFlexItem>
                   )}
                 </EuiFlexGroup>
