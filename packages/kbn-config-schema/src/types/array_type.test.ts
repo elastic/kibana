@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { schema } from '..';
+import { schema } from '../..';
 
 test('returns value if it matches the type', () => {
   const type = schema.arrayOf(schema.string());
