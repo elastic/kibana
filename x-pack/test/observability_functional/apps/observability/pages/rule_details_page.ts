@@ -133,6 +133,10 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('maps correctly the rule type with the human readable rule type', async () => {
+        await retry.waitFor(
+          'Rules ruleTypeIndex to be loaded from hook',
+          async () => await testSubjects.exists('ruleSummaryRuleType')
+        );
         const ruleType = await testSubjects.getVisibleText('ruleSummaryRuleType');
         expect(ruleType).to.be('Log threshold');
       });
