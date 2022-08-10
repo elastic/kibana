@@ -66,7 +66,7 @@ export const DynamicTreeView = ({
 }: DynamicTreeViewProps) => {
   const styles = useStyles(depth);
 
-  const { indexPattern, hasSelection, setNoResults } = useTreeViewContext();
+  const { indexPattern, setNoResults } = useTreeViewContext();
 
   const { data, fetchNextPage, isFetchingNextPage, hasNextPage, isLoading } =
     useFetchDynamicTreeView(query, tree[depth].key, indexPattern, expanded);
