@@ -12,8 +12,8 @@ import { userProfiles } from '../../containers/user_profiles/api.mock';
 import { AppMockRenderer, createAppMockRenderer } from '../../common/mock';
 
 describe('UserRepresentation', () => {
-  const dataTestSubjGroup = `user-profile-assigned-user-group-${userProfiles[0].uid}`;
-  const dataTestSubjCross = `user-profile-assigned-user-cross-${userProfiles[0].uid}`;
+  const dataTestSubjGroup = `user-profile-assigned-user-group-${userProfiles[0].user.username}`;
+  const dataTestSubjCross = `user-profile-assigned-user-cross-${userProfiles[0].user.username}`;
 
   let defaultProps: UserRepresentationProps;
   let appMockRender: AppMockRenderer;
@@ -30,9 +30,7 @@ describe('UserRepresentation', () => {
   it('does not show the cross button when the user is not hovering over the row', () => {
     appMockRender.render(<UserRepresentation {...defaultProps} />);
 
-    expect(
-      screen.queryByTestId(`user-profile-assigned-user-cross-${userProfiles[0].uid}`)
-    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId(dataTestSubjCross)).not.toBeInTheDocument();
   });
 
   it('show the cross button when the user is hovering over the row', () => {

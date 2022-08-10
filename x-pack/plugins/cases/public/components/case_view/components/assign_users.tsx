@@ -146,11 +146,15 @@ const AssignUsersComponent: React.FC<AssignUsersProps> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s">
-              <EuiLink onClick={togglePopOver}>{i18n.ASSIGN_A_USER}</EuiLink>
+              <EuiLink data-test-subj="case-view-assign-users-link" onClick={togglePopOver}>
+                {i18n.ASSIGN_A_USER}
+              </EuiLink>
               {currentUserProfile && (
                 <>
                   <span>{i18n.SPACED_OR}</span>
-                  <EuiLink onClick={assignSelf}>{i18n.ASSIGN_YOURSELF}</EuiLink>
+                  <EuiLink data-test-subj="case-view-assign-yourself-link" onClick={assignSelf}>
+                    {i18n.ASSIGN_YOURSELF}
+                  </EuiLink>
                 </>
               )}
             </EuiText>

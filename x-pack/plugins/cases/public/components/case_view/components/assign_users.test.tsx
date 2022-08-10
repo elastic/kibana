@@ -182,9 +182,11 @@ describe('AssignUsers', () => {
     appMockRender.render(<AssignUsers {...props} />);
 
     fireEvent.mouseEnter(
-      screen.getByTestId(`user-profile-assigned-user-group-${userProfiles[0].uid}`)
+      screen.getByTestId(`user-profile-assigned-user-group-${userProfiles[0].user.username}`)
     );
-    fireEvent.click(screen.getByTestId(`user-profile-assigned-user-cross-${userProfiles[0].uid}`));
+    fireEvent.click(
+      screen.getByTestId(`user-profile-assigned-user-cross-${userProfiles[0].user.username}`)
+    );
 
     expect(onAssigneesChanged.mock.calls[0][0]).toMatchInlineSnapshot(`Array []`);
   });

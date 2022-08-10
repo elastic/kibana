@@ -59,7 +59,7 @@ const UserRepresentationComponent: React.FC<UserRepresentationProps> = ({
       alignItems="center"
       gutterSize="s"
       justifyContent="spaceBetween"
-      data-test-subj={`user-profile-assigned-user-group-${profile.uid}`}
+      data-test-subj={`user-profile-assigned-user-group-${profile.user.username}`}
     >
       <EuiFlexItem grow={false}>
         <UserToolTip profile={profile}>
@@ -71,10 +71,10 @@ const UserRepresentationComponent: React.FC<UserRepresentationProps> = ({
           <EuiToolTip
             position="left"
             content={i18n.REMOVE_ASSIGNEE}
-            data-test-subj={`user-profile-assigned-user-cross-tooltip-${profile.uid}`}
+            data-test-subj={`user-profile-assigned-user-cross-tooltip-${profile.user.username}`}
           >
             <EuiButtonIcon
-              data-test-subj={`user-profile-assigned-user-cross-${profile.uid}`}
+              data-test-subj={`user-profile-assigned-user-cross-${profile.user.username}`}
               aria-label={i18n.REMOVE_ASSIGNEE_ARIA_LABEL}
               iconType="cross"
               color="danger"

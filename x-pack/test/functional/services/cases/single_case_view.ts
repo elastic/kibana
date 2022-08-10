@@ -33,5 +33,13 @@ export function CasesSingleViewServiceProvider({ getService, getPageObject }: Ft
 
       expect(userActionText).contain(contentToMatch);
     },
+
+    async openAssigneesPopover() {
+      await common.clickAndValidate('case-view-assignees-edit-button', 'euiSelectableList');
+    },
+
+    async selectFirstRowInAssigneesPopover() {
+      await (await find.byClassName('euiSelectableListItem__content')).click();
+    },
   };
 }
