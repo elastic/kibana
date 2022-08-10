@@ -14,6 +14,7 @@ import {
   EuiBadge,
   keys,
   EuiLoadingSpinner,
+  EuiToolTip,
 } from '@elastic/eui';
 import { KubernetesCollection } from '../../../types';
 import {
@@ -24,6 +25,7 @@ import { useFetchDynamicTreeView } from './hooks';
 import { useStyles } from './styles';
 import { disableEventDefaults, focusNextElement } from './helpers';
 import { useTreeViewContext } from '../contexts';
+import { TreeViewIcon } from '../tree_view_icon';
 import type { DynamicTreeViewProps, DynamicTreeViewItemProps } from './types';
 
 const BUTTON_TEST_ID = 'kubernetesSecurity:dynamicTreeViewButton';
@@ -64,7 +66,7 @@ export const DynamicTreeView = ({
 }: DynamicTreeViewProps) => {
   const styles = useStyles(depth);
 
-  const { indexPattern, hasSelection, setNoResults } = useTreeViewContext();
+  const { indexPattern, setNoResults } = useTreeViewContext();
 
   const { data, fetchNextPage, isFetchingNextPage, hasNextPage, isLoading } =
     useFetchDynamicTreeView(query, tree[depth].key, indexPattern, expanded);
@@ -101,7 +103,7 @@ export const DynamicTreeView = ({
   }, [fetchNextPage, expanded]);
 
   useEffect(() => {
-    if (!hasSelection && !depth && data && data.pages?.[0].buckets?.[0]?.key) {
+    if (!selected && !depth && data && data.pages?.[0].buckets?.[0]?.key) {
       onSelect(
         {},
         tree[depth].type,
@@ -109,7 +111,7 @@ export const DynamicTreeView = ({
         data.pages[0].buckets[0].key_as_string
       );
     }
-  }, [data, depth, hasSelection, onSelect, tree]);
+  }, [data, depth, selected, onSelect, tree]);
 
   const onClickNextPageHandler = () => {
     fetchNextPage();
@@ -295,11 +297,18 @@ const DynamicTreeViewItem = ({
   const isSelected = useMemo(() => {
     return (
       selected ===
-      Object.entries({ ...selectionDepth, [tree[depth].type]: aggData.key })
+      Object.entries({
+        ...selectionDepth,
+        [tree[depth].type]: aggData.key,
+        ...(tree[depth].type === KubernetesCollection.clusterId &&
+          aggData.key_as_string && {
+            [KubernetesCollection.clusterName]: aggData.key_as_string,
+          }),
+      })
         .map(([k, v]) => `${k}.${v}`)
         .join()
     );
-  }, [aggData.key, depth, selected, selectionDepth, tree]);
+  }, [aggData.key, aggData.key_as_string, depth, selected, selectionDepth, tree]);
 
   return (
     <li
@@ -314,6 +323,7 @@ const DynamicTreeViewItem = ({
         onClick={onButtonToggle}
         onKeyDown={onKeyDown}
         ref={(el) => (buttonRef.current[aggData.key] = el)}
+        css={isLastNode ? styles.leafNodeButton : undefined}
       >
         {!isLastNode && (
           <EuiIcon
@@ -322,8 +332,10 @@ const DynamicTreeViewItem = ({
             onClick={onArrowToggle}
           />
         )}
-        <EuiIcon {...tree[depth].iconProps} css={styles.labelIcon} />
-        <span className="euiTreeView__nodeLabel">{aggData.key_as_string || aggData.key}</span>
+        <TreeViewIcon {...tree[depth].iconProps} css={styles.labelIcon} />
+        <EuiToolTip content={aggData.key}>
+          <span className="euiTreeView__nodeLabel">{aggData.key_as_string || aggData.key}</span>
+        </EuiToolTip>
       </button>
       <div
         onKeyDown={(event: React.KeyboardEvent) => onChildrenKeydown(event, aggData.key.toString())}
