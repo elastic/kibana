@@ -12,7 +12,7 @@ import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
 import { XyToolbar } from '.';
 import { DimensionEditor } from './dimension_editor';
 import { AxisSettingsPopover } from './axis_settings_popover';
-import { FramePublicAPI } from '../../../types';
+import { FramePublicAPI, DatasourcePublicAPI } from '../../../types';
 import { State, XYState, XYDataLayerConfig } from '../types';
 import { Position } from '@elastic/charts';
 import { createMockFramePublicAPI, createMockDatasource } from '../../../mocks';
@@ -109,7 +109,8 @@ describe('XY Config panels', () => {
     });
 
     it('should pass in endzone visibility setter and current sate for time chart', () => {
-      (frame.datasourceLayers.first.getOperationForColumnId as jest.Mock).mockReturnValue({
+      const datasourceLayers = frame.datasourceLayers as Record<string, DatasourcePublicAPI>;
+      (datasourceLayers.first.getOperationForColumnId as jest.Mock).mockReturnValue({
         dataType: 'date',
       });
       const state = testState();

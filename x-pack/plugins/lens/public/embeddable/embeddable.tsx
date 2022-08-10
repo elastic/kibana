@@ -555,10 +555,10 @@ export class Embeddable
    */
   render(domNode: HTMLElement | Element) {
     this.domNode = domNode;
-    super.render(domNode as HTMLElement);
     if (!this.savedVis || !this.isInitialized || this.isDestroyed) {
       return;
     }
+    super.render(domNode as HTMLElement);
     if (this.input.onLoad) {
       this.input.onLoad(true);
     }
@@ -876,7 +876,6 @@ export class Embeddable
   destroy() {
     this.isDestroyed = true;
     super.destroy();
-
     if (this.inputReloadSubscriptions.length > 0) {
       this.inputReloadSubscriptions.forEach((reloadSub) => {
         reloadSub.unsubscribe();
