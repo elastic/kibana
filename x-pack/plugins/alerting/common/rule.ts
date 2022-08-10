@@ -20,18 +20,16 @@ export interface IntervalSchedule extends SavedObjectAttributes {
   interval: string;
 }
 
-export enum RuleExecutionStatusOptions {
-  Ok = 'ok',
-  Active = 'active',
-  Error = 'error',
-  Pending = 'pending',
-  Unknown = 'unknown',
-  Warning = 'warning',
-}
-
 // for the `typeof ThingValues[number]` types below, become string types that
 // only accept the values in the associated string arrays
-export const RuleExecutionStatusValues = Object.values(RuleExecutionStatusOptions);
+export const RuleExecutionStatusValues = [
+  'ok',
+  'active',
+  'error',
+  'pending',
+  'unknown',
+  'warning',
+] as const;
 export type RuleExecutionStatuses = typeof RuleExecutionStatusValues[number];
 
 export enum RuleExecutionStatusErrorReasons {

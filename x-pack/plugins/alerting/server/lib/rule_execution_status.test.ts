@@ -9,7 +9,6 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   ActionsCompletion,
   RuleExecutionStatusErrorReasons,
-  RuleExecutionStatusOptions,
   RuleExecutionStatusWarningReasons,
 } from '../types';
 import {
@@ -161,7 +160,7 @@ describe('RuleExecutionStatus', () => {
 
   describe('ruleExecutionStatusToRaw()', () => {
     const date = new Date('2020-09-03T16:26:58Z');
-    const status = RuleExecutionStatusOptions.Ok;
+    const status = 'ok';
     const reason = RuleExecutionStatusErrorReasons.Decrypt;
     const error = { reason, message: 'wops' };
 
@@ -226,7 +225,7 @@ describe('RuleExecutionStatus', () => {
 
   describe('ruleExecutionStatusFromRaw()', () => {
     const date = new Date('2020-09-03T16:26:58Z').toISOString();
-    const status = RuleExecutionStatusOptions.Active;
+    const status = 'active';
     const reason = RuleExecutionStatusErrorReasons.Execute;
     const error = { reason, message: 'wops' };
 

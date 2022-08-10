@@ -119,11 +119,7 @@ import {
   formatExecutionLogResult,
   getExecutionLogAggregation,
 } from '../lib/get_execution_log_aggregation';
-import {
-  IExecutionLogResult,
-  IExecutionErrorsResult,
-  RuleExecutionStatusOptions,
-} from '../../common';
+import { IExecutionLogResult, IExecutionErrorsResult } from '../../common';
 import { validateSnoozeStartDate } from '../lib/validate_snooze_date';
 import { RuleMutedError } from '../lib/errors/rule_muted';
 import { formatExecutionErrorsResult } from '../lib/format_execution_log_errors';
@@ -2026,7 +2022,7 @@ export class RulesClient {
         updatedBy: username,
         updatedAt: new Date().toISOString(),
         executionStatus: {
-          status: RuleExecutionStatusOptions.Pending,
+          status: 'pending',
           lastDuration: 0,
           lastExecutionDate: new Date().toISOString(),
           error: null,

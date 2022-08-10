@@ -51,7 +51,6 @@ import {
   RuleTypeState,
   parseDuration,
   WithoutReservedActionGroups,
-  RuleExecutionStatusOptions,
 } from '../../common';
 import { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
@@ -788,7 +787,7 @@ export class TaskRunner<
     // Update the rule saved object with execution status
     const executionStatus: RuleExecutionStatus = {
       lastExecutionDate: new Date(),
-      status: RuleExecutionStatusOptions.Error,
+      status: 'error',
       error: {
         reason: RuleExecutionStatusErrorReasons.Timeout,
         message: `${this.ruleType.id}:${ruleId}: execution cancelled due to timeout - exceeded rule type timeout of ${this.ruleType.ruleTaskTimeout}`,

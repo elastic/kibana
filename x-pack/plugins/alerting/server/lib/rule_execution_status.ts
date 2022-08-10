@@ -8,7 +8,7 @@
 import { Logger } from '@kbn/core/server';
 import {
   RuleExecutionStatus,
-  RuleExecutionStatusOptions,
+  RuleExecutionStatusValues,
   RuleExecutionStatusWarningReasons,
   RawRuleExecutionStatus,
 } from '../types';
@@ -31,19 +31,19 @@ export function executionStatusFromState(
   const alertIds = Object.keys(stateWithMetrics.alertInstances ?? {});
 
   let status: RuleExecutionStatuses =
-    alertIds.length === 0 ? RuleExecutionStatusOptions.Ok : RuleExecutionStatusOptions.Active;
+    alertIds.length === 0 ? RuleExecutionStatusValues[0] : RuleExecutionStatusValues[1];
 
   // Check for warning states
   let warning = null;
   // We only have a single warning field so prioritizing the alert circuit breaker over the actions circuit breaker
   if (stateWithMetrics.metrics.hasReachedAlertLimit) {
-    status = RuleExecutionStatusOptions.Warning;
+    status = RuleExecutionStatusValues[5];
     warning = {
       reason: RuleExecutionStatusWarningReasons.MAX_ALERTS,
       message: translations.taskRunner.warning.maxAlerts,
     };
   } else if (stateWithMetrics.metrics.triggeredActionsStatus === ActionsCompletion.PARTIAL) {
-    status = RuleExecutionStatusOptions.Warning;
+    status = RuleExecutionStatusValues[5];
     warning = {
       reason: RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
       message: translations.taskRunner.warning.maxExecutableActions,
@@ -67,7 +67,7 @@ export function executionStatusFromError(
   return {
     status: {
       lastExecutionDate: lastExecutionDate ?? new Date(),
-      status: RuleExecutionStatusOptions.Error,
+      status: 'error',
       error: {
         reason: getReasonFromError(error),
         message: getEsErrorMessage(error),
@@ -104,7 +104,7 @@ export function ruleExecutionStatusFromRaw(
   const {
     lastExecutionDate,
     lastDuration,
-    status = RuleExecutionStatusOptions.Unknown,
+    status = 'unknown',
     error,
     warning,
   } = rawRuleExecutionStatus;
