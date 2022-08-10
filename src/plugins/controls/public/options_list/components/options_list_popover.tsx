@@ -28,13 +28,12 @@ import { optionsListReducers } from '../options_list_reducers';
 import { OptionsListStrings } from './options_list_strings';
 import { OptionsListReduxState } from '../types';
 
-export const OptionsListPopover = ({
-  width,
-  updateSearchString,
-}: {
+export interface OptionsListPopoverProps {
   width: number;
   updateSearchString: (newSearchString: string) => void;
-}) => {
+}
+
+export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPopoverProps) => {
   // Redux embeddable container Context
   const {
     useEmbeddableDispatch,
@@ -137,6 +136,7 @@ export const OptionsListPopover = ({
                     color={showOnlySelected ? 'primary' : 'text'}
                     display={showOnlySelected ? 'base' : 'empty'}
                     aria-label={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
+                    data-test-subj="optionsList-control-show-only-selected"
                     onClick={() => setShowOnlySelected(!showOnlySelected)}
                   />
                 </EuiToolTip>
