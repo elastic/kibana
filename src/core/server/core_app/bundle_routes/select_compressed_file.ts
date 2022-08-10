@@ -32,7 +32,7 @@ export async function selectCompressedFile(acceptEncodingHeader: string | undefi
   let fileEncoding: 'gzip' | 'br' | undefined;
   const ext = extname(path);
 
-  const supportedEncodings = Accept.encodings(acceptEncodingHeader, ['br']);
+  const supportedEncodings = Accept.encodings(acceptEncodingHeader, ['br', 'gzip']);
 
   // do not bother trying to look compressed versions for anything else than js or css files
   if (ext === '.js' || ext === '.css') {
