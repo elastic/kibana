@@ -7,11 +7,10 @@
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function ({ getService, getPageObject, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const ml = getService('ml');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const browser = getService('browser');
-  const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'timePicker', 'dashboard']);
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
@@ -19,13 +18,6 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
   const dashboardTitle = 'lens_to_ml';
   const dashboardArchive =
     'x-pack/test/functional/fixtures/kbn_archiver/ml/lens_to_ml_dashboard.json';
-
-  async function retrySwitchTab(tabIndex: number, seconds: number) {
-    await retry.tryForTime(seconds * 1000, async () => {
-      await browser.switchTab(tabIndex);
-    });
-    await browser.setWindowSize(1920, 1080);
-  }
 
   async function setFarequoteTimerange() {
     await PageObjects.timePicker.setAbsoluteRange(
@@ -63,16 +55,6 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
 
     beforeEach(async () => {
       await PageObjects.common.navigateToApp('dashboard');
-    });
-
-    let tabsCount = 1;
-
-    afterEach(async () => {
-      if (tabsCount > 1) {
-        await browser.closeCurrentWindow();
-        await retrySwitchTab(0, 10);
-        tabsCount--;
-      }
     });
 
     it('can create a single metric job from vis with single layer', async () => {
