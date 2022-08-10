@@ -93,7 +93,7 @@ function fnIsCorrect(fn: ApiDeclaration | undefined) {
   expect(p5?.description?.length).toBe(1);
 }
 
-beforeAll(async () => {
+beforeAll(async (done) => {
   const tsConfigFilePath = Path.resolve(__dirname, '__fixtures__/src/tsconfig.json');
   const project = new Project({
     tsConfigFilePath,
@@ -137,6 +137,7 @@ beforeAll(async () => {
       log,
     }),
   ]);
+  done();
 });
 
 it('Stats', () => {
