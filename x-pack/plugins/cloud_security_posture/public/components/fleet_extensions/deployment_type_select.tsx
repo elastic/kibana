@@ -17,7 +17,11 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { CIS_INTEGRATION_INPUTS_MAP } from '../../../common/constants';
+import {
+  CIS_INTEGRATION_INPUTS_MAP,
+  CLOUDBEAT_EKS,
+  CLOUDBEAT_VANILLA,
+} from '../../../common/constants';
 
 export type InputType = keyof typeof CIS_INTEGRATION_INPUTS_MAP;
 
@@ -29,14 +33,14 @@ interface Props {
 
 const kubeDeployOptions: Array<EuiComboBoxOptionOption<InputType>> = [
   {
-    value: 'cloudbeat/vanilla',
+    value: CLOUDBEAT_VANILLA,
     label: i18n.translate(
       'xpack.csp.createPackagePolicy.stepConfigure.integrationSettingsSection.vanillaKubernetesDeploymentOption',
       { defaultMessage: 'Unmanaged Kubernetes' }
     ),
   },
   {
-    value: 'cloudbeat/eks',
+    value: CLOUDBEAT_EKS,
     label: i18n.translate(
       'xpack.csp.createPackagePolicy.stepConfigure.integrationSettingsSection.eksKubernetesDeploymentOption',
       { defaultMessage: 'EKS (Elastic Kubernetes Service)' }
