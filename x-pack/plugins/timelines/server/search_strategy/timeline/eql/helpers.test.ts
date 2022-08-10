@@ -282,6 +282,9 @@ describe('Search Strategy EQL helper', () => {
                     "family": Array [
                       "windows",
                     ],
+                    "name": Array [
+                      "Windows",
+                    ],
                   },
                 },
                 "message": Array [
@@ -411,6 +414,9 @@ describe('Search Strategy EQL helper', () => {
                   "os": Object {
                     "family": Array [
                       "windows",
+                    ],
+                    "name": Array [
+                      "Windows",
                     ],
                   },
                 },
@@ -549,6 +555,9 @@ describe('Search Strategy EQL helper', () => {
                     "family": Array [
                       "windows",
                     ],
+                    "name": Array [
+                      "Windows",
+                    ],
                   },
                 },
                 "message": Array [
@@ -674,6 +683,9 @@ describe('Search Strategy EQL helper', () => {
                   "os": Object {
                     "family": Array [
                       "windows",
+                    ],
+                    "name": Array [
+                      "Windows",
                     ],
                   },
                 },
