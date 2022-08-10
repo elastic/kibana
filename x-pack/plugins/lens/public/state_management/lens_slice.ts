@@ -806,23 +806,41 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         return state;
       }
 
-      const datasource = datasourceId ? datasourceMap[datasourceId] : undefined;
-      if (datasource && datasourceId) {
-        state.datasourceStates[datasourceId].state = datasource?.removeColumn({
-          layerId,
-          columnId,
-          prevState: state.datasourceStates[datasourceId].state,
-        });
-      }
-
       const activeVisualization = visualizationMap[state.visualization.activeId];
 
-      state.visualization.state = activeVisualization.removeDimension({
-        layerId,
-        columnId,
-        prevState: state.visualization.state,
-        frame: selectFramePublicAPI({ lens: state }, datasourceMap),
-      });
+      // TODO - should this logic be part of syncLinkedDimensionsFunction?
+      const links = activeVisualization.reportLinkedDimensions?.(state.visualization.state);
+
+      const linkedDimension = links?.find(
+        ({ from: { columnId: fromId } }) => columnId === fromId
+      )?.to;
+
+      const datasource = datasourceId ? datasourceMap[datasourceId] : undefined;
+
+      const frame = selectFramePublicAPI({ lens: state }, datasourceMap);
+
+      const remove = (dimensionProps: { layerId: string; columnId: string }) => {
+        if (datasource && datasourceId) {
+          state.datasourceStates[datasourceId].state = datasource?.removeColumn({
+            layerId: dimensionProps.layerId,
+            columnId: dimensionProps.columnId,
+            prevState: state.datasourceStates[datasourceId].state,
+          });
+        }
+
+        state.visualization.state = activeVisualization.removeDimension({
+          layerId: dimensionProps.layerId,
+          columnId: dimensionProps.columnId,
+          prevState: state.visualization.state,
+          frame,
+        });
+      };
+
+      remove({ layerId, columnId });
+
+      if (linkedDimension && linkedDimension.columnId) {
+        remove({ columnId: linkedDimension.columnId, layerId: linkedDimension.layerId });
+      }
     },
   });
 };
