@@ -179,8 +179,6 @@ export const thresholdExecutor = async ({
 
     const newSignalHistory = buildThresholdSignalHistory({
       alerts: createdAlerts,
-      primaryTimestamp,
-      secondaryTimestamp,
     });
 
     return {
