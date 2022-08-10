@@ -7,12 +7,14 @@
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import type { TestData } from './types';
-import { farequoteDataViewTestData } from '../ml/data_visualizer/index_test_data';
+import { farequoteDataViewTestData } from './test_data';
 
 export default function ({ getPageObject, getService }: FtrProviderContext) {
   const headerPage = getPageObject('header');
   const esArchiver = getService('esArchiver');
   const aiops = getService('aiops');
+
+  // aiops / Explain Log Rate Spikes lives in the ML UI so we need some related services.
   const ml = getService('ml');
 
   function runTests(testData: TestData) {
@@ -57,8 +59,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
     });
   }
 
-  describe('index based', function () {
-    this.tags(['ml']);
+  describe('explain log rate spikes', function () {
+    this.tags(['aiops']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
 

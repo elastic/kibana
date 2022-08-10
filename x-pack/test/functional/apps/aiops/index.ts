@@ -9,10 +9,12 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
+
+  // aiops / Explain Log Rate Spikes lives in the ML UI so we need some related services.
   const ml = getService('ml');
 
-  describe('machine learning - aiops', function () {
-    this.tags(['skipFirefox', 'ml', 'walterra']);
+  describe('aiops', function () {
+    this.tags(['skipFirefox', 'aiops']);
 
     before(async () => {
       await ml.securityCommon.createMlRoles();
