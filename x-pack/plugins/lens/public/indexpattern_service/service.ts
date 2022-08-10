@@ -18,7 +18,7 @@ import {
 } from './loader';
 import type { DataViewsState } from '../state_management';
 
-interface IndexPatternServiceProps {
+export interface IndexPatternServiceProps {
   core: Pick<CoreStart, 'http' | 'notifications'>;
   dataViews: DataViewsContract;
   uiSettings: IUiSettingsClient;
