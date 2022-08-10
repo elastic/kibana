@@ -7,8 +7,7 @@
  */
 
 import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
-import type { ISearchSource, RefreshInterval } from '@kbn/data-plugin/public';
-import type { TimeRange } from '@kbn/es-query';
+import type { ISearchSource, RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
 import { DiscoverGridSettingsColumn } from '../../components/discover_grid/types';
 import { VIEW_MODE } from '../../components/view_mode_toggle';
 

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { RefreshInterval, TimefilterContract } from '@kbn/data-plugin/public';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
+import type { TimeRange, RefreshInterval } from '@kbn/data-plugin/common';
 import { restoreStateFromSavedSearch } from './restore_from_saved_search';
 import type { SavedSearch } from './types';
-import { TimeRange } from '@kbn/data-plugin/common';
 
 describe('restoreStateFromSavedSearch', () => {
   let timefilterMock: TimefilterContract;
