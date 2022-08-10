@@ -59,6 +59,11 @@ export type DeletePackagePoliciesResponse = Array<{
   success: boolean;
   package?: PackagePolicyPackage;
   policy_id?: string;
+  // Support generic errors
+  statusCode?: number;
+  body?: {
+    message: string;
+  };
 }>;
 
 export interface UpgradePackagePolicyBaseResponse {
