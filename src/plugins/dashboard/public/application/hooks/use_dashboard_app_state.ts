@@ -258,9 +258,9 @@ export const useDashboardAppState = ({
           if (newDataViewIds?.[0]) {
             dashboardContainer.controlGroup?.setRelevantDataViewId(newDataViewIds[0]);
           }
-
           // fetch all data views. These should be cached locally at this time so we will not need to query ES.
           const allDataViews = await Promise.all(newDataViewIds.map((id) => dataViews.get(id)));
+          dashboardContainer.setAllDataViews(allDataViews);
           setDashboardAppState((s) => ({ ...s, dataViews: allDataViews }));
         },
       });
