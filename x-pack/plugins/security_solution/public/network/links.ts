@@ -55,5 +55,12 @@ export const links: LinkItem = {
       path: `${NETWORK_PATH}/anomalies`,
       licenseType: 'gold',
     },
+    {
+      id: SecurityPageName.networkEvents,
+      title: i18n.translate('xpack.securitySolution.appLinks.network.events', {
+        defaultMessage: 'Events',
+      }),
+      path: `${NETWORK_PATH}/events`,
+    },
   ],
 };
