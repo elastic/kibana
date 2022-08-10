@@ -42,13 +42,17 @@ export {
   OptionsListEmbeddableFactory,
   OptionsListEmbeddable,
   type OptionsListEmbeddableInput,
+<<<<<<< HEAD
 } from './options_list';
+=======
+} from './control_types';
+>>>>>>> fcf35064384 (Refactor range slider)
 
 export {
   RangeSliderEmbeddableFactory,
   RangeSliderEmbeddable,
   type RangeSliderEmbeddableInput,
-} from './control_types';
+} from './range_slider';
 
 export { LazyControlsCallout, type CalloutProps } from './controls_callout';
 
