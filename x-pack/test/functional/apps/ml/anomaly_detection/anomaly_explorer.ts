@@ -66,6 +66,8 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('anomaly explorer', function () {
     this.tags(['mlqa']);
+    this.onlyEsVersion('<=7 || >=8.4');
+
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
