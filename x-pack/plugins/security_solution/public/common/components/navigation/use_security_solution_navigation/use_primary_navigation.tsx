@@ -22,12 +22,11 @@ const translatedNavTitle = i18n.translate('xpack.securitySolution.navigation.mai
 export const usePrimaryNavigation = ({
   navTabs,
   pageName,
-  tabName,
 }: PrimaryNavigationProps): KibanaPageTemplateProps['solutionNav'] => {
   const isGroupedNavigationEnabled = useIsGroupedNavigationEnabled();
   const mapLocationToTab = useCallback(
-    (): string => ((tabName && navTabs[tabName]) || navTabs[pageName])?.id ?? '',
-    [pageName, tabName, navTabs]
+    (): string => navTabs[pageName]?.id ?? '',
+    [pageName, navTabs]
   );
 
   const [selectedTabId, setSelectedTabId] = useState(mapLocationToTab());
