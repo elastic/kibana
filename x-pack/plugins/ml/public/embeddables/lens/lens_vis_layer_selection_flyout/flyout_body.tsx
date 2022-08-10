@@ -32,6 +32,7 @@ import {
   EuiButtonEmpty,
   EuiCheckbox,
   EuiAccordion,
+  EuiCallOut,
 } from '@elastic/eui';
 
 import {
@@ -84,6 +85,7 @@ export const FlyoutBody: FC<Props> = ({
   const [jobIdValid, setJobIdValid] = useState<string>('');
   const [bucketSpanValid, setBucketSpanValid] = useState<string>('');
   const [state, setState] = useState<STATE>(STATE.DEFAULT);
+  const [createError, setCreateError] = useState<{ text: string; errorText: string } | null>(null);
 
   function createADJobInWizard(layerIndex: number) {
     convertLensToADJob(embeddable, share, layerIndex);
@@ -91,23 +93,25 @@ export const FlyoutBody: FC<Props> = ({
 
   async function createADJob(layerIndex: number) {
     setState(STATE.SAVING);
-    try {
-      await createAndSaveJob(
-        jobId,
-        bucketSpan,
-        embeddable,
-        startJob,
-        runInRealTime,
-        data.dataViews,
-        kibanaConfig,
-        data.query.timefilter.timefilter,
-        ml,
-        layerIndex
-      );
+    setCreateError(null);
+    const result = await createAndSaveJob(
+      jobId,
+      bucketSpan,
+      embeddable,
+      startJob,
+      runInRealTime,
+      data.dataViews,
+      kibanaConfig,
+      data.query.timefilter.timefilter,
+      ml,
+      layerIndex
+    );
+    const error = checkForCreationErrors(result);
+    if (error === null) {
       setState(STATE.SAVE_SUCCESS);
-    } catch (error) {
+    } else {
       setState(STATE.SAVE_FAILED);
-      // console.error(error);
+      setCreateError(error);
     }
   }
 
@@ -401,6 +405,15 @@ export const FlyoutBody: FC<Props> = ({
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   ) : null}
+
+                  {state === STATE.SAVE_FAILED && createError !== null ? (
+                    <>
+                      <EuiSpacer />
+                      <EuiCallOut color="danger" title={createError.text}>
+                        {createError.errorText}
+                      </EuiCallOut>
+                    </>
+                  ) : null}
                 </>
               ) : (
                 <>
@@ -436,4 +449,38 @@ export const FlyoutBody: FC<Props> = ({
       ))}
     </>
   );
+};
+
+const checkForCreationErrors = (result: Awaited<ReturnType<typeof createAndSaveJob>>) => {
+  if (result.jobCreated.error) {
+    return {
+      text: i18n.translate('xpack.ml.embeddables.lensLayerFlyout.jobCreateError.jobCreated', {
+        defaultMessage: 'Job could not be created.',
+      }),
+      errorText: extractErrorMessage(result.jobCreated.error),
+    };
+  } else if (result.datafeedCreated.error) {
+    return {
+      text: i18n.translate('xpack.ml.embeddables.lensLayerFlyout.jobCreateError.datafeedCreated', {
+        defaultMessage: 'Job created but datafeed could not be created.',
+      }),
+      errorText: extractErrorMessage(result.datafeedCreated.error),
+    };
+  } else if (result.jobOpened.error) {
+    return {
+      text: i18n.translate('xpack.ml.embeddables.lensLayerFlyout.jobCreateError.jobOpened', {
+        defaultMessage: 'Job and datafeed created but the job could not be opened.',
+      }),
+      errorText: extractErrorMessage(result.jobOpened.error),
+    };
+  } else if (result.datafeedStarted.error) {
+    return {
+      text: i18n.translate('xpack.ml.embeddables.lensLayerFlyout.jobCreateError.datafeedStarted', {
+        defaultMessage: 'Job and datafeed created but the datafeed could not be started.',
+      }),
+      errorText: extractErrorMessage(result.datafeedStarted.error),
+    };
+  } else {
+    return null;
+  }
 };

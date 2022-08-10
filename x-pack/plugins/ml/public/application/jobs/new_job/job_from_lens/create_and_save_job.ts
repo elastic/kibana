@@ -12,6 +12,19 @@ import type { IUiSettingsClient } from '@kbn/core/public';
 import { getJobsItemsFromEmbeddable } from './utils';
 import { createJob } from './create_job';
 import { MlApiServices } from '../../../services/ml_api_service';
+import type { ErrorType } from '../../../../../common/util/errors';
+
+interface State {
+  success: boolean;
+  error?: ErrorType;
+}
+
+interface CreateState {
+  jobCreated: State;
+  datafeedCreated: State;
+  jobOpened: State;
+  datafeedStarted: State;
+}
 
 export async function createAndSaveJob(
   jobId: string,
@@ -24,7 +37,7 @@ export async function createAndSaveJob(
   timeFilter: TimefilterContract,
   ml: MlApiServices,
   layerIndex?: number
-) {
+): Promise<CreateState> {
   const { query, filters, to, from, vis } = getJobsItemsFromEmbeddable(embeddable);
   if (query === undefined || filters === undefined) {
     throw new Error('Cannot create job, query and filters are undefined');
@@ -49,18 +62,48 @@ export async function createAndSaveJob(
   const datafeedId = `datafeed-${jobId}`;
   const datafeed = { ...datafeedConfig, job_id: jobId, datafeed_id: datafeedId };
 
-  const createdJob = await ml.addJob({ jobId: job.job_id, job });
-  const createdDatafeed = await ml.addDatafeed({ datafeedId, datafeedConfig: datafeed });
+  const result: CreateState = {
+    jobCreated: { success: false },
+    datafeedCreated: { success: false },
+    jobOpened: { success: false },
+    datafeedStarted: { success: false },
+  };
+
+  try {
+    await ml.addJob({ jobId: job.job_id, job });
+  } catch (error) {
+    result.jobCreated.error = error;
+    return result;
+  }
+  result.jobCreated.success = true;
+
+  try {
+    await ml.addDatafeed({ datafeedId, datafeedConfig: datafeed });
+  } catch (error) {
+    result.datafeedCreated.error = error;
+    return result;
+  }
+  result.datafeedCreated.success = true;
+
   if (startJob) {
     try {
       await ml.openJob({ jobId });
     } catch (error) {
       if (error.body.statusCode !== 409) {
-        throw error;
+        result.jobOpened.error = error;
+        return result;
       }
     }
-    await ml.startDatafeed({ datafeedId, start, ...(runInRealTime ? {} : { end }) });
+    result.jobOpened.success = true;
+
+    try {
+      await ml.startDatafeed({ datafeedId, start, ...(runInRealTime ? {} : { end }) });
+    } catch (error) {
+      result.datafeedStarted.error = error;
+      return result;
+    }
+    result.datafeedStarted.success = true;
   }
 
-  return { job: createdJob, datafeed: createdDatafeed };
+  return result;
 }
