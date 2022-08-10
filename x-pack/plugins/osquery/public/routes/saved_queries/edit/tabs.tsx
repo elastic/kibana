@@ -16,7 +16,7 @@ interface ResultTabsProps {
   actionId: string;
   agentIds?: string[];
   startDate?: string;
-  ecsMapping?: Record<string, string>;
+  ecsMapping?: Record<string, { field?: string; value?: string }>;
   failedAgentsCount?: number;
   endDate?: string;
   addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => ReactElement;

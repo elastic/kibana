@@ -48,7 +48,7 @@ interface ResultsTableComponentProps {
   actionId: string;
   selectedAgent?: string;
   agentIds?: string[];
-  ecsMapping?: Record<string, string>;
+  ecsMapping?: Record<string, { field?: string; value?: string }>;
   endDate?: string;
   startDate?: string;
   addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
@@ -186,10 +186,8 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     if (!ecsMapping) return;
 
     return reduce(
-      (acc, [key, value]) => {
-        // @ts-expect-error update types
+      (acc: Record<string, string[]>, [key, value]) => {
         if (value?.field) {
-          // @ts-expect-error update types
           acc[value?.field] = [...(acc[value?.field] ?? []), key];
         }
 
@@ -202,7 +200,6 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
   const getHeaderDisplay = useCallback(
     (columnName: string) => {
-      // @ts-expect-error update types
       if (ecsMappingConfig && ecsMappingConfig[columnName]) {
         return (
           <>
@@ -217,12 +214,9 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
                   />
                   {`:`}
                   <ul>
-                    {
-                      // @ts-expect-error update types
-                      ecsMappingConfig[columnName].map((fieldName) => (
-                        <li key={fieldName}>{fieldName}</li>
-                      ))
-                    }
+                    {ecsMappingConfig[columnName].map((fieldName) => (
+                      <li key={fieldName}>{fieldName}</li>
+                    ))}
                   </ul>
                 </>
               }

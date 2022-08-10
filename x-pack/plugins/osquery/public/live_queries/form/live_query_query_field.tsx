@@ -6,10 +6,13 @@
  */
 
 import { EuiCodeBlock, EuiFormRow } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
-import type { EuiCodeEditorProps, FieldHook } from '../../shared_imports';
+import { useController } from 'react-hook-form';
+import { i18n } from '@kbn/i18n';
+import { MAX_QUERY_LENGTH } from './schema';
+import type { EuiCodeEditorProps } from '../../shared_imports';
 import { OsqueryEditor } from '../../editor';
 import { useKibana } from '../../common/lib/kibana';
 
@@ -19,30 +22,45 @@ const StyledEuiCodeBlock = styled(EuiCodeBlock)`
 
 interface LiveQueryQueryFieldProps {
   disabled?: boolean;
-  field: FieldHook<string>;
   commands?: EuiCodeEditorProps['commands'];
+  name: string;
+  queryType: string;
 }
 
 const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
+  name: fieldName,
   disabled,
-  field,
   commands,
+  queryType,
 }) => {
   const permissions = useKibana().services.application.capabilities.osquery;
-  const { value, setValue, errors } = field;
-  const error = errors[0]?.message;
 
-  const handleEditorChange = useCallback(
-    (newValue) => {
-      setValue(newValue);
+  const { field, fieldState } = useController({
+    name: fieldName,
+    rules: {
+      required: {
+        message: i18n.translate('xpack.osquery.pack.queryFlyoutForm.emptyQueryError', {
+          defaultMessage: 'Query is a required field',
+        }),
+        value: queryType === 'query',
+      },
+      maxLength: {
+        message: i18n.translate('xpack.osquery.liveQuery.queryForm.largeQueryError', {
+          defaultMessage: 'Query is too large (max {maxLength} characters)',
+          values: { maxLength: MAX_QUERY_LENGTH },
+        }),
+        value: MAX_QUERY_LENGTH,
+      },
     },
-    [setValue]
-  );
+    defaultValue: '',
+  });
+  const { onChange, value } = field;
+  const { error } = fieldState;
 
   return (
     <EuiFormRow
-      isInvalid={typeof error === 'string'}
-      error={error}
+      isInvalid={!!error?.message}
+      error={error?.message}
       fullWidth
       isDisabled={!permissions.writeLiveQueries || disabled}
     >
@@ -56,7 +74,7 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
           {value}
         </StyledEuiCodeBlock>
       ) : (
-        <OsqueryEditor defaultValue={value} onChange={handleEditorChange} commands={commands} />
+        <OsqueryEditor defaultValue={value} onChange={onChange} commands={commands} />
       )}
     </EuiFormRow>
   );
