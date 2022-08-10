@@ -1,0 +1,107 @@
+[[osquery-manager-packs-api-get-all]]
+=== Get packs API
+++++
+<titleabbrev>Get packs</titleabbrev>
+++++
+
+experimental[] Get packs.
+
+
+[[osquery-manager-packs-api-get-all-request]]
+==== Request
+
+`GET <kibana host>:<port>/api/osquery/packs`
+
+`GET <kibana host>:<port>/s/<space_id>/api/osquery/packs`
+
+
+[[osquery-manager-packs-api-get-all-params]]
+==== Path parameters
+
+`space_id`::
+(Optional, string) The space identifier. When `space_id` is not provided in the URL, the default space is used.
+
+
+=== Query parameters
+
+`page`::
+(Optional, integer) The page number to return. The default is `1`.
+
+`perPage`::
+(Optional, integer) The number of rules to return per page. The default is `20`.
+
+`sortField`::
+(Optional, string) Specifies the field that sorts the results. Options include `createdAt` or `updatedAt`.
+The default is `createdAt`.
++
+NOTE: Even though the JSON case object uses the `created_at` and `updated_at`
+fields, you must use `createdAt` and `updatedAt` fields in the URL
+query.
+
+`sortOrder`::
+(Optional, string) Specifies the sort order. Options include `desc` or `asc`.
+The default is `desc`.
+
+
+[[osquery-manager-packs-api-get-all-codes]]
+==== Response code
+
+`200`::
+Indicates a successful call.
+
+
+[[osquery-manager-packs-api-get-all-example]]
+==== Example
+
+Retrieve the first 10 packs:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X GET api/osquery/packs?page=1&perPage=10&sortField=updatedAt&sortOrder=asc
+--------------------------------------------------
+// KIBANA
+
+The API returns a JSON object with the retrieved packs:
+
+[source,sh]
+--------------------------------------------------
+{
+  "page": 1,
+  "per_page": 10,
+  "total": 11,
+  "data": [
+    {
+      "type": "osquery-pack",
+      "id": "bbe5b070-0c51-11ed-b0f8-ad31b008e832",
+      "namespaces": ["default"],
+      "attributes": {
+        "name": "test_pack",
+        "queries": [
+          {
+            "query": "select * from uptime",
+            "interval": 3600,
+            "id": "uptime",
+            "ecs_mapping": [
+              {
+                "value": {
+                  "field": "days"
+                },
+                "key": "message"
+              }
+            ]
+          }
+        ],
+        "enabled": true,
+        "created_at": "2022-07-25T19:41:10.263Z",
+        "created_by": "elastic",
+        "updated_at": "2022-07-25T20:12:01.455Z",
+        "updated_by": "elastic",
+        "description": ""
+      },
+      "policy_ids": []
+      }, 
+      {...}
+    ]
+  }
+}
+--------------------------------------------------
