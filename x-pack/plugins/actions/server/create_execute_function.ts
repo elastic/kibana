@@ -154,9 +154,9 @@ export function createBulkExecutionEnqueuerFunction({
       );
     }
 
-    const actionTypeIds: { [key: string]: string } = {};
-    const spaceIds: { [key: string]: string } = {};
-    const connectorIsPreconfigured: { [key: string]: boolean } = {};
+    const actionTypeIds: Record<string, string> = {};
+    const spaceIds: Record<string, string> = {};
+    const connectorIsPreconfigured: Record<string, boolean> = {};
     const connectorIds = [...new Set(actionsToExecute.map((action) => action.id))];
     const connectors = await getConnectors(
       unsecuredSavedObjectsClient,
