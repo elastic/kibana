@@ -28,6 +28,7 @@ import {
   setToggleFullscreen,
   useLensSelector,
   selectVisualization,
+  syncLinkedDimensions,
 } from '../../../state_management';
 import { AddLayerButton } from './add_layer';
 import { getRemoveOperation } from '../../../utils';
@@ -134,6 +135,7 @@ export function LayerPanels(
             },
           })
         );
+        dispatchLens(syncLinkedDimensions());
       }, 0);
     },
     [dispatchLens]
