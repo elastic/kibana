@@ -23,6 +23,7 @@ import { getLayerType } from '../editor_frame_service/editor_frame/config_panel/
 import { getVisualizeFieldSuggestions } from '../editor_frame_service/editor_frame/suggestion_helpers';
 import { FramePublicAPI, LensEditContextMapping, LensEditEvent } from '../types';
 import { selectFramePublicAPI } from './selectors';
+import { onDropForVisualization } from '../editor_frame_service/editor_frame/config_panel/buttons/drop_targets_utils';
 
 export const initialState: LensAppState = {
   persistedDoc: undefined,
@@ -817,7 +818,6 @@ function syncLinkedDimensions(
   datasourceMap: DatasourceMap
 ) {
   let datasourceState: unknown = state.datasourceStates[activeDatasourceId].state;
-
   let visualizationState: unknown = state.visualization.state;
 
   const activeVisualization = visualizationMap[state.visualization.activeId!]; // TODO - double check the safety of this coercion
@@ -827,36 +827,49 @@ function syncLinkedDimensions(
   linkedDimensions?.forEach(({ from, to }) => {
     const columnId = to.columnId ?? generateId();
 
+    const dropSource = {
+      ...from,
+      id: from.columnId,
+      // don't need to worry about accessibility here
+      humanData: { label: '' },
+    };
+
+    const dropTarget = {
+      ...to,
+      columnId,
+      filterOperations: () => true,
+    };
+
+    const dropType = 'duplicate_compatible';
+
+    const dimensionGroups = activeVisualization.getConfiguration({
+      state: visualizationState,
+      layerId: to.layerId,
+      frame,
+    }).groups;
+
     datasourceMap[activeDatasourceId].onDrop({
-      source: {
-        ...from,
-        id: from.columnId,
-        // don't need to worry about accessibility here
-        humanData: { label: '' },
-      },
-      target: {
-        ...to,
-        columnId,
-        filterOperations: () => true,
-      },
+      source: dropSource,
+      target: dropTarget,
       state: datasourceState,
       setState: (s) => {
         datasourceState = s;
       },
-      dimensionGroups: activeVisualization.getConfiguration({
-        state: visualizationState,
-        layerId: to.layerId,
-        frame,
-      }).groups,
-      dropType: 'duplicate_compatible',
+      dimensionGroups,
+      dropType,
     });
 
-    visualizationState = activeVisualization.setDimension({
-      prevState: visualizationState,
-      frame,
-      ...to,
-      columnId,
-    });
+    visualizationState = (activeVisualization.onDrop || onDropForVisualization)?.(
+      {
+        prevState: visualizationState,
+        frame,
+        target: dropTarget,
+        source: dropSource,
+        dropType,
+        group: dimensionGroups.find(({ groupId }) => groupId === dropTarget.groupId),
+      },
+      activeVisualization
+    );
   });
 
   return { datasourceState, visualizationState };
