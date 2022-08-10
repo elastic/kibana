@@ -7,29 +7,56 @@
  */
 import { useMemo, useEffect, useState, useCallback } from 'react';
 import { isEqual } from 'lodash';
-import { History } from 'history';
-import { getState } from '../../main/services/discover_state';
-import { getStateDefaults } from '../../main/utils/get_state_defaults';
-import { DiscoverServices } from '../../../build_services';
-import { SavedSearch, getSavedSearch } from '../../../services/saved_searches';
-import { loadDataView } from '../../main/utils/resolve_data_view';
-import { MODIFY_COLUMNS_ON_SWITCH, SORT_DEFAULT_ORDER_SETTING } from '../../../../common';
-import { getDataViewAppState } from '../../main/utils/get_switch_data_view_app_state';
-import { SortPairArr } from '../../../components/doc_table/utils/get_sort';
-import { DataTableRecord } from '../../../types';
+import createContainer from 'constate';
+import { useHistory } from 'react-router-dom';
+import { generateFilters } from '@kbn/data-plugin/public';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { getState } from '../../../main/services/discover_state';
+import { getStateDefaults } from '../../../main/utils/get_state_defaults';
+import { SavedSearch, getSavedSearch } from '../../../../services/saved_searches';
+import { loadDataView } from '../../../main/utils/resolve_data_view';
+import { MODIFY_COLUMNS_ON_SWITCH, SORT_DEFAULT_ORDER_SETTING } from '../../../../../common';
+import { getDataViewAppState } from '../../../main/utils/get_switch_data_view_app_state';
+import { SortPairArr } from '../../../../components/doc_table/utils/get_sort';
+import { DataTableRecord } from '../../../../types';
+import { useUrl } from '../../../main/hooks/use_url';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import { setBreadcrumbsTitle } from '../../../../utils/breadcrumbs';
+import { addHelpMenuToAppChrome } from '../../../../components/help_menu/help_menu_util';
+import { useSavedSearchAliasMatchRedirect } from '../../../../services/saved_searches';
+import { popularizeField } from '../../../../utils/popularize_field';
 
+/**
+ * State from "outer" Discover (e.g. not specific to the log explorer mode).
+ * This includes data views, filters, saved searches etc.
+ **/
 export function useDiscoverState({
-  services,
-  history,
   savedSearch,
   setExpandedDoc,
 }: {
-  services: DiscoverServices;
   savedSearch: SavedSearch;
-  history: History;
   setExpandedDoc: (doc?: DataTableRecord) => void;
 }) {
-  const { uiSettings: config, data, filterManager, dataViews, storage } = services;
+  const {
+    uiSettings: config,
+    data,
+    filterManager,
+    dataViews,
+    storage,
+    chrome,
+    docLinks,
+    spaces,
+    core: {
+      notifications: { toasts },
+      savedObjects: { client: savedObjectsClient },
+    },
+    history,
+    trackUiMetric,
+    capabilities,
+  } = useDiscoverServices();
+
+  const usedHistory = useHistory();
 
   const dataView = savedSearch.searchSource.getField('index')!;
 
@@ -50,10 +77,10 @@ export function useDiscoverState({
           }),
         storeInSessionStorage: config.get('state:storeInSessionStorage'),
         history,
-        toasts: services.core.notifications.toasts,
+        toasts,
         uiSettings: config,
       }),
-    [config, data, history, savedSearch, services.core.notifications.toasts, storage]
+    [config, data, history, savedSearch, toasts, storage]
   );
 
   const { appStateContainer } = stateContainer;
@@ -101,9 +128,9 @@ export function useDiscoverState({
   const resetSavedSearch = useCallback(
     async (id?: string) => {
       const newSavedSearch = await getSavedSearch(id, {
-        search: services.data.search,
-        savedObjectsClient: services.core.savedObjects.client,
-        spaces: services.spaces,
+        search: data.search,
+        savedObjectsClient,
+        spaces,
       });
 
       const newDataView = newSavedSearch.searchSource.getField('index') || dataView;
@@ -117,7 +144,7 @@ export function useDiscoverState({
       await stateContainer.replaceUrlAppState(newAppState);
       setState(newAppState);
     },
-    [services, dataView, config, data, storage, stateContainer]
+    [dataView, config, data, storage, stateContainer, spaces, savedObjectsClient]
   );
 
   /**
@@ -152,13 +179,87 @@ export function useDiscoverState({
     ]
   );
 
+  const onDataViewCreated = useCallback(
+    (newDataView: DataView) => {
+      if (newDataView.id) {
+        onChangeDataView(newDataView.id);
+      }
+    },
+    [onChangeDataView]
+  );
+
+  /**
+   * Url / Routing logic
+   */
+  useUrl({ history: usedHistory, resetSavedSearch });
+
+  /**
+   * SavedSearch dependant initialisation
+   */
+  useEffect(() => {
+    const pageTitleSuffix = savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '';
+    chrome.docTitle.change(`Discover${pageTitleSuffix}`);
+    setBreadcrumbsTitle(savedSearch, chrome);
+    return () => {
+      data.search.session.clear();
+    };
+  }, [savedSearch, chrome, docLinks, stateContainer, data, config]);
+
+  /**
+   * Initializing syncing with state and help menu
+   */
+  useEffect(() => {
+    addHelpMenuToAppChrome(chrome, docLinks);
+  }, [stateContainer, chrome, docLinks]);
+
+  const resetCurrentSavedSearch = useCallback(() => {
+    resetSavedSearch(savedSearch.id);
+  }, [resetSavedSearch, savedSearch]);
+
+  useSavedSearchAliasMatchRedirect({ savedSearch, spaces, history });
+
+  const navigateTo = useCallback(
+    (path: string) => {
+      usedHistory.push(path);
+    },
+    [usedHistory]
+  );
+
+  // Filters
+  const onAddFilter = useCallback(
+    (field: DataViewField | string, values: unknown, operation: '+' | '-') => {
+      const fieldName = typeof field === 'string' ? field : field.name;
+      popularizeField(dataView, fieldName, dataViews, capabilities);
+      const newFilters = generateFilters(filterManager, field, values, operation, dataView);
+      if (trackUiMetric) {
+        trackUiMetric(METRIC_TYPE.CLICK, 'filter_added');
+      }
+      return filterManager.addFilters(newFilters);
+    },
+    [filterManager, dataView, dataViews, trackUiMetric, capabilities]
+  );
+
+  const onDisableFilters = useCallback(() => {
+    const disabledFilters = filterManager
+      .getFilters()
+      .map((filter) => ({ ...filter, meta: { ...filter.meta, disabled: true } }));
+    filterManager.setFilters(disabledFilters);
+  }, [filterManager]);
+
   return {
     dataView,
     resetSavedSearch,
     onChangeDataView,
+    onDataViewCreated,
+    onAddFilter,
+    onDisableFilters,
     searchSource,
     setState,
     state,
     stateContainer,
+    navigateTo,
+    resetCurrentSavedSearch,
   };
 }
+
+export const [DiscoverStateProvider, useDiscoverStateContext] = createContainer(useDiscoverState);

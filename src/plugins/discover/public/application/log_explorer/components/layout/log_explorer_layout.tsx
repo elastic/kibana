@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import '../../../main/components/layout/discover_layout.scss';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { isOfQueryType } from '@kbn/es-query';
 import {
   EuiButtonIcon,
@@ -19,11 +19,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { METRIC_TYPE } from '@kbn/analytics';
 import classNames from 'classnames';
-import { generateFilters } from '@kbn/data-plugin/public';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import { InspectorSession } from '@kbn/inspector-plugin/public';
 import { useActor } from '@xstate/react';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -31,7 +27,6 @@ import { DiscoverNoResults } from '../../../main/components/no_results';
 import { LoadingSpinner } from '../../../main/components/loading_spinner/loading_spinner';
 import { DiscoverSidebarResponsive } from '../../../main/components/sidebar';
 import { DiscoverLayoutProps } from '../../../main/components/layout/types';
-import { popularizeField } from '../../../../utils/popularize_field';
 import { DiscoverTopNav } from '../../../main/components/top_nav/discover_topnav';
 import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
 import { DiscoverUninitialized } from '../../../main/components/uninitialized/uninitialized';
@@ -41,54 +36,50 @@ import { hasActiveFilter } from '../../../main/components/layout/utils';
 import { LogExplorer } from './log_explorer';
 import { useStateMachineContext } from '../../hooks/query_data/use_state_machine';
 import { useFieldCounts } from '../../hooks/use_field_counts';
-
-/**
- * Local storage key for sidebar persistence state
- */
-export const SIDEBAR_CLOSED_KEY = 'discover:sidebarClosed';
+import { useDiscoverStateContext } from '../../hooks/discover_state/use_discover_state';
+import { useSidebarState } from '../../hooks/ui/use_sidebar_state';
 
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
 
 export function LogExplorerLayout({
-  dataView,
   dataViewList,
   inspectorAdapters,
   expandedDoc,
-  navigateTo,
-  onChangeDataView,
-  onUpdateQuery,
   setExpandedDoc,
-  savedSearchRefetch$,
-  resetSavedSearch,
-  savedSearchData$,
   savedSearch,
-  searchSource,
-  state,
-  stateContainer,
 }: DiscoverLayoutProps) {
+  // Access to Discover services
   const {
     trackUiMetric,
     capabilities,
     dataViews,
     data,
     uiSettings,
-    filterManager,
     storage,
     history,
     spaces,
     inspector,
   } = useDiscoverServices();
-  const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
 
-  const stateMachine = useStateMachineContext();
-  const [dataAccessState] = useActor(stateMachine);
-  const fieldCounts = useFieldCounts(stateMachine);
-  // const dataState: DataMainMsg = useDataState(main$);
+  // Access to "outer" Discover state
+  const {
+    dataView,
+    onChangeDataView,
+    onDataViewCreated,
+    resetSavedSearch,
+    searchSource,
+    state,
+    stateContainer,
+    navigateTo,
+    onAddFilter,
+    onDisableFilters,
+  } = useDiscoverStateContext();
 
-  const initialSidebarClosed = Boolean(storage.get(SIDEBAR_CLOSED_KEY));
-  const [isSidebarClosed, setIsSidebarClosed] = useState(initialSidebarClosed);
+  // Inspector
+  // TODO: Fix this and move to independent hook
 
+  // const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
   // const onOpenInspector = useCallback(() => {
   //   // prevent overlapping
   //   setExpandedDoc(undefined);
@@ -97,16 +88,26 @@ export function LogExplorerLayout({
   //   });
   //   setInspectorSession(session);
   // }, [setExpandedDoc, inspectorAdapters, savedSearch, inspector]);
+  // useEffect(() => {
+  //   return () => {
+  //     if (inspectorSession) {
+  //       // Close the inspector if this scope is destroyed (e.g. because the user navigates away).
+  //       inspectorSession.close();
+  //     }
+  //   };
+  // }, [inspectorSession]);
 
-  useEffect(() => {
-    return () => {
-      if (inspectorSession) {
-        // Close the inspector if this scope is destroyed (e.g. because the user navigates away).
-        inspectorSession.close();
-      }
-    };
-  }, [inspectorSession]);
+  // Data querying state machine access and derivatives
+  const stateMachine = useStateMachineContext();
+  const [dataAccessState] = useActor(stateMachine);
+  const fieldCounts = useFieldCounts(stateMachine);
 
+  // Sidebar state
+  const { isSidebarClosed, toggleSidebarCollapse } = useSidebarState({
+    storage,
+  });
+
+  // Columns
   const { columns, onAddColumn, onRemoveColumn } = useColumns({
     capabilities,
     config: uiSettings,
@@ -117,46 +118,13 @@ export function LogExplorerLayout({
     useNewFieldsApi: true,
   });
 
-  const onAddFilter = useCallback(
-    (field: DataViewField | string, values: unknown, operation: '+' | '-') => {
-      const fieldName = typeof field === 'string' ? field : field.name;
-      popularizeField(dataView, fieldName, dataViews, capabilities);
-      const newFilters = generateFilters(filterManager, field, values, operation, dataView);
-      if (trackUiMetric) {
-        trackUiMetric(METRIC_TYPE.CLICK, 'filter_added');
-      }
-      return filterManager.addFilters(newFilters);
-    },
-    [filterManager, dataView, dataViews, trackUiMetric, capabilities]
-  );
-
   const onFieldEdited = useCallback(() => {
-    savedSearchRefetch$.next('reset');
-  }, [savedSearchRefetch$]);
-
-  const onDisableFilters = useCallback(() => {
-    const disabledFilters = filterManager
-      .getFilters()
-      .map((filter) => ({ ...filter, meta: { ...filter.meta, disabled: true } }));
-    filterManager.setFilters(disabledFilters);
-  }, [filterManager]);
-
-  const toggleSidebarCollapse = useCallback(() => {
-    storage.set(SIDEBAR_CLOSED_KEY, !isSidebarClosed);
-    setIsSidebarClosed(!isSidebarClosed);
-  }, [isSidebarClosed, storage]);
+    // TODO: Refetch via state machine
+    // savedSearchRefetch$.next('reset');
+  }, []);
 
   const contentCentered =
     dataAccessState.matches('uninitialized') || dataAccessState.matches('failedNoData');
-
-  // const onDataViewCreated = useCallback(
-  //   (newDataView: DataView) => {
-  //     if (newDataView.id) {
-  //       onChangeDataView(newDataView.id);
-  //     }
-  //   },
-  //   [onChangeDataView]
-  // );
 
   const savedSearchTitle = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
@@ -192,12 +160,12 @@ export function LogExplorerLayout({
         savedSearch={savedSearch}
         searchSource={searchSource}
         stateContainer={stateContainer}
-        updateQuery={onUpdateQuery}
+        // updateQuery={onUpdateQuery} - TODO: respond to query updates
         resetSavedSearch={resetSavedSearch}
         onChangeDataView={onChangeDataView}
         onFieldEdited={onFieldEdited}
-        // isPlainRecord={isPlainRecord}
-        // textBasedLanguageModeErrors={textBasedLanguageModeErrors}
+        // isPlainRecord={isPlainRecord} - SQL
+        // textBasedLanguageModeErrors={textBasedLanguageModeErrors} - SQL
       />
       <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
         <SavedSearchURLConflictCallout
@@ -267,7 +235,9 @@ export function LogExplorerLayout({
                   onDisableFilters={onDisableFilters}
                 />
               ) : dataAccessState.matches('uninitialized') ? (
-                <DiscoverUninitialized onRefresh={() => savedSearchRefetch$.next(undefined)} />
+                <DiscoverUninitialized
+                // onRefresh={() => TODO: Refetch via state machine}
+                />
               ) : dataAccessState.matches('loadingAround') ? (
                 <LoadingSpinner />
               ) : (

@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ISearchSource, QueryStart } from '@kbn/data-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/public';
+import { QueryStart } from '@kbn/data-plugin/public';
 import { TimeRange } from '@kbn/es-query';
 import { useInterpret } from '@xstate/react';
 import createContainer from 'constate';
@@ -22,18 +21,17 @@ import {
 } from '../../state_machines/data_access_state_machine';
 import { loadTail } from '../../state_machines/data_access_state_machine/load_tail_service';
 import { useSubscription } from '../use_observable';
+import { useDiscoverStateContext } from '../discover_state/use_discover_state';
 
 export const useStateMachineService = ({
   virtualRowCount,
-  dataView,
   query,
-  searchSource,
 }: {
   virtualRowCount: number;
-  dataView: DataView;
   query: QueryStart;
-  searchSource: ISearchSource;
 }) => {
+  const { searchSource, dataView } = useDiscoverStateContext();
+
   const {
     timefilter: { timefilter },
     filterManager,
