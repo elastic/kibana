@@ -30,7 +30,7 @@ export function collectApiStatsForPlugin(
     unreferencedDeprecatedApisCount: 0,
     adoptionTrackedAPIs: [],
     adoptionTrackedAPIsCount: 0,
-    adoptionTrackedAPIsReferencedCount: 0,
+    adoptionTrackedAPIsUnreferencedCount: 0,
     apiCount: countApiForPlugin(doc),
     missingExports: Object.values(missingApiItems[doc.id] ?? {}).length,
   };
@@ -57,8 +57,8 @@ function collectAdoptionTrackedAPIStats(
 ) {
   stats.adoptionTrackedAPIs = adoptionTrackedAPIs[doc.id] || [];
   stats.adoptionTrackedAPIsCount = stats.adoptionTrackedAPIs.length;
-  stats.adoptionTrackedAPIsReferencedCount = stats.adoptionTrackedAPIs.filter(
-    ({ references }) => references.length
+  stats.adoptionTrackedAPIsUnreferencedCount = stats.adoptionTrackedAPIs.filter(
+    ({ references }) => references.length === 0
   ).length;
 }
 

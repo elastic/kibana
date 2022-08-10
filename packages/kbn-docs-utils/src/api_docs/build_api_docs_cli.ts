@@ -178,8 +178,8 @@ export function runBuildApiDocsCli() {
           {
             id,
             meta: { pluginTeam },
-            group: 'Adoption-tracked APIs that are referenced at least once',
-            value: pluginStats.adoptionTrackedAPIsReferencedCount,
+            group: 'Adoption-tracked APIs that are not used anywhere',
+            value: pluginStats.adoptionTrackedAPIsUnreferencedCount,
           },
           {
             id,

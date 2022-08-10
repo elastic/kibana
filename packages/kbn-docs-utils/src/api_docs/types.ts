@@ -286,9 +286,9 @@ export interface ApiStats {
    */
   adoptionTrackedAPIsCount: number;
   /**
-   * Number of adoption-tracked APIs that are referenced, at least, once.
+   * Number of adoption-tracked APIs that are still not referenced.
    */
-  adoptionTrackedAPIsReferencedCount: number;
+  adoptionTrackedAPIsUnreferencedCount: number;
 }
 
 export type PluginMetaInfo = ApiStats & {
