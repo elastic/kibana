@@ -14,7 +14,6 @@ import {
 import { FILTERS } from './constants';
 import { FilterAggForm, FilterEditorForm, FilterRangeForm, FilterTermForm } from './components';
 import {
-  FilterAggConfigBase,
   FilterAggConfigBool,
   FilterAggConfigExists,
   FilterAggConfigRange,
@@ -30,10 +29,13 @@ import {
 export function getFilterAggConfig(
   commonConfig: PivotAggsConfigWithUiBase | PivotAggsConfigBase
 ): PivotAggsConfigFilter {
+  const field = isPivotAggsConfigWithUiSupport(commonConfig) ? commonConfig.field : null;
+
   return {
     ...commonConfig,
     isSubAggsSupported: true,
-    field: isPivotAggsConfigWithUiSupport(commonConfig) ? commonConfig.field : '',
+    // Field name might be missing, for instance for the bool filter.
+    field,
     AggFormComponent: FilterAggForm,
     aggConfig: {},
     getEsAggConfig() {
@@ -49,10 +51,11 @@ export function getFilterAggConfig(
     setUiConfigFromEs(esAggDefinition) {
       const filterAgg = Object.keys(esAggDefinition)[0] as FilterAggType;
       const filterAggConfig = esAggDefinition[filterAgg];
-      const aggTypeConfig = getFilterAggTypeConfig(filterAgg, filterAggConfig);
 
-      // TODO consider moving field to the filter agg type level
-      this.field = Object.keys(filterAggConfig)[0];
+      const aggTypeConfig = getFilterAggTypeConfig(filterAgg, field as string, filterAggConfig);
+
+      this.field = field ?? aggTypeConfig.fieldName ?? null;
+
       this.aggConfig = {
         filterAgg,
         aggTypeConfig,
@@ -82,8 +85,9 @@ export function getFilterAggConfig(
  */
 export function getFilterAggTypeConfig(
   filterAggType: FilterAggConfigUnion['filterAgg'] | FilterAggType,
+  fieldName?: string,
   esConfig?: { [key: string]: any }
-): FilterAggConfigUnion['aggTypeConfig'] | FilterAggConfigBase['aggTypeConfig'] {
+): FilterAggConfigUnion['aggTypeConfig'] {
   switch (filterAggType) {
     case FILTERS.TERM:
       const value = typeof esConfig === 'object' ? Object.values(esConfig)[0] : undefined;
@@ -93,12 +97,12 @@ export function getFilterAggTypeConfig(
         filterAggConfig: {
           value,
         },
-        getEsAggConfig(fieldName) {
-          if (fieldName === undefined || !this.filterAggConfig) {
+        getEsAggConfig() {
+          if (this.fieldName === undefined || !this.filterAggConfig) {
             throw new Error(`Config ${FILTERS.TERM} is not completed`);
           }
           return {
-            [fieldName]: this.filterAggConfig.value,
+            [this.fieldName]: this.filterAggConfig.value,
           };
         },
         isValid() {
@@ -107,6 +111,7 @@ export function getFilterAggTypeConfig(
         getAggName() {
           return this.filterAggConfig?.value ? this.filterAggConfig.value : undefined;
         },
+        fieldName,
       } as FilterAggConfigTerm['aggTypeConfig'];
     case FILTERS.RANGE:
       const esFilterRange = typeof esConfig === 'object' ? Object.values(esConfig)[0] : undefined;
@@ -122,8 +127,8 @@ export function getFilterAggTypeConfig(
                 includeTo: esFilterRange.lts !== undefined,
               }
             : undefined,
-        getEsAggConfig(fieldName) {
-          if (fieldName === undefined || !this.filterAggConfig) {
+        getEsAggConfig() {
+          if (this.fieldName === undefined || !this.filterAggConfig) {
             throw new Error(`Config ${FILTERS.RANGE} is not completed`);
           }
 
@@ -140,7 +145,7 @@ export function getFilterAggTypeConfig(
           }
 
           return {
-            [fieldName]: result,
+            [this.fieldName]: result,
           };
         },
         isValid() {
@@ -157,6 +162,7 @@ export function getFilterAggTypeConfig(
 
           return true;
         },
+        fieldName,
         helperText() {
           if (!this.isValid!()) return;
           const { from, to, includeFrom, includeTo } = this.filterAggConfig!;
@@ -167,14 +173,20 @@ export function getFilterAggTypeConfig(
         },
       } as FilterAggConfigRange['aggTypeConfig'];
     case FILTERS.EXISTS:
+      const resultField = esConfig ? esConfig.field : fieldName;
+
       return {
-        getEsAggConfig(fieldName) {
-          if (fieldName === undefined) {
+        fieldName: resultField,
+        getEsAggConfig() {
+          if (this.fieldName === undefined) {
             throw new Error(`Config ${FILTERS.EXISTS} is not completed`);
           }
           return {
-            field: fieldName,
+            field: this.fieldName,
           };
+        },
+        isValid() {
+          return typeof this.fieldName === 'string';
         },
       } as FilterAggConfigExists['aggTypeConfig'];
     case FILTERS.BOOL:
@@ -192,12 +204,13 @@ export function getFilterAggTypeConfig(
         isValid() {
           return jsonStringValidator(this.filterAggConfig);
         },
-        getEsAggConfig(fieldName) {
+        getEsAggConfig() {
           return JSON.parse(this.filterAggConfig!);
         },
       } as FilterAggConfigBool['aggTypeConfig'];
     default:
       return {
+        fieldName,
         FilterAggFormComponent: FilterEditorForm,
         filterAggConfig: '',
         getEsAggConfig() {
