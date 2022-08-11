@@ -1298,7 +1298,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('should show stats for the detection_rule_details for a specific pre-packaged rule', async () => {
+      it.only('should show stats for the detection_rule_details for a specific pre-packaged rule', async () => {
         await installPrePackagedRules(supertest, log);
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
@@ -1315,12 +1315,12 @@ export default ({ getService }: FtrProviderContext) => {
             created_on: createdOn,
             updated_on: updatedOn,
             rule_id: ruleId,
+            rule_version: ruleVersion,
             ...omittedFields
           } = foundRule;
           expect(omittedFields).to.eql({
             rule_name: 'Endpoint Security',
             rule_type: 'query',
-            rule_version: 3,
             enabled: true,
             elastic_rule: true,
             alert_count_daily: 0,
