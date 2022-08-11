@@ -317,6 +317,7 @@ export function DualBrush({
       {width > 0 && (
         <svg
           className="aiops-dual-brush"
+          data-test-subj="aiopsDualBrush"
           width={width}
           height={BRUSH_HEIGHT}
           style={{ marginLeft }}

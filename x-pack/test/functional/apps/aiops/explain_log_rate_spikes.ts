@@ -22,6 +22,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
   function runTests(testData: TestData) {
     it(`${testData.suiteTitle} loads the source data in explain log rate spikes`, async () => {
+      await elasticChart.setNewChartUiDebugFlag(true);
+
       await ml.testExecution.logTestStep(
         `${testData.suiteTitle} loads the saved search selection page`
       );
@@ -69,13 +71,49 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
       await aiops.explainLogRateSpikes.assertNoResultsFoundEmptyPromptExist();
 
+      // aiopsDualBrush
+
+      await elasticChart.waitForRenderComplete('aiopsDocumentCountChart');
+      const chartDebugData = await elasticChart.getChartDebugData('aiopsDocumentCountChart');
+
+      const dualBrushWrapper = await testSubjects.find('aiopsDualBrush');
+      const dualBrushWrapperRect = await dualBrushWrapper._webElement.getRect();
+      // console.log('dualBrushWidth', dualBrushWrapperRect.width);
+
+      const bars = chartDebugData?.bars?.[0].bars ?? [];
+      const barsCount = bars.length;
+      const targetDeviationBarIndex = bars.findIndex((b) => b.x === 1455033600000);
+      // console.log('chartDebugData', targetDeviationBarIndex);
+
+      const targetPx = Math.round(
+        (targetDeviationBarIndex / barsCount) * dualBrushWrapperRect.width
+      );
+      const intervalPx = Math.round((1 / barsCount) * dualBrushWrapperRect.width);
+      // console.log('targetPx', targetPx);
+
       // #aiops-brush-deviation .handle--e
-      const brush = (await testSubjects.findAll('aiopsBrushDeviation'))[0];
+      const brush = await testSubjects.find('aiopsBrushDeviation');
+
       const rightHandle = (await brush.findAllByClassName('handle--e'))[0];
+      const rightHandleRect = await rightHandle._webElement.getRect();
+      const rightHandlePx = rightHandleRect.x - dualBrushWrapperRect.x;
+      const rightHandleFactor = rightHandlePx > targetPx ? 1 : -1;
+      const rightDragAndDropOffsetPx = (targetPx - rightHandlePx) * rightHandleFactor;
 
       await browser.dragAndDrop(
         { location: rightHandle, offset: { x: 0, y: 0 } },
-        { location: rightHandle, offset: { x: 200, y: 0 } }
+        { location: rightHandle, offset: { x: rightDragAndDropOffsetPx, y: 0 } }
+      );
+
+      const leftHandle = (await brush.findAllByClassName('handle--w'))[0];
+      const leftHandleRect = await leftHandle._webElement.getRect();
+      const leftHandlePx = leftHandleRect.x - dualBrushWrapperRect.x;
+      const leftHandleFactor = leftHandlePx > targetPx ? 1 : -1;
+      const leftDragAndDropOffsetPx = (targetPx - leftHandlePx) * leftHandleFactor - intervalPx;
+
+      await browser.dragAndDrop(
+        { location: leftHandle, offset: { x: 0, y: 0 } },
+        { location: leftHandle, offset: { x: leftDragAndDropOffsetPx, y: 0 } }
       );
 
       await aiops.explainLogRateSpikes.assertNoWindowParametersEmptyPromptExist();
@@ -100,10 +138,9 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
     describe('with farequote', function () {
       // Run tests on full farequote index.
       it(`${farequoteDataViewTestData.suiteTitle} loads the explain log rate spikes page`, async () => {
-        await elasticChart.setNewChartUiDebugFlag();
-
         // Start navigation from the base of the ML app.
         await ml.navigation.navigateToMl();
+        await elasticChart.setNewChartUiDebugFlag(true);
       });
 
       runTests(farequoteDataViewTestData);

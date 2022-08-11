@@ -33,6 +33,15 @@ import { useAiOpsKibana } from '../../../kibana_context';
 
 import { BrushBadge } from './brush_badge';
 
+declare global {
+  interface Window {
+    /**
+     * Flag used to enable debugState on elastic charts
+     */
+    _echDebugStateFlag?: boolean;
+  }
+}
+
 export interface DocumentCountChartPoint {
   time: number | string;
   value: number;
@@ -326,6 +335,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
             }}
             theme={chartTheme}
             baseTheme={chartBaseTheme}
+            debugState={window._echDebugStateFlag ?? false}
           />
           <Axis
             id="bottom"
