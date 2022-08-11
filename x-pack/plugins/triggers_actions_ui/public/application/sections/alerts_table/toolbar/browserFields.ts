@@ -53,37 +53,6 @@ export default {
       },
     },
   },
-  _score: {
-    fields: {
-      _score: {
-        name: '_score',
-        type: 'number',
-        searchable: false,
-        aggregatable: false,
-        readFromDocValues: false,
-        metadata_field: true,
-        category: '_score',
-        description: '',
-        example: '',
-      },
-    },
-  },
-  _source: {
-    fields: {
-      _source: {
-        name: '_source',
-        type: '_source',
-        esTypes: ['_source'],
-        searchable: false,
-        aggregatable: false,
-        readFromDocValues: false,
-        metadata_field: true,
-        category: '_source',
-        description: '',
-        example: '',
-      },
-    },
-  },
   ecs: {
     fields: {
       'ecs.version': {
@@ -136,8 +105,6 @@ export default {
         readFromDocValues: true,
         metadata_field: false,
         category: 'kibana',
-        description: '',
-        example: '',
       },
       'kibana.alert.duration.us': {
         name: 'kibana.alert.duration.us',
@@ -148,8 +115,6 @@ export default {
         readFromDocValues: true,
         metadata_field: false,
         category: 'kibana',
-        description: '',
-        example: '',
       },
       'kibana.alert.end': {
         name: 'kibana.alert.end',
@@ -160,8 +125,6 @@ export default {
         readFromDocValues: true,
         metadata_field: false,
         category: 'kibana',
-        description: '',
-        example: '',
       },
       'kibana.alert.evaluation.threshold': {
         name: 'kibana.alert.evaluation.threshold',
@@ -172,8 +135,6 @@ export default {
         readFromDocValues: true,
         metadata_field: false,
         category: 'kibana',
-        description: '',
-        example: '',
       },
       'kibana.alert.evaluation.value': {
         name: 'kibana.alert.evaluation.value',
@@ -184,8 +145,6 @@ export default {
         readFromDocValues: true,
         metadata_field: false,
         category: 'kibana',
-        description: '',
-        example: '',
       },
       'kibana.alert.instance.id': {
         name: 'kibana.alert.instance.id',
@@ -196,8 +155,6 @@ export default {
         readFromDocValues: true,
         metadata_field: false,
         category: 'kibana',
-        description: '',
-        example: '',
       },
       'kibana.alert.reason': {
         name: 'kibana.alert.reason',
@@ -208,8 +165,6 @@ export default {
         readFromDocValues: true,
         metadata_field: false,
         category: 'kibana',
-        description: '',
-        example: '',
       },
       'kibana.alert.risk_score': {
         name: 'kibana.alert.risk_score',
@@ -220,8 +175,6 @@ export default {
         readFromDocValues: true,
         metadata_field: false,
         category: 'kibana',
-        description: '',
-        example: '',
       },
       'kibana.alert.rule.author': {
         name: 'kibana.alert.rule.author',
@@ -232,8 +185,6 @@ export default {
         readFromDocValues: true,
         metadata_field: false,
         category: 'kibana',
-        description: '',
-        example: '',
       },
       'kibana.alert.rule.category': {
         name: 'kibana.alert.rule.category',
@@ -244,8 +195,6 @@ export default {
         readFromDocValues: true,
         metadata_field: false,
         category: 'kibana',
-        description: '',
-        example: '',
       },
       'kibana.alert.rule.consumer': {
         name: 'kibana.alert.rule.consumer',
@@ -256,8 +205,6 @@ export default {
         readFromDocValues: true,
         metadata_field: false,
         category: 'kibana',
-        description: '',
-        example: '',
       },
       'kibana.alert.rule.created_at': {
         name: 'kibana.alert.rule.created_at',
@@ -268,8 +215,6 @@ export default {
         readFromDocValues: true,
         metadata_field: false,
         category: 'kibana',
-        description: '',
-        example: '',
       },
       'kibana.alert.rule.created_by': {
         name: 'kibana.alert.rule.created_by',
@@ -280,8 +225,6 @@ export default {
         readFromDocValues: true,
         metadata_field: false,
         category: 'kibana',
-        description: '',
-        example: '',
       },
       'kibana.alert.rule.description': {
         name: 'kibana.alert.rule.description',
@@ -292,8 +235,6 @@ export default {
         readFromDocValues: true,
         metadata_field: false,
         category: 'kibana',
-        description: '',
-        example: '',
       },
       'kibana.alert.rule.enabled': {
         name: 'kibana.alert.rule.enabled',
@@ -304,8 +245,6 @@ export default {
         readFromDocValues: true,
         metadata_field: false,
         category: 'kibana',
-        description: '',
-        example: '',
       },
       'kibana.alert.rule.execution.uuid': {
         name: 'kibana.alert.rule.execution.uuid',
@@ -316,8 +255,6 @@ export default {
         readFromDocValues: true,
         metadata_field: false,
         category: 'kibana',
-        description: '',
-        example: '',
       },
       'kibana.alert.rule.from': {
         name: 'kibana.alert.rule.from',
@@ -328,8 +265,6 @@ export default {
         readFromDocValues: true,
         metadata_field: false,
         category: 'kibana',
-        description: '',
-        example: '',
       },
       'kibana.alert.rule.interval': {
         name: 'kibana.alert.rule.interval',
@@ -340,8 +275,6 @@ export default {
         readFromDocValues: true,
         metadata_field: false,
         category: 'kibana',
-        description: '',
-        example: '',
       },
       'kibana.alert.rule.license': {
         name: 'kibana.alert.rule.license',
@@ -352,8 +285,6 @@ export default {
         readFromDocValues: true,
         metadata_field: false,
         category: 'kibana',
-        description: '',
-        example: '',
       },
       'kibana.alert.rule.name': {
         name: 'kibana.alert.rule.name',
@@ -364,8 +295,6 @@ export default {
         readFromDocValues: true,
         metadata_field: false,
         category: 'kibana',
-        description: '',
-        example: '',
       },
       'kibana.alert.rule.note': {
         name: 'kibana.alert.rule.note',
@@ -376,8 +305,6 @@ export default {
         readFromDocValues: true,
         metadata_field: false,
         category: 'kibana',
-        description: '',
-        example: '',
       },
       'kibana.alert.rule.parameters': {
         name: 'kibana.alert.rule.parameters',
@@ -388,8 +315,6 @@ export default {
         readFromDocValues: true,
         metadata_field: false,
         category: 'kibana',
-        description: '',
-        example: '',
       },
       'kibana.alert.rule.producer': {
         name: 'kibana.alert.rule.producer',
@@ -400,8 +325,6 @@ export default {
         readFromDocValues: true,
         metadata_field: false,
         category: 'kibana',
-        description: '',
-        example: '',
       },
       'kibana.alert.rule.references': {
         name: 'kibana.alert.rule.references',
@@ -412,8 +335,6 @@ export default {
         readFromDocValues: true,
         metadata_field: false,
         category: 'kibana',
-        description: '',
-        example: '',
       },
       'kibana.alert.rule.rule_id': {
         name: 'kibana.alert.rule.rule_id',
@@ -424,8 +345,6 @@ export default {
         readFromDocValues: true,
         metadata_field: false,
         category: 'kibana',
-        description: '',
-        example: '',
       },
       'kibana.alert.rule.rule_name_override': {
         name: 'kibana.alert.rule.rule_name_override',
@@ -436,8 +355,6 @@ export default {
         readFromDocValues: true,
         metadata_field: false,
         category: 'kibana',
-        description: '',
-        example: '',
       },
       'kibana.alert.rule.rule_type_id': {
         name: 'kibana.alert.rule.rule_type_id',
@@ -448,8 +365,6 @@ export default {
         readFromDocValues: true,
         metadata_field: false,
         category: 'kibana',
-        description: '',
-        example: '',
       },
       'kibana.alert.rule.tags': {
         name: 'kibana.alert.rule.tags',
@@ -460,8 +375,6 @@ export default {
         readFromDocValues: true,
         metadata_field: false,
         category: 'kibana',
-        description: '',
-        example: '',
       },
       'kibana.alert.rule.to': {
         name: 'kibana.alert.rule.to',
@@ -472,8 +385,6 @@ export default {
         readFromDocValues: true,
         metadata_field: false,
         category: 'kibana',
-        description: '',
-        example: '',
       },
       'kibana.alert.rule.type': {
         name: 'kibana.alert.rule.type',
@@ -484,8 +395,6 @@ export default {
         readFromDocValues: true,
         metadata_field: false,
         category: 'kibana',
-        description: '',
-        example: '',
       },
       'kibana.alert.rule.updated_at': {
         name: 'kibana.alert.rule.updated_at',
@@ -496,8 +405,6 @@ export default {
         readFromDocValues: true,
         metadata_field: false,
         category: 'kibana',
-        description: '',
-        example: '',
       },
       'kibana.alert.rule.updated_by': {
         name: 'kibana.alert.rule.updated_by',
@@ -508,8 +415,6 @@ export default {
         readFromDocValues: true,
         metadata_field: false,
         category: 'kibana',
-        description: '',
-        example: '',
       },
       'kibana.alert.rule.uuid': {
         name: 'kibana.alert.rule.uuid',
@@ -520,8 +425,6 @@ export default {
         readFromDocValues: true,
         metadata_field: false,
         category: 'kibana',
-        description: '',
-        example: '',
       },
       'kibana.alert.rule.version': {
         name: 'kibana.alert.rule.version',
@@ -532,8 +435,6 @@ export default {
         readFromDocValues: true,
         metadata_field: false,
         category: 'kibana',
-        description: '',
-        example: '',
       },
       'kibana.alert.severity': {
         name: 'kibana.alert.severity',
@@ -544,8 +445,6 @@ export default {
         readFromDocValues: true,
         metadata_field: false,
         category: 'kibana',
-        description: '',
-        example: '',
       },
       'kibana.alert.start': {
         name: 'kibana.alert.start',
@@ -556,8 +455,6 @@ export default {
         readFromDocValues: true,
         metadata_field: false,
         category: 'kibana',
-        description: '',
-        example: '',
       },
       'kibana.alert.status': {
         name: 'kibana.alert.status',
@@ -568,8 +465,6 @@ export default {
         readFromDocValues: true,
         metadata_field: false,
         category: 'kibana',
-        description: '',
-        example: '',
       },
       'kibana.alert.system_status': {
         name: 'kibana.alert.system_status',
@@ -580,8 +475,6 @@ export default {
         readFromDocValues: true,
         metadata_field: false,
         category: 'kibana',
-        description: '',
-        example: '',
       },
       'kibana.alert.uuid': {
         name: 'kibana.alert.uuid',
@@ -592,8 +485,6 @@ export default {
         readFromDocValues: true,
         metadata_field: false,
         category: 'kibana',
-        description: '',
-        example: '',
       },
       'kibana.alert.workflow_reason': {
         name: 'kibana.alert.workflow_reason',
@@ -604,8 +495,6 @@ export default {
         readFromDocValues: true,
         metadata_field: false,
         category: 'kibana',
-        description: '',
-        example: '',
       },
       'kibana.alert.workflow_status': {
         name: 'kibana.alert.workflow_status',
@@ -616,8 +505,6 @@ export default {
         readFromDocValues: true,
         metadata_field: false,
         category: 'kibana',
-        description: '',
-        example: '',
       },
       'kibana.alert.workflow_user': {
         name: 'kibana.alert.workflow_user',
@@ -628,8 +515,6 @@ export default {
         readFromDocValues: true,
         metadata_field: false,
         category: 'kibana',
-        description: '',
-        example: '',
       },
       'kibana.space_ids': {
         name: 'kibana.space_ids',
@@ -640,8 +525,6 @@ export default {
         readFromDocValues: true,
         metadata_field: false,
         category: 'kibana',
-        description: '',
-        example: '',
       },
       'kibana.version': {
         name: 'kibana.version',
@@ -652,8 +535,6 @@ export default {
         readFromDocValues: true,
         metadata_field: false,
         category: 'kibana',
-        description: '',
-        example: '',
       },
     },
   },
