@@ -115,9 +115,9 @@ connector, use `none`. To retrieve connector IDs, use
 connector, use `none`.
 
 `type`::
-(Required, string) The type of the connector. Valid values are: `.jira`, `.none`,
-`.resilient`,`.servicenow`, `.servicenow-sir`, and `.swimlane`. To create a case
-without a connector, use `.none`.
+(Required, string) The type of the connector. Valid values are: `.cases-webhook`,
+`.jira`, `.none`, `.resilient`,`.servicenow`, `.servicenow-sir`, and `.swimlane`.
+To create a case without a connector, use `.none`.
 ====
 
 `description`::
