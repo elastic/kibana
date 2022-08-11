@@ -155,7 +155,7 @@ export function isMetricsTabHidden({
   );
 }
 
-export function isJVMsTabHidden({
+export function isMetricsJVMsTabHidden({
   agentName,
   runtimeName,
 }: {
@@ -255,9 +255,9 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         query,
       }),
       label: i18n.translate('xpack.apm.serviceDetails.nodesTabLabel', {
-        defaultMessage: 'JVMs',
+        defaultMessage: 'Metrics',
       }),
-      hidden: isJVMsTabHidden({ agentName, runtimeName }),
+      hidden: isMetricsJVMsTabHidden({ agentName, runtimeName }),
     },
     {
       key: 'infrastructure',
