@@ -123,7 +123,7 @@ export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummary
     );
   const isVisibleFunction: FilterPredicate = (series) => series.splitAccessors.get('g') !== 'total';
   return (
-    <EuiPanel hasShadow={false} hasBorder>
+    <EuiPanel data-test-subj="ruleAlertsSummary" hasShadow={false} hasBorder>
       <EuiFlexGroup direction="column">
         <EuiFlexItem grow={false}>
           <EuiFlexGroup direction="column">
