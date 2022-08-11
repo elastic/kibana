@@ -7,10 +7,12 @@
  */
 
 import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { ControlEmbeddable, ControlFactory, ControlInput, ControlOutput } from '.';
-import { ControlTypeRegistry } from './services/controls';
+import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
+import { ControlEmbeddable, ControlFactory, ControlInput, ControlOutput } from '../..';
+import { ControlsPluginStartDeps } from '../../types';
+import { ControlsServiceType, ControlTypeRegistry } from './types';
 
-export class ControlsService {
+export class ControlsService implements ControlsServiceType {
   private controlsFactoriesMap: ControlTypeRegistry = {};
 
   public registerControlType = (factory: ControlFactory) => {
@@ -29,3 +31,12 @@ export class ControlsService {
 
   public getControlTypes = () => Object.keys(this.controlsFactoriesMap);
 }
+
+export type ControlsServiceFactory = KibanaPluginServiceFactory<
+  ControlsServiceType,
+  ControlsPluginStartDeps
+>;
+
+export const controlsServiceFactory: ControlsServiceFactory = (core) => {
+  return new ControlsService();
+};

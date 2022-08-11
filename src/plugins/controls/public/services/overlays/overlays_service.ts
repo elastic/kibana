@@ -7,21 +7,20 @@
  */
 
 import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
-import { ControlsSettingsService } from '../settings';
 import { ControlsPluginStartDeps } from '../../types';
+import { ControlsOverlaysService } from './types';
 
-export type SettingsServiceFactory = KibanaPluginServiceFactory<
-  ControlsSettingsService,
+export type OverlaysServiceFactory = KibanaPluginServiceFactory<
+  ControlsOverlaysService,
   ControlsPluginStartDeps
 >;
+export const overlaysServiceFactory: OverlaysServiceFactory = ({ coreStart }) => {
+  const {
+    overlays: { openFlyout, openConfirm },
+  } = coreStart;
 
-export const settingsServiceFactory: SettingsServiceFactory = ({ coreStart }) => {
   return {
-    getDateFormat: () => {
-      return coreStart.uiSettings.get('dateFormat', 'MMM D, YYYY @ HH:mm:ss.SSS');
-    },
-    getTimezone: () => {
-      return coreStart.uiSettings.get('dateFormat:tz', 'Browser');
-    },
+    openFlyout,
+    openConfirm,
   };
 };

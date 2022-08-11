@@ -7,19 +7,21 @@
  */
 
 import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
-import { ControlsHTTPService } from '../http';
+import { ControlsSettingsService } from './types';
 import { ControlsPluginStartDeps } from '../../types';
 
-export type HttpServiceFactory = KibanaPluginServiceFactory<
-  ControlsHTTPService,
+export type SettingsServiceFactory = KibanaPluginServiceFactory<
+  ControlsSettingsService,
   ControlsPluginStartDeps
 >;
-export const httpServiceFactory: HttpServiceFactory = ({ coreStart }) => {
-  const {
-    http: { fetch },
-  } = coreStart;
 
+export const settingsServiceFactory: SettingsServiceFactory = ({ coreStart }) => {
   return {
-    fetch,
+    getDateFormat: () => {
+      return coreStart.uiSettings.get('dateFormat', 'MMM D, YYYY @ HH:mm:ss.SSS');
+    },
+    getTimezone: () => {
+      return coreStart.uiSettings.get('dateFormat:tz', 'Browser');
+    },
   };
 };

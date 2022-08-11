@@ -41,7 +41,7 @@ export class ControlsPlugin
     coreStart: CoreStart,
     startPlugins: ControlsPluginStartDeps
   ) {
-    const { registry } = await import('./services/kibana');
+    const { registry } = await import('./services/plugin_services');
     pluginServices.setRegistry(registry.start({ coreStart, startPlugins }));
   }
 
@@ -60,7 +60,7 @@ export class ControlsPlugin
     _coreSetup: CoreSetup<ControlsPluginStartDeps, ControlsPluginStart>,
     _setupPlugins: ControlsPluginSetupDeps
   ): ControlsPluginSetup {
-    const { registerControlType } = controlsService;
+    const { registerControlType } = pluginServices.getServices().controls;
     const { embeddable } = _setupPlugins;
 
     // register control group embeddable factory
@@ -103,7 +103,7 @@ export class ControlsPlugin
   public start(coreStart: CoreStart, startPlugins: ControlsPluginStartDeps): ControlsPluginStart {
     this.startControlsKibanaServices(coreStart, startPlugins);
 
-    const { getControlFactory, getControlTypes } = controlsService;
+    const { getControlFactory, getControlTypes } = pluginServices.getServices().controls;
 
     return {
       getControlFactory,

@@ -7,7 +7,7 @@
  */
 
 import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
-import { ControlsSettingsService } from '../settings';
+import { ControlsSettingsService } from './types';
 
 export type SettingsServiceFactory = PluginServiceFactory<ControlsSettingsService>;
 export const settingsServiceFactory: SettingsServiceFactory = () => ({

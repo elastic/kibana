@@ -8,7 +8,7 @@
 
 // Start the services with stubs
 import { pluginServices } from './public/services';
-import { registry } from './public/services/stub';
+import { registry } from './public/services/plugin_services.story';
 
 registry.start({});
 pluginServices.setRegistry(registry);

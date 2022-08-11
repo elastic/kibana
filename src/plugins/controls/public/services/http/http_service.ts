@@ -7,20 +7,19 @@
  */
 
 import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
-import { ControlsThemeService } from '../theme';
+import { ControlsHTTPService } from './types';
 import { ControlsPluginStartDeps } from '../../types';
 
-export type ThemeServiceFactory = KibanaPluginServiceFactory<
-  ControlsThemeService,
+export type HttpServiceFactory = KibanaPluginServiceFactory<
+  ControlsHTTPService,
   ControlsPluginStartDeps
 >;
-
-export const themeServiceFactory: ThemeServiceFactory = ({ coreStart }) => {
+export const httpServiceFactory: HttpServiceFactory = ({ coreStart }) => {
   const {
-    theme: { theme$ },
+    http: { fetch },
   } = coreStart;
 
   return {
-    theme$,
+    fetch,
   };
 };

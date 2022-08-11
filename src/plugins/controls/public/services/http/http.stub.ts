@@ -8,7 +8,7 @@
 
 import { HttpResponse } from '@kbn/core/public';
 import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
-import { ControlsHTTPService } from '../http';
+import { ControlsHTTPService } from './types';
 
 type HttpServiceFactory = PluginServiceFactory<ControlsHTTPService>;
 

@@ -8,7 +8,7 @@
 
 import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { ControlsPluginStartDeps } from '../../types';
-import { ControlsDataViewsService } from '../data_views';
+import { ControlsDataViewsService } from './types';
 
 export type DataViewsServiceFactory = KibanaPluginServiceFactory<
   ControlsDataViewsService,

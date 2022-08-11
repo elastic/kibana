@@ -36,9 +36,9 @@ import {
 import { pluginServices } from '../../services';
 import { ControlInput, ControlOutput } from '../..';
 import { optionsListReducers } from '../options_list_reducers';
-import { ControlsDataViewsService } from '../../services/data_views';
 import { OptionsListControl } from '../components/options_list_control';
-import { ControlsOptionsListService } from '../../services/options_list';
+import { ControlsDataViewsService } from '../../services/data_views/types';
+import { ControlsOptionsListService } from '../../services/options_list/types';
 
 const diffDataFetchProps = (
   last?: OptionsListDataFetchProps,

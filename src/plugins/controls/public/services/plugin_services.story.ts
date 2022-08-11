@@ -12,19 +12,17 @@ import {
   PluginServiceProvider,
   PluginServiceRegistry,
 } from '@kbn/presentation-util-plugin/public';
-import { ControlsServices } from '..';
-import { dataServiceFactory } from './data';
-import { unifiedSearchServiceFactory } from './unified_search';
-import { overlaysServiceFactory } from './overlays';
-import { dataViewsServiceFactory } from './data_views';
-import { httpServiceFactory } from '../stub/http';
-import { settingsServiceFactory } from './settings';
-import { themeServiceFactory } from './theme';
+import { ControlsServices } from './types';
+import { dataServiceFactory } from './data/data.story';
+import { unifiedSearchServiceFactory } from './unified_search/unified_search.story';
+import { overlaysServiceFactory } from './overlays/overlays.story';
+import { dataViewsServiceFactory } from './data_views/data_views.story';
+import { httpServiceFactory } from './http/http.stub';
+import { settingsServiceFactory } from './settings/settings.story';
+import { themeServiceFactory } from './theme/theme.story';
 
-import { optionsListServiceFactory } from './options_list';
-import { controlsServiceFactory } from '../stub/controls';
-
-export type { ControlsServices } from '..';
+import { optionsListServiceFactory } from './options_list/options_list.story';
+import { controlsServiceFactory } from './controls/controls.story';
 
 export const providers: PluginServiceProviders<ControlsServices> = {
   dataViews: new PluginServiceProvider(dataViewsServiceFactory),

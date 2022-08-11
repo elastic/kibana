@@ -9,7 +9,8 @@
 import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { ControlsUnifiedSearchService } from '../unified_search';
+
+import { ControlsUnifiedSearchService } from './types';
 
 let valueSuggestionMethod = ({ field, query }: { field: DataViewField; query: string }) =>
   Promise.resolve(['storybook', 'default', 'values']);

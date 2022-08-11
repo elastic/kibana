@@ -10,7 +10,7 @@ import { of, Observable } from 'rxjs';
 import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { ControlsDataService } from '../data';
+import { ControlsDataService } from './types';
 
 export type DataServiceFactory = PluginServiceFactory<ControlsDataService>;
 export const dataServiceFactory: DataServiceFactory = () => ({

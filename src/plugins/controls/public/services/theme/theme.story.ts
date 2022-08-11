@@ -8,7 +8,7 @@
 
 import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { Observable } from 'rxjs';
-import { ControlsThemeService } from '../theme';
+import { ControlsThemeService } from './types';
 
 export type ThemeServiceFactory = PluginServiceFactory<ControlsThemeService>;
 

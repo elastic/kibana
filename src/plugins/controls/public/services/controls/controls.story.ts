@@ -9,19 +9,19 @@
 import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { ControlEmbeddable, ControlFactory, ControlInput, ControlOutput } from '../..';
-import { ControlsService, ControlTypeRegistry } from '../controls';
+import { ControlsServiceType, ControlTypeRegistry } from './types';
 
-export type ControlsServiceFactory = PluginServiceFactory<ControlsService>;
-export const controlsServiceFactory = () => controlsService;
+export type ControlsServiceFactory = PluginServiceFactory<ControlsServiceType>;
+export const controlsServiceFactory = () => getStubControlsService();
 
-const controlsFactoriesMap: ControlTypeRegistry = {};
+export const getStubControlsService = () => {
+  const controlsFactoriesMap: ControlTypeRegistry = {};
 
-// export controls service directly for use in plugin setup lifecycle
-export const controlsService: ControlsService = {
-  registerControlType: (factory: ControlFactory) => {
+  const registerControlType = (factory: ControlFactory) => {
     controlsFactoriesMap[factory.type] = factory;
-  },
-  getControlFactory: <
+  };
+
+  const getControlFactory = <
     I extends ControlInput = ControlInput,
     O extends ControlOutput = ControlOutput,
     E extends ControlEmbeddable<I, O> = ControlEmbeddable<I, O>
@@ -29,6 +29,13 @@ export const controlsService: ControlsService = {
     type: string
   ) => {
     return controlsFactoriesMap[type] as EmbeddableFactory<I, O, E>;
-  },
-  getControlTypes: () => Object.keys(controlsFactoriesMap),
+  };
+
+  const getControlTypes = () => Object.keys(controlsFactoriesMap);
+
+  return {
+    registerControlType,
+    getControlFactory,
+    getControlTypes,
+  };
 };

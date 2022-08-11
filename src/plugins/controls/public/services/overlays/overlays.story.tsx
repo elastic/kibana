@@ -18,7 +18,7 @@ import {
 } from '@kbn/core/public';
 import { MountWrapper } from '@kbn/core/public/utils';
 import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
-import { ControlsOverlaysService } from '../overlays';
+import { ControlsOverlaysService } from './types';
 
 type OverlaysServiceFactory = PluginServiceFactory<ControlsOverlaysService>;
 

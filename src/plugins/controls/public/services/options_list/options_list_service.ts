@@ -18,10 +18,10 @@ import {
   OptionsListRequestBody,
   OptionsListField,
 } from '../../options_list/types';
-import { ControlsHTTPService } from '../http';
-import { ControlsDataService } from '../data';
+import { ControlsHTTPService } from '../http/types';
+import { ControlsDataService } from '../data/types';
 import { ControlsPluginStartDeps } from '../../types';
-import { ControlsOptionsListService } from '../options_list';
+import { ControlsOptionsListService } from './types';
 
 class OptionsListService implements ControlsOptionsListService {
   private data: ControlsDataService;

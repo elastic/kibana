@@ -10,7 +10,7 @@ import { DataViewField } from '@kbn/data-views-plugin/common';
 import { get } from 'lodash';
 import { from, lastValueFrom } from 'rxjs';
 import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
-import { ControlsDataService } from '../data';
+import { ControlsDataService } from './types';
 import { ControlsPluginStartDeps } from '../../types';
 
 export type DataServiceFactory = KibanaPluginServiceFactory<

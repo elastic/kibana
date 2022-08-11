@@ -9,7 +9,7 @@
 import { Observable } from 'rxjs';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { ControlInput } from '../types';
+import { ControlInput } from '../../types';
 
 export interface ControlsDataService {
   fetchFieldRange: (

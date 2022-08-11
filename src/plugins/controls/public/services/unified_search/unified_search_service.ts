@@ -8,19 +8,19 @@
 
 import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { ControlsPluginStartDeps } from '../../types';
-import { ControlsOverlaysService } from '../overlays';
+import { ControlsUnifiedSearchService } from './types';
 
-export type OverlaysServiceFactory = KibanaPluginServiceFactory<
-  ControlsOverlaysService,
+export type UnifiedSearchServiceFactory = KibanaPluginServiceFactory<
+  ControlsUnifiedSearchService,
   ControlsPluginStartDeps
 >;
-export const overlaysServiceFactory: OverlaysServiceFactory = ({ coreStart }) => {
+
+export const unifiedSearchServiceFactory: UnifiedSearchServiceFactory = ({ startPlugins }) => {
   const {
-    overlays: { openFlyout, openConfirm },
-  } = coreStart;
+    unifiedSearch: { autocomplete },
+  } = startPlugins;
 
   return {
-    openFlyout,
-    openConfirm,
+    autocomplete,
   };
 };

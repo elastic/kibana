@@ -7,20 +7,20 @@
  */
 
 import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
-import { ControlsUnifiedSearchService } from '../unified_search';
+import { ControlsThemeService } from './types';
 import { ControlsPluginStartDeps } from '../../types';
 
-export type UnifiedSearchServiceFactory = KibanaPluginServiceFactory<
-  ControlsUnifiedSearchService,
+export type ThemeServiceFactory = KibanaPluginServiceFactory<
+  ControlsThemeService,
   ControlsPluginStartDeps
 >;
 
-export const unifiedSearchServiceFactory: UnifiedSearchServiceFactory = ({ startPlugins }) => {
+export const themeServiceFactory: ThemeServiceFactory = ({ coreStart }) => {
   const {
-    unifiedSearch: { autocomplete },
-  } = startPlugins;
+    theme: { theme$ },
+  } = coreStart;
 
   return {
-    autocomplete,
+    theme$,
   };
 };
