@@ -202,7 +202,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
     const queryString = this.getQueryString();
 
     const recentSearchSuggestions = this.getRecentSearchSuggestions(queryString);
-    const hasQuerySuggestions = this.services.autocomplete.hasQuerySuggestions(language);
+    const hasQuerySuggestions = await this.services.autocomplete.hasQuerySuggestions(language);
 
     if (
       !hasQuerySuggestions ||

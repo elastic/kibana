@@ -27,9 +27,10 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { stubIndexPattern } from '@kbn/data-plugin/public/stubs';
 import { KibanaContextProvider, withKibana } from '@kbn/kibana-react-plugin/public';
+import { unifiedSearchPluginMock } from '../mocks';
 
 jest.useFakeTimers();
-
+const { autocomplete: autocompleteStartMock } = unifiedSearchPluginMock.createStartContract();
 const startMock = coreMock.createStart();
 
 const noop = () => {
@@ -68,6 +69,7 @@ const QueryStringInput = withKibana(QueryStringInputUI);
 function wrapQueryStringInputInContext(testProps: any, storage?: any) {
   const services = {
     ...startMock,
+    autocomplete: autocompleteStartMock,
     data: dataPluginMock.createStartContract(),
     appName: testProps.appName || 'test',
     storage: storage || createMockStorage(),
