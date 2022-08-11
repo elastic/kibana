@@ -31355,8 +31355,6 @@
     "xpack.watcher.models.watchHistoryItem.idPropertyMissingBadRequestMessage": "L'argument JSON doit contenir une propriété {id}",
     "xpack.watcher.models.watchHistoryItem.watchHistoryItemJsonPropertyMissingBadRequestMessage": "L'argument JSON doit contenir une propriété {watchHistoryItemJson}",
     "xpack.watcher.models.watchHistoryItem.watchIdPropertyMissingBadRequestMessage": "L'argument JSON doit contenir une propriété {watchId}",
-    "xpack.watcher.models.watchStatus.idPropertyMissingBadRequestMessage": "L'argument JSON doit contenir une propriété {id}",
-    "xpack.watcher.models.watchStatus.watchStatusJsonPropertyMissingBadRequestMessage": "L'argument JSON doit contenir une propriété {watchStatusJson}",
     "xpack.watcher.models.webhookAction.selectMessageText": "Envoyer une requête à un service Web.",
     "xpack.watcher.models.webhookAction.simulateButtonLabel": "Envoyer la requête",
     "xpack.watcher.models.webhookAction.simulateFailMessage": "Impossible d'envoyer la requête vers {fullPath}.",
