@@ -82,7 +82,7 @@ export const getESRequests = async (esClient: ESClient, requests: Request[]) => 
     .map((r) => r.transactionId);
   const hits = await esClient.getSpans(transactionIds);
   for (const hit of hits.map((i) => i!._source as SpanDocument)) {
-    const query = hit?.span.db?.statement ? parseQueryStatement(hit?.span.db?.statement) : {};
+    const query = hit?.span?.db?.statement ? parseQueryStatement(hit?.span?.db?.statement) : {};
     const method = findFirstMatch(httpMethodRegExp, hit.span.name);
     const path = findFirstMatch(httpPathRegExp, hit.span.name.replace(/\s+/g, ''));
     // filter out requests without method, path and POST/PUT/DELETE without body
