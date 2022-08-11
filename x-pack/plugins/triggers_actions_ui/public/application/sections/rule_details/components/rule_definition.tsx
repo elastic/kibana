@@ -14,6 +14,7 @@ import {
   EuiPanel,
   EuiTitle,
 } from '@elastic/eui';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { formatDuration } from '@kbn/alerting-plugin/common';
 import { RuleDefinitionProps } from '../../../../types';
@@ -82,6 +83,17 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
         : false)
     );
   }, [hideEditButton, canSaveRule, ruleTypeRegistry, rule]);
+
+  const ruleDescription = useMemo(() => {
+    if (ruleTypeRegistry.has(rule.ruleTypeId)) {
+      return ruleTypeRegistry.get(rule.ruleTypeId).description;
+    }
+    if (rule.consumer === AlertConsumers.SIEM) {
+      return rule.params.description as string;
+    }
+    return '';
+  }, [rule, ruleTypeRegistry]);
+
   return (
     <EuiFlexItem data-test-subj="ruleSummaryRuleDefinition" grow={3}>
       <EuiPanel color="subdued" hasBorder={false} paddingSize={'m'}>
@@ -130,27 +142,33 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
               </ItemTitleRuleSummary>
               <ItemValueRuleSummary
                 data-test-subj="ruleSummaryRuleDescription"
-                itemValue={ruleTypeRegistry.get(rule.ruleTypeId).description}
+                itemValue={ruleDescription}
               />
             </EuiFlexGroup>
 
             <EuiSpacer size="m" />
 
-            <EuiFlexGroup>
+            <EuiFlexGroup alignItems="center">
               <ItemTitleRuleSummary>
                 {i18n.translate('xpack.triggersActionsUI.ruleDetails.conditionsTitle', {
                   defaultMessage: 'Conditions',
                 })}
               </ItemTitleRuleSummary>
               <EuiFlexItem grow={3}>
-                <EuiFlexGroup data-test-subj="ruleSummaryRuleConditions" alignItems="center">
-                  {hasEditButton ? (
-                    <EuiButtonEmpty onClick={() => setEditFlyoutVisible(true)}>
+                <EuiFlexGroup
+                  data-test-subj="ruleSummaryRuleConditions"
+                  alignItems="center"
+                  gutterSize="none"
+                >
+                  <EuiFlexItem grow={false}>
+                    {hasEditButton ? (
+                      <EuiButtonEmpty onClick={() => setEditFlyoutVisible(true)} flush="left">
+                        <EuiText size="s">{getRuleConditionsWording()}</EuiText>
+                      </EuiButtonEmpty>
+                    ) : (
                       <EuiText size="s">{getRuleConditionsWording()}</EuiText>
-                    </EuiButtonEmpty>
-                  ) : (
-                    <EuiText size="s">{getRuleConditionsWording()}</EuiText>
-                  )}
+                    )}
+                  </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
