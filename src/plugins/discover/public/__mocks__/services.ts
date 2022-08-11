@@ -113,4 +113,7 @@ export const discoverServiceMock = {
     addWarning: jest.fn(),
   },
   expressions: expressionsPlugin,
+  dataViews: {
+    getIdsWithTitle: () => [],
+  },
 } as unknown as DiscoverServices;

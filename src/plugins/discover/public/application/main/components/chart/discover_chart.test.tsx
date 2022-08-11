@@ -26,6 +26,12 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ReactWrapper } from 'enzyme';
 
+jest.mock('../../../../hooks/use_persisted_data_view', () => {
+  return {
+    usePersistedDataView: () => () => Promise.resolve(true),
+  };
+});
+
 setHeaderActionMenuMounter(jest.fn());
 
 async function mountComponent(isTimeBased: boolean = false) {
@@ -167,12 +173,13 @@ describe('Discover chart', () => {
       },
     } as unknown as UiActionsStart);
     const component = await mountComponent(true);
-    component.find('[data-test-subj="discoverEditVisualization"]').first().simulate('click');
-    expect(fn).toHaveBeenCalledWith(
-      expect.objectContaining({
-        indexPatternId: '123',
-        fieldName: 'timefield',
-      })
-    );
+    await act(async () => {
+      await component
+        .find('[data-test-subj="discoverEditVisualization"]')
+        .first()
+        .simulate('click');
+    });
+
+    expect(fn).toHaveBeenCalled();
   });
 });
