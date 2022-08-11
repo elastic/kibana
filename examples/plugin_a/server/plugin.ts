@@ -10,7 +10,11 @@ import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '
 
 import { PluginAPluginSetup, PluginAPluginStart } from './types';
 
-import { rpc } from './rpc';
+import { rpc, setContract } from './rpc';
+
+export interface PluginASetup {
+  somethingSpecialFromA(): Promise<{ yo: string }>;
+}
 
 export class PluginAPlugin implements Plugin<PluginAPluginSetup, PluginAPluginStart> {
   private readonly logger: Logger;
@@ -24,7 +28,17 @@ export class PluginAPlugin implements Plugin<PluginAPluginSetup, PluginAPluginSt
 
     core.http.registerRPCDefinition(rpc);
 
-    return {};
+    const somethingSpecialFromA = async () => ({
+      yo: 'something special from a',
+    });
+
+    const contract: PluginASetup = {
+      somethingSpecialFromA,
+    };
+
+    setContract(contract);
+
+    return contract;
   }
 
   public start(core: CoreStart) {

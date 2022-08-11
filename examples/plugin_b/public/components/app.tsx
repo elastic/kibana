@@ -6,14 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { BrowserRouter as Router } from 'react-router-dom';
 
 import {
   EuiButton,
-  EuiHorizontalRule,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
@@ -28,6 +26,8 @@ import { CoreStart } from '@kbn/core/public';
 import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 
 import { PLUGIN_ID, PLUGIN_NAME } from '../../common';
+import { rpc } from '../rpc';
+import { UseQueryResult } from 'react-query';
 
 interface PluginBAppDeps {
   basename: string;
@@ -36,21 +36,29 @@ interface PluginBAppDeps {
   navigation: NavigationPublicPluginStart;
 }
 
-export const PluginBApp = ({ basename, notifications, http, navigation }: PluginBAppDeps) => {
-  // Use React hooks to manage state.
-  const [timestamp, setTimestamp] = useState<string | undefined>();
+export const PluginBApp = ({ basename, notifications, navigation }: PluginBAppDeps) => {
+  const result = rpc.useQuery(['getSomethingFromB']);
+  const resultFromA = rpc.useQuery(['somethingSpecialFromA']);
+
+  const c = rpc.useContext();
 
   const onClickHandler = () => {
-    // Use the core http service to make a response to the server API.
-    http.get('/api/plugin_b/example').then((res) => {
-      setTimestamp(res.time);
-      // Use the core notifications service to display a success message.
-      notifications.toasts.addSuccess(
-        i18n.translate('pluginB.dataUpdated', {
-          defaultMessage: 'Data updated',
-        })
-      );
-    });
+    c.fetchQuery(['getSomethingFromB'])
+      .then((r) => {
+        notifications.toasts.addSuccess({ title: 'yeah!', text: JSON.stringify(r, null, 2) });
+      })
+      .catch((e) => notifications.toasts.addError(e, { title: 'oh no!' }));
+    c.client.mutation('updateSomething', { inputA: 'test', inputB: 'test' });
+  };
+
+  const resultToOutput = (r: UseQueryResult) => {
+    return r.isSuccess ? (
+      <pre>{JSON.stringify(r.data)}</pre>
+    ) : r.isError ? (
+      <pre>{r.error as null}</pre>
+    ) : r.isLoading ? (
+      <pre>Loading...</pre>
+    ) : null;
   };
 
   // Render the application DOM.
@@ -70,7 +78,7 @@ export const PluginBApp = ({ basename, notifications, http, navigation }: Plugin
                 <EuiTitle size="l">
                   <h1>
                     <FormattedMessage
-                      id="pluginB.helloWorldText"
+                      id="pluginA.helloWorldText"
                       defaultMessage="{name}"
                       values={{ name: PLUGIN_NAME }}
                     />
@@ -82,7 +90,7 @@ export const PluginBApp = ({ basename, notifications, http, navigation }: Plugin
                   <EuiTitle>
                     <h2>
                       <FormattedMessage
-                        id="pluginB.congratulationsTitle"
+                        id="pluginA.congratulationsTitle"
                         defaultMessage="Congratulations, you have successfully created a new Kibana Plugin!"
                       />
                     </h2>
@@ -92,20 +100,14 @@ export const PluginBApp = ({ basename, notifications, http, navigation }: Plugin
                   <EuiText>
                     <p>
                       <FormattedMessage
-                        id="pluginB.content"
+                        id="pluginA.content"
                         defaultMessage="Look through the generated code and check out the plugin development documentation."
                       />
                     </p>
-                    <EuiHorizontalRule />
-                    <p>
-                      <FormattedMessage
-                        id="pluginB.timestampText"
-                        defaultMessage="Last timestamp: {time}"
-                        values={{ time: timestamp ? timestamp : 'Unknown' }}
-                      />
-                    </p>
+                    {resultToOutput(result)}
+                    {resultToOutput(resultFromA)}
                     <EuiButton type="primary" size="s" onClick={onClickHandler}>
-                      <FormattedMessage id="pluginB.buttonText" defaultMessage="Get data" />
+                      <FormattedMessage id="pluginA.buttonText" defaultMessage="Get data" />
                     </EuiButton>
                   </EuiText>
                 </EuiPageContentBody>

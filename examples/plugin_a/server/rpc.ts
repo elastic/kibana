@@ -6,13 +6,42 @@
  * Side Public License, v 1.
  */
 
-// import { schema } from '@kbn/config-schema';
+import { schema, Type, TypeOf } from '@kbn/config-schema';
+import { createGetterSetter } from '@kbn/kibana-utils-plugin/common';
 import * as trpc from '@trpc/server';
+import type { PluginASetup } from './plugin';
 
-export const rpc = trpc.router().query('getSomething', {
-  resolve: async () => ({
-    ok: true,
-  }),
+const mySchema = schema.object({
+  inputA: schema.string(),
+  inputB: schema.maybe(schema.string()),
 });
+
+function toZodEsque<T extends Type<unknown> = Type<unknown>>(
+  s: T
+): { _input: TypeOf<T>; _output: TypeOf<T> } {
+  return {
+    _input: undefined as unknown as TypeOf<typeof s>,
+    _output: undefined as unknown as TypeOf<typeof s>,
+    ...s,
+  };
+}
+
+export const rpc = trpc
+  .router()
+  .query('getSomething', {
+    resolve: async () => ({
+      okFromA: true,
+    }),
+  })
+  // Expose your start contract over the RPC interface
+  .query('somethingSpecialFromA' as keyof PluginASetup, {
+    resolve: async () => getContract().somethingSpecialFromA(),
+  })
+  .mutation('updateSomething', {
+    input: toZodEsque(mySchema),
+    resolve: async () => {},
+  });
+
+export const [getContract, setContract] = createGetterSetter<PluginASetup>('pluginAContract');
 
 export type PluginARPC = typeof rpc;

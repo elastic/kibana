@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export const PLUGIN_ID = 'pluginB';
-export const PLUGIN_NAME = 'plugin_b';
+import * as trpc from '@trpc/react';
+import type { PluginBRPC } from '../common';
 
-export type { PluginBRPC } from '../server/rpc';
+export const rpc = trpc.createReactQueryHooks<PluginBRPC>();

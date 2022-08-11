@@ -10,6 +10,7 @@ import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '
 
 import { PluginBPluginSetup, PluginBPluginStart } from './types';
 import { defineRoutes } from './routes';
+import { rpc } from './rpc';
 
 export class PluginBPlugin implements Plugin<PluginBPluginSetup, PluginBPluginStart> {
   private readonly logger: Logger;
@@ -21,6 +22,7 @@ export class PluginBPlugin implements Plugin<PluginBPluginSetup, PluginBPluginSt
   public setup(core: CoreSetup) {
     this.logger.debug('plugin_b: Setup');
     const router = core.http.createRouter();
+    core.http.registerRPCDefinition(rpc);
 
     // Register server side APIs
     defineRoutes(router);
