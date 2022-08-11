@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { CommentType } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -13,27 +12,33 @@ export default function ({ getService }: FtrProviderContext) {
   const commonScreenshots = getService('commonScreenshots');
 
   const screenshotDirectories = ['response_ops_docs', 'cases'];
+  let CASE_ID: string;
 
-  describe('list view', function () {
+  describe('deatils view', function () {
     before(async () => {
       const { id: caseId } = await cases.api.createCase({
         title: 'Web transactions',
         tags: ['e-commerce'],
         description: 'Investigate e-commerce sample data.',
       });
-      await cases.api.createAttachment({
-        caseId,
-        params: { comment: 'test comment', type: CommentType.user, owner: 'cases' },
-      });
+      CASE_ID = caseId;
     });
 
     after(async () => {
       await cases.api.deleteAllCases();
     });
 
-    it('cases list screenshot', async () => {
+    it('cases visualization screenshot', async () => {
       await cases.navigation.navigateToApp();
-      await commonScreenshots.takeScreenshot('cases', screenshotDirectories, 1400, 1024);
+      await cases.navigation.navigateToSingleCase('cases', CASE_ID);
+      await cases.singleCase.addVisualization('Transactions per day');
+      await cases.singleCase.openVisualizationButtonTooltip();
+      await commonScreenshots.takeScreenshot(
+        'cases-visualization',
+        screenshotDirectories,
+        1400,
+        1024
+      );
     });
   });
 }
