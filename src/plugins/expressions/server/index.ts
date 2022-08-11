@@ -28,7 +28,6 @@ export type {
   DatatableRow,
   ExecutionContainer,
   ExecutionContext,
-  ExecutionParams,
   ExecutionState,
   ExecutorContainer,
   ExecutorState,

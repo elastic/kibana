@@ -8,3 +8,4 @@
 
 export * from './container';
 export * from './executor';
+export * from './module';

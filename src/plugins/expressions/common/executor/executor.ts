@@ -8,9 +8,9 @@
 
 /* eslint-disable max-classes-per-file */
 
+import { inject, injectable, interfaces } from 'inversify';
 import { cloneDeep, mapValues } from 'lodash';
 import { Observable } from 'rxjs';
-import type { Logger } from '@kbn/logging';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { SavedObjectReference } from '@kbn/core/types';
 import {
@@ -20,14 +20,13 @@ import {
   VersionedState,
 } from '@kbn/kibana-utils-plugin/common';
 import { ExecutorState, ExecutorContainer } from './container';
-import { createExecutorContainer } from './container';
 import { AnyExpressionFunctionDefinition, ExpressionFunction } from '../expression_functions';
-import { Execution, ExecutionParams, ExecutionResult } from '../execution/execution';
+import type { Execution, ExecutionResult } from '../execution';
 import { IRegistry } from '../types';
 import { ExpressionType } from '../expression_types/expression_type';
 import { AnyExpressionTypeDefinition } from '../expression_types/types';
 import { ExpressionAstExpression, ExpressionAstFunction } from '../ast';
-import { ExpressionValueError, typeSpecs } from '../expression_types/specs';
+import { ExpressionValueError } from '../expression_types/specs';
 import { ALL_NAMESPACES, getByAlias } from '../util';
 import { ExpressionExecutionParams } from '../service';
 
@@ -84,21 +83,19 @@ export class FunctionsRegistry implements IRegistry<ExpressionFunction> {
   }
 }
 
+export type ExecutionFactory = <Input, Output>(
+  ast: string | ExpressionAstExpression,
+  params: ExpressionExecutionParams
+) => Execution<Input, Output>;
+export const ExecutionFactoryToken: interfaces.ServiceIdentifier<ExecutionFactory> =
+  Symbol.for('ExecutionFactory');
+export const ContainerToken: interfaces.ServiceIdentifier<ExecutorContainer> =
+  Symbol.for('Container');
+
+@injectable()
 export class Executor<Context extends Record<string, unknown> = Record<string, unknown>>
   implements PersistableStateService<ExpressionAstExpression>
 {
-  static createWithDefaults<Ctx extends Record<string, unknown> = Record<string, unknown>>(
-    logger?: Logger,
-    state?: ExecutorState<Ctx>
-  ): Executor<Ctx> {
-    const executor = new Executor<Ctx>(logger, state);
-    for (const type of typeSpecs) executor.registerType(type);
-
-    return executor;
-  }
-
-  public readonly container: ExecutorContainer<Context>;
-
   /**
    * @deprecated
    */
@@ -109,10 +106,12 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
    */
   public readonly types: TypesRegistry;
 
-  constructor(private readonly logger?: Logger, state?: ExecutorState<Context>) {
+  constructor(
+    @inject(ExecutionFactoryToken) private readonly executionFactory: ExecutionFactory,
+    @inject(ContainerToken) public readonly container: ExecutorContainer<Context>
+  ) {
     this.functions = new FunctionsRegistry(this as Executor);
     this.types = new TypesRegistry(this as Executor);
-    this.container = createExecutorContainer<Context>(state);
   }
 
   public get state(): ExecutorState<Context> {
@@ -186,15 +185,7 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     ast: string | ExpressionAstExpression,
     params: ExpressionExecutionParams = {}
   ): Execution<Input, Output> {
-    const executionParams = {
-      params,
-      executor: this,
-    } as ExecutionParams;
-
-    if (typeof ast === 'string') executionParams.expression = ast;
-    else executionParams.ast = ast;
-
-    const execution = new Execution<Input, Output>(executionParams, this.logger);
+    const execution = this.executionFactory<Input, Output>(ast, params);
 
     return execution;
   }

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { Container } from 'inversify';
 import { Observable } from 'rxjs';
-import type { Logger } from '@kbn/logging';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { KibanaExecutionContext } from '@kbn/core/public';
@@ -19,7 +19,7 @@ import {
   VersionedState,
 } from '@kbn/kibana-utils-plugin/common';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
-import { Executor } from '../executor';
+import { Executor, ExecutorModule } from '../executor';
 import { AnyExpressionRenderDefinition, ExpressionRendererRegistry } from '../expression_renderers';
 import { ExpressionAstExpression } from '../ast';
 import { ExecutionContract, ExecutionResult } from '../execution';
@@ -269,8 +269,8 @@ export interface ExpressionsServiceStart {
 }
 
 export interface ExpressionServiceParams {
+  container: Container;
   executor?: Executor;
-  logger?: Logger;
   renderers?: ExpressionRendererRegistry;
 }
 
@@ -307,11 +307,11 @@ export class ExpressionsService
   public readonly renderers: ExpressionRendererRegistry;
 
   constructor({
-    logger,
-    executor = Executor.createWithDefaults(logger),
+    container,
     renderers = new ExpressionRendererRegistry(),
-  }: ExpressionServiceParams = {}) {
-    this.executor = executor;
+  }: ExpressionServiceParams) {
+    container.load(ExecutorModule());
+    this.executor = container.get(Executor);
     this.renderers = renderers;
   }
 

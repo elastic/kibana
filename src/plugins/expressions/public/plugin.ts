@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { Container } from 'inversify';
 import { pick } from 'lodash';
 import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { ExpressionsServiceSetup, ExpressionsServiceStart } from '../common';
+import { LoggerToken } from '../common/logger';
 import {
   ExpressionsService,
   setRenderersRegistry,
@@ -44,11 +46,14 @@ export class ExpressionsPublicPlugin implements Plugin<ExpressionsSetup, Express
     },
   };
 
+  private readonly container = new Container({ skipBaseClassChecks: true });
   private readonly expressions: ExpressionsService = new ExpressionsService({
-    logger: ExpressionsPublicPlugin.logger,
+    container: this.container,
   });
 
-  constructor(initializerContext: PluginInitializerContext) {}
+  constructor(context: PluginInitializerContext) {
+    this.container.bind(LoggerToken).toConstantValue(ExpressionsPublicPlugin.logger);
+  }
 
   public setup(core: CoreSetup): ExpressionsSetup {
     const { expressions } = this;

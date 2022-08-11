@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-export * from './types';
-export * from './container';
-export * from './execution';
-export * from './execution_contract';
-export * from './module';
+import type { interfaces } from 'inversify';
+import type { Logger } from '@kbn/logging';
+
+export const LoggerToken: interfaces.ServiceIdentifier<Logger> = Symbol.for('Logger');

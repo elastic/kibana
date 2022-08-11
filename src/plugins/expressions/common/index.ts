@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import 'core-js/proposals/reflect-metadata';
 export {
   BackgroundRepeat,
   BackgroundSize,
@@ -195,7 +196,6 @@ export type {
   ExecutionContract,
   ExecutionContainer,
   ExecutionContext,
-  ExecutionParams,
   ExecutionState,
   ExecutionPureTransitions,
   ExecutionResult,

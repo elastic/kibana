@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { Container } from 'inversify';
 import { pick } from 'lodash';
 import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { ExpressionsService, ExpressionsServiceSetup, ExpressionsServiceStart } from '../common';
+import { LoggerToken } from '../common/logger';
 
 export type ExpressionsServerSetup = ExpressionsServiceSetup;
 
@@ -17,12 +19,13 @@ export type ExpressionsServerStart = ExpressionsServiceStart;
 export class ExpressionsServerPlugin
   implements Plugin<ExpressionsServerSetup, ExpressionsServerStart>
 {
-  readonly expressions: ExpressionsService;
+  private readonly container = new Container({ skipBaseClassChecks: true });
+  private readonly expressions: ExpressionsService = new ExpressionsService({
+    container: this.container,
+  });
 
   constructor(context: PluginInitializerContext) {
-    this.expressions = new ExpressionsService({
-      logger: context.logger.get('expressions'),
-    });
+    this.container.bind(LoggerToken).toConstantValue(context.logger.get('expressions'));
   }
 
   public setup(core: CoreSetup): ExpressionsServerSetup {

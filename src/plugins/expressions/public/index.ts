@@ -46,7 +46,6 @@ export type {
   ExecutionContract,
   ExecutionContainer,
   ExecutionContext,
-  ExecutionParams,
   ExecutionState,
   Executor,
   ExecutorContainer,

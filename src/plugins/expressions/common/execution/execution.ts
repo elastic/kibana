@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { inject, injectable, interfaces } from 'inversify';
 import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
 import { isPromise } from '@kbn/std';
@@ -24,8 +25,9 @@ import {
 import { catchError, finalize, map, pluck, shareReplay, switchMap, tap } from 'rxjs/operators';
 import { now, AbortError } from '@kbn/kibana-utils-plugin/common';
 import { Adapters } from '@kbn/inspector-plugin/common';
+import { LoggerToken } from '../logger';
 import { Executor } from '../executor';
-import { createExecutionContainer, ExecutionContainer } from './container';
+import { ExecutionContainer } from './container';
 import { createError } from '../util';
 import { isExpressionValueError, ExpressionValueError } from '../expression_types/specs/error';
 import {
@@ -33,15 +35,13 @@ import {
   ExpressionAstExpression,
   ExpressionAstFunction,
   parse,
-  formatExpression,
-  parseExpression,
   ExpressionAstNode,
 } from '../ast';
 import { ExecutionContext, DefaultInspectorAdapters } from './types';
 import { getType, Datatable } from '../expression_types';
 import type { ExpressionFunction, ExpressionFunctionParameter } from '../expression_functions';
 import { getByAlias } from '../util/get_by_alias';
-import { ExecutionContract } from './execution_contract';
+import type { ExecutionContract } from './execution_contract';
 import { ExpressionExecutionParams } from '../service';
 import { createDefaultInspectorAdapters } from '../util/create_default_inspector_adapters';
 
@@ -116,13 +116,19 @@ function takeUntilAborted<T>(signal: AbortSignal) {
     });
 }
 
-export interface ExecutionParams {
-  executor: Executor;
-  ast?: ExpressionAstExpression;
-  expression?: string;
-  params: ExpressionExecutionParams;
-}
+export type ContractFactory<
+  Input = unknown,
+  Output = unknown,
+  InspectorAdapters = unknown
+> = () => ExecutionContract<Input, Output, InspectorAdapters>;
 
+export const ContractFactoryToken: interfaces.ServiceIdentifier<ContractFactory> =
+  Symbol.for('ContractFactory');
+export const ParamsToken: interfaces.ServiceIdentifier<ExpressionExecutionParams> =
+  Symbol.for('Params');
+export const StateToken: interfaces.ServiceIdentifier<ExecutionContainer> = Symbol.for('State');
+
+@injectable()
 export class Execution<
   Input = unknown,
   Output = unknown,
@@ -130,11 +136,6 @@ export class Execution<
     ? ExpressionExecutionParams['inspectorAdapters']
     : DefaultInspectorAdapters
 > {
-  /**
-   * Dynamic state of the execution.
-   */
-  public readonly state: ExecutionContainer<ExecutionResult<Output | ExpressionValueError>>;
-
   /**
    * Initial input of the execution.
    *
@@ -176,58 +177,41 @@ export class Execution<
    */
   private readonly childExecutions: Execution[] = [];
 
-  /**
-   * Contract is a public representation of `Execution` instances. Contract we
-   * can return to other plugins for their consumption.
-   */
-  public readonly contract: ExecutionContract<Input, Output, InspectorAdapters>;
-
-  public readonly expression: string;
-
   public get inspectorAdapters(): InspectorAdapters {
     return this.context.inspectorAdapters;
   }
 
-  constructor(public readonly execution: ExecutionParams, private readonly logger?: Logger) {
-    const { executor } = execution;
-
-    this.contract = new ExecutionContract<Input, Output, InspectorAdapters>(this);
-
-    if (!execution.ast && !execution.expression) {
-      throw new TypeError('Execution params should contain at least .ast or .expression key.');
-    } else if (execution.ast && execution.expression) {
-      throw new TypeError('Execution params cannot contain both .ast and .expression key.');
-    }
-
-    this.expression = execution.expression || formatExpression(execution.ast!);
-    const ast = execution.ast || parseExpression(this.expression);
-
-    this.state = createExecutionContainer({
-      ...executor.state,
-      state: 'not-started',
-      ast,
-    });
-
+  /**
+   * @param state Dynamic state of the execution.
+   * @param contract Contract is a public representation of `Execution` instances. Contract we can return to other plugins for their consumption.
+   */
+  constructor(
+    @inject(ContractFactoryToken)
+    private readonly contractFactory: ContractFactory<Input, Output, InspectorAdapters>,
+    @inject(ParamsToken) public readonly params: ExpressionExecutionParams,
+    @inject(Executor) private executor: Executor,
+    @inject(StateToken)
+    public readonly state: ExecutionContainer<ExecutionResult<Output | ExpressionValueError>>,
+    @inject(LoggerToken) private readonly logger?: Logger
+  ) {
     const inspectorAdapters =
-      (execution.params.inspectorAdapters as InspectorAdapters) || createDefaultInspectorAdapters();
+      (params.inspectorAdapters as InspectorAdapters) || createDefaultInspectorAdapters();
 
     this.context = {
-      getSearchContext: () => this.execution.params.searchContext || {},
-      getSearchSessionId: () => execution.params.searchSessionId,
-      getKibanaRequest: execution.params.kibanaRequest
-        ? () => execution.params.kibanaRequest!
-        : undefined,
-      variables: execution.params.variables || {},
+      getSearchContext: () => this.params.searchContext || {},
+      getSearchSessionId: () => params.searchSessionId,
+      getKibanaRequest: params.kibanaRequest ? () => params.kibanaRequest! : undefined,
+      variables: params.variables || {},
       types: executor.getTypes(),
       abortSignal: this.abortController.signal,
       inspectorAdapters,
       logDatatable: (name: string, datatable: Datatable) => {
         inspectorAdapters.tables[name] = datatable;
       },
-      isSyncColorsEnabled: () => execution.params.syncColors!,
-      isSyncTooltipsEnabled: () => execution.params.syncTooltips!,
-      ...execution.executor.context,
-      getExecutionContext: () => execution.params.executionContext,
+      isSyncColorsEnabled: () => params.syncColors!,
+      isSyncTooltipsEnabled: () => params.syncTooltips!,
+      ...executor.context,
+      getExecutionContext: () => params.executionContext,
     };
 
     this.result = this.input$.pipe(
@@ -255,6 +239,10 @@ export class Execution<
       }),
       shareReplay(1)
     );
+  }
+
+  public get contract(): ExecutionContract<Input, Output, InspectorAdapters> {
+    return this.contractFactory();
   }
 
   /**
@@ -302,11 +290,7 @@ export class Execution<
       ...(chainArr.map((link) =>
         switchMap((currentInput) => {
           const { function: fnName, arguments: fnArgs } = link;
-          const fn = getByAlias(
-            this.state.get().functions,
-            fnName,
-            this.execution.params.namespace
-          );
+          const fn = getByAlias(this.state.get().functions, fnName, this.params.namespace);
 
           if (!fn) {
             throw createError({
@@ -336,7 +320,7 @@ export class Execution<
             this.logger?.warn(`Function '${fnName}' is deprecated`);
           }
 
-          if (this.execution.params.debug) {
+          if (this.params.debug) {
             link.debug = {
               args: {},
               duration: 0,
@@ -346,28 +330,28 @@ export class Execution<
             };
           }
 
-          const timeStart = this.execution.params.debug ? now() : 0;
+          const timeStart = this.params.debug ? now() : 0;
 
           // `resolveArgs` returns an object because the arguments themselves might
           // actually have `then` or `subscribe` methods which would be treated as a `Promise`
           // or an `Observable` accordingly.
           return this.resolveArgs(fn, currentInput, fnArgs).pipe(
-            tap((args) => this.execution.params.debug && Object.assign(link.debug, { args })),
+            tap((args) => this.params.debug && Object.assign(link.debug, { args })),
             switchMap((args) => this.invokeFunction(fn, currentInput, args)),
             switchMap((output) => (getType(output) === 'error' ? throwError(output) : of(output))),
-            tap((output) => this.execution.params.debug && Object.assign(link.debug, { output })),
+            tap((output) => this.params.debug && Object.assign(link.debug, { output })),
             catchError((rawError) => {
               const error = createError(rawError);
               error.error.message = `[${fnName}] > ${error.error.message}`;
 
-              if (this.execution.params.debug) {
+              if (this.params.debug) {
                 Object.assign(link.debug, { error, rawError, success: false });
               }
 
               return throwError(error);
             }),
             finalize(() => {
-              if (this.execution.params.debug) {
+              if (this.params.debug) {
                 Object.assign(link.debug, { duration: now() - timeStart });
               }
             })
@@ -564,8 +548,8 @@ export class Execution<
   interpret<T>(ast: ExpressionAstNode, input: T): Observable<ExecutionResult<unknown>> {
     switch (getType(ast)) {
       case 'expression':
-        const execution = this.execution.executor.createExecution(ast as ExpressionAstExpression, {
-          ...this.execution.params,
+        const execution = this.executor.createExecution(ast as ExpressionAstExpression, {
+          ...this.params,
           variables: this.context.variables,
         });
         this.childExecutions.push(execution);

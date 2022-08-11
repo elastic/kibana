@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { inject, injectable, interfaces } from 'inversify';
 import { of, Observable } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
@@ -13,10 +14,13 @@ import { Execution, ExecutionResult } from './execution';
 import { ExpressionValueError } from '../expression_types/specs';
 import { ExpressionAstExpression } from '../ast';
 
+export const ExpressionToken: interfaces.ServiceIdentifier<string> = Symbol.for('Expression');
+
 /**
  * `ExecutionContract` is a wrapper around `Execution` class. It provides the
  * same functionality but does not expose Expressions plugin internals.
  */
+@injectable()
 export class ExecutionContract<Input = unknown, Output = unknown, InspectorAdapters = unknown> {
   public get isPending(): boolean {
     const { state, result } = this.execution.state.get();
@@ -24,11 +28,11 @@ export class ExecutionContract<Input = unknown, Output = unknown, InspectorAdapt
     return !finished;
   }
 
-  protected readonly execution: Execution<Input, Output, InspectorAdapters>;
-
-  constructor(execution: Execution<Input, Output, InspectorAdapters>) {
-    this.execution = execution;
-  }
+  constructor(
+    @inject(Execution)
+    protected readonly execution: Execution<Input, Output, InspectorAdapters>,
+    @inject(ExpressionToken) private readonly expression: string
+  ) {}
 
   /**
    * Cancel the execution of the expression. This will set abort signal
@@ -68,7 +72,7 @@ export class ExecutionContract<Input = unknown, Output = unknown, InspectorAdapt
    * AST this method returns a string generated from AST.
    */
   getExpression = () => {
-    return this.execution.expression;
+    return this.expression;
   };
 
   /**
