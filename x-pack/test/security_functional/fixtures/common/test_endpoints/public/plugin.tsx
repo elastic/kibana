@@ -10,9 +10,14 @@ import ReactDOM from 'react-dom';
 import React from 'react';
 import { debounce, filter, first } from 'rxjs/operators';
 import { timer } from 'rxjs';
+import { SecurityPluginStart } from '@kbn/security-plugin/public';
 
-export class TestEndpointsPlugin implements Plugin {
-  public setup(core: CoreSetup) {
+export interface PluginStartDependencies {
+  security: SecurityPluginStart;
+}
+
+export class TestEndpointsPlugin implements Plugin<void, void, object, PluginStartDependencies> {
+  public setup(core: CoreSetup<PluginStartDependencies>) {
     // Prevent auto-logout on server `401` errors.
     core.http.anonymousPaths.register('/authentication/app');
 
@@ -36,6 +41,39 @@ export class TestEndpointsPlugin implements Plugin {
             element
           );
         });
+        return () => ReactDOM.unmountComponentAtNode(element);
+      },
+    });
+
+    core.application.register({
+      id: 'user_profiles_app',
+      title: 'User Profiles app',
+      async mount({ element }) {
+        const [, { security }] = await core.getStartServices();
+
+        const [currentUserProfile, otherUserProfiles] = await Promise.all([
+          security.userProfiles.getCurrent({ dataPath: '*' }),
+          security.userProfiles.bulkGet({
+            uids: new Set(new URLSearchParams(location.search).getAll('uid')),
+            dataPath: '*',
+          }),
+        ]);
+
+        ReactDOM.render(
+          <div>
+            <div data-test-subj="testEndpointsUserProfilesAppCurrentUserProfile">
+              {currentUserProfile?.user.username}:{JSON.stringify(currentUserProfile?.data)}
+            </div>
+            {otherUserProfiles.map((userProfile) => (
+              <div
+                data-test-subj={`testEndpointsUserProfilesAppUserProfile_${userProfile.user.username}`}
+              >
+                {userProfile.user.username}:{JSON.stringify(userProfile.data)}
+              </div>
+            ))}
+          </div>,
+          element
+        );
         return () => ReactDOM.unmountComponentAtNode(element);
       },
     });

@@ -29,6 +29,11 @@ export interface UserProfile<D extends UserProfileData = UserProfileData> {
   uid: string;
 
   /**
+   * Indicates whether user profile is enabled or not.
+   */
+  enabled: boolean;
+
+  /**
    * Information about the user that owns profile.
    */
   user: UserProfileUserInfo;
