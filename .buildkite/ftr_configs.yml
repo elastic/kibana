@@ -151,6 +151,7 @@ enabled:
   - x-pack/test/functional_synthetics/config.js
   - x-pack/test/functional_with_es_ssl/config.ts
   - x-pack/test/functional/apps/advanced_settings/config.ts
+  - x-pack/test/functional/apps/aiops/config.ts
   - x-pack/test/functional/apps/api_keys/config.ts
   - x-pack/test/functional/apps/apm/config.ts
   - x-pack/test/functional/apps/canvas/config.ts
