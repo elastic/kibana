@@ -192,8 +192,8 @@ const SaveSearchObjectModal: React.FC<{
     <EuiFormRow
       helpText={
         <FormattedMessage
-          id="discover.topNav.saveModal.storeTimeWithSearchFormRowHelpText"
-          defaultMessage="Restore the time filter with the currently selected time range and refresh interval each time this search is opened"
+          id="discover.topNav.saveModal.storeTimeWithSearchToggleDescription"
+          defaultMessage="Update the time filter and refresh interval to the current selection when using this search."
         />
       }
     >
@@ -203,8 +203,8 @@ const SaveSearchObjectModal: React.FC<{
         onChange={(event) => setTimeRestore(event.target.checked)}
         label={
           <FormattedMessage
-            id="discover.topNav.saveModal.storeTimeWithSearchFormRowLabel"
-            defaultMessage="Store time with search"
+            id="discover.topNav.saveModal.storeTimeWithSearchToggleLabel"
+            defaultMessage="Store time with saved search"
           />
         }
       />
