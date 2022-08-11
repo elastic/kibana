@@ -31,12 +31,14 @@ type GetTotalCountsResults = Pick<
   | 'throttle_time_number_s'
   | 'schedule_time_number_s'
   | 'connectors_per_alert'
->;
+> & { errorMessage?: string; hasErrors: boolean };
 
 interface GetTotalCountInUseResults {
   countTotal: number;
   countByType: Record<string, number>;
   countNamespaces: number;
+  errorMessage?: string;
+  hasErrors: boolean;
 }
 
 export async function getTotalCountAggregations({
@@ -79,17 +81,17 @@ export async function getTotalCountAggregations({
                 int parsed = 0;
                 if (doc['alert.schedule.interval'].size() > 0) {
                   def interval = doc['alert.schedule.interval'].value;
-  
+
                   if (interval.length() > 1) {
                       // get last char
                       String timeChar = interval.substring(interval.length() - 1);
                       // remove last char
                       interval = interval.substring(0, interval.length() - 1);
-  
+
                       if (interval.chars().allMatch(Character::isDigit)) {
                         // using of regex is not allowed in painless language
                         parsed = Integer.parseInt(interval);
-  
+
                         if (timeChar.equals("s")) {
                           parsed = parsed;
                         } else if (timeChar.equals("m")) {
@@ -115,17 +117,17 @@ export async function getTotalCountAggregations({
                 int parsed = 0;
                 if (doc['alert.throttle'].size() > 0) {
                 def throttle = doc['alert.throttle'].value;
-  
+
                 if (throttle.length() > 1) {
                     // get last char
                     String timeChar = throttle.substring(throttle.length() - 1);
                     // remove last char
                     throttle = throttle.substring(0, throttle.length() - 1);
-  
+
                     if (throttle.chars().allMatch(Character::isDigit)) {
                       // using of regex is not allowed in painless language
                       parsed = Integer.parseInt(throttle);
-  
+
                       if (timeChar.equals("s")) {
                         parsed = parsed;
                       } else if (timeChar.equals("m")) {
@@ -186,6 +188,7 @@ export async function getTotalCountAggregations({
       typeof results.hits.total === 'number' ? results.hits.total : results.hits.total?.value;
 
     return {
+      hasErrors: false,
       count_total: totalRulesCount ?? 0,
       count_by_type: parseSimpleRuleTypeBucket(aggregations.by_rule_type_id.buckets),
       throttle_time: {
@@ -215,6 +218,8 @@ export async function getTotalCountAggregations({
       },
     };
   } catch (err) {
+    const errorMessage = err && err.message ? err.message : err.toString();
+
     logger.warn(
       `Error executing alerting telemetry task: getTotalCountAggregations - ${JSON.stringify(err)}`,
       {
@@ -223,6 +228,8 @@ export async function getTotalCountAggregations({
       }
     );
     return {
+      hasErrors: true,
+      errorMessage,
       count_total: 0,
       count_by_type: {},
       throttle_time: {
@@ -296,11 +303,13 @@ export async function getTotalCountInUse({
       typeof results.hits.total === 'number' ? results.hits.total : results.hits.total?.value;
 
     return {
+      hasErrors: false,
       countTotal: totalEnabledRulesCount ?? 0,
       countByType: parseSimpleRuleTypeBucket(aggregations.by_rule_type_id.buckets),
       countNamespaces: aggregations.namespaces_count.value ?? 0,
     };
   } catch (err) {
+    const errorMessage = err && err.message ? err.message : err.toString();
     logger.warn(
       `Error executing alerting telemetry task: getTotalCountInUse - ${JSON.stringify(err)}`,
       {
@@ -309,6 +318,8 @@ export async function getTotalCountInUse({
       }
     );
     return {
+      hasErrors: true,
+      errorMessage,
       countTotal: 0,
       countByType: {},
       countNamespaces: 0,
