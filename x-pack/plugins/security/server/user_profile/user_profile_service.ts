@@ -7,7 +7,7 @@
 
 import type {
   SecurityActivateUserProfileRequest,
-  SecuritySuggestUserProfilesResponse,
+  SecurityUserProfileWithMetadata,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { SecurityUserProfile } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
@@ -179,8 +179,10 @@ function parseUserProfile<D extends UserProfileData>(
 ): UserProfile<D> {
   return {
     uid: rawUserProfile.uid,
-    // @ts-expect-error @elastic/elasticsearch SecurityActivateUserProfileResponse.enabled: boolean
-    enabled: rawUserProfile.enabled,
+    // Get User Profile API returns `enabled` property, but Suggest User Profile API doesn't since it's assumed that the
+    // API returns only enabled profiles. To simplify the API in Kibana we use the same interfaces for user profiles
+    // irrespective to the source they are coming from, so we need to "normalize" `enabled` property here.
+    enabled: rawUserProfile.enabled ?? true,
     data: rawUserProfile.data?.[KIBANA_DATA_ROOT] ?? {},
     user: {
       username: rawUserProfile.user.username,
@@ -315,12 +317,13 @@ export class UserProfileService {
       return null;
     }
 
+    let body;
     try {
-      const body = await clusterClient.asInternalUser.security.getUserProfile({
+      // @ts-expect-error Invalid response format.
+      body = (await clusterClient.asInternalUser.security.getUserProfile({
         uid: userSession.userProfileId,
         data: dataPath ? `${KIBANA_DATA_ROOT}.${dataPath}` : undefined,
-      });
-      return parseUserProfileWithSecurity<D>(body[userSession.userProfileId]!);
+      })) as { profiles: SecurityUserProfileWithMetadata[] };
     } catch (error) {
       this.logger.error(
         `Failed to retrieve user profile for the current user [sid=${getPrintableSessionId(
@@ -329,6 +332,17 @@ export class UserProfileService {
       );
       throw error;
     }
+
+    if (body.profiles.length === 0) {
+      this.logger.error(
+        `The user profile for the current user [sid=${getPrintableSessionId(
+          userSession.sid
+        )}] is not found.`
+      );
+      throw new Error(`User profile is not found.`);
+    }
+
+    return parseUserProfileWithSecurity<D>(body.profiles[0]);
   }
 
   /**
@@ -343,41 +357,13 @@ export class UserProfileService {
     }
 
     try {
-      // Use `transport.request` since `.security.suggestUserProfiles` implementation doesn't accept `hint` as a body
-      // parameter yet.
-      const body =
-        await clusterClient.asInternalUser.transport.request<SecuritySuggestUserProfilesResponse>({
-          method: 'POST',
-          path: '_security/profile/_suggest',
-          body: {
-            hint: { uids: [...uids] },
-            // We need at most as many results as requested uids.
-            size: uids.size,
-            data: dataPath ? `${KIBANA_DATA_ROOT}.${dataPath}` : undefined,
-          },
-        });
+      // @ts-expect-error Invalid response format.
+      const body = (await clusterClient.asInternalUser.security.getUserProfile({
+        uid: [...uids].join(','),
+        data: dataPath ? `${KIBANA_DATA_ROOT}.${dataPath}` : undefined,
+      })) as { profiles: SecurityUserProfileWithMetadata[] };
 
-      // Using `_suggest` API to simulate `_bulk_get` API has two important shortcomings:
-      // 1. "uids" parameter is just a hint that asks Elasticsearch to put user profiles with the requested uids on the
-      // top of the returned list, but if Elasticsearch cannot find user profiles for all requested uids it might
-      // include other "matched" user profiles as well. We should filter those non-requested profiles out.
-      // 2. The `_suggest` API is supposed to sort results by relevance i.e. first by the search score (if `name`
-      // parameter is specified which isn't the case here) and then by the activation time. The `_bulk_get` API, on the
-      // contrary, should always return results in the order the consumer specified UIDs in (in our case, the insertion
-      // order for the `Set` we use as the UIDs parameter). That's why we're manually sorting profiles here.
-      const rawUserProfiles = new Map(
-        body.profiles.map((rawUserProfile) => [rawUserProfile.uid, rawUserProfile])
-      );
-
-      const parsedUserProfiles = [];
-      for (const uid of uids) {
-        const rawUserProfile = rawUserProfiles.get(uid);
-        if (rawUserProfile) {
-          parsedUserProfiles.push(parseUserProfile<D>(rawUserProfile));
-        }
-      }
-
-      return parsedUserProfiles;
+      return body.profiles.map((rawUserProfile) => parseUserProfile<D>(rawUserProfile));
     } catch (error) {
       this.logger.error(`Failed to bulk get user profiles: ${getDetailedErrorMessage(error)}`);
       throw error;
@@ -493,7 +479,7 @@ export class UserProfileService {
         // but still iterate through entire batch to collect and report all unknown uids.
         if (filteredProfile && filteredProfiles.length < requiredSize) {
           filteredProfiles.push(filteredProfile);
-        } else {
+        } else if (!filteredProfile) {
           unknownUids.push(profileUid);
         }
       }
