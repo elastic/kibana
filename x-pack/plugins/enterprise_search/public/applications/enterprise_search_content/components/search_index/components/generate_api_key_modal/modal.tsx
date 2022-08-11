@@ -113,17 +113,23 @@ export const GenerateApiKeyModal: React.FC<GenerateApiKeyModalProps> = ({ indexN
                       </EuiFlexItem>
                     </>
                   ) : (
-                    <ApiKey
-                      apiKey={apiKey}
-                      label={keyName}
-                      actions={
-                        <EuiButtonIcon
-                          iconType="download"
-                          href={encodeURI(`data:text/csv;charset=utf-8,${apiKey}`)}
-                          download={`${keyName}.csv`}
-                        />
-                      }
-                    />
+                    <EuiFlexItem>
+                      <ApiKey
+                        apiKey={apiKey}
+                        label={keyName}
+                        actions={
+                          <EuiButtonIcon
+                            aria-label={i18n.translate(
+                              'xpack.enterpriseSearch.content.overview.generateApiKeyModal.csvDownloadButton',
+                              { defaultMessage: 'Download API key' }
+                            )}
+                            iconType="download"
+                            href={encodeURI(`data:text/csv;charset=utf-8,${apiKey}`)}
+                            download={`${keyName}.csv`}
+                          />
+                        }
+                      />
+                    </EuiFlexItem>
                   )}
                 </EuiFlexGroup>
               </EuiFlexItem>

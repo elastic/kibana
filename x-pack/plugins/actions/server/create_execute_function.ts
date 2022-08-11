@@ -150,13 +150,13 @@ export function createBulkExecutionEnqueuerFunction({
   ) {
     if (!isESOCanEncrypt) {
       throw new Error(
-        `Unable to execute action because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
+        `Unable to execute actions because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
       );
     }
 
-    const actionTypeIds: { [key: string]: string } = {};
-    const spaceIds: { [key: string]: string } = {};
-    const connectorIsPreconfigured: { [key: string]: boolean } = {};
+    const actionTypeIds: Record<string, string> = {};
+    const spaceIds: Record<string, string> = {};
+    const connectorIsPreconfigured: Record<string, boolean> = {};
     const connectorIds = [...new Set(actionsToExecute.map((action) => action.id))];
     const connectors = await getConnectors(
       unsecuredSavedObjectsClient,

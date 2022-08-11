@@ -10,7 +10,7 @@ import { IScopedClusterClient } from '@kbn/core/server';
 import { get } from 'lodash';
 import { RouteDependencies } from '../../../types';
 // @ts-ignore
-import { WatchStatus } from '../../../models/watch_status';
+import { WatchStatusModel } from '../../../models/watch_status_model';
 
 const paramsSchema = schema.object({
   watchId: schema.string(),
@@ -46,7 +46,7 @@ export function registerDeactivateRoute({
           watchStatusJson,
         };
 
-        const watchStatus = WatchStatus.fromUpstreamJson(json);
+        const watchStatus = WatchStatusModel.fromUpstreamJson(json);
         return response.ok({
           body: {
             watchStatus: watchStatus.downstreamJson,
