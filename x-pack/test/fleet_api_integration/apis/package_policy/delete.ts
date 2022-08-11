@@ -277,8 +277,10 @@ export default function (providerContext: FtrProviderContext) {
 
       it('should work for regular policies', async function () {
         await supertest
-          .delete(`/api/fleet/package_policies/${packagePolicy.id}`)
-          .set('kbn-xsrf', 'xxxx');
+          .post(`/api/fleet/package_policies/delete`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ packagePolicyIds: [packagePolicy.id] })
+          .expect(200);
       });
     });
   });
