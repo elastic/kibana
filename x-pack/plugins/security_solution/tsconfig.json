@@ -4,8 +4,7 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true,
-    "noErrorTruncation": true
+    "declarationMap": true
   },
   "include": [
     "common/**/*",
