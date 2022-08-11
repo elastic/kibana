@@ -99,6 +99,7 @@ const addRangeFilter = (range: { startTime: string; endTime: string }): QueryDsl
 export class ESClient {
   client: Client;
   log: ToolingLog;
+  tracesIndex: string = '.ds-traces-apm-default*';
 
   constructor(options: ClientOptions, log: ToolingLog) {
     this.client = new Client({
@@ -113,6 +114,7 @@ export class ESClient {
 
   async getTransactions<T>(queryFilters: QueryDslQueryContainer[]) {
     const searchRequest: SearchRequest = {
+      index: this.tracesIndex,
       body: {
         sort: [
           {
@@ -196,7 +198,7 @@ export class ESClient {
       const filters = [{ field: 'parent.id', value: transactionId }];
       const queryFilters = filters.map((filter) => addBooleanFilter(filter));
       const requestItem = this.getMsearchRequestItem(queryFilters);
-      searches.push({}, requestItem);
+      searches.push({ index: this.tracesIndex }, requestItem);
     }
     this.log.debug(`Msearch request: ${JSON.stringify(searches)}`);
     const result = await this.client.msearch<SpanDocument>({
