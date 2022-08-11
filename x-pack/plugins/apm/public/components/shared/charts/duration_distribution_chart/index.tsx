@@ -143,9 +143,10 @@ export function DurationDistributionChart({
       ...flatten(data.map((d) => d.histogram)).map((d) => d.doc_count)
     ) ?? 0;
   const yTicks = Math.max(1, Math.ceil(Math.log10(yMax)));
+  const yAxisMaxDomain = Math.pow(10, yTicks);
   const yAxisDomain = {
     min: Y_AXIS_MIN_DOMAIN,
-    max: Math.pow(10, yTicks),
+    max: yAxisMaxDomain,
   };
 
   const selectionAnnotation =
@@ -156,7 +157,7 @@ export function DurationDistributionChart({
               x0: selection[0],
               x1: selection[1],
               y0: 0,
-              y1: 100000,
+              y1: yAxisMaxDomain,
             },
             details: 'selection',
           },
