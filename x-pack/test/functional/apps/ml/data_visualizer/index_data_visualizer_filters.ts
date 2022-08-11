@@ -116,7 +116,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('data visualizer with pinned global filters', function () {
     before(async function () {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/module_sample_logs');
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.createSavedSearchFarequoteFilterAndLuceneIfNeeded();
       await ml.testResources.createSavedSearchFarequoteFilterAndKueryIfNeeded();
@@ -134,7 +133,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe(`with ${farequoteLuceneFiltersSearchTestData.suiteTitle}`, function () {
-      runTests(farequoteKQLFiltersSearchTestData);
+      runTests(farequoteLuceneFiltersSearchTestData);
     });
     describe(`with ${farequoteKQLFiltersSearchTestData.suiteTitle}`, function () {
       runTests(farequoteKQLFiltersSearchTestData);
