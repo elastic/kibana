@@ -93,9 +93,9 @@ export class UserProfileAPIClient {
    * optional "dataPath" parameter can be used to return personal data for the requested user profiles.
    */
   public bulkGet<D extends UserProfileData>(params: UserProfileBulkGetParams) {
-    const uids = [...params.uids];
     return this.http.post<Array<UserProfile<D>>>('/internal/security/user_profile/_bulk_get', {
-      body: JSON.stringify({ ...params, uids }),
+      // Convert `Set` with UIDs to an array to make it serializable.
+      body: JSON.stringify({ ...params, uids: [...params.uids] }),
     });
   }
 
