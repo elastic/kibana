@@ -31,13 +31,6 @@ import {
 import { Logger, ElasticsearchClient, EcsEventOutcome } from '@kbn/core/server';
 import { AuditLogger } from '@kbn/security-plugin/server';
 import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
-import { FieldSpec } from '@kbn/data-views-plugin/server';
-import { fieldsBeat } from '@kbn/timelines-plugin/server/utils/beat_schema/fields';
-import {
-  BrowserField,
-  FieldInfo,
-  IndexField,
-} from '@kbn/timelines-plugin/common/search_strategy/index_fields';
 import { alertAuditEvent, operationAlertAuditActionMap } from './audit_events';
 import {
   ALERT_WORKFLOW_STATUS,
@@ -48,6 +41,8 @@ import {
 import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 import { Dataset, IRuleDataService } from '../rule_data_plugin_service';
 import { getAuthzFilter, getSpacesFilter } from '../lib';
+import { fieldDescriptorToBrowserFieldMapper } from './browser_fields';
+import { BrowserField } from '../types';
 
 // TODO: Fix typings https://github.com/elastic/kibana/issues/101776
 type NonNullableProps<Obj extends {}, Props extends keyof Obj> = Omit<Obj, Props> & {
@@ -68,8 +63,6 @@ const isValidAlert = (source?: estypes.SearchHit<ParsedTechnicalFields>): source
       source?.fields?.[SPACE_IDS][0] != null)
   );
 };
-
-const beatsMap = new Map(Object.entries(fieldsBeat));
 
 export interface ConstructorOptions {
   logger: Logger;
@@ -727,7 +720,7 @@ export class AlertsClient {
     }
   }
 
-  async getFieldCapabilities({
+  async getBrowserFields({
     indices,
     metaFields,
     allowNoIndex,
@@ -735,7 +728,7 @@ export class AlertsClient {
     indices: string[];
     metaFields: string[];
     allowNoIndex: boolean;
-  }): Promise<IndexField[]> {
+  }): Promise<BrowserField[]> {
     const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(this.esClient);
     const fieldDescriptor = await indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
       pattern: indices,
@@ -743,66 +736,6 @@ export class AlertsClient {
       fieldCapsOptions: { allow_no_indices: allowNoIndex },
     });
 
-    return await fieldDescriptorToIndexFieldMapper(fieldDescriptor);
+    return await fieldDescriptorToBrowserFieldMapper(fieldDescriptor);
   }
 }
-
-const populatedFieldInfoFactory = (descriptor: FieldSpec, beat: FieldInfo) => {
-  const { category, description, example, name } = beat;
-  const { aggregatable, readFromDocValues, searchable, type } = descriptor;
-
-  return {
-    category,
-    field: {
-      [name]: {
-        aggregatable,
-        category,
-        description,
-        example,
-        name,
-        readFromDocValues,
-        searchable,
-        type,
-      },
-    },
-  };
-};
-
-const emptyFieldInfoFactory = (descriptor: FieldSpec) => {
-  const category = descriptor.name.split('.')[0];
-  return {
-    category,
-    field: {
-      [descriptor.name]: {
-        ...descriptor,
-        category,
-      },
-    },
-  };
-};
-
-export const fieldDescriptorToIndexFieldMapper = async (
-  fieldDescriptor: FieldSpec[]
-): Promise<BrowserField[]> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const map = new Map();
-
-      fieldDescriptor.forEach((descriptor) => {
-        const beat = beatsMap.get(descriptor.name);
-        const { category, field } = beat
-          ? populatedFieldInfoFactory(descriptor, beat)
-          : emptyFieldInfoFactory(descriptor);
-
-        if (map.has(category)) {
-          const { fields: currentFields } = map.get(category);
-          map.set(category, { fields: { ...currentFields, ...field } });
-        } else {
-          map.set(category, { fields: field });
-        }
-      });
-
-      resolve(Object.fromEntries(map));
-    });
-  });
-};

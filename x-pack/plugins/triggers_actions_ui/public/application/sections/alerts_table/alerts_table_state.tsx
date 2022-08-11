@@ -162,8 +162,6 @@ const AlertsTableState = ({
     skip: false,
   });
 
-  console.log('featureIds', featureIds);
-
   const onPageChange = useCallback((_pagination: RuleRegistrySearchRequestPagination) => {
     setPagination(_pagination);
   }, []);

@@ -12,13 +12,13 @@ import { schema } from '@kbn/config-schema';
 import { RacRequestHandlerContext } from '../types';
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
 
-export const getAlertFieldByFeatureId = (router: IRouter<RacRequestHandlerContext>) => {
+export const getBrowserFieldsByFeatureId = (router: IRouter<RacRequestHandlerContext>) => {
   router.get(
     {
-      path: `${BASE_RAC_ALERTS_API_PATH}/field_caps`,
+      path: `${BASE_RAC_ALERTS_API_PATH}/browser_fields`,
       validate: {
         query: schema.object({
-          featureIds: schema.string(),
+          featureIds: schema.string({ minLength: 1 }),
         }),
       },
       options: {
@@ -34,18 +34,23 @@ export const getAlertFieldByFeatureId = (router: IRouter<RacRequestHandlerContex
         const indices = await alertsClient.getAuthorizedAlertsIndices(featureIds.split(','));
 
         if (!indices) {
-          throw new Error('fix me');
+          return response.notFound({
+            body: {
+              message: `indices for featureIds [${featureIds}] not found`,
+              attributes: { success: false },
+            },
+          });
         }
 
         const o11yIndices = indices.filter((index) => index.startsWith('.alerts-observability'));
-        const fieldCaps = await alertsClient.getFieldCapabilities({
+        const browserFields = await alertsClient.getBrowserFields({
           indices: o11yIndices,
           metaFields: ['_id', '_index'],
           allowNoIndex: true,
         });
 
         return response.ok({
-          body: fieldCaps,
+          body: browserFields,
         });
       } catch (error) {
         const formatedError = transformError(error);
