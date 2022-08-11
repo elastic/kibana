@@ -14,7 +14,7 @@ interface SidebarTitleProps {
 
 const SidebarTitleComponent: React.FC<SidebarTitleProps> = ({ title }) => {
   return (
-    <EuiText css={{ marginBottom: 20 }}>
+    <EuiText>
       <h4>{title}</h4>
     </EuiText>
   );

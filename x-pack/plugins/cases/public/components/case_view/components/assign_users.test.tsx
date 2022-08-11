@@ -144,14 +144,13 @@ describe('AssignUsers', () => {
 
     fireEvent.click(screen.getByText('assign yourself'));
 
-    // the first call will be when the component is initially render with isPopover as false
-    // and then it should call again when the user is assigned
-    await waitFor(() => expect(onAssigneesChanged).toBeCalledTimes(2));
+    await waitFor(() => expect(onAssigneesChanged).toBeCalledTimes(1));
 
-    expect(onAssigneesChanged.mock.calls[1][0]).toMatchInlineSnapshot(`
+    expect(onAssigneesChanged.mock.calls[0][0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "data": Object {},
+          "enabled": true,
           "uid": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
           "user": Object {
             "email": "damaged_raccoon@elastic.co",
@@ -180,14 +179,12 @@ describe('AssignUsers', () => {
       screen.getByTestId(`user-profile-assigned-user-cross-${userProfiles[0].user.username}`)
     );
 
-    // the first call will be when the component is initially render with isPopover as false
-    // and then it should call again when the user is assigned
-    await waitFor(() => expect(onAssigneesChanged).toBeCalledTimes(2));
+    await waitFor(() => expect(onAssigneesChanged).toBeCalledTimes(1));
 
-    expect(onAssigneesChanged.mock.calls[1][0]).toMatchInlineSnapshot(`Array []`);
+    expect(onAssigneesChanged.mock.calls[0][0]).toMatchInlineSnapshot(`Array []`);
   });
 
-  it('calls onAssigneesChanged when the popover is closed', async () => {
+  it('calls onAssigneesChanged when the popover is closed using the pencil button', async () => {
     const onAssigneesChanged = jest.fn();
     const props = {
       ...defaultProps,
@@ -203,14 +200,13 @@ describe('AssignUsers', () => {
     // close the popover
     fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
 
-    // the first call will be when the component is initially render with isPopover as false
-    // and then it should call again when the user is assigned
-    await waitFor(() => expect(onAssigneesChanged).toBeCalledTimes(2));
+    await waitFor(() => expect(onAssigneesChanged).toBeCalledTimes(1));
 
-    expect(onAssigneesChanged.mock.calls[1][0]).toMatchInlineSnapshot(`
+    expect(onAssigneesChanged.mock.calls[0][0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "data": Object {},
+          "enabled": true,
           "uid": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
           "user": Object {
             "email": "damaged_raccoon@elastic.co",
@@ -220,5 +216,22 @@ describe('AssignUsers', () => {
         },
       ]
     `);
+  });
+
+  it('does not call onAssigneesChanged when the selected assignees have not changed between renders', async () => {
+    const onAssigneesChanged = jest.fn();
+    const props = {
+      ...defaultProps,
+      assignees: [{ uid: userProfiles[0].uid }],
+      onAssigneesChanged,
+      userProfiles: userProfilesMap,
+    };
+    appMockRender.render(<AssignUsers {...props} />);
+
+    fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
+    // close the popover
+    fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
+
+    await waitFor(() => expect(onAssigneesChanged).toBeCalledTimes(0));
   });
 });

@@ -78,7 +78,10 @@ export const CaseViewActivity = ({
     caseData,
   });
 
-  const isLoadingProfileData = isLoadingUserProfiles || isLoadingCurrentUserProfile;
+  const isLoadingAssigneeData =
+    (isLoading && loadingKey === 'assignees') ||
+    isLoadingUserProfiles ||
+    isLoadingCurrentUserProfile;
 
   const changeStatus = useCallback(
     (status: CaseStatuses) =>
@@ -180,7 +183,7 @@ export const CaseViewActivity = ({
             assignees={caseData.assignees}
             currentUserProfile={currentUserProfile}
             onAssigneesChanged={onUpdateAssignees}
-            isLoading={isLoadingProfileData}
+            isLoading={isLoadingAssigneeData}
             userProfiles={userProfiles ?? new Map()}
           />
         </SidebarSection>

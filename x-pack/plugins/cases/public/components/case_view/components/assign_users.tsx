@@ -15,9 +15,10 @@ import {
   EuiPopover,
   EuiToolTip,
   EuiLoadingSpinner,
+  EuiSpacer,
 } from '@elastic/eui';
 
-import { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { UserProfileWithAvatar, UserProfile } from '@kbn/user-profile-components';
 import { CaseAssignees } from '../../../../common/api/cases/assignee';
 import * as i18n from '../translations';
 import { SuggestUsers } from '../../user_profiles/suggest_users';
@@ -83,7 +84,7 @@ export interface AssignUsersProps {
   assignees: CaseAssignees;
   currentUserProfile?: UserProfileWithAvatar;
   userProfiles: Map<string, UserProfileWithAvatar>;
-  onAssigneesChanged: (assignees: UserProfileWithAvatar[]) => void;
+  onAssigneesChanged: (assignees: UserProfile[]) => void;
   isLoading: boolean;
 }
 
@@ -105,16 +106,19 @@ const AssignUsersComponent: React.FC<AssignUsersProps> = ({
     }, []);
   }, [assignees, userProfiles]);
 
-  const [selectedAssignees, setSelectedAssignees] = useState<UserProfileWithAvatar[]>([]);
+  const [selectedAssignees, setSelectedAssignees] = useState<UserProfileWithAvatar[] | undefined>();
+  const [needToUpdateAssignees, setNeedToUpdateAssignees] = useState(false);
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const togglePopOver = useCallback(() => {
     setIsPopoverOpen((value) => !value);
+    setNeedToUpdateAssignees(true);
   }, []);
 
   const onClosePopover = useCallback(() => {
     setIsPopoverOpen(false);
+    setNeedToUpdateAssignees(true);
   }, []);
 
   const onAssigneeRemoved = useCallback(
@@ -123,6 +127,7 @@ const AssignUsersComponent: React.FC<AssignUsersProps> = ({
         (assignee) => assignee.uid !== removedAssigneeUID
       );
       setSelectedAssignees(remainingAssignees);
+      setNeedToUpdateAssignees(true);
     },
     [assigneesWithProfiles]
   );
@@ -138,15 +143,19 @@ const AssignUsersComponent: React.FC<AssignUsersProps> = ({
 
     const newAssignees = [...assigneesWithProfiles, currentUserProfile];
     setSelectedAssignees(newAssignees);
+    setNeedToUpdateAssignees(true);
   }, [currentUserProfile, assigneesWithProfiles]);
 
   const { permissions } = useCasesContext();
 
   useEffect(() => {
-    if (isPopoverOpen === false) {
+    // selectedAssignees will be undefined when an initial or rerender occurs, so we only want to update the assignees
+    // after the users have been changed in some manner not when it is an initial value
+    if (isPopoverOpen === false && needToUpdateAssignees && selectedAssignees) {
+      setNeedToUpdateAssignees(false);
       onAssigneesChanged(selectedAssignees);
     }
-  }, [isPopoverOpen, onAssigneesChanged, selectedAssignees]);
+  }, [isPopoverOpen, needToUpdateAssignees, onAssigneesChanged, selectedAssignees]);
 
   const popOverButton = (
     <EuiToolTip position="left" content={i18n.EDIT_ASSIGNEES}>
@@ -161,7 +170,7 @@ const AssignUsersComponent: React.FC<AssignUsersProps> = ({
   );
 
   return (
-    <>
+    <EuiFlexItem grow={false}>
       <EuiFlexGroup
         alignItems="center"
         gutterSize="xs"
@@ -193,17 +202,15 @@ const AssignUsersComponent: React.FC<AssignUsersProps> = ({
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-      {isLoading && <EuiLoadingSpinner data-test-subj="case-view-assignees-list-loading" />}
-      {!isLoading && (
-        <AssigneesList
-          assigneesWithProfiles={assigneesWithProfiles}
-          currentUserProfile={currentUserProfile}
-          assignSelf={assignSelf}
-          togglePopOver={togglePopOver}
-          onAssigneeRemoved={onAssigneeRemoved}
-        />
-      )}
-    </>
+      <EuiSpacer size="m" />
+      <AssigneesList
+        assigneesWithProfiles={assigneesWithProfiles}
+        currentUserProfile={currentUserProfile}
+        assignSelf={assignSelf}
+        togglePopOver={togglePopOver}
+        onAssigneeRemoved={onAssigneeRemoved}
+      />
+    </EuiFlexItem>
   );
 };
 
