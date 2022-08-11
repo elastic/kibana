@@ -16,8 +16,7 @@ import * as GetStoredAnnotations from './get_stored_annotations';
 import { Annotation, AnnotationType } from '../../../../common/annotations';
 import { errors } from '@elastic/elasticsearch';
 
-// FLAKY: https://github.com/elastic/kibana/issues/138039
-describe.skip('getServiceAnnotations', () => {
+describe('getServiceAnnotations', () => {
   const storedAnnotations = [
     {
       type: AnnotationType.VERSION,
@@ -218,21 +217,17 @@ describe.skip('getServiceAnnotations', () => {
       .mockImplementation(
         () =>
           new Promise((resolve, reject) => {
-            setTimeout(() => {
-              reject(
-                new WrappedElasticsearchClientError(
-                  new errors.RequestAbortedError('foo')
-                )
-              );
-            }, 20);
+            reject(
+              new WrappedElasticsearchClientError(
+                new errors.RequestAbortedError('foo')
+              )
+            );
           })
       );
     jest.spyOn(GetStoredAnnotations, 'getStoredAnnotations').mockImplementation(
       async () =>
         new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(storedAnnotations);
-          }, 10);
+          resolve(storedAnnotations);
         })
     );
 
