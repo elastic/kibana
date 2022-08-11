@@ -37,6 +37,7 @@ import {
   useFetchAlertStatus,
   useFetchSessionViewProcessEvents,
   useFetchSessionViewAlerts,
+  useFetchGetTotalIOBytes,
 } from './hooks';
 import { LOCAL_STORAGE_DISPLAY_OPTIONS_KEY } from '../../../common/constants';
 
@@ -165,6 +166,9 @@ export const SessionView = ({
     fetchAlertStatus[0] ?? ''
   );
 
+  const { data: totalTTYOutputBytes } = useFetchGetTotalIOBytes(sessionEntityId);
+  const hasTTYOutput = !!totalTTYOutputBytes;
+
   useEffect(() => {
     if (newUpdatedAlertsStatus) {
       setUpdatedAlertsStatus({ ...newUpdatedAlertsStatus });
@@ -275,17 +279,19 @@ export const SessionView = ({
             />
           </EuiFlexItem>
 
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              isSelected={showTTY}
-              display={showTTY ? 'fill' : 'empty'}
-              iconType="videoPlayer"
-              onClick={onToggleTTY}
-              size="m"
-              aria-label="Opens TTY player"
-              data-test-subj="sessionView:sessionViewTTYPlayerToggle"
-            />
-          </EuiFlexItem>
+          {hasTTYOutput && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                isSelected={showTTY}
+                display={showTTY ? 'fill' : 'empty'}
+                iconType="videoPlayer"
+                onClick={onToggleTTY}
+                size="m"
+                aria-label="Opens TTY player"
+                data-test-subj="sessionView:sessionViewTTYPlayerToggle"
+              />
+            </EuiFlexItem>
+          )}
 
           <EuiFlexItem grow={false}>
             <SessionViewDisplayOptions

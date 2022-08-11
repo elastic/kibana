@@ -21,7 +21,7 @@ export const enum EventAction {
   fork = 'fork',
   exec = 'exec',
   end = 'end',
-  io = 'io',
+  tty_output = 'tty_output',
 }
 
 export interface User {

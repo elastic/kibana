@@ -6,12 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import { IO_EVENTS_ROUTE } from '@kbn/session-view-plugin/common/constants';
+import { IO_EVENTS_PER_PAGE, IO_EVENTS_ROUTE } from '@kbn/session-view-plugin/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 const MOCK_SESSION_ENTITY_ID = '1';
 const MOCK_IO_EVENT_TOTAL = 8;
-const MOCK_CURSOR_OF_SECOND_EVENT = '2020-12-16T15:16:30.570Z';
+const MOCK_CURSOR = '2022-07-14T11:16:35.570Z';
 
 // eslint-disable-next-line import/no-default-export
 export default function ioEventsTests({ getService }: FtrProviderContext) {
@@ -24,7 +24,7 @@ export default function ioEventsTests({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-//      await esArchiver.unload('x-pack/test/functional/es_archives/session_view/io_events');
+      await esArchiver.unload('x-pack/test/functional/es_archives/session_view/io_events');
     });
 
     it(`${IO_EVENTS_ROUTE} returns a page of IO events`, async () => {
@@ -33,7 +33,7 @@ export default function ioEventsTests({ getService }: FtrProviderContext) {
       });
       expect(response.status).to.be(200);
       expect(response.body.total).to.be(MOCK_IO_EVENT_TOTAL);
-      expect(response.body.events.length).to.be(MOCK_IO_EVENT_TOTAL);
+      expect(response.body.events.length).to.be(IO_EVENTS_PER_PAGE);
 
       // ensure sorting timestamp ascending
       let lastSort = 0;
@@ -49,13 +49,13 @@ export default function ioEventsTests({ getService }: FtrProviderContext) {
     it(`${IO_EVENTS_ROUTE} returns a page of IO events (w cursor)`, async () => {
       const response = await supertest.get(IO_EVENTS_ROUTE).set('kbn-xsrf', 'foo').query({
         sessionEntityId: MOCK_SESSION_ENTITY_ID,
-        cursor: MOCK_CURSOR_OF_SECOND_EVENT,
+        cursor: MOCK_CURSOR,
       });
       expect(response.status).to.be(200);
       expect(response.body.total).to.be(MOCK_IO_EVENT_TOTAL);
 
-      // since our cursor is the timestamp of the second event, the first result will be event #3 (thus the - 2)
-      expect(response.body.events.length).to.be(MOCK_IO_EVENT_TOTAL - 2);
+      // since our cursor is last event the result set size should only be 1
+      expect(response.body.events.length).to.be(1);
     });
   });
 }

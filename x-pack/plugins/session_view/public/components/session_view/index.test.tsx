@@ -134,6 +134,20 @@ describe('SessionView component', () => {
 
         expect(renderResult.getAllByTestId('sessionView:sessionViewRefreshButton')).toBeTruthy();
       });
+
+      it('should show tty player button, if session has output', async () => {
+        render();
+        await waitForApiCall();
+
+        expect(renderResult.getAllByTestId('sessionView:sessionViewTTYPlayer')).toBeTruthy();
+      });
+
+      it('should NOT show tty player button, if session has no output', async () => {
+        render();
+        await waitForApiCall();
+
+        expect(renderResult.getAllByTestId('sessionView:sessionViewTTYPlayer')).toBeFalsy();
+      });
     });
   });
 });
