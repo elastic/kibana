@@ -7,7 +7,11 @@
  */
 
 export { config } from './src/logging_config';
-export type { LoggingConfigType, loggerContextConfigSchema, loggerSchema } from './src/logging_config';
+export type {
+  LoggingConfigType,
+  loggerContextConfigSchema,
+  loggerSchema,
+} from './src/logging_config';
 export { LoggingSystem } from './src/logging_system';
 export type { ILoggingSystem } from './src/logging_system';
 export { LoggingService } from './src/logging_service';
