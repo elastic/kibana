@@ -37,6 +37,12 @@ export function makeDefaultServices(): DashboardAppServices {
         id: `dashboard${i}`,
         title: `dashboard${i} - ${search} - title`,
         description: `dashboard${i} desc`,
+        references: [],
+        timeRestore: true,
+        url: '',
+        updatedAt: '',
+        panelsJSON: '',
+        lastSavedTitle: '',
       });
     }
     return Promise.resolve({

@@ -14,4 +14,4 @@ export type {
   UserContentCommonSchema,
 } from './table_list_view';
 
-export { TableListViewProvider } from './services';
+export { TableListViewProvider, TableListViewKibanaProvider } from './services';

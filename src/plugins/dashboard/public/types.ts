@@ -25,6 +25,8 @@ import { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import { VisualizationsStart } from '@kbn/visualizations-plugin/public';
 import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list';
+
 import { DataView } from './services/data_views';
 import { SharePluginStart } from './services/share';
 import { EmbeddableStart } from './services/embeddable';
@@ -220,4 +222,14 @@ export interface DashboardAppServices {
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   savedQueryService: DataPublicPluginStart['query']['savedQueries'];
   spacesService?: SpacesPluginStart;
+}
+
+/** Those are the **required** attributes for UserContent and that TableListView depend on */
+export interface DashboardAttributesUserContent {
+  title: string;
+  timeRestore: boolean;
+}
+
+export interface DashboardSavedObjectUserContent extends UserContentCommonSchema {
+  attributes: DashboardAttributesUserContent;
 }

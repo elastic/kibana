@@ -460,7 +460,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   );
 }
 
-const TableListView = React.memo(TableListViewComp);
+const TableListView = React.memo(TableListViewComp) as typeof TableListViewComp;
 
 export { TableListView };
 

@@ -49,6 +49,36 @@ export const TableListViewProvider: FC<Services> = ({ children, ...services }) =
 };
 
 /**
+ * Kibana-specific service types.
+ */
+// export interface KibanaServices {
+//   // applicationStart: Services['application'];
+//   // toastStart: Services['toast'];
+//   // savedObjectTaggingApi: Services['savedObjectTagging'];
+//   // themeServiceStart: Services['theme'];
+//   // kibanaReactToMountPoint: Services['toMountPoint'];
+// }
+
+/**
+ * Kibana-specific Provider that maps to known dependency types.
+ */
+export const TableListViewKibanaProvider: FC<{}> = ({ children, ...services }) => {
+  return (
+    <div>{children}</div>
+    // <TableListViewProvider
+    //   canEditAdvancedSettings={}
+    //   // application={services.applicationStart}
+    //   // toast={services.toastStart}
+    //   // savedObjectTagging={services.savedObjectTaggingApi}
+    //   // theme={services.themeServiceStart}
+    //   // toMountPoint={services.kibanaReactToMountPoint}
+    // >
+    //   {children}
+    // </TableListViewProvider>
+  );
+};
+
+/**
  * React hook for accessing pre-wired services.
  */
 export function useServices() {
