@@ -230,22 +230,26 @@ export class TaskRunner<
     executionHandler: ExecutionHandler<ActionGroupIds | RecoveryActionGroupId>,
     ruleRunMetricsStore: RuleRunMetricsStore
   ) {
-    const {
-      actionGroup,
-      subgroup: actionSubgroup,
-      context,
-      state,
-    } = alert.getScheduledActionOptions()!;
-    alert.updateLastScheduledActions(actionGroup, actionSubgroup);
-    alert.unscheduleActions();
-    return executionHandler({
-      actionGroup,
-      actionSubgroup,
-      context,
-      state,
-      alertId,
-      ruleRunMetricsStore,
-    });
+    if (alert.hasScheduledActions()) {
+      const {
+        actionGroup,
+        subgroup: actionSubgroup,
+        context,
+        state,
+      } = alert.getScheduledActionOptions()!;
+      alert.updateLastScheduledActions(actionGroup, actionSubgroup);
+      alert.unscheduleActions();
+      return executionHandler({
+        actionGroup,
+        actionSubgroup,
+        context,
+        state,
+        alertId,
+        ruleRunMetricsStore,
+      });
+    }
+
+    return Promise.resolve();
   }
 
   private async executeRule(

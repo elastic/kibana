@@ -547,7 +547,13 @@ describe('processAlerts', () => {
         alertLimit: 7,
       });
 
-      expect(activeAlerts).toEqual(existingAlerts);
+      expect(activeAlerts).toEqual({
+        '1': updatedAlerts['1'],
+        '2': updatedAlerts['2'],
+        '3': updatedAlerts['3'],
+        '4': updatedAlerts['4'],
+        '5': existingAlert5,
+      });
     });
 
     test('adds new alerts up to max allowed', () => {
@@ -602,7 +608,11 @@ describe('processAlerts', () => {
 
       expect(Object.keys(activeAlerts).length).toEqual(MAX_ALERTS);
       expect(activeAlerts).toEqual({
-        ...existingAlerts,
+        '1': updatedAlerts['1'],
+        '2': updatedAlerts['2'],
+        '3': updatedAlerts['3'],
+        '4': updatedAlerts['4'],
+        '5': existingAlert5,
         '6': newAlert6,
         '7': newAlert7,
       });

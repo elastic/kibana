@@ -140,6 +140,9 @@ function processAlertsLimitReached<
   // update duration for existing alerts
   for (const id in activeAlerts) {
     if (activeAlerts.hasOwnProperty(id)) {
+      if (alerts.hasOwnProperty(id)) {
+        activeAlerts[id] = alerts[id];
+      }
       const state = existingAlerts[id].getState();
       const durationInMs =
         new Date(currentTime).valueOf() - new Date(state.start as string).valueOf();
