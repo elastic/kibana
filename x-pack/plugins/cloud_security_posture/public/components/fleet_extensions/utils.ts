@@ -20,6 +20,10 @@ export const getUpdatedDeploymentType = (newPolicy: NewPackagePolicy, inputType:
     inputs: newPolicy.inputs.map((item) => ({
       ...item,
       enabled: item.type === inputType,
+      streams: item.streams.map((stream) => ({
+        ...stream,
+        enabled: item.type === inputType,
+      })),
     })),
   },
 });
