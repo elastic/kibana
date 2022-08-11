@@ -12,6 +12,7 @@ import dedent from 'dedent';
 import fs from 'fs/promises';
 import Path from 'path';
 import { ApiDeclaration, ApiReference, ReferencedDeprecationsByPlugin } from '../types';
+import { AUTO_GENERATED_WARNING } from '../auto_generated_warning';
 import { getPluginApiDocId } from '../utils';
 
 export async function writeDeprecationDocByPlugin(
@@ -70,13 +71,13 @@ export async function writeDeprecationDocByPlugin(
 
   const mdx = dedent(`
 ---
+${AUTO_GENERATED_WARNING}
 id: kibDevDocsDeprecationsByPlugin
 slug: /kibana-dev-docs/api-meta/deprecated-api-list-by-plugin
 title: Deprecated API usage by plugin
-summary: A list of deprecated APIs, which plugins are still referencing them, and when they need to be removed by.
+description: A list of deprecated APIs, which plugins are still referencing them, and when they need to be removed by.
 date: ${moment().format('YYYY-MM-DD')}
 tags: ['contributor', 'dev', 'apidocs', 'kibana']
-warning: This document is auto-generated and is meant to be viewed inside our experimental, new docs system.
 ---
 
 ${tableMdx}

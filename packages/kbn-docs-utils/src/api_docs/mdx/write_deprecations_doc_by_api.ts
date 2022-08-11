@@ -17,6 +17,7 @@ import {
   ReferencedDeprecationsByPlugin,
   UnreferencedDeprecationsByPlugin,
 } from '../types';
+import { AUTO_GENERATED_WARNING } from '../auto_generated_warning';
 import { getPluginApiDocId } from '../utils';
 
 export async function writeDeprecationDocByApi(
@@ -76,13 +77,13 @@ export async function writeDeprecationDocByApi(
 
   const mdx = dedent(`
 ---
+${AUTO_GENERATED_WARNING}
 id: kibDevDocsDeprecationsByApi
 slug: /kibana-dev-docs/api-meta/deprecated-api-list-by-api
 title: Deprecated API usage by API
-summary: A list of deprecated APIs, which plugins are still referencing them, and when they need to be removed by.
+description: A list of deprecated APIs, which plugins are still referencing them, and when they need to be removed by.
 date: ${moment().format('YYYY-MM-DD')}
 tags: ['contributor', 'dev', 'apidocs', 'kibana']
-warning: This document is auto-generated and is meant to be viewed inside our experimental, new docs system.
 ---
 
 ## Referenced deprecated APIs

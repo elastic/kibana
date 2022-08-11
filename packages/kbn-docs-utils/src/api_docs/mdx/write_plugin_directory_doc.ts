@@ -11,6 +11,7 @@ import Path from 'path';
 import dedent from 'dedent';
 import { ToolingLog } from '@kbn/tooling-log';
 import { PluginApi, PluginMetaInfo } from '../types';
+import { AUTO_GENERATED_WARNING } from '../auto_generated_warning';
 import { getPluginApiDocId } from '../utils';
 
 function hasPublicApi(doc: PluginApi): boolean {
@@ -74,13 +75,13 @@ export async function writePluginDirectoryDoc(
   const mdx =
     dedent(`
 ---
+${AUTO_GENERATED_WARNING}
 id: kibDevDocsPluginDirectory
 slug: /kibana-dev-docs/api-meta/plugin-api-directory
 title: Directory
-summary: Directory of public APIs available through plugins or packages.
+description: Directory of public APIs available through plugins or packages.
 date: ${moment().format('YYYY-MM-DD')}
 tags: ['contributor', 'dev', 'apidocs', 'kibana']
-warning: This document is auto-generated and is meant to be viewed inside our experimental, new docs system. Reach out in #docs-engineering for more info.
 ---
 
 ### Overall stats

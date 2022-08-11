@@ -16,6 +16,7 @@ import {
   PluginOrPackage,
   ReferencedDeprecationsByPlugin,
 } from '../types';
+import { AUTO_GENERATED_WARNING } from '../auto_generated_warning';
 import { getPluginApiDocId } from '../utils';
 
 export async function writeDeprecationDueByTeam(
@@ -97,13 +98,13 @@ export async function writeDeprecationDueByTeam(
 
   const mdx = dedent(`
 ---
+${AUTO_GENERATED_WARNING}
 id: kibDevDocsDeprecationsDueByTeam
 slug: /kibana-dev-docs/api-meta/deprecations-due-by-team
 title: Deprecated APIs due to be removed, by team
-summary: Lists the teams that are referencing deprecated APIs with a remove by date.
+description: Lists the teams that are referencing deprecated APIs with a remove by date.
 date: ${moment().format('YYYY-MM-DD')}
 tags: ['contributor', 'dev', 'apidocs', 'kibana']
-warning: This document is auto-generated and is meant to be viewed inside our experimental, new docs system.
 ---
 
 ${tableMdx}
