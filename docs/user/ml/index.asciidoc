@@ -130,7 +130,7 @@ level of impact and a sparkline showing the shape of the impact in the chart.
 Hovering over a row displays the impact on the histogram chart in more detail. 
 
 Sliders in the chart show the baseline values and the deviation in the analyzed 
-data. You can move the sliders to redifine both the baseline and the deviation 
+data. You can move the sliders to redefine both the baseline and the deviation 
 and rerun the analysis with the modified values.
 
 [role="screenshot"]
