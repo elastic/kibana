@@ -28,6 +28,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.console.clearTextArea();
     });
 
+    after(async () => {
+      await security.testUser.restoreDefaults();
+    });
+
     it('should validate response', async () => {
       await PageObjects.console.enterText(`GET kibana_sample_data_logs/_mvt/geo.coordinates/0/0/0`);
       await PageObjects.console.clickPlay();
