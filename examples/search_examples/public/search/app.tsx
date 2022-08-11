@@ -358,6 +358,7 @@ export const SearchExamplesApp = ({
     }
   };
 
+  // click handler for "See warning notifications"
   const showSearchSourceSearchWarnings = () => {
     if (searchSourceWarnings) {
       data.search.showWarnings(searchSourceWarnings);
