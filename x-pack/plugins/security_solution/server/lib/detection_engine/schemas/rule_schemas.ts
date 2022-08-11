@@ -78,18 +78,11 @@ import {
   newTermsFields,
   historyWindowStart,
   timestampOverrideFallbackDisabledOrUndefined,
-  groupBy,
+  alertGroupingOrUndefined,
 } from '../../../../common/detection_engine/schemas/common';
 import { SERVER_APP_ID } from '../../../../common/constants';
 
 const nonEqlLanguages = t.keyof({ kuery: null, lucene: null });
-
-export const alertGrouping = t.exact(
-  t.type({
-    groupBy,
-  })
-);
-export const alertGroupingOrUndefined = t.union([t.undefined, alertGrouping]);
 
 export const baseRuleParams = t.exact(
   t.type({

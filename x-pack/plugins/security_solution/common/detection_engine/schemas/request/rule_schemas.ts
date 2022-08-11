@@ -76,6 +76,7 @@ import {
   SetupGuide,
   newTermsFields,
   historyWindowStart,
+  alertGrouping,
 } from '../common';
 
 export const createSchema = <
@@ -295,6 +296,7 @@ const queryRuleParams = {
     data_view_id,
     filters,
     saved_id,
+    alertGrouping,
   },
   defaultable: {
     query,
