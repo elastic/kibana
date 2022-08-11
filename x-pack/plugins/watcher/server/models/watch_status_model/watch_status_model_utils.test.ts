@@ -9,7 +9,7 @@ import moment from 'moment';
 
 import { ACTION_STATES, WATCH_STATES, WATCH_STATE_COMMENTS } from '../../../common/constants';
 import { ClientActionStatusModel } from '../../../common/types';
-import { deriveState, deriveComment, deriveLastFired } from './watch_status_model_utils';
+import { deriveState, deriveComment, deriveLastExecution } from './watch_status_model_utils';
 
 const mockActionStatus = (opts: Partial<ClientActionStatusModel>): ClientActionStatusModel => ({
   state: ACTION_STATES.ACTIVE,
@@ -25,13 +25,13 @@ const mockActionStatus = (opts: Partial<ClientActionStatusModel>): ClientActionS
 });
 
 describe('WatchStatusModel utils', () => {
-  describe('deriveLastFired', () => {
+  describe('deriveLastExecution', () => {
     it(`is the latest lastExecution from the client action statuses`, () => {
       const actionStatuses = [
         mockActionStatus({ lastExecution: moment('2017-07-05T00:00:00.000Z') }),
         mockActionStatus({ lastExecution: moment('2015-05-26T18:21:08.630Z') }),
       ];
-      expect(deriveLastFired(actionStatuses)).toEqual(moment('2017-07-05T00:00:00.000Z'));
+      expect(deriveLastExecution(actionStatuses)).toEqual(moment('2017-07-05T00:00:00.000Z'));
     });
   });
 

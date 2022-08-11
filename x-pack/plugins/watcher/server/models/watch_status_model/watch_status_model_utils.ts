@@ -28,7 +28,7 @@ export const deriveActionStatusTotals = (
   return result;
 };
 
-export const deriveLastFired = (actionStatuses: ClientWatchStatusModel['actionStatuses']) => {
+export const deriveLastExecution = (actionStatuses: ClientWatchStatusModel['actionStatuses']) => {
   const actionStatus = maxBy(actionStatuses, 'lastExecution');
   if (actionStatus) {
     return actionStatus.lastExecution;
