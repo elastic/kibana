@@ -83,6 +83,7 @@ export const entityAnalyticsLinks: LinkItem = {
   path: ENTITY_ANALYTICS_PATH,
   capabilities: [`${SERVER_APP_ID}.show`],
   experimentalKey: 'entityAnalyticsDashoardEnabled',
+  licenseType: 'platinum',
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.entityAnalytics', {
       defaultMessage: 'Entity Analytics',
