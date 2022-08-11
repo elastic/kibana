@@ -18,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { Status } from '../../../../../common/types/api';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
+import { AccessProps } from '../../../shared/types';
 import { FetchIndexApiLogic } from '../../api/index/fetch_index_api_logic';
 import { SEARCH_INDEX_PATH, SEARCH_INDEX_TAB_PATH } from '../../routes';
 import { isConnectorIndex, isCrawlerIndex } from '../../utils/indices';
@@ -50,7 +51,7 @@ export enum SearchIndexTabId {
   DOMAIN_MANAGEMENT = 'domain_management',
 }
 
-export const SearchIndex: React.FC = () => {
+export const SearchIndex: React.FC<AccessProps> = ({ access }) => {
   const { data: indexData, status: indexApiStatus } = useValues(FetchIndexApiLogic);
   const { isCalloutVisible } = useValues(IndexCreatedCalloutLogic);
   const { tabId = SearchIndexTabId.OVERVIEW } = useParams<{
@@ -138,6 +139,7 @@ export const SearchIndex: React.FC = () => {
   };
   return (
     <EnterpriseSearchContentPageTemplate
+      access={access}
       pageChrome={[...baseBreadcrumbs, indexName]}
       pageViewTelemetry={tabId}
       isLoading={

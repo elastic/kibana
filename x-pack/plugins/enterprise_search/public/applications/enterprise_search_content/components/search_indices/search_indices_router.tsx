@@ -8,6 +8,8 @@
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 
+import { AccessProps } from '../../../shared/types';
+
 import { SEARCH_INDICES_PATH, SEARCH_INDEX_PATH, NEW_INDEX_PATH } from '../../routes';
 
 import { NewIndex } from '../new_index';
@@ -15,17 +17,17 @@ import { SearchIndexRouter } from '../search_index/search_index_router';
 
 import { SearchIndices } from './search_indices';
 
-export const SearchIndicesRouter: React.FC = () => {
+export const SearchIndicesRouter: React.FC<AccessProps> = ({ access }) => {
   return (
     <Switch>
       <Route exact path={NEW_INDEX_PATH}>
-        <NewIndex />
+        <NewIndex access={access} />
       </Route>
       <Route exact path={SEARCH_INDICES_PATH}>
-        <SearchIndices />
+        <SearchIndices access={access} />
       </Route>
       <Route path={SEARCH_INDEX_PATH}>
-        <SearchIndexRouter />
+        <SearchIndexRouter access={access} />
       </Route>
     </Switch>
   );

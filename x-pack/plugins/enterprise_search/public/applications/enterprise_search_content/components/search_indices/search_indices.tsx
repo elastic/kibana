@@ -30,6 +30,7 @@ import { ElasticsearchResources } from '../../../shared/elasticsearch_resources'
 import { GettingStartedSteps } from '../../../shared/getting_started_steps';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
 import { handlePageChange } from '../../../shared/table_pagination';
+import { AccessProps } from '../../../shared/types';
 import { useLocalStorage } from '../../../shared/use_local_storage';
 import { NEW_INDEX_PATH } from '../../routes';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
@@ -48,7 +49,7 @@ export const baseBreadcrumbs = [
   }),
 ];
 
-export const SearchIndices: React.FC = () => {
+export const SearchIndices: React.FC<AccessProps> = ({ access }) => {
   const { fetchIndices, onPaginate } = useActions(IndicesLogic);
   const { meta, indices, hasNoIndices, isLoading } = useValues(IndicesLogic);
   const [showHiddenIndices, setShowHiddenIndices] = useState(false);
@@ -75,6 +76,7 @@ export const SearchIndices: React.FC = () => {
   return (
     <>
       <EnterpriseSearchContentPageTemplate
+        access={access}
         pageChrome={baseBreadcrumbs}
         pageViewTelemetry="Search indices"
         isLoading={isLoading}

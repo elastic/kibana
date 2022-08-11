@@ -23,6 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { parseQueryParams } from '../../../shared/query_params';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
 
+import { AccessProps } from '../../../shared/types';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 import { baseBreadcrumbs } from '../search_indices';
 
@@ -95,7 +96,7 @@ const METHOD_BUTTON_GROUP_OPTIONS: ButtonGroupOption[] = [
   },
 ];
 
-export const NewIndex: React.FC = () => {
+export const NewIndex: React.FC<AccessProps> = ({ access }) => {
   const { search } = useLocation();
   const { method: methodParam } = parseQueryParams(search);
 
@@ -107,6 +108,7 @@ export const NewIndex: React.FC = () => {
 
   return (
     <EnterpriseSearchContentPageTemplate
+      access={access}
       pageChrome={[
         ...baseBreadcrumbs,
         i18n.translate('xpack.enterpriseSearch.content.newIndex.breadcrumb', {

@@ -27,6 +27,8 @@ import {
   ELASTICSEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
 } from '../../../../../common/constants';
+import { ProductAccess } from '../../../../../common/types';
+
 import { AddContentEmptyPrompt } from '../../../shared/add_content_empty_prompt';
 import { docLinks } from '../../../shared/doc_links';
 import { KibanaLogic } from '../../../shared/kibana';
@@ -41,10 +43,7 @@ import { TrialCallout } from '../trial_callout';
 import illustration from './lock_light.svg';
 
 interface ProductSelectorProps {
-  access: {
-    hasAppSearchAccess?: boolean;
-    hasWorkplaceSearchAccess?: boolean;
-  };
+  access: ProductAccess;
   isWorkplaceSearchAdmin: boolean;
 }
 
@@ -354,6 +353,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
   );
   return (
     <EnterpriseSearchOverviewPageTemplate
+      access={access}
       restrictWidth
       pageHeader={{
         pageTitle: i18n.translate('xpack.enterpriseSearch.overview.pageTitle', {

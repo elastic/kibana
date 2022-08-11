@@ -14,6 +14,7 @@ import { useEnterpriseSearchNav } from '../../../shared/layout';
 import { SendEnterpriseSearchTelemetry } from '../../../shared/telemetry';
 
 export const EnterpriseSearchContentPageTemplate: React.FC<PageTemplateProps> = ({
+  access,
   children,
   pageChrome,
   pageViewTelemetry,
@@ -23,7 +24,7 @@ export const EnterpriseSearchContentPageTemplate: React.FC<PageTemplateProps> = 
     <EnterpriseSearchPageTemplateWrapper
       {...pageTemplateProps}
       solutionNav={{
-        items: useEnterpriseSearchNav(),
+        items: useEnterpriseSearchNav(access),
         name: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAME,
       }}
       restrictWidth

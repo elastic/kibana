@@ -10,6 +10,7 @@ import { Route, Switch } from 'react-router-dom';
 
 import { isVersionMismatch } from '../../../common/is_version_mismatch';
 import { InitialAppData } from '../../../common/types';
+import { NO_ACCESS } from '../shared/constants';
 import { VersionMismatchPage } from '../shared/version_mismatch';
 
 import { ElasticsearchGuide } from './components/elasticsearch_guide';
@@ -17,7 +18,7 @@ import { ElasticsearchGuide } from './components/elasticsearch_guide';
 import { ROOT_PATH } from './routes';
 
 export const Elasticsearch: React.FC<InitialAppData> = (props) => {
-  const { enterpriseSearchVersion, kibanaVersion } = props;
+  const { access, enterpriseSearchVersion, kibanaVersion } = props;
   const incompatibleVersions = isVersionMismatch(enterpriseSearchVersion, kibanaVersion);
 
   const showView = () => {
@@ -30,7 +31,7 @@ export const Elasticsearch: React.FC<InitialAppData> = (props) => {
       );
     }
 
-    return <ElasticsearchGuide />;
+    return <ElasticsearchGuide access={access || NO_ACCESS} />;
   };
 
   return (

@@ -17,6 +17,7 @@ import { i18n } from '@kbn/i18n';
 
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { EuiButtonTo } from '../../../shared/react_router_helpers';
+import { AccessProps } from '../../../shared/types';
 import { SEARCH_INDEX_TAB_PATH } from '../../routes';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 import { CrawlCustomSettingsFlyout } from '../search_index/crawler/crawl_custom_settings_flyout/crawl_custom_settings_flyout';
@@ -34,7 +35,7 @@ import { DeduplicationPanel } from './deduplication_panel/deduplication_panel';
 import { EntryPointsTable } from './entry_points_table';
 import { SitemapsTable } from './sitemaps_table';
 
-export const CrawlerDomainDetail: React.FC = () => {
+export const CrawlerDomainDetail: React.FC<AccessProps> = ({ access }) => {
   const { domainId } = useParams<{
     domainId: string;
   }>();
@@ -53,6 +54,7 @@ export const CrawlerDomainDetail: React.FC = () => {
 
   return (
     <EnterpriseSearchContentPageTemplate
+      access={access}
       pageChrome={[...baseBreadcrumbs, indexName, domainUrl]}
       isLoading={getLoading}
       pageHeader={{

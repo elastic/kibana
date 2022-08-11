@@ -13,9 +13,10 @@ import { NotFoundPrompt } from '../../../shared/not_found';
 import { SendEnterpriseSearchTelemetry } from '../../../shared/telemetry';
 import { EnterpriseSearchContentPageTemplate } from '../layout';
 
-export const NotFound: React.FC<PageTemplateProps> = ({ pageChrome = [] }) => {
+export const NotFound: React.FC<PageTemplateProps> = ({ access, pageChrome = [] }) => {
   return (
     <EnterpriseSearchContentPageTemplate
+      access={access}
       pageChrome={[...pageChrome, '404']}
       template="centeredContent"
     >

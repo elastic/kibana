@@ -15,6 +15,8 @@ import { i18n } from '@kbn/i18n';
 
 import { KibanaPageTemplate, KibanaPageTemplateProps } from '@kbn/kibana-react-plugin/public';
 
+import { ProductAccess } from '../../../../common/types';
+
 import { FlashMessages } from '../flash_messages';
 import { HttpLogic } from '../http';
 import { BreadcrumbTrail } from '../kibana_chrome/generate_breadcrumbs';
@@ -34,6 +36,7 @@ import './page_template.scss';
  */
 
 export type PageTemplateProps = KibanaPageTemplateProps & {
+  access?: ProductAccess;
   hideFlashMessages?: boolean;
   isLoading?: boolean;
   emptyState?: React.ReactNode;

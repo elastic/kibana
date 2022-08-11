@@ -12,6 +12,7 @@ import { useValues } from 'kea';
 
 import { isVersionMismatch } from '../../../common/is_version_mismatch';
 import { InitialAppData } from '../../../common/types';
+import { NO_ACCESS } from '../shared/constants';
 import { HttpLogic } from '../shared/http';
 import { KibanaLogic } from '../shared/kibana';
 import { VersionMismatchPage } from '../shared/version_mismatch';
@@ -22,7 +23,7 @@ import { SetupGuide } from './components/setup_guide';
 import { ROOT_PATH, SETUP_GUIDE_PATH } from './routes';
 
 export const EnterpriseSearchOverview: React.FC<InitialAppData> = ({
-  access = {},
+  access,
   workplaceSearch,
   enterpriseSearchVersion,
   kibanaVersion,
@@ -48,7 +49,12 @@ export const EnterpriseSearchOverview: React.FC<InitialAppData> = ({
       return <ErrorConnecting />;
     }
 
-    return <ProductSelector isWorkplaceSearchAdmin={isWorkplaceSearchAdmin} access={access} />;
+    return (
+      <ProductSelector
+        access={access || NO_ACCESS}
+        isWorkplaceSearchAdmin={isWorkplaceSearchAdmin}
+      />
+    );
   };
 
   return (

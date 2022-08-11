@@ -14,6 +14,7 @@ import { useEnterpriseSearchNav } from '../../../shared/layout';
 import { SendEnterpriseSearchTelemetry } from '../../../shared/telemetry';
 
 export const EnterpriseSearchElasticsearchPageTemplate: React.FC<PageTemplateProps> = ({
+  access,
   children,
   pageChrome,
   pageViewTelemetry,
@@ -23,8 +24,8 @@ export const EnterpriseSearchElasticsearchPageTemplate: React.FC<PageTemplatePro
     <EnterpriseSearchPageTemplateWrapper
       {...pageTemplateProps}
       solutionNav={{
+        items: useEnterpriseSearchNav(access),
         name: ELASTICSEARCH_PLUGIN.NAME,
-        items: useEnterpriseSearchNav(),
       }}
       setPageChrome={pageChrome && <SetElasticsearchChrome trail={pageChrome} />}
     >

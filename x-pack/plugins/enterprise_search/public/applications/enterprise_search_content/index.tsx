@@ -13,6 +13,7 @@ import { useValues } from 'kea';
 import { isVersionMismatch } from '../../../common/is_version_mismatch';
 import { InitialAppData } from '../../../common/types';
 import { SetupGuide } from '../enterprise_search_overview/components/setup_guide';
+import { NO_ACCESS } from '../shared/constants';
 import { HttpLogic } from '../shared/http';
 import { KibanaLogic } from '../shared/kibana';
 import { VersionMismatchPage } from '../shared/version_mismatch';
@@ -64,18 +65,20 @@ export const EnterpriseSearchContentUnconfigured: React.FC = () => (
   </Switch>
 );
 
-export const EnterpriseSearchContentConfigured: React.FC<Required<InitialAppData>> = () => {
+export const EnterpriseSearchContentConfigured: React.FC<Required<InitialAppData>> = ({
+  access,
+}) => {
   return (
     <Switch>
       <Redirect exact from={ROOT_PATH} to={SEARCH_INDICES_PATH} />
       <Route path={SEARCH_INDICES_PATH}>
-        <SearchIndicesRouter />
+        <SearchIndicesRouter access={access || NO_ACCESS} />
       </Route>
       <Route path={SETTINGS_PATH}>
-        <Settings />
+        <Settings access={access || NO_ACCESS} />
       </Route>
       <Route>
-        <NotFound />
+        <NotFound access={access || NO_ACCESS} />
       </Route>
     </Switch>
   );

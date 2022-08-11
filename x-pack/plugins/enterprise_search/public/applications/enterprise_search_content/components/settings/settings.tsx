@@ -9,11 +9,13 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
+import { AccessProps } from '../../../shared/types';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
-export const Settings: React.FC = () => {
+export const Settings: React.FC<AccessProps> = ({ access }) => {
   return (
     <EnterpriseSearchContentPageTemplate
+      access={access}
       pageChrome={[
         i18n.translate('xpack.enterpriseSearch.content.searchIndices.content.breadcrumb', {
           defaultMessage: 'Content',

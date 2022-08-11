@@ -6,6 +6,7 @@
  */
 
 import { APP_SEARCH_PLUGIN, WORKPLACE_SEARCH_PLUGIN } from '../../../common/constants';
+import { ProductAccess } from '../../../common/types';
 
 import { ADD, UPDATE } from './constants/operations';
 
@@ -56,4 +57,8 @@ export interface SingleUserRoleMapping<T> {
   elasticsearchUser: ElasticsearchUser;
   roleMapping: T;
   hasEnterpriseSearchRole?: boolean;
+}
+
+export interface AccessProps {
+  access: ProductAccess;
 }

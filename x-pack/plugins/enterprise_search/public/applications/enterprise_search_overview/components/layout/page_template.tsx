@@ -14,6 +14,7 @@ import { useEnterpriseSearchNav } from '../../../shared/layout';
 import { SendEnterpriseSearchTelemetry } from '../../../shared/telemetry';
 
 export const EnterpriseSearchOverviewPageTemplate: React.FC<PageTemplateProps> = ({
+  access,
   children,
   pageChrome,
   pageViewTelemetry,
@@ -24,7 +25,7 @@ export const EnterpriseSearchOverviewPageTemplate: React.FC<PageTemplateProps> =
       {...pageTemplateProps}
       solutionNav={{
         name: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAME,
-        items: useEnterpriseSearchNav(),
+        items: useEnterpriseSearchNav(access),
       }}
       setPageChrome={pageChrome && <SetEnterpriseSearchChrome trail={pageChrome} />}
     >
