@@ -58,17 +58,17 @@ export class ApmSynthtraceKibanaClient {
       'https://epr-snapshot.elastic.co/search?package=apm&prerelease=true&all=true&kibana.version=';
     const response = await fetch(url + version, { method: 'GET' });
     const json = await response.json();
-    if (!Array.isArray(json)) {
-      throw new Error('Could not locate apm package compatible with the current kibana version');
-    }
-    const versions = json
-      .map<string>((item) => item.version)
+    const packageVersions = (json ?? []).map((item) => item.version);
+    const validPackageVersions = packageVersions
       .filter((v) => Semver.valid(v))
       .sort(Semver.rcompare);
-    if (versions.length === 0) {
-      throw new Error('Could not locate apm package compatible with the current kibana version');
+    const bestMatch = validPackageVersions[0];
+    if (!bestMatch) {
+      throw new Error(
+        `None of the available APM package versions (${packageVersions}) is a valid match for the current Kibana version (${version})`
+      );
     }
-    return versions[0];
+    return bestMatch;
   }
 
   async installApmPackage(kibanaUrl: string, version: string, username: string, password: string) {
