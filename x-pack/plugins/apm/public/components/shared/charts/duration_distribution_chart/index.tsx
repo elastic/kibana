@@ -83,17 +83,21 @@ const getAnnotationsStyle = (color = 'gray'): LineAnnotationStyle => ({
   },
 });
 
-// With a log axis, Elastic Charts would not draw a continuous line for values that are 0.
-// By replacing the 0s with a minimum domain value of >0 the line will be drawn as intended.
+// With a log based y axis in combination with the `CURVE_STEP_AFTER` style,
+// the line of an area would not go down to 0 but end on the y axis at the last value >0.
+// By replacing the 0s with a small value >0 the line will be drawn as intended.
 // This is just to visually fix the line, for tooltips, that number will be again rounded down to 0.
+// Note this workaround is only safe to use for this type of chart because it works with
+// count based values and not a float based metric for example on the y axis.
 const Y_AXIS_MIN_DOMAIN = 0.5;
+const Y_AXIS_MIN_VALUE = 0.0001;
 
 export const replaceHistogramZerosWithMinimumDomainValue = (
   histogramItems: HistogramItem[]
 ) =>
   histogramItems.reduce((histogramItem, _, i) => {
     if (histogramItem[i].doc_count === 0) {
-      histogramItem[i].doc_count = Y_AXIS_MIN_DOMAIN;
+      histogramItem[i].doc_count = Y_AXIS_MIN_VALUE;
     }
     return histogramItem;
   }, histogramItems);
