@@ -16,7 +16,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { getFilter } from '../get_filter';
 import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
-import { groupAndBulkCreate } from '../group_and_bulk_create';
+import { groupAndBulkCreate } from '../alert_grouping/group_and_bulk_create';
 import type { RuleRangeTuple, BulkCreate, WrapHits } from '../types';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import type {
