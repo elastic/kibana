@@ -50,8 +50,25 @@ export function createExploratoryViewUrl(
 
   return (
     baseHref +
-    `/app/${appId}/exploratory-view/#?reportType=${reportType}&sr=${rison.encode(
-      allShortSeries as unknown as RisonValue
+    `/app/${appId}/exploratory-view/#?reportType=${reportType}&sr=${encodeUriIfNeeded(
+      rison.encode(allShortSeries as unknown as RisonValue)
     )}`
   );
+}
+
+/**
+ * Encodes the uri if URL reserved characters (`;,/?:@&=+$#`) are found.
+ *
+ * @param uri Non encoded URI
+ */
+function encodeUriIfNeeded(uri: string) {
+  if (!uri) {
+    return uri;
+  }
+
+  if (/[;,\/?:@&=+$#]/.test(uri)) {
+    return encodeURIComponent(uri);
+  }
+
+  return uri;
 }
