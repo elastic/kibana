@@ -8,9 +8,9 @@
 import { createAction, createReducer, current, PayloadAction } from '@reduxjs/toolkit';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { mapValues } from 'lodash';
+import { Query } from '@kbn/es-query';
 import { History } from 'history';
 import { LensEmbeddableInput } from '..';
-import { getDatasourceLayers } from '../editor_frame_service/editor_frame';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
 import type { VisualizeEditorContext, Suggestion } from '../types';
 import { getInitialDatasourceId, getResolvedDateRange, getRemoveOperation } from '../utils';
@@ -21,6 +21,7 @@ import type { LayerType } from '../../common/types';
 import { getLayerType } from '../editor_frame_service/editor_frame/config_panel/add_layer';
 import { getVisualizeFieldSuggestions } from '../editor_frame_service/editor_frame/suggestion_helpers';
 import { FramePublicAPI, LensEditContextMapping, LensEditEvent } from '../types';
+import { selectFramePublicAPI } from './selectors';
 
 export const initialState: LensAppState = {
   persistedDoc: undefined,
@@ -63,7 +64,7 @@ export const getPreloadedState = ({
     // only if Lens was opened with the intention to visualize a field (e.g. coming from Discover)
     query: !initialContext
       ? data.query.queryString.getDefaultQuery()
-      : data.query.queryString.getQuery(),
+      : (data.query.queryString.getQuery() as Query),
     filters: !initialContext
       ? data.query.filterManager.getGlobalFilters()
       : data.query.filterManager.getFilters(),
@@ -627,14 +628,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         layerType
       );
 
-      const framePublicAPI = {
-        // any better idea to avoid `as`?
-        activeData: state.activeData
-          ? (current(state.activeData) as TableInspectorAdapter)
-          : undefined,
-        datasourceLayers: getDatasourceLayers(state.datasourceStates, datasourceMap),
-        dateRange: current(state.resolvedDateRange),
-      };
+      const framePublicAPI = selectFramePublicAPI({ lens: current(state) }, datasourceMap);
 
       const activeDatasource = datasourceMap[state.activeDatasourceId];
       const { noDatasource } =
@@ -686,14 +680,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       const { activeDatasourceState, activeVisualizationState } = addInitialValueIfAvailable({
         datasourceState: state.datasourceStates[state.activeDatasourceId].state,
         visualizationState: state.visualization.state,
-        framePublicAPI: {
-          // any better idea to avoid `as`?
-          activeData: state.activeData
-            ? (current(state.activeData) as TableInspectorAdapter)
-            : undefined,
-          datasourceLayers: getDatasourceLayers(state.datasourceStates, datasourceMap),
-          dateRange: current(state.resolvedDateRange),
-        },
+        framePublicAPI: selectFramePublicAPI({ lens: current(state) }, datasourceMap),
         activeVisualization,
         activeDatasource,
         layerId,

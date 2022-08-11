@@ -82,7 +82,6 @@ TimelineBody.displayName = 'TimelineBody';
  */
 
 export const EVENTS_TABLE_CLASS_NAME = 'siemEventsTable';
-export const EVENTS_TABLE_HEAD_CLASS_NAME = 'siemEventsTable__thead';
 
 interface EventsTableProps {
   $activePage: number;

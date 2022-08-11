@@ -14,6 +14,7 @@ import { EuiFieldText, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eu
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { docLinks } from '../../../shared/doc_links';
 import { GenericEndpointInlineEditableTable } from '../../../shared/tables/generic_endpoint_inline_editable_table';
 
 import { InlineEditableTableColumn } from '../../../shared/tables/inline_editable_table/types';
@@ -75,7 +76,7 @@ export const EntryPointsTable: React.FC<EntryPointsTableProps> = ({ domain, inde
             defaultMessage:
               'Include the most important URLs for your website here. Entry point URLs will be the first pages to be indexed and processed for links to other pages.',
           })}{' '}
-          <EuiLink href={'' /* TODO get docs url */} target="_blank" external>
+          <EuiLink href={docLinks.crawlerManaging} target="_blank" external>
             {i18n.translate('xpack.enterpriseSearch.crawler.entryPointsTable.learnMoreLinkText', {
               defaultMessage: 'Learn more about entry points.',
             })}

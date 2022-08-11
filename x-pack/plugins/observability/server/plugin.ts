@@ -55,6 +55,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       cases: [observabilityFeatureId],
       privileges: {
         all: {
+          api: ['casesSuggestUserProfiles'],
           app: [casesFeatureId, 'kibana'],
           catalogue: [observabilityFeatureId],
           cases: {
@@ -63,7 +64,6 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
             update: [observabilityFeatureId],
             push: [observabilityFeatureId],
           },
-          api: [],
           savedObject: {
             all: [],
             read: [],
@@ -76,7 +76,6 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
           cases: {
             read: [observabilityFeatureId],
           },
-          api: [],
           savedObject: {
             all: [],
             read: [],

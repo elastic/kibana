@@ -49,6 +49,9 @@ function getArtifact(platform: PLATFORM_TYPE, kibanaVersion: string) {
         `sudo rpm -vi elastic-agent-${kibanaVersion}-x86_64.rpm`,
       ].join(`\n`),
     },
+    kubernetes: {
+      downloadCommand: '',
+    },
   };
 
   return artifactMap[platform];
@@ -109,6 +112,7 @@ export function getInstallCommandForPlatform(
     windows: `${artifact.downloadCommand}\n.\\elastic-agent.exe install ${commandArgumentsStr}`,
     deb: `${artifact.downloadCommand}\nsudo elastic-agent enroll ${commandArgumentsStr}\nsudo systemctl enable elastic-agent\nsudo systemctl start elastic-agent`,
     rpm: `${artifact.downloadCommand}\nsudo elastic-agent enroll ${commandArgumentsStr}\nsudo systemctl enable elastic-agent\nsudo systemctl start elastic-agent`,
+    kubernetes: '',
   };
 
   return commands[platform];

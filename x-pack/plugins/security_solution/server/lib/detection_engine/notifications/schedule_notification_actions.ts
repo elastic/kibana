@@ -36,8 +36,7 @@ const convertToLegacyAlert = (alert: DetectionAlert) =>
 
 export const normalizeAlertForNotificationActions = (alert: DetectionAlert) => {
   if (isThresholdRule(alert[ALERT_RULE_TYPE])) {
-    const { 'kibana.alert.threshold_result': thresholdResult, ...alertWithoutThresholdResult } =
-      alert;
+    const { [ALERT_THRESHOLD_RESULT]: thresholdResult, ...alertWithoutThresholdResult } = alert;
     return {
       ...alertWithoutThresholdResult,
       ...flattenWithPrefix(ALERT_THRESHOLD_RESULT, thresholdResult),

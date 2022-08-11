@@ -10,7 +10,11 @@ import React from 'react';
 import { EuiDataGridColumnCellActionProps, EuiDataGridColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { DatatableColumn, DatatableRow, IInterpreterRenderHandlers } from '@kbn/expressions-plugin';
+import {
+  DatatableColumn,
+  DatatableRow,
+  IInterpreterRenderHandlers,
+} from '@kbn/expressions-plugin/common';
 import { FormattedColumns, TableVisUiState } from '../types';
 
 interface FilterCellData {

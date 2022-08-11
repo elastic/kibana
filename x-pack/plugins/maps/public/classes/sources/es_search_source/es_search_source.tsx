@@ -30,7 +30,6 @@ import {
   TotalHits,
 } from '../../../../common/elasticsearch_util';
 import { encodeMvtResponseBody } from '../../../../common/mvt_request_body';
-// @ts-expect-error
 import { UpdateSourceEditor } from './update_source_editor';
 import {
   DEFAULT_MAX_BUCKETS_LIMIT,

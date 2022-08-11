@@ -41,24 +41,25 @@ export function DiscoverChart({
   savedSearchDataChart$,
   savedSearchDataTotalHits$,
   stateContainer,
-  indexPattern,
+  dataView,
   viewMode,
   setDiscoverViewMode,
   hideChart,
   interval,
+  isTimeBased,
 }: {
   resetSavedSearch: () => void;
   savedSearch: SavedSearch;
   savedSearchDataChart$: DataCharts$;
   savedSearchDataTotalHits$: DataTotalHits$;
   stateContainer: GetStateReturn;
-  indexPattern: DataView;
+  dataView: DataView;
   viewMode: VIEW_MODE;
   setDiscoverViewMode: (viewMode: VIEW_MODE) => void;
+  isTimeBased: boolean;
   hideChart?: boolean;
   interval?: string;
 }) {
-  const isTimeBased = indexPattern.isTimeBased();
   const { uiSettings, data, storage } = useDiscoverServices();
   const [showChartOptionsPopover, setShowChartOptionsPopover] = useState(false);
   const showViewModeToggle = uiSettings.get(SHOW_FIELD_STATISTICS) ?? false;
@@ -68,23 +69,22 @@ export function DiscoverChart({
     moveFocus: false,
   });
 
-  const timeField =
-    indexPattern.timeFieldName && indexPattern.getFieldByName(indexPattern.timeFieldName);
+  const timeField = dataView.timeFieldName && dataView.getFieldByName(dataView.timeFieldName);
   const [canVisualize, setCanVisualize] = useState(false);
 
   useEffect(() => {
     if (!timeField) return;
-    getVisualizeInformation(timeField, indexPattern.id, savedSearch.columns || []).then((info) => {
+    getVisualizeInformation(timeField, dataView.id, savedSearch.columns || []).then((info) => {
       setCanVisualize(Boolean(info));
     });
-  }, [indexPattern, savedSearch.columns, timeField]);
+  }, [dataView, savedSearch.columns, timeField]);
 
   const onEditVisualization = useCallback(() => {
     if (!timeField) {
       return;
     }
-    triggerVisualizeActions(timeField, indexPattern.id, savedSearch.columns || []);
-  }, [indexPattern.id, savedSearch, timeField]);
+    triggerVisualizeActions(timeField, dataView.id, savedSearch.columns || []);
+  }, [dataView.id, savedSearch, timeField]);
 
   const onShowChartOptions = useCallback(() => {
     setShowChartOptionsPopover(!showChartOptionsPopover);

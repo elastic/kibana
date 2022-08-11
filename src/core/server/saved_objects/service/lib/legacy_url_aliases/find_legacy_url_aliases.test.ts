@@ -8,10 +8,10 @@
 
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
+import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../../object_types';
 import type { CreatePointInTimeFinderFn, PointInTimeFinder } from '../point_in_time_finder';
 import { savedObjectsPointInTimeFinderMock } from '../point_in_time_finder.mock';
-import type { ISavedObjectsRepository } from '../repository';
 import { savedObjectsRepositoryMock } from '../repository.mock';
 import { findLegacyUrlAliases } from './find_legacy_url_aliases';
 
@@ -82,10 +82,10 @@ describe('findLegacyUrlAliases', () => {
       const typeAndIdFilter = typeAndIdFilters[i].arguments;
       expect(typeAndIdFilter).toEqual([
         expect.objectContaining({
-          arguments: expect.arrayContaining([{ type: 'literal', value: type }]),
+          arguments: expect.arrayContaining([{ type: 'literal', value: type, isQuoted: false }]),
         }),
         expect.objectContaining({
-          arguments: expect.arrayContaining([{ type: 'literal', value: id }]),
+          arguments: expect.arrayContaining([{ type: 'literal', value: id, isQuoted: false }]),
         }),
       ]);
     });

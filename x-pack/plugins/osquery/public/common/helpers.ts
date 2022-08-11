@@ -31,7 +31,6 @@ export const generateTablePaginationOptions = (
   return {
     activePage,
     cursorStart,
-    fakePossibleCount: 4 <= activePage && activePage > 0 ? limit * (activePage + 2) : limit * 5,
     querySize: limit,
   };
 };

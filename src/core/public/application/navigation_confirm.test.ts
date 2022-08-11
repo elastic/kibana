@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { OverlayStart } from '../overlays';
-import { overlayServiceMock } from '../overlays/overlay_service.mock';
+import type { OverlayStart } from '@kbn/core-overlays-browser';
+import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
 import { getUserConfirmationHandler, ConfirmHandler } from './navigation_confirm';
 
 const nextTick = () => new Promise((resolve) => setImmediate(resolve));

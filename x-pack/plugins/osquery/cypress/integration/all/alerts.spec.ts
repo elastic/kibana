@@ -58,11 +58,11 @@ describe('Alert Event Details', () => {
     cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'true');
   });
 
-  it('should be able to run live query and add to timeline (-depending on the previous test)', () => {
+  it.skip('should be able to run live query and add to timeline (-depending on the previous test)', () => {
     const TIMELINE_NAME = 'Untitled timeline';
     cy.visit('/app/security/alerts');
     cy.getBySel('header-page-title').contains('Alerts').should('exist');
-    cy.getBySel('timeline-context-menu-button').first().click({ force: true });
+    cy.getBySel('timeline-context-menu-button').first().click();
     cy.getBySel('osquery-action-item').should('exist').contains('Run Osquery');
     cy.getBySel('expand-event').first().click();
     cy.getBySel('take-action-dropdown-btn').click();

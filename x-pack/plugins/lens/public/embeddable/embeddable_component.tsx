@@ -23,10 +23,10 @@ import {
 import type { LensByReferenceInput, LensByValueInput } from './embeddable';
 import type { Document } from '../persistence';
 import type { IndexPatternPersistedState } from '../indexpattern_datasource/types';
-import type { XYState } from '../xy_visualization/types';
+import type { XYState } from '../visualizations/xy/types';
 import type { PieVisualizationState, MetricState } from '../../common';
-import type { DatatableVisualizationState } from '../datatable_visualization/visualization';
-import type { HeatmapVisualizationState } from '../heatmap_visualization/types';
+import type { DatatableVisualizationState } from '../visualizations/datatable/visualization';
+import type { HeatmapVisualizationState } from '../visualizations/heatmap/types';
 import type { GaugeVisualizationState } from '../visualizations/gauge/constants';
 
 type LensAttributes<TVisType, TVisState> = Omit<

@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import semverLt from 'semver/functions/lt';
 
-import { splitPkgKey } from '../../../../../../../common';
+import { splitPkgKey } from '../../../../../../../common/services';
 import {
   useGetPackageInstallStatus,
   useSetPackageInstallStatus,

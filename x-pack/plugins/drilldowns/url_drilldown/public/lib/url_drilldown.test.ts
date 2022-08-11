@@ -15,7 +15,7 @@ import {
   CONTEXT_MENU_TRIGGER,
 } from '@kbn/embeddable-plugin/public';
 import { DatatableColumnType } from '@kbn/expressions-plugin/common';
-import { of } from '@kbn/kibana-utils-plugin';
+import { of } from '@kbn/kibana-utils-plugin/common';
 import { createPoint, rowClickData, TestEmbeddable } from './test/data';
 import { ROW_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/public';
 

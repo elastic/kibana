@@ -8,7 +8,7 @@
 import React from 'react';
 import { DEFAULT_ICON, ICON_SOURCE } from '../../../../../../common/constants';
 import { i18n } from '@kbn/i18n';
-import { getOtherCategoryLabel } from '../../style_util';
+import { OTHER_CATEGORY_LABEL } from '../../style_util';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { IconSelect } from './icon_select';
 import { StopInput } from '../stop_input';
@@ -132,8 +132,8 @@ export function IconStops({
       const stopInput =
         index === 0 ? (
           <EuiFieldText
-            aria-label={getOtherCategoryLabel()}
-            placeholder={getOtherCategoryLabel()}
+            aria-label={OTHER_CATEGORY_LABEL}
+            placeholder={OTHER_CATEGORY_LABEL}
             disabled
             compressed
           />

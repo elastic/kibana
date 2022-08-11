@@ -12,14 +12,14 @@ import {
   PROCESSOR_EVENT,
 } from '../../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../../common/event_outcome';
-import { ProcessorEvent } from '../../../../common/processor_event';
+import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
 import { Setup } from '../../../lib/helpers/setup_request';
 import { getCommonCorrelationsQuery } from './get_common_correlations_query';
 import { fetchDurationRanges } from './fetch_duration_ranges';
+import { getEventType } from '../utils';
 
 export const fetchFailedEventsCorrelationPValues = async ({
   setup,
-  eventType,
   start,
   end,
   environment,
@@ -29,11 +29,14 @@ export const fetchFailedEventsCorrelationPValues = async ({
   fieldName,
 }: CommonCorrelationsQueryParams & {
   setup: Setup;
-  eventType: ProcessorEvent;
   rangeSteps: number[];
   fieldName: string;
 }) => {
   const { apmEventClient } = setup;
+
+  const chartType = LatencyDistributionChartType.failedTransactionsCorrelations;
+  const searchMetrics = false; // failed transactions correlations does not search metrics documents
+  const eventType = getEventType(chartType, searchMetrics);
 
   const commonQuery = getCommonCorrelationsQuery({
     start,
@@ -101,9 +104,9 @@ export const fetchFailedEventsCorrelationPValues = async ({
       0.25 * Math.min(Math.max((bucket.score - 6.908) / 6.908, 0), 1) +
       0.25 * Math.min(Math.max((bucket.score - 13.816) / 101.314, 0), 1);
 
-    const histogram = await fetchDurationRanges({
+    const { durationRanges: histogram } = await fetchDurationRanges({
       setup,
-      eventType,
+      chartType,
       start,
       end,
       environment,
@@ -114,6 +117,7 @@ export const fetchFailedEventsCorrelationPValues = async ({
         },
       },
       rangeSteps,
+      searchMetrics,
     });
 
     result.push({

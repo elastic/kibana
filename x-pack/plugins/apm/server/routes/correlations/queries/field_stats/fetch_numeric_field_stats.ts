@@ -6,6 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   NumericFieldStats,
   TopValueBucket,
@@ -15,7 +16,6 @@ import {
   FieldValuePair,
 } from '../../../../../common/correlations/types';
 import { Setup } from '../../../../lib/helpers/setup_request';
-import { ProcessorEvent } from '../../../../../common/processor_event';
 import { getCommonCorrelationsQuery } from '../get_common_correlations_query';
 
 export const fetchNumericFieldStats = async ({

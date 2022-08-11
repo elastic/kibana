@@ -19,6 +19,7 @@ import {
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
 import {
+  getNavigateToApp,
   getMapsCapabilities,
   getIsAllowByValueEmbeddables,
   getInspector,
@@ -95,6 +96,23 @@ export function getTopNavConfig({
       },
     }
   );
+
+  if (savedMap.hasOriginatingApp()) {
+    topNavConfigs.push({
+      label: i18n.translate('xpack.maps.topNav.cancel', {
+        defaultMessage: 'Cancel',
+      }),
+      run: () => {
+        getNavigateToApp()(savedMap.getOriginatingApp()!, {
+          path: savedMap.getOriginatingPath(),
+        });
+      },
+      testId: 'mapsCancelButton',
+      description: i18n.translate('xpack.maps.topNav.cancelButtonAriaLabel', {
+        defaultMessage: 'Return to the last app without saving changes',
+      }),
+    });
+  }
 
   if (getMapsCapabilities().save) {
     const hasSaveAndReturnConfig = savedMap.hasSaveAndReturnConfig();
@@ -197,7 +215,7 @@ export function getTopNavConfig({
 
         let saveModal;
 
-        if (savedMap.getOriginatingApp() || !getIsAllowByValueEmbeddables()) {
+        if (savedMap.hasOriginatingApp() || !getIsAllowByValueEmbeddables()) {
           saveModal = (
             <SavedObjectSaveModalOrigin
               {...saveModalProps}

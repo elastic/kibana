@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DatatableColumn } from '@kbn/expressions-plugin';
+import { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { PointStyleProps, RangeStyleProps } from '../types';
 
 export type ManualPointEventAnnotationArgs = {

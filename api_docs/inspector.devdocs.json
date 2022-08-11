@@ -195,13 +195,7 @@
                 "text": "InspectorOptions"
               },
               " | undefined) => ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.OverlayRef",
-                "text": "OverlayRef"
-              },
+              "OverlayRef",
               "; }"
             ],
             "path": "src/plugins/inspector/public/plugin.tsx",
@@ -1272,13 +1266,7 @@
         "label": "InspectorSession",
         "description": [],
         "signature": [
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.OverlayRef",
-            "text": "OverlayRef"
-          }
+          "OverlayRef"
         ],
         "path": "src/plugins/inspector/public/types.ts",
         "deprecated": false,
@@ -1449,13 +1437,7 @@
               "text": "InspectorOptions"
             },
             " | undefined) => ",
-            {
-              "pluginId": "core",
-              "scope": "public",
-              "docId": "kibCorePluginApi",
-              "section": "def-public.OverlayRef",
-              "text": "OverlayRef"
-            }
+            "OverlayRef"
           ],
           "path": "src/plugins/inspector/public/plugin.tsx",
           "deprecated": false,

@@ -36,13 +36,6 @@ export const drag = (subject: JQuery<HTMLElement>) => {
     .wait(300);
 };
 
-/** Drags the subject being dragged on the specified drop target, but does not drop it  */
-export const dragWithoutDrop = (dropTarget: JQuery<HTMLElement>) => {
-  cy.wrap(dropTarget).trigger('mousemove', 'center', {
-    button: primaryButton,
-  });
-};
-
 /** "Drops" the subject being dragged on the specified drop target  */
 export const drop = (dropTarget: JQuery<HTMLElement>) => {
   const targetLocation = dropTarget[0].getBoundingClientRect();
@@ -186,14 +179,14 @@ export const deleteCases = () => {
   });
 };
 
-export const postDataView = (indexPattern: string) => {
+export const postDataView = (dataSource: string) => {
   cy.request({
     method: 'POST',
     url: `/api/index_patterns/index_pattern`,
     body: {
       index_pattern: {
         fieldAttrs: '{}',
-        title: indexPattern,
+        title: dataSource,
         timeFieldName: '@timestamp',
         fields: '{}',
       },

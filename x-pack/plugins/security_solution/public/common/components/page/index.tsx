@@ -19,6 +19,23 @@ export const SecuritySolutionAppWrapper = styled.div`
 SecuritySolutionAppWrapper.displayName = 'SecuritySolutionAppWrapper';
 
 /**
+ * Stylesheet for Eui class overrides for components that may be displayed when content
+ * on the page has been set to display in full screen mode. It ensures that certain Eui
+ * components, that position themselves just below the kibana header, are displayed correctly
+ * when shown above content that is set to `full screen`.
+ */
+export const FULL_SCREEN_CONTENT_OVERRIDES_CSS_STYLESHEET = () => css`
+  .euiOverlayMask--belowHeader {
+    top: 0 !important;
+  }
+
+  .euiFlyout {
+    top: 0 !important;
+    height: 100% !important;
+  }
+`;
+
+/**
  * Stylesheet with Eui class overrides in order to address display issues caused when
  * the Timeline overlay is opened. These are normally adjustments to ensure that the
  * z-index of other EUI components continues to work with the z-index used by timeline

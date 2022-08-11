@@ -12,7 +12,7 @@ import type { PackagePolicy } from '../../../../common';
 import { migratePackagePolicyToV840 as migration } from './to_v8_4_0';
 
 describe('8.4.0 Endpoint Package Policy migration', () => {
-  const policyDoc = ({ linuxAdvanced = {} }) => {
+  const policyDoc = ({ linuxAdvanced = {}, windowsOptions = {} }) => {
     return {
       id: 'mock-saved-object-id',
       attributes: {
@@ -40,7 +40,9 @@ describe('8.4.0 Endpoint Package Policy migration', () => {
             config: {
               policy: {
                 value: {
-                  windows: {},
+                  windows: {
+                    ...windowsOptions,
+                  },
                   mac: {},
                   linux: {
                     ...linuxAdvanced,
@@ -55,17 +57,18 @@ describe('8.4.0 Endpoint Package Policy migration', () => {
     };
   };
 
-  it('adds advanced file monitoring defaulted to false', () => {
+  it('adds advanced file monitoring defaulted to false and ensures credential hardening is added and false.', () => {
     const initialDoc = policyDoc({});
 
     const migratedDoc = policyDoc({
       linuxAdvanced: { advanced: { fanotify: { ignore_unknown_filesystems: false } } },
+      windowsOptions: { attack_surface_reduction: { credential_hardening: { enabled: false } } },
     });
 
     expect(migration(initialDoc, {} as SavedObjectMigrationContext)).toEqual(migratedDoc);
   });
 
-  it('adds advanced file monitoring defaulted to false and preserves existing advanced fields', () => {
+  it('adds advanced file monitoring defaulted to false and preserves existing advanced fields and ensures credential hardening is added and false.', () => {
     const initialDoc = policyDoc({
       linuxAdvanced: { advanced: { existingAdvanced: true } },
     });
@@ -74,6 +77,7 @@ describe('8.4.0 Endpoint Package Policy migration', () => {
       linuxAdvanced: {
         advanced: { fanotify: { ignore_unknown_filesystems: false }, existingAdvanced: true },
       },
+      windowsOptions: { attack_surface_reduction: { credential_hardening: { enabled: false } } },
     });
 
     expect(migration(initialDoc, {} as SavedObjectMigrationContext)).toEqual(migratedDoc);

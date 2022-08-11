@@ -11,13 +11,14 @@ import {
   HttpSetup,
   CoreStart,
 } from '@kbn/core/public';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import {
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type {
   ExpressionAstExpressionBuilder,
   ExpressionAstFunction,
 } from '@kbn/expressions-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { termsOperation } from './terms';
 import { filtersOperation } from './filters';
@@ -190,6 +191,7 @@ export interface ParamEditorProps<
   http: HttpSetup;
   dateRange: DateRange;
   data: DataPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   activeData?: IndexPatternDimensionEditorProps['activeData'];
@@ -344,6 +346,10 @@ interface BaseOperationDefinitionProps<
    * autocomplete.
    */
   filterable?: boolean | { helpMessage: string };
+  /**
+   * Windowable operations can have a time window defined at the dimension level - under the hood this will be translated into a filter on the defined time field
+   */
+  windowable?: boolean;
   shiftable?: boolean;
 
   getHelpMessage?: (props: HelpProps<C>) => React.ReactNode;
@@ -411,6 +417,13 @@ interface BaseOperationDefinitionProps<
     aggs: ExpressionAstExpressionBuilder[];
     esAggsIdMap: Record<string, OriginalColumn[]>;
   };
+
+  /**
+   * Returns the maximum possible number of values for this column
+   * (e.g. with a top 5 values operation, we can be sure that there will never be
+   *    more than 5 values returned or 6 if the "Other" bucket is enabled)
+   */
+  getMaxPossibleNumValues?: (column: C) => number;
 }
 
 interface BaseBuildColumnArgs {
@@ -485,6 +498,7 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn, P = {}
       kql?: string;
       lucene?: string;
       shift?: string;
+      window?: string;
       usedInMath?: boolean;
     }
   ) => C;
@@ -551,7 +565,11 @@ export interface RequiredReference {
   // Limit the input types, usually used to prevent other references from being used
   input: Array<GenericOperationDefinition['input']>;
   // Function which is used to determine if the reference is bucketed, or if it's a number
-  validateMetadata: (metadata: OperationMetadata) => boolean;
+  validateMetadata: (
+    metadata: OperationMetadata,
+    operation?: OperationType,
+    field?: string
+  ) => boolean;
   // Do not use specificOperations unless you need to limit to only one or two exact
   // operation types. The main use case is Cumulative Sum, where we need to only take the
   // sum of Count or sum of Sum.

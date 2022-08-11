@@ -49,6 +49,7 @@ RUNTIME_DEPS = [
 #
 #  References to NPM packages work the same as RUNTIME_DEPS
 TYPES_DEPS = [
+  "@npm//tslib",
   "@npm//@types/eslint",
   "@npm//@types/jest",
   "@npm//@types/node",
@@ -58,6 +59,7 @@ jsts_transpiler(
   name = "target_node",
   srcs = SRCS,
   build_pkg_name = package_name(),
+  root_input_dir = "src",
 )
 
 ts_config(

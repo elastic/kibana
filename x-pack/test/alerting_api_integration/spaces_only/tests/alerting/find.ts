@@ -51,6 +51,8 @@ const findTestUtils = (
       expect(response.body.per_page).to.be.greaterThan(0);
       expect(response.body.total).to.be.greaterThan(0);
       const match = response.body.data.find((obj: any) => obj.id === createdAlert.id);
+      const activeSnoozes = match.active_snoozes;
+      const hasActiveSnoozes = !!(activeSnoozes || []).filter((obj: any) => obj).length;
       expect(match).to.eql({
         id: createdAlert.id,
         name: 'abc',
@@ -76,7 +78,7 @@ const findTestUtils = (
           ? {
               monitoring: match.monitoring,
               snooze_schedule: match.snooze_schedule,
-              active_snoozes: match.active_snoozes,
+              ...(hasActiveSnoozes && { active_snoozes: activeSnoozes }),
             }
           : {}),
       });

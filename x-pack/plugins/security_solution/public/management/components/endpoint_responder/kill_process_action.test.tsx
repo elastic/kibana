@@ -138,6 +138,15 @@ describe('When using the kill-process action from response actions console', () 
     );
   });
 
+  it('should check the pid is a safe number', async () => {
+    await render();
+    enterConsoleCommand(renderResult, 'kill-process --pid 123123123123123123123');
+
+    expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+      'Invalid argument value: --pid. Argument must be a positive number representing the PID of a process'
+    );
+  });
+
   it('should check the entityId has a given value', async () => {
     await render();
     enterConsoleCommand(renderResult, 'kill-process --entityId');
@@ -266,17 +275,6 @@ describe('When using the kill-process action from response actions console', () 
       await consoleManagerMockAccess.openRunningConsole();
 
       expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledTimes(1);
-    });
-
-    it('should show exit modal when action still pending', async () => {
-      const pendingDetailResponse = apiMocks.responseProvider.actionDetails({
-        path: '/api/endpoint/action/1.2.3',
-      });
-      pendingDetailResponse.data.isCompleted = false;
-      apiMocks.responseProvider.actionDetails.mockReturnValue(pendingDetailResponse);
-      await render();
-      await consoleManagerMockAccess.openRunningConsole();
-      await consoleManagerMockAccess.hideOpenedConsole();
     });
   });
 });

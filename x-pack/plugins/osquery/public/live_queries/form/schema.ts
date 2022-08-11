@@ -43,6 +43,13 @@ export const liveQueryFormSchema = {
       { validator: queryFieldValidation },
     ],
   },
+  packId: {
+    label: i18n.translate('xpack.osquery.packs.dropdown.searchFieldLabel', {
+      defaultMessage: `Pack`,
+    }),
+    type: FIELD_TYPES.COMBO_BOX,
+    defaultValue: [],
+  },
   ecs_mapping: {
     defaultValue: [],
     type: FIELD_TYPES.JSON,

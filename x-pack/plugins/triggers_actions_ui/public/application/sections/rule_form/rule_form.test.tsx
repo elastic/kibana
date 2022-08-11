@@ -232,7 +232,7 @@ describe('rule_form', () => {
   describe('rule_form create rule', () => {
     let wrapper: ReactWrapper<any>;
 
-    async function setup(enforceMinimum = false, schedule = '1m') {
+    async function setup(enforceMinimum = false, schedule = '1m', featureId = 'alerting') {
       const mocks = coreMock.createSetup();
       const { useLoadRuleTypes } = jest.requireMock('../../hooks/use_load_rule_types');
       const ruleTypes: RuleType[] = [
@@ -333,6 +333,7 @@ describe('rule_form', () => {
           operation="create"
           actionTypeRegistry={actionTypeRegistry}
           ruleTypeRegistry={ruleTypeRegistry}
+          connectorFeatureId={featureId}
         />
       );
 
@@ -376,6 +377,44 @@ describe('rule_form', () => {
       );
     });
 
+    it('handles schedule interval inputs correctly', async () => {
+      const getIntervalInput = () => {
+        return wrapper.find('[data-test-subj="intervalInput"] input').first();
+      };
+
+      await setup();
+      expect(getIntervalInput().props().value).toEqual(1);
+
+      getIntervalInput().simulate('change', { target: { value: '2' } });
+      expect(getIntervalInput().props().value).toEqual(2);
+
+      getIntervalInput().simulate('change', { target: { value: '20' } });
+      expect(getIntervalInput().props().value).toEqual(20);
+
+      getIntervalInput().simulate('change', { target: { value: '999' } });
+      expect(getIntervalInput().props().value).toEqual(999);
+
+      // Invalid values:
+      await setup();
+      getIntervalInput().simulate('change', { target: { value: '0' } });
+      expect(getIntervalInput().props().value).toEqual(1);
+
+      getIntervalInput().simulate('change', { target: { value: 'INVALID' } });
+      expect(getIntervalInput().props().value).toEqual(1);
+
+      getIntervalInput().simulate('change', { target: { value: '-123' } });
+      expect(getIntervalInput().props().value).toEqual(1);
+
+      getIntervalInput().simulate('change', { target: { value: '1.0123' } });
+      expect(getIntervalInput().props().value).toEqual(1);
+
+      getIntervalInput().simulate('change', { target: { value: '0.0123' } });
+      expect(getIntervalInput().props().value).toEqual(1);
+
+      getIntervalInput().simulate('change', { target: { value: '+123' } });
+      expect(getIntervalInput().props().value).toEqual(1);
+    });
+
     it('does not render registered rule type which non editable', async () => {
       await setup();
       const ruleTypeSelectOptions = wrapper.find(
@@ -387,7 +426,15 @@ describe('rule_form', () => {
     it('renders registered action types', async () => {
       await setup();
       const ruleTypeSelectOptions = wrapper.find(
-        '[data-test-subj=".server-log-ActionTypeSelectOption"]'
+        '[data-test-subj=".server-log-alerting-ActionTypeSelectOption"]'
+      );
+      expect(ruleTypeSelectOptions.exists()).toBeFalsy();
+    });
+
+    it('renders uses feature id to load action types', async () => {
+      await setup(false, '1m', 'anotherFeature');
+      const ruleTypeSelectOptions = wrapper.find(
+        '[data-test-subj=".server-log-anotherFeature-ActionTypeSelectOption"]'
       );
       expect(ruleTypeSelectOptions.exists()).toBeFalsy();
     });

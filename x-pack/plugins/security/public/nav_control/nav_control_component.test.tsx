@@ -25,7 +25,14 @@ const useObservableMock = useObservable as jest.Mock;
 const useUserProfileMock = jest.spyOn(UseCurrentUserImports, 'useUserProfile');
 const useCurrentUserMock = jest.spyOn(UseCurrentUserImports, 'useCurrentUser');
 
-const userProfile = userProfileMock.create();
+const userProfileWithSecurity = userProfileMock.createWithSecurity();
+const userProfile = {
+  ...userProfileWithSecurity,
+  user: {
+    ...userProfileWithSecurity.user,
+    authentication_provider: { type: 'basic', name: 'basic1' },
+  },
+};
 const userMenuLinks$ = new BehaviorSubject([]);
 
 describe('SecurityNavControl', () => {
@@ -78,26 +85,11 @@ describe('SecurityNavControl', () => {
                 "name": "basic1",
                 "type": "basic",
               },
-              "authentication_realm": Object {
-                "name": "native1",
-                "type": "native",
-              },
-              "authentication_type": "realm",
-              "elastic_cloud_user": false,
-              "email": "email",
-              "enabled": true,
-              "full_name": "full name",
-              "lookup_realm": Object {
-                "name": "native1",
-                "type": "native",
-              },
-              "metadata": Object {
-                "_reserved": false,
-              },
-              "roles": Array [
-                "user-role",
-              ],
-              "username": "user",
+              "email": "some@email",
+              "realm_domain": "some-realm-domain",
+              "realm_name": "some-realm",
+              "roles": Array [],
+              "username": "some-username",
             }
           }
         />

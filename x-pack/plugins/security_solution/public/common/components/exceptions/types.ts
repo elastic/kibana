@@ -5,22 +5,9 @@
  * 2.0.
  */
 
-import type { ReactNode } from 'react';
 import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import type { Ecs } from '../../../../common/ecs';
 import type { CodeSignature } from '../../../../common/ecs/file';
-
-export interface FormattedEntry {
-  fieldName: string;
-  operator: string | undefined;
-  value: string | string[] | undefined;
-  isNested: boolean;
-}
-
-export interface DescriptionListItem {
-  title: NonNullable<ReactNode>;
-  description: NonNullable<ReactNode>;
-}
 
 export interface ExceptionListItemIdentifiers {
   id: string;

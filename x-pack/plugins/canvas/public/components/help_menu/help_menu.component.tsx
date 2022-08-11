@@ -5,22 +5,10 @@
  * 2.0.
  */
 
-import React, { FC, lazy, Suspense, useCallback } from 'react';
-import { EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
+import React, { FC, useCallback } from 'react';
+import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ChromeHelpMenuActions } from '@kbn/core/public';
-import { ExpressionFunction } from '@kbn/expressions-plugin';
-import { CanvasPluginServices } from '../../services';
-
-let FunctionReferenceGenerator: null | React.LazyExoticComponent<any> = null;
-
-if (process.env.NODE_ENV === 'development') {
-  FunctionReferenceGenerator = lazy(() =>
-    import('../function_reference_generator').then((module) => ({
-      default: module.FunctionReferenceGenerator,
-    }))
-  );
-}
 
 const strings = {
   getKeyboardShortcutsLinkLabel: () =>
@@ -30,18 +18,11 @@ const strings = {
 };
 
 interface Props {
-  functionRegistry: Record<string, ExpressionFunction>;
-  notifyService: CanvasPluginServices['notify'];
   showKeyboardShortcutsDocFlyout: () => void;
   hideHelpMenu: ChromeHelpMenuActions['hideHelpMenu'];
 }
 
-export const HelpMenu: FC<Props> = ({
-  functionRegistry,
-  notifyService,
-  hideHelpMenu,
-  showKeyboardShortcutsDocFlyout,
-}) => {
+export const HelpMenu: FC<Props> = ({ hideHelpMenu, showKeyboardShortcutsDocFlyout }) => {
   const onKeyboardShortcutButtonClick = useCallback(() => {
     hideHelpMenu();
     showKeyboardShortcutsDocFlyout();
@@ -57,16 +38,6 @@ export const HelpMenu: FC<Props> = ({
       >
         {strings.getKeyboardShortcutsLinkLabel()}
       </EuiButtonEmpty>
-
-      {FunctionReferenceGenerator ? (
-        <Suspense fallback={null}>
-          <EuiSpacer size="xs" />
-          <FunctionReferenceGenerator
-            functionRegistry={functionRegistry}
-            notifyService={notifyService}
-          />
-        </Suspense>
-      ) : null}
     </>
   );
 };
