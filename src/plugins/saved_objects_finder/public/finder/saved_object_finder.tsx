@@ -133,11 +133,6 @@ class SavedObjectFinderUi extends React.Component<
       .map((metaData) => metaData.includeFields || [])
       .reduce((allFields, currentFields) => allFields.concat(currentFields), ['title', 'name']);
 
-    const searchTypes = Object.keys(metaDataMap).filter(
-      (type) => !visibleTypes || visibleTypes.includes(type)
-    );
-
-    const perPage = this.props.savedObjectsPlugin.settings.getListingLimit();
     const additionalSearchFields = Object.values(metaDataMap).reduce<string[]>((col, item) => {
       if (item.defaultSearchField) {
         col.push(item.defaultSearchField);
@@ -145,6 +140,11 @@ class SavedObjectFinderUi extends React.Component<
       return col;
     }, []);
 
+    const searchTypes = Object.keys(metaDataMap).filter(
+      (type) => !visibleTypes || visibleTypes.includes(type)
+    );
+
+    const perPage = this.props.savedObjectsPlugin.settings.getListingLimit();
     const response = await this.props.savedObjects.client.find<FinderAttributes>({
       type: searchTypes,
       fields: [...new Set(fields)],
