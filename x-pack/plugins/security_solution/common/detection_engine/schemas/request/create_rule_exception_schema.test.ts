@@ -71,9 +71,9 @@ describe('createRuleExceptionsSchema', () => {
   });
 
   test('items with list_id do not validate', () => {
-    const payload: CreateRuleExceptionSchema = {
+    const payload = {
       items: [getCreateExceptionListItemSchemaMock()],
-    };
+    } as unknown as CreateRuleExceptionSchema;
 
     const decoded = createRuleExceptionsSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
