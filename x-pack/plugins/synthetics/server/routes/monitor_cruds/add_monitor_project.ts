@@ -8,12 +8,12 @@ import { schema } from '@kbn/config-schema';
 import { UMServerLibs } from '../../legacy_uptime/lib/lib';
 import { ProjectBrowserMonitor } from '../../../common/runtime_types';
 
-import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
+import { SyntheticsStreamingRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS } from '../../../common/constants';
 import { getAllLocations } from '../../synthetics_service/get_all_locations';
 import { ProjectMonitorFormatter } from '../../synthetics_service/project_monitor_formatter';
 
-export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
+export const addSyntheticsProjectMonitorRoute: SyntheticsStreamingRouteFactory = (
   libs: UMServerLibs
 ) => ({
   method: 'PUT',
@@ -27,10 +27,10 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
   },
   handler: async ({
     request,
-    response,
     savedObjectsClient,
     server,
     syntheticsMonitorClient,
+    subject,
   }): Promise<any> => {
     const monitors = (request.body?.monitors as ProjectBrowserMonitor[]) || [];
     const spaceId = server.spaces.spacesService.getSpaceId(request);
@@ -54,19 +54,19 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
       server,
       syntheticsMonitorClient,
       request,
+      subject,
     });
 
     await pushMonitorFormatter.configureAllProjectMonitors();
 
-    return response.ok({
-      body: {
-        createdMonitors: pushMonitorFormatter.createdMonitors,
-        updatedMonitors: pushMonitorFormatter.updatedMonitors,
-        staleMonitors: pushMonitorFormatter.staleMonitors,
-        deletedMonitors: pushMonitorFormatter.deletedMonitors,
-        failedMonitors: pushMonitorFormatter.failedMonitors,
-        failedStaleMonitors: pushMonitorFormatter.failedStaleMonitors,
-      },
+    subject?.next({
+      createdMonitors: pushMonitorFormatter.createdMonitors,
+      updatedMonitors: pushMonitorFormatter.updatedMonitors,
+      staleMonitors: pushMonitorFormatter.staleMonitors,
+      deletedMonitors: pushMonitorFormatter.deletedMonitors,
+      failedMonitors: pushMonitorFormatter.failedMonitors,
+      failedStaleMonitors: pushMonitorFormatter.failedStaleMonitors,
     });
+    subject?.complete();
   },
 });
