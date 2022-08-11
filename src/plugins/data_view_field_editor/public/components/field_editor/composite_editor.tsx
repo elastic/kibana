@@ -23,10 +23,11 @@ import { ScriptField } from './form_fields';
 import { useFieldEditorContext } from '../field_editor_context';
 import { RUNTIME_FIELD_OPTIONS_PRIMITIVE } from './constants';
 import { valueToComboBoxOption } from './lib';
+import { RuntimePrimitiveTypes } from '../../shared_imports';
 
 export interface CompositeEditorProps {
-  value: Record<string, string>;
-  setValue: (newValue: Record<string, string>) => void;
+  value: Record<string, RuntimePrimitiveTypes>;
+  setValue: (newValue: Record<string, RuntimePrimitiveTypes>) => void;
 }
 
 export const CompositeEditor = ({ value, setValue }: CompositeEditorProps) => {
@@ -77,7 +78,7 @@ export const CompositeEditor = ({ value, setValue }: CompositeEditorProps) => {
                           return;
                         }
                         // update the type for the given field
-                        value[key] = newValue[0].value!;
+                        value[key] = newValue[0].value! as RuntimePrimitiveTypes;
                         // retun new object as to trigger react hooks
                         setValue({ ...value });
                       }}

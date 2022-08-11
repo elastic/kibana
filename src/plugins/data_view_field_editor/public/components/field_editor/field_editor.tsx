@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { get, isEqual, differenceWith } from 'lodash';
+import { get } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiCallOut } from '@elastic/eui';
 
 import {
@@ -32,7 +32,8 @@ import { getNameFieldConfig } from './lib';
 import { TypeField } from './form_fields';
 import { FieldDetail } from './field_detail';
 import { CompositeEditor } from './composite_editor';
-import { TypeSelection, FieldTypeInfo } from './types';
+import { TypeSelection } from './types';
+import { ChangeType } from '../preview/types';
 
 export interface FieldEditorFormState {
   isValid: boolean | undefined;
@@ -42,8 +43,6 @@ export interface FieldEditorFormState {
 }
 
 export interface FieldFormInternal extends Omit<Field, 'type' | 'internalType' | 'fields'> {
-  // todo - remove? Had trouble with this
-  // fields?: Array<{ name: string; type: TypeSelection }>;
   type: TypeSelection;
   __meta__: {
     isCustomLabelVisible: boolean;
@@ -106,12 +105,10 @@ const formSerializer = (field: FieldFormInternal): Field => {
 
 const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) => {
   // todo see if we can reduce renders
-  const { namesNotAllowed, fieldTypeToProcess, setSubfields } = useFieldEditorContext();
+  const { namesNotAllowed, fieldTypeToProcess, setSubfields, subfields } = useFieldEditorContext();
   const {
     params: { update: updatePreviewParams },
-    fields,
-    isLoadingPreview,
-    initialPreviewComplete,
+    previewFields$,
   } = useFieldPreviewContext();
   const { form } = useForm<Field, FieldFormInternal>({
     defaultValue: field,
@@ -119,24 +116,8 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
     deserializer: formDeserializer,
     serializer: formSerializer,
   });
-  const [previousPreviewTypes, setPreviousPreviewTypes] = useState<FieldTypeInfo[]>();
+
   const { submit, isValid: isFormValid, isSubmitted, getFields, isSubmitting } = form;
-
-  // loading from saved field
-  const savedSubfieldTypes = Object.entries(field?.fields || {}).reduce<Record<string, string>>(
-    (col, [key, val]) => {
-      col[key] = val.type;
-      return col;
-    },
-    {}
-  );
-
-  const [fieldsAndTypes, setFieldsAndTypes] = useState(savedSubfieldTypes);
-
-  // todo - likely factor out
-  useEffect(() => {
-    setSubfields(fieldsAndTypes);
-  }, [fieldsAndTypes, setSubfields]);
 
   const nameFieldConfig = getNameFieldConfig(namesNotAllowed, field);
 
@@ -163,56 +144,30 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
 
   const isValueVisible = get(formData, '__meta__.isValueVisible');
 
+  // look into using form.subscribe
   useEffect(() => {
-    if (isLoadingPreview || !initialPreviewComplete || updatedType[0].value !== 'composite') {
-      return;
-    }
+    console.log('*** subscribing');
 
-    // sometimes we get undefined types, remove them
-    const fieldsFitlered = fields.filter((item) => item.type !== undefined);
+    const sub = previewFields$.subscribe((previewFields) => {
+      console.log('*** from field editor:', previewFields);
 
-    // Take preview info, remove unneeded info for updating types, comparison
-    const fieldTypeInfoUpdate = fieldsFitlered.map<FieldTypeInfo>((item) => {
-      const key = item.key.slice(item.key.search('\\.') + 1);
-      return { name: key, type: item.type! };
+      const modifiedFields = { ...subfields } as Record<string, RuntimePrimitiveTypes>;
+
+      Object.entries(previewFields).forEach(([name, change]) => {
+        if (change.changeType === ChangeType.DELETE) {
+          delete modifiedFields[name];
+        } else {
+          modifiedFields[name] = change.type!;
+        }
+      });
+      console.log('*** modified fields:', modifiedFields);
+
+      setSubfields(modifiedFields);
     });
-
-    const update = differenceWith(fieldTypeInfoUpdate, previousPreviewTypes || [], isEqual).reduce<
-      Record<string, string>
-    >((col, item) => {
-      col[item.name] = item.type;
-      return col;
-    }, {});
-
-    const hasUpdates =
-      Object.keys(fieldsAndTypes).length !== fieldsFitlered.length ||
-      Object.keys(update).length > 0;
-
-    if (hasUpdates) {
-      const updatedFieldsAndTypes = fieldTypeInfoUpdate.reduce((col, item) => {
-        col[item.name] = update[item.name] || fieldsAndTypes[item.name];
-        return col;
-      }, {} as Record<string, string>);
-
-      // preview state
-      setPreviousPreviewTypes(fieldTypeInfoUpdate);
-      if (previousPreviewTypes !== undefined) {
-        // actual form state
-        setFieldsAndTypes(updatedFieldsAndTypes);
-
-        // updates what gets saved
-        setSubfields(updatedFieldsAndTypes as Record<string, RuntimePrimitiveTypes>);
-      }
-    }
-  }, [
-    fields,
-    isLoadingPreview,
-    initialPreviewComplete,
-    fieldsAndTypes,
-    previousPreviewTypes,
-    setSubfields,
-    updatedType,
-  ]);
+    return () => {
+      sub.unsubscribe();
+    };
+  }, [previewFields$, subfields, setSubfields]);
 
   useEffect(() => {
     if (onChange) {
@@ -280,14 +235,6 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
             isDisabled={fieldTypeToProcess === 'concrete'}
             includeComposite={true}
             path="type"
-            onChange={(type) => {
-              // reset preview type info when type changes
-              if (type === 'composite') {
-                setPreviousPreviewTypes([]);
-              } else {
-                setPreviousPreviewTypes(undefined);
-              }
-            }}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -320,7 +267,7 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
         <FieldDetail />
       ) : (
         // todo rename these subfields
-        <CompositeEditor value={fieldsAndTypes} setValue={setFieldsAndTypes} />
+        <CompositeEditor value={subfields || {}} setValue={setSubfields} />
       )}
     </Form>
   );

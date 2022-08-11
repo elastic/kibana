@@ -21,6 +21,8 @@ import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
+import { BehaviorSubject, Subject, bufferCount, map, filter } from 'rxjs';
+import { differenceWith, isEqual } from 'lodash';
 import { RuntimePrimitiveTypes } from '../../shared_imports';
 
 import { parseEsError } from '../../lib/runtime_field_validation';
@@ -35,7 +37,11 @@ import type {
   ScriptErrorCodes,
   FetchDocError,
   FieldPreview,
+  ChangeSet,
+  Change,
 } from './types';
+
+import { ChangeType } from './types';
 
 const fieldPreviewContext = createContext<Context | undefined>(undefined);
 
@@ -79,6 +85,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
 
   const {
     dataView,
+    subfields,
     fieldTypeToProcess,
     services: {
       search,
@@ -88,12 +95,66 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     fieldFormats,
   } = useFieldEditorContext();
 
+  /*
+  useEffect(() => {
+
+  }, [subfield]);
+  */
+
+  const [previewFields$, previewFieldsObservable] = useMemo(() => {
+    const savedSubfieldsToPreviews = Object.entries(subfields || {}).reduce<FieldPreview[]>(
+      (col, [key, type]) => {
+        col.push({ key, type, value: undefined });
+        return col;
+      },
+      []
+    );
+    console.log('*** HERE');
+    // todo
+    const subj = savedSubfieldsToPreviews.length
+      ? new Subject<Context['fields']>()
+      : new BehaviorSubject<Context['fields']>(savedSubfieldsToPreviews);
+    const observable = subj.pipe(
+      map((items) =>
+        // reduce the fields to make diffing easier
+        items.map((item) => {
+          const key = item.key.slice(item.key.search('\\.') + 1);
+          return { name: key, type: item.type! };
+        })
+      ),
+      bufferCount(2, 1),
+      // convert values into diff descriptions
+      map(([prev, next]) => {
+        console.log('*** prev next', prev, next);
+        const changes = differenceWith(next, prev, isEqual).reduce<ChangeSet>((col, item) => {
+          col[item.name] = {
+            changeType: ChangeType.UPSERT,
+            type: item.type as RuntimePrimitiveTypes,
+          };
+          return col;
+        }, {} as ChangeSet);
+
+        prev.forEach((prevItem) => {
+          if (!next.find((nextItem) => nextItem.name === prevItem.name)) {
+            changes[prevItem.name] = { changeType: ChangeType.DELETE };
+          }
+        });
+        console.log('*** CHANGES', changes);
+        return changes;
+      }),
+      filter((fields) => Object.keys(fields).length > 0)
+    );
+
+    return [subj, observable];
+    // curious how I might factor this out as its causing
+    // // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [subfields]);
+
   /** Response from the Painless _execute API */
   const [previewResponse, setPreviewResponse] = useState<{
     fields: Context['fields'];
     error: Context['error'];
   }>({ fields: [], error: null });
-  /** Returns true after first preview is completed */
   const [initialPreviewComplete, setInitialPreviewComplete] = useState(false);
 
   /** Possible error while fetching sample documents */
@@ -345,7 +406,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     (compositeName: string | null, compositeValues: Record<string, unknown[]>) => {
       const updatedFieldsInScript: string[] = [];
       // if we're displaying a composite subfield, filter results
-      const filter = parentName ? (field: FieldPreview) => field.key === name : () => true;
+      const filterSubfield = parentName ? (field: FieldPreview) => field.key === name : () => true;
 
       const fields = Object.entries(compositeValues)
         .map<FieldPreview>(([key, values]) => {
@@ -366,16 +427,17 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
             type: valueTypeToSelectedType(value),
           };
         })
-        .filter(filter)
+        .filter(filterSubfield)
         // ...and sort alphabetically
         .sort((a, b) => a.key.localeCompare(b.key));
 
+      previewFields$.next(fields);
       setPreviewResponse({
         fields,
         error: null,
       });
     },
-    [valueFormatter, parentName, name]
+    [valueFormatter, parentName, name, previewFields$]
   );
 
   const updatePreview = useCallback(async () => {
@@ -506,6 +568,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     () => ({
       fields: previewResponse.fields,
       error: previewResponse.error,
+      previewFields$: previewFieldsObservable,
       isPreviewAvailable,
       isLoadingPreview,
       initialPreviewComplete,
@@ -549,6 +612,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     }),
     [
       previewResponse,
+      previewFieldsObservable,
       fetchDocError,
       params,
       isPreviewAvailable,

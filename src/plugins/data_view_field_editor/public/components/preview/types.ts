@@ -7,7 +7,13 @@
  */
 
 import React from 'react';
-import type { RuntimeType, RuntimeField, SerializedFieldFormat } from '../../shared_imports';
+import { Observable } from 'rxjs';
+import type {
+  RuntimeType,
+  RuntimeField,
+  SerializedFieldFormat,
+  RuntimePrimitiveTypes,
+} from '../../shared_imports';
 import type { RuntimeFieldPainlessError } from '../../types';
 
 export type From = 'cluster' | 'custom';
@@ -72,8 +78,20 @@ export interface FieldTypeInfo {
   type: string;
 }
 
+export enum ChangeType {
+  UPSERT = 'upsert',
+  DELETE = 'delete',
+}
+export interface Change {
+  changeType: ChangeType;
+  type?: RuntimePrimitiveTypes;
+}
+
+export type ChangeSet = Record<string, Change>;
+
 export interface Context {
   fields: FieldPreview[];
+  previewFields$: Observable<ChangeSet>;
   error: PreviewError | null;
   fieldTypeInfo?: FieldTypeInfo[];
   initialPreviewComplete: boolean;
