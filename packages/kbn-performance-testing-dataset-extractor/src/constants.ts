@@ -6,8 +6,4 @@
  * Side Public License, v 1.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-performance-testing-dataset-extractor'],
-};
+export const DATE_FORMAT = `YYYY-MM-DD'T'HH:mm:ss.SSS'Z'`;
