@@ -12,7 +12,7 @@ export default function ({ getService }: FtrProviderContext) {
   const cases = getService('cases');
   const commonScreenshots = getService('commonScreenshots');
 
-  const screenshotDirectories = ['response_ops_docs', 'cases'];
+  const screenshotDirectories = ['response_ops_docs', 'stack_cases'];
 
   describe('list view', function () {
     before(async () => {

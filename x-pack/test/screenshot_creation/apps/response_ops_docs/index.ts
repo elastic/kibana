@@ -33,5 +33,6 @@ export default function ({ getPageObject, getService, loadTestFile }: FtrProvide
     });
 
     loadTestFile(require.resolve('./stack_cases'));
+    loadTestFile(require.resolve('./observability_cases'));
   });
 }
