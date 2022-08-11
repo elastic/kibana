@@ -18,6 +18,7 @@ export function CommonScreenshotsProvider({ getService }: FtrProviderContext) {
   return {
     async takeScreenshot(name: string, subDirectories: string[], width?: number, height?: number) {
       await browser.setWindowSize(width ?? DEFAULT_WIDTH, height ?? DEFAULT_HEIGHT);
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // give components time to resize
       await screenshot.take(`${name}_new`, undefined, subDirectories);
       await browser.setWindowSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
     },
