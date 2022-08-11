@@ -34,7 +34,7 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const log = getService('log');
 
-  describe.only('update_actions', () => {
+  describe('update_actions', () => {
     describe('updating actions', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
