@@ -101,7 +101,6 @@ describe('Export rules', () => {
           {
             ...getNewRule(),
             name: 'rule with exceptions',
-            dataSource: { index: ['exceptions-*'], type: 'indexPatterns' },
             exceptionLists: [
               {
                 id: response.body.id,
