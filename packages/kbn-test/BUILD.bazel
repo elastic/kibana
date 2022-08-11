@@ -8,6 +8,9 @@ PKG_REQUIRE_NAME = "@kbn/test"
 
 SOURCE_FILES = glob(
   [
+    "src/failed_tests_reporter/es_config",
+    "**/*.html",
+    "**/*.js",
     "**/*.ts",
   ],
   exclude = [
