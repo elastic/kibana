@@ -18,12 +18,14 @@ import {
   EuiTitle,
   EuiSwitch,
   EuiSearchBar,
+  EuiLink,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { AddContentEmptyPrompt } from '../../../shared/add_content_empty_prompt';
+import { docLinks } from '../../../shared/doc_links';
 import { ElasticsearchResources } from '../../../shared/elasticsearch_resources';
 import { GettingStartedSteps } from '../../../shared/getting_started_steps';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
@@ -60,71 +62,38 @@ export const SearchIndices: React.FC = () => {
     fetchIndices({ meta, returnHiddenIndices: showHiddenIndices, searchQuery });
   }, [searchQuery, meta.page.current, showHiddenIndices]);
 
-  const createNewIndexButton = (
-    <EuiLinkTo data-test-subj="create-new-index-button" to={NEW_INDEX_PATH}>
-      <EuiButton iconType="plusInCircle" color="primary" fill>
-        {i18n.translate('xpack.enterpriseSearch.content.searchIndices.create.buttonTitle', {
-          defaultMessage: 'Create new index',
-        })}
-      </EuiButton>
-    </EuiLinkTo>
-  );
-
-  const engineSteps = (
-    <>
-      <EuiTitle>
-        <h2>
-          {i18n.translate('xpack.enterpriseSearch.content.searchIndices.searchIndices.stepsTitle', {
-            defaultMessage: 'Build beautiful search experiences with Enterprise Search',
-          })}
-        </h2>
-      </EuiTitle>
-      <EuiSpacer size="l" />
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <GettingStartedSteps step={indices.length === 0 ? 'first' : 'second'} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <ElasticsearchResources />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
-  );
-
-  const hiddenIndicesSwitch = (
-    <EuiSwitch
-      checked={showHiddenIndices}
-      label={i18n.translate(
-        'xpack.enterpriseSearch.content.searchIndices.searchIndices.includeHidden.label',
-        {
-          defaultMessage: 'Show hidden indices',
-        }
-      )}
-      onChange={(event) => setShowHiddenIndices(event.target.checked)}
-    />
-  );
-
-  const pageTitle =
-    indices.length !== 0
-      ? i18n.translate('xpack.enterpriseSearch.content.searchIndices.searchIndices.pageTitle', {
-          defaultMessage: 'Elasticsearch Indices',
-        })
-      : i18n.translate(
-          'xpack.enterpriseSearch.content.searchIndices.searchIndices.emptyPageTitle',
-          {
-            defaultMessage: 'Welcome to Enterprise Search',
-          }
-        );
+  const pageTitle = isLoading
+    ? ''
+    : indices.length !== 0
+    ? i18n.translate('xpack.enterpriseSearch.content.searchIndices.searchIndices.pageTitle', {
+        defaultMessage: 'Elasticsearch indices',
+      })
+    : i18n.translate('xpack.enterpriseSearch.content.searchIndices.searchIndices.emptyPageTitle', {
+        defaultMessage: 'Welcome to Enterprise Search',
+      });
 
   return (
     <>
       <EnterpriseSearchContentPageTemplate
         pageChrome={baseBreadcrumbs}
         pageViewTelemetry="Search indices"
-        isLoading={false}
+        isLoading={isLoading}
         pageHeader={{
           pageTitle,
-          rightSideItems: [createNewIndexButton],
+          rightSideItems: isLoading
+            ? []
+            : [
+                <EuiLinkTo data-test-subj="create-new-index-button" to={NEW_INDEX_PATH}>
+                  <EuiButton iconType="plusInCircle" color="primary" fill>
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.content.searchIndices.create.buttonTitle',
+                      {
+                        defaultMessage: 'Create new index',
+                      }
+                    )}
+                  </EuiButton>
+                </EuiLinkTo>,
+              ],
         }}
       >
         {!hasNoIndices ? (
@@ -145,14 +114,18 @@ export const SearchIndices: React.FC = () => {
                       defaultMessage="Your Elasticsearch indices are now front and center in Enterprise Search. You can create new indices and build search experiences with them directly. To learn more about how to use Elasticsearch indices in Enterprise Search {docLink}"
                       values={{
                         docLink: (
-                          <EuiLinkTo data-test-subj="search-index-link" to="#">
+                          <EuiLink
+                            data-test-subj="search-index-link"
+                            href={docLinks.appSearchElasticsearchIndexedEngines}
+                            target="_blank"
+                          >
                             {i18n.translate(
                               'xpack.enterpriseSearch.content.indices.callout.docLink',
                               {
                                 defaultMessage: 'read the documentation',
                               }
                             )}
-                          </EuiLinkTo>
+                          </EuiLink>
                         ),
                       }}
                     />
@@ -181,7 +154,18 @@ export const SearchIndices: React.FC = () => {
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-                    <EuiFlexItem grow={false}>{hiddenIndicesSwitch}</EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiSwitch
+                        checked={showHiddenIndices}
+                        label={i18n.translate(
+                          'xpack.enterpriseSearch.content.searchIndices.searchIndices.includeHidden.label',
+                          {
+                            defaultMessage: 'Show hidden indices',
+                          }
+                        )}
+                        onChange={(event) => setShowHiddenIndices(event.target.checked)}
+                      />
+                    </EuiFlexItem>
                     <EuiFlexItem className="entSearchIndicesSearchBar">
                       <EuiSearchBar
                         query={searchQuery}
@@ -208,19 +192,34 @@ export const SearchIndices: React.FC = () => {
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem>
-              <IndicesTable
-                indices={indices}
-                meta={meta}
-                onChange={handlePageChange(onPaginate)}
-                isLoading={isLoading}
-              />
+              <IndicesTable indices={indices} meta={meta} onChange={handlePageChange(onPaginate)} />
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : (
           <>
             <AddContentEmptyPrompt />
             <EuiSpacer size="xxl" />
-            {engineSteps}
+            <>
+              <EuiTitle>
+                <h2>
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.content.searchIndices.searchIndices.stepsTitle',
+                    {
+                      defaultMessage: 'Build beautiful search experiences with Enterprise Search',
+                    }
+                  )}
+                </h2>
+              </EuiTitle>
+              <EuiSpacer size="l" />
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <GettingStartedSteps step={indices.length === 0 ? 'first' : 'second'} />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <ElasticsearchResources />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>
           </>
         )}
       </EnterpriseSearchContentPageTemplate>

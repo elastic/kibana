@@ -151,7 +151,7 @@ const columns: Array<EuiBasicTableColumn<ElasticsearchViewIndex>> = [
 
 interface IndicesTableProps {
   indices: ElasticsearchViewIndex[];
-  isLoading: boolean;
+  isLoading?: boolean;
   meta: Meta;
   onChange: (criteria: CriteriaWithPagination<ElasticsearchViewIndex>) => void;
 }

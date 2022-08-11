@@ -47,7 +47,7 @@ export function DraggableDimensionButton({
   group: VisualizationDimensionGroupConfig;
   label: string;
   children: ReactElement;
-  layerDatasource: Datasource<unknown, unknown>;
+  layerDatasource?: Datasource<unknown, unknown>;
   datasourceLayers: DatasourceLayers;
   state: unknown;
   accessorIndex: number;
