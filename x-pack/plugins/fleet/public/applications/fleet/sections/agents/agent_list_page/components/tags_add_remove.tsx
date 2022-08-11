@@ -212,7 +212,7 @@ export const TagsAddRemove: React.FC<Props> = ({
             </Fragment>
           )}
         </EuiSelectable>
-        {!isExactMatch && labels.length && searchValue !== '' ? createTagButton : null}
+        {(!isExactMatch || labels.length === 0) && searchValue !== '' ? createTagButton : null}
       </EuiWrappingPopover>
     </>
   );
