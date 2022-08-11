@@ -411,43 +411,48 @@ function DiscoverFieldComponent({
     const details = getDetails(field);
     const dateRange = data?.query?.timefilter.timefilter.getTime();
     const fieldForStats = multiFields ? multiFields[0].field : field; // TODO: how to handle multifields?
+    const showNewStatsPreviewInDiscover = false; // Toggle this variable to preview new stats locally
 
     return (
       <>
         {showFieldStats && (
           <>
-            <EuiText color="subdued" size="s">
-              {'Stats as in Lens:'}
-            </EuiText>
-            <EuiSpacer size="s" />
-            {Boolean(dateRange) && (
-              <FieldStats
-                query={state.query!}
-                filters={state.filters!}
-                fromDate={dateRange.from}
-                toDate={dateRange.to}
-                dataViewOrDataViewId={dataView}
-                field={fieldForStats}
-                testSubject="dscFieldListPanel"
-                overrideMissingContent={(params) => {
-                  if (params?.noDataFound) {
-                    return (
-                      <EuiText size="s">{`TODO: add a custom "no data available" message for ${fieldForStats.type} field`}</EuiText>
-                    );
-                  }
+            {showNewStatsPreviewInDiscover && (
+              <>
+                <EuiText color="subdued" size="s">
+                  {'Stats as in Lens:'}
+                </EuiText>
+                <EuiSpacer size="s" />
+                {Boolean(dateRange) && (
+                  <FieldStats
+                    query={state.query!}
+                    filters={state.filters!}
+                    fromDate={dateRange.from}
+                    toDate={dateRange.to}
+                    dataViewOrDataViewId={dataView}
+                    field={fieldForStats}
+                    testSubject="dscFieldListPanel"
+                    overrideMissingContent={(params) => {
+                      if (params?.noDataFound) {
+                        return (
+                          <EuiText size="s">{`TODO: add a custom "no data available" message for ${fieldForStats.type} field`}</EuiText>
+                        );
+                      }
 
-                  return (
-                    <EuiText size="s">{`TODO: add a custom "stats are not available" message for ${fieldForStats.type} field`}</EuiText>
-                  );
-                }}
-              />
+                      return (
+                        <EuiText size="s">{`TODO: add a custom "stats are not available" message for ${fieldForStats.type} field`}</EuiText>
+                      );
+                    }}
+                  />
+                )}
+                {/* TODO: remove previous field stats view when we finish FieldStats component and add addFilter buttons to it */}
+                <EuiSpacer size="l" />
+                <EuiText color="subdued" size="s">
+                  {'Current Discover stats:'}
+                </EuiText>
+                <EuiSpacer size="s" />
+              </>
             )}
-            {/* TODO: remove previous field stats view when we finish FieldStats component and add addFilter buttons to it */}
-            <EuiSpacer size="l" />
-            <EuiText color="subdued" size="s">
-              {'Current Discover stats:'}
-            </EuiText>
-            <EuiSpacer size="s" />
             <EuiTitle size="xxxs">
               <h5>
                 {i18n.translate('discover.fieldChooser.discoverField.fieldTopValuesLabel', {
