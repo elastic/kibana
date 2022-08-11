@@ -275,3 +275,236 @@ POST _transform/ml_hostriskscore_latest_transform_default/_stop
 POST _transform/ml_hostriskscore_latest_transform_default/_start
 "
 `;
+
+exports[`readPrebuiltDevToolContentRoute should read content from enable_user_risk_score template 1`] = `
+"# Click the run button of each step to enable the module
+# 1. Upload scripts
+PUT _scripts/ml_userriskscore_levels_script_default
+{
+  \\"script\\": {
+    \\"lang\\": \\"painless\\",
+    \\"source\\": \\"double risk_score = (def)ctx.getByPath(params.risk_score);\\\\nif (risk_score < 20) {\\\\n  ctx['risk'] = 'Unknown'\\\\n}\\\\nelse if (risk_score >= 20 && risk_score < 40) {\\\\n  ctx['risk'] = 'Low'\\\\n}\\\\nelse if (risk_score >= 40 && risk_score < 70) {\\\\n  ctx['risk'] = 'Moderate'\\\\n}\\\\nelse if (risk_score >= 70 && risk_score < 90) {\\\\n  ctx['risk'] = 'High'\\\\n}\\\\nelse if (risk_score >= 90) {\\\\n  ctx['risk'] = 'Critical'\\\\n}\\"
+  }
+}
+
+# 2. script for the User risk score transform
+PUT _scripts/ml_userriskscore_map_script_default
+{
+  \\"script\\": {
+    \\"lang\\": \\"painless\\", \\"source\\": \\"// Get running sum of risk score per rule name per shard\\\\\\\\\\\\\\\\\\\\nString rule_name = doc[\\\\\\"signal.rule.name\\\\\\"].value;\\\\ndef stats = state.rule_risk_stats.getOrDefault(rule_name, 0.0);\\\\nstats = doc[\\\\\\"signal.rule.risk_score\\\\\\"].value;\\\\nstate.rule_risk_stats.put(rule_name, stats);\\"
+  }
+}
+
+
+# 3. script for the User risk score transform
+PUT _scripts/ml_userriskscore_reduce_script_default
+{
+  \\"script\\": {
+    \\"lang\\": \\"painless\\",
+    \\"source\\": \\"// Consolidating time decayed risks from across all shards\\\\nMap total_risk_stats = new HashMap();\\\\nfor (state in states) {\\\\n    for (key in state.rule_risk_stats.keySet()) {\\\\n    def rule_stats = state.rule_risk_stats.get(key);\\\\n    def stats = total_risk_stats.getOrDefault(key, 0.0);\\\\n    stats = rule_stats;\\\\n    total_risk_stats.put(key, stats);\\\\n    }\\\\n}\\\\n// Consolidating individual rule risks and arranging them in decreasing order\\\\nList risks = new ArrayList();\\\\nfor (key in total_risk_stats.keySet()) {\\\\n    risks.add(total_risk_stats[key])\\\\n}\\\\nCollections.sort(risks, Collections.reverseOrder());\\\\n// Calculating total risk and normalizing it to a range\\\\ndouble total_risk = 0.0;\\\\ndouble risk_cap = params.max_risk * params.zeta_constant;\\\\nfor (int i=0;i<risks.length;i++) {\\\\n    total_risk += risks[i] / Math.pow((1+i), params.p);\\\\n}\\\\ndouble total_norm_risk = 100 * total_risk / risk_cap;\\\\nif (total_norm_risk < 40) {\\\\n    total_norm_risk =  2.125 * total_norm_risk;\\\\n}\\\\nelse if (total_norm_risk >= 40 && total_norm_risk < 50) {\\\\n    total_norm_risk = 85 + (total_norm_risk - 40);\\\\n}\\\\nelse {\\\\n    total_norm_risk = 95 + (total_norm_risk - 50) / 10;\\\\n}\\\\n\\\\nList rule_stats = new ArrayList();\\\\nfor (key in total_risk_stats.keySet()) {\\\\n    Map temp = new HashMap();\\\\n    temp[\\\\\\"rule_name\\\\\\"] = key;\\\\n    temp[\\\\\\"rule_risk\\\\\\"] = total_risk_stats[key];\\\\n    rule_stats.add(temp);\\\\n}\\\\n\\\\nreturn [\\\\\\"risk_score\\\\\\": total_norm_risk, \\\\\\"rule_risks\\\\\\": rule_stats];\\"
+  }
+}
+
+
+# 4. Upload ingest pipeline
+PUT _ingest/pipeline/ml_userriskscore_ingest_pipeline_default
+{
+  \\"dest\\": {
+    \\"index\\": \\"ml_user_risk_score_default\\",
+    \\"pipeline\\": \\"ml_userriskscore_ingest_pipeline_default\\"
+  },
+  \\"frequency\\": \\"1h\\",
+  \\"pivot\\": {
+    \\"aggregations\\": {
+      \\"@timestamp\\": {
+        \\"max\\": {
+          \\"field\\": \\"@timestamp\\"
+        }
+      },
+      \\"risk_stats\\": {
+        \\"scripted_metric\\": {
+          \\"combine_script\\": \\"return state\\",
+          \\"init_script\\": \\"state.rule_risk_stats = new HashMap();\\",
+          \\"map_script\\": {
+            \\"id\\": \\"ml_userriskscore_map_script_default\\"
+          },
+          \\"params\\": {
+            \\"max_risk\\": 100,
+            \\"p\\": 1.5,
+            \\"zeta_constant\\": 2.612
+          },
+          \\"reduce_script\\": {
+            \\"id\\": \\"ml_userriskscore_reduce_script_default\\"
+          }
+        }
+      }
+    },
+    \\"group_by\\": {
+      \\"user.name\\": {
+        \\"terms\\": {
+          \\"field\\": \\"user.name\\"
+        }
+      }
+    }
+  },
+  \\"source\\": {
+    \\"index\\": [
+      \\".siem-signals-default\\"
+    ],
+    \\"query\\": {
+      \\"bool\\": {
+        \\"filter\\": [
+          {
+            \\"range\\": {
+              \\"@timestamp\\": {
+                \\"gte\\": \\"now-90d\\"
+              }
+            }
+          },
+          {
+            \\"match\\": {
+              \\"signal.status\\": \\"open\\"
+            }
+          }
+        ]
+      }
+    }
+  },
+  \\"sync\\": {
+    \\"time\\": {
+      \\"delay\\": \\"120s\\",
+      \\"field\\": \\"@timestamp\\"
+    }
+  }
+}
+
+# 5. Upload the pivot transform
+PUT _transform/ml_userriskscore_pivot_transform_default
+{
+  \\"dest\\": {
+    \\"index\\": \\"ml_user_risk_score_default\\",
+    \\"pipeline\\": \\"ml_userriskscore_ingest_pipeline_default\\"
+  },
+  \\"frequency\\": \\"1h\\",
+  \\"pivot\\": {
+    \\"aggregations\\": {
+      \\"@timestamp\\": {
+        \\"max\\": {
+          \\"field\\": \\"@timestamp\\"
+        }
+      },
+      \\"risk_stats\\": {
+        \\"scripted_metric\\": {
+          \\"combine_script\\": \\"return state\\",
+          \\"init_script\\": \\"state.rule_risk_stats = new HashMap();\\",
+          \\"map_script\\": {
+            \\"id\\": \\"ml_userriskscore_map_script_default\\"
+          },
+          \\"params\\": {
+            \\"max_risk\\": 100,
+            \\"p\\": 1.5,
+            \\"zeta_constant\\": 2.612
+          },
+          \\"reduce_script\\": {
+            \\"id\\": \\"ml_userriskscore_reduce_script_default\\"
+          }
+        }
+      }
+    },
+    \\"group_by\\": {
+      \\"user.name\\": {
+        \\"terms\\": {
+          \\"field\\": \\"user.name\\"
+        }
+      }
+    }
+  },
+  \\"source\\": {
+    \\"index\\": [
+      \\".siem-signals-default\\"
+    ],
+    \\"query\\": {
+      \\"bool\\": {
+        \\"filter\\": [
+          {
+            \\"range\\": {
+              \\"@timestamp\\": {
+                \\"gte\\": \\"now-90d\\"
+              }
+            }
+          },
+          {
+            \\"match\\": {
+              \\"signal.status\\": \\"open\\"
+            }
+          }
+        ]
+      }
+    }
+  },
+  \\"sync\\": {
+    \\"time\\": {
+      \\"delay\\": \\"120s\\",
+      \\"field\\": \\"@timestamp\\"
+    }
+  }
+}
+
+# 6. start the pivot transform
+POST _transform/ml_userriskscore_pivot_transform_default/_start
+
+# 7. Create the User Risk Score index
+PUT ml_user_risk_score_latest_default
+{
+  \\"mappings\\":{
+    \\"properties\\":{
+      \\"user.name\\":{
+        \\"type\\":\\"keyword\\"
+      }
+    }
+  }
+}
+
+# 8. Upload the latest transform
+PUT _transform/ml_userriskscore_latest_transform_default
+{
+  \\"dest\\": {
+    \\"index\\": \\"ml_user_risk_score_latest_default\\"
+  },
+  \\"frequency\\": \\"1h\\",
+  \\"latest\\": {
+    \\"sort\\": \\"@timestamp\\",
+    \\"unique_key\\": [
+      \\"user.name\\"
+    ]
+  },
+  \\"source\\": {
+    \\"index\\": [
+      \\"ml_user_risk_score_default\\"
+    ]
+  },
+  \\"sync\\": {
+    \\"time\\": {
+      \\"delay\\": \\"2s\\",
+      \\"field\\": \\"ingest_timestamp\\"
+    }
+  }
+}
+
+# 9. Start the latest transform
+POST _transform/ml_userriskscore_latest_transform_default/_start
+
+# Hint: If you don't see data after running any of the transforms, stop and restart the transforms
+# Stop the pivot transform
+POST _transform/ml_userriskscore_pivot_transform_default/_start
+
+# Start the pivot transform
+POST _transform/ml_userriskscore_pivot_transform_default/_stop
+
+# Stop the latest transform
+POST _transform/ml_userriskscore_latest_transform_default/_start
+
+# Start the latest transform
+POST _transform/ml_userriskscore_latest_transform_default/_stop
+"
+`;

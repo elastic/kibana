@@ -13,7 +13,10 @@ import {
   requestMock,
 } from '../../detection_engine/routes/__mocks__';
 import { getEmptySavedObjectsResponse } from '../../detection_engine/routes/__mocks__/request_responses';
-import { expectedSavedObjectTemplate } from '../mocks';
+import {
+  expecteHostRiskScoreSavedObjectTemplate,
+  expecteUserRiskScoreSavedObjectTemplate,
+} from '../__mocks__';
 import { createPrebuiltSavedObjectsRoute } from './create_prebuilt_saved_objects';
 
 const createPrebuiltSavedObjectsRequest = (savedObjectTemplate: string) =>
@@ -47,14 +50,27 @@ describe('createPrebuiltSavedObjects', () => {
     createPrebuiltSavedObjectsRoute(server.router, securitySetup);
   });
 
-  test('should create saved objects from given template', async () => {
+  test('should create saved objects from given template - hostRiskScoreDashboards', async () => {
     const response = await server.inject(
       createPrebuiltSavedObjectsRequest('hostRiskScoreDashboards'),
       requestContextMock.convertContext(context)
     );
 
     expect(clients.savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
-      expectedSavedObjectTemplate,
+      expecteHostRiskScoreSavedObjectTemplate,
+      { overwrite: true }
+    );
+    expect(response.status).toEqual(200);
+  });
+
+  test('should create saved objects from given template - userRiskScoreDashboards', async () => {
+    const response = await server.inject(
+      createPrebuiltSavedObjectsRequest('userRiskScoreDashboards'),
+      requestContextMock.convertContext(context)
+    );
+
+    expect(clients.savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+      expecteUserRiskScoreSavedObjectTemplate,
       { overwrite: true }
     );
     expect(response.status).toEqual(200);

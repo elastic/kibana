@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const expectedSavedObjectTemplate = [
+export const expecteHostRiskScoreSavedObjectTemplate = [
   {
     attributes: {
       fieldAttrs: '{}',

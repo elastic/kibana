@@ -43,4 +43,14 @@ describe('readPrebuiltDevToolContentRoute', () => {
     expect(response.status).toEqual(200);
     expect(response.body).toMatchSnapshot();
   });
+
+  test('should read content from enable_user_risk_score template', async () => {
+    const response = await server.inject(
+      readPrebuiltDevToolContentRequest('enable_user_risk_score'),
+      requestContextMock.convertContext(context)
+    );
+
+    expect(response.status).toEqual(200);
+    expect(response.body).toMatchSnapshot();
+  });
 });

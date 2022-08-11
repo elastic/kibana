@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export type SavedObjectTemplate = 'hostRiskScoreDashboards' | 'userRiskScoreDashboards';
+export { expecteHostRiskScoreSavedObjectTemplate } from './host_risk_sore';
+export { expecteUserRiskScoreSavedObjectTemplate } from './user_risk_sore';
