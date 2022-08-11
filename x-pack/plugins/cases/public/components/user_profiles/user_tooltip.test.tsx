@@ -14,6 +14,7 @@ describe('UserToolTip', () => {
   it('renders the tooltip when hovering', async () => {
     const profile: UserProfileWithAvatar = {
       uid: '1',
+      enabled: true,
       data: {
         avatar: {
           initials: 'SU',
@@ -45,6 +46,7 @@ describe('UserToolTip', () => {
   it('only shows the display name if full name is missing', async () => {
     const profile: UserProfileWithAvatar = {
       uid: '1',
+      enabled: true,
       data: {
         avatar: {
           initials: 'SU',
@@ -75,6 +77,7 @@ describe('UserToolTip', () => {
   it('only shows the full name if display name is missing', async () => {
     const profile: UserProfileWithAvatar = {
       uid: '1',
+      enabled: true,
       data: {
         avatar: {
           initials: 'SU',
@@ -105,6 +108,7 @@ describe('UserToolTip', () => {
   it('only shows the email once when display name and full name are not defined', async () => {
     const profile: UserProfileWithAvatar = {
       uid: '1',
+      enabled: true,
       data: {
         avatar: {
           initials: 'SU',
@@ -135,6 +139,7 @@ describe('UserToolTip', () => {
   it('only shows the username once when all other fields are undefined', async () => {
     const profile: UserProfileWithAvatar = {
       uid: '1',
+      enabled: true,
       data: {
         avatar: {
           initials: 'SU',
