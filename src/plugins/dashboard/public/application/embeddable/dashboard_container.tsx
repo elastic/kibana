@@ -9,6 +9,18 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
+import deepEqual from 'fast-deep-equal';
+import {
+  BehaviorSubject,
+  catchError,
+  distinctUntilChanged,
+  EMPTY,
+  map,
+  merge,
+  pipe,
+  Subscription,
+  switchMap,
+} from 'rxjs';
 import uuid from 'uuid';
 import { CoreStart, IUiSettingsClient, KibanaExecutionContext } from '@kbn/core/public';
 import { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
@@ -112,6 +124,9 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   public readonly type = DASHBOARD_CONTAINER_TYPE;
 
   private onDestroyControlGroup?: () => void;
+  private anyChildLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(true);
+  private subscriptions: Subscription = new Subscription();
+
   public controlGroup?: ControlGroupContainer;
   private domNode?: HTMLElement;
 
@@ -163,7 +178,71 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
         }
       );
     }
+
+    /**
+     * Create a pipe that outputs the child's ID, any time any child's output changes.
+     */
+    const anyChildChangePipe = pipe(
+      map(() => this.getChildIds()),
+      distinctUntilChanged(deepEqual),
+
+      // children may change, so make sure we subscribe/unsubscribe with switchMap
+      switchMap((newChildIds: string[]) =>
+        merge(
+          ...newChildIds.map((childId) =>
+            this.getChild(childId)
+              .getOutput$()
+              .pipe(
+                // Embeddables often throw errors into their output streams.
+                catchError(() => EMPTY),
+                map(() => childId)
+              )
+          )
+        )
+      )
+    );
+
+    /**
+     * run OnChildOutputChanged when any child's output has changed
+     */
+    this.subscriptions.add(
+      this.getOutput$()
+        .pipe(anyChildChangePipe)
+        .subscribe(() => {
+          for (const child of Object.values(this.children)) {
+            const isLoading = child.getOutput().loading;
+            if (isLoading) {
+              this.anyChildLoading$.next(true);
+              console.log('one child loading');
+              this.controlGroup?.setAllPanelsLoadedState(false);
+              return;
+            }
+          }
+          this.anyChildLoading$.next(false);
+          console.log('no children loading');
+          this.controlGroup?.setAllPanelsLoadedState(true);
+        })
+    );
   }
+
+  public untilNoChildLoading = () => {
+    const panelsLoading = () => this.anyChildLoading$.value;
+    if (panelsLoading()) {
+      return new Promise<void>((resolve, reject) => {
+        const subscription = this.anyChildLoading$.subscribe(() => {
+          if (this.destroyed) {
+            subscription.unsubscribe();
+            reject();
+          }
+          if (!panelsLoading()) {
+            subscription.unsubscribe();
+            resolve();
+          }
+        });
+      });
+    }
+    return Promise.resolve();
+  };
 
   private onDataLoaded(data: DashboardLoadedInfo) {
     if (this.services.analytics) {
