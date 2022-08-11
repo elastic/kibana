@@ -496,6 +496,7 @@ export class DataView implements DataViewBase {
 
   /**
    * Get all runtime field definitions.
+   * NOTE: this does not strip out runtime fields that match mapped field names
    * @returns map of runtime field definitions by field name
    */
 
@@ -582,8 +583,19 @@ export class DataView implements DataViewBase {
    * Return the "runtime_mappings" section of the ES search query.
    */
   getRuntimeMappings(): estypes.MappingRuntimeFields {
-    // @ts-expect-error The ES client does not yet include the "composite" runtime type
-    return _.cloneDeep(this.runtimeFieldMap);
+    const mappedFields = this.getMappedFieldNames();
+    const records = Object.keys(this.runtimeFieldMap).reduce<Record<string, RuntimeFieldSpec>>(
+      (acc, fieldName) => {
+        // do not include fields that are mapped
+        if (!mappedFields.includes(fieldName)) {
+          acc[fieldName] = this.runtimeFieldMap[fieldName];
+        }
+
+        return acc;
+      },
+      {}
+    );
+    return records as estypes.MappingRuntimeFields;
   }
 
   /**
@@ -666,6 +678,15 @@ export class DataView implements DataViewBase {
   public readonly deleteFieldFormat = (fieldName: string) => {
     delete this.fieldFormatMap[fieldName];
   };
+
+  private getMappedFieldNames() {
+    return this.fields.getAll().reduce<string[]>((acc, dataViewField) => {
+      if (dataViewField.isMapped) {
+        acc.push(dataViewField.name);
+      }
+      return acc;
+    }, []);
+  }
 
   /**
    * Add composite runtime field and all subfields.
