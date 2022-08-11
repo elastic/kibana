@@ -30,12 +30,12 @@ describe('TransactionDistributionChart', () => {
       ).toEqual([
         { doc_count: 10 },
         { doc_count: 10 },
-        { doc_count: 0.5 },
-        { doc_count: 0.5 },
-        { doc_count: 0.5 },
+        { doc_count: 0.0001 },
+        { doc_count: 0.0001 },
+        { doc_count: 0.0001 },
         { doc_count: 10 },
         { doc_count: 10 },
-        { doc_count: 0.5 },
+        { doc_count: 0.0001 },
         { doc_count: 10 },
         { doc_count: 10 },
       ]);
