@@ -10,8 +10,8 @@ import React from 'react';
 import { EuiText } from '@elastic/eui';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface FieldStatsFromSampleProps {}
+export interface FieldStatsFromHitsProps {}
 
-export const FieldStatsFromSample: React.FC<FieldStatsFromSampleProps> = () => {
+export const FieldStatsFromHits: React.FC<FieldStatsFromHitsProps> = () => {
   return <EuiText>{'TODO: move current field stats from Discover to this component'}</EuiText>;
 };

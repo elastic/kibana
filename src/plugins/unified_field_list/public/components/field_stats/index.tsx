@@ -9,5 +9,5 @@
 export type { FieldStatsProps } from './field_stats';
 export { FieldStats } from './field_stats';
 
-export type { FieldStatsFromSampleProps } from './field_stats_from_sample';
-export { FieldStatsFromSample } from './field_stats_from_sample';
+export type { FieldStatsFromHitsProps } from './field_stats_from_hits';
+export { FieldStatsFromHits } from './field_stats_from_hits';
