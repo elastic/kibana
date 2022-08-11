@@ -496,7 +496,7 @@
         "label": "findListsWithValidation",
         "description": [],
         "signature": [
-          "({ cursor, http, pageIndex, pageSize, signal, }: ",
+          "({ cursor, http, pageIndex, pageSize, signal, sortField, sortOrder, }: ",
           {
             "pluginId": "@kbn/securitysolution-list-api",
             "scope": "common",
@@ -514,7 +514,7 @@
             "id": "def-common.findListsWithValidation.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  cursor,\n  http,\n  pageIndex,\n  pageSize,\n  signal,\n}",
+            "label": "{\n  cursor,\n  http,\n  pageIndex,\n  pageSize,\n  signal,\n  sortField,\n  sortOrder,\n}",
             "description": [],
             "signature": [
               {
@@ -1008,6 +1008,32 @@
             "description": [],
             "signature": [
               "number | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-list-api/src/list_api/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-list-api",
+            "id": "def-common.FindListsParams.sortOrder",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "sortOrder",
+            "description": [],
+            "signature": [
+              "\"asc\" | \"desc\" | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-list-api/src/list_api/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-list-api",
+            "id": "def-common.FindListsParams.sortField",
+            "type": "string",
+            "tags": [],
+            "label": "sortField",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "packages/kbn-securitysolution-list-api/src/list_api/types.ts",
             "deprecated": false
