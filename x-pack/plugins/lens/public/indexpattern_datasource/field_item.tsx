@@ -340,7 +340,7 @@ function FieldItemPopoverContents(props: FieldItemProps) {
         filters={filters}
         fromDate={dateRange.fromDate}
         toDate={dateRange.toDate}
-        dataViewOrDataViewId={indexPattern.id}
+        dataViewOrDataViewId={indexPattern.id} // TODO: Refactor to pass a variable with DataView type instead
         field={field as DataViewField}
         testSubject="lnsFieldListPanel"
         overrideContent={(currentField, params) => {

@@ -9,7 +9,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import DateMath from '@kbn/datemath';
 import { ESSearchResponse } from '@kbn/core/types/elasticsearch';
-import type { DataViewFieldBase, BoolQuery } from '@kbn/es-query';
+import type { DataViewFieldBase } from '@kbn/es-query';
 import type { FieldStatsResponse } from '../../types';
 
 export type SearchHandler = (
@@ -32,7 +32,7 @@ export function buildSearchParams({
   timeFieldName?: string;
   fromDate: string;
   toDate: string;
-  dslQuery: { bool: BoolQuery } | {};
+  dslQuery: object;
   runtimeMappings: estypes.MappingRuntimeFields;
   aggs: Record<string, estypes.AggregationsAggregationContainer>;
 }) {
@@ -81,7 +81,7 @@ export async function fetchAndCalculateFieldStats({
   toDate: string;
   size?: number;
 }) {
-  if (field.type.includes('range')) {
+  if (!canProvideFieldStatsForField(field)) {
     return {};
   }
 
@@ -98,6 +98,15 @@ export async function fetchAndCalculateFieldStats({
   }
 
   return await getStringSamples(searchHandler, field, size);
+}
+
+export function canProvideFieldStatsForField(field: DataViewFieldBase): boolean {
+  return !(
+    field.type === 'document' ||
+    field.type.includes('range') ||
+    field.type === 'geo_point' ||
+    field.type === 'geo_shape'
+  );
 }
 
 export async function getNumberHistogram(

@@ -39,7 +39,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { buildEsQuery, Query, Filter, AggregateQuery } from '@kbn/es-query';
 import type { BucketedAggregation } from '../../../common/types';
-import { fetchFieldStats } from '../../../common/services/field_stats';
+import {
+  fetchFieldStats,
+  canProvideFieldStatsForField,
+} from '../../../common/services/field_stats';
 import { useUnifiedFieldListServices } from '../../hooks/use_unified_field_list_services';
 import './field_stats.scss';
 
@@ -91,14 +94,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
 
     setDataView(loadedDataView);
 
-    // Range types don't have any useful stats we can show
-    if (
-      state.isLoading ||
-      field.type === 'document' ||
-      field.type.includes('range') ||
-      field.type === 'geo_point' ||
-      field.type === 'geo_shape'
-    ) {
+    if (state.isLoading || !canProvideFieldStatsForField(field)) {
       return;
     }
 

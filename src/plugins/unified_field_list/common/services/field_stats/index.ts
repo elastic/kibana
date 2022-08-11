@@ -7,3 +7,4 @@
  */
 
 export { fetchFieldStats } from './field_stats';
+export { canProvideFieldStatsForField } from './field_stats_utils';
