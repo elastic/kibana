@@ -13,16 +13,34 @@ import { RequestResponder } from './request_responder';
 import { Request, RequestParams, RequestStatus, ResponseWarning } from './types';
 
 /**
+ * A type of function the caller will use to handle warnings on their own. If the function
+ * returns false, the request adapter will show warnings using {@link RequestAdapterOptions['handleWarnings']}
+ * @return boolean - true if the caller has handled the warnings on their own.
+ */
+export type WarningsHandler = (warnings: ResponseWarning[]) => boolean | undefined;
+/**
+ * @public
+ */
+export interface RequestAdapterOptions {
+  /**
+   * A callback function to show any warnings that are found in the request adapter's
+   * collection of responses.
+   */
+  handleWarnings: WarningsHandler;
+}
+
+/**
  * An generic inspector adapter to log requests.
  * These can be presented in the inspector using the requests view.
  * The adapter is not coupled to a specific implementation or even Elasticsearch
  * instead it offers a generic API to log requests of any kind.
  * @extends EventEmitter
+ * @public
  */
 export class RequestAdapter extends EventEmitter {
   private requests: Map<string, Request>;
 
-  constructor() {
+  constructor(private options?: RequestAdapterOptions) {
     super();
     this.requests = new Map();
   }
@@ -88,6 +106,29 @@ export class RequestAdapter extends EventEmitter {
       });
 
     return response;
+  }
+
+  /**
+   * Call an indirect dependency to show a toast warning message
+   */
+  public handleWarnings(cb?: WarningsHandler) {
+    if (!this.options?.handleWarnings && cb == null) {
+      throw new Error('Can not handleWarnings without a WarningsHandler provided!');
+    }
+
+    const warnings = this.extractWarnings();
+    if (!warnings) {
+      return;
+    }
+
+    let warningsHandled: boolean | undefined = false;
+    if (cb) {
+      warningsHandled = cb(warnings);
+    }
+
+    if (!warningsHandled) {
+      this.options?.handleWarnings(warnings);
+    }
   }
 
   private _onChange(): void {

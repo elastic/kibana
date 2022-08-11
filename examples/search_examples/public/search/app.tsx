@@ -318,7 +318,7 @@ export const SearchExamplesApp = ({
       setRequest(searchSource.getSearchRequestBody());
       const abortController = new AbortController();
       const inspector: IInspectorInfo = {
-        adapter: new RequestAdapter(),
+        adapter: new RequestAdapter({ handleWarnings: data.search.showWarnings }),
         title: 'Example App Inspector!',
         id: 'greatest-example-app-inspector',
         description: 'Use the `description` field for more info about the inspector.',
@@ -334,13 +334,11 @@ export const SearchExamplesApp = ({
       );
       setRawResponse(result.rawResponse);
 
-      const warnings = inspector.adapter?.extractWarnings();
-      setSearchSourceWarnings(warnings);
-      if (warnings && warningsShown) {
-        for (const warning of warnings) {
-          data.search.showWarning(warning);
-        }
-      }
+      inspector.adapter?.handleWarnings((warnings) => {
+        setSearchSourceWarnings(warnings);
+        // return "true" if the warnings were handled here, so they're not shown automatically
+        return !warningsShown;
+      });
 
       const message = <EuiText>Searched {result.rawResponse.hits.total} documents.</EuiText>;
       notifications.toasts.addSuccess(
@@ -362,9 +360,7 @@ export const SearchExamplesApp = ({
 
   const showSearchSourceSearchWarnings = () => {
     if (searchSourceWarnings) {
-      for (const warning of searchSourceWarnings) {
-        data.search.showWarning(warning);
-      }
+      data.search.showWarnings(searchSourceWarnings);
     }
     setSearchSourceWarnings([]);
   };

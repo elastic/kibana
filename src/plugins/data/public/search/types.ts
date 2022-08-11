@@ -59,8 +59,9 @@ export interface ISearchStart {
   showError: (e: Error) => void;
   /**
    * Show a toast notification with a warning from an Elasticsearch search response.
+   * A callback can be provided to intercept the warnings before they are shown.
    */
-  showWarning: (warning: ResponseWarning) => void;
+  showWarnings: (warning: ResponseWarning[]) => boolean | undefined;
   /**
    * high level search
    * {@link ISearchStartSearchSource}

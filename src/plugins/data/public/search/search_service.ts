@@ -270,8 +270,11 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       showError: (e: Error) => {
         this.searchInterceptor.showError(e);
       },
-      showWarning: (warning: ResponseWarning) => {
-        this.searchInterceptor.showWarning(warning);
+      showWarnings: (warnings: ResponseWarning[]) => {
+        for (const warning of warnings) {
+          this.searchInterceptor.showWarning(warning);
+        }
+        return true;
       },
       session: this.sessionService,
       sessionsClient: this.sessionsClient,
