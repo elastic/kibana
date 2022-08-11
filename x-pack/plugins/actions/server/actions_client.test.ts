@@ -2345,7 +2345,7 @@ describe('bulkEnqueueExecution()', () => {
   describe('authorization', () => {
     test('ensures user is authorised to excecute actions', async () => {
       (getBulkAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
-        return AuthorizationMode.RBAC;
+        return { [AuthorizationMode.RBAC]: 1, [AuthorizationMode.Legacy]: 0 };
       });
       await actionsClient.bulkEnqueueExecution([
         {
@@ -2368,7 +2368,7 @@ describe('bulkEnqueueExecution()', () => {
 
     test('throws when user is not authorised to create the type of action', async () => {
       (getBulkAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
-        return AuthorizationMode.RBAC;
+        return { [AuthorizationMode.RBAC]: 1, [AuthorizationMode.Legacy]: 0 };
       });
       authorization.ensureAuthorized.mockRejectedValue(
         new Error(`Unauthorized to execute all actions`)
@@ -2397,8 +2397,8 @@ describe('bulkEnqueueExecution()', () => {
     });
 
     test('tracks legacy RBAC', async () => {
-      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
-        return AuthorizationMode.Legacy;
+      (getBulkAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
+        return { [AuthorizationMode.RBAC]: 0, [AuthorizationMode.Legacy]: 2 };
       });
 
       await actionsClient.bulkEnqueueExecution([
@@ -2420,12 +2420,16 @@ describe('bulkEnqueueExecution()', () => {
 
       expect(trackLegacyRBACExemption as jest.Mock).toBeCalledWith(
         'bulkEnqueueExecution',
-        mockUsageCounter
+        mockUsageCounter,
+        2
       );
     });
   });
 
   test('calls the bulkExecutionEnqueuer with the appropriate parameters', async () => {
+    (getBulkAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
+      return { [AuthorizationMode.RBAC]: 0, [AuthorizationMode.Legacy]: 0 };
+    });
     const opts = [
       {
         id: uuid.v4(),
