@@ -163,7 +163,7 @@ export class TimeSliderControlEmbeddable extends Embeddable<
   };
 
   private epochToKbnDateFormat = (epoch: number) => {
-    return moment.tz(epoch, getMomentTimezone(this.getTimezon)).format(this.getDateFormat());
+    return moment.tz(epoch, getMomentTimezone(this.getTimezone()).format(this.getDateFormat());
   };
 
   public render = (node: HTMLElement) => {
