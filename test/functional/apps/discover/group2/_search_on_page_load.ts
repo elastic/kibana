@@ -18,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
   const testSubjects = getService('testSubjects');
+  const security = getService('security');
   const refreshButtonSelector = 'refreshDataButton';
 
   const defaultSettings = {
@@ -37,6 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('usage of discover:searchOnPageLoad', () => {
     before(async function () {
+      await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       log.debug('load kibana index with default index pattern');
 
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');

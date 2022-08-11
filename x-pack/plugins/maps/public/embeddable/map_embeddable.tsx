@@ -23,6 +23,7 @@ import {
   genericEmbeddableInputIsEqual,
   VALUE_CLICK_TRIGGER,
   omitGenericEmbeddableInput,
+  FilterableEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
@@ -103,7 +104,7 @@ function getIsRestore(searchSessionId?: string) {
 
 export class MapEmbeddable
   extends Embeddable<MapEmbeddableInput, MapEmbeddableOutput>
-  implements ReferenceOrValueEmbeddable<MapByValueInput, MapByReferenceInput>
+  implements ReferenceOrValueEmbeddable<MapByValueInput, MapByReferenceInput>, FilterableEmbeddable
 {
   type = MAP_SAVED_OBJECT_TYPE;
   deferEmbeddableLoad = true;
@@ -246,6 +247,22 @@ export class MapEmbeddable
 
   public getDescription() {
     return this._isInitialized ? this._savedMap.getAttributes().description : '';
+  }
+
+  /**
+   * TODO: Implement this function once https://github.com/elastic/kibana/issues/91282 is resolved
+   * @returns []
+   */
+  public async getFilters() {
+    return [];
+  }
+
+  /**
+   * TODO: Implement this function once https://github.com/elastic/kibana/issues/91282 is resolved
+   * @returns undefined
+   */
+  public async getQuery() {
+    return undefined;
   }
 
   public supportedTriggers(): string[] {
