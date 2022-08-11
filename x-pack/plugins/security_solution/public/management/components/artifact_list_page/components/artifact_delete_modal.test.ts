@@ -37,38 +37,45 @@ describe('When displaying the Delete artifact modal in the Artifact List Page', 
     });
   };
 
-  beforeEach(async () => {
-    const renderSetup = getArtifactListPageRenderingSetup();
+  beforeEach(
+    async () => {
+      const renderSetup = getArtifactListPageRenderingSetup();
 
-    ({ history, coreStart, mockedApi, getFirstCard } = renderSetup);
+      ({ history, coreStart, mockedApi, getFirstCard } = renderSetup);
 
-    history.push('somepage?show=create');
+      history.push('somepage?show=create');
 
-    renderResult = renderSetup.renderArtifactListPage();
+      renderResult = renderSetup.renderArtifactListPage();
 
-    await act(async () => {
-      await waitFor(() => {
-        expect(renderResult.getByTestId('testPage-list')).toBeTruthy();
+      await act(async () => {
+        await waitFor(() => {
+          expect(renderResult.getByTestId('testPage-list')).toBeTruthy();
+        });
       });
-    });
 
-    await clickCardAction('delete');
+      await clickCardAction('delete');
 
-    // Wait for the dialog to be present
-    await act(async () => {
-      await waitFor(() => {
-        expect(renderResult.getByTestId('testPage-deleteModal')).not.toBeNull();
+      // Wait for the dialog to be present
+      await act(async () => {
+        await waitFor(() => {
+          expect(renderResult.getByTestId('testPage-deleteModal')).not.toBeNull();
+        });
       });
-    });
 
-    cancelButton = renderResult.getByTestId(
-      'testPage-deleteModal-cancelButton'
-    ) as HTMLButtonElement;
+      cancelButton = renderResult.getByTestId(
+        'testPage-deleteModal-cancelButton'
+      ) as HTMLButtonElement;
 
-    submitButton = renderResult.getByTestId(
-      'testPage-deleteModal-submitButton'
-    ) as HTMLButtonElement;
-  });
+      submitButton = renderResult.getByTestId(
+        'testPage-deleteModal-submitButton'
+      ) as HTMLButtonElement;
+    },
+    // Timeout set to 10s
+    // In some cases, whose causes are unknown, a test will timeout and will point
+    // to this setup as the culprid. It rarely happens, but in order to avoid it,
+    // the timeout below is being set to 10s
+    10000
+  );
 
   it('should show Cancel and Delete buttons enabled', async () => {
     expect(cancelButton).toBeEnabled();
