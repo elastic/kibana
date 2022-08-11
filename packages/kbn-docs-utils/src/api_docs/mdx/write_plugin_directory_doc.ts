@@ -11,6 +11,7 @@ import Path from 'path';
 import dedent from 'dedent';
 import { ToolingLog } from '@kbn/tooling-log';
 import { PluginApi, PluginMetaInfo } from '../types';
+import { AUTO_GENERATED_WARNING } from '../auto_generated_warning';
 import { getPluginApiDocId } from '../utils';
 
 function hasPublicApi(doc: PluginApi): boolean {
@@ -74,24 +75,24 @@ export function writePluginDirectoryDoc(
   const mdx =
     dedent(`
 ---
+${AUTO_GENERATED_WARNING}
 id: kibDevDocsPluginDirectory
 slug: /kibana-dev-docs/api-meta/plugin-api-directory
 title: Directory
-summary: Directory of public APIs available through plugins or packages.
+description: Directory of public APIs available through plugins or packages.
 date: ${moment().format('YYYY-MM-DD')}
 tags: ['contributor', 'dev', 'apidocs', 'kibana']
-warning: This document is auto-generated and is meant to be viewed inside our experimental, new docs system. Reach out in #docs-engineering for more info.
 ---
 
 ### Overall stats
 
-| Count | Plugins or Packages with a <br /> public API | Number of teams | 
+| Count | Plugins or Packages with a <br /> public API | Number of teams |
 |--------------|----------|------------------------|
 | ${totalStats.pluginCnt} | ${totalStats.pluginCntWithPublicApi} | ${totalStats.teamCnt} |
 
 ### Public API health stats
 
-| API Count | Any Count | Missing comments | Missing exports | 
+| API Count | Any Count | Missing comments | Missing exports |
 |--------------|----------|-----------------|--------|
 | ${totalStats.totalApiCnt} | ${totalStats.anyCnt} | ${totalStats.missingCommentCnt} | ${
       totalStats.missingExportCnt
@@ -99,13 +100,13 @@ warning: This document is auto-generated and is meant to be viewed inside our ex
 
 ## Plugin Directory
 
-| Plugin name &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  | Maintaining team | Description | API Cnt | Any Cnt | Missing<br />comments | Missing<br />exports | 
+| Plugin name &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  | Maintaining team | Description | API Cnt | Any Cnt | Missing<br />comments | Missing<br />exports |
 |--------------|----------------|-----------|--------------|----------|---------------|--------|
 ${getDirectoryTable(pluginApiMap, pluginStatsMap, true)}
 
 ## Package Directory
 
-| Package name &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  | Maintaining team | Description | API Cnt | Any Cnt | Missing<br />comments | Missing<br />exports | 
+| Package name &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  | Maintaining team | Description | API Cnt | Any Cnt | Missing<br />comments | Missing<br />exports |
 |--------------|----------------|-----------|--------------|----------|---------------|--------|
 ${getDirectoryTable(pluginApiMap, pluginStatsMap, false)}
 

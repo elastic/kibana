@@ -69,6 +69,7 @@ import {
   TIMELINE_TAB_CONTENT_EQL,
   TIMESTAMP_HOVER_ACTION_OVERFLOW_BTN,
   TIMELINE_DATA_PROVIDER_FIELD_INPUT,
+  ACTIVE_TIMELINE_BOTTOM_BAR,
 } from '../screens/timeline';
 import { REFRESH_BUTTON, TIMELINE } from '../screens/timelines';
 
@@ -294,6 +295,10 @@ export const openTimelineById = (timelineId: string): Cypress.Chainable<JQuery<H
   // We avoid use cypress.pipe() here and multiple clicks because each of these clicks
   // can result in a new URL async operation occurring and then we get indeterminism as the URL loads multiple times.
   return cy.get(TIMELINE_TITLE_BY_ID(timelineId)).should('be.visible').click({ force: true });
+};
+
+export const openActiveTimeline = () => {
+  cy.get(ACTIVE_TIMELINE_BOTTOM_BAR).click({ force: true });
 };
 
 export const pinFirstEvent = (): Cypress.Chainable<JQuery<HTMLElement>> => {
