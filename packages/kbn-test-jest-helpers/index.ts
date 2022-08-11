@@ -6,27 +6,27 @@
  * Side Public License, v 1.
  */
 
-export * from './enzyme_helpers';
+export * from './src/enzyme_helpers';
 
-export * from './find_test_subject';
+export * from './src/find_test_subject';
 
-export * from './jsdom_svg_mocks';
+export * from './src/jsdom_svg_mocks';
 
-export * from './random';
+export * from './src/random';
 
-export * from './redux_helpers';
+export * from './src/redux_helpers';
 
-export * from './router_helpers';
+export * from './src/router_helpers';
 
-export * from './stub_broadcast_channel';
+export * from './src/stub_broadcast_channel';
 
-export * from './stub_browser_storage';
+export * from './src/stub_browser_storage';
 
-export * from './stub_web_worker';
+export * from './src/stub_web_worker';
 
-export * from './testbed';
+export * from './src/testbed';
 
-export * from './axe_helpers';
+export * from './src/axe_helpers';
 
 export const nextTick = () => new Promise((res) => process.nextTick(res));
 

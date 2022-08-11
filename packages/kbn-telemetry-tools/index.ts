@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { runTelemetryCheck } from './cli/run_telemetry_check';
-export { runTelemetryExtract } from './cli/run_telemetry_extract';
+export { runTelemetryCheck } from './src/cli/run_telemetry_check';
+export { runTelemetryExtract } from './src/cli/run_telemetry_extract';

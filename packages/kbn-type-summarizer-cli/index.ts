@@ -11,9 +11,9 @@ import Fsp from 'fs/promises';
 import { Path } from '@kbn/type-summarizer-core';
 import { summarizePackage } from '@kbn/type-summarizer';
 
-import { parseCliConfig } from './cli_config';
+import { parseCliConfig } from './src/cli_config';
 
-import { run } from './run';
+import { run } from './src/run';
 
 const HELP = `
 Script called from bazel to create the summarized version of a package. When called by Bazel
