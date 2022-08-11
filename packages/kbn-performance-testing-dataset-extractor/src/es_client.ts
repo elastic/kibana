@@ -7,12 +7,8 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import { QueryDslQueryContainer, SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
-import {
-  SearchRequest,
-  MsearchRequestItem,
-  SearchResponse,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { SearchRequest, MsearchRequestItem } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ToolingLog } from '@kbn/tooling-log';
 
 interface ClientOptions {
@@ -207,10 +203,9 @@ export class ESClient {
       searches,
     });
     this.log.debug(`Msearch result: ${JSON.stringify(result)}`);
-    this.log.debug(`Msearch result: ${JSON.stringify(result)}`);
     return result.responses.flatMap((response) => {
       if ('error' in response) {
-        throw new Error(`msearch failure: ${JSON.stringify(response.error)}`);
+        throw new Error(`Msearch failure: ${JSON.stringify(response.error)}`);
       } else if (response.hits.hits.length > 0) {
         return response.hits.hits;
       } else {
