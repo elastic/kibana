@@ -23,7 +23,6 @@ SOURCE_FILES = glob(
     "**/__fixtures__/**",
     "**/__snapshots__/**",
     "**/integration_tests/**",
-    "**/mocks/**",
     "**/scripts/**",
     "**/storybook/**",
     "**/test_fixtures/**",
