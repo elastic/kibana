@@ -335,11 +335,10 @@ export const SearchExamplesApp = ({
       setRawResponse(result.rawResponse);
 
       const warnings = inspector.adapter?.extractWarnings();
-      if (warnings) {
-        setSearchSourceWarnings(warnings);
-
-        if (warningsShown) {
-          data.search.showWarnings(warnings);
+      setSearchSourceWarnings(warnings);
+      if (warnings && warningsShown) {
+        for (const warning of warnings) {
+          data.search.showWarning(warning);
         }
       }
 
@@ -363,7 +362,9 @@ export const SearchExamplesApp = ({
 
   const showSearchSourceSearchWarnings = () => {
     if (searchSourceWarnings) {
-      data.search.showWarnings(searchSourceWarnings);
+      for (const warning of searchSourceWarnings) {
+        data.search.showWarning(warning);
+      }
     }
     setSearchSourceWarnings([]);
   };
@@ -678,18 +679,6 @@ export const SearchExamplesApp = ({
                 <EuiSpacer />
                 <EuiButtonEmpty
                   size="xs"
-                  onClick={onWarningSearchClickHandler}
-                  iconType="play"
-                  data-test-subj="searchWithWarning"
-                >
-                  <FormattedMessage
-                    id="searchExamples.searchWithWarningButtonText"
-                    defaultMessage="Request with a warning in response"
-                  />
-                </EuiButtonEmpty>
-                <EuiText />
-                <EuiButtonEmpty
-                  size="xs"
                   onClick={onErrorSearchClickHandler}
                   iconType="play"
                   data-test-subj="searchWithError"
@@ -697,6 +686,18 @@ export const SearchExamplesApp = ({
                   <FormattedMessage
                     id="searchExamples.searchWithErrorButtonText"
                     defaultMessage="Request with an error in response"
+                  />
+                </EuiButtonEmpty>
+                <EuiText />
+                <EuiButtonEmpty
+                  size="xs"
+                  onClick={onWarningSearchClickHandler}
+                  iconType="play"
+                  data-test-subj="searchWithWarning"
+                >
+                  <FormattedMessage
+                    id="searchExamples.searchWithWarningButtonText"
+                    defaultMessage="Request with a warning in response, notification automatically shown"
                   />
                 </EuiButtonEmpty>
                 <EuiText />
@@ -714,7 +715,7 @@ export const SearchExamplesApp = ({
                 >
                   <FormattedMessage
                     id="searchExamples.searchSource.buttonText"
-                    defaultMessage="Request with a warning in response, automatic warnings not shown."
+                    defaultMessage="Request with a warning in response, notification not automatically shown."
                   />
                 </EuiButtonEmpty>
                 <EuiText size="xs" color="subdued" className="searchExampleStepDsc">
@@ -726,7 +727,7 @@ export const SearchExamplesApp = ({
                   >
                     <FormattedMessage
                       id="searchExamples.searchSource.buttonText"
-                      defaultMessage="See warnings"
+                      defaultMessage="See warning notification"
                     />
                   </EuiButtonEmpty>
                 </EuiText>

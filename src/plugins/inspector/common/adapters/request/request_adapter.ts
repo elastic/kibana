@@ -70,7 +70,7 @@ export class RequestAdapter extends EventEmitter {
   }
 
   /**
-   * Extract the warning strings from Elasticsearch search responses
+   * Extract a string warning field from the json object
    */
   public extractWarnings(): ResponseWarning[] | undefined {
     const response = Array.from(this.requests.values())
