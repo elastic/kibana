@@ -20,9 +20,14 @@ import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { KibanaExecutionContext } from '@kbn/core/public';
-import { Container, Embeddable } from '@kbn/embeddable-plugin/public';
+import { Container, Embeddable, FilterableEmbeddable } from '@kbn/embeddable-plugin/public';
 import { Adapters, RequestAdapter } from '@kbn/inspector-plugin/common';
-import { APPLY_FILTER_TRIGGER, FilterManager, generateFilters } from '@kbn/data-plugin/public';
+import {
+  APPLY_FILTER_TRIGGER,
+  FilterManager,
+  generateFilters,
+  mapAndFlattenFilters,
+} from '@kbn/data-plugin/public';
 import { ISearchSource } from '@kbn/data-plugin/public';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
@@ -83,7 +88,7 @@ interface SearchEmbeddableConfig {
 
 export class SavedSearchEmbeddable
   extends Embeddable<SearchInput, SearchOutput>
-  implements ISearchEmbeddable
+  implements ISearchEmbeddable, FilterableEmbeddable
 {
   private readonly savedSearch: SavedSearch;
   private inspectorAdapters: Adapters;
@@ -546,6 +551,22 @@ export class SavedSearchEmbeddable
 
   public getDescription() {
     return this.savedSearch.description;
+  }
+
+  /**
+   * @returns Local/panel-level array of filters for Saved Search embeddable
+   */
+  public async getFilters() {
+    return mapAndFlattenFilters(
+      (this.savedSearch.searchSource.getFields().filter as Filter[]) ?? []
+    );
+  }
+
+  /**
+   * @returns Local/panel-level query for Saved Search embeddable
+   */
+  public async getQuery() {
+    return this.savedSearch.searchSource.getFields().query;
   }
 
   public destroy() {
