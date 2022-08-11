@@ -36,9 +36,8 @@ const createTestAction = ({
 
 const resultMapper = (panel: EuiContextMenuPanelDescriptor) => ({
   items: panel.items
-    ? panel.items.map((item) => item.isSeparator
-        ? { name: 'SEPARATOR' }
-        : { name: item.name, disabled: item.disabled }
+    ? panel.items.map((item) =>
+        item.isSeparator ? { name: 'SEPARATOR' } : { name: item.name, disabled: item.disabled }
       )
     : [],
 });
@@ -81,15 +80,15 @@ test('sorts items in DESC order by "order" field first, then by display name', a
       Object {
         "items": Array [
           Object {
-            "disabled": false,
+            "disabled": undefined,
             "name": "a-3",
           },
           Object {
-            "disabled": false,
+            "disabled": undefined,
             "name": "a-2",
           },
           Object {
-            "disabled": false,
+            "disabled": undefined,
             "name": "b-2",
           },
           Object {
@@ -101,11 +100,11 @@ test('sorts items in DESC order by "order" field first, then by display name', a
       Object {
         "items": Array [
           Object {
-            "disabled": false,
+            "disabled": undefined,
             "name": "c-2",
           },
           Object {
-            "disabled": false,
+            "disabled": undefined,
             "name": "a-1",
           },
         ],
@@ -150,7 +149,7 @@ test('can build menu with one action', async () => {
       Object {
         "items": Array [
           Object {
-            "disabled": false,
+            "disabled": undefined,
             "name": "Foo",
           },
         ],
@@ -222,15 +221,15 @@ test('hides items behind in "More" submenu if there are more than 4 actions', as
       Object {
         "items": Array [
           Object {
-            "disabled": false,
+            "disabled": undefined,
             "name": "Foo 1",
           },
           Object {
-            "disabled": false,
+            "disabled": undefined,
             "name": "Foo 2",
           },
           Object {
-            "disabled": false,
+            "disabled": undefined,
             "name": "Foo 3",
           },
           Object {
@@ -242,11 +241,11 @@ test('hides items behind in "More" submenu if there are more than 4 actions', as
       Object {
         "items": Array [
           Object {
-            "disabled": false,
+            "disabled": undefined,
             "name": "Foo 4",
           },
           Object {
-            "disabled": false,
+            "disabled": undefined,
             "name": "Foo 5",
           },
         ],
@@ -285,22 +284,22 @@ test('separates grouped items from main items with a separator', async () => {
       Object {
         "items": Array [
           Object {
-            "disabled": false,
+            "disabled": undefined,
             "name": "Foo 1",
           },
           Object {
-            "disabled": false,
+            "disabled": undefined,
             "name": "Foo 2",
           },
           Object {
-            "disabled": false,
+            "disabled": undefined,
             "name": "Foo 3",
           },
           Object {
             "name": "SEPARATOR",
           },
           Object {
-            "disabled": false,
+            "disabled": undefined,
             "name": "Foo 4",
           },
         ],
@@ -308,7 +307,7 @@ test('separates grouped items from main items with a separator', async () => {
       Object {
         "items": Array [
           Object {
-            "disabled": false,
+            "disabled": undefined,
             "name": "Foo 4",
           },
         ],
@@ -356,29 +355,29 @@ test('separates multiple groups each with its own separator', async () => {
       Object {
         "items": Array [
           Object {
-            "disabled": false,
+            "disabled": undefined,
             "name": "Foo 1",
           },
           Object {
-            "disabled": false,
+            "disabled": undefined,
             "name": "Foo 2",
           },
           Object {
-            "disabled": false,
+            "disabled": undefined,
             "name": "Foo 3",
           },
           Object {
             "name": "SEPARATOR",
           },
           Object {
-            "disabled": false,
+            "disabled": undefined,
             "name": "Foo 4",
           },
           Object {
             "name": "SEPARATOR",
           },
           Object {
-            "disabled": false,
+            "disabled": undefined,
             "name": "Foo 5",
           },
         ],
@@ -386,7 +385,7 @@ test('separates multiple groups each with its own separator', async () => {
       Object {
         "items": Array [
           Object {
-            "disabled": false,
+            "disabled": undefined,
             "name": "Foo 4",
           },
         ],
@@ -394,7 +393,7 @@ test('separates multiple groups each with its own separator', async () => {
       Object {
         "items": Array [
           Object {
-            "disabled": false,
+            "disabled": undefined,
             "name": "Foo 5",
           },
         ],
@@ -433,14 +432,14 @@ test('does not add separator for first grouping if there are no main items', asy
       Object {
         "items": Array [
           Object {
-            "disabled": false,
+            "disabled": undefined,
             "name": "Foo 4",
           },
           Object {
             "name": "SEPARATOR",
           },
           Object {
-            "disabled": false,
+            "disabled": undefined,
             "name": "Foo 5",
           },
         ],
@@ -448,7 +447,7 @@ test('does not add separator for first grouping if there are no main items', asy
       Object {
         "items": Array [
           Object {
-            "disabled": false,
+            "disabled": undefined,
             "name": "Foo 4",
           },
         ],
@@ -456,7 +455,7 @@ test('does not add separator for first grouping if there are no main items', asy
       Object {
         "items": Array [
           Object {
-            "disabled": false,
+            "disabled": undefined,
             "name": "Foo 5",
           },
         ],
@@ -488,7 +487,7 @@ test('it creates disabled actions', async () => {
             "name": "Foo 4",
           },
           Object {
-            "disabled": false,
+            "disabled": undefined,
             "name": "Foo 5",
           },
         ],
