@@ -150,7 +150,7 @@ const UsersComponent = () => {
     [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
   );
 
-  const narrowDateRange = useCallback<UpdateDateRange>(
+  const updateDateRange = useCallback<UpdateDateRange>(
     ({ x }) => {
       if (!x) {
         return;
@@ -199,7 +199,7 @@ const UsersComponent = () => {
               setQuery={setQuery}
               to={to}
               skip={isInitializing || !filterQuery}
-              narrowDateRange={narrowDateRange}
+              updateDateRange={updateDateRange}
             />
 
             <EuiSpacer />
@@ -215,7 +215,6 @@ const UsersComponent = () => {
               from={from}
               indexNames={selectedPatterns}
               isInitializing={isInitializing}
-              setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
               setQuery={setQuery}
               to={to}
               type={usersModel.UsersType.page}

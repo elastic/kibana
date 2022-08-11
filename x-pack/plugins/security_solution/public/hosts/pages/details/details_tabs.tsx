@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Switch } from 'react-router-dom';
 import { Route } from '@kbn/kibana-react-plugin/public';
 
-import type { UpdateDateRange } from '../../../common/components/charts/common';
-import { scoreIntervalToDateTime } from '../../../common/components/ml/score/score_interval_to_datetime';
-import type { Anomaly } from '../../../common/components/ml/types';
 import { HostsTableType } from '../../store/model';
 import { AnomaliesQueryTabBody } from '../../../common/containers/anomalies/anomalies_query_tab_body';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
@@ -38,36 +35,9 @@ export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
     indexNames,
     indexPattern,
     pageFilters = [],
-    setAbsoluteRangeDatePicker,
     hostDetailsPagePath,
   }) => {
     const { from, to, isInitializing, deleteQuery, setQuery } = useGlobalTime();
-    const narrowDateRange = useCallback(
-      (score: Anomaly, interval: string) => {
-        const fromTo = scoreIntervalToDateTime(score, interval);
-        setAbsoluteRangeDatePicker({
-          id: 'global',
-          from: fromTo.from,
-          to: fromTo.to,
-        });
-      },
-      [setAbsoluteRangeDatePicker]
-    );
-
-    const updateDateRange = useCallback<UpdateDateRange>(
-      ({ x }) => {
-        if (!x) {
-          return;
-        }
-        const [min, max] = x;
-        setAbsoluteRangeDatePicker({
-          id: 'global',
-          from: new Date(min).toISOString(),
-          to: new Date(max).toISOString(),
-        });
-      },
-      [setAbsoluteRangeDatePicker]
-    );
 
     const tabProps = {
       deleteQuery,
@@ -80,8 +50,6 @@ export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
       indexPattern,
       indexNames,
       hostName: detailName,
-      narrowDateRange,
-      updateDateRange,
     };
 
     const externalAlertPageFilters = useMemo(
