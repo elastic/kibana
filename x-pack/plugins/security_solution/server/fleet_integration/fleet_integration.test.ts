@@ -43,7 +43,7 @@ import { Manifest } from '../endpoint/lib/artifacts';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/common/types/models';
 import type { ManifestSchema } from '../../common/endpoint/schema/manifest';
 import type { DeletePackagePoliciesResponse } from '@kbn/fleet-plugin/common';
-import { createMockPolicyData } from '../endpoint/services/feature_usage';
+import { createMockPolicyData } from '../endpoint/services/feature_usage/mocks';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../common/endpoint/service/artifacts/constants';
 
 describe('ingest_integration tests ', () => {
