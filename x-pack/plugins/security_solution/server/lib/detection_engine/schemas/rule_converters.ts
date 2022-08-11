@@ -134,6 +134,7 @@ export const typeSpecificSnakeToCamel = (params: CreateTypeSpecific): TypeSpecif
         query: params.query ?? '',
         filters: params.filters,
         savedId: params.saved_id,
+        alertGrouping: params.alertGrouping,
       };
     }
     case 'saved_query': {
@@ -145,6 +146,7 @@ export const typeSpecificSnakeToCamel = (params: CreateTypeSpecific): TypeSpecif
         filters: params.filters,
         savedId: params.saved_id,
         dataViewId: params.data_view_id,
+        alertGrouping: undefined,
       };
     }
     case 'threshold': {
@@ -236,6 +238,7 @@ const patchQueryParams = (
     query: params.query ?? existingRule.query,
     filters: params.filters ?? existingRule.filters,
     savedId: params.saved_id ?? existingRule.savedId,
+    alertGrouping: params.alertGrouping,
   };
 };
 
@@ -251,6 +254,7 @@ const patchSavedQueryParams = (
     query: params.query ?? existingRule.query,
     filters: params.filters ?? existingRule.filters,
     savedId: params.saved_id ?? existingRule.savedId,
+    alertGrouping: undefined,
   };
 };
 
@@ -549,6 +553,7 @@ export const typeSpecificCamelToSnake = (params: TypeSpecificRuleParams): Respon
         query: params.query,
         filters: params.filters,
         saved_id: params.savedId,
+        alertGrouping: params.alertGrouping,
       };
     }
     case 'saved_query': {

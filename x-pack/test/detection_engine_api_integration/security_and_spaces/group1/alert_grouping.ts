@@ -70,7 +70,9 @@ export default ({ getService }: FtrProviderContext) => {
       await waitForSignalsToBePresent(supertest, log, 2, [createdRule.id]);
 
       const signalsOpen = await getOpenSignals(supertest, log, es, createdRule);
-      expect(signalsOpen.hits.hits.length).eql(1);
+      expect(signalsOpen.hits.hits.length).eql(2);
+
+      // TODO: more specific testing
     });
   });
 };
