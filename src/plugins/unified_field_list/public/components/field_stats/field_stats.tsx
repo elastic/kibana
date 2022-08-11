@@ -173,11 +173,10 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   let title = <></>;
 
   if (field.type.includes('range')) {
-    // TODO: new localization keys
     return (
       <>
         <EuiText size="s">
-          {i18n.translate('xpack.lens.indexPattern.fieldStatsLimited', {
+          {i18n.translate('unifiedFieldList.fieldStats.notAvailableForRangeFieldDescription', {
             defaultMessage: `Summary information is not available for range type fields.`,
           })}
         </EuiText>
@@ -189,7 +188,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
     return (
       <>
         <EuiText size="s">
-          {i18n.translate('xpack.lens.indexPattern.fieldStatsMurmur3Limited', {
+          {i18n.translate('unifiedFieldList.fieldStats.notAvailableForMurmur3FieldDescription', {
             defaultMessage: `Summary information is not available for murmur3 fields.`,
           })}
         </EuiText>
@@ -213,18 +212,18 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
       <EuiButtonGroup
         buttonSize="compressed"
         isFullWidth
-        legend={i18n.translate('xpack.lens.indexPattern.fieldStatsDisplayToggle', {
+        legend={i18n.translate('unifiedFieldList.fieldStats.displayToggleLegend', {
           defaultMessage: 'Toggle either the',
         })}
         options={[
           {
-            label: i18n.translate('xpack.lens.indexPattern.fieldTopValuesLabel', {
+            label: i18n.translate('unifiedFieldList.fieldStats.topValuesLabel', {
               defaultMessage: 'Top values',
             }),
             id: 'topValues',
           },
           {
-            label: i18n.translate('xpack.lens.indexPattern.fieldDistributionLabel', {
+            label: i18n.translate('unifiedFieldList.fieldStats.fieldDistributionLabel', {
               defaultMessage: 'Distribution',
             }),
             id: 'histogram',
@@ -240,7 +239,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
     title = (
       <EuiTitle size="xxxs">
         <h6>
-          {i18n.translate('xpack.lens.indexPattern.fieldTimeDistributionLabel', {
+          {i18n.translate('unifiedFieldList.fieldStats.fieldTimeDistributionLabel', {
             defaultMessage: 'Time distribution',
           })}
         </h6>
@@ -250,7 +249,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
     title = (
       <EuiTitle size="xxxs">
         <h6>
-          {i18n.translate('xpack.lens.indexPattern.fieldTopValuesLabel', {
+          {i18n.translate('unifiedFieldList.fieldStats.topValuesLabel', {
             defaultMessage: 'Top values',
           })}
         </h6>
@@ -273,7 +272,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
           <EuiText color="subdued" size="xs">
             {sampledDocuments && (
               <>
-                {i18n.translate('xpack.lens.indexPattern.percentageOfLabel', {
+                {i18n.translate('unifiedFieldList.fieldStats.percentageOfLabel', {
                   defaultMessage: '{percentage}% of',
                   values: {
                     percentage: Math.round((sampledDocuments / totalDocuments) * 100),
@@ -286,7 +285,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
                 .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
                 .convert(totalDocuments)}
             </strong>{' '}
-            {i18n.translate('xpack.lens.indexPattern.ofDocumentsLabel', {
+            {i18n.translate('unifiedFieldList.fieldStats.ofDocumentsLabel', {
               defaultMessage: 'documents',
             })}
           </EuiText>
@@ -298,7 +297,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   }
 
   if (histogram && histogram.buckets.length) {
-    const specId = i18n.translate('xpack.lens.indexPattern.fieldStatsCountLabel', {
+    const specId = i18n.translate('unifiedFieldList.fieldStats.countLabel', {
       defaultMessage: 'Count',
     });
 
@@ -397,7 +396,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
                   {formatted === '' ? (
                     <EuiText size="xs" color="subdued">
                       <em>
-                        {i18n.translate('xpack.lens.indexPattern.fieldPanelEmptyStringValue', {
+                        {i18n.translate('unifiedFieldList.fieldStats.emptyStringValueLabel', {
                           defaultMessage: 'Empty string',
                         })}
                       </em>
@@ -434,7 +433,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
             <EuiFlexGroup alignItems="stretch" gutterSize="xs" responsive={false}>
               <EuiFlexItem grow={true} className="eui-textTruncate">
                 <EuiText size="xs" className="eui-textTruncate" color="subdued">
-                  {i18n.translate('xpack.lens.indexPattern.otherDocsLabel', {
+                  {i18n.translate('unifiedFieldList.fieldStats.otherDocsLabel', {
                     defaultMessage: 'Other',
                   })}
                 </EuiText>
