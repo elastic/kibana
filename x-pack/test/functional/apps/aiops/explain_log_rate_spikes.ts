@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
+
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import type { TestData } from './types';
 import { farequoteDataViewTestData } from './test_data';
 
 export default function ({ getPageObject, getService }: FtrProviderContext) {
   const headerPage = getPageObject('header');
-  const browser = getService('browser');
   const elasticChart = getService('elasticChart');
   const esArchiver = getService('esArchiver');
   const aiops = getService('aiops');
-  const testSubjects = getService('testSubjects');
 
   // aiops / Explain Log Rate Spikes lives in the ML UI so we need some related services.
   const ml = getService('ml');
@@ -71,52 +71,61 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
       await aiops.explainLogRateSpikes.assertNoResultsFoundEmptyPromptExist();
 
-      // aiopsDualBrush
+      await ml.testExecution.logTestStep('adjusts the brushes to get analysis results');
 
-      await elasticChart.waitForRenderComplete('aiopsDocumentCountChart');
-      const chartDebugData = await elasticChart.getChartDebugData('aiopsDocumentCountChart');
+      await aiops.explainLogRateSpikes.assertRerunAnalysisButton(false);
 
-      const dualBrushWrapper = await testSubjects.find('aiopsDualBrush');
-      const dualBrushWrapperRect = await dualBrushWrapper._webElement.getRect();
-      // console.log('dualBrushWidth', dualBrushWrapperRect.width);
-
-      const bars = chartDebugData?.bars?.[0].bars ?? [];
-      const barsCount = bars.length;
-      const targetDeviationBarIndex = bars.findIndex((b) => b.x === 1455033600000);
-      // console.log('chartDebugData', targetDeviationBarIndex);
-
-      const targetPx = Math.round(
-        (targetDeviationBarIndex / barsCount) * dualBrushWrapperRect.width
-      );
-      const intervalPx = Math.round((1 / barsCount) * dualBrushWrapperRect.width);
-      // console.log('targetPx', targetPx);
-
-      // #aiops-brush-deviation .handle--e
-      const brush = await testSubjects.find('aiopsBrushDeviation');
-
-      const rightHandle = (await brush.findAllByClassName('handle--e'))[0];
-      const rightHandleRect = await rightHandle._webElement.getRect();
-      const rightHandlePx = rightHandleRect.x - dualBrushWrapperRect.x;
-      const rightHandleFactor = rightHandlePx > targetPx ? 1 : -1;
-      const rightDragAndDropOffsetPx = (targetPx - rightHandlePx) * rightHandleFactor;
-
-      await browser.dragAndDrop(
-        { location: rightHandle, offset: { x: 0, y: 0 } },
-        { location: rightHandle, offset: { x: rightDragAndDropOffsetPx, y: 0 } }
+      // Get the current width of the deviation brush for later comparison.
+      const brushSelectionWidthBefore = await aiops.explainLogRateSpikes.getBrushSelectionWidth(
+        'aiopsBrushDeviation'
       );
 
-      const leftHandle = (await brush.findAllByClassName('handle--w'))[0];
-      const leftHandleRect = await leftHandle._webElement.getRect();
-      const leftHandlePx = leftHandleRect.x - dualBrushWrapperRect.x;
-      const leftHandleFactor = leftHandlePx > targetPx ? 1 : -1;
-      const leftDragAndDropOffsetPx = (targetPx - leftHandlePx) * leftHandleFactor - intervalPx;
-
-      await browser.dragAndDrop(
-        { location: leftHandle, offset: { x: 0, y: 0 } },
-        { location: leftHandle, offset: { x: leftDragAndDropOffsetPx, y: 0 } }
+      // Get the px values for the timestamp we want to move the brush to.
+      const { targetPx, intervalPx } = await aiops.explainLogRateSpikes.getPxForTimestamp(
+        testData.brushTargetTimestamp
       );
 
-      await aiops.explainLogRateSpikes.assertNoWindowParametersEmptyPromptExist();
+      // Adjust the right brush handle
+      await aiops.explainLogRateSpikes.adjustBrushHandler(
+        'aiopsBrushDeviation',
+        'handle--e',
+        targetPx
+      );
+
+      // Adjust the left brush handle
+      await aiops.explainLogRateSpikes.adjustBrushHandler(
+        'aiopsBrushDeviation',
+        'handle--w',
+        targetPx - intervalPx
+      );
+
+      // Get the new brush selection width for later comparison.
+      const brushSelectionWidthAfter = await aiops.explainLogRateSpikes.getBrushSelectionWidth(
+        'aiopsBrushDeviation'
+      );
+
+      // Assert the adjusted brush: The selection width should have changed,
+      // because the brush selection is a few pixel wider as the bucket interval,
+      // we test if the selection is larger than one bucket interval but smaller
+      // than two bucket intervals. Finally, the adjusted brush should trigger
+      // a warning on the "Rerun analysis" button.
+      expect(brushSelectionWidthBefore).not.to.be(brushSelectionWidthAfter);
+      expect(
+        brushSelectionWidthAfter > intervalPx && brushSelectionWidthAfter < intervalPx * 2
+      ).to.be(true);
+
+      await aiops.explainLogRateSpikes.assertRerunAnalysisButton(true);
+
+      await ml.testExecution.logTestStep('rerun the analysis with adjusted settings');
+
+      await aiops.explainLogRateSpikes.clickRerunAnalysisButton(true);
+      await aiops.explainLogRateSpikes.assertProgressTitle('Progress: 100% — Done.');
+
+      await aiops.explainLogRateSpikesAnalysisTable.assertSpikeAnalysisTableExist();
+
+      const analysisTable = await aiops.explainLogRateSpikesAnalysisTable.parseAnalysisTable();
+
+      expect(analysisTable).to.be.eql(testData.expected.analysisTable);
     });
   }
 
@@ -132,7 +141,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      // await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
+      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
     });
 
     describe('with farequote', function () {

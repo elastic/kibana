@@ -69,21 +69,82 @@ export function ExplainLogRateSpikesProvider({ getService }: FtrProviderContext)
       await browser.getActions().move({ x: 0, y: 0, origin: el._webElement }).click().perform();
     },
 
+    async clickRerunAnalysisButton(shouldRerun: boolean) {
+      await testSubjects.clickWhenNotDisabled(
+        `aiopsRerunAnalysisButton${shouldRerun ? ' shouldRerun' : ''}`
+      );
+
+      await retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.existOrFail(
+          `aiopsRerunAnalysisButton${!shouldRerun ? ' shouldRerun' : ''}`
+        );
+      });
+    },
+
     async assertAnalysisSectionExist() {
       await retry.tryForTime(5000, async () => {
         await testSubjects.existOrFail(`aiopsExplainLogRateSpikesAnalysis`);
       });
     },
 
-    async assertRerunAnalysisButtonExit(shouldRerun: boolean) {
+    async assertRerunAnalysisButton(shouldRerun: boolean) {
       await testSubjects.existOrFail(
         `aiopsRerunAnalysisButton${shouldRerun ? ' shouldRerun' : ''}`
       );
     },
 
+    async assertProgressTitle(expectedProgressTitle: string) {
+      await testSubjects.existOrFail('aiopProgressTitle');
+      const currentProgressTitle = await testSubjects.getVisibleText('aiopProgressTitle');
+      expect(currentProgressTitle).to.be(expectedProgressTitle);
+    },
+
     async navigateToIndexPatternSelection() {
       await testSubjects.click('mlMainTab explainLogRateSpikes');
       await testSubjects.existOrFail('mlPageSourceSelection');
+    },
+
+    async getBrushSelectionWidth(selector: string) {
+      const brush = await testSubjects.find(selector);
+      const brushSelectionBefore = (await brush.findAllByClassName('selection'))[0];
+      const brushSelectionRectBefore = await brushSelectionBefore._webElement.getRect();
+      return brushSelectionRectBefore.width;
+    },
+
+    async getPxForTimestamp(timestamp: number) {
+      await elasticChart.waitForRenderComplete('aiopsDocumentCountChart');
+      const chartDebugData = await elasticChart.getChartDebugData('aiopsDocumentCountChart');
+
+      const dualBrushWrapper = await testSubjects.find('aiopsDualBrush');
+      const dualBrushWrapperRect = await dualBrushWrapper._webElement.getRect();
+
+      const bars = chartDebugData?.bars?.[0].bars ?? [];
+      const barsCount = bars.length;
+      const targetDeviationBarIndex = bars.findIndex((b) => b.x === timestamp);
+
+      const targetPx = Math.round(
+        (targetDeviationBarIndex / barsCount) * dualBrushWrapperRect.width
+      );
+      const intervalPx = Math.round((1 / barsCount) * dualBrushWrapperRect.width);
+
+      return { targetPx, intervalPx };
+    },
+
+    async adjustBrushHandler(selector: string, handlerClassName: string, targetPx: number) {
+      const brush = await testSubjects.find(selector);
+      const dualBrushWrapper = await testSubjects.find('aiopsDualBrush');
+      const dualBrushWrapperRect = await dualBrushWrapper._webElement.getRect();
+
+      const handle = (await brush.findAllByClassName(handlerClassName))[0];
+      const handleRect = await handle._webElement.getRect();
+      const handlePx = handleRect.x - dualBrushWrapperRect.x;
+      const handleFactor = handlePx < targetPx ? 1 : -1;
+      const dragAndDropOffsetPx = Math.abs(handlePx - targetPx) * handleFactor;
+
+      await browser.dragAndDrop(
+        { location: handle, offset: { x: 0, y: 0 } },
+        { location: handle, offset: { x: dragAndDropOffsetPx, y: 0 } }
+      );
     },
   };
 }
