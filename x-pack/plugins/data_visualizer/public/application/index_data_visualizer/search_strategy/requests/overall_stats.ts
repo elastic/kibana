@@ -83,7 +83,6 @@ export const checkAggregatableFieldsExistRequest = (
       ? { runtime_mappings: combinedRuntimeMappings }
       : {}),
   };
-  console.log('searchBody', searchBody);
 
   return {
     index,
@@ -129,8 +128,7 @@ export const processAggregatableFieldsExistResponse = (
     const aggregations = body.aggregations;
 
     const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
-    const sampleCount =
-      samplerShardSize > 0 ? get(aggregations, ['sample', 'doc_count'], 0) : totalCount;
+    const sampleCount = totalCount;
     aggregatableFieldsChunk.forEach((field, i) => {
       const safeFieldName = getSafeAggregationName(field, i);
       const count = get(aggregations, [...aggsPath, `${safeFieldName}_count`, 'doc_count'], 0);

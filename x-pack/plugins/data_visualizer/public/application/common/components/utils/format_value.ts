@@ -13,7 +13,7 @@
  */
 
 import moment from 'moment';
-const SIGFIGS_IF_ROUNDING = 3; // Number of sigfigs to use for values < 10
+export const SIGFIGS_IF_ROUNDING = 3; // Number of sigfigs to use for values < 10
 
 // Formats a single value according to the specified ML function.
 // If a Kibana fieldFormat is not supplied, will fall back to default

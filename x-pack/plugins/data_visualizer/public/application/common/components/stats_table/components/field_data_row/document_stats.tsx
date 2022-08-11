@@ -20,10 +20,6 @@ export const DocumentStat = ({ config, showIcon, totalCount }: Props) => {
   const { stats } = config;
   if (stats === undefined) return null;
   const { count, sampleCount } = stats;
-
-  if (config.fieldName === 'region') {
-    console.log('config', config);
-  }
   // If field exists is docs but we don't have count stats then don't show
   // Otherwise if field doesn't appear in docs at all, show 0%
   const docsCount =
