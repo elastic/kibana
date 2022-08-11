@@ -7,7 +7,7 @@
     "githubTeam": "kibana-data-discovery"
   },
   "description": "Contains functionality for the field list which can be integrated into apps sidebar",
-  "server": false,
+  "server": true,
   "ui": true,
   "requiredPlugins": ["dataViews", "data", "fieldFormats", "charts"],
   "optionalPlugins": [],
