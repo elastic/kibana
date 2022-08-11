@@ -207,15 +207,15 @@ export class ESClient {
       searches,
     });
     this.log.debug(`Msearch result: ${JSON.stringify(result)}`);
-    const hits = result.responses
-      .map((response) => response as SearchResponse<SpanDocument>)
-      .filter(
-        (response) => response.hits.total && (response.hits.total as SearchTotalHits).value > 0
-      )
-      .map((response) => response.hits.hits)
-      .reduce((acc, value) => {
-        return acc.concat(value);
-      });
-    return hits;
+    this.log.debug(`Msearch result: ${JSON.stringify(result)}`);
+    return result.responses.flatMap((response) => {
+      if ('error' in response) {
+        throw new Error(`msearch failure: ${JSON.stringify(response.error)}`);
+      } else if (response.hits.hits.length > 0) {
+        return response.hits.hits;
+      } else {
+        return [];
+      }
+    });
   }
 }
