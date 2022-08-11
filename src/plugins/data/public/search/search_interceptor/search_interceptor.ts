@@ -463,8 +463,8 @@ export class SearchInterceptor {
     }
   };
 
-  public showWarning({ title, text }: ResponseWarning) {
-    this.deps.toasts.addWarning({ title, text });
+  public showWarning(warning: ResponseWarning) {
+    this.deps.toasts.addWarning(warning);
   }
 
   public showError(e: Error) {
