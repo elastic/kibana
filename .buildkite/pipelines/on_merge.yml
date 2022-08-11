@@ -134,7 +134,7 @@ steps:
   - command: .buildkite/scripts/steps/bazel_cache/bootstrap_linux.sh
     label: 'Populate local dev bazel cache (Linux)'
     agents:
-      queue: n2-4-spot
+      queue: n2-16-spot
     timeout_in_minutes: 15
     retry:
       automatic:
