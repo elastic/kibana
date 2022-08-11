@@ -42,9 +42,9 @@ import {
 } from '@kbn/ui-actions-plugin/public';
 import { VISUALIZE_EDITOR_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
-import type { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { AdvancedUiActionsSetup } from '@kbn/ui-actions-enhanced-plugin/public';
+import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type {
   IndexPatternDatasource as IndexPatternDatasourceType,
@@ -108,8 +108,8 @@ export interface LensPluginSetupDependencies {
   eventAnnotation: EventAnnotationPluginSetup;
   globalSearch?: GlobalSearchPluginSetup;
   usageCollection?: UsageCollectionSetup;
-  discover?: DiscoverSetup;
   uiActionsEnhanced: AdvancedUiActionsSetup;
+  share?: SharePluginSetup;
 }
 
 export interface LensPluginStartDependencies {
@@ -132,7 +132,7 @@ export interface LensPluginStartDependencies {
   inspector: InspectorStartContract;
   spaces: SpacesPluginStart;
   usageCollection?: UsageCollectionStart;
-  discover?: DiscoverStart;
+  share?: SharePluginStart;
 }
 
 export interface LensPublicSetup {
@@ -232,6 +232,7 @@ export class LensPlugin {
   private topNavMenuEntries: LensTopNavMenuEntryGenerator[] = [];
   private hasDiscoverAccess: boolean = false;
   private dataViewsService: DataViewsPublicPluginStart | undefined;
+  private stopReportManager?: () => void;
 
   setup(
     core: CoreSetup<LensPluginStartDependencies, void>,
@@ -247,7 +248,7 @@ export class LensPlugin {
       globalSearch,
       usageCollection,
       uiActionsEnhanced,
-      discover,
+      share,
     }: LensPluginSetupDependencies
   ) {
     const startServices = createStartServicesGetter(core.getStartServices);
@@ -298,16 +299,15 @@ export class LensPlugin {
     }
 
     visualizations.registerAlias(getLensAliasConfig());
-    if (discover) {
-      uiActionsEnhanced.registerDrilldown(
-        new OpenInDiscoverDrilldown({
-          discover,
-          dataViews: () => this.dataViewsService!,
-          hasDiscoverAccess: () => this.hasDiscoverAccess,
-          application: () => startServices().core.application,
-        })
-      );
-    }
+
+    // if (locator) {
+    uiActionsEnhanced.registerDrilldown(
+      new OpenInDiscoverDrilldown({
+        locator: () => share?.url.locators.get('discover'),
+        hasDiscoverAccess: () => this.hasDiscoverAccess,
+      })
+    );
+    // }
 
     setupExpressions(
       expressions,
@@ -450,7 +450,6 @@ export class LensPlugin {
 
   start(core: CoreStart, startDependencies: LensPluginStartDependencies): LensPublicStart {
     this.hasDiscoverAccess = core.application.capabilities.discover.show as boolean;
-    this.dataViewsService = startDependencies.dataViews;
     // unregisters the Visualize action and registers the lens one
     if (startDependencies.uiActions.hasAction(ACTION_VISUALIZE_FIELD)) {
       startDependencies.uiActions.unregisterAction(ACTION_VISUALIZE_FIELD);
@@ -468,8 +467,7 @@ export class LensPlugin {
     startDependencies.uiActions.addTriggerAction(
       CONTEXT_MENU_TRIGGER,
       createOpenInDiscoverAction(
-        startDependencies.discover!,
-        startDependencies.dataViews!,
+        startDependencies.share?.url.locators.get('discover'),
         this.hasDiscoverAccess
       )
     );

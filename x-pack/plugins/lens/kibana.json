@@ -34,8 +34,7 @@
     "taskManager",
     "globalSearch",
     "savedObjectsTagging",
-    "spaces",
-    "discover"
+    "spaces"
   ],
   "configPath": ["xpack", "lens"],
   "extraPublicDirs": ["common/constants"],

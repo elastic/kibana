@@ -84,6 +84,9 @@ discover-app {
   height: $euiSize * 7;
   padding: 0 $euiSizeS $euiSizeS * 2 $euiSizeS;
 }
+.dscHistogram > div {
+  height: 100%;
+}
 
 .dscHistogramTimeRange {
   padding: 0 $euiSizeS 0 $euiSizeS;

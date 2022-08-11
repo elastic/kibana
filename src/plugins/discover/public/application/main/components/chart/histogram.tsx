@@ -6,76 +6,41 @@
  * Side Public License, v 1.
  */
 import './histogram.scss';
-import moment, { unitOfTime } from 'moment-timezone';
+import moment from 'moment-timezone';
 import React, { useCallback, useMemo } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiIconTip,
-  EuiLoadingChart,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText } from '@elastic/eui';
 import dateMath from '@kbn/datemath';
-import {
-  Axis,
-  BrushEndListener,
-  Chart,
-  ElementClickListener,
-  HistogramBarSeries,
-  Position,
-  ScaleType,
-  Settings,
-  TooltipType,
-  XYBrushEvent,
-  XYChartElementEvent,
-} from '@elastic/charts';
-import { IUiSettingsClient } from '@kbn/core/public';
+import { XYBrushEvent } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import {
-  CurrentTime,
-  Endzones,
-  getAdjustedInterval,
-  renderEndzoneTooltip,
-} from '@kbn/charts-plugin/public';
-import { LEGACY_TIME_AXIS, MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { TableInspectorAdapter } from '@kbn/lens-plugin/public/editor_frame_service/types';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { DataCharts$, DataChartsMessage } from '../../hooks/use_saved_search';
+import { DataCharts$, DataChartsMessage, DataTotalHits$ } from '../../hooks/use_saved_search';
 import { FetchStatus } from '../../../types';
 import { useDataState } from '../../hooks/use_data_state';
 import { GetStateReturn } from '../../services/discover_state';
 
 export interface DiscoverHistogramProps {
   savedSearchData$: DataCharts$;
+  savedSearchDataTotalHits$: DataTotalHits$;
   timefilterUpdateHandler: (ranges: { from: number; to: number }) => void;
   stateContainer: GetStateReturn;
-}
-
-function getTimezone(uiSettings: IUiSettingsClient) {
-  if (uiSettings.isDefault('dateFormat:tz')) {
-    const detectedTimezone = moment.tz.guess();
-    if (detectedTimezone) return detectedTimezone;
-    else return moment().format('Z');
-  } else {
-    return uiSettings.get('dateFormat:tz', 'Browser');
-  }
+  dataView: DataView;
 }
 
 export function DiscoverHistogram({
   savedSearchData$,
+  savedSearchDataTotalHits$,
   timefilterUpdateHandler,
   stateContainer,
+  dataView,
 }: DiscoverHistogramProps) {
-  const { data, theme, uiSettings, fieldFormats } = useDiscoverServices();
-  const chartTheme = theme.useChartsTheme();
-  const chartBaseTheme = theme.useChartsBaseTheme();
+  const { data, uiSettings, lens } = useDiscoverServices();
 
   const dataState: DataChartsMessage = useDataState(savedSearchData$);
 
-  const timeZone = getTimezone(uiSettings);
-  const { chartData, bucketInterval, fetchStatus, error } = dataState;
+  const { bucketInterval } = dataState;
 
   const onBrushEnd = useCallback(
     ({ x }: XYBrushEvent) => {
@@ -85,21 +50,6 @@ export function DiscoverHistogram({
       const [from, to] = x;
       timefilterUpdateHandler({ from, to });
     },
-    [timefilterUpdateHandler]
-  );
-
-  const onElementClick = useCallback(
-    (xInterval: number): ElementClickListener =>
-      ([elementData]) => {
-        const startRange = (elementData as XYChartElementEvent)[0].x;
-
-        const range = {
-          from: startRange,
-          to: startRange + xInterval,
-        };
-
-        timefilterUpdateHandler(range);
-      },
     [timefilterUpdateHandler]
   );
 
@@ -140,91 +90,6 @@ export function DiscoverHistogram({
     });
     return `${toMoment(timeRange.from)} - ${toMoment(timeRange.to)} ${intervalText}`;
   }, [from, to, toMoment, bucketInterval, stateContainer]);
-
-  if (!chartData && fetchStatus === FetchStatus.LOADING) {
-    return (
-      <div className="dscHistogram" data-test-subj="discoverChart">
-        <div className="dscChart__loading">
-          <EuiText size="xs" color="subdued">
-            <EuiLoadingChart mono size="l" />
-            <EuiSpacer size="s" />
-            <FormattedMessage id="discover.loadingChartResults" defaultMessage="Loading chart" />
-          </EuiText>
-        </div>
-      </div>
-    );
-  }
-
-  if (fetchStatus === FetchStatus.ERROR && error) {
-    return (
-      <div className="dscHistogram__errorChartContainer">
-        <EuiFlexGroup gutterSize="s">
-          <EuiFlexItem grow={false} className="dscHistogram__errorChart__icon">
-            <EuiIcon type="visBarVertical" color="danger" size="m" />
-          </EuiFlexItem>
-          <EuiFlexItem className="dscHistogram__errorChart">
-            <EuiText size="s" color="danger">
-              <FormattedMessage
-                id="discover.errorLoadingChart"
-                defaultMessage="Error loading chart"
-              />
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiText className="dscHistogram__errorChart__text" size="s">
-          {error.message}
-        </EuiText>
-      </div>
-    );
-  }
-
-  if (!chartData) {
-    return null;
-  }
-
-  const formatXValue = (val: string) => {
-    const xAxisFormat = chartData.xAxisFormat.params!.pattern;
-    return moment(val).format(xAxisFormat);
-  };
-
-  const isDarkMode = uiSettings.get('theme:darkMode');
-
-  /*
-   * Deprecation: [interval] on [date_histogram] is deprecated, use [fixed_interval] or [calendar_interval].
-   * see https://github.com/elastic/kibana/issues/27410
-   * TODO: Once the Discover query has been update, we should change the below to use the new field
-   */
-  const { intervalESValue, intervalESUnit, interval } = chartData.ordered;
-  const xInterval = interval.asMilliseconds();
-
-  const xValues = chartData.xAxisOrderedValues;
-  const lastXValue = xValues[xValues.length - 1];
-
-  const domain = chartData.ordered;
-  const domainStart = domain.min.valueOf();
-  const domainEnd = domain.max.valueOf();
-
-  const domainMin = Math.min(chartData.values[0]?.x, domainStart);
-  const domainMax = Math.max(domainEnd - xInterval, lastXValue);
-
-  const xDomain = {
-    min: domainMin,
-    max: domainMax,
-    minInterval: getAdjustedInterval(
-      xValues,
-      intervalESValue,
-      intervalESUnit as unitOfTime.Base,
-      timeZone
-    ),
-  };
-  const tooltipProps = {
-    headerFormatter: renderEndzoneTooltip(xInterval, domainStart, domainEnd, formatXValue),
-    type: TooltipType.VerticalCursor,
-  };
-
-  const xAxisFormatter = fieldFormats.deserialize(chartData.yAxisFormat);
-
-  const useLegacyTimeAxis = uiSettings.get(LEGACY_TIME_AXIS, false);
 
   const toolTipTitle = i18n.translate('discover.timeIntervalWithValueWarning', {
     defaultMessage: 'Warning',
@@ -267,55 +132,118 @@ export function DiscoverHistogram({
     );
   }
 
+  const LensComponent = lens.EmbeddableComponent;
+
   return (
     <React.Fragment>
       <div className="dscHistogram" data-test-subj="discoverChart" data-time-range={timeRangeText}>
-        <Chart size="100%">
-          <Settings
-            xDomain={xDomain}
-            onBrushEnd={onBrushEnd as BrushEndListener}
-            onElementClick={onElementClick(xInterval)}
-            tooltip={tooltipProps}
-            theme={chartTheme}
-            baseTheme={chartBaseTheme}
-            allowBrushingLastHistogramBin={true}
-          />
-          <Axis
-            id="discover-histogram-left-axis"
-            position={Position.Left}
-            ticks={2}
-            integersOnly
-            tickFormat={(value) => xAxisFormatter.convert(value)}
-          />
-          <Axis
-            id="discover-histogram-bottom-axis"
-            position={Position.Bottom}
-            tickFormat={formatXValue}
-            timeAxisLayerCount={useLegacyTimeAxis ? 0 : 2}
-            style={useLegacyTimeAxis ? {} : MULTILAYER_TIME_AXIS_STYLE}
-          />
-          <CurrentTime isDarkMode={isDarkMode} domainEnd={domainEnd} />
-          <Endzones
-            isDarkMode={isDarkMode}
-            domainStart={domainStart}
-            domainEnd={domainEnd}
-            interval={xDomain.minInterval}
-            domainMin={xDomain.min}
-            domainMax={xDomain.max}
-          />
-          <HistogramBarSeries
-            id="discover-histogram"
-            minBarHeight={2}
-            xScaleType={ScaleType.Time}
-            yScaleType={ScaleType.Linear}
-            xAccessor="x"
-            yAccessors={['y']}
-            data={chartData.values}
-            yNice
-            timeZone={timeZone}
-            name={chartData.yAxisLabel}
-          />
-        </Chart>
+        <LensComponent
+          id=""
+          viewMode="view"
+          style={{ height: '100%' }}
+          onBrushEnd={onBrushEnd}
+          timeRange={{ from, to }}
+          onLoad={(_, activeData: TableInspectorAdapter) => {
+            if (!activeData) return;
+            savedSearchDataTotalHits$.next({
+              fetchStatus: FetchStatus.COMPLETE,
+              result: activeData?.layer1?.meta?.statistics?.totalCount,
+            });
+          }}
+          attributes={{
+            title: 'Prefilled from example app',
+            references: [
+              {
+                id: dataView.id,
+                name: 'indexpattern-datasource-current-indexpattern',
+                type: 'index-pattern',
+              },
+              {
+                id: dataView.id,
+                name: 'indexpattern-datasource-layer-layer1',
+                type: 'index-pattern',
+              },
+            ],
+            state: {
+              datasourceStates: {
+                indexpattern: {
+                  layers: {
+                    layer1: {
+                      columnOrder: ['col1', 'col2'],
+                      columns: {
+                        col2: {
+                          dataType: 'number',
+                          isBucketed: false,
+                          label: 'Count of records',
+                          operationType: 'count',
+                          scale: 'ratio',
+                          sourceField: '___records___',
+                        },
+                        col1: {
+                          dataType: 'date',
+                          isBucketed: true,
+                          label: dataView.timeFieldName,
+                          operationType: 'date_histogram',
+                          params: {
+                            interval:
+                              stateContainer.appStateContainer.getState().interval || 'auto',
+                          },
+                          scale: 'interval',
+                          sourceField: dataView.timeFieldName,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              filters: stateContainer.appStateContainer.getState().filters || [],
+              query: stateContainer.appStateContainer.getState().query || {
+                language: 'kuery',
+                query: '',
+              },
+              visualization: {
+                axisTitlesVisibilitySettings: {
+                  x: false,
+                  yLeft: false,
+                  yRight: true,
+                },
+                fittingFunction: 'None',
+                gridlinesVisibilitySettings: {
+                  x: true,
+                  yLeft: true,
+                  yRight: true,
+                },
+                layers: [
+                  {
+                    accessors: ['col2'],
+                    layerId: 'layer1',
+                    layerType: 'data',
+                    seriesType: 'bar_stacked',
+                    xAccessor: 'col1',
+                    yConfig: [
+                      {
+                        forAccessor: 'col2',
+                        color: 'green',
+                      },
+                    ],
+                  },
+                ],
+                legend: {
+                  isVisible: true,
+                  position: 'right',
+                },
+                preferredSeriesType: 'bar_stacked',
+                tickLabelsVisibilitySettings: {
+                  x: true,
+                  yLeft: true,
+                  yRight: true,
+                },
+                valueLabels: 'hide',
+              },
+            },
+            visualizationType: 'lnsXY',
+          }}
+        />
       </div>
       {timeRange}
     </React.Fragment>

@@ -176,6 +176,7 @@ export interface DiscoverStartPlugins {
   spaces?: SpacesPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   expressions: ExpressionsStart;
+  lens?: LensPublicStart;
 }
 
 /**

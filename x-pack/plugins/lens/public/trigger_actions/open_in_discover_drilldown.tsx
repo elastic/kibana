@@ -17,11 +17,10 @@ import {
   UiActionsEnhancedBaseActionFactoryContext as BaseActionFactoryContext,
 } from '@kbn/ui-actions-enhanced-plugin/public';
 import { EuiFormRow, EuiSwitch } from '@elastic/eui';
-import { DiscoverSetup } from '@kbn/discover-plugin/public';
+import { DiscoverAppLocator } from '@kbn/discover-plugin/public';
 import { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { DataViewsService } from '@kbn/data-views-plugin/public';
-import { isCompatible, isLensEmbeddable, getHref, getLocation } from './open_in_discover_helpers';
+import { isCompatible, isLensEmbeddable, getHref } from './open_in_discover_helpers';
 
 interface EmbeddableQueryInput extends EmbeddableInput {
   query?: Query;
@@ -33,8 +32,7 @@ interface EmbeddableQueryInput extends EmbeddableInput {
 export type EmbeddableWithQueryInput = IEmbeddable<EmbeddableQueryInput>;
 
 interface UrlDrilldownDeps {
-  discover: Pick<DiscoverSetup, 'locator'>;
-  dataViews: () => Pick<DataViewsService, 'get'>;
+  locator: () => DiscoverAppLocator | undefined;
   hasDiscoverAccess: () => boolean;
   application: () => ApplicationStart;
 }
@@ -108,8 +106,7 @@ export class OpenInDiscoverDrilldown
 
   public readonly isCompatible = async (config: Config, context: ActionContext) => {
     return isCompatible({
-      discover: this.deps.discover,
-      dataViews: this.deps.dataViews(),
+      locator: this.deps.locator(),
       hasDiscoverAccess: this.deps.hasDiscoverAccess(),
       ...context,
       embeddable: context.embeddable as IEmbeddable,
@@ -132,17 +129,18 @@ export class OpenInDiscoverDrilldown
   };
 
   public readonly execute = async (config: Config, context: ActionContext) => {
-    if (config.openInNewTab) {
-      window.open(await this.getHref(config, context), '_blank');
-    } else {
-      const { app, path, state } = await getLocation({
-        discover: this.deps.discover,
-        dataViews: this.deps.dataViews(),
-        hasDiscoverAccess: this.deps.hasDiscoverAccess(),
-        ...context,
-        embeddable: context.embeddable as IEmbeddable,
-      });
-      await this.deps.application().navigateToApp(app, { path, state });
-    }
+    const { restOfFilters: filters, timeRange: timeRange } = extractTimeRange(
+      context.filters,
+      context.timeFieldName
+    );
+    execute({
+      locator: this.deps.locator(),
+      hasDiscoverAccess: this.deps.hasDiscoverAccess(),
+      ...context,
+      embeddable: context.embeddable as IEmbeddable,
+      openInSameTab: !config.openInNewTab,
+      filters,
+      timeRange,
+    });
   };
 }

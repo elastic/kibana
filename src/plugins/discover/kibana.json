@@ -17,7 +17,7 @@
     "dataViewEditor",
     "expressions"
   ],
-  "optionalPlugins": ["home", "share", "usageCollection", "spaces", "triggersActionsUi"],
+  "optionalPlugins": ["home", "share", "usageCollection", "spaces", "triggersActionsUi", "lens"],
   "requiredBundles": ["kibanaUtils", "kibanaReact", "dataViews", "unifiedSearch", "savedSearch"],
   "extraPublicDirs": ["common"],
   "owner": {

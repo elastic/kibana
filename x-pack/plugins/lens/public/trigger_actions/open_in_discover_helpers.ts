@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { DiscoverSetup } from '@kbn/discover-plugin/public';
+import type { DiscoverAppLocator } from '@kbn/discover-plugin/public';
 import { Filter } from '@kbn/es-query';
 import { IEmbeddable } from '@kbn/embeddable-plugin/public';
-import { DataViewsService } from '@kbn/data-views-plugin/public';
 import type { Embeddable } from '../embeddable';
 import { DOC_TYPE } from '../../common';
 
@@ -17,9 +16,7 @@ interface Context {
   filters?: Filter[];
   openInSameTab?: boolean;
   hasDiscoverAccess: boolean;
-  dataViews: Pick<DataViewsService, 'get'>;
-  discover: Pick<DiscoverSetup, 'locator'>;
-  timeFieldName?: string;
+  locator?: DiscoverAppLocator;
 }
 
 export function isLensEmbeddable(embeddable: IEmbeddable): embeddable is Embeddable {
@@ -38,12 +35,7 @@ export async function isCompatible({ hasDiscoverAccess, embeddable }: Context) {
   }
 }
 
-async function getDiscoverLocationParams({
-  embeddable,
-  filters,
-  dataViews,
-  timeFieldName,
-}: Pick<Context, 'dataViews' | 'embeddable' | 'filters' | 'timeFieldName'>) {
+export function execute({ embeddable, locator, timeRange, filters, openInSameTab }: Context) {
   if (!isLensEmbeddable(embeddable)) {
     // shouldn't be executed because of the isCompatible check
     throw new Error('Can only be executed in the context of Lens visualization');
@@ -53,84 +45,10 @@ async function getDiscoverLocationParams({
     // shouldn't be executed because of the isCompatible check
     throw new Error('Underlying data is not ready');
   }
-  const dataView = await dataViews.get(args.indexPatternId);
-  let filtersToApply = [...(filters || []), ...args.filters];
-  let timeRangeToApply = args.timeRange;
-  // if the target data view is time based, attempt to split out a time range from the provided filters
-  if (dataView.isTimeBased() && dataView.timeFieldName === timeFieldName) {
-    const { extractTimeRange } = await import('@kbn/es-query');
-    const { restOfFilters, timeRange } = extractTimeRange(filters || [], timeFieldName);
-    filtersToApply = restOfFilters;
-    if (timeRange) {
-      timeRangeToApply = timeRange;
-    }
-  }
-
-  return {
+  const discoverUrl = locator?.getRedirectUrl({
     ...args,
-    timeRange: timeRangeToApply,
-    filters: filtersToApply,
-  };
-}
-
-export async function getHref({
-  embeddable,
-  discover,
-  filters,
-  dataViews,
-  timeFieldName,
-}: Context) {
-  const params = await getDiscoverLocationParams({
-    embeddable,
-    filters,
-    dataViews,
-    timeFieldName,
-  });
-
-  const discoverUrl = discover.locator?.getRedirectUrl(params);
-
-  return discoverUrl;
-}
-
-export async function getLocation({
-  embeddable,
-  discover,
-  filters,
-  dataViews,
-  timeFieldName,
-}: Context) {
-  const params = await getDiscoverLocationParams({
-    embeddable,
-    filters,
-    dataViews,
-    timeFieldName,
-  });
-
-  const discoverLocation = discover.locator?.getLocation(params);
-
-  if (!discoverLocation) {
-    throw new Error('Discover location not found');
-  }
-
-  return discoverLocation;
-}
-
-export async function execute({
-  embeddable,
-  discover,
-  filters,
-  openInSameTab,
-  dataViews,
-  timeFieldName,
-  hasDiscoverAccess,
-}: Context) {
-  const discoverUrl = await getHref({
-    embeddable,
-    discover,
-    filters,
-    dataViews,
-    timeFieldName,
-    hasDiscoverAccess,
+    timeRange: timeRange || args.timeRange,
+    filters: [...(filters || []), ...args.filters],
   });
   window.open(discoverUrl, !openInSameTab ? '_blank' : '_self');
 }
