@@ -62,7 +62,6 @@ export const createCommonUpdateUserActionBuilder = ({
             fullName={userAction.createdBy.fullName}
           />
         ),
-        type: 'update' as const,
         event: label,
         'data-test-subj': `${userAction.type}-${userAction.action}-action-${userAction.actionId}`,
         timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,

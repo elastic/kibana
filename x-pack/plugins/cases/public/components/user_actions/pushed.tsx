@@ -85,7 +85,6 @@ const getFooters = ({
       ...footers,
       {
         username: '',
-        type: 'update',
         event: i18n.ALREADY_PUSHED_TO_SERVICE(`${connectorName}`),
         timelineIcon: 'sortUp',
         'data-test-subj': 'top-footer',
@@ -98,7 +97,6 @@ const getFooters = ({
       ...footers,
       {
         username: '',
-        type: 'update',
         event: i18n.REQUIRED_UPDATE_TO_SERVICE(`${connectorName}`),
         timelineIcon: 'sortDown',
         'data-test-subj': 'bottom-footer',

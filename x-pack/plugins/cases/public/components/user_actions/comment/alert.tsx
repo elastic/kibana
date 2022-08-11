@@ -59,7 +59,6 @@ const getSingleAlertUserAction = ({
         />
       ),
       className: 'comment-alert',
-      type: 'update',
       event: (
         <SingleAlertCommentEvent
           actionId={userAction.actionId}
@@ -116,7 +115,6 @@ const getMultipleAlertsUserAction = ({
         />
       ),
       className: 'comment-alert',
-      type: 'update',
       event: (
         <MultipleAlertsCommentEvent
           actionId={userAction.actionId}

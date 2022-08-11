@@ -14,7 +14,6 @@ import {
 import { Case } from '../../containers/types';
 
 export interface AttachmentViewObject<Props = {}> {
-  type?: EuiCommentProps['type'];
   timelineIcon?: EuiCommentProps['timelineIcon'];
   actions?: EuiCommentProps['actions'];
   event?: EuiCommentProps['event'];
