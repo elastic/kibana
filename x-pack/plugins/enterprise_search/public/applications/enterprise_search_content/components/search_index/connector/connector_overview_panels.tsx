@@ -28,19 +28,19 @@ import {
 import { IndexViewLogic } from '../index_view_logic';
 import { SearchIndexTabId } from '../search_index';
 
+const StatusPanel: React.FC<{ ingestionStatus: IngestionStatus }> = ({ ingestionStatus }) => (
+  <EuiPanel color={ingestionStatusToColor(ingestionStatus)} hasShadow={false} paddingSize="l">
+    <EuiStat
+      description={i18n.translate('xpack.enterpriseSearch.connector.ingestionStatus.title', {
+        defaultMessage: 'Ingestion status',
+      })}
+      title={ingestionStatusToText(ingestionStatus)}
+    />
+  </EuiPanel>
+);
+
 export const ConnectorOverviewPanels: React.FC = () => {
   const { ingestionStatus, index } = useValues(IndexViewLogic);
-
-  const statusPanel = (
-    <EuiPanel color={ingestionStatusToColor(ingestionStatus)} hasShadow={false} paddingSize="l">
-      <EuiStat
-        description={i18n.translate('xpack.enterpriseSearch.connector.ingestionStatus.title', {
-          defaultMessage: 'Ingestion status',
-        })}
-        title={ingestionStatusToText(ingestionStatus)}
-      />
-    </EuiPanel>
-  );
 
   return isConnectorIndex(index) ? (
     <EuiFlexGroup>
@@ -83,10 +83,10 @@ export const ConnectorOverviewPanels: React.FC = () => {
               tabId: SearchIndexTabId.CONFIGURATION,
             })}
           >
-            {statusPanel}
+            <StatusPanel ingestionStatus={ingestionStatus} />
           </EuiLinkTo>
         ) : (
-          statusPanel
+          <StatusPanel ingestionStatus={ingestionStatus} />
         )}
       </EuiFlexItem>
     </EuiFlexGroup>
