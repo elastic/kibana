@@ -10,7 +10,7 @@ Array [
         "loadIndexPatternRefs": [Function],
         "loadIndexPatterns": [Function],
         "refreshExistingFields": [Function],
-        "updateIndexPatternsCache": [Function],
+        "updateDataViewsState": [Function],
       },
       "lensInspector": Object {
         "adapters": Object {
