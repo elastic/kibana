@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
@@ -34,6 +34,7 @@ import type { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/commo
 import { CUSTOM_PALETTE } from '@kbn/coloring';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { useResizeObserver } from '@elastic/eui';
 import { VisParams } from '../../common';
 import {
   getPaletteService,
@@ -309,16 +310,17 @@ export const MetricVis = ({
 
   const [scrollChildHeight, setScrollChildHeight] = useState<string>('100%');
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const scrollDimensions = useResizeObserver(scrollContainerRef.current);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const minTileHeight = 64; // TODO - magic number from the @elastic/charts side. would be nice to deduplicate
     const minimumRequiredVerticalSpace = minTileHeight * grid.length;
     setScrollChildHeight(
-      (scrollContainerRef.current?.clientHeight ?? -Infinity) > minimumRequiredVerticalSpace
+      (scrollDimensions.height ?? -Infinity) > minimumRequiredVerticalSpace
         ? '100%'
         : `${minimumRequiredVerticalSpace}px`
     );
-  }, [grid.length]);
+  }, [grid.length, scrollDimensions.height]);
 
   // force chart to re-render to circumvent a charts bug
   const magicKey = useRef(0);
