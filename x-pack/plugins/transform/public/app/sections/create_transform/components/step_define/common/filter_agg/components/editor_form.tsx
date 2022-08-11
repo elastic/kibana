@@ -6,13 +6,15 @@
  */
 
 import React from 'react';
-import { EuiSpacer } from '@elastic/eui';
-import { CodeEditor } from '../../../../../../../../../../../../src/plugins/kibana_react/public';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { FilterAggConfigEditor } from '../types';
 
 export const FilterEditorForm: FilterAggConfigEditor['aggTypeConfig']['FilterAggFormComponent'] = ({
   config,
   onChange,
+  isValid,
 }) => {
   return (
     <>
@@ -36,6 +38,17 @@ export const FilterEditorForm: FilterAggConfigEditor['aggTypeConfig']['FilterAgg
         }}
         value={config || ''}
       />
+      {isValid === false ? (
+        <>
+          <EuiSpacer size="m" />
+          <EuiCallOut color="danger" iconType="alert" size="s">
+            <FormattedMessage
+              id="xpack.transform.agg.filterEditorForm.jsonInvalidErrorMessage"
+              defaultMessage="JSON is invalid."
+            />
+          </EuiCallOut>
+        </>
+      ) : null}
     </>
   );
 };

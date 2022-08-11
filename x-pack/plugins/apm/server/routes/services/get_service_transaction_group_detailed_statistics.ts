@@ -6,6 +6,7 @@
  */
 
 import { keyBy } from 'lodash';
+import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import {
   EVENT_OUTCOME,
   SERVICE_NAME,
@@ -15,7 +16,6 @@ import {
 import { EventOutcome } from '../../../common/event_outcome';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
-import { kqlQuery, rangeQuery } from '../../../../observability/server';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { Coordinate } from '../../../typings/timeseries';
 import {
@@ -30,6 +30,7 @@ import {
 } from '../../lib/helpers/latency_aggregation_type';
 import { Setup } from '../../lib/helpers/setup_request';
 import { calculateFailedTransactionRate } from '../../lib/helpers/transaction_error_rate';
+import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 
 export async function getServiceTransactionGroupDetailedStatistics({
   environment,
@@ -43,6 +44,7 @@ export async function getServiceTransactionGroupDetailedStatistics({
   latencyAggregationType,
   start,
   end,
+  offset,
 }: {
   environment: string;
   kuery: string;
@@ -55,6 +57,7 @@ export async function getServiceTransactionGroupDetailedStatistics({
   latencyAggregationType: LatencyAggregationType;
   start: number;
   end: number;
+  offset?: string;
 }): Promise<
   Array<{
     transactionName: string;
@@ -65,9 +68,16 @@ export async function getServiceTransactionGroupDetailedStatistics({
   }>
 > {
   const { apmEventClient } = setup;
-  const { intervalString } = getBucketSizeForAggregatedTransactions({
+
+  const { startWithOffset, endWithOffset } = getOffsetInMs({
     start,
     end,
+    offset,
+  });
+
+  const { intervalString } = getBucketSizeForAggregatedTransactions({
+    start: startWithOffset,
+    end: endWithOffset,
     numBuckets,
     searchAggregatedTransactions,
   });
@@ -92,7 +102,7 @@ export async function getServiceTransactionGroupDetailedStatistics({
               ...getDocumentTypeFilterForTransactions(
                 searchAggregatedTransactions
               ),
-              ...rangeQuery(start, end),
+              ...rangeQuery(startWithOffset, endWithOffset),
               ...environmentQuery(environment),
               ...kqlQuery(kuery),
             ],
@@ -116,8 +126,8 @@ export async function getServiceTransactionGroupDetailedStatistics({
                   fixed_interval: intervalString,
                   min_doc_count: 0,
                   extended_bounds: {
-                    min: start,
-                    max: end,
+                    min: startWithOffset,
+                    max: endWithOffset,
                   },
                 },
                 aggs: {
@@ -179,12 +189,11 @@ export async function getServiceTransactionGroupDetailedStatisticsPeriods({
   searchAggregatedTransactions,
   transactionType,
   latencyAggregationType,
-  comparisonStart,
-  comparisonEnd,
   environment,
   kuery,
   start,
   end,
+  offset,
 }: {
   serviceName: string;
   transactionNames: string[];
@@ -193,12 +202,11 @@ export async function getServiceTransactionGroupDetailedStatisticsPeriods({
   searchAggregatedTransactions: boolean;
   transactionType: string;
   latencyAggregationType: LatencyAggregationType;
-  comparisonStart?: number;
-  comparisonEnd?: number;
   environment: string;
   kuery: string;
   start: number;
   end: number;
+  offset?: string;
 }) {
   const commonProps = {
     setup,
@@ -218,14 +226,14 @@ export async function getServiceTransactionGroupDetailedStatisticsPeriods({
     end,
   });
 
-  const previousPeriodPromise =
-    comparisonStart && comparisonEnd
-      ? getServiceTransactionGroupDetailedStatistics({
-          ...commonProps,
-          start: comparisonStart,
-          end: comparisonEnd,
-        })
-      : [];
+  const previousPeriodPromise = offset
+    ? getServiceTransactionGroupDetailedStatistics({
+        ...commonProps,
+        start,
+        end,
+        offset,
+      })
+    : [];
 
   const [currentPeriod, previousPeriod] = await Promise.all([
     currentPeriodPromise,

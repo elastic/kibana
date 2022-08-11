@@ -65,7 +65,6 @@ export const IndexSetupDatasetFilter: React.FC<{
       isSelected={isVisible}
       onClick={show}
       iconType="arrowDown"
-      size="s"
     >
       <FormattedMessage
         id="xpack.infra.analysisSetup.indexDatasetFilterIncludeAllButtonLabel"

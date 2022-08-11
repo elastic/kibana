@@ -10,10 +10,10 @@ import {
   Collector,
   createUsageCollectionSetupMock,
   createCollectorFetchContextMock,
-} from '../../../../usage_collection/server/mocks';
+} from '@kbn/usage-collection-plugin/server/mocks';
 import { registerCoreUsageCollector } from './core_usage_collector';
-import { coreUsageDataServiceMock, loggingSystemMock } from '../../../../../core/server/mocks';
-import type { CoreUsageData } from '../../../../../core/server';
+import { coreUsageDataServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { CoreUsageData } from '@kbn/core/server';
 
 const logger = loggingSystemMock.createLogger();
 

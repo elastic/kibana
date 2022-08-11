@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import type { Headers } from 'src/core/server';
-import { ReportingCore } from '../../';
+import type { Headers, Logger } from '@kbn/core/server';
+import { ReportingCore } from '../..';
 import { UI_SETTINGS_CUSTOM_PDF_LOGO } from '../../../common/constants';
-import { LevelLogger } from '../../lib';
 
 export const getCustomLogo = async (
   reporting: ReportingCore,
   headers: Headers,
   spaceId: string | undefined,
-  logger: LevelLogger
+  logger: Logger
 ) => {
   const fakeRequest = reporting.getFakeRequest({ headers }, spaceId, logger);
   const uiSettingsClient = await reporting.getUiSettingsClient(fakeRequest, logger);

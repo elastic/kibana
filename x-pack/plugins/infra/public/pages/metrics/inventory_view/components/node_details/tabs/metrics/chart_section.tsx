@@ -17,6 +17,7 @@ import {
 } from '@elastic/charts';
 import React from 'react';
 import moment from 'moment';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { MetricsExplorerSeries } from '../../../../../../../../common/http_api';
 import { MetricExplorerSeriesChart } from '../../../../../metrics_explorer/components/series_chart';
 import {
@@ -25,7 +26,6 @@ import {
 } from '../../../../../metrics_explorer/hooks/use_metrics_explorer_options';
 import { ChartHeader } from './chart_header';
 import { getTimelineChartTheme } from '../../../../../metrics_explorer/components/helpers/get_chart_theme';
-import { useUiSetting } from '../../../../../../../../../../../src/plugins/kibana_react/public';
 
 const CHART_SIZE: ChartSizeArray = ['100%', 160];
 

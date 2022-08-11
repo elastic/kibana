@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart } from 'src/core/public';
+import { CoreStart } from '@kbn/core/public';
 import { IEmbeddable, ViewMode, EmbeddableStart } from '../../services/embeddable';
 import { DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '../embeddable';
 import { Action, IncompatibleActionError } from '../../services/ui_actions';

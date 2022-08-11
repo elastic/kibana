@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { kibanaResponseFactory } from 'src/core/server';
-import { loggingSystemMock } from 'src/core/server/mocks';
-import { licensingMock } from '../../../../licensing/server/mocks';
-import { securityMock } from '../../../../security/server/mocks';
+import { kibanaResponseFactory } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { createMockRouter, MockRouter, routeHandlerContextMock } from '../__mocks__/routes.mock';
 import { createRequestMock } from '../__mocks__/request.mock';
 import { handleEsError } from '../../shared_imports';

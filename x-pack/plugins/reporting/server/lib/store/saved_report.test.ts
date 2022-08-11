@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedReport } from './';
+import { SavedReport } from '.';
 
 test('SavedReport should succeed if report has ES document fields present', () => {
   const createInstance = () => {

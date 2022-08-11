@@ -10,7 +10,7 @@ import {
   httpServerMock,
   httpServiceMock,
   loggingSystemMock,
-} from 'src/core/server/mocks';
+} from '@kbn/core/server/mocks';
 
 import { initAPIAuthorization } from './api_authorization';
 import { authorizationMock } from './index.mock';

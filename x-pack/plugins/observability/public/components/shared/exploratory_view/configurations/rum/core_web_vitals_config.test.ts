@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import { mockAppIndexPattern, mockIndexPattern } from '../../rtl_helpers';
+import { mockAppDataView, mockDataView } from '../../rtl_helpers';
 import { getDefaultConfigs } from '../default_configs';
 import { LayerConfig, LensAttributes } from '../lens_attributes';
 import { sampleAttributeCoreWebVital } from '../test_data/sample_attribute_cwv';
 import { LCP_FIELD, SERVICE_NAME, USER_AGENT_OS } from '../constants/elasticsearch_fieldnames';
 import { obsvReportConfigMap } from '../../obsv_exploratory_view';
+import { ReportTypes } from '../../../../..';
 
 describe('Core web vital config test', function () {
-  mockAppIndexPattern();
+  mockAppDataView();
 
   const seriesConfig = getDefaultConfigs({
-    reportType: 'core-web-vitals',
+    reportType: ReportTypes.CORE_WEB_VITAL,
     dataType: 'ux',
-    indexPattern: mockIndexPattern,
+    dataView: mockDataView,
     reportConfigMap: obsvReportConfigMap,
   });
 
@@ -29,14 +30,14 @@ describe('Core web vital config test', function () {
     color: 'green',
     name: 'test-series',
     breakdown: USER_AGENT_OS,
-    indexPattern: mockIndexPattern,
+    indexPattern: mockDataView,
     time: { from: 'now-15m', to: 'now' },
     reportDefinitions: { [SERVICE_NAME]: ['elastic-co'] },
     selectedMetricField: LCP_FIELD,
   };
 
   beforeEach(() => {
-    lnsAttr = new LensAttributes([layerConfig]);
+    lnsAttr = new LensAttributes([layerConfig], ReportTypes.CORE_WEB_VITAL);
   });
   it('should return expected json', function () {
     expect(lnsAttr.getJSON()).toEqual(sampleAttributeCoreWebVital);

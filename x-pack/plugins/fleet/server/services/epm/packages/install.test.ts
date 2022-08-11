@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock } from 'src/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-import type { ElasticsearchClient } from 'kibana/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
-import { DEFAULT_SPACE_ID } from '../../../../../spaces/common/constants';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
 import * as Registry from '../registry';
 
@@ -19,7 +19,7 @@ import { licenseService } from '../../license';
 
 import { installPackage } from './install';
 import * as install from './_install_package';
-import * as obj from './index';
+import * as obj from '.';
 import { getBundledPackages } from './bundled_packages';
 
 jest.mock('../../app_context', () => {
@@ -32,10 +32,14 @@ jest.mock('../../app_context', () => {
       getSavedObjects: jest.fn(() => ({
         createImporter: jest.fn(),
       })),
+      getSavedObjectsTagging: jest.fn(() => ({
+        createInternalAssignmentService: jest.fn(),
+        createTagClient: jest.fn(),
+      })),
     },
   };
 });
-jest.mock('./index');
+jest.mock('.');
 jest.mock('../registry');
 jest.mock('../../upgrade_sender');
 jest.mock('../../license');
@@ -54,11 +58,12 @@ jest.mock('../kibana/index_pattern/install', () => {
 });
 jest.mock('../archive', () => {
   return {
-    parseAndVerifyArchiveEntries: jest.fn(() =>
+    generatePackageInfoFromArchiveBuffer: jest.fn(() =>
       Promise.resolve({ packageInfo: { name: 'apache', version: '1.3.0' } })
     ),
     unpackBufferToCache: jest.fn(),
     setPackageInfo: jest.fn(),
+    deleteVerificationResult: jest.fn(),
   };
 });
 
@@ -83,6 +88,7 @@ describe('install', () => {
       .mockImplementation(() => Promise.resolve({ packageInfo: { license: 'basic' } } as any));
 
     mockGetBundledPackages.mockReset();
+    (install._installPackage as jest.Mock).mockClear();
   });
 
   describe('registry', () => {
@@ -204,6 +210,7 @@ describe('install', () => {
     });
 
     it('should install from bundled package if one exists', async () => {
+      (install._installPackage as jest.Mock).mockResolvedValue({});
       mockGetBundledPackages.mockResolvedValue([
         {
           name: 'test_package',
@@ -212,13 +219,15 @@ describe('install', () => {
         },
       ]);
 
-      await installPackage({
+      const response = await installPackage({
         spaceId: DEFAULT_SPACE_ID,
         installSource: 'registry',
         pkgkey: 'test_package-1.0.0',
         savedObjectsClient: savedObjectsClientMock.create(),
         esClient: {} as ElasticsearchClient,
       });
+
+      expect(response.error).toBeUndefined();
 
       expect(install._installPackage).toHaveBeenCalledWith(
         expect.objectContaining({ installSource: 'upload' })

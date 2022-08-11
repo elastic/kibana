@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  buildExpression,
-  buildExpressionFunction,
-} from '../../../../../../src/plugins/expressions/public';
-import { VisToExpressionAst } from '../../../../../../src/plugins/visualizations/public';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import { VisToExpressionAst } from '@kbn/visualizations-plugin/public';
 import { TileMapExpressionFunctionDefinition } from './tile_map_fn';
 import { TileMapVisParams } from './types';
 import { extractLayerDescriptorParams } from './utils';

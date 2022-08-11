@@ -6,11 +6,11 @@
  */
 
 import { healthRoute } from './health';
-import { httpServiceMock } from 'src/core/server/mocks';
+import { httpServiceMock } from '@kbn/core/server/mocks';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { licenseStateMock } from '../lib/license_state.mock';
-import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { rulesClientMock } from '../rules_client.mock';
 import { HealthStatus } from '../types';
 import { alertsMock } from '../mocks';
@@ -19,7 +19,7 @@ import { RegistryAlertTypeWithAuth } from '../authorization';
 
 const rulesClient = rulesClientMock.create();
 
-jest.mock('../lib/license_api_access.ts', () => ({
+jest.mock('../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 

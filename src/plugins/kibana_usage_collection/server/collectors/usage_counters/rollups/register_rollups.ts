@@ -6,16 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { timer } from 'rxjs';
-import { Logger, ISavedObjectsRepository } from 'kibana/server';
+import { type Observable, timer, takeUntil } from 'rxjs';
+import { Logger, ISavedObjectsRepository } from '@kbn/core/server';
 import { ROLL_INDICES_INTERVAL, ROLL_INDICES_START } from './constants';
 import { rollUsageCountersIndices } from './rollups';
 
 export function registerUsageCountersRollups(
   logger: Logger,
-  getSavedObjectsClient: () => ISavedObjectsRepository | undefined
+  getSavedObjectsClient: () => ISavedObjectsRepository | undefined,
+  pluginStop$: Observable<void>
 ) {
-  timer(ROLL_INDICES_START, ROLL_INDICES_INTERVAL).subscribe(() =>
-    rollUsageCountersIndices(logger, getSavedObjectsClient())
-  );
+  timer(ROLL_INDICES_START, ROLL_INDICES_INTERVAL)
+    .pipe(takeUntil(pluginStop$))
+    .subscribe(() => rollUsageCountersIndices(logger, getSavedObjectsClient()));
 }

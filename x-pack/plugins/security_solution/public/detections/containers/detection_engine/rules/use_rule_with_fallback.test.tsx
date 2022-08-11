@@ -6,9 +6,9 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { SecurityAppError } from '@kbn/securitysolution-t-grid';
-import { alertsMock8x } from '../alerts/mock';
-import { AlertSearchResponse } from '../alerts/types';
+import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
+import { alertsMock8x, alertMockEmptyResults } from '../alerts/mock';
+import type { AlertSearchResponse } from '../alerts/types';
 import { useRuleWithFallback } from './use_rule_with_fallback';
 import * as api from './api';
 import * as alertsAPI from '../alerts/api';
@@ -18,6 +18,14 @@ import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 jest.mock('./api');
 jest.mock('../alerts/api');
 jest.mock('../../../../common/hooks/use_app_toasts');
+
+const mockNotFoundErrorForRule = () => {
+  (api.fetchRuleById as jest.Mock).mockImplementation(async () => {
+    const err = new Error('Not found') as SecurityAppError;
+    err.body = { status_code: 404, message: 'Rule Not found' };
+    throw err;
+  });
+};
 
 describe('useRuleWithFallback', () => {
   (useAppToasts as jest.Mock).mockReturnValue(useAppToastsMock.create());
@@ -78,9 +86,12 @@ describe('useRuleWithFallback', () => {
             "name": "Test rule",
             "query": "user.email: 'root@elastic.co'",
             "references": Array [],
+            "related_integrations": Array [],
+            "required_fields": Array [],
             "risk_score": 75,
             "risk_score_mapping": Array [],
             "rule_id": "bbd3106e-b4b5-4d7c-a1a2-47531d6a2baf",
+            "setup": "",
             "severity": "high",
             "severity_mapping": Array [],
             "tags": Array [
@@ -99,11 +110,7 @@ describe('useRuleWithFallback', () => {
   });
 
   it("should fallback to fetching rule data from a 7.x signal if the rule doesn't exist", async () => {
-    (api.fetchRuleById as jest.Mock).mockImplementation(async () => {
-      const err = new Error('Not found') as SecurityAppError;
-      err.body = { status_code: 404, message: 'Rule Not found' };
-      throw err;
-    });
+    mockNotFoundErrorForRule();
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook((id) => useRuleWithFallback(id), {
         initialProps: 'testRuleId',
@@ -154,8 +161,6 @@ describe('useRuleWithFallback', () => {
             "tags": Array [
               "host.name exists",
               "for testing",
-              "__internal_rule_id:82b2b065-a2ee-49fc-9d6d-781a75c3d280",
-              "__internal_immutable:false",
             ],
             "threat": Array [
               Object {
@@ -216,11 +221,7 @@ describe('useRuleWithFallback', () => {
       return alertsMock8x as AlertSearchResponse;
     });
 
-    (api.fetchRuleById as jest.Mock).mockImplementation(async () => {
-      const err = new Error('Not found') as SecurityAppError;
-      err.body = { status_code: 404, message: 'Rule Not found' };
-      throw err;
-    });
+    mockNotFoundErrorForRule();
 
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook((id) => useRuleWithFallback(id), {
@@ -349,6 +350,26 @@ describe('useRuleWithFallback', () => {
           },
         }
       `);
+    });
+    // Reset back to default mock coming from ../alerts/__mocks__/api.ts
+    spy.mockRestore();
+  });
+
+  it('should return rule as null if fallback fetching from 8.0 alert returns empty results', async () => {
+    // Override default mock coming from ../alerts/__mocks__/api.ts
+    const spy = jest.spyOn(alertsAPI, 'fetchQueryAlerts').mockImplementation(async () => {
+      return alertMockEmptyResults;
+    });
+
+    mockNotFoundErrorForRule();
+
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook((id) => useRuleWithFallback(id), {
+        initialProps: 'testRuleId',
+      });
+      await waitForNextUpdate();
+
+      expect(result.current.rule).toBeNull();
     });
     // Reset back to default mock coming from ../alerts/__mocks__/api.ts
     spy.mockRestore();

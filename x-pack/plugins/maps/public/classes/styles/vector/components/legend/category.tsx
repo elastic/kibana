@@ -17,9 +17,18 @@ interface Props {
   isLinesOnly: boolean;
   isPointsOnly: boolean;
   symbolId?: string;
+  svg?: string;
 }
 
-export function Category({ styleName, label, color, isLinesOnly, isPointsOnly, symbolId }: Props) {
+export function Category({
+  styleName,
+  label,
+  color,
+  isLinesOnly,
+  isPointsOnly,
+  symbolId,
+  svg,
+}: Props) {
   function renderIcon() {
     if (styleName === VECTOR_STYLES.LABEL_COLOR) {
       return (
@@ -36,6 +45,7 @@ export function Category({ styleName, label, color, isLinesOnly, isPointsOnly, s
         isLinesOnly={isLinesOnly}
         strokeColor={color}
         symbolId={symbolId}
+        svg={svg}
       />
     );
   }

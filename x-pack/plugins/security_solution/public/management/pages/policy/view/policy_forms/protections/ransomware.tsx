@@ -9,14 +9,12 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { APP_UI_ID } from '../../../../../../../common/constants';
 import { SecurityPageName } from '../../../../../../app/types';
-import {
-  Immutable,
-  OperatingSystem,
-  PolicyOperatingSystem,
-} from '../../../../../../../common/endpoint/types';
-import { RansomwareProtectionOSes } from '../../../types';
+import type { Immutable } from '../../../../../../../common/endpoint/types';
+import { PolicyOperatingSystem } from '../../../../../../../common/endpoint/types';
+import type { RansomwareProtectionOSes } from '../../../types';
 import { ConfigForm } from '../../components/config_form';
 import { LinkToApp } from '../../../../../../common/components/endpoint/link_to_app';
 import { RadioButtons } from '../components/radio_buttons';

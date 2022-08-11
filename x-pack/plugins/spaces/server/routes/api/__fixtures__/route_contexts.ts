@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RequestHandlerContext } from 'src/core/server';
+import type { RequestHandlerContext } from '@kbn/core/server';
 
 export const mockRouteContext = {
   licensing: {

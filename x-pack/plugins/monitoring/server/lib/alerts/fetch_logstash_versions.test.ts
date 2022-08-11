@@ -6,7 +6,7 @@
  */
 
 import { fetchLogstashVersions } from './fetch_logstash_versions';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 jest.mock('../../static_globals', () => ({
   Globals: {

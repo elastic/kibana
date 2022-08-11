@@ -6,8 +6,8 @@
  */
 
 import { dashboardServiceProvider } from './dashboard_service';
-import { savedObjectsServiceMock } from '../../../../../../src/core/public/mocks';
-import type { DashboardAppLocator } from '../../../../../../src/plugins/dashboard/public';
+import { savedObjectsServiceMock } from '@kbn/core/public/mocks';
+import type { DashboardAppLocator } from '@kbn/dashboard-plugin/public';
 
 describe('DashboardService', () => {
   const mockSavedObjectClient = savedObjectsServiceMock.createStartContract().client;

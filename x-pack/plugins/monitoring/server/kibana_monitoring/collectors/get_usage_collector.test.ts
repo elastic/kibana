@@ -7,7 +7,7 @@
 
 import { getMonitoringUsageCollector } from './get_usage_collector';
 import { fetchClusters } from '../../lib/alerts/fetch_clusters';
-import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { MonitoringConfig } from '../../config';
 
 jest.mock('../../lib/alerts/fetch_clusters', () => ({

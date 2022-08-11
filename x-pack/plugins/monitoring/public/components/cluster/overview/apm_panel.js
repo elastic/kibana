@@ -39,14 +39,14 @@ const getServerTitle = (isFleetTypeMetric, total) => {
     linkLabel.link = (
       <FormattedMessage
         id="xpack.monitoring.cluster.overview.apmPanel.agentServersTotalLinkLabel"
-        defaultMessage="APM & Fleet Servers: {apmsTotal}"
+        defaultMessage="Integrations Servers: {apmsTotal}"
         values={{ apmsTotal }}
       />
     );
     linkLabel.aria = i18n.translate(
       'xpack.monitoring.cluster.overview.apmPanel.instancesAndFleetsTotalLinkAriaLabel',
       {
-        defaultMessage: 'APM and Fleet server instances: {apmsTotal}',
+        defaultMessage: 'Integrations server instances: {apmsTotal}',
         values: { apmsTotal },
       }
     );
@@ -73,7 +73,7 @@ const getServerTitle = (isFleetTypeMetric, total) => {
 const getOverviewTitle = (isFleetTypeMetric) => {
   if (isFleetTypeMetric) {
     return i18n.translate('xpack.monitoring.cluster.overview.apmPanel.overviewFleetLinkLabel', {
-      defaultMessage: 'APM & Fleet server overview',
+      defaultMessage: 'Integrations server overview',
     });
   }
   return i18n.translate('xpack.monitoring.cluster.overview.apmPanel.overviewLinkLabel', {
@@ -84,7 +84,7 @@ const getOverviewTitle = (isFleetTypeMetric) => {
 const getHeadingTitle = (isFleetTypeMetric) => {
   if (isFleetTypeMetric) {
     return i18n.translate('xpack.monitoring.cluster.overview.apmPanel.apmFleetTitle', {
-      defaultMessage: 'APM & Fleet server',
+      defaultMessage: 'Integrations server',
     });
   }
   return i18n.translate('xpack.monitoring.cluster.overview.apmPanel.apmTitle', {

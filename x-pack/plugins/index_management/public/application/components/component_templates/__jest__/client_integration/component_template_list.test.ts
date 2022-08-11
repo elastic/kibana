@@ -16,16 +16,12 @@ import { API_BASE_PATH } from './helpers/constants';
 const { setup } = pageHelpers.componentTemplateList;
 
 describe('<ComponentTemplateList />', () => {
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: ComponentTemplateListTestBed;
-
-  afterAll(() => {
-    server.restore();
-  });
 
   beforeEach(async () => {
     await act(async () => {
-      testBed = await setup();
+      testBed = await setup(httpSetup);
     });
 
     testBed.component.update();
@@ -69,7 +65,6 @@ describe('<ComponentTemplateList />', () => {
 
     test('should reload the component templates data', async () => {
       const { component, actions } = testBed;
-      const totalRequests = server.requests.length;
 
       await act(async () => {
         actions.clickReloadButton();
@@ -77,9 +72,9 @@ describe('<ComponentTemplateList />', () => {
 
       component.update();
 
-      expect(server.requests.length).toBe(totalRequests + 1);
-      expect(server.requests[server.requests.length - 1].url).toBe(
-        `${API_BASE_PATH}/component_templates`
+      expect(httpSetup.get).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/component_templates`,
+        expect.anything()
       );
     });
 
@@ -103,7 +98,7 @@ describe('<ComponentTemplateList />', () => {
       expect(modal).not.toBe(null);
       expect(modal!.textContent).toContain('Delete component template');
 
-      httpRequestsMockHelpers.setDeleteComponentTemplateResponse({
+      httpRequestsMockHelpers.setDeleteComponentTemplateResponse(componentTemplateName, {
         itemsDeleted: [componentTemplateName],
         errors: [],
       });
@@ -114,13 +109,10 @@ describe('<ComponentTemplateList />', () => {
 
       component.update();
 
-      const deleteRequest = server.requests[server.requests.length - 2];
-
-      expect(deleteRequest.method).toBe('DELETE');
-      expect(deleteRequest.url).toBe(
-        `${API_BASE_PATH}/component_templates/${componentTemplateName}`
+      expect(httpSetup.delete).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/component_templates/${componentTemplateName}`,
+        expect.anything()
       );
-      expect(deleteRequest.status).toEqual(200);
     });
   });
 
@@ -129,7 +121,7 @@ describe('<ComponentTemplateList />', () => {
       httpRequestsMockHelpers.setLoadComponentTemplatesResponse([]);
 
       await act(async () => {
-        testBed = await setup();
+        testBed = await setup(httpSetup);
       });
 
       testBed.component.update();
@@ -147,15 +139,15 @@ describe('<ComponentTemplateList />', () => {
   describe('Error handling', () => {
     beforeEach(async () => {
       const error = {
-        status: 500,
+        statusCode: 500,
         error: 'Internal server error',
         message: 'Internal server error',
       };
 
-      httpRequestsMockHelpers.setLoadComponentTemplatesResponse(undefined, { body: error });
+      httpRequestsMockHelpers.setLoadComponentTemplatesResponse(undefined, error);
 
       await act(async () => {
-        testBed = await setup();
+        testBed = await setup(httpSetup);
       });
 
       testBed.component.update();

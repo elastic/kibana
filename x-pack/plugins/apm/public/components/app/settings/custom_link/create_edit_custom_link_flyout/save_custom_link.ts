@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { NotificationsStart } from 'kibana/public';
+import { NotificationsStart } from '@kbn/core/public';
 import {
   Filter,
   CustomLink,

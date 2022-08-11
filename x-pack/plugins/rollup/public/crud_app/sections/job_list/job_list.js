@@ -19,7 +19,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
 
 import { extractQueryParams, SectionLoading } from '../../../shared_imports';
 import { getRouterLinkProps, listBreadcrumb } from '../../services';

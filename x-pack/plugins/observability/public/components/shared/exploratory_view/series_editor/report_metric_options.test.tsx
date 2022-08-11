@@ -8,7 +8,7 @@
 import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { mockAppIndexPattern, mockIndexPattern, mockUxSeries, render } from '../rtl_helpers';
+import { mockAppDataView, mockDataView, mockUxSeries, render } from '../rtl_helpers';
 import { getDefaultConfigs } from '../configurations/default_configs';
 import { PERCENTILE } from '../configurations/constants';
 import { ReportMetricOptions } from './report_metric_options';
@@ -18,7 +18,7 @@ describe('ReportMetricOptions', function () {
   const dataViewSeries = getDefaultConfigs({
     dataType: 'ux',
     reportType: 'kpi-over-time',
-    indexPattern: mockIndexPattern,
+    dataView: mockDataView,
     reportConfigMap: obsvReportConfigMap,
   });
 
@@ -31,7 +31,7 @@ describe('ReportMetricOptions', function () {
   });
 
   it('should display loading if index pattern is not available and is loading', async function () {
-    mockAppIndexPattern({ loading: true, indexPatterns: undefined });
+    mockAppDataView({ loading: true, dataViews: undefined });
     const { container } = render(
       <ReportMetricOptions
         seriesId={0}
@@ -44,7 +44,7 @@ describe('ReportMetricOptions', function () {
   });
 
   it('should not display loading if index pattern is already loaded', async function () {
-    mockAppIndexPattern({ loading: true });
+    mockAppDataView({ loading: true });
     render(
       <ReportMetricOptions
         seriesId={0}
@@ -57,7 +57,7 @@ describe('ReportMetricOptions', function () {
   });
 
   it('should include a tooltip for the report metric', async function () {
-    mockAppIndexPattern({ loading: false });
+    mockAppDataView({ loading: false });
     const { getByText, findByText } = render(
       <ReportMetricOptions
         seriesId={0}

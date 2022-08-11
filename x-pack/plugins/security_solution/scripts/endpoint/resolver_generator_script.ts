@@ -10,8 +10,10 @@ import yargs from 'yargs';
 import fs from 'fs';
 import { Client, errors } from '@elastic/elasticsearch';
 import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
-import { ToolingLog, CA_CERT_PATH } from '@kbn/dev-utils';
-import { KbnClient, KbnClientOptions } from '@kbn/test';
+import { CA_CERT_PATH } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
+import type { KbnClientOptions } from '@kbn/test';
+import { KbnClient } from '@kbn/test';
 import { indexHostsAndAlerts } from '../../common/endpoint/index_data';
 import { ANCESTRY_LIMIT, EndpointDocGenerator } from '../../common/endpoint/generate_data';
 
@@ -232,14 +234,6 @@ async function main() {
       type: 'boolean',
       default: false,
     },
-    logsEndpoint: {
-      alias: 'le',
-      describe:
-        'By default .logs-endpoint.action and .logs-endpoint.action.responses are not indexed. \
-        Add endpoint actions and responses using this option. Starting with v7.16.0.',
-      type: 'boolean',
-      default: false,
-    },
     ssl: {
       alias: 'ssl',
       describe: 'Use https for elasticsearch and kbn clients',
@@ -354,7 +348,6 @@ async function main() {
     argv.alertIndex,
     argv.alertsPerHost,
     argv.fleet,
-    argv.logsEndpoint,
     {
       ancestors: argv.ancestors,
       generations: argv.generations,

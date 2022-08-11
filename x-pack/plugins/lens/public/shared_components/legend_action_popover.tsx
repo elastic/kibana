@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiContextMenuPanelDescriptor, EuiIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
 import { useLegendAction } from '@elastic/charts';
-import type { LensFilterEvent } from '../types';
+import { ClickTriggerEvent } from '@kbn/charts-plugin/public';
 
 export interface LegendActionPopoverProps {
   /**
@@ -19,11 +19,11 @@ export interface LegendActionPopoverProps {
   /**
    * Callback on filter value
    */
-  onFilter: (data: LensFilterEvent['data']) => void;
+  onFilter: (data: ClickTriggerEvent['data']) => void;
   /**
    * Determines the filter event data
    */
-  context: LensFilterEvent['data'];
+  context: ClickTriggerEvent['data'];
 }
 
 export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverProps> = ({
@@ -87,7 +87,6 @@ export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverPro
   );
   return (
     <EuiPopover
-      id="contextMenuNormal"
       button={Button}
       isOpen={popoverOpen}
       closePopover={() => {

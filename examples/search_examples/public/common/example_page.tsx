@@ -8,7 +8,7 @@
 
 import React, { PropsWithChildren } from 'react';
 import { EuiPage, EuiPageSideBar, EuiSideNav } from '@elastic/eui';
-import { IBasePath } from 'kibana/public';
+import { IBasePath } from '@kbn/core/public';
 import { PLUGIN_ID } from '../../common';
 
 export interface ExampleLink {

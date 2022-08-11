@@ -8,9 +8,20 @@
 import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import React from 'react';
+import React, { useCallback } from 'react';
+import { useDispatch } from 'react-redux';
 import { UserDetailsLink } from '../../../../common/components/links';
+import { UserOverview } from '../../../../overview/components/user_overview';
+import { useUserDetails } from '../../../../users/containers/users/details';
+import { useGlobalTime } from '../../../../common/containers/use_global_time';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
+import { getCriteriaFromUsersType } from '../../../../common/components/ml/criteria/get_criteria_from_users_type';
+import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
+import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
+import { UsersType } from '../../../../users/store/model';
 
+export const QUERY_ID = 'usersDetailsQuery';
 export interface ExpandableUserProps {
   userName: string;
 }
@@ -45,5 +56,56 @@ export const ExpandableUserDetails = ({
   userName,
   isDraggable,
 }: ExpandableUserProps & { contextID: string; isDraggable?: boolean }) => {
-  return <>{'TODO I am empty'}</>;
+  const { to, from, isInitializing } = useGlobalTime();
+  const { selectedPatterns } = useSourcererDataView();
+  const dispatch = useDispatch();
+
+  const [loading, { userDetails }] = useUserDetails({
+    endDate: to,
+    startDate: from,
+    userName,
+    indexNames: selectedPatterns,
+    skip: isInitializing,
+  });
+
+  const narrowDateRange = useCallback(
+    (score, interval) => {
+      const fromTo = scoreIntervalToDateTime(score, interval);
+      dispatch(
+        setAbsoluteRangeDatePicker({
+          id: 'global',
+          from: fromTo.from,
+          to: fromTo.to,
+        })
+      );
+    },
+    [dispatch]
+  );
+
+  return (
+    <AnomalyTableProvider
+      criteriaFields={getCriteriaFromUsersType(UsersType.details, userName)}
+      startDate={from}
+      endDate={to}
+      skip={isInitializing}
+    >
+      {({ isLoadingAnomaliesData, anomaliesData }) => (
+        <UserOverview
+          userName={userName}
+          isInDetailsSidePanel={true}
+          data={userDetails}
+          loading={loading}
+          contextID={contextID}
+          isDraggable={isDraggable}
+          id={QUERY_ID}
+          anomaliesData={anomaliesData}
+          isLoadingAnomaliesData={isLoadingAnomaliesData}
+          startDate={from}
+          endDate={to}
+          narrowDateRange={narrowDateRange}
+          indexPatterns={selectedPatterns}
+        />
+      )}
+    </AnomalyTableProvider>
+  );
 };

@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { EuiStepsHorizontal, EuiSpacer } from '@elastic/eui';
+import { EuiStepsHorizontal, EuiStepStatus, EuiSpacer } from '@elastic/eui';
 
 import {
   FormWizardProvider,
@@ -32,6 +32,7 @@ export function FormWizard<T extends object = { [key: string]: any }, S extends 
   isSaving,
   onSave,
   onChange,
+  onStepChange,
   children,
   rightContentNav,
 }: Props<T, S>) {
@@ -41,6 +42,7 @@ export function FormWizard<T extends object = { [key: string]: any }, S extends 
       isEditing={isEditing}
       onSave={onSave}
       onChange={onChange}
+      onStepChange={onStepChange}
       defaultActiveStep={defaultActiveStep}
     >
       <FormWizardConsumer>
@@ -86,8 +88,11 @@ export function FormWizard<T extends object = { [key: string]: any }, S extends 
           const euiSteps = Object.values(steps).map(({ index, label }) => {
             return {
               title: label,
-              isComplete: activeStepIndex > index,
-              isSelected: activeStepIndex === index,
+              status: (activeStepIndex === index
+                ? 'selected'
+                : activeStepIndex > index
+                ? 'complete'
+                : 'incomplete') as EuiStepStatus,
               disabled: getIsStepDisabled(index),
               onClick: () => navigateToStep(index),
             };

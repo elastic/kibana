@@ -8,7 +8,7 @@
 
 import React, { useState, useEffect, useCallback, RefCallback } from 'react';
 import { useResizeObserver } from '@elastic/eui';
-import { withSuspense } from '../../../../presentation_util/public';
+import { withSuspense } from '@kbn/presentation-util-plugin/public';
 import {
   ShapeRef,
   ShapeAttributes,

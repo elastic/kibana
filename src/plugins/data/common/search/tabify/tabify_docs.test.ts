@@ -7,11 +7,11 @@
  */
 
 import { tabifyDocs, flattenHit } from './tabify_docs';
-import { IndexPattern, DataView } from '../..';
+import { DataView } from '@kbn/data-views-plugin/common';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { fieldFormatsMock } from '../../../../field_formats/common/mocks';
-import { stubbedSavedObjectIndexPattern } from '../../../../data_views/common/data_view.stub';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
+import { stubbedSavedObjectIndexPattern } from '@kbn/data-views-plugin/common/data_view.stub';
 
 class MockFieldFormatter {}
 
@@ -127,7 +127,7 @@ describe('tabify_docs', () => {
       getDefaultInstance: (id: string) => ({ toJSON: () => ({ id }) }),
     };
 
-    const index = new IndexPattern({
+    const index = new DataView({
       spec: {
         id: 'test-index',
         fields: {
@@ -186,6 +186,42 @@ describe('tabify_docs', () => {
     it('works without provided index pattern', () => {
       const table = tabifyDocs(response);
       expect(table).toMatchSnapshot();
+    });
+
+    it('handles custom meta fields provided by ES plugins correctly', () => {
+      // @ts-expect-error not full inteface
+      const responsePlugin = {
+        hits: {
+          hits: [
+            {
+              _id: 'hit-id-value',
+              _index: 'hit-index-value',
+              _type: 'hit-type-value',
+              _size: 12,
+              _score: 77,
+              _source: {},
+            },
+          ],
+        },
+      } as estypes.SearchResponse<unknown>;
+      const dataView = new DataView({
+        spec: {
+          id: 'test-index',
+          fields: {
+            sourceTest: {
+              name: 'sourceTest',
+              type: 'number',
+              searchable: true,
+              aggregatable: true,
+            },
+          },
+        },
+        metaFields: ['_id', '_index', '_score', '_type', '_size'],
+        fieldFormats: fieldFormats as any,
+      });
+      const table = tabifyDocs(responsePlugin, dataView);
+
+      expect(table.columns.map((col) => col.id)).toEqual(['_id', '_index', '_score', '_size']);
     });
   });
 });

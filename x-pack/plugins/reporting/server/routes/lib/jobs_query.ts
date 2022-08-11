@@ -14,14 +14,14 @@ import {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { errors } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
-import { ElasticsearchClient } from 'src/core/server';
-import { PromiseType } from 'utility-types';
-import { ReportingCore } from '../../';
+import { ElasticsearchClient } from '@kbn/core/server';
+import { ReportingCore } from '../..';
 import { REPORTING_SYSTEM_INDEX } from '../../../common/constants';
 import { ReportApiJSON, ReportSource } from '../../../common/types';
 import { statuses } from '../../lib/statuses';
 import { Report } from '../../lib/store';
 import { ReportingUser } from '../../types';
+import { runtimeFields, runtimeFieldKeys } from '../../lib/store/runtime_fields';
 
 const defaultSize = 10;
 const getUsername = (user: ReportingUser) => (user ? user.username : false);
@@ -29,10 +29,12 @@ const getUsername = (user: ReportingUser) => (user ? user.username : false);
 function getSearchBody(body: SearchRequest['body']): SearchRequest['body'] {
   return {
     _source: {
-      excludes: ['output.content'],
+      excludes: ['output.content', 'payload.headers'],
     },
     sort: [{ created_at: { order: 'desc' } }],
     size: defaultSize,
+    fields: runtimeFieldKeys,
+    runtime_mappings: runtimeFields,
     ...body,
   };
 }
@@ -61,7 +63,7 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
   }
 
   async function execQuery<
-    T extends (client: ElasticsearchClient) => Promise<PromiseType<ReturnType<T>> | undefined>
+    T extends (client: ElasticsearchClient) => Promise<Awaited<ReturnType<T>> | undefined>
   >(callback: T): Promise<Awaited<ReturnType<T>> | undefined> {
     try {
       const { asInternalUser: client } = await reportingCore.getEsClient();
@@ -138,7 +140,7 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
     async get(user, id) {
       const { logger } = reportingCore.getPluginSetupDeps();
       if (!id) {
-        logger.warning(`No ID provided for GET`);
+        logger.warn(`No ID provided for GET`);
         return;
       }
 
@@ -163,11 +165,11 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
 
       const result = response?.hits?.hits?.[0];
       if (!result?._source) {
-        logger.warning(`No hits resulted in search`);
+        logger.warn(`No hits resulted in search`);
         return;
       }
 
-      const report = new Report({ ...result, ...result._source });
+      const report = new Report({ ...result, ...result._source }, result.fields);
       return report.toApiJSON();
     },
 

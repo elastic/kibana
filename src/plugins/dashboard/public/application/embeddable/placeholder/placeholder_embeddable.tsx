@@ -10,7 +10,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { EuiLoadingChart } from '@elastic/eui';
 import classNames from 'classnames';
-import { CoreStart } from 'src/core/public';
+import { CoreStart } from '@kbn/core/public';
 import { Embeddable, EmbeddableInput, IContainer } from '../../../services/embeddable';
 import { KibanaThemeProvider } from '../../../services/kibana_react';
 

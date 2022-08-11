@@ -7,7 +7,7 @@
 
 // import { get } from 'lodash';
 import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginConfigDescriptor } from 'kibana/server';
+import { PluginConfigDescriptor } from '@kbn/core/server';
 import { isHexColor } from './utils';
 
 const configSchema = schema.object({

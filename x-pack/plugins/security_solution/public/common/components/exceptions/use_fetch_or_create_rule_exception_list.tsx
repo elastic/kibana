@@ -18,9 +18,9 @@ import {
   addEndpointExceptionList,
 } from '@kbn/securitysolution-list-api';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
-import { HttpStart } from '../../../../../../../src/core/public';
+import type { HttpStart } from '@kbn/core/public';
 
-import { Rule } from '../../../detections/containers/detection_engine/rules/types';
+import type { Rule } from '../../../detections/containers/detection_engine/rules/types';
 import {
   fetchRuleById,
   patchRule,
@@ -173,7 +173,7 @@ export const useFetchOrCreateRuleExceptionList = ({
           setExceptionList(exceptionListToUse);
           setIsLoading(false);
           if (onSuccess) {
-            onSuccess(matchingList == null);
+            onSuccess(false);
           }
         }
       } catch (error) {

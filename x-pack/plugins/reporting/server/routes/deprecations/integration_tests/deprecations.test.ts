@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { setupServer } from 'src/core/server/test_utils';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { setupServer } from '@kbn/core/server/test_utils';
 import supertest from 'supertest';
-import { licensingMock } from '../../../../../licensing/server/mocks';
-import { securityMock } from '../../../../../security/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { API_GET_ILM_POLICY_STATUS } from '../../../../common/constants';
 import {
   createMockConfigSchema,
-  createMockLevelLogger,
   createMockPluginSetup,
   createMockPluginStart,
   createMockReportingCore,
@@ -54,7 +54,7 @@ describe(`GET ${API_GET_ILM_POLICY_STATUS}`, () => {
   it('correctly handles authz when security is unavailable', async () => {
     const core = await createReportingCore({});
 
-    registerDeprecationsRoutes(core, createMockLevelLogger());
+    registerDeprecationsRoutes(core, loggingSystemMock.createLogger());
     await server.start();
 
     await supertest(httpSetup.server.listener)
@@ -68,7 +68,7 @@ describe(`GET ${API_GET_ILM_POLICY_STATUS}`, () => {
     security.license.isEnabled.mockReturnValue(false);
     const core = await createReportingCore({ security });
 
-    registerDeprecationsRoutes(core, createMockLevelLogger());
+    registerDeprecationsRoutes(core, loggingSystemMock.createLogger());
     await server.start();
 
     await supertest(httpSetup.server.listener)

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { VisualizeConstants } from '@kbn/visualizations-plugin/common/constants';
+import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { FtrService } from '../ftr_provider_context';
-import { VisualizeConstants } from '../../../src/plugins/visualizations/common/constants';
-import { FORMATS_UI_SETTINGS } from '../../../src/plugins/field_formats/common';
 
 // TODO: Remove & Refactor to use the TTV page objects
 interface VisualizeSaveModalArgs {
@@ -47,6 +47,9 @@ export class VisualizePageObject extends FtrService {
     LOGSTASH_NON_TIME_BASED: 'logstash*',
   };
 
+  remoteEsPrefix = 'ftr-remote:';
+  defaultIndexString = 'logstash-*';
+
   public async initTests(isNewLibrary = false) {
     await this.kibanaServer.savedObjects.clean({ types: ['visualization'] });
     await this.kibanaServer.importExport.load(
@@ -54,7 +57,7 @@ export class VisualizePageObject extends FtrService {
     );
 
     await this.kibanaServer.uiSettings.replace({
-      defaultIndex: 'logstash-*',
+      defaultIndex: this.defaultIndexString,
       [FORMATS_UI_SETTINGS.FORMAT_BYTES_DEFAULT_PATTERN]: '0,0.[000]b',
       'visualization:visualize:legacyPieChartsLibrary': !isNewLibrary,
       'visualization:visualize:legacyHeatmapChartsLibrary': !isNewLibrary,
@@ -66,7 +69,7 @@ export class VisualizePageObject extends FtrService {
   }
 
   public async clickNewVisualization() {
-    await this.listingTable.clickNewButton('createVisualizationPromptButton');
+    await this.listingTable.clickNewButton();
   }
 
   public async clickAggBasedVisualizations() {
@@ -78,7 +81,7 @@ export class VisualizePageObject extends FtrService {
   }
 
   public async createVisualizationPromptButton() {
-    await this.testSubjects.click('createVisualizationPromptButton');
+    await this.testSubjects.click('newItemButton');
   }
 
   public async getChartTypes() {
@@ -252,7 +255,7 @@ export class VisualizePageObject extends FtrService {
       await this.listingTable.checkListingSelectAllCheckbox();
       await this.listingTable.clickDeleteSelected();
       await this.common.clickConfirmOnModal();
-      await this.testSubjects.find('createVisualizationPromptButton');
+      await this.testSubjects.find('newItemButton');
     });
   }
 

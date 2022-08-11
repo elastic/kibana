@@ -7,7 +7,7 @@
  */
 
 import { pollSearch } from './poll_search';
-import { AbortError } from '../../../../../src/plugins/kibana_utils/common';
+import { AbortError } from '@kbn/kibana-utils-plugin/common';
 
 describe('pollSearch', () => {
   function getMockedSearch$(resolveOnI = 1, finishWithError = false) {

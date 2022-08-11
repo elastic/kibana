@@ -26,7 +26,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 
 const UNIT_OPTIONS = [
   {
@@ -111,7 +111,11 @@ export const PositiveRateAgg = (props) => {
             restrict={[KBN_FIELD_TYPES.NUMBER]}
             indexPattern={indexPattern}
             value={model.field}
-            onChange={handleSelectChange('field')}
+            onChange={(value) =>
+              handleChange({
+                field: value?.[0],
+              })
+            }
             uiRestrictions={props.uiRestrictions}
             fullWidth
           />

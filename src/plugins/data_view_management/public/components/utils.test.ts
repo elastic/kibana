@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { DataViewsContract } from 'src/plugins/data_views/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { getIndexPatterns } from './utils';
 
 const indexPatternContractMock = {
@@ -19,6 +19,7 @@ const indexPatternContractMock = {
       {
         id: 'test1',
         title: 'test name 1',
+        name: 'Test Name 1',
       },
     ])
   ),

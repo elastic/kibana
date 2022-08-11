@@ -35,7 +35,11 @@ export class ColorFormat extends FieldFormat {
     switch (this.param('fieldType')) {
       case 'string':
         return findLast(this.param('colors'), (colorParam: typeof DEFAULT_CONVERTER_COLOR) => {
-          return new RegExp(colorParam.regex).test(val as string);
+          try {
+            return new RegExp(colorParam.regex).test(val as string);
+          } catch (e) {
+            return false;
+          }
         });
 
       case 'number':
@@ -50,10 +54,10 @@ export class ColorFormat extends FieldFormat {
     }
   }
 
-  htmlConvert: HtmlContextTypeConvert = (val: string | number) => {
+  htmlConvert: HtmlContextTypeConvert = (val: string | number, options) => {
     const color = this.findColorRuleForVal(val) as typeof DEFAULT_CONVERTER_COLOR;
 
-    const displayVal = escape(asPrettyString(val));
+    const displayVal = escape(asPrettyString(val, options));
     if (!color) return displayVal;
 
     return ReactDOM.renderToStaticMarkup(

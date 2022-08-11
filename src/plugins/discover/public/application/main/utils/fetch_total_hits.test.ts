@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 import { throwError as throwErrorRx, of } from 'rxjs';
-import { RequestAdapter } from '../../../../../inspector';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { savedSearchMock, savedSearchMockWithTimeField } from '../../../__mocks__/saved_search';
 import { fetchTotalHits } from './fetch_total_hits';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { IKibanaSearchResponse } from 'src/plugins/data/common';
+import { IKibanaSearchResponse } from '@kbn/data-plugin/public';
 import { FetchDeps } from './fetch_all';
 
 const getDeps = () =>
@@ -25,18 +25,18 @@ const getDeps = () =>
 
 describe('test fetchTotalHits', () => {
   test('resolves returned promise with hit count', async () => {
-    savedSearchMock.searchSource.fetch$ = () =>
-      of({ rawResponse: { hits: { total: 45 } } } as IKibanaSearchResponse<SearchResponse>);
+    savedSearchMock.searchSource.fetch$ = <T>() =>
+      of({ rawResponse: { hits: { total: 45 } } } as IKibanaSearchResponse<SearchResponse<T>>);
 
     await expect(fetchTotalHits(savedSearchMock.searchSource, getDeps())).resolves.toBe(45);
   });
 
   test('rejects in case of an error', async () => {
-    savedSearchMock.searchSource.fetch$ = () => throwErrorRx({ msg: 'Oh noes!' });
+    savedSearchMock.searchSource.fetch$ = () => throwErrorRx(() => new Error('Oh noes!'));
 
-    await expect(fetchTotalHits(savedSearchMock.searchSource, getDeps())).rejects.toEqual({
-      msg: 'Oh noes!',
-    });
+    await expect(fetchTotalHits(savedSearchMock.searchSource, getDeps())).rejects.toEqual(
+      new Error('Oh noes!')
+    );
   });
   test('fetch$ is called with execution context containing savedSearch id', async () => {
     const fetch$Mock = jest
@@ -51,10 +51,6 @@ describe('test fetchTotalHits', () => {
     expect(fetch$Mock.mock.calls[0][0].executionContext).toMatchInlineSnapshot(`
       Object {
         "description": "fetch total hits",
-        "id": "the-saved-search-id",
-        "name": "discover",
-        "type": "application",
-        "url": "/",
       }
     `);
   });

@@ -10,7 +10,7 @@ import Path from 'path';
 
 import webpack from 'webpack';
 import { RawSource } from 'webpack-sources';
-import { CiStatsMetric } from '@kbn/dev-utils';
+import { CiStatsMetric } from '@kbn/ci-stats-reporter';
 
 import { Bundle } from '../common';
 

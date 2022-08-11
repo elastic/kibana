@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { CoreSetup } from 'kibana/server';
+import { CoreSetup } from '@kbn/core/server';
 
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { getTelemetry, initTelemetry, Telemetry } from './telemetry';
 import { telemetryMappingsType } from './mappings';
 import { setInternalRepository } from './internal_repository';

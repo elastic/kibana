@@ -11,7 +11,7 @@ import { EuiFormLabel } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { monaco } from '@kbn/monaco';
 
-import { CodeEditor, useKibana } from '../../../../kibana_react/public';
+import { CodeEditor, useKibana } from '@kbn/kibana-react-plugin/public';
 import { suggest, getSuggestion } from './timelion_expression_input_helpers';
 import { getArgValueSuggestions } from '../helpers/arg_value_suggestions';
 import { ITimelionFunction, TimelionFunctionArgs } from '../../common/types';

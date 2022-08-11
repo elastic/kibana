@@ -47,10 +47,12 @@ const OsqueryPackUploaderComponent: React.FC<OsqueryPackUploaderProps> = ({ onCh
           // remove any multiple spaces from the query
           return value.replaceAll(/\s(?=\s)/gm, '');
         }
+
         if (key === 'interval') {
           // convert interval int to string
           return `${value}`;
         }
+
         return value;
       });
 
@@ -82,6 +84,7 @@ const OsqueryPackUploaderComponent: React.FC<OsqueryPackUploaderProps> = ({ onCh
     (inputFiles) => {
       if (!inputFiles.length) {
         packName.current = '';
+
         return;
       }
 
@@ -103,6 +106,7 @@ const OsqueryPackUploaderComponent: React.FC<OsqueryPackUploaderProps> = ({ onCh
         );
         // @ts-expect-error update types
         filePickerRef.current?.removeFiles(new Event('fake'));
+
         return;
       }
 

@@ -24,11 +24,7 @@
         "privileges": ["read", "write"]
       },
       {
-        "names": [
-          "metrics-endpoint.metadata_current_*",
-          ".fleet-agents*",
-          ".fleet-actions*"
-        ],
+        "names": ["metrics-endpoint.metadata_current_*", ".fleet-agents*", ".fleet-actions*"],
         "privileges": ["read"]
       }
     ]

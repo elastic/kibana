@@ -7,13 +7,15 @@
  */
 
 import { Readable } from 'stream';
-import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
-import { SavedObjectsClientContract } from '../types';
-import {
+import type {
   SavedObjectsImportFailure,
   SavedObjectsImportResponse,
+} from '@kbn/core-saved-objects-common';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type {
+  ISavedObjectTypeRegistry,
   SavedObjectsImportHook,
-} from './types';
+} from '@kbn/core-saved-objects-server';
 import {
   checkReferenceOrigins,
   validateReferences,
@@ -35,6 +37,8 @@ export interface ImportSavedObjectsOptions {
   objectLimit: number;
   /** If true, will override existing object if present. Note: this has no effect when used with the `createNewCopies` option. */
   overwrite: boolean;
+  /** Refresh setting, defaults to `wait_for` */
+  refresh?: boolean | 'wait_for';
   /** {@link SavedObjectsClientContract | client} to use to perform the import operation */
   savedObjectsClient: SavedObjectsClientContract;
   /** The registry of all known saved object types */
@@ -62,6 +66,7 @@ export async function importSavedObjectsFromStream({
   typeRegistry,
   importHooks,
   namespace,
+  refresh,
 }: ImportSavedObjectsOptions): Promise<SavedObjectsImportResponse> {
   let errorAccumulator: SavedObjectsImportFailure[] = [];
   const supportedTypes = typeRegistry.getImportableAndExportableTypes().map((type) => type.name);
@@ -141,6 +146,7 @@ export async function importSavedObjectsFromStream({
     importStateMap,
     overwrite,
     namespace,
+    refresh,
   };
   const createSavedObjectsResult = await createSavedObjects(createSavedObjectsParams);
   errorAccumulator = [...errorAccumulator, ...createSavedObjectsResult.errors];

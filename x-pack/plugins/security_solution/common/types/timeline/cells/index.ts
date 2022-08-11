@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export type { CellValueElementProps } from '../../../../../timelines/common';
+export type { CellValueElementProps } from '@kbn/timelines-plugin/common';

@@ -11,8 +11,8 @@ import { JOBS_LIST_PATH } from './management_urls';
 export function getJobsListBreadcrumbs() {
   return [
     {
-      text: i18n.translate('xpack.ml.jobsList.breadcrumb', {
-        defaultMessage: 'Jobs',
+      text: i18n.translate('xpack.ml.management.breadcrumb', {
+        defaultMessage: 'Machine Learning',
       }),
       href: `#${JOBS_LIST_PATH}`,
     },

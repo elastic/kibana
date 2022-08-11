@@ -124,13 +124,7 @@
           "(theme$?: ",
           "Observable",
           "<",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.CoreTheme",
-            "text": "CoreTheme"
-          },
+          "CoreTheme",
           ">) => () => ",
           {
             "pluginId": "expressions",
@@ -154,13 +148,7 @@
             "signature": [
               "Observable",
               "<",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreTheme",
-                "text": "CoreTheme"
-              },
+              "CoreTheme",
               ">"
             ],
             "path": "src/plugins/expression_error/public/expression_renderers/debug_renderer.tsx",
@@ -182,13 +170,7 @@
           "(theme$?: ",
           "Observable",
           "<",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.CoreTheme",
-            "text": "CoreTheme"
-          },
+          "CoreTheme",
           ">) => () => ",
           {
             "pluginId": "expressions",
@@ -214,13 +196,7 @@
             "signature": [
               "Observable",
               "<",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreTheme",
-                "text": "CoreTheme"
-              },
+              "CoreTheme",
               ">"
             ],
             "path": "src/plugins/expression_error/public/expression_renderers/error_renderer.tsx",

@@ -11,7 +11,7 @@ import { shallow } from 'enzyme';
 
 import { EuiFlexGroup, EuiTablePagination } from '@elastic/eui';
 
-import { TablePaginationBar } from './';
+import { TablePaginationBar } from '.';
 
 const onChange = jest.fn();
 

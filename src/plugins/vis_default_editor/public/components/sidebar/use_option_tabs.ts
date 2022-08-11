@@ -9,7 +9,7 @@
 import { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { Vis, VisEditorOptionsProps } from '../../../../visualizations/public';
+import { Vis, VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 
 import { DefaultEditorDataTab, DefaultEditorDataTabProps } from './data_tab';
 

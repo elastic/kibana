@@ -7,21 +7,22 @@
 
 import {
   EuiButtonEmpty,
-  EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFieldSearch,
   EuiPopover,
+  EuiSelectable,
+  EuiSelectableListItem,
 } from '@elastic/eui';
 import { act } from '@testing-library/react';
 import React from 'react';
 
+import { coreMock } from '@kbn/core/public/mocks';
+import type { Space } from '@kbn/spaces-plugin/public';
+import { SpaceAvatarInternal } from '@kbn/spaces-plugin/public/space_avatar/space_avatar_internal';
+import { spacesManagerMock } from '@kbn/spaces-plugin/public/spaces_manager/mocks';
+import { getUiApi } from '@kbn/spaces-plugin/public/ui_api';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { coreMock } from 'src/core/public/mocks';
 
-import type { Space } from '../../../../../../spaces/public';
-import { SpaceAvatarInternal } from '../../../../../../spaces/public/space_avatar/space_avatar_internal';
-import { spacesManagerMock } from '../../../../../../spaces/public/spaces_manager/mocks';
-import { getUiApi } from '../../../../../../spaces/public/ui_api';
 import { SpacesPopoverList } from './spaces_popover_list';
 
 const mockSpaces = [
@@ -66,27 +67,89 @@ describe('SpacesPopoverList', () => {
     expect(wrapper.find(EuiContextMenuPanel)).toHaveLength(0);
   });
 
-  it('clicking the button renders a context menu with the provided spaces', async () => {
+  it('clicking the button renders an EuiSelectable menu with the provided spaces', async () => {
     const wrapper = await setup(mockSpaces);
     await act(async () => {
       wrapper.find(EuiButtonEmpty).simulate('click');
     });
     wrapper.update();
 
-    const menu = wrapper.find(EuiContextMenuPanel);
-    expect(menu).toHaveLength(1);
+    await act(async () => {
+      const menu = wrapper.find(EuiSelectable);
+      expect(menu).toHaveLength(1);
 
-    const items = menu.find(EuiContextMenuItem);
-    expect(items).toHaveLength(mockSpaces.length);
+      const items = menu.find(EuiSelectableListItem);
+      expect(items).toHaveLength(mockSpaces.length);
 
-    mockSpaces.forEach((space, index) => {
-      const spaceAvatar = items.at(index).find(SpaceAvatarInternal);
-      expect(spaceAvatar.props().space).toEqual(space);
+      mockSpaces.forEach((space, index) => {
+        const spaceAvatar = items.at(index).find(SpaceAvatarInternal);
+        expect(spaceAvatar.props().space).toEqual(space);
+      });
     });
   });
 
-  it('Should NOT render a search box when there is less than 8 spaces', async () => {
-    const wrapper = await setup(mockSpaces);
+  it('should render a search box when there are 8 or more spaces', async () => {
+    const eightSpaces = mockSpaces.concat([
+      {
+        id: 'space-3',
+        name: 'Space-3',
+        disabledFeatures: [],
+      },
+      {
+        id: 'space-4',
+        name: 'Space 4',
+        disabledFeatures: [],
+      },
+      {
+        id: 'space-5',
+        name: 'Space 5',
+        disabledFeatures: [],
+      },
+      {
+        id: 'space-6',
+        name: 'Space 6',
+        disabledFeatures: [],
+      },
+      {
+        id: 'space-7',
+        name: 'Space 7',
+        disabledFeatures: [],
+      },
+    ]);
+    const wrapper = await setup(eightSpaces);
+    await act(async () => {
+      wrapper.find(EuiButtonEmpty).simulate('click');
+    });
+    wrapper.update();
+
+    expect(wrapper.find(EuiFieldSearch)).toHaveLength(1);
+  });
+
+  it('should NOT render a search box when there are less than 8 spaces', async () => {
+    const sevenSpaces = mockSpaces.concat([
+      {
+        id: 'space-3',
+        name: 'Space-3',
+        disabledFeatures: [],
+      },
+      {
+        id: 'space-4',
+        name: 'Space 4',
+        disabledFeatures: [],
+      },
+      {
+        id: 'space-5',
+        name: 'Space 5',
+        disabledFeatures: [],
+      },
+      {
+        id: 'space-6',
+        name: 'Space 6',
+        disabledFeatures: [],
+      },
+    ]);
+
+    const wrapper = await setup(sevenSpaces);
     await act(async () => {
       wrapper.find(EuiButtonEmpty).simulate('click');
     });
@@ -101,11 +164,11 @@ describe('SpacesPopoverList', () => {
       wrapper.find(EuiButtonEmpty).simulate('click');
     });
     wrapper.update();
-
     expect(wrapper.find(EuiPopover).props().isOpen).toEqual(true);
 
-    wrapper.find(EuiPopover).props().closePopover();
-
+    await act(async () => {
+      wrapper.find(EuiPopover).props().closePopover();
+    });
     wrapper.update();
 
     expect(wrapper.find(EuiPopover).props().isOpen).toEqual(false);

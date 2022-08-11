@@ -55,7 +55,7 @@ https://www.elastic.co/guide/en/elasticsearch/client/index.html[{es} Client docu
 
 If you are running {kib} on our hosted {es} Service,
 click *View deployment details* on the *Integrations* view
-to verify your {es} endpoint and Cloud ID, and create API keys for integestion.
+to verify your {es} endpoint and Cloud ID, and create API keys for integration.
 
 [float]
 === Add sample data

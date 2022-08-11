@@ -8,6 +8,9 @@
 import { EuiErrorBoundary } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
+import { useTrackPageview } from '@kbn/observability-plugin/public';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { FilterBar } from './components/filter_bar';
 
 import { DocumentTitle } from '../../../components/document_title';
@@ -15,15 +18,12 @@ import { DocumentTitle } from '../../../components/document_title';
 import { SourceErrorPage } from '../../../components/source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { Source } from '../../../containers/metrics_source';
-import { useTrackPageview } from '../../../../../observability/public';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { LayoutView } from './components/layout_view';
 import { SavedViewProvider } from '../../../containers/saved_view/saved_view';
 import { DEFAULT_WAFFLE_VIEW_STATE } from './hooks/use_waffle_view_state';
 import { useWaffleOptionsContext } from './hooks/use_waffle_options';
 import { MetricsPageTemplate } from '../page_template';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
-import { APP_WRAPPER_CLASS } from '../../../../../../../src/core/public';
 import { inventoryTitle } from '../../../translations';
 import { SavedViews } from './components/saved_views';
 import { SnapshotContainer } from './components/snapshot_container';

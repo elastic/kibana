@@ -4,22 +4,21 @@
     <button role="tab"
           aria-selected="true"
           aria-controls="data-streams-tab"
-          id="data-streams"
-          tabindex="-1">
+          id="data-streams">
       Data streams
     </button>
     <button role="tab"
             aria-selected="false"
             aria-controls="classic-indices-tab"
-            id="classic-indices">
+            id="classic-indices"
+            tabindex="-1">
       Classic APM indices
     </button>
   </div>
   <div tabindex="0"
        role="tabpanel"
        id="data-streams-tab"
-       aria-labelledby="data-streams"
-       hidden="">
+       aria-labelledby="data-streams">
 ++++
 
 include::content.asciidoc[tag=data-streams]
@@ -29,7 +28,8 @@ include::content.asciidoc[tag=data-streams]
   <div tabindex="0"
        role="tabpanel"
        id="classic-indices-tab"
-       aria-labelledby="classic-indices">
+       aria-labelledby="classic-indices"
+       hidden="">
 ++++
 
 include::content.asciidoc[tag=classic-indices]

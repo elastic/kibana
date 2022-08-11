@@ -135,7 +135,7 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `Params` | `Params`: `AlertTypeParams` = `never` |
+| `Params` | `Params`: `RuleTypeParams` = `never` |
 
 #### Parameters
 
@@ -184,7 +184,7 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `Params` | `Params`: `AlertTypeParams` = `never` |
+| `Params` | `Params`: `RuleTypeParams` = `never` |
 
 #### Parameters
 
@@ -375,7 +375,7 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `Params` | `Params`: `AlertTypeParams` = `never` |
+| `Params` | `Params`: `RuleTypeParams` = `never` |
 
 #### Parameters
 

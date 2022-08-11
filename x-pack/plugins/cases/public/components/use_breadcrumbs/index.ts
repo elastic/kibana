@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ChromeBreadcrumb } from 'kibana/public';
+import { ChromeBreadcrumb } from '@kbn/core/public';
 import { useCallback, useEffect } from 'react';
 import { useKibana, useNavigation } from '../../common/lib/kibana';
 import { CasesDeepLinkId, ICasesDeepLinkId } from '../../common/navigation';

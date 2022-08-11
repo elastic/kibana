@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { INDEX_META_DATA_CREATED_BY } from '../common/constants';
 import {
   ImportResponse,

@@ -48,3 +48,5 @@ export type ObjectValues<T> = Array<T[keyof T]>;
 
 export type ObjectEntry<T> = [keyof T, T[keyof T]];
 export type ObjectEntries<T> = Array<ObjectEntry<T>>;
+
+export type UnwrapPromise<T extends Promise<any>> = T extends Promise<infer Value> ? Value : never;

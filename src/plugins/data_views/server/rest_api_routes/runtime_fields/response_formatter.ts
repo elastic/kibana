@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DataView, DataViewField } from 'src/plugins/data_views/common';
+import { DataView, DataViewField } from '../../../common';
 import { SERVICE_KEY_LEGACY, SERVICE_KEY_TYPE, SERVICE_KEY } from '../../constants';
 
 interface ResponseFormatterArgs {

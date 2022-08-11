@@ -10,7 +10,9 @@ import { pageObjects } from './page_objects';
 import { services } from './services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const xPackFunctionalConfig = await readConfigFile(require.resolve('../functional/config'));
+  const xPackFunctionalConfig = await readConfigFile(
+    require.resolve('../functional/config.base.js')
+  );
 
   return {
     // default to the xpack functional config

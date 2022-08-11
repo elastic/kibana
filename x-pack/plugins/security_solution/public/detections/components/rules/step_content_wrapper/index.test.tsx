@@ -8,7 +8,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { StepContentWrapper } from './index';
+import { StepContentWrapper } from '.';
 
 describe('StepContentWrapper', () => {
   it('renders correctly', () => {

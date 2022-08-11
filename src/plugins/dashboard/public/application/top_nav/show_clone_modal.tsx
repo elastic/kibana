@@ -10,7 +10,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
-import { CoreStart } from 'src/core/public';
+import { CoreStart } from '@kbn/core/public';
 import { DashboardCloneModal } from './clone_modal';
 import { KibanaThemeProvider } from '../../services/kibana_react';
 

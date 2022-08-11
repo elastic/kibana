@@ -6,6 +6,7 @@
  */
 
 import {
+  TIMESTAMP,
   ALERT_START,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
@@ -13,10 +14,10 @@ import {
   ALERT_RULE_NAME,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
-import type { TopAlert } from '../';
-import { experimentalRuleFieldMap } from '../../../../../rule_registry/common/assets/field_maps/experimental_rule_field_map';
-import { parseTechnicalFields } from '../../../../../rule_registry/common/parse_technical_fields';
-import { parseExperimentalFields } from '../../../../../rule_registry/common/parse_experimental_fields';
+import { experimentalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/experimental_rule_field_map';
+import { parseTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
+import { parseExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
+import type { TopAlert } from '..';
 import { asDuration, asPercent } from '../../../../common/utils/formatters';
 import { ObservabilityRuleTypeRegistry } from '../../../rules/create_observability_rule_type_registry';
 
@@ -48,5 +49,6 @@ export const parseAlert =
       fields: parsedFields,
       active: parsedFields[ALERT_STATUS] === ALERT_STATUS_ACTIVE,
       start: new Date(parsedFields[ALERT_START] ?? 0).getTime(),
+      lastUpdated: new Date(parsedFields[TIMESTAMP] ?? 0).getTime(),
     };
   };

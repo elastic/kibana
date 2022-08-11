@@ -45,26 +45,26 @@ export function UptimeCommonProvider({ getService, getPageObjects }: FtrProvider
       await this.setKueryBarText('queryInput', filterQuery);
     },
     async goToNextPage() {
-      await testSubjects.click('xpack.uptime.monitorList.nextButton', 5000);
+      await testSubjects.click('xpack.synthetics.monitorList.nextButton', 5000);
     },
     async goToPreviousPage() {
-      await testSubjects.click('xpack.uptime.monitorList.prevButton', 5000);
+      await testSubjects.click('xpack.synthetics.monitorList.prevButton', 5000);
     },
     async setStatusFilterUp() {
-      await testSubjects.click('xpack.uptime.filterBar.filterStatusUp');
+      await testSubjects.click('xpack.synthetics.filterBar.filterStatusUp');
     },
     async setStatusFilterDown() {
-      await testSubjects.click('xpack.uptime.filterBar.filterStatusDown');
+      await testSubjects.click('xpack.synthetics.filterBar.filterStatusDown');
     },
     async resetStatusFilter() {
       const upFilter = await find.byCssSelector(
-        '[data-test-subj="xpack.uptime.filterBar.filterStatusUp"]'
+        '[data-test-subj="xpack.synthetics.filterBar.filterStatusUp"]'
       );
       if (await upFilter.elementHasClass('euiFilterButton-hasActiveFilters')) {
         await this.setStatusFilterUp();
       }
       const downFilter = await find.byCssSelector(
-        '[data-test-subj="xpack.uptime.filterBar.filterStatusDown"]'
+        '[data-test-subj="xpack.synthetics.filterBar.filterStatusDown"]'
       );
       if (await downFilter.elementHasClass('euiFilterButton-hasActiveFilters')) {
         await this.setStatusFilterDown();
@@ -92,16 +92,16 @@ export function UptimeCommonProvider({ getService, getPageObjects }: FtrProvider
     },
     async getSnapshotCount() {
       return {
-        up: await testSubjects.getVisibleText('xpack.uptime.snapshot.donutChart.up'),
-        down: await testSubjects.getVisibleText('xpack.uptime.snapshot.donutChart.down'),
+        up: await testSubjects.getVisibleText('xpack.synthetics.snapshot.donutChart.up'),
+        down: await testSubjects.getVisibleText('xpack.synthetics.snapshot.donutChart.down'),
       };
     },
     async openPageSizeSelectPopover(): Promise<void> {
-      return testSubjects.click('xpack.uptime.monitorList.pageSizeSelect.popoverOpen', 5000);
+      return testSubjects.click('xpack.synthetics.monitorList.pageSizeSelect.popoverOpen', 5000);
     },
     async clickPageSizeSelectPopoverItem(size: number = 10): Promise<void> {
       return testSubjects.click(
-        `xpack.uptime.monitorList.pageSizeSelect.sizeSelectItem${size.toString()}`,
+        `xpack.synthetics.monitorList.pageSizeSelect.sizeSelectItem${size.toString()}`,
         5000
       );
     },
@@ -116,7 +116,7 @@ export function UptimeCommonProvider({ getService, getPageObjects }: FtrProvider
       });
     },
     async hasMappingsError() {
-      return testSubjects.exists('xpack.uptime.mappingsErrorPage');
+      return testSubjects.exists('xpack.synthetics.mappingsErrorPage');
     },
   };
 }

@@ -13,17 +13,18 @@ import {
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { useRef } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import type { PackQueryFormData } from '../../../packs/queries/use_pack_query_form';
 import { useRouterNavigate } from '../../../common/lib/kibana';
 import { Form } from '../../../shared_imports';
-import { SavedQueryForm, SavedQueryFormRefObject } from '../../../saved_queries/form';
+import { SavedQueryForm } from '../../../saved_queries/form';
 import { useSavedQueryForm } from '../../../saved_queries/form/use_saved_query_form';
 
 interface EditSavedQueryFormProps {
-  defaultValue?: unknown;
-  handleSubmit: () => Promise<void>;
+  defaultValue?: PackQueryFormData;
+  handleSubmit: (payload: unknown) => Promise<void>;
   viewMode?: boolean;
 }
 
@@ -32,19 +33,17 @@ const EditSavedQueryFormComponent: React.FC<EditSavedQueryFormProps> = ({
   handleSubmit,
   viewMode,
 }) => {
-  const savedQueryFormRef = useRef<SavedQueryFormRefObject>(null);
   const savedQueryListProps = useRouterNavigate('saved_queries');
 
   const { form } = useSavedQueryForm({
     defaultValue,
-    savedQueryFormRef,
     handleSubmit,
   });
   const { submit, isSubmitting } = form;
 
   return (
     <Form form={form}>
-      <SavedQueryForm ref={savedQueryFormRef} viewMode={viewMode} hasPlayground />
+      <SavedQueryForm viewMode={viewMode} hasPlayground />
       {!viewMode && (
         <>
           <EuiBottomBar>

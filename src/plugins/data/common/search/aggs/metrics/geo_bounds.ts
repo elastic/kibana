@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { aggGeoBoundsFnName } from './geo_bounds_fn';
 import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
-import { KBN_FIELD_TYPES } from '../../../../common';
+import { KBN_FIELD_TYPES } from '../../..';
 import { BaseAggParams } from '../types';
 
 export interface AggParamsGeoBounds extends BaseAggParams {

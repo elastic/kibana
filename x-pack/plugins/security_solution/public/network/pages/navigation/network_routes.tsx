@@ -6,24 +6,30 @@
  */
 
 import React, { useCallback } from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
+import { Route } from '@kbn/kibana-react-plugin/public';
 import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import { scoreIntervalToDateTime } from '../../../common/components/ml/score/score_interval_to_datetime';
 
-import { IPsQueryTabBody } from './ips_query_tab_body';
-import { CountriesQueryTabBody } from './countries_query_tab_body';
-import { HttpQueryTabBody } from './http_query_tab_body';
-import { AnomaliesQueryTabBody } from '../../../common/containers/anomalies/anomalies_query_tab_body';
+import {
+  CountriesQueryTabBody,
+  DnsQueryTabBody,
+  HttpQueryTabBody,
+  IPsQueryTabBody,
+  TlsQueryTabBody,
+} from '.';
+import { EventsQueryTabBody } from '../../../common/components/events_tab';
 import { AnomaliesNetworkTable } from '../../../common/components/ml/tables/anomalies_network_table';
-import { DnsQueryTabBody } from './dns_query_tab_body';
+import { filterNetworkExternalAlertData } from '../../../common/components/visualization_actions/utils';
+import { AnomaliesQueryTabBody } from '../../../common/containers/anomalies/anomalies_query_tab_body';
+import { TimelineId } from '../../../../common/types';
 import { ConditionalFlexGroup } from './conditional_flex_group';
-import { NetworkRoutesProps, NetworkRouteType } from './types';
-import { TlsQueryTabBody } from './tls_query_tab_body';
-import { Anomaly } from '../../../common/components/ml/types';
-import { NetworkAlertsQueryTabBody } from './alerts_query_tab_body';
-import { UpdateDateRange } from '../../../common/components/charts/common';
+import type { NetworkRoutesProps } from './types';
+import { NetworkRouteType } from './types';
+import type { Anomaly } from '../../../common/components/ml/types';
+import type { UpdateDateRange } from '../../../common/components/charts/common';
 import { NETWORK_PATH } from '../../../../common/constants';
 
 export const NetworkRoutes = React.memo<NetworkRoutesProps>(
@@ -149,8 +155,12 @@ export const NetworkRoutes = React.memo<NetworkRoutesProps>(
             AnomaliesTableComponent={AnomaliesNetworkTable}
           />
         </Route>
-        <Route path={`${NETWORK_PATH}/:tabName(${NetworkRouteType.alerts})`}>
-          <NetworkAlertsQueryTabBody {...tabProps} />
+        <Route path={`${NETWORK_PATH}/:tabName(${NetworkRouteType.events})`}>
+          <EventsQueryTabBody
+            pageFilters={filterNetworkExternalAlertData}
+            timelineId={TimelineId.networkPageEvents}
+            {...tabProps}
+          />
         </Route>
       </Switch>
     );

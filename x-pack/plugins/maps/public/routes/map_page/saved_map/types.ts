@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { Query } from 'src/plugins/data/common';
+import type { Query } from '@kbn/data-plugin/common';
 import { Filter } from '@kbn/es-query';
-import { TimeRange } from '../../../../../../../src/plugins/data/public';
-import { MapCenter } from '../../../../common/descriptor_types';
-import { MapSettings } from '../../../reducers/map';
+import type { TimeRange } from '@kbn/es-query';
+import { MapCenter, MapSettings } from '../../../../common/descriptor_types';
 
 export interface RefreshConfig {
   isPaused: boolean;

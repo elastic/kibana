@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { PackageListItem } from '../../../../common/types/models';
-import type { CustomIntegration } from '../../../../../../../src/plugins/custom_integrations/common';
+import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
 
-import type { IntegrationCategory } from '../../../../../../../src/plugins/custom_integrations/common';
+import type { IntegrationCategory } from '@kbn/custom-integrations-plugin/common';
+
+import type { PackageListItem } from '../../../../common/types/models';
 
 import { useMergeEprPackagesWithReplacements } from './use_merge_epr_with_replacements';
 

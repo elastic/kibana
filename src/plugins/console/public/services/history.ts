@@ -7,7 +7,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { Storage } from './index';
+import { Storage } from '.';
 
 const MAX_NUMBER_OF_HISTORY_ITEMS = 100;
 

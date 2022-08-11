@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { UpdateDateRange } from '../../../common/components/charts/common';
-import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
+import type { UpdateDateRange } from '../../../common/components/charts/common';
+import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 
 export interface UsersKpiProps {
   filterQuery?: string;

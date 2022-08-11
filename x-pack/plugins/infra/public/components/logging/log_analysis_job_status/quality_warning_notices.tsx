@@ -17,7 +17,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { groupBy } from 'lodash';
 import React, { Fragment, useState } from 'react';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import {
   CategoryQualityWarning,
   CategoryQualityWarningReason,
@@ -86,7 +86,7 @@ export const CategoryQualityWarnings: React.FC<{
 const QualityWarningReasonDescription = euiStyled(EuiDescriptionListDescription)`
   display: list-item;
   list-style-type: disc;
-  margin-left: ${(props) => props.theme.eui.paddingSizes.m};
+  margin-left: ${(props) => props.theme.eui.euiSizeM};
 `;
 
 const categoryQualityWarningCalloutTitle = i18n.translate(

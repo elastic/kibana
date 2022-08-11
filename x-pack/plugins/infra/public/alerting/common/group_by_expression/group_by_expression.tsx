@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
-import { DataViewField } from 'src/plugins/data_views/common';
-import { i18n } from '@kbn/i18n';
 import {
-  EuiPopoverTitle,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiPopover,
   EuiExpression,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiPopoverTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React, { useMemo, useState } from 'react';
+import { FieldSpec } from '@kbn/data-views-plugin/common';
 import { GroupBySelector } from './selector';
 
 interface Props {
   selectedGroups?: string[];
-  fields: DataViewField[];
+  fields: FieldSpec[];
   onChange: (groupBy: string[]) => void;
   label?: string;
 }

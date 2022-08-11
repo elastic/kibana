@@ -11,7 +11,7 @@ import { mount, shallow } from 'enzyme';
 
 import { ScaleType } from '../../../../types';
 import { YExtents, YExtentsProps } from './y_extents';
-import { NumberInputOption } from '../../../../../../../vis_default_editor/public';
+import { NumberInputOption } from '@kbn/vis-default-editor-plugin/public';
 
 describe('YExtents component', () => {
   let setMultipleValidity: jest.Mock;

@@ -13,7 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiPageContent, EuiEmptyPrompt, EuiPageContentBody } from '@elastic/eui';
 
 import { listBreadcrumb, editBreadcrumb, setBreadcrumbs } from '../../services/breadcrumbs';
-import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import {
   AutoFollowPatternForm,
   AutoFollowPatternPageTitle,

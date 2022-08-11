@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
@@ -45,12 +45,8 @@ export function registerAddPolicyRoute({
       const { indexName, policyName, alias = '' } = body;
 
       try {
-        await addLifecyclePolicy(
-          context.core.elasticsearch.client.asCurrentUser,
-          indexName,
-          policyName,
-          alias
-        );
+        const esClient = (await context.core).elasticsearch.client;
+        await addLifecyclePolicy(esClient.asCurrentUser, indexName, policyName, alias);
         return response.ok();
       } catch (error) {
         return handleEsError({ error, response });

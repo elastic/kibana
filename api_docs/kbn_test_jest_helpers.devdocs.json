@@ -256,6 +256,24 @@
     "functions": [
       {
         "parentPluginId": "@kbn/test-jest-helpers",
+        "id": "def-server.clearBroadcastChannelInstances",
+        "type": "Function",
+        "tags": [],
+        "label": "clearBroadcastChannelInstances",
+        "description": [
+          "\nRemoves all BroadcastChannel instances."
+        ],
+        "signature": [
+          "() => void"
+        ],
+        "path": "packages/kbn-test-jest-helpers/src/stub_broadcast_channel.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-jest-helpers",
         "id": "def-server.delay",
         "type": "Function",
         "tags": [],
@@ -278,6 +296,41 @@
               "number"
             ],
             "path": "packages/kbn-test-jest-helpers/src/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-jest-helpers",
+        "id": "def-server.expectToBeAccessible",
+        "type": "Function",
+        "tags": [],
+        "label": "expectToBeAccessible",
+        "description": [
+          "\nFunction to test if a component doesn't have a11y violations from axe automated testing"
+        ],
+        "signature": [
+          "(component: ",
+          "ReactWrapper",
+          ") => Promise<void>"
+        ],
+        "path": "packages/kbn-test-jest-helpers/src/axe_helpers.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.expectToBeAccessible.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "component",
+            "description": [],
+            "signature": [
+              "ReactWrapper"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/axe_helpers.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -357,6 +410,63 @@
           }
         ],
         "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-jest-helpers",
+        "id": "def-server.getA11yViolations",
+        "type": "Function",
+        "tags": [],
+        "label": "getA11yViolations",
+        "description": [
+          "\nReturns a11y violations as found by axe testing"
+        ],
+        "signature": [
+          "(component: ",
+          "ReactWrapper",
+          ") => Promise<",
+          "Result",
+          "[]>"
+        ],
+        "path": "packages/kbn-test-jest-helpers/src/axe_helpers.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.getA11yViolations.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "component",
+            "description": [],
+            "signature": [
+              "ReactWrapper"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/axe_helpers.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-jest-helpers",
+        "id": "def-server.getBroadcastChannelInstances",
+        "type": "Function",
+        "tags": [],
+        "label": "getBroadcastChannelInstances",
+        "description": [
+          "\nReturns all BroadcastChannel instances."
+        ],
+        "signature": [
+          "() => BroadcastChannel[]"
+        ],
+        "path": "packages/kbn-test-jest-helpers/src/stub_broadcast_channel.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [
+          "BroadcastChannel[]"
+        ],
         "initialIsOpen": false
       },
       {
@@ -1312,6 +1422,24 @@
       },
       {
         "parentPluginId": "@kbn/test-jest-helpers",
+        "id": "def-server.stubBroadcastChannel",
+        "type": "Function",
+        "tags": [],
+        "label": "stubBroadcastChannel",
+        "description": [
+          "\nStubs the global window.BroadcastChannel for use in jest tests."
+        ],
+        "signature": [
+          "() => void"
+        ],
+        "path": "packages/kbn-test-jest-helpers/src/stub_broadcast_channel.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-jest-helpers",
         "id": "def-server.stubWebWorker",
         "type": "Function",
         "tags": [],
@@ -1570,7 +1698,7 @@
             "tags": [],
             "label": "component",
             "description": [
-              "The comonent under test"
+              "The component under test"
             ],
             "signature": [
               "ReactWrapper",

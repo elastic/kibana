@@ -5,15 +5,22 @@
  * 2.0.
  */
 
-import {
+import type {
   ElasticsearchClient,
   Logger,
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
-} from 'kibana/server';
+} from '@kbn/core/server';
 
-import { SearchTotalHits, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import {
+import type { SearchTotalHits, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { Agent, AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
+import type {
+  AgentPolicyServiceInterface,
+  PackagePolicyServiceInterface,
+} from '@kbn/fleet-plugin/server';
+import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
+import { getAgentStatus } from '@kbn/fleet-plugin/common/services/agent_status';
+import type {
   HostInfo,
   HostMetadata,
   MaybeImmutable,
@@ -21,12 +28,6 @@ import {
   PolicyData,
   UnitedAgentMetadata,
 } from '../../../../common/endpoint/types';
-import { Agent, AgentPolicy, PackagePolicy } from '../../../../../fleet/common';
-import {
-  AgentNotFoundError,
-  AgentPolicyServiceInterface,
-  PackagePolicyServiceInterface,
-} from '../../../../../fleet/server';
 import {
   EndpointHostNotFoundError,
   EndpointHostUnEnrolledError,
@@ -52,10 +53,9 @@ import {
 import { createInternalReadonlySoClient } from '../../utils/create_internal_readonly_so_client';
 import { METADATA_UNITED_INDEX } from '../../../../common/endpoint/constants';
 import { getAllEndpointPackagePolicies } from '../../routes/metadata/support/endpoint_package_policies';
-import { getAgentStatus } from '../../../../../fleet/common/services/agent_status';
-import { GetMetadataListRequestQuery } from '../../../../common/endpoint/schema/metadata';
+import type { GetMetadataListRequestQuery } from '../../../../common/endpoint/schema/metadata';
 import { EndpointError } from '../../../../common/endpoint/errors';
-import { EndpointFleetServicesInterface } from '../fleet/endpoint_fleet_services_factory';
+import type { EndpointFleetServicesInterface } from '../fleet/endpoint_fleet_services_factory';
 
 type AgentPolicyWithPackagePolicies = Omit<AgentPolicy, 'package_policies'> & {
   package_policies: PackagePolicy[];

@@ -6,18 +6,25 @@
  */
 
 import chunk from 'lodash/fp/chunk';
-import { getThreatList, getThreatListCount } from './get_threat_list';
+import type { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { CreateThreatSignalsOptions } from './types';
+import { getThreatList, getThreatListCount } from './get_threat_list';
+import type {
+  CreateThreatSignalsOptions,
+  CreateSignalInterface,
+  GetDocumentListInterface,
+} from './types';
 import { createThreatSignal } from './create_threat_signal';
-import { SearchAfterAndBulkCreateReturnType } from '../types';
+import { createEventSignal } from './create_event_signal';
+import type { SearchAfterAndBulkCreateReturnType } from '../types';
 import { buildExecutionIntervalValidator, combineConcurrentResults } from './utils';
 import { buildThreatEnrichment } from './build_threat_enrichment';
-import { getEventCount } from './get_event_count';
+import { getEventCount, getEventList } from './get_event_count';
+import { getMappingFilters } from './get_mapping_filters';
+import { THREAT_PIT_KEEP_ALIVE } from '../../../../../common/cti/constants';
 
 export const createThreatSignals = async ({
   alertId,
-  buildRuleMessage,
   bulkCreate,
   completeRule,
   concurrentSearches,
@@ -28,9 +35,9 @@ export const createThreatSignals = async ({
   itemsPerSearch,
   language,
   listClient,
-  logger,
   outputIndex,
   query,
+  ruleExecutionLogger,
   savedId,
   searchAfterSize,
   services,
@@ -43,9 +50,12 @@ export const createThreatSignals = async ({
   tuple,
   type,
   wrapHits,
+  runtimeMappings,
+  primaryTimestamp,
+  secondaryTimestamp,
 }: CreateThreatSignalsOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const params = completeRule.ruleParams;
-  logger.debug(buildRuleMessage('Indicator matching rule starting'));
+  ruleExecutionLogger.debug('Indicator matching rule starting');
   const perPage = concurrentSearches * itemsPerSearch;
   const verifyExecutionCanProceed = buildExecutionIntervalValidator(
     completeRule.ruleConfig.schedule.interval
@@ -63,6 +73,10 @@ export const createThreatSignals = async ({
     warningMessages: [],
   };
 
+  const { eventMappingFilter, indicatorMappingFilter } = getMappingFilters(threatMapping);
+  const allEventFilters = [...filters, eventMappingFilter];
+  const allThreatFilters = [...threatFilters, indicatorMappingFilter];
+
   const eventCount = await getEventCount({
     esClient: services.scopedClusterClient.asCurrentUser,
     index: inputIndex,
@@ -70,80 +84,192 @@ export const createThreatSignals = async ({
     tuple,
     query,
     language,
-    filters,
+    filters: allEventFilters,
+    primaryTimestamp,
+    secondaryTimestamp,
   });
 
-  logger.debug(`Total event count: ${eventCount}`);
+  ruleExecutionLogger.debug(`Total event count: ${eventCount}`);
 
-  if (eventCount === 0) {
-    logger.debug(buildRuleMessage('Indicator matching rule has completed'));
-    return results;
-  }
+  // if (eventCount === 0) {
+  //   ruleExecutionLogger.debug('Indicator matching rule has completed');
+  //   return results;
+  // }
 
-  let threatListCount = await getThreatListCount({
+  let threatPitId: OpenPointInTimeResponse['id'] = (
+    await services.scopedClusterClient.asCurrentUser.openPointInTime({
+      index: threatIndex,
+      keep_alive: THREAT_PIT_KEEP_ALIVE,
+    })
+  ).id;
+  const reassignThreatPitId = (newPitId: OpenPointInTimeResponse['id'] | undefined) => {
+    if (newPitId) threatPitId = newPitId;
+  };
+
+  const threatListCount = await getThreatListCount({
     esClient: services.scopedClusterClient.asCurrentUser,
     exceptionItems,
-    threatFilters,
+    threatFilters: allThreatFilters,
     query: threatQuery,
     language: threatLanguage,
     index: threatIndex,
   });
 
-  logger.debug(buildRuleMessage(`Total indicator items: ${threatListCount}`));
+  ruleExecutionLogger.debug(`Total indicator items: ${threatListCount}`);
 
   const threatListConfig = {
     fields: threatMapping.map((mapping) => mapping.entries.map((item) => item.value)).flat(),
     _source: false,
   };
 
-  let threatList = await getThreatList({
-    esClient: services.scopedClusterClient.asCurrentUser,
-    exceptionItems,
-    threatFilters,
-    query: threatQuery,
-    language: threatLanguage,
-    index: threatIndex,
-    searchAfter: undefined,
-    logger,
-    buildRuleMessage,
-    perPage,
-    threatListConfig,
-  });
-
   const threatEnrichment = buildThreatEnrichment({
-    buildRuleMessage,
     exceptionItems,
-    logger,
+    ruleExecutionLogger,
     services,
-    threatFilters,
+    threatFilters: allThreatFilters,
     threatIndex,
     threatIndicatorPath,
     threatLanguage,
     threatQuery,
+    pitId: threatPitId,
+    reassignPitId: reassignThreatPitId,
+    listClient,
   });
 
-  while (threatList.hits.hits.length !== 0) {
-    verifyExecutionCanProceed();
-    const chunks = chunk(itemsPerSearch, threatList.hits.hits);
-    logger.debug(buildRuleMessage(`${chunks.length} concurrent indicator searches are starting.`));
-    const concurrentSearchesPerformed = chunks.map<Promise<SearchAfterAndBulkCreateReturnType>>(
-      (slicedChunk) =>
+  const createSignals = async ({
+    getDocumentList,
+    createSignal,
+    totalDocumentCount,
+  }: {
+    getDocumentList: GetDocumentListInterface;
+    createSignal: CreateSignalInterface;
+    totalDocumentCount: number;
+  }) => {
+    let list = await getDocumentList({ searchAfter: undefined });
+    let documentCount = totalDocumentCount;
+
+    while (list.hits.hits.length !== 0) {
+      verifyExecutionCanProceed();
+      const chunks = chunk(itemsPerSearch, list.hits.hits);
+      ruleExecutionLogger.debug(`${chunks.length} concurrent indicator searches are starting.`);
+      const concurrentSearchesPerformed =
+        chunks.map<Promise<SearchAfterAndBulkCreateReturnType>>(createSignal);
+      const searchesPerformed = await Promise.all(concurrentSearchesPerformed);
+      results = combineConcurrentResults(results, searchesPerformed);
+      documentCount -= list.hits.hits.length;
+      ruleExecutionLogger.debug(
+        `Concurrent indicator match searches completed with ${results.createdSignalsCount} signals found`,
+        `search times of ${results.searchAfterTimes}ms,`,
+        `bulk create times ${results.bulkCreateTimes}ms,`,
+        `all successes are ${results.success}`
+      );
+      if (results.createdSignalsCount >= params.maxSignals) {
+        ruleExecutionLogger.debug(
+          `Indicator match has reached its max signals count ${params.maxSignals}. Additional documents not checked are ${documentCount}`
+        );
+        break;
+      }
+      ruleExecutionLogger.debug(`Documents items left to check are ${documentCount}`);
+
+      list = await getDocumentList({
+        searchAfter: list.hits.hits[list.hits.hits.length - 1].sort,
+      });
+    }
+  };
+
+  if (eventCount < threatListCount) {
+    await createSignals({
+      totalDocumentCount: eventCount,
+      getDocumentList: async ({ searchAfter }) =>
+        getEventList({
+          services,
+          ruleExecutionLogger,
+          exceptionItems,
+          filters: allEventFilters,
+          query,
+          language,
+          index: inputIndex,
+          searchAfter,
+          perPage,
+          tuple,
+          runtimeMappings,
+          primaryTimestamp,
+          secondaryTimestamp,
+        }),
+
+      createSignal: (slicedChunk) =>
+        createEventSignal({
+          alertId,
+          bulkCreate,
+          completeRule,
+          currentEventList: slicedChunk,
+          currentResult: results,
+          eventsTelemetry,
+          exceptionItems,
+          filters: allEventFilters,
+          inputIndex,
+          language,
+          listClient,
+          outputIndex,
+          query,
+          reassignThreatPitId,
+          ruleExecutionLogger,
+          savedId,
+          searchAfterSize,
+          services,
+          threatEnrichment,
+          threatFilters: allThreatFilters,
+          threatIndex,
+          threatIndicatorPath,
+          threatLanguage,
+          threatMapping,
+          threatPitId,
+          threatQuery,
+          tuple,
+          type,
+          wrapHits,
+          runtimeMappings,
+          primaryTimestamp,
+          secondaryTimestamp,
+        }),
+    });
+  } else {
+    await createSignals({
+      totalDocumentCount: threatListCount,
+      getDocumentList: async ({ searchAfter }) =>
+        getThreatList({
+          esClient: services.scopedClusterClient.asCurrentUser,
+          exceptionItems,
+          threatFilters: allThreatFilters,
+          query: threatQuery,
+          language: threatLanguage,
+          index: threatIndex,
+          searchAfter,
+          ruleExecutionLogger,
+          perPage,
+          threatListConfig,
+          pitId: threatPitId,
+          reassignPitId: reassignThreatPitId,
+          runtimeMappings,
+          listClient,
+        }),
+
+      createSignal: (slicedChunk) =>
         createThreatSignal({
           alertId,
-          buildRuleMessage,
           bulkCreate,
           completeRule,
           currentResult: results,
           currentThreatList: slicedChunk,
           eventsTelemetry,
           exceptionItems,
-          filters,
+          filters: allEventFilters,
           inputIndex,
           language,
           listClient,
-          logger,
           outputIndex,
           query,
+          ruleExecutionLogger,
           savedId,
           searchAfterSize,
           services,
@@ -152,44 +278,22 @@ export const createThreatSignals = async ({
           tuple,
           type,
           wrapHits,
-        })
-    );
-    const searchesPerformed = await Promise.all(concurrentSearchesPerformed);
-    results = combineConcurrentResults(results, searchesPerformed);
-    threatListCount -= threatList.hits.hits.length;
-    logger.debug(
-      buildRuleMessage(
-        `Concurrent indicator match searches completed with ${results.createdSignalsCount} signals found`,
-        `search times of ${results.searchAfterTimes}ms,`,
-        `bulk create times ${results.bulkCreateTimes}ms,`,
-        `all successes are ${results.success}`
-      )
-    );
-    if (results.createdSignalsCount >= params.maxSignals) {
-      logger.debug(
-        buildRuleMessage(
-          `Indicator match has reached its max signals count ${params.maxSignals}. Additional indicator items not checked are ${threatListCount}`
-        )
-      );
-      break;
-    }
-    logger.debug(buildRuleMessage(`Indicator items left to check are ${threatListCount}`));
-
-    threatList = await getThreatList({
-      esClient: services.scopedClusterClient.asCurrentUser,
-      exceptionItems,
-      query: threatQuery,
-      language: threatLanguage,
-      threatFilters,
-      index: threatIndex,
-      searchAfter: threatList.hits.hits[threatList.hits.hits.length - 1].sort,
-      buildRuleMessage,
-      logger,
-      perPage,
-      threatListConfig,
+          runtimeMappings,
+          primaryTimestamp,
+          secondaryTimestamp,
+        }),
     });
   }
 
-  logger.debug(buildRuleMessage('Indicator matching rule has completed'));
+  try {
+    await services.scopedClusterClient.asCurrentUser.closePointInTime({ id: threatPitId });
+  } catch (error) {
+    // Don't fail due to a bad point in time closure. We have seen failures in e2e tests during nominal operations.
+    ruleExecutionLogger.warn(
+      `Error trying to close point in time: "${threatPitId}", it will expire within "${THREAT_PIT_KEEP_ALIVE}". Error is: "${error}"`
+    );
+  }
+
+  ruleExecutionLogger.debug('Indicator matching rule has completed');
   return results;
 };

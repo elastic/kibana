@@ -1,50 +1,48 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`FeatureProperties should render 1`] = `
-<table
-  className="eui-yScrollWithShadows mapFeatureTooltip_table"
+<div
+  className="mapFeatureTooltip_tableWrapper"
 >
-  <tbody>
-    <tr
-      className="mapFeatureTooltip_row"
-      key="prop1"
-    >
-      <td
-        className="eui-textOverflowWrap mapFeatureTooltip__propertyLabel"
+  <table
+    className="eui-yScrollWithShadows mapFeatureTooltip_table"
+  >
+    <tbody>
+      <tr
+        className="mapFeatureTooltip_row"
+        key="prop1"
       >
-        prop1
-      </td>
-      <td
-        className="eui-textOverflowWrap"
-        dangerouslySetInnerHTML={
-          Object {
-            "__html": "foobar1",
-          }
-        }
-      />
-      <td />
-    </tr>
-    <tr
-      className="mapFeatureTooltip_row"
-      key="prop2"
-    >
-      <td
-        className="eui-textOverflowWrap mapFeatureTooltip__propertyLabel"
+        <td
+          className="eui-textBreakWord mapFeatureTooltip__propertyLabel"
+        >
+          prop1
+        </td>
+        <td
+          className="eui-textBreakWord"
+        >
+          foobar1
+        </td>
+        <td />
+      </tr>
+      <tr
+        className="mapFeatureTooltip_row"
+        key="prop2"
       >
-        prop2
-      </td>
-      <td
-        className="eui-textOverflowWrap"
-        dangerouslySetInnerHTML={
-          Object {
-            "__html": "foobar2",
-          }
-        }
-      />
-      <td />
-    </tr>
-  </tbody>
-</table>
+        <td
+          className="eui-textBreakWord mapFeatureTooltip__propertyLabel"
+        >
+          prop2
+        </td>
+        <td
+          className="eui-textBreakWord"
+        >
+          foobar2
+        </td>
+        <td />
+      </tr>
+    </tbody>
+  </table>
+</div>
 `;
 
 exports[`FeatureProperties should show error message if unable to load tooltip content 1`] = `
@@ -61,90 +59,28 @@ exports[`FeatureProperties should show error message if unable to load tooltip c
 `;
 
 exports[`FeatureProperties should show filter button for filterable properties 1`] = `
-<table
-  className="eui-yScrollWithShadows mapFeatureTooltip_table"
+<div
+  className="mapFeatureTooltip_tableWrapper"
 >
-  <tbody>
-    <tr
-      className="mapFeatureTooltip_row"
-      key="prop1"
-    >
-      <td
-        className="eui-textOverflowWrap mapFeatureTooltip__propertyLabel"
+  <table
+    className="eui-yScrollWithShadows mapFeatureTooltip_table"
+  >
+    <tbody>
+      <tr
+        className="mapFeatureTooltip_row"
+        key="prop1"
       >
-        prop1
-      </td>
-      <td
-        className="eui-textOverflowWrap"
-        dangerouslySetInnerHTML={
-          Object {
-            "__html": "foobar1",
-          }
-        }
-      />
-      <td>
-        <EuiButtonEmpty
-          aria-label="Filter on property"
-          data-test-subj="mapTooltipCreateFilterButton"
-          onClick={[Function]}
-          size="xs"
-          title="Filter on property"
+        <td
+          className="eui-textBreakWord mapFeatureTooltip__propertyLabel"
         >
-          <EuiIcon
-            type="filter"
-          />
-        </EuiButtonEmpty>
-      </td>
-    </tr>
-    <tr
-      className="mapFeatureTooltip_row"
-      key="prop2"
-    >
-      <td
-        className="eui-textOverflowWrap mapFeatureTooltip__propertyLabel"
-      >
-        prop2
-      </td>
-      <td
-        className="eui-textOverflowWrap"
-        dangerouslySetInnerHTML={
-          Object {
-            "__html": "foobar2",
-          }
-        }
-      />
-      <td />
-    </tr>
-  </tbody>
-</table>
-`;
-
-exports[`FeatureProperties should show view actions button when there are available actions 1`] = `
-<table
-  className="eui-yScrollWithShadows mapFeatureTooltip_table"
->
-  <tbody>
-    <tr
-      className="mapFeatureTooltip_row"
-      key="prop1"
-    >
-      <td
-        className="eui-textOverflowWrap mapFeatureTooltip__propertyLabel"
-      >
-        prop1
-      </td>
-      <td
-        className="eui-textOverflowWrap"
-        dangerouslySetInnerHTML={
-          Object {
-            "__html": "foobar1",
-          }
-        }
-      />
-      <td
-        className="mapFeatureTooltip_actionsRow"
-      >
-        <span>
+          prop1
+        </td>
+        <td
+          className="eui-textBreakWord"
+        >
+          foobar1
+        </td>
+        <td>
           <EuiButtonEmpty
             aria-label="Filter on property"
             data-test-subj="mapTooltipCreateFilterButton"
@@ -156,39 +92,97 @@ exports[`FeatureProperties should show view actions button when there are availa
               type="filter"
             />
           </EuiButtonEmpty>
-          <EuiButtonEmpty
-            aria-label="View filter actions"
-            data-test-subj="mapTooltipMoreActionsButton"
-            onClick={[Function]}
-            size="xs"
-            title="View filter actions"
-          >
-            <EuiIcon
-              type="arrowRight"
-            />
-          </EuiButtonEmpty>
-        </span>
-      </td>
-    </tr>
-    <tr
-      className="mapFeatureTooltip_row"
-      key="prop2"
-    >
-      <td
-        className="eui-textOverflowWrap mapFeatureTooltip__propertyLabel"
+        </td>
+      </tr>
+      <tr
+        className="mapFeatureTooltip_row"
+        key="prop2"
       >
-        prop2
-      </td>
-      <td
-        className="eui-textOverflowWrap"
-        dangerouslySetInnerHTML={
-          Object {
-            "__html": "foobar2",
-          }
-        }
-      />
-      <td />
-    </tr>
-  </tbody>
-</table>
+        <td
+          className="eui-textBreakWord mapFeatureTooltip__propertyLabel"
+        >
+          prop2
+        </td>
+        <td
+          className="eui-textBreakWord"
+        >
+          foobar2
+        </td>
+        <td />
+      </tr>
+    </tbody>
+  </table>
+</div>
+`;
+
+exports[`FeatureProperties should show view actions button when there are available actions 1`] = `
+<div
+  className="mapFeatureTooltip_tableWrapper"
+>
+  <table
+    className="eui-yScrollWithShadows mapFeatureTooltip_table"
+  >
+    <tbody>
+      <tr
+        className="mapFeatureTooltip_row"
+        key="prop1"
+      >
+        <td
+          className="eui-textBreakWord mapFeatureTooltip__propertyLabel"
+        >
+          prop1
+        </td>
+        <td
+          className="eui-textBreakWord"
+        >
+          foobar1
+        </td>
+        <td
+          className="mapFeatureTooltip_actionsRow"
+        >
+          <span>
+            <EuiButtonEmpty
+              aria-label="Filter on property"
+              data-test-subj="mapTooltipCreateFilterButton"
+              onClick={[Function]}
+              size="xs"
+              title="Filter on property"
+            >
+              <EuiIcon
+                type="filter"
+              />
+            </EuiButtonEmpty>
+            <EuiButtonEmpty
+              aria-label="View filter actions"
+              data-test-subj="mapTooltipMoreActionsButton"
+              onClick={[Function]}
+              size="xs"
+              title="View filter actions"
+            >
+              <EuiIcon
+                type="arrowRight"
+              />
+            </EuiButtonEmpty>
+          </span>
+        </td>
+      </tr>
+      <tr
+        className="mapFeatureTooltip_row"
+        key="prop2"
+      >
+        <td
+          className="eui-textBreakWord mapFeatureTooltip__propertyLabel"
+        >
+          prop2
+        </td>
+        <td
+          className="eui-textBreakWord"
+        >
+          foobar2
+        </td>
+        <td />
+      </tr>
+    </tbody>
+  </table>
+</div>
 `;

@@ -23,4 +23,5 @@ export { IdAutocompleteComponent } from './id_autocomplete_component';
 export { UsernameAutocompleteComponent } from './username_autocomplete_component';
 export { IndexTemplateAutocompleteComponent } from './index_template_autocomplete_component';
 export { ComponentTemplateAutocompleteComponent } from './component_template_autocomplete_component';
+export { DataStreamAutocompleteComponent } from './data_stream_autocomplete_component';
 export * from './legacy';

@@ -5,11 +5,17 @@
  * 2.0.
  */
 
-import { run, RunFn, createFailError } from '@kbn/dev-utils';
+import type { RunFn } from '@kbn/dev-cli-runner';
+import { run } from '@kbn/dev-cli-runner';
+import { createFailError } from '@kbn/dev-cli-errors';
 import { KbnClient } from '@kbn/test';
-import { AxiosError } from 'axios';
+import type { AxiosError } from 'axios';
 import pMap from 'p-map';
-import type { CreateExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  CreateExceptionListItemSchema,
+  CreateExceptionListSchema,
+  ExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import {
   ENDPOINT_EVENT_FILTERS_LIST_DESCRIPTION,
   ENDPOINT_EVENT_FILTERS_LIST_ID,
@@ -41,8 +47,8 @@ export const cli = () => {
           kibana: 'http://elastic:changeme@localhost:5601',
         },
         help: `
-        --count            Number of event filters to create. Default: 10
-        --kibana           The URL to kibana including credentials. Default: http://elastic:changeme@localhost:5601
+        --count               Number of event filters to create. Default: 10
+        --kibana              The URL to kibana including credentials. Default: http://elastic:changeme@localhost:5601
       `,
       },
     }
@@ -55,7 +61,7 @@ class EventFilterDataLoaderError extends Error {
   }
 }
 
-const handleThrowAxiosHttpError = (err: AxiosError): never => {
+const handleThrowAxiosHttpError = (err: AxiosError<{ message?: string }>): never => {
   let message = err.message;
 
   if (err.response) {
@@ -77,7 +83,25 @@ const createEventFilters: RunFn = async ({ flags, log }) => {
   await pMap(
     Array.from({ length: flags.count as unknown as number }),
     () => {
-      const body = eventGenerator.generateEventFilterForCreate();
+      let options: Partial<CreateExceptionListItemSchema> = {};
+      const listSize = (flags.count ?? 10) as number;
+      const randomN = eventGenerator.randomN(listSize);
+      if (randomN > Math.floor(listSize / 2)) {
+        const os = eventGenerator.randomOSFamily() as ExceptionListItemSchema['os_types'][number];
+        options = {
+          os_types: [os],
+          entries: [
+            {
+              field: 'file.path.text',
+              operator: 'included',
+              type: 'wildcard',
+              value: os === 'windows' ? 'C:\\Fol*\\file.*' : '/usr/*/*.dmg',
+            },
+          ],
+        };
+      }
+
+      const body = eventGenerator.generateEventFilterForCreate(options);
 
       if (isArtifactByPolicy(body)) {
         const nmExceptions = Math.floor(Math.random() * 3) || 1;

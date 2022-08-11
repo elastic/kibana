@@ -6,23 +6,27 @@
  */
 
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
-import { Type, LanguageOrUndefined, Language } from '@kbn/securitysolution-io-ts-alerting-types';
+import type {
+  Type,
+  LanguageOrUndefined,
+  Language,
+} from '@kbn/securitysolution-io-ts-alerting-types';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  AlertInstanceContext,
+  AlertInstanceState,
+  RuleExecutorServices,
+} from '@kbn/alerting-plugin/server';
 import { assertUnreachable } from '../../../../common/utility_types';
 import { getQueryFilter } from '../../../../common/detection_engine/get_query_filter';
-import {
+import type {
   QueryOrUndefined,
   SavedIdOrUndefined,
   IndexOrUndefined,
 } from '../../../../common/detection_engine/schemas/common/schemas';
-import {
-  AlertInstanceContext,
-  AlertInstanceState,
-  AlertServices,
-} from '../../../../../alerting/server';
-import { PartialFilter } from '../types';
-import { QueryFilter } from './types';
+import type { PartialFilter } from '../types';
 import { withSecuritySpan } from '../../../utils/with_security_span';
+import type { ESBoolQuery } from '../../../../common/typed_json';
 
 interface GetFilterArgs {
   type: Type;
@@ -30,7 +34,7 @@ interface GetFilterArgs {
   language: LanguageOrUndefined;
   query: QueryOrUndefined;
   savedId: SavedIdOrUndefined;
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   index: IndexOrUndefined;
   lists: ExceptionListItemSchema[];
 }
@@ -53,7 +57,7 @@ export const getFilter = async ({
   type,
   query,
   lists,
-}: GetFilterArgs): Promise<QueryFilter> => {
+}: GetFilterArgs): Promise<ESBoolQuery> => {
   const queryFilter = () => {
     if (query != null && language != null && index != null) {
       return getQueryFilter(query, language, filters || [], index, lists);
@@ -95,6 +99,7 @@ export const getFilter = async ({
   switch (type) {
     case 'threat_match':
     case 'threshold':
+    case 'new_terms':
     case 'query': {
       return queryFilter();
     }

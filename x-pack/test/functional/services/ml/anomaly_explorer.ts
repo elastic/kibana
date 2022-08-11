@@ -140,9 +140,15 @@ export function MachineLearningAnomalyExplorerProvider({
 
     async assertClearSelectionButtonVisible(expectVisible: boolean) {
       if (expectVisible) {
-        await testSubjects.existOrFail('mlAnomalyTimelineClearSelection');
+        expect(await testSubjects.isDisplayed('mlAnomalyTimelineClearSelection')).to.eql(
+          true,
+          `Expected 'Clear selection' button to be displayed`
+        );
       } else {
-        await testSubjects.missingOrFail('mlAnomalyTimelineClearSelection');
+        expect(await testSubjects.isDisplayed('mlAnomalyTimelineClearSelection')).to.eql(
+          false,
+          `Expected 'Clear selection' button to be hidden`
+        );
       }
     },
 
@@ -169,6 +175,18 @@ export function MachineLearningAnomalyExplorerProvider({
 
     async scrollMapContainerIntoView() {
       await testSubjects.scrollIntoView('mlAnomaliesMapContainer');
+    },
+
+    async assertSingleMetricViewerButtonEnabled(expectedEnabled = true) {
+      const isEnabled = await testSubjects.isEnabled(
+        'mlAnomalyResultsViewSelectorSingleMetricViewer'
+      );
+      expect(isEnabled).to.eql(
+        expectedEnabled,
+        `Expected the Single Metric Viewer button to be '${
+          expectedEnabled ? 'enabled' : 'disabled'
+        }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+      );
     },
   };
 }

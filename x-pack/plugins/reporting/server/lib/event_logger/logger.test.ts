@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ConcreteTaskInstance } from '../../../../task_manager/server';
-import { createMockLevelLogger } from '../../test_helpers';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { BasePayload } from '../../types';
 import { Report } from '../store';
 import { ReportingEventLogger, reportingEventLoggerFactory } from './logger';
@@ -21,7 +21,7 @@ describe('Event Logger', () => {
   let factory: ReportingEventLogger;
 
   beforeEach(() => {
-    factory = reportingEventLoggerFactory(createMockLevelLogger());
+    factory = reportingEventLoggerFactory(loggingSystemMock.createLogger());
   });
 
   it(`should construct with an internal seed object`, () => {
@@ -171,10 +171,11 @@ describe('Event Logger', () => {
 
   it(`logClaimTask`, () => {
     const logger = new factory(mockReport);
-    const result = logger.logClaimTask();
+    const result = logger.logClaimTask({ queueDurationMs: 5500 });
     expect([result.event, result.kibana.reporting, result.message]).toMatchInlineSnapshot(`
       Array [
         Object {
+          "duration": 5500000000,
           "timezone": "UTC",
         },
         Object {

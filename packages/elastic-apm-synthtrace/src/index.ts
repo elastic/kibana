@@ -9,8 +9,12 @@
 export { timerange } from './lib/timerange';
 export { apm } from './lib/apm';
 export { stackMonitoring } from './lib/stack_monitoring';
+export { observer } from './lib/agent_config';
 export { cleanWriteTargets } from './lib/utils/clean_write_targets';
 export { createLogger, LogLevel } from './lib/utils/create_logger';
 
 export type { Fields } from './lib/entity';
+export type { ApmFields } from './lib/apm/apm_fields';
 export type { ApmException, ApmSynthtraceEsClient } from './lib/apm';
+export type { EntityIterable } from './lib/entity_iterable';
+export { EntityArrayIterable } from './lib/entity_iterable';

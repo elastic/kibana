@@ -6,22 +6,19 @@
  */
 import '../_index.scss';
 import React, { FC } from 'react';
-import {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-} from '../../../../../../src/plugins/kibana_react/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { getCoreStart, getPluginsStart } from '../../kibana_services';
 
 // @ts-ignore
-import { FileDataVisualizerView } from './components/file_data_visualizer_view/index';
-import { ResultLink } from '../common/components/results_links';
+import { FileDataVisualizerView } from './components/file_data_visualizer_view';
+import { GetAdditionalLinks } from '../common/components/results_links';
 
 interface Props {
-  additionalLinks?: ResultLink[];
+  getAdditionalLinks?: GetAdditionalLinks;
 }
 
 export type FileDataVisualizerSpec = typeof FileDataVisualizer;
-export const FileDataVisualizer: FC<Props> = ({ additionalLinks }) => {
+export const FileDataVisualizer: FC<Props> = ({ getAdditionalLinks }) => {
   const coreStart = getCoreStart();
   const { data, maps, embeddable, discover, share, security, fileUpload, cloud } =
     getPluginsStart();
@@ -44,11 +41,10 @@ export const FileDataVisualizer: FC<Props> = ({ additionalLinks }) => {
       <KibanaContextProvider services={{ ...services }}>
         <CloudContext>
           <FileDataVisualizerView
-            indexPatterns={data.indexPatterns}
-            savedObjectsClient={coreStart.savedObjects.client}
+            dataViewsContract={data.dataViews}
             http={coreStart.http}
             fileUpload={fileUpload}
-            resultsLinks={additionalLinks}
+            getAdditionalLinks={getAdditionalLinks}
             capabilities={coreStart.application.capabilities}
           />
         </CloudContext>

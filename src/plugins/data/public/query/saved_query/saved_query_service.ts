@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { HttpStart } from 'src/core/public';
+import { HttpStart } from '@kbn/core/public';
 import { SavedQuery } from './types';
 import type { SavedQueryAttributes } from '../../../common';
 

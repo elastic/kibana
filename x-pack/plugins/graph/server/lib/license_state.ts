@@ -8,8 +8,8 @@
 import Boom from '@hapi/boom';
 import { map } from 'rxjs/operators';
 import { Observable, Subscription } from 'rxjs';
-import { LicensingPluginStart } from '../../../licensing/server';
-import { ILicense } from '../../../licensing/common/types';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import { ILicense } from '@kbn/licensing-plugin/common/types';
 import { checkLicense, GraphLicenseInformation } from '../../common/check_license';
 
 export class LicenseState {

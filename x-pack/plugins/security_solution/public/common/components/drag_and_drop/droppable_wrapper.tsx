@@ -7,7 +7,8 @@
 
 import { rgba } from 'polished';
 import React, { useCallback } from 'react';
-import { Droppable, DraggableChildrenFn } from 'react-beautiful-dnd';
+import type { DraggableChildrenFn } from 'react-beautiful-dnd';
+import { Droppable } from 'react-beautiful-dnd';
 import styled from 'styled-components';
 
 interface Props {
@@ -44,7 +45,7 @@ const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean; height: string 
      color: ${props.theme.eui.euiColorSuccess};
      background-color: ${rgba(props.theme.eui.euiColorSuccess, 0.2)};
 
-     & .euiTextColor--subdued {
+     & .timeline-drop-area-empty__text {
       color: ${props.theme.eui.euiColorSuccess};
      }
   }

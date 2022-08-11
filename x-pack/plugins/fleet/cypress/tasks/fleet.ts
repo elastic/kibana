@@ -18,7 +18,6 @@ export function createAgentPolicy() {
   cy.getBySel(ADD_AGENT_BUTTON_TOP).click();
   cy.getBySel(STANDALONE_TAB).click();
   cy.getBySel(CREATE_POLICY_BUTTON).click();
-  cy.getBySel('agentPolicyCreateStatusCallOut').contains('Agent policy created');
   cy.getBySel(AGENT_FLYOUT_CLOSE_BUTTON).click();
 }
 
@@ -56,4 +55,15 @@ export function verifyPolicy(name: string, integrations: string[]) {
 export function verifyAgentPackage() {
   cy.visit('/app/integrations/installed');
   cy.getBySel('integration-card:epr:elastic_agent');
+}
+
+export function setFleetServerHost(host = 'https://fleetserver:8220') {
+  cy.request({
+    method: 'PUT',
+    url: '/api/fleet/settings',
+    headers: { 'kbn-xsrf': 'xx' },
+    body: {
+      fleet_server_hosts: [host],
+    },
+  });
 }

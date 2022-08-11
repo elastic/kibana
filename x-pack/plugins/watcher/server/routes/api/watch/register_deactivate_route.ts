@@ -6,11 +6,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { get } from 'lodash';
 import { RouteDependencies } from '../../../types';
-// @ts-ignore
-import { WatchStatus } from '../../../models/watch_status/index';
+import {
+  buildServerWatchStatusModel,
+  buildClientWatchStatusModel,
+} from '../../../models/watch_status_model';
 
 const paramsSchema = schema.object({
   watchId: schema.string(),
@@ -38,17 +40,18 @@ export function registerDeactivateRoute({
       const { watchId } = request.params;
 
       try {
-        const hit = await deactivateWatch(ctx.core.elasticsearch.client, watchId);
+        const esClient = (await ctx.core).elasticsearch.client;
+        const hit = await deactivateWatch(esClient, watchId);
         const watchStatusJson = get(hit, 'status');
         const json = {
           id: watchId,
           watchStatusJson,
         };
 
-        const watchStatus = WatchStatus.fromUpstreamJson(json);
+        const watchStatus = buildServerWatchStatusModel(json);
         return response.ok({
           body: {
-            watchStatus: watchStatus.downstreamJson,
+            watchStatus: buildClientWatchStatusModel(watchStatus),
           },
         });
       } catch (e) {

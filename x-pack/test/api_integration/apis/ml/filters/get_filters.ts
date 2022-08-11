@@ -41,32 +41,34 @@ export default ({ getService }: FtrProviderContext) => {
         await ml.api.deleteFilter(filterId);
       }
     });
+
     it(`should fetch all filters`, async () => {
-      const { body } = await supertest
+      const { body, status } = await supertest
         .get(`/api/ml/filters`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(COMMON_REQUEST_HEADERS)
-        .expect(200);
+        .set(COMMON_REQUEST_HEADERS);
+      ml.api.assertResponseStatusCode(200, status, body);
 
       expect(body).to.have.length(validFilters.length);
     });
 
     it(`should not allow to retrieve filters for user without required permission`, async () => {
-      const { body } = await supertest
+      const { body, status } = await supertest
         .get(`/api/ml/filters`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-        .set(COMMON_REQUEST_HEADERS)
-        .expect(403);
+        .set(COMMON_REQUEST_HEADERS);
+      ml.api.assertResponseStatusCode(403, status, body);
+
       expect(body.error).to.eql('Forbidden');
       expect(body.message).to.eql('Forbidden');
     });
 
     it(`should not allow to retrieve filters for unauthorized user`, async () => {
-      const { body } = await supertest
+      const { body, status } = await supertest
         .get(`/api/ml/filters`)
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-        .set(COMMON_REQUEST_HEADERS)
-        .expect(403);
+        .set(COMMON_REQUEST_HEADERS);
+      ml.api.assertResponseStatusCode(403, status, body);
 
       expect(body.error).to.eql('Forbidden');
       expect(body.message).to.eql('Forbidden');
@@ -74,24 +76,25 @@ export default ({ getService }: FtrProviderContext) => {
 
     it(`should fetch single filter by id`, async () => {
       const { filterId, requestBody } = validFilters[0];
-      const { body } = await supertest
+      const { body, status } = await supertest
         .get(`/api/ml/filters/${filterId}`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(COMMON_REQUEST_HEADERS)
-        .expect(200);
+        .set(COMMON_REQUEST_HEADERS);
+      ml.api.assertResponseStatusCode(200, status, body);
 
       expect(body.filter_id).to.eql(filterId);
       expect(body.description).to.eql(requestBody.description);
       expect(body.items).to.eql(requestBody.items);
     });
 
-    it(`should return 400 if filterId does not exist`, async () => {
-      const { body } = await supertest
+    it(`should return 404 if filterId does not exist`, async () => {
+      const { body, status } = await supertest
         .get(`/api/ml/filters/filter_id_dne`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(COMMON_REQUEST_HEADERS)
-        .expect(400);
-      expect(body.error).to.eql('Bad Request');
+        .set(COMMON_REQUEST_HEADERS);
+      ml.api.assertResponseStatusCode(404, status, body);
+
+      expect(body.error).to.eql('Not Found');
       expect(body.message).to.contain('resource_not_found_exception');
     });
   });

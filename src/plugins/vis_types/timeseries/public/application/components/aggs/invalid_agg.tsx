@@ -7,10 +7,11 @@
  */
 
 import React from 'react';
-import { EuiTitle } from '@elastic/eui';
+import { EuiTitle, useEuiTheme } from '@elastic/eui';
 import { AggRow } from './agg_row';
 import type { Metric } from '../../../../common/types';
 import { DragHandleProps } from '../../../types';
+import { titleStyles } from '../../styles/common.styles';
 
 interface InvalidAggProps {
   disableDelete: boolean;
@@ -23,6 +24,7 @@ interface InvalidAggProps {
 
 export const getInvalidAggComponent =
   (message: JSX.Element | string) => (props: InvalidAggProps) => {
+    const { euiTheme } = useEuiTheme();
     return (
       <AggRow
         disableDelete={props.disableDelete}
@@ -32,7 +34,7 @@ export const getInvalidAggComponent =
         siblings={props.siblings}
         dragHandleProps={props.dragHandleProps}
       >
-        <EuiTitle className="tvbAggRow__unavailable" size="xxxs" data-test-subj="invalid_agg">
+        <EuiTitle css={titleStyles(euiTheme)} size="xxxs" data-test-subj="invalid_agg">
           <span>{message}</span>
         </EuiTitle>
       </AggRow>

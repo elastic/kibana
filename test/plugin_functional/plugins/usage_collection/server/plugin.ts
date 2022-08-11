@@ -6,11 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { Plugin, CoreSetup } from 'kibana/server';
-import {
-  UsageCollectionSetup,
-  UsageCounter,
-} from '../../../../../src/plugins/usage_collection/server';
+import type { Plugin, CoreSetup } from '@kbn/core/server';
+import { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { registerRoutes } from './routes';
 
 export interface TestPluginDepsSetup {

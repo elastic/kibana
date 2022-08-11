@@ -8,8 +8,8 @@
 
 import moment from 'moment-timezone';
 import { Position, AxisSpec } from '@elastic/charts';
-import type { TimefilterContract } from 'src/plugins/data/public';
-import type { IUiSettingsClient } from 'kibana/public';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
 
 import { calculateInterval } from '../../common/lib';
 import { xaxisFormatterProvider } from './xaxis_formatter';

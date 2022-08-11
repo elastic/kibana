@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { migrationMocks } from 'src/core/server/mocks';
+import { migrationMocks } from '@kbn/core/server/mocks';
 import { addNewIndexingStrategyIndexNames } from './7_9_0_add_new_indexing_strategy_index_names';
 import { infraSourceConfigurationSavedObjectName } from '../saved_object_type';
 

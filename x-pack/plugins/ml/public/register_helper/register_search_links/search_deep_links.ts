@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { AppDeepLink } from 'src/core/public';
+import type { AppDeepLink } from '@kbn/core/public';
 import { ML_PAGES } from '../../../common/constants/locator';
 
 const OVERVIEW_LINK_DEEP_LINK: AppDeepLink = {

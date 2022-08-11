@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from 'src/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { removeArchiveEntries } from '../archive/storage';
 
 import { ASSETS_SAVED_OBJECT_TYPE, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../common';
-import type { PackageAssetReference } from '../../../../common';
+import type { PackageAssetReference } from '../../../../common/types';
 import { packagePolicyService } from '../../package_policy';
 import { appContextService } from '../..';
 

@@ -19,7 +19,7 @@ import {
   EuiSpacer,
   EuiCallOut,
 } from '@elastic/eui';
-import { DocLinksStart } from 'src/core/public';
+import { DocLinksStart } from '@kbn/core/public';
 
 import { RuntimeField } from '../../types';
 import { FormState } from '../runtime_field_form';

@@ -16,7 +16,8 @@ import {
   createSecuritySolutionStorageMock,
 } from '../../../common/mock';
 import '../../../common/mock/match_media';
-import { createStore, State } from '../../../common/store';
+import type { State } from '../../../common/store';
+import { createStore } from '../../../common/store';
 import { NetworkKpiComponent } from '.';
 
 describe('NetworkKpiComponent', () => {

@@ -6,77 +6,33 @@
  */
 
 import { buildEsQuery } from '@kbn/es-query';
-import { SavedObjectsClientContract, SimpleSavedObject, IUiSettingsClient } from 'src/core/public';
-import {
-  IndexPattern,
-  getEsQueryConfig,
-  IndexPatternsContract,
-  IndexPatternAttributes,
-} from '../../../../../../../src/plugins/data/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import { getEsQueryConfig } from '@kbn/data-plugin/public';
+import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 
 import { matchAllQuery } from '../../common';
 
-import { isIndexPattern } from '../../../../common/types/index_pattern';
+import { isDataView } from '../../../../common/types/data_view';
 
 export type SavedSearchQuery = object;
 
-type IndexPatternId = string;
+let dataViewCache: DataView[] = [];
 
-let indexPatternCache: Array<SimpleSavedObject<Record<string, any>>> = [];
-let fullIndexPatterns;
-let currentIndexPattern = null;
+export let refreshDataViews: () => Promise<unknown>;
 
-export let refreshIndexPatterns: () => Promise<unknown>;
-
-export function loadIndexPatterns(
-  savedObjectsClient: SavedObjectsClientContract,
-  indexPatterns: IndexPatternsContract
-) {
-  fullIndexPatterns = indexPatterns;
-  return savedObjectsClient
-    .find<IndexPatternAttributes>({
-      type: 'index-pattern',
-      fields: ['id', 'title', 'type', 'fields'],
-      perPage: 10000,
-    })
-    .then((response) => {
-      indexPatternCache = response.savedObjects;
-
-      if (refreshIndexPatterns === null) {
-        refreshIndexPatterns = () => {
-          return new Promise((resolve, reject) => {
-            loadIndexPatterns(savedObjectsClient, indexPatterns)
-              .then((resp) => {
-                resolve(resp);
-              })
-              .catch((error) => {
-                reject(error);
-              });
-          });
-        };
-      }
-
-      return indexPatternCache;
-    });
+export async function loadDataViews(dataViewsContract: DataViewsContract) {
+  dataViewCache = await dataViewsContract.find('*', 10000);
+  return dataViewCache;
 }
 
-export function getIndexPatternIdByTitle(indexPatternTitle: string): string | undefined {
-  return indexPatternCache.find((d) => d?.attributes?.title === indexPatternTitle)?.id;
+export function getDataViewIdByTitle(dataViewTitle: string): string | undefined {
+  return dataViewCache.find(({ title }) => title === dataViewTitle)?.id;
 }
 
 type CombinedQuery = Record<'bool', any> | object;
 
-export function loadCurrentIndexPattern(
-  indexPatterns: IndexPatternsContract,
-  indexPatternId: IndexPatternId
-) {
-  fullIndexPatterns = indexPatterns;
-  currentIndexPattern = fullIndexPatterns.get(indexPatternId);
-  return currentIndexPattern;
-}
-
 export interface SearchItems {
-  indexPattern: IndexPattern;
+  dataView: DataView;
   savedSearch: any;
   query: any;
   combinedQuery: CombinedQuery;
@@ -84,7 +40,7 @@ export interface SearchItems {
 
 // Helper for creating the items used for searching and job creation.
 export function createSearchItems(
-  indexPattern: IndexPattern | undefined,
+  dataView: DataView | undefined,
   savedSearch: any,
   config: IUiSettingsClient
 ): SearchItems {
@@ -103,9 +59,9 @@ export function createSearchItems(
     },
   };
 
-  if (!isIndexPattern(indexPattern) && savedSearch !== null && savedSearch.id !== undefined) {
+  if (!isDataView(dataView) && savedSearch !== null && savedSearch.id !== undefined) {
     const searchSource = savedSearch.searchSource;
-    indexPattern = searchSource.getField('index') as IndexPattern;
+    dataView = searchSource.getField('index') as DataView;
 
     query = searchSource.getField('query');
     const fs = searchSource.getField('filter');
@@ -113,15 +69,15 @@ export function createSearchItems(
     const filters = fs.length ? fs : [];
 
     const esQueryConfigs = getEsQueryConfig(config);
-    combinedQuery = buildEsQuery(indexPattern, [query], filters, esQueryConfigs);
+    combinedQuery = buildEsQuery(dataView, [query], filters, esQueryConfigs);
   }
 
-  if (!isIndexPattern(indexPattern)) {
+  if (!isDataView(dataView)) {
     throw new Error('Data view is not defined.');
   }
 
   return {
-    indexPattern,
+    dataView,
     savedSearch,
     query,
     combinedQuery,

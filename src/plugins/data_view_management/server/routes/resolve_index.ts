@@ -7,7 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'src/core/server';
+import { IRouter } from '@kbn/core/server';
 
 export function registerResolveIndexRoute(router: IRouter): void {
   router.get(
@@ -31,7 +31,8 @@ export function registerResolveIndexRoute(router: IRouter): void {
       },
     },
     async (context, req, res) => {
-      const body = await context.core.elasticsearch.client.asCurrentUser.indices.resolveIndex({
+      const esClient = (await context.core).elasticsearch.client;
+      const body = await esClient.asCurrentUser.indices.resolveIndex({
         name: req.params.query,
         expand_wildcards: req.query.expand_wildcards || 'open',
       });

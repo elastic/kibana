@@ -5,20 +5,24 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useCallback } from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import React, { memo, useMemo, useCallback, useState } from 'react';
+import { EuiConfirmModal, EuiLoadingSpinner } from '@elastic/eui';
 
 import { PropertyActions } from '../property_actions';
 import { useLensOpenVisualization } from '../markdown_editor/plugins/lens/use_lens_open_visualization';
+import { CANCEL_BUTTON, CONFIRM_BUTTON } from './translations';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
-interface UserActionPropertyActionsProps {
+export interface UserActionPropertyActionsProps {
   id: string;
   editLabel: string;
+  deleteLabel?: string;
+  deleteConfirmTitle?: string;
   quoteLabel: string;
   isLoading: boolean;
   onEdit: (id: string) => void;
+  onDelete?: (id: string) => void;
   onQuote: (id: string) => void;
-  userCanCrud: boolean;
   commentMarkdown: string;
 }
 
@@ -26,37 +30,85 @@ const UserActionPropertyActionsComponent = ({
   id,
   editLabel,
   quoteLabel,
+  deleteLabel,
+  deleteConfirmTitle,
   isLoading,
   onEdit,
+  onDelete,
   onQuote,
-  userCanCrud,
   commentMarkdown,
 }: UserActionPropertyActionsProps) => {
+  const { permissions } = useCasesContext();
   const { canUseEditor, actionConfig } = useLensOpenVisualization({ comment: commentMarkdown });
   const onEditClick = useCallback(() => onEdit(id), [id, onEdit]);
   const onQuoteClick = useCallback(() => onQuote(id), [id, onQuote]);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  const propertyActions = useMemo(
-    () =>
-      [
-        userCanCrud
-          ? [
-              {
-                iconType: 'pencil',
-                label: editLabel,
-                onClick: onEditClick,
-              },
-              {
-                iconType: 'quote',
-                label: quoteLabel,
-                onClick: onQuoteClick,
-              },
-            ]
-          : [],
-        canUseEditor && actionConfig ? [actionConfig] : [],
-      ].flat(),
-    [userCanCrud, editLabel, onEditClick, quoteLabel, onQuoteClick, canUseEditor, actionConfig]
-  );
+  const onDeleteClick = useCallback(() => {
+    setShowDeleteConfirm(true);
+  }, []);
+
+  const onDeleteConfirmClick = useCallback(() => {
+    if (onDelete) {
+      onDelete(id);
+    }
+    setShowDeleteConfirm(false);
+  }, [id, onDelete]);
+
+  const onDeleteCancelClick = useCallback(() => {
+    setShowDeleteConfirm(false);
+  }, []);
+
+  const propertyActions = useMemo(() => {
+    const showEditPencilIcon = permissions.update;
+    const showTrashIcon = permissions.delete && deleteLabel && onDelete;
+    const showQuoteIcon = permissions.create;
+    const showLensEditor = permissions.update && canUseEditor && actionConfig;
+
+    return [
+      ...(showEditPencilIcon
+        ? [
+            {
+              iconType: 'pencil',
+              label: editLabel,
+              onClick: onEditClick,
+            },
+          ]
+        : []),
+      ...(showTrashIcon
+        ? [
+            {
+              iconType: 'trash',
+              label: deleteLabel,
+              onClick: onDeleteClick,
+            },
+          ]
+        : []),
+      ...(showQuoteIcon
+        ? [
+            {
+              iconType: 'quote',
+              label: quoteLabel,
+              onClick: onQuoteClick,
+            },
+          ]
+        : []),
+      ...(showLensEditor ? [actionConfig] : []),
+    ];
+  }, [
+    permissions.update,
+    permissions.delete,
+    permissions.create,
+    deleteLabel,
+    onDelete,
+    canUseEditor,
+    actionConfig,
+    editLabel,
+    onEditClick,
+    onDeleteClick,
+    quoteLabel,
+    onQuoteClick,
+  ]);
 
   if (!propertyActions.length) {
     return null;
@@ -66,6 +118,18 @@ const UserActionPropertyActionsComponent = ({
     <>
       {isLoading && <EuiLoadingSpinner data-test-subj="user-action-title-loading" />}
       {!isLoading && <PropertyActions propertyActions={propertyActions} />}
+      {showDeleteConfirm ? (
+        <EuiConfirmModal
+          title={deleteConfirmTitle}
+          onCancel={onDeleteCancelClick}
+          onConfirm={onDeleteConfirmClick}
+          cancelButtonText={CANCEL_BUTTON}
+          confirmButtonText={CONFIRM_BUTTON}
+          buttonColor="danger"
+          defaultFocusedButton="confirm"
+          data-test-subj="property-actions-confirm-modal"
+        />
+      ) : null}
     </>
   );
 };

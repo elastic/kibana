@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Index as IndexInterface } from '../../../index_management/common/types';
+import { Index as IndexInterface } from '@kbn/index-management-plugin/common/types';
 
 export type Phase = keyof Phases;
 
@@ -80,6 +80,7 @@ export interface RolloverAction {
   max_age?: string;
   max_docs?: number;
   max_primary_shard_size?: string;
+  max_primary_shard_docs?: number;
   /**
    * @deprecated This will be removed in versions 8+ of the stack
    */
@@ -229,7 +230,6 @@ export interface IndexLifecyclePolicy {
   step?: string;
   step_info?: {
     reason?: string;
-    stack_trace?: string;
     type?: string;
     message?: string;
   };

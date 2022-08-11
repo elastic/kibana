@@ -32,3 +32,10 @@ export const getUpdateRequest = () =>
       index: '.alerts-observability.apm.alerts*',
     },
   });
+
+export const getReadFeatureIdsRequest = () =>
+  requestMock.create({
+    method: 'get',
+    path: `${BASE_RAC_ALERTS_API_PATH}/_feature_ids`,
+    query: { registrationContext: ['security'] },
+  });

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import * as Rx from 'rxjs';
 import { Lifecycle } from '../lifecycle';
 import { Mocha } from '../../fake_mocha_types';
 
@@ -18,14 +19,23 @@ import { Mocha } from '../../fake_mocha_types';
  *  @param  {Mocha} mocha
  *  @return {Promise<Number>} resolves to the number of test failures
  */
-export async function runTests(lifecycle: Lifecycle, mocha: Mocha) {
+export async function runTests(lifecycle: Lifecycle, mocha: Mocha, abortSignal?: AbortSignal) {
   let runComplete = false;
   const runner = mocha.run(() => {
     runComplete = true;
   });
 
-  lifecycle.cleanup.add(() => {
-    if (!runComplete) runner.abort();
+  Rx.race(
+    lifecycle.cleanup.before$,
+    abortSignal ? Rx.fromEvent(abortSignal, 'abort').pipe(Rx.take(1)) : Rx.NEVER
+  ).subscribe({
+    next() {
+      if (!runComplete) {
+        runComplete = true;
+        runner.uncaught(new Error('Forcing mocha to abort'));
+        runner.abort();
+      }
+    },
   });
 
   return new Promise((resolve) => {

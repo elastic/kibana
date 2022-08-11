@@ -6,8 +6,6 @@
  */
 
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
-// @ts-expect-error
-import configureStore from '../../../../../store/config/configureStore';
 import { getDiscoverQuery } from './discover_transaction_link';
 
 function getMockTransaction() {

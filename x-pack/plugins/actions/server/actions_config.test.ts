@@ -14,8 +14,8 @@ import {
   EnabledActionTypes,
 } from './actions_config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
-import { Logger } from '../../../../src/core/server';
-import { loggingSystemMock } from '../../../../src/core/server/mocks';
+import { Logger } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import moment from 'moment';
 
@@ -127,6 +127,17 @@ describe('isUriAllowed', () => {
     expect(
       getActionsConfigurationUtilities(config).isUriAllowed('https://github.com/elastic/kibana')
     ).toEqual(true);
+  });
+
+  test('returns true for network path references', () => {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      allowedHosts: ['my-domain.com'],
+      enabledActionTypes: [],
+    };
+    expect(getActionsConfigurationUtilities(config).isUriAllowed('//my-domain.com/foo')).toEqual(
+      true
+    );
   });
 
   test('throws when the hostname in the requested uri is not in the allowedHosts', () => {
@@ -468,5 +479,49 @@ describe('getSSLSettings', () => {
     };
     sslSettings = getActionsConfigurationUtilities(configFalse).getSSLSettings();
     expect(sslSettings.verificationMode).toBe('none');
+  });
+});
+
+const testEmailsOk = ['bob@elastic.co', 'jim@elastic.co'];
+const testEmailsNotAllowed = ['hal@bad.com', 'lou@notgood.org'];
+const testEmailsInvalid = ['invalid-email-address', '(garbage)'];
+const testEmailsAll = testEmailsOk.concat(testEmailsNotAllowed).concat(testEmailsInvalid);
+
+describe('validateEmailAddresses()', () => {
+  test('all domains allowed if config not set', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    const message = acu.validateEmailAddresses(testEmailsAll);
+    expect(message).toEqual(undefined);
+  });
+
+  test('only filtered domains allowed if config set', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      email: {
+        domain_allowlist: ['elastic.co'],
+      },
+    });
+
+    let message = acu.validateEmailAddresses(testEmailsOk);
+    expect(message).toBe(undefined);
+
+    message = acu.validateEmailAddresses(testEmailsAll);
+    expect(message).toMatchInlineSnapshot(
+      `"not valid emails: invalid-email-address, (garbage); not allowed emails: hal@bad.com, lou@notgood.org"`
+    );
+  });
+
+  test('no domains allowed if config set to empty array', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      email: {
+        domain_allowlist: [],
+      },
+    });
+
+    const message = acu.validateEmailAddresses(testEmailsAll);
+    expect(message).toMatchInlineSnapshot(
+      `"not valid emails: invalid-email-address, (garbage); not allowed emails: bob@elastic.co, jim@elastic.co, hal@bad.com, lou@notgood.org"`
+    );
   });
 });

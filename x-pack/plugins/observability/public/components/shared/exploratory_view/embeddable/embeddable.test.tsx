@@ -6,8 +6,8 @@
  */
 import React from 'react';
 import Embeddable from './embeddable';
-import { LensPublicStart } from '../../../../../../lens/public';
-import { IndexPatternState } from '../hooks/use_app_index_pattern';
+import { LensPublicStart } from '@kbn/lens-plugin/public';
+import { DataViewState } from '../hooks/use_app_data_view';
 import { render } from '../rtl_helpers';
 import { AddToCaseAction } from '../header/add_to_case_action';
 import { ActionTypes } from './use_actions';
@@ -77,7 +77,7 @@ const mockTimeRange = {
 };
 const mockOwner = 'securitySolution';
 const mockAppId = 'securitySolutionUI';
-const mockIndexPatterns = {} as IndexPatternState;
+const mockDataViews = {} as DataViewState;
 const mockReportType = 'kpi-over-time';
 const mockTitle = 'mockTitle';
 const mockLens = {
@@ -110,7 +110,7 @@ describe('Embeddable', () => {
         caseOwner={mockOwner}
         customLensAttrs={mockLensAttrs}
         customTimeRange={mockTimeRange}
-        indexPatterns={mockIndexPatterns}
+        indexPatterns={mockDataViews}
         lens={mockLens}
         reportType={mockReportType}
         title={mockTitle}
@@ -128,7 +128,7 @@ describe('Embeddable', () => {
         caseOwner={mockOwner}
         customLensAttrs={mockLensAttrs}
         customTimeRange={mockTimeRange}
-        indexPatterns={mockIndexPatterns}
+        indexPatterns={mockDataViews}
         lens={mockLens}
         reportType={mockReportType}
         withActions={mockActions}
@@ -146,7 +146,7 @@ describe('Embeddable', () => {
         caseOwner={mockOwner}
         customLensAttrs={mockLensAttrs}
         customTimeRange={mockTimeRange}
-        indexPatterns={mockIndexPatterns}
+        indexPatterns={mockDataViews}
         lens={mockLens}
         reportType={mockReportType}
         withActions={mockActions}
@@ -181,7 +181,7 @@ describe('Embeddable', () => {
         caseOwner={mockOwner}
         customLensAttrs={mockLensAttrs}
         customTimeRange={mockTimeRange}
-        indexPatterns={mockIndexPatterns}
+        indexPatterns={mockDataViews}
         isSingleMetric={true}
         lens={mockLens}
         reportType={mockReportType}
@@ -213,7 +213,7 @@ describe('Embeddable', () => {
         caseOwner={mockOwner}
         customLensAttrs={mockLensAttrs}
         customTimeRange={mockTimeRange}
-        indexPatterns={mockIndexPatterns}
+        indexPatterns={mockDataViews}
         isSingleMetric={true}
         lens={mockLens}
         reportType={mockReportType}

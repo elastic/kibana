@@ -7,6 +7,7 @@
 
 import { keyBy } from 'lodash';
 import { IndexPatternField, IndexPatternPrivateState } from './types';
+import { documentField } from './document_field';
 
 export function fieldExists(
   existingFields: IndexPatternPrivateState['existingFields'],
@@ -16,7 +17,13 @@ export function fieldExists(
   return existingFields[indexPatternTitle] && existingFields[indexPatternTitle][fieldName];
 }
 
-export function getFieldByNameFactory(newFields: IndexPatternField[]) {
+export function getFieldByNameFactory(
+  newFields: IndexPatternField[],
+  addRecordsField: boolean = true
+) {
   const fieldsLookup = keyBy(newFields, 'name');
+  if (addRecordsField) {
+    fieldsLookup[documentField.name] = documentField;
+  }
   return (name: string) => fieldsLookup[name];
 }

@@ -151,6 +151,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the IP Details
   isInspect={false}
   loadPage={[MockFunction]}
   loading={false}
+  setQuerySkip={[MockFunction]}
   showMorePagesIndicator={true}
   totalCount={524}
   type="details"
@@ -308,6 +309,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the default Ne
   isInspect={false}
   loadPage={[MockFunction]}
   loading={false}
+  setQuerySkip={[MockFunction]}
   showMorePagesIndicator={true}
   totalCount={524}
   type="page"

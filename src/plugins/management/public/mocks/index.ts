@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { ManagementSetup, ManagementStart, DefinedSections } from '../types';
-import { ManagementSection } from '../index';
-import { sharePluginMock } from '../../../share/public/mocks';
+import { ManagementSection } from '..';
 
 export const createManagementSectionMock = () =>
   ({

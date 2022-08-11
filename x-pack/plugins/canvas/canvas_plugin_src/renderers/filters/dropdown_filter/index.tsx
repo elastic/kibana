@@ -9,7 +9,7 @@ import { fromExpression, toExpression, Ast } from '@kbn/interpreter';
 import { get } from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { KibanaThemeProvider } from '../../../../../../../src/plugins/kibana_react/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { syncFilterExpression } from '../../../../public/lib/sync_filter_expression';
 import { RendererFactory } from '../../../../types';
 import { StartInitializer } from '../../../plugin';

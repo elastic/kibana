@@ -27,6 +27,7 @@ export default ({ getService }: FtrProviderContext) => {
         timeFieldName: 'order_date',
       },
       expected: {
+        statusCode: 200,
         responseBody: {
           'customer_first_name.keyword': 46,
           'customer_last_name.keyword': 183,
@@ -45,6 +46,7 @@ export default ({ getService }: FtrProviderContext) => {
         latestMs: 1560643199000, //  June 15, 2019 11:59:59 PM GMT
       },
       expected: {
+        statusCode: 200,
         responseBody: {
           'geoip.city_name': 10,
           'geoip.continent_name': 5,
@@ -64,6 +66,7 @@ export default ({ getService }: FtrProviderContext) => {
         latestMs: 1560643199000, //  June 15, 2019 11:59:59 PM GMT
       },
       expected: {
+        statusCode: 200,
         responseBody: {},
       },
     },
@@ -76,8 +79,8 @@ export default ({ getService }: FtrProviderContext) => {
         timeFieldName: 'order_date',
       },
       expected: {
+        statusCode: 404,
         responseBody: {
-          statusCode: 404,
           error: 'Not Found',
           message: 'index_not_found_exception',
         },
@@ -93,11 +96,12 @@ export default ({ getService }: FtrProviderContext) => {
 
     for (const testData of testDataList) {
       it(`${testData.testTitle}`, async () => {
-        const { body } = await supertest
+        const { body, status } = await supertest
           .post('/api/ml/fields_service/field_cardinality')
           .auth(testData.user, ml.securityCommon.getPasswordForUser(testData.user))
           .set(COMMON_REQUEST_HEADERS)
           .send(testData.requestBody);
+        ml.api.assertResponseStatusCode(testData.expected.statusCode, status, body);
 
         if (body.error === undefined) {
           expect(body).to.eql(testData.expected.responseBody);

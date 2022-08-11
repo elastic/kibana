@@ -40,9 +40,9 @@ export const deleteIndexRoute = (router: SecuritySolutionPluginRouter) => {
       const siemResponse = buildSiemResponse(response);
 
       try {
-        const esClient = context.core.elasticsearch.client.asCurrentUser;
+        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
-        const siemClient = context.securitySolution?.getAppClient();
+        const siemClient = (await context.securitySolution)?.getAppClient();
 
         if (!siemClient) {
           return siemResponse.error({ statusCode: 404 });

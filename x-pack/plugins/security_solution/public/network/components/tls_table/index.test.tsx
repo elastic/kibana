@@ -19,7 +19,8 @@ import {
   createSecuritySolutionStorageMock,
 } from '../../../common/mock';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
-import { createStore, State } from '../../../common/store';
+import type { State } from '../../../common/store';
+import { createStore } from '../../../common/store';
 import { networkModel } from '../../store';
 import { TlsTable } from '.';
 import { mockTlsData } from './mock';
@@ -29,7 +30,18 @@ jest.mock('../../../common/lib/kibana');
 describe('Tls Table Component', () => {
   const loadPage = jest.fn();
   const state: State = mockGlobalState;
-
+  const defaultProps = {
+    data: mockTlsData.edges,
+    fakeTotalCount: getOr(50, 'fakeTotalCount', mockTlsData.pageInfo),
+    id: 'tls',
+    isInspect: false,
+    loading: false,
+    loadPage,
+    setQuerySkip: jest.fn(),
+    showMorePagesIndicator: getOr(false, 'showMorePagesIndicator', mockTlsData.pageInfo),
+    totalCount: 1,
+    type: networkModel.NetworkType.details,
+  };
   const { storage } = createSecuritySolutionStorageMock();
   let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   const mount = useMountAppended();
@@ -42,17 +54,7 @@ describe('Tls Table Component', () => {
     test('it renders the default Domains table', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
-          <TlsTable
-            data={mockTlsData.edges}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockTlsData.pageInfo)}
-            id="tls"
-            isInspect={false}
-            loading={false}
-            loadPage={loadPage}
-            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockTlsData.pageInfo)}
-            totalCount={1}
-            type={networkModel.NetworkType.details}
-          />
+          <TlsTable {...defaultProps} />
         </ReduxStoreProvider>
       );
 
@@ -64,17 +66,7 @@ describe('Tls Table Component', () => {
     test('when you click on the column header, you should show the sorting icon', () => {
       const wrapper = mount(
         <TestProviders store={store}>
-          <TlsTable
-            data={mockTlsData.edges}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockTlsData.pageInfo)}
-            id="tls"
-            isInspect={false}
-            loading={false}
-            loadPage={loadPage}
-            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockTlsData.pageInfo)}
-            totalCount={1}
-            type={networkModel.NetworkType.details}
-          />
+          <TlsTable {...defaultProps} />
         </TestProviders>
       );
       expect(store.getState().network.details.queries?.tls.sort).toEqual({

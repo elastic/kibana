@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from 'src/core/server/mocks';
-import { taskManagerMock } from '../../../../task_manager/server/mocks';
-import { SuccessfulRunResult } from '../../../../task_manager/server/task';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import type { SuccessfulRunResult } from '@kbn/task-manager-plugin/server/task';
 import { OsqueryTelemetryTask } from './task';
 import {
   createMockTaskInstance,
@@ -50,7 +50,7 @@ describe('test osquery telemetry task', () => {
     expect(mockTaskManagerStart.ensureScheduled).toHaveBeenCalled();
   });
 
-  test('telemetry task should run if opted in', async () => {
+  test('telemetry task should run', async () => {
     const {
       testLastTimestamp,
       testResult,
@@ -70,12 +70,6 @@ describe('test osquery telemetry task', () => {
         current: testResult.state.lastExecutionTimestamp,
       }
     );
-  });
-
-  test('telemetry task should not run if opted out', async () => {
-    const { mockTelemetryTaskConfig } = await testTelemetryTaskRun(false);
-
-    expect(mockTelemetryTaskConfig.runTask).not.toHaveBeenCalled();
   });
 
   async function testTelemetryTaskRun(optedIn: boolean) {
@@ -104,7 +98,6 @@ describe('test osquery telemetry task', () => {
     const testResult = (await taskRunner.run()) as SuccessfulRunResult;
 
     expect(mockTelemetryTaskConfig.getLastExecutionTime).toHaveBeenCalled();
-    expect(mockTelemetryEventsSender.isTelemetryOptedIn).toHaveBeenCalled();
 
     expect(testResult).not.toBeNull();
     expect(testResult).toHaveProperty('state.lastExecutionTimestamp');

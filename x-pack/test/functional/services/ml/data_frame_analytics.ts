@@ -7,10 +7,9 @@
 
 import expect from '@kbn/expect';
 
+import { DATA_FRAME_TASK_STATE } from '@kbn/ml-plugin/common/constants/data_frame_analytics';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { MlApi } from './api';
-
-import { DATA_FRAME_TASK_STATE } from '../../../../plugins/ml/common/constants/data_frame_analytics';
 
 export function MachineLearningDataFrameAnalyticsProvider(
   { getService }: FtrProviderContext,
@@ -59,7 +58,7 @@ export function MachineLearningDataFrameAnalyticsProvider(
         } else {
           throw new Error('No Analytics create button found');
         }
-        await testSubjects.existOrFail('analyticsCreateSourceIndexModal', { timeout: 5000 });
+        await testSubjects.existOrFail('mlDFAPageSourceSelection', { timeout: 5000 });
       });
     },
 

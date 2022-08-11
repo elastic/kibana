@@ -9,7 +9,12 @@ import { shallow } from 'enzyme';
 import React from 'react';
 
 import '../../common/mock/match_media';
-import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../common/mock';
+import {
+  AppMockRenderer,
+  createAppMockRenderer,
+  readCasesPermissions,
+  TestProviders,
+} from '../../common/mock';
 import { EditableTitle, EditableTitleProps } from './editable_title';
 import { useMountAppended } from '../../utils/use_mount_appended';
 
@@ -20,7 +25,6 @@ describe('EditableTitle', () => {
     title: 'Test title',
     onSubmit: submitTitle,
     isLoading: false,
-    userCanCrud: true,
   };
 
   beforeEach(() => {
@@ -39,8 +43,8 @@ describe('EditableTitle', () => {
 
   it('does not show the edit icon when the user does not have edit permissions', () => {
     const wrapper = mount(
-      <TestProviders>
-        <EditableTitle {...{ ...defaultProps, userCanCrud: false }} />
+      <TestProviders permissions={readCasesPermissions()}>
+        <EditableTitle {...defaultProps} />
       </TestProviders>
     );
 
@@ -219,6 +223,49 @@ describe('EditableTitle', () => {
     expect(wrapper.find('[data-test-subj="editable-title-edit-icon"]').first().exists()).toBe(
       false
     );
+  });
+
+  it('does not show an error after a previous edit error was displayed', () => {
+    const longTitle =
+      'This is a title that should not be saved as it is longer than 64 characters.';
+
+    const shortTitle = 'My title';
+    const wrapper = mount(
+      <TestProviders>
+        <EditableTitle {...defaultProps} />
+      </TestProviders>
+    );
+
+    wrapper.find('button[data-test-subj="editable-title-edit-icon"]').simulate('click');
+    wrapper.update();
+
+    // simualte a long title
+    wrapper
+      .find('input[data-test-subj="editable-title-input-field"]')
+      .simulate('change', { target: { value: longTitle } });
+
+    wrapper.find('button[data-test-subj="editable-title-submit-btn"]').simulate('click');
+    wrapper.update();
+    expect(wrapper.find('.euiFormErrorText').text()).toBe(
+      'The length of the title is too long. The maximum length is 64.'
+    );
+
+    // write a shorter one
+    wrapper
+      .find('input[data-test-subj="editable-title-input-field"]')
+      .simulate('change', { target: { value: shortTitle } });
+    wrapper.update();
+
+    // submit the form
+    wrapper.find('button[data-test-subj="editable-title-submit-btn"]').simulate('click');
+    wrapper.update();
+
+    // edit again
+    wrapper.find('button[data-test-subj="editable-title-edit-icon"]').simulate('click');
+    wrapper.update();
+
+    // no error should appear
+    expect(wrapper.find('.euiFormErrorText').length).toBe(0);
   });
 
   describe('Badges', () => {

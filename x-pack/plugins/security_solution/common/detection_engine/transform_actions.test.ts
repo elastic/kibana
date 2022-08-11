@@ -8,7 +8,7 @@
 import { transformRuleToAlertAction, transformAlertToRuleAction } from './transform_actions';
 
 describe('transform_actions', () => {
-  test('it should transform RuleAlertAction[] to AlertAction[]', () => {
+  test('it should transform RuleAlertAction[] to RuleAction[]', () => {
     const ruleAction = {
       id: 'id',
       group: 'group',
@@ -24,7 +24,7 @@ describe('transform_actions', () => {
     });
   });
 
-  test('it should transform AlertAction[] to RuleAlertAction[]', () => {
+  test('it should transform RuleAction[] to RuleAlertAction[]', () => {
     const alertAction = {
       id: 'id',
       group: 'group',

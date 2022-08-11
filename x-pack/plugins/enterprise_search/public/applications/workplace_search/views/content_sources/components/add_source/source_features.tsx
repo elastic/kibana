@@ -39,7 +39,7 @@ import {
   SOURCE_FEATURES_GLOBAL_ACCESS_PERMISSIONS_FEATURE_DESCRIPTION,
 } from './constants';
 
-interface ConnectInstanceProps {
+interface SourceFeatureProps {
   features?: Features;
   objTypes?: string[];
   name: string;
@@ -47,7 +47,7 @@ interface ConnectInstanceProps {
 
 type IncludedFeatureIds = Exclude<FeatureIds, FeatureIds.DocumentLevelPermissions>;
 
-export const SourceFeatures: React.FC<ConnectInstanceProps> = ({ features, objTypes, name }) => {
+export const SourceFeatures: React.FC<SourceFeatureProps> = ({ features, objTypes, name }) => {
   const { hasPlatinumLicense } = useValues(LicensingLogic);
   const { isOrganization } = useValues(AppLogic);
 

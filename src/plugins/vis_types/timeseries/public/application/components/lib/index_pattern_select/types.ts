@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 import type { Assign } from '@kbn/utility-types';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { FetchedIndexPattern, IndexPatternValue } from '../../../../../common/types';
-import type { IndexPattern } from '../../../../../../../data/common';
 
 /** @internal **/
 export interface SelectIndexComponentProps {
   fetchedIndex: FetchedIndexPattern & {
-    defaultIndex?: IndexPattern | null;
+    defaultIndex?: DataView | null;
+    missedIndex?: string;
   };
   onIndexChange: (value: IndexPatternValue) => void;
   onModeChange: (useKibanaIndexes: boolean, index?: FetchedIndexPattern) => void;

@@ -7,14 +7,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { UiActionsStart } from 'src/plugins/ui_actions/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
   EmbeddableFactoryDefinition,
   Container,
   ErrorEmbeddable,
-} from '../../../embeddable/public';
+} from '@kbn/embeddable-plugin/public';
 
-import { TimeRange } from '../../../data/public';
+import type { TimeRange } from '@kbn/es-query';
 
 import { SearchInput, SearchOutput } from './types';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
@@ -80,7 +80,7 @@ export class SearchEmbeddableFactory
 
       await throwErrorOnSavedSearchUrlConflict(savedSearch);
 
-      const indexPattern = savedSearch.searchSource.getField('index');
+      const dataView = savedSearch.searchSource.getField('index');
       const { executeTriggerActions } = await this.getStartServices();
       const { SavedSearchEmbeddable: SavedSearchEmbeddableClass } = await import(
         './saved_search_embeddable'
@@ -92,7 +92,7 @@ export class SearchEmbeddableFactory
           editPath: url,
           filterManager,
           editable: services.capabilities.discover.save as boolean,
-          indexPatterns: indexPattern ? [indexPattern] : [],
+          indexPatterns: dataView ? [dataView] : [],
           services,
         },
         input,

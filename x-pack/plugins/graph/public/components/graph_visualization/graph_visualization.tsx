@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useRef, Fragment } from 'react';
+import React, { useRef } from 'react';
 import classNames from 'classnames';
 import d3, { ZoomEvent } from 'd3';
 import { isColorDark, hexToRgb } from '@elastic/eui';
 import { Workspace, WorkspaceNode, TermIntersect, ControlType, WorkspaceEdge } from '../../types';
-import { makeEdgeId, makeNodeId } from '../../services/persistence';
+import { makeNodeId } from '../../services/persistence';
 
 export interface GraphVisualizationProps {
   workspace: Workspace;
@@ -36,6 +36,13 @@ function registerZooming(element: SVGSVGElement) {
           .attr('style', 'stroke-width: ' + 1 / event.scale);
       })
     );
+}
+
+function makeEdgeId(edge: WorkspaceEdge) {
+  return `${makeNodeId(edge.source.data.field, edge.source.data.term)}-${makeNodeId(
+    edge.target.data.field,
+    edge.target.data.term
+  )}`;
 }
 
 export function GraphVisualization({
@@ -75,7 +82,7 @@ export function GraphVisualization({
   };
 
   const edgeClick = (edge: WorkspaceEdge, event: React.MouseEvent) => {
-    if (filterSet.size && !filterSet.has(makeEdgeId(edge.source.id, edge.target.id))) {
+    if (filterSet.size && !filterSet.has(makeEdgeId(edge))) {
       return;
     }
 
@@ -99,12 +106,6 @@ export function GraphVisualization({
 
   return (
     <svg
-      xmlns="http://www.w3.org/2000/svg"
-      className="gphGraph"
-      width="100%"
-      height="100%"
-      pointerEvents="all"
-      id="graphSvg"
       ref={(element) => {
         if (element && svgRoot.current !== element) {
           svgRoot.current = element;
@@ -116,7 +117,7 @@ export function GraphVisualization({
         <g>
           {workspace.edges &&
             workspace.edges.map((edge) => {
-              const edgeId = makeEdgeId(edge.source.id, edge.target.id);
+              const edgeId = makeEdgeId(edge);
               return (
                 <g key={edgeId} className="gphEdge--wrapper">
                   {/* Draw two edges: a thicker one for better click handling and the one to show the user */}
@@ -139,8 +140,8 @@ export function GraphVisualization({
                     y1={edge.topSrc.ky}
                     x2={edge.topTarget.kx}
                     y2={edge.topTarget.ky}
-                    onClick={() => {
-                      edgeClick(edge);
+                    onClick={(e) => {
+                      edgeClick(edge, e);
                     }}
                     className="gphEdge gphEdge--clickable"
                     style={{
@@ -173,7 +174,6 @@ export function GraphVisualization({
                   cy={node.ky}
                   r={node.scaledSize}
                   className={classNames('gphNode__circle', {
-                    // eslint-disable-next-line @typescript-eslint/naming-convention
                     'gphNode__circle--selected': node.isSelected,
                   })}
                   style={{
@@ -184,7 +184,6 @@ export function GraphVisualization({
                 {node.icon && (
                   <text
                     className={classNames('fa gphNode__text', {
-                      // eslint-disable-next-line @typescript-eslint/naming-convention
                       'gphNode__text--inverse': isColorDark(...hexToRgb(node.color)),
                     })}
                     transform="translate(0,5)"

@@ -6,12 +6,12 @@
  */
 
 import expect from '@kbn/expect';
+import { DataFrameAnalyticsConfig } from '@kbn/ml-plugin/public/application/data_frame_analytics/common';
+import { DeepPartial } from '@kbn/ml-plugin/common/types/common';
+import { DATA_FRAME_TASK_STATE } from '@kbn/ml-plugin/common/constants/data_frame_analytics';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { DataFrameAnalyticsConfig } from '../../../../../plugins/ml/public/application/data_frame_analytics/common';
-import { DeepPartial } from '../../../../../plugins/ml/common/types/common';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
-import { DATA_FRAME_TASK_STATE } from '../../../../../plugins/ml/common/constants/data_frame_analytics';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -78,11 +78,11 @@ export default ({ getService }: FtrProviderContext) => {
       it('should start analytics job for specified id if job exists', async () => {
         const analyticsId = `${jobId}_0`;
 
-        const { body } = await supertest
+        const { body, status } = await supertest
           .post(`/api/ml/data_frame/analytics/${analyticsId}/_start`)
           .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-          .set(COMMON_REQUEST_HEADERS)
-          .expect(200);
+          .set(COMMON_REQUEST_HEADERS);
+        ml.api.assertResponseStatusCode(200, status, body);
 
         expect(body).not.to.be(undefined);
         expect(body.acknowledged).to.be(true);
@@ -96,11 +96,11 @@ export default ({ getService }: FtrProviderContext) => {
         const id = `${jobId}_invalid`;
         const message = `No known job with id '${id}'`;
 
-        const { body } = await supertest
+        const { body, status } = await supertest
           .post(`/api/ml/data_frame/analytics/${id}/_start`)
           .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-          .set(COMMON_REQUEST_HEADERS)
-          .expect(404);
+          .set(COMMON_REQUEST_HEADERS);
+        ml.api.assertResponseStatusCode(404, status, body);
 
         expect(body.error).to.eql('Not Found');
         expect(body.message).to.eql(message);
@@ -109,11 +109,11 @@ export default ({ getService }: FtrProviderContext) => {
       it('should not allow to start analytics job for unauthorized user', async () => {
         const analyticsId = `${jobId}_0`;
 
-        const { body } = await supertest
+        const { body, status } = await supertest
           .post(`/api/ml/data_frame/analytics/${analyticsId}/_start`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-          .set(COMMON_REQUEST_HEADERS)
-          .expect(403);
+          .set(COMMON_REQUEST_HEADERS);
+        ml.api.assertResponseStatusCode(403, status, body);
 
         expect(body.error).to.eql('Forbidden');
         expect(body.message).to.eql('Forbidden');
@@ -122,11 +122,11 @@ export default ({ getService }: FtrProviderContext) => {
       it('should not allow to start analytics job for user with view only permission', async () => {
         const analyticsId = `${jobId}_0`;
 
-        const { body } = await supertest
+        const { body, status } = await supertest
           .post(`/api/ml/data_frame/analytics/${analyticsId}/_start`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-          .set(COMMON_REQUEST_HEADERS)
-          .expect(403);
+          .set(COMMON_REQUEST_HEADERS);
+        ml.api.assertResponseStatusCode(403, status, body);
 
         expect(body.error).to.eql('Forbidden');
         expect(body.message).to.eql('Forbidden');

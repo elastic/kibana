@@ -11,8 +11,6 @@ export const getDetectionEngineUrl = (search?: string) => `${appendSearch(search
 
 export const getRulesUrl = (search?: string) => `${appendSearch(search)}`;
 
-export const getCreateRuleUrl = (search?: string) => `/create${appendSearch(search)}`;
-
 export const getRuleDetailsUrl = (detailName: string, search?: string) =>
   `/id/${detailName}${appendSearch(search)}`;
 

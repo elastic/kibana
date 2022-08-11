@@ -6,7 +6,7 @@
  */
 
 import { Observable, Subject } from 'rxjs';
-import { ILicense } from '../../../../licensing/common/types';
+import { ILicense } from '@kbn/licensing-plugin/common/types';
 
 import { MlClientLicense } from './ml_client_license';
 

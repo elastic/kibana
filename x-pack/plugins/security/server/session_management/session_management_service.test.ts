@@ -7,14 +7,14 @@
 
 import { Subject } from 'rxjs';
 
-import { nextTick } from '@kbn/test-jest-helpers';
-import { coreMock, elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
-
+import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type {
   TaskManagerStartContract,
   TaskRunCreatorFunction,
-} from '../../../task_manager/server';
-import { taskManagerMock } from '../../../task_manager/server/mocks';
+} from '@kbn/task-manager-plugin/server';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { nextTick } from '@kbn/test-jest-helpers';
+
 import type { AuditLogger } from '../audit';
 import { auditLoggerMock } from '../audit/mocks';
 import { ConfigSchema, createConfig } from '../config';

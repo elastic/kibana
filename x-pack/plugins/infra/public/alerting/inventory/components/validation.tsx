@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ValidationResult } from '../../../../../triggers_actions_ui/public';
+import type { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   Comparator,
   FilterQuery,

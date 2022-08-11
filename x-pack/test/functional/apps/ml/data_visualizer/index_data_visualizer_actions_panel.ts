@@ -12,7 +12,7 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
 
   describe('index based actions panel on trial license', function () {
-    this.tags(['mlqa']);
+    this.tags(['ml']);
 
     const indexPatternName = 'ft_farequote';
 

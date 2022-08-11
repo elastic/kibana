@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PluginConfigDescriptor, PluginInitializerContext } from 'src/core/server';
+import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 
 import { ConfigSchema } from './config';
 import { SpacesPlugin } from './plugin';

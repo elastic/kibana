@@ -13,30 +13,30 @@ import { DocFailure, Failures } from './failures';
 
 interface Props {
   index: string;
-  indexPattern: string;
+  dataView: string;
   ingestPipelineId: string;
   docCount: number;
   importFailures: DocFailure[];
-  createIndexPattern: boolean;
+  createDataView: boolean;
   createPipeline: boolean;
 }
 
 export const ImportSummary: FC<Props> = ({
   index,
-  indexPattern,
+  dataView,
   ingestPipelineId,
   docCount,
   importFailures,
-  createIndexPattern,
+  createDataView,
   createPipeline,
 }) => {
   const items = createDisplayItems(
     index,
-    indexPattern,
+    dataView,
     ingestPipelineId,
     docCount,
     importFailures,
-    createIndexPattern,
+    createDataView,
     createPipeline
   );
 
@@ -91,11 +91,11 @@ export const ImportSummary: FC<Props> = ({
 
 function createDisplayItems(
   index: string,
-  indexPattern: string,
+  dataView: string,
   ingestPipelineId: string,
   docCount: number,
   importFailures: DocFailure[],
-  createIndexPattern: boolean,
+  createDataView: boolean,
   createPipeline: boolean
 ) {
   const items = [
@@ -131,7 +131,7 @@ function createDisplayItems(
     });
   }
 
-  if (createIndexPattern) {
+  if (createDataView) {
     items.splice(1, 0, {
       title: (
         <FormattedMessage
@@ -139,7 +139,7 @@ function createDisplayItems(
           defaultMessage="Data view"
         />
       ),
-      description: indexPattern,
+      description: dataView,
     });
   }
 

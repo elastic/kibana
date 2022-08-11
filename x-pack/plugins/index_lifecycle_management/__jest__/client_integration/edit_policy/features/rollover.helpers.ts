@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { HttpSetup } from '@kbn/core/public';
 import {
   createForceMergeActions,
   createMinAgeActions,
@@ -20,8 +21,8 @@ type SetupReturn = ReturnType<typeof setupRolloverTestBed>;
 
 export type RolloverTestBed = SetupReturn extends Promise<infer U> ? U : SetupReturn;
 
-export const setupRolloverTestBed = async () => {
-  const testBed = await initTestBed();
+export const setupRolloverTestBed = async (httpSetup: HttpSetup) => {
+  const testBed = await initTestBed(httpSetup);
 
   return {
     ...testBed,

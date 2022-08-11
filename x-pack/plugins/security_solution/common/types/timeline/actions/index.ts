@@ -11,4 +11,4 @@ export type {
   HeaderCellRender,
   RowCellRender,
   ControlColumnProps,
-} from '../../../../../timelines/common';
+} from '@kbn/timelines-plugin/common';

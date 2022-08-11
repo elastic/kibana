@@ -18,6 +18,7 @@ import React, {
   useState,
 } from 'react';
 import { useTheme } from '../../../hooks/use_theme';
+import { useTraceExplorerEnabledSetting } from '../../../hooks/use_trace_explorer_enabled_setting';
 import { getCytoscapeOptions } from './cytoscape_options';
 import { useCytoscapeEventHandlers } from './use_cytoscape_event_handlers';
 
@@ -65,8 +66,9 @@ function CytoscapeComponent({
   style,
 }: CytoscapeProps) {
   const theme = useTheme();
+  const isTraceExplorerEnabled = useTraceExplorerEnabledSetting();
   const [ref, cy] = useCytoscape({
-    ...getCytoscapeOptions(theme),
+    ...getCytoscapeOptions(theme, isTraceExplorerEnabled),
     elements,
   });
   useCytoscapeEventHandlers({ cy, serviceName, theme });

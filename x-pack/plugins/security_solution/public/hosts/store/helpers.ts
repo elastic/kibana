@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import type { RiskSeverity } from '../../../common/search_strategy';
 import { DEFAULT_TABLE_ACTIVE_PAGE } from '../../common/store/constants';
 
-import { HostsModel, HostsTableType, Queries, HostsType } from './model';
-import { HostRiskSeverity } from '../../../common/search_strategy';
+import type { HostsModel, Queries } from './model';
+import { HostsTableType, HostsType } from './model';
 
 export const setHostPageQueriesActivePageToZero = (state: HostsModel): Queries => ({
   ...state.page.queries,
@@ -26,10 +27,6 @@ export const setHostPageQueriesActivePageToZero = (state: HostsModel): Queries =
   },
   [HostsTableType.uncommonProcesses]: {
     ...state.page.queries[HostsTableType.uncommonProcesses],
-    activePage: DEFAULT_TABLE_ACTIVE_PAGE,
-  },
-  [HostsTableType.alerts]: {
-    ...state.page.queries[HostsTableType.alerts],
     activePage: DEFAULT_TABLE_ACTIVE_PAGE,
   },
 });
@@ -52,10 +49,6 @@ export const setHostDetailsQueriesActivePageToZero = (state: HostsModel): Querie
     ...state.details.queries[HostsTableType.uncommonProcesses],
     activePage: DEFAULT_TABLE_ACTIVE_PAGE,
   },
-  [HostsTableType.alerts]: {
-    ...state.page.queries[HostsTableType.alerts],
-    activePage: DEFAULT_TABLE_ACTIVE_PAGE,
-  },
 });
 
 export const setHostsQueriesActivePageToZero = (state: HostsModel, type: HostsType): Queries => {
@@ -67,7 +60,7 @@ export const setHostsQueriesActivePageToZero = (state: HostsModel, type: HostsTy
   throw new Error(`HostsType ${type} is unknown`);
 };
 
-export const generateSeverityFilter = (severitySelection: HostRiskSeverity[]) =>
+export const generateSeverityFilter = (severitySelection: RiskSeverity[]) =>
   severitySelection.length > 0
     ? [
         {

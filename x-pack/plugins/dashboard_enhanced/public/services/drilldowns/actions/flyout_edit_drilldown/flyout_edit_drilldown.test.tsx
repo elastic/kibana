@@ -7,10 +7,10 @@
 
 import { Subject } from 'rxjs';
 import { FlyoutEditDrilldownAction, FlyoutEditDrilldownParams } from './flyout_edit_drilldown';
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
-import { ViewMode } from '../../../../../../../../src/plugins/embeddable/public';
-import { uiActionsEnhancedPluginMock } from '../../../../../../ui_actions_enhanced/public/mocks';
-import { EnhancedEmbeddable } from '../../../../../../embeddable_enhanced/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { uiActionsEnhancedPluginMock } from '@kbn/ui-actions-enhanced-plugin/public/mocks';
+import { EnhancedEmbeddable } from '@kbn/embeddable-enhanced-plugin/public';
 import { MockEmbeddable, enhanceEmbeddable } from '../test_helpers';
 
 const overlays = coreMock.createStart().overlays;

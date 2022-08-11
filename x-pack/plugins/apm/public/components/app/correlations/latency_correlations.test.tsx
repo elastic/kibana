@@ -12,12 +12,12 @@ import { of } from 'rxjs';
 
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 import { merge } from 'lodash';
-import { dataPluginMock } from 'src/plugins/data/public/mocks';
-import type { IKibanaSearchResponse } from 'src/plugins/data/public';
-import { EuiThemeProvider } from 'src/plugins/kibana_react/common';
-import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import type { IKibanaSearchResponse } from '@kbn/data-plugin/public';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import type { LatencyCorrelationsResponse } from '../../../../common/correlations/latency_correlations/types';
 import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
 import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';

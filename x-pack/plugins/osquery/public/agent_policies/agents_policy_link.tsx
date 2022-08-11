@@ -9,8 +9,8 @@ import { EuiLink } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
-import { PLUGIN_ID } from '../../../fleet/common';
-import { pagePathGetters } from '../../../fleet/public';
+import { PLUGIN_ID } from '@kbn/fleet-plugin/common';
+import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { useKibana, isModifiedEvent, isLeftClickEvent } from '../common/lib/kibana';
 import { useAgentPolicy } from './use_agent_policy';
 

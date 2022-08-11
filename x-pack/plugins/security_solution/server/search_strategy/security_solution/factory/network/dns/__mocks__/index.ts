@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '../../../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
+import type { NetworkDnsRequestOptions } from '../../../../../../../common/search_strategy';
 import {
   Direction,
   NetworkDnsFields,
-  NetworkDnsRequestOptions,
   NetworkQueries,
 } from '../../../../../../../common/search_strategy';
 
@@ -189,6 +189,14 @@ export const formattedSearchStrategyResponse = {
                 must_not: [{ term: { 'dns.question.type': { value: 'PTR' } } }],
               },
             },
+            _source: false,
+            fields: [
+              'dns.question.registered_domain',
+              {
+                field: '@timestamp',
+                format: 'strict_date_optional_time',
+              },
+            ],
           },
           size: 0,
           track_total_hits: false,
@@ -261,6 +269,14 @@ export const expectedDsl = {
         must_not: [{ term: { 'dns.question.type': { value: 'PTR' } } }],
       },
     },
+    _source: false,
+    fields: [
+      'dns.question.registered_domain',
+      {
+        field: '@timestamp',
+        format: 'strict_date_optional_time',
+      },
+    ],
   },
   size: 0,
   track_total_hits: false,

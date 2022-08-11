@@ -10,7 +10,7 @@ import { getBucketSize } from '../get_bucket_size';
 export function getBucketSizeForAggregatedTransactions({
   start,
   end,
-  numBuckets = 100,
+  numBuckets = 50,
   searchAggregatedTransactions,
 }: {
   start: number;

@@ -16,6 +16,12 @@ properties:
       enum:
         - metrics
         - logs
+  data_output_id:
+    type: string
+    nullable: true
+  monitoring_output_id:
+    type: string
+    nullable: true
 required:
   - name
   - namespace

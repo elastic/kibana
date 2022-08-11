@@ -68,11 +68,12 @@ export async function generateData({
   const instance = apm.service(serviceName, 'production', agentName).instance('instance-a');
 
   const traceEvents = [
-    ...timerange(start, end)
+    timerange(start, end)
       .interval('30s')
       .rate(rate)
-      .flatMap((timestamp) =>
+      .generator((timestamp) =>
         instance
+          .containerId('instance-a')
           .transaction(transaction.name)
           .timestamp(timestamp)
           .defaults({
@@ -94,12 +95,11 @@ export async function generateData({
           })
           .duration(transaction.duration)
           .success()
-          .serialize()
       ),
-    ...timerange(start, end)
+    timerange(start, end)
       .interval('30s')
       .rate(rate)
-      .flatMap((timestamp) =>
+      .generator((timestamp) =>
         instance
           .transaction(transaction.name)
           .timestamp(timestamp)
@@ -122,7 +122,6 @@ export async function generateData({
           })
           .duration(transaction.duration)
           .success()
-          .serialize()
       ),
   ];
 

@@ -29,15 +29,14 @@ discover-app {
 
 .dscPageBody__contents {
   overflow: hidden;
-  padding-top: $euiSizeXS / 2; // A little breathing room for the index pattern button
 }
 
 .dscPageContent__wrapper {
-  padding: 0 $euiSize $euiSize 0;
+  padding: $euiSizeS $euiSizeS $euiSizeS 0;
   overflow: hidden; // Ensures horizontal scroll of table
 
   @include euiBreakpoint('xs', 's') {
-    padding: 0 $euiSize $euiSize;
+    padding: 0 $euiSizeS $euiSizeS;
   }
 }
 

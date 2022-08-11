@@ -9,8 +9,8 @@ import { Subject, Observable, Subscription } from 'rxjs';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Option, some, map as mapOptional } from 'fp-ts/lib/Option';
 import { tap } from 'rxjs/operators';
-import { UsageCounter } from '../../../../src/plugins/usage_collection/server';
-import type { Logger, ExecutionContextStart } from '../../../../src/core/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { Logger, ExecutionContextStart } from '@kbn/core/server';
 
 import { Result, asErr, mapErr, asOk, map, mapOk } from './lib/result_type';
 import { ManagedConfiguration } from './lib/create_managed_configuration';
@@ -91,6 +91,7 @@ export class TaskPollingLifecycle {
   private middleware: Middleware;
 
   private usageCounter?: UsageCounter;
+  private config: TaskManagerConfig;
 
   /**
    * Initializes the task manager, preventing any further addition of middleware,
@@ -117,6 +118,7 @@ export class TaskPollingLifecycle {
     this.store = taskStore;
     this.executionContext = executionContext;
     this.usageCounter = usageCounter;
+    this.config = config;
 
     const emitEvent = (event: TaskLifecycleEvent) => this.events$.next(event);
 
@@ -240,6 +242,7 @@ export class TaskPollingLifecycle {
       defaultMaxAttempts: this.taskClaiming.maxAttempts,
       executionContext: this.executionContext,
       usageCounter: this.usageCounter,
+      eventLoopDelayConfig: { ...this.config.event_loop_delay },
     });
   };
 

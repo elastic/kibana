@@ -15,19 +15,20 @@ import {
   getDescriptionItem,
 } from '.';
 
-import { FilterManager, UI_SETTINGS } from '../../../../../../../../src/plugins/data/public';
-import { Filter, FilterStateStore } from '@kbn/es-query';
+import { FilterManager, UI_SETTINGS } from '@kbn/data-plugin/public';
+import type { Filter } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
 import {
   mockAboutStepRule,
   mockDefineStepRule,
 } from '../../../pages/detection_engine/rules/all/__mocks__/mock';
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import * as i18n from './translations';
 
 import { schema } from '../step_about_rule/schema';
-import { ListItems } from './types';
-import { AboutStepRule } from '../../../pages/detection_engine/rules/types';
+import type { ListItems } from './types';
+import type { AboutStepRule } from '../../../pages/detection_engine/rules/types';
 
 jest.mock('../../../../common/lib/kibana');
 

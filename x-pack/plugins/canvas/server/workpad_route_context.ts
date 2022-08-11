@@ -6,19 +6,19 @@
  */
 
 import {
-  RequestHandlerContext,
-  RequestHandlerContextProvider,
+  CustomRequestHandlerContext,
+  IContextProvider,
   SavedObject,
   SavedObjectsResolveResponse,
-} from 'kibana/server';
-import { ExpressionsService } from 'src/plugins/expressions';
+} from '@kbn/core/server';
+import { ExpressionsServiceStart } from '@kbn/expressions-plugin/common';
 import { WorkpadAttributes } from './routes/workpad/workpad_attributes';
 import { CANVAS_TYPE } from '../common/lib/constants';
 import { injectReferences, extractReferences } from './saved_objects/workpad_references';
 import { getId } from '../common/lib/get_id';
 import { CanvasWorkpad, ImportedCanvasWorkpad } from '../types';
 
-export interface CanvasRouteHandlerContext extends RequestHandlerContext {
+export type CanvasRouteHandlerContext = CustomRequestHandlerContext<{
   canvas: {
     workpad: {
       create: (attributes: CanvasWorkpad) => Promise<SavedObject<WorkpadAttributes>>;
@@ -31,118 +31,116 @@ export interface CanvasRouteHandlerContext extends RequestHandlerContext {
       ) => Promise<SavedObject<WorkpadAttributes>>;
     };
   };
-}
+}>;
 
 interface Deps {
-  expressions: ExpressionsService;
+  expressions: ExpressionsServiceStart;
 }
 
 export const createWorkpadRouteContext: (
   deps: Deps
-) => RequestHandlerContextProvider<CanvasRouteHandlerContext, 'canvas'> = ({ expressions }) => {
-  return (context) => ({
-    workpad: {
-      create: async (workpad: CanvasWorkpad) => {
-        const now = new Date().toISOString();
-        const { id: maybeId, ...attributes } = workpad;
+) => IContextProvider<CanvasRouteHandlerContext, 'canvas'> = ({ expressions }) => {
+  return async (context) => {
+    const soClient = (await context.core).savedObjects.client;
+    return {
+      workpad: {
+        create: async (workpad: CanvasWorkpad) => {
+          const now = new Date().toISOString();
+          const { id: maybeId, ...attributes } = workpad;
 
-        const id = maybeId ? maybeId : getId('workpad');
+          const id = maybeId ? maybeId : getId('workpad');
 
-        const { workpad: extractedAttributes, references } = extractReferences(
-          attributes,
-          expressions
-        );
+          const { workpad: extractedAttributes, references } = extractReferences(
+            attributes,
+            expressions
+          );
 
-        return await context.core.savedObjects.client.create<WorkpadAttributes>(
-          CANVAS_TYPE,
-          {
-            ...extractedAttributes,
-            '@timestamp': now,
-            '@created': now,
-          },
-          { id, references }
-        );
-      },
-      import: async (workpad: ImportedCanvasWorkpad) => {
-        const now = new Date().toISOString();
-        const { id: maybeId, ...workpadWithoutId } = workpad;
+          return await soClient.create<WorkpadAttributes>(
+            CANVAS_TYPE,
+            {
+              ...extractedAttributes,
+              '@timestamp': now,
+              '@created': now,
+            },
+            { id, references }
+          );
+        },
+        import: async (workpad: ImportedCanvasWorkpad) => {
+          const now = new Date().toISOString();
+          const { id: maybeId, ...workpadWithoutId } = workpad;
 
-        // Functionality of running migrations on import of workpads was implemented in v8.1.0.
-        // As only attributes of the saved object workpad are exported, to run migrations it is necessary
-        // to specify the minimal version of possible migrations to execute them. It is v8.0.0 in the current case.
-        const DEFAULT_MIGRATION_VERSION = { [CANVAS_TYPE]: '8.0.0' };
-        const DEFAULT_CORE_MIGRATION_VERSION = '8.0.0';
+          // Functionality of running migrations on import of workpads was implemented in v8.1.0.
+          // As only attributes of the saved object workpad are exported, to run migrations it is necessary
+          // to specify the minimal version of possible migrations to execute them. It is v8.0.0 in the current case.
+          const DEFAULT_MIGRATION_VERSION = { [CANVAS_TYPE]: '8.0.0' };
+          const DEFAULT_CORE_MIGRATION_VERSION = '8.0.0';
 
-        const id = maybeId ? maybeId : getId('workpad');
+          const id = maybeId ? maybeId : getId('workpad');
 
-        return await context.core.savedObjects.client.create<WorkpadAttributes>(
-          CANVAS_TYPE,
-          {
-            isWriteable: true,
-            ...workpadWithoutId,
-            '@timestamp': now,
-            '@created': now,
-          },
-          {
-            migrationVersion: DEFAULT_MIGRATION_VERSION,
-            coreMigrationVersion: DEFAULT_CORE_MIGRATION_VERSION,
+          return await soClient.create<WorkpadAttributes>(
+            CANVAS_TYPE,
+            {
+              isWriteable: true,
+              ...workpadWithoutId,
+              '@timestamp': now,
+              '@created': now,
+            },
+            {
+              migrationVersion: DEFAULT_MIGRATION_VERSION,
+              coreMigrationVersion: DEFAULT_CORE_MIGRATION_VERSION,
+              id,
+            }
+          );
+        },
+        get: async (id: string) => {
+          const workpad = await soClient.get<WorkpadAttributes>(CANVAS_TYPE, id);
+
+          workpad.attributes = injectReferences(
+            workpad.attributes,
+            workpad.references,
+            expressions
+          );
+
+          return workpad;
+        },
+        resolve: async (id: string) => {
+          const resolved = await soClient.resolve<WorkpadAttributes>(CANVAS_TYPE, id);
+
+          resolved.saved_object.attributes = injectReferences(
+            resolved.saved_object.attributes,
+            resolved.saved_object.references,
+            expressions
+          );
+
+          return resolved;
+        },
+        update: async (id: string, { id: omittedId, ...workpad }: Partial<CanvasWorkpad>) => {
+          const now = new Date().toISOString();
+
+          const workpadObject = await soClient.get<WorkpadAttributes>(CANVAS_TYPE, id);
+
+          const injectedAttributes = injectReferences(
+            workpadObject.attributes,
+            workpadObject.references,
+            expressions
+          );
+
+          const updatedAttributes = {
+            ...injectedAttributes,
+            ...workpad,
+            '@timestamp': now, // always update the modified time
+            '@created': workpadObject.attributes['@created'], // ensure created is not modified
+          } as WorkpadAttributes;
+
+          const extracted = extractReferences(updatedAttributes, expressions);
+
+          return await soClient.create(CANVAS_TYPE, extracted.workpad, {
+            overwrite: true,
             id,
-          }
-        );
+            references: extracted.references,
+          });
+        },
       },
-      get: async (id: string) => {
-        const workpad = await context.core.savedObjects.client.get<WorkpadAttributes>(
-          CANVAS_TYPE,
-          id
-        );
-
-        workpad.attributes = injectReferences(workpad.attributes, workpad.references, expressions);
-
-        return workpad;
-      },
-      resolve: async (id: string) => {
-        const resolved = await context.core.savedObjects.client.resolve<WorkpadAttributes>(
-          CANVAS_TYPE,
-          id
-        );
-
-        resolved.saved_object.attributes = injectReferences(
-          resolved.saved_object.attributes,
-          resolved.saved_object.references,
-          expressions
-        );
-
-        return resolved;
-      },
-      update: async (id: string, { id: omittedId, ...workpad }: Partial<CanvasWorkpad>) => {
-        const now = new Date().toISOString();
-
-        const workpadObject = await context.core.savedObjects.client.get<WorkpadAttributes>(
-          CANVAS_TYPE,
-          id
-        );
-
-        const injectedAttributes = injectReferences(
-          workpadObject.attributes,
-          workpadObject.references,
-          expressions
-        );
-
-        const updatedAttributes = {
-          ...injectedAttributes,
-          ...workpad,
-          '@timestamp': now, // always update the modified time
-          '@created': workpadObject.attributes['@created'], // ensure created is not modified
-        } as WorkpadAttributes;
-
-        const extracted = extractReferences(updatedAttributes, expressions);
-
-        return await context.core.savedObjects.client.create(CANVAS_TYPE, extracted.workpad, {
-          overwrite: true,
-          id,
-          references: extracted.references,
-        });
-      },
-    },
-  });
+    };
+  };
 };

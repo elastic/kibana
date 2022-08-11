@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { HomePublicPluginSetup, HomePublicPluginStart } from 'src/plugins/home/public';
-import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
-import { DataViewsPublicPluginStart } from 'src/plugins/data_views/public';
-import { NewsfeedPublicPluginStart } from 'src/plugins/newsfeed/public';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import { SharePluginStart } from '../../share/public';
+import { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
+import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { NewsfeedPublicPluginStart } from '@kbn/newsfeed-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { SharePluginStart } from '@kbn/share-plugin/public';
+import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface KibanaOverviewPluginSetup {}
@@ -30,4 +31,5 @@ export interface AppPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
   newsfeed?: NewsfeedPublicPluginStart;
   share: SharePluginStart;
+  dataViewEditor: DataViewEditorStart;
 }

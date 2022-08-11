@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Component, default as React, Fragment } from 'react';
 import { Subscription } from 'rxjs';
-import { ILicense } from '../../../licensing/public';
+import { ILicense } from '@kbn/licensing-plugin/public';
 import { REPORT_TABLE_ID, REPORT_TABLE_ROW_ID } from '../../common/constants';
 import { prettyPrintJobType } from '../../common/job_utils';
 import { Poller } from '../../common/poller';
@@ -30,7 +30,7 @@ import { Job } from '../lib/job';
 import { checkLicense } from '../lib/license_check';
 import { useInternalApiClient } from '../lib/reporting_api_client';
 import { useKibana } from '../shared_imports';
-import { ListingProps as Props } from './';
+import { ListingProps as Props } from '.';
 import {
   IlmPolicyLink,
   MigrateIlmPolicyCallOut,
@@ -449,7 +449,7 @@ class ReportListingUi extends Component<Props, State> {
       pageIndex: this.state.page,
       pageSize: 10,
       totalItemCount: this.state.total,
-      hidePerPageOptions: true,
+      showPerPageOptions: false,
     };
 
     const selection = {

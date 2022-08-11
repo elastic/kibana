@@ -11,38 +11,33 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
 
-import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ESQuery } from '../../../common/typed_json';
-import {
-  DataView,
-  isCompleteResponse,
-  isErrorResponse,
-} from '../../../../../../src/plugins/data/common';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { DataView } from '@kbn/data-plugin/common';
+import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
+import type { ESQuery } from '../../../common/typed_json';
 
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-import { inputsModel } from '../../common/store';
+import type { inputsModel } from '../../common/store';
 import { useKibana } from '../../common/lib/kibana';
 import { createFilter } from '../../common/containers/helpers';
-import { timelineActions } from '../../timelines/store/timeline';
+import { timelineActions } from '../store/timeline';
 import { detectionsTimelineIds, skipQueryForDetectionsPage } from './helpers';
 import { getInspectResponse } from '../../helpers';
-import {
-  Direction,
+import type {
   PaginationInputPaginated,
-  TimelineEventsQueries,
   TimelineEventsAllStrategyResponse,
   TimelineEventsAllRequestOptions,
   TimelineEdges,
   TimelineItem,
   TimelineRequestSortField,
-  DocValueFields,
 } from '../../../common/search_strategy';
-import { InspectResponse } from '../../types';
+import { Direction, TimelineEventsQueries } from '../../../common/search_strategy';
+import type { InspectResponse } from '../../types';
 import * as i18n from './translations';
-import { KueryFilterQueryKind, TimelineId } from '../../../common/types/timeline';
+import type { KueryFilterQueryKind } from '../../../common/types/timeline';
+import { TimelineId } from '../../../common/types/timeline';
 import { useRouteSpy } from '../../common/utils/route/use_route_spy';
 import { activeTimeline } from './active_timeline_context';
-import {
+import type {
   EqlOptionsSelected,
   TimelineEqlRequestOptions,
   TimelineEqlResponse,
@@ -80,7 +75,6 @@ type TimelineResponse<T extends KueryFilterQueryKind> = T extends 'kuery'
 
 export interface UseTimelineEventsProps {
   dataViewId: string | null;
-  docValueFields?: DocValueFields[];
   endDate: string;
   eqlOptions?: EqlOptionsSelected;
   fields: string[];
@@ -100,11 +94,12 @@ const getTimelineEvents = (timelineEdges: TimelineEdges[]): TimelineItem[] =>
   timelineEdges.map((e: TimelineEdges) => e.node);
 
 const ID = 'timelineEventsQuery';
-export const initSortDefault = [
+export const initSortDefault: TimelineRequestSortField[] = [
   {
     field: '@timestamp',
     direction: Direction.asc,
-    type: 'number',
+    type: 'date',
+    esTypes: ['date'],
   },
 ];
 
@@ -133,7 +128,6 @@ const deStructureEqlOptions = (eqlOptions?: EqlOptionsSelected) => ({
 
 export const useTimelineEvents = ({
   dataViewId,
-  docValueFields,
   endDate,
   eqlOptions = undefined,
   id = ID,
@@ -214,9 +208,6 @@ export const useTimelineEvents = ({
     updatedAt: 0,
   });
   const { addWarning } = useAppToasts();
-
-  // TODO: Once we are past experimental phase this code should be removed
-  const ruleRegistryEnabled = useIsExperimentalFeatureEnabled('ruleRegistryEnabled');
 
   const timelineSearch = useCallback(
     (request: TimelineRequest<typeof language> | null) => {
@@ -336,10 +327,7 @@ export const useTimelineEvents = ({
   );
 
   useEffect(() => {
-    if (
-      skipQueryForDetectionsPage(id, indexNames, ruleRegistryEnabled) ||
-      indexNames.length === 0
-    ) {
+    if (skipQueryForDetectionsPage(id, indexNames) || indexNames.length === 0) {
       return;
     }
 
@@ -375,10 +363,9 @@ export const useTimelineEvents = ({
 
       const currentRequest = {
         defaultIndex: indexNames,
-        docValueFields: docValueFields ?? [],
         factoryQueryType: TimelineEventsQueries.all,
         fieldRequested: fields,
-        fields: [],
+        fields,
         filterQuery: createFilter(filterQuery),
         pagination: {
           activePage: newActivePage,
@@ -401,10 +388,7 @@ export const useTimelineEvents = ({
           activeTimeline.setActivePage(newActivePage);
         }
       }
-      if (
-        !skipQueryForDetectionsPage(id, indexNames, ruleRegistryEnabled) &&
-        !deepEqual(prevRequest, currentRequest)
-      ) {
+      if (!skipQueryForDetectionsPage(id, indexNames) && !deepEqual(prevRequest, currentRequest)) {
         return currentRequest;
       }
       return prevRequest;
@@ -413,14 +397,12 @@ export const useTimelineEvents = ({
     dispatch,
     indexNames,
     activePage,
-    docValueFields,
     endDate,
     eqlOptions,
     filterQuery,
     id,
     language,
     limit,
-    ruleRegistryEnabled,
     startDate,
     sort,
     fields,

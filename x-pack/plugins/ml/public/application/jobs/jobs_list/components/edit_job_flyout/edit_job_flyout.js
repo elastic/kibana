@@ -31,7 +31,7 @@ import { loadFullJob } from '../utils';
 import { validateModelMemoryLimit, validateGroupNames, isValidCustomUrls } from '../validate_job';
 import { toastNotificationServiceProvider } from '../../../../services/toast_notification_service';
 import { ml } from '../../../../services/ml_api_service';
-import { withKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { collapseLiteralStrings } from '../../../../../../shared_imports';
 import { DATAFEED_STATE, JOB_STATE } from '../../../../../../common/constants/states';
 import { isManagedJob } from '../../../jobs_utils';

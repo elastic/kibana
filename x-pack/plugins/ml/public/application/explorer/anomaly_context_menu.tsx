@@ -22,7 +22,7 @@ import { AddAnomalyChartsToDashboardControl } from './dashboard_controls/add_ano
 
 interface AnomalyContextMenuProps {
   selectedJobs: ExplorerJob[];
-  selectedCells?: AppStateSelectedCells;
+  selectedCells?: AppStateSelectedCells | null;
   bounds?: TimeRangeBounds;
   interval?: number;
   chartsCount: number;

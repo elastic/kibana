@@ -5,39 +5,38 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { DataView, SortDirection } from '../../../../../data/common';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { SortDirection } from '@kbn/data-plugin/public';
 import { createSearchSourceStub } from './_stubs';
 import { fetchAnchor, updateSearchSource } from './anchor';
-import { indexPatternMock } from '../../../__mocks__/index_pattern';
+import { dataViewMock } from '../../../__mocks__/data_view';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
-import { EsHitRecordList } from '../../types';
 
 describe('context app', function () {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let searchSourceStub: any;
-  const indexPattern = {
-    id: 'INDEX_PATTERN_ID',
+  const dataView = {
+    id: 'DATA_VIEW_ID',
     isTimeNanosBased: () => false,
     popularizeField: () => {},
   } as unknown as DataView;
 
   describe('function fetchAnchor', function () {
     beforeEach(() => {
-      searchSourceStub = createSearchSourceStub([{ _id: 'hit1' }] as unknown as EsHitRecordList);
+      searchSourceStub = createSearchSourceStub([{ _id: 'hit1', _index: 'test' }]);
     });
 
-    it('should use the `fetch` method of the SearchSource', function () {
-      return fetchAnchor('id', indexPattern, searchSourceStub, [
+    it('should use the `fetch$` method of the SearchSource', function () {
+      return fetchAnchor('id', dataView, searchSourceStub, [
         { '@timestamp': SortDirection.desc },
         { _doc: SortDirection.desc },
       ]).then(() => {
-        expect(searchSourceStub.fetch.calledOnce).toBe(true);
+        expect(searchSourceStub.fetch$.calledOnce).toBe(true);
       });
     });
 
     it('should configure the SearchSource to not inherit from the implicit root', function () {
-      return fetchAnchor('id', indexPattern, searchSourceStub, [
+      return fetchAnchor('id', dataView, searchSourceStub, [
         { '@timestamp': SortDirection.desc },
         { _doc: SortDirection.desc },
       ]).then(() => {
@@ -47,18 +46,18 @@ describe('context app', function () {
       });
     });
 
-    it('should set the SearchSource index pattern', function () {
-      return fetchAnchor('id', indexPattern, searchSourceStub, [
+    it('should set the SearchSource data view', function () {
+      return fetchAnchor('id', dataView, searchSourceStub, [
         { '@timestamp': SortDirection.desc },
         { _doc: SortDirection.desc },
       ]).then(() => {
         const setFieldSpy = searchSourceStub.setField;
-        expect(setFieldSpy.firstCall.args[1].id).toEqual('INDEX_PATTERN_ID');
+        expect(setFieldSpy.firstCall.args[1].id).toEqual('DATA_VIEW_ID');
       });
     });
 
     it('should set the SearchSource version flag to true', function () {
-      return fetchAnchor('id', indexPattern, searchSourceStub, [
+      return fetchAnchor('id', dataView, searchSourceStub, [
         { '@timestamp': SortDirection.desc },
         { _doc: SortDirection.desc },
       ]).then(() => {
@@ -69,7 +68,7 @@ describe('context app', function () {
     });
 
     it('should set the SearchSource size to 1', function () {
-      return fetchAnchor('id', indexPattern, searchSourceStub, [
+      return fetchAnchor('id', dataView, searchSourceStub, [
         { '@timestamp': SortDirection.desc },
         { _doc: SortDirection.desc },
       ]).then(() => {
@@ -80,7 +79,7 @@ describe('context app', function () {
     });
 
     it('should set the SearchSource query to an ids query', function () {
-      return fetchAnchor('id', indexPattern, searchSourceStub, [
+      return fetchAnchor('id', dataView, searchSourceStub, [
         { '@timestamp': SortDirection.desc },
         { _doc: SortDirection.desc },
       ]).then(() => {
@@ -102,7 +101,7 @@ describe('context app', function () {
     });
 
     it('should set the SearchSource sort order', function () {
-      return fetchAnchor('id', indexPattern, searchSourceStub, [
+      return fetchAnchor('id', dataView, searchSourceStub, [
         { '@timestamp': SortDirection.desc },
         { _doc: SortDirection.desc },
       ]).then(() => {
@@ -121,7 +120,7 @@ describe('context app', function () {
         'id',
         [],
         false,
-        indexPatternMock
+        dataViewMock
       );
       const searchRequestBody = searchSource.getSearchRequestBody();
       expect(searchRequestBody._source).toBeInstanceOf(Object);
@@ -134,7 +133,7 @@ describe('context app', function () {
         'id',
         [],
         true,
-        indexPatternMock
+        dataViewMock
       );
       const searchRequestBody = searchSource.getSearchRequestBody();
       expect(searchRequestBody._source).toBe(false);
@@ -142,9 +141,9 @@ describe('context app', function () {
     });
 
     it('should reject with an error when no hits were found', function () {
-      searchSourceStub._stubHits = [];
+      searchSourceStub = createSearchSourceStub([]);
 
-      return fetchAnchor('id', indexPattern, searchSourceStub, [
+      return fetchAnchor('id', dataView, searchSourceStub, [
         { '@timestamp': SortDirection.desc },
         { _doc: SortDirection.desc },
       ]).then(
@@ -158,13 +157,16 @@ describe('context app', function () {
     });
 
     it('should return the first hit after adding an anchor marker', function () {
-      searchSourceStub._stubHits = [{ property1: 'value1' }, { property2: 'value2' }];
+      searchSourceStub = createSearchSourceStub([
+        { _id: '1', _index: 't' },
+        { _id: '3', _index: 't' },
+      ]);
 
-      return fetchAnchor('id', indexPattern, searchSourceStub, [
+      return fetchAnchor('id', dataView, searchSourceStub, [
         { '@timestamp': SortDirection.desc },
         { _doc: SortDirection.desc },
       ]).then((anchorDocument) => {
-        expect(anchorDocument).toHaveProperty('property1', 'value1');
+        expect(anchorDocument).toHaveProperty('raw._id', '1');
         expect(anchorDocument).toHaveProperty('isAnchor', true);
       });
     });
@@ -172,7 +174,7 @@ describe('context app', function () {
 
   describe('useNewFields API', () => {
     beforeEach(() => {
-      searchSourceStub = createSearchSourceStub([{ _id: 'hit1' }] as unknown as EsHitRecordList);
+      searchSourceStub = createSearchSourceStub([{ _id: 'hit1', _index: 't' }]);
     });
 
     it('should request fields if useNewFieldsApi set', function () {
@@ -180,7 +182,7 @@ describe('context app', function () {
 
       return fetchAnchor(
         'id',
-        indexPattern,
+        dataView,
         searchSourceStub,
         [{ '@timestamp': SortDirection.desc }, { _doc: SortDirection.desc }],
         true

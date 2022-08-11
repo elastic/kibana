@@ -50,6 +50,9 @@ export class ESTestIndexTool {
               testedValue: {
                 type: 'long',
               },
+              testedValueUnsigned: {
+                type: 'unsigned_long',
+              },
               group: {
                 type: 'keyword',
               },
@@ -107,7 +110,8 @@ export class ESTestIndexTool {
     return await this.retry.try(async () => {
       const searchResult = await this.search(source, reference);
       // @ts-expect-error doesn't handle total: number
-      if (searchResult.body.hits.total.value < numDocs) {
+      const value = searchResult.body.hits.total.value?.value || searchResult.body.hits.total.value;
+      if (value < numDocs) {
         // @ts-expect-error doesn't handle total: number
         throw new Error(`Expected ${numDocs} but received ${searchResult.body.hits.total.value}.`);
       }

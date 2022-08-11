@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 import { CasesUiConfigType } from '../../../../common/ui/types';
 
 type GlobalServices = Pick<CoreStart, 'http'>;

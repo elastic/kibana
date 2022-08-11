@@ -50,12 +50,19 @@ export function TopNavMenuItem(props: TopNavMenuData) {
     className: props.className,
   };
 
+  // If the item specified a href, then override the suppress the onClick
+  // and make it become a regular link
+  const overrideProps =
+    props.target && props.href
+      ? { onClick: undefined, href: props.href, target: props.target }
+      : {};
+
   const btn = props.emphasize ? (
     <EuiButton size="s" {...commonButtonProps} fill>
       {getButtonContainer()}
     </EuiButton>
   ) : (
-    <EuiHeaderLink size="s" color="primary" {...commonButtonProps}>
+    <EuiHeaderLink size="s" color="primary" {...commonButtonProps} {...overrideProps}>
       {getButtonContainer()}
     </EuiHeaderLink>
   );

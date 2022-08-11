@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IRouter } from '../../../../../../src/core/server';
-import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import type { IRouter } from '@kbn/core/server';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { getAgentPoliciesRoute } from './get_agent_policies';
 import { getAgentPolicyRoute } from './get_agent_policy';
 import { getAgentStatusForAgentPolicyRoute } from './get_agent_status_for_agent_policy';

@@ -11,8 +11,8 @@
   (we want the panel to be wider than the input)
 */
 
+import type { EuiSuperSelectProps } from '@elastic/eui';
 import {
-  EuiSuperSelectProps,
   EuiScreenReaderOnly,
   EuiSuperSelectControl,
   EuiInputPopover,
@@ -187,7 +187,6 @@ export class EuiSuperSelect<T extends string> extends Component<EuiSuperSelectPr
 
     const buttonClasses = classNames(
       {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'euiSuperSelect--isOpen__button': this.state.isPopoverOpen,
       },
       className
@@ -196,7 +195,6 @@ export class EuiSuperSelect<T extends string> extends Component<EuiSuperSelectPr
     const itemClasses = classNames(
       'euiSuperSelect__item',
       {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'euiSuperSelect__item--hasDividers': hasDividers,
       },
       itemClassName

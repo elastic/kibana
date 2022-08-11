@@ -18,23 +18,23 @@ import {
   IUiSettingsClient,
   Capabilities,
   ScopedHistory,
-} from 'kibana/public';
+} from '@kbn/core/public';
 import ReactDOM from 'react-dom';
 import React from 'react';
-import { DataPlugin, IndexPatternsContract } from '../../../../src/plugins/data/public';
-import { LicensingPluginStart } from '../../licensing/public';
-import { LensPublicStart } from '../../lens/public';
-import { checkLicense } from '../common/check_license';
-import { NavigationPublicPluginStart as NavigationStart } from '../../../../src/plugins/navigation/public';
-import { Storage } from '../../../../src/plugins/kibana_utils/public';
+import { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
+import { SpacesApi } from '@kbn/spaces-plugin/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { DataPlugin, DataViewsContract } from '@kbn/data-plugin/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { LensPublicStart } from '@kbn/lens-plugin/public';
+import { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import './index.scss';
 import('./font_awesome');
-import { SavedObjectsStart } from '../../../../src/plugins/saved_objects/public';
 import { GraphSavePolicy } from './types';
 import { graphRouter } from './router';
-import { SpacesApi } from '../../spaces/public';
-import { KibanaThemeProvider } from '../../../../src/plugins/kibana_react/public';
+import { checkLicense } from '../common/check_license';
 
 /**
  * These are dependencies of the Graph app besides the base dependencies
@@ -53,7 +53,7 @@ export interface GraphDependencies {
   licensing: LicensingPluginStart;
   chrome: ChromeStart;
   toastNotifications: ToastsStart;
-  indexPatterns: IndexPatternsContract;
+  indexPatterns: DataViewsContract;
   data: ReturnType<DataPlugin['start']>;
   savedObjectsClient: SavedObjectsClientContract;
   addBasePath: (url: string) => string;

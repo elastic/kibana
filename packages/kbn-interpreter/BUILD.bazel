@@ -40,6 +40,15 @@ jsts_transpiler(
   name = "target_node",
   srcs = SRCS,
   build_pkg_name = package_name(),
+  root_input_dir = "src",
+)
+
+jsts_transpiler(
+  name = "target_web",
+  srcs = SRCS,
+  build_pkg_name = package_name(),
+  root_input_dir = "src",
+  web = True,
 )
 
 peggy(
@@ -52,7 +61,7 @@ peggy(
     "--allowed-start-rules",
     "expression,argument",
     "-o",
-    "$(@D)/index.js",
+    "$(@D)/built_grammar.js",
     "./%s/grammar/grammar.peggy" % package_name()
   ],
 )
@@ -73,6 +82,7 @@ ts_project(
   deps = TYPES_DEPS,
   allow_js = True,
   declaration = True,
+  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
   root_dir = "src",
@@ -82,7 +92,7 @@ ts_project(
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES + [":grammar"],
-  deps = RUNTIME_DEPS + [":target_node"],
+  deps = RUNTIME_DEPS + [":target_node", ":target_web"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )

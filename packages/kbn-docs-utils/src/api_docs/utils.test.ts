@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import Path from 'path';
 import { Project } from 'ts-morph';
 import { findPlugins } from './find_plugins';
@@ -21,7 +21,7 @@ const log = new ToolingLog({
 });
 
 it('getFileName', () => {
-  expect(getFileName('@elastic/datemath')).toBe('elastic_datemath');
+  expect(getFileName('@kbn/datemath')).toBe('kbn_datemath');
 });
 
 it('test getPluginForPath', () => {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'kibana/server';
-import { SecurityPluginSetup } from '../../../../security/server';
+import { KibanaRequest } from '@kbn/core/server';
+import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
 export const getUpdatableSavedObjectTypes = async ({
   request,

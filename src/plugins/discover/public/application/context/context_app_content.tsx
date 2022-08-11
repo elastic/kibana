@@ -9,8 +9,9 @@
 import React, { useState, Fragment, useMemo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiHorizontalRule, EuiText } from '@elastic/eui';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { SortDirection } from '@kbn/data-plugin/public';
 import { CONTEXT_STEP_SETTING, DOC_HIDE_TIME_COLUMN_SETTING } from '../../../common';
-import { DataView, SortDirection } from '../../../../data/common';
 import { LoadingStatus } from './services/context_query_state';
 import { ActionBar } from './components/action_bar/action_bar';
 import { DiscoverGrid } from '../../components/discover_grid/discover_grid';
@@ -19,22 +20,21 @@ import { AppState } from './services/context_state';
 import { SurrDocType } from './services/context';
 import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from './services/constants';
 import { DocTableContext } from '../../components/doc_table/doc_table_context';
-import { EsHitRecordList } from '../types';
-import { SortPairArr } from '../../components/doc_table/lib/get_sort';
-import { ElasticSearchHit } from '../../types';
-import { useDiscoverServices } from '../../utils/use_discover_services';
+import type { SortPairArr } from '../../components/doc_table/utils/get_sort';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
+import type { DataTableRecord } from '../../types';
 
 export interface ContextAppContentProps {
   columns: string[];
   onAddColumn: (columnsName: string) => void;
   onRemoveColumn: (columnsName: string) => void;
   onSetColumns: (columnsNames: string[], hideTimeColumn: boolean) => void;
-  indexPattern: DataView;
+  dataView: DataView;
   predecessorCount: number;
   successorCount: number;
-  rows: EsHitRecordList;
-  predecessors: EsHitRecordList;
-  successors: EsHitRecordList;
+  rows: DataTableRecord[];
+  predecessors: DataTableRecord[];
+  successors: DataTableRecord[];
   anchorStatus: LoadingStatus;
   predecessorsStatus: LoadingStatus;
   successorsStatus: LoadingStatus;
@@ -42,6 +42,7 @@ export interface ContextAppContentProps {
   isLegacy: boolean;
   setAppState: (newState: Partial<AppState>) => void;
   addFilter: DocViewFilterFn;
+  onFieldEdited: () => void;
 }
 
 const controlColumnIds = ['openDetails'];
@@ -59,7 +60,7 @@ export function ContextAppContent({
   onAddColumn,
   onRemoveColumn,
   onSetColumns,
-  indexPattern,
+  dataView,
   predecessorCount,
   successorCount,
   rows,
@@ -72,10 +73,11 @@ export function ContextAppContent({
   isLegacy,
   setAppState,
   addFilter,
+  onFieldEdited,
 }: ContextAppContentProps) {
   const { uiSettings: config } = useDiscoverServices();
 
-  const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>();
+  const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
   const isAnchorLoading =
     anchorStatus === LoadingStatus.LOADING || anchorStatus === LoadingStatus.UNINITIALIZED;
   const arePredecessorsLoading =
@@ -85,8 +87,8 @@ export function ContextAppContent({
     successorsStatus === LoadingStatus.LOADING || successorsStatus === LoadingStatus.UNINITIALIZED;
 
   const showTimeCol = useMemo(
-    () => !config.get(DOC_HIDE_TIME_COLUMN_SETTING, false) && !!indexPattern.timeFieldName,
-    [config, indexPattern]
+    () => !config.get(DOC_HIDE_TIME_COLUMN_SETTING, false) && !!dataView.timeFieldName,
+    [config, dataView]
   );
   const defaultStepSize = useMemo(() => parseInt(config.get(CONTEXT_STEP_SETTING), 10), [config]);
 
@@ -109,8 +111,8 @@ export function ContextAppContent({
     [setAppState]
   );
   const sort = useMemo(() => {
-    return [[indexPattern.timeFieldName!, SortDirection.desc]];
-  }, [indexPattern]);
+    return [[dataView.timeFieldName!, SortDirection.desc]];
+  }, [dataView]);
 
   return (
     <Fragment>
@@ -128,7 +130,7 @@ export function ContextAppContent({
       {isLegacy && rows && rows.length !== 0 && (
         <DocTableContextMemoized
           columns={columns}
-          indexPattern={indexPattern}
+          dataView={dataView}
           rows={rows}
           isLoading={isAnchorLoading}
           onFilter={addFilter}
@@ -145,7 +147,7 @@ export function ContextAppContent({
             ariaLabelledBy="surDocumentsAriaLabel"
             columns={columns}
             rows={rows}
-            indexPattern={indexPattern}
+            dataView={dataView}
             expandedDoc={expandedDoc}
             isLoading={isAnchorLoading}
             sampleSize={0}
@@ -160,6 +162,7 @@ export function ContextAppContent({
             onAddColumn={onAddColumn}
             onRemoveColumn={onRemoveColumn}
             onSetColumns={onSetColumns}
+            onFieldEdited={onFieldEdited}
           />
         </div>
       )}

@@ -64,7 +64,7 @@ export function BucketNestingEditor({
       defaultMessage: 'Group by this field first',
     });
     return (
-      <EuiFormRow label={useAsTopLevelAggCopy} display="columnCompressedSwitch">
+      <EuiFormRow label={useAsTopLevelAggCopy} display="columnCompressedSwitch" fullWidth>
         <EuiSwitch
           compressed
           label={useAsTopLevelAggCopy}

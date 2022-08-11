@@ -17,7 +17,7 @@
   "license": "Elastic License v2",
   "name": "AWS Security Group Configuration Change Detection",
   "note": "## Config\n\nThe AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
-  "query": "event.dataset:aws.cloudtrail and event.provider:iam.amazonaws.com and event.action:(AuthorizeSecurityGroupEgress or \nCreateSecurityGroup or ModifyInstanceAttribute or ModifySecurityGroupRules or RevokeSecurityGroupEgress or \nRevokeSecurityGroupIngress) and event.outcome:success\n",
+  "query": "event.dataset:aws.cloudtrail and event.provider:ec2.amazonaws.com and event.action:(AuthorizeSecurityGroupEgress or \nCreateSecurityGroup or ModifyInstanceAttribute or ModifySecurityGroupRules or RevokeSecurityGroupEgress or \nRevokeSecurityGroupIngress) and event.outcome:success\n",
   "references": [
     "https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2-security-groups.html"
   ],
@@ -67,5 +67,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 3
+  "version": 4
 }

@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { debounce } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
-import { IErrorObject } from '../../../../../triggers_actions_ui/public';
+import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
 import {
   SnapshotCustomAggregation,

@@ -30,7 +30,7 @@ export function TransactionDetails() {
     rangeTo,
     transactionType: transactionTypeFromUrl,
     comparisonEnabled,
-    comparisonType,
+    offset,
   } = query;
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const apmRouter = useApmRouter();
@@ -44,13 +44,16 @@ export function TransactionDetails() {
     replace(history, { query: { transactionType } });
   }
 
-  useBreadcrumb({
-    title: transactionName,
-    href: apmRouter.link('/services/{serviceName}/transactions/view', {
-      path,
-      query,
+  useBreadcrumb(
+    () => ({
+      title: transactionName,
+      href: apmRouter.link('/services/{serviceName}/transactions/view', {
+        path,
+        query,
+      }),
     }),
-  });
+    [apmRouter, path, query, transactionName]
+  );
 
   const isServerless = isServerlessAgent(runtimeName);
 
@@ -74,7 +77,7 @@ export function TransactionDetails() {
           transactionName={transactionName}
           isServerlessContext={isServerless}
           comparisonEnabled={comparisonEnabled}
-          comparisonType={comparisonType}
+          offset={offset}
         />
       </ChartPointerEventContextProvider>
 

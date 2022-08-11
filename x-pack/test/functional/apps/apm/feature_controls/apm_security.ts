@@ -137,7 +137,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('no apm privileges', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/122001
+    describe.skip('no apm privileges', () => {
       before(async () => {
         await security.role.create('no_apm_privileges_role', {
           elasticsearch: {

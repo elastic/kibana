@@ -16,12 +16,14 @@ import {
   ObjectRemover,
 } from '../../../../../common/lib';
 import { createEsDocuments } from './create_test_data';
+import { createDataStream, deleteDataStream } from '../lib/create_test_data';
 
 const RULE_TYPE_ID = '.index-threshold';
 const CONNECTOR_TYPE_ID = '.index';
 const ES_TEST_INDEX_SOURCE = 'builtin-alert:index-threshold';
 const ES_TEST_INDEX_REFERENCE = '-na-';
 const ES_TEST_OUTPUT_INDEX_NAME = `${ES_TEST_INDEX_NAME}-output`;
+const ES_TEST_DATA_STREAM_NAME = 'test-data-stream';
 
 const RULE_INTERVALS_TO_WRITE = 5;
 const RULE_INTERVAL_SECONDS = 3;
@@ -54,13 +56,16 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       endDate = new Date(endDateMillis).toISOString();
 
       // write documents from now to the future end date in 3 groups
-      createEsDocumentsInGroups(3);
+      await createEsDocumentsInGroups(3);
+
+      await createDataStream(es, ES_TEST_DATA_STREAM_NAME);
     });
 
     afterEach(async () => {
       await objectRemover.removeAll();
       await esTestIndexTool.destroy();
       await esTestIndexToolOutput.destroy();
+      await deleteDataStream(es, ES_TEST_DATA_STREAM_NAME);
     });
 
     // The tests below create two alerts, one that will fire, one that will
@@ -101,9 +106,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     });
 
     it('runs correctly: count grouped <= =>', async () => {
-      // create some more documents in the first group
-      createEsDocumentsInGroups(1);
-
       await createRule({
         name: 'never fire',
         aggType: 'count',
@@ -123,6 +125,9 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         thresholdComparator: '>=',
         threshold: [0],
       });
+
+      // create some more documents in the first group
+      await createEsDocumentsInGroups(1);
 
       const docs = await waitForDocs(4);
       let inGroup0 = 0;
@@ -145,9 +150,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     });
 
     it('runs correctly: sum all between', async () => {
-      // create some more documents in the first group
-      createEsDocumentsInGroups(1);
-
       await createRule({
         name: 'never fire',
         aggType: 'sum',
@@ -166,6 +168,9 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         threshold: [0, 1000000],
       });
 
+      // create some more documents in the first group
+      await createEsDocumentsInGroups(1);
+
       const docs = await waitForDocs(2);
       for (const doc of docs) {
         const { name, message } = doc._source.params;
@@ -179,9 +184,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     });
 
     it('runs correctly: avg all', async () => {
-      // create some more documents in the first group
-      createEsDocumentsInGroups(1);
-
       // this never fires because of bad fields error
       await createRule({
         name: 'never fire',
@@ -202,6 +204,9 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         threshold: [0],
       });
 
+      // create some more documents in the first group
+      await createEsDocumentsInGroups(1);
+
       const docs = await waitForDocs(4);
       for (const doc of docs) {
         const { name, message } = doc._source.params;
@@ -215,9 +220,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     });
 
     it('runs correctly: max grouped', async () => {
-      // create some more documents in the first group
-      createEsDocumentsInGroups(1);
-
       await createRule({
         name: 'never fire',
         aggType: 'max',
@@ -239,6 +241,9 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         thresholdComparator: '>=',
         threshold: [0],
       });
+
+      // create some more documents in the first group
+      await createEsDocumentsInGroups(1);
 
       const docs = await waitForDocs(4);
       let inGroup2 = 0;
@@ -260,10 +265,46 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       expect(inGroup2).to.be.greaterThan(0);
     });
 
-    it('runs correctly: min grouped', async () => {
-      // create some more documents in the first group
-      createEsDocumentsInGroups(1);
+    it('runs correctly: max grouped on unsigned long', async () => {
+      await createRule({
+        name: 'never fire',
+        aggType: 'max',
+        aggField: 'testedValueUnsigned',
+        groupBy: 'top',
+        termField: 'group',
+        termSize: 2,
+        thresholdComparator: '<',
+        threshold: [Number.MAX_SAFE_INTEGER],
+      });
 
+      await createRule({
+        name: 'always fire',
+        aggType: 'max',
+        aggField: 'testedValueUnsigned',
+        groupBy: 'top',
+        termField: 'group',
+        termSize: 2, // two actions will fire each interval
+        thresholdComparator: '>=',
+        threshold: [Number.MAX_SAFE_INTEGER],
+      });
+
+      // create some more documents in the first group
+      await createEsDocumentsInGroups(1);
+
+      const docs = await waitForDocs(4);
+
+      for (const doc of docs) {
+        const { name, message } = doc._source.params;
+
+        expect(name).to.be('always fire');
+
+        const messagePattern =
+          /alert 'always fire' is active for group \'group-\d\':\n\n- Value: \d+\n- Conditions Met: max\(testedValueUnsigned\) is greater than or equal to \d+ over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+        expect(message).to.match(messagePattern);
+      }
+    });
+
+    it('runs correctly: min grouped', async () => {
       await createRule({
         name: 'never fire',
         aggType: 'min',
@@ -285,6 +326,9 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         thresholdComparator: '>=',
         threshold: [0],
       });
+
+      // create some more documents in the first group
+      await createEsDocumentsInGroups(1);
 
       const docs = await waitForDocs(4);
       let inGroup0 = 0;
@@ -315,8 +359,10 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         groupBy: 'all',
         thresholdComparator: '<',
         threshold: [10],
-        timeWindowSize: 60,
+        notifyWhen: 'onActionGroupChange',
       });
+
+      await waitForDocs(1);
 
       await createEsDocumentsInGroups(1);
 
@@ -333,7 +379,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       expect(activeGroup).to.be('all documents');
       expect(activeTitle).to.be('alert fire then recovers group all documents met threshold');
       expect(activeMessage).to.match(
-        /alert 'fire then recovers' is active for group \'all documents\':\n\n- Value: \d+\n- Conditions Met: count is less than 10 over 60s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/
+        /alert 'fire then recovers' is active for group \'all documents\':\n\n- Value: \d+\n- Conditions Met: count is less than 10 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/
       );
 
       const recoveredDoc = docs[1];
@@ -348,18 +394,62 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       expect(recoveredGroup).to.be('all documents');
       expect(recoveredTitle).to.be('alert fire then recovers group all documents recovered');
       expect(recoveredMessage).to.match(
-        /alert 'fire then recovers' is recovered for group \'all documents\':\n\n- Value: \d+\n- Conditions Met: count is NOT less than 10 over 60s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/
+        /alert 'fire then recovers' is recovered for group \'all documents\':\n\n- Value: \d+\n- Conditions Met: count is NOT less than 10 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/
       );
     });
 
-    async function createEsDocumentsInGroups(groups: number) {
+    it('runs correctly over a data stream: count all < >', async () => {
+      await createRule({
+        name: 'never fire',
+        aggType: 'count',
+        groupBy: 'all',
+        thresholdComparator: '<',
+        threshold: [0],
+        indexName: ES_TEST_DATA_STREAM_NAME,
+        timeField: '@timestamp',
+      });
+
+      await createRule({
+        name: 'always fire',
+        aggType: 'count',
+        groupBy: 'all',
+        thresholdComparator: '>',
+        threshold: [0],
+        indexName: ES_TEST_DATA_STREAM_NAME,
+        timeField: '@timestamp',
+      });
+
+      await createEsDocumentsInGroups(1, ES_TEST_DATA_STREAM_NAME);
+
+      const docs = await waitForDocs(2);
+      for (const doc of docs) {
+        const { group } = doc._source;
+        const { name, title, message } = doc._source.params;
+
+        expect(name).to.be('always fire');
+        expect(group).to.be('all documents');
+
+        // we'll check title and message in this test, but not subsequent ones
+        expect(title).to.be('alert always fire group all documents met threshold');
+
+        const messagePattern =
+          /alert 'always fire' is active for group \'all documents\':\n\n- Value: \d+\n- Conditions Met: count is greater than 0 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+        expect(message).to.match(messagePattern);
+      }
+    });
+
+    async function createEsDocumentsInGroups(
+      groups: number,
+      indexName: string = ES_TEST_INDEX_NAME
+    ) {
       await createEsDocuments(
         es,
         esTestIndexTool,
         endDate,
         RULE_INTERVALS_TO_WRITE,
         RULE_INTERVAL_MILLIS,
-        groups
+        groups,
+        indexName
       );
     }
 
@@ -382,6 +472,8 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       termSize?: number;
       thresholdComparator: string;
       threshold: number[];
+      notifyWhen?: string;
+      indexName?: string;
     }
 
     async function createRule(params: CreateRuleParams): Promise<string> {
@@ -440,9 +532,9 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           rule_type_id: RULE_TYPE_ID,
           schedule: { interval: `${RULE_INTERVAL_SECONDS}s` },
           actions: [action, recoveryAction],
-          notify_when: 'onActiveAlert',
+          notify_when: params.notifyWhen || 'onActiveAlert',
           params: {
-            index: ES_TEST_INDEX_NAME,
+            index: params.indexName || ES_TEST_INDEX_NAME,
             timeField: params.timeField || 'date',
             aggType: params.aggType,
             aggField: params.aggField,

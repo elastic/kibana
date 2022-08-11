@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { HttpSetup } from 'kibana/public';
+import type { HttpSetup } from '@kbn/core/public';
 import React, { createContext, useContext } from 'react';
 
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { useRequest } from '../../../public/request';
 
 import { Privileges, Error as CustomError } from '../types';

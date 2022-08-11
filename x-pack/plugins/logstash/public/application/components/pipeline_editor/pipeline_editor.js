@@ -15,7 +15,7 @@ import 'brace/theme/github';
 
 import { isEmpty } from 'lodash';
 import { TOOLTIPS } from '../../../../common/constants/tooltips';
-import { EuiCodeEditor } from '../../../../../../../src/plugins/es_ui_shared/public';
+import { EuiCodeEditor } from '@kbn/es-ui-shared-plugin/public';
 import {
   EuiButton,
   EuiButtonEmpty,

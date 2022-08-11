@@ -6,18 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { apmEventsToElasticsearchOutput } from '../lib/apm/utils/apm_events_to_elasticsearch_output';
 import { ApmFields } from '../lib/apm/apm_fields';
-
-const writeTargets = {
-  transaction: 'apm-8.0.0-transaction',
-  span: 'apm-8.0.0-span',
-  metric: 'apm-8.0.0-metric',
-  error: 'apm-8.0.0-error',
-};
+import { StreamProcessor } from '../lib/stream_processor';
 
 describe('output apm events to elasticsearch', () => {
   let event: ApmFields;
+  const streamProcessor = new StreamProcessor({ processors: [], version: '8.0.0' });
 
   beforeEach(() => {
     event = {
@@ -29,32 +23,31 @@ describe('output apm events to elasticsearch', () => {
   });
 
   it('properly formats @timestamp', () => {
-    const doc = apmEventsToElasticsearchOutput({ events: [event], writeTargets })[0] as any;
-
-    expect(doc._source['@timestamp']).toEqual('2020-12-31T23:00:00.000Z');
+    const doc = streamProcessor.toDocument(event);
+    expect(doc['@timestamp']).toEqual('2020-12-31T23:00:00.000Z');
   });
 
   it('formats a nested object', () => {
-    const doc = apmEventsToElasticsearchOutput({ events: [event], writeTargets })[0] as any;
+    const doc = streamProcessor.toDocument(event);
 
-    expect(doc._source.processor).toEqual({
+    expect(doc.processor).toEqual({
       event: 'transaction',
       name: 'transaction',
     });
   });
 
   it('formats all fields consistently', () => {
-    const doc = apmEventsToElasticsearchOutput({ events: [event], writeTargets })[0] as any;
+    const doc = streamProcessor.toDocument(event);
 
-    expect(doc._source).toMatchInlineSnapshot(`
+    expect(doc).toMatchInlineSnapshot(`
       Object {
         "@timestamp": "2020-12-31T23:00:00.000Z",
         "ecs": Object {
           "version": "1.4",
         },
         "observer": Object {
-          "version": "7.16.0",
-          "version_major": 7,
+          "version": "8.0.0",
+          "version_major": 8,
         },
         "processor": Object {
           "event": "transaction",

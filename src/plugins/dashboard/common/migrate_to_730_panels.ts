@@ -16,7 +16,7 @@ import {
   SavedDashboardPanel620,
   SavedDashboardPanel630,
   SavedDashboardPanel610,
-} from './';
+} from '.';
 import {
   RawSavedDashboardPanelTo60,
   RawSavedDashboardPanel630,

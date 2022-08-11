@@ -7,13 +7,14 @@
 
 import { isString } from 'lodash';
 import { JsonValue } from '@kbn/utility-types';
+import { Logger } from '@kbn/core/server';
 import { HealthStatus, RawMonitoringStats } from '../monitoring';
 import { TaskManagerConfig } from '../config';
-import { Logger } from '../../../../../src/core/server';
 
 export function calculateHealthStatus(
   summarizedStats: RawMonitoringStats,
   config: TaskManagerConfig,
+  shouldRunTasks: boolean,
   logger: Logger
 ): HealthStatus {
   const now = Date.now();
@@ -30,9 +31,12 @@ export function calculateHealthStatus(
     return HealthStatus.Error;
   }
 
-  if (hasExpiredHotTimestamps(summarizedStats, now, requiredHotStatsFreshness)) {
-    logger.debug('setting HealthStatus.Error because of expired hot timestamps');
-    return HealthStatus.Error;
+  // Hot timestamps look at runtime stats which are not available when tasks are not running
+  if (shouldRunTasks) {
+    if (hasExpiredHotTimestamps(summarizedStats, now, requiredHotStatsFreshness)) {
+      logger.debug('setting HealthStatus.Error because of expired hot timestamps');
+      return HealthStatus.Error;
+    }
   }
 
   if (hasExpiredColdTimestamps(summarizedStats, now, requiredColdStatsFreshness)) {

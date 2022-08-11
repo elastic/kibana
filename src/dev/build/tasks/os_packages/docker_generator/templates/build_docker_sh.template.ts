@@ -15,14 +15,19 @@ function generator({
   imageFlavor,
   dockerPush,
   dockerTagQualifier,
+  dockerCrossCompile,
   version,
   dockerTargetFilename,
-  baseOSImage,
+  baseImageName,
   architecture,
 }: TemplateContext) {
   const dockerTargetName = `${imageTag}${imageFlavor}:${version}${
     dockerTagQualifier ? '-' + dockerTagQualifier : ''
   }`;
+  const dockerArchitecture = architecture === 'aarch64' ? 'linux/arm64' : 'linux/amd64';
+  const dockerBuild = dockerCrossCompile
+    ? `docker buildx build --platform ${dockerArchitecture} -t ${dockerTargetName} -f Dockerfile . || exit 1;`
+    : `docker build -t ${dockerTargetName} -f Dockerfile . || exit 1;`;
   return dedent(`
   #!/usr/bin/env bash
   #
@@ -56,10 +61,10 @@ function generator({
     done
   }
 
-  retry_docker_pull ${baseOSImage}
+  retry_docker_pull ${baseImageName}
 
   echo "Building: kibana${imageFlavor}-docker"; \\
-  docker build -t ${dockerTargetName} -f Dockerfile . || exit 1;
+  ${dockerBuild}
 
   docker save ${dockerTargetName} | gzip -c > ${dockerTargetFilename}
 

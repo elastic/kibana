@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { KibanaRequest, SavedObjectsClientContract, Logger } from 'kibana/server';
-import type { MlDatafeedStats, MlJob, MlPluginSetup } from '../../../../../ml/server';
+import type { KibanaRequest, SavedObjectsClientContract, Logger } from '@kbn/core/server';
+import type { MlDatafeedStats, MlJob, MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { MlJobMetric, MlJobUsageMetric } from './types';
 
 import { isJobStarted } from '../../../../common/machine_learning/helpers';

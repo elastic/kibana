@@ -8,14 +8,14 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { i18n } from '@kbn/i18n';
+import { ThemeServiceStart } from '@kbn/core/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { Ast } from '@kbn/interpreter';
-import { DatatableRow } from 'src/plugins/expressions';
-import type { GaugeArguments } from '../../../../../../src/plugins/chart_expressions/expression_gauge/common';
-import {
-  GaugeShapes,
-  EXPRESSION_GAUGE_NAME,
-} from '../../../../../../src/plugins/chart_expressions/expression_gauge/common';
+import { DatatableRow } from '@kbn/expressions-plugin/common';
+import { PaletteRegistry, CustomPaletteParams, CUSTOM_PALETTE } from '@kbn/coloring';
+import type { GaugeArguments } from '@kbn/expression-gauge-plugin/common';
+import { GaugeShapes, EXPRESSION_GAUGE_NAME } from '@kbn/expression-gauge-plugin/common';
 import {
   getGoalValue,
   getMaxValue,
@@ -23,9 +23,8 @@ import {
   getValueFromAccessor,
   VerticalBulletIcon,
   HorizontalBulletIcon,
-} from '../../../../../../src/plugins/chart_expressions/expression_gauge/public';
-import { PaletteRegistry } from '../../../../../../src/plugins/charts/public';
-import type { DatasourcePublicAPI, OperationMetadata, Visualization } from '../../types';
+} from '@kbn/expression-gauge-plugin/public';
+import type { DatasourceLayers, OperationMetadata, Visualization } from '../../types';
 import { getSuggestions } from './suggestions';
 import {
   GROUP_ID,
@@ -34,9 +33,9 @@ import {
   GaugeExpressionState,
 } from './constants';
 import { GaugeToolbar } from './toolbar_component';
-import { applyPaletteParams, CUSTOM_PALETTE } from '../../shared_components';
+import { applyPaletteParams } from '../../shared_components';
 import { GaugeDimensionEditor } from './dimension_editor';
-import { CustomPaletteParams, layerTypes } from '../../../common';
+import { layerTypes } from '../../../common';
 import { generateId } from '../../id_generator';
 import { getAccessorsFromState } from './utils';
 
@@ -46,6 +45,7 @@ const groupLabelForGauge = i18n.translate('xpack.lens.metric.groupLabel', {
 
 interface GaugeVisualizationDeps {
   paletteService: PaletteRegistry;
+  theme: ThemeServiceStart;
 }
 
 export const isNumericMetric = (op: OperationMetadata) =>
@@ -115,12 +115,14 @@ const checkInvalidConfiguration = (row?: DatatableRow, state?: GaugeVisualizatio
 const toExpression = (
   paletteService: PaletteRegistry,
   state: GaugeVisualizationState,
-  datasourceLayers: Record<string, DatasourcePublicAPI>,
-  attributes?: Partial<Omit<GaugeArguments, keyof GaugeExpressionState | 'ariaLabel'>>
+  datasourceLayers: DatasourceLayers,
+  attributes?: Partial<Omit<GaugeArguments, keyof GaugeExpressionState | 'ariaLabel'>>,
+  datasourceExpressionsByLayers: Record<string, Ast> | undefined = {}
 ): Ast | null => {
   const datasource = datasourceLayers[state.layerId];
+  const datasourceExpression = datasourceExpressionsByLayers[state.layerId];
 
-  const originalOrder = datasource.getTableSpec().map(({ columnId }) => columnId);
+  const originalOrder = datasource?.getTableSpec().map(({ columnId }) => columnId);
   if (!originalOrder || !state.metricAccessor) {
     return null;
   }
@@ -128,6 +130,7 @@ const toExpression = (
   return {
     type: 'expression',
     chain: [
+      ...(datasourceExpression?.chain ?? []),
       {
         type: 'function',
         function: EXPRESSION_GAUGE_NAME,
@@ -159,6 +162,7 @@ const toExpression = (
 
 export const getGaugeVisualization = ({
   paletteService,
+  theme,
 }: GaugeVisualizationDeps): Visualization<GaugeVisualizationState> => ({
   id: LENS_GAUGE_ID,
 
@@ -251,6 +255,11 @@ export const getGaugeVisualization = ({
           groupLabel: i18n.translate('xpack.lens.gauge.metricLabel', {
             defaultMessage: 'Metric',
           }),
+          paramEditorCustomProps: {
+            headingLabel: i18n.translate('xpack.lens.gauge.headingLabel', {
+              defaultMessage: 'Value',
+            }),
+          },
           accessors: metricAccessor
             ? [
                 palette
@@ -279,6 +288,16 @@ export const getGaugeVisualization = ({
           groupLabel: i18n.translate('xpack.lens.gauge.minValueLabel', {
             defaultMessage: 'Minimum value',
           }),
+          paramEditorCustomProps: {
+            labels: [
+              i18n.translate('xpack.lens.gauge.minValueLabel', {
+                defaultMessage: 'Minimum value',
+              }),
+            ],
+            headingLabel: i18n.translate('xpack.lens.gauge.headingLabel', {
+              defaultMessage: 'Value',
+            }),
+          },
           accessors: state.minAccessor ? [{ columnId: state.minAccessor }] : [],
           filterOperations: isNumericMetric,
           supportsMoreColumns: !state.minAccessor,
@@ -295,6 +314,16 @@ export const getGaugeVisualization = ({
           groupLabel: i18n.translate('xpack.lens.gauge.maxValueLabel', {
             defaultMessage: 'Maximum value',
           }),
+          paramEditorCustomProps: {
+            labels: [
+              i18n.translate('xpack.lens.gauge.maxValueLabel', {
+                defaultMessage: 'Maximum value',
+              }),
+            ],
+            headingLabel: i18n.translate('xpack.lens.gauge.headingLabel', {
+              defaultMessage: 'Value',
+            }),
+          },
           accessors: state.maxAccessor ? [{ columnId: state.maxAccessor }] : [],
           filterOperations: isNumericMetric,
           supportsMoreColumns: !state.maxAccessor,
@@ -311,6 +340,16 @@ export const getGaugeVisualization = ({
           groupLabel: i18n.translate('xpack.lens.gauge.goalValueLabel', {
             defaultMessage: 'Goal value',
           }),
+          paramEditorCustomProps: {
+            labels: [
+              i18n.translate('xpack.lens.gauge.goalValueLabel', {
+                defaultMessage: 'Goal value',
+              }),
+            ],
+            headingLabel: i18n.translate('xpack.lens.gauge.headingLabel', {
+              defaultMessage: 'Value',
+            }),
+          },
           accessors: state.goalAccessor ? [{ columnId: state.goalAccessor }] : [],
           filterOperations: isNumericMetric,
           supportsMoreColumns: !state.goalAccessor,
@@ -365,18 +404,22 @@ export const getGaugeVisualization = ({
 
   renderDimensionEditor(domElement, props) {
     render(
-      <I18nProvider>
-        <GaugeDimensionEditor {...props} paletteService={paletteService} />
-      </I18nProvider>,
+      <KibanaThemeProvider theme$={theme.theme$}>
+        <I18nProvider>
+          <GaugeDimensionEditor {...props} paletteService={paletteService} />
+        </I18nProvider>
+      </KibanaThemeProvider>,
       domElement
     );
   },
 
   renderToolbar(domElement, props) {
     render(
-      <I18nProvider>
-        <GaugeToolbar {...props} />
-      </I18nProvider>,
+      <KibanaThemeProvider theme$={theme.theme$}>
+        <I18nProvider>
+          <GaugeToolbar {...props} />
+        </I18nProvider>
+      </KibanaThemeProvider>,
       domElement
     );
   },
@@ -399,22 +442,16 @@ export const getGaugeVisualization = ({
               {
                 groupId: 'min',
                 columnId: generateId(),
-                dataType: 'number',
-                label: 'minAccessor',
                 staticValue: minValue,
               },
               {
                 groupId: 'max',
                 columnId: generateId(),
-                dataType: 'number',
-                label: 'maxAccessor',
                 staticValue: maxValue,
               },
               {
                 groupId: 'goal',
                 columnId: generateId(),
-                dataType: 'number',
-                label: 'goalAccessor',
                 staticValue: goalValue,
               },
             ]
@@ -429,10 +466,17 @@ export const getGaugeVisualization = ({
     }
   },
 
-  toExpression: (state, datasourceLayers, attributes) =>
-    toExpression(paletteService, state, datasourceLayers, { ...attributes }),
-  toPreviewExpression: (state, datasourceLayers) =>
-    toExpression(paletteService, state, datasourceLayers),
+  toExpression: (state, datasourceLayers, attributes, datasourceExpressionsByLayers = {}) =>
+    toExpression(
+      paletteService,
+      state,
+      datasourceLayers,
+      { ...attributes },
+      datasourceExpressionsByLayers
+    ),
+
+  toPreviewExpression: (state, datasourceLayers, datasourceExpressionsByLayers = {}) =>
+    toExpression(paletteService, state, datasourceLayers, undefined, datasourceExpressionsByLayers),
 
   getErrorMessages(state) {
     // not possible to break it?

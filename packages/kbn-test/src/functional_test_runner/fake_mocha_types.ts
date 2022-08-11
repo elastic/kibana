@@ -31,11 +31,13 @@ export interface Test {
   file?: string;
   parent?: Suite;
   isPassed: () => boolean;
+  pending?: boolean;
 }
 
 export interface Runner extends EventEmitter {
   abort(): void;
   failures: any[];
+  uncaught: (error: Error) => void;
 }
 
 export interface Mocha {

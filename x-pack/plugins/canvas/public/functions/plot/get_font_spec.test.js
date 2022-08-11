@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { fontStyle } from '../../../../../../src/plugins/presentation_util/common/lib';
+import { fontStyle } from '@kbn/presentation-util-plugin/common/lib';
 import { defaultSpec, getFontSpec } from './get_font_spec';
 
 describe('getFontSpec', () => {

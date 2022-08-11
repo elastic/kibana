@@ -7,10 +7,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { ViewMode } from '../../services/embeddable';
 import { TopNavIds } from './top_nav_ids';
 import { NavAction } from '../../types';
-import { TopNavMenuData } from '../../../../navigation/public';
 
 /**
  * @param actions - A mapping of TopNavIds to an action function that should run when the

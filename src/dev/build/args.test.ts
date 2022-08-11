@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog, createAnyInstanceSerializer } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
+import { createAnyInstanceSerializer } from '@kbn/jest-serializers';
 
 import { readCliArgs } from './args';
 
@@ -26,6 +27,7 @@ it('build default and oss dist for current platform, without packages, by defaul
   expect(readCliArgs(['node', 'scripts/build'])).toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
+        "buildCanvasShareableRuntime": true,
         "createArchives": true,
         "createDebPackage": false,
         "createDockerCloud": false,
@@ -36,6 +38,8 @@ it('build default and oss dist for current platform, without packages, by defaul
         "createGenericFolders": true,
         "createPlatformFolders": true,
         "createRpmPackage": false,
+        "dockerContextUseLocalArtifact": null,
+        "dockerCrossCompile": false,
         "dockerPush": false,
         "dockerTagQualifier": null,
         "downloadCloudDependencies": true,
@@ -57,6 +61,7 @@ it('builds packages if --all-platforms is passed', () => {
   expect(readCliArgs(['node', 'scripts/build', '--all-platforms'])).toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
+        "buildCanvasShareableRuntime": true,
         "createArchives": true,
         "createDebPackage": true,
         "createDockerCloud": true,
@@ -67,6 +72,8 @@ it('builds packages if --all-platforms is passed', () => {
         "createGenericFolders": true,
         "createPlatformFolders": true,
         "createRpmPackage": true,
+        "dockerContextUseLocalArtifact": null,
+        "dockerCrossCompile": false,
         "dockerPush": false,
         "dockerTagQualifier": null,
         "downloadCloudDependencies": true,
@@ -88,6 +95,7 @@ it('limits packages if --rpm passed with --all-platforms', () => {
   expect(readCliArgs(['node', 'scripts/build', '--all-platforms', '--rpm'])).toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
+        "buildCanvasShareableRuntime": true,
         "createArchives": true,
         "createDebPackage": false,
         "createDockerCloud": false,
@@ -98,6 +106,8 @@ it('limits packages if --rpm passed with --all-platforms', () => {
         "createGenericFolders": true,
         "createPlatformFolders": true,
         "createRpmPackage": true,
+        "dockerContextUseLocalArtifact": null,
+        "dockerCrossCompile": false,
         "dockerPush": false,
         "dockerTagQualifier": null,
         "downloadCloudDependencies": true,
@@ -119,6 +129,7 @@ it('limits packages if --deb passed with --all-platforms', () => {
   expect(readCliArgs(['node', 'scripts/build', '--all-platforms', '--deb'])).toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
+        "buildCanvasShareableRuntime": true,
         "createArchives": true,
         "createDebPackage": true,
         "createDockerCloud": false,
@@ -129,6 +140,8 @@ it('limits packages if --deb passed with --all-platforms', () => {
         "createGenericFolders": true,
         "createPlatformFolders": true,
         "createRpmPackage": false,
+        "dockerContextUseLocalArtifact": null,
+        "dockerCrossCompile": false,
         "dockerPush": false,
         "dockerTagQualifier": null,
         "downloadCloudDependencies": true,
@@ -151,6 +164,7 @@ it('limits packages if --docker passed with --all-platforms', () => {
     .toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
+        "buildCanvasShareableRuntime": true,
         "createArchives": true,
         "createDebPackage": false,
         "createDockerCloud": true,
@@ -161,6 +175,8 @@ it('limits packages if --docker passed with --all-platforms', () => {
         "createGenericFolders": true,
         "createPlatformFolders": true,
         "createRpmPackage": false,
+        "dockerContextUseLocalArtifact": null,
+        "dockerCrossCompile": false,
         "dockerPush": false,
         "dockerTagQualifier": null,
         "downloadCloudDependencies": true,
@@ -190,6 +206,7 @@ it('limits packages if --docker passed with --skip-docker-ubi and --all-platform
   ).toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
+        "buildCanvasShareableRuntime": true,
         "createArchives": true,
         "createDebPackage": false,
         "createDockerCloud": true,
@@ -200,6 +217,8 @@ it('limits packages if --docker passed with --skip-docker-ubi and --all-platform
         "createGenericFolders": true,
         "createPlatformFolders": true,
         "createRpmPackage": false,
+        "dockerContextUseLocalArtifact": null,
+        "dockerCrossCompile": false,
         "dockerPush": false,
         "dockerTagQualifier": null,
         "downloadCloudDependencies": true,
@@ -222,6 +241,7 @@ it('limits packages if --all-platforms passed with --skip-docker-ubuntu', () => 
     .toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
+        "buildCanvasShareableRuntime": true,
         "createArchives": true,
         "createDebPackage": true,
         "createDockerCloud": true,
@@ -232,6 +252,8 @@ it('limits packages if --all-platforms passed with --skip-docker-ubuntu', () => 
         "createGenericFolders": true,
         "createPlatformFolders": true,
         "createRpmPackage": true,
+        "dockerContextUseLocalArtifact": null,
+        "dockerCrossCompile": false,
         "dockerPush": false,
         "dockerTagQualifier": null,
         "downloadCloudDependencies": true,

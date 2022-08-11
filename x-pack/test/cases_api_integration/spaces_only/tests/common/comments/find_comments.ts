@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
+import { CASES_URL } from '@kbn/cases-plugin/common/constants';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
 import { getPostCaseRequest, postCommentUserReq } from '../../../../common/lib/mock';
 import {
   createComment,
@@ -22,7 +22,7 @@ import {
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
   const authSpace1 = getAuthWithSuperUser();
 
@@ -34,22 +34,27 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should find all case comments in space1', async () => {
-      const caseInfo = await createCase(supertest, getPostCaseRequest(), 200, authSpace1);
+      const caseInfo = await createCase(
+        supertestWithoutAuth,
+        getPostCaseRequest(),
+        200,
+        authSpace1
+      );
       await createComment({
-        supertest,
+        supertest: supertestWithoutAuth,
         caseId: caseInfo.id,
         params: postCommentUserReq,
         auth: authSpace1,
       });
 
       const patchedCase = await createComment({
-        supertest,
+        supertest: supertestWithoutAuth,
         caseId: caseInfo.id,
         params: postCommentUserReq,
         auth: authSpace1,
       });
 
-      const { body: caseComments } = await supertest
+      const { body: caseComments } = await supertestWithoutAuth
         .get(`${getSpaceUrlPrefix(authSpace1.space)}${CASES_URL}/${caseInfo.id}/comments/_find`)
         .expect(200);
 
@@ -57,22 +62,27 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should not find any case comments in space2', async () => {
-      const caseInfo = await createCase(supertest, getPostCaseRequest(), 200, authSpace1);
+      const caseInfo = await createCase(
+        supertestWithoutAuth,
+        getPostCaseRequest(),
+        200,
+        authSpace1
+      );
       await createComment({
-        supertest,
+        supertest: supertestWithoutAuth,
         caseId: caseInfo.id,
         params: postCommentUserReq,
         auth: authSpace1,
       });
 
       await createComment({
-        supertest,
+        supertest: supertestWithoutAuth,
         caseId: caseInfo.id,
         params: postCommentUserReq,
         auth: authSpace1,
       });
 
-      const { body: caseComments } = await supertest
+      const { body: caseComments } = await supertestWithoutAuth
         .get(`${getSpaceUrlPrefix('space2')}${CASES_URL}/${caseInfo.id}/comments/_find`)
         .expect(200);
 

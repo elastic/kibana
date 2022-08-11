@@ -6,10 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { IRouter } from '@kbn/core/server';
 import { PLUGIN_ID } from '../../../common';
-import { IRouter } from '../../../../../../src/core/server';
-import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
-import { getInternalSavedObjectsClient } from '../../usage/collector';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { getInternalSavedObjectsClient } from '../utils';
 
 export const getAgentPolicyRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.get(

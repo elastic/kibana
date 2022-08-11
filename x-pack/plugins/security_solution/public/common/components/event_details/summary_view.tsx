@@ -5,60 +5,75 @@
  * 2.0.
  */
 
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
-  EuiInMemoryTable,
-  EuiBasicTableColumn,
   EuiLink,
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
   EuiText,
+  EuiIconTip,
 } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
 
-import { SummaryRow } from './helpers';
+import type { AlertSummaryRow } from './helpers';
+import * as i18n from './translations';
 import { VIEW_ALL_FIELDS } from './translations';
+import { SummaryTable } from './table/summary_table';
+import { SummaryValueCell } from './table/summary_value_cell';
+import { PrevalenceCellRenderer } from './table/prevalence_cell';
 
-export const Indent = styled.div`
-  padding: 0 12px;
-`;
+const baseColumns: Array<EuiBasicTableColumn<AlertSummaryRow>> = [
+  {
+    field: 'title',
+    truncateText: false,
+    name: i18n.HIGHLIGHTED_FIELDS_FIELD,
+    textOnly: true,
+  },
+  {
+    field: 'description',
+    truncateText: false,
+    render: SummaryValueCell,
+    name: i18n.HIGHLIGHTED_FIELDS_VALUE,
+  },
+];
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
-  .euiTableHeaderCell,
-  .euiTableRowCell {
-    border: none;
-  }
-  .euiTableHeaderCell .euiTableCellContent {
-    padding: 0;
-  }
+const allColumns: Array<EuiBasicTableColumn<AlertSummaryRow>> = [
+  ...baseColumns,
+  {
+    field: 'description',
+    truncateText: true,
+    render: PrevalenceCellRenderer,
+    name: (
+      <>
+        {i18n.HIGHLIGHTED_FIELDS_ALERT_PREVALENCE}{' '}
+        <EuiIconTip
+          type="iInCircle"
+          color="subdued"
+          title={i18n.HIGHLIGHTED_FIELDS_ALERT_PREVALENCE}
+          content={<span>{i18n.HIGHLIGHTED_FIELDS_ALERT_PREVALENCE_TOOLTIP}</span>}
+        />
+      </>
+    ),
+    align: 'right',
+    width: '130px',
+  },
+];
 
-  .flyoutOverviewDescription {
-    .hoverActions-active {
-      .timelines__hoverActionButton,
-      .securitySolution__hoverActionButton {
-        opacity: 1;
-      }
-    }
+const rowProps = {
+  // Class name for each row. On hover of a row, all actions for that row will be shown.
+  className: 'flyoutTableHoverActions',
+};
 
-    &:hover {
-      .timelines__hoverActionButton,
-      .securitySolution__hoverActionButton {
-        opacity: 1;
-      }
-    }
-  }
-`;
-
-export const SummaryViewComponent: React.FC<{
+const SummaryViewComponent: React.FC<{
   goToTable: () => void;
   title: string;
-  summaryColumns: Array<EuiBasicTableColumn<SummaryRow>>;
-  summaryRows: SummaryRow[];
-  dataTestSubj?: string;
-}> = ({ goToTable, summaryColumns, summaryRows, dataTestSubj = 'summary-view', title }) => {
+  rows: AlertSummaryRow[];
+  isReadOnly?: boolean;
+}> = ({ goToTable, rows, title, isReadOnly }) => {
+  const columns = isReadOnly ? baseColumns : allColumns;
+
   return (
     <div>
       <EuiFlexGroup>
@@ -74,14 +89,13 @@ export const SummaryViewComponent: React.FC<{
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-      <Indent>
-        <StyledEuiInMemoryTable
-          data-test-subj={dataTestSubj}
-          items={summaryRows}
-          columns={summaryColumns}
-          compressed
-        />
-      </Indent>
+      <SummaryTable
+        data-test-subj="summary-view"
+        items={rows}
+        columns={columns}
+        rowProps={rowProps}
+        compressed
+      />
     </div>
   );
 };

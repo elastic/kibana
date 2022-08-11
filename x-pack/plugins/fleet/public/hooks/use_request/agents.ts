@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import type {
+  GetAgentTagsResponse,
+  PostBulkUpdateAgentTagsRequest,
+  UpdateAgentRequest,
+} from '../../../common/types';
+
 import { agentRouteService } from '../../services';
 
 import type {
@@ -21,12 +27,16 @@ import type {
   GetAgentsResponse,
   GetAgentStatusRequest,
   GetAgentStatusResponse,
+  GetAgentIncomingDataRequest,
+  GetAgentIncomingDataResponse,
   PostAgentUpgradeRequest,
   PostBulkAgentUpgradeRequest,
   PostAgentUpgradeResponse,
   PostBulkAgentUpgradeResponse,
   PostNewAgentActionRequest,
   PostNewAgentActionResponse,
+  GetCurrentUpgradesResponse,
+  GetAvailableVersionsResponse,
 } from '../../types';
 
 import { useRequest, sendRequest } from './use_request';
@@ -68,6 +78,13 @@ export function useGetAgentStatus(query: GetAgentStatusRequest['query'], options
     ...options,
   });
 }
+export function sendGetAgentIncomingData(query: GetAgentIncomingDataRequest['query']) {
+  return sendRequest<GetAgentIncomingDataResponse>({
+    method: 'get',
+    path: agentRouteService.getIncomingDataPath(),
+    query,
+  });
+}
 
 export function sendGetAgentStatus(
   query: GetAgentStatusRequest['query'],
@@ -76,6 +93,15 @@ export function sendGetAgentStatus(
   return sendRequest<GetAgentStatusResponse>({
     method: 'get',
     path: agentRouteService.getStatusPath(),
+    query,
+    ...options,
+  });
+}
+
+export function sendGetAgentTags(query: GetAgentsRequest['query'], options?: RequestOptions) {
+  return sendRequest<GetAgentTagsResponse>({
+    method: 'get',
+    path: agentRouteService.getListTagsPath(),
     query,
     ...options,
   });
@@ -166,5 +192,51 @@ export function sendPostBulkAgentUpgrade(
     method: 'post',
     body,
     ...options,
+  });
+}
+
+export function sendGetCurrentUpgrades() {
+  return sendRequest<GetCurrentUpgradesResponse>({
+    path: agentRouteService.getCurrentUpgradesPath(),
+    method: 'get',
+  });
+}
+
+export function sendPostCancelAction(actionId: string) {
+  return sendRequest<GetCurrentUpgradesResponse>({
+    path: agentRouteService.getCancelActionPath(actionId),
+    method: 'post',
+  });
+}
+
+export function sendPutAgentTagsUpdate(
+  agentId: string,
+  body: UpdateAgentRequest['body'],
+  options?: RequestOptions
+) {
+  return sendRequest<GetOneAgentResponse>({
+    method: 'put',
+    path: agentRouteService.getUpdatePath(agentId),
+    body,
+    ...options,
+  });
+}
+
+export function sendPostBulkAgentTagsUpdate(
+  body: PostBulkUpdateAgentTagsRequest['body'],
+  options?: RequestOptions
+) {
+  return sendRequest<GetOneAgentResponse>({
+    method: 'post',
+    path: agentRouteService.getBulkUpdateTagsPath(),
+    body,
+    ...options,
+  });
+}
+
+export function sendGetAgentsAvailableVersions() {
+  return sendRequest<GetAvailableVersionsResponse>({
+    method: 'get',
+    path: agentRouteService.getAvailableVersionsPath(),
   });
 }

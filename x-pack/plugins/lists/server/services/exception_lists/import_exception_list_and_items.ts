@@ -16,7 +16,7 @@ import {
   ImportExceptionsResponseSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { createPromiseFromStreams } from '@kbn/utils';
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 import { chunk } from 'lodash/fp';
 
 import { importExceptionLists } from './utils/import/import_exception_lists';

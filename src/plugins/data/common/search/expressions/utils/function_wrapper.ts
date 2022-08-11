@@ -7,7 +7,7 @@
  */
 
 import { mapValues } from 'lodash';
-import { AnyExpressionFunctionDefinition, ExecutionContext } from 'src/plugins/expressions/common';
+import { AnyExpressionFunctionDefinition, ExecutionContext } from '@kbn/expressions-plugin/common';
 
 /**
  * Takes a function spec and passes in default args,

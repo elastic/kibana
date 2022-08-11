@@ -14,7 +14,7 @@ import {
 
 describe('<EditPolicy /> node allocation cloud-aware behavior', () => {
   let testBed: CloudNodeAllocationTestBed;
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
     jest.useFakeTimers();
@@ -22,23 +22,21 @@ describe('<EditPolicy /> node allocation cloud-aware behavior', () => {
 
   afterAll(() => {
     jest.useRealTimers();
-    server.restore();
   });
 
   const setup = async (isOnCloud?: boolean) => {
     await act(async () => {
       if (Boolean(isOnCloud)) {
-        testBed = await setupCloudNodeAllocation({
+        testBed = await setupCloudNodeAllocation(httpSetup, {
           appServicesContext: { cloud: { isCloudEnabled: true } },
         });
       } else {
-        testBed = await setupCloudNodeAllocation();
+        testBed = await setupCloudNodeAllocation(httpSetup);
       }
     });
   };
 
   beforeEach(async () => {
-    server.respondImmediately = true;
     httpRequestsMockHelpers.setLoadPolicies([]);
     httpRequestsMockHelpers.setListNodes({
       nodesByRoles: { data: ['node1'] },

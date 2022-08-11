@@ -10,9 +10,9 @@ import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { IUiSettingsClient } from 'kibana/public';
-import { KibanaContextProvider } from '../../../../kibana_react/public';
-import { Adapters, RequestAdapter, InspectorViewDescription } from '../../../../inspector/public';
+import { IUiSettingsClient } from '@kbn/core/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { Adapters, RequestAdapter, InspectorViewDescription } from '@kbn/inspector-plugin/public';
 import { VegaAdapter } from './vega_adapter';
 import type { VegaDataInspectorProps } from './vega_data_inspector';
 

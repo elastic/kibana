@@ -12,7 +12,8 @@ import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { CtiEnabledModule } from './cti_enabled_module';
 import { ThemeProvider } from 'styled-components';
-import { createStore, State } from '../../../common/store';
+import type { State } from '../../../common/store';
+import { createStore } from '../../../common/store';
 import {
   createSecuritySolutionStorageMock,
   kibanaObservable,
@@ -49,7 +50,7 @@ describe('CtiEnabledModule', () => {
       <Provider store={store}>
         <I18nProvider>
           <ThemeProvider theme={mockTheme}>
-            <CtiEnabledModule {...mockProps} allIntegrationsInstalled={true} />
+            <CtiEnabledModule {...mockProps} />
           </ThemeProvider>
         </I18nProvider>
       </Provider>

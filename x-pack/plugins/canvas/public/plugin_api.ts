@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import {
   AnyExpressionFunctionDefinition,
   AnyExpressionTypeDefinition,
@@ -12,7 +13,6 @@ import {
   AnyRendererFactory,
 } from '../types';
 import { ElementFactory } from '../types';
-import { ExpressionsSetup } from '../../../../src/plugins/expressions/public';
 
 type SpecPromiseFn<T extends any> = () => Promise<T[]>;
 type AddToRegistry<T extends any> = (add: T[] | SpecPromiseFn<T>) => void;

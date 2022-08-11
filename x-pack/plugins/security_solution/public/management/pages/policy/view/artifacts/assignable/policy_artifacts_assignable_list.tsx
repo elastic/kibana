@@ -6,13 +6,14 @@
  */
 
 import { EuiProgress } from '@elastic/eui';
-import { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import React, { useMemo } from 'react';
-import { GetTrustedAppsListResponse, Immutable } from '../../../../../../../common/endpoint/types';
-import {
-  AnyArtifact,
-  ArtifactEntryCardMinified,
-} from '../../../../../components/artifact_entry_card';
+import type {
+  GetTrustedAppsListResponse,
+  Immutable,
+} from '../../../../../../../common/endpoint/types';
+import type { AnyArtifact } from '../../../../../components/artifact_entry_card';
+import { ArtifactEntryCardMinified } from '../../../../../components/artifact_entry_card';
 
 export interface PolicyArtifactsAssignableListProps {
   // TrustedApps is still migrating to use FoundExceptionListItemSchema and the compatibility is

@@ -42,12 +42,10 @@ export const PreviewListItem: React.FC<Props> = ({
 
   const [isPreviewImageModalVisible, setIsPreviewImageModalVisible] = useState(false);
 
-  /* eslint-disable @typescript-eslint/naming-convention */
   const classes = classnames('indexPatternFieldEditor__previewFieldList__item', {
     'indexPatternFieldEditor__previewFieldList__item--highlighted': isFromScript,
     'indexPatternFieldEditor__previewFieldList__item--pinned': isPinned,
   });
-  /* eslint-enable @typescript-eslint/naming-convention */
 
   const doesContainImage = formattedValue?.includes('<img');
 

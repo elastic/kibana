@@ -6,26 +6,39 @@
  * Side Public License, v 1.
  */
 
-import {
-  ElasticsearchClient,
-  Logger,
-  KibanaRequest,
-  SavedObjectsClientContract,
-} from 'src/core/server';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { TelemetryCollectionManagerPlugin } from './plugin';
+import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { TelemetryCollectionManagerPlugin } from './plugin';
 
-export interface TelemetryCollectionManagerPluginSetup {
+/**
+ * Public contract coming from the setup method.
+ */
+export interface TelemetryCollectionManagerPluginSetup
+  extends TelemetryCollectionManagerPluginStart {
   setCollectionStrategy: <T extends BasicStatsPayload>(
     collectionConfig: CollectionStrategyConfig<T>
   ) => void;
-  getOptInStats: TelemetryCollectionManagerPlugin['getOptInStats'];
-  getStats: TelemetryCollectionManagerPlugin['getStats'];
 }
 
+/**
+ * Public contract coming from the start method.
+ */
 export interface TelemetryCollectionManagerPluginStart {
+  /**
+   * Fetches the minimum piece of data to report when Opting IN or OUT.
+   */
   getOptInStats: TelemetryCollectionManagerPlugin['getOptInStats'];
+  /**
+   * Fetches the Snapshot telemetry report.
+   */
   getStats: TelemetryCollectionManagerPlugin['getStats'];
+  /**
+   * Is it OK to fetch telemetry?
+   *
+   * It should be called before calling `getStats` or `getOptInStats` to validate that Kibana is in a healthy state
+   * to attempt to fetch the Telemetry report.
+   */
+  shouldGetTelemetry: () => Promise<boolean>;
 }
 
 export interface TelemetryOptInStats {
@@ -36,7 +49,6 @@ export interface TelemetryOptInStats {
 export interface BaseStatsGetterConfig {
   unencrypted: boolean;
   refreshCache?: boolean;
-  request?: KibanaRequest;
 }
 
 export interface EncryptedStatsGetterConfig extends BaseStatsGetterConfig {
@@ -45,7 +57,6 @@ export interface EncryptedStatsGetterConfig extends BaseStatsGetterConfig {
 
 export interface UnencryptedStatsGetterConfig extends BaseStatsGetterConfig {
   unencrypted: true;
-  request: KibanaRequest;
 }
 
 export interface ClusterDetails {
@@ -56,7 +67,6 @@ export interface StatsCollectionConfig {
   usageCollection: UsageCollectionSetup;
   esClient: ElasticsearchClient;
   soClient: SavedObjectsClientContract;
-  kibanaRequest: KibanaRequest | undefined; // intentionally `| undefined` to enforce providing the parameter
   refreshCache: boolean;
 }
 

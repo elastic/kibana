@@ -58,7 +58,7 @@ export const ensureFieldIsSafeForQuery = (field: string, value: string): boolean
 };
 
 export const includeFieldsRequiredForAuthentication = (fields?: string[]): string[] | undefined => {
-  if (fields === undefined) {
+  if (fields === undefined || fields.length === 0) {
     return;
   }
   return uniq([...fields, OWNER_FIELD]);

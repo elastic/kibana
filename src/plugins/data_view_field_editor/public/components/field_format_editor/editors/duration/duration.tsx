@@ -7,7 +7,7 @@
  */
 
 import React, { Fragment } from 'react';
-import { DurationFormat } from 'src/plugins/field_formats/common';
+import { DurationFormat } from '@kbn/field-formats-plugin/common';
 
 import { EuiFieldNumber, EuiFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
 
@@ -33,8 +33,8 @@ interface OutputFormat {
   text: string;
 }
 
-interface DurationFormatEditorFormatParams {
-  outputPrecision: number;
+export interface DurationFormatEditorFormatParams {
+  outputPrecision: number | null;
   inputFormat: string;
   outputFormat: string;
   showSuffix?: boolean;
@@ -60,9 +60,11 @@ export class DurationFormatEditor extends DefaultFormatEditor<
     const output = super.getDerivedStateFromProps(nextProps, state);
     let error = null;
 
+    const { outputPrecision } = nextProps.formatParams;
     if (
       !(nextProps.format as DurationFormat).isHuman() &&
-      nextProps.formatParams.outputPrecision > 20
+      outputPrecision != null &&
+      outputPrecision > 20
     ) {
       error = i18n.translate('indexPatternFieldEditor.durationErrorMessage', {
         defaultMessage: 'Decimal places must be between 0 and 20',
@@ -86,7 +88,7 @@ export class DurationFormatEditor extends DefaultFormatEditor<
     const { error, samples, hasDecimalError } = this.state;
 
     const formatParams: DurationFormatEditorFormatParams = {
-      includeSpaceWithSuffix: format.getParamDefaults().includeSpaceWithSuffix,
+      includeSpaceWithSuffix: format.getParamDefaults().includeSpaceWithSuffix as boolean,
       ...this.props.formatParams,
     };
 
@@ -156,7 +158,7 @@ export class DurationFormatEditor extends DefaultFormatEditor<
               error={hasDecimalError ? error : null}
             >
               <EuiFieldNumber
-                value={formatParams.outputPrecision}
+                value={formatParams.outputPrecision ?? undefined}
                 min={0}
                 max={20}
                 onChange={(e) => {

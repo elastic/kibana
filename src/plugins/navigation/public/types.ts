@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { AggregateQuery, Query } from '@kbn/es-query';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { TopNavMenuProps, TopNavMenuExtensionsRegistrySetup } from './top_nav_menu';
-import { DataPublicPluginStart } from '../../data/public';
 
 export interface NavigationPublicPluginSetup {
   registerMenuItem: TopNavMenuExtensionsRegistrySetup['register'];
@@ -15,10 +16,11 @@ export interface NavigationPublicPluginSetup {
 
 export interface NavigationPublicPluginStart {
   ui: {
-    TopNavMenu: React.ComponentType<TopNavMenuProps>;
+    TopNavMenu: (props: TopNavMenuProps<Query>) => React.ReactElement;
+    AggregateQueryTopNavMenu: (props: TopNavMenuProps<AggregateQuery>) => React.ReactElement;
   };
 }
 
 export interface NavigationPluginStartDependencies {
-  data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }

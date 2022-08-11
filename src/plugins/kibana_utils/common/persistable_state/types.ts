@@ -7,7 +7,7 @@
  */
 
 import type { SerializableRecord, Serializable } from '@kbn/utility-types';
-import { SavedObjectReference } from '../../../../core/types';
+import { SavedObjectReference } from '@kbn/core/types';
 
 /**
  * Versioned state is a POJO JavaScript object that can be serialized to JSON,
@@ -159,7 +159,7 @@ export interface PersistableStateService<P extends Serializable = Serializable> 
    * @param version Current semver version of the `state`.
    * @returns A serializable state object migrated to the latest state.
    */
-  migrateToLatest?: (state: VersionedState) => P;
+  migrateToLatest?: (state: VersionedState<P>) => P;
 
   /**
    * returns all registered migrations

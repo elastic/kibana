@@ -10,7 +10,6 @@ import React, {
   useRef,
   useState,
   KeyboardEvent,
-  useEffect,
   ReactNode,
   FormEventHandler,
 } from 'react';
@@ -110,13 +109,6 @@ export function SelectableUrlList({
   useEvent('keydown', onEnterKey, searchRef);
   useEvent('escape', () => setPopoverIsOpen(false), searchRef);
 
-  useEffect(() => {
-    if (searchRef && searchRef.value !== searchValue) {
-      searchRef.value = searchValue;
-      searchRef.dispatchEvent(new Event('change'));
-    }
-  }, [searchRef, searchValue]);
-
   const loadingMessage = (
     <EuiSelectableMessage style={{ minHeight: 300 }}>
       <EuiLoadingSpinner size="l" />
@@ -165,6 +157,7 @@ export function SelectableUrlList({
       renderOption={renderOption}
       singleSelection={false}
       searchProps={{
+        value: searchValue,
         isClearable: true,
         onClick: onInputClick,
         onInput: onSearchInput,

@@ -7,7 +7,7 @@
 
 import del from 'del';
 import path from 'path';
-import type { Logger } from 'src/core/server';
+import type { Logger } from '@kbn/core/server';
 import { ChromiumArchivePaths, PackageInfo } from './chromium';
 import { download } from './download';
 import { md5 } from './download/checksum';

@@ -8,8 +8,8 @@
 
 const convert = require('./convert');
 
-const clusterHealthSpec = require('./__fixtures__/cluster_health_spec');
-const clusterHealthAutocomplete = require('./__fixtures__/cluster_health_autocomplete');
+const clusterHealthSpec = require('./__fixtures__/cluster_health_spec.json');
+const clusterHealthAutocomplete = require('./__fixtures__/cluster_health_autocomplete.json');
 
 test('convert', () => {
   expect(convert(clusterHealthSpec)).toEqual(clusterHealthAutocomplete);

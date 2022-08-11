@@ -7,13 +7,13 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import type {
   DefinedSections,
   ManagementApp,
   ManagementSetup,
-} from 'src/plugins/management/public';
-import { createManagementSectionMock } from 'src/plugins/management/public/mocks';
+} from '@kbn/management-plugin/public';
+import { createManagementSectionMock } from '@kbn/management-plugin/public/mocks';
 
 import { licenseMock } from '../../common/licensing/index.mock';
 import type { SecurityLicenseFeatures } from '../../common/licensing/license_features';

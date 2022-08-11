@@ -17,7 +17,7 @@ import { RoleTypes as ASRole } from '../../app_search/types';
 
 import { REQUIRED_LABEL, USERNAME_NO_USERS_TEXT } from './constants';
 
-import { UserSelector } from './';
+import { UserSelector } from '.';
 
 const simulatedEvent = {
   target: { value: 'foo' },

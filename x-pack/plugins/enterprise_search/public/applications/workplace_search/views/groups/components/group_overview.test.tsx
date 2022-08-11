@@ -91,7 +91,6 @@ describe('GroupOverview', () => {
       ...mockValues,
       group: {
         ...groups[0],
-        users: [],
         contentSources: [],
       },
     });

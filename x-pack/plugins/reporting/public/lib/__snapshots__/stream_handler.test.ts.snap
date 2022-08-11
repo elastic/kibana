@@ -5,6 +5,7 @@ Object {
   "completed": Array [
     Object {
       "csvContainsFormulas": false,
+      "errorCode": undefined,
       "id": "job-source-mock1",
       "jobtype": undefined,
       "maxSizeReached": false,
@@ -13,6 +14,7 @@ Object {
     },
     Object {
       "csvContainsFormulas": true,
+      "errorCode": undefined,
       "id": "job-source-mock4",
       "jobtype": undefined,
       "maxSizeReached": false,
@@ -23,6 +25,7 @@ Object {
   "failed": Array [
     Object {
       "csvContainsFormulas": false,
+      "errorCode": undefined,
       "id": "job-source-mock2",
       "jobtype": undefined,
       "maxSizeReached": false,
@@ -81,6 +84,9 @@ Array [
       />,
     },
   },
+  Object {
+    "toastLifeTimeMs": 86400000,
+  },
 ]
 `;
 
@@ -94,9 +100,7 @@ Array [
         <EuiCallOut
           color="danger"
           data-test-errorText="this is the failed report error"
-          iconType="alert"
           size="m"
-          title="The reporting job failed"
         >
           this is the failed report error
         </EuiCallOut>
@@ -183,6 +187,9 @@ Array [
       />,
     },
   },
+  Object {
+    "toastLifeTimeMs": 86400000,
+  },
 ]
 `;
 
@@ -223,6 +230,9 @@ Array [
         }
       />,
     },
+  },
+  Object {
+    "toastLifeTimeMs": 86400000,
   },
 ]
 `;

@@ -35,7 +35,6 @@ describe('extractPropertiesFromBucket', () => {
     expect(properties).toEqual({
       doc_count: 3,
       'terms_of_machine.os.keyword': 'win xp',
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'terms_of_machine.os.keyword__percentage': 33,
     });
   });

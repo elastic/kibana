@@ -32,6 +32,7 @@ export interface AggParamsMultiTerms extends BaseAggParams {
   orderAgg?: AggConfigSerialized;
   order?: 'asc' | 'desc';
   size?: number;
+  shardSize?: number;
   otherBucket?: boolean;
   otherBucketLabel?: string;
   separatorLabel?: string;
@@ -90,6 +91,7 @@ export const getMultiTermsBucketAgg = () => {
     },
     createFilter: createFilterMultiTerms,
     postFlightRequest: createOtherBucketPostFlightRequest(constructMultiTermOtherFilter),
+    hasPrecisionError: (aggBucket) => Boolean(aggBucket?.doc_count_error_upper_bound),
     params: [
       {
         name: 'fields',
@@ -126,6 +128,12 @@ export const getMultiTermsBucketAgg = () => {
       {
         name: 'size',
         default: 5,
+      },
+      {
+        name: 'shardSize',
+        write: (aggConfig, output) => {
+          output.params.shard_size = aggConfig.params.shardSize;
+        },
       },
       {
         name: 'otherBucket',

@@ -7,10 +7,16 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { isEmpty, isEqual, pick } from 'lodash/fp';
-import { Subscription } from 'rxjs/internal/Subscription';
+import { Subscription } from 'rxjs';
 
 import memoizeOne from 'memoize-one';
 import { DataViewBase } from '@kbn/es-query';
+
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
+
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import * as i18n from './translations';
 import {
   BrowserField,
   BrowserFields,
@@ -19,12 +25,6 @@ import {
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
 } from '../../../common/search_strategy';
-import * as i18n from './translations';
-
-import type { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
-import { isCompleteResponse, isErrorResponse } from '../../../../../../src/plugins/data/common';
-
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 
 const DEFAULT_BROWSER_FIELDS = {};

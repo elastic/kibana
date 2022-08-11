@@ -6,8 +6,8 @@
  */
 
 import { of } from 'rxjs';
-import type { Logger, KibanaRequest, RequestHandlerContext } from 'src/core/server';
-import { httpServerMock } from 'src/core/server/mocks';
+import type { Logger, KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
+import { httpServerMock } from '@kbn/core/server/mocks';
 import { License } from './license';
 import { LicenseCheckState, licensingMock, LicenseType } from './shared_imports';
 

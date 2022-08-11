@@ -13,7 +13,12 @@ get:
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/get_enrollment_api_keys_response.yaml
+            type: object
+            properties:
+              item:
+                $ref: ../components/schemas/enrollment_api_key.yaml
+            required:
+              - item
   operationId: get-enrollment-api-key
 delete:
   summary: Enrollment API Key - Delete

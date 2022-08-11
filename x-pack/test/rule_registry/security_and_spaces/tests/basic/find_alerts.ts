@@ -6,7 +6,7 @@
  */
 import expect from '@kbn/expect';
 
-import { ALERT_WORKFLOW_STATUS } from '../../../../../plugins/rule_registry/common/technical_rule_data_field_names';
+import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import {
   superUser,
   globalRead,
@@ -50,7 +50,6 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
 
   const TEST_URL = '/internal/rac/alerts';
-  const ALERTS_INDEX_URL = `${TEST_URL}/index`;
   const SPACE1 = 'space1';
   const SPACE2 = 'space2';
   const APM_ALERT_ID = 'NoxgpHkBqbdrfX07MqXV';
@@ -58,44 +57,39 @@ export default ({ getService }: FtrProviderContext) => {
   const SECURITY_SOLUTION_ALERT_ID = '020202';
   const SECURITY_SOLUTION_ALERT_INDEX = '.alerts-security.alerts';
 
-  const getAPMIndexName = async (user: User) => {
-    const { body: indexNames }: { body: { index_name: string[] | undefined } } =
-      await supertestWithoutAuth
-        .get(`${getSpaceUrlPrefix(SPACE1)}${ALERTS_INDEX_URL}`)
-        .auth(user.username, user.password)
-        .set('kbn-xsrf', 'true')
-        .expect(200);
-    const observabilityIndex = indexNames?.index_name?.find(
-      (indexName) => indexName === APM_ALERT_INDEX
-    );
-    expect(observabilityIndex).to.eql(APM_ALERT_INDEX); // assert this here so we can use constants in the dynamically-defined test cases below
-  };
-
-  const getSecuritySolutionIndexName = async (user: User) => {
-    const { body: indexNames }: { body: { index_name: string[] | undefined } } =
-      await supertestWithoutAuth
-        .get(`${getSpaceUrlPrefix(SPACE1)}${ALERTS_INDEX_URL}`)
-        .auth(user.username, user.password)
-        .set('kbn-xsrf', 'true')
-        .expect(200);
-    const securitySolution = indexNames?.index_name?.find((indexName) =>
-      indexName.startsWith(SECURITY_SOLUTION_ALERT_INDEX)
-    );
-    expect(securitySolution).to.eql(`${SECURITY_SOLUTION_ALERT_INDEX}-${SPACE1}`); // assert this here so we can use constants in the dynamically-defined test cases below
-  };
-
   describe('Alert - Find - RBAC - spaces', () => {
-    before(async () => {
-      await getSecuritySolutionIndexName(superUser);
-      await getAPMIndexName(superUser);
-    });
-
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/rule_registry/alerts');
     });
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/rule_registry/alerts');
+    });
+
+    it(`${superUser.username} should reject at route level when aggs contains script alerts which match query in ${SPACE1}/${SECURITY_SOLUTION_ALERT_INDEX}`, async () => {
+      const found = await supertestWithoutAuth
+        .post(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}/find`)
+        .auth(superUser.username, superUser.password)
+        .set('kbn-xsrf', 'true')
+        .send({
+          query: { match: { [ALERT_WORKFLOW_STATUS]: 'open' } },
+          aggs: {
+            alertsByGroupingCount: {
+              terms: {
+                field: 'kibana.alert.rule.name',
+                order: {
+                  _count: 'desc',
+                },
+                script: {
+                  source: 'SCRIPT',
+                },
+                size: 10000,
+              },
+            },
+          },
+          index: SECURITY_SOLUTION_ALERT_INDEX,
+        });
+      expect(found.statusCode).to.eql(400);
     });
 
     it(`${superUser.username} should reject at route level when nested aggs contains script alerts which match query in ${SPACE1}/${SECURITY_SOLUTION_ALERT_INDEX}`, async () => {
@@ -162,6 +156,113 @@ export default ({ getService }: FtrProviderContext) => {
         });
       expect(found.statusCode).to.eql(200);
       expect(found.body.hits.total.value).to.be.above(0);
+    });
+
+    it(`${superUser.username} should allow a custom sort and return alerts which match query in ${SPACE1}/${SECURITY_SOLUTION_ALERT_INDEX}`, async () => {
+      const found = await supertestWithoutAuth
+        .post(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}/find`)
+        .auth(superUser.username, superUser.password)
+        .set('kbn-xsrf', 'true')
+        .send({
+          query: { match: { [ALERT_WORKFLOW_STATUS]: 'open' } },
+          sort: [
+            {
+              '@timestamp': 'desc', // the default in alerts_client.ts is timestamp ascending, so we are testing the reverse of that.
+            },
+          ],
+          index: SECURITY_SOLUTION_ALERT_INDEX,
+        });
+      expect(found.statusCode).to.eql(200);
+      expect(found.body.hits.total.value).to.be.above(0);
+
+      let lastSort = Infinity;
+
+      found.body.hits.hits.forEach((hit: any) => {
+        expect(hit.sort).to.be.above(0);
+
+        if (hit.sort > lastSort) {
+          throw new Error('sort by timestamp desc failed.');
+        }
+
+        lastSort = hit.sort;
+      });
+    });
+
+    it(`${superUser.username} should handle an invalid custom sort`, async () => {
+      const found = await supertestWithoutAuth
+        .post(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}/find`)
+        .auth(superUser.username, superUser.password)
+        .set('kbn-xsrf', 'true')
+        .send({
+          query: { match: { [ALERT_WORKFLOW_STATUS]: 'open' } },
+          sort: [
+            {
+              asdf: 'invalid',
+            },
+          ],
+          index: SECURITY_SOLUTION_ALERT_INDEX,
+        });
+      expect(found.statusCode).to.eql(404);
+    });
+
+    it(`${superUser.username} should allow a custom sort (using search_after) and return alerts which match query in ${SPACE1}/${SECURITY_SOLUTION_ALERT_INDEX}`, async () => {
+      const firstSearch = await supertestWithoutAuth
+        .post(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}/find`)
+        .auth(superUser.username, superUser.password)
+        .set('kbn-xsrf', 'true')
+        .send({
+          query: { match: { [ALERT_WORKFLOW_STATUS]: 'open' } },
+          sort: [
+            {
+              '@timestamp': 'desc', // the default in alerts_client.ts is timestamp ascending, so we are testing the reverse of that.
+            },
+          ],
+          index: SECURITY_SOLUTION_ALERT_INDEX,
+        });
+
+      // grab second to last event cursor
+      const hits = firstSearch.body.hits.hits;
+      const cursor = hits[hits.length - 2].sort[0];
+
+      const secondSearch = await supertestWithoutAuth
+        .post(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}/find`)
+        .auth(superUser.username, superUser.password)
+        .set('kbn-xsrf', 'true')
+        .send({
+          query: { match: { [ALERT_WORKFLOW_STATUS]: 'open' } },
+          sort: [
+            {
+              '@timestamp': 'desc', // the default in alerts_client.ts is timestamp ascending, so we are testing the reverse of that.
+            },
+          ],
+          search_after: [cursor],
+          index: SECURITY_SOLUTION_ALERT_INDEX,
+        });
+
+      expect(secondSearch.body.hits.hits.length).equal(1);
+
+      // there should only be one result, as we are searching after the second to last record of the first search
+      expect(secondSearch.body.hits.hits[0].sort).to.be.below(cursor); // below since we are paging backwards in time
+    });
+
+    it(`${superUser.username} should allow cardinality aggs in ${SPACE1}/${SECURITY_SOLUTION_ALERT_INDEX}`, async () => {
+      const found = await supertestWithoutAuth
+        .post(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}/find`)
+        .auth(superUser.username, superUser.password)
+        .set('kbn-xsrf', 'true')
+        .send({
+          size: 1,
+          aggs: {
+            nbr_consumer: {
+              cardinality: {
+                field: 'kibana.alert.rule.consumer',
+              },
+            },
+          },
+          index: '.alerts*',
+        });
+      expect(found.statusCode).to.eql(200);
+      expect(found.body.aggregations.nbr_consumer.value).to.be.equal(2);
     });
 
     function addTests({ space, authorizedUsers, unauthorizedUsers, alertId, index }: TestCase) {

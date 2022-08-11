@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionFunctionKibana, ExpressionFunctionKibanaContext } from '../../../data/public';
-import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
+import type { ExpressionFunctionKibana } from '@kbn/data-plugin/public';
+import { ExpressionAstExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 
-import { VisToExpressionAst } from '../types';
-import { queryToAst, filtersToAst } from '../../../data/common';
+import type { VisToExpressionAst } from '../types';
 
 /**
  * Creates an ast expression for a visualization based on kibana context (query, filters, timerange)
@@ -19,31 +18,43 @@ import { queryToAst, filtersToAst } from '../../../data/common';
  *
  * @internal
  */
-export const toExpressionAst: VisToExpressionAst = async (vis, params) => {
-  const { savedSearchId, searchSource } = vis.data;
-  const query = searchSource?.getField('query');
-  let filters = searchSource?.getField('filter');
-  if (typeof filters === 'function') {
-    filters = filters();
-  }
-
-  const kibana = buildExpressionFunction<ExpressionFunctionKibana>('kibana', {});
-  const kibanaContext = buildExpressionFunction<ExpressionFunctionKibanaContext>('kibana_context', {
-    q: query && queryToAst(query),
-    filters: filters && filtersToAst(filters),
-    savedSearchId,
-  });
-
-  const ast = buildExpression([kibana, kibanaContext]);
-  const expression = ast.toAst();
-
+export const toExpressionAst: VisToExpressionAst = async (
+  vis,
+  params
+): Promise<ExpressionAstExpression> => {
   if (!vis.type.toExpressionAst) {
     throw new Error('Visualization type definition should have toExpressionAst function defined');
   }
 
+  const searchSource = vis.data.searchSource?.createCopy();
+
+  if (vis.data.aggs) {
+    const aggs = vis.data.aggs.clone({
+      opts: {
+        hierarchical: vis.isHierarchical(),
+        partialRows:
+          typeof vis.type.hasPartialRows === 'function'
+            ? vis.type.hasPartialRows(vis)
+            : vis.type.hasPartialRows,
+      },
+    });
+
+    searchSource?.setField('aggs', aggs);
+  }
+
   const visExpressionAst = await vis.type.toExpressionAst(vis, params);
-  // expand the expression chain with a particular visualization expression chain, if it exists
-  expression.chain.push(...visExpressionAst.chain);
+  const searchSourceExpressionAst = searchSource?.toExpressionAst({
+    asDatatable: vis.type.fetchDatatable,
+  });
+
+  const expression = {
+    ...visExpressionAst,
+    chain: [
+      buildExpressionFunction<ExpressionFunctionKibana>('kibana', {}).toAst(),
+      ...(searchSourceExpressionAst?.chain ?? []),
+      ...visExpressionAst.chain,
+    ],
+  };
 
   return expression;
 };

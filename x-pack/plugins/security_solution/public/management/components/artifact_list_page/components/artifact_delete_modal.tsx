@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback } from 'react';
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
@@ -20,16 +20,14 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { AutoFocusButton } from '../../../../common/components/autofocus_button/autofocus_button';
-import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import {
   getPolicyIdsFromArtifact,
   isArtifactGlobal,
 } from '../../../../../common/endpoint/service/artifacts';
-import {
-  ARTIFACT_DELETE_ACTION_LABELS,
-  useArtifactDeleteItem,
-} from '../hooks/use_artifact_delete_item';
-import { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
+import type { ARTIFACT_DELETE_ACTION_LABELS } from '../hooks/use_with_artifact_delete_item';
+import { useWithArtifactDeleteItem } from '../hooks/use_with_artifact_delete_item';
+import type { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
 
 export const ARTIFACT_DELETE_LABELS = Object.freeze({
   deleteModalTitle: (itemName: string): string =>
@@ -90,7 +88,11 @@ export const ArtifactDeleteModal = memo<DeleteArtifactModalProps>(
   ({ apiClient, item, onCancel, onSuccess, 'data-test-subj': dataTestSubj, labels }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
 
-    const { deleteArtifactItem, isLoading: isDeleting } = useArtifactDeleteItem(apiClient, labels);
+    const { deleteArtifactItem, isLoading: isDeleting } = useWithArtifactDeleteItem(
+      apiClient,
+      item,
+      labels
+    );
 
     const onConfirm = useCallback(() => {
       deleteArtifactItem(item).then(() => onSuccess());
@@ -103,7 +105,7 @@ export const ArtifactDeleteModal = memo<DeleteArtifactModalProps>(
     }, [isDeleting, onCancel]);
 
     return (
-      <EuiModal onClose={handleOnCancel}>
+      <EuiModal onClose={handleOnCancel} data-test-subj={dataTestSubj}>
         <EuiModalHeader data-test-subj={getTestId('header')}>
           <EuiModalHeaderTitle>{labels.deleteModalTitle(item.name)}</EuiModalHeaderTitle>
         </EuiModalHeader>
@@ -139,6 +141,7 @@ export const ArtifactDeleteModal = memo<DeleteArtifactModalProps>(
             color="danger"
             onClick={onConfirm}
             isLoading={isDeleting}
+            isDisabled={isDeleting}
             data-test-subj={getTestId('submitButton')}
           >
             {labels.deleteModalSubmitButtonTitle}

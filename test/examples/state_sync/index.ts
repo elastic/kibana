@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginFunctionalProviderContext } from 'test/plugin_functional/services';
+import { PluginFunctionalProviderContext } from '../../plugin_functional/services';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({
@@ -17,7 +17,6 @@ export default function ({
   const browser = getService('browser');
 
   describe('state sync examples', function () {
-    this.tags('ciGroup2');
     before(async () => {
       await browser.setWindowSize(1300, 900);
     });

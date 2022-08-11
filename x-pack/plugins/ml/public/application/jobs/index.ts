@@ -6,4 +6,3 @@
  */
 
 export { JobsPage } from './jobs_list';
-export {} from './new_job';

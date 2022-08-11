@@ -24,12 +24,12 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { isValidCustomUrlSettingsTimeRange } from './utils';
+import { DataViewListItem } from '@kbn/data-views-plugin/common';
+import { CustomUrlSettings, isValidCustomUrlSettingsTimeRange } from './utils';
 import { isValidLabel } from '../../../util/custom_url_utils';
 
-import { TIME_RANGE_TYPE, URL_TYPE } from './constants';
+import { TIME_RANGE_TYPE, TimeRangeType, URL_TYPE } from './constants';
 import { UrlConfig } from '../../../../../common/types/custom_urls';
-import { DataViewListItem } from '../../../../../../../../src/plugins/data_views/common';
 
 function getLinkToOptions() {
   return [
@@ -55,10 +55,10 @@ function getLinkToOptions() {
 }
 
 interface CustomUrlEditorProps {
-  customUrl: any;
-  setEditCustomUrl: (url: any) => void;
+  customUrl: CustomUrlSettings | undefined;
+  setEditCustomUrl: (url: CustomUrlSettings) => void;
   savedCustomUrls: UrlConfig[];
-  dashboards: any[];
+  dashboards: Array<{ id: string; title: string }>;
   dataViewListItems: DataViewListItem[];
   queryEntityFieldNames: string[];
 }
@@ -142,7 +142,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
       ...customUrl,
       timeRange: {
         ...timeRange,
-        type: e.target.value,
+        type: e.target.value as TimeRangeType,
       },
     });
   };
@@ -255,7 +255,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
           >
             <EuiSelect
               options={dashboardOptions}
-              value={kibanaSettings.dashboardId}
+              value={kibanaSettings?.dashboardId}
               onChange={onDashboardChange}
               data-test-subj="mlJobCustomUrlDashboardNameInput"
               compressed
@@ -275,7 +275,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
           >
             <EuiSelect
               options={dataViewOptions}
-              value={kibanaSettings.discoverIndexPatternId}
+              value={kibanaSettings?.discoverIndexPatternId}
               onChange={onDiscoverIndexPatternChange}
               data-test-subj="mlJobCustomUrlDiscoverIndexPatternInput"
               compressed
@@ -369,7 +369,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
             <EuiTextArea
               fullWidth={true}
               rows={2}
-              value={otherUrlSettings.urlValue}
+              value={otherUrlSettings?.urlValue}
               onChange={onOtherUrlValueChange}
               data-test-subj="mlJobCustomUrlOtherTypeUrlInput"
               compressed

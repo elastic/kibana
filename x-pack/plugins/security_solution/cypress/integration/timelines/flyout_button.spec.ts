@@ -14,7 +14,7 @@ import {
 import { cleanKibana } from '../../tasks/common';
 
 import { waitForAllHostsToBeLoaded } from '../../tasks/hosts/all_hosts';
-import { loginAndWaitForPage } from '../../tasks/login';
+import { login, visit } from '../../tasks/login';
 import {
   closeTimelineUsingCloseButton,
   closeTimelineUsingToggle,
@@ -26,7 +26,8 @@ import { HOSTS_URL } from '../../urls/navigation';
 describe('timeline flyout button', () => {
   before(() => {
     cleanKibana();
-    loginAndWaitForPage(HOSTS_URL);
+    login();
+    visit(HOSTS_URL);
     waitForAllHostsToBeLoaded();
   });
 

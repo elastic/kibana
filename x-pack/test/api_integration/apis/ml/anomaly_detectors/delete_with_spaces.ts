@@ -19,14 +19,15 @@ export default ({ getService }: FtrProviderContext) => {
   const idSpace2 = 'space2';
 
   async function runRequest(jobId: string, expectedStatusCode: number, space?: string) {
-    const { body } = await supertest
+    const { body, status } = await supertest
       .delete(`${space ? `/s/${space}` : ''}/api/ml/anomaly_detectors/${jobId}`)
       .auth(
         USER.ML_POWERUSER_ALL_SPACES,
         ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER_ALL_SPACES)
       )
-      .set(COMMON_REQUEST_HEADERS)
-      .expect(expectedStatusCode);
+      .set(COMMON_REQUEST_HEADERS);
+    ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
+
     return body;
   }
 

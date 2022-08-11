@@ -11,7 +11,7 @@ import { outputType } from '../../../common/constants';
 
 export function validateLogstashHost(val: string) {
   if (val.match(/^http([s]){0,1}:\/\//)) {
-    return 'Invalid logstash host should not start with http(s)';
+    return 'Host address must begin with a domain name or IP address';
   }
 
   try {
@@ -21,7 +21,7 @@ export function validateLogstashHost(val: string) {
       return 'Invalid host';
     }
   } catch (err) {
-    return 'Invalid logstash host';
+    return 'Invalid Logstash host';
   }
 }
 
@@ -35,8 +35,12 @@ const OutputBaseSchema = {
   hosts: schema.conditional(
     schema.siblingRef('type'),
     schema.literal(outputType.Elasticsearch),
-    schema.arrayOf(schema.uri({ scheme: ['http', 'https'] })),
-    schema.arrayOf(schema.string({ validate: validateLogstashHost }))
+    schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), {
+      minSize: 1,
+    }),
+    schema.arrayOf(schema.string({ validate: validateLogstashHost }), {
+      minSize: 1,
+    })
   ),
   is_default: schema.boolean({ defaultValue: false }),
   is_default_monitoring: schema.boolean({ defaultValue: false }),

@@ -6,10 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import {
-  config as ElasticsearchBaseConfig,
-  ElasticsearchConfig,
-} from '../../../../src/core/server/';
+import { config as ElasticsearchBaseConfig, ElasticsearchConfig } from '@kbn/core/server';
 import { MonitoringConfigSchema } from './types';
 
 const hostURISchema = schema.uri({ scheme: ['http', 'https'] });
@@ -33,8 +30,16 @@ export const configSchema = schema.object({
     logs: schema.object({
       index: schema.string({ defaultValue: 'filebeat-*' }),
     }),
+    metricbeat: schema.object({
+      index: schema.string({ defaultValue: 'metricbeat-*' }),
+    }),
     max_bucket_size: schema.number({ defaultValue: 10000 }),
     elasticsearch: monitoringElasticsearchConfigSchema,
+    kibana: schema.object({
+      reporting: schema.object({
+        stale_status_threshold_seconds: schema.number({ defaultValue: 120 }),
+      }),
+    }),
     container: schema.object({
       elasticsearch: schema.object({
         enabled: schema.boolean({ defaultValue: false }),

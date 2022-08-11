@@ -8,7 +8,6 @@
 
 import React, { ComponentType } from 'react';
 import { Store } from 'redux';
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 

@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-import {
-  getCapabilitiesForRollupIndices,
-  IndexPatternsService,
-} from '../../../../../../data/server';
+import { getCapabilitiesForRollupIndices } from '@kbn/data-plugin/server';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { AbstractSearchStrategy, EsSearchRequest } from './abstract_search_strategy';
 import { RollupSearchCapabilities } from '../capabilities/rollup_search_capabilities';
 
@@ -40,10 +38,10 @@ export class RollupSearchStrategy extends AbstractSearchStrategy {
     indexPattern: string
   ) {
     try {
-      const body =
-        await requestContext.core.elasticsearch.client.asCurrentUser.rollup.getRollupIndexCaps({
-          index: indexPattern,
-        });
+      const esClient = (await requestContext.core).elasticsearch.client;
+      const body = await esClient.asCurrentUser.rollup.getRollupIndexCaps({
+        index: indexPattern,
+      });
 
       return body;
     } catch (e) {
@@ -66,7 +64,7 @@ export class RollupSearchStrategy extends AbstractSearchStrategy {
     ) {
       const rollupData = await this.getRollupData(requestContext, indexPatternString);
       const rollupIndices = getRollupIndices(rollupData);
-      const uiSettings = requestContext.core.uiSettings.client;
+      const uiSettings = (await requestContext.core).uiSettings.client;
 
       isViable = rollupIndices.length === 1;
 
@@ -93,7 +91,7 @@ export class RollupSearchStrategy extends AbstractSearchStrategy {
 
   async getFieldsForWildcard(
     fetchedIndexPattern: FetchedIndexPattern,
-    indexPatternsService: IndexPatternsService,
+    indexPatternsService: DataViewsService,
     getCachedIndexPatternFetcher: CachedIndexPatternFetcher,
     capabilities?: unknown
   ) {

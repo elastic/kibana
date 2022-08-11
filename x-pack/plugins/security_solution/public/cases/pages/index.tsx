@@ -7,7 +7,7 @@
 
 import React, { useCallback, useRef } from 'react';
 import { useDispatch } from 'react-redux';
-import { CaseViewRefreshPropInterface } from '../../../../cases/common';
+import type { CaseViewRefreshPropInterface } from '@kbn/cases-plugin/common';
 import { TimelineId } from '../../../common/types/timeline';
 
 import { getRuleDetailsUrl, useFormatUrl } from '../../common/components/link_to';
@@ -27,13 +27,10 @@ import { DetailsPanel } from '../../timelines/components/side_panel';
 import { useFetchAlertData } from './use_fetch_alert_data';
 
 const TimelineDetailsPanel = () => {
-  const { browserFields, docValueFields, runtimeMappings } = useSourcererDataView(
-    SourcererScopeName.detections
-  );
+  const { browserFields, runtimeMappings } = useSourcererDataView(SourcererScopeName.detections);
   return (
     <DetailsPanel
       browserFields={browserFields}
-      docValueFields={docValueFields}
       entityType="events"
       isFlyoutView
       runtimeMappings={runtimeMappings}
@@ -43,9 +40,9 @@ const TimelineDetailsPanel = () => {
 };
 
 const CaseContainerComponent: React.FC = () => {
-  const { cases: casesUi } = useKibana().services;
+  const { cases } = useKibana().services;
   const { getAppUrl, navigateTo } = useNavigation();
-  const userPermissions = useGetUserCasesPermissions();
+  const userCasesPermissions = useGetUserCasesPermissions();
   const dispatch = useDispatch();
   const { formatUrl: detectionsFormatUrl, search: detectionsUrlSearch } = useFormatUrl(
     SecurityPageName.rules
@@ -98,11 +95,12 @@ const CaseContainerComponent: React.FC = () => {
   return (
     <SecuritySolutionPageWrapper noPadding>
       <CaseDetailsRefreshContext.Provider value={refreshRef}>
-        {casesUi.getCases({
+        {cases.ui.getCases({
           basePath: CASES_PATH,
           owner: [APP_ID],
           features: {
             metrics: ['alerts.count', 'alerts.users', 'alerts.hosts', 'connectors', 'lifespan'],
+            alerts: { isExperimental: true },
           },
           refreshRef,
           onComponentInitialized,
@@ -147,7 +145,7 @@ const CaseContainerComponent: React.FC = () => {
             },
           },
           useFetchAlertData,
-          userCanCrud: userPermissions?.crud ?? false,
+          permissions: userCasesPermissions,
         })}
       </CaseDetailsRefreshContext.Provider>
       <SpyRoute pageName={SecurityPageName.case} />

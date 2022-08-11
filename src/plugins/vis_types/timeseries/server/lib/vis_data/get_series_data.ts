@@ -29,38 +29,44 @@ export async function getSeriesData(
   panel: Panel,
   services: VisTypeTimeseriesRequestServices
 ) {
-  const {
-    cachedIndexPatternFetcher,
-    searchStrategyRegistry,
-    indexPatternsService,
-    fieldFormatService,
-  } = services;
-
-  const panelIndex = await cachedIndexPatternFetcher(
-    panel.index_pattern,
-    !panel.use_kibana_indexes
-  );
-
-  const strategy = await searchStrategyRegistry.getViableStrategy(requestContext, req, panelIndex);
-
-  if (!strategy) {
-    throw new Error(
-      i18n.translate('visTypeTimeseries.searchStrategyUndefinedErrorMessage', {
-        defaultMessage: 'Search strategy was not defined',
-      })
-    );
-  }
-
-  const { searchStrategy, capabilities } = strategy;
+  let meta: DataResponseMeta | undefined;
   const handleError = handleErrorResponse(panel);
 
-  const meta: DataResponseMeta = {
-    type: panel.type,
-    uiRestrictions: capabilities.uiRestrictions,
-    trackedEsSearches: {},
-  };
-
   try {
+    const {
+      cachedIndexPatternFetcher,
+      searchStrategyRegistry,
+      indexPatternsService,
+      fieldFormatService,
+    } = services;
+
+    const panelIndex = await cachedIndexPatternFetcher(
+      panel.index_pattern,
+      !panel.use_kibana_indexes
+    );
+
+    const strategy = await searchStrategyRegistry.getViableStrategy(
+      requestContext,
+      req,
+      panelIndex
+    );
+
+    if (!strategy) {
+      throw new Error(
+        i18n.translate('visTypeTimeseries.searchStrategyUndefinedErrorMessage', {
+          defaultMessage: 'Search strategy was not defined',
+        })
+      );
+    }
+
+    const { searchStrategy, capabilities } = strategy;
+
+    meta = {
+      type: panel.type,
+      uiRestrictions: capabilities.uiRestrictions,
+      trackedEsSearches: {},
+    };
+
     const bodiesPromises = getActiveSeries(panel).map((series) => {
       isAggSupported(series.metrics, capabilities);
       return getSeriesRequestParams(req, panel, panelIndex, series, capabilities, services);
@@ -116,7 +122,7 @@ export async function getSeriesData(
     };
   } catch (err) {
     return {
-      ...meta,
+      ...(meta || {}),
       ...handleError(err),
     };
   }

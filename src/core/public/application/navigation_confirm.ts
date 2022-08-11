@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { OverlayStart } from 'kibana/public';
+import { OverlayStart } from '..';
 
 export type ConfirmHandlerCallback = (result: boolean) => void;
 export type ConfirmHandler = (message: string, callback: ConfirmHandlerCallback) => void;

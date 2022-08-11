@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { AnalyticsLogic } from '../';
+import { AnalyticsLogic } from '..';
 import { KibanaLogic } from '../../../../shared/kibana';
 
 import { DEFAULT_START_DATE, DEFAULT_END_DATE, SERVER_DATE_FORMAT } from '../constants';

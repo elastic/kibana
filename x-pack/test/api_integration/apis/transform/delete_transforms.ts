@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 
-import { DeleteTransformsRequestSchema } from '../../../../plugins/transform/common/api_schemas/delete_transforms';
-import { TRANSFORM_STATE } from '../../../../plugins/transform/common/constants';
+import { DeleteTransformsRequestSchema } from '@kbn/transform-plugin/common/api_schemas/delete_transforms';
+import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 
 import { COMMON_REQUEST_HEADERS } from '../../../functional/services/ml/common_api';
 import { USER } from '../../../functional/services/transform/security_common';
@@ -54,19 +54,19 @@ export default ({ getService }: FtrProviderContext) => {
         const reqBody: DeleteTransformsRequestSchema = {
           transformsInfo: [{ id: transformId, state: TRANSFORM_STATE.STOPPED }],
         };
-        const { body } = await supertest
+        const { body, status } = await supertest
           .post(`/api/transform/delete_transforms`)
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
           .set(COMMON_REQUEST_HEADERS)
-          .send(reqBody)
-          .expect(200);
+          .send(reqBody);
+        transform.api.assertResponseStatusCode(200, status, body);
 
         expect(body[transformId].transformDeleted.success).to.eql(true);
         expect(body[transformId].destIndexDeleted.success).to.eql(false);
-        expect(body[transformId].destIndexPatternDeleted.success).to.eql(false);
+        expect(body[transformId].destDataViewDeleted.success).to.eql(false);
         await transform.api.waitForTransformNotToExist(transformId);
         await transform.api.waitForIndicesToExist(destinationIndex);
       });
@@ -75,15 +75,16 @@ export default ({ getService }: FtrProviderContext) => {
         const reqBody: DeleteTransformsRequestSchema = {
           transformsInfo: [{ id: transformId, state: TRANSFORM_STATE.STOPPED }],
         };
-        await supertest
+        const { body, status } = await supertest
           .post(`/api/transform/delete_transforms`)
           .auth(
             USER.TRANSFORM_VIEWER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_VIEWER)
           )
           .set(COMMON_REQUEST_HEADERS)
-          .send(reqBody)
-          .expect(403);
+          .send(reqBody);
+        transform.api.assertResponseStatusCode(403, status, body);
+
         await transform.api.waitForTransformToExist(transformId);
         await transform.api.waitForIndicesToExist(destinationIndex);
       });
@@ -94,15 +95,16 @@ export default ({ getService }: FtrProviderContext) => {
         const reqBody: DeleteTransformsRequestSchema = {
           transformsInfo: [{ id: 'invalid_transform_id', state: TRANSFORM_STATE.STOPPED }],
         };
-        const { body } = await supertest
+        const { body, status } = await supertest
           .post(`/api/transform/delete_transforms`)
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
           .set(COMMON_REQUEST_HEADERS)
-          .send(reqBody)
-          .expect(200);
+          .send(reqBody);
+        transform.api.assertResponseStatusCode(200, status, body);
+
         expect(body.invalid_transform_id.transformDeleted.success).to.eql(false);
         expect(body.invalid_transform_id.transformDeleted).to.have.property('error');
       });
@@ -131,22 +133,22 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should delete multiple transforms by transformIds', async () => {
-        const { body } = await supertest
+        const { body, status } = await supertest
           .post(`/api/transform/delete_transforms`)
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
           .set(COMMON_REQUEST_HEADERS)
-          .send(reqBody)
-          .expect(200);
+          .send(reqBody);
+        transform.api.assertResponseStatusCode(200, status, body);
 
         await asyncForEach(
           reqBody.transformsInfo,
           async ({ id: transformId }: { id: string }, idx: number) => {
             expect(body[transformId].transformDeleted.success).to.eql(true);
             expect(body[transformId].destIndexDeleted.success).to.eql(false);
-            expect(body[transformId].destIndexPatternDeleted.success).to.eql(false);
+            expect(body[transformId].destDataViewDeleted.success).to.eql(false);
             await transform.api.waitForTransformNotToExist(transformId);
             await transform.api.waitForIndicesToExist(destinationIndices[idx]);
           }
@@ -155,7 +157,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should delete multiple transforms by transformIds, even if one of the transformIds is invalid', async () => {
         const invalidTransformId = 'invalid_transform_id';
-        const { body } = await supertest
+        const { body, status } = await supertest
           .post(`/api/transform/delete_transforms`)
           .auth(
             USER.TRANSFORM_POWERUSER,
@@ -168,15 +170,15 @@ export default ({ getService }: FtrProviderContext) => {
               ...reqBody.transformsInfo,
               { id: invalidTransformId, state: TRANSFORM_STATE.STOPPED },
             ],
-          })
-          .expect(200);
+          });
+        transform.api.assertResponseStatusCode(200, status, body);
 
         await asyncForEach(
           reqBody.transformsInfo,
           async ({ id: transformId }: { id: string }, idx: number) => {
             expect(body[transformId].transformDeleted.success).to.eql(true);
             expect(body[transformId].destIndexDeleted.success).to.eql(false);
-            expect(body[transformId].destIndexPatternDeleted.success).to.eql(false);
+            expect(body[transformId].destDataViewDeleted.success).to.eql(false);
             await transform.api.waitForTransformNotToExist(transformId);
             await transform.api.waitForIndicesToExist(destinationIndices[idx]);
           }
@@ -205,25 +207,25 @@ export default ({ getService }: FtrProviderContext) => {
           transformsInfo: [{ id: transformId, state: TRANSFORM_STATE.STOPPED }],
           deleteDestIndex: true,
         };
-        const { body } = await supertest
+        const { body, status } = await supertest
           .post(`/api/transform/delete_transforms`)
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
           .set(COMMON_REQUEST_HEADERS)
-          .send(reqBody)
-          .expect(200);
+          .send(reqBody);
+        transform.api.assertResponseStatusCode(200, status, body);
 
         expect(body[transformId].transformDeleted.success).to.eql(true);
         expect(body[transformId].destIndexDeleted.success).to.eql(true);
-        expect(body[transformId].destIndexPatternDeleted.success).to.eql(false);
+        expect(body[transformId].destDataViewDeleted.success).to.eql(false);
         await transform.api.waitForTransformNotToExist(transformId);
         await transform.api.waitForIndicesNotToExist(destinationIndex);
       });
     });
 
-    describe('with deleteDestIndexPattern setting', function () {
+    describe('with deleteDestDataView setting', function () {
       const transformId = 'test3';
       const destinationIndex = generateDestIndex(transformId);
 
@@ -242,28 +244,28 @@ export default ({ getService }: FtrProviderContext) => {
         const reqBody: DeleteTransformsRequestSchema = {
           transformsInfo: [{ id: transformId, state: TRANSFORM_STATE.STOPPED }],
           deleteDestIndex: false,
-          deleteDestIndexPattern: true,
+          deleteDestDataView: true,
         };
-        const { body } = await supertest
+        const { body, status } = await supertest
           .post(`/api/transform/delete_transforms`)
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
           .set(COMMON_REQUEST_HEADERS)
-          .send(reqBody)
-          .expect(200);
+          .send(reqBody);
+        transform.api.assertResponseStatusCode(200, status, body);
 
         expect(body[transformId].transformDeleted.success).to.eql(true);
         expect(body[transformId].destIndexDeleted.success).to.eql(false);
-        expect(body[transformId].destIndexPatternDeleted.success).to.eql(true);
+        expect(body[transformId].destDataViewDeleted.success).to.eql(true);
         await transform.api.waitForTransformNotToExist(transformId);
         await transform.api.waitForIndicesToExist(destinationIndex);
         await transform.testResources.assertIndexPatternNotExist(destinationIndex);
       });
     });
 
-    describe('with deleteDestIndex & deleteDestIndexPattern setting', function () {
+    describe('with deleteDestIndex & deleteDestDataView setting', function () {
       const transformId = 'test4';
       const destinationIndex = generateDestIndex(transformId);
 
@@ -282,21 +284,21 @@ export default ({ getService }: FtrProviderContext) => {
         const reqBody: DeleteTransformsRequestSchema = {
           transformsInfo: [{ id: transformId, state: TRANSFORM_STATE.STOPPED }],
           deleteDestIndex: true,
-          deleteDestIndexPattern: true,
+          deleteDestDataView: true,
         };
-        const { body } = await supertest
+        const { body, status } = await supertest
           .post(`/api/transform/delete_transforms`)
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
           .set(COMMON_REQUEST_HEADERS)
-          .send(reqBody)
-          .expect(200);
+          .send(reqBody);
+        transform.api.assertResponseStatusCode(200, status, body);
 
         expect(body[transformId].transformDeleted.success).to.eql(true);
         expect(body[transformId].destIndexDeleted.success).to.eql(true);
-        expect(body[transformId].destIndexPatternDeleted.success).to.eql(true);
+        expect(body[transformId].destDataViewDeleted.success).to.eql(true);
         await transform.api.waitForTransformNotToExist(transformId);
         await transform.api.waitForIndicesNotToExist(destinationIndex);
         await transform.testResources.assertIndexPatternNotExist(destinationIndex);

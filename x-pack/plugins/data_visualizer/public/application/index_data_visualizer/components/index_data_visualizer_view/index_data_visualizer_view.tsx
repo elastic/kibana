@@ -20,8 +20,10 @@ import {
 } from '@elastic/eui';
 import { Required } from 'utility-types';
 import { i18n } from '@kbn/i18n';
-import { Filter } from '@kbn/es-query';
-import { Query, generateFilters } from '../../../../../../../../src/plugins/data/public';
+import { Filter, FilterStateStore, Query } from '@kbn/es-query';
+import { generateFilters } from '@kbn/data-plugin/public';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { DV_RANDOM_SAMPLER_PREFERENCE, useStorage } from '../../hooks/use_storage';
 import { FullTimeRangeSelector } from '../full_time_range_selector';
 import { usePageUrlState, useUrlState } from '../../../common/util/url_state';
 import {
@@ -35,7 +37,7 @@ import { IndexBasedDataVisualizerExpandedRow } from '../../../common/components/
 import { DATA_VISUALIZER_INDEX_VIEWER } from '../../constants/index_data_visualizer_viewer';
 import { DataVisualizerIndexBasedAppState } from '../../types/index_data_visualizer_state';
 import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '../../types/combined_query';
-import { JobFieldType, SavedSearchSavedObject } from '../../../../../common/types';
+import { SupportedFieldType, SavedSearchSavedObject } from '../../../../../common/types';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { FieldCountPanel } from '../../../common/components/field_count_panel';
 import { DocumentCountContent } from '../../../common/components/document_count_content';
@@ -46,12 +48,13 @@ import { ActionsPanel } from '../actions_panel';
 import { DatePickerWrapper } from '../../../common/components/date_picker_wrapper';
 import { HelpMenu } from '../../../common/components/help_menu';
 import { createMergedEsQuery } from '../../utils/saved_search_utils';
-import { DataVisualizerIndexPatternManagement } from '../index_pattern_management';
-import { ResultLink } from '../../../common/components/results_links';
-import { IndexPatternField, IndexPattern } from '../../../../../../../../src/plugins/data/common';
+import { DataVisualizerDataViewManagement } from '../data_view_management';
+import { GetAdditionalLinks } from '../../../common/components/results_links';
 import { useDataVisualizerGridData } from '../../hooks/use_data_visualizer_grid_data';
 import { DataVisualizerGridInput } from '../../embeddables/grid_embeddable/grid_embeddable';
+// TODO port to `@emotion/react` once `useEuiBreakpoint` is available https://github.com/elastic/eui/pull/6057
 import './_index.scss';
+import { RANDOM_SAMPLER_OPTION, RandomSamplerOption } from '../../constants/random_sampler';
 
 interface DataVisualizerPageState {
   overallStats: OverallStats;
@@ -103,18 +106,35 @@ export const getDefaultDataVisualizerListState = (
   showDistributions: true,
   showAllFields: false,
   showEmptyFields: false,
+  probability: null,
+  rndSamplerPref: RANDOM_SAMPLER_OPTION.ON_AUTOMATIC,
   ...overrides,
 });
 
 export interface IndexDataVisualizerViewProps {
-  currentIndexPattern: IndexPattern;
+  currentDataView: DataView;
   currentSavedSearch: SavedSearchSavedObject | null;
   currentSessionId?: string;
-  additionalLinks?: ResultLink[];
+  getAdditionalLinks?: GetAdditionalLinks;
 }
-const restorableDefaults = getDefaultDataVisualizerListState();
 
 export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVisualizerProps) => {
+  const [savedRandomSamplerPreference, saveRandomSamplerPreference] =
+    useStorage<RandomSamplerOption>(
+      DV_RANDOM_SAMPLER_PREFERENCE,
+      RANDOM_SAMPLER_OPTION.ON_AUTOMATIC
+    );
+
+  const restorableDefaults = useMemo(
+    () =>
+      getDefaultDataVisualizerListState({
+        rndSamplerPref: savedRandomSamplerPreference,
+      }),
+    // We just  need to load the saved preference when the page is first loaded
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
   const { services } = useDataVisualizerKibana();
   const { docLinks, notifications, uiSettings, data } = services;
   const { toasts } = notifications;
@@ -129,7 +149,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     dataVisualizerProps.currentSavedSearch
   );
 
-  const { currentIndexPattern, additionalLinks, currentSessionId } = dataVisualizerProps;
+  const { currentDataView, currentSessionId, getAdditionalLinks } = dataVisualizerProps;
 
   useEffect(() => {
     if (dataVisualizerProps?.currentSavedSearch !== undefined) {
@@ -138,40 +158,40 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
   }, [dataVisualizerProps?.currentSavedSearch]);
 
   useEffect(() => {
-    if (!currentIndexPattern.isTimeBased()) {
+    if (!currentDataView.isTimeBased()) {
       toasts.addWarning({
         title: i18n.translate(
-          'xpack.dataVisualizer.index.indexPatternNotBasedOnTimeSeriesNotificationTitle',
+          'xpack.dataVisualizer.index.dataViewNotBasedOnTimeSeriesNotificationTitle',
           {
-            defaultMessage: 'The index pattern {indexPatternTitle} is not based on a time series',
-            values: { indexPatternTitle: currentIndexPattern.title },
+            defaultMessage: 'The data view {dataViewTitle} is not based on a time series',
+            values: { dataViewTitle: currentDataView.title },
           }
         ),
         text: i18n.translate(
-          'xpack.dataVisualizer.index.indexPatternNotBasedOnTimeSeriesNotificationDescription',
+          'xpack.dataVisualizer.index.dataViewNotBasedOnTimeSeriesNotificationDescription',
           {
             defaultMessage: 'Anomaly detection only runs over time-based indices',
           }
         ),
       });
     }
-  }, [currentIndexPattern, toasts]);
+  }, [currentDataView, toasts]);
 
-  const indexPatternFields: IndexPatternField[] = currentIndexPattern.fields;
+  const dataViewFields: DataViewField[] = currentDataView.fields;
 
   const fieldTypes = useMemo(() => {
     // Obtain the list of non metric field types which appear in the index pattern.
-    const indexedFieldTypes: JobFieldType[] = [];
-    indexPatternFields.forEach((field) => {
+    const indexedFieldTypes: SupportedFieldType[] = [];
+    dataViewFields.forEach((field) => {
       if (!OMIT_FIELDS.includes(field.name) && field.scripted !== true) {
-        const dataVisualizerType: JobFieldType | undefined = kbnTypeToJobType(field);
+        const dataVisualizerType: SupportedFieldType | undefined = kbnTypeToJobType(field);
         if (dataVisualizerType !== undefined && !indexedFieldTypes.includes(dataVisualizerType)) {
           indexedFieldTypes.push(dataVisualizerType);
         }
       }
     });
     return indexedFieldTypes.sort();
-  }, [indexPatternFields]);
+  }, [dataViewFields]);
 
   const setSearchParams = useCallback(
     (searchParams: {
@@ -226,14 +246,14 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
 
   const input: DataVisualizerGridInput = useMemo(() => {
     return {
-      indexPattern: currentIndexPattern,
+      dataView: currentDataView,
       savedSearch: currentSavedSearch,
       sessionId: currentSessionId,
       visibleFieldNames,
       allowEditDataView: true,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentIndexPattern.id, currentSavedSearch?.id, visibleFieldNames, currentSessionId]);
+  }, [currentDataView.id, currentSavedSearch?.id, visibleFieldNames, currentSessionId]);
 
   const {
     configs,
@@ -247,21 +267,61 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     setLastRefresh,
     progress,
     extendedColumns,
-  } = useDataVisualizerGridData(input, dataVisualizerListState, setGlobalState);
+    overallStatsProgress,
+  } = useDataVisualizerGridData(
+    input,
+    dataVisualizerListState,
+    savedRandomSamplerPreference,
+    setGlobalState
+  );
 
-  useEffect(() => {
-    return () => {
-      // When navigating away from the index pattern
-      // Reset all previously set filters
-      // to make sure new page doesn't have unrelated filters
-      data.query.filterManager.removeAll();
-    };
-  }, [currentIndexPattern.id, data.query.filterManager]);
+  useEffect(
+    () => {
+      switch (savedRandomSamplerPreference) {
+        case RANDOM_SAMPLER_OPTION.OFF:
+          setSamplingProbability(1);
+          return;
+        case RANDOM_SAMPLER_OPTION.ON_MANUAL:
+          setSamplingProbability(
+            dataVisualizerListState?.probability ?? documentCountStats?.probability ?? null
+          );
+          return;
+        case RANDOM_SAMPLER_OPTION.ON_AUTOMATIC:
+        default:
+          setSamplingProbability(null);
+          return;
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      dataVisualizerListState.probability,
+      documentCountStats?.probability,
+      savedRandomSamplerPreference,
+    ]
+  );
+
+  const setSamplingProbability = (value: number | null) => {
+    setDataVisualizerListState({ ...dataVisualizerListState, probability: value });
+  };
+
+  useEffect(
+    function clearFiltersOnLeave() {
+      return () => {
+        // We want to clear all filters that have not been pinned globally
+        // when navigating to other pages
+        data.query.filterManager
+          .getFilters()
+          .filter((f) => f.$state?.store === FilterStateStore.APP_STATE)
+          .forEach((f) => data.query.filterManager.removeFilter(f));
+      };
+    },
+    [data.query.filterManager]
+  );
 
   useEffect(() => {
     // Force refresh on index pattern change
     setLastRefresh(Date.now());
-  }, [currentIndexPattern.id, setLastRefresh]);
+  }, [currentDataView.id, setLastRefresh]);
 
   useEffect(() => {
     if (globalState?.time !== undefined) {
@@ -281,13 +341,13 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
   }, [JSON.stringify(globalState?.refreshInterval), timefilter]);
 
   const onAddFilter = useCallback(
-    (field: IndexPatternField | string, values: string, operation: '+' | '-') => {
+    (field: DataViewField | string, values: string, operation: '+' | '-') => {
       const newFilters = generateFilters(
         data.query.filterManager,
         field,
         values,
         operation,
-        String(currentIndexPattern.id)
+        currentDataView
       );
       if (newFilters) {
         data.query.filterManager.addFilters(newFilters);
@@ -305,7 +365,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
           language: searchQueryLanguage,
         },
         data.query.filterManager.getFilters() ?? [],
-        currentIndexPattern,
+        currentDataView,
         uiSettings
       );
 
@@ -317,7 +377,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
       });
     },
     [
-      currentIndexPattern,
+      currentDataView,
       data.query.filterManager,
       searchQueryLanguage,
       searchString,
@@ -356,7 +416,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
           m[fieldName] = (
             <IndexBasedDataVisualizerExpandedRow
               item={item}
-              indexPattern={currentIndexPattern}
+              dataView={currentDataView}
               combinedQuery={{ searchQueryLanguage, searchString }}
               onAddFilter={onAddFilter}
             />
@@ -365,7 +425,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
         return m;
       }, {} as ItemIdToExpandedRowMap);
     },
-    [currentIndexPattern, searchQueryLanguage, searchString, onAddFilter]
+    [currentDataView, searchQueryLanguage, searchString, onAddFilter]
   );
 
   // Some actions open up fly-out or popup
@@ -398,11 +458,11 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
             <EuiPageContentHeader className="dataVisualizerPageHeader">
               <EuiPageContentHeaderSection>
                 <div className="dataViewTitleHeader">
-                  <EuiTitle>
-                    <h1>{currentIndexPattern.title}</h1>
+                  <EuiTitle size={'s'}>
+                    <h2>{currentDataView.getName()}</h2>
                   </EuiTitle>
-                  <DataVisualizerIndexPatternManagement
-                    currentIndexPattern={currentIndexPattern}
+                  <DataVisualizerDataViewManagement
+                    currentDataView={currentDataView}
                     useNewFieldsApi={true}
                   />
                 </div>
@@ -414,10 +474,10 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                 gutterSize="s"
                 data-test-subj="dataVisualizerTimeRangeSelectorSection"
               >
-                {currentIndexPattern.timeFieldName !== undefined && (
+                {currentDataView.timeFieldName !== undefined && (
                   <EuiFlexItem grow={false}>
                     <FullTimeRangeSelector
-                      indexPattern={currentIndexPattern}
+                      dataView={currentDataView}
                       query={undefined}
                       disabled={false}
                       timefilter={timefilter}
@@ -436,16 +496,8 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
           <EuiFlexGroup gutterSize="m">
             <EuiFlexItem>
               <EuiPanel hasShadow={false} hasBorder>
-                {overallStats?.totalCount !== undefined && (
-                  <EuiFlexItem grow={true}>
-                    <DocumentCountContent
-                      documentCountStats={documentCountStats}
-                      totalCount={overallStats.totalCount}
-                    />
-                  </EuiFlexItem>
-                )}
                 <SearchPanel
-                  indexPattern={currentIndexPattern}
+                  dataView={currentDataView}
                   searchString={searchString}
                   searchQuery={searchQuery}
                   searchQueryLanguage={searchQueryLanguage}
@@ -461,6 +513,27 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                   showEmptyFields={showEmptyFields}
                   onAddFilter={onAddFilter}
                 />
+
+                {overallStats?.totalCount !== undefined && (
+                  <>
+                    <EuiSpacer size={'m'} />
+                    <EuiFlexItem grow={true}>
+                      <DocumentCountContent
+                        documentCountStats={documentCountStats}
+                        totalCount={overallStats.totalCount}
+                        setSamplingProbability={setSamplingProbability}
+                        samplingProbability={
+                          dataVisualizerListState.probability === null
+                            ? documentCountStats?.probability
+                            : dataVisualizerListState.probability
+                        }
+                        loading={overallStatsProgress.loaded < 100}
+                        randomSamplerPreference={savedRandomSamplerPreference}
+                        setRandomSamplerPreference={saveRandomSamplerPreference}
+                      />
+                    </EuiFlexItem>
+                  </>
+                )}
                 <EuiSpacer size={'m'} />
                 <FieldCountPanel
                   showEmptyFields={showEmptyFields}
@@ -484,10 +557,10 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
             </EuiFlexItem>
             <EuiFlexItem grow={false} style={{ width: wizardPanelWidth }}>
               <ActionsPanel
-                indexPattern={currentIndexPattern}
+                dataView={currentDataView}
                 searchQueryLanguage={searchQueryLanguage}
                 searchString={searchString}
-                additionalLinks={additionalLinks ?? []}
+                getAdditionalLinks={getAdditionalLinks}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

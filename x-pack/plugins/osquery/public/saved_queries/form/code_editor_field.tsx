@@ -12,7 +12,7 @@ import styled from 'styled-components';
 
 import { OsquerySchemaLink } from '../../components/osquery_schema_link';
 import { OsqueryEditor } from '../../editor';
-import { FieldHook } from '../../shared_imports';
+import type { FieldHook } from '../../shared_imports';
 
 const StyledEuiCodeBlock = styled(EuiCodeBlock)`
   min-height: 100px;
@@ -36,7 +36,7 @@ const CodeEditorFieldComponent: React.FC<CodeEditorFieldProps> = ({ euiFieldProp
       error={error}
       fullWidth
     >
-      {euiFieldProps?.disabled ? (
+      {euiFieldProps?.isDisabled ? (
         <StyledEuiCodeBlock
           language="sql"
           fontSize="m"

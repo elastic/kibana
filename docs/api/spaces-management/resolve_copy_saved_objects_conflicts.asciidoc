@@ -68,7 +68,7 @@ Execute the <<spaces-api-copy-saved-objects,copy saved objects to space API>>, w
     `id`::::
     (Required, string) The saved object ID.
     `overwrite`::::
-    (Required, boolean) When set to `true`, the saved object from the source space (desigated by the <<spaces-api-resolve-copy-saved-objects-conflicts-path-params, `space_id` path parameter>>) overwrites the conflicting object in the destination space. When set to `false`, this does nothing.
+    (Required, boolean) When set to `true`, the saved object from the source space (designated by the <<spaces-api-resolve-copy-saved-objects-conflicts-path-params, `space_id` path parameter>>) overwrites the conflicting object in the destination space. When set to `false`, this does nothing.
     `destinationId`::::
     (Optional, string) Specifies the destination ID that the copied object should have, if different from the current ID.
     `ignoreMissingReferences`:::

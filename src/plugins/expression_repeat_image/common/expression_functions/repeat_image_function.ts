@@ -11,7 +11,7 @@ import {
   getElasticOutline,
   isValidUrl,
   resolveWithMissingImage,
-} from '../../../presentation_util/common/lib';
+} from '@kbn/presentation-util-plugin/common/lib';
 import { CONTEXT, BASE64, URL } from '../constants';
 import { ExpressionRepeatImageFunction } from '../types';
 

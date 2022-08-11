@@ -11,10 +11,10 @@ import {
   SavedObjectUnsanitizedDoc,
   SavedObjectMigrationFn,
   SavedObjectMigrationContext,
-} from '../../../../../src/core/server';
+} from '@kbn/core/server';
+import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { IsMigrationNeededPredicate } from '@kbn/encrypted-saved-objects-plugin/server';
 import { RawAction } from '../types';
-import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
-import type { IsMigrationNeededPredicate } from '../../../encrypted_saved_objects/server';
 
 interface ActionsLogMeta extends LogMeta {
   migrations: { actionDocument: SavedObjectUnsanitizedDoc<RawAction> };
@@ -78,12 +78,22 @@ export function getActionsMigrations(
     (doc) => doc // no-op
   );
 
+  const migrationActions830 = createEsoMigration(
+    encryptedSavedObjects,
+    (doc): doc is SavedObjectUnsanitizedDoc<RawAction> =>
+      doc.attributes.actionTypeId === '.servicenow' ||
+      doc.attributes.actionTypeId === '.servicenow-sir' ||
+      doc.attributes.actionTypeId === '.servicenow-itom',
+    pipeMigrations(addIsOAuthToServiceNowConnectors)
+  );
+
   return {
     '7.10.0': executeMigrationWithErrorHandling(migrationActionsTen, '7.10.0'),
     '7.11.0': executeMigrationWithErrorHandling(migrationActionsEleven, '7.11.0'),
     '7.14.0': executeMigrationWithErrorHandling(migrationActionsFourteen, '7.14.0'),
     '7.16.0': executeMigrationWithErrorHandling(migrationActionsSixteen, '7.16.0'),
     '8.0.0': executeMigrationWithErrorHandling(migrationActions800, '8.0.0'),
+    '8.3.0': executeMigrationWithErrorHandling(migrationActions830, '8.3.0'),
   };
 }
 
@@ -214,6 +224,29 @@ const addUsesTableApiToServiceNowConnectors = (
       config: {
         ...doc.attributes.config,
         usesTableApi: true,
+      },
+    },
+  };
+};
+
+const addIsOAuthToServiceNowConnectors = (
+  doc: SavedObjectUnsanitizedDoc<RawAction>
+): SavedObjectUnsanitizedDoc<RawAction> => {
+  if (
+    doc.attributes.actionTypeId !== '.servicenow' &&
+    doc.attributes.actionTypeId !== '.servicenow-sir' &&
+    doc.attributes.actionTypeId !== '.servicenow-itom'
+  ) {
+    return doc;
+  }
+
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      config: {
+        ...doc.attributes.config,
+        isOAuth: false,
       },
     },
   };

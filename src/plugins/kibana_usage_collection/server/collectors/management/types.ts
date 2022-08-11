@@ -10,16 +10,15 @@ export interface UsageStats {
   /**
    * sensitive settings
    */
-  'timelion:quandl.key': string;
   'securitySolution:defaultIndex': string;
   'securitySolution:defaultThreatIndex': string;
   'securitySolution:newsFeedUrl': string;
   'xpackReporting:customPdfLogo': string;
   'notifications:banner': string;
-  'timelion:graphite.url': string;
   'xpackDashboardMode:roles': string;
   'securitySolution:ipReputationLinks': string;
   'banners:textContent': string;
+  'observability:apmDefaultServiceEnvironment': string;
   /**
    * non-sensitive settings
    */
@@ -35,12 +34,15 @@ export interface UsageStats {
   'discover:searchFieldsFromSource': boolean;
   'discover:showFieldStatistics': boolean;
   'discover:showMultiFields': boolean;
+  'discover:enableSql': boolean;
   'discover:maxDocFieldsDisplayed': number;
   'securitySolution:rulesTableRefresh': string;
   'observability:enableInspectEsQueries': boolean;
+  'observability:enableNewSyntheticsView': boolean;
   'observability:maxSuggestions': number;
   'observability:enableComparisonByDefault': boolean;
   'observability:enableInfrastructureView': boolean;
+  'observability:enableServiceGroups': boolean;
   'visualize:enableLabs': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:colorMapping': string;
@@ -49,7 +51,6 @@ export interface UsageStats {
   'visualization:tileMap:maxPrecision': number;
   'csv:separator': string;
   'visualization:tileMap:WMSdefaults': string;
-  'timelion:legacyChartsLibrary': boolean;
   'timelion:target_buckets': number;
   'timelion:max_buckets': number;
   'timelion:es.timefield': string;
@@ -59,6 +60,7 @@ export interface UsageStats {
   'securitySolution:defaultAnomalyScore': number;
   'securitySolution:refreshIntervalDefaults': string;
   'securitySolution:enableNewsFeed': boolean;
+  'securitySolution:enableCcsWarning': boolean;
   'search:includeFrozen': boolean;
   'courier:maxConcurrentShardRequests': number;
   'courier:setRequestPreference': string;
@@ -71,9 +73,9 @@ export interface UsageStats {
   'notifications:lifetime:error': number;
   'doc_table:highlight': boolean;
   'discover:searchOnPageLoad': boolean;
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   'doc_table:hideTimeColumn': boolean;
   'discover:sampleSize': number;
+  'discover:sampleRowsPerPage': number;
   defaultColumns: string[];
   'context:defaultSize': number;
   'context:tieBreakerFields': string[];
@@ -131,4 +133,17 @@ export interface UsageStats {
   'labs:dashboard:enable_ui': boolean;
   'labs:dashboard:deferBelowFold': boolean;
   'labs:dashboard:dashboardControls': boolean;
+  'discover:rowHeightOption': number;
+  hideAnnouncements: boolean;
+  isDefaultIndexMigrated: boolean;
+  'lens:useFieldExistenceSampling': boolean;
+  'metrics:allowCheckingForFailedShards': boolean;
+  'observability:apmOperationsTab': boolean;
+  'observability:apmProgressiveLoading': string;
+  'observability:apmServiceGroupMaxNumberOfServices': number;
+  'observability:apmServiceInventoryOptimizedSorting': boolean;
+  'observability:apmTraceExplorerTab': boolean;
+  'securitySolution:enableGroupedNav': boolean;
+  'securitySolution:showRelatedIntegrations': boolean;
+  'visualization:visualize:legacyGaugeChartsLibrary': boolean;
 }

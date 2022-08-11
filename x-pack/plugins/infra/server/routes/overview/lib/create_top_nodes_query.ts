@@ -75,14 +75,68 @@ export const createTopNodesQuery = (
               field: 'system.load.15',
             },
           },
+          rx_avg: {
+            avg: {
+              field: 'host.network.ingress.bytes',
+            },
+          },
+          rx_period: {
+            filter: {
+              exists: {
+                field: 'host.network.ingress.bytes',
+              },
+            },
+            aggs: {
+              period: {
+                max: {
+                  field: 'metricset.period',
+                },
+              },
+            },
+          },
           rx: {
-            sum: {
-              field: 'host.network.in.bytes',
+            bucket_script: {
+              buckets_path: {
+                value: 'rx_avg',
+                period: 'rx_period>period',
+              },
+              script: {
+                source: 'params.value / (params.period / 1000)',
+                lang: 'painless',
+              },
+              gap_policy: 'skip',
+            },
+          },
+          tx_avg: {
+            avg: {
+              field: 'host.network.egress.bytes',
+            },
+          },
+          tx_period: {
+            filter: {
+              exists: {
+                field: 'host.network.egress.bytes',
+              },
+            },
+            aggs: {
+              period: {
+                max: {
+                  field: 'metricset.period',
+                },
+              },
             },
           },
           tx: {
-            sum: {
-              field: 'host.network.out.bytes',
+            bucket_script: {
+              buckets_path: {
+                value: 'tx_avg',
+                period: 'tx_period>period',
+              },
+              script: {
+                source: 'params.value / (params.period / 1000)',
+                lang: 'painless',
+              },
+              gap_policy: 'skip',
             },
           },
           timeseries: {
@@ -110,14 +164,68 @@ export const createTopNodesQuery = (
                   field: 'system.load.15',
                 },
               },
-              rx: {
-                rate: {
+              rx_avg: {
+                avg: {
                   field: 'host.network.ingress.bytes',
                 },
               },
-              tx: {
-                rate: {
+              rx_period: {
+                filter: {
+                  exists: {
+                    field: 'host.network.ingress.bytes',
+                  },
+                },
+                aggs: {
+                  period: {
+                    max: {
+                      field: 'metricset.period',
+                    },
+                  },
+                },
+              },
+              rx: {
+                bucket_script: {
+                  buckets_path: {
+                    value: 'rx_avg',
+                    period: 'rx_period>period',
+                  },
+                  script: {
+                    source: 'params.value / (params.period / 1000)',
+                    lang: 'painless',
+                  },
+                  gap_policy: 'skip',
+                },
+              },
+              tx_avg: {
+                avg: {
                   field: 'host.network.egress.bytes',
+                },
+              },
+              tx_period: {
+                filter: {
+                  exists: {
+                    field: 'host.network.egress.bytes',
+                  },
+                },
+                aggs: {
+                  period: {
+                    max: {
+                      field: 'metricset.period',
+                    },
+                  },
+                },
+              },
+              tx: {
+                bucket_script: {
+                  buckets_path: {
+                    value: 'tx_avg',
+                    period: 'tx_period>period',
+                  },
+                  script: {
+                    source: 'params.value / (params.period / 1000)',
+                    lang: 'painless',
+                  },
+                  gap_policy: 'skip',
                 },
               },
             },

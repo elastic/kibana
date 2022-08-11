@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EcsEventCategory, EcsEventOutcome, EcsEventType } from 'kibana/server';
+import { EcsEventCategory, EcsEventOutcome, EcsEventType } from '@kbn/core/server';
+import { CasesSupportedOperations } from '@kbn/security-plugin/server';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_CONFIGURE_SAVED_OBJECT,
@@ -13,7 +14,6 @@ import {
   CASE_USER_ACTION_SAVED_OBJECT,
 } from '../../common/constants';
 import { Verbs, ReadOperations, WriteOperations, OperationDetails } from './types';
-import { CasesSupportedOperations } from '../../../security/server';
 
 export * from './authorization';
 export * from './audit_logger';
@@ -124,6 +124,14 @@ const CaseOperations = {
     action: 'case_get_metrics',
     verbs: accessVerbs,
     docType: 'case',
+    savedObjectType: CASE_SAVED_OBJECT,
+  },
+  [ReadOperations.GetCasesMetrics]: {
+    ecsType: EVENT_TYPES.access,
+    name: ACCESS_CASE_OPERATION,
+    action: 'cases_get_metrics',
+    verbs: accessVerbs,
+    docType: 'cases',
     savedObjectType: CASE_SAVED_OBJECT,
   },
   [WriteOperations.CreateCase]: {

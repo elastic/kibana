@@ -16,18 +16,14 @@ import { DashboardViewport, DashboardViewportProps } from './dashboard_viewport'
 import { DashboardContainer, DashboardContainerServices } from '../dashboard_container';
 import { getSampleDashboardInput } from '../../test_helpers';
 import { KibanaContextProvider } from '../../../services/kibana_react';
-import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
-import {
-  applicationServiceMock,
-  coreMock,
-  uiSettingsServiceMock,
-} from '../../../../../../core/public/mocks';
+import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
+import { applicationServiceMock, coreMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import {
   ContactCardEmbeddableFactory,
   CONTACT_CARD_EMBEDDABLE,
-} from '../../../../../embeddable/public/lib/test_samples';
-import { getStubPluginServices } from '../../../../../presentation_util/public';
-import { screenshotModePluginMock } from '../../../../../screenshot_mode/public/mocks';
+} from '@kbn/embeddable-plugin/public/lib/test_samples';
+import { getStubPluginServices } from '@kbn/presentation-util-plugin/public';
+import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 
 let dashboardContainer: DashboardContainer | undefined;
 const presentationUtil = getStubPluginServices();

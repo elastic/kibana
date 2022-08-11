@@ -12,9 +12,9 @@ import {
   ConcreteTaskInstance,
   TaskInstanceWithDeprecatedFields,
   TaskStatus,
-} from '../../../../plugins/task_manager/server/task';
+} from '@kbn/task-manager-plugin/server/task';
+import { SavedObjectsUtils } from '@kbn/core/server/saved_objects';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { SavedObjectsUtils } from '../../../../../src/core/server/saved_objects';
 
 export default function createGetTests({ getService }: FtrProviderContext) {
   const es = getService('es');

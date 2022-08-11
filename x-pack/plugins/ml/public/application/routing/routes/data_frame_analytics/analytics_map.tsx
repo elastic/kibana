@@ -13,7 +13,7 @@ import { NavigateToPath } from '../../../contexts/kibana';
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
-import { Page } from '../../../data_frame_analytics/pages/analytics_management';
+import { Page } from '../../../data_frame_analytics/pages/job_map/page';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
 export const analyticsMapRouteFactory = (
@@ -34,6 +34,8 @@ export const analyticsMapRouteFactory = (
       }),
     },
   ],
+  enableDatePicker: true,
+  'data-test-subj': 'mlPageAnalyticsMap',
 });
 
 const PageWrapper: FC<PageProps> = ({ deps }) => {

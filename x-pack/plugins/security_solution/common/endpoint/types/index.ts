@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { ApplicationStart } from 'kibana/public';
-import { Agent, PackagePolicy, UpdatePackagePolicy } from '../../../../fleet/common';
-import { ManifestSchema } from '../schema/manifest';
+import type { ApplicationStart } from '@kbn/core/public';
+import type { Agent, PackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
+import type { ManifestSchema } from '../schema/manifest';
 
 export * from './actions';
 export * from './os';
 export * from './trusted_apps';
+export type { ConditionEntriesMap, ConditionEntry } from './exception_list_items';
 
 /**
  * Supported React-Router state for the Policy Details page
@@ -698,6 +699,13 @@ export type SafeEndpointEvent = Partial<{
     kind: ECSField<string>;
     sequence: ECSField<number>;
   }>;
+  kibana: Partial<{
+    alert: Partial<{
+      rule: Partial<{
+        name: ECSField<string>;
+      }>;
+    }>;
+  }>;
   host: Partial<{
     id: ECSField<string>;
     hostname: ECSField<string>;
@@ -739,7 +747,23 @@ export type SafeEndpointEvent = Partial<{
     }>;
     pid: ECSField<number>;
     hash: Hashes;
+    working_directory: ECSField<string>;
     parent: Partial<{
+      entity_id: ECSField<string>;
+      name: ECSField<string>;
+      pid: ECSField<number>;
+    }>;
+    session_leader: Partial<{
+      entity_id: ECSField<string>;
+      name: ECSField<string>;
+      pid: ECSField<number>;
+    }>;
+    entry_leader: Partial<{
+      entity_id: ECSField<string>;
+      name: ECSField<string>;
+      pid: ECSField<number>;
+    }>;
+    group_leader: Partial<{
       entity_id: ECSField<string>;
       name: ECSField<string>;
       pid: ECSField<number>;
@@ -894,7 +918,17 @@ type KbnConfigSchemaNonOptionalProps<Props extends Record<string, unknown>> = Pi
  */
 export interface PolicyConfig {
   windows: {
-    advanced?: {};
+    advanced?: {
+      [key: string]: unknown;
+      alerts?: {
+        [key: string]: unknown;
+        rollback: {
+          self_healing: {
+            enabled: boolean;
+          };
+        };
+      };
+    };
     events: {
       dll_and_driver_load: boolean;
       dns: boolean;
@@ -904,7 +938,7 @@ export interface PolicyConfig {
       registry: boolean;
       security: boolean;
     };
-    malware: ProtectionFields;
+    malware: ProtectionFields & BlocklistFields;
     memory_protection: ProtectionFields & SupportedFields;
     behavior_protection: ProtectionFields & SupportedFields;
     ransomware: ProtectionFields & SupportedFields;
@@ -932,6 +966,11 @@ export interface PolicyConfig {
     antivirus_registration: {
       enabled: boolean;
     };
+    attack_surface_reduction: {
+      credential_hardening: {
+        enabled: boolean;
+      };
+    };
   };
   mac: {
     advanced?: {};
@@ -940,7 +979,7 @@ export interface PolicyConfig {
       process: boolean;
       network: boolean;
     };
-    malware: ProtectionFields;
+    malware: ProtectionFields & BlocklistFields;
     behavior_protection: ProtectionFields & SupportedFields;
     memory_protection: ProtectionFields & SupportedFields;
     popup: {
@@ -967,8 +1006,9 @@ export interface PolicyConfig {
       file: boolean;
       process: boolean;
       network: boolean;
+      session_data: boolean;
     };
-    malware: ProtectionFields;
+    malware: ProtectionFields & BlocklistFields;
     behavior_protection: ProtectionFields & SupportedFields;
     memory_protection: ProtectionFields & SupportedFields;
     popup: {
@@ -1008,6 +1048,7 @@ export interface UIPolicyConfig {
     | 'advanced'
     | 'memory_protection'
     | 'behavior_protection'
+    | 'attack_surface_reduction'
   >;
   /**
    * Mac-specific policy configuration that is supported via the UI
@@ -1033,6 +1074,10 @@ export interface ProtectionFields {
 /** Policy:  Supported fields */
 export interface SupportedFields {
   supported: boolean;
+}
+
+export interface BlocklistFields {
+  blocklist: boolean;
 }
 
 /** Policy protection mode options */
@@ -1240,6 +1285,12 @@ interface BaseListResponse<D = unknown> {
   page: number;
   pageSize: number;
   total: number;
+}
+
+export interface AdditionalOnSwitchChangeParams {
+  value: boolean;
+  policyConfigData: UIPolicyConfig;
+  protectionOsList: ImmutableArray<Partial<keyof UIPolicyConfig>>;
 }
 
 /**

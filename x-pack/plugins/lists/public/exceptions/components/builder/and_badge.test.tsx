@@ -7,8 +7,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-
-import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 
 import { BuilderAndBadgeComponent } from './and_badge';
 

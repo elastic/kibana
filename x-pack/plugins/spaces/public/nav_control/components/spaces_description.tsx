@@ -11,14 +11,16 @@ import { EuiContextMenuPanel, EuiText } from '@elastic/eui';
 import type { FC } from 'react';
 import React from 'react';
 
-import type { ApplicationStart, Capabilities } from 'src/core/public';
+import type { ApplicationStart, Capabilities } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 
 import { getSpacesFeatureDescription } from '../../constants';
 import { ManageSpacesButton } from './manage_spaces_button';
 
 interface Props {
   id: string;
-  onManageSpacesClick: () => void;
+  isLoading: boolean;
+  toggleSpaceSelector: () => void;
   capabilities: Capabilities;
   navigateToApp: ApplicationStart['navigateToApp'];
 }
@@ -30,16 +32,20 @@ export const SpacesDescription: FC<Props> = (props: Props) => {
     title: 'Spaces',
   };
 
+  const spacesLoadingMessage = i18n.translate('xpack.spaces.navControl.loadingMessage', {
+    defaultMessage: 'Loading...',
+  });
+
   return (
     <EuiContextMenuPanel {...panelProps}>
       <EuiText className="spcDescription__text">
-        <p>{getSpacesFeatureDescription()}</p>
+        <p>{props.isLoading ? spacesLoadingMessage : getSpacesFeatureDescription()}</p>
       </EuiText>
       <div key="manageSpacesButton" className="spcDescription__manageButtonWrapper">
         <ManageSpacesButton
           size="s"
           style={{ width: `100%` }}
-          onClick={props.onManageSpacesClick}
+          onClick={props.toggleSpaceSelector}
           capabilities={props.capabilities}
           navigateToApp={props.navigateToApp}
         />

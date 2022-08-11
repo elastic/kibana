@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { coreMock } from '../../../../src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { DateFormat } from './lib/converters/date';
 import { FieldFormatsPlugin } from './plugin';
 

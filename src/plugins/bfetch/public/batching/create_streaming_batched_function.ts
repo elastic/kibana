@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { AbortError, abortSignalToPromise, defer } from '../../../kibana_utils/public';
+import { AbortError, abortSignalToPromise, defer } from '@kbn/kibana-utils-plugin/public';
 import {
   ItemBufferParams,
   TimedItemBufferParams,
@@ -87,6 +87,10 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
           if (item.signal?.aborted) item.future.reject(new AbortError());
           return !item.signal?.aborted;
         });
+
+        if (items.length === 0) {
+          return; // all items have been aborted before a request has been sent
+        }
 
         const donePromises: Array<Promise<any>> = items.map((item) => {
           return new Promise<void>((resolve) => {

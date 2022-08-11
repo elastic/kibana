@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ViewMode, EmbeddableOutput, isErrorEmbeddable } from '../../../../';
+import { ViewMode, EmbeddableOutput, isErrorEmbeddable } from '../../../..';
 import { AddPanelAction } from './add_panel_action';
 import {
   MockFilter,
@@ -16,11 +16,11 @@ import {
 } from '../../../../test_samples/embeddables/filterable_embeddable';
 import { FilterableEmbeddableFactory } from '../../../../test_samples/embeddables/filterable_embeddable_factory';
 import { FilterableContainer } from '../../../../test_samples/embeddables/filterable_container';
-import { coreMock, themeServiceMock } from '../../../../../../../../core/public/mocks';
+import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { ContactCardEmbeddable } from '../../../../test_samples';
 import { EmbeddableStart } from '../../../../../plugin';
 import { embeddablePluginMock } from '../../../../../mocks';
-import { defaultTrigger } from '../../../../../../../ui_actions/public/triggers';
+import { defaultTrigger } from '@kbn/ui-actions-plugin/public/triggers';
 
 const { setup, doStart } = embeddablePluginMock.createInstance();
 setup.registerEmbeddableFactory(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());

@@ -11,8 +11,7 @@
   "interval": "15m",
   "license": "Elastic License v2",
   "machine_learning_job_id": [
-    "linux_rare_metadata_user",
-    "v2_linux_rare_metadata_user"
+    "v3_linux_rare_metadata_user"
   ],
   "name": "Unusual Linux User Calling the Metadata Service",
   "risk_score": 21,
@@ -26,5 +25,5 @@
     "ML"
   ],
   "type": "machine_learning",
-  "version": 3
+  "version": 4
 }

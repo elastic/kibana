@@ -9,15 +9,12 @@ import pMap from 'p-map';
 import { schema } from '@kbn/config-schema';
 import { filter, uniq, map } from 'lodash';
 import { satisfies } from 'semver';
-import {
-  GetAgentPoliciesResponseItem,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-  PackagePolicy,
-} from '../../../../fleet/common';
+import type { GetAgentPoliciesResponseItem, PackagePolicy } from '@kbn/fleet-plugin/common';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import type { IRouter } from '@kbn/core/server';
 import { OSQUERY_INTEGRATION_NAME, PLUGIN_ID } from '../../../common';
-import { IRouter } from '../../../../../../src/core/server';
-import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
-import { getInternalSavedObjectsClient } from '../../usage/collector';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { getInternalSavedObjectsClient } from '../utils';
 
 export const getAgentPoliciesRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.get(

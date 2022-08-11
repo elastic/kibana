@@ -6,10 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreStart } from 'kibana/public';
+import { HttpSetup } from '@kbn/core/public';
 import { ISection } from '../../typings/section';
 
-export const getEmptySections = ({ core }: { core: CoreStart }): ISection[] => {
+export const getEmptySections = ({ http }: { http: HttpSetup }): ISection[] => {
   return [
     {
       id: 'infra_logs',
@@ -19,12 +19,12 @@ export const getEmptySections = ({ core }: { core: CoreStart }): ISection[] => {
       icon: 'logoLogging',
       description: i18n.translate('xpack.observability.emptySection.apps.logs.description', {
         defaultMessage:
-          'Centralize logs from any source. Search, tail, automate anomaly detection, and visualize trends so you can take action quicker.',
+          'Fast, easy, and scalable centralized log monitoring with out-of-the-box support for common data sources.',
       }),
       linkTitle: i18n.translate('xpack.observability.emptySection.apps.logs.link', {
         defaultMessage: 'Install Filebeat',
       }),
-      href: core.http.basePath.prepend('/app/home#/tutorial_directory/logging'),
+      href: http.basePath.prepend('/app/home#/tutorial_directory/logging'),
     },
     {
       id: 'apm',
@@ -34,12 +34,12 @@ export const getEmptySections = ({ core }: { core: CoreStart }): ISection[] => {
       icon: 'logoObservability',
       description: i18n.translate('xpack.observability.emptySection.apps.apm.description', {
         defaultMessage:
-          'Trace transactions through a distributed architecture and map your services’ interactions to easily spot performance bottlenecks.',
+          'Get deeper visibility into your applications with extensive support for popular languages, OpenTelemetry, and distributed tracing.',
       }),
       linkTitle: i18n.translate('xpack.observability.emptySection.apps.apm.link', {
         defaultMessage: 'Install Agent',
       }),
-      href: core.http.basePath.prepend('/app/home#/tutorial/apm'),
+      href: http.basePath.prepend('/app/home#/tutorial/apm'),
     },
     {
       id: 'infra_metrics',
@@ -48,13 +48,12 @@ export const getEmptySections = ({ core }: { core: CoreStart }): ISection[] => {
       }),
       icon: 'logoMetrics',
       description: i18n.translate('xpack.observability.emptySection.apps.metrics.description', {
-        defaultMessage:
-          'Analyze metrics from your infrastructure, apps, and services. Discover trends, forecast behavior, get alerts on anomalies, and more.',
+        defaultMessage: 'Stream, visualize, and analyze your infrastructure metrics.',
       }),
       linkTitle: i18n.translate('xpack.observability.emptySection.apps.metrics.link', {
         defaultMessage: 'Install Metricbeat',
       }),
-      href: core.http.basePath.prepend('/app/home#/tutorial_directory/metrics'),
+      href: http.basePath.prepend('/app/home#/tutorial_directory/metrics'),
     },
     {
       id: 'synthetics',
@@ -63,13 +62,12 @@ export const getEmptySections = ({ core }: { core: CoreStart }): ISection[] => {
       }),
       icon: 'logoUptime',
       description: i18n.translate('xpack.observability.emptySection.apps.uptime.description', {
-        defaultMessage:
-          'Proactively monitor the availability of your sites and services. Receive alerts and resolve issues faster to optimize your users’ experience.',
+        defaultMessage: 'Proactively monitor the availability and functionality of user journeys.',
       }),
       linkTitle: i18n.translate('xpack.observability.emptySection.apps.uptime.link', {
         defaultMessage: 'Install Heartbeat',
       }),
-      href: core.http.basePath.prepend('/app/home#/tutorial/uptimeMonitors'),
+      href: http.basePath.prepend('/app/home#/tutorial/uptimeMonitors'),
     },
     {
       id: 'ux',
@@ -79,12 +77,12 @@ export const getEmptySections = ({ core }: { core: CoreStart }): ISection[] => {
       icon: 'logoObservability',
       description: i18n.translate('xpack.observability.emptySection.apps.ux.description', {
         defaultMessage:
-          'Performance is a distribution. Measure the experiences of all visitors to your web application and understand how to improve the experience for everyone.',
+          'Collect, measure, and analyze performance data that reflects real-world user experiences.',
       }),
       linkTitle: i18n.translate('xpack.observability.emptySection.apps.ux.link', {
         defaultMessage: 'Install RUM Agent',
       }),
-      href: core.http.basePath.prepend('/app/home#/tutorial/apm'),
+      href: http.basePath.prepend('/app/home#/tutorial/apm'),
     },
     {
       id: 'alert',
@@ -94,14 +92,12 @@ export const getEmptySections = ({ core }: { core: CoreStart }): ISection[] => {
       icon: 'watchesApp',
       description: i18n.translate('xpack.observability.emptySection.apps.alert.description', {
         defaultMessage:
-          'Are 503 errors stacking up? Are services responding? Is CPU and RAM utilization jumping? See warnings as they happen—not as part of the post-mortem.',
+          'Detect complex conditions within Observability and trigger actions when those conditions are met.',
       }),
       linkTitle: i18n.translate('xpack.observability.emptySection.apps.alert.link', {
         defaultMessage: 'Create rule',
       }),
-      href: core.http.basePath.prepend(
-        '/app/management/insightsAndAlerting/triggersActions/alerts'
-      ),
+      href: http.basePath.prepend('/app/management/insightsAndAlerting/triggersActions/alerts'),
     },
   ];
 };

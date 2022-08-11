@@ -6,7 +6,8 @@
  */
 
 import React, { createContext, ReactNode } from 'react';
-import { ValuesType } from 'utility-types';
+import { useHistory } from 'react-router-dom';
+import { History } from 'history';
 import { isRumAgentName } from '../../../common/agent_name';
 import {
   TRANSACTION_PAGE_LOAD,
@@ -14,22 +15,16 @@ import {
 } from '../../../common/transaction_types';
 import { useServiceTransactionTypesFetcher } from './use_service_transaction_types_fetcher';
 import { useServiceAgentFetcher } from './use_service_agent_fetcher';
-import { APIReturnType } from '../../services/rest/create_call_apm_api';
-import { useServiceAlertsFetcher } from './use_service_alerts_fetcher';
 import { useApmParams } from '../../hooks/use_apm_params';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { useFallbackToTransactionsFetcher } from '../../hooks/use_fallback_to_transactions_fetcher';
-
-export type APMServiceAlert = ValuesType<
-  APIReturnType<'GET /internal/apm/services/{serviceName}/alerts'>['alerts']
->;
+import { replace } from '../../components/shared/links/url_helpers';
 
 export interface APMServiceContextValue {
   serviceName: string;
   agentName?: string;
   transactionType?: string;
   transactionTypes: string[];
-  alerts: APMServiceAlert[];
   runtimeName?: string;
   fallbackToTransactions: boolean;
 }
@@ -37,7 +32,6 @@ export interface APMServiceContextValue {
 export const APMServiceContext = createContext<APMServiceContextValue>({
   serviceName: '',
   transactionTypes: [],
-  alerts: [],
   fallbackToTransactions: false,
 });
 
@@ -46,6 +40,8 @@ export function ApmServiceContextProvider({
 }: {
   children: ReactNode;
 }) {
+  const history = useHistory();
+
   const {
     path: { serviceName },
     query,
@@ -66,18 +62,11 @@ export function ApmServiceContextProvider({
     end,
   });
 
-  const transactionType = getTransactionType({
+  const transactionType = getOrRedirectToTransactionType({
     transactionType: query.transactionType,
     transactionTypes,
     agentName,
-  });
-
-  const { alerts } = useServiceAlertsFetcher({
-    serviceName,
-    transactionType,
-    environment: query.environment,
-    start,
-    end,
+    history,
   });
 
   const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
@@ -91,7 +80,6 @@ export function ApmServiceContextProvider({
         agentName,
         transactionType,
         transactionTypes,
-        alerts,
         runtimeName,
         fallbackToTransactions,
       }}
@@ -100,16 +88,18 @@ export function ApmServiceContextProvider({
   );
 }
 
-export function getTransactionType({
+export function getOrRedirectToTransactionType({
   transactionType,
   transactionTypes,
   agentName,
+  history,
 }: {
   transactionType?: string;
   transactionTypes: string[];
   agentName?: string;
+  history: History;
 }) {
-  if (transactionType) {
+  if (transactionType && transactionTypes.includes(transactionType)) {
     return transactionType;
   }
 
@@ -123,7 +113,13 @@ export function getTransactionType({
     : TRANSACTION_REQUEST;
 
   // If the default transaction type is not in transactionTypes the first in the list is returned
-  return transactionTypes.includes(defaultTransactionType)
+  const currentTransactionType = transactionTypes.includes(
+    defaultTransactionType
+  )
     ? defaultTransactionType
     : transactionTypes[0];
+
+  // Replace transactionType in the URL in case it is not one of the types returned by the API
+  replace(history, { query: { transactionType: currentTransactionType } });
+  return currentTransactionType;
 }

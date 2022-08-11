@@ -19,7 +19,7 @@ export function useInput(
   const [hasChanged, setHasChanged] = useState(false);
 
   const onChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
       const newValue = e.target.value;
       setValue(newValue);
       if (errors && validate && validate(newValue) === undefined) {
@@ -154,6 +154,10 @@ export function useComboInput(
       errors,
       isInvalid,
       disabled,
+    },
+    formRowProps: {
+      error: errors,
+      isInvalid,
     },
     value,
     clear: () => {

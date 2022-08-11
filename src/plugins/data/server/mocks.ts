@@ -6,27 +6,22 @@
  * Side Public License, v 1.
  */
 
+import { coreMock } from '@kbn/core/server/mocks';
+import {
+  createFieldFormatsSetupMock,
+  createFieldFormatsStartMock,
+} from '@kbn/field-formats-plugin/server/mocks';
 import {
   createSearchSetupMock,
   createSearchStartMock,
   createSearchRequestHandlerContext,
 } from './search/mocks';
-import {
-  createFieldFormatsSetupMock,
-  createFieldFormatsStartMock,
-} from '../../field_formats/server/mocks';
 import { createIndexPatternsStartMock } from './data_views/mocks';
-import { DataRequestHandlerContext } from './search';
-import { AutocompleteSetup } from './autocomplete';
-
-const autocompleteSetupMock: jest.Mocked<AutocompleteSetup> = {
-  getAutocompleteSettings: jest.fn(),
-};
+import { createDatatableUtilitiesMock } from './datatable_utilities/mock';
 
 function createSetupContract() {
   return {
     search: createSearchSetupMock(),
-    autocomplete: autocompleteSetupMock,
     /**
      * @deprecated - use directly from "fieldFormats" plugin instead
      */
@@ -42,13 +37,15 @@ function createStartContract() {
      */
     fieldFormats: createFieldFormatsStartMock(),
     indexPatterns: createIndexPatternsStartMock(),
+    datatableUtilities: createDatatableUtilitiesMock(),
   };
 }
 
 function createRequestHandlerContext() {
   return {
+    core: coreMock.createRequestHandlerContext(),
     search: createSearchRequestHandlerContext(),
-  } as unknown as jest.Mocked<DataRequestHandlerContext>;
+  };
 }
 
 export const dataPluginMock = {

@@ -8,11 +8,11 @@
 import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ComponentProps } from '../../route_init';
 import { BeatsTemplate } from './beats_template';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { useCharts } from '../../hooks/use_charts';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 // @ts-ignore
 import { BeatsOverview } from '../../../components/beats/overview';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';

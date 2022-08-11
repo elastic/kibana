@@ -8,18 +8,18 @@
 import expect from '@kbn/expect';
 import { sample } from 'lodash';
 import { duration } from 'moment';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { Datafeed, Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import { MlAnomalyDetectionAlertParams } from '@kbn/ml-plugin/common/types/alerts';
+import { ANOMALY_SCORE_MATCH_GROUP_ID } from '@kbn/ml-plugin/server/lib/alerts/register_anomaly_detection_alert_type';
+import { ML_ALERT_TYPES } from '@kbn/ml-plugin/common/constants/alerts';
+import { Spaces } from '../../../../scenarios';
 import {
   ES_TEST_INDEX_NAME,
   ESTestIndexTool,
   getUrlPrefix,
   ObjectRemover,
 } from '../../../../../common/lib';
-import { Spaces } from '../../../../scenarios';
-import { Datafeed, Job } from '../../../../../../../plugins/ml/common/types/anomaly_detection_jobs';
-import { MlAnomalyDetectionAlertParams } from '../../../../../../../plugins/ml/common/types/alerts';
-import { ANOMALY_SCORE_MATCH_GROUP_ID } from '../../../../../../../plugins/ml/server/lib/alerts/register_anomaly_detection_alert_type';
-import { ML_ALERT_TYPES } from '../../../../../../../plugins/ml/common/constants/alerts';
+import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 const ACTION_TYPE_ID = '.index';
 const ALERT_TYPE_ID = ML_ALERT_TYPES.ANOMALY_DETECTION;

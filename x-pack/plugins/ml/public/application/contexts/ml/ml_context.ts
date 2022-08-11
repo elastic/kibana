@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { DataView, DataViewsContract } from '../../../../../../../src/plugins/data_views/public';
-import { SavedSearchSavedObject } from '../../../../common/types/kibana';
-import { MlServicesContext } from '../../app';
+import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { SavedSearchSavedObject } from '../../../../common/types/kibana';
+import type { MlServicesContext } from '../../app';
 
 export interface MlContextValue {
   combinedQuery: any;

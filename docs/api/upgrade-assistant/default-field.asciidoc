@@ -26,7 +26,7 @@ GET /api/upgrade_assistant/add_query_default_field/myIndex
 // KIBANA
 
 <1> A required array of {es} field types that generate the list of fields.
-<2> An optional array of additional field names, dot-deliminated.
+<2> An optional array of additional field names, dot-delimited.
 
 To add the `index.query.default_field` index setting to the specified index, {kib} generates an array of all fields from the index mapping.
 The fields contain the types specified in `fieldTypes`. {kib} appends any other fields specified in `otherFields` to the array of default fields.

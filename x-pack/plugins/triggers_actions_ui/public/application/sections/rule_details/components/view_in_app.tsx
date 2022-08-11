@@ -8,15 +8,15 @@
 import React, { useState, useEffect } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 import { fromNullable, fold } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 import {
-  AlertNavigation as RuleNavigation,
-  AlertStateNavigation as RuleStateNavigation,
-  AlertUrlNavigation as RuleUrlNavigation,
-} from '../../../../../../alerting/common';
+  RuleNavigation,
+  RuleStateNavigation,
+  RuleUrlNavigation,
+} from '@kbn/alerting-plugin/common';
 import { Rule } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
 

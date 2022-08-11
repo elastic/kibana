@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { get } from 'lodash';
 import { AlertCluster, AlertMemoryUsageNodeStats } from '../../../common/types/alerts';
 import { createDatasetFilter } from './create_dataset_query_filter';
 import { Globals } from '../../static_globals';
-import { getConfigCcs } from '../../../common/ccs_utils';
+import { CCS_REMOTE_PATTERN } from '../../../common/constants';
 import { getNewIndexPatterns } from '../cluster/get_index_patterns';
 
 export async function fetchMemoryUsageNodeStats(
@@ -26,7 +26,7 @@ export async function fetchMemoryUsageNodeStats(
     config: Globals.app.config,
     moduleType: 'elasticsearch',
     dataset: 'node_stats',
-    ccs: getConfigCcs(Globals.app.config) ? '*' : undefined,
+    ccs: CCS_REMOTE_PATTERN,
   });
   const params = {
     index: indexPatterns,
@@ -109,8 +109,13 @@ export async function fetchMemoryUsageNodeStats(
 
   const response = await esClient.search(params);
   const stats: AlertMemoryUsageNodeStats[] = [];
+
+  if (!response.aggregations) {
+    return stats;
+  }
+
   // @ts-expect-error declare type for aggregations explicitly
-  const { buckets: clusterBuckets } = response.aggregations?.clusters;
+  const { buckets: clusterBuckets } = response.aggregations.clusters;
 
   if (!clusterBuckets?.length) {
     return stats;

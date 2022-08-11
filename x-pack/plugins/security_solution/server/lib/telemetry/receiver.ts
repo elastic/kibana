@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import {
+import type {
   Logger,
   CoreStart,
+  IScopedClusterClient,
   ElasticsearchClient,
   SavedObjectsClientContract,
-} from 'src/core/server';
-import {
+} from '@kbn/core/server';
+import type {
   AggregationsAggregate,
   SearchRequest,
   SearchResponse,
@@ -21,35 +22,47 @@ import {
   EQL_RULE_TYPE_ID,
   INDICATOR_RULE_TYPE_ID,
   ML_RULE_TYPE_ID,
+  NEW_TERMS_RULE_TYPE_ID,
   QUERY_RULE_TYPE_ID,
   SAVED_QUERY_RULE_TYPE_ID,
   SIGNALS_ID,
   THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
-import { TransportResult } from '@elastic/elasticsearch';
-import { Agent, AgentPolicy } from '../../../../fleet/common';
-import { AgentClient, AgentPolicyServiceInterface } from '../../../../fleet/server';
-import { ExceptionListClient } from '../../../../lists/server';
-import { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
+import type { TransportResult } from '@elastic/elasticsearch';
+import type { Agent, AgentPolicy } from '@kbn/fleet-plugin/common';
+import type { AgentClient, AgentPolicyServiceInterface } from '@kbn/fleet-plugin/server';
+import type { ExceptionListClient } from '@kbn/lists-plugin/server';
+import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import { TELEMETRY_MAX_BUFFER_SIZE } from './constants';
 import {
   exceptionListItemToTelemetryEntry,
   trustedApplicationToTelemetryEntry,
   ruleExceptionListItemToTelemetryEvent,
+  metricsResponseToValueListMetaData,
 } from './helpers';
+import { Fetcher } from '../../endpoint/routes/resolver/tree/utils/fetch';
+import type { TreeOptions, TreeResponse } from '../../endpoint/routes/resolver/tree/utils/fetch';
+import type { SafeEndpointEvent, ResolverSchema } from '../../../common/endpoint/types';
 import type {
   TelemetryEvent,
+  EnhancedAlertEvent,
   ESLicense,
   ESClusterInfo,
   GetEndpointListResponse,
   RuleSearchResult,
   ExceptionListItem,
+  ValueListMetaData,
+  ValueListResponseAggregation,
+  ValueListItemsResponseAggregation,
+  ValueListExceptionListResponseAggregation,
+  ValueListIndicatorMatchResponseAggregation,
 } from './types';
 
 export interface ITelemetryReceiver {
   start(
     core?: CoreStart,
     kibanaIndex?: string,
+    alertsIndex?: string,
     endpointContextService?: EndpointAppContextService,
     exceptionListClient?: ExceptionListClient
   ): Promise<void>;
@@ -74,6 +87,13 @@ export interface ITelemetryReceiver {
   >;
 
   fetchEndpointMetrics(
+    executeFrom: string,
+    executeTo: string
+  ): Promise<
+    TransportResult<SearchResponse<unknown, Record<string, AggregationsAggregate>>, unknown>
+  >;
+
+  fetchEndpointMetadata(
     executeFrom: string,
     executeTo: string
   ): Promise<
@@ -124,6 +144,25 @@ export interface ITelemetryReceiver {
     status: string;
     type: string;
   };
+
+  fetchPrebuiltRuleAlerts(): Promise<{ events: TelemetryEvent[]; count: number }>;
+
+  fetchTimelineEndpointAlerts(
+    interval: number
+  ): Promise<SearchResponse<EnhancedAlertEvent, Record<string, AggregationsAggregate>>>;
+
+  buildProcessTree(
+    entityId: string,
+    resolverSchema: ResolverSchema,
+    startOfDay: string,
+    endOfDay: string
+  ): TreeResponse;
+
+  fetchTimelineEvents(
+    nodeIds: string[]
+  ): Promise<SearchResponse<SafeEndpointEvent, Record<string, AggregationsAggregate>>>;
+
+  fetchValueListMetaData(interval: number): Promise<ValueListMetaData>;
 }
 
 export class TelemetryReceiver implements ITelemetryReceiver {
@@ -134,8 +173,10 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   private exceptionListClient?: ExceptionListClient;
   private soClient?: SavedObjectsClientContract;
   private kibanaIndex?: string;
+  private alertsIndex?: string;
   private clusterInfo?: ESClusterInfo;
-  private readonly max_records = 10_000;
+  private processTreeFetcher?: Fetcher;
+  private readonly maxRecords = 10_000 as const;
 
   constructor(logger: Logger) {
     this.logger = logger.get('telemetry_events');
@@ -144,10 +185,12 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   public async start(
     core?: CoreStart,
     kibanaIndex?: string,
+    alertsIndex?: string,
     endpointContextService?: EndpointAppContextService,
     exceptionListClient?: ExceptionListClient
   ) {
     this.kibanaIndex = kibanaIndex;
+    this.alertsIndex = alertsIndex;
     this.agentClient = endpointContextService?.getAgentService()?.asInternalUser;
     this.agentPolicyService = endpointContextService?.getAgentPolicyService();
     this.esClient = core?.elasticsearch.client.asInternalUser;
@@ -155,6 +198,9 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     this.soClient =
       core?.savedObjects.createInternalRepository() as unknown as SavedObjectsClientContract;
     this.clusterInfo = await this.fetchClusterInfo();
+
+    const elasticsearch = core?.elasticsearch.client as unknown as IScopedClusterClient;
+    this.processTreeFetcher = new Fetcher(elasticsearch);
   }
 
   public getClusterInfo(): ESClusterInfo | undefined {
@@ -163,11 +209,11 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
   public async fetchFleetAgents() {
     if (this.esClient === undefined || this.esClient === null) {
-      throw Error('elasticsearch client is unavailable: cannot retrieve fleet policy responses');
+      throw Error('elasticsearch client is unavailable: cannot retrieve fleet agents');
     }
 
     return this.agentClient?.listAgents({
-      perPage: this.max_records,
+      perPage: this.maxRecords,
       showInactive: true,
       sortField: 'enrolled_at',
       sortOrder: 'desc',
@@ -198,7 +244,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
         aggs: {
           policy_responses: {
             terms: {
-              size: this.max_records,
+              size: this.maxRecords,
               field: 'agent.id',
             },
             aggs: {
@@ -246,10 +292,62 @@ export class TelemetryReceiver implements ITelemetryReceiver {
           endpoint_agents: {
             terms: {
               field: 'agent.id',
-              size: this.max_records,
+              size: this.maxRecords,
             },
             aggs: {
               latest_metrics: {
+                top_hits: {
+                  size: 1,
+                  sort: [
+                    {
+                      '@timestamp': {
+                        order: 'desc' as const,
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          endpoint_count: {
+            cardinality: {
+              field: 'agent.id',
+            },
+          },
+        },
+      },
+    };
+
+    return this.esClient.search(query, { meta: true });
+  }
+
+  public async fetchEndpointMetadata(executeFrom: string, executeTo: string) {
+    if (this.esClient === undefined || this.esClient === null) {
+      throw Error('elasticsearch client is unavailable: cannot retrieve elastic endpoint metrics');
+    }
+
+    const query: SearchRequest = {
+      expand_wildcards: ['open' as const, 'hidden' as const],
+      index: `.ds-metrics-endpoint.metadata-*`,
+      ignore_unavailable: false,
+      size: 0, // no query results required - only aggregation quantity
+      body: {
+        query: {
+          range: {
+            '@timestamp': {
+              gte: executeFrom,
+              lt: executeTo,
+            },
+          },
+        },
+        aggs: {
+          endpoint_metadata: {
+            terms: {
+              field: 'agent.id',
+              size: this.maxRecords,
+            },
+            aggs: {
+              latest_metadata: {
                 top_hits: {
                   size: 1,
                   sort: [
@@ -334,7 +432,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       data: results?.data.map(trustedApplicationToTelemetryEntry),
       total: results?.total ?? 0,
       page: results?.page ?? 1,
-      per_page: results?.per_page ?? this.max_records,
+      per_page: results?.per_page ?? this.maxRecords,
     };
   }
 
@@ -349,7 +447,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     const results = await this.exceptionListClient.findExceptionListItem({
       listId,
       page: 1,
-      perPage: this.max_records,
+      perPage: this.maxRecords,
       filter: undefined,
       namespaceType: 'agnostic',
       sortField: 'name',
@@ -360,7 +458,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       data: results?.data.map(exceptionListItemToTelemetryEntry) ?? [],
       total: results?.total ?? 0,
       page: results?.page ?? 1,
-      per_page: results?.per_page ?? this.max_records,
+      per_page: results?.per_page ?? this.maxRecords,
     };
   }
 
@@ -370,14 +468,14 @@ export class TelemetryReceiver implements ITelemetryReceiver {
    */
   public async fetchDetectionRules() {
     if (this.esClient === undefined || this.esClient === null) {
-      throw Error('elasticsearch client is unavailable: cannot retrieve diagnostic alerts');
+      throw Error('elasticsearch client is unavailable: cannot retrieve detection rules');
     }
 
     const query: SearchRequest = {
       expand_wildcards: ['open' as const, 'hidden' as const],
       index: `${this.kibanaIndex}*`,
       ignore_unavailable: true,
-      size: this.max_records,
+      size: this.maxRecords,
       body: {
         query: {
           bool: {
@@ -394,6 +492,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
                         SAVED_QUERY_RULE_TYPE_ID,
                         INDICATOR_RULE_TYPE_ID,
                         THRESHOLD_RULE_TYPE_ID,
+                        NEW_TERMS_RULE_TYPE_ID,
                       ],
                     },
                   },
@@ -427,7 +526,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     const results = await this.exceptionListClient?.findExceptionListsItem({
       listId: [listId],
       filter: [],
-      perPage: this.max_records,
+      perPage: this.maxRecords,
       page: 1,
       sortField: 'exception-list.created_at',
       sortOrder: 'desc',
@@ -438,8 +537,382 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       data: results?.data.map((r) => ruleExceptionListItemToTelemetryEvent(r, ruleVersion)) ?? [],
       total: results?.total ?? 0,
       page: results?.page ?? 1,
-      per_page: results?.per_page ?? this.max_records,
+      per_page: results?.per_page ?? this.maxRecords,
     };
+  }
+
+  /**
+   * Fetch an overview of detection rule alerts over the last 3 hours.
+   * Filters out custom rules and endpoint rules.
+   * @returns total of alerts by rules
+   */
+  public async fetchPrebuiltRuleAlerts() {
+    if (this.esClient === undefined || this.esClient === null) {
+      throw Error('elasticsearch client is unavailable: cannot retrieve pre-built rule alerts');
+    }
+
+    const query: SearchRequest = {
+      expand_wildcards: ['open' as const, 'hidden' as const],
+      index: `${this.alertsIndex}*`,
+      ignore_unavailable: true,
+      size: 1_000,
+      body: {
+        _source: {
+          exclude: [
+            'message',
+            'kibana.alert.rule.note',
+            'kibana.alert.rule.parameters.note',
+            'powershell.file.script_block_text',
+          ],
+        },
+        query: {
+          bool: {
+            filter: [
+              {
+                bool: {
+                  should: [
+                    {
+                      bool: {
+                        must_not: {
+                          bool: {
+                            should: [
+                              {
+                                match_phrase: {
+                                  'kibana.alert.rule.name': 'Malware Prevention Alert',
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      },
+                    },
+                    {
+                      bool: {
+                        must_not: {
+                          bool: {
+                            should: [
+                              {
+                                match_phrase: {
+                                  'kibana.alert.rule.name': 'Malware Detection Alert',
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      },
+                    },
+                    {
+                      bool: {
+                        must_not: {
+                          bool: {
+                            should: [
+                              {
+                                match_phrase: {
+                                  'kibana.alert.rule.name': 'Ransomware Prevention Alert',
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      },
+                    },
+                    {
+                      bool: {
+                        must_not: {
+                          bool: {
+                            should: [
+                              {
+                                match_phrase: {
+                                  'kibana.alert.rule.name': 'Ransomware Detection Alert',
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                bool: {
+                  should: [
+                    {
+                      match_phrase: {
+                        'kibana.alert.rule.parameters.immutable': 'true',
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                range: {
+                  '@timestamp': {
+                    gte: 'now-1h',
+                    lte: 'now',
+                  },
+                },
+              },
+            ],
+          },
+        },
+        aggs: {
+          prebuilt_rule_alert_count: {
+            cardinality: {
+              field: 'event.id',
+            },
+          },
+        },
+      },
+    };
+
+    const response = await this.esClient.search(query, { meta: true });
+    this.logger.debug(`received prebuilt alerts: (${response.body.hits.hits.length})`);
+
+    const telemetryEvents: TelemetryEvent[] = response.body.hits.hits.flatMap((h) =>
+      h._source != null ? ([h._source] as TelemetryEvent[]) : []
+    );
+
+    const aggregations = response.body?.aggregations as unknown as {
+      prebuilt_rule_alert_count: { value: number };
+    };
+
+    return { events: telemetryEvents, count: aggregations?.prebuilt_rule_alert_count.value ?? 0 };
+  }
+
+  public async fetchTimelineEndpointAlerts(interval: number) {
+    if (this.esClient === undefined || this.esClient === null) {
+      throw Error('elasticsearch client is unavailable: cannot retrieve cluster infomation');
+    }
+
+    const query: SearchRequest = {
+      expand_wildcards: ['open' as const, 'hidden' as const],
+      index: `${this.alertsIndex}*`,
+      ignore_unavailable: true,
+      size: 30,
+      body: {
+        query: {
+          bool: {
+            filter: [
+              {
+                bool: {
+                  should: [
+                    {
+                      match_phrase: {
+                        'event.module': 'endpoint',
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                bool: {
+                  should: [
+                    {
+                      match_phrase: {
+                        'kibana.alert.rule.parameters.immutable': 'true',
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                range: {
+                  '@timestamp': {
+                    gte: `now-${interval}h`,
+                    lte: 'now',
+                  },
+                },
+              },
+            ],
+          },
+        },
+        aggs: {
+          endpoint_alert_count: {
+            cardinality: {
+              field: 'event.id',
+            },
+          },
+        },
+      },
+    };
+
+    return this.esClient.search<EnhancedAlertEvent>(query);
+  }
+
+  public async buildProcessTree(
+    entityId: string,
+    resolverSchema: ResolverSchema,
+    startOfDay: string,
+    endOfDay: string
+  ): TreeResponse {
+    if (this.processTreeFetcher === undefined || this.processTreeFetcher === null) {
+      throw Error(
+        'resolver tree builder is unavailable: cannot build encoded endpoint event graph'
+      );
+    }
+
+    const request: TreeOptions = {
+      ancestors: 200,
+      descendants: 500,
+      timeRange: {
+        from: startOfDay,
+        to: endOfDay,
+      },
+      schema: resolverSchema,
+      nodes: [entityId],
+      indexPatterns: [`${this.alertsIndex}*`, 'logs-*'],
+      descendantLevels: 20,
+    };
+
+    return this.processTreeFetcher.tree(request, true);
+  }
+
+  public async fetchTimelineEvents(nodeIds: string[]) {
+    if (this.esClient === undefined || this.esClient === null) {
+      throw Error('elasticsearch client is unavailable: cannot retrieve timeline endpoint events');
+    }
+
+    const query: SearchRequest = {
+      expand_wildcards: ['open' as const, 'hidden' as const],
+      index: [`${this.alertsIndex}*`, 'logs-*'],
+      ignore_unavailable: true,
+      size: 100,
+      body: {
+        _source: {
+          include: [
+            '@timestamp',
+            'process',
+            'event',
+            'file',
+            'network',
+            'dns',
+            'kibana.rule.alert.uuid',
+          ],
+        },
+        query: {
+          bool: {
+            filter: [
+              {
+                terms: {
+                  'process.entity_id': nodeIds,
+                },
+              },
+              {
+                term: {
+                  'event.category': 'process',
+                },
+              },
+            ],
+          },
+        },
+      },
+    };
+
+    return this.esClient.search<SafeEndpointEvent>(query);
+  }
+
+  public async fetchValueListMetaData(interval: number) {
+    if (this.esClient === undefined || this.esClient === null) {
+      throw Error('elasticsearch client is unavailable: cannot retrieve diagnostic alerts');
+    }
+
+    const listQuery: SearchRequest = {
+      expand_wildcards: ['open' as const, 'hidden' as const],
+      index: '.lists-*',
+      ignore_unavailable: true,
+      size: 0, // no query results required - only aggregation quantity
+      body: {
+        aggs: {
+          total_value_list_count: {
+            cardinality: {
+              field: 'name',
+            },
+          },
+          type_breakdown: {
+            terms: {
+              field: 'type',
+              size: 50,
+            },
+          },
+        },
+      },
+    };
+    const itemQuery: SearchRequest = {
+      expand_wildcards: ['open' as const, 'hidden' as const],
+      index: '.items-*',
+      ignore_unavailable: true,
+      size: 0, // no query results required - only aggregation quantity
+      body: {
+        aggs: {
+          value_list_item_count: {
+            terms: {
+              field: 'list_id',
+              size: 100,
+            },
+          },
+        },
+      },
+    };
+    const exceptionListQuery: SearchRequest = {
+      expand_wildcards: ['open' as const, 'hidden' as const],
+      index: `${this.kibanaIndex}*`,
+      ignore_unavailable: true,
+      size: 0, // no query results required - only aggregation quantity
+      body: {
+        query: {
+          bool: {
+            must: [{ match: { 'exception-list.entries.type': 'list' } }],
+          },
+        },
+        aggs: {
+          vl_included_in_exception_lists_count: {
+            cardinality: {
+              field: 'exception-list.entries.list.id',
+            },
+          },
+        },
+      },
+    };
+    const indicatorMatchRuleQuery: SearchRequest = {
+      expand_wildcards: ['open' as const, 'hidden' as const],
+      index: `${this.kibanaIndex}*`,
+      ignore_unavailable: true,
+      size: 0,
+      body: {
+        query: {
+          bool: {
+            must: [{ prefix: { 'alert.params.threatIndex': '.items' } }],
+          },
+        },
+        aggs: {
+          vl_used_in_indicator_match_rule_count: {
+            cardinality: {
+              field: 'alert.params.ruleId',
+            },
+          },
+        },
+      },
+    };
+    const [listMetrics, itemMetrics, exceptionListMetrics, indicatorMatchMetrics] =
+      await Promise.all([
+        this.esClient.search(listQuery),
+        this.esClient.search(itemQuery),
+        this.esClient.search(exceptionListQuery),
+        this.esClient.search(indicatorMatchRuleQuery),
+      ]);
+    const listMetricsResponse = listMetrics as unknown as ValueListResponseAggregation;
+    const itemMetricsResponse = itemMetrics as unknown as ValueListItemsResponseAggregation;
+    const exceptionListMetricsResponse =
+      exceptionListMetrics as unknown as ValueListExceptionListResponseAggregation;
+    const indicatorMatchMetricsResponse =
+      indicatorMatchMetrics as unknown as ValueListIndicatorMatchResponseAggregation;
+    return metricsResponseToValueListMetaData({
+      listMetricsResponse,
+      itemMetricsResponse,
+      exceptionListMetricsResponse,
+      indicatorMatchMetricsResponse,
+    });
   }
 
   public async fetchClusterInfo(): Promise<ESClusterInfo> {

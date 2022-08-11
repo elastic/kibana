@@ -7,9 +7,9 @@
  */
 
 import { Subject } from 'rxjs';
-import { loggingSystemMock, metricsServiceMock } from '../../../../../core/server/mocks';
+import { loggingSystemMock, metricsServiceMock } from '@kbn/core/server/mocks';
 import { startTrackingEventLoopDelaysThreshold } from './track_threshold';
-import { usageCountersServiceMock } from '../../../../usage_collection/server/usage_counters/usage_counters_service.mock';
+import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 
 describe('startTrackingEventLoopDelaysThreshold', () => {
   const logger = loggingSystemMock.createLogger();

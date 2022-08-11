@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { AppCategory } from '../../';
+import { AppCategory } from '../..';
 
 /**
  * @public

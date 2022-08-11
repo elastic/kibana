@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Anomalies, AnomaliesByUser, Anomaly } from '../types';
+import type { Anomalies, AnomaliesByUser, Anomaly } from '../types';
 import { getUserNameFromInfluencers } from '../influencers/get_user_name_from_influencers';
 
 export const convertAnomaliesToUsers = (

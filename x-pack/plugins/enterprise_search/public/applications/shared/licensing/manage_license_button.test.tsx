@@ -13,11 +13,11 @@ import { shallow } from 'enzyme';
 
 import { EuiButton } from '@elastic/eui';
 
-import { docLinks } from '../../shared/doc_links';
+import { docLinks } from '../doc_links';
 
 import { EuiButtonTo } from '../react_router_helpers';
 
-import { ManageLicenseButton } from './';
+import { ManageLicenseButton } from '.';
 
 describe('ManageLicenseButton', () => {
   describe('when the user can access license management', () => {

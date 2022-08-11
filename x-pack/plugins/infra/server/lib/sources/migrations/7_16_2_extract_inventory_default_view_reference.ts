@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectMigrationFn } from 'src/core/server';
+import { SavedObjectMigrationFn } from '@kbn/core/server';
 import { InfraSourceConfiguration } from '../../../../common/source_configuration/source_configuration';
 import { extractInventorySavedViewReferences } from '../saved_object_references';
 

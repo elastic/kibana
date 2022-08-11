@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { SavedObject } from '../../types';
-import { SavedObjectsImportFailure, CreatedObject } from '../types';
+import type { SavedObject, SavedObjectsImportFailure } from '@kbn/core-saved-objects-common';
+import type { CreatedObject } from '@kbn/core-saved-objects-server';
 
 export function extractErrors(
   // TODO: define saved object type
@@ -30,7 +30,6 @@ export function extractErrors(
         errors.push({
           id: savedObject.id,
           type: savedObject.type,
-          title,
           meta: { title },
           error: {
             type: 'conflict',
@@ -42,7 +41,6 @@ export function extractErrors(
       errors.push({
         id: savedObject.id,
         type: savedObject.type,
-        title,
         meta: { title },
         error: {
           ...savedObject.error,

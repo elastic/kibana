@@ -1,4 +1,0 @@
-{
-  "modules": ["network_entities"],
-  "indices": ["auditbeat-*"]
-}

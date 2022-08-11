@@ -7,12 +7,13 @@
 
 import expect from '@kbn/expect';
 import * as Rx from 'rxjs';
+import { lastValueFrom } from 'rxjs';
 import { filter, first, map, switchMap, tap, timeout } from 'rxjs/operators';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
+  const spacesService = getService('spaces');
   const kibanaServer = getService('kibanaServer');
   const reportingAPI = getService('reportingAPI');
   const supertest = getService('supertest');
@@ -38,19 +39,21 @@ export default function ({ getService }: FtrProviderContext) {
     );
   };
 
-  const spacesSharedObjectsArchive =
-    'x-pack/test/functional/es_archives/reporting/ecommerce_kibana_spaces';
-
   describe('Exports and Spaces', () => {
+    const id = 'non_default_space';
     before(async () => {
-      await esArchiver.load(spacesSharedObjectsArchive); // multiple spaces with different config settings
+      await spacesService.create({ id, name: id });
+      await kibanaServer.importExport.load(
+        `x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce_kibana_non_default_space`,
+        { space: id }
+      );
       await reportingAPI.initEcommerce();
     });
 
     after(async () => {
       await reportingAPI.teardownEcommerce();
       await reportingAPI.deleteAllReports();
-      await esArchiver.unload(spacesSharedObjectsArchive);
+      await spacesService.delete(id);
     });
 
     /*
@@ -75,7 +78,7 @@ export default function ({ getService }: FtrProviderContext) {
         const path = await reportingAPI.postJobJSON(`/api/reporting/generate/csv_searchsource`, {
           jobParams: `(${JOB_PARAMS_CSV_DEFAULT_SPACE},title:'EC SEARCH')`,
         });
-        const csv = await getCompleted$(path).toPromise();
+        const csv = await lastValueFrom(getCompleted$(path));
 
         expectSnapshot(csv.slice(0, 500)).toMatchInline(`
           "\\"order_date\\",category,\\"customer_full_name\\",\\"taxful_total_price\\",currency
@@ -99,7 +102,7 @@ export default function ({ getService }: FtrProviderContext) {
             jobParams: `(${JOB_PARAMS_CSV_NONDEFAULT_SPACE},title:'Ecom Search from Non-Default')`,
           }
         );
-        const csv = await getCompleted$(path).toPromise();
+        const csv = await lastValueFrom(getCompleted$(path));
         expectSnapshot(csv.slice(0, 500)).toMatchInline(`
           "order_date;category;customer_full_name;taxful_total_price;currency
           Jul 11, 2019 @ 16:00:00.000;Men's Shoes, Men's Clothing, Women's Accessories, Men's Accessories;Sultan Al Boone;174;EUR
@@ -122,7 +125,7 @@ export default function ({ getService }: FtrProviderContext) {
           jobParams: `(browserTimezone:${tzParam},${JOB_PARAMS_CSV_DEFAULT_SPACE},title:'EC SEARCH')`,
         });
 
-        const csv = await getCompleted$(path).toPromise();
+        const csv = await lastValueFrom(getCompleted$(path));
         expectSnapshot(csv.slice(0, 500)).toMatchInline(`
           "\\"order_date\\",category,\\"customer_full_name\\",\\"taxful_total_price\\",currency
           \\"Jul 11, 2019 @ 17:00:00.000\\",\\"Men's Shoes, Men's Clothing, Women's Accessories, Men's Accessories\\",\\"Sultan Al Boone\\",174,EUR
@@ -138,7 +141,7 @@ export default function ({ getService }: FtrProviderContext) {
         const path = await reportingAPI.postJobJSON(`/api/reporting/generate/csv_searchsource`, {
           jobParams: `(${JOB_PARAMS_CSV_DEFAULT_SPACE},title:'EC SEARCH')`,
         });
-        const csv = await getCompleted$(path).toPromise();
+        const csv = await lastValueFrom(getCompleted$(path));
         expectSnapshot(csv.slice(0, 500)).toMatchInline(`
           "\\"order_date\\",category,\\"customer_full_name\\",\\"taxful_total_price\\",currency
           \\"Jul 12, 2019 @ 00:00:00.000\\",\\"Men's Shoes, Men's Clothing, Women's Accessories, Men's Accessories\\",\\"Sultan Al Boone\\",174,EUR

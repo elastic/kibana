@@ -6,17 +6,17 @@
  */
 
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
+import { affectedJobIds } from '../../callouts/ml_job_compatibility_callout/affected_job_ids';
+import { MlJobUpgradeModal } from '../../modals/ml_job_upgrade_modal';
+import { useInstalledSecurityJobs } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
 
-import { getCreateRuleUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import * as i18n from './translations';
-import { LinkButton } from '../../../../common/components/links';
+import { SecuritySolutionLinkButton } from '../../../../common/components/links';
 import { SecurityPageName } from '../../../../app/types';
-import { useFormatUrl } from '../../../../common/components/link_to';
 import { usePrePackagedRules } from '../../../containers/detection_engine/rules';
 import { useUserData } from '../../user_info';
-import { useNavigateTo } from '../../../../common/lib/kibana/hooks';
 
 const EmptyPrompt = styled(EuiEmptyPrompt)`
   align-self: center; /* Corrects horizontal centering in IE11 */
@@ -35,22 +35,12 @@ const PrePackagedRulesPromptComponent: React.FC<PrePackagedRulesPromptProps> = (
   loading = false,
   userHasPermissions = false,
 }) => {
-  const handlePreBuiltCreation = useCallback(() => {
-    createPrePackagedRules();
-  }, [createPrePackagedRules]);
-  const { formatUrl } = useFormatUrl(SecurityPageName.rules);
-  const { navigateTo } = useNavigateTo();
-
-  const goToCreateRule = useCallback(
-    (ev) => {
-      ev.preventDefault();
-      navigateTo({ deepLinkId: SecurityPageName.rules, path: getCreateRuleUrl() });
-    },
-    [navigateTo]
-  );
-
   const [{ isSignalIndexExists, isAuthenticated, hasEncryptionKey, canUserCRUD, hasIndexWrite }] =
     useUserData();
+
+  const { loading: loadingJobs, jobs } = useInstalledSecurityJobs();
+  const legacyJobsInstalled = jobs.filter((job) => affectedJobIds.includes(job.id));
+  const [isUpgradeModalVisible, setIsUpgradeModalVisible] = useState(false);
 
   const { getLoadPrebuiltRulesAndTemplatesButton } = usePrePackagedRules({
     canUserCRUD,
@@ -60,15 +50,35 @@ const PrePackagedRulesPromptComponent: React.FC<PrePackagedRulesPromptProps> = (
     hasEncryptionKey,
   });
 
+  // Wrapper to add confirmation modal for users who may be running older ML Jobs that would
+  // be overridden by updating their rules. For details, see: https://github.com/elastic/kibana/issues/128121
+  const mlJobUpgradeModalConfirm = useCallback(() => {
+    setIsUpgradeModalVisible(false);
+    createPrePackagedRules();
+  }, [createPrePackagedRules, setIsUpgradeModalVisible]);
+
   const loadPrebuiltRulesAndTemplatesButton = useMemo(
     () =>
       getLoadPrebuiltRulesAndTemplatesButton({
-        isDisabled: !userHasPermissions || loading,
-        onClick: handlePreBuiltCreation,
+        isDisabled: !userHasPermissions || loading || loadingJobs,
+        onClick: () => {
+          if (legacyJobsInstalled.length > 0) {
+            setIsUpgradeModalVisible(true);
+          } else {
+            createPrePackagedRules();
+          }
+        },
         fill: true,
         'data-test-subj': 'load-prebuilt-rules',
       }),
-    [getLoadPrebuiltRulesAndTemplatesButton, handlePreBuiltCreation, userHasPermissions, loading]
+    [
+      getLoadPrebuiltRulesAndTemplatesButton,
+      userHasPermissions,
+      loading,
+      loadingJobs,
+      legacyJobsInstalled,
+      createPrePackagedRules,
+    ]
   );
 
   return (
@@ -80,15 +90,21 @@ const PrePackagedRulesPromptComponent: React.FC<PrePackagedRulesPromptProps> = (
         <EuiFlexGroup justifyContent="center">
           <EuiFlexItem grow={false}>{loadPrebuiltRulesAndTemplatesButton}</EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <LinkButton
+            <SecuritySolutionLinkButton
               isDisabled={!userHasPermissions}
-              onClick={goToCreateRule}
-              href={formatUrl(getCreateRuleUrl())}
               iconType="plusInCircle"
+              deepLinkId={SecurityPageName.rulesCreate}
             >
               {i18n.CREATE_RULE_ACTION}
-            </LinkButton>
+            </SecuritySolutionLinkButton>
           </EuiFlexItem>
+          {isUpgradeModalVisible && (
+            <MlJobUpgradeModal
+              jobs={legacyJobsInstalled}
+              onCancel={() => setIsUpgradeModalVisible(false)}
+              onConfirm={mlJobUpgradeModalConfirm}
+            />
+          )}
         </EuiFlexGroup>
       }
     />

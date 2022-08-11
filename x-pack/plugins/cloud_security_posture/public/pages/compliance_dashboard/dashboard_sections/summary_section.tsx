@@ -7,23 +7,15 @@
 
 import React from 'react';
 import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
-import { useHistory } from 'react-router-dom';
 import { PartitionElementEvent } from '@elastic/charts';
-import { Query } from '@kbn/es-query';
-import { ScorePerAccountChart } from '../compliance_charts/score_per_account_chart';
+import { i18n } from '@kbn/i18n';
 import { ChartPanel } from '../../../components/chart_panel';
-import { useCloudPostureStatsApi } from '../../../common/api';
-import * as TEXT from '../translations';
 import { CloudPostureScoreChart } from '../compliance_charts/cloud_posture_score_chart';
-import { allNavigationItems } from '../../../common/navigation/constants';
-import { encodeQuery } from '../../../common/navigation/query_utils';
-import { Evaluation } from '../../../../common/types';
+import type { ComplianceDashboardData, Evaluation } from '../../../../common/types';
 import { RisksTable } from '../compliance_charts/risks_table';
-
-const getEvaluationQuery = (evaluation: Evaluation): Query => ({
-  language: 'kuery',
-  query: `"result.evaluation : "${evaluation}"`,
-});
+import { CasesTable } from '../compliance_charts/cases_table';
+import { useNavigateFindings } from '../../../common/hooks/use_navigate_findings';
+import { RULE_FAILED } from '../../../../common/constants';
 
 const defaultHeight = 360;
 
@@ -32,50 +24,65 @@ const summarySectionWrapperStyle = {
   height: defaultHeight,
 };
 
-export const SummarySection = () => {
-  const history = useHistory();
-  const getStats = useCloudPostureStatsApi();
-  if (!getStats.isSuccess) return null;
+export const SummarySection = ({ complianceData }: { complianceData: ComplianceDashboardData }) => {
+  const navToFindings = useNavigateFindings();
 
   const handleElementClick = (elements: PartitionElementEvent[]) => {
     const [element] = elements;
     const [layerValue] = element;
-    const rollupValue = layerValue[0].groupByRollup as Evaluation;
+    const evaluation = layerValue[0].groupByRollup as Evaluation;
 
-    history.push({
-      pathname: allNavigationItems.findings.path,
-      search: encodeQuery(getEvaluationQuery(rollupValue)),
+    navToFindings({ 'result.evaluation': evaluation });
+  };
+
+  const handleCellClick = (ruleSection: string) => {
+    navToFindings({
+      'rule.section': ruleSection,
+      'result.evaluation': RULE_FAILED,
     });
+  };
+
+  const handleViewAllClick = () => {
+    navToFindings({ 'result.evaluation': RULE_FAILED });
   };
 
   return (
     <EuiFlexGrid columns={3} style={summarySectionWrapperStyle}>
       <EuiFlexItem>
         <ChartPanel
-          title={TEXT.CLOUD_POSTURE_SCORE}
-          isLoading={getStats.isLoading}
-          isError={getStats.isError}
+          title={i18n.translate('xpack.csp.dashboard.summarySection.cloudPostureScorePanelTitle', {
+            defaultMessage: 'Cloud Posture Score',
+          })}
         >
           <CloudPostureScoreChart
             id="cloud_posture_score_chart"
-            data={getStats.data}
+            data={complianceData.stats}
+            trend={complianceData.trend}
             partitionOnElementClick={handleElementClick}
           />
         </ChartPanel>
       </EuiFlexItem>
       <EuiFlexItem>
-        <ChartPanel title={TEXT.RISKS} isLoading={getStats.isLoading} isError={getStats.isError}>
-          <RisksTable data={getStats.data.resourceTypesAggs} />
+        <ChartPanel
+          title={i18n.translate('xpack.csp.dashboard.summarySection.failedFindingsPanelTitle', {
+            defaultMessage: 'Failed Findings',
+          })}
+        >
+          <RisksTable
+            data={complianceData.groupedFindingsEvaluation}
+            maxItems={5}
+            onCellClick={handleCellClick}
+            onViewAllClick={handleViewAllClick}
+          />
         </ChartPanel>
       </EuiFlexItem>
       <EuiFlexItem>
         <ChartPanel
-          title={TEXT.SCORE_PER_CLUSTER_CHART_TITLE}
-          isLoading={getStats.isLoading}
-          isError={getStats.isError}
+          title={i18n.translate('xpack.csp.dashboard.summarySection.openCasesPanelTitle', {
+            defaultMessage: 'Open Cases',
+          })}
         >
-          {/* TODO: no api for this chart yet, using empty state for now. needs BE */}
-          <ScorePerAccountChart />
+          <CasesTable />
         </ChartPanel>
       </EuiFlexItem>
     </EuiFlexGrid>

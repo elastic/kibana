@@ -10,7 +10,6 @@ import React, { ReactElement } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import {
-  AddFromLibraryButton,
   QuickButtonGroup,
   PrimaryActionButton,
   SolutionToolbarButton,
@@ -23,8 +22,9 @@ import './solution_toolbar.scss';
 interface NamedSlots {
   primaryActionButton: ReactElement<typeof PrimaryActionButton | typeof PrimaryActionPopover>;
   quickButtonGroup?: ReactElement<typeof QuickButtonGroup>;
-  addFromLibraryButton?: ReactElement<typeof AddFromLibraryButton>;
-  extraButtons?: Array<ReactElement<typeof SolutionToolbarButton | typeof SolutionToolbarPopover>>;
+  extraButtons?: Array<
+    ReactElement<typeof SolutionToolbarButton | typeof SolutionToolbarPopover> | undefined
+  >;
 }
 
 export interface Props {
@@ -33,12 +33,7 @@ export interface Props {
 }
 
 export const SolutionToolbar = ({ isDarkModeEnabled, children }: Props) => {
-  const {
-    primaryActionButton,
-    quickButtonGroup,
-    addFromLibraryButton,
-    extraButtons = [],
-  } = children;
+  const { primaryActionButton, quickButtonGroup, extraButtons = [] } = children;
 
   const extra = extraButtons.map((button, index) =>
     button ? (
@@ -58,12 +53,9 @@ export const SolutionToolbar = ({ isDarkModeEnabled, children }: Props) => {
     >
       <EuiFlexItem grow={false}>{primaryActionButton}</EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
+        <EuiFlexGroup wrap={true} responsive={false} alignItems="center" gutterSize="xs">
           {quickButtonGroup ? <EuiFlexItem grow={false}>{quickButtonGroup}</EuiFlexItem> : null}
           {extra}
-          {addFromLibraryButton ? (
-            <EuiFlexItem grow={false}>{addFromLibraryButton}</EuiFlexItem>
-          ) : null}
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>

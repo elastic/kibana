@@ -7,7 +7,7 @@
 
 import { useEffect, useState } from 'react';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { Privilege } from '../alerts/types';
+import type { Privilege } from '../alerts/types';
 
 export interface UseListsPrivilegesState {
   isAuthenticated: boolean | null;

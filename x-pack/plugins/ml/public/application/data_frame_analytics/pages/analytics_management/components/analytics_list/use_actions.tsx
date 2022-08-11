@@ -11,7 +11,7 @@ import { EuiTableActionsColumnType } from '@elastic/eui';
 
 import { checkPermission } from '../../../../../capabilities/check_capabilities';
 
-import { DeleteJobCheckModal } from '../../../../../components/delete_job_check_modal';
+import { DeleteSpaceAwareItemCheckModal } from '../../../../../components/delete_space_aware_item_check_modal';
 import { useCloneAction } from '../action_clone';
 import { useDeleteAction, DeleteActionModal } from '../action_delete';
 import { isEditActionFlyoutVisible, useEditAction, EditActionFlyout } from '../action_edit';
@@ -23,9 +23,7 @@ import { useMapAction } from '../action_map';
 import { DataFrameAnalyticsListRow } from './common';
 import { useRefreshAnalyticsList } from '../../../../common/analytics';
 
-export const useActions = (
-  isManagementTable: boolean
-): {
+export const useActions = (): {
   actions: EuiTableActionsColumnType<DataFrameAnalyticsListRow>['actions'];
   modals: JSX.Element | null;
 } => {
@@ -43,48 +41,42 @@ export const useActions = (
 
   const { refresh } = useRefreshAnalyticsList();
 
-  let modals: JSX.Element | null = null;
-
   const actions: EuiTableActionsColumnType<DataFrameAnalyticsListRow>['actions'] = [
     viewAction.action,
     mapAction.action,
   ];
 
-  // isManagementTable will be the same for the lifecycle of the component
-  // Disabling lint error to fix console error in management list due to action hooks using deps not initialized in management
-  if (isManagementTable === false) {
-    modals = (
-      <>
-        {startAction.isModalVisible && <StartActionModal {...startAction} />}
-        {stopAction.isModalVisible && <StopActionModal {...stopAction} />}
-        {deleteAction.isDeleteJobCheckModalVisible && deleteAction?.item?.config && (
-          <DeleteJobCheckModal
-            onCloseCallback={deleteAction.closeDeleteJobCheckModal}
-            canDeleteCallback={() => {
-              // Item will always be set by the time we open the delete modal
-              deleteAction.openModal(deleteAction.item!);
-              deleteAction.closeDeleteJobCheckModal();
-            }}
-            refreshJobsCallback={refresh}
-            jobType={deleteAction.jobType}
-            jobIds={[deleteAction.item.config.id]}
-          />
-        )}
-        {deleteAction.isModalVisible && <DeleteActionModal {...deleteAction} />}
-        {isEditActionFlyoutVisible(editAction) && <EditActionFlyout {...editAction} />}
-      </>
-    );
+  const modals = (
+    <>
+      {startAction.isModalVisible && <StartActionModal {...startAction} />}
+      {stopAction.isModalVisible && <StopActionModal {...stopAction} />}
+      {deleteAction.isDeleteJobCheckModalVisible && deleteAction?.item?.config && (
+        <DeleteSpaceAwareItemCheckModal
+          onCloseCallback={deleteAction.closeDeleteJobCheckModal}
+          canDeleteCallback={() => {
+            // Item will always be set by the time we open the delete modal
+            deleteAction.openModal(deleteAction.item!);
+            deleteAction.closeDeleteJobCheckModal();
+          }}
+          refreshJobsCallback={refresh}
+          mlSavedObjectType={deleteAction.jobType}
+          ids={[deleteAction.item.config.id]}
+        />
+      )}
+      {deleteAction.isModalVisible && <DeleteActionModal {...deleteAction} />}
+      {isEditActionFlyoutVisible(editAction) && <EditActionFlyout {...editAction} />}
+    </>
+  );
 
-    actions.push(
-      ...[
-        startAction.action,
-        stopAction.action,
-        editAction.action,
-        cloneAction.action,
-        deleteAction.action,
-      ]
-    );
-  }
+  actions.push(
+    ...[
+      startAction.action,
+      stopAction.action,
+      editAction.action,
+      cloneAction.action,
+      deleteAction.action,
+    ]
+  );
 
   return { actions, modals };
 };

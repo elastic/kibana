@@ -9,7 +9,6 @@ import React from 'react';
 
 import '../../../../../../common/mock/match_media';
 import { TestProviders } from '../../../../../../common/mock';
-import { mockBrowserFields } from '../../../../../../common/containers/source/mock';
 import {
   mockEndgameAdminLogon,
   mockEndgameExplicitUserLogon,
@@ -37,7 +36,6 @@ describe('EndgameSecurityEventDetails', () => {
     const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetails
-          browserFields={mockBrowserFields}
           contextId="test-context"
           data={mockEndgameUserLogon}
           timelineId="timeline-id-test"
@@ -53,7 +51,6 @@ describe('EndgameSecurityEventDetails', () => {
     const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetails
-          browserFields={mockBrowserFields}
           contextId="test-context"
           data={mockEndgameAdminLogon}
           timelineId="timeline-id-test"
@@ -69,7 +66,6 @@ describe('EndgameSecurityEventDetails', () => {
     const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetails
-          browserFields={mockBrowserFields}
           contextId="test-context"
           data={mockEndgameExplicitUserLogon}
           timelineId="timeline-id-test"
@@ -85,7 +81,6 @@ describe('EndgameSecurityEventDetails', () => {
     const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetails
-          browserFields={mockBrowserFields}
           contextId="test-context"
           data={mockEndgameUserLogoff}
           timelineId="timeline-id-test"

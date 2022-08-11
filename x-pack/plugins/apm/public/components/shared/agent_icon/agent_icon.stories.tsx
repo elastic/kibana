@@ -16,7 +16,7 @@ import type { Story } from '@storybook/react';
 import React from 'react';
 import { AGENT_NAMES } from '../../../../common/agent_name';
 import { getAgentIcon } from './get_agent_icon';
-import { AgentIcon } from './index';
+import { AgentIcon } from '.';
 
 export default {
   title: 'shared/AgentIcon',

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { HttpSetup } from 'src/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 import type { FunctionComponent } from 'react';
 import React, { createContext, useContext } from 'react';
 

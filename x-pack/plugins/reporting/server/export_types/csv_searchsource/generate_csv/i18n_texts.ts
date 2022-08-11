@@ -19,8 +19,24 @@ export const i18nTexts = {
       'xpack.reporting.exportTypes.csv.generateCsv.authenticationExpired.partialResultsMessage',
       {
         defaultMessage:
-          'This report contains partial CSV results because authentication expired before it could finish. Try exporting a smaller amount of data or increase your authentication timeout.',
+          'This report contains partial CSV results because the authentication token expired. Export a smaller amount of data or increase the timeout of the authentication token.',
       }
     ),
   },
+  esErrorMessage: (statusCode: number, message: string) =>
+    i18n.translate('xpack.reporting.exportTypes.csv.generateCsv.esErrorMessage', {
+      defaultMessage: 'Received a {statusCode} response from Elasticsearch: {message}',
+      values: { statusCode, message },
+    }),
+  unknownError: (message: string = 'unknown') =>
+    i18n.translate('xpack.reporting.exportTypes.csv.generateCsv.unknownErrorMessage', {
+      defaultMessage: 'Encountered an unknown error: {message}',
+      values: { message },
+    }),
+  csvRowCountError: ({ expected, received }: { expected?: number; received: number }) =>
+    i18n.translate('xpack.reporting.exportTypes.csv.generateCsv.incorrectRowCount', {
+      defaultMessage:
+        'Encountered an error with the number of CSV rows generated from the search: expected {expected}, received {received}.',
+      values: { expected, received },
+    }),
 };

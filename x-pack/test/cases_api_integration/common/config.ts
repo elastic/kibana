@@ -20,8 +20,8 @@ interface CreateTestConfigOptions {
   testFiles?: string[];
 }
 
-// test.not-enabled is specifically not enabled
 const enabledActionTypes = [
+  '.cases-webhook',
   '.email',
   '.index',
   '.jira',
@@ -94,7 +94,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     );
 
     return {
-      testFiles: testFiles ? testFiles : [require.resolve('../tests/common')],
+      testFiles,
       servers,
       services,
       junit: {
@@ -139,6 +139,20 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
             (pluginDir) =>
               `--plugin-path=${path.resolve(__dirname, 'fixtures', 'plugins', pluginDir)}`
           ),
+          `--xpack.actions.preconfigured=${JSON.stringify({
+            'preconfigured-servicenow': {
+              name: 'preconfigured-servicenow',
+              actionTypeId: '.servicenow',
+              config: {
+                apiUrl: 'https://example.com',
+                usesTableApi: false,
+              },
+              secrets: {
+                username: 'elastic',
+                password: 'elastic',
+              },
+            },
+          })}`,
           `--server.xsrf.allowlist=${JSON.stringify(getAllExternalServiceSimulatorPaths())}`,
           ...(ssl
             ? [
@@ -148,7 +162,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
             : []),
           '--xpack.ruleRegistry.write.enabled=true',
           '--xpack.ruleRegistry.write.cache.enabled=false',
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify(['ruleRegistryEnabled'])}`,
         ],
       },
     };

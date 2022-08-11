@@ -36,13 +36,17 @@ import {
 } from '@kbn/es-query';
 
 import {
-  EXCEPTION_OPERATORS,
+  ALL_OPERATORS,
   EXCEPTION_OPERATORS_SANS_LISTS,
   doesNotExistOperator,
   existsOperator,
   isNotOperator,
   isOneOfOperator,
   isOperator,
+  DETECTION_ENGINE_EXCEPTION_OPERATORS,
+  isNotOneOfOperator,
+  isInListOperator,
+  isNotInListOperator,
 } from '../autocomplete_operators';
 
 import {
@@ -172,6 +176,8 @@ export const getOperatorType = (item: BuilderEntry): OperatorTypeEnum => {
       return OperatorTypeEnum.MATCH;
     case 'match_any':
       return OperatorTypeEnum.MATCH_ANY;
+    case 'wildcard':
+      return OperatorTypeEnum.WILDCARD;
     case 'list':
       return OperatorTypeEnum.LIST;
     default:
@@ -190,7 +196,7 @@ export const getExceptionOperatorSelect = (item: BuilderEntry): OperatorOption =
     return isOperator;
   } else {
     const operatorType = getOperatorType(item);
-    const foundOperator = EXCEPTION_OPERATORS.find((operatorOption) => {
+    const foundOperator = ALL_OPERATORS.find((operatorOption) => {
       return item.operator === operatorOption.operator && operatorType === operatorOption.type;
     });
 
@@ -207,6 +213,7 @@ export const getEntryValue = (item: BuilderEntry): string | string[] | undefined
   switch (item.type) {
     case OperatorTypeEnum.MATCH:
     case OperatorTypeEnum.MATCH_ANY:
+    case OperatorTypeEnum.WILDCARD:
       return item.value;
     case OperatorTypeEnum.EXISTS:
       return undefined;
@@ -524,6 +531,54 @@ export const getEntryOnMatchChange = (
 };
 
 /**
+ * Determines proper entry update when user updates value
+ * when operator is of type "wildcard"
+ *
+ * @param item - current exception item entry values
+ * @param newField - newly entered value
+ *
+ */
+export const getEntryOnWildcardChange = (
+  item: FormattedBuilderEntry,
+  newField: string
+): { index: number; updatedEntry: BuilderEntry } => {
+  const { nested, parent, entryIndex, field, operator } = item;
+
+  if (nested != null && parent != null) {
+    const fieldName = field != null ? field.name.split('.').slice(-1)[0] : '';
+
+    return {
+      index: parent.parentIndex,
+      updatedEntry: {
+        ...parent.parent,
+        entries: [
+          ...parent.parent.entries.slice(0, entryIndex),
+          {
+            field: fieldName,
+            id: item.id,
+            operator: operator.operator,
+            type: OperatorTypeEnum.WILDCARD,
+            value: newField,
+          },
+          ...parent.parent.entries.slice(entryIndex + 1),
+        ],
+      },
+    };
+  } else {
+    return {
+      index: entryIndex,
+      updatedEntry: {
+        field: field != null ? field.name : '',
+        id: item.id,
+        operator: operator.operator,
+        type: OperatorTypeEnum.WILDCARD,
+        value: newField,
+      },
+    };
+  }
+};
+
+/**
  * On operator change, determines whether value needs to be cleared or not
  *
  * @param field
@@ -562,6 +617,15 @@ export const getEntryFromOperator = (
         list: { id: '', type: 'ip' },
         operator: selectedOperator.operator,
         type: OperatorTypeEnum.LIST,
+      };
+    case 'wildcard':
+      return {
+        field: fieldValue,
+        id: currentEntry.id,
+        operator: selectedOperator.operator,
+        type: OperatorTypeEnum.WILDCARD,
+        value:
+          isSameOperatorType && typeof currentEntry.value === 'string' ? currentEntry.value : '',
       };
     default:
       return {
@@ -607,6 +671,10 @@ export const getEntryOnOperatorChange = (
   }
 };
 
+const fieldSupportsMatches = (field: DataViewFieldBase) => {
+  return field.type === 'string';
+};
+
 /**
  * Determines which operators to make available
  *
@@ -627,12 +695,34 @@ export const getOperatorOptions = (
     return isBoolean ? [isOperator] : [isOperator, isOneOfOperator];
   } else if (item.nested != null && listType === 'detection') {
     return isBoolean ? [isOperator, existsOperator] : [isOperator, isOneOfOperator, existsOperator];
+  } else if (isBoolean) {
+    return [isOperator, isNotOperator, existsOperator, doesNotExistOperator];
+  } else if (!includeValueListOperators) {
+    return fieldSupportsMatches(item.field)
+      ? EXCEPTION_OPERATORS_SANS_LISTS
+      : [
+          isOperator,
+          isNotOperator,
+          isOneOfOperator,
+          isNotOneOfOperator,
+          existsOperator,
+          doesNotExistOperator,
+        ];
   } else {
-    return isBoolean
-      ? [isOperator, isNotOperator, existsOperator, doesNotExistOperator]
-      : includeValueListOperators
-      ? EXCEPTION_OPERATORS
-      : EXCEPTION_OPERATORS_SANS_LISTS;
+    return listType === 'detection'
+      ? fieldSupportsMatches(item.field)
+        ? DETECTION_ENGINE_EXCEPTION_OPERATORS
+        : [
+            isOperator,
+            isNotOperator,
+            isOneOfOperator,
+            isNotOneOfOperator,
+            existsOperator,
+            doesNotExistOperator,
+            isInListOperator,
+            isNotInListOperator,
+          ]
+      : ALL_OPERATORS;
   }
 };
 
@@ -641,7 +731,7 @@ export const getOperatorOptions = (
  * to find it's corresponding keyword type (if available) which does
  * generate autocomplete values
  *
- * @param fields IFieldType fields
+ * @param fields DataViewFieldBase fields
  * @param selectedField the field name that was selected
  * @param isTextType we only want a corresponding keyword field if
  * the selected field is of type 'text'

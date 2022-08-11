@@ -78,7 +78,6 @@ describe('checkCompatibleTypeDescriptor', () => {
     ]);
     expect(incompatibles).toHaveLength(1);
     const { diff, message } = incompatibles[0];
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     expect(diff).toEqual({ '@@INDEX@@.count_2.kind': 'number' });
     expect(message).toHaveLength(1);
     expect(message).toEqual([

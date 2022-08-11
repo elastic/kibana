@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import fixture from './fixtures/kibana_exclusive_mb';
+import fixture from './fixtures/kibana_exclusive_mb.json';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -15,17 +15,21 @@ export default function ({ getService }) {
   describe('kibana_exclusive', () => {
     const archive =
       'x-pack/test/functional/es_archives/monitoring/setup/collection/kibana_exclusive';
+    const archiveMb7 =
+      'x-pack/test/functional/es_archives/monitoring/setup/collection/kibana_exclusive_mb_7';
     const timeRange = {
       min: '2019-04-09T00:00:00.741Z',
       max: '2019-04-09T23:59:59.741Z',
     };
 
-    before('load archive', () => {
-      return esArchiver.load(archive);
+    before('load archive', async () => {
+      await esArchiver.load(archive);
+      await esArchiver.load(archiveMb7);
     });
 
-    after('unload archive', () => {
-      return esArchiver.unload(archive);
+    after('unload archive', async () => {
+      await esArchiver.unload(archive);
+      await esArchiver.unload(archiveMb7);
     });
 
     it('should get collection status', async () => {

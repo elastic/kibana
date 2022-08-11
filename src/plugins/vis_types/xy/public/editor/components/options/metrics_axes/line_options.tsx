@@ -15,7 +15,7 @@ import {
   NumberInputOption,
   SelectOption,
   SwitchOption,
-} from '../../../../../../../vis_default_editor/public';
+} from '@kbn/vis-default-editor-plugin/public';
 
 import { SeriesParam } from '../../../../types';
 import { SetChart } from './chart_options';

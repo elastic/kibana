@@ -45,14 +45,18 @@ const getProps = (
   if (codec == null) {
     return null;
   }
+
   switch (codec._tag) {
     case 'DictionaryType': {
       if (codec.codomain.props != null) {
         return codec.codomain.props;
       }
+
       const dTypes: rt.HasProps[] = codec.codomain.types;
+
       return dTypes.reduce<rt.Props>((props, type) => Object.assign(props, getProps(type)), {});
     }
+
     case 'RefinementType':
     case 'ReadonlyType':
       return getProps(codec.type);
@@ -62,11 +66,13 @@ const getProps = (
       return codec.props;
     case 'IntersectionType': {
       const iTypes = codec.types as rt.HasProps[];
+
       return iTypes.reduce<rt.Props>(
         (props, type) => Object.assign(props, getProps(type) as rt.Props),
         {} as rt.Props
       ) as rt.Props;
     }
+
     default:
       return null;
   }
@@ -84,6 +90,7 @@ const getExcessProps = (
     const childrenObject = r[k] as Record<string, unknown>;
     if (codecChildren != null && childrenProps != null && codecChildren._tag === 'DictionaryType') {
       const keys = Object.keys(childrenObject);
+
       return [
         ...acc,
         ...keys.reduce<string[]>(
@@ -92,11 +99,13 @@ const getExcessProps = (
         ),
       ];
     }
+
     if (codecChildren != null && childrenProps != null) {
       return [...acc, ...getExcessProps(childrenProps, childrenObject)];
     } else if (codecChildren == null) {
       return [...acc, k];
     }
+
     return acc;
   }, []);
 
@@ -115,6 +124,7 @@ export const excess = <
         if (codecProps == null) {
           return rt.failure(i, c, 'unknown codec');
         }
+
         const ex = getExcessProps(codecProps, s);
 
         return ex.length > 0
@@ -128,5 +138,6 @@ export const excess = <
     codec.encode,
     codecProps
   );
+
   return r as C;
 };

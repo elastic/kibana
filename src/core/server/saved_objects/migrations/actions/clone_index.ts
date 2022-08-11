@@ -10,19 +10,22 @@ import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { ElasticsearchClient } from '../../../elasticsearch';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   catchRetryableEsClientErrors,
   RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
-import type { IndexNotFound, AcknowledgeResponse } from './';
-import { waitForIndexStatusYellow } from './wait_for_index_status_yellow';
+import type { IndexNotFound, AcknowledgeResponse } from '.';
+import { type IndexNotGreenTimeout, waitForIndexStatus } from './wait_for_index_status';
 import {
   DEFAULT_TIMEOUT,
   INDEX_AUTO_EXPAND_REPLICAS,
   INDEX_NUMBER_OF_SHARDS,
   WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE,
 } from './constants';
+import { isClusterShardLimitExceeded } from './es_errors';
+import { ClusterShardLimitExceeded } from './create_index';
+
 export type CloneIndexResponse = AcknowledgeResponse;
 
 /** @internal */
@@ -49,40 +52,37 @@ export const cloneIndex = ({
   target,
   timeout = DEFAULT_TIMEOUT,
 }: CloneIndexParams): TaskEither.TaskEither<
-  RetryableEsClientError | IndexNotFound,
+  RetryableEsClientError | IndexNotFound | IndexNotGreenTimeout | ClusterShardLimitExceeded,
   CloneIndexResponse
 > => {
   const cloneTask: TaskEither.TaskEither<
-    RetryableEsClientError | IndexNotFound,
+    RetryableEsClientError | IndexNotFound | ClusterShardLimitExceeded,
     AcknowledgeResponse
   > = () => {
     return client.indices
-      .clone(
-        {
-          index: source,
-          target,
-          wait_for_active_shards: WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE,
-          body: {
-            settings: {
-              index: {
-                // The source we're cloning from will have a write block set, so
-                // we need to remove it to allow writes to our newly cloned index
-                'blocks.write': false,
-                number_of_shards: INDEX_NUMBER_OF_SHARDS,
-                auto_expand_replicas: INDEX_AUTO_EXPAND_REPLICAS,
-                // Set an explicit refresh interval so that we don't inherit the
-                // value from incorrectly configured index templates (not required
-                // after we adopt system indices)
-                refresh_interval: '1s',
-                // Bump priority so that recovery happens before newer indices
-                priority: 10,
-              },
+      .clone({
+        index: source,
+        target,
+        wait_for_active_shards: WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE,
+        body: {
+          settings: {
+            index: {
+              // The source we're cloning from will have a write block set, so
+              // we need to remove it to allow writes to our newly cloned index
+              'blocks.write': false,
+              number_of_shards: INDEX_NUMBER_OF_SHARDS,
+              auto_expand_replicas: INDEX_AUTO_EXPAND_REPLICAS,
+              // Set an explicit refresh interval so that we don't inherit the
+              // value from incorrectly configured index templates (not required
+              // after we adopt system indices)
+              refresh_interval: '1s',
+              // Bump priority so that recovery happens before newer indices
+              priority: 10,
             },
           },
-          timeout,
         },
-        { maxRetries: 0 /** handle retry ourselves for now */ }
-      )
+        timeout,
+      })
       .then((response) => {
         /**
          * - acknowledged=false, we timed out before the cluster state was
@@ -113,6 +113,10 @@ export const cloneIndex = ({
             acknowledged: true,
             shardsAcknowledged: false,
           });
+        } else if (isClusterShardLimitExceeded(error?.body?.error)) {
+          return Either.left({
+            type: 'cluster_shard_limit_exceeded' as const,
+          });
         } else {
           throw error;
         }
@@ -122,14 +126,14 @@ export const cloneIndex = ({
 
   return pipe(
     cloneTask,
-    TaskEither.chain((res) => {
+    TaskEither.chainW((res) => {
       if (res.acknowledged && res.shardsAcknowledged) {
         // If the cluster state was updated and all shards ackd we're done
         return TaskEither.right(res);
       } else {
         // Otherwise, wait until the target index has a 'yellow' status.
         return pipe(
-          waitForIndexStatusYellow({ client, index: target, timeout }),
+          waitForIndexStatus({ client, index: target, timeout, status: 'green' }),
           TaskEither.map((value) => {
             /** When the index status is 'yellow' we know that all shards were started */
             return { acknowledged: true, shardsAcknowledged: true };

@@ -1,0 +1,56 @@
+[[add-case-connectors]]
+== Add connectors
+
+preview::[]
+
+You can add connectors to cases to push information to these external incident
+management systems:
+
+* IBM Resilient
+* Jira
+* ServiceNow ITSM
+* ServiceNow SecOps
+* {swimlane}
+
+NOTE: To create connectors and send cases to external systems, you must have the
+appropriate {kib} feature privileges. Refer to <<setup-cases>>.
+
+[discrete]
+[[create-case-connectors]]
+== Create connectors
+
+You can create connectors in *Management > {stack-manage-app} > {rules-ui}*, as
+described in <<action-types>>. Alternatively, you can create them in
+*Management > {stack-manage-app} > Cases*:
+
+. Click *Edit external connection*.
++
+[role="screenshot"]
+image::images/cases-connectors.png[]
+
+. From the *Incident management system* list, select *Add new connector*.
+
+. Select an external incident management system.
+
+. Enter your required settings. Refer to <<resilient-action-type>>,
+<<jira-action-type>>, <<servicenow-action-type>>, <<servicenow-sir-action-type>>,
+or <<swimlane-action-type>> for connector configuration details.
+
+. Click *Save*.
+
+[discrete]
+[[edit-case-connector-settings]]
+== Edit connector settings
+
+You can create additional connectors, update existing connectors, change
+the default connector, and change case closure options.
+
+. Go to *Management > {stack-manage-app} > Cases*, click *Edit external connection*.
+
+. To change whether cases are automatically closed after they are sent to an
+external system, update the case closure options.
+
+. To change the default connector for new cases, select the connector from the
+*Incident management system* list.
+
+. To update a connector, click *Update <connector name>* and edit the connector fields as required.

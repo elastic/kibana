@@ -15,7 +15,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const appsMenu = getService('appsMenu');
   const managementMenu = getService('managementMenu');
 
-  describe('security', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/132159
+  describe.skip('security', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
       await PageObjects.common.navigateToApp('home');
@@ -27,7 +28,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('global all privileges (aka kibana_admin)', () => {
       before(async () => {
-        await security.testUser.setRoles(['kibana_admin'], true);
+        await security.testUser.setRoles(['kibana_admin']);
       });
       after(async () => {
         await security.testUser.restoreDefaults();
@@ -47,7 +48,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('global dashboard read with ingest_pipelines_user', () => {
       before(async () => {
-        await security.testUser.setRoles(['global_dashboard_read', 'ingest_pipelines_user'], true);
+        await security.testUser.setRoles(['global_dashboard_read', 'ingest_pipelines_user']);
       });
       after(async () => {
         await security.testUser.restoreDefaults();

@@ -8,7 +8,7 @@
 import { Observable, from } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
-import { NotificationsStart, OverlayStart, ThemeServiceStart } from 'kibana/public';
+import { NotificationsStart, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
 import { TagWithRelations } from '../../../common';
 import { ITagsCache } from '../../services/tags';
 import { getAssignFlyoutOpener } from '../../components/assign_flyout';

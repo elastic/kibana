@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { convertMetaToPagination, handlePageChange, updateMetaPageIndex } from './';
+import { convertMetaToPagination, handlePageChange, updateMetaPageIndex } from '.';
 
 describe('convertMetaToPagination', () => {
   expect(

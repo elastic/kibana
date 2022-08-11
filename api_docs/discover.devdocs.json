@@ -66,7 +66,7 @@
         "signature": [
           "(id?: string | undefined) => string"
         ],
-        "path": "src/plugins/discover/public/services/saved_searches/saved_searches_utils.ts",
+        "path": "src/plugins/discover/common/services/saved_searches/saved_searches_url.ts",
         "deprecated": false,
         "children": [
           {
@@ -79,7 +79,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/discover/public/services/saved_searches/saved_searches_utils.ts",
+            "path": "src/plugins/discover/common/services/saved_searches/saved_searches_url.ts",
             "deprecated": false,
             "isRequired": false
           }
@@ -97,7 +97,7 @@
         "signature": [
           "(id?: string | undefined) => string"
         ],
-        "path": "src/plugins/discover/public/services/saved_searches/saved_searches_utils.ts",
+        "path": "src/plugins/discover/common/services/saved_searches/saved_searches_url.ts",
         "deprecated": false,
         "children": [
           {
@@ -110,7 +110,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/discover/public/services/saved_searches/saved_searches_utils.ts",
+            "path": "src/plugins/discover/common/services/saved_searches/saved_searches_url.ts",
             "deprecated": false,
             "isRequired": false
           }
@@ -271,7 +271,7 @@
             "tags": [],
             "label": "indexPatternId",
             "description": [
-              "\nOptionally set index pattern ID."
+              "\nOptionally set index pattern / data view ID."
             ],
             "signature": [
               "string | undefined"
@@ -289,13 +289,7 @@
               "\nOptionally set the time range in the time picker."
             ],
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.TimeRange",
-                "text": "TimeRange"
-              },
+              "TimeRange",
               " | undefined"
             ],
             "path": "src/plugins/discover/public/locator.ts",
@@ -345,7 +339,7 @@
           {
             "parentPluginId": "discover",
             "id": "def-public.DiscoverAppLocatorParams.query",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "query",
             "description": [
@@ -353,6 +347,8 @@
             ],
             "signature": [
               "Query",
+              " | ",
+              "AggregateQuery",
               " | undefined"
             ],
             "path": "src/plugins/discover/public/locator.ts",
@@ -653,7 +649,7 @@
                 "section": "def-common.SearchSourceFields",
                 "text": "SearchSourceFields"
               },
-              "[K]; getOwnField: <K extends keyof ",
+              "[K]; getActiveIndexFilter: () => string[]; getOwnField: <K extends keyof ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -717,13 +713,13 @@
                 "section": "def-common.SearchSource",
                 "text": "SearchSource"
               },
-              " | undefined; fetch$: (options?: ",
+              " | undefined; fetch$: <T = {}>(options?: ",
               {
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
-                "section": "def-common.ISearchOptions",
-                "text": "ISearchOptions"
+                "section": "def-common.SearchSourceSearchOptions",
+                "text": "SearchSourceSearchOptions"
               },
               ") => ",
               "Observable",
@@ -737,19 +733,19 @@
               },
               "<",
               "SearchResponse",
-              "<any, Record<string, ",
+              "<T, Record<string, ",
               "AggregationsAggregate",
               ">>>>; fetch: (options?: ",
               {
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
-                "section": "def-common.ISearchOptions",
-                "text": "ISearchOptions"
+                "section": "def-common.SearchSourceSearchOptions",
+                "text": "SearchSourceSearchOptions"
               },
               ") => Promise<",
               "SearchResponse",
-              "<any, Record<string, ",
+              "<unknown, Record<string, ",
               "AggregationsAggregate",
               ">>>; onRequestStart: (handler: (searchSource: ",
               {
@@ -764,8 +760,8 @@
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
-                "section": "def-common.ISearchOptions",
-                "text": "ISearchOptions"
+                "section": "def-common.SearchSourceSearchOptions",
+                "text": "SearchSourceSearchOptions"
               },
               " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; destroy: () => void; getSerializedFields: (recurse?: boolean) => ",
               {
@@ -777,7 +773,15 @@
               },
               "; serialize: () => { searchSourceJSON: string; references: ",
               "SavedObjectReference",
-              "[]; }; }"
+              "[]; }; toExpressionAst: ({ asDatatable }?: ExpressionAstOptions) => ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionAstExpression",
+                "text": "ExpressionAstExpression"
+              },
+              "; parseActiveIndexPatternFromQueryString: (queryString: string) => string[]; }"
             ],
             "path": "src/plugins/discover/public/services/saved_searches/types.ts",
             "deprecated": false
@@ -884,7 +888,7 @@
             "label": "sharingSavedObjectProps",
             "description": [],
             "signature": [
-              "{ outcome?: \"conflict\" | \"aliasMatch\" | \"exactMatch\" | undefined; aliasTargetId?: string | undefined; errorJSON?: string | undefined; } | undefined"
+              "{ outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; errorJSON?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/discover/public/services/saved_searches/types.ts",
             "deprecated": false
@@ -922,6 +926,32 @@
             "type": "number",
             "tags": [],
             "label": "rowHeight",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/discover/public/services/saved_searches/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.SavedSearch.isTextBasedQuery",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isTextBasedQuery",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/discover/public/services/saved_searches/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.SavedSearch.rowsPerPage",
+            "type": "number",
+            "tags": [],
+            "label": "rowsPerPage",
             "description": [],
             "signature": [
               "number | undefined"
@@ -1046,6 +1076,19 @@
             "type": "number",
             "tags": [],
             "label": "rowHeight",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/discover/public/embeddable/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.SearchInput.rowsPerPage",
+            "type": "number",
+            "tags": [],
+            "label": "rowsPerPage",
             "description": [],
             "signature": [
               "number | undefined"
@@ -1224,13 +1267,13 @@
     "misc": [
       {
         "parentPluginId": "discover",
-        "id": "def-common.APP_ID",
+        "id": "def-common.APP_ICON",
         "type": "string",
         "tags": [],
-        "label": "APP_ID",
+        "label": "APP_ICON",
         "description": [],
         "signature": [
-          "\"discover\""
+          "\"discoverApp\""
         ],
         "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,
@@ -1322,6 +1365,20 @@
       },
       {
         "parentPluginId": "discover",
+        "id": "def-common.ENABLE_SQL",
+        "type": "string",
+        "tags": [],
+        "label": "ENABLE_SQL",
+        "description": [],
+        "signature": [
+          "\"discover:enableSql\""
+        ],
+        "path": "src/plugins/discover/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discover",
         "id": "def-common.FIELDS_LIMIT_SETTING",
         "type": "string",
         "tags": [],
@@ -1329,6 +1386,20 @@
         "description": [],
         "signature": [
           "\"fields:popularLimit\""
+        ],
+        "path": "src/plugins/discover/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discover",
+        "id": "def-common.HIDE_ANNOUNCEMENTS",
+        "type": "string",
+        "tags": [],
+        "label": "HIDE_ANNOUNCEMENTS",
+        "description": [],
+        "signature": [
+          "\"hideAnnouncements\""
         ],
         "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,
@@ -1364,6 +1435,20 @@
       },
       {
         "parentPluginId": "discover",
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_ID",
+        "description": [],
+        "signature": [
+          "\"discover\""
+        ],
+        "path": "src/plugins/discover/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discover",
         "id": "def-common.ROW_HEIGHT_OPTION",
         "type": "string",
         "tags": [],
@@ -1371,6 +1456,20 @@
         "description": [],
         "signature": [
           "\"discover:rowHeightOption\""
+        ],
+        "path": "src/plugins/discover/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discover",
+        "id": "def-common.SAMPLE_ROWS_PER_PAGE_SETTING",
+        "type": "string",
+        "tags": [],
+        "label": "SAMPLE_ROWS_PER_PAGE_SETTING",
+        "description": [],
+        "signature": [
+          "\"discover:sampleRowsPerPage\""
         ],
         "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,

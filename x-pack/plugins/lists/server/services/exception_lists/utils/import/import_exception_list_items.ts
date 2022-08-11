@@ -9,7 +9,7 @@ import {
   ImportExceptionListItemSchemaDecoded,
   NamespaceType,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { ImportDataResponse, ImportResponse } from '../../import_exception_list_and_items';
 

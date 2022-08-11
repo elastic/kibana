@@ -6,15 +6,9 @@
  * Side Public License, v 1.
  */
 
-import {
-  PluginServiceProviders,
-  PluginServiceProvider,
-  PluginServiceRegistry,
-  KibanaPluginServiceParams,
-} from '../../../../presentation_util/public';
-
 import { CustomIntegrationsServices } from '..';
 import { CustomIntegrationsStartDependencies } from '../../types';
+import { KibanaPluginServiceFactory } from '../types';
 
 import { findServiceFactory } from './find';
 import { platformServiceFactory } from './platform';
@@ -22,23 +16,10 @@ import { platformServiceFactory } from './platform';
 export { findServiceFactory } from './find';
 export { platformServiceFactory } from './platform';
 
-/**
- * A set of `PluginServiceProvider`s for use in Kibana.
- * @see /src/plugins/presentation_util/public/services/create/provider.tsx
- */
-export const pluginServiceProviders: PluginServiceProviders<
+export const servicesFactory: KibanaPluginServiceFactory<
   CustomIntegrationsServices,
-  KibanaPluginServiceParams<CustomIntegrationsStartDependencies>
-> = {
-  find: new PluginServiceProvider(findServiceFactory),
-  platform: new PluginServiceProvider(platformServiceFactory),
-};
-
-/**
- * A `PluginServiceRegistry` for use in Kibana.
- * @see /src/plugins/presentation_util/public/services/create/registry.tsx
- */
-export const pluginServiceRegistry = new PluginServiceRegistry<
-  CustomIntegrationsServices,
-  KibanaPluginServiceParams<CustomIntegrationsStartDependencies>
->(pluginServiceProviders);
+  CustomIntegrationsStartDependencies
+> = (params) => ({
+  find: findServiceFactory(params),
+  platform: platformServiceFactory(params),
+});

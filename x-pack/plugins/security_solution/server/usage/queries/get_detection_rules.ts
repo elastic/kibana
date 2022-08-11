@@ -10,7 +10,7 @@ import type {
   SavedObjectsCreatePointInTimeFinderOptions,
   SavedObjectsClientContract,
   SavedObjectsFindResult,
-} from 'kibana/server';
+} from '@kbn/core/server';
 import {
   SIGNALS_ID,
   EQL_RULE_TYPE_ID,
@@ -19,6 +19,7 @@ import {
   QUERY_RULE_TYPE_ID,
   THRESHOLD_RULE_TYPE_ID,
   SAVED_QUERY_RULE_TYPE_ID,
+  NEW_TERMS_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
 import type { RuleSearchResult } from '../types';
 
@@ -44,6 +45,7 @@ export const getDetectionRules = async ({
     `${filterAttribute}: ${SAVED_QUERY_RULE_TYPE_ID}`,
     `${filterAttribute}: ${THRESHOLD_RULE_TYPE_ID}`,
     `${filterAttribute}: ${INDICATOR_RULE_TYPE_ID}`,
+    `${filterAttribute}: ${NEW_TERMS_RULE_TYPE_ID}`,
   ].join(' OR ');
 
   const query: SavedObjectsCreatePointInTimeFinderOptions = {

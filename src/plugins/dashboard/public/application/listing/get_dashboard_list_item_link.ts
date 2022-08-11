@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ApplicationStart } from 'kibana/public';
-import { QueryState } from '../../../../data/public';
-import { setStateToKbnUrl } from '../../../../kibana_utils/public';
+import { ApplicationStart } from '@kbn/core/public';
+import { QueryState } from '@kbn/data-plugin/public';
+import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import {
   DashboardConstants,
   createDashboardEditUrl,

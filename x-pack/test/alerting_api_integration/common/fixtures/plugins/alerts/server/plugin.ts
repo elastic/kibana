@@ -5,22 +5,28 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup, Logger, PluginInitializerContext } from 'kibana/server';
-import { PluginSetupContract as ActionsPluginSetup } from '../../../../../../../plugins/actions/server/plugin';
-import { PluginSetupContract as AlertingPluginSetup } from '../../../../../../../plugins/alerting/server/plugin';
-import { EncryptedSavedObjectsPluginStart } from '../../../../../../../plugins/encrypted_saved_objects/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../../plugins/features/server';
+import { Plugin, CoreSetup, CoreStart, Logger, PluginInitializerContext } from '@kbn/core/server';
+import { firstValueFrom, Subject } from 'rxjs';
+import { PluginSetupContract as ActionsPluginSetup } from '@kbn/actions-plugin/server/plugin';
+import { PluginSetupContract as AlertingPluginSetup } from '@kbn/alerting-plugin/server/plugin';
+import {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server/plugin';
+import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { defineAlertTypes } from './alert_types';
 import { defineActionTypes } from './action_types';
 import { defineRoutes } from './routes';
-import { SpacesPluginStart } from '../../../../../../../plugins/spaces/server';
-import { SecurityPluginStart } from '../../../../../../../plugins/security/server';
-import { PluginStartContract as ActionsPluginStart } from '../../../../../../../plugins/actions/server';
 
 export interface FixtureSetupDeps {
   features: FeaturesPluginSetup;
   actions: ActionsPluginSetup;
   alerting: AlertingPluginSetup;
+  taskManager: TaskManagerSetupContract;
 }
 
 export interface FixtureStartDeps {
@@ -28,10 +34,14 @@ export interface FixtureStartDeps {
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
   actions: ActionsPluginStart;
+  taskManager: TaskManagerStartContract;
 }
 
 export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, FixtureStartDeps> {
   private readonly logger: Logger;
+
+  taskManagerStart$: Subject<TaskManagerStartContract> = new Subject<TaskManagerStartContract>();
+  taskManagerStart: Promise<TaskManagerStartContract> = firstValueFrom(this.taskManagerStart$);
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get('fixtures', 'plugins', 'alerts');
@@ -127,9 +137,12 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
 
     defineActionTypes(core, { actions });
     defineAlertTypes(core, { alerting });
-    defineRoutes(core, { logger: this.logger });
+    defineRoutes(core, this.taskManagerStart, { logger: this.logger });
   }
 
-  public start() {}
+  public start(core: CoreStart, { taskManager }: FixtureStartDeps) {
+    this.taskManagerStart$.next(taskManager);
+    this.taskManagerStart$.complete();
+  }
   public stop() {}
 }

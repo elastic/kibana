@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { HttpHandler } from 'src/core/public';
+import type { HttpHandler } from '@kbn/core/public';
 import { getJobId } from '../../../../common/log_analysis';
 import { callDeleteJobs, callGetJobDeletionTasks, callStopDatafeeds } from './api/ml_cleanup';
 

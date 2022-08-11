@@ -8,7 +8,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
-import { useTrackPageview } from '../../../../../observability/public';
+import { useTrackPageview } from '@kbn/observability-plugin/public';
 
 interface LogEntryCategoriesSetupContentProps {
   onOpenSetup: () => void;

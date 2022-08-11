@@ -7,8 +7,8 @@
 
 import { get } from 'lodash/fp';
 
-import { InputsModel, TimeRange, Refetch, RefetchKql, InspectQuery } from './model';
-import { InputsModelId } from './constants';
+import type { InputsModel, TimeRange, Refetch, RefetchKql, InspectQuery } from './model';
+import type { InputsModelId } from './constants';
 
 export const updateInputFullScreen = (
   inputId: InputsModelId,
@@ -109,7 +109,14 @@ export const upsertQuery = ({
             ]
           : [
               ...state[inputId].queries,
-              { id, inspect, isInspected: false, loading, refetch, selectedInspectIndex: 0 },
+              {
+                id,
+                inspect,
+                isInspected: false,
+                loading,
+                refetch,
+                selectedInspectIndex: 0,
+              },
             ],
     },
   };

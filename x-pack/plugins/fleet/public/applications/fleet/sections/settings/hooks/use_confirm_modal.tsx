@@ -13,13 +13,14 @@ import React, { useCallback, useContext, useState } from 'react';
 interface ModalState {
   title?: React.ReactNode;
   description?: React.ReactNode;
-  buttonColor?: EuiConfirmModalProps['buttonColor'];
+  options?: ModalOptions;
   onConfirm: () => void;
   onCancel: () => void;
 }
 
 interface ModalOptions {
   buttonColor?: EuiConfirmModalProps['buttonColor'];
+  confirmButtonText?: string;
 }
 
 const ModalContext = React.createContext<null | {
@@ -40,7 +41,7 @@ export function useConfirmModal() {
           description,
           onConfirm: () => resolve(true),
           onCancel: () => resolve(false),
-          buttonColor: options?.buttonColor,
+          options,
         });
       });
     },
@@ -67,7 +68,7 @@ export const ConfirmModalProvider: React.FunctionComponent = ({ children }) => {
     onConfirm: () => {},
   });
 
-  const showModal = useCallback(({ title, description, onConfirm, onCancel }) => {
+  const showModal = useCallback(({ title, description, onConfirm, onCancel, options }) => {
     setIsVisible(true);
     setModal({
       title,
@@ -80,6 +81,7 @@ export const ConfirmModalProvider: React.FunctionComponent = ({ children }) => {
         setIsVisible(false);
         onCancel();
       },
+      options,
     });
   }, []);
 
@@ -89,18 +91,18 @@ export const ConfirmModalProvider: React.FunctionComponent = ({ children }) => {
         <EuiPortal>
           <EuiConfirmModal
             title={modal.title}
-            buttonColor={modal.buttonColor}
+            buttonColor={modal.options?.buttonColor}
             onCancel={modal.onCancel}
             onConfirm={modal.onConfirm}
             cancelButtonText={i18n.translate('xpack.fleet.settings.confirmModal.cancelButtonText', {
               defaultMessage: 'Cancel',
             })}
-            confirmButtonText={i18n.translate(
-              'xpack.fleet.settings.confirmModal.confirmButtonText',
-              {
+            confirmButtonText={
+              modal.options?.confirmButtonText ??
+              i18n.translate('xpack.fleet.settings.confirmModal.confirmButtonText', {
                 defaultMessage: 'Save and deploy',
-              }
-            )}
+              })
+            }
             defaultFocusedButton="confirm"
           >
             {modal.description}

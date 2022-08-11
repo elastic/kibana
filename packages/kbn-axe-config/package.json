@@ -1,0 +1,11 @@
+{
+  "name": "@kbn/axe-config",
+  "private": true,
+  "version": "1.0.0",
+  "main": "./target_node/index.js",
+  "browser": "./target_web/index.js",
+  "license": "SSPL-1.0 OR Elastic License 2.0",
+  "kibana": {
+    "devOnly": true
+  }
+}

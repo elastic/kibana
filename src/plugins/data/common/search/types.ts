@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { KibanaExecutionContext } from 'src/core/public';
+import type { KibanaExecutionContext } from '@kbn/core/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { Observable } from 'rxjs';
-import { IEsSearchRequest, IEsSearchResponse, IndexPattern } from '..';
-import type { RequestAdapter } from '../../../inspector/common';
+import { IEsSearchRequest, IEsSearchResponse } from '..';
 
 export type ISearchGeneric = <
   SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
@@ -90,13 +90,6 @@ export interface IKibanaSearchRequest<Params = any> {
   params?: Params;
 }
 
-export interface IInspectorInfo {
-  adapter?: RequestAdapter;
-  title: string;
-  id?: string;
-  description?: string;
-}
-
 export interface ISearchOptions {
   /**
    * An `AbortSignal` that allows the caller of `search` to abort a search request.
@@ -131,16 +124,14 @@ export interface ISearchOptions {
   isRestore?: boolean;
 
   /**
-   * Index pattern reference is used for better error messages
+   * Represents a meta-information about a Kibana entity intitating a saerch request.
    */
-  indexPattern?: IndexPattern;
+  executionContext?: KibanaExecutionContext;
 
   /**
-   * Inspector integration options
+   * Index pattern reference is used for better error messages
    */
-  inspector?: IInspectorInfo;
-
-  executionContext?: KibanaExecutionContext;
+  indexPattern?: DataView;
 }
 
 /**

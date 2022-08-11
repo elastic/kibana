@@ -6,7 +6,7 @@
  */
 
 import { uniq, intersection } from 'lodash';
-import { SavedObjectReference } from '../../../../src/core/types';
+import { SavedObjectReference } from '@kbn/core/types';
 import { tagSavedObjectTypeName } from './constants';
 
 /**

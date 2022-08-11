@@ -9,7 +9,7 @@
 import { join } from 'path';
 import { logger } from '@storybook/node-logger';
 import buildStandalone from '@storybook/react/standalone';
-import { Flags, run } from '@kbn/dev-utils';
+import { Flags, run } from '@kbn/dev-cli-runner';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
 import * as constants from './constants';

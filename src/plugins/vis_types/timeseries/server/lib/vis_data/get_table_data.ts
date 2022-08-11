@@ -14,7 +14,7 @@ import { handleErrorResponse } from './handle_error_response';
 import { processBucket } from './table/process_bucket';
 
 import { createFieldsFetcher } from '../search_strategies/lib/fields_fetcher';
-import { extractFieldLabel } from '../../../common/fields_utils';
+import { getFieldsForTerms, getMultiFieldLabel } from '../../../common/fields_utils';
 import { isAggSupported } from './helpers/check_aggs';
 import { isConfigurationFeatureEnabled } from '../../../common/check_ui_restrictions';
 import { FilterCannotBeAppliedError, PivotNotSelectedForTableError } from '../../../common/errors';
@@ -33,51 +33,56 @@ export async function getTableData(
   panel: Panel,
   services: VisTypeTimeseriesRequestServices
 ) {
-  const panelIndex = await services.cachedIndexPatternFetcher(
-    panel.index_pattern,
-    !panel.use_kibana_indexes
-  );
-
-  const strategy = await services.searchStrategyRegistry.getViableStrategy(
-    requestContext,
-    req,
-    panelIndex
-  );
-
-  if (!strategy) {
-    throw new Error(
-      i18n.translate('visTypeTimeseries.searchStrategyUndefinedErrorMessage', {
-        defaultMessage: 'Search strategy was not defined',
-      })
-    );
-  }
-
-  const { searchStrategy, capabilities } = strategy;
-
-  const extractFields = createFieldsFetcher(req, {
-    indexPatternsService: services.indexPatternsService,
-    cachedIndexPatternFetcher: services.cachedIndexPatternFetcher,
-    searchStrategy,
-    capabilities,
-  });
-
-  const calculatePivotLabel = async () => {
-    if (panel.pivot_id && panelIndex.indexPattern?.id) {
-      const fields = await extractFields({ id: panelIndex.indexPattern.id });
-
-      return extractFieldLabel(fields, panel.pivot_id);
-    }
-    return panel.pivot_id;
-  };
-
-  const meta: DataResponseMeta = {
-    type: panel.type,
-    uiRestrictions: capabilities.uiRestrictions,
-    trackedEsSearches: {},
-  };
+  let meta: DataResponseMeta | undefined;
   const handleError = handleErrorResponse(panel);
 
   try {
+    const panelIndex = await services.cachedIndexPatternFetcher(
+      panel.index_pattern,
+      !panel.use_kibana_indexes
+    );
+
+    const strategy = await services.searchStrategyRegistry.getViableStrategy(
+      requestContext,
+      req,
+      panelIndex
+    );
+
+    if (!strategy) {
+      throw new Error(
+        i18n.translate('visTypeTimeseries.searchStrategyUndefinedErrorMessage', {
+          defaultMessage: 'Search strategy was not defined',
+        })
+      );
+    }
+
+    const { searchStrategy, capabilities } = strategy;
+
+    const extractFields = createFieldsFetcher(req, {
+      indexPatternsService: services.indexPatternsService,
+      cachedIndexPatternFetcher: services.cachedIndexPatternFetcher,
+      searchStrategy,
+      capabilities,
+    });
+
+    const calculatePivotLabel = async () => {
+      const pivotIds = getFieldsForTerms(panel.pivot_id);
+
+      if (pivotIds.length) {
+        const fields = panelIndex.indexPattern?.id
+          ? await extractFields({ id: panelIndex.indexPattern.id })
+          : [];
+
+        return getMultiFieldLabel(pivotIds, fields);
+      }
+    };
+
+    meta = {
+      type: panel.type,
+      uiRestrictions: capabilities.uiRestrictions,
+      trackedEsSearches: {},
+    };
+
     panel.series.forEach((series) => {
       isAggSupported(series.metrics, capabilities);
       if (series.filter?.query && !isConfigurationFeatureEnabled('filter', capabilities)) {
@@ -85,7 +90,7 @@ export async function getTableData(
       }
     });
 
-    if (!panel.pivot_id) {
+    if (!getFieldsForTerms(panel.pivot_id).length) {
       throw new PivotNotSelectedForTableError();
     }
 
@@ -128,7 +133,7 @@ export async function getTableData(
     const series = await Promise.all(buckets.map(processBucket({ panel, extractFields })));
 
     return {
-      ...meta,
+      ...(meta || {}),
       pivot_label: panel.pivot_label || (await calculatePivotLabel()),
       series,
     };

@@ -6,13 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import { skipIfNoDockerRegistry } from '../../helpers';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { setupFleetAndAgents } from '../agents/services';
 import {
   AGENT_POLICY_INDEX,
   AGENT_UPDATE_LAST_CHECKIN_INTERVAL_MS,
-} from '../../../../plugins/fleet/common';
+} from '@kbn/fleet-plugin/common';
+import { skipIfNoDockerRegistry } from '../../helpers';
+import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;

@@ -7,11 +7,8 @@
 
 import { map } from 'rxjs/operators';
 import { FilterStateStore } from '@kbn/es-query';
-import { connectToQueryState } from '../../../../../../../src/plugins/data/public';
-import {
-  syncState,
-  BaseStateContainer,
-} from '../../../../../../../src/plugins/kibana_utils/public';
+import { connectToQueryState } from '@kbn/data-plugin/public';
+import { syncState, BaseStateContainer } from '@kbn/kibana-utils-plugin/public';
 import { getData } from '../../../kibana_services';
 import { kbnUrlStateStorage } from '../../../render_app';
 import { AppStateManager } from './app_state_manager';

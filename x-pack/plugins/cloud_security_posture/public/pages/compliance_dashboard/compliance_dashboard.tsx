@@ -6,39 +6,54 @@
  */
 
 import React from 'react';
-import { EuiSpacer } from '@elastic/eui';
-import { allNavigationItems } from '../../common/navigation/constants';
-import { useCspBreadcrumbs } from '../../common/navigation/use_csp_breadcrumbs';
+import { EuiSpacer, EuiPageHeader } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { CloudPosturePageTitle } from '../../components/cloud_posture_page_title';
+import { CloudPosturePage } from '../../components/cloud_posture_page';
+import { DASHBOARD_CONTAINER } from './test_subjects';
 import { SummarySection } from './dashboard_sections/summary_section';
 import { BenchmarksSection } from './dashboard_sections/benchmarks_section';
-import { useCloudPostureStatsApi } from '../../common/api';
-import { CspPageTemplate } from '../../components/page_template';
-import * as TEXT from './translations';
-
-const CompliancePage = () => {
-  const getStats = useCloudPostureStatsApi();
-  if (getStats.isLoading) return null;
-
-  return (
-    <>
-      <SummarySection />
-      <EuiSpacer />
-      <BenchmarksSection />
-      <EuiSpacer />
-    </>
-  );
-};
+import { useComplianceDashboardDataApi } from '../../common/api';
+import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
+import { NoFindingsStates } from '../../components/no_findings_states';
 
 export const ComplianceDashboard = () => {
-  useCspBreadcrumbs([allNavigationItems.dashboard]);
+  const getSetupStatus = useCspSetupStatusApi();
+  const hasFindings = getSetupStatus.data?.status === 'indexed';
+  const getDashboardData = useComplianceDashboardDataApi({
+    enabled: hasFindings,
+  });
+
+  if (!hasFindings) return <NoFindingsStates />;
 
   return (
-    <CspPageTemplate
-      pageHeader={{
-        pageTitle: TEXT.CLOUD_POSTURE,
-      }}
-    >
-      <CompliancePage />
-    </CspPageTemplate>
+    <CloudPosturePage query={getDashboardData}>
+      <EuiPageHeader
+        bottomBorder
+        pageTitle={
+          <CloudPosturePageTitle
+            isBeta
+            title={i18n.translate('xpack.csp.dashboard.cspPageTemplate.pageTitle', {
+              defaultMessage: 'Cloud Posture',
+            })}
+          />
+        }
+      />
+      <EuiSpacer />
+      <div
+        data-test-subj={DASHBOARD_CONTAINER}
+        css={css`
+          max-width: 1600px;
+          margin-left: auto;
+          margin-right: auto;
+        `}
+      >
+        <SummarySection complianceData={getDashboardData.data!} />
+        <EuiSpacer />
+        <BenchmarksSection complianceData={getDashboardData.data!} />
+        <EuiSpacer />
+      </div>
+    </CloudPosturePage>
   );
 };

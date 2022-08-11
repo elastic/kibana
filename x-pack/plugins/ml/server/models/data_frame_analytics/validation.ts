@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { getAnalysisType } from '../../../common/util/analytics_utils';
 import { ANALYSIS_CONFIG_TYPE } from '../../../common/constants/data_frame_analytics';
 import {
@@ -239,14 +239,16 @@ async function getValidationCheckMessages(
   let analysisFieldsEmpty = false;
 
   const fieldLimit =
-    analyzedFields.length <= MINIMUM_NUM_FIELD_FOR_CHECK
+    Array.isArray(analyzedFields) && analyzedFields.length <= MINIMUM_NUM_FIELD_FOR_CHECK
       ? analyzedFields.length
       : MINIMUM_NUM_FIELD_FOR_CHECK;
 
-  let aggs = analyzedFields.slice(0, fieldLimit).reduce((acc, curr) => {
-    acc[curr] = { missing: { field: curr } };
-    return acc;
-  }, {} as any);
+  let aggs = Array.isArray(analyzedFields)
+    ? analyzedFields.slice(0, fieldLimit).reduce((acc, curr) => {
+        acc[curr] = { missing: { field: curr } };
+        return acc;
+      }, {} as any)
+    : {};
 
   if (depVar !== '') {
     const depVarAgg = {
@@ -259,16 +261,19 @@ async function getValidationCheckMessages(
   }
 
   try {
-    const body = await asCurrentUser.search<ValidationSearchResult>({
-      index,
-      size: 0,
-      track_total_hits: true,
-      body: {
-        ...(source.runtime_mappings ? { runtime_mappings: source.runtime_mappings } : {}),
-        query,
-        aggs,
+    const body = await asCurrentUser.search<ValidationSearchResult>(
+      {
+        index,
+        size: 0,
+        track_total_hits: true,
+        body: {
+          ...(source.runtime_mappings ? { runtime_mappings: source.runtime_mappings } : {}),
+          query,
+          aggs,
+        },
       },
-    });
+      { maxRetries: 0 }
+    );
 
     // @ts-expect-error incorrect search response type
     const totalDocs = body.hits.total.value;
@@ -344,10 +349,18 @@ async function getValidationCheckMessages(
     );
     messages.push(...regressionAndClassificationMessages);
 
-    if (analyzedFields.length && analyzedFields.length > INCLUDED_FIELDS_THRESHOLD) {
+    if (
+      Array.isArray(analyzedFields) &&
+      analyzedFields.length &&
+      analyzedFields.length > INCLUDED_FIELDS_THRESHOLD
+    ) {
       analysisFieldsNumHigh = true;
     } else {
-      if (analysisType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION && analyzedFields.length < 1) {
+      if (
+        analysisType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION &&
+        Array.isArray(analyzedFields) &&
+        analyzedFields.length < 1
+      ) {
         lowFieldCountWarningMessage.text = i18n.translate(
           'xpack.ml.models.dfaValidation.messages.lowFieldCountOutlierWarningText',
           {
@@ -358,6 +371,7 @@ async function getValidationCheckMessages(
         messages.push(lowFieldCountWarningMessage);
       } else if (
         analysisType !== ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION &&
+        Array.isArray(analyzedFields) &&
         analyzedFields.length < 2
       ) {
         lowFieldCountWarningMessage.text = i18n.translate(
@@ -446,9 +460,12 @@ export async function validateAnalyticsJob(
   client: IScopedClusterClient,
   job: DataFrameAnalyticsConfig
 ) {
+  const includedFields = (
+    Array.isArray(job?.analyzed_fields?.includes) ? job?.analyzed_fields?.includes : []
+  ) as string[];
   const messages = await getValidationCheckMessages(
     client.asCurrentUser,
-    job?.analyzed_fields?.includes || [],
+    includedFields,
     job.analysis,
     job.source
   );

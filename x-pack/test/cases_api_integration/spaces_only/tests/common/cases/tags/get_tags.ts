@@ -18,7 +18,7 @@ import { getPostCaseRequest } from '../../../../../common/lib/mock';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
   const authSpace1 = getAuthWithSuperUser();
   const authSpace2 = getAuthWithSuperUser('space2');
@@ -29,11 +29,16 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should return case tags in space1', async () => {
-      await createCase(supertest, getPostCaseRequest(), 200, authSpace1);
-      await createCase(supertest, getPostCaseRequest({ tags: ['unique'] }), 200, authSpace2);
+      await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, authSpace1);
+      await createCase(
+        supertestWithoutAuth,
+        getPostCaseRequest({ tags: ['unique'] }),
+        200,
+        authSpace2
+      );
 
-      const tagsSpace1 = await getTags({ supertest, auth: authSpace1 });
-      const tagsSpace2 = await getTags({ supertest, auth: authSpace2 });
+      const tagsSpace1 = await getTags({ supertest: supertestWithoutAuth, auth: authSpace1 });
+      const tagsSpace2 = await getTags({ supertest: supertestWithoutAuth, auth: authSpace2 });
 
       expect(tagsSpace1).to.eql(['defacement']);
       expect(tagsSpace2).to.eql(['unique']);

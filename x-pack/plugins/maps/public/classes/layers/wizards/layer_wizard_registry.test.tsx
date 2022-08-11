@@ -16,6 +16,7 @@ import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
 describe('LayerWizardRegistryTest', () => {
   it('should enforce ordering', async () => {
     registerLayerWizardExternal({
+      id: '',
       categories: [LAYER_WIZARD_CATEGORY.REFERENCE],
       description: '',
       icon: '',
@@ -27,6 +28,7 @@ describe('LayerWizardRegistryTest', () => {
     });
 
     registerLayerWizardInternal({
+      id: '',
       order: 1,
       categories: [LAYER_WIZARD_CATEGORY.REFERENCE],
       description: '',
@@ -38,6 +40,7 @@ describe('LayerWizardRegistryTest', () => {
     });
 
     registerLayerWizardInternal({
+      id: '',
       order: 1,
       categories: [LAYER_WIZARD_CATEGORY.REFERENCE],
       description: '',
@@ -58,6 +61,7 @@ describe('LayerWizardRegistryTest', () => {
   it('external users must add order higher than 99 ', async () => {
     expect(() => {
       registerLayerWizardExternal({
+        id: '',
         order: 99,
         categories: [LAYER_WIZARD_CATEGORY.REFERENCE],
         description: '',

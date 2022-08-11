@@ -46,7 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.get(savedSessionURL);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await searchSessions.expectState('restored');
-      await testSubjects.existOrFail('embeddableErrorLabel'); // expected that panel errors out because of non existing session
+      await testSubjects.existOrFail('embeddableError'); // expected that panel errors out because of non existing session
 
       const session1 = await dashboardPanelActions.getSearchSessionIdByTitle(
         'Sum of Bytes by Extension'
@@ -56,7 +56,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await queryBar.clickQuerySubmitButton();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await searchSessions.expectState('completed');
-      await testSubjects.missingOrFail('embeddableErrorLabel');
+      await testSubjects.missingOrFail('embeddableError');
       const session2 = await dashboardPanelActions.getSearchSessionIdByTitle(
         'Sum of Bytes by Extension'
       );
@@ -97,7 +97,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Check that session is restored
       await searchSessions.expectState('restored');
-      await testSubjects.missingOrFail('embeddableErrorLabel');
+      await testSubjects.missingOrFail('embeddableError');
 
       // switching dashboard to edit mode (or any other non-fetch required) state change
       // should leave session state untouched

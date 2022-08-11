@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { estimateBucketSpanFactory } from '../../models/bucket_span_estimator';
+import { estimateBucketSpanFactory } from '../bucket_span_estimator';
 import { mlFunctionToESAggregation, parseTimeIntervalForJob } from '../../../common/util/job_utils';
 import { SKIP_BUCKET_SPAN_ESTIMATION } from '../../../common/constants/validation';
 

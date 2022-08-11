@@ -9,7 +9,7 @@
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 
-import { coreMock, themeServiceMock } from 'src/core/public/mocks';
+import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 
 import { Providers } from './plugin';
 import { VerificationCodeForm } from './verification_code_form';

@@ -8,8 +8,8 @@
 import ReactDOM from 'react-dom';
 import React from 'react';
 import { toExpression } from '@kbn/interpreter';
-import { UI_SETTINGS } from '../../../../../../../src/plugins/data/public';
-import { KibanaThemeProvider } from '../../../../../../../src/plugins/kibana_react/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { syncFilterExpression } from '../../../../public/lib/sync_filter_expression';
 import { RendererStrings } from '../../../../i18n';
 import { TimeFilter } from './components';

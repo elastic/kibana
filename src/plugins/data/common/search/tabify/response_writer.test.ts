@@ -72,11 +72,14 @@ describe('TabbedAggResponseWriter class', () => {
       getFormatterForField: () => ({ toJSON: () => '' }),
     } as any;
 
-    return new TabbedAggResponseWriter(new AggConfigs(indexPattern, aggs, { typesRegistry }), {
-      metricsAtAllLevels: false,
-      partialRows: false,
-      ...opts,
-    });
+    return new TabbedAggResponseWriter(
+      new AggConfigs(indexPattern, aggs, { typesRegistry }, jest.fn()),
+      {
+        metricsAtAllLevels: false,
+        partialRows: false,
+        ...opts,
+      }
+    );
   };
 
   describe('Constructor', () => {
@@ -177,6 +180,8 @@ describe('TabbedAggResponseWriter class', () => {
               order: 'desc',
               otherBucket: false,
               otherBucketLabel: 'Other',
+              includeIsRegex: true,
+              excludeIsRegex: true,
               size: 5,
             },
             type: 'terms',
@@ -201,6 +206,7 @@ describe('TabbedAggResponseWriter class', () => {
             indexPatternId: '1234',
             params: {
               field: 'machine.os.raw',
+              emptyAsNull: false,
             },
             type: 'cardinality',
           },
@@ -241,6 +247,8 @@ describe('TabbedAggResponseWriter class', () => {
               otherBucket: false,
               otherBucketLabel: 'Other',
               size: 5,
+              includeIsRegex: true,
+              excludeIsRegex: true,
             },
             type: 'terms',
           },
@@ -264,6 +272,7 @@ describe('TabbedAggResponseWriter class', () => {
             indexPatternId: '1234',
             params: {
               field: 'machine.os.raw',
+              emptyAsNull: false,
             },
             type: 'cardinality',
           },

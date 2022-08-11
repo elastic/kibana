@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { EuiPopover, EuiContextMenuItem, EuiContextMenuPanel, EuiHeaderLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AlertFlyout } from './alert_flyout';
-import { useRulesLink } from '../../../../../observability/public';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 const readOnlyUserTooltipContent = i18n.translate(
@@ -31,13 +30,14 @@ export const AlertDropdown = () => {
   const {
     services: {
       application: { capabilities },
+      observability,
     },
   } = useKibanaContextForPlugin();
   const canCreateAlerts = capabilities?.logs?.save ?? false;
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [flyoutVisible, setFlyoutVisible] = useState(false);
 
-  const manageRulesLinkProps = useRulesLink({
+  const manageRulesLinkProps = observability.useRulesLink({
     hrefOnly: true,
   });
 

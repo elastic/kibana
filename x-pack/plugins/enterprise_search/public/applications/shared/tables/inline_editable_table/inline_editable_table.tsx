@@ -38,6 +38,8 @@ export interface InlineEditableTableProps<Item extends ItemWithAnID> {
   lastItemWarning?: string;
   noItemsMessage?: (editNewItem: () => void) => React.ReactNode;
   uneditableItems?: Item[];
+  bottomRows?: React.ReactNode[];
+  showRowIndex?: boolean;
 }
 
 export const InlineEditableTable = <Item extends ItemWithAnID>(
@@ -93,7 +95,6 @@ export const InlineEditableTableContents = <Item extends ItemWithAnID>({
   description,
   isLoading,
   lastItemWarning,
-  defaultItem,
   noItemsMessage = () => null,
   uneditableItems,
   ...rest

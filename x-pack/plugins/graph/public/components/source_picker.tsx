@@ -8,8 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
-import { CoreStart } from 'src/core/public';
-import { SavedObjectFinderUi } from '../../../../../src/plugins/saved_objects/public';
+import { CoreStart } from '@kbn/core/public';
+import { SavedObjectFinderUi } from '@kbn/saved-objects-plugin/public';
 import { IndexPatternSavedObject } from '../types';
 
 export interface SourcePickerProps {
@@ -45,6 +45,7 @@ export function SourcePicker({
           }),
           showSavedObject: (indexPattern) => !indexPattern.attributes.type,
           includeFields: ['type'],
+          defaultSearchField: 'name',
         },
       ]}
       fixedPageSize={fixedPageSize}

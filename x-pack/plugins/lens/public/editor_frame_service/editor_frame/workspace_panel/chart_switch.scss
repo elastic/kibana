@@ -6,9 +6,18 @@
 }
 
 .lnsChartSwitch__summaryIcon {
-  margin-right: $euiSizeS;
   transform: translateY(-1px);
   color: $euiTextSubduedColor;
+
+  @include euiBreakpoint('xl') {
+    margin-right: $euiSizeS;
+  }
+}
+
+.lnsChartSwitch__summaryText {
+  @include euiBreakpoint('xs', 's', 'm', 'l') {
+    @include euiScreenReaderOnly;
+  }
 }
 
 .lnsChartSwitch__append {

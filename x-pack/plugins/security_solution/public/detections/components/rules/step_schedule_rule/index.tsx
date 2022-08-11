@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import React, { FC, memo, useCallback, useEffect } from 'react';
-import { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { FC } from 'react';
+import React, { memo, useCallback, useEffect } from 'react';
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 
-import {
-  RuleStep,
-  RuleStepProps,
-  ScheduleStepRule,
-} from '../../../pages/detection_engine/rules/types';
+import type { RuleStepProps, ScheduleStepRule } from '../../../pages/detection_engine/rules/types';
+import { RuleStep } from '../../../pages/detection_engine/rules/types';
 import { StepRuleDescription } from '../description_step';
 import { ScheduleItem } from '../schedule_item_form';
 import { Form, UseField, useForm } from '../../../../shared_imports';

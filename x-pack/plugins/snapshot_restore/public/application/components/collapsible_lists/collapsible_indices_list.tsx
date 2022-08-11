@@ -27,15 +27,13 @@ export const CollapsibleIndicesList: React.FunctionComponent<Props> = ({ indices
   ) : (
     <>
       <EuiText>
-        <ul>
-          {items.map((index) => (
-            <li key={index}>
-              <EuiTitle size="xs">
-                <span>{index}</span>
-              </EuiTitle>
-            </li>
-          ))}
-        </ul>
+        {items.map((index) => (
+          <div key={index}>
+            <EuiTitle size="xs">
+              <span>{index}</span>
+            </EuiTitle>
+          </div>
+        ))}
       </EuiText>
       {hiddenItemsCount ? (
         <>

@@ -15,16 +15,12 @@ import {
   getFocusedAriaColindexCell,
   getTableSkipFocus,
   stopPropagationAndPreventDefault,
-} from '../../../../../timelines/public';
+} from '@kbn/timelines-plugin/public';
 import { escapeQueryValue, convertToBuildEsQuery } from '../../../common/lib/keury';
 
-import {
-  DataProvider,
-  DataProviderType,
-  DataProvidersAnd,
-  EXISTS_OPERATOR,
-} from './data_providers/data_provider';
-import { BrowserFields } from '../../../common/containers/source';
+import type { DataProvider, DataProvidersAnd } from './data_providers/data_provider';
+import { DataProviderType, EXISTS_OPERATOR } from './data_providers/data_provider';
+import type { BrowserFields } from '../../../common/containers/source';
 
 import { EVENTS_TABLE_CLASS_NAME } from './styles';
 
@@ -304,7 +300,6 @@ export const onTimelineTabKeyPressed = ({
 
 export const ACTIVE_TIMELINE_BUTTON_CLASS_NAME = 'active-timeline-button';
 export const FLYOUT_BUTTON_BAR_CLASS_NAME = 'timeline-flyout-button-bar';
-export const FLYOUT_BUTTON_CLASS_NAME = 'timeline-flyout-button';
 
 /**
  * This function focuses the active timeline button on the next tick. Focus

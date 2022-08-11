@@ -11,10 +11,10 @@ import {
   VISUALIZE_GEO_FIELD_TRIGGER,
   visualizeFieldTrigger,
   visualizeGeoFieldTrigger,
-} from '../../../../../../../ui_actions/public';
+} from '@kbn/ui-actions-plugin/public';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { getUiActions } from '../../../../../kibana_services';
-import { DataViewField, KBN_FIELD_TYPES } from '../../../../../../../data/common';
-import { APP_ID } from '../../../../../../common';
 
 function getTriggerConstant(type: string) {
   return type === KBN_FIELD_TYPES.GEO_POINT || type === KBN_FIELD_TYPES.GEO_SHAPE
@@ -30,12 +30,12 @@ function getTrigger(type: string) {
 
 async function getCompatibleActions(
   fieldName: string,
-  indexPatternId: string,
+  dataViewId: string,
   contextualFields: string[],
   trigger: typeof VISUALIZE_FIELD_TRIGGER | typeof VISUALIZE_GEO_FIELD_TRIGGER
 ) {
   const compatibleActions = await getUiActions().getTriggerCompatibleActions(trigger, {
-    indexPatternId,
+    indexPatternId: dataViewId,
     fieldName,
     contextualFields,
   });
@@ -44,16 +44,15 @@ async function getCompatibleActions(
 
 export function triggerVisualizeActions(
   field: DataViewField,
-  indexPatternId: string | undefined,
+  dataViewId: string | undefined,
   contextualFields: string[]
 ) {
-  if (!indexPatternId) return;
+  if (!dataViewId) return;
   const trigger = getTriggerConstant(field.type);
   const triggerOptions = {
-    indexPatternId,
+    indexPatternId: dataViewId,
     fieldName: field.name,
     contextualFields,
-    originatingApp: APP_ID,
   };
   getUiActions().getTrigger(trigger).exec(triggerOptions);
 }
@@ -69,11 +68,11 @@ export interface VisualizeInformation {
  */
 export async function getVisualizeInformation(
   field: DataViewField,
-  indexPatternId: string | undefined,
+  dataViewId: string | undefined,
   contextualFields: string[],
   multiFields: DataViewField[] = []
 ): Promise<VisualizeInformation | undefined> {
-  if (field.name === '_id' || !indexPatternId) {
+  if (field.name === '_id' || !dataViewId) {
     // _id fields are not visualizeable in ES
     return undefined;
   }
@@ -85,7 +84,7 @@ export async function getVisualizeInformation(
     // Retrieve compatible actions for the specific field
     const actions = await getCompatibleActions(
       f.name,
-      indexPatternId,
+      dataViewId,
       contextualFields,
       getTriggerConstant(f.type)
     );
@@ -93,7 +92,7 @@ export async function getVisualizeInformation(
     // if the field has compatible actions use this field for visualizing
     if (actions.length > 0) {
       const triggerOptions = {
-        indexPatternId,
+        indexPatternId: dataViewId,
         fieldName: f.name,
         contextualFields,
         trigger: getTrigger(f.type),

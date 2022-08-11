@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { mapCenter } from '../../../canvas_plugin_src/functions/common/map_center';
-import { FunctionHelp } from '../';
+import type { mapCenter } from '../../../canvas_plugin_src/functions/common/map_center';
+import { FunctionHelp } from '..';
 import { FunctionFactory } from '../../../types';
 
 export const help: FunctionHelp<FunctionFactory<typeof mapCenter>> = {

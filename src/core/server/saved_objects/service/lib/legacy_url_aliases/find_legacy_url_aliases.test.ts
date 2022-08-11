@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
+import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../../object_types';
 import type { CreatePointInTimeFinderFn, PointInTimeFinder } from '../point_in_time_finder';
 import { savedObjectsPointInTimeFinderMock } from '../point_in_time_finder.mock';
-import type { ISavedObjectsRepository } from '../repository';
 import { savedObjectsRepositoryMock } from '../repository.mock';
 import { findLegacyUrlAliases } from './find_legacy_url_aliases';
 
@@ -51,7 +51,8 @@ describe('findLegacyUrlAliases', () => {
     });
   }
 
-  const obj1 = { type: 'obj-type', id: 'id-1' };
+  // Include KQL special characters in the object type/ID to implicitly assert that the kuery node builder handles it gracefully
+  const obj1 = { type: 'obj-type:"', id: 'id-1:"' };
   const obj2 = { type: 'obj-type', id: 'id-2' };
   const obj3 = { type: 'obj-type', id: 'id-3' };
 
@@ -81,10 +82,10 @@ describe('findLegacyUrlAliases', () => {
       const typeAndIdFilter = typeAndIdFilters[i].arguments;
       expect(typeAndIdFilter).toEqual([
         expect.objectContaining({
-          arguments: expect.arrayContaining([{ type: 'literal', value: type }]),
+          arguments: expect.arrayContaining([{ type: 'literal', value: type, isQuoted: false }]),
         }),
         expect.objectContaining({
-          arguments: expect.arrayContaining([{ type: 'literal', value: id }]),
+          arguments: expect.arrayContaining([{ type: 'literal', value: id, isQuoted: false }]),
         }),
       ]);
     });

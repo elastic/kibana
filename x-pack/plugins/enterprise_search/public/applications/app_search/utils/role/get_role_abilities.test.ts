@@ -7,7 +7,7 @@
 
 import { DEFAULT_INITIAL_APP_DATA } from '../../../../../common/__mocks__';
 
-import { getRoleAbilities } from './';
+import { getRoleAbilities } from '.';
 
 describe('getRoleAbilities', () => {
   const mockRole = DEFAULT_INITIAL_APP_DATA.appSearch.role as any;
@@ -23,6 +23,7 @@ describe('getRoleAbilities', () => {
       // Has access
       canViewAccountCredentials: true,
       canManageEngines: true,
+      canManageMetaEngines: true,
       // Does not have access
       canViewMetaEngines: false,
       canViewEngineAnalytics: false,
@@ -35,7 +36,6 @@ describe('getRoleAbilities', () => {
       canViewMetaEngineSourceEngines: false,
       canViewSettings: false,
       canViewRoleMappings: false,
-      canManageMetaEngines: false,
       canManageLogSettings: false,
       canManageSettings: false,
       canManageEngineCrawler: false,
@@ -76,19 +76,19 @@ describe('getRoleAbilities', () => {
     const canManageEngines = { ability: { manage: ['account_engines'] } };
 
     it('returns true when the user can manage any engines and the account has a platinum license', () => {
-      const myRole = getRoleAbilities({ ...mockRole, ...canManageEngines }, true);
+      const myRole = getRoleAbilities({ ...mockRole, ...canManageEngines });
 
       expect(myRole.canManageMetaEngines).toEqual(true);
     });
 
-    it('returns false when the user can manage any engines but the account does not have a platinum license', () => {
-      const myRole = getRoleAbilities({ ...mockRole, ...canManageEngines }, false);
+    it('returns true when the user can manage any engines but the account does not have a platinum license', () => {
+      const myRole = getRoleAbilities({ ...mockRole, ...canManageEngines });
 
-      expect(myRole.canManageMetaEngines).toEqual(false);
+      expect(myRole.canManageMetaEngines).toEqual(true);
     });
 
     it('returns false when has a platinum license but the user cannot manage any engines', () => {
-      const myRole = getRoleAbilities({ ...mockRole, ability: { manage: [] } }, true);
+      const myRole = getRoleAbilities({ ...mockRole, ability: { manage: [] } });
 
       expect(myRole.canManageMetaEngines).toEqual(false);
     });

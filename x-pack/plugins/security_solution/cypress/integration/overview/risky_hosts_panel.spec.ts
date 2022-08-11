@@ -11,10 +11,11 @@ import {
   OVERVIEW_RISKY_HOSTS_LINKS_ERROR_INNER_PANEL,
   OVERVIEW_RISKY_HOSTS_LINKS_WARNING_INNER_PANEL,
   OVERVIEW_RISKY_HOSTS_TOTAL_EVENT_COUNT,
-  OVERVIEW_RISKY_HOSTS_VIEW_DASHBOARD_BUTTON,
+  OVERVIEW_RISKY_HOSTS_DOC_LINK,
+  OVERVIEW_RISKY_HOSTS_IMPORT_DASHBOARD_BUTTON,
 } from '../../screens/overview';
 
-import { loginAndWaitForPage } from '../../tasks/login';
+import { login, visit } from '../../tasks/login';
 import { OVERVIEW_URL } from '../../urls/navigation';
 import { cleanKibana } from '../../tasks/common';
 import { changeSpace } from '../../tasks/kibana_navigation';
@@ -26,17 +27,17 @@ const testSpaceName = 'test';
 describe('Risky Hosts Link Panel', () => {
   before(() => {
     cleanKibana();
+    login();
   });
 
   it('renders disabled panel view as expected', () => {
-    loginAndWaitForPage(OVERVIEW_URL);
+    visit(OVERVIEW_URL);
     cy.get(`${OVERVIEW_RISKY_HOSTS_LINKS} ${OVERVIEW_RISKY_HOSTS_LINKS_ERROR_INNER_PANEL}`).should(
       'exist'
     );
-    cy.get(`${OVERVIEW_RISKY_HOSTS_VIEW_DASHBOARD_BUTTON}`).should('be.disabled');
     cy.get(`${OVERVIEW_RISKY_HOSTS_TOTAL_EVENT_COUNT}`).should('have.text', 'Showing: 0 hosts');
     cy.get(`${OVERVIEW_RISKY_HOSTS_ENABLE_MODULE_BUTTON}`).should('exist');
-    cy.get(`${OVERVIEW_RISKY_HOSTS_ENABLE_MODULE_BUTTON}`)
+    cy.get(`${OVERVIEW_RISKY_HOSTS_DOC_LINK}`)
       .should('have.attr', 'href')
       .and('match', /host-risk-score.md/);
   });
@@ -53,27 +54,25 @@ describe('Risky Hosts Link Panel', () => {
     });
 
     it('renders disabled dashboard module as expected when there are no hosts in the selected time period', () => {
-      loginAndWaitForPage(
+      visit(
         `${OVERVIEW_URL}?sourcerer=(timerange:(from:%272021-07-08T04:00:00.000Z%27,kind:absolute,to:%272021-07-09T03:59:59.999Z%27))`
       );
       cy.get(
         `${OVERVIEW_RISKY_HOSTS_LINKS} ${OVERVIEW_RISKY_HOSTS_LINKS_WARNING_INNER_PANEL}`
       ).should('exist');
-      cy.get(`${OVERVIEW_RISKY_HOSTS_VIEW_DASHBOARD_BUTTON}`).should('be.disabled');
       cy.get(`${OVERVIEW_RISKY_HOSTS_TOTAL_EVENT_COUNT}`).should('have.text', 'Showing: 0 hosts');
     });
 
     it('renders space aware dashboard module as expected when there are hosts in the selected time period', () => {
-      loginAndWaitForPage(OVERVIEW_URL);
+      visit(OVERVIEW_URL);
       cy.get(
         `${OVERVIEW_RISKY_HOSTS_LINKS} ${OVERVIEW_RISKY_HOSTS_LINKS_WARNING_INNER_PANEL}`
       ).should('not.exist');
-      cy.get(`${OVERVIEW_RISKY_HOSTS_VIEW_DASHBOARD_BUTTON}`).should('be.disabled');
-      cy.get(`${OVERVIEW_RISKY_HOSTS_TOTAL_EVENT_COUNT}`).should('have.text', 'Showing: 1 host');
+      cy.get(`${OVERVIEW_RISKY_HOSTS_IMPORT_DASHBOARD_BUTTON}`).should('exist');
+      cy.get(`${OVERVIEW_RISKY_HOSTS_TOTAL_EVENT_COUNT}`).should('have.text', 'Showing: 6 hosts');
 
       changeSpace(testSpaceName);
       cy.visit(`/s/${testSpaceName}${OVERVIEW_URL}`);
-      cy.get(`${OVERVIEW_RISKY_HOSTS_VIEW_DASHBOARD_BUTTON}`).should('be.disabled');
       cy.get(`${OVERVIEW_RISKY_HOSTS_TOTAL_EVENT_COUNT}`).should('have.text', 'Showing: 0 hosts');
       cy.get(`${OVERVIEW_RISKY_HOSTS_ENABLE_MODULE_BUTTON}`).should('exist');
     });

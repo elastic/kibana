@@ -12,17 +12,13 @@ import { PhaseWithTiming } from '../../../../common/types';
 
 describe('<EditPolicy /> timing', () => {
   let testBed: TimingTestBed;
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
-
-  afterAll(() => {
-    server.restore();
-  });
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeEach(async () => {
     httpRequestsMockHelpers.setDefaultResponses();
 
     await act(async () => {
-      testBed = await setupTimingTestBed();
+      testBed = await setupTimingTestBed(httpSetup);
     });
 
     const { component } = testBed;

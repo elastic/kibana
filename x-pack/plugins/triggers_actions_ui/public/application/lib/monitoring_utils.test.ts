@@ -19,7 +19,9 @@ describe('monitoring_utils', () => {
   it('should return a formatted duration', () => {
     expect(getFormattedDuration(0)).toEqual('00:00');
     expect(getFormattedDuration(100.111)).toEqual('00:00');
+    expect(getFormattedDuration(500)).toEqual('00:01');
     expect(getFormattedDuration(50000)).toEqual('00:50');
+    expect(getFormattedDuration(59900)).toEqual('01:00');
     expect(getFormattedDuration(500000)).toEqual('08:20');
     expect(getFormattedDuration(5000000)).toEqual('83:20');
     expect(getFormattedDuration(50000000)).toEqual('833:20');

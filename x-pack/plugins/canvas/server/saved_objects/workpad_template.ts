@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from 'src/core/server';
+import { SavedObjectsType } from '@kbn/core/server';
 import { TEMPLATE_TYPE } from '../../common/lib/constants';
 import {
   CanvasSavedObjectTypeMigrationsDeps,
@@ -50,7 +50,7 @@ export const workpadTemplateType = (
       },
     },
   },
-  migrations: templateWorkpadMigrationsFactory(deps),
+  migrations: () => templateWorkpadMigrationsFactory(deps),
   management: {
     importableAndExportable: false,
     icon: 'canvasApp',

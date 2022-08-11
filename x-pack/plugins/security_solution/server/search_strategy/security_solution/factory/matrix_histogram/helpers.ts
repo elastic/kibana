@@ -6,7 +6,7 @@
  */
 
 import { get, getOr } from 'lodash/fp';
-import {
+import type {
   MatrixHistogramParseData,
   MatrixHistogramBucket,
   MatrixHistogramData,
@@ -18,7 +18,8 @@ export const getGenericData = <T>(
 ): MatrixHistogramData[] => {
   let result: MatrixHistogramData[] = [];
   data.forEach((bucketData: unknown) => {
-    const group = get('key', bucketData);
+    // if key_as_string is present use it, else default to the existing key
+    const group = get('key_as_string', bucketData) ?? get('key', bucketData);
     const histData = getOr([], keyBucket, bucketData).map(
       // eslint-disable-next-line @typescript-eslint/naming-convention
       ({ key, doc_count }: MatrixHistogramBucket) => ({
@@ -30,21 +31,5 @@ export const getGenericData = <T>(
     result = [...result, ...histData];
   });
 
-  return result;
-};
-
-export const getEntitiesParser = <T>(
-  data: MatrixHistogramParseData<T>,
-  keyBucket: string // TODO: Remove this keyBucket if it is not being used.
-): MatrixHistogramData[] => {
-  let result: MatrixHistogramData[] = [];
-  data.forEach((bucketData: unknown) => {
-    const successValue = get('success.value', bucketData);
-    const failureValue = get('failure.value', bucketData);
-    const key = get('key', bucketData);
-    const histDataSuccess = { x: key, y: successValue, g: 'success' };
-    const histDataFailure = { x: key, y: failureValue, g: 'failure' };
-    result = [...result, histDataFailure, histDataSuccess];
-  });
   return result;
 };

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Storage } from '../../../kibana_utils/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { isValidRowHeight } from './validate_row_height';
 
 export interface DataGridOptionsRecord {

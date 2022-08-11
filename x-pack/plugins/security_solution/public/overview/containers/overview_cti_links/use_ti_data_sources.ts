@@ -4,24 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { useEffect, useState } from 'react';
 import { useObservable, withOptionalSignal } from '@kbn/securitysolution-hook-utils';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/public';
 import { useKibana } from '../../../common/lib/kibana';
-import {
-  DataPublicPluginStart,
-  isCompleteResponse,
-  isErrorResponse,
-} from '../../../../../../../src/plugins/data/public';
-import {
+import type {
   Bucket,
-  CtiQueries,
   CtiDataSourceStrategyResponse,
   CtiDataSourceRequestOptions,
 } from '../../../../common/search_strategy/security_solution/cti';
+import { CtiQueries } from '../../../../common/search_strategy/security_solution/cti';
 import { DEFAULT_THREAT_INDEX_KEY } from '../../../../common/constants';
-import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
+import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { OTHER_DATA_SOURCE_TITLE } from '../../components/overview_cti_links/translations';
 import { OTHER_TI_DATASET_KEY } from '../../../../common/cti/constants';
 

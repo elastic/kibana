@@ -36,7 +36,7 @@ export const seriesAgg: TableResponseProcessorsFunction =
 
       const fn = SeriesAgg[series.aggregate_function];
       const data = fn(targetSeries);
-      const fieldsForSeries = meta.index ? await extractFields({ id: meta.index }) : [];
+      const fieldsForSeries = meta.dataViewId ? await extractFields({ id: meta.dataViewId }) : [];
 
       results.push({
         id: `${series.id}`,

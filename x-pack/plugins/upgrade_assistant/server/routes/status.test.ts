@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { kibanaResponseFactory } from 'src/core/server';
+import { kibanaResponseFactory } from '@kbn/core/server';
 
 import { handleEsError } from '../shared_imports';
 import { createMockRouter, MockRouter, routeHandlerContextMock } from './__mocks__/routes.mock';
@@ -121,8 +121,7 @@ describe('Status API', () => {
       expect(resp.payload).toEqual({
         readyForUpgrade: false,
         details:
-          'You have 0 system indices that must be migrated and ' +
-          '1 Elasticsearch deprecation issue and 1 Kibana deprecation issue that must be resolved before upgrading.',
+          'The following issues must be resolved before upgrading: 1 Elasticsearch deprecation issue, 1 Kibana deprecation issue.',
       });
     });
 
@@ -144,8 +143,7 @@ describe('Status API', () => {
       expect(resp.payload).toEqual({
         readyForUpgrade: false,
         details:
-          'You have 1 system index that must be migrated and ' +
-          '1 Elasticsearch deprecation issue and 1 Kibana deprecation issue that must be resolved before upgrading.',
+          'The following issues must be resolved before upgrading: 1 unmigrated system index, 1 Elasticsearch deprecation issue, 1 Kibana deprecation issue.',
       });
     });
 
@@ -167,8 +165,7 @@ describe('Status API', () => {
       expect(resp.payload).toEqual({
         readyForUpgrade: false,
         details:
-          'You have 1 system index that must be migrated and ' +
-          '0 Elasticsearch deprecation issues and 0 Kibana deprecation issues that must be resolved before upgrading.',
+          'The following issues must be resolved before upgrading: 1 unmigrated system index.',
       });
     });
 

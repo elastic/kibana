@@ -11,7 +11,7 @@ To add a vector layer to your map, click *Add layer*, then select one of the fol
 
 *Choropleth*:: Shaded areas to compare statistics across boundaries.
 
-*Clusters and grids*:: Geospatial data grouped in grids with metrics for each gridded cell.
+*Clusters*:: Geospatial data grouped in grids with metrics for each gridded cell.
 The index must contain at least one field mapped as {ref}/geo-point.html[geo_point] or {ref}/geo-shape.html[geo_shape].
 
 *Create index*:: Draw shapes on the map and index in Elasticsearch.

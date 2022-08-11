@@ -7,10 +7,7 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import {
-  SavedObjectUnsanitizedDoc,
-  SavedObjectSanitizedDoc,
-} from '../../../../../../src/core/server';
+import { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc } from '@kbn/core/server';
 import { ConnectorTypes } from '../../../common/api';
 import { addOwnerToSO, SanitizedCaseOwner } from '.';
 import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';

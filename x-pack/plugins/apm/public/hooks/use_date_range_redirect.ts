@@ -6,7 +6,7 @@
  */
 import qs from 'query-string';
 import { useHistory, useLocation } from 'react-router-dom';
-import { UI_SETTINGS } from '../../../../../src/plugins/data/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { TimePickerTimeDefaults } from '../components/shared/date_picker/typings';
 import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
 

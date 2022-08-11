@@ -12,7 +12,7 @@ import { Route, Switch } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
 
-import { CurationsRouter } from './';
+import { CurationsRouter } from '.';
 
 describe('CurationsRouter', () => {
   it('renders', () => {

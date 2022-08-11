@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DeprecationsServiceStart, DomainDeprecationDetails } from 'kibana/public';
+import type { DeprecationsServiceStart, DomainDeprecationDetails } from '@kbn/core/public';
 
 const kibanaDeprecations: DomainDeprecationDetails[] = [
   {

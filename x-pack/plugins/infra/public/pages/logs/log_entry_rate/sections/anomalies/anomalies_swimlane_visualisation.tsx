@@ -7,13 +7,13 @@
 
 import React, { useMemo } from 'react';
 import moment from 'moment';
-import { AutoRefresh } from '../../use_log_entry_rate_results_url_state';
-import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import {
   ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
   AnomalySwimlaneEmbeddableInput,
-} from '../../../../../../../ml/public';
-import { EmbeddableRenderer } from '../../../../../../../../../src/plugins/embeddable/public';
+} from '@kbn/ml-plugin/public';
+import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { AutoRefresh } from '../../use_log_entry_rate_results_url_state';
+import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { partitionField } from '../../../../../../common/infra_ml';
 import { MissingEmbeddableFactoryCallout } from '../../../../../components/missing_embeddable_factory_callout';
 import { TimeRange } from '../../../../../../common/time/time_range';

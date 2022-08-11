@@ -19,7 +19,8 @@ import {
   createSecuritySolutionStorageMock,
 } from '../../../common/mock';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
-import { createStore, State } from '../../../common/store';
+import type { State } from '../../../common/store';
+import { createStore } from '../../../common/store';
 import { networkModel } from '../../store';
 import { NetworkTopNFlowTable } from '.';
 import { mockData } from './mock';
@@ -35,6 +36,19 @@ describe('NetworkTopNFlow Table Component', () => {
   const { storage } = createSecuritySolutionStorageMock();
   let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   const mount = useMountAppended();
+  const defaultProps = {
+    data: mockData.edges,
+    fakeTotalCount: getOr(50, 'fakeTotalCount', mockData.pageInfo),
+    flowTargeted: FlowTargetSourceDest.source,
+    id: 'topNFlowSource',
+    isInspect: false,
+    loading: false,
+    loadPage,
+    setQuerySkip: jest.fn(),
+    showMorePagesIndicator: getOr(false, 'showMorePagesIndicator', mockData.pageInfo),
+    totalCount: mockData.totalCount,
+    type: networkModel.NetworkType.page,
+  };
 
   beforeEach(() => {
     store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
@@ -44,18 +58,7 @@ describe('NetworkTopNFlow Table Component', () => {
     test('it renders the default NetworkTopNFlow table on the Network page', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
-          <NetworkTopNFlowTable
-            data={mockData.edges}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.pageInfo)}
-            flowTargeted={FlowTargetSourceDest.source}
-            id="topNFlowSource"
-            isInspect={false}
-            loading={false}
-            loadPage={loadPage}
-            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockData.pageInfo)}
-            totalCount={mockData.totalCount}
-            type={networkModel.NetworkType.page}
-          />
+          <NetworkTopNFlowTable {...defaultProps} />
         </ReduxStoreProvider>
       );
 
@@ -65,18 +68,7 @@ describe('NetworkTopNFlow Table Component', () => {
     test('it renders the default NetworkTopNFlow table on the IP Details page', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
-          <NetworkTopNFlowTable
-            data={mockData.edges}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.pageInfo)}
-            flowTargeted={FlowTargetSourceDest.source}
-            id="topNFlowSource"
-            isInspect={false}
-            loading={false}
-            loadPage={loadPage}
-            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockData.pageInfo)}
-            totalCount={mockData.totalCount}
-            type={networkModel.NetworkType.details}
-          />
+          <NetworkTopNFlowTable {...defaultProps} type={networkModel.NetworkType.details} />
         </ReduxStoreProvider>
       );
 
@@ -88,18 +80,7 @@ describe('NetworkTopNFlow Table Component', () => {
     test('when you click on the column header, you should show the sorting icon', () => {
       const wrapper = mount(
         <TestProviders store={store}>
-          <NetworkTopNFlowTable
-            data={mockData.edges}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.pageInfo)}
-            flowTargeted={FlowTargetSourceDest.source}
-            id="topNFlowSource"
-            isInspect={false}
-            loading={false}
-            loadPage={loadPage}
-            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockData.pageInfo)}
-            totalCount={mockData.totalCount}
-            type={networkModel.NetworkType.page}
-          />
+          <NetworkTopNFlowTable {...defaultProps} />
         </TestProviders>
       );
       expect(store.getState().network.page.queries.topNFlowSource.sort).toEqual({

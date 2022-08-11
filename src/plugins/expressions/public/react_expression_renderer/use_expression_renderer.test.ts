@@ -205,7 +205,7 @@ describe('useExpressionRenderer', () => {
   });
 
   it('should update on reload', () => {
-    const reload$ = new Subject();
+    const reload$ = new Subject<void>();
     hook.rerender({ reload$, expression: 'something' });
 
     expect(expressionLoader.update).not.toHaveBeenCalled();

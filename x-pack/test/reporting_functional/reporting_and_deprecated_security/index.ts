@@ -43,8 +43,6 @@ export default function (context: FtrProviderContext) {
   };
 
   describe('Reporting Functional Tests with Deprecated Security configuration enabled', function () {
-    this.tags('ciGroup2');
-
     before(async () => {
       const reportingAPI = context.getService('reportingAPI');
       await reportingAPI.logTaskManagerHealth();

@@ -8,9 +8,9 @@
 import { createSelector } from 'reselect';
 
 import type { Filter, Query } from '@kbn/es-query';
-import { State } from '../types';
+import type { State } from '../types';
 
-import { InputsModel, InputsRange, GlobalQuery } from './model';
+import type { InputsModel, InputsRange, GlobalQuery } from './model';
 
 const selectInputs = (state: State): InputsModel => state.inputs;
 
@@ -54,8 +54,6 @@ export const timelineFullScreenSelector = createSelector(
 );
 
 export const globalTimeRangeSelector = createSelector(selectGlobal, (global) => global.timerange);
-
-export const globalPolicySelector = createSelector(selectGlobal, (global) => global.policy);
 
 export const globalQuery = () => createSelector(selectGlobal, (global) => global.queries);
 

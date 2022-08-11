@@ -106,8 +106,8 @@ and Kibana instance that the tests will be run against.
 
 1. Functional UI tests with `Trial` license (default config):
 
-        node scripts/functional_tests_server.js
-        node scripts/functional_test_runner.js --include-tag transform
+        node scripts/functional_tests_server.js --config test/functional/apps/transform/config.ts
+        node scripts/functional_test_runner.js --config test/functional/apps/transform/config.ts
 
     Transform functional `Trial` license tests are located in `x-pack/test/functional/apps/transform`.
 
@@ -120,7 +120,7 @@ and Kibana instance that the tests will be run against.
 
 1. API integration tests with `Trial` license:
 
-        node scripts/functional_tests_server.js
+        node scripts/functional_tests_server.js --config test/api_integration/config.ts
         node scripts/functional_test_runner.js --config test/api_integration/config.ts --include-tag transform
         
    Transform API integration `Trial` license tests are located in `x-pack/test/api_integration/apis/transform`.

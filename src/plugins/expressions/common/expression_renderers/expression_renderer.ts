@@ -10,6 +10,7 @@ import { ExpressionRenderDefinition } from './types';
 
 export class ExpressionRenderer<Config = unknown> {
   public readonly name: string;
+  public readonly namespace?: string;
   public readonly displayName: string;
   public readonly help: string;
   public readonly validate: () => void | Error;
@@ -17,9 +18,10 @@ export class ExpressionRenderer<Config = unknown> {
   public readonly render: ExpressionRenderDefinition<Config>['render'];
 
   constructor(config: ExpressionRenderDefinition<Config>) {
-    const { name, displayName, help, validate, reuseDomNode, render } = config;
+    const { name, displayName, help, validate, reuseDomNode, render, namespace } = config;
 
     this.name = name;
+    this.namespace = namespace;
     this.displayName = displayName || name;
     this.help = help || '';
     this.validate = validate || (() => {});

@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { agentPolicyStatuses, dataTypes } from '../../../common';
+import { agentPolicyStatuses, dataTypes } from '../../../common/constants';
 
 import { PackagePolicySchema, NamespaceSchema } from './package_policy';
 
@@ -32,6 +32,9 @@ export const AgentPolicyBaseSchema = {
       schema.oneOf([schema.literal(dataTypes.Logs), schema.literal(dataTypes.Metrics)])
     )
   ),
+  data_output_id: schema.maybe(schema.nullable(schema.string())),
+  monitoring_output_id: schema.maybe(schema.nullable(schema.string())),
+  download_source_id: schema.maybe(schema.nullable(schema.string())),
 };
 
 export const NewAgentPolicySchema = schema.object({

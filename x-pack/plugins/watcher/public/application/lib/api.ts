@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpSetup, SavedObjectsClientContract } from 'kibana/public';
+import { HttpSetup, SavedObjectsClientContract } from '@kbn/core/public';
 
 import { Settings } from '../models/settings';
 import { Watch } from '../models/watch';

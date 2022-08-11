@@ -7,17 +7,13 @@
 
 import { mockEnsureAuthorized } from './secure_spaces_client_wrapper.test.mocks';
 
+import type { EcsEventOutcome, SavedObjectsFindResponse } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { httpServerMock } from '@kbn/core/server/mocks';
+import type { GetAllSpacesPurpose, LegacyUrlAliasTarget, Space } from '@kbn/spaces-plugin/server';
+import { spacesClientMock } from '@kbn/spaces-plugin/server/mocks';
 import { deepFreeze } from '@kbn/std';
-import type {
-  EcsEventOutcome,
-  SavedObjectsClientContract,
-  SavedObjectsFindResponse,
-} from 'src/core/server';
-import { SavedObjectsErrorHelpers } from 'src/core/server';
-import { httpServerMock } from 'src/core/server/mocks';
 
-import type { GetAllSpacesPurpose, LegacyUrlAliasTarget, Space } from '../../../spaces/server';
-import { spacesClientMock } from '../../../spaces/server/mocks';
 import type { AuditEvent, AuditLogger } from '../audit';
 import { SavedObjectAction, SpaceAuditAction } from '../audit';
 import { auditLoggerMock } from '../audit/mocks';
@@ -106,7 +102,7 @@ const setup = ({ securityEnabled = false }: Opts = {}) => {
   const errors = {
     decorateForbiddenError: jest.fn().mockReturnValue(forbiddenError),
     // other errors exist but are not needed for these test cases
-  } as unknown as jest.Mocked<SavedObjectsClientContract['errors']>;
+  } as unknown as jest.Mocked<typeof SavedObjectsErrorHelpers>;
 
   const wrapper = new SecureSpacesClientWrapper(
     baseClient,

@@ -20,7 +20,6 @@ export type {
   ActionProps,
   AlertWorkflowStatus,
   CellValueElementProps,
-  CreateFieldComponentType,
   ColumnId,
   ColumnRenderer,
   ColumnHeaderType,
@@ -37,6 +36,7 @@ export type {
   RowRenderer,
   SetEventsDeleted,
   SetEventsLoading,
+  TimelineType,
 } from './types';
 
 export { IS_OPERATOR, EXISTS_OPERATOR, DataProviderType, TimelineId } from './types';

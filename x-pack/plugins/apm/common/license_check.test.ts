@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { License } from '../../licensing/common/license';
+import { License } from '@kbn/licensing-plugin/common/license';
 import { isActiveGoldLicense, isActivePlatinumLicense } from './license_check';
 
 describe('License check', () => {

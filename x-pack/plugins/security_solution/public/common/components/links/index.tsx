@@ -5,22 +5,12 @@
  * 2.0.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiToolTip,
-} from '@elastic/eui';
-import React, { useMemo, useCallback, SyntheticEvent } from 'react';
+import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiToolTip } from '@elastic/eui';
+import type { SyntheticEvent, MouseEventHandler, MouseEvent } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { isArray, isNil } from 'lodash/fp';
-
 import { IP_REPUTATION_LINKS_SETTING, APP_UI_ID } from '../../../../common/constants';
-import {
-  DefaultFieldRendererOverflow,
-  DEFAULT_MORE_MAX_HEIGHT,
-} from '../../../timelines/components/field_renderers/field_renderers';
 import { encodeIpv6 } from '../../lib/helpers';
 import {
   getCaseDetailsUrl,
@@ -29,23 +19,34 @@ import {
   getNetworkDetailsUrl,
   getCreateCaseUrl,
   useFormatUrl,
+  useGetSecuritySolutionUrl,
 } from '../link_to';
-import {
-  FlowTarget,
-  FlowTargetSourceDest,
-} from '../../../../common/search_strategy/security_solution/network';
-import { useUiSetting$, useKibana } from '../../lib/kibana';
+import type { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
+import { FlowTarget } from '../../../../common/search_strategy/security_solution/network';
+import { useUiSetting$, useKibana, useNavigateTo } from '../../lib/kibana';
 import { isUrlInvalid } from '../../utils/validators';
 
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../app/types';
-import { getUsersDetailsUrl } from '../link_to/redirect_to_users';
-import { LinkAnchor, GenericLinkButton, PortContainer, Comma } from './helpers';
-import { HostsTableType } from '../../../hosts/store/model';
+import { getTabsOnUsersDetailsUrl, getUsersDetailsUrl } from '../link_to/redirect_to_users';
+import type { ReputationLinkSetting } from './helpers';
+import {
+  LinkAnchor,
+  GenericLinkButton,
+  PortContainer,
+  Comma,
+  LinkButton,
+  ReputationLinksOverflow,
+} from './helpers';
+import type { HostsTableType } from '../../../hosts/store/model';
+import type { UsersTableType } from '../../../users/store/model';
 
 export { LinkButton, LinkAnchor } from './helpers';
 
 export const DEFAULT_NUMBER_OF_LINK = 5;
+
+/** The default max-height of the Reputation Links popover used to show "+n More" items (e.g. `+9 More`) */
+export const DEFAULT_MORE_MAX_HEIGHT = '200px';
 
 // Internal Links
 const UserDetailsLinkComponent: React.FC<{
@@ -53,10 +54,13 @@ const UserDetailsLinkComponent: React.FC<{
   /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
   userName: string;
+  userTab?: UsersTableType;
   title?: string;
   isButton?: boolean;
   onClick?: (e: SyntheticEvent) => void;
-}> = ({ children, Component, userName, isButton, onClick, title }) => {
+}> = ({ children, Component, userName, isButton, onClick, title, userTab }) => {
+  const encodedUserName = encodeURIComponent(userName);
+
   const { formatUrl, search } = useFormatUrl(SecurityPageName.users);
   const { navigateToApp } = useKibana().services.application;
   const goToUsersDetails = useCallback(
@@ -64,17 +68,29 @@ const UserDetailsLinkComponent: React.FC<{
       ev.preventDefault();
       navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.users,
-        path: getUsersDetailsUrl(encodeURIComponent(userName), search),
+        path: userTab
+          ? getTabsOnUsersDetailsUrl(encodedUserName, userTab, search)
+          : getUsersDetailsUrl(encodedUserName, search),
       });
     },
-    [userName, navigateToApp, search]
+    [encodedUserName, navigateToApp, search, userTab]
+  );
+
+  const href = useMemo(
+    () =>
+      formatUrl(
+        userTab
+          ? getTabsOnUsersDetailsUrl(encodedUserName, userTab)
+          : getUsersDetailsUrl(encodedUserName)
+      ),
+    [formatUrl, encodedUserName, userTab]
   );
 
   return isButton ? (
     <GenericLinkButton
       Component={Component}
       dataTestSubj="data-grid-user-details"
-      href={formatUrl(getUsersDetailsUrl(encodeURIComponent(userName)))}
+      href={href}
       onClick={onClick ?? goToUsersDetails}
       title={title ?? userName}
     >
@@ -84,7 +100,7 @@ const UserDetailsLinkComponent: React.FC<{
     <LinkAnchor
       data-test-subj="users-link-anchor"
       onClick={onClick ?? goToUsersDetails}
-      href={formatUrl(getUsersDetailsUrl(encodeURIComponent(userName)))}
+      href={href}
     >
       {children ? children : userName}
     </LinkAnchor>
@@ -197,32 +213,24 @@ const NetworkDetailsLinkComponent: React.FC<{
   onClick?: (e: SyntheticEvent) => void | undefined;
   title?: string;
 }> = ({ Component, children, ip, flowTarget = FlowTarget.source, isButton, onClick, title }) => {
-  const { formatUrl, search } = useFormatUrl(SecurityPageName.network);
-  const { navigateToApp } = useKibana().services.application;
-  const goToNetworkDetails = useCallback(
-    (ev, cIp: string) => {
-      ev.preventDefault();
-      navigateToApp(APP_UI_ID, {
-        deepLinkId: SecurityPageName.network,
-        path: getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(cIp)), flowTarget, search),
-      });
-    },
-    [flowTarget, navigateToApp, search]
-  );
-  const getHref = useCallback(
-    (cIp: string) => formatUrl(getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(cIp)))),
-    [formatUrl]
-  );
+  const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
 
   const getLink = useCallback(
-    (cIp: string, i: number) =>
-      isButton ? (
+    (cIp: string, i: number) => {
+      const { onClick: onClickNavigation, href } = getSecuritySolutionLinkProps({
+        deepLinkId: SecurityPageName.network,
+        path: getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(cIp)), flowTarget),
+      });
+
+      const onLinkClick = onClick ?? ((e: SyntheticEvent) => onClickNavigation(e as MouseEvent));
+
+      return isButton ? (
         <GenericLinkButton
           Component={Component}
           key={`${cIp}-${i}`}
           dataTestSubj="data-grid-network-details"
-          onClick={onClick ?? ((e: SyntheticEvent) => goToNetworkDetails(e, cIp))}
-          href={getHref(cIp)}
+          onClick={onLinkClick}
+          href={href}
           title={title ?? cIp}
         >
           {children}
@@ -230,14 +238,15 @@ const NetworkDetailsLinkComponent: React.FC<{
       ) : (
         <LinkAnchor
           key={`${cIp}-${i}`}
-          onClick={onClick ?? ((e: SyntheticEvent) => goToNetworkDetails(e, cIp))}
-          href={getHref(cIp)}
+          onClick={onLinkClick}
+          href={href}
           data-test-subj="network-details"
         >
           {children ? children : cIp}
         </LinkAnchor>
-      ),
-    [Component, children, getHref, goToNetworkDetails, isButton, onClick, title]
+      );
+    },
+    [children, Component, flowTarget, getSecuritySolutionLinkProps, onClick, isButton, title]
   );
   return isArray(ip) ? <>{ip.map(getLink)}</> : getLink(ip, 0);
 };
@@ -386,11 +395,6 @@ enum DefaultReputationLink {
   'talosIntelligence.com' = 'talosIntelligence.com',
 }
 
-export interface ReputationLinkSetting {
-  name: string;
-  url_template: string;
-}
-
 function isDefaultReputationLink(name: string): name is DefaultReputationLink {
   return (
     name === DefaultReputationLink['virustotal.com'] ||
@@ -484,9 +488,8 @@ const ReputationLinkComponent: React.FC<{
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <DefaultFieldRendererOverflow
+          <ReputationLinksOverflow
             rowItems={ipReputationLinks}
-            idPrefix="moreReputationLink"
             render={renderCallback}
             moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
             overflowIndexStart={overflowIndexStart}
@@ -512,3 +515,81 @@ export const WhoIsLink = React.memo<{ children?: React.ReactNode; domain: string
 );
 
 WhoIsLink.displayName = 'WhoIsLink';
+
+interface SecuritySolutionLinkProps {
+  deepLinkId: SecurityPageName;
+  path?: string;
+}
+
+interface LinkProps {
+  onClick: MouseEventHandler;
+  href: string;
+}
+
+type GetSecuritySolutionProps = (
+  params: SecuritySolutionLinkProps & { onClick?: MouseEventHandler }
+) => LinkProps;
+
+/**
+ * It returns the `onClick` and `href` props to use in link components based on the` deepLinkId` and `path` parameters.
+ */
+export const useGetSecuritySolutionLinkProps = (): GetSecuritySolutionProps => {
+  const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
+  const { navigateTo } = useNavigateTo();
+
+  const getSecuritySolutionProps = useCallback<GetSecuritySolutionProps>(
+    ({ deepLinkId, path, onClick: onClickProps }) => {
+      const url = getSecuritySolutionUrl({ deepLinkId, path });
+      return {
+        href: url,
+        onClick: (ev: MouseEvent) => {
+          ev.preventDefault();
+          navigateTo({ url });
+          if (onClickProps) {
+            onClickProps(ev);
+          }
+        },
+      };
+    },
+    [getSecuritySolutionUrl, navigateTo]
+  );
+
+  return getSecuritySolutionProps;
+};
+
+/**
+ * HOC that wraps any Link component and makes it a Security solutions internal navigation Link.
+ */
+export const withSecuritySolutionLink = <T extends Partial<LinkProps>>(
+  WrappedComponent: React.FC<T>
+) => {
+  const SecuritySolutionLink: React.FC<Omit<T & SecuritySolutionLinkProps, 'href'>> = ({
+    deepLinkId,
+    path,
+    onClick: onClickProps,
+    ...rest
+  }) => {
+    const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
+    const { onClick, href } = getSecuritySolutionLinkProps({
+      deepLinkId,
+      path,
+      onClick: onClickProps,
+    });
+    return <WrappedComponent onClick={onClick} href={href} {...(rest as unknown as T)} />;
+  };
+  return SecuritySolutionLink;
+};
+
+/**
+ * Security Solutions internal link button.
+ *
+ * `<SecuritySolutionLinkButton deepLinkId={SecurityPageName.hosts} />;`
+ */
+export const SecuritySolutionLinkButton = withSecuritySolutionLink(LinkButton);
+
+/**
+ * Security Solutions internal link anchor.
+ *
+ * `<SecuritySolutionLinkAnchor deepLinkId={SecurityPageName.hosts} />;`
+ */
+export const SecuritySolutionLinkAnchor = withSecuritySolutionLink(LinkAnchor);

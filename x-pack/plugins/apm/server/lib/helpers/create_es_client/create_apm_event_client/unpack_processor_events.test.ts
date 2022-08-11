@@ -14,7 +14,10 @@ describe('unpackProcessorEvents', () => {
   beforeEach(() => {
     const request = {
       apm: { events: ['transaction', 'error'] },
-      body: { query: { bool: { filter: [{ terms: { foo: 'bar' } }] } } },
+      body: {
+        size: 0,
+        query: { bool: { filter: [{ terms: { foo: 'bar' } }] } },
+      },
     } as APMEventESSearchRequest;
 
     const indices = {

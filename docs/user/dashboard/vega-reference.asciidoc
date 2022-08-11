@@ -242,12 +242,17 @@ experimental[] Access the Elastic Map Service files via the same mechanism:
 url: {
   // "type" defaults to "elasticsearch" otherwise
   %type%: emsfile
-  // Name of the file, exactly as in the Region map visualization
+  // Name of the file, exactly as in https://maps.elastic.co
   name: World Countries
 }
-// The result is a geojson file, get its features to use
-// this data source with the "shape" marks
+// The result is either a topojson file or a geojson file. 
+// Refer to the Default format for the file at https://maps.elastic.co
+// Get its features to use this data source with the "shape" marks
 // https://vega.github.io/vega/docs/marks/shape/
+// For a topojson file use
+format: {type: "topojson", feature: "data"}
+
+// For a geojson file use
 format: {property: "features"}
 ----
 
@@ -310,16 +315,28 @@ experimental[] You can use the *Vega* https://vega.github.io/vega/docs/data/[dat
 
 [source,yaml]
 ----
-url: {
-  // "type" defaults to "elasticsearch" otherwise
-  %type%: emsfile
-  // Name of the file, exactly as in the Region map visualization
-  name: World Countries
-}
-// The result is a geojson file, get its features to use
-// this data source with the "shape" marks
-// https://vega.github.io/vega/docs/marks/shape/
-format: {property: "features"}
+  "data": [
+    {
+      "name": "countries",
+      "url": {
+        // "type" defaults to "elasticsearch" otherwise
+        %type%: emsfile
+        // Name of the file, exactly as in the Region map visualization
+        name: World Countries
+      },
+      // The result is a topojson file, get its features to use
+      // this data source with the "shape" marks
+      // https://vega.github.io/vega/docs/marks/shape/
+      "format": {"type": "topojson", "feature": "data"},
+    }
+  ],
+  "marks": [
+    {
+      "type": "shape",
+      "from": {"data": "countries"},
+      "transform": [{"type": "geoshape", "projection": "projection"}]
+    }
+  ]
 ----
 
 [float]
@@ -350,6 +367,9 @@ a configuration option for changing the tooltip position and padding:
 
 *Vega* can load data from any URL. To enable, set `vis_type_vega.enableExternalUrls: true` in `kibana.yml`,
 then restart {kib}.
+
+The files that the external URLs load must allow https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS[CORS].
+The remote URL must include `Access-Control-Allow-Origin`, which allows requests from the {kib} URL.
 
 You can make the current time range part of the external as a millisecond timestamp by using the placeholders `%timefilter_min%` and `%timefilter_max%`, e.g. `http://example.com?min=%timefilter_min%`.
 

@@ -7,9 +7,9 @@
  */
 
 import { toArray } from 'lodash';
+import type { Dimensions } from '@kbn/vis-type-pie-plugin/public';
 import { getFormatService } from '../../../services';
 import { Table } from '../../types';
-import type { Dimensions } from '../../../../../pie/public';
 
 interface Slice {
   name: string;

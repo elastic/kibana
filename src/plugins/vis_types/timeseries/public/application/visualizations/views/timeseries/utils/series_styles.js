@@ -29,7 +29,7 @@ export const getAreaStyles = ({ points, lines, color }) => ({
       visible: points.lineWidth > 0 && Boolean(points.show),
     },
   },
-  curve: lines.steps ? CurveType.CURVE_STEP : CurveType.LINEAR,
+  curve: lines.steps ? CurveType.CURVE_STEP_AFTER : CurveType.LINEAR,
 });
 
 export const getBarStyles = ({ show = true, lineWidth = 0, fill = 1 }, color) => ({

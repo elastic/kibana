@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { GetDeprecationsContext, IScopedClusterClient } from 'kibana/server';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { GetDeprecationsContext, IScopedClusterClient } from '@kbn/core/server';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { ReportingCore } from '..';
 import {
   createMockConfigSchema,
@@ -151,7 +151,7 @@ it('insufficient permissions', async () => {
           ],
         },
         "deprecationType": "feature",
-        "documentationUrl": "https://www.elastic.co/guide/en/kibana/current/xpack-security.html#_required_permissions_7",
+        "documentationUrl": "https://www.elastic.co/guide/en/kibana/test-branch/xpack-security.html#_required_permissions_7",
         "level": "fetch_error",
         "message": "You do not have enough permissions to fix this deprecation.",
         "title": "The \\"reporting_user\\" role is deprecated: check user roles",
@@ -163,7 +163,7 @@ it('insufficient permissions', async () => {
           ],
         },
         "deprecationType": "feature",
-        "documentationUrl": "https://www.elastic.co/guide/en/kibana/current/xpack-security.html#_required_permissions_7",
+        "documentationUrl": "https://www.elastic.co/guide/en/kibana/test-branch/xpack-security.html#_required_permissions_7",
         "level": "fetch_error",
         "message": "You do not have enough permissions to fix this deprecation.",
         "title": "The \\"reporting_user\\" role is deprecated: check role mappings",

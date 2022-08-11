@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { Logger } from 'src/core/server';
-import { TELEMETRY_CHANNEL_PACKS } from '../constants';
+import type { Logger } from '@kbn/core/server';
+import { TELEMETRY_EBT_PACK_EVENT } from '../constants';
 import { templatePacks } from '../helpers';
-import { TelemetryEventsSender } from '../sender';
-import { TelemetryReceiver } from '../receiver';
-import type { ESClusterInfo, ESLicense } from '../types';
+import type { TelemetryEventsSender } from '../sender';
+import type { TelemetryReceiver } from '../receiver';
 
 export function createTelemetryPacksTaskConfig() {
   return {
@@ -18,39 +17,26 @@ export function createTelemetryPacksTaskConfig() {
     title: 'Osquery Packs Telemetry',
     interval: '24h',
     timeout: '10m',
-    version: '1.0.0',
+    version: '1.1.0',
     runTask: async (
       taskId: string,
       logger: Logger,
       receiver: TelemetryReceiver,
       sender: TelemetryEventsSender
     ) => {
-      const [clusterInfoPromise, licenseInfoPromise] = await Promise.allSettled([
-        receiver.fetchClusterInfo(),
-        receiver.fetchLicenseInfo(),
-      ]);
-
-      const clusterInfo =
-        clusterInfoPromise.status === 'fulfilled'
-          ? clusterInfoPromise.value
-          : ({} as ESClusterInfo);
-      const licenseInfo =
-        licenseInfoPromise.status === 'fulfilled'
-          ? licenseInfoPromise.value
-          : ({} as ESLicense | undefined);
-
       const packsResponse = await receiver.fetchPacks();
 
       if (!packsResponse?.total) {
         logger.debug('no packs found');
-        return 0;
+
+        return;
       }
 
-      const packsJson = templatePacks(packsResponse?.saved_objects, clusterInfo, licenseInfo);
+      const packsJson = templatePacks(packsResponse?.saved_objects);
 
-      sender.sendOnDemand(TELEMETRY_CHANNEL_PACKS, packsJson);
-
-      return packsResponse.total;
+      packsJson.forEach((pack) => {
+        sender.reportEvent(TELEMETRY_EBT_PACK_EVENT, pack);
+      });
     },
   };
 }

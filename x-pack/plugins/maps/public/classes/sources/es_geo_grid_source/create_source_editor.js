@@ -51,10 +51,15 @@ export class CreateSourceEditor extends Component {
     );
   };
 
-  _onGeoFieldSelect = (geoField) => {
+  _onGeoFieldSelect = (geoFieldName) => {
+    const geoField =
+      this.state.indexPattern && geoFieldName
+        ? this.state.indexPattern.fields.getByName(geoFieldName)
+        : undefined;
     this.setState(
       {
-        geoField,
+        geoField: geoFieldName,
+        geoFieldType: geoField ? geoField.type : undefined,
       },
       this.previewLayer
     );
@@ -85,7 +90,7 @@ export class CreateSourceEditor extends Component {
     return (
       <EuiFormRow
         label={i18n.translate('xpack.maps.source.esGeoGrid.geofieldLabel', {
-          defaultMessage: 'Geospatial field',
+          defaultMessage: 'Cluster field',
         })}
       >
         <SingleFieldSelect
@@ -110,7 +115,11 @@ export class CreateSourceEditor extends Component {
     }
 
     return (
-      <RenderAsSelect renderAs={this.state.requestType} onChange={this._onRequestTypeSelect} />
+      <RenderAsSelect
+        geoFieldType={this.state.geoFieldType}
+        renderAs={this.state.requestType}
+        onChange={this._onRequestTypeSelect}
+      />
     );
   }
 

@@ -165,7 +165,7 @@ export const dashboardLibraryNotification = {
   getTooltip: () =>
     i18n.translate('dashboard.panel.libraryNotification.toolTip', {
       defaultMessage:
-        'Editing this panel might affect other dashboards. To change to this panel only, unlink it from the library.',
+        'Editing this panel might affect other dashboards. To change this panel only, unlink it from the library.',
     }),
   getPopoverAriaLabel: () =>
     i18n.translate('dashboard.panel.libraryNotification.ariaLabel', {
@@ -188,6 +188,29 @@ export const dashboardReplacePanelAction = {
   getNoMatchingObjectsMessage: () =>
     i18n.translate('dashboard.addPanel.noMatchingObjectsMessage', {
       defaultMessage: 'No matching objects found.',
+    }),
+};
+
+export const dashboardFilterNotificationBadge = {
+  getDisplayName: () =>
+    i18n.translate('dashboard.panel.filters', {
+      defaultMessage: 'Panel filters',
+    }),
+  getEditButtonTitle: () =>
+    i18n.translate('dashboard.panel.filters.modal.editButton', {
+      defaultMessage: 'Edit filters',
+    }),
+  getCloseButtonTitle: () =>
+    i18n.translate('dashboard.panel.filters.modal.closeButton', {
+      defaultMessage: 'Close',
+    }),
+  getQueryTitle: () =>
+    i18n.translate('dashboard.panel.filters.modal.queryTitle', {
+      defaultMessage: 'Query',
+    }),
+  getFiltersTitle: () =>
+    i18n.translate('dashboard.panel.filters.modal.filtersTitle', {
+      defaultMessage: 'Filters',
     }),
 };
 

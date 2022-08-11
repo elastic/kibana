@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { KibanaPageTemplate } from '../../../../../../../../src/plugins/kibana_react/public';
+import { KibanaPageTemplate } from '@kbn/kibana-react-plugin/public';
 
 import { WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
 import { ErrorStatePrompt } from '../../../shared/error_state';

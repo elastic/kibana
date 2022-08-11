@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const { divide } = require('../../src/functions/divide.js');
+const { divide } = require('../../src/functions/divide');
 
 describe('Divide', () => {
   it('number, number', () => {

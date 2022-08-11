@@ -128,7 +128,7 @@ traffic. Larger circles will symbolize grids with
 more total bytes transferred, and smaller circles will symbolize
 grids with less bytes transferred.
 
-. Click **Add layer**, and select **Clusters and grids**.
+. Click **Add layer**, and select **Clusters**.
 . Set **Data view** to **kibana_sample_data_logs**.
 . Click **Add layer**.
 . In **Layer settings**, set:

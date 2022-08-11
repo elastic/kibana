@@ -12,6 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "UAC Bypass via Windows Firewall Snap-In Hijack",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type in (\"start\", \"process_started\") and\n process.parent.name == \"mmc.exe\" and\n /* process.Ext.token.integrity_level_name == \"high\" can be added in future for tuning */\n /* args of the Windows Firewall SnapIn */\n  process.parent.args == \"WF.msc\" and process.name != \"WerFault.exe\"\n",
   "references": [
     "https://github.com/AzAgarampur/byeintegrity-uac"
@@ -52,5 +53,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 4
+  "version": 5
 }

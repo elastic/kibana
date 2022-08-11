@@ -38,10 +38,8 @@ export const initNodeDetailsRoute = (libs: InfraBackendLibs) => {
         NodeDetailsRequestRT.decode(request.body),
         fold(throwErrors(Boom.badRequest), identity)
       );
-      const source = await libs.sources.getSourceConfiguration(
-        requestContext.core.savedObjects.client,
-        sourceId
-      );
+      const soClient = (await requestContext.core).savedObjects.client;
+      const source = await libs.sources.getSourceConfiguration(soClient, sourceId);
 
       UsageCollector.countNode(nodeType);
 

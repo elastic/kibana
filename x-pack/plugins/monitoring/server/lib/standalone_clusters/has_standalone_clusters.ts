@@ -8,7 +8,7 @@
 import moment from 'moment';
 import { get } from 'lodash';
 import { LegacyRequest } from '../../types';
-import { standaloneClusterFilter } from './';
+import { standaloneClusterFilter } from '.';
 import { Globals } from '../../static_globals';
 import { getLegacyIndexPattern, getNewIndexPatterns } from '../cluster/get_index_patterns';
 

@@ -67,7 +67,7 @@ function LoadingSpinner() {
 
 export function ServiceMapHome() {
   const {
-    query: { environment, kuery, rangeFrom, rangeTo },
+    query: { environment, kuery, rangeFrom, rangeTo, serviceGroup },
   } = useApmParams('/service-map');
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   return (
@@ -76,6 +76,7 @@ export function ServiceMapHome() {
       kuery={kuery}
       start={start}
       end={end}
+      serviceGroupId={serviceGroup}
     />
   );
 }
@@ -100,11 +101,13 @@ export function ServiceMap({
   kuery,
   start,
   end,
+  serviceGroupId,
 }: {
   environment: Environment;
   kuery: string;
   start: string;
   end: string;
+  serviceGroupId?: string;
 }) {
   const theme = useTheme();
   const license = useLicenseContext();
@@ -130,11 +133,12 @@ export function ServiceMap({
             end,
             environment,
             serviceName,
+            serviceGroup: serviceGroupId,
           },
         },
       });
     },
-    [license, serviceName, environment, start, end]
+    [license, serviceName, environment, start, end, serviceGroupId]
   );
 
   const { ref, height } = useRefDimensions();

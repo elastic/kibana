@@ -8,6 +8,8 @@
 import { AGENT_POLLING_THRESHOLD_MS } from '../constants';
 import type { Agent, AgentStatus } from '../types';
 
+const offlineTimeoutIntervalCount = 10; // 30s*10 = 5m timeout
+
 export function getAgentStatus(agent: Agent): AgentStatus {
   const { last_checkin: lastCheckIn } = agent;
 
@@ -34,7 +36,7 @@ export function getAgentStatus(agent: Agent): AgentStatus {
   if (agent.upgrade_started_at && !agent.upgraded_at) {
     return 'updating';
   }
-  if (intervalsSinceLastCheckIn >= 4) {
+  if (intervalsSinceLastCheckIn >= offlineTimeoutIntervalCount) {
     return 'offline';
   }
 
@@ -63,7 +65,7 @@ export function buildKueryForErrorAgents(path: string = '') {
 
 export function buildKueryForOfflineAgents(path: string = '') {
   return `${path}last_checkin < now-${
-    (4 * AGENT_POLLING_THRESHOLD_MS) / 1000
+    (offlineTimeoutIntervalCount * AGENT_POLLING_THRESHOLD_MS) / 1000
   }s AND not (${buildKueryForErrorAgents(path)}) AND not ( ${buildKueryForUpdatingAgents(path)} )`;
 }
 

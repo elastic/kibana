@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
-import {
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type {
   GeoItem,
   FlowTargetSourceDest,
   TopNetworkTablesEcsField,
   NetworkTopTablesFields,
 } from '../common';
-import {
+import type {
   CursorType,
   Inspect,
   Maybe,
@@ -20,7 +20,7 @@ import {
   TotalValue,
   GenericBuckets,
 } from '../../../common';
-import { RequestOptionsPaginated } from '../..';
+import type { RequestOptionsPaginated } from '../..';
 
 export interface NetworkTopNFlowRequestOptions
   extends RequestOptionsPaginated<NetworkTopTablesFields> {
@@ -77,7 +77,7 @@ export interface AutonomousSystemHit<T> {
       total: TotalValue | number;
       max_score: number | null;
       hits: Array<{
-        _source: T;
+        fields: T;
         sort?: [number];
         _index?: string;
         _type?: string;
@@ -113,7 +113,7 @@ export interface LocationHit<T> {
       total: TotalValue | number;
       max_score: number | null;
       hits: Array<{
-        _source: T;
+        fields: T;
         sort?: [number];
         _index?: string;
         _type?: string;

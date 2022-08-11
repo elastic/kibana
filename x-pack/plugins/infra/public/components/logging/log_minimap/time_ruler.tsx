@@ -8,7 +8,7 @@
 import { scaleTime } from 'd3-scale';
 import * as React from 'react';
 
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { getTimeLabelFormat } from './time_label_formatter';
 
 interface TimeRulerProps {
@@ -28,7 +28,7 @@ export const TimeRuler: React.FC<TimeRulerProps> = ({ end, height, start, tickCo
   return (
     <g>
       {ticks.map((tick, tickIndex) => {
-        const y = yScale(tick);
+        const y = yScale(tick) ?? 0;
 
         return (
           <g key={`tick${tickIndex}`}>

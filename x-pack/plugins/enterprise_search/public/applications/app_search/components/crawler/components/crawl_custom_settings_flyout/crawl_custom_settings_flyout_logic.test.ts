@@ -48,8 +48,16 @@ describe('CrawlCustomSettingsFlyoutLogic', () => {
     describe('fetchDomainConfigData', () => {
       it('updates logic with data that has been converted from server to client', async () => {
         jest.spyOn(CrawlCustomSettingsFlyoutLogic.actions, 'onRecieveDomainConfigData');
+
         http.get.mockReturnValueOnce(
           Promise.resolve({
+            meta: {
+              page: {
+                current: 1,
+                size: 1,
+                total_pages: 2,
+              },
+            },
             results: [
               {
                 id: '1234',
@@ -61,18 +69,62 @@ describe('CrawlCustomSettingsFlyoutLogic', () => {
           })
         );
 
+        http.get.mockReturnValueOnce(
+          Promise.resolve({
+            meta: {
+              page: {
+                current: 2,
+                size: 1,
+                total_pages: 2,
+              },
+            },
+            results: [
+              {
+                id: '5678',
+                name: 'https://www.swiftype.com',
+                seed_urls: [],
+                sitemap_urls: [],
+              },
+            ],
+          })
+        );
+
         CrawlCustomSettingsFlyoutLogic.actions.fetchDomainConfigData();
         await nextTick();
 
-        expect(http.get).toHaveBeenCalledWith(
-          '/internal/app_search/engines/some-engine/crawler/domain_configs'
+        expect(http.get).toHaveBeenNthCalledWith(
+          1,
+          '/internal/enterprise_search/engines/some-engine/crawler/domain_configs',
+          {
+            query: {
+              'page[current]': 1,
+              'page[size]': 100,
+            },
+          }
         );
+        expect(http.get).toHaveBeenNthCalledWith(
+          2,
+          '/internal/enterprise_search/engines/some-engine/crawler/domain_configs',
+          {
+            query: {
+              'page[current]': 2,
+              'page[size]': 1,
+            },
+          }
+        );
+
         expect(
           CrawlCustomSettingsFlyoutLogic.actions.onRecieveDomainConfigData
         ).toHaveBeenCalledWith([
           {
             id: '1234',
             name: 'https://www.elastic.co',
+            seedUrls: [],
+            sitemapUrls: [],
+          },
+          {
+            id: '5678',
+            name: 'https://www.swiftype.com',
             seedUrls: [],
             sitemapUrls: [],
           },
@@ -297,7 +349,25 @@ describe('CrawlCustomSettingsFlyoutLogic', () => {
     });
 
     describe('startCustomCrawl', () => {
-      it('starts a custom crawl with the user set values', async () => {
+      it('can start a custom crawl for selected domains', async () => {
+        mount({
+          includeSitemapsInRobotsTxt: true,
+          maxCrawlDepth: 5,
+          selectedDomainUrls: ['https://www.elastic.co', 'https://swiftype.com'],
+        });
+        jest.spyOn(CrawlerLogic.actions, 'startCrawl');
+
+        CrawlCustomSettingsFlyoutLogic.actions.startCustomCrawl();
+        await nextTick();
+
+        expect(CrawlerLogic.actions.startCrawl).toHaveBeenCalledWith({
+          domain_allowlist: ['https://www.elastic.co', 'https://swiftype.com'],
+          max_crawl_depth: 5,
+          sitemap_discovery_disabled: false,
+        });
+      });
+
+      it('can start a custom crawl selected domains, sitemaps, and seed urls', async () => {
         mount({
           includeSitemapsInRobotsTxt: true,
           maxCrawlDepth: 5,

@@ -14,7 +14,7 @@ import {
   SavedObjectReference,
   SavedObjectSanitizedDoc,
   SavedObjectUnsanitizedDoc,
-} from '../../../../../../../src/core/server';
+} from '@kbn/core/server';
 import {
   Actions,
   ActionTypes,

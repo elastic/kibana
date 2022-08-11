@@ -21,14 +21,14 @@ import {
   EuiText,
   EuiFormRow,
 } from '@elastic/eui';
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { isEqual, omit } from 'lodash';
 import useMount from 'react-use/lib/useMount';
-import { DocLinksStart } from 'src/core/public';
+import { DocLinksStart } from '@kbn/core/public';
 
-import { useKibana } from '../../../../kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AggParamEditorProps } from '../agg_param_props';
 
 const FROM_PLACEHOLDER = '\u2212\u221E';

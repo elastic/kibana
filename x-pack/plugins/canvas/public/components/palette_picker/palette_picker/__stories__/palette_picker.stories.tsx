@@ -8,7 +8,7 @@
 import React, { FC, useState } from 'react';
 import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
-import { PalettePicker } from '../../palette_picker';
+import { PalettePicker } from '..';
 
 import { paulTor14, ColorPalette } from '../../../../../common/lib/palettes';
 import { CustomColorPalette } from '../../types';

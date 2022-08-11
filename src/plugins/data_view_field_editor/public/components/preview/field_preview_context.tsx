@@ -121,7 +121,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   // If no documents could be fetched from the cluster (and we are not trying to load
   // a custom doc ID) then we disable preview as the script field validation expect the result
   // of the preview to before resolving. If there are no documents we can't have a preview
-  // (the _execute API expects one) and thus the validation should not expect any value.
+  // (the _execute API expects one) and thus the validation should not expect a value.
   if (!isFetchingDocument && !isCustomDocId && documents.length === 0) {
     isPreviewAvailable = false;
   }
@@ -333,16 +333,15 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     const currentApiCall = ++previewCount.current;
 
     const response = await getFieldPreview({
-      index: currentDocIndex!,
+      index: currentDocIndex,
       document: document!,
       context: `${type!}_field` as PainlessExecuteContext,
       script: script!,
-      documentId: currentDocId,
     });
 
     if (currentApiCall !== previewCount.current) {
       // Discard this response as there is another one inflight
-      // or we have called reset() and don't need the response anymore.
+      // or we have called reset() and no longer need the response.
       return;
     }
 
@@ -384,7 +383,6 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     type,
     script,
     document,
-    currentDocIndex,
     currentDocId,
     getFieldPreview,
     notifications.toasts,
@@ -392,6 +390,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     allParamsDefined,
     scriptEditorValidation,
     hasSomeParamsChanged,
+    currentDocIndex,
   ]);
 
   const goToNextDoc = useCallback(() => {
@@ -411,7 +410,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   }, [currentIdx, totalDocs]);
 
   const reset = useCallback(() => {
-    // By resetting the previewCount we will discard any inflight
+    // By resetting the previewCount we will discard previous inflight
     // API call response coming in after calling reset() was called
     previewCount.current = 0;
 
@@ -604,7 +603,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   }, [scriptEditorValidation, script?.source, setPreviewError, clearPreviewError]);
 
   /**
-   * Whenever updatePreview() changes (meaning whenever any of the params changes)
+   * Whenever updatePreview() changes (meaning whenever a param changes)
    * we call it to update the preview response with the field(s) value or possible error.
    */
   useDebounce(updatePreview, 500, [updatePreview]);

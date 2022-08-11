@@ -18,7 +18,7 @@ import * as StatusCheckStates from './status_check_states';
 import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { getServices } from '../../kibana_services';
-import { KibanaPageTemplate } from '../../../../../kibana_react/public';
+import { KibanaPageTemplate } from '@kbn/kibana-react-plugin/public';
 
 const INSTRUCTIONS_TYPE = {
   ELASTIC_CLOUD: 'elasticCloud',

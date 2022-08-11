@@ -9,10 +9,8 @@ import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { skipWhile } from 'rxjs/operators';
 
-import type {
-  HttpSetup,
-  SavedObjectsCollectMultiNamespaceReferencesResponse,
-} from 'src/core/public';
+import type { SavedObjectsCollectMultiNamespaceReferencesResponse } from '@kbn/core-saved-objects-api-server';
+import type { HttpSetup } from '@kbn/core/public';
 
 import type {
   GetAllSpacesOptions,

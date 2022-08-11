@@ -9,9 +9,9 @@
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Assign } from '@kbn/utility-types';
-import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { ExtendedBoundsOutput } from '../../expressions';
-import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '../';
+import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '..';
 
 export const aggHistogramFnName = 'aggHistogram';
 
@@ -84,6 +84,13 @@ export const aggHistogram = (): FunctionDefinition => ({
       types: ['number'],
       help: i18n.translate('data.search.aggs.buckets.histogram.maxBars.help', {
         defaultMessage: 'Calculate interval to get approximately this many bars',
+      }),
+    },
+    autoExtendBounds: {
+      types: ['boolean'],
+      help: i18n.translate('data.search.aggs.buckets.histogram.autoExtendBounds.help', {
+        defaultMessage:
+          'Set to true to extend bounds to the domain of the data. This makes sure each interval bucket within these bounds will create a separate table row',
       }),
     },
     has_extended_bounds: {

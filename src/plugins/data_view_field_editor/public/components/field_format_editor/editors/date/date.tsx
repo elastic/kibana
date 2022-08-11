@@ -17,7 +17,7 @@ import { formatId } from './constants';
 
 import { FormatEditorSamples } from '../../samples';
 
-interface DateFormatEditorFormatParams {
+export interface DateFormatEditorFormatParams {
   pattern: string;
 }
 
@@ -35,7 +35,7 @@ export class DateFormatEditor extends DefaultFormatEditor<DateFormatEditorFormat
   render() {
     const { format, formatParams } = this.props;
     const { error, samples } = this.state;
-    const defaultPattern = format.getParamDefaults().pattern;
+    const defaultPattern = `${format.getParamDefaults().pattern}`;
 
     return (
       <Fragment>

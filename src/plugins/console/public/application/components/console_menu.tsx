@@ -8,7 +8,7 @@
 
 import React, { Component } from 'react';
 
-import { NotificationsSetup } from 'src/core/public';
+import { NotificationsSetup } from '@kbn/core/public';
 
 import {
   EuiIcon,

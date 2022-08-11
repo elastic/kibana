@@ -7,7 +7,7 @@
  */
 
 import * as t from 'io-ts';
-import { jsonRt } from './index';
+import { jsonRt } from '.';
 import { isRight, Either, isLeft, fold } from 'fp-ts/lib/Either';
 import { Right } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';

@@ -6,13 +6,13 @@
  */
 
 import sinon from 'sinon';
-import { loggingSystemMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { Alert } from './alert';
 import { createAlertFactory } from './create_alert_factory';
-import { getRecoveredAlerts } from '../lib';
+import { processAlerts } from '../lib';
 
 jest.mock('../lib', () => ({
-  getRecoveredAlerts: jest.fn(),
+  processAlerts: jest.fn(),
 }));
 
 let clock: sinon.SinonFakeTimers;
@@ -37,6 +37,7 @@ describe('createAlertFactory()', () => {
                 "state": Object {},
               }
         `);
+    // @ts-expect-error
     expect(result.getId()).toEqual('1');
   });
 
@@ -108,16 +109,18 @@ describe('createAlertFactory()', () => {
   });
 
   test('returns recovered alerts when setsRecoveryContext is true', () => {
-    (getRecoveredAlerts as jest.Mock).mockReturnValueOnce({
-      z: {
-        id: 'z',
-        state: { foo: true },
-        meta: { lastScheduledActions: { group: 'default', date: new Date() } },
-      },
-      y: {
-        id: 'y',
-        state: { foo: true },
-        meta: { lastScheduledActions: { group: 'default', date: new Date() } },
+    (processAlerts as jest.Mock).mockReturnValueOnce({
+      recoveredAlerts: {
+        z: {
+          id: 'z',
+          state: { foo: true },
+          meta: { lastScheduledActions: { group: 'default', date: new Date() } },
+        },
+        y: {
+          id: 'y',
+          state: { foo: true },
+          meta: { lastScheduledActions: { group: 'default', date: new Date() } },
+        },
       },
     });
     const alertFactory = createAlertFactory({
@@ -142,7 +145,7 @@ describe('createAlertFactory()', () => {
   });
 
   test('returns empty array if no recovered alerts', () => {
-    (getRecoveredAlerts as jest.Mock).mockReturnValueOnce({});
+    (processAlerts as jest.Mock).mockReturnValueOnce({ recoveredAlerts: {} });
     const alertFactory = createAlertFactory({
       alerts: {},
       logger,
@@ -163,8 +166,8 @@ describe('createAlertFactory()', () => {
     expect(recoveredAlerts.length).toEqual(0);
   });
 
-  test('returns empty array if getRecoveredAlerts returns null', () => {
-    (getRecoveredAlerts as jest.Mock).mockReturnValueOnce(null);
+  test('returns empty array if recovered alerts are null', () => {
+    (processAlerts as jest.Mock).mockReturnValueOnce({ recoveredAlerts: null });
     const alertFactory = createAlertFactory({
       alerts: {},
       logger,

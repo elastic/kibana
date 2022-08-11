@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObject } from 'kibana/server';
+import { SavedObject } from '@kbn/core/server';
 import { ActionTypeRegistry } from '../action_type_registry';
 import { validateSecrets } from '../lib';
 import { RawAction, ActionType } from '../types';
@@ -28,6 +28,7 @@ function transformConnectorForExport(
   actionType: ActionType
 ): SavedObject<RawAction> {
   let isMissingSecrets = false;
+
   try {
     // If connector requires secrets, this will throw an error
     validateSecrets(actionType, {});
@@ -39,11 +40,11 @@ function transformConnectorForExport(
     isMissingSecrets = true;
   }
 
-  // Skip connectors
   return {
     ...connector,
     attributes: {
       ...connector.attributes,
+      secrets: {},
       isMissingSecrets,
     },
   };

@@ -86,7 +86,7 @@ export const IndexingRulesTable: React.FC = () => {
         'xpack.enterpriseSearch.workplaceSearch.sources.sourceAssetsAndObjectsObjectsDescription',
         {
           defaultMessage:
-            'Include or exclude high level items, file types and (file or folder) paths to synchronize from {contentSourceName}. Everything is included by default. Each document is tested against the rules below and the first rule that matches will be applied.',
+            'Add an indexing rule to customize what data is synchronized from {contentSourceName}. Everything is included by default, and documents are validated against the configured set of indexing rules starting from the top listed down.',
           values: { contentSourceName: contentSource.name },
         }
       )}
@@ -95,7 +95,7 @@ export const IndexingRulesTable: React.FC = () => {
         {i18n.translate(
           'xpack.enterpriseSearch.workplaceSearch.sources.sourceAssetsAndObjectsSyncLearnMoreLink',
           {
-            defaultMessage: 'Learn more about sync rules.',
+            defaultMessage: 'Learn more about customizing your index rules.',
           }
         )}
       </EuiLink>
@@ -229,7 +229,18 @@ export const IndexingRulesTable: React.FC = () => {
         clearFlashMessages();
       }}
       title=""
+      bottomRows={[
+        <EuiText size="s">
+          {i18n.translate(
+            'xpack.enterpriseSearch.workplaceSearch.sources.indexingRulesTable.includeEverythingMessage',
+            {
+              defaultMessage: 'Include everything else from this source',
+            }
+          )}
+        </EuiText>,
+      ]}
       canRemoveLastItem
+      showRowIndex
     />
   );
 };

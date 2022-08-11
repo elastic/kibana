@@ -148,31 +148,6 @@ Object {
 }
 `;
 
-exports[`agent configuration queries getServiceNames fetches service names 1`] = `
-Object {
-  "apm": Object {
-    "events": Array [
-      "transaction",
-      "error",
-      "metric",
-    ],
-  },
-  "body": Object {
-    "aggs": Object {
-      "services": Object {
-        "terms": Object {
-          "field": "service.name",
-          "min_doc_count": 0,
-          "size": 50,
-        },
-      },
-    },
-    "size": 0,
-    "timeout": "1ms",
-  },
-}
-`;
-
 exports[`agent configuration queries listConfigurations fetches configurations 1`] = `
 Object {
   "index": "myIndex",

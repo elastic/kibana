@@ -9,28 +9,28 @@ import React, { useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
-import {
-  Columns,
-  Criteria,
-  ItemsPerRow,
-  PaginatedTable,
-} from '../../../common/components/paginated_table';
+import styled from 'styled-components';
+import type { Columns, Criteria, ItemsPerRow } from '../../../common/components/paginated_table';
+import { PaginatedTable } from '../../../common/components/paginated_table';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { hostsActions, hostsModel, hostsSelectors } from '../../store';
 import { getHostRiskScoreColumns } from './columns';
 import type {
   HostsRiskScore,
-  HostRiskScoreItem,
-  HostRiskScoreSortField,
+  RiskScoreItem,
+  RiskScoreSortField,
+  RiskSeverity,
+  RiskScoreFields,
 } from '../../../../common/search_strategy';
-import { HostRiskScoreFields, HostRiskSeverity } from '../../../../common/search_strategy';
-import { State } from '../../../common/store';
+import type { State } from '../../../common/store';
 import * as i18n from '../hosts_table/translations';
 import * as i18nHosts from './translations';
-import { SeverityBar } from './severity_bar';
-import { SeverityBadges } from './severity_badges';
-import { SeverityFilterGroup } from './severity_filter_group';
-import { SeverityCount } from '../../containers/kpi_hosts/risky_hosts';
+
+import { SeverityBadges } from '../../../common/components/severity/severity_badges';
+import { SeverityBar } from '../../../common/components/severity/severity_bar';
+import { SeverityFilterGroup } from '../../../common/components/severity/severity_filter_group';
+
+import type { SeverityCount } from '../../../common/components/severity/types';
 
 export const rowItems: ItemsPerRow[] = [
   {
@@ -43,6 +43,10 @@ export const rowItems: ItemsPerRow[] = [
   },
 ];
 
+const IconWrapper = styled.span`
+  margin-left: ${({ theme }) => theme.eui.euiSizeS};
+`;
+
 const tableType = hostsModel.HostsTableType.risk;
 
 interface HostRiskScoreTableProps {
@@ -51,15 +55,16 @@ interface HostRiskScoreTableProps {
   isInspect: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
+  setQuerySkip: (skip: boolean) => void;
   severityCount: SeverityCount;
   totalCount: number;
   type: hostsModel.HostsType;
 }
 
 export type HostRiskScoreColumns = [
-  Columns<HostRiskScoreItem[HostRiskScoreFields.hostName]>,
-  Columns<HostRiskScoreItem[HostRiskScoreFields.riskScore]>,
-  Columns<HostRiskScoreItem[HostRiskScoreFields.risk]>
+  Columns<RiskScoreItem[RiskScoreFields.hostName]>,
+  Columns<RiskScoreItem[RiskScoreFields.riskScore]>,
+  Columns<RiskScoreItem[RiskScoreFields.risk]>
 ];
 
 const HostRiskScoreTableComponent: React.FC<HostRiskScoreTableProps> = ({
@@ -68,6 +73,7 @@ const HostRiskScoreTableComponent: React.FC<HostRiskScoreTableProps> = ({
   isInspect,
   loading,
   loadPage,
+  setQuerySkip,
   severityCount,
   totalCount,
   type,
@@ -108,7 +114,7 @@ const HostRiskScoreTableComponent: React.FC<HostRiskScoreTableProps> = ({
         if (newSort.direction !== sort.direction || newSort.field !== sort.field) {
           dispatch(
             hostsActions.updateHostRiskScoreSort({
-              sort: newSort as HostRiskScoreSortField,
+              sort: newSort as RiskScoreSortField,
               hostsType: type,
             })
           );
@@ -118,7 +124,7 @@ const HostRiskScoreTableComponent: React.FC<HostRiskScoreTableProps> = ({
     [dispatch, sort, type]
   );
   const dispatchSeverityUpdate = useCallback(
-    (s: HostRiskSeverity) => {
+    (s: RiskSeverity) => {
       dispatch(
         hostsActions.updateHostRiskScoreSeverityFilter({
           severitySelection: [s],
@@ -145,9 +151,9 @@ const HostRiskScoreTableComponent: React.FC<HostRiskScoreTableProps> = ({
   );
 
   const headerTitle = (
-    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-      <EuiFlexItem grow={false}>{i18nHosts.HOSTS_BY_RISK}</EuiFlexItem>
-      <EuiFlexItem grow={false}>
+    <>
+      {i18nHosts.HOST_RISK_TITLE}
+      <IconWrapper>
         <EuiIconTip
           color="subdued"
           content={i18nHosts.HOST_RISK_TABLE_TOOLTIP}
@@ -155,16 +161,44 @@ const HostRiskScoreTableComponent: React.FC<HostRiskScoreTableProps> = ({
           size="l"
           type="iInCircle"
         />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      </IconWrapper>
+    </>
   );
+
+  const getHostRiskScoreFilterQuerySelector = useMemo(
+    () => hostsSelectors.hostRiskScoreSeverityFilterSelector(),
+    []
+  );
+  const severitySelectionRedux = useDeepEqualSelector((state: State) =>
+    getHostRiskScoreFilterQuerySelector(state, type)
+  );
+
+  const onSelect = useCallback(
+    (newSelection: RiskSeverity[]) => {
+      dispatch(
+        hostsActions.updateHostRiskScoreSeverityFilter({
+          severitySelection: newSelection,
+          hostsType: type,
+        })
+      );
+    },
+    [dispatch, type]
+  );
+
   return (
     <PaginatedTable
       activePage={activePage}
       columns={columns}
       dataTestSubj={`table-${tableType}`}
       headerCount={totalCount}
-      headerFilters={<SeverityFilterGroup severityCount={severityCount} type={type} />}
+      headerFilters={
+        <SeverityFilterGroup
+          selectedSeverities={severitySelectionRedux}
+          severityCount={severityCount}
+          title={i18n.HOST_RISK}
+          onSelect={onSelect}
+        />
+      }
       headerSupplement={risk}
       headerTitle={headerTitle}
       headerUnit={i18n.UNIT(totalCount)}
@@ -176,6 +210,7 @@ const HostRiskScoreTableComponent: React.FC<HostRiskScoreTableProps> = ({
       loadPage={loadPage}
       onChange={onSort}
       pageOfItems={data}
+      setQuerySkip={setQuerySkip}
       showMorePagesIndicator={false}
       sorting={sort}
       split={true}

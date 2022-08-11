@@ -10,9 +10,9 @@ import { render, act } from '@testing-library/react';
 import { mockAnomalies } from '../mock';
 import { cloneDeep } from 'lodash/fp';
 import { ExplorerLink } from './create_explorer_link';
-import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public/context';
-import { MlLocatorDefinition } from '../../../../../../ml/public/locator';
-import { MockUrlService } from '../../../../../../../../src/plugins/share/common/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public/context';
+import { MlLocatorDefinition } from '@kbn/ml-plugin/public/locator';
+import { MockUrlService } from '@kbn/share-plugin/common/mocks';
 
 describe('create_explorer_link', () => {
   let anomalies = cloneDeep(mockAnomalies);

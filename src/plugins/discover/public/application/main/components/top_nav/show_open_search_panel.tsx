@@ -8,11 +8,11 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { CoreTheme, I18nStart } from 'kibana/public';
+import { CoreTheme, I18nStart } from '@kbn/core/public';
 import { Observable } from 'rxjs';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { DiscoverServices } from '../../../../build_services';
 import { OpenSearchPanel } from './open_search_panel';
-import { KibanaContextProvider, KibanaThemeProvider } from '../../../../../../kibana_react/public';
 
 let isOpen = false;
 

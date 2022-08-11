@@ -15,7 +15,7 @@ import { EuiLinkTo } from '../../react_router_helpers';
 
 import { SchemaType } from '../types';
 
-import { SchemaErrorsAccordion } from './';
+import { SchemaErrorsAccordion } from '.';
 
 describe('SchemaErrorsAccordion', () => {
   const props = {

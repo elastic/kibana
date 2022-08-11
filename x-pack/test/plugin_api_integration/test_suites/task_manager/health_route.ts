@@ -9,8 +9,8 @@ import expect from '@kbn/expect';
 import url from 'url';
 import { keyBy, mapValues } from 'lodash';
 import supertest from 'supertest';
+import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { ConcreteTaskInstance } from '../../../../plugins/task_manager/server';
 
 interface MonitoringStats {
   last_update: string;
@@ -124,8 +124,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   const monitoredAggregatedStatsRefreshRate = 5000;
 
-  // FLAKY: https://github.com/elastic/kibana/issues/125581
-  describe.skip('health', () => {
+  describe('health', () => {
     it('should return basic configuration of task manager', async () => {
       const health = await getHealth();
       expect(health.status).to.eql('OK');
@@ -226,7 +225,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(typeof proposed.avg_required_throughput_per_minute_per_kibana).to.eql('number');
     });
 
-    it('should return an estimation of task manager capacity', async () => {
+    it('should return an estimation of task manager capacity as an array', async () => {
       const {
         workload: { value: workload },
       } = (await getHealth()).stats;
@@ -241,10 +240,6 @@ export default function ({ getService }: FtrProviderContext) {
       expect(typeof workload.capacity_requirements.per_day).to.eql('number');
 
       expect(Array.isArray(workload.estimated_schedule_density)).to.eql(true);
-
-      // test run with the default poll_interval of 3s and a monitored_aggregated_stats_refresh_rate of 5s,
-      // so we expect the estimated_schedule_density to span a minute (which means 20 buckets, as 60s / 3s = 20)
-      expect(workload.estimated_schedule_density.length).to.eql(20);
     });
 
     it('should return the task manager runtime stats', async () => {

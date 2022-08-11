@@ -6,7 +6,7 @@
  */
 
 import type { agentPolicyStatuses } from '../../constants';
-import type { MonitoringType, ValueOf } from '../../types';
+import type { MonitoringType, ValueOf } from '..';
 
 import type { PackagePolicy, PackagePolicyPackage } from './package_policy';
 import type { Output } from './output';
@@ -25,8 +25,10 @@ export interface NewAgentPolicy {
   monitoring_enabled?: MonitoringType;
   unenroll_timeout?: number;
   is_preconfigured?: boolean;
-  data_output_id?: string;
-  monitoring_output_id?: string;
+  // Nullable to allow user to reset to default outputs
+  data_output_id?: string | null;
+  monitoring_output_id?: string | null;
+  download_source_id?: string | null;
 }
 
 export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
@@ -37,6 +39,7 @@ export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
   updated_at: string;
   updated_by: string;
   revision: number;
+  agents?: number;
 }
 
 export type AgentPolicySOAttributes = Omit<AgentPolicy, 'id'>;
@@ -104,6 +107,7 @@ export interface FullAgentPolicy {
       metrics: boolean;
       logs: boolean;
     };
+    download: { source_uri: string };
   };
 }
 

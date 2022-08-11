@@ -8,7 +8,7 @@
 
 import { CLIEngine } from 'eslint';
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import { File } from '../file';
 
 /**

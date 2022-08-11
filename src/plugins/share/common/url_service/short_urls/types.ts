@@ -79,12 +79,6 @@ export interface ShortUrlCreateParams<P extends SerializableRecord> {
    * URL. This part will be visible to the user, it can have user-friendly text.
    */
   slug?: string;
-
-  /**
-   * Whether to generate a slug automatically. If `true`, the slug will be
-   * a human-readable text consisting of three worlds: "<adjective>-<adjective>-<noun>".
-   */
-  humanReadableSlug?: boolean;
 }
 
 /**

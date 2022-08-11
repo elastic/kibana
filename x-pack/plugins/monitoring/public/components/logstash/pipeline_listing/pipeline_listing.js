@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { formatMetric } from '../../../lib/format_number';
 import { ClusterStatus } from '../cluster_status';
-import { Sparkline } from '../../../components/sparkline';
+import { Sparkline } from '../../sparkline';
 import { EuiMonitoringSSPTable } from '../../table';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';

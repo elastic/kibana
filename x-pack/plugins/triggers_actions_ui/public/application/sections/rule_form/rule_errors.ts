@@ -6,7 +6,7 @@
  */
 import { isObject } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { formatDuration, parseDuration } from '../../../../../alerting/common/parse_duration';
+import { formatDuration, parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
 import {
   RuleTypeModel,
   Rule,
@@ -43,15 +43,15 @@ export function validateBaseProperties(
         defaultMessage: 'Check interval is required.',
       })
     );
-  } else if (config.minimumScheduleInterval) {
+  } else if (config.minimumScheduleInterval && config.minimumScheduleInterval.enforce) {
     const duration = parseDuration(ruleObject.schedule.interval);
-    const minimumDuration = parseDuration(config.minimumScheduleInterval);
+    const minimumDuration = parseDuration(config.minimumScheduleInterval.value);
     if (duration < minimumDuration) {
       errors['schedule.interval'].push(
         i18n.translate('xpack.triggersActionsUI.sections.ruleForm.error.belowMinimumText', {
           defaultMessage: 'Interval must be at least {minimum}.',
           values: {
-            minimum: formatDuration(config.minimumScheduleInterval, true),
+            minimum: formatDuration(config.minimumScheduleInterval.value, true),
           },
         })
       );

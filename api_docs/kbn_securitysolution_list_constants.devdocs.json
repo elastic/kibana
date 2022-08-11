@@ -24,6 +24,48 @@
     "misc": [
       {
         "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.ENDPOINT_BLOCKLISTS_LIST_DESCRIPTION",
+        "type": "string",
+        "tags": [],
+        "label": "ENDPOINT_BLOCKLISTS_LIST_DESCRIPTION",
+        "description": [],
+        "signature": [
+          "\"Endpoint Security Blocklists List\""
+        ],
+        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.ENDPOINT_BLOCKLISTS_LIST_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ENDPOINT_BLOCKLISTS_LIST_ID",
+        "description": [],
+        "signature": [
+          "\"endpoint_blocklists\""
+        ],
+        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.ENDPOINT_BLOCKLISTS_LIST_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "ENDPOINT_BLOCKLISTS_LIST_NAME",
+        "description": [],
+        "signature": [
+          "\"Endpoint Security Blocklists List\""
+        ],
+        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
         "id": "def-common.ENDPOINT_EVENT_FILTERS_LIST_DESCRIPTION",
         "type": "string",
         "tags": [],

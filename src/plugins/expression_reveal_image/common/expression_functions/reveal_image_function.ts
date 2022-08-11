@@ -11,9 +11,9 @@ import {
   resolveWithMissingImage,
   getElasticOutline,
   isValidUrl,
-} from '../../../presentation_util/common/lib';
-import { ExpressionRevealImageFunction, Origin, Position } from '../../common/types';
-import { BASE64, URL } from '../../common/constants';
+} from '@kbn/presentation-util-plugin/common/lib';
+import { ExpressionRevealImageFunction, Origin, Position } from '../types';
+import { BASE64, URL } from '../constants';
 
 const strings = {
   help: i18n.translate('expressionRevealImage.functions.revealImageHelpText', {

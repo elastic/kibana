@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
+import type { Logger } from '@kbn/logging';
+import type {
+  SavedObjectsValidationMap,
+  SavedObjectSanitizedDoc,
+} from '@kbn/core-saved-objects-server';
 import { createSavedObjectSanitizedDocSchema } from './schema';
-import { SavedObjectsValidationMap } from './types';
-import { SavedObjectSanitizedDoc } from '../serialization';
-import { Logger } from '../../logging';
 
 /**
  * Helper class that takes a {@link SavedObjectsValidationMap} and runs validations for a

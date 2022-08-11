@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`xyVis it should throw error if addTimeMarker applied for not time chart 1`] = `"Only time charts can have current time marker"`;
+
+exports[`xyVis it should throw error if markSizeRatio is lower then 1 or greater then 100 1`] = `"Mark size ratio must be greater or equal to 1 and less or equal to 100"`;
+
+exports[`xyVis it should throw error if markSizeRatio is lower then 1 or greater then 100 2`] = `"Mark size ratio must be greater or equal to 1 and less or equal to 100"`;
+
+exports[`xyVis it should throw error if markSizeRatio is specified while markSizeAccessor is not 1`] = `"Mark size ratio can be applied only with \`markSizeAccessor\`"`;
+
+exports[`xyVis it should throw error if minTimeBarInterval applied for not time bar chart 1`] = `"\`minTimeBarInterval\` argument is applicable only for time bar charts."`;
+
+exports[`xyVis it should throw error if minTimeBarInterval is invalid 1`] = `"Provided x-axis interval is invalid. The interval should include quantity and unit names. Examples: 1d, 24h, 1w."`;
+
+exports[`xyVis it should throw error if splitColumnAccessor is pointing to the absent column 1`] = `"Provided column name or index is invalid: absent-accessor"`;
+
+exports[`xyVis it should throw error if splitRowAccessor is pointing to the absent column 1`] = `"Provided column name or index is invalid: absent-accessor"`;
+
+exports[`xyVis throws the error if showLines is provided to the not line/area chart 1`] = `"Lines visibility can be controlled only at line charts"`;
+
+exports[`xyVis throws the error if the x axis extent is enabled for a date histogram 1`] = `"X axis extent is only supported for numeric histograms."`;
+
+exports[`xyVis throws the error if the x axis extent is enabled with the full mode 1`] = `"For x axis extent, the full mode is not supported."`;
+
+exports[`xyVis throws the error if the x axis extent is enabled without a histogram defined 1`] = `"X axis extent is only supported for numeric histograms."`;

@@ -51,6 +51,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
         .expect(200, {
           id: createdAction.id,
           is_preconfigured: false,
+          is_deprecated: false,
           connector_type_id: 'test.index-record',
           is_missing_secrets: false,
           name: 'My action updated',
@@ -160,6 +161,26 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
       expect(new Date(noopFeature.last_used).getTime()).to.be.greaterThan(updateStart.getTime());
     });
 
+    it('should handle update action request appropriately when empty strings are submitted', async () => {
+      await supertest
+        .put(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector/custom-system-abc-connector`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: ' ',
+          config: {
+            unencrypted: `This value shouldn't get encrypted`,
+          },
+          secrets: {
+            encrypted: 'This value should be encrypted',
+          },
+        })
+        .expect(400, {
+          statusCode: 400,
+          error: 'Bad Request',
+          message: `[request body.name]: value '' is not valid`,
+        });
+    });
+
     describe('legacy', () => {
       it('should handle update action request appropriately', async () => {
         const { body: createdAction } = await supertest
@@ -193,6 +214,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
           .expect(200, {
             id: createdAction.id,
             isPreconfigured: false,
+            isDeprecated: false,
             actionTypeId: 'test.index-record',
             isMissingSecrets: false,
             name: 'My action updated',

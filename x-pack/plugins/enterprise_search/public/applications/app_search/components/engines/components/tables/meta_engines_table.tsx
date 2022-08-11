@@ -14,6 +14,9 @@ import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 import { AppLogic } from '../../../../app_logic';
 import { EngineDetails } from '../../../engine/types';
 
+import { AuditLogsModalLogic } from '../audit_logs_modal/audit_logs_modal_logic';
+
+import { renderLastChangeLink } from './engine_link_helpers';
 import { MetaEnginesTableExpandedRow } from './meta_engines_table_expanded_row';
 import { MetaEnginesTableLogic } from './meta_engines_table_logic';
 import { MetaEnginesTableNameColumnContent } from './meta_engines_table_name_column_content';
@@ -21,6 +24,7 @@ import {
   ACTIONS_COLUMN,
   BLANK_COLUMN,
   CREATED_AT_COLUMN,
+  LAST_UPDATED_COLUMN,
   DOCUMENT_COUNT_COLUMN,
   FIELD_COUNT_COLUMN,
   NAME_COLUMN,
@@ -48,6 +52,8 @@ export const MetaEnginesTable: React.FC<EnginesTableProps> = ({
   const {
     myRole: { canManageMetaEngines },
   } = useValues(AppLogic);
+
+  const { showModal: showAuditLogModal } = useActions(AuditLogsModalLogic);
 
   const conflictingEnginesSets: ConflictingEnginesSets = useMemo(
     () =>
@@ -89,6 +95,14 @@ export const MetaEnginesTable: React.FC<EnginesTableProps> = ({
       ),
     },
     CREATED_AT_COLUMN,
+    {
+      ...LAST_UPDATED_COLUMN,
+      render: (dateString: string, engineDetails) => {
+        return renderLastChangeLink(dateString, () => {
+          showAuditLogModal(engineDetails.name);
+        });
+      },
+    },
     BLANK_COLUMN,
     DOCUMENT_COUNT_COLUMN,
     FIELD_COUNT_COLUMN,

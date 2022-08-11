@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ApplicationStart } from 'kibana/public';
-import type { DataViewsContract } from '../../../../../../../../../src/plugins/data_views/public';
+import type { ApplicationStart } from '@kbn/core/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { mlJobService } from '../../../../services/job_service';
 import { Datafeed } from '../../../../../../common/types/anomaly_detection_jobs';
 import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../common/constants/new_job';

@@ -11,18 +11,14 @@ import { Observable } from 'rxjs';
 import { ReactWrapper } from 'enzyme';
 import { mountWithI18nProvider, shallowWithI18nProvider } from '@kbn/test-jest-helpers';
 import dedent from 'dedent';
-import {
-  PublicUiSettingsParams,
-  UserProvidedValues,
-  UiSettingsType,
-} from '../../../../core/public';
+import { PublicUiSettingsParams, UserProvidedValues, UiSettingsType } from '@kbn/core/public';
 import { FieldSetting } from './types';
 import { AdvancedSettings } from './advanced_settings';
 import {
   notificationServiceMock,
   docLinksServiceMock,
   themeServiceMock,
-} from '../../../../core/public/mocks';
+} from '@kbn/core/public/mocks';
 import { ComponentRegistry } from '../component_registry';
 import { Search } from './components/search';
 
@@ -252,7 +248,7 @@ describe('AdvancedSettings', () => {
         history={mockHistory}
         enableSaving={true}
         toasts={notificationServiceMock.createStartContract().toasts}
-        dockLinks={docLinksServiceMock.createStartContract().links}
+        docLinks={docLinksServiceMock.createStartContract().links}
         uiSettings={mockConfig().core.uiSettings}
         componentRegistry={new ComponentRegistry().start}
         theme={themeServiceMock.createStartContract().theme$}
@@ -268,6 +264,35 @@ describe('AdvancedSettings', () => {
     ).toHaveLength(1);
   });
 
+  it('should should not render a custom setting', async () => {
+    // The manual mock for the uiSettings client returns false for isConfig, override that
+    const uiSettings = mockConfig().core.uiSettings;
+    uiSettings.isCustom = (key) => true;
+
+    const customSettingQuery = 'test:customstring:setting';
+    mockQuery(customSettingQuery);
+    const component = mountWithI18nProvider(
+      <AdvancedSettings
+        history={mockHistory}
+        enableSaving={true}
+        toasts={notificationServiceMock.createStartContract().toasts}
+        docLinks={docLinksServiceMock.createStartContract().links}
+        uiSettings={uiSettings}
+        componentRegistry={new ComponentRegistry().start}
+        theme={themeServiceMock.createStartContract().theme$}
+      />
+    );
+
+    expect(
+      component
+        .find('Field')
+        .filterWhere(
+          (n: ReactWrapper) =>
+            (n.prop('setting') as Record<string, any>).name === customSettingQuery
+        )
+    ).toEqual({});
+  });
+
   it('should render read-only when saving is disabled', async () => {
     mockQuery();
     const component = mountWithI18nProvider(
@@ -275,7 +300,7 @@ describe('AdvancedSettings', () => {
         history={mockHistory}
         enableSaving={false}
         toasts={notificationServiceMock.createStartContract().toasts}
-        dockLinks={docLinksServiceMock.createStartContract().links}
+        docLinks={docLinksServiceMock.createStartContract().links}
         uiSettings={mockConfig().core.uiSettings}
         componentRegistry={new ComponentRegistry().start}
         theme={themeServiceMock.createStartContract().theme$}
@@ -302,7 +327,7 @@ describe('AdvancedSettings', () => {
           history={mockHistory}
           enableSaving={false}
           toasts={toasts}
-          dockLinks={docLinksServiceMock.createStartContract().links}
+          docLinks={docLinksServiceMock.createStartContract().links}
           uiSettings={mockConfig().core.uiSettings}
           componentRegistry={new ComponentRegistry().start}
           theme={themeServiceMock.createStartContract().theme$}

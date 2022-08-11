@@ -15,10 +15,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedNumber } from '@kbn/i18n-react';
 
+import { EnginesLogic } from '../..';
 import { MANAGE_BUTTON_LABEL, DELETE_BUTTON_LABEL } from '../../../../../shared/constants';
 import { FormattedDateTime } from '../../../../utils/formatted_date_time';
 import { EngineDetails } from '../../../engine/types';
-import { EnginesLogic } from '../../../engines';
 
 import { navigateToEngine } from './engine_link_helpers';
 
@@ -48,6 +48,17 @@ export const CREATED_AT_COLUMN: EuiTableFieldDataColumnType<EngineDetails> = {
   }),
   dataType: 'string',
   render: (dateString: string) => <FormattedDateTime date={new Date(dateString)} hideTime />,
+};
+
+export const LAST_UPDATED_COLUMN: EuiTableFieldDataColumnType<EngineDetails> = {
+  field: 'updated_at',
+  name: i18n.translate(
+    'xpack.enterpriseSearch.appSearch.enginesOverview.table.column.lastUpdated',
+    {
+      defaultMessage: 'Last updated',
+    }
+  ),
+  dataType: 'string',
 };
 
 export const DOCUMENT_COUNT_COLUMN: EuiTableFieldDataColumnType<EngineDetails> = {

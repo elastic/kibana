@@ -8,9 +8,9 @@
 import { EuiConfirmModal } from '@elastic/eui';
 import React, { Fragment, useRef, useState } from 'react';
 
+import type { NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { NotificationsStart } from 'src/core/public';
 
 import type { ApiKeyToInvalidate } from '../../../../../common/model';
 import type { APIKeysAPIClient } from '../../api_keys_api_client';

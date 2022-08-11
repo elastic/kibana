@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
+import { SavedObject, SavedObjectsClientContract } from '../../../..';
 
 const MAX_BULK_GET_SIZE = 10000;
 

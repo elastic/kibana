@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { PutTransformsRequestSchema } from '@kbn/transform-plugin/common/api_schemas/transforms';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import {
   ES_TEST_INDEX_NAME,
@@ -14,7 +15,6 @@ import {
   ObjectRemover,
 } from '../../../../../common/lib';
 import { Spaces } from '../../../../scenarios';
-import { PutTransformsRequestSchema } from '../../../../../../../plugins/transform/common/api_schemas/transforms';
 
 const ACTION_TYPE_ID = '.index';
 const ALERT_TYPE_ID = 'transform_health';

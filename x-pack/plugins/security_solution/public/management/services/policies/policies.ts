@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { HttpFetchOptions, HttpStart } from 'kibana/public';
-import {
-  GetPackagePoliciesRequest,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-} from '../../../../../fleet/common';
-import { INGEST_API_PACKAGE_POLICIES } from '../../pages/policy/store/services/ingest';
-import { GetPolicyListResponse } from '../../pages/policy/types';
+import type { HttpFetchOptions, HttpStart } from '@kbn/core/public';
+import type { GetPackagePoliciesRequest } from '@kbn/fleet-plugin/common';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import type { GetPolicyListResponse } from '../../pages/policy/types';
+import { INGEST_API_PACKAGE_POLICIES } from './ingest';
 
 /**
  * Retrieves a list of endpoint specific package policies (those created with a `package.name` of

@@ -51,7 +51,6 @@ export const Panel: React.FC<Props & React.HTMLProps<HTMLDivElement>> = ({
     hasFooter: false,
   });
 
-  /* eslint-disable @typescript-eslint/naming-convention */
   const classes = classnames('fieldEditor__flyoutPanel', className, {
     'fieldEditor__flyoutPanel--pageBackground': backgroundColor === 'euiPageBackground',
     'fieldEditor__flyoutPanel--emptyShade': backgroundColor === 'euiEmptyShade',
@@ -59,7 +58,6 @@ export const Panel: React.FC<Props & React.HTMLProps<HTMLDivElement>> = ({
     'fieldEditor__flyoutPanel--rightBorder': border === 'right',
     'fieldEditor__flyoutPanel--withContent': config.hasContent,
   });
-  /* eslint-enable @typescript-eslint/naming-convention */
 
   const { addPanel } = useFlyoutPanelsContext();
 

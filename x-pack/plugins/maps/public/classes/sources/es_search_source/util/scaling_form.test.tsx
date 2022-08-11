@@ -25,9 +25,9 @@ const defaultProps = {
   onChange: () => {},
   scalingType: SCALING_TYPES.LIMIT,
   supportsClustering: true,
+  supportsMvt: true,
   termFields: [],
-  hasJoins: false,
-  clearJoins: () => {},
+  numberOfJoins: 0,
 };
 
 describe('scaling form', () => {

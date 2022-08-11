@@ -9,9 +9,9 @@ import React from 'react';
 
 import { useActions } from 'kea';
 
+import { RelevanceTuningLogic } from '../..';
 import { MultiInputRows } from '../../../multi_input_rows';
 
-import { RelevanceTuningLogic } from '../../index';
 import { ValueBoost } from '../../types';
 
 interface Props {

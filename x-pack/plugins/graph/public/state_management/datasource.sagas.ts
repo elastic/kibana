@@ -8,6 +8,7 @@
 import { takeLatest, put, call, select } from 'redux-saga/effects';
 import { i18n } from '@kbn/i18n';
 import { Action } from 'typescript-fsa';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { GraphStoreDependencies } from './store';
 import { loadFields } from './fields';
 import { mapFields } from '../services/persistence';
@@ -18,7 +19,6 @@ import {
   setDatasource,
   requestDatasource,
 } from './datasource';
-import { IndexPattern } from '../../../../../src/plugins/data/public';
 
 /**
  * Saga loading field information when the datasource is switched. This will overwrite current settings
@@ -34,7 +34,7 @@ export const datasourceSaga = ({
 }: GraphStoreDependencies) => {
   function* fetchFields(action: Action<IndexpatternDatasource>) {
     try {
-      const indexPattern: IndexPattern = yield call(indexPatternProvider.get, action.payload.id);
+      const indexPattern: DataView = yield call(indexPatternProvider.get, action.payload.id);
       yield put(loadFields(mapFields(indexPattern)));
       yield put(datasourceLoaded());
       const advancedSettings = settingsSelector(yield select());

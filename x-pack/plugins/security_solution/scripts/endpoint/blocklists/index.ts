@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { run, RunFn, createFailError } from '@kbn/dev-utils';
+import type { RunFn } from '@kbn/dev-cli-runner';
+import { run } from '@kbn/dev-cli-runner';
+import { createFailError } from '@kbn/dev-cli-errors';
 import { KbnClient } from '@kbn/test';
-import { AxiosError } from 'axios';
+import type { AxiosError } from 'axios';
 import pMap from 'p-map';
 import type { CreateExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
@@ -55,7 +57,7 @@ class BlocklistDataLoaderError extends Error {
   }
 }
 
-const handleThrowAxiosHttpError = (err: AxiosError): never => {
+const handleThrowAxiosHttpError = (err: AxiosError<{ message?: string }>): never => {
   let message = err.message;
 
   if (err.response) {
@@ -80,7 +82,7 @@ const createBlocklists: RunFn = async ({ flags, log }) => {
       const body = eventGenerator.generateBlocklistForCreate();
 
       if (isArtifactByPolicy(body)) {
-        const nmExceptions = Math.floor(Math.random() * 3) || 1;
+        const nmExceptions = eventGenerator.randomN(3) || 1;
         body.tags = Array.from({ length: nmExceptions }, () => {
           return `policy:${randomPolicyId()}`;
         });

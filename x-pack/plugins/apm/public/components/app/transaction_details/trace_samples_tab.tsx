@@ -18,6 +18,7 @@ function TraceSamplesTab({
   sampleRangeFrom,
   sampleRangeTo,
   traceSamples,
+  traceSamplesStatus,
 }: TabContentProps) {
   return (
     <TransactionDistribution
@@ -28,6 +29,7 @@ function TraceSamplesTab({
           ? [sampleRangeFrom, sampleRangeTo]
           : undefined
       }
+      traceSamplesStatus={traceSamplesStatus}
       traceSamples={traceSamples}
     />
   );

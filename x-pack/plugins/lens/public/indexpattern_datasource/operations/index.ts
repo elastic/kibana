@@ -27,7 +27,9 @@ export type {
   CardinalityIndexPatternColumn,
   SumIndexPatternColumn,
   MedianIndexPatternColumn,
+  StandardDeviationIndexPatternColumn,
   PercentileIndexPatternColumn,
+  PercentileRanksIndexPatternColumn,
   CountIndexPatternColumn,
   LastValueIndexPatternColumn,
   CumulativeSumIndexPatternColumn,
@@ -41,4 +43,5 @@ export type {
   FormulaIndexPatternColumn,
   MathIndexPatternColumn,
   StaticValueIndexPatternColumn,
+  TimeScaleIndexPatternColumn,
 } from './definitions';

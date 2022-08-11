@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Capabilities } from 'src/core/types';
+import { Capabilities } from '@kbn/core/types';
 import { tagFeatureId } from './constants';
 
 /**

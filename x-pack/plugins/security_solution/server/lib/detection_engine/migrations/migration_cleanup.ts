@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'src/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import migrationCleanupPolicy from './migration_cleanup_policy.json';
 
 export const getMigrationCleanupPolicyName = (alias: string): string =>

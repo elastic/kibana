@@ -1,6 +1,6 @@
 server.host: 0.0.0.0
 
-elasticsearch.hosts: http://192.168.50.1:9200
+elasticsearch.hosts: http://192.168.56.1:9200
 elasticsearch.username: "{{ elasticsearch_username }}"
 elasticsearch.password: "{{ elasticsearch_password }}"
 

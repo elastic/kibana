@@ -5,25 +5,20 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
-import { AxiosResponse } from 'axios';
-import { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { KbnClient } from '@kbn/test';
-import { HostMetadata } from '../types';
-import {
-  Agent,
-  AGENT_API_ROUTES,
-  FleetServerAgent,
-  GetOneAgentResponse,
-} from '../../../../fleet/common';
+import type { Client } from '@elastic/elasticsearch';
+import type { AxiosResponse } from 'axios';
+import type { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { KbnClient } from '@kbn/test';
+import type { Agent, FleetServerAgent, GetOneAgentResponse } from '@kbn/fleet-plugin/common';
+import { AGENT_API_ROUTES } from '@kbn/fleet-plugin/common';
+import type { HostMetadata } from '../types';
 import { FleetAgentGenerator } from '../data_generators/fleet_agent_generator';
 import { wrapErrorAndRejectPromise } from './utils';
 
 const defaultFleetAgentGenerator = new FleetAgentGenerator();
 
 export interface IndexedFleetAgentResponse {
-  agents: Agent[];
+  agents: Array<Agent & FleetServerAgent>;
   fleetAgentsIndex: string;
 }
 
@@ -47,6 +42,7 @@ export const indexFleetAgentForHost = async (
   fleetAgentGenerator: FleetAgentGenerator = defaultFleetAgentGenerator
 ): Promise<IndexedFleetAgentResponse> => {
   const agentDoc = fleetAgentGenerator.generateEsHit({
+    _id: endpointHost.agent.id,
     _source: {
       agent: {
         id: endpointHost.agent.id,
@@ -75,6 +71,7 @@ export const indexFleetAgentForHost = async (
       id: agentDoc._id,
       body: agentDoc._source,
       op_type: 'create',
+      refresh: 'wait_for',
     })
     .catch(wrapErrorAndRejectPromise);
 

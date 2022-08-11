@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
+import { lastValueFrom } from 'rxjs';
+import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import { VIEW_BY_JOB_LABEL } from '../../application/explorer/explorer_constants';
-import { toMountPoint, wrapWithTheme } from '../../../../../../src/plugins/kibana_react/public';
 import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
 import { getDefaultExplorerChartsPanelTitle } from './anomaly_charts_embeddable';
 import { HttpService } from '../../application/services/http_service';
@@ -28,7 +29,7 @@ export async function resolveEmbeddableAnomalyChartsUserInput(
     try {
       const { jobIds } = await resolveJobSelection(coreStart, input?.jobIds);
       const title = input?.title ?? getDefaultExplorerChartsPanelTitle(jobIds);
-      const jobs = await anomalyDetectorService.getJobs$(jobIds).toPromise();
+      const jobs = await lastValueFrom(anomalyDetectorService.getJobs$(jobIds));
       const influencers = anomalyDetectorService.extractInfluencers(jobs);
       influencers.push(VIEW_BY_JOB_LABEL);
       const { theme$ } = coreStart.theme;

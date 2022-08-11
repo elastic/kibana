@@ -6,11 +6,10 @@
  */
 
 import * as Rx from 'rxjs';
-import { CoreSetup, HttpServerInfo, PluginInitializerContext } from 'src/core/server';
-import { coreMock } from 'src/core/server/mocks';
-import { LevelLogger } from '../lib/level_logger';
-import { createMockConfigSchema, createMockLevelLogger } from '../test_helpers';
-import { ReportingConfigType } from './';
+import type { CoreSetup, HttpServerInfo, Logger, PluginInitializerContext } from '@kbn/core/server';
+import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { createMockConfigSchema } from '../test_helpers';
+import type { ReportingConfigType } from '.';
 import { createConfig$ } from './create_config';
 
 const createMockConfig = (
@@ -20,14 +19,14 @@ const createMockConfig = (
 describe('Reporting server createConfig$', () => {
   let mockCoreSetup: CoreSetup;
   let mockInitContext: PluginInitializerContext;
-  let mockLogger: jest.Mocked<LevelLogger>;
+  let mockLogger: jest.Mocked<Logger>;
 
   beforeEach(() => {
     mockCoreSetup = coreMock.createSetup();
     mockInitContext = coreMock.createPluginInitializerContext(
       createMockConfigSchema({ kibanaServer: {} })
     );
-    mockLogger = createMockLevelLogger();
+    mockLogger = loggingSystemMock.createLogger();
   });
 
   afterEach(() => {
@@ -40,7 +39,7 @@ describe('Reporting server createConfig$', () => {
       encryptionKey: undefined,
     });
     const mockConfig$ = createMockConfig(mockInitContext);
-    const result = await createConfig$(mockCoreSetup, mockConfig$, mockLogger).toPromise();
+    const result = await Rx.lastValueFrom(createConfig$(mockCoreSetup, mockConfig$, mockLogger));
 
     expect(result.encryptionKey).toMatch(/\S{32,}/); // random 32 characters
     expect(mockLogger.warn).toHaveBeenCalledTimes(1);
@@ -56,7 +55,7 @@ describe('Reporting server createConfig$', () => {
       })
     );
     const mockConfig$ = createMockConfig(mockInitContext);
-    const result = await createConfig$(mockCoreSetup, mockConfig$, mockLogger).toPromise();
+    const result = await Rx.lastValueFrom(createConfig$(mockCoreSetup, mockConfig$, mockLogger));
     expect(result.encryptionKey).toMatch('iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii');
     expect(mockLogger.warn).not.toHaveBeenCalled();
   });
@@ -77,6 +76,9 @@ describe('Reporting server createConfig$', () => {
 
     expect(result).toMatchInlineSnapshot(`
       Object {
+        "capture": Object {
+          "maxAttempts": 1,
+        },
         "csv": Object {},
         "encryptionKey": "iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii",
         "index": ".reporting",

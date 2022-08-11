@@ -6,12 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { GaugeShape } from '../../../../../../src/plugins/chart_expressions/expression_gauge/common';
+import type { GaugeShape } from '@kbn/expression-gauge-plugin/common';
 import {
   GaugeShapes,
   GaugeTicksPositions,
   GaugeLabelMajorModes,
-} from '../../../../../../src/plugins/chart_expressions/expression_gauge/common';
+} from '@kbn/expression-gauge-plugin/common';
 import type { TableSuggestion, Visualization } from '../../types';
 import { layerTypes } from '../../../common';
 import { GaugeVisualizationState } from './constants';

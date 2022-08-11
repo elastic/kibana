@@ -17,7 +17,7 @@ import {
   useLegendAction,
 } from '@elastic/charts';
 
-import { ClickTriggerEvent } from '../../../../charts/public';
+import { ClickTriggerEvent } from '@kbn/charts-plugin/public';
 
 export const getLegendActions = (
   canFilter: (data: ClickTriggerEvent | null) => Promise<boolean>,
@@ -96,7 +96,6 @@ export const getLegendActions = (
 
     return (
       <EuiPopover
-        id="contextMenuNormal"
         button={Button}
         isOpen={popoverOpen}
         closePopover={() => {

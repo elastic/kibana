@@ -26,7 +26,7 @@ import {
   HorizontalAlignment,
 } from '@elastic/charts';
 
-import { renderEndzoneTooltip } from '../../../../charts/public';
+import { renderEndzoneTooltip } from '@kbn/charts-plugin/public';
 
 import { getThemeService } from '../services';
 import { VisConfig } from '../types';
@@ -51,6 +51,7 @@ type XYSettingsProps = Pick<
   | 'orderBucketsBySum'
 > & {
   onPointerUpdate: SettingsProps['onPointerUpdate'];
+  externalPointerEvents: SettingsProps['externalPointerEvents'];
   xDomain?: DomainRange;
   adjustedXDomain?: DomainRange;
   showLegend: boolean;
@@ -62,6 +63,7 @@ type XYSettingsProps = Pick<
   legendPosition: Position;
   truncateLegend: boolean;
   maxLegendLines: number;
+  legendSize?: number;
   ariaLabel?: string;
 };
 
@@ -90,6 +92,7 @@ export const XYSettings: FC<XYSettingsProps> = ({
   showLegend,
   onElementClick,
   onPointerUpdate,
+  externalPointerEvents,
   onBrushEnd,
   onRenderChange,
   legendAction,
@@ -97,6 +100,7 @@ export const XYSettings: FC<XYSettingsProps> = ({
   legendPosition,
   maxLegendLines,
   truncateLegend,
+  legendSize,
   ariaLabel,
 }) => {
   const themeService = getThemeService();
@@ -161,12 +165,14 @@ export const XYSettings: FC<XYSettingsProps> = ({
     <Settings
       debugState={window._echDebugStateFlag ?? false}
       onPointerUpdate={onPointerUpdate}
+      externalPointerEvents={externalPointerEvents}
       xDomain={adjustedXDomain}
       rotation={rotation}
       theme={[themeOverrides, theme]}
       baseTheme={baseTheme}
       showLegend={showLegend}
       legendPosition={legendPosition}
+      legendSize={legendSize}
       allowBrushingLastHistogramBin={isTimeChart}
       roundHistogramBrushValues={enableHistogramMode && !isTimeChart}
       legendColorPicker={legendColorPicker}

@@ -6,10 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AggFunctionsMapping } from '../../../../../../../src/plugins/data/public';
-import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
-import { OperationDefinition } from './index';
-import { FormattedIndexPatternColumn, FieldBasedIndexPatternColumn } from './column_types';
+import React from 'react';
+import { EuiSwitch, EuiText } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
+import { AggFunctionsMapping } from '@kbn/data-plugin/public';
+import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import { OperationDefinition, ParamEditorProps } from '.';
+import { FieldBasedIndexPatternColumn, ValueFormatConfig } from './column_types';
 
 import {
   getFormatFromPreviousColumn,
@@ -17,9 +20,12 @@ import {
   getSafeName,
   getFilter,
   combineErrorMessages,
+  isColumnOfType,
 } from './helpers';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
+import { updateColumnParam } from '../layer_helpers';
+import { getColumnWindowError } from '../../window_utils';
 
 const supportedTypes = new Set([
   'string',
@@ -30,13 +36,14 @@ const supportedTypes = new Set([
   'ip_range',
   'date',
   'date_range',
+  'murmur3',
 ]);
 
 const SCALE = 'ratio';
 const OPERATION_TYPE = 'unique_count';
 const IS_BUCKETED = false;
 
-function ofName(name: string, timeShift: string | undefined) {
+function ofName(name: string, timeShift: string | undefined, window: string | undefined) {
   return adjustTimeScaleLabelSuffix(
     i18n.translate('xpack.lens.indexPattern.cardinalityOf', {
       defaultMessage: 'Unique count of {name}',
@@ -47,21 +54,31 @@ function ofName(name: string, timeShift: string | undefined) {
     undefined,
     undefined,
     undefined,
-    timeShift
+    timeShift,
+    undefined,
+    window
   );
 }
 
-export interface CardinalityIndexPatternColumn
-  extends FormattedIndexPatternColumn,
-    FieldBasedIndexPatternColumn {
+export interface CardinalityIndexPatternColumn extends FieldBasedIndexPatternColumn {
   operationType: typeof OPERATION_TYPE;
+  params?: {
+    emptyAsNull?: boolean;
+    format?: ValueFormatConfig;
+  };
 }
 
-export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternColumn, 'field'> = {
+export const cardinalityOperation: OperationDefinition<
+  CardinalityIndexPatternColumn,
+  'field',
+  {},
+  true
+> = {
   type: OPERATION_TYPE,
   displayName: i18n.translate('xpack.lens.indexPattern.cardinality', {
     defaultMessage: 'Unique count',
   }),
+  allowAsReference: true,
   input: 'field',
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
     if (
@@ -76,6 +93,7 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
     combineErrorMessages([
       getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
       getDisallowedPreviousShiftMessage(layer, columnId),
+      getColumnWindowError(layer, columnId, indexPattern),
     ]),
   isTransferable: (column, newIndexPattern) => {
     const newField = newIndexPattern.getFieldByName(column.sourceField);
@@ -89,11 +107,12 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
   },
   filterable: true,
   shiftable: true,
+  windowable: true,
   getDefaultLabel: (column, indexPattern) =>
-    ofName(getSafeName(column.sourceField, indexPattern), column.timeShift),
+    ofName(getSafeName(column.sourceField, indexPattern), column.timeShift, column.window),
   buildColumn({ field, previousColumn }, columnParams) {
     return {
-      label: ofName(field.displayName, previousColumn?.timeShift),
+      label: ofName(field.displayName, previousColumn?.timeShift, previousColumn?.window),
       dataType: 'number',
       operationType: OPERATION_TYPE,
       scale: SCALE,
@@ -101,8 +120,56 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
       isBucketed: IS_BUCKETED,
       filter: getFilter(previousColumn, columnParams),
       timeShift: columnParams?.shift || previousColumn?.timeShift,
-      params: getFormatFromPreviousColumn(previousColumn),
+      window: columnParams?.window || previousColumn?.window,
+      params: {
+        ...getFormatFromPreviousColumn(previousColumn),
+        emptyAsNull:
+          previousColumn &&
+          isColumnOfType<CardinalityIndexPatternColumn>('unique_count', previousColumn)
+            ? previousColumn.params?.emptyAsNull
+            : !columnParams?.usedInMath,
+      },
     };
+  },
+  getAdvancedOptions: ({
+    layer,
+    columnId,
+    currentColumn,
+    paramEditorUpdater,
+  }: ParamEditorProps<CardinalityIndexPatternColumn>) => {
+    return [
+      {
+        dataTestSubj: 'hide-zero-values',
+        inlineElement: (
+          <EuiSwitch
+            label={
+              <EuiText size="xs">
+                {i18n.translate('xpack.lens.indexPattern.hideZero', {
+                  defaultMessage: 'Hide zero values',
+                })}
+              </EuiText>
+            }
+            labelProps={{
+              style: {
+                fontWeight: euiThemeVars.euiFontWeightMedium,
+              },
+            }}
+            checked={Boolean(currentColumn.params?.emptyAsNull)}
+            onChange={() => {
+              paramEditorUpdater(
+                updateColumnParam({
+                  layer,
+                  columnId,
+                  paramName: 'emptyAsNull',
+                  value: !currentColumn.params?.emptyAsNull,
+                })
+              );
+            }}
+            compressed
+          />
+        ),
+      },
+    ];
   },
   toEsAggsFn: (column, columnId) => {
     return buildExpressionFunction<AggFunctionsMapping['aggCardinality']>('aggCardinality', {
@@ -112,12 +179,13 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
       field: column.sourceField,
       // time shift is added to wrapping aggFilteredMetric if filter is set
       timeShift: column.filter ? undefined : column.timeShift,
+      emptyAsNull: column.params?.emptyAsNull,
     }).toAst();
   },
   onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
-      label: ofName(field.displayName, oldColumn.timeShift),
+      label: ofName(field.displayName, oldColumn.timeShift, oldColumn.window),
       sourceField: field.name,
     };
   },

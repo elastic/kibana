@@ -13,6 +13,7 @@ Object {
         "isDerivative": false,
         "label": "CPU Utilization",
         "metricAgg": "max",
+        "technicalPreview": undefined,
         "units": "%",
       },
       "summary": Object {
@@ -32,6 +33,7 @@ Object {
         "isDerivative": false,
         "label": "Used Heap",
         "metricAgg": "max",
+        "technicalPreview": undefined,
         "title": "JVM Heap",
         "units": "%",
       },

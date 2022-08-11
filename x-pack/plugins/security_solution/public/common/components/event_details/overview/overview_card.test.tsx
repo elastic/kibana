@@ -8,8 +8,8 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { OverviewCardWithActions } from './overview_card';
-import { TestProviders } from '../../../../common/mock';
-import { SeverityBadge } from '../../../../../public/detections/components/rules/severity_badge';
+import { TestProviders } from '../../../mock';
+import { SeverityBadge } from '../../../../detections/components/rules/severity_badge';
 
 const props = {
   title: 'Severity',

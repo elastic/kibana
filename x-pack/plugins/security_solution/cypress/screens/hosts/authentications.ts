@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const AUTHENTICATIONS_TABLE = '[data-test-subj="table-authentications-loading-false"]';
+export const AUTHENTICATIONS_TABLE = '[data-test-subj="table-users-authentications-loading-false"]';

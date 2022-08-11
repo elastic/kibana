@@ -5,14 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { DataView, ISearchSource } from '../../../../data/common';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { ISearchSource } from '@kbn/data-plugin/public';
 import { getSortForSearchSource } from '../../components/doc_table';
-import { SortPairArr } from '../../components/doc_table/lib/get_sort';
+import { SortPairArr } from '../../components/doc_table/utils/get_sort';
 
 export const updateSearchSource = (
   searchSource: ISearchSource,
-  indexPattern: DataView | undefined,
+  dataView: DataView | undefined,
   sort: (SortPairArr[] & string[][]) | undefined,
   useNewFieldsApi: boolean,
   defaults: {
@@ -22,7 +22,7 @@ export const updateSearchSource = (
 ) => {
   const { sampleSize, defaultSort } = defaults;
   searchSource.setField('size', sampleSize);
-  searchSource.setField('sort', getSortForSearchSource(sort, indexPattern, defaultSort));
+  searchSource.setField('sort', getSortForSearchSource(sort, dataView, defaultSort));
   if (useNewFieldsApi) {
     searchSource.removeField('fieldsFromSource');
     const fields: Record<string, string> = { field: '*', include_unmapped: 'true' };

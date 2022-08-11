@@ -2,7 +2,7 @@
 id: kibDevTutorialServerEndpoint
 slug: /kibana-dev-docs/tutorials/registering-endpoints
 title: Registering and accessing an endpoint
-summary: Learn how to register a new endpoint and access it
+description: Learn how to register a new endpoint and access it
 date: 2021-11-24
 tags: ['kibana', 'dev', 'architecture', 'tutorials']
 ---
@@ -46,7 +46,7 @@ HTTP method. All these APIs share the same signature, and receive two parameters
 
 When invoked, the `handler` receive three parameters: `context`, `request`, and `response`, and must return a response that will be sent to serve
 the request.
-- `context` is a request-bound context exposed for the request. It allows for example to use an elasticsearch client bound to the request's credentials.
+- `context` is a request-bound context exposed for the request. For example, it allows to use an elasticsearch client bound to the request's credentials.
 - `request` contains information related to the request, such as the path and query parameter
 - `response` contains factory helpers to create the response to return from the endpoint
 
@@ -63,7 +63,7 @@ the request.
 The following snippet demonstrate how to create a basic `GET` endpoint on the `/api/my_plugin/get_object` path:
 
 ```ts
-import type { CoreSetup, Plugin } from 'kibana/server';
+import type { CoreSetup, Plugin } from '@kbn/core/server';
 
 export class MyPlugin implements Plugin {
   public setup(core: CoreSetup) {
@@ -86,7 +86,7 @@ export class MyPlugin implements Plugin {
 consuming the endpoint from the client-side using core's `http` service would then look like:
 
 ```ts
-import { HttpStart } from 'kibana/public';
+import { HttpStart } from '@kbn/core/public';
 
 interface ResponseType {
   result: string;
@@ -105,7 +105,7 @@ of the route definition.
 
 ```ts
 import { schema } from '@kbn/config-schema';
-import type { CoreSetup, Plugin } from 'kibana/server';
+import type { CoreSetup, Plugin } from '@kbn/core/server';
 
 export class MyPlugin implements Plugin {
   public setup(core: CoreSetup) {
@@ -135,7 +135,7 @@ export class MyPlugin implements Plugin {
 consuming the endpoint from the client-side using core's `http` service would then look like:
 
 ```ts
-import { HttpStart } from 'kibana/public';
+import { HttpStart } from '@kbn/core/public';
 import { MyObjectType } from '../common/types';
 
 async function fetchData(http: HttpStart, id: string) {
@@ -150,7 +150,7 @@ must be provided when registering a `post` handler that will access the payload.
 
 ```ts
 import { schema } from '@kbn/config-schema';
-import type { CoreSetup, Plugin } from 'kibana/server';
+import type { CoreSetup, Plugin } from '@kbn/core/server';
 
 export class MyPlugin implements Plugin {
   public setup(core: CoreSetup) {
@@ -182,7 +182,7 @@ export class MyPlugin implements Plugin {
 consuming the endpoint from the client-side using core's `http` service would then look like:
 
 ```ts
-import { HttpStart } from 'kibana/public';
+import { HttpStart } from '@kbn/core/public';
 
 interface ResponseType {
   updated: boolean;
@@ -207,7 +207,7 @@ option of the route definition to be accessible from the handler.
 
 ```ts
 import { schema } from '@kbn/config-schema';
-import type { CoreSetup, Plugin } from 'kibana/server';
+import type { CoreSetup, Plugin } from '@kbn/core/server';
 
 export class MyPlugin implements Plugin {
   public setup(core: CoreSetup) {
@@ -236,7 +236,7 @@ export class MyPlugin implements Plugin {
 consuming the endpoint from the client-side using core's `http` service would then look like:
 
 ```ts
-import { HttpStart } from 'kibana/public';
+import { HttpStart } from '@kbn/core/public';
 import { MyObjectType } from '../common/types';
 
 interface ResponseType {
@@ -264,7 +264,7 @@ All APIs of the `response` parameter of the handler accept a `headers` property 
 to define headers to attach to the response.
 
 ```ts
-import type { CoreSetup, Plugin } from 'kibana/server';
+import type { CoreSetup, Plugin } from '@kbn/core/server';
 
 export class MyPlugin implements Plugin {
   public setup(core: CoreSetup) {
@@ -300,7 +300,7 @@ However, some of the less commonly used return codes don't have such helpers. In
 and/or `response.customError` APIs should be used.
 
 ```ts
-import type { CoreSetup, Plugin } from 'kibana/server';
+import type { CoreSetup, Plugin } from '@kbn/core/server';
 
 export class MyPlugin implements Plugin {
   public setup(core: CoreSetup) {
@@ -332,7 +332,7 @@ These observables can either be used directly, or be used to control an `AbortCo
 
 ```ts
 import { schema } from '@kbn/config-schema';
-import type { CoreSetup, Plugin } from 'kibana/server';
+import type { CoreSetup, Plugin } from '@kbn/core/server';
 
 export class MyPlugin implements Plugin {
   public setup(core: CoreSetup) {
@@ -371,7 +371,7 @@ and will return a `401 - Unauthorized` otherwise.
 It is possible to disable this requirement using the `authRequired` option of the route.
 
 ```ts
-import type { CoreSetup, Plugin } from 'kibana/server';
+import type { CoreSetup, Plugin } from '@kbn/core/server';
 
 export class MyPlugin implements Plugin {
   public setup(core: CoreSetup) {
@@ -407,7 +407,7 @@ be achieved by using the `url` and `route` properties of the `request` parameter
 request.url / request.route
 
 ```ts
-import type { CoreSetup, Plugin } from 'kibana/server';
+import type { CoreSetup, Plugin } from '@kbn/core/server';
 
 export class MyPlugin implements Plugin {
   public setup(core: CoreSetup) {

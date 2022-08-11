@@ -9,24 +9,21 @@ import expect from '@kbn/expect';
 import { omit } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Response as SupertestResponse } from 'supertest';
-import { RecoveredActionGroup } from '../../../../../plugins/alerting/common';
+import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';
+import { TaskRunning, TaskRunningStage } from '@kbn/task-manager-plugin/server/task_running';
+import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { Space } from '../../../common/types';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
   ESTestIndexTool,
   ES_TEST_INDEX_NAME,
   getUrlPrefix,
-  getTestAlertData,
+  getTestRuleData,
   ObjectRemover,
   AlertUtils,
   ensureDatetimeIsWithinRange,
   TaskManagerUtils,
 } from '../../../common/lib';
-import {
-  TaskRunning,
-  TaskRunningStage,
-} from '../../../../../plugins/task_manager/server/task_running';
-import { ConcreteTaskInstance } from '../../../../../plugins/task_manager/server';
 
 export function alertTests({ getService }: FtrProviderContext, space: Space) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -198,7 +195,7 @@ instanceStateValue: true
         .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
-          getTestAlertData({
+          getTestRuleData({
             rule_type_id: 'test.patternFiring',
             schedule: { interval: '1s' },
             throttle: null,
@@ -259,7 +256,7 @@ instanceStateValue: true
         .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
-          getTestAlertData({
+          getTestRuleData({
             rule_type_id: 'test.patternFiring',
             schedule: { interval: '1s' },
             enabled: false,
@@ -354,7 +351,7 @@ instanceStateValue: true
         .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
-          getTestAlertData({
+          getTestRuleData({
             schedule: { interval: '1m' },
             rule_type_id: 'test.always-firing',
             params: {
@@ -427,7 +424,7 @@ instanceStateValue: true
         .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
-          getTestAlertData({
+          getTestRuleData({
             rule_type_id: 'test.authorization',
             params: {
               callClusterAuthorizationIndex: authorizationIndex,
@@ -473,7 +470,7 @@ instanceStateValue: true
         .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
-          getTestAlertData({
+          getTestRuleData({
             rule_type_id: 'test.always-firing',
             params: {
               index: ES_TEST_INDEX_NAME,

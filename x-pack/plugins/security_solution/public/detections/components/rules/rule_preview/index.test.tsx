@@ -7,11 +7,17 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+
+import type { DataViewBase } from '@kbn/es-query';
+import { fields } from '@kbn/data-plugin/common/mocks';
 
 import { TestProviders } from '../../../../common/mock';
-import { RulePreview, RulePreviewProps } from './';
+import type { RulePreviewProps } from '.';
+import { RulePreview } from '.';
 import { usePreviewRoute } from './use_preview_route';
 import { usePreviewHistogram } from './use_preview_histogram';
+import { DataSourceType } from '../../../pages/detection_engine/rules/types';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('./use_preview_route');
@@ -25,9 +31,17 @@ jest.mock('../../../../common/containers/use_global_time', () => ({
   }),
 }));
 
+const getMockIndexPattern = (): DataViewBase => ({
+  fields,
+  id: '1234',
+  title: 'logstash-*',
+});
+
 const defaultProps: RulePreviewProps = {
   ruleType: 'threat_match',
   index: ['test-*'],
+  indexPattern: getMockIndexPattern(),
+  dataSourceType: DataSourceType.IndexPatterns,
   threatIndex: ['threat-*'],
   threatMapping: [
     {
@@ -40,10 +54,12 @@ const defaultProps: RulePreviewProps = {
   query: {
     filters: [],
     query: { query: 'file.hash.md5:*', language: 'kuery' },
+    saved_id: null,
   },
   threatQuery: {
     filters: [],
     query: { query: 'threat.indicator.file.hash.md5:*', language: 'kuery' },
+    saved_id: null,
   },
   threshold: {
     field: ['agent.hostname'],
@@ -55,6 +71,9 @@ const defaultProps: RulePreviewProps = {
   },
   anomalyThreshold: 50,
   machineLearningJobId: ['test-ml-job-id'],
+  eqlOptions: {},
+  newTermsFields: ['host.ip'],
+  historyWindowSize: '7d',
 };
 
 describe('PreviewQuery', () => {
@@ -85,44 +104,91 @@ describe('PreviewQuery', () => {
     jest.clearAllMocks();
   });
 
-  test('it renders timeframe select and preview button on render', () => {
+  test('it renders timeframe select and preview button on render', async () => {
     const wrapper = render(
       <TestProviders>
         <RulePreview {...defaultProps} />
       </TestProviders>
     );
 
-    expect(wrapper.findByTestId('rule-preview')).toBeTruthy();
-    expect(wrapper.findByTestId('preview-time-frame')).toBeTruthy();
+    expect(await wrapper.findByTestId('rule-preview')).toBeTruthy();
+    expect(await wrapper.findByTestId('preview-time-frame')).toBeTruthy();
   });
 
-  test('it renders preview button disabled if "isDisabled" is true', () => {
+  test('it renders preview button disabled if "isDisabled" is true', async () => {
     const wrapper = render(
       <TestProviders>
         <RulePreview {...defaultProps} isDisabled={true} />
       </TestProviders>
     );
 
-    expect(wrapper.getByTestId('queryPreviewButton').closest('button')).toBeDisabled();
+    expect(await wrapper.getByTestId('queryPreviewButton').closest('button')).toBeDisabled();
   });
 
-  test('it renders preview button enabled if "isDisabled" is false', () => {
+  test('it renders preview button enabled if "isDisabled" is false', async () => {
     const wrapper = render(
       <TestProviders>
         <RulePreview {...defaultProps} />
       </TestProviders>
     );
 
-    expect(wrapper.getByTestId('queryPreviewButton').closest('button')).not.toBeDisabled();
+    expect(await wrapper.getByTestId('queryPreviewButton').closest('button')).not.toBeDisabled();
   });
 
-  test('does not render histogram when there is no previewId', () => {
+  test('does not render histogram when there is no previewId', async () => {
     const wrapper = render(
       <TestProviders>
         <RulePreview {...defaultProps} />
       </TestProviders>
     );
 
-    expect(wrapper.queryByTestId('[data-test-subj="preview-histogram-panel"]')).toBeNull();
+    expect(await wrapper.queryByTestId('[data-test-subj="preview-histogram-panel"]')).toBeNull();
+  });
+
+  test('it renders quick/advanced query toggle button', async () => {
+    const wrapper = render(
+      <TestProviders>
+        <RulePreview {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(await wrapper.findByTestId('quickAdvancedToggleButtonGroup')).toBeTruthy();
+  });
+
+  test('it renders timeframe, interval and look-back buttons when advanced query is selected', async () => {
+    const wrapper = render(
+      <TestProviders>
+        <RulePreview {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(await wrapper.findByTestId('quickAdvancedToggleButtonGroup')).toBeTruthy();
+    const advancedQueryButton = await wrapper.findByTestId('advancedQuery');
+    userEvent.click(advancedQueryButton);
+    expect(await wrapper.findByTestId('detectionEnginePreviewRuleInterval')).toBeTruthy();
+    expect(await wrapper.findByTestId('detectionEnginePreviewRuleLookback')).toBeTruthy();
+  });
+
+  test('it renders invocation count warning when advanced query is selected and warning flag is set to true', async () => {
+    (usePreviewRoute as jest.Mock).mockReturnValue({
+      hasNoiseWarning: false,
+      addNoiseWarning: jest.fn(),
+      createPreview: jest.fn(),
+      clearPreview: jest.fn(),
+      logs: [],
+      isPreviewRequestInProgress: false,
+      previewId: undefined,
+      showInvocationCountWarning: true,
+    });
+
+    const wrapper = render(
+      <TestProviders>
+        <RulePreview {...defaultProps} />
+      </TestProviders>
+    );
+
+    const advancedQueryButton = await wrapper.findByTestId('advancedQuery');
+    userEvent.click(advancedQueryButton);
+    expect(await wrapper.findByTestId('previewInvocationCountWarning')).toBeTruthy();
   });
 });

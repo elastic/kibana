@@ -6,7 +6,7 @@
  */
 
 import { anomaliesTableDefaultEquality } from './default_equality';
-import { AnomaliesHostTableProps } from '../types';
+import type { AnomaliesHostTableProps } from '../types';
 import { HostsType } from '../../../../hosts/store/model';
 
 describe('host_equality', () => {

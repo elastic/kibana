@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { Headers, RouteRegistrar } from 'kibana/server';
+import { Headers, RouteRegistrar } from '@kbn/core/server';
 import { CasesRequestHandlerContext } from '../../types';
 import { RegisterRoutesDeps } from './types';
 import {
@@ -74,11 +74,12 @@ export const registerRoutes = (deps: RegisterRoutesDeps) => {
   const { router, routes, logger, kibanaVersion, telemetryUsageCounter } = deps;
 
   routes.forEach((route) => {
-    const { method, path, params, options, handler } = route;
+    const { method, path, params, options, routerOptions, handler } = route;
 
     (router[method] as RouteRegistrar<typeof method, CasesRequestHandlerContext>)(
       {
         path,
+        options: routerOptions,
         validate: {
           params: params?.params ?? escapeHatch,
           query: params?.query ?? escapeHatch,

@@ -7,10 +7,10 @@
  */
 
 import React from 'react';
-import type { AdvancedSettingsSetup } from 'src/plugins/advanced_settings/public';
-import type { TelemetryPluginSetup } from 'src/plugins/telemetry/public';
-import type { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import type { CoreStart, CoreSetup } from 'src/core/public';
+import type { AdvancedSettingsSetup } from '@kbn/advanced-settings-plugin/public';
+import type { TelemetryPluginSetup } from '@kbn/telemetry-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { CoreStart, CoreSetup, DocLinksStart } from '@kbn/core/public';
 
 import {
   telemetryManagementSectionWrapper,
@@ -32,6 +32,12 @@ export class TelemetryManagementSectionPlugin {
       usageCollection,
     }: TelemetryManagementSectionPluginDepsSetup
   ) {
+    let docLinksLinks: DocLinksStart['links'];
+
+    core.getStartServices().then(([{ docLinks }]) => {
+      docLinksLinks = docLinks?.links;
+    });
+
     const ApplicationUsageTrackingProvider =
       usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
     advancedSettings.component.register(
@@ -39,9 +45,10 @@ export class TelemetryManagementSectionPlugin {
       (props) => {
         return (
           <ApplicationUsageTrackingProvider>
-            {telemetryManagementSectionWrapper(telemetryService)(
-              props as TelemetryManagementSectionWrapperProps
-            )}
+            {telemetryManagementSectionWrapper(
+              telemetryService,
+              docLinksLinks
+            )(props as TelemetryManagementSectionWrapperProps)}
           </ApplicationUsageTrackingProvider>
         );
       },

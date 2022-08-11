@@ -6,8 +6,8 @@
  */
 
 import React, { ReactElement } from 'react';
-import { I18nStart, OverlayStart, SavedObjectsClientContract } from 'src/core/public';
-import { SaveResult } from 'src/plugins/saved_objects/public';
+import { I18nStart, OverlayStart, SavedObjectsClientContract } from '@kbn/core/public';
+import { SaveResult } from '@kbn/saved-objects-plugin/public';
 import { GraphWorkspaceSavedObject, GraphSavePolicy } from '../types';
 import { SaveModal, OnSaveGraphProps } from '../components/save_modal';
 

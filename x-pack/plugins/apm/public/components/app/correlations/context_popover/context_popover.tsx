@@ -73,7 +73,7 @@ export function CorrelationsContextPopover({
               }
             )}
             data-test-subj={'apmCorrelationsContextPopoverButton'}
-            style={{ marginLeft: theme.eui.paddingSizes.xs }}
+            style={{ marginLeft: theme.eui.euiSizeXS }}
           />
         </EuiToolTip>
       }

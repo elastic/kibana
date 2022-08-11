@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from 'src/core/server';
+import { SavedObjectsType } from '@kbn/core/server';
 import { CANVAS_TYPE } from '../../common/lib/constants';
 import { workpadMigrationsFactory } from './migrations';
 import type { CanvasSavedObjectTypeMigrationsDeps } from './migrations';
@@ -32,7 +32,7 @@ export const workpadTypeFactory = (
       '@created': { type: 'date' },
     },
   },
-  migrations: workpadMigrationsFactory(deps),
+  migrations: () => workpadMigrationsFactory(deps),
   management: {
     importableAndExportable: true,
     icon: 'canvasApp',

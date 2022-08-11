@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-jest.mock('../../../../../src/plugins/kibana_utils/public');
+jest.mock('@kbn/kibana-utils-plugin/public');
 
-import { Storage } from '../../../../../src/plugins/kibana_utils/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { setClipboardData, getClipboardData } from './clipboard';
 import { LOCALSTORAGE_CLIPBOARD } from '../../common/lib/constants';
 import { elements } from '../../__fixtures__/workpads';

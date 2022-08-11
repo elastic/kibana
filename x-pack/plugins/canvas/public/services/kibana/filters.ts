@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaPluginServiceFactory } from '../../../../../../src/plugins/presentation_util/public';
+import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 // @ts-expect-error untyped local
 import { getState, getStore } from '../../state/store';
 import { State } from '../../../types';

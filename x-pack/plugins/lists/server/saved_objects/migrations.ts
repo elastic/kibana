@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { SavedObjectSanitizedDoc, SavedObjectUnsanitizedDoc } from 'kibana/server';
+import { SavedObjectSanitizedDoc, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import {
   EntriesArray,
   NonEmptyNestedEntriesArray,

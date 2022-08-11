@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { AppMountParameters } from 'kibana/public';
+import type { AppMountParameters } from '@kbn/core/public';
 import type { FC } from 'react';
 import React, { useEffect, useMemo } from 'react';
 import { createPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 
-import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
 export interface Props {
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];

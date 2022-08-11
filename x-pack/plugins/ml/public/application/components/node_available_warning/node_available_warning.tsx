@@ -11,6 +11,7 @@ import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { mlNodesAvailable, permissionToViewMlNodeCount } from '../../ml_nodes_check';
 import { getCloudDeploymentId, isCloud } from '../../services/ml_server_info';
+import { TRIAL_MAX_RAM_FOR_ML_NODES } from '../../../../common/constants/cloud';
 
 export const NodeAvailableWarning: FC = () => {
   if (mlNodesAvailable() === true || permissionToViewMlNodeCount() === false) {
@@ -46,7 +47,7 @@ export const NodeAvailableWarning: FC = () => {
           <div>
             <FormattedMessage
               id="xpack.ml.jobsList.nodeAvailableWarning.linkToCloudDescription"
-              defaultMessage="Please edit your {link}. You may enable a free 1GB machine learning node or expand your existing ML configuration."
+              defaultMessage="Please edit your {link}. You may enable a free {maxRamForMLNodes} machine learning node or expand your existing ML configuration."
               values={{
                 link: (
                   <EuiLink href={`https://cloud.elastic.co/deployments?q=${id}`}>
@@ -56,6 +57,7 @@ export const NodeAvailableWarning: FC = () => {
                     />
                   </EuiLink>
                 ),
+                maxRamForMLNodes: TRIAL_MAX_RAM_FOR_ML_NODES,
               }}
             />
           </div>

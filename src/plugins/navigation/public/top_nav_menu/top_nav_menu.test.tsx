@@ -9,21 +9,23 @@
 import React from 'react';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
-import { MountPoint } from 'kibana/public';
+import { MountPoint } from '@kbn/core/public';
 import { TopNavMenu } from './top_nav_menu';
 import { TopNavMenuData } from './top_nav_menu_data';
 import { shallowWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
-const dataShim = {
+const unifiedSearch = {
   ui: {
     SearchBar: () => <div className="searchBar" />,
+    AggregateQuerySearchBar: () => <div className="searchBar" />,
   },
-};
+} as unknown as UnifiedSearchPublicPluginStart;
 
 describe('TopNavMenu', () => {
   const WRAPPER_SELECTOR = '.kbnTopNavMenu__wrapper';
   const TOP_NAV_ITEM_SELECTOR = 'TopNavMenuItem';
-  const SEARCH_BAR_SELECTOR = 'SearchBar';
+  const SEARCH_BAR_SELECTOR = 'AggregateQuerySearchBar';
   const menuItems: TopNavMenuData[] = [
     {
       id: 'test',
@@ -72,7 +74,7 @@ describe('TopNavMenu', () => {
 
   it('Should render search bar', () => {
     const component = shallowWithIntl(
-      <TopNavMenu appName={'test'} showSearchBar={true} data={dataShim as any} />
+      <TopNavMenu appName={'test'} showSearchBar={true} unifiedSearch={unifiedSearch} />
     );
     expect(component.find(WRAPPER_SELECTOR).length).toBe(1);
     expect(component.find(TOP_NAV_ITEM_SELECTOR).length).toBe(0);
@@ -81,7 +83,12 @@ describe('TopNavMenu', () => {
 
   it('Should render menu items and search bar', () => {
     const component = shallowWithIntl(
-      <TopNavMenu appName={'test'} config={menuItems} showSearchBar={true} data={dataShim as any} />
+      <TopNavMenu
+        appName={'test'}
+        config={menuItems}
+        showSearchBar={true}
+        unifiedSearch={unifiedSearch}
+      />
     );
     expect(component.find(WRAPPER_SELECTOR).length).toBe(1);
     expect(component.find(TOP_NAV_ITEM_SELECTOR).length).toBe(menuItems.length);
@@ -94,7 +101,7 @@ describe('TopNavMenu', () => {
         appName={'test'}
         config={menuItems}
         showSearchBar={true}
-        data={dataShim as any}
+        unifiedSearch={unifiedSearch}
         className={'myCoolClass'}
       />
     );
@@ -142,7 +149,7 @@ describe('TopNavMenu', () => {
           appName={'test'}
           config={menuItems}
           showSearchBar={true}
-          data={dataShim as any}
+          unifiedSearch={unifiedSearch}
           setMenuMountPoint={setMountPoint}
         />
       );
@@ -153,7 +160,6 @@ describe('TopNavMenu', () => {
 
       await refresh();
 
-      expect(component.find(WRAPPER_SELECTOR).length).toBe(1);
       expect(component.find(SEARCH_BAR_SELECTOR).length).toBe(1);
 
       // menu is rendered outside of the component

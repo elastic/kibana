@@ -6,8 +6,8 @@
  */
 
 import { Filter } from '@kbn/es-query';
+import { MigrateFunction } from '@kbn/kibana-utils-plugin/common';
 import { MapSavedObjectAttributes } from '../map_saved_object_type';
-import { MigrateFunction } from '../../../../../src/plugins/kibana_utils/common';
 
 export function migrateDataPersistedState(
   {

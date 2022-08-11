@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const map = require('./static/map_interpolation');
+const map = require('./static/map_interpolation.json');
 
 module.exports = (pattern, { brackets, exact } = {}) => {
   let newPattern = pattern;

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ApmUserAgentFields } from '../../apm/apm_fields';
+import { ApmUserAgentFields } from '../apm_fields';
 
 export function getChromeUserAgentDefaults(): ApmUserAgentFields {
   return {

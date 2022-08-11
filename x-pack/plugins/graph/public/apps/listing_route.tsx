@@ -9,23 +9,26 @@ import React, { Fragment, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { EuiEmptyPrompt, EuiLink, EuiButton } from '@elastic/eui';
-import { ApplicationStart } from 'kibana/public';
+import { ApplicationStart } from '@kbn/core/public';
 import { useHistory, useLocation } from 'react-router-dom';
-import { TableListView } from '../../../../../src/plugins/kibana_react/public';
+import { TableListView } from '@kbn/kibana-react-plugin/public';
 import { deleteSavedWorkspace, findSavedWorkspace } from '../helpers/saved_workspace_utils';
 import { getEditPath, getEditUrl, getNewPath, setBreadcrumbs } from '../services/url';
 import { GraphWorkspaceSavedObject } from '../types';
 import { GraphServices } from '../application';
 
+const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
+const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
+
 export interface ListingRouteProps {
-  deps: GraphServices;
+  deps: Omit<GraphServices, 'savedObjects'>;
 }
 
 export function ListingRoute({
-  deps: { chrome, savedObjects, savedObjectsClient, coreStart, capabilities, addBasePath },
+  deps: { chrome, savedObjectsClient, coreStart, capabilities, addBasePath, uiSettings },
 }: ListingRouteProps) {
-  const listingLimit = savedObjects.settings.getListingLimit();
-  const initialPageSize = savedObjects.settings.getPerPage();
+  const listingLimit = uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
+  const initialPageSize = uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
   const history = useHistory();
   const query = new URLSearchParams(useLocation().search);
   const initialFilter = query.get('filter') || '';
@@ -103,6 +106,7 @@ export function ListingRoute({
           defaultMessage: 'Graphs',
         })}
         theme={coreStart.theme}
+        application={coreStart.application}
       />
     </I18nProvider>
   );

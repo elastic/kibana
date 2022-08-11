@@ -9,7 +9,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { SynonymIcon } from './';
+import { SynonymIcon } from '.';
 
 describe('SynonymIcon', () => {
   it('renders', () => {

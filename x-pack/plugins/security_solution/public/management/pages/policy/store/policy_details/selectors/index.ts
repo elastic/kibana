@@ -6,5 +6,4 @@
  */
 
 export * from './policy_settings_selectors';
-export * from './trusted_apps_selectors';
 export * from './policy_common_selectors';

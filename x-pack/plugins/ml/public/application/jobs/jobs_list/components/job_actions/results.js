@@ -75,7 +75,6 @@ export function ResultLinks({ jobs }) {
               href={timeSeriesExplorerLink}
               iconType="visLine"
               aria-label={openJobsInSingleMetricViewerText}
-              className="results-button"
               isDisabled={singleMetricEnabled === false || jobActionsDisabled === true}
               data-test-subj="mlOpenJobsInSingleMetricViewerButton"
             />
@@ -88,7 +87,6 @@ export function ResultLinks({ jobs }) {
             href={anomalyExplorerLink}
             iconType="visTable"
             aria-label={openJobsInAnomalyExplorerText}
-            className="results-button"
             isDisabled={jobActionsDisabled === true}
             data-test-subj="mlOpenJobsInAnomalyExplorerButton"
           />

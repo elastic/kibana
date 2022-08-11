@@ -9,7 +9,7 @@ import { useState, useEffect, useMemo } from 'react';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { DEFAULT_ANOMALY_SCORE } from '../../../../../common/constants';
 import { anomaliesTableData } from '../api/anomalies_table_data';
-import { InfluencerInput, Anomalies, CriteriaFields } from '../types';
+import type { InfluencerInput, Anomalies, CriteriaFields } from '../types';
 
 import * as i18n from './translations';
 import { useTimeZone, useUiSetting$ } from '../../../lib/kibana';
@@ -80,7 +80,9 @@ export const useAnomaliesTableData = ({
       earliestMs: number,
       latestMs: number
     ) {
-      if (isMlUser && !skip && jobIds.length > 0) {
+      if (skip) {
+        setLoading(false);
+      } else if (isMlUser && !skip && jobIds.length > 0) {
         try {
           const data = await anomaliesTableData(
             {

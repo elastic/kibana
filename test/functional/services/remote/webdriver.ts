@@ -12,7 +12,7 @@ import Fs from 'fs';
 import * as Rx from 'rxjs';
 import { mergeMap, map, takeUntil, catchError, ignoreElements } from 'rxjs/operators';
 import { Lifecycle } from '@kbn/test';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import chromeDriver from 'chromedriver';
 // @ts-ignore types not available
 import geckoDriver from 'geckodriver';
@@ -364,39 +364,41 @@ export async function initWebDriver(
   }
 
   let attempt = 1;
-  return await Rx.race(
-    Rx.timer(2 * MINUTE).pipe(
-      map(() => {
-        throw new Error('remote failed to start within 2 minutes');
-      })
-    ),
-
+  return await Rx.firstValueFrom(
     Rx.race(
-      Rx.defer(async () => {
-        const command = await attemptToCreateCommand(log, browserType, lifecycle, config);
-        if (!command) {
-          throw new Error('remote creation aborted');
-        }
-        return command;
-      }),
-      Rx.timer(30 * SECOND).pipe(
+      Rx.timer(2 * MINUTE).pipe(
         map(() => {
-          throw new Error('remote failed to start within 30 seconds');
+          throw new Error('remote failed to start within 2 minutes');
+        })
+      ),
+
+      Rx.race(
+        Rx.defer(async () => {
+          const command = await attemptToCreateCommand(log, browserType, lifecycle, config);
+          if (!command) {
+            throw new Error('remote creation aborted');
+          }
+          return command;
+        }),
+        Rx.timer(30 * SECOND).pipe(
+          map(() => {
+            throw new Error('remote failed to start within 30 seconds');
+          })
+        )
+      ).pipe(
+        catchError((error, resubscribe) => {
+          log.warning('Failure while creating webdriver instance');
+          log.warning(error);
+
+          if (attempt > 5) {
+            throw new Error('out of retry attempts');
+          }
+
+          attempt += 1;
+          log.warning('...retrying in 15 seconds...');
+          return Rx.concat(sleep$(15000), resubscribe);
         })
       )
-    ).pipe(
-      catchError((error, resubscribe) => {
-        log.warning('Failure while creating webdriver instance');
-        log.warning(error);
-
-        if (attempt > 5) {
-          throw new Error('out of retry attempts');
-        }
-
-        attempt += 1;
-        log.warning('...retrying in 15 seconds...');
-        return Rx.concat(sleep$(15000), resubscribe);
-      })
     )
-  ).toPromise();
+  );
 }

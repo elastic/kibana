@@ -22,7 +22,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('Home page', function () {
     describe('Loads the app with limited privileges', () => {
       before(async () => {
-        await security.testUser.setRoles(['alerts_and_actions_role'], true);
+        await security.testUser.setRoles(['alerts_and_actions_role']);
       });
       after(async () => {
         await security.testUser.restoreDefaults();
@@ -32,6 +32,21 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.common.navigateToApp('triggersActions');
         const headingText = await pageObjects.triggersActionsUI.getSectionHeadingText();
         expect(headingText).to.be('Rules and Connectors');
+      });
+    });
+
+    describe('Loads the app with actions but not alerting privilege', () => {
+      before(async () => {
+        await security.testUser.setRoles(['only_actions_role']);
+      });
+      after(async () => {
+        await security.testUser.restoreDefaults();
+      });
+
+      it('Loads the Alerts page but with error', async () => {
+        await pageObjects.common.navigateToApp('triggersActions');
+        const headingText = await pageObjects.triggersActionsUI.getRulesListTitle();
+        expect(headingText).to.be('No permissions to create rules');
       });
     });
 

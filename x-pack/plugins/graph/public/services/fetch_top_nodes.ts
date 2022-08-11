@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreStart } from 'src/core/public';
+import { CoreStart } from '@kbn/core/public';
 import { WorkspaceField, ServerResultNode } from '../types';
 
 const DEFAULT_SHARD_SIZE = 5000;

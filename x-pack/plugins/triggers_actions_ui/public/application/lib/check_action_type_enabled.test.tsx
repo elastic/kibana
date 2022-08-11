@@ -24,6 +24,7 @@ describe('checkActionTypeEnabled', () => {
     const actionType: ActionType = {
       id: '1',
       minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
       name: 'my action',
       enabled: true,
       enabledInConfig: true,
@@ -40,6 +41,7 @@ describe('checkActionTypeEnabled', () => {
     const actionType: ActionType = {
       id: '1',
       minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
       name: 'my action',
       enabled: false,
       enabledInConfig: true,
@@ -74,6 +76,7 @@ describe('checkActionTypeEnabled', () => {
     const actionType: ActionType = {
       id: '1',
       minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
       name: 'my action',
       enabled: false,
       enabledInConfig: false,
@@ -99,6 +102,7 @@ describe('checkActionFormActionTypeEnabled', () => {
       actionTypeId: '1',
       id: 'test1',
       isPreconfigured: true,
+      isDeprecated: true,
       name: 'test',
       referencedByCount: 0,
     },
@@ -106,6 +110,7 @@ describe('checkActionFormActionTypeEnabled', () => {
       actionTypeId: '2',
       id: 'test2',
       isPreconfigured: true,
+      isDeprecated: true,
       name: 'test',
       referencedByCount: 0,
     },
@@ -115,6 +120,7 @@ describe('checkActionFormActionTypeEnabled', () => {
     const actionType: ActionType = {
       id: '1',
       minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
       name: 'my action',
       enabled: true,
       enabledInConfig: false,
@@ -133,6 +139,7 @@ describe('checkActionFormActionTypeEnabled', () => {
     const actionType: ActionType = {
       id: 'disabled-by-config',
       minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
       name: 'my action',
       enabled: true,
       enabledInConfig: false,

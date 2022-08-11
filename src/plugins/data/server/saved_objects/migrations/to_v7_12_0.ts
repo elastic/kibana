@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectMigrationFn } from 'kibana/server';
+import type { SavedObjectMigrationFn } from '@kbn/core/server';
 
 /**
  * Drop the previous document's attributes, which report `averageDuration` incorrectly.

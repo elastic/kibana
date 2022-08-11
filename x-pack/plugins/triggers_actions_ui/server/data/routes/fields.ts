@@ -13,8 +13,8 @@ import {
   IKibanaResponse,
   KibanaResponseFactory,
   ElasticsearchClient,
-} from 'kibana/server';
-import { Logger } from '../../../../../../src/core/server';
+} from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 
 const bodySchema = schema.object({
   indexPatterns: schema.arrayOf(schema.string()),
@@ -34,6 +34,7 @@ export function createFieldsRoute(logger: Logger, router: IRouter, baseRoute: st
     },
     handler
   );
+
   async function handler(
     ctx: RequestHandlerContext,
     req: KibanaRequest<unknown, unknown, RequestBody>,
@@ -49,10 +50,8 @@ export function createFieldsRoute(logger: Logger, router: IRouter, baseRoute: st
     }
 
     try {
-      rawFields = await getRawFields(
-        ctx.core.elasticsearch.client.asCurrentUser,
-        req.body.indexPatterns
-      );
+      const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
+      rawFields = await getRawFields(esClient, req.body.indexPatterns);
     } catch (err) {
       const indexPatterns = req.body.indexPatterns.join(',');
       logger.warn(
@@ -139,4 +138,5 @@ const normalizedFieldTypes: Record<string, string> = {
   float: 'number',
   half_float: 'number',
   scaled_float: 'number',
+  unsigned_long: 'number',
 };

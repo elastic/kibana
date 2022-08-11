@@ -1,0 +1,149 @@
+{
+  "id": "@kbn/axe-config",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/axe-config",
+        "id": "def-common.AXE_CONFIG",
+        "type": "Object",
+        "tags": [],
+        "label": "AXE_CONFIG",
+        "description": [],
+        "path": "packages/kbn-axe-config/src/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/axe-config",
+            "id": "def-common.AXE_CONFIG.rules",
+            "type": "Array",
+            "tags": [],
+            "label": "rules",
+            "description": [],
+            "signature": [
+              "{ id: string; selector: string; }[]"
+            ],
+            "path": "packages/kbn-axe-config/src/index.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/axe-config",
+        "id": "def-common.AXE_OPTIONS",
+        "type": "Object",
+        "tags": [],
+        "label": "AXE_OPTIONS",
+        "description": [],
+        "path": "packages/kbn-axe-config/src/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/axe-config",
+            "id": "def-common.AXE_OPTIONS.reporter",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "reporter",
+            "description": [],
+            "signature": [
+              "\"raw\" | \"v2\" | \"v1\" | \"raw-env\" | \"no-passes\""
+            ],
+            "path": "packages/kbn-axe-config/src/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/axe-config",
+            "id": "def-common.AXE_OPTIONS.runOnly",
+            "type": "Array",
+            "tags": [],
+            "label": "runOnly",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/kbn-axe-config/src/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/axe-config",
+            "id": "def-common.AXE_OPTIONS.rules",
+            "type": "Object",
+            "tags": [],
+            "label": "rules",
+            "description": [],
+            "path": "packages/kbn-axe-config/src/index.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/axe-config",
+                "id": "def-common.AXE_OPTIONS.rules.colorcontrast",
+                "type": "Object",
+                "tags": [],
+                "label": "'color-contrast'",
+                "description": [],
+                "path": "packages/kbn-axe-config/src/index.ts",
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/axe-config",
+                    "id": "def-common.AXE_OPTIONS.rules.colorcontrast.enabled",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "enabled",
+                    "description": [],
+                    "path": "packages/kbn-axe-config/src/index.ts",
+                    "deprecated": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "@kbn/axe-config",
+                "id": "def-common.AXE_OPTIONS.rules.bypass",
+                "type": "Object",
+                "tags": [],
+                "label": "bypass",
+                "description": [],
+                "path": "packages/kbn-axe-config/src/index.ts",
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/axe-config",
+                    "id": "def-common.AXE_OPTIONS.rules.bypass.enabled",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "enabled",
+                    "description": [],
+                    "path": "packages/kbn-axe-config/src/index.ts",
+                    "deprecated": false
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

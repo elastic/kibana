@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '../../../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
+import type {
+  NetworkTopNFlowRequestOptions,
+  NetworkTopNFlowStrategyResponse,
+} from '../../../../../../../common/search_strategy';
 import {
   Direction,
   FlowTargetSourceDest,
   NetworkQueries,
-  NetworkTopNFlowRequestOptions,
-  NetworkTopNFlowStrategyResponse,
   NetworkTopTablesFields,
 } from '../../../../../../../common/search_strategy';
 
@@ -95,8 +97,9 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                       _index: 'filebeat-8.0.0-2020.09.02-000001',
                       _id: 'dd4fa2d4bd-1526378075029582',
                       _score: 0,
-                      _source: {
-                        source: { as: { number: 15169, organization: { name: 'Google LLC' } } },
+                      fields: {
+                        'source.as.number': [15169],
+                        'source.as.organization.name': ['Google LLC'],
                       },
                     },
                   ],
@@ -114,16 +117,17 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                       _index: 'filebeat-8.0.0-2020.09.02-000001',
                       _id: 'dd4fa2d4bd-1526378075029582',
                       _score: 0,
-                      _source: {
-                        source: {
-                          geo: {
-                            continent_name: 'North America',
-                            region_iso_code: 'US-VA',
-                            country_iso_code: 'US',
-                            region_name: 'Virginia',
-                            location: { lon: -77.2481, lat: 38.6583 },
+                      fields: {
+                        'source.geo.continent_name': ['North America'],
+                        'source.geo.region_iso_code': ['US-VA'],
+                        'source.geo.country_iso_code': ['US'],
+                        'source.geo.region_name': ['Virginia'],
+                        'source.geo.location': [
+                          {
+                            coordinates: [-77.2481, 38.6583],
+                            type: 'Point',
                           },
-                        },
+                        ],
                       },
                     },
                   ],
@@ -150,8 +154,9 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                       _index: 'filebeat-8.0.0-2020.09.02-000001',
                       _id: 'dd4fa2d4bd-1527252060367158',
                       _score: 0,
-                      _source: {
-                        source: { as: { number: 54113, organization: { name: 'Fastly' } } },
+                      fields: {
+                        'source.as.number': [54113],
+                        'source.as.organization.name': ['Fastly'],
                       },
                     },
                   ],
@@ -169,17 +174,18 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                       _index: 'filebeat-8.0.0-2020.09.02-000001',
                       _id: 'dd4fa2d4bd-1527252060367158',
                       _score: 0,
-                      _source: {
-                        source: {
-                          geo: {
-                            continent_name: 'North America',
-                            region_iso_code: 'US-VA',
-                            city_name: 'Ashburn',
-                            country_iso_code: 'US',
-                            region_name: 'Virginia',
-                            location: { lon: -77.4728, lat: 39.0481 },
+                      fields: {
+                        'source.geo.continent_name': ['North America'],
+                        'source.geo.region_iso_code': ['US-VA'],
+                        'source.geo.city_name': ['Ashburn'],
+                        'source.geo.country_iso_code': ['US'],
+                        'source.geo.region_name': ['Virginia'],
+                        'source.geo.location': [
+                          {
+                            coordinates: [-77.4728, 39.0481],
+                            type: 'Point',
                           },
-                        },
+                        ],
                       },
                     },
                   ],
@@ -206,10 +212,9 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                       _index: 'filebeat-8.0.0-2020.09.02-000001',
                       _id: 'dd4fa2d4bd-1526971840437636',
                       _score: 0,
-                      _source: {
-                        source: {
-                          as: { number: 41231, organization: { name: 'Canonical Group Limited' } },
-                        },
+                      fields: {
+                        'source.as.number': [41231],
+                        'source.as.organization.name': ['Canonical Group Limited'],
                       },
                     },
                   ],
@@ -227,17 +232,18 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                       _index: 'filebeat-8.0.0-2020.09.02-000001',
                       _id: 'dd4fa2d4bd-1526971840437636',
                       _score: 0,
-                      _source: {
-                        source: {
-                          geo: {
-                            continent_name: 'Europe',
-                            region_iso_code: 'GB-ENG',
-                            city_name: 'London',
-                            country_iso_code: 'GB',
-                            region_name: 'England',
-                            location: { lon: -0.0961, lat: 51.5132 },
+                      fields: {
+                        'source.geo.continent_name': ['Europe'],
+                        'source.geo.region_iso_code': ['GB-ENG'],
+                        'source.geo.city_name': ['London'],
+                        'source.geo.country_iso_code': ['GB'],
+                        'source.geo.region_name': ['England'],
+                        'source.geo.location': [
+                          {
+                            coordinates: [-0.0961, 51.5132],
+                            type: 'Point',
                           },
-                        },
+                        ],
                       },
                     },
                   ],
@@ -291,8 +297,9 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                       _index: 'filebeat-8.0.0-2020.09.02-000001',
                       _id: 'dd4fa2d4bd-1527003062069535',
                       _score: 0,
-                      _source: {
-                        source: { as: { number: 54113, organization: { name: 'Fastly' } } },
+                      fields: {
+                        'source.as.number': [54113],
+                        'source.as.organization.name': ['Fastly'],
                       },
                     },
                   ],
@@ -310,17 +317,18 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                       _index: 'filebeat-8.0.0-2020.09.02-000001',
                       _id: 'dd4fa2d4bd-1527003062069535',
                       _score: 0,
-                      _source: {
-                        source: {
-                          geo: {
-                            continent_name: 'North America',
-                            region_iso_code: 'US-VA',
-                            city_name: 'Ashburn',
-                            country_iso_code: 'US',
-                            region_name: 'Virginia',
-                            location: { lon: -77.539, lat: 39.018 },
+                      fields: {
+                        'source.geo.continent_name': ['North America'],
+                        'source.geo.region_iso_code': ['US-VA'],
+                        'source.geo.city_name': ['Ashburn'],
+                        'source.geo.country_iso_code': ['US'],
+                        'source.geo.region_name': ['Virginia'],
+                        'source.geo.location': [
+                          {
+                            coordinates: [-77.539, 39.018],
+                            type: 'Point',
                           },
-                        },
+                        ],
                       },
                     },
                   ],
@@ -347,8 +355,9 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                       _index: 'filebeat-8.0.0-2020.09.02-000001',
                       _id: 'dd4fa2d4bd-1526557113311472',
                       _score: 0,
-                      _source: {
-                        source: { as: { number: 15169, organization: { name: 'Google LLC' } } },
+                      fields: {
+                        'source.as.number': [15169],
+                        'source.as.organization.name': ['Google LLC'],
                       },
                     },
                   ],
@@ -366,16 +375,17 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                       _index: 'filebeat-8.0.0-2020.09.02-000001',
                       _id: 'dd4fa2d4bd-1526557113311472',
                       _score: 0,
-                      _source: {
-                        source: {
-                          geo: {
-                            continent_name: 'North America',
-                            region_iso_code: 'US-VA',
-                            country_iso_code: 'US',
-                            region_name: 'Virginia',
-                            location: { lon: -77.2481, lat: 38.6583 },
+                      fields: {
+                        'source.geo.continent_name': ['North America'],
+                        'source.geo.region_iso_code': ['US-VA'],
+                        'source.geo.country_iso_code': ['US'],
+                        'source.geo.region_name': ['Virginia'],
+                        'source.geo.location': [
+                          {
+                            coordinates: [-77.2481, 38.6583],
+                            type: 'Point',
                           },
-                        },
+                        ],
                       },
                     },
                   ],
@@ -402,8 +412,9 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                       _index: 'filebeat-8.0.0-2020.09.02-000001',
                       _id: 'dd4fa2d4bd-1526379128390241',
                       _score: 0,
-                      _source: {
-                        source: { as: { number: 54113, organization: { name: 'Fastly' } } },
+                      fields: {
+                        'source.as.number': [54113],
+                        'source.as.organization.name': ['Fastly'],
                       },
                     },
                   ],
@@ -421,14 +432,15 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                       _index: 'filebeat-8.0.0-2020.09.02-000001',
                       _id: 'dd4fa2d4bd-1526379128390241',
                       _score: 0,
-                      _source: {
-                        source: {
-                          geo: {
-                            continent_name: 'North America',
-                            country_iso_code: 'US',
-                            location: { lon: -97.822, lat: 37.751 },
+                      fields: {
+                        'source.geo.continent_name': ['North America'],
+                        'source.geo.country_iso_code': ['US'],
+                        'source.geo.location': [
+                          {
+                            coordinates: [-97.822, 37.751],
+                            type: 'Point',
                           },
-                        },
+                        ],
                       },
                     },
                   ],
@@ -455,10 +467,9 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                       _index: 'filebeat-8.0.0-2020.09.02-000001',
                       _id: 'dd4fa2d4bd-1526555996515551',
                       _score: 0,
-                      _source: {
-                        source: {
-                          as: { number: 41231, organization: { name: 'Canonical Group Limited' } },
-                        },
+                      fields: {
+                        'source.as.number': [41231],
+                        'source.as.organization.name': ['Canonical Group Limited'],
                       },
                     },
                   ],
@@ -476,17 +487,18 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                       _index: 'filebeat-8.0.0-2020.09.02-000001',
                       _id: 'dd4fa2d4bd-1526555996515551',
                       _score: 0,
-                      _source: {
-                        source: {
-                          geo: {
-                            continent_name: 'North America',
-                            region_iso_code: 'US-MA',
-                            city_name: 'Boston',
-                            country_iso_code: 'US',
-                            region_name: 'Massachusetts',
-                            location: { lon: -71.0631, lat: 42.3562 },
+                      fields: {
+                        'source.geo.continent_name': ['North America'],
+                        'source.geo.region_iso_code': ['US-MA'],
+                        'source.geo.city_name': ['Boston'],
+                        'source.geo.country_iso_code': ['US'],
+                        'source.geo.region_name': ['Massachusetts'],
+                        'source.geo.location': [
+                          {
+                            coordinates: [-71.0631, 42.3562],
+                            type: 'Point',
                           },
-                        },
+                        ],
                       },
                     },
                   ],
@@ -513,8 +525,9 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                       _index: 'filebeat-8.0.0-2020.09.02-000001',
                       _id: 'dd4fa2d4bd-1526584379144248',
                       _score: 0,
-                      _source: {
-                        source: { as: { number: 133766, organization: { name: 'YHSRV.LLC' } } },
+                      fields: {
+                        'source.as.number': [133766],
+                        'source.as.organization.name': ['YHSRV.LLC'],
                       },
                     },
                   ],
@@ -532,14 +545,15 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                       _index: 'filebeat-8.0.0-2020.09.02-000001',
                       _id: 'dd4fa2d4bd-1526584379144248',
                       _score: 0,
-                      _source: {
-                        source: {
-                          geo: {
-                            continent_name: 'North America',
-                            country_iso_code: 'US',
-                            location: { lon: -97.822, lat: 37.751 },
+                      fields: {
+                        'source.geo.continent_name': ['North America'],
+                        'source.geo.country_iso_code': ['US'],
+                        'source.geo.location': [
+                          {
+                            coordinates: [-97.822, 37.751],
+                            type: 'Point',
                           },
-                        },
+                        ],
                       },
                     },
                   ],
@@ -836,11 +850,39 @@ export const formattedSearchStrategyResponse: NetworkTopNFlowStrategyResponse = 
                   },
                   location: {
                     filter: { exists: { field: 'source.geo' } },
-                    aggs: { top_geo: { top_hits: { _source: 'source.geo.*', size: 1 } } },
+                    aggs: {
+                      top_geo: {
+                        top_hits: {
+                          _source: false,
+                          fields: [
+                            'source.geo.*',
+                            {
+                              field: '@timestamp',
+                              format: 'strict_date_optional_time',
+                            },
+                          ],
+                          size: 1,
+                        },
+                      },
+                    },
                   },
                   autonomous_system: {
                     filter: { exists: { field: 'source.as' } },
-                    aggs: { top_as: { top_hits: { _source: 'source.as.*', size: 1 } } },
+                    aggs: {
+                      top_as: {
+                        top_hits: {
+                          _source: false,
+                          fields: [
+                            'source.as.*',
+                            {
+                              field: '@timestamp',
+                              format: 'strict_date_optional_time',
+                            },
+                          ],
+                          size: 1,
+                        },
+                      },
+                    },
                   },
                   flows: { cardinality: { field: 'network.community_id' } },
                   destination_ips: { cardinality: { field: 'destination.ip' } },
@@ -863,6 +905,13 @@ export const formattedSearchStrategyResponse: NetworkTopNFlowStrategyResponse = 
                 ],
               },
             },
+            _source: false,
+            fields: [
+              {
+                field: '@timestamp',
+                format: 'strict_date_optional_time',
+              },
+            ],
           },
           size: 0,
           track_total_hits: false,
@@ -904,11 +953,39 @@ export const expectedDsl = {
           },
           location: {
             filter: { exists: { field: 'source.geo' } },
-            aggs: { top_geo: { top_hits: { _source: 'source.geo.*', size: 1 } } },
+            aggs: {
+              top_geo: {
+                top_hits: {
+                  _source: false,
+                  fields: [
+                    'source.geo.*',
+                    {
+                      field: '@timestamp',
+                      format: 'strict_date_optional_time',
+                    },
+                  ],
+                  size: 1,
+                },
+              },
+            },
           },
           autonomous_system: {
             filter: { exists: { field: 'source.as' } },
-            aggs: { top_as: { top_hits: { _source: 'source.as.*', size: 1 } } },
+            aggs: {
+              top_as: {
+                top_hits: {
+                  _source: false,
+                  fields: [
+                    'source.as.*',
+                    {
+                      field: '@timestamp',
+                      format: 'strict_date_optional_time',
+                    },
+                  ],
+                  size: 1,
+                },
+              },
+            },
           },
           flows: { cardinality: { field: 'network.community_id' } },
           destination_ips: { cardinality: { field: 'destination.ip' } },
@@ -931,6 +1008,13 @@ export const expectedDsl = {
         ],
       },
     },
+    _source: false,
+    fields: [
+      {
+        field: '@timestamp',
+        format: 'strict_date_optional_time',
+      },
+    ],
   },
   size: 0,
   track_total_hits: false,

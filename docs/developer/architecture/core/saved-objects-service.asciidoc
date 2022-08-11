@@ -32,6 +32,7 @@ wanting to use Saved Objects.
 
 === Server side usage
 
+[[saved-objects-type-registration]]
 ==== Registering a Saved Object type
 Saved object type definitions should be defined in their own `my_plugin/server/saved_objects` directory.
 

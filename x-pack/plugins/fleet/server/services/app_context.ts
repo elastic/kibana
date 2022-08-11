@@ -8,31 +8,37 @@
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { kibanaPackageJson } from '@kbn/utils';
-import type { KibanaRequest } from 'src/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import type {
   ElasticsearchClient,
   SavedObjectsServiceStart,
   HttpServiceSetup,
   Logger,
-} from 'src/core/server';
+} from '@kbn/core/server';
 
-import type { PluginStart as DataPluginStart } from '../../../../../src/plugins/data/server';
+import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type {
   EncryptedSavedObjectsClient,
   EncryptedSavedObjectsPluginSetup,
-} from '../../../encrypted_saved_objects/server';
+} from '@kbn/encrypted-saved-objects-plugin/server';
 
-import type { SecurityPluginStart, SecurityPluginSetup } from '../../../security/server';
-import type { FleetConfigType } from '../../common';
+import type { SecurityPluginStart, SecurityPluginSetup } from '@kbn/security-plugin/server';
+
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
+
+import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
+
+import type { FleetConfigType } from '../../common/types';
+import type { ExperimentalFeatures } from '../../common/experimental_features';
 import type {
   ExternalCallback,
   ExternalCallbacksStorage,
   PostPackagePolicyCreateCallback,
   PostPackagePolicyDeleteCallback,
+  PostPackagePolicyPostCreateCallback,
   PutPackagePolicyUpdateCallback,
 } from '../types';
 import type { FleetAppContext } from '../plugin';
-import type { CloudSetup } from '../../../cloud/server';
 import type { TelemetryEventsSender } from '../telemetry/sender';
 
 class AppContextService {
@@ -40,6 +46,7 @@ class AppContextService {
   private encryptedSavedObjectsSetup: EncryptedSavedObjectsPluginSetup | undefined;
   private data: DataPluginStart | undefined;
   private esClient: ElasticsearchClient | undefined;
+  private experimentalFeatures?: ExperimentalFeatures;
   private securitySetup: SecurityPluginSetup | undefined;
   private securityStart: SecurityPluginStart | undefined;
   private config$?: Observable<FleetConfigType>;
@@ -53,6 +60,7 @@ class AppContextService {
   private httpSetup?: HttpServiceSetup;
   private externalCallbacks: ExternalCallbacksStorage = new Map();
   private telemetryEventsSender: TelemetryEventsSender | undefined;
+  private savedObjectsTagging: SavedObjectTaggingStart | undefined;
 
   public start(appContext: FleetAppContext) {
     this.data = appContext.data;
@@ -62,6 +70,7 @@ class AppContextService {
     this.securitySetup = appContext.securitySetup;
     this.securityStart = appContext.securityStart;
     this.savedObjects = appContext.savedObjects;
+    this.experimentalFeatures = appContext.experimentalFeatures;
     this.isProductionMode = appContext.isProductionMode;
     this.cloud = appContext.cloud;
     this.logger = appContext.logger;
@@ -69,6 +78,7 @@ class AppContextService {
     this.kibanaBranch = appContext.kibanaBranch;
     this.httpSetup = appContext.httpSetup;
     this.telemetryEventsSender = appContext.telemetryEventsSender;
+    this.savedObjectsTagging = appContext.savedObjectsTagging;
 
     if (appContext.config$) {
       this.config$ = appContext.config$;
@@ -123,11 +133,25 @@ class AppContextService {
     return this.config$;
   }
 
+  public getExperimentalFeatures() {
+    if (!this.experimentalFeatures) {
+      throw new Error('experimentalFeatures not set.');
+    }
+    return this.experimentalFeatures;
+  }
+
   public getSavedObjects() {
     if (!this.savedObjects) {
       throw new Error('Saved objects start service not set.');
     }
     return this.savedObjects;
+  }
+
+  public getSavedObjectsTagging() {
+    if (!this.savedObjectsTagging) {
+      throw new Error('Saved object tagging start service not set.');
+    }
+    return this.savedObjectsTagging;
   }
 
   public getInternalUserSOClient(request: KibanaRequest) {
@@ -183,6 +207,8 @@ class AppContextService {
           ? PostPackagePolicyCreateCallback
           : T extends 'postPackagePolicyDelete'
           ? PostPackagePolicyDeleteCallback
+          : T extends 'packagePolicyPostCreate'
+          ? PostPackagePolicyPostCreateCallback
           : PutPackagePolicyUpdateCallback
       >
     | undefined {
@@ -192,6 +218,8 @@ class AppContextService {
           ? PostPackagePolicyCreateCallback
           : T extends 'postPackagePolicyDelete'
           ? PostPackagePolicyDeleteCallback
+          : T extends 'packagePolicyPostCreate'
+          ? PostPackagePolicyPostCreateCallback
           : PutPackagePolicyUpdateCallback
       >;
     }

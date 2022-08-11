@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
-
-import { ElasticsearchAssetType } from '../../../../types';
-import type { EsAssetReference } from '../../../../types';
-import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common/constants';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
 export const deleteIlms = async (esClient: ElasticsearchClient, ilmPolicyIds: string[]) => {
   await Promise.all(
@@ -25,25 +21,4 @@ export const deleteIlms = async (esClient: ElasticsearchClient, ilmPolicyIds: st
       );
     })
   );
-};
-
-export const deleteIlmRefs = async (
-  savedObjectsClient: SavedObjectsClientContract,
-  installedEsAssets: EsAssetReference[],
-  pkgName: string,
-  installedEsIdToRemove: string[],
-  currentInstalledEsIlmIds: string[]
-) => {
-  const seen = new Set<string>();
-  const filteredAssets = installedEsAssets.filter(({ type, id }) => {
-    if (type !== ElasticsearchAssetType.dataStreamIlmPolicy) return true;
-    const add =
-      (currentInstalledEsIlmIds.includes(id) || !installedEsIdToRemove.includes(id)) &&
-      !seen.has(id);
-    seen.add(id);
-    return add;
-  });
-  return savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
-    installed_es: filteredAssets,
-  });
 };

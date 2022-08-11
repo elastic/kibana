@@ -7,7 +7,7 @@
   "requiredPlugins": ["uiActions", "embeddable", "discover"],
   "optionalPlugins": ["share", "usageCollection"],
   "configPath": ["xpack", "discoverEnhanced"],
-  "requiredBundles": ["kibanaUtils", "data"],
+  "requiredBundles": ["kibanaUtils", "data", "lens"],
   "owner": {
     "name": "Data Discovery",
     "githubTeam": "kibana-data-discovery"

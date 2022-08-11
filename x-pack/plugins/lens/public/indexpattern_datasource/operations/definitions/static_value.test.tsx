@@ -6,16 +6,19 @@
  */
 
 import React from 'react';
+import { act } from 'react-dom/test-utils';
+import { EuiFieldNumber } from '@elastic/eui';
+import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { shallow, mount } from 'enzyme';
-import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createMockedIndexPattern } from '../../mocks';
-import { staticValueOperation } from './index';
+import { staticValueOperation } from '.';
 import { IndexPattern, IndexPatternLayer } from '../../types';
 import { StaticValueIndexPatternColumn } from './static_value';
-import { EuiFieldNumber } from '@elastic/eui';
-import { act } from 'react-dom/test-utils';
 import { TermsIndexPatternColumn } from './terms';
 
 jest.mock('lodash', () => {
@@ -35,6 +38,9 @@ const defaultProps = {
   savedObjectsClient: {} as SavedObjectsClientContract,
   dateRange: { fromDate: 'now-1d', toDate: 'now' },
   data: dataPluginMock.createStartContract(),
+  fieldFormats: fieldFormatsServiceMock.createStartContract(),
+  unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+  dataViews: dataViewPluginMocks.createStartContract(),
   http: {} as HttpSetup,
   indexPattern: {
     ...createMockedIndexPattern(),
@@ -45,6 +51,14 @@ const defaultProps = {
   toggleFullscreen: jest.fn(),
   setIsCloseable: jest.fn(),
   layerId: '1',
+  existingFields: {
+    my_index_pattern: {
+      timestamp: true,
+      bytes: true,
+      memory: true,
+      source: true,
+    },
+  },
 };
 
 describe('static_value', () => {
@@ -336,7 +350,7 @@ describe('static_value', () => {
         <ParamEditor
           {...defaultProps}
           layer={layer}
-          updateLayer={updateLayerSpy}
+          paramEditorUpdater={updateLayerSpy}
           columnId="col2"
           currentColumn={layer.columns.col2 as StaticValueIndexPatternColumn}
         />
@@ -367,7 +381,7 @@ describe('static_value', () => {
         <ParamEditor
           {...defaultProps}
           layer={zeroLayer}
-          updateLayer={updateLayerSpy}
+          paramEditorUpdater={updateLayerSpy}
           columnId="col2"
           currentColumn={zeroLayer.columns.col2 as StaticValueIndexPatternColumn}
         />
@@ -383,7 +397,7 @@ describe('static_value', () => {
         <ParamEditor
           {...defaultProps}
           layer={layer}
-          updateLayer={updateLayerSpy}
+          paramEditorUpdater={updateLayerSpy}
           columnId="col2"
           currentColumn={layer.columns.col2 as StaticValueIndexPatternColumn}
         />
@@ -424,7 +438,7 @@ describe('static_value', () => {
         <ParamEditor
           {...defaultProps}
           layer={layer}
-          updateLayer={updateLayerSpy}
+          paramEditorUpdater={updateLayerSpy}
           columnId="col2"
           currentColumn={layer.columns.col2 as StaticValueIndexPatternColumn}
         />

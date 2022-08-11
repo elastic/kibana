@@ -8,7 +8,7 @@
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { ExpandedSeriesRow } from './expanded_series_row';
-import { mockIndexPattern, mockUxSeries, render } from '../rtl_helpers';
+import { mockDataView, mockUxSeries, render } from '../rtl_helpers';
 import { getDefaultConfigs } from '../configurations/default_configs';
 import { PERCENTILE } from '../configurations/constants';
 import { obsvReportConfigMap } from '../obsv_exploratory_view';
@@ -17,7 +17,7 @@ describe('ExpandedSeriesRow', function () {
   const dataViewSeries = getDefaultConfigs({
     reportConfigMap: obsvReportConfigMap,
     reportType: 'kpi-over-time',
-    indexPattern: mockIndexPattern,
+    dataView: mockDataView,
     dataType: 'ux',
   });
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from 'src/core/server';
+import { SavedObjectsType } from '@kbn/core/server';
 import { addNewIndexingStrategyIndexNames } from './migrations/7_9_0_add_new_indexing_strategy_index_names';
 import { convertLogAliasToLogIndices } from './migrations/7_13_0_convert_log_alias_to_log_indices';
 import { composeMigrations } from './migrations/compose_migrations';

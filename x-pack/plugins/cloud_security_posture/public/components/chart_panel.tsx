@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { css } from '@emotion/react';
 import {
   EuiPanel,
   EuiText,
@@ -15,13 +14,13 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { CHART_PANEL_TEST_SUBJECTS } from './constants';
+import { CHART_PANEL_TEST_SUBJECTS } from './test_subjects';
 
 interface ChartPanelProps {
   title?: string;
   hasBorder?: boolean;
-  isLoading: boolean;
-  isError: boolean;
+  isLoading?: boolean;
+  isError?: boolean;
 }
 
 const Loading = () => (
@@ -64,7 +63,7 @@ export const ChartPanel: React.FC<ChartPanelProps> = ({
       <EuiFlexGroup direction="column" gutterSize="none" style={{ height: '100%' }}>
         <EuiFlexItem grow={false}>
           {title && (
-            <EuiTitle size="s" css={euiTitleStyle}>
+            <EuiTitle size="s">
               <h3>{title}</h3>
             </EuiTitle>
           )}
@@ -74,7 +73,3 @@ export const ChartPanel: React.FC<ChartPanelProps> = ({
     </EuiPanel>
   );
 };
-
-const euiTitleStyle = css`
-  font-weight: 400;
-`;

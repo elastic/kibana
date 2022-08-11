@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import reduce from '../lib/reduce.js';
+import reduce from '../lib/reduce';
 import Chainable from '../lib/classes/chainable';
 
 export default new Chainable('divide', {

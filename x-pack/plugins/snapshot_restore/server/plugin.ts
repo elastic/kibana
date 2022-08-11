@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, Plugin, Logger, PluginInitializerContext } from 'kibana/server';
+import { CoreSetup, Plugin, Logger, PluginInitializerContext } from '@kbn/core/server';
 
 import { PLUGIN, APP_REQUIRED_CLUSTER_PRIVILEGES } from '../common';
 import { License } from './services';

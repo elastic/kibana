@@ -7,7 +7,7 @@
  */
 
 import { applicationServiceMock } from './application/application_service.mock';
-import { fatalErrorsServiceMock } from './fatal_errors/fatal_errors_service.mock';
+import { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';
 export const fatalErrorMock = fatalErrorsServiceMock.createSetupContract();
 export const coreSystemMock = {
   setup: jest.fn().mockResolvedValue({

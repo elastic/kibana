@@ -6,10 +6,10 @@
  */
 
 import { useCallback, useState } from 'react';
-import { ToastsStart } from 'kibana/public';
-import { IHttpFetchError, ResponseErrorBody, CoreStart } from 'kibana/public';
+import type { CoreStart, ToastsStart } from '@kbn/core/public';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
-import {
+import type {
   ExploreRequest,
   GraphExploreCallback,
   GraphSearchCallback,

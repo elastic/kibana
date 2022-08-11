@@ -8,7 +8,7 @@
 import { EuiSuperDatePicker } from '@elastic/eui';
 import React, { useEffect } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { UI_SETTINGS } from '../../../../../../../src/plugins/data/common';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { clearCache } from '../../../services/rest/call_api';
 import { fromQuery, toQuery } from '../links/url_helpers';

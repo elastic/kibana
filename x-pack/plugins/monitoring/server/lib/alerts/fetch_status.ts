@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { RulesClient } from '@kbn/alerting-plugin/server';
 import { AlertInstanceState } from '../../../common/types/alerts';
-import { RulesClient } from '../../../../alerting/server';
 import { AlertsFactory } from '../../alerts';
 import { CommonAlertState, CommonAlertFilter, RulesByType } from '../../../common/types/alerts';
 import { RULES } from '../../../common/constants';

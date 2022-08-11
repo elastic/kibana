@@ -7,15 +7,15 @@
  */
 
 import React from 'react';
-import { OverlayStart } from 'kibana/public';
+import { OverlayStart } from '@kbn/core/public';
 import { EuiFieldText, EuiModalBody, EuiButton } from '@elastic/eui';
 import { useState } from 'react';
-import { toMountPoint } from '../../../../src/plugins/kibana_react/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import {
   ActionExecutionContext,
   createAction,
   UiActionsStart,
-} from '../../../../src/plugins/ui_actions/public';
+} from '@kbn/ui-actions-plugin/public';
 
 export const USER_TRIGGER = 'USER_TRIGGER';
 export const COUNTRY_TRIGGER = 'COUNTRY_TRIGGER';

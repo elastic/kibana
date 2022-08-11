@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const log = getService('log');
 
-  describe('Reporting', () => {
+  describe('Reporting Accessibility', () => {
     const createReportingUser = async () => {
       await security.user.create(reporting.REPORTING_USER_USERNAME, {
         password: reporting.REPORTING_USER_PASSWORD,
@@ -75,7 +75,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.waitForWithTimeout('A reporting list item', 5000, () => {
         return testSubjects.exists('reportingListItemObjectTitle');
       });
-      await a11y.testAppSnapshot();
+      await retry.try(async () => {
+        await a11y.testAppSnapshot();
+      });
     });
   });
 }

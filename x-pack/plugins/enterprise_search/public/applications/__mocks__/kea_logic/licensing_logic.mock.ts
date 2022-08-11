@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { licensingMock } from '../../../../../licensing/public/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 export const mockLicensingValues = {
   license: licensingMock.createLicense(),

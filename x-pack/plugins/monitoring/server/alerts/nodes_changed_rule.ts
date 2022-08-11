@@ -6,7 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
+import { Alert } from '@kbn/alerting-plugin/server';
+import { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { BaseRule } from './base_rule';
 import {
   AlertData,
@@ -19,10 +21,8 @@ import {
   AlertInstanceState,
   AlertNodesChangedState,
 } from '../../common/types/alerts';
-import { Alert } from '../../../alerting/server';
 import { RULE_NODES_CHANGED, LEGACY_RULE_DETAILS } from '../../common/constants';
 import { AlertingDefaults } from './alert_helpers';
-import { SanitizedAlert } from '../../../alerting/common';
 import { fetchNodesFromClusterStats } from '../lib/alerts/fetch_nodes_from_cluster_stats';
 import { AlertSeverity } from '../../common/enums';
 interface AlertNodesChangedStates {
@@ -56,7 +56,7 @@ function getNodeStates(nodes: AlertClusterStatsNodes): AlertNodesChangedStates {
 }
 
 export class NodesChangedRule extends BaseRule {
-  constructor(public sanitizedRule?: SanitizedAlert) {
+  constructor(public sanitizedRule?: SanitizedRule) {
     super(sanitizedRule, {
       id: RULE_NODES_CHANGED,
       name: LEGACY_RULE_DETAILS[RULE_NODES_CHANGED].label,

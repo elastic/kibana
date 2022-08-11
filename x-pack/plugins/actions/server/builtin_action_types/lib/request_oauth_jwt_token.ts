@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Logger } from '../../../../../../src/core/server';
+import { Logger } from '@kbn/core/server';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import { OAuthTokenResponse, requestOAuthToken } from './request_oauth_token';
-import { RewriteResponseCase } from '../../../../actions/common';
+import { RewriteResponseCase } from '../../../common';
 
 // This is a standard for JSON Web Token (JWT) Profile
 // for OAuth 2.0 Client Authentication and Authorization Grants https://datatracker.ietf.org/doc/html/rfc7523#section-8.1

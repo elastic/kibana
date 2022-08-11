@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -22,7 +23,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { HostsInput } from '../hosts_input';
+import { MultiRowInput } from '../multi_row_input';
 import { useStartServices } from '../../../../hooks';
 import { FLYOUT_MAX_WIDTH } from '../../constants';
 
@@ -75,7 +76,16 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
           />
         </EuiText>
         <EuiSpacer size="m" />
-        <HostsInput {...form.fleetServerHostsInput.props} id="fleet-server-inputs" />
+        <MultiRowInput
+          {...form.fleetServerHostsInput.props}
+          id="fleet-server-inputs"
+          placeholder={i18n.translate(
+            'xpack.fleet.settings.fleetServerHostsFlyout.fleetServerHostsInputPlaceholder',
+            {
+              defaultMessage: 'Specify host URL',
+            }
+          )}
+        />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">

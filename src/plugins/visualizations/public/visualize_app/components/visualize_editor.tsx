@@ -11,13 +11,14 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { EventEmitter } from 'events';
 
-import { useKibana } from '../../../../kibana_react/public';
+import { useExecutionContext, useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   useChromeVisibility,
   useSavedVisInstance,
   useVisualizeAppState,
   useEditorUpdates,
   useLinkedSearchUpdates,
+  useDataViewUpdates,
 } from '../utils';
 import { VisualizeServices } from '../types';
 import { VisualizeEditorCommon } from './visualize_editor_common';
@@ -41,6 +42,14 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
     originatingApp,
     visualizationIdFromUrl
   );
+
+  const editorName = savedVisInstance?.vis.type.title.toLowerCase().replace(' ', '_') || '';
+  useExecutionContext(services.executionContext, {
+    type: 'application',
+    page: `editor${editorName ? `:${editorName}` : ''}`,
+    id: visualizationIdFromUrl || 'new',
+  });
+
   const { appState, hasUnappliedChanges } = useVisualizeAppState(
     services,
     eventEmitter,
@@ -55,6 +64,7 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
     visEditorController
   );
   useLinkedSearchUpdates(services, eventEmitter, appState, savedVisInstance);
+  useDataViewUpdates(services, eventEmitter, appState, savedVisInstance);
 
   useEffect(() => {
     const { stateTransferService, data } = services;

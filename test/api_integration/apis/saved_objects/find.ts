@@ -7,8 +7,8 @@
  */
 
 import expect from '@kbn/expect';
+import { SavedObject } from '@kbn/core/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { SavedObject } from '../../../../src/core/server';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

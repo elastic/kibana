@@ -47,7 +47,11 @@ export const AnomalyChart: FC<Props> = ({
     <div style={{ width, height }} data-test-subj={`mlAnomalyChart ${CHART_TYPE[chartType]}`}>
       <LoadingWrapper height={height} hasData={data.length > 0} loading={loading}>
         <Chart>
-          <Settings xDomain={xDomain} tooltip={TooltipType.None} />
+          <Settings
+            // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
+            xDomain={xDomain}
+            tooltip={TooltipType.None}
+          />
           <Axes chartData={data} />
           <Anomalies anomalyData={anomalyData} />
           <ModelBounds modelData={modelData} />

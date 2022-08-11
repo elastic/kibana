@@ -31,7 +31,11 @@
 
   &.lnsWorkspacePanelWrapper--fullscreen {
     margin-bottom: 0;
+    .lnsWorkspacePanelWrapper__pageContentBody {
+      box-shadow: none;
+    }
   }
+
 }
 
 .lnsWorkspacePanel__dragDrop {
@@ -76,20 +80,41 @@
   justify-content: center;
   align-items: center;
   transition: background-color $euiAnimSpeedFast ease-in-out;
+
+  .lnsWorkspacePanel__actions {
+    margin-top: $euiSizeL;
+  }
 }
 
 .lnsWorkspacePanelWrapper__toolbar {
-  margin-bottom: 0;
+  margin-bottom: $euiSizeXS;
 }
 
-.lnsDropIllustration__adjustFill {
-  fill: $euiColorFullShade;
+.lnsWorkspacePanelWrapper__toolbar--fullscreen {
+  background-color: $euiColorEmptyShade;
+  justify-content: flex-end;
+  margin-bottom: 0;
+  padding: $euiSizeS $euiSizeS 0;
+}
+
+.lnsWorkspacePanelWrapper__applyButton .euiButton__text {
+  @include euiBreakpoint('xs', 's', 'm', 'l') {
+    @include euiScreenReaderOnly;
+  }
+}
+
+.lnsWorkspacePanel__promptIllustration {
+  overflow: visible; // Shows arrow animation when it gets out of bounds
+  margin-top: 0;
+  margin-bottom: -$euiSize;
+
+  margin-right: auto;
+  margin-left: auto;
+  max-width: 176px;
+  max-height: 176px;
 }
 
 .lnsWorkspacePanel__dropIllustration {
-  overflow: visible; // Shows arrow animation when it gets out of bounds
-  margin-top: $euiSizeL;
-  margin-bottom: $euiSizeXXL;
   // Drop shadow values is a dupe of @euiBottomShadowMedium but used as a filter
   // Hard-coded px values OK (@cchaos)
   // sass-lint:disable-block indentation
@@ -97,6 +122,10 @@
     drop-shadow(0 6px 12px transparentize($euiShadowColor, .8))
     drop-shadow(0 4px 4px transparentize($euiShadowColor, .8))
     drop-shadow(0 2px 2px transparentize($euiShadowColor, .8));
+}
+
+.lnsDropIllustration__adjustFill {
+  fill: $euiColorFullShade;
 }
 
 .lnsDropIllustration__hand {

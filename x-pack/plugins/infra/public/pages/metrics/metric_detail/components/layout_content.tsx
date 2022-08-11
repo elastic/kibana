@@ -6,7 +6,7 @@
  */
 
 import { EuiPageContent } from '@elastic/eui';
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
 export const LayoutContent = euiStyled(EuiPageContent)`
   position: relative;

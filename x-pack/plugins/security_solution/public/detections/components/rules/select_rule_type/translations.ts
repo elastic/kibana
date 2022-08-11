@@ -78,3 +78,17 @@ export const THREAT_MATCH_TYPE_DESCRIPTION = i18n.translate(
       'Use indicators from intelligence sources to detect matching events and alerts.',
   }
 );
+
+export const NEW_TERMS_TYPE_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ruleTypeField.newTermsTitle',
+  {
+    defaultMessage: 'New Terms',
+  }
+);
+
+export const NEW_TERMS_TYPE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ruleTypeField.newTermsDescription',
+  {
+    defaultMessage: 'Find documents with values appearing for the first time.',
+  }
+);

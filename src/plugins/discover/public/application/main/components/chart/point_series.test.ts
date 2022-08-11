@@ -8,7 +8,7 @@
 
 import { buildPointSeriesData } from './point_series';
 import moment from 'moment';
-import { Unit } from '@elastic/datemath';
+import { Unit } from '@kbn/datemath';
 
 describe('buildPointSeriesData', () => {
   test('with valid data', () => {
@@ -25,7 +25,7 @@ describe('buildPointSeriesData', () => {
             params: { id: 'date', params: { pattern: 'YYYY-MM-DD' } },
             source: 'esaggs',
             sourceParams: {
-              indexPatternId: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+              dataViewId: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
               id: '2',
               enabled: true,
               type: 'date_histogram',
@@ -53,7 +53,7 @@ describe('buildPointSeriesData', () => {
             params: { id: 'number' },
             source: 'esaggs',
             sourceParams: {
-              indexPatternId: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+              dataViewId: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
               id: '1',
               enabled: true,
               type: 'count',

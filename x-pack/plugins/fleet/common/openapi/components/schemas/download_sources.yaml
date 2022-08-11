@@ -1,0 +1,15 @@
+title: Download Source
+type: object
+properties:
+  id:
+    type: string
+  is_default:
+    type: boolean
+  name:
+    type: string
+  host:
+    type: string
+required:
+  - is_default
+  - name
+  - host

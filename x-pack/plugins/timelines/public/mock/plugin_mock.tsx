@@ -18,12 +18,9 @@ import { mockHoverActions } from './mock_hover_actions';
 export const createTGridMocks = () => ({
   getHoverActions: () => mockHoverActions,
   getTGrid: () => <>{'hello grid'}</>,
-  getFieldBrowser: () => <div data-test-subj="field-browser" />,
   getLastUpdated: (props: LastUpdatedAtProps) => <LastUpdatedAt {...props} />,
   getLoadingPanel: (props: LoadingPanelProps) => <LoadingPanel {...props} />,
   getUseAddToTimeline: () => useAddToTimeline,
   getUseAddToTimelineSensor: () => useAddToTimelineSensor,
   getUseDraggableKeyboardWrapper: () => useDraggableKeyboardWrapper,
-  getAddToExistingCaseButton: () => <div data-test-subj="add-to-existing-case" />,
-  getAddToNewCaseButton: () => <div data-test-subj="add-to-new-case" />,
 });

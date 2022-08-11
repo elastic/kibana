@@ -78,6 +78,9 @@ You can add and remove remote clusters, and check their connectivity.
 | Centrally <<create-and-manage-rules, manage your rules>> across {kib}. Create and <<connector-management, manage reusable
 connectors>> for triggering actions.
 
+| <<cases,Cases>>
+| Create and manage cases to investigate issues.
+
 | <<reporting-getting-started, Reporting>>
 | Monitor the generation of reports&mdash;PDF, PNG, and CSV&mdash;and download reports that you previously generated.
 A report can contain a dashboard, visualization, saved search, or Canvas workpad.
@@ -174,6 +177,8 @@ see the https://www.elastic.co/subscriptions[subscription page].
 --
 
 include::{kib-repo-dir}/management/advanced-options.asciidoc[]
+
+include::{kib-repo-dir}/management/cases/index.asciidoc[]
 
 include::{kib-repo-dir}/management/action-types.asciidoc[]
 

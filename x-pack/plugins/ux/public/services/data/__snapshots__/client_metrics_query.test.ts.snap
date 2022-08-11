@@ -1,0 +1,76 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`clientMetricsQuery fetches client metrics 1`] = `
+Object {
+  "body": Object {
+    "aggs": Object {
+      "hasFetchStartField": Object {
+        "aggs": Object {
+          "backEnd": Object {
+            "percentiles": Object {
+              "field": "transaction.marks.agent.timeToFirstByte",
+              "hdr": Object {
+                "number_of_significant_value_digits": 3,
+              },
+              "percents": Array [
+                50,
+              ],
+            },
+          },
+          "totalPageLoadDuration": Object {
+            "percentiles": Object {
+              "field": "transaction.duration.us",
+              "hdr": Object {
+                "number_of_significant_value_digits": 3,
+              },
+              "percents": Array [
+                50,
+              ],
+            },
+          },
+        },
+        "filter": Object {
+          "exists": Object {
+            "field": "transaction.marks.navigationTiming.fetchStart",
+          },
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 0,
+                "lte": 50000,
+              },
+            },
+          },
+          Object {
+            "term": Object {
+              "transaction.type": "page-load",
+            },
+          },
+          Object {
+            "terms": Object {
+              "processor.event": Array [
+                "transaction",
+              ],
+            },
+          },
+          Object {
+            "term": Object {
+              "service.environment": "staging",
+            },
+          },
+        ],
+        "must_not": Array [],
+      },
+    },
+    "size": 0,
+    "track_total_hits": true,
+  },
+}
+`;

@@ -13,7 +13,7 @@ import {
   AcceptEndpointComponent,
   ListComponent,
   SimpleParamComponent,
-} from './index';
+} from '.';
 
 import { FullRequestComponent } from './full_request_component';
 

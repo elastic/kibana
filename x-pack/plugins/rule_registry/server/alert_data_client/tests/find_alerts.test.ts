@@ -12,12 +12,11 @@ import {
   ALERT_WORKFLOW_STATUS,
 } from '@kbn/rule-data-utils';
 import { AlertsClient, ConstructorOptions } from '../alerts_client';
-import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
-import { alertingAuthorizationMock } from '../../../../alerting/server/authorization/alerting_authorization.mock';
-import { auditLoggerMock } from '../../../../security/server/audit/mocks';
-import { AlertingAuthorizationEntity } from '../../../../alerting/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { alertingAuthorizationMock } from '@kbn/alerting-plugin/server/authorization/alerting_authorization.mock';
+import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
+import { AlertingAuthorizationEntity } from '@kbn/alerting-plugin/server';
 import { ruleDataServiceMock } from '../../rule_data_plugin_service/rule_data_plugin_service.mock';
 
 const alertingAuthMock = alertingAuthorizationMock.create();
@@ -186,6 +185,136 @@ describe('find()', () => {
                   "order": "asc",
                   "unmapped_type": "date",
                 },
+              },
+            ],
+            "track_total_hits": undefined,
+          },
+          "ignore_unavailable": true,
+          "index": ".alerts-observability.apm.alerts",
+          "seq_no_primary_term": true,
+        },
+      ]
+    `);
+  });
+
+  test('allows custom sort', async () => {
+    const alertsClient = new AlertsClient(alertsClientParams);
+    esClientMock.search.mockResponseOnce({
+      took: 5,
+      timed_out: false,
+      _shards: {
+        total: 1,
+        successful: 1,
+        failed: 0,
+        skipped: 0,
+      },
+      hits: {
+        total: 1,
+        max_score: 999,
+        hits: [
+          {
+            // @ts-expect-error incorrect fields
+            found: true,
+            _type: 'alert',
+            _index: '.alerts-observability.apm.alerts',
+            _id: 'NoxgpHkBqbdrfX07MqXV',
+            _version: 1,
+            _seq_no: 362,
+            _primary_term: 2,
+            _source: {
+              [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
+              message: 'hello world 1',
+              [ALERT_RULE_CONSUMER]: 'apm',
+              [ALERT_WORKFLOW_STATUS]: 'open',
+              [SPACE_IDS]: ['test_default_space_id'],
+            },
+          },
+        ],
+      },
+    });
+    const result = await alertsClient.find({
+      query: { match: { [ALERT_WORKFLOW_STATUS]: 'open' } },
+      index: '.alerts-observability.apm.alerts',
+      sort: [
+        {
+          '@timestamp': 'desc',
+        },
+      ],
+    });
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "_shards": Object {
+          "failed": 0,
+          "skipped": 0,
+          "successful": 1,
+          "total": 1,
+        },
+        "hits": Object {
+          "hits": Array [
+            Object {
+              "_id": "NoxgpHkBqbdrfX07MqXV",
+              "_index": ".alerts-observability.apm.alerts",
+              "_primary_term": 2,
+              "_seq_no": 362,
+              "_source": Object {
+                "kibana.alert.rule.consumer": "apm",
+                "kibana.alert.rule.rule_type_id": "apm.error_rate",
+                "kibana.alert.workflow_status": "open",
+                "kibana.space_ids": Array [
+                  "test_default_space_id",
+                ],
+                "message": "hello world 1",
+              },
+              "_type": "alert",
+              "_version": 1,
+              "found": true,
+            },
+          ],
+          "max_score": 999,
+          "total": 1,
+        },
+        "timed_out": false,
+        "took": 5,
+      }
+    `);
+    expect(esClientMock.search).toHaveBeenCalledTimes(1);
+    expect(esClientMock.search.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "body": Object {
+            "_source": undefined,
+            "aggs": undefined,
+            "fields": Array [
+              "kibana.alert.rule.rule_type_id",
+              "kibana.alert.rule.consumer",
+              "kibana.alert.workflow_status",
+              "kibana.space_ids",
+            ],
+            "query": Object {
+              "bool": Object {
+                "filter": Array [
+                  Object {},
+                  Object {
+                    "term": Object {
+                      "kibana.space_ids": "test_default_space_id",
+                    },
+                  },
+                ],
+                "must": Array [
+                  Object {
+                    "match": Object {
+                      "kibana.alert.workflow_status": "open",
+                    },
+                  },
+                ],
+                "must_not": Array [],
+                "should": Array [],
+              },
+            },
+            "size": undefined,
+            "sort": Array [
+              Object {
+                "@timestamp": "desc",
               },
             ],
             "track_total_hits": undefined,

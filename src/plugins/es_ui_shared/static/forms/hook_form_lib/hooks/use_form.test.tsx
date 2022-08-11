@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { act } from 'react-dom/test-utils';
 
 import { registerTestBed, getRandomString, TestBed } from '../shared_imports';
 import { emptyField } from '../../helpers/field_validators';
-import { Form, UseField } from '../components';
+import { ComboBoxField } from '../../components';
+import { Form, UseField, UseArray } from '../components';
 import {
   FormSubmitHandler,
   OnUpdateHandler,
@@ -274,7 +275,7 @@ describe('useForm() hook', () => {
       onFormData.mockReset();
     });
 
-    test('should set the default value of a field ', async () => {
+    test('should set the default value of a field ', () => {
       const defaultValue = {
         title: getRandomString(),
         subTitle: getRandomString(),
@@ -285,6 +286,7 @@ describe('useForm() hook', () => {
 
       const TestComp = ({ onData }: { onData: OnUpdateHandler }) => {
         const { form } = useForm({ defaultValue });
+        formHook = form;
         const { subscribe } = form;
 
         useEffect(() => subscribe(onData).unsubscribe, [subscribe, onData]);
@@ -316,6 +318,40 @@ describe('useForm() hook', () => {
           name: defaultValue.user.name,
         },
       });
+
+      expect(formHook?.__getFormDefaultValue()).toEqual({
+        ...defaultValue,
+        subTitle: 'hasBeenOverridden',
+      });
+    });
+
+    test('should be updated with the UseField "defaultValue" prop', () => {
+      const TestComp = () => {
+        const { form } = useForm({ defaultValue: { name: 'Mike' } });
+        const [_, setDate] = useState(new Date());
+        formHook = form;
+
+        return (
+          <Form form={form}>
+            {/* "John" should be set in the form defaultValue */}
+            <UseField path="name" defaultValue="John" />
+            <button data-test-subj="forceUpdateBtn" onClick={() => setDate(new Date())}>
+              Force udpate
+            </button>
+          </Form>
+        );
+      };
+
+      const { find } = registerTestBed(TestComp, { memoryRouter: { wrapComponent: false } })();
+
+      expect(formHook?.__getFormDefaultValue()).toEqual({ name: 'John' });
+
+      // Make sure a re-render of the component does not re-update the defaultValue
+      act(() => {
+        find('forceUpdateBtn').simulate('click');
+      });
+
+      expect(formHook?.__getFormDefaultValue()).toEqual({ name: 'John' });
     });
   });
 
@@ -651,6 +687,323 @@ describe('useForm() hook', () => {
       await setInputValue('field2', 'bad');
       errors = formHook!.getErrors();
       expect(errors).toEqual(['Field1 can not be empty', 'Field2 is invalid']);
+    });
+  });
+
+  describe('form.updateFieldValues()', () => {
+    test('should update field values and discard unknwon fields provided', async () => {
+      const TestComp = () => {
+        const { form } = useForm();
+        formHook = form;
+
+        return (
+          <Form form={form}>
+            <UseField path="field1" config={{ defaultValue: 'field1_defaultValue' }} />
+            <UseField path="field2.a" config={{ defaultValue: 'field2_a_defaultValue' }} />
+            <UseField path="field2.b" config={{ defaultValue: 'field2_b_defaultValue' }} />
+          </Form>
+        );
+      };
+
+      registerTestBed(TestComp)();
+
+      expect(formHook!.getFormData()).toEqual({
+        field1: 'field1_defaultValue',
+        field2: {
+          a: 'field2_a_defaultValue',
+          b: 'field2_b_defaultValue',
+        },
+      });
+
+      await act(async () => {
+        formHook!.updateFieldValues({
+          field1: 'field1_updated',
+          field2: {
+            a: 'field2_a_updated',
+            b: 'field2_b_updated',
+          },
+          unknownField: 'foo',
+        });
+      });
+
+      expect(formHook!.getFormData()).toEqual({
+        field1: 'field1_updated',
+        field2: {
+          a: 'field2_a_updated',
+          b: 'field2_b_updated',
+        },
+      });
+    });
+
+    test('should update an array of object fields', async () => {
+      const TestComp = () => {
+        const { form } = useForm();
+        formHook = form;
+
+        return (
+          <Form form={form}>
+            <UseArray path="users">
+              {({ items }) => (
+                <>
+                  {items.map(({ id, path, isNew }) => (
+                    <div key={id}>
+                      <UseField
+                        path={`${path}.name`}
+                        config={{ defaultValue: 'John' }}
+                        readDefaultValueOnForm={!isNew}
+                      />
+                      <UseField
+                        path={`${path}.lastName`}
+                        config={{ defaultValue: 'Snow' }}
+                        readDefaultValueOnForm={!isNew}
+                      />
+                    </div>
+                  ))}
+                </>
+              )}
+            </UseArray>
+          </Form>
+        );
+      };
+
+      registerTestBed(TestComp)();
+
+      if (formHook === null) {
+        throw new Error('Formhook has not been set.');
+      }
+
+      expect(formHook.getFormData()).toEqual({
+        users: [
+          {
+            name: 'John',
+            lastName: 'Snow',
+          },
+        ],
+      });
+
+      const newFormData = {
+        users: [
+          {
+            name: 'User1_name',
+            lastName: 'User1_lastName',
+          },
+          {
+            name: 'User2_name',
+            lastName: 'User2_lastName',
+          },
+        ],
+      };
+
+      await act(async () => {
+        formHook!.updateFieldValues(newFormData);
+      });
+
+      expect(formHook.getFormData()).toEqual(newFormData);
+    });
+
+    test('should update an array of string fields (ComboBox)', async () => {
+      const TestComp = () => {
+        const { form } = useForm();
+        formHook = form;
+
+        return (
+          <Form form={form}>
+            <UseField path="tags" defaultValue={['foo', 'bar']} component={ComboBoxField} />
+          </Form>
+        );
+      };
+
+      registerTestBed(TestComp)();
+
+      if (formHook === null) {
+        throw new Error('Formhook has not been set.');
+      }
+
+      expect(formHook.getFormData()).toEqual({
+        tags: ['foo', 'bar'],
+      });
+
+      const newFormData = {
+        tags: ['updated', 'array'],
+      };
+
+      await act(async () => {
+        formHook!.updateFieldValues(newFormData);
+      });
+
+      expect(formHook.getFormData()).toEqual(newFormData);
+    });
+
+    test('should update recursively an array of object fields', async () => {
+      const TestComp = () => {
+        const { form } = useForm();
+        formHook = form;
+
+        return (
+          <Form form={form}>
+            <UseArray path="users">
+              {({ items: userItems }) => (
+                <>
+                  {userItems.map(({ id: userId, path: userPath }) => (
+                    <div key={userId}>
+                      <UseField path={`${userPath}.name`} config={{ defaultValue: 'John' }} />
+                      <UseArray path={`${userPath}.address`}>
+                        {({ items: addressItems }) => (
+                          <>
+                            {addressItems.map(
+                              ({ id: addressId, path: addressPath, isNew: isNewAddress }) => (
+                                <div key={addressId}>
+                                  <UseField
+                                    path={`${addressPath}.street`}
+                                    config={{ defaultValue: 'Street name' }}
+                                    readDefaultValueOnForm={!isNewAddress}
+                                  />
+                                  <UseField
+                                    path={`${addressPath}.city`}
+                                    config={{ defaultValue: 'Lagos' }}
+                                    readDefaultValueOnForm={!isNewAddress}
+                                  />
+                                </div>
+                              )
+                            )}
+                          </>
+                        )}
+                      </UseArray>
+                      <UseField
+                        path={`${userPath}.tags`}
+                        config={{ defaultValue: ['blue', 'red'] }}
+                        component={ComboBoxField}
+                      />
+                    </div>
+                  ))}
+                </>
+              )}
+            </UseArray>
+          </Form>
+        );
+      };
+
+      registerTestBed(TestComp)();
+
+      if (formHook === null) {
+        throw new Error('Formhook has not been set.');
+      }
+
+      expect(formHook.getFormData()).toEqual({
+        users: [
+          {
+            name: 'John',
+            address: [
+              {
+                street: 'Street name',
+                city: 'Lagos',
+              },
+            ],
+            tags: ['blue', 'red'],
+          },
+        ],
+      });
+
+      const newFormData = {
+        users: [
+          {
+            name: 'Balbina',
+            tags: ['yellow', 'pink'],
+            address: [
+              {
+                street: 'Rua direita',
+                city: 'Burgau',
+              },
+            ],
+          },
+          {
+            name: 'Mike',
+            tags: ['green', 'black', 'orange'],
+            address: [
+              {
+                street: 'Calle de Callao',
+                city: 'Madrid',
+              },
+              {
+                street: 'Rue de Flagey',
+                city: 'Brussels',
+              },
+            ],
+          },
+        ],
+      };
+
+      await act(async () => {
+        formHook!.updateFieldValues(newFormData);
+      });
+
+      expect(formHook.getFormData()).toEqual(newFormData);
+    });
+
+    describe('deserializer', () => {
+      const formDefaultValue = { foo: 'initial' };
+      const deserializer = (formData: typeof formDefaultValue) => ({
+        foo: { label: formData.foo.toUpperCase(), value: formData.foo },
+      });
+
+      const TestComp = () => {
+        const { form } = useForm({ defaultValue: formDefaultValue, deserializer });
+        formHook = form;
+
+        return (
+          <Form form={form}>
+            <UseField path="foo">{() => null}</UseField>
+          </Form>
+        );
+      };
+
+      test('should run deserializer on the new form data provided', async () => {
+        registerTestBed(TestComp)();
+
+        if (formHook === null) {
+          throw new Error('Formhook has not been set.');
+        }
+
+        expect(formHook.getFormData()).toEqual({
+          foo: { label: 'INITIAL', value: 'initial' },
+        });
+
+        const newFormData = {
+          foo: 'updated',
+        };
+
+        await act(async () => {
+          formHook!.updateFieldValues(newFormData);
+        });
+
+        expect(formHook.getFormData()).toEqual({
+          foo: { label: 'UPDATED', value: 'updated' },
+        });
+      });
+
+      test('should not run deserializer on the new form data provided', async () => {
+        registerTestBed(TestComp)();
+
+        if (formHook === null) {
+          throw new Error('Formhook has not been set.');
+        }
+
+        expect(formHook.getFormData()).toEqual({
+          foo: { label: 'INITIAL', value: 'initial' },
+        });
+
+        const newFormData = {
+          foo: 'updated',
+        };
+
+        await act(async () => {
+          formHook!.updateFieldValues(newFormData, { runDeserializer: false });
+        });
+
+        expect(formHook.getFormData()).toEqual({
+          foo: 'updated',
+        });
+      });
     });
   });
 });

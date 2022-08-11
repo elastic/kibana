@@ -12,8 +12,8 @@ import Os from 'os';
 import * as Rx from 'rxjs';
 import { mergeMap, reduce } from 'rxjs/operators';
 import execa from 'execa';
-import { run, createFailError } from '@kbn/dev-utils';
-import { lastValueFrom } from '@kbn/std';
+import { run } from '@kbn/dev-cli-runner';
+import { createFailError } from '@kbn/dev-cli-errors';
 
 import { PROJECTS } from './projects';
 import { buildTsRefs } from './build_ts_refs';
@@ -35,14 +35,16 @@ export async function runTypeCheckCli() {
         return !p.disableTypeCheck && (!projectFilter || p.tsConfigPath === projectFilter);
       });
 
-      const { failed } = await buildTsRefs({
-        log,
-        procRunner,
-        verbose: !!flags.verbose,
-        project: projects.length === 1 ? projects[0] : undefined,
-      });
-      if (failed) {
-        throw createFailError('Unable to build TS project refs');
+      if (projects.length > 1 || projects[0].isCompositeProject()) {
+        const { failed } = await buildTsRefs({
+          log,
+          procRunner,
+          verbose: !!flags.verbose,
+          project: projects.length === 1 ? projects[0] : undefined,
+        });
+        if (failed) {
+          throw createFailError('Unable to build TS project refs');
+        }
       }
 
       if (!projects.length) {
@@ -53,7 +55,13 @@ export async function runTypeCheckCli() {
         }
       }
 
-      const concurrency = Math.min(4, Math.round((Os.cpus() || []).length / 2) || 1) || 1;
+      const concurrencyArg =
+        typeof flags.concurrency === 'string' && parseInt(flags.concurrency, 10);
+      const concurrency =
+        concurrencyArg && concurrencyArg > 0
+          ? concurrencyArg
+          : Math.min(4, Math.round((Os.cpus() || []).length / 2) || 1) || 1;
+
       log.info('running type check in', projects.length, 'projects');
 
       const tscArgs = [
@@ -65,7 +73,7 @@ export async function runTypeCheckCli() {
           : ['--skipLibCheck', 'false']),
       ];
 
-      const failureCount = await lastValueFrom(
+      const failureCount = await Rx.lastValueFrom(
         Rx.from(projects).pipe(
           mergeMap(async (p) => {
             const relativePath = Path.relative(process.cwd(), p.tsConfigPath);
@@ -113,12 +121,13 @@ export async function runTypeCheckCli() {
           node scripts/type_check --project packages/kbn-pm/tsconfig.json
       `,
       flags: {
-        string: ['project'],
+        string: ['project', 'concurrency'],
         boolean: ['skip-lib-check'],
         help: `
-          --project [path]    Path to a tsconfig.json file determines the project to check
-          --skip-lib-check    Skip type checking of all declaration files (*.d.ts). Default is false
-          --help              Show this message
+          --concurrency <number>  Number of projects to check in parallel. Defaults to 50% of available CPUs, up to 4.
+          --project [path]        Path to a tsconfig.json file determines the project to check
+          --skip-lib-check        Skip type checking of all declaration files (*.d.ts). Default is false
+          --help                  Show this message
         `,
       },
     }

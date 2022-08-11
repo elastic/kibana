@@ -1,0 +1,31 @@
+{
+  "attributes": {
+    "audit": "Run the following command on the control plane node:\n```\nps -ef | grep kube-apiserver\n```\nVerify that the `--token-auth-file` argument does not exist.\n",
+    "benchmark": {
+      "name": "CIS Kubernetes V1.23",
+      "version": "v1.0.0"
+    },
+    "default_value": "By default, `--token-auth-file` argument is not set.\n",
+    "description": "Do not use token based authentication.\n",
+    "enabled": true,
+    "id": "6c8f1b4a-9e41-5fdb-b4bf-57b850ea1d29",
+    "impact": "You will have to configure and use alternate authentication mechanisms such as certificates. Static token based authentication could not be used.\n",
+    "muted": false,
+    "name": "Ensure that the --token-auth-file parameter is not set (Automated)",
+    "profile_applicability": "* Level 1 - Master Node\n",
+    "rationale": "The token-based authentication utilizes static tokens to authenticate requests to the apiserver. The tokens are stored in clear-text in a file on the apiserver, and cannot be revoked or rotated without restarting the apiserver. Hence, do not use static token-based authentication.\n",
+    "references": "1. [https://kubernetes.io/docs/admin/authentication/#static-token-file](https://kubernetes.io/docs/admin/authentication/#static-token-file)\n2. [https://kubernetes.io/docs/admin/kube-apiserver/](https://kubernetes.io/docs/admin/kube-apiserver/)\n",
+    "rego_rule_id": "cis_1_2_2",
+    "remediation": "Follow the documentation and configure alternate mechanisms for\nauthentication. Then,\nedit the API server pod specification file `/etc/kubernetes/manifests/kube-apiserver.yaml` \non the control plane node and remove the `--token-auth-file=<filename>`\nparameter.\n",
+    "section": "API Server",
+    "tags": [
+      "CIS",
+      "Kubernetes",
+      "CIS 1.2.2",
+      "API Server"
+    ],
+    "version": "1.0"
+  },
+  "id": "sample_csp_rule_template",
+  "type": "csp-rule-template"
+}

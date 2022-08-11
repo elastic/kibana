@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
-import { MatrixHistogramStrategyResponse } from '../../../../../../common/search_strategy';
+import type { MatrixHistogramStrategyResponse } from '../../../../../../common/search_strategy';
 
 export const mockAlertsSearchStrategyResponse: IEsSearchResponse<unknown> = {
   isPartial: false,

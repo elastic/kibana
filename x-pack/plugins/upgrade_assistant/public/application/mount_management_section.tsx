@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import type { ManagementAppMountParams } from 'src/plugins/management/public';
+import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { RootComponent } from './app';
 import { AppDependencies } from '../types';
 

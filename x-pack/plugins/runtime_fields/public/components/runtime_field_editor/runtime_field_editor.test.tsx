@@ -6,7 +6,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { DocLinksStart } from 'src/core/public';
+import { DocLinksStart } from '@kbn/core/public';
 
 import '../../__jest__/setup_environment';
 import { registerTestBed, TestBed } from '../../test_utils';

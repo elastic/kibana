@@ -46,10 +46,10 @@ describe('SourceLayout', () => {
     expect(wrapper.find('.testChild')).toHaveLength(1);
   });
 
-  it('passes a source name to SourceInfoCard', () => {
+  it('passes a content source to SourceInfoCard', () => {
     const wrapper = shallow(<SourceLayout />);
 
-    expect(wrapper.find(SourceInfoCard).prop('sourceName')).toEqual('Jira');
+    expect(wrapper.find(SourceInfoCard).prop('contentSource')).toEqual(contentSource);
   });
 
   it('renders the default Workplace Search layout when on an organization view', () => {

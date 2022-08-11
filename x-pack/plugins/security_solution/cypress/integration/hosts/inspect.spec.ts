@@ -7,20 +7,20 @@
 
 import { INSPECT_HOSTS_BUTTONS_IN_SECURITY, INSPECT_MODAL } from '../../screens/inspect';
 import { HOST_OVERVIEW } from '../../screens/hosts/main';
-import { cleanKibana } from '../../tasks/common';
 
 import { clickInspectButton, closesModal, openStatsAndTables } from '../../tasks/inspect';
-import { loginAndWaitForHostDetailsPage, loginAndWaitForPage } from '../../tasks/login';
+
+import { login, visit, visitHostDetailsPage } from '../../tasks/login';
 
 import { HOSTS_URL } from '../../urls/navigation';
 
 describe('Inspect', () => {
   before(() => {
-    cleanKibana();
+    login();
   });
   context('Hosts stats and tables', () => {
     before(() => {
-      loginAndWaitForPage(HOSTS_URL);
+      visit(HOSTS_URL);
     });
     afterEach(() => {
       closesModal();
@@ -36,10 +36,7 @@ describe('Inspect', () => {
 
   context('Hosts details', () => {
     before(() => {
-      loginAndWaitForHostDetailsPage();
-    });
-    afterEach(() => {
-      closesModal();
+      visitHostDetailsPage('test.local');
     });
 
     it(`inspects the host details`, () => {

@@ -129,7 +129,6 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
         props.initialTemplate.icon && <LegacyIcon asListIcon icon={props.initialTemplate.icon} />
       }
       className={classNames('gphUrlTemplateList__accordion', {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'gphUrlTemplateList__accordion--isOpen': open,
       })}
       buttonClassName="gphUrlTemplateList__accordionbutton"
@@ -265,6 +264,7 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
           <div role="listbox">
             {urlTemplateIconChoices.map((icon) => (
               <LegacyIcon
+                aria-label={icon.label}
                 key={icon.class}
                 selected={icon === currentTemplate.icon}
                 icon={icon}

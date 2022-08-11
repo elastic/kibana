@@ -7,7 +7,7 @@
  */
 
 import uuid from 'uuid';
-import { ISearchStrategy } from '../../../src/plugins/data/server';
+import { ISearchStrategy } from '@kbn/data-plugin/server';
 import { FibonacciRequest, FibonacciResponse } from '../common/types';
 
 export const fibonacciStrategyProvider = (): ISearchStrategy<

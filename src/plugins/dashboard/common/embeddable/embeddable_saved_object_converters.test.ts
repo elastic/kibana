@@ -11,7 +11,7 @@ import {
   convertPanelStateToSavedDashboardPanel,
 } from './embeddable_saved_object_converters';
 import { SavedDashboardPanel, DashboardPanelState } from '../types';
-import { EmbeddableInput } from '../../../embeddable/common/types';
+import { EmbeddableInput } from '@kbn/embeddable-plugin/common/types';
 
 test('convertSavedDashboardPanelToPanelState', () => {
   const savedDashboardPanel: SavedDashboardPanel = {

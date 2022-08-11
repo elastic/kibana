@@ -9,8 +9,6 @@ import { shallow } from 'enzyme';
 import React from 'react';
 
 import '../../../../../../common/mock/match_media';
-import { BrowserFields } from '../../../../../../common/containers/source';
-import { mockBrowserFields } from '../../../../../../common/containers/source/mock';
 import { mockTimelineData, TestProviders } from '../../../../../../common/mock';
 import { AuditdGenericDetails, AuditdGenericLine } from './generic_details';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
@@ -30,13 +28,10 @@ describe('GenericDetails', () => {
 
   describe('rendering', () => {
     test('it renders the default AuditAcquiredCredsDetails', () => {
-      // I cannot and do not want to use BrowserFields for the mocks for the snapshot tests as they are too heavy
-      const browserFields: BrowserFields = {};
       const wrapper = shallow(
         <AuditdGenericDetails
           contextId="contextid-123"
           text="generic-text-123"
-          browserFields={browserFields}
           data={mockTimelineData[21].ecs}
           timelineId="test"
         />
@@ -50,7 +45,6 @@ describe('GenericDetails', () => {
           <AuditdGenericDetails
             contextId="contextid-123"
             text="generic-text-123"
-            browserFields={mockBrowserFields}
             data={mockTimelineData[19].ecs}
             timelineId="test"
           />
@@ -66,7 +60,6 @@ describe('GenericDetails', () => {
         <AuditdGenericDetails
           contextId="contextid-123"
           text="generic-text-123"
-          browserFields={mockBrowserFields}
           data={mockTimelineData[0].ecs}
           timelineId="test"
         />

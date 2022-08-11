@@ -11,17 +11,20 @@ import { inspect } from 'util';
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Client } from '@elastic/elasticsearch';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 
+import { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 import { Stats } from '../stats';
 import { deleteKibanaIndices } from './kibana_index';
 import { deleteIndex } from './delete_index';
+import { deleteDataStream } from './delete_data_stream';
 import { ES_CLIENT_HEADERS } from '../../client_headers';
 
 interface DocRecord {
   value: estypes.IndicesIndexState & {
     index: string;
     type: string;
+    template?: IndicesPutIndexTemplateRequest;
   };
 }
 
@@ -52,6 +55,43 @@ export function createCreateIndexStream({
     }
 
     stream.push(record);
+  }
+
+  async function handleDataStream(record: DocRecord, attempts = 1) {
+    if (docsOnly) return;
+
+    const { data_stream: dataStream, template } = record.value as {
+      data_stream: string;
+      template: IndicesPutIndexTemplateRequest;
+    };
+
+    try {
+      await client.indices.putIndexTemplate(template, {
+        headers: ES_CLIENT_HEADERS,
+      });
+
+      await client.indices.createDataStream(
+        { name: dataStream },
+        {
+          headers: ES_CLIENT_HEADERS,
+        }
+      );
+      stats.createdDataStream(dataStream, template.name, { template });
+    } catch (err) {
+      if (err?.meta?.body?.error?.type !== 'resource_already_exists_exception' || attempts >= 3) {
+        throw err;
+      }
+
+      if (skipExisting) {
+        skipDocsFromIndices.add(dataStream);
+        stats.skippedIndex(dataStream);
+        return;
+      }
+
+      await deleteDataStream(client, dataStream, template.name);
+      stats.deletedDataStream(dataStream, template.name);
+      await handleDataStream(record, attempts + 1);
+    }
   }
 
   async function handleIndex(record: DocRecord) {
@@ -132,6 +172,10 @@ export function createCreateIndexStream({
         switch (record && record.type) {
           case 'index':
             await handleIndex(record);
+            break;
+
+          case 'data_stream':
+            await handleDataStream(record);
             break;
 
           case 'doc':

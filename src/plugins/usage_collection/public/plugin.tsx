@@ -16,8 +16,8 @@ import type {
   CoreSetup,
   CoreStart,
   HttpSetup,
-} from 'src/core/public';
-import { Storage } from '../../kibana_utils/public';
+} from '@kbn/core/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { createReporter, trackApplicationUsageChange } from './services';
 import { ApplicationUsageContext } from './components/track_application_view';
 

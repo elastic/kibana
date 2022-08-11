@@ -12,15 +12,15 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { DataView } from '../../../../../src/plugins/data_views/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import {
   clearEventsLoading,
   clearEventsDeleted,
   setTimelineUpdatedAt,
 } from '../store/t_grid/actions';
-
-import type { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
-import { isCompleteResponse, isErrorResponse } from '../../../../../src/plugins/data/common';
 import {
   Direction,
   TimelineFactoryQueryTypes,
@@ -28,7 +28,6 @@ import {
   EntityType,
 } from '../../common/search_strategy';
 import type {
-  DocValueFields,
   Inspect,
   PaginationInputPaginated,
   TimelineStrategyResponseType,
@@ -75,7 +74,6 @@ export interface UseTimelineEventsProps {
   alertConsumers?: AlertConsumers[];
   data?: DataPublicPluginStart;
   dataViewId: string | null;
-  docValueFields?: DocValueFields[];
   endDate: string;
   entityType: EntityType;
   excludeEcsData?: boolean;
@@ -110,9 +108,10 @@ const getInspectResponse = <T extends TimelineFactoryQueryTypes>(
 const ID = 'timelineEventsQuery';
 export const initSortDefault = [
   {
+    direction: Direction.desc,
+    esTypes: ['date'],
     field: '@timestamp',
-    direction: Direction.asc,
-    type: 'number',
+    type: 'date',
   },
 ];
 
@@ -120,7 +119,6 @@ const NO_CONSUMERS: AlertConsumers[] = [];
 export const useTimelineEvents = ({
   alertConsumers = NO_CONSUMERS,
   dataViewId,
-  docValueFields,
   endDate,
   entityType,
   excludeEcsData = false,
@@ -297,7 +295,6 @@ export const useTimelineEvents = ({
       const currentRequest = {
         alertConsumers,
         defaultIndex: indexNames,
-        docValueFields: docValueFields ?? [],
         excludeEcsData,
         factoryQueryType: TimelineEventsQueries.all,
         fieldRequested: fields,
@@ -330,7 +327,6 @@ export const useTimelineEvents = ({
     dispatch,
     indexNames,
     activePage,
-    docValueFields,
     endDate,
     excludeEcsData,
     filterQuery,

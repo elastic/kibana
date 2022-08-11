@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Plugin, CoreSetup } from 'kibana/server';
+import { Plugin, CoreSetup } from '@kbn/core/server';
 
 export class SavedObjectExportTransformsPlugin implements Plugin {
   public setup({ savedObjects, getStartServices }: CoreSetup, deps: {}) {

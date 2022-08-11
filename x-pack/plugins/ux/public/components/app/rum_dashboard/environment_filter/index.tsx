@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { History } from 'history';
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { fromQuery, toQuery } from '../../../../../../observability/public';
+import { fromQuery, toQuery } from '@kbn/observability-plugin/public';
 import { useEnvironmentsFetcher } from '../../../../hooks/use_environments_fetcher';
 import {
   ENVIRONMENT_ALL,
@@ -73,7 +73,7 @@ export function EnvironmentFilter({
 }: EnvironmentFilterProps) {
   const history = useHistory();
   const location = useLocation();
-  const { environments, status = 'loading' } = useEnvironmentsFetcher({
+  const { environments, loading } = useEnvironmentsFetcher({
     serviceName,
     start,
     end,
@@ -97,7 +97,7 @@ export function EnvironmentFilter({
       onChange={(event) => {
         updateEnvironmentUrl(history, location, event.target.value);
       }}
-      isLoading={status === 'loading'}
+      isLoading={loading}
       style={{ minWidth }}
     />
   );

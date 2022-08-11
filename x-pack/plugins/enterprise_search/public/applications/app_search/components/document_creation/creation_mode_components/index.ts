@@ -7,5 +7,7 @@
 
 export { ShowCreationModes } from './show_creation_modes';
 export { ApiCodeExample } from './api_code_example';
-export { PasteJsonText } from './paste_json_text';
-export { UploadJsonFile } from './upload_json_file';
+export { JsonFlyout } from './json_flyout';
+export { ElasticsearchIndex } from './elasticsearch_index';
+export { PasteJsonTextTabContent, PasteJsonTextFooterContent } from './paste_json_text';
+export { UploadJsonFileTabContent, UploadJsonFileFooterContent } from './upload_json_file';

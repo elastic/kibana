@@ -44,6 +44,10 @@ describe('createMonitoringStatsStream', () => {
     unsafe: {
       exclude_task_types: [],
     },
+    event_loop_delay: {
+      monitor: true,
+      warn_threshold: 5000,
+    },
   };
 
   it('returns the initial config used to configure Task Manager', async () => {

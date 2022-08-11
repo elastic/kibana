@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { ApplicationStart } from '@kbn/core/public';
+
 import {
   LOGOUT_PROVIDER_QUERY_STRING_PARAMETER,
   LOGOUT_REASON_QUERY_STRING_PARAMETER,
@@ -27,13 +29,18 @@ const getProviderParameter = (tenant: string) => {
 };
 
 export class SessionExpired {
-  constructor(private logoutUrl: string, private tenant: string) {}
+  constructor(
+    private application: ApplicationStart,
+    private logoutUrl: string,
+    private tenant: string
+  ) {}
 
   logout(reason: LogoutReason) {
     const next = getNextParameter();
     const provider = getProviderParameter(this.tenant);
-    window.location.assign(
-      `${this.logoutUrl}?${LOGOUT_REASON_QUERY_STRING_PARAMETER}=${reason}${next}${provider}`
+    this.application.navigateToUrl(
+      `${this.logoutUrl}?${LOGOUT_REASON_QUERY_STRING_PARAMETER}=${reason}${next}${provider}`,
+      { forceRedirect: true, skipAppLeave: true }
     );
   }
 }

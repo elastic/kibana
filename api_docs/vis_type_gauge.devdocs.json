@@ -1,0 +1,154 @@
+{
+  "id": "visTypeGauge",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "visTypeGauge",
+        "id": "def-public.gaugeVisType",
+        "type": "Function",
+        "tags": [],
+        "label": "gaugeVisType",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "GaugeTypeProps",
+          ") => ",
+          {
+            "pluginId": "visualizations",
+            "scope": "public",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-public.VisTypeDefinition",
+            "text": "VisTypeDefinition"
+          },
+          "<",
+          "GaugeVisParams",
+          ">"
+        ],
+        "path": "src/plugins/vis_types/gauge/public/vis_type/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "visTypeGauge",
+            "id": "def-public.gaugeVisType.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "GaugeTypeProps"
+            ],
+            "path": "src/plugins/vis_types/gauge/public/vis_type/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visTypeGauge",
+        "id": "def-public.goalVisType",
+        "type": "Function",
+        "tags": [],
+        "label": "goalVisType",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "GaugeTypeProps",
+          ") => ",
+          {
+            "pluginId": "visualizations",
+            "scope": "public",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-public.VisTypeDefinition",
+            "text": "VisTypeDefinition"
+          },
+          "<",
+          "GaugeVisParams",
+          ">"
+        ],
+        "path": "src/plugins/vis_types/gauge/public/vis_type/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "visTypeGauge",
+            "id": "def-public.goalVisType.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "GaugeTypeProps"
+            ],
+            "path": "src/plugins/vis_types/gauge/public/vis_type/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "visTypeGauge",
+        "id": "def-public.VisTypeGaugePluginSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "VisTypeGaugePluginSetup",
+        "description": [],
+        "path": "src/plugins/vis_types/gauge/public/types.ts",
+        "deprecated": false,
+        "children": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visTypeGauge",
+        "id": "def-public.VisTypeGaugePluginStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "VisTypeGaugePluginStart",
+        "description": [],
+        "path": "src/plugins/vis_types/gauge/public/types.ts",
+        "deprecated": false,
+        "children": [],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "visTypeGauge",
+        "id": "def-common.LEGACY_GAUGE_CHARTS_LIBRARY",
+        "type": "string",
+        "tags": [],
+        "label": "LEGACY_GAUGE_CHARTS_LIBRARY",
+        "description": [],
+        "signature": [
+          "\"visualization:visualize:legacyGaugeChartsLibrary\""
+        ],
+        "path": "src/plugins/vis_types/gauge/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

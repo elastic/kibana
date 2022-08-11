@@ -17,6 +17,8 @@ exports[`entity_draggable renders correctly against snapshot 1`] = `
       },
     }
   }
+  fieldType="keyword"
+  isAggregatable={true}
   key="entity-draggable-id-prefix-entity-name-entity-value"
   render={[Function]}
 />

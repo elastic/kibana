@@ -7,7 +7,7 @@
  */
 
 import { Reference } from './reference';
-import { schema } from '../';
+import { schema } from '..';
 
 describe('Reference.isReference', () => {
   it('handles primitives', () => {

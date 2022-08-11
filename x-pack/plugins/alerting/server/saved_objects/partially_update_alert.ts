@@ -6,15 +6,14 @@
  */
 
 import { pick } from 'lodash';
-import { RawRule } from '../types';
-
 import {
   SavedObjectsClient,
   SavedObjectsErrorHelpers,
   SavedObjectsUpdateOptions,
-} from '../../../../../src/core/server';
+} from '@kbn/core/server';
+import { RawRule } from '../types';
 
-import { AlertAttributesExcludedFromAAD, AlertAttributesExcludedFromAADType } from './index';
+import { AlertAttributesExcludedFromAAD, AlertAttributesExcludedFromAADType } from '.';
 
 export type PartiallyUpdateableAlertAttributes = Partial<
   Pick<RawRule, AlertAttributesExcludedFromAADType>

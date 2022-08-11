@@ -12,9 +12,11 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiConfirmModal, EuiEmptyPrompt, EuiPanel, EuiTable } from '@elastic/eui';
+import { EuiCallOut, EuiConfirmModal, EuiEmptyPrompt, EuiTable } from '@elastic/eui';
 
 import { ComponentLoader } from '../../../components/shared/component_loader';
+
+import { CustomSourceDeployment } from './custom_source_deployment';
 
 import { Overview } from './overview';
 
@@ -31,6 +33,7 @@ describe('Overview', () => {
   };
 
   beforeEach(() => {
+    jest.clearAllMocks();
     setMockValues({ ...mockValues });
     setMockActions({ initializeSourceSynchronization });
   });
@@ -83,14 +86,6 @@ describe('Overview', () => {
     expect(groupsSummary.find('[data-test-subj="SourceGroupLink"]')).toHaveLength(1);
   });
 
-  it('renders DocumentationCallout', () => {
-    setMockValues({ ...mockValues, contentSource: fullContentSources[1] });
-    const wrapper = shallow(<Overview />);
-    const documentationCallout = wrapper.find('[data-test-subj="DocumentationCallout"]').dive();
-
-    expect(documentationCallout.find(EuiPanel)).toHaveLength(1);
-  });
-
   it('renders PermissionsStatus', () => {
     setMockValues({
       ...mockValues,
@@ -121,6 +116,22 @@ describe('Overview', () => {
     expect(wrapper.find('[data-test-subj="DocumentPermissionsDisabled"]')).toHaveLength(1);
   });
 
+  it('renders feedback callout for external sources', () => {
+    setMockValues({
+      ...mockValues,
+      contentSource: {
+        ...fullContentSources[1],
+        serviceTypeSupportsPermissions: true,
+        custom: false,
+        serviceType: 'external',
+      },
+    });
+
+    const wrapper = shallow(<Overview />);
+
+    expect(wrapper.find(EuiCallOut)).toHaveLength(1);
+  });
+
   it('handles confirmModal submission', () => {
     const wrapper = shallow(<Overview />);
     const button = wrapper.find('[data-test-subj="SyncButton"]');
@@ -129,5 +140,18 @@ describe('Overview', () => {
     modal.prop('onConfirm')!({} as any);
 
     expect(initializeSourceSynchronization).toHaveBeenCalled();
+  });
+
+  describe('custom sources', () => {
+    it('includes deployment instructions', () => {
+      setMockValues({
+        ...mockValues,
+        contentSource: fullContentSources[1],
+      });
+
+      const wrapper = shallow(<Overview />);
+
+      expect(wrapper.find(CustomSourceDeployment)).toHaveLength(1);
+    });
   });
 });

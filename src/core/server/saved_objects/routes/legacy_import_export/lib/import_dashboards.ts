@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
+import { SavedObject, SavedObjectsClientContract } from '../../../..';
 
 export async function importDashboards(
   savedObjectsClient: SavedObjectsClientContract,

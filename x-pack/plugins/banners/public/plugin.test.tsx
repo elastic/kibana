@@ -6,8 +6,8 @@
  */
 
 import { getBannerInfoMock } from './plugin.test.mocks';
-import { coreMock } from '../../../../src/core/public/mocks';
-import { screenshotModePluginMock } from '../../../../src/plugins/screenshot_mode/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
+import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 import { BannerConfiguration } from '../common/types';
 import { BannersPlugin } from './plugin';
 

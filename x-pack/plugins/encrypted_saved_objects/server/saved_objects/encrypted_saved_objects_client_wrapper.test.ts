@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type { SavedObjectsBulkResolveResponse, SavedObjectsClientContract } from 'src/core/server';
-import { savedObjectsClientMock, savedObjectsTypeRegistryMock } from 'src/core/server/mocks';
+import type { SavedObjectsBulkResolveResponse, SavedObjectsClientContract } from '@kbn/core/server';
+import { savedObjectsClientMock, savedObjectsTypeRegistryMock } from '@kbn/core/server/mocks';
+import { mockAuthenticatedUser } from '@kbn/security-plugin/common/model/authenticated_user.mock';
 
-import { mockAuthenticatedUser } from '../../../security/common/model/authenticated_user.mock';
 import type { EncryptedSavedObjectsService } from '../crypto';
 import { EncryptionError } from '../crypto';
 import { EncryptionErrorOperation } from '../crypto/encryption_error';
 import { encryptedSavedObjectsServiceMock } from '../crypto/index.mock';
 import { EncryptedSavedObjectsClientWrapper } from './encrypted_saved_objects_client_wrapper';
 
-jest.mock('src/core/server/saved_objects/service/lib/utils', () => {
+jest.mock('@kbn/core/server/saved_objects/service/lib/utils', () => {
   const { SavedObjectsUtils } = jest.requireActual(
-    'src/core/server/saved_objects/service/lib/utils'
+    '@kbn/core/server/saved_objects/service/lib/utils'
   );
   return {
     SavedObjectsUtils: {

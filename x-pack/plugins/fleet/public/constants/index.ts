@@ -37,3 +37,7 @@ export const DURATION_APM_SETTINGS_VARS = {
   TAIL_SAMPLING_INTERVAL: 'tail_sampling_interval',
   WRITE_TIMEOUT: 'write_timeout',
 };
+
+export const LOCATORS_IDS = {
+  APM_LOCATOR: 'APM_LOCATOR',
+} as const;

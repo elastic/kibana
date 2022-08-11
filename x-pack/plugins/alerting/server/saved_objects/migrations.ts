@@ -7,6 +7,9 @@
 
 import { isRuleType, ruleTypeMappings } from '@kbn/securitysolution-rules';
 import { isString } from 'lodash/fp';
+import { omit } from 'lodash';
+import moment from 'moment-timezone';
+import { gte } from 'semver';
 import {
   LogMeta,
   SavedObjectMigrationMap,
@@ -16,14 +19,19 @@ import {
   SavedObjectAttributes,
   SavedObjectAttribute,
   SavedObjectReference,
-} from '../../../../../src/core/server';
-import { RawRule, RawAlertAction } from '../types';
-import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
-import type { IsMigrationNeededPredicate } from '../../../encrypted_saved_objects/server';
+} from '@kbn/core/server';
+import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { IsMigrationNeededPredicate } from '@kbn/encrypted-saved-objects-plugin/server';
+import { MigrateFunctionsObject, MigrateFunction } from '@kbn/kibana-utils-plugin/common';
+import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
+import { isSerializedSearchSource, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { extractRefsFromGeoContainmentAlert } from './geo_containment/migrations';
+import { RawRule, RawRuleAction, RawRuleExecutionStatus } from '../types';
+import { getMappedParams } from '../rules_client/lib/mapped_params_utils';
 
 const SIEM_APP_ID = 'securitySolution';
 const SIEM_SERVER_APP_ID = 'siem';
+const MINIMUM_SS_MIGRATION_VERSION = '8.3.0';
 export const LEGACY_LAST_MODIFIED_VERSION = 'pre-7.10.0';
 export const FILEBEAT_7X_INDICATOR_PATH = 'threatintel.indicator';
 
@@ -58,6 +66,9 @@ export const isAnyActionSupportIncidents = (doc: SavedObjectUnsanitizedDoc<RawRu
 export const isSiemSignalsRuleType = (doc: SavedObjectUnsanitizedDoc<RawRule>): boolean =>
   doc.attributes.alertTypeId === 'siem.signals';
 
+export const isEsQueryRuleType = (doc: SavedObjectUnsanitizedDoc<RawRule>) =>
+  doc.attributes.alertTypeId === '.es-query';
+
 export const isDetectionEngineAADRuleType = (doc: SavedObjectUnsanitizedDoc<RawRule>): boolean =>
   (Object.values(ruleTypeMappings) as string[]).includes(doc.attributes.alertTypeId);
 
@@ -74,6 +85,7 @@ export const isSecuritySolutionLegacyNotification = (
 
 export function getMigrations(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
+  searchSourceMigrations: MigrateFunctionsObject,
   isPreconfigured: (connectorId: string) => boolean
 ): SavedObjectMigrationMap {
   const migrationWhenRBACWasIntroduced = createEsoMigration(
@@ -145,17 +157,34 @@ export function getMigrations(
     pipeMigrations(addSecuritySolutionAADRuleTypeTags)
   );
 
-  return {
-    '7.10.0': executeMigrationWithErrorHandling(migrationWhenRBACWasIntroduced, '7.10.0'),
-    '7.11.0': executeMigrationWithErrorHandling(migrationAlertUpdatedAtAndNotifyWhen, '7.11.0'),
-    '7.11.2': executeMigrationWithErrorHandling(migrationActions7112, '7.11.2'),
-    '7.13.0': executeMigrationWithErrorHandling(migrationSecurityRules713, '7.13.0'),
-    '7.14.1': executeMigrationWithErrorHandling(migrationSecurityRules714, '7.14.1'),
-    '7.15.0': executeMigrationWithErrorHandling(migrationSecurityRules715, '7.15.0'),
-    '7.16.0': executeMigrationWithErrorHandling(migrateRules716, '7.16.0'),
-    '8.0.0': executeMigrationWithErrorHandling(migrationRules800, '8.0.0'),
-    '8.0.1': executeMigrationWithErrorHandling(migrationRules801, '8.0.1'),
-  };
+  const migrationRules820 = createEsoMigration(
+    encryptedSavedObjects,
+    (doc: SavedObjectUnsanitizedDoc<RawRule>): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
+    pipeMigrations(addMappedParams)
+  );
+
+  const migrationRules830 = createEsoMigration(
+    encryptedSavedObjects,
+    (doc: SavedObjectUnsanitizedDoc<RawRule>): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
+    pipeMigrations(addSearchType, removeInternalTags, convertSnoozes)
+  );
+
+  return mergeSavedObjectMigrationMaps(
+    {
+      '7.10.0': executeMigrationWithErrorHandling(migrationWhenRBACWasIntroduced, '7.10.0'),
+      '7.11.0': executeMigrationWithErrorHandling(migrationAlertUpdatedAtAndNotifyWhen, '7.11.0'),
+      '7.11.2': executeMigrationWithErrorHandling(migrationActions7112, '7.11.2'),
+      '7.13.0': executeMigrationWithErrorHandling(migrationSecurityRules713, '7.13.0'),
+      '7.14.1': executeMigrationWithErrorHandling(migrationSecurityRules714, '7.14.1'),
+      '7.15.0': executeMigrationWithErrorHandling(migrationSecurityRules715, '7.15.0'),
+      '7.16.0': executeMigrationWithErrorHandling(migrateRules716, '7.16.0'),
+      '8.0.0': executeMigrationWithErrorHandling(migrationRules800, '8.0.0'),
+      '8.0.1': executeMigrationWithErrorHandling(migrationRules801, '8.0.1'),
+      '8.2.0': executeMigrationWithErrorHandling(migrationRules820, '8.2.0'),
+      '8.3.0': executeMigrationWithErrorHandling(migrationRules830, '8.3.0'),
+    },
+    getSearchSourceMigrations(encryptedSavedObjects, searchSourceMigrations)
+  );
 }
 
 function executeMigrationWithErrorHandling(
@@ -272,7 +301,7 @@ function initializeExecutionStatus(
         status: 'pending',
         lastExecutionDate: new Date().toISOString(),
         error: null,
-      },
+      } as RawRuleExecutionStatus,
     },
   };
 }
@@ -345,7 +374,7 @@ function restructureConnectorsThatSupportIncident(
               },
             },
           },
-        ] as RawAlertAction[];
+        ] as RawRuleAction[];
       } else if (action.actionTypeId === '.jira') {
         const { title, comments, description, issueType, priority, labels, parent, summary } =
           action.params.subActionParams as {
@@ -377,7 +406,7 @@ function restructureConnectorsThatSupportIncident(
               },
             },
           },
-        ] as RawAlertAction[];
+        ] as RawRuleAction[];
       } else if (action.actionTypeId === '.resilient') {
         const { title, comments, description, incidentTypes, severityCode, name } = action.params
           .subActionParams as {
@@ -405,12 +434,12 @@ function restructureConnectorsThatSupportIncident(
               },
             },
           },
-        ] as RawAlertAction[];
+        ] as RawRuleAction[];
       }
     }
 
     return [...acc, action];
-  }, [] as RawAlertAction[]);
+  }, [] as RawRuleAction[]);
 
   return {
     ...doc,
@@ -682,6 +711,23 @@ function addSecuritySolutionAADRuleTypes(
     : doc;
 }
 
+function addSearchType(doc: SavedObjectUnsanitizedDoc<RawRule>) {
+  const searchType = doc.attributes.params.searchType;
+
+  return isEsQueryRuleType(doc) && !searchType
+    ? {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          params: {
+            ...doc.attributes.params,
+            searchType: 'esQuery',
+          },
+        },
+      }
+    : doc;
+}
+
 function addSecuritySolutionAADRuleTypeTags(
   doc: SavedObjectUnsanitizedDoc<RawRule>
 ): SavedObjectUnsanitizedDoc<RawRule> {
@@ -822,20 +868,148 @@ function fixInventoryThresholdGroupId(
   }
 }
 
+function addMappedParams(
+  doc: SavedObjectUnsanitizedDoc<RawRule>
+): SavedObjectUnsanitizedDoc<RawRule> {
+  const {
+    attributes: { params },
+  } = doc;
+
+  const mappedParams = getMappedParams(params);
+
+  if (Object.keys(mappedParams).length) {
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        mapped_params: mappedParams,
+      },
+    };
+  }
+
+  return doc;
+}
+
+function convertSnoozes(
+  doc: SavedObjectUnsanitizedDoc<RawRule>
+): SavedObjectUnsanitizedDoc<RawRule> {
+  const {
+    attributes: { snoozeEndTime },
+  } = doc;
+
+  return {
+    ...doc,
+    attributes: {
+      ...(omit(doc.attributes, ['snoozeEndTime']) as RawRule),
+      snoozeSchedule: snoozeEndTime
+        ? [
+            {
+              duration: Date.parse(snoozeEndTime as string) - Date.now(),
+              rRule: {
+                dtstart: new Date().toISOString(),
+                tzid: moment.tz.guess(),
+                count: 1,
+              },
+            },
+          ]
+        : [],
+    },
+  };
+}
+
 function getCorrespondingAction(
   actions: SavedObjectAttribute,
   connectorRef: string
-): RawAlertAction | null {
+): RawRuleAction | null {
   if (!Array.isArray(actions)) {
     return null;
   } else {
     return actions.find(
-      (action) => (action as RawAlertAction)?.actionRef === connectorRef
-    ) as RawAlertAction;
+      (action) => (action as RawRuleAction)?.actionRef === connectorRef
+    ) as RawRuleAction;
   }
+}
+/**
+ * removes internal tags(starts with '__internal') from Security Solution rules
+ * @param doc rule to be migrated
+ * @returns migrated rule if it's Security Solution rule or unchanged if not
+ */
+function removeInternalTags(
+  doc: SavedObjectUnsanitizedDoc<RawRule>
+): SavedObjectUnsanitizedDoc<RawRule> {
+  if (!isDetectionEngineAADRuleType(doc)) {
+    return doc;
+  }
+
+  const {
+    attributes: { tags },
+  } = doc;
+
+  const filteredTags = (tags ?? []).filter((tag) => !tag.startsWith('__internal_'));
+
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      tags: filteredTags,
+    },
+  };
 }
 
 function pipeMigrations(...migrations: AlertMigration[]): AlertMigration {
   return (doc: SavedObjectUnsanitizedDoc<RawRule>) =>
     migrations.reduce((migratedDoc, nextMigration) => nextMigration(migratedDoc), doc);
+}
+
+function mapSearchSourceMigrationFunc(
+  migrateSerializedSearchSourceFields: MigrateFunction<SerializedSearchSourceFields>
+): MigrateFunction {
+  return (doc) => {
+    const _doc = doc as { attributes: RawRule };
+
+    const serializedSearchSource = _doc.attributes.params.searchConfiguration;
+
+    if (isSerializedSearchSource(serializedSearchSource)) {
+      return {
+        ..._doc,
+        attributes: {
+          ..._doc.attributes,
+          params: {
+            ..._doc.attributes.params,
+            searchConfiguration: migrateSerializedSearchSourceFields(serializedSearchSource),
+          },
+        },
+      };
+    }
+    return _doc;
+  };
+}
+
+/**
+ * This creates a migration map that applies search source migrations to legacy es query rules.
+ * It doesn't modify existing migrations. The following migrations will occur at minimum version of 8.3+.
+ */
+function getSearchSourceMigrations(
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
+  searchSourceMigrations: MigrateFunctionsObject
+) {
+  const filteredMigrations: SavedObjectMigrationMap = {};
+  for (const versionKey in searchSourceMigrations) {
+    if (gte(versionKey, MINIMUM_SS_MIGRATION_VERSION)) {
+      const migrateSearchSource = mapSearchSourceMigrationFunc(
+        searchSourceMigrations[versionKey]
+      ) as unknown as AlertMigration;
+
+      filteredMigrations[versionKey] = executeMigrationWithErrorHandling(
+        createEsoMigration(
+          encryptedSavedObjects,
+          (doc: SavedObjectUnsanitizedDoc<RawRule>): doc is SavedObjectUnsanitizedDoc<RawRule> =>
+            isEsQueryRuleType(doc),
+          pipeMigrations(migrateSearchSource)
+        ),
+        versionKey
+      );
+    }
+  }
+  return filteredMigrations;
 }

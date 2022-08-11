@@ -12,7 +12,14 @@ import ReactDOM from 'react-dom';
 import React from 'react';
 import moment from 'moment';
 import { I18nProvider } from '@kbn/i18n-react';
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  CoreTheme,
+  Plugin,
+} from '@kbn/core/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { NewsfeedPluginBrowserConfig, NewsfeedPluginStartDependencies } from './types';
 import { NewsfeedNavButton } from './components/newsfeed_header_nav_button';
 import { getApi, NewsfeedApi, NewsfeedApiEndpoint } from './lib/api';
@@ -25,7 +32,7 @@ export class NewsfeedPublicPlugin
 {
   private readonly kibanaVersion: string;
   private readonly config: NewsfeedPluginBrowserConfig;
-  private readonly stop$ = new Rx.ReplaySubject(1);
+  private readonly stop$ = new Rx.ReplaySubject<void>(1);
 
   constructor(initializerContext: PluginInitializerContext<NewsfeedPluginBrowserConfig>) {
     this.kibanaVersion = initializerContext.env.packageInfo.version;
@@ -48,7 +55,7 @@ export class NewsfeedPublicPlugin
     const api = this.createNewsfeedApi(this.config, NewsfeedApiEndpoint.KIBANA, isScreenshotMode);
     core.chrome.navControls.registerRight({
       order: 1000,
-      mount: (target) => this.mount(api, target),
+      mount: (target) => this.mount(api, target, core.theme.theme$),
     });
 
     return {
@@ -84,11 +91,13 @@ export class NewsfeedPublicPlugin
     };
   }
 
-  private mount(api: NewsfeedApi, targetDomElement: HTMLElement) {
+  private mount(api: NewsfeedApi, targetDomElement: HTMLElement, theme$: Rx.Observable<CoreTheme>) {
     ReactDOM.render(
-      <I18nProvider>
-        <NewsfeedNavButton newsfeedApi={api} />
-      </I18nProvider>,
+      <KibanaThemeProvider theme$={theme$}>
+        <I18nProvider>
+          <NewsfeedNavButton newsfeedApi={api} />
+        </I18nProvider>
+      </KibanaThemeProvider>,
       targetDomElement
     );
     return () => ReactDOM.unmountComponentAtNode(targetDomElement);

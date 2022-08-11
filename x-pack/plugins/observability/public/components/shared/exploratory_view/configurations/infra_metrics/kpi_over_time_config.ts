@@ -20,7 +20,7 @@ import {
   SYSTEM_MEMORY_USAGE,
 } from '../constants/labels';
 
-export function getMetricsKPIConfig({ indexPattern }: ConfigProps): SeriesConfig {
+export function getMetricsKPIConfig({ dataView }: ConfigProps): SeriesConfig {
   return {
     reportType: ReportTypes.KPI,
     defaultSeriesType: 'area',

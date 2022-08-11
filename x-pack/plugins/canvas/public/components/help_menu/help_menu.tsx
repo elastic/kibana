@@ -5,68 +5,22 @@
  * 2.0.
  */
 
-import React, { FC, useState, lazy, Suspense } from 'react';
-import { EuiButtonEmpty, EuiPortal, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { ExpressionFunction } from 'src/plugins/expressions';
-
-import { KeyboardShortcutsDoc } from '../keyboard_shortcuts_doc';
-import { CanvasPluginServices } from '../../services/';
-
-let FunctionReferenceGenerator: null | React.LazyExoticComponent<any> = null;
-
-if (process.env.NODE_ENV === 'development') {
-  FunctionReferenceGenerator = lazy(() =>
-    import('../function_reference_generator').then((module) => ({
-      default: module.FunctionReferenceGenerator,
-    }))
-  );
-}
-
-const strings = {
-  getKeyboardShortcutsLinkLabel: () =>
-    i18n.translate('xpack.canvas.helpMenu.keyboardShortcutsLinkLabel', {
-      defaultMessage: 'Keyboard shortcuts',
-    }),
-};
+import React, { FC, useCallback } from 'react';
+import { ChromeHelpMenuActions } from '@kbn/core/public';
+import { useDispatch } from 'react-redux';
+import { HelpMenu as Component } from './help_menu.component';
+import { setKeyboardShortcutsDocVisibility } from '../../state/actions/flyouts';
 
 interface Props {
-  functionRegistry: Record<string, ExpressionFunction>;
-  notifyService: CanvasPluginServices['notify'];
+  hideHelpMenu: ChromeHelpMenuActions['hideHelpMenu'];
 }
 
-export const HelpMenu: FC<Props> = ({ functionRegistry, notifyService }) => {
-  const [isFlyoutVisible, setFlyoutVisible] = useState(false);
-
-  const showFlyout = () => {
-    setFlyoutVisible(true);
-  };
-
-  const hideFlyout = () => {
-    setFlyoutVisible(false);
-  };
-
-  return (
-    <>
-      <EuiButtonEmpty size="s" flush="left" iconType="keyboardShortcut" onClick={showFlyout}>
-        {strings.getKeyboardShortcutsLinkLabel()}
-      </EuiButtonEmpty>
-
-      {FunctionReferenceGenerator ? (
-        <Suspense fallback={null}>
-          <EuiSpacer size="xs" />
-          <FunctionReferenceGenerator
-            functionRegistry={functionRegistry}
-            notifyService={notifyService}
-          />
-        </Suspense>
-      ) : null}
-
-      {isFlyoutVisible && (
-        <EuiPortal>
-          <KeyboardShortcutsDoc onClose={hideFlyout} />
-        </EuiPortal>
-      )}
-    </>
+export const HelpMenu: FC<Props> = (props) => {
+  const dispatch = useDispatch();
+  const showKeyboardShortcutsDocFlyout = useCallback(
+    () => dispatch(setKeyboardShortcutsDocVisibility(true)),
+    [dispatch]
   );
+
+  return <Component {...props} showKeyboardShortcutsDocFlyout={showKeyboardShortcutsDocFlyout} />;
 };

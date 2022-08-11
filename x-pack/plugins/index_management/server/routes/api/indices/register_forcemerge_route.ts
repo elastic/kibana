@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 
 import { RouteDependencies } from '../../../types';
-import { addBasePath } from '../index';
+import { addBasePath } from '..';
 
 const bodySchema = schema.object({
   indices: schema.arrayOf(schema.string()),
@@ -24,7 +24,7 @@ export function registerForcemergeRoute({ router, lib: { handleEsError } }: Rout
       },
     },
     async (context, request, response) => {
-      const { client } = context.core.elasticsearch;
+      const { client } = (await context.core).elasticsearch;
       const { maxNumSegments, indices = [] } = request.body as typeof bodySchema.type;
       const params = {
         expand_wildcards: 'none' as const,

@@ -8,10 +8,7 @@
 import { forkJoin, Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { ml } from '../../services/ml_api_service';
-import {
-  ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
-  ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
-} from '../../../../common/constants/search';
+import { ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE } from '../../../../common/constants/search';
 import { extractErrorMessage } from '../../../../common/util/errors';
 import { mlTimeSeriesSearchService } from '../timeseries_search_service';
 import { mlResultsService, CriteriaField } from '../../services/results_service';
@@ -71,13 +68,13 @@ export function getFocusData(
       esFunctionToPlotIfMetric
     ),
     // Query 2 - load all the records across selected time range for the chart anomaly markers.
-    mlResultsService.getRecordsForCriteria(
+    ml.results.getAnomalyRecords$(
       [selectedJob.job_id],
       criteriaFields,
       0,
       searchBounds.min.valueOf(),
       searchBounds.max.valueOf(),
-      ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
+      focusAggregationInterval.expression,
       functionDescription
     ),
     // Query 3 - load any scheduled events for the selected job.
@@ -148,7 +145,11 @@ export function getFocusData(
         modelPlotEnabled,
         functionDescription
       );
-      focusChartData = processScheduledEventsForChart(focusChartData, scheduledEvents);
+      focusChartData = processScheduledEventsForChart(
+        focusChartData,
+        scheduledEvents,
+        focusAggregationInterval
+      );
 
       const refreshFocusData: FocusData = {
         scheduledEvents,

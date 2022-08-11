@@ -92,6 +92,20 @@
       },
       {
         "parentPluginId": "snapshotRestore",
+        "id": "def-common.FEATURE_STATES_NONE_OPTION",
+        "type": "string",
+        "tags": [],
+        "label": "FEATURE_STATES_NONE_OPTION",
+        "description": [],
+        "signature": [
+          "\"none\""
+        ],
+        "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "snapshotRestore",
         "id": "def-common.MAJOR_VERSION",
         "type": "string",
         "tags": [],

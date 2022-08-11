@@ -6,13 +6,13 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useState, useEffect } from 'react';
 
 import { DEFAULT_NUMBER_FORMAT, APP_UI_ID } from '../../../../common/constants';
-import { ESQuery } from '../../../../common/typed_json';
+import type { ESQuery } from '../../../../common/typed_json';
 import { ID as OverviewHostQueryId, useHostOverview } from '../../containers/overview_host';
 import { HeaderSection } from '../../../common/components/header_section';
 import { useUiSetting$, useKibana } from '../../../common/lib/kibana';
@@ -20,9 +20,10 @@ import { getHostDetailsUrl, useFormatUrl } from '../../../common/components/link
 import { getOverviewHostStats, OverviewHostStats } from '../overview_host_stats';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { InspectButtonContainer } from '../../../common/components/inspect';
-import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
+import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { SecurityPageName } from '../../../app/types';
 import { LinkButton } from '../../../common/components/links';
+import { useQueryToggle } from '../../../common/containers/query_toggle';
 
 export interface OwnProps {
   startDate: GlobalTimeArgs['from'];
@@ -46,12 +47,26 @@ const OverviewHostComponent: React.FC<OverviewHostProps> = ({
   const { navigateToApp } = useKibana().services.application;
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
 
+  const { toggleStatus, setToggleStatus } = useQueryToggle(OverviewHostQueryId);
+  const [querySkip, setQuerySkip] = useState(filterQuery === undefined || !toggleStatus);
+  useEffect(() => {
+    setQuerySkip(filterQuery === undefined || !toggleStatus);
+  }, [filterQuery, toggleStatus]);
+  const toggleQuery = useCallback(
+    (status: boolean) => {
+      setToggleStatus(status);
+      // toggle on = skipQuery false
+      setQuerySkip(!status);
+    },
+    [setQuerySkip, setToggleStatus]
+  );
+
   const [loading, { overviewHost, id, inspect, refetch }] = useHostOverview({
     endDate,
     filterQuery,
     indexNames,
     startDate,
-    skip: filterQuery === undefined,
+    skip: querySkip,
   });
 
   const goToHost = useCallback(
@@ -115,18 +130,19 @@ const OverviewHostComponent: React.FC<OverviewHostProps> = ({
   );
 
   return (
-    <EuiFlexItem>
-      <InspectButtonContainer>
-        <EuiPanel hasBorder>
-          <HeaderSection
-            id={OverviewHostQueryId}
-            subtitle={subtitle}
-            title={title}
-            isInspectDisabled={filterQuery === undefined}
-          >
-            <>{hostPageButton}</>
-          </HeaderSection>
-
+    <InspectButtonContainer show={toggleStatus}>
+      <EuiPanel hasBorder>
+        <HeaderSection
+          id={OverviewHostQueryId}
+          subtitle={subtitle}
+          toggleStatus={toggleStatus}
+          toggleQuery={toggleQuery}
+          title={title}
+          isInspectDisabled={filterQuery === undefined}
+        >
+          <>{hostPageButton}</>
+        </HeaderSection>
+        {toggleStatus && (
           <OverviewHostStatsManage
             loading={loading}
             data={overviewHost}
@@ -135,9 +151,9 @@ const OverviewHostComponent: React.FC<OverviewHostProps> = ({
             inspect={inspect}
             refetch={refetch}
           />
-        </EuiPanel>
-      </InspectButtonContainer>
-    </EuiFlexItem>
+        )}
+      </EuiPanel>
+    </InspectButtonContainer>
   );
 };
 

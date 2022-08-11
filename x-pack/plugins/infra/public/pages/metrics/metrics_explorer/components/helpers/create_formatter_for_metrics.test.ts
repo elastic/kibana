@@ -27,7 +27,7 @@ describe('createFormatterForMetric()', () => {
   it('should just work for rates', () => {
     const metric: MetricsExplorerMetric = {
       aggregation: 'rate',
-      field: 'system.network.out.bytes',
+      field: 'host.network.egress.bytes',
     };
     const format = createFormatterForMetric(metric);
     expect(format(103929292)).toBe('831.4Mbit/s');
@@ -35,7 +35,7 @@ describe('createFormatterForMetric()', () => {
   it('should just work for bytes', () => {
     const metric: MetricsExplorerMetric = {
       aggregation: 'avg',
-      field: 'system.network.out.bytes',
+      field: 'host.network.egress.bytes',
     };
     const format = createFormatterForMetric(metric);
     expect(format(103929292)).toBe('103.9MB');

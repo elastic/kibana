@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { coreMock } from 'src/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
 import { MonitoringPlugin } from './plugin';
 import { AlertsFactory } from './alerts';
 

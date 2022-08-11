@@ -11,7 +11,13 @@ exports[`OptInDetailsComponent renders as expected 1`] = `
     />
   }
 >
-  <OptInMessage />
+  <OptInMessage
+    telemetryConstants={
+      Object {
+        "getPrivacyStatementUrl": [Function],
+      }
+    }
+  />
   <EuiSpacer
     size="s"
   />

@@ -9,14 +9,13 @@
 import type { Subscription } from 'rxjs';
 import { fromEvent, interval, merge } from 'rxjs';
 import { exhaustMap } from 'rxjs/operators';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { LOCALSTORAGE_KEY, PAYLOAD_CONTENT_ENCODING } from '../../common/constants';
 import { TelemetryService } from './telemetry_service';
-import { Storage } from '../../../kibana_utils/public';
 import type { EncryptedTelemetryPayload } from '../../common/types';
 import { isReportIntervalExpired } from '../../common/is_report_interval_expired';
 
 export class TelemetrySender {
-  private readonly telemetryService: TelemetryService;
   private lastReported?: number;
   private readonly storage: Storage;
   private sendIfDue$?: Subscription;
@@ -26,8 +25,10 @@ export class TelemetrySender {
     return 60 * (1000 * Math.min(Math.pow(2, retryCount), 64)); // 120s, 240s, 480s, 960s, 1920s, 3840s, 3840s, 3840s
   }
 
-  constructor(telemetryService: TelemetryService) {
-    this.telemetryService = telemetryService;
+  constructor(
+    private readonly telemetryService: TelemetryService,
+    private readonly refreshConfig: () => Promise<void>
+  ) {
     this.storage = new Storage(window.localStorage);
 
     const attributes = this.storage.get(LOCALSTORAGE_KEY);
@@ -80,7 +81,23 @@ export class TelemetrySender {
    */
   private shouldSendReport = async (): Promise<boolean> => {
     if (this.isActiveWindow() && this.telemetryService.canSendTelemetry()) {
-      return await this.isReportDue();
+      if (await this.isReportDue()) {
+        /*
+         * If we think it should send telemetry (local optIn config is `true` and the last report is expired),
+         * let's refresh the config and make sure optIn is still true.
+         *
+         * This change is to ensure that if the user opts-out of telemetry, background tabs realize about it without needing to refresh the page or navigate to another app.
+         *
+         * We are checking twice to avoid making too many requests to fetch the SO:
+         * `sendIfDue` is triggered every minute or when the page regains focus.
+         * If the previously fetched config already dismisses the telemetry, there's no need to fetch the telemetry config.
+         *
+         * The edge case is: if previously opted-out and the user opts-in, background tabs won't realize about that until they navigate to another app.
+         * We are fine with that compromise for now.
+         */
+        await this.refreshConfig();
+        return this.telemetryService.canSendTelemetry();
+      }
     }
 
     return false;

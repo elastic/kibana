@@ -7,7 +7,7 @@
  */
 
 import { SessionService, ISessionService } from './session_service';
-import { coreMock } from '../../../../../core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { take, toArray } from 'rxjs/operators';
 import { getSessionsClientMock } from './mocks';
 import { BehaviorSubject } from 'rxjs';
@@ -17,7 +17,7 @@ import { NowProviderInternalContract } from '../../now_provider';
 import { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
 import type { SearchSessionSavedObject, ISessionsClient } from './sessions_client';
 import { SearchSessionStatus } from '../../../common';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 
 const mockSavedObject: SearchSessionSavedObject = {
   id: 'd7170a35-7e2c-48d6-8dec-9a056721b489',

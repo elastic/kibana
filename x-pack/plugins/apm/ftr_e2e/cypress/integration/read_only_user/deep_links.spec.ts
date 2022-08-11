@@ -7,7 +7,7 @@
 
 describe('APM deep links', () => {
   before(() => {
-    cy.loginAsReadOnlyUser();
+    cy.loginAsViewerUser();
   });
   it('navigates to apm links on search elastic', () => {
     cy.visit('/');

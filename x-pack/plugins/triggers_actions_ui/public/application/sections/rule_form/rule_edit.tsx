@@ -21,6 +21,7 @@ import {
   EuiCallOut,
   EuiSpacer,
   EuiLoadingSpinner,
+  EuiIconTip,
 } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -68,7 +69,7 @@ export const RuleEdit = ({
   const [serverRuleType, setServerRuleType] = useState<RuleType<string, string> | undefined>(
     props.ruleType
   );
-  const [config, setConfig] = useState<TriggersActionsUiConfig>({});
+  const [config, setConfig] = useState<TriggersActionsUiConfig>({ isUsingSecurity: false });
 
   const {
     http,
@@ -122,7 +123,8 @@ export const RuleEdit = ({
     }
   };
 
-  async function onSaveRule(): Promise<Rule | undefined> {
+  async function onSaveRule(): Promise<void> {
+    setIsSaving(true);
     try {
       if (
         !isLoading &&
@@ -138,7 +140,10 @@ export const RuleEdit = ({
             },
           })
         );
-        return newRule;
+        onClose(RuleFlyoutCloseReason.SAVED);
+        if (onSaveHandler) {
+          onSaveHandler();
+        }
       } else {
         setRule(
           getRuleWithInvalidatedFields(rule, ruleParamsErrors, ruleBaseErrors, ruleActionsErrors)
@@ -152,6 +157,7 @@ export const RuleEdit = ({
           })
       );
     }
+    setIsSaving(false);
   }
 
   return (
@@ -201,9 +207,12 @@ export const RuleEdit = ({
                 canChangeTrigger={false}
                 setHasActionsDisabled={setHasActionsDisabled}
                 setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
-                operation="i18n.translate('xpack.triggersActionsUI.sections.ruleEdit.operationName', {
-                  defaultMessage: 'edit',
-                })"
+                operation={i18n.translate(
+                  'xpack.triggersActionsUI.sections.ruleEdit.operationName',
+                  {
+                    defaultMessage: 'edit',
+                  }
+                )}
                 metadata={metadata}
               />
             </EuiFlyoutBody>
@@ -228,30 +237,40 @@ export const RuleEdit = ({
                   <></>
                 )}
                 <EuiFlexItem grow={false}>
-                  <EuiButton
-                    fill
-                    color="success"
-                    data-test-subj="saveEditedRuleButton"
-                    type="submit"
-                    iconType="check"
-                    isLoading={isSaving}
-                    onClick={async () => {
-                      setIsSaving(true);
-                      const savedRule = await onSaveRule();
-                      setIsSaving(false);
-                      if (savedRule) {
-                        onClose(RuleFlyoutCloseReason.SAVED);
-                        if (onSaveHandler) {
-                          onSaveHandler();
-                        }
-                      }
-                    }}
-                  >
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.ruleEdit.saveButtonLabel"
-                      defaultMessage="Save"
-                    />
-                  </EuiButton>
+                  <EuiFlexGroup alignItems="center">
+                    {config.isUsingSecurity && (
+                      <EuiFlexItem grow={false}>
+                        <EuiIconTip
+                          type="alert"
+                          position="top"
+                          data-test-subj="changeInPrivilegesTip"
+                          content={i18n.translate(
+                            'xpack.triggersActionsUI.sections.ruleEdit.changeInPrivilegesLabel',
+                            {
+                              defaultMessage:
+                                'Saving this rule will change its privileges and might change its behavior.',
+                            }
+                          )}
+                        />
+                      </EuiFlexItem>
+                    )}
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        fill
+                        color="success"
+                        data-test-subj="saveEditedRuleButton"
+                        type="submit"
+                        iconType="check"
+                        isLoading={isSaving}
+                        onClick={async () => await onSaveRule()}
+                      >
+                        <FormattedMessage
+                          id="xpack.triggersActionsUI.sections.ruleEdit.saveButtonLabel"
+                          defaultMessage="Save"
+                        />
+                      </EuiButton>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlyoutFooter>

@@ -12,34 +12,40 @@
     "actions",
     "alerting",
     "cases",
+    "cloudSecurityPosture",
+    "dashboard",
     "data",
-    "dataEnhanced",
     "embeddable",
     "eventLog",
     "features",
     "inspector",
+    "kubernetesSecurity",
+    "lens",
     "licensing",
     "maps",
     "ruleRegistry",
+    "sessionView",
     "taskManager",
+    "threatIntelligence",
     "timelines",
     "triggersActionsUi",
-    "uiActions"
+    "uiActions",
+    "unifiedSearch"
   ],
   "optionalPlugins": [
     "encryptedSavedObjects",
     "fleet",
     "ml",
-    "dashboard",
     "newsfeed",
     "security",
     "spaces",
     "usageCollection",
-    "lens",
     "lists",
     "home",
     "telemetry",
-    "dataViewFieldEditor"
+    "dataViewFieldEditor",
+    "osquery",
+    "savedObjectsTaggingOss"
   ],
   "server": true,
   "ui": true,
@@ -50,6 +56,7 @@
     "kibanaReact",
     "usageCollection",
     "lists",
-    "ml"
+    "ml",
+    "unifiedSearch"
   ]
 }

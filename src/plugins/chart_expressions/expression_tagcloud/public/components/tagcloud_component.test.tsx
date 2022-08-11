@@ -7,12 +7,13 @@
  */
 import React from 'react';
 import { Wordcloud, Settings, WordcloudSpec } from '@elastic/charts';
-import { chartPluginMock } from '../../../../charts/public/mocks';
-import type { Datatable } from '../../../../expressions/public';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import type { Datatable } from '@kbn/expressions-plugin/public';
 import { mount } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import TagCloudChart, { TagCloudChartProps } from './tagcloud_component';
 import { TagCloudRendererParams } from '../../common/types';
+import { ScaleOptions, Orientation } from '../../common/constants';
 
 jest.mock('../format_service', () => ({
   getFormatService: jest.fn(() => {
@@ -51,8 +52,8 @@ const visData: Datatable = {
 const visParams: TagCloudRendererParams = {
   bucket: { type: 'vis_dimension', accessor: 0, format: { params: {} } },
   metric: { type: 'vis_dimension', accessor: 1, format: { params: {} } },
-  scale: 'linear',
-  orientation: 'single',
+  scale: ScaleOptions.LINEAR,
+  orientation: Orientation.SINGLE,
   palette: {
     type: 'palette',
     name: 'default',
@@ -166,7 +167,10 @@ describe('TagCloudChart', function () {
   });
 
   it('sets the angles correctly', async () => {
-    const newVisParams: TagCloudRendererParams = { ...visParams, orientation: 'right angled' };
+    const newVisParams: TagCloudRendererParams = {
+      ...visParams,
+      orientation: Orientation.RIGHT_ANGLED,
+    };
     const newProps = { ...wrapperPropsWithIndexes, visParams: newVisParams };
     const component = mount(<TagCloudChart {...newProps} />);
     expect(component.find(Wordcloud).prop('endAngle')).toBe(90);

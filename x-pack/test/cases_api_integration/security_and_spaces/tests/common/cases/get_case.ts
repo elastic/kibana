@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import { AttributesTypeUser, getCaseDetailsUrl } from '../../../../../../plugins/cases/common/api';
-import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
+import { AttributesTypeUser, getCaseDetailsUrl } from '@kbn/cases-plugin/common/api';
+import { CASES_URL } from '@kbn/cases-plugin/common/constants';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   defaultUser,
   postCaseReq,

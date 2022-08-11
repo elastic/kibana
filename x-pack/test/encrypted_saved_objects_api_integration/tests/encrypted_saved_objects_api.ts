@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { SavedObject } from 'src/core/server';
+import { SavedObject } from '@kbn/core/server';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -424,6 +424,67 @@ export default function ({ getService }: FtrProviderContext) {
           error: 'Bad Request',
           message: 'Failed to encrypt attributes',
         });
+    });
+
+    it('#createPointInTimeFinderDecryptedAsInternalUser decrypts and returns all attributes', async () => {
+      const { body: decryptedResponse } = await supertest
+        .get(
+          `${getURLAPIBaseURL()}create-point-in-time-finder-decrypted-as-internal-user?type=${encryptedSavedObjectType}`
+        )
+        .expect(200);
+      expect(decryptedResponse.saved_objects[0].error).to.be(undefined);
+      expect(decryptedResponse.saved_objects[0].attributes).to.eql(savedObjectOriginalAttributes);
+    });
+
+    it('#createPointInTimeFinderDecryptedAsInternalUser returns error and stripped attributes if AAD attribute has changed', async () => {
+      const updatedAttributes = { publicProperty: randomness.string() };
+
+      const { body: response } = await supertest
+        .put(`${getURLAPIBaseURL()}${encryptedSavedObjectType}/${savedObject.id}`)
+        .set('kbn-xsrf', 'xxx')
+        .send({ attributes: updatedAttributes })
+        .expect(200);
+
+      expect(response.attributes).to.eql({
+        publicProperty: updatedAttributes.publicProperty,
+      });
+
+      const { body: decryptedResponse } = await supertest.get(
+        `${getURLAPIBaseURL()}create-point-in-time-finder-decrypted-as-internal-user?type=${encryptedSavedObjectType}`
+      );
+
+      expect(decryptedResponse.saved_objects[0].error.message).to.be(
+        'Unable to decrypt attribute "privateProperty"'
+      );
+
+      expect(decryptedResponse.saved_objects[0].attributes).to.eql({
+        publicProperty: updatedAttributes.publicProperty,
+        publicPropertyExcludedFromAAD: savedObjectOriginalAttributes.publicPropertyExcludedFromAAD,
+      });
+    });
+
+    it('#createPointInTimeFinderDecryptedAsInternalUser is able to decrypt if non-AAD attribute has changed', async () => {
+      const updatedAttributes = { publicPropertyExcludedFromAAD: randomness.string() };
+
+      const { body: response } = await supertest
+        .put(`${getURLAPIBaseURL()}${encryptedSavedObjectType}/${savedObject.id}`)
+        .set('kbn-xsrf', 'xxx')
+        .send({ attributes: updatedAttributes })
+        .expect(200);
+
+      expect(response.attributes).to.eql({
+        publicPropertyExcludedFromAAD: updatedAttributes.publicPropertyExcludedFromAAD,
+      });
+
+      const { body: decryptedResponse } = await supertest.get(
+        `${getURLAPIBaseURL()}create-point-in-time-finder-decrypted-as-internal-user?type=${encryptedSavedObjectType}`
+      );
+
+      expect(decryptedResponse.saved_objects[0].error).to.be(undefined);
+      expect(decryptedResponse.saved_objects[0].attributes).to.eql({
+        ...savedObjectOriginalAttributes,
+        publicPropertyExcludedFromAAD: updatedAttributes.publicPropertyExcludedFromAAD,
+      });
     });
   }
 

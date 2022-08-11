@@ -11,7 +11,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Privilege Escalation via Rogue Named Pipe Impersonation",
-  "note": "## Config\n\nNamed Pipe Creation Events need to be enabled within the Sysmon configuration by including the following settings:\n`condition equal \"contains\" and keyword equal \"pipe\"`\n",
+  "note": "## Config\n\nNamed Pipe Creation Events need to be enabled within the Sysmon configuration by including the following settings:\n`condition equal \"contains\" and keyword equal \"pipe\"`\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n\n",
   "query": "file where event.action : \"Pipe Created*\" and\n /* normal sysmon named pipe creation events truncate the pipe keyword */\n  file.name : \"\\\\*\\\\Pipe\\\\*\"\n",
   "references": [
     "https://itm4n.github.io/printspoofer-abusing-impersonate-privileges/",
@@ -47,5 +47,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 2
 }

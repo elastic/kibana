@@ -7,12 +7,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreStart } from 'kibana/public';
+import { ChromeStart, DocLinksStart } from '@kbn/core/public';
 
-export function addHelpMenuToAppChrome(
-  chrome: CoreStart['chrome'],
-  docLinks: CoreStart['docLinks']
-) {
+export function addHelpMenuToAppChrome(chrome: ChromeStart, docLinks: DocLinksStart) {
   chrome.setHelpExtension({
     appName: i18n.translate('dashboard.helpMenu.appName', {
       defaultMessage: 'Dashboards',

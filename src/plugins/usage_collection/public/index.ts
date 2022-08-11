@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { PluginInitializerContext } from 'src/core/public';
+import type { PluginInitializerContext } from '@kbn/core/public';
 import { UsageCollectionPlugin } from './plugin';
 
 export type { UsageCollectionSetup, UsageCollectionStart } from './plugin';

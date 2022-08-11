@@ -24,6 +24,26 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+/**
+ * The dimension container is set up to close when it detects a click outside it.
+ * Use this CSS class to exclude particular elements from this behavior.
+ */
+export const DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS =
+  'lensDontCloseDimensionContainerOnClick';
+
+function fromExcludedClickTarget(event: Event) {
+  for (
+    let node: HTMLElement | null = event.target as HTMLElement;
+    node !== null;
+    node = node!.parentElement
+  ) {
+    if (node.classList!.contains(DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 export function DimensionContainer({
   isOpen,
   groupLabel,
@@ -77,8 +97,8 @@ export function DimensionContainer({
       <EuiFocusTrap disabled={!focusTrapIsEnabled} clickOutsideDisables={true}>
         <EuiWindowEvent event="keydown" handler={closeOnEscape} />
         <EuiOutsideClickDetector
-          onOutsideClick={() => {
-            if (isFullscreen) {
+          onOutsideClick={(event) => {
+            if (isFullscreen || fromExcludedClickTarget(event)) {
               return;
             }
             closeFlyout();
@@ -135,7 +155,13 @@ export function DimensionContainer({
             <div className="lnsDimensionContainer__content">{panel}</div>
 
             <EuiFlyoutFooter className="lnsDimensionContainer__footer">
-              <EuiButtonEmpty flush="left" size="s" iconType="cross" onClick={closeFlyout}>
+              <EuiButtonEmpty
+                flush="left"
+                size="s"
+                iconType="cross"
+                onClick={closeFlyout}
+                data-test-subj="lns-indexPattern-dimensionContainerClose"
+              >
                 {i18n.translate('xpack.lens.dimensionContainer.close', {
                   defaultMessage: 'Close',
                 })}

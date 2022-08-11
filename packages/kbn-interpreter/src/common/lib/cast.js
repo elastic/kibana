@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getType } from '../lib/get_type';
+import { getType } from './get_type';
 
 export function castProvider(types) {
   return function cast(node, toTypeNames) {

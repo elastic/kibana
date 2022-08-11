@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreStart } from '../../../../src/core/server';
+import { CoreStart } from '@kbn/core/server';
 import { StartDeps } from './types';
 
 let coreStart: CoreStart;
@@ -20,5 +20,5 @@ export const getSavedObjectClient = (extraTypes?: string[]) => {
 };
 
 export const getIndexPatternsServiceFactory = () =>
-  pluginsStart.data.indexPatterns.indexPatternsServiceFactory;
+  pluginsStart.data.indexPatterns.dataViewsServiceFactory;
 export const getElasticsearch = () => coreStart.elasticsearch;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ScopedHistory } from 'kibana/public';
+import { ScopedHistory } from '@kbn/core/public';
 
 /**
  * This file based on guidance from https://github.com/elastic/eui/blob/master/wiki/react-router.md

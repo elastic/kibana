@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { httpServiceMock, httpServerMock } from 'src/core/server/mocks';
-import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
+import { httpServiceMock, httpServerMock } from '@kbn/core/server/mocks';
+import { kibanaResponseFactory, RequestHandler } from '@kbn/core/server';
 
 import { handleEsError } from '../../../shared_imports';
 import { mockRouteContext, mockLicense } from '../test_lib';

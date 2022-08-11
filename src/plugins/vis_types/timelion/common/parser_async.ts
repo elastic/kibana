@@ -10,6 +10,6 @@ import { ParsedExpression } from './parser';
 
 /** Build optimizations, we want to exclude the parser from the main bundle **/
 export const parseTimelionExpressionAsync = async (input: string): Promise<ParsedExpression> => {
-  const { parseTimelionExpression } = await import('../common/parser');
+  const { parseTimelionExpression } = await import('./parser');
   return parseTimelionExpression(input);
 };

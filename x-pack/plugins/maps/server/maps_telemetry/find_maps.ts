@@ -6,13 +6,13 @@
  */
 
 import { asyncForEach } from '@kbn/std';
-import { ISavedObjectsRepository } from 'kibana/server';
+import type { ISavedObjectsRepository, SavedObject } from '@kbn/core/server';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
-import { MapSavedObject, MapSavedObjectAttributes } from '../../common/map_saved_object_type';
+import type { MapSavedObjectAttributes } from '../../common/map_saved_object_type';
 
 export async function findMaps(
   savedObjectsClient: Pick<ISavedObjectsRepository, 'find'>,
-  callback: (savedObject: MapSavedObject) => Promise<void>
+  callback: (savedObject: SavedObject<MapSavedObjectAttributes>) => Promise<void>
 ) {
   let nextPage = 1;
   let hasMorePages = false;

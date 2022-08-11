@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginConfigDescriptor } from 'kibana/server';
+import { PluginConfigDescriptor } from '@kbn/core/server';
 
 import { configSchema, ConfigSchema } from '../config';
 

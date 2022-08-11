@@ -6,7 +6,7 @@
  */
 
 import { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { deleteExceptionListItemByList } from '../../delete_exception_list_items_by_list';
 

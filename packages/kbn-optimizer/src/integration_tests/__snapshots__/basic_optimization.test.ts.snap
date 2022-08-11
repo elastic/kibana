@@ -214,14 +214,7 @@ exports[`prepares assets for distribution: bar bundle 1`] = `
   function (e, n, t) {
     \\"use strict\\";
     var r,
-      o = function () {
-        return (
-          void 0 === r &&
-            (r = Boolean(window && document && document.all && !window.atob)),
-          r
-        );
-      },
-      i = (function () {
+      o = (function () {
         var e = {};
         return function (n) {
           if (void 0 === e[n]) {
@@ -240,37 +233,37 @@ exports[`prepares assets for distribution: bar bundle 1`] = `
           return e[n];
         };
       })(),
-      a = [];
-    function c(e) {
-      for (var n = -1, t = 0; t < a.length; t++)
-        if (a[t].identifier === e) {
+      i = [];
+    function a(e) {
+      for (var n = -1, t = 0; t < i.length; t++)
+        if (i[t].identifier === e) {
           n = t;
           break;
         }
       return n;
     }
-    function u(e, n) {
+    function c(e, n) {
       for (var t = {}, r = [], o = 0; o < e.length; o++) {
-        var i = e[o],
-          u = n.base ? i[0] + n.base : i[0],
+        var c = e[o],
+          u = n.base ? c[0] + n.base : c[0],
           s = t[u] || 0,
           f = \\"\\".concat(u, \\" \\").concat(s);
         t[u] = s + 1;
-        var l = c(f),
-          d = { css: i[1], media: i[2], sourceMap: i[3] };
+        var l = a(f),
+          d = { css: c[1], media: c[2], sourceMap: c[3] };
         -1 !== l
-          ? (a[l].references++, a[l].updater(d))
-          : a.push({ identifier: f, updater: h(d, n), references: 1 }),
+          ? (i[l].references++, i[l].updater(d))
+          : i.push({ identifier: f, updater: v(d, n), references: 1 }),
           r.push(f);
       }
       return r;
     }
-    function s(e) {
+    function u(e) {
       var n = document.createElement(\\"style\\"),
         r = e.attributes || {};
       if (void 0 === r.nonce) {
-        var o = t.nc;
-        o && (r.nonce = o);
+        var i = t.nc;
+        i && (r.nonce = i);
       }
       if (
         (Object.keys(r).forEach(function (e) {
@@ -280,7 +273,7 @@ exports[`prepares assets for distribution: bar bundle 1`] = `
       )
         e.insert(n);
       else {
-        var a = i(e.insert || \\"head\\");
+        var a = o(e.insert || \\"head\\");
         if (!a)
           throw new Error(
             \\"Couldn't find a style target. This probably means that the value for the 'insert' parameter is invalid.\\"
@@ -289,19 +282,19 @@ exports[`prepares assets for distribution: bar bundle 1`] = `
       }
       return n;
     }
-    var f,
-      l =
-        ((f = []),
+    var s,
+      f =
+        ((s = []),
         function (e, n) {
-          return (f[e] = n), f.filter(Boolean).join(\\"\\\\n\\");
+          return (s[e] = n), s.filter(Boolean).join(\\"\\\\n\\");
         });
-    function d(e, n, t, r) {
+    function l(e, n, t, r) {
       var o = t
         ? \\"\\"
         : r.media
         ? \\"@media \\".concat(r.media, \\" {\\").concat(r.css, \\"}\\")
         : r.css;
-      if (e.styleSheet) e.styleSheet.cssText = l(n, o);
+      if (e.styleSheet) e.styleSheet.cssText = f(n, o);
       else {
         var i = document.createTextNode(o),
           a = e.childNodes;
@@ -309,7 +302,7 @@ exports[`prepares assets for distribution: bar bundle 1`] = `
           a.length ? e.insertBefore(i, a[n]) : e.appendChild(i);
       }
     }
-    function p(e, n, t) {
+    function d(e, n, t) {
       var r = t.css,
         o = t.media,
         i = t.sourceMap;
@@ -329,18 +322,18 @@ exports[`prepares assets for distribution: bar bundle 1`] = `
         e.appendChild(document.createTextNode(r));
       }
     }
-    var v = null,
+    var p = null,
       b = 0;
-    function h(e, n) {
+    function v(e, n) {
       var t, r, o;
       if (n.singleton) {
         var i = b++;
-        (t = v || (v = s(n))),
-          (r = d.bind(null, t, i, !1)),
-          (o = d.bind(null, t, i, !0));
+        (t = p || (p = u(n))),
+          (r = l.bind(null, t, i, !1)),
+          (o = l.bind(null, t, i, !0));
       } else
-        (t = s(n)),
-          (r = p.bind(null, t, n)),
+        (t = u(n)),
+          (r = d.bind(null, t, n)),
           (o = function () {
             !(function (e) {
               if (null === e.parentNode) return !1;
@@ -365,22 +358,25 @@ exports[`prepares assets for distribution: bar bundle 1`] = `
     e.exports = function (e, n) {
       (n = n || {}).singleton ||
         \\"boolean\\" == typeof n.singleton ||
-        (n.singleton = o());
-      var t = u((e = e || []), n);
+        (n.singleton =
+          (void 0 === r &&
+            (r = Boolean(window && document && document.all && !window.atob)),
+          r));
+      var t = c((e = e || []), n);
       return function (e) {
         if (
           ((e = e || []),
           \\"[object Array]\\" === Object.prototype.toString.call(e))
         ) {
           for (var r = 0; r < t.length; r++) {
-            var o = c(t[r]);
-            a[o].references--;
+            var o = a(t[r]);
+            i[o].references--;
           }
-          for (var i = u(e, n), s = 0; s < t.length; s++) {
-            var f = c(t[s]);
-            0 === a[f].references && (a[f].updater(), a.splice(f, 1));
+          for (var u = c(e, n), s = 0; s < t.length; s++) {
+            var f = a(t[s]);
+            0 === i[f].references && (i[f].updater(), i.splice(f, 1));
           }
-          t = i;
+          t = u;
         }
       };
     };
@@ -393,27 +389,29 @@ exports[`prepares assets for distribution: bar bundle 1`] = `
         (n.toString = function () {
           return this.map(function (n) {
             var t = (function (e, n) {
-              var t = e[1] || \\"\\",
-                r = e[3];
-              if (!r) return t;
+              var t,
+                r,
+                o,
+                i = e[1] || \\"\\",
+                a = e[3];
+              if (!a) return i;
               if (n && \\"function\\" == typeof btoa) {
-                var o =
-                    ((a = r),
-                    (c = btoa(unescape(encodeURIComponent(JSON.stringify(a))))),
-                    (u =
+                var c =
+                    ((t = a),
+                    (r = btoa(unescape(encodeURIComponent(JSON.stringify(t))))),
+                    (o =
                       \\"sourceMappingURL=data:application/json;charset=utf-8;base64,\\".concat(
-                        c
+                        r
                       )),
-                    \\"/*# \\".concat(u, \\" */\\")),
-                  i = r.sources.map(function (e) {
+                    \\"/*# \\".concat(o, \\" */\\")),
+                  u = a.sources.map(function (e) {
                     return \\"/*# sourceURL=\\"
-                      .concat(r.sourceRoot || \\"\\")
+                      .concat(a.sourceRoot || \\"\\")
                       .concat(e, \\" */\\");
                   });
-                return [t].concat(i).concat([o]).join(\\"\\\\n\\");
+                return [i].concat(u).concat([c]).join(\\"\\\\n\\");
               }
-              var a, c, u;
-              return [t].join(\\"\\\\n\\");
+              return [i].join(\\"\\\\n\\");
             })(n, e);
             return n[2] ? \\"@media \\".concat(n[2], \\" {\\").concat(t, \\"}\\") : t;
           }).join(\\"\\");
@@ -464,16 +462,10 @@ exports[`prepares assets for distribution: bar bundle 1`] = `
       o = t(7);
     \\"string\\" == typeof (o = o.__esModule ? o.default : o) &&
       (o = [[e.i, o, \\"\\"]]);
-    var i = { insert: \\"head\\", singleton: !1 };
-    r(o, i);
-    e.exports = o.locals || {};
+    r(o, { insert: \\"head\\", singleton: !1 }), (e.exports = o.locals || {});
   },
   function (e, n, t) {
-    (n = t(1)(!1)).push([
-      e.i,
-      \\"p{background-color:rebeccapurple}body{width:12}\\\\n\\",
-      \\"\\",
-    ]),
+    (n = t(1)(!1)).push([e.i, \\"p{background-color:#639}body{width:12}\\", \\"\\"]),
       (e.exports = n);
   },
   function (e, n, t) {
@@ -481,16 +473,10 @@ exports[`prepares assets for distribution: bar bundle 1`] = `
       o = t(9);
     \\"string\\" == typeof (o = o.__esModule ? o.default : o) &&
       (o = [[e.i, o, \\"\\"]]);
-    var i = { insert: \\"head\\", singleton: !1 };
-    r(o, i);
-    e.exports = o.locals || {};
+    r(o, { insert: \\"head\\", singleton: !1 }), (e.exports = o.locals || {});
   },
   function (e, n, t) {
-    (n = t(1)(!1)).push([
-      e.i,
-      \\"p{background-color:rebeccapurple}body{width:13}\\\\n\\",
-      \\"\\",
-    ]),
+    (n = t(1)(!1)).push([e.i, \\"p{background-color:#639}body{width:13}\\", \\"\\"]),
       (e.exports = n);
   },
   function (e, n, t) {
@@ -506,24 +492,20 @@ exports[`prepares assets for distribution: bar bundle 1`] = `
       o = t(12);
     \\"string\\" == typeof (o = o.__esModule ? o.default : o) &&
       (o = [[e.i, o, \\"\\"]]);
-    var i = { insert: \\"head\\", singleton: !1 };
-    r(o, i);
-    e.exports = o.locals || {};
+    r(o, { insert: \\"head\\", singleton: !1 }), (e.exports = o.locals || {});
   },
   function (e, n, t) {
-    (n = t(1)(!1)).push([e.i, \\"body{color:green}\\\\n\\", \\"\\"]), (e.exports = n);
+    (n = t(1)(!1)).push([e.i, \\"body{color:green}\\", \\"\\"]), (e.exports = n);
   },
   function (e, n, t) {
     var r = t(0),
       o = t(14);
     \\"string\\" == typeof (o = o.__esModule ? o.default : o) &&
       (o = [[e.i, o, \\"\\"]]);
-    var i = { insert: \\"head\\", singleton: !1 };
-    r(o, i);
-    e.exports = o.locals || {};
+    r(o, { insert: \\"head\\", singleton: !1 }), (e.exports = o.locals || {});
   },
   function (e, n, t) {
-    (n = t(1)(!1)).push([e.i, \\"body{color:green}\\\\n\\", \\"\\"]), (e.exports = n);
+    (n = t(1)(!1)).push([e.i, \\"body{color:green}\\", \\"\\"]), (e.exports = n);
   },
   function (e, n, t) {
     \\"use strict\\";
@@ -533,8 +515,9 @@ exports[`prepares assets for distribution: bar bundle 1`] = `
       }),
       t.d(n, \\"fooLibFn\\", function () {
         return r.fooLibFn;
-      });
-    t(5), t(10);
+      }),
+      t(5),
+      t(10);
     var r = t(2);
     function o() {
       return \\"bar\\";

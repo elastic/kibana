@@ -47,7 +47,7 @@ export default function ({ getService, getPageObjects }) {
         osFreeMemory: 'OS Free Memory\n1.5 GB',
         version: 'Version\n7.0.0-alpha1',
         uptime: 'Uptime\n3 minutes',
-        health: 'Health: green',
+        health: 'Last Reported Status\n Green\nStale',
       });
     });
   });

@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { NotificationsStart } from 'kibana/public';
+import { NotificationsStart } from '@kbn/core/public';
 import moment from 'moment';
 import { useLocalStorage } from '../../../../hooks/use_local_storage';
 import { SchemaOverview } from './schema_overview';
@@ -56,6 +56,7 @@ export function Schema() {
   const cloudApmPackagePolicy = data.cloud_apm_package_policy;
   const hasCloudApmPackagePolicy = !!cloudApmPackagePolicy;
   const hasRequiredRole = !!data.has_required_role;
+  const latestApmPackageVersion = data.latest_apm_package_version;
 
   function updateLocalStorage(newStatus: FETCH_STATUS) {
     setApmDataStreamsMigrationStatus({
@@ -91,6 +92,7 @@ export function Schema() {
         hasCloudAgentPolicy={hasCloudAgentPolicy}
         hasRequiredRole={hasRequiredRole}
         cloudApmPackagePolicy={cloudApmPackagePolicy}
+        latestApmPackageVersion={latestApmPackageVersion}
       />
       {isSwitchActive && (
         <ConfirmSwitchModal

@@ -57,7 +57,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('dashboard panel full screen', async () => {
       const header = await dashboardPanelActions.getPanelHeading('[Flights] Flight count');
-      await dashboardPanelActions.toggleContextMenu(header);
+      await dashboardPanelActions.openContextMenuMorePanel(header);
 
       await testSubjects.click('embeddablePanelAction-togglePanel');
       await a11y.testAppSnapshot();

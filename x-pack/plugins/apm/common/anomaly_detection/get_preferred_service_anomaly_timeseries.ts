@@ -5,20 +5,17 @@
  * 2.0.
  */
 
-import { ENVIRONMENT_ALL } from '../environment_filter_values';
 import { Environment } from '../environment_rt';
 import { ApmMlDetectorType } from './apm_ml_detectors';
 import { ServiceAnomalyTimeseries } from './service_anomaly_timeseries';
 
 export function getPreferredServiceAnomalyTimeseries({
-  environment,
-  environments,
+  preferredEnvironment,
   detectorType,
   allAnomalyTimeseries,
   fallbackToTransactions,
 }: {
-  environment: Environment;
-  environments: Environment[];
+  preferredEnvironment: Environment;
   detectorType: ApmMlDetectorType;
   allAnomalyTimeseries: ServiceAnomalyTimeseries[];
   fallbackToTransactions: boolean;
@@ -26,11 +23,6 @@ export function getPreferredServiceAnomalyTimeseries({
   const seriesForType = allAnomalyTimeseries.filter(
     (serie) => serie.type === detectorType
   );
-
-  const preferredEnvironment =
-    environment === ENVIRONMENT_ALL.value && environments.length === 1
-      ? environments[0]
-      : environment;
 
   return seriesForType.find(
     (serie) =>

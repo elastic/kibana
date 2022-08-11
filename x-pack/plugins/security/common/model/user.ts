@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+/**
+ * A set of fields describing Kibana user.
+ */
 export interface User {
   username: string;
   email?: string;
@@ -23,6 +26,6 @@ export interface EditUser extends User {
   confirmPassword?: string;
 }
 
-export function getUserDisplayName(user: User) {
+export function getUserDisplayName(user: Pick<User, 'username' | 'full_name'>) {
   return user.full_name || user.username;
 }

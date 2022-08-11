@@ -5,10 +5,17 @@
  * 2.0.
  */
 
+import { FtrConfigProviderContext } from '@kbn/test';
+
 import { SecuritySolutionCypressUpgradeCliTestRunner } from './runner';
 
-export default async function () {
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
+  const kibanaCommonTestsConfig = await readConfigFile(
+    require.resolve('../../../test/common/config.js')
+  );
+
   return {
+    ...kibanaCommonTestsConfig.getAll(),
     testRunner: SecuritySolutionCypressUpgradeCliTestRunner,
   };
 }

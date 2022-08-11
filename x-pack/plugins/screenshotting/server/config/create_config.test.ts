@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from 'src/core/server';
+import type { Logger } from '@kbn/core/server';
 import { createConfig } from './create_config';
 import { ConfigType } from './schema';
 

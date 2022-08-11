@@ -8,9 +8,9 @@
 import React, { createContext, useContext } from 'react';
 import { Observable } from 'rxjs';
 
-import { CoreStart, ScopedHistory, CoreTheme } from '../../../../../src/core/public';
-import { LicensingPluginSetup, ILicense } from '../../../licensing/public';
-import { TelemetryPluginStart } from '../../../../../src/plugins/telemetry/public';
+import { CoreStart, ScopedHistory, CoreTheme } from '@kbn/core/public';
+import { LicensingPluginSetup, ILicense } from '@kbn/licensing-plugin/public';
+import { TelemetryPluginStart } from '@kbn/telemetry-plugin/public';
 import { ClientConfigType } from '../types';
 import { BreadcrumbService } from './breadcrumbs';
 

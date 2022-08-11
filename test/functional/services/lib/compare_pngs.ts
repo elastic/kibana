@@ -8,7 +8,7 @@
 
 import { parse, join } from 'path';
 import Jimp from 'jimp';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import { promises as fs } from 'fs';
 import path from 'path';
 

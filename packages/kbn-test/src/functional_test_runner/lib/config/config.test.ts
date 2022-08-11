@@ -15,6 +15,11 @@ describe('Config', () => {
         services: {
           foo: () => 42,
         },
+        servers: {
+          elasticsearch: {
+            port: 1234,
+          },
+        },
       },
       primary: true,
       path: process.cwd(),

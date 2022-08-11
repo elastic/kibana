@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import moment from 'moment';
-import { HostInfo, HostMetadata } from '../../../../common/endpoint/types';
+import type { HostInfo, HostMetadata } from '../../../../common/endpoint/types';
 
 export const isPolicyOutOfDate = (
   reported: HostMetadata['Endpoint']['policy']['applied'],
   current: HostInfo['policy_info']
 ): boolean => {
-  if (current === undefined || current === null) {
+  if (!current || !reported.id) {
     return false; // we don't know, can't declare it out-of-date
   }
   return !(

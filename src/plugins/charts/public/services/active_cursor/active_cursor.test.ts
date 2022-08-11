@@ -22,8 +22,8 @@ describe('ActiveCursor', () => {
 
     expect(activeCursor.activeCursor$).toMatchInlineSnapshot(`
       Subject {
-        "_isScalar": false,
         "closed": false,
+        "currentObservers": null,
         "hasError": false,
         "isStopped": false,
         "observers": Array [],

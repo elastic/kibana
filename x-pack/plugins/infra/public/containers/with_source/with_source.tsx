@@ -13,7 +13,7 @@ import {
 } from '../../../common/metrics_sources';
 import { RendererFunction } from '../../utils/typed_react';
 import { Source } from '../metrics_source';
-import { CreateDerivedIndexPattern } from '../../containers/metrics_source';
+import { CreateDerivedIndexPattern } from '../metrics_source';
 
 interface WithSourceProps {
   children: RendererFunction<{

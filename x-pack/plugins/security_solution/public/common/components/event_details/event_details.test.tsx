@@ -6,7 +6,7 @@
  */
 
 import { waitFor } from '@testing-library/dom';
-import { ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 
 import '../../mock/match_media';
@@ -17,11 +17,19 @@ import { EventDetails, EventsViewType } from './event_details';
 import { mockBrowserFields } from '../../containers/source/mock';
 import { useMountAppended } from '../../utils/use_mount_appended';
 import { mockAlertDetailsData } from './__mocks__';
-import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
+import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { TimelineTabs } from '../../../../common/types/timeline';
 import { useInvestigationTimeEnrichment } from '../../containers/cti/event_enrichment';
+import { useGetUserCasesPermissions } from '../../lib/kibana';
 
-jest.mock('../../../common/lib/kibana');
+jest.mock('../../lib/kibana');
+const originalKibanaLib = jest.requireActual('../../lib/kibana');
+
+// Restore the useGetUserCasesPermissions so the calling functions can receive a valid permissions object
+// The returned permissions object will indicate that the user does not have permissions by default
+const mockUseGetUserCasesPermissions = useGetUserCasesPermissions as jest.Mock;
+mockUseGetUserCasesPermissions.mockImplementation(originalKibanaLib.useGetUserCasesPermissions);
+
 jest.mock('../../containers/cti/event_enrichment');
 
 jest.mock('../../../detections/containers/detection_engine/rules/use_rule_with_fallback', () => {
@@ -139,6 +147,21 @@ describe('EventDetails', () => {
     it('renders a "no enrichments" panel view if there are no enrichments', () => {
       alertsWrapper.find('[data-test-subj="threatIntelTab"]').first().simulate('click');
       expect(alertsWrapper.find('[data-test-subj="no-enrichments-found"]').exists()).toEqual(true);
+    });
+    it('does not render if readOnly prop is passed', async () => {
+      const newProps = { ...defaultProps, isReadOnly: true };
+      wrapper = mount(
+        <TestProviders>
+          <EventDetails {...newProps} />
+        </TestProviders>
+      ) as ReactWrapper;
+      alertsWrapper = mount(
+        <TestProviders>
+          <EventDetails {...{ ...alertsProps, ...newProps }} />
+        </TestProviders>
+      ) as ReactWrapper;
+      await waitFor(() => wrapper.update());
+      expect(alertsWrapper.find('[data-test-subj="threatIntelTab"]').exists()).toBeFalsy();
     });
   });
 });

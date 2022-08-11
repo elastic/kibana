@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { registerExpressionsLanguage } from '.';
 import { PresentationLabsService } from './services/labs';
-import { DataViewsPublicPluginStart } from '../../data_views/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PresentationUtilPluginSetup {}

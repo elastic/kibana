@@ -5,9 +5,15 @@
  * 2.0.
  */
 
+export const ALERT_PAGE_LINK = '/app/observability/alerts';
+export const RULES_PAGE_LINK = `${ALERT_PAGE_LINK}/rules`;
+
 export const paths = {
   observability: {
-    alerts: '/app/observability/alerts',
+    alerts: ALERT_PAGE_LINK,
+    rules: RULES_PAGE_LINK,
+    ruleDetails: (ruleId?: string | null) =>
+      ruleId ? `${RULES_PAGE_LINK}/${encodeURI(ruleId)}` : RULES_PAGE_LINK,
   },
   management: {
     rules: '/app/management/insightsAndAlerting/triggersActions/rules',

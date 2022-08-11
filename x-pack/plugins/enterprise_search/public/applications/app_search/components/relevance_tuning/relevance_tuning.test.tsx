@@ -33,6 +33,7 @@ describe('RelevanceTuning', () => {
     schemaFieldsWithConflicts: [],
     unsavedChanges: false,
     dataLoading: false,
+    isPrecisionTuningEnabled: true,
   };
 
   const actions = {
@@ -94,6 +95,17 @@ describe('RelevanceTuning', () => {
       });
       const buttons = getPageHeaderActions(subject());
       expect(buttons.children().length).toBe(0);
+    });
+  });
+
+  describe('precision tuning', () => {
+    it('will not render the PrecisionSlider when precision tuning is disabled', () => {
+      setMockValues({
+        ...values,
+        isPrecisionTuningEnabled: false,
+      });
+
+      expect(subject().find(PrecisionSlider).exists()).toBe(false);
     });
   });
 });

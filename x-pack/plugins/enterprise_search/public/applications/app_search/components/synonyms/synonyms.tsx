@@ -18,7 +18,7 @@ import { AppSearchPageTemplate } from '../layout';
 import { SynonymCard, SynonymModal, EmptyState } from './components';
 import { SYNONYMS_TITLE } from './constants';
 
-import { SynonymsLogic } from './';
+import { SynonymsLogic } from '.';
 
 export const Synonyms: React.FC = () => {
   const { loadSynonyms, onPaginate, openModal } = useActions(SynonymsLogic);

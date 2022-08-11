@@ -8,7 +8,7 @@
 
 import { get } from 'lodash';
 import { getEsQueryConfig } from './get_es_query_config';
-import { IUiSettingsClient } from 'kibana/public';
+import { IUiSettingsClient } from '@kbn/core/public';
 import { UI_SETTINGS } from '..';
 
 const config = {

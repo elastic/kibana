@@ -8,7 +8,7 @@
 import { CaseResponse } from '../../../../common/api';
 import { createCasesClientMock } from '../../mocks';
 import { CasesClientArgs } from '../../types';
-import { loggingSystemMock } from '../../../../../../../src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createAttachmentServiceMock } from '../../../services/mocks';
 
 import { Actions } from './actions';
@@ -21,7 +21,7 @@ const getAuthorizationFilter = jest.fn().mockResolvedValue({});
 
 const clientArgs = {
   logger,
-  attachmentService,
+  services: { attachmentService },
   authorization: { getAuthorizationFilter },
 } as unknown as CasesClientArgs;
 

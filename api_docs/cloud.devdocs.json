@@ -119,7 +119,7 @@
             "label": "full_story",
             "description": [],
             "signature": [
-              "{ enabled: boolean; org_id?: string | undefined; }"
+              "{ enabled: boolean; org_id?: string | undefined; eventTypesAllowlist?: string[] | undefined; }"
             ],
             "path": "x-pack/plugins/cloud/public/plugin.tsx",
             "deprecated": false
@@ -369,6 +369,19 @@
           "tags": [],
           "label": "isCloudEnabled",
           "description": [],
+          "path": "x-pack/plugins/cloud/server/plugin.ts",
+          "deprecated": false
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-server.CloudSetup.instanceSizeMb",
+          "type": "number",
+          "tags": [],
+          "label": "instanceSizeMb",
+          "description": [],
+          "signature": [
+            "number | undefined"
+          ],
           "path": "x-pack/plugins/cloud/server/plugin.ts",
           "deprecated": false
         },

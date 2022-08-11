@@ -228,6 +228,13 @@ export class LegacyCoreEditor implements CoreEditor {
     );
   }
 
+  detachCompleter() {
+    // In some situations we need to detach the autocomplete suggestions element manually,
+    // such as when navigating away from Console when the suggestions list is open.
+    const completer = (this.editor as unknown as { completer: { detach(): void } }).completer;
+    return completer?.detach();
+  }
+
   private forceRetokenize() {
     const session = this.editor.getSession();
     return new Promise<void>((resolve) => {
@@ -295,6 +302,11 @@ export class LegacyCoreEditor implements CoreEditor {
       name: opts.name,
       bindKey: opts.keys,
     });
+  }
+
+  unregisterKeyboardShortcut(command: string) {
+    // @ts-ignore
+    this.editor.commands.removeCommand(command);
   }
 
   legacyUpdateUI(range: Range) {
@@ -408,5 +420,64 @@ export class LegacyCoreEditor implements CoreEditor {
 
   destroy() {
     this.editor.destroy();
+  }
+
+  /**
+   * Formats body of the request in the editor by removing the extra whitespaces at the beginning of lines,
+   * And adds the correct indentation for each line
+   * @param reqRange request range to indent
+   */
+  autoIndent(reqRange: Range) {
+    const session = this.editor.getSession();
+    const mode = session.getMode();
+    const startRow = reqRange.start.lineNumber;
+    const endRow = reqRange.end.lineNumber;
+    const tab = session.getTabString();
+
+    for (let row = startRow; row <= endRow; row++) {
+      let prevLineState = '';
+      let prevLineIndent = '';
+      if (row > 0) {
+        prevLineState = session.getState(row - 1);
+        const prevLine = session.getLine(row - 1);
+        prevLineIndent = mode.getNextLineIndent(prevLineState, prevLine, tab);
+      }
+
+      const line = session.getLine(row);
+      // @ts-ignore
+      // Brace does not expose type definition for mode.$getIndent, though we have access to this method provided by the underlying Ace editor.
+      // See https://github.com/ajaxorg/ace/blob/87ce087ed1cf20eeabe56fb0894e048d9bc9c481/lib/ace/mode/text.js#L259
+      const currLineIndent = mode.$getIndent(line);
+      if (prevLineIndent !== currLineIndent) {
+        if (currLineIndent.length > 0) {
+          // If current line has indentation, remove it.
+          // Next we will add the correct indentation by looking at the previous line
+          const range = new _AceRange(row, 0, row, currLineIndent.length);
+          session.remove(range);
+        }
+        if (prevLineIndent.length > 0) {
+          // If previous line has indentation, add indentation at the current line
+          session.insert({ row, column: 0 }, prevLineIndent);
+        }
+      }
+
+      // Lastly outdent any closing braces
+      mode.autoOutdent(prevLineState, session, row);
+    }
+  }
+
+  getAllFoldRanges(): Range[] {
+    const session = this.editor.getSession();
+    // @ts-ignore
+    // Brace does not expose type definition for session.getAllFolds, though we have access to this method provided by the underlying Ace editor.
+    // See https://github.com/ajaxorg/ace/blob/13dc911dbc0ea31ca343d5744b3f472767458fc3/ace.d.ts#L82
+    return session.getAllFolds().map((fold) => fold.range);
+  }
+
+  addFoldsAtRanges(foldRanges: Range[]) {
+    const session = this.editor.getSession();
+    foldRanges.forEach((range) => {
+      session.addFold('...', _AceRange.fromPoints(range.start, range.end));
+    });
   }
 }

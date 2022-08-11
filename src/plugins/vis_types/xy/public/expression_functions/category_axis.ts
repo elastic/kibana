@@ -11,7 +11,7 @@ import type {
   ExpressionFunctionDefinition,
   Datatable,
   ExpressionValueBoxed,
-} from '../../../../expressions/public';
+} from '@kbn/expressions-plugin/public';
 import type { CategoryAxis } from '../types';
 import type { ExpressionValueScale } from './vis_scale';
 import type { ExpressionValueLabel } from './label';

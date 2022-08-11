@@ -10,7 +10,7 @@ import fs from 'fs';
 import Path from 'path';
 
 import { Project } from 'ts-morph';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 
 import { writePluginDocs } from '../mdx/write_plugin_mdx_docs';
 import {

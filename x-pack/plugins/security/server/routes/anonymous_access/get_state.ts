@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type { AnonymousAccessState } from '@kbn/share-plugin/common';
+
 import type { RouteDefinitionParams } from '..';
-import type { AnonymousAccessState } from '../../../../../../src/plugins/share/common';
 
 /**
  * Defines route that returns the state of anonymous access -- whether anonymous access is enabled, and what additional parameters should be

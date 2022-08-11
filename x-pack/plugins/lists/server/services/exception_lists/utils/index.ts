@@ -6,7 +6,11 @@
  */
 
 import uuid from 'uuid';
-import { SavedObject, SavedObjectsFindResponse, SavedObjectsUpdateResponse } from 'kibana/server';
+import {
+  SavedObject,
+  SavedObjectsFindResponse,
+  SavedObjectsUpdateResponse,
+} from '@kbn/core/server';
 import {
   CommentsArray,
   CreateComment,

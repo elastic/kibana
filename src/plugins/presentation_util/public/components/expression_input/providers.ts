@@ -7,7 +7,7 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import { ExpressionFunction } from '../../../../expressions/common';
+import { ExpressionFunction } from '@kbn/expressions-plugin/common';
 import {
   AutocompleteSuggestion,
   getAutocompleteSuggestions,

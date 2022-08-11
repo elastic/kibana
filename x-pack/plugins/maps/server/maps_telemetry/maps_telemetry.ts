@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { SavedObjectsClient } from '@kbn/core/server';
 import {
   getElasticsearch,
   getIndexPatternsServiceFactory,
   getSavedObjectClient,
 } from '../kibana_server_services';
-import { SavedObjectsClient } from '../../../../../src/core/server';
 import { MapStats, MapStatsCollector } from './map_stats';
 import { IndexPatternStats, IndexPatternStatsCollector } from './index_pattern_stats';
 import { findMaps } from './find_maps';

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { BroadcastChannel as BroadcastChannelType } from 'broadcast-channel';
 import type { Subscription } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { skip, tap, throttleTime } from 'rxjs/operators';
@@ -15,7 +14,7 @@ import type {
   HttpSetup,
   NotificationsSetup,
   Toast,
-} from 'src/core/public';
+} from '@kbn/core/public';
 
 import {
   SESSION_CHECK_MS,
@@ -34,7 +33,7 @@ export interface SessionState extends Pick<SessionInfo, 'expiresInMs' | 'canBeEx
 }
 
 export class SessionTimeout {
-  private channel?: BroadcastChannelType<SessionState>;
+  private channel?: BroadcastChannel;
 
   private isVisible = document.visibilityState !== 'hidden';
   private isFetchingSessionInfo = false;
@@ -77,11 +76,8 @@ export class SessionTimeout {
     // Subscribe to a broadcast channel for session timeout messages.
     // This allows us to synchronize the UX across tabs and avoid repetitive API calls.
     try {
-      const { BroadcastChannel } = await import('broadcast-channel');
-      this.channel = new BroadcastChannel(`${this.tenant}/session_timeout`, {
-        webWorkerSupport: false,
-      });
-      this.channel.onmessage = this.handleChannelMessage;
+      this.channel = new BroadcastChannel(`${this.tenant}/session_timeout`);
+      this.channel.onmessage = (event) => this.handleChannelMessage(event);
     } catch (error) {
       // eslint-disable-next-line no-console
       console.warn(
@@ -108,8 +104,14 @@ export class SessionTimeout {
   /**
    * Event handler that receives session information from other browser tabs.
    */
-  private handleChannelMessage = (message: SessionState) => {
-    this.sessionState$.next(message);
+  private handleChannelMessage = (messageEvent: MessageEvent<any>) => {
+    if (this.isSessionState(messageEvent.data)) {
+      this.sessionState$.next(messageEvent.data);
+    }
+  };
+
+  private isSessionState = (data: unknown): data is SessionState => {
+    return typeof data === 'object' && Object.hasOwn(data ?? {}, 'canBeExtended');
   };
 
   /**

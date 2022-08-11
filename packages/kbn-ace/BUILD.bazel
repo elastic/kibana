@@ -50,6 +50,21 @@ jsts_transpiler(
     "--quiet"
   ],
   build_pkg_name = package_name(),
+  root_input_dir = "src",
+)
+
+jsts_transpiler(
+  name = "target_web",
+  srcs = SRCS,
+  additional_args = [
+    "--copy-files",
+    "--ignore",
+    "**/*/src/ace/modes/x_json/worker/x_json.ace.worker.js",
+    "--quiet"
+  ],
+  build_pkg_name = package_name(),
+  root_input_dir = "src",
+  web = True,
 )
 
 ts_config(
@@ -67,6 +82,7 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
+  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
   root_dir = "src",
@@ -76,7 +92,7 @@ ts_project(
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS + [":target_node"],
+  deps = RUNTIME_DEPS + [":target_node", ":target_web"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )

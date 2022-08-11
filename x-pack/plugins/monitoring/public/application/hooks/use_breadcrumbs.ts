@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import createContainer from 'constate';
 import { History } from 'history';
 import { Observable } from 'rxjs';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 interface Crumb {
   url?: string | null;
@@ -243,9 +243,11 @@ export const useBreadcrumbs = ({ history }: { history: History }) => {
     (bcrumbs?: BreadcrumbItem[]) => {
       if (!chrome) return;
       if (!bcrumbs) {
-        const currentBreadcrumbs: Observable<any> & {
-          value?: BreadcrumbItem[];
-        } = chrome.getBreadcrumbs$()?.source;
+        const currentBreadcrumbs:
+          | (Observable<any> & {
+              value?: BreadcrumbItem[];
+            })
+          | undefined = chrome.getBreadcrumbs$()?.source;
         if (currentBreadcrumbs && currentBreadcrumbs.value) {
           bcrumbs = currentBreadcrumbs.value;
         }

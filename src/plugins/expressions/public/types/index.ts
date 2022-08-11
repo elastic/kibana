@@ -7,8 +7,8 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { KibanaExecutionContext } from 'src/core/public';
-import { Adapters } from '../../../inspector/public';
+import type { KibanaExecutionContext } from '@kbn/core/public';
+import { Adapters } from '@kbn/inspector-plugin/public';
 import {
   IInterpreterRenderHandlers,
   ExpressionValue,
@@ -50,6 +50,7 @@ export interface IExpressionLoaderParams {
   searchSessionId?: string;
   renderMode?: RenderMode;
   syncColors?: boolean;
+  syncTooltips?: boolean;
   hasCompatibleActions?: ExpressionRenderHandlerParams['hasCompatibleActions'];
   executionContext?: KibanaExecutionContext;
 

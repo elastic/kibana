@@ -11,9 +11,9 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { DiscoverField } from './discover_field';
-import { DataViewField } from '../../../../../../data/common';
-import { stubIndexPattern } from '../../../../../../data/common/stubs';
-import { KibanaContextProvider } from '../../../../../../kibana_react/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { stubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 
 jest.mock('../../../../kibana_services', () => ({
   getUiActions: jest.fn(() => {
@@ -27,10 +27,12 @@ function getComponent({
   selected = false,
   showDetails = false,
   field,
+  onAddFilterExists = true,
 }: {
   selected?: boolean;
   showDetails?: boolean;
   field?: DataViewField;
+  onAddFilterExists?: boolean;
 }) {
   const finalField =
     field ??
@@ -46,10 +48,10 @@ function getComponent({
     });
 
   const props = {
-    indexPattern: stubIndexPattern,
+    dataView: stubDataView,
     field: finalField,
     getDetails: jest.fn(() => ({ buckets: [], error: '', exists: 1, total: 2, columns: [] })),
-    onAddFilter: jest.fn(),
+    ...(onAddFilterExists && { onAddFilter: jest.fn() }),
     onAddField: jest.fn(),
     onRemoveField: jest.fn(),
     showDetails,
@@ -138,5 +140,22 @@ describe('discover sidebar field', function () {
     const { props, comp } = getComponent({});
     findTestSubject(comp, 'field-bytes-showDetails').simulate('click');
     expect(props.getDetails.mock.calls.length).toEqual(1);
+  });
+  it('should not return the popover if onAddFilter is not provided', function () {
+    const field = new DataViewField({
+      name: '_source',
+      type: '_source',
+      esTypes: ['_source'],
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+    });
+    const { comp } = getComponent({
+      selected: true,
+      field,
+      onAddFilterExists: false,
+    });
+    const popover = findTestSubject(comp, 'discoverFieldListPanelPopover');
+    expect(popover.length).toBe(0);
   });
 });

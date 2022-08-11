@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { AppMountParameters, CoreSetup, Plugin, AppNavLinkStatus } from '../../../src/core/public';
+import { AppMountParameters, CoreSetup, Plugin, AppNavLinkStatus } from '@kbn/core/public';
+import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { AppPluginDependencies } from './with_data_services/types';
-import { DeveloperExamplesSetup } from '../../developer_examples/public';
 import image from './state_sync.png';
 
 interface SetupDeps {

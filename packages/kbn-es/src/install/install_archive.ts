@@ -12,7 +12,8 @@ import path from 'path';
 import chalk from 'chalk';
 import execa from 'execa';
 import del from 'del';
-import { extract, ToolingLog } from '@kbn/dev-utils';
+import { extract } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 
 import { BASE_PATH, ES_CONFIG, ES_KEYSTORE_BIN } from '../paths';
 import { Artifact } from '../artifact';

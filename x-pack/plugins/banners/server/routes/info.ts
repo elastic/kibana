@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IUiSettingsClient } from 'kibana/server';
-import { ILicense } from '../../../licensing/server';
+import { IUiSettingsClient } from '@kbn/core/server';
+import { ILicense } from '@kbn/licensing-plugin/server';
 import { BannersConfigType } from '../config';
 import { BannerInfoResponse, BannerConfiguration, BannerPlacement } from '../../common';
 import { BannersRouter } from '../types';
@@ -21,11 +21,11 @@ export const registerInfoRoute = (router: BannersRouter, config: BannersConfigTy
       },
     },
     async (ctx, req, res) => {
-      const allowed = isValidLicense(ctx.licensing.license);
+      const allowed = isValidLicense((await ctx.licensing).license);
 
       const bannerConfig =
         req.auth.isAuthenticated && config.disableSpaceBanners === false
-          ? await getBannerConfig(ctx.core.uiSettings.client)
+          ? await getBannerConfig((await ctx.core).uiSettings.client)
           : config;
 
       return res.ok({

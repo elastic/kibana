@@ -8,19 +8,18 @@
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import { DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  Draggable,
+import type {
   DraggableProvided,
   DraggableStateSnapshot,
   DraggingStyle,
-  Droppable,
   NotDraggingStyle,
 } from 'react-beautiful-dnd';
+import { Draggable, Droppable } from 'react-beautiful-dnd';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import { dragAndDropActions } from '../../store/drag_and_drop';
-import { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
+import type { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../../../timelines/components/row_renderers_browser/constants';
 
 import { TruncatableText } from '../truncatable_text';
@@ -102,6 +101,8 @@ interface Props {
   hideTopN?: boolean;
   isDraggable?: boolean;
   render: RenderFunctionProp;
+  isAggregatable?: boolean;
+  fieldType?: string;
   timelineId?: string;
   truncate?: boolean;
   onFilterAdded?: () => void;
@@ -131,6 +132,8 @@ const DraggableOnWrapperComponent: React.FC<Props> = ({
   hideTopN = false,
   onFilterAdded,
   render,
+  fieldType = '',
+  isAggregatable = false,
   timelineId,
   truncate,
 }) => {
@@ -154,6 +157,8 @@ const DraggableOnWrapperComponent: React.FC<Props> = ({
     hideTopN,
     onFilterAdded,
     render,
+    fieldType,
+    isAggregatable,
     timelineId,
     truncate,
   });
@@ -313,6 +318,8 @@ const DraggableWrapperComponent: React.FC<Props> = ({
   isDraggable = false,
   onFilterAdded,
   render,
+  isAggregatable = false,
+  fieldType = '',
   timelineId,
   truncate,
 }) => {
@@ -327,6 +334,8 @@ const DraggableWrapperComponent: React.FC<Props> = ({
     dataProvider,
     hideTopN,
     isDraggable,
+    isAggregatable,
+    fieldType,
     onFilterAdded,
     render,
     timelineId,
@@ -372,6 +381,8 @@ const DraggableWrapperComponent: React.FC<Props> = ({
       dataProvider={dataProvider}
       hideTopN={hideTopN}
       onFilterAdded={onFilterAdded}
+      fieldType={fieldType}
+      isAggregatable={isAggregatable}
       render={render}
       timelineId={timelineId}
       truncate={truncate}

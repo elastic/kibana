@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { StatusMessage } from '../status_message';
+import { StatusMessage } from '.';
 import { shallow } from 'enzyme';
 import { MatchedItem } from '../../../types';
 

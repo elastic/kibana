@@ -22,7 +22,7 @@ describe('ConfigureOauth', () => {
   const onFormCreated = jest.fn();
   const getPreContentSourceConfigData = jest.fn();
   const setSelectedGithubOrganizations = jest.fn();
-  const createContentSource = jest.fn((_, formSubmitSuccess, handleFormSubmitError) => {
+  const createContentSource = jest.fn((formSubmitSuccess, handleFormSubmitError) => {
     formSubmitSuccess();
     handleFormSubmitError();
   });

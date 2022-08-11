@@ -8,20 +8,20 @@
 import {
   loggingSystemMock,
   savedObjectsClientMock,
-} from '../../../../../../../src/core/server/mocks';
-import {
-  Logger,
+  elasticsearchServiceMock,
+} from '@kbn/core/server/mocks';
+import type {
   SavedObjectsClient,
+  Logger,
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
-} from 'kibana/server';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+} from '@kbn/core/server';
 import { migrateArtifactsToFleet } from './migrate_artifacts_to_fleet';
 import { createEndpointArtifactClientMock } from '../../services/artifacts/mocks';
-import { InternalArtifactCompleteSchema } from '../../schemas';
-import { generateArtifactEsGetSingleHitMock } from '../../../../../fleet/server/services/artifacts/mocks';
-import { NewArtifact } from '../../../../../fleet/server/services';
-import { CreateRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { InternalArtifactCompleteSchema } from '../../schemas';
+import { generateArtifactEsGetSingleHitMock } from '@kbn/fleet-plugin/server/services/artifacts/mocks';
+import type { NewArtifact } from '@kbn/fleet-plugin/server/services';
+import type { CreateRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 describe('When migrating artifacts to fleet', () => {
   let soClient: jest.Mocked<SavedObjectsClient>;
@@ -44,7 +44,7 @@ describe('When migrating artifacts to fleet', () => {
   };
 
   beforeEach(async () => {
-    soClient = savedObjectsClientMock.create() as jest.Mocked<SavedObjectsClient>;
+    soClient = savedObjectsClientMock.create() as unknown as jest.Mocked<SavedObjectsClient>;
     logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
     artifactClient = createEndpointArtifactClientMock();
     // pre-v7.14 artifact, which is compressed

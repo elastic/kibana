@@ -35,11 +35,11 @@ import { getCombinedRuntimeMappings } from '../../../../../common/request';
 export function applyTransformConfigToDefineState(
   state: StepDefineExposedState,
   transformConfig?: TransformBaseConfig,
-  indexPattern?: StepDefineFormProps['searchItems']['indexPattern']
+  dataView?: StepDefineFormProps['searchItems']['dataView']
 ): StepDefineExposedState {
   // apply runtime fields from both the index pattern and inline configurations
   state.runtimeMappings = getCombinedRuntimeMappings(
-    indexPattern,
+    dataView,
     transformConfig?.source?.runtime_mappings
   );
 
@@ -88,12 +88,12 @@ export function applyTransformConfigToDefineState(
     state.latestConfig = {
       unique_key: transformConfig.latest.unique_key.map((v) => ({
         value: v,
-        label: indexPattern ? indexPattern.fields.find((f) => f.name === v)?.displayName ?? v : v,
+        label: dataView ? dataView.fields.find((f) => f.name === v)?.displayName ?? v : v,
       })),
       sort: {
         value: transformConfig.latest.sort,
-        label: indexPattern
-          ? indexPattern.fields.find((f) => f.name === transformConfig.latest.sort)?.displayName ??
+        label: dataView
+          ? dataView.fields.find((f) => f.name === transformConfig.latest.sort)?.displayName ??
             transformConfig.latest.sort
           : transformConfig.latest.sort,
       },

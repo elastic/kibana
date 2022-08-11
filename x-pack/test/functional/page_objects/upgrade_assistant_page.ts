@@ -31,9 +31,9 @@ export class UpgradeAssistantPageObject extends FtrService {
 
   async navigateToEsDeprecationLogs() {
     return await this.retry.try(async () => {
-      await this.common.navigateToApp('settings');
-      await this.testSubjects.click('upgrade_assistant');
-      await this.testSubjects.click('viewElasticsearchDeprecationLogs');
+      await this.common.navigateToUrl('management', 'stack/upgrade_assistant/es_deprecation_logs', {
+        shouldUseHashForSubUrl: false,
+      });
       await this.retry.waitFor(
         'url to contain /upgrade_assistant/es_deprecation_logs',
         async () => {

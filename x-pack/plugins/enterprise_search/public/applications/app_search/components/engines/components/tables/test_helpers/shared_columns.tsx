@@ -12,9 +12,8 @@ import { ShallowWrapper } from 'enzyme';
 
 import { EuiBasicTable, EuiButtonIcon } from '@elastic/eui';
 
+import { EnginesLogic } from '../../..';
 import { rerender } from '../../../../../../test_helpers';
-
-import { EnginesLogic } from '../../../../engines';
 
 import * as engineLinkHelpers from '../engine_link_helpers';
 

@@ -6,7 +6,9 @@
  */
 import { omit, pick } from 'lodash';
 
-import { KibanaFeature } from '../../../../features/server';
+import { KibanaFeature } from '@kbn/features-plugin/server';
+import { loggerMock } from '@kbn/logging-mocks';
+
 import { transformElasticsearchRoleToRole } from './elasticsearch_role';
 import type { ElasticsearchRole } from './elasticsearch_role';
 
@@ -70,6 +72,23 @@ const roles = [
       {
         application: 'kibana-.kibana',
         privileges: ['feature_foo.read'],
+        resources: ['*'],
+      },
+    ],
+    run_as: [],
+    metadata: {},
+    transient_metadata: {
+      enabled: true,
+    },
+  },
+  {
+    name: 'global-malformed',
+    cluster: [],
+    indices: [],
+    applications: [
+      {
+        application: 'kibana-.kibana',
+        privileges: ['feature_securitySolutionCases.a;;'],
         resources: ['*'],
       },
     ],
@@ -147,6 +166,23 @@ const roles = [
       enabled: true,
     },
   },
+  {
+    name: 'default-malformed',
+    cluster: [],
+    indices: [],
+    applications: [
+      {
+        application: 'kibana-.kibana',
+        privileges: ['feature_securitySolutionCases.a;;'],
+        resources: ['space:default'],
+      },
+    ],
+    run_as: [],
+    metadata: {},
+    transient_metadata: {
+      enabled: true,
+    },
+  },
 ];
 
 function testRoles(
@@ -160,7 +196,8 @@ function testRoles(
       features,
       omit(role, 'name'),
       role.name,
-      'kibana-.kibana'
+      'kibana-.kibana',
+      loggerMock.create()
     );
     return pick(transformedRole, ['name', '_transform_error']);
   });
@@ -227,10 +264,12 @@ describe('#transformElasticsearchRoleToRole', () => {
     { name: 'global-base-read', _transform_error: [] },
     { name: 'global-foo-all', _transform_error: [] },
     { name: 'global-foo-read', _transform_error: [] },
+    { name: 'global-malformed', _transform_error: ['kibana'] },
     { name: 'default-base-all', _transform_error: [] },
     { name: 'default-base-read', _transform_error: [] },
     { name: 'default-foo-all', _transform_error: ['kibana'] },
     { name: 'default-foo-read', _transform_error: [] },
+    { name: 'default-malformed', _transform_error: ['kibana'] },
   ]);
 
   testRoles(
@@ -242,10 +281,12 @@ describe('#transformElasticsearchRoleToRole', () => {
       { name: 'global-base-read', _transform_error: [] },
       { name: 'global-foo-all', _transform_error: [] },
       { name: 'global-foo-read', _transform_error: ['kibana'] },
+      { name: 'global-malformed', _transform_error: ['kibana'] },
       { name: 'default-base-all', _transform_error: [] },
       { name: 'default-base-read', _transform_error: [] },
       { name: 'default-foo-all', _transform_error: [] },
       { name: 'default-foo-read', _transform_error: ['kibana'] },
+      { name: 'default-malformed', _transform_error: ['kibana'] },
     ]
   );
 });

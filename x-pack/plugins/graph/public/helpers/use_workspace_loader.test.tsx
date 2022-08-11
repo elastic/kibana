@@ -5,12 +5,14 @@
  * 2.0.
  */
 import { useWorkspaceLoader, UseWorkspaceLoaderProps } from './use_workspace_loader';
-import { coreMock } from 'src/core/public/mocks';
-import { spacesPluginMock } from '../../../spaces/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
+import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { createMockGraphStore } from '../state_management/mocks';
 import { Workspace } from '../types';
-import { SavedObjectsClientCommon } from 'src/plugins/data/common';
+import { SavedObjectsClientCommon } from '@kbn/data-views-plugin/public';
 import { renderHook, act, RenderHookOptions } from '@testing-library/react-hooks';
+import type { SavedObjectsClientContract } from '@kbn/core/public';
 
 jest.mock('react-router-dom', () => {
   const useLocation = () => ({
@@ -40,13 +42,14 @@ const mockSavedObjectsClient = {
 } as unknown as SavedObjectsClientCommon;
 
 describe('use_workspace_loader', () => {
-  const defaultProps = {
+  const defaultProps: UseWorkspaceLoaderProps = {
     workspaceRef: { current: {} as Workspace },
     store: createMockGraphStore({}).store,
-    savedObjectsClient: mockSavedObjectsClient,
+    savedObjectsClient: mockSavedObjectsClient as unknown as SavedObjectsClientContract,
     coreStart: coreMock.createStart(),
     spaces: spacesPluginMock.createStartContract(),
-  } as unknown as UseWorkspaceLoaderProps;
+    data: dataPluginMock.createStartContract(),
+  };
 
   it('should not redirect if outcome is exactMatch', async () => {
     await act(async () => {
@@ -68,6 +71,7 @@ describe('use_workspace_loader', () => {
           saved_object: { id: 10, _version: '7.15.0', attributes: { wsState: '{}' } },
           outcome: 'aliasMatch',
           alias_target_id: 'aliasTargetId',
+          alias_purpose: 'savedObjectConversion',
         }),
       },
     } as unknown as UseWorkspaceLoaderProps;
@@ -78,9 +82,10 @@ describe('use_workspace_loader', () => {
         props as RenderHookOptions<UseWorkspaceLoaderProps>
       );
     });
-    expect(props.spaces?.ui.redirectLegacyUrl).toHaveBeenCalledWith(
-      '#/workspace/aliasTargetId?query={}',
-      'Graph'
-    );
+    expect(props.spaces?.ui.redirectLegacyUrl).toHaveBeenCalledWith({
+      path: '#/workspace/aliasTargetId?query={}',
+      aliasPurpose: 'savedObjectConversion',
+      objectNoun: 'Graph',
+    });
   });
 });

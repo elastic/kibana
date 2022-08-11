@@ -22,11 +22,26 @@ export const createReactQueryResponse = <TData = unknown, TError = unknown>({
   data = undefined,
 }: CreateReactQueryResponseInput<TData, TError> = {}): Partial<UseQueryResult<TData, TError>> => {
   if (status === 'success') {
-    return { status, data };
+    return { status, data, isSuccess: true, isLoading: false, isError: false };
   }
 
   if (status === 'error') {
-    return { status, error };
+    return { status, error, isSuccess: false, isLoading: false, isError: true };
+  }
+
+  if (status === 'loading') {
+    return { status, data: undefined, isSuccess: false, isLoading: true, isError: false };
+  }
+
+  if (status === 'idle') {
+    return {
+      status,
+      data: undefined,
+      isSuccess: false,
+      isLoading: false,
+      isError: false,
+      isIdle: true,
+    };
   }
 
   return { status };

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 
 export function setReadonlyBadge({ application, chrome }: CoreStart) {
   const canSave = application.capabilities.apm.save;

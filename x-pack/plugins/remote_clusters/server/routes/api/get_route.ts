@@ -7,7 +7,7 @@
 
 import { get } from 'lodash';
 
-import { RequestHandler } from 'src/core/server';
+import { RequestHandler } from '@kbn/core/server';
 import { deserializeCluster } from '../../../common/lib';
 import { API_BASE_PATH } from '../../../common/constants';
 import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
@@ -21,7 +21,7 @@ export const register = (deps: RouteDependencies): void => {
 
   const allHandler: RequestHandler<unknown, unknown, unknown> = async (ctx, request, response) => {
     try {
-      const { client: clusterClient } = ctx.core.elasticsearch;
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
       const clusterSettings = await clusterClient.asCurrentUser.cluster.getSettings();
 
       const transientClusterNames = Object.keys(

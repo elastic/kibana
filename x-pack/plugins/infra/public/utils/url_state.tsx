@@ -11,7 +11,7 @@ import { throttle } from 'lodash';
 import React from 'react';
 import { Route, RouteProps } from 'react-router-dom';
 import { decode, encode, RisonValue } from 'rison-node';
-import { url } from '../../../../../src/plugins/kibana_utils/public';
+import { url } from '@kbn/kibana-utils-plugin/public';
 
 interface UrlStateContainerProps<UrlState> {
   urlState: UrlState | undefined;

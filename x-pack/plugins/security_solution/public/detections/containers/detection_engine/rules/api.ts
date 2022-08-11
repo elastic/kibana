@@ -6,7 +6,7 @@
  */
 
 import { camelCase } from 'lodash';
-import { HttpStart } from 'src/core/public';
+import type { HttpStart } from '@kbn/core/public';
 
 import {
   DETECTION_ENGINE_RULES_URL,
@@ -15,34 +15,29 @@ import {
   DETECTION_ENGINE_TAGS_URL,
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_PREVIEW,
-  detectionEngineRuleExecutionEventsUrl,
+  DETECTION_ENGINE_INSTALLED_INTEGRATIONS_URL,
 } from '../../../../../common/constants';
-import { BulkAction } from '../../../../../common/detection_engine/schemas/common';
-import {
+import type { BulkAction } from '../../../../../common/detection_engine/schemas/common';
+import type {
   FullResponseSchema,
   PreviewResponse,
 } from '../../../../../common/detection_engine/schemas/request';
-import {
+import type {
   RulesSchema,
-  GetRuleExecutionEventsResponse,
+  GetInstalledIntegrationsResponse,
 } from '../../../../../common/detection_engine/schemas/response';
 
-import {
+import type {
   UpdateRulesProps,
   CreateRulesProps,
-  DeleteRulesProps,
-  DuplicateRulesProps,
-  EnableRulesProps,
   FetchRulesProps,
   FetchRulesResponse,
   Rule,
   FetchRuleProps,
-  BasicFetchProps,
   ImportDataProps,
   ExportDocumentsProps,
   ImportDataResponse,
   PrePackagedRulesStatusResponse,
-  BulkRuleResponse,
   PatchRuleProps,
   BulkActionProps,
   BulkActionResponseMap,
@@ -198,66 +193,13 @@ export const pureFetchRuleById = async ({
   });
 
 /**
- * Enables/Disables provided Rule ID's
- *
- * @param ids array of Rule ID's (not rule_id) to enable/disable
- * @param enabled to enable or disable
- *
- * @throws An error if response is not OK
- */
-export const enableRules = async ({ ids, enabled }: EnableRulesProps): Promise<BulkRuleResponse> =>
-  KibanaServices.get().http.fetch<BulkRuleResponse>(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`, {
-    method: 'PATCH',
-    body: JSON.stringify(ids.map((id) => ({ id, enabled }))),
-  });
-
-/**
- * Deletes provided Rule ID's
- *
- * @param ids array of Rule ID's (not rule_id) to delete
- *
- * @throws An error if response is not OK
- */
-export const deleteRules = async ({ ids }: DeleteRulesProps): Promise<BulkRuleResponse> =>
-  KibanaServices.get().http.fetch<Rule[]>(`${DETECTION_ENGINE_RULES_URL}/_bulk_delete`, {
-    method: 'POST',
-    body: JSON.stringify(ids.map((id) => ({ id }))),
-  });
-
-/**
- * Duplicates provided Rules
- *
- * @param rules to duplicate
- *
- * @throws An error if response is not OK
- */
-export const duplicateRules = async ({ rules }: DuplicateRulesProps): Promise<BulkRuleResponse> =>
-  KibanaServices.get().http.fetch<Rule[]>(`${DETECTION_ENGINE_RULES_URL}/_bulk_create`, {
-    method: 'POST',
-    body: JSON.stringify(
-      rules.map((rule) => ({
-        ...rule,
-        name: `${rule.name} [${i18n.DUPLICATE}]`,
-        created_at: undefined,
-        created_by: undefined,
-        id: undefined,
-        rule_id: undefined,
-        updated_at: undefined,
-        updated_by: undefined,
-        enabled: false,
-        immutable: undefined,
-        execution_summary: undefined,
-      }))
-    ),
-  });
-
-/**
  * Perform bulk action with rules selected by a filter query
  *
  * @param query filter query to select rules to perform bulk action with
  * @param ids string[] rule ids to select rules to perform bulk action with
  * @param edit BulkEditActionPayload edit action payload
  * @param action bulk action to perform
+ * @param isDryRun enables dry run mode for bulk actions
  *
  * @throws An error if response is not OK
  */
@@ -266,6 +208,7 @@ export const performBulkAction = async <Action extends BulkAction>({
   query,
   edit,
   ids,
+  isDryRun,
 }: BulkActionProps<Action>): Promise<BulkActionResponseMap<Action>> =>
   KibanaServices.get().http.fetch<BulkActionResponseMap<Action>>(
     DETECTION_ENGINE_RULES_BULK_ACTION,
@@ -277,6 +220,9 @@ export const performBulkAction = async <Action extends BulkAction>({
         ...(ids ? { ids } : {}),
         ...(query !== undefined ? { query } : {}),
       }),
+      query: {
+        ...(isDryRun ? { dry_run: isDryRun } : {}),
+      },
     }
   );
 
@@ -287,9 +233,7 @@ export const performBulkAction = async <Action extends BulkAction>({
  *
  * @throws An error if response is not OK
  */
-export const createPrepackagedRules = async ({
-  signal,
-}: BasicFetchProps): Promise<{
+export const createPrepackagedRules = async (): Promise<{
   rules_installed: number;
   rules_updated: number;
   timelines_installed: number;
@@ -302,7 +246,6 @@ export const createPrepackagedRules = async ({
     timelines_updated: number;
   }>(DETECTION_ENGINE_PREPACKAGED_URL, {
     method: 'PUT',
-    signal,
   });
 
   return result;
@@ -371,28 +314,6 @@ export const exportRules = async ({
 };
 
 /**
- * Fetch rule execution events (e.g. status changes) from Event Log.
- *
- * @param ruleId string Saved Object ID of the rule (`rule.id`, not static `rule.rule_id`)
- * @param signal AbortSignal Optional signal for cancelling the request
- *
- * @throws An error if response is not OK
- */
-export const fetchRuleExecutionEvents = async ({
-  ruleId,
-  signal,
-}: {
-  ruleId: string;
-  signal?: AbortSignal;
-}): Promise<GetRuleExecutionEventsResponse> => {
-  const url = detectionEngineRuleExecutionEventsUrl(ruleId);
-  return KibanaServices.get().http.fetch<GetRuleExecutionEventsResponse>(url, {
-    method: 'GET',
-    signal,
-  });
-};
-
-/**
  * Fetch all unique Tags used by Rules
  *
  * @param signal to cancel request
@@ -415,12 +336,38 @@ export const fetchTags = async ({ signal }: { signal: AbortSignal }): Promise<st
 export const getPrePackagedRulesStatus = async ({
   signal,
 }: {
-  signal: AbortSignal;
+  signal: AbortSignal | undefined;
 }): Promise<PrePackagedRulesStatusResponse> =>
   KibanaServices.get().http.fetch<PrePackagedRulesStatusResponse>(
     DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL,
     {
       method: 'GET',
+      signal,
+    }
+  );
+
+/**
+ * Fetch all installed integrations
+ *
+ * @param packages array of packages to filter for
+ * @param signal to cancel request
+ *
+ * @throws An error if response is not OK
+ */
+export const fetchInstalledIntegrations = async ({
+  packages,
+  signal,
+}: {
+  packages?: string[];
+  signal?: AbortSignal;
+}): Promise<GetInstalledIntegrationsResponse> =>
+  KibanaServices.get().http.fetch<GetInstalledIntegrationsResponse>(
+    DETECTION_ENGINE_INSTALLED_INTEGRATIONS_URL,
+    {
+      method: 'GET',
+      query: {
+        packages: packages?.sort()?.join(','),
+      },
       signal,
     }
   );

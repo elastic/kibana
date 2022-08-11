@@ -11,8 +11,8 @@ import { parse } from 'query-string';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiCodeBlock } from '@elastic/eui';
 
-import type { ScopedHistory } from 'src/core/public';
-import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/public';
+import type { ScopedHistory } from '@kbn/core/public';
+import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
 
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../../common/constants';
 import { LocatorParams } from '../../common/types';

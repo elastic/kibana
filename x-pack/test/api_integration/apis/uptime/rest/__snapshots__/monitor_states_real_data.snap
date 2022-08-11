@@ -6,62 +6,17 @@ Object {
   "prevPagePagination": null,
   "summaries": Array [
     Object {
-      "histogram": Object {
-        "points": Array [
-          Object {
-            "down": 1,
-            "timestamp": 1568172624744,
-          },
-          Object {
-            "down": 2,
-            "timestamp": 1568172677247,
-          },
-          Object {
-            "down": 1,
-            "timestamp": 1568172729750,
-          },
-          Object {
-            "down": 2,
-            "timestamp": 1568172782253,
-          },
-          Object {
-            "down": 2,
-            "timestamp": 1568172834756,
-          },
-          Object {
-            "down": 2,
-            "timestamp": 1568172887259,
-          },
-          Object {
-            "down": 1,
-            "timestamp": 1568172939762,
-          },
-          Object {
-            "down": 2,
-            "timestamp": 1568172992265,
-          },
-          Object {
-            "down": 2,
-            "timestamp": 1568173044768,
-          },
-          Object {
-            "down": 2,
-            "timestamp": 1568173097271,
-          },
-          Object {
-            "down": 1,
-            "timestamp": 1568173149774,
-          },
-          Object {
-            "down": 2,
-            "timestamp": 1568173202277,
-          },
-        ],
-      },
-      "minInterval": 52503,
       "monitor_id": "0010-down",
       "state": Object {
+        "error": Object {
+          "message": "400 Bad Request",
+          "type": "validate",
+        },
         "monitor": Object {
+          "checkGroup": "d76f07d1-d445-11e9-88e3-3e80641b9c71",
+          "duration": Object {
+            "us": 37926,
+          },
           "name": "",
           "type": "http",
         },
@@ -186,62 +141,17 @@ Object {
       },
     },
     Object {
-      "histogram": Object {
-        "points": Array [
-          Object {
-            "down": 1,
-            "timestamp": 1568172624744,
-          },
-          Object {
-            "down": 2,
-            "timestamp": 1568172677247,
-          },
-          Object {
-            "down": 1,
-            "timestamp": 1568172729750,
-          },
-          Object {
-            "down": 2,
-            "timestamp": 1568172782253,
-          },
-          Object {
-            "down": 2,
-            "timestamp": 1568172834756,
-          },
-          Object {
-            "down": 2,
-            "timestamp": 1568172887259,
-          },
-          Object {
-            "down": 1,
-            "timestamp": 1568172939762,
-          },
-          Object {
-            "down": 2,
-            "timestamp": 1568172992265,
-          },
-          Object {
-            "down": 2,
-            "timestamp": 1568173044768,
-          },
-          Object {
-            "down": 2,
-            "timestamp": 1568173097271,
-          },
-          Object {
-            "down": 1,
-            "timestamp": 1568173149774,
-          },
-          Object {
-            "down": 2,
-            "timestamp": 1568173202277,
-          },
-        ],
-      },
-      "minInterval": 52503,
       "monitor_id": "0020-down",
       "state": Object {
+        "error": Object {
+          "message": "400 Bad Request",
+          "type": "validate",
+        },
         "monitor": Object {
+          "checkGroup": "d7712ecb-d445-11e9-88e3-3e80641b9c71",
+          "duration": Object {
+            "us": 14900,
+          },
           "name": "",
           "type": "http",
         },

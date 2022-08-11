@@ -8,7 +8,7 @@
 import { HOST_STATS, NETWORK_STATS, OVERVIEW_EMPTY_PAGE } from '../../screens/overview';
 
 import { expandHostStats, expandNetworkStats } from '../../tasks/overview';
-import { loginAndWaitForPage } from '../../tasks/login';
+import { login, visit } from '../../tasks/login';
 
 import { OVERVIEW_URL } from '../../urls/navigation';
 
@@ -17,11 +17,15 @@ import { createTimeline, favoriteTimeline } from '../../tasks/api_calls/timeline
 import { getTimeline } from '../../objects/timeline';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 
+before(() => {
+  login();
+});
+
 describe('Overview Page', () => {
   before(() => {
     cleanKibana();
     esArchiverLoad('overview');
-    loginAndWaitForPage(OVERVIEW_URL);
+    visit(OVERVIEW_URL);
   });
 
   after(() => {
@@ -50,7 +54,7 @@ describe('Overview Page', () => {
         .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
         .then((timelineId: string) => {
           favoriteTimeline({ timelineId, timelineType: 'default' }).then(() => {
-            loginAndWaitForPage(OVERVIEW_URL);
+            visit(OVERVIEW_URL);
             cy.get('[data-test-subj="overview-recent-timelines"]').should(
               'contain',
               getTimeline().title
@@ -70,7 +74,7 @@ describe('Overview page with no data', () => {
   });
 
   it('Splash screen should be here', () => {
-    loginAndWaitForPage(OVERVIEW_URL);
+    visit(OVERVIEW_URL);
     cy.get(OVERVIEW_EMPTY_PAGE).should('be.visible');
   });
 });

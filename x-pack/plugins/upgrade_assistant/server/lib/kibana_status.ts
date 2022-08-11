@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { DeprecationsClient } from 'kibana/server';
-import { DomainDeprecationDetails } from 'src/core/server/types';
+import { DeprecationsClient } from '@kbn/core/server';
+import { DomainDeprecationDetails } from '@kbn/core/server/types';
 
 export const getKibanaUpgradeStatus = async (deprecationsClient: DeprecationsClient) => {
   const kibanaDeprecations: DomainDeprecationDetails[] =

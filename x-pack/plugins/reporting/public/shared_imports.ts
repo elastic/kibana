@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-export type { SharePluginSetup, SharePluginStart, LocatorPublic } from 'src/plugins/share/public';
+export type { SharePluginSetup, SharePluginStart, LocatorPublic } from '@kbn/share-plugin/public';
 
-export { AppNavLinkStatus } from '../../../../src/core/public';
+export { AppNavLinkStatus } from '@kbn/core/public';
 
-export type { UseRequestResponse } from '../../../../src/plugins/es_ui_shared/public';
-export { useRequest } from '../../../../src/plugins/es_ui_shared/public';
+export type { UseRequestResponse } from '@kbn/es-ui-shared-plugin/public';
+export { useRequest } from '@kbn/es-ui-shared-plugin/public';
 
-export { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';
+export { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
-import { useKibana as _useKibana } from '../../../../src/plugins/kibana_react/public';
+import { useKibana as _useKibana } from '@kbn/kibana-react-plugin/public';
 import type { KibanaContext } from './types';
 export const useKibana = () => _useKibana<KibanaContext>();
 
 export type { SerializableRecord } from '@kbn/utility-types';
 
-export type { UiActionsSetup, UiActionsStart } from 'src/plugins/ui_actions/public';
+export type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
-export type { ManagementAppMountParams } from 'src/plugins/management/public';
+export type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 
-export type { LicenseCheck } from '../../licensing/public';
+export type { LicenseCheck } from '@kbn/licensing-plugin/public';

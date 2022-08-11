@@ -7,7 +7,7 @@
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { act } from '@testing-library/react';
-import { SideEffectSimulator } from '../types';
+import type { SideEffectSimulator } from '../types';
 
 /**
  * Create mock `SideEffectors` for `SideEffectContext.Provider`. The `control`
@@ -107,6 +107,7 @@ export const sideEffectSimulatorFactory: () => SideEffectSimulator = () => {
             contentRect,
             borderBoxSize: [{ inlineSize: 0, blockSize: 0 }],
             contentBoxSize: [{ inlineSize: 0, blockSize: 0 }],
+            devicePixelContentBoxSize: [],
           },
         ];
         this.callback(entries, this);

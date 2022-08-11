@@ -14,7 +14,7 @@ import { DateRangePicker } from '../../components/date_range_picker';
 import { SeriesDatePicker } from '../../components/series_date_picker';
 import { AppDataType, SeriesUrl } from '../../types';
 import { ReportTypes } from '../../configurations/constants';
-import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
+import { useAppDataViewContext } from '../../hooks/use_app_data_view';
 import { SyntheticsAddData } from '../../../add_data_buttons/synthetics_add_data';
 import { MobileAddData } from '../../../add_data_buttons/mobile_add_data';
 import { UXAddData } from '../../../add_data_buttons/ux_add_data';
@@ -36,7 +36,7 @@ const AddDataComponents: Record<AppDataType, React.FC | null> = {
 export function DatePickerCol({ seriesId, series }: Props) {
   const { reportType } = useSeriesStorage();
 
-  const { hasAppData } = useAppIndexPatternContext();
+  const { hasAppData } = useAppDataViewContext();
 
   if (!series.dataType) {
     return null;

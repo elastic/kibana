@@ -7,7 +7,7 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { InfraMlRequestHandlerContext, InfraRequestHandlerContext } from '../types';
+import { InfraRequestHandlerContext } from '../types';
 
 export class MissingContextValuesError extends Error {
   constructor(message?: string) {
@@ -23,22 +23,31 @@ export class NoMlPluginError extends Error {
   }
 }
 
-export function assertHasInfraPlugins<Context extends { infra?: InfraRequestHandlerContext }>(
-  context: Context
-): asserts context is Context & { infra: Context['infra'] } {
+export function assertHasInfraPlugins<
+  Context extends { infra?: Promise<InfraRequestHandlerContext> }
+>(context: Context): asserts context is Context & { infra: Context['infra'] } {
   if (context.infra == null) {
     throw new MissingContextValuesError('Failed to access "infra" context values.');
   }
 }
 
-export function assertHasInfraMlPlugins<Context extends { infra?: InfraRequestHandlerContext }>(
+export async function assertHasInfraMlPlugins<
+  Context extends { infra?: Promise<InfraRequestHandlerContext> }
+>(
   context: Context
-): asserts context is Context & {
-  infra: Context['infra'] & Required<InfraMlRequestHandlerContext>;
-} {
+): Promise<
+  Context & {
+    infra: Promise<Required<InfraRequestHandlerContext>>;
+  }
+> {
   assertHasInfraPlugins(context);
 
-  if (context.infra?.mlAnomalyDetectors == null || context.infra?.mlSystem == null) {
+  const infraContext = await context.infra;
+  if (infraContext?.mlAnomalyDetectors == null || infraContext?.mlSystem == null) {
     throw new NoMlPluginError('Failed to access ML plugin.');
   }
+
+  return context as Context & {
+    infra: Promise<Required<InfraRequestHandlerContext>>;
+  };
 }

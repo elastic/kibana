@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 
 import { SchemaAddFieldModal } from '../../../../shared/schema';
 import { AppLogic } from '../../../app_logic';
-import { getEngineBreadcrumbs } from '../../engine';
+import { EngineLogic, getEngineBreadcrumbs } from '../../engine';
 import { AppSearchPageTemplate } from '../../layout';
 
 import { SchemaCallouts, SchemaTable, EmptyState } from '../components';
@@ -29,6 +29,7 @@ export const Schema: React.FC = () => {
     useActions(SchemaLogic);
   const { dataLoading, isUpdating, hasSchema, hasSchemaChanged, isModalOpen } =
     useValues(SchemaLogic);
+  const { isElasticsearchEngine } = useValues(EngineLogic);
 
   useEffect(() => {
     loadSchema();
@@ -60,19 +61,32 @@ export const Schema: React.FC = () => {
     </EuiButton>,
   ];
 
+  const editableSchemaHeader = {
+    pageTitle: i18n.translate('xpack.enterpriseSearch.appSearch.engine.schema.pageTitle', {
+      defaultMessage: 'Manage engine schema',
+    }),
+    description: i18n.translate('xpack.enterpriseSearch.appSearch.engine.schema.pageDescription', {
+      defaultMessage: 'Add new fields or change the types of existing ones.',
+    }),
+    rightSideItems: canManageEngines ? schemaActions : [],
+  };
+
+  const readOnlySchemaHeader = {
+    pageTitle: i18n.translate('xpack.enterpriseSearch.appSearch.engine.schema.readOnly.pageTitle', {
+      defaultMessage: 'Engine schema',
+    }),
+    description: i18n.translate(
+      'xpack.enterpriseSearch.appSearch.engine.schema.readOnly.pageDescription',
+      {
+        defaultMessage: 'View schema field types.',
+      }
+    ),
+  };
+
   return (
     <AppSearchPageTemplate
       pageChrome={getEngineBreadcrumbs([SCHEMA_TITLE])}
-      pageHeader={{
-        pageTitle: i18n.translate('xpack.enterpriseSearch.appSearch.engine.schema.pageTitle', {
-          defaultMessage: 'Manage engine schema',
-        }),
-        description: i18n.translate(
-          'xpack.enterpriseSearch.appSearch.engine.schema.pageDescription',
-          { defaultMessage: 'Add new fields or change the types of existing ones.' }
-        ),
-        rightSideItems: canManageEngines ? schemaActions : [],
-      }}
+      pageHeader={isElasticsearchEngine ? readOnlySchemaHeader : editableSchemaHeader}
       isLoading={dataLoading}
       isEmptyState={!hasSchema}
       emptyState={<EmptyState />}

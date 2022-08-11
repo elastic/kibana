@@ -1,0 +1,13 @@
+---
+id: kibDevDocsOpsUiSharedDepsSrc
+slug: /kibana-dev-docs/ops/ui-shared-deps-src
+title: "@kbn/ui-shared-deps-src"
+description: A package to share single instances of internal packages across bundles
+date: 2022-05-24
+tags: ['kibana', 'dev', 'contributor', 'operations', 'ui', 'shared', 'deps', 'src']
+---
+
+This is a package of shared dependencies that must only have a single instance and are internal to 
+the Kibana repository. To consume them, import the package and merge the `externals` export into 
+your webpack externals config so that all references to the supported modules will be remapped 
+to use the global versions.

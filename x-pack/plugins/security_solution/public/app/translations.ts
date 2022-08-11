@@ -11,8 +11,23 @@ export const OVERVIEW = i18n.translate('xpack.securitySolution.navigation.overvi
   defaultMessage: 'Overview',
 });
 
+export const DETECTION_RESPONSE = i18n.translate(
+  'xpack.securitySolution.navigation.detectionResponse',
+  {
+    defaultMessage: 'Detection & Response',
+  }
+);
+
 export const HOSTS = i18n.translate('xpack.securitySolution.navigation.hosts', {
   defaultMessage: 'Hosts',
+});
+
+export const GETTING_STARTED = i18n.translate('xpack.securitySolution.navigation.gettingStarted', {
+  defaultMessage: 'Get started',
+});
+
+export const DASHBOARDS = i18n.translate('xpack.securitySolution.navigation.dashboards', {
+  defaultMessage: 'Dashboards',
 });
 
 export const NETWORK = i18n.translate('xpack.securitySolution.navigation.network', {
@@ -21,6 +36,10 @@ export const NETWORK = i18n.translate('xpack.securitySolution.navigation.network
 
 export const USERS = i18n.translate('xpack.securitySolution.navigation.users', {
   defaultMessage: 'Users',
+});
+
+export const KUBERNETES = i18n.translate('xpack.securitySolution.navigation.kubernetes', {
+  defaultMessage: 'Kubernetes',
 });
 
 export const RULES = i18n.translate('xpack.securitySolution.navigation.rules', {
@@ -77,6 +96,9 @@ export const HOST_ISOLATION_EXCEPTIONS = i18n.translate(
 export const DETECT = i18n.translate('xpack.securitySolution.navigation.detect', {
   defaultMessage: 'Detect',
 });
+export const FINDINGS = i18n.translate('xpack.securitySolution.navigation.findings', {
+  defaultMessage: 'Findings',
+});
 export const EXPLORE = i18n.translate('xpack.securitySolution.navigation.explore', {
   defaultMessage: 'Explore',
 });
@@ -89,6 +111,17 @@ export const MANAGE = i18n.translate('xpack.securitySolution.navigation.manage',
 
 export const BLOCKLIST = i18n.translate('xpack.securitySolution.navigation.blocklist', {
   defaultMessage: 'Blocklist',
+});
+
+export const RESPONSE_ACTIONS = i18n.translate(
+  'xpack.securitySolution.navigation.responseActions',
+  {
+    defaultMessage: 'Response Actions',
+  }
+);
+
+export const CREATE_NEW_RULE = i18n.translate('xpack.securitySolution.navigation.newRuleTitle', {
+  defaultMessage: 'Create new rule',
 });
 
 export const GO_TO_DOCUMENTATION = i18n.translate(
@@ -108,3 +141,10 @@ export const NO_PERMISSIONS_MSG = (subPluginKey: string) =>
 export const NO_PERMISSIONS_TITLE = i18n.translate('xpack.securitySolution.noPermissionsTitle', {
   defaultMessage: 'Privileges required',
 });
+
+export const THREAT_INTELLIGENCE = i18n.translate(
+  'xpack.securitySolution.navigation.threatIntelligence',
+  {
+    defaultMessage: 'Threat Intelligence',
+  }
+);

@@ -47,7 +47,7 @@ export const createEndpointListItemRoute = (router: ListsPluginRouter): void => 
           os_types: osTypes,
           type,
         } = request.body;
-        const exceptionLists = getExceptionListClient(context);
+        const exceptionLists = await getExceptionListClient(context);
         const exceptionListItem = await exceptionLists.getEndpointListItem({
           id: undefined,
           itemId,

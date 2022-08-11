@@ -9,7 +9,7 @@
 import { resolve, relative } from 'path';
 import { createReadStream } from 'fs';
 import { Readable } from 'stream';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/utils';
 import { KbnClient } from '@kbn/test';
 import type { Client } from '@elastic/elasticsearch';

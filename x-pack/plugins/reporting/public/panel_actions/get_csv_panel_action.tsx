@@ -7,23 +7,18 @@
 
 import { i18n } from '@kbn/i18n';
 import * as Rx from 'rxjs';
-import { first } from 'rxjs/operators';
-import type { CoreSetup, NotificationsSetup } from 'src/core/public';
-import { CoreStart } from 'src/core/public';
-import type { ISearchEmbeddable, SavedSearch } from '../../../../../src/plugins/discover/public';
-import {
-  loadSharingDataHelpers,
-  SEARCH_EMBEDDABLE_TYPE,
-} from '../../../../../src/plugins/discover/public';
-import type { IEmbeddable } from '../../../../../src/plugins/embeddable/public';
-import { ViewMode } from '../../../../../src/plugins/embeddable/public';
-import type { UiActionsActionDefinition as ActionDefinition } from '../../../../../src/plugins/ui_actions/public';
-import { IncompatibleActionError } from '../../../../../src/plugins/ui_actions/public';
+import type { CoreSetup, NotificationsSetup } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
+import type { ISearchEmbeddable, SavedSearch } from '@kbn/discover-plugin/public';
+import { loadSharingDataHelpers, SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-plugin/public';
+import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { CSV_REPORTING_ACTION } from '../../common/constants';
 import { checkLicense } from '../lib/license_check';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import type { ReportingPublicPluginStartDendencies } from '../plugin';
-
 function isSavedSearchEmbeddable(
   embeddable: IEmbeddable | ISearchEmbeddable
 ): embeddable is ISearchEmbeddable {
@@ -73,7 +68,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
   }
 
   public async getSearchSource(savedSearch: SavedSearch, _embeddable: ISearchEmbeddable) {
-    const [{ uiSettings }, { data }] = await this.startServices$.pipe(first()).toPromise();
+    const [{ uiSettings }, { data }] = await Rx.firstValueFrom(this.startServices$);
     const { getSharingData } = await loadSharingDataHelpers();
     return await getSharingData(savedSearch.searchSource, savedSearch, { uiSettings, data });
   }
@@ -102,7 +97,20 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
     }
 
     const { embeddable } = context;
-    return embeddable.getInput().viewMode !== ViewMode.EDIT && embeddable.type === 'search';
+
+    if (embeddable.type !== 'search') {
+      return false;
+    }
+
+    const savedSearch = embeddable.getSavedSearch();
+    const query = savedSearch.searchSource.getField('query');
+
+    // using isOfAggregateQueryType(query) added increased the bundle size over the configured limit of 55.7KB
+    if (query && Boolean(query && 'sql' in query)) {
+      // hide exporting CSV for SQL
+      return false;
+    }
+    return embeddable.getInput().viewMode !== ViewMode.EDIT;
   };
 
   public execute = async (context: ActionContext) => {

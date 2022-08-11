@@ -17,9 +17,12 @@ import {
   EuiFormRow,
   EuiRange,
   EuiToolTip,
+  EuiSwitch,
+  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
-import type { IFieldFormat } from 'src/plugins/field_formats/common';
-import { UI_SETTINGS } from '../../../../../../../../src/plugins/data/public';
+import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { RangeColumnParams, UpdateParamsFnType, MODES_TYPES } from './ranges';
 import { AdvancedRangeEditor } from './advanced_editor';
 import { TYPING_DEBOUNCE_TIME, MODES, MIN_HISTOGRAM_BARS } from './constants';
@@ -83,12 +86,16 @@ const BaseRangeEditor = ({
   maxHistogramBars,
   onToggleEditor,
   onMaxBarsChange,
+  includeEmptyRows,
+  onChangeIncludeEmptyRows,
 }: {
   maxBars: number;
   step: number;
   maxHistogramBars: number;
   onToggleEditor: () => void;
   onMaxBarsChange: (newMaxBars: number) => void;
+  onChangeIncludeEmptyRows: (includeEmptyRows: boolean) => void;
+  includeEmptyRows?: boolean;
 }) => {
   const [maxBarsValue, setMaxBarsValue] = useState(String(maxBars));
 
@@ -170,6 +177,23 @@ const BaseRangeEditor = ({
           defaultMessage: 'Create custom ranges',
         })}
       </EuiButtonEmpty>
+      <EuiSpacer size="s" />
+      <EuiFormRow display="rowCompressed" hasChildLabel={false}>
+        <EuiSwitch
+          label={
+            <EuiText size="xs">
+              {i18n.translate('xpack.lens.indexPattern.ranges.includeEmptyRows', {
+                defaultMessage: 'Include empty rows',
+              })}
+            </EuiText>
+          }
+          checked={Boolean(includeEmptyRows)}
+          onChange={() => {
+            onChangeIncludeEmptyRows(!includeEmptyRows);
+          }}
+          compressed
+        />
+      </EuiFormRow>
     </>
   );
 };
@@ -211,11 +235,15 @@ export const RangeEditor = ({
 
   return (
     <BaseRangeEditor
+      includeEmptyRows={params.includeEmptyRows}
       maxBars={maxBars}
       step={granularityStep}
       maxHistogramBars={maxHistogramBars}
       onMaxBarsChange={(newMaxBars: number) => {
         setParam('maxBars', newMaxBars);
+      }}
+      onChangeIncludeEmptyRows={(includeEmptyRows: boolean) => {
+        setParam('includeEmptyRows', includeEmptyRows);
       }}
       onToggleEditor={() => {
         onChangeMode(MODES.Range);

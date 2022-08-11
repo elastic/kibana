@@ -42,7 +42,7 @@ export async function importerFactory(
 }
 
 interface HasImportPermissionParams {
-  checkCreateIndexPattern: boolean;
+  checkCreateDataView: boolean;
   checkHasManagePipeline: boolean;
   indexName?: string;
 }

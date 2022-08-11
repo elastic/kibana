@@ -15,8 +15,9 @@ export async function getAgentKeysPrivileges({
   context: ApmPluginRequestHandlerContext;
   securityPluginStart: NonNullable<APMPluginStartDependencies['security']>;
 }) {
+  const esClient = (await context.core).elasticsearch.client;
   const [securityHasPrivilegesResponse, areApiKeysEnabled] = await Promise.all([
-    context.core.elasticsearch.client.asCurrentUser.security.hasPrivileges({
+    esClient.asCurrentUser.security.hasPrivileges({
       body: {
         cluster: ['manage_security', 'manage_api_key', 'manage_own_api_key'],
       },

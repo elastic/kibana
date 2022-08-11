@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { isNil } from 'lodash';
-import { Alert, AlertTypeParams, RecoveredActionGroup } from '../../common';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import { Rule, RuleTypeParams, RecoveredActionGroup } from '../../common';
 import { getDefaultRuleMonitoring } from './task_runner';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
-import { TaskStatus } from '../../../task_manager/server';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 
 interface GeneratorParams {
@@ -22,13 +21,15 @@ export const RULE_TYPE_ID = 'test';
 export const DATE_1969 = '1969-12-31T00:00:00.000Z';
 export const DATE_1970 = '1970-01-01T00:00:00.000Z';
 export const DATE_1970_5_MIN = '1969-12-31T23:55:00.000Z';
-export const MOCK_DURATION = 86400000000000;
+export const DATE_9999 = '9999-12-31T12:34:56.789Z';
+export const MOCK_DURATION = '86400000000000';
 
 export const SAVED_OBJECT = {
   id: '1',
   type: 'alert',
   attributes: {
     apiKey: Buffer.from('123:abc').toString('base64'),
+    consumer: 'bar',
     enabled: true,
   },
   references: [],
@@ -53,7 +54,15 @@ export const RULE_ACTIONS = [
   },
 ];
 
-export const SAVED_OBJECT_UPDATE_PARAMS = [
+export const generateSavedObjectParams = ({
+  error = null,
+  warning = null,
+  status = 'ok',
+}: {
+  error?: null | { reason: string; message: string };
+  warning?: null | { reason: string; message: string };
+  status?: string;
+}) => [
   'alert',
   '1',
   {
@@ -71,10 +80,11 @@ export const SAVED_OBJECT_UPDATE_PARAMS = [
       },
     },
     executionStatus: {
-      error: null,
+      error,
       lastDuration: 0,
       lastExecutionDate: '1970-01-01T00:00:00.000Z',
-      status: 'ok',
+      status,
+      warning,
     },
   },
   { refresh: false, namespace: undefined },
@@ -92,6 +102,8 @@ export const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   recoveryActionGroup: RecoveredActionGroup,
   executor: jest.fn(),
   producer: 'alerts',
+  cancelAlertsOnRuleTimeout: true,
+  ruleTaskTimeout: '5m',
 };
 
 export const mockRunNowResponse = {
@@ -100,7 +112,7 @@ export const mockRunNowResponse = {
 
 export const mockDate = new Date('2019-02-12T21:01:22.479Z');
 
-export const mockedRuleTypeSavedObject: Alert<AlertTypeParams> = {
+export const mockedRuleTypeSavedObject: Rule<RuleTypeParams> = {
   id: '1',
   consumer: 'bar',
   createdAt: mockDate,
@@ -160,156 +172,57 @@ export const mockTaskInstance = () => ({
   taskType: 'alerting:test',
   params: {
     alertId: RULE_ID,
+    spaceId: 'default',
+    consumer: 'bar',
   },
   ownerId: null,
 });
 
-export const generateAlertSO = (id: string) => ({
-  id,
-  rel: 'primary',
-  type: 'alert',
-  type_id: RULE_TYPE_ID,
-});
-
-export const generateActionSO = (id: string) => ({
-  id,
-  namespace: undefined,
-  type: 'action',
-  type_id: 'action',
-});
-
-export const generateEventLog = ({
-  action,
-  task,
-  duration,
-  start,
-  end,
-  outcome,
-  reason,
-  instanceId,
-  actionSubgroup,
-  actionGroupId,
-  status,
-  numberOfTriggeredActions,
-  savedObjects = [generateAlertSO('1')],
-}: GeneratorParams = {}) => ({
-  ...(status === 'error' && {
-    error: {
-      message: generateErrorMessage(String(reason)),
-    },
-  }),
-  event: {
+export const generateAlertOpts = ({ action, group, subgroup, state, id }: GeneratorParams = {}) => {
+  id = id ?? '1';
+  let message: string = '';
+  switch (action) {
+    case EVENT_LOG_ACTIONS.newInstance:
+      message = `test:1: 'rule-name' created new alert: '${id}'`;
+      break;
+    case EVENT_LOG_ACTIONS.activeInstance:
+      message = subgroup
+        ? `test:1: 'rule-name' active alert: '${id}' in actionGroup(subgroup): 'default(${subgroup})'`
+        : `test:1: 'rule-name' active alert: '${id}' in actionGroup: 'default'`;
+      break;
+    case EVENT_LOG_ACTIONS.recoveredInstance:
+      message = `test:1: 'rule-name' alert '${id}' has recovered`;
+      break;
+  }
+  return {
     action,
-    ...(!isNil(duration) && { duration }),
-    ...(start && { start }),
-    ...(end && { end }),
-    ...(outcome && { outcome }),
-    ...(reason && { reason }),
-    category: ['alerts'],
-    kind: 'alert',
-  },
-  kibana: {
-    alert: {
-      rule: {
-        execution: {
-          uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-          ...(!isNil(numberOfTriggeredActions) && {
-            metrics: {
-              number_of_triggered_actions: numberOfTriggeredActions,
-              number_of_searches: 3,
-              es_search_duration_ms: 33,
-              total_search_duration_ms: 23423,
-            },
-          }),
-        },
-      },
-    },
-    ...((actionSubgroup || actionGroupId || instanceId || status) && {
-      alerting: {
-        ...(actionSubgroup && { action_subgroup: actionSubgroup }),
-        ...(actionGroupId && { action_group_id: actionGroupId }),
-        ...(instanceId && { instance_id: instanceId }),
-        ...(status && { status }),
-      },
-    }),
-    saved_objects: savedObjects,
-    ...(task && {
-      task: {
-        schedule_delay: 0,
-        scheduled: '1970-01-01T00:00:00.000Z',
-      },
-    }),
-  },
-  message: generateMessage({ action, instanceId, actionGroupId, actionSubgroup, reason, status }),
-  rule: {
-    category: 'test',
-    id: '1',
-    license: 'basic',
-    ...(hasRuleName({ action, status }) && { name: RULE_NAME }),
-    ruleset: 'alerts',
-  },
+    id,
+    message,
+    state,
+    ...(group ? { group } : {}),
+    ...(subgroup ? { subgroup } : {}),
+  };
+};
+
+export const generateActionOpts = ({
+  subgroup,
+  id,
+  alertGroup,
+  alertId,
+}: GeneratorParams = {}) => ({
+  id: id ?? '1',
+  typeId: 'action',
+  alertId: alertId ?? '1',
+  alertGroup: alertGroup ?? 'default',
+  ...(subgroup ? { alertSubgroup: subgroup } : {}),
 });
-
-const generateMessage = ({
-  action,
-  instanceId,
-  actionGroupId,
-  actionSubgroup,
-  reason,
-  status,
-}: GeneratorParams) => {
-  if (action === EVENT_LOG_ACTIONS.executeStart) {
-    return `rule execution start: "${mockTaskInstance().params.alertId}"`;
-  }
-
-  if (action === EVENT_LOG_ACTIONS.newInstance) {
-    return `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}' created new alert: '${instanceId}'`;
-  }
-
-  if (action === EVENT_LOG_ACTIONS.activeInstance) {
-    if (actionSubgroup) {
-      return `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}' active alert: '${instanceId}' in actionGroup(subgroup): 'default(${actionSubgroup})'`;
-    }
-    return `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}' active alert: '${instanceId}' in actionGroup: '${actionGroupId}'`;
-  }
-
-  if (action === EVENT_LOG_ACTIONS.recoveredInstance) {
-    return `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}' alert '${instanceId}' has recovered`;
-  }
-
-  if (action === EVENT_LOG_ACTIONS.executeAction) {
-    if (actionSubgroup) {
-      return `alert: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}' instanceId: '${instanceId}' scheduled actionGroup(subgroup): 'default(${actionSubgroup})' action: action:${instanceId}`;
-    }
-    return `alert: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}' instanceId: '${instanceId}' scheduled actionGroup: '${actionGroupId}' action: action:${instanceId}`;
-  }
-
-  if (action === EVENT_LOG_ACTIONS.execute) {
-    if (status === 'error' && reason === 'execute') {
-      return `rule execution failure: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`;
-    }
-    if (status === 'error') {
-      return `${RULE_TYPE_ID}:${RULE_ID}: execution failed`;
-    }
-    if (actionGroupId === 'recovered') {
-      return `rule-name' instanceId: '${instanceId}' scheduled actionGroup: '${actionGroupId}' action: action:${instanceId}`;
-    }
-    return `rule executed: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`;
-  }
-};
-
-const generateErrorMessage = (reason: string) => {
-  if (reason === 'disabled') {
-    return 'Rule failed to execute because rule ran after it was disabled.';
-  }
-  return GENERIC_ERROR_MESSAGE;
-};
 
 export const generateRunnerResult = ({
   successRatio = 1,
   history = Array(false),
   state = false,
   interval = '10s',
+  alertInstances = {},
 }: GeneratorParams = {}) => {
   return {
     monitoring: {
@@ -325,7 +238,7 @@ export const generateRunnerResult = ({
       interval,
     },
     state: {
-      ...(state && { alertInstances: {} }),
+      ...(state && { alertInstances }),
       ...(state && { alertTypeState: undefined }),
       ...(state && { previousStartedAt: new Date('1970-01-01T00:00:00.000Z') }),
     },
@@ -339,6 +252,7 @@ export const generateEnqueueFunctionInput = () => ({
   params: {
     foo: true,
   },
+  consumer: 'bar',
   relatedSavedObjects: [
     {
       id: '1',
@@ -354,7 +268,7 @@ export const generateEnqueueFunctionInput = () => ({
     },
     type: 'SAVED_OBJECT',
   },
-  spaceId: undefined,
+  spaceId: 'default',
 });
 
 export const generateAlertInstance = ({ id, duration, start }: GeneratorParams = { id: 1 }) => ({
@@ -373,6 +287,3 @@ export const generateAlertInstance = ({ id, duration, start }: GeneratorParams =
     },
   },
 });
-const hasRuleName = ({ action, status }: GeneratorParams) => {
-  return action !== 'execute-start' && status !== 'error';
-};

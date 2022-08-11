@@ -11,7 +11,8 @@ import { useValues } from 'kea';
 
 import { EuiEmptyPrompt, EuiButton, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 
-import type { AuthenticatedUser } from '../../../../../security/public';
+import type { AuthenticatedUser } from '@kbn/security-plugin/public';
+
 import { KibanaLogic } from '../kibana/kibana_logic';
 import { ProductName } from '../types';
 

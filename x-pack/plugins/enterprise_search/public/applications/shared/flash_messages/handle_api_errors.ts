@@ -5,9 +5,8 @@
  * 2.0.
  */
 
+import { HttpResponse } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-
-import { HttpResponse } from 'src/core/public';
 
 import { FlashMessagesLogic } from './flash_messages_logic';
 import { flashErrorToast } from './set_message_helpers';
@@ -23,12 +22,12 @@ import { IFlashMessage } from './types';
  * display to the user.
  */
 interface ErrorResponse {
-  statusCode: number;
-  error: string;
-  message: string;
-  attributes: {
+  attributes?: {
     errors: string[];
   };
+  error: string;
+  message: string;
+  statusCode: number;
 }
 interface Options {
   isQueued?: boolean;
@@ -43,7 +42,7 @@ export const defaultErrorMessage = i18n.translate(
 
 export const getErrorsFromHttpResponse = (response: HttpResponse<ErrorResponse>) => {
   return Array.isArray(response?.body?.attributes?.errors)
-    ? response.body!.attributes.errors
+    ? response.body!.attributes!.errors
     : [response?.body?.message || defaultErrorMessage];
 };
 
@@ -55,7 +54,7 @@ export const flashAPIErrors = (
   { isQueued }: Options = {}
 ) => {
   const errorFlashMessages: IFlashMessage[] = getErrorsFromHttpResponse(response).map(
-    (message) => ({ type: 'error', message })
+    (message) => ({ message, type: 'error' })
   );
 
   if (isQueued) {

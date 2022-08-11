@@ -12,20 +12,20 @@ export type ExperimentalFeatures = typeof allowedExperimentalValues;
  * This object is then used to validate and parse the value entered.
  */
 export const allowedExperimentalValues = Object.freeze({
-  metricsEntitiesEnabled: false,
-  ruleRegistryEnabled: true,
   tGridEnabled: true,
   tGridEventRenderedViewEnabled: true,
   excludePoliciesInFilterEnabled: false,
-  usersEnabled: false,
+  kubernetesEnabled: true,
   disableIsolationUIPendingStatuses: false,
   riskyHostsEnabled: false,
-  securityRulesCancelEnabled: false,
+  riskyUsersEnabled: false,
   pendingActionResponsesWithAck: true,
-  policyListEnabled: false,
+  policyListEnabled: true,
+  policyResponseInFleetEnabled: true,
+  threatIntelligenceEnabled: false,
 
   /**
-   * This is used for enabling the end to end tests for the security_solution telemetry.
+   * This is used for enabling the end-to-end tests for the security_solution telemetry.
    * We disable the telemetry since we don't have specific roles or permissions around it and
    * we don't want people to be able to violate security by getting access to whole documents
    * around telemetry they should not.
@@ -33,6 +33,25 @@ export const allowedExperimentalValues = Object.freeze({
    * @see test/detection_engine_api_integration/security_and_spaces/tests/telemetry/README.md
    */
   previewTelemetryUrlEnabled: false,
+
+  /**
+   * Enables the Endpoint response actions console in various areas of the app
+   */
+  responseActionsConsoleEnabled: true,
+
+  /**
+   * Enables the insights module for related alerts by process ancestry
+   */
+  insightsRelatedAlertsByProcessAncestry: false,
+
+  /**
+   * Enables extended rule execution logging to Event Log. When this setting is enabled:
+   * - Rules write their console error, info, debug, and trace messages to Event Log,
+   *   in addition to other events they log there (status changes and execution metrics).
+   * - We add a Kibana Advanced Setting that controls this behavior (on/off and log level).
+   * - We show a table with plain execution logs on the Rule Details page.
+   */
+  extendedRuleExecutionLoggingEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

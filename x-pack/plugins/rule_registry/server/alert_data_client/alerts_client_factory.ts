@@ -6,9 +6,9 @@
  */
 
 import { PublicMethodsOf } from '@kbn/utility-types';
-import { ElasticsearchClient, KibanaRequest, Logger } from 'src/core/server';
-import { AlertingAuthorization } from '../../../alerting/server';
-import { SecurityPluginSetup } from '../../../security/server';
+import { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
+import { AlertingAuthorization } from '@kbn/alerting-plugin/server';
+import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { IRuleDataService } from '../rule_data_plugin_service';
 import { AlertsClient } from './alerts_client';
 

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Logger } from 'kibana/server';
+import { Logger } from '@kbn/core/server';
 import { chunk } from 'lodash';
-import { ProcessorEvent } from '../../../common/processor_event';
-import { rangeQuery, termQuery } from '../../../../observability/server';
+import { rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
@@ -29,7 +29,7 @@ import { getProcessorEventForTransactions } from '../../lib/helpers/transactions
 
 export interface IEnvOptions {
   setup: Setup;
-  serviceName?: string;
+  serviceNames?: string[];
   environment: string;
   searchAggregatedTransactions: boolean;
   logger: Logger;
@@ -39,7 +39,7 @@ export interface IEnvOptions {
 
 async function getConnectionData({
   setup,
-  serviceName,
+  serviceNames,
   environment,
   start,
   end,
@@ -47,7 +47,7 @@ async function getConnectionData({
   return withApmSpan('get_service_map_connections', async () => {
     const { traceIds } = await getTraceSampleIds({
       setup,
-      serviceName,
+      serviceNames,
       environment,
       start,
       end,
@@ -90,10 +90,17 @@ async function getConnectionData({
   });
 }
 
-async function getServicesData(options: IEnvOptions) {
-  const { environment, setup, searchAggregatedTransactions, start, end } =
-    options;
-
+async function getServicesData(
+  options: IEnvOptions & { maxNumberOfServices: number }
+) {
+  const {
+    environment,
+    setup,
+    searchAggregatedTransactions,
+    start,
+    end,
+    maxNumberOfServices,
+  } = options;
   const params = {
     apm: {
       events: [
@@ -109,7 +116,7 @@ async function getServicesData(options: IEnvOptions) {
           filter: [
             ...rangeQuery(start, end),
             ...environmentQuery(environment),
-            ...termQuery(SERVICE_NAME, options.serviceName),
+            ...termsQuery(SERVICE_NAME, ...(options.serviceNames ?? [])),
           ],
         },
       },
@@ -117,7 +124,7 @@ async function getServicesData(options: IEnvOptions) {
         services: {
           terms: {
             field: SERVICE_NAME,
-            size: 500,
+            size: maxNumberOfServices,
           },
           aggs: {
             agent_name: {
@@ -156,7 +163,9 @@ async function getServicesData(options: IEnvOptions) {
 export type ConnectionsResponse = Awaited<ReturnType<typeof getConnectionData>>;
 export type ServicesResponse = Awaited<ReturnType<typeof getServicesData>>;
 
-export function getServiceMap(options: IEnvOptions) {
+export function getServiceMap(
+  options: IEnvOptions & { maxNumberOfServices: number }
+) {
   return withApmSpan('get_service_map', async () => {
     const { logger } = options;
     const anomaliesPromise = getServiceAnomalies(

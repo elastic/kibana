@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { LicenseType } from '@kbn/licensing-plugin/server';
 import type { KibanaFeature, SubFeaturePrivilegeConfig } from '../../common';
-import type { LicenseType } from '../../../licensing/server';
 
 /**
  * Utility for iterating through all sub-feature privileges belonging to a specific feature.

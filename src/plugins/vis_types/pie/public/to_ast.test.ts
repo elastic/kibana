@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { Vis } from '../../../visualizations/public';
+import { Vis } from '@kbn/visualizations-plugin/public';
 
-import { PartitionVisParams } from '../../../chart_expressions/expression_partition_vis/common';
+import { PartitionVisParams } from '@kbn/expression-partition-vis-plugin/common';
 import { samplePieVis } from './sample_vis.test.mocks';
 import { toExpressionAst } from './to_ast';
 

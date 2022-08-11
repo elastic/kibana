@@ -14,7 +14,6 @@ export { getPartitionTheme } from './get_partition_theme';
 export { getColumns } from './get_columns';
 export { getSplitDimensionAccessor } from './get_split_dimension_accessor';
 export { getDistinctSeries } from './get_distinct_series';
-export { getColumnByAccessor } from './accessor';
 export { isLegendFlat, shouldShowLegend } from './legend';
 export { generateFormatters, getAvailableFormatter, getFormatter } from './formatters';
 export { getPartitionType } from './get_partition_type';

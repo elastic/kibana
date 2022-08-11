@@ -55,25 +55,18 @@ import {
   TIMELINE_TEMPLATE_DETAILS,
 } from '../../screens/rule_details';
 import { INDICATOR_MATCH_ROW_RENDER, PROVIDER_BADGE } from '../../screens/timeline';
+import { investigateFirstAlertInTimeline } from '../../tasks/alerts';
 import {
-  goToManageAlertsDetectionRules,
-  investigateFirstAlertInTimeline,
-} from '../../tasks/alerts';
-import {
-  changeRowsPerPageTo100,
   duplicateFirstRule,
   duplicateSelectedRules,
   duplicateRuleFromMenu,
-  filterByCustomRules,
-  goToCreateNewRule,
   goToRuleDetails,
-  waitForRulesTableToBeLoaded,
   selectNumberOfRules,
   checkDuplicatedRule,
 } from '../../tasks/alerts_detection_rules';
 import { createCustomIndicatorRule } from '../../tasks/api_calls/rules';
 import { loadPrepackagedTimelineTemplates } from '../../tasks/api_calls/timelines';
-import { cleanKibana, reload } from '../../tasks/common';
+import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
 import {
   createAndEnableRule,
   fillAboutRuleAndContinue,
@@ -106,15 +99,15 @@ import {
   SCHEDULE_LOOKBACK_AMOUNT_INPUT,
   SCHEDULE_LOOKBACK_UNITS_INPUT,
 } from '../../screens/create_new_rule';
-import { goBackToRuleDetails, waitForKibana } from '../../tasks/edit_rule';
+import { goBackToRuleDetails } from '../../tasks/edit_rule';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
-import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
+import { login, visit, visitWithoutDateRange } from '../../tasks/login';
 import { goBackToAllRulesTable, getDetails } from '../../tasks/rule_details';
 
-import { ALERTS_URL, RULE_CREATION } from '../../urls/navigation';
+import { DETECTIONS_RULE_MANAGEMENT_URL, RULE_CREATION } from '../../urls/navigation';
 const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d/d"';
 
-describe.skip('indicator match', () => {
+describe('indicator match', () => {
   describe('Detection rules, Indicator Match', () => {
     const expectedUrls = getNewThreatIndicatorRule().referenceUrls.join('');
     const expectedFalsePositives = getNewThreatIndicatorRule().falsePositivesExamples.join('');
@@ -127,6 +120,7 @@ describe.skip('indicator match', () => {
       cleanKibana();
       esArchiverLoad('threat_indicator');
       esArchiverLoad('suspicious_source_event');
+      login();
     });
     after(() => {
       esArchiverUnload('threat_indicator');
@@ -134,8 +128,8 @@ describe.skip('indicator match', () => {
     });
 
     describe('Creating new indicator match rules', () => {
-      beforeEach(() => {
-        loginAndWaitForPageWithoutDateRange(RULE_CREATION);
+      before(() => {
+        visitWithoutDateRange(RULE_CREATION);
         selectIndicatorMatchType();
       });
 
@@ -158,6 +152,11 @@ describe.skip('indicator match', () => {
       });
 
       describe('Indicator index patterns', () => {
+        before(() => {
+          visitWithoutDateRange(RULE_CREATION);
+          selectIndicatorMatchType();
+        });
+
         it('Contains a predefined index pattern', () => {
           getIndicatorIndicatorIndex().should('have.text', getThreatIndexPatterns().join(''));
         });
@@ -174,6 +173,11 @@ describe.skip('indicator match', () => {
       });
 
       describe('custom query input', () => {
+        before(() => {
+          visitWithoutDateRange(RULE_CREATION);
+          selectIndicatorMatchType();
+        });
+
         it('Has a default set of *:*', () => {
           getCustomQueryInput().should('have.text', '*:*');
         });
@@ -185,6 +189,10 @@ describe.skip('indicator match', () => {
       });
 
       describe('custom indicator query input', () => {
+        before(() => {
+          visitWithoutDateRange(RULE_CREATION);
+          selectIndicatorMatchType();
+        });
         it(`Has a default set of ${DEFAULT_THREAT_MATCH_QUERY}`, () => {
           getCustomIndicatorQueryInput().should('have.text', DEFAULT_THREAT_MATCH_QUERY);
         });
@@ -197,10 +205,12 @@ describe.skip('indicator match', () => {
 
       describe('Indicator mapping', () => {
         beforeEach(() => {
-          fillIndexAndIndicatorIndexPattern(
-            getNewThreatIndicatorRule().index,
-            getNewThreatIndicatorRule().indicatorIndexPattern
-          );
+          const rule = getNewThreatIndicatorRule();
+          visitWithoutDateRange(RULE_CREATION);
+          selectIndicatorMatchType();
+          if (rule.dataSource.type === 'indexPatterns') {
+            fillIndexAndIndicatorIndexPattern(rule.dataSource.index, rule.indicatorIndexPattern);
+          }
         });
 
         it('Does NOT show invalidation text on initial page load', () => {
@@ -390,6 +400,7 @@ describe.skip('indicator match', () => {
 
       describe('Schedule', () => {
         it('IM rule has 1h time interval and lookback by default', () => {
+          visitWithoutDateRange(RULE_CREATION);
           selectIndicatorMatchType();
           fillDefineIndicatorMatchRuleAndContinue(getNewThreatIndicatorRule());
           fillAboutRuleAndContinue(getNewThreatIndicatorRule());
@@ -404,49 +415,37 @@ describe.skip('indicator match', () => {
 
     describe('Generating signals', () => {
       beforeEach(() => {
-        cleanKibana();
-        loginAndWaitForPageWithoutDateRange(ALERTS_URL);
+        deleteAlertsAndRules();
       });
 
       it('Creates and enables a new Indicator Match rule', () => {
-        goToManageAlertsDetectionRules();
-        waitForRulesTableToBeLoaded();
-        goToCreateNewRule();
+        const rule = getNewThreatIndicatorRule();
+        visitWithoutDateRange(RULE_CREATION);
         selectIndicatorMatchType();
-        fillDefineIndicatorMatchRuleAndContinue(getNewThreatIndicatorRule());
-        fillAboutRuleAndContinue(getNewThreatIndicatorRule());
-        fillScheduleRuleAndContinue(getNewThreatIndicatorRule());
+        fillDefineIndicatorMatchRuleAndContinue(rule);
+        fillAboutRuleAndContinue(rule);
+        fillScheduleRuleAndContinue(rule);
         createAndEnableRule();
 
         cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
-
-        changeRowsPerPageTo100();
 
         cy.get(RULES_TABLE).then(($table) => {
           cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
         });
 
-        filterByCustomRules();
-
-        cy.get(RULES_TABLE).then(($table) => {
-          cy.wrap($table.find(RULES_ROW).length).should('eql', 1);
-        });
-        cy.get(RULE_NAME).should('have.text', getNewThreatIndicatorRule().name);
-        cy.get(RISK_SCORE).should('have.text', getNewThreatIndicatorRule().riskScore);
-        cy.get(SEVERITY).should('have.text', getNewThreatIndicatorRule().severity);
+        cy.get(RULE_NAME).should('have.text', rule.name);
+        cy.get(RISK_SCORE).should('have.text', rule.riskScore);
+        cy.get(SEVERITY).should('have.text', rule.severity);
         cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
 
         goToRuleDetails();
 
-        cy.get(RULE_NAME_HEADER).should('contain', `${getNewThreatIndicatorRule().name}`);
-        cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', getNewThreatIndicatorRule().description);
+        cy.get(RULE_NAME_HEADER).should('contain', `${rule.name}`);
+        cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', rule.description);
         cy.get(ABOUT_DETAILS).within(() => {
-          getDetails(SEVERITY_DETAILS).should('have.text', getNewThreatIndicatorRule().severity);
-          getDetails(RISK_SCORE_DETAILS).should('have.text', getNewThreatIndicatorRule().riskScore);
-          getDetails(INDICATOR_PREFIX_OVERRIDE).should(
-            'have.text',
-            getNewThreatIndicatorRule().threatIndicatorPath
-          );
+          getDetails(SEVERITY_DETAILS).should('have.text', rule.severity);
+          getDetails(RISK_SCORE_DETAILS).should('have.text', rule.riskScore);
+          getDetails(INDICATOR_PREFIX_OVERRIDE).should('have.text', rule.threatIndicatorPath);
           getDetails(REFERENCE_URLS_DETAILS).should((details) => {
             expect(removeExternalLinkText(details.text())).equal(expectedUrls);
           });
@@ -460,22 +459,19 @@ describe.skip('indicator match', () => {
         cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', INVESTIGATION_NOTES_MARKDOWN);
 
         cy.get(DEFINITION_DETAILS).within(() => {
-          getDetails(INDEX_PATTERNS_DETAILS).should(
-            'have.text',
-            getNewThreatIndicatorRule().index.join('')
-          );
+          if (rule.dataSource.type === 'indexPatterns') {
+            getDetails(INDEX_PATTERNS_DETAILS).should('have.text', rule.dataSource.index?.join(''));
+          }
           getDetails(CUSTOM_QUERY_DETAILS).should('have.text', '*:*');
           getDetails(RULE_TYPE_DETAILS).should('have.text', 'Indicator Match');
           getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
           getDetails(INDICATOR_INDEX_PATTERNS).should(
             'have.text',
-            getNewThreatIndicatorRule().indicatorIndexPattern.join('')
+            rule.indicatorIndexPattern.join('')
           );
           getDetails(INDICATOR_MAPPING).should(
             'have.text',
-            `${getNewThreatIndicatorRule().indicatorMappingField} MATCHES ${
-              getNewThreatIndicatorRule().indicatorIndexField
-            }`
+            `${rule.indicatorMappingField} MATCHES ${rule.indicatorIndexField}`
           );
           getDetails(INDICATOR_INDEX_QUERY).should('have.text', '*:*');
         });
@@ -483,15 +479,11 @@ describe.skip('indicator match', () => {
         cy.get(SCHEDULE_DETAILS).within(() => {
           getDetails(RUNS_EVERY_DETAILS).should(
             'have.text',
-            `${getNewThreatIndicatorRule().runsEvery.interval}${
-              getNewThreatIndicatorRule().runsEvery.type
-            }`
+            `${rule.runsEvery.interval}${rule.runsEvery.type}`
           );
           getDetails(ADDITIONAL_LOOK_BACK_DETAILS).should(
             'have.text',
-            `${getNewThreatIndicatorRule().lookBack.interval}${
-              getNewThreatIndicatorRule().lookBack.type
-            }`
+            `${rule.lookBack.interval}${rule.lookBack.type}`
           );
         });
 
@@ -499,22 +491,17 @@ describe.skip('indicator match', () => {
         waitForAlertsToPopulate();
 
         cy.get(NUMBER_OF_ALERTS).should('have.text', expectedNumberOfAlerts);
-        cy.get(ALERT_RULE_NAME).first().should('have.text', getNewThreatIndicatorRule().name);
-        cy.get(ALERT_SEVERITY)
-          .first()
-          .should('have.text', getNewThreatIndicatorRule().severity.toLowerCase());
-        cy.get(ALERT_RISK_SCORE).first().should('have.text', getNewThreatIndicatorRule().riskScore);
+        cy.get(ALERT_RULE_NAME).first().should('have.text', rule.name);
+        cy.get(ALERT_SEVERITY).first().should('have.text', rule.severity.toLowerCase());
+        cy.get(ALERT_RISK_SCORE).first().should('have.text', rule.riskScore);
       });
 
       it('Investigate alert in timeline', () => {
         const accessibilityText = `Press enter for options, or press space to begin dragging.`;
 
         loadPrepackagedTimelineTemplates();
-
-        goToManageAlertsDetectionRules();
         createCustomIndicatorRule(getNewThreatIndicatorRule());
-
-        reload();
+        visit(DETECTIONS_RULE_MANAGEMENT_URL);
         goToRuleDetails();
         waitForAlertsToPopulate();
         investigateFirstAlertInTimeline();
@@ -543,15 +530,12 @@ describe.skip('indicator match', () => {
 
     describe('Duplicates the indicator rule', () => {
       beforeEach(() => {
-        cleanKibana();
-        loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-        goToManageAlertsDetectionRules();
+        deleteAlertsAndRules();
         createCustomIndicatorRule(getNewThreatIndicatorRule());
-        reload();
+        visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
       });
 
       it('Allows the rule to be duplicated from the table', () => {
-        waitForKibana();
         duplicateFirstRule();
         goBackToRuleDetails();
         goBackToAllRulesTable();
@@ -559,19 +543,16 @@ describe.skip('indicator match', () => {
       });
 
       it("Allows the rule to be duplicated from the table's bulk actions", () => {
-        waitForKibana();
         selectNumberOfRules(1);
         duplicateSelectedRules();
         checkDuplicatedRule();
       });
 
       it('Allows the rule to be duplicated from the edit screen', () => {
-        waitForKibana();
         goToRuleDetails();
         duplicateRuleFromMenu();
         goBackToRuleDetails();
         goBackToAllRulesTable();
-        reload();
         checkDuplicatedRule();
       });
     });

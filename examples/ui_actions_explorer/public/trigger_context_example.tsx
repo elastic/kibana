@@ -11,7 +11,7 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import { EuiText } from '@elastic/eui';
 import { EuiDataGrid } from '@elastic/eui';
 import { EuiDataGridCellValueElementProps } from '@elastic/eui';
-import { UiActionsStart } from '../../../src/plugins/ui_actions/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { USER_TRIGGER, PHONE_TRIGGER, COUNTRY_TRIGGER, User } from './actions/actions';
 
 export interface Props {

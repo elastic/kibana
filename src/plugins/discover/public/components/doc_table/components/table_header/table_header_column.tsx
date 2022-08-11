@@ -69,9 +69,13 @@ export function TableHeaderColumn({
   const curColSort = sortOrder.find((pair) => pair[0] === name);
   const curColSortDir = (curColSort && curColSort[1]) || '';
 
+  const fieldName = customLabel ?? displayName;
   const timeAriaLabel = i18n.translate(
     'discover.docTable.tableHeader.timeFieldIconTooltipAriaLabel',
-    { defaultMessage: 'Primary time field.' }
+    {
+      defaultMessage: '{timeFieldName} - this field represents the time that events occurred.',
+      values: { timeFieldName: fieldName },
+    }
   );
   const timeTooltip = i18n.translate('discover.docTable.tableHeader.timeFieldIconTooltip', {
     defaultMessage: 'This field represents the time that events occurred.',
@@ -195,7 +199,7 @@ export function TableHeaderColumn({
     <th data-test-subj="docTableHeaderField">
       <span data-test-subj={`docTableHeader-${name}`} className="kbnDocTableHeader__actions">
         {showScoreSortWarning && <DocViewTableScoreSortWarning />}
-        {customLabel ?? displayName}
+        {fieldName}
         {isTimeColumn && (
           <EuiIconTip
             key="time-icon"

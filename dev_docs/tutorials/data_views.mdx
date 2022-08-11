@@ -2,7 +2,7 @@
 id: kibDevTutorialDataViews
 slug: /kibana-dev-docs/tutorials/data-views
 title: Data views API
-summary: Data views API
+description: Data views API
 date: 2021-08-11
 tags: ['kibana', 'onboarding', 'dev', 'architecture']
 ---
@@ -84,3 +84,11 @@ await data.indexPatterns.delete(dataViewId);
 ### Data view HTTP API
 
 Rest-like HTTP CRUD+ API - [docs](https://www.elastic.co/guide/en/kibana/master/data-views-api.html)
+
+
+### Services
+
+#### **hasData:** A standardized way to check the empty state for indices and data views.
+- `hasESData: () => Promise<boolean>; // Check to see if ES data exists`
+- `hasDataView: () => Promise<boolean>; // Check to see if any data view exists (managed or user created)`
+- `hasUserDataView: () => Promise<boolean>; // Check to see if user created data views exists`

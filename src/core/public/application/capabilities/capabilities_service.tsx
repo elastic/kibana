@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { RecursiveReadonly } from '@kbn/utility-types';
+import type { RecursiveReadonly } from '@kbn/utility-types';
 import { deepFreeze } from '@kbn/std';
-
-import { Capabilities } from '../../../types/capabilities';
-import { HttpStart } from '../../http';
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { Capabilities } from '@kbn/core-capabilities-common';
 
 interface StartDeps {
   appIds: string[];

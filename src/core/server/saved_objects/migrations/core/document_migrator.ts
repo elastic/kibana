@@ -46,17 +46,20 @@ import uuidv5 from 'uuid/v5';
 import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
 import Semver from 'semver';
-import { Logger } from '../../../logging';
-import { SavedObjectUnsanitizedDoc } from '../../serialization';
-import {
+import type { Logger } from '@kbn/logging';
+import type {
   SavedObjectsMigrationVersion,
   SavedObjectsNamespaceType,
+} from '@kbn/core-saved-objects-common';
+import type {
+  SavedObjectUnsanitizedDoc,
   SavedObjectsType,
-} from '../../types';
+  ISavedObjectTypeRegistry,
+  SavedObjectMigrationFn,
+  SavedObjectMigrationMap,
+} from '@kbn/core-saved-objects-server';
 import { MigrationLogger } from './migration_logger';
 import { TransformSavedObjectDocumentError } from '.';
-import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
-import { SavedObjectMigrationFn, SavedObjectMigrationMap } from '../types';
 import { DEFAULT_NAMESPACE_STRING, SavedObjectsUtils } from '../../service/lib/utils';
 import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 
@@ -549,19 +552,21 @@ function convertNamespaceType(doc: SavedObjectUnsanitizedDoc) {
 
   const { id: originId, type } = otherAttrs;
   const id = SavedObjectsUtils.getConvertedObjectId(namespace, type, originId!);
-  if (namespace !== undefined) {
-    const legacyUrlAlias: SavedObjectUnsanitizedDoc<LegacyUrlAlias> = {
-      id: `${namespace}:${type}:${originId}`,
-      type: LEGACY_URL_ALIAS_TYPE,
-      attributes: {
-        sourceId: originId,
-        targetNamespace: namespace,
-        targetType: type,
-        targetId: id,
-      },
-    };
-    additionalDocs.push(legacyUrlAlias);
-  }
+  const legacyUrlAlias: SavedObjectUnsanitizedDoc<LegacyUrlAlias> = {
+    id: `${namespace}:${type}:${originId}`,
+    type: LEGACY_URL_ALIAS_TYPE,
+    attributes: {
+      // NOTE TO MAINTAINERS: If a saved object migration is added in `src/core/server/saved_objects/object_types/registration.ts`, these
+      // values must be updated accordingly. That's because a user can upgrade Kibana from 7.17 to 8.x, and any defined migrations will not
+      // be applied to aliases that are created during the conversion process.
+      sourceId: originId,
+      targetNamespace: namespace,
+      targetType: type,
+      targetId: id,
+      purpose: 'savedObjectConversion',
+    },
+  };
+  additionalDocs.push(legacyUrlAlias);
   return {
     transformedDoc: { ...otherAttrs, id, originId, namespaces: [namespace] },
     additionalDocs,
@@ -668,7 +673,7 @@ function wrapWithTry(
     try {
       const result = migrationFn(doc, context);
 
-      // A basic sanity check to help migration authors detect basic errors
+      // A basic check to help migration authors detect basic errors
       // (e.g. forgetting to return the transformed doc)
       if (!result || !result.type) {
         throw new Error(`Invalid saved object returned from migration ${type.name}:${version}.`);

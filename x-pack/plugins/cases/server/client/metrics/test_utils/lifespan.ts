@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObject } from 'kibana/server';
+import { SavedObject } from '@kbn/core/server';
 import { CaseStatuses, CaseUserActionResponse } from '../../../../common/api';
 
 export function createStatusChangeSavedObject(

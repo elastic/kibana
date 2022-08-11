@@ -39,6 +39,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
       expect(response.body).to.eql({
         id: response.body.id,
         is_preconfigured: false,
+        is_deprecated: false,
         name: 'My action',
         connector_type_id: 'test.index-record',
         is_missing_secrets: false,
@@ -55,6 +56,27 @@ export default function createActionTests({ getService }: FtrProviderContext) {
         type: 'action',
         id: response.body.id,
       });
+    });
+
+    it('should handle create action request appropriately when empty strings are submitted', async () => {
+      await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'My action',
+          connector_type_id: 'test.index-record',
+          config: {
+            unencrypted: ' ',
+          },
+          secrets: {
+            encrypted: 'This value should be encrypted',
+          },
+        })
+        .expect(400, {
+          statusCode: 400,
+          error: 'Bad Request',
+          message: `[request body.config.unencrypted]: value '' is not valid`,
+        });
     });
 
     describe('legacy', () => {
@@ -78,6 +100,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
         expect(response.body).to.eql({
           id: response.body.id,
           isPreconfigured: false,
+          isDeprecated: false,
           name: 'My action',
           actionTypeId: 'test.index-record',
           isMissingSecrets: false,

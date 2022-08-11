@@ -17,13 +17,11 @@ import {
 } from './log_threshold_executor';
 import {
   Comparator,
-  AlertStates,
   RuleParams,
   Criterion,
   UngroupedSearchQueryResponse,
   GroupedSearchQueryResponse,
 } from '../../../../common/alerting/logs/log_threshold';
-import { alertsMock } from '../../../../../alerting/server/mocks';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 // Mocks //
@@ -31,7 +29,6 @@ const numericField = {
   field: 'numericField',
   value: 10,
 };
-
 const keywordField = {
   field: 'keywordField',
   value: 'error',
@@ -137,6 +134,7 @@ const baseRuleParams: Pick<RuleParams, 'count' | 'timeSize' | 'timeUnit'> = {
 
 const TIMESTAMP_FIELD = '@timestamp';
 const FILEBEAT_INDEX = 'filebeat-*';
+const EXECUTION_TIMESTAMP = new Date('2022-01-01T00:00:00.000Z').valueOf();
 
 const runtimeMappings: estypes.MappingRuntimeFields = {
   runtime_field: {
@@ -169,7 +167,7 @@ describe('Log threshold executor', () => {
         ...baseRuleParams,
         criteria: positiveCriteria,
       };
-      const filters = buildFiltersFromCriteria(ruleParams, TIMESTAMP_FIELD);
+      const filters = buildFiltersFromCriteria(ruleParams, TIMESTAMP_FIELD, EXECUTION_TIMESTAMP);
       expect(filters.mustFilters).toEqual(expectedPositiveFilterClauses);
     });
 
@@ -178,14 +176,14 @@ describe('Log threshold executor', () => {
         ...baseRuleParams,
         criteria: negativeCriteria,
       };
-      const filters = buildFiltersFromCriteria(ruleParams, TIMESTAMP_FIELD);
+      const filters = buildFiltersFromCriteria(ruleParams, TIMESTAMP_FIELD, EXECUTION_TIMESTAMP);
 
       expect(filters.mustNotFilters).toEqual(expectedNegativeFilterClauses);
     });
 
     test('Handles time range', () => {
       const ruleParams: RuleParams = { ...baseRuleParams, criteria: [] };
-      const filters = buildFiltersFromCriteria(ruleParams, TIMESTAMP_FIELD);
+      const filters = buildFiltersFromCriteria(ruleParams, TIMESTAMP_FIELD, EXECUTION_TIMESTAMP);
       expect(typeof filters.rangeFilter.range[TIMESTAMP_FIELD].gte).toBe('number');
       expect(typeof filters.rangeFilter.range[TIMESTAMP_FIELD].lte).toBe('number');
       expect(filters.rangeFilter.range[TIMESTAMP_FIELD].format).toBe('epoch_millis');
@@ -207,7 +205,8 @@ describe('Log threshold executor', () => {
           ruleParams,
           TIMESTAMP_FIELD,
           FILEBEAT_INDEX,
-          runtimeMappings
+          runtimeMappings,
+          EXECUTION_TIMESTAMP
         );
         expect(query).toEqual({
           index: 'filebeat-*',
@@ -257,7 +256,8 @@ describe('Log threshold executor', () => {
             ruleParams,
             TIMESTAMP_FIELD,
             FILEBEAT_INDEX,
-            runtimeMappings
+            runtimeMappings,
+            EXECUTION_TIMESTAMP
           );
 
           expect(query).toEqual({
@@ -327,7 +327,8 @@ describe('Log threshold executor', () => {
             ruleParams,
             TIMESTAMP_FIELD,
             FILEBEAT_INDEX,
-            runtimeMappings
+            runtimeMappings,
+            EXECUTION_TIMESTAMP
           );
 
           expect(query).toEqual({
@@ -407,7 +408,7 @@ describe('Log threshold executor', () => {
   describe('Results processors', () => {
     describe('Can process ungrouped results', () => {
       test('It handles the ALERT state correctly', () => {
-        const alertUpdaterMock = jest.fn();
+        const alertFactoryMock = jest.fn();
         const ruleParams = {
           ...baseRuleParams,
           criteria: [positiveCriteria[0]],
@@ -419,16 +420,11 @@ describe('Log threshold executor', () => {
             },
           },
         } as UngroupedSearchQueryResponse;
-        processUngroupedResults(
-          results,
-          ruleParams,
-          alertsMock.createAlertFactory.create,
-          alertUpdaterMock
-        );
-        // First call, second argument
-        expect(alertUpdaterMock.mock.calls[0][1]).toBe(AlertStates.ALERT);
-        // First call, third argument
-        expect(alertUpdaterMock.mock.calls[0][2]).toEqual([
+
+        processUngroupedResults(results, ruleParams, alertFactoryMock);
+
+        // first call, fifth argument
+        expect(alertFactoryMock.mock.calls[0][4]).toEqual([
           {
             actionGroup: 'logs.threshold.fired',
             context: {
@@ -445,7 +441,7 @@ describe('Log threshold executor', () => {
 
     describe('Can process grouped results', () => {
       test('It handles the ALERT state correctly', () => {
-        const alertUpdaterMock = jest.fn();
+        const alertFactoryMock = jest.fn();
         const ruleParams = {
           ...baseRuleParams,
           criteria: [positiveCriteria[0]],
@@ -484,17 +480,12 @@ describe('Log threshold executor', () => {
             },
           },
         ] as GroupedSearchQueryResponse['aggregations']['groups']['buckets'];
-        processGroupByResults(
-          results,
-          ruleParams,
-          alertsMock.createAlertFactory.create,
-          alertUpdaterMock
-        );
-        expect(alertUpdaterMock.mock.calls.length).toBe(2);
-        // First call, second argument
-        expect(alertUpdaterMock.mock.calls[0][1]).toBe(AlertStates.ALERT);
-        // First call, third argument
-        expect(alertUpdaterMock.mock.calls[0][2]).toEqual([
+
+        processGroupByResults(results, ruleParams, alertFactoryMock);
+        expect(alertFactoryMock.mock.calls.length).toBe(2);
+
+        // First call, fifth argument
+        expect(alertFactoryMock.mock.calls[0][4]).toEqual([
           {
             actionGroup: 'logs.threshold.fired',
             context: {
@@ -508,10 +499,8 @@ describe('Log threshold executor', () => {
           },
         ]);
 
-        // Second call, second argument
-        expect(alertUpdaterMock.mock.calls[1][1]).toBe(AlertStates.ALERT);
-        // Second call, third argument
-        expect(alertUpdaterMock.mock.calls[1][2]).toEqual([
+        // Second call, fifth argument
+        expect(alertFactoryMock.mock.calls[1][4]).toEqual([
           {
             actionGroup: 'logs.threshold.fired',
             context: {

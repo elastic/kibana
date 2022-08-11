@@ -15,7 +15,7 @@ import {
   FieldFormatsContentType,
   IFieldFormat,
   SerializedFieldFormat,
-} from '../../../../../field_formats/common';
+} from '@kbn/field-formats-plugin/common';
 import { DateRange } from '../../expressions';
 import { convertDateRangeToString } from '../buckets/lib/date_range';
 import { convertIPRangeToString, IpRangeKey } from '../buckets/lib/ip_range';
@@ -42,6 +42,10 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
 
       textConvert = (range: any) => {
         const params = this._params;
+
+        if (range == null) {
+          return '';
+        }
 
         if (range.label) {
           return range.label;
@@ -89,6 +93,10 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
       static hidden = true;
 
       textConvert = (range: DateRange) => {
+        if (range == null) {
+          return '';
+        }
+
         const nestedFormatter = this._params as SerializedFieldFormat;
         const format = getFieldFormat({
           id: nestedFormatter.id,
@@ -102,6 +110,10 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
       static hidden = true;
 
       textConvert = (range: IpRangeKey) => {
+        if (range == null) {
+          return '';
+        }
+
         const nestedFormatter = this._params as SerializedFieldFormat;
         const format = getFieldFormat({
           id: nestedFormatter.id,
@@ -116,13 +128,13 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
 
       convert = (val: string, type: FieldFormatsContentType) => {
         const params = this._params;
-        const format = getFieldFormat({ id: params.id, params });
+        const format = getFieldFormat({ id: `${params.id}`, params });
 
         if (val === '__other__') {
-          return params.otherBucketLabel;
+          return `${params.otherBucketLabel}`;
         }
         if (val === '__missing__') {
-          return params.missingBucketLabel;
+          return `${params.missingBucketLabel}`;
         }
 
         return format.convert(val, type);
@@ -133,17 +145,24 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
       static id = 'multi_terms';
       static hidden = true;
 
+      private formatCache: Map<SerializedFieldFormat, FieldFormat> = new Map();
+
       convert = (val: unknown, type: FieldFormatsContentType) => {
         const params = this._params;
-        const formats = (params.paramsPerField as SerializedFieldFormat[]).map((fieldParams) =>
-          getFieldFormat({ id: fieldParams.id, params: fieldParams })
-        );
+        const formats = (params.paramsPerField as SerializedFieldFormat[]).map((fieldParams) => {
+          const isCached = this.formatCache.has(fieldParams);
+          const cachedFormat = this.formatCache.get(fieldParams) || getFieldFormat(fieldParams);
+          if (!isCached) {
+            this.formatCache.set(fieldParams, cachedFormat);
+          }
+          return cachedFormat;
+        });
 
         if (String(val) === '__other__') {
-          return params.otherBucketLabel;
+          return `${params.otherBucketLabel}`;
         }
 
-        const joinTemplate = params.separator ?? ' › ';
+        const joinTemplate = `${params.separator ?? ' › '}`;
 
         return (val as MultiFieldKey).keys
           .map((valPart, i) => formats[i].convert(valPart, type))

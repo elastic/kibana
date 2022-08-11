@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IndexMapping, SavedObjectsTypeMappingDefinitions } from './../../mappings';
+import { IndexMapping, SavedObjectsTypeMappingDefinitions } from '../../mappings';
 import { buildActiveMappings, diffMappings } from './build_active_mappings';
 
 describe('buildActiveMappings', () => {

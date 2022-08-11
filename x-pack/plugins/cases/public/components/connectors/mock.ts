@@ -13,6 +13,7 @@ export const connector = {
   actionTypeId: '.jira',
   config: {},
   isPreconfigured: false,
+  isDeprecated: false,
 };
 
 export const swimlaneConnector = {
@@ -29,6 +30,7 @@ export const swimlaneConnector = {
     },
   },
   isPreconfigured: false,
+  isDeprecated: false,
 };
 
 export const issues = [

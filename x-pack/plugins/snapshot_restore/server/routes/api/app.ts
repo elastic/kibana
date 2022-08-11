@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Privileges } from '../../../../../../src/plugins/es_ui_shared/common';
+import { Privileges } from '@kbn/es-ui-shared-plugin/common';
 
 import {
   APP_REQUIRED_CLUSTER_PRIVILEGES,
@@ -32,7 +32,7 @@ export function registerAppRoutes({
   router.get(
     { path: addBasePath('privileges'), validate: false },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { client: clusterClient } = ctx.core.elasticsearch;
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
 
       const privilegesResult: Privileges = {
         hasAllPrivileges: true,

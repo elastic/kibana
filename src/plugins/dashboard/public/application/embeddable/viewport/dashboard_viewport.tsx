@@ -8,17 +8,27 @@
 
 import React from 'react';
 import { Subscription } from 'rxjs';
+import {
+  CalloutProps,
+  ControlGroupContainer,
+  LazyControlsCallout,
+} from '@kbn/controls-plugin/public';
 import { ViewMode } from '../../../services/embeddable';
-import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
+import {
+  DashboardContainer,
+  DashboardReactContextValue,
+  DashboardLoadedInfo,
+} from '../dashboard_container';
 import { DashboardGrid } from '../grid';
 import { context } from '../../../services/kibana_react';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
-import { ControlGroupContainer } from '../../../../../controls/public';
+import { withSuspense } from '../../../services/presentation_util';
 
 export interface DashboardViewportProps {
   container: DashboardContainer;
   controlGroup?: ControlGroupContainer;
   controlsEnabled?: boolean;
+  onDataLoaded?: (data: DashboardLoadedInfo) => void;
 }
 
 interface State {
@@ -30,6 +40,8 @@ interface State {
   panelCount: number;
   isEmbeddedExternally?: boolean;
 }
+
+const ControlsCallout = withSuspense<CalloutProps>(LazyControlsCallout);
 
 export class DashboardViewport extends React.Component<DashboardViewportProps, State> {
   static contextType = context;
@@ -94,14 +106,38 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
   };
 
   public render() {
-    const { container, controlsEnabled } = this.props;
+    const { container, controlsEnabled, controlGroup } = this.props;
     const isEditMode = container.getInput().viewMode !== ViewMode.VIEW;
     const { isEmbeddedExternally, isFullScreenMode, panelCount, title, description, useMargins } =
       this.state;
+    const hideAnnouncements = Boolean(this.context.services.uiSettings.get('hideAnnouncements'));
+
     return (
       <>
         {controlsEnabled ? (
-          <div className="dshDashboardViewport-controlGroup" ref={this.controlsRoot} />
+          <>
+            {!hideAnnouncements &&
+            isEditMode &&
+            panelCount !== 0 &&
+            controlGroup?.getPanelCount() === 0 ? (
+              <ControlsCallout
+                getCreateControlButton={() => {
+                  return controlGroup?.getCreateControlButton('callout');
+                }}
+              />
+            ) : null}
+
+            {container.getInput().viewMode !== ViewMode.PRINT && (
+              <div
+                className={
+                  controlGroup && controlGroup.getPanelCount() > 0
+                    ? 'dshDashboardViewport-controls'
+                    : ''
+                }
+                ref={this.controlsRoot}
+              />
+            )}
+          </>
         ) : null}
         <div
           data-shared-items-count={panelCount}
@@ -128,7 +164,9 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
               />
             </div>
           )}
-          {this.state.controlGroupReady && <DashboardGrid container={container} />}
+          {this.state.controlGroupReady && (
+            <DashboardGrid container={container} onDataLoaded={this.props.onDataLoaded} />
+          )}
         </div>
       </>
     );

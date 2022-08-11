@@ -7,10 +7,10 @@
  */
 
 import { Serializable } from '../serializable';
-import { ApmFields } from './apm_fields';
+import { Fields } from '../entity';
 
-export class Metricset extends Serializable<ApmFields> {
-  constructor(fields: ApmFields) {
+export class Metricset<TFields extends Fields> extends Serializable<TFields> {
+  constructor(fields: TFields) {
     super({
       'processor.event': 'metric',
       'processor.name': 'metric',

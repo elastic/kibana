@@ -7,7 +7,7 @@
  */
 
 import { DateFormat } from './lib/converters/date_server';
-import { coreMock, httpServerMock } from '../../../core/server/mocks';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { FieldFormatsPlugin } from './plugin';
 
 describe('FieldFormats registry server plugin', () => {

@@ -7,11 +7,11 @@
 
 import { kibanaPackageJson } from '@kbn/utils';
 
-import { GetDeprecationsContext } from '../../../../../src/core/server';
-import { CloudSetup } from '../../../cloud/server';
-import { getDeprecations } from './';
-import { APMRouteHandlerResources } from '../';
-import { AgentPolicy } from '../../../fleet/common';
+import { GetDeprecationsContext } from '@kbn/core/server';
+import { CloudSetup } from '@kbn/cloud-plugin/server';
+import { getDeprecations } from '.';
+import { APMRouteHandlerResources } from '..';
+import { AgentPolicy } from '@kbn/fleet-plugin/common';
 
 const deprecationContext = {
   esClient: {},

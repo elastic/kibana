@@ -19,6 +19,7 @@ import { sortSchema } from './common_schemas';
  * - max
  * - sum
  * - top_hits
+ * - value_count
  * - weighted_avg
  *
  * Not implemented:
@@ -75,6 +76,9 @@ export const metricsAggsSchemas: Record<string, ObjectType> = {
     track_scores: s.maybe(s.boolean()),
     highlight: s.maybe(s.any()),
     _source: s.maybe(s.oneOf([s.boolean(), s.string(), s.arrayOf(s.string())])),
+  }),
+  value_count: s.object({
+    field: s.maybe(s.string()),
   }),
   weighted_avg: s.object({
     format: s.maybe(s.string()),

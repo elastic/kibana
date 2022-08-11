@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiButton, EuiEmptyPrompt, EuiSpacer, EuiPageHeader, EuiPageContent } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
-import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { PolicyFromES } from '../../../../common/types';
 import { PolicyTable } from './components/policy_table';
 import { getPolicyCreatePath } from '../../services/navigation';

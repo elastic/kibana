@@ -18,13 +18,15 @@ export const CreateNoticeFile: Task = {
 
   async run(config, log, build) {
     log.info('Generating notice from source');
-    log.indent(4);
-    const noticeFromSource = await generateNoticeFromSource({
-      productName: 'Kibana',
-      directory: build.resolvePath(),
-      log,
-    });
-    log.indent(-4);
+    const noticeFromSource = await log.indent(
+      4,
+      async () =>
+        await generateNoticeFromSource({
+          productName: 'Kibana',
+          directory: build.resolvePath(),
+          log,
+        })
+    );
 
     log.info('Discovering installed packages');
     const packages = await getInstalledPackages({
@@ -48,5 +50,25 @@ export const CreateNoticeFile: Task = {
 
     log.info('Writing notice to NOTICE.txt');
     await write(build.resolvePath('NOTICE.txt'), notice);
+  },
+};
+
+export const CreateXPackNoticeFile: Task = {
+  description: 'Generating x-pack NOTICE.txt file',
+
+  async run(config, log, build) {
+    log.info('Generating x-pack notice from source');
+    const noticeFromSource = await log.indent(
+      4,
+      async () =>
+        await generateNoticeFromSource({
+          productName: 'Kibana X-Pack',
+          directory: build.resolvePath('x-pack'),
+          log,
+        })
+    );
+
+    log.info('Writing notice to x-pack/NOTICE.txt');
+    await write(build.resolvePath('x-pack/NOTICE.txt'), noticeFromSource);
   },
 };

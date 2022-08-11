@@ -8,7 +8,7 @@
 
 import { get, max, min, sum, noop } from 'lodash';
 import { toPercentileNumber } from '../../../../common/to_percentile_number';
-import { METRIC_TYPES } from '../../../../../../data/common';
+import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import { getAggByPredicate } from '../../../../common/agg_utils';
 

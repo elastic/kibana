@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { SearchAggregatedTransactionSetting } from '../../../../common/aggregated_transactions';
-import { kqlQuery, rangeQuery } from '../../../../../observability/server';
-import { ProcessorEvent } from '../../../../common/processor_event';
 import {
   TRANSACTION_DURATION,
   TRANSACTION_DURATION_HISTOGRAM,
@@ -33,6 +33,7 @@ export async function getHasAggregatedTransactions({
         events: [ProcessorEvent.metric],
       },
       body: {
+        size: 1,
         query: {
           bool: {
             filter: [

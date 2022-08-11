@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { getESUpgradeStatus } from './es_deprecations_status';

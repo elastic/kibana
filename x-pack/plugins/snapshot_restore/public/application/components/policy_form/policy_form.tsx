@@ -67,6 +67,14 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
   const [policy, setPolicy] = useState<SlmPolicyPayload>({
     ...originalPolicy,
     config: {
+      // When creating a new policy includesGlobalState is enabled by default and the API will also
+      // include all featureStates into the snapshot when this happens. We need to take this case into account
+      // when creating the local state for the form and also set featureStates to be an empty array, which
+      // for the API it means that it will include all featureStates.
+      featureStates: [],
+      // IncludeGlobalState is set as default by the api, so we want to replicate that behaviour in our
+      // form state so that it gets explicitly represented in the request.
+      includeGlobalState: true,
       ...(originalPolicy.config || {}),
     },
     retention: {

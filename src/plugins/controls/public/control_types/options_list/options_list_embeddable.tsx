@@ -6,6 +6,14 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { batch } from 'react-redux';
+import deepEqual from 'fast-deep-equal';
+import { isEmpty, isEqual } from 'lodash';
+import { merge, Subject, Subscription } from 'rxjs';
+import { debounceTime, map, distinctUntilChanged, skip } from 'rxjs/operators';
+
 import {
   Filter,
   compareFilters,
@@ -13,32 +21,24 @@ import {
   buildPhrasesFilter,
   COMPARE_ALL_OPTIONS,
 } from '@kbn/es-query';
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { isEmpty, isEqual } from 'lodash';
-import deepEqual from 'fast-deep-equal';
-import { merge, Subject, Subscription, BehaviorSubject } from 'rxjs';
-import { tap, debounceTime, map, distinctUntilChanged, skip } from 'rxjs/operators';
+import { ReduxEmbeddableTools, ReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
-import { OptionsListComponent, OptionsListComponentState } from './options_list_component';
-import { OptionsListEmbeddableInput, OPTIONS_LIST_CONTROL } from './types';
-import { DataView, DataViewField } from '../../../../data_views/public';
-import { Embeddable, IContainer } from '../../../../embeddable/public';
+import {
+  OptionsListEmbeddableInput,
+  OptionsListField,
+  OptionsListReduxState,
+  OPTIONS_LIST_CONTROL,
+} from './types';
+import { OptionsListComponent } from './options_list_component';
+import { ControlsOptionsListService } from '../../services/options_list';
 import { ControlsDataViewsService } from '../../services/data_views';
 import { optionsListReducers } from './options_list_reducers';
 import { OptionsListStrings } from './options_list_strings';
 import { ControlInput, ControlOutput } from '../..';
 import { pluginServices } from '../../services';
-import {
-  withSuspense,
-  LazyReduxEmbeddableWrapper,
-  ReduxEmbeddableWrapperPropsWithChildren,
-} from '../../../../presentation_util/public';
-import { ControlsOptionsListService } from '../../services/options_list';
-
-const OptionsListReduxWrapper = withSuspense<
-  ReduxEmbeddableWrapperPropsWithChildren<OptionsListEmbeddableInput>
->(LazyReduxEmbeddableWrapper);
 
 const diffDataFetchProps = (
   last?: OptionsListDataFetchProps,
@@ -56,6 +56,7 @@ interface OptionsListDataFetchProps {
   search?: string;
   fieldName: string;
   dataViewId: string;
+  validate?: boolean;
   query?: ControlInput['query'];
   filters?: ControlInput['filters'];
 }
@@ -75,27 +76,35 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
   private typeaheadSubject: Subject<string> = new Subject<string>();
   private abortController?: AbortController;
   private dataView?: DataView;
-  private field?: DataViewField;
-  private searchString = '';
+  private field?: OptionsListField;
 
-  // State to be passed down to component
-  private componentState: OptionsListComponentState;
-  private componentStateSubject$ = new BehaviorSubject<OptionsListComponentState>({
-    invalidSelections: [],
-    validSelections: [],
-    loading: true,
-  });
+  private reduxEmbeddableTools: ReduxEmbeddableTools<
+    OptionsListReduxState,
+    typeof optionsListReducers
+  >;
 
-  constructor(input: OptionsListEmbeddableInput, output: ControlOutput, parent?: IContainer) {
-    super(input, output, parent); // get filters for initial output...
+  constructor(
+    reduxEmbeddablePackage: ReduxEmbeddablePackage,
+    input: OptionsListEmbeddableInput,
+    output: ControlOutput,
+    parent?: IContainer
+  ) {
+    super(input, output, parent);
 
     // Destructure controls services
     ({ dataViews: this.dataViewsService, optionsList: this.optionsListService } =
       pluginServices.getServices());
 
-    this.componentState = { loading: true };
-    this.updateComponentState(this.componentState);
     this.typeaheadSubject = new Subject<string>();
+
+    // build redux embeddable tools
+    this.reduxEmbeddableTools = reduxEmbeddablePackage.createTools<
+      OptionsListReduxState,
+      typeof optionsListReducers
+    >({
+      embeddable: this,
+      reducers: optionsListReducers,
+    });
 
     this.initialize();
   }
@@ -115,6 +124,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
   private setupSubscriptions = () => {
     const dataFetchPipe = this.getInput$().pipe(
       map((newInput) => ({
+        validate: !Boolean(newInput.ignoreParentSettings?.ignoreValidations),
         lastReloadRequestTime: newInput.lastReloadRequestTime,
         dataViewId: newInput.dataViewId,
         fieldName: newInput.fieldName,
@@ -125,11 +135,8 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       distinctUntilChanged(diffDataFetchProps)
     );
 
-    // push searchString changes into a debounced typeahead subject
-    const typeaheadPipe = this.typeaheadSubject.pipe(
-      tap((newSearchString) => (this.searchString = newSearchString)),
-      debounceTime(100)
-    );
+    // debounce typeahead pipe to slow down search string related queries
+    const typeaheadPipe = this.typeaheadSubject.pipe(debounceTime(100));
 
     // fetch available options when input changes or when search string has changed
     this.subscriptions.add(
@@ -138,87 +145,129 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
         .subscribe(this.runOptionsListQuery)
     );
 
-    // build filters when selectedOptions or invalidSelections change
-    this.subscriptions.add(
-      this.componentStateSubject$
-        .pipe(
-          debounceTime(100),
-          distinctUntilChanged((a, b) => isEqual(a.validSelections, b.validSelections)),
-          skip(1) // skip the first input update because initial filters will be built by initialize.
-        )
-        .subscribe(() => this.buildFilter())
-    );
-
     /**
-     * when input selectedOptions changes, check all selectedOptions against the latest value of invalidSelections.
+     * when input selectedOptions changes, check all selectedOptions against the latest value of invalidSelections, and publish filter
      **/
     this.subscriptions.add(
       this.getInput$()
         .pipe(distinctUntilChanged((a, b) => isEqual(a.selectedOptions, b.selectedOptions)))
-        .subscribe(({ selectedOptions: newSelectedOptions }) => {
+        .subscribe(async ({ selectedOptions: newSelectedOptions }) => {
+          const {
+            actions: {
+              clearValidAndInvalidSelections,
+              setValidAndInvalidSelections,
+              publishFilters,
+            },
+            dispatch,
+          } = this.reduxEmbeddableTools;
+
           if (!newSelectedOptions || isEmpty(newSelectedOptions)) {
-            this.updateComponentState({
-              validSelections: [],
-              invalidSelections: [],
-            });
-            return;
-          }
-          const { invalidSelections } = this.componentStateSubject$.getValue();
-          const newValidSelections: string[] = [];
-          const newInvalidSelections: string[] = [];
-          for (const selectedOption of newSelectedOptions) {
-            if (invalidSelections?.includes(selectedOption)) {
-              newInvalidSelections.push(selectedOption);
-              continue;
+            dispatch(clearValidAndInvalidSelections({}));
+          } else {
+            const { invalidSelections } = this.reduxEmbeddableTools.getState().componentState ?? {};
+            const newValidSelections: string[] = [];
+            const newInvalidSelections: string[] = [];
+            for (const selectedOption of newSelectedOptions) {
+              if (invalidSelections?.includes(selectedOption)) {
+                newInvalidSelections.push(selectedOption);
+                continue;
+              }
+              newValidSelections.push(selectedOption);
             }
-            newValidSelections.push(selectedOption);
+            dispatch(
+              setValidAndInvalidSelections({
+                validSelections: newValidSelections,
+                invalidSelections: newInvalidSelections,
+              })
+            );
           }
-          this.updateComponentState({
-            validSelections: newValidSelections,
-            invalidSelections: newInvalidSelections,
-          });
+          const newFilters = await this.buildFilter();
+          dispatch(publishFilters(newFilters));
         })
     );
   };
 
   private getCurrentDataViewAndField = async (): Promise<{
-    dataView: DataView;
-    field: DataViewField;
+    dataView?: DataView;
+    field?: OptionsListField;
   }> => {
-    const { dataViewId, fieldName } = this.getInput();
+    const {
+      dispatch,
+      getState,
+      actions: { setField, setDataViewId },
+    } = this.reduxEmbeddableTools;
+
+    const {
+      explicitInput: { dataViewId, fieldName, parentFieldName, childFieldName },
+    } = getState();
+
     if (!this.dataView || this.dataView.id !== dataViewId) {
-      this.dataView = await this.dataViewsService.get(dataViewId);
-      if (this.dataView === undefined) {
-        this.onFatalError(
-          new Error(OptionsListStrings.errors.getDataViewNotFoundError(dataViewId))
-        );
+      try {
+        this.dataView = await this.dataViewsService.get(dataViewId);
+        if (!this.dataView)
+          throw new Error(OptionsListStrings.errors.getDataViewNotFoundError(dataViewId));
+      } catch (e) {
+        this.onFatalError(e);
       }
-      this.updateOutput({ dataViews: [this.dataView] });
+
+      dispatch(setDataViewId(this.dataView?.id));
     }
 
-    if (!this.field || this.field.name !== fieldName) {
-      this.field = this.dataView.getFieldByName(fieldName);
-      if (this.field === undefined) {
-        this.onFatalError(new Error(OptionsListStrings.errors.getDataViewNotFoundError(fieldName)));
+    if (this.dataView && (!this.field || this.field.name !== fieldName)) {
+      try {
+        const originalField = this.dataView.getFieldByName(fieldName);
+        if (!originalField) {
+          throw new Error(OptionsListStrings.errors.getfieldNotFoundError(fieldName));
+        }
+
+        // pair up keyword / text fields for case insensitive search
+        const childField =
+          (childFieldName && this.dataView.getFieldByName(childFieldName)) || undefined;
+        const parentField =
+          (parentFieldName && this.dataView.getFieldByName(parentFieldName)) || undefined;
+        const textFieldName = childField?.esTypes?.includes('text')
+          ? childField.name
+          : parentField?.esTypes?.includes('text')
+          ? parentField.name
+          : undefined;
+
+        const optionsListField: OptionsListField = originalField.toSpec();
+        optionsListField.textFieldName = textFieldName;
+
+        this.field = optionsListField;
+      } catch (e) {
+        this.onFatalError(e);
       }
-      this.updateComponentState({ field: this.field });
+      dispatch(setField(this.field));
     }
 
     return { dataView: this.dataView, field: this.field! };
   };
 
-  private updateComponentState(changes: Partial<OptionsListComponentState>) {
-    this.componentState = {
-      ...this.componentState,
-      ...changes,
-    };
-    this.componentStateSubject$.next(this.componentState);
-  }
-
   private runOptionsListQuery = async () => {
-    this.updateComponentState({ loading: true });
+    const {
+      dispatch,
+      getState,
+      actions: { setLoading, updateQueryResults, publishFilters, setSearchString },
+    } = this.reduxEmbeddableTools;
+
+    const previousFieldName = this.field?.name;
     const { dataView, field } = await this.getCurrentDataViewAndField();
-    const { ignoreParentSettings, filters, query, selectedOptions, timeRange } = this.getInput();
+    if (!dataView || !field) return;
+
+    if (previousFieldName && field.name !== previousFieldName) {
+      dispatch(setSearchString(''));
+    }
+
+    const {
+      componentState: { searchString },
+      explicitInput: { selectedOptions, runPastTimeout },
+    } = getState();
+
+    dispatch(setLoading(true));
+
+    // need to get filters, query, ignoreParentSettings, and timeRange from input for inheritance
+    const { ignoreParentSettings, filters, query, timeRange } = this.getInput();
 
     if (this.abortController) this.abortController.abort();
     this.abortController = new AbortController();
@@ -226,50 +275,60 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       await this.optionsListService.runOptionsListRequest(
         {
           field,
+          query,
+          filters,
           dataView,
+          timeRange,
+          searchString,
+          runPastTimeout,
           selectedOptions,
-          searchString: this.searchString,
-          ...(ignoreParentSettings?.ignoreQuery ? {} : { query }),
-          ...(ignoreParentSettings?.ignoreFilters ? {} : { filters }),
-          ...(ignoreParentSettings?.ignoreTimerange ? {} : { timeRange }),
         },
         this.abortController.signal
       );
-
     if (!selectedOptions || isEmpty(invalidSelections) || ignoreParentSettings?.ignoreValidations) {
-      this.updateComponentState({
-        availableOptions: suggestions,
-        invalidSelections: undefined,
-        validSelections: selectedOptions,
-        totalCardinality,
-        loading: false,
-      });
-      return;
+      dispatch(
+        updateQueryResults({
+          availableOptions: suggestions,
+          invalidSelections: undefined,
+          validSelections: selectedOptions,
+          totalCardinality,
+        })
+      );
+    } else {
+      const valid: string[] = [];
+      const invalid: string[] = [];
+
+      for (const selectedOption of selectedOptions) {
+        if (invalidSelections?.includes(selectedOption)) invalid.push(selectedOption);
+        else valid.push(selectedOption);
+      }
+      dispatch(
+        updateQueryResults({
+          availableOptions: suggestions,
+          invalidSelections: invalid,
+          validSelections: valid,
+          totalCardinality,
+        })
+      );
     }
 
-    const valid: string[] = [];
-    const invalid: string[] = [];
-
-    for (const selectedOption of selectedOptions) {
-      if (invalidSelections?.includes(selectedOption)) invalid.push(selectedOption);
-      else valid.push(selectedOption);
-    }
-    this.updateComponentState({
-      availableOptions: suggestions,
-      invalidSelections: invalid,
-      validSelections: valid,
-      totalCardinality,
-      loading: false,
+    // publish filter
+    const newFilters = await this.buildFilter();
+    batch(() => {
+      dispatch(setLoading(false));
+      dispatch(publishFilters(newFilters));
     });
   };
 
   private buildFilter = async () => {
-    const { validSelections } = this.componentState;
+    const { getState } = this.reduxEmbeddableTools;
+    const { validSelections } = getState().componentState ?? {};
+
     if (!validSelections || isEmpty(validSelections)) {
-      this.updateOutput({ filters: [] });
-      return;
+      return [];
     }
     const { dataView, field } = await this.getCurrentDataViewAndField();
+    if (!dataView || !field) return;
 
     let newFilter: Filter;
     if (validSelections.length === 1) {
@@ -279,7 +338,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     }
 
     newFilter.meta.key = field?.name;
-    this.updateOutput({ filters: [newFilter] });
+    return [newFilter];
   };
 
   reload = () => {
@@ -290,20 +349,21 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     super.destroy();
     this.abortController?.abort();
     this.subscriptions.unsubscribe();
+    this.reduxEmbeddableTools.cleanup();
   };
 
   public render = (node: HTMLElement) => {
     if (this.node) {
       ReactDOM.unmountComponentAtNode(this.node);
     }
+    const { Wrapper: OptionsListReduxWrapper } = this.reduxEmbeddableTools;
     this.node = node;
     ReactDOM.render(
-      <OptionsListReduxWrapper embeddable={this} reducers={optionsListReducers}>
-        <OptionsListComponent
-          componentStateSubject={this.componentStateSubject$}
-          typeaheadSubject={this.typeaheadSubject}
-        />
-      </OptionsListReduxWrapper>,
+      <KibanaThemeProvider theme$={pluginServices.getServices().theme.theme$}>
+        <OptionsListReduxWrapper>
+          <OptionsListComponent typeaheadSubject={this.typeaheadSubject} />
+        </OptionsListReduxWrapper>
+      </KibanaThemeProvider>,
       node
     );
   };

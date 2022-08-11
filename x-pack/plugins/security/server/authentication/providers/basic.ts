@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from 'src/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 
 import { NEXT_URL_QUERY_STRING_PARAMETER } from '../../../common/constants';
 import { AuthenticationResult } from '../authentication_result';
@@ -80,7 +80,11 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
       const user = await this.getUser(request, authHeaders);
 
       this.logger.debug('Login has been successfully performed.');
-      return AuthenticationResult.succeeded(user, { authHeaders, state: authHeaders });
+      return AuthenticationResult.succeeded(user, {
+        userProfileGrant: { type: 'password', username, password },
+        authHeaders,
+        state: authHeaders,
+      });
     } catch (err) {
       this.logger.debug(`Failed to perform a login: ${err.message}`);
       return AuthenticationResult.failed(err);

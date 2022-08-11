@@ -6,7 +6,7 @@
  */
 
 import { TestScheduler } from 'rxjs/testing';
-import { ServiceStatusLevels } from '../../../../src/core/server';
+import { ServiceStatusLevels } from '@kbn/core/server';
 import { licenseMock } from '../common/licensing.mock';
 import { getPluginStatus$ } from './plugin_status';
 import { ILicense } from '../common/types';

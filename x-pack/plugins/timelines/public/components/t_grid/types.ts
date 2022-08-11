@@ -5,13 +5,4 @@
  * 2.0.
  */
 
-export type {
-  OnColumnSorted,
-  OnColumnsSorted,
-  OnColumnRemoved,
-  OnColumnResized,
-  OnChangePage,
-  OnRowSelected,
-  OnSelectAll,
-  OnUpdateColumns,
-} from '../../../common/types/timeline';
+export type { OnChangePage, OnRowSelected, OnSelectAll } from '../../../common/types/timeline';

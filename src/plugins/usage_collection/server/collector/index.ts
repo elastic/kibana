@@ -17,7 +17,6 @@ export type {
   CollectorOptions,
   CollectorFetchContext,
   CollectorFetchMethod,
-  CollectorOptionsFetchExtendedContext,
   ICollector as Collector,
 } from './types';
 export type { UsageCollectorOptions } from './usage_collector';

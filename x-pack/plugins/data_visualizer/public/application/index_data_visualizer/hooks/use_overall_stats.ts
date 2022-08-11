@@ -6,24 +6,27 @@
  */
 
 import { useCallback, useEffect, useState, useRef, useMemo, useReducer } from 'react';
-import { forkJoin, of, Subscription } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { from, Subscription, Observable } from 'rxjs';
+import { mergeMap, last, map, toArray } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
-import type { ToastsStart } from 'kibana/public';
+import type { ToastsStart } from '@kbn/core/public';
 import { chunk } from 'lodash';
+import type {
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  ISearchOptions,
+} from '@kbn/data-plugin/common';
 import { useDataVisualizerKibana } from '../../kibana_context';
 import {
   AggregatableFieldOverallStats,
   checkAggregatableFieldsExistRequest,
   checkNonAggregatableFieldExistsRequest,
+  isAggregatableFieldOverallStats,
+  isNonAggregatableFieldOverallStats,
+  NonAggregatableFieldOverallStats,
   processAggregatableFieldsExistResponse,
   processNonAggregatableFieldsExistResponse,
 } from '../search_strategy/requests/overall_stats';
-import type {
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
-  ISearchOptions,
-} from '../../../../../../../src/plugins/data/common';
 import type { OverallStats } from '../types/overall_stats';
 import { getDefaultPageState } from '../components/index_data_visualizer_view/index_data_visualizer_view';
 import { extractErrorProperties } from '../utils/error_utils';
@@ -31,13 +34,36 @@ import type {
   DataStatsFetchProgress,
   OverallStatsSearchStrategyParams,
 } from '../../../../common/types/field_stats';
-import {
-  getDocumentCountStatsRequest,
-  processDocumentCountStats,
-} from '../search_strategy/requests/get_document_stats';
+import { getDocumentCountStats } from '../search_strategy/requests/get_document_stats';
 import { getInitialProgress, getReducer } from '../progress_utils';
+import { MAX_CONCURRENT_REQUESTS } from '../constants/index_data_visualizer_viewer';
+import { DocumentCountStats } from '../../../../common/types/field_stats';
 
-function displayError(toastNotifications: ToastsStart, indexPattern: string, err: any) {
+/**
+ * Helper function to run forkJoin
+ * with restrictions on how many input observables can be subscribed to concurrently
+ */
+export function rateLimitingForkJoin<T>(
+  observables: Array<Observable<T>>,
+  maxConcurrentRequests = MAX_CONCURRENT_REQUESTS
+): Observable<T[]> {
+  return from(observables).pipe(
+    mergeMap(
+      (observable, index) =>
+        observable.pipe(
+          last(),
+          map((value) => ({ index, value }))
+        ),
+      maxConcurrentRequests
+    ),
+    toArray(),
+    map((indexedObservables) =>
+      indexedObservables.sort((l, r) => l.index - r.index).map((obs) => obs.value)
+    )
+  );
+}
+
+function displayError(toastNotifications: ToastsStart, index: string, err: any) {
   if (err.statusCode === 500) {
     toastNotifications.addError(err, {
       title: i18n.translate('xpack.dataVisualizer.index.dataLoader.internalServerErrorMessage', {
@@ -45,7 +71,7 @@ function displayError(toastNotifications: ToastsStart, indexPattern: string, err
           'Error loading data in index {index}. {message}. ' +
           'The request may have timed out. Try using a smaller sample size or narrowing the time range.',
         values: {
-          index: indexPattern,
+          index,
           message: err.error ?? err.message,
         },
       }),
@@ -55,7 +81,7 @@ function displayError(toastNotifications: ToastsStart, indexPattern: string, err
       title: i18n.translate('xpack.dataVisualizer.index.errorLoadingDataMessage', {
         defaultMessage: 'Error loading data in index {index}. {message}.',
         values: {
-          index: indexPattern,
+          index,
           message: err.error ?? err.message,
         },
       }),
@@ -65,7 +91,9 @@ function displayError(toastNotifications: ToastsStart, indexPattern: string, err
 
 export function useOverallStats<TParams extends OverallStatsSearchStrategyParams>(
   searchStrategyParams: TParams | undefined,
-  lastRefresh: number
+  lastRefresh: number,
+  browserSessionSeed: number,
+  probability?: number | null
 ): {
   progress: DataStatsFetchProgress;
   overallStats: OverallStats;
@@ -106,129 +134,131 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
       timeFieldName,
       earliest,
       latest,
-      intervalMs,
       runtimeFieldMap,
       samplerShardSize,
-      fieldsToFetch,
     } = searchStrategyParams;
 
     const searchOptions: ISearchOptions = {
       abortSignal: abortCtrl.current.signal,
       sessionId: searchStrategyParams?.sessionId,
     };
-    const nonAggregatableOverallStats$ =
-      nonAggregatableFields.length > 0
-        ? forkJoin(
-            nonAggregatableFields.map((fieldName: string) =>
-              data.search
-                .search<IKibanaSearchRequest, IKibanaSearchResponse>(
-                  {
-                    params: checkNonAggregatableFieldExistsRequest(
-                      index,
-                      searchQuery,
-                      fieldName,
-                      timeFieldName,
-                      earliest,
-                      latest,
-                      runtimeFieldMap
-                    ),
-                  },
-                  searchOptions
-                )
-                .pipe(
-                  switchMap((resp) => {
-                    return of({
-                      ...resp,
-                      rawResponse: { ...resp.rawResponse, fieldName },
-                    } as IKibanaSearchResponse);
-                  })
-                )
-            )
-          )
-        : of(undefined);
+
+    const nonAggregatableFieldsObs = nonAggregatableFields.map((fieldName: string) =>
+      data.search
+        .search<IKibanaSearchRequest, IKibanaSearchResponse>(
+          {
+            params: checkNonAggregatableFieldExistsRequest(
+              index,
+              searchQuery,
+              fieldName,
+              timeFieldName,
+              earliest,
+              latest,
+              runtimeFieldMap
+            ),
+          },
+          searchOptions
+        )
+        .pipe(
+          map((resp) => {
+            return {
+              ...resp,
+              rawResponse: { ...resp.rawResponse, fieldName },
+            } as IKibanaSearchResponse;
+          })
+        )
+    );
 
     // Have to divide into smaller requests to avoid 413 payload too large
     const aggregatableFieldsChunks = chunk(aggregatableFields, 30);
 
-    const aggregatableOverallStats$ = forkJoin(
-      aggregatableFields.length > 0
-        ? aggregatableFieldsChunks.map((aggregatableFieldsChunk) =>
-            data.search
-              .search(
-                {
-                  params: checkAggregatableFieldsExistRequest(
-                    index,
-                    searchQuery,
-                    aggregatableFieldsChunk,
-                    samplerShardSize,
-                    timeFieldName,
-                    earliest,
-                    latest,
-                    undefined,
-                    runtimeFieldMap
-                  ),
-                },
-                searchOptions
-              )
-              .pipe(
-                switchMap((resp) => {
-                  return of({
-                    ...resp,
-                    aggregatableFields: aggregatableFieldsChunk,
-                  } as AggregatableFieldOverallStats);
-                })
-              )
-          )
-        : of(undefined)
+    const aggregatableOverallStatsObs = aggregatableFieldsChunks.map((aggregatableFieldsChunk) =>
+      data.search
+        .search(
+          {
+            params: checkAggregatableFieldsExistRequest(
+              index,
+              searchQuery,
+              aggregatableFieldsChunk,
+              samplerShardSize,
+              timeFieldName,
+              earliest,
+              latest,
+              undefined,
+              runtimeFieldMap
+            ),
+          },
+          searchOptions
+        )
+        .pipe(
+          map((resp) => {
+            return {
+              ...resp,
+              aggregatableFields: aggregatableFieldsChunk,
+            } as AggregatableFieldOverallStats;
+          })
+        )
     );
 
-    const documentCountStats$ =
-      !fieldsToFetch && timeFieldName !== undefined && intervalMs !== undefined && intervalMs > 0
-        ? data.search.search(
-            {
-              params: getDocumentCountStatsRequest(searchStrategyParams),
-            },
-            searchOptions
+    const sub = rateLimitingForkJoin<
+      | DocumentCountStats
+      | AggregatableFieldOverallStats
+      | NonAggregatableFieldOverallStats
+      | undefined
+    >(
+      [
+        from(
+          getDocumentCountStats(
+            data.search,
+            searchStrategyParams,
+            searchOptions,
+            browserSessionSeed,
+            probability
           )
-        : of(undefined);
-    const sub = forkJoin({
-      documentCountStatsResp: documentCountStats$,
-      nonAggregatableOverallStatsResp: nonAggregatableOverallStats$,
-      aggregatableOverallStatsResp: aggregatableOverallStats$,
-    }).pipe(
-      switchMap(
-        ({
-          documentCountStatsResp,
-          nonAggregatableOverallStatsResp,
-          aggregatableOverallStatsResp,
-        }) => {
-          const aggregatableOverallStats = processAggregatableFieldsExistResponse(
-            aggregatableOverallStatsResp,
-            aggregatableFields,
-            samplerShardSize
-          );
-          const nonAggregatableOverallStats = processNonAggregatableFieldsExistResponse(
-            nonAggregatableOverallStatsResp,
-            nonAggregatableFields
-          );
-
-          return of({
-            documentCountStats: processDocumentCountStats(
-              documentCountStatsResp?.rawResponse,
-              searchStrategyParams
-            ),
-            ...nonAggregatableOverallStats,
-            ...aggregatableOverallStats,
-          });
-        }
-      )
+        ),
+        ...aggregatableOverallStatsObs,
+        ...nonAggregatableFieldsObs,
+      ],
+      MAX_CONCURRENT_REQUESTS
     );
 
     searchSubscription$.current = sub.subscribe({
-      next: (overallStats) => {
-        if (overallStats) {
-          setOverallStats(overallStats);
-        }
+      next: (value) => {
+        const aggregatableOverallStatsResp: AggregatableFieldOverallStats[] = [];
+        const nonAggregatableOverallStatsResp: NonAggregatableFieldOverallStats[] = [];
+        const documentCountStats = value[0] as DocumentCountStats;
+
+        value.forEach((resp, idx) => {
+          if (!resp || idx === 0) return;
+          if (isAggregatableFieldOverallStats(resp)) {
+            aggregatableOverallStatsResp.push(resp);
+          }
+
+          if (isNonAggregatableFieldOverallStats(resp)) {
+            nonAggregatableOverallStatsResp.push(resp);
+          }
+        });
+
+        const totalCount = documentCountStats?.totalCount ?? 0;
+
+        const aggregatableOverallStats = processAggregatableFieldsExistResponse(
+          aggregatableOverallStatsResp,
+          aggregatableFields,
+          samplerShardSize,
+          totalCount
+        );
+
+        const nonAggregatableOverallStats = processNonAggregatableFieldsExistResponse(
+          nonAggregatableOverallStatsResp,
+          nonAggregatableFields
+        );
+
+        setOverallStats({
+          documentCountStats,
+          ...nonAggregatableOverallStats,
+          ...aggregatableOverallStats,
+          totalCount,
+        });
       },
       error: (error) => {
         displayError(toasts, searchStrategyParams.index, extractErrorProperties(error));
@@ -244,7 +274,8 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
         });
       },
     });
-  }, [data.search, searchStrategyParams, toasts, lastRefresh]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data.search, searchStrategyParams, toasts, lastRefresh, probability]);
 
   const cancelFetch = useCallback(() => {
     searchSubscription$.current?.unsubscribe();

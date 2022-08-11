@@ -5,32 +5,50 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { CoreId } from '../server';
-import { PackageInfo, EnvironmentMode } from '../server/types';
+
+import { filter, firstValueFrom } from 'rxjs';
+import type { CoreContext } from '@kbn/core-base-browser-internal';
+import {
+  InjectedMetadataService,
+  type InjectedMetadataParams,
+  type InternalInjectedMetadataSetup,
+  type InternalInjectedMetadataStart,
+} from '@kbn/core-injected-metadata-browser-internal';
+import { DocLinksService } from '@kbn/core-doc-links-browser-internal';
+import { ThemeService } from '@kbn/core-theme-browser-internal';
+import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import { AnalyticsService } from '@kbn/core-analytics-browser-internal';
+import { I18nService } from '@kbn/core-i18n-browser-internal';
+import { ExecutionContextService } from '@kbn/core-execution-context-browser-internal';
+import type { FatalErrorsSetup } from '@kbn/core-fatal-errors-browser';
+import { FatalErrorsService } from '@kbn/core-fatal-errors-browser-internal';
+import { HttpService } from '@kbn/core-http-browser-internal';
+import { UiSettingsService } from '@kbn/core-ui-settings-browser-internal';
+import { DeprecationsService } from '@kbn/core-deprecations-browser-internal';
+import { IntegrationsService } from '@kbn/core-integrations-browser-internal';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import { OverlayService } from '@kbn/core-overlays-browser-internal';
+import { KBN_LOAD_MARKS } from '@kbn/core-mount-utils-browser-internal';
+import { SavedObjectsService } from '@kbn/core-saved-objects-browser-internal';
+import { NotificationsService } from '@kbn/core-notifications-browser-internal';
+import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
 import { CoreSetup, CoreStart } from '.';
 import { ChromeService } from './chrome';
-import { FatalErrorsService, FatalErrorsSetup } from './fatal_errors';
-import { HttpService } from './http';
-import { I18nService } from './i18n';
-import {
-  InjectedMetadataParams,
-  InjectedMetadataService,
-  InjectedMetadataSetup,
-  InjectedMetadataStart,
-} from './injected_metadata';
-import { NotificationsService } from './notifications';
-import { OverlayService } from './overlays';
 import { PluginsService } from './plugins';
-import { UiSettingsService } from './ui_settings';
 import { ApplicationService } from './application';
-import { DocLinksService } from './doc_links';
 import { RenderingService } from './rendering';
-import { SavedObjectsService } from './saved_objects';
-import { IntegrationsService } from './integrations';
-import { DeprecationsService } from './deprecations';
-import { ThemeService } from './theme';
 import { CoreApp } from './core_app';
 import type { InternalApplicationSetup, InternalApplicationStart } from './application/types';
+
+import {
+  LOAD_SETUP_DONE,
+  LOAD_START_DONE,
+  KIBANA_LOADED_EVENT,
+  LOAD_CORE_CREATED,
+  LOAD_FIRST_NAV,
+  LOAD_BOOTSTRAP_START,
+  LOAD_START,
+} from './events';
 
 interface Params {
   rootDomElement: HTMLElement;
@@ -39,24 +57,15 @@ interface Params {
 }
 
 /** @internal */
-export interface CoreContext {
-  coreId: CoreId;
-  env: {
-    mode: Readonly<EnvironmentMode>;
-    packageInfo: Readonly<PackageInfo>;
-  };
-}
-
-/** @internal */
 export interface InternalCoreSetup extends Omit<CoreSetup, 'application' | 'getStartServices'> {
   application: InternalApplicationSetup;
-  injectedMetadata: InjectedMetadataSetup;
+  injectedMetadata: InternalInjectedMetadataSetup;
 }
 
 /** @internal */
 export interface InternalCoreStart extends Omit<CoreStart, 'application'> {
   application: InternalApplicationStart;
-  injectedMetadata: InjectedMetadataStart;
+  injectedMetadata: InternalInjectedMetadataStart;
 }
 
 /**
@@ -68,6 +77,7 @@ export interface InternalCoreStart extends Omit<CoreStart, 'application'> {
  * @internal
  */
 export class CoreSystem {
+  private readonly analytics: AnalyticsService;
   private readonly fatalErrors: FatalErrorsService;
   private readonly injectedMetadata: InjectedMetadataService;
   private readonly notifications: NotificationsService;
@@ -87,6 +97,7 @@ export class CoreSystem {
   private readonly theme: ThemeService;
   private readonly rootDomElement: HTMLElement;
   private readonly coreContext: CoreContext;
+  private readonly executionContext: ExecutionContextService;
   private fatalErrorsSetup: FatalErrorsSetup | null = null;
 
   constructor(params: Params) {
@@ -100,6 +111,8 @@ export class CoreSystem {
       injectedMetadata,
     });
     this.coreContext = { coreId: Symbol('core'), env: injectedMetadata.env };
+
+    this.analytics = new AnalyticsService(this.coreContext);
 
     this.fatalErrors = new FatalErrorsService(rootDomElement, () => {
       // Stop Core before rendering any fatal errors into the DOM
@@ -121,9 +134,57 @@ export class CoreSystem {
     this.application = new ApplicationService();
     this.integrations = new IntegrationsService();
     this.deprecations = new DeprecationsService();
+    this.executionContext = new ExecutionContextService();
 
     this.plugins = new PluginsService(this.coreContext, injectedMetadata.uiPlugins);
     this.coreApp = new CoreApp(this.coreContext);
+
+    performance.mark(KBN_LOAD_MARKS, {
+      detail: LOAD_CORE_CREATED,
+    });
+  }
+
+  private getLoadMarksInfo(): Record<string, number> {
+    if (!performance) return {};
+    const reportData: Record<string, number> = {};
+    const marks = performance.getEntriesByName(KBN_LOAD_MARKS);
+    for (const mark of marks) {
+      reportData[(mark as PerformanceMark).detail] = mark.startTime;
+    }
+
+    return reportData;
+  }
+
+  private reportKibanaLoadedEvent(analytics: AnalyticsServiceStart) {
+    /**
+     * @deprecated here for backwards compatibility in FullStory
+     **/
+    analytics.reportEvent('Loaded Kibana', {
+      kibana_version: this.coreContext.env.packageInfo.version,
+      protocol: window.location.protocol,
+    });
+
+    const timing = this.getLoadMarksInfo();
+    reportPerformanceMetricEvent(analytics, {
+      eventName: KIBANA_LOADED_EVENT,
+      meta: {
+        kibana_version: this.coreContext.env.packageInfo.version,
+        protocol: window.location.protocol,
+        ...fetchOptionalMemoryInfo(),
+      },
+      duration: timing[LOAD_FIRST_NAV],
+      key1: LOAD_START,
+      value1: timing[LOAD_START],
+      key2: LOAD_BOOTSTRAP_START,
+      value2: timing[LOAD_BOOTSTRAP_START],
+      key3: LOAD_CORE_CREATED,
+      value3: timing[LOAD_CORE_CREATED],
+      key4: LOAD_SETUP_DONE,
+      value4: timing[LOAD_SETUP_DONE],
+      key5: LOAD_START_DONE,
+      value5: timing[LOAD_START_DONE],
+    });
+    performance.clearMarks(KBN_LOAD_MARKS);
   }
 
   public async setup() {
@@ -131,21 +192,34 @@ export class CoreSystem {
       // Setup FatalErrorsService and it's dependencies first so that we're
       // able to render any errors.
       const injectedMetadata = this.injectedMetadata.setup();
+      const theme = this.theme.setup({ injectedMetadata });
+
       this.fatalErrorsSetup = this.fatalErrors.setup({
         injectedMetadata,
+        theme,
         i18n: this.i18n.getContext(),
       });
       await this.integrations.setup();
       this.docLinks.setup();
-      const http = this.http.setup({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
+
+      const analytics = this.analytics.setup({ injectedMetadata });
+
+      this.registerLoadedKibanaEventType(analytics);
+
+      const executionContext = this.executionContext.setup({ analytics });
+      const http = this.http.setup({
+        injectedMetadata,
+        fatalErrors: this.fatalErrorsSetup,
+        executionContext,
+      });
       const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
       const notifications = this.notifications.setup({ uiSettings });
-      const theme = this.theme.setup({ injectedMetadata });
 
       const application = this.application.setup({ http });
       this.coreApp.setup({ application, http, injectedMetadata, notifications });
 
       const core: InternalCoreSetup = {
+        analytics,
         application,
         fatalErrors: this.fatalErrorsSetup,
         http,
@@ -153,10 +227,15 @@ export class CoreSystem {
         notifications,
         theme,
         uiSettings,
+        executionContext,
       };
 
       // Services that do not expose contracts at setup
       await this.plugins.setup(core);
+
+      performance.mark(KBN_LOAD_MARKS, {
+        detail: LOAD_SETUP_DONE,
+      });
 
       return { fatalErrors: this.fatalErrorsSetup };
     } catch (error) {
@@ -172,6 +251,7 @@ export class CoreSystem {
 
   public async start() {
     try {
+      const analytics = this.analytics.start();
       const injectedMetadata = await this.injectedMetadata.start();
       const uiSettings = await this.uiSettings.start();
       const docLinks = this.docLinks.start({ injectedMetadata });
@@ -201,6 +281,11 @@ export class CoreSystem {
         targetDomElement: notificationsTargetDomElement,
       });
       const application = await this.application.start({ http, theme, overlays });
+
+      const executionContext = this.executionContext.start({
+        curApp$: application.currentAppId$,
+      });
+
       const chrome = await this.chrome.start({
         application,
         docLinks,
@@ -213,9 +298,11 @@ export class CoreSystem {
       this.coreApp.start({ application, docLinks, http, notifications, uiSettings });
 
       const core: InternalCoreStart = {
+        analytics,
         application,
         chrome,
         docLinks,
+        executionContext,
         http,
         theme,
         savedObjects,
@@ -246,8 +333,21 @@ export class CoreSystem {
         targetDomElement: coreUiTargetDomElement,
       });
 
+      performance.mark(KBN_LOAD_MARKS, {
+        detail: LOAD_START_DONE,
+      });
+
+      // Wait for the first app navigation to report Kibana Loaded
+      firstValueFrom(application.currentAppId$.pipe(filter(Boolean))).then(() => {
+        performance.mark(KBN_LOAD_MARKS, {
+          detail: LOAD_FIRST_NAV,
+        });
+        this.reportKibanaLoadedEvent(analytics);
+      });
+
       return {
         application,
+        executionContext,
       };
     } catch (error) {
       if (this.fatalErrorsSetup) {
@@ -272,6 +372,28 @@ export class CoreSystem {
     this.application.stop();
     this.deprecations.stop();
     this.theme.stop();
+    this.analytics.stop();
     this.rootDomElement.textContent = '';
+  }
+
+  /**
+   * @deprecated
+   */
+  private registerLoadedKibanaEventType(analytics: AnalyticsServiceSetup) {
+    analytics.registerEventType({
+      eventType: 'Loaded Kibana',
+      schema: {
+        kibana_version: {
+          type: 'keyword',
+          _meta: { description: 'The version of Kibana' },
+        },
+        protocol: {
+          type: 'keyword',
+          _meta: {
+            description: 'Value from window.location.protocol',
+          },
+        },
+      },
+    });
   }
 }

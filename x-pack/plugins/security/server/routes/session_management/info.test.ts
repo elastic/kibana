@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { RequestHandler, RouteConfig } from '@kbn/core/server';
+import { kibanaResponseFactory } from '@kbn/core/server';
+import { httpServerMock } from '@kbn/core/server/mocks';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { RequestHandler, RouteConfig } from 'src/core/server';
-import { kibanaResponseFactory } from 'src/core/server';
-import { httpServerMock } from 'src/core/server/mocks';
 
 import { SESSION_EXPIRATION_WARNING_MS } from '../../../common/constants';
 import type { Session } from '../../session_management';

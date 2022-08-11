@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CoreSetup } from 'kibana/server';
-import { MigrateFunctionsObject } from '../../../../src/plugins/kibana_utils/common';
+import { CoreSetup } from '@kbn/core/server';
+import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { getEditPath } from '../common';
 import { getAllMigrations } from './migrations/saved_object_migrations';
 import { CustomVisualizationMigrations } from './migrations/types';

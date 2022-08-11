@@ -21,7 +21,7 @@ import {
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
   const authSpace1 = getAuthWithSuperUser();
 
@@ -31,17 +31,20 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should return a configuration in space1', async () => {
-      await createConfiguration(supertest, getConfigurationRequest(), 200, authSpace1);
-      const configuration = await getConfiguration({ supertest, auth: authSpace1 });
+      await createConfiguration(supertestWithoutAuth, getConfigurationRequest(), 200, authSpace1);
+      const configuration = await getConfiguration({
+        supertest: supertestWithoutAuth,
+        auth: authSpace1,
+      });
 
       const data = removeServerGeneratedPropertiesFromSavedObject(configuration[0]);
       expect(data).to.eql(getConfigurationOutput(false, { created_by: nullUser }));
     });
 
     it('should not find a configuration when looking in a different space', async () => {
-      await createConfiguration(supertest, getConfigurationRequest(), 200, authSpace1);
+      await createConfiguration(supertestWithoutAuth, getConfigurationRequest(), 200, authSpace1);
       const configuration = await getConfiguration({
-        supertest,
+        supertest: supertestWithoutAuth,
         auth: getAuthWithSuperUser('space2'),
       });
 

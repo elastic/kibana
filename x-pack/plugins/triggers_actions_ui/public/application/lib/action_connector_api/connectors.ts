@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { HttpSetup } from 'kibana/public';
-import { AsApiContract, RewriteRequestCase } from '../../../../../actions/common';
+import { HttpSetup } from '@kbn/core/public';
+import { AsApiContract, RewriteRequestCase } from '@kbn/actions-plugin/common';
 import { BASE_ACTION_API_PATH } from '../../constants';
 import type { ActionConnector, ActionConnectorProps } from '../../../types';
 
@@ -22,12 +22,14 @@ const transformConnector: RewriteRequestCase<
 > = ({
   connector_type_id: actionTypeId,
   is_preconfigured: isPreconfigured,
+  is_deprecated: isDeprecated,
   referenced_by_count: referencedByCount,
   is_missing_secrets: isMissingSecrets,
   ...res
 }) => ({
   actionTypeId,
   isPreconfigured,
+  isDeprecated,
   referencedByCount,
   isMissingSecrets,
   ...res,

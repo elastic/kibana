@@ -2,14 +2,6 @@
 # Import shared settings first so we can override below
 import %workspace%/.bazelrc.common
 
-# Remote cache settings for local env
-# build --remote_cache=grpcs://cloud.buildbuddy.io
-# build --incompatible_remote_results_ignore_disk=true
-# build --noremote_upload_local_results
-# build --remote_timeout=30
-# build --remote_header=x-buildbuddy-api-key=3EYk49W2NefOx2n3yMze
-# build --remote_accept_cached=true
-
 # Enable this in case you want to share your build info
 # build --build_metadata=VISIBILITY=PUBLIC
 build --build_metadata=TEST_GROUPS=//packages

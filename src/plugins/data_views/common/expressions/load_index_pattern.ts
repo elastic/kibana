@@ -7,16 +7,26 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import { SavedObjectReference } from '@kbn/core/types';
 import { DataViewsContract } from '../data_views';
 import { DataViewSpec } from '..';
-import { SavedObjectReference } from '../../../../core/types';
 
 const name = 'indexPatternLoad';
 const type = 'index_pattern';
 
+/**
+ * Index pattern expression interface
+ * @public
+ */
 export interface IndexPatternExpressionType {
+  /**
+   * Expression type
+   */
   type: typeof type;
+  /**
+   * Value - DataViewSpec
+   */
   value: DataViewSpec;
 }
 

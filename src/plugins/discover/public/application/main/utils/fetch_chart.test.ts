@@ -6,14 +6,13 @@
  * Side Public License, v 1.
  */
 import { of, throwError as throwErrorRx } from 'rxjs';
-import { RequestAdapter } from '../../../../../inspector';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { savedSearchMockWithTimeField } from '../../../__mocks__/saved_search';
 import { fetchChart, updateSearchSource } from './fetch_chart';
-import { ReduxLikeStateContainer } from '../../../../../kibana_utils/common';
+import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
 import { AppState } from '../services/discover_state';
 import { discoverServiceMock } from '../../../__mocks__/services';
-import { calculateBounds, IKibanaSearchResponse } from '../../../../../data/common';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { calculateBounds } from '@kbn/data-plugin/public';
 import { FetchDeps } from './fetch_all';
 
 function getDeps() {
@@ -62,7 +61,7 @@ const requestResult = {
   total: 1,
   loaded: 1,
   isRestored: false,
-} as unknown as IKibanaSearchResponse<estypes.SearchResponse<unknown>>;
+};
 
 describe('test fetchCharts', () => {
   test('updateSearchSource helper function', () => {
@@ -76,7 +75,9 @@ describe('test fetchCharts', () => {
         Object {
           "enabled": true,
           "id": "1",
-          "params": Object {},
+          "params": Object {
+            "emptyAsNull": false,
+          },
           "schema": "metric",
           "type": "count",
         },
@@ -85,6 +86,7 @@ describe('test fetchCharts', () => {
           "id": "2",
           "params": Object {
             "drop_partials": false,
+            "extendToTimeRange": false,
             "extended_bounds": Object {},
             "field": "timestamp",
             "interval": "auto",
@@ -110,14 +112,15 @@ describe('test fetchCharts', () => {
   });
 
   test('rejects promise on query failure', async () => {
-    savedSearchMockWithTimeField.searchSource.fetch$ = () => throwErrorRx({ msg: 'Oh noes!' });
+    savedSearchMockWithTimeField.searchSource.fetch$ = () =>
+      throwErrorRx(() => new Error('Oh noes!'));
 
-    await expect(fetchChart(savedSearchMockWithTimeField.searchSource, getDeps())).rejects.toEqual({
-      msg: 'Oh noes!',
-    });
+    await expect(fetchChart(savedSearchMockWithTimeField.searchSource, getDeps())).rejects.toEqual(
+      new Error('Oh noes!')
+    );
   });
 
-  test('fetch$ is called with execution context containing savedSearch id', async () => {
+  test('fetch$ is called with request specific execution context', async () => {
     const fetch$Mock = jest.fn().mockReturnValue(of(requestResult));
 
     savedSearchMockWithTimeField.searchSource.fetch$ = fetch$Mock;
@@ -126,10 +129,6 @@ describe('test fetchCharts', () => {
     expect(fetch$Mock.mock.calls[0][0].executionContext).toMatchInlineSnapshot(`
       Object {
         "description": "fetch chart data and total hits",
-        "id": "the-saved-search-id-with-timefield",
-        "name": "discover",
-        "type": "application",
-        "url": "/",
       }
     `);
   });

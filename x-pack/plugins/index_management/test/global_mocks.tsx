@@ -11,8 +11,8 @@ import React from 'react';
 // is imported. Typically this means just importing above your other imports.
 // See https://jestjs.io/docs/manual-mocks for more info.
 
-jest.mock('../../../../src/plugins/es_ui_shared/public', () => {
-  const original = jest.requireActual('../../../../src/plugins/es_ui_shared/public');
+jest.mock('@kbn/es-ui-shared-plugin/public', () => {
+  const original = jest.requireActual('@kbn/es-ui-shared-plugin/public');
 
   return {
     ...original,

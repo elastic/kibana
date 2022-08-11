@@ -1,12 +1,12 @@
 # Event Log
 
 The event log plugin provides a persistent history of alerting and action
-actitivies.
+activities.
 
 ## Overview
 
 This plugin provides a persistent log of "events" that can be used by other
-plugins to record their processing, for later accces. It is used by:
+plugins to record their processing for later access. It is used by:
 
 - `alerting` and `actions` plugins
 - [work in progress] `security_solution` (detection rules execution log)
@@ -29,6 +29,7 @@ A client API is available for other plugins to:
 - register the events they want to write
 - write the events, with helpers for `duration` calculation, etc
 - query the events
+- aggregate the events
 
 HTTP APIs are also available to query the events.
 
@@ -132,7 +133,7 @@ Below is a document in the expected structure, with descriptions of the fields:
       schedule_delay: "delay in nanoseconds between when this task was supposed to start and when it actually started",
     },
     alerting: {
-      instance_id: "alert instance id, for relevant documents",
+      instance_id: "alert id, for relevant documents",
       action_group_id: "alert action group, for relevant documents",
       action_subgroup: "alert action subgroup, for relevant documents",
       status: "overall alert status, after rule  execution",
@@ -142,9 +143,27 @@ Below is a document in the expected structure, with descriptions of the fields:
         rel: "'primary' | undefined; see below",
         namespace: "${spaceId} | undefined",
         id: "saved object id",
-        type: " saved object type",
+        type: "saved object type",
+        type_id: "rule type id if saved object type is "alert"",
       },
     ],
+    alert: {
+      rule: {
+        rule_type_id: "rule type id",
+        consumer: "rule consumer",
+        execution: {
+          uuid: "UUID of current rule execution cycle",
+          metrics: {
+            number_of_triggered_actions: "number of actions scheduled for execution during current rule execution cycle",
+            number_of_searches: "number of ES queries issued during current rule execution cycle",
+            es_search_duration_ms: "total time spent performing ES searches as measured by Elasticsearch",
+            total_search_duration_ms: "total time spent performing ES searches as measured by Kibana; includes network latency and time spent serializing/deserializing request/response",
+            total_indexing_duration_ms: "total time spent indexing documents during current rule execution cycle",
+            execution_gap_duration_s: "duration in seconds of execution gap"
+          }
+        }
+      }
+    },
     version: "7.15.0"
   },
 }
@@ -174,13 +193,13 @@ plugins:
 For the `saved_objects` array elements, these are references to saved objects
 associated with the event.  For the `alerting` provider, those are rule saved
 ojects and for the `actions` provider those are connector saved objects.  The 
-`alerts:execute-action` event includes both the rule and connector saved object
+`alerting:execute-action` event includes both the rule and connector saved object
 references.  For that event, only the rule reference has the optional `rel`
 property with a `primary` value.  This property is used when searching the
 event log to indicate which saved objects should be directly searchable via 
-saved object references.  For the `alerts:execute-action` event, only searching 
+saved object references.  For the `alerting:execute-action` event, only searching 
 via the rule saved object reference will return the event; searching via the
-connector save object reference will **NOT** return the event.  The 
+connector saved object reference will **NOT** return the event.  The 
 `actions:execute` event also includes both the rule and connector saved object
 references, and both of them have the `rel` property with a `primary` value,
 allowing those events to be returned in searches of either the rule or 
@@ -202,7 +221,7 @@ and `index.lifecycle.*` properties.
 
 For ad-hoc diagnostic purposes, your go to tools are Discover and Lens. Your
 user will need to have access to the index, which is considered a Kibana
-system index due to it's prefix.
+system index due to its prefix.
 
 Add the event log index as a data view.  The only customization needed is
 to set the `event.duration` field to a duration in nanoseconds.  You'll
@@ -217,7 +236,7 @@ to target a space other than the default space.
 Usage of the event log allows you to retrieve the events for a given saved object type by the specified set of IDs.
 The following API is experimental and can change or be removed in a future release.
 
-### `GET /api/event_log/{type}/{id}/_find`: Get events for a given saved object type by the ID
+### `GET /internal/event_log/{type}/{id}/_find`: Get events for a given saved object type by the ID
 
 Collects event information from the event log for the selected saved object by type and ID.
 
@@ -234,8 +253,7 @@ Query:
 |---|---|---|
 |page|The page number.|number|
 |per_page|The number of events to return per page.|number|
-|sort_field|Sorts the response. Could be an event fields returned in the response.|string|
-|sort_order|Sort direction, either `asc` or `desc`.|string|
+|sort|Array of sort fields and order for the response. Each sort object specifies `sort_field` and `sort_order` where `sort_order` is either `asc` or `desc`.|object|
 |filter|A KQL string that you filter with an attribute from the event. It should look like `event.action:(execute)`.|string|
 |start|The date to start looking for saved object events in the event log. Either an ISO date string, or a duration string that indicates the time since now.|string|
 |end|The date to stop looking for saved object events in the event log. Either an ISO date string, or a duration string that indicates the time since now.|string|
@@ -244,7 +262,7 @@ Response body:
 
 See `QueryEventsBySavedObjectResult` in the Plugin Client APIs below.
 
-### `POST /api/event_log/{type}/_find`: Retrive events for a given saved object type by the IDs
+### `POST /internal/event_log/{type}/_find`: Retrive events for a given saved object type by the IDs
 
 Collects event information from the event log for the selected saved object by type and by IDs.
 
@@ -260,8 +278,7 @@ Query:
 |---|---|---|
 |page|The page number.|number|
 |per_page|The number of events to return per page.|number|
-|sort_field|Sorts the response. Could be an event field returned in the response.|string|
-|sort_order|Sort direction, either `asc` or `desc`.|string|
+|sort|Array of sort fields and order for the response. Each sort object specifies `sort_field` and `sort_order` where `sort_order` is either `asc` or `desc`.|object|
 |filter|A KQL string that you filter with an attribute from the event. It should look like `event.action:(execute)`.|string|
 |start|The date to start looking for saved object events in the event log. Either an ISO date string, or a duration string that indicates the time since now.|string|
 |end|The date to stop looking for saved object events in the event log. Either an ISO date string, or a duration string that indicates the time since now.|string|
@@ -288,6 +305,12 @@ interface EventLogClient {
     options?: Partial<FindOptionsType>,
     legacyIds?: string[]
   ): Promise<QueryEventsBySavedObjectResult>;
+  aggregateEventsBySavedObjectIds(
+    type: string,
+    ids: string[],
+    options?: Partial<AggregateOptionsType>,
+    legacyIds?: string[]
+  ): Promise<AggregateEventsBySavedObjectResult>;
 }
 
 interface FindOptionsType { /* typed version of HTTP query parameters ^^^ */ }
@@ -297,6 +320,17 @@ interface QueryEventsBySavedObjectResult {
   per_page: number;
   total: number;
   data: Event[];
+}
+
+interface AggregateOptionsType {
+  start?: Date,
+  end?: Date,
+  filter?: string;
+  aggs: Record<string, estypes.AggregationsAggregationContainer>;
+}
+
+interface AggregateEventsBySavedObjectResult {
+  aggregations: Record<string, estypes.AggregationsAggregate> | undefined;
 }
 ```
 
@@ -409,6 +443,12 @@ export interface IEventLogClient {
     options?: Partial<FindOptionsType>,
     legacyIds?: string[]
   ): Promise<QueryEventsBySavedObjectResult>;
+  aggregateEventsBySavedObjectIds(
+    type: string,
+    ids: string[],
+    options?: Partial<AggregateOptionsType>,
+    legacyIds?: string[]
+  ): Promise<AggregateEventsBySavedObjectResult>;
 }
 ```
 

@@ -15,7 +15,7 @@ import { Globals } from '../../static_globals';
 
 interface GetLogstashPipelineIdsParams {
   req: LegacyRequest;
-  clusterUuid: string;
+  clusterUuid?: string;
   size: number;
   logstashUuid?: string;
   ccs?: string;

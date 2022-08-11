@@ -15,8 +15,8 @@ import { getConfigPath } from '@kbn/utils';
 import {
   ElasticsearchService,
   EnrollResult,
-} from '../plugins/interactive_setup/server/elasticsearch_service';
-import { getDetailedErrorMessage } from '../plugins/interactive_setup/server/errors';
+} from '@kbn/interactive-setup-plugin/server/elasticsearch_service';
+import { getDetailedErrorMessage } from '@kbn/interactive-setup-plugin/server/errors';
 import {
   promptToken,
   getCommand,

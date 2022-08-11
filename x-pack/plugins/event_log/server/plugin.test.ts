@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart } from 'src/core/server';
-import { coreMock } from 'src/core/server/mocks';
-import { IEventLogService } from './index';
+import { CoreSetup, CoreStart } from '@kbn/core/server';
+import { coreMock } from '@kbn/core/server/mocks';
+import { IEventLogService } from '.';
 import { Plugin } from './plugin';
-import { spacesMock } from '../../spaces/server/mocks';
+import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 
 describe('event_log plugin', () => {
   it('can setup and start', () => {

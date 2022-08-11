@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-jest.mock('./assign_bundles_to_workers.ts');
-jest.mock('./kibana_platform_plugins.ts');
-jest.mock('./get_plugin_bundles.ts');
-jest.mock('../common/theme_tags.ts');
-jest.mock('./filter_by_id.ts');
+jest.mock('./assign_bundles_to_workers');
+jest.mock('./kibana_platform_plugins');
+jest.mock('./get_plugin_bundles');
+jest.mock('../common/theme_tags');
+jest.mock('./filter_by_id');
 jest.mock('./focus_bundles');
-jest.mock('../limits.ts');
+jest.mock('../limits');
 
 jest.mock('os', () => {
   const realOs = jest.requireActual('os');
@@ -24,7 +24,7 @@ jest.mock('os', () => {
 
 import Path from 'path';
 import { REPO_ROOT } from '@kbn/utils';
-import { createAbsolutePathSerializer } from '@kbn/dev-utils';
+import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
 
 import { OptimizerConfig, ParsedOptions } from './optimizer_config';
 import { parseThemeTags } from '../common';
@@ -381,15 +381,15 @@ describe('OptimizerConfig::parseOptions()', () => {
  */
 describe('OptimizerConfig::create()', () => {
   const assignBundlesToWorkers: jest.Mock = jest.requireMock(
-    './assign_bundles_to_workers.ts'
+    './assign_bundles_to_workers'
   ).assignBundlesToWorkers;
   const findKibanaPlatformPlugins: jest.Mock = jest.requireMock(
-    './kibana_platform_plugins.ts'
+    './kibana_platform_plugins'
   ).findKibanaPlatformPlugins;
-  const getPluginBundles: jest.Mock = jest.requireMock('./get_plugin_bundles.ts').getPluginBundles;
-  const filterById: jest.Mock = jest.requireMock('./filter_by_id.ts').filterById;
+  const getPluginBundles: jest.Mock = jest.requireMock('./get_plugin_bundles').getPluginBundles;
+  const filterById: jest.Mock = jest.requireMock('./filter_by_id').filterById;
   const focusBundles: jest.Mock = jest.requireMock('./focus_bundles').focusBundles;
-  const readLimits: jest.Mock = jest.requireMock('../limits.ts').readLimits;
+  const readLimits: jest.Mock = jest.requireMock('../limits').readLimits;
 
   beforeEach(() => {
     if ('mock' in OptimizerConfig.parseOptions) {

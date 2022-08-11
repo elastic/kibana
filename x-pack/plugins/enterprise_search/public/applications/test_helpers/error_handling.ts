@@ -7,8 +7,8 @@
 
 import { mockFlashMessageHelpers } from '../__mocks__/kea_logic';
 
+import { HttpHandler } from '@kbn/core/public';
 import { nextTick } from '@kbn/test-jest-helpers';
-import { HttpHandler } from 'src/core/public';
 
 export const itShowsServerErrorAsFlashMessage = (httpMethod: HttpHandler, callback: () => void) => {
   const { flashAPIErrors } = mockFlashMessageHelpers;

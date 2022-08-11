@@ -19,7 +19,7 @@ export interface EnginesTableProps {
     pageIndex: number;
     pageSize: number;
     totalItemCount: number;
-    hidePerPageOptions: boolean;
+    showPerPageOptions: boolean;
   };
   onChange(criteria: CriteriaWithPagination<EngineDetails>): void;
 }

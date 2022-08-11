@@ -9,8 +9,12 @@ import { JsonObject } from '@kbn/utility-types';
 import expect from '@kbn/expect';
 import { ALERT_UUID, ALERT_RULE_CONSUMER } from '@kbn/rule-data-utils';
 
+import { TimelineEdges, TimelineNonEcsData } from '@kbn/timelines-plugin/common';
+import {
+  Direction,
+  TimelineEventsQueries,
+} from '@kbn/security-solution-plugin/common/search_strategy';
 import { User } from '../../../../rule_registry/common/lib/authentication/types';
-import { TimelineEdges, TimelineNonEcsData } from '../../../../../plugins/timelines/common/';
 import { getSpaceUrlPrefix } from '../../../../rule_registry/common/lib/authentication/spaces';
 
 import {
@@ -33,10 +37,6 @@ import {
   secOnlySpacesAll,
   noKibanaPrivileges,
 } from '../../../../rule_registry/common/lib/authentication/users';
-import {
-  Direction,
-  TimelineEventsQueries,
-} from '../../../../../plugins/security_solution/common/search_strategy';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 interface TestCase {

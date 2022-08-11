@@ -44,7 +44,7 @@ export const AppLogic = kea<MakeLogicType<AppValues, AppActions, Required<Initia
   selectors: {
     myRole: [
       (selectors) => [selectors.account, LicensingLogic.selectors.hasPlatinumLicense],
-      ({ role }, hasPlatinumLicense) => (role ? getRoleAbilities(role, hasPlatinumLicense) : {}),
+      ({ role }) => (role ? getRoleAbilities(role) : {}),
     ],
   },
 });

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ReportingStart } from '../../../../reporting/public';
-import { CanvasServiceFactory } from './';
+import { ReportingStart } from '@kbn/reporting-plugin/public';
+import { CanvasServiceFactory } from '.';
 
 export interface ReportingService {
   start?: ReportingStart;

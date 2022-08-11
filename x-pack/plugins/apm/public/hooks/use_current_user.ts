@@ -6,9 +6,9 @@
  */
 
 import { useState, useEffect } from 'react';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 import { ApmPluginStartDeps } from '../plugin';
-import { AuthenticatedUser } from '../../../security/common/model';
 
 export function useCurrentUser() {
   const {

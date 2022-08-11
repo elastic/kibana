@@ -16,10 +16,9 @@ export async function getFailedTransactionRatePeriods({
   transactionName,
   setup,
   searchAggregatedTransactions,
-  comparisonStart,
-  comparisonEnd,
   start,
   end,
+  offset,
 }: {
   environment: string;
   kuery: string;
@@ -28,10 +27,9 @@ export async function getFailedTransactionRatePeriods({
   transactionName?: string;
   setup: Setup;
   searchAggregatedTransactions: boolean;
-  comparisonStart?: number;
-  comparisonEnd?: number;
   start: number;
   end: number;
+  offset?: string;
 }) {
   const commonProps = {
     environment,
@@ -49,14 +47,14 @@ export async function getFailedTransactionRatePeriods({
     end,
   });
 
-  const previousPeriodPromise =
-    comparisonStart && comparisonEnd
-      ? getFailedTransactionRate({
-          ...commonProps,
-          start: comparisonStart,
-          end: comparisonEnd,
-        })
-      : { timeseries: [], average: null };
+  const previousPeriodPromise = offset
+    ? getFailedTransactionRate({
+        ...commonProps,
+        start,
+        end,
+        offset,
+      })
+    : { timeseries: [], average: null };
 
   const [currentPeriod, previousPeriod] = await Promise.all([
     currentPeriodPromise,

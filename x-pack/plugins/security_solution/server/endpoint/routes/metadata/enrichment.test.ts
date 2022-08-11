@@ -5,19 +5,29 @@
  * 2.0.
  */
 
+import { coreMock } from '@kbn/core/server/mocks';
 import { HostStatus } from '../../../../common/endpoint/types';
 import { createMockMetadataRequestContext } from '../../mocks';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
-import { enrichHostMetadata, MetadataRequestContext } from './handlers';
-import { AgentClient } from '../../../../../fleet/server';
+import type { MetadataRequestContext } from './handlers';
+import { enrichHostMetadata } from './handlers';
+import type { AgentClient } from '@kbn/fleet-plugin/server';
 
 describe('test document enrichment', () => {
-  let metaReqCtx: jest.Mocked<MetadataRequestContext>;
+  let metaReqCtx: ReturnType<typeof createMockMetadataRequestContext>;
   const docGen = new EndpointDocGenerator();
 
   beforeEach(() => {
     metaReqCtx = createMockMetadataRequestContext();
   });
+
+  const getMetadataRequestContext = () =>
+    ({
+      ...metaReqCtx,
+      requestHandlerContext: coreMock.createCustomRequestHandlerContext(
+        metaReqCtx.requestHandlerContext
+      ),
+    } as unknown as MetadataRequestContext);
 
   describe('host status enrichment', () => {
     let statusFn: jest.Mock;
@@ -32,49 +42,70 @@ describe('test document enrichment', () => {
     it('should return host healthy for online agent', async () => {
       statusFn.mockImplementation(() => 'online');
 
-      const enrichedHostList = await enrichHostMetadata(docGen.generateHostMetadata(), metaReqCtx);
+      const enrichedHostList = await enrichHostMetadata(
+        docGen.generateHostMetadata(),
+        getMetadataRequestContext()
+      );
       expect(enrichedHostList.host_status).toEqual(HostStatus.HEALTHY);
     });
 
     it('should return host offline for offline agent', async () => {
       statusFn.mockImplementation(() => 'offline');
 
-      const enrichedHostList = await enrichHostMetadata(docGen.generateHostMetadata(), metaReqCtx);
+      const enrichedHostList = await enrichHostMetadata(
+        docGen.generateHostMetadata(),
+        getMetadataRequestContext()
+      );
       expect(enrichedHostList.host_status).toEqual(HostStatus.OFFLINE);
     });
 
     it('should return host updating for unenrolling agent', async () => {
       statusFn.mockImplementation(() => 'unenrolling');
 
-      const enrichedHostList = await enrichHostMetadata(docGen.generateHostMetadata(), metaReqCtx);
+      const enrichedHostList = await enrichHostMetadata(
+        docGen.generateHostMetadata(),
+        getMetadataRequestContext()
+      );
       expect(enrichedHostList.host_status).toEqual(HostStatus.UPDATING);
     });
 
     it('should return host unhealthy for degraded agent', async () => {
       statusFn.mockImplementation(() => 'degraded');
 
-      const enrichedHostList = await enrichHostMetadata(docGen.generateHostMetadata(), metaReqCtx);
+      const enrichedHostList = await enrichHostMetadata(
+        docGen.generateHostMetadata(),
+        getMetadataRequestContext()
+      );
       expect(enrichedHostList.host_status).toEqual(HostStatus.UNHEALTHY);
     });
 
     it('should return host unhealthy for erroring agent', async () => {
       statusFn.mockImplementation(() => 'error');
 
-      const enrichedHostList = await enrichHostMetadata(docGen.generateHostMetadata(), metaReqCtx);
+      const enrichedHostList = await enrichHostMetadata(
+        docGen.generateHostMetadata(),
+        getMetadataRequestContext()
+      );
       expect(enrichedHostList.host_status).toEqual(HostStatus.UNHEALTHY);
     });
 
     it('should return host unhealthy for warning agent', async () => {
       statusFn.mockImplementation(() => 'warning');
 
-      const enrichedHostList = await enrichHostMetadata(docGen.generateHostMetadata(), metaReqCtx);
+      const enrichedHostList = await enrichHostMetadata(
+        docGen.generateHostMetadata(),
+        getMetadataRequestContext()
+      );
       expect(enrichedHostList.host_status).toEqual(HostStatus.UNHEALTHY);
     });
 
     it('should return host unhealthy for invalid agent', async () => {
       statusFn.mockImplementation(() => 'asliduasofb');
 
-      const enrichedHostList = await enrichHostMetadata(docGen.generateHostMetadata(), metaReqCtx);
+      const enrichedHostList = await enrichHostMetadata(
+        docGen.generateHostMetadata(),
+        getMetadataRequestContext()
+      );
       expect(enrichedHostList.host_status).toEqual(HostStatus.UNHEALTHY);
     });
   });
@@ -109,7 +140,10 @@ describe('test document enrichment', () => {
         };
       });
 
-      const enrichedHostList = await enrichHostMetadata(docGen.generateHostMetadata(), metaReqCtx);
+      const enrichedHostList = await enrichHostMetadata(
+        docGen.generateHostMetadata(),
+        getMetadataRequestContext()
+      );
       expect(enrichedHostList.policy_info).toBeDefined();
       expect(enrichedHostList.policy_info?.agent.applied.id).toEqual(policyID);
       expect(enrichedHostList.policy_info?.agent.applied.revision).toEqual(policyRev);
@@ -125,7 +159,10 @@ describe('test document enrichment', () => {
         };
       });
 
-      const enrichedHostList = await enrichHostMetadata(docGen.generateHostMetadata(), metaReqCtx);
+      const enrichedHostList = await enrichHostMetadata(
+        docGen.generateHostMetadata(),
+        getMetadataRequestContext()
+      );
       expect(enrichedHostList.policy_info).toBeDefined();
       expect(enrichedHostList.policy_info?.agent.configured.id).toEqual(policyID);
       expect(enrichedHostList.policy_info?.agent.configured.revision).toEqual(policyRev);
@@ -146,7 +183,10 @@ describe('test document enrichment', () => {
         };
       });
 
-      const enrichedHostList = await enrichHostMetadata(docGen.generateHostMetadata(), metaReqCtx);
+      const enrichedHostList = await enrichHostMetadata(
+        docGen.generateHostMetadata(),
+        getMetadataRequestContext()
+      );
       expect(enrichedHostList.policy_info).toBeDefined();
       expect(enrichedHostList.policy_info?.endpoint.id).toEqual(policyID);
       expect(enrichedHostList.policy_info?.endpoint.revision).toEqual(policyRev);

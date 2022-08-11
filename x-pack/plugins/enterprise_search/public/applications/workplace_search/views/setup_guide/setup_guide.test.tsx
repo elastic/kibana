@@ -12,7 +12,7 @@ import { shallow } from 'enzyme';
 import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SetupGuideLayout } from '../../../shared/setup_guide';
 
-import { SetupGuide } from './';
+import { SetupGuide } from '.';
 
 describe('SetupGuide', () => {
   it('renders', () => {

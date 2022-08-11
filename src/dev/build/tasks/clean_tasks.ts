@@ -7,7 +7,7 @@
  */
 
 import minimatch from 'minimatch';
-
+import { discoverBazelPackages } from '@kbn/bazel-packages';
 import { deleteAll, deleteEmptyFolders, scanDelete, Task, GlobalTask } from '../lib';
 
 export const Clean: GlobalTask = {
@@ -26,14 +26,11 @@ export const Clean: GlobalTask = {
   },
 };
 
-export const CleanPackages: Task = {
-  description: 'Cleaning source for packages that are now installed in node_modules',
+export const CleanPackageManagerRelatedFiles: Task = {
+  description: 'Cleaning package manager related files from the build folder',
 
   async run(config, log, build) {
-    await deleteAll(
-      [build.resolvePath('packages'), build.resolvePath('yarn.lock'), build.resolvePath('.npmrc')],
-      log
-    );
+    await deleteAll([build.resolvePath('yarn.lock'), build.resolvePath('.npmrc')], log);
   },
 };
 
@@ -74,6 +71,12 @@ export const CleanExtraFilesFromModules: Task = {
       '**/CONTRIBUTING.md',
       '**/Contributing.md',
       '**/contributing.md',
+      '**/README.md',
+      '**/readme.md',
+      '**/README.markdown',
+      '**/readme.markdown',
+      '**/README',
+
       '**/History.md',
       '**/HISTORY.md',
       '**/history.md',
@@ -89,16 +92,27 @@ export const CleanExtraFilesFromModules: Task = {
 
       // bins
       '**/.bin',
+      '**/bin',
 
       // linters
       '**/.eslintrc',
       '**/.eslintrc.js',
       '**/.eslintrc.yml',
+      '**/.eslintrc.json',
+      '**/.eslintignore',
+      '**/.jshintignore',
       '**/.prettierrc',
+      '**/.prettierrc.js',
+      '**/.prettierrc.yaml',
+      '**/.prettierrc.yml',
       '**/.jshintrc',
       '**/.babelrc',
+      '**/.babelrc.js',
       '**/.jscs.json',
       '**/.lint',
+      '**/.jscsrc',
+      '**/.nycrc',
+      '**/.taprc',
 
       // hints
       '**/*.flow',
@@ -120,25 +134,36 @@ export const CleanExtraFilesFromModules: Task = {
       '**/*.sass',
       '**/.ts',
       '**/.tsx',
+      '**/.tsbuildinfo',
 
       // editors
       '**/.editorconfig',
       '**/.vscode',
+      '**/.idea',
 
       // git
+      '**/.git',
+      '**/.github',
       '**/.gitattributes',
       '**/.gitkeep',
       '**/.gitempty',
       '**/.gitmodules',
       '**/.keep',
       '**/.empty',
+      '**/.patch',
 
       // ci
       '**/.travis.yml',
+      '**/.gitlab-ci.yml',
+      '**/circle.yml',
       '**/.coveralls.yml',
-      '**/.instanbul.yml',
-      '**/appveyor.yml',
+      '**/.istanbul.yml',
+      '**/.appveyor.yml',
       '**/.zuul.yml',
+      '**/.codeclimate.yml',
+      '**/.codecov.yml',
+      '**/.airtap.yml',
+      '**/.gitpod.yml',
 
       // metadata
       '**/package-lock.json',
@@ -148,12 +173,31 @@ export const CleanExtraFilesFromModules: Task = {
 
       // misc
       '**/.*ignore',
+      '**/*.log',
+      '**/.nvmrc',
       '**/.DS_Store',
       '**/Dockerfile',
       '**/docker-compose.yml',
 
-      // https://github.com/elastic/kibana/issues/107617
-      '**/png-js/images/*.png',
+      '**/*.png',
+      '**/*.jpg',
+      '**/*.jpeg',
+      '**/*.gif',
+      '**/*.webp',
+
+      '**/*.zip',
+      '**/*.7z',
+      '**/*.rar',
+      '**/*.tar',
+      '**/*.tgz',
+      '**/*.gz',
+
+      '**/*.xml',
+
+      '**/@elastic/eui/es',
+      '**/@elastic/eui/test-env',
+      '**/@elastic/eui/optimize',
+      '**/@elastic/eui/i18ntokens.json',
     ]);
 
     log.info(
@@ -198,5 +242,18 @@ export const CleanEmptyFolders: Task = {
       build.resolvePath('data'),
       build.resolvePath('logs'),
     ]);
+  },
+};
+
+export const DeleteBazelPackagesFromBuildRoot: Task = {
+  description:
+    'Deleting bazel packages outputs from build folder root as they are now installed as node_modules',
+
+  async run(config, log, build) {
+    const bazelPackagesOnBuildRoot = (await discoverBazelPackages()).map((pkg) =>
+      build.resolvePath(pkg.normalizedRepoRelativeDir)
+    );
+
+    await deleteAll(bazelPackagesOnBuildRoot, log);
   },
 };

@@ -26,4 +26,5 @@ export type StackMonitoringFields = Fields &
     'kibana_stats.requests.total': number;
     'kibana_stats.timestamp': string;
     'kibana_stats.response_times.max': number;
+    timestamp: number;
   }>;

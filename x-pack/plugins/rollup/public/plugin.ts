@@ -6,23 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { ManagementSetup } from '@kbn/management-plugin/public';
+import { IndexManagementPluginSetup } from '@kbn/index-management-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { rollupBadgeExtension, rollupToggleExtension } from './extend_index_management';
-// @ts-ignore
-import { RollupIndexPatternCreationConfig } from './index_pattern_creation/rollup_index_pattern_creation_config';
-// @ts-ignore
-import { RollupIndexPatternListConfig } from './index_pattern_list/rollup_index_pattern_list_config';
 import { UIM_APP_NAME } from '../common';
-import {
-  FeatureCatalogueCategory,
-  HomePublicPluginSetup,
-} from '../../../../src/plugins/home/public';
-import { ManagementSetup } from '../../../../src/plugins/management/public';
-import { IndexManagementPluginSetup } from '../../index_management/public';
 // @ts-ignore
-import { setHttp, init as initDocumentation } from './crud_app/services/index';
+import { setHttp, init as initDocumentation } from './crud_app/services';
 import { setNotifications, setFatalErrors, setUiStatsReporter } from './kibana_services';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import { ClientConfigType } from './types';
 
 export interface RollupPluginSetupDependencies {
@@ -64,7 +57,7 @@ export class RollupPlugin implements Plugin {
         icon: 'indexRollupApp',
         path: `/app/management/data/rollup_jobs/job_list`,
         showOnHomePage: false,
-        category: FeatureCatalogueCategory.ADMIN,
+        category: 'admin',
       });
     }
 

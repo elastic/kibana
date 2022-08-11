@@ -27,9 +27,9 @@ pip3 install --user ansible
 [cols=",,",options="header",]
 |===
 |Hostname |IP |Description
-|deb |192.168.50.5 |Installation of Kibana’s deb package
-|rpm |192.168.50.6 |Installation of Kibana’s rpm package
-|docker |192.168.50.7 |Installation of Kibana’s docker image
+|deb |192.168.56.5 |Installation of Kibana’s deb package
+|rpm |192.168.56.6 |Installation of Kibana’s rpm package
+|docker |192.168.56.7 |Installation of Kibana’s docker image
 |===
 
 === Running
@@ -49,11 +49,11 @@ vagrant provision <hostname>
 
 # Running functional tests
 node scripts/es snapshot \
-  -E network.bind_host=127.0.0.1,192.168.50.1 \
+  -E network.bind_host=127.0.0.1,192.168.56.1 \
   -E discovery.type=single-node \
   --license=trial
 TEST_KIBANA_URL=http://elastic:changeme@<ip>:5601 \
-TEST_ES_URL=http://elastic:changeme@192.168.50.1:9200 \
+TEST_ES_URL=http://elastic:changeme@192.168.56.1:9200 \
   node scripts/functional_test_runner.js --include-tag=smoke
 ```
 

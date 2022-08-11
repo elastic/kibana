@@ -6,14 +6,16 @@
  * Side Public License, v 1.
  */
 
+import Fs from 'fs';
+
 import * as Rx from 'rxjs';
 import { mergeAll } from 'rxjs/operators';
+import { dllManifestPath } from '@kbn/ui-shared-deps-npm';
 
-import { Bundle, BundleRefs } from '../common';
+import { Bundle, BundleRefs, Hashes, parseDllManifest } from '../common';
 
 import { OptimizerConfig } from './optimizer_config';
-import { getMtimes } from './get_mtimes';
-import { diffCacheKey } from './cache_keys';
+import { diffCacheKey } from './diff_cache_key';
 
 export type BundleCacheEvent = BundleNotCachedEvent | BundleCachedEvent;
 
@@ -26,7 +28,8 @@ export interface BundleNotCachedEvent {
     | 'cache key mismatch'
     | 'cache disabled'
     | 'bundle references missing'
-    | 'bundle references outdated';
+    | 'bundle references outdated'
+    | 'dll references missing';
   diff?: string;
   bundle: Bundle;
 }
@@ -96,7 +99,6 @@ export function getBundleCacheEvent$(
       }
 
       const refs = bundleRefs.filterByExportIds(bundleRefExportIds);
-
       const bundleRefsDiff = diffCacheKey(
         refs.map((r) => r.exportId).sort((a, b) => a.localeCompare(b)),
         bundleRefExportIds
@@ -111,22 +113,27 @@ export function getBundleCacheEvent$(
         continue;
       }
 
+      if (!bundle.cache.getDllRefKeys()) {
+        events.push({
+          type: 'bundle not cached',
+          reason: 'dll references missing',
+          bundle,
+        });
+        continue;
+      }
+
       eligibleBundles.push(bundle);
     }
 
-    const mtimes = await getMtimes(
-      new Set<string>(
-        eligibleBundles.reduce(
-          (acc: string[], bundle) => [...acc, ...(bundle.cache.getReferencedFiles() || [])],
-          []
-        )
-      )
-    );
-
+    const dllManifest = parseDllManifest(JSON.parse(Fs.readFileSync(dllManifestPath, 'utf8')));
+    const hashes = new Hashes();
     for (const bundle of eligibleBundles) {
+      const paths = bundle.cache.getReferencedPaths() ?? [];
+      await hashes.populate(paths);
+
       const diff = diffCacheKey(
         bundle.cache.getCacheKey(),
-        bundle.createCacheKey(bundle.cache.getReferencedFiles() || [], mtimes)
+        bundle.createCacheKey(paths, hashes, dllManifest, bundle.cache.getDllRefKeys() ?? [])
       );
 
       if (diff) {

@@ -10,7 +10,7 @@ import type {
   KibanaRequest,
   LifecycleResponseFactory,
   OnPreRoutingToolkit,
-} from 'src/core/server';
+} from '@kbn/core/server';
 
 import { getSpaceIdFromPath } from '../../../common';
 

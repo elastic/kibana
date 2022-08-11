@@ -8,10 +8,10 @@
 import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
+import { LinkDescriptor } from '@kbn/observability-plugin/public';
 import { replaceMetricTimeInQueryString } from '../metrics/metric_detail/hooks/use_metrics_time';
 import { getFromFromLocation, getToFromLocation } from './query_params';
 import { InventoryItemType } from '../../../common/inventory_models/types';
-import { LinkDescriptor } from '../../../../observability/public';
 
 type RedirectToNodeDetailProps = RouteComponentProps<{
   nodeId: string;

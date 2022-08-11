@@ -92,6 +92,6 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
   }
 );
 
-MarkdownEditorComponent.displayName = 'MarkdownEditorComponent';
+MarkdownEditorComponent.displayName = 'MarkdownEditor';
 
 export const MarkdownEditor = memo(MarkdownEditorComponent);

@@ -14,8 +14,9 @@
  * Side Public License, v 1.
  */
 
-import { Container, EmbeddableFactoryDefinition } from '../../../../embeddable/public';
-import { EmbeddablePersistableStateService } from '../../../../embeddable/common';
+import { Container, EmbeddableFactoryDefinition } from '@kbn/embeddable-plugin/public';
+import { lazyLoadReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
+import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
 
 import { ControlGroupInput, CONTROL_GROUP_TYPE } from '../types';
 import { ControlGroupStrings } from '../control_group_strings';
@@ -23,6 +24,7 @@ import {
   createControlGroupExtract,
   createControlGroupInject,
 } from '../../../common/control_group/control_group_persistable_state';
+import { getDefaultControlGroupInput } from '../../../common';
 
 export class ControlGroupContainerFactory implements EmbeddableFactoryDefinition {
   public readonly isContainerType = true;
@@ -42,18 +44,12 @@ export class ControlGroupContainerFactory implements EmbeddableFactoryDefinition
   };
 
   public getDefaultInput(): Partial<ControlGroupInput> {
-    return {
-      panels: {},
-      ignoreParentSettings: {
-        ignoreFilters: false,
-        ignoreQuery: false,
-        ignoreTimerange: false,
-      },
-    };
+    return getDefaultControlGroupInput();
   }
 
   public create = async (initialInput: ControlGroupInput, parent?: Container) => {
+    const reduxEmbeddablePackage = await lazyLoadReduxEmbeddablePackage();
     const { ControlGroupContainer } = await import('./control_group_container');
-    return new ControlGroupContainer(initialInput, parent);
+    return new ControlGroupContainer(reduxEmbeddablePackage, initialInput, parent);
   };
 }

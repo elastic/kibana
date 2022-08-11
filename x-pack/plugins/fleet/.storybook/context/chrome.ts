@@ -6,7 +6,7 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import type { ChromeStart } from 'kibana/public';
+import type { ChromeStart } from '@kbn/core/public';
 
 export const getChrome = () => {
   const chrome: ChromeStart = {

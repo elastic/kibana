@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Action } from 'src/plugins/ui_actions/public';
+import { Action } from '@kbn/ui-actions-plugin/public';
 import { ViewMode } from '../../../../types';
 import { IEmbeddable } from '../../../../embeddables';
 

@@ -36,7 +36,7 @@ export function alertingRoutes(
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response, client, context }) => {
       try {
         const alertingService = sharedServicesProviders.alertingServiceProvider(
-          context.core.savedObjects.client,
+          (await context.core).savedObjects.client,
           request
         );
 

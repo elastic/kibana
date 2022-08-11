@@ -6,3 +6,4 @@
  */
 
 export { getLazyOsqueryAction } from './lazy_osquery_action';
+export { useIsOsqueryAvailableSimple } from './osquery_action/use_is_osquery_available_simple';

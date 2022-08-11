@@ -6,7 +6,7 @@
  */
 
 import uuid from 'uuid';
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import {
   DeserializerOrUndefined,
   IdOrUndefined,

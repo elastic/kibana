@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpSetup } from 'src/core/public';
+import { HttpSetup } from '@kbn/core/public';
 import type { FileDataVisualizerSpec, IndexDataVisualizerSpec } from '../application';
 import { getCoreStart } from '../kibana_services';
 

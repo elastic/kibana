@@ -65,8 +65,9 @@ export const updateColumns = actionCreator<{
   columns: ColumnHeaderOptions[];
 }>('UPDATE_COLUMNS');
 
-export const updateItemsPerPage =
-  actionCreator<{ id: string; itemsPerPage: number }>('UPDATE_ITEMS_PER_PAGE');
+export const updateItemsPerPage = actionCreator<{ id: string; itemsPerPage: number }>(
+  'UPDATE_ITEMS_PER_PAGE'
+);
 
 export const updateItemsPerPageOptions = actionCreator<{
   id: string;
@@ -108,20 +109,14 @@ export const clearEventsDeleted = actionCreator<{
 
 export const initializeTGridSettings = actionCreator<InitialyzeTGridSettings>('INITIALIZE_TGRID');
 
-export const setTGridSelectAll =
-  actionCreator<{ id: string; selectAll: boolean }>('SET_TGRID_SELECT_ALL');
+export const setTGridSelectAll = actionCreator<{ id: string; selectAll: boolean }>(
+  'SET_TGRID_SELECT_ALL'
+);
 
-export const setTimelineUpdatedAt =
-  actionCreator<{ id: string; updated: number }>('SET_TIMELINE_UPDATED_AT');
+export const setTimelineUpdatedAt = actionCreator<{ id: string; updated: number }>(
+  'SET_TIMELINE_UPDATED_AT'
+);
 
 export const addProviderToTimeline = actionCreator<{ id: string; dataProvider: DataProvider }>(
   'ADD_PROVIDER_TO_TIMELINE'
-);
-
-export const setOpenAddToExistingCase = actionCreator<{ id: string; isOpen: boolean }>(
-  'SET_OPEN_ADD_TO_EXISTING_CASE'
-);
-
-export const setOpenAddToNewCase = actionCreator<{ id: string; isOpen: boolean }>(
-  'SET_OPEN_ADD_TO_NEW_CASE'
 );

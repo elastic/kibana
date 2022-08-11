@@ -1,0 +1,28 @@
+{
+  "attributes": {
+    "created_at": "2022-01-28T09:01:46.147Z",
+    "created_by": "elastic",
+    "description": "gfd",
+    "enabled": true,
+    "name": "testpack",
+    "queries": [
+      {
+        "id": "fds",
+        "interval": 10,
+        "query": "select * from uptime;"
+      }
+    ],
+    "updated_at": "2022-01-28T09:01:46.147Z",
+    "updated_by": "elastic"
+  },
+  "coreMigrationVersion": "8.1.0",
+  "id": "eb92a730-8018-11ec-88ce-bd5b5e3a7526",
+  "references": [],
+  "sort": [
+    1643360506152,
+    9062
+  ],
+  "type": "osquery-pack",
+  "updated_at": "2022-01-28T09:01:46.152Z",
+  "version": "WzgzOTksMV0="
+}

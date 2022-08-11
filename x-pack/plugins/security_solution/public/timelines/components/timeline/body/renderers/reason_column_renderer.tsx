@@ -9,11 +9,11 @@ import { EuiSpacer, EuiPanel } from '@elastic/eui';
 import { isEqual } from 'lodash/fp';
 import React, { useMemo } from 'react';
 
-import { ColumnHeaderOptions, RowRenderer } from '../../../../../../common/types';
-import { BrowserFields } from '../../../../../../common/search_strategy';
-import { Ecs } from '../../../../../../common/ecs';
+import type { ColumnHeaderOptions, RowRenderer } from '../../../../../../common/types';
+import { TimelineId } from '../../../../../../common/types';
+import type { Ecs } from '../../../../../../common/ecs';
 import { eventRendererNames } from '../../../row_renderers_browser/catalog/constants';
-import { ColumnRenderer } from './column_renderer';
+import type { ColumnRenderer } from './column_renderer';
 import { REASON_FIELD_NAME } from './constants';
 import { getRowRenderer } from './get_row_renderer';
 import { plainColumnRenderer } from './plain_column_renderer';
@@ -23,7 +23,6 @@ export const reasonColumnRenderer: ColumnRenderer = {
   isInstance: isEqual(REASON_FIELD_NAME),
 
   renderColumn: ({
-    browserFields,
     columnName,
     ecsData,
     eventId,
@@ -36,7 +35,6 @@ export const reasonColumnRenderer: ColumnRenderer = {
     truncate,
     values,
   }: {
-    browserFields?: BrowserFields;
     columnName: string;
     ecsData?: Ecs;
     eventId: string;
@@ -49,10 +47,9 @@ export const reasonColumnRenderer: ColumnRenderer = {
     truncate?: boolean;
     values: string[] | undefined | null;
   }) => {
-    if (isDetails && values && ecsData && rowRenderers && browserFields) {
+    if (isDetails && values && ecsData && rowRenderers) {
       return values.map((value, i) => (
         <ReasonCell
-          browserFields={browserFields}
           ecsData={ecsData}
           key={`reason-column-renderer-value-${timelineId}-${columnName}-${eventId}-${field.id}-${value}-${i}`}
           rowRenderers={rowRenderers}
@@ -81,25 +78,26 @@ const ReasonCell: React.FC<{
   timelineId: string;
   ecsData: Ecs;
   rowRenderers: RowRenderer[];
-  browserFields: BrowserFields;
-}> = ({ ecsData, rowRenderers, browserFields, timelineId, value }) => {
+}> = ({ ecsData, rowRenderers, timelineId, value }) => {
   const rowRenderer = useMemo(() => getRowRenderer(ecsData, rowRenderers), [ecsData, rowRenderers]);
 
   const rowRender = useMemo(() => {
     return (
       rowRenderer &&
       rowRenderer.renderRow({
-        browserFields,
         data: ecsData,
         isDraggable: false,
         timelineId,
       })
     );
-  }, [rowRenderer, browserFields, ecsData, timelineId]);
+  }, [rowRenderer, ecsData, timelineId]);
+
+  // We don't currently show enriched renders for rule preview table
+  const isPlainText = useMemo(() => timelineId === TimelineId.rulePreview, [timelineId]);
 
   return (
     <>
-      {rowRenderer && rowRender ? (
+      {rowRenderer && rowRender && !isPlainText ? (
         <>
           {value}
           <h4>{i18n.REASON_RENDERER_TITLE(eventRendererNames[rowRenderer.id] ?? '')}</h4>

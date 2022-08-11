@@ -12,7 +12,7 @@ import { InfluencersFilterQuery } from '../../../../common/types/es_client';
 import { EntityField } from '../../../../common/util/anomaly_utils';
 import { RuntimeMappings } from '../../../../common/types/fields';
 
-type RecordForInfluencer = AnomalyRecordDoc;
+export type RecordForInfluencer = AnomalyRecordDoc;
 export function resultsServiceProvider(mlApiServices: MlApiServices): {
   getScoresByBucket(
     jobIds: string[],
@@ -28,7 +28,7 @@ export function resultsServiceProvider(mlApiServices: MlApiServices): {
     selectedJobIds: string[],
     earliestMs: number,
     latestMs: number,
-    maxFieldValues: number,
+    maxFieldValues?: number,
     perPage?: number,
     fromPage?: number,
     influencers?: EntityField[],

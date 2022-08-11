@@ -9,10 +9,10 @@
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Assign } from '@kbn/utility-types';
-import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 
 import { GeoBoundingBoxOutput, KibanaQueryOutput } from '../../expressions';
-import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '../';
+import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '..';
 
 export const aggFilterFnName = 'aggFilter';
 
@@ -70,6 +70,14 @@ export const aggFilter = (): FunctionDefinition => ({
         defaultMessage:
           'Filter results based on a kql or lucene query. Do not use together with geo_bounding_box',
       }),
+    },
+    timeWindow: {
+      types: ['string'],
+      help: '',
+    },
+    timeShift: {
+      types: ['string'],
+      help: '',
     },
     json: {
       types: ['string'],

@@ -22,7 +22,8 @@ export const getCommentRoute = createCasesRoute({
   },
   handler: async ({ context, request, response }) => {
     try {
-      const client = await context.cases.getCasesClient();
+      const caseContext = await context.cases;
+      const client = await caseContext.getCasesClient();
 
       return response.ok({
         body: await client.attachments.get({

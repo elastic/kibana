@@ -8,7 +8,7 @@
 import { appContextService } from '../../../app_context';
 import type { Field, Fields } from '../../fields/field';
 
-const QUERY_DEFAULT_FIELD_TYPES = ['keyword', 'text'];
+const QUERY_DEFAULT_FIELD_TYPES = ['keyword', 'text', 'match_only_text', 'wildcard'];
 const QUERY_DEFAULT_FIELD_LIMIT = 1024;
 
 const flattenFieldsToNameAndType = (
@@ -67,12 +67,6 @@ export function buildDefaultSettings({
       },
       // What should be our default for the compression?
       codec: 'best_compression',
-      mapping: {
-        total_fields: {
-          limit: '10000',
-        },
-      },
-
       // All the default fields which should be queried have to be added here.
       // So far we add all keyword and text fields here if there are any, otherwise
       // this setting is skipped.

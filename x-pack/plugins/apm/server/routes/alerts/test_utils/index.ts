@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { Logger } from 'kibana/server';
+import { IBasePath, Logger } from '@kbn/core/server';
 import { of } from 'rxjs';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
-import { IRuleDataClient } from '../../../../../rule_registry/server';
-import { ruleRegistryMocks } from '../../../../../rule_registry/server/mocks';
-import { PluginSetupContract as AlertingPluginSetupContract } from '../../../../../alerting/server';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
+import { PluginSetupContract as AlertingPluginSetupContract } from '@kbn/alerting-plugin/server';
 import { APMConfig, APM_SERVER_FEATURE_ID } from '../../..';
 
 export const createRuleTypeMocks = () => {
@@ -56,6 +56,11 @@ export const createRuleTypeMocks = () => {
       ruleDataClient: ruleRegistryMocks.createRuleDataClient(
         '.alerts-observability.apm.alerts'
       ) as IRuleDataClient,
+      basePath: {
+        serverBasePath: '/eyr',
+        publicBaseUrl: 'http://localhost:5601/eyr',
+        prepend: (path: string) => `http://localhost:5601/eyr${path}`,
+      } as IBasePath,
     },
     services,
     scheduleActions,

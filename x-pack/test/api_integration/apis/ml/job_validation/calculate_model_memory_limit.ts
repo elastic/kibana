@@ -151,12 +151,12 @@ export default ({ getService }: FtrProviderContext) => {
 
     for (const testData of testDataList) {
       it(`calculates the model memory limit ${testData.testTitleSuffix}`, async () => {
-        await supertest
+        const { body, status } = await supertest
           .post('/api/ml/validate/calculate_model_memory_limit')
           .auth(testData.user, ml.securityCommon.getPasswordForUser(testData.user))
           .set(COMMON_REQUEST_HEADERS)
-          .send(testData.requestBody)
-          .expect(testData.expected.responseCode);
+          .send(testData.requestBody);
+        ml.api.assertResponseStatusCode(testData.expected.responseCode, status, body);
 
         // More backend changes to the model memory calculation are planned.
         // This value check will be re-enabled when the final batch of updates is in.

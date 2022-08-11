@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Query } from 'src/plugins/data/public';
+import type { Query } from '@kbn/es-query';
 import { Feature, GeoJsonProperties } from 'geojson';
 import { ESTermSource } from '../sources/es_term_source';
 import { getComputedFieldNamePrefix } from '../styles/vector/style_util';
@@ -25,11 +25,9 @@ import { IField } from '../fields/field';
 import { PropertiesMap } from '../../../common/elasticsearch_util';
 import { ITermJoinSource } from '../sources/term_join_source';
 import { TableSource } from '../sources/table_source';
-import { Adapters } from '../../../../../../src/plugins/inspector/common/adapters';
 
 function createJoinTermSource(
-  descriptor: Partial<TermJoinSourceDescriptor> | undefined,
-  inspectorAdapters: Adapters | undefined
+  descriptor: Partial<TermJoinSourceDescriptor> | undefined
 ): ITermJoinSource | undefined {
   if (!descriptor) {
     return;
@@ -40,9 +38,9 @@ function createJoinTermSource(
     'indexPatternId' in descriptor &&
     'term' in descriptor
   ) {
-    return new ESTermSource(descriptor as ESTermSourceDescriptor, inspectorAdapters);
+    return new ESTermSource(descriptor as ESTermSourceDescriptor);
   } else if (descriptor.type === SOURCE_TYPES.TABLE_SOURCE) {
-    return new TableSource(descriptor as TableSourceDescriptor, inspectorAdapters);
+    return new TableSource(descriptor as TableSourceDescriptor);
   }
 }
 
@@ -53,17 +51,10 @@ export class InnerJoin {
 
   constructor(joinDescriptor: JoinDescriptor, leftSource: IVectorSource) {
     this._descriptor = joinDescriptor;
-    const inspectorAdapters = leftSource.getInspectorAdapters();
-    this._rightSource = createJoinTermSource(this._descriptor.right, inspectorAdapters);
+    this._rightSource = createJoinTermSource(this._descriptor.right);
     this._leftField = joinDescriptor.leftField
       ? leftSource.createField({ fieldName: joinDescriptor.leftField })
       : undefined;
-  }
-
-  destroy() {
-    if (this._rightSource) {
-      this._rightSource.destroy();
-    }
   }
 
   hasCompleteConfig() {

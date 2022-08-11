@@ -9,7 +9,7 @@
 import { useCallback } from 'react';
 import type { SerializableRecord } from '@kbn/utility-types';
 
-import { IAggConfig, AggParamType } from 'src/plugins/data/public';
+import { IAggConfig, AggParamType } from '@kbn/data-plugin/public';
 
 type SetValue = (value?: IAggConfig) => void;
 

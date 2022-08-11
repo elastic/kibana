@@ -52,3 +52,10 @@ export const DELETE_CASE_CONFIRM_BUTTON = '[data-test-subj="confirmModalConfirmB
 export const PARTICIPANTS = 1;
 
 export const REPORTER = 0;
+
+export const EXPECTED_METRICS = ['alerts.count', 'alerts.users', 'alerts.hosts', 'connectors'];
+export const UNEXPECTED_METRICS = ['actions.isolateHost'];
+
+export const CASES_METRIC = (metric: string) => {
+  return `[data-test-subj="case-metrics-totals-${metric}"]`;
+};

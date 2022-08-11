@@ -31,6 +31,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           query: {
             ...commonQuery,
             kuery: `service.name : "${serviceName}" and processor.event : "${processorEvent}"`,
+            probability: 1,
           },
         },
       }),
@@ -76,25 +77,23 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .instance('instance-b');
 
           await synthtraceEsClient.index([
-            ...timerange(start, end)
+            timerange(start, end)
               .interval('1m')
               .rate(GO_PROD_RATE)
-              .flatMap((timestamp) =>
+              .generator((timestamp) =>
                 serviceGoProdInstance
                   .transaction('GET /api/product/list', 'Worker')
                   .duration(GO_PROD_DURATION)
                   .timestamp(timestamp)
-                  .serialize()
               ),
-            ...timerange(start, end)
+            timerange(start, end)
               .interval('1m')
               .rate(GO_DEV_RATE)
-              .flatMap((timestamp) =>
+              .generator((timestamp) =>
                 serviceGoDevInstance
                   .transaction('GET /api/product/:id')
                   .duration(GO_DEV_DURATION)
                   .timestamp(timestamp)
-                  .serialize()
               ),
           ]);
         });

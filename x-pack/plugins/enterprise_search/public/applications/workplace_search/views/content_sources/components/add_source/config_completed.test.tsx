@@ -9,6 +9,8 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
+import { EuiCallOut } from '@elastic/eui';
+
 import { ConfigCompleted } from './config_completed';
 
 describe('ConfigCompleted', () => {
@@ -26,6 +28,7 @@ describe('ConfigCompleted', () => {
 
     expect(wrapper.find('[data-test-subj="OrgCanConnectMessage"]')).toHaveLength(1);
     expect(wrapper.find('[data-test-subj="PersonalConnectLinkMessage"]')).toHaveLength(0);
+    expect(wrapper.find(EuiCallOut)).toHaveLength(0);
   });
 
   it('renders account context', () => {
@@ -44,5 +47,9 @@ describe('ConfigCompleted', () => {
     );
 
     expect(wrapper.find('[data-test-subj="PrivateDisabledMessage"]')).toHaveLength(1);
+  });
+  it('renders feedback callout when set', () => {
+    const wrapper = shallow(<ConfigCompleted {...{ ...props, showFeedbackLink: true }} />);
+    expect(wrapper.find(EuiCallOut)).toHaveLength(1);
   });
 });

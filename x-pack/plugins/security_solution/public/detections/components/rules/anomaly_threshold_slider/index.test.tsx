@@ -8,7 +8,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { AnomalyThresholdSlider } from './index';
+import { AnomalyThresholdSlider } from '.';
 import { useFormFieldMock } from '../../../../common/mock';
 
 describe('AnomalyThresholdSlider', () => {

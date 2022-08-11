@@ -11,12 +11,12 @@ import React from 'react';
 import { EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { partition } from 'lodash';
 import * as i18n from './translations';
-import { CtiEnrichment } from '../../../../../common/search_strategy/security_solution/cti';
+import type { CtiEnrichment } from '../../../../../common/search_strategy/security_solution/cti';
 import { getEnrichmentIdentifiers, isInvestigationTimeEnrichment } from './helpers';
 
-import { FieldsData } from '../types';
+import type { FieldsData } from '../types';
 import { ActionCell } from '../table/action_cell';
-import {
+import type {
   BrowserField,
   BrowserFields,
   TimelineEventsDetailsItem,

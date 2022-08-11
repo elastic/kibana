@@ -6,7 +6,7 @@
  */
 
 import { useRef, useCallback, useState } from 'react';
-import { HttpSetup } from 'kibana/public';
+import { HttpSetup } from '@kbn/core/public';
 import { debounce } from 'lodash';
 
 import { API_BASE_PATH } from '../../../common/constants';

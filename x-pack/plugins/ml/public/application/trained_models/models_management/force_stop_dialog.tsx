@@ -8,9 +8,9 @@
 import React, { FC } from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { OverlayStart, ThemeServiceStart } from 'kibana/public';
+import type { OverlayStart, ThemeServiceStart } from '@kbn/core/public';
+import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import type { ModelItem } from './models_list';
-import { toMountPoint, wrapWithTheme } from '../../../../../../../src/plugins/kibana_react/public';
 
 interface ForceStopModelConfirmDialogProps {
   model: ModelItem;

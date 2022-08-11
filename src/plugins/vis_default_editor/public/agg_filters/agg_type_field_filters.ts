@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { IAggConfig, IndexPatternField } from '../../../data/public';
+import { IAggConfig } from '@kbn/data-plugin/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
 
-type AggTypeFieldFilter = (field: IndexPatternField, aggConfig: IAggConfig) => boolean;
+type AggTypeFieldFilter = (field: DataViewField, aggConfig: IAggConfig) => boolean;
 
 const filters: AggTypeFieldFilter[] = [
   /**
@@ -29,7 +30,7 @@ const filters: AggTypeFieldFilter[] = [
   },
 ];
 
-export function filterAggTypeFields(fields: IndexPatternField[], aggConfig: IAggConfig) {
+export function filterAggTypeFields(fields: DataViewField[], aggConfig: IAggConfig) {
   const allowedAggTypeFields = fields.filter((field) => {
     const isAggTypeFieldAllowed = filters.every((filter) => filter(field, aggConfig));
     return isAggTypeFieldAllowed;

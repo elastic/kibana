@@ -12,11 +12,10 @@ import {
   SavedObjectMigrationFn,
   SavedObjectReference,
   SavedObjectUnsanitizedDoc,
-} from 'src/core/server';
-import { Filter } from '@kbn/es-query';
-import { Query } from 'src/plugins/data/public';
-import { mergeSavedObjectMigrationMaps } from '../../../../../src/core/server';
-import { MigrateFunctionsObject } from '../../../../../src/plugins/kibana_utils/common';
+} from '@kbn/core/server';
+import type { Query, Filter } from '@kbn/es-query';
+import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
+import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { PersistableFilter } from '../../common';
 import {
   LensDocShapePost712,
@@ -29,6 +28,11 @@ import {
   VisState716,
   CustomVisualizationMigrations,
   LensDocShape810,
+  LensDocShape830,
+  XYVisualizationStatePre830,
+  XYVisualizationState830,
+  VisState810,
+  VisState820,
 } from './types';
 import {
   commonRenameOperationsForFormula,
@@ -40,6 +44,12 @@ import {
   getLensCustomVisualizationMigrations,
   commonRenameRecordsField,
   fixLensTopValuesCustomFormatting,
+  commonSetLastValueShowArrayValues,
+  commonEnhanceTableRowHeight,
+  commonSetIncludeEmptyRowsDateHistogram,
+  commonFixValueLabelsInXY,
+  commonLockOldMetricVisSettings,
+  commonPreserveOldLegendSizeDefault,
 } from './common_migrations';
 
 interface LensDocShapePre710<VisualizationState = unknown> {
@@ -188,7 +198,7 @@ const removeLensAutoDate: SavedObjectMigrationFn<LensDocShapePre710, LensDocShap
       },
     };
   } catch (e) {
-    context.log.warning(e.message);
+    context.log.warn(e.message);
     return { ...doc };
   }
 };
@@ -255,7 +265,7 @@ const addTimeFieldToEsaggs: SavedObjectMigrationFn<LensDocShapePre710, LensDocSh
       },
     };
   } catch (e) {
-    context.log.warning(e.message);
+    context.log.warn(e.message);
     return { ...doc };
   }
 };
@@ -464,6 +474,42 @@ const addParentFormatter: SavedObjectMigrationFn<LensDocShape810, LensDocShape81
   return { ...newDoc, attributes: fixLensTopValuesCustomFormatting(newDoc.attributes) };
 };
 
+const setLastValueShowArrayValues: SavedObjectMigrationFn<LensDocShape810, LensDocShape810> = (
+  doc
+) => {
+  return { ...doc, attributes: commonSetLastValueShowArrayValues(doc.attributes) };
+};
+
+const enhanceTableRowHeight: SavedObjectMigrationFn<
+  LensDocShape810<VisState810>,
+  LensDocShape810<VisState820>
+> = (doc) => {
+  const newDoc = cloneDeep(doc);
+  return { ...newDoc, attributes: commonEnhanceTableRowHeight(newDoc.attributes) };
+};
+
+const setIncludeEmptyRowsDateHistogram: SavedObjectMigrationFn<LensDocShape810, LensDocShape810> = (
+  doc
+) => {
+  return { ...doc, attributes: commonSetIncludeEmptyRowsDateHistogram(doc.attributes) };
+};
+
+const fixValueLabelsInXY: SavedObjectMigrationFn<
+  LensDocShape830<XYVisualizationStatePre830>,
+  LensDocShape830<XYVisualizationState830 | unknown>
+> = (doc) => {
+  const newDoc = cloneDeep(doc);
+  return { ...newDoc, attributes: commonFixValueLabelsInXY(newDoc.attributes) };
+};
+
+const lockOldMetricVisSettings: SavedObjectMigrationFn<LensDocShape810, LensDocShape810> = (
+  doc
+) => ({ ...doc, attributes: commonLockOldMetricVisSettings(doc.attributes) });
+
+const preserveOldLegendSizeDefault: SavedObjectMigrationFn<LensDocShape810, LensDocShape810> = (
+  doc
+) => ({ ...doc, attributes: commonPreserveOldLegendSizeDefault(doc.attributes) });
+
 const lensMigrations: SavedObjectMigrationMap = {
   '7.7.0': removeInvalidAccessors,
   // The order of these migrations matter, since the timefield migration relies on the aggConfigs
@@ -478,6 +524,12 @@ const lensMigrations: SavedObjectMigrationMap = {
   '7.15.0': addLayerTypeToVisualization,
   '7.16.0': moveDefaultReversedPaletteToCustom,
   '8.1.0': flow(renameFilterReferences, renameRecordsField, addParentFormatter),
+  '8.2.0': flow(
+    setLastValueShowArrayValues,
+    setIncludeEmptyRowsDateHistogram,
+    enhanceTableRowHeight
+  ),
+  '8.3.0': flow(lockOldMetricVisSettings, preserveOldLegendSizeDefault, fixValueLabelsInXY),
 };
 
 export const getAllMigrations = (

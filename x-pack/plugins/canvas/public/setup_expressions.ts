@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CoreSetup } from '../../../../src/core/public';
-import { serializeProvider } from '../../../../src/plugins/expressions/common';
+import { CoreSetup } from '@kbn/core/public';
+import { serializeProvider } from '@kbn/expressions-plugin/common';
 import { API_ROUTE_FUNCTIONS } from '../common/lib/constants';
 
 import { CanvasSetupDeps } from './plugin';

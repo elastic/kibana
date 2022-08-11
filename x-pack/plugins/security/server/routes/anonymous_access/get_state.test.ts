@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { kibanaResponseFactory } from 'src/core/server';
-import { httpServerMock } from 'src/core/server/mocks';
+import { kibanaResponseFactory } from '@kbn/core/server';
+import { httpServerMock } from '@kbn/core/server/mocks';
 
 import type { AnonymousAccessServiceStart } from '../../anonymous_access';
 import { routeDefinitionParamsMock, securityRequestHandlerContextMock } from '../index.mock';

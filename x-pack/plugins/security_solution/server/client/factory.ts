@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '../../../../../src/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import { AppClient } from './client';
-import { ConfigType } from '../config';
+import type { ConfigType } from '../config';
 
 interface SetupDependencies {
   getSpaceId?: (request: KibanaRequest) => string | undefined;

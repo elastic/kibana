@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from 'src/core/server';
+import type { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import type { Actions, CheckSavedObjectsPrivileges } from '../authorization';
 import type { CheckPrivilegesResponse } from '../authorization/types';
 
 export interface EnsureAuthorizedDependencies {
   actions: Actions;
-  errors: SavedObjectsClientContract['errors'];
+  errors: typeof SavedObjectsErrorHelpers;
   checkSavedObjectsPrivilegesAsCurrentUser: CheckSavedObjectsPrivileges;
 }
 

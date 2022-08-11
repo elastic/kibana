@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { monitorEventLoopDelay } from 'perf_hooks';
+
 import { Option } from 'fp-ts/lib/Option';
 
 import { ConcreteTaskInstance } from './task';
@@ -14,6 +16,7 @@ import { ClaimAndFillPoolResult } from './lib/fill_pool';
 import { PollingError } from './polling';
 import { TaskRunResult } from './task_running';
 import { EphemeralTaskInstanceRequest } from './ephemeral_task_lifecycle';
+import type { EventLoopDelayConfig } from './config';
 
 export enum TaskPersistence {
   Recurring = 'recurring',
@@ -40,12 +43,29 @@ export enum TaskClaimErrorType {
 export interface TaskTiming {
   start: number;
   stop: number;
+  eventLoopBlockMs?: number;
 }
 export type WithTaskTiming<T> = T & { timing: TaskTiming };
 
 export function startTaskTimer(): () => TaskTiming {
   const start = Date.now();
   return () => ({ start, stop: Date.now() });
+}
+
+export function startTaskTimerWithEventLoopMonitoring(
+  eventLoopDelayConfig: EventLoopDelayConfig
+): () => TaskTiming {
+  const stopTaskTimer = startTaskTimer();
+  const eldHistogram = eventLoopDelayConfig.monitor ? monitorEventLoopDelay() : null;
+  eldHistogram?.enable();
+
+  return () => {
+    const { start, stop } = stopTaskTimer();
+    eldHistogram?.disable();
+    const eldMax = eldHistogram?.max ?? 0;
+    const eventLoopBlockMs = Math.round(eldMax / 1000 / 1000); // original in nanoseconds
+    return { start, stop, eventLoopBlockMs };
+  };
 }
 
 export interface TaskEvent<OkResult, ErrorResult, ID = string> {

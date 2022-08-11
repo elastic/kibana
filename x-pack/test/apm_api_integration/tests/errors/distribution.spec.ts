@@ -6,12 +6,12 @@
  */
 import expect from '@kbn/expect';
 import { first, last, sumBy } from 'lodash';
-import { isFiniteNumber } from '../../../../plugins/apm/common/utils/is_finite_number';
+import { isFiniteNumber } from '@kbn/apm-plugin/common/utils/is_finite_number';
 import {
   APIClientRequestParamsOf,
   APIReturnType,
-} from '../../../../plugins/apm/public/services/rest/create_call_apm_api';
-import { RecursivePartial } from '../../../../plugins/apm/typings/common';
+} from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { config, generateData } from './generate_data';
 
@@ -112,8 +112,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 query: {
                   start: new Date(end - fiveMinutes).toISOString(),
                   end: new Date(end).toISOString(),
-                  comparisonStart: new Date(start).toISOString(),
-                  comparisonEnd: new Date(start + fiveMinutes).toISOString(),
+                  offset: '5m',
                 },
               });
               errorsDistribution = response.body;
@@ -157,8 +156,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 query: {
                   start: '2021-01-03T00:00:00.000Z',
                   end: '2021-01-03T00:15:00.000Z',
-                  comparisonStart: '2021-01-02T00:00:00.000Z',
-                  comparisonEnd: '2021-01-02T00:15:00.000Z',
+                  offset: '1d',
                 },
               });
               errorsDistribution = response.body;

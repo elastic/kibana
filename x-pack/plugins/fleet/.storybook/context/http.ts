@@ -6,7 +6,7 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import type { HttpFetchOptions, HttpHandler, HttpStart } from 'kibana/public';
+import type { HttpFetchOptions, HttpHandler, HttpStart } from '@kbn/core/public';
 
 const BASE_PATH = '';
 
@@ -27,7 +27,7 @@ export const getHttp = (basepath = BASE_PATH) => {
       serverBasePath: basepath,
     },
     get: (async (path: string, options: HttpFetchOptions) => {
-      action('get')(path, options);
+      action('get')(path, JSON.stringify(options));
       // TODO: all of this needs revision, as it's far too clunky... but it works for now,
       // with the few paths we're supporting.
       if (path === '/api/fleet/agents/setup') {
@@ -35,7 +35,7 @@ export const getHttp = (basepath = BASE_PATH) => {
           isReady = true;
           return { isReady: false, missing_requirements: ['api_keys', 'fleet_server'] };
         }
-        return { isInitialized: true, nonFatalErrors: [] };
+        return { isReady: true, isInitialized: true, nonFatalErrors: [], missing_requirements: [] };
       }
 
       if (path === '/api/fleet/epm/categories') {
@@ -79,8 +79,66 @@ export const getHttp = (basepath = BASE_PATH) => {
         return { success: true };
       }
 
-      action(path)('KP: UNSUPPORTED ROUTE');
+      if (path.match('/api/fleet/agent_policies')) {
+        return { items: [] };
+      }
+
+      if (path.match('/api/fleet/settings')) {
+        return { item: { fleet_server_hosts: [] } };
+      }
+
+      if (path.match('/api/fleet/outputs')) {
+        return {
+          items: [{ name: 'Default Output', is_default: true, hosts: ['https://test.es:9200'] }],
+        };
+      }
+
+      if (path.match('/api/fleet/agent_download_sources')) {
+        return {
+          items: [
+            { name: 'Default Download Source', is_default: true, host: 'https://www.example.com' },
+          ],
+        };
+      }
+
+      action(path)(`UNSUPPORTED ROUTE: GET ${path}`);
       return {};
+    }) as HttpHandler,
+    post: (async (path: string, options: HttpFetchOptions) => {
+      action('post')(path, JSON.stringify(options));
+
+      if (path.match('/api/fleet/settings')) {
+        return { items: [] };
+      }
+
+      if (path.match('/api/fleet/service_tokens')) {
+        return {
+          name: 'test-token',
+          value: 'test-token-value',
+        };
+      }
+
+      if (path.match('/api/fleet/agent_policies')) {
+        return {
+          item: {
+            id: 'test-policy',
+            name: 'Test Policy',
+            namespace: 'default',
+            description: 'Test Policy',
+            monitoring_enabled: ['metrics'],
+            data_output_id: 'test-output',
+            monitoring_output_id: 'test-output',
+            status: 'active',
+            packagePolicies: ['test-package-policy'],
+            updated_on: new Date(),
+            updated_by: 'elastic',
+            revision: 0,
+            agents: 0,
+          },
+        };
+      }
+
+      action(path)(`UNSUPPORTED ROUTE: POST ${path}`);
     }) as HttpHandler,
   } as unknown as HttpStart;
 

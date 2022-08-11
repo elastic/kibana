@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { TASK_TYPE } from './constants';
 import { taskRunner, TaskRunnerOpts } from './task_runner';
-import { TaskManagerSetupContract } from '../../../task_manager/server';
 
 export function registerTaskDefinition(
   taskManager: TaskManagerSetupContract,

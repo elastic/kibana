@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { CoreSetup } from '@kbn/core/server';
+import { SavedObjectsClient } from '@kbn/core/server';
 import { reduce } from 'lodash';
 
 export const convertECSMappingToArray = (ecsMapping: Record<string, object> | undefined) =>
@@ -22,7 +24,16 @@ export const convertECSMappingToObject = (
     ecsMapping,
     (acc, value) => {
       acc[value.key] = value.value;
+
       return acc;
     },
     {} as Record<string, { field?: string; value?: string }>
   );
+
+export const getInternalSavedObjectsClient = async (
+  getStartServices: CoreSetup['getStartServices']
+) => {
+  const [coreStart] = await getStartServices();
+
+  return new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
+};

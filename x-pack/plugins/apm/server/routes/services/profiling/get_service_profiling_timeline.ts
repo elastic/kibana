@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { mapKeys, mapValues } from 'lodash';
-import { ProcessorEvent } from '../../../../common/processor_event';
+import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   PROFILE_ID,
   SERVICE_NAME,
@@ -17,7 +18,6 @@ import {
 import { Setup } from '../../../lib/helpers/setup_request';
 import { getBucketSize } from '../../../lib/helpers/get_bucket_size';
 import { environmentQuery } from '../../../../common/utils/environment_query';
-import { kqlQuery, rangeQuery } from '../../../../../observability/server';
 
 const configMap = mapValues(
   mapKeys(ProfilingValueType, (val, key) => val),

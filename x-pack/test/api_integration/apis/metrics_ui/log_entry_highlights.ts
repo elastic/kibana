@@ -11,13 +11,13 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { identity } from 'fp-ts/lib/function';
 import { fold } from 'fp-ts/lib/Either';
 
-import { createPlainError, throwErrors } from '../../../../plugins/infra/common/runtime_types';
+import { createPlainError, throwErrors } from '@kbn/infra-plugin/common/runtime_types';
 
 import {
   LOG_ENTRIES_HIGHLIGHTS_PATH,
   logEntriesHighlightsRequestRT,
   logEntriesHighlightsResponseRT,
-} from '../../../../plugins/infra/common/http_api';
+} from '@kbn/infra-plugin/common/http_api';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 

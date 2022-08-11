@@ -8,7 +8,7 @@
 
 import { mergeWith } from 'lodash';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { MigrateFunctionsObject, MigrateFunction } from '../../../src/plugins/kibana_utils/common';
+import { MigrateFunctionsObject, MigrateFunction } from '@kbn/kibana-utils-plugin/common';
 
 export const mergeMigrationFunctionMaps = (
   obj1: MigrateFunctionsObject,

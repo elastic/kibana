@@ -40,6 +40,8 @@ export const ProcessHash = React.memo<Props>(
             iconType="number"
             isDraggable={isDraggable}
             value={processHashSha256}
+            fieldType="keyword"
+            isAggregatable={true}
           />
         </TokensFlexItem>
       </HashFlexGroup>

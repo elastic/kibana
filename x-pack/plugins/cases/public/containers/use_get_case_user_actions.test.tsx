@@ -8,7 +8,6 @@
 import { renderHook, act } from '@testing-library/react-hooks';
 import {
   getPushedInfo,
-  initialData,
   useGetCaseUserActions,
   UseGetCaseUserActions,
 } from './use_get_case_user_actions';
@@ -21,99 +20,71 @@ import {
   getUserAction,
   jiraFields,
 } from './mock';
-import * as api from './api';
 import { Actions } from '../../common/api';
+import React from 'react';
+import { QueryClientProvider } from 'react-query';
+import { testQueryClient } from '../common/mock';
+import { waitFor } from '@testing-library/dom';
+import * as api from './api';
+import { useToasts } from '../common/lib/kibana';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
+const initialData = {
+  data: undefined,
+  isError: false,
+  isLoading: true,
+};
+
+const wrapper: React.FC<string> = ({ children }) => (
+  <QueryClientProvider client={testQueryClient}>{children}</QueryClientProvider>
+);
+
 describe('useGetCaseUserActions', () => {
-  const abortCtrl = new AbortController();
   beforeEach(() => {
     jest.clearAllMocks();
     jest.restoreAllMocks();
   });
 
-  it('init', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetCaseUserActions>(() =>
-        useGetCaseUserActions(basicCase.id, basicCase.connector.id)
-      );
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        ...initialData,
-        fetchCaseUserActions: result.current.fetchCaseUserActions,
-      });
-    });
-  });
-
-  it('calls getCaseUserActions with correct arguments', async () => {
-    const spyOnPostCase = jest.spyOn(api, 'getCaseUserActions');
-
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetCaseUserActions>(() =>
-        useGetCaseUserActions(basicCase.id, basicCase.connector.id)
-      );
-      await waitForNextUpdate();
-
-      result.current.fetchCaseUserActions(basicCase.id, basicCase.connector.id);
-      await waitForNextUpdate();
-      expect(spyOnPostCase).toBeCalledWith(basicCase.id, abortCtrl.signal);
-    });
-  });
-
   it('returns proper state on getCaseUserActions', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetCaseUserActions>(() =>
-        useGetCaseUserActions(basicCase.id, basicCase.connector.id)
+      const { result } = renderHook<string, UseGetCaseUserActions>(
+        () => useGetCaseUserActions(basicCase.id, basicCase.connector.id),
+        { wrapper }
       );
-      await waitForNextUpdate();
-      result.current.fetchCaseUserActions(basicCase.id, basicCase.connector.id);
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        ...initialData,
-        caseUserActions,
-        fetchCaseUserActions: result.current.fetchCaseUserActions,
-        hasDataToPush: true,
-        isError: false,
-        isLoading: false,
-        participants: [elasticUser],
+      await waitFor(() => {
+        expect(result.current).toEqual(
+          expect.objectContaining({
+            ...initialData,
+            data: {
+              caseUserActions,
+              caseServices: {},
+              hasDataToPush: true,
+              participants: [elasticUser],
+            },
+            isError: false,
+            isLoading: false,
+            isFetching: false,
+          })
+        );
       });
     });
   });
 
-  it('set isLoading to true when posting case', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetCaseUserActions>(() =>
-        useGetCaseUserActions(basicCase.id, basicCase.connector.id)
-      );
-      await waitForNextUpdate();
-      result.current.fetchCaseUserActions(basicCase.id, basicCase.connector.id);
+  it('shows a toast error when the API returns an error', async () => {
+    const spy = jest.spyOn(api, 'getCaseUserActions').mockRejectedValue(new Error("C'est la vie"));
 
-      expect(result.current.isLoading).toBe(true);
-    });
-  });
+    const addError = jest.fn();
+    (useToasts as jest.Mock).mockReturnValue({ addError });
 
-  it('unhappy path', async () => {
-    const spyOnPostCase = jest.spyOn(api, 'getCaseUserActions');
-    spyOnPostCase.mockImplementation(() => {
-      throw new Error('Something went wrong');
-    });
-
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetCaseUserActions>(() =>
-        useGetCaseUserActions(basicCase.id, basicCase.connector.id)
-      );
-      await waitForNextUpdate();
-      result.current.fetchCaseUserActions(basicCase.id, basicCase.connector.id);
-
-      expect(result.current).toEqual({
-        ...initialData,
-        isLoading: false,
-        isError: true,
-        fetchCaseUserActions: result.current.fetchCaseUserActions,
-      });
-    });
+    const { waitForNextUpdate } = renderHook<string, UseGetCaseUserActions>(
+      () => useGetCaseUserActions(basicCase.id, basicCase.connector.id),
+      { wrapper }
+    );
+    await waitForNextUpdate();
+    expect(spy).toHaveBeenCalledWith(basicCase.id, expect.any(AbortSignal));
+    expect(addError).toHaveBeenCalled();
   });
 
   describe('getPushedInfo', () => {

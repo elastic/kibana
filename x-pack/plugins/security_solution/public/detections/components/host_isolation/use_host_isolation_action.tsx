@@ -56,11 +56,15 @@ export const useHostIsolationAction = ({
     agentId,
   });
 
-  const isolationSupported = isIsolationSupported({
-    osName: hostOsFamily,
-    version: agentVersion,
-    capabilities,
-  });
+  const isolationSupported = useMemo(() => {
+    return isEndpointAlert
+      ? isIsolationSupported({
+          osName: hostOsFamily,
+          version: agentVersion,
+          capabilities,
+        })
+      : false;
+  }, [agentVersion, capabilities, hostOsFamily, isEndpointAlert]);
 
   const isIsolationAllowed = useUserPrivileges().endpointPrivileges.canIsolateHost;
 

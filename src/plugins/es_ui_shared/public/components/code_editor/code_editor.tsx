@@ -58,6 +58,8 @@ export interface EuiCodeEditorProps extends SupportedAriaAttributes, Omit<IAceEd
    */
   mode?: IAceEditorProps['mode'] | object;
   id?: string;
+
+  onAceEditorRef?: (editor: AceEditor | null) => void;
 }
 
 export interface EuiCodeEditorState {
@@ -98,6 +100,7 @@ class EuiCodeEditor extends Component<EuiCodeEditorProps, EuiCodeEditorState> {
       setOrRemoveAttribute(textbox, 'aria-labelledby', this.props['aria-labelledby']);
       setOrRemoveAttribute(textbox, 'aria-describedby', this.props['aria-describedby']);
     }
+    this.props.onAceEditorRef?.(aceEditor);
   };
 
   onEscToExit = () => {

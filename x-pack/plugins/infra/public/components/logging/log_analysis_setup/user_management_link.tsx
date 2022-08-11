@@ -8,7 +8,7 @@
 import { EuiButton, EuiButtonProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { useLinkProps } from '../../../../../observability/public';
+import { useLinkProps } from '@kbn/observability-plugin/public';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 export const UserManagementLink: React.FunctionComponent<EuiButtonProps> = (props) => {

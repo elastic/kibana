@@ -14,7 +14,7 @@ import { StopActionName, StopActionNameProps } from './stop_action_name';
 import transformListRow from '../../../../common/__mocks__/transform_list_row.json';
 
 jest.mock('../../../../../shared_imports');
-jest.mock('../../../../../app/app_dependencies');
+jest.mock('../../../../app_dependencies');
 
 describe('Transform: Transform List Actions <StopAction />', () => {
   test('Minimal initialization', () => {

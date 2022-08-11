@@ -19,7 +19,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DataView } from 'src/plugins/data_views/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { SourceFiltersTableFilter } from '../../types';
 
 const filterHeader = i18n.translate(
@@ -73,7 +73,7 @@ export interface TableProps {
   items: SourceFiltersTableFilter[];
   deleteFilter: Function;
   fieldWildcardMatcher: Function;
-  saveFilter: (filter: SourceFiltersTableFilter) => any;
+  saveFilter: (filter: SourceFiltersTableFilter) => void;
   isSaving: boolean;
 }
 
@@ -150,7 +150,7 @@ export class Table extends Component<TableProps, TableState> {
           ]);
           const matches = indexPattern
             .getNonScriptedFields()
-            .map((currentFilter: any) => currentFilter.name)
+            .map((currentFilter) => currentFilter.name)
             .filter(wildcardMatcher)
             .sort();
 

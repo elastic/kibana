@@ -13,10 +13,10 @@ exports[`Storyshots Home/Components/Empty Prompt Empty Prompt 1`] = `
     className="euiFlexItem euiFlexItem--flexGrowZero"
   >
     <div
-      className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--subdued euiPanel--noShadow euiPanel--noBorder"
+      className="euiPanel euiPanel--subdued euiPanel--paddingMedium emotion-euiPanel-grow-none-m-subdued"
     >
       <div
-        className="euiPanel euiPanel--borderRadiusMedium euiPanel--subdued euiPanel--noShadow euiPanel--noBorder euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge"
+        className="euiPanel euiPanel--subdued euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge emotion-euiPanel-m-subdued"
       >
         <div
           className="euiEmptyPrompt__main"
@@ -28,7 +28,9 @@ exports[`Storyshots Home/Components/Empty Prompt Empty Prompt 1`] = `
               color="subdued"
               data-euiicon-type="importAction"
               size="xxl"
-            />
+            >
+              
+            </span>
           </div>
           <div
             className="euiEmptyPrompt__content"
@@ -37,37 +39,33 @@ exports[`Storyshots Home/Components/Empty Prompt Empty Prompt 1`] = `
               className="euiEmptyPrompt__contentInner"
             >
               <h2
-                className="euiTitle euiTitle--medium"
+                className="euiTitle emotion-euiTitle-m"
               >
                 Add your first workpad
               </h2>
-              <span
-                className="euiTextColor euiTextColor--subdued"
+              <div
+                className="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+              />
+              <div
+                className="euiText emotion-euiText-m-euiTextColor-subdued"
                 style={Object {}}
               >
-                <div
-                  className="euiSpacer euiSpacer--m"
-                />
-                <div
-                  className="euiText euiText--medium"
-                >
-                  <p>
-                    Create a new workpad, start from a template, or import a workpad JSON file by dropping it here.
-                  </p>
-                  <p>
-                    New to Canvas?
-                     
-                    <a
-                      className="euiLink euiLink--primary"
-                      href="home#/tutorial_directory/sampleData"
-                      rel="noreferrer"
-                    >
-                      Add your first workpad
-                    </a>
-                    .
-                  </p>
-                </div>
-              </span>
+                <p>
+                  Create a new workpad, start from a template, or import a workpad JSON file by dropping it here.
+                </p>
+                <p>
+                  New to Canvas?
+                   
+                  <a
+                    className="euiLink emotion-euiLink-primary"
+                    href="home#/tutorial_directory/sampleData"
+                    rel="noreferrer"
+                  >
+                    Add your first workpad
+                  </a>
+                  .
+                </p>
+              </div>
             </div>
           </div>
         </div>

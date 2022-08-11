@@ -7,8 +7,8 @@
 
 import { Readable } from 'stream';
 
-import { HapiReadableStream } from '../../rules/types';
-import { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
+import type { HapiReadableStream } from '../../rules/types';
+import type { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
 
@@ -90,4 +90,7 @@ export const getOutputRuleAlertForRest = (): Omit<
   note: '# Investigative notes',
   version: 1,
   execution_summary: undefined,
+  related_integrations: [],
+  required_fields: [],
+  setup: '',
 });

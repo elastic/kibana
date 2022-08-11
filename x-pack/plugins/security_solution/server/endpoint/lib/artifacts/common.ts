@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import { Logger } from 'src/core/server';
-import {
-  InternalArtifactSchema,
-  InternalArtifactCompleteSchema,
-  internalArtifactCompleteSchema,
-} from '../../schemas/artifacts';
+import type { Logger } from '@kbn/core/server';
+import type { InternalArtifactSchema } from '../../schemas/artifacts';
 
 export const ArtifactConstants = {
   GLOBAL_ALLOWLIST_NAME: 'endpoint-exceptionlist',
@@ -28,6 +24,9 @@ export const ArtifactConstants = {
 
   SUPPORTED_HOST_ISOLATION_EXCEPTIONS_OPERATING_SYSTEMS: ['macos', 'windows', 'linux'],
   GLOBAL_HOST_ISOLATION_EXCEPTIONS_NAME: 'endpoint-hostisolationexceptionlist',
+
+  SUPPORTED_BLOCKLISTS_OPERATING_SYSTEMS: ['macos', 'windows', 'linux'],
+  GLOBAL_BLOCKLISTS_NAME: 'endpoint-blocklist',
 };
 
 export const ManifestConstants = {
@@ -36,12 +35,6 @@ export const ManifestConstants = {
 
 export const getArtifactId = (artifact: InternalArtifactSchema) => {
   return `${artifact.identifier}-${artifact.decodedSha256}`;
-};
-
-export const isCompleteArtifact = (
-  artifact: InternalArtifactSchema
-): artifact is InternalArtifactCompleteSchema => {
-  return internalArtifactCompleteSchema.is(artifact);
 };
 
 export const reportErrors = (logger: Logger, errors: Error[]) => {

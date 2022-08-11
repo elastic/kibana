@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LevelLogger } from '..';
+import type { Logger } from '@kbn/core/server';
 
 const MAX_PARTIAL_ERROR_LENGTH = 1000; // 1000 of beginning, 1000 of end
 const ERROR_PARTIAL_SEPARATOR = '...';
@@ -15,7 +15,7 @@ const MAX_ERROR_LENGTH = MAX_PARTIAL_ERROR_LENGTH * 2 + ERROR_PARTIAL_SEPARATOR.
  * An error message string could be very long, as it sometimes includes huge
  * amount of base64
  */
-export const errorLogger = (logger: LevelLogger, message: string, err?: Error) => {
+export const errorLogger = (logger: Logger, message: string, err?: Error) => {
   if (err) {
     const errString = `${message}: ${err}`;
     const errLength = errString.length;

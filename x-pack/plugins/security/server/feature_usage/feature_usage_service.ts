@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { FeatureUsageServiceSetup, FeatureUsageServiceStart } from '../../../licensing/server';
+import type {
+  FeatureUsageServiceSetup,
+  FeatureUsageServiceStart,
+} from '@kbn/licensing-plugin/server';
 
 interface SetupDeps {
   featureUsage: FeatureUsageServiceSetup;

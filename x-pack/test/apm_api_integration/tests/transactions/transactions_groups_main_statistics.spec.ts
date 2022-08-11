@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import { pick, sum } from 'lodash';
-import url from 'url';
-import { APIReturnType } from '../../../../plugins/apm/public/services/rest/create_call_apm_api';
+import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import archives from '../../common/fixtures/es_archiver/archives_metadata';
 
@@ -17,7 +17,7 @@ type TransactionsGroupsPrimaryStatistics =
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
-  const supertest = getService('legacySupertestAsApmReadUser');
+  const apmApiClient = getService('apmApiClient');
 
   const archiveName = 'apm_8.0.0';
   const { start, end } = archives[archiveName];
@@ -27,19 +27,20 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     { config: 'basic', archives: [] },
     () => {
       it('handles the empty state', async () => {
-        const response = await supertest.get(
-          url.format({
-            pathname: `/internal/apm/services/opbeans-java/transactions/groups/main_statistics`,
+        const response = await apmApiClient.readUser({
+          endpoint: 'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics',
+          params: {
+            path: { serviceName: 'opbeans-java' },
             query: {
               start,
               end,
-              latencyAggregationType: 'avg',
+              latencyAggregationType: LatencyAggregationType.avg,
               transactionType: 'request',
               environment: 'ENVIRONMENT_ALL',
               kuery: '',
             },
-          })
-        );
+          },
+        });
 
         expect(response.status).to.be(200);
         const transctionsGroupsPrimaryStatistics =
@@ -55,19 +56,20 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     { config: 'basic', archives: [archiveName] },
     () => {
       it('returns the correct data', async () => {
-        const response = await supertest.get(
-          url.format({
-            pathname: `/internal/apm/services/opbeans-java/transactions/groups/main_statistics`,
+        const response = await apmApiClient.readUser({
+          endpoint: 'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics',
+          params: {
+            path: { serviceName: 'opbeans-java' },
             query: {
               start,
               end,
+              latencyAggregationType: LatencyAggregationType.avg,
               transactionType: 'request',
-              latencyAggregationType: 'avg',
               environment: 'ENVIRONMENT_ALL',
               kuery: '',
             },
-          })
-        );
+          },
+        });
 
         expect(response.status).to.be(200);
 
@@ -130,19 +132,20 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('returns the correct data for latency aggregation 99th percentile', async () => {
-        const response = await supertest.get(
-          url.format({
-            pathname: `/internal/apm/services/opbeans-java/transactions/groups/main_statistics`,
+        const response = await apmApiClient.readUser({
+          endpoint: 'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics',
+          params: {
+            path: { serviceName: 'opbeans-java' },
             query: {
               start,
               end,
+              latencyAggregationType: LatencyAggregationType.p99,
               transactionType: 'request',
-              latencyAggregationType: 'p99',
               environment: 'ENVIRONMENT_ALL',
               kuery: '',
             },
-          })
-        );
+          },
+        });
 
         expect(response.status).to.be(200);
 

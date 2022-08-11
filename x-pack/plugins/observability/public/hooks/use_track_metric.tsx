@@ -7,8 +7,8 @@
 
 import { useEffect, useMemo } from 'react';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ObservabilityApp } from '../../typings/common';
 
 /**

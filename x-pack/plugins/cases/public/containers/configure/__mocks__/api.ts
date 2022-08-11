@@ -14,7 +14,8 @@ import {
 
 import { ApiProps } from '../../types';
 import { CaseConfigure } from '../types';
-import { connectorsMock, caseConfigurationCamelCaseResponseMock, actionTypesMock } from '../mock';
+import { caseConfigurationCamelCaseResponseMock } from '../mock';
+import { actionTypesMock, connectorsMock } from '../../../common/mock/connectors';
 
 export const fetchConnectors = async ({ signal }: ApiProps): Promise<ActionConnector[]> =>
   Promise.resolve(connectorsMock);

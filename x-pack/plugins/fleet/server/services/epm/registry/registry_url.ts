@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { appContextService } from '../../';
+import { appContextService } from '../..';
 
 // from https://github.com/elastic/package-registry#docker (maybe from OpenAPI one day)
 // the unused variables cause a TS warning about unused values

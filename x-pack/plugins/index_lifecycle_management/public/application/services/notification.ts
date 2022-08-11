@@ -11,7 +11,7 @@
  * in future. The pattern in this file is legacy and should be updated to conform to the plugin lifecycle.
  */
 
-import { IToasts, FatalErrorsSetup } from 'src/core/public';
+import { IToasts, FatalErrorsSetup } from '@kbn/core/public';
 
 export let toasts: IToasts;
 export let fatalErrors: FatalErrorsSetup;

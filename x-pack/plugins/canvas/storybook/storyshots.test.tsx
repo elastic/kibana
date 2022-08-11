@@ -18,6 +18,8 @@ import initStoryshots, { Stories2SnapsConverter } from '@storybook/addon-storysh
 // @ts-expect-error untyped library
 import styleSheetSerializer from 'jest-styled-components/src/styleSheetSerializer';
 import { addSerializer } from 'jest-specific-snapshot';
+import { createSerializer } from '@emotion/jest';
+import { replaceEmotionPrefix } from '@elastic/eui/lib/test';
 
 // Several of the renderers, used by the runtime, use jQuery.
 import jquery from 'jquery';
@@ -61,8 +63,8 @@ import { EuiObserver } from '@elastic/eui/test-env/components/observer/observer'
 jest.mock('@elastic/eui/test-env/components/observer/observer');
 EuiObserver.mockImplementation(() => 'EuiObserver');
 
-import { ExpressionInput } from '../../../../src/plugins/presentation_util/public/components/expression_input';
-jest.mock('../../../../src/plugins/presentation_util/public/components/expression_input');
+import { ExpressionInput } from '@kbn/presentation-util-plugin/public/components/expression_input';
+jest.mock('@kbn/presentation-util-plugin/public/components/expression_input');
 // @ts-expect-error
 ExpressionInput.mockImplementation(() => 'ExpressionInput');
 
@@ -89,6 +91,12 @@ jest.mock('../public/lib/es_service', () => ({
 }));
 
 addSerializer(styleSheetSerializer);
+
+const emotionSerializer = createSerializer({
+  classNameReplacer: replaceEmotionPrefix,
+  includeStyles: false,
+});
+addSerializer(emotionSerializer);
 
 const converter = new Stories2SnapsConverter();
 

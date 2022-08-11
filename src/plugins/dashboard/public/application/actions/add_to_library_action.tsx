@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
-
 import { Action, IncompatibleActionError } from '../../services/ui_actions';
 import {
   ViewMode,

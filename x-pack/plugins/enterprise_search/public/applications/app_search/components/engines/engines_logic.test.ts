@@ -18,7 +18,7 @@ import { DEFAULT_META } from '../../../shared/constants';
 import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 import { EngineDetails, EngineTypes } from '../engine/types';
 
-import { EnginesLogic } from './';
+import { EnginesLogic } from '.';
 
 describe('EnginesLogic', () => {
   const { mount } = new LogicMounter(EnginesLogic);
@@ -222,6 +222,17 @@ describe('EnginesLogic', () => {
         EnginesLogic.actions.onDeleteEngineSuccess({
           ...MOCK_ENGINE,
           type: 'default' as EngineTypes.default,
+        });
+
+        expect(EnginesLogic.actions.loadEngines).toHaveBeenCalled();
+      });
+
+      it('should call loadEngines if engine.type === elasticsearch', () => {
+        jest.spyOn(EnginesLogic.actions, 'loadEngines');
+
+        EnginesLogic.actions.onDeleteEngineSuccess({
+          ...MOCK_ENGINE,
+          type: 'elasticsearch' as EngineTypes.elasticsearch,
         });
 
         expect(EnginesLogic.actions.loadEngines).toHaveBeenCalled();

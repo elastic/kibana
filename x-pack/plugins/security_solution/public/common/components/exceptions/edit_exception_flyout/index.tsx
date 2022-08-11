@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+// Component being re-implemented in 8.5
+
+/* eslint-disable complexity */
+
 import React, { memo, useState, useCallback, useEffect, useMemo } from 'react';
 import styled, { css } from 'styled-components';
 import {
@@ -31,15 +35,19 @@ import type {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
+import type { DataViewBase } from '@kbn/es-query';
+
+import { useRuleIndices } from '../../../../detections/containers/detection_engine/rules/use_rule_indices';
 import {
   hasEqlSequenceQuery,
   isEqlRule,
+  isNewTermsRule,
   isThresholdRule,
 } from '../../../../../common/detection_engine/utils';
 import { useFetchIndex } from '../../../containers/source';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useRuleAsync } from '../../../../detections/containers/detection_engine/rules/use_rule_async';
-import { getExceptionBuilderComponentLazy } from '../../../../../../lists/public';
 
 import * as i18n from './translations';
 import * as sharedI18n from '../translations';
@@ -56,13 +64,14 @@ import {
   filterIndexPatterns,
 } from '../helpers';
 import { Loader } from '../../loader';
-import { ErrorInfo, ErrorCallout } from '../error_callout';
-import { useGetInstalledJob } from '../../ml/hooks/use_get_jobs';
+import type { ErrorInfo } from '../error_callout';
+import { ErrorCallout } from '../error_callout';
 
 interface EditExceptionFlyoutProps {
   ruleName: string;
   ruleId: string;
   ruleIndices: string[];
+  dataViewId?: string;
   exceptionItem: ExceptionListItemSchema;
   exceptionListType: ExceptionListType;
   onCancel: () => void;
@@ -88,7 +97,7 @@ const FlyoutBodySection = styled.section`
   `}
 `;
 
-const FlyoutCheckboxesSection = styled(EuiFlyoutBody)`
+const FlyoutCheckboxesSection = styled.section`
   overflow-y: inherit;
   height: auto;
   .euiFlyoutBody__overflowContent {
@@ -106,13 +115,14 @@ export const EditExceptionFlyout = memo(function EditExceptionFlyout({
   ruleName,
   ruleId,
   ruleIndices,
+  dataViewId,
   exceptionItem,
   exceptionListType,
   onCancel,
   onConfirm,
   onRuleChange,
 }: EditExceptionFlyoutProps) {
-  const { http, data } = useKibana().services;
+  const { http, unifiedSearch, data } = useKibana().services;
   const [comment, setComment] = useState('');
   const [errorsExist, setErrorExists] = useState(false);
   const { rule: maybeRule, loading: isRuleLoading } = useRuleAsync(ruleId);
@@ -132,18 +142,36 @@ export const EditExceptionFlyout = memo(function EditExceptionFlyout({
   const [isSignalIndexPatternLoading, { indexPatterns: signalIndexPatterns }] =
     useFetchIndex(memoSignalIndexName);
 
-  const memoMlJobIds = useMemo(() => maybeRule?.machine_learning_job_id ?? [], [maybeRule]);
-  const { loading: mlJobLoading, jobs } = useGetInstalledJob(memoMlJobIds);
+  const { mlJobLoading, ruleIndices: memoRuleIndices } = useRuleIndices(
+    maybeRule?.machine_learning_job_id,
+    ruleIndices
+  );
 
-  const memoRuleIndices = useMemo(() => {
-    if (jobs.length > 0) {
-      return jobs[0].results_index_name ? [`.ml-anomalies-${jobs[0].results_index_name}`] : [];
-    } else {
-      return ruleIndices;
-    }
-  }, [jobs, ruleIndices]);
+  const hasDataViewId = dataViewId || maybeRule?.data_view_id || null;
+  const [dataViewIndexPatterns, setDataViewIndexPatterns] = useState<DataViewBase | null>(null);
 
-  const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(memoRuleIndices);
+  useEffect(() => {
+    const fetchSingleDataView = async () => {
+      if (hasDataViewId) {
+        const dv = await data.dataViews.get(hasDataViewId);
+        setDataViewIndexPatterns(dv);
+      }
+    };
+
+    fetchSingleDataView();
+  }, [hasDataViewId, data.dataViews, setDataViewIndexPatterns]);
+
+  // Don't fetch indices if rule has data view id (currently rule can technically have
+  // both defined and in that case we'd be doing unnecessary work here if all we want is
+  // the data view fields)
+  const [isIndexPatternLoading, { indexPatterns: indexIndexPatterns }] = useFetchIndex(
+    hasDataViewId ? [] : memoRuleIndices
+  );
+
+  const indexPattern = useMemo(
+    (): DataViewBase | null => (hasDataViewId ? dataViewIndexPatterns : indexIndexPatterns),
+    [hasDataViewId, dataViewIndexPatterns, indexIndexPatterns]
+  );
 
   const handleExceptionUpdateError = useCallback(
     (error: Error, statusCode: number | null, message: string | null) => {
@@ -328,11 +356,12 @@ export const EditExceptionFlyout = memo(function EditExceptionFlyout({
         <Loader data-test-subj="loadingEditExceptionFlyout" size="xl" />
       )}
       {!isSignalIndexLoading &&
+        indexPattern != null &&
         !addExceptionIsLoading &&
         !isIndexPatternLoading &&
         !isRuleLoading &&
         !mlJobLoading && (
-          <>
+          <EuiFlyoutBody>
             <FlyoutBodySection className="builder-section">
               {isRuleEQLSequenceStatement && (
                 <>
@@ -358,9 +387,11 @@ export const EditExceptionFlyout = memo(function EditExceptionFlyout({
               )}
               {getExceptionBuilderComponentLazy({
                 allowLargeValueLists:
-                  !isEqlRule(maybeRule?.type) && !isThresholdRule(maybeRule?.type),
+                  !isEqlRule(maybeRule?.type) &&
+                  !isThresholdRule(maybeRule?.type) &&
+                  !isNewTermsRule(maybeRule?.type),
                 httpService: http,
-                autocompleteService: data.autocomplete,
+                autocompleteService: unifiedSearch.autocomplete,
                 exceptionListItems: [exceptionItem],
                 listType: exceptionListType,
                 listId: exceptionItem.list_id,
@@ -374,7 +405,7 @@ export const EditExceptionFlyout = memo(function EditExceptionFlyout({
                 dataTestSubj: 'edit-exception-builder',
                 idAria: 'edit-exception-builder',
                 onChange: handleBuilderOnChange,
-                indexPatterns,
+                indexPatterns: indexPattern,
               })}
 
               <EuiSpacer />
@@ -408,29 +439,37 @@ export const EditExceptionFlyout = memo(function EditExceptionFlyout({
                 </>
               )}
             </FlyoutCheckboxesSection>
+          </EuiFlyoutBody>
+        )}
+
+      <EuiFlyoutFooter>
+        {hasVersionConflict && (
+          <>
+            <EuiCallOut
+              title={i18n.VERSION_CONFLICT_ERROR_TITLE}
+              color="danger"
+              iconType="alert"
+              data-test-subj="exceptionsFlyoutVersionConflict"
+            >
+              <p>{i18n.VERSION_CONFLICT_ERROR_DESCRIPTION}</p>
+            </EuiCallOut>
+            <EuiSpacer size="m" />
           </>
         )}
-      {updateError != null && (
-        <EuiFlyoutFooter>
-          <ErrorCallout
-            http={http}
-            errorInfo={updateError}
-            rule={maybeRule}
-            onCancel={onCancel}
-            onSuccess={handleDissasociationSuccess}
-            onError={handleDissasociationError}
-          />
-        </EuiFlyoutFooter>
-      )}
-      {hasVersionConflict && (
-        <EuiFlyoutFooter>
-          <EuiCallOut title={i18n.VERSION_CONFLICT_ERROR_TITLE} color="danger" iconType="alert">
-            <p>{i18n.VERSION_CONFLICT_ERROR_DESCRIPTION}</p>
-          </EuiCallOut>
-        </EuiFlyoutFooter>
-      )}
-      {updateError == null && (
-        <EuiFlyoutFooter>
+        {updateError != null && (
+          <>
+            <ErrorCallout
+              http={http}
+              errorInfo={updateError}
+              rule={maybeRule}
+              onCancel={onCancel}
+              onSuccess={handleDissasociationSuccess}
+              onError={handleDissasociationError}
+            />
+            <EuiSpacer size="m" />
+          </>
+        )}
+        {updateError === null && (
           <FlyoutFooterGroup justifyContent="spaceBetween">
             <EuiButtonEmpty data-test-subj="cancelExceptionAddButton" onClick={onCancel}>
               {i18n.CANCEL}
@@ -446,8 +485,8 @@ export const EditExceptionFlyout = memo(function EditExceptionFlyout({
               {i18n.EDIT_EXCEPTION_SAVE_BUTTON}
             </EuiButton>
           </FlyoutFooterGroup>
-        </EuiFlyoutFooter>
-      )}
+        )}
+      </EuiFlyoutFooter>
     </EuiFlyout>
   );
 });

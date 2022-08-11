@@ -28,15 +28,17 @@ export const readPrivilegesRoute = (
       const siemResponse = buildSiemResponse(response);
 
       try {
-        const esClient = context.core.elasticsearch.client.asCurrentUser;
-        const siemClient = context.securitySolution?.getAppClient();
+        const core = await context.core;
+        const securitySolution = await context.securitySolution;
+        const esClient = core.elasticsearch.client.asCurrentUser;
+        const siemClient = securitySolution?.getAppClient();
 
         if (!siemClient) {
           return siemResponse.error({ statusCode: 404 });
         }
 
-        const spaceId = context.securitySolution.getSpaceId();
-        const index = context.securitySolution
+        const spaceId = securitySolution.getSpaceId();
+        const index = securitySolution
           .getRuleDataService()
           .getResourceName(`security.alerts-${spaceId}`);
         const clusterPrivileges = await readPrivileges(esClient, index);

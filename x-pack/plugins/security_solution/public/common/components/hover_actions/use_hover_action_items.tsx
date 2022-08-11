@@ -7,20 +7,18 @@
 
 import { EuiContextMenuItem } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { DraggableId } from 'react-beautiful-dnd';
+import type { DraggableId } from 'react-beautiful-dnd';
 
 import { isEmpty } from 'lodash';
 
+import { FilterManager } from '@kbn/data-plugin/public';
 import { useKibana } from '../../lib/kibana';
-import { getAllFieldsByName } from '../../containers/source';
 import { allowTopN } from '../drag_and_drop/helpers';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
-import { ColumnHeaderOptions, DataProvider, TimelineId } from '../../../../common/types/timeline';
-import { SourcererScopeName } from '../../store/sourcerer/model';
-import { useSourcererDataView } from '../../containers/sourcerer';
+import type { ColumnHeaderOptions, DataProvider } from '../../../../common/types/timeline';
+import { TimelineId } from '../../../../common/types/timeline';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { ShowTopNButton } from './actions/show_top_n';
-import { FilterManager } from '../../../../../../../src/plugins/data/public';
 
 export interface UseHoverActionItemsProps {
   dataProvider?: DataProvider | DataProvider[];
@@ -29,7 +27,10 @@ export interface UseHoverActionItemsProps {
   draggableId?: DraggableId;
   enableOverflowButton?: boolean;
   field: string;
+  fieldType: string;
+  isAggregatable: boolean;
   handleHoverActionClicked: () => void;
+  hideAddToTimeline: boolean;
   hideTopN: boolean;
   isCaseView: boolean;
   isObjectArray: boolean;
@@ -58,8 +59,11 @@ export const useHoverActionItems = ({
   draggableId,
   enableOverflowButton,
   field,
+  fieldType,
+  isAggregatable,
   handleHoverActionClicked,
   hideTopN,
+  hideAddToTimeline,
   isCaseView,
   isObjectArray,
   isOverflowPopoverOpen,
@@ -100,23 +104,6 @@ export const useHoverActionItems = ({
         : filterManagerBackup,
     [uiSettings, timelineId, activeFilterManager, filterManagerBackup]
   );
-
-  //  Regarding data from useManageTimeline:
-  //  * `indexToAdd`, which enables the alerts index to be appended to
-  //    the `indexPattern` returned by `useWithSource`, may only be populated when
-  //    this component is rendered in the context of the active timeline. This
-  //    behavior enables the 'All events' view by appending the alerts index
-  //    to the index pattern.
-  const activeScope: SourcererScopeName =
-    timelineId === TimelineId.active
-      ? SourcererScopeName.timeline
-      : timelineId != null &&
-        [TimelineId.detectionsPage, TimelineId.detectionsRulesDetailsPage].includes(
-          timelineId as TimelineId
-        )
-      ? SourcererScopeName.detections
-      : SourcererScopeName.default;
-  const { browserFields } = useSourcererDataView(activeScope);
 
   /*
    * In the case of `DisableOverflowButton`, we show filters only when topN is NOT opened. As after topN button is clicked, the chart panel replace current hover actions in the hover actions' popover, so we have to hide all the actions.
@@ -204,7 +191,7 @@ export const useHoverActionItems = ({
             })}
           </div>
         ) : null,
-        values != null && (draggableId != null || !isEmpty(dataProvider)) ? (
+        values != null && (draggableId != null || !isEmpty(dataProvider)) && !hideAddToTimeline ? (
           <div data-test-subj="hover-actions-add-timeline" key="hover-actions-add-timeline">
             {getAddToTimelineButton({
               Component: enableOverflowButton ? EuiContextMenuItem : undefined,
@@ -220,7 +207,8 @@ export const useHoverActionItems = ({
           </div>
         ) : null,
         allowTopN({
-          browserField: getAllFieldsByName(browserFields)[field],
+          fieldType,
+          isAggregatable,
           fieldName: field,
           hideTopN,
         })
@@ -244,13 +232,14 @@ export const useHoverActionItems = ({
         return item != null;
       }),
     [
-      browserFields,
       dataProvider,
       dataType,
       defaultFocusedButtonRef,
       draggableId,
       enableOverflowButton,
       field,
+      fieldType,
+      isAggregatable,
       filterManager,
       getAddToTimelineButton,
       getColumnToggleButton,
@@ -258,6 +247,7 @@ export const useHoverActionItems = ({
       getFilterForValueButton,
       getFilterOutValueButton,
       handleHoverActionClicked,
+      hideAddToTimeline,
       hideTopN,
       isObjectArray,
       onFilterAdded,

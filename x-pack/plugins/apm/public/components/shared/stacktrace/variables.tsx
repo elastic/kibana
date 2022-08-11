@@ -8,7 +8,7 @@
 import { EuiAccordion } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
 import { KeyValueTable } from '../key_value_table';
 import { flattenObject } from '../../../utils/flatten_object';
@@ -17,8 +17,7 @@ const VariablesContainer = euiStyled.div`
   background: ${({ theme }) => theme.eui.euiColorEmptyShade};
   border-radius: 0 0 ${({ theme }) =>
     `${theme.eui.euiBorderRadiusSmall} ${theme.eui.euiBorderRadiusSmall}`};
-  padding:  ${({ theme }) =>
-    `${theme.eui.paddingSizes.s} ${theme.eui.paddingSizes.m}`};
+  padding:  ${({ theme }) => `${theme.eui.euiSizeS} ${theme.eui.euiSizeM}`};
 `;
 
 interface Props {

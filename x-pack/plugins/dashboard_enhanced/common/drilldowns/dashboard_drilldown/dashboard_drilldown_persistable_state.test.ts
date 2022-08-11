@@ -6,7 +6,7 @@
  */
 
 import { createExtract, createInject } from './dashboard_drilldown_persistable_state';
-import { SerializedEvent } from '../../../../ui_actions_enhanced/common';
+import { SerializedEvent } from '@kbn/ui-actions-enhanced-plugin/common';
 
 const drilldownId = 'test_id';
 const extract = createExtract({ drilldownId });

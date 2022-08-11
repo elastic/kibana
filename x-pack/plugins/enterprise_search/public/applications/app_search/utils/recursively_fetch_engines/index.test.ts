@@ -11,7 +11,7 @@ import { nextTick } from '@kbn/test-jest-helpers';
 
 import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 
-import { recursivelyFetchEngines } from './';
+import { recursivelyFetchEngines } from '.';
 
 describe('recursivelyFetchEngines', () => {
   const { http } = mockHttpValues;

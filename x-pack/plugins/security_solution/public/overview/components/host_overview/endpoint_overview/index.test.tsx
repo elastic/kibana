@@ -12,11 +12,9 @@ import '../../../../common/mock/match_media';
 import '../../../../common/mock/react_beautiful_dnd';
 import { TestProviders } from '../../../../common/mock';
 
-import { EndpointOverview } from './index';
-import {
-  EndpointFields,
-  HostPolicyResponseActionStatus,
-} from '../../../../../common/search_strategy/security_solution/hosts';
+import { EndpointOverview } from '.';
+import type { EndpointFields } from '../../../../../common/search_strategy/security_solution/hosts';
+import { HostPolicyResponseActionStatus } from '../../../../../common/search_strategy/security_solution/hosts';
 import { HostStatus } from '../../../../../common/endpoint/types';
 
 jest.mock('../../../../common/lib/kibana');

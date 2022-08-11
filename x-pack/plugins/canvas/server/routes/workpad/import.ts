@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RouteInitializerDeps } from '../';
+import { RouteInitializerDeps } from '..';
 import { API_ROUTE_WORKPAD_IMPORT } from '../../../common/lib/constants';
 import { ImportedCanvasWorkpad } from '../../../types';
 import { ImportedWorkpadSchema } from './workpad_schema';
@@ -32,7 +32,8 @@ export function initializeImportWorkpadRoute(deps: RouteInitializerDeps) {
     catchErrorHandler(async (context, request, response) => {
       const workpad = request.body as ImportedCanvasWorkpad;
 
-      const createdObject = await context.canvas.workpad.import(workpad);
+      const canvasContext = await context.canvas;
+      const createdObject = await canvasContext.workpad.import(workpad);
 
       return response.ok({
         body: { ...okResponse, id: createdObject.id },

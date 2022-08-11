@@ -22,7 +22,7 @@ export function SwimLaneProvider({ getService }: FtrProviderContext) {
   /**
    * Y axis labels width + padding
    */
-  const xOffset = 185;
+  const xOffset = 170;
 
   /**
    * Get coordinates relative to the left top corner of the canvas
@@ -96,7 +96,7 @@ export function SwimLaneProvider({ getService }: FtrProviderContext) {
         const actualValues = await this.getAxisLabels(testSubj, axis);
         expect(actualValues.length).to.eql(
           expectedCount,
-          `Expected swim lane ${axis} label count to be ${expectedCount}, got ${actualValues}`
+          `Expected swim lane ${axis} label count to be ${expectedCount}, got ${actualValues.length}`
         );
       });
     },

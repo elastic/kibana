@@ -29,6 +29,7 @@ const connector = {
   actionTypeId: '.servicenow',
   name: 'ServiceNow',
   isPreconfigured: false,
+  isDeprecated: false,
   config: {
     apiUrl: 'https://dev94428.service-now.com/',
   },

@@ -8,7 +8,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { NoApiIntegrationKeyCallOut } from './index';
+import { NoApiIntegrationKeyCallOut } from '.';
 
 describe('no_api_integration_callout', () => {
   it('renders correctly', () => {

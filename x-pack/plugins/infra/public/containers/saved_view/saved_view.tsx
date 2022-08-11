@@ -12,7 +12,7 @@ import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
 import { useCallback, useMemo, useState, useEffect, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
-import { SimpleSavedObject, SavedObjectAttributes } from 'kibana/public';
+import { SimpleSavedObject, SavedObjectAttributes } from '@kbn/core/public';
 import { useUrlState } from '../../utils/use_url_state';
 import { useFindSavedObject } from '../../hooks/use_find_saved_object';
 import { useCreateSavedObject } from '../../hooks/use_create_saved_object';

@@ -14,6 +14,7 @@ export {
   EuiLinkTo,
   EuiButtonTo,
   EuiButtonEmptyTo,
+  EuiButtonIconTo,
   EuiListGroupItemTo,
   EuiPanelTo,
   EuiCardTo,

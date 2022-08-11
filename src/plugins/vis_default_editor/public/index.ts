@@ -9,7 +9,7 @@
 // TODO: https://github.com/elastic/kibana/issues/110891
 /* eslint-disable @kbn/eslint/no_export_all */
 
-import { PluginInitializerContext } from 'kibana/public';
+import { PluginInitializerContext } from '@kbn/core/public';
 import { DefaultEditorController } from './default_editor_controller';
 import { VisDefaultEditorPlugin } from './plugin';
 

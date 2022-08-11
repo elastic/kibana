@@ -6,7 +6,7 @@
  */
 
 import { createMockedIndexPattern } from '../../../mocks';
-import { formulaOperation, GenericOperationDefinition, GenericIndexPatternColumn } from '../index';
+import { formulaOperation, GenericOperationDefinition, GenericIndexPatternColumn } from '..';
 import { FormulaIndexPatternColumn } from './formula';
 import { insertOrReplaceFormulaColumn } from './parse';
 import type { IndexPattern, IndexPatternField, IndexPatternLayer } from '../../../types';
@@ -194,6 +194,30 @@ describe('formula', () => {
       });
     });
 
+    it("should start with an empty formula if previous operation can't be converted", () => {
+      expect(
+        formulaOperation.buildColumn({
+          previousColumn: {
+            ...layer.columns.col1,
+            dataType: 'date',
+            filter: { language: 'kuery', query: 'ABC: DEF' },
+          },
+          layer,
+          indexPattern,
+        })
+      ).toEqual({
+        label: 'Formula',
+        dataType: 'number',
+        operationType: 'formula',
+        isBucketed: false,
+        filter: undefined,
+        timeScale: undefined,
+        scale: 'ratio',
+        params: {},
+        references: [],
+      });
+    });
+
     it('it should move over explicit format param if set', () => {
       expect(
         formulaOperation.buildColumn({
@@ -343,6 +367,7 @@ describe('formula', () => {
           formula: 'moving_average(average(bytes), window=3)',
         },
         references: [],
+        timeScale: 'd',
       });
     });
 
@@ -643,14 +668,6 @@ describe('formula', () => {
         'derivative(bytes + average(bytes))',
         'derivative(bytes + 7 + average(bytes))',
       ];
-
-      for (const formula of formulas) {
-        testIsBrokenFormula(formula);
-      }
-    });
-
-    it('returns no change but error if an argument is passed to count operation', () => {
-      const formulas = ['count(7)', 'count("bytes")', 'count(bytes)'];
 
       for (const formula of formulas) {
         testIsBrokenFormula(formula);
@@ -1099,19 +1116,15 @@ invalid: "
       }
     });
 
-    it('returns an error if an argument is passed to count() operation', () => {
-      const formulas = ['count(7)', 'count("bytes")', 'count(bytes)'];
-
-      for (const formula of formulas) {
-        expect(
-          formulaOperation.getErrorMessage!(
-            getNewLayerWithFormula(formula),
-            'col1',
-            indexPattern,
-            operationDefinitionMap
-          )
-        ).toEqual(['The operation count does not accept any field as argument']);
-      }
+    it('does not return an error if count() is called without a field', () => {
+      expect(
+        formulaOperation.getErrorMessage!(
+          getNewLayerWithFormula('count()'),
+          'col1',
+          indexPattern,
+          operationDefinitionMap
+        )
+      ).toEqual(undefined);
     });
 
     it('returns an error if an operation with required parameters does not receive them', () => {
@@ -1521,7 +1534,10 @@ invalid: "
           `${fn}(${Array(nArgs.length).fill('bytes').join(', ')})`,
         ];
         // add the fourth check only for those functions with more than 1 arg required
-        const enableFourthCheck = nArgs.filter(({ optional }) => !optional).length > 1;
+        const enableFourthCheck =
+          nArgs.filter(
+            ({ optional, alternativeWhenMissing }) => !optional && !alternativeWhenMissing
+          ).length > 1;
         if (enableFourthCheck) {
           formulas.push(`${fn}(1)`);
         }
@@ -1537,6 +1553,24 @@ invalid: "
         });
       });
     }
+
+    it('returns an error suggesting to use an alternative function', () => {
+      const formulas = [`clamp(1)`, 'clamp(1, 5)'];
+      const errorsWithSuggestions = [
+        'The operation clamp in the Formula is missing the min argument: use the pick_max operation instead.',
+        'The operation clamp in the Formula is missing the max argument: use the pick_min operation instead.',
+      ];
+      formulas.forEach((formula, i) => {
+        expect(
+          formulaOperation.getErrorMessage!(
+            getNewLayerWithFormula(formula),
+            'col1',
+            indexPattern,
+            operationDefinitionMap
+          )
+        ).toEqual([errorsWithSuggestions[i]]);
+      });
+    });
 
     it('returns error if formula filter has not same type of inner operations filter', () => {
       const formulas = [

@@ -5,15 +5,20 @@
  * 2.0.
  */
 
-import { CoreStart } from 'kibana/public';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+import {
+  HttpStart,
+  DocLinksStart,
+  IUiSettingsClient,
+  ApplicationStart,
+} from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ApmPluginStartDeps } from '../plugin';
 
 interface UxKibanaServices extends ApmPluginStartDeps {
-  http: CoreStart['http'];
-  docLinks: CoreStart['docLinks'];
-  uiSettings: CoreStart['uiSettings'];
-  application: CoreStart['application'];
+  http: HttpStart;
+  docLinks: DocLinksStart;
+  uiSettings: IUiSettingsClient;
+  application: ApplicationStart;
 }
 
 export function useKibanaServices() {

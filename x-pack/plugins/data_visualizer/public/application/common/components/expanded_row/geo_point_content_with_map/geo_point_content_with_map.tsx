@@ -4,25 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React, { FC, useEffect, useState } from 'react';
-import { IndexPattern } from '../../../../../../../../../src/plugins/data/common';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { ES_GEO_FIELD_TYPE, LayerDescriptor } from '@kbn/maps-plugin/common';
 import { CombinedQuery } from '../../../../index_data_visualizer/types/combined_query';
 import { ExpandedRowContent } from '../../stats_table/components/field_data_expanded_row/expanded_row_content';
 import { DocumentStatsTable } from '../../stats_table/components/field_data_expanded_row/document_stats';
 import { ExamplesList } from '../../examples_list';
 import { FieldVisConfig } from '../../stats_table/types';
 import { useDataVisualizerKibana } from '../../../../kibana_context';
-import { JOB_FIELD_TYPES } from '../../../../../../common/constants';
-import { ES_GEO_FIELD_TYPE, LayerDescriptor } from '../../../../../../../maps/common';
+import { SUPPORTED_FIELD_TYPES } from '../../../../../../common/constants';
 import { EmbeddedMapComponent } from '../../embedded_map';
 import { ExpandedRowPanel } from '../../stats_table/components/field_data_expanded_row/expanded_row_panel';
 
 export const GeoPointContentWithMap: FC<{
   config: FieldVisConfig;
-  indexPattern: IndexPattern | undefined;
+  dataView: DataView | undefined;
   combinedQuery: CombinedQuery;
-}> = ({ config, indexPattern, combinedQuery }) => {
+}> = ({ config, dataView, combinedQuery }) => {
   const { stats } = config;
   const [layerList, setLayerList] = useState<LayerDescriptor[]>([]);
   const {
@@ -33,13 +32,14 @@ export const GeoPointContentWithMap: FC<{
   useEffect(() => {
     async function updateIndexPatternSearchLayer() {
       if (
-        indexPattern?.id !== undefined &&
+        dataView?.id !== undefined &&
         config !== undefined &&
         config.fieldName !== undefined &&
-        (config.type === JOB_FIELD_TYPES.GEO_POINT || config.type === JOB_FIELD_TYPES.GEO_SHAPE)
+        (config.type === SUPPORTED_FIELD_TYPES.GEO_POINT ||
+          config.type === SUPPORTED_FIELD_TYPES.GEO_SHAPE)
       ) {
         const params = {
-          indexPatternId: indexPattern.id,
+          indexPatternId: dataView.id,
           geoFieldName: config.fieldName,
           geoFieldType: config.type as ES_GEO_FIELD_TYPE,
           filters: data.query.filterManager.getFilters() ?? [],
@@ -58,13 +58,13 @@ export const GeoPointContentWithMap: FC<{
     }
     updateIndexPatternSearchLayer();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [indexPattern, combinedQuery, config, mapsPlugin, data.query]);
+  }, [dataView, combinedQuery, config, mapsPlugin, data.query]);
 
   if (stats?.examples === undefined) return null;
   return (
     <ExpandedRowContent dataTestSubj={'dataVisualizerIndexBasedMapContent'}>
       <DocumentStatsTable config={config} />
-      <ExamplesList examples={stats.examples} />
+      <ExamplesList examples={stats?.examples} />
       <ExpandedRowPanel className={'dvPanel__wrapper dvMap__wrapper'} grow={true}>
         <EmbeddedMapComponent layerList={layerList} />
       </ExpandedRowPanel>

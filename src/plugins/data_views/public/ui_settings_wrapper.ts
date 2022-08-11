@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IUiSettingsClient, PublicUiSettingsParams, UserProvidedValues } from 'src/core/public';
+import { IUiSettingsClient, PublicUiSettingsParams, UserProvidedValues } from '@kbn/core/public';
 import { UiSettingsCommon } from '../common';
 
 export class UiSettingsPublicToCommon implements UiSettingsCommon {
@@ -14,15 +14,17 @@ export class UiSettingsPublicToCommon implements UiSettingsCommon {
   constructor(uiSettings: IUiSettingsClient) {
     this.uiSettings = uiSettings;
   }
-  get<T = any>(key: string): Promise<T> {
+  get<T = unknown>(key: string): Promise<T | undefined> {
     return Promise.resolve(this.uiSettings.get(key));
   }
 
-  getAll<T = any>(): Promise<Record<string, PublicUiSettingsParams & UserProvidedValues<T>>> {
+  getAll<T = unknown>(): Promise<
+    Record<string, (PublicUiSettingsParams & UserProvidedValues<T>) | undefined>
+  > {
     return Promise.resolve(this.uiSettings.getAll());
   }
 
-  set(key: string, value: any) {
+  set(key: string, value: unknown) {
     this.uiSettings.set(key, value);
     return Promise.resolve();
   }

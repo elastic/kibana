@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import alter from '../lib/alter.js';
+import alter from '../lib/alter';
 import Chainable from '../lib/classes/chainable';
 import tinygradient from 'tinygradient';
 

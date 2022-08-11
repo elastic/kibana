@@ -7,6 +7,11 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { sortBy } from 'lodash';
+import {
+  kqlQuery,
+  rangeQuery,
+  termQuery,
+} from '@kbn/observability-plugin/server';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { Setup } from '../../lib/helpers/setup_request';
@@ -14,11 +19,6 @@ import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { calculateImpactBuilder } from './calculate_impact_builder';
 import { calculateThroughputWithRange } from '../../lib/helpers/calculate_throughput';
-import {
-  kqlQuery,
-  rangeQuery,
-  termQuery,
-} from '../../../../observability/server';
 import {
   getDurationFieldForTransactions,
   getDocumentTypeFilterForTransactions,
@@ -32,6 +32,7 @@ import {
   TRANSACTION_NAME,
   TRANSACTION_ROOT,
 } from '../../../common/elasticsearch_fieldnames';
+import { RandomSampler } from '../../lib/helpers/get_random_sampler';
 
 export type BucketKey = Record<
   typeof TRANSACTION_NAME | typeof SERVICE_NAME,
@@ -46,8 +47,9 @@ interface TopTracesParams {
   start: number;
   end: number;
   setup: Setup;
+  randomSampler: RandomSampler;
 }
-export function getTopTracesPrimaryStats({
+export async function getTopTracesPrimaryStats({
   environment,
   kuery,
   transactionName,
@@ -55,6 +57,7 @@ export function getTopTracesPrimaryStats({
   start,
   end,
   setup,
+  randomSampler,
 }: TopTracesParams) {
   return withApmSpan('get_top_traces_primary_stats', async () => {
     const response = await setup.apmEventClient.search(
@@ -101,47 +104,52 @@ export function getTopTracesPrimaryStats({
             },
           },
           aggs: {
-            transaction_groups: {
-              composite: {
-                sources: asMutableArray([
-                  { [SERVICE_NAME]: { terms: { field: SERVICE_NAME } } },
-                  {
-                    [TRANSACTION_NAME]: {
-                      terms: { field: TRANSACTION_NAME },
-                    },
-                  },
-                ] as const),
-                // traces overview is hardcoded to 10000
-                size: 10000,
-              },
+            sample: {
+              random_sampler: randomSampler,
               aggs: {
-                transaction_type: {
-                  top_metrics: {
-                    sort: {
-                      '@timestamp': 'desc' as const,
+                transaction_groups: {
+                  composite: {
+                    sources: asMutableArray([
+                      { [SERVICE_NAME]: { terms: { field: SERVICE_NAME } } },
+                      {
+                        [TRANSACTION_NAME]: {
+                          terms: { field: TRANSACTION_NAME },
+                        },
+                      },
+                    ] as const),
+                    // traces overview is hardcoded to 10000
+                    size: 10000,
+                  },
+                  aggs: {
+                    transaction_type: {
+                      top_metrics: {
+                        sort: {
+                          '@timestamp': 'desc' as const,
+                        },
+                        metrics: [
+                          {
+                            field: TRANSACTION_TYPE,
+                          } as const,
+                          {
+                            field: AGENT_NAME,
+                          } as const,
+                        ],
+                      },
                     },
-                    metrics: [
-                      {
-                        field: TRANSACTION_TYPE,
-                      } as const,
-                      {
-                        field: AGENT_NAME,
-                      } as const,
-                    ],
-                  },
-                },
-                avg: {
-                  avg: {
-                    field: getDurationFieldForTransactions(
-                      searchAggregatedTransactions
-                    ),
-                  },
-                },
-                sum: {
-                  sum: {
-                    field: getDurationFieldForTransactions(
-                      searchAggregatedTransactions
-                    ),
+                    avg: {
+                      avg: {
+                        field: getDurationFieldForTransactions(
+                          searchAggregatedTransactions
+                        ),
+                      },
+                    },
+                    sum: {
+                      sum: {
+                        field: getDurationFieldForTransactions(
+                          searchAggregatedTransactions
+                        ),
+                      },
+                    },
                   },
                 },
               },
@@ -152,12 +160,12 @@ export function getTopTracesPrimaryStats({
     );
 
     const calculateImpact = calculateImpactBuilder(
-      response.aggregations?.transaction_groups.buckets.map(
+      response.aggregations?.sample.transaction_groups.buckets.map(
         ({ sum }) => sum.value
       )
     );
 
-    const items = response.aggregations?.transaction_groups.buckets.map(
+    const items = response.aggregations?.sample.transaction_groups.buckets.map(
       (bucket) => {
         return {
           key: bucket.key as BucketKey,

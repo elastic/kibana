@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup } from 'kibana/server';
+import { Plugin, CoreSetup } from '@kbn/core/server';
 
-import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../../plugins/features/server';
-import { SpacesPluginStart } from '../../../../../../../plugins/spaces/server';
-import { SecurityPluginStart } from '../../../../../../../plugins/security/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { SecurityPluginStart } from '@kbn/security-plugin/server';
 
 export interface FixtureSetupDeps {
   features: FeaturesPluginSetup;
@@ -23,6 +23,14 @@ export interface FixtureStartDeps {
 export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, FixtureStartDeps> {
   public setup(core: CoreSetup<FixtureStartDeps>, deps: FixtureSetupDeps) {
     const { features } = deps;
+    this.registerFeatures(features);
+  }
+
+  public start() {}
+
+  public stop() {}
+
+  private registerFeatures(features: FeaturesPluginSetup) {
     features.registerKibanaFeature({
       id: 'securitySolutionFixture',
       name: 'SecuritySolutionFixture',
@@ -31,9 +39,13 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       cases: ['securitySolutionFixture'],
       privileges: {
         all: {
+          api: ['casesSuggestUserProfiles'],
           app: ['kibana'],
           cases: {
-            all: ['securitySolutionFixture'],
+            create: ['securitySolutionFixture'],
+            read: ['securitySolutionFixture'],
+            update: ['securitySolutionFixture'],
+            push: ['securitySolutionFixture'],
           },
           savedObject: {
             all: [],
@@ -53,6 +65,31 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
           ui: [],
         },
       },
+      subFeatures: [
+        {
+          name: 'Custom privileges',
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  name: 'Delete',
+                  id: 'cases_delete',
+                  includeIn: 'all',
+                  cases: {
+                    delete: ['securitySolutionFixture'],
+                  },
+                  savedObject: {
+                    all: [],
+                    read: [],
+                  },
+                  ui: [],
+                },
+              ],
+            },
+          ],
+        },
+      ],
     });
 
     features.registerKibanaFeature({
@@ -88,6 +125,4 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       },
     });
   }
-  public start() {}
-  public stop() {}
 }

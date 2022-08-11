@@ -7,9 +7,9 @@
 
 import React, { ReactNode } from 'react';
 import { EuiLink } from '@elastic/eui';
-import { UI_SETTINGS } from '../../../../../../../../src/plugins/data/common';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { useMlHref, ML_PAGES } from '@kbn/ml-plugin/public';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { useMlHref, ML_PAGES } from '../../../../../../ml/public';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { TimePickerRefreshInterval } from '../../date_picker/typings';
 

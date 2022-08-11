@@ -247,4 +247,11 @@ describe('IndexingRulesTable', () => {
       expect(clearFlashMessages).toHaveBeenCalled();
     });
   });
+
+  it('includes a bottom row message', () => {
+    const wrapper = shallow(<IndexingRulesTable />);
+    const table = wrapper.find(InlineEditableTable);
+
+    expect(table.prop('bottomRows')).toHaveLength(1);
+  });
 });

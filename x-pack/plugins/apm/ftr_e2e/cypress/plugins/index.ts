@@ -4,7 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, createLogger, LogLevel } from '@elastic/apm-synthtrace';
+import {
+  apm,
+  createLogger,
+  EntityArrayIterable,
+  LogLevel,
+} from '@elastic/apm-synthtrace';
 import { createEsClientForTesting } from '@kbn/test';
 
 // ***********************************************************
@@ -35,12 +40,16 @@ const plugin: Cypress.PluginConfig = (on, config) => {
 
   const synthtraceEsClient = new apm.ApmSynthtraceEsClient(
     client,
-    createLogger(LogLevel.info)
+    createLogger(LogLevel.info),
+    {
+      forceLegacyIndices: true,
+      refreshAfterIndex: true,
+    }
   );
 
   on('task', {
-    'synthtrace:index': async (events) => {
-      await synthtraceEsClient.index(events);
+    'synthtrace:index': async (events: Array<Record<string, any>>) => {
+      await synthtraceEsClient.index(new EntityArrayIterable(events));
       return null;
     },
     'synthtrace:clean': async () => {

@@ -10,17 +10,21 @@ import _ from 'lodash';
 import { populateContext } from '../autocomplete/engine';
 
 import '../../application/models/sense_editor/sense_editor.test.mocks';
-import * as kb from '../kb';
-import * as mappings from '../mappings/mappings';
+import * as kb from '.';
+import { AutocompleteInfo, setAutocompleteInfo } from '../../services';
 
 describe('Knowledge base', () => {
+  let autocompleteInfo;
   beforeEach(() => {
-    mappings.clear();
     kb.setActiveApi(kb._test.loadApisFromJson({}));
+    autocompleteInfo = new AutocompleteInfo();
+    setAutocompleteInfo(autocompleteInfo);
+    autocompleteInfo.mapping.clearMappings();
   });
   afterEach(() => {
-    mappings.clear();
     kb.setActiveApi(kb._test.loadApisFromJson({}));
+    autocompleteInfo = null;
+    setAutocompleteInfo(null);
   });
 
   const MAPPING = {
@@ -122,7 +126,7 @@ describe('Knowledge base', () => {
 
       kb.setActiveApi(testApi);
 
-      mappings.loadMappings(MAPPING);
+      autocompleteInfo.mapping.loadMappings(MAPPING);
       testUrlContext(tokenPath, otherTokenValues, expectedContext);
     });
   }
@@ -165,7 +169,7 @@ describe('Knowledge base', () => {
       );
       kb.setActiveApi(testApi);
 
-      mappings.loadMappings(MAPPING);
+      autocompleteInfo.mapping.loadMappings(MAPPING);
 
       testUrlContext(tokenPath, otherTokenValues, expectedContext);
     });

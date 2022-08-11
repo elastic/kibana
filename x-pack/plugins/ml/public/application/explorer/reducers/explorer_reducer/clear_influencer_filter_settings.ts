@@ -12,14 +12,10 @@ import { ExplorerState } from './state';
 export function clearInfluencerFilterSettings(state: ExplorerState): ExplorerState {
   return {
     ...state,
-    filterActive: false,
-    filteredFields: [],
-    influencersFilterQuery: undefined,
     isAndOperator: false,
     maskAll: false,
     queryString: '',
     tableQueryString: '',
     ...getClearedSelectedAnomaliesState(),
-    viewByFromPage: 1,
   };
 }

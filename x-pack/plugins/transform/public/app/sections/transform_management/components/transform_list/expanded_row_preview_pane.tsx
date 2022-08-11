@@ -17,7 +17,7 @@ import { SearchItems } from '../../../../hooks/use_search_items';
 import {
   applyTransformConfigToDefineState,
   getDefaultStepDefineState,
-} from '../../../create_transform/components/step_define/';
+} from '../../../create_transform/components/step_define';
 
 interface ExpandedRowPreviewPaneProps {
   transformConfig: TransformConfigUnion;
@@ -40,12 +40,12 @@ export const ExpandedRowPreviewPane: FC<ExpandedRowPreviewPaneProps> = ({ transf
 
   const pivotQuery = useMemo(() => getPivotQuery(searchQuery), [searchQuery]);
 
-  const indexPatternTitle = Array.isArray(transformConfig.source.index)
+  const dataViewTitle = Array.isArray(transformConfig.source.index)
     ? transformConfig.source.index.join(',')
     : transformConfig.source.index;
 
   const pivotPreviewProps = usePivotData(
-    indexPatternTitle,
+    dataViewTitle,
     pivotQuery,
     validationStatus,
     previewRequest,

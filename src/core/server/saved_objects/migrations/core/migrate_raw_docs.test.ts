@@ -192,9 +192,15 @@ describe('migrateRawDocsSafely', () => {
     const result = (await task()) as Either.Left<DocumentsTransformFailed>;
     expect(transform).toHaveBeenCalledTimes(1);
     expect(result._tag).toEqual('Left');
-    expect(Object.keys(result.left)).toEqual(['type', 'corruptDocumentIds', 'transformErrors']);
+    expect(Object.keys(result.left)).toEqual([
+      'type',
+      'corruptDocumentIds',
+      'transformErrors',
+      'processedDocs',
+    ]);
     expect(result.left.corruptDocumentIds.length).toEqual(1);
     expect(result.left.transformErrors.length).toEqual(0);
+    expect(result.left.processedDocs.length).toEqual(1);
   });
 
   test('handles when one document is transformed into multiple documents', async () => {

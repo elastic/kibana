@@ -8,11 +8,11 @@
 import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { useStatusBulkActionItems } from '../../../../../../timelines/public';
-import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
+import { useBulkActionItems } from '@kbn/timelines-plugin/public';
+import type { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { timelineActions } from '../../../../timelines/store/timeline';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
-import { SetEventsDeletedProps, SetEventsLoadingProps } from '../types';
+import type { SetEventsDeletedProps, SetEventsLoadingProps } from '../types';
 interface Props {
   alertStatus?: Status;
   closePopover: () => void;
@@ -31,7 +31,7 @@ export const useAlertsActions = ({
   refetch,
 }: Props) => {
   const dispatch = useDispatch();
-  const { hasIndexWrite, hasKibanaCRUD } = useAlertsPrivileges();
+  const { hasIndexWrite } = useAlertsPrivileges();
 
   const onStatusUpdate = useCallback(() => {
     closePopover();
@@ -54,7 +54,7 @@ export const useAlertsActions = ({
     [dispatch, timelineId]
   );
 
-  const actionItems = useStatusBulkActionItems({
+  const actionItems = useBulkActionItems({
     eventIds: [eventId],
     currentStatus: alertStatus,
     indexName,
@@ -66,6 +66,6 @@ export const useAlertsActions = ({
   });
 
   return {
-    actionItems: hasIndexWrite && hasKibanaCRUD ? actionItems : [],
+    actionItems: hasIndexWrite ? actionItems : [],
   };
 };

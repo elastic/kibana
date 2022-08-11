@@ -5,32 +5,20 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTitle,
-  RIGHT_ALIGNMENT,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ConnectionStatsItemWithComparisonData } from '../../../../common/connections';
-import {
-  asMillisecondDuration,
-  asPercent,
-  asTransactionRate,
-} from '../../../../common/utils/formatters';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { EmptyMessage } from '../empty_message';
-import { ImpactBar } from '../impact_bar';
-import { ListMetric } from '../list_metric';
 import { ITableColumn, ManagedTable } from '../managed_table';
 import { OverviewTableContainer } from '../overview_table_container';
 import { TruncateWithTooltip } from '../truncate_with_tooltip';
 import {
-  ChartType,
-  getTimeSeriesColor,
-} from '../charts/helper/get_timeseries_color';
+  getSpanMetricColumns,
+  SpanMetricGroup,
+} from './get_span_metric_columns';
 
 export type DependenciesItem = Omit<
   ConnectionStatsItemWithComparisonData,
@@ -42,34 +30,60 @@ export type DependenciesItem = Omit<
 
 interface Props {
   dependencies: DependenciesItem[];
+  initialPageSize: number;
   fixedHeight?: boolean;
-  isSingleColumn?: boolean;
   link?: React.ReactNode;
   title: React.ReactNode;
   nameColumnTitle: React.ReactNode;
   status: FETCH_STATUS;
   compact?: boolean;
-  hidePerPageOptions?: boolean;
+  showPerPageOptions?: boolean;
 }
+
+type FormattedSpanMetricGroup = SpanMetricGroup & {
+  name: string;
+  link: React.ReactElement;
+};
 
 export function DependenciesTable(props: Props) {
   const {
     dependencies,
     fixedHeight,
-    isSingleColumn = true,
     link,
     title,
     nameColumnTitle,
     status,
     compact = true,
-    hidePerPageOptions = false,
+    showPerPageOptions = true,
+    initialPageSize,
   } = props;
 
   // SparkPlots should be hidden if we're in two-column view and size XL (1200px)
-  const { isXl } = useBreakpoints();
-  const shouldShowSparkPlots = isSingleColumn || !isXl;
+  const breakpoints = useBreakpoints();
 
-  const columns: Array<ITableColumn<DependenciesItem>> = [
+  const items: FormattedSpanMetricGroup[] = dependencies.map((dependency) => ({
+    name: dependency.name,
+    link: dependency.link,
+    latency: dependency.currentStats.latency.value,
+    throughput: dependency.currentStats.throughput.value,
+    failureRate: dependency.currentStats.errorRate.value,
+    impact: dependency.currentStats.impact,
+    currentStats: {
+      latency: dependency.currentStats.latency.timeseries,
+      throughput: dependency.currentStats.throughput.timeseries,
+      failureRate: dependency.currentStats.errorRate.timeseries,
+    },
+    previousStats: dependency.previousStats
+      ? {
+          latency: dependency.previousStats.latency.timeseries,
+          throughput: dependency.previousStats.throughput.timeseries,
+          failureRate: dependency.previousStats.errorRate.timeseries,
+          impact: dependency.previousStats.impact,
+        }
+      : undefined,
+  }));
+
+  const columns: Array<ITableColumn<FormattedSpanMetricGroup>> = [
     {
       field: 'name',
       name: nameColumnTitle,
@@ -78,119 +92,13 @@ export function DependenciesTable(props: Props) {
         return <TruncateWithTooltip text={name} content={itemLink} />;
       },
       sortable: true,
+      width: '30%',
     },
-    {
-      field: 'latencyValue',
-      name: i18n.translate('xpack.apm.dependenciesTable.columnLatency', {
-        defaultMessage: 'Latency (avg.)',
-      }),
-      align: RIGHT_ALIGNMENT,
-      render: (_, { currentStats, previousStats }) => {
-        const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
-          ChartType.LATENCY_AVG
-        );
-
-        return (
-          <ListMetric
-            compact
-            color={currentPeriodColor}
-            hideSeries={!shouldShowSparkPlots}
-            series={currentStats.latency.timeseries}
-            comparisonSeries={previousStats?.latency.timeseries}
-            valueLabel={asMillisecondDuration(currentStats.latency.value)}
-            comparisonSeriesColor={previousPeriodColor}
-          />
-        );
-      },
-      sortable: true,
-    },
-    {
-      field: 'throughputValue',
-      name: i18n.translate('xpack.apm.dependenciesTable.columnThroughput', {
-        defaultMessage: 'Throughput',
-      }),
-      align: RIGHT_ALIGNMENT,
-      render: (_, { currentStats, previousStats }) => {
-        const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
-          ChartType.THROUGHPUT
-        );
-
-        return (
-          <ListMetric
-            compact
-            color={currentPeriodColor}
-            hideSeries={!shouldShowSparkPlots}
-            series={currentStats.throughput.timeseries}
-            comparisonSeries={previousStats?.throughput.timeseries}
-            valueLabel={asTransactionRate(currentStats.throughput.value)}
-            comparisonSeriesColor={previousPeriodColor}
-          />
-        );
-      },
-      sortable: true,
-    },
-    {
-      field: 'errorRateValue',
-      name: i18n.translate('xpack.apm.dependenciesTable.columnErrorRate', {
-        defaultMessage: 'Failed transaction rate',
-      }),
-      align: RIGHT_ALIGNMENT,
-      render: (_, { currentStats, previousStats }) => {
-        const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
-          ChartType.FAILED_TRANSACTION_RATE
-        );
-
-        return (
-          <ListMetric
-            compact
-            color={currentPeriodColor}
-            hideSeries={!shouldShowSparkPlots}
-            series={currentStats.errorRate.timeseries}
-            comparisonSeries={previousStats?.errorRate.timeseries}
-            valueLabel={asPercent(currentStats.errorRate.value, 1)}
-            comparisonSeriesColor={previousPeriodColor}
-          />
-        );
-      },
-      sortable: true,
-    },
-    {
-      field: 'impactValue',
-      name: i18n.translate('xpack.apm.dependenciesTable.columnImpact', {
-        defaultMessage: 'Impact',
-      }),
-      align: RIGHT_ALIGNMENT,
-      render: (_, { currentStats, previousStats }) => {
-        return (
-          <EuiFlexGroup alignItems="flexEnd" gutterSize="xs" direction="column">
-            <EuiFlexItem>
-              <ImpactBar value={currentStats.impact} size="m" />
-            </EuiFlexItem>
-            {previousStats?.impact !== undefined && (
-              <EuiFlexItem>
-                <ImpactBar
-                  value={previousStats?.impact}
-                  size="s"
-                  color="subdued"
-                />
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        );
-      },
-      sortable: true,
-    },
+    ...getSpanMetricColumns({
+      breakpoints,
+      comparisonFetchStatus: status,
+    }),
   ];
-
-  // need top-level sortable fields for the managed table
-  const items =
-    dependencies.map((item) => ({
-      ...item,
-      errorRateValue: item.currentStats.errorRate.value,
-      latencyValue: item.currentStats.latency.value,
-      throughputValue: item.currentStats.throughput.value,
-      impactValue: item.currentStats.impact,
-    })) ?? [];
 
   const noItemsMessage = !compact ? (
     <EmptyMessage
@@ -233,10 +141,11 @@ export function DependenciesTable(props: Props) {
             columns={columns}
             items={items}
             noItemsMessage={noItemsMessage}
-            initialSortField="impactValue"
+            initialSortField="impact"
             initialSortDirection="desc"
             pagination={true}
-            hidePerPageOptions={hidePerPageOptions}
+            showPerPageOptions={showPerPageOptions}
+            initialPageSize={initialPageSize}
           />
         </OverviewTableContainer>
       </EuiFlexItem>

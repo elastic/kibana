@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { termQuery } from '../../../../observability/server';
-import { ProcessorEvent } from '../../../common/processor_event';
+import { termQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { Setup } from '../../lib/helpers/setup_request';
 import {
   SERVICE_NAME,

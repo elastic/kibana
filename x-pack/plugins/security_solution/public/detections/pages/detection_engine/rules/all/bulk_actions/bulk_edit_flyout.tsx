@@ -7,13 +7,12 @@
 
 import React from 'react';
 
-import {
-  BulkActionEditType,
-  BulkActionEditPayload,
-} from '../../../../../../../common/detection_engine/schemas/common/schemas';
+import type { BulkActionEditPayload } from '../../../../../../../common/detection_engine/schemas/common/schemas';
+import { BulkActionEditType } from '../../../../../../../common/detection_engine/schemas/common/schemas';
 
 import { IndexPatternsForm } from './forms/index_patterns_form';
 import { TagsForm } from './forms/tags_form';
+import { TimelineTemplateForm } from './forms/timeline_template_form';
 
 interface BulkEditFlyoutProps {
   onClose: () => void;
@@ -34,6 +33,9 @@ const BulkEditFlyoutComponent = ({ editAction, tags, ...props }: BulkEditFlyoutP
     case BulkActionEditType.delete_tags:
     case BulkActionEditType.set_tags:
       return <TagsForm {...props} editAction={editAction} tags={tags} />;
+
+    case BulkActionEditType.set_timeline:
+      return <TimelineTemplateForm {...props} />;
 
     default:
       return null;

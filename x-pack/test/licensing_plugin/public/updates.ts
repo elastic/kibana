@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import { FtrProviderContext } from '../services';
-import { LicensingPluginSetup } from '../../../plugins/licensing/public';
 import { createScenario } from '../scenario';
-import '../../../../test/plugin_functional/plugins/core_provider_plugin/types';
+import '@kbn/core-provider-plugin/types';
 
 // eslint-disable-next-line import/no-default-export
 export default function (ftrContext: FtrProviderContext) {

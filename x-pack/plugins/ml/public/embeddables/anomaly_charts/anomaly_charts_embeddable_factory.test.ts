@@ -6,8 +6,8 @@
  */
 
 import { AnomalyChartsEmbeddableFactory } from './anomaly_charts_embeddable_factory';
-import { coreMock } from '../../../../../../src/core/public/mocks';
-import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { AnomalyChartsEmbeddable } from './anomaly_charts_embeddable';
 import { AnomalyChartsEmbeddableInput } from '..';
 

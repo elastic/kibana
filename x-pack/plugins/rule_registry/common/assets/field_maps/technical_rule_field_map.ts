@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { pickWithPatterns } from '../../../common/pick_with_patterns';
-import * as Fields from '../../../common/technical_rule_data_field_names';
+
+import { pickWithPatterns } from '../../pick_with_patterns';
+import * as Fields from '../../technical_rule_data_field_names';
 import { ecsFieldMap } from './ecs_field_map';
 
 export const technicalRuleFieldMap = {
@@ -22,6 +23,7 @@ export const technicalRuleFieldMap = {
   [Fields.ALERT_RULE_PRODUCER]: { type: 'keyword', required: true },
   [Fields.SPACE_IDS]: { type: 'keyword', array: true, required: true },
   [Fields.ALERT_UUID]: { type: 'keyword', required: true },
+  [Fields.ALERT_INSTANCE_ID]: { type: 'keyword', required: true },
   [Fields.ALERT_START]: { type: 'date' },
   [Fields.ALERT_END]: { type: 'date' },
   [Fields.ALERT_DURATION]: { type: 'long' },

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { SavedObject } from '../../types';
+import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { CreatedObject } from '@kbn/core-saved-objects-server';
 import { extractErrors } from './extract_errors';
 import { SavedObjectsErrorHelpers } from '../../service';
-import { CreatedObject } from '../types';
 
 describe('extractErrors()', () => {
   test('returns empty array when no errors exist', () => {
@@ -51,45 +51,42 @@ describe('extractErrors()', () => {
     ];
     const result = extractErrors(savedObjects, savedObjects);
     expect(result).toMatchInlineSnapshot(`
-Array [
-  Object {
-    "error": Object {
-      "type": "conflict",
-    },
-    "id": "2",
-    "meta": Object {
-      "title": "My Dashboard 2",
-    },
-    "title": "My Dashboard 2",
-    "type": "dashboard",
-  },
-  Object {
-    "error": Object {
-      "error": "Bad Request",
-      "message": "Bad Request",
-      "statusCode": 400,
-      "type": "unknown",
-    },
-    "id": "3",
-    "meta": Object {
-      "title": "My Dashboard 3",
-    },
-    "title": "My Dashboard 3",
-    "type": "dashboard",
-  },
-  Object {
-    "error": Object {
-      "destinationId": "foo",
-      "type": "conflict",
-    },
-    "id": "4",
-    "meta": Object {
-      "title": "My Dashboard 4",
-    },
-    "title": "My Dashboard 4",
-    "type": "dashboard",
-  },
-]
-`);
+      Array [
+        Object {
+          "error": Object {
+            "type": "conflict",
+          },
+          "id": "2",
+          "meta": Object {
+            "title": "My Dashboard 2",
+          },
+          "type": "dashboard",
+        },
+        Object {
+          "error": Object {
+            "error": "Bad Request",
+            "message": "Bad Request",
+            "statusCode": 400,
+            "type": "unknown",
+          },
+          "id": "3",
+          "meta": Object {
+            "title": "My Dashboard 3",
+          },
+          "type": "dashboard",
+        },
+        Object {
+          "error": Object {
+            "destinationId": "foo",
+            "type": "conflict",
+          },
+          "id": "4",
+          "meta": Object {
+            "title": "My Dashboard 4",
+          },
+          "type": "dashboard",
+        },
+      ]
+    `);
   });
 });

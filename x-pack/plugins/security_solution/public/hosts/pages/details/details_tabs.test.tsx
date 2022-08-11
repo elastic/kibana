@@ -12,22 +12,31 @@ import useResizeObserver from 'use-resize-observer/polyfilled';
 import '../../../common/mock/match_media';
 import { mockIndexPattern, TestProviders } from '../../../common/mock';
 import { HostDetailsTabs } from './details_tabs';
-import { HostDetailsTabsProps, SetAbsoluteRangeDatePicker } from './types';
+import type { HostDetailsTabsProps, SetAbsoluteRangeDatePicker } from './types';
 import { hostDetailsPagePath } from '../types';
 import { type } from './utils';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
 import { getHostDetailsPageFilters } from './helpers';
 import { HostsTableType } from '../../store/model';
+import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 
-jest.mock('../../../common/lib/kibana');
+jest.mock('../../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../../common/lib/kibana');
 
-jest.mock('../../../common/components/url_state/normalize_time_range.ts');
+  return {
+    ...original,
+    useKibana: () => ({
+      ...original.useKibana(),
+      services: {
+        ...original.useKibana().services,
+        cases: mockCasesContract(),
+        timelines: { getTGrid: jest.fn().mockReturnValue(() => <></>) },
+      },
+    }),
+  };
+});
 
-jest.mock('../../../common/lib/kibana/hooks', () => ({
-  useNavigateTo: () => ({
-    navigateTo: jest.fn(),
-  }),
-}));
+jest.mock('../../../common/utils/normalize_time_range');
 
 jest.mock('../../../common/containers/source', () => ({
   useFetchIndex: () => [false, { indicesExist: true, indexPatterns: mockIndexPattern }],
@@ -54,6 +63,9 @@ jest.mock('../../../common/components/query_bar', () => ({
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));
+jest.mock('../../../common/components/visualization_actions', () => ({
+  VisualizationActions: jest.fn(() => <div data-test-subj="mock-viz-actions" />),
+}));
 
 describe('body', () => {
   const scenariosMap = {
@@ -62,7 +74,6 @@ describe('body', () => {
     [HostsTableType.uncommonProcesses]: 'UncommonProcessQueryTabBody',
     [HostsTableType.anomalies]: 'AnomaliesQueryTabBody',
     [HostsTableType.events]: 'EventsQueryTabBody',
-    [HostsTableType.alerts]: 'HostAlertsQueryTabBody',
   };
 
   const mockHostDetailsPageFilters = getHostDetailsPageFilters('host-1');
@@ -86,7 +97,7 @@ describe('body', () => {
     test(`it should pass expected object properties to ${componentName}`, () => {
       const wrapper = mount(
         <TestProviders>
-          <MemoryRouter initialEntries={[`/hosts/host-1/${path}`]}>
+          <MemoryRouter initialEntries={[`/hosts/name/host-1/${path}`]}>
             <HostDetailsTabs
               isInitializing={false}
               detailName={'host-1'}

@@ -11,7 +11,7 @@ jest.mock('lodash', () => ({
 }));
 
 jest.mock('../../../crud_app/services/documentation_links', () => {
-  const coreMocks = jest.requireActual('../../../../../../../src/core/public/mocks');
+  const coreMocks = jest.requireActual('@kbn/core/public/mocks');
 
   return {
     init: jest.fn(),

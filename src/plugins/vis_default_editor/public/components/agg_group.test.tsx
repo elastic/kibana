@@ -9,9 +9,9 @@
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { act } from 'react-dom/test-utils';
-import type { IAggConfigs, IAggConfig } from 'src/plugins/data/public';
-import { ISchemas } from 'src/plugins/visualizations/public';
-import { createMockedVisEditorSchemas } from 'src/plugins/visualizations/public/mocks';
+import type { IAggConfigs, IAggConfig } from '@kbn/data-plugin/public';
+import { ISchemas } from '@kbn/visualizations-plugin/public';
+import { createMockedVisEditorSchemas } from '@kbn/visualizations-plugin/public/mocks';
 
 import { DefaultEditorAggGroup, DefaultEditorAggGroupProps } from './agg_group';
 import { DefaultEditorAgg } from './agg';

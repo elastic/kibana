@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Plugin, CoreSetup } from 'kibana/public';
-import { ExpressionsSetup } from '../../expressions/public';
+import { Plugin, CoreSetup } from '@kbn/core/public';
+import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import { palette, systemPalette } from '../common';
 
 import { ThemeService, LegacyColorsService } from './services';

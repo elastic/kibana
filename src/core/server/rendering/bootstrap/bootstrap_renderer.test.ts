@@ -14,10 +14,9 @@ import {
 } from './bootstrap_renderer.test.mocks';
 
 import { PackageInfo } from '@kbn/config';
+import { AuthStatus } from '@kbn/core-http-server';
 import { UiPlugins } from '../../plugins';
-import { httpServiceMock } from '../../http/http_service.mock';
-import { httpServerMock } from '../../http/http_server.mocks';
-import { AuthStatus } from '../../http';
+import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
 import { uiSettingsServiceMock } from '../../ui_settings/ui_settings_service.mock';
 import { bootstrapRendererFactory, BootstrapRenderer } from './bootstrap_renderer';
 
@@ -180,18 +179,22 @@ describe('bootstrapRenderer', () => {
     });
   });
 
-  it('calls getPluginsBundlePaths with the correct parameters', async () => {
-    const request = httpServerMock.createKibanaRequest();
+  [false, true].forEach((isAnonymousPage) => {
+    it(`calls getPluginsBundlePaths with the correct parameters when isAnonymousPage=${isAnonymousPage}`, async () => {
+      const request = httpServerMock.createKibanaRequest();
 
-    await renderer({
-      request,
-      uiSettingsClient,
-    });
+      await renderer({
+        request,
+        uiSettingsClient,
+        isAnonymousPage,
+      });
 
-    expect(getPluginsBundlePathsMock).toHaveBeenCalledTimes(1);
-    expect(getPluginsBundlePathsMock).toHaveBeenCalledWith({
-      uiPlugins,
-      regularBundlePath: '/base-path/42/bundles',
+      expect(getPluginsBundlePathsMock).toHaveBeenCalledTimes(1);
+      expect(getPluginsBundlePathsMock).toHaveBeenCalledWith({
+        isAnonymousPage,
+        uiPlugins,
+        regularBundlePath: '/base-path/42/bundles',
+      });
     });
   });
 

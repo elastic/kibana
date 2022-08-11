@@ -221,6 +221,29 @@ export const POLICY_WITH_KNOWN_AND_UNKNOWN_FIELDS = {
   name: POLICY_NAME,
 } as any as PolicyFromES;
 
+export const POLICY_MANAGED_BY_ES: PolicyFromES = {
+  version: 1,
+  modifiedDate: Date.now().toString(),
+  policy: {
+    name: POLICY_NAME,
+    phases: {
+      hot: {
+        min_age: '0ms',
+        actions: {
+          rollover: {
+            max_age: '30d',
+            max_primary_shard_size: '50gb',
+          },
+        },
+      },
+    },
+    _meta: {
+      managed: true,
+    },
+  },
+  name: POLICY_NAME,
+};
+
 export const getGeneratedPolicies = (): PolicyFromES[] => {
   const policy = {
     phases: {

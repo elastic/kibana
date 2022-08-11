@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import '../../../../../../../../../src/plugins/es_ui_shared/public/components/code_editor/jest_mock';
+import '@kbn/es-ui-shared-plugin/public/components/code_editor/jest_mock';
 import { ModalProvider, OnDoneLoadJsonHandler } from './modal_provider';
 
 jest.mock('lodash', () => {

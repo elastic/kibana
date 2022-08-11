@@ -9,7 +9,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { AreaSeries, BarSeries, CurveType } from '@elastic/charts';
-import { DatatableRow } from '../../../../expressions/public';
+import { DatatableRow } from '@kbn/expressions-plugin/public';
 import { renderAllSeries } from './render_all_series';
 import {
   getVisConfig,

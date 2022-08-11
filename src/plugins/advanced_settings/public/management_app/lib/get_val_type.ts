@@ -12,7 +12,7 @@
  * @returns {string} the type to use for determining the display and editor
  */
 
-import { UiSettingsType } from 'src/core/public';
+import { UiSettingsType } from '@kbn/core/public';
 import { FieldSetting } from '../types';
 
 export function getValType(def: Partial<FieldSetting>, value?: any): UiSettingsType {

@@ -8,7 +8,7 @@
 
 import { storeApplicationUsageMock } from './store_report.test.mocks';
 
-import { savedObjectsRepositoryMock } from '../../../../core/server/mocks';
+import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { storeReport } from './store_report';
 import { ReportSchemaType } from './schema';
 import { METRIC_TYPE } from '@kbn/analytics';

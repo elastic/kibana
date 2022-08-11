@@ -17,7 +17,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { AppDataType, SeriesUrl } from '../../types';
-import { DataTypes, ReportTypes } from '../../configurations/constants';
 import { useExploratoryView } from '../../contexts/exploratory_view_config';
 
 interface Props {
@@ -47,17 +46,11 @@ export function DataTypesSelect({ seriesId, series }: Props) {
     }
   };
 
-  const { dataTypes } = useExploratoryView();
+  const { dataTypes, reportConfigMap } = useExploratoryView();
 
   const options = dataTypes
     .filter(({ id }) => {
-      if (reportType === ReportTypes.DEVICE_DISTRIBUTION) {
-        return id === DataTypes.MOBILE;
-      }
-      if (reportType === ReportTypes.CORE_WEB_VITAL) {
-        return id === DataTypes.UX;
-      }
-      return true;
+      return reportConfigMap[id]?.find((config) => config({}).reportType === reportType);
     })
     .map(({ id, label }) => ({
       value: id,

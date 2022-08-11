@@ -8,8 +8,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { filter, map } from 'rxjs/operators';
-import { isCompleteResponse, ISearchSource } from '../../../../../data/public';
-import { DataViewType } from '../../../../../data_views/common';
+import { lastValueFrom } from 'rxjs';
+import { isCompleteResponse, ISearchSource } from '@kbn/data-plugin/public';
+import { DataViewType } from '@kbn/data-views-plugin/public';
 import { FetchDeps } from './fetch_all';
 
 export function fetchTotalHits(
@@ -22,19 +23,15 @@ export function fetchTotalHits(
   searchSource.removeField('fields');
   searchSource.removeField('aggs');
   if (searchSource.getField('index')?.type === DataViewType.ROLLUP) {
-    // We treat that index pattern as "normal" even if it was a rollup index pattern,
+    // We treat that data view as "normal" even if it was a rollup data view,
     // since the rollup endpoint does not support querying individual documents, but we
-    // can get them from the regular _search API that will be used if the index pattern
-    // not a rollup index pattern.
+    // can get them from the regular _search API that will be used if the data view
+    // not a rollup data view.
     searchSource.setOverwriteDataViewType(undefined);
   }
 
   const executionContext = {
-    type: 'application',
-    name: 'discover',
     description: 'fetch total hits',
-    url: window.location.pathname,
-    id: savedSearch.id ?? '',
   };
 
   const fetch$ = searchSource
@@ -57,5 +54,5 @@ export function fetchTotalHits(
       map((res) => res.rawResponse.hits.total as number)
     );
 
-  return fetch$.toPromise();
+  return lastValueFrom(fetch$);
 }

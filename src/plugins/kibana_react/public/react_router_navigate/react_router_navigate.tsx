@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ScopedHistory } from 'kibana/public';
+import { ScopedHistory } from '@kbn/core/public';
 import { MouseEvent } from 'react';
 import { History, parsePath } from 'history';
 

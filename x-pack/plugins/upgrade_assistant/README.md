@@ -35,8 +35,7 @@ Elasticsearch deprecations can be handled in a number of ways:
     * Create an index alias pointing from the original index name to the prefixed index name.
     * Reindex from the original index into the prefixed index.
     * Delete the old index and rename the prefixed index.
-* **Updating index settings.** Some index settings will need to be updated, which doesn't require a
-reindex. An example of this is the "Remove deprecated settings" button, which is shown when [deprecated translog settings](https://www.elastic.co/guide/en/elasticsearch/reference/current/index-modules-translog.html#index-modules-translog-retention) are detected ([#93293](https://github.com/elastic/kibana/pull/93293)).
+* **Removing settings.** Some index and cluser settings are deprecated and need to be removed. The Upgrade Assistant provides a way to auto-resolve these settings via a "Remove deprecated settings" button. 
 * **Upgrading or deleting snapshots**. This is specific to Machine Learning. If a user has old Machine Learning job model snapshots, they will need to be upgraded or deleted. The Upgrade Assistant provides a way to resolve this automatically for the user ([#100066](https://github.com/elastic/kibana/pull/100066)).
 * **Following the docs.** The Deprecation Info API provides links to the deprecation docs. Users
 will follow these docs to address the problem and make these warnings or errors disappear in the
@@ -107,17 +106,66 @@ To test the Elasticsearch deprecations page ([#107053](https://github.com/elasti
   yarn es snapshot --license trial -E path.data=./path_to_6.x_ml_snapshots
   ```
 
-**3. Removing deprecated index settings**
+**3. Removing deprecated settings**
 
-  The Upgrade Assistant currently only supports fixing deprecated translog index settings. However [the code](https://github.com/elastic/kibana/blob/master/x-pack/plugins/upgrade_assistant/common/constants.ts#L22) is written in a way to add support for more if necessary. Run the following Console command to trigger the deprecation warning:
+  The Upgrade Assistant supports removing deprecated index and cluster settings. This is determined based on the `actions` array returned from the deprecation info API. It currently does not support removing affix settings. See https://github.com/elastic/elasticsearch/pull/84246 for more details. 
+  
+  Run the following Console commands to trigger deprecation issues for cluster and index settings:
+
+```
+// Can be set as persistent or transient
+PUT /_cluster/settings
+{
+  "persistent" : {
+    "script.context.filter.cache_max_size": 10,
+    "script.context.update.cache_max_size": 10,
+    "script.context.update.max_compilations_rate": "10/1m",
+    "discovery.zen.minimum_master_nodes": 10,
+    "discovery.zen.commit_timeout": "10s",
+    "discovery.zen.no_master_block": "all",
+    "discovery.zen.publish_diff.enable": true,
+    "discovery.zen.publish_timeout": "10s",
+    "indices.lifecycle.step.master_timeout": "10s",
+    "script.context.field.max_compilations_rate": "10/1m",
+    "script.context.score.max_compilations_rate": "10/1m",
+    "script.context.interval.cache_expire": "10s",
+    "script.context.moving-function.cache_expire": "10s",
+    "xpack.watcher.history.cleaner_service.enabled": true,
+    "cluster.routing.allocation.exclude._tier": "data_warm",
+    "cluster.routing.allocation.include._tier": "data_cold",
+    "cluster.routing.allocation.require._tier": "data_hot",
+    "xpack.monitoring.elasticsearch.collection.enabled": true,
+    "xpack.monitoring.collection.enabled": true,
+    "xpack.monitoring.collection.interval": "20s",
+    "xpack.monitoring.collection.ccr.stats.timeout": "20s",
+    "xpack.monitoring.collection.cluster.stats.timeout": "20s",
+    "xpack.monitoring.collection.enrich.stats.timeout": "20s",
+    "xpack.monitoring.collection.index.recovery.timeout": "20s",
+    "xpack.monitoring.collection.index.stats.timeout": "20s",
+    "xpack.monitoring.collection.ml.job.stats.timeout": "20s",
+    "xpack.monitoring.collection.node.stats.timeout": "20s",
+    "xpack.monitoring.collection.index.recovery.active_only": true,
+    "xpack.monitoring.history.duration": "2d",
+    "xpack.monitoring.migration.decommission_alerts": true,
+    "cluster.routing.allocation.shard_state.reroute.priority": "HIGH",
+    "cluster.routing.allocation.disk.include_relocations": true
+  }
+}
+```
 
   ```
   PUT deprecated_settings
   {
     "settings": {
-      "translog.retention.size": "1b",
-      "translog.retention.age": "5m",
+      "index.indexing.slowlog.level": "warn",
+      "index.max_adjacency_matrix_filters":  10,
+      "index.routing.allocation.exclude._tier": "data_warm",
+      "index.routing.allocation.include._tier": "data_hot",
+      "index.routing.allocation.require._tier": "data_cold",
+      "index.search.slowlog.level": "warn",
       "index.soft_deletes.enabled": true,
+      "index.translog.retention.size": "1mb",
+      "index.translog.retention.age": "5s"
     }
   }
   ```

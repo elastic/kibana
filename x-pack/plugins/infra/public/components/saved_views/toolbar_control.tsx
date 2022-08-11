@@ -8,10 +8,10 @@
 import React, { useCallback, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiPopover, EuiListGroup, EuiListGroupItem } from '@elastic/eui';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SavedViewCreateModal } from './create_modal';
 import { SavedViewUpdateModal } from './update_modal';
 import { SavedViewManageViewsFlyout } from './manage_views_flyout';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { useSavedViewContext } from '../../containers/saved_view/saved_view';
 import { SavedViewListModal } from './view_list_modal';
 
@@ -150,6 +150,7 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
             data-test-subj="savedViews-openPopover"
             iconType="arrowDown"
             iconSide="right"
+            color="text"
           >
             {currentView
               ? currentView.name

@@ -15,6 +15,7 @@ import { parentPipelineAggWriter } from './parent_pipeline_agg_writer';
 
 const metricAggFilter = [
   '!top_hits',
+  '!top_metrics',
   '!percentiles',
   '!percentile_ranks',
   '!median',

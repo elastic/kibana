@@ -6,12 +6,16 @@
  * Side Public License, v 1.
  */
 
-import type { MockedKeys } from '@kbn/utility-types/jest';
-import { coreMock } from '../../../../core/public/mocks';
-import { CoreSetup, CoreStart } from '../../../../core/public';
+import type { MockedKeys } from '@kbn/utility-types-jest';
+import { coreMock } from '@kbn/core/public/mocks';
+import { CoreSetup, CoreStart } from '@kbn/core/public';
 
 import { SearchService, SearchServiceSetupDependencies } from './search_service';
-import { bfetchPluginMock } from '../../../bfetch/public/mocks';
+import { bfetchPluginMock } from '@kbn/bfetch-plugin/public/mocks';
+import { managementPluginMock } from '@kbn/management-plugin/public/mocks';
+import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
+import { DataViewsContract } from '@kbn/data-views-plugin/common';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
 describe('Search service', () => {
   let searchService: SearchService;
@@ -19,7 +23,7 @@ describe('Search service', () => {
   let mockCoreStart: MockedKeys<CoreStart>;
   const initializerContext = coreMock.createPluginInitializerContext();
   initializerContext.config.get = jest.fn().mockReturnValue({
-    search: { aggs: { shardDelay: { enabled: false } } },
+    search: { aggs: { shardDelay: { enabled: false } }, sessions: { enabled: true } },
   });
 
   beforeEach(() => {
@@ -35,6 +39,7 @@ describe('Search service', () => {
         packageInfo: { version: '8' },
         bfetch,
         expressions: { registerFunction: jest.fn(), registerType: jest.fn() },
+        management: managementPluginMock.createSetupContract(),
       } as unknown as SearchServiceSetupDependencies);
       expect(setup).toHaveProperty('aggs');
       expect(setup).toHaveProperty('usageCollector');
@@ -45,12 +50,22 @@ describe('Search service', () => {
 
   describe('start()', () => {
     it('exposes proper contract', async () => {
+      const bfetch = bfetchPluginMock.createSetupContract();
+      searchService.setup(mockCoreSetup, {
+        packageInfo: { version: '8' },
+        bfetch,
+        expressions: { registerFunction: jest.fn(), registerType: jest.fn() },
+        management: managementPluginMock.createSetupContract(),
+      } as unknown as SearchServiceSetupDependencies);
+
       const start = searchService.start(mockCoreStart, {
-        fieldFormats: {},
-        indexPatterns: {},
-      } as any);
+        fieldFormats: {} as FieldFormatsStart,
+        indexPatterns: {} as DataViewsContract,
+        screenshotMode: screenshotModePluginMock.createStartContract(),
+      });
       expect(start).toHaveProperty('aggs');
       expect(start).toHaveProperty('search');
+      expect(start).toHaveProperty('showError');
       expect(start).toHaveProperty('searchSource');
       expect(start).toHaveProperty('sessionsClient');
       expect(start).toHaveProperty('session');

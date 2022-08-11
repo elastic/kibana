@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { CloudEcs } from '../../../../ecs/cloud';
-import { HostEcs, OsEcs } from '../../../../ecs/host';
-import { Hit, Hits, Maybe, SearchHit, StringOrNumber, TotalValue } from '../../../common';
-import { EndpointPendingActions, HostStatus } from '../../../../endpoint/types';
-import { HostRiskSeverity } from '../kpi';
+import type { CloudEcs } from '../../../../ecs/cloud';
+import type { HostEcs, OsEcs } from '../../../../ecs/host';
+import type { Hit, Hits, Maybe, SearchHit, StringOrNumber, TotalValue } from '../../../common';
+import type { EndpointPendingActions, HostStatus } from '../../../../endpoint/types';
+import type { CommonFields } from '../..';
 
 export enum HostPolicyResponseActionStatus {
   success = 'success',
@@ -64,12 +64,17 @@ export interface HostBuckets {
   buckets: HostBucketItem[];
 }
 
+type HostOsFields = CommonFields &
+  Partial<{
+    [Property in keyof OsEcs as `host.os.${Property}`]: unknown[];
+  }>;
+
 export interface HostOsHitsItem {
   hits: {
     total: TotalValue | number;
     max_score: number | null;
     hits: Array<{
-      _source: { host: { os: Maybe<OsEcs> } };
+      fields: HostOsFields;
       sort?: [number];
       _index?: string;
       _type?: string;
@@ -99,49 +104,21 @@ export interface HostAggEsItem {
   os?: HostOsHitsItem;
 }
 
-export interface HostEsData extends SearchHit {
-  sort: string[];
-  aggregations: {
-    host_count: {
-      value: number;
-    };
-    host_data: {
-      buckets: HostAggEsItem[];
-    };
-  };
-}
-
 export interface HostAggEsData extends SearchHit {
   sort: string[];
   aggregations: HostAggEsItem;
 }
 
+type HostFields = CommonFields &
+  Partial<{
+    [Property in keyof HostEcs as `host.${Property}`]: unknown[];
+  }>;
+
 export interface HostHit extends Hit {
-  _source: {
-    '@timestamp'?: string;
-    host: HostEcs;
-  };
+  fields: HostFields;
   cursor?: string;
   firstSeen?: string;
   sort?: StringOrNumber[];
 }
 
 export type HostHits = Hits<number, HostHit>;
-
-export const enum HostRiskScoreFields {
-  timestamp = '@timestamp',
-  hostName = 'host.name',
-  riskScore = 'risk_stats.risk_score',
-  risk = 'risk',
-  // TODO: Steph/Host Risk
-  // ruleRisks = 'rule_risks',
-}
-
-export interface HostRiskScoreItem {
-  _id?: Maybe<string>;
-  [HostRiskScoreFields.hostName]: Maybe<string>;
-  [HostRiskScoreFields.risk]: Maybe<HostRiskSeverity>;
-  [HostRiskScoreFields.riskScore]: Maybe<number>;
-  // TODO: Steph/Host Risk
-  // [HostRiskScoreFields.ruleRisks]: Maybe<RuleRisk[]>;
-}

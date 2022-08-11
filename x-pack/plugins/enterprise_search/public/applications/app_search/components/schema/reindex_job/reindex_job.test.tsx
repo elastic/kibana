@@ -16,7 +16,7 @@ import { shallow } from 'enzyme';
 
 import { SchemaErrorsAccordion } from '../../../../shared/schema';
 
-import { ReindexJob } from './';
+import { ReindexJob } from '.';
 
 describe('ReindexJob', () => {
   const values = {

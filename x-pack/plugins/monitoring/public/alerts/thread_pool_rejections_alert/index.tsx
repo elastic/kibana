@@ -8,7 +8,7 @@
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { RuleTypeModel } from '../../../../triggers_actions_ui/public';
+import type { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { RULE_REQUIRES_APP_CONTEXT } from '../../../common/constants';
 import type { CommonAlertParamDetails } from '../../../common/types/alerts';
 import type { MonitoringConfig } from '../../types';

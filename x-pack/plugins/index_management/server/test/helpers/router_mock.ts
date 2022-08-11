@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { IRouter } from 'src/core/server';
+import type { IRouter } from '@kbn/core/server';
 import { get } from 'lodash';
 
-import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 type RequestHandler = (...params: any[]) => any;
 

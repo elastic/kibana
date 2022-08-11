@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ES_FIELD_TYPES } from '../../../../../data/public';
+import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
 
 /** @public */
 export interface FieldMappingSpec {

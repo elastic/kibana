@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'src/core/server';
-import { SignalsReindexOptions } from '../../../../common/detection_engine/schemas/request/create_signals_migration_schema';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { SignalsReindexOptions } from '../../../../common/detection_engine/schemas/request/create_signals_migration_schema';
 import { createMigrationIndex } from './create_migration_index';
 
 export interface CreatedMigration {

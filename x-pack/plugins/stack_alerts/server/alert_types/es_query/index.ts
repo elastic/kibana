@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { Logger } from 'src/core/server';
+import { CoreSetup, Logger } from '@kbn/core/server';
 import { AlertingSetup } from '../../types';
-import { getAlertType } from './alert_type';
+import { getRuleType } from './rule_type';
 
 interface RegisterParams {
   logger: Logger;
   alerting: AlertingSetup;
+  core: CoreSetup;
 }
 
 export function register(params: RegisterParams) {
-  const { logger, alerting } = params;
-  alerting.registerType(getAlertType(logger));
+  const { logger, alerting, core } = params;
+  alerting.registerType(getRuleType(logger, core));
 }

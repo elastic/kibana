@@ -12,7 +12,7 @@ import { MetricsEditor } from '../../../components/metrics_editor';
 import { getIndexPatternService } from '../../../kibana_services';
 import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { indexPatterns } from '../../../../../../../src/plugins/data/public';
+import { indexPatterns } from '@kbn/data-plugin/public';
 
 export class UpdateSourceEditor extends Component {
   state = {

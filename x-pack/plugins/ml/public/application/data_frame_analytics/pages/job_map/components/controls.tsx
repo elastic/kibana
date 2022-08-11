@@ -39,7 +39,7 @@ import {
   useDeleteAction,
   DeleteActionModal,
 } from '../../analytics_management/components/action_delete';
-import { DeleteJobCheckModal } from '../../../../components/delete_job_check_modal';
+import { DeleteSpaceAwareItemCheckModal } from '../../../../components/delete_space_aware_item_check_modal';
 
 interface Props {
   details: any;
@@ -309,9 +309,9 @@ export const Controls: FC<Props> = React.memo(
           </EuiFlyoutFooter>
         </EuiFlyout>
         {isDeleteJobCheckModalVisible && item && (
-          <DeleteJobCheckModal
-            jobType={jobType}
-            jobIds={[item.config.id]}
+          <DeleteSpaceAwareItemCheckModal
+            mlSavedObjectType={jobType}
+            ids={[item.config.id]}
             onCloseCallback={closeDeleteJobCheckModal}
             canDeleteCallback={() => {
               // Item will always be set by the time we open the delete modal

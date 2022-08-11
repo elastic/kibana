@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { isIncompatibleMappingException, isWriteBlockException } from './es_errors';
+import {
+  isClusterShardLimitExceeded,
+  isIncompatibleMappingException,
+  isIndexNotFoundException,
+  isWriteBlockException,
+} from './es_errors';
 
 describe('isWriteBlockError', () => {
   it('returns true for a `index write` cluster_block_exception', () => {
@@ -33,6 +38,9 @@ describe('isWriteBlockError', () => {
       })
     ).toEqual(false);
   });
+  it('returns false undefined', () => {
+    expect(isWriteBlockException(undefined)).toEqual(false);
+  });
 });
 
 describe('isIncompatibleMappingExceptionError', () => {
@@ -52,5 +60,53 @@ describe('isIncompatibleMappingExceptionError', () => {
         reason: 'idk',
       })
     ).toEqual(true);
+  });
+  it('returns false undefined', () => {
+    expect(isIncompatibleMappingException(undefined)).toEqual(false);
+  });
+});
+
+describe('isIndexNotFoundException', () => {
+  it('returns true with index_not_found_exception errors', () => {
+    expect(
+      isIndexNotFoundException({
+        type: 'index_not_found_exception',
+        reason: 'idk',
+      })
+    ).toEqual(true);
+  });
+  it('returns false for other errors', () => {
+    expect(
+      isIndexNotFoundException({
+        type: 'validation_exception',
+        reason: 'idk',
+      })
+    ).toEqual(false);
+  });
+  it('returns false undefined', () => {
+    expect(isIndexNotFoundException(undefined)).toEqual(false);
+  });
+});
+
+describe('isClusterShardLimitExceeded', () => {
+  it('returns true with validation_exception and reason is maximum normal shards open', () => {
+    expect(
+      isClusterShardLimitExceeded({
+        type: 'validation_exception',
+        reason:
+          'Validation Failed: 1: this action would add [2] shards, but this cluster currently has [3]/[1] maximum normal shards open;',
+      })
+    ).toEqual(true);
+  });
+  it('returns false for validation_exception with another reason', () => {
+    expect(
+      isClusterShardLimitExceeded({
+        type: 'validation_exception',
+        reason: 'Validation Failed: 1: this action would do something its not allowed to do',
+      })
+    ).toEqual(false);
+  });
+  it('returns false undefined', () => {
+    expect(isClusterShardLimitExceeded(undefined)).toEqual(false);
   });
 });

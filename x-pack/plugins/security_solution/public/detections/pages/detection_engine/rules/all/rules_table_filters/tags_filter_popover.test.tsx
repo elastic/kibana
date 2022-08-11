@@ -13,13 +13,7 @@ import { TagsFilterPopover } from './tags_filter_popover';
 describe('TagsFilterPopover', () => {
   it('renders correctly', () => {
     const wrapper = shallow(
-      <TagsFilterPopover
-        tags={[]}
-        selectedTags={[]}
-        onSelectedTagsChanged={jest.fn()}
-        currentFilterTags={[]}
-        isLoading={false}
-      />
+      <TagsFilterPopover tags={[]} selectedTags={[]} onSelectedTagsChanged={jest.fn()} />
     );
 
     expect(wrapper.find('EuiPopover')).toHaveLength(1);

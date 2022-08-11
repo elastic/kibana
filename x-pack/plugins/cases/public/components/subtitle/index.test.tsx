@@ -9,7 +9,7 @@ import { mount, shallow } from 'enzyme';
 import React from 'react';
 
 import { TestProviders } from '../../common/mock';
-import { Subtitle } from './index';
+import { Subtitle } from '.';
 
 describe('Subtitle', () => {
   test('it renders', () => {

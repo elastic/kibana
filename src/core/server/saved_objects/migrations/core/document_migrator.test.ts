@@ -9,11 +9,10 @@
 import { mockGetConvertedObjectId } from './document_migrator.test.mock';
 import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
-import { SavedObjectUnsanitizedDoc } from '../../serialization';
+import type { SavedObjectUnsanitizedDoc, SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { DocumentMigrator } from './document_migrator';
 import { TransformSavedObjectDocumentError } from './transform_saved_object_document_error';
-import { loggingSystemMock } from '../../../logging/logging_system.mock';
-import { SavedObjectsType } from '../../types';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 
@@ -33,6 +32,15 @@ const createRegistry = (...types: Array<Partial<SavedObjectsType>>) => {
       ...type,
     })
   );
+  registry.registerType({
+    name: LEGACY_URL_ALIAS_TYPE,
+    namespaceType: 'agnostic',
+    hidden: false,
+    mappings: { properties: {} },
+    migrations: {
+      '0.1.2': () => ({} as SavedObjectUnsanitizedDoc), // the migration version is non-existent and the result doesn't matter, this migration function is never applied, we just want to assert that aliases are marked as "up-to-date"
+    },
+  });
   return registry;
 };
 
@@ -106,7 +114,9 @@ describe('DocumentMigrator', () => {
         expect(migrationObj.prepareMigrations).toThrow(/expected a function, but got 23/i);
       });
       it('validates definitions with migrations: Function | Objects', () => {
-        const validMigrationMap = { '1.2.3': () => {} };
+        const validMigrationMap = {
+          '1.2.3': () => {},
+        };
         const migrationFn = new DocumentMigrator(createDefinition(() => validMigrationMap));
         const migrationObj = new DocumentMigrator(createDefinition(validMigrationMap));
         expect(migrationFn.prepareMigrations).not.toThrow();
@@ -783,6 +793,7 @@ describe('DocumentMigrator', () => {
         aaa: '10.4.0',
         bbb: '3.2.3',
         ccc: '11.0.0',
+        [LEGACY_URL_ALIAS_TYPE]: '0.1.2',
       });
     });
 
@@ -948,8 +959,9 @@ describe('DocumentMigrator', () => {
                 targetNamespace: 'foo-namespace',
                 targetType: 'dog',
                 targetId: 'uuidv5',
+                purpose: 'savedObjectConversion',
               },
-              migrationVersion: {},
+              migrationVersion: { [LEGACY_URL_ALIAS_TYPE]: '0.1.2' },
               coreMigrationVersion: kibanaVersion,
             },
           ]);
@@ -1023,8 +1035,9 @@ describe('DocumentMigrator', () => {
                 targetNamespace: 'foo-namespace',
                 targetType: 'dog',
                 targetId: 'uuidv5',
+                purpose: 'savedObjectConversion',
               },
-              migrationVersion: {},
+              migrationVersion: { [LEGACY_URL_ALIAS_TYPE]: '0.1.2' },
               coreMigrationVersion: kibanaVersion,
             },
           ]);
@@ -1148,8 +1161,9 @@ describe('DocumentMigrator', () => {
                 targetNamespace: 'foo-namespace',
                 targetType: 'dog',
                 targetId: 'uuidv5',
+                purpose: 'savedObjectConversion',
               },
-              migrationVersion: {},
+              migrationVersion: { [LEGACY_URL_ALIAS_TYPE]: '0.1.2' },
               coreMigrationVersion: kibanaVersion,
             },
           ]);
@@ -1231,8 +1245,9 @@ describe('DocumentMigrator', () => {
                 targetNamespace: 'foo-namespace',
                 targetType: 'dog',
                 targetId: 'uuidv5',
+                purpose: 'savedObjectConversion',
               },
-              migrationVersion: {},
+              migrationVersion: { [LEGACY_URL_ALIAS_TYPE]: '0.1.2' },
               coreMigrationVersion: kibanaVersion,
             },
           ]);

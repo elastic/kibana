@@ -6,12 +6,11 @@
  */
 
 import type { RouteRepositoryClient } from '@kbn/server-route-repository';
-import { HttpFetchOptions } from 'kibana/public';
+import { HttpFetchOptions } from '@kbn/core/public';
 import type {
   AbstractObservabilityServerRouteRepository,
   ObservabilityServerRouteRepository,
   ObservabilityAPIReturnType,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../server';
 
 export type ObservabilityClientOptions = Omit<

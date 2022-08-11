@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import sinon from 'sinon';
 import { getLicenses, handleLicenses, fetchLicenses } from './get_licenses';
 
 describe('get_licenses', () => {
   const searchMock = sinon.stub();
+  const timestamp = 1646785200000;
   const client = { search: searchMock } as unknown as ElasticsearchClient;
   const body = {
     hits: {
@@ -33,7 +34,7 @@ describe('get_licenses', () => {
     it('returns clusters', async () => {
       searchMock.returns(Promise.resolve(body));
 
-      expect(await getLicenses(clusterUuids, client, 1)).toStrictEqual(expectedLicenses);
+      expect(await getLicenses(clusterUuids, client, timestamp, 1)).toStrictEqual(expectedLicenses);
     });
   });
 
@@ -41,7 +42,7 @@ describe('get_licenses', () => {
     it('searches for clusters', async () => {
       searchMock.returns(body);
 
-      expect(await fetchLicenses(client, clusterUuids, 1)).toStrictEqual(body);
+      expect(await fetchLicenses(client, clusterUuids, timestamp, 1)).toStrictEqual(body);
     });
   });
 

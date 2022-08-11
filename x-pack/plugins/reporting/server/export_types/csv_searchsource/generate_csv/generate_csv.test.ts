@@ -5,34 +5,31 @@
  * 2.0.
  */
 
-import { Writable } from 'stream';
-import * as Rx from 'rxjs';
 import { errors as esErrors } from '@elastic/elasticsearch';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { Logger, IScopedClusterClient, IUiSettingsClient } from '@kbn/core/server';
 import { identity, range } from 'lodash';
-import { IScopedClusterClient, IUiSettingsClient, SearchResponse } from 'src/core/server';
+import * as Rx from 'rxjs';
 import {
   elasticsearchServiceMock,
+  loggingSystemMock,
   savedObjectsClientMock,
   uiSettingsServiceMock,
-} from 'src/core/server/mocks';
-import { ISearchStartSearchSource } from 'src/plugins/data/common';
-import { FieldFormatsRegistry } from 'src/plugins/field_formats/common';
-import { searchSourceInstanceMock } from 'src/plugins/data/common/search/search_source/mocks';
-import { IScopedSearchClient } from 'src/plugins/data/server';
-import { dataPluginMock } from 'src/plugins/data/server/mocks';
-import { ReportingConfig } from '../../../';
+} from '@kbn/core/server/mocks';
+import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
+import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
+import { IScopedSearchClient } from '@kbn/data-plugin/server';
+import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
+import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import { Writable } from 'stream';
+import { ReportingConfig } from '../../..';
 import { CancellationToken } from '../../../../common/cancellation_token';
 import {
   UI_SETTINGS_CSV_QUOTE_VALUES,
   UI_SETTINGS_CSV_SEPARATOR,
   UI_SETTINGS_DATEFORMAT_TZ,
 } from '../../../../common/constants';
-import { UnknownError } from '../../../../common/errors';
-import {
-  createMockConfig,
-  createMockConfigSchema,
-  createMockLevelLogger,
-} from '../../../test_helpers';
+import { createMockConfig, createMockConfigSchema } from '../../../test_helpers';
 import { JobParamsCSV } from '../types';
 import { CsvGenerator } from './generate_csv';
 
@@ -43,11 +40,15 @@ const createMockJob = (baseObj: any = {}): JobParamsCSV => ({
 let mockEsClient: IScopedClusterClient;
 let mockDataClient: IScopedSearchClient;
 let mockConfig: ReportingConfig;
+let mockLogger: jest.Mocked<Logger>;
 let uiSettingsClient: IUiSettingsClient;
 let stream: jest.Mocked<Writable>;
 let content: string;
 
-const searchSourceMock = { ...searchSourceInstanceMock };
+const searchSourceMock = {
+  ...searchSourceInstanceMock,
+  getSearchRequestBody: jest.fn(() => ({})),
+};
 const mockSearchSourceService: jest.Mocked<ISearchStartSearchSource> = {
   create: jest.fn().mockReturnValue(searchSourceMock),
   createEmpty: jest.fn().mockReturnValue(searchSourceMock),
@@ -123,9 +124,9 @@ beforeEach(async () => {
         };
     }
   });
-});
 
-const logger = createMockLevelLogger();
+  mockLogger = loggingSystemMock.createLogger();
+});
 
 it('formats an empty search result to CSV content', async () => {
   const generateCsv = new CsvGenerator(
@@ -141,7 +142,7 @@ it('formats an empty search result to CSV content', async () => {
       fieldFormatsRegistry: mockFieldFormatsRegistry,
     },
     new CancellationToken(),
-    logger,
+    mockLogger,
     stream
   );
   const csvResult = await generateCsv.generateData();
@@ -181,7 +182,7 @@ it('formats a search result to CSV content', async () => {
       fieldFormatsRegistry: mockFieldFormatsRegistry,
     },
     new CancellationToken(),
-    logger,
+    mockLogger,
     stream
   );
   const csvResult = await generateCsv.generateData();
@@ -220,7 +221,7 @@ it('calculates the bytes of the content', async () => {
       fieldFormatsRegistry: mockFieldFormatsRegistry,
     },
     new CancellationToken(),
-    logger,
+    mockLogger,
     stream
   );
   const csvResult = await generateCsv.generateData();
@@ -272,7 +273,7 @@ it('warns if max size was reached', async () => {
       fieldFormatsRegistry: mockFieldFormatsRegistry,
     },
     new CancellationToken(),
-    logger,
+    mockLogger,
     stream
   );
   const csvResult = await generateCsv.generateData();
@@ -324,7 +325,7 @@ it('uses the scrollId to page all the data', async () => {
       fieldFormatsRegistry: mockFieldFormatsRegistry,
     },
     new CancellationToken(),
-    logger,
+    mockLogger,
     stream
   );
   const csvResult = await generateCsv.generateData();
@@ -333,7 +334,7 @@ it('uses the scrollId to page all the data', async () => {
 
   expect(mockDataClient.search).toHaveBeenCalledTimes(1);
   expect(mockDataClient.search).toBeCalledWith(
-    { params: { ignore_throttled: undefined, scroll: '30s', size: 500 } },
+    { params: { body: {}, ignore_throttled: undefined, scroll: '30s', size: 500 } },
     { strategy: 'es' }
   );
 
@@ -385,7 +386,7 @@ describe('fields from job.searchSource.getFields() (7.12 generated)', () => {
         fieldFormatsRegistry: mockFieldFormatsRegistry,
       },
       new CancellationToken(),
-      logger,
+      mockLogger,
       stream
     );
     await generateCsv.generateData();
@@ -437,7 +438,7 @@ describe('fields from job.searchSource.getFields() (7.12 generated)', () => {
         fieldFormatsRegistry: mockFieldFormatsRegistry,
       },
       new CancellationToken(),
-      logger,
+      mockLogger,
       stream
     );
 
@@ -496,7 +497,7 @@ describe('fields from job.searchSource.getFields() (7.12 generated)', () => {
         fieldFormatsRegistry: mockFieldFormatsRegistry,
       },
       new CancellationToken(),
-      logger,
+      mockLogger,
       stream
     );
 
@@ -543,7 +544,7 @@ describe('fields from job.columns (7.13+ generated)', () => {
         fieldFormatsRegistry: mockFieldFormatsRegistry,
       },
       new CancellationToken(),
-      logger,
+      mockLogger,
       stream
     );
     await generateCsv.generateData();
@@ -586,7 +587,7 @@ describe('fields from job.columns (7.13+ generated)', () => {
         fieldFormatsRegistry: mockFieldFormatsRegistry,
       },
       new CancellationToken(),
-      logger,
+      mockLogger,
       stream
     );
     await generateCsv.generateData();
@@ -629,7 +630,7 @@ describe('fields from job.columns (7.13+ generated)', () => {
         fieldFormatsRegistry: mockFieldFormatsRegistry,
       },
       new CancellationToken(),
-      logger,
+      mockLogger,
       stream
     );
     await generateCsv.generateData();
@@ -674,7 +675,7 @@ describe('formulas', () => {
         fieldFormatsRegistry: mockFieldFormatsRegistry,
       },
       new CancellationToken(),
-      logger,
+      mockLogger,
       stream
     );
 
@@ -717,7 +718,7 @@ describe('formulas', () => {
         fieldFormatsRegistry: mockFieldFormatsRegistry,
       },
       new CancellationToken(),
-      logger,
+      mockLogger,
       stream
     );
 
@@ -770,7 +771,7 @@ describe('formulas', () => {
         fieldFormatsRegistry: mockFieldFormatsRegistry,
       },
       new CancellationToken(),
-      logger,
+      mockLogger,
       stream
     );
 
@@ -796,16 +797,109 @@ it('can override ignoring frozen indices', async () => {
     { es: mockEsClient, data: mockDataClient, uiSettings: uiSettingsClient },
     { searchSourceStart: mockSearchSourceService, fieldFormatsRegistry: mockFieldFormatsRegistry },
     new CancellationToken(),
-    logger,
+    mockLogger,
     stream
   );
 
   await generateCsv.generateData();
 
   expect(mockDataClient.search).toBeCalledWith(
-    { params: { ignore_throttled: false, scroll: '30s', size: 500 } },
+    { params: { body: {}, ignore_throttled: false, scroll: '30s', size: 500 } },
     { strategy: 'es' }
   );
+});
+
+it('will return partial data if the scroll or search fails', async () => {
+  mockDataClient.search = jest.fn().mockImplementation(() => {
+    throw new esErrors.ResponseError({
+      statusCode: 500,
+      meta: {} as any,
+      body: 'my error',
+      warnings: [],
+    });
+  });
+  const generateCsv = new CsvGenerator(
+    createMockJob({ columns: ['date', 'ip', 'message'] }),
+    mockConfig,
+    {
+      es: mockEsClient,
+      data: mockDataClient,
+      uiSettings: uiSettingsClient,
+    },
+    {
+      searchSourceStart: mockSearchSourceService,
+      fieldFormatsRegistry: mockFieldFormatsRegistry,
+    },
+    new CancellationToken(),
+    mockLogger,
+    stream
+  );
+  await expect(generateCsv.generateData()).resolves.toMatchInlineSnapshot(`
+          Object {
+            "content_type": "text/csv",
+            "csv_contains_formulas": false,
+            "error_code": undefined,
+            "max_size_reached": false,
+            "metrics": Object {
+              "csv": Object {
+                "rows": 0,
+              },
+            },
+            "warnings": Array [
+              "Received a 500 response from Elasticsearch: my error",
+              "Encountered an error with the number of CSV rows generated from the search: expected NaN, received 0.",
+            ],
+          }
+        `);
+  expect(mockLogger.error.mock.calls).toMatchInlineSnapshot(`
+    Array [
+      Array [
+        "CSV export scan error: ResponseError: my error",
+      ],
+      Array [
+        [ResponseError: my error],
+      ],
+    ]
+  `);
+});
+
+it('handles unknown errors', async () => {
+  mockDataClient.search = jest.fn().mockImplementation(() => {
+    throw new Error('An unknown error');
+  });
+  const generateCsv = new CsvGenerator(
+    createMockJob({ columns: ['date', 'ip', 'message'] }),
+    mockConfig,
+    {
+      es: mockEsClient,
+      data: mockDataClient,
+      uiSettings: uiSettingsClient,
+    },
+    {
+      searchSourceStart: mockSearchSourceService,
+      fieldFormatsRegistry: mockFieldFormatsRegistry,
+    },
+    new CancellationToken(),
+    mockLogger,
+    stream
+  );
+  await expect(generateCsv.generateData()).resolves.toMatchInlineSnapshot(`
+          Object {
+            "content_type": "text/csv",
+            "csv_contains_formulas": false,
+            "error_code": undefined,
+            "max_size_reached": false,
+            "metrics": Object {
+              "csv": Object {
+                "rows": 0,
+              },
+            },
+            "warnings": Array [
+              "Encountered an unknown error: An unknown error",
+              "Encountered an error with the number of CSV rows generated from the search: expected NaN, received 0.",
+            ],
+          }
+        `);
 });
 
 describe('error codes', () => {
@@ -845,39 +939,28 @@ describe('error codes', () => {
         fieldFormatsRegistry: mockFieldFormatsRegistry,
       },
       new CancellationToken(),
-      logger,
+      mockLogger,
       stream
     );
 
     const { error_code: errorCode, warnings } = await generateCsv.generateData();
-    expect(errorCode).toBe('authentication_expired');
+    expect(errorCode).toBe('authentication_expired_error');
     expect(warnings).toMatchInlineSnapshot(`
       Array [
-        "This report contains partial CSV results because authentication expired before it could finish. Try exporting a smaller amount of data or increase your authentication timeout.",
+        "This report contains partial CSV results because the authentication token expired. Export a smaller amount of data or increase the timeout of the authentication token.",
+        "Encountered an error with the number of CSV rows generated from the search: expected 10, received 5.",
       ]
     `);
-  });
 
-  it('throws for unknown errors', async () => {
-    mockDataClient.search = jest.fn().mockImplementation(() => {
-      throw new esErrors.ResponseError({ statusCode: 500, meta: {} as any, warnings: [] });
-    });
-    const generateCsv = new CsvGenerator(
-      createMockJob({ columns: ['date', 'ip', 'message'] }),
-      mockConfig,
-      {
-        es: mockEsClient,
-        data: mockDataClient,
-        uiSettings: uiSettingsClient,
-      },
-      {
-        searchSourceStart: mockSearchSourceService,
-        fieldFormatsRegistry: mockFieldFormatsRegistry,
-      },
-      new CancellationToken(),
-      logger,
-      stream
-    );
-    await expect(generateCsv.generateData()).rejects.toBeInstanceOf(UnknownError);
+    expect(mockLogger.error.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "CSV export scroll error: ResponseError: Response Error",
+        ],
+        Array [
+          [ResponseError: Response Error],
+        ],
+      ]
+    `);
   });
 });

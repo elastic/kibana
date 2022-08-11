@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 
 export function useUxQuery() {
-  const { urlParams, uxUiFilters } = useLegacyUrlParams();
+  const { rangeId, urlParams, uxUiFilters } = useLegacyUrlParams();
 
   const { start, end, searchTerm, percentile } = urlParams;
 
@@ -27,7 +27,10 @@ export function useUxQuery() {
     }
 
     return null;
-  }, [start, end, searchTerm, percentile, uxUiFilters]);
+
+    // `rangeId` acts as a cache buster for stable date ranges like `Today`
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [start, end, searchTerm, percentile, uxUiFilters, rangeId]);
 
   return queryParams;
 }

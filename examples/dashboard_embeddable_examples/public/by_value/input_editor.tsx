@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
-import { CodeEditor } from '../../../../src/plugins/kibana_react/public';
+import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 
 export const InputEditor = <T,>(props: { input: T; onSubmit: (value: T) => void }) => {
   const input = JSON.stringify(props.input, null, 4);

@@ -54,14 +54,14 @@ export const argTypes: ArgTypes = {
   palette: {
     name: `${visConfigName}.palette`,
     description: 'Palette',
-    type: { name: 'palette', required: false },
+    type: { name: 'other', required: true, value: 'string' },
     table: { type: { summary: 'object' } },
     control: { type: 'object' },
   },
   labels: {
     name: `${visConfigName}.labels`,
     description: 'Labels configuration',
-    type: { name: 'object', required: false },
+    type: { name: 'other', required: false, value: 'string' },
     table: {
       type: {
         summary: 'object',
@@ -81,7 +81,7 @@ export const argTypes: ArgTypes = {
   dimensions: {
     name: `${visConfigName}.dimensions`,
     description: 'dimensions configuration',
-    type: { name: 'object', required: false },
+    type: { name: 'other', required: false, value: 'string' },
     table: {
       type: {
         summary: 'object',

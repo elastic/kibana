@@ -11,24 +11,24 @@ import { i18n } from '@kbn/i18n';
 
 // TODO: All of these imports need to be moved to the core editor so that it can inject components from there.
 import {
-  getTopLevelUrlCompleteComponents,
   getEndpointBodyCompleteComponents,
   getGlobalAutocompleteComponents,
+  getTopLevelUrlCompleteComponents,
   getUnmatchedEndpointComponents,
   // @ts-ignore
 } from '../kb/kb';
 
 import { createTokenIterator } from '../../application/factories';
-import { Position, Token, Range, CoreEditor } from '../../types';
+import type { CoreEditor, Position, Range, Token } from '../../types';
 import type RowParser from '../row_parser';
 
 import * as utils from '../utils';
 
 // @ts-ignore
 import { populateContext } from './engine';
-import { AutoCompleteContext, ResultTerm } from './types';
+import type { AutoCompleteContext, DataAutoCompleteRulesOneOf, ResultTerm } from './types';
 // @ts-ignore
-import { URL_PATH_END_MARKER } from './components/index';
+import { URL_PATH_END_MARKER } from './components';
 
 let lastEvaluatedToken: Token | null = null;
 
@@ -303,7 +303,7 @@ export function getCurrentMethodAndTokenPaths(
   return ret;
 }
 
-// eslint-disable-next-line
+// eslint-disable-next-line import/no-default-export
 export default function ({
   coreEditor: editor,
   parser,
@@ -349,14 +349,84 @@ export default function ({
     });
   }
 
+  /**
+   * Get a different set of templates based on the value configured in the request.
+   * For example, when creating a snapshot repository of different types (`fs`, `url` etc),
+   * different properties are inserted in the textarea based on the type.
+   * E.g. https://github.com/elastic/kibana/blob/main/src/plugins/console/server/lib/spec_definitions/json/overrides/snapshot.create_repository.json
+   */
+  function getConditionalTemplate(
+    name: string,
+    autocompleteRules: Record<string, unknown> | null | undefined
+  ) {
+    const obj = autocompleteRules && autocompleteRules[name];
+
+    if (obj) {
+      const currentLineNumber = editor.getCurrentPosition().lineNumber;
+
+      if (hasOneOfIn(obj)) {
+        // Get the line number of value that should provide different templates based on that
+        const startLine = getStartLineNumber(currentLineNumber, obj.__one_of);
+        // Join line values from start to current line
+        const lines = editor.getLines(startLine, currentLineNumber).join('\n');
+        // Get the correct template by comparing the autocomplete rules against the lines
+        const prop = getProperty(lines, obj.__one_of);
+        if (prop && prop.__template) {
+          return prop.__template;
+        }
+      }
+    }
+  }
+
+  /**
+   * Check if object has a property of '__one_of'
+   */
+  function hasOneOfIn(value: unknown): value is { __one_of: DataAutoCompleteRulesOneOf[] } {
+    return typeof value === 'object' && value !== null && '__one_of' in value;
+  }
+
+  /**
+   * Get the start line of value that matches the autocomplete rules condition
+   */
+  function getStartLineNumber(currentLine: number, rules: DataAutoCompleteRulesOneOf[]): number {
+    if (currentLine === 1) {
+      return currentLine;
+    }
+    const value = editor.getLineValue(currentLine);
+    const prop = getProperty(value, rules);
+    if (prop) {
+      return currentLine;
+    }
+    return getStartLineNumber(currentLine - 1, rules);
+  }
+
+  /**
+   * Get the matching property based on the given condition
+   */
+  function getProperty(condition: string, rules: DataAutoCompleteRulesOneOf[]) {
+    return rules.find((rule) => {
+      if (rule.__condition && rule.__condition.lines_regex) {
+        return new RegExp(rule.__condition.lines_regex, 'm').test(condition);
+      }
+      return false;
+    });
+  }
+
   function applyTerm(term: {
     value?: string;
     context?: AutoCompleteContext;
-    template?: { __raw: boolean; value: string };
+    template?: { __raw?: boolean; value?: string; [key: string]: unknown };
     insertValue?: string;
   }) {
     const context = term.context!;
 
+    if (context?.endpoint && term.value) {
+      const { data_autocomplete_rules: autocompleteRules } = context.endpoint;
+      const template = getConditionalTemplate(term.value, autocompleteRules);
+      if (template) {
+        term.template = template;
+      }
+    }
     // make sure we get up to date replacement info.
     addReplacementInfoToContext(context, editor.getCurrentPosition(), term.insertValue);
 
@@ -1034,6 +1104,9 @@ export default function ({
       case 'paren.rparen':
       case 'punctuation.colon':
       case 'punctuation.comma':
+      case 'comment.line':
+      case 'comment.punctuation':
+      case 'comment.block':
       case 'UNKNOWN':
         return;
     }

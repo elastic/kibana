@@ -12,8 +12,8 @@ import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiToolTip } from '@ela
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { SelectOption, SwitchOption } from '../../../../../../../vis_default_editor/public';
-import { Labels } from '../../../../../../../charts/public';
+import { SelectOption, SwitchOption } from '@kbn/vis-default-editor-plugin/public';
+import { Labels } from '@kbn/charts-plugin/public';
 
 import { TruncateLabelsOption } from '../../common';
 import { getRotateOptions } from '../../../collections';

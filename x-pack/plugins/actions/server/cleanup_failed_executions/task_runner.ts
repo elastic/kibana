@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Logger, CoreStart } from 'kibana/server';
+import { Logger, CoreStart } from '@kbn/core/server';
+import { RunContext, asInterval } from '@kbn/task-manager-plugin/server';
 import { ActionsConfig } from '../config';
-import { RunContext, asInterval } from '../../../task_manager/server';
 import { ActionsPluginsStart } from '../plugin';
 import { ActionTypeRegistryContract } from '../types';
 import { findAndCleanupTasks } from './find_and_cleanup_tasks';

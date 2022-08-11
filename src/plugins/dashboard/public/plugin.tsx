@@ -10,9 +10,9 @@ import * as React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
-import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
-import { APP_WRAPPER_CLASS } from '../../../core/public';
+import { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
+import { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
+import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import {
   App,
   Plugin,
@@ -24,14 +24,17 @@ import {
   DEFAULT_APP_CATEGORIES,
   PluginInitializerContext,
   SavedObjectsClientContract,
-} from '../../../core/public';
-import { VisualizationsStart } from '../../visualizations/public';
+} from '@kbn/core/public';
+import { VisualizationsStart } from '@kbn/visualizations-plugin/public';
+import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/public';
 
 import { createKbnUrlTracker } from './services/kibana_utils';
 import { UsageCollectionSetup } from './services/usage_collection';
 import { UiActionsSetup, UiActionsStart } from './services/ui_actions';
 import { PresentationUtilPluginStart } from './services/presentation_util';
-import { FeatureCatalogueCategory, HomePublicPluginSetup } from './services/home';
+import type { HomePublicPluginSetup } from './services/home';
 import { NavigationPublicPluginStart as NavigationStart } from './services/navigation';
 import { DataPublicPluginSetup, DataPublicPluginStart } from './services/data';
 import { SharePluginSetup, SharePluginStart } from './services/share';
@@ -49,6 +52,7 @@ import {
   CONTEXT_MENU_TRIGGER,
   EmbeddableSetup,
   EmbeddableStart,
+  PANEL_BADGE_TRIGGER,
   PANEL_NOTIFICATION_TRIGGER,
 } from './services/embeddable';
 import {
@@ -76,8 +80,8 @@ import { DashboardConstants } from './dashboard_constants';
 import { PlaceholderEmbeddableFactory } from './application/embeddable/placeholder';
 import { ExportCSVAction } from './application/actions/export_csv_action';
 import { dashboardFeatureCatalog } from './dashboard_strings';
-import { replaceUrlHashQuery } from '../../kibana_utils/public';
 import { SpacesPluginStart } from './services/spaces';
+import { FiltersNotificationBadge } from './application/actions/filters_notification_badge';
 
 export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
@@ -92,6 +96,7 @@ export interface DashboardSetupDependencies {
   uiActions: UiActionsSetup;
   usageCollection?: UsageCollectionSetup;
   screenshotMode: ScreenshotModePluginSetup;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 export interface DashboardStartDependencies {
@@ -109,6 +114,8 @@ export interface DashboardStartDependencies {
   spaces?: SpacesPluginStart;
   visualizations: VisualizationsStart;
   screenshotMode: ScreenshotModePluginStart;
+  dataViewEditor: DataViewEditorStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 export interface DashboardSetup {
@@ -170,6 +177,7 @@ export class DashboardPlugin
         application: coreStart.application,
         uiSettings: coreStart.uiSettings,
         overlays: coreStart.overlays,
+        analytics: coreStart.analytics,
         embeddable: deps.embeddable,
         uiActions: deps.uiActions,
         inspector: deps.inspector,
@@ -321,7 +329,7 @@ export class DashboardPlugin
         icon: 'dashboardApp',
         path: `/app/dashboards#${DashboardConstants.LANDING_PAGE_PATH}`,
         showOnHomePage: false,
-        category: FeatureCatalogueCategory.DATA,
+        category: 'data',
         solutionId: 'kibana',
         order: 100,
       });
@@ -333,13 +341,13 @@ export class DashboardPlugin
   }
 
   public start(core: CoreStart, plugins: DashboardStartDependencies): DashboardStart {
-    const { notifications, overlays, application, theme } = core;
+    const { notifications, overlays, application, theme, uiSettings } = core;
     const { uiActions, data, share, presentationUtil, embeddable } = plugins;
 
     const dashboardCapabilities: Readonly<DashboardCapabilities> = application.capabilities
       .dashboard as DashboardCapabilities;
 
-    const SavedObjectFinder = getSavedObjectFinder(core.savedObjects, core.uiSettings);
+    const SavedObjectFinder = getSavedObjectFinder(core.savedObjects, uiSettings);
 
     const expandPanelAction = new ExpandPanelAction();
     uiActions.registerAction(expandPanelAction);
@@ -357,6 +365,16 @@ export class DashboardPlugin
     const clonePanelAction = new ClonePanelAction(core);
     uiActions.registerAction(clonePanelAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, clonePanelAction.id);
+
+    const panelLevelFiltersNotification = new FiltersNotificationBadge(
+      application,
+      embeddable,
+      overlays,
+      theme,
+      uiSettings
+    );
+    uiActions.registerAction(panelLevelFiltersNotification);
+    uiActions.attachAction(PANEL_BADGE_TRIGGER, panelLevelFiltersNotification.id);
 
     if (share) {
       const ExportCSVPlugin = new ExportCSVAction({ core, data });

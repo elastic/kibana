@@ -7,16 +7,9 @@
  */
 
 import { get, isEmpty } from 'lodash';
-
-import {
-  IAggConfig,
-  AggParam,
-  IFieldParamType,
-  IAggType,
-  IndexPattern,
-  IndexPatternField,
-} from '../../../data/public';
-import type { Schema } from '../../../visualizations/public';
+import { IAggConfig, AggParam, IFieldParamType, IAggType } from '@kbn/data-plugin/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { Schema } from '@kbn/visualizations-plugin/public';
 
 import { filterAggTypes, filterAggTypeFields } from '../agg_filters';
 import { groupAndSortBy, ComboBoxGroupedOptions } from '../utils';
@@ -38,7 +31,7 @@ interface ParamInstanceBase {
 
 export interface ParamInstance extends ParamInstanceBase {
   aggParam: AggParam;
-  indexedFields: ComboBoxGroupedOptions<IndexPatternField>;
+  indexedFields: ComboBoxGroupedOptions<DataViewField>;
   paramEditor: React.ComponentType<AggParamEditorProps<unknown>>;
   value: unknown;
 }
@@ -66,8 +59,8 @@ function getAggParamsToRender({
   const schema = getSchemaByName(schemas, agg.schema);
   // build collection of agg params components
   paramsToRender.forEach((param: AggParam, index: number) => {
-    let indexedFields: ComboBoxGroupedOptions<IndexPatternField> = [];
-    let fields: IndexPatternField[];
+    let indexedFields: ComboBoxGroupedOptions<DataViewField> = [];
+    let fields: DataViewField[];
 
     if (hideCustomLabel && param.name === 'customLabel') {
       return;
@@ -77,7 +70,7 @@ function getAggParamsToRender({
     }
     // if field param exists, compute allowed fields
     if (param.type === 'field') {
-      let availableFields: IndexPatternField[] = (param as IFieldParamType).getAvailableFields(agg);
+      let availableFields: DataViewField[] = (param as IFieldParamType).getAvailableFields(agg);
       // should be refactored in the future to provide a more general way
       // for visualization to override some agg config settings
       if (agg.type.name === 'top_hits' && param.name === 'field') {
@@ -135,7 +128,7 @@ function getAggParamsToRender({
 function getAggTypeOptions(
   aggTypes: any,
   agg: IAggConfig,
-  indexPattern: IndexPattern,
+  indexPattern: DataView,
   groupName: string,
   allowedAggs: string[]
 ): ComboBoxGroupedOptions<IAggType> {

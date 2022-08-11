@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { getTestAlertData } from '../../../common/lib';
+import { getTestRuleData } from '../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function emailTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  describe('create gold noop alert', () => {
-    it('should return 403 when creating an gold alert', async () => {
+  describe('create gold noop rule', () => {
+    it('should return 403 when creating an gold rule', async () => {
       await supertest
         .post(`/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData({ rule_type_id: 'test.gold.noop' }))
+        .send(getTestRuleData({ rule_type_id: 'test.gold.noop' }))
         .expect(403, {
           statusCode: 403,
           error: 'Forbidden',

@@ -5,20 +5,33 @@
  * 2.0.
  */
 import React from 'react';
+import Chance from 'chance';
 import { render, screen } from '@testing-library/react';
 import type { UseQueryResult } from 'react-query/types/react/types';
 import { createCspBenchmarkIntegrationFixture } from '../../test/fixtures/csp_benchmark_integration';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { TestProvider } from '../../test/test_provider';
-import { Benchmarks, BENCHMARKS_ERROR_TEXT, BENCHMARKS_TABLE_DATA_TEST_SUBJ } from './benchmarks';
-import { ADD_A_CIS_INTEGRATION, BENCHMARK_INTEGRATIONS, LOADING_BENCHMARKS } from './translations';
+import { Benchmarks } from './benchmarks';
+import * as TEST_SUBJ from './test_subjects';
 import { useCspBenchmarkIntegrations } from './use_csp_benchmark_integrations';
+import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
+import { useCISIntegrationLink } from '../../common/navigation/use_navigate_to_cis_integration';
 
 jest.mock('./use_csp_benchmark_integrations');
+jest.mock('../../common/api/use_setup_status_api');
+jest.mock('../../common/navigation/use_navigate_to_cis_integration');
+const chance = new Chance();
 
 describe('<Benchmarks />', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: { status: 'indexed' },
+      })
+    );
+    (useCISIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
   });
 
   const renderBenchmarks = (
@@ -36,37 +49,33 @@ describe('<Benchmarks />', () => {
   it('renders the page header', () => {
     renderBenchmarks();
 
-    expect(screen.getByText(BENCHMARK_INTEGRATIONS)).toBeInTheDocument();
+    expect(screen.getByTestId(TEST_SUBJ.BENCHMARKS_PAGE_HEADER)).toBeInTheDocument();
   });
 
   it('renders the "add integration" button', () => {
     renderBenchmarks();
 
-    expect(screen.getByText(ADD_A_CIS_INTEGRATION)).toBeInTheDocument();
-  });
-
-  it('renders loading state while loading', () => {
-    renderBenchmarks(createReactQueryResponse({ status: 'loading' }));
-
-    expect(screen.getByText(LOADING_BENCHMARKS)).toBeInTheDocument();
-    expect(screen.queryByTestId(BENCHMARKS_TABLE_DATA_TEST_SUBJ)).not.toBeInTheDocument();
+    expect(screen.getByTestId(TEST_SUBJ.ADD_INTEGRATION_TEST_SUBJ)).toBeInTheDocument();
   });
 
   it('renders error state while there is an error', () => {
-    renderBenchmarks(createReactQueryResponse({ status: 'error', error: new Error() }));
+    const error = new Error('message');
+    renderBenchmarks(createReactQueryResponse({ status: 'error', error }));
 
-    expect(screen.getByText(BENCHMARKS_ERROR_TEXT)).toBeInTheDocument();
-    expect(screen.queryByTestId(BENCHMARKS_TABLE_DATA_TEST_SUBJ)).not.toBeInTheDocument();
+    expect(screen.getByText(error.message)).toBeInTheDocument();
   });
 
   it('renders the benchmarks table', () => {
     renderBenchmarks(
       createReactQueryResponse({
         status: 'success',
-        data: [createCspBenchmarkIntegrationFixture()],
+        data: { total: 1, items: [createCspBenchmarkIntegrationFixture()] },
       })
     );
 
-    expect(screen.getByTestId(BENCHMARKS_TABLE_DATA_TEST_SUBJ)).toBeInTheDocument();
+    expect(screen.getByTestId(TEST_SUBJ.BENCHMARKS_TABLE_DATA_TEST_SUBJ)).toBeInTheDocument();
+    Object.values(TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS).forEach((testId) =>
+      expect(screen.getAllByTestId(testId)[0]).toBeInTheDocument()
+    );
   });
 });

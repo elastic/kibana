@@ -1,0 +1,10 @@
+type: string
+description: The type of connector.
+enum:
+  - .jira
+  - .none
+  - .resilient
+  - .servicenow
+  - .servicenow-sir
+  - .swimlane
+example: .none

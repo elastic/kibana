@@ -153,27 +153,61 @@ export const combineQueries = ({
   kqlQuery,
   kqlMode,
   isEventViewer,
-}: CombineQueries): { filterQuery: string } | null => {
+}: CombineQueries): { filterQuery: string | undefined; kqlError: Error | undefined } | null => {
   const kuery: Query = { query: '', language: kqlQuery.language };
   if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && isEmpty(filters) && !isEventViewer) {
     return null;
   } else if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && isEventViewer) {
+    const [filterQuery, kqlError] = convertToBuildEsQuery({
+      config,
+      queries: [kuery],
+      indexPattern,
+      filters,
+    });
+
     return {
-      filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
+      filterQuery,
+      kqlError,
     };
   } else if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && !isEmpty(filters)) {
+    const [filterQuery, kqlError] = convertToBuildEsQuery({
+      config,
+      queries: [kuery],
+      indexPattern,
+      filters,
+    });
+
     return {
-      filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
+      filterQuery,
+      kqlError,
     };
   } else if (isEmpty(dataProviders) && !isEmpty(kqlQuery.query)) {
     kuery.query = `(${kqlQuery.query})`;
+
+    const [filterQuery, kqlError] = convertToBuildEsQuery({
+      config,
+      queries: [kuery],
+      indexPattern,
+      filters,
+    });
+
     return {
-      filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
+      filterQuery,
+      kqlError,
     };
   } else if (!isEmpty(dataProviders) && isEmpty(kqlQuery)) {
     kuery.query = `(${buildGlobalQuery(dataProviders, browserFields)})`;
+
+    const [filterQuery, kqlError] = convertToBuildEsQuery({
+      config,
+      queries: [kuery],
+      indexPattern,
+      filters,
+    });
+
     return {
-      filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
+      filterQuery,
+      kqlError,
     };
   }
   const operatorKqlQuery = kqlMode === 'filter' ? 'and' : 'or';
@@ -181,8 +215,17 @@ export const combineQueries = ({
   kuery.query = `((${buildGlobalQuery(dataProviders, browserFields)})${postpend(
     kqlQuery.query as string
   )})`;
+
+  const [filterQuery, kqlError] = convertToBuildEsQuery({
+    config,
+    queries: [kuery],
+    indexPattern,
+    filters,
+  });
+
   return {
-    filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
+    filterQuery,
+    kqlError,
   };
 };
 

@@ -7,7 +7,7 @@
  */
 
 import { mapAndFlattenFilters } from './map_and_flatten_filters';
-import { Filter } from '../../../../common';
+import type { Filter } from '@kbn/es-query';
 
 describe('filter manager utilities', () => {
   describe('mapAndFlattenFilters()', () => {

@@ -8,7 +8,7 @@
 
 import { LocatorDefinition } from './types';
 import { Locator, LocatorDependencies } from './locator';
-import { KibanaLocation } from 'src/plugins/share/public';
+import { KibanaLocation } from '../../../public';
 import { LocatorGetUrlParams } from '.';
 import { decompressFromBase64 } from 'lz-string';
 

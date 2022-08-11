@@ -11,14 +11,19 @@ import { shallow } from 'enzyme';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory, createLocation } from 'history';
-import { ToastsApi } from 'kibana/public';
+import { ToastsApi } from '@kbn/core/public';
 import { RuleDetailsRoute, getRuleData } from './rule_details_route';
 import { Rule } from '../../../../types';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
-import { spacesPluginMock } from '../../../../../../spaces/public/mocks';
+import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { useKibana } from '../../../../common/lib/kibana';
 jest.mock('../../../../common/lib/kibana');
 
+jest.mock('../../../../common/lib/config_api', () => ({
+  triggersActionsUiConfig: jest
+    .fn()
+    .mockResolvedValue({ minimumScheduleInterval: { value: '1m', enforce: false } }),
+}));
 describe('rule_details_route', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -51,6 +56,7 @@ describe('rule_details_route', () => {
       id: 'new_id',
       outcome: 'aliasMatch',
       alias_target_id: rule.id,
+      alias_purpose: 'savedObjectConversion',
     }));
     const wrapper = mountWithIntl(
       <RuleDetailsRoute {...mockRouterProps(rule)} {...{ ...mockApis(), resolveRule }} />
@@ -60,10 +66,11 @@ describe('rule_details_route', () => {
       wrapper.update();
     });
     expect(resolveRule).toHaveBeenCalledWith(rule.id);
-    expect((spacesMock as any).ui.redirectLegacyUrl).toHaveBeenCalledWith(
-      `insightsAndAlerting/triggersActions/rule/new_id`,
-      `rule`
-    );
+    expect((spacesMock as any).ui.redirectLegacyUrl).toHaveBeenCalledWith({
+      path: 'insightsAndAlerting/triggersActions/rule/new_id',
+      aliasPurpose: 'savedObjectConversion',
+      objectNoun: 'rule',
+    });
   });
 
   it('shows warning callout if fetched rule is a conflict', async () => {

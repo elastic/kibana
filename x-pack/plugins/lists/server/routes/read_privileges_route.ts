@@ -25,8 +25,8 @@ export const readPrivilegesRoute = (router: ListsPluginRouter): void => {
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        const esClient = context.core.elasticsearch.client.asCurrentUser;
-        const lists = getListClient(context);
+        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+        const lists = await getListClient(context);
         const clusterPrivilegesLists = await readPrivileges(esClient, lists.getListIndex());
         const clusterPrivilegesListItems = await readPrivileges(esClient, lists.getListItemIndex());
         const privileges = merge(

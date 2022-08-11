@@ -5,21 +5,20 @@
  * 2.0.
  */
 
-import {
-  CreateExceptionListItemSchema,
+import type {
   ExceptionListItemSchema,
   ExceptionListSummarySchema,
   FoundExceptionListItemSchema,
   UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { HttpStart } from 'kibana/public';
+import type { HttpStart } from '@kbn/core/public';
 import {
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_URL,
   EVENT_FILTER_LIST_DEFINITION,
   ENDPOINT_EVENT_FILTERS_LIST_ID,
 } from '../constants';
-import { Immutable } from '../../../../../common/endpoint/types';
+import type { Immutable } from '../../../../../common/endpoint/types';
 
 async function createEventFilterList(http: HttpStart): Promise<void> {
   try {
@@ -67,48 +66,6 @@ export async function getList({
       list_id: [ENDPOINT_EVENT_FILTERS_LIST_ID],
       namespace_type: ['agnostic'],
       filter,
-    },
-  });
-}
-
-export async function addEventFilters(
-  http: HttpStart,
-  exception: ExceptionListItemSchema | CreateExceptionListItemSchema
-) {
-  await ensureEventFiltersListExists(http);
-  // Clean meta data before create event flter as the API throws an error with it
-  delete exception.meta;
-  return http.post<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
-    body: JSON.stringify(exception),
-  });
-}
-
-export async function getOne(http: HttpStart, id: string) {
-  await ensureEventFiltersListExists(http);
-  return http.get<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
-    query: {
-      id,
-      namespace_type: 'agnostic',
-    },
-  });
-}
-
-export async function updateOne(
-  http: HttpStart,
-  exception: Immutable<UpdateExceptionListItemSchema>
-): Promise<ExceptionListItemSchema> {
-  await ensureEventFiltersListExists(http);
-  return http.put<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
-    body: JSON.stringify(cleanEventFilterToUpdate(exception)),
-  });
-}
-
-export async function deleteOne(http: HttpStart, id: string): Promise<ExceptionListItemSchema> {
-  await ensureEventFiltersListExists(http);
-  return http.delete<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
-    query: {
-      id,
-      namespace_type: 'agnostic',
     },
   });
 }

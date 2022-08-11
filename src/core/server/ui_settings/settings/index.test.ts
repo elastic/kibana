@@ -12,14 +12,16 @@ import { getMiscUiSettings } from './misc';
 import { getNavigationSettings } from './navigation';
 import { getNotificationsSettings } from './notifications';
 import { getThemeSettings } from './theme';
-import { getCoreSettings } from './index';
+import { getCoreSettings } from '.';
 import { getStateSettings } from './state';
+import { getAnnouncementsSettings } from './announcements';
 
 describe('getCoreSettings', () => {
   it('should not have setting overlaps', () => {
     const coreSettingsLength = Object.keys(getCoreSettings()).length;
     const summedLength = [
       getAccessibilitySettings(),
+      getAnnouncementsSettings(),
       getDateFormatSettings(),
       getMiscUiSettings(),
       getNavigationSettings(),

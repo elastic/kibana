@@ -44,7 +44,6 @@ const defaultProps = {
   selectedAlertPatterns: ['some-test-pattern'],
   statusActionButton: null,
   updateCase,
-  userCanCrud: true,
   useFetchAlertData: (): [boolean, Record<string, unknown>] => [
     false,
     { 'some-id': { _id: 'some-id' } },
@@ -283,8 +282,6 @@ describe(`UserActions`, () => {
         commentUpdate: sampleData.content,
         caseId: 'case-id',
         commentId: props.data.comments[0].id,
-        fetchUserActions,
-        updateCase,
         version: props.data.comments[0].version,
       });
     });

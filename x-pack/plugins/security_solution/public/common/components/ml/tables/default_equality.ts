@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AnomaliesTableCommonProps } from '../types';
+import type { AnomaliesTableCommonProps } from '../types';
 
 export const anomaliesTableDefaultEquality = (
   prevProps: AnomaliesTableCommonProps,

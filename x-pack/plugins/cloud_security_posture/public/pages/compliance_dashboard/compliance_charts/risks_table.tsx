@@ -5,122 +5,67 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiBasicTable,
+  EuiBasicTableColumn,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
   EuiText,
 } from '@elastic/eui';
-import type { Query } from '@kbn/es-query';
-import { useHistory } from 'react-router-dom';
-import { CloudPostureStats, ResourceTypeAgg } from '../../../../common/types';
-import { allNavigationItems } from '../../../common/navigation/constants';
-import { encodeQuery } from '../../../common/navigation/query_utils';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { ComplianceDashboardData, GroupedFindingsEvaluation } from '../../../../common/types';
 import { CompactFormattedNumber } from '../../../components/compact_formatted_number';
-import * as TEXT from '../translations';
-import { RULE_FAILED } from '../../../../common/constants';
-
-// TODO: remove this option after we get data from the beat
-const useMockData: boolean = false;
-const mock = [
-  {
-    resourceType: 'pods',
-    totalFindings: 2,
-    totalPassed: 1,
-    totalFailed: 1,
-  },
-  {
-    resourceType: 'etcd',
-    totalFindings: 5,
-    totalPassed: 0,
-    totalFailed: 5,
-  },
-  {
-    resourceType: 'cluster',
-    totalFindings: 2,
-    totalPassed: 2,
-    totalFailed: 0,
-  },
-  {
-    resourceType: 'system',
-    totalFindings: 10,
-    totalPassed: 6,
-    totalFailed: 4,
-  },
-  {
-    resourceType: 'api',
-    totalFindings: 19100,
-    totalPassed: 2100,
-    totalFailed: 17000,
-  },
-  {
-    resourceType: 'server',
-    totalFindings: 7,
-    totalPassed: 4,
-    totalFailed: 3,
-  },
-];
 
 export interface RisksTableProps {
-  data: CloudPostureStats['resourceTypesAggs'];
+  data: ComplianceDashboardData['groupedFindingsEvaluation'];
+  maxItems: number;
+  onCellClick: (name: string) => void;
+  onViewAllClick: () => void;
 }
 
-const maxRisks = 5;
-
-export const getTop5Risks = (resourceTypesAggs: CloudPostureStats['resourceTypesAggs']) => {
-  const filtered = resourceTypesAggs.filter((x) => x.totalFailed > 0);
+export const getTopRisks = (
+  groupedFindingsEvaluation: ComplianceDashboardData['groupedFindingsEvaluation'],
+  maxItems: number
+) => {
+  const filtered = groupedFindingsEvaluation.filter((x) => x.totalFailed > 0);
   const sorted = filtered.slice().sort((first, second) => second.totalFailed - first.totalFailed);
 
-  return sorted.slice(0, maxRisks);
+  return sorted.slice(0, maxItems);
 };
 
-const getFailedFindingsQuery = (): Query => ({
-  language: 'kuery',
-  query: `result.evaluation : "${RULE_FAILED}" `,
-});
-
-const getResourceTypeFailedFindingsQuery = (resourceType: string): Query => ({
-  language: 'kuery',
-  query: `resource.type : "${resourceType}" and result.evaluation : "${RULE_FAILED}" `,
-});
-
-export const RisksTable = ({ data: resourceTypesAggs }: RisksTableProps) => {
-  const { push } = useHistory();
-
-  const handleCellClick = useCallback(
-    (resourceType: ResourceTypeAgg['resourceType']) =>
-      push({
-        pathname: allNavigationItems.findings.path,
-        search: encodeQuery(getResourceTypeFailedFindingsQuery(resourceType)),
-      }),
-    [push]
-  );
-
-  const handleViewAllClick = useCallback(
-    () =>
-      push({
-        pathname: allNavigationItems.findings.path,
-        search: encodeQuery(getFailedFindingsQuery()),
-      }),
-    [push]
-  );
-
-  const columns = useMemo(
+export const RisksTable = ({
+  data: resourcesTypes,
+  maxItems,
+  onCellClick,
+  onViewAllClick,
+}: RisksTableProps) => {
+  const columns: Array<EuiBasicTableColumn<GroupedFindingsEvaluation>> = useMemo(
     () => [
       {
-        field: 'resourceType',
-        name: TEXT.RESOURCE_TYPE,
-        render: (resourceType: ResourceTypeAgg['resourceType']) => (
-          <EuiLink onClick={() => handleCellClick(resourceType)}>{resourceType}</EuiLink>
+        field: 'name',
+        truncateText: true,
+        name: i18n.translate('xpack.csp.dashboard.risksTable.cisSectionColumnLabel', {
+          defaultMessage: 'CIS Section',
+        }),
+        render: (name: GroupedFindingsEvaluation['name']) => (
+          <EuiLink onClick={() => onCellClick(name)} className="eui-textTruncate">
+            {name}
+          </EuiLink>
         ),
       },
       {
         field: 'totalFailed',
-        name: TEXT.FAILED_FINDINGS,
-        render: (totalFailed: ResourceTypeAgg['totalFailed'], resource: ResourceTypeAgg) => (
+        name: i18n.translate('xpack.csp.dashboard.risksTable.findingsColumnLabel', {
+          defaultMessage: 'Findings',
+        }),
+        render: (
+          totalFailed: GroupedFindingsEvaluation['totalFailed'],
+          resource: GroupedFindingsEvaluation
+        ) => (
           <>
             <EuiText size="s" color="danger">
               <CompactFormattedNumber number={resource.totalFailed} />
@@ -133,23 +78,28 @@ export const RisksTable = ({ data: resourceTypesAggs }: RisksTableProps) => {
         ),
       },
     ],
-    [handleCellClick]
+    [onCellClick]
   );
+
+  const items = useMemo(() => getTopRisks(resourcesTypes, maxItems), [resourcesTypes, maxItems]);
 
   return (
     <EuiFlexGroup direction="column" justifyContent="spaceBetween" gutterSize="s">
       <EuiFlexItem>
-        <EuiBasicTable<ResourceTypeAgg>
-          rowHeader="resourceType"
-          items={useMockData ? getTop5Risks(mock) : getTop5Risks(resourceTypesAggs)}
+        <EuiBasicTable<GroupedFindingsEvaluation>
+          rowHeader="name"
+          items={items}
           columns={columns}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup justifyContent="center" gutterSize="none">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={handleViewAllClick} iconType="search">
-              {TEXT.VIEW_ALL_FAILED_FINDINGS}
+            <EuiButtonEmpty onClick={onViewAllClick} iconType="search">
+              <FormattedMessage
+                id="xpack.csp.dashboard.risksTable.viewAllButtonTitle"
+                defaultMessage="View all failed findings"
+              />
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>

@@ -7,14 +7,12 @@
 
 import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { Subject } from 'rxjs';
-import {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-} from '../../../../../../src/plugins/kibana_react/public';
-import { Embeddable, IContainer } from '../../../../../../src/plugins/embeddable/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { EmbeddableAnomalyChartsContainer } from './embeddable_anomaly_charts_container_lazy';
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import type { MlDependencies } from '../../application/app';
@@ -24,7 +22,6 @@ import {
   AnomalyChartsEmbeddableOutput,
   AnomalyChartsServices,
 } from '..';
-import type { DataView } from '../../../../../../src/plugins/data_views/common';
 import { EmbeddableLoading } from '../common/components/embeddable_loading_fallback';
 export const getDefaultExplorerChartsPanelTitle = (jobIds: JobId[]) =>
   i18n.translate('xpack.ml.anomalyChartsEmbeddable.title', {
@@ -39,7 +36,7 @@ export class AnomalyChartsEmbeddable extends Embeddable<
   AnomalyChartsEmbeddableOutput
 > {
   private node?: HTMLElement;
-  private reload$ = new Subject();
+  private reload$ = new Subject<void>();
   public readonly type: string = ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE;
 
   constructor(
@@ -94,9 +91,27 @@ export class AnomalyChartsEmbeddable extends Embeddable<
     }
   }
 
+  public onLoading() {
+    this.renderComplete.dispatchInProgress();
+    this.updateOutput({ loading: true, error: undefined });
+  }
+
+  public onError(error: Error) {
+    this.renderComplete.dispatchError();
+    this.updateOutput({ loading: false, error: { name: error.name, message: error.message } });
+  }
+
+  public onRenderComplete() {
+    this.renderComplete.dispatchComplete();
+    this.updateOutput({ loading: false, error: undefined });
+  }
+
   public render(node: HTMLElement) {
     super.render(node);
     this.node = node;
+
+    // required for the export feature to work
+    this.node.setAttribute('data-shared-item', '');
 
     const I18nContext = this.services[0].i18n.Context;
     const theme$ = this.services[0].theme.theme$;
@@ -114,6 +129,9 @@ export class AnomalyChartsEmbeddable extends Embeddable<
                 refresh={this.reload$.asObservable()}
                 onInputChange={this.updateInput.bind(this)}
                 onOutputChange={this.updateOutput.bind(this)}
+                onRenderComplete={this.onRenderComplete.bind(this)}
+                onLoading={this.onLoading.bind(this)}
+                onError={this.onError.bind(this)}
               />
             </Suspense>
           </KibanaContextProvider>

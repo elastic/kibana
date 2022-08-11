@@ -7,7 +7,6 @@
  */
 
 import React from 'react';
-import { METRIC_TYPE } from '@kbn/analytics';
 import {
   EuiBetaBadge,
   EuiButton,
@@ -19,22 +18,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ApplicationStart } from 'kibana/public';
-import { IKbnUrlStateStorage } from 'src/plugins/kibana_utils/public';
-import { VisualizationListItem } from 'src/plugins/visualizations/public';
-import type { SavedObjectsTaggingApi } from 'src/plugins/saved_objects_tagging_oss/public';
-import { RedirectAppLinks } from '../../../../kibana_react/public';
+import { ApplicationStart } from '@kbn/core/public';
+import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+import { VisualizationListItem } from '../..';
 import { getVisualizeListItemLink } from './get_visualize_list_item_link';
-import { getUsageCollector } from '../../services';
-import { VISUALIZE_APP_NAME } from '../../../common/constants';
-
-const doTelemetryForAddEvent = (visType?: string) => {
-  const usageCollection = getUsageCollector();
-
-  if (usageCollection && visType) {
-    usageCollection.reportUiCounter(VISUALIZE_APP_NAME, METRIC_TYPE.CLICK, `${visType}:add`);
-  }
-};
 
 const getBadge = (item: VisualizationListItem) => {
   if (item.stage === 'beta') {
@@ -106,12 +95,8 @@ export const getTableColumns = (
         // In case an error occurs i.e. the vis has wrong type, we render the vis but without the link
         !error ? (
           <RedirectAppLinks application={application} className="visListingTable__titleLink">
-            {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
             <EuiLink
               href={getVisualizeListItemLink(application, kbnUrlStateStorage, editApp, editUrl)}
-              onClick={() => {
-                doTelemetryForAddEvent(typeof type === 'string' ? type : type?.name);
-              }}
               data-test-subj={`visListingTitleLink-${title.split(' ').join('-')}`}
             >
               {field}
@@ -155,7 +140,7 @@ export const getNoItemsMessage = (createItem: () => void) => (
   <EuiEmptyPrompt
     iconType="visualizeApp"
     title={
-      <h1 id="visualizeListingHeading">
+      <h1 id="visualizeListingHeading" data-test-subj="emptyListPrompt">
         <FormattedMessage
           id="visualizations.listing.createNew.title"
           defaultMessage="Create your first visualization"
@@ -171,12 +156,7 @@ export const getNoItemsMessage = (createItem: () => void) => (
       </p>
     }
     actions={
-      <EuiButton
-        onClick={createItem}
-        fill
-        iconType="plusInCircle"
-        data-test-subj="createVisualizationPromptButton"
-      >
+      <EuiButton onClick={createItem} fill iconType="plusInCircle" data-test-subj="newItemButton">
         <FormattedMessage
           id="visualizations.listing.createNew.createButtonLabel"
           defaultMessage="Create new visualization"

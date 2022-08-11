@@ -11,6 +11,7 @@ import * as path from 'path';
 import { parseUsageCollection } from './ts_parser';
 import { globAsync } from './utils';
 import { TelemetryRC } from './config';
+import { compilerHost } from './compiler_host';
 
 export async function getProgramPaths({
   root,
@@ -48,7 +49,7 @@ export async function getProgramPaths({
 }
 
 export function* extractCollectors(fullPaths: string[], tsConfig: any) {
-  const program = ts.createProgram(fullPaths, tsConfig);
+  const program = ts.createProgram(fullPaths, tsConfig, compilerHost);
   program.getTypeChecker();
   const sourceFiles = fullPaths.map((fullPath) => {
     const sourceFile = program.getSourceFile(fullPath);

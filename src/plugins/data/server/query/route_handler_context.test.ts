@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { coreMock } from '../../../../core/server/mocks';
-import { DATA_VIEW_SAVED_OBJECT_TYPE, FilterStateStore } from '../../common';
+import { coreMock } from '@kbn/core/server/mocks';
+import { FilterStateStore, Query } from '@kbn/es-query';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../common';
 import type { SavedObject, SavedQueryAttributes } from '../../common';
 import { registerSavedQueryRouteHandlerContext } from './route_handler_context';
-import { SavedObjectsFindResponse, SavedObjectsUpdateResponse } from 'kibana/server';
+import { SavedObjectsFindResponse, SavedObjectsUpdateResponse } from '@kbn/core/server';
 
 const mockContext = {
   core: coreMock.createRequestHandlerContext(),
@@ -20,7 +21,6 @@ const {
     savedObjects: { client: mockSavedObjectsClient },
   },
 } = mockContext;
-const context = registerSavedQueryRouteHandlerContext(mockContext);
 
 const savedQueryAttributes: SavedQueryAttributes = {
   title: 'foo',
@@ -73,7 +73,15 @@ const savedQueryReferences = [
 ];
 
 describe('saved query route handler context', () => {
-  beforeEach(() => {
+  let context: Awaited<ReturnType<typeof registerSavedQueryRouteHandlerContext>>;
+
+  beforeEach(async () => {
+    context = await registerSavedQueryRouteHandlerContext(
+      coreMock.createCustomRequestHandlerContext({
+        core: mockContext.core,
+      })
+    );
+
     mockSavedObjectsClient.create.mockClear();
     mockSavedObjectsClient.resolve.mockClear();
     mockSavedObjectsClient.find.mockClear();
@@ -430,7 +438,8 @@ describe('saved query route handler context', () => {
       });
 
       const response = await context.get('food');
-      expect(response.attributes.query.query).toEqual({ x: 'y' });
+      const query = response.attributes.query as Query;
+      expect(query.query).toEqual({ x: 'y' });
     });
 
     it('should handle null string', async () => {
@@ -452,7 +461,8 @@ describe('saved query route handler context', () => {
       });
 
       const response = await context.get('food');
-      expect(response.attributes.query.query).toEqual('null');
+      const query = response.attributes.query as Query;
+      expect(query.query).toEqual('null');
     });
 
     it('should handle null quoted string', async () => {
@@ -474,7 +484,8 @@ describe('saved query route handler context', () => {
       });
 
       const response = await context.get('food');
-      expect(response.attributes.query.query).toEqual('"null"');
+      const query = response.attributes.query as Query;
+      expect(query.query).toEqual('"null"');
     });
 
     it('should not lose quotes', async () => {
@@ -496,7 +507,8 @@ describe('saved query route handler context', () => {
       });
 
       const response = await context.get('food');
-      expect(response.attributes.query.query).toEqual('"Bob"');
+      const query = response.attributes.query as Query;
+      expect(query.query).toEqual('"Bob"');
     });
 
     it('should inject references', async () => {

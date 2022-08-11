@@ -9,7 +9,7 @@
 // TODO: https://github.com/elastic/kibana/issues/110893
 /* eslint-disable @kbn/eslint/no_export_all */
 
-import { ExpressionFunction } from 'src/plugins/expressions';
+import { ExpressionFunction } from '@kbn/expressions-plugin/common';
 import { PresentationUtilPlugin } from './plugin';
 import { pluginServices } from './services';
 
@@ -43,8 +43,16 @@ export {
   withSuspense,
   LazyDataViewPicker,
   LazyFieldPicker,
-  LazyReduxEmbeddableWrapper,
 } from './components';
+
+export {
+  useReduxContainerContext,
+  useReduxEmbeddableContext,
+  lazyLoadReduxEmbeddablePackage,
+  type ReduxEmbeddableState,
+  type ReduxEmbeddableTools,
+  type ReduxEmbeddablePackage,
+} from './redux_embeddables';
 
 export * from './components/types';
 
@@ -54,19 +62,12 @@ export {
   AddFromLibraryButton,
   PrimaryActionButton,
   PrimaryActionPopover,
+  /** @deprecated QuickButtonGroup  - use `IconButtonGroup` from `@kbn/shared-ux-button-toolbar` */
   QuickButtonGroup,
   SolutionToolbar,
   SolutionToolbarButton,
   SolutionToolbarPopover,
 } from './components/solution_toolbar';
-
-export {
-  ReduxEmbeddableContext,
-  useReduxContainerContext,
-  useReduxEmbeddableContext,
-  type ReduxContainerContextServices,
-  type ReduxEmbeddableWrapperPropsWithChildren,
-} from './components/redux_embeddables';
 
 /**
  * Register a set of Expression Functions with the Presentation Utility ExpressionInput.  This allows

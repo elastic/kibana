@@ -94,6 +94,11 @@ export class ElasticChartService extends FtrService {
     }
   }
 
+  public async getAllChartsDebugDataByTestSubj(dataTestSubj: string): Promise<WebElementWrapper[]> {
+    const charts = await this.testSubjects.findAll(dataTestSubj);
+    return charts;
+  }
+
   private async getAllCharts(timeout?: number) {
     return await this.find.allByCssSelector('.echChart', timeout);
   }

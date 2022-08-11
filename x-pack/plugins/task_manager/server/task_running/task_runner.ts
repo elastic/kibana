@@ -15,12 +15,8 @@ import apm from 'elastic-apm-node';
 import uuid from 'uuid';
 import { withSpan } from '@kbn/apm-utils';
 import { identity, defaults, flow } from 'lodash';
-import {
-  Logger,
-  SavedObjectsErrorHelpers,
-  ExecutionContextStart,
-} from '../../../../../src/core/server';
-import { UsageCounter } from '../../../../../src/plugins/usage_collection/server';
+import { Logger, SavedObjectsErrorHelpers, ExecutionContextStart } from '@kbn/core/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { Middleware } from '../lib/middleware';
 import {
   asOk,
@@ -38,7 +34,7 @@ import {
   TaskMarkRunning,
   asTaskRunEvent,
   asTaskMarkRunningEvent,
-  startTaskTimer,
+  startTaskTimerWithEventLoopMonitoring,
   TaskTiming,
   TaskPersistence,
 } from '../task_events';
@@ -56,6 +52,7 @@ import {
 } from '../task';
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import { isUnrecoverableError } from './errors';
+import type { EventLoopDelayConfig } from '../config';
 
 const defaultBackoffPerFailure = 5 * 60 * 1000;
 export const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
@@ -105,6 +102,7 @@ type Opts = {
   defaultMaxAttempts: number;
   executionContext: ExecutionContextStart;
   usageCounter?: UsageCounter;
+  eventLoopDelayConfig: EventLoopDelayConfig;
 } & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning'>;
 
 export enum TaskRunResult {
@@ -152,6 +150,7 @@ export class TaskManagerRunner implements TaskRunner {
   private uuid: string;
   private readonly executionContext: ExecutionContextStart;
   private usageCounter?: UsageCounter;
+  private eventLoopDelayConfig: EventLoopDelayConfig;
 
   /**
    * Creates an instance of TaskManagerRunner.
@@ -174,6 +173,7 @@ export class TaskManagerRunner implements TaskRunner {
     onTaskEvent = identity,
     executionContext,
     usageCounter,
+    eventLoopDelayConfig,
   }: Opts) {
     this.instance = asPending(sanitizeInstance(instance));
     this.definitions = definitions;
@@ -186,6 +186,7 @@ export class TaskManagerRunner implements TaskRunner {
     this.executionContext = executionContext;
     this.usageCounter = usageCounter;
     this.uuid = uuid.v4();
+    this.eventLoopDelayConfig = eventLoopDelayConfig;
   }
 
   /**
@@ -282,7 +283,7 @@ export class TaskManagerRunner implements TaskRunner {
         }`
       );
     }
-    this.logger.debug(`Running task ${this}`);
+    this.logger.debug(`Running task ${this}`, { tags: ['task:start', this.id, this.taskType] });
 
     const apmTrans = apm.startTransaction(this.taskType, TASK_MANAGER_RUN_TRANSACTION_TYPE, {
       childOf: this.instance.task.traceparent,
@@ -292,7 +293,7 @@ export class TaskManagerRunner implements TaskRunner {
       taskInstance: this.instance.task,
     });
 
-    const stopTaskTimer = startTaskTimer();
+    const stopTaskTimer = startTaskTimerWithEventLoopMonitoring(this.eventLoopDelayConfig);
 
     try {
       this.task = this.definition.createTaskRunner(modifiedContext);
@@ -312,7 +313,10 @@ export class TaskManagerRunner implements TaskRunner {
       if (apmTrans) apmTrans.end('success');
       return processedResult;
     } catch (err) {
-      this.logger.error(`Task ${this} failed: ${err}`);
+      this.logger.error(`Task ${this} failed: ${err}`, {
+        tags: [this.taskType, this.instance.task.id, 'task-run-failed'],
+        error: { stack_trace: err.stack },
+      });
       // in error scenario, we can not get the RunResult
       // re-use modifiedContext's state, which is correct as of beforeRun
       const processedResult = await withSpan({ name: 'process result', type: 'task manager' }, () =>
@@ -323,6 +327,8 @@ export class TaskManagerRunner implements TaskRunner {
       );
       if (apmTrans) apmTrans.end('failure');
       return processedResult;
+    } finally {
+      this.logger.debug(`Task ${this} ended`, { tags: ['task:end', this.id, this.taskType] });
     }
   }
 
@@ -617,6 +623,18 @@ export class TaskManagerRunner implements TaskRunner {
         );
       }
     );
+
+    const { eventLoopBlockMs = 0 } = taskTiming;
+    const taskLabel = `${this.taskType} ${this.instance.task.id}`;
+    if (eventLoopBlockMs > this.eventLoopDelayConfig.warn_threshold) {
+      this.logger.warn(
+        `event loop blocked for at least ${eventLoopBlockMs} ms while running task ${taskLabel}`,
+        {
+          tags: [this.taskType, taskLabel, 'event-loop-blocked'],
+        }
+      );
+    }
+
     return result;
   }
 

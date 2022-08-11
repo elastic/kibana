@@ -64,6 +64,15 @@ post:
                   required:
                     - id
                     - type
+              _meta:
+                type: object
+                properties:
+                  install_source:
+                    type: string
+                    enum:
+                      - registry
+                      - upload
+                      - bundled
             required:
               - items
   operationId: install-package

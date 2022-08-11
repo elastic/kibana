@@ -6,9 +6,9 @@
  */
 
 import { createPromiseFromStreams } from '@kbn/utils';
-import { SecurityPluginSetup } from '../../../../../../../security/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
-import { FrameworkRequest } from '../../../../framework';
+import type { FrameworkRequest } from '../../../../framework';
 import {
   createMockConfig,
   requestContextMock,
@@ -22,14 +22,11 @@ import {
 import * as helpers from './helpers';
 import { importTimelines } from '../../timelines/import_timelines/helpers';
 import { buildFrameworkRequest } from '../../../utils/common';
-import { ImportTimelineResultSchema } from '../../../../../../common/types/timeline';
+import type { ImportTimelineResultSchema } from '../../../../../../common/types/timeline';
 
 jest.mock('../../timelines/import_timelines/helpers');
 
-describe.each([
-  ['Legacy', false],
-  ['RAC', true],
-])('installPrepackagedTimelines - %s', (_, isRuleRegistryEnabled) => {
+describe('installPrepackagedTimelines', () => {
   let securitySetup: SecurityPluginSetup;
   let frameworkRequest: FrameworkRequest;
   const spyInstallPrepackagedTimelines = jest.spyOn(helpers, 'installPrepackagedTimelines');
@@ -47,7 +44,7 @@ describe.each([
       authz: {},
     } as unknown as SecurityPluginSetup;
 
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
     jest.doMock('./helpers', () => {
       return {
@@ -57,7 +54,11 @@ describe.each([
     });
 
     const request = addPrepackagedRulesRequest();
-    frameworkRequest = await buildFrameworkRequest(context, securitySetup, request);
+    frameworkRequest = await buildFrameworkRequest(
+      requestContextMock.convertContext(context),
+      securitySetup,
+      request
+    );
   });
 
   afterEach(() => {

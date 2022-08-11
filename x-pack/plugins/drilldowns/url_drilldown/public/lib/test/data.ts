@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-import { DatatableColumnType } from '../../../../../../../src/plugins/expressions/common';
-import { Query, Filter, TimeRange } from '../../../../../../../src/plugins/data/public';
-import {
-  Embeddable,
-  EmbeddableInput,
-  EmbeddableOutput,
-} from '../../../../../../../src/plugins/embeddable/public';
+import { DatatableColumnType } from '@kbn/expressions-plugin/common';
+import type { Query, Filter, TimeRange } from '@kbn/es-query';
+import { Embeddable, EmbeddableInput, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
 
 export const createPoint = ({
   field,

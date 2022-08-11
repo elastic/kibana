@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { VisParams } from 'src/plugins/visualizations/common';
+import { VisParams } from '@kbn/visualizations-plugin/common';
 
 export const getVisTypeFromParams = (params?: VisParams) => {
   let type = params?.seriesParams?.[0]?.type;

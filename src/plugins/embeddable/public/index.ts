@@ -8,17 +8,21 @@
 
 import './index.scss';
 
-import { PluginInitializerContext } from 'src/core/public';
+import { PluginInitializerContext } from '@kbn/core/public';
 import { EmbeddablePublicPlugin } from './plugin';
 
 export type {
   Adapters,
   ReferenceOrValueEmbeddable,
+  SelfStyledEmbeddable,
+  FilterableEmbeddable,
   ChartActionContext,
   ContainerInput,
   ContainerOutput,
   EmbeddableChildPanelProps,
   EmbeddableContext,
+  EmbeddablePhaseEvent,
+  EmbeddablePhase,
   EmbeddableFactory,
   EmbeddableFactoryDefinition,
   EmbeddableInput,
@@ -36,6 +40,7 @@ export type {
   EmbeddablePackageState,
   EmbeddableRendererProps,
   EmbeddableContainerContext,
+  EmbeddableContainerSettings,
 } from './lib';
 export {
   ACTION_ADD_PANEL,
@@ -75,6 +80,7 @@ export {
   EmbeddableStateTransfer,
   EmbeddableRenderer,
   useEmbeddableFactory,
+  isFilterableEmbeddable,
 } from './lib';
 
 export { AttributeService, ATTRIBUTE_SERVICE_KEY } from './lib/attribute_service';

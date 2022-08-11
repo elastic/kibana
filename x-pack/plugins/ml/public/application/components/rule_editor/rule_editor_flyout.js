@@ -51,7 +51,7 @@ import {
   CONDITIONS_NOT_SUPPORTED_FUNCTIONS,
 } from '../../../../common/constants/detector_rule';
 import { getPartitioningFieldNames } from '../../../../common/util/job_utils';
-import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { mlJobService } from '../../services/job_service';
 import { ml } from '../../services/ml_api_service';
 import { extractErrorMessage } from '../../../../common/util/errors';

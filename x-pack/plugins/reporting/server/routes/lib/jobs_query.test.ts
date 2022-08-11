@@ -6,8 +6,8 @@
  */
 
 import { set } from 'lodash';
-import { ElasticsearchClient } from 'src/core/server';
-import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
+import { ElasticsearchClient } from '@kbn/core/server';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { statuses } from '../../lib';
 import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
 

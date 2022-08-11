@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import {
-  Direction,
-  HostRiskSeverity,
-  HostRiskScoreSortField,
-} from '../../../common/search_strategy';
-import { HostsFields } from '../../../common/search_strategy/security_solution';
+import type { Direction } from '../../../common/search_strategy';
+import type {
+  HostsFields,
+  RiskScoreSortField,
+  RiskSeverity,
+} from '../../../common/search_strategy/security_solution';
 
 export enum HostsType {
   page = 'page',
@@ -23,8 +23,8 @@ export enum HostsTableType {
   events = 'events',
   uncommonProcesses = 'uncommonProcesses',
   anomalies = 'anomalies',
-  alerts = 'externalAlerts',
   risk = 'hostRisk',
+  sessions = 'sessions',
 }
 
 export interface BasicQueryPaginated {
@@ -38,8 +38,8 @@ export interface HostsQuery extends BasicQueryPaginated {
 }
 
 export interface HostRiskScoreQuery extends BasicQueryPaginated {
-  sort: HostRiskScoreSortField;
-  severitySelection: HostRiskSeverity[];
+  sort: RiskScoreSortField;
+  severitySelection: RiskSeverity[];
 }
 
 export interface Queries {
@@ -48,8 +48,8 @@ export interface Queries {
   [HostsTableType.events]: BasicQueryPaginated;
   [HostsTableType.uncommonProcesses]: BasicQueryPaginated;
   [HostsTableType.anomalies]: null | undefined;
-  [HostsTableType.alerts]: BasicQueryPaginated;
   [HostsTableType.risk]: HostRiskScoreQuery;
+  [HostsTableType.sessions]: BasicQueryPaginated;
 }
 
 export interface GenericHostsModel {

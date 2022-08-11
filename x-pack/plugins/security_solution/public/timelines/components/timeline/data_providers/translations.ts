@@ -11,29 +11,12 @@ export const AND = i18n.translate('xpack.securitySolution.dataProviders.and', {
   defaultMessage: 'AND',
 });
 
-export const COPY_TO_CLIPBOARD = i18n.translate(
-  'xpack.securitySolution.dataProviders.copyToClipboardTooltip',
-  {
-    defaultMessage: 'Copy to Clipboard',
-  }
-);
-
 export const DELETE_DATA_PROVIDER = i18n.translate(
   'xpack.securitySolution.dataProviders.deleteDataProvider',
   {
     defaultMessage: 'Delete',
   }
 );
-export const DROP_HERE_TO_ADD_AN = i18n.translate(
-  'xpack.securitySolution.dataProviders.dropHereToAddAnLabel',
-  {
-    defaultMessage: 'Drop here to add an',
-  }
-);
-
-export const DROP_HERE = i18n.translate('xpack.securitySolution.dataProviders.dropHere', {
-  defaultMessage: 'Drop here',
-});
 
 export const DROP_ANYTHING = i18n.translate('xpack.securitySolution.dataProviders.dropAnything', {
   defaultMessage: 'Drop anything',
@@ -98,10 +81,6 @@ export const HERE_TO_BUILD_AN = i18n.translate(
   }
 );
 
-export const TO_BUILD_AN = i18n.translate('xpack.securitySolution.dataProviders.toBuildAn', {
-  defaultMessage: 'to build an',
-});
-
 export const INCLUDE_DATA_PROVIDER = i18n.translate(
   'xpack.securitySolution.dataProviders.includeDataProvider',
   {
@@ -155,13 +134,6 @@ export const TEMPORARILY_DISABLE_DATA_PROVIDER = i18n.translate(
 export const VALUE = i18n.translate('xpack.securitySolution.dataProviders.valuePlaceholder', {
   defaultMessage: 'value',
 });
-
-export const VALUE_ARIA_LABEL = i18n.translate(
-  'xpack.securitySolution.dataProviders.valueAriaLabel',
-  {
-    defaultMessage: 'value',
-  }
-);
 
 export const ADD_FIELD_LABEL = i18n.translate(
   'xpack.securitySolution.dataProviders.addFieldPopoverButtonLabel',

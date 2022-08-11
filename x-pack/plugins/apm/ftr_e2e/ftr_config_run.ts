@@ -23,7 +23,7 @@ async function testRunner({ getService }: FtrProviderContext) {
   const result = await cypressStart(getService, cypress.run);
 
   if (result && (result.status === 'failed' || result.totalFailed > 0)) {
-    throw new Error(`APM Cypress tests failed`);
+    process.exit(1);
   }
 }
 

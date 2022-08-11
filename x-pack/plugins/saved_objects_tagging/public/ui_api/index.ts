@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { OverlayStart, ThemeServiceStart } from 'src/core/public';
-import { SavedObjectsTaggingApiUi } from '../../../../../src/plugins/saved_objects_tagging_oss/public';
+import { OverlayStart, ThemeServiceStart } from '@kbn/core/public';
+import { SavedObjectsTaggingApiUi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { TagsCapabilities } from '../../common';
 import { ITagsCache, ITagInternalClient } from '../services';
 import {

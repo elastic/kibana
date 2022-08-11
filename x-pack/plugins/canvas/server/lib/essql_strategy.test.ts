@@ -8,6 +8,7 @@
 import { essqlSearchStrategyProvider } from './essql_strategy';
 import { EssqlSearchStrategyRequest } from '../../types';
 import { zipObject } from 'lodash';
+import { lastValueFrom } from 'rxjs';
 
 const getMockEssqlResponse = () => ({
   body: {
@@ -72,7 +73,7 @@ describe('ESSQL search strategy', () => {
     describe('query functionality', () => {
       it('performs a simple query', async () => {
         const sqlSearch = await essqlSearchStrategyProvider();
-        const result = await sqlSearch.search(basicReq, {}, mockDeps).toPromise();
+        const result = await lastValueFrom(sqlSearch.search(basicReq, {}, mockDeps));
         const [[request]] = mockQuery.mock.calls;
 
         expect(request.format).toEqual('json');
@@ -120,7 +121,9 @@ describe('ESSQL search strategy', () => {
         mockQuery.mockReset().mockReturnValueOnce(pageOne).mockReturnValueOnce(pageTwo);
 
         const sqlSearch = await essqlSearchStrategyProvider();
-        const result = await sqlSearch.search({ ...basicReq, count: 2 }, {}, mockDeps).toPromise();
+        const result = await lastValueFrom(
+          sqlSearch.search({ ...basicReq, count: 2 }, {}, mockDeps)
+        );
 
         expect(result.rows).toHaveLength(2);
       });

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
-import type { AuthenticatedUser } from '../../../security/common/model';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 
 import {
   FLEET_ELASTIC_AGENT_PACKAGE,

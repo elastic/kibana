@@ -26,7 +26,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { reactRouterNavigate } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
 import { SlmPolicy } from '../../../../../../common/types';
 import { useServices } from '../../../../app_context';

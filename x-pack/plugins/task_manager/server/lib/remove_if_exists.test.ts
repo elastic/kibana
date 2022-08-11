@@ -6,7 +6,7 @@
  */
 
 import uuid from 'uuid';
-import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { removeIfExists } from './remove_if_exists';
 import { taskStoreMock } from '../task_store.mock';
 

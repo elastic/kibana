@@ -8,13 +8,12 @@
 
 import { from } from 'rxjs';
 import { action } from '@storybook/addon-actions';
-import { DataPublicPluginStart } from '../../../../data/public';
-import { FieldFormatsStart } from '../../../../field_formats/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { getFormatService } from './format_service';
-
-const theme = {
-  theme$: from([{ darkMode: false }]),
-};
+import { palettes } from './palettes';
+import { theme } from './theme';
+import { VisTypePieDependencies } from '../plugin';
 
 const data = {
   actions: {
@@ -23,8 +22,20 @@ const data = {
   },
 } as DataPublicPluginStart;
 
-export const getStartDeps = async () => ({
+export const getStartDeps = (() => ({
   data,
   fieldFormats: getFormatService() as FieldFormatsStart,
-  kibanaTheme: theme,
-});
+  core: {
+    theme: {
+      theme$: from([{ darkMode: false }]),
+    },
+  },
+  plugins: {
+    data,
+    fieldFormats: getFormatService() as FieldFormatsStart,
+    charts: {
+      theme,
+      palettes,
+    },
+  },
+})) as unknown as VisTypePieDependencies['getStartDeps'];

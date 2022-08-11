@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ResponseErrorAttributes } from 'kibana/server';
+import type { ResponseErrorAttributes } from '@kbn/core/server';
 import type { DataViewBase } from '@kbn/es-query';
-import { FieldSpec } from '../../../../../src/plugins/data_views/common';
+import type { FieldSpec } from '@kbn/data-views-plugin/common';
 
 export interface ServerApiError {
   statusCode: number;

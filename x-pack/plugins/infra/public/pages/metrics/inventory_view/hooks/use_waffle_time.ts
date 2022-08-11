@@ -9,7 +9,7 @@ import { useCallback, useState, useEffect } from 'react';
 import * as rt from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
-import DateMath from '@elastic/datemath';
+import DateMath from '@kbn/datemath';
 import { constant, identity } from 'fp-ts/lib/function';
 import createContainer from 'constate';
 import { useUrlState } from '../../../../utils/use_url_state';

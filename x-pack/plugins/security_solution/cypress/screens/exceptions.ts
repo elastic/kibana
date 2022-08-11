@@ -15,14 +15,15 @@ export const CONFIRM_BTN = '[data-test-subj="add-exception-confirm-button"]';
 export const FIELD_INPUT =
   '[data-test-subj="fieldAutocompleteComboBox"] [data-test-subj="comboBoxInput"]';
 
-export const FIELD_INPUT_RESULT = '.euiFilterSelectItem';
-
 export const LOADING_SPINNER = '[data-test-subj="loading-spinner"]';
 
 export const OPERATOR_INPUT = '[data-test-subj="operatorAutocompleteComboBox"]';
 
 export const VALUES_INPUT =
   '[data-test-subj="valuesAutocompleteMatch"] [data-test-subj="comboBoxInput"]';
+
+export const VALUES_MATCH_ANY_INPUT =
+  '[data-test-subj="valuesAutocompleteMatchAny"] [data-test-subj="comboBoxInput"]';
 
 export const ADD_AND_BTN = '[data-test-subj="exceptionsAndButton"]';
 
@@ -33,8 +34,6 @@ export const ADD_NESTED_BTN = '[data-test-subj="exceptionsNestedButton"]';
 export const ENTRY_DELETE_BTN = '[data-test-subj="builderItemEntryDeleteButton"]';
 
 export const CANCEL_BTN = '[data-test-subj="cancelExceptionAddButton"]';
-
-export const BUILDER_FLYOUT_BODY = '[data-test-subj="exceptionsBuilderWrapper"]';
 
 export const EXCEPTIONS_TABLE = '[data-test-subj="exceptions-table"]';
 
@@ -61,3 +60,10 @@ export const EXCEPTION_FIELD_LIST =
   '[data-test-subj="comboBoxOptionsList fieldAutocompleteComboBox-optionsList"]';
 
 export const EXCEPTION_FLYOUT_TITLE = '[data-test-subj="exception-flyout-title"]';
+
+export const EXCEPTION_EDIT_FLYOUT_SAVE_BTN = '[data-test-subj="edit-exception-confirm-button"]';
+
+export const EXCEPTION_FLYOUT_VERSION_CONFLICT =
+  '[data-test-subj="exceptionsFlyoutVersionConflict"]';
+
+export const EXCEPTION_FLYOUT_LIST_DELETED_ERROR = '[data-test-subj="errorCalloutContainer"]';

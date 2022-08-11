@@ -7,7 +7,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { Logger } from 'src/core/server';
+import { Logger } from '@kbn/core/server';
 import { Stream, PassThrough } from 'stream';
 
 const delimiter = '\n';

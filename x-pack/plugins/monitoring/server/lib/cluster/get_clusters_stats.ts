@@ -6,8 +6,6 @@
  */
 
 // @ts-ignore
-import { checkParam } from '../error_missing_required';
-// @ts-ignore
 import { createQuery } from '../create_query';
 // @ts-ignore
 import { ElasticsearchMetric } from '../metrics';
@@ -26,7 +24,7 @@ import { Globals } from '../../static_globals';
  * @param  {String} clusterUuid (optional) If not undefined, getClusters will filter for a single cluster
  * @return {Promise} A promise containing an array of clusters.
  */
-export function getClustersStats(req: LegacyRequest, clusterUuid: string, ccs?: string) {
+export function getClustersStats(req: LegacyRequest, clusterUuid?: string, ccs?: string) {
   return (
     fetchClusterStats(req, clusterUuid, ccs)
       .then((response) => handleClusterStats(response))
@@ -42,7 +40,7 @@ export function getClustersStats(req: LegacyRequest, clusterUuid: string, ccs?: 
  * @param {String} clusterUuid (optional) - if not undefined, getClusters filters for a single clusterUuid
  * @return {Promise} Object representing each cluster.
  */
-function fetchClusterStats(req: LegacyRequest, clusterUuid: string, ccs?: string) {
+function fetchClusterStats(req: LegacyRequest, clusterUuid?: string, ccs?: string) {
   const dataset = 'cluster_stats';
   const moduleType = 'elasticsearch';
   const indexPattern = getNewIndexPatterns({

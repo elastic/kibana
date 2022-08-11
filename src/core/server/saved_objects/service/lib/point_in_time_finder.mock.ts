@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { loggerMock, MockedLogger } from '../../../logging/logger.mock';
-import type { SavedObjectsClientContract } from '../../types';
-import type { ISavedObjectsRepository } from './repository';
+import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
+import type {
+  SavedObjectsClientContract,
+  ISavedObjectsRepository,
+} from '@kbn/core-saved-objects-api-server';
 import { PointInTimeFinder } from './point_in_time_finder';
 
 const createPointInTimeFinderMock = ({

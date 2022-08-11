@@ -13,7 +13,6 @@ export const MATCHED_ID = 'matched.id';
 export const MATCHED_TYPE = 'matched.type';
 export const INDICATOR_MATCH_SUBFIELDS = [MATCHED_ATOMIC, MATCHED_FIELD, MATCHED_TYPE];
 
-export const INDICATOR_MATCHED_ATOMIC = `${ENRICHMENT_DESTINATION_PATH}.${MATCHED_ATOMIC}`;
 export const INDICATOR_MATCHED_FIELD = `${ENRICHMENT_DESTINATION_PATH}.${MATCHED_FIELD}`;
 export const INDICATOR_MATCHED_TYPE = `${ENRICHMENT_DESTINATION_PATH}.${MATCHED_TYPE}`;
 
@@ -21,24 +20,12 @@ export const EVENT_DATASET = 'event.dataset';
 
 export const FIRST_SEEN = 'indicator.first_seen';
 export const LAST_SEEN = 'indicator.last_seen';
-export const PROVIDER = 'indicator.provider';
 export const REFERENCE = 'indicator.reference';
 export const FEED_NAME = 'feed.name';
 
 export const FEED_NAME_PATH = `threat.${FEED_NAME}`;
 
-export const INDICATOR_FIRSTSEEN = `${ENRICHMENT_DESTINATION_PATH}.${FIRST_SEEN}`;
-export const INDICATOR_LASTSEEN = `${ENRICHMENT_DESTINATION_PATH}.${LAST_SEEN}`;
-export const INDICATOR_PROVIDER = `${ENRICHMENT_DESTINATION_PATH}.${PROVIDER}`;
 export const INDICATOR_REFERENCE = `${ENRICHMENT_DESTINATION_PATH}.${REFERENCE}`;
-
-export const CTI_ROW_RENDERER_FIELDS = [
-  INDICATOR_MATCHED_ATOMIC,
-  INDICATOR_MATCHED_FIELD,
-  INDICATOR_MATCHED_TYPE,
-  INDICATOR_REFERENCE,
-  INDICATOR_PROVIDER,
-];
 
 export enum ENRICHMENT_TYPES {
   InvestigationTime = 'investigation_time',
@@ -61,5 +48,6 @@ export const EVENT_ENRICHMENT_INDICATOR_FIELD_MAP = {
 export const DEFAULT_EVENT_ENRICHMENT_FROM = 'now-30d';
 export const DEFAULT_EVENT_ENRICHMENT_TO = 'now';
 
-export const TI_INTEGRATION_PREFIX = 'ti';
 export const OTHER_TI_DATASET_KEY = '_others_ti_';
+
+export const THREAT_PIT_KEEP_ALIVE = '5m';

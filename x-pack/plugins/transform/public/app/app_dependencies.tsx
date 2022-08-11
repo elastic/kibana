@@ -5,34 +5,45 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart } from 'src/core/public';
-import type { DataPublicPluginStart } from 'src/plugins/data/public';
-import type { SavedObjectsStart } from 'src/plugins/saved_objects/public';
-import type { ScopedHistory } from 'kibana/public';
-import type { SharePluginStart } from 'src/plugins/share/public';
-import type { SpacesPluginStart } from '../../../spaces/public';
+import type {
+  ApplicationStart,
+  ChromeStart,
+  DocLinksStart,
+  HttpSetup,
+  I18nStart,
+  IUiSettingsClient,
+  NotificationsSetup,
+  OverlayStart,
+  SavedObjectsStart,
+  ThemeServiceStart,
+} from '@kbn/core/public';
+import type { SavedObjectsStart as SavedObjectsPluginStart } from '@kbn/saved-objects-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { ScopedHistory } from '@kbn/core/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import type { Storage } from '../../../../../src/plugins/kibana_utils/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
 
+import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { GetMlSharedImportsReturnType } from '../shared_imports';
-import type { TriggersAndActionsUIPublicPluginStart } from '../../../triggers_actions_ui/public';
 
 export interface AppDependencies {
-  application: CoreStart['application'];
-  chrome: CoreStart['chrome'];
+  application: ApplicationStart;
+  chrome: ChromeStart;
   data: DataPublicPluginStart;
-  docLinks: CoreStart['docLinks'];
-  http: CoreSetup['http'];
-  i18n: CoreStart['i18n'];
-  notifications: CoreSetup['notifications'];
-  uiSettings: CoreStart['uiSettings'];
-  savedObjects: CoreStart['savedObjects'];
+  docLinks: DocLinksStart;
+  http: HttpSetup;
+  i18n: I18nStart;
+  notifications: NotificationsSetup;
+  uiSettings: IUiSettingsClient;
+  savedObjects: SavedObjectsStart;
   storage: Storage;
-  overlays: CoreStart['overlays'];
-  theme: CoreStart['theme'];
+  overlays: OverlayStart;
+  theme: ThemeServiceStart;
   history: ScopedHistory;
-  savedObjectsPlugin: SavedObjectsStart;
+  savedObjectsPlugin: SavedObjectsPluginStart;
   share: SharePluginStart;
   ml: GetMlSharedImportsReturnType;
   spaces?: SpacesPluginStart;

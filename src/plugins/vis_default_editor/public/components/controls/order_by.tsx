@@ -11,6 +11,7 @@ import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useMount from 'react-use/lib/useMount';
 
+import { search } from '@kbn/data-plugin/public';
 import {
   isCompatibleAggregation,
   useAvailableOptions,
@@ -18,7 +19,6 @@ import {
   useValidation,
 } from './utils';
 import { AggParamEditorProps } from '../agg_param_props';
-import { search } from '../../../../data/public';
 
 const { termsAggFilter } = search.aggs;
 const DEFAULT_VALUE = '_key';

@@ -8,7 +8,7 @@
 
 import Path from 'path';
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 // @ts-ignore
 import { createPatch } from 'diff';
 

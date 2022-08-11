@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
-import { ExceptionsListPreGetOneItemServerExtension } from '../../../../../lists/server';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionsListPreGetOneItemServerExtension } from '@kbn/lists-plugin/server';
+import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import {
   TrustedAppValidator,
   HostIsolationExceptionsValidator,
   EventFilterValidator,
+  BlocklistValidator,
 } from '../validators';
 
 type ValidatorCallback = ExceptionsListPreGetOneItemServerExtension['callback'];
@@ -54,6 +55,12 @@ export const getExceptionsPreGetOneHandler = (
     // Event Filters Exception
     if (EventFilterValidator.isEventFilter({ listId })) {
       await new EventFilterValidator(endpointAppContextService, request).validatePreGetOneItem();
+      return data;
+    }
+
+    // Validate Blocklists
+    if (BlocklistValidator.isBlocklist({ listId })) {
+      await new BlocklistValidator(endpointAppContextService, request).validatePreGetOneItem();
       return data;
     }
 

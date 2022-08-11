@@ -9,15 +9,15 @@
 import React from 'react';
 import { EuiText, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { DataViewField } from '@kbn/data-views-plugin/public';
 import { StringFieldProgressBar } from './string_progress_bar';
 import { Bucket } from './types';
-import { DataViewField } from '../../../../../../data/common';
 import './discover_field_bucket.scss';
 
 interface Props {
   bucket: Bucket;
   field: DataViewField;
-  onAddFilter: (field: DataViewField | string, value: string, type: '+' | '-') => void;
+  onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
 }
 
 export function DiscoverFieldBucket({ field, bucket, onAddFilter }: Props) {
@@ -66,7 +66,7 @@ export function DiscoverFieldBucket({ field, bucket, onAddFilter }: Props) {
             count={bucket.count}
           />
         </EuiFlexItem>
-        {field.filterable && (
+        {onAddFilter && field.filterable && (
           <EuiFlexItem grow={false}>
             <div>
               <EuiButtonIcon

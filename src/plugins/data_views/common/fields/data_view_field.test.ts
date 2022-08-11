@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { IndexPatternField } from './data_view_field';
-import { IndexPattern } from '..';
+import { DataView } from '..';
+import { DataViewField } from './data_view_field';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldSpec, RuntimeField } from '../types';
-import { FieldFormat } from '../../../field_formats/common';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 describe('Field', function () {
   function flatten(obj: Record<string, any>) {
@@ -18,7 +18,7 @@ describe('Field', function () {
   }
 
   function getField(values = {}) {
-    return new IndexPatternField({ ...fieldValues, ...values });
+    return new DataViewField({ ...fieldValues, ...values });
   }
 
   const fieldValues = {
@@ -40,7 +40,7 @@ describe('Field', function () {
     displayName: 'displayName',
     indexPattern: {
       fieldFormatMap: { name: {}, _source: {}, _score: {}, _id: {} },
-    } as unknown as IndexPattern,
+    } as unknown as DataView,
     $$spec: {} as unknown as FieldSpec,
     conflictDescriptions: { a: ['b', 'c'], d: ['e'] },
     runtimeField: {
@@ -146,12 +146,12 @@ describe('Field', function () {
   });
 
   it('exports the property to JSON', () => {
-    const field = new IndexPatternField(fieldValues);
+    const field = new DataViewField(fieldValues);
     expect(flatten(field)).toMatchSnapshot();
   });
 
   it('spec snapshot', () => {
-    const field = new IndexPatternField(fieldValues);
+    const field = new DataViewField(fieldValues);
     const getFormatterForField = () =>
       ({
         toJSON: () => ({

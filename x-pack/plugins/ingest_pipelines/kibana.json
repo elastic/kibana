@@ -1,6 +1,7 @@
 {
   "id": "ingestPipelines",
   "version": "8.2.0",
+  "kibanaVersion": "kibana",
   "server": true,
   "ui": true,
   "owner": {

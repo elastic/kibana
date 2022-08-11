@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-jest.mock('../../../services/job_service.js', () => 'mlJobService');
+jest.mock('../../../services/job_service', () => 'mlJobService');
 
 // Mock the call for loading a filter.
 // The mock is hoisted to the top, so need to prefix the filter variable

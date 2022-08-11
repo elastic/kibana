@@ -35,7 +35,7 @@ describe('Service inventory - header filters', () => {
   });
 
   beforeEach(() => {
-    cy.loginAsReadOnlyUser();
+    cy.loginAsViewerUser();
   });
 
   describe('Filtering by kuerybar', () => {

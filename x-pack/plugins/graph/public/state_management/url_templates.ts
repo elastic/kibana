@@ -23,8 +23,9 @@ import { matchesOne } from './helpers';
 const actionCreator = actionCreatorFactory('x-pack/graph/urlTemplates');
 
 export const loadTemplates = actionCreator<UrlTemplate[]>('LOAD_TEMPLATES');
-export const saveTemplate =
-  actionCreator<{ index: number; template: UrlTemplate }>('SAVE_TEMPLATE');
+export const saveTemplate = actionCreator<{ index: number; template: UrlTemplate }>(
+  'SAVE_TEMPLATE'
+);
 export const removeTemplate = actionCreator<UrlTemplate>('REMOVE_TEMPLATE');
 
 export type UrlTemplatesState = UrlTemplate[];

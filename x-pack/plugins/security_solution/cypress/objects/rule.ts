@@ -6,16 +6,12 @@
  */
 
 import type { RulesSchema } from '../../common/detection_engine/schemas/response';
-/* eslint-disable @kbn/eslint/no-restricted-paths */
-import { rawRules } from '../../server/lib/detection_engine/rules/prepackaged_rules/index';
+import { rawRules } from '../../server/lib/detection_engine/rules/prepackaged_rules';
 import { getMockThreatData } from '../../public/detections/mitre/mitre_tactics_techniques';
-import { getTimeline, CompleteTimeline, getIndicatorMatchTimelineTemplate } from './timeline';
+import type { CompleteTimeline } from './timeline';
+import { getTimeline, getIndicatorMatchTimelineTemplate } from './timeline';
 
 export const totalNumberOfPrebuiltRules = rawRules.length;
-
-export const totalNumberOfPrebuiltRulesInEsArchive = 127;
-
-export const totalNumberOfPrebuiltRulesInEsArchiveCustomRule = 145;
 
 const ccsRemoteName: string = Cypress.env('CCS_REMOTE_NAME');
 
@@ -40,11 +36,15 @@ interface Interval {
   type: string;
 }
 
+export type RuleDataSource =
+  | { type: 'indexPatterns'; index: string[] }
+  | { type: 'dataView'; dataView: string };
+
 export interface CustomRule {
   customQuery?: string;
   name: string;
   description: string;
-  index: string[];
+  dataSource: RuleDataSource;
   interval?: string;
   severity: string;
   riskScore: string;
@@ -59,6 +59,7 @@ export interface CustomRule {
   timeline: CompleteTimeline;
   maxSignals: number;
   buildingBlockType?: string;
+  exceptionLists?: Array<{ id: string; list_id: string; type: string; namespace_type: string }>;
 }
 
 export interface ThresholdRule extends CustomRule {
@@ -85,9 +86,14 @@ export interface ThreatIndicatorRule extends CustomRule {
   matchedIndex?: string;
 }
 
+export interface NewTermsRule extends CustomRule {
+  newTermsFields: string[];
+  historyWindowSize: Interval;
+}
+
 export interface MachineLearningRule {
   machineLearningJobs: string[];
-  anomalyScoreThreshold: string;
+  anomalyScoreThreshold: number;
   name: string;
   description: string;
   severity: string;
@@ -100,17 +106,19 @@ export interface MachineLearningRule {
   note: string;
   runsEvery: Interval;
   lookBack: Interval;
+  interval?: string;
 }
 
 export const getIndexPatterns = (): string[] => [
   'apm-*-transaction*',
-  'traces-apm*',
   'auditbeat-*',
   'endgame-*',
   'filebeat-*',
   'logs-*',
   'packetbeat-*',
+  'traces-apm*',
   'winlogbeat-*',
+  '-*elastic-cloud-logs-*',
 ];
 
 export const getThreatIndexPatterns = (): string[] => ['logs-ti_*'];
@@ -171,15 +179,39 @@ const getRunsEvery = (): Interval => ({
   type: 's',
 });
 
+const getRunsEveryFiveMinutes = (): Interval => ({
+  interval: '5',
+  timeType: 'Minutes',
+  type: 'm',
+});
+
 const getLookBack = (): Interval => ({
   interval: '50000',
   timeType: 'Hours',
   type: 'h',
 });
 
+export const getDataViewRule = (): CustomRule => ({
+  customQuery: 'host.name: *',
+  dataSource: { dataView: 'auditbeat-2022', type: 'dataView' },
+  name: 'New Data View Rule',
+  description: 'The new rule description.',
+  severity: 'High',
+  riskScore: '17',
+  tags: ['test', 'newRule'],
+  referenceUrls: ['http://example.com/', 'https://example.com/'],
+  falsePositivesExamples: ['False1', 'False2'],
+  mitre: [getMitre1(), getMitre2()],
+  note: '# test markdown',
+  runsEvery: getRunsEveryFiveMinutes(),
+  lookBack: getLookBack(),
+  timeline: getTimeline(),
+  maxSignals: 100,
+});
+
 export const getNewRule = (): CustomRule => ({
   customQuery: 'host.name: *',
-  index: getIndexPatterns(),
+  dataSource: { index: getIndexPatterns(), type: 'indexPatterns' },
   name: 'New Rule Test',
   description: 'The new rule description.',
   severity: 'High',
@@ -197,7 +229,7 @@ export const getNewRule = (): CustomRule => ({
 
 export const getBuildingBlockRule = (): CustomRule => ({
   customQuery: 'host.name: *',
-  index: getIndexPatterns(),
+  dataSource: { index: getIndexPatterns(), type: 'indexPatterns' },
   name: 'Building Block Rule Test',
   description: 'The new rule description.',
   severity: 'High',
@@ -216,7 +248,7 @@ export const getBuildingBlockRule = (): CustomRule => ({
 
 export const getUnmappedRule = (): CustomRule => ({
   customQuery: '*:*',
-  index: ['unmapped*'],
+  dataSource: { index: ['unmapped*'], type: 'indexPatterns' },
   name: 'Rule with unmapped fields',
   description: 'The new rule description.',
   severity: 'High',
@@ -234,7 +266,7 @@ export const getUnmappedRule = (): CustomRule => ({
 
 export const getUnmappedCCSRule = (): CustomRule => ({
   customQuery: '*:*',
-  index: [`${ccsRemoteName}:unmapped*`],
+  dataSource: { index: [`${ccsRemoteName}:unmapped*`], type: 'indexPatterns' },
   name: 'Rule with unmapped fields',
   description: 'The new rule description.',
   severity: 'High',
@@ -254,7 +286,7 @@ export const getExistingRule = (): CustomRule => ({
   customQuery: 'host.name: *',
   name: 'Rule 1',
   description: 'Description for Rule 1',
-  index: ['auditbeat-*'],
+  dataSource: { index: ['auditbeat-*'], type: 'indexPatterns' },
   interval: '100m',
   severity: 'High',
   riskScore: '19',
@@ -273,7 +305,7 @@ export const getExistingRule = (): CustomRule => ({
 
 export const getNewOverrideRule = (): OverrideRule => ({
   customQuery: 'host.name: *',
-  index: getIndexPatterns(),
+  dataSource: { index: getIndexPatterns(), type: 'indexPatterns' },
   name: 'Override Rule',
   description: 'The new rule description.',
   severity: 'High',
@@ -300,7 +332,7 @@ export const getNewOverrideRule = (): OverrideRule => ({
 
 export const getNewThresholdRule = (): ThresholdRule => ({
   customQuery: 'host.name: *',
-  index: getIndexPatterns(),
+  dataSource: { index: getIndexPatterns(), type: 'indexPatterns' },
   name: 'Threshold Rule',
   description: 'The new rule description.',
   severity: 'High',
@@ -311,7 +343,32 @@ export const getNewThresholdRule = (): ThresholdRule => ({
   mitre: [getMitre1(), getMitre2()],
   note: '# test markdown',
   thresholdField: 'host.name',
-  threshold: '10',
+  threshold: '1',
+  runsEvery: getRunsEvery(),
+  lookBack: getLookBack(),
+  timeline: getTimeline(),
+  maxSignals: 100,
+});
+
+export const getNewTermsRule = (): NewTermsRule => ({
+  customQuery: 'host.name: *',
+  dataSource: { index: getIndexPatterns(), type: 'indexPatterns' },
+  name: 'New Terms Rule',
+  description: 'The new rule description.',
+  severity: 'High',
+  riskScore: '17',
+  tags: ['test', 'newRule'],
+  referenceUrls: ['http://example.com/', 'https://example.com/'],
+  falsePositivesExamples: ['False1', 'False2'],
+  mitre: [getMitre1(), getMitre2()],
+  note: '# test markdown',
+  newTermsFields: ['host.name'],
+  historyWindowSize: {
+    // historyWindowSize needs to be larger than the rule's lookback value
+    interval: '51000',
+    timeType: 'Hours',
+    type: 'h',
+  },
   runsEvery: getRunsEvery(),
   lookBack: getLookBack(),
   timeline: getTimeline(),
@@ -319,8 +376,11 @@ export const getNewThresholdRule = (): ThresholdRule => ({
 });
 
 export const getMachineLearningRule = (): MachineLearningRule => ({
-  machineLearningJobs: ['linux_anomalous_network_service', 'linux_anomalous_network_activity_ecs'],
-  anomalyScoreThreshold: '20',
+  machineLearningJobs: [
+    'v3_linux_anomalous_process_all_hosts',
+    'v3_linux_anomalous_network_activity',
+  ],
+  anomalyScoreThreshold: 20,
   name: 'New ML Rule Test',
   description: 'The new ML rule description.',
   severity: 'Critical',
@@ -335,9 +395,9 @@ export const getMachineLearningRule = (): MachineLearningRule => ({
 });
 
 export const getEqlRule = (): CustomRule => ({
-  customQuery: 'any where process.name == "which"',
+  customQuery: 'any where process.name == "zsh"',
   name: 'New EQL Rule',
-  index: getIndexPatterns(),
+  dataSource: { index: getIndexPatterns(), type: 'indexPatterns' },
   description: 'New EQL rule description.',
   severity: 'High',
   riskScore: '17',
@@ -355,7 +415,7 @@ export const getEqlRule = (): CustomRule => ({
 export const getCCSEqlRule = (): CustomRule => ({
   customQuery: 'any where process.name == "run-parts"',
   name: 'New EQL Rule',
-  index: [`${ccsRemoteName}:run-parts`],
+  dataSource: { index: [`${ccsRemoteName}:run-parts`], type: 'indexPatterns' },
   description: 'New EQL rule description.',
   severity: 'High',
   riskScore: '17',
@@ -373,10 +433,10 @@ export const getCCSEqlRule = (): CustomRule => ({
 export const getEqlSequenceRule = (): CustomRule => ({
   customQuery:
     'sequence with maxspan=30s\
-     [any where process.name == "which"]\
-     [any where process.name == "xargs"]',
+     [any where agent.name == "test.local"]\
+     [any where host.name == "test.local"]',
   name: 'New EQL Sequence Rule',
-  index: getIndexPatterns(),
+  dataSource: { index: getIndexPatterns(), type: 'indexPatterns' },
   description: 'New EQL rule description.',
   severity: 'High',
   riskScore: '17',
@@ -394,7 +454,7 @@ export const getEqlSequenceRule = (): CustomRule => ({
 export const getNewThreatIndicatorRule = (): ThreatIndicatorRule => ({
   name: 'Threat Indicator Rule Test',
   description: 'The threat indicator rule description.',
-  index: ['suspicious-*'],
+  dataSource: { index: ['suspicious-*'], type: 'indexPatterns' },
   severity: 'Critical',
   riskScore: '20',
   tags: ['test', 'threat'],
@@ -440,7 +500,9 @@ export const expectedExportedRule = (ruleResponse: Cypress.Response<RulesSchema>
     severity,
     query,
   } = ruleResponse.body;
-  const rule = {
+
+  // NOTE: Order of the properties in this object matters for the tests to work.
+  const rule: RulesSchema = {
     id,
     updated_at: updatedAt,
     updated_by: updatedBy,
@@ -453,7 +515,7 @@ export const expectedExportedRule = (ruleResponse: Cypress.Response<RulesSchema>
     description,
     risk_score: riskScore,
     severity,
-    output_index: '.siem-signals-default',
+    output_index: '',
     author: [],
     false_positives: [],
     from: 'now-50000h',
@@ -467,6 +529,9 @@ export const expectedExportedRule = (ruleResponse: Cypress.Response<RulesSchema>
     version: 1,
     exceptions_list: [],
     immutable: false,
+    related_integrations: [],
+    required_fields: [],
+    setup: '',
     type: 'query',
     language: 'kuery',
     index: getIndexPatterns(),
@@ -474,6 +539,8 @@ export const expectedExportedRule = (ruleResponse: Cypress.Response<RulesSchema>
     throttle: 'no_actions',
     actions: [],
   };
+
+  // NOTE: Order of the properties in this object matters for the tests to work.
   const details = {
     exported_count: 1,
     exported_rules_count: 1,

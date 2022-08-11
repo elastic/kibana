@@ -12,7 +12,7 @@ import {
   FieldFormatEditor,
   FieldFormatEditorFactory,
   IndexPatternFieldEditorSetup,
-} from '../../../../src/plugins/data_view_field_editor/public';
+} from '@kbn/data-view-field-editor-plugin/public';
 import { ExampleCurrencyFormat } from '../../common';
 
 // 1. Create an editor component
@@ -41,12 +41,12 @@ const ExampleCurrencyFormatEditor: FieldFormatEditor<{ currency: string }> = (pr
 ExampleCurrencyFormatEditor.formatId = ExampleCurrencyFormat.id;
 
 // 3. Wrap editor component in a factory. This is needed to support and encourage code-splitting.
-const ExampleCurrencyFormatEditorFactory: FieldFormatEditorFactory<{
-  currency: string;
-}> = async () => ExampleCurrencyFormatEditor;
+const ExampleCurrencyFormatEditorFactory = async () => ExampleCurrencyFormatEditor;
 ExampleCurrencyFormatEditorFactory.formatId = ExampleCurrencyFormatEditor.formatId;
 
 export function registerExampleFormatEditor(indexPatternFieldEditor: IndexPatternFieldEditorSetup) {
   // 4. Register a field editor. This should happen in setup plugin lifecycle phase.
-  indexPatternFieldEditor.fieldFormatEditors.register(ExampleCurrencyFormatEditorFactory);
+  indexPatternFieldEditor.fieldFormatEditors.register(
+    ExampleCurrencyFormatEditorFactory as FieldFormatEditorFactory
+  );
 }

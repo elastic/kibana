@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { OverlayStart, NotificationsStart } from 'src/core/public';
+import { OverlayStart, NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { ITagInternalClient } from '../../services';
 import { TagBulkAction } from '../types';

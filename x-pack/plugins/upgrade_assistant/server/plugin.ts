@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import {
   Plugin,
   CoreSetup,
@@ -14,13 +14,13 @@ import {
   Logger,
   SavedObjectsClient,
   SavedObjectsServiceStart,
-} from '../../../../src/core/server';
-import { SecurityPluginStart } from '../../security/server';
-import { InfraPluginSetup } from '../../infra/server';
+} from '@kbn/core/server';
+import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { InfraPluginSetup } from '@kbn/infra-plugin/server';
 
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import { SecurityPluginSetup } from '../../security/server';
-import { LicensingPluginSetup } from '../../licensing/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { DEPRECATION_LOGS_SOURCE_ID, DEPRECATION_LOGS_INDEX } from '../common/constants';
 
 import { CredentialStore, credentialStoreFactory } from './lib/reindexing/credential_store';

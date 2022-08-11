@@ -5,7 +5,7 @@
  * See `packages/elastic-safer-lodash-set/LICENSE` for more information.
  */
 
-/* eslint-disable */
+/* eslint-disable no-var,eqeqeq */
 
 var baseSet = require('./_baseSet');
 

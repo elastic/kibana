@@ -17,7 +17,7 @@ import type {
   PackagePolicyConfigRecordEntry,
 } from '../types';
 
-import { doesPackageHaveIntegrations } from './';
+import { doesPackageHaveIntegrations } from '.';
 
 export const getStreamsForInputType = (
   inputType: string,

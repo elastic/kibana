@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import SemVer from 'semver/classes/semver';
 
-import { CoreSetup, PluginInitializerContext } from '../../../../src/core/public';
+import { CoreSetup, PluginInitializerContext } from '@kbn/core/public';
 import { setExtensionsService } from './application/store/selectors/extension_service';
 
 import { ExtensionsService } from './services';

@@ -6,3 +6,4 @@
  */
 
 export { FixDeprecationLogs } from './fix_deprecation_logs';
+export { useDeprecationLogging } from './use_deprecation_logging';

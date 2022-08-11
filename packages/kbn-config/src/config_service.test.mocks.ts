@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { DocLinks } from '@kbn/doc-links';
+
 export const mockPackage = new Proxy({ raw: {} as any }, { get: (obj, prop) => obj.raw[prop] });
 import type { applyDeprecations } from './deprecation/apply_deprecations';
 
@@ -25,4 +27,13 @@ export const mockApplyDeprecations = jest.fn<
 
 jest.mock('./deprecation/apply_deprecations', () => ({
   applyDeprecations: mockApplyDeprecations,
+}));
+
+export const docLinksMock = {
+  settings: 'settings',
+} as DocLinks;
+export const getDocLinksMock = jest.fn().mockReturnValue(docLinksMock);
+
+jest.doMock('@kbn/doc-links', () => ({
+  getDocLinks: getDocLinksMock,
 }));

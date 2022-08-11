@@ -7,9 +7,9 @@
 
 import { schema } from '@kbn/config-schema';
 
+import type { ExternalRouteDeps } from '.';
 import { wrapError } from '../../../lib/errors';
 import { createLicensedRouteHandler } from '../../lib';
-import type { ExternalRouteDeps } from './';
 
 export function initGetShareableReferencesApi(deps: ExternalRouteDeps) {
   const { externalRouter, getStartServices } = deps;

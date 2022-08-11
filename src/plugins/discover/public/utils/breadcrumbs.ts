@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ChromeStart } from 'kibana/public';
+import { ChromeStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { SavedSearch } from '../services/saved_searches';
 

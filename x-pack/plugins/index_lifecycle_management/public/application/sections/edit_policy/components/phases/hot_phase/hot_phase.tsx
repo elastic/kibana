@@ -21,7 +21,7 @@ import { useEditPolicyContext } from '../../../edit_policy_context';
 
 import { ROLLOVER_FORM_PATHS, isUsingDefaultRolloverPath } from '../../../constants';
 
-import { LearnMoreLink, DescribedFormRow } from '../../';
+import { LearnMoreLink, DescribedFormRow } from '../..';
 
 import {
   ForcemergeField,
@@ -35,6 +35,7 @@ import { Phase } from '../phase';
 import { useRolloverValueRequiredValidation } from './use_rollover_value_required_validation';
 import {
   MaxPrimaryShardSizeField,
+  MaxPrimaryShardDocsField,
   MaxAgeField,
   MaxDocumentCountField,
   MaxIndexSizeField,
@@ -149,6 +150,9 @@ export const HotPhase: FunctionComponent = () => {
                 )}
 
                 <MaxPrimaryShardSizeField />
+                <EuiSpacer />
+
+                <MaxPrimaryShardDocsField />
                 <EuiSpacer />
 
                 <MaxAgeField />

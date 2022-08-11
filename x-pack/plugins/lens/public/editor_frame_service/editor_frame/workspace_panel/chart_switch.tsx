@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ToolbarButton } from '@kbn/kibana-react-plugin/public';
 import {
   Visualization,
   FramePublicAPI,
@@ -29,8 +30,6 @@ import {
   Suggestion,
 } from '../../../types';
 import { getSuggestions, switchToSuggestion } from '../suggestion_helpers';
-import { trackUiEvent } from '../../../lens_ui_telemetry';
-import { ToolbarButton } from '../../../../../../../src/plugins/kibana_react/public';
 import {
   insertLayer,
   removeLayers,
@@ -92,7 +91,7 @@ function VisualizationSummary({
       {description.icon && (
         <EuiIcon size="l" className="lnsChartSwitch__summaryIcon" type={description.icon} />
       )}
-      {description.label}
+      <span className="lnsChartSwitch__summaryText">{description.label}</span>
     </>
   );
 }
@@ -124,15 +123,13 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
   const commitSelection = (selection: VisualizationSelection) => {
     setFlyoutOpen(false);
 
-    trackUiEvent(`chart_switch`);
-
     switchToSuggestion(
       dispatchLens,
       {
         ...selection,
         visualizationState: selection.getVisualizationState(),
       },
-      true
+      { clearStagedPreview: true }
     );
 
     if (
@@ -158,7 +155,7 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
       ((_type: string, initialState: unknown) => initialState);
     const layers = Object.entries(props.framePublicAPI.datasourceLayers);
     const containsData = layers.some(
-      ([_layerId, datasource]) => datasource.getTableSpec().length > 0
+      ([_layerId, datasource]) => datasource && datasource.getTableSpec().length > 0
     );
     // Always show the active visualization as a valid selection
     if (
@@ -193,7 +190,7 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
       dataLoss = 'everything';
     } else if (layers.length > 1 && layers.length !== topSuggestion.keptLayerIds.length) {
       dataLoss = 'layers';
-    } else if (topSuggestion.columns !== layers[0][1].getTableSpec().length) {
+    } else if (topSuggestion.columns !== layers[0][1]?.getTableSpec().length) {
       dataLoss = 'columns';
     } else {
       dataLoss = 'nothing';
@@ -438,10 +435,9 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
           isPreFiltered
           data-test-subj="lnsChartSwitchList"
           searchProps={{
-            incremental: true,
             className: 'lnsChartSwitch__search',
             'data-test-subj': 'lnsChartSwitchSearch',
-            onSearch: (value) => setSearchTerm(value),
+            onChange: (value) => setSearchTerm(value),
           }}
           options={visualizationTypes}
           onChange={(newOptions) => {

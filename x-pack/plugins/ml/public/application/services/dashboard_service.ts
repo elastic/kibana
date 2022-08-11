@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/public';
+import { SavedObjectsClientContract } from '@kbn/core/public';
 import { useMemo } from 'react';
-import {
-  DashboardSavedObject,
-  DashboardAppLocator,
-} from '../../../../../../src/plugins/dashboard/public';
+import { DashboardSavedObject, DashboardAppLocator } from '@kbn/dashboard-plugin/public';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { useMlKibana } from '../contexts/kibana';
-import { ViewMode } from '../../../../../../src/plugins/embeddable/public';
 
 export type DashboardService = ReturnType<typeof dashboardServiceProvider>;
 

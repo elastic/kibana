@@ -6,5 +6,3 @@
  */
 
 export const FLYOUT_MAX_WIDTH = 670;
-
-export const FEATURE_ADD_OUTPUT_ENABLED = false;

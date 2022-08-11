@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, Plugin, AppMountParameters } from 'kibana/public';
-import { NavigationPublicPluginSetup } from '../../../../../src/plugins/navigation/public';
+import { CoreSetup, Plugin, AppMountParameters } from '@kbn/core/public';
+import { NavigationPublicPluginSetup } from '@kbn/navigation-plugin/public';
 import { AppPluginDependencies } from './types';
 
 export class TopNavTestPlugin implements Plugin<TopNavTestPluginSetup, TopNavTestPluginStart> {

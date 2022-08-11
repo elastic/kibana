@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { tagsRegistry } from '../lib/tags_registry';
 import { getDefaultWorkpad } from '../state/defaults';
+import { tagsRegistry } from './tags_registry';
 import { getId } from './get_id';
 
 const defaultWorkpad = getDefaultWorkpad();

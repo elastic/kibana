@@ -17,6 +17,7 @@ import moment, { Moment } from 'moment';
 import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import { useUiTracker } from '@kbn/observability-plugin/public';
 import { useSourceViaHttp } from '../../../../../../containers/metrics_source/use_source_via_http';
 import { useMetricK8sModuleContext } from '../../../../../../containers/ml/modules/metrics_k8s/module';
 import { useMetricHostsModuleContext } from '../../../../../../containers/ml/modules/metrics_hosts/module';
@@ -24,7 +25,6 @@ import { FixedDatePicker } from '../../../../../../components/fixed_datepicker';
 import { DEFAULT_K8S_PARTITION_FIELD } from '../../../../../../containers/ml/modules/metrics_k8s/module_descriptor';
 import { MetricsExplorerKueryBar } from '../../../../metrics_explorer/components/kuery_bar';
 import { convertKueryToElasticSearchQuery } from '../../../../../../utils/kuery';
-import { useUiTracker } from '../../../../../../../../observability/public';
 
 interface Props {
   jobType: 'hosts' | 'kubernetes';

@@ -18,7 +18,7 @@ import {
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
   const authSpace1 = getAuthWithSuperUser();
   const authSpace2 = getAuthWithSuperUser('space2');
@@ -30,13 +30,16 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should not return reporters when security is disabled', async () => {
       await Promise.all([
-        createCase(supertest, getPostCaseRequest(), 200, authSpace2),
-        createCase(supertest, getPostCaseRequest(), 200, authSpace1),
+        createCase(supertestWithoutAuth, getPostCaseRequest(), 200, authSpace2),
+        createCase(supertestWithoutAuth, getPostCaseRequest(), 200, authSpace1),
       ]);
 
-      const reportersSpace1 = await getReporters({ supertest, auth: authSpace1 });
+      const reportersSpace1 = await getReporters({
+        supertest: supertestWithoutAuth,
+        auth: authSpace1,
+      });
       const reportersSpace2 = await getReporters({
-        supertest,
+        supertest: supertestWithoutAuth,
         auth: authSpace2,
       });
 

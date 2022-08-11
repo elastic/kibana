@@ -13,4 +13,10 @@ export const REPOSITORY_EDIT = getRepository({ name: REPOSITORY_NAME });
 
 export const POLICY_NAME = 'my-test-policy';
 
-export const POLICY_EDIT = getPolicy({ name: POLICY_NAME, retention: { minCount: 1 } });
+export const SNAPSHOT_NAME = 'my-test-snapshot';
+
+export const POLICY_EDIT = getPolicy({
+  name: POLICY_NAME,
+  retention: { minCount: 1 },
+  config: { includeGlobalState: true, featureStates: ['kibana'] },
+});

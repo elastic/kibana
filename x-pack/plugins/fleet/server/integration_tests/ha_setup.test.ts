@@ -9,8 +9,8 @@ import Path from 'path';
 
 import { range } from 'lodash';
 
-import type { ISavedObjectsRepository } from 'src/core/server';
-import * as kbnTestServer from 'src/core/test_helpers/kbn_server';
+import type { ISavedObjectsRepository } from '@kbn/core/server';
+import * as kbnTestServer from '@kbn/core/test_helpers/kbn_server';
 
 import type {
   AgentPolicySOAttributes,
@@ -298,7 +298,7 @@ describe('Fleet setup preconfiguration with multiple instances Kibana', () => {
       type: 'epm-packages',
       perPage: 10000,
     });
-    expect(packages.saved_objects).toHaveLength(2);
+    expect(packages.saved_objects.length).toBeGreaterThanOrEqual(2);
     expect(packages.saved_objects.map((p) => p.attributes.name)).toEqual(
       expect.arrayContaining(['fleet_server', 'apm'])
     );

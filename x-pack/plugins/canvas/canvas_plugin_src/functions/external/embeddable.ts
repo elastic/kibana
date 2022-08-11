@@ -6,19 +6,16 @@
  */
 
 import { mapValues } from 'lodash';
-import { EmbeddableStateWithType } from 'src/plugins/embeddable/common';
+import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import {
   ExpressionFunctionDefinition,
   ExpressionAstFunction,
-} from 'src/plugins/expressions/common';
-import {
-  MigrateFunction,
-  MigrateFunctionsObject,
-} from '../../../../../../src/plugins/kibana_utils/common';
+} from '@kbn/expressions-plugin/common';
+import { MigrateFunction, MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import { SavedObjectReference } from '@kbn/core/types';
 import { ExpressionValueFilter, EmbeddableInput } from '../../../types';
 import { EmbeddableExpressionType, EmbeddableExpression } from '../../expression_types';
 import { getFunctionHelp } from '../../../i18n';
-import { SavedObjectReference } from '../../../../../../src/core/types';
 import { getQueryFilters } from '../../../common/lib/build_embeddable_filters';
 import { decode, encode } from '../../../common/lib/embeddable_dataurl';
 import { InitializeArguments } from '.';
@@ -59,13 +56,15 @@ export function embeddableFunctionFactory({
         migrateFn: MigrateFunction<EmbeddableStateWithType, EmbeddableStateWithType>
       ): MigrateFunction<ExpressionAstFunction, ExpressionAstFunction> =>
       (state: ExpressionAstFunction): ExpressionAstFunction => {
-        const embeddableInput = decode(state.arguments.config[0] as string);
+        const embeddableInput = decode(state.arguments.config[0] as string) as EmbeddableInput;
 
         const embeddableType = state.arguments.type[0];
-        const migratedInput = migrateFn({ ...embeddableInput, type: embeddableType });
 
-        state.arguments.config[0] = encode(migratedInput);
-        state.arguments.type[0] = migratedInput.type as string;
+        if (embeddableInput.savedObjectId === undefined) {
+          const migratedInput = migrateFn({ ...embeddableInput, type: embeddableType as string });
+          state.arguments.config[0] = encode(migratedInput);
+          state.arguments.type[0] = migratedInput.type as string;
+        }
 
         return state;
       };
@@ -166,10 +165,12 @@ export function embeddableFunctionFactory({
         return state;
       },
 
-      migrations: mapValues<
-        MigrateFunctionsObject,
-        MigrateFunction<ExpressionAstFunction, ExpressionAstFunction>
-      >(embeddablePersistableStateService.getAllMigrations(), migrateByValueEmbeddable),
+      migrations: () => {
+        return mapValues<
+          MigrateFunctionsObject,
+          MigrateFunction<ExpressionAstFunction, ExpressionAstFunction>
+        >(embeddablePersistableStateService.getAllMigrations(), migrateByValueEmbeddable);
+      },
     };
   };
 }

@@ -9,7 +9,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { TruncatedContent } from './';
+import { TruncatedContent } from '.';
 
 const content = 'foobarbaz';
 

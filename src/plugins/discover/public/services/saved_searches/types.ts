@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { ISearchSource } from '../../../../data/public';
+import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
+import type { ISearchSource } from '@kbn/data-plugin/public';
 import { DiscoverGridSettingsColumn } from '../../components/discover_grid/types';
 import { VIEW_MODE } from '../../components/view_mode_toggle';
 
@@ -20,12 +21,14 @@ export interface SavedSearchAttributes {
     columns?: Record<string, DiscoverGridSettingsColumn>;
   };
   hideChart: boolean;
+  isTextBasedQuery: boolean;
   kibanaSavedObjectMeta: {
     searchSourceJSON: string;
   };
   viewMode?: VIEW_MODE;
   hideAggregatedPreview?: boolean;
   rowHeight?: number;
+  rowsPerPage?: number;
 }
 
 /** @internal **/
@@ -44,11 +47,14 @@ export interface SavedSearch {
   };
   hideChart?: boolean;
   sharingSavedObjectProps?: {
-    outcome?: 'aliasMatch' | 'exactMatch' | 'conflict';
-    aliasTargetId?: string;
+    outcome?: ResolvedSimpleSavedObject['outcome'];
+    aliasTargetId?: ResolvedSimpleSavedObject['alias_target_id'];
+    aliasPurpose?: ResolvedSimpleSavedObject['alias_purpose'];
     errorJSON?: string;
   };
   viewMode?: VIEW_MODE;
   hideAggregatedPreview?: boolean;
   rowHeight?: number;
+  isTextBasedQuery?: boolean;
+  rowsPerPage?: number;
 }

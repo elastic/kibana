@@ -12,8 +12,8 @@ import {
   CoreSetup,
   AppMountParameters,
   AppNavLinkStatus,
-} from '../../../src/core/public';
-import { DeveloperExamplesSetup } from '../../developer_examples/public';
+} from '@kbn/core/public';
+import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { getServices } from './services';
 
 interface SetupDeps {

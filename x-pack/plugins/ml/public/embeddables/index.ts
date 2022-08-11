@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import { AnomalySwimlaneEmbeddableFactory } from './anomaly_swimlane';
 import type { MlCoreSetup } from '../plugin';
-import type { EmbeddableSetup } from '../../../../../src/plugins/embeddable/public';
 import { AnomalyChartsEmbeddableFactory } from './anomaly_charts';
 
 export * from './constants';

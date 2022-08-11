@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { InfraTimerangeInput } from '../../../../../common/http_api';
 
-export const calculateRateTimeranges = (timerange: InfraTimerangeInput) => {
+export const calculateRateTimeranges = (timerange: { to: number; from: number }) => {
   // This is the total number of milliseconds for the entire timerange
   const totalTime = timerange.to - timerange.from;
   // Halfway is the to minus half the total time;
-  const halfway = timerange.to - totalTime / 2;
+  const halfway = Math.round(timerange.to - totalTime / 2);
   // The interval is half the total time (divided by 1000 to convert to seconds)
-  const intervalInSeconds = totalTime / 2000;
+  const intervalInSeconds = Math.round(totalTime / (2 * 1000));
 
   // The first bucket is from the beginning of the time range to the halfway point
   const firstBucketRange = {

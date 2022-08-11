@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-export enum OperatingSystem {
-  LINUX = 'linux',
-  MAC = 'macos',
-  WINDOWS = 'windows',
-}
-
 // PolicyConfig uses mac instead of macos
 export enum PolicyOperatingSystem {
   windows = 'windows',

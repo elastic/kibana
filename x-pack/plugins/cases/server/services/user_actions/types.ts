@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { SavedObjectReference } from 'kibana/server';
+import { SavedObjectReference } from '@kbn/core/server';
+import { CaseAssignees } from '../../../common/api/cases/assignee';
 import {
   CasePostRequest,
   CaseSettings,
+  CaseSeverity,
   CaseStatuses,
   CommentUserAction,
   ConnectorUserAction,
@@ -17,6 +19,7 @@ import {
   UserAction,
   UserActionTypes,
 } from '../../../common/api';
+import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 
 export interface BuilderParameters {
   title: {
@@ -28,8 +31,14 @@ export interface BuilderParameters {
   status: {
     parameters: { payload: { status: CaseStatuses } };
   };
+  severity: {
+    parameters: { payload: { severity: CaseSeverity } };
+  };
   tags: {
     parameters: { payload: { tags: string[] } };
+  };
+  assignees: {
+    parameters: { payload: { assignees: CaseAssignees } };
   };
   pushed: {
     parameters: {
@@ -100,3 +109,7 @@ export type CommonBuilderArguments = CommonArguments & {
   value: unknown;
   valueKey: string;
 };
+
+export interface BuilderDeps {
+  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
+}

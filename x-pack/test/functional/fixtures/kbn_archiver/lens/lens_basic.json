@@ -111,7 +111,8 @@
                   "label": "@timestamp",
                   "operationType": "date_histogram",
                   "params": {
-                    "interval": "auto"
+                    "interval": "auto",
+                    "includeEmptyRows": false
                   },
                   "scale": "interval",
                   "sourceField": "@timestamp"
@@ -175,7 +176,7 @@
   "coreMigrationVersion": "8.0.0",
   "id": "76fc4200-cf44-11e9-b933-fd84270f3ac2",
   "migrationVersion": {
-    "lens": "7.14.0"
+    "lens": "8.2.0"
   },
   "references": [
     {

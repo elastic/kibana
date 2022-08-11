@@ -11,10 +11,11 @@ import {
   ServerRouteRepository,
 } from '@kbn/server-route-repository';
 import * as t from 'io-ts';
-import { CoreSetup, Logger } from 'src/core/server';
+import { CoreSetup, Logger } from '@kbn/core/server';
 import { APMConfig } from '../..';
 import { APMRouteCreateOptions, APMRouteHandlerResources } from '../typings';
 import { registerRoutes } from './register_apm_server_routes';
+import { NEVER } from 'rxjs';
 
 type RegisterRouteDependencies = Parameters<typeof registerRoutes>[0];
 
@@ -105,9 +106,7 @@ const initApi = (
         query: {},
         body: null,
         events: {
-          aborted$: {
-            toPromise: () => new Promise(() => {}),
-          },
+          aborted$: NEVER,
         },
         ...request,
       },

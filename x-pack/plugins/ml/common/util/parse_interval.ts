@@ -6,7 +6,7 @@
  */
 
 import { duration, Duration, unitOfTime } from 'moment';
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 
 type SupportedUnits = unitOfTime.Base;
 

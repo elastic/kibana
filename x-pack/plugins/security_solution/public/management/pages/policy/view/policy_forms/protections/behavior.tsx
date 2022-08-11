@@ -9,12 +9,10 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  Immutable,
-  OperatingSystem,
-  PolicyOperatingSystem,
-} from '../../../../../../../common/endpoint/types';
-import { BehaviorProtectionOSes } from '../../../types';
+import { OperatingSystem } from '@kbn/securitysolution-utils';
+import type { Immutable } from '../../../../../../../common/endpoint/types';
+import { PolicyOperatingSystem } from '../../../../../../../common/endpoint/types';
+import type { BehaviorProtectionOSes } from '../../../types';
 import { ConfigForm } from '../../components/config_form';
 import { RadioButtons } from '../components/radio_buttons';
 import { UserNotification } from '../components/user_notification';

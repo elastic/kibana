@@ -23,8 +23,8 @@ export interface DeleteTestCase extends TestCase {
   failure?: 400 | 403 | 404;
 }
 
-const ALIAS_DELETE_INCLUSIVE = Object.freeze({ type: 'resolvetype', id: 'alias-match-newid' }); // exists in three specific spaces; deleting this should also delete the alias that targets it in space 1
-const ALIAS_DELETE_EXCLUSIVE = Object.freeze({ type: 'resolvetype', id: 'all_spaces' }); // exists in all spaces; deleting this should also delete the alias that targets it in space 1
+const ALIAS_DELETE_INCLUSIVE = Object.freeze({ type: 'resolvetype', id: 'alias-match-newid' }); // exists in three specific spaces; deleting this should also delete the aliases that target it in the default space and space_1
+const ALIAS_DELETE_EXCLUSIVE = Object.freeze({ type: 'resolvetype', id: 'all_spaces' }); // exists in all spaces; deleting this should also delete the aliases that target it in the default space and space_1
 const DOES_NOT_EXIST = Object.freeze({ type: 'dashboard', id: 'does-not-exist' });
 export const TEST_CASES: Record<string, DeleteTestCase> = Object.freeze({
   ...CASES,
@@ -68,9 +68,9 @@ export function deleteTestSuiteFactory(es: Client, esArchiver: any, supertest: S
             ({ type, id }) => testCase.type === type && testCase.id === id
           );
           expect((searchResponse.hits.total as SearchTotalHits).value).to.eql(
-            // Five aliases exist but only one should be deleted in each case (for the "inclusive" case, this asserts that the aliases
+            // Eight aliases exist but only two should be deleted in each case (for the "inclusive" case, this asserts that the aliases
             // targeting that object in space x and space y were *not* deleted)
-            expectAliasWasDeleted ? 4 : 5
+            expectAliasWasDeleted ? 6 : 8
           );
         }
       }

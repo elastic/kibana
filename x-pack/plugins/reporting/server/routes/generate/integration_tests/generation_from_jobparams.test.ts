@@ -7,16 +7,16 @@
 
 import rison from 'rison-node';
 import { BehaviorSubject } from 'rxjs';
-import { setupServer } from 'src/core/server/test_utils';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { setupServer } from '@kbn/core/server/test_utils';
 import supertest from 'supertest';
-import { ReportingCore } from '../../../';
-import { licensingMock } from '../../../../../licensing/server/mocks';
+import { ReportingCore } from '../../..';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { ReportingStore } from '../../../lib';
 import { ExportTypesRegistry } from '../../../lib/export_types_registry';
 import { Report } from '../../../lib/store';
 import {
   createMockConfigSchema,
-  createMockLevelLogger,
   createMockPluginSetup,
   createMockPluginStart,
   createMockReportingCore,
@@ -38,7 +38,7 @@ describe('POST /api/reporting/generate', () => {
     queue: { indexInterval: 'year', timeout: 10000, pollEnabled: true },
   });
 
-  const mockLogger = createMockLevelLogger();
+  const mockLogger = loggingSystemMock.createLogger();
 
   beforeEach(async () => {
     ({ server, httpSetup } = await setupServer(reportingSymbol));

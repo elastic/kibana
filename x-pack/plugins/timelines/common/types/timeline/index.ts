@@ -310,25 +310,31 @@ export type SavedTimelineNote = runtimeTypes.TypeOf<typeof SavedTimelineRuntimeT
  */
 
 export enum TimelineId {
+  usersPageEvents = 'users-page-events',
   hostsPageEvents = 'hosts-page-events',
-  hostsPageExternalAlerts = 'hosts-page-external-alerts',
+  networkPageEvents = 'network-page-events',
+  hostsPageSessions = 'hosts-page-sessions-v2',
   detectionsRulesDetailsPage = 'detections-rules-details-page',
   detectionsPage = 'detections-page',
-  networkPageExternalAlerts = 'network-page-external-alerts',
   active = 'timeline-1',
   casePage = 'timeline-case',
   test = 'test', // Reserved for testing purposes
   alternateTest = 'alternateTest',
+  rulePreview = 'rule-preview',
+  kubernetesPageSessions = 'kubernetes-page-sessions',
 }
 
 export const TimelineIdLiteralRt = runtimeTypes.union([
   runtimeTypes.literal(TimelineId.hostsPageEvents),
-  runtimeTypes.literal(TimelineId.hostsPageExternalAlerts),
+  runtimeTypes.literal(TimelineId.usersPageEvents),
+  runtimeTypes.literal(TimelineId.networkPageEvents),
+  runtimeTypes.literal(TimelineId.hostsPageSessions),
   runtimeTypes.literal(TimelineId.detectionsRulesDetailsPage),
   runtimeTypes.literal(TimelineId.detectionsPage),
-  runtimeTypes.literal(TimelineId.networkPageExternalAlerts),
   runtimeTypes.literal(TimelineId.active),
   runtimeTypes.literal(TimelineId.test),
+  runtimeTypes.literal(TimelineId.rulePreview),
+  runtimeTypes.literal(TimelineId.kubernetesPageSessions),
 ]);
 
 export type TimelineIdLiteral = runtimeTypes.TypeOf<typeof TimelineIdLiteralRt>;
@@ -462,12 +468,9 @@ export enum TimelineTabs {
   graph = 'graph',
   notes = 'notes',
   pinned = 'pinned',
+  session = 'session',
   eql = 'eql',
 }
-
-export type CreateFieldComponentType = React.FC<{
-  onClick: () => void;
-}>;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type EmptyObject = Partial<Record<any, never>>;
@@ -500,20 +503,16 @@ export type TimelineExpandedUserType =
       };
     }
   | EmptyObject;
-
-enum FlowTarget {
-  client = 'client',
+enum FlowTargetSourceDest {
   destination = 'destination',
-  server = 'server',
   source = 'source',
 }
-
 export type TimelineExpandedNetworkType =
   | {
       panelView?: 'networkDetail';
       params?: {
         ip: string;
-        flowTarget: FlowTarget;
+        flowTarget: FlowTargetSourceDest;
       };
     }
   | EmptyObject;

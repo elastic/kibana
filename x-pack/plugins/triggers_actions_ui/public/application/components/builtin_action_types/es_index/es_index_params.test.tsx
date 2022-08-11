@@ -33,6 +33,7 @@ const actionConnector = {
   },
   id: 'es index connector',
   isPreconfigured: false,
+  isDeprecated: false,
   name: 'test name',
   secrets: {},
 };
@@ -44,6 +45,7 @@ const preconfiguredActionConnector = {
   },
   id: AlertHistoryEsIndexConnectorId,
   isPreconfigured: true,
+  isDeprecated: false,
   name: 'Alert history Elasticsearch index',
   secrets: {},
 };
@@ -162,7 +164,7 @@ describe('IndexParamsFields renders', () => {
     );
     expect(wrapper.find('[data-test-subj="preconfiguredDocumentToIndex"]').length > 0).toBeTruthy();
 
-    wrapper.find('EuiLink[data-test-subj="resetDefaultIndex"]').simulate('click');
+    wrapper.find('EuiLink[data-test-subj="resetDefaultIndex"]').find('button').simulate('click');
     await act(async () => {
       await nextTick();
       wrapper.update();

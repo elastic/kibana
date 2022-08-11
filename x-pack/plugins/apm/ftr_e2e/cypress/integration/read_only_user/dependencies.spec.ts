@@ -6,6 +6,7 @@
  */
 import { synthtrace } from '../../../synthtrace';
 import { opbeans } from '../../fixtures/synthtrace/opbeans';
+import { checkA11y } from '../../support/commands';
 
 const start = '2021-10-10T00:00:00.000Z';
 const end = '2021-10-10T00:15:00.000Z';
@@ -15,7 +16,7 @@ const timeRange = {
   rangeTo: end,
 };
 
-describe('Dependencies', () => {
+describe.skip('Dependencies', () => {
   before(async () => {
     await synthtrace.index(
       opbeans({
@@ -30,7 +31,7 @@ describe('Dependencies', () => {
   });
 
   beforeEach(() => {
-    cy.loginAsReadOnlyUser();
+    cy.loginAsViewerUser();
   });
 
   describe('top-level dependencies page', () => {
@@ -43,14 +44,25 @@ describe('Dependencies', () => {
 
       cy.contains('h1', 'postgresql');
     });
+
+    it('has no detectable a11y violations on load', () => {
+      cy.visit(
+        `/app/apm/services/opbeans-java/dependencies?${new URLSearchParams(
+          timeRange
+        )}`
+      );
+      cy.contains('a[role="tab"]', 'Dependencies');
+      // set skipFailures to true to not fail the test when there are accessibility failures
+      checkA11y({ skipFailures: true });
+    });
   });
 
-  describe('dependency overview page', () => {
+  describe.skip('dependency overview page', () => {
     it('shows dependency information and you can navigate to a page for an upstream service', () => {
       cy.visit(
-        `/app/apm/backends/overview?${new URLSearchParams({
+        `/app/apm/dependencies/overview?${new URLSearchParams({
           ...timeRange,
-          backendName: 'postgresql',
+          dependencyName: 'postgresql',
         })}`
       );
 
@@ -61,6 +73,18 @@ describe('Dependencies', () => {
       cy.contains('opbeans-java').click({ force: true });
 
       cy.contains('h1', 'opbeans-java');
+    });
+
+    it('has no detectable a11y violations on load', () => {
+      cy.visit(
+        `/app/apm/dependencies/overview?${new URLSearchParams({
+          ...timeRange,
+          dependencyName: 'postgresql',
+        })}`
+      );
+      cy.contains('h1', 'postgresql');
+      // set skipFailures to true to not fail the test when there are accessibility failures
+      checkA11y({ skipFailures: true });
     });
   });
 

@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash/fp';
-import { SignalSource } from '../../types';
+import type { SignalSource } from '../../types';
 
 /**
  * Returns true if an array within the path exists anywhere.

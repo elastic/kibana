@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { UsageCountersSavedObject } from '../../../../../usage_collection/server';
+import type { UsageCountersSavedObject } from '@kbn/usage-collection-plugin/server';
 
 export const rawUsageCounters: UsageCountersSavedObject[] = [
   {

@@ -17,12 +17,13 @@ import type {
   IClusterClient,
   SavedObjectsServiceStart,
   UiSettingsServiceStart,
-} from 'kibana/server';
-import type { SecurityPluginSetup } from '../../security/server';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
-import type { PluginStart as DataViewsPluginStart } from '../../../../src/plugins/data_views/server';
+} from '@kbn/core/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
+import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { PluginsSetup, PluginsStart, RouteInitialization } from './types';
-import type { SpacesPluginSetup } from '../../spaces/server';
 import { PLUGIN_ID } from '../common/constants/app';
 import type { MlCapabilities } from '../common/types/capabilities';
 
@@ -51,6 +52,7 @@ import { getPluginPrivileges } from '../common/types/capabilities';
 import { setupCapabilitiesSwitcher } from './lib/capabilities';
 import { registerKibanaSettings } from './lib/register_settings';
 import { trainedModelsRoutes } from './routes/trained_models';
+import { managementRoutes } from './routes/management';
 import {
   setupSavedObjects,
   jobSavedObjectsInitializationFactory,
@@ -61,7 +63,7 @@ import { registerMlAlerts } from './lib/alerts/register_ml_alerts';
 import { ML_ALERT_TYPES } from '../common/constants/alerts';
 import { alertingRoutes } from './routes/alerting';
 import { registerCollector } from './usage';
-import { FieldFormatsStart } from '../../../../src/plugins/field_formats/server';
+import { SavedObjectsSyncService } from './saved_objects/sync_task';
 
 export type MlPluginSetup = SharedServices;
 export type MlPluginStart = void;
@@ -81,11 +83,13 @@ export class MlServerPlugin
   private dataViews: DataViewsPluginStart | null = null;
   private isMlReady: Promise<void>;
   private setMlReady: () => void = () => {};
+  private savedObjectsSyncService: SavedObjectsSyncService;
 
   constructor(ctx: PluginInitializerContext) {
     this.log = ctx.logger.get();
     this.mlLicense = new MlLicense();
     this.isMlReady = new Promise((resolve) => (this.setMlReady = resolve));
+    this.savedObjectsSyncService = new SavedObjectsSyncService(this.log);
   }
 
   public setup(coreSetup: CoreSetup<PluginsStart>, plugins: PluginsSetup): MlPluginSetup {
@@ -141,6 +145,12 @@ export class MlServerPlugin
     // initialize capabilities switcher to add license filter to ml capabilities
     setupCapabilitiesSwitcher(coreSetup, plugins.licensing.license$, this.log);
     setupSavedObjects(coreSetup.savedObjects);
+    this.savedObjectsSyncService.registerSyncTask(
+      plugins.taskManager,
+      plugins.security,
+      this.spacesPlugin !== undefined,
+      () => this.isMlReady
+    );
 
     const { getInternalSavedObjectsClient, getMlSavedObjectsClient } = savedObjectClientsFactory(
       () => this.savedObjectsStart
@@ -205,6 +215,7 @@ export class MlServerPlugin
     jobAuditMessagesRoutes(routeInit);
     jobRoutes(routeInit);
     jobServiceRoutes(routeInit);
+    managementRoutes(routeInit);
     resultsServiceRoutes(routeInit);
     jobValidationRoutes(routeInit);
     savedObjectsRoutes(routeInit, {
@@ -255,6 +266,7 @@ export class MlServerPlugin
     initializeJobs().finally(() => {
       this.setMlReady();
     });
+    this.savedObjectsSyncService.scheduleSyncTask(plugins.taskManager, coreStart);
   }
 
   public stop() {

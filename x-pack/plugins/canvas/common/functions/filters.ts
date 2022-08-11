@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExpressionFunctionDefinition } from 'src/plugins/expressions/public';
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/public';
 import { ExpressionValueFilter } from '../../types';
 import { getFunctionHelp } from '../../i18n';
 

@@ -2,14 +2,14 @@
 
 set -euo pipefail
 
-BUILD_SUCCESSFUL=$(node "$(dirname "${0}")/build_status.js")
+BUILD_SUCCESSFUL=$(ts-node "$(dirname "${0}")/build_status.ts")
 export BUILD_SUCCESSFUL
 
 if [[ "${GITHUB_BUILD_COMMIT_STATUS_ENABLED:-}" != "true" ]]; then
   "$(dirname "${0}")/commit_status_complete.sh"
 fi
 
-node "$(dirname "${0}")/ci_stats_complete.js"
+ts-node "$(dirname "${0}")/ci_stats_complete.ts"
 
 if [[ "${GITHUB_PR_NUMBER:-}" ]]; then
   DOCS_CHANGES_URL="https://kibana_$GITHUB_PR_NUMBER}.docs-preview.app.elstc.co/diff"

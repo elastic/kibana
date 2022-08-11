@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '../../../../../../../src/core/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 import {
   APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE,
   APM_INDEX_SETTINGS_SAVED_OBJECT_ID,

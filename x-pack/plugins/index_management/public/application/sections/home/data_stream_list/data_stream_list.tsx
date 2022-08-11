@@ -20,7 +20,7 @@ import {
   EuiEmptyPrompt,
   EuiLink,
 } from '@elastic/eui';
-import { ScopedHistory } from 'kibana/public';
+import { ScopedHistory } from '@kbn/core/public';
 
 import {
   PageLoading,
@@ -30,6 +30,7 @@ import {
   extractQueryParams,
   attemptToURIDecode,
   APP_WRAPPER_CLASS,
+  useExecutionContext,
 } from '../../../../shared_imports';
 import { useAppContext } from '../../../app_context';
 import { useLoadDataStreams } from '../../../services/api';
@@ -56,9 +57,14 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
   const decodedDataStreamName = attemptToURIDecode(dataStreamName);
 
   const {
-    core: { getUrlForApp },
+    core: { getUrlForApp, executionContext },
     plugins: { isFleetEnabled },
   } = useAppContext();
+
+  useExecutionContext(executionContext, {
+    type: 'application',
+    page: 'indexManagementDataStreamsTab',
+  });
 
   const [isIncludeStatsChecked, setIsIncludeStatsChecked] = useState(false);
   const {

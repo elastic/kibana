@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { HttpSetup } from 'kibana/public';
+import { HttpSetup } from '@kbn/core/public';
 import { EsConfigApiResponse } from '../../../common/types/api_responses';
 import { sendRequest } from '../../shared_imports';
 

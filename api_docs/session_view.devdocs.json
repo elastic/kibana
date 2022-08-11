@@ -1,0 +1,73 @@
+{
+  "id": "sessionView",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "sessionView",
+        "id": "def-public.SessionViewStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "SessionViewStart",
+        "description": [],
+        "path": "x-pack/plugins/session_view/public/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-public.SessionViewStart.getSessionView",
+            "type": "Function",
+            "tags": [],
+            "label": "getSessionView",
+            "description": [],
+            "signature": [
+              "(props: ",
+              "SessionViewDeps",
+              ") => JSX.Element"
+            ],
+            "path": "x-pack/plugins/session_view/public/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "sessionView",
+                "id": "def-public.SessionViewStart.getSessionView.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "SessionViewDeps"
+                ],
+                "path": "x-pack/plugins/session_view/public/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

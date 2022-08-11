@@ -7,9 +7,8 @@
  */
 
 import React from 'react';
+import { coreMock } from '@kbn/core/public/mocks';
 import { ExpressionsSetup, ExpressionsStart, plugin as pluginInitializer } from '.';
-
-import { coreMock } from '../../../core/public/mocks';
 
 export type Setup = jest.Mocked<ExpressionsSetup>;
 export type Start = jest.Mocked<ExpressionsStart>;
@@ -23,6 +22,7 @@ const createSetupContract = (): Setup => {
     registerFunction: jest.fn(),
     registerRenderer: jest.fn(),
     registerType: jest.fn(),
+    getAllMigrations: jest.fn(),
   };
   return setupContract;
 };
@@ -40,6 +40,10 @@ const createStartContract = (): Start => {
     render: jest.fn(),
     ReactExpressionRenderer: jest.fn((props) => <></>),
     run: jest.fn(),
+    telemetry: jest.fn(),
+    extract: jest.fn(),
+    inject: jest.fn(),
+    getAllMigrations: jest.fn(),
   };
 };
 

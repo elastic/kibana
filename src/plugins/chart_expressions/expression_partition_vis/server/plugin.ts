@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { CoreSetup, CoreStart, Plugin } from '../../../../core/server';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import {
   partitionLabelsFunction,
   pieVisFunction,

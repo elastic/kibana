@@ -8,8 +8,6 @@
 
 import { FtrService } from '../ftr_provider_context';
 import { WebElementWrapper } from './lib/web_element_wrapper';
-// @ts-ignore not supported yet
-import { scrollIntoViewIfNecessary } from './lib/web_element_wrapper/scroll_into_view_if_necessary';
 
 /**
  * wrapper around EuiComboBox interactions
@@ -157,7 +155,7 @@ export class ComboBoxService extends FtrService {
    * @param comboBoxElement element that wraps up EuiComboBox
    */
   private async waitForOptionsListLoading(comboBoxElement: WebElementWrapper): Promise<void> {
-    await comboBoxElement.waitForDeletedByCssSelector('.euiLoadingSpinner');
+    await comboBoxElement.waitForDeletedByCssSelector('.euiLoadingSpinner', 50);
   }
 
   /**
@@ -255,7 +253,9 @@ export class ComboBoxService extends FtrService {
    * @param comboBoxElement element that wraps up EuiComboBox
    */
   public async closeOptionsList(comboBoxElement: WebElementWrapper): Promise<void> {
-    const isOptionsListOpen = await this.testSubjects.exists('~comboBoxOptionsList');
+    const isOptionsListOpen = await this.testSubjects.exists('~comboBoxOptionsList', {
+      timeout: 50,
+    });
     if (isOptionsListOpen) {
       const input = await comboBoxElement.findByTagName('input');
       await input.pressKeys(this.browser.keys.ESCAPE);
@@ -268,7 +268,10 @@ export class ComboBoxService extends FtrService {
    * @param comboBoxElement element that wraps up EuiComboBox
    */
   public async openOptionsList(comboBoxElement: WebElementWrapper): Promise<void> {
-    const isOptionsListOpen = await this.testSubjects.exists('~comboBoxOptionsList');
+    const isOptionsListOpen = await this.testSubjects.exists('~comboBoxOptionsList', {
+      timeout: 50,
+    });
+
     if (!isOptionsListOpen) {
       await this.retry.try(async () => {
         const toggleBtn = await comboBoxElement.findByTestSubject('comboBoxInput');

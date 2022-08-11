@@ -9,4 +9,4 @@
 export type {
   ScreenshotModePluginStart,
   ScreenshotModePluginSetup,
-} from '../../../screenshot_mode/public';
+} from '@kbn/screenshot-mode-plugin/public';

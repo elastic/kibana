@@ -11,51 +11,41 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { Agent, SimplifiedAgentStatus } from '../../../../types';
 
 import { AgentStatusBar } from './status_bar';
-import { AgentBulkActions } from './bulk_actions';
+import { AgentsSelectionStatus } from './agents_selection_status';
 import {} from '@elastic/eui';
 import { AgentStatusBadges } from './status_badges';
-
-export type SelectionMode = 'manual' | 'query';
+import type { SelectionMode } from './types';
 
 export const AgentTableHeader: React.FunctionComponent<{
   agentStatus?: { [k in SimplifiedAgentStatus]: number };
   showInactive: boolean;
   totalAgents: number;
-  totalInactiveAgents: number;
   selectableAgents: number;
   selectionMode: SelectionMode;
   setSelectionMode: (mode: SelectionMode) => void;
-  currentQuery: string;
   selectedAgents: Agent[];
   setSelectedAgents: (agents: Agent[]) => void;
-  refreshAgents: () => void;
 }> = ({
   agentStatus,
   totalAgents,
-  totalInactiveAgents,
   selectableAgents,
   selectionMode,
   setSelectionMode,
-  currentQuery,
   selectedAgents,
   setSelectedAgents,
-  refreshAgents,
   showInactive,
 }) => {
   return (
     <>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <AgentBulkActions
+          <AgentsSelectionStatus
             totalAgents={totalAgents}
-            totalInactiveAgents={totalInactiveAgents}
             selectableAgents={selectableAgents}
             selectionMode={selectionMode}
             setSelectionMode={setSelectionMode}
-            currentQuery={currentQuery}
             selectedAgents={selectedAgents}
             setSelectedAgents={setSelectedAgents}
-            refreshAgents={refreshAgents}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

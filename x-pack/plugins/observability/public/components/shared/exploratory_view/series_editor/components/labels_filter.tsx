@@ -19,7 +19,7 @@ import { EuiSelectable } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FilterProps } from '../columns/filter_expanded';
-import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
+import { useAppDataViewContext } from '../../hooks/use_app_data_view';
 import { FilterValuesList } from './filter_values_list';
 import { useFilterValues } from '../use_filter_values';
 
@@ -28,9 +28,9 @@ export function LabelsFieldFilter(props: FilterProps) {
 
   const [query, setQuery] = useState('');
 
-  const { indexPattern } = useAppIndexPatternContext(series.dataType);
+  const { dataView } = useAppDataViewContext(series.dataType);
 
-  const labelFields = indexPattern?.fields.filter((field) => field.name.startsWith('labels.'));
+  const labelFields = dataView?.fields.filter((field) => field.name.startsWith('labels.'));
 
   const [isPopoverOpen, setPopover] = useState(false);
 

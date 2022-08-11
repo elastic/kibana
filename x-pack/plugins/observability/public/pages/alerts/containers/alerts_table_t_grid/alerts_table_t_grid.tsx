@@ -23,61 +23,54 @@ import {
   ALERT_START,
 } from '@kbn/rule-data-utils';
 
-import {
-  EuiButtonIcon,
-  EuiDataGridColumn,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiPopover,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiDataGridColumn, EuiFlexGroup } from '@elastic/eui';
+
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 
 import styled from 'styled-components';
 import React, { Suspense, useMemo, useState, useCallback, useEffect } from 'react';
 
 import { pick } from 'lodash';
-import { getAlertsPermissions } from '../../../../hooks/use_alert_permission';
 import type {
-  TimelinesUIStart,
   TGridType,
   TGridState,
   TGridModel,
   SortDirection,
-} from '../../../../../../timelines/public';
-
-import type { TopAlert } from '../alerts_page/alerts_page';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+} from '@kbn/timelines-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type {
   ActionProps,
   ColumnHeaderOptions,
   ControlColumnProps,
   RowRenderer,
-} from '../../../../../../timelines/common';
+} from '@kbn/timelines-plugin/common';
+import { getAlertsPermissions } from '../../../../hooks/use_alert_permission';
+
+import type { TopAlert } from '../alerts_page/alerts_page';
 
 import { getRenderCellValue } from '../../components/render_cell_value';
 import { observabilityAppId, observabilityFeatureId } from '../../../../../common';
 import { useGetUserCasesPermissions } from '../../../../hooks/use_get_user_cases_permissions';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import { LazyAlertsFlyout } from '../../../..';
-import { parseAlert } from '../../components/parse_alert';
-import { CoreStart } from '../../../../../../../../src/core/public';
-import { translations, paths } from '../../../../config';
+import { translations } from '../../../../config';
 import { addDisplayNames } from './add_display_names';
-
-const ALERT_TABLE_STATE_STORAGE_KEY = 'xpack.observability.alert.tableState';
+import { ObservabilityAppServices } from '../../../../application/types';
+import { useBulkAddToCaseActions } from '../../../../hooks/use_alert_bulk_case_actions';
+import {
+  ObservabilityActions,
+  ObservabilityActionsProps,
+} from '../../components/observability_actions';
 
 interface AlertsTableTGridProps {
   indexNames: string[];
   rangeFrom: string;
   rangeTo: string;
   kuery?: string;
+  stateStorageKey: string;
+  storage: IStorageWrapper;
   setRefetch: (ref: () => void) => void;
-}
-
-interface ObservabilityActionsProps extends ActionProps {
-  setFlyoutAlert: React.Dispatch<React.SetStateAction<TopAlert | undefined>>;
+  itemsPerPage?: number;
 }
 
 const EventsThContent = styled.div.attrs(({ className = '' }) => ({
@@ -87,7 +80,7 @@ const EventsThContent = styled.div.attrs(({ className = '' }) => ({
   font-weight: ${({ theme }) => theme.eui.euiFontWeightBold};
   line-height: ${({ theme }) => theme.eui.euiLineHeight};
   min-width: 0;
-  padding: ${({ theme }) => theme.eui.paddingSizes.xs};
+  padding: ${({ theme }) => theme.eui.euiSizeXS};
   text-align: ${({ textAlign }) => textAlign};
   width: ${({ width }) =>
     width != null
@@ -96,7 +89,7 @@ const EventsThContent = styled.div.attrs(({ className = '' }) => ({
 
   > button.euiButtonIcon,
   > .euiToolTipAnchor > button.euiButtonIcon {
-    margin-left: ${({ theme }) => `-${theme.eui.paddingSizes.xs}`};
+    margin-left: ${({ theme }) => `-${theme.eui.euiSizeXS}`};
   }
 `;
 /**
@@ -136,145 +129,6 @@ const NO_ROW_RENDER: RowRenderer[] = [];
 
 const trailingControlColumns: never[] = [];
 
-function ObservabilityActions({
-  data,
-  eventId,
-  ecsData,
-  setFlyoutAlert,
-}: ObservabilityActionsProps) {
-  const { core, observabilityRuleTypeRegistry } = usePluginContext();
-  const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
-  const [openActionsPopoverId, setActionsPopover] = useState(null);
-  const {
-    timelines,
-    application: {},
-  } = useKibana<CoreStart & { timelines: TimelinesUIStart }>().services;
-
-  const parseObservabilityAlert = useMemo(
-    () => parseAlert(observabilityRuleTypeRegistry),
-    [observabilityRuleTypeRegistry]
-  );
-
-  const alert = parseObservabilityAlert(dataFieldEs);
-  const { prepend } = core.http.basePath;
-
-  const afterCaseSelection = useCallback(() => {
-    setActionsPopover(null);
-  }, []);
-
-  const closeActionsPopover = useCallback(() => {
-    setActionsPopover(null);
-  }, []);
-
-  const toggleActionsPopover = useCallback((id) => {
-    setActionsPopover((current) => (current ? null : id));
-  }, []);
-
-  const casePermissions = useGetUserCasesPermissions();
-  const event = useMemo(() => {
-    return {
-      data,
-      _id: eventId,
-      ecs: ecsData,
-    };
-  }, [data, eventId, ecsData]);
-
-  const ruleId = alert.fields['kibana.alert.rule.uuid'] ?? null;
-  const linkToRule = ruleId ? prepend(paths.management.ruleDetails(ruleId)) : null;
-
-  const actionsMenuItems = useMemo(() => {
-    return [
-      ...(casePermissions?.crud
-        ? [
-            timelines.getAddToExistingCaseButton({
-              event,
-              casePermissions,
-              appId: observabilityAppId,
-              owner: observabilityFeatureId,
-              onClose: afterCaseSelection,
-            }),
-            timelines.getAddToNewCaseButton({
-              event,
-              casePermissions,
-              appId: observabilityAppId,
-              owner: observabilityFeatureId,
-              onClose: afterCaseSelection,
-            }),
-          ]
-        : []),
-
-      ...(!!linkToRule
-        ? [
-            <EuiContextMenuItem
-              key="viewRuleDetails"
-              data-test-subj="viewRuleDetails"
-              href={linkToRule}
-            >
-              {translations.alertsTable.viewRuleDetailsButtonText}
-            </EuiContextMenuItem>,
-          ]
-        : []),
-    ];
-  }, [afterCaseSelection, casePermissions, timelines, event, linkToRule]);
-
-  const actionsToolTip =
-    actionsMenuItems.length <= 0
-      ? translations.alertsTable.notEnoughPermissions
-      : translations.alertsTable.moreActionsTextLabel;
-
-  return (
-    <>
-      <EuiFlexGroup gutterSize="none" responsive={false}>
-        <EuiFlexItem>
-          <EuiToolTip content={translations.alertsTable.viewDetailsTextLabel}>
-            <EuiButtonIcon
-              size="s"
-              iconType="expand"
-              color="text"
-              onClick={() => setFlyoutAlert(alert)}
-              data-test-subj="openFlyoutButton"
-              aria-label={translations.alertsTable.viewDetailsTextLabel}
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiToolTip content={translations.alertsTable.viewInAppTextLabel}>
-            <EuiButtonIcon
-              size="s"
-              href={prepend(alert.link ?? '')}
-              iconType="eye"
-              color="text"
-              aria-label={translations.alertsTable.viewInAppTextLabel}
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiPopover
-            button={
-              <EuiToolTip content={actionsToolTip}>
-                <EuiButtonIcon
-                  display="empty"
-                  size="s"
-                  color="text"
-                  iconType="boxesHorizontal"
-                  aria-label={actionsToolTip}
-                  onClick={() => toggleActionsPopover(eventId)}
-                  data-test-subj="alertsTableRowActionMore"
-                />
-              </EuiToolTip>
-            }
-            isOpen={openActionsPopoverId === eventId}
-            closePopover={closeActionsPopover}
-            panelPaddingSize="none"
-            anchorPosition="downLeft"
-          >
-            <EuiContextMenuPanel size="s" items={actionsMenuItems} />
-          </EuiPopover>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
-  );
-}
 const FIELDS_WITHOUT_CELL_ACTIONS = [
   '@timestamp',
   'signal.rule.risk_score',
@@ -284,19 +138,29 @@ const FIELDS_WITHOUT_CELL_ACTIONS = [
 ];
 
 export function AlertsTableTGrid(props: AlertsTableTGridProps) {
-  const { indexNames, rangeFrom, rangeTo, kuery, setRefetch } = props;
+  const {
+    indexNames,
+    rangeFrom,
+    rangeTo,
+    kuery,
+    setRefetch,
+    stateStorageKey,
+    storage,
+    itemsPerPage,
+  } = props;
 
   const {
     timelines,
     application: { capabilities },
-  } = useKibana<CoreStart & { timelines: TimelinesUIStart }>().services;
+  } = useKibana<ObservabilityAppServices>().services;
+  const { observabilityRuleTypeRegistry } = usePluginContext();
 
   const [flyoutAlert, setFlyoutAlert] = useState<TopAlert | undefined>(undefined);
   const [tGridState, setTGridState] = useState<Partial<TGridModel> | null>(
-    JSON.parse(localStorage.getItem(ALERT_TABLE_STATE_STORAGE_KEY) ?? 'null')
+    storage.get(stateStorageKey)
   );
 
-  const casePermissions = useGetUserCasesPermissions();
+  const userCasesPermissions = useGetUserCasesPermissions();
 
   const hasAlertsCrudPermissions = useCallback(
     ({ ruleConsumer, ruleProducer }: { ruleConsumer: string; ruleProducer?: string }) => {
@@ -312,17 +176,17 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
 
   useEffect(() => {
     if (tGridState) {
-      const newState = JSON.stringify({
+      const newState = {
         ...tGridState,
         columns: tGridState.columns?.map((c) =>
           pick(c, ['columnHeaderType', 'displayAsText', 'id', 'initialWidth', 'linkField'])
         ),
-      });
-      if (newState !== localStorage.getItem(ALERT_TABLE_STATE_STORAGE_KEY)) {
-        localStorage.setItem(ALERT_TABLE_STATE_STORAGE_KEY, newState);
+      };
+      if (newState !== storage.get(stateStorageKey)) {
+        storage.set(stateStorageKey, newState);
       }
     }
-  }, [tGridState]);
+  }, [tGridState, stateStorageKey, storage]);
 
   const setEventsDeleted = useCallback<ObservabilityActionsProps['setEventsDeleted']>((action) => {
     if (action.isDeleted) {
@@ -340,16 +204,19 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
         },
         rowCellRender: (actionProps: ActionProps) => {
           return (
-            <ObservabilityActions
-              {...actionProps}
-              setEventsDeleted={setEventsDeleted}
-              setFlyoutAlert={setFlyoutAlert}
-            />
+            <EuiFlexGroup gutterSize="none" responsive={false}>
+              <ObservabilityActions
+                {...actionProps}
+                setEventsDeleted={setEventsDeleted}
+                setFlyoutAlert={setFlyoutAlert}
+                observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
+              />
+            </EuiFlexGroup>
           );
         },
       },
     ];
-  }, [setEventsDeleted]);
+  }, [setEventsDeleted, observabilityRuleTypeRegistry]);
 
   const onStateChange = useCallback(
     (state: TGridState) => {
@@ -365,13 +232,21 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     [tGridState]
   );
 
+  const addToCaseBulkActions = useBulkAddToCaseActions();
+  const bulkActions = useMemo(
+    () => ({
+      alertStatusActions: false,
+      customBulkActions: addToCaseBulkActions,
+    }),
+    [addToCaseBulkActions]
+  );
   const tGridProps = useMemo(() => {
     const type: TGridType = 'standalone';
     const sortDirection: SortDirection = 'desc';
     return {
       appId: observabilityAppId,
       casesOwner: observabilityFeatureId,
-      casePermissions,
+      casePermissions: userCasesPermissions,
       type,
       columns: (tGridState?.columns ?? columns).map(addDisplayNames),
       deletedEventIds,
@@ -380,6 +255,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       filters: [],
       hasAlertsCrudPermissions,
       indexNames,
+      itemsPerPage,
       itemsPerPageOptions: [10, 25, 50],
       loadingText: translations.alertsTable.loadingTextLabel,
       footerText: translations.alertsTable.footerTextLabel,
@@ -388,13 +264,13 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
         query: kuery ?? '',
         language: 'kuery',
       },
-      renderCellValue: getRenderCellValue({ setFlyoutAlert }),
+      renderCellValue: getRenderCellValue({ setFlyoutAlert, observabilityRuleTypeRegistry }),
       rowRenderers: NO_ROW_RENDER,
       // TODO: implement Kibana data view runtime fields in observability
       runtimeMappings: {},
       start: rangeFrom,
       setRefetch,
-      showCheckboxes: false,
+      bulkActions,
       sort: tGridState?.sort ?? [
         {
           columnId: '@timestamp',
@@ -419,21 +295,24 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       unit: (totalAlerts: number) => translations.alertsTable.showingAlertsTitle(totalAlerts),
     };
   }, [
-    casePermissions,
+    userCasesPermissions,
+    tGridState?.columns,
+    tGridState?.sort,
+    deletedEventIds,
     rangeTo,
     hasAlertsCrudPermissions,
     indexNames,
+    itemsPerPage,
+    observabilityRuleTypeRegistry,
+    onStateChange,
     kuery,
     rangeFrom,
     setRefetch,
+    bulkActions,
     leadingControlColumns,
-    deletedEventIds,
-    onStateChange,
-    tGridState,
   ]);
 
   const handleFlyoutClose = () => setFlyoutAlert(undefined);
-  const { observabilityRuleTypeRegistry } = usePluginContext();
 
   return (
     <>

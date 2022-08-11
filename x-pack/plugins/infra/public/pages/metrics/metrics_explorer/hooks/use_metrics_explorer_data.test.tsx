@@ -9,7 +9,7 @@ import React from 'react';
 import { useMetricsExplorerData } from './use_metrics_explorer_data';
 
 import { renderHook } from '@testing-library/react-hooks';
-import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import {
   options,
@@ -21,7 +21,7 @@ import {
 } from '../../../../utils/fixtures/metrics_explorer';
 import { MetricsExplorerOptions, MetricsExplorerTimeOptions } from './use_metrics_explorer_options';
 import { DataViewBase } from '@kbn/es-query';
-import { HttpHandler } from 'kibana/public';
+import { HttpHandler } from '@kbn/core/public';
 import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
 
 const mockedFetch = jest.fn();

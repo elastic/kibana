@@ -12,6 +12,11 @@ import { AddToCaseAction } from './add_to_case_action';
 import * as useCaseHook from '../hooks/use_add_to_case';
 import * as datePicker from '../components/date_range_picker';
 import moment from 'moment';
+import { noCasesPermissions as mockUseGetCasesPermissions } from '../../../../utils/cases_permissions';
+
+jest.mock('../../../../hooks/use_get_user_cases_permissions', () => ({
+  useGetUserCasesPermissions: jest.fn(() => mockUseGetCasesPermissions()),
+}));
 
 describe('AddToCaseAction', function () {
   beforeEach(() => {
@@ -102,11 +107,18 @@ describe('AddToCaseAction', function () {
     );
     fireEvent.click(await findByText('Add to case'));
 
-    expect(core?.cases?.getAllCasesSelectorModal).toHaveBeenCalledTimes(1);
-    expect(core?.cases?.getAllCasesSelectorModal).toHaveBeenCalledWith(
+    expect(core?.cases?.ui.getAllCasesSelectorModal).toHaveBeenCalledTimes(1);
+    expect(core?.cases?.ui.getAllCasesSelectorModal).toHaveBeenCalledWith(
       expect.objectContaining({
         owner: ['observability'],
-        userCanCrud: true,
+        permissions: {
+          all: false,
+          create: false,
+          read: false,
+          update: false,
+          delete: false,
+          push: false,
+        },
       })
     );
   });

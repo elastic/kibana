@@ -9,8 +9,6 @@
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { cloneDeepWith } from 'lodash';
 import { Key, Origin, WebDriver } from 'selenium-webdriver';
-// @ts-ignore internal modules are not typed
-import { LegacyActionSequence } from 'selenium-webdriver/lib/actions';
 import { modifyUrl } from '@kbn/std';
 
 import Jimp from 'jimp';

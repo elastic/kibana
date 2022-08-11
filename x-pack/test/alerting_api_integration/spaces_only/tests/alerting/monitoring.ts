@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { Spaces } from '../../scenarios';
-import { getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
+import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -23,7 +23,7 @@ export default function monitoringAlertTests({ getService }: FtrProviderContext)
       const createResponse = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData({ schedule: { interval: '3s' } }));
+        .send(getTestRuleData({ schedule: { interval: '3s' } }));
       expect(createResponse.status).to.eql(200);
       objectRemover.add(Spaces.space1.id, createResponse.body.id, 'rule', 'alerting');
 
@@ -44,7 +44,7 @@ export default function monitoringAlertTests({ getService }: FtrProviderContext)
       const createResponse = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData({ schedule: { interval: '3s' } }));
+        .send(getTestRuleData({ schedule: { interval: '3s' } }));
       expect(createResponse.status).to.eql(200);
       objectRemover.add(Spaces.space1.id, createResponse.body.id, 'rule', 'alerting');
 
@@ -69,7 +69,7 @@ export default function monitoringAlertTests({ getService }: FtrProviderContext)
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
-          getTestAlertData({
+          getTestRuleData({
             rule_type_id: 'test.patternSuccessOrFailure',
             schedule: { interval: '3s' },
             params: {
@@ -102,7 +102,7 @@ export default function monitoringAlertTests({ getService }: FtrProviderContext)
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
-          getTestAlertData({
+          getTestRuleData({
             schedule: { interval: '3s' },
           })
         );

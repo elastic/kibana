@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CoreSetup } from 'kibana/public';
-import { EmbeddableSetup } from '../../../../../../../src/plugins/embeddable/public';
+import { CoreSetup } from '@kbn/core/public';
+import { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import { DataVisualizerGridEmbeddableFactory } from './grid_embeddable/grid_embeddable_factory';
 import { DataVisualizerPluginStart, DataVisualizerStartDependencies } from '../../../plugin';
 

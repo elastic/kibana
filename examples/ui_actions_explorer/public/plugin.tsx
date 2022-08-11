@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { UiActionsStart, UiActionsSetup } from '../../../src/plugins/ui_actions/public';
-import { Plugin, CoreSetup, AppMountParameters, AppNavLinkStatus } from '../../../src/core/public';
+import { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
+import { Plugin, CoreSetup, AppMountParameters, AppNavLinkStatus } from '@kbn/core/public';
+import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import {
   PHONE_TRIGGER,
   USER_TRIGGER,
@@ -19,7 +20,6 @@ import {
   showcasePluggability,
   createTriggerPhoneTriggerAction,
 } from './actions/actions';
-import { DeveloperExamplesSetup } from '../../developer_examples/public';
 import image from './ui_actions.png';
 
 interface StartDeps {

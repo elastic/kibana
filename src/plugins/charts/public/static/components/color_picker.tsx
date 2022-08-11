@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import classNames from 'classnames';
-import React, { BaseSyntheticEvent } from 'react';
-
+import React, { BaseSyntheticEvent, useMemo } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiButtonEmpty,
   EuiFlexItem,
@@ -16,10 +15,10 @@ import {
   euiPaletteColorBlind,
   EuiScreenReaderOnly,
   EuiFlexGroup,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { lightenColor } from '../../services/palettes/lighten_color';
-import './color_picker.scss';
 
 export const legacyColors: string[] = [
   '#3F6833',
@@ -80,7 +79,7 @@ export const legacyColors: string[] = [
   '#DEDAF7',
 ];
 
-interface ColorPickerProps {
+export interface ColorPickerProps {
   /**
    * Label that characterizes the color that is going to change
    */
@@ -116,6 +115,24 @@ interface ColorPickerProps {
 }
 const euiColors = euiPaletteColorBlind({ rotations: 4, order: 'group' });
 
+const visColorPickerColorBtnStyle = css`
+  position: relative;
+  input[type='radio'] {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    opacity: 0;
+    transform: translate(-50%, -50%);
+  }
+`;
+
+const visColorPickerValueDotStyle = css`
+  cursor: pointer;
+  &:hover {
+    transform: scale(1.4);
+  }
+`;
+
 export const ColorPicker = ({
   onChange,
   color: selectedColor,
@@ -127,6 +144,22 @@ export const ColorPicker = ({
   layerIndex,
 }: ColorPickerProps) => {
   const legendColors = useLegacyColors ? legacyColors : euiColors;
+  const { euiTheme } = useEuiTheme();
+
+  const visColorPickerValueStyle = useMemo(
+    () => css`
+      width: calc(${euiTheme.size.l} * 8);
+    `,
+    [euiTheme.size.l]
+  );
+
+  const visColorPickerValueDotSelectedStyle = useMemo(
+    () => css`
+      border: ${euiTheme.size.xs} solid;
+      border-radius: 100%;
+    `,
+    [euiTheme.size.xs]
+  );
 
   return (
     <div className="visColorPicker">
@@ -140,9 +173,18 @@ export const ColorPicker = ({
             />
           </legend>
         </EuiScreenReaderOnly>
-        <EuiFlexGroup wrap={true} gutterSize="none" className="visColorPicker__value">
+        <EuiFlexGroup
+          wrap={true}
+          gutterSize="none"
+          css={visColorPickerValueStyle}
+          className="visColorPicker__value"
+        >
           {legendColors.map((color) => (
-            <label key={color} className="visColorPicker__colorBtn">
+            <label
+              key={color}
+              css={visColorPickerColorBtnStyle}
+              className="visColorPicker__colorBtn"
+            >
               <input
                 type="radio"
                 onChange={(e) => onChange(color, e)}
@@ -155,10 +197,11 @@ export const ColorPicker = ({
                 type="dot"
                 size="l"
                 color={selectedColor}
-                className={classNames('visColorPicker__valueDot', {
-                  // eslint-disable-next-line @typescript-eslint/naming-convention
-                  'visColorPicker__valueDot-isSelected': color === selectedColor,
-                })}
+                css={[
+                  visColorPickerValueDotStyle,
+                  color === selectedColor ? visColorPickerValueDotSelectedStyle : null,
+                ]}
+                className="visColorPicker__valueDot"
                 style={{ color }}
                 data-test-subj={`visColorPickerColor-${color}`}
               />

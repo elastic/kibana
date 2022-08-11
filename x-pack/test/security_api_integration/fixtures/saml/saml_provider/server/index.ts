@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PluginInitializer, Plugin } from '../../../../../../../src/core/server';
+import type { PluginInitializer, Plugin } from '@kbn/core/server';
 import { initRoutes } from './init_routes';
 
 export const plugin: PluginInitializer<void, void> = (): Plugin => ({

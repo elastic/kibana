@@ -9,9 +9,9 @@
 import { i18n } from '@kbn/i18n';
 import { Fit } from '@elastic/charts';
 
+import { LabelRotation } from '@kbn/charts-plugin/public';
 import { AxisMode, ChartMode, InterpolationMode, ThresholdLineStyle } from '../types';
 import { ChartType } from '../../common';
-import { LabelRotation } from '../../../../charts/public';
 import { getScaleTypes } from './scale_types';
 import { getPositions } from './positions';
 

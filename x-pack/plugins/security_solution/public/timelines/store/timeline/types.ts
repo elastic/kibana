@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { Action } from 'redux';
-import { Observable } from 'rxjs';
+import type { Action } from 'redux';
+import type { Observable } from 'rxjs';
 
-import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
-import { inputsModel } from '../../../common/store/inputs';
-import { NotesById } from '../../../common/store/app/model';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { inputsModel } from '../../../common/store/inputs';
+import type { NotesById } from '../../../common/store/app/model';
 
-import { TimelineModel } from './model';
-import { CoreStart } from '../../../../../../../src/core/public';
+import type { TimelineModel } from './model';
 
 export interface AutoSavedWarningMsg {
   timelineId: string | null;

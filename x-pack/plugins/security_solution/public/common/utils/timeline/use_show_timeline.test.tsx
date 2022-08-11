@@ -6,29 +6,190 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
+import { allowedExperimentalValues } from '../../../../common/experimental_features';
+import { updateAppLinks } from '../../links';
+import { links } from '../../links/app_links';
 import { useShowTimeline } from './use_show_timeline';
-import { globalNode } from '../../mock';
+
+const mockUseLocation = jest.fn().mockReturnValue({ pathname: '/overview' });
+jest.mock('react-router-dom', () => {
+  const original = jest.requireActual('react-router-dom');
+  return {
+    ...original,
+    useLocation: () => mockUseLocation(),
+  };
+});
+
+const mockUseSourcererDataView = jest.fn(
+  (): { indicesExist: boolean; dataViewId: string | null } => ({
+    indicesExist: true,
+    dataViewId: null,
+  })
+);
+jest.mock('../../containers/sourcerer', () => ({
+  useSourcererDataView: () => mockUseSourcererDataView(),
+}));
+
+const mockedUseIsGroupedNavigationEnabled = jest.fn();
+jest.mock('../../components/navigation/helpers', () => ({
+  useIsGroupedNavigationEnabled: () => mockedUseIsGroupedNavigationEnabled(),
+}));
+
+const mockSiemUserCanRead = jest.fn(() => true);
+jest.mock('../../lib/kibana', () => {
+  const original = jest.requireActual('../../lib/kibana');
+
+  return {
+    ...original,
+    useKibana: () => ({
+      services: {
+        ...original.useKibana().services,
+        application: {
+          capabilities: {
+            siem: {
+              show: mockSiemUserCanRead(),
+            },
+          },
+        },
+      },
+    }),
+  };
+});
 
 describe('use show timeline', () => {
-  it('shows timeline for routes on default', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useShowTimeline());
-      await waitForNextUpdate();
-      const uninitializedTimeline = result.current;
-      expect(uninitializedTimeline).toEqual([true]);
+  beforeAll(() => {
+    // initialize all App links before running test
+    updateAppLinks(links, {
+      experimentalFeatures: allowedExperimentalValues,
+      capabilities: {
+        navLinks: {},
+        management: {},
+        catalogue: {},
+        actions: { show: true, crud: true },
+        siem: {
+          show: true,
+          crud: true,
+        },
+      },
     });
   });
-  it('hides timeline for blacklist routes', async () => {
-    await act(async () => {
-      Object.defineProperty(globalNode.window, 'location', {
-        value: {
-          pathname: `/cases/configure`,
-        },
+  describe('useIsGroupedNavigationEnabled false', () => {
+    beforeAll(() => {
+      mockedUseIsGroupedNavigationEnabled.mockReturnValue(false);
+    });
+
+    it('shows timeline for routes on default', async () => {
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook(() => useShowTimeline());
+        await waitForNextUpdate();
+        const showTimeline = result.current;
+        expect(showTimeline).toEqual([true]);
       });
-      const { result, waitForNextUpdate } = renderHook(() => useShowTimeline());
-      await waitForNextUpdate();
-      const uninitializedTimeline = result.current;
-      expect(uninitializedTimeline).toEqual([false]);
+    });
+
+    it('hides timeline for blacklist routes', async () => {
+      mockUseLocation.mockReturnValueOnce({ pathname: '/rules/create' });
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook(() => useShowTimeline());
+        await waitForNextUpdate();
+        const showTimeline = result.current;
+        expect(showTimeline).toEqual([false]);
+      });
+    });
+    it('shows timeline for partial blacklist routes', async () => {
+      mockUseLocation.mockReturnValueOnce({ pathname: '/rules' });
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook(() => useShowTimeline());
+        await waitForNextUpdate();
+        const showTimeline = result.current;
+        expect(showTimeline).toEqual([true]);
+      });
+    });
+    it('hides timeline for sub blacklist routes', async () => {
+      mockUseLocation.mockReturnValueOnce({ pathname: '/administration/policy' });
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook(() => useShowTimeline());
+        await waitForNextUpdate();
+        const showTimeline = result.current;
+        expect(showTimeline).toEqual([false]);
+      });
+    });
+  });
+
+  describe('useIsGroupedNavigationEnabled true', () => {
+    beforeAll(() => {
+      mockedUseIsGroupedNavigationEnabled.mockReturnValue(true);
+    });
+
+    it('shows timeline for routes on default', async () => {
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook(() => useShowTimeline());
+        await waitForNextUpdate();
+        const showTimeline = result.current;
+        expect(showTimeline).toEqual([true]);
+      });
+    });
+
+    it('hides timeline for blacklist routes', async () => {
+      mockUseLocation.mockReturnValueOnce({ pathname: '/rules/create' });
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook(() => useShowTimeline());
+        await waitForNextUpdate();
+        const showTimeline = result.current;
+        expect(showTimeline).toEqual([false]);
+      });
+    });
+    it('shows timeline for partial blacklist routes', async () => {
+      mockUseLocation.mockReturnValueOnce({ pathname: '/rules' });
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook(() => useShowTimeline());
+        await waitForNextUpdate();
+        const showTimeline = result.current;
+        expect(showTimeline).toEqual([true]);
+      });
+    });
+    it('hides timeline for sub blacklist routes', async () => {
+      mockUseLocation.mockReturnValueOnce({ pathname: '/administration/policy' });
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook(() => useShowTimeline());
+        await waitForNextUpdate();
+        const showTimeline = result.current;
+        expect(showTimeline).toEqual([false]);
+      });
+    });
+  });
+
+  describe('sourcererDataView', () => {
+    it('should show timeline when indices exist', () => {
+      mockUseSourcererDataView.mockReturnValueOnce({ indicesExist: true, dataViewId: 'test' });
+      const { result } = renderHook(() => useShowTimeline());
+      expect(result.current).toEqual([true]);
+    });
+
+    it('should show timeline when dataViewId is null', () => {
+      mockUseSourcererDataView.mockReturnValueOnce({ indicesExist: false, dataViewId: null });
+      const { result } = renderHook(() => useShowTimeline());
+      expect(result.current).toEqual([true]);
+    });
+
+    it('should not show timeline when dataViewId is not null and indices does not exist', () => {
+      mockUseSourcererDataView.mockReturnValueOnce({ indicesExist: false, dataViewId: 'test' });
+      const { result } = renderHook(() => useShowTimeline());
+      expect(result.current).toEqual([false]);
+    });
+  });
+
+  describe('Security solution capabilities', () => {
+    it('should show timeline when user has read capabilities', () => {
+      mockSiemUserCanRead.mockReturnValueOnce(true);
+      const { result } = renderHook(() => useShowTimeline());
+      expect(result.current).toEqual([true]);
+    });
+
+    it('should not show timeline when user does not have read capabilities', () => {
+      mockSiemUserCanRead.mockReturnValueOnce(false);
+      const { result } = renderHook(() => useShowTimeline());
+      expect(result.current).toEqual([false]);
     });
   });
 });

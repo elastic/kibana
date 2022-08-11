@@ -6,16 +6,26 @@
  */
 
 export default async function ({ readConfigFile }) {
-  const chromeConfig = await readConfigFile(require.resolve('./config'));
+  const chromeConfig = await readConfigFile(require.resolve('./config.base.js'));
 
   return {
     ...chromeConfig.getAll(),
+
+    testFiles: [
+      require.resolve('./apps/canvas'),
+      require.resolve('./apps/infra'),
+      require.resolve('./apps/security'),
+      require.resolve('./apps/spaces'),
+      require.resolve('./apps/status_page'),
+      require.resolve('./apps/watcher'),
+    ],
 
     browser: {
       type: 'firefox',
     },
 
     suiteTags: {
+      include: ['includeFirefox'],
       exclude: ['skipFirefox'],
     },
 

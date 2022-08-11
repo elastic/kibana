@@ -30,9 +30,14 @@ describe('AggConfig Filters', () => {
         indexPattern,
       };
 
-      return new AggConfigs(indexPattern, aggs, {
-        typesRegistry: mockAggTypesRegistry(),
-      });
+      return new AggConfigs(
+        indexPattern,
+        aggs,
+        {
+          typesRegistry: mockAggTypesRegistry(),
+        },
+        jest.fn()
+      );
     };
 
     test('should return a match_phrase filter for terms', () => {

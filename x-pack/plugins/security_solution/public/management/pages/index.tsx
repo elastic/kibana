@@ -6,9 +6,10 @@
  */
 
 import React, { memo } from 'react';
-import { Route, Switch, Redirect } from 'react-router-dom';
-import { EuiEmptyPrompt, EuiLoadingSpinner, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { Switch, Redirect } from 'react-router-dom';
+import { Route } from '@kbn/kibana-react-plugin/public';
+import { EuiLoadingSpinner } from '@elastic/eui';
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import {
   MANAGEMENT_ROUTING_ENDPOINTS_PATH,
   MANAGEMENT_ROUTING_EVENT_FILTERS_PATH,
@@ -16,9 +17,9 @@ import {
   MANAGEMENT_ROUTING_POLICIES_PATH,
   MANAGEMENT_ROUTING_TRUSTED_APPS_PATH,
   MANAGEMENT_ROUTING_BLOCKLIST_PATH,
+  MANAGEMENT_ROUTING_RESPONSE_ACTIONS_PATH,
 } from '../common/constants';
 import { NotFoundPage } from '../../app/404';
-import { TrackApplicationView } from '../../../../../../src/plugins/usage_collection/public';
 import { EndpointsContainer } from './endpoint_hosts';
 import { PolicyContainer } from './policy';
 import { TrustedAppsContainer } from './trusted_apps';
@@ -29,64 +30,48 @@ import { getEndpointListPath } from '../common/routing';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import { HostIsolationExceptionsContainer } from './host_isolation_exceptions';
 import { BlocklistContainer } from './blocklist';
-
-const NoPermissions = memo(() => {
-  return (
-    <>
-      <EuiEmptyPrompt
-        iconType="alert"
-        iconColor="danger"
-        titleSize="l"
-        data-test-subj="noIngestPermissions"
-        title={
-          <FormattedMessage
-            id="xpack.securitySolution.endpointManagemnet.noPermissionsText"
-            defaultMessage="You do not have the required Kibana permissions to use Elastic Security Administration"
-          />
-        }
-        body={
-          <EuiText color="subdued">
-            <FormattedMessage
-              id="xpack.securitySolution.endpointManagement.noPermissionsSubText"
-              defaultMessage="You must have the superuser role to use this feature. If you do not have the superuser role and do not have permissions to edit user roles, contact your Kibana administrator."
-            />
-          </EuiText>
-        }
-      />
-      <SpyRoute pageName={SecurityPageName.administration} />
-    </>
-  );
-});
-NoPermissions.displayName = 'NoPermissions';
+import { NoPermissions } from '../components/no_permissons';
+import { ResponseActionsContainer } from './response_actions';
 
 const EndpointTelemetry = () => (
   <TrackApplicationView viewId={SecurityPageName.endpoints}>
     <EndpointsContainer />
+    <SpyRoute pageName={SecurityPageName.endpoints} />
   </TrackApplicationView>
 );
 
 const PolicyTelemetry = () => (
   <TrackApplicationView viewId={SecurityPageName.policies}>
     <PolicyContainer />
+    <SpyRoute pageName={SecurityPageName.policies} />
   </TrackApplicationView>
 );
 
 const TrustedAppTelemetry = () => (
   <TrackApplicationView viewId={SecurityPageName.trustedApps}>
     <TrustedAppsContainer />
+    <SpyRoute pageName={SecurityPageName.trustedApps} />
   </TrackApplicationView>
 );
 
 const EventFilterTelemetry = () => (
   <TrackApplicationView viewId={SecurityPageName.eventFilters}>
     <EventFiltersContainer />
+    <SpyRoute pageName={SecurityPageName.eventFilters} />
   </TrackApplicationView>
 );
 
 const HostIsolationExceptionsTelemetry = () => (
   <TrackApplicationView viewId={SecurityPageName.hostIsolationExceptions}>
-    <SpyRoute pageName={SecurityPageName.administration} />
     <HostIsolationExceptionsContainer />
+    <SpyRoute pageName={SecurityPageName.hostIsolationExceptions} />
+  </TrackApplicationView>
+);
+
+const ResponseActionsTelemetry = () => (
+  <TrackApplicationView viewId={SecurityPageName.responseActions}>
+    <ResponseActionsContainer />
+    <SpyRoute pageName={SecurityPageName.responseActions} />
   </TrackApplicationView>
 );
 
@@ -99,7 +84,12 @@ export const ManagementContainer = memo(() => {
   }
 
   if (!canAccessEndpointManagement) {
-    return <Route path="*" component={NoPermissions} />;
+    return (
+      <>
+        <Route path="*" component={NoPermissions} />
+        <SpyRoute pageName={SecurityPageName.administration} />
+      </>
+    );
   }
 
   return (
@@ -113,6 +103,7 @@ export const ManagementContainer = memo(() => {
         component={HostIsolationExceptionsTelemetry}
       />
       <Route path={MANAGEMENT_ROUTING_BLOCKLIST_PATH} component={BlocklistContainer} />
+      <Route path={MANAGEMENT_ROUTING_RESPONSE_ACTIONS_PATH} component={ResponseActionsTelemetry} />
       <Route path={MANAGEMENT_PATH} exact>
         <Redirect to={getEndpointListPath({ name: 'endpointList' })} />
       </Route>

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { LayoutParams } from '@kbn/screenshotting-plugin/common';
 import type { LocatorParams } from '../url';
-import type { LayoutParams } from '../../../../screenshotting/common';
 import type { BaseParams, BasePayload } from '../base';
 
 // Job params: structure of incoming user request data

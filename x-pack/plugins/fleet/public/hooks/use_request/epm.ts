@@ -20,7 +20,7 @@ import type {
   UpdatePackageRequest,
   UpdatePackageResponse,
 } from '../../types';
-import type { GetStatsResponse } from '../../../common';
+import type { FleetErrorResponse, GetStatsResponse } from '../../../common/types';
 
 import { getCustomIntegrations } from '../../services/custom_integrations';
 
@@ -67,7 +67,7 @@ export const useGetLimitedPackages = () => {
   });
 };
 
-export const useGetPackageInfoByKey = (pkgName: string, pkgVersion: string) => {
+export const useGetPackageInfoByKey = (pkgName: string, pkgVersion?: string) => {
   return useRequest<GetInfoResponse>({
     path: epmRouteService.getInfoPath(pkgName, pkgVersion),
     method: 'get',
@@ -81,7 +81,7 @@ export const useGetPackageStats = (pkgName: string) => {
   });
 };
 
-export const sendGetPackageInfoByKey = (pkgName: string, pkgVersion: string) => {
+export const sendGetPackageInfoByKey = (pkgName: string, pkgVersion?: string) => {
   return sendRequest<GetInfoResponse>({
     path: epmRouteService.getInfoPath(pkgName, pkgVersion),
     method: 'get',
@@ -102,17 +102,22 @@ export const sendGetFileByPath = (filePath: string) => {
   });
 };
 
-export const sendInstallPackage = (pkgName: string, pkgVersion: string) => {
-  return sendRequest<InstallPackageResponse>({
+export const sendInstallPackage = (pkgName: string, pkgVersion: string, force: boolean = false) => {
+  const body = force ? { force } : undefined;
+  return sendRequest<InstallPackageResponse, FleetErrorResponse>({
     path: epmRouteService.getInstallPath(pkgName, pkgVersion),
     method: 'post',
+    body,
   });
 };
 
-export const sendRemovePackage = (pkgName: string, pkgVersion: string) => {
+export const sendRemovePackage = (pkgName: string, pkgVersion: string, force: boolean = false) => {
   return sendRequest<DeletePackageResponse>({
     path: epmRouteService.getRemovePath(pkgName, pkgVersion),
     method: 'delete',
+    body: {
+      force,
+    },
   });
 };
 

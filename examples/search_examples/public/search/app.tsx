@@ -32,27 +32,29 @@ import {
   EuiTabbedContentTab,
 } from '@elastic/eui';
 
-import { CoreStart } from '../../../../src/core/public';
-import { mountReactNode } from '../../../../src/core/public/utils';
-import { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/public';
-
-import { PLUGIN_ID, PLUGIN_NAME, SERVER_SEARCH_ROUTE_PATH } from '../../common';
+import { lastValueFrom } from 'rxjs';
+import { CoreStart } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 
 import {
   DataPublicPluginStart,
   IKibanaSearchResponse,
   isCompleteResponse,
   isErrorResponse,
-} from '../../../../src/plugins/data/public';
-import type { DataViewField, DataView } from '../../../../src/plugins/data_views/public';
+} from '@kbn/data-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
+import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { IMyStrategyResponse } from '../../common/types';
-import { AbortError } from '../../../../src/plugins/kibana_utils/common';
+import { PLUGIN_ID, PLUGIN_NAME, SERVER_SEARCH_ROUTE_PATH } from '../../common';
 
 interface SearchExamplesAppDeps {
   notifications: CoreStart['notifications'];
   http: CoreStart['http'];
   navigation: NavigationPublicPluginStart;
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 function getNumeric(fields?: DataViewField[]) {
@@ -85,8 +87,9 @@ export const SearchExamplesApp = ({
   notifications,
   navigation,
   data,
+  unifiedSearch,
 }: SearchExamplesAppDeps) => {
-  const { IndexPatternSelect } = data.ui;
+  const { IndexPatternSelect } = unifiedSearch.ui;
   const [getCool, setGetCool] = useState<boolean>(false);
   const [fibonacciN, setFibonacciN] = useState<number>(10);
   const [timeTook, setTimeTook] = useState<number | undefined>();
@@ -229,7 +232,7 @@ export const SearchExamplesApp = ({
             notifications.toasts.addSuccess(
               {
                 title: 'Query result',
-                text: mountReactNode(message),
+                text: toMountPoint(message),
               },
               {
                 toastLifeTimeMs: 300000,
@@ -238,7 +241,7 @@ export const SearchExamplesApp = ({
             if (res.warning) {
               notifications.toasts.addWarning({
                 title: 'Warning',
-                text: mountReactNode(res.warning),
+                text: toMountPoint(res.warning),
               });
             }
           } else if (isErrorResponse(res)) {
@@ -303,16 +306,16 @@ export const SearchExamplesApp = ({
       const abortController = new AbortController();
       setAbortController(abortController);
       setIsLoading(true);
-      const { rawResponse: res } = await searchSource
-        .fetch$({ abortSignal: abortController.signal })
-        .toPromise();
+      const { rawResponse: res } = await lastValueFrom(
+        searchSource.fetch$({ abortSignal: abortController.signal })
+      );
       setRawResponse(res);
 
       const message = <EuiText>Searched {res.hits.total} documents.</EuiText>;
       notifications.toasts.addSuccess(
         {
           title: 'Query result',
-          text: mountReactNode(message),
+          text: toMountPoint(message),
         },
         {
           toastLifeTimeMs: 300000,

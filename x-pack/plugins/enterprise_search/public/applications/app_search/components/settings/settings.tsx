@@ -11,7 +11,7 @@ import { AppSearchPageTemplate } from '../layout';
 
 import { LogRetentionPanel, LogRetentionConfirmationModal } from './log_retention';
 
-import { SETTINGS_TITLE } from './';
+import { SETTINGS_TITLE } from '.';
 
 export const Settings: React.FC = () => {
   return (

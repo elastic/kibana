@@ -6,10 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import type { KibanaRequest, KibanaResponseFactory } from 'src/core/server';
 
-import type { RouteDefinitionParams } from '../';
+import type { RouteDefinitionParams } from '..';
 import { OIDCAuthenticationProvider, OIDCLogin } from '../../authentication';
 import type { ProviderLoginAttempt } from '../../authentication/providers/oidc';
 import { wrapIntoCustomErrorResponse } from '../../errors';

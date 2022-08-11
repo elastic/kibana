@@ -7,7 +7,7 @@
  */
 
 import { EmbeddableInput } from '../../../services/embeddable';
-import { CONTACT_CARD_EMBEDDABLE } from '../../../../../embeddable/public/lib/test_samples';
+import { CONTACT_CARD_EMBEDDABLE } from '@kbn/embeddable-plugin/public/lib/test_samples';
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../dashboard_constants';
 import { DashboardPanelState } from '../types';
 import { createPanelState } from './create_panel_state';

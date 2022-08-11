@@ -10,12 +10,12 @@ import type {
   KibanaResponseFactory,
   RequestHandlerContext,
   SavedObjectsClientContract,
-} from 'kibana/server';
+} from '@kbn/core/server';
 import {
   elasticsearchServiceMock,
   savedObjectsClientMock,
   httpServerMock,
-} from 'src/core/server/mocks';
+} from '@kbn/core/server/mocks';
 
 import { NewAgentActionSchema } from '../../types/models';
 import type { ActionsService } from '../../services/agents';
@@ -86,6 +86,7 @@ describe('test actions handlers', () => {
         id: 'agent',
       }),
       createAgentAction: jest.fn().mockReturnValueOnce(agentAction),
+      cancelAgentAction: jest.fn(),
     } as jest.Mocked<ActionsService>;
 
     const postNewAgentActionHandler = postNewAgentActionHandlerBuilder(actionsService);

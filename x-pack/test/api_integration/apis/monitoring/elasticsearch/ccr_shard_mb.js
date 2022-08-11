@@ -7,7 +7,7 @@
 
 import { omit } from 'lodash';
 import expect from '@kbn/expect';
-import ccrShardFixture from './fixtures/ccr_shard';
+import ccrShardFixture from './fixtures/ccr_shard.json';
 import { getLifecycleMethods } from '../data_stream';
 
 export default function ({ getService }) {

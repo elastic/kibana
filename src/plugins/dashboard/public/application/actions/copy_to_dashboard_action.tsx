@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { CoreStart, OverlayStart } from '../../../../../core/public';
+import { CoreStart, OverlayStart } from '@kbn/core/public';
 import { dashboardCopyToDashboardAction } from '../../dashboard_strings';
 import { EmbeddableStateTransfer, IEmbeddable } from '../../services/embeddable';
 import { toMountPoint } from '../../services/kibana_react';

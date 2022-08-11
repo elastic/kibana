@@ -5,37 +5,37 @@
  * 2.0.
  */
 
-import { HttpSetup } from 'kibana/public';
+import { HttpSetup } from '@kbn/core/public';
+import { AsApiContract } from '@kbn/actions-plugin/common';
 import { BASE_ALERTING_API_PATH, INTERNAL_BASE_ALERTING_API_PATH } from '../common';
-import type { Alert, RuleType } from '../common';
-import { AsApiContract } from '../../actions/common';
-import { transformAlert, transformRuleType, ApiAlert } from './lib/common_transformations';
+import type { Rule, RuleType } from '../common';
+import { transformRule, transformRuleType, ApiRule } from './lib/common_transformations';
 
-export async function loadAlertTypes({ http }: { http: HttpSetup }): Promise<RuleType[]> {
+export async function loadRuleTypes({ http }: { http: HttpSetup }): Promise<RuleType[]> {
   const res = await http.get<Array<AsApiContract<RuleType>>>(
     `${BASE_ALERTING_API_PATH}/rule_types`
   );
   return res.map((ruleType) => transformRuleType(ruleType));
 }
 
-export async function loadAlertType({
+export async function loadRuleType({
   http,
   id,
 }: {
   http: HttpSetup;
   id: RuleType['id'];
 }): Promise<RuleType | undefined> {
-  const ruleTypes = await loadAlertTypes({ http });
+  const ruleTypes = await loadRuleTypes({ http });
   return ruleTypes.find((type) => type.id === id);
 }
 
-export async function loadAlert({
+export async function loadRule({
   http,
-  alertId,
+  ruleId,
 }: {
   http: HttpSetup;
-  alertId: string;
-}): Promise<Alert> {
-  const res = await http.get<ApiAlert>(`${INTERNAL_BASE_ALERTING_API_PATH}/rule/${alertId}`);
-  return transformAlert(res);
+  ruleId: string;
+}): Promise<Rule> {
+  const res = await http.get<ApiRule>(`${INTERNAL_BASE_ALERTING_API_PATH}/rule/${ruleId}`);
+  return transformRule(res);
 }

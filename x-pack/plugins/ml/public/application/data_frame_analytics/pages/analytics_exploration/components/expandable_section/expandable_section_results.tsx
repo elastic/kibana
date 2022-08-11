@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiDataGridColumn, EuiSpacer, EuiText } from '@elastic/eui';
 
-import type { DataView } from '../../../../../../../../../../src/plugins/data_views/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 import {
   isClassificationAnalysis,
@@ -37,11 +37,7 @@ import {
   getAnalysisType,
 } from '../../../../common';
 
-import {
-  ExpandableSection,
-  ExpandableSectionProps,
-  HEADER_ITEMS_LOADING,
-} from '../expandable_section';
+import { ExpandableSection, ExpandableSectionProps, HEADER_ITEMS_LOADING } from '.';
 import { IndexPatternPrompt } from '../index_pattern_prompt';
 
 const showingDocs = i18n.translate(

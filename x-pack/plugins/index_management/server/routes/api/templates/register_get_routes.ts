@@ -15,13 +15,13 @@ import {
 } from '../../../../common/lib';
 import { getCloudManagedTemplatePrefix } from '../../../lib/get_managed_templates';
 import { RouteDependencies } from '../../../types';
-import { addBasePath } from '../index';
+import { addBasePath } from '..';
 
 export function registerGetAllRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.get(
     { path: addBasePath('/index_templates'), validate: false },
     async (context, request, response) => {
-      const { client } = context.core.elasticsearch;
+      const { client } = (await context.core).elasticsearch;
 
       try {
         const cloudManagedTemplatePrefix = await getCloudManagedTemplatePrefix(client);
@@ -34,6 +34,7 @@ export function registerGetAllRoute({ router, lib: { handleEsError } }: RouteDep
           legacyTemplatesEs,
           cloudManagedTemplatePrefix
         );
+        // @ts-expect-error TemplateSerialized.index_patterns not compatible with IndicesIndexTemplate.index_patterns
         const templates = deserializeTemplateList(templatesEs, cloudManagedTemplatePrefix);
 
         const body = {
@@ -65,7 +66,7 @@ export function registerGetOneRoute({ router, lib: { handleEsError } }: RouteDep
       validate: { params: paramsSchema, query: querySchema },
     },
     async (context, request, response) => {
-      const { client } = context.core.elasticsearch;
+      const { client } = (await context.core).elasticsearch;
       const { name } = request.params as TypeOf<typeof paramsSchema>;
       const isLegacy = (request.query as TypeOf<typeof querySchema>).legacy === 'true';
 
@@ -92,6 +93,7 @@ export function registerGetOneRoute({ router, lib: { handleEsError } }: RouteDep
           if (indexTemplates.length > 0) {
             return response.ok({
               body: deserializeTemplate(
+                // @ts-expect-error TemplateSerialized.index_patterns not compatible with IndicesIndexTemplate.index_patterns
                 { ...indexTemplates[0].index_template, name },
                 cloudManagedTemplatePrefix
               ),

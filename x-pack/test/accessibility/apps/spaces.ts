@@ -13,16 +13,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'spaceSelector', 'home', 'header', 'security']);
   const a11y = getService('a11y');
   const browser = getService('browser');
-  const esArchiver = getService('esArchiver');
+  const spacesService = getService('spaces');
+
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const toasts = getService('toasts');
+  const kibanaServer = getService('kibanaServer');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/100968
-  describe.skip('Kibana spaces page meets a11y validations', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/137136
+  describe.skip('Kibana Spaces Accessibility', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
       await PageObjects.common.navigateToApp('home');
+    });
+    after(async () => {
+      await spacesService.delete('space_a');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     it('a11y test for manage spaces menu from top nav on Kibana home', async () => {
@@ -52,7 +58,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    // EUI issue - https://github.com/elastic/eui/issues/3999
     it('a11y test for color picker', async () => {
       await PageObjects.spaceSelector.clickColorPicker();
       await a11y.testAppSnapshot();
@@ -81,7 +86,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     // creating space b and making it the current space so space selector page gets displayed when space b gets deleted
-    it('a11y test for delete space button', async () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/135341
+    it.skip('a11y test for delete space button', async () => {
       await PageObjects.spaceSelector.clickCreateSpace();
       await PageObjects.spaceSelector.clickEnterSpaceName();
       await PageObjects.spaceSelector.addSpaceName('space_b');
@@ -99,7 +105,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     // test starts with deleting space b so we can get the space selection page instead of logging out in the test
     it('a11y test for space selection page', async () => {
       await PageObjects.spaceSelector.confirmDeletingSpace();
-      await a11y.testAppSnapshot();
+      await retry.try(async () => {
+        await a11y.testAppSnapshot();
+      });
       await PageObjects.spaceSelector.clickSpaceCard('default');
     });
   });

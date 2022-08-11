@@ -25,6 +25,7 @@ export const FIELDS_TO_EXCLUDE_AS_CANDIDATE = new Set([
   'transaction.id',
   'process.pid',
   'process.ppid',
+  'process.parent.pid',
   'processor.event',
   'processor.name',
   'transaction.sampled',

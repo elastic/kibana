@@ -110,6 +110,10 @@ describe('graph_visualization', () => {
       return !node.isSelected;
     }),
     getAllIntersections: jest.fn(),
+    removeEdgeFromSelection: jest.fn(),
+    addEdgeToSelection: jest.fn(),
+    getEdgeSelection: jest.fn().mockImplementation(() => []),
+    clearEdgeSelection: jest.fn(),
   } as unknown as jest.Mocked<Workspace>;
 
   beforeEach(() => {
@@ -207,5 +211,6 @@ describe('graph_visualization', () => {
     expect(workspace.getAllIntersections).toHaveBeenCalled();
     expect(edges[0].topSrc).toEqual(workspace.getAllIntersections.mock.calls[0][1][0]);
     expect(edges[0].topTarget).toEqual(workspace.getAllIntersections.mock.calls[0][1][1]);
+    expect(workspace.removeEdgeFromSelection).toHaveBeenCalled();
   });
 });

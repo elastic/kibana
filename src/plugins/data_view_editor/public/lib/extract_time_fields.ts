@@ -7,11 +7,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IndexPatternField } from '../../../../plugins/data/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
 import { TimestampOption } from '../types';
 
 export function extractTimeFields(
-  fields: IndexPatternField[],
+  fields: DataViewField[],
   requireTimestampField: boolean = false
 ): TimestampOption[] {
   const dateFields = fields.filter((field) => field.type === 'date');

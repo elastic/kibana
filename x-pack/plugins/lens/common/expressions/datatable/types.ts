@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions';
-import type { LensMultiTable } from '../../types';
+import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import type { DatatableArgs } from './datatable';
 
 export interface DatatableProps {
-  data: LensMultiTable;
-  untransposedData?: LensMultiTable;
+  data: Datatable;
+  untransposedData?: Datatable;
   args: DatatableArgs;
 }
 
@@ -23,7 +22,7 @@ export interface DatatableRender {
 
 export type DatatableExpressionFunction = ExpressionFunctionDefinition<
   'lens_datatable',
-  LensMultiTable,
+  Datatable,
   DatatableArgs,
   Promise<DatatableRender>
 >;

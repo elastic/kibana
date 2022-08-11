@@ -10,13 +10,13 @@ import { renderHook } from '@testing-library/react-hooks';
 import { EventEmitter } from 'events';
 
 import { setTypes } from '../../../services';
-import { coreMock } from '../../../../../../core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { useSavedVisInstance } from './use_saved_vis_instance';
-import { redirectWhenMissing } from '../../../../../kibana_utils/public';
+import { redirectWhenMissing } from '@kbn/kibana-utils-plugin/public';
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
 import { VisualizeConstants } from '../../../../common/constants';
 import { createVisEditorsRegistry } from '../../../vis_editors_registry';
-import { createEmbeddableStateTransferMock } from '../../../../../embeddable/public/mocks';
+import { createEmbeddableStateTransferMock } from '@kbn/embeddable-plugin/public/mocks';
 import type { VisualizeServices } from '../../types';
 import type { TypesStart } from '../../../vis_types';
 
@@ -50,8 +50,8 @@ jest.mock('../breadcrumbs', () => ({
   getCreateBreadcrumbs: jest.fn((text) => text),
 }));
 
-jest.mock('../../../../../kibana_utils/public', () => {
-  const actual = jest.requireActual('../../../../../kibana_utils/public');
+jest.mock('@kbn/kibana-utils-plugin/public', () => {
+  const actual = jest.requireActual('@kbn/kibana-utils-plugin/public');
   return {
     ...actual,
     redirectWhenMissing: jest.fn(),

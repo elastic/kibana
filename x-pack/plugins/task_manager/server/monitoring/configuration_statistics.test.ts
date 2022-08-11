@@ -40,6 +40,10 @@ describe('Configuration Statistics Aggregator', () => {
       unsafe: {
         exclude_task_types: [],
       },
+      event_loop_delay: {
+        monitor: true,
+        warn_threshold: 5000,
+      },
     };
 
     const managedConfig = {

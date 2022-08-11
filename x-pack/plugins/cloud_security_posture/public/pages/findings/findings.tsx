@@ -5,46 +5,70 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
-import type { EuiPageHeaderProps } from '@elastic/eui';
-import { allNavigationItems } from '../../common/navigation/constants';
-import { useCspBreadcrumbs } from '../../common/navigation/use_csp_breadcrumbs';
-import { FindingsContainer } from './findings_container';
-import { CspPageTemplate } from '../../components/page_template';
-import { useKubebeatDataView } from './utils';
-import * as TEST_SUBJECTS from './test_subjects';
-import { FINDINGS, MISSING_KUBEBEAT } from './translations';
-
-const pageHeader: EuiPageHeaderProps = {
-  pageTitle: FINDINGS,
-};
+import type { UseQueryResult } from 'react-query';
+import { Redirect, Switch, Route, useLocation } from 'react-router-dom';
+import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
+import { NoFindingsStates } from '../../components/no_findings_states';
+import { CloudPosturePage } from '../../components/cloud_posture_page';
+import { useFindingsEsPit } from './es_pit/use_findings_es_pit';
+import { FindingsEsPitContext } from './es_pit/findings_es_pit_context';
+import { useLatestFindingsDataView } from '../../common/api/use_latest_findings_data_view';
+import { cloudPosturePages, findingsNavigation } from '../../common/navigation/constants';
+import { FindingsByResourceContainer } from './latest_findings_by_resource/findings_by_resource_container';
+import { LatestFindingsContainer } from './latest_findings/latest_findings_container';
 
 export const Findings = () => {
-  const dataView = useKubebeatDataView();
-  useCspBreadcrumbs([allNavigationItems.findings]);
+  const location = useLocation();
+  const dataViewQuery = useLatestFindingsDataView();
+  // TODO: Consider splitting the PIT window so that each "group by" view has its own PIT
+  const { pitQuery, pitIdRef, setPitId } = useFindingsEsPit('findings');
+  const getSetupStatus = useCspSetupStatusApi();
+
+  const hasFindings = getSetupStatus.data?.status === 'indexed';
+  if (!hasFindings) return <NoFindingsStates />;
+
+  let queryForCloudPosturePage: UseQueryResult = dataViewQuery;
+  if (pitQuery.isError || pitQuery.isLoading || pitQuery.isIdle) {
+    queryForCloudPosturePage = pitQuery;
+  }
 
   return (
-    <CspPageTemplate pageHeader={pageHeader}>
-      {dataView.status === 'loading' && <LoadingPrompt />}
-      {(dataView.status === 'error' || (dataView.status !== 'loading' && !dataView.data)) && (
-        <ErrorPrompt />
-      )}
-      {dataView.status === 'success' && dataView.data && (
-        <FindingsContainer dataView={dataView.data} />
-      )}
-    </CspPageTemplate>
+    <CloudPosturePage query={queryForCloudPosturePage}>
+      <FindingsEsPitContext.Provider
+        value={{
+          pitQuery,
+          // Asserting the ref as a string value since at this point the query was necessarily successful
+          pitIdRef: pitIdRef as React.MutableRefObject<string>,
+          setPitId,
+        }}
+      >
+        <Switch>
+          <Route
+            exact
+            path={cloudPosturePages.findings.path}
+            component={() => (
+              <Redirect
+                to={{
+                  pathname: findingsNavigation.findings_default.path,
+                  search: location.search,
+                }}
+              />
+            )}
+          />
+          <Route
+            path={findingsNavigation.findings_default.path}
+            render={() => <LatestFindingsContainer dataView={dataViewQuery.data!} />}
+          />
+          <Route
+            path={findingsNavigation.findings_by_resource.path}
+            render={() => <FindingsByResourceContainer dataView={dataViewQuery.data!} />}
+          />
+          <Route
+            path={'*'}
+            component={() => <Redirect to={findingsNavigation.findings_default.path} />}
+          />
+        </Switch>
+      </FindingsEsPitContext.Provider>
+    </CloudPosturePage>
   );
 };
-
-const LoadingPrompt = () => <EuiEmptyPrompt icon={<EuiLoadingSpinner size="xl" />} />;
-
-// TODO: follow https://elastic.github.io/eui/#/display/empty-prompt/guidelines
-const ErrorPrompt = () => (
-  <EuiEmptyPrompt
-    data-test-subj={TEST_SUBJECTS.FINDINGS_MISSING_INDEX}
-    color="danger"
-    iconType="alert"
-    // TODO: account for when we have a dataview without an index
-    title={<h2>{MISSING_KUBEBEAT}</h2>}
-  />
-);

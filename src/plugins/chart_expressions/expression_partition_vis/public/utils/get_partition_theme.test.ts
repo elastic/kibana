@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionValueVisDimension } from '../../../../visualizations/common';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { getPartitionTheme } from './get_partition_theme';
 import { createMockPieParams, createMockDonutParams, createMockPartitionVisParams } from '../mocks';
 import { ChartTypes, LabelPositions, PartitionVisParams } from '../../common/types';

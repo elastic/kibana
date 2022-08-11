@@ -8,7 +8,7 @@
 
 import constate from 'constate';
 
-import type { CoreStart } from 'src/core/public';
+import type { CoreStart } from '@kbn/core/public';
 
 export const [KibanaProvider, useKibana] = constate(({ services }: { services: CoreStart }) => {
   return services;

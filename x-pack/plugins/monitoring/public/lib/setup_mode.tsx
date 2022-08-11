@@ -7,11 +7,12 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { HttpStart, IHttpFetchError, ResponseErrorBody } from 'kibana/public';
+import type { HttpStart } from '@kbn/core/public';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { Legacy } from '../legacy_shims';
 import { SetupModeFeature } from '../../common/enums';
-import { ISetupModeContext } from '../components/setup_mode/setup_mode_context';
-import { State as GlobalState } from '../application/contexts/global_state_context';
+import type { ISetupModeContext } from '../components/setup_mode/setup_mode_context';
+import type { State as GlobalState } from '../application/contexts/global_state_context';
 
 let globalState: GlobalState;
 let httpService: HttpStart;

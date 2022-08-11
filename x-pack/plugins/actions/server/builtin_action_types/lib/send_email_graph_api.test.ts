@@ -9,8 +9,8 @@ jest.mock('axios', () => ({
 }));
 
 import axios from 'axios';
-import { Logger } from '../../../../../../src/core/server';
-import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
+import { Logger } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '../../actions_config.mock';
 import { CustomHostSettings } from '../../config';
 import { ProxySettings } from '../../types';

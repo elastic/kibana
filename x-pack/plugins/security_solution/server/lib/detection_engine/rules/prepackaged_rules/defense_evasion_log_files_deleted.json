@@ -11,6 +11,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "System Log File Deletion",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "file where event.type == \"deletion\" and \n  file.path : \n    (\n    \"/var/run/utmp\", \n    \"/var/log/wtmp\", \n    \"/var/log/btmp\", \n    \"/var/log/lastlog\", \n    \"/var/log/faillog\",\n    \"/var/log/syslog\", \n    \"/var/log/messages\", \n    \"/var/log/secure\", \n    \"/var/log/auth.log\"\n    )\n",
   "references": [
     "https://www.fireeye.com/blog/threat-research/2020/11/live-off-the-land-an-overview-of-unc1945.html"
@@ -44,5 +45,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 3
+  "version": 4
 }

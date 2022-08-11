@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaPluginServiceFactory } from '../../../../../../src/plugins/presentation_util/public';
+import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 
 import { API_ROUTE_CUSTOM_ELEMENT } from '../../../common/lib/constants';
 import { CustomElement } from '../../../types';

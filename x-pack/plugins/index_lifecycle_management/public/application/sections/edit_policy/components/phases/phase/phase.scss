@@ -1,28 +1,7 @@
-.ilmPhase {
-  .euiCommentEvent {
-    &__header {
-      padding: $euiSize;
-    }
-    &__body {
-      padding: $euiSize;
-    }
-  }
+.ilmSettingsAccordion {
   .ilmSettingsButton {
     color: $euiColorPrimary;
     padding-top: $euiSizeS;
     padding-bottom: $euiSizeS;
-  }
-  .euiCommentTimeline {
-    padding-top: $euiSize;
-    &::before {
-      height: calc(100% + #{$euiSizeXXL});
-    }
-  }
-  &--enabled {
-    .euiCommentEvent {
-      &__header {
-        background-color: $euiColorEmptyShade;
-      }
-    }
   }
 }

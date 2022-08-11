@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { transformDataToNdjson } from './';
+import { transformDataToNdjson } from '.';
 
 export const ANCHOR_DATE = '2020-02-20T03:57:54.037Z';
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { MlPluginSetup, MlPluginStart } from './plugin';
-import { sharePluginMock } from '../../../../src/plugins/share/public/mocks';
 
 const createSetupContract = (): jest.Mocked<MlPluginSetup> => {
   return {

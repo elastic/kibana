@@ -7,7 +7,7 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { Resources } from './';
+import { Resources } from '.';
 
 describe('Resources', () => {
   it('renders resources with all elements', () => {

@@ -8,7 +8,7 @@
 import React, { useEffect } from 'react';
 
 import { DEFAULT_ANOMALY_SCORE } from '../../../../../common/constants';
-import { AnomaliesQueryTabBodyProps } from './types';
+import type { AnomaliesQueryTabBodyProps } from './types';
 import { getAnomaliesFilterQuery } from './utils';
 import { useInstalledSecurityJobs } from '../../../components/ml/hooks/use_installed_security_jobs';
 import { useUiSetting$ } from '../../../lib/kibana';
@@ -31,6 +31,7 @@ const AnomaliesQueryTabBodyComponent: React.FC<AnomaliesQueryTabBodyProps> = ({
   flowTarget,
   ip,
   hostName,
+  userName,
   indexNames,
 }) => {
   const { jobs } = useInstalledSecurityJobs();
@@ -74,6 +75,7 @@ const AnomaliesQueryTabBodyComponent: React.FC<AnomaliesQueryTabBodyProps> = ({
         flowTarget={flowTarget}
         ip={ip}
         hostName={hostName}
+        userName={userName}
       />
     </>
   );

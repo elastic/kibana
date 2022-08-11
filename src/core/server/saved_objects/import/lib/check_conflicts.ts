@@ -7,13 +7,13 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import {
+import type {
   SavedObject,
-  SavedObjectsClientContract,
   SavedObjectsImportFailure,
   SavedObjectError,
   SavedObjectsImportRetry,
-} from '../../types';
+} from '@kbn/core-saved-objects-common';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { ImportStateMap } from './types';
 
 interface CheckConflictsParams {
@@ -80,10 +80,10 @@ export async function checkConflicts({
       importStateMap.set(`${type}:${id}`, { destinationId: uuidv4(), omitOriginId });
       filteredObjects.push(object);
     } else if (errorObj && errorObj.statusCode !== 409) {
-      errors.push({ type, id, title, meta: { title }, error: { ...errorObj, type: 'unknown' } });
+      errors.push({ type, id, meta: { title }, error: { ...errorObj, type: 'unknown' } });
     } else if (errorObj?.statusCode === 409 && !ignoreRegularConflicts && !overwrite) {
       const error = { type: 'conflict' as 'conflict', ...(destinationId && { destinationId }) };
-      errors.push({ type, id, title, meta: { title }, error });
+      errors.push({ type, id, meta: { title }, error });
     } else {
       filteredObjects.push(object);
       if (errorObj?.statusCode === 409) {

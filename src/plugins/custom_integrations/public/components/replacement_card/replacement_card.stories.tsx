@@ -37,14 +37,14 @@ interface Args {
 }
 
 const args: Args = {
-  eprPackageName: 'nginx',
+  eprPackageName: 'ga_beats',
 };
 
 const argTypes = {
   eprPackageName: {
     control: {
       type: 'radio',
-      options: ['nginx', 'okta', 'aws', 'apache'],
+      options: ['ga_beats', 'beta_beats', 'exp_beats'],
     },
   },
 };

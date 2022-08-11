@@ -6,28 +6,25 @@
  * Side Public License, v 1.
  */
 
-import { each, cloneDeep } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
-// @ts-expect-error
-import realHits from '../../../../__fixtures__/real_hits.js';
+import { getDataTableRecords } from '../../../../__fixtures__/real_hits';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { flattenHit, IndexPatternAttributes } from '../../../../../../data/common';
-import { SavedObject } from '../../../../../../../core/types';
+import { DataViewAttributes } from '@kbn/data-views-plugin/public';
+import { SavedObject } from '@kbn/core/types';
 import {
   DiscoverSidebarResponsive,
   DiscoverSidebarResponsiveProps,
 } from './discover_sidebar_responsive';
 import { DiscoverServices } from '../../../../build_services';
 import { FetchStatus } from '../../../types';
-import { AvailableFields$, DataDocuments$ } from '../../utils/use_saved_search';
-import { stubLogstashIndexPattern } from '../../../../../../data/common/stubs';
+import { AvailableFields$, DataDocuments$, RecordRawType } from '../../hooks/use_saved_search';
+import { stubLogstashDataView } from '@kbn/data-plugin/common/stubs';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
-import { ElasticSearchHit } from '../../../../types';
-import { KibanaContextProvider } from '../../../../../../kibana_react/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 const mockServices = {
   history: () => ({
@@ -50,6 +47,12 @@ const mockServices = {
       }
     },
   },
+  docLinks: { links: { discover: { fieldTypeHelp: '' } } },
+  dataViewEditor: {
+    userPermissions: {
+      editDataView: jest.fn(() => true),
+    },
+  },
 } as unknown as DiscoverServices;
 
 const mockfieldCounts: Record<string, number> = {};
@@ -70,21 +73,18 @@ jest.mock('../../utils/calc_field_counts', () => ({
 }));
 
 function getCompProps(): DiscoverSidebarResponsiveProps {
-  const indexPattern = stubLogstashIndexPattern;
+  const dataView = stubLogstashDataView;
 
-  // @ts-expect-error _.each() is passing additional args to flattenHit
-  const hits = each(cloneDeep(realHits), (hit) => flattenHit(hit, indexPattern)) as Array<
-    Record<string, unknown>
-  > as ElasticSearchHit[];
+  const hits = getDataTableRecords(dataView);
 
-  const indexPatternList = [
-    { id: '0', attributes: { title: 'b' } } as SavedObject<IndexPatternAttributes>,
-    { id: '1', attributes: { title: 'a' } } as SavedObject<IndexPatternAttributes>,
-    { id: '2', attributes: { title: 'c' } } as SavedObject<IndexPatternAttributes>,
+  const dataViewList = [
+    { id: '0', attributes: { title: 'b' } } as SavedObject<DataViewAttributes>,
+    { id: '1', attributes: { title: 'a' } } as SavedObject<DataViewAttributes>,
+    { id: '2', attributes: { title: 'c' } } as SavedObject<DataViewAttributes>,
   ];
 
   for (const hit of hits) {
-    for (const key of Object.keys(flattenHit(hit, indexPattern))) {
+    for (const key of Object.keys(hit.flattened)) {
       mockfieldCounts[key] = (mockfieldCounts[key] || 0) + 1;
     }
   }
@@ -93,23 +93,24 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
     columns: ['extension'],
     documents$: new BehaviorSubject({
       fetchStatus: FetchStatus.COMPLETE,
-      result: hits as ElasticSearchHit[],
+      result: hits,
     }) as DataDocuments$,
     availableFields$: new BehaviorSubject({
       fetchStatus: FetchStatus.COMPLETE,
       fields: [] as string[],
     }) as AvailableFields$,
-    indexPatternList,
-    onChangeIndexPattern: jest.fn(),
+    dataViewList,
+    onChangeDataView: jest.fn(),
     onAddFilter: jest.fn(),
     onAddField: jest.fn(),
     onRemoveField: jest.fn(),
-    selectedIndexPattern: indexPattern,
+    selectedDataView: dataView,
     state: {},
     trackUiMetric: jest.fn(),
-    onEditRuntimeField: jest.fn(),
+    onFieldEdited: jest.fn(),
     viewMode: VIEW_MODE.DOCUMENT_LEVEL,
     onDataViewCreated: jest.fn(),
+    useNewFieldsApi: true,
   };
 }
 
@@ -158,5 +159,55 @@ describe('discover responsive sidebar', function () {
     comp.update();
     expect(findTestSubject(comp, 'fieldList-unpopular').children().length).toBe(4);
     expect(mockCalcFieldCounts.mock.calls.length).toBe(1);
+  });
+
+  it('should show "Add a field" button to create a runtime field', () => {
+    expect(mockServices.dataViewEditor.userPermissions.editDataView).toHaveBeenCalled();
+    expect(findTestSubject(comp, 'dataView-add-field_btn').length).toBe(1);
+  });
+
+  it('should not show "Add a field" button on the sql mode', () => {
+    const initialProps = getCompProps();
+    const propsWithTextBasedMode = {
+      ...initialProps,
+      onAddFilter: undefined,
+      documents$: new BehaviorSubject({
+        fetchStatus: FetchStatus.COMPLETE,
+        recordRawType: RecordRawType.PLAIN,
+        result: getDataTableRecords(stubLogstashDataView),
+      }) as DataDocuments$,
+      state: {
+        ...initialProps.state,
+        query: { sql: 'SELECT * FROM `index`' },
+      },
+    };
+    const compInViewerMode = mountWithIntl(
+      <KibanaContextProvider services={mockServices}>
+        <DiscoverSidebarResponsive {...propsWithTextBasedMode} />
+      </KibanaContextProvider>
+    );
+    expect(findTestSubject(compInViewerMode, 'indexPattern-add-field_btn').length).toBe(0);
+  });
+
+  it('should not show "Add a field" button in viewer mode', () => {
+    const mockedServicesInViewerMode = {
+      ...mockServices,
+      dataViewEditor: {
+        ...mockServices.dataViewEditor,
+        userPermissions: {
+          ...mockServices.dataViewEditor.userPermissions,
+          editDataView: jest.fn(() => false),
+        },
+      },
+    };
+    const compInViewerMode = mountWithIntl(
+      <KibanaContextProvider services={mockedServicesInViewerMode}>
+        <DiscoverSidebarResponsive {...props} />
+      </KibanaContextProvider>
+    );
+    expect(
+      mockedServicesInViewerMode.dataViewEditor.userPermissions.editDataView
+    ).toHaveBeenCalled();
+    expect(findTestSubject(compInViewerMode, 'dataView-add-field_btn').length).toBe(0);
   });
 });

@@ -23,7 +23,7 @@
             "date" : {
               "date_histogram" : {
                 "field" : "@timestamp",
-                "fixed_interval" : "90s"
+                "fixed_interval" : "60s"
               }
             }
           },

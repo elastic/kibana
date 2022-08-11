@@ -10,20 +10,20 @@ import {
   createStateContainer,
   IKbnUrlStateStorage,
   syncState,
-} from '../../../../kibana_utils/public';
+} from '@kbn/kibana-utils-plugin/public';
+import { FilterStateStore } from '@kbn/es-query';
 import { QuerySetup, QueryStart } from '../query_service';
 import { connectToQueryState } from './connect_to_query_state';
-import { QueryState } from './types';
-import { FilterStateStore } from '../../../common';
+import { GlobalQueryStateFromUrl } from './types';
 
 const GLOBAL_STATE_STORAGE_KEY = '_g';
 
 /**
- * Helper to setup syncing of global data with the URL
+ * Helper to sync global query state {@link GlobalQueryStateFromUrl} with the URL (`_g` query param that is preserved between apps)
  * @param QueryService: either setup or start
  * @param kbnUrlStateStorage to use for syncing
  */
-export const syncQueryStateWithUrl = (
+export const syncGlobalQueryStateWithUrl = (
   query: Pick<QueryStart | QuerySetup, 'filterManager' | 'timefilter' | 'queryString' | 'state$'>,
   kbnUrlStateStorage: IKbnUrlStateStorage
 ) => {
@@ -31,14 +31,15 @@ export const syncQueryStateWithUrl = (
     timefilter: { timefilter },
     filterManager,
   } = query;
-  const defaultState: QueryState = {
+  const defaultState: GlobalQueryStateFromUrl = {
     time: timefilter.getTime(),
     refreshInterval: timefilter.getRefreshInterval(),
     filters: filterManager.getGlobalFilters(),
   };
 
   // retrieve current state from `_g` url
-  const initialStateFromUrl = kbnUrlStateStorage.get<QueryState>(GLOBAL_STATE_STORAGE_KEY);
+  const initialStateFromUrl =
+    kbnUrlStateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_STORAGE_KEY);
 
   // remember whether there was info in the URL
   const hasInheritedQueryFromUrl = Boolean(
@@ -46,7 +47,7 @@ export const syncQueryStateWithUrl = (
   );
 
   // prepare initial state, whatever was in URL takes precedences over current state in services
-  const initialState: QueryState = {
+  const initialState: GlobalQueryStateFromUrl = {
     ...defaultState,
     ...initialStateFromUrl,
   };
@@ -61,7 +62,7 @@ export const syncQueryStateWithUrl = (
   // if there weren't any initial state in url,
   // then put _g key into url
   if (!initialStateFromUrl) {
-    kbnUrlStateStorage.set<QueryState>(GLOBAL_STATE_STORAGE_KEY, initialState, {
+    kbnUrlStateStorage.set<GlobalQueryStateFromUrl>(GLOBAL_STATE_STORAGE_KEY, initialState, {
       replace: true,
     });
   }
@@ -92,3 +93,8 @@ export const syncQueryStateWithUrl = (
     hasInheritedQueryFromUrl,
   };
 };
+
+/**
+ * @deprecated use {@link syncGlobalQueryStateWithUrl} instead
+ */
+export const syncQueryStateWithUrl = syncGlobalQueryStateWithUrl;

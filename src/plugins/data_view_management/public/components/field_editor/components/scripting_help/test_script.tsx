@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import './test_script.scss';
-
 import React, { Component, Fragment } from 'react';
 
 import {
@@ -25,9 +23,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import { Query, buildEsQuery } from '@kbn/es-query';
-import { getEsQueryConfig } from '../../../../../../../plugins/data/public';
-import { DataView } from '../../../../../../../plugins/data_views/public';
-import { context as contextType } from '../../../../../../kibana_react/public';
+import { getEsQueryConfig } from '@kbn/data-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { context as contextType } from '@kbn/kibana-react-plugin/public';
 import { IndexPatternManagmentContextValue } from '../../../../types';
 import { ExecuteScript } from '../../types';
 
@@ -107,7 +105,7 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
 
     this.setState({
       isLoading: false,
-      previewData: scriptResponse.hits?.hits.map((hit: any) => ({
+      previewData: scriptResponse.hits?.hits.map((hit) => ({
         _id: hit._id,
         ...hit._source,
         ...hit.fields,
@@ -223,8 +221,11 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
           />
         </EuiFormRow>
 
+        <EuiSpacer size="s" />
+
         <div className="testScript__searchBar">
-          <this.context.services.data.ui.SearchBar
+          <this.context.services.unifiedSearch.ui.SearchBar
+            displayStyle="inPage"
             appName={'indexPatternManagement'}
             showFilterBar={false}
             showDatePicker={false}

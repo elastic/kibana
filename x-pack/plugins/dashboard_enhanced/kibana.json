@@ -8,6 +8,6 @@
   "server": true,
   "ui": true,
   "configPath": ["xpack", "dashboardEnhanced"],
-  "requiredPlugins": ["dashboard", "data", "embeddable", "share", "uiActionsEnhanced"],
+  "requiredPlugins": ["dashboard", "data", "embeddable", "share", "uiActionsEnhanced", "unifiedSearch"],
   "requiredBundles": ["embeddable", "embeddableEnhanced", "kibanaReact", "kibanaUtils"]
 }

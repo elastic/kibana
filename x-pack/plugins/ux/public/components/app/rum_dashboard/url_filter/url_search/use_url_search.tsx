@@ -6,10 +6,12 @@
  */
 
 import useDebounce from 'react-use/lib/useDebounce';
-import { useState } from 'react';
-import { useFetcher } from '../../../../../hooks/use_fetcher';
+import { useMemo, useState } from 'react';
+import { useEsSearch } from '@kbn/observability-plugin/public';
 import { useUxQuery } from '../../hooks/use_ux_query';
 import { useLegacyUrlParams } from '../../../../../context/url_params_context/use_url_params';
+import { useDataView } from '../../local_uifilters/use_data_view';
+import { urlSearchQuery } from '../../../../../services/data/url_search_query';
 
 interface Props {
   popoverIsOpen: boolean;
@@ -34,22 +36,33 @@ export const useUrlSearch = ({ popoverIsOpen, query }: Props) => {
     [query]
   );
 
-  return useFetcher(
-    (callApmApi) => {
-      if (uxQuery && popoverIsOpen) {
-        return callApmApi('GET /internal/apm/ux/url-search', {
-          params: {
-            query: {
-              ...uxQuery,
-              uiFilters: JSON.stringify(restFilters),
-              urlQuery: searchValue,
-            },
-          },
-        });
-      }
-      return Promise.resolve(null);
+  const { dataViewTitle } = useDataView();
+  const { data: asyncSearchResult, loading } = useEsSearch(
+    {
+      // when `index` is undefined, the hook will not send a request,
+      // so we pass this to ensure the search values load lazily
+      index: uxQuery && popoverIsOpen ? dataViewTitle : undefined,
+      ...urlSearchQuery(restFilters, uxQuery, searchValue),
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [uxQuery, searchValue, popoverIsOpen]
+    [dataViewTitle, popoverIsOpen, uxQuery, searchValue],
+    { name: 'UX_URL_SEARCH' }
   );
+
+  const data = useMemo(() => {
+    if (!asyncSearchResult) return asyncSearchResult;
+    const { urls, totalUrls } = asyncSearchResult.aggregations ?? {};
+
+    const pkey = Number(uxQuery?.percentile ?? 0).toFixed(1);
+
+    return {
+      total: totalUrls?.value || 0,
+      items: (urls?.buckets ?? []).map((bucket) => ({
+        url: bucket.key as string,
+        count: bucket.doc_count,
+        pld: bucket.medianPLD.values[pkey] ?? 0,
+      })),
+    };
+  }, [asyncSearchResult, uxQuery?.percentile]);
+
+  return { data, loading };
 };

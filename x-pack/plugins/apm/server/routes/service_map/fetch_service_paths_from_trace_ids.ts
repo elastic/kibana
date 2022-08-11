@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { rangeQuery } from '../../../../observability/server';
-import { ProcessorEvent } from '../../../common/processor_event';
+import { rangeQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { TRACE_ID } from '../../../common/elasticsearch_fieldnames';
 import {
   ConnectionNode,

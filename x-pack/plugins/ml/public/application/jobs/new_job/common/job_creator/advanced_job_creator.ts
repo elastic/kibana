@@ -6,6 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 
 import { JobCreator } from './job_creator';
@@ -20,8 +21,6 @@ import { createBasicDetector } from './util/default_configs';
 import { JOB_TYPE } from '../../../../../../common/constants/new_job';
 import { getRichDetectors } from './util/general';
 import { isValidJson } from '../../../../../../common/util/validation_utils';
-import { ml } from '../../../../services/ml_api_service';
-import type { DataView } from '../../../../../../../../../src/plugins/data_views/public';
 
 export interface RichDetector {
   agg: Aggregation | null;
@@ -179,19 +178,6 @@ export class AdvancedJobCreator extends JobCreator {
 
   public get isValidQueryString(): boolean {
     return isValidJson(this._queryString);
-  }
-
-  // load the start and end times for the selected index
-  // and apply them to the job creator
-  public async autoSetTimeRange() {
-    const { start, end } = await ml.getTimeFieldRange({
-      index: this._indexPatternTitle,
-      timeFieldName: this.timeFieldName,
-      query: this.query,
-      runtimeMappings: this.datafeedConfig.runtime_mappings,
-      indicesOptions: this.datafeedConfig.indices_options,
-    });
-    this.setTimeRange(start.epoch, end.epoch);
   }
 
   public cloneFromExistingJob(job: Job, datafeed: Datafeed) {

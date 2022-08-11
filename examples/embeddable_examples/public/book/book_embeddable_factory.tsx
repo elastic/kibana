@@ -8,15 +8,16 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { BookSavedObjectAttributes, BOOK_SAVED_OBJECT } from '../../common';
-import { toMountPoint } from '../../../../src/plugins/kibana_react/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import {
   EmbeddableFactoryDefinition,
   IContainer,
   EmbeddableFactory,
   EmbeddableStart,
   AttributeService,
-} from '../../../../src/plugins/embeddable/public';
+} from '@kbn/embeddable-plugin/public';
+import { OverlayStart, SavedObjectsClientContract, SimpleSavedObject } from '@kbn/core/public';
+import { checkForDuplicateTitle, OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import {
   BookEmbeddable,
   BOOK_EMBEDDABLE,
@@ -24,12 +25,7 @@ import {
   BookEmbeddableOutput,
 } from './book_embeddable';
 import { CreateEditBookComponent } from './create_edit_book_component';
-import {
-  OverlayStart,
-  SavedObjectsClientContract,
-  SimpleSavedObject,
-} from '../../../../src/core/public';
-import { checkForDuplicateTitle, OnSaveProps } from '../../../../src/plugins/saved_objects/public';
+import { BookSavedObjectAttributes, BOOK_SAVED_OBJECT } from '../../common';
 
 interface StartServices {
   getAttributeService: EmbeddableStart['getAttributeService'];

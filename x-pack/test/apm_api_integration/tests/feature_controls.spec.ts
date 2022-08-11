@@ -79,7 +79,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     },
     {
       req: {
-        url: `/internal/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`,
+        url: `/internal/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=&probability=1`,
       },
       expectForbidden: expect403,
       expectResponse: expect200,
@@ -98,7 +98,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     },
     {
       req: {
-        url: `/internal/apm/traces?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`,
+        url: `/internal/apm/traces?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=&probability=1`,
       },
       expectForbidden: expect403,
       expectResponse: expect200,

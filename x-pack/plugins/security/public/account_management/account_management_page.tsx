@@ -5,80 +5,51 @@
  * 2.0.
  */
 
-import { EuiPage, EuiPageBody, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
-import ReactDOM from 'react-dom';
+import { EuiEmptyPrompt } from '@elastic/eui';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 
-import { FormattedMessage } from '@kbn/i18n-react';
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { AppMountParameters, CoreStart, NotificationsStart } from 'src/core/public';
+import type { CoreStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
-import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
-import type { AuthenticatedUser } from '../../common/model';
-import { getUserDisplayName } from '../../common/model';
-import type { AuthenticationServiceSetup } from '../authentication';
-import type { UserAPIClient } from '../management';
-import { ChangePassword } from './change_password';
-import { PersonalInfo } from './personal_info';
+import type { UserProfileAvatarData } from '../../common';
+import { canUserHaveProfile } from '../../common/model';
+import { useCurrentUser, useUserProfile } from '../components';
+import { Breadcrumb } from '../components/breadcrumb';
+import { UserProfile } from './user_profile';
 
-interface Props {
-  authc: AuthenticationServiceSetup;
-  userAPIClient: PublicMethodsOf<UserAPIClient>;
-  notifications: NotificationsStart;
-}
+export const AccountManagementPage: FunctionComponent = () => {
+  const { services } = useKibana<CoreStart>();
 
-export const AccountManagementPage = ({ userAPIClient, authc, notifications }: Props) => {
-  const [currentUser, setCurrentUser] = useState<AuthenticatedUser | null>(null);
-  useEffect(() => {
-    authc.getCurrentUser().then(setCurrentUser);
-  }, [authc]);
+  const currentUser = useCurrentUser();
+  const userProfile = useUserProfile<{ avatar: UserProfileAvatarData }>('avatar');
 
-  if (!currentUser) {
+  // If we fail to load profile, we treat it as a failure _only_ if user is supposed
+  // to have a profile. For example, anonymous and users authenticated via
+  // authentication proxies don't have profiles.
+  const profileLoadError =
+    userProfile.error && currentUser.value && canUserHaveProfile(currentUser.value)
+      ? userProfile.error
+      : undefined;
+
+  const error = currentUser.error || profileLoadError;
+  if (error) {
+    return <EuiEmptyPrompt iconType="alert" title={<h2>{error.message}</h2>} />;
+  }
+
+  if (!currentUser.value || (canUserHaveProfile(currentUser.value) && !userProfile.value)) {
     return null;
   }
 
   return (
-    <EuiPage>
-      <EuiPageBody restrictWidth>
-        <EuiPanel>
-          <EuiText data-test-subj={'userDisplayName'}>
-            <h1>
-              <FormattedMessage
-                id="xpack.security.account.pageTitle"
-                defaultMessage="Settings for {strongUsername}"
-                values={{ strongUsername: <strong>{getUserDisplayName(currentUser)}</strong> }}
-              />
-            </h1>
-          </EuiText>
-
-          <EuiSpacer size="xl" />
-
-          <PersonalInfo user={currentUser} />
-
-          <ChangePassword
-            user={currentUser}
-            userAPIClient={userAPIClient}
-            notifications={notifications}
-          />
-        </EuiPanel>
-      </EuiPageBody>
-    </EuiPage>
+    <Breadcrumb
+      text={i18n.translate('xpack.security.accountManagement.userSettingsBreadcrumbRootLabel', {
+        defaultMessage: 'User settings',
+      })}
+      href={services.http.basePath.prepend('/security/account')}
+    >
+      <UserProfile user={currentUser.value} data={userProfile.value?.data} />
+    </Breadcrumb>
   );
 };
-
-export function renderAccountManagementPage(
-  i18nStart: CoreStart['i18n'],
-  { element, theme$ }: Pick<AppMountParameters, 'element' | 'theme$'>,
-  props: Props
-) {
-  ReactDOM.render(
-    <i18nStart.Context>
-      <KibanaThemeProvider theme$={theme$}>
-        <AccountManagementPage {...props} />
-      </KibanaThemeProvider>
-    </i18nStart.Context>,
-    element
-  );
-
-  return () => ReactDOM.unmountComponentAtNode(element);
-}

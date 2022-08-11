@@ -10,10 +10,11 @@ import {
   PaletteDefinition,
   PaletteRegistry,
   SeriesLayer,
-} from 'src/plugins/charts/public';
+  RequiredPaletteParamTypes,
+} from '@kbn/coloring';
+
 import Color from 'color';
-import { RequiredPaletteParamTypes } from '../../../common';
-import { defaultPaletteParams as sharedDefaultParams } from '../../shared_components/';
+import { defaultPaletteParams as sharedDefaultParams } from '../../shared_components';
 
 export const DEFAULT_PALETTE_NAME = 'gray';
 export const DEFAULT_COLOR_STEPS = 3;

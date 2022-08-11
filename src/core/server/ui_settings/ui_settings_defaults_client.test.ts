@@ -8,8 +8,7 @@
 
 import Chance from 'chance';
 import { schema } from '@kbn/config-schema';
-
-import { loggingSystemMock } from '../logging/logging_system.mock';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { UiSettingsDefaultsClient } from './ui_settings_defaults_client';
 

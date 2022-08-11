@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export * from '../../../../src/plugins/expressions/common';
+export * from '@kbn/expressions-plugin/common';
 export * from './assets';
 export * from './canvas';
 export * from './elements';

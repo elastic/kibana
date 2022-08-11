@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger } from 'src/core/server';
+import { Logger } from '@kbn/core/server';
 import { AlertingSetup, StackAlertsStartDeps } from '../../types';
 import { getAlertType } from './alert_type';
 

@@ -7,13 +7,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { Logger } from '@kbn/logging';
+import type { DomainDeprecationDetails, DeprecationsDetails } from '@kbn/core-deprecations-common';
 import { DeprecationsRegistry } from './deprecations_registry';
-import type { Logger } from '../logging';
-import type {
-  DomainDeprecationDetails,
-  DeprecationsDetails,
-  GetDeprecationsContext,
-} from './types';
+import type { GetDeprecationsContext } from './types';
 
 export interface DeprecationsFactoryDeps {
   logger: Logger;

@@ -6,24 +6,35 @@
  */
 
 import { getNewRule } from '../../objects/rule';
-import { PROVIDER_BADGE } from '../../screens/timeline';
+import {
+  ALERT_TABLE_FILE_NAME_HEADER,
+  ALERT_TABLE_FILE_NAME_VALUES,
+  ALERT_TABLE_SEVERITY_VALUES,
+  PROVIDER_BADGE,
+} from '../../screens/timeline';
 
-import { investigateFirstAlertInTimeline } from '../../tasks/alerts';
+import {
+  addAlertPropertyToTimeline,
+  investigateFirstAlertInTimeline,
+  scrollAlertTableColumnIntoView,
+} from '../../tasks/alerts';
 import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
-import { loginAndWaitForPage } from '../../tasks/login';
-import { refreshPage } from '../../tasks/security_header';
+import { login, visit } from '../../tasks/login';
+import { openActiveTimeline } from '../../tasks/timeline';
 
 import { ALERTS_URL } from '../../urls/navigation';
 
-describe.skip('Alerts timeline', () => {
-  beforeEach(() => {
+describe('Alerts timeline', () => {
+  before(() => {
     cleanKibana();
-    loginAndWaitForPage(ALERTS_URL);
+    login();
     createCustomRuleEnabled(getNewRule());
-    refreshPage();
-    waitForAlertsToPopulate(500);
+  });
+  beforeEach(() => {
+    visit(ALERTS_URL);
+    waitForAlertsToPopulate();
   });
 
   it('Investigate alert in default timeline', () => {
@@ -35,5 +46,25 @@ describe.skip('Alerts timeline', () => {
         investigateFirstAlertInTimeline();
         cy.get(PROVIDER_BADGE).filter(':visible').should('have.text', eventId);
       });
+  });
+
+  it('Add a non-empty property to default timeline', () => {
+    cy.get(ALERT_TABLE_SEVERITY_VALUES)
+      .first()
+      .invoke('text')
+      .then((severityVal) => {
+        addAlertPropertyToTimeline(ALERT_TABLE_SEVERITY_VALUES, 0);
+        openActiveTimeline();
+        cy.get(PROVIDER_BADGE)
+          .first()
+          .should('have.text', `kibana.alert.severity: "${severityVal}"`);
+      });
+  });
+
+  it('Add an empty property to default timeline', () => {
+    scrollAlertTableColumnIntoView(ALERT_TABLE_FILE_NAME_HEADER);
+    addAlertPropertyToTimeline(ALERT_TABLE_FILE_NAME_VALUES, 0);
+    openActiveTimeline();
+    cy.get(PROVIDER_BADGE).first().should('have.text', 'NOT file.name exists');
   });
 });

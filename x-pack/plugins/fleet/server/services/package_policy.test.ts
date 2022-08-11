@@ -9,14 +9,16 @@ import {
   elasticsearchServiceMock,
   savedObjectsClientMock,
   httpServerMock,
-} from 'src/core/server/mocks';
+  coreMock,
+} from '@kbn/core/server/mocks';
 import { produce } from 'immer';
 import type {
+  KibanaRequest,
   SavedObjectsClient,
   SavedObjectsClientContract,
   SavedObjectsUpdateResponse,
-} from 'src/core/server';
-import type { KibanaRequest } from 'kibana/server';
+} from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import type {
   PackageInfo,
@@ -26,6 +28,7 @@ import type {
   RegistryDataStream,
   PackagePolicyInputStream,
   PackagePolicy,
+  PostPackagePolicyPostCreateCallback,
 } from '../types';
 import { createPackagePolicyMock } from '../../common/mocks';
 
@@ -39,8 +42,8 @@ import type {
   NewPackagePolicy,
   NewPackagePolicyInput,
   PackagePolicyPackage,
-} from '../../common';
-import { packageToPackagePolicy } from '../../common';
+} from '../../common/types';
+import { packageToPackagePolicy } from '../../common/services';
 
 import { IngestManagerError, PackagePolicyIneligibleForUpgradeError } from '../errors';
 
@@ -111,6 +114,36 @@ async function mockedGetPackageInfo(params: any) {
   if (params.pkgName === 'apache') pkg = { version: '1.3.2' };
   if (params.pkgName === 'aws') pkg = { version: '0.3.3' };
   if (params.pkgName === 'endpoint') pkg = {};
+  if (params.pkgName === 'test') {
+    pkg = {
+      version: '1.0.2',
+    };
+  }
+  if (params.pkgName === 'test-conflict') {
+    pkg = {
+      version: '1.0.2',
+      policy_templates: [
+        {
+          name: 'test-conflict',
+          inputs: [
+            {
+              title: 'test',
+              type: 'logs',
+              description: 'test',
+              vars: [
+                {
+                  name: 'test-var-required',
+                  required: true,
+                  type: 'integer',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+  }
+
   return Promise.resolve(pkg);
 }
 
@@ -127,8 +160,8 @@ jest.mock('./epm/packages', () => {
   };
 });
 
-jest.mock('../../common', () => ({
-  ...jest.requireActual('../../common'),
+jest.mock('../../common/services/package_to_package_policy', () => ({
+  ...jest.requireActual('../../common/services/package_to_package_policy'),
   packageToPackagePolicy: jest.fn(),
 }));
 
@@ -618,7 +651,7 @@ describe('Package policy service', () => {
           _type: string,
           _id: string
         ): Promise<SavedObjectsUpdateResponse<PackagePolicySOAttributes>> => {
-          throw savedObjectsClient.errors.createConflictError('abc', '123');
+          throw SavedObjectsErrorHelpers.createConflictError('abc', '123');
         }
       );
       const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -632,7 +665,128 @@ describe('Package policy service', () => {
       ).rejects.toThrow('Saved object [abc/123] conflict');
     });
 
-    it('should only update input vars that are not frozen', async () => {
+    it('should throw if the user try to update input vars that are frozen', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      const mockPackagePolicy = createPackagePolicyMock();
+      const mockInputs = [
+        {
+          config: {},
+          enabled: true,
+          keep_enabled: true,
+          type: 'endpoint',
+          vars: {
+            dog: {
+              type: 'text',
+              value: 'dalmatian',
+            },
+            cat: {
+              type: 'text',
+              value: 'siamese',
+              frozen: true,
+            },
+          },
+          streams: [
+            {
+              data_stream: {
+                type: 'birds',
+                dataset: 'migratory.patterns',
+              },
+              enabled: false,
+              id: `endpoint-migratory.patterns-${mockPackagePolicy.id}`,
+              vars: {
+                paths: {
+                  value: ['north', 'south'],
+                  type: 'text',
+                  frozen: true,
+                },
+                period: {
+                  value: '6mo',
+                  type: 'text',
+                },
+              },
+            },
+          ],
+        },
+      ];
+      const inputsUpdate = [
+        {
+          config: {},
+          enabled: false,
+          type: 'endpoint',
+          vars: {
+            dog: {
+              type: 'text',
+              value: 'labrador',
+            },
+            cat: {
+              type: 'text',
+              value: 'tabby',
+            },
+          },
+          streams: [
+            {
+              data_stream: {
+                type: 'birds',
+                dataset: 'migratory.patterns',
+              },
+              enabled: false,
+              id: `endpoint-migratory.patterns-${mockPackagePolicy.id}`,
+              vars: {
+                paths: {
+                  value: ['east', 'west'],
+                  type: 'text',
+                },
+                period: {
+                  value: '12mo',
+                  type: 'text',
+                },
+              },
+            },
+          ],
+        },
+      ];
+      const attributes = {
+        ...mockPackagePolicy,
+        inputs: mockInputs,
+      };
+
+      savedObjectsClient.get.mockResolvedValue({
+        id: 'test',
+        type: 'abcd',
+        references: [],
+        version: 'test',
+        attributes,
+      });
+
+      savedObjectsClient.update.mockImplementation(
+        async (
+          type: string,
+          id: string,
+          attrs: any
+        ): Promise<SavedObjectsUpdateResponse<PackagePolicySOAttributes>> => {
+          savedObjectsClient.get.mockResolvedValue({
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: attrs,
+          });
+          return attrs;
+        }
+      );
+      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const res = packagePolicyService.update(
+        savedObjectsClient,
+        elasticsearchClient,
+        'the-package-policy-id',
+        { ...mockPackagePolicy, inputs: inputsUpdate }
+      );
+
+      await expect(res).rejects.toThrow('cat is a frozen variable and cannot be modified');
+    });
+
+    it('should allow to update input vars that are frozen with the force flag', async () => {
       const savedObjectsClient = savedObjectsClientMock.create();
       const mockPackagePolicy = createPackagePolicyMock();
       const mockInputs = [
@@ -747,18 +901,18 @@ describe('Package policy service', () => {
         savedObjectsClient,
         elasticsearchClient,
         'the-package-policy-id',
-        { ...mockPackagePolicy, inputs: inputsUpdate }
+        { ...mockPackagePolicy, inputs: inputsUpdate },
+        { force: true }
       );
 
       const [modifiedInput] = result.inputs;
       expect(modifiedInput.enabled).toEqual(true);
       expect(modifiedInput.vars!.dog.value).toEqual('labrador');
-      expect(modifiedInput.vars!.cat.value).toEqual('siamese');
+      expect(modifiedInput.vars!.cat.value).toEqual('tabby');
       const [modifiedStream] = modifiedInput.streams;
-      expect(modifiedStream.vars!.paths.value).toEqual(expect.arrayContaining(['north', 'south']));
+      expect(modifiedStream.vars!.paths.value).toEqual(expect.arrayContaining(['east', 'west']));
       expect(modifiedStream.vars!.period.value).toEqual('12mo');
     });
-
     it('should add new input vars when updating', async () => {
       const savedObjectsClient = savedObjectsClientMock.create();
       const mockPackagePolicy = createPackagePolicyMock();
@@ -810,7 +964,7 @@ describe('Package policy service', () => {
             },
             cat: {
               type: 'text',
-              value: 'tabby',
+              value: 'siamese',
             },
           },
           streams: [
@@ -823,7 +977,7 @@ describe('Package policy service', () => {
               id: `endpoint-migratory.patterns-${mockPackagePolicy.id}`,
               vars: {
                 paths: {
-                  value: ['east', 'west'],
+                  value: ['north', 'south'],
                   type: 'text',
                 },
                 period: {
@@ -987,6 +1141,10 @@ describe('Package policy service', () => {
     });
   });
 
+  describe('delete', () => {
+    it('should allow to delete a package policy', async () => {});
+  });
+
   describe('runDeleteExternalCallbacks', () => {
     let callbackOne: jest.MockedFunction<PostPackagePolicyDeleteCallback>;
     let callbackTwo: jest.MockedFunction<PostPackagePolicyDeleteCallback>;
@@ -1148,7 +1306,7 @@ describe('Package policy service', () => {
       await packagePolicyService.runExternalCallbacks(
         'packagePolicyCreate',
         newPackagePolicy,
-        context,
+        coreMock.createCustomRequestHandlerContext(context),
         request
       );
       expect(callbackCallingOrder).toEqual(['a', 'b']);
@@ -1161,7 +1319,7 @@ describe('Package policy service', () => {
       await packagePolicyService.runExternalCallbacks(
         'packagePolicyCreate',
         newPackagePolicy,
-        context,
+        coreMock.createCustomRequestHandlerContext(context),
         request
       );
 
@@ -1208,7 +1366,7 @@ describe('Package policy service', () => {
           await packagePolicyService.runExternalCallbacks(
             'packagePolicyCreate',
             newPackagePolicy,
-            context,
+            coreMock.createCustomRequestHandlerContext(context),
             request
           );
         } catch (e) {
@@ -1227,11 +1385,106 @@ describe('Package policy service', () => {
           packagePolicyService.runExternalCallbacks(
             'packagePolicyCreate',
             newPackagePolicy,
-            context,
+            coreMock.createCustomRequestHandlerContext(context),
             request
           )
         ).rejects.toThrow('callbackThree threw error on purpose');
       });
+    });
+  });
+
+  describe('runPostPackagePolicyPostCreateCallback', () => {
+    let context: ReturnType<typeof xpackMocks.createRequestHandlerContext>;
+    let request: KibanaRequest;
+    const packagePolicy = {
+      id: '93ac25fe-0467-4fcc-a3c5-57a26a8496e2',
+      version: 'WzYyMzcsMV0=',
+      name: 'my-cis_kubernetes_benchmark',
+      namespace: 'default',
+      description: '',
+      package: {
+        name: 'cis_kubernetes_benchmark',
+        title: 'CIS Kubernetes Benchmark',
+        version: '0.0.3',
+      },
+      enabled: true,
+      policy_id: '1e6d0690-b995-11ec-a355-d35391e25881',
+      output_id: '',
+      inputs: [
+        {
+          type: 'cloudbeat',
+          policy_template: 'findings',
+          enabled: true,
+          streams: [
+            {
+              enabled: true,
+              data_stream: {
+                type: 'logs',
+                dataset: 'cis_kubernetes_benchmark.findings',
+              },
+              id: 'cloudbeat-cis_kubernetes_benchmark.findings-66b402b3-f24a-4018-b3d0-b88582a836ab',
+              compiled_stream: {
+                processors: [
+                  {
+                    add_cluster_id: null,
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      ],
+      vars: {
+        dataYaml: {
+          type: 'yaml',
+        },
+      },
+      elasticsearch: undefined,
+      revision: 1,
+      created_at: '2022-04-11T12:44:43.385Z',
+      created_by: 'elastic',
+      updated_at: '2022-04-11T12:44:43.385Z',
+      updated_by: 'elastic',
+    };
+    const callbackCallingOrder: string[] = [];
+
+    beforeEach(() => {
+      context = xpackMocks.createRequestHandlerContext();
+      request = httpServerMock.createKibanaRequest();
+      appContextService.start(createAppContextStartContractMock());
+    });
+
+    afterEach(() => {
+      appContextService.stop();
+      jest.clearAllMocks();
+      callbackCallingOrder.length = 0;
+    });
+
+    it('should execute PostPackagePolicyPostCreateCallback external callbacks', async () => {
+      const callbackA: PostPackagePolicyPostCreateCallback = jest.fn(async (ds) => {
+        callbackCallingOrder.push('a');
+        return ds;
+      });
+
+      const callbackB: PostPackagePolicyPostCreateCallback = jest.fn(async (ds) => {
+        callbackCallingOrder.push('b');
+        return ds;
+      });
+
+      appContextService.addExternalCallback('packagePolicyPostCreate', callbackA);
+      appContextService.addExternalCallback('packagePolicyPostCreate', callbackB);
+
+      const requestContext = coreMock.createCustomRequestHandlerContext(context);
+      await packagePolicyService.runExternalCallbacks(
+        'packagePolicyPostCreate',
+        packagePolicy,
+        requestContext,
+        request
+      );
+
+      expect(callbackA).toHaveBeenCalledWith(packagePolicy, requestContext, request);
+      expect(callbackB).toHaveBeenCalledWith(packagePolicy, requestContext, request);
+      expect(callbackCallingOrder).toEqual(['a', 'b']);
     });
   });
 
@@ -3110,6 +3363,7 @@ describe('Package policy service', () => {
     beforeEach(() => {
       savedObjectsClient = savedObjectsClientMock.create();
     });
+
     function mockPackage(pkgName: string) {
       const mockPackagePolicy = createPackagePolicyMock();
 
@@ -3130,6 +3384,7 @@ describe('Package policy service', () => {
         attributes,
       });
     }
+
     it('should return success if package and policy versions match', async () => {
       mockPackage('apache');
 
@@ -3160,6 +3415,72 @@ describe('Package policy service', () => {
         packagePolicyService.getUpgradePackagePolicyInfo(savedObjectsClient, 'package-policy-id')
       ).rejects.toEqual(new IngestManagerError('Package notinstalled is not installed'));
     });
+  });
+});
+
+describe('getUpgradeDryRunDiff', () => {
+  let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  beforeEach(() => {
+    savedObjectsClient = savedObjectsClientMock.create();
+    appContextService.start(createAppContextStartContractMock());
+  });
+  afterEach(() => {
+    appContextService.stop();
+  });
+  it('should return no errors if there is no conflict to upgrade', async () => {
+    const res = await packagePolicyService.getUpgradeDryRunDiff(
+      savedObjectsClient,
+      'package-policy-id',
+      {
+        id: '123',
+        name: 'test-123',
+        package: {
+          title: 'test',
+          name: 'test',
+          version: '1.0.1',
+        },
+        namespace: 'default',
+        inputs: [
+          {
+            id: 'toto',
+            enabled: true,
+            streams: [],
+            type: 'logs',
+          },
+        ],
+      } as any,
+      '1.0.2'
+    );
+
+    expect(res.hasErrors).toBeFalsy();
+  });
+
+  it('should no errors if there is a conflict to upgrade', async () => {
+    const res = await packagePolicyService.getUpgradeDryRunDiff(
+      savedObjectsClient,
+      'package-policy-id',
+      {
+        id: '123',
+        name: 'test-123',
+        package: {
+          title: 'test',
+          name: 'test-conflict',
+          version: '1.0.1',
+        },
+        namespace: 'default',
+        inputs: [
+          {
+            id: 'toto',
+            enabled: true,
+            streams: [],
+            type: 'logs',
+          },
+        ],
+      } as any,
+      '1.0.2'
+    );
+
+    expect(res.hasErrors).toBeTruthy();
   });
 });
 

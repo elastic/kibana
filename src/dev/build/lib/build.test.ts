@@ -7,7 +7,7 @@
  */
 
 import { REPO_ROOT } from '@kbn/utils';
-import { createAbsolutePathSerializer } from '@kbn/dev-utils';
+import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
 
 import { Config } from './config';
 import { Build } from './build';
@@ -32,6 +32,8 @@ const config = new Config(
     buildSha: 'abcd1234',
     buildVersion: '8.0.0',
   },
+  false,
+  false,
   '',
   false,
   true

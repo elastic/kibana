@@ -7,23 +7,24 @@
 
 // Service for querying filters, which hold lists of entities,
 // for example a list of known safe URL domains.
+import { useMemo } from 'react';
+import { HttpService } from '../http_service';
+import { useMlKibana } from '../../contexts/kibana';
 
-import { http } from '../http_service';
-
-import { basePath } from './index';
+import { basePath } from '.';
 import type { Filter, FilterStats } from '../../../../common/types/filters';
 
-export const filters = {
+export const filtersApiProvider = (httpService: HttpService) => ({
   filters(obj?: { filterId?: string }) {
     const filterId = obj && obj.filterId ? `/${obj.filterId}` : '';
-    return http<Filter[]>({
+    return httpService.http<Filter[]>({
       path: `${basePath()}/filters${filterId}`,
       method: 'GET',
     });
   },
 
   filtersStats() {
-    return http<FilterStats[]>({
+    return httpService.http<FilterStats[]>({
       path: `${basePath()}/filters/_stats`,
       method: 'GET',
     });
@@ -35,7 +36,7 @@ export const filters = {
       description,
       items,
     });
-    return http<Filter>({
+    return httpService.http<Filter>({
       path: `${basePath()}/filters`,
       method: 'PUT',
       body,
@@ -49,7 +50,7 @@ export const filters = {
       ...(removeItems !== undefined ? { removeItems } : {}),
     });
 
-    return http<Filter>({
+    return httpService.http<Filter>({
       path: `${basePath()}/filters/${filterId}`,
       method: 'PUT',
       body,
@@ -57,9 +58,23 @@ export const filters = {
   },
 
   deleteFilter(filterId: string) {
-    return http<{ acknowledged: boolean }>({
+    return httpService.http<{ acknowledged: boolean }>({
       path: `${basePath()}/filters/${filterId}`,
       method: 'DELETE',
     });
   },
-};
+});
+
+export type FiltersApiService = ReturnType<typeof filtersApiProvider>;
+
+/**
+ * Hooks for accessing {@link FiltersApiService} in React components.
+ */
+export function useFiltersApiService(): FiltersApiService {
+  const {
+    services: {
+      mlServices: { httpService },
+    },
+  } = useMlKibana();
+  return useMemo(() => filtersApiProvider(httpService), [httpService]);
+}

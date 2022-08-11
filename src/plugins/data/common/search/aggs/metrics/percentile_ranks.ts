@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { KBN_FIELD_TYPES } from '../../../../common';
+import { KBN_FIELD_TYPES } from '../../..';
 import { AggTypesDependencies } from '../agg_types';
 import { BaseAggParams } from '../types';
 

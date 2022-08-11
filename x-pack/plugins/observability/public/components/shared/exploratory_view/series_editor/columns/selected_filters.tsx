@@ -10,7 +10,7 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/e
 import { i18n } from '@kbn/i18n';
 import { FilterLabel } from '../../components/filter_label';
 import { SeriesConfig, SeriesUrl, UrlFilter } from '../../types';
-import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
+import { useAppDataViewContext } from '../../hooks/use_app_data_view';
 import { useSeriesFilters } from '../../hooks/use_series_filters';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 
@@ -28,16 +28,16 @@ export function SelectedFilters({ seriesId, series, seriesConfig }: Props) {
 
   const { removeFilter, replaceFilter } = useSeriesFilters({ seriesId, series });
 
-  const { indexPattern } = useAppIndexPatternContext(series.dataType);
+  const { dataView } = useAppDataViewContext(series.dataType);
 
-  if (filters.length === 0 || !indexPattern) {
+  if (filters.length === 0 || !dataView) {
     return null;
   }
 
   const btnProps = {
     seriesId,
     series,
-    indexPattern,
+    dataView,
   };
 
   return (

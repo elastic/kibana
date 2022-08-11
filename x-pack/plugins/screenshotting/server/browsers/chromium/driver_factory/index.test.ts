@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
+import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
 import puppeteer from 'puppeteer';
 import * as Rx from 'rxjs';
 import { mergeMap, take } from 'rxjs/operators';
-import type { Logger } from 'src/core/server';
-import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/server';
+import { DEFAULT_VIEWPORT, HeadlessChromiumDriverFactory } from '.';
 import { ConfigType } from '../../../config';
-import { HeadlessChromiumDriverFactory, DEFAULT_VIEWPORT } from '.';
 
 jest.mock('puppeteer');
 
@@ -68,7 +68,7 @@ describe('HeadlessChromiumDriverFactory', () => {
   });
 
   describe('createPage', () => {
-    it('returns browser driver, unexpected process exit observable, and close callback', async () => {
+    it('returns browser driver, error observable, and close callback', async () => {
       await expect(
         factory
           .createPage({ openUrlTimeout: 0, defaultViewport: DEFAULT_VIEWPORT })
@@ -77,7 +77,7 @@ describe('HeadlessChromiumDriverFactory', () => {
       ).resolves.toEqual(
         expect.objectContaining({
           driver: expect.anything(),
-          unexpectedExit$: expect.anything(),
+          error$: expect.anything(),
           close: expect.anything(),
         })
       );

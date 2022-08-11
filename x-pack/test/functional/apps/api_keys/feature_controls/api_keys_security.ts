@@ -21,7 +21,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('global all privileges (aka kibana_admin)', () => {
       before(async () => {
-        await security.testUser.setRoles(['kibana_admin'], true);
+        await security.testUser.setRoles(['kibana_admin']);
       });
       after(async () => {
         await security.testUser.restoreDefaults();
@@ -41,7 +41,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('global dashboard read with manage_security', () => {
       before(async () => {
-        await security.testUser.setRoles(['global_dashboard_read', 'manage_security'], true);
+        await security.testUser.setRoles(['global_dashboard_read', 'manage_security']);
       });
       after(async () => {
         await security.testUser.restoreDefaults();

@@ -119,6 +119,38 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .expect(basic ? 403 : 204);
       });
+
+      describe('with the createOnly option enabled', () => {
+        it('should fail when role already exists', async () => {
+          await es.security.putRole({
+            name: 'test_role',
+            body: {
+              cluster: ['monitor'],
+              indices: [
+                {
+                  names: ['beats-*'],
+                  privileges: ['write'],
+                },
+              ],
+              run_as: ['reporting_user'],
+            },
+          });
+
+          await supertest
+            .put('/api/security/role/test_role?createOnly=true')
+            .set('kbn-xsrf', 'xxx')
+            .send({})
+            .expect(409);
+        });
+
+        it('should succeed when role does not exist', async () => {
+          await supertest
+            .put('/api/security/role/new_role?createOnly=true')
+            .set('kbn-xsrf', 'xxx')
+            .send({})
+            .expect(204);
+        });
+      });
     });
 
     describe('Update Role', () => {
@@ -360,6 +392,7 @@ export default function ({ getService }: FtrProviderContext) {
           });
       });
     });
+
     describe('Delete Role', () => {
       it('should delete the roles we created', async () => {
         await supertest.delete('/api/security/role/empty_role').set('kbn-xsrf', 'xxx').expect(204);

@@ -7,48 +7,59 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import { ApmApiError } from '../../../common/apm_api_supertest';
 
 export default function apiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
-  const noAccessUser = getService('legacySupertestAsNoAccessUser');
-  const readUser = getService('legacySupertestAsApmReadUser');
-  const writeUser = getService('legacySupertestAsApmWriteUser');
+  const apmApiClient = getService('apmApiClient');
 
-  type SupertestAsUser = typeof noAccessUser | typeof readUser | typeof writeUser;
+  type SupertestAsUser =
+    | typeof apmApiClient.readUser
+    | typeof apmApiClient.writeUser
+    | typeof apmApiClient.noAccessUser;
 
   function getJobs(user: SupertestAsUser) {
-    return user.get(`/internal/apm/settings/anomaly-detection/jobs`).set('kbn-xsrf', 'foo');
+    return user({ endpoint: `GET /internal/apm/settings/anomaly-detection/jobs` });
   }
 
   function createJobs(user: SupertestAsUser, environments: string[]) {
-    return user
-      .post(`/internal/apm/settings/anomaly-detection/jobs`)
-      .send({ environments })
-      .set('kbn-xsrf', 'foo');
+    return user({
+      endpoint: 'POST /internal/apm/settings/anomaly-detection/jobs',
+      params: {
+        body: { environments },
+      },
+    });
   }
 
   async function expectForbidden(user: SupertestAsUser) {
-    const { body: getJobsBody } = await getJobs(user);
-    expect(getJobsBody.statusCode).to.be(403);
-    expect(getJobsBody.error).to.be('Forbidden');
+    try {
+      await getJobs(user);
+      expect(true).to.be(false);
+    } catch (e) {
+      const err = e as ApmApiError;
+      expect(err.res.status).to.be(403);
+    }
 
-    const { body: createJobsBody } = await createJobs(user, ['production', 'staging']);
-
-    expect(createJobsBody.statusCode).to.be(403);
-    expect(getJobsBody.error).to.be('Forbidden');
+    try {
+      await createJobs(user, ['production', 'staging']);
+      expect(true).to.be(false);
+    } catch (e) {
+      const err = e as ApmApiError;
+      expect(err.res.status).to.be(403);
+    }
   }
 
   registry.when('ML jobs return a 403 for', { config: 'basic', archives: [] }, () => {
     it('user without access', async () => {
-      await expectForbidden(noAccessUser);
+      await expectForbidden(apmApiClient.noAccessUser);
     });
 
     it('read user', async () => {
-      await expectForbidden(readUser);
+      await expectForbidden(apmApiClient.readUser);
     });
 
     it('write user', async () => {
-      await expectForbidden(writeUser);
+      await expectForbidden(apmApiClient.writeUser);
     });
   });
 }

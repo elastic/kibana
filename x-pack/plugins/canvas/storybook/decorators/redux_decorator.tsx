@@ -5,16 +5,12 @@
  * 2.0.
  */
 
-/* es-lint-disable import/no-extraneous-dependencies */
-
 import React from 'react';
 import { createStore } from 'redux';
 import { Provider as ReduxProvider } from 'react-redux';
 import { cloneDeep } from 'lodash';
 import { set } from '@elastic/safer-lodash-set';
 
-// @ts-expect-error Untyped local
-import { getDefaultWorkpad } from '../../public/state/defaults';
 import { CanvasWorkpad, CanvasElement, CanvasAsset, CanvasPage } from '../../types';
 
 // @ts-expect-error untyped local

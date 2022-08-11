@@ -8,16 +8,17 @@
 import { produce } from 'immer';
 import { satisfies } from 'semver';
 import { filter, reduce, mapKeys, each, set, unset, uniq, map, has } from 'lodash';
-import { packSavedObjectType } from '../../../common/types';
+import type { PackagePolicyInputStream } from '@kbn/fleet-plugin/common';
 import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
-} from '../../../../fleet/common';
+} from '@kbn/fleet-plugin/common';
+import type { IRouter } from '@kbn/core/server';
+import { packSavedObjectType } from '../../../common/types';
 import { PLUGIN_ID, OSQUERY_INTEGRATION_NAME } from '../../../common';
-import { IRouter } from '../../../../../../src/core/server';
-import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { convertPackQueriesToSO } from '../pack/utils';
-import { getInternalSavedObjectsClient } from '../../usage/collector';
+import { getInternalSavedObjectsClient } from '../utils';
 
 export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.get(
@@ -27,7 +28,8 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     async (context, request, response) => {
-      const esClient = context.core.elasticsearch.client.asInternalUser;
+      const coreContext = await context.core;
+      const esClient = coreContext.elasticsearch.client.asInternalUser;
       const internalSavedObjectsClient = await getInternalSavedObjectsClient(
         osqueryContext.getStartServices
       );
@@ -57,10 +59,10 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
               const packagePolicyName = policy.name;
               const currentOsqueryManagerNamePacksCount = filter(
                 Object.keys(acc.packs),
-                (packName) => packName.startsWith('osquery_manager')
+                (packName) => packName.startsWith(OSQUERY_INTEGRATION_NAME)
               ).length;
 
-              const packName = packagePolicyName.startsWith('osquery_manager')
+              const packName = packagePolicyName.startsWith(OSQUERY_INTEGRATION_NAME)
                 ? `osquery_manager-1_${currentOsqueryManagerNamePacksCount + 1}`
                 : packagePolicyName;
 
@@ -68,23 +70,23 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
                 if (!acc.packs[packName]) {
                   acc.packs[packName] = {
                     policy_ids: [policy.policy_id],
-                    enabled: !packName.startsWith('osquery_manager'),
+                    enabled: !packName.startsWith(OSQUERY_INTEGRATION_NAME),
                     name: packName,
                     description: policy.description,
-                    queries: reduce(
+                    queries: reduce<PackagePolicyInputStream, Record<string, unknown>>(
                       policy.inputs[0].streams,
                       (queries, stream) => {
                         if (stream.compiled_stream?.id) {
                           const { id: queryId, ...query } = stream.compiled_stream;
                           queries[queryId] = query;
                         }
+
                         return queries;
                       },
-                      {} as Record<string, unknown>
+                      {}
                     ),
                   };
                 } else {
-                  // @ts-expect-error update types
                   acc.packs[packName].policy_ids.push(policy.policy_id);
                 }
               }
@@ -92,7 +94,16 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
               return acc;
             },
             {
-              packs: {} as Record<string, unknown>,
+              packs: {} as Record<
+                string,
+                {
+                  policy_ids: string[];
+                  enabled: boolean;
+                  name: string;
+                  description?: string;
+                  queries: Record<string, unknown>;
+                }
+              >,
               agentPolicyToPackage: {} as Record<string, string>,
               packagePoliciesToDelete: [] as string[],
             }
@@ -113,13 +124,9 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
               await internalSavedObjectsClient.create(
                 packSavedObjectType,
                 {
-                  // @ts-expect-error update types
                   name: packObject.name,
-                  // @ts-expect-error update types
                   description: packObject.description,
-                  // @ts-expect-error update types
                   queries: convertPackQueriesToSO(packObject.queries),
-                  // @ts-expect-error update types
                   enabled: packObject.enabled,
                   created_at: new Date().toISOString(),
                   created_by: 'system',
@@ -127,7 +134,6 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
                   updated_by: 'system',
                 },
                 {
-                  // @ts-expect-error update types
                   references: packObject.policy_ids.map((policyId: string) => ({
                     id: policyId,
                     name: agentPolicies[policyId].name,
@@ -150,7 +156,6 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
           await Promise.all(
             map(migrationObject.agentPolicyToPackage, async (value, key) => {
               const agentPacks = filter(migrationObject.packs, (pack) =>
-                // @ts-expect-error update types
                 pack.policy_ids.includes(key)
               );
               await packagePolicyService?.upgrade(internalSavedObjectsClient, esClient, [value]);
@@ -171,15 +176,13 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
 
                     set(draft, 'inputs[0]', {
                       enabled: true,
-                      policy_template: 'osquery_manager',
+                      policy_template: OSQUERY_INTEGRATION_NAME,
                       streams: [],
                       type: 'osquery',
                     });
 
                     each(agentPacks, (agentPack) => {
-                      // @ts-expect-error update types
                       set(draft, `inputs[0].config.osquery.value.packs.${agentPack.name}`, {
-                        // @ts-expect-error update types
                         queries: agentPack.queries,
                       });
                     });

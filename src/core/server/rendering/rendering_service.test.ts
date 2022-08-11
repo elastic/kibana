@@ -15,8 +15,8 @@ import {
 
 import { load } from 'cheerio';
 
-import { httpServerMock } from '../http/http_server.mocks';
-import { mockRouter } from '../http/router/router.mock';
+import { mockRouter } from '@kbn/core-http-router-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
 import {
   mockRenderingServiceParams,
@@ -25,6 +25,7 @@ import {
 } from './__mocks__/params';
 import { InternalRenderingServicePreboot, InternalRenderingServiceSetup } from './types';
 import { RenderingService } from './rendering_service';
+import { AuthStatus } from '@kbn/core-http-server';
 
 const INJECTED_METADATA = {
   version: expect.any(String),
@@ -75,6 +76,23 @@ function renderTestCases(
       expect(data).toMatchSnapshot(INJECTED_METADATA);
     });
 
+    it('renders "core" page for unauthenticated requests', async () => {
+      mockRenderingSetupDeps.http.auth.get.mockReturnValueOnce({
+        status: AuthStatus.unauthenticated,
+        state: {},
+      });
+
+      const [render] = await getRender();
+      const content = await render(
+        createKibanaRequest({ auth: { isAuthenticated: false } }),
+        uiSettings
+      );
+      const dom = load(content);
+      const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
+
+      expect(data).toMatchSnapshot(INJECTED_METADATA);
+    });
+
     it('renders "core" page for blank basepath', async () => {
       const [render, deps] = await getRender();
       deps.http.basePath.get.mockReturnValueOnce('');
@@ -87,24 +105,29 @@ function renderTestCases(
     });
 
     it('renders "core" page driven by settings', async () => {
-      uiSettings.getUserProvided.mockResolvedValue({ 'theme:darkMode': { userValue: true } });
+      const userSettings = { 'theme:darkMode': { userValue: true } };
+      uiSettings.getUserProvided.mockResolvedValue(userSettings);
       const [render] = await getRender();
       const content = await render(createKibanaRequest(), uiSettings);
       const dom = load(content);
       const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
 
       expect(data).toMatchSnapshot(INJECTED_METADATA);
+      expect(data.legacyMetadata.uiSettings.user).toEqual(userSettings); // user settings are injected
     });
 
     it('renders "core" with excluded user settings', async () => {
+      const userSettings = { 'theme:darkMode': { userValue: true } };
+      uiSettings.getUserProvided.mockResolvedValue(userSettings);
       const [render] = await getRender();
       const content = await render(createKibanaRequest(), uiSettings, {
-        includeUserSettings: false,
+        isAnonymousPage: true,
       });
       const dom = load(content);
       const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
 
       expect(data).toMatchSnapshot(INJECTED_METADATA);
+      expect(data.legacyMetadata.uiSettings.user).toEqual({}); // user settings are not injected
     });
 
     it('calls `getStylesheetPaths` with the correct parameters', async () => {

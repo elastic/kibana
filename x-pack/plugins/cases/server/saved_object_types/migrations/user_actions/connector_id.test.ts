@@ -12,8 +12,8 @@ import {
   SavedObjectSanitizedDoc,
   SavedObjectsMigrationLogger,
   SavedObjectUnsanitizedDoc,
-} from 'kibana/server';
-import { migrationMocks } from 'src/core/server/mocks';
+} from '@kbn/core/server';
+import { migrationMocks } from '@kbn/core/server/mocks';
 import {
   CASE_USER_ACTION_SAVED_OBJECT,
   SECURITY_SOLUTION_OWNER,

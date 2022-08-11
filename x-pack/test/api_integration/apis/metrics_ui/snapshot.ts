@@ -8,12 +8,12 @@
 import expect from '@kbn/expect';
 import { first, last } from 'lodash';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   SnapshotNodeResponse,
   SnapshotMetricInput,
   SnapshotRequest,
-} from '../../../../plugins/infra/common/http_api/snapshot_api';
+} from '@kbn/infra-plugin/common/http_api/snapshot_api';
+import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATES } from './constants';
 
 export default function ({ getService }: FtrProviderContext) {

@@ -10,9 +10,9 @@ import React, { useCallback, createContext, useContext } from 'react';
 import Color from 'color';
 import { LegendColorPicker, Position } from '@elastic/charts';
 import { PopoverAnchorPosition, EuiWrappingPopover, EuiOutsideClickDetector } from '@elastic/eui';
-import type { DatatableRow } from '../../../../expressions/public';
-import type { PersistedState } from '../../../../visualizations/public';
-import { ColorPicker } from '../../../../charts/public';
+import type { DatatableRow } from '@kbn/expressions-plugin/public';
+import type { PersistedState } from '@kbn/visualizations-plugin/public';
+import { ColorPicker } from '@kbn/charts-plugin/public';
 import { BucketColumns } from '../../common/types';
 
 const KEY_CODE_ENTER = 13;

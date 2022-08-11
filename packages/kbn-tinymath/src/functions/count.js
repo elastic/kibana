@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const { size } = require('./size.js');
+const { size } = require('./size');
 
 /**
  * Returns the length of an array. Alias for size

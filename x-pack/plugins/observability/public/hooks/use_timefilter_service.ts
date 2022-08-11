@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import { ObservabilityPublicPluginsStart } from '../';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ObservabilityPublicPluginsStart } from '..';
 
 export function useTimefilterService() {
   const { services } = useKibana<ObservabilityPublicPluginsStart>();

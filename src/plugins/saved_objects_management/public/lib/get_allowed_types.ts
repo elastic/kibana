@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { HttpStart } from 'src/core/public';
+import type { HttpStart } from '@kbn/core/public';
 import type { SavedObjectManagementTypeInfo } from '../../common/types';
 
 interface GetAllowedTypesResponse {

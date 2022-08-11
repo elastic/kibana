@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { RuleTypeModel } from '../../../../triggers_actions_ui/public';
+import type { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   RULE_DETAILS,
   RULE_MISSING_MONITORING_DATA,

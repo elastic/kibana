@@ -8,6 +8,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { TypeOf } from '@kbn/config-schema';
+import { Logger } from '@kbn/core/server';
 import {
   ExternalIncidentServiceConfigurationSchema,
   ExternalIncidentServiceSecretConfigurationSchema,
@@ -22,7 +23,6 @@ import {
   ExecutorSubActionCommonFieldsParamsSchema,
 } from './schema';
 import { ActionsConfigurationUtilities } from '../../actions_config';
-import { Logger } from '../../../../../../src/core/server';
 
 export type JiraPublicConfigurationType = TypeOf<typeof ExternalIncidentServiceConfigurationSchema>;
 export type JiraSecretConfigurationType = TypeOf<

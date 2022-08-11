@@ -14,6 +14,7 @@ import { getEmsFileLayers } from '../util';
 import { getEmsUnavailableMessage } from './ems_unavailable_message';
 
 interface Props {
+  isColumnCompressed?: boolean;
   onChange: (emsFileId: string) => void;
   value: string | null;
 }
@@ -32,7 +33,18 @@ export class EMSFileSelect extends Component<Props, State> {
   };
 
   _loadFileOptions = async () => {
-    const fileLayers: FileLayer[] = await getEmsFileLayers();
+    let fileLayers: FileLayer[] = [];
+    try {
+      fileLayers = await getEmsFileLayers();
+    } catch (error) {
+      if (this._isMounted) {
+        this.setState({
+          hasLoadedOptions: true,
+          emsFileOptions: [],
+        });
+      }
+    }
+
     const options = fileLayers.map((fileLayer) => {
       return {
         value: fileLayer.getId(),
@@ -78,7 +90,7 @@ export class EMSFileSelect extends Component<Props, State> {
     return (
       <EuiComboBox
         placeholder={i18n.translate('xpack.maps.emsFileSelect.selectPlaceholder', {
-          defaultMessage: 'Select EMS layer',
+          defaultMessage: 'Select EMS boundaries',
         })}
         options={this.state.emsFileOptions}
         selectedOptions={selectedOption ? [selectedOption!] : []}
@@ -95,9 +107,10 @@ export class EMSFileSelect extends Component<Props, State> {
     return (
       <EuiFormRow
         label={i18n.translate('xpack.maps.source.emsFileSelect.selectLabel', {
-          defaultMessage: 'Layer',
+          defaultMessage: 'EMS boundaries',
         })}
         helpText={this.state.emsFileOptions.length === 0 ? getEmsUnavailableMessage() : null}
+        display={this.props.isColumnCompressed ? 'columnCompressed' : 'row'}
       >
         {this._renderSelect()}
       </EuiFormRow>

@@ -23,10 +23,11 @@ export const INTEGRATION_CATEGORY_DISPLAY = {
   custom: 'Custom',
   datastore: 'Datastore',
   elastic_stack: 'Elastic Stack',
-  google_cloud: 'Google cloud',
+  google_cloud: 'Google Cloud',
   kubernetes: 'Kubernetes',
   languages: 'Languages',
   message_queue: 'Message queue',
+  microsoft_365: 'Microsoft 365',
   monitoring: 'Monitoring',
   network: 'Network',
   notification: 'Notification',
@@ -35,12 +36,14 @@ export const INTEGRATION_CATEGORY_DISPLAY = {
   security: 'Security',
   sample_data: 'Sample data',
   support: 'Support',
+  threat_intel: 'Threat intelligence',
   ticketing: 'Ticketing',
   version_control: 'Version control',
   web: 'Web',
 
   // Kibana added
   communications: 'Communications',
+  enterprise_search: 'Enterprise search',
   file_storage: 'File storage',
   language_client: 'Language client',
   upload_file: 'Upload a file',
@@ -80,6 +83,7 @@ export const SHIPPER_DISPLAY = {
   sample_data: 'Sample data',
   tests: 'Tests',
   tutorial: 'Tutorials',
+  placeholders: 'Extra Integrations',
 };
 
 /**
@@ -111,6 +115,7 @@ export interface CustomIntegration {
   description: string;
   type: 'ui_link';
   uiInternalPath: string;
+  uiExternalLink?: string;
   isBeta: boolean;
   icons: CustomIntegrationIcon[];
   categories: IntegrationCategory[];

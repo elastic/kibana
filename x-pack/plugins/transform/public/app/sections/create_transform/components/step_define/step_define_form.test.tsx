@@ -10,10 +10,10 @@ import { render } from '@testing-library/react';
 
 import { I18nProvider } from '@kbn/i18n-react';
 
-import { KibanaContextProvider } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
-import { coreMock } from '../../../../../../../../../src/core/public/mocks';
-import { dataPluginMock } from '../../../../../../../../../src/plugins/data/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 const startMock = coreMock.createStart();
 
 import { PIVOT_SUPPORTED_AGGS } from '../../../../../../common/types/pivot_aggs';
@@ -29,9 +29,9 @@ import { getAggNameConflictToastMessages } from './common';
 import { StepDefineForm } from './step_define_form';
 
 jest.mock('../../../../../shared_imports');
-jest.mock('../../../../../app/app_dependencies');
+jest.mock('../../../../app_dependencies');
 
-import { MlSharedContext } from '../../../../../app/__mocks__/shared_context';
+import { MlSharedContext } from '../../../../__mocks__/shared_context';
 import { getMlSharedImports } from '../../../../../shared_imports';
 
 const createMockWebStorage = () => ({
@@ -57,10 +57,10 @@ describe('Transform: <DefinePivotForm />', () => {
     const mlSharedImports = await getMlSharedImports();
 
     const searchItems = {
-      indexPattern: {
-        title: 'the-index-pattern-title',
+      dataView: {
+        title: 'the-data-view-title',
         fields: [] as any[],
-      } as SearchItems['indexPattern'],
+      } as SearchItems['dataView'],
     };
 
     // mock services for QueryStringInput
@@ -84,7 +84,7 @@ describe('Transform: <DefinePivotForm />', () => {
     // Act
     // Assert
     expect(getByText('Data view')).toBeInTheDocument();
-    expect(getByText(searchItems.indexPattern.title)).toBeInTheDocument();
+    expect(getByText(searchItems.dataView.title)).toBeInTheDocument();
   });
 });
 

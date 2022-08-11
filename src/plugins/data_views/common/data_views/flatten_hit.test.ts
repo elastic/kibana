@@ -8,7 +8,7 @@
 
 import { DataView } from './data_view';
 
-import { fieldFormatsMock } from '../../../field_formats/common/mocks';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { flattenHitWrapper } from './flatten_hit';
 import { stubbedSavedObjectIndexPattern } from '../data_view.stub';
 
@@ -59,7 +59,7 @@ describe('flattenHit', () => {
         zzz: ['z'],
         _abc: ['a'],
       },
-    });
+    } as {});
     const expectedOrder = ['_abc', 'date', 'name', 'zzz', '_id', '_routing', '_score', '_type'];
     expect(Object.keys(response)).toEqual(expectedOrder);
     expect(Object.entries(response).map(([key]) => key)).toEqual(expectedOrder);

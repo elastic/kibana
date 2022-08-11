@@ -10,16 +10,16 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { ReactElement } from 'react';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { CoreSetup, SavedObjectAttributes, SimpleSavedObject, Toast } from 'src/core/public';
+import { CoreSetup, SavedObjectAttributes, SimpleSavedObject, Toast } from '@kbn/core/public';
 
 import { EuiContextMenuItem, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 
-import { EmbeddableFactory, EmbeddableStart } from 'src/plugins/embeddable/public';
+import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { EmbeddableFactory, EmbeddableStart } from '../../../../..';
 import { IContainer } from '../../../../containers';
 import { EmbeddableFactoryNotFoundError } from '../../../../errors';
 import { SavedObjectFinderCreateNew } from './saved_object_finder_create_new';
 import { SavedObjectEmbeddableInput } from '../../../../embeddables';
-import { UsageCollectionStart } from '../../../../../../../usage_collection/public';
 
 interface Props {
   onClose: () => void;

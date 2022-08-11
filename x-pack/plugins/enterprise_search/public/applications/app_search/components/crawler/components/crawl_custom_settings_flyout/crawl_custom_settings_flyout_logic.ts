@@ -7,11 +7,11 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { Meta } from '../../../../../../../common/types';
 import { flashAPIErrors } from '../../../../../shared/flash_messages';
 import { HttpLogic } from '../../../../../shared/http';
 import { EngineLogic } from '../../../engine';
-
-import { CrawlerLogic } from '../../crawler_logic';
+import { CrawlerLogic, CrawlRequestOverrides } from '../../crawler_logic';
 import { DomainConfig, DomainConfigFromServer } from '../../types';
 import { domainConfigServerToClient } from '../../utils';
 import { extractDomainAndEntryPointFromUrl } from '../add_domain/utils';
@@ -198,12 +198,29 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
       const { http } = HttpLogic.values;
       const { engineName } = EngineLogic.values;
 
+      let domainConfigs: DomainConfig[] = [];
+      let nextPage: number = 1;
+      let totalPages: number = 1;
+      let pageSize: number = 100;
       try {
-        const { results } = await http.get<{
-          results: DomainConfigFromServer[];
-        }>(`/internal/app_search/engines/${engineName}/crawler/domain_configs`);
+        while (nextPage <= totalPages) {
+          const {
+            results,
+            meta: { page },
+          } = await http.get<{
+            meta: Meta;
+            results: DomainConfigFromServer[];
+          }>(`/internal/enterprise_search/engines/${engineName}/crawler/domain_configs`, {
+            query: { 'page[current]': nextPage, 'page[size]': pageSize },
+          });
 
-        const domainConfigs = results.map(domainConfigServerToClient);
+          domainConfigs = [...domainConfigs, ...results.map(domainConfigServerToClient)];
+
+          nextPage = page.current + 1;
+          totalPages = page.total_pages;
+          pageSize = page.size;
+        }
+
         actions.onRecieveDomainConfigData(domainConfigs);
       } catch (e) {
         flashAPIErrors(e);
@@ -213,13 +230,23 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
       actions.fetchDomainConfigData();
     },
     startCustomCrawl: () => {
-      CrawlerLogic.actions.startCrawl({
-        domain_allowlist: values.selectedDomainUrls,
-        max_crawl_depth: values.maxCrawlDepth,
-        seed_urls: [...values.selectedEntryPointUrls, ...values.customEntryPointUrls],
-        sitemap_urls: [...values.selectedSitemapUrls, ...values.customSitemapUrls],
+      const overrides: CrawlRequestOverrides = {
         sitemap_discovery_disabled: !values.includeSitemapsInRobotsTxt,
-      });
+        max_crawl_depth: values.maxCrawlDepth,
+        domain_allowlist: values.selectedDomainUrls,
+      };
+
+      const seedUrls = [...values.selectedEntryPointUrls, ...values.customEntryPointUrls];
+      if (seedUrls.length > 0) {
+        overrides.seed_urls = seedUrls;
+      }
+
+      const sitemapUrls = [...values.selectedSitemapUrls, ...values.customSitemapUrls];
+      if (sitemapUrls.length > 0) {
+        overrides.sitemap_urls = sitemapUrls;
+      }
+
+      CrawlerLogic.actions.startCrawl(overrides);
     },
   }),
 });

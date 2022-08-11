@@ -16,7 +16,7 @@ import {
   SendEnterpriseSearchTelemetry,
   SendAppSearchTelemetry,
   SendWorkplaceSearchTelemetry,
-} from './';
+} from '.';
 
 describe('Telemetry component helpers', () => {
   beforeEach(() => {

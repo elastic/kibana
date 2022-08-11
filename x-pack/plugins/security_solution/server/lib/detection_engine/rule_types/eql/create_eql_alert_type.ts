@@ -9,18 +9,19 @@ import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { EQL_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 
 import { SERVER_APP_ID } from '../../../../../common/constants';
-import { eqlRuleParams, EqlRuleParams } from '../../schemas/rule_schemas';
+import type { EqlRuleParams } from '../../schemas/rule_schemas';
+import { eqlRuleParams } from '../../schemas/rule_schemas';
 import { eqlExecutor } from '../../signals/executors/eql';
-import { CreateRuleOptions, SecurityAlertType } from '../types';
+import type { CreateRuleOptions, SecurityAlertType } from '../types';
+import { validateImmutable, validateIndexPatterns } from '../utils';
 
 export const createEqlAlertType = (
   createOptions: CreateRuleOptions
 ): SecurityAlertType<EqlRuleParams, {}, {}, 'default'> => {
-  const { experimentalFeatures, logger, version } = createOptions;
+  const { version } = createOptions;
   return {
     id: EQL_RULE_TYPE_ID,
     name: 'Event Correlation Rule',
-    ruleTaskTimeout: experimentalFeatures.securityRulesCancelEnabled ? '5m' : '1d',
     validate: {
       params: {
         validate: (object: unknown) => {
@@ -32,6 +33,18 @@ export const createEqlAlertType = (
             throw new Error('Validation of rule params failed');
           }
           return validated;
+        },
+        /**
+         * validate rule params when rule is bulk edited (update and created in future as well)
+         * returned params can be modified (useful in case of version increment)
+         * @param mutatedRuleParams
+         * @returns mutatedRuleParams
+         */
+        validateMutatedParams: (mutatedRuleParams) => {
+          validateImmutable(mutatedRuleParams.immutable);
+          validateIndexPatterns(mutatedRuleParams.index);
+
+          return mutatedRuleParams;
         },
       },
     },
@@ -51,30 +64,36 @@ export const createEqlAlertType = (
     async executor(execOptions) {
       const {
         runOpts: {
-          bulkCreate,
-          exceptionItems,
           completeRule,
-          searchAfterSize,
           tuple,
+          inputIndex,
+          runtimeMappings,
+          exceptionItems,
+          ruleExecutionLogger,
+          bulkCreate,
           wrapHits,
           wrapSequences,
+          primaryTimestamp,
+          secondaryTimestamp,
         },
         services,
         state,
       } = execOptions;
 
       const result = await eqlExecutor({
-        bulkCreate,
-        exceptionItems,
-        experimentalFeatures,
-        logger,
         completeRule,
-        searchAfterSize,
-        services,
         tuple,
+        inputIndex,
+        runtimeMappings,
+        exceptionItems,
+        ruleExecutionLogger,
+        services,
         version,
+        bulkCreate,
         wrapHits,
         wrapSequences,
+        primaryTimestamp,
+        secondaryTimestamp,
       });
       return { ...result, state };
     },

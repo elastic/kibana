@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Logger } from 'kibana/server';
+import { Logger } from '@kbn/core/server';
+import { TaskManagerStartContract, asInterval } from '@kbn/task-manager-plugin/server';
 import { TASK_ID, TASK_TYPE } from './constants';
 import { ActionsConfig } from '../config';
-import { TaskManagerStartContract, asInterval } from '../../../task_manager/server';
 
 export async function ensureScheduled(
   taskManager: TaskManagerStartContract,

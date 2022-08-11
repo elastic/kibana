@@ -48,6 +48,7 @@ const ConfigUploaderComponent: React.FC<ConfigUploaderProps> = ({ onChange }) =>
           // remove any multiple spaces from the query
           return value.replaceAll(/\s(?=\s)/gm, '');
         }
+
         return value;
       });
 
@@ -95,6 +96,7 @@ const ConfigUploaderComponent: React.FC<ConfigUploaderProps> = ({ onChange }) =>
         );
         // @ts-expect-error update types
         filePickerRef.current?.removeFiles(new Event('fake'));
+
         return;
       }
 

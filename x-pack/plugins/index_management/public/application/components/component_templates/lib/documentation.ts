@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DocLinksStart } from 'src/core/public';
+import { DocLinksStart } from '@kbn/core/public';
 
 export const getDocumentation = ({ links }: DocLinksStart) => {
   const esDocsBase = links.elasticsearch.docsBase;

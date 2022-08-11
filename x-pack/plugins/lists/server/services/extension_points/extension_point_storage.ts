@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from 'kibana/server';
+import type { Logger } from '@kbn/core/server';
 
 import {
   ExtensionPoint,

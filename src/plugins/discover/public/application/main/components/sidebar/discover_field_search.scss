@@ -2,6 +2,14 @@
   padding: $euiSizeM;
 }
 
-.dscFieldSearch__filterWrapper {
-  width: 100%;
+.dscFieldTypesHelp__popover {
+  flex-grow: 0;
+  min-width: 0 !important; // Reduce width of icon-only button
+}
+
+.dscFieldTypesHelp__panel {
+  width: $euiSize * 22;
+  @include euiBreakpoint('xs', 's') {
+    width: $euiSize * 20;
+  }
 }

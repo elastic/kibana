@@ -10,7 +10,15 @@
 
 import { cloneDeep, mapValues } from 'lodash';
 import { Observable } from 'rxjs';
+import type { Logger } from '@kbn/logging';
 import type { SerializableRecord } from '@kbn/utility-types';
+import { SavedObjectReference } from '@kbn/core/types';
+import {
+  MigrateFunctionsObject,
+  migrateToLatest,
+  PersistableStateService,
+  VersionedState,
+} from '@kbn/kibana-utils-plugin/common';
 import { ExecutorState, ExecutorContainer } from './container';
 import { createExecutorContainer } from './container';
 import { AnyExpressionFunctionDefinition, ExpressionFunction } from '../expression_functions';
@@ -20,14 +28,7 @@ import { ExpressionType } from '../expression_types/expression_type';
 import { AnyExpressionTypeDefinition } from '../expression_types/types';
 import { ExpressionAstExpression, ExpressionAstFunction } from '../ast';
 import { ExpressionValueError, typeSpecs } from '../expression_types/specs';
-import { getByAlias } from '../util';
-import { SavedObjectReference } from '../../../../core/types';
-import {
-  MigrateFunctionsObject,
-  migrateToLatest,
-  PersistableStateService,
-  VersionedState,
-} from '../../../kibana_utils/common';
+import { ALL_NAMESPACES, getByAlias } from '../util';
 import { ExpressionExecutionParams } from '../service';
 
 export interface ExpressionExecOptions {
@@ -87,9 +88,10 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
   implements PersistableStateService<ExpressionAstExpression>
 {
   static createWithDefaults<Ctx extends Record<string, unknown> = Record<string, unknown>>(
+    logger?: Logger,
     state?: ExecutorState<Ctx>
   ): Executor<Ctx> {
-    const executor = new Executor<Ctx>(state);
+    const executor = new Executor<Ctx>(logger, state);
     for (const type of typeSpecs) executor.registerType(type);
 
     return executor;
@@ -107,34 +109,14 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
    */
   public readonly types: TypesRegistry;
 
-  protected parent?: Executor<Context>;
-
-  constructor(state?: ExecutorState<Context>) {
+  constructor(private readonly logger?: Logger, state?: ExecutorState<Context>) {
     this.functions = new FunctionsRegistry(this as Executor);
     this.types = new TypesRegistry(this as Executor);
     this.container = createExecutorContainer<Context>(state);
   }
 
   public get state(): ExecutorState<Context> {
-    const parent = this.parent?.state;
-    const state = this.container.get();
-
-    return {
-      ...(parent ?? {}),
-      ...state,
-      types: {
-        ...(parent?.types ?? {}),
-        ...state.types,
-      },
-      functions: {
-        ...(parent?.functions ?? {}),
-        ...state.functions,
-      },
-      context: {
-        ...(parent?.context ?? {}),
-        ...state.context,
-      },
-    };
+    return this.container.get();
   }
 
   public registerFunction(
@@ -146,15 +128,20 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     this.container.transitions.addFunction(fn);
   }
 
-  public getFunction(name: string): ExpressionFunction | undefined {
-    return this.container.get().functions[name] ?? this.parent?.getFunction(name);
+  public getFunction(name: string, namespace?: string): ExpressionFunction | undefined {
+    const fn = this.container.get().functions[name];
+
+    if (!fn?.namespace || fn.namespace === namespace) {
+      return fn;
+    }
   }
 
-  public getFunctions(): Record<string, ExpressionFunction> {
-    return {
-      ...(this.parent?.getFunctions() ?? {}),
-      ...this.container.get().functions,
-    };
+  public getFunctions(namespace?: string): Record<string, ExpressionFunction> {
+    const fns = Object.entries(this.container.get().functions);
+    const filtered = fns.filter(
+      ([key, value]) => !value.namespace || value.namespace === namespace
+    );
+    return Object.fromEntries(filtered);
   }
 
   public registerType(
@@ -168,21 +155,15 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
   }
 
   public getType(name: string): ExpressionType | undefined {
-    return this.container.get().types[name] ?? this.parent?.getType(name);
+    return this.container.get().types[name];
   }
 
   public getTypes(): Record<string, ExpressionType> {
-    return {
-      ...(this.parent?.getTypes() ?? {}),
-      ...this.container.get().types,
-    };
+    return this.container.get().types;
   }
 
   public get context(): Record<string, unknown> {
-    return {
-      ...(this.parent?.context ?? {}),
-      ...this.container.selectors.getContext(),
-    };
+    return this.container.selectors.getContext();
   }
 
   /**
@@ -213,7 +194,7 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     if (typeof ast === 'string') executionParams.expression = ast;
     else executionParams.ast = ast;
 
-    const execution = new Execution<Input, Output>(executionParams);
+    const execution = new Execution<Input, Output>(executionParams, this.logger);
 
     return execution;
   }
@@ -222,9 +203,10 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     ast: ExpressionAstExpression,
     action: (fn: ExpressionFunction, link: ExpressionAstFunction) => void
   ) {
+    const functions = this.container.get().functions;
     for (const link of ast.chain) {
       const { function: fnName, arguments: fnArgs } = link;
-      const fn = getByAlias(this.getFunctions(), fnName);
+      const fn = getByAlias(functions, fnName, ALL_NAMESPACES);
 
       if (fn) {
         // if any of arguments are expressions we should migrate those first
@@ -249,12 +231,13 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     ) => ExpressionAstFunction | ExpressionAstExpression
   ): ExpressionAstExpression {
     let additionalFunctions = 0;
+    const functions = this.container.get().functions;
     return (
       ast.chain.reduce<ExpressionAstExpression>(
         (newAst: ExpressionAstExpression, funcAst: ExpressionAstFunction, index: number) => {
           const realIndex = index + additionalFunctions;
           const { function: fnName, arguments: fnArgs } = funcAst;
-          const fn = getByAlias(this.getFunctions(), fnName);
+          const fn = getByAlias(functions, fnName, ALL_NAMESPACES);
           if (!fn) {
             return newAst;
           }
@@ -331,8 +314,12 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
 
   public getAllMigrations() {
     const uniqueVersions = new Set(
-      Object.values(this.getFunctions())
-        .map((fn) => Object.keys(fn.migrations))
+      Object.values(this.container.get().functions)
+        .map((fn) => {
+          const migrations =
+            typeof fn.migrations === 'function' ? fn.migrations() : fn.migrations || {};
+          return Object.keys(migrations);
+        })
         .flat(1)
     );
 
@@ -360,12 +347,5 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
 
       return migrations[version](link) as ExpressionAstExpression;
     });
-  }
-
-  public fork(): Executor<Context> {
-    const fork = new Executor<Context>();
-    fork.parent = this;
-
-    return fork;
   }
 }

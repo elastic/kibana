@@ -12,6 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Persistence via BITS Job Notify Cmdline",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type == \"start\" and\n  process.parent.name : \"svchost.exe\" and process.parent.args : \"BITS\" and\n  not process.executable :\n              (\"?:\\\\Windows\\\\System32\\\\WerFaultSecure.exe\",\n               \"?:\\\\Windows\\\\System32\\\\WerFault.exe\",\n               \"?:\\\\Windows\\\\System32\\\\wermgr.exe\",\n               \"?:\\\\WINDOWS\\\\system32\\\\directxdatabaseupdater.exe\")\n",
   "references": [
     "https://pentestlab.blog/2019/10/30/persistence-bits-jobs/",
@@ -48,5 +49,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 2
 }

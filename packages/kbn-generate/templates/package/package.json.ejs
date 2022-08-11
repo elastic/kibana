@@ -1,0 +1,15 @@
+{
+  "name": <%- json(pkg.name) %>,
+  "version": "1.0.0",
+  "private": true,
+  "license": "SSPL-1.0 OR Elastic License 2.0",
+  "main": "./target_node/index.js"
+  <%_ if (pkg.web) { %>,
+    "browser": "./target_web/index.js"
+  <%_ } %>
+  <% if (pkg.dev) { %>,
+    "kibana": {
+      "devOnly": true
+    }
+  <% } %>
+}

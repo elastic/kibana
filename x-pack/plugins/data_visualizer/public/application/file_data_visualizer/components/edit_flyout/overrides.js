@@ -33,7 +33,7 @@ import {
   // getCharsetOptions,
 } from './options';
 import { isTimestampFormatValid } from './overrides_validation';
-import { withKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { replaceFieldInGrokPattern } from '../../../common/util/grok_pattern';
 import {
   convertDelimiter,

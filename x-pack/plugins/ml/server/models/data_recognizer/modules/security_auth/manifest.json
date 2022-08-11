@@ -41,6 +41,10 @@
     {
       "id": "auth_rare_user",
       "file": "auth_rare_user.json"
+    },
+    {
+      "id": "suspicious_login_activity",
+      "file": "suspicious_login_activity.json"
     }
   ],
   "datafeeds": [
@@ -73,6 +77,11 @@
       "id": "datafeed-auth_rare_user",
       "file": "datafeed_auth_rare_user.json",
       "job_id": "auth_rare_user"
+    },
+    {
+      "id": "datafeed-suspicious_login_activity",
+      "file": "datafeed_suspicious_login_activity.json",
+      "job_id": "suspicious_login_activity"
     }
   ]
 }

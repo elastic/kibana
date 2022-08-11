@@ -7,11 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 import { get } from 'lodash';
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { INDEX_NAMES } from '../../../common/constants';
 import { RouteDependencies } from '../../types';
 // @ts-ignore
-import { WatchHistoryItem } from '../../models/watch_history_item/index';
+import { WatchHistoryItem } from '../../models/watch_history_item';
 
 const paramsSchema = schema.object({
   id: schema.string(),
@@ -46,7 +46,8 @@ export function registerLoadHistoryRoute({
       const id = request.params.id;
 
       try {
-        const responseFromES = await fetchHistoryItem(ctx.core.elasticsearch.client, id);
+        const esClient = (await ctx.core).elasticsearch.client;
+        const responseFromES = await fetchHistoryItem(esClient, id);
         const hit = get(responseFromES, 'hits.hits[0]');
         if (!hit) {
           return response.notFound({ body: `Watch History Item with id = ${id} not found` });

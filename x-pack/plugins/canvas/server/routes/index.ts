@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IRouter, Logger } from 'src/core/server';
-import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
-import { BfetchServerSetup } from 'src/plugins/bfetch/server';
+import { IRouter, Logger } from '@kbn/core/server';
+import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
+import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
 import { initCustomElementsRoutes } from './custom_elements';
 import { initESFieldsRoutes } from './es_fields';
 import { initShareablesRoutes } from './shareables';

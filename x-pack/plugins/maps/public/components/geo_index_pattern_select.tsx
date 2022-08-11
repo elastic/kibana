@@ -9,7 +9,7 @@ import React, { Component } from 'react';
 import { EuiCallOut, EuiFormRow, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DataView } from 'src/plugins/data/common';
+import { DataView } from '@kbn/data-plugin/common';
 import {
   getIndexPatternSelectComponent,
   getIndexPatternService,

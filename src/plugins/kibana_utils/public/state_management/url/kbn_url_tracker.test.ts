@@ -10,8 +10,8 @@ import { StubBrowserStorage } from '@kbn/test-jest-helpers';
 import { createMemoryHistory, History } from 'history';
 import { createKbnUrlTracker, KbnUrlTracker } from './kbn_url_tracker';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { App, AppUpdater, ToastsSetup } from 'kibana/public';
-import { coreMock } from '../../../../../core/public/mocks';
+import { App, AppUpdater, ToastsSetup } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
 import { unhashUrl } from './hash_unhash_url';
 
 jest.mock('./hash_unhash_url', () => ({

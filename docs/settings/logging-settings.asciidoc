@@ -60,7 +60,7 @@ The following table serves as a quick reference for different logging configurat
 | The suffix to append to the file path when rolling. Must include `%i`.
 
 | `logging.appenders[].<appender-name>.strategy.max`
-| The maximum number of files to keep. Optional. Default is `7`.
+| The maximum number of files to keep. Optional. Default is `7` and the maximum is `100`.
 
 | `logging.appenders[].<appender-name>.layout.type`
 | Determines how the log messages are displayed. Options are `pattern`, which provides human-readable output, or `json`, which provides ECS-compliant output. Required.

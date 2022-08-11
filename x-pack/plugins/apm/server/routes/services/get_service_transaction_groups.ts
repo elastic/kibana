@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { rangeQuery, kqlQuery } from '@kbn/observability-plugin/server';
 import {
   EVENT_OUTCOME,
   SERVICE_NAME,
@@ -13,7 +14,6 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../common/event_outcome';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
-import { rangeQuery, kqlQuery } from '../../../../observability/server';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import {
   getDocumentTypeFilterForTransactions,

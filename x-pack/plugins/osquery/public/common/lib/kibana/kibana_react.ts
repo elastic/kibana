@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
+import type React from 'react';
 import { useHistory } from 'react-router-dom';
 import { FieldIcon } from '@kbn/react-field';
+import type { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
 import {
   KibanaContextProvider,
-  KibanaReactContextValue,
   useKibana,
   useUiSetting,
   useUiSetting$,
   withKibana,
   reactRouterNavigate,
-} from '../../../../../../../src/plugins/kibana_react/public';
-import { StartServices } from '../../../types';
+} from '@kbn/kibana-react-plugin/public';
+import type { StartServices } from '../../../types';
 
 export type KibanaContext = KibanaReactContextValue<StartServices>;
 export interface WithKibanaProps {
@@ -36,6 +36,7 @@ const useRouterNavigate = (
   onClickCallback?: Parameters<typeof reactRouterNavigate>[2]
 ) => {
   const history = useHistory();
+
   return reactRouterNavigate(history, to, onClickCallback);
 };
 

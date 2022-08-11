@@ -15,7 +15,7 @@ import xmlBuilder from 'xmlbuilder';
 import { getUniqueJunitReportPath } from '../report_path';
 
 import { getSnapshotOfRunnableLogs } from './log_cache';
-import { escapeCdata } from '../';
+import { escapeCdata } from '..';
 
 const dateNow = Date.now.bind(Date);
 

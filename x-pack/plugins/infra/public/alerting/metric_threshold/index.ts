@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { AlertTypeParams as RuleTypeParams } from '../../../../alerting/common';
-import { ObservabilityRuleTypeModel } from '../../../../observability/public';
+import { RuleTypeParams } from '@kbn/alerting-plugin/common';
+import { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
 import {
   MetricExpressionParams,
   METRIC_THRESHOLD_ALERT_TYPE_ID,

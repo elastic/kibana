@@ -11,7 +11,7 @@ import { waitFor } from '@testing-library/react';
 import { HostName } from './host_name';
 import { TestProviders } from '../../../../../common/mock';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types';
-import { StatefulEventContext } from '../../../../../../../timelines/public';
+import { StatefulEventContext } from '@kbn/timelines-plugin/public';
 import { timelineActions } from '../../../../store/timeline';
 import { activeTimeline } from '../../../../containers/active_timeline_context';
 
@@ -57,6 +57,8 @@ describe('HostName', () => {
     contextId: 'test-context-id',
     eventId: 'test-event-id',
     isDraggable: false,
+    fieldType: 'keyword',
+    isAggregatable: true,
     value: 'Mock Host',
   };
 
@@ -102,7 +104,7 @@ describe('HostName', () => {
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="host-details-button"]').first().simulate('click');
+    wrapper.find('[data-test-subj="host-details-button"]').last().simulate('click');
     await waitFor(() => {
       expect(timelineActions.toggleDetailPanel).not.toHaveBeenCalled();
       expect(toggleExpandedDetail).not.toHaveBeenCalled();
@@ -124,7 +126,7 @@ describe('HostName', () => {
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="host-details-button"]').first().simulate('click');
+    wrapper.find('[data-test-subj="host-details-button"]').last().simulate('click');
     await waitFor(() => {
       expect(timelineActions.toggleDetailPanel).toHaveBeenCalledWith({
         panelView: 'hostDetail',
@@ -152,7 +154,7 @@ describe('HostName', () => {
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="host-details-button"]').first().simulate('click');
+    wrapper.find('[data-test-subj="host-details-button"]').last().simulate('click');
     await waitFor(() => {
       expect(toggleExpandedDetail).toHaveBeenCalledWith({
         panelView: 'hostDetail',
@@ -178,7 +180,7 @@ describe('HostName', () => {
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="host-details-button"]').first().simulate('click');
+    wrapper.find('[data-test-subj="host-details-button"]').last().simulate('click');
     await waitFor(() => {
       expect(timelineActions.toggleDetailPanel).toHaveBeenCalledWith({
         panelView: 'hostDetail',

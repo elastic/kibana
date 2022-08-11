@@ -37,7 +37,7 @@ export const registerUpdateTagsAssignmentsRoute = (router: TagsPluginRouter) => 
     },
     router.handleLegacyErrors(async (ctx, req, res) => {
       try {
-        const { assignmentService } = ctx.tags!;
+        const { assignmentService } = await ctx.tags;
         const { tags, assign, unassign } = req.body;
 
         await assignmentService.updateTagAssignments({

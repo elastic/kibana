@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/public';
+import { SavedObjectsClientContract } from '@kbn/core/public';
 import { SavedObjectIndexStore } from './saved_object_store';
 
 describe('LensStore', () => {

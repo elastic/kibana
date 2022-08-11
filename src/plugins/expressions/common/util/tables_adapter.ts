@@ -7,13 +7,18 @@
  */
 
 import { EventEmitter } from 'events';
-import { Datatable } from '../expression_types/specs';
+import type { Datatable } from '../expression_types/specs';
 
 export class TablesAdapter extends EventEmitter {
   private _tables: { [key: string]: Datatable } = {};
 
   public logDatatable(name: string, datatable: Datatable): void {
     this._tables[name] = datatable;
+    this.emit('change', this.tables);
+  }
+
+  public reset() {
+    this._tables = {};
     this.emit('change', this.tables);
   }
 

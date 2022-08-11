@@ -13,7 +13,8 @@ export default function ({ getService, getPageObjects }) {
   const pipelinesList = getService('monitoringLogstashPipelines');
   const pipelineViewer = getService('monitoringLogstashPipelineViewer');
 
-  describe('Logstash pipeline viewer mb', () => {
+  // FAILING: https://github.com/elastic/kibana/issues/128968
+  describe.skip('Logstash pipeline viewer mb', () => {
     const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
     before(async () => {

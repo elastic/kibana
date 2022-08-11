@@ -11,7 +11,7 @@ import React from 'react';
 
 import '../../common/mock/match_media';
 import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../common/mock';
-import { HeaderPage } from './index';
+import { HeaderPage } from '.';
 import { useMountAppended } from '../../utils/use_mount_appended';
 
 jest.mock('../../common/navigation/hooks');
@@ -124,7 +124,7 @@ describe('HeaderPage', () => {
     const casesHeaderPage = wrapper.find('.casesHeaderPage').first();
 
     expect(casesHeaderPage).toHaveStyleRule('border-bottom', euiDarkVars.euiBorderThin);
-    expect(casesHeaderPage).toHaveStyleRule('padding-bottom', euiDarkVars.paddingSizes.l);
+    expect(casesHeaderPage).toHaveStyleRule('padding-bottom', euiDarkVars.euiSizeL);
   });
 
   test('it DOES NOT apply border styles when border is false', () => {
@@ -136,7 +136,7 @@ describe('HeaderPage', () => {
     const casesHeaderPage = wrapper.find('.casesHeaderPage').first();
 
     expect(casesHeaderPage).not.toHaveStyleRule('border-bottom', euiDarkVars.euiBorderThin);
-    expect(casesHeaderPage).not.toHaveStyleRule('padding-bottom', euiDarkVars.paddingSizes.l);
+    expect(casesHeaderPage).not.toHaveStyleRule('padding-bottom', euiDarkVars.euiSizeL);
   });
 
   describe('Badges', () => {

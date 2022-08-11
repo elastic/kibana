@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { AlertsFieldMap, alertsFieldMap } from './alerts';
-import { RulesFieldMap, rulesFieldMap } from './rules';
-export type { AlertsFieldMap, RulesFieldMap };
-export { alertsFieldMap, rulesFieldMap };
+import type { AlertsFieldMap840 } from './8.4.0';
+import { alertsFieldMap840 } from './8.4.0';
+import type { RulesFieldMap } from './8.0.0/rules';
+import { rulesFieldMap } from './8.0.0/rules';
+export type { AlertsFieldMap840 as AlertsFieldMap, RulesFieldMap };
+export { alertsFieldMap840 as alertsFieldMap, rulesFieldMap };

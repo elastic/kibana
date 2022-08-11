@@ -17,7 +17,7 @@ peggy(
   output_dir = True,
   args = [
     "-o",
-    "$(@D)/chain.js",
+    "$(@D)/built_grammar.js",
     "./%s/grammar/chain.peggy" % package_name()
   ],
 )

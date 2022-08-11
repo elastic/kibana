@@ -7,7 +7,7 @@
 
 import { KibanaServices } from '../../lib/kibana';
 import { SOURCERER_API_URL } from '../../../../common/constants';
-import { KibanaDataView } from '../../store/sourcerer/model';
+import type { KibanaDataView } from '../../store/sourcerer/model';
 
 export interface GetSourcererDataView {
   signal: AbortSignal;
@@ -31,7 +31,7 @@ export const postSourcererDataView = async ({
     signal,
   });
 
-export const getSourcererDataview = async (
+export const getSourcererDataView = async (
   dataViewId: string,
   signal?: AbortSignal
 ): Promise<KibanaDataView> => {

@@ -8,6 +8,8 @@
 import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
+import { useExecutionContext } from '../shared_imports';
+import { useComponentTemplatesContext } from '../component_templates_context';
 import { ComponentTemplatesAuthProvider } from './auth_provider';
 import { ComponentTemplatesWithPrivileges } from './with_privileges';
 import { ComponentTemplateList } from './component_template_list';
@@ -24,6 +26,13 @@ export const ComponentTemplateListContainer: React.FunctionComponent<
   },
   history,
 }) => {
+  const { executionContext } = useComponentTemplatesContext();
+
+  useExecutionContext(executionContext, {
+    type: 'application',
+    page: 'indexManagementComponentTemplatesTab',
+  });
+
   return (
     <ComponentTemplatesAuthProvider>
       <ComponentTemplatesWithPrivileges>

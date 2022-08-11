@@ -274,3 +274,145 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "id": "978766",
+    "index": "filebeat-8.0.0-2021.01.26-000001",
+    "source": {
+      "@timestamp": "2021-01-26T11:09:05.529Z",
+      "agent": {
+        "ephemeral_id": "b7b56c3e-1f27-4c69-96f4-aa9ca47888d0",
+        "id": "69acb5f0-1e79-4cfe-a4dc-e0dbf229ff51",
+        "name": "MacBook-Pro-de-Gloria.local",
+        "type": "filebeat",
+        "version": "8.0.0"
+      },
+      "ecs": {
+        "version": "1.6.0"
+      },
+      "event": {
+        "category": "threat",
+        "created": "2021-01-26T11:09:05.529Z",
+        "dataset": "ti_abusech.malware",
+        "ingested": "2021-01-26T11:09:06.595350Z",
+        "kind": "enrichment",
+        "module": "threatintel",
+        "reference": "https://urlhaus.abuse.ch/url/978783/",
+        "type": "indicator"
+      },
+      "fileset": {
+        "name": "abuseurl"
+      },
+      "input": {
+        "type": "httpjson"
+      },
+      "service": {
+        "type": "threatintel"
+      },
+      "tags": [
+        "threatintel-abuseurls",
+        "forwarded"
+      ],
+      "threat": {
+        "indicator": {
+          "description": "domain should match the auditbeat hosts' data's source.ip",
+          "domain": "172.16.0.0",
+          "ip": "8.8.8.8",
+          "port": 777,
+          "first_seen": "2021-01-26T11:09:04.000Z",
+          "provider": "geenensp",
+          "type": "url",
+          "url": {
+            "full": "http://159.89.119.67:59600/bin.sh",
+            "scheme": "http"
+          }
+        }
+      },
+      "threatintel": {
+        "abuseurl": {
+          "blacklists": {
+            "spamhaus_dbl": "not listed",
+            "surbl": "not listed"
+          },
+          "larted": false,
+          "tags": null,
+          "threat": "malware_download",
+          "url_status": "online"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "978767",
+    "index": "filebeat-8.0.0-2021.01.26-000001",
+    "source": {
+      "@timestamp": "2021-01-26T11:09:05.529Z",
+      "agent": {
+        "ephemeral_id": "b7b56c3e-1f27-4c69-96f4-aa9ca47888d0",
+        "id": "69acb5f0-1e79-4cfe-a4dc-e0dbf229ff51",
+        "name": "MacBook-Pro-de-Gloria.local",
+        "type": "filebeat",
+        "version": "8.0.0"
+      },
+      "ecs": {
+        "version": "1.6.0"
+      },
+      "event": {
+        "category": "threat",
+        "created": "2021-01-26T11:09:05.529Z",
+        "dataset": "ti_abusech.malware",
+        "ingested": "2021-01-26T11:09:06.595350Z",
+        "kind": "enrichment",
+        "module": "threatintel",
+        "reference": "https://urlhaus.abuse.ch/url/978783/",
+        "type": "indicator"
+      },
+      "fileset": {
+        "name": "abuseurl"
+      },
+      "input": {
+        "type": "httpjson"
+      },
+      "service": {
+        "type": "threatintel"
+      },
+      "tags": [
+        "threatintel-abuseurls",
+        "forwarded"
+      ],
+      "threat": {
+        "indicator": {
+          "description": "domain should match the auditbeat hosts' data's source.ip",
+          "domain": "172.16.0.0",
+          "ip": "9.9.9.9",
+          "port": 123,
+          "first_seen": "2021-01-26T11:09:04.000Z",
+          "provider": "geenensp",
+          "type": "url",
+          "url": {
+            "full": "http://159.89.119.67:59600/bin.sh",
+            "scheme": "http"
+          }
+        }
+      },
+      "threatintel": {
+        "abuseurl": {
+          "blacklists": {
+            "spamhaus_dbl": "not listed",
+            "surbl": "not listed"
+          },
+          "larted": false,
+          "tags": null,
+          "threat": "malware_download",
+          "url_status": "online"
+        }
+      }
+    }
+  }
+}

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsType } from 'kibana/server';
-import { MigrateFunctionsObject } from 'src/plugins/kibana_utils/common';
+import { SavedObjectsType } from '@kbn/core/server';
+import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { getAllMigrations } from '../migrations/visualization_saved_object_migrations';
 
 export const getVisualizationSavedObjectType = (

@@ -51,7 +51,7 @@ Additionally, in order to migrate into project refs, you also need to make sure 
   ],
   "references": [
     { "path": "../../core/tsconfig.json" },
-    // add references to other TypeScript projects your plugin dependes on
+    // add references to other TypeScript projects your plugin depends on
   ]
 }
 ----

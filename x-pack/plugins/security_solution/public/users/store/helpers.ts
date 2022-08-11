@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { UsersModel, UsersType, UsersTableType, UsersQueries } from './model';
+import type { UsersModel, UsersQueries } from './model';
+import { UsersTableType } from './model';
 import { DEFAULT_TABLE_ACTIVE_PAGE } from '../../common/store/constants';
 
 export const setUsersPageQueriesActivePageToZero = (state: UsersModel): UsersQueries => ({
@@ -15,13 +16,3 @@ export const setUsersPageQueriesActivePageToZero = (state: UsersModel): UsersQue
     activePage: DEFAULT_TABLE_ACTIVE_PAGE,
   },
 });
-
-export const setUsersQueriesActivePageToZero = (
-  state: UsersModel,
-  type: UsersType
-): UsersQueries => {
-  if (type === UsersType.page) {
-    return setUsersPageQueriesActivePageToZero(state);
-  }
-  throw new Error(`UsersType ${type} is unknown`);
-};

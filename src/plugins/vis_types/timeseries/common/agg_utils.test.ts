@@ -13,7 +13,7 @@ import {
   getAggsByPredicate,
   getAggsByType,
 } from './agg_utils';
-import { METRIC_TYPES } from '../../../data/common';
+import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { TSVB_METRIC_TYPES } from './enums';
 import type { Metric } from './types';
 

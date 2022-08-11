@@ -8,7 +8,7 @@
 import type { Payload } from '@hapi/boom';
 import Boom from '@hapi/boom';
 
-import type { SavedObjectsImportError } from 'src/core/server';
+import type { SavedObjectsImportError } from '@kbn/core/server';
 
 export const createEmptyFailureResponse = (errors?: Array<SavedObjectsImportError | Boom.Boom>) => {
   const errorMessages: Array<SavedObjectsImportError | Payload> = (errors || []).map((error) => {

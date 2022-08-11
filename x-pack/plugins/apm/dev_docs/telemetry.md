@@ -19,7 +19,7 @@ to the telemetry cluster using the
 During the APM server-side plugin's setup phase a
 [Saved Object](https://www.elastic.co/guide/en/kibana/master/managing-saved-objects.html)
 for APM telemetry is registered and a
-[task manager](../../task_manager/server/README.md) task is registered and started.
+[task manager](../../task_manager/README.md) task is registered and started.
 The task periodically queries the APM indices and saves the results in the Saved
 Object, and the usage collector periodically gets the data from the saved object
 and uploads it to the telemetry cluster.
@@ -27,23 +27,19 @@ and uploads it to the telemetry cluster.
 Once uploaded to the telemetry cluster, the data telemetry is stored in
 `stack_stats.kibana.plugins.apm` in the xpack-phone-home index.
 
-### Generating sample data
+### Collect a new telemetry field
 
-The script in `scripts/upload_telemetry_data` can generate sample telemetry data and upload it to a cluster of your choosing.
+In order to collect a new telemetry field you need to add a task which performs the query that collects the data from the cluster.
 
-You'll need to set the `GITHUB_TOKEN` environment variable to a token that has `repo` scope so it can read from the
-[elastic/telemetry](https://github.com/elastic/telemetry) repository. (You probably have a token that works for this in
-~/.backport/config.json.)
+All the available tasks are [here](https://github.com/elastic/kibana/blob/ba84602455671f0f6175bbc0fd2e8f302c60bbe6/x-pack/plugins/apm/server/lib/apm_telemetry/collect_data_telemetry/tasks.ts)
 
-The script will run as the `elastic` user using the elasticsearch hosts and password settings from the config/kibana.yml
-and/or config/kibana.dev.yml files.
+### Debug telemetry
 
-Running the script with `--clear` will delete the index first.
+The following endpoint will run the `apm-telemetry-task` which is responsible for collecting the telemetry data and once it's completed it will return the telemetry attributes.
 
-If you're using an Elasticsearch instance without TLS verification (if you have `elasticsearch.ssl.verificationMode: none` set in your kibana.yml)
-you can run the script with `env NODE_TLS_REJECT_UNAUTHORIZED=0` to avoid TLS connection errors.
-
-After running the script you should see sample telemetry data in the "xpack-phone-home" index.
+```
+GET /internal/apm/debug-telemetry
+```
 
 ### Updating Data Telemetry Mappings
 
@@ -64,6 +60,9 @@ The queries for the stats are in the [collect data telemetry tasks](../server/li
 The collection tasks also use the [`APMDataTelemetry` type](../server/lib/apm_telemetry/types.ts) which also needs to be updated with any changes to the fields.
 
 Running `node scripts/telemetry_check --fix` from the root Kibana directory will update the schemas which should automatically notify the Infra team when a pull request is opened so they can update the mapping in the telemetry clusters.
+
+Running `node scripts/test/jest --updateSnapshot` from the `x-pack/plugins/apm` directory will update the
+mappings snapshot used in the jest tests.
 
 ## Behavioral Telemetry
 

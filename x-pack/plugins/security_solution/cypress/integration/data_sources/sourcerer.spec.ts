@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  loginAndWaitForPage,
-  loginWithUserAndWaitForPageWithoutDateRange,
-} from '../../tasks/login';
+import { login, loginWithUser, visit, visitWithUser } from '../../tasks/login';
 
 import { HOSTS_URL, TIMELINES_URL } from '../../urls/navigation';
 import {
@@ -30,7 +27,7 @@ import {
   saveSourcerer,
   waitForAlertsIndexToExist,
 } from '../../tasks/sourcerer';
-import { cleanKibana, postDataView } from '../../tasks/common';
+import { postDataView } from '../../tasks/common';
 import { openTimelineUsingToggle } from '../../tasks/security_main';
 import { createUsersAndRoles, secReadCasesAll, secReadCasesAllUser } from '../../tasks/privileges';
 import { TOASTER } from '../../screens/configure_cases';
@@ -39,15 +36,16 @@ import { SOURCERER } from '../../screens/sourcerer';
 import { createTimeline } from '../../tasks/api_calls/timelines';
 import { getTimeline, getTimelineModifiedSourcerer } from '../../objects/timeline';
 import { closeTimeline, openTimelineById } from '../../tasks/timeline';
+import { esArchiverResetKibana } from '../../tasks/es_archiver';
 
 const usersToCreate = [secReadCasesAllUser];
 const rolesToCreate = [secReadCasesAll];
 const siemDataViewTitle = 'Security Default Data View';
-const dataViews = ['auditbeat-*,fakebeat-*', 'auditbeat-*,beats*,siem-read*,.kibana*,fakebeat-*'];
+const dataViews = ['auditbeat-*,fakebeat-*', 'auditbeat-*,*beat*,siem-read*,.kibana*,fakebeat-*'];
 
 describe('Sourcerer', () => {
   before(() => {
-    cleanKibana();
+    esArchiverResetKibana();
     deleteAlertsIndex();
     dataViews.forEach((dataView: string) => postDataView(dataView));
   });
@@ -56,15 +54,19 @@ describe('Sourcerer', () => {
       createUsersAndRoles(usersToCreate, rolesToCreate);
     });
     it(`role(s) ${secReadCasesAllUser.roles.join()} shows error when user does not have permissions`, () => {
-      loginWithUserAndWaitForPageWithoutDateRange(HOSTS_URL, secReadCasesAllUser);
+      loginWithUser(secReadCasesAllUser);
+      visitWithUser(HOSTS_URL, secReadCasesAllUser);
       cy.get(TOASTER).should('have.text', 'Write role required to generate data');
     });
   });
 
   describe('Default scope', () => {
+    before(() => {
+      login();
+    });
     beforeEach(() => {
       cy.clearLocalStorage();
-      loginAndWaitForPage(HOSTS_URL);
+      visit(HOSTS_URL);
     });
 
     it('correctly loads SIEM data view', () => {
@@ -123,23 +125,26 @@ describe('Sourcerer', () => {
     it('adds a pattern to the default index and correctly filters out auditbeat-*', () => {
       openSourcerer();
       isSourcererSelection(`auditbeat-*`);
-      isNotSourcererSelection('beats*');
-      addIndexToDefault('beats*');
-      isHostsStatValue('4 ');
+      isNotSourcererSelection('*beat*');
+      addIndexToDefault('*beat*');
+      isHostsStatValue('1 ');
       openSourcerer();
       openAdvancedSettings();
       isSourcererSelection(`auditbeat-*`);
-      isSourcererSelection('beats*');
+      isSourcererSelection('*beat*');
     });
   });
 });
 describe('Timeline scope', () => {
+  before(() => {
+    login();
+  });
   beforeEach(() => {
     cy.clearLocalStorage();
-    loginAndWaitForPage(TIMELINES_URL);
+    visit(TIMELINES_URL);
   });
 
-  it.skip('correctly loads SIEM data view before and after signals index exists', () => {
+  it('correctly loads SIEM data view before and after signals index exists', () => {
     openTimelineUsingToggle();
     openSourcerer('timeline');
     isDataViewSelection(siemDataViewTitle);
@@ -196,6 +201,7 @@ describe('Timeline scope', () => {
   });
   describe('Alerts checkbox', () => {
     before(() => {
+      login();
       createTimeline(getTimeline()).then((response) =>
         cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('timelineId')
       );
@@ -204,7 +210,7 @@ describe('Timeline scope', () => {
       );
     });
     beforeEach(() => {
-      loginAndWaitForPage(TIMELINES_URL);
+      visit(TIMELINES_URL);
       waitForAlertsIndexToExist();
     });
     it('Modifies timeline to alerts only, and switches to different saved timeline without issue', function () {
@@ -237,7 +243,7 @@ describe('Timeline scope', () => {
       isDataViewSelection(dataViews[1]);
       dataViews[1]
         .split(',')
-        .filter((pattern) => pattern !== 'fakebeat-*')
+        .filter((pattern) => pattern !== 'fakebeat-*' && pattern !== 'siem-read*')
         .forEach((pattern) => isSourcererSelection(pattern));
 
       clickAlertCheckbox();

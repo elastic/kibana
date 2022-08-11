@@ -1,0 +1,112 @@
+[[saved-objects-api-bulk-update]]
+=== Bulk update object API
+++++
+<titleabbrev>Bulk update objects</titleabbrev>
+++++
+
+experimental[] Update the attributes for multiple existing {kib} saved objects.
+
+[[saved-objects-api-bulk-update-request]]
+==== Request
+
+`PUT <kibana host>:<port>/api/saved_objects/_bulk_update`
+
+`PUT <kibana host>:<port>/s/<space_id>/api/saved_objects/_bulk_update`
+
+[[saved-objects-api-bulk-update-path-params]]
+==== Path parameters
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+
+[[saved-objects-api-bulk-update-request-body]]
+==== Request body
+
+`type`::
+  (Required, string) Valid options include `visualization`, `dashboard`, `search`, `index-pattern`, `config`.
+
+`id`::
+  (Required, string) The object ID to update.
+
+`attributes`::
+  (Required, object) The data to persist.
++
+WARNING: When you update, attributes are not validated, which allows you to pass arbitrary and ill-formed data into the API and break {kib}. Make sure any data that you send to the API is properly formed.
+
+`references`::
+  (Optional, array) Objects with `name`, `id`, and `type` properties that describe the other saved objects this object references. To refer to the other saved object, use `name` in the attributes, but never the `id`, which automatically updates during migrations or import/export.
+
+`version`::
+  (Optional, number) Ensures the version matches that of the persisted object.
+  
+`namespace`:: (Optional, string) Identifier for the space in which to update this object. If this is defined, it will supersede the space ID that is in the URL.
+
+[[saved-objects-api-bulk-update-codes]]
+==== Response code
+
+`200`::
+  Indicates a successful call. Note, this HTTP response code indicates that the bulk operation succeeded. Errors pertaining to individual
+  objects will be returned in the response body. Refer to the example below for details.
+
+[[saved-objects-api-bulk-update-example]]
+==== Example
+
+Update three saved objects, where one of them does not exist:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X PUT api/saved_objects/_bulk_update
+[
+  {
+    type: 'visualization',
+    id: 'not an id',
+    attributes: {
+      title: 'An existing visualization',
+    },
+  },
+  {
+    type: 'dashboard',
+    id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
+    attributes: {
+      title: 'An existing dashboard',
+    },
+  {
+    type: 'index-pattern',
+    id: 'logstash-*',
+    attributes: { title: 'my-logstash-pattern' }
+  }
+]
+--------------------------------------------------
+// KIBANA
+
+The API returns the following:
+
+[source,sh]
+--------------------------------------------------
+[
+  {
+    "type": "visualization",
+    "id": "not an id",
+    "error": {
+      "statusCode": 404,
+      "error": "Not Found",
+      "message": "Saved object [visualization/not an id] not found",
+    },
+  },
+  {
+    "type": "dashboard",
+    "id": "be3733a0-9efe-11e7-acb3-3dab96693fab",
+    "version": 2,
+    "attributes": {
+      "title": "An existing dashboard",
+    },
+  },
+  {
+    "type": "index-pattern",
+    "id": "logstash-*",
+    "attributes": { 
+      "title": "my-logstash-pattern",
+    }
+  }
+]
+--------------------------------------------------

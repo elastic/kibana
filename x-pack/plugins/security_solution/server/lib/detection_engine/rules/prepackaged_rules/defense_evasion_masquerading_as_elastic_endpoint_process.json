@@ -12,6 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Suspicious Endpoint Security Parent Process",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type in (\"start\", \"process_started\", \"info\") and\n process.name : (\"esensor.exe\", \"elastic-endpoint.exe\") and\n process.parent.executable != null and\n  /* add FPs here */\n not process.parent.executable : (\"C:\\\\Program Files\\\\Elastic\\\\*\", \n                                  \"C:\\\\Windows\\\\System32\\\\services.exe\", \n                                  \"C:\\\\Windows\\\\System32\\\\WerFault*.exe\", \n                                  \"C:\\\\Windows\\\\System32\\\\wermgr.exe\")\n",
   "risk_score": 47,
   "rule_id": "b41a13c6-ba45-4bab-a534-df53d0cfed6a",
@@ -42,5 +43,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 4
+  "version": 5
 }

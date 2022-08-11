@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { advancedSettingsMock } from 'src/plugins/advanced_settings/public/mocks';
+import { advancedSettingsMock } from '@kbn/advanced-settings-plugin/public/mocks';
 
 import { AdvancedSettingsService } from './advanced_settings_service';
 

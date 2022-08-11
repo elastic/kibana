@@ -6,7 +6,7 @@
  */
 
 import { flow, flatMap, map, flatten, uniq } from 'lodash/fp';
-import { ElasticsearchClient } from 'src/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import {
   SystemIndicesMigrationStatus,
   SystemIndicesMigrationFeature,

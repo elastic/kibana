@@ -13,7 +13,7 @@ import React from 'react';
 import { useLocation } from 'react-router-dom';
 import qs from 'query-string';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
-import { DatePicker } from './';
+import { DatePicker } from '.';
 
 let history: MemoryHistory;
 

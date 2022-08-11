@@ -7,6 +7,7 @@
  */
 
 import type { findLegacyUrlAliases } from './legacy_url_aliases';
+import type { findSharedOriginObjects } from './find_shared_origin_objects';
 import type * as InternalUtils from './internal_utils';
 
 export const mockFindLegacyUrlAliases = jest.fn() as jest.MockedFunction<
@@ -15,6 +16,14 @@ export const mockFindLegacyUrlAliases = jest.fn() as jest.MockedFunction<
 
 jest.mock('./legacy_url_aliases', () => {
   return { findLegacyUrlAliases: mockFindLegacyUrlAliases };
+});
+
+export const mockFindSharedOriginObjects = jest.fn() as jest.MockedFunction<
+  typeof findSharedOriginObjects
+>;
+
+jest.mock('./find_shared_origin_objects', () => {
+  return { findSharedOriginObjects: mockFindSharedOriginObjects };
 });
 
 export const mockRawDocExistsInNamespace = jest.fn() as jest.MockedFunction<

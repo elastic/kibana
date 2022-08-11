@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const { fix } = require('../../src/functions/fix.js');
+const { fix } = require('../../src/functions/fix');
 
 describe('Fix', () => {
   it('numbers', () => {

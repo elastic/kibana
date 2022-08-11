@@ -11,6 +11,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { SeriesConfig, SeriesUrl } from '../../types';
 import { ReportDefinitionField } from './report_definition_field';
+import { TextReportDefinitionField } from './text_report_definition_field';
 import { isStepLevelMetric } from '../../configurations/synthetics/kpi_over_time_config';
 import { SYNTHETICS_STEP_NAME } from '../../configurations/constants/field_names/synthetics';
 
@@ -25,9 +26,12 @@ export function ReportDefinitionCol({
 }) {
   const { setSeries } = useSeriesStorage();
 
-  const { reportDefinitions: selectedReportDefinitions = {} } = series;
+  const {
+    reportDefinitions: selectedReportDefinitions = {},
+    textReportDefinitions: selectedTextReportDefinitions = {},
+  } = series;
 
-  const { definitionFields } = seriesConfig;
+  const { definitionFields, textDefinitionFields } = seriesConfig;
 
   const onChange = (field: string, value?: string[]) => {
     if (!value?.[0]) {
@@ -40,6 +44,21 @@ export function ReportDefinitionCol({
       setSeries(seriesId, {
         ...series,
         reportDefinitions: { ...selectedReportDefinitions, [field]: value },
+      });
+    }
+  };
+
+  const onChangeTextDefinitionField = (field: string, value: string) => {
+    if (isEmpty(value)) {
+      delete selectedTextReportDefinitions[field];
+      setSeries(seriesId, {
+        ...series,
+        textReportDefinitions: { ...selectedTextReportDefinitions },
+      });
+    } else {
+      setSeries(seriesId, {
+        ...series,
+        textReportDefinitions: { ...selectedTextReportDefinitions, [field]: value },
       });
     }
   };
@@ -100,6 +119,20 @@ export function ReportDefinitionCol({
             </EuiFlexItem>
             {nestedFieldElement}
           </>
+        );
+      })}
+
+      {textDefinitionFields?.map((field) => {
+        return (
+          <EuiFlexItem key={field} grow={1}>
+            <TextReportDefinitionField
+              seriesId={seriesId}
+              series={series}
+              seriesConfig={seriesConfig}
+              field={field}
+              onChange={onChangeTextDefinitionField}
+            />
+          </EuiFlexItem>
         );
       })}
     </EuiFlexGroup>

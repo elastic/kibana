@@ -5,48 +5,37 @@
  * 2.0.
  */
 
-import {
-  RuleExecutionLogForExecutorsFactory,
+import type {
+  IRuleExecutionLogService,
   RuleExecutionContext,
   StatusChangeArgs,
-} from '../../rule_execution_log';
+} from '../../rule_monitoring';
 
 export interface IPreviewRuleExecutionLogger {
-  factory: RuleExecutionLogForExecutorsFactory;
-
-  logged: {
-    statusChanges: Array<RuleExecutionContext & StatusChangeArgs>;
-  };
-
-  clearLogs(): void;
+  factory: IRuleExecutionLogService['createClientForExecutors'];
 }
 
-export const createPreviewRuleExecutionLogger = () => {
-  let logged: IPreviewRuleExecutionLogger['logged'] = {
-    statusChanges: [],
+export const createPreviewRuleExecutionLogger = (
+  loggedStatusChanges: Array<RuleExecutionContext & StatusChangeArgs>
+): IPreviewRuleExecutionLogger => {
+  return {
+    factory: ({ context }) => {
+      const spyLogger = {
+        context,
+
+        trace: () => {},
+        debug: () => {},
+        info: () => {},
+        warn: () => {},
+        error: () => {},
+
+        logStatusChange: (args: StatusChangeArgs): Promise<void> => {
+          loggedStatusChanges.push({ ...context, ...args });
+          return Promise.resolve();
+        },
+      };
+
+      return Promise.resolve(spyLogger);
+    },
   };
-
-  const factory: RuleExecutionLogForExecutorsFactory = (
-    savedObjectsClient,
-    eventLogService,
-    logger,
-    context
-  ) => {
-    return {
-      context,
-
-      logStatusChange(args: StatusChangeArgs): Promise<void> {
-        logged.statusChanges.push({ ...context, ...args });
-        return Promise.resolve();
-      },
-    };
-  };
-
-  const clearLogs = (): void => {
-    logged = {
-      statusChanges: [],
-    };
-  };
-
-  return { factory, logged, clearLogs };
 };

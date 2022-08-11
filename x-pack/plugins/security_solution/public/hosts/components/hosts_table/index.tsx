@@ -8,27 +8,25 @@
 import React, { useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { assertUnreachable } from '../../../../common/utility_types';
-import {
+import type {
   Columns,
   Criteria,
   ItemsPerRow,
-  PaginatedTable,
   SortingBasicTable,
 } from '../../../common/components/paginated_table';
+import { PaginatedTable } from '../../../common/components/paginated_table';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { hostsActions, hostsModel, hostsSelectors } from '../../store';
 import { getHostsColumns } from './columns';
 import * as i18n from './translations';
-import {
+import type {
   HostsEdges,
   HostItem,
   HostsSortField,
-  HostsFields,
-  HostRiskSeverity,
 } from '../../../../common/search_strategy/security_solution/hosts';
-import { Direction } from '../../../../common/search_strategy';
-import { HostEcs, OsEcs } from '../../../../common/ecs/host';
+import { HostsFields } from '../../../../common/search_strategy/security_solution/hosts';
+import type { Direction, RiskSeverity } from '../../../../common/search_strategy';
+import type { HostEcs, OsEcs } from '../../../../common/ecs/host';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { SecurityPageName } from '../../../../common/constants';
 import { HostsTableType } from '../../store/model';
@@ -43,6 +41,7 @@ interface HostsTableProps {
   isInspect: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
+  setQuerySkip: (skip: boolean) => void;
   showMorePagesIndicator: boolean;
   totalCount: number;
   type: hostsModel.HostsType;
@@ -53,7 +52,7 @@ export type HostsTableColumns = [
   Columns<HostItem['lastSeen']>,
   Columns<OsEcs['name']>,
   Columns<OsEcs['version']>,
-  Columns<HostRiskSeverity>?
+  Columns<RiskSeverity>?
 ];
 
 const rowItems: ItemsPerRow[] = [
@@ -78,6 +77,7 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
   isInspect,
   loading,
   loadPage,
+  setQuerySkip,
   showMorePagesIndicator,
   totalCount,
   type,
@@ -135,7 +135,7 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
   const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
 
   const dispatchSeverityUpdate = useCallback(
-    (s: HostRiskSeverity) => {
+    (s: RiskSeverity) => {
       dispatch(
         hostsActions.updateHostRiskScoreSeverityFilter({
           severitySelection: [s],
@@ -173,6 +173,7 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
       loadPage={loadPage}
       onChange={onChange}
       pageOfItems={data}
+      setQuerySkip={setQuerySkip}
       showMorePagesIndicator={showMorePagesIndicator}
       sorting={sorting}
       totalCount={fakeTotalCount}
@@ -202,7 +203,6 @@ const getNodeField = (field: HostsFields): string => {
     case HostsFields.lastSeen:
       return 'node.lastSeen';
   }
-  assertUnreachable(field);
 };
 
 export const HostsTable = React.memo(HostsTableComponent);

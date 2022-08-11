@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from 'kibana/server';
+import { PluginInitializerContext } from '@kbn/core/server';
 import { FixturePlugin } from './plugin';
 
 export const plugin = (initContext: PluginInitializerContext) => new FixturePlugin(initContext);

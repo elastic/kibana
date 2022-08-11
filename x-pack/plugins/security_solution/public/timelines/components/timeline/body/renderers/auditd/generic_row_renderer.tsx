@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { IconType } from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import React from 'react';
 
-import { RowRendererId, RowRenderer } from '../../../../../../../common/types/timeline';
+import type { RowRenderer } from '../../../../../../../common/types/timeline';
+import { RowRendererId } from '../../../../../../../common/types/timeline';
 
 import { RowRendererContainer } from '../row_renderer';
 import { AuditdGenericDetails } from './generic_details';
@@ -34,10 +35,9 @@ export const createGenericAuditRowRenderer = ({
       action.toLowerCase() === actionName
     );
   },
-  renderRow: ({ browserFields, data, isDraggable, timelineId }) => (
+  renderRow: ({ data, isDraggable, timelineId }) => (
     <RowRendererContainer>
       <AuditdGenericDetails
-        browserFields={browserFields}
         data={data}
         isDraggable={isDraggable}
         contextId={`${actionName}-${timelineId}`}
@@ -68,10 +68,9 @@ export const createGenericFileRowRenderer = ({
       action.toLowerCase() === actionName
     );
   },
-  renderRow: ({ browserFields, data, isDraggable, timelineId }) => (
+  renderRow: ({ data, isDraggable, timelineId }) => (
     <RowRendererContainer>
       <AuditdGenericFileDetails
-        browserFields={browserFields}
         contextId={`${actionName}-${timelineId}`}
         data={data}
         fileIcon={fileIcon}

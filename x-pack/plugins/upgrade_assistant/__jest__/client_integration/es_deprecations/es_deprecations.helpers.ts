@@ -7,7 +7,8 @@
 import { act } from 'react-dom/test-utils';
 
 import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
-import { EsDeprecations } from '../../../public/application/components/es_deprecations';
+import { HttpSetup } from '@kbn/core/public';
+import { EsDeprecations } from '../../../public/application/components';
 import { WithAppDependencies } from '../helpers';
 
 const testBedConfig: AsyncTestBedConfig = {
@@ -38,7 +39,7 @@ const createActions = (testBed: TestBed) => {
       component.update();
     },
     clickDeprecationRowAt: async (
-      deprecationType: 'mlSnapshot' | 'indexSetting' | 'reindex' | 'default',
+      deprecationType: 'mlSnapshot' | 'indexSetting' | 'reindex' | 'default' | 'clusterSetting',
       index: number
     ) => {
       await act(async () => {
@@ -125,6 +126,16 @@ const createActions = (testBed: TestBed) => {
     },
   };
 
+  const clusterSettingsDeprecationFlyout = {
+    clickDeleteSettingsButton: async () => {
+      await act(async () => {
+        find('deleteClusterSettingsButton').simulate('click');
+      });
+
+      component.update();
+    },
+  };
+
   const reindexDeprecationFlyout = {
     clickReindexButton: async () => {
       await act(async () => {
@@ -142,14 +153,16 @@ const createActions = (testBed: TestBed) => {
     mlDeprecationFlyout,
     reindexDeprecationFlyout,
     indexSettingsDeprecationFlyout,
+    clusterSettingsDeprecationFlyout,
   };
 };
 
 export const setupElasticsearchPage = async (
+  httpSetup: HttpSetup,
   overrides?: Record<string, unknown>
 ): Promise<ElasticsearchTestBed> => {
   const initTestBed = registerTestBed(
-    WithAppDependencies(EsDeprecations, overrides),
+    WithAppDependencies(EsDeprecations, httpSetup, overrides),
     testBedConfig
   );
   const testBed = await initTestBed();

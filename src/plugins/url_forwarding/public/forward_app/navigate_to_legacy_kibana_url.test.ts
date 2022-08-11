@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { ForwardDefinition } from '../index';
+import { ForwardDefinition } from '..';
 import { navigateToLegacyKibanaUrl } from './navigate_to_legacy_kibana_url';
-import { CoreStart } from '../../../../core/public';
-import { coreMock } from '../../../../core/public/mocks';
+import { CoreStart } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
 
 describe('migrate legacy kibana urls', () => {
   let forwardDefinitions: ForwardDefinition[];

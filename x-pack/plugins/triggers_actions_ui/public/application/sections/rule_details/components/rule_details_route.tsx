@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { useState, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { ToastsApi } from 'kibana/public';
+import { ToastsApi } from '@kbn/core/public';
 import { EuiSpacer } from '@elastic/eui';
 import { RuleType, ActionType, ResolvedRule } from '../../../../types';
 import { RuleDetailsWithApi as RuleDetails } from './rule_details';
@@ -69,16 +69,17 @@ export const RuleDetailsRoute: React.FunctionComponent<RuleDetailsRouteProps> = 
       if (spacesApi && outcome === 'aliasMatch') {
         // This rule has been resolved from a legacy URL - redirect the user to the new URL and display a toast.
         const path = basePath.prepend(`insightsAndAlerting/triggersActions/rule/${rule.id}`);
-        spacesApi.ui.redirectLegacyUrl(
+        spacesApi.ui.redirectLegacyUrl({
           path,
-          i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.redirectObjectNoun', {
-            defaultMessage: 'rule',
-          })
-        );
+          aliasPurpose: (rule as ResolvedRule).alias_purpose,
+          objectNoun: i18n.translate(
+            'xpack.triggersActionsUI.sections.ruleDetails.redirectObjectNoun',
+            { defaultMessage: 'rule' }
+          ),
+        });
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rule]);
+  }, [rule, spacesApi, basePath]);
 
   const getLegacyUrlConflictCallout = () => {
     const outcome = (rule as ResolvedRule).outcome;

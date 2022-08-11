@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import { RuleExecutionStatus } from '../../../../../../common/detection_engine/schemas/common';
-import {
-  GetRuleExecutionEventsResponse,
+import type {
+  GetInstalledIntegrationsResponse,
   RulesSchema,
 } from '../../../../../../common/detection_engine/schemas/response';
 
 import { getRulesSchemaMock } from '../../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import { savedRuleMock, rulesMock } from '../mock';
 
-import {
+import type {
   PatchRuleProps,
   CreateRulesProps,
   UpdateRulesProps,
@@ -60,23 +59,33 @@ export const fetchRuleById = jest.fn(
 export const fetchRules = async (_: FetchRulesProps): Promise<FetchRulesResponse> =>
   Promise.resolve(rulesMock);
 
-export const fetchRuleExecutionEvents = async ({
-  ruleId,
+export const fetchTags = async ({ signal }: { signal: AbortSignal }): Promise<string[]> =>
+  Promise.resolve(['elastic', 'love', 'quality', 'code']);
+
+// do not delete
+export const fetchInstalledIntegrations = async ({
+  packages,
   signal,
 }: {
-  ruleId: string;
+  packages?: string[];
   signal?: AbortSignal;
-}): Promise<GetRuleExecutionEventsResponse> => {
+}): Promise<GetInstalledIntegrationsResponse> => {
   return Promise.resolve({
-    events: [
+    installed_integrations: [
       {
-        date: '2021-12-29T10:42:59.996Z',
-        status: RuleExecutionStatus.succeeded,
-        message: 'Rule executed successfully',
+        package_name: 'atlassian_bitbucket',
+        package_title: 'Atlassian Bitbucket',
+        package_version: '1.0.1',
+        integration_name: 'audit',
+        integration_title: 'Audit Logs',
+        is_enabled: true,
+      },
+      {
+        package_name: 'system',
+        package_title: 'System',
+        package_version: '1.6.4',
+        is_enabled: true,
       },
     ],
   });
 };
-
-export const fetchTags = async ({ signal }: { signal: AbortSignal }): Promise<string[]> =>
-  Promise.resolve(['elastic', 'love', 'quality', 'code']);

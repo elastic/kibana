@@ -24,20 +24,58 @@ import { i18n } from '@kbn/i18n';
 
 import { LicensingLogic } from '../../../../../shared/licensing';
 import { ApiKey } from '../../../../components/shared/api_key';
-import {
-  PUBLIC_KEY_LABEL,
-  CONSUMER_KEY_LABEL,
-  BASE_URI_LABEL,
-  BASE_URL_LABEL,
-  CLIENT_ID_LABEL,
-  CLIENT_SECRET_LABEL,
-  REMOVE_BUTTON,
-} from '../../../../constants';
+import { PUBLIC_KEY_LABEL, CONSUMER_KEY_LABEL, REMOVE_BUTTON } from '../../../../constants';
+
 import { Configuration } from '../../../../types';
 
-import { AddSourceLogic } from './add_source_logic';
+import { ExternalConnectorFormFields } from './add_external_connector';
+import { ExternalConnectorDocumentation } from './add_external_connector';
+import { AddSourceLogic, SourceConfigFormElement } from './add_source_logic';
 import { ConfigDocsLinks } from './config_docs_links';
-import { OAUTH_SAVE_CONFIG_BUTTON, OAUTH_BACK_BUTTON, OAUTH_STEP_2 } from './constants';
+import { OAUTH_SAVE_CONFIG_BUTTON, OAUTH_BACK_BUTTON } from './constants';
+
+const clientIdSecretFields: SourceConfigFormElement[] = [
+  {
+    key: 'client_id',
+    label: i18n.translate(
+      'xpack.enterpriseSearch.workplaceSearch.contentSource.saveConfig.clientIDLabel',
+      {
+        defaultMessage: 'Client ID',
+      }
+    ),
+  },
+  {
+    key: 'client_secret',
+    label: i18n.translate(
+      'xpack.enterpriseSearch.workplaceSearch.contentSource.saveConfig.clientSecretLabel',
+      {
+        defaultMessage: 'Client Secret',
+      }
+    ),
+  },
+];
+
+const baseUrlFields: SourceConfigFormElement[] = [
+  {
+    key: 'base_url',
+    label: i18n.translate(
+      'xpack.enterpriseSearch.workplaceSearch.contentSource.saveConfig.baseUrlLabel',
+      {
+        defaultMessage: 'Base URL',
+      }
+    ),
+  },
+];
+
+const getInternalConnectorConfigurableFields = (
+  needsClientIdSecret: boolean,
+  needsBaseUrl: boolean
+): SourceConfigFormElement[] => {
+  return [
+    ...(needsClientIdSecret ? clientIdSecretFields : []),
+    ...(needsBaseUrl ? baseUrlFields : []),
+  ];
+};
 
 interface SaveConfigProps {
   header: React.ReactNode;
@@ -50,30 +88,29 @@ interface SaveConfigProps {
 
 export const SaveConfig: React.FC<SaveConfigProps> = ({
   name,
-  configuration: {
-    isPublicKey,
-    needsBaseUrl,
-    documentationUrl,
-    applicationPortalUrl,
-    applicationLinkTitle,
-    baseUrlTitle,
-  },
+  configuration,
   advanceStep,
   goBackStep,
   onDeleteConfig,
   header,
 }) => {
+  const { documentationUrl, applicationPortalUrl, applicationLinkTitle } = configuration;
+
   const { hasPlatinumLicense } = useValues(LicensingLogic);
 
-  const { setClientIdValue, setClientSecretValue, setBaseUrlValue } = useActions(AddSourceLogic);
+  const { setConfiguredField } = useActions(AddSourceLogic);
 
-  const { sourceConfigData, buttonLoading, clientIdValue, clientSecretValue, baseUrlValue } =
-    useValues(AddSourceLogic);
+  const { sourceConfigData, buttonLoading, configuredFields } = useValues(AddSourceLogic);
 
-  const {
-    accountContextOnly,
-    configuredFields: { publicKey, consumerKey },
-  } = sourceConfigData;
+  const { accountContextOnly, serviceType, configurableFields = [] } = sourceConfigData;
+
+  const isPublicKey = configuredFields.public_key && configuredFields.consumer_key;
+  const needsClientIdSecret = !isPublicKey;
+
+  const formFields: SourceConfigFormElement[] =
+    serviceType === 'external'
+      ? configurableFields
+      : getInternalConnectorConfigurableFields(needsClientIdSecret, configuration.needsBaseUrl);
 
   const handleFormSubmission = (e: FormEvent) => {
     e.preventDefault();
@@ -107,119 +144,83 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
     </EuiFormRow>
   );
 
-  const publicKeyStep1 = (
-    <EuiFlexGroup justifyContent="flexStart" direction="column" responsive={false}>
-      <ConfigDocsLinks
-        name={name}
-        documentationUrl={documentationUrl}
-        applicationPortalUrl={applicationPortalUrl}
-        applicationLinkTitle={applicationLinkTitle}
-      />
-      <EuiSpacer />
-      <EuiFlexGroup direction="column" justifyContent="flexStart" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <ApiKey label={PUBLIC_KEY_LABEL} apiKey={publicKey} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <ApiKey label={CONSUMER_KEY_LABEL} apiKey={consumerKey} />
+  const oauthStep = {
+    title: i18n.translate(
+      'xpack.enterpriseSearch.workplaceSearch.contentSource.saveConfig.oauthStep1',
+      {
+        defaultMessage: "Create an OAuth app in your organization's {sourceName} account",
+        values: { sourceName: name },
+      }
+    ),
+    children: (
+      <EuiFlexGroup justifyContent="flexStart" direction="column" responsive={false}>
+        <ConfigDocsLinks
+          name={name}
+          documentationUrl={documentationUrl}
+          applicationPortalUrl={applicationPortalUrl}
+          applicationLinkTitle={applicationLinkTitle}
+        />
+        {isPublicKey && (
+          <>
+            <EuiSpacer />
+            <EuiFlexGroup direction="column" justifyContent="flexStart" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <ApiKey label={PUBLIC_KEY_LABEL} apiKey={configuredFields.public_key} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <ApiKey label={CONSUMER_KEY_LABEL} apiKey={configuredFields.consumer_key} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>
+        )}
+      </EuiFlexGroup>
+    ),
+  };
+  const configurationStep = {
+    title: i18n.translate(
+      'xpack.enterpriseSearch.workplaceSearch.contentSource.saveConfig.oauthStep2',
+      {
+        defaultMessage: 'Provide the appropriate configuration information',
+      }
+    ),
+    children: (
+      <EuiFlexGroup direction="column" responsive={false}>
+        <EuiFlexItem>
+          <EuiForm>
+            {serviceType === 'external' && <ExternalConnectorFormFields />}
+            {formFields.map(({ key, label }, index) => (
+              <EuiFormRow key={index} label={label}>
+                <EuiFieldText
+                  value={configuredFields[key]}
+                  required
+                  type="text"
+                  autoComplete="off"
+                  onChange={(e) => setConfiguredField(key, e.target.value)}
+                  name={key}
+                />
+              </EuiFormRow>
+            ))}
+            <EuiSpacer />
+            {formActions}
+          </EuiForm>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer />
-    </EuiFlexGroup>
-  );
+    ),
+  };
 
-  const credentialsStep1 = (
-    <ConfigDocsLinks
-      name={name}
-      documentationUrl={documentationUrl}
-      applicationPortalUrl={applicationPortalUrl}
-      applicationLinkTitle={applicationLinkTitle}
-    />
-  );
-
-  const publicKeyStep2 = (
-    <>
-      <EuiFormRow label={BASE_URI_LABEL}>
-        <EuiFieldText
-          value={baseUrlValue}
-          required
-          type="text"
-          autoComplete="off"
-          onChange={(e) => setBaseUrlValue(e.target.value)}
-          name="base-uri"
-        />
-      </EuiFormRow>
-      <EuiSpacer />
-      {formActions}
-    </>
-  );
-
-  const credentialsStep2 = (
-    <EuiFlexGroup direction="column" responsive={false}>
-      <EuiFlexItem>
-        <EuiForm>
-          <EuiFormRow label={CLIENT_ID_LABEL}>
-            <EuiFieldText
-              value={clientIdValue}
-              required
-              type="text"
-              autoComplete="off"
-              onChange={(e) => setClientIdValue(e.target.value)}
-              name="client-id"
-            />
-          </EuiFormRow>
-          <EuiFormRow label={CLIENT_SECRET_LABEL}>
-            <EuiFieldText
-              value={clientSecretValue}
-              required
-              type="text"
-              autoComplete="off"
-              onChange={(e) => setClientSecretValue(e.target.value)}
-              name="client-secret"
-            />
-          </EuiFormRow>
-          {needsBaseUrl && (
-            <EuiFormRow label={baseUrlTitle || BASE_URL_LABEL}>
-              <EuiFieldText
-                value={baseUrlValue}
-                required
-                type="text"
-                autoComplete="off"
-                onChange={(e) => setBaseUrlValue(e.target.value)}
-                name="base-url"
-              />
-            </EuiFormRow>
-          )}
-          <EuiSpacer />
-          {formActions}
-        </EuiForm>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-
-  const oauthSteps = (sourceName: string) => [
-    i18n.translate('xpack.enterpriseSearch.workplaceSearch.contentSource.saveConfig.oauthStep1', {
-      defaultMessage: "Create an OAuth app in your organization's {sourceName} account",
-      values: { sourceName },
-    }),
-    OAUTH_STEP_2,
-  ];
-
-  const configSteps = [
-    {
-      title: oauthSteps(name)[0],
-      children: isPublicKey ? publicKeyStep1 : credentialsStep1,
-    },
-    {
-      title: oauthSteps(name)[1],
-      children: isPublicKey ? publicKeyStep2 : credentialsStep2,
-    },
-  ];
+  const configSteps =
+    serviceType === 'external' ? [configurationStep] : [oauthStep, configurationStep];
 
   return (
     <>
       {header}
       <EuiSpacer size="l" />
+      {serviceType === 'external' && (
+        <>
+          <ExternalConnectorDocumentation name={name} documentationUrl={documentationUrl} />
+          <EuiSpacer size="l" />
+        </>
+      )}
       <form onSubmit={handleFormSubmission}>
         <EuiSteps steps={configSteps} className="adding-a-source__config-steps" />
       </form>

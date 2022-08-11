@@ -20,13 +20,13 @@ import {
 
 describe('ES deprecations table', () => {
   let testBed: ElasticsearchTestBed;
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
-
-  afterAll(() => {
-    server.restore();
-  });
-
+  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
   beforeEach(async () => {
+    const mockEnvironment = setupEnvironment();
+    httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
+    httpSetup = mockEnvironment.httpSetup;
+
     httpRequestsMockHelpers.setLoadEsDeprecationsResponse(esDeprecationsMockResponse);
     httpRequestsMockHelpers.setUpgradeMlSnapshotStatusResponse({
       nodeId: 'my_node',
@@ -34,7 +34,7 @@ describe('ES deprecations table', () => {
       jobId: MOCK_JOB_ID,
       status: 'idle',
     });
-    httpRequestsMockHelpers.setReindexStatusResponse({
+    httpRequestsMockHelpers.setReindexStatusResponse('reindex_index', {
       reindexOp: null,
       warnings: [],
       hasRequiredPrivileges: true,
@@ -47,7 +47,7 @@ describe('ES deprecations table', () => {
     httpRequestsMockHelpers.setLoadRemoteClustersResponse([]);
 
     await act(async () => {
-      testBed = await setupElasticsearchPage({ isReadOnlyMode: false });
+      testBed = await setupElasticsearchPage(httpSetup, { isReadOnlyMode: false });
     });
 
     testBed.component.update();
@@ -66,7 +66,6 @@ describe('ES deprecations table', () => {
 
   it('refreshes deprecation data', async () => {
     const { actions } = testBed;
-    const totalRequests = server.requests.length;
 
     await actions.table.clickRefreshButton();
 
@@ -74,21 +73,24 @@ describe('ES deprecations table', () => {
     const reindexDeprecation = esDeprecationsMockResponse.deprecations[3];
 
     // Since upgradeStatusMockResponse includes ML and reindex actions (which require fetching status), there will be 4 requests made
-    expect(server.requests.length).toBe(totalRequests + 4);
-    expect(server.requests[server.requests.length - 4].url).toBe(
-      `${API_BASE_PATH}/es_deprecations`
+    expect(httpSetup.get).toHaveBeenCalledWith(
+      `${API_BASE_PATH}/es_deprecations`,
+      expect.anything()
     );
-    expect(server.requests[server.requests.length - 3].url).toBe(
+    expect(httpSetup.get).toHaveBeenCalledWith(
       `${API_BASE_PATH}/ml_snapshots/${(mlDeprecation.correctiveAction as MlAction).jobId}/${
         (mlDeprecation.correctiveAction as MlAction).snapshotId
-      }`
+      }`,
+      expect.anything()
     );
-    expect(server.requests[server.requests.length - 2].url).toBe(
-      `${API_BASE_PATH}/reindex/${reindexDeprecation.index}`
+    expect(httpSetup.get).toHaveBeenCalledWith(
+      `${API_BASE_PATH}/reindex/${reindexDeprecation.index}`,
+      expect.anything()
     );
 
-    expect(server.requests[server.requests.length - 1].url).toBe(
-      `${API_BASE_PATH}/ml_upgrade_mode`
+    expect(httpSetup.get).toHaveBeenCalledWith(
+      `${API_BASE_PATH}/ml_upgrade_mode`,
+      expect.anything()
     );
   });
 
@@ -111,7 +113,9 @@ describe('ES deprecations table', () => {
       httpRequestsMockHelpers.setLoadRemoteClustersResponse(['test_remote_cluster']);
 
       await act(async () => {
-        testBed = await setupElasticsearchPage({ isReadOnlyMode: false });
+        testBed = await setupElasticsearchPage(httpSetup, {
+          isReadOnlyMode: false,
+        });
       });
 
       testBed.component.update();
@@ -217,7 +221,9 @@ describe('ES deprecations table', () => {
       });
 
       await act(async () => {
-        testBed = await setupElasticsearchPage({ isReadOnlyMode: false });
+        testBed = await setupElasticsearchPage(httpSetup, {
+          isReadOnlyMode: false,
+        });
       });
 
       testBed.component.update();
@@ -299,7 +305,7 @@ describe('ES deprecations table', () => {
       httpRequestsMockHelpers.setLoadEsDeprecationsResponse(noDeprecationsResponse);
 
       await act(async () => {
-        testBed = await setupElasticsearchPage({ isReadOnlyMode: false });
+        testBed = await setupElasticsearchPage(httpSetup, { isReadOnlyMode: false });
       });
 
       testBed.component.update();

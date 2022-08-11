@@ -7,10 +7,11 @@
  */
 
 import _ from 'lodash';
-import { Datatable } from '../../../../../plugins/expressions/public';
-import { esFilters, Filter } from '../../../public';
-import { getIndexPatterns, getSearchService } from '../../../public/services';
+import { Datatable } from '@kbn/expressions-plugin/public';
+import { compareFilters, COMPARE_ALL_OPTIONS, Filter, toggleFilterNegated } from '@kbn/es-query';
+import { getIndexPatterns, getSearchService } from '../../services';
 import { AggConfigSerialized } from '../../../common/search/aggs';
+import { mapAndFlattenFilters } from '../../query';
 
 interface ValueClickDataContext {
   data: Array<{
@@ -135,7 +136,7 @@ export const createFiltersFromValueClickAction = async ({
         if (filter) {
           filter.forEach((f) => {
             if (negate) {
-              f = esFilters.toggleFilterNegated(f);
+              f = toggleFilterNegated(f);
             }
             filters.push(f);
           });
@@ -143,7 +144,7 @@ export const createFiltersFromValueClickAction = async ({
       })
   );
 
-  return _.uniqWith(esFilters.mapAndFlattenFilters(filters), (a, b) =>
-    esFilters.compareFilters(a, b, esFilters.COMPARE_ALL_OPTIONS)
+  return _.uniqWith(mapAndFlattenFilters(filters), (a, b) =>
+    compareFilters(a, b, COMPARE_ALL_OPTIONS)
   );
 };

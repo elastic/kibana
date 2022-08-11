@@ -9,14 +9,11 @@ import React, { useCallback } from 'react';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { Ast } from '@kbn/interpreter';
 import deepEqual from 'react-fast-compare';
-import {
-  ExpressionAstExpression,
-  ExpressionValue,
-} from '../../../../../../src/plugins/expressions';
+import { ExpressionAstExpression, ExpressionValue } from '@kbn/expressions-plugin/common';
 import { findExpressionType } from '../../lib/find_expression_type';
-import { getId } from '../../lib/get_id';
+
 // @ts-expect-error unconverted action function
-import { createAsset } from '../../state/actions/assets';
+import { setAsset } from '../../state/actions/assets';
 import {
   fetchContext,
   setArgument as setArgumentValue,
@@ -29,6 +26,7 @@ import {
   getSelectedPage,
   getContextForIndex,
   getGlobalFilterGroups,
+  getFullWorkpadPersisted,
 } from '../../state/selectors/workpad';
 import { getAssets } from '../../state/selectors/assets';
 // @ts-expect-error unconverted lib
@@ -36,6 +34,8 @@ import { findExistingAsset } from '../../lib/find_existing_asset';
 import { FunctionForm as Component } from './function_form';
 import { Args, ArgType, ArgTypeDef } from '../../expression_types/types';
 import { State, ExpressionContext, CanvasElement, AssetType } from '../../../types';
+import { useNotifyService, useWorkpadService } from '../../services';
+import { createAsset, notifyError } from '../../lib/assets';
 
 interface FunctionFormProps {
   name: string;
@@ -54,6 +54,9 @@ interface FunctionFormProps {
 export const FunctionForm: React.FunctionComponent<FunctionFormProps> = (props) => {
   const { expressionIndex, ...restProps } = props;
   const { nextArgType, path, parentPath, argType } = restProps;
+  const service = useWorkpadService();
+  const notifyService = useNotifyService();
+
   const dispatch = useDispatch();
   const context = useSelector<State, ExpressionContext>(
     (state) => getContextForIndex(state, parentPath, expressionIndex),
@@ -70,11 +73,15 @@ export const FunctionForm: React.FunctionComponent<FunctionFormProps> = (props) 
     shallowEqual
   );
 
+  const workpad = useSelector((state: State) => getFullWorkpadPersisted(state));
+
   const addArgument = useCallback(
     (argName: string, argValue: string | Ast | null) => () => {
-      dispatch(addArgumentValue({ element, pageId, argName, value: argValue, path }));
+      dispatch(
+        addArgumentValue({ elementId: element?.id, pageId, argName, value: argValue, path })
+      );
     },
-    [dispatch, element, pageId, path]
+    [dispatch, element?.id, pageId, path]
   );
 
   const updateContext = useCallback(() => {
@@ -83,9 +90,11 @@ export const FunctionForm: React.FunctionComponent<FunctionFormProps> = (props) 
 
   const setArgument = useCallback(
     (argName: string, valueIndex: number) => (value: string | Ast | null) => {
-      dispatch(setArgumentValue({ element, pageId, argName, value, valueIndex, path }));
+      dispatch(
+        setArgumentValue({ elementId: element?.id, pageId, argName, value, valueIndex, path })
+      );
     },
-    [dispatch, element, pageId, path]
+    [dispatch, element?.id, pageId, path]
   );
 
   const deleteArgument = useCallback(
@@ -102,13 +111,18 @@ export const FunctionForm: React.FunctionComponent<FunctionFormProps> = (props) 
   const onAssetAddDispatch = useCallback(
     (type: AssetType['type'], content: AssetType['value']) => {
       // make the ID here and pass it into the action
-      const assetId = getId('asset');
-      dispatch(createAsset(type, content, assetId));
+      const asset = createAsset(type, content);
 
-      // then return the id, so the caller knows the id that will be created
-      return assetId;
+      return service
+        .updateAssets(workpad.id, { ...workpad.assets, [asset.id]: asset })
+        .then((res) => {
+          dispatch(setAsset(asset));
+          // then return the id, so the caller knows the id that will be created
+          return asset.id;
+        })
+        .catch((error) => notifyError(error, notifyService.error));
     },
-    [dispatch]
+    [dispatch, notifyService, service, workpad.assets, workpad.id]
   );
 
   const onAssetAdd = useCallback(

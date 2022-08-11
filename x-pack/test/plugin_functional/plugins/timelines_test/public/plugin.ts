@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Plugin, CoreStart, CoreSetup, AppMountParameters } from 'kibana/public';
+import { Plugin, CoreStart, CoreSetup, AppMountParameters } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { TimelinesUIStart } from '../../../../../plugins/timelines/public';
+import { TimelinesUIStart } from '@kbn/timelines-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { renderApp } from './applications/timelines_test';
-import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
 
 export type TimelinesTestPluginSetup = void;
 export type TimelinesTestPluginStart = void;

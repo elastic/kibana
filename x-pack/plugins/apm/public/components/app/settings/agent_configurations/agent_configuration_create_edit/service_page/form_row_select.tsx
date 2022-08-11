@@ -5,23 +5,24 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
+  EuiComboBox,
+  EuiComboBoxOptionOption,
   EuiDescribedFormGroup,
-  EuiSelectOption,
   EuiFormRow,
 } from '@elastic/eui';
-import { SelectWithPlaceholder } from '../../../../../shared/select_with_placeholder';
-
+import { i18n } from '@kbn/i18n';
+import React, { useMemo } from 'react';
 interface Props {
   title: string;
   description: string;
   fieldLabel: string;
   isLoading: boolean;
-  options?: EuiSelectOption[];
+  options?: Array<EuiComboBoxOptionOption<string>>;
+  isDisabled: boolean;
   value?: string;
-  disabled: boolean;
-  onChange: (event: React.ChangeEvent<HTMLSelectElement>) => void;
+  onChange: (value?: string) => void;
+  dataTestSubj?: string;
 }
 
 export function FormRowSelect({
@@ -30,10 +31,23 @@ export function FormRowSelect({
   fieldLabel,
   isLoading,
   options,
-  value,
-  disabled,
+  isDisabled,
   onChange,
+  value,
+  dataTestSubj,
 }: Props) {
+  const selectedOptions = useMemo(() => {
+    const optionFound = options?.find((option) => option.value === value);
+    return optionFound ? [optionFound] : undefined;
+  }, [options, value]);
+
+  const handleOnChange = (
+    nextSelectedOptions: Array<EuiComboBoxOptionOption<string>>
+  ) => {
+    const [selectedOption] = nextSelectedOptions;
+    onChange(selectedOption.value);
+  };
+
   return (
     <EuiDescribedFormGroup
       fullWidth
@@ -41,12 +55,19 @@ export function FormRowSelect({
       description={description}
     >
       <EuiFormRow label={fieldLabel}>
-        <SelectWithPlaceholder
+        <EuiComboBox
+          isClearable={false}
           isLoading={isLoading}
+          singleSelection={{ asPlainText: true }}
           options={options}
-          value={value}
-          disabled={disabled}
-          onChange={onChange}
+          isDisabled={isDisabled}
+          selectedOptions={selectedOptions}
+          onChange={handleOnChange}
+          placeholder={i18n.translate(
+            'xpack.apm.agentConfig.servicePage.environment.placeholder',
+            { defaultMessage: 'Select Option' }
+          )}
+          data-test-subj={dataTestSubj}
         />
       </EuiFormRow>
     </EuiDescribedFormGroup>

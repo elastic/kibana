@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from 'src/core/server';
+import type { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import type { CheckSavedObjectsPrivileges } from '../authorization';
 import { Actions } from '../authorization';
@@ -26,7 +26,7 @@ describe('ensureAuthorized', () => {
     const errors = {
       decorateForbiddenError: jest.fn().mockImplementation((err) => err),
       decorateGeneralError: jest.fn().mockImplementation((err) => err),
-    } as unknown as jest.Mocked<SavedObjectsClientContract['errors']>;
+    } as unknown as jest.Mocked<typeof SavedObjectsErrorHelpers>;
     const checkSavedObjectsPrivilegesAsCurrentUser: jest.MockedFunction<CheckSavedObjectsPrivileges> =
       jest.fn();
     return { actions, errors, checkSavedObjectsPrivilegesAsCurrentUser };

@@ -21,10 +21,10 @@ import React, { Component, Fragment } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { CodeEditorField } from '@kbn/kibana-react-plugin/public';
 import type { monaco } from '@kbn/monaco';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import { CodeEditorField } from '../../../../../../../../../src/plugins/kibana_react/public';
 import type { RoleIndexPrivilege } from '../../../../../../common/model';
 import type { IndicesAPIClient } from '../../../indices_api_client';
 import type { RoleValidator } from '../../validate_role';

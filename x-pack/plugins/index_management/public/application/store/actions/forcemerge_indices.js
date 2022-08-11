@@ -8,7 +8,7 @@
 import { createAction } from 'redux-actions';
 import { i18n } from '@kbn/i18n';
 import { forcemergeIndices as request } from '../../services';
-import { clearRowStatus, reloadIndices } from '../actions';
+import { clearRowStatus, reloadIndices } from '.';
 import { notificationService } from '../../services/notification';
 
 export const forcemergeIndicesStart = createAction('INDEX_MANAGEMENT_FORCEMERGE_INDICES_START');

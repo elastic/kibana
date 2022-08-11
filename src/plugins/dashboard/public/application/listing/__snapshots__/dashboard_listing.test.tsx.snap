@@ -22,6 +22,37 @@ exports[`after fetch When given a title that matches multiple dashboards, filter
   title="search by title"
 >
   <TableListView
+    application={
+      Object {
+        "applications$": BehaviorSubject {
+          "_value": Map {},
+          "closed": false,
+          "currentObservers": null,
+          "hasError": false,
+          "isStopped": false,
+          "observers": Array [],
+          "thrownError": null,
+        },
+        "capabilities": Object {
+          "catalogue": Object {},
+          "management": Object {},
+          "navLinks": Object {},
+        },
+        "currentAppId$": Observable {
+          "source": Subject {
+            "closed": false,
+            "currentObservers": null,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+        },
+        "getUrlForApp": [MockFunction],
+        "navigateToApp": [MockFunction],
+        "navigateToUrl": [MockFunction],
+      }
+    }
     createItem={[Function]}
     deleteItems={[Function]}
     editItem={[Function]}
@@ -29,7 +60,7 @@ exports[`after fetch When given a title that matches multiple dashboards, filter
       <EuiEmptyPrompt
         actions={
           <EuiButton
-            data-test-subj="createDashboardPromptButton"
+            data-test-subj="newItemButton"
             fill={true}
             iconType="plusInCircle"
             onClick={[Function]}
@@ -62,6 +93,7 @@ exports[`after fetch When given a title that matches multiple dashboards, filter
         iconType="dashboardApp"
         title={
           <h1
+            data-test-subj="emptyListPrompt"
             id="dashboardListingHeading"
           >
             Create your first dashboard
@@ -74,8 +106,6 @@ exports[`after fetch When given a title that matches multiple dashboards, filter
     findItems={[Function]}
     headingId="dashboardListingHeading"
     initialFilter="\\"search by title\\""
-    initialPageSize={20}
-    listingLimit={100}
     rowHeader="title"
     searchFilters={Array []}
     tableCaption="Dashboards"
@@ -99,7 +129,6 @@ exports[`after fetch When given a title that matches multiple dashboards, filter
     theme={
       Object {
         "theme$": Observable {
-          "_isScalar": false,
           "_subscribe": [Function],
         },
       }
@@ -142,6 +171,37 @@ exports[`after fetch initialFilter 1`] = `
   redirectTo={[MockFunction]}
 >
   <TableListView
+    application={
+      Object {
+        "applications$": BehaviorSubject {
+          "_value": Map {},
+          "closed": false,
+          "currentObservers": null,
+          "hasError": false,
+          "isStopped": false,
+          "observers": Array [],
+          "thrownError": null,
+        },
+        "capabilities": Object {
+          "catalogue": Object {},
+          "management": Object {},
+          "navLinks": Object {},
+        },
+        "currentAppId$": Observable {
+          "source": Subject {
+            "closed": false,
+            "currentObservers": null,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+        },
+        "getUrlForApp": [MockFunction],
+        "navigateToApp": [MockFunction],
+        "navigateToUrl": [MockFunction],
+      }
+    }
     createItem={[Function]}
     deleteItems={[Function]}
     editItem={[Function]}
@@ -149,7 +209,7 @@ exports[`after fetch initialFilter 1`] = `
       <EuiEmptyPrompt
         actions={
           <EuiButton
-            data-test-subj="createDashboardPromptButton"
+            data-test-subj="newItemButton"
             fill={true}
             iconType="plusInCircle"
             onClick={[Function]}
@@ -182,6 +242,7 @@ exports[`after fetch initialFilter 1`] = `
         iconType="dashboardApp"
         title={
           <h1
+            data-test-subj="emptyListPrompt"
             id="dashboardListingHeading"
           >
             Create your first dashboard
@@ -194,8 +255,6 @@ exports[`after fetch initialFilter 1`] = `
     findItems={[Function]}
     headingId="dashboardListingHeading"
     initialFilter="testFilter"
-    initialPageSize={20}
-    listingLimit={100}
     rowHeader="title"
     searchFilters={Array []}
     tableCaption="Dashboards"
@@ -219,7 +278,6 @@ exports[`after fetch initialFilter 1`] = `
     theme={
       Object {
         "theme$": Observable {
-          "_isScalar": false,
           "_subscribe": [Function],
         },
       }
@@ -261,6 +319,37 @@ exports[`after fetch renders all table rows 1`] = `
   redirectTo={[MockFunction]}
 >
   <TableListView
+    application={
+      Object {
+        "applications$": BehaviorSubject {
+          "_value": Map {},
+          "closed": false,
+          "currentObservers": null,
+          "hasError": false,
+          "isStopped": false,
+          "observers": Array [],
+          "thrownError": null,
+        },
+        "capabilities": Object {
+          "catalogue": Object {},
+          "management": Object {},
+          "navLinks": Object {},
+        },
+        "currentAppId$": Observable {
+          "source": Subject {
+            "closed": false,
+            "currentObservers": null,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+        },
+        "getUrlForApp": [MockFunction],
+        "navigateToApp": [MockFunction],
+        "navigateToUrl": [MockFunction],
+      }
+    }
     createItem={[Function]}
     deleteItems={[Function]}
     editItem={[Function]}
@@ -268,7 +357,7 @@ exports[`after fetch renders all table rows 1`] = `
       <EuiEmptyPrompt
         actions={
           <EuiButton
-            data-test-subj="createDashboardPromptButton"
+            data-test-subj="newItemButton"
             fill={true}
             iconType="plusInCircle"
             onClick={[Function]}
@@ -301,6 +390,7 @@ exports[`after fetch renders all table rows 1`] = `
         iconType="dashboardApp"
         title={
           <h1
+            data-test-subj="emptyListPrompt"
             id="dashboardListingHeading"
           >
             Create your first dashboard
@@ -313,8 +403,6 @@ exports[`after fetch renders all table rows 1`] = `
     findItems={[Function]}
     headingId="dashboardListingHeading"
     initialFilter=""
-    initialPageSize={20}
-    listingLimit={100}
     rowHeader="title"
     searchFilters={Array []}
     tableCaption="Dashboards"
@@ -338,7 +426,6 @@ exports[`after fetch renders all table rows 1`] = `
     theme={
       Object {
         "theme$": Observable {
-          "_isScalar": false,
           "_subscribe": [Function],
         },
       }
@@ -380,6 +467,37 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
   redirectTo={[MockFunction]}
 >
   <TableListView
+    application={
+      Object {
+        "applications$": BehaviorSubject {
+          "_value": Map {},
+          "closed": false,
+          "currentObservers": null,
+          "hasError": false,
+          "isStopped": false,
+          "observers": Array [],
+          "thrownError": null,
+        },
+        "capabilities": Object {
+          "catalogue": Object {},
+          "management": Object {},
+          "navLinks": Object {},
+        },
+        "currentAppId$": Observable {
+          "source": Subject {
+            "closed": false,
+            "currentObservers": null,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+        },
+        "getUrlForApp": [MockFunction],
+        "navigateToApp": [MockFunction],
+        "navigateToUrl": [MockFunction],
+      }
+    }
     createItem={[Function]}
     deleteItems={[Function]}
     editItem={[Function]}
@@ -387,7 +505,7 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
       <EuiEmptyPrompt
         actions={
           <EuiButton
-            data-test-subj="createDashboardPromptButton"
+            data-test-subj="newItemButton"
             fill={true}
             iconType="plusInCircle"
             onClick={[Function]}
@@ -420,6 +538,7 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
         iconType="dashboardApp"
         title={
           <h1
+            data-test-subj="emptyListPrompt"
             id="dashboardListingHeading"
           >
             Create your first dashboard
@@ -432,8 +551,6 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
     findItems={[Function]}
     headingId="dashboardListingHeading"
     initialFilter=""
-    initialPageSize={20}
-    listingLimit={100}
     rowHeader="title"
     searchFilters={Array []}
     tableCaption="Dashboards"
@@ -457,7 +574,6 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
     theme={
       Object {
         "theme$": Observable {
-          "_isScalar": false,
           "_subscribe": [Function],
         },
       }
@@ -499,6 +615,37 @@ exports[`after fetch renders call to action with continue when no dashboards exi
   redirectTo={[MockFunction]}
 >
   <TableListView
+    application={
+      Object {
+        "applications$": BehaviorSubject {
+          "_value": Map {},
+          "closed": false,
+          "currentObservers": null,
+          "hasError": false,
+          "isStopped": false,
+          "observers": Array [],
+          "thrownError": null,
+        },
+        "capabilities": Object {
+          "catalogue": Object {},
+          "management": Object {},
+          "navLinks": Object {},
+        },
+        "currentAppId$": Observable {
+          "source": Subject {
+            "closed": false,
+            "currentObservers": null,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+        },
+        "getUrlForApp": [MockFunction],
+        "navigateToApp": [MockFunction],
+        "navigateToUrl": [MockFunction],
+      }
+    }
     createItem={[Function]}
     deleteItems={[Function]}
     editItem={[Function]}
@@ -530,7 +677,7 @@ exports[`after fetch renders call to action with continue when no dashboards exi
               <EuiButton
                 aria-label="Continue editing New Dashboard"
                 color="primary"
-                data-test-subj="createDashboardPromptButton"
+                data-test-subj="newItemButton"
                 fill={true}
                 iconType="pencil"
                 onClick={[Function]}
@@ -550,6 +697,7 @@ exports[`after fetch renders call to action with continue when no dashboards exi
         iconType="dashboardApp"
         title={
           <h1
+            data-test-subj="emptyListPrompt"
             id="dashboardListingHeading"
           >
             Dashboard in progress
@@ -562,8 +710,6 @@ exports[`after fetch renders call to action with continue when no dashboards exi
     findItems={[Function]}
     headingId="dashboardListingHeading"
     initialFilter=""
-    initialPageSize={20}
-    listingLimit={100}
     rowHeader="title"
     searchFilters={Array []}
     tableCaption="Dashboards"
@@ -587,7 +733,6 @@ exports[`after fetch renders call to action with continue when no dashboards exi
     theme={
       Object {
         "theme$": Observable {
-          "_isScalar": false,
           "_subscribe": [Function],
         },
       }
@@ -629,6 +774,37 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
   redirectTo={[MockFunction]}
 >
   <TableListView
+    application={
+      Object {
+        "applications$": BehaviorSubject {
+          "_value": Map {},
+          "closed": false,
+          "currentObservers": null,
+          "hasError": false,
+          "isStopped": false,
+          "observers": Array [],
+          "thrownError": null,
+        },
+        "capabilities": Object {
+          "catalogue": Object {},
+          "management": Object {},
+          "navLinks": Object {},
+        },
+        "currentAppId$": Observable {
+          "source": Subject {
+            "closed": false,
+            "currentObservers": null,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+        },
+        "getUrlForApp": [MockFunction],
+        "navigateToApp": [MockFunction],
+        "navigateToUrl": [MockFunction],
+      }
+    }
     createItem={[Function]}
     deleteItems={[Function]}
     editItem={[Function]}
@@ -636,7 +812,7 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
       <EuiEmptyPrompt
         actions={
           <EuiButton
-            data-test-subj="createDashboardPromptButton"
+            data-test-subj="newItemButton"
             fill={true}
             iconType="plusInCircle"
             onClick={[Function]}
@@ -669,6 +845,7 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
         iconType="dashboardApp"
         title={
           <h1
+            data-test-subj="emptyListPrompt"
             id="dashboardListingHeading"
           >
             Create your first dashboard
@@ -681,8 +858,6 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
     findItems={[Function]}
     headingId="dashboardListingHeading"
     initialFilter=""
-    initialPageSize={20}
-    listingLimit={1}
     rowHeader="title"
     searchFilters={Array []}
     tableCaption="Dashboards"
@@ -706,7 +881,6 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
     theme={
       Object {
         "theme$": Observable {
-          "_isScalar": false,
           "_subscribe": [Function],
         },
       }
@@ -748,6 +922,37 @@ exports[`after fetch showWriteControls 1`] = `
   redirectTo={[MockFunction]}
 >
   <TableListView
+    application={
+      Object {
+        "applications$": BehaviorSubject {
+          "_value": Map {},
+          "closed": false,
+          "currentObservers": null,
+          "hasError": false,
+          "isStopped": false,
+          "observers": Array [],
+          "thrownError": null,
+        },
+        "capabilities": Object {
+          "catalogue": Object {},
+          "management": Object {},
+          "navLinks": Object {},
+        },
+        "currentAppId$": Observable {
+          "source": Subject {
+            "closed": false,
+            "currentObservers": null,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+        },
+        "getUrlForApp": [MockFunction],
+        "navigateToApp": [MockFunction],
+        "navigateToUrl": [MockFunction],
+      }
+    }
     emptyPrompt={
       <EuiEmptyPrompt
         body={
@@ -758,6 +963,7 @@ exports[`after fetch showWriteControls 1`] = `
         iconType="glasses"
         title={
           <h1
+            data-test-subj="emptyListPrompt"
             id="dashboardListingHeading"
           >
             No dashboards to view
@@ -770,8 +976,6 @@ exports[`after fetch showWriteControls 1`] = `
     findItems={[Function]}
     headingId="dashboardListingHeading"
     initialFilter=""
-    initialPageSize={20}
-    listingLimit={100}
     rowHeader="title"
     searchFilters={Array []}
     tableCaption="Dashboards"
@@ -795,7 +999,6 @@ exports[`after fetch showWriteControls 1`] = `
     theme={
       Object {
         "theme$": Observable {
-          "_isScalar": false,
           "_subscribe": [Function],
         },
       }

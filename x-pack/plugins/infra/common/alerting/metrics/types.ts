@@ -5,10 +5,10 @@
  * 2.0.
  */
 import * as rt from 'io-ts';
+import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
 import { SnapshotCustomMetricInput } from '../../http_api';
 import { ANOMALY_THRESHOLD } from '../../infra_ml';
 import { InventoryItemType, SnapshotMetricType } from '../../inventory_models/types';
-import { TimeUnitChar } from '../../../../observability/common/utils/formatters/duration';
 
 export const METRIC_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.threshold';
 export const METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.inventory.threshold';
@@ -112,3 +112,8 @@ export type MetricExpressionParams = NonCountMetricExpressionParams | CountMetri
 export const QUERY_INVALID: unique symbol = Symbol('QUERY_INVALID');
 
 export type FilterQuery = string | typeof QUERY_INVALID;
+
+export interface AlertExecutionDetails {
+  alertId: string;
+  executionId: string;
+}

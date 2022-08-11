@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { kibanaJSON } from './constants';
-import { KBN_FIELD_TYPES } from '../../../../data/common';
 
 export function getSchemaByKbnType(kbnType: string | undefined) {
   // Default DataGrid schemas: boolean, numeric, datetime, json, currency, string

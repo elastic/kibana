@@ -40,18 +40,18 @@ export const useDeleteAction = (forceDisable: boolean) => {
     userCanDeleteIndex,
     userCanDeleteDataView,
     deleteDestIndex,
-    indexPatternExists,
-    deleteIndexPattern,
+    dataViewExists,
+    deleteDataView,
     toggleDeleteIndex,
-    toggleDeleteIndexPattern,
+    toggleDeleteDataView,
   } = useDeleteIndexAndTargetIndex(items);
 
   const deleteAndCloseModal = () => {
     setModalVisible(false);
 
     const shouldDeleteDestIndex = userCanDeleteIndex && deleteDestIndex;
-    const shouldDeleteDestIndexPattern =
-      userCanDeleteIndex && userCanDeleteDataView && indexPatternExists && deleteIndexPattern;
+    const shouldDeleteDestDataView =
+      userCanDeleteIndex && userCanDeleteDataView && dataViewExists && deleteDataView;
     // if we are deleting multiple transforms, then force delete all if at least one item has failed
     // else, force delete only when the item user picks has failed
     const forceDelete = isBulkAction
@@ -64,7 +64,7 @@ export const useDeleteAction = (forceDisable: boolean) => {
         state: i.stats.state,
       })),
       deleteDestIndex: shouldDeleteDestIndex,
-      deleteDestIndexPattern: shouldDeleteDestIndexPattern,
+      deleteDestDataView: shouldDeleteDestDataView,
       forceDelete,
     });
   };
@@ -103,14 +103,14 @@ export const useDeleteAction = (forceDisable: boolean) => {
     closeModal,
     deleteAndCloseModal,
     deleteDestIndex,
-    deleteIndexPattern,
-    indexPatternExists,
+    deleteDataView,
+    dataViewExists,
     isModalVisible,
     items,
     openModal,
     shouldForceDelete,
     toggleDeleteIndex,
-    toggleDeleteIndexPattern,
+    toggleDeleteDataView,
     userCanDeleteIndex,
     userCanDeleteDataView,
   };

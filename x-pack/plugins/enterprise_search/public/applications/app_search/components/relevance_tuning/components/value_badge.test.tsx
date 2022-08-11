@@ -9,7 +9,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { ValueBadge } from './';
+import { ValueBadge } from '.';
 
 describe('ValueBadge', () => {
   it('renders', () => {

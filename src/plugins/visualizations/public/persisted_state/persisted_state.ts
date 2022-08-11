@@ -231,7 +231,7 @@ export class PersistedState extends EventEmitter {
     // If `mergeMethod` returns `undefined` the default merging method is used
     this._mergedState = mergeWith(targetObj, sourceObj, mergeMethod);
 
-    // sanity check; verify that there are actually changes
+    // verify that there are actually changes
     if (isEqual(this._mergedState, this._defaultState)) this._changedState = {};
 
     if (!silent && stateChanged) this.emit('change', key);

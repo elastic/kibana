@@ -11,7 +11,7 @@ import { act } from 'react-dom/test-utils';
 import { JOB_TO_CLONE, JOB_CLONE_INDEX_PATTERN_CHECK } from './helpers/constants';
 import { getRouter } from '../../crud_app/services/routing';
 import { setHttp } from '../../crud_app/services';
-import { coreMock } from '../../../../../../src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 
 jest.mock('../../kibana_services', () => {
   const services = jest.requireActual('../../kibana_services');

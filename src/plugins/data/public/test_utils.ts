@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { getFieldFormatsRegistry } from '../../field_formats/public/mocks';
+export { getFieldFormatsRegistry } from '@kbn/field-formats-plugin/public/mocks';

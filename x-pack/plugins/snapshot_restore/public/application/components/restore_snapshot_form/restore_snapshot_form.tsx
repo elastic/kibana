@@ -15,6 +15,7 @@ import {
   EuiForm,
   EuiSpacer,
 } from '@elastic/eui';
+import { FEATURE_STATES_NONE_OPTION } from '../../../../common/constants';
 import { SnapshotDetails, RestoreSettings } from '../../../../common/types';
 import { RestoreValidation, validateRestore } from '../../services/validation';
 import {
@@ -50,7 +51,12 @@ export const RestoreSnapshotForm: React.FunctionComponent<Props> = ({
   const CurrentStepForm = stepMap[currentStep];
 
   // Restore details state
-  const [restoreSettings, setRestoreSettings] = useState<RestoreSettings>({});
+  const [restoreSettings, setRestoreSettings] = useState<RestoreSettings>({
+    // Since includeGlobalState always includes all featureStates when enabled,
+    // we wanna keep in the local state that no feature states will be restored
+    // by default.
+    featureStates: [FEATURE_STATES_NONE_OPTION],
+  });
 
   // Restore validation state
   const [validation, setValidation] = useState<RestoreValidation>({

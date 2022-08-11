@@ -17,6 +17,9 @@ export function createMockDatasource(id: string): DatasourceMock {
     getTableSpec: jest.fn(() => []),
     getOperationForColumnId: jest.fn(),
     getVisualDefaults: jest.fn(),
+    getSourceId: jest.fn(),
+    getFilters: jest.fn(),
+    getMaxPossibleNumValues: jest.fn(),
   };
 
   return {
@@ -30,10 +33,12 @@ export function createMockDatasource(id: string): DatasourceMock {
       state: x,
       savedObjectReferences: [{ type: 'index-pattern', id: 'mockip', name: 'mockip' }],
     })),
+    getRenderEventCounters: jest.fn((_state) => []),
     getPublicAPI: jest.fn().mockReturnValue(publicAPIMock),
     initialize: jest.fn((_state?) => Promise.resolve()),
     renderDataPanel: jest.fn(),
     renderLayerPanel: jest.fn(),
+    getCurrentIndexPatternId: jest.fn(),
     toExpression: jest.fn((_frame, _state) => null),
     insertLayer: jest.fn((_state, _newLayerId) => ({})),
     removeLayer: jest.fn((_state, _layerId) => {}),
@@ -53,6 +58,7 @@ export function createMockDatasource(id: string): DatasourceMock {
     isTimeBased: jest.fn(),
     isValidColumn: jest.fn(),
     isEqual: jest.fn(),
+    getUsedDataView: jest.fn(),
   };
 }
 

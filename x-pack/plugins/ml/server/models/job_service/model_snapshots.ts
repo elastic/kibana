@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { ModelSnapshot } from '../../../common/types/anomaly_detection_jobs';
 import { datafeedsProvider } from './datafeeds';
 import { FormCalendar, CalendarManager } from '../calendar';
@@ -93,7 +93,11 @@ export function modelSnapshotProvider(client: IScopedClusterClient, mlClient: Ml
         await cm.newCalendar(calendar);
       }
 
-      forceStartDatafeeds([datafeedId], +snapshot.model_snapshots[0].latest_record_time_stamp, end);
+      forceStartDatafeeds(
+        [datafeedId],
+        +snapshot.model_snapshots[0].latest_record_time_stamp!,
+        end
+      );
     }
 
     return { success: true };

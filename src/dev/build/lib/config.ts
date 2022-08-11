@@ -17,6 +17,8 @@ interface Options {
   isRelease: boolean;
   targetAllPlatforms: boolean;
   versionQualifier?: string;
+  dockerContextUseLocalArtifact: boolean | null;
+  dockerCrossCompile: boolean;
   dockerTagQualifier: string | null;
   dockerPush: boolean;
 }
@@ -35,6 +37,8 @@ export class Config {
     isRelease,
     targetAllPlatforms,
     versionQualifier,
+    dockerContextUseLocalArtifact,
+    dockerCrossCompile,
     dockerTagQualifier,
     dockerPush,
   }: Options) {
@@ -51,6 +55,8 @@ export class Config {
         versionQualifier,
         pkg,
       }),
+      dockerContextUseLocalArtifact,
+      dockerCrossCompile,
       dockerTagQualifier,
       dockerPush,
       isRelease
@@ -63,6 +69,8 @@ export class Config {
     private readonly nodeVersion: string,
     private readonly repoRoot: string,
     private readonly versionInfo: VersionInfo,
+    private readonly dockerContextUseLocalArtifact: boolean | null,
+    private readonly dockerCrossCompile: boolean,
     private readonly dockerTagQualifier: string | null,
     private readonly dockerPush: boolean,
     public readonly isRelease: boolean
@@ -94,6 +102,20 @@ export class Config {
    */
   getDockerPush() {
     return this.dockerPush;
+  }
+
+  /**
+   * Use a local Kibana distribution when producing a docker context
+   */
+  getDockerContextUseLocalArtifact() {
+    return this.dockerContextUseLocalArtifact;
+  }
+
+  /**
+   * Get docker cross compile
+   */
+  getDockerCrossCompile() {
+    return this.dockerCrossCompile;
   }
 
   /**

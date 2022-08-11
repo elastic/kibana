@@ -58,6 +58,7 @@ export const IgnoredQueriesLogic = kea<MakeLogicType<IgnoredQueriesValues, Ignor
     dataLoading: [
       true,
       {
+        loadIgnoredQueries: () => true,
         onIgnoredQueriesLoad: () => false,
       },
     ],

@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { createSelectHandler } from '../lib/create_select_handler';
-import { GroupBySelect } from './group_by_select';
 import PropTypes from 'prop-types';
 import React from 'react';
 import {
@@ -17,14 +15,18 @@ import {
   EuiFormRow,
   EuiCode,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
-
 import { FormattedMessage } from '@kbn/i18n-react';
+import { createSelectHandler } from '../lib/create_select_handler';
+import { GroupBySelect } from './group_by_select';
+import { titleStyles } from '../../styles/common.styles';
 
 export const SplitUnsupported = (props) => {
   const { onChange, model, uiRestrictions } = props;
   const htmlId = htmlIdGenerator();
   const handleSelectChange = createSelectHandler(onChange);
+  const { euiTheme } = useEuiTheme();
   return (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem>
@@ -45,7 +47,7 @@ export const SplitUnsupported = (props) => {
         </EuiFormRow>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiTitle className="tvbAggRow__unavailable" size="xxxs">
+        <EuiTitle size="xxxs" css={titleStyles(euiTheme)}>
           <span>
             <FormattedMessage
               id="visTypeTimeseries.unsupportedSplit.splitIsUnsupportedDescription"

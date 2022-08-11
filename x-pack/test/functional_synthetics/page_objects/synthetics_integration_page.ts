@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrapper';
+import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function SyntheticsIntegrationPageProvider({
@@ -143,7 +143,20 @@ export function SyntheticsIntegrationPageProvider({
     async confirmAndSave(isEditPage?: boolean) {
       await this.ensureIsOnPackagePage();
       const saveButton = await this.findSaveButton(isEditPage);
-      saveButton.click();
+      await saveButton.click();
+      await this.maybeForceInstall();
+    },
+
+    /**
+     * If the force install modal opens, click force install
+     */
+    async maybeForceInstall() {
+      const confirmForceInstallModalOpen = await testSubjects.exists('confirmForceInstallModal');
+
+      if (confirmForceInstallModalOpen) {
+        const forceInstallBtn = await testSubjects.find('confirmModalConfirmButton');
+        return forceInstallBtn.click();
+      }
     },
 
     /**

@@ -34,7 +34,7 @@ export const registerCreateRoute = ({
       },
     },
     license.guardApiRoute(async (context, request, response) => {
-      const { client } = context.core.elasticsearch;
+      const { client } = (await context.core).elasticsearch;
       const { id, ...rest } = request.body;
       const body = serializeAutoFollowPattern(rest as AutoFollowPattern);
 

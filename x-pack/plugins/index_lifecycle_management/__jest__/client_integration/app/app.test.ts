@@ -40,16 +40,13 @@ jest.mock('@elastic/eui', () => {
 
 describe('<App />', () => {
   let testBed: AppTestBed;
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
-  afterAll(() => {
-    server.restore();
-  });
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   describe('new policy creation', () => {
     test('when there are no policies', async () => {
       httpRequestsMockHelpers.setLoadPolicies([]);
       await act(async () => {
-        testBed = await setup(['/']);
+        testBed = await setup(httpSetup, ['/']);
       });
 
       const { component, actions } = testBed;
@@ -65,7 +62,7 @@ describe('<App />', () => {
     test('when there are policies', async () => {
       httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy()]);
       await act(async () => {
-        testBed = await setup(['/']);
+        testBed = await setup(httpSetup, ['/']);
       });
 
       const { component, actions } = testBed;
@@ -86,7 +83,7 @@ describe('<App />', () => {
 
     test('clicking policy name in the table works', async () => {
       await act(async () => {
-        testBed = await setup(['/']);
+        testBed = await setup(httpSetup, ['/']);
       });
 
       const { component, actions } = testBed;
@@ -100,7 +97,7 @@ describe('<App />', () => {
 
     test('loading edit policy page url works', async () => {
       await act(async () => {
-        testBed = await setup([getEncodedPolicyEditPath(SPECIAL_CHARS_NAME)]);
+        testBed = await setup(httpSetup, [getEncodedPolicyEditPath(SPECIAL_CHARS_NAME)]);
       });
 
       const { component } = testBed;
@@ -113,7 +110,7 @@ describe('<App />', () => {
     // when those links are open in a new tab, address bar contains double encoded url
     test('loading edit policy page url with double encoding works', async () => {
       await act(async () => {
-        testBed = await setup([getDoubleEncodedPolicyEditPath(SPECIAL_CHARS_NAME)]);
+        testBed = await setup(httpSetup, [getDoubleEncodedPolicyEditPath(SPECIAL_CHARS_NAME)]);
       });
 
       const { component } = testBed;
@@ -130,7 +127,7 @@ describe('<App />', () => {
 
     test('loading edit policy page url works', async () => {
       await act(async () => {
-        testBed = await setup([getEncodedPolicyEditPath(PERCENT_SIGN_NAME)]);
+        testBed = await setup(httpSetup, [getEncodedPolicyEditPath(PERCENT_SIGN_NAME)]);
       });
 
       const { component } = testBed;
@@ -141,7 +138,7 @@ describe('<App />', () => {
 
     test('loading edit policy page url with double encoding works', async () => {
       await act(async () => {
-        testBed = await setup([getDoubleEncodedPolicyEditPath(PERCENT_SIGN_NAME)]);
+        testBed = await setup(httpSetup, [getDoubleEncodedPolicyEditPath(PERCENT_SIGN_NAME)]);
       });
 
       const { component } = testBed;
@@ -160,7 +157,7 @@ describe('<App />', () => {
 
     test('clicking policy name in the table works', async () => {
       await act(async () => {
-        testBed = await setup(['/']);
+        testBed = await setup(httpSetup, ['/']);
       });
 
       const { component, actions } = testBed;
@@ -176,7 +173,9 @@ describe('<App />', () => {
 
     test("loading edit policy page url doesn't work", async () => {
       await act(async () => {
-        testBed = await setup([getEncodedPolicyEditPath(PERCENT_SIGN_WITH_OTHER_CHARS_NAME)]);
+        testBed = await setup(httpSetup, [
+          getEncodedPolicyEditPath(PERCENT_SIGN_WITH_OTHER_CHARS_NAME),
+        ]);
       });
 
       const { component } = testBed;
@@ -192,7 +191,9 @@ describe('<App />', () => {
     // when those links are open in a new tab, address bar contains double encoded url
     test('loading edit policy page url with double encoding works', async () => {
       await act(async () => {
-        testBed = await setup([getDoubleEncodedPolicyEditPath(PERCENT_SIGN_WITH_OTHER_CHARS_NAME)]);
+        testBed = await setup(httpSetup, [
+          getDoubleEncodedPolicyEditPath(PERCENT_SIGN_WITH_OTHER_CHARS_NAME),
+        ]);
       });
 
       const { component } = testBed;
@@ -211,7 +212,7 @@ describe('<App />', () => {
 
     test('clicking policy name in the table works correctly', async () => {
       await act(async () => {
-        testBed = await setup(['/']);
+        testBed = await setup(httpSetup, ['/']);
       });
 
       const { component, actions } = testBed;
@@ -227,7 +228,7 @@ describe('<App />', () => {
 
     test("loading edit policy page url doesn't work", async () => {
       await act(async () => {
-        testBed = await setup([getEncodedPolicyEditPath(PERCENT_SIGN_25_SEQUENCE)]);
+        testBed = await setup(httpSetup, [getEncodedPolicyEditPath(PERCENT_SIGN_25_SEQUENCE)]);
       });
 
       const { component } = testBed;
@@ -243,7 +244,9 @@ describe('<App />', () => {
     // when those links are open in a new tab, address bar contains double encoded url
     test('loading edit policy page url with double encoding works', async () => {
       await act(async () => {
-        testBed = await setup([getDoubleEncodedPolicyEditPath(PERCENT_SIGN_25_SEQUENCE)]);
+        testBed = await setup(httpSetup, [
+          getDoubleEncodedPolicyEditPath(PERCENT_SIGN_25_SEQUENCE),
+        ]);
       });
 
       const { component } = testBed;

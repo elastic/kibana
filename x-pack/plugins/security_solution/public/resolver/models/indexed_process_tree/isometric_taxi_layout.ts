@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   IndexedProcessTree,
   Vector2,
   EdgeLineSegment,
@@ -17,9 +17,9 @@ import {
   IsometricTaxiLayout,
 } from '../../types';
 import * as nodeModel from '../../../../common/endpoint/models/node';
-import { ResolverNode } from '../../../../common/endpoint/types';
+import type { ResolverNode } from '../../../../common/endpoint/types';
 import * as vector2 from '../vector2';
-import * as indexedProcessTreeModel from './index';
+import * as indexedProcessTreeModel from '.';
 import { getFriendlyElapsedTime as elapsedTime } from '../../lib/date';
 
 /**

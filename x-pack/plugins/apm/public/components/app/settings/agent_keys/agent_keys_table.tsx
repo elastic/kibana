@@ -12,8 +12,8 @@ import {
   EuiBasicTableColumn,
   EuiInMemoryTableProps,
 } from '@elastic/eui';
+import { ApiKey } from '@kbn/security-plugin/common/model';
 import { TimestampTooltip } from '../../../shared/timestamp_tooltip';
-import { ApiKey } from '../../../../../../security/common/model';
 import { ConfirmDeleteModal } from './confirm_delete_modal';
 
 interface Props {

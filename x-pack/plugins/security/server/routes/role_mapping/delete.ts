@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import type { RouteDefinitionParams } from '../';
+import type { RouteDefinitionParams } from '..';
 import { wrapError } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
@@ -23,10 +23,10 @@ export function defineRoleMappingDeleteRoutes({ router }: RouteDefinitionParams)
     },
     createLicensedRouteHandler(async (context, request, response) => {
       try {
-        const deleteResponse =
-          await context.core.elasticsearch.client.asCurrentUser.security.deleteRoleMapping({
-            name: request.params.name,
-          });
+        const esClient = (await context.core).elasticsearch.client;
+        const deleteResponse = await esClient.asCurrentUser.security.deleteRoleMapping({
+          name: request.params.name,
+        });
         return response.ok({ body: deleteResponse });
       } catch (error) {
         const wrappedError = wrapError(error);

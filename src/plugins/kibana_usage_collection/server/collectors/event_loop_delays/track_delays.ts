@@ -8,8 +8,8 @@
 
 import { takeUntil, finalize, map } from 'rxjs/operators';
 import { Observable, timer } from 'rxjs';
-import type { ISavedObjectsRepository } from 'kibana/server';
-import type { EventLoopDelaysMonitor } from '../../../../../core/server';
+import type { ISavedObjectsRepository } from '@kbn/core/server';
+import type { IEventLoopDelaysMonitor, IntervalHistogram } from '@kbn/core/server';
 import {
   MONITOR_EVENT_LOOP_DELAYS_START,
   MONITOR_EVENT_LOOP_DELAYS_INTERVAL,
@@ -27,7 +27,7 @@ export function startTrackingEventLoopDelaysUsage(
   internalRepository: ISavedObjectsRepository,
   instanceUuid: string,
   stopMonitoringEventLoop$: Observable<void>,
-  eventLoopDelaysMonitor: EventLoopDelaysMonitor,
+  eventLoopDelaysMonitor: IEventLoopDelaysMonitor<IntervalHistogram>,
   configs: {
     collectionStartDelay?: number;
     collectionInterval?: number;

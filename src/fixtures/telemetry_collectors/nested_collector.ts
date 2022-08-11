@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { Collector } from 'src/plugins/usage_collection/server';
-import { createUsageCollectionSetupMock } from '../../plugins/usage_collection/server/mocks';
+import type { Collector } from '@kbn/usage-collection-plugin/server';
+import { createUsageCollectionSetupMock } from '@kbn/usage-collection-plugin/server/mocks';
 
 const collectorSet = createUsageCollectionSetupMock();
 

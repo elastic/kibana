@@ -61,7 +61,7 @@ Update a title of the `<my-view>` data view:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/saved_objects/data-view/my-view
+$ curl -X POST api/data_views/data-view/my-view
 {
   "data_view": {
     "title": "some-other-view-*"
@@ -74,7 +74,7 @@ Customize the update behavior:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/saved_objects/data-view/my-view
+$ curl -X POST api/data_views/data-view/my-view
 {
   "refresh_fields": true,
   "data_view": {
@@ -89,7 +89,7 @@ All update fields are optional, but you can specify the following fields:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/saved_objects/data-view/my-view
+$ curl -X POST api/data_views/data-view/my-view
 {
   "data_view": {
     "title": "...",

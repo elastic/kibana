@@ -12,14 +12,12 @@ import { AnalyticsPanel } from './analytics_panel';
 
 interface Props {
   createAnomalyDetectionJobDisabled: boolean;
-  createAnalyticsJobDisabled: boolean;
   setAdLazyJobCount: React.Dispatch<React.SetStateAction<number>>;
   setDfaLazyJobCount: React.Dispatch<React.SetStateAction<number>>;
 }
 
 export const OverviewContent: FC<Props> = ({
   createAnomalyDetectionJobDisabled,
-  createAnalyticsJobDisabled,
   setAdLazyJobCount,
   setDfaLazyJobCount,
 }) => (
@@ -29,9 +27,6 @@ export const OverviewContent: FC<Props> = ({
       setLazyJobCount={setAdLazyJobCount}
     />
     <EuiSpacer size="m" />
-    <AnalyticsPanel
-      jobCreationDisabled={createAnalyticsJobDisabled}
-      setLazyJobCount={setDfaLazyJobCount}
-    />
+    <AnalyticsPanel setLazyJobCount={setDfaLazyJobCount} />
   </>
 );

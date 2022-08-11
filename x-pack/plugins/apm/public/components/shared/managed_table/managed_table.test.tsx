@@ -33,7 +33,11 @@ describe('ManagedTable', () => {
   it('should render a page-full of items, with defaults', () => {
     expect(
       shallow(
-        <UnoptimizedManagedTable<Person> columns={columns} items={people} />
+        <UnoptimizedManagedTable<Person>
+          columns={columns}
+          items={people}
+          initialPageSize={25}
+        />
       )
     ).toMatchSnapshot();
   });
@@ -48,7 +52,7 @@ describe('ManagedTable', () => {
           initialSortDirection="desc"
           initialPageIndex={1}
           initialPageSize={2}
-          hidePerPageOptions={false}
+          showPerPageOptions={false}
         />
       )
     ).toMatchSnapshot();

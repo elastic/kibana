@@ -5,9 +5,15 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createTelemetryEndpointTaskConfig } from './endpoint';
 import { createMockTelemetryEventsSender, createMockTelemetryReceiver } from '../__mocks__';
+import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
+
+const usageCountersServiceSetup = usageCountersServiceMock.createSetupContract();
+const telemetryUsageCounter = usageCountersServiceSetup.createUsageCounter(
+  'testTelemetryUsageCounter'
+);
 
 describe('endpoint telemetry task test', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -22,6 +28,9 @@ describe('endpoint telemetry task test', () => {
       current: new Date().toISOString(),
     };
     const mockTelemetryEventsSender = createMockTelemetryEventsSender();
+    mockTelemetryEventsSender.getTelemetryUsageCluster = jest
+      .fn()
+      .mockReturnValue(telemetryUsageCounter);
     const mockTelemetryReceiver = createMockTelemetryReceiver();
     const telemetryEndpointTaskConfig = createTelemetryEndpointTaskConfig(1);
 
@@ -41,6 +50,10 @@ describe('endpoint telemetry task test', () => {
     expect(mockTelemetryReceiver.fetchEndpointPolicyResponses).toHaveBeenCalledWith(
       testTaskExecutionPeriod.last,
       testTaskExecutionPeriod.current
+    );
+    expect(mockTelemetryEventsSender.getTelemetryUsageCluster).toHaveBeenCalled();
+    expect(mockTelemetryEventsSender.getTelemetryUsageCluster()?.incrementCounter).toBeCalledTimes(
+      1
     );
   });
 });

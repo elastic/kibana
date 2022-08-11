@@ -11,6 +11,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLink,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
@@ -20,13 +21,12 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import semverLt from 'semver/functions/lt';
-import { SUPPORTED_APM_PACKAGE_VERSION } from '../../../../../common/fleet';
-import { PackagePolicy } from '../../../../../../fleet/common/types';
-import { ElasticDocsLink } from '../../../shared/links/elastic_docs_link';
+import { PackagePolicy } from '@kbn/fleet-plugin/common/types';
 import rocketLaunchGraphic from './blog_rocket_720x420.png';
 import { MigrationInProgressPanel } from './migration_in_progress_panel';
 import { UpgradeAvailableCard } from './migrated/upgrade_available_card';
 import { SuccessfulMigrationCard } from './migrated/successful_migration_card';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 interface Props {
   onSwitch: () => void;
@@ -38,6 +38,7 @@ interface Props {
   hasCloudAgentPolicy: boolean;
   hasRequiredRole: boolean;
   cloudApmPackagePolicy: PackagePolicy | undefined;
+  latestApmPackageVersion: string;
 }
 export function SchemaOverview({
   onSwitch,
@@ -49,12 +50,13 @@ export function SchemaOverview({
   hasCloudAgentPolicy,
   hasRequiredRole,
   cloudApmPackagePolicy,
+  latestApmPackageVersion,
 }: Props) {
   const isDisabled =
     !cloudApmMigrationEnabled || !hasCloudAgentPolicy || !hasRequiredRole;
   const packageVersion = cloudApmPackagePolicy?.package?.version;
   const isUpgradeAvailable =
-    packageVersion && semverLt(packageVersion, SUPPORTED_APM_PACKAGE_VERSION);
+    packageVersion && semverLt(packageVersion, latestApmPackageVersion);
 
   if (isLoading) {
     return (
@@ -183,6 +185,7 @@ export function SchemaOverview({
 }
 
 export function SchemaOverviewHeading() {
+  const { docLinks } = useApmPluginContext().core;
   return (
     <>
       <EuiText color="subdued">
@@ -207,16 +210,12 @@ export function SchemaOverviewHeading() {
               </strong>
             ),
             elasticAgentDocLink: (
-              <ElasticDocsLink
-                section="/apm/server"
-                path="/apm-integration-data-streams.html"
-                target="_blank"
-              >
+              <EuiLink target="_blank" href={docLinks.links.apm.elasticAgent}>
                 {i18n.translate(
                   'xpack.apm.settings.schema.descriptionText.elasticAgentDocLinkText',
                   { defaultMessage: 'Elastic Agent' }
                 )}
-              </ElasticDocsLink>
+              </EuiLink>
             ),
           }}
         />

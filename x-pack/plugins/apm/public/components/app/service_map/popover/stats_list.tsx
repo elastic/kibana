@@ -198,6 +198,7 @@ export function StatsList({ data, isLoading }: StatsListProps) {
                 <EuiFlexItem grow={false}>
                   {timeseries ? (
                     <SparkPlot
+                      isLoading={isLoading}
                       series={timeseries}
                       color={color}
                       valueLabel={valueLabel}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup, Plugin } from 'kibana/server';
+import { CoreSetup, Plugin } from '@kbn/core/server';
 
 import { ApiRoutes } from './routes';
 import { handleEsError } from './shared_imports';

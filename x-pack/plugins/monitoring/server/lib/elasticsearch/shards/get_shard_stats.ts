@@ -6,22 +6,15 @@
  */
 
 import { get } from 'lodash';
-// @ts-ignore
-import { checkParam } from '../../error_missing_required';
-// @ts-ignore
-import { createQuery } from '../../create_query';
-// @ts-ignore
-import { ElasticsearchMetric } from '../../metrics';
-// @ts-ignore
-import { normalizeIndexShards, normalizeNodeShards } from './normalize_shard_objects';
-// @ts-ignore
-import { getShardAggs } from './get_shard_stat_aggs';
-// @ts-ignore
-import { calculateIndicesTotals } from './calculate_shard_stat_indices_totals';
-import { LegacyRequest } from '../../../types';
-import { ElasticsearchResponse, ElasticsearchModifiedSource } from '../../../../common/types/es';
-import { getNewIndexPatterns } from '../../cluster/get_index_patterns';
+import { ElasticsearchModifiedSource, ElasticsearchResponse } from '../../../../common/types/es';
 import { Globals } from '../../../static_globals';
+import { LegacyRequest } from '../../../types';
+import { getNewIndexPatterns } from '../../cluster/get_index_patterns';
+import { createQuery } from '../../create_query';
+import { ElasticsearchMetric } from '../../metrics';
+import { calculateIndicesTotals } from './calculate_shard_stat_indices_totals';
+import { getShardAggs } from './get_shard_stat_aggs';
+import { normalizeIndexShards, normalizeNodeShards } from './normalize_shard_objects';
 
 export function handleResponse(
   resp: ElasticsearchResponse,
@@ -58,7 +51,17 @@ export function handleResponse(
 export function getShardStats(
   req: LegacyRequest,
   cluster: ElasticsearchModifiedSource,
-  { includeNodes = false, includeIndices = false, indexName = null, nodeUuid = null } = {}
+  {
+    includeNodes = false,
+    includeIndices = false,
+    indexName = null,
+    nodeUuid = null,
+  }: {
+    includeNodes?: boolean;
+    includeIndices?: boolean;
+    indexName?: string | null;
+    nodeUuid?: string | null;
+  } = {}
 ) {
   const dataset = 'shard'; // data_stream.dataset
   const type = 'shards'; // legacy

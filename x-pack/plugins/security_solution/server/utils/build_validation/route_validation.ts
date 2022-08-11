@@ -7,14 +7,15 @@
 
 import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 import { exactCheck, formatErrors } from '@kbn/securitysolution-io-ts-utils';
-import {
+import type {
   RouteValidationFunction,
   RouteValidationResultFactory,
   RouteValidationError,
-} from '../../../../../../src/core/server';
-import { excess, GenericIntersectionC } from '../runtime_types';
+} from '@kbn/core/server';
+import type { GenericIntersectionC } from '../runtime_types';
+import { excess } from '../runtime_types';
 
 type RequestValidationResult<T> =
   | {
@@ -32,6 +33,17 @@ export const buildRouteValidation =
     pipe(
       schema.decode(inputValue),
       (decoded) => exactCheck(inputValue, decoded),
+      fold<rt.Errors, A, RequestValidationResult<A>>(
+        (errors: rt.Errors) => validationResult.badRequest(formatErrors(errors).join()),
+        (validatedInput: A) => validationResult.ok(validatedInput)
+      )
+    );
+
+export const buildRouteValidationNonExact =
+  <T extends rt.Mixed, A = rt.TypeOf<T>>(schema: T): RouteValidationFunction<A> =>
+  (inputValue: unknown, validationResult: RouteValidationResultFactory) =>
+    pipe(
+      schema.decode(inputValue),
       fold<rt.Errors, A, RequestValidationResult<A>>(
         (errors: rt.Errors) => validationResult.badRequest(formatErrors(errors).join()),
         (validatedInput: A) => validationResult.ok(validatedInput)

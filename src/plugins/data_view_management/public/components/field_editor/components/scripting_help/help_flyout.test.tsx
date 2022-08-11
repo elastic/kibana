@@ -11,7 +11,7 @@ import { shallow } from 'enzyme';
 
 import { ScriptingHelpFlyout } from './help_flyout';
 
-import { DataView } from '../../../../../../data_views/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 
 import { ExecuteScript } from '../../types';
 

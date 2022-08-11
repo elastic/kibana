@@ -7,12 +7,16 @@
  */
 
 import { sortBy } from 'lodash';
-import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
+import { BehaviorSubject, type Observable, ReplaySubject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
+import type { HttpStart, IBasePath } from '@kbn/core-http-browser';
 
-import { InternalApplicationStart, PublicAppDeepLinkInfo, PublicAppInfo } from '../../application';
-import { HttpStart, IBasePath } from '../../http';
-import { ChromeNavLink, NavLinkWrapper } from './nav_link';
+import type {
+  InternalApplicationStart,
+  PublicAppDeepLinkInfo,
+  PublicAppInfo,
+} from '../../application';
+import type { ChromeNavLink, NavLinkWrapper } from './nav_link';
 import { toNavLink } from './to_nav_link';
 
 interface StartDeps {
@@ -69,7 +73,7 @@ export interface ChromeNavLinks {
 }
 
 export class NavLinksService {
-  private readonly stop$ = new ReplaySubject(1);
+  private readonly stop$ = new ReplaySubject<void>(1);
 
   public start({ application, http }: StartDeps): ChromeNavLinks {
     const navLinks$ = new BehaviorSubject<ReadonlyMap<string, NavLinkWrapper>>(new Map());

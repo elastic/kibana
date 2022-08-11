@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup } from 'kibana/server';
-import {
-  LicensingPluginSetup,
-  LicensingPluginStart,
-} from '../../../../../plugins/licensing/server';
+import { Plugin, CoreSetup } from '@kbn/core/server';
+import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { registerRoutes } from './routes';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

@@ -9,8 +9,8 @@
 import d3 from 'd3';
 import _ from 'lodash';
 
-import { getHeatmapColors } from '../../../../../../charts/public';
-import { FORMATS_UI_SETTINGS } from '../../../../../../field_formats/common';
+import { getHeatmapColors } from '@kbn/charts-plugin/public';
+import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { getValueForPercentageMode } from '../../percentage_mode_transform';
 
 const arcAngles = {

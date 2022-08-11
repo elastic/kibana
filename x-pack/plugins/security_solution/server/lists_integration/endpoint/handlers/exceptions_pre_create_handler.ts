@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import {
+import type {
   CreateExceptionListItemOptions,
   ExceptionsListPreCreateItemServerExtension,
-} from '../../../../../lists/server';
-import { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
+} from '@kbn/lists-plugin/server';
+import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import {
   EventFilterValidator,
   TrustedAppValidator,
   HostIsolationExceptionsValidator,
+  BlocklistValidator,
 } from '../validators';
 
 type ValidatorCallback = ExceptionsListPreCreateItemServerExtension['callback'];
@@ -53,6 +54,14 @@ export const getExceptionsPreCreateItemHandler = (
         'HOST_ISOLATION_EXCEPTION_BY_POLICY'
       );
       hostIsolationExceptionsValidator.notifyFeatureUsage(data, 'HOST_ISOLATION_EXCEPTION');
+      return validatedItem;
+    }
+
+    // Validate blocklists
+    if (BlocklistValidator.isBlocklist(data)) {
+      const blocklistValidator = new BlocklistValidator(endpointAppContext, request);
+      const validatedItem = await blocklistValidator.validatePreCreateItem(data);
+      blocklistValidator.notifyFeatureUsage(data, 'BLOCKLIST_BY_POLICY');
       return validatedItem;
     }
 

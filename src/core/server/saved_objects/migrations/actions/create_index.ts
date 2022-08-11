@@ -10,8 +10,8 @@ import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { AcknowledgeResponse } from './index';
-import { ElasticsearchClient } from '../../../elasticsearch';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { AcknowledgeResponse } from '.';
 import { IndexMapping } from '../../mappings';
 import {
   catchRetryableEsClientErrors,
@@ -22,7 +22,8 @@ import {
   INDEX_AUTO_EXPAND_REPLICAS,
   WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE,
 } from './constants';
-import { waitForIndexStatusYellow } from './wait_for_index_status_yellow';
+import { type IndexNotGreenTimeout, waitForIndexStatus } from './wait_for_index_status';
+import { isClusterShardLimitExceeded } from './es_errors';
 
 function aliasArrayToRecord(aliases: string[]): Record<string, estypes.IndicesAlias> {
   const result: Record<string, estypes.IndicesAlias> = {};
@@ -33,11 +34,17 @@ function aliasArrayToRecord(aliases: string[]): Record<string, estypes.IndicesAl
 }
 
 /** @internal */
+export interface ClusterShardLimitExceeded {
+  type: 'cluster_shard_limit_exceeded';
+}
+
+/** @internal */
 export interface CreateIndexParams {
   client: ElasticsearchClient;
   indexName: string;
   mappings: IndexMapping;
   aliases?: string[];
+  timeout?: string;
 }
 /**
  * Creates an index with the given mappings
@@ -54,44 +61,46 @@ export const createIndex = ({
   indexName,
   mappings,
   aliases = [],
-}: CreateIndexParams): TaskEither.TaskEither<RetryableEsClientError, 'create_index_succeeded'> => {
+  timeout = DEFAULT_TIMEOUT,
+}: CreateIndexParams): TaskEither.TaskEither<
+  RetryableEsClientError | IndexNotGreenTimeout | ClusterShardLimitExceeded,
+  'create_index_succeeded'
+> => {
   const createIndexTask: TaskEither.TaskEither<
-    RetryableEsClientError,
+    RetryableEsClientError | ClusterShardLimitExceeded,
     AcknowledgeResponse
   > = () => {
     const aliasesObject = aliasArrayToRecord(aliases);
 
     return client.indices
-      .create(
-        {
-          index: indexName,
-          // wait until all shards are available before creating the index
-          // (since number_of_shards=1 this does not have any effect atm)
-          wait_for_active_shards: WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE,
-          // Wait up to 60s for the cluster state to update and all shards to be
-          // started
-          timeout: DEFAULT_TIMEOUT,
-          body: {
-            mappings,
-            aliases: aliasesObject,
-            settings: {
-              index: {
-                // ES rule of thumb: shards should be several GB to 10's of GB, so
-                // Kibana is unlikely to cross that limit.
-                number_of_shards: 1,
-                auto_expand_replicas: INDEX_AUTO_EXPAND_REPLICAS,
-                // Set an explicit refresh interval so that we don't inherit the
-                // value from incorrectly configured index templates (not required
-                // after we adopt system indices)
-                refresh_interval: '1s',
-                // Bump priority so that recovery happens before newer indices
-                priority: 10,
-              },
+      .create({
+        index: indexName,
+        // wait up to timeout until the following shards are available before
+        // creating the index: primary, replica (only on multi node clusters)
+        wait_for_active_shards: WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE,
+        // Timeout for the cluster state to update and all shards to become
+        // available. If the request doesn't complete within timeout,
+        // acknowledged or shards_acknowledged would be false.
+        timeout,
+        body: {
+          mappings,
+          aliases: aliasesObject,
+          settings: {
+            index: {
+              // ES rule of thumb: shards should be several GB to 10's of GB, so
+              // Kibana is unlikely to cross that limit.
+              number_of_shards: 1,
+              auto_expand_replicas: INDEX_AUTO_EXPAND_REPLICAS,
+              // Set an explicit refresh interval so that we don't inherit the
+              // value from incorrectly configured index templates (not required
+              // after we adopt system indices)
+              refresh_interval: '1s',
+              // Bump priority so that recovery happens before newer indices
+              priority: 10,
             },
           },
         },
-        { maxRetries: 0 /** handle retry ourselves for now */ }
-      )
+      })
       .then((res) => {
         /**
          * - acknowledged=false, we timed out before the cluster state was
@@ -117,6 +126,10 @@ export const createIndex = ({
             acknowledged: true,
             shardsAcknowledged: false,
           });
+        } else if (isClusterShardLimitExceeded(error?.body?.error)) {
+          return Either.left({
+            type: 'cluster_shard_limit_exceeded' as const,
+          });
         } else {
           throw error;
         }
@@ -126,16 +139,26 @@ export const createIndex = ({
 
   return pipe(
     createIndexTask,
-    TaskEither.chain((res) => {
+    TaskEither.chain<
+      RetryableEsClientError | IndexNotGreenTimeout | ClusterShardLimitExceeded,
+      AcknowledgeResponse,
+      'create_index_succeeded'
+    >((res) => {
       if (res.acknowledged && res.shardsAcknowledged) {
-        // If the cluster state was updated and all shards ackd we're done
+        // If the cluster state was updated and all shards started we're done
         return TaskEither.right('create_index_succeeded');
       } else {
-        // Otherwise, wait until the target index has a 'yellow' status.
+        // Otherwise, wait until the target index has a 'green' status meaning
+        // the primary (and on multi node clusters) the replica has been started
         return pipe(
-          waitForIndexStatusYellow({ client, index: indexName, timeout: DEFAULT_TIMEOUT }),
+          waitForIndexStatus({
+            client,
+            index: indexName,
+            timeout: DEFAULT_TIMEOUT,
+            status: 'green',
+          }),
           TaskEither.map(() => {
-            /** When the index status is 'yellow' we know that all shards were started */
+            /** When the index status is 'green' we know that all shards were started */
             return 'create_index_succeeded';
           })
         );

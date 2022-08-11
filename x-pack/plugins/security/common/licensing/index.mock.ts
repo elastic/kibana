@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 
-import type { LicenseType } from '../../../licensing/common/types';
-import { LICENSE_TYPE } from '../../../licensing/common/types';
+import type { LicenseType } from '@kbn/licensing-plugin/common/types';
+import { LICENSE_TYPE } from '@kbn/licensing-plugin/common/types';
+
 import type { SecurityLicenseFeatures } from './license_features';
 import type { SecurityLicense } from './license_service';
 
 export const licenseMock = {
   create: (
-    features: Partial<SecurityLicenseFeatures> = {},
+    features: Partial<SecurityLicenseFeatures> | Observable<Partial<SecurityLicenseFeatures>> = {},
     licenseType: LicenseType = 'basic' // default to basic if this is not specified
   ): jest.Mocked<SecurityLicense> => ({
     isLicenseAvailable: jest.fn().mockReturnValue(true),
@@ -26,6 +27,9 @@ export const licenseMock = {
         (licenseTypeToCheck: LicenseType) =>
           LICENSE_TYPE[licenseTypeToCheck] <= LICENSE_TYPE[licenseType]
       ),
-    features$: features ? of(features as SecurityLicenseFeatures) : of(),
+    features$:
+      features instanceof Observable
+        ? (features as Observable<SecurityLicenseFeatures>)
+        : of((features ?? {}) as SecurityLicenseFeatures),
   }),
 };

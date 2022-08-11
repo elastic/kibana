@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { TOASTER } from '../../screens/configure_cases';
 import {
   ADD_TO_TIMELINE,
   COPY,
@@ -14,6 +13,7 @@ import {
   IPS_TABLE_LOADED,
   SHOW_TOP_FIELD,
   EXPAND_OVERFLOW_ITEMS,
+  OVERFLOW_ITEM,
 } from '../../screens/network/flows';
 
 export const waitForIpsTableToBeLoaded = () => {
@@ -21,8 +21,11 @@ export const waitForIpsTableToBeLoaded = () => {
 };
 
 export const openHoverActions = () => {
-  cy.get(TOASTER).should('not.exist', { timeout: 12000 }); // Wait until "Your browser does not meet the security requirements for Kibana." toaster goes away
-  cy.get(EXPAND_OVERFLOW_ITEMS).click({ scrollBehavior: 'center' });
+  cy.get(EXPAND_OVERFLOW_ITEMS).first().click({ scrollBehavior: 'center' });
+};
+
+export const mouseoverOnToOverflowItem = () => {
+  cy.get(OVERFLOW_ITEM).first().trigger('mouseover');
 };
 
 export const clickOnFilterIn = () => {
