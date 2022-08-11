@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { jsonStringValidator } from '../../../../../../common/validators';
 import {
   isPivotAggsConfigWithUiSupport,
   PivotAggsConfigBase,
@@ -188,6 +189,9 @@ export function getFilterAggTypeConfig(
           null,
           2
         ),
+        isValid() {
+          return jsonStringValidator(this.filterAggConfig);
+        },
         getEsAggConfig(fieldName) {
           return JSON.parse(this.filterAggConfig!);
         },
@@ -198,6 +202,9 @@ export function getFilterAggTypeConfig(
         filterAggConfig: '',
         getEsAggConfig() {
           return this.filterAggConfig !== undefined ? JSON.parse(this.filterAggConfig!) : {};
+        },
+        isValid() {
+          return jsonStringValidator(this.filterAggConfig);
         },
       };
   }
