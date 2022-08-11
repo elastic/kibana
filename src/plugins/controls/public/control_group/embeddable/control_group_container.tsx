@@ -69,6 +69,7 @@ export class ControlGroupContainer extends Container<
 
   private relevantDataViewId?: string;
   private lastUsedDataViewId?: string;
+  private allPanelsLoaded: boolean;
 
   private reduxEmbeddableTools: ReduxEmbeddableTools<
     ControlGroupReduxState,
@@ -208,6 +209,8 @@ export class ControlGroupContainer extends Container<
       embeddable: this,
       reducers: controlGroupReducers,
     });
+
+    this.allPanelsLoaded = false;
 
     // when all children are ready setup subscriptions
     this.untilReady().then(() => {
@@ -387,6 +390,12 @@ export class ControlGroupContainer extends Container<
     }
     return Promise.resolve();
   };
+
+  public setAllPanelsLoadedState(value: boolean) {
+    this.allPanelsLoaded = value;
+    console.log(`allPanelsLoaded: ${this.allPanelsLoaded}`);
+    return;
+  }
 
   public render(dom: HTMLElement) {
     if (this.domNode) {
