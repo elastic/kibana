@@ -18,12 +18,14 @@ import {
   EuiTitle,
   EuiSwitch,
   EuiSearchBar,
+  EuiLink,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { AddContentEmptyPrompt } from '../../../shared/add_content_empty_prompt';
+import { docLinks } from '../../../shared/doc_links';
 import { ElasticsearchResources } from '../../../shared/elasticsearch_resources';
 import { GettingStartedSteps } from '../../../shared/getting_started_steps';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
@@ -112,14 +114,18 @@ export const SearchIndices: React.FC = () => {
                       defaultMessage="Your Elasticsearch indices are now front and center in Enterprise Search. You can create new indices and build search experiences with them directly. To learn more about how to use Elasticsearch indices in Enterprise Search {docLink}"
                       values={{
                         docLink: (
-                          <EuiLinkTo data-test-subj="search-index-link" to="#">
+                          <EuiLink
+                            data-test-subj="search-index-link"
+                            href={docLinks.appSearchElasticsearchIndexedEngines}
+                            target="_blank"
+                          >
                             {i18n.translate(
                               'xpack.enterpriseSearch.content.indices.callout.docLink',
                               {
                                 defaultMessage: 'read the documentation',
                               }
                             )}
-                          </EuiLinkTo>
+                          </EuiLink>
                         ),
                       }}
                     />
