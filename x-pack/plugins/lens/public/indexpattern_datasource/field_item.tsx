@@ -15,6 +15,7 @@ import {
   EuiIconTip,
   EuiPopover,
   EuiPopoverTitle,
+  EuiPopoverFooter,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -343,17 +344,18 @@ function FieldItemPopoverContents(props: FieldItemProps) {
         dataViewOrDataViewId={indexPattern.id} // TODO: Refactor to pass a variable with DataView type instead
         field={field as DataViewField}
         testSubject="lnsFieldListPanel"
-        overrideContent={(currentField, params) => {
-          if (currentField.type === 'geo_point' || currentField.type === 'geo_shape') {
+        overrideFooter={({ element }) => <EuiPopoverFooter>{element}</EuiPopoverFooter>}
+        overrideMissingContent={(params) => {
+          if (field.type === 'geo_point' || field.type === 'geo_shape') {
             return (
               <>
-                <EuiText size="s">{getVisualizeGeoFieldMessage(currentField.type)}</EuiText>
+                <EuiText size="s">{getVisualizeGeoFieldMessage(field.type)}</EuiText>
 
                 <EuiSpacer size="m" />
                 <VisualizeGeoFieldButton
                   uiActions={uiActions}
                   indexPatternId={indexPattern.id}
-                  fieldName={currentField.name}
+                  fieldName={field.name}
                 />
               </>
             );

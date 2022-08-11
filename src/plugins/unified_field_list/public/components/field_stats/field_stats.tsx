@@ -63,10 +63,12 @@ export interface FieldStatsProps {
   dataViewOrDataViewId: DataView | string;
   field: DataViewField;
   testSubject: string;
-  overrideContent?: (
-    field: DataViewField,
-    params?: { noDataFound?: boolean }
-  ) => JSX.Element | null;
+  overrideMissingContent?: (params?: { noDataFound?: boolean }) => JSX.Element | null;
+  overrideFooter?: (params: {
+    element: JSX.Element;
+    totalDocuments?: number;
+    sampledDocuments?: number;
+  }) => JSX.Element;
 }
 
 const FieldStatsComponent: React.FC<FieldStatsProps> = ({
@@ -77,7 +79,8 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   dataViewOrDataViewId,
   field,
   testSubject,
-  overrideContent,
+  overrideMissingContent,
+  overrideFooter,
 }) => {
   const services = useUnifiedFieldListServices();
   const { fieldFormats, uiSettings, charts, dataViews, data } = services;
@@ -226,14 +229,14 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   }
 
   if (field.type === 'geo_point' || field.type === 'geo_shape') {
-    return overrideContent?.(field) || null;
+    return overrideMissingContent ? overrideMissingContent() : null;
   }
 
   if (
     (!histogram || histogram.buckets.length === 0) &&
     (!topValues || topValues.buckets.length === 0)
   ) {
-    return overrideContent?.(field, { noDataFound: true }) || null;
+    return overrideMissingContent ? overrideMissingContent({ noDataFound: true }) : null;
   }
 
   if (histogram && histogram.buckets.length && topValues && topValues.buckets.length) {
@@ -287,6 +290,31 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   }
 
   function combineWithTitleAndFooter(el: React.ReactElement) {
+    const countsElement = totalDocuments ? (
+      <EuiText color="subdued" size="xs">
+        {sampledDocuments && (
+          <>
+            {i18n.translate('unifiedFieldList.fieldStats.percentageOfLabel', {
+              defaultMessage: '{percentage}% of',
+              values: {
+                percentage: Math.round((sampledDocuments / totalDocuments) * 100),
+              },
+            })}
+          </>
+        )}{' '}
+        <strong>
+          {fieldFormats
+            .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
+            .convert(totalDocuments)}
+        </strong>{' '}
+        {i18n.translate('unifiedFieldList.fieldStats.ofDocumentsLabel', {
+          defaultMessage: 'documents',
+        })}
+      </EuiText>
+    ) : (
+      <></>
+    );
+
     return (
       <>
         {title ? title : <></>}
@@ -295,31 +323,13 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
 
         {el}
 
-        <EuiSpacer />
-
-        {totalDocuments ? (
-          <EuiText color="subdued" size="xs">
-            {sampledDocuments && (
-              <>
-                {i18n.translate('unifiedFieldList.fieldStats.percentageOfLabel', {
-                  defaultMessage: '{percentage}% of',
-                  values: {
-                    percentage: Math.round((sampledDocuments / totalDocuments) * 100),
-                  },
-                })}
-              </>
-            )}{' '}
-            <strong>
-              {fieldFormats
-                .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-                .convert(totalDocuments)}
-            </strong>{' '}
-            {i18n.translate('unifiedFieldList.fieldStats.ofDocumentsLabel', {
-              defaultMessage: 'documents',
-            })}
-          </EuiText>
+        {overrideFooter ? (
+          overrideFooter?.({ element: countsElement, totalDocuments, sampledDocuments })
         ) : (
-          <></>
+          <>
+            <EuiSpacer />
+            {countsElement}
+          </>
         )}
       </>
     );

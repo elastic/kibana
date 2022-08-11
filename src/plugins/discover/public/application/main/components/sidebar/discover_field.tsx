@@ -410,6 +410,7 @@ function DiscoverFieldComponent({
   const renderPopover = () => {
     const details = getDetails(field);
     const dateRange = data?.query?.timefilter.timefilter.getTime();
+    const fieldForStats = multiFields ? multiFields[0].field : field; // TODO: how to handle multifields?
 
     return (
       <>
@@ -426,17 +427,17 @@ function DiscoverFieldComponent({
                 fromDate={dateRange.from}
                 toDate={dateRange.to}
                 dataViewOrDataViewId={dataView}
-                field={multiFields ? multiFields[0].field : field} // TODO: how to handle multifields?
+                field={fieldForStats}
                 testSubject="dscFieldListPanel"
-                overrideContent={(currentField, params) => {
+                overrideMissingContent={(params) => {
                   if (params?.noDataFound) {
                     return (
-                      <EuiText size="s">{`TODO: add a custom "no data available" message for ${currentField.type} field`}</EuiText>
+                      <EuiText size="s">{`TODO: add a custom "no data available" message for ${fieldForStats.type} field`}</EuiText>
                     );
                   }
 
                   return (
-                    <EuiText size="s">{`TODO: add a custom "stats are not available" message for ${currentField.type} field`}</EuiText>
+                    <EuiText size="s">{`TODO: add a custom "stats are not available" message for ${fieldForStats.type} field`}</EuiText>
                   );
                 }}
               />
