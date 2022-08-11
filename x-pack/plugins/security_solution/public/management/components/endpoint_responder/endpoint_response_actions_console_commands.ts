@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { CommandDefinition } from '../console';
+import type { Command, CommandDefinition } from '../console';
 import { IsolateActionResult } from './isolate_action';
 import { ReleaseActionResult } from './release_action';
 import { KillProcessActionResult } from './kill_process_action';
@@ -14,6 +14,9 @@ import { SuspendProcessActionResult } from './suspend_process_action';
 import { EndpointStatusActionResult } from './status_action';
 import { GetProcessesActionResult } from './get_processes_action';
 import type { ParsedArgData } from '../console/service/parsed_command_input';
+import type { ImmutableArray } from '../../../../common/endpoint/types';
+import { UPGRADE_ENDPOINT_FOR_RESPONDER } from '../../../common/translations';
+import { RESPONDER_CAPABILITIES } from '../../../../common/endpoint/constants';
 
 const emptyArgumentValidator = (argData: ParsedArgData): true | string => {
   if (argData?.length > 0 && argData[0]?.trim().length > 0) {
@@ -36,6 +39,21 @@ const pidValidator = (argData: ParsedArgData): true | string => {
       defaultMessage: 'Argument must be a positive number representing the PID of a process',
     });
   }
+};
+
+const capabilitiesValidator = (command: Command): true | string => {
+  const endpointCapabilities = command.commandDefinition.meta.capabilities;
+  if (endpointCapabilities.length === 0) {
+    return UPGRADE_ENDPOINT_FOR_RESPONDER;
+  } else if (
+    RESPONDER_CAPABILITIES.every((capability) =>
+      command.commandDefinition.meta.capabilities.includes(capability)
+    ) === true
+  ) {
+    return true;
+  }
+
+  return UPGRADE_ENDPOINT_FOR_RESPONDER;
 };
 
 const HELP_GROUPS = Object.freeze({
@@ -62,9 +80,18 @@ const COMMENT_ARG_ABOUT = i18n.translate(
   { defaultMessage: 'A comment to go along with the action' }
 );
 
-export const getEndpointResponseActionsConsoleCommands = (
-  endpointAgentId: string
-): CommandDefinition[] => {
+const DISABLED_COMMAND_ABOUT = i18n.translate(
+  'xpack.securitySolution.endpointConsoleCommands.suspendProcess.disabledCommandAbout',
+  { defaultMessage: 'This endpoint does not support this commmand' }
+);
+
+export const getEndpointResponseActionsConsoleCommands = ({
+  endpointAgentId,
+  endpointCapabilities,
+}: {
+  endpointAgentId: string;
+  endpointCapabilities?: ImmutableArray<string>;
+}): CommandDefinition[] => {
   return [
     {
       name: 'isolate',
@@ -118,9 +145,11 @@ export const getEndpointResponseActionsConsoleCommands = (
       RenderComponent: KillProcessActionResult,
       meta: {
         endpointId: endpointAgentId,
+        capabilities: endpointCapabilities ?? [],
       },
       exampleUsage: 'kill-process --pid 123 --comment "kill this process"',
       exampleInstruction: ENTER_PID_OR_ENTITY_ID_INSTRUCTION,
+      validate: capabilitiesValidator,
       mustHaveArgs: true,
       args: {
         comment: {
@@ -153,6 +182,7 @@ export const getEndpointResponseActionsConsoleCommands = (
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
       helpCommandPosition: 4,
+      helpDisabled: true,
     },
     {
       name: 'suspend-process',

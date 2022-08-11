@@ -54,6 +54,10 @@ export interface CommandDefinition<TMeta = any> {
    */
   HelpComponent?: CommandExecutionComponent;
   /**
+   * If defined, the button to add to the text bar will be disabled.
+   */
+  helpDisabled?: boolean;
+  /**
    * A store for any data needed when the command is executed.
    * The entire `CommandDefinition` is passed along to the component
    * that will handle it, so this data will be available there

@@ -194,15 +194,23 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
                   command.RenderComponent && (
                     <EuiFlexItem grow={false}>
                       <EuiToolTip
-                        content={i18n.translate(
-                          'xpack.securitySolution.console.commandList.addButtonTooltip',
-                          { defaultMessage: 'Add to text bar' }
-                        )}
+                        content={
+                          command.helpDisabled === false
+                            ? i18n.translate(
+                                'xpack.securitySolution.console.commandList.addButtonTooltip',
+                                { defaultMessage: 'Add to text bar' }
+                              )
+                            : i18n.translate(
+                                'xpack.securitySolution.console.commandList.disabledButtonTooltip',
+                                { defaultMessage: 'Disabled command' }
+                              )
+                        }
                       >
                         <EuiButtonIcon
                           iconType="plusInCircle"
                           aria-label={`updateTextInputCommand-${command.name}`}
                           onClick={updateInputText(`${commandNameWithArgs} `)}
+                          isDisabled={command.helpDisabled === true}
                         />
                       </EuiToolTip>
                     </EuiFlexItem>
