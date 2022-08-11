@@ -5,9 +5,6 @@ Object {
   "chain": Array [
     Object {
       "arguments": Object {
-        "curveType": Array [
-          "LINEAR",
-        ],
         "emphasizeFitting": Array [
           true,
         ],
@@ -34,6 +31,9 @@ Object {
                   ],
                   "columnToLabel": Array [
                     "{\\"b\\":\\"col_b\\",\\"c\\":\\"col_c\\",\\"d\\":\\"col_d\\"}",
+                  ],
+                  "curveType": Array [
+                    "LINEAR",
                   ],
                   "decorations": Array [],
                   "isHistogram": Array [
@@ -72,12 +72,6 @@ Object {
                   ],
                   "splitAccessors": Array [
                     "d",
-                  ],
-                  "table": Array [
-                    Object {
-                      "chain": Array [],
-                      "type": "expression",
-                    },
                   ],
                   "xAccessor": Array [
                     "a",

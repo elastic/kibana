@@ -421,7 +421,7 @@ describe('XYChart component', () => {
 
         expect(component.find(Settings).prop('xDomain')).toEqual({
           // shortened to 24th midnight (elastic-charts automatically adds one min interval)
-          max: new Date('2021-04-24').valueOf(),
+          max: new Date('2021-04-25').valueOf(),
           // extended to 22nd midnight because of first bucket
           min: new Date('2021-04-22').valueOf(),
           minInterval: 24 * 60 * 60 * 1000,
@@ -446,7 +446,7 @@ describe('XYChart component', () => {
             domainStart: new Date('2021-04-22T12:00:00.000Z').valueOf(),
             domainEnd: new Date('2021-04-24T12:00:00.000Z').valueOf(),
             domainMin: new Date('2021-04-22').valueOf(),
-            domainMax: new Date('2021-04-24').valueOf(),
+            domainMax: new Date('2021-04-25').valueOf(),
           })
         );
       });
@@ -3209,7 +3209,7 @@ describe('XYChart component', () => {
       const smallMultiples = splitChart.dive().find(SmallMultiples);
 
       expect(groupBy.at(0).prop('id')).toEqual(SPLIT_ROW);
-      expect(smallMultiples.prop('splitHorizontally')).toEqual(SPLIT_ROW);
+      expect(smallMultiples.prop('splitVertically')).toEqual(SPLIT_ROW);
     });
 
     it('should render split chart if splitColumnAccessor is specified', () => {
@@ -3235,7 +3235,7 @@ describe('XYChart component', () => {
       const smallMultiples = splitChart.dive().find(SmallMultiples);
 
       expect(groupBy.at(0).prop('id')).toEqual(SPLIT_COLUMN);
-      expect(smallMultiples.prop('splitVertically')).toEqual(SPLIT_COLUMN);
+      expect(smallMultiples.prop('splitHorizontally')).toEqual(SPLIT_COLUMN);
     });
 
     it('should render split chart if both, splitRowAccessor and splitColumnAccessor are specified', () => {
@@ -3267,8 +3267,8 @@ describe('XYChart component', () => {
       expect(groupBy.at(0).prop('id')).toEqual(SPLIT_COLUMN);
       expect(groupBy.at(1).prop('id')).toEqual(SPLIT_ROW);
 
-      expect(smallMultiples.prop('splitVertically')).toEqual(SPLIT_COLUMN);
-      expect(smallMultiples.prop('splitHorizontally')).toEqual(SPLIT_ROW);
+      expect(smallMultiples.prop('splitVertically')).toEqual(SPLIT_ROW);
+      expect(smallMultiples.prop('splitHorizontally')).toEqual(SPLIT_COLUMN);
     });
   });
 
