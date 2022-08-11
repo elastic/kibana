@@ -102,7 +102,10 @@ export async function refreshIndexPatternsList({
     indexPatternService.loadIndexPatternRefs({ isFullEditor: true }),
   ]);
   const indexPattern = newlyMappedIndexPattern[indexPatternId];
-  indexPatternService.updateIndexPatternsCache({
+  // But what about existingFields here?
+  // When the indexPatterns cache object gets updated, the data panel will
+  // notice it and refetch the fields list existence map
+  indexPatternService.updateDataViewsState({
     indexPatterns: {
       ...indexPatternsCache,
       [indexPatternId]: indexPattern,
