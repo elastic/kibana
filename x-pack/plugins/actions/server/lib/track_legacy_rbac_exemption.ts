@@ -10,13 +10,13 @@ import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 export function trackLegacyRBACExemption(
   source: string,
   usageCounter?: UsageCounter,
-  increment: number = 1
+  increment?: number
 ) {
   if (usageCounter) {
     usageCounter.incrementCounter({
       counterName: `source_${source}`,
       counterType: 'legacyRBACExemption',
-      incrementBy: increment,
+      incrementBy: increment ? increment : 1,
     });
   }
 }
