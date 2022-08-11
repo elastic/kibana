@@ -139,7 +139,7 @@ for (const testSuite of testSuites) {
       concurrency_group: process.env.UUID,
       concurrency_method: 'eager',
       agents: {
-        queue: 'n2-4-spot-2',
+        queue: 'chrome-test',
       },
       depends_on: 'build',
       timeout_in_minutes: 150,
