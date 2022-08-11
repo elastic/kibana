@@ -20,7 +20,7 @@ import {
 import { buildEmptyFilter, FieldFilter, Filter, getFilterParams } from '@kbn/es-query';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
+import { cx, css } from '@emotion/css';
 import uuid from 'uuid';
 
 import returnKey from '../assets/return_key.svg';
@@ -74,6 +74,14 @@ export function FilterItem({
   let field: DataViewField | undefined;
   let operator: Operator | undefined;
   let params: Filter['meta']['params'] | undefined;
+
+  const cursorPlus = css`
+    cursor: url(${plus}), auto;
+  `;
+
+  const cursorReturnKey = css`
+    cursor: url(${returnKey}), auto;
+  `;
 
   if (!conditionalOperationType) {
     field = getFieldFromFilter(filter as FieldFilter, dataView);
@@ -166,9 +174,7 @@ export function FilterItem({
           droppableId={path}
           spacing="s"
           isCombineEnabled={!disableOr || !hideOr}
-          css={css`
-            cursor: ${dropTarget === path ? `url(${plus}), auto` : `auto`};
-          `}
+          className={cx({ [cursorPlus]: dropTarget === path })}
           isDropDisabled={disableAnd}
         >
           <EuiDraggable
@@ -185,9 +191,7 @@ export function FilterItem({
                 responsive={false}
                 alignItems="center"
                 justifyContent="center"
-                css={css`
-                  cursor: ${dropTarget === path && !hideOr ? `url(${returnKey}), auto` : `auto`};
-                `}
+                className={cx({ [cursorReturnKey]: dropTarget === path && !hideOr })}
               >
                 <EuiFlexItem>
                   <EuiPanel color={color} paddingSize={'none'} hasShadow={false} key={uuid()}>
