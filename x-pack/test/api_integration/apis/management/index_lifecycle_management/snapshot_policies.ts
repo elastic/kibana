@@ -22,6 +22,9 @@ export default function ({ getService }: FtrProviderContext) {
     registerSnapshotRepositoriesHelpers(getService);
 
   describe('snapshot policies', () => {
+    // skip Cloud failing test https://github.com/elastic/kibana/issues/136881
+    this.tags(['skipCloud']);
+
     before(async () => Promise.all([cleanupPolicies(), cleanupRepositories()]));
     after(async () => Promise.all([cleanupPolicies(), cleanupRepositories()]));
 

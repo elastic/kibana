@@ -14,6 +14,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
 
   describe('console vector tiles response validation', function describeIndexTests() {
+    // skip Cloud failing test https://github.com/elastic/kibana/issues/133428
+    this.tags(['skipCloud']);
+
     before(async () => {
       await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
