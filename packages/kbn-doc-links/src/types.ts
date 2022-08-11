@@ -264,6 +264,7 @@ export interface DocLinks {
       linux_deadlock: string;
     };
     readonly threatIntelInt: string;
+    readonly responseActions: string;
   };
   readonly query: {
     readonly eql: string;
@@ -337,6 +338,7 @@ export interface DocLinks {
   readonly monitoring: Record<string, string>;
   readonly reporting: Readonly<{
     cloudMinimumRequirements: string;
+    grantUserAccess: string;
     browserSystemDependencies: string;
     browserSandboxDependencies: string;
   }>;

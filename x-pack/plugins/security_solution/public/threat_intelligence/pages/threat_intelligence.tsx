@@ -12,6 +12,7 @@ import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../../common/constants';
 import { useKibana } from '../../common/lib/kibana';
 import { FiltersGlobal } from '../../common/components/filters_global';
+import { licenseService } from '../../common/hooks/use_license';
 
 const ThreatIntelligence = () => {
   const services = useKibana().services;
@@ -20,6 +21,7 @@ const ThreatIntelligence = () => {
 
   const securitySolutionContext: ThreatIntelligenceSecuritySolutionContext = {
     getFiltersGlobalComponent: () => FiltersGlobal,
+    licenseService,
   };
 
   return (
