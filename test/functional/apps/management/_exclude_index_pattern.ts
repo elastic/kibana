@@ -19,17 +19,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.testUser.setRoles(['kibana_admin', 'index_a', 'index_b']);
       await PageObjects.settings.navigateTo();
       await es.transport.request({
-        path: '/index_a/_doc',
+        path: '/index-a/_doc',
         method: 'POST',
         body: { user: 'matt' },
       });
 
       await es.transport.request({
-        path: '/index_b/_doc',
+        path: '/index-b/_doc',
         method: 'POST',
         body: { title: 'hello' },
       });
-      await PageObjects.settings.createIndexPattern('index_*,-index_b');
+      await PageObjects.settings.createIndexPattern('index-*,-index-b');
     });
 
     it('data view creation with exclusion', async () => {
@@ -40,11 +40,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await es.transport.request({
-        path: '/index_a',
+        path: '/index-a',
         method: 'DELETE',
       });
       await es.transport.request({
-        path: '/index_b',
+        path: '/index-b',
         method: 'DELETE',
       });
       await PageObjects.settings.removeIndexPattern();

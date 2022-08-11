@@ -254,7 +254,7 @@ export default async function ({ readConfigFile }) {
             cluster: [],
             indices: [
               {
-                names: ['index_a'],
+                names: ['index-a'],
                 privileges: ['read', 'view_index_metadata', 'manage', 'create_index', 'index'],
                 field_security: { grant: ['*'], except: [] },
               },
@@ -269,7 +269,7 @@ export default async function ({ readConfigFile }) {
             cluster: [],
             indices: [
               {
-                names: ['index_b'],
+                names: ['index-b'],
                 privileges: ['read', 'view_index_metadata', 'manage', 'create_index', 'index'],
                 field_security: { grant: ['*'], except: [] },
               },
