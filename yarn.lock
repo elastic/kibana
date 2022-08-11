@@ -2727,7 +2727,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/content-management-table-list@link:bazel-bin/packages/kbn-content-management-table-list":
+"@kbn/content-management-table-list@link:bazel-bin/packages/content-management/table_list":
   version "0.0.0"
   uid ""
 
@@ -6765,7 +6765,7 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__content-management-table-list@link:bazel-bin/packages/kbn-content-management-table-list/npm_module_types":
+"@types/kbn__content-management-table-list@link:bazel-bin/packages/content-management/table_list/npm_module_types":
   version "0.0.0"
   uid ""
 

@@ -2,17 +2,26 @@ load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_DIRNAME = "kbn-content-management-table-list"
+PKG_DIRNAME = "table_list"
 PKG_REQUIRE_NAME = "@kbn/content-management-table-list"
 
 SOURCE_FILES = glob(
   [
-    "src/**/*.ts",
-    "src/**/*.tsx",
+    "**/*.ts",
+    "**/*.tsx",
   ],
   exclude = [
+    "**/*.config.js",
+    "**/*.mock.*",
     "**/*.test.*",
     "**/*.stories.*",
+    "**/__snapshots__",
+    "**/integration_tests",
+    "**/mocks",
+    "**/scripts",
+    "**/storybook",
+    "**/test_fixtures",
+    "**/test_helpers",
   ],
 )
 
@@ -113,7 +122,7 @@ ts_project(
   declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  root_dir = "src",
+  root_dir = ".",
   tsconfig = ":tsconfig",
 )
 
