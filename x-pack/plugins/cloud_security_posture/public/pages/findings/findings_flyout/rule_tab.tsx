@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiDescriptionList } from '@elastic/eui';
+import { EuiBadge, EuiDescriptionList } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { CspFinding } from '../types';
@@ -23,6 +23,18 @@ export const getRuleList = (rule: CspFinding['rule']) => [
       defaultMessage: 'Description',
     }),
     description: <Markdown>{rule.description}</Markdown>,
+  },
+  {
+    title: i18n.translate('xpack.csp.findings.findingsFlyout.ruleTab.tagsTitle', {
+      defaultMessage: 'Tags',
+    }),
+    description: (
+      <>
+        {rule.tags.map((tag) => (
+          <EuiBadge>{tag}</EuiBadge>
+        ))}
+      </>
+    ),
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.ruleTab.frameworkSourcesTitle', {

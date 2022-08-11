@@ -160,7 +160,7 @@ export const getHeatmapVisualization = ({
   getConfiguration({ state, frame, layerId }) {
     const datasourceLayer = frame.datasourceLayers[layerId];
 
-    const originalOrder = datasourceLayer.getTableSpec().map(({ columnId }) => columnId);
+    const originalOrder = datasourceLayer?.getTableSpec().map(({ columnId }) => columnId);
     if (!originalOrder) {
       return { groups: [] };
     }
@@ -312,7 +312,7 @@ export const getHeatmapVisualization = ({
     const datasource = datasourceLayers[state.layerId];
     const datasourceExpression = datasourceExpressionsByLayers[state.layerId];
 
-    const originalOrder = datasource.getTableSpec().map(({ columnId }) => columnId);
+    const originalOrder = datasource?.getTableSpec().map(({ columnId }) => columnId);
     // When we add a column it could be empty, and therefore have no order
 
     if (!originalOrder || !state.valueAccessor) {
@@ -402,7 +402,7 @@ export const getHeatmapVisualization = ({
     const datasource = datasourceLayers[state.layerId];
     const datasourceExpression = datasourceExpressionsByLayers[state.layerId];
 
-    const originalOrder = datasource.getTableSpec().map(({ columnId }) => columnId);
+    const originalOrder = datasource?.getTableSpec().map(({ columnId }) => columnId);
     // When we add a column it could be empty, and therefore have no order
 
     if (!originalOrder) {
@@ -513,7 +513,7 @@ export const getHeatmapVisualization = ({
     const hasArrayValues = rows.some((row) => Array.isArray(row[state.valueAccessor!]));
 
     const datasource = frame.datasourceLayers[state.layerId];
-    const operation = datasource.getOperationForColumnId(state.valueAccessor);
+    const operation = datasource?.getOperationForColumnId(state.valueAccessor);
 
     return hasArrayValues
       ? [
