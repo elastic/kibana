@@ -14,16 +14,24 @@ import {
   EuiButton,
   EuiText,
   EuiImage,
+  EuiSwitch,
+  EuiSpacer,
+  EuiForm,
+  EuiFormRow,
+  EuiFieldText,
+  EuiRange,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { LargeDataSetParams } from '.';
 
 const title = i18n.translate('homePackages.largeDataSetPanel.title', {
   defaultMessage: 'Generate large data set',
 });
 
 const message = i18n.translate('homePackages.largeDataSetPanel.message', {
-  defaultMessage: 'Generate a large data set. Takes about 10 minutes',
+  defaultMessage:
+    'Generate a large data set. Takes about 10 minutes. Leaving the switch on will generate the dataset with default parameters',
 });
 
 const useSVG: () => [string | null, boolean] = () => {
@@ -56,19 +64,60 @@ const useSVG: () => [string | null, boolean] = () => {
 };
 
 interface Props {
-  install: () => Promise<void>;
+  install: (params: LargeDataSetParams) => Promise<void>;
 }
 
 export const LargeDatasetPanel = ({ install }: Props) => {
   const [imageSrc] = useSVG();
   const [installed, setInstalled] = useState<boolean>(false);
+  const [checked, setChecked] = useState<boolean>(false);
+  const [indexName, setIndexName] = useState<string>('kibana_sample_dataset_large');
+  const [nrOfDocuments, setNrOfDocuments] = useState<number>(100000);
 
   const image = imageSrc ? <EuiImage alt={'demo image'} size="l" src={imageSrc} /> : null;
 
   const onClick = async () => {
-    await install();
+    await install({ indexName, nrOfDocuments });
     setInstalled(true);
   };
+
+  const onChange = async () => {
+    setChecked(!checked);
+  };
+
+  const onIndexNameChange = (val: string) => {
+    setIndexName(val);
+  };
+
+  const onNrOfDocumentsChange = (target: EventTarget | (EventTarget & HTMLInputElement)) => {
+    setNrOfDocuments(Number((target as HTMLInputElement).value));
+  };
+
+  const configureLayout = (
+    <EuiPanel>
+      <EuiForm component="form">
+        <EuiFormRow label="Index name" helpText="Elasticsearch index to generate">
+          <EuiFieldText
+            name="indexName"
+            value={indexName}
+            onChange={(e) => onIndexNameChange(e.target.value)}
+          />
+        </EuiFormRow>
+        <EuiFormRow label="Number of documents" helpText="Number of documents to generate">
+          <EuiRange
+            min={1000}
+            max={100000}
+            step={1000}
+            value={nrOfDocuments}
+            onChange={(e) => onNrOfDocumentsChange(e.target)}
+            showLabels
+            showValue
+          />
+        </EuiFormRow>
+      </EuiForm>
+      <EuiSpacer />
+    </EuiPanel>
+  );
 
   const installedLayout = (
     <EuiFlexGroup alignItems="center">
@@ -91,6 +140,10 @@ export const LargeDatasetPanel = ({ install }: Props) => {
         <EuiText size="s">
           <h2>{title}</h2>
           <p>{message}</p>
+          <EuiSwitch label="Configure your own data set" checked={checked} onChange={onChange} />
+          <EuiSpacer />
+          {checked ? configureLayout : null}
+          {checked ? <EuiSpacer /> : null}
           <EuiButton fill iconSide="right" iconType="popout" onClick={onClick} target="_blank">
             Generate!
           </EuiButton>

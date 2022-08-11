@@ -1170,6 +1170,7 @@
     "expect": "^28.1.1",
     "expose-loader": "^0.7.5",
     "faker": "^5.1.0",
+    "faker-js": "^1.0.0",
     "fetch-mock": "^7.3.9",
     "file-loader": "^4.2.0",
     "form-data": "^4.0.0",

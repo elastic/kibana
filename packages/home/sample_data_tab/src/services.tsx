@@ -34,7 +34,7 @@ interface Services {
   fetchSampleDataSets: () => Promise<SampleDataSet[]>;
   notifyError: NotifyFn;
   logClick: (metric: string) => void;
-  installLargeDataset: () => Promise<void>;
+  installLargeDataset: (params: LargeDataSetParams) => Promise<void>;
 }
 
 /**
@@ -85,6 +85,11 @@ interface KibanaDependencies {
  */
 export type SampleDataTabKibanaDependencies = KibanaDependencies & SampleDataCardKibanaDependencies;
 
+export interface LargeDataSetParams {
+  nrOfDocuments: number;
+  indexName: string;
+}
+
 /**
  * Kibana-specific Provider that maps dependencies to services.
  */
@@ -95,8 +100,10 @@ export const SampleDataTabKibanaProvider: FC<SampleDataTabKibanaDependencies> = 
   const { coreStart, trackUiMetric } = dependencies;
   const { http, notifications } = coreStart;
 
-  const installLargeDataset = async () => {
-    await http.post(`${URL_SAMPLE_DATA_API}/large_dataset`);
+  const installLargeDataset = async (params: LargeDataSetParams) => {
+    // @ts-ignore
+    const { indexName, nrOfDocuments } = params;
+    await http.post(`${URL_SAMPLE_DATA_API}/large_dataset/${indexName}/${nrOfDocuments}`);
   };
 
   const value: Services = {
