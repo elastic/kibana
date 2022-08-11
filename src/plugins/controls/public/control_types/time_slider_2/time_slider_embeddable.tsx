@@ -7,6 +7,7 @@
  */
 
 import _ from 'lodash';
+import { timer } from 'rxjs';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { ReduxEmbeddableTools, ReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
@@ -120,9 +121,11 @@ export class TimeSliderControlEmbeddable extends Embeddable<
 
     const { Wrapper: TimeSliderControlReduxWrapper } = this.reduxEmbeddableTools;
 
+    const mockWaitForPanelsToLoad$ = timer(3000, 3000);
+
     ReactDOM.render(
       <TimeSliderControlReduxWrapper>
-        <TimeSlider dateFormat={this.getDateFormat()} timezone={this.getTimezone()} />
+        <TimeSlider dateFormat={this.getDateFormat()} timezone={this.getTimezone()} waitForPanelsToLoad$={mockWaitForPanelsToLoad$} />
       </TimeSliderControlReduxWrapper>,
       node
     );

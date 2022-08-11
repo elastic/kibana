@@ -8,6 +8,8 @@
 
 import _ from 'lodash';
 import React, { Component, ReactNode, useCallback, useEffect, useState } from 'react';
+import { Observable, Subscription } from 'rxjs';
+import { first } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
 import {
@@ -32,6 +34,7 @@ const TO_INDEX = 1;
 export interface Props {
   dateFormat?: string;
   timezone?: string;
+  waitForPanelsToLoad$: Observable<void>;
 }
 
 export const TimeSlider: FC<Props> = (props) => {
@@ -54,6 +57,7 @@ export const TimeSlider: FC<Props> = (props) => {
   }, 500);
 
   const dispatchChange = (value: [number, number]) => {
+    console.log('new value: ', value);
     dispatch(actions.setValue({ value }));
     dispatchPublishChange(value);
   };
@@ -63,9 +67,10 @@ export const TimeSlider: FC<Props> = (props) => {
   });
   const timeRangeMin = timeRangeBounds[FROM_INDEX];
   const timeRangeMax = timeRangeBounds[TO_INDEX];
-  const value = select((state) => {
+  const myValue = select((state) => {
     return state.explicitInput.value;
   });
+  console.log('value: ', myValue);
 
   const getTimezone = useCallback(() => {
     const detectedTimezone = moment.tz.guess();
@@ -85,6 +90,10 @@ export const TimeSlider: FC<Props> = (props) => {
     setIsPopoverOpen(!isPopoverOpen);
   }, [isPopoverOpen, setIsPopoverOpen]);
 
+  const [isPaused, setIsPaused] = useState(true);
+  const [timeoutId, setTimeoutId] = useState<number | undefined>(undefined);
+  const [subscription, setSubscription] = useState<Subscription | undefined>(undefined);
+
   const epochToKbnDateFormat = useCallback(
     (epoch: number) => {
       const tz = getTimezone();
@@ -101,32 +110,65 @@ export const TimeSlider: FC<Props> = (props) => {
     []
   );
 
-  const onNext  = useCallback(
-    () => {
-      setIsPopoverOpen(true);
-      const from = value === undefined || value[TO_INDEX] === timeRangeMax
-        ? ticks[0].value
-        : value[TO_INDEX];
-      const to = from + range;
-      dispatchChange([from, Math.min(to, timeRangeMax)]);
-    },
-    [ticks, timeRangeMax, value]
-  );
+  const onNext = () => {
+    console.log('onNext: current value: ', myValue);
+    setIsPopoverOpen(true);
+    const from = myValue === undefined || myValue[TO_INDEX] === timeRangeMax
+      ? ticks[0].value
+      : myValue[TO_INDEX];
+    const to = from + range;
+    dispatchChange([from, Math.min(to, timeRangeMax)]);
+  }
 
-  const onPrevious  = useCallback(
+  const onPrevious = useCallback(
     () => {
       setIsPopoverOpen(true);
-      const to = value === undefined || value[FROM_INDEX] === timeRangeMin
+      const to = myValue === undefined || myValue[FROM_INDEX] === timeRangeMin
         ? ticks[ticks.length - 1].value
-        : value[FROM_INDEX];
+        : myValue[FROM_INDEX];
       const from = to - range;
       dispatchChange([Math.max(from, timeRangeMin), to]);
     },
-    [ticks, timeRangeMin, value]
+    [ticks, timeRangeMin, myValue]
   );
 
-  const from = value ? value[FROM_INDEX] : timeRangeMin;
-  const to = value ? value[TO_INDEX] : timeRangeMax;
+  const playNextFrame = () => {
+    // advance to next frame
+    onNext();
+
+    // use waitForPanelsToLoad$ observable to wait until next frame loaded
+    // .pipe(first()) waits until the first value is emitted from an observable and then automatically unsubscribes
+    const nextSubscription = props.waitForPanelsToLoad$.pipe(first()).subscribe(() => {
+      // use timeout to display frame for small time period before moving to next frame
+      const nextTimeoutId = window.setTimeout(() => {
+        playNextFrame();
+      }, 1750);
+      setTimeoutId(nextTimeoutId);
+    });
+    setSubscription(nextSubscription);
+  }
+
+  const onPlay = () => {
+    setIsPopoverOpen(true);
+    setIsPaused(false);
+    playNextFrame();
+  }
+
+  const onPause = () => {
+    setIsPopoverOpen(true);
+    setIsPaused(true);
+    if (subscription) {
+      subscription.unsubscribe();
+      setSubscription(undefined);
+    }
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+      setTimeoutId(undefined);
+    }
+  }
+
+  const from = myValue ? myValue[FROM_INDEX] : timeRangeMin;
+  const to = myValue ? myValue[TO_INDEX] : timeRangeMax;
   
   return (
     <EuiFlexGroup>
@@ -138,6 +180,24 @@ export const TimeSlider: FC<Props> = (props) => {
           aria-label={i18n.translate('xpack.maps.timeslider.previousTimeWindowLabel', {
             defaultMessage: 'Previous time window',
           })}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon
+          className="mapTimeslider__playButton"
+          onClick={isPaused ? onPlay : onPause}
+          iconType={isPaused ? 'playFilled' : 'pause'}
+          size="s"
+          display="fill"
+          aria-label={
+            isPaused
+              ? i18n.translate('xpack.maps.timeslider.playLabel', {
+                  defaultMessage: 'Play',
+                })
+              : i18n.translate('xpack.maps.timeslider.pauseLabel', {
+                  defaultMessage: 'Pause',
+                })
+          }
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

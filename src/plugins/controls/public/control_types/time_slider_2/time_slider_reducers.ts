@@ -27,6 +27,7 @@ export const timeSliderReducers = {
     state: WritableDraft<TimeSliderReduxState>,
     action: PayloadAction<{ value: [number, number] }>
   ) => {
+    console.log('setValue: ', action.payload.value);
     state.explicitInput.value = action.payload.value;
   },
 };
