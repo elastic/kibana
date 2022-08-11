@@ -250,7 +250,10 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             sendGetAgentStatus({
               kuery: kuery && kuery !== '' ? kuery : undefined,
             }),
-            sendGetAgentTags(),
+            sendGetAgentTags({
+              kuery: kuery && kuery !== '' ? kuery : undefined,
+              showInactive,
+            }),
           ]);
           isLoadingVar.current = false;
           // Return if a newer request has been triggered
@@ -531,7 +534,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
                   setAgentToAddRemoveTags(agent);
                   setShowTagsAddRemove(!showTagsAddRemove);
                 }}
-                allTags={allTags ?? []}
               />
             );
           },
@@ -601,6 +603,9 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           button={tagsPopoverButton!}
           onTagsUpdated={() => {
             fetchData();
+          }}
+          onClosePopover={() => {
+            setShowTagsAddRemove(false);
           }}
         />
       )}

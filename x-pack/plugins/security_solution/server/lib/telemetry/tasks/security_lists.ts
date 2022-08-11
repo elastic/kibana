@@ -51,9 +51,9 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
         licenseInfoPromise.status === 'fulfilled'
           ? licenseInfoPromise.value
           : ({} as ESLicense | undefined);
+      const FETCH_VALUE_LIST_META_DATA_INTERVAL_IN_HOURS = 24;
 
       // Lists Telemetry: Trusted Applications
-
       const trustedApps = await receiver.fetchTrustedApplications();
       if (trustedApps?.data) {
         const trustedAppsJson = templateExceptionList(
@@ -109,6 +109,13 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
         }
       }
 
+      // Value list meta data
+      const valueListMetaData = await receiver.fetchValueListMetaData(
+        FETCH_VALUE_LIST_META_DATA_INTERVAL_IN_HOURS
+      );
+      if (valueListMetaData?.total_list_count) {
+        await sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, [valueListMetaData]);
+      }
       return count;
     },
   };

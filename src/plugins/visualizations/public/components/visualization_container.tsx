@@ -17,6 +17,7 @@ export interface VisualizationContainerProps {
   className?: string;
   children: ReactNode;
   handlers: IInterpreterRenderHandlers;
+  renderComplete?: () => void;
   showNoResult?: boolean;
   error?: string;
 }
@@ -31,6 +32,7 @@ export const VisualizationContainer = ({
   handlers,
   showNoResult = false,
   error,
+  renderComplete,
 }: VisualizationContainerProps) => {
   const classes = classNames('visualization', className);
 
@@ -46,7 +48,9 @@ export const VisualizationContainer = ({
         {error ? (
           <VisualizationError onInit={() => handlers.done()} error={error} />
         ) : showNoResult ? (
-          <VisualizationNoResults onInit={() => handlers.done()} />
+          <VisualizationNoResults
+            onInit={() => (renderComplete ? renderComplete() : handlers.done())}
+          />
         ) : (
           children
         )}

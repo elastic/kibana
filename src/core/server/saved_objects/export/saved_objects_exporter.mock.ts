@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ISavedObjectsExporter } from './saved_objects_exporter';
+import type { ISavedObjectsExporter } from '@kbn/core-saved-objects-server';
 
 const createExporterMock = () => {
   const mock: jest.Mocked<ISavedObjectsExporter> = {

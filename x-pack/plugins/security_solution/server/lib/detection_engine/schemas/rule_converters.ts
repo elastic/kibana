@@ -41,9 +41,9 @@ import { assertUnreachable } from '../../../../common/utility_types';
 import type {
   RelatedIntegrationArray,
   RequiredFieldArray,
-  RuleExecutionSummary,
   SetupGuide,
 } from '../../../../common/detection_engine/schemas/common';
+import type { RuleExecutionSummary } from '../../../../common/detection_engine/rule_monitoring';
 import {
   eqlPatchParams,
   machineLearningPatchParams,
@@ -81,7 +81,7 @@ import {
 } from '../rules/utils';
 // eslint-disable-next-line no-restricted-imports
 import type { LegacyRuleActions } from '../rule_actions/legacy_types';
-import { mergeRuleExecutionSummary } from '../rule_execution_log';
+import { mergeRuleExecutionSummary } from '../rule_monitoring';
 
 // These functions provide conversions from the request API schema to the internal rule schema and from the internal rule schema
 // to the response API schema. This provides static type-check assurances that the internal schema is in sync with the API schema for

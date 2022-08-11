@@ -7,6 +7,7 @@
  */
 
 import { CustomPaletteState } from '@kbn/charts-plugin/common';
+import type { PaletteRegistry } from '@kbn/coloring';
 
 export const getPaletteService = () => {
   return {
@@ -17,5 +18,5 @@ export const getPaletteService = () => {
         return colors[lessThenValueIndex];
       },
     }),
-  };
+  } as unknown as PaletteRegistry;
 };

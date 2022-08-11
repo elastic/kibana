@@ -14,10 +14,11 @@ import { eqlRuleParams } from '../../schemas/rule_schemas';
 import { eqlExecutor } from '../../signals/executors/eql';
 import type { CreateRuleOptions, SecurityAlertType } from '../types';
 import { validateImmutable, validateIndexPatterns } from '../utils';
+
 export const createEqlAlertType = (
   createOptions: CreateRuleOptions
 ): SecurityAlertType<EqlRuleParams, {}, {}, 'default'> => {
-  const { experimentalFeatures, logger, version } = createOptions;
+  const { version } = createOptions;
   return {
     id: EQL_RULE_TYPE_ID,
     name: 'Event Correlation Rule',
@@ -63,12 +64,13 @@ export const createEqlAlertType = (
     async executor(execOptions) {
       const {
         runOpts: {
-          inputIndex,
-          runtimeMappings,
-          bulkCreate,
-          exceptionItems,
           completeRule,
           tuple,
+          inputIndex,
+          runtimeMappings,
+          exceptionItems,
+          ruleExecutionLogger,
+          bulkCreate,
           wrapHits,
           wrapSequences,
           primaryTimestamp,
@@ -79,16 +81,15 @@ export const createEqlAlertType = (
       } = execOptions;
 
       const result = await eqlExecutor({
+        completeRule,
+        tuple,
         inputIndex,
         runtimeMappings,
-        bulkCreate,
         exceptionItems,
-        experimentalFeatures,
-        logger,
-        completeRule,
+        ruleExecutionLogger,
         services,
-        tuple,
         version,
+        bulkCreate,
         wrapHits,
         wrapSequences,
         primaryTimestamp,

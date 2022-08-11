@@ -9,6 +9,7 @@ import { has, isEmpty } from 'lodash/fp';
 import type { Unit } from '@kbn/datemath';
 import moment from 'moment';
 import deepmerge from 'deepmerge';
+import omit from 'lodash/omit';
 
 import type {
   ExceptionListType,
@@ -38,7 +39,9 @@ import type {
   ActionsStepRuleJson,
   RuleStepsFormData,
   RuleStep,
+  AdvancedPreviewOptions,
 } from '../types';
+import { DataSourceType } from '../types';
 import type { FieldValueQueryBar } from '../../../../components/rules/query_bar';
 import type { CreateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
 import { stepDefineDefaultValue } from '../../../../components/rules/step_define_rule';
@@ -47,9 +50,9 @@ import { stepActionsDefaultValue } from '../../../../components/rules/step_rule_
 import type { FieldValueThreshold } from '../../../../components/rules/threshold_input';
 import type { EqlOptionsSelected } from '../../../../../../common/search_strategy';
 
-export const getTimeTypeValue = (time: string): { unit: string; value: number } => {
-  const timeObj = {
-    unit: '',
+export const getTimeTypeValue = (time: string): { unit: Unit; value: number } => {
+  const timeObj: { unit: Unit; value: number } = {
+    unit: 'ms',
     value: 0,
   };
   const filterTimeVal = time.match(/\d+/g);
@@ -62,7 +65,7 @@ export const getTimeTypeValue = (time: string): { unit: string; value: number } 
     filterTimeType != null &&
     ['s', 'm', 'h'].includes(filterTimeType[0])
   ) {
-    timeObj.unit = filterTimeType[0];
+    timeObj.unit = filterTimeType[0] as Unit;
   }
   return timeObj;
 };
@@ -336,9 +339,34 @@ export const filterEmptyThreats = (threats: Threats): Threats => {
     });
 };
 
+/**
+ * remove unused data source.
+ * Ex: rule is using a data view so we should not
+ * write an index property on the rule form.
+ * @param defineStepData
+ * @returns DefineStepRule
+ */
+export const getStepDataDataSource = (
+  defineStepData: DefineStepRule
+): Omit<DefineStepRule, 'dataViewId' | 'index' | 'dataSourceType'> & {
+  index?: string[];
+  dataViewId?: string;
+} => {
+  const copiedStepData = { ...defineStepData };
+  if (defineStepData.dataSourceType === DataSourceType.DataView) {
+    return omit(copiedStepData, ['index', 'dataSourceType']);
+  } else if (defineStepData.dataSourceType === DataSourceType.IndexPatterns) {
+    return omit(copiedStepData, ['dataViewId', 'dataSourceType']);
+  }
+  return copiedStepData;
+};
+
 export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStepRuleJson => {
-  const ruleFields = filterRuleFieldsForType(defineStepData, defineStepData.ruleType);
+  const stepData = getStepDataDataSource(defineStepData);
+
+  const ruleFields = filterRuleFieldsForType(stepData, stepData.ruleType);
   const { ruleType, timeline } = ruleFields;
+
   const baseFields = {
     type: ruleType,
     ...(timeline.id != null &&
@@ -433,8 +461,8 @@ export const formatScheduleStepData = (scheduleData: ScheduleStepRule): Schedule
       formatScheduleData.interval
     );
     const { unit: fromUnit, value: fromValue } = getTimeTypeValue(formatScheduleData.from);
-    const duration = moment.duration(intervalValue, intervalUnit as 's' | 'm' | 'h');
-    duration.add(fromValue, fromUnit as 's' | 'm' | 'h');
+    const duration = moment.duration(intervalValue, intervalUnit);
+    duration.add(fromValue, fromUnit);
     formatScheduleData.from = `now-${duration.asSeconds()}s`;
     formatScheduleData.to = 'now';
   }
@@ -552,6 +580,7 @@ export const formatRule = <T>(
 export const formatPreviewRule = ({
   index,
   dataViewId,
+  dataSourceType,
   query,
   threatIndex,
   threatQuery,
@@ -564,9 +593,11 @@ export const formatPreviewRule = ({
   eqlOptions,
   newTermsFields,
   historyWindowSize,
+  advancedOptions,
 }: {
   index: string[];
   dataViewId?: string;
+  dataSourceType: DataSourceType;
   threatIndex: string[];
   query: FieldValueQueryBar;
   threatQuery: FieldValueQueryBar;
@@ -579,11 +610,13 @@ export const formatPreviewRule = ({
   eqlOptions: EqlOptionsSelected;
   newTermsFields: string[];
   historyWindowSize: string;
+  advancedOptions?: AdvancedPreviewOptions;
 }): CreateRulesSchema => {
   const defineStepData = {
     ...stepDefineDefaultValue,
     index,
     dataViewId,
+    dataSourceType,
     queryBar: query,
     ruleType,
     threatIndex,
@@ -601,10 +634,16 @@ export const formatPreviewRule = ({
     name: 'Preview Rule',
     description: 'Preview Rule',
   };
-  const scheduleStepData = {
+  let scheduleStepData = {
     from: `now-${timeFrame === 'M' ? '25h' : timeFrame === 'd' ? '65m' : '6m'}`,
     interval: `${timeFrame === 'M' ? '1d' : timeFrame === 'd' ? '1h' : '5m'}`,
   };
+  if (advancedOptions) {
+    scheduleStepData = {
+      interval: advancedOptions.interval,
+      from: advancedOptions.lookback,
+    };
+  }
   return {
     ...formatRule<CreateRulesSchema>(
       defineStepData,
@@ -612,6 +651,6 @@ export const formatPreviewRule = ({
       scheduleStepData,
       stepActionsDefaultValue
     ),
-    ...scheduleStepData,
+    ...(!advancedOptions ? scheduleStepData : {}),
   };
 };

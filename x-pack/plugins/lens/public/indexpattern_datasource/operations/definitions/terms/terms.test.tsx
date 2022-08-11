@@ -15,6 +15,7 @@ import type {
   HttpSetup,
   CoreStart,
 } from '@kbn/core/public';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -34,6 +35,7 @@ import { DateHistogramIndexPatternColumn } from '../date_histogram';
 import { getOperationSupportMatrix } from '../../../dimension_panel/operation_support';
 import { FieldSelect } from '../../../dimension_panel/field_select';
 import { ReferenceEditor } from '../../../dimension_panel/reference_editor';
+import { cloneDeep } from 'lodash';
 import { IncludeExcludeRow } from './include_exclude_options';
 
 // mocking random id generator function
@@ -67,6 +69,7 @@ const defaultProps = {
   savedObjectsClient: {} as SavedObjectsClientContract,
   dateRange: { fromDate: 'now-1d', toDate: 'now' },
   data: dataPluginMock.createStartContract(),
+  fieldFormats: fieldFormatsServiceMock.createStartContract(),
   unifiedSearch: unifiedSearchPluginMock.createStartContract(),
   dataViews: dataViewPluginMocks.createStartContract(),
   http: {} as HttpSetup,
@@ -330,6 +333,49 @@ describe('terms', () => {
           function: 'aggTerms',
           arguments: expect.objectContaining({
             orderBy: ['_key'],
+          }),
+        })
+      );
+    });
+
+    it('should reflect correct orderBy for multiple percentiles', () => {
+      const newLayer = {
+        ...layer,
+        columns: {
+          ...layer.columns,
+          col2: {
+            ...layer.columns.col2,
+            operationType: 'percentile',
+            params: {
+              percentile: 95,
+            },
+          },
+          col3: {
+            ...layer.columns.col2,
+            operationType: 'percentile',
+            params: {
+              percentile: 65,
+            },
+          },
+        },
+      };
+      const termsColumn = layer.columns.col1 as TermsIndexPatternColumn;
+      const esAggsFn = termsOperation.toEsAggsFn(
+        {
+          ...termsColumn,
+          params: { ...termsColumn.params, orderBy: { type: 'column', columnId: 'col3' } },
+        },
+        'col1',
+        {} as IndexPattern,
+        newLayer,
+        uiSettingsMock,
+        ['col1', 'col2', 'col3']
+      );
+      expect(esAggsFn).toEqual(
+        expect.objectContaining({
+          function: 'aggTerms',
+          arguments: expect.objectContaining({
+            orderBy: ['1.65'],
           }),
         })
       );
@@ -1345,7 +1391,7 @@ describe('terms', () => {
       ).toBe('Invalid field: "timestamp". Check your data view or pick another field.');
     });
 
-    it('should render the an add button for single layer, but no other hints', () => {
+    it('should render the an add button for single layer and disabled the remove button', () => {
       const updateLayerSpy = jest.fn();
       const existingFields = getExistingFields();
       const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
@@ -1365,7 +1411,15 @@ describe('terms', () => {
         instance.find('[data-test-subj="indexPattern-terms-add-field"]').exists()
       ).toBeTruthy();
 
-      expect(instance.find('[data-test-subj^="indexPattern-terms-removeField-"]').length).toBe(0);
+      expect(instance.find('[data-test-subj^="indexPattern-terms-removeField-"]').length).not.toBe(
+        0
+      );
+      expect(
+        instance
+          .find('[data-test-subj^="indexPattern-terms-removeField-"]')
+          .first()
+          .prop('isDisabled')
+      ).toBeTruthy();
     });
 
     it('should switch to the first supported operation when in single term mode and the picked field is not supported', () => {
@@ -1582,7 +1636,7 @@ describe('terms', () => {
       );
 
       expect(
-        instance.find('[data-test-subj="indexPattern-dimension-field"]').first().prop('options')
+        instance.find('[data-test-subj="indexPattern-dimension-field"]').at(1).prop('options')
       ).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
@@ -3072,6 +3126,22 @@ describe('terms', () => {
           defaultProps.indexPattern
         )
       ).toEqual(['unsupported']);
+    });
+  });
+
+  describe('getMaxPossibleNumValues', () => {
+    it('reports correct number of values', () => {
+      const termsSize = 5;
+
+      const withoutOther = cloneDeep(layer.columns.col1 as TermsIndexPatternColumn);
+      withoutOther.params.size = termsSize;
+      withoutOther.params.otherBucket = false;
+
+      const withOther = cloneDeep(withoutOther);
+      withOther.params.otherBucket = true;
+
+      expect(termsOperation.getMaxPossibleNumValues!(withoutOther)).toBe(termsSize);
+      expect(termsOperation.getMaxPossibleNumValues!(withOther)).toBe(termsSize + 1);
     });
   });
 });

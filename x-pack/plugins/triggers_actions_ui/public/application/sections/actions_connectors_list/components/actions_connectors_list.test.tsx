@@ -6,6 +6,7 @@
  */
 
 import * as React from 'react';
+import { uniq } from 'lodash';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import { ThemeProvider } from 'styled-components';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
@@ -39,10 +40,12 @@ describe('actions_connectors_list component empty', () => {
       {
         id: 'test',
         name: 'Test',
+        supportedFeatureIds: ['alerting'],
       },
       {
         id: 'test2',
         name: 'Test2',
+        supportedFeatureIds: ['alerting'],
       },
     ]);
     actionTypeRegistry.has.mockReturnValue(true);
@@ -140,11 +143,13 @@ describe('actions_connectors_list component with items', () => {
         id: 'test',
         name: 'Test',
         enabled: true,
+        supportedFeatureIds: ['alerting'],
       },
       {
         id: 'test2',
         name: 'Test2',
         enabled: true,
+        supportedFeatureIds: ['alerting', 'cases'],
       },
     ]);
 
@@ -197,6 +202,13 @@ describe('actions_connectors_list component with items', () => {
     await setup();
     expect(wrapper.find('EuiInMemoryTable')).toHaveLength(1);
     expect(wrapper.find('EuiTableRow')).toHaveLength(4);
+
+    const featureIdsBadges = wrapper.find(
+      'EuiBadge[data-test-subj="connectorsTableCell-featureIds"]'
+    );
+    expect(featureIdsBadges).toHaveLength(5);
+
+    expect(uniq(featureIdsBadges.map((badge) => badge.text()))).toEqual(['Alerting', 'Cases']);
   });
 
   it('renders table with preconfigured connectors', async () => {
@@ -261,6 +273,18 @@ describe('actions_connectors_list component with items', () => {
     await wrapper.find('[data-test-subj="edit1"]').first().find('button').simulate('click');
     expect(wrapper.find('[data-test-subj="edit-connector-flyout"]').exists()).toBeTruthy();
   });
+
+  test('if delete item that is used in a rule should show a warning in the popup', async () => {
+    await setup();
+    await wrapper.find('.euiButtonIcon').last().simulate('click');
+    expect(wrapper.find('[data-test-subj="deleteConnectorsConfirmation"]').exists()).toBeTruthy();
+    expect(
+      wrapper
+        .find('[data-test-subj="deleteConnectorsConfirmation"]')
+        .text()
+        .includes('This connector is used in a rule')
+    );
+  });
 });
 
 describe('actions_connectors_list component empty with show only capability', () => {
@@ -272,10 +296,12 @@ describe('actions_connectors_list component empty with show only capability', ()
       {
         id: 'test',
         name: 'Test',
+        supportedFeatureIds: ['alerting'],
       },
       {
         id: 'test2',
         name: 'Test2',
+        supportedFeatureIds: ['alerting'],
       },
     ]);
     const [
@@ -335,10 +361,12 @@ describe('actions_connectors_list with show only capability', () => {
       {
         id: 'test',
         name: 'Test',
+        supportedFeatureIds: ['alerting'],
       },
       {
         id: 'test2',
         name: 'Test2',
+        supportedFeatureIds: ['alerting'],
       },
     ]);
     const [
@@ -406,6 +434,7 @@ describe('actions_connectors_list component with disabled items', () => {
         enabled: false,
         enabledInConfig: false,
         enabledInLicense: true,
+        supportedFeatureIds: ['alerting'],
       },
       {
         id: 'test2',
@@ -413,6 +442,7 @@ describe('actions_connectors_list component with disabled items', () => {
         enabled: false,
         enabledInConfig: true,
         enabledInLicense: false,
+        supportedFeatureIds: ['alerting'],
       },
     ]);
 
@@ -486,6 +516,7 @@ describe('actions_connectors_list component with deprecated connectors', () => {
         enabled: false,
         enabledInConfig: false,
         enabledInLicense: true,
+        supportedFeatureIds: ['alerting'],
       },
       {
         id: 'test2',
@@ -493,6 +524,7 @@ describe('actions_connectors_list component with deprecated connectors', () => {
         enabled: false,
         enabledInConfig: true,
         enabledInLicense: false,
+        supportedFeatureIds: ['alerting'],
       },
     ]);
 

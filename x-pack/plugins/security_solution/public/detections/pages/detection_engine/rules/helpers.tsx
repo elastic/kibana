@@ -33,6 +33,7 @@ import type {
   ScheduleStepRule,
   ActionsStepRule,
 } from './types';
+import { DataSourceType } from './types';
 import { severityOptions } from '../../../components/rules/step_about_rule/data';
 
 export interface GetStepsData {
@@ -120,6 +121,7 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
     eventCategoryField: rule.event_category_override,
     tiebreakerField: rule.tiebreaker_field,
   },
+  dataSourceType: rule.data_view_id ? DataSourceType.DataView : DataSourceType.IndexPatterns,
   newTermsFields: rule.new_terms_fields ?? [],
   historyWindowSize: rule.history_window_start
     ? convertHistoryStartToSize(rule.history_window_start)

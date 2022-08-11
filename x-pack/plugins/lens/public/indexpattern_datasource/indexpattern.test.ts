@@ -37,7 +37,7 @@ import {
 } from './operations';
 import { createMockedFullReference } from './operations/mocks';
 import { cloneDeep } from 'lodash';
-import { DatatableColumn } from '@kbn/expressions-plugin';
+import { DatatableColumn } from '@kbn/expressions-plugin/common';
 
 jest.mock('./loader');
 jest.mock('../id_generator');
@@ -2332,6 +2332,25 @@ describe('IndexPattern Data Source', () => {
           },
           disabled: { kuery: [], lucene: [] },
         });
+      });
+    });
+
+    describe('getMaxPossibleNumValues', () => {
+      it('should pass it on to the operation when available', () => {
+        const prediction = 23;
+        const operationPredictSpy = jest
+          .spyOn(operationDefinitionMap.terms, 'getMaxPossibleNumValues')
+          .mockReturnValue(prediction);
+        const columnId = 'col1';
+
+        expect(publicAPI.getMaxPossibleNumValues(columnId)).toEqual(prediction);
+        expect(operationPredictSpy).toHaveBeenCalledWith(
+          expect.objectContaining({ operationType: 'terms' })
+        );
+      });
+
+      it('should default to null', () => {
+        expect(publicAPI.getMaxPossibleNumValues('non-existant')).toEqual(null);
       });
     });
   });

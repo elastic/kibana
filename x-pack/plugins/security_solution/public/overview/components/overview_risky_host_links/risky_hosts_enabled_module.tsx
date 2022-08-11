@@ -10,8 +10,6 @@ import { RiskyHostsPanelView } from './risky_hosts_panel_view';
 import type { LinkPanelListItem } from '../link_panel';
 import { useRiskyHostsDashboardLinks } from '../../containers/overview_risky_host_links/use_risky_hosts_dashboard_links';
 import type { HostsRiskScore } from '../../../../common/search_strategy';
-import { useDashboardButtonHref } from '../../../common/hooks/use_dashboard_button_href';
-import { RISKY_HOSTS_DASHBOARD_TITLE } from '../../../hosts/pages/navigation/constants';
 
 const getListItemsFromHits = (items: HostsRiskScore[]): LinkPanelListItem[] => {
   return items.map(({ host, risk_stats: riskStats, risk: copy }) => ({
@@ -28,15 +26,15 @@ const RiskyHostsEnabledModuleComponent: React.FC<{
   to: string;
 }> = ({ hostRiskScore, to, from }) => {
   const listItems = useMemo(() => getListItemsFromHits(hostRiskScore || []), [hostRiskScore]);
-  const { buttonHref } = useDashboardButtonHref({ to, from, title: RISKY_HOSTS_DASHBOARD_TITLE });
   const { listItemsWithLinks } = useRiskyHostsDashboardLinks(to, from, listItems);
 
   return (
     <RiskyHostsPanelView
-      buttonHref={buttonHref}
       isInspectEnabled
       listItems={listItemsWithLinks}
       totalCount={listItems.length}
+      to={to}
+      from={from}
     />
   );
 };

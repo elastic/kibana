@@ -14,7 +14,8 @@
     "uiActions",
     "savedObjects",
     "dataViewFieldEditor",
-    "dataViewEditor"
+    "dataViewEditor",
+    "expressions"
   ],
   "optionalPlugins": ["home", "share", "usageCollection", "spaces", "triggersActionsUi"],
   "requiredBundles": ["kibanaUtils", "kibanaReact", "dataViews", "unifiedSearch"],

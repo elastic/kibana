@@ -76,6 +76,13 @@ export const createSerializer =
                 delete hotPhaseActions.rollover.max_primary_shard_size;
               }
 
+              if (
+                typeof updatedPolicy.phases.hot!.actions.rollover?.max_primary_shard_docs !==
+                'number'
+              ) {
+                delete hotPhaseActions.rollover.max_primary_shard_docs;
+              }
+
               if (updatedPolicy.phases.hot!.actions.rollover?.max_size) {
                 hotPhaseActions.rollover.max_size = `${hotPhaseActions.rollover.max_size}${_meta.hot?.customRollover.maxStorageSizeUnit}`;
               } else {

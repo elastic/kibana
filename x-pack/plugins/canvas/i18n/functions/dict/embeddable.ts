@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { embeddableFunctionFactory } from '../../../canvas_plugin_src/functions/external/embeddable';
+import type { embeddableFunctionFactory } from '../../../canvas_plugin_src/functions/external/embeddable';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 

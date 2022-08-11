@@ -7,12 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { ValidationFunc } from '../shared_imports';
+import type { FormData, ValidationFunc } from '../shared_imports';
 import { fieldValidators } from '../shared_imports';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const queryFieldValidation: ValidationFunc<any, string, string> = fieldValidators.emptyField(
-  i18n.translate('xpack.osquery.pack.queryFlyoutForm.emptyQueryError', {
-    defaultMessage: 'Query is a required field',
-  })
-);
+export const queryFieldValidation: ValidationFunc<FormData, string, string> =
+  fieldValidators.emptyField(
+    i18n.translate('xpack.osquery.pack.queryFlyoutForm.emptyQueryError', {
+      defaultMessage: 'Query is a required field',
+    })
+  );

@@ -26,3 +26,9 @@ export type CloudSecurityPosturePageId =
   | 'cloud_security_posture-findings'
   | 'cloud_security_posture-benchmarks'
   | 'cloud_security_posture-rules';
+
+/** An entry for the cloud security posture breadcrumbs implementation. */
+export interface BreadcrumbEntry {
+  readonly name: string;
+  readonly path: string;
+}

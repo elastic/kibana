@@ -6,11 +6,7 @@
  */
 import { Ast } from '@kbn/interpreter';
 import type { IconType } from '@elastic/eui/src/components/icon/icon';
-import type {
-  CoreSetup,
-  SavedObjectReference,
-  SavedObjectsResolveResponse,
-} from '@kbn/core/public';
+import type { CoreSetup, SavedObjectReference, ResolvedSimpleSavedObject } from '@kbn/core/public';
 import type { PaletteOutput } from '@kbn/coloring';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import type { MutableRefObject } from 'react';
@@ -36,14 +32,14 @@ import type {
   LensResizeActionData,
   LensToggleActionData,
   LensPagesizeActionData,
-} from './datatable_visualization/components/types';
+} from './visualizations/datatable/components/types';
 
 import {
   LENS_EDIT_SORT_ACTION,
   LENS_EDIT_RESIZE_ACTION,
   LENS_TOGGLE_ACTION,
   LENS_EDIT_PAGESIZE_ACTION,
-} from './datatable_visualization/components/constants';
+} from './visualizations/datatable/components/constants';
 import type { LensInspector } from './lens_inspector_service';
 
 export type ErrorCallback = (e: { message: string }) => void;
@@ -354,6 +350,10 @@ export interface Datasource<T = unknown, P = unknown> {
     references2: SavedObjectReference[]
   ) => boolean;
   /**
+   * Get RenderEventCounters events for telemetry
+   */
+  getRenderEventCounters?: (state: T) => string[];
+  /**
    * Get the used DataView value from state
    */
   getUsedDataView: (state: T, layerId: string) => string;
@@ -394,6 +394,13 @@ export interface DatasourcePublicAPI {
           lucene: Query[][];
         }
       >;
+
+  /**
+   * Returns the maximum possible number of values for this column when it can be known, otherwise null
+   * (e.g. with a top 5 values operation, we can be sure that there will never be more than 5 values returned
+   *       or 6 if the "Other" bucket is enabled)
+   */
+  getMaxPossibleNumValues: (columnId: string) => number | null;
 }
 
 export interface DatasourceDataPanelProps<T = unknown> {
@@ -437,6 +444,7 @@ export type DatasourceDimensionProps<T> = SharedDimensionProps & {
 export type ParamEditorCustomProps = Record<string, unknown> & {
   labels?: string[];
   isInline?: boolean;
+  headingLabel?: string;
 };
 // The only way a visualization has to restrict the query building
 export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionProps<T> & {
@@ -579,6 +587,7 @@ export interface AccessorConfig {
 
 export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   groupLabel: string;
+  dimensionEditorGroupLabel?: string;
   groupTooltip?: string;
 
   /** ID is passed back to visualization. For example, `x` */
@@ -618,6 +627,7 @@ export interface VisualizationDimensionChangeProps<T> {
   prevState: T;
   frame: FramePublicAPI;
 }
+
 export interface Suggestion {
   visualizationId: string;
   datasourceState?: unknown;
@@ -708,7 +718,7 @@ export interface VisualizationSuggestion<T = unknown> {
   previewIcon: IconType;
 }
 
-export type DatasourceLayers = Record<string, DatasourcePublicAPI>;
+export type DatasourceLayers = Partial<Record<string, DatasourcePublicAPI>>;
 
 export interface FramePublicAPI {
   datasourceLayers: DatasourceLayers;
@@ -720,6 +730,7 @@ export interface FramePublicAPI {
    */
   activeData?: Record<string, Datatable>;
 }
+
 export interface FrameDatasourceAPI extends FramePublicAPI {
   query: Query;
   filters: Filter[];
@@ -758,6 +769,11 @@ export interface VisualizationType {
    * Indicates if visualization is in the experimental stage.
    */
   showExperimentalBadge?: boolean;
+}
+
+export interface VisualizationDisplayOptions {
+  noPanelTitle?: boolean;
+  noPadding?: boolean;
 }
 
 export interface Visualization<T = unknown> {
@@ -894,6 +910,14 @@ export interface Visualization<T = unknown> {
     props: VisualizationDimensionEditorProps<T>
   ) => ((cleanupElement: Element) => void) | void;
   /**
+   * Additional editor that gets rendered inside the dimension popover.
+   * This can be used to configure dimension-specific options
+   */
+  renderDimensionEditorAdditionalSection?: (
+    domElement: Element,
+    props: VisualizationDimensionEditorProps<T>
+  ) => ((cleanupElement: Element) => void) | void;
+  /**
    * Renders dimension trigger. Used only for noDatasource layers
    */
   renderDimensionTrigger?: (props: {
@@ -956,6 +980,16 @@ export interface Visualization<T = unknown> {
    * On Edit events the frame will call this to know what's going to be the next visualization state
    */
   onEditAction?: (state: T, event: LensEditEvent<LensEditSupportedActions>) => T;
+
+  /**
+   * Gets custom display options for showing the visualization.
+   */
+  getDisplayOptions?: () => VisualizationDisplayOptions;
+
+  /**
+   * Get RenderEventCounters events for telemetry
+   */
+  getRenderEventCounters?: (state: T) => string[];
 }
 
 // Use same technique as TriggerContext
@@ -1020,9 +1054,9 @@ export interface ILensInterpreterRenderHandlers extends IInterpreterRenderHandle
 }
 
 export interface SharingSavedObjectProps {
-  outcome?: SavedObjectsResolveResponse['outcome'];
-  aliasTargetId?: SavedObjectsResolveResponse['alias_target_id'];
-  aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
+  outcome?: ResolvedSimpleSavedObject['outcome'];
+  aliasTargetId?: ResolvedSimpleSavedObject['alias_target_id'];
+  aliasPurpose?: ResolvedSimpleSavedObject['alias_purpose'];
   sourceId?: string;
 }
 

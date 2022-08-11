@@ -15,7 +15,6 @@ import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/
 import { UserProfileAPIClient } from '..';
 import type { UserProfileData } from '../../../common';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
-import { UserAvatar } from '../../components';
 import { UserAPIClient } from '../../management';
 import { securityMock } from '../../mocks';
 import { Providers } from '../account_management_app';
@@ -205,7 +204,7 @@ describe('useUserProfileForm', () => {
         </Providers>
       );
 
-      expect(testWrapper.exists(UserAvatar)).toBeTruthy();
+      expect(testWrapper.exists('UserAvatar')).toBeTruthy();
     });
 
     it('should not display if the User is a cloud user', () => {
@@ -228,7 +227,7 @@ describe('useUserProfileForm', () => {
         </Providers>
       );
 
-      expect(testWrapper.exists(UserAvatar)).toBeFalsy();
+      expect(testWrapper.exists('UserAvatar')).toBeFalsy();
     });
   });
 });

@@ -55,7 +55,11 @@ export const getTableColumns: GetTableColumns = ({ getAppUrl, navigateTo, openRu
     render: (name: string, { id }) => {
       const url = getAppUrl({ deepLinkId: SecurityPageName.rules, path: `id/${id}` });
       return (
-        <EuiToolTip data-test-subj={`${id}-tooltip`} content={i18n.OPEN_RULE_DETAIL_TOOLTIP}>
+        <EuiToolTip
+          data-test-subj={`${id}-tooltip`}
+          title={i18n.OPEN_RULE_DETAIL_TOOLTIP}
+          content={name}
+        >
           {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
           <EuiLink
             data-test-subj="severityRuleAlertsTable-name"

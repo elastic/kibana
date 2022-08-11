@@ -6,16 +6,4 @@
  * Side Public License, v 1.
  */
 
-/*
- * This file contains the logic for transforming saved objects to / from
- * the raw document format as stored in ElasticSearch.
- */
-
-export type {
-  SavedObjectUnsanitizedDoc,
-  SavedObjectSanitizedDoc,
-  SavedObjectsRawDoc,
-  SavedObjectsRawDocParseOptions,
-  SavedObjectsRawDocSource,
-} from './types';
 export { SavedObjectsSerializer } from './serializer';

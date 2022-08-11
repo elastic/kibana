@@ -13,7 +13,7 @@ import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import { MapSavedObjectAttributes } from '../../../../common/map_saved_object_type';
 import { APP_ID, MAP_PATH, MAP_SAVED_OBJECT_TYPE } from '../../../../common/constants';
 import { createMapStore, MapStore, MapStoreState } from '../../../reducers/store';
-import { MapSettings } from '../../../reducers/map';
+import { MapSettings } from '../../../../common/descriptor_types';
 import {
   getTimeFilters,
   getMapZoom,
@@ -332,6 +332,14 @@ export class SavedMap {
     return this._originatingApp ? this.getAppNameFromId(this._originatingApp) : undefined;
   }
 
+  public hasOriginatingApp(): boolean {
+    return !!this._originatingApp;
+  }
+
+  public getOriginatingPath(): string | undefined {
+    return this._originatingPath;
+  }
+
   public getAppNameFromId = (appId: string): string | undefined => {
     return this._getStateTransfer().getAppNameFromId(appId);
   };
@@ -341,7 +349,7 @@ export class SavedMap {
   }
 
   public hasSaveAndReturnConfig() {
-    const hasOriginatingApp = !!this._originatingApp;
+    const hasOriginatingApp = this.hasOriginatingApp();
     const isNewMap = !this.getSavedObjectId();
     return getIsAllowByValueEmbeddables() ? hasOriginatingApp : !isNewMap && hasOriginatingApp;
   }

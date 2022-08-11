@@ -20,6 +20,7 @@ import type { FiltersIndexPatternColumn } from '..';
 import type { TermsIndexPatternColumn } from './types';
 import { LastValueIndexPatternColumn } from '../last_value';
 import type { PercentileRanksIndexPatternColumn } from '../percentile_ranks';
+import type { PercentileIndexPatternColumn } from '../percentile';
 
 import type { IndexPatternLayer, IndexPattern, IndexPatternField } from '../../../types';
 import { MULTI_KEY_VISUAL_SEPARATOR, supportedTypes } from './constants';
@@ -222,6 +223,31 @@ export function isPercentileRankSortable(column: GenericIndexPatternColumn) {
     (column.operationType === 'percentile_rank' &&
       Number.isInteger((column as PercentileRanksIndexPatternColumn).params.value))
   );
+}
+
+export function computeOrderForMultiplePercentiles(
+  column: GenericIndexPatternColumn,
+  layer: IndexPatternLayer,
+  orderedColumnIds: string[]
+) {
+  // compute the percentiles orderBy correctly for multiple percentiles
+  if (column.operationType === 'percentile') {
+    const percentileColumns = [];
+    for (const [key, value] of Object.entries(layer.columns)) {
+      if (
+        value.operationType === 'percentile' &&
+        (value as PercentileIndexPatternColumn).sourceField ===
+          (column as PercentileIndexPatternColumn).sourceField
+      ) {
+        percentileColumns.push(key);
+      }
+    }
+    if (percentileColumns.length > 1) {
+      const parentColumn = String(orderedColumnIds.indexOf(percentileColumns[0]));
+      return `${parentColumn}.${(column as PercentileIndexPatternColumn).params?.percentile}`;
+    }
+  }
+  return null;
 }
 
 export function isSortableByColumn(layer: IndexPatternLayer, columnId: string) {

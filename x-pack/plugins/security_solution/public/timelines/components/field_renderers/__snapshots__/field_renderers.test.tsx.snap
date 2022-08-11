@@ -146,7 +146,7 @@ exports[`Field Renderers #hostIdRenderer it renders correctly against snapshot 1
                 <a
                   class="euiLink emotion-euiLink-primary"
                   data-test-subj="host-details-button"
-                  href="securitySolutionUI/hosts/raspberrypi"
+                  href="securitySolutionUI/hosts/name/raspberrypi"
                   rel="noreferrer"
                 >
                   raspberrypi
@@ -201,7 +201,7 @@ exports[`Field Renderers #hostNameRenderer it renders correctly against snapshot
                 <a
                   class="euiLink emotion-euiLink-primary"
                   data-test-subj="host-details-button"
-                  href="securitySolutionUI/hosts/raspberrypi"
+                  href="securitySolutionUI/hosts/name/raspberrypi"
                   rel="noreferrer"
                 >
                   raspberrypi

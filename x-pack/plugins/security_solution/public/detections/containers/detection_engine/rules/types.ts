@@ -22,6 +22,9 @@ import {
   severity_mapping,
   severity,
 } from '@kbn/securitysolution-io-ts-alerting-types';
+
+import { RuleExecutionSummary } from '../../../../../common/detection_engine/rule_monitoring';
+
 import type {
   SortOrder,
   BulkAction,
@@ -41,7 +44,6 @@ import {
   event_category_override,
   tiebreaker_field,
   threshold,
-  ruleExecutionSummary,
   RelatedIntegrationArray,
   RequiredFieldArray,
   SetupGuide,
@@ -75,7 +77,7 @@ export interface CreateRulesProps {
 }
 
 export interface PreviewRulesProps {
-  rule: CreateRulesSchema & { invocationCount: number };
+  rule: CreateRulesSchema & { invocationCount: number; timeframeEnd: string };
   signal: AbortSignal;
 }
 
@@ -169,7 +171,7 @@ export const RuleSchema = t.intersection([
     exceptions_list: listArray,
     uuid: t.string,
     version: t.number,
-    execution_summary: ruleExecutionSummary,
+    execution_summary: RuleExecutionSummary,
   }),
 ]);
 

@@ -50,6 +50,8 @@ describe('rule helpers', () => {
       const defineRuleStepData = {
         ruleType: 'saved_query',
         anomalyThreshold: 50,
+        dataSourceType: 'indexPatterns',
+        dataViewId: undefined,
         index: ['auditbeat-*'],
         machineLearningJobId: [],
         queryBar: {
@@ -215,6 +217,8 @@ describe('rule helpers', () => {
       const expected = {
         ruleType: 'saved_query',
         anomalyThreshold: 50,
+        dataSourceType: 'indexPatterns',
+        dataViewId: undefined,
         machineLearningJobId: [],
         index: ['auditbeat-*'],
         queryBar: {
@@ -266,6 +270,8 @@ describe('rule helpers', () => {
       const expected = {
         ruleType: 'saved_query',
         anomalyThreshold: 50,
+        dataSourceType: 'indexPatterns',
+        dataViewId: undefined,
         machineLearningJobId: [],
         index: ['auditbeat-*'],
         queryBar: {

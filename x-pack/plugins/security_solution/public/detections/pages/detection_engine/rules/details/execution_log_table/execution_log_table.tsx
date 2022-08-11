@@ -5,32 +5,36 @@
  * 2.0.
  */
 
+import React, { useCallback, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import moment from 'moment';
-import React, { useCallback, useMemo, useRef } from 'react';
 import type { OnTimeChangeProps, OnRefreshProps, OnRefreshChangeProps } from '@elastic/eui';
 import {
   EuiTextColor,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPanel,
   EuiSuperDatePicker,
   EuiSpacer,
   EuiSwitch,
   EuiBasicTable,
   EuiButton,
 } from '@elastic/eui';
+
 import type { Filter, Query } from '@kbn/es-query';
 import { buildFilter, FILTERS } from '@kbn/es-query';
 import { MAX_EXECUTION_EVENTS_DISPLAYED } from '@kbn/securitysolution-rules';
 import { mountReactNode } from '@kbn/core/public/utils';
+
 import { RuleDetailTabs } from '..';
 import { RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY } from '../../../../../../../common/constants';
 import type {
-  AggregateRuleExecutionEvent,
+  RuleExecutionResult,
   RuleExecutionStatus,
-} from '../../../../../../../common/detection_engine/schemas/common';
+} from '../../../../../../../common/detection_engine/rule_monitoring';
 
+import { HeaderSection } from '../../../../../../common/components/header_section';
 import {
   UtilityBar,
   UtilityBarGroup,
@@ -56,7 +60,7 @@ import {
   isRelativeTimeRange,
 } from '../../../../../../common/store/inputs/model';
 import { SourcererScopeName } from '../../../../../../common/store/sourcerer/model';
-import { useRuleExecutionEvents } from '../../../../../containers/detection_engine/rules';
+import { useExecutionResults } from '../../../../../../detection_engine/rule_monitoring';
 import { useRuleDetailsContext } from '../rule_details_context';
 import * as i18n from './translations';
 import { EXECUTION_LOG_COLUMNS, GET_EXECUTION_LOG_METRICS_COLUMNS } from './execution_log_columns';
@@ -97,7 +101,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
   } = useKibana().services;
 
   const {
-    [RuleDetailTabs.executionLogs]: {
+    [RuleDetailTabs.executionResults]: {
       state: {
         superDatePicker: { recentlyUsedRanges, refreshInterval, isPaused, start, end },
         queryText,
@@ -181,7 +185,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
     isFetching,
     isLoading,
     refetch,
-  } = useRuleExecutionEvents({
+  } = useExecutionResults({
     ruleId,
     start,
     end,
@@ -368,7 +372,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
             description: i18n.COLUMN_ACTIONS_TOOLTIP,
             icon: 'filter',
             type: 'icon',
-            onClick: (executionEvent: AggregateRuleExecutionEvent) => {
+            onClick: (executionEvent: RuleExecutionResult) => {
               if (executionEvent?.execution_uuid) {
                 onFilterByExecutionIdCallback(
                   executionEvent.execution_uuid,
@@ -393,14 +397,18 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
   );
 
   return (
-    <>
+    <EuiPanel hasBorder>
+      {/* Filter bar */}
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={true}>
+          <HeaderSection title={i18n.TABLE_TITLE} subtitle={i18n.TABLE_SUBTITLE} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <ExecutionLogSearchBar
-            onSearch={onSearchCallback}
-            onStatusFilterChange={onStatusFilterChangeCallback}
             onlyShowFilters={true}
-            defaultSelectedStatusFilters={statusFilters}
+            selectedStatuses={statusFilters}
+            onStatusFilterChange={onStatusFilterChangeCallback}
+            onSearch={onSearchCallback}
           />
         </EuiFlexItem>
         <DatePickerEuiFlexItem>
@@ -418,7 +426,10 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
           />
         </DatePickerEuiFlexItem>
       </EuiFlexGroup>
+
       <EuiSpacer size="s" />
+
+      {/* Utility bar */}
       <UtilityBar>
         <UtilityBarSection>
           <UtilityBarGroup>
@@ -460,15 +471,17 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
           </UtilityBarGroup>
         </UtilityBarSection>
       </UtilityBar>
+
+      {/* Table with items */}
       <EuiBasicTable
         columns={executionLogColumns}
         items={items}
         loading={isFetching}
-        pagination={pagination}
         sorting={sorting}
+        pagination={pagination}
         onChange={onTableChangeCallback}
       />
-    </>
+    </EuiPanel>
   );
 };
 

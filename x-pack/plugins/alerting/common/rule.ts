@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import {
+import type {
   SavedObjectAttribute,
   SavedObjectAttributes,
   SavedObjectsResolveResponse,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '@kbn/core/server';
 import { RuleNotifyWhenType } from './rule_notify_when_type';
 import { RuleSnooze } from './rule_snooze_type';

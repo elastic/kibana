@@ -737,7 +737,9 @@
         "signature": [
           "(xInterval?: number | undefined, domainStart?: number | undefined, domainEnd?: number | undefined, formatter?: ((v: any) => string) | undefined, renderValue?: boolean) => (headerData: ",
           "TooltipValue",
-          "<any>) => string | JSX.Element"
+          "<any, ",
+          "SeriesIdentifier",
+          ">) => string | JSX.Element"
         ],
         "path": "src/plugins/charts/public/static/components/endzones.tsx",
         "deprecated": false,

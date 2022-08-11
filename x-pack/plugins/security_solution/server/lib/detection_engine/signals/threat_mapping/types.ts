@@ -25,9 +25,8 @@ import type {
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
-import type { BuildRuleMessage } from '../rule_messages';
 import type {
   BulkCreate,
   RuleRangeTuple,
@@ -36,12 +35,12 @@ import type {
   WrapHits,
 } from '../types';
 import type { CompleteRule, ThreatRuleParams } from '../../schemas/rule_schemas';
+import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 
 export type SortOrderOrUndefined = 'asc' | 'desc' | undefined;
 
 export interface CreateThreatSignalsOptions {
   alertId: string;
-  buildRuleMessage: BuildRuleMessage;
   bulkCreate: BulkCreate;
   completeRule: CompleteRule<ThreatRuleParams>;
   concurrentSearches: ConcurrentSearches;
@@ -52,9 +51,9 @@ export interface CreateThreatSignalsOptions {
   itemsPerSearch: ItemsPerSearch;
   language: LanguageOrUndefined;
   listClient: ListClient;
-  logger: Logger;
   outputIndex: string;
   query: string;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
   savedId: string | undefined;
   searchAfterSize: number;
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
@@ -74,7 +73,6 @@ export interface CreateThreatSignalsOptions {
 
 export interface CreateThreatSignalOptions {
   alertId: string;
-  buildRuleMessage: BuildRuleMessage;
   bulkCreate: BulkCreate;
   completeRule: CompleteRule<ThreatRuleParams>;
   currentResult: SearchAfterAndBulkCreateReturnType;
@@ -85,9 +83,9 @@ export interface CreateThreatSignalOptions {
   inputIndex: string[];
   language: LanguageOrUndefined;
   listClient: ListClient;
-  logger: Logger;
   outputIndex: string;
   query: string;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
   savedId: string | undefined;
   searchAfterSize: number;
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
@@ -103,7 +101,6 @@ export interface CreateThreatSignalOptions {
 
 export interface CreateEventSignalOptions {
   alertId: string;
-  buildRuleMessage: BuildRuleMessage;
   bulkCreate: BulkCreate;
   completeRule: CompleteRule<ThreatRuleParams>;
   currentResult: SearchAfterAndBulkCreateReturnType;
@@ -114,9 +111,9 @@ export interface CreateEventSignalOptions {
   inputIndex: string[];
   language: LanguageOrUndefined;
   listClient: ListClient;
-  logger: Logger;
   outputIndex: string;
   query: string;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
   savedId: string | undefined;
   searchAfterSize: number;
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
@@ -186,14 +183,13 @@ interface ThreatListConfig {
 }
 
 export interface GetThreatListOptions {
-  buildRuleMessage: BuildRuleMessage;
   esClient: ElasticsearchClient;
   exceptionItems: ExceptionListItemSchema[];
   index: string[];
   language: ThreatLanguageOrUndefined;
-  logger: Logger;
   perPage?: number;
   query: string;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
   searchAfter: estypes.SortResults | undefined;
   threatFilters: unknown[];
   threatListConfig: ThreatListConfig;
@@ -238,9 +234,8 @@ export interface ThreatMatchNamedQuery {
 export type GetMatchedThreats = (ids: string[]) => Promise<ThreatListItem[]>;
 
 export interface BuildThreatEnrichmentOptions {
-  buildRuleMessage: BuildRuleMessage;
   exceptionItems: ExceptionListItemSchema[];
-  logger: Logger;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   threatFilters: unknown[];
   threatIndex: ThreatIndex;
@@ -254,14 +249,13 @@ export interface BuildThreatEnrichmentOptions {
 
 export interface EventsOptions {
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
   query: string;
-  buildRuleMessage: BuildRuleMessage;
   language: ThreatLanguageOrUndefined;
   exceptionItems: ExceptionListItemSchema[];
   index: string[];
   searchAfter: estypes.SortResults | undefined;
   perPage?: number;
-  logger: Logger;
   filters: unknown[];
   primaryTimestamp: string;
   secondaryTimestamp?: string;

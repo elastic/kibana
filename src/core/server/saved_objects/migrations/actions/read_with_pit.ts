@@ -10,12 +10,12 @@ import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { SavedObjectsRawDoc } from '../../serialization';
+import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import {
   catchRetryableEsClientErrors,
   RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
-import { pitKeepAlive } from './open_pit';
+import { DEFAULT_PIT_KEEP_ALIVE } from './open_pit';
 
 /** @internal */
 export interface ReadWithPit {
@@ -49,11 +49,18 @@ export const readWithPit =
   () => {
     return client
       .search<SavedObjectsRawDoc>({
-        allow_partial_search_results: false,
         seq_no_primary_term: seqNoPrimaryTerm,
-        // Sort fields are required to use searchAfter
+        // Fail if the index being searched doesn't exist or is closed
+        // allow_no_indices: false,
+        // By default ES returns a 200 with partial results if there are shard
+        // request timeouts or shard failures which can lead to data loss for
+        // migrations
+        allow_partial_search_results: false,
+        // Sort fields are required to use searchAfter so we sort by the
+        // natural order of the index which is the most efficient option
+        // as order is not important for the migration
         sort: '_shard_doc:asc',
-        pit: { id: pitId, keep_alive: pitKeepAlive },
+        pit: { id: pitId, keep_alive: DEFAULT_PIT_KEEP_ALIVE },
         size: batchSize,
         search_after: searchAfter,
         /**

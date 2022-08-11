@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useState, useMemo } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { lastValueFrom } from 'rxjs';
+
 import { i18n } from '@kbn/i18n';
 import type { ToastsStart } from '@kbn/core/public';
+import { stringHash } from '@kbn/ml-string-hash';
+
 import { useAiOpsKibana } from '../kibana_context';
 import { extractErrorProperties } from '../application/utils/error_utils';
 import {
@@ -21,6 +24,7 @@ import {
 export interface DocumentStats {
   totalCount: number;
   documentCountStats?: DocumentCountStats;
+  documentCountStatsCompare?: DocumentCountStats;
 }
 
 function displayError(toastNotifications: ToastsStart, index: string, err: any) {
@@ -51,10 +55,9 @@ function displayError(toastNotifications: ToastsStart, index: string, err: any) 
 
 export function useDocumentCountStats<TParams extends DocumentStatsSearchStrategyParams>(
   searchParams: TParams | undefined,
+  searchParamsCompare: TParams | undefined,
   lastRefresh: number
-): {
-  docStats: DocumentStats;
-} {
+): DocumentStats {
   const {
     services: {
       data,
@@ -62,41 +65,91 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
     },
   } = useAiOpsKibana();
 
-  const [stats, setStats] = useState<DocumentStats>({
+  const abortCtrl = useRef(new AbortController());
+
+  const [documentStats, setDocumentStats] = useState<DocumentStats>({
     totalCount: 0,
   });
+
+  const [documentStatsCache, setDocumentStatsCache] = useState<Record<string, DocumentStats>>({});
 
   const fetchDocumentCountData = useCallback(async () => {
     if (!searchParams) return;
 
+    const cacheKey = stringHash(
+      `${JSON.stringify(searchParams)}_${JSON.stringify(searchParamsCompare)}`
+    );
+
+    if (documentStatsCache[cacheKey]) {
+      setDocumentStats(documentStatsCache[cacheKey]);
+      return;
+    }
+
     try {
+      abortCtrl.current = new AbortController();
+
       const resp = await lastValueFrom(
-        data.search.search({
-          params: getDocumentCountStatsRequest(searchParams),
-        })
+        data.search.search(
+          {
+            params: getDocumentCountStatsRequest(searchParams),
+          },
+          { abortSignal: abortCtrl.current.signal }
+        )
       );
+
       const documentCountStats = processDocumentCountStats(resp?.rawResponse, searchParams);
       const totalCount = documentCountStats?.totalCount ?? 0;
-      setStats({
+
+      const newStats: DocumentStats = {
         documentCountStats,
         totalCount,
+      };
+
+      if (searchParamsCompare) {
+        const respCompare = await lastValueFrom(
+          data.search.search(
+            {
+              params: getDocumentCountStatsRequest(searchParamsCompare),
+            },
+            { abortSignal: abortCtrl.current.signal }
+          )
+        );
+
+        const documentCountStatsCompare = processDocumentCountStats(
+          respCompare?.rawResponse,
+          searchParamsCompare
+        );
+        const totalCountCompare = documentCountStatsCompare?.totalCount ?? 0;
+
+        newStats.documentCountStatsCompare = documentCountStatsCompare;
+        newStats.totalCount = totalCount + totalCountCompare;
+      }
+
+      setDocumentStats(newStats);
+      setDocumentStatsCache({
+        ...documentStatsCache,
+        [cacheKey]: newStats,
       });
     } catch (error) {
-      displayError(toasts, searchParams!.index, extractErrorProperties(error));
+      // An `AbortError` gets triggered when a user cancels a request by navigating away, we need to ignore these errors.
+      if (error.name !== 'AbortError') {
+        displayError(toasts, searchParams!.index, extractErrorProperties(error));
+      }
     }
-  }, [data?.search, searchParams, toasts]);
+  }, [data?.search, documentStatsCache, searchParams, searchParamsCompare, toasts]);
 
   useEffect(
     function getDocumentCountData() {
       fetchDocumentCountData();
+      return () => abortCtrl.current.abort();
     },
-    [fetchDocumentCountData]
+    [fetchDocumentCountData, lastRefresh]
   );
 
-  return useMemo(
-    () => ({
-      docStats: stats,
-    }),
-    [stats]
-  );
+  // Clear the document count stats cache when the outer page (date picker/search bar) triggers a refresh.
+  useEffect(() => {
+    setDocumentStatsCache({});
+  }, [lastRefresh]);
+
+  return documentStats;
 }

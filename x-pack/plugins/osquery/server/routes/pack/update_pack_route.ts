@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment-timezone';
-import { set, unset, has, difference, filter, find, map, mapKeys, uniq } from 'lodash';
+import { set, unset, has, difference, filter, find, map, mapKeys, uniq, some } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { produce } from 'immer';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
@@ -21,13 +21,13 @@ import { packSavedObjectType } from '../../../common/types';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { PLUGIN_ID } from '../../../common';
 import { convertSOQueriesToPack, convertPackQueriesToSO } from './utils';
-import { getInternalSavedObjectsClient } from '../../usage/collector';
+import { getInternalSavedObjectsClient } from '../utils';
 import type { PackSavedObjectAttributes } from '../../common/types';
 
 export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.put(
     {
-      path: '/internal/osquery/packs/{id}',
+      path: '/api/osquery/packs/{id}',
       validate: {
         params: schema.object(
           {
@@ -95,11 +95,10 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         });
 
         if (
-          filter(
-            conflictingEntries.saved_objects,
-            (packSO) =>
-              packSO.id !== currentPackSO.id && packSO.attributes.name.length === name.length
-          ).length
+          some(
+            filter(conflictingEntries.saved_objects, (packSO) => packSO.id !== currentPackSO.id),
+            ['attributes.name', name]
+          )
         ) {
           return response.conflict({ body: `Pack with name "${name}" already exists.` });
         }
@@ -326,7 +325,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         );
       }
 
-      return response.ok({ body: updatedPackSO });
+      return response.ok({ body: { data: updatedPackSO } });
     }
   );
 };

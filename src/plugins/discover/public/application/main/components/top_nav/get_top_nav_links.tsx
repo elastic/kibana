@@ -24,7 +24,7 @@ import { openAlertsPopover } from './open_alerts_popover';
  * Helper function to build the top nav links
  */
 export const getTopNavLinks = ({
-  indexPattern,
+  dataView,
   navigateTo,
   savedSearch,
   services,
@@ -32,8 +32,9 @@ export const getTopNavLinks = ({
   onOpenInspector,
   searchSource,
   onOpenSavedSearch,
+  isPlainRecord,
 }: {
-  indexPattern: DataView;
+  dataView: DataView;
   navigateTo: (url: string) => void;
   savedSearch: SavedSearch;
   services: DiscoverServices;
@@ -41,6 +42,7 @@ export const getTopNavLinks = ({
   onOpenInspector: () => void;
   searchSource: ISearchSource;
   onOpenSavedSearch: (id: string) => void;
+  isPlainRecord: boolean;
 }): TopNavMenuData[] => {
   const options = {
     id: 'options',
@@ -107,7 +109,7 @@ export const getTopNavLinks = ({
       onSaveSearch({
         savedSearch,
         services,
-        indexPattern,
+        dataView,
         navigateTo,
         state,
         onClose: () => {
@@ -196,11 +198,12 @@ export const getTopNavLinks = ({
     ...(services.capabilities.advancedSettings.save ? [options] : []),
     newSearch,
     openSearch,
+    ...(!isPlainRecord ? [shareSearch] : []),
     ...(services.triggersActionsUi &&
-    services.capabilities.management?.insightsAndAlerting?.triggersActions
+    services.capabilities.management?.insightsAndAlerting?.triggersActions &&
+    !isPlainRecord
       ? [alerts]
       : []),
-    shareSearch,
     inspectSearch,
     ...(services.capabilities.discover.save ? [saveSearch] : []),
   ];

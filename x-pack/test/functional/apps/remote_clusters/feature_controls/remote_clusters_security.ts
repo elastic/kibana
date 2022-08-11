@@ -15,7 +15,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const appsMenu = getService('appsMenu');
   const managementMenu = getService('managementMenu');
 
-  describe('security', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/138129
+  describe.skip('security', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
       await PageObjects.common.navigateToApp('home');

@@ -36,7 +36,7 @@ const KibanaOverview = ({ data }: { data: any }) => {
   const showRules =
     data.metrics.kibana_cluster_rule_overdue_count &&
     data.metrics.kibana_cluster_rule_overdue_count.length &&
-    data.metrics.kibana_cluster_rule_overdue_count[0].indices_found.metricbeat;
+    data.metrics.kibana_cluster_rule_overdue_count[0].indices_found.ecs;
 
   return (
     <EuiPage>

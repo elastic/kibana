@@ -21,7 +21,7 @@ import { environmentServiceMock } from '@kbn/core-environment-server-mocks';
 import { mockRouter, RouterMock } from '@kbn/core-http-router-server-mocks';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { ServiceStatusLevelSnapshotSerializer } from './test_utils';
-import { metricsServiceMock } from '../metrics/metrics_service.mock';
+import { metricsServiceMock } from '@kbn/core-metrics-server-mocks';
 import { configServiceMock } from '@kbn/config-mocks';
 import { coreUsageDataServiceMock } from '../core_usage_data/core_usage_data_service.mock';
 import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';

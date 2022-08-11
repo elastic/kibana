@@ -53,6 +53,7 @@ function createStartMock() {
       mode: mockAuthz.mode,
     },
     userProfiles: {
+      getCurrent: mockUserProfiles.getCurrent,
       suggest: mockUserProfiles.suggest,
       bulkGet: mockUserProfiles.bulkGet,
     },

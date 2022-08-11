@@ -46,28 +46,30 @@ export function GeoFieldWorkspacePanel(props: Props) {
   return (
     <EuiPageContentBody className="lnsWorkspacePanelWrapper__pageContentBody">
       <EuiText className="lnsWorkspacePanel__emptyContent" textAlign="center" size="s">
-        <h2>
-          <strong>{getVisualizeGeoFieldMessage(props.fieldType)}</strong>
-        </h2>
-        <GlobeIllustration aria-hidden={true} className="lnsWorkspacePanel__promptIllustration" />
-        <DragDrop
-          className="lnsVisualizeGeoFieldWorkspacePanel__dragDrop"
-          dataTestSubj="lnsGeoFieldWorkspace"
-          draggable={false}
-          dropTypes={['field_add']}
-          order={dragDropOrder}
-          value={dragDropIdentifier}
-          onDrop={onDrop}
-        >
-          <p>
-            <strong>
-              <FormattedMessage
-                id="xpack.lens.geoFieldWorkspace.dropMessage"
-                defaultMessage="Drop field here to open in Maps"
-              />
-            </strong>
-          </p>
-        </DragDrop>
+        <div>
+          <h2>
+            <strong>{getVisualizeGeoFieldMessage(props.fieldType)}</strong>
+          </h2>
+          <GlobeIllustration aria-hidden={true} className="lnsWorkspacePanel__promptIllustration" />
+          <DragDrop
+            className="lnsVisualizeGeoFieldWorkspacePanel__dragDrop"
+            dataTestSubj="lnsGeoFieldWorkspace"
+            draggable={false}
+            dropTypes={['field_add']}
+            order={dragDropOrder}
+            value={dragDropIdentifier}
+            onDrop={onDrop}
+          >
+            <p>
+              <strong>
+                <FormattedMessage
+                  id="xpack.lens.geoFieldWorkspace.dropMessage"
+                  defaultMessage="Drop field here to open in Maps"
+                />
+              </strong>
+            </p>
+          </DragDrop>
+        </div>
       </EuiText>
     </EuiPageContentBody>
   );

@@ -1464,7 +1464,7 @@
         "label": "VisualizationContainer",
         "description": [],
         "signature": [
-          "({ \"data-test-subj\": dataTestSubj, className, children, handlers, showNoResult, error, }: ",
+          "({ \"data-test-subj\": dataTestSubj, className, children, handlers, showNoResult, error, renderComplete, }: ",
           "VisualizationContainerProps",
           ") => JSX.Element"
         ],
@@ -1476,7 +1476,7 @@
             "id": "def-public.VisualizationContainer.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  'data-test-subj': dataTestSubj = '',\n  className,\n  children,\n  handlers,\n  showNoResult = false,\n  error,\n}",
+            "label": "{\n  'data-test-subj': dataTestSubj = '',\n  className,\n  children,\n  handlers,\n  showNoResult = false,\n  error,\n  renderComplete,\n}",
             "description": [],
             "signature": [
               "VisualizationContainerProps"
@@ -2600,6 +2600,8 @@
             "signature": [
               "{ type?: string | undefined; query?: ",
               "Query",
+              " | ",
+              "AggregateQuery",
               " | undefined; filter?: ",
               "Filter",
               "[] | undefined; sort?: ",
@@ -5155,7 +5157,11 @@
             "section": "def-public.ContainerOutput",
             "text": "ContainerOutput"
           },
-          "> | undefined; updateInput: (changes: Partial<",
+          "> | undefined; getQuery: () => Promise<",
+          "Query",
+          " | ",
+          "AggregateQuery",
+          " | undefined>; updateInput: (changes: Partial<",
           {
             "pluginId": "visualizations",
             "scope": "public",
@@ -5163,7 +5169,9 @@
             "section": "def-public.VisualizeInput",
             "text": "VisualizeInput"
           },
-          ">) => void; reportsEmbeddableLoad: () => boolean; getInspectorAdapters: () => ",
+          ">) => void; reportsEmbeddableLoad: () => boolean; getFilters: () => Promise<",
+          "Filter",
+          "[]>; getInspectorAdapters: () => ",
           {
             "pluginId": "inspector",
             "scope": "common",
@@ -5172,13 +5180,7 @@
             "text": "Adapters"
           },
           " | undefined; openInspector: () => ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.OverlayRef",
-            "text": "OverlayRef"
-          },
+          "OverlayRef",
           " | undefined; transferCustomizationsToUiState: () => void; hasInspector: () => boolean; onContainerLoading: () => void; onContainerData: () => void; onContainerRender: () => void; onContainerError: (error: ",
           {
             "pluginId": "expressions",
@@ -6761,6 +6763,8 @@
             "signature": [
               "{ type?: string | undefined; query?: ",
               "Query",
+              " | ",
+              "AggregateQuery",
               " | undefined; filter?: ",
               "Filter",
               "[] | undefined; sort?: ",

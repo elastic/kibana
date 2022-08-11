@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const DANGER_TITLE = i18n.translate(
   'xpack.securitySolution.overview.ctiDashboardDangerPanelTitle',
   {
-    defaultMessage: 'No threat intel data available to display',
+    defaultMessage: 'No threat intelligence data',
   }
 );
 

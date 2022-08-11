@@ -12,6 +12,7 @@ import { EuiFormRowProps, EuiSpacer, EuiComboBox, EuiComboBoxOptionOption } from
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DateRange } from '../../../common';
@@ -33,7 +34,6 @@ import type {
   IndexPatternLayer,
   IndexPatternPrivateState,
 } from '../types';
-import { trackUiEvent } from '../../lens_ui_telemetry';
 import type { ParamEditorCustomProps } from '../../types';
 import type { IndexPatternDimensionEditorProps } from './dimension_panel';
 import { FormRow } from '../operations/definitions/shared_components';
@@ -106,6 +106,7 @@ export interface ReferenceEditorProps {
   savedObjectsClient: SavedObjectsClientContract;
   http: HttpSetup;
   data: DataPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
 }
@@ -281,7 +282,6 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
                     : undefined;
 
                 onChooseFunction(operationType, field);
-                trackUiEvent(`indexpattern_dimension_operation_${operationType}`);
                 return;
               }}
             />
