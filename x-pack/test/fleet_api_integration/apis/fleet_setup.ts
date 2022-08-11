@@ -14,17 +14,16 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
   const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
 
   describe('fleet_setup', () => {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
 
     after(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
+      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
     beforeEach(async () => {
