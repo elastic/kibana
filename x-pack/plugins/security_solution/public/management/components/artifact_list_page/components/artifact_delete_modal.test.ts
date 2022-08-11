@@ -13,8 +13,7 @@ import { act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { getDeferred } from '../../mocks';
 
-// FLAKY: https://github.com/elastic/kibana/issues/137590
-describe.skip('When displaying the Delete artfifact modal in the Artifact List Page', () => {
+describe('When displaying the Delete artifact modal in the Artifact List Page', () => {
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let history: AppContextTestRender['history'];
   let coreStart: AppContextTestRender['coreStart'];
@@ -55,9 +54,17 @@ describe.skip('When displaying the Delete artfifact modal in the Artifact List P
 
     await clickCardAction('delete');
 
+    // Wait for the dialog to be present
+    await act(async () => {
+      await waitFor(() => {
+        expect(renderResult.getByTestId('testPage-deleteModal')).not.toBeNull();
+      });
+    });
+
     cancelButton = renderResult.getByTestId(
       'testPage-deleteModal-cancelButton'
     ) as HTMLButtonElement;
+
     submitButton = renderResult.getByTestId(
       'testPage-deleteModal-submitButton'
     ) as HTMLButtonElement;
