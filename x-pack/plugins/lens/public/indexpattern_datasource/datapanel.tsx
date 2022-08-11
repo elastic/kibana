@@ -178,6 +178,8 @@ export function IndexPatternDataPanel({
           dateRange.fromDate,
           dateRange.toDate,
           indexPatternList.map((x) => `${x.title}:${x.timeFieldName}`).join(','),
+          // important here to rerun the fields existence on indexPattern change (i.e. add new fields in place)
+          frame.dataViews.indexPatterns,
         ]}
       />
 
@@ -495,9 +497,11 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
       cache: {},
       onIndexPatternRefresh,
     });
-    indexPatternService.updateIndexPatternsCache({
-      ...frame.dataViews.indexPatterns,
-      [currentIndexPattern.id]: newlyMappedIndexPattern[currentIndexPattern.id],
+    indexPatternService.updateDataViewsState({
+      indexPatterns: {
+        ...frame.dataViews.indexPatterns,
+        [currentIndexPattern.id]: newlyMappedIndexPattern[currentIndexPattern.id],
+      },
     });
     // start a new session so all charts are refreshed
     data.search.session.start();
@@ -519,9 +523,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 dataView: indexPatternInstance,
               },
               fieldName,
-              onSave: async () => {
-                await refreshFieldList();
-              },
+              onSave: () => refreshFieldList(),
             });
           }
         : undefined,
@@ -538,9 +540,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 dataView: indexPatternInstance,
               },
               fieldName,
-              onDelete: async () => {
-                await refreshFieldList();
-              },
+              onDelete: () => refreshFieldList(),
             });
           }
         : undefined,

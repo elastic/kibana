@@ -75,9 +75,9 @@ export interface IndexPatternServiceAPI {
   getDefaultIndex: () => string;
 
   /**
-   * Update the Lens state cache of indexPatterns
+   * Update the Lens dataViews state
    */
-  updateIndexPatternsCache: (
+  updateDataViewsState: (
     newState: Partial<DataViewsState>,
     options?: { applyImmediately: boolean }
   ) => void;
@@ -96,7 +96,7 @@ export function createIndexPatternService({
       }),
     });
   return {
-    updateIndexPatternsCache: updateIndexPatterns,
+    updateDataViewsState: updateIndexPatterns,
     loadIndexPatterns: (args) => {
       return loadIndexPatterns({
         dataViews,
