@@ -25,14 +25,14 @@ import { i18n } from '@kbn/i18n';
 import { docLinks } from '../../../shared/doc_links';
 import { ElasticsearchResources } from '../../../shared/elasticsearch_resources';
 import { SetElasticsearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
-import { AccessProps } from '../../../shared/types';
+import { ProductAccessProps } from '../../../shared/types';
 import { ElasticsearchClientInstructions } from '../elasticsearch_client_instructions';
 import { ElasticsearchCloudId } from '../elasticsearch_cloud_id';
 import { EnterpriseSearchElasticsearchPageTemplate } from '../layout';
 
 // Replace FormattedMessage with i18n strings
 
-export const ElasticsearchGuide: React.FC<AccessProps> = ({ access }) => {
+export const ElasticsearchGuide: React.FC<ProductAccessProps> = ({ access }) => {
   const languages = [
     { value: 'dotnet', text: '.Net' },
     { value: 'go', text: 'Go' },

@@ -8,7 +8,7 @@
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 
-import { AccessProps } from '../../../shared/types';
+import { ProductAccessProps } from '../../../shared/types';
 
 import { SEARCH_INDICES_PATH, SEARCH_INDEX_PATH, NEW_INDEX_PATH } from '../../routes';
 
@@ -17,7 +17,7 @@ import { SearchIndexRouter } from '../search_index/search_index_router';
 
 import { SearchIndices } from './search_indices';
 
-export const SearchIndicesRouter: React.FC<AccessProps> = ({ access }) => {
+export const SearchIndicesRouter: React.FC<ProductAccessProps> = ({ access }) => {
   return (
     <Switch>
       <Route exact path={NEW_INDEX_PATH}>

@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { parseQueryParams } from '../../../shared/query_params';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
 
-import { AccessProps } from '../../../shared/types';
+import { ProductAccessProps } from '../../../shared/types';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 import { baseBreadcrumbs } from '../search_indices';
 
@@ -96,7 +96,7 @@ const METHOD_BUTTON_GROUP_OPTIONS: ButtonGroupOption[] = [
   },
 ];
 
-export const NewIndex: React.FC<AccessProps> = ({ access }) => {
+export const NewIndex: React.FC<ProductAccessProps> = ({ access }) => {
   const { search } = useLocation();
   const { method: methodParam } = parseQueryParams(search);
 

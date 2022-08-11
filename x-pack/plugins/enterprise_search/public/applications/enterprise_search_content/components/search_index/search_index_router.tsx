@@ -10,7 +10,7 @@ import { Route, Switch, useParams } from 'react-router-dom';
 
 import { useActions } from 'kea';
 
-import { AccessProps } from '../../../shared/types';
+import { ProductAccessProps } from '../../../shared/types';
 import {
   SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH,
   SEARCH_INDEX_PATH,
@@ -23,7 +23,7 @@ import { IndexNameLogic } from './index_name_logic';
 import { IndexViewLogic } from './index_view_logic';
 import { SearchIndex } from './search_index';
 
-export const SearchIndexRouter: React.FC<AccessProps> = ({ access }) => {
+export const SearchIndexRouter: React.FC<ProductAccessProps> = ({ access }) => {
   const { indexName } = useParams<{ indexName: string }>();
 
   const indexNameLogic = IndexNameLogic({ indexName });

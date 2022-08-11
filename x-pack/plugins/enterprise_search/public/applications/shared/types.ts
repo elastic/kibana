@@ -59,6 +59,6 @@ export interface SingleUserRoleMapping<T> {
   hasEnterpriseSearchRole?: boolean;
 }
 
-export interface AccessProps {
+export interface ProductAccessProps {
   access: ProductAccess;
 }

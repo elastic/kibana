@@ -9,10 +9,10 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { AccessProps } from '../../../shared/types';
+import { ProductAccessProps } from '../../../shared/types';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
-export const Settings: React.FC<AccessProps> = ({ access }) => {
+export const Settings: React.FC<ProductAccessProps> = ({ access }) => {
   return (
     <EnterpriseSearchContentPageTemplate
       access={access}
