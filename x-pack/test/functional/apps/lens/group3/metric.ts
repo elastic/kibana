@@ -173,6 +173,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
 
       const colorPicker = await testSubjects.find('euiColorPickerAnchor');
+
+      colorPicker.clearValue();
       await colorPicker.type('#000000');
 
       await PageObjects.lens.waitForVisualization('mtrVis');
