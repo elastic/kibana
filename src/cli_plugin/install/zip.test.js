@@ -55,16 +55,12 @@ describe('kibana cli', function () {
 
         expect(globby.sync('**/*', { cwd: tempPath })).toMatchInlineSnapshot(`
           Array [
-            "bin",
+            "kibana.json",
             "bin/executable",
             "bin/not-executable",
-            "kibana.json",
-            "node_modules",
-            "node_modules/some-package",
+            "public/index.js",
             "node_modules/some-package/index.js",
             "node_modules/some-package/package.json",
-            "public",
-            "public/index.js",
           ]
         `);
       });
