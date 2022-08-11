@@ -16,7 +16,7 @@ const Path = require('path');
 const distDir = Path.resolve(__dirname, '../shared_built_assets');
 const dllManifestPath = Path.resolve(distDir, 'kbn-ui-shared-deps-npm-manifest.json');
 const dllFilename = 'kbn-ui-shared-deps-npm.dll.js';
-const publicPathLoader = require.resolve('./public_path_loader');
+const publicPathLoader = require.resolve('./src/public_path_loader');
 
 /**
  * Absolute path to the distributable directory
