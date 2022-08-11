@@ -12,7 +12,7 @@ module.exports = {
   ...preset,
   testEnvironment: 'node',
   snapshotSerializers: [],
-  setupFiles: ['<rootDir>/node_modules/@kbn/test/target_node/jest/setup/babel_polyfill.js'],
+  setupFiles: ['<rootDir>/node_modules/@kbn/test/target_node/src/jest/setup/babel_polyfill.js'],
   haste: {
     ...preset.haste,
     throwOnModuleCollision: true,
