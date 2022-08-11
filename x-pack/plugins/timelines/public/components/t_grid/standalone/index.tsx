@@ -181,7 +181,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
         filters,
         kqlQuery: query,
         kqlMode: 'search',
-        isEventViewer: true,
       }),
     [uiSettings, indexPatterns, browserFields, filters, query]
   );
@@ -276,7 +275,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
         filters,
         kqlQuery: query,
         kqlMode: 'search',
-        isEventViewer: true,
         from: start,
         to: end,
       }),

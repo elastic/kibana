@@ -39,7 +39,7 @@ import type {
 
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { defaultHeaders } from '../body/column_headers/default_headers';
-import { buildCombinedQuery, getCombinedFilterQuery, resolverIsShowing } from '../helpers';
+import { getCombinedFilterQuery, resolverIsShowing } from '../helpers';
 import { tGridActions, tGridSelectors } from '../../../store/t_grid';
 import { useTimelineEvents, InspectResponse, Refetch } from '../../../container';
 import { StatefulBody } from '../body';
@@ -194,26 +194,32 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   }, [dispatch, id, isQueryLoading]);
 
   const justTitle = useMemo(() => <TitleText data-test-subj="title">{title}</TitleText>, [title]);
+  const esQueryConfig = getEsQueryConfig(uiSettings);
 
-  const combinedQueries = buildCombinedQuery({
-    config: getEsQueryConfig(uiSettings),
-    dataProviders,
-    indexPattern,
-    browserFields,
-    filters,
-    kqlQuery: query,
-    kqlMode,
-    isEventViewer: true,
-  });
+  const filterQuery = useMemo(
+    () =>
+      getCombinedFilterQuery({
+        config: esQueryConfig,
+        browserFields,
+        dataProviders,
+        filters,
+        from: start,
+        indexPattern,
+        kqlMode,
+        kqlQuery: query,
+        to: end,
+      }),
+    [esQueryConfig, dataProviders, indexPattern, browserFields, filters, start, end, query, kqlMode]
+  );
 
   const canQueryTimeline = useMemo(
     () =>
-      combinedQueries != null &&
+      filterQuery != null &&
       isLoadingIndexPattern != null &&
       !isLoadingIndexPattern &&
       !isEmpty(start) &&
       !isEmpty(end),
-    [isLoadingIndexPattern, combinedQueries, start, end]
+    [isLoadingIndexPattern, filterQuery, start, end]
   );
 
   const fields = useMemo(
@@ -241,7 +247,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
       endDate: end,
       entityType,
       fields,
-      filterQuery: combinedQueries?.filterQuery,
+      filterQuery,
       id,
       indexNames,
       limit: itemsPerPage,
@@ -250,23 +256,6 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
       sort: sortField,
       startDate: start,
     });
-
-  const filterQuery = useMemo(
-    () =>
-      getCombinedFilterQuery({
-        config: getEsQueryConfig(uiSettings),
-        browserFields,
-        dataProviders,
-        filters,
-        from: start,
-        indexPattern,
-        isEventViewer: true,
-        kqlMode,
-        kqlQuery: query,
-        to: end,
-      }),
-    [uiSettings, dataProviders, indexPattern, browserFields, filters, start, end, query, kqlMode]
-  );
 
   const totalCountMinusDeleted = useMemo(
     () => (totalCount > 0 ? totalCount - deletedEventIds.length : 0),
