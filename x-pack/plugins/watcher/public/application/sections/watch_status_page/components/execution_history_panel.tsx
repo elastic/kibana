@@ -13,6 +13,8 @@ import { Moment } from 'moment';
 import {
   EuiCodeBlock,
   EuiFlexGroup,
+  EuiToolTip,
+  EuiIcon,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
@@ -135,18 +137,79 @@ export const ExecutionHistoryPanel = () => {
     },
     {
       field: 'watchStatus.state',
-      name: i18n.translate('xpack.watcher.sections.watchHistory.watchTable.stateHeader', {
-        defaultMessage: 'State',
-      }),
+      name: (
+        <EuiToolTip
+          content={i18n.translate(
+            'xpack.watcher.sections.watchHistory.watchTable.stateHeader.tooltipText',
+            {
+              defaultMessage: 'Active or error state',
+            }
+          )}
+        >
+          <span>
+            {i18n.translate('xpack.watcher.sections.watchHistory.watchTable.stateHeader', {
+              defaultMessage: 'State',
+            })}{' '}
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </span>
+        </EuiToolTip>
+      ),
       sortable: true,
       truncateText: true,
       render: (state: string) => <WatchStateBadge state={state} />,
     },
     {
+      name: (
+        <EuiToolTip
+          content={i18n.translate(
+            'xpack.watcher.sections.watchHistory.watchTable.metConditionHeader.tooltipText',
+            {
+              defaultMessage: `Whether the watch's condition was met and its actions were executed`,
+            }
+          )}
+        >
+          <span>
+            {i18n.translate('xpack.watcher.sections.watchHistory.watchTable.metConditionHeader', {
+              defaultMessage: 'Condition met',
+            })}{' '}
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </span>
+        </EuiToolTip>
+      ),
+      sortable: true,
+      truncateText: true,
+      // TODO: Once we convert the client-side models to TS, this should be a WatchHistoryItemModel.
+      render: (watchHistoryItem: any) => {
+        const {
+          startTime,
+          watchStatus: { lastExecution },
+        } = watchHistoryItem;
+
+        if (startTime.isSame(lastExecution)) {
+          return <EuiIcon color="green" type="check" />;
+        }
+      },
+    },
+    {
       field: 'watchStatus.comment',
-      name: i18n.translate('xpack.watcher.sections.watchHistory.watchTable.commentHeader', {
-        defaultMessage: 'Comment',
-      }),
+      name: (
+        <EuiToolTip
+          content={i18n.translate(
+            'xpack.watcher.sections.watchHistory.watchTable.commentHeader.tooltipText',
+            {
+              defaultMessage:
+                'Information about whether the watch was throttled, acknowledged, or failed to execute',
+            }
+          )}
+        >
+          <span>
+            {i18n.translate('xpack.watcher.sections.watchHistory.watchTable.commentHeader', {
+              defaultMessage: 'Comment',
+            })}{' '}
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </span>
+        </EuiToolTip>
+      ),
       sortable: true,
       truncateText: true,
     },
