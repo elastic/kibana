@@ -21,6 +21,8 @@ import {
   bulkExportRules,
   selectAllRules,
 } from '../../tasks/alerts_detection_rules';
+import { createExceptionList, deleteExceptionList } from '../../tasks/api_calls/exceptions';
+import { getExceptionList } from '../../objects/exception';
 import { createCustomRule } from '../../tasks/api_calls/rules';
 import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
 import { login, visitWithoutDateRange } from '../../tasks/login';
@@ -85,5 +87,53 @@ describe('Export rules', () => {
       'contain',
       `Successfully exported ${expectedNumberCustomRulesToBeExported} of ${totalNumberOfRules} rules. Prebuilt rules were excluded from the resulting file.`
     );
+  });
+
+  context('rules with exceptions', () => {
+    before(() => {
+      deleteExceptionList(getExceptionList().list_id, getExceptionList().namespace_type);
+    });
+
+    beforeEach(() => {
+      // create rule with exceptions
+      createExceptionList(getExceptionList(), getExceptionList().list_id).then((response) =>
+        createCustomRule(
+          {
+            ...getNewRule(),
+            name: 'rule with exceptions',
+            dataSource: { index: ['exceptions-*'], type: 'indexPatterns' },
+            exceptionLists: [
+              {
+                id: response.body.id,
+                list_id: getExceptionList().list_id,
+                type: getExceptionList().type,
+                namespace_type: getExceptionList().namespace_type,
+              },
+            ],
+          },
+          '2'
+        )
+      );
+    });
+
+    it('exports custom rules with exceptions', function () {
+      // one rule with exception, one without it
+      const expectedNumberCustomRulesToBeExported = 2;
+
+      loadPrebuiltDetectionRulesFromHeaderBtn();
+
+      selectAllRules();
+      bulkExportRules();
+
+      // should display correct number of custom rules when one of them has exceptions
+      cy.get(MODAL_CONFIRMATION_BTN)
+        .should('have.text', `Export ${expectedNumberCustomRulesToBeExported} Custom rules`)
+        .click();
+
+      cy.get(TOASTER_BODY).should(
+        'contain',
+        `Successfully exported ${expectedNumberCustomRulesToBeExported}`
+      );
+    });
   });
 });
