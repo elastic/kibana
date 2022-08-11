@@ -50,8 +50,7 @@ describe('ruleParamsModifier', () => {
     expect(editedRuleParams).toHaveProperty('version', ruleParamsMock.version + 1);
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/138409
-  describe.skip('index_patterns', () => {
+  describe('index_patterns', () => {
     test('should add new index pattern to rule', () => {
       const editedRuleParams = ruleParamsModifier(ruleParamsMock, [
         {
@@ -125,6 +124,36 @@ describe('ruleParamsModifier', () => {
         ]
       );
       expect(editedRuleParams).toHaveProperty('dataViewId', undefined);
+    });
+
+    test('should set dataViewId to undefined if overwrite_data_views=true on delete_index_patterns action', () => {
+      const editedRuleParams = ruleParamsModifier(
+        { dataViewId: 'test-data-view', index: ['test-*', 'index'] } as RuleAlertType['params'],
+        [
+          {
+            type: BulkActionEditType.delete_index_patterns,
+            value: ['index'],
+            overwrite_data_views: true,
+          },
+        ]
+      );
+      expect(editedRuleParams).toHaveProperty('dataViewId', undefined);
+      expect(editedRuleParams).toHaveProperty('index', ['test-*']);
+    });
+
+    test('should set dataViewId to undefined and index to undefined if overwrite_data_views=true on delete_index_patterns action and rule had no index patterns to begin with', () => {
+      const editedRuleParams = ruleParamsModifier(
+        { dataViewId: 'test-data-view', index: undefined } as RuleAlertType['params'],
+        [
+          {
+            type: BulkActionEditType.delete_index_patterns,
+            value: ['index'],
+            overwrite_data_views: true,
+          },
+        ]
+      );
+      expect(editedRuleParams).toHaveProperty('dataViewId', undefined);
+      expect(editedRuleParams).toHaveProperty('index', undefined);
     });
 
     test('should throw error on adding index pattern if rule is of machine learning type', () => {
