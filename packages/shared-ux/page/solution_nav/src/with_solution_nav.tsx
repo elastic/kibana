@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { ComponentType, useState } from 'react';
+import React, { ComponentType, ReactNode, useState } from 'react';
 import classNames from 'classnames';
-import { useIsWithinBreakpoints, useEuiTheme } from '@elastic/eui';
-import { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
+import { useIsWithinBreakpoints, useEuiTheme, EuiPageSidebarProps } from '@elastic/eui';
 import { SolutionNav, SolutionNavProps } from './solution_nav';
 
 import './with_solution_nav.scss';
@@ -19,7 +18,12 @@ function getDisplayName(Component: ComponentType<any>) {
   return Component.displayName || Component.name || 'UnnamedComponent';
 }
 
-type TemplateProps = Pick<KibanaPageTemplateProps, 'pageSideBar' | 'pageSideBarProps' | 'children'>;
+// TODO: Would be nice to grab these from KibanaPageTemplate or vice-versa
+interface TemplateProps {
+  pageSideBar?: ReactNode;
+  pageSideBarProps?: Partial<EuiPageSidebarProps>;
+  children?: ReactNode;
+}
 
 type Props<P> = P &
   TemplateProps & {
@@ -65,7 +69,7 @@ export const withSolutionNav = <P extends TemplateProps>(WrappedComponent: Compo
       />
     );
 
-    const pageSideBarProps: KibanaPageTemplateProps['pageSideBarProps'] = {
+    const pageSideBarProps: TemplateProps['pageSideBarProps'] = {
       paddingSize: 'none' as 'none',
       ...props.pageSideBarProps,
       // TODO: `minWidth` isn't re-populating down on state change
