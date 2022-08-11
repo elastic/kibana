@@ -57,7 +57,7 @@ export default function ({
           updateBaselines,
           log
         )
-      ).to.be.lessThan(0.01);
+      ).to.be.lessThan(0.09);
     });
   });
 }

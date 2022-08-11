@@ -183,7 +183,7 @@ export default function ({
           log
         );
 
-        expect(percentDiff).to.be.lessThan(0.01);
+        expect(percentDiff).to.be.lessThan(0.09);
       });
 
       it('PNG file matches the baseline: large dashboard', async function () {
@@ -192,9 +192,9 @@ export default function ({
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.loadSavedDashboard('Large Dashboard');
         await PageObjects.reporting.openPngReportingPanel();
-        // await PageObjects.reporting.forceSharedItemsContainerSize({ width: 800 });
+        await PageObjects.reporting.forceSharedItemsContainerSize({ width: 1405 });
         await PageObjects.reporting.clickGenerateReportButton();
-        // await PageObjects.reporting.removeForceSharedItemsContainerSize();
+        await PageObjects.reporting.removeForceSharedItemsContainerSize();
 
         const url = await PageObjects.reporting.getReportURL(200000);
         const reportData = await PageObjects.reporting.getRawPdfReportData(url);
@@ -213,7 +213,7 @@ export default function ({
           log
         );
 
-        expect(percentDiff).to.be.lessThan(0.01);
+        expect(percentDiff).to.be.lessThan(0.09);
       });
     });
 
@@ -319,7 +319,7 @@ export default function ({
           log
         );
 
-        expect(percentDiff).to.be.lessThan(0.01);
+        expect(percentDiff).to.be.lessThan(0.09);
       });
     });
   });

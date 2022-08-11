@@ -143,7 +143,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           log
         );
 
-        expect(percentDiff).to.be.lessThan(0.01);
+        expect(percentDiff).to.be.lessThan(0.09);
       });
     });
   });
