@@ -21,6 +21,8 @@ import { useFilterManager } from './lib/use_filter_manager';
 import { useTimefilter } from './lib/use_timefilter';
 import { useSavedQuery } from './lib/use_saved_query';
 import { useQueryStringManager } from './lib/use_query_string_manager';
+import { QuerySuggestionGetFn } from '../autocomplete';
+import { ValueSuggestionsGetFn } from '../autocomplete/providers/value_suggestion_provider';
 
 interface StatefulSearchBarDeps {
   core: CoreStart;
@@ -28,6 +30,11 @@ interface StatefulSearchBarDeps {
   storage: IStorageWrapper;
   usageCollection?: UsageCollectionSetup;
   isScreenshotMode?: boolean;
+  autocomplete: {
+    getQuerySuggestions: QuerySuggestionGetFn;
+    hasQuerySuggestions: (language: string) => boolean;
+    getValueSuggestions: ValueSuggestionsGetFn;
+  };
 }
 
 export type StatefulSearchBarProps<QT extends Query | AggregateQuery = Query> =
@@ -127,6 +134,7 @@ export function createSearchBar({
   data,
   usageCollection,
   isScreenshotMode = false,
+  autocomplete,
 }: StatefulSearchBarDeps) {
   // App name should come from the core application service.
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
@@ -179,6 +187,7 @@ export function createSearchBar({
           data,
           storage,
           usageCollection,
+          autocomplete,
           ...core,
         }}
       >

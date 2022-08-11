@@ -18,8 +18,6 @@ import { FilterStateStore } from '@kbn/es-query';
 import { FilterManager } from '@kbn/data-plugin/public';
 import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
 import { buildGlobalQuery } from '../helpers';
-import { setAutocomplete } from '@kbn/unified-search-plugin/public/services';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 
 import type { QueryBarTimelineComponentProps } from '.';
 import { QueryBarTimeline, getDataProviderFilter, TIMELINE_FILTER_DROP_AREA } from '.';
@@ -182,11 +180,6 @@ describe('Timeline QueryBar ', () => {
   });
 
   describe('#onSavedQuery', () => {
-    beforeEach(() => {
-      const autocompleteStart = unifiedSearchPluginMock.createStartContract();
-      setAutocomplete(autocompleteStart.autocomplete);
-    });
-
     test('is only reference that changed when dataProviders props get updated', async () => {
       const Proxy = (props: QueryBarTimelineComponentProps) => (
         <TestProviders>

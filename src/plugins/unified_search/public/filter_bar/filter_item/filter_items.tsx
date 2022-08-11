@@ -11,11 +11,11 @@ import { css } from '@emotion/react';
 import { EuiFlexItem } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import type { Filter } from '@kbn/es-query';
-import { IDataPluginServices } from '@kbn/data-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FilterItem, FilterItemProps } from './filter_item';
+import type { IUnifiedSearchPluginServices } from '../../types';
 
 export interface Props {
   filters: Filter[];
@@ -28,7 +28,7 @@ export interface Props {
 
 const FilterItemsUI = React.memo(function FilterItemsUI(props: Props) {
   const groupRef = useRef<HTMLDivElement>(null);
-  const kibana = useKibana<IDataPluginServices>();
+  const kibana = useKibana<IUnifiedSearchPluginServices>();
   const { appName, usageCollection, uiSettings } = kibana.services;
   if (!uiSettings) return null;
 
