@@ -1298,7 +1298,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('should show stats for the detection_rule_details for a specific pre-packaged rule', async () => {
+      it.only('should show stats for the detection_rule_details for a specific pre-packaged rule', async () => {
         await installPrePackagedRules(supertest, log);
         await retry.try(async () => {
           const stats = await getStats(supertest, log);

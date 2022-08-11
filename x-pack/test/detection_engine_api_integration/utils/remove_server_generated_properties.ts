@@ -20,6 +20,7 @@ export const removeServerGeneratedProperties = (
     created_at,
     updated_at,
     execution_summary,
+    required_fields,
     ...removedProperties
   } = rule;
   return removedProperties;
