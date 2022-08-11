@@ -12,18 +12,11 @@ describe('get_moment', () => {
     it(`returns a moment object when passed a date`, () => {
       const moment = getMoment('2017-03-30T14:53:08.121Z');
 
-      expect(moment.constructor.name).toBe('Moment');
+      expect(moment?.constructor.name).toBe('Moment');
     });
 
     it(`returns null when passed falsy`, () => {
-      const results = [
-        getMoment(false),
-        getMoment(0),
-        getMoment(''),
-        getMoment(null),
-        getMoment(undefined),
-        getMoment(NaN),
-      ];
+      const results = [getMoment(''), getMoment(null), getMoment(undefined)];
 
       results.forEach((result) => {
         expect(result).toBe(null);

@@ -5,4 +5,12 @@
  * 2.0.
  */
 
-export { ActionStatusModel } from './action_status_model';
+export interface TestData {
+  suiteTitle: string;
+  isSavedSearch?: boolean;
+  sourceIndexOrSavedSearch: string;
+  rowsPerPage?: 10 | 25 | 50;
+  expected: {
+    totalDocCountFormatted: string;
+  };
+}
