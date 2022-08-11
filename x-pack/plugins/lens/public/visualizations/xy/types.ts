@@ -113,7 +113,6 @@ export interface XYAnnotationLayerConfig {
   layerId: string;
   layerType: 'annotations';
   annotations: EventAnnotationConfig[];
-  hide?: boolean;
   simpleView?: boolean;
 }
 
