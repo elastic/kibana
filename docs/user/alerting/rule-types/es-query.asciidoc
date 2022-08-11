@@ -76,13 +76,14 @@ over these hits to get values from the ES documents into your actions.
 image::images/rule-types-es-query-example-action-variable.png[Iterate over hits using Mustache template syntax]
 +
 The documents returned by `context.hits` include the {ref}/mapping-source-field.html[`_source`] field.
-If the {es} query search API's {ref}/search-fields.html#search-fields-param[`fields`] parameter is used, documents will also return the `fields` field, which can be used to access any runtime fields defined by the usage {ref}/runtime-search-request.html[`runtime_mappings`] parameter.
+If the {es} query search API's {ref}/search-fields.html#search-fields-param[`fields`] parameter is used, documents will also return the `fields` field, 
+which can be used to access any runtime fields defined by the {ref}/runtime-search-request.html[`runtime_mappings`] parameter.
 +
 --
-[source,md]
+[source]
 --------------------------------------------------
 {{#context.hits}}
-timestamp: {{_source.timestamp}}
+timestamp: {{_source.@timestamp}}
 day of the week: {{fields.day_of_week}}
 {{/context.hits}}
 --------------------------------------------------
