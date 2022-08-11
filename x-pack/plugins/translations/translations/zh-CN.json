@@ -31460,8 +31460,6 @@
     "xpack.watcher.models.watchHistoryItem.idPropertyMissingBadRequestMessage": "JSON 参数必须包含 {id} 属性",
     "xpack.watcher.models.watchHistoryItem.watchHistoryItemJsonPropertyMissingBadRequestMessage": "JSON 参数必须包含 {watchHistoryItemJson} 属性",
     "xpack.watcher.models.watchHistoryItem.watchIdPropertyMissingBadRequestMessage": "JSON 参数必须包含 {watchId} 属性",
-    "xpack.watcher.models.watchStatus.idPropertyMissingBadRequestMessage": "JSON 参数必须包含 {id} 属性",
-    "xpack.watcher.models.watchStatus.watchStatusJsonPropertyMissingBadRequestMessage": "JSON 参数必须包含 {watchStatusJson} 属性",
     "xpack.watcher.models.webhookAction.selectMessageText": "将请求发送到 Web 服务。",
     "xpack.watcher.models.webhookAction.simulateButtonLabel": "发送请求",
     "xpack.watcher.models.webhookAction.simulateFailMessage": "无法将请求发送至 {fullPath}",
