@@ -92,9 +92,7 @@ describe('When on the host isolation exceptions entry form', () => {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/136165
-  // FLAKY: https://github.com/elastic/kibana/issues/136166
-  describe.skip('and creating a new exception', () => {
+  describe('and creating a new exception', () => {
     beforeEach(async () => {
       await render();
     });
@@ -107,32 +105,35 @@ describe('When on the host isolation exceptions entry form', () => {
       ).toHaveValue('');
     });
 
-    it.each(['not an ip', '100', '900.0.0.1', 'x.x.x.x', '10.0.0'])(
+    it('should keep submit button disabled if only the name is entered', async () => {
+      const nameInput = renderResult.getByTestId('hostIsolationExceptions-form-name-input');
+
+      userEvent.type(nameInput, 'test name');
+      userEvent.click(renderResult.getByTestId('hostIsolationExceptions-form-description-input'));
+
+      await waitFor(() => {
+        expect(submitButtonDisabledState()).toBe(true);
+      });
+    });
+
+    it.each([['not an ip'], ['100'], ['900.0.0.1'], ['x.x.x.x'], ['10.0.0']])(
       'should show validation error when a wrong ip value is entered. Case: "%s"',
       async (value: string) => {
-        const nameInput = renderResult.getByTestId('hostIsolationExceptions-form-name-input');
         const ipInput = renderResult.getByTestId('hostIsolationExceptions-form-ip-input');
 
-        userEvent.type(nameInput, 'test name');
+        userEvent.type(ipInput, value);
+        userEvent.click(renderResult.getByTestId('hostIsolationExceptions-form-description-input'));
 
         await waitFor(() => {
+          expect(formRowHasError('hostIsolationExceptions-form-ip-input-formRow')).toBe(true);
           expect(submitButtonDisabledState()).toBe(true);
         });
-
-        userEvent.type(ipInput, value);
-        userEvent.tab();
-
-        await waitFor(() =>
-          expect(formRowHasError('hostIsolationExceptions-form-ip-input-formRow')).toBe(true)
-        );
-
-        await waitFor(() => expect(submitButtonDisabledState()).toBe(true));
       }
     );
 
-    it.each(['192.168.0.1', '10.0.0.1', '100.90.1.1/24', '192.168.200.6/30'])(
+    it.each([['192.168.0.1'], ['10.0.0.1'], ['100.90.1.1/24'], ['192.168.200.6/30']])(
       'should NOT show validation error when a correct ip value is entered. Case: "%s"',
-      (value: string) => {
+      async (value: string) => {
         const ipInput = renderResult.getByTestId('hostIsolationExceptions-form-ip-input');
         const nameInput = renderResult.getByTestId('hostIsolationExceptions-form-name-input');
 
@@ -140,7 +141,10 @@ describe('When on the host isolation exceptions entry form', () => {
         userEvent.type(ipInput, value);
 
         expect(formRowHasError('hostIsolationExceptions-form-ip-input-formRow')).toBe(false);
-        expect(submitButtonDisabledState()).toBe(false);
+
+        await waitFor(() => {
+          expect(submitButtonDisabledState()).toBe(false);
+        });
       }
     );
 
