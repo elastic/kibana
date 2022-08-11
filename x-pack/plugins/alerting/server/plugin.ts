@@ -80,6 +80,7 @@ import { getSecurityHealth, SecurityHealth } from './lib/get_security_health';
 import { registerNodeCollector, registerClusterCollector, InMemoryMetrics } from './monitoring';
 import { getRuleTaskTimeout } from './lib/get_rule_task_timeout';
 import { getActionsConfigMap } from './lib/get_actions_config_map';
+import { configureFlapping } from './flapping';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -189,6 +190,7 @@ export class AlertingPlugin {
     core: CoreSetup<AlertingPluginsStart, unknown>,
     plugins: AlertingPluginsSetup
   ): PluginSetupContract {
+    configureFlapping(this.config, this.logger);
     const kibanaIndex = core.savedObjects.getKibanaIndex();
     this.kibanaBaseUrl = core.http.basePath.publicBaseUrl;
     this.licenseState = new LicenseState(plugins.licensing.license$);
