@@ -50,11 +50,15 @@ export const getIndicesViaResolve = async ({
   pattern: string;
   showAllIndices: boolean;
   isRollupIndex: (indexName: string) => boolean;
-}) =>
-  http
-    .get<ResolveIndexResponse>(`/internal/index-pattern-management/resolve_index/${pattern}`, {
-      query: showAllIndices ? { expand_wildcards: 'all' } : undefined,
-    })
+}) => {
+  const encodedPattern = encodeURIComponent(pattern);
+  return http
+    .get<ResolveIndexResponse>(
+      `/internal/index-pattern-management/resolve_index/${encodedPattern}`,
+      {
+        query: showAllIndices ? { expand_wildcards: 'all' } : undefined,
+      }
+    )
     .then((response) => {
       if (!response) {
         return [];
@@ -62,6 +66,7 @@ export const getIndicesViaResolve = async ({
         return responseToItemArray(response, getIndexTags(isRollupIndex));
       }
     });
+};
 
 export async function getIndices({
   http,
