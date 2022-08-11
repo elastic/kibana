@@ -36,10 +36,10 @@ const createTestAction = ({
 
 const resultMapper = (panel: EuiContextMenuPanelDescriptor) => ({
   items: panel.items
-    ? panel.items.map((item) => ({
-        name: item.isSeparator ? 'SEPARATOR' : item.name,
-        ...(!item.isSeparator ? { disabled: item.disabled } : {}),
-      }))
+    ? panel.items.map((item) => item.isSeparator
+        ? { name: 'SEPARATOR' }
+        : { name: item.name, disabled: item.disabled }
+      )
     : [],
 });
 
