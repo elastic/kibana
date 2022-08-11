@@ -13,6 +13,8 @@ import {
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
 import { RuleExecutorOptions, RuleExecutorServices, RuleType } from '@kbn/alerting-plugin/server';
+import { IFieldSubType } from '@kbn/es-query';
+import { RuntimeField } from '@kbn/data-views-plugin/common';
 import { AlertsClient } from './alert_data_client/alerts_client';
 
 type SimpleAlertType<
@@ -71,3 +73,31 @@ export interface RacApiRequestHandlerContext {
 export type RacRequestHandlerContext = CustomRequestHandlerContext<{
   rac: RacApiRequestHandlerContext;
 }>;
+
+export interface BrowserField {
+  aggregatable: boolean;
+  category: string;
+  description: string | null;
+  example: string | number | null;
+  fields: Readonly<Record<string, Partial<BrowserField>>>;
+  format: string;
+  indexes?: string[];
+  name: string;
+  searchable: boolean;
+  type: string;
+  esTypes?: string[];
+  subType?: IFieldSubType;
+  readFromDocValues: boolean;
+  runtimeField?: RuntimeField;
+}
+
+export interface FieldInfo {
+  category: string;
+  description?: string;
+  example?: string | number;
+  format?: string;
+  name: string;
+  type?: string;
+}
+
+export type BeatFields = Record<string, FieldInfo>;

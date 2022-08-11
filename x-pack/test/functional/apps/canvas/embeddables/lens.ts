@@ -44,7 +44,7 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
       it('renders lens visualization using savedLens expression', async () => {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        await PageObjects.lens.assertMetric('Maximum of bytes', '16,788');
+        await PageObjects.lens.assertLegacyMetric('Maximum of bytes', '16,788');
       });
 
       it('adds existing lens embeddable from the visualize library', async () => {

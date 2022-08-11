@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useCallback, useEffect, useState } from 'react';
+import React, { Fragment, useCallback, useEffect, useState, useMemo } from 'react';
 import { difference } from 'lodash';
 import styled from 'styled-components';
 import type { EuiSelectableOption } from '@elastic/eui';
@@ -79,6 +79,11 @@ export const TagsAddRemove: React.FC<Props> = ({
     setLabels(labelsFromTags(allTags));
   }, [allTags, labelsFromTags]);
 
+  const isExactMatch = useMemo(
+    () => labels.some((label) => label.label === searchValue),
+    [labels, searchValue]
+  );
+
   const updateTags = async (
     tagsToAdd: string[],
     tagsToRemove: string[],
@@ -135,6 +140,43 @@ export const TagsAddRemove: React.FC<Props> = ({
     );
   };
 
+  const createTagButton = (
+    <EuiButtonEmpty
+      color="text"
+      data-test-subj="createTagBtn"
+      onClick={() => {
+        if (!searchValue) {
+          return;
+        }
+        updateTags(
+          [searchValue],
+          [],
+          i18n.translate('xpack.fleet.createAgentTags.successNotificationTitle', {
+            defaultMessage: 'Tag created',
+          }),
+          i18n.translate('xpack.fleet.createAgentTags.errorNotificationTitle', {
+            defaultMessage: 'Tag creation failed',
+          })
+        );
+      }}
+    >
+      <EuiFlexGroup alignItems="center" gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="plus" />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <FormattedMessage
+            id="xpack.fleet.tagsAddRemove.createText"
+            defaultMessage='Create a new tag "{name}"'
+            values={{
+              name: searchValue,
+            }}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiButtonEmpty>
+  );
+
   return (
     <>
       <EuiWrappingPopover
@@ -162,41 +204,6 @@ export const TagsAddRemove: React.FC<Props> = ({
           }}
           options={labels}
           renderOption={renderOption}
-          noMatchesMessage={
-            <EuiButtonEmpty
-              color="text"
-              onClick={() => {
-                if (!searchValue) {
-                  return;
-                }
-                updateTags(
-                  [searchValue],
-                  [],
-                  i18n.translate('xpack.fleet.createAgentTags.successNotificationTitle', {
-                    defaultMessage: 'Tag created',
-                  }),
-                  i18n.translate('xpack.fleet.createAgentTags.errorNotificationTitle', {
-                    defaultMessage: 'Tag creation failed',
-                  })
-                );
-              }}
-            >
-              <EuiFlexGroup alignItems="center" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type="plus" />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <FormattedMessage
-                    id="xpack.fleet.tagsAddRemove.createText"
-                    defaultMessage='Create a new tag "{name}"'
-                    values={{
-                      name: searchValue,
-                    }}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiButtonEmpty>
-          }
         >
           {(list, search) => (
             <Fragment>
@@ -205,6 +212,7 @@ export const TagsAddRemove: React.FC<Props> = ({
             </Fragment>
           )}
         </EuiSelectable>
+        {!isExactMatch && labels.length && searchValue !== '' ? createTagButton : null}
       </EuiWrappingPopover>
     </>
   );
