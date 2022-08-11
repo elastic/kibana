@@ -20,14 +20,11 @@ export default function ({
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const browser = getService('browser');
-  const log = getService('log');
   const es = getService('es');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
-  const reporting = getService('reporting');
+  const png = getService('png');
   const ecommerceSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
-  const config = getService('config');
-  const screenshotDir = config.get('screenshots.directory');
 
   const loadEcommerce = async () => {
     await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
@@ -172,15 +169,14 @@ export default function ({
           reportFileName,
           'png',
           reportData,
-          screenshotDir
+          REPORTS_FOLDER
         );
 
-        const percentDiff = await reporting.comparePngAgainstBaseline(
+        const percentDiff = await png.compareAgainstBaseline(
           sessionReportPath,
           PageObjects.reporting.getBaselineReportPath(reportFileName, 'png', REPORTS_FOLDER),
-          screenshotDir,
-          updateBaselines,
-          log
+          REPORTS_FOLDER,
+          updateBaselines
         );
 
         expect(percentDiff).to.be.lessThan(0.09);
@@ -203,14 +199,13 @@ export default function ({
           reportFileName,
           'png',
           reportData,
-          screenshotDir
+          REPORTS_FOLDER
         );
-        const percentDiff = await reporting.comparePngAgainstBaseline(
+        const percentDiff = await png.compareAgainstBaseline(
           sessionReportPath,
           PageObjects.reporting.getBaselineReportPath(reportFileName, 'png', REPORTS_FOLDER),
-          screenshotDir,
-          updateBaselines,
-          log
+          REPORTS_FOLDER,
+          updateBaselines
         );
 
         expect(percentDiff).to.be.lessThan(0.09);
@@ -298,7 +293,7 @@ export default function ({
           reportFileName,
           'png',
           reportData,
-          screenshotDir
+          REPORTS_FOLDER
         );
       });
 
@@ -311,12 +306,11 @@ export default function ({
 
       it('PNG file matches the baseline image', async function () {
         this.timeout(300000);
-        const percentDiff = await reporting.comparePngAgainstBaseline(
+        const percentDiff = await png.compareAgainstBaseline(
           sessionReportPath,
           PageObjects.reporting.getBaselineReportPath(reportFileName, 'png', REPORTS_FOLDER),
-          screenshotDir,
-          updateBaselines,
-          log
+          REPORTS_FOLDER,
+          updateBaselines
         );
 
         expect(percentDiff).to.be.lessThan(0.09);

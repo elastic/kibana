@@ -15,9 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const reportingAPI = getService('reportingAPI');
   const reportingFunctional = getService('reportingFunctional');
   const browser = getService('browser');
-  const log = getService('log');
-  // const compareImages = getService('compareImages');
-  const reporting = getService('reporting');
+  const png = getService('png');
   const config = getService('config');
   const screenshotDir = config.get('screenshots.directory');
 
@@ -52,7 +50,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('adds a visual warning in the report output', async () => {
       const captureData = await PageObjects.reporting.getRawPdfReportData(url);
-      // const pngSessionFilePath = await reporting.writeToSessionFile(sessionPng, captureData);
       const pngSessionFilePath = await PageObjects.reporting.writeSessionReport(
         sessionPng,
         'png',
@@ -62,7 +59,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // allow minor visual differences: https://github.com/elastic/kibana/issues/135309#issuecomment-1169095186
       expect(
-        await reporting.checkIfPngsMatch(pngSessionFilePath, baselineAPng, screenshotDir, log)
+        await png.checkIfPngsMatch(pngSessionFilePath, baselineAPng, screenshotDir)
       ).to.be.lessThan(0.015); // this factor of difference allows passing whether or not the page has loaded things like the loading graphics and titlebars
     });
   });

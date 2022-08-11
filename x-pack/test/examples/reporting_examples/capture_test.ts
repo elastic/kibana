@@ -17,8 +17,7 @@ export default function ({
 }: FtrProviderContext & { updateBaselines: boolean }) {
   const PageObjects = getPageObjects(['common', 'reporting']);
   const testSubjects = getService('testSubjects');
-  const reporting = getService('reporting');
-  const log = getService('log');
+  const png = getService('png');
   const config = getService('config');
   const screenshotDir = config.get('screenshots.directory');
 
@@ -50,12 +49,11 @@ export default function ({
       );
 
       expect(
-        await reporting.comparePngAgainstBaseline(
+        await png.compareAgainstBaseline(
           pngSessionFilePath,
           fixtures.baselineAPng,
           screenshotDir,
-          updateBaselines,
-          log
+          updateBaselines
         )
       ).to.be.lessThan(0.09);
     });

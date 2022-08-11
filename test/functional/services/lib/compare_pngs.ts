@@ -6,20 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { dirname, join, parse } from 'path';
+import { join, parse } from 'path';
 import sharp from 'sharp';
 import pixelmatch from 'pixelmatch';
 import { ToolingLog } from '@kbn/tooling-log';
 import { promises as fs } from 'fs';
-import path from 'path';
 import { PNG } from 'pngjs';
-import { writeFile, readFileSync, mkdir } from 'fs';
-import { promisify } from 'util';
-
-const mkdirAsync = promisify(mkdir);
-const writeFileAsync = promisify(writeFile);
-
-interface PngDescriptor {
+export interface PngDescriptor {
   path: string;
 
   /**
@@ -132,74 +125,4 @@ export async function comparePngs(
     await fs.writeFile(diffPath, buffer);
   }
   return diffRatio;
-}
-
-export async function checkIfPngsMatch(
-  actualpngPath: string,
-  baselinepngPath: string,
-  screenshotsDirectory: string,
-  log: any
-) {
-  log.debug(`checkIfpngsMatch: ${actualpngPath} vs ${baselinepngPath}`);
-  // Copy the pngs into the screenshot session directory, as that's where the generated pngs will automatically be
-  // stored.
-  const sessionDirectoryPath = path.resolve(screenshotsDirectory, 'session');
-  const failureDirectoryPath = path.resolve(screenshotsDirectory, 'failure');
-
-  await fs.mkdir(sessionDirectoryPath, { recursive: true });
-  await fs.mkdir(failureDirectoryPath, { recursive: true });
-
-  const actualpngFileName = path.basename(actualpngPath, '.png');
-  const baselinepngFileName = path.basename(baselinepngPath, '.png');
-
-  const baselineCopyPath = path.resolve(
-    sessionDirectoryPath,
-    `${baselinepngFileName}_baseline.png`
-  );
-  const actualCopyPath = path.resolve(sessionDirectoryPath, `${actualpngFileName}_actual.png`);
-
-  // Don't cause a test failure if the baseline snapshot doesn't exist - we don't have all OS's covered and we
-  // don't want to start causing failures for other devs working on OS's which are lacking snapshots.  We have
-  // mac and linux covered which is better than nothing for now.
-  try {
-    log.debug(`writeFile: ${baselineCopyPath}`);
-    await fs.writeFile(baselineCopyPath, await fs.readFile(baselinepngPath));
-  } catch (error) {
-    throw new Error(`No baseline png found at ${baselinepngPath}`);
-  }
-  log.debug(`writeFile: ${actualCopyPath}`);
-  await fs.writeFile(actualCopyPath, await fs.readFile(actualpngPath));
-
-  let diffTotal = 0;
-
-  const diffPngPath = path.resolve(failureDirectoryPath, `${baselinepngFileName}-${1}.png`);
-  diffTotal += await comparePngs(
-    actualCopyPath,
-    baselineCopyPath,
-    diffPngPath,
-    sessionDirectoryPath,
-    log
-  );
-
-  return diffTotal;
-}
-
-// async compareAgainstBaseline(name: string, updateBaselines: boolean, el?: WebElementWrapper) {
-export async function comparePngAgainstBaseline(
-  sessionPath: string,
-  baselinePath: string,
-  screenshotsDirectory: string,
-  updateBaselines: boolean,
-  log: any
-) {
-  log.debug(`comparePngAgainstBaseline: ${sessionPath} vs ${baselinePath}`);
-
-  if (updateBaselines) {
-    log.debug('Updating baseline PNG');
-    await mkdirAsync(dirname(baselinePath), { recursive: true });
-    await writeFileAsync(baselinePath, readFileSync(sessionPath));
-    return 0;
-  } else {
-    return await checkIfPngsMatch(sessionPath, baselinePath, screenshotsDirectory, log);
-  }
 }

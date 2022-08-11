@@ -6,10 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  checkIfPngsMatch,
-  comparePngAgainstBaseline,
-} from '../../../../test/functional/services/lib/compare_pngs';
 import { createScenarios as createAPIScenarios } from '../../reporting_api_integration/services/scenarios';
 import { FtrProviderContext } from '../ftr_provider_context';
 
@@ -165,7 +161,5 @@ export function createScenarios(
     tryReportsNotAvailable,
     loginDataAnalyst,
     loginReportingUser,
-    checkIfPngsMatch,
-    comparePngAgainstBaseline,
   };
 }
