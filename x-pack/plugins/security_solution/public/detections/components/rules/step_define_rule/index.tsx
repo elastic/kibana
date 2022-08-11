@@ -830,34 +830,39 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             }}
           />
         </Form>
-        <EuiSpacer size="s" />
-        <RulePreview
-          index={index}
-          dataViewId={formDataViewId}
-          isDisabled={getIsRulePreviewDisabled({
-            ruleType,
-            isQueryBarValid,
-            isThreatQueryBarValid,
-            index,
-            dataViewId: formDataViewId,
-            threatIndex,
-            threatMapping: formThreatMapping,
-            machineLearningJobId,
-            queryBar: formQuery ?? initialState.queryBar,
-            newTermsFields: formNewTermsFields,
-          })}
-          query={formQuery}
-          ruleType={ruleType}
-          threatIndex={threatIndex}
-          threatQuery={formThreatQuery}
-          threatMapping={formThreatMapping}
-          threshold={formThreshold}
-          machineLearningJobId={machineLearningJobId}
-          anomalyThreshold={anomalyThreshold}
-          eqlOptions={optionsSelected}
-          newTermsFields={newTermsFields}
-          historyWindowSize={historyWindowSize}
-        />
+        <EuiSpacer size="m" />
+        <RuleTypeEuiFormRow label={i18n.RULE_PREVIEW_TITLE} $isVisible={true} fullWidth>
+          <RulePreview
+            index={index}
+            indexPattern={indexPattern}
+            dataViewId={formDataViewId}
+            dataSourceType={dataSourceType}
+            isDisabled={getIsRulePreviewDisabled({
+              ruleType,
+              isQueryBarValid,
+              isThreatQueryBarValid,
+              index,
+              dataViewId: formDataViewId,
+              dataSourceType,
+              threatIndex,
+              threatMapping: formThreatMapping,
+              machineLearningJobId,
+              queryBar: formQuery ?? initialState.queryBar,
+              newTermsFields: formNewTermsFields,
+            })}
+            query={formQuery}
+            ruleType={ruleType}
+            threatIndex={threatIndex}
+            threatQuery={formThreatQuery}
+            threatMapping={formThreatMapping}
+            threshold={formThreshold}
+            machineLearningJobId={machineLearningJobId}
+            anomalyThreshold={anomalyThreshold}
+            eqlOptions={optionsSelected}
+            newTermsFields={newTermsFields}
+            historyWindowSize={historyWindowSize}
+          />
+        </RuleTypeEuiFormRow>
       </StepContentWrapper>
 
       {!isUpdateView && (

@@ -11,13 +11,14 @@ import {
   HttpSetup,
   CoreStart,
 } from '@kbn/core/public';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import {
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type {
   ExpressionAstExpressionBuilder,
   ExpressionAstFunction,
 } from '@kbn/expressions-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { termsOperation } from './terms';
 import { filtersOperation } from './filters';
@@ -190,6 +191,7 @@ export interface ParamEditorProps<
   http: HttpSetup;
   dateRange: DateRange;
   data: DataPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   activeData?: IndexPatternDimensionEditorProps['activeData'];
