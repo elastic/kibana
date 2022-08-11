@@ -13,16 +13,21 @@ export function MapsHelper({ getPageObjects, getService }: FtrProviderContext) {
   const log = getService('log');
 
   return {
-    async toggleLayerVisibility(layerName: string) {
-      log.debug('Inside toggleLayerVisibility');
-      await PageObjects.maps.openLayerTocActionsPanel(layerName);
-      await testSubjects.click('layerVisibilityToggleButton');
-      await PageObjects.common.sleep(3000);
+    async clearLegendTooltip() {
       const isTooltipOpen = await testSubjects.exists(`layerTocTooltip`, { timeout: 5000 });
       if (isTooltipOpen) {
         await testSubjects.click(`layerTocTooltip`);
         await PageObjects.common.sleep(1000);
       }
+    },
+
+    async toggleLayerVisibility(layerName: string) {
+      log.debug('Inside toggleLayerVisibility');
+      await this.clearLegendTooltip();
+      await PageObjects.maps.openLayerTocActionsPanel(layerName);
+      await testSubjects.click('layerVisibilityToggleButton');
+      await PageObjects.common.sleep(3000);
+      await this.clearLegendTooltip();
     },
 
     // In v7.16, e-commerce sample data was re-worked so that geo.src field to match country code of geo.coordinates
