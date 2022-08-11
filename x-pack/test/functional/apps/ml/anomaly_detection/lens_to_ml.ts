@@ -85,6 +85,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await ml.testExecution.logTestStep('pre-fills the job selection');
       await ml.jobSelection.assertJobSelection([jobId]);
+
+      await ml.api.deleteAnomalyDetectionJobES(jobId);
     });
 
     it('can create multi metric job from vis with single layer', async () => {
@@ -115,6 +117,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await ml.testExecution.logTestStep('pre-fills the job selection');
       await ml.jobSelection.assertJobSelection([jobId]);
+
+      await ml.api.deleteAnomalyDetectionJobES(jobId);
     });
   });
 }
