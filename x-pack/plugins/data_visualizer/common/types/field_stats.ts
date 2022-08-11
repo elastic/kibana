@@ -186,6 +186,8 @@ export interface FieldStatsCommonRequestParams {
   intervalMs?: number;
   query: estypes.QueryDslQueryContainer;
   maxExamples?: number;
+  samplingProbability: number | null;
+  browserSessionSeed: number;
 }
 
 export interface OverallStatsSearchStrategyParams {
@@ -202,6 +204,7 @@ export interface OverallStatsSearchStrategyParams {
   aggregatableFields: string[];
   nonAggregatableFields: string[];
   fieldsToFetch?: string[];
+  browserSessionSeed: number;
 }
 
 export interface FieldStatsSearchStrategyReturnBase {

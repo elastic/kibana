@@ -60,6 +60,7 @@ interface DataVisualizerTableProps<T> {
   /** Callback to receive any updates when table or page state is changed **/
   onChange?: (update: Partial<DataVisualizerTableState>) => void;
   loading?: boolean;
+  totalCount: number;
 }
 
 export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
@@ -71,6 +72,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
   showPreviewByDefault,
   onChange,
   loading,
+  totalCount,
 }: DataVisualizerTableProps<T>) => {
   const { euiTheme } = useEuiTheme();
 
@@ -221,7 +223,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
           defaultMessage: 'Documents (%)',
         }),
         render: (value: number | undefined, item: DataVisualizerTableItem) => (
-          <DocumentStat config={item} showIcon={dimensions.showIcon} />
+          <DocumentStat config={item} showIcon={dimensions.showIcon} totalCount={totalCount} />
         ),
         sortable: (item: DataVisualizerTableItem) => item?.stats?.count,
         align: LEFT_ALIGNMENT as HorizontalAlignment,

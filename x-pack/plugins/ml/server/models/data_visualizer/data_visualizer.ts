@@ -690,6 +690,7 @@ export class DataVisualizer {
       },
       { maxRetries: 0 }
     );
+    console.log('\nbody\n', body);
     const aggregations = body.aggregations;
     const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
     const batchStats: NumericFieldStats[] = [];

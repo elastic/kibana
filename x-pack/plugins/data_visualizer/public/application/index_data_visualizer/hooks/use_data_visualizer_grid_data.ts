@@ -217,6 +217,7 @@ export const useDataVisualizerGridData = (
         aggregatableFields,
         nonAggregatableFields,
         fieldsToFetch,
+        browserSessionSeed,
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -230,12 +231,14 @@ export const useDataVisualizerGridData = (
       searchSessionId,
       lastRefresh,
       fieldsToFetch,
+      browserSessionSeed,
     ]
   );
 
   const { overallStats, progress: overallStatsProgress } = useOverallStats(
     fieldStatsRequest,
     lastRefresh,
+    // @todo
     browserSessionSeed,
     dataVisualizerListState.probability
   );
@@ -272,7 +275,11 @@ export const useDataVisualizerGridData = (
   const strategyResponse = useFieldStatsSearchStrategy(
     fieldStatsRequest,
     configsWithoutStats,
-    dataVisualizerListState
+    dataVisualizerListState,
+    // @todo: use this in a function for maintainability
+    (dataVisualizerListState.probability === null
+      ? overallStats?.documentCountStats?.probability
+      : dataVisualizerListState.probability) ?? 1
   );
 
   const combinedProgress = useMemo(

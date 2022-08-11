@@ -14,19 +14,23 @@ import { isIndexBasedFieldVisConfig } from '../../types';
 
 interface Props extends FieldDataRowProps {
   showIcon?: boolean;
+  totalCount: number;
 }
-export const DocumentStat = ({ config, showIcon }: Props) => {
+export const DocumentStat = ({ config, showIcon, totalCount }: Props) => {
   const { stats } = config;
   if (stats === undefined) return null;
   const { count, sampleCount } = stats;
 
+  if (config.fieldName === 'region') {
+    console.log('config', config);
+  }
   // If field exists is docs but we don't have count stats then don't show
   // Otherwise if field doesn't appear in docs at all, show 0%
   const docsCount =
     count ?? (isIndexBasedFieldVisConfig(config) && config.existsInDocs === true ? undefined : 0);
   const docsPercent =
     docsCount !== undefined && sampleCount !== undefined
-      ? roundToDecimalPlace((docsCount / sampleCount) * 100)
+      ? roundToDecimalPlace((docsCount / totalCount) * 100)
       : 0;
 
   return docsCount !== undefined ? (

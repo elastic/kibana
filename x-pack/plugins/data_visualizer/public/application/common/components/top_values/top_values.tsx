@@ -154,7 +154,7 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
             <EuiText size="xs" textAlign={'center'}>
               <FormattedMessage
                 id="xpack.dataVisualizer.dataGrid.field.topValues.calculatedFromSampleDescription"
-                defaultMessage="Calculated from sample of {topValuesSamplerShardSize} documents per shard"
+                defaultMessage="Calculated from sample of {topValuesSamplerShardSize} documents"
                 values={{
                   topValuesSamplerShardSize,
                 }}
