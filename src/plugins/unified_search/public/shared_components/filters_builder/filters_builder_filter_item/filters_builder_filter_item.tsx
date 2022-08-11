@@ -46,7 +46,6 @@ export interface FilterItemProps {
   timeRangeForSuggestionsOverride?: boolean;
   reverseBackground?: boolean;
   disableOr: boolean;
-  hideOr: boolean;
   disableAnd: boolean;
   disableRemove: boolean;
   color: 'plain' | 'subdued';
@@ -58,14 +57,18 @@ export function FilterItem({
   path,
   timeRangeForSuggestionsOverride,
   reverseBackground,
-  hideOr,
   disableOr,
   disableAnd,
   disableRemove,
   color,
   index,
 }: FilterItemProps) {
-  const { dispatch, dataView, dropTarget } = useContext(FiltersBuilderContextType);
+  const {
+    dispatch,
+    dataView,
+    dropTarget,
+    globalParams: { hideOr },
+  } = useContext(FiltersBuilderContextType);
   const conditionalOperationType = getConditionalOperationType(filter);
 
   let field: DataViewField | undefined;
@@ -235,7 +238,7 @@ export function FilterItem({
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <EuiFlexGroup responsive={false} justifyContent="center">
-                          {!hideOr && (
+                          {!hideOr ? (
                             <EuiFlexItem grow={false}>
                               <EuiButtonIcon
                                 onClick={onOrButtonClick}
@@ -243,14 +246,14 @@ export function FilterItem({
                                 iconType="returnKey"
                                 size="s"
                                 aria-label={i18n.translate(
-                                  'unifiedSearch.filter.filterEditor.addOrFilterGroupButttonIcon',
+                                  'unifiedSearch.filter.filtersBuilder.addOrFilterGroupButttonIcon',
                                   {
                                     defaultMessage: 'Add filter group with OR',
                                   }
                                 )}
                               />
                             </EuiFlexItem>
-                          )}
+                          ) : null}
 
                           <EuiFlexItem grow={false}>
                             <EuiButtonIcon
@@ -260,7 +263,7 @@ export function FilterItem({
                               iconType="plus"
                               size="s"
                               aria-label={i18n.translate(
-                                'unifiedSearch.filter.filterEditor.addAndFilterGroupButttonIcon',
+                                'unifiedSearch.filter.filtersBuilder.addAndFilterGroupButttonIcon',
                                 {
                                   defaultMessage: 'Add filter group with AND',
                                 }
@@ -277,7 +280,7 @@ export function FilterItem({
                               size="s"
                               color="danger"
                               aria-label={i18n.translate(
-                                'unifiedSearch.filter.filterEditor.deleteFilterGroupButttonIcon',
+                                'unifiedSearch.filter.filtersBuilder.deleteFilterGroupButttonIcon',
                                 {
                                   defaultMessage: 'Delete filter group',
                                 }

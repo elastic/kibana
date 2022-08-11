@@ -38,7 +38,7 @@ export function FieldInput({ field, dataView, onHandleField }: FieldInputProps) 
     <GenericComboBox
       id={id}
       isDisabled={!dataView}
-      placeholder={i18n.translate('unifiedSearch.filter.filterEditor.fieldSelectPlaceholder', {
+      placeholder={i18n.translate('unifiedSearch.filter.filtersBuilder.fieldSelectPlaceholder', {
         defaultMessage: 'Select a field first',
       })}
       options={fields}

@@ -32,7 +32,7 @@ const Delimiter = ({ conditionType }: { conditionType: ConditionTypes }) =>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiText size="s" color="subdued">
-          {i18n.translate('unifiedSearch.filter.FiltersBuilder.orDelimiterLabel', {
+          {i18n.translate('unifiedSearch.filter.filtersBuilder.orDelimiterLabel', {
             defaultMessage: 'OR',
           })}
         </EuiText>
@@ -65,30 +65,27 @@ export const FilterGroup = ({
   return (
     <EuiPanel color={color} paddingSize="s" hasShadow={false}>
       {filters.map((filter, index, acc) => (
-        <>
-          <EuiFlexGroup direction="column" gutterSize="xs">
-            <EuiFlexItem>
-              <FilterItem
-                filter={filter}
-                path={`${path}${path ? '.' : ''}${index}`}
-                timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
-                reverseBackground={reverseBackground}
-                hideOr={hideOr}
-                disableOr={orDisabled}
-                disableAnd={andDisabled}
-                disableRemove={removeDisabled}
-                color={color}
-                index={index}
-              />
-            </EuiFlexItem>
+        <EuiFlexGroup direction="column" gutterSize="xs">
+          <EuiFlexItem>
+            <FilterItem
+              filter={filter}
+              path={`${path}${path ? '.' : ''}${index}`}
+              timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+              reverseBackground={reverseBackground}
+              disableOr={orDisabled}
+              disableAnd={andDisabled}
+              disableRemove={removeDisabled}
+              color={color}
+              index={index}
+            />
+          </EuiFlexItem>
 
-            {index + 1 < acc.length ? (
-              <EuiFlexItem>
-                <Delimiter conditionType={conditionType} />
-              </EuiFlexItem>
-            ) : null}
-          </EuiFlexGroup>
-        </>
+          {index + 1 < acc.length ? (
+            <EuiFlexItem>
+              <Delimiter conditionType={conditionType} />
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
       ))}
     </EuiPanel>
   );

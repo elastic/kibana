@@ -46,10 +46,10 @@ export function OperatorInput<TParams = unknown>({
       isDisabled={!field}
       placeholder={
         field
-          ? i18n.translate('unifiedSearch.filter.filterEditor.operatorSelectPlaceholderSelect', {
+          ? i18n.translate('unifiedSearch.filter.filtersBuilder.operatorSelectPlaceholderSelect', {
               defaultMessage: 'Select',
             })
-          : i18n.translate('unifiedSearch.filter.filterEditor.operatorSelectPlaceholderWaiting', {
+          : i18n.translate('unifiedSearch.filter.filtersBuilder.operatorSelectPlaceholderWaiting', {
               defaultMessage: 'Waiting',
             })
       }

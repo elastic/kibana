@@ -8,7 +8,7 @@
 
 import React, { FC } from 'react';
 import { ComponentStory } from '@storybook/react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { EuiForm } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { action } from '@storybook/addon-actions';
@@ -29,11 +29,11 @@ export const Default = Template.bind({});
 
 Default.decorators = [
   (Story) => (
-    <IntlProvider locale="en">
+    <I18nProvider>
       <KibanaContextProvider services={services}>
         <Story />
       </KibanaContextProvider>
-    </IntlProvider>
+    </I18nProvider>
   ),
 ];
 
@@ -61,16 +61,16 @@ Default.args = {
   hideOr: false,
 };
 
-export const filterBuilderWithOrHide = Template.bind({});
-filterBuilderWithOrHide.args = { ...Default.args, filters: getFiltersMockOrHide(), hideOr: true };
+export const withoutOR = Template.bind({});
+withoutOR.args = { ...Default.args, filters: getFiltersMockOrHide(), hideOr: true };
 
-filterBuilderWithOrHide.decorators = [
+withoutOR.decorators = [
   (Story) => (
-    <IntlProvider locale="en">
+    <I18nProvider>
       <KibanaContextProvider services={services}>
         <Story />
       </KibanaContextProvider>
-    </IntlProvider>
+    </I18nProvider>
   ),
 ];
 
