@@ -25,7 +25,7 @@ import {
 } from '@elastic/eui';
 import { MlApiServices } from '../../../application/services/ml_api_service';
 
-import { FlyoutBody } from './flyout_body';
+import { JobLayer } from './job_layer';
 import type { LayerResult } from '../../../application/jobs/new_job/job_from_lens';
 
 interface Props {
@@ -69,16 +69,18 @@ export const LensLayerSelectionFlyout: FC<Props> = ({
         </EuiText>
       </EuiFlyoutHeader>
       <EuiFlyoutBody className="mlLensToJobFlyoutBody">
-        <FlyoutBody
-          onClose={onClose}
-          layerResults={layerResults}
-          embeddable={embeddable}
-          share={share}
-          data={data}
-          application={application}
-          kibanaConfig={kibanaConfig}
-          ml={ml}
-        />
+        {layerResults.map((layer, i) => (
+          <JobLayer
+            layer={layer}
+            layerIndex={i}
+            application={application}
+            data={data}
+            embeddable={embeddable}
+            kibanaConfig={kibanaConfig}
+            ml={ml}
+            share={share}
+          />
+        ))}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
