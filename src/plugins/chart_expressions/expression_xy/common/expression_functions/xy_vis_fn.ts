@@ -6,17 +6,12 @@
  * Side Public License, v 1.
  */
 
-import {
-  Dimension,
-  prepareLogTable,
-  validateAccessor,
-} from '@kbn/visualizations-plugin/common/utils';
+import { validateAccessor } from '@kbn/visualizations-plugin/common/utils';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
-import { LayerTypes, XY_VIS_RENDERER, DATA_LAYER, REFERENCE_LINE } from '../constants';
+import { LayerTypes, XY_VIS_RENDERER, DATA_LAYER } from '../constants';
 import { appendLayerIds, getAccessors, getShowLines, normalizeTable } from '../helpers';
 import { DataLayerConfigResult, XYLayerConfig, XyVisFn, XYArgs } from '../types';
-import { getLayerDimensions } from '../utils';
 import {
   hasAreaLayer,
   hasBarLayer,
@@ -35,6 +30,7 @@ import {
   validateLinesVisibilityForChartType,
   validateAxes,
 } from './validate';
+import { logDatatable } from '../utils';
 
 const createDataLayer = (args: XYArgs, table: Datatable): DataLayerConfigResult => {
   const accessors = getAccessors<string | ExpressionValueVisDimension, XYArgs>(args, table);
@@ -108,21 +104,7 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
     ...appendLayerIds(annotationLayers, 'annotationLayers'),
   ];
 
-  if (handlers.inspectorAdapters.tables) {
-    handlers.inspectorAdapters.tables.reset();
-    handlers.inspectorAdapters.tables.allowCsvExport = true;
-
-    const layerDimensions = layers.reduce<Dimension[]>((dimensions, layer) => {
-      if (layer.layerType === LayerTypes.ANNOTATIONS || layer.type === REFERENCE_LINE) {
-        return dimensions;
-      }
-
-      return [...dimensions, ...getLayerDimensions(layer)];
-    }, []);
-
-    const logTable = prepareLogTable(data, layerDimensions, true);
-    handlers.inspectorAdapters.tables.logDatatable('default', logTable);
-  }
+  logDatatable(data, layers, handlers, args.splitColumnAccessor, args.splitRowAccessor);
 
   const hasBar = hasBarLayer(dataLayers);
   const hasArea = hasAreaLayer(dataLayers);
