@@ -9,7 +9,7 @@
 const fs = require('fs');
 const path = require('path');
 const program = require('commander');
-const glob = require('glob');
+const globby = require('globby');
 const chalk = require('chalk');
 
 const packageJSON = require('../package.json');
@@ -26,7 +26,7 @@ if (!program.glob) {
   process.exit(1);
 }
 
-const files = glob.sync(program.glob);
+const files = globby.sync(program.glob);
 const totalFilesCount = files.length;
 let convertedFilesCount = 0;
 
