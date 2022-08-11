@@ -120,7 +120,7 @@ export default ({ getService }: FtrProviderContext) => {
           rule_id: immutableRule.rule_id, // Rule id should match the same as the immutable rule
           version: immutableRule.version, // This version number should not change when an immutable rule is updated
           immutable: true, // It should stay immutable true when returning
-          required_fields: bodyToCompare.required_fields, // required_fields cannot be modified, so newRuleToUpdate will have required_fields from immutable rule
+          required_fields: immutableRule.required_fields, // required_fields cannot be modified, so newRuleToUpdate will have required_fields from immutable rule
         };
         expect(bodyToCompare).to.eql(expected);
       });
