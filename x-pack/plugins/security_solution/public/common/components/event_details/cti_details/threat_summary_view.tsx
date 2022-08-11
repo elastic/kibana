@@ -21,27 +21,13 @@ import {
 import * as i18n from './translations';
 import type { CtiEnrichment } from '../../../../../common/search_strategy/security_solution/cti';
 
-import type { FieldsData } from '../types';
-
 import type {
-  BrowserField,
   BrowserFields,
   TimelineEventsDetailsItem,
 } from '../../../../../common/search_strategy';
 import { HostRiskSummary } from './host_risk_summary';
 import { EnrichmentSummary } from './enrichment_summary';
 import type { HostRisk } from '../../../../risk_score/containers';
-
-export interface ThreatSummaryDescription {
-  browserField: BrowserField;
-  data: FieldsData | undefined;
-  eventId: string;
-  index: number;
-  provider: string | undefined;
-  timelineId: string;
-  value: string | undefined;
-  isDraggable?: boolean;
-}
 
 const UppercaseEuiTitle = styled(EuiTitle)`
   text-transform: uppercase;

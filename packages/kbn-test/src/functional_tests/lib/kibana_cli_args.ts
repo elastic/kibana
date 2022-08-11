@@ -112,6 +112,10 @@ export function parseRawFlags(rawFlags: string[]) {
     }
   }
 
+  if (cliArgs.has('oss')) {
+    throw new Error(`--oss is not a valid flag to pass in FTR config files`);
+  }
+
   return [...cliArgs.entries()]
     .sort(([a], [b]) => {
       const aDot = a.includes('.');

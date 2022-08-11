@@ -8,7 +8,7 @@
 
 import React, { ReactElement, useEffect, useState } from 'react';
 import { times } from 'lodash';
-import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin';
+import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import { RepeatImageRendererConfig } from '../../common';
 
 interface RepeatImageComponentProps extends RepeatImageRendererConfig {

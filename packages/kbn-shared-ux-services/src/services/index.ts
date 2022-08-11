@@ -15,5 +15,7 @@ export type { SharedUxPlatformService } from './platform';
 export type { SharedUxDataService } from './data';
 export type { MockServicesFactoryParams } from './mock';
 
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 export { mockServicesFactory, mockServiceFactories } from './mock';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 export { stubServicesFactory, stubServiceFactories } from './stub';

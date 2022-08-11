@@ -73,6 +73,15 @@ export function registerTelemetryOptInStatsRoutes(
         const newOptInStatus = req.body.enabled;
         const unencrypted = req.body.unencrypted;
 
+        if (!(await telemetryCollectionManager.shouldGetTelemetry())) {
+          // We probably won't reach here because there is a license check in the auth phase of the HTTP requests.
+          // But let's keep it here should that changes at any point.
+          return res.customError({
+            statusCode: 503,
+            body: `Can't fetch telemetry at the moment because some services are down. Check the /status page for more details.`,
+          });
+        }
+
         const statsGetterConfig: StatsGetterConfig = {
           unencrypted,
         };

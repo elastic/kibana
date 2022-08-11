@@ -241,6 +241,19 @@ export const DetailPanelMetadataTab = ({
             })}
             listItems={[
               {
+                title: <DetailPanelListItem>instance.name</DetailPanelListItem>,
+                description: (
+                  <DetailPanelCopy
+                    textToCopy={`cloud.provider: "${cloudData.instance.name}"`}
+                    tooltipContent={cloudData.instance.name}
+                  >
+                    <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                      {cloudData.instance.name}
+                    </EuiTextColor>
+                  </DetailPanelCopy>
+                ),
+              },
+              {
                 title: <DetailPanelListItem>provider</DetailPanelListItem>,
                 description: (
                   <DetailPanelCopy

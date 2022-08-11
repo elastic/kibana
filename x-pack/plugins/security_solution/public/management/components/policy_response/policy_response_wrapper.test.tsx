@@ -19,6 +19,11 @@ import type {
 } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import { useGetEndpointDetails } from '../../hooks';
+import {
+  descriptions,
+  LINUX_DEADLOCK_MESSAGE,
+  policyResponseTitles,
+} from './policy_response_friendly_names';
 
 jest.mock('../../hooks/endpoint/use_get_endpoint_policy_response');
 jest.mock('../../hooks/endpoint/use_get_endpoint_details');
@@ -96,7 +101,7 @@ describe('when on the policy response', () => {
     props?: Partial<PolicyResponseWrapperProps>
   ) => ReturnType<AppContextTestRender['render']>;
   let renderOpenedTree: () => Promise<ReturnType<AppContextTestRender['render']>>;
-  const runMock = (customPolicyResponse?: HostPolicyResponse): void => {
+  const runMock = (customPolicyResponse?: HostPolicyResponse, os = 'macOS'): void => {
     commonPolicyResponse = customPolicyResponse ?? createPolicyResponse();
     useGetEndpointPolicyResponseMock.mockReturnValue({
       data: { policy_response: commonPolicyResponse },
@@ -106,7 +111,7 @@ describe('when on the policy response', () => {
     });
     useGetEndpointDetailsMock.mockReturnValue({
       data: {
-        metadata: { host: { os: { name: 'macOS' } } },
+        metadata: { host: { os: { name: os } } },
       },
       isLoading: false,
       isFetching: false,
@@ -301,21 +306,56 @@ describe('when on the policy response', () => {
 
       const component = await renderOpenedTree();
 
-      const macosSystemExtTitle = 'Permissions required';
       const calloutTitles = component
         .queryAllByTestId('endpointPolicyResponseErrorCallOut')
-        .filter((calloutTitle) => calloutTitle.innerHTML.includes(macosSystemExtTitle));
+        .filter((calloutTitle) =>
+          calloutTitle.innerHTML.includes(policyResponseTitles.get('macos_system_ext')!)
+        );
       expect(calloutTitles.length).toEqual(2);
 
-      const macosSystemExtMessage =
-        'You must enable the Mac system extension for Elastic Endpoint on your machine.';
       const calloutMessages = component
         .queryAllByTestId('endpointPolicyResponseErrorCallOut')
-        .filter((calloutMessage) => calloutMessage.innerHTML.includes(macosSystemExtMessage));
+        .filter((calloutMessage) =>
+          calloutMessage.innerHTML.includes(descriptions.get('macos_system_ext')!)
+        );
       expect(calloutMessages.length).toEqual(2);
 
       const calloutLinks = component.queryAllByTestId('endpointPolicyResponseErrorCallOutLink');
       expect(calloutLinks.length).toEqual(2);
     });
+
+    it.each(['load_malware_model', 'configure_malware'])(
+      'should display correct description and link for linux_deadlock with %s failure',
+      async (actionName: string) => {
+        policyResponse = createPolicyResponse(HostPolicyResponseActionStatus.failure, [
+          {
+            name: actionName,
+            message: LINUX_DEADLOCK_MESSAGE,
+            status: HostPolicyResponseActionStatus.failure,
+          },
+        ]);
+        runMock(policyResponse, 'Linux');
+
+        const component = await renderOpenedTree();
+
+        const calloutTitles = component
+          .queryAllByTestId('endpointPolicyResponseErrorCallOut')
+          .filter((calloutTitle) =>
+            calloutTitle.innerHTML.includes(policyResponseTitles.get('linux_deadlock')!)
+          );
+        expect(calloutTitles.length).toEqual(2);
+
+        // uncomment once we have an actual description
+        // const calloutMessages = component
+        //   .queryAllByTestId('endpointPolicyResponseErrorCallOut')
+        //   .filter((calloutMessage) =>
+        //     calloutMessage.innerHTML.includes(descriptions.get('linux_deadlock')!)
+        //   );
+        // expect(calloutMessages.length).toEqual(2);
+
+        const calloutLinks = component.queryAllByTestId('endpointPolicyResponseErrorCallOutLink');
+        expect(calloutLinks.length).toEqual(2);
+      }
+    );
   });
 });

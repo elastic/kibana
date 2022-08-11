@@ -8,13 +8,11 @@
 import { mount } from 'enzyme';
 import React from 'react';
 
-import { CONSTANTS } from '../url_state/constants';
 import { TabNavigationComponent } from '.';
 import { navTabs } from '../../../app/home/home_navigations';
 import { HostsTableType } from '../../../hosts/store/model';
 import type { RouteSpyState } from '../../utils/route/types';
 import type { TabNavigationComponentProps, SecuritySolutionTabNavigationProps } from './types';
-import { TimelineTabs } from '../../../../common/types/timeline';
 import { SecurityPageName } from '../../../app/types';
 
 jest.mock('react-router-dom', () => {
@@ -68,14 +66,6 @@ describe('SIEM Navigation', () => {
     search: '',
     tabName: HostsTableType.authentications,
     navTabs,
-    urlState: {
-      [CONSTANTS.timeline]: {
-        activeTab: TimelineTabs.query,
-        id: '',
-        isOpen: false,
-        graphEventId: '',
-      },
-    },
   };
   const wrapper = mount(<TabNavigationComponent {...mockProps} />);
   test('it calls setBreadcrumbs with correct path on mount', () => {

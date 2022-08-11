@@ -59,6 +59,7 @@ import type {
   RuleTagBadgeProps,
   RuleTagBadgeOptions,
   RuleEventLogListProps,
+  RuleEventLogListOptions,
   RulesListProps,
   RulesListNotifyBadgeProps,
   AlertsTableConfigurationRegistry,
@@ -76,6 +77,8 @@ import { ActionAccordionFormProps } from './application/sections/action_connecto
 import type { FieldBrowserProps } from './application/sections/field_browser/types';
 import { getRuleDefinitionLazy } from './common/get_rule_definition';
 import { RuleStatusPanelProps } from './application/sections/rule_details/components/rule_status_panel';
+import { RuleAlertsSummaryProps } from './application/sections/rule_details/components/alert_summary';
+import { getRuleAlertsSummaryLazy } from './common/get_rule_alerts_summary';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
@@ -111,13 +114,16 @@ export interface TriggersAndActionsUIPublicPluginStart {
   getRuleTagBadge: <T extends RuleTagBadgeOptions>(
     props: RuleTagBadgeProps<T>
   ) => ReactElement<RuleTagBadgeProps<T>>;
-  getRuleEventLogList: (props: RuleEventLogListProps) => ReactElement<RuleEventLogListProps>;
+  getRuleEventLogList: <T extends RuleEventLogListOptions>(
+    props: RuleEventLogListProps<T>
+  ) => ReactElement<RuleEventLogListProps<T>>;
   getRulesList: (props: RulesListProps) => ReactElement;
   getRulesListNotifyBadge: (
     props: RulesListNotifyBadgeProps
   ) => ReactElement<RulesListNotifyBadgeProps>;
   getRuleDefinition: (props: RuleDefinitionProps) => ReactElement<RuleDefinitionProps>;
   getRuleStatusPanel: (props: RuleStatusPanelProps) => ReactElement<RuleStatusPanelProps>;
+  getRuleAlertsSummary: (props: RuleAlertsSummaryProps) => ReactElement<RuleAlertsSummaryProps>;
 }
 
 interface PluginsSetup {
@@ -327,7 +333,7 @@ export class Plugin
       getRuleTagBadge: <T extends RuleTagBadgeOptions>(props: RuleTagBadgeProps<T>) => {
         return getRuleTagBadgeLazy(props);
       },
-      getRuleEventLogList: (props: RuleEventLogListProps) => {
+      getRuleEventLogList: <T extends RuleEventLogListOptions>(props: RuleEventLogListProps<T>) => {
         return getRuleEventLogListLazy(props);
       },
       getRulesListNotifyBadge: (props: RulesListNotifyBadgeProps) => {
@@ -350,6 +356,9 @@ export class Plugin
       },
       getRuleStatusPanel: (props: RuleStatusPanelProps) => {
         return getRuleStatusPanelLazy(props);
+      },
+      getRuleAlertsSummary: (props: RuleAlertsSummaryProps) => {
+        return getRuleAlertsSummaryLazy(props);
       },
     };
   }

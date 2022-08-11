@@ -22,14 +22,24 @@ export const ActionLogButton = memo<EndpointResponderExtensionComponentProps>((p
 
   return (
     <>
-      <EuiButton onClick={toggleActionLog} disabled={showActionLogFlyout} iconType="list">
+      <EuiButton
+        onClick={toggleActionLog}
+        disabled={showActionLogFlyout}
+        iconType="list"
+        data-test-subj="responderShowActionLogButton"
+      >
         <FormattedMessage
           id="xpack.securitySolution.actionLogButton.label"
           defaultMessage="Action log"
         />
       </EuiButton>
       {showActionLogFlyout && (
-        <EuiFlyout onClose={toggleActionLog} size="m" paddingSize="l">
+        <EuiFlyout
+          onClose={toggleActionLog}
+          size="m"
+          paddingSize="l"
+          data-test-subj="responderActionLogFlyout"
+        >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
               <h1>{UX_MESSAGES.flyoutTitle(props.meta.endpoint.host.hostname)}</h1>

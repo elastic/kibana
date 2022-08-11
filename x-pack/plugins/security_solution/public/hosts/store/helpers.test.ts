@@ -33,10 +33,6 @@ export const mockHostsState: HostsModel = {
         limit: DEFAULT_TABLE_LIMIT,
       },
       [HostsTableType.anomalies]: null,
-      [HostsTableType.alerts]: {
-        activePage: 4,
-        limit: DEFAULT_TABLE_LIMIT,
-      },
       [HostsTableType.risk]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
@@ -73,10 +69,6 @@ export const mockHostsState: HostsModel = {
         limit: DEFAULT_TABLE_LIMIT,
       },
       [HostsTableType.anomalies]: null,
-      [HostsTableType.alerts]: {
-        activePage: 4,
-        limit: DEFAULT_TABLE_LIMIT,
-      },
       [HostsTableType.risk]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
@@ -117,10 +109,6 @@ describe('Hosts redux store', () => {
           activePage: 0,
           limit: 10,
         },
-        [HostsTableType.alerts]: {
-          activePage: 0,
-          limit: 10,
-        },
         [HostsTableType.risk]: {
           activePage: 0,
           limit: 10,
@@ -155,10 +143,6 @@ describe('Hosts redux store', () => {
           limit: 10,
         },
         [HostsTableType.uncommonProcesses]: {
-          activePage: 0,
-          limit: 10,
-        },
-        [HostsTableType.alerts]: {
           activePage: 0,
           limit: 10,
         },

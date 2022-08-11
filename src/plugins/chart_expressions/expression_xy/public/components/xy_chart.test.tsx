@@ -1896,6 +1896,7 @@ describe('XYChart component', () => {
       seriesKeys: [],
       key: '',
       specId: 'a',
+      xAccessor: '',
       yAccessor: '',
       splitAccessors: new Map(),
     };

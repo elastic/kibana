@@ -7,7 +7,6 @@
 
 import { performance } from 'perf_hooks';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import type { Logger } from '@kbn/core/server';
 import type {
   AlertInstanceContext,
   AlertInstanceState,
@@ -27,7 +26,6 @@ import type {
   SignalSource,
 } from '../types';
 import { createSearchAfterReturnType, makeFloatString } from '../utils';
-import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { buildReasonMessageForEqlAlert } from '../reason_formatters';
 import type { CompleteRule, EqlRuleParams } from '../../schemas/rule_schemas';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
@@ -35,6 +33,7 @@ import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
 } from '../../../../../common/detection_engine/schemas/alerts';
+import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 
 export const eqlExecutor = async ({
   inputIndex,
@@ -42,10 +41,9 @@ export const eqlExecutor = async ({
   completeRule,
   tuple,
   exceptionItems,
-  experimentalFeatures,
+  ruleExecutionLogger,
   services,
   version,
-  logger,
   bulkCreate,
   wrapHits,
   wrapSequences,
@@ -57,10 +55,9 @@ export const eqlExecutor = async ({
   completeRule: CompleteRule<EqlRuleParams>;
   tuple: RuleRangeTuple;
   exceptionItems: ExceptionListItemSchema[];
-  experimentalFeatures: ExperimentalFeatures;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   version: string;
-  logger: Logger;
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
   wrapSequences: WrapSequences;
@@ -94,8 +91,9 @@ export const eqlExecutor = async ({
       tiebreakerField: ruleParams.tiebreakerField,
     });
 
+    ruleExecutionLogger.debug(`EQL query request: ${JSON.stringify(request)}`);
+
     const eqlSignalSearchStart = performance.now();
-    logger.debug(`EQL query request: ${JSON.stringify(request)}`);
 
     const response = await services.scopedClusterClient.asCurrentUser.eql.search<SignalSource>(
       request

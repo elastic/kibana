@@ -89,7 +89,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     name: i18n.translate('xpack.observability.enableInfrastructureView', {
       defaultMessage: 'Infrastructure feature',
     }),
-    value: false,
+    value: true,
     description: i18n.translate('xpack.observability.enableInfrastructureViewDescription', {
       defaultMessage: 'Enable the Infrastructure view feature in APM app',
     }),
@@ -97,6 +97,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
   },
   [defaultApmServiceEnvironment]: {
     category: [observabilityFeatureId],
+    sensitive: true,
     name: i18n.translate('xpack.observability.defaultApmServiceEnvironment', {
       defaultMessage: 'Default service environment',
     }),

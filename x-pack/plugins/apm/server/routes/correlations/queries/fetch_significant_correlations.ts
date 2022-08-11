@@ -14,7 +14,7 @@ import type {
   FieldValuePair,
 } from '../../../../common/correlations/types';
 
-import { ProcessorEvent } from '../../../../common/processor_event';
+import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
 import { Setup } from '../../../lib/helpers/setup_request';
 import {
   computeExpectationsAndRanges,
@@ -25,10 +25,10 @@ import { fetchDurationCorrelationWithHistogram } from './fetch_duration_correlat
 import { fetchDurationFractions } from './fetch_duration_fractions';
 import { fetchDurationHistogramRangeSteps } from './fetch_duration_histogram_range_steps';
 import { fetchDurationRanges } from './fetch_duration_ranges';
+import { getEventType } from '../utils';
 
 export const fetchSignificantCorrelations = async ({
   setup,
-  eventType,
   start,
   end,
   environment,
@@ -37,20 +37,24 @@ export const fetchSignificantCorrelations = async ({
   fieldValuePairs,
 }: CommonCorrelationsQueryParams & {
   setup: Setup;
-  eventType: ProcessorEvent;
   fieldValuePairs: FieldValuePair[];
 }) => {
   // Create an array of ranges [2, 4, 6, ..., 98]
   const percentileAggregationPercents = range(2, 100, 2);
+  const chartType = LatencyDistributionChartType.latencyCorrelations;
+  const searchMetrics = false; // latency correlations does not search metrics documents
+  const eventType = getEventType(chartType, searchMetrics);
+
   const { percentiles: percentilesRecords } = await fetchDurationPercentiles({
     setup,
-    eventType,
+    chartType,
     start,
     end,
     environment,
     kuery,
     query,
     percents: percentileAggregationPercents,
+    searchMetrics,
   });
 
   // We need to round the percentiles values
@@ -73,12 +77,13 @@ export const fetchSignificantCorrelations = async ({
 
   const histogramRangeSteps = await fetchDurationHistogramRangeSteps({
     setup,
-    eventType,
+    chartType,
     start,
     end,
     environment,
     kuery,
     query,
+    searchMetrics,
   });
 
   const { fulfilled, rejected } = splitAllSettledPromises(
@@ -86,7 +91,7 @@ export const fetchSignificantCorrelations = async ({
       fieldValuePairs.map((fieldValuePair) =>
         fetchDurationCorrelationWithHistogram({
           setup,
-          eventType,
+          chartType,
           start,
           end,
           environment,
@@ -130,9 +135,9 @@ export const fetchSignificantCorrelations = async ({
           }, undefined);
   if (latencyCorrelations.length === 0 && fallbackResult) {
     const { fieldName, fieldValue } = fallbackResult;
-    const logHistogram = await fetchDurationRanges({
+    const { durationRanges: histogram } = await fetchDurationRanges({
       setup,
-      eventType,
+      chartType,
       start,
       end,
       environment,
@@ -143,12 +148,13 @@ export const fetchSignificantCorrelations = async ({
         },
       },
       rangeSteps: histogramRangeSteps,
+      searchMetrics,
     });
 
     if (fallbackResult) {
       fallbackResult = {
         ...fallbackResult,
-        histogram: logHistogram,
+        histogram,
       };
     }
   }

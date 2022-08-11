@@ -13,8 +13,11 @@ import * as i18n from './translations';
 import { getCases } from './api';
 import { ServerError } from '../types';
 
+const DEFAULT_SEARCH_FIELDS = ['title', 'description'];
+
 export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
   search: '',
+  searchFields: DEFAULT_SEARCH_FIELDS,
   severity: SeverityAll,
   reporters: [],
   status: StatusAll,

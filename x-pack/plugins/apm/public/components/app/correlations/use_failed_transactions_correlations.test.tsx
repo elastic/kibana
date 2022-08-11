@@ -20,7 +20,6 @@ import { delay } from '../../../utils/test_helpers';
 import { fromQuery } from '../../shared/links/url_helpers';
 
 import { useFailedTransactionsCorrelations } from './use_failed_transactions_correlations';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { APIEndpoint } from '../../../../server';
 
 function wrapper({

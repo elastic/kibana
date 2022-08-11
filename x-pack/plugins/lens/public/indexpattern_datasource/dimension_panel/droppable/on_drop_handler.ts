@@ -27,7 +27,6 @@ import { mergeLayer, mergeLayers } from '../../state_helpers';
 import { isDraggedField } from '../../pure_utils';
 import { getNewOperation, getField } from './get_drop_props';
 import { IndexPatternPrivateState, DraggedField, DataViewDragDropOperation } from '../../types';
-import { trackUiEvent } from '../../../lens_ui_telemetry';
 
 interface DropHandlerProps<T = DataViewDragDropOperation> {
   state: IndexPatternPrivateState;
@@ -156,10 +155,6 @@ function onFieldDrop(props: DropHandlerProps<DraggedField>, shouldAddField?: boo
     shouldCombineField: shouldAddField,
     initialParams,
   });
-
-  trackUiEvent('drop_onto_dimension');
-  const hasData = Object.values(state.layers).some(({ columns }) => columns.length);
-  trackUiEvent(hasData ? 'drop_non_empty' : 'drop_empty');
   setState(mergeLayer({ state, layerId: target.layerId, newLayer }));
   return true;
 }
@@ -271,8 +266,6 @@ function onMoveIncompatible(
       targetGroup: target.groupId,
       shouldResetLabel: true,
     });
-
-    trackUiEvent('drop_onto_dimension');
     setState(
       mergeLayer({
         state,
@@ -292,8 +285,6 @@ function onMoveIncompatible(
       targetGroup: target.groupId,
       shouldResetLabel: true,
     });
-
-    trackUiEvent('drop_onto_dimension');
     setState(
       mergeLayers({
         state,
@@ -352,8 +343,6 @@ function onSwapIncompatible({
       targetGroup: source.groupId,
       shouldResetLabel: true,
     });
-
-    trackUiEvent('drop_onto_dimension');
     setState(
       mergeLayer({
         state,
@@ -373,8 +362,6 @@ function onSwapIncompatible({
       targetGroup: source.groupId,
       shouldResetLabel: true,
     });
-
-    trackUiEvent('drop_onto_dimension');
     setState(
       mergeLayers({
         state,

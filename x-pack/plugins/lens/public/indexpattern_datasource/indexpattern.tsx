@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { isEqual } from 'lodash';
+import { flatten, isEqual } from 'lodash';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -63,6 +63,7 @@ import {
   GenericIndexPatternColumn,
   getErrorMessages,
   insertNewColumn,
+  operationDefinitionMap,
   TermsIndexPatternColumn,
 } from './operations';
 import { getReferenceRoot } from './operations/layer_helpers';
@@ -377,6 +378,7 @@ export function getIndexPatternDatasource({
               <IndexPatternDimensionEditor
                 uiSettings={uiSettings}
                 storage={storage}
+                fieldFormats={fieldFormats}
                 savedObjectsClient={core.savedObjects.client}
                 http={core.http}
                 data={data}
@@ -456,6 +458,36 @@ export function getIndexPatternDatasource({
 
     updateCurrentIndexPatternId: ({ state, indexPatternId, setState }) => {
       handleChangeIndexPattern(indexPatternId, state, setState);
+    },
+
+    getRenderEventCounters(state: IndexPatternPrivateState): string[] {
+      const additionalEvents = {
+        time_shift: false,
+        filter: false,
+      };
+      const operations = flatten(
+        Object.values(state.layers ?? {}).map((l) =>
+          Object.values(l.columns).map((c) => {
+            if (c.timeShift) {
+              additionalEvents.time_shift = true;
+            }
+            if (c.filter) {
+              additionalEvents.filter = true;
+            }
+            return c.operationType;
+          })
+        )
+      );
+
+      return [
+        ...operations,
+        ...Object.entries(additionalEvents).reduce<string[]>((acc, [key, isActive]) => {
+          if (isActive) {
+            acc.push(key);
+          }
+          return acc;
+        }, []),
+      ].map((item) => `dimension_${item}`);
     },
 
     refreshIndexPatternsList: async ({ indexPatternId, setState }) => {
@@ -544,6 +576,15 @@ export function getIndexPatternDatasource({
             timeRange
           ),
         getVisualDefaults: () => getVisualDefaultsForLayer(layer),
+        getMaxPossibleNumValues: (columnId) => {
+          if (layer && layer.columns[columnId]) {
+            const column = layer.columns[columnId];
+            return (
+              operationDefinitionMap[column.operationType].getMaxPossibleNumValues?.(column) ?? null
+            );
+          }
+          return null;
+        },
       };
     },
     getDatasourceSuggestionsForField(state, draggedField, filterLayers) {

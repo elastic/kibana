@@ -13,7 +13,7 @@ GCS_BUCKET="gs://kibana-performance/scalability-tests"
 .buildkite/scripts/bootstrap.sh
 
 echo "--- Extract APM metrics"
-scalabilityJourneys=("login" "promotion_tracking_dashboard")
+scalabilityJourneys=("login" "ecommerce_dashboard" "flight_dashboard" "web_logs_dashboard" "promotion_tracking_dashboard" "many_fields_discover")
 
 for i in "${scalabilityJourneys[@]}"; do
     JOURNEY_NAME="${i}"
@@ -24,7 +24,8 @@ for i in "${scalabilityJourneys[@]}"; do
         --buildId "${BUILD_ID}" \
         --es-url "${ES_SERVER_URL}" \
         --es-username "${USER_FROM_VAULT}" \
-        --es-password "${PASS_FROM_VAULT}"
+        --es-password "${PASS_FROM_VAULT}" \
+        --without-static-resources
 done
 
 echo "--- Upload Kibana build, plugins and scalability traces to the public bucket"

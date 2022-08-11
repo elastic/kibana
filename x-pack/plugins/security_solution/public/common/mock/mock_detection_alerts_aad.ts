@@ -91,11 +91,6 @@ export const mockAADEcsDataWithAlert: Ecs = {
   },
 };
 
-export const getDetectionAlertAADMock = (overrides: Partial<Ecs> = {}): Ecs => ({
-  ...mockAADEcsDataWithAlert,
-  ...overrides,
-});
-
 export const getThresholdDetectionAlertAADMock = (overrides: Partial<Ecs> = {}): Ecs[] => [
   {
     ...mockAADEcsDataWithAlert,

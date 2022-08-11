@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Switch } from 'react-router-dom';
 import { Route } from '@kbn/kibana-react-plugin/public';
 
@@ -16,7 +16,8 @@ import { HostsTableType } from '../../store/model';
 import { AnomaliesQueryTabBody } from '../../../common/containers/anomalies/anomalies_query_tab_body';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { AnomaliesHostTable } from '../../../common/components/ml/tables/anomalies_host_table';
-import { EventsQueryTabBody } from '../../../common/components/events_tab/events_query_tab_body';
+import { EventsQueryTabBody } from '../../../common/components/events_tab';
+import { hostNameExistsFilter } from '../../../common/components/visualization_actions/utils';
 
 import type { HostDetailsTabsProps } from './types';
 import { type } from './utils';
@@ -25,7 +26,6 @@ import {
   HostsQueryTabBody,
   AuthenticationsQueryTabBody,
   UncommonProcessQueryTabBody,
-  HostAlertsQueryTabBody,
   HostRiskTabBody,
   SessionsTabBody,
 } from '../navigation';
@@ -37,7 +37,7 @@ export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
     filterQuery,
     indexNames,
     indexPattern,
-    pageFilters,
+    pageFilters = [],
     setAbsoluteRangeDatePicker,
     hostDetailsPagePath,
   }) => {
@@ -84,6 +84,11 @@ export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
       updateDateRange,
     };
 
+    const externalAlertPageFilters = useMemo(
+      () => [...hostNameExistsFilter, ...pageFilters],
+      [pageFilters]
+    );
+
     return (
       <Switch>
         <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.authentications})`}>
@@ -104,10 +109,8 @@ export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
             {...tabProps}
             pageFilters={pageFilters}
             timelineId={TimelineId.hostsPageEvents}
+            externalAlertPageFilters={externalAlertPageFilters}
           />
-        </Route>
-        <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.alerts})`}>
-          <HostAlertsQueryTabBody {...tabProps} pageFilters={pageFilters} />
         </Route>
         <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.risk})`}>
           <HostRiskTabBody {...tabProps} />

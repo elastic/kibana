@@ -81,6 +81,7 @@ export const createRolloverActions = (testBed: TestBed) => {
       toggle: createFormToggleAction(testBed, 'rolloverSwitch'),
       toggleDefault: createFormToggleAction(testBed, 'useDefaultRolloverSwitch'),
       setMaxPrimaryShardSize: createSetPrimaryShardSizeAction(testBed),
+      setMaxPrimaryShardDocs: createFormSetValueAction(testBed, 'hot-selectedMaxPrimaryShardDocs'),
       setMaxDocs: createFormSetValueAction(testBed, 'hot-selectedMaxDocuments'),
       setMaxAge: createSetMaxAgeAction(testBed),
       setMaxSize: createSetMaxSizeAction(testBed),

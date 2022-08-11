@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
-import { CspAppContext } from '../plugin';
+import { ElasticsearchClient, type Logger } from '@kbn/core/server';
 import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '../../common/constants';
 
 export const isLatestFindingsIndexExists = async (
   esClient: ElasticsearchClient,
-  logger: CspAppContext['logger']
+  logger: Logger
 ): Promise<boolean> => {
   try {
     const queryResult = await esClient.search({

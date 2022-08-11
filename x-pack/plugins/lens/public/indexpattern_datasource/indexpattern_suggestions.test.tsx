@@ -3030,7 +3030,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   operation: {
                     dataType: 'number',
                     isBucketed: false,
-                    label: 'Cumulative sum of Records label',
+                    label: 'Cumulative sum of Records',
                     scale: undefined,
                     isStaticValue: false,
                     hasTimeShift: false,

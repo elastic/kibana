@@ -9,7 +9,7 @@
 import type { MaybePromise } from '@kbn/utility-types';
 import type { DeprecationsDetails } from '@kbn/core-deprecations-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import type { SavedObjectsClientContract } from '../saved_objects/types';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
 /**
  * @public

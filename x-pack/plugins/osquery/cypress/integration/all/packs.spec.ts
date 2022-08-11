@@ -66,6 +66,7 @@ describe('ALL - Packs', () => {
       cy.contains('Save and deploy changes');
       findAndClickButton('Save and deploy changes');
       cy.contains(PACK_NAME);
+      cy.contains(`Successfully created "${PACK_NAME}" pack`);
     });
 
     it('to click the edit button and edit pack', () => {
@@ -96,7 +97,7 @@ describe('ALL - Packs', () => {
       cy.contains('ID must be unique').should('exist');
       cy.react('EuiFlyoutFooter').react('EuiButtonEmpty').contains('Cancel').click();
     });
-    it('should open lens in new tab', () => {
+    it.skip('should open lens in new tab', () => {
       let lensUrl = '';
       cy.window().then((win) => {
         cy.stub(win, 'open')

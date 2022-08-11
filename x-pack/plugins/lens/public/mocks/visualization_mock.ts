@@ -29,6 +29,7 @@ export function createMockVisualization(id = 'testVis'): jest.Mocked<Visualizati
     getDescription: jest.fn((_state) => ({ label: '' })),
     switchVisualizationType: jest.fn((_, x) => x),
     getSuggestions: jest.fn((_options) => []),
+    getRenderEventCounters: jest.fn((_state) => []),
     initialize: jest.fn((_frame, _state?) => ({ newState: 'newState' })),
     getConfiguration: jest.fn((props) => ({
       groups: [

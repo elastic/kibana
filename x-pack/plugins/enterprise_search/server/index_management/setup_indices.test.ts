@@ -38,12 +38,13 @@ describe('Setup Indices', () => {
         type: 'object',
       },
       error: { type: 'keyword' },
-      index_name: { type: 'text' },
+      index_name: { type: 'keyword' },
       language: { type: 'keyword' },
       last_seen: { type: 'date' },
       last_sync_error: { type: 'keyword' },
       last_sync_status: { type: 'keyword' },
       last_synced: { type: 'date' },
+      name: { type: 'keyword' },
       scheduling: {
         properties: {
           enabled: { type: 'boolean' },
@@ -61,28 +62,21 @@ describe('Setup Indices', () => {
       version: CONNECTORS_VERSION,
     },
     properties: {
-      api_key_id: {
+      completed_at: { type: 'date' },
+      connector: connectorsMappings.properties,
+      connector_id: {
         type: 'keyword',
       },
-      configuration: {
-        type: 'object',
+      created_at: { type: 'date' },
+      deleted_document_count: { type: 'integer' },
+      error: {
+        type: 'keyword',
       },
-      error: { type: 'keyword' },
-      index_name: { type: 'text' },
-      language: { type: 'keyword' },
-      last_seen: { type: 'date' },
-      last_sync_error: { type: 'keyword' },
-      last_sync_status: { type: 'keyword' },
-      last_synced: { type: 'date' },
-      scheduling: {
-        properties: {
-          enabled: { type: 'boolean' },
-          interval: { type: 'text' },
-        },
+      indexed_document_count: { type: 'integer' },
+      status: {
+        type: 'keyword',
       },
-      service_type: { type: 'keyword' },
-      status: { type: 'keyword' },
-      sync_now: { type: 'boolean' },
+      worker_hostname: { type: 'keyword' },
     },
   };
 

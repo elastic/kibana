@@ -7,7 +7,7 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import type { SavedObject } from '../../../types';
+import type { SavedObject } from '@kbn/core-saved-objects-common';
 import { SavedObjectsExporter } from './saved_objects_exporter';
 import { savedObjectsClientMock } from '../service/saved_objects_client.mock';
 import { SavedObjectTypeRegistry } from '../saved_objects_type_registry';

@@ -102,6 +102,7 @@ function getExpressionForLayer(
       operationDefinitionMap[col.operationType]?.input === 'fullReference' ||
       operationDefinitionMap[col.operationType]?.input === 'managedReference'
   );
+  const hasDateHistogram = columnEntries.some(([, c]) => c.operationType === 'date_histogram');
 
   if (referenceEntries.length || esAggEntries.length) {
     let aggs: ExpressionAstExpressionBuilder[] = [];
@@ -124,6 +125,8 @@ function getExpressionForLayer(
         const aggId = String(index);
 
         const wrapInFilter = Boolean(def.filterable && col.filter);
+        const wrapInTimeFilter =
+          def.windowable && !hasDateHistogram && col.window && indexPattern.timeFieldName;
         let aggAst = def.toEsAggsFn(
           col,
           wrapInFilter ? `${aggId}-metric` : aggId,
@@ -133,7 +136,7 @@ function getExpressionForLayer(
           orderedColumnIds,
           operationDefinitionMap
         );
-        if (wrapInFilter) {
+        if (wrapInFilter || wrapInTimeFilter) {
           aggAst = buildExpressionFunction<AggFunctionsMapping['aggFilteredMetric']>(
             'aggFilteredMetric',
             {
@@ -146,6 +149,8 @@ function getExpressionForLayer(
                   enabled: true,
                   schema: 'bucket',
                   filter: col.filter && queryToAst(col.filter),
+                  timeWindow: wrapInTimeFilter ? col.window : undefined,
+                  timeShift: col.timeShift,
                 }),
               ]),
               customMetric: buildExpression({ type: 'expression', chain: [aggAst] }),
@@ -208,7 +213,7 @@ function getExpressionForLayer(
     });
 
     /*
-      Update ID mappings with new agg array positions. 
+      Update ID mappings with new agg array positions.
 
       Given this esAggs-ID-to-original-column map after percentile (for example) optimization:
       col-0-0:    column1

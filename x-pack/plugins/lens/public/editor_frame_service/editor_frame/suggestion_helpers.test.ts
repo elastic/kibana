@@ -708,6 +708,7 @@ describe('suggestion helpers', () => {
             getVisualDefaults: jest.fn(),
             getSourceId: jest.fn(),
             getFilters: jest.fn(),
+            getMaxPossibleNumValues: jest.fn(),
           },
         },
         { activeId: 'testVis', state: {} },
@@ -742,6 +743,7 @@ describe('suggestion helpers', () => {
           getVisualDefaults: jest.fn(),
           getSourceId: jest.fn(),
           getFilters: jest.fn(),
+          getMaxPossibleNumValues: jest.fn(),
         },
       };
       defaultParams[3] = {
@@ -803,6 +805,7 @@ describe('suggestion helpers', () => {
           getVisualDefaults: jest.fn(),
           getSourceId: jest.fn(),
           getFilters: jest.fn(),
+          getMaxPossibleNumValues: jest.fn(),
         },
       };
       mockVisualization1.getSuggestions.mockReturnValue([]);

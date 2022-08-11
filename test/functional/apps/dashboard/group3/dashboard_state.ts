@@ -48,7 +48,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       isNewChartsLibraryEnabled = await PageObjects.visChart.isNewChartsLibraryEnabled();
       await PageObjects.dashboard.initTests();
       await PageObjects.dashboard.preserveCrossAppState();
-      await browser.setLocalStorageItem('data.newDataViewMenu', 'true');
 
       if (!isNewChartsLibraryEnabled) {
         await kibanaServer.uiSettings.update({

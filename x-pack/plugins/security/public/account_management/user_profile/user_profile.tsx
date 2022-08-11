@@ -33,15 +33,16 @@ import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { UserAvatar } from '@kbn/user-profile-components';
 
-import type { AuthenticatedUser, UserAvatarData } from '../../../common';
+import type { AuthenticatedUser, UserProfileAvatarData } from '../../../common';
 import {
   canUserChangeDetails,
   canUserChangePassword,
   getUserAvatarColor,
   getUserAvatarInitials,
 } from '../../../common/model';
-import { UserAvatar, useSecurityApiClients } from '../../components';
+import { useSecurityApiClients } from '../../components';
 import { Breadcrumb } from '../../components/breadcrumb';
 import {
   FormChangesProvider,
@@ -58,7 +59,7 @@ import { createImageHandler, getRandomColor, IMAGE_FILE_TYPES, VALID_HEX_COLOR }
 export interface UserProfileProps {
   user: AuthenticatedUser;
   data?: {
-    avatar?: UserAvatarData;
+    avatar?: UserProfileAvatarData;
   };
 }
 
@@ -439,6 +440,8 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
 
   const canChangeDetails = canUserChangeDetails(user, services.application.capabilities);
 
+  const isCloudUser = user.elastic_cloud_user;
+
   const rightSideItems = [
     {
       title: (
@@ -559,7 +562,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
           >
             <Form aria-labelledby={titleId}>
               <UserDetailsEditor user={user} />
-              <UserAvatarEditor user={user} formik={formik} />
+              {isCloudUser ? null : <UserAvatarEditor user={user} formik={formik} />}
               <UserPasswordEditor
                 user={user}
                 onShowPasswordForm={() => setShowChangePasswordForm(true)}

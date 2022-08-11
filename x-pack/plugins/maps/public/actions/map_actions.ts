@@ -61,12 +61,12 @@ import {
   syncDataForLayerId,
 } from './data_request_actions';
 import { addLayer, addLayerWithoutDataSync } from './layer_actions';
-import { MapSettings } from '../reducers/map';
 import {
   CustomIcon,
   DrawState,
   MapCenterAndZoom,
   MapExtent,
+  MapSettings,
   Timeslice,
 } from '../../common/descriptor_types';
 import { INITIAL_LOCATION } from '../../common/constants';

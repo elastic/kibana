@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { waitFor, within } from '@testing-library/dom';
-import { act } from '@testing-library/react-hooks';
+import { act, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { ConnectorTypes } from '../../../common/api';
@@ -43,6 +42,7 @@ jest.mock('../../containers/use_post_push_to_service');
 jest.mock('../user_actions/timestamp');
 jest.mock('../../common/navigation/hooks');
 jest.mock('../../common/hooks');
+jest.mock('../connectors/resilient/api');
 
 const useFetchCaseMock = useGetCase as jest.Mock;
 const useUrlParamsMock = useUrlParams as jest.Mock;
@@ -371,6 +371,38 @@ describe('CaseViewPage', () => {
   });
 
   describe('Tabs', () => {
+    jest.mock('@kbn/kibana-react-plugin/public', () => ({
+      useKibana: () => ({
+        services: {
+          application: {
+            capabilities: {
+              fakeCases: {
+                create_cases: true,
+                read_cases: true,
+                update_cases: true,
+                delete_cases: true,
+                push_cases: true,
+              },
+            },
+          },
+          cases: {
+            ui: {
+              getCasesContext: () => null,
+            },
+            helpers: {
+              getUICapabilities: () => ({
+                all: true,
+                read: true,
+                create: true,
+                update: true,
+                delete: true,
+                push: true,
+              }),
+            },
+          },
+        },
+      }),
+    }));
     it('renders tabs correctly', async () => {
       const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
       await act(async () => {
@@ -435,8 +467,7 @@ describe('CaseViewPage', () => {
       });
     });
 
-    // unskip when alerts tab is activated
-    it.skip('navigates to the alerts tab when the alerts tab is clicked', async () => {
+    it('navigates to the alerts tab when the alerts tab is clicked', async () => {
       const navigateToCaseViewMock = useCaseViewNavigationMock().navigateToCaseView;
       const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
       userEvent.click(result.getByTestId('case-view-tab-title-alerts'));
@@ -448,8 +479,7 @@ describe('CaseViewPage', () => {
       });
     });
 
-    // unskip when alerts tab is activated
-    it.skip('should display the alerts tab when the feature is enabled', async () => {
+    it('should display the alerts tab when the feature is enabled', async () => {
       appMockRenderer = createAppMockRenderer({ features: { alerts: { enabled: true } } });
       const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
       await act(async () => {
@@ -464,6 +494,24 @@ describe('CaseViewPage', () => {
       await act(async () => {
         expect(result.queryByTestId('case-view-tab-title-activity')).toBeTruthy();
         expect(result.queryByTestId('case-view-tab-title-alerts')).toBeFalsy();
+      });
+    });
+
+    it('should not show the experimental badge on the alerts table', async () => {
+      appMockRenderer = createAppMockRenderer({ features: { alerts: { isExperimental: false } } });
+      const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
+
+      await act(async () => {
+        expect(result.queryByTestId('case-view-alerts-table-experimental-badge')).toBeFalsy();
+      });
+    });
+
+    it('should show the experimental badge on the alerts table', async () => {
+      appMockRenderer = createAppMockRenderer({ features: { alerts: { isExperimental: true } } });
+      const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
+
+      await act(async () => {
+        expect(result.queryByTestId('case-view-alerts-table-experimental-badge')).toBeTruthy();
       });
     });
   });

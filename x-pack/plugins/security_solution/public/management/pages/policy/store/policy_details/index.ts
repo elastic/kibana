@@ -5,19 +5,7 @@
  * 2.0.
  */
 
-import type { PolicyDetailsState } from '../../types';
-import type { ImmutableReducer } from '../../../../../common/store';
-import type { AppAction } from '../../../../../common/store/actions';
-import type { Immutable } from '../../../../../../common/endpoint/types';
-
 export { policyDetailsMiddlewareFactory } from './middleware';
 export { policyDetailsReducer, initialPolicyDetailsState } from './reducer';
 
-export interface EndpointPolicyDetailsStatePluginState {
-  policyDetails: Immutable<PolicyDetailsState>;
-}
-
-export interface EndpointPolicyDetailsStatePluginReducer {
-  policyDetails: ImmutableReducer<PolicyDetailsState, AppAction>;
-}
 export type { PolicyDetailsAction } from './action';

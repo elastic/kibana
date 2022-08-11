@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty, isEqual, isUndefined, keyBy, pick } from 'lodash/fp';
+import { isEmpty, isEqual, keyBy, pick } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
@@ -83,28 +83,6 @@ export const getBrowserFields = memoizeOne(
   },
   (newArgs, lastArgs) => newArgs[0] === lastArgs[0] && newArgs[1].length === lastArgs[1].length
 );
-
-export const getDocValueFields = memoizeOne(
-  (_title: string, fields: IndexField[]): DocValueFields[] =>
-    fields && fields.length > 0
-      ? fields.reduce<DocValueFields[]>((accumulator: DocValueFields[], field: IndexField) => {
-          if (field.readFromDocValues && accumulator.length < 100) {
-            return [
-              ...accumulator,
-              {
-                field: field.name,
-              },
-            ];
-          }
-          return accumulator;
-        }, [])
-      : [],
-  (newArgs, lastArgs) => newArgs[0] === lastArgs[0] && newArgs[1].length === lastArgs[1].length
-);
-
-export const indicesExistOrDataTemporarilyUnavailable = (
-  indicesExist: boolean | null | undefined
-) => indicesExist || isUndefined(indicesExist);
 
 const DEFAULT_BROWSER_FIELDS = {};
 const DEFAULT_INDEX_PATTERNS = { fields: [], title: '' };

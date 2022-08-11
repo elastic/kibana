@@ -68,8 +68,16 @@ export function createTelemetryTimelineTaskConfig() {
 
       const endpointAlerts = await receiver.fetchTimelineEndpointAlerts(3);
 
-      // No EP Alerts -> Nothing to do
+      const aggregations = endpointAlerts?.aggregations as unknown as {
+        endpoint_alert_count: { value: number };
+      };
+      sender.getTelemetryUsageCluster()?.incrementCounter({
+        counterName: 'telemetry_endpoint_alert',
+        counterType: 'endpoint_alert_count',
+        incrementBy: aggregations?.endpoint_alert_count.value,
+      });
 
+      // No EP Alerts -> Nothing to do
       if (
         endpointAlerts.hits.hits?.length === 0 ||
         endpointAlerts.hits.hits?.length === undefined
@@ -96,9 +104,11 @@ export function createTelemetryTimelineTaskConfig() {
         );
 
         const nodeIds = [] as string[];
-        for (const node of tree) {
-          const nodeId = node?.id.toString();
-          nodeIds.push(nodeId);
+        if (Array.isArray(tree)) {
+          for (const node of tree) {
+            const nodeId = node?.id.toString();
+            nodeIds.push(nodeId);
+          }
         }
 
         sender.getTelemetryUsageCluster()?.incrementCounter({
@@ -130,16 +140,18 @@ export function createTelemetryTimelineTaskConfig() {
         // Create telemetry record
 
         const telemetryTimeline: TimelineTelemetryEvent[] = [];
-        for (const node of tree) {
-          const id = node.id.toString();
-          const event = eventsStore.get(id);
+        if (Array.isArray(tree)) {
+          for (const node of tree) {
+            const id = node.id.toString();
+            const event = eventsStore.get(id);
 
-          const timelineTelemetryEvent: TimelineTelemetryEvent = {
-            ...node,
-            event,
-          };
+            const timelineTelemetryEvent: TimelineTelemetryEvent = {
+              ...node,
+              event,
+            };
 
-          telemetryTimeline.push(timelineTelemetryEvent);
+            telemetryTimeline.push(timelineTelemetryEvent);
+          }
         }
 
         if (telemetryTimeline.length >= 1) {

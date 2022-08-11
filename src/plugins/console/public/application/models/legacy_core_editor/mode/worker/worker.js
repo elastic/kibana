@@ -1950,8 +1950,8 @@ ace.define(
           uffff;
 
         if (ch === '"') {
-          let c = '""';
-          if (text.substring(at, c.length) === c) {
+          // If the current and the next characters are equal to "", empty string or start of triple quoted strings
+          if (peek(0) === '"' && peek(1) === '"') {
             // literal
             next('"');
             next('"');
