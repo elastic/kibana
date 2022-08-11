@@ -8,7 +8,7 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Monitoring Collection', () => {
-    loadTestFile(require.resolve('./prometheus'));
+  describe('security app - user profiles', function () {
+    loadTestFile(require.resolve('./client_side_apis'));
   });
 }
