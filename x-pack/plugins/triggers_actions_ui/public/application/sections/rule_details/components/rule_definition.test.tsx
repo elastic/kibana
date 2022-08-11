@@ -69,19 +69,28 @@ const mockedRuleTypeIndex = new Map(
   })
 );
 
+interface SetupProps {
+  ruleOverwrite?: any;
+}
+
 describe('Rule Definition', () => {
   let wrapper: ReactWrapper;
-  async function setup() {
+  async function setup({ ruleOverwrite }: SetupProps = {}) {
     const actionTypeRegistry = actionTypeRegistryMock.create();
     const ruleTypeRegistry = ruleTypeRegistryMock.create();
-    const mockedRule = mockRule();
+    const mockedRule = mockRule(ruleOverwrite);
     jest.mock('../../../lib/capabilities', () => ({
       hasAllPrivilege: jest.fn(() => true),
       hasSaveRulesCapability: jest.fn(() => true),
       hasExecuteActionsCapability: jest.fn(() => true),
       hasManageApiKeysCapability: jest.fn(() => true),
     }));
-    ruleTypeRegistry.has.mockReturnValue(true);
+    ruleTypeRegistry.has.mockImplementation((id) => {
+      if (id === 'siem_rule') {
+        return false;
+      }
+      return true;
+    });
     const ruleTypeR: RuleTypeModel = {
       id: 'my-rule-type',
       iconClass: 'test',
@@ -93,7 +102,12 @@ describe('Rule Definition', () => {
       ruleParamsExpression: jest.fn(),
       requiresAppContext: false,
     };
-    ruleTypeRegistry.get.mockReturnValue(ruleTypeR);
+    ruleTypeRegistry.get.mockImplementation((id) => {
+      if (id === 'siem_rule') {
+        throw new Error('error');
+      }
+      return ruleTypeR;
+    });
     actionTypeRegistry.list.mockReturnValue([
       { id: '.server-log', iconClass: 'logsApp' },
       { id: '.slack', iconClass: 'logoSlack' },
@@ -117,7 +131,10 @@ describe('Rule Definition', () => {
     });
   }
 
-  beforeAll(async () => await setup());
+  beforeEach(async () => await setup());
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
 
   it('renders rule definition ', async () => {
     expect(wrapper.find('[data-test-subj="ruleSummaryRuleDefinition"]')).toBeTruthy();
@@ -133,9 +150,20 @@ describe('Rule Definition', () => {
   });
 
   it('show rule type description "', async () => {
-    const ruleDescription = wrapper.find('[data-test-subj="ruleSummaryRuleDescription"]');
+    let ruleDescription = wrapper.find('[data-test-subj="ruleSummaryRuleDescription"]');
     expect(ruleDescription).toBeTruthy();
     expect(ruleDescription.find('div.euiText').text()).toEqual('Rule when testing');
+
+    await setup({
+      ruleOverwrite: {
+        consumer: 'siem',
+        ruleTypeId: 'siem_rule',
+      },
+    });
+
+    ruleDescription = wrapper.find('[data-test-subj="ruleSummaryRuleDescription"]');
+    expect(ruleDescription).toBeTruthy();
+    expect(ruleDescription.find('div.euiText').text()).toEqual('siem description');
   });
 
   it('show rule conditions "', async () => {
@@ -166,7 +194,7 @@ describe('Rule Definition', () => {
     expect(editButton).toMatchObject({});
   });
 });
-function mockRule(): Rule {
+function mockRule(overwrite = {}): Rule {
   return {
     id: '1',
     name: 'test rule',
@@ -175,7 +203,7 @@ function mockRule(): Rule {
     ruleTypeId: 'test_rule_type',
     schedule: { interval: '1s' },
     actions: [],
-    params: { name: 'test rule type name' },
+    params: { name: 'test rule type name', description: 'siem description' },
     createdBy: null,
     updatedBy: null,
     apiKeyOwner: null,
@@ -218,5 +246,6 @@ function mockRule(): Rule {
         },
       },
     },
+    ...overwrite,
   };
 }
