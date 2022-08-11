@@ -2961,6 +2961,48 @@
             "$ref": "#/components/parameters/kbn_xsrf"
           }
         ]
+      },
+      "delete": {
+        "summary": "Package policy - Delete",
+        "tags": [],
+        "operationId": "delete-package-policy",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "packagePolicyId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "boolean"
+            },
+            "name": "force",
+            "in": "query"
+          }
+        ]
       }
     },
     "/outputs": {
@@ -4306,6 +4348,10 @@
                 "description": "list of agent IDs"
               }
             ]
+          },
+          "force": {
+            "type": "boolean",
+            "description": "Force upgrade, skipping validation (should be used with caution)"
           }
         },
         "required": [
@@ -4315,32 +4361,21 @@
       },
       "upgrade_agent": {
         "title": "Upgrade agent",
-        "oneOf": [
-          {
-            "type": "object",
-            "properties": {
-              "version": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "version"
-            ]
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string"
           },
-          {
-            "type": "object",
-            "properties": {
-              "version": {
-                "type": "string"
-              },
-              "source_uri": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "version"
-            ]
+          "source_uri": {
+            "type": "string"
+          },
+          "force": {
+            "type": "boolean",
+            "description": "Force upgrade, skipping validation (should be used with caution)"
           }
+        },
+        "required": [
+          "version"
         ]
       },
       "agent_action": {
