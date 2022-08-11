@@ -1,0 +1,41 @@
+[[osquery-manager-api]]
+== Osquery manager API
+
+experimental[] Run live queries, manage packs and saved queries
+
+WARNING: Use the osquery manager APIs for managing packs and saved queries instead of lower-level <<saved-objects-api, saved objects API>>.
+
+The following osquery manager APIs are available: 
+
+* Live queries
+    ** <<osquery-manager-live-queries-api-get-all, Get all live queries API>> to retrieve a list of live queries
+    ** <<osquery-manager-live-queries-api-get, Get live query API>> to retrieve a single live query
+    ** <<osquery-manager-live-queries-api-create, Create live query API>> to create a live query
+    ** <<osquery-manager-live-queries-api-get-results, Get live query results API>> to retrieve the results of a single live query
+* Packs
+    ** <<osquery-manager-packs-api-get-all, Get all packs API>> to retrieve a list of packs
+    ** <<osquery-manager-packs-api-get, Get pack API>> to retrieve a pack
+    ** <<osquery-manager-packs-api-create, Create pack API>> to create a pack
+    ** <<osquery-manager-packs-api-update, Update pack API>> to partially update an existing pack
+    ** <<osquery-manager-packs-api-delete, Delete pack API>> to delete a pack
+* Saved queries
+    ** <<osquery-manager-saved-queries-api-get-all, Get all saved queries API>> to retrieve a list of saved queries
+    ** <<osquery-manager-saved-queries-api-get, Get saved query API>> to retrieve a saved query
+    ** <<osquery-manager-saved-queries-api-create, Create saved query API>> to create a saved query
+    ** <<osquery-manager-saved-queries-api-update, Update saved query API>> to partially update an existing saved query
+    ** <<osquery-manager-saved-queries-api-delete, Delete saved query API>> to delete a saved query
+
+include::osquery-manager/live-queries/get.asciidoc[]
+include::osquery-manager/live-queries/get-all.asciidoc[]
+include::osquery-manager/live-queries/get-results.asciidoc[]
+include::osquery-manager/live-queries/create.asciidoc[]
+include::osquery-manager/packs/get.asciidoc[]
+include::osquery-manager/packs/get-all.asciidoc[]
+include::osquery-manager/packs/create.asciidoc[]
+include::osquery-manager/packs/update.asciidoc[]
+include::osquery-manager/packs/delete.asciidoc[]
+include::osquery-manager/saved-queries/get.asciidoc[]
+include::osquery-manager/saved-queries/get-all.asciidoc[]
+include::osquery-manager/saved-queries/create.asciidoc[]
+include::osquery-manager/saved-queries/update.asciidoc[]
+include::osquery-manager/saved-queries/delete.asciidoc[]
