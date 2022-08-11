@@ -12,6 +12,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { IUiSettingsClient, ApplicationStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
+import './style.scss';
+
 import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
@@ -25,7 +27,7 @@ import {
 } from '@elastic/eui';
 import { MlApiServices } from '../../../application/services/ml_api_service';
 
-import { JobLayer } from './job_layer';
+import { Layer } from './layer';
 import type { LayerResult } from '../../../application/jobs/new_job/job_from_lens';
 
 interface Props {
@@ -70,7 +72,7 @@ export const LensLayerSelectionFlyout: FC<Props> = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody className="mlLensToJobFlyoutBody">
         {layerResults.map((layer, i) => (
-          <JobLayer
+          <Layer
             layer={layer}
             layerIndex={i}
             application={application}
