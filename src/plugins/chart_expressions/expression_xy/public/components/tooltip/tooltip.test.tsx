@@ -31,14 +31,14 @@ const getSeriesIdentifier = ({
   splitColumnAccessor?: string;
   seriesSplitAccessors: Map<number | string, number | string>;
 }): XYChartSeriesIdentifier => ({
-  specId: generateSeriesId({ layerId, xAccessor }, splitAccessors, yAccessor),
+  specId: generateSeriesId({ layerId }, splitAccessors, yAccessor, xAccessor),
   xAccessor: xAccessor ?? 'x',
   yAccessor: yAccessor ?? 'a',
   splitAccessors: seriesSplitAccessors,
   seriesKeys: [],
   key: '1',
-  smVerticalAccessorValue: splitColumnAccessor,
-  smHorizontalAccessorValue: splitRowAccessor,
+  smVerticalAccessorValue: splitRowAccessor,
+  smHorizontalAccessorValue: splitColumnAccessor,
 });
 
 describe('Tooltip', () => {
@@ -113,6 +113,7 @@ describe('Tooltip', () => {
         formatFactory={formatFactory}
         formattedDatatables={{ [layerId]: { table: data, formattedColumns: {} } }}
         splitAccessors={{ splitColumnAccessor, splitRowAccessor }}
+        layers={[sampleLayer]}
       />
     );
 
@@ -133,6 +134,7 @@ describe('Tooltip', () => {
         formattedDatatables={{ [layerId]: { table: data, formattedColumns: {} } }}
         splitAccessors={{ splitColumnAccessor, splitRowAccessor }}
         xDomain={xDomain}
+        layers={[sampleLayer]}
       />
     );
 
@@ -153,6 +155,7 @@ describe('Tooltip', () => {
         formattedDatatables={{ [layerId]: { table: data, formattedColumns: {} } }}
         splitAccessors={{ splitColumnAccessor, splitRowAccessor }}
         xDomain={xDomain}
+        layers={[sampleLayer]}
       />
     );
 
@@ -170,6 +173,7 @@ describe('Tooltip', () => {
         formattedDatatables={{ [layerId]: { table: data, formattedColumns: {} } }}
         splitAccessors={{ splitColumnAccessor, splitRowAccessor }}
         xDomain={xDomain2}
+        layers={[sampleLayer]}
       />
     );
 
@@ -188,6 +192,7 @@ describe('Tooltip', () => {
         formatFactory={formatFactory}
         formattedDatatables={{ [layerId]: { table: data, formattedColumns: {} } }}
         splitAccessors={{ splitColumnAccessor, splitRowAccessor }}
+        layers={[sampleLayer]}
       />
     );
 
@@ -213,6 +218,7 @@ describe('Tooltip', () => {
         formatFactory={formatFactory}
         formattedDatatables={{ [layerId]: { table: data, formattedColumns: {} } }}
         splitAccessors={{ splitColumnAccessor, splitRowAccessor }}
+        layers={[sampleLayer]}
       />
     );
 
@@ -240,6 +246,7 @@ describe('Tooltip', () => {
         formatFactory={formatFactory}
         formattedDatatables={{ [layerId]: { table: data, formattedColumns: {} } }}
         splitAccessors={{ splitColumnAccessor, splitRowAccessor }}
+        layers={[sampleLayer]}
       />
     );
 
@@ -268,6 +275,7 @@ describe('Tooltip', () => {
         formatFactory={formatFactory}
         formattedDatatables={{ [layerId]: { table: data, formattedColumns: {} } }}
         splitAccessors={{ splitColumnAccessor, splitRowAccessor }}
+        layers={[sampleLayer]}
       />
     );
 
@@ -295,6 +303,7 @@ describe('Tooltip', () => {
         formatFactory={formatFactory}
         formattedDatatables={{ [layerId]: { table: data, formattedColumns: {} } }}
         splitAccessors={{ splitColumnAccessor }}
+        layers={[sampleLayer]}
       />
     );
 
@@ -322,6 +331,7 @@ describe('Tooltip', () => {
         formatFactory={formatFactory}
         formattedDatatables={{ [layerId]: { table: data, formattedColumns: {} } }}
         splitAccessors={{ splitRowAccessor }}
+        layers={[sampleLayer]}
       />
     );
 

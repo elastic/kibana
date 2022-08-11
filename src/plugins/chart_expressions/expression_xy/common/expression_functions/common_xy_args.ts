@@ -11,7 +11,6 @@ import {
   FittingFunctions,
   LEGEND_CONFIG,
   ValueLabelModes,
-  XYCurveTypes,
   X_AXIS_CONFIG,
   Y_AXIS_CONFIG,
 } from '../constants';
@@ -49,12 +48,6 @@ export const commonXYArgs: CommonXYFn['args'] = {
     help: strings.getValueLabelsHelp(),
     strict: true,
     default: ValueLabelModes.HIDE,
-  },
-  curveType: {
-    types: ['string'],
-    options: [...Object.values(XYCurveTypes)],
-    help: strings.getCurveTypeHelp(),
-    strict: true,
   },
   fillOpacity: {
     types: ['number'],

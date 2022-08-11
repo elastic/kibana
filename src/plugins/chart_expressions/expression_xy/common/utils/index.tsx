@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { logDatatables, getLayerDimensions } from './log_datatables';
+export { logDatatables, logDatatable, getLayerDimensions } from './log_datatables';

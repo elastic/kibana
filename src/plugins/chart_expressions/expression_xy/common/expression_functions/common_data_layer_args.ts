@@ -7,7 +7,7 @@
  */
 
 import { ArgumentType } from '@kbn/expressions-plugin/common';
-import { SeriesTypes, XScaleTypes, DATA_DECORATION_CONFIG } from '../constants';
+import { SeriesTypes, XScaleTypes, DATA_DECORATION_CONFIG, XYCurveTypes } from '../constants';
 import { strings } from '../i18n';
 import { DataLayerArgs, ExtendedDataLayerArgs } from '../types';
 
@@ -57,6 +57,12 @@ export const commonDataLayerArgs: Omit<
     types: ['boolean'],
     default: false,
     help: strings.getIsHorizontalHelp(),
+  },
+  curveType: {
+    types: ['string'],
+    options: [...Object.values(XYCurveTypes)],
+    help: strings.getCurveTypeHelp(),
+    strict: true,
   },
   lineWidth: {
     types: ['number'],

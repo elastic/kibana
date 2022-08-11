@@ -25,6 +25,18 @@ export const strings = {
     i18n.translate('expressionXY.xyVis.logDatatable.breakDown', {
       defaultMessage: 'Break down by',
     }),
+  getSplitRowHelp: () =>
+    i18n.translate('expressionXY.xyVis.logDatatable.splitRow', {
+      defaultMessage: 'Split rows by',
+    }),
+  getSplitColumnHelp: () =>
+    i18n.translate('expressionXY.xyVis.logDatatable.splitColumn', {
+      defaultMessage: 'Split columns by',
+    }),
+  getMarkSizeHelp: () =>
+    i18n.translate('expressionXY.xyVis.logDatatable.markSize', {
+      defaultMessage: 'Mark size',
+    }),
   getReferenceLineHelp: () =>
     i18n.translate('expressionXY.xyVis.logDatatable.breakDown', {
       defaultMessage: 'Break down by',
