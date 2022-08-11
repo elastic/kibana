@@ -195,259 +195,253 @@ export const JobLayer: FC<Props> = ({
 
   return (
     <>
-      <React.Fragment key={layer.id}>
-        <EuiSplitPanel.Outer grow>
-          <EuiSplitPanel.Inner>
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              {layer.icon && (
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type={layer.icon} />
-                </EuiFlexItem>
-              )}
-              <EuiFlexItem grow>
-                <EuiText color={layer.isCompatible ? '' : 'subdued'}>
-                  <h5>{layer.label}</h5>
-                </EuiText>
+      <EuiSplitPanel.Outer grow>
+        <EuiSplitPanel.Inner>
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            {layer.icon && (
+              <EuiFlexItem grow={false}>
+                <EuiIcon type={layer.icon} />
               </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiSplitPanel.Inner>
-          <EuiHorizontalRule margin="none" />
-          <EuiSplitPanel.Inner grow={false} color="subdued">
-            {layer.isCompatible ? (
-              <>
-                {state !== STATE.SAVE_SUCCESS && state !== STATE.SAVING ? (
-                  <>
-                    <EuiFlexGroup gutterSize="s" data-test-subj="mlLensLayerCompatible">
-                      <EuiFlexItem grow={false}>
-                        <EuiText size="s">
-                          <EuiIcon type="checkInCircleFilled" color="success" />
-                        </EuiText>
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <EuiText size="s">
-                          {layer.jobWizardType === CREATED_BY_LABEL.MULTI_METRIC ? (
-                            <FormattedMessage
-                              id="xpack.ml.embeddables.lensLayerFlyout.createJobCalloutTitle.multiMetric"
-                              defaultMessage="This layer can be used to create a multi-metric job"
-                            />
-                          ) : (
-                            <FormattedMessage
-                              id="xpack.ml.embeddables.lensLayerFlyout.createJobCalloutTitle.singleMetric"
-                              defaultMessage="This layer can be used to create a single metric job"
-                            />
-                          )}
-                        </EuiText>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                    <EuiSpacer size="m" />
-                    <EuiForm>
-                      <EuiFormRow label="Job ID" error={jobIdValid} isInvalid={jobIdValid !== ''}>
+            )}
+            <EuiFlexItem grow>
+              <EuiText color={layer.isCompatible ? '' : 'subdued'}>
+                <h5>{layer.label}</h5>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiSplitPanel.Inner>
+        <EuiHorizontalRule margin="none" />
+        <EuiSplitPanel.Inner grow={false} color="subdued">
+          {layer.isCompatible ? (
+            <>
+              {state !== STATE.SAVE_SUCCESS && state !== STATE.SAVING ? (
+                <>
+                  <EuiFlexGroup gutterSize="s" data-test-subj="mlLensLayerCompatible">
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="s">
+                        <EuiIcon type="checkInCircleFilled" color="success" />
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiText size="s">
+                        {layer.jobWizardType === CREATED_BY_LABEL.MULTI_METRIC ? (
+                          <FormattedMessage
+                            id="xpack.ml.embeddables.lensLayerFlyout.createJobCalloutTitle.multiMetric"
+                            defaultMessage="This layer can be used to create a multi-metric job"
+                          />
+                        ) : (
+                          <FormattedMessage
+                            id="xpack.ml.embeddables.lensLayerFlyout.createJobCalloutTitle.singleMetric"
+                            defaultMessage="This layer can be used to create a single metric job"
+                          />
+                        )}
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                  <EuiSpacer size="m" />
+                  <EuiForm>
+                    <EuiFormRow label="Job ID" error={jobIdValid} isInvalid={jobIdValid !== ''}>
+                      <EuiFieldText
+                        data-test-subj={`mlLensLayerJobIdInput_${layerIndex}`}
+                        value={jobId}
+                        onChange={(e) => {
+                          setJobId(e.target.value);
+                          setState(STATE.VALIDATING);
+                        }}
+                      />
+                    </EuiFormRow>
+
+                    <EuiSpacer size="s" />
+                    <EuiAccordion
+                      data-test-subj={`mlLensLayerAdditionalSettingsButton_${layerIndex}`}
+                      id="additional-section"
+                      buttonContent={i18n.translate(
+                        'xpack.ml.embeddables.lensLayerFlyout.createJobCallout.additionalSettings.title',
+                        {
+                          defaultMessage: 'Additional settings',
+                        }
+                      )}
+                    >
+                      <EuiSpacer size="s" />
+                      <EuiFormRow
+                        label="Bucket span"
+                        error={bucketSpanValid}
+                        isInvalid={bucketSpanValid !== ''}
+                      >
                         <EuiFieldText
-                          data-test-subj={`mlLensLayerJobIdInput_${layerIndex}`}
-                          value={jobId}
+                          data-test-subj={`mlLensLayerBucketSpanInput_${layerIndex}`}
+                          value={bucketSpan}
                           onChange={(e) => {
-                            setJobId(e.target.value);
+                            setBucketSpan(e.target.value);
                             setState(STATE.VALIDATING);
                           }}
                         />
                       </EuiFormRow>
+                      <EuiSpacer size="l" />
+                      <EuiFormRow>
+                        <EuiCheckbox
+                          id="startJob"
+                          data-test-subj={`mlLensLayerStartJobCheckbox_${layerIndex}`}
+                          checked={startJob}
+                          onChange={(e) => setStartJobWrapper(e.target.checked)}
+                          label={i18n.translate(
+                            'xpack.ml.embeddables.lensLayerFlyout.createJobCallout.additionalSettings.start',
+                            {
+                              defaultMessage: 'Start the job after saving',
+                            }
+                          )}
+                        />
+                      </EuiFormRow>
 
                       <EuiSpacer size="s" />
-                      <EuiAccordion
-                        data-test-subj={`mlLensLayerAdditionalSettingsButton_${layerIndex}`}
-                        id="additional-section"
-                        buttonContent={i18n.translate(
-                          'xpack.ml.embeddables.lensLayerFlyout.createJobCallout.additionalSettings.title',
-                          {
-                            defaultMessage: 'Additional settings',
-                          }
-                        )}
-                      >
-                        <EuiSpacer size="s" />
-                        <EuiFormRow
-                          label="Bucket span"
-                          error={bucketSpanValid}
-                          isInvalid={bucketSpanValid !== ''}
-                        >
-                          <EuiFieldText
-                            data-test-subj={`mlLensLayerBucketSpanInput_${layerIndex}`}
-                            value={bucketSpan}
-                            onChange={(e) => {
-                              setBucketSpan(e.target.value);
-                              setState(STATE.VALIDATING);
-                            }}
-                          />
-                        </EuiFormRow>
-                        <EuiSpacer size="l" />
-                        <EuiFormRow>
-                          <EuiCheckbox
-                            id="startJob"
-                            data-test-subj={`mlLensLayerStartJobCheckbox_${layerIndex}`}
-                            checked={startJob}
-                            onChange={(e) => setStartJobWrapper(e.target.checked)}
-                            label={i18n.translate(
-                              'xpack.ml.embeddables.lensLayerFlyout.createJobCallout.additionalSettings.start',
-                              {
-                                defaultMessage: 'Start the job after saving',
-                              }
-                            )}
-                          />
-                        </EuiFormRow>
-
-                        <EuiSpacer size="s" />
-                        <EuiFormRow>
-                          <EuiCheckbox
-                            id="realTime"
-                            disabled={startJob === false}
-                            data-test-subj={`mlLensLayerRealTimeCheckbox_${layerIndex}`}
-                            checked={runInRealTime}
-                            onChange={(e) => setRunInRealTime(e.target.checked)}
-                            label={i18n.translate(
-                              'xpack.ml.embeddables.lensLayerFlyout.createJobCallout.additionalSettings.realTime',
-                              {
-                                defaultMessage: 'Leave the job running for new data',
-                              }
-                            )}
-                          />
-                        </EuiFormRow>
-                        <EuiSpacer size="m" />
-                      </EuiAccordion>
-                    </EuiForm>
-                    <EuiSpacer size="m" />
-                    <EuiFlexGroup>
-                      <EuiFlexItem>
-                        <EuiButton
-                          disabled={
-                            state === STATE.VALIDATING ||
-                            jobId === '' ||
-                            jobIdValid !== '' ||
-                            bucketSpanValid !== ''
-                          }
-                          onClick={createADJob.bind(null, layerIndex)}
-                          size="s"
-                          data-test-subj={`mlLensLayerCreateJobButton_${layerIndex}`}
-                        >
-                          <FormattedMessage
-                            id="xpack.ml.embeddables.lensLayerFlyout.createJobButton.saving"
-                            defaultMessage="Create job"
-                          />
-                        </EuiButton>
-                      </EuiFlexItem>
-
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonEmpty
-                          onClick={createADJobInWizard.bind(null, layerIndex)}
-                          size="s"
-                          iconType="popout"
-                          iconSide="right"
-                          data-test-subj={`mlLensLayerCreateWithWizardButton_${layerIndex}`}
-                        >
-                          <FormattedMessage
-                            id="xpack.ml.embeddables.lensLayerFlyout.createJobButton"
-                            defaultMessage="Create job using wizard"
-                          />
-                        </EuiButtonEmpty>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </>
-                ) : null}
-
-                {state === STATE.SAVE_SUCCESS ? (
-                  <>
-                    <EuiFlexGroup
-                      gutterSize="s"
-                      data-test-subj={`mlLensLayerCompatible.jobCreated.success_${layerIndex}`}
-                    >
-                      <EuiFlexItem grow={false}>
-                        <EuiText size="s">
-                          <EuiIcon type="checkInCircleFilled" color="success" />
-                        </EuiText>
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <EuiText size="s">
-                          <FormattedMessage
-                            id="xpack.ml.embeddables.lensLayerFlyout.saveSuccess"
-                            defaultMessage="Job created"
-                          />
-                        </EuiText>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-
-                    <EuiSpacer size="s" />
-                    <EuiButtonEmpty
-                      onClick={viewResults.bind(null, layer.jobWizardType)}
-                      flush="left"
-                      data-test-subj={`mlLensLayerResultsButton_${layerIndex}`}
-                    >
-                      {layer.jobWizardType === CREATED_BY_LABEL.MULTI_METRIC ? (
-                        <FormattedMessage
-                          id="xpack.ml.embeddables.lensLayerFlyout.saveSuccess.resultsLink.multiMetric"
-                          defaultMessage="View results in Anomaly Explorer"
+                      <EuiFormRow>
+                        <EuiCheckbox
+                          id="realTime"
+                          disabled={startJob === false}
+                          data-test-subj={`mlLensLayerRealTimeCheckbox_${layerIndex}`}
+                          checked={runInRealTime}
+                          onChange={(e) => setRunInRealTime(e.target.checked)}
+                          label={i18n.translate(
+                            'xpack.ml.embeddables.lensLayerFlyout.createJobCallout.additionalSettings.realTime',
+                            {
+                              defaultMessage: 'Leave the job running for new data',
+                            }
+                          )}
                         />
-                      ) : (
-                        <FormattedMessage
-                          id="xpack.ml.embeddables.lensLayerFlyout.saveSuccess.resultsLink.singleMetric"
-                          defaultMessage="View results in Single Metric Viewer"
-                        />
-                      )}
-                    </EuiButtonEmpty>
-                  </>
-                ) : null}
-
-                {state === STATE.SAVING ? (
+                      </EuiFormRow>
+                      <EuiSpacer size="m" />
+                    </EuiAccordion>
+                  </EuiForm>
+                  <EuiSpacer size="m" />
                   <EuiFlexGroup>
-                    <EuiFlexItem grow={false}>
-                      <FormattedMessage
-                        id="xpack.ml.embeddables.lensLayerFlyout.creatingJob"
-                        defaultMessage="Creating job"
-                      />
+                    <EuiFlexItem>
+                      <EuiButton
+                        disabled={
+                          state === STATE.VALIDATING ||
+                          jobId === '' ||
+                          jobIdValid !== '' ||
+                          bucketSpanValid !== ''
+                        }
+                        onClick={createADJob.bind(null, layerIndex)}
+                        size="s"
+                        data-test-subj={`mlLensLayerCreateJobButton_${layerIndex}`}
+                      >
+                        <FormattedMessage
+                          id="xpack.ml.embeddables.lensLayerFlyout.createJobButton.saving"
+                          defaultMessage="Create job"
+                        />
+                      </EuiButton>
                     </EuiFlexItem>
+
                     <EuiFlexItem grow={false}>
-                      <EuiLoadingSpinner />
+                      <EuiButtonEmpty
+                        onClick={createADJobInWizard.bind(null, layerIndex)}
+                        size="s"
+                        iconType="popout"
+                        iconSide="right"
+                        data-test-subj={`mlLensLayerCreateWithWizardButton_${layerIndex}`}
+                      >
+                        <FormattedMessage
+                          id="xpack.ml.embeddables.lensLayerFlyout.createJobButton"
+                          defaultMessage="Create job using wizard"
+                        />
+                      </EuiButtonEmpty>
                     </EuiFlexItem>
                   </EuiFlexGroup>
-                ) : null}
+                </>
+              ) : null}
 
-                {state === STATE.SAVE_FAILED && createError !== null ? (
-                  <>
-                    <EuiSpacer />
-                    <EuiCallOut color="danger" title={createError.text}>
-                      {createError.errorText}
-                    </EuiCallOut>
-                  </>
-                ) : null}
-              </>
-            ) : (
-              <>
-                <EuiFlexGroup
-                  gutterSize="s"
-                  color="subdued"
-                  data-test-subj="mlLensLayerIncompatible"
-                >
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="s">
-                      <EuiIcon type="crossInACircleFilled" color="subdued" />
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiText color="subdued" size="s">
-                      {layer.error ? (
-                        extractErrorMessage(layer.error)
-                      ) : (
+              {state === STATE.SAVE_SUCCESS ? (
+                <>
+                  <EuiFlexGroup
+                    gutterSize="s"
+                    data-test-subj={`mlLensLayerCompatible.jobCreated.success_${layerIndex}`}
+                  >
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="s">
+                        <EuiIcon type="checkInCircleFilled" color="success" />
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiText size="s">
                         <FormattedMessage
-                          id="xpack.ml.embeddables.lensLayerFlyout.defaultLayerError"
-                          defaultMessage="This layer cannot be used to create an anomaly detection job"
+                          id="xpack.ml.embeddables.lensLayerFlyout.saveSuccess"
+                          defaultMessage="Job created"
                         />
-                      )}
-                    </EuiText>
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+
+                  <EuiSpacer size="s" />
+                  <EuiButtonEmpty
+                    onClick={viewResults.bind(null, layer.jobWizardType)}
+                    flush="left"
+                    data-test-subj={`mlLensLayerResultsButton_${layerIndex}`}
+                  >
+                    {layer.jobWizardType === CREATED_BY_LABEL.MULTI_METRIC ? (
+                      <FormattedMessage
+                        id="xpack.ml.embeddables.lensLayerFlyout.saveSuccess.resultsLink.multiMetric"
+                        defaultMessage="View results in Anomaly Explorer"
+                      />
+                    ) : (
+                      <FormattedMessage
+                        id="xpack.ml.embeddables.lensLayerFlyout.saveSuccess.resultsLink.singleMetric"
+                        defaultMessage="View results in Single Metric Viewer"
+                      />
+                    )}
+                  </EuiButtonEmpty>
+                </>
+              ) : null}
+
+              {state === STATE.SAVING ? (
+                <EuiFlexGroup>
+                  <EuiFlexItem grow={false}>
+                    <FormattedMessage
+                      id="xpack.ml.embeddables.lensLayerFlyout.creatingJob"
+                      defaultMessage="Creating job"
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiLoadingSpinner />
                   </EuiFlexItem>
                 </EuiFlexGroup>
-              </>
-            )}
-          </EuiSplitPanel.Inner>
-        </EuiSplitPanel.Outer>
-        <EuiSpacer />
-      </React.Fragment>
+              ) : null}
+
+              {state === STATE.SAVE_FAILED && createError !== null ? (
+                <>
+                  <EuiSpacer />
+                  <EuiCallOut color="danger" title={createError.text}>
+                    {createError.errorText}
+                  </EuiCallOut>
+                </>
+              ) : null}
+            </>
+          ) : (
+            <>
+              <EuiFlexGroup gutterSize="s" color="subdued" data-test-subj="mlLensLayerIncompatible">
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s">
+                    <EuiIcon type="crossInACircleFilled" color="subdued" />
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiText color="subdued" size="s">
+                    {layer.error ? (
+                      extractErrorMessage(layer.error)
+                    ) : (
+                      <FormattedMessage
+                        id="xpack.ml.embeddables.lensLayerFlyout.defaultLayerError"
+                        defaultMessage="This layer cannot be used to create an anomaly detection job"
+                      />
+                    )}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>
+          )}
+        </EuiSplitPanel.Inner>
+      </EuiSplitPanel.Outer>
+      <EuiSpacer />
     </>
   );
 };
