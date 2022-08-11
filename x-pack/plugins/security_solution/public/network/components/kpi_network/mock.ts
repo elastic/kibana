@@ -12,7 +12,7 @@ import { kpiUniquePrivateIpsBarLensAttributes } from '../../../common/components
 import { kpiUniquePrivateIpsDestinationMetricLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_private_ips_destination_metric';
 import { kpiUniquePrivateIpsSourceMetricLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_private_ips_source_metric';
 
-export const mockNarrowDateRange = jest.fn();
+export const mockUpdateDateRange = jest.fn();
 
 export const mockData: NetworkKpiStrategyResponse = {
   networkEvents: 16,
@@ -152,7 +152,7 @@ export const mockEnableChartsData = {
   statKey: 'UniqueIps',
   setQuerySkip: jest.fn(),
   to: '2019-06-18T06:00:00.000Z',
-  narrowDateRange: mockNarrowDateRange,
+  updateDateRange: mockUpdateDateRange,
   areaChartLensAttributes: kpiUniquePrivateIpsAreaLensAttributes,
   barChartLensAttributes: kpiUniquePrivateIpsBarLensAttributes,
 };

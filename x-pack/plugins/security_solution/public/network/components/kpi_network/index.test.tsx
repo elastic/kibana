@@ -26,7 +26,7 @@ describe('NetworkKpiComponent', () => {
     filterQuery: '',
     from: '2019-06-15T06:00:00.000Z',
     indexNames: [],
-    narrowDateRange: jest.fn(),
+    updateDateRange: jest.fn(),
     setQuery: jest.fn(),
     skip: true,
     to: '2019-06-18T06:00:00.000Z',
