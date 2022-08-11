@@ -53,6 +53,7 @@ export default ({ getService }: FtrProviderContext) => {
       const createdRule = await createRule(supertest, log, {
         ...getCreateRulesSchemaMock('rule-1'),
         query: '*',
+        from: 'now-100000h',
         max_signals: 2,
         alertGrouping: {
           groupBy: ['host.name'],

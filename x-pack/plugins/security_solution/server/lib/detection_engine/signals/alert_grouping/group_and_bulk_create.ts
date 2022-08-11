@@ -19,6 +19,7 @@ import type {
 } from '../types';
 import { createSearchAfterReturnType } from '../utils';
 import { getEventsByGroup } from './get_events_by_group';
+import type { QueryRuleParams } from '../../schemas/rule_schemas';
 
 // search_after through grouped documents and re-index using bulk endpoint.
 export const groupAndBulkCreate = async ({
@@ -105,8 +106,16 @@ export const groupAndBulkCreate = async ({
       // - low cardinality means we may want to group by that field?
       // - also, should we sort first by severity?
 
-      // For now, group by host name
-      const groupByFields: string[] = ['host.name'];
+      // TODO: remove this type assertion once threat_match grouping is implemented
+      const groupByFields =
+        (completeRule.ruleParams as QueryRuleParams).alertGrouping?.groupBy ?? [];
+
+      if (groupByFields.length === 0) {
+        return createSearchAfterReturnType({
+          success: false,
+          errors: ['no groupBy fields found'],
+        });
+      }
 
       // Get aggregated results
       const eventsByGroupResponse = await getEventsByGroup({
