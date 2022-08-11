@@ -16,8 +16,9 @@ import { updateConnectorScheduling } from '../../lib/connectors/update_connector
 
 import { RouteDependencies } from '../../plugin';
 import { createError } from '../../utils/create_error';
+import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 
-export function registerConnectorRoutes({ router }: RouteDependencies) {
+export function registerConnectorRoutes({ router, log }: RouteDependencies) {
   router.post(
     {
       path: '/internal/enterprise_search/connectors',
@@ -29,25 +30,12 @@ export function registerConnectorRoutes({ router }: RouteDependencies) {
         }),
       },
     },
-    async (context, request, response) => {
+    elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       try {
         const body = await addConnector(client, request.body);
         return response.ok({ body });
       } catch (error) {
-        if (error.statusCode === 403) {
-          return createError({
-            errorCode: ErrorCode.UNAUTHORIZED,
-            message: i18n.translate(
-              'xpack.enterpriseSearch.server.routes.addConnector.unauthorizedError',
-              {
-                defaultMessage: 'You do not have the correct access rights to create this resource',
-              }
-            ),
-            response,
-            statusCode: 403,
-          });
-        }
         if (
           (error as Error).message === ErrorCode.CONNECTOR_DOCUMENT_ALREADY_EXISTS ||
           (error as Error).message === ErrorCode.INDEX_ALREADY_EXISTS
@@ -64,15 +52,12 @@ export function registerConnectorRoutes({ router }: RouteDependencies) {
             statusCode: 409,
           });
         }
-        return response.customError({
-          body: i18n.translate('xpack.enterpriseSearch.server.routes.addConnector.error', {
-            defaultMessage: 'Error fetching data from Enterprise Search',
-          }),
-          statusCode: 502,
-        });
+
+        throw error;
       }
-    }
+    })
   );
+
   router.post(
     {
       path: '/internal/enterprise_search/connectors/{connectorId}/configuration',
@@ -86,7 +71,7 @@ export function registerConnectorRoutes({ router }: RouteDependencies) {
         }),
       },
     },
-    async (context, request, response) => {
+    elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       try {
         await updateConnectorConfiguration(client, request.params.connectorId, request.body);
@@ -99,8 +84,9 @@ export function registerConnectorRoutes({ router }: RouteDependencies) {
           statusCode: 502,
         });
       }
-    }
+    })
   );
+
   router.post(
     {
       path: '/internal/enterprise_search/connectors/{connectorId}/scheduling',
@@ -111,7 +97,7 @@ export function registerConnectorRoutes({ router }: RouteDependencies) {
         }),
       },
     },
-    async (context, request, response) => {
+    elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       try {
         await updateConnectorScheduling(client, request.params.connectorId, request.body);
@@ -124,8 +110,9 @@ export function registerConnectorRoutes({ router }: RouteDependencies) {
           statusCode: 502,
         });
       }
-    }
+    })
   );
+
   router.post(
     {
       path: '/internal/enterprise_search/connectors/{connectorId}/start_sync',
@@ -135,7 +122,7 @@ export function registerConnectorRoutes({ router }: RouteDependencies) {
         }),
       },
     },
-    async (context, request, response) => {
+    elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       try {
         await startConnectorSync(client, request.params.connectorId);
@@ -148,6 +135,6 @@ export function registerConnectorRoutes({ router }: RouteDependencies) {
           statusCode: 502,
         });
       }
-    }
+    })
   );
 }

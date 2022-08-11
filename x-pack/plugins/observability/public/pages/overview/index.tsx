@@ -219,6 +219,7 @@ export function OverviewPage() {
       </>
       {isFlyoutVisible && (
         <EuiFlyout
+          className="oblt__flyout"
           size="s"
           ownFocus
           onClose={() => setIsFlyoutVisible(false)}
