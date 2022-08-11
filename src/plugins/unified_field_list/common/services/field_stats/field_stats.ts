@@ -21,6 +21,7 @@ interface FetchFieldStatsParams {
   toDate: string;
   dslQuery: object;
   size?: number;
+  abortController?: AbortController;
 }
 
 export const fetchFieldStats = async ({
@@ -31,6 +32,7 @@ export const fetchFieldStats = async ({
   toDate,
   dslQuery,
   size,
+  abortController,
 }: FetchFieldStatsParams): Promise<FieldStatsResponse<string | number>> => {
   try {
     if (!dataView?.id || !field?.type) {
@@ -39,17 +41,22 @@ export const fetchFieldStats = async ({
 
     const searchHandler: SearchHandler = async (aggs) => {
       const result = await lastValueFrom(
-        data.search.search({
-          params: buildSearchParams({
-            dataViewPattern: dataView.title,
-            timeFieldName: dataView.timeFieldName,
-            fromDate,
-            toDate,
-            dslQuery,
-            runtimeMappings: dataView.getRuntimeMappings(),
-            aggs,
-          }),
-        })
+        data.search.search(
+          {
+            params: buildSearchParams({
+              dataViewPattern: dataView.title,
+              timeFieldName: dataView.timeFieldName,
+              fromDate,
+              toDate,
+              dslQuery,
+              runtimeMappings: dataView.getRuntimeMappings(),
+              aggs,
+            }),
+          },
+          {
+            abortSignal: abortController?.signal,
+          }
+        )
       );
       return result.rawResponse;
     };

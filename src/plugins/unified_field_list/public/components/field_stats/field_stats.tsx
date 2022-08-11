@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   DataView,
   DataViewField,
@@ -81,25 +81,51 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
 }) => {
   const services = useUnifiedFieldListServices();
   const { fieldFormats, uiSettings, charts, dataViews, data } = services;
-  const [state, setState] = useState<State>({
+  const [state, changeState] = useState<State>({
     isLoading: false,
   });
-  const [dataView, setDataView] = useState<DataView | null>(null);
+  const [dataView, changeDataView] = useState<DataView | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const isCanceledRef = useRef<boolean>(false);
+
+  const setState: typeof changeState = useCallback(
+    (nextState) => {
+      if (!isCanceledRef.current) {
+        changeState(nextState);
+      }
+    },
+    [changeState, isCanceledRef]
+  );
+
+  const setDataView: typeof changeDataView = useCallback(
+    (nextDataView) => {
+      if (!isCanceledRef.current) {
+        changeDataView(nextDataView);
+      }
+    },
+    [changeDataView, isCanceledRef]
+  );
 
   async function fetchData() {
-    const loadedDataView =
-      typeof dataViewOrDataViewId === 'string'
-        ? await dataViews.get(dataViewOrDataViewId)
-        : dataViewOrDataViewId;
-
-    setDataView(loadedDataView);
-
-    if (state.isLoading || !canProvideFieldStatsForField(field)) {
+    if (isCanceledRef.current) {
       return;
     }
 
     try {
+      const loadedDataView =
+        typeof dataViewOrDataViewId === 'string'
+          ? await dataViews.get(dataViewOrDataViewId)
+          : dataViewOrDataViewId;
+
+      setDataView(loadedDataView);
+
+      if (state.isLoading || !canProvideFieldStatsForField(field)) {
+        return;
+      }
+
       setState((s) => ({ ...s, isLoading: true }));
+
+      abortControllerRef.current = new AbortController();
 
       const results = await fetchFieldStats({
         data,
@@ -108,8 +134,10 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
         fromDate,
         toDate,
         dslQuery: buildEsQuery(loadedDataView, query, filters, getEsQueryConfig(uiSettings)),
-        // TODO: pass abortSignal on unmount
+        abortController: abortControllerRef.current,
       });
+
+      abortControllerRef.current = null;
 
       setState((s) => ({
         ...s,
@@ -128,6 +156,11 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
 
   useEffect(() => {
     fetchData();
+
+    return () => {
+      isCanceledRef.current = true;
+      abortControllerRef.current?.abort();
+    };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const chartTheme = charts.theme.useChartsTheme();
