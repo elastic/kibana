@@ -59,8 +59,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     }
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/138295
-  describe.skip('lens metric', () => {
+  describe('lens metric', () => {
     it('should render a metric', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
@@ -174,6 +173,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
 
       const colorPicker = await testSubjects.find('euiColorPickerAnchor');
+
+      colorPicker.clearValue();
       await colorPicker.type('#000000');
 
       await PageObjects.lens.waitForVisualization('mtrVis');
