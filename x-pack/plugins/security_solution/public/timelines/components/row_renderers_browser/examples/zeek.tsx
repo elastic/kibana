@@ -7,15 +7,14 @@
 
 import React from 'react';
 
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { mockTimelineData } from '../../../../common/mock/mock_timeline_data';
+import { demoTimelineData } from '../../../../common/demo_data/timeline';
 import { zeekRowRenderer } from '../../timeline/body/renderers/zeek/zeek_row_renderer';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../constants';
 
 const ZeekExampleComponent: React.FC = () => (
   <>
     {zeekRowRenderer.renderRow({
-      data: mockTimelineData[13].ecs,
+      data: demoTimelineData[13].ecs,
       isDraggable: false,
       timelineId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,
     })}
