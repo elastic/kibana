@@ -8,7 +8,7 @@
 
 // import { schema } from '@kbn/config-schema';
 import * as trpc from '@trpc/server';
-import type { PluginARPC } from '../../plugin_a/common';
+import type { PluginARPC } from '@kbn/plugin-a-plugin/common';
 
 export const rpc = trpc.router().query('getSomethingFromB', {
   resolve: async () => ({

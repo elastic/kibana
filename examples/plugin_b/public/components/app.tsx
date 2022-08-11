@@ -25,9 +25,9 @@ import {
 import { CoreStart } from '@kbn/core/public';
 import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 
+import { UseQueryResult } from 'react-query';
 import { PLUGIN_ID, PLUGIN_NAME } from '../../common';
 import { rpc } from '../rpc';
-import { UseQueryResult } from 'react-query';
 
 interface PluginBAppDeps {
   basename: string;
