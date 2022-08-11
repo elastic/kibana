@@ -10,15 +10,19 @@ import { defaults } from 'lodash';
 import { DataViewsService, DataView } from '.';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 
-import { UiSettingsCommon, SavedObjectsClientCommon, SavedObject } from '../types';
+import {
+  UiSettingsCommon,
+  SavedObjectsClientCommon,
+  SavedObject,
+  DataViewSpec,
+  IDataViewsApiClient,
+} from '../types';
 import { stubbedSavedObjectIndexPattern } from '../data_view.stub';
 
-const createFieldsFetcher = jest.fn().mockImplementation(() => ({
-  getFieldsForWildcard: jest.fn().mockImplementation(() => {
-    return new Promise((resolve) => resolve([]));
-  }),
-  every: jest.fn(),
-}));
+const createFieldsFetcher = () =>
+  ({
+    getFieldsForWildcard: jest.fn(async () => []),
+  } as any as IDataViewsApiClient);
 
 const fieldFormats = fieldFormatsMock;
 let object: any = {};
@@ -52,6 +56,7 @@ describe('IndexPatterns', () => {
   let indexPatternsNoAccess: DataViewsService;
   let savedObjectsClient: SavedObjectsClientCommon;
   let SOClientGetDelay = 0;
+  let apiClient: IDataViewsApiClient;
   const uiSettings = {
     get: () => Promise.resolve(false),
     getAll: () => {},
@@ -93,10 +98,12 @@ describe('IndexPatterns', () => {
         };
       });
 
+    apiClient = createFieldsFetcher();
+
     indexPatterns = new DataViewsService({
       uiSettings,
       savedObjectsClient: savedObjectsClient as unknown as SavedObjectsClientCommon,
-      apiClient: createFieldsFetcher(),
+      apiClient,
       fieldFormats,
       onNotification: () => {},
       onError: () => {},
@@ -108,7 +115,7 @@ describe('IndexPatterns', () => {
     indexPatternsNoAccess = new DataViewsService({
       uiSettings,
       savedObjectsClient: savedObjectsClient as unknown as SavedObjectsClientCommon,
-      apiClient: createFieldsFetcher(),
+      apiClient,
       fieldFormats,
       onNotification: () => {},
       onError: () => {},
@@ -436,6 +443,44 @@ describe('IndexPatterns', () => {
       expect(defaultDataViewResult).toBeInstanceOf(DataView);
       expect(defaultDataViewResult?.id).toBe('id1');
       expect(uiSettings.set).toBeCalledTimes(0);
+    });
+  });
+
+  describe('refreshFields', () => {
+    beforeEach(() => {
+      // preserve mocked functionality
+      jest.clearAllMocks();
+    });
+
+    test('refreshFields includes runtimeFields', async () => {
+      const indexPatternSpec: DataViewSpec = {
+        runtimeFieldMap: {
+          a: {
+            type: 'keyword',
+            script: {
+              source: "emit('a');",
+            },
+          },
+        },
+        title: 'test',
+      };
+
+      const indexPattern = await indexPatterns.create(indexPatternSpec);
+      await indexPatterns.refreshFields(indexPattern);
+      expect(indexPattern.fields.length).toBe(1);
+    });
+
+    test('refreshFields properly includes allowNoIndex', async () => {
+      const indexPatternSpec: DataViewSpec = {
+        allowNoIndex: true,
+        title: 'test',
+      };
+
+      const indexPattern = await indexPatterns.create(indexPatternSpec);
+
+      indexPatterns.refreshFields(indexPattern);
+      // @ts-expect-error
+      expect(apiClient.getFieldsForWildcard.mock.calls[0][0].allowNoIndex).toBe(true);
     });
   });
 });

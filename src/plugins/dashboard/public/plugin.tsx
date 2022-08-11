@@ -26,9 +26,10 @@ import {
   SavedObjectsClientContract,
 } from '@kbn/core/public';
 import { VisualizationsStart } from '@kbn/visualizations-plugin/public';
-
-import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/public';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/public';
+
 import { createKbnUrlTracker } from './services/kibana_utils';
 import { UsageCollectionSetup } from './services/usage_collection';
 import { UiActionsSetup, UiActionsStart } from './services/ui_actions';
@@ -51,6 +52,7 @@ import {
   CONTEXT_MENU_TRIGGER,
   EmbeddableSetup,
   EmbeddableStart,
+  PANEL_BADGE_TRIGGER,
   PANEL_NOTIFICATION_TRIGGER,
 } from './services/embeddable';
 import {
@@ -71,7 +73,6 @@ import {
   LibraryNotificationAction,
   CopyToDashboardAction,
   DashboardCapabilities,
-  DashboardLoadedEvent,
 } from './application';
 import { DashboardAppLocatorDefinition, DashboardAppLocator } from './locator';
 import { createSavedDashboardLoader } from './saved_dashboards';
@@ -80,6 +81,7 @@ import { PlaceholderEmbeddableFactory } from './application/embeddable/placehold
 import { ExportCSVAction } from './application/actions/export_csv_action';
 import { dashboardFeatureCatalog } from './dashboard_strings';
 import { SpacesPluginStart } from './services/spaces';
+import { FiltersNotificationBadge } from './application/actions/filters_notification_badge';
 
 export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
@@ -94,6 +96,7 @@ export interface DashboardSetupDependencies {
   uiActions: UiActionsSetup;
   usageCollection?: UsageCollectionSetup;
   screenshotMode: ScreenshotModePluginSetup;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 export interface DashboardStartDependencies {
@@ -112,6 +115,7 @@ export interface DashboardStartDependencies {
   visualizations: VisualizationsStart;
   screenshotMode: ScreenshotModePluginStart;
   dataViewEditor: DataViewEditorStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 export interface DashboardSetup {
@@ -138,30 +142,6 @@ export class DashboardPlugin
   private currentHistory: ScopedHistory | undefined = undefined;
   private dashboardFeatureFlagConfig?: DashboardFeatureFlagConfig;
   private locator?: DashboardAppLocator;
-
-  private registerEvents(analytics: CoreSetup['analytics']) {
-    analytics.registerEventType<DashboardLoadedEvent>({
-      eventType: 'dashboard-data-loaded',
-      schema: {
-        timeToData: {
-          type: 'long',
-          _meta: { description: 'Time all embeddables took to load data' },
-        },
-        timeToDone: {
-          type: 'long',
-          _meta: { description: 'Time all embeddables took to load data' },
-        },
-        status: {
-          type: 'keyword',
-          _meta: { description: 'Error  ok' },
-        },
-        numOfPanels: {
-          type: 'long',
-          _meta: { description: 'Number of panels loaded' },
-        },
-      },
-    });
-  }
 
   public setup(
     core: CoreSetup<DashboardStartDependencies, DashboardStart>,
@@ -312,8 +292,6 @@ export class DashboardPlugin
       },
     };
 
-    this.registerEvents(core.analytics);
-
     core.application.register(app);
     urlForwarding.forwardApp(
       DashboardConstants.DASHBOARDS_ID,
@@ -363,13 +341,13 @@ export class DashboardPlugin
   }
 
   public start(core: CoreStart, plugins: DashboardStartDependencies): DashboardStart {
-    const { notifications, overlays, application, theme } = core;
+    const { notifications, overlays, application, theme, uiSettings } = core;
     const { uiActions, data, share, presentationUtil, embeddable } = plugins;
 
     const dashboardCapabilities: Readonly<DashboardCapabilities> = application.capabilities
       .dashboard as DashboardCapabilities;
 
-    const SavedObjectFinder = getSavedObjectFinder(core.savedObjects, core.uiSettings);
+    const SavedObjectFinder = getSavedObjectFinder(core.savedObjects, uiSettings);
 
     const expandPanelAction = new ExpandPanelAction();
     uiActions.registerAction(expandPanelAction);
@@ -387,6 +365,16 @@ export class DashboardPlugin
     const clonePanelAction = new ClonePanelAction(core);
     uiActions.registerAction(clonePanelAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, clonePanelAction.id);
+
+    const panelLevelFiltersNotification = new FiltersNotificationBadge(
+      application,
+      embeddable,
+      overlays,
+      theme,
+      uiSettings
+    );
+    uiActions.registerAction(panelLevelFiltersNotification);
+    uiActions.attachAction(PANEL_BADGE_TRIGGER, panelLevelFiltersNotification.id);
 
     if (share) {
       const ExportCSVPlugin = new ExportCSVAction({ core, data });

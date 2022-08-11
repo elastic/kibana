@@ -38,7 +38,7 @@ import {
 } from '../../shared_components';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import { defaultNumberPaletteParams, defaultPercentagePaletteParams } from './palette_config';
-import { DEFAULT_MAX_COLUMNS, MetricVisualizationState } from './visualization';
+import { DEFAULT_MAX_COLUMNS, getDefaultColor, MetricVisualizationState } from './visualization';
 import { CollapseSetting } from '../../shared_components/collapse_setting';
 
 type Props = VisualizationDimensionEditorProps<MetricVisualizationState> & {
@@ -291,6 +291,7 @@ function PrimaryMetricEditor(props: Props) {
                   };
             setState({
               ...state,
+              color: undefined,
               ...params,
             });
           }}
@@ -379,7 +380,7 @@ function StaticColorControls({ state, setState }: Pick<Props, 'state' | 'setStat
     useDebouncedValue<string>(
       {
         onChange: setColor,
-        value: state.color || '',
+        value: state.color || getDefaultColor(!!state.maxAccessor),
       },
       { allowFalsyValue: true }
     );
@@ -388,14 +389,10 @@ function StaticColorControls({ state, setState }: Pick<Props, 'state' | 'setStat
     <EuiFormRow display="columnCompressed" fullWidth label={colorLabel}>
       <EuiColorPicker
         fullWidth
-        data-test-subj="lnsMetric_colorpicker"
         compressed
-        isClearable={true}
+        isClearable={false}
         onChange={(color: string) => handleColorChange(color)}
         color={currentColor}
-        placeholder={i18n.translate('xpack.lens.metric.colorPlaceholder', {
-          defaultMessage: 'Auto',
-        })}
         aria-label={colorLabel}
         showAlpha={false}
         swatches={euiPaletteColorBlind()}

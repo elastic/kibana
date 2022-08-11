@@ -333,7 +333,7 @@ export class DashboardPageObject extends FtrService {
         await this.common.clickConfirmOnModal();
       }
     }
-    await this.listingTable.clickNewButton('createDashboardPromptButton');
+    await this.listingTable.clickNewButton();
     if (await this.testSubjects.exists('dashboardCreateConfirm')) {
       if (continueEditing) {
         await this.testSubjects.click('dashboardCreateConfirmContinue');
@@ -355,7 +355,7 @@ export class DashboardPageObject extends FtrService {
         await this.common.clickConfirmOnModal();
       }
     }
-    await this.listingTable.clickNewButton('createDashboardPromptButton');
+    await this.listingTable.clickNewButton();
     await this.testSubjects.existOrFail('dashboardCreateConfirm');
     if (continueEditing) {
       await this.testSubjects.click('dashboardCreateConfirmContinue');
@@ -367,11 +367,11 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async clickCreateDashboardPrompt() {
-    await this.testSubjects.click('createDashboardPromptButton');
+    await this.testSubjects.click('newItemButton');
   }
 
   public async getCreateDashboardPromptExists() {
-    return await this.testSubjects.exists('createDashboardPromptButton');
+    return this.testSubjects.exists('emptyListPrompt');
   }
 
   public async isOptionsOpen() {
@@ -562,7 +562,7 @@ export class DashboardPageObject extends FtrService {
 
   public async getPanelTitles() {
     this.log.debug('in getPanelTitles');
-    const titleObjects = await this.testSubjects.findAll('dashboardPanelTitle');
+    const titleObjects = await this.find.allByCssSelector('span.embPanel__titleInner');
     return await Promise.all(titleObjects.map(async (title) => await title.getVisibleText()));
   }
 

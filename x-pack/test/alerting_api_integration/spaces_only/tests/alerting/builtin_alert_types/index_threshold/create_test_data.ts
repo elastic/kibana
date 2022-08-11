@@ -29,7 +29,8 @@ export async function createEsDocuments(
   endDate: string = END_DATE,
   intervals: number = 1,
   intervalMillis: number = 1000,
-  groups: number = 2
+  groups: number = 2,
+  indexName: string = ES_TEST_INDEX_NAME
 ) {
   const endDateMillis = Date.parse(endDate) - intervalMillis / 2;
 
@@ -42,7 +43,7 @@ export async function createEsDocuments(
 
     // don't need await on these, wait at the end of the function
     times(groups, (group) => {
-      promises.push(createEsDocument(es, date, testedValue + group, `group-${group}`));
+      promises.push(createEsDocument(es, date, testedValue + group, `group-${group}`, indexName));
     });
   });
   await Promise.all(promises);
@@ -55,7 +56,8 @@ async function createEsDocument(
   es: Client,
   epochMillis: number,
   testedValue: number,
-  group: string
+  group: string,
+  indexName: string
 ) {
   const document = {
     source: DOCUMENT_SOURCE,
@@ -63,13 +65,16 @@ async function createEsDocument(
     date: new Date(epochMillis).toISOString(),
     date_epoch_millis: epochMillis,
     testedValue,
+    testedValueUnsigned: '18446744073709551615',
     group,
+    '@timestamp': new Date(epochMillis).toISOString(),
   };
 
   const response = await es.index({
     id: uuid(),
-    index: ES_TEST_INDEX_NAME,
+    index: indexName,
     refresh: 'wait_for',
+    op_type: 'create',
     body: document,
   });
   // console.log(`writing document to ${ES_TEST_INDEX_NAME}:`, JSON.stringify(document, null, 4));
