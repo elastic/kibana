@@ -44,6 +44,7 @@ import {
 import { ActionsAuthorization } from './authorization/actions_authorization';
 import {
   getAuthorizationModeBySource,
+  getBulkAuthorizationModeBySource,
   AuthorizationMode,
 } from './authorization/get_authorization_mode_by_source';
 import { connectorAuditEvent, ConnectorAuditAction } from './lib/audit_events';
@@ -662,16 +663,13 @@ export class ActionsClient {
   }
 
   public async bulkEnqueueExecution(options: EnqueueExecutionOptions[]): Promise<void> {
-    for (const option of options) {
-      const { source } = option;
-      if (
-        (await getAuthorizationModeBySource(this.unsecuredSavedObjectsClient, source)) ===
-        AuthorizationMode.RBAC
-      ) {
-        await this.authorization.ensureAuthorized('execute');
-      } else {
-        trackLegacyRBACExemption('bulkEnqueueExecution', this.usageCounter);
-      }
+    const isRBAC =
+      (await getBulkAuthorizationModeBySource(this.unsecuredSavedObjectsClient, options)) ===
+      AuthorizationMode.RBAC;
+    if (isRBAC) {
+      await this.authorization.ensureAuthorized('execute');
+    } else {
+      trackLegacyRBACExemption('bulkEnqueueExecution', this.usageCounter);
     }
     return this.bulkExecutionEnqueuer(this.unsecuredSavedObjectsClient, options);
   }
