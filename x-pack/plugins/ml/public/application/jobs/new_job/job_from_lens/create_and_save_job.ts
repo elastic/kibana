@@ -89,6 +89,7 @@ export async function createAndSaveJob(
     try {
       await ml.openJob({ jobId });
     } catch (error) {
+      // job may already be open, so ignore 409 error.
       if (error.body.statusCode !== 409) {
         result.jobOpened.error = error;
         return result;

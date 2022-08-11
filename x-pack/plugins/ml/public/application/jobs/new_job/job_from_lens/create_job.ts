@@ -365,6 +365,7 @@ function createDetectors(
     const func = getMlFunction(operationType);
     return {
       function: func,
+      // don't use the source field if the detector is count
       ...(func === 'count' ? {} : { field_name: sourceField }),
       ...(splitField ? { partition_field_name: splitField.sourceField } : {}),
     };

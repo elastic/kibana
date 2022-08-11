@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import React, { FC, useState } from 'react';
+import React, { FC, useState, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
 import type { Embeddable } from '@kbn/lens-plugin/public';
@@ -115,22 +115,25 @@ export const FlyoutBody: FC<Props> = ({
     }
   }
 
-  const viewResults = async (jobType: CREATED_BY_LABEL | null) => {
-    const { timeRange } = embeddable.getInput();
-    const page = jobType === CREATED_BY_LABEL.MULTI_METRIC ? 'explorer' : 'timeseriesexplorer';
-    const locator = share.url.locators.get(ML_APP_LOCATOR);
-    if (locator) {
-      const url = await locator!.getUrl({
-        page,
-        pageState: {
-          jobIds: [jobId],
-          timeRange,
-        },
-      });
+  const viewResults = useCallback(
+    async (jobType: CREATED_BY_LABEL | null) => {
+      const { timeRange } = embeddable.getInput();
+      const page = jobType === CREATED_BY_LABEL.MULTI_METRIC ? 'explorer' : 'timeseriesexplorer';
+      const locator = share.url.locators.get(ML_APP_LOCATOR);
+      if (locator) {
+        const url = await locator!.getUrl({
+          page,
+          pageState: {
+            jobIds: [jobId],
+            timeRange,
+          },
+        });
 
-      application.navigateToUrl(url);
-    }
-  };
+        application.navigateToUrl(url);
+      }
+    },
+    [embeddable, share, application]
+  );
 
   function setStartJobWrapper(start: boolean) {
     setStartJob(start);
