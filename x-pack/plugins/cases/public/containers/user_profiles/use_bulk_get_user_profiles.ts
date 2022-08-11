@@ -33,6 +33,7 @@ export const useBulkGetUserProfiles = ({ uids }: { uids: string[] }) => {
     },
     {
       retry: false,
+      keepPreviousData: true,
       onError: (error: ServerError) => {
         if (error.name !== 'AbortError') {
           toasts.addError(

@@ -52,8 +52,13 @@ export const CaseViewActivity = ({
     caseData.connector.id
   );
 
+  const assignees = useMemo(
+    () => caseData.assignees.map((assignee) => assignee.uid),
+    [caseData.assignees]
+  );
+
   const { data: userProfiles, isLoading: isLoadingUserProfiles } = useBulkGetUserProfiles({
-    uids: caseData.assignees.map((assignee) => assignee.uid),
+    uids: assignees,
   });
 
   const { data: currentUserProfile, isLoading: isLoadingCurrentUserProfile } =
@@ -73,7 +78,7 @@ export const CaseViewActivity = ({
     caseData,
   });
 
-  const isLoadingProfileData = isLoading || isLoadingUserProfiles || isLoadingCurrentUserProfile;
+  const isLoadingProfileData = isLoadingUserProfiles || isLoadingCurrentUserProfile;
 
   const changeStatus = useCallback(
     (status: CaseStatuses) =>

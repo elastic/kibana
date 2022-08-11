@@ -8,7 +8,7 @@
 import { useSuggestUserProfiles } from '../../../containers/user_profiles/use_suggest_user_profiles';
 import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_get_current_user_profile';
 import { userProfiles, userProfilesMap } from '../../../containers/user_profiles/api.mock';
-import { fireEvent, screen } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import {
   AppMockRenderer,
@@ -61,7 +61,7 @@ describe('AssignUsers', () => {
     appMockRender.render(<AssignUsers {...{ ...defaultProps, isLoading: true }} />);
 
     expect(screen.queryByTestId('case-view-assignees-edit')).not.toBeInTheDocument();
-    expect(screen.getByTestId('case-view-assignees-loading')).toBeInTheDocument();
+    expect(screen.getByTestId('case-view-assignees-button-loading')).toBeInTheDocument();
   });
 
   it('does not show the assign yourself link when the current profile is undefined', () => {
@@ -133,19 +133,7 @@ describe('AssignUsers', () => {
     expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
   });
 
-  it('assigns the current user when the assign yourself link is clicked', () => {
-    const props = {
-      ...defaultProps,
-      userProfiles: userProfilesMap,
-    };
-    appMockRender.render(<AssignUsers {...props} />);
-
-    fireEvent.click(screen.getByText('assign yourself'));
-
-    expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
-  });
-
-  it('calls onAssigneesChanged with the self assigned user', () => {
+  it('assigns the current user when the assign yourself link is clicked', async () => {
     const onAssigneesChanged = jest.fn();
     const props = {
       ...defaultProps,
@@ -156,7 +144,11 @@ describe('AssignUsers', () => {
 
     fireEvent.click(screen.getByText('assign yourself'));
 
-    expect(onAssigneesChanged.mock.calls[0][0]).toMatchInlineSnapshot(`
+    // the first call will be when the component is initially render with isPopover as false
+    // and then it should call again when the user is assigned
+    await waitFor(() => expect(onAssigneesChanged).toBeCalledTimes(2));
+
+    expect(onAssigneesChanged.mock.calls[1][0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "data": Object {},
@@ -171,7 +163,7 @@ describe('AssignUsers', () => {
     `);
   });
 
-  it('calls onAssigneesChanged with the deleted user', () => {
+  it('calls onAssigneesChanged with the deleted user', async () => {
     const onAssigneesChanged = jest.fn();
     const props = {
       ...defaultProps,
@@ -188,6 +180,45 @@ describe('AssignUsers', () => {
       screen.getByTestId(`user-profile-assigned-user-cross-${userProfiles[0].user.username}`)
     );
 
-    expect(onAssigneesChanged.mock.calls[0][0]).toMatchInlineSnapshot(`Array []`);
+    // the first call will be when the component is initially render with isPopover as false
+    // and then it should call again when the user is assigned
+    await waitFor(() => expect(onAssigneesChanged).toBeCalledTimes(2));
+
+    expect(onAssigneesChanged.mock.calls[1][0]).toMatchInlineSnapshot(`Array []`);
+  });
+
+  it('calls onAssigneesChanged when the popover is closed', async () => {
+    const onAssigneesChanged = jest.fn();
+    const props = {
+      ...defaultProps,
+      onAssigneesChanged,
+      userProfiles: userProfilesMap,
+    };
+    appMockRender.render(<AssignUsers {...props} />);
+
+    fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
+
+    fireEvent.click(screen.getByText('Damaged Raccoon'));
+
+    // close the popover
+    fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
+
+    // the first call will be when the component is initially render with isPopover as false
+    // and then it should call again when the user is assigned
+    await waitFor(() => expect(onAssigneesChanged).toBeCalledTimes(2));
+
+    expect(onAssigneesChanged.mock.calls[1][0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "data": Object {},
+          "uid": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+          "user": Object {
+            "email": "damaged_raccoon@elastic.co",
+            "full_name": "Damaged Raccoon",
+            "username": "damaged_raccoon",
+          },
+        },
+      ]
+    `);
   });
 });
