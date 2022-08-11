@@ -38,7 +38,6 @@ import type {
   FetchDocError,
   FieldPreview,
   ChangeSet,
-  Change,
 } from './types';
 
 import { ChangeType } from './types';
