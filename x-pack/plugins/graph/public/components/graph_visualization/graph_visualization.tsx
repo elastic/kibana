@@ -106,6 +106,12 @@ export function GraphVisualization({
 
   return (
     <svg
+      xmlns="http://www.w3.org/2000/svg"
+      className="gphGraph"
+      width="100%"
+      height="100%"
+      pointerEvents="all"
+      id="graphSvg"
       ref={(element) => {
         if (element && svgRoot.current !== element) {
           svgRoot.current = element;

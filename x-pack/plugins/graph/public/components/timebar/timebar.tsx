@@ -10,17 +10,17 @@ import moment from 'moment';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPanel, EuiTitle } from '@elastic/eui';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { FormulaPublicApi, LensPublicStart } from '@kbn/lens-plugin/public';
 import { ControlType, TimeRange, Workspace } from '../../types/workspace_state';
-import { ViewMode } from '../../../../../../src/plugins/embeddable/public';
-import { IndexPattern } from '../../../../../../src/plugins/data/public';
-import type { FormulaPublicApi, LensPublicStart } from '../../../../lens/public';
 import { TIME_STEPS, getCustomActions } from './actions';
 import { buildQueryFilters, getLensAttributes, MAIN_COLOR, SELECTION_COLOR } from './helpers';
 
 export interface TimebarProps {
   workspace: Workspace;
   lens: LensPublicStart;
-  indexPattern?: IndexPattern;
+  indexPattern?: DataView;
   onSetControl: (control: ControlType) => void;
 }
 
@@ -102,7 +102,7 @@ export function Timebar({ workspace, indexPattern, lens, onSetControl }: Timebar
     lens,
     // Omit the timeFilter for now to not break the Lens Editor
     attributes: getLensAttributes(workspace, indexPattern, formulaApi, {
-      timeFilter: undefined,
+      timeFilter,
       playTimeFilter: undefined,
     }),
     timeRange,

@@ -6,7 +6,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import { IRouter } from 'kibana/server';
+import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
 import { LicenseState, verifyApiAccess } from '../lib/license_state';
@@ -34,52 +34,43 @@ export function registerTimeExtentsRoute({
         }),
       },
     },
-    router.handleLegacyErrors(
-      async (
-        {
-          core: {
-            elasticsearch: { client: esClient },
+    router.handleLegacyErrors(async ({ core }, request, response) => {
+      verifyApiAccess(licenseState);
+      licenseState.notifyUsage('Graph');
+      const {
+        elasticsearch: { client: esClient },
+      } = await core;
+      try {
+        return response.ok({
+          body: {
+            resp: await esClient.asCurrentUser.search({
+              index: encodeURIComponent(request.body.index),
+              body: request.body.body,
+              track_total_hits: true,
+            }),
           },
-        },
-        request,
-        response
-      ) => {
-        verifyApiAccess(licenseState);
-        licenseState.notifyUsage('Graph');
-        try {
-          return response.ok({
-            body: {
-              resp: (
-                await esClient.asCurrentUser.search({
-                  index: request.body.index,
-                  body: request.body.body,
-                  track_total_hits: true,
-                })
-              ).body,
-            },
+        });
+      } catch (error) {
+        if (error instanceof errors.ResponseError) {
+          const errorBody: ErrorResponse = error.body;
+          const relevantCause = (errorBody.error?.root_cause ?? []).find((cause) => {
+            return (
+              cause.reason.includes('Fielddata is disabled on text fields') ||
+              cause.reason.includes('No support for examining floating point') ||
+              cause.reason.includes('Sample diversifying key must be a single valued-field') ||
+              cause.reason.includes('Failed to parse query') ||
+              cause.reason.includes('Text fields are not optimised for operations') ||
+              cause.type === 'parsing_exception'
+            );
           });
-        } catch (error) {
-          if (error instanceof errors.ResponseError) {
-            const errorBody: ErrorResponse = error.body;
-            const relevantCause = (errorBody.error?.root_cause ?? []).find((cause) => {
-              return (
-                cause.reason.includes('Fielddata is disabled on text fields') ||
-                cause.reason.includes('No support for examining floating point') ||
-                cause.reason.includes('Sample diversifying key must be a single valued-field') ||
-                cause.reason.includes('Failed to parse query') ||
-                cause.reason.includes('Text fields are not optimised for operations') ||
-                cause.type === 'parsing_exception'
-              );
-            });
 
-            if (relevantCause) {
-              throw Boom.badRequest(relevantCause.reason);
-            }
+          if (relevantCause) {
+            throw Boom.badRequest(relevantCause.reason);
           }
-
-          throw error;
         }
+
+        throw error;
       }
-    )
+    })
   );
 }

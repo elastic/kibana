@@ -4,20 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { DataView } from 'src/plugins/data_views/public';
-import moment from 'moment';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 import { i18n } from '@kbn/i18n';
-import { SavedObjectReference } from 'kibana/public';
-import { TimeRange, Workspace, WorkspaceEdge } from '../../types/workspace_state';
+import { SavedObjectReference } from '@kbn/core/public';
 import type {
   DateHistogramIndexPatternColumn,
-  StaticValueIndexPatternColumn,
   FormulaPublicApi,
   PersistedIndexPatternLayer,
   TypedLensByValueInput,
+  XYAnnotationLayerConfig,
   XYState,
-} from '../../../../lens/public';
+} from '@kbn/lens-plugin/public';
+import { TimeRange, Workspace, WorkspaceEdge } from '../../types/workspace_state';
 
 // Based on default Lens palette
 export const MAIN_COLOR = '#54B399';
@@ -30,36 +29,42 @@ function escapeString(string: string) {
 export function buildQueryFilters(edges: WorkspaceEdge[]): Record<string, unknown> {
   return {
     bool: {
-      should: edges.map(({ source, target }) => ({
-        bool: {
-          filter: [
-            {
-              bool: {
-                should: [
-                  {
-                    match_phrase: {
-                      [source.data.field]: source.data.term,
+      // avoid self links
+      should: edges
+        .filter(
+          ({ source, target }) =>
+            source.data.term !== target.data.term && source.data.field !== target.data.field
+        )
+        .map(({ source, target }) => ({
+          bool: {
+            filter: [
+              {
+                bool: {
+                  should: [
+                    {
+                      match_phrase: {
+                        [source.data.field]: source.data.term,
+                      },
                     },
-                  },
-                ],
-                minimum_should_match: 1,
+                  ],
+                  minimum_should_match: 1,
+                },
               },
-            },
-            {
-              bool: {
-                should: [
-                  {
-                    match_phrase: {
-                      [target.data.field]: target.data.term,
+              {
+                bool: {
+                  should: [
+                    {
+                      match_phrase: {
+                        [target.data.field]: target.data.term,
+                      },
                     },
-                  },
-                ],
-                minimum_should_match: 1,
+                  ],
+                  minimum_should_match: 1,
+                },
               },
-            },
-          ],
-        },
-      })),
+            ],
+          },
+        })),
     },
   };
 }
@@ -68,7 +73,12 @@ function getKqlQuery(edges: WorkspaceEdge[]) {
   // workout the KQL query from the list of edges displayed
   const tuples = [];
   for (const edge of edges) {
-    tuples.push([edge.source.data, edge.target.data]);
+    if (
+      edge.source.data.term !== edge.target.data.term &&
+      edge.source.data.field !== edge.target.data.field
+    ) {
+      tuples.push([edge.source.data, edge.target.data]);
+    }
   }
   // remove duplicates
   const sets = new Set(
@@ -159,81 +169,26 @@ export function getLensAttributes(
     });
   }
 
-  if (timeFilter) {
-    const cols = ['col4', 'col5'];
-    dataLayers.layer3 = {
-      columnOrder: cols,
-      columns: Object.fromEntries(
-        [timeFilter.from, timeFilter.to].map((value, i) => [
-          cols[i],
-          {
-            label: value,
-            dataType: 'number',
-            operationType: 'static_value',
-            isStaticValue: true,
-            isBucketed: false,
-            scale: 'ratio',
-            params: {
-              value: String(moment(value).valueOf()),
-            },
-            references: [],
-          } as StaticValueIndexPatternColumn,
-        ])
-      ),
-    };
-    layers.push({
+  if (timeFilter || playTimeFilter) {
+    const layer = {
       layerId: 'layer3',
-      layerType: 'referenceLine',
-      yConfig: cols.map((forAccessor, i) => ({
-        forAccessor,
-        axisMode: 'bottom',
-        fill: i ? 'above' : 'below',
-        lineWidth: 4,
-        lineStyle: 'dashed',
-        icon: i ? 'arrowLeft' : 'arrowRight',
-        areaOpacity: 0.5,
-      })),
-      accessors: cols,
-      seriesType: 'bar_stacked',
-    });
-  } else if (playTimeFilter) {
-    const cols = ['col6'];
-    dataLayers.layer4 = {
-      columnOrder: cols,
-      columns: Object.fromEntries(
-        [playTimeFilter.to].map((value, i) => [
-          cols[i],
-          {
-            label: value,
-            dataType: 'number',
-            operationType: 'static_value',
-            isStaticValue: true,
-            isBucketed: false,
-            scale: 'ratio',
-            params: {
-              value: String(moment(value).valueOf()),
-            },
-            references: [],
-          } as StaticValueIndexPatternColumn,
-        ])
-      ),
-    };
-    layers.push({
-      layerId: 'layer4',
-      layerType: 'referenceLine',
-      yConfig: cols.map((forAccessor, i) => ({
-        forAccessor,
-        axisMode: 'bottom',
-        fill: 'above',
-        lineWidth: 2,
-        lineStyle: 'solid',
-        icon: 'arrowLeft',
-        color: MAIN_COLOR,
-        areaOpacity: 0.8,
-      })),
-      accessors: cols,
-      seriesType: 'bar_stacked',
-    });
+      layerType: 'annotations',
+      annotations: [],
+    } as XYAnnotationLayerConfig;
+    layers.push(layer);
+
+    if (timeFilter) {
+      layer.annotations.push({
+        label: 'User selection range',
+        key: {
+          type: 'range',
+          timestamp: timeFilter.from,
+          endTimestamp: timeFilter.to,
+        },
+        id: 'layer3-timebar',
+        color: '#7B7B7B1A',
+      });
+    }
   }
 
   const xyConfig: XYState = {

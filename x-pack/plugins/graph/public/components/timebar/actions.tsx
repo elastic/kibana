@@ -7,9 +7,9 @@
 import moment from 'moment';
 
 import { i18n } from '@kbn/i18n';
-import type { Action, ActionExecutionContext } from 'src/plugins/ui_actions/public';
+import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import type { LensPublicStart, TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { TimeRange } from '../../types/workspace_state';
-import type { LensPublicStart, TypedLensByValueInput } from '../../../../lens/public';
 
 export const TIME_STEPS = 5;
 export const DURATION = 15000;
