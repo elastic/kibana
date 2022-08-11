@@ -26,7 +26,7 @@ import type {
 } from '@kbn/ui-actions-plugin/public';
 import type { ClickTriggerEvent, BrushTriggerEvent } from '@kbn/charts-plugin/public';
 import type { IndexPatternAggRestrictions } from '@kbn/data-plugin/public';
-import type { FieldSpec } from '@kbn/data-views-plugin/common';
+import type { FieldSpec, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import type { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
 import type { DateRange, LayerType, SortingHint } from '../common';
@@ -51,6 +51,7 @@ export interface IndexPatternRef {
   id: string;
   title: string;
   name?: string;
+  adHoc?: boolean;
 }
 
 export interface IndexPattern {
@@ -68,6 +69,7 @@ export interface IndexPattern {
     }
   >;
   hasRestrictions: boolean;
+  spec?: DataViewSpec;
 }
 
 export type IndexPatternField = FieldSpec & {
@@ -273,6 +275,7 @@ export interface Datasource<T = unknown, P = unknown> {
   removeLayer: (state: T, layerId: string) => T;
   clearLayer: (state: T, layerId: string) => T;
   getLayers: (state: T) => string[];
+  getAdHocIndexSpecs?: (state: P) => Record<string, DataViewSpec> | undefined;
   removeColumn: (props: {
     prevState: T;
     layerId: string;

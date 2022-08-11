@@ -42,7 +42,8 @@ import { loadIndexPatternRefs, loadIndexPatterns } from '../../indexpattern_serv
 function getIndexPatterns(
   references?: SavedObjectReference[],
   initialContext?: VisualizeFieldContext | VisualizeEditorContext,
-  initialId?: string
+  initialId?: string,
+  adHocDataviews?: string[]
 ) {
   const indexPatternIds = [];
   if (initialContext) {
@@ -65,6 +66,9 @@ function getIndexPatterns(
         indexPatternIds.push(reference.id);
       }
     }
+  }
+  if (adHocDataviews) {
+    indexPatternIds.push(...adHocDataviews);
   }
   return [...new Set(indexPatternIds)];
 }
@@ -111,8 +115,26 @@ export async function initializeDataViews(
     Object.keys(datasourceMap).every((datasourceId) => !datasourceStates[datasourceId]?.state)
       ? fallbackId
       : undefined;
-
-  const usedIndexPatterns = getIndexPatterns(references, initialContext, initialId);
+  const adHocDataviewsIds: string[] = [];
+  let adHocDataviews;
+  Object.keys(datasourceMap).forEach((datasourceId) => {
+    const datasource = datasourceMap[datasourceId];
+    const datasourceState = datasourceStates[datasourceId]?.state;
+    const adHocSpecs = datasource?.getAdHocIndexSpecs?.(datasourceState);
+    if (adHocSpecs) {
+      const dataViewsIds: string[] = Object.keys(adHocSpecs);
+      if (dataViewsIds.length) {
+        adHocDataviewsIds.push(...dataViewsIds);
+        adHocDataviews = Object.values(adHocSpecs);
+      }
+    }
+  });
+  const usedIndexPatterns = getIndexPatterns(
+    references,
+    initialContext,
+    initialId,
+    adHocDataviewsIds
+  );
 
   // load them
   const availableIndexPatterns = new Set(indexPatternRefs.map(({ id }: IndexPatternRef) => id));
@@ -124,6 +146,7 @@ export async function initializeDataViews(
     patterns: usedIndexPatterns,
     notUsedPatterns,
     cache: {},
+    adHocDataviews,
   });
 
   return { indexPatternRefs, indexPatterns };

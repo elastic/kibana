@@ -764,8 +764,23 @@ export class Embeddable
 
     this.activeDataInfo.activeDatasource = this.deps.datasourceMap[activeDatasourceId];
     const docDatasourceState = this.savedVis?.state.datasourceStates[activeDatasourceId];
+    const adHocIndexPatterns =
+      this.activeDataInfo.activeDatasource?.getAdHocIndexSpecs?.(docDatasourceState);
 
-    const indexPatternsCache = this.indexPatterns.reduce(
+    const adHocDataviews: DataView[] = [];
+
+    if (adHocIndexPatterns) {
+      const adHocSpecs = Object.values(adHocIndexPatterns);
+      if (adHocSpecs?.length) {
+        for (const addHocDataView of adHocSpecs) {
+          const d = await this.deps.dataViews.create(addHocDataView);
+          adHocDataviews.push(d);
+        }
+      }
+    }
+    const allIndexPatterns = [...this.indexPatterns, ...adHocDataviews];
+
+    const indexPatternsCache = allIndexPatterns.reduce(
       (acc, indexPattern) => ({
         [indexPattern.id!]: convertDataViewIntoLensIndexPattern(indexPattern),
         ...acc,

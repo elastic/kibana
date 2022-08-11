@@ -6,7 +6,7 @@
  */
 
 import { isNestedField } from '@kbn/data-views-plugin/common';
-import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
+import type { DataViewsContract, DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { keyBy } from 'lodash';
 import { HttpSetup } from '@kbn/core/public';
 import { IndexPattern, IndexPatternField, IndexPatternMap, IndexPatternRef } from '../types';
@@ -15,7 +15,7 @@ import { BASE_API_URL, DateRange, ExistingFields } from '../../common';
 import { DataViewsState } from '../state_management';
 
 type ErrorHandler = (err: Error) => void;
-type MinimalDataViewsContract = Pick<DataViewsContract, 'get' | 'getIdsWithTitle'>;
+type MinimalDataViewsContract = Pick<DataViewsContract, 'get' | 'getIdsWithTitle' | 'create'>;
 
 /**
  * All these functions will be used by the Embeddable instance too,
@@ -92,6 +92,7 @@ export function convertDataViewIntoLensIndexPattern(
     fields: newFields,
     getFieldByName: getFieldByNameFactory(newFields),
     hasRestrictions: !!typeMeta?.aggs,
+    spec: dataView.isPersisted() ? undefined : dataView.toSpec(false),
   };
 }
 
@@ -122,12 +123,14 @@ export async function loadIndexPatterns({
   patterns,
   notUsedPatterns,
   cache,
+  adHocDataviews,
   onIndexPatternRefresh,
 }: {
   dataViews: MinimalDataViewsContract;
   patterns: string[];
   notUsedPatterns?: string[];
   cache: Record<string, IndexPattern>;
+  adHocDataviews?: DataViewSpec[];
   onIndexPatternRefresh?: () => void;
 }) {
   const missingIds = patterns.filter((id) => !cache[id]);
@@ -155,6 +158,12 @@ export async function loadIndexPatterns({
       if (resp) {
         indexPatterns = [resp];
       }
+    }
+  }
+  if (adHocDataviews?.length) {
+    for (const addHocDataView of adHocDataviews) {
+      const d = await dataViews.create(addHocDataView);
+      indexPatterns.push(d);
     }
   }
 

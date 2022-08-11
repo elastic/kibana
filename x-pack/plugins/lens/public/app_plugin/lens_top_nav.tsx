@@ -252,14 +252,38 @@ export const LensTopNavMenu = ({
     [dispatch]
   );
   const dispatchChangeIndexPattern = React.useCallback(
-    async (indexPatternId) => {
-      const newIndexPatterns = await indexPatternService.ensureIndexPattern({
-        id: indexPatternId,
-        cache: dataViews.indexPatterns,
-      });
+    async (dataViewOrId, isAdHoc?) => {
+      const indexPatternId = typeof dataViewOrId === 'string' ? dataViewOrId : dataViewOrId.id;
+      const [newIndexPatternRefs, newIndexPatterns] = await Promise.all([
+        // Reload refs in case it's a new indexPattern created on the spot
+        dataViews.indexPatternRefs[indexPatternId]
+          ? dataViews.indexPatternRefs
+          : indexPatternService.loadIndexPatternRefs({
+              isFullEditor: true,
+            }),
+        indexPatternService.ensureIndexPattern({
+          id: indexPatternId,
+          cache: dataViews.indexPatterns,
+        }),
+      ]);
+      let indexPatternRefsEnhanced = newIndexPatternRefs;
+      if (isAdHoc) {
+        indexPatternRefsEnhanced = [
+          ...indexPatternRefsEnhanced,
+          {
+            title: dataViewOrId.title,
+            name: dataViewOrId.name,
+            id: indexPatternId,
+            adHoc: true,
+          },
+        ];
+      }
       dispatch(
         changeIndexPattern({
-          dataViews: { indexPatterns: newIndexPatterns },
+          dataViews: {
+            indexPatterns: newIndexPatterns,
+            indexPatternRefs: indexPatternRefsEnhanced,
+          },
           datasourceIds: Object.keys(datasourceStates),
           visualizationIds: visualization.activeId ? [visualization.activeId] : [],
           indexPatternId,
@@ -267,6 +291,7 @@ export const LensTopNavMenu = ({
       );
     },
     [
+      dataViews.indexPatternRefs,
       dataViews.indexPatterns,
       datasourceStates,
       dispatch,
@@ -694,14 +719,20 @@ export const LensTopNavMenu = ({
             closeDataViewEditor.current = dataViewEditor.openEditor({
               onSave: async (dataView) => {
                 if (dataView.id) {
-                  dispatchChangeIndexPattern(dataView.id);
+                  dispatchChangeIndexPattern(dataView, !dataView.isPersisted());
+                  setCurrentIndexPattern(dataView);
+                  if (!dataView.isPersisted()) {
+                    // add the ad-hoc dataview on the indexPatterns list
+                    setIndexPatterns([...indexPatterns, dataView]);
+                  }
                   refreshFieldList();
                 }
               },
+              allowAdHocDataView: true,
             });
           }
         : undefined,
-    [canEditDataView, dataViewEditor, dispatchChangeIndexPattern, refreshFieldList]
+    [canEditDataView, dataViewEditor, dispatchChangeIndexPattern, indexPatterns, refreshFieldList]
   );
 
   const dataViewPickerProps = {

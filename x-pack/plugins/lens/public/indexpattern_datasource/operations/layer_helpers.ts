@@ -200,6 +200,12 @@ export function insertNewColumn({
   if (layer.columns[columnId]) {
     throw new Error(`Can't insert a column with an ID that is already in use`);
   }
+  if (indexPattern.spec) {
+    layer = {
+      ...layer,
+      adHocSpec: indexPattern.spec,
+    };
+  }
 
   const baseOptions = {
     indexPattern,
@@ -1356,6 +1362,7 @@ export function updateLayerIndexPattern(
   return {
     ...layer,
     indexPatternId: newIndexPattern.id,
+    adHocSpec: newIndexPattern?.spec,
     columns: newColumns,
     columnOrder: newColumnOrder,
   };

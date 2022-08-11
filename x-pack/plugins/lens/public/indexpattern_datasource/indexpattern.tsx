@@ -202,6 +202,10 @@ export function getIndexPatternDatasource({
       return Object.keys(state.layers);
     },
 
+    getAdHocIndexSpecs(state: IndexPatternPersistedState) {
+      return state?.adHocIndexPatterns;
+    },
+
     removeColumn({ prevState, layerId, columnId, indexPatterns }) {
       const indexPattern = indexPatterns[prevState.layers[layerId]?.indexPatternId];
       return mergeLayer({
@@ -540,15 +544,18 @@ export function getIndexPatternDatasource({
           }
           return null;
         },
-        getSourceId: () => layer.indexPatternId,
-        getFilters: (activeData: FramePublicAPI['activeData'], timeRange?: TimeRange) =>
-          getFiltersInLayer(
+        getSourceId: () => {
+          return layer.adHocSpec?.id || layer.indexPatternId;
+        },
+        getFilters: (activeData: FramePublicAPI['activeData'], timeRange?: TimeRange) => {
+          return getFiltersInLayer(
             layer,
             visibleColumnIds,
             activeData?.[layerId],
             indexPatterns[layer.indexPatternId],
             timeRange
-          ),
+          );
+        },
         getVisualDefaults: () => getVisualDefaultsForLayer(layer),
         getMaxPossibleNumValues: (columnId) => {
           if (layer && layer.columns[columnId]) {

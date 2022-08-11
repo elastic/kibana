@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { DragDropIdentifier } from '../drag_drop/providers';
 import type { IncompleteColumn, GenericIndexPatternColumn } from './operations';
 import type { DragDropOperation } from '../types';
@@ -55,10 +55,12 @@ export interface IndexPatternLayer {
   indexPatternId: string;
   // Partial columns represent the temporary invalid states
   incompleteColumns?: Record<string, IncompleteColumn>;
+  adHocSpec?: DataViewSpec;
 }
 
 export interface IndexPatternPersistedState {
   layers: Record<string, Omit<IndexPatternLayer, 'indexPatternId'>>;
+  adHocIndexPatterns?: Record<string, DataViewSpec>;
 }
 
 export type PersistedIndexPatternLayer = Omit<IndexPatternLayer, 'indexPatternId'>;
