@@ -939,6 +939,7 @@ function syncLinkedDimensionsFunction(
 
     const dropType = 'duplicate_compatible';
 
+    // TODO - always call onDrop with the TARGET's dimension groups throughout Lens
     const dimensionGroups = activeVisualization.getConfiguration({
       state: visualizationState,
       layerId: to.layerId,
