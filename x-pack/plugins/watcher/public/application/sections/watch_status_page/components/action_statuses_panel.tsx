@@ -8,6 +8,7 @@
 import React, { Fragment, useState, useEffect, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { Moment } from 'moment';
 
 import {
   EuiInMemoryTable,
@@ -18,6 +19,7 @@ import {
   EuiFlyout,
   EuiFlyoutHeader,
   EuiFlyoutBody,
+  EuiIcon,
 } from '@elastic/eui';
 
 import { PAGINATION } from '../../../../../common/constants';
@@ -72,16 +74,56 @@ export const ActionStatusesPanel = () => {
         defaultMessage: 'Name',
       }),
       sortable: true,
-      truncateText: true,
+      truncateText: false,
     },
     {
       field: 'state',
-      name: i18n.translate('xpack.watcher.sections.watchDetail.watchTable.stateHeader', {
-        defaultMessage: 'State',
-      }),
+      name: (
+        <EuiToolTip
+          content={i18n.translate(
+            'xpack.watcher.sections.watchDetail.watchTable.stateHeader.tooltipText',
+            {
+              defaultMessage: 'OK, acked, throttled, or error state',
+            }
+          )}
+        >
+          <span>
+            {i18n.translate('xpack.watcher.sections.watchDetail.watchTable.stateHeader', {
+              defaultMessage: 'State',
+            })}{' '}
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </span>
+        </EuiToolTip>
+      ),
       sortable: true,
       truncateText: true,
       render: (state: string) => <ActionStateBadge state={state} />,
+    },
+    {
+      field: 'lastExecution',
+      name: (
+        <EuiToolTip
+          content={i18n.translate(
+            'xpack.watcher.sections.watchHistory.watchActionStatusTable.lastExecuted.tooltipText',
+            {
+              defaultMessage: `When this action was last executed`,
+            }
+          )}
+        >
+          <span>
+            {i18n.translate(
+              'xpack.watcher.sections.watchHistory.watchActionStatusTable.lastExecuted',
+              {
+                defaultMessage: 'Last executed',
+              }
+            )}{' '}
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </span>
+        </EuiToolTip>
+      ),
+      sortable: true,
+      truncateText: false,
+      render: (lastExecution?: Moment) => lastExecution?.format() ?? '',
     },
   ];
 
