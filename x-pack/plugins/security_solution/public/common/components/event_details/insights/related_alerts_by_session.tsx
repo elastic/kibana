@@ -7,12 +7,11 @@
 
 import React, { useCallback } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 
 import type { BrowserFields } from '../../../containers/source';
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
 import type { DataProvider } from '../../../../../common/types';
-import { EXISTS_OPERATOR } from '../../../../../common/types';
+import { IS_OPERATOR } from '../../../../../common/types';
 import { useActionCellDataProvider } from '../table/use_action_cell_data_provider';
 import { useAlertPrevalence } from '../../../containers/alerts/use_alert_prevalence';
 import type { InsightAccordionState } from './insight_accordion';
@@ -84,14 +83,14 @@ export const RelatedAlertsBySession = React.memo<Props>(
       }
       const ensureOnlyRuleProviders: DataProvider = {
         enabled: true,
-        id: ALERT_RULE_UUID,
-        name: ALERT_RULE_UUID,
+        id: 'event.kind',
+        name: 'event.kind',
         excluded: false,
         kqlQuery: '',
         queryMatch: {
-          field: ALERT_RULE_UUID,
-          value: '*',
-          operator: EXISTS_OPERATOR,
+          field: 'event.kind',
+          value: 'signal',
+          operator: IS_OPERATOR,
         },
       };
       const dataProvidersWithAlertFilter = cellData.dataProviders.map((provider) => {

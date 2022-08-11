@@ -7,7 +7,6 @@
 
 /* eslint-disable complexity */
 
-import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { escapeDataProviderId } from '@kbn/securitysolution-t-grid';
 import { isArray, isEmpty, isString } from 'lodash/fp';
 import { useMemo } from 'react';
@@ -30,7 +29,7 @@ import { PORT_NAMES } from '../../../../network/components/port/helpers';
 import { INDICATOR_REFERENCE } from '../../../../../common/cti/constants';
 import type { BrowserField } from '../../../containers/source';
 import type { DataProvider } from '../../../../../common/types';
-import { IS_OPERATOR, EXISTS_OPERATOR } from '../../../../../common/types';
+import { IS_OPERATOR } from '../../../../../common/types';
 
 export interface UseActionCellDataProvider {
   contextId?: string;
@@ -159,18 +158,18 @@ export const useActionCellDataProvider = ({
   if (alertsOnly && cellData) {
     const ensureOnlyRuleProviders: DataProvider = {
       enabled: true,
-      id: ALERT_RULE_UUID,
-      name: ALERT_RULE_UUID,
+      id: 'event.kind',
+      name: 'event.kind',
       excluded: false,
       kqlQuery: '',
       queryMatch: {
-        field: ALERT_RULE_UUID,
-        value: '*',
-        operator: EXISTS_OPERATOR,
+        field: 'event.kind',
+        value: 'signal',
+        operator: IS_OPERATOR,
       },
     };
     cellData.dataProviders = cellData?.dataProviders.map((provider) => {
-      const id = `${provider.id}-${ALERT_RULE_UUID}`;
+      const id = `${provider.id}-event-kind`;
       return {
         ...provider,
         id,
