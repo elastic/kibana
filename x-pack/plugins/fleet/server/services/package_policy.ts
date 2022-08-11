@@ -74,7 +74,7 @@ import { outputService } from './output';
 import { getPackageInfo, getInstallation, ensureInstalledPackage } from './epm/packages';
 import { getAssetsData } from './epm/packages/assets';
 import { compileTemplate } from './epm/agent/agent';
-import { normalizeKuery } from './saved_object';
+import { escapeSearchQueryPhrase, normalizeKuery } from './saved_object';
 import { appContextService } from '.';
 import { removeOldAssets } from './epm/packages/cleanup';
 import type { PackageUpdateEvent, UpdateEventType } from './upgrade_sender';
@@ -289,6 +289,26 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
       version: packagePolicySO.version,
       ...packagePolicySO.attributes,
     };
+  }
+
+  public async findAllForPolicy(
+    soClient: SavedObjectsClientContract,
+    agentPolicyId: string
+  ): Promise<PackagePolicy[] | null> {
+    const packagePolicySO = await soClient.find<PackagePolicySOAttributes>({
+      type: SAVED_OBJECT_TYPE,
+      filter: `${SAVED_OBJECT_TYPE}.attributes.policy_id:${escapeSearchQueryPhrase(agentPolicyId)}`,
+      perPage: SO_SEARCH_LIMIT,
+    });
+    if (!packagePolicySO) {
+      return null;
+    }
+
+    return packagePolicySO.saved_objects.map((so) => ({
+      id: so.id,
+      version: so.version,
+      ...so.attributes,
+    }));
   }
 
   public async getByIDs(
@@ -1266,6 +1286,10 @@ export interface PackagePolicyServiceInterface {
   get(soClient: SavedObjectsClientContract, id: string): Promise<PackagePolicy | null>;
 
   getByIDs(soClient: SavedObjectsClientContract, ids: string[]): Promise<PackagePolicy[] | null>;
+  findAllForPolicy(
+    soClient: SavedObjectsClientContract,
+    agentPolicyId: string
+  ): Promise<PackagePolicy[]>;
 
   list(
     soClient: SavedObjectsClientContract,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { uniq, omit, isEqual } from 'lodash';
+import { omit, isEqual } from 'lodash';
 import uuid from 'uuid/v4';
 import uuidv5 from 'uuid/v5';
 import { safeDump } from 'js-yaml';
@@ -180,8 +180,9 @@ class AgentPolicyService {
   }
 
   public hasAPMIntegration(agentPolicy: AgentPolicy) {
-    return agentPolicy.package_policies.some(
-      (p) => typeof p !== 'string' && p.package?.name === FLEET_APM_PACKAGE
+    return (
+      agentPolicy.package_policies &&
+      agentPolicy.package_policies.some((p) => p.package?.name === FLEET_APM_PACKAGE)
     );
   }
 
@@ -254,10 +255,7 @@ class AgentPolicyService {
 
     if (withPackagePolicies) {
       agentPolicy.package_policies =
-        (await packagePolicyService.getByIDs(
-          soClient,
-          (agentPolicySO.attributes.package_policies as string[]) || []
-        )) || [];
+        (await packagePolicyService.findAllForPolicy(soClient, id)) || [];
     }
 
     return agentPolicy;
@@ -420,7 +418,7 @@ class AgentPolicyService {
     );
 
     // Copy all package policies and append (copy n) to their names
-    if (baseAgentPolicy.package_policies.length) {
+    if (baseAgentPolicy.package_policies) {
       const newPackagePolicies = await pMap(
         baseAgentPolicy.package_policies as PackagePolicy[],
         async (packagePolicy: PackagePolicy) => {
@@ -593,18 +591,9 @@ class AgentPolicyService {
       );
     }
 
-    return await this._update(
-      soClient,
-      esClient,
-      id,
-      {
-        package_policies: uniq(
-          [...((oldAgentPolicy.package_policies || []) as string[])].concat(packagePolicyIds)
-        ),
-      },
-      options?.user,
-      { bumpRevision: options.bumpRevision }
-    );
+    return await this._update(soClient, esClient, id, {}, options?.user, {
+      bumpRevision: options.bumpRevision,
+    });
   }
 
   public async unassignPackagePolicies(
@@ -626,19 +615,7 @@ class AgentPolicyService {
       );
     }
 
-    return await this._update(
-      soClient,
-      esClient,
-      id,
-      {
-        package_policies: uniq(
-          [...((oldAgentPolicy.package_policies || []) as string[])].filter(
-            (packagePolicyId) => !packagePolicyIds.includes(packagePolicyId)
-          )
-        ),
-      },
-      options?.user
-    );
+    return await this._update(soClient, esClient, id, {}, options?.user);
   }
 
   public async delete(
@@ -667,12 +644,14 @@ class AgentPolicyService {
       throw new Error('Cannot delete agent policy that is assigned to agent(s)');
     }
 
+    const packagePolicies = await packagePolicyService.findAllForPolicy(soClient, id);
+
     if (agentPolicy.package_policies && agentPolicy.package_policies.length) {
       const deletedPackagePolicies: DeletePackagePoliciesResponse =
         await packagePolicyService.delete(
           soClient,
           esClient,
-          agentPolicy.package_policies as string[],
+          packagePolicies.map((p) => p.id),
           {
             force: options?.force,
             skipUnassignFromAgentPolicies: true,
