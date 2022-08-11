@@ -57,7 +57,8 @@ export function createExploratoryViewUrl(
 }
 
 /**
- * Encodes the uri if URL reserved characters (`;,/?:@&=+$#`) are found.
+ * Encodes the uri if it contains characters (`/?@&=+#`).
+ * It doesn't consider `,` and `:` as they are part of [Rison]{@link https://www.npmjs.com/package/rison-node} syntax.
  *
  * @param uri Non encoded URI
  */
@@ -66,7 +67,7 @@ function encodeUriIfNeeded(uri: string) {
     return uri;
   }
 
-  if (/[;,\/?:@&=+$#]/.test(uri)) {
+  if (/[\/?@&=+#]/.test(uri)) {
     return encodeURIComponent(uri);
   }
 
