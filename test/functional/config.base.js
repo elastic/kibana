@@ -249,6 +249,36 @@ export default async function ({ readConfigFile }) {
           kibana: [],
         },
 
+        index_a: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['index-a'],
+                privileges: ['read', 'view_index_metadata', 'manage', 'create_index', 'index'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
+
+        index_b: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['index-b'],
+                privileges: ['read', 'view_index_metadata', 'manage', 'create_index', 'index'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
+
         kibana_sample_read: {
           elasticsearch: {
             cluster: [],
