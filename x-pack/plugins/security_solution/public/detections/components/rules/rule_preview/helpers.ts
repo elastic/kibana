@@ -16,6 +16,8 @@ import type { ChartSeriesConfigs } from '../../../../common/components/charts/co
 import { getQueryFilter } from '../../../../../common/detection_engine/get_query_filter';
 import type { FieldValueQueryBar } from '../query_bar';
 import type { ESQuery } from '../../../../../common/typed_json';
+import { DataSourceType } from '../../../pages/detection_engine/rules/types';
+
 /**
  * Determines whether or not to display noise warning.
  * Is considered noisy if alerts/hour rate > 1
@@ -165,6 +167,7 @@ export const getIsRulePreviewDisabled = ({
   isThreatQueryBarValid,
   index,
   dataViewId,
+  dataSourceType,
   threatIndex,
   threatMapping,
   machineLearningJobId,
@@ -176,14 +179,20 @@ export const getIsRulePreviewDisabled = ({
   isThreatQueryBarValid: boolean;
   index: string[];
   dataViewId: string | undefined;
+  dataSourceType: DataSourceType;
   threatIndex: string[];
   threatMapping: ThreatMapping;
   machineLearningJobId: string[];
   queryBar: FieldValueQueryBar;
   newTermsFields: string[];
 }) => {
-  if (!isQueryBarValid || ((index == null || index.length === 0) && dataViewId == null))
+  if (
+    !isQueryBarValid ||
+    (dataSourceType === DataSourceType.DataView && !dataViewId) ||
+    (dataSourceType === DataSourceType.IndexPatterns && index.length === 0)
+  ) {
     return true;
+  }
   if (ruleType === 'threat_match') {
     if (!isThreatQueryBarValid || !threatIndex.length || !threatMapping) return true;
     if (

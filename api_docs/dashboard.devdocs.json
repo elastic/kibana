@@ -83,6 +83,82 @@
           },
           {
             "parentPluginId": "dashboard",
+            "id": "def-public.DashboardContainer.getAllDataViews",
+            "type": "Function",
+            "tags": [],
+            "label": "getAllDataViews",
+            "description": [
+              "\nGets all the dataviews that are actively being used in the dashboard"
+            ],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              "[]"
+            ],
+            "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": [
+              "An array of dataviews"
+            ]
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-public.DashboardContainer.setAllDataViews",
+            "type": "Function",
+            "tags": [],
+            "label": "setAllDataViews",
+            "description": [
+              "\nUse this to set the dataviews that are used in the dashboard when they change/update"
+            ],
+            "signature": [
+              "(newDataViews: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              "[]) => void"
+            ],
+            "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "dashboard",
+                "id": "def-public.DashboardContainer.setAllDataViews.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "newDataViews",
+                "description": [
+                  "The new array of dataviews that will overwrite the old dataviews array"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataView",
+                    "text": "DataView"
+                  },
+                  "[]"
+                ],
+                "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dashboard",
             "id": "def-public.DashboardContainer.getPanelCount",
             "type": "Function",
             "tags": [],
@@ -1795,13 +1871,13 @@
                 "section": "def-common.SearchSource",
                 "text": "SearchSource"
               },
-              " | undefined; fetch$: (options?: ",
+              " | undefined; fetch$: <T = {}>(options?: ",
               {
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
-                "section": "def-common.ISearchOptions",
-                "text": "ISearchOptions"
+                "section": "def-common.SearchSourceSearchOptions",
+                "text": "SearchSourceSearchOptions"
               },
               ") => ",
               "Observable",
@@ -1815,19 +1891,19 @@
               },
               "<",
               "SearchResponse",
-              "<any, Record<string, ",
+              "<T, Record<string, ",
               "AggregationsAggregate",
               ">>>>; fetch: (options?: ",
               {
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
-                "section": "def-common.ISearchOptions",
-                "text": "ISearchOptions"
+                "section": "def-common.SearchSourceSearchOptions",
+                "text": "SearchSourceSearchOptions"
               },
               ") => Promise<",
               "SearchResponse",
-              "<any, Record<string, ",
+              "<unknown, Record<string, ",
               "AggregationsAggregate",
               ">>>; onRequestStart: (handler: (searchSource: ",
               {
@@ -1842,8 +1918,8 @@
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
-                "section": "def-common.ISearchOptions",
-                "text": "ISearchOptions"
+                "section": "def-common.SearchSourceSearchOptions",
+                "text": "SearchSourceSearchOptions"
               },
               " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; destroy: () => void; getSerializedFields: (recurse?: boolean) => ",
               {

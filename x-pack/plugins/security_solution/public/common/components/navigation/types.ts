@@ -62,7 +62,6 @@ export interface NavTab {
   isBeta?: boolean;
 }
 export const securityNavKeys = [
-  SecurityPageName.administration,
   SecurityPageName.alerts,
   SecurityPageName.blocklist,
   SecurityPageName.detectionAndResponse,
