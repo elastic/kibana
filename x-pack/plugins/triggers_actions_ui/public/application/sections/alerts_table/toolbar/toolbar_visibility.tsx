@@ -19,6 +19,7 @@ const getDefaultVisibility = (
   updatedAt: number,
   columnIds: string[]
 ): EuiDataGridToolBarVisibilityOptions => {
+  console.log('columnIds', columnIds);
   const fieldBrowserProps: FieldBrowserProps = {
     columnIds,
     browserFields,

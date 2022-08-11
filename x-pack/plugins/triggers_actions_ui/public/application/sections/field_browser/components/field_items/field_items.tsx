@@ -44,7 +44,6 @@ export const getFieldItems = ({
   const categoryIds =
     selectedCategoryIds.length > 0 ? selectedCategoryIds : Object.keys(browserFields);
   const selectedFieldIds = new Set(columnIds);
-  console.log(browserFields);
 
   return uniqBy(
     'name',

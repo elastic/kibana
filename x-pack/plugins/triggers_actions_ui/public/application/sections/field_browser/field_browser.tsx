@@ -30,7 +30,6 @@ export const FieldBrowserComponent: React.FC<FieldBrowserProps> = ({
   options,
   width,
 }) => {
-  console.log('first', browserFields, columnIds);
   const customizeColumnsButtonRef = useRef<HTMLButtonElement | null>(null);
   /** all field names shown in the field browser must contain this string (when specified) */
   const [filterInput, setFilterInput] = useState('');

@@ -64,7 +64,9 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     alerts,
     useBulkActionsConfig: props.alertsTableConfiguration.useBulkActions,
   });
-  console.log(props.columns);
+
+  const columnIds: string[] = props.columns.map((column) => column.id);
+
   const toolbarVisibility = useCallback(() => {
     const { rowSelection } = bulkActionsState;
     return getToolbarVisibility({
@@ -74,7 +76,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       alerts: alertsData.alerts,
       updatedAt: props.updatedAt,
       isLoading,
-      columnsIds: props.columns.map((column) => column.id),
+      columnIds,
     });
   }, [
     bulkActionsState,
@@ -82,8 +84,8 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     alertsCount,
     alertsData.alerts,
     props.updatedAt,
-    props.columns,
     isLoading,
+    columnIds,
   ])();
 
   const {

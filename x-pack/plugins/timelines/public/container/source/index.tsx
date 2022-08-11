@@ -134,7 +134,6 @@ export const useFetchIndex = (
           )
           .subscribe({
             next: (response) => {
-              console.log(response);
               if (isCompleteResponse(response)) {
                 const stringifyIndices = response.indicesExist.sort().join();
 

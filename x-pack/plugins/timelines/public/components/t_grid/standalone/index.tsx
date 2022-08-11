@@ -150,7 +150,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   bulkActions = {},
   queryFields = [],
 }) => {
-  console.log('standalone');
   const dispatch = useDispatch();
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
   const { uiSettings } = useKibana<CoreStart>().services;
