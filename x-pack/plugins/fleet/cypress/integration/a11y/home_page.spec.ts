@@ -42,6 +42,7 @@ describe('Home page', () => {
         checkA11y({ skipFailures: false });
       });
       it('Install Fleet Server', () => {
+        cy.getBySel('fleetServerHostInput', { timeout: 15000 }).should('be.visible');
         cy.getBySel('fleetServerHostInput').getBySel('comboBoxSearchInput').type(fleetServerHost);
         cy.getBySel(GENERATE_FLEET_SERVER_POLICY_BUTTON).click();
         cy.getBySel(PLATFORM_TYPE_LINUX_BUTTON, { timeout: 15000 }).should('be.visible');
