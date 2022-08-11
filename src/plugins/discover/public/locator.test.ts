@@ -57,9 +57,7 @@ describe('Discover url generator', () => {
 
   test('can specify specific data view', async () => {
     const { locator } = await setup();
-    const { path } = await locator.getLocation({
-      dataViewId,
-    });
+    const { path } = await locator.getLocation({ dataViewId });
     const { _a, _g } = getStatesFromKbnUrl(path, ['_a', '_g']);
 
     expect(_a).toEqual({
@@ -224,13 +222,19 @@ describe('Discover url generator', () => {
     );
   });
 
+  test('should use legacy locator params', async () => {
+    const { locator } = await setup();
+    const { path } = await locator.getLocation({ dataViewId });
+    const { path: legacyParamsPath } = await locator.getLocation({ indexPatternId: dataViewId });
+
+    expect(path).toEqual(legacyParamsPath);
+  });
+
   describe('useHash property', () => {
     describe('when default useHash is set to false', () => {
       test('when using default, sets data view ID in the generated URL', async () => {
         const { locator } = await setup();
-        const { path } = await locator.getLocation({
-          dataViewId,
-        });
+        const { path } = await locator.getLocation({ dataViewId });
 
         expect(path.indexOf(dataViewId) > -1).toBe(true);
       });
