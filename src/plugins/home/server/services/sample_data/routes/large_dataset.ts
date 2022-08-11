@@ -52,7 +52,7 @@ export function createInstallLargeDatasetRoute(
           'es_test_data.py',
           '--username=elastic',
           '--password=changeme',
-          '--index_name=kibana_sample_dataset_large',
+          '--index_name=${indexName}',
           '--count=${nrOfDocuments}',
         ],
         { shell: true }
