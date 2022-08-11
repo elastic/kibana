@@ -37,9 +37,10 @@ import { useFetchParams } from './use_fetch_params';
 
 // Overall progress is a float from 0 to 1.
 const LOADED_OVERALL_HISTOGRAM = 0.05;
-const LOADED_FIELD_CANDIDATES = LOADED_OVERALL_HISTOGRAM + 0.05;
+const LOADED_ERROR_HISTOGRAM = LOADED_OVERALL_HISTOGRAM + 0.05;
+const LOADED_FIELD_CANDIDATES = LOADED_ERROR_HISTOGRAM + 0.05;
 const LOADED_DONE = 1;
-const PROGRESS_STEP_P_VALUES = 0.9;
+const PROGRESS_STEP_P_VALUES = 0.9 - LOADED_FIELD_CANDIDATES;
 
 export function useFailedTransactionsCorrelations() {
   const fetchParams = useFetchParams();
@@ -101,6 +102,10 @@ export function useFailedTransactionsCorrelations() {
         }
       );
 
+      if (abortCtrl.current.signal.aborted) {
+        return;
+      }
+
       const {
         overallHistogram,
         totalDocCount,
@@ -108,6 +113,16 @@ export function useFailedTransactionsCorrelations() {
         durationMin,
         durationMax,
       } = overallHistogramResponse;
+
+      responseUpdate.overallHistogram = overallHistogram;
+      responseUpdate.totalDocCount = totalDocCount;
+      responseUpdate.percentileThresholdValue = percentileThresholdValue;
+
+      setResponse({
+        ...responseUpdate,
+        loaded: LOADED_OVERALL_HISTOGRAM,
+      });
+      setResponse.flush();
 
       const errorHistogramResponse = await callApmApi(
         'POST /internal/apm/latency/overall_distribution/transactions',
@@ -132,20 +147,17 @@ export function useFailedTransactionsCorrelations() {
         }
       );
 
-      const { overallHistogram: errorHistogram } = errorHistogramResponse;
-
-      responseUpdate.errorHistogram = errorHistogram;
-      responseUpdate.overallHistogram = overallHistogram;
-      responseUpdate.totalDocCount = totalDocCount;
-      responseUpdate.percentileThresholdValue = percentileThresholdValue;
-
       if (abortCtrl.current.signal.aborted) {
         return;
       }
 
+      const { overallHistogram: errorHistogram } = errorHistogramResponse;
+
+      responseUpdate.errorHistogram = errorHistogram;
+
       setResponse({
         ...responseUpdate,
-        loaded: LOADED_OVERALL_HISTOGRAM,
+        loaded: LOADED_ERROR_HISTOGRAM,
       });
       setResponse.flush();
 
@@ -295,7 +307,7 @@ export function useFailedTransactionsCorrelations() {
   const progress = useMemo(
     () => ({
       error,
-      loaded,
+      loaded: Math.round(loaded * 100) / 100,
       isRunning,
     }),
     [error, loaded, isRunning]
