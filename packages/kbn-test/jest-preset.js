@@ -32,10 +32,12 @@ module.exports = {
   moduleNameMapper: {
     '@elastic/eui/lib/(.*)?': '<rootDir>/node_modules/@elastic/eui/test-env/$1',
     '@elastic/eui$': '<rootDir>/node_modules/@elastic/eui/test-env',
-    'elastic-apm-node': '<rootDir>/node_modules/@kbn/test/target_node/src/jest/mocks/apm_agent_mock.js',
+    'elastic-apm-node':
+      '<rootDir>/node_modules/@kbn/test/target_node/src/jest/mocks/apm_agent_mock.js',
     '\\.module.(css|scss)$':
       '<rootDir>/node_modules/@kbn/test/target_node/src/jest/mocks/css_module_mock.js',
-    '\\.(css|less|scss)$': '<rootDir>/node_modules/@kbn/test/target_node/src/jest/mocks/style_mock.js',
+    '\\.(css|less|scss)$':
+      '<rootDir>/node_modules/@kbn/test/target_node/src/jest/mocks/style_mock.js',
     '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
       '<rootDir>/node_modules/@kbn/test/target_node/src/jest/mocks/file_mock.js',
     '\\.ace\\.worker$':
@@ -140,7 +142,8 @@ module.exports = {
   ],
 
   // A custom resolver to preserve symlinks by default
-  resolver: '<rootDir>/node_modules/@kbn/test/target_node/src/jest/setup/preserve_symlinks_resolver.js',
+  resolver:
+    '<rootDir>/node_modules/@kbn/test/target_node/src/jest/setup/preserve_symlinks_resolver.js',
 
   watchPathIgnorePatterns: ['.*/__tmp__/.*'],
 };
