@@ -9,6 +9,7 @@ source .buildkite/scripts/common/util.sh
 export KBN_NP_PLUGINS_BUILT=true
 
 VERSION="$(jq -r '.version' package.json)-SNAPSHOT"
+ECCTL_LOGS=$(mktemp --suffix ".json")
 
 echo "--- Download Kibana Distribution"
 
@@ -46,9 +47,19 @@ fi
 
 docker logout docker.elastic.co
 
+if is_pr_with_label "ci:cloud-redeploy"; then
+  echo "--- Shutdown Previous Deployment"
+  CLOUD_DEPLOYMENT_ID=$(ecctl deployment list --output json | jq -r '.deployments[] | select(.name == "'$CLOUD_DEPLOYMENT_NAME'") | .id')
+  if [ -z "${CLOUD_DEPLOYMENT_ID}" ]; then
+    echo "No deployment to remove"
+  else
+    echo -n "Shutting down previous deployment..."
+    ecctl deployment shutdown "$CLOUD_DEPLOYMENT_ID" --force --track --output json > "$ECCTL_LOGS"
+  fi
+fi
+
 echo "--- Create Deployment"
 CLOUD_DEPLOYMENT_ID=$(ecctl deployment list --output json | jq -r '.deployments[] | select(.name == "'$CLOUD_DEPLOYMENT_NAME'") | .id')
-JSON_FILE=$(mktemp --suffix ".json")
 if [ -z "${CLOUD_DEPLOYMENT_ID}" ]; then
   jq '
     .resources.kibana[0].plan.kibana.docker_image = "'$KIBANA_CLOUD_IMAGE'" |
@@ -61,13 +72,13 @@ if [ -z "${CLOUD_DEPLOYMENT_ID}" ]; then
     ' .buildkite/scripts/steps/cloud/deploy.json > /tmp/deploy.json
 
   echo -n "Creating deployment..."
-  ecctl deployment create --track --output json --file /tmp/deploy.json > "$JSON_FILE"
+  ecctl deployment create --track --output json --file /tmp/deploy.json > "$ECCTL_LOGS"
   echo "done"
 
-  CLOUD_DEPLOYMENT_USERNAME=$(jq --slurp '.[]|select(.resources).resources[] | select(.credentials).credentials.username' "$JSON_FILE")
-  CLOUD_DEPLOYMENT_PASSWORD=$(jq --slurp '.[]|select(.resources).resources[] | select(.credentials).credentials.password' "$JSON_FILE")
-  CLOUD_DEPLOYMENT_ID=$(jq -r --slurp '.[0].id' "$JSON_FILE")
-  CLOUD_DEPLOYMENT_STATUS_MESSAGES=$(jq --slurp '[.[]|select(.resources == null)]' "$JSON_FILE")
+  CLOUD_DEPLOYMENT_USERNAME=$(jq --slurp '.[]|select(.resources).resources[] | select(.credentials).credentials.username' "$ECCTL_LOGS")
+  CLOUD_DEPLOYMENT_PASSWORD=$(jq --slurp '.[]|select(.resources).resources[] | select(.credentials).credentials.password' "$ECCTL_LOGS")
+  CLOUD_DEPLOYMENT_ID=$(jq -r --slurp '.[0].id' "$ECCTL_LOGS")
+  CLOUD_DEPLOYMENT_STATUS_MESSAGES=$(jq --slurp '[.[]|select(.resources == null)]' "$ECCTL_LOGS")
 
   echo -n "Writing to vault..."
   VAULT_ROLE_ID="$(retry 5 15 gcloud secrets versions access latest --secret=kibana-buildkite-vault-role-id)"
@@ -81,23 +92,23 @@ if [ -z "${CLOUD_DEPLOYMENT_ID}" ]; then
     .settings.observability.metrics.destination.deployment_id = "'$CLOUD_DEPLOYMENT_ID'" |
     .settings.observability.logging.destination.deployment_id = "'$CLOUD_DEPLOYMENT_ID'"
     ' .buildkite/scripts/steps/cloud/stack_monitoring.json > /tmp/stack_monitoring.json
-  ecctl deployment update "$CLOUD_DEPLOYMENT_ID" --track --output json --file /tmp/stack_monitoring.json > "$JSON_FILE"
+  ecctl deployment update "$CLOUD_DEPLOYMENT_ID" --track --output json --file /tmp/stack_monitoring.json > "$ECCTL_LOGS"
   echo "done"
 
   echo -n "Enabling verbose logging..."
   ecctl deployment show "$CLOUD_DEPLOYMENT_ID" --generate-update-payload | jq '
     .resources.kibana[0].plan.kibana.user_settings_yaml = "logging.root.level: all"
     ' > /tmp/verbose_logging.json
-  ecctl deployment update "$CLOUD_DEPLOYMENT_ID" --track --output json --file /tmp/verbose_logging.json > "$JSON_FILE"
+  ecctl deployment update "$CLOUD_DEPLOYMENT_ID" --track --output json --file /tmp/verbose_logging.json > "$ECCTL_LOGS"
   echo "done"
 else
-ecctl deployment show "$CLOUD_DEPLOYMENT_ID" --generate-update-payload | jq '
-  .resources.kibana[0].plan.kibana.docker_image = "'$KIBANA_CLOUD_IMAGE'" |
-  (.. | select(.version? != null).version) = "'$VERSION'"
-  ' > /tmp/deploy.json
+  ecctl deployment show "$CLOUD_DEPLOYMENT_ID" --generate-update-payload | jq '
+    .resources.kibana[0].plan.kibana.docker_image = "'$KIBANA_CLOUD_IMAGE'" |
+    (.. | select(.version? != null).version) = "'$VERSION'"
+    ' > /tmp/deploy.json
 
   echo -n "Updating deployment..."
-  ecctl deployment update "$CLOUD_DEPLOYMENT_ID" --track --output json --file /tmp/deploy.json > "$JSON_FILE"
+  ecctl deployment update "$CLOUD_DEPLOYMENT_ID" --track --output json --file /tmp/deploy.json > "$ECCTL_LOGS"
   echo "done"
 fi
 
