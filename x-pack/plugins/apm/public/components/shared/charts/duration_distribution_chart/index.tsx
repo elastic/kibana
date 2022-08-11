@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { flatten } from 'lodash';
 
 import {
@@ -163,6 +163,15 @@ export function DurationDistributionChart({
         ]
       : undefined;
 
+  const chartData = useMemo(
+    () =>
+      data.map((d) => ({
+        ...d,
+        histogram: replaceHistogramZerosWithMinimumDomainValue(d.histogram),
+      })),
+    [data]
+  );
+
   return (
     <div
       data-test-subj="apmCorrelationsChart"
@@ -273,13 +282,13 @@ export function DurationDistributionChart({
             ticks={yTicks}
             gridLine={{ visible: true }}
           />
-          {data.map((d) => (
+          {chartData.map((d) => (
             <AreaSeries
               key={d.id}
               id={d.id}
               xScaleType={ScaleType.Log}
               yScaleType={ScaleType.Log}
-              data={replaceHistogramZerosWithMinimumDomainValue(d.histogram)}
+              data={d.histogram}
               curve={CurveType.CURVE_STEP_AFTER}
               xAccessor="key"
               yAccessors={['doc_count']}
