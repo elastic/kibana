@@ -124,7 +124,7 @@ export const fetchStringFieldsStats = (
             fieldName: field.fieldName,
             isTopValuesSampled: true,
             topValues,
-            topValuesSampleSize: get(aggregations, ['sample', 'doc_count']),
+            topValuesSampleSize: params.totalCount,
             // @todo: remove
             topValuesSamplerShardSize: get(aggregations, ['sample', 'doc_count']),
           };

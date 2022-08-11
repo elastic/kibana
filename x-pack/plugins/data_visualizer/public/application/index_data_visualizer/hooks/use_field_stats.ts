@@ -66,7 +66,8 @@ export function useFieldStatsSearchStrategy(
   searchStrategyParams: OverallStatsSearchStrategyParams | undefined,
   fieldStatsParams: FieldStatsParams | undefined,
   dataVisualizerListState: DataVisualizerIndexBasedAppState,
-  samplingProbability: number | null
+  samplingProbability: number | null,
+  totalCount: number
 ): FieldStatsSearchStrategyReturnBase {
   const {
     services: {
@@ -171,6 +172,7 @@ export function useFieldStatsSearchStrategy(
       maxExamples: MAX_EXAMPLES_DEFAULT,
       samplingProbability,
       browserSessionSeed: searchStrategyParams.browserSessionSeed,
+      totalCount,
     };
     const searchOptions: ISearchOptions = {
       abortSignal: abortCtrl.current.signal,

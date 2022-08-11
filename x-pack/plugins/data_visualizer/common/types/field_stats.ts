@@ -188,6 +188,7 @@ export interface FieldStatsCommonRequestParams {
   maxExamples?: number;
   samplingProbability: number | null;
   browserSessionSeed: number;
+  totalCount: number;
 }
 
 export interface OverallStatsSearchStrategyParams {

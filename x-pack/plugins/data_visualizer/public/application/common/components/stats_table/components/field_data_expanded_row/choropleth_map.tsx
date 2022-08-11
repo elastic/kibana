@@ -113,7 +113,7 @@ export const ChoroplethMap: FC<Props> = ({ stats, suggestion }) => {
       <div className={'dvMap__wrapper'}>
         <EmbeddedMapComponent layerList={layerList} />
       </div>
-
+      {/* @TODO: REMOVE*/}
       {isTopValuesSampled === true && (
         <div>
           <EuiSpacer size={'s'} />

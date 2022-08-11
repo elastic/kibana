@@ -148,6 +148,7 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
               ) : null}
             </EuiFlexGroup>
           ))}
+        {/* @TODO: REMOVE*/}
         {isTopValuesSampled === true && (
           <Fragment>
             <EuiSpacer size="xs" />

@@ -279,7 +279,8 @@ export const useDataVisualizerGridData = (
     // @todo: use this in a function for maintainability
     (dataVisualizerListState.probability === null
       ? overallStats?.documentCountStats?.probability
-      : dataVisualizerListState.probability) ?? 1
+      : dataVisualizerListState.probability) ?? 1,
+    overallStats?.documentCountStats?.totalCount
   );
 
   const combinedProgress = useMemo(

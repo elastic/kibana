@@ -37,7 +37,6 @@ import type {
 import { getDocumentCountStats } from '../search_strategy/requests/get_document_stats';
 import { getInitialProgress, getReducer } from '../progress_utils';
 import { MAX_CONCURRENT_REQUESTS } from '../constants/index_data_visualizer_viewer';
-import { DocumentCountStats } from '../../../../common/types/field_stats';
 
 /**
  * Helper function to run forkJoin
@@ -114,7 +113,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef<Subscription>();
 
-  const startFetch = useCallback(() => {
+  const startFetch = useCallback(async () => {
     searchSubscription$.current?.unsubscribe();
     abortCtrl.current.abort();
     abortCtrl.current = new AbortController();
@@ -142,6 +141,14 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
       abortSignal: abortCtrl.current.signal,
       sessionId: searchStrategyParams?.sessionId,
     };
+
+    const documentCountStats = await getDocumentCountStats(
+      data.search,
+      searchStrategyParams,
+      searchOptions,
+      browserSessionSeed,
+      probability
+    );
 
     const nonAggregatableFieldsObs = nonAggregatableFields.map((fieldName: string) =>
       data.search
@@ -180,7 +187,9 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
               index,
               searchQuery,
               aggregatableFieldsChunk,
-              samplerShardSize,
+              documentCountStats.probability,
+              documentCountStats.totalCount,
+              browserSessionSeed,
               timeFieldName,
               earliest,
               latest,
@@ -201,21 +210,18 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
     );
 
     const sub = rateLimitingForkJoin<
-      | DocumentCountStats
-      | AggregatableFieldOverallStats
-      | NonAggregatableFieldOverallStats
-      | undefined
+      AggregatableFieldOverallStats | NonAggregatableFieldOverallStats | undefined
     >(
       [
-        from(
-          getDocumentCountStats(
-            data.search,
-            searchStrategyParams,
-            searchOptions,
-            browserSessionSeed,
-            probability
-          )
-        ),
+        // from(
+        //   getDocumentCountStats(
+        //     data.search,
+        //     searchStrategyParams,
+        //     searchOptions,
+        //     browserSessionSeed,
+        //     probability
+        //   )
+        // ),
         ...aggregatableOverallStatsObs,
         ...nonAggregatableFieldsObs,
       ],
@@ -226,10 +232,9 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
       next: (value) => {
         const aggregatableOverallStatsResp: AggregatableFieldOverallStats[] = [];
         const nonAggregatableOverallStatsResp: NonAggregatableFieldOverallStats[] = [];
-        const documentCountStats = value[0] as DocumentCountStats;
+        // const documentCountStats = value[0] as DocumentCountStats;
 
         value.forEach((resp, idx) => {
-          if (!resp || idx === 0) return;
           if (isAggregatableFieldOverallStats(resp)) {
             aggregatableOverallStatsResp.push(resp);
           }
@@ -240,6 +245,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
         });
 
         const totalCount = documentCountStats?.totalCount ?? 0;
+        console.log('aggregatableOverallStatsResp', aggregatableOverallStatsResp);
 
         const aggregatableOverallStats = processAggregatableFieldsExistResponse(
           aggregatableOverallStatsResp,
