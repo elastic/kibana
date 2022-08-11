@@ -20,6 +20,10 @@ const mockSeverityCount: SeverityCount = {
   [RiskSeverity.critical]: 1,
 };
 
+jest.mock('../../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: () => true,
+}));
+
 const mockUseQueryToggle = jest
   .fn()
   .mockReturnValue({ toggleStatus: false, setToggleStatus: jest.fn() });
@@ -47,7 +51,7 @@ describe('EntityAnalyticsUserRiskScores', () => {
     jest.clearAllMocks();
   });
 
-  it('render enable button when module is disable', () => {
+  it('renders enable button when module is disable', () => {
     mockUseUserRiskScore.mockReturnValue([
       false,
       { data: undefined, inspect: null, refetch: () => {}, isModuleEnabled: false },

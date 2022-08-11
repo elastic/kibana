@@ -24,6 +24,10 @@ const mockSeverityCount: SeverityCount = {
   [RiskSeverity.critical]: 99,
 };
 
+jest.mock('../../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: () => true,
+}));
+
 jest.mock('../../../../risk_score/containers', () => {
   return {
     useHostRiskScoreKpi: () => ({ severityCount: mockSeverityCount }),
