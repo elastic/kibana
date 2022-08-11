@@ -7,8 +7,7 @@
 
 import React from 'react';
 
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { mockEndgameFileCreateEvent } from '../../../../common/mock/mock_endgame_ecs_data';
+import { demoEndgameFileCreateEvent } from '../../../../common/demo_data/endgame_ecs/file_events';
 import { createFimRowRenderer } from '../../timeline/body/renderers/system/generic_row_renderer';
 import { CREATED_FILE } from '../../timeline/body/renderers/system/translations';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../constants';
@@ -22,7 +21,7 @@ const SystemFimExampleComponent: React.FC = () => {
   return (
     <>
       {systemFimRowRenderer.renderRow({
-        data: mockEndgameFileCreateEvent,
+        data: demoEndgameFileCreateEvent,
         isDraggable: false,
         timelineId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,
       })}

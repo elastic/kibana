@@ -6,12 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
-import { VisualizationsSetup, VisualizationsStart } from '@kbn/visualizations-plugin/public';
-import { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
+import type { VisualizationsSetup, VisualizationsStart } from '@kbn/visualizations-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type {
+  UsageCollectionSetup,
+  UsageCollectionStart,
+} from '@kbn/usage-collection-plugin/public';
 import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import {
   setDataActions,
@@ -46,6 +50,7 @@ export interface VisTypeXyPluginStartDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['start']>;
   visualizations: VisualizationsStart;
   data: DataPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
   charts: ChartsPluginStart;
   usageCollection?: UsageCollectionStart;
 }
@@ -93,8 +98,8 @@ export class VisTypeXyPlugin
     return {};
   }
 
-  public start(core: CoreStart, { data, charts }: VisTypeXyPluginStartDependencies) {
-    setFormatService(data.fieldFormats);
+  public start(core: CoreStart, { data, charts, fieldFormats }: VisTypeXyPluginStartDependencies) {
+    setFormatService(fieldFormats);
     setDataActions(data.actions);
     setDocLinks(core.docLinks);
     setActiveCursor(charts.activeCursor);
