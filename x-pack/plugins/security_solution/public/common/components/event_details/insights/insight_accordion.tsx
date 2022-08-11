@@ -25,6 +25,7 @@ interface Props {
   state: InsightAccordionState;
   text: string;
   renderContent: () => ReactNode;
+  extraAction?: EuiAccordionProps['extraAction'];
   onToggle?: EuiAccordionProps['onToggle'];
 }
 
@@ -33,7 +34,7 @@ interface Props {
  * It wraps logic and custom styling around the loading, error and success states of an insight section.
  */
 export const InsightAccordion = React.memo<Props>(
-  ({ prefix, state, text, renderContent, onToggle = noop }) => {
+  ({ prefix, state, text, renderContent, onToggle = noop, extraAction }) => {
     const accordionId = useGeneratedHtmlId({ prefix });
 
     switch (state) {
@@ -54,6 +55,7 @@ export const InsightAccordion = React.memo<Props>(
               </span>
             }
             onToggle={onToggle}
+            extraAction={extraAction}
           />
         );
       case 'success':
@@ -64,6 +66,7 @@ export const InsightAccordion = React.memo<Props>(
             buttonContent={text}
             onToggle={onToggle}
             paddingSize="l"
+            extraAction={extraAction}
           >
             {renderContent()}
           </StyledAccordion>

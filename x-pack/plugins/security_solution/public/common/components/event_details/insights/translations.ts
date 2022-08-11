@@ -135,3 +135,10 @@ export const SIMPLE_ALERT_TABLE_LIMITED = i18n.translate(
     defaultMessage: 'Showing only the latest 10 alerts. View the rest of alerts in timeline.',
   }
 );
+
+export const ALERT_UPSELL = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.insights.alertUpsellTitle',
+  {
+    defaultMessage: 'Get more insights with a subscription',
+  }
+);
