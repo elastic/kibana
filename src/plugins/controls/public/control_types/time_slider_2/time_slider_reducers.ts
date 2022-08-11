@@ -8,26 +8,28 @@
 
 import { PayloadAction } from '@reduxjs/toolkit';
 import { WritableDraft } from 'immer/dist/types/types-external';
+import { EuiRangeTick } from '@elastic/eui/src/components/form/range/range_ticks';
 import { TimeSliderReduxState } from './types';
+import { getTicks, FROM_INDEX, TO_INDEX } from './time_utils';
 
 export const timeSliderReducers = {
   publishValue: (
     state: WritableDraft<TimeSliderReduxState>,
-    action: PayloadAction<{ value: [number, number] }>
+    action: PayloadAction<{ value?: [number, number] }>
   ) => {
     state.output.timeslice = action.payload.value;
   },
   setTimeRangeBounds: (
     state: WritableDraft<TimeSliderReduxState>,
-    action: PayloadAction<{ timeRangeBounds: [number, number] }>
+    action: PayloadAction<{ timeRangeBounds: [number, number], ticks: EuiRangeTick[] }>
   ) => {
+    state.componentState.ticks = action.payload.ticks;
     state.componentState.timeRangeBounds = action.payload.timeRangeBounds;
   },
   setValue: (
     state: WritableDraft<TimeSliderReduxState>,
-    action: PayloadAction<{ value: [number, number] }>
+    action: PayloadAction<{ value?: [number, number] }>
   ) => {
-    console.log('setValue: ', action.payload.value);
     state.explicitInput.value = action.payload.value;
   },
 };

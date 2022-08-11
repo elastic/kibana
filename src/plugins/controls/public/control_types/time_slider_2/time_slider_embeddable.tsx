@@ -8,6 +8,7 @@
 
 import _ from 'lodash';
 import { timer } from 'rxjs';
+import moment from 'moment-timezone';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { ReduxEmbeddableTools, ReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
@@ -23,6 +24,7 @@ import { ControlOutput } from '../../types';
 import { TimeSlider } from './components';
 import { timeSliderReducers } from './time_slider_reducers';
 import { TimeSliderReduxState } from './types';
+import { getMomentTimezone, getTicks, getRange, FROM_INDEX, TO_INDEX } from './time_utils';
 
 export class TimeSliderControlEmbeddable extends Embeddable<
   TimeSliderControlEmbeddableInput,
@@ -60,6 +62,8 @@ export class TimeSliderControlEmbeddable extends Embeddable<
     this.getTimezone = getTimezone;
     this.timefilter = timefilter;
 
+    const timeRangeBounds = timefilter.calculateBounds(input.timeRange ? input.timeRange : getDefaultTimeRange());
+
     this.reduxEmbeddableTools = reduxEmbeddablePackage.createTools<
       TimeSliderReduxState,
       typeof timeSliderReducers
@@ -67,7 +71,8 @@ export class TimeSliderControlEmbeddable extends Embeddable<
       embeddable: this,
       reducers: timeSliderReducers,
       initialComponentState: {
-        timeRangeBounds: timefilter.calculateBounds(input.timeRange ? input.timeRange : getDefaultTimeRange()),
+        ticks: getTicks(timeRangeBounds[FROM_INDEX], timeRangeBounds[TO_INDEX], getTimezone()),
+        timeRangeBounds,
       }
     });
 
@@ -91,11 +96,16 @@ export class TimeSliderControlEmbeddable extends Embeddable<
       const nextBounds = [timeRangeBounds.min.valueOf(), timeRangeBounds.max.valueOf()];
       const { actions, dispatch, getState } = this.reduxEmbeddableTools;
       if (!_.isEqual(nextBounds, getState().componentState.timeRangeBounds)) {
-        dispatch(actions.setTimeRangeBounds({ timeRangeBounds: nextBounds }));
+        dispatch(
+          actions.setTimeRangeBounds({
+            ticks: getTicks(nextBounds[FROM_INDEX], nextBounds[TO_INDEX], this.getTimezone()),
+            timeRangeBounds: nextBounds, 
+          })
+        );
         const value = getState().explicitInput.value;
         // unset value when its not valid for next time bounds
         if (value && (value[0] < nextBounds[0] || value[1] > nextBounds[1])) {
-          dispatch(actions.setValue({ value: undefined }));
+          this.onTimesliceChange();
         }
       }
     }
@@ -113,6 +123,49 @@ export class TimeSliderControlEmbeddable extends Embeddable<
     return;
   }
 
+  private debouncedPublishChange = _.debounce((value: [number, number]) => {
+    const { actions, dispatch } = this.reduxEmbeddableTools;
+    dispatch(actions.publishValue({ value }));
+  }, 500);
+
+  private onTimesliceChange = (value?: [number, number]) => {
+    const { actions, dispatch } = this.reduxEmbeddableTools;
+    dispatch(actions.setValue({ value }));
+    this.debouncedPublishChange(value);
+  };
+
+  private onNext = () => {
+    const { actions, dispatch, getState } = this.reduxEmbeddableTools;
+    const value = getState().explicitInput.value;
+    const ticks = getState().componentState.ticks;
+    const timeRangeBounds = getState().componentState.timeRangeBounds;
+    const timeRangeMax = timeRangeBounds[TO_INDEX];
+    const from = value === undefined || value[TO_INDEX] === timeRangeMax
+      ? ticks[0].value
+      : value[TO_INDEX];
+    const range = getRange(timeRangeBounds, value);
+    const to = from + range;
+    this.onTimesliceChange([from, Math.min(to, timeRangeMax)]);
+  };
+
+  private onPrevious = () => {
+    const { actions, dispatch, getState } = this.reduxEmbeddableTools;
+    const value = getState().explicitInput.value;
+    const ticks = getState().componentState.ticks;
+    const timeRangeBounds = getState().componentState.timeRangeBounds;
+    const timeRangeMin = timeRangeBounds[FROM_INDEX];
+    const to = value === undefined || value[FROM_INDEX] === timeRangeMin
+      ? ticks[ticks.length - 1].value
+      : value[FROM_INDEX];
+    const range = getRange(timeRangeBounds, value);
+    const from = to - range;
+    this.onTimesliceChange([Math.max(from, timeRangeMin), to]);
+  };
+
+  private epochToKbnDateFormat = (epoch: number) => {
+    return moment.tz(epoch, getMomentTimezone(this.getTimezon)).format(this.getDateFormat());
+  };
+
   public render = (node: HTMLElement) => {
     if (this.node) {
       ReactDOM.unmountComponentAtNode(this.node);
@@ -121,11 +174,17 @@ export class TimeSliderControlEmbeddable extends Embeddable<
 
     const { Wrapper: TimeSliderControlReduxWrapper } = this.reduxEmbeddableTools;
 
-    const mockWaitForPanelsToLoad$ = timer(3000, 3000);
+    const mockWaitForPanelsToLoad$ = timer(2000, 2000);
 
     ReactDOM.render(
       <TimeSliderControlReduxWrapper>
-        <TimeSlider dateFormat={this.getDateFormat()} timezone={this.getTimezone()} waitForPanelsToLoad$={mockWaitForPanelsToLoad$} />
+        <TimeSlider 
+          formatDate={this.epochToKbnDateFormat}
+          onChange={this.onTimesliceChange}
+          onNext={this.onNext}
+          onPrevious={this.onPrevious}
+          waitForPanelsToLoad$={mockWaitForPanelsToLoad$}
+        />
       </TimeSliderControlReduxWrapper>,
       node
     );
