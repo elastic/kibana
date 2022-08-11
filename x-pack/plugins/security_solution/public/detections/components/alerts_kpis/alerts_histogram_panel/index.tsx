@@ -7,7 +7,7 @@
 
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { Position } from '@elastic/charts';
-import type { EuiTitleSize } from '@elastic/eui';
+import type { EuiComboBox, EuiTitleSize } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
@@ -72,6 +72,7 @@ interface AlertsHistogramPanelProps {
   chartHeight?: number;
   chartOptionsContextMenu?: (queryId: string) => React.ReactNode;
   combinedQueries?: string;
+  comboboxRef?: React.RefObject<EuiComboBox<string | number | string[] | undefined>>;
   defaultStackByOption?: string;
   filters?: Filter[];
   headerChildren?: React.ReactNode;
@@ -84,6 +85,7 @@ interface AlertsHistogramPanelProps {
   titleSize?: EuiTitleSize;
   query?: Query;
   legendPosition?: Position;
+  setComboboxInputRef?: (inputRef: HTMLInputElement | null) => void;
   signalIndexName: string | null;
   showCountsInLegend?: boolean;
   showGroupByPlaceholder?: boolean;
@@ -107,6 +109,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     chartHeight,
     chartOptionsContextMenu,
     combinedQueries,
+    comboboxRef,
     defaultStackByOption = DEFAULT_STACK_BY_FIELD,
     filters,
     headerChildren,
@@ -117,6 +120,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     panelHeight = PANEL_HEIGHT,
     query,
     legendPosition = 'right',
+    setComboboxInputRef,
     signalIndexName,
     showCountsInLegend = false,
     showGroupByPlaceholder = false,
@@ -354,10 +358,12 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
                 {showStackBy && (
                   <>
                     <StackByComboBox
+                      ref={comboboxRef}
                       data-test-subj="stackByComboBox"
                       selected={selectedStackByOption}
                       onSelect={onSelect}
                       prepend={stackByLabel}
+                      inputRef={setComboboxInputRef}
                       width={stackByWidth}
                     />
                     {showGroupByPlaceholder && (
