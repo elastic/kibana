@@ -7,11 +7,11 @@
 
 import type { HistogramItem } from '../../../../../common/correlations/types';
 
-import { replaceHistogramDotsWithBars } from '.';
+import { replaceHistogramZerosWithMinimumDomainValue } from '.';
 
 describe('TransactionDistributionChart', () => {
-  describe('replaceHistogramDotsWithBars', () => {
-    it('does the thing', () => {
+  describe('replaceHistogramZerosWithMinimumDomainValue', () => {
+    it('replaces zeroes', () => {
       const mockHistogram = [
         { doc_count: 10 },
         { doc_count: 10 },
@@ -25,7 +25,9 @@ describe('TransactionDistributionChart', () => {
         { doc_count: 10 },
       ] as HistogramItem[];
 
-      expect(replaceHistogramDotsWithBars(mockHistogram)).toEqual([
+      expect(
+        replaceHistogramZerosWithMinimumDomainValue(mockHistogram)
+      ).toEqual([
         { doc_count: 10 },
         { doc_count: 10 },
         { doc_count: 0.0001 },
