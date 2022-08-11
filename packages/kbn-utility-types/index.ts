@@ -14,7 +14,7 @@ export type {
   JsonObject,
   SerializableRecord,
   Serializable,
-} from './serializable';
+} from './src/serializable';
 
 /**
  * A type that may or may not be a `Promise`.

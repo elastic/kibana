@@ -7,7 +7,7 @@
  */
 
 import { expectAssignable } from 'tsd';
-import { UnionToIntersection } from '../..';
+import { UnionToIntersection } from '../../..';
 
 type INTERSECTED = UnionToIntersection<{ foo: 'bar' } | { baz: 'qux' }>;
 

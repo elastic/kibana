@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export * from './package_json';
-export * from './path';
-export * from './repo_root';
-export * from './streams';
+export * from './src/package_json';
+export * from './src/path';
+export * from './src/repo_root';
+export * from './src/streams';

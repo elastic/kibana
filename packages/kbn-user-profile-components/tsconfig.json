@@ -11,5 +11,7 @@
       "node"
     ]
   },
-  "include": ["src/**/*"]
+  "include": [
+    "**/*.ts"
+  ]
 }

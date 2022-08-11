@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export type { Theme } from './theme';
+export type { Theme } from './src/theme';
 
-export { darkMode, euiDarkVars, euiLightVars, euiThemeVars, tag, version } from './theme';
+export { darkMode, euiDarkVars, euiLightVars, euiThemeVars, tag, version } from './src/theme';
