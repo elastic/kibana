@@ -814,25 +814,30 @@ export class RulesClient {
     sort,
   }: GetExecutionLogByIdParams): Promise<IExecutionLogResult> {
     this.logger.debug(`getExecutionLogForRule(): getting execution log for rule ${id}`);
-    const rule = (await this.get({ id, includeLegacyId: true })) as SanitizedRuleWithLegacyId;
+    const rule =
+      id === '*'
+        ? { legacyId: null }
+        : ((await this.get({ id, includeLegacyId: true })) as SanitizedRuleWithLegacyId);
 
-    try {
-      // Make sure user has access to this rule
-      await this.authorization.ensureAuthorized({
-        ruleTypeId: rule.alertTypeId,
-        consumer: rule.consumer,
-        operation: ReadOperations.GetExecutionLog,
-        entity: AlertingAuthorizationEntity.Rule,
-      });
-    } catch (error) {
-      this.auditLogger?.log(
-        ruleAuditEvent({
-          action: RuleAuditAction.GET_EXECUTION_LOG,
-          savedObject: { type: 'alert', id },
-          error,
-        })
-      );
-      throw error;
+    if (id !== '*') {
+      try {
+        // Make sure user has access to this rule
+        await this.authorization.ensureAuthorized({
+          ruleTypeId: rule.alertTypeId,
+          consumer: rule.consumer,
+          operation: ReadOperations.GetExecutionLog,
+          entity: AlertingAuthorizationEntity.Rule,
+        });
+      } catch (error) {
+        this.auditLogger?.log(
+          ruleAuditEvent({
+            action: RuleAuditAction.GET_EXECUTION_LOG,
+            savedObject: { type: 'alert', id },
+            error,
+          })
+        );
+        throw error;
+      }
     }
 
     this.auditLogger?.log(

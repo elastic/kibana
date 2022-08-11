@@ -30,7 +30,7 @@ import { RuleActionErrorLogFlyout } from './rule_action_error_log_flyout';
 
 import { RefineSearchPrompt } from '../refine_search_prompt';
 import { LoadExecutionLogAggregationsProps } from '../../../lib/rule_api';
-import { Rule, RuleSummary, RuleType } from '../../../../types';
+import { RuleSummary, RuleType } from '../../../../types';
 import {
   ComponentOpts as RuleApis,
   withBulkRuleOperations,
@@ -76,13 +76,14 @@ const ruleEventListContainerStyle = { minHeight: 400 };
 export type RuleEventLogListOptions = 'stackManagement' | 'default';
 
 export interface RuleEventLogListCommonProps {
-  rule: Rule;
+  ruleId: string;
   ruleType: RuleType;
   localStorageKey?: string;
   refreshToken?: number;
   requestRefresh?: () => Promise<void>;
   loadExecutionLogAggregations?: RuleApis['loadExecutionLogAggregations'];
   fetchRuleSummary?: boolean;
+  hideChart?: boolean;
 }
 
 export interface RuleEventLogListStackManagementProps {
@@ -103,13 +104,14 @@ export const RuleEventLogList = <T extends RuleEventLogListOptions>(
   props: RuleEventLogListProps<T>
 ) => {
   const {
-    rule,
+    ruleId,
     ruleType,
     localStorageKey = RULE_EVENT_LOG_LIST_STORAGE_KEY,
     refreshToken,
     requestRefresh,
     fetchRuleSummary = true,
     loadExecutionLogAggregations,
+    hideChart = false,
   } = props;
 
   const {
@@ -183,7 +185,7 @@ export const RuleEventLogList = <T extends RuleEventLogListOptions>(
     setIsLoading(true);
     try {
       const result = await loadExecutionLogAggregations({
-        id: rule.id,
+        id: ruleId,
         sort: formattedSort as LoadExecutionLogAggregationsProps['sort'],
         outcomeFilter: filter,
         message: searchText,
@@ -338,17 +340,19 @@ export const RuleEventLogList = <T extends RuleEventLogListOptions>(
   return (
     <div style={ruleEventListContainerStyle} data-test-subj="ruleEventLogListContainer">
       <EuiSpacer />
-      <RuleExecutionSummaryAndChartWithApi
-        rule={rule}
-        ruleType={ruleType}
-        ruleSummary={ruleSummary}
-        numberOfExecutions={numberOfExecutions}
-        isLoadingRuleSummary={isLoadingRuleSummary}
-        refreshToken={refreshToken}
-        onChangeDuration={onChangeDuration}
-        requestRefresh={requestRefresh}
-        fetchRuleSummary={fetchRuleSummary}
-      />
+      {!hideChart && (
+        <RuleExecutionSummaryAndChartWithApi
+          ruleId={ruleId}
+          ruleType={ruleType}
+          ruleSummary={ruleSummary}
+          numberOfExecutions={numberOfExecutions}
+          isLoadingRuleSummary={isLoadingRuleSummary}
+          refreshToken={refreshToken}
+          onChangeDuration={onChangeDuration}
+          requestRefresh={requestRefresh}
+          fetchRuleSummary={fetchRuleSummary}
+        />
+      )}
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <EuiFieldSearch
@@ -389,7 +393,7 @@ export const RuleEventLogList = <T extends RuleEventLogListOptions>(
       )}
       {isFlyoutOpen && selectedRunLog && (
         <RuleActionErrorLogFlyout
-          rule={rule}
+          ruleId={ruleId}
           runLog={selectedRunLog}
           refreshToken={refreshToken}
           onClose={onFlyoutClose}

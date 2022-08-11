@@ -108,7 +108,7 @@ export function RuleComponent({
         'xl'
       )({
         fetchRuleSummary: false,
-        rule,
+        ruleId: rule.id,
         ruleType,
         ruleSummary,
         numberOfExecutions,

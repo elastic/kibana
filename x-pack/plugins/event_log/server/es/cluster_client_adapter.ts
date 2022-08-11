@@ -492,36 +492,38 @@ export function getQueryBody(
   ];
 
   const shouldQuery = [];
-  shouldQuery.push({
-    bool: {
-      must: [
-        {
-          nested: {
-            path: 'kibana.saved_objects',
-            query: {
-              bool: {
-                must: [
-                  {
-                    terms: {
-                      // default maximum of 65,536 terms, configurable by index.max_terms_count
-                      'kibana.saved_objects.id': ids,
+  if (ids[0] !== '*') {
+    shouldQuery.push({
+      bool: {
+        must: [
+          {
+            nested: {
+              path: 'kibana.saved_objects',
+              query: {
+                bool: {
+                  must: [
+                    {
+                      terms: {
+                        // default maximum of 65,536 terms, configurable by index.max_terms_count
+                        'kibana.saved_objects.id': ids,
+                      },
                     },
-                  },
-                ],
+                  ],
+                },
               },
             },
           },
-        },
-        {
-          range: {
-            'kibana.version': {
-              gte: LEGACY_ID_CUTOFF_VERSION,
+          {
+            range: {
+              'kibana.version': {
+                gte: LEGACY_ID_CUTOFF_VERSION,
+              },
             },
           },
-        },
-      ],
-    },
-  });
+        ],
+      },
+    });
+  }
 
   if (legacyIds && legacyIds.length > 0) {
     shouldQuery.push({

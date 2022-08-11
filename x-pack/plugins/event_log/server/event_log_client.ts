@@ -126,7 +126,8 @@ export class EventLogClient implements IEventLogClient {
     const aggregateOptions = queryOptionsSchema.validate(omit(options, 'aggs') ?? {});
 
     // verify the user has the required permissions to view this saved object
-    await this.savedObjectGetter(type, ids);
+    // FIXME do not let me merge this PR with this line unchanged
+    if (ids[0] !== '*') await this.savedObjectGetter(type, ids);
 
     return await this.esContext.esAdapter.aggregateEventsBySavedObjects({
       index: this.esContext.esNames.indexPattern,

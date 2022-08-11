@@ -202,6 +202,14 @@ export function getExecutionLogAggregation({
                 },
               },
               aggs: {
+                ruleId: {
+                  top_hits: {
+                    size: 1,
+                    _source: {
+                      includes: ['rule.id'],
+                    },
+                  },
+                },
                 executeStartTime: {
                   min: {
                     field: START_FIELD,
@@ -325,6 +333,8 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
       ? `${outcomeAndMessage?.message ?? ''} - ${outcomeAndMessage?.error?.message ?? ''}`
       : outcomeAndMessage?.message ?? '';
   const version = outcomeAndMessage ? outcomeAndMessage?.kibana?.version ?? '' : '';
+
+  const ruleId = bucket?.ruleExecution?.ruleId?.hits?.hits[0]._source.rule.id ?? '';
   return {
     id: bucket?.key ?? '',
     timestamp: bucket?.ruleExecution?.executeStartTime.value_as_string ?? '',
@@ -343,6 +353,7 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
     es_search_duration_ms: bucket?.ruleExecution?.esSearchDuration?.value ?? 0,
     schedule_delay_ms: scheduleDelayUs / Millis2Nanos,
     timed_out: timedOut,
+    rule_id: ruleId,
   };
 }
 
