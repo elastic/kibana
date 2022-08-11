@@ -374,19 +374,20 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
                   .getTableSpec()
                   .map(({ columnId }) => columnId)
                   .filter((columnId) => !nextTable.has(columnId));
-                const nextVisState = (newState.visualization || state.visualization).state;
                 const activeVisualization = visualizationMap[state.visualization.activeId];
+                let nextVisState = (newState.visualization || state.visualization).state;
                 removed.forEach((columnId) => {
-                  newState.visualization = {
-                    ...state.visualization,
-                    state: activeVisualization.removeDimension({
-                      layerId,
-                      columnId,
-                      prevState: nextVisState,
-                      frame,
-                    }),
-                  };
+                  nextVisState = activeVisualization.removeDimension({
+                    layerId,
+                    columnId,
+                    prevState: nextVisState,
+                    frame,
+                  });
                 });
+                newState.visualization = {
+                  ...state.visualization,
+                  state: nextVisState,
+                };
               }
             }
           }
