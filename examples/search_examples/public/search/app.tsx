@@ -339,10 +339,7 @@ export const SearchExamplesApp = ({
         setSearchSourceWarnings(warnings);
 
         if (warningsShown) {
-          data.search.showWarnings({
-            title: 'ResponseWarning',
-            text: result.warning,
-          });
+          data.search.showWarnings(warnings);
         }
       }
 
@@ -366,9 +363,7 @@ export const SearchExamplesApp = ({
 
   const showSearchSourceSearchWarnings = () => {
     if (searchSourceWarnings) {
-      for (const warning of searchSourceWarnings) {
-        data.search.showWarnings(warning);
-      }
+      data.search.showWarnings(searchSourceWarnings);
     }
     setSearchSourceWarnings([]);
   };

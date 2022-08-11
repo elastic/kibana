@@ -60,7 +60,7 @@ export interface ISearchStart {
   /**
    * Show a toast notification with a warning from an Elasticsearch search response.
    */
-  showWarnings: (warning: ResponseWarning) => void;
+  showWarnings: (warning: ResponseWarning[]) => void;
   /**
    * high level search
    * {@link ISearchStartSearchSource}
