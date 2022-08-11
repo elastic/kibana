@@ -8,9 +8,7 @@
 
 import React, { useCallback } from 'react';
 import ReactDOM from 'react-dom';
-import { I18nStart } from '@kbn/core/public';
 import { EuiConfirmModal } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
 import { useDiscoverServices } from './use_discover_services';
@@ -56,7 +54,6 @@ export const usePersistedDataView = (dataView: DataView) => {
 
     return new Promise((resolve) =>
       showConfirmPanel({
-        I18nContext: services.core.i18n.Context,
         onConfirm: () =>
           persistDataView()
             .then(() => resolve(true))
@@ -64,7 +61,7 @@ export const usePersistedDataView = (dataView: DataView) => {
         onCancel: () => resolve(false),
       })
     );
-  }, [dataView, getDataViewList, persistDataView, services.core.i18n.Context]);
+  }, [dataView, getDataViewList, persistDataView]);
 
   return shouldPersistDataView;
 };
@@ -74,11 +71,9 @@ function isHocDataView(persistedDataViews: DataViewListItem[], checkDataView: Da
 }
 
 function showConfirmPanel({
-  I18nContext,
   onConfirm,
   onCancel,
 }: {
-  I18nContext: I18nStart['Context'];
   onConfirm: () => void;
   onCancel: () => void;
 }) {
@@ -96,34 +91,28 @@ function showConfirmPanel({
 
   document.body.appendChild(container);
   const element = (
-    <I18nContext>
-      <EuiConfirmModal
-        title={
-          <FormattedMessage
-            id="discover.confirmDataViewPersist.title"
-            defaultMessage="Persist data view"
-          />
-        }
-        onCancel={() => {
-          onClose();
-          onCancel();
-        }}
-        onConfirm={() => {
-          onClose();
-          onConfirm();
-        }}
-        cancelButtonText="Cancel"
-        confirmButtonText="Confirm"
-        defaultFocusedButton="confirm"
-      >
-        <p>
-          <FormattedMessage
-            id="discover.confirmDataViewPersist.message"
-            defaultMessage="Persist data view, then proceed."
-          />
-        </p>
-      </EuiConfirmModal>
-    </I18nContext>
+    <EuiConfirmModal
+      title={i18n.translate('discover.confirmDataViewPersist.title', {
+        defaultMessage: 'Persist data view',
+      })}
+      onCancel={() => {
+        onClose();
+        onCancel();
+      }}
+      onConfirm={() => {
+        onClose();
+        onConfirm();
+      }}
+      cancelButtonText="Cancel"
+      confirmButtonText="Confirm"
+      defaultFocusedButton="confirm"
+    >
+      <p>
+        {i18n.translate('discover.confirmDataViewPersist.message', {
+          defaultMessage: 'Persist data view, then proceed.',
+        })}
+      </p>
+    </EuiConfirmModal>
   );
   ReactDOM.render(element, container);
 }
