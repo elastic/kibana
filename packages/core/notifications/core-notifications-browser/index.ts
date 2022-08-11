@@ -14,4 +14,9 @@ export type {
   IToasts,
   ToastInputFields,
 } from './src/types';
-export type { ToastsSetup, ToastsStart, NotificationsSetup, NotificationsStart } from './src/contracts';
+export type {
+  ToastsSetup,
+  ToastsStart,
+  NotificationsSetup,
+  NotificationsStart,
+} from './src/contracts';

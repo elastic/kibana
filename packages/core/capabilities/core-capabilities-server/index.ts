@@ -7,4 +7,8 @@
  */
 
 export type { CapabilitiesSwitcher, CapabilitiesProvider } from './src/capabilities';
-export type { CapabilitiesSetup, CapabilitiesStart, ResolveCapabilitiesOptions } from './src/contracts';
+export type {
+  CapabilitiesSetup,
+  CapabilitiesStart,
+  ResolveCapabilitiesOptions,
+} from './src/contracts';
