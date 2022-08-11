@@ -1,0 +1,78 @@
+[[osquery-manager-saved-queries-api-update]]
+=== Update saved query API
+++++
+<titleabbrev>Update saved query</titleabbrev>
+++++
+
+experimental[] Update saved queries.
+
+WARNING: You are unable to update a prebuilt saved query (`prebuilt = true`).
+
+
+[[osquery-manager-saved-queries-api-update-request]]
+==== Request
+
+`PUT <kibana host>:<port>/api/osquery/saved_queries/<id>`
+
+`PUT <kibana host>:<port>/s/<space_id>/api/osquery/saved_queries/<id>`
+
+
+[[osquery-manager-saved-queries-api-update-path-params]]
+==== Path parameters
+
+`space_id`::
+  (Optional, string) The space identifier. When `space_id` is not provided in the URL, the default space is used.
+
+`id`::
+  (Required, string) The ID of the saved query you want to update.
+
+
+[[osquery-manager-saved-queries-api-update-body-params]]
+==== Request body
+
+`id`:: (Required, string) The saved query name.
+
+`description`:: (Optional, string) The saved query description.
+
+`platform`:: (Optional, string) Restricts the query to a specified platform. The default is 'all' platforms. To specify multiple platforms, use commas. For example, 'linux,darwin'.
+
+`query`:: (Required, string) The SQL query you want to run.
+
+`version`:: (Optional, string) Runs on Osquery versions greater than or equal to the specified version string.
+
+`internal`:: (Optional, string) The interval, in seconds, to run the query.
+
+`ecs_mapping`:: (Optional, object) Maps Osquery result columns or static values to ECS fields.
+
+
+[[osquery-manager-saved-queries-api-update-request-codes]]
+==== Response code
+
+`200`::
+    Indicates a successful call.
+
+
+[[osquery-manager-saved-queries-api-update-example]]
+==== Examples
+
+Update a name of the <my_saved query> saved query:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X PUT api/osquery/saved_queries/<id> \
+{
+  "id": "updated_my_saved_query_name",
+}
+
+--------------------------------------------------
+// KIBANA
+
+
+The API returns the saved query saved object:
+
+[source,sh]
+--------------------------------------------------
+{
+    "data": {...}
+}
+--------------------------------------------------
