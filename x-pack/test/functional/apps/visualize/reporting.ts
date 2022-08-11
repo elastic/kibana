@@ -139,8 +139,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const percentDiff = await png.checkIfPngsMatch(
           sessionReportPath,
           PageObjects.reporting.getBaselineReportPath(reportFileName, 'png', REPORTS_FOLDER),
-          config.get('screenshots.directory'),
-          log
+          config.get('screenshots.directory')
         );
 
         expect(percentDiff).to.be.lessThan(0.09);
