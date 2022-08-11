@@ -38,14 +38,11 @@ export async function getAuthorizationModeBySource(
 export async function getBulkAuthorizationModeBySource(
   unsecuredSavedObjectsClient: SavedObjectsClientContract,
   executionOptions: ExecuteOptions[] = []
-): Promise<AuthorizationMode> {
+): Promise<Record<string, number>> {
+  const count = { [AuthorizationMode.Legacy]: 0, [AuthorizationMode.RBAC]: 0 };
   if (executionOptions.length === 0) {
-    return AuthorizationMode.RBAC;
+    return count;
   }
-  const isAlertSavedObject = executionOptions?.every(
-    (eo) =>
-      isSavedObjectExecutionSource(eo.source) && eo.source?.source?.type === ALERT_SAVED_OBJECT_TYPE
-  );
   const alerts = await unsecuredSavedObjectsClient.bulkGet<{
     meta?: {
       versionApiKeyLastmodified?: string;
@@ -56,8 +53,21 @@ export async function getBulkAuthorizationModeBySource(
       id: get(eo, 'source.source.id'),
     }))
   );
-  const isLegacyVersion = alerts.saved_objects.every(
-    (so) => so.attributes.meta?.versionApiKeyLastmodified === LEGACY_VERSION
+  const legacyVersions: Record<string, boolean> = alerts.saved_objects.reduce(
+    (acc, so) => ({
+      ...acc,
+      [so.id]: so.attributes.meta?.versionApiKeyLastmodified === LEGACY_VERSION,
+    }),
+    {}
   );
-  return isAlertSavedObject && isLegacyVersion ? AuthorizationMode.Legacy : AuthorizationMode.RBAC;
+  return executionOptions.reduce((acc, eo) => {
+    const isAlertSavedObject =
+      isSavedObjectExecutionSource(eo.source) &&
+      eo.source?.source?.type === ALERT_SAVED_OBJECT_TYPE;
+    const isLegacyVersion = legacyVersions[get(eo, 'source.source.id')];
+    const key =
+      isAlertSavedObject && isLegacyVersion ? AuthorizationMode.Legacy : AuthorizationMode.RBAC;
+    acc[key]++;
+    return acc;
+  }, count);
 }

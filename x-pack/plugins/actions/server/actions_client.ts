@@ -663,13 +663,19 @@ export class ActionsClient {
   }
 
   public async bulkEnqueueExecution(options: EnqueueExecutionOptions[]): Promise<void> {
-    const isRBAC =
-      (await getBulkAuthorizationModeBySource(this.unsecuredSavedObjectsClient, options)) ===
-      AuthorizationMode.RBAC;
-    if (isRBAC) {
+    const authCounts = await getBulkAuthorizationModeBySource(
+      this.unsecuredSavedObjectsClient,
+      options
+    );
+    if (authCounts[AuthorizationMode.RBAC] > 0) {
       await this.authorization.ensureAuthorized('execute');
-    } else {
-      trackLegacyRBACExemption('bulkEnqueueExecution', this.usageCounter);
+    }
+    if (authCounts[AuthorizationMode.Legacy] > 0) {
+      trackLegacyRBACExemption(
+        'bulkEnqueueExecution',
+        this.usageCounter,
+        authCounts[AuthorizationMode.Legacy]
+      );
     }
     return this.bulkExecutionEnqueuer(this.unsecuredSavedObjectsClient, options);
   }

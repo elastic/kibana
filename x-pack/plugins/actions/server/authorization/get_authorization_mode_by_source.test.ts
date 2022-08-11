@@ -100,9 +100,10 @@ describe(`#getAuthorizationModeBySource`, () => {
 describe(`#getBulkAuthorizationModeBySource`, () => {
   test('should return RBAC if no source is provided', async () => {
     unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({ saved_objects: [] });
-    expect(await getBulkAuthorizationModeBySource(unsecuredSavedObjectsClient)).toEqual(
-      AuthorizationMode.RBAC
-    );
+    expect(await getBulkAuthorizationModeBySource(unsecuredSavedObjectsClient)).toEqual({
+      [AuthorizationMode.RBAC]: 0,
+      [AuthorizationMode.Legacy]: 0,
+    });
   });
 
   test('should return RBAC if source is not an alert', async () => {
@@ -116,7 +117,7 @@ describe(`#getBulkAuthorizationModeBySource`, () => {
           }),
         } as ExecuteOptions,
       ])
-    ).toEqual(AuthorizationMode.RBAC);
+    ).toEqual({ [AuthorizationMode.RBAC]: 1, [AuthorizationMode.Legacy]: 0 });
   });
 
   test('should return RBAC if source alert is not marked as legacy', async () => {
@@ -131,7 +132,7 @@ describe(`#getBulkAuthorizationModeBySource`, () => {
           }),
         } as ExecuteOptions,
       ])
-    ).toEqual(AuthorizationMode.RBAC);
+    ).toEqual({ [AuthorizationMode.RBAC]: 1, [AuthorizationMode.Legacy]: 0 });
   });
 
   test('should return Legacy if source alert is marked as legacy', async () => {
@@ -150,7 +151,7 @@ describe(`#getBulkAuthorizationModeBySource`, () => {
           }),
         } as ExecuteOptions,
       ])
-    ).toEqual(AuthorizationMode.Legacy);
+    ).toEqual({ [AuthorizationMode.RBAC]: 0, [AuthorizationMode.Legacy]: 1 });
   });
 
   test('should return RBAC if source alert is marked as modern', async () => {
@@ -169,7 +170,7 @@ describe(`#getBulkAuthorizationModeBySource`, () => {
           }),
         } as ExecuteOptions,
       ])
-    ).toEqual(AuthorizationMode.RBAC);
+    ).toEqual({ [AuthorizationMode.RBAC]: 1, [AuthorizationMode.Legacy]: 0 });
   });
 
   test('should return RBAC if source alert doesnt have a last modified version', async () => {
@@ -186,7 +187,7 @@ describe(`#getBulkAuthorizationModeBySource`, () => {
           }),
         } as ExecuteOptions,
       ])
-    ).toEqual(AuthorizationMode.RBAC);
+    ).toEqual({ [AuthorizationMode.RBAC]: 1, [AuthorizationMode.Legacy]: 0 });
   });
 });
 
