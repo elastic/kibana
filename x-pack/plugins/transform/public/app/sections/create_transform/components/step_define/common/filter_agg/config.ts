@@ -88,9 +88,13 @@ export function getFilterAggTypeConfig(
   fieldName?: string,
   esConfig?: { [key: string]: any }
 ): FilterAggConfigUnion['aggTypeConfig'] {
+  let resultField = fieldName;
+
   switch (filterAggType) {
     case FILTERS.TERM:
       const value = typeof esConfig === 'object' ? Object.values(esConfig)[0] : undefined;
+
+      resultField = esConfig ? Object.keys(esConfig)[0] : resultField;
 
       return {
         FilterAggFormComponent: FilterTermForm,
@@ -111,12 +115,15 @@ export function getFilterAggTypeConfig(
         getAggName() {
           return this.filterAggConfig?.value ? this.filterAggConfig.value : undefined;
         },
-        fieldName,
+        fieldName: resultField,
       } as FilterAggConfigTerm['aggTypeConfig'];
     case FILTERS.RANGE:
+      resultField = esConfig ? Object.keys(esConfig)[0] : resultField;
+
       const esFilterRange = typeof esConfig === 'object' ? Object.values(esConfig)[0] : undefined;
 
       return {
+        fieldName: resultField,
         FilterAggFormComponent: FilterRangeForm,
         filterAggConfig:
           typeof esFilterRange === 'object'
@@ -124,7 +131,7 @@ export function getFilterAggTypeConfig(
                 from: esFilterRange.gte ?? esFilterRange.gt,
                 to: esFilterRange.lte ?? esFilterRange.lt,
                 includeFrom: esFilterRange.gte !== undefined,
-                includeTo: esFilterRange.lts !== undefined,
+                includeTo: esFilterRange.lte !== undefined,
               }
             : undefined,
         getEsAggConfig() {
@@ -162,7 +169,6 @@ export function getFilterAggTypeConfig(
 
           return true;
         },
-        fieldName,
         helperText() {
           if (!this.isValid!()) return;
           const { from, to, includeFrom, includeTo } = this.filterAggConfig!;
@@ -173,7 +179,7 @@ export function getFilterAggTypeConfig(
         },
       } as FilterAggConfigRange['aggTypeConfig'];
     case FILTERS.EXISTS:
-      const resultField = esConfig ? esConfig.field : fieldName;
+      resultField = esConfig ? esConfig.field : resultField;
 
       return {
         fieldName: resultField,
