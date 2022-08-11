@@ -97,5 +97,4 @@ export const getEsaggsMeta: () => Omit<EsaggsExpressionFunctionDefinition, 'fn'>
   },
 });
 
-/** @internal */
 export { handleRequest as handleEsaggsRequest };
