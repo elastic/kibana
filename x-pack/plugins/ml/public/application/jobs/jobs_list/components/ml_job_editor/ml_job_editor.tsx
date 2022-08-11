@@ -6,14 +6,11 @@
  */
 
 import React, { FC } from 'react';
-import { XJsonMode } from '@kbn/ace';
+import { XJsonLang } from '@kbn/monaco';
+import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { expandLiteralStrings, EuiCodeEditorProps } from '../../../../../../shared_imports';
 
-import { EuiCodeEditor, XJson } from '@kbn/es-ui-shared-plugin/public';
-import type { EuiCodeEditorProps } from '@kbn/es-ui-shared-plugin/public';
-
-const { expandLiteralStrings } = XJson;
-
-export const ML_EDITOR_MODE = { TEXT: 'text', JSON: 'json', XJSON: new XJsonMode() };
+export const ML_EDITOR_MODE = { TEXT: 'text', JSON: 'json', XJSON: XJsonLang.ID };
 
 interface MlJobEditorProps {
   value: string;
@@ -45,22 +42,13 @@ export const MLJobEditor: FC<MlJobEditorProps> = ({
   }
 
   return (
-    <EuiCodeEditor
+    <CodeEditor
+      languageId={mode}
       value={value}
       width={width}
       height={height}
-      mode={mode}
-      readOnly={readOnly}
-      wrapEnabled={true}
-      showPrintMargin={false}
-      theme={theme}
-      editorProps={{ $blockScrolling: true }}
-      setOptions={{
-        useWorker: syntaxChecking,
-        tabSize: 2,
-        useSoftTabs: true,
-      }}
       onChange={onChange}
+      languageConfiguration={{}}
     />
   );
 };
