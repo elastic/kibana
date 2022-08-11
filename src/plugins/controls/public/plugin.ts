@@ -18,7 +18,6 @@ import {
 import { OptionsListEmbeddableFactory, OptionsListEmbeddableInput } from './options_list';
 import { RangeSliderEmbeddableFactory, RangeSliderEmbeddableInput } from './range_slider';
 import { pluginServices } from './services';
-import { controlsService } from './services/kibana/controls';
 import {
   ControlsPluginSetup,
   ControlsPluginStart,
@@ -60,7 +59,7 @@ export class ControlsPlugin
     _coreSetup: CoreSetup<ControlsPluginStartDeps, ControlsPluginStart>,
     _setupPlugins: ControlsPluginSetupDeps
   ): ControlsPluginSetup {
-    const { registerControlType } = pluginServices.getServices().controls;
+    const { registerControlType } = controlsService;
     const { embeddable } = _setupPlugins;
 
     // register control group embeddable factory
@@ -103,7 +102,7 @@ export class ControlsPlugin
   public start(coreStart: CoreStart, startPlugins: ControlsPluginStartDeps): ControlsPluginStart {
     this.startControlsKibanaServices(coreStart, startPlugins);
 
-    const { getControlFactory, getControlTypes } = pluginServices.getServices().controls;
+    const { getControlFactory, getControlTypes } = controlsService;
 
     return {
       getControlFactory,
