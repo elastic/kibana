@@ -15,9 +15,10 @@ import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ManagementSetup, ManagementAppMountParams } from '@kbn/management-plugin/public';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/public';
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart as TriggersActionsStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type { DistributiveOmit } from '@elastic/eui';
 import type {
   CasesByAlertId,
   CasesByAlertIDRequest,
@@ -56,6 +57,7 @@ export interface CasesPluginStart {
   storage: Storage;
   triggersActionsUi: TriggersActionsStart;
   features: FeaturesPluginStart;
+  security: SecurityPluginStart;
   spaces?: SpacesPluginStart;
 }
 
@@ -65,10 +67,7 @@ export interface CasesPluginStart {
  * Leaving it out currently in lieu of RBAC changes
  */
 
-export type StartServices = CoreStart &
-  CasesPluginStart & {
-    security: SecurityPluginSetup;
-  };
+export type StartServices = CoreStart & CasesPluginStart;
 
 export interface RenderAppProps {
   mountParams: ManagementAppMountParams;
@@ -147,5 +146,7 @@ export interface CasesUiStart {
 
 export type SupportedCaseAttachment = CommentRequestAlertType | CommentRequestUserType;
 export type CaseAttachments = SupportedCaseAttachment[];
+export type CaseAttachmentWithoutOwner = DistributiveOmit<SupportedCaseAttachment, 'owner'>;
+export type CaseAttachmentsWithoutOwner = CaseAttachmentWithoutOwner[];
 
 export type ServerError = IHttpFetchError<ResponseErrorBody>;

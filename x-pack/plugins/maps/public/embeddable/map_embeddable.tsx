@@ -735,7 +735,7 @@ export class MapEmbeddable
       ) {
         /**
          * Maps emit rendered when the data is loaded, as we don't have feedback from the maps rendering library atm.
-         * This means that the dashboard-loaded event might be fired while a map is still rendering in some cases.
+         * This means that the DASHBOARD_LOADED_EVENT event might be fired while a map is still rendering in some cases.
          * For more details please contact the maps team.
          */
         this.updateOutput({

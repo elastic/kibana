@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { LegacyRequest, MonitoringCore } from '../../../../types';
-import { MonitoringConfig } from '../../../../config';
+import type { LegacyRequest, MonitoringCore } from '../../../../types';
+import type { MonitoringConfig } from '../../../../config';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 import { getHealthRequestQueryRT } from '../../../../../common/http_api/_health';
-import { TimeRange } from '../../../../../common/http_api/shared';
+import type { TimeRange } from '../../../../../common/http_api/shared';
 import { INDEX_PATTERN, INDEX_PATTERN_ENTERPRISE_SEARCH } from '../../../../../common/constants';
 
 import { fetchMonitoredClusters } from './monitored_clusters';
+import { fetchMetricbeatErrors } from './metricbeat';
+import type { FetchParameters } from './types';
 
 const DEFAULT_QUERY_TIMERANGE = { min: 'now-15m', max: 'now' };
 const DEFAULT_QUERY_TIMEOUT_SECONDS = 15;
@@ -44,19 +46,38 @@ export function registerV1HealthRoute(server: MonitoringCore) {
 
       const settings = extractSettings(server.config);
 
-      const monitoredClusters = await fetchMonitoredClusters({
+      const fetchArgs: FetchParameters = {
         timeout,
         timeRange,
-        monitoringIndex: withCCS(INDEX_PATTERN),
-        entSearchIndex: withCCS(INDEX_PATTERN_ENTERPRISE_SEARCH),
         search: (params: any) => callWithRequest(req, 'search', params),
         logger,
-      }).catch((err: Error) => {
-        logger.error(`_health: failed to retrieve monitored clusters:\n${err.stack}`);
-        return { error: err.message };
-      });
+      };
 
-      return { monitoredClusters, settings };
+      const monitoredClustersFn = () =>
+        fetchMonitoredClusters({
+          ...fetchArgs,
+          monitoringIndex: withCCS(INDEX_PATTERN),
+          entSearchIndex: withCCS(INDEX_PATTERN_ENTERPRISE_SEARCH),
+        }).catch((err: Error) => {
+          logger.error(`_health: failed to retrieve monitored clusters:\n${err.stack}`);
+          return { error: err.message };
+        });
+
+      const metricbeatErrorsFn = () =>
+        fetchMetricbeatErrors({
+          ...fetchArgs,
+          metricbeatIndex: server.config.ui.metricbeat.index,
+        }).catch((err: Error) => {
+          logger.error(`_health: failed to retrieve metricbeat data:\n${err.stack}`);
+          return { error: err.message };
+        });
+
+      const [monitoredClusters, metricbeatErrors] = await Promise.all([
+        monitoredClustersFn(),
+        metricbeatErrorsFn(),
+      ]);
+
+      return { monitoredClusters, metricbeatErrors, settings };
     },
   });
 }

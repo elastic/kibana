@@ -62,12 +62,12 @@ export interface UserProfileServiceStart {
   ): Promise<Array<UserProfile<D>>>;
 
   /**
-   * Retrieves a single user profile by identifier.
+   * Suggests multiple user profiles by search criteria.
    * @param params Suggest operation parameters.
-   * @param params.name Query string used to match name-related fields in user profiles. The following fields are
-   * treated as name-related: username, full_name and email.
-   * @param params.dataPath By default API returns user information, but does not return any user data. The optional
-   * "dataPath" parameter can be used to return personal data for this user (within `kibana` namespace).
+   * @param params.name Query string used to match name-related fields in user profiles. The following fields are treated as name-related: username, full_name and email.
+   * @param params.size Desired number of suggestion to return. The default value is 10.
+   * @param params.dataPath By default, suggest API returns user information, but does not return any user data. The optional "dataPath" parameter can be used to return personal data for this user (within `kibana` namespace only).
+   * @param params.requiredPrivileges The set of the privileges that users associated with the suggested user profile should have in the specified space. If not specified, privileges check isn't performed and all matched profiles are returned irrespective to the privileges of the associated users.
    */
   suggest<D extends UserProfileData>(
     params: UserProfileSuggestParams

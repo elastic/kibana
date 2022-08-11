@@ -227,6 +227,17 @@ describe('EnginesLogic', () => {
         expect(EnginesLogic.actions.loadEngines).toHaveBeenCalled();
       });
 
+      it('should call loadEngines if engine.type === elasticsearch', () => {
+        jest.spyOn(EnginesLogic.actions, 'loadEngines');
+
+        EnginesLogic.actions.onDeleteEngineSuccess({
+          ...MOCK_ENGINE,
+          type: 'elasticsearch' as EngineTypes.elasticsearch,
+        });
+
+        expect(EnginesLogic.actions.loadEngines).toHaveBeenCalled();
+      });
+
       it('should call loadMetaEngines if engine.type === meta', () => {
         jest.spyOn(EnginesLogic.actions, 'loadMetaEngines');
 

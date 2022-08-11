@@ -8,9 +8,7 @@
 import { isEmpty } from 'lodash/fp';
 import { useCallback } from 'react';
 import { useGetUrlSearch, useGetUrlStateQueryString } from '../navigation/use_get_url_search';
-import { navTabs } from '../../../app/home/home_navigations';
 import { useAppUrl } from '../../lib/kibana/hooks';
-import type { SecurityNavKey } from '../navigation/types';
 import type { SecurityPageName } from '../../../app/types';
 import { needsUrlState } from '../../links';
 
@@ -44,8 +42,7 @@ export type FormatUrl = (path: string, options?: Partial<FormatUrlOptions>) => s
  */
 export const useFormatUrl = (page: SecurityPageName) => {
   const { getAppUrl } = useAppUrl();
-  const tab = page in navTabs ? navTabs[page as SecurityNavKey] : undefined;
-  const search = useGetUrlSearch(tab);
+  const search = useGetUrlSearch(page);
 
   const formatUrl = useCallback<FormatUrl>(
     (path: string, { absolute = false, skipSearch = false } = {}) => {

@@ -151,7 +151,11 @@ export const DashboardListing = ({
       return (
         <EuiEmptyPrompt
           iconType="glasses"
-          title={<h1 id="dashboardListingHeading">{noItemsStrings.getReadonlyTitle()}</h1>}
+          title={
+            <h1 id="dashboardListingHeading" data-test-subj="emptyListPrompt">
+              {noItemsStrings.getReadonlyTitle()}
+            </h1>
+          }
           body={<p>{noItemsStrings.getReadonlyBody()}</p>}
         />
       );
@@ -183,7 +187,7 @@ export const DashboardListing = ({
             iconType="pencil"
             color="primary"
             onClick={() => redirectTo({ destination: 'dashboard' })}
-            data-test-subj="createDashboardPromptButton"
+            data-test-subj="newItemButton"
             aria-label={dashboardUnsavedListingStrings.getEditAriaLabel(getNewDashboardTitle())}
           >
             {dashboardUnsavedListingStrings.getEditTitle()}
@@ -191,12 +195,7 @@ export const DashboardListing = ({
         </EuiFlexItem>
       </EuiFlexGroup>
     ) : (
-      <EuiButton
-        onClick={createItem}
-        fill
-        iconType="plusInCircle"
-        data-test-subj="createDashboardPromptButton"
-      >
+      <EuiButton onClick={createItem} fill iconType="plusInCircle" data-test-subj="newItemButton">
         {noItemsStrings.getCreateNewDashboardText()}
       </EuiButton>
     );
@@ -205,7 +204,7 @@ export const DashboardListing = ({
       <EuiEmptyPrompt
         iconType="dashboardApp"
         title={
-          <h1 id="dashboardListingHeading">
+          <h1 id="dashboardListingHeading" data-test-subj="emptyListPrompt">
             {isEditingFirstDashboard
               ? noItemsStrings.getReadEditInProgressTitle()
               : noItemsStrings.getReadEditTitle()}

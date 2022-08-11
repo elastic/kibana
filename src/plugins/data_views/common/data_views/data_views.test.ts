@@ -10,15 +10,19 @@ import { defaults } from 'lodash';
 import { DataViewsService, DataView } from '.';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 
-import { UiSettingsCommon, SavedObjectsClientCommon, SavedObject } from '../types';
+import {
+  UiSettingsCommon,
+  SavedObjectsClientCommon,
+  SavedObject,
+  DataViewSpec,
+  IDataViewsApiClient,
+} from '../types';
 import { stubbedSavedObjectIndexPattern } from '../data_view.stub';
 
-const createFieldsFetcher = jest.fn().mockImplementation(() => ({
-  getFieldsForWildcard: jest.fn().mockImplementation(() => {
-    return new Promise((resolve) => resolve([]));
-  }),
-  every: jest.fn(),
-}));
+const createFieldsFetcher = () =>
+  ({
+    getFieldsForWildcard: () => [],
+  } as any as IDataViewsApiClient);
 
 const fieldFormats = fieldFormatsMock;
 let object: any = {};
@@ -436,6 +440,25 @@ describe('IndexPatterns', () => {
       expect(defaultDataViewResult).toBeInstanceOf(DataView);
       expect(defaultDataViewResult?.id).toBe('id1');
       expect(uiSettings.set).toBeCalledTimes(0);
+    });
+
+    test('refreshFields includes runtimeFields', async () => {
+      const indexPatternSpec: DataViewSpec = {
+        runtimeFieldMap: {
+          a: {
+            type: 'keyword',
+            script: {
+              source: "emit('a');",
+            },
+          },
+        },
+        title: 'test',
+      };
+
+      const indexPattern = await indexPatterns.create(indexPatternSpec);
+
+      indexPatterns.refreshFields(indexPattern);
+      expect(indexPattern.fields.length).toBe(1);
     });
   });
 });

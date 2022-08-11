@@ -6,12 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
-import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
-import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
+import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
+import type {
+  UsageCollectionSetup,
+  UsageCollectionStart,
+} from '@kbn/usage-collection-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { setFormatService } from './services';
 import { registerTableVis } from './register_vis';
 
@@ -24,7 +27,7 @@ export interface TablePluginSetupDependencies {
 
 /** @internal */
 export interface TablePluginStartDependencies {
-  data: DataPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
   usageCollection?: UsageCollectionStart;
 }
 
@@ -36,7 +39,7 @@ export class TableVisPlugin
     registerTableVis(core, deps);
   }
 
-  public start(core: CoreStart, { data }: TablePluginStartDependencies) {
-    setFormatService(data.fieldFormats);
+  public start(core: CoreStart, { fieldFormats }: TablePluginStartDependencies) {
+    setFormatService(fieldFormats);
   }
 }

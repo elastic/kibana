@@ -75,20 +75,22 @@ export function LayerPanels(
     [activeVisualization, dispatchLens]
   );
   const updateDatasource = useMemo(
-    () => (datasourceId: string, newState: unknown) => {
-      dispatchLens(
-        updateDatasourceState({
-          updater: (prevState: unknown) =>
-            typeof newState === 'function' ? newState(prevState) : newState,
-          datasourceId,
-          clearStagedPreview: false,
-        })
-      );
+    () => (datasourceId: string | undefined, newState: unknown) => {
+      if (datasourceId) {
+        dispatchLens(
+          updateDatasourceState({
+            updater: (prevState: unknown) =>
+              typeof newState === 'function' ? newState(prevState) : newState,
+            datasourceId,
+            clearStagedPreview: false,
+          })
+        );
+      }
     },
     [dispatchLens]
   );
   const updateDatasourceAsync = useMemo(
-    () => (datasourceId: string, newState: unknown) => {
+    () => (datasourceId: string | undefined, newState: unknown) => {
       // React will synchronously update if this is triggered from a third party component,
       // which we don't want. The timeout lets user interaction have priority, then React updates.
       setTimeout(() => {
@@ -99,43 +101,49 @@ export function LayerPanels(
   );
 
   const updateAll = useMemo(
-    () => (datasourceId: string, newDatasourceState: unknown, newVisualizationState: unknown) => {
-      // React will synchronously update if this is triggered from a third party component,
-      // which we don't want. The timeout lets user interaction have priority, then React updates.
+    () =>
+      (
+        datasourceId: string | undefined,
+        newDatasourceState: unknown,
+        newVisualizationState: unknown
+      ) => {
+        if (!datasourceId) return;
+        // React will synchronously update if this is triggered from a third party component,
+        // which we don't want. The timeout lets user interaction have priority, then React updates.
 
-      setTimeout(() => {
-        dispatchLens(
-          updateState({
-            updater: (prevState) => {
-              const updatedDatasourceState =
-                typeof newDatasourceState === 'function'
-                  ? newDatasourceState(prevState.datasourceStates[datasourceId].state)
-                  : newDatasourceState;
+        setTimeout(() => {
+          dispatchLens(
+            updateState({
+              updater: (prevState) => {
+                const updatedDatasourceState =
+                  typeof newDatasourceState === 'function'
+                    ? newDatasourceState(prevState.datasourceStates[datasourceId].state)
+                    : newDatasourceState;
 
-              const updatedVisualizationState =
-                typeof newVisualizationState === 'function'
-                  ? newVisualizationState(prevState.visualization.state)
-                  : newVisualizationState;
+                const updatedVisualizationState =
+                  typeof newVisualizationState === 'function'
+                    ? newVisualizationState(prevState.visualization.state)
+                    : newVisualizationState;
 
-              return {
-                ...prevState,
-                datasourceStates: {
-                  ...prevState.datasourceStates,
-                  [datasourceId]: {
-                    state: updatedDatasourceState,
-                    isLoading: false,
+                return {
+                  ...prevState,
+                  datasourceStates: {
+                    ...prevState.datasourceStates,
+                    [datasourceId]: {
+                      state: updatedDatasourceState,
+                      isLoading: false,
+                    },
                   },
-                },
-                visualization: {
-                  ...prevState.visualization,
-                  state: updatedVisualizationState,
-                },
-              };
-            },
-          })
-        );
-      }, 0);
-    },
+                  visualization: {
+                    ...prevState.visualization,
+                    state: updatedVisualizationState,
+                  },
+                };
+              },
+            })
+          );
+        }, 0);
+      },
     [dispatchLens]
   );
 
@@ -187,20 +195,22 @@ export function LayerPanels(
           onRemoveLayer={() => {
             const datasourcePublicAPI = props.framePublicAPI.datasourceLayers?.[layerId];
             const datasourceId = datasourcePublicAPI?.datasourceId;
-            const layerDatasource = datasourceMap[datasourceId];
-            const layerDatasourceState = datasourceStates?.[datasourceId]?.state;
 
-            const trigger = props.uiActions.getTrigger(UPDATE_FILTER_REFERENCES_TRIGGER);
-            const action = props.uiActions.getAction(UPDATE_FILTER_REFERENCES_ACTION);
+            if (datasourceId) {
+              const layerDatasource = datasourceMap[datasourceId];
+              const layerDatasourceState = datasourceStates?.[datasourceId]?.state;
+              const trigger = props.uiActions.getTrigger(UPDATE_FILTER_REFERENCES_TRIGGER);
+              const action = props.uiActions.getAction(UPDATE_FILTER_REFERENCES_ACTION);
 
-            action?.execute({
-              trigger,
-              fromDataView: layerDatasource.getUsedDataView(layerDatasourceState, layerId),
-              usedDataViews: layerDatasource
-                .getLayers(layerDatasourceState)
-                .map((layer) => layerDatasource.getUsedDataView(layerDatasourceState, layer)),
-              defaultDataView: layerDatasource.getCurrentIndexPatternId(layerDatasourceState),
-            } as ActionExecutionContext);
+              action?.execute({
+                trigger,
+                fromDataView: layerDatasource.getUsedDataView(layerDatasourceState, layerId),
+                usedDataViews: layerDatasource
+                  .getLayers(layerDatasourceState)
+                  .map((layer) => layerDatasource.getUsedDataView(layerDatasourceState, layer)),
+                defaultDataView: layerDatasource.getCurrentIndexPatternId(layerDatasourceState),
+              } as ActionExecutionContext);
+            }
 
             dispatchLens(
               removeOrClearLayer({
