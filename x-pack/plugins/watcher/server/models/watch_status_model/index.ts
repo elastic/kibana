@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { WatchStatusModel } from './watch_status_model';
+export { buildServerWatchStatusModel, buildClientWatchStatusModel } from './watch_status_model';
