@@ -9,6 +9,20 @@ import moment from 'moment-timezone';
 import { EuiRangeTick } from '@elastic/eui/src/components/form/range/range_ticks';
 import { calcAutoIntervalNear } from '@kbn/data-plugin/common';
 
+export const FROM_INDEX = 0;
+export const TO_INDEX = 1;
+
+export function getMomentTimezone(dateFormatTZ: string) {
+  const detectedTimezone = moment.tz.guess();
+  return dateFormatTZ === undefined | dateFormatTZ === 'Browser' ? detectedTimezone : dateFormatTZ;
+}
+
+export function getRange(timeRangeBounds: [number, number], value?: [number, number]) {
+  return value 
+    ? value[TO_INDEX] - value[FROM_INDEX] 
+    : timeRangeBounds[TO_INDEX] - timeRangeBounds[FROM_INDEX];
+}
+
 function getScaledDateFormat(interval: number): string {
   if (interval >= moment.duration(1, 'y').asMilliseconds()) {
     return 'YYYY';
@@ -52,7 +66,8 @@ export function getInterval(min: number, max: number, steps = 6): number {
   return interval;
 }
 
-export function getTicks(min: number, max: number, interval: number, timezone: string): EuiRangeTick[] {
+export function getTicks(min: number, max: number, timezone: string): EuiRangeTick[] {
+  const interval = getInterval(min, max);
   const format = getScaledDateFormat(interval);
 
   let tick = Math.ceil(min / interval) * interval;
@@ -60,7 +75,7 @@ export function getTicks(min: number, max: number, interval: number, timezone: s
   while (tick < max) {
     ticks.push({
       value: tick,
-      label: moment.tz(tick, timezone).format(format),
+      label: moment.tz(tick, getMomentTimezone(timezone)).format(format),
     });
     tick += interval;
   }

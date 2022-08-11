@@ -8,6 +8,7 @@
 
 import type { TimeRange } from '@kbn/es-query';
 import { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
+import { EuiRangeTick } from '@elastic/eui/src/components/form/range/range_ticks';
 
 import { ControlOutput } from '../../types';
 import { TimeSliderControlEmbeddableInput } from '../../../common/control_types/time_slider/types';
@@ -16,6 +17,7 @@ export * from '../../../common/control_types/time_slider/types';
 
 // Component state is only used by public components.
 export interface TimeSliderSubjectState {
+  ticks: EuiRangeTick[];
   timeRangeBounds: [number, number];
 }
 
