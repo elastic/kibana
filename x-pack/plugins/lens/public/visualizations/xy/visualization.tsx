@@ -100,8 +100,8 @@ export const getXyVisualization = ({
     return type === 'mixed' ? type : type.id;
   },
 
-  getLayerIds(state) {
-    return getLayersByType(state).map((l) => l.layerId);
+  getLayersInUse(state) {
+    return getLayersByType(state).map((l) => ({ id: l.layerId }));
   },
 
   getRemoveOperation(state, layerId) {

@@ -181,8 +181,8 @@ export const getGaugeVisualization = ({
   getVisualizationTypeId(state) {
     return state.shape;
   },
-  getLayerIds(state) {
-    return [state.layerId];
+  getLayersInUse(state) {
+    return [{ id: state.layerId }];
   },
   clearLayer(state) {
     const newState = { ...state };

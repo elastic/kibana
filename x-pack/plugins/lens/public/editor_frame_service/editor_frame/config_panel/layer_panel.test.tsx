@@ -126,7 +126,7 @@ describe('LayerPanel', () => {
       ],
     };
 
-    mockVisualization.getLayerIds.mockReturnValue(['first']);
+    mockVisualization.getLayersInUse.mockReturnValue([{ id: 'first' }]);
     mockDatasource = createMockDatasource('testDatasource');
   });
 

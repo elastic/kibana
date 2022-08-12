@@ -456,8 +456,11 @@ export const getMetricVisualization = ({
     return newState;
   },
 
-  getLayerIds(state) {
-    return [state.layerId, ...(state.trendlineLayerId ? [state.trendlineLayerId] : [])];
+  getLayersInUse(state) {
+    return [
+      { id: state.layerId },
+      ...(state.trendlineLayerId ? [{ id: state.trendlineLayerId, hidden: true }] : []),
+    ];
   },
 
   getDescription() {
@@ -513,6 +516,7 @@ export const getMetricVisualization = ({
           { groupId: GROUP_ID.TREND_TIME, columnId: generateId(), autoTimeField: true },
         ],
         disabled: Boolean(state?.trendlineLayerId),
+        hidden: true,
       },
     ];
   },

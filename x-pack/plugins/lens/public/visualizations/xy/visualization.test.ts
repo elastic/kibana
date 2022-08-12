@@ -247,7 +247,7 @@ describe('xy_visualization', () => {
 
   describe('#getLayerIds', () => {
     it('returns layerids', () => {
-      expect(xyVisualization.getLayerIds(exampleState())).toEqual(['first']);
+      expect(xyVisualization.getLayersInUse(exampleState())).toEqual(['first']);
     });
   });
 

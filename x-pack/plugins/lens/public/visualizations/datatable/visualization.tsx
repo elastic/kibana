@@ -69,8 +69,8 @@ export const getDatatableVisualization = ({
     return 'lnsDatatable';
   },
 
-  getLayerIds(state) {
-    return [state.layerId];
+  getLayersInUse(state) {
+    return [{ id: state.layerId }];
   },
 
   clearLayer(state) {

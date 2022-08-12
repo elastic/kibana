@@ -494,7 +494,7 @@ describe('metric visualization', () => {
   });
 
   test('getLayerIds returns the single layer ID', () => {
-    expect(visualization.getLayerIds(fullState)).toEqual([fullState.layerId]);
+    expect(visualization.getLayersInUse(fullState)).toEqual([fullState.layerId]);
   });
 
   it('gives a description', () => {

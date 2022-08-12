@@ -63,7 +63,7 @@ describe('metric_visualization', () => {
 
   describe('#getLayerIds', () => {
     it('returns the layer id', () => {
-      expect(metricVisualization.getLayerIds(exampleState())).toEqual(['l1']);
+      expect(metricVisualization.getLayersInUse(exampleState())).toEqual(['l1']);
     });
   });
 

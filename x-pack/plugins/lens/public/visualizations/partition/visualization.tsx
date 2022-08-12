@@ -79,8 +79,8 @@ export const getPieVisualization = ({
     return state.shape;
   },
 
-  getLayerIds(state) {
-    return state.layers.map((l) => l.layerId);
+  getLayersInUse(state) {
+    return state.layers.map((l) => ({ id: l.layerId }));
   },
 
   clearLayer(state) {

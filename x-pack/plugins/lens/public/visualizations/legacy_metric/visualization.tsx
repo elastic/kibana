@@ -202,8 +202,8 @@ export const getLegacyMetricVisualization = ({
     };
   },
 
-  getLayerIds(state) {
-    return [state.layerId];
+  getLayersInUse(state) {
+    return [{ id: state.layerId }];
   },
 
   getDescription() {

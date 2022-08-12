@@ -59,7 +59,7 @@ describe('Datatable Visualization', () => {
         layerType: layerTypes.DATA,
         columns: [{ columnId: 'a' }, { columnId: 'b' }, { columnId: 'c' }],
       };
-      expect(datatableVisualization.getLayerIds(state)).toEqual(['baz']);
+      expect(datatableVisualization.getLayersInUse(state)).toEqual(['baz']);
     });
   });
 

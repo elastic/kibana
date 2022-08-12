@@ -815,7 +815,7 @@ export interface Visualization<T = unknown> {
   getDescription: (state: T) => { icon?: IconType; label: string };
 
   /** Frame needs to know which layers the visualization is currently using */
-  getLayerIds: (state: T) => string[];
+  getLayersInUse: (state: T) => Array<{ id: string; hidden?: boolean }>;
   /** Reset button on each layer triggers this */
   clearLayer: (state: T, layerId: string) => T;
   /** Optional, if the visualization supports multiple layers */
@@ -843,6 +843,8 @@ export interface Visualization<T = unknown> {
     icon?: IconType;
     noDatasource?: boolean;
     disabled?: boolean;
+    // does this layer show up in the UI?
+    hidden?: boolean;
     toolTipContent?: string;
     initialDimensions?: Array<{
       columnId: string;

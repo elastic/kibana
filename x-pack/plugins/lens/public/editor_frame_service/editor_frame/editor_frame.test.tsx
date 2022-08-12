@@ -123,8 +123,8 @@ describe('editor_frame', () => {
       ],
     };
 
-    mockVisualization.getLayerIds.mockReturnValue(['first']);
-    mockVisualization2.getLayerIds.mockReturnValue(['second']);
+    mockVisualization.getLayersInUse.mockReturnValue(['first']);
+    mockVisualization2.getLayersInUse.mockReturnValue(['second']);
 
     mockDatasource = createMockDatasource('testDatasource');
     mockDatasource2 = createMockDatasource('testDatasource2');
