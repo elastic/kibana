@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   DataView,
   DataViewField,
@@ -25,7 +25,9 @@ import {
   EuiText,
   EuiTitle,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import {
   Axis,
   Chart,
@@ -41,7 +43,6 @@ import { buildEsQuery, Query, Filter, AggregateQuery } from '@kbn/es-query';
 import type { BucketedAggregation } from '../../../common/types';
 import { loadFieldStats, canProvideStatsForField } from '../../services';
 import { useUnifiedFieldListServices } from '../../hooks/use_unified_field_list_services';
-import './field_stats.scss';
 
 interface State {
   isLoading: boolean;
@@ -79,6 +80,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   overrideMissingContent,
   overrideFooter,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const services = useUnifiedFieldListServices();
   const { fieldFormats, uiSettings, charts, dataViews, data } = services;
   const [state, changeState] = useState<State>({
@@ -87,6 +89,28 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   const [dataView, changeDataView] = useState<DataView | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const isCanceledRef = useRef<boolean>(false);
+
+  const topValueStyles = useMemo(
+    () => css`
+      margin-bottom: ${euiTheme.size.s};
+
+      &:last-of-type {
+        margin-bottom: 0;
+      }
+    `,
+    [euiTheme]
+  );
+
+  const topValueProgressStyles = useMemo(
+    () => css`
+      background-color: ${euiTheme.colors.lightestShade};
+
+      &::-webkit-progress-bar {
+        background-color: ${euiTheme.colors.lightestShade};
+      }
+    `,
+    [euiTheme]
+  );
 
   const setState: typeof changeState = useCallback(
     (nextState) => {
@@ -421,8 +445,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
         {topValues.buckets.map((topValue) => {
           const formatted = formatter.convert(topValue.key);
           return (
-            // TODO: convert styles to `css` prop
-            <div className="unifiedFieldList__fieldStats__topValue" key={topValue.key}>
+            <div css={topValueStyles} key={topValue.key}>
               <EuiFlexGroup
                 alignItems="stretch"
                 key={topValue.key}
@@ -456,7 +479,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiProgress
-                className="unifiedFieldList__fieldStats__topValueProgress"
+                css={topValueProgressStyles}
                 value={topValue.count / sampledValues!}
                 max={1}
                 size="s"
@@ -487,7 +510,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
             </EuiFlexGroup>
 
             <EuiProgress
-              className="unifiedFieldList__fieldStats__topValueProgress"
+              css={topValueProgressStyles}
               value={otherCount / sampledValues!}
               max={1}
               size="s"
