@@ -26,6 +26,7 @@ import {
   VisualizeEditorContext,
 } from '../../types';
 import { buildExpression } from './expression_helpers';
+import { showMemoizedErrorNotification } from '../../lens_ui_errors';
 import { Document } from '../../persistence/saved_object_store';
 import { getActiveDatasourceIdFromDoc } from '../../utils';
 import type { ErrorMessage } from '../types';
@@ -115,6 +116,7 @@ export async function initializeDataViews(
     Object.keys(datasourceMap).every((datasourceId) => !datasourceStates[datasourceId]?.state)
       ? fallbackId
       : undefined;
+
   const adHocDataviewsIds: string[] = [];
   let adHocDataviews;
   Object.keys(datasourceMap).forEach((datasourceId) => {
@@ -129,6 +131,7 @@ export async function initializeDataViews(
       }
     }
   });
+
   const usedIndexPatterns = getIndexPatterns(
     references,
     initialContext,
@@ -398,16 +401,29 @@ export const validateDatasourceAndVisualization = (
   currentVisualizationState: unknown | undefined,
   { datasourceLayers, dataViews }: Pick<FramePublicAPI, 'datasourceLayers' | 'dataViews'>
 ): ErrorMessage[] | undefined => {
-  const datasourceValidationErrors = currentDatasourceState
-    ? currentDataSource?.getErrorMessages(currentDatasourceState, dataViews.indexPatterns)
-    : undefined;
+  try {
+    const datasourceValidationErrors = currentDatasourceState
+      ? currentDataSource?.getErrorMessages(currentDatasourceState, dataViews.indexPatterns)
+      : undefined;
 
-  const visualizationValidationErrors = currentVisualizationState
-    ? currentVisualization?.getErrorMessages(currentVisualizationState, datasourceLayers)
-    : undefined;
+    const visualizationValidationErrors = currentVisualizationState
+      ? currentVisualization?.getErrorMessages(currentVisualizationState, datasourceLayers)
+      : undefined;
 
-  if (datasourceValidationErrors?.length || visualizationValidationErrors?.length) {
-    return [...(datasourceValidationErrors || []), ...(visualizationValidationErrors || [])];
+    if (datasourceValidationErrors?.length || visualizationValidationErrors?.length) {
+      return [...(datasourceValidationErrors || []), ...(visualizationValidationErrors || [])];
+    }
+  } catch (e) {
+    showMemoizedErrorNotification(e);
+    if (e.message) {
+      return [
+        {
+          shortMessage: e.message,
+          longMessage: e.message,
+          type: 'critical',
+        },
+      ];
+    }
   }
   return undefined;
 };

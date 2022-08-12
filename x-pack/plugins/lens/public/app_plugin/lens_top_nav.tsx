@@ -675,7 +675,7 @@ export const LensTopNavMenu = ({
   }, [data.query.filterManager, data.query.queryString, dispatchSetState]);
 
   const refreshFieldList = useCallback(async () => {
-    if (currentIndexPattern && currentIndexPattern.id) {
+    if (currentIndexPattern?.id) {
       refreshIndexPatternsList({
         activeDatasources: Object.keys(datasourceStates).reduce(
           (acc, datasourceId) => ({

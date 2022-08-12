@@ -5,15 +5,20 @@
  * 2.0.
  */
 
-import type { IndexPatternServiceAPI } from '../indexpattern_service/service';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
+import { coreMock } from '@kbn/core/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import {
+  createIndexPatternService,
+  IndexPatternServiceProps,
+  IndexPatternServiceAPI,
+} from '../indexpattern_service/service';
 
-export function createIndexPatternServiceMock(): IndexPatternServiceAPI {
-  return {
-    loadIndexPatterns: jest.fn(async () => ({})),
-    loadIndexPatternRefs: jest.fn(async () => []),
-    ensureIndexPattern: jest.fn(async () => ({})),
-    refreshExistingFields: jest.fn(async () => {}),
-    getDefaultIndex: jest.fn(() => 'fake-index'),
-    updateIndexPatternsCache: jest.fn(async () => {}),
-  };
+export function createIndexPatternServiceMock({
+  core = coreMock.createStart(),
+  uiSettings = uiSettingsServiceMock.createStartContract(),
+  dataViews = dataViewPluginMocks.createStartContract(),
+  updateIndexPatterns = jest.fn(),
+}: Partial<IndexPatternServiceProps> = {}): IndexPatternServiceAPI {
+  return createIndexPatternService({ core, uiSettings, updateIndexPatterns, dataViews });
 }
