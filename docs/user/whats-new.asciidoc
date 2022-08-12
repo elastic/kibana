@@ -18,6 +18,17 @@ coming::[8.4.0]
 === Enhancements to Alerting
 
 [discrete]
+==== Add schedules for snoozing rule notifications
+
+Starting in 8.2, you could suppress the notifications and actions for your rules
+for a specific duration. Now you can also schedule these single or recurring
+downtimes to start and end at specific dates and times.
+
+[role="screenshot"]
+image::images/highlights-snooze-schedule.png[Snooze notifications for a rule in {stack-manage-app} > {rules-ui} ]
+
+
+[discrete]
 ==== New metrics for rules and actions
 
 You can now ship metrics related to {alert-features} to your monitoring cluster
@@ -27,7 +38,5 @@ actions that are queued, running, or failing.
 
 [role="screenshot"]
 image::images/highlights-rule-metrics.png[Stack Monitoring overview metrics for Kibana]
-
-
 
 // end::notable-highlights[]
