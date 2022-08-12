@@ -8,20 +8,19 @@
 
 import fs from 'fs';
 import { createHash } from 'crypto';
-import { pipeline, Writable } from 'stream';
+import { pipeline } from 'stream/promises';
 import { resolve, dirname, isAbsolute, sep } from 'path';
 import { createGunzip } from 'zlib';
 import { inspect, promisify } from 'util';
 
 import archiver from 'archiver';
-import vfs from 'vinyl-fs';
-import File from 'vinyl';
+import globby from 'globby';
+import cpy from 'cpy';
 import del from 'del';
 import deleteEmpty from 'delete-empty';
 import tar, { ExtractOptions } from 'tar';
 import { ToolingLog } from '@kbn/dev-utils';
 
-const pipelineAsync = promisify(pipeline);
 const mkdirAsync = promisify(fs.mkdir);
 const writeFileAsync = promisify(fs.writeFile);
 const readFileAsync = promisify(fs.readFile);
@@ -166,32 +165,24 @@ export async function copyAll(
   assertAbsolute(sourceDir);
   assertAbsolute(destination);
 
-  await pipelineAsync(
-    vfs.src(select, {
-      buffer: false,
-      cwd: sourceDir,
-      base: sourceDir,
-      dot,
-    }),
-    vfs.dest(destination)
-  );
+  const copiedFiles = await cpy(select, destination, {
+    cwd: sourceDir,
+    parents: true,
+    ignoreJunk: false,
+    dot,
+  });
 
   // we must update access and modified file times after the file copy
   // has completed, otherwise the copy action can effect modify times.
-  if (Boolean(time)) {
-    await pipelineAsync(
-      vfs.src(select, {
-        buffer: false,
-        cwd: destination,
-        base: destination,
-        dot,
-      }),
-      new Writable({
-        objectMode: true,
-        write(file: File, _, cb) {
-          utimesAsync(file.path, time, time).then(() => cb(), cb);
-        },
-      })
+  if (time) {
+    const copiedDirectories = await globby(select, {
+      cwd: destination,
+      dot,
+      onlyDirectories: true,
+      absolute: true,
+    });
+    await Promise.all(
+      [...copiedFiles, ...copiedDirectories].map((entry) => Fsp.utimes(entry, time, time))
     );
   }
 }
@@ -221,7 +212,7 @@ export async function untar(
 
   await mkdirAsync(destination, { recursive: true });
 
-  await pipelineAsync(
+  await pipeline(
     fs.createReadStream(source),
     createGunzip(),
     tar.extract({
@@ -237,7 +228,7 @@ export async function gunzip(source: string, destination: string) {
 
   await mkdirAsync(dirname(destination), { recursive: true });
 
-  await pipelineAsync(
+  await pipeline(
     fs.createReadStream(source),
     createGunzip(),
     fs.createWriteStream(destination)
