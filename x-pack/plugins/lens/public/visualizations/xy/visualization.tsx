@@ -11,13 +11,14 @@ import { Position } from '@elastic/charts';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { PaletteRegistry } from '@kbn/coloring';
-import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { ThemeServiceStart } from '@kbn/core/public';
+import { CoreStart, ThemeServiceStart } from '@kbn/core/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { FillStyle } from '@kbn/expression-xy-plugin/common';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { getSuggestions } from './xy_suggestions';
 import { XyToolbar } from './xy_config_panel';
 import { DimensionEditor } from './xy_config_panel/dimension_editor';
@@ -79,14 +80,18 @@ import { defaultAnnotationLabel } from './annotations/helpers';
 import { onDropForVisualization } from '../../editor_frame_service/editor_frame/config_panel/buttons/drop_targets_utils';
 
 export const getXyVisualization = ({
-  datatableUtilities,
+  core,
+  storage,
+  data,
   paletteService,
   fieldFormats,
   useLegacyTimeAxis,
   kibanaTheme,
   eventAnnotationService,
 }: {
-  datatableUtilities: DatatableUtilitiesService;
+  core: CoreStart;
+  storage: IStorageWrapper;
+  data: DataPublicPluginStart;
   paletteService: PaletteRegistry;
   eventAnnotationService: EventAnnotationServiceType;
   fieldFormats: FieldFormatsStart;
@@ -137,7 +142,10 @@ export const getXyVisualization = ({
       layers: state.layers.map((l) =>
         l.layerId !== layerId
           ? l
-          : newLayerState({ seriesType: state.preferredSeriesType, layerId })
+          : newLayerState({
+              seriesType: state.preferredSeriesType,
+              layerId,
+            })
       ),
     };
   },
@@ -187,6 +195,20 @@ export const getXyVisualization = ({
       getAnnotationsSupportedLayer(state, frame),
       getReferenceSupportedLayer(state, frame),
     ];
+  },
+
+  onIndexPatternChange(state, indexPatternId, layerId) {
+    const layerIndex = state.layers.findIndex((l) => l.layerId === layerId);
+    const layer = state.layers[layerIndex];
+    if (!layer || !isAnnotationsLayer(layer)) {
+      return state;
+    }
+    const newLayers = [...state.layers];
+    newLayers[layerIndex] = { ...layer };
+    return {
+      ...state,
+      layers: newLayers,
+    };
   },
 
   getConfiguration({ state, frame, layerId }) {
@@ -520,7 +542,7 @@ export const getXyVisualization = ({
   renderDimensionEditor(domElement, props) {
     const allProps = {
       ...props,
-      datatableUtilities,
+      datatableUtilities: data.datatableUtilities,
       formatFactory: fieldFormats.deserialize,
       paletteService,
     };
