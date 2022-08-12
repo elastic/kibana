@@ -142,7 +142,35 @@ describe('getExecutionLogAggregation', () => {
           },
         },
         aggs: {
-          executionUuidCardinality: { cardinality: { field: 'kibana.alert.rule.execution.uuid' } },
+          executionUuidCardinality: {
+            aggs: {
+              executionUuidCardinality: {
+                cardinality: { field: 'kibana.alert.rule.execution.uuid' },
+              },
+            },
+            filter: {
+              bool: {
+                must: [
+                  {
+                    bool: {
+                      must: [
+                        {
+                          match: {
+                            'event.action': 'execute',
+                          },
+                        },
+                        {
+                          match: {
+                            'event.provider': 'alerting',
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          },
           executionUuid: {
             terms: {
               field: 'kibana.alert.rule.execution.uuid',
@@ -175,12 +203,28 @@ describe('getExecutionLogAggregation', () => {
                 },
                 aggs: { actionOutcomes: { terms: { field: 'event.outcome', size: 2 } } },
               },
+              minExecutionUuidBucket: {
+                bucket_selector: {
+                  buckets_path: {
+                    count: 'ruleExecution._count',
+                  },
+                  script: {
+                    source: 'params.count > 0',
+                  },
+                },
+              },
               ruleExecution: {
                 filter: {
                   bool: {
                     must: [
-                      { match: { 'event.action': 'execute' } },
-                      { match: { 'event.provider': 'alerting' } },
+                      {
+                        bool: {
+                          must: [
+                            { match: { 'event.action': 'execute' } },
+                            { match: { 'event.provider': 'alerting' } },
+                          ],
+                        },
+                      },
                     ],
                   },
                 },
@@ -448,7 +492,9 @@ describe('formatExecutionLogResult', () => {
             ],
           },
           executionUuidCardinality: {
-            value: 374,
+            executionUuidCardinality: {
+              value: 374,
+            },
           },
         },
       },
@@ -683,7 +729,9 @@ describe('formatExecutionLogResult', () => {
             ],
           },
           executionUuidCardinality: {
-            value: 374,
+            executionUuidCardinality: {
+              value: 374,
+            },
           },
         },
       },
@@ -910,7 +958,9 @@ describe('formatExecutionLogResult', () => {
             ],
           },
           executionUuidCardinality: {
-            value: 374,
+            executionUuidCardinality: {
+              value: 374,
+            },
           },
         },
       },
@@ -1142,7 +1192,9 @@ describe('formatExecutionLogResult', () => {
             ],
           },
           executionUuidCardinality: {
-            value: 417,
+            executionUuidCardinality: {
+              value: 417,
+            },
           },
         },
       },

@@ -50,7 +50,17 @@ jq '
   .resources.integrations_server[0].plan.integrations_server.version = "'$FULL_VERSION'"
   ' .buildkite/scripts/steps/cloud/deploy.json > "$DEPLOYMENT_SPEC"
 
-ecctl deployment create --track --output json --file "$DEPLOYMENT_SPEC" &> "$LOGS"
+function shutdown {
+  echo "--- Shutdown deployment"
+  # Re-fetch the deployment ID - if there's an error during creation the ID may not be set
+  CLOUD_DEPLOYMENT_ID=$(ecctl deployment list --output json | jq -r '.deployments[] | select(.name == "'$CLOUD_DEPLOYMENT_NAME'") | .id')
+  if [ -n "${CLOUD_DEPLOYMENT_ID}" ]; then
+    ecctl deployment shutdown "$CLOUD_DEPLOYMENT_ID" --force --track --output json > "$LOGS"
+  fi
+}
+trap "shutdown" EXIT
+
+ecctl deployment create --track --output json --file "$DEPLOYMENT_SPEC" > "$LOGS"
 CLOUD_DEPLOYMENT_USERNAME=$(jq -r --slurp '.[]|select(.resources).resources[] | select(.credentials).credentials.username' "$LOGS")
 CLOUD_DEPLOYMENT_PASSWORD=$(jq -r --slurp '.[]|select(.resources).resources[] | select(.credentials).credentials.password' "$LOGS")
 CLOUD_DEPLOYMENT_ID=$(jq -r --slurp '.[0].id' "$LOGS")
@@ -61,12 +71,6 @@ export CLOUD_DEPLOYMENT_ELASTICSEARCH_URL=$(ecctl deployment show "$CLOUD_DEPLOY
 
 echo "Kibana: $CLOUD_DEPLOYMENT_KIBANA_URL"
 echo "ES: $CLOUD_DEPLOYMENT_ELASTICSEARCH_URL"
-
-function shutdown {
-  echo "--- Shutdown deployment"
-  ecctl deployment shutdown "$CLOUD_DEPLOYMENT_ID" --force --track --output json &> "$LOGS"
-}
-trap "shutdown" EXIT
 
 export TEST_KIBANA_PROTOCOL=$(node -e "console.log(new URL(process.env.CLOUD_DEPLOYMENT_KIBANA_URL).protocol.replace(':', ''))")
 export TEST_KIBANA_HOSTNAME=$(node -e "console.log(new URL(process.env.CLOUD_DEPLOYMENT_KIBANA_URL).hostname)")

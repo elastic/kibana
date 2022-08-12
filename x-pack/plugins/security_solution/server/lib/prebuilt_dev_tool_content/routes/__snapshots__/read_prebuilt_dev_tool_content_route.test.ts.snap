@@ -86,7 +86,12 @@ PUT ml_host_risk_score_default
         \\"type\\": \\"date\\"
       },
       \\"risk\\": {
-        \\"type\\": \\"keyword\\"
+        \\"type\\": \\"text\\",
+        \\"fields\\": {
+          \\"keyword\\": {
+            \\"type\\":  \\"keyword\\"
+          }
+        }
       },
       \\"risk_stats\\": {
         \\"properties\\": {
@@ -208,7 +213,12 @@ PUT ml_host_risk_score_latest_default
         \\"type\\": \\"date\\"
       },
       \\"risk\\": {
-        \\"type\\": \\"keyword\\"
+        \\"type\\": \\"text\\",
+        \\"fields\\": {
+          \\"keyword\\": {
+            \\"type\\":  \\"keyword\\"
+          }
+        }
       },
       \\"risk_stats\\": {
         \\"properties\\": {

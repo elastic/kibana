@@ -7,8 +7,8 @@
 import { fromKueryExpression } from '@kbn/es-query';
 import { flatten, merge, sortBy, sum, pickBy } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
-import { ProcessorEvent } from '../../../../common/processor_event';
 import { TelemetryTask } from '.';
 import { AGENT_NAMES, RUM_AGENT_NAMES } from '../../../../common/agent_name';
 import {

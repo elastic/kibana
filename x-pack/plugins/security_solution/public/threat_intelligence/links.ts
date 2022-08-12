@@ -15,13 +15,13 @@ export const links: LinkItem = {
   id: SecurityPageName.threatIntelligence,
   title: THREAT_INTELLIGENCE,
   path: THREAT_INTELLIGENCE_PATH,
+  experimentalKey: 'threatIntelligenceEnabled',
   landingImage: threatIntelligencePageImg,
   description: i18n.translate('xpack.securitySolution.appLinks.threatIntelligence.description', {
     defaultMessage:
       'Elastic threat intelligence helps you see if you are open to or have been subject to current or historical known threats.',
   }),
   capabilities: [`${SERVER_APP_ID}.show`],
-  globalNavEnabled: false,
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.threatIntelligence', {
       defaultMessage: 'Threat Intelligence',

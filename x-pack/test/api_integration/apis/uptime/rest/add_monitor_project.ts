@@ -16,8 +16,7 @@ import { PrivateLocationTestService } from './services/private_location_test_ser
 import { comparePolicies, getTestProjectSyntheticsPolicy } from './sample_data/test_policy';
 
 export default function ({ getService }: FtrProviderContext) {
-  // FLAKY: https://github.com/elastic/kibana/issues/137124
-  describe.skip('[PUT] /api/uptime/service/monitors', function () {
+  describe('[PUT] /api/uptime/service/monitors', function () {
     this.tags('skipCloud');
 
     const supertest = getService('supertest');
@@ -70,7 +69,7 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await supertest.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
       await supertest
-        .post('/api/fleet/epm/packages/synthetics/0.9.5')
+        .post('/api/fleet/epm/packages/synthetics/0.9.4')
         .set('kbn-xsrf', 'true')
         .send({ force: true })
         .expect(200);
@@ -727,7 +726,6 @@ export default function ({ getService }: FtrProviderContext) {
               label: 'Test private location 0',
               isServiceManaged: false,
               isInvalid: false,
-              name: 'Test private location 0',
               agentPolicyId: testPolicyId,
               id: testPolicyId,
               geo: {

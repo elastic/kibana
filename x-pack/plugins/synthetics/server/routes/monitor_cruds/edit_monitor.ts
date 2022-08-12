@@ -155,7 +155,8 @@ export const syncEditedMonitor = async ({
     const errors = await syntheticsMonitorClient.editMonitor(
       editedMonitor as MonitorFields,
       editedMonitorSavedObject.id,
-      request
+      request,
+      savedObjectsClient
     );
 
     sendTelemetryEvents(

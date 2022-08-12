@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { EuiSwitch } from '@elastic/eui';
+import { EuiSwitch, EuiText } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
@@ -25,6 +25,7 @@ import {
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 import { updateColumnParam } from '../layer_helpers';
+import { getColumnWindowError } from '../../window_utils';
 
 const supportedTypes = new Set([
   'string',
@@ -42,7 +43,7 @@ const SCALE = 'ratio';
 const OPERATION_TYPE = 'unique_count';
 const IS_BUCKETED = false;
 
-function ofName(name: string, timeShift: string | undefined) {
+function ofName(name: string, timeShift: string | undefined, window: string | undefined) {
   return adjustTimeScaleLabelSuffix(
     i18n.translate('xpack.lens.indexPattern.cardinalityOf', {
       defaultMessage: 'Unique count of {name}',
@@ -53,7 +54,9 @@ function ofName(name: string, timeShift: string | undefined) {
     undefined,
     undefined,
     undefined,
-    timeShift
+    timeShift,
+    undefined,
+    window
   );
 }
 
@@ -90,6 +93,7 @@ export const cardinalityOperation: OperationDefinition<
     combineErrorMessages([
       getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
       getDisallowedPreviousShiftMessage(layer, columnId),
+      getColumnWindowError(layer, columnId, indexPattern),
     ]),
   isTransferable: (column, newIndexPattern) => {
     const newField = newIndexPattern.getFieldByName(column.sourceField);
@@ -103,11 +107,12 @@ export const cardinalityOperation: OperationDefinition<
   },
   filterable: true,
   shiftable: true,
+  windowable: true,
   getDefaultLabel: (column, indexPattern) =>
-    ofName(getSafeName(column.sourceField, indexPattern), column.timeShift),
+    ofName(getSafeName(column.sourceField, indexPattern), column.timeShift, column.window),
   buildColumn({ field, previousColumn }, columnParams) {
     return {
-      label: ofName(field.displayName, previousColumn?.timeShift),
+      label: ofName(field.displayName, previousColumn?.timeShift, previousColumn?.window),
       dataType: 'number',
       operationType: OPERATION_TYPE,
       scale: SCALE,
@@ -115,6 +120,7 @@ export const cardinalityOperation: OperationDefinition<
       isBucketed: IS_BUCKETED,
       filter: getFilter(previousColumn, columnParams),
       timeShift: columnParams?.shift || previousColumn?.timeShift,
+      window: columnParams?.window || previousColumn?.window,
       params: {
         ...getFormatFromPreviousColumn(previousColumn),
         emptyAsNull:
@@ -136,9 +142,13 @@ export const cardinalityOperation: OperationDefinition<
         dataTestSubj: 'hide-zero-values',
         inlineElement: (
           <EuiSwitch
-            label={i18n.translate('xpack.lens.indexPattern.hideZero', {
-              defaultMessage: 'Hide zero values',
-            })}
+            label={
+              <EuiText size="xs">
+                {i18n.translate('xpack.lens.indexPattern.hideZero', {
+                  defaultMessage: 'Hide zero values',
+                })}
+              </EuiText>
+            }
             labelProps={{
               style: {
                 fontWeight: euiThemeVars.euiFontWeightMedium,
@@ -175,7 +185,7 @@ export const cardinalityOperation: OperationDefinition<
   onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
-      label: ofName(field.displayName, oldColumn.timeShift),
+      label: ofName(field.displayName, oldColumn.timeShift, oldColumn.window),
       sourceField: field.name,
     };
   },

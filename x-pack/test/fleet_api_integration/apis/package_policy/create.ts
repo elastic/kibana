@@ -4,12 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
+import { Installation } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
+  const es: Client = getService('es');
   const supertest = getService('supertest');
 
   const getPackagePolicyById = async (id: string) => {
@@ -225,6 +228,7 @@ export default function (providerContext: FtrProviderContext) {
             title: 'Endpoint',
             version: '1.4.1',
           },
+          force: true,
         })
         .expect(200);
       await supertest
@@ -453,6 +457,139 @@ export default function (providerContext: FtrProviderContext) {
       const { item: policy } = await getPackagePolicyById(policyId);
 
       expect(policy.name).to.equal(nameWithWhitespace.trim());
+    });
+    describe('Package verification', () => {
+      const uninstallPackage = async (pkg: string, version: string) => {
+        await supertest.delete(`/api/fleet/epm/packages/${pkg}/${version}`).set('kbn-xsrf', 'xxxx');
+      };
+
+      const getInstallationSavedObject = async (pkg: string): Promise<Installation | undefined> => {
+        const res: { _source?: { 'epm-packages': Installation } } = await es.transport.request({
+          method: 'GET',
+          path: `/.kibana/_doc/epm-packages:${pkg}`,
+        });
+
+        return res?._source?.['epm-packages'] as Installation;
+      };
+      const TEST_KEY_ID = 'd2a182a7b0e00c14';
+
+      afterEach(async () => {
+        await uninstallPackage('verified', '1.0.0');
+        await uninstallPackage('unverified_content', '1.0.0');
+      });
+
+      it('should work with a verified package', async function () {
+        await supertest
+          .post(`/api/fleet/package_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'verified-1',
+            description: '',
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            enabled: true,
+            output_id: '',
+            inputs: [
+              {
+                type: 'logfile',
+                policy_template: 'logs',
+                enabled: true,
+                streams: [
+                  {
+                    enabled: true,
+                    data_stream: { type: 'logs', dataset: 'verified.log' },
+                    vars: {
+                      paths: { type: 'text', value: ['/tmp/test.log'] },
+                      'data_stream.dataset': { value: 'generic', type: 'text' },
+                      custom: { value: '', type: 'yaml' },
+                    },
+                  },
+                ],
+              },
+            ],
+            package: { name: 'verified', title: 'Verified Package', version: '1.0.0' },
+          })
+          .expect(200);
+
+        const installationSO = await getInstallationSavedObject('verified');
+        expect(installationSO?.verification_status).equal('verified');
+        expect(installationSO?.verification_key_id).equal(TEST_KEY_ID);
+      });
+      it('should return 400 for unverified package', async function () {
+        const res = await supertest
+          .post(`/api/fleet/package_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'unverified_content-1',
+            description: '',
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            enabled: true,
+            output_id: '',
+            inputs: [
+              {
+                type: 'logfile',
+                policy_template: 'logs',
+                enabled: true,
+                streams: [
+                  {
+                    enabled: true,
+                    data_stream: { type: 'logs', dataset: 'unverified_content.log' },
+                    vars: {
+                      paths: { type: 'text', value: ['/tmp/test.log'] },
+                      'data_stream.dataset': { value: 'generic', type: 'text' },
+                      custom: { value: '', type: 'yaml' },
+                    },
+                  },
+                ],
+              },
+            ],
+            package: { name: 'unverified_content', title: 'Unerified Package', version: '1.0.0' },
+          });
+
+        expect(res.status).equal(400);
+        expect(res.body.attributes).eql({
+          type: 'verification_failed',
+        });
+      });
+      it('should return 200 for force installed unverified package', async function () {
+        await supertest
+          .post(`/api/fleet/package_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'unverified_content-1',
+            description: '',
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            enabled: true,
+            output_id: '',
+            inputs: [
+              {
+                type: 'logfile',
+                policy_template: 'logs',
+                enabled: true,
+                streams: [
+                  {
+                    enabled: true,
+                    data_stream: { type: 'logs', dataset: 'unverified_content.log' },
+                    vars: {
+                      paths: { type: 'text', value: ['/tmp/test.log'] },
+                      'data_stream.dataset': { value: 'generic', type: 'text' },
+                      custom: { value: '', type: 'yaml' },
+                    },
+                  },
+                ],
+              },
+            ],
+            package: { name: 'unverified_content', title: 'Unerified Package', version: '1.0.0' },
+            force: true,
+          })
+          .expect(200);
+
+        const installationSO = await getInstallationSavedObject('unverified_content');
+        expect(installationSO?.verification_status).equal('unverified');
+        expect(installationSO?.verification_key_id).equal(TEST_KEY_ID);
+      });
     });
   });
 }

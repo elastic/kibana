@@ -11,11 +11,13 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 export const DeleteLocation = ({
+  loading,
   id,
   locationMonitors,
   onDelete,
 }: {
   id: string;
+  loading?: boolean;
   onDelete: (id: string) => void;
   locationMonitors: Array<{ id: string; count: number }>;
 }) => {
@@ -54,6 +56,7 @@ export const DeleteLocation = ({
         }
       >
         <EuiButtonIcon
+          isLoading={loading}
           iconType="trash"
           color="danger"
           aria-label={DELETE_LABEL}
