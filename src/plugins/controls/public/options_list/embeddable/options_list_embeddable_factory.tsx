@@ -8,17 +8,17 @@
 
 import deepEqual from 'fast-deep-equal';
 
+import { i18n } from '@kbn/i18n';
 import { lazyLoadReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
 import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
 
-import { OptionsListEditorOptions } from './options_list_editor_options';
-import { ControlEmbeddable, DataControlField, IEditableControlFactory } from '../../types';
-import { OptionsListEmbeddableInput, OPTIONS_LIST_CONTROL } from './types';
 import {
   createOptionsListExtract,
   createOptionsListInject,
-} from '../../../common/control_types/options_list/options_list_persistable_state';
-import { OptionsListStrings } from './options_list_strings';
+} from '../../../common/options_list/options_list_persistable_state';
+import { ControlEmbeddable, DataControlField, IEditableControlFactory } from '../../types';
+import { OptionsListEditorOptions } from '../components/options_list_editor_options';
+import { OptionsListEmbeddableInput, OPTIONS_LIST_CONTROL } from '../types';
 
 export class OptionsListEmbeddableFactory
   implements EmbeddableFactoryDefinition, IEditableControlFactory<OptionsListEmbeddableInput>
@@ -64,9 +64,15 @@ export class OptionsListEmbeddableFactory
 
   public isEditable = () => Promise.resolve(false);
 
-  public getDisplayName = () => OptionsListStrings.getDisplayName();
+  public getDisplayName = () =>
+    i18n.translate('controls.optionsList.displayName', {
+      defaultMessage: 'Options list',
+    });
   public getIconType = () => 'editorChecklist';
-  public getDescription = () => OptionsListStrings.getDescription();
+  public getDescription = () =>
+    i18n.translate('controls.optionsList.description', {
+      defaultMessage: 'Add a menu for selecting field values.',
+    });
 
   public inject = createOptionsListInject();
   public extract = createOptionsListExtract();

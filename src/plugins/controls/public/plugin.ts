@@ -17,10 +17,7 @@ import {
   IEditableControlFactory,
   ControlInput,
 } from './types';
-import {
-  OptionsListEmbeddableFactory,
-  OptionsListEmbeddableInput,
-} from './control_types/options_list';
+import { OptionsListEmbeddableFactory, OptionsListEmbeddableInput } from './options_list';
 import {
   RangeSliderEmbeddableFactory,
   RangeSliderEmbeddableInput,
