@@ -7,11 +7,8 @@
 
 import { mockGlobalState } from '../../mock';
 import { SourcererScopeName } from './model';
-import {
-  getScopePatternListSelection,
-  sortWithExcludesAtEnd,
-  validateSelectedPatterns,
-} from './helpers';
+import { getScopePatternListSelection, validateSelectedPatterns } from './helpers';
+import { sortWithExcludesAtEnd } from '../../../../common/utils/sourcerer';
 
 const signalIndexName = mockGlobalState.sourcerer.signalIndexName;
 

@@ -10,7 +10,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { DatasourceLayerPanelProps } from '../types';
 import { IndexPatternPrivateState } from './types';
-import { ChangeIndexPattern } from './change_indexpattern';
+import { ChangeIndexPattern } from '../shared_components/dataview_picker/dataview_picker';
 
 export interface IndexPatternLayerPanelProps
   extends DatasourceLayerPanelProps<IndexPatternPrivateState> {
@@ -18,10 +18,15 @@ export interface IndexPatternLayerPanelProps
   onChangeIndexPattern: (newId: string) => void;
 }
 
-export function LayerPanel({ state, layerId, onChangeIndexPattern }: IndexPatternLayerPanelProps) {
+export function LayerPanel({
+  state,
+  layerId,
+  onChangeIndexPattern,
+  dataViews,
+}: IndexPatternLayerPanelProps) {
   const layer = state.layers[layerId];
 
-  const indexPattern = state.indexPatterns[layer.indexPatternId];
+  const indexPattern = dataViews.indexPatterns[layer.indexPatternId];
   const notFoundTitleLabel = i18n.translate('xpack.lens.layerPanel.missingDataView', {
     defaultMessage: 'Data view not found',
   });
@@ -37,7 +42,7 @@ export function LayerPanel({ state, layerId, onChangeIndexPattern }: IndexPatter
           fontWeight: 'normal',
         }}
         indexPatternId={layer.indexPatternId}
-        indexPatternRefs={state.indexPatternRefs}
+        indexPatternRefs={dataViews.indexPatternRefs}
         isMissingCurrent={!indexPattern}
         onChangeIndexPattern={onChangeIndexPattern}
       />
