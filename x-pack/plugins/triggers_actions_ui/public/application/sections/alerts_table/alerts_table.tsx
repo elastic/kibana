@@ -65,29 +65,6 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     useBulkActionsConfig: props.alertsTableConfiguration.useBulkActions,
   });
 
-  const columnIds: string[] = props.columns.map((column) => column.id);
-
-  const toolbarVisibility = useCallback(() => {
-    const { rowSelection } = bulkActionsState;
-    return getToolbarVisibility({
-      bulkActions,
-      alertsCount,
-      rowSelection,
-      alerts: alertsData.alerts,
-      updatedAt: props.updatedAt,
-      isLoading,
-      columnIds,
-    });
-  }, [
-    bulkActionsState,
-    bulkActions,
-    alertsCount,
-    alertsData.alerts,
-    props.updatedAt,
-    isLoading,
-    columnIds,
-  ])();
-
   const {
     pagination,
     onChangePageSize,
@@ -124,6 +101,47 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     },
     [onColumnsChange, props.columns]
   );
+
+  const onToggleColumn = useCallback(
+    (columnId: string): void => {
+      const currentIndex = visibleColumns.indexOf(columnId);
+      const newColumnIds =
+        currentIndex >= 0
+          ? [...visibleColumns.slice(0, currentIndex), ...visibleColumns.slice(currentIndex + 1)]
+          : [...visibleColumns, columnId];
+      onChangeVisibleColumns(newColumnIds);
+    },
+    [onChangeVisibleColumns, visibleColumns]
+  );
+
+  const onResetColumns = useCallback(() => {
+    return onChangeVisibleColumns(props.columns.map((column) => column.id));
+  }, [onChangeVisibleColumns, props.columns]);
+
+  const toolbarVisibility = useCallback(() => {
+    const { rowSelection } = bulkActionsState;
+    return getToolbarVisibility({
+      bulkActions,
+      alertsCount,
+      rowSelection,
+      alerts: alertsData.alerts,
+      updatedAt: props.updatedAt,
+      isLoading,
+      columnIds: visibleColumns,
+      onToggleColumn,
+      onResetColumns,
+    });
+  }, [
+    bulkActionsState,
+    bulkActions,
+    alertsCount,
+    alertsData.alerts,
+    props.updatedAt,
+    isLoading,
+    visibleColumns,
+    onToggleColumn,
+    onResetColumns,
+  ])();
 
   const leadingControlColumns = useMemo(() => {
     const isActionButtonsColumnActive =

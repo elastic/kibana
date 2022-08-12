@@ -17,14 +17,15 @@ const BulkActionsToolbar = lazy(() => import('../bulk_actions/components/toolbar
 
 const getDefaultVisibility = (
   updatedAt: number,
-  columnIds: string[]
+  columnIds: string[],
+  onToggleColumn: (columnId: string) => void,
+  onResetColumns: () => void
 ): EuiDataGridToolBarVisibilityOptions => {
-  console.log('columnIds', columnIds);
   const fieldBrowserProps: FieldBrowserProps = {
     columnIds,
     browserFields,
-    onResetColumns: () => console.log('reset columns clicked'),
-    onToggleColumn: () => console.log('onToggleColumn clicked'),
+    onResetColumns,
+    onToggleColumn,
     options: {},
   };
 
@@ -48,6 +49,8 @@ export const getToolbarVisibility = ({
   isLoading,
   updatedAt,
   columnIds,
+  onToggleColumn,
+  onResetColumns,
 }: {
   bulkActions: BulkActionsConfig[];
   alertsCount: number;
@@ -56,9 +59,16 @@ export const getToolbarVisibility = ({
   isLoading: boolean;
   updatedAt: number;
   columnIds: string[];
+  onToggleColumn: (columnId: string) => void;
+  onResetColumns: () => void;
 }): EuiDataGridToolBarVisibilityOptions => {
   const selectedRowsCount = rowSelection.size;
-  const defaultVisibility = getDefaultVisibility(updatedAt, columnIds);
+  const defaultVisibility = getDefaultVisibility(
+    updatedAt,
+    columnIds,
+    onToggleColumn,
+    onResetColumns
+  );
   const isBulkActionsActive =
     selectedRowsCount === 0 || selectedRowsCount === undefined || bulkActions.length === 0;
 
@@ -68,7 +78,7 @@ export const getToolbarVisibility = ({
     showColumnSelector: false,
     showSortSelector: false,
     additionalControls: {
-      ...defaultVisibility.additionalControls,
+      right: <LastUpdatedAt updatedAt={updatedAt} />,
       left: {
         append: (
           <Suspense fallback={null}>
