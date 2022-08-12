@@ -29,7 +29,7 @@ import { LastEventIndexKey } from '../../../common/search_strategy';
 import { useKibana } from '../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../common/lib/keury';
 import { inputsSelectors } from '../../common/store';
-import { setAbsoluteRangeDatePicker } from '../../common/store/inputs/actions';
+
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { Display } from '../../hosts/pages/display';
 import { networkModel } from '../store';
@@ -193,7 +193,6 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                     indexPattern={indexPattern}
                     indexNames={selectedPatterns}
                     setQuery={setQuery}
-                    setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
                     type={networkModel.NetworkType.page}
                     to={to}
                   />
