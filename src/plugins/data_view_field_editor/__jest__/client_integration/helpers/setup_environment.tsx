@@ -138,7 +138,6 @@ export const WithFieldEditorDependencies =
         getById: () => undefined,
       },
       fieldFormats,
-      setSubfields: () => {},
     };
 
     const mergedDependencies = merge({}, dependencies, overridingDependencies);
