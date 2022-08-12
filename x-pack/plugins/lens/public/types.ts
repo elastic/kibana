@@ -846,9 +846,7 @@ export interface Visualization<T = unknown> {
     icon?: IconType;
     noDatasource?: boolean;
     disabled?: boolean;
-    // does this layer show up in the UI?
-    hidden?: boolean;
-    toolTipContent?: string;
+    hideFromMenu?: boolean;
     initialDimensions?: Array<{
       columnId: string;
       groupId: string;

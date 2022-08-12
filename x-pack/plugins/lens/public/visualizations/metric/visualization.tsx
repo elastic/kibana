@@ -458,6 +458,8 @@ export const getMetricVisualization = ({
     return newState;
   },
 
+  // TODO - can we just hide by layer type in the supportedLayers array instead of by layer?
+  // I.e. do we anticipate a scenario where some layers of the same type will be hidden while others be shown?
   getLayersInUse(state) {
     return [
       { id: state.layerId },
@@ -508,6 +510,7 @@ export const getMetricVisualization = ({
             ]
           : undefined,
         disabled: true,
+        hideFromMenu: true,
       },
       {
         type: layerTypes.METRIC_TRENDLINE,
@@ -518,7 +521,7 @@ export const getMetricVisualization = ({
           { groupId: GROUP_ID.TREND_TIME, columnId: generateId(), autoTimeField: true },
         ],
         disabled: Boolean(state?.trendlineLayerId),
-        hidden: true,
+        hideFromMenu: true,
       },
     ];
   },
