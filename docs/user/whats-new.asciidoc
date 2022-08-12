@@ -12,4 +12,19 @@ Previous versions: {kibana-ref-all}/8.3/whats-new.html[8.3] | {kibana-ref-all}/8
 
 // tag::notable-highlights[]
 coming::[8.4.0]
+
+[discrete]
+[[highlights-8.4-alerting]]
+=== Enhancements to Alerting
+
+[discrete]
+==== Add schedules for snoozing rule notifications
+
+Starting in 8.2, you could suppress the notifications and actions for your rules
+for a specific duration. Now you can also schedule these single or recurring
+downtimes to start and end at specific dates and times.
+
+[role="screenshot"]
+image::images/highlights-snooze-schedule.png[Snooze notifications for a rule in {stack-manage-app} > {rules-ui} ]
+
 // end::notable-highlights[]
