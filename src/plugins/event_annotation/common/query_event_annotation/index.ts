@@ -92,13 +92,13 @@ export const queryPointEventAnnotation: ExpressionFunctionDefinition<
     query: {
       types: ['kibana_query'],
       help: i18n.translate('eventAnnotation.queryAnnotation.args.query', {
-        defaultMessage: ``,
+        defaultMessage: `Query to apply for the annotation`,
       }),
     },
     additionalFields: {
       types: ['string'],
-      help: i18n.translate('eventAnnotation.queryAnnotation.args.query', {
-        defaultMessage: ``,
+      help: i18n.translate('eventAnnotation.queryAnnotation.args.additionalFields', {
+        defaultMessage: `Provide additional field names to visualize in the tooltip`,
       }),
       multi: true,
     },

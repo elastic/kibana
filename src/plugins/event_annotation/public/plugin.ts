@@ -13,6 +13,7 @@ import {
   manualRangeEventAnnotation,
   eventAnnotationGroup,
   fetchEventAnnotations,
+  queryPointEventAnnotation,
 } from '../common';
 import { EventAnnotationService } from './event_annotation_service';
 
@@ -35,6 +36,7 @@ export class EventAnnotationPlugin
   public setup(core: CoreSetup, dependencies: SetupDependencies): EventAnnotationPluginSetup {
     dependencies.expressions.registerFunction(manualPointEventAnnotation);
     dependencies.expressions.registerFunction(manualRangeEventAnnotation);
+    dependencies.expressions.registerFunction(queryPointEventAnnotation);
     dependencies.expressions.registerFunction(eventAnnotationGroup);
     dependencies.expressions.registerFunction(fetchEventAnnotations);
     return this.eventAnnotationService;

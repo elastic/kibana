@@ -13,6 +13,7 @@ export type {
   ManualRangeEventAnnotationOutput,
 } from './manual_event_annotation/types';
 export { manualPointEventAnnotation, manualRangeEventAnnotation } from './manual_event_annotation';
+export { queryPointEventAnnotation } from './query_event_annotation';
 export { eventAnnotationGroup } from './event_annotation_group';
 export type { EventAnnotationGroupArgs } from './event_annotation_group';
 export { fetchEventAnnotations } from './fetch_event_annotations';
@@ -23,4 +24,5 @@ export type {
   PointInTimeEventAnnotationConfig,
   PointInTimeQueryEventAnnotationConfig,
   AvailableAnnotationIcon,
+  EventAnnotationOutput,
 } from './types';
