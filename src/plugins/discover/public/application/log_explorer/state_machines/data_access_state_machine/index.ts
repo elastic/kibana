@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+export * from './chunk_guards';
 export * from './data_view_selectors';
 export * from './entry_selectors';
 export * from './field_count_selectors';

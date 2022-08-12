@@ -64,11 +64,11 @@ export const loadBefore = ({
       topChunk,
     } = context;
 
-    if (topChunk.status !== 'loading-top') {
+    if (topChunk.status !== 'loading-top' && topChunk.status !== 'loaded') {
       return throwError(
         () =>
           new Error(
-            `Expected top chunk to have status "loading-top", but found "${topChunk.status}"`
+            `Expected top chunk to have status "loading-top" or "loaded, but found "${topChunk.status}"`
           )
       );
     }
