@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export * from './import_resolver';
-export * from './helpers/import_req';
-export * from './resolve_result';
+export * from './src/import_resolver';
+export * from './src/helpers/import_req';
+export * from './src/resolve_result';

@@ -22,5 +22,5 @@ export {
   IntlProvider as __IntlProvider, // eslint-disable-next-line @kbn/eslint/module_migration
 } from 'react-intl';
 
-export { I18nProvider } from './provider';
-export { injectI18n } from './inject';
+export { I18nProvider } from './src/provider';
+export { injectI18n } from './src/inject';

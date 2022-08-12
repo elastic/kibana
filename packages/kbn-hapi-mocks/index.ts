@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { createRequestMock } from './request';
+import { createRequestMock } from './src/request';
 
 export const hapiMocks = {
   createRequest: createRequestMock,
