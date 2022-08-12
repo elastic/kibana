@@ -302,7 +302,7 @@ The number of lines to allow in a row. A value of -1 automatically adjusts the r
 Limits the number of rows per page in the document table.
 
 [[discover-sample-size]]`discover:sampleSize`::
-Sets the maximum number of rows for the entire document table.
+Sets the maximum number of rows for the entire document table. This is the maximum number of documents fetched from {es}.
 
 [[discover-searchFieldsFromSource]]`discover:searchFieldsFromSource`::
 Load fields from the original JSON {ref}/mapping-source-field.html[`_source`].
