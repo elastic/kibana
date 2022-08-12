@@ -10,6 +10,7 @@
 
 # Data Discovery
 /src/plugins/discover/ @elastic/kibana-data-discovery
+/src/plugins/saved_search/ @elastic/kibana-data-discovery
 /x-pack/plugins/discover_enhanced/ @elastic/kibana-data-discovery
 /test/functional/apps/discover/ @elastic/kibana-data-discovery
 /x-pack/plugins/graph/ @elastic/kibana-data-discovery
@@ -85,6 +86,7 @@
 /x-pack/plugins/runtime_fields @elastic/kibana-app-services
 /x-pack/test/search_sessions_integration/ @elastic/kibana-app-services
 /src/plugins/dashboard/public/application/embeddable/viewport/print_media @elastic/kibana-app-services
+x-pack/plugins/files @elastic/kibana-app-services
 
 ### Observability Plugins
 
