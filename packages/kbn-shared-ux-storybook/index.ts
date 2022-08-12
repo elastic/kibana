@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { servicesDecorator } from './decorators';
+export { servicesDecorator } from './src/decorators';
 
 export {
   applicationServiceFactory,
@@ -17,6 +17,6 @@ export {
   servicesFactory,
   userPermissionsServiceFactory,
   dataServiceFactory,
-} from './services';
+} from './src/services';
 
-export type { DataServiceFactoryConfig } from './services';
+export type { DataServiceFactoryConfig } from './src/services';
