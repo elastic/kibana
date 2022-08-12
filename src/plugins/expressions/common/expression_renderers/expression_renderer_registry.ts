@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { injectable } from 'inversify';
 import { IRegistry } from '../types';
 import { ExpressionRenderer } from './expression_renderer';
 import { AnyExpressionRenderDefinition } from './types';
 
+@injectable()
 export class ExpressionRendererRegistry implements IRegistry<ExpressionRenderer> {
   private readonly renderers: Map<string, ExpressionRenderer> = new Map<
     string,

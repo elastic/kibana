@@ -10,7 +10,7 @@ import { Container } from 'inversify';
 import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { ExpressionsService, ExpressionsServiceSetup, ExpressionsServiceStart } from '../common';
-import { LoggerToken, UiSettingsClientToken } from '../common/module';
+import { ExpressionsModule, LoggerToken, UiSettingsClientToken } from '../common/module';
 import { setRenderersRegistry, setNotifications, setExpressionsService } from './services';
 import { ReactExpressionRenderer } from './react_expression_renderer_wrapper';
 import type { IExpressionLoader } from './loader';
@@ -41,11 +41,9 @@ export class ExpressionsPublicPlugin implements Plugin<ExpressionsSetup, Express
   };
 
   private readonly container = new Container({ skipBaseClassChecks: true });
-  private readonly expressions: ExpressionsService = new ExpressionsService({
-    container: this.container,
-  });
 
   constructor(context: PluginInitializerContext) {
+    this.container.load(ExpressionsModule());
     this.container.bind(LoggerToken).toConstantValue(ExpressionsPublicPlugin.logger);
   }
 
@@ -59,7 +57,7 @@ export class ExpressionsPublicPlugin implements Plugin<ExpressionsSetup, Express
       })
       .inSingletonScope();
 
-    const { expressions } = this;
+    const expressions = this.container.get(ExpressionsService);
     const { renderers } = expressions;
 
     setRenderersRegistry(renderers);
@@ -73,8 +71,7 @@ export class ExpressionsPublicPlugin implements Plugin<ExpressionsSetup, Express
   public start(core: CoreStart): ExpressionsStart {
     setNotifications(core.notifications);
 
-    const { expressions } = this;
-
+    const expressions = this.container.get(ExpressionsService);
     const loader: IExpressionLoader = async (element, expression, params) => {
       const { ExpressionLoader } = await import('./loader');
       return new ExpressionLoader(element, expression, params);
@@ -98,6 +95,6 @@ export class ExpressionsPublicPlugin implements Plugin<ExpressionsSetup, Express
   }
 
   public stop() {
-    this.expressions.stop();
+    this.container.get(ExpressionsService).stop();
   }
 }

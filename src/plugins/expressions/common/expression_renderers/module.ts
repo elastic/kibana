@@ -6,5 +6,11 @@
  * Side Public License, v 1.
  */
 
-export * from './expressions_services';
-export * from './module';
+import { ContainerModule } from 'inversify';
+import { ExpressionRendererRegistry } from './expression_renderer_registry';
+
+export function RenderersModule() {
+  return new ContainerModule((bind) => {
+    bind(ExpressionRendererRegistry).toSelf().inSingletonScope();
+  });
+}

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { interfaces } from 'inversify';
+import { ContainerModule, interfaces } from 'inversify';
 import type { Logger } from '@kbn/logging';
 import type {
   IUiSettingsClient as UiSettingsClientPublic,
@@ -17,6 +17,11 @@ import type {
   SavedObjectsClientContract as SavedObjectsClientServer,
   KibanaRequest,
 } from '@kbn/core/server';
+import { ExecutorModule } from './executor';
+import { FunctionsModule } from './expression_functions';
+import { RenderersModule } from './expression_renderers';
+import { TypesModule } from './expression_types';
+import { ExpressionsService, ServiceModule } from './service';
 
 export const LoggerToken: interfaces.ServiceIdentifier<Logger> = Symbol.for('Logger');
 export const KibanaRequestToken: interfaces.ServiceIdentifier<KibanaRequest> =
@@ -27,3 +32,20 @@ export const SavedObjectsClientToken: interfaces.ServiceIdentifier<
 export const UiSettingsClientToken: interfaces.ServiceIdentifier<
   UiSettingsClientPublic | UiSettingsClientServer
 > = Symbol.for('UiSettingsClient');
+
+export function ExpressionsModule() {
+  return new ContainerModule((bind) => {
+    bind(ExpressionsService)
+      .toDynamicValue(({ container }) => {
+        const scope = container.createChild();
+        scope.load(ExecutorModule());
+        scope.load(FunctionsModule());
+        scope.load(RenderersModule());
+        scope.load(ServiceModule());
+        scope.load(TypesModule());
+
+        return scope.get(ExpressionsService);
+      })
+      .inSingletonScope();
+  });
+}

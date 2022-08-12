@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { inject, injectable, interfaces } from 'inversify';
 import {
   ExpressionExecutionParams,
   ExpressionsService,
@@ -21,6 +22,8 @@ export interface ExpressionServiceFork {
   setup(): ExpressionsServiceSetup;
   start(): ExpressionsServiceStart;
 }
+
+export const NamespaceToken: interfaces.ServiceIdentifier<string> = Symbol.for('Namespace');
 
 /**
  * `ExpressionsService` class is used for multiple purposes:
@@ -41,11 +44,15 @@ export interface ExpressionServiceFork {
  *
  *    so that JSDoc appears in developers IDE when they use those `plugins.expressions.registerFunction(`.
  */
+@injectable()
 export class ExpressionsServiceFork implements ExpressionServiceFork {
   /**
    * @note Workaround since the expressions service is frozen.
    */
-  constructor(private namespace: string, private expressionsService: ExpressionsService) {
+  constructor(
+    @inject(NamespaceToken) private namespace: string,
+    @inject(ExpressionsService) private expressionsService: ExpressionsService
+  ) {
     this.registerFunction = this.registerFunction.bind(this);
     this.registerRenderer = this.registerRenderer.bind(this);
     this.registerType = this.registerType.bind(this);

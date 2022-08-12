@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Container } from 'inversify';
+import { inject, injectable, interfaces } from 'inversify';
 import { Observable } from 'rxjs';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { KibanaRequest } from '@kbn/core/server';
@@ -19,17 +19,12 @@ import {
   VersionedState,
 } from '@kbn/kibana-utils-plugin/common';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
-import { Executor, ExecutorModule } from '../executor';
+import { Executor } from '../executor';
 import { AnyExpressionRenderDefinition, ExpressionRendererRegistry } from '../expression_renderers';
 import { ExpressionAstExpression } from '../ast';
 import { ExecutionContract, ExecutionResult } from '../execution';
-import {
-  AnyExpressionTypeDefinition,
-  ExpressionValueError,
-  TypesModule,
-} from '../expression_types';
+import { AnyExpressionTypeDefinition, ExpressionValueError } from '../expression_types';
 import { AnyExpressionFunctionDefinition } from '../expression_functions';
-import { FunctionsModule } from '../expression_functions';
 import { ExpressionsServiceFork } from './expressions_fork';
 
 /**
@@ -258,11 +253,9 @@ export interface ExpressionsServiceStart {
   getAllMigrations(): MigrateFunctionsObject;
 }
 
-export interface ExpressionServiceParams {
-  container: Container;
-  executor?: Executor;
-  renderers?: ExpressionRendererRegistry;
-}
+export type ExpressionsServiceForkFactory = (namespace: string) => ExpressionsServiceFork;
+export const ExpressionsServiceForkFactoryToken: interfaces.ServiceIdentifier<ExpressionsServiceForkFactory> =
+  Symbol.for('ExpressionsServiceForkFactory');
 
 /**
  * `ExpressionsService` class is used for multiple purposes:
@@ -283,6 +276,7 @@ export interface ExpressionServiceParams {
  *
  *    so that JSDoc appears in developers IDE when they use those `plugins.expressions.registerFunction(`.
  */
+@injectable()
 export class ExpressionsService
   implements
     PersistableStateService<ExpressionAstExpression>,
@@ -293,20 +287,13 @@ export class ExpressionsService
    * @note Workaround since the expressions service is frozen.
    */
   private static started = new WeakSet<ExpressionsService>();
-  public readonly executor: Executor;
-  public readonly renderers: ExpressionRendererRegistry;
 
-  constructor({
-    container,
-    renderers = new ExpressionRendererRegistry(),
-  }: ExpressionServiceParams) {
-    container.load(ExecutorModule());
-    container.load(FunctionsModule());
-    container.load(TypesModule());
-
-    this.executor = container.get(Executor);
-    this.renderers = renderers;
-  }
+  constructor(
+    @inject(Executor) public readonly executor: Executor,
+    @inject(ExpressionRendererRegistry) public readonly renderers: ExpressionRendererRegistry,
+    @inject(ExpressionsServiceForkFactoryToken)
+    private readonly forkFactory: ExpressionsServiceForkFactory
+  ) {}
 
   private isStarted(): boolean {
     return ExpressionsService.started.has(this);
@@ -362,8 +349,8 @@ export class ExpressionsService
 
   public readonly fork: ExpressionsServiceSetup['fork'] = (name) => {
     this.assertSetup();
-    const fork = new ExpressionsServiceFork(name, this);
-    return fork;
+
+    return this.forkFactory(name);
   };
 
   public readonly execute: ExpressionsServiceStart['execute'] = ((ast, input, params) => {

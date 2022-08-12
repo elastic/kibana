@@ -16,6 +16,7 @@ import {
 } from '@kbn/core/server';
 import { ExpressionsService, ExpressionsServiceSetup, ExpressionsServiceStart } from '../common';
 import {
+  ExpressionsModule,
   KibanaRequestToken,
   LoggerToken,
   SavedObjectsClientToken,
@@ -30,11 +31,9 @@ export class ExpressionsServerPlugin
   implements Plugin<ExpressionsServerSetup, ExpressionsServerStart>
 {
   private readonly container = new Container({ skipBaseClassChecks: true });
-  private readonly expressions: ExpressionsService = new ExpressionsService({
-    container: this.container,
-  });
 
   constructor(context: PluginInitializerContext) {
+    this.container.load(ExpressionsModule());
     this.container.bind(LoggerToken).toConstantValue(context.logger.get('expressions'));
   }
 
@@ -66,12 +65,12 @@ export class ExpressionsServerPlugin
       })
       .inRequestScope();
 
-    const start = this.expressions.start();
+    const start = this.container.get(ExpressionsService).start();
 
     return Object.freeze(start);
   }
 
   public stop() {
-    this.expressions.stop();
+    this.container.get(ExpressionsService).stop();
   }
 }

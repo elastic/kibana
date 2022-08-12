@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { inject, injectable, interfaces } from 'inversify';
+import { LazyServiceIdentifer, inject, injectable, interfaces } from 'inversify';
 import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
 import { isPromise } from '@kbn/std';
@@ -192,7 +192,7 @@ export class Execution<
     @inject(Executor) private executor: Executor,
     @inject(StateToken)
     public readonly state: ExecutionContainer<ExecutionResult<Output | ExpressionValueError>>,
-    @inject(LoggerToken) private readonly logger?: Logger
+    @inject(new LazyServiceIdentifer(() => LoggerToken)) private readonly logger?: Logger
   ) {
     const inspectorAdapters =
       (params.inspectorAdapters as InspectorAdapters) || createDefaultInspectorAdapters();
