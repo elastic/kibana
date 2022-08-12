@@ -49,7 +49,7 @@ export const TTYPlayer = ({ sessionEntityId, onClose, isFullscreen }: TTYPlayerD
     <div css={styles.container}>
       <EuiPanel hasShadow={false} borderRadius="none">
         <EuiFlexGroup alignItems="center" gutterSize="s">
-          <EuiFlexItem data-test-subj="sessionView:sessionViewOutputSearch">
+          <EuiFlexItem data-test-subj="sessionView:TTYSearch">
             <TTYSearchBar lines={lines} seekToLine={seekToLine} xTermSearchFn={search} />
           </EuiFlexItem>
 
@@ -59,14 +59,20 @@ export const TTYPlayer = ({ sessionEntityId, onClose, isFullscreen }: TTYPlayerD
               display="empty"
               size="m"
               aria-label="TTY Output Close Button"
-              data-test-subj="sessionView:sessionViewTTYCloseBtn"
+              data-test-subj="sessionView:TTYCloseBtn"
               onClick={onClose}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
-      <div ref={ref} css={styles.terminal} />
-      <EuiPanel hasShadow={false} borderRadius="none">
+      <div ref={ref} data-test-subj="sessionView:TTYPlayer" css={styles.terminal} />
+
+      {/* the following will be replaced by a new <TTYPlayerControls/> component */}
+      <EuiPanel
+        data-test-subj="sessionView:TTYPlayerControls"
+        hasShadow={false}
+        borderRadius="none"
+      >
         <EuiFlexGroup alignItems="center" gutterSize="s" direction="row">
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
@@ -74,7 +80,6 @@ export const TTYPlayer = ({ sessionEntityId, onClose, isFullscreen }: TTYPlayerD
               display="empty"
               size="m"
               aria-label="TTY Play Button"
-              data-test-subj="sessionView:sessionViewTTYPlayBtn"
               onClick={onTogglePlayback}
             />
           </EuiFlexItem>

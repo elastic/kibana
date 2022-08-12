@@ -81,8 +81,6 @@ export const useIOLines = (pages: ProcessEventsPage[] | undefined) => {
             const data: IOLine[] = event.process.io.text.split(/\n\r?/).map((line) => {
               return {
                 value: line,
-
-                // TODO: other process meta
               };
             });
 
