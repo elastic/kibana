@@ -25,3 +25,5 @@ export { toEditableConfig } from './management_app/lib/to_editable_config';
 export function plugin(initializerContext: PluginInitializerContext) {
   return new AdvancedSettingsPlugin();
 }
+
+export { FieldState } from './management_app/types';
