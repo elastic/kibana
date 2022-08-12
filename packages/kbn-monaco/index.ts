@@ -7,16 +7,16 @@
  */
 
 // global setup for supported languages
-import './register_globals';
+import './src/register_globals';
 
-export { monaco } from './monaco_imports';
-export { XJsonLang } from './xjson';
-export { EsqlLang } from './esql';
-export * from './painless';
+export { monaco } from './src/monaco_imports';
+export { XJsonLang } from './src/xjson';
+export { EsqlLang } from './src/esql';
+export * from './src/painless';
 /* eslint-disable-next-line @kbn/eslint/module_migration */
 import * as BarePluginApi from 'monaco-editor/esm/vs/editor/editor.api';
 
-import { registerLanguage } from './helpers';
+import { registerLanguage } from './src/helpers';
 
 export { BarePluginApi, registerLanguage };
-export * from './types';
+export * from './src/types';
