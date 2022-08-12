@@ -11,7 +11,7 @@ import type { TimeRange, RefreshInterval } from '@kbn/data-plugin/common';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { restoreStateFromSavedSearch } from './restore_from_saved_search';
 
-describe('restoreStateFromSavedSearch', () => {
+describe('discover restore state from saved search', () => {
   let timefilterMock: TimefilterContract;
   const timeRange: TimeRange = {
     from: 'now-30m',
