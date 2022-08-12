@@ -30,7 +30,6 @@ import { useKibana } from '../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../common/lib/keury';
 import type { State } from '../../common/store';
 import { inputsSelectors } from '../../common/store';
-import { setAbsoluteRangeDatePicker } from '../../common/store/inputs/actions';
 
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useMlCapabilities } from '../../common/components/ml/hooks/use_ml_capabilities';
