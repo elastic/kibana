@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { observeLines } from './observe_lines';
-export { observeReadable } from './observe_readable';
+export { observeLines } from './src/observe_lines';
+export { observeReadable } from './src/observe_readable';
