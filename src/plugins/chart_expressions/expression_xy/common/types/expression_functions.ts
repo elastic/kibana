@@ -71,6 +71,7 @@ export interface AxisExtentConfig {
   mode: AxisExtentMode;
   lowerBound?: number;
   upperBound?: number;
+  enforce?: boolean;
 }
 
 export interface AxisConfig {
@@ -130,6 +131,7 @@ export interface DataLayerArgs {
   isHorizontal: boolean;
   palette: PaletteOutput;
   decorations?: DataDecorationConfigResult[];
+  curveType?: XYCurveType;
 }
 
 export interface ValidLayer extends DataLayerConfigResult {
@@ -138,12 +140,12 @@ export interface ValidLayer extends DataLayerConfigResult {
 
 export interface ExtendedDataLayerArgs {
   layerId?: string;
-  accessors: string[];
+  accessors: Array<ExpressionValueVisDimension | string>;
   seriesType: SeriesType;
-  xAccessor?: string;
+  xAccessor?: string | ExpressionValueVisDimension;
   simpleView?: boolean;
-  splitAccessors?: string[];
-  markSizeAccessor?: string;
+  splitAccessors?: Array<ExpressionValueVisDimension | string>;
+  markSizeAccessor?: string | ExpressionValueVisDimension;
   lineWidth?: number;
   showPoints?: boolean;
   showLines?: boolean;
@@ -157,7 +159,7 @@ export interface ExtendedDataLayerArgs {
   palette: PaletteOutput;
   // palette will always be set on the expression
   decorations?: DataDecorationConfigResult[];
-  table?: Datatable;
+  curveType?: XYCurveType;
 }
 
 export interface LegendConfig {
@@ -215,7 +217,6 @@ export interface XYArgs extends DataLayerArgs {
   referenceLines: ReferenceLineConfigResult[];
   annotationLayers: AnnotationLayerConfigResult[];
   fittingFunction?: FittingFunction;
-  curveType?: XYCurveType;
   fillOpacity?: number;
   hideEndzones?: boolean;
   valuesInLegend?: boolean;
@@ -239,7 +240,6 @@ export interface LayeredXYArgs {
   valueLabels: ValueLabelMode;
   layers?: XYExtendedLayerConfigResult[];
   fittingFunction?: FittingFunction;
-  curveType?: XYCurveType;
   fillOpacity?: number;
   hideEndzones?: boolean;
   valuesInLegend?: boolean;
@@ -252,6 +252,9 @@ export interface LayeredXYArgs {
   minTimeBarInterval?: string;
   orderBucketsBySum?: boolean;
   showTooltip: boolean;
+  splitRowAccessor?: ExpressionValueVisDimension | string;
+  splitColumnAccessor?: ExpressionValueVisDimension | string;
+  singleTable?: boolean;
 }
 
 export interface XYProps {
@@ -261,7 +264,6 @@ export interface XYProps {
   valueLabels: ValueLabelMode;
   layers: CommonXYLayerConfig[];
   fittingFunction?: FittingFunction;
-  curveType?: XYCurveType;
   fillOpacity?: number;
   hideEndzones?: boolean;
   valuesInLegend?: boolean;
@@ -276,6 +278,7 @@ export interface XYProps {
   detailedTooltip?: boolean;
   orderBucketsBySum?: boolean;
   showTooltip: boolean;
+  singleTable?: boolean;
 }
 
 export interface AnnotationLayerArgs {
@@ -317,12 +320,14 @@ export type XYLayerConfig = DataLayerConfig | ReferenceLineConfig | AnnotationLa
 export type XYExtendedLayerConfig =
   | ExtendedDataLayerConfig
   | ReferenceLineLayerConfig
-  | ExtendedAnnotationLayerConfig;
+  | ExtendedAnnotationLayerConfig
+  | ReferenceLineConfig;
 
 export type XYExtendedLayerConfigResult =
   | ExtendedDataLayerConfigResult
   | ReferenceLineLayerConfigResult
-  | ExtendedAnnotationLayerConfigResult;
+  | ExtendedAnnotationLayerConfigResult
+  | ReferenceLineConfigResult;
 
 export interface ExtendedReferenceLineDecorationConfig extends ReferenceLineArgs {
   type: typeof EXTENDED_REFERENCE_LINE_DECORATION_CONFIG;

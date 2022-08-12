@@ -8,11 +8,11 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { SavedObjectSaveModal, showSaveModal, OnSaveProps } from '@kbn/saved-objects-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/public';
 import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SavedSearch, SaveSavedSearchOptions } from '../../../../services/saved_searches';
+import { SavedObjectSaveModal, showSaveModal, OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { SavedSearch, SaveSavedSearchOptions } from '@kbn/saved-search-plugin/public';
 import { DiscoverServices } from '../../../../build_services';
 import { GetStateReturn } from '../../services/discover_state';
 import { setBreadcrumbsTitle } from '../../../../utils/breadcrumbs';
