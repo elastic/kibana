@@ -6,6 +6,7 @@
  */
 
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import type { SavedObjectReference } from '@kbn/core/public';
 import type { FramePublicAPI, DatasourcePublicAPI } from '../../types';
 import {
   visualizationTypes,
@@ -14,6 +15,8 @@ import {
   XYReferenceLineLayerConfig,
   SeriesType,
   YConfig,
+  XYState,
+  XYPersistedState,
 } from './types';
 import { getDataLayers, isAnnotationsLayer, isDataLayer } from './visualization_helpers';
 
@@ -101,4 +104,43 @@ export function hasHistogramSeries(
       xAxisOperation.scale !== 'ordinal'
     );
   });
+}
+
+function getLayerReferenceName(layerId: string) {
+  return `xy-visualization-layer-${layerId}`;
+}
+
+export function extractReferences({ layers }: XYState) {
+  const savedObjectReferences: SavedObjectReference[] = [];
+  const persistableLayers: Array<Omit<XYLayerConfig, 'indexPatternId'>> = [];
+  layers.forEach((layer) => {
+    if (isAnnotationsLayer(layer)) {
+      const { indexPatternId, ...persistableLayer } = layer;
+      savedObjectReferences.push({
+        type: 'index-pattern',
+        id: indexPatternId,
+        name: getLayerReferenceName(layer.layerId),
+      });
+      persistableLayers.push(persistableLayer);
+    } else {
+      persistableLayers.push(layer);
+    }
+  });
+  return { savedObjectReferences, state: { layers: persistableLayers } };
+}
+
+export function injectReferences(state: XYPersistedState, references: SavedObjectReference[]) {
+  return {
+    layers: state.layers.map((layer) => {
+      if (!isAnnotationsLayer(layer)) {
+        return layer;
+      }
+      return {
+        ...layer,
+        indexPatternId: references.find(
+          ({ name }) => name === getLayerReferenceName(layer.layerId)
+        )!.id,
+      };
+    }),
+  };
 }

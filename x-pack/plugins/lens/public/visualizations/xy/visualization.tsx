@@ -35,7 +35,7 @@ import {
   SeriesType,
 } from './types';
 import { layerTypes } from '../../../common';
-import { isHorizontalChart } from './state_helpers';
+import { extractReferences, isHorizontalChart } from './state_helpers';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
 import { getAccessorColorConfigs, getColorAssignments } from './color_assignment';
 import { getColumnToLabelMap } from './state_helpers';
@@ -151,6 +151,10 @@ export const getXyVisualization = ({
             })
       ),
     };
+  },
+
+  getPersistableState(state) {
+    return extractReferences(state);
   },
 
   getDescription,

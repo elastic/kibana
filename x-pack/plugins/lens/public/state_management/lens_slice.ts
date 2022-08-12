@@ -275,6 +275,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       }
     ) => {
       const activeVisualization = visualizationMap[visualizationId];
+      const activeDataSource = datasourceMap[state.activeDatasourceId!];
       const isOnlyLayer =
         getRemoveOperation(
           activeVisualization,
@@ -296,9 +297,13 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         }
       );
       state.stagedPreview = undefined;
+      // reuse the activeDatasource current dataView id for the moment
+      const currentDataViewsId = activeDataSource.getCurrentIndexPatternId(
+        state.datasourceStates[state.activeDatasourceId!].state
+      );
       state.visualization.state =
         isOnlyLayer || !activeVisualization.removeLayer
-          ? activeVisualization.clearLayer(state.visualization.state, layerId)
+          ? activeVisualization.clearLayer(state.visualization.state, layerId, currentDataViewsId)
           : activeVisualization.removeLayer(state.visualization.state, layerId);
     },
     [changeIndexPattern.type]: (
@@ -743,15 +748,20 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       }
 
       const activeVisualization = visualizationMap[state.visualization.activeId];
+      const activeDatasource = datasourceMap[state.activeDatasourceId];
+      // reuse the active datasource dataView id for the new layer
+      const currentDataViewsId = activeDatasource.getCurrentIndexPatternId(
+        state.datasourceStates[state.activeDatasourceId!].state
+      );
       const visualizationState = activeVisualization.appendLayer!(
         state.visualization.state,
         layerId,
-        layerType
+        layerType,
+        currentDataViewsId
       );
 
       const framePublicAPI = selectFramePublicAPI({ lens: current(state) }, datasourceMap);
 
-      const activeDatasource = datasourceMap[state.activeDatasourceId];
       const { noDatasource } =
         activeVisualization
           .getSupportedLayers(visualizationState, framePublicAPI)

@@ -159,6 +159,10 @@ export interface XYState {
 
 export type State = XYState;
 
+export type XYPersistedState = Omit<XYState, 'layers'> & {
+  layers: Array<Omit<XYLayerConfig, 'indexPatternId'>>;
+};
+
 const groupLabelForBar = i18n.translate('xpack.lens.xyVisualization.barGroupLabel', {
   defaultMessage: 'Bar',
 });
