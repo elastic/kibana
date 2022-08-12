@@ -110,9 +110,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       // than two bucket intervals. Finally, the adjusted brush should trigger
       // a warning on the "Rerun analysis" button.
       expect(brushSelectionWidthBefore).not.to.be(brushSelectionWidthAfter);
-      expect(
-        brushSelectionWidthAfter > intervalPx && brushSelectionWidthAfter < intervalPx * 2
-      ).to.be(true);
+      expect(brushSelectionWidthAfter).to.be.greaterThan(intervalPx);
+      expect(brushSelectionWidthAfter).not.to.be.greaterThan(intervalPx * 2);
 
       await aiops.explainLogRateSpikes.assertRerunAnalysisButton(true);
 
