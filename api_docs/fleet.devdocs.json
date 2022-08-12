@@ -6689,7 +6689,7 @@
             "section": "def-common.PackagePolicyPackage",
             "text": "PackagePolicyPackage"
           },
-          " | undefined; policy_id?: string | undefined; }>) => Promise<void>"
+          " | undefined; policy_id?: string | undefined; statusCode?: number | undefined; body?: { message: string; } | undefined; }>) => Promise<void>"
         ],
         "path": "x-pack/plugins/fleet/server/types/extensions.ts",
         "deprecated": false,
@@ -6712,7 +6712,7 @@
                 "section": "def-common.PackagePolicyPackage",
                 "text": "PackagePolicyPackage"
               },
-              " | undefined; policy_id?: string | undefined; }>"
+              " | undefined; policy_id?: string | undefined; statusCode?: number | undefined; body?: { message: string; } | undefined; }>"
             ],
             "path": "x-pack/plugins/fleet/server/types/extensions.ts",
             "deprecated": false
@@ -9758,7 +9758,7 @@
             "label": "install_source",
             "description": [],
             "signature": [
-              "\"registry\" | \"upload\" | \"bundled\""
+              "\"upload\" | \"registry\" | \"bundled\""
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false
@@ -9908,7 +9908,7 @@
             "label": "installSource",
             "description": [],
             "signature": [
-              "\"registry\" | \"upload\" | \"bundled\""
+              "\"upload\" | \"registry\" | \"bundled\""
             ],
             "path": "x-pack/plugins/fleet/common/types/rest_spec/epm.ts",
             "deprecated": false
@@ -12835,7 +12835,7 @@
             "section": "def-common.PackagePolicyPackage",
             "text": "PackagePolicyPackage"
           },
-          " | undefined; policy_id?: string | undefined; }[]"
+          " | undefined; policy_id?: string | undefined; statusCode?: number | undefined; body?: { message: string; } | undefined; }[]"
         ],
         "path": "x-pack/plugins/fleet/common/types/rest_spec/package_policy.ts",
         "deprecated": false,

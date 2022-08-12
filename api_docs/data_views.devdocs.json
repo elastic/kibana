@@ -1046,7 +1046,7 @@
             "tags": [],
             "label": "getAllRuntimeFields",
             "description": [
-              "\nGet all runtime field definitions."
+              "\nGet all runtime field definitions.\nNOTE: this does not strip out runtime fields that match mapped field names"
             ],
             "signature": [
               "() => Record<string, ",
@@ -7250,7 +7250,7 @@
             "tags": [],
             "label": "getAllRuntimeFields",
             "description": [
-              "\nGet all runtime field definitions."
+              "\nGet all runtime field definitions.\nNOTE: this does not strip out runtime fields that match mapped field names"
             ],
             "signature": [
               "() => Record<string, ",
@@ -12988,7 +12988,7 @@
             "tags": [],
             "label": "getAllRuntimeFields",
             "description": [
-              "\nGet all runtime field definitions."
+              "\nGet all runtime field definitions.\nNOTE: this does not strip out runtime fields that match mapped field names"
             ],
             "signature": [
               "() => Record<string, ",
