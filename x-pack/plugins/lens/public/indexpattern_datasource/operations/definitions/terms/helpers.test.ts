@@ -23,7 +23,7 @@ import type { PercentileRanksIndexPatternColumn } from '../percentile_ranks';
 import type { PercentileIndexPatternColumn } from '../percentile';
 import { MULTI_KEY_VISUAL_SEPARATOR } from './constants';
 
-jest.mock('@kbn/unified-field-list-plugin/common/services/field_stats', () => ({
+jest.mock('@kbn/unified-field-list-plugin/public/services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({
     topValues: {
       buckets: [

@@ -14,6 +14,8 @@ import type { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/pu
 import type {
   DatasourceFixAction,
   FrameDatasourceAPI,
+  IndexPattern,
+  IndexPatternField,
   OperationMetadata,
   VisualizationDimensionGroupConfig,
 } from '../../types';
@@ -28,8 +30,6 @@ import {
 } from './definitions';
 import type {
   DataViewDragDropOperation,
-  IndexPattern,
-  IndexPatternField,
   IndexPatternLayer,
   IndexPatternPrivateState,
 } from '../types';

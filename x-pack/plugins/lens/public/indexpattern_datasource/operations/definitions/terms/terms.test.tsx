@@ -25,16 +25,17 @@ import {
   LastValueIndexPatternColumn,
   operationDefinitionMap,
 } from '..';
-import { IndexPattern, IndexPatternLayer, IndexPatternPrivateState } from '../../../types';
+import { IndexPatternLayer, IndexPatternPrivateState } from '../../../types';
 import { FrameDatasourceAPI } from '../../../../types';
 import { DateHistogramIndexPatternColumn } from '../date_histogram';
 import { getOperationSupportMatrix } from '../../../dimension_panel/operation_support';
 import { FieldSelect } from '../../../dimension_panel/field_select';
 import { ReferenceEditor } from '../../../dimension_panel/reference_editor';
+import { IndexPattern } from '../../../../types';
 import { cloneDeep } from 'lodash';
 import { IncludeExcludeRow } from './include_exclude_options';
 
-jest.mock('@kbn/unified-field-list-plugin/common/services/field_stats', () => ({
+jest.mock('@kbn/unified-field-list-plugin/public/services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({
     topValues: {
       buckets: [
@@ -1218,7 +1219,7 @@ describe('terms', () => {
         fields[field.name] = true;
       }
       return {
-        [layer.indexPatternId]: fields,
+        [defaultProps.indexPattern.title]: fields,
       };
     }
 
@@ -1229,14 +1230,13 @@ describe('terms', () => {
       return getOperationSupportMatrix({
         state: {
           layers: { layer1: layer },
-          indexPatterns: {
-            [defaultProps.indexPattern.id]: defaultProps.indexPattern,
-          },
-          existingFields,
         } as unknown as IndexPatternPrivateState,
         layerId: 'layer1',
         filterOperations: () => true,
         columnId,
+        indexPatterns: {
+          [defaultProps.indexPattern.id]: defaultProps.indexPattern,
+        },
       });
     }
 

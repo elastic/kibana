@@ -33,7 +33,7 @@ import { FieldStats } from '@kbn/unified-field-list-plugin/public';
 import { DragDrop, DragDropIdentifier } from '../drag_drop';
 import { DatasourceDataPanelProps, DataType } from '../types';
 import { DOCUMENT_FIELD_NAME } from '../../common';
-import { IndexPattern, IndexPatternField, DraggedField } from './types';
+import type { IndexPattern, IndexPatternField, DraggedField } from './types';
 import { LensFieldIcon } from '../shared_components/field_picker/lens_field_icon';
 import { VisualizeGeoFieldButton } from './visualize_geo_field_button';
 import { getVisualizeGeoFieldMessage } from '../utils';
