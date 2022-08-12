@@ -54,13 +54,13 @@ export function registerSearchRoute({ router, log }: RouteDependencies) {
       },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
+      const indexName = decodeURIComponent(request.params.index_name);
       const { client } = (await context.core).elasticsearch;
       const { page = 0, size = ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT } = request.query;
       const from = page * size;
-
       const searchResults: SearchResponseBody = await fetchSearchResults(
         client,
-        request.params.index_name,
+        indexName,
         '',
         from,
         size
@@ -94,13 +94,14 @@ export function registerSearchRoute({ router, log }: RouteDependencies) {
       },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
+      const indexName = decodeURIComponent(request.params.index_name);
       const { client } = (await context.core).elasticsearch;
       const { page = 0, size = ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT } = request.query;
       const from = page * size;
 
       const searchResults = await fetchSearchResults(
         client,
-        request.params.index_name,
+        indexName,
         request.params.query,
         from,
         size

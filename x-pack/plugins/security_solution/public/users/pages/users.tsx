@@ -27,7 +27,6 @@ import { useKibana } from '../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../common/lib/keury';
 import type { State } from '../../common/store';
 import { inputsSelectors } from '../../common/store';
-import { setAbsoluteRangeDatePicker } from '../../common/store/inputs/actions';
 
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { UsersTabs } from './users_tabs';
@@ -187,7 +186,6 @@ const UsersComponent = () => {
               from={from}
               indexNames={selectedPatterns}
               isInitializing={isInitializing}
-              setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
               setQuery={setQuery}
               to={to}
               type={usersModel.UsersType.page}

@@ -43,9 +43,9 @@ const TotalUsersKpiComponent: React.FC<UsersKpiProps> = ({ from, to, setQuery })
       fieldsMapping={fieldsMapping}
       from={from}
       id={QUERY_ID}
-      loading={false} // TODO: remove unused props
-      setQuery={setQuery}
       to={to}
+      loading={false}
+      setQuery={setQuery}
     />
   );
 };
