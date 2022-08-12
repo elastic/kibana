@@ -1,0 +1,58 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { useMemo } from 'react';
+import { CaseAssignees } from '../../../common/api';
+import { Assignee, AssigneeWithProfile } from '../../components/user_profiles/types';
+
+export const useAssignees = ({
+  caseAssignees,
+  userProfiles,
+}: {
+  caseAssignees: CaseAssignees;
+  userProfiles: Map<string, UserProfileWithAvatar>;
+}) => {
+  const assigneesWithProfiles = useMemo(
+    () =>
+      caseAssignees.reduce<AssigneeWithProfile[]>((acc, assignee) => {
+        const profile = userProfiles.get(assignee.uid);
+
+        if (profile) {
+          acc.push({ uid: assignee.uid, profile });
+        }
+
+        return acc;
+      }, []),
+    [caseAssignees, userProfiles]
+  );
+
+  const assigneesWithoutProfiles = useMemo(
+    () =>
+      caseAssignees.reduce<Assignee[]>((acc, assignee) => {
+        const profile = userProfiles.get(assignee.uid);
+
+        if (!profile) {
+          acc.push({ uid: assignee.uid });
+        }
+
+        return acc;
+      }, []),
+    [caseAssignees, userProfiles]
+  );
+
+  const allAssignees = useMemo(
+    () => [...assigneesWithProfiles, ...assigneesWithoutProfiles],
+    [assigneesWithProfiles, assigneesWithoutProfiles]
+  );
+
+  return {
+    assigneesWithProfiles,
+    assigneesWithoutProfiles,
+    allAssignees,
+  };
+};

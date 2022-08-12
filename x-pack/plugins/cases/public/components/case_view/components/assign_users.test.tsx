@@ -31,7 +31,7 @@ describe('AssignUsers', () => {
 
   beforeEach(() => {
     defaultProps = {
-      assignees: [],
+      caseAssignees: [],
       currentUserProfile,
       userProfiles: new Map(),
       onAssigneesChanged: jest.fn(),
@@ -80,7 +80,7 @@ describe('AssignUsers', () => {
   it('shows the two initially assigned users', () => {
     const props = {
       ...defaultProps,
-      assignees: userProfiles.slice(0, 2),
+      caseAssignees: userProfiles.slice(0, 2),
       userProfiles: userProfilesMap,
     };
     appMockRender.render(<AssignUsers {...props} />);
@@ -97,7 +97,7 @@ describe('AssignUsers', () => {
 
     const props = {
       ...defaultProps,
-      assignees: userProfiles.slice(0, 2),
+      caseAssignees: userProfiles.slice(0, 2),
       userProfiles: userProfilesMap,
     };
     rerender(<AssignUsers {...props} />);
@@ -162,11 +162,11 @@ describe('AssignUsers', () => {
     `);
   });
 
-  it('calls onAssigneesChanged with the deleted user', async () => {
+  it('calls onAssigneesChanged with an empty array because all the users were deleted', async () => {
     const onAssigneesChanged = jest.fn();
     const props = {
       ...defaultProps,
-      assignees: [{ uid: userProfiles[0].uid }],
+      caseAssignees: [{ uid: userProfiles[0].uid }],
       onAssigneesChanged,
       userProfiles: userProfilesMap,
     };
@@ -222,7 +222,7 @@ describe('AssignUsers', () => {
     const onAssigneesChanged = jest.fn();
     const props = {
       ...defaultProps,
-      assignees: [{ uid: userProfiles[0].uid }],
+      caseAssignees: [{ uid: userProfiles[0].uid }],
       onAssigneesChanged,
       userProfiles: userProfilesMap,
     };
@@ -233,5 +233,134 @@ describe('AssignUsers', () => {
     fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
 
     await waitFor(() => expect(onAssigneesChanged).toBeCalledTimes(0));
+  });
+
+  it('calls onAssigneesChanged without unknownId1', async () => {
+    const onAssigneesChanged = jest.fn();
+    const props = {
+      ...defaultProps,
+      caseAssignees: [{ uid: 'unknownId1' }, { uid: 'unknownId2' }],
+      onAssigneesChanged,
+      userProfiles: userProfilesMap,
+    };
+    appMockRender.render(<AssignUsers {...props} />);
+
+    fireEvent.mouseEnter(screen.getByTestId(`user-profile-assigned-user-group-unknownId1`));
+    fireEvent.click(screen.getByTestId(`user-profile-assigned-user-cross-unknownId1`));
+
+    await waitFor(() => expect(onAssigneesChanged).toBeCalledTimes(1));
+
+    expect(onAssigneesChanged.mock.calls[0][0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "uid": "unknownId2",
+        },
+      ]
+    `);
+  });
+
+  it('renders two unknown users and one user with a profile', async () => {
+    const props = {
+      ...defaultProps,
+      caseAssignees: [{ uid: 'unknownId1' }, { uid: 'unknownId2' }, { uid: userProfiles[0].uid }],
+      userProfiles: userProfilesMap,
+    };
+    appMockRender.render(<AssignUsers {...props} />);
+
+    expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
+    expect(screen.getByTestId('user-profile-assigned-user-group-unknownId1')).toBeInTheDocument();
+    expect(screen.getByTestId('user-profile-assigned-user-group-unknownId2')).toBeInTheDocument();
+  });
+
+  it('calls onAssigneesChanged with both users with profiles and without', async () => {
+    const onAssigneesChanged = jest.fn();
+    const props = {
+      ...defaultProps,
+      caseAssignees: [{ uid: 'unknownId1' }, { uid: 'unknownId2' }],
+      onAssigneesChanged,
+      userProfiles: userProfilesMap,
+    };
+    appMockRender.render(<AssignUsers {...props} />);
+
+    fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
+
+    fireEvent.click(screen.getByText('Damaged Raccoon'));
+
+    // close the popover
+    fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
+
+    await waitFor(() => expect(onAssigneesChanged).toBeCalledTimes(1));
+
+    expect(onAssigneesChanged.mock.calls[0][0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "data": Object {},
+          "enabled": true,
+          "uid": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+          "user": Object {
+            "email": "damaged_raccoon@elastic.co",
+            "full_name": "Damaged Raccoon",
+            "username": "damaged_raccoon",
+          },
+        },
+        Object {
+          "uid": "unknownId1",
+        },
+        Object {
+          "uid": "unknownId2",
+        },
+      ]
+    `);
+  });
+
+  it('calls onAssigneesChanged with the unknown users at the end', async () => {
+    const onAssigneesChanged = jest.fn();
+    const props = {
+      ...defaultProps,
+      caseAssignees: [{ uid: userProfiles[1].uid }, { uid: 'unknownId1' }, { uid: 'unknownId2' }],
+      onAssigneesChanged,
+      userProfiles: userProfilesMap,
+    };
+    appMockRender.render(<AssignUsers {...props} />);
+
+    fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
+
+    fireEvent.click(screen.getByText('Damaged Raccoon'));
+
+    // close the popover
+    fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
+
+    await waitFor(() => expect(onAssigneesChanged).toBeCalledTimes(1));
+
+    expect(onAssigneesChanged.mock.calls[0][0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "data": Object {},
+          "enabled": true,
+          "uid": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+          "user": Object {
+            "email": "damaged_raccoon@elastic.co",
+            "full_name": "Damaged Raccoon",
+            "username": "damaged_raccoon",
+          },
+        },
+        Object {
+          "data": Object {},
+          "enabled": true,
+          "uid": "u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0",
+          "user": Object {
+            "email": "physical_dinosaur@elastic.co",
+            "full_name": "Physical Dinosaur",
+            "username": "physical_dinosaur",
+          },
+        },
+        Object {
+          "uid": "unknownId1",
+        },
+        Object {
+          "uid": "unknownId2",
+        },
+      ]
+    `);
   });
 });

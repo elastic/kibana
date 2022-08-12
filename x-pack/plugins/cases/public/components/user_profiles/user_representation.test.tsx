@@ -14,13 +14,15 @@ import { AppMockRenderer, createAppMockRenderer } from '../../common/mock';
 describe('UserRepresentation', () => {
   const dataTestSubjGroup = `user-profile-assigned-user-group-${userProfiles[0].user.username}`;
   const dataTestSubjCross = `user-profile-assigned-user-cross-${userProfiles[0].user.username}`;
+  const dataTestSubjGroupUnknown = `user-profile-assigned-user-group-unknownId`;
+  const dataTestSubjCrossUnknown = `user-profile-assigned-user-cross-unknownId`;
 
   let defaultProps: UserRepresentationProps;
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
     defaultProps = {
-      profile: userProfiles[0],
+      assignee: { uid: userProfiles[0].uid, profile: userProfiles[0] },
       onRemoveAssignee: jest.fn(),
     };
 
@@ -41,6 +43,16 @@ describe('UserRepresentation', () => {
     expect(screen.getByTestId(dataTestSubjCross)).toBeInTheDocument();
   });
 
+  it('show the cross button when hovering over the row of an unknown user', () => {
+    appMockRender.render(
+      <UserRepresentation {...{ ...defaultProps, assignee: { uid: 'unknownId' } }} />
+    );
+
+    fireEvent.mouseEnter(screen.getByTestId(dataTestSubjGroupUnknown));
+
+    expect(screen.getByTestId(dataTestSubjCrossUnknown)).toBeInTheDocument();
+  });
+
   it('shows and then removes the cross button when the user hovers and removes the mouse from over the row', () => {
     appMockRender.render(<UserRepresentation {...defaultProps} />);
 
@@ -49,5 +61,13 @@ describe('UserRepresentation', () => {
 
     fireEvent.mouseLeave(screen.getByTestId(dataTestSubjGroup));
     expect(screen.queryByTestId(dataTestSubjCross)).not.toBeInTheDocument();
+  });
+
+  it("renders unknown for the user's information", () => {
+    appMockRender.render(
+      <UserRepresentation {...{ ...defaultProps, assignee: { uid: 'unknownId' } }} />
+    );
+
+    expect(screen.getByText('Unknown')).toBeInTheDocument();
   });
 });

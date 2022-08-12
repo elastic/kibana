@@ -12,8 +12,9 @@ import { CaseUserAvatar } from './user_avatar';
 import { UserToolTip } from './user_tooltip';
 import { getName } from './display_name';
 import * as i18n from './translations';
+import { Assignee } from './types';
 
-const UserAvatarWithName: React.FC<{ profile: UserProfileWithAvatar }> = ({ profile }) => {
+const UserAvatarWithName: React.FC<{ profile?: UserProfileWithAvatar }> = ({ profile }) => {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s">
       <EuiFlexItem grow={false}>
@@ -23,7 +24,7 @@ const UserAvatarWithName: React.FC<{ profile: UserProfileWithAvatar }> = ({ prof
         <EuiFlexGroup direction={'column'} gutterSize="none">
           <EuiFlexItem>
             <EuiText size="s" className="eui-textBreakWord">
-              {getName(profile.user)}
+              {getName(profile?.user)}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -34,23 +35,25 @@ const UserAvatarWithName: React.FC<{ profile: UserProfileWithAvatar }> = ({ prof
 UserAvatarWithName.displayName = 'UserAvatarWithName';
 
 export interface UserRepresentationProps {
-  profile: UserProfileWithAvatar;
+  assignee: Assignee;
   onRemoveAssignee: (removedAssigneeUID: string) => void;
 }
 
 const UserRepresentationComponent: React.FC<UserRepresentationProps> = ({
-  profile,
+  assignee,
   onRemoveAssignee,
 }) => {
   const [isHovering, setIsHovering] = useState(false);
 
   const removeAssigneeCallback = useCallback(
-    () => onRemoveAssignee(profile.uid),
-    [onRemoveAssignee, profile.uid]
+    () => onRemoveAssignee(assignee.uid),
+    [onRemoveAssignee, assignee.uid]
   );
 
   const onMouseEnter = useCallback(() => setIsHovering(true), []);
   const onMouseLeave = useCallback(() => setIsHovering(false), []);
+
+  const usernameDataTestSubj = assignee.profile?.user.username ?? assignee.uid;
 
   return (
     <EuiFlexGroup
@@ -59,11 +62,11 @@ const UserRepresentationComponent: React.FC<UserRepresentationProps> = ({
       alignItems="center"
       gutterSize="s"
       justifyContent="spaceBetween"
-      data-test-subj={`user-profile-assigned-user-group-${profile.user.username}`}
+      data-test-subj={`user-profile-assigned-user-group-${usernameDataTestSubj}`}
     >
       <EuiFlexItem grow={false}>
-        <UserToolTip profile={profile}>
-          <UserAvatarWithName profile={profile} />
+        <UserToolTip profile={assignee.profile}>
+          <UserAvatarWithName profile={assignee.profile} />
         </UserToolTip>
       </EuiFlexItem>
       {isHovering && (
@@ -71,10 +74,10 @@ const UserRepresentationComponent: React.FC<UserRepresentationProps> = ({
           <EuiToolTip
             position="left"
             content={i18n.REMOVE_ASSIGNEE}
-            data-test-subj={`user-profile-assigned-user-cross-tooltip-${profile.user.username}`}
+            data-test-subj={`user-profile-assigned-user-cross-tooltip-${usernameDataTestSubj}`}
           >
             <EuiButtonIcon
-              data-test-subj={`user-profile-assigned-user-cross-${profile.user.username}`}
+              data-test-subj={`user-profile-assigned-user-cross-${usernameDataTestSubj}`}
               aria-label={i18n.REMOVE_ASSIGNEE_ARIA_LABEL}
               iconType="cross"
               color="danger"
