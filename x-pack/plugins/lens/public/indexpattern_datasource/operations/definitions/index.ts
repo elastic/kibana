@@ -558,7 +558,11 @@ export interface RequiredReference {
   // Limit the input types, usually used to prevent other references from being used
   input: Array<GenericOperationDefinition['input']>;
   // Function which is used to determine if the reference is bucketed, or if it's a number
-  validateMetadata: (metadata: OperationMetadata) => boolean;
+  validateMetadata: (
+    metadata: OperationMetadata,
+    operation?: OperationType,
+    field?: string
+  ) => boolean;
   // Do not use specificOperations unless you need to limit to only one or two exact
   // operation types. The main use case is Cumulative Sum, where we need to only take the
   // sum of Count or sum of Sum.

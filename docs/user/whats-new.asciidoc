@@ -1,12 +1,42 @@
 [[whats-new]]
-== What's new in 8.0
+== What's new in {minor-version}
 
-This section summarizes the most important changes in each release. For the 
-full list, see <<release-notes>> and <<breaking-changes-8.0.0>>. 
+Here are the highlights of what's new and improved in {minor-version}.
+For detailed information about this release,
+check the <<release-notes, release notes>>.
+
+Previous versions: {kibana-ref-all}/8.3/whats-new.html[8.3] | {kibana-ref-all}/8.2/whats-new.html[8.2] | {kibana-ref-all}/8.1/whats-new.html[8.1] | {kibana-ref-all}/8.0/whats-new.html[8.0]
 
 //NOTE: The notable-highlights tagged regions are re-used in the
 //Installation and Upgrade Guide
 
 // tag::notable-highlights[]
+coming::[8.4.0]
+
+[discrete]
+[[highlights-8.4-alerting]]
+=== Enhancements to Alerting
+
+[discrete]
+==== Add schedules for snoozing rule notifications
+
+Starting in 8.2, you could suppress the notifications and actions for your rules
+for a specific duration. Now you can also schedule these single or recurring
+downtimes to start and end at specific dates and times.
+
+[role="screenshot"]
+image::images/highlights-snooze-schedule.png[Snooze notifications for a rule in {stack-manage-app} > {rules-ui} ]
+
+
+[discrete]
+==== New metrics for rules and actions
+
+You can now ship metrics related to {alert-features} to your monitoring cluster
+by using the {agent} or {metricbeat}. Click *Overview* and *Instances* in the
+{kib} section of *{stack-monitor-app}* to see visualizations about the rules and
+actions that are queued, running, or failing.
+
+[role="screenshot"]
+image::images/highlights-rule-metrics.png[Stack Monitoring overview metrics for Kibana]
 
 // end::notable-highlights[]
