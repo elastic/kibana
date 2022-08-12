@@ -22,7 +22,7 @@ import {
   load,
   isPseudoLocale,
   translateUsingPseudoLocale,
-} from './core';
+} from './src/core';
 
 import {
   registerTranslationFile,
@@ -31,7 +31,7 @@ import {
   getAllTranslations,
   getAllTranslationsFromPaths,
   getRegisteredLocales as getRegisteredLocalesForLoader,
-} from './loader';
+} from './src/loader';
 
 const i18n = {
   formats,
@@ -60,6 +60,6 @@ const i18nLoader = {
   getRegisteredLocales: getRegisteredLocalesForLoader,
 };
 
-export type { Translation } from './translation';
-export type { Formats, TranslateArguments } from './core';
+export type { Translation } from './src/translation';
+export type { Formats, TranslateArguments } from './src/core';
 export { i18n, i18nLoader };
