@@ -11,6 +11,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
+  const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['security', 'spaceSelector']);
   const testSubjects = getService('testSubjects');
   const spaces = getService('spaces');
@@ -19,7 +20,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     this.tags('includeFirefox');
     describe('Login Page', () => {
       before(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
         await PageObjects.security.forceLogout();
+      });
+
+      after(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
       });
 
       afterEach(async () => {
