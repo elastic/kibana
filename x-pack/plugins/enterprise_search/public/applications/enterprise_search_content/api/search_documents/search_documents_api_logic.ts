@@ -16,14 +16,17 @@ export const searchDocuments = async ({
   docsPerPage,
   indexName,
   pagination,
-  query: q,
+  query: searchQuery,
 }: {
   docsPerPage?: number;
   indexName: string;
-  pagination: { pageIndex: number; pageSize: number; totalItemCount: number };
-  query: string;
+  pagination: { pageIndex: number; pageSize: number };
+  query?: string;
 }) => {
-  const route = `/internal/enterprise_search/indices/${indexName}/search/${q}`;
+  const newIndexName = encodeURIComponent(indexName);
+  const route = `/internal/enterprise_search/indices/${newIndexName}/search${
+    searchQuery ? `/${searchQuery}` : ''
+  }`;
   const query = {
     page: pagination.pageIndex,
     size: docsPerPage || pagination.pageSize,

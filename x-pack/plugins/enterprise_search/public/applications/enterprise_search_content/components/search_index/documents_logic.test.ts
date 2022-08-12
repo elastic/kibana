@@ -11,7 +11,7 @@ import { nextTick } from '@kbn/test-jest-helpers';
 
 import { HttpError, Status } from '../../../../../common/types/api';
 import { MappingsApiLogic } from '../../api/mappings/mappings_logic';
-import { SearchDocumentsApiLogic } from '../../api/search_documents/search_documents_logic';
+import { SearchDocumentsApiLogic } from '../../api/search_documents/search_documents_api_logic';
 
 import {
   DocumentsLogic,
