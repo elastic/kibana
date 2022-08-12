@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiTourStep } from '@elastic/eui';
+import { EuiText, EuiTourStep } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
-import { NEW_TERMS_TOUR_ACTIVE_KEY } from '../../../../../common/constants';
+import { RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY } from '../../../../../common/constants';
+import { useKibana } from '../../../../common/lib/kibana';
 import * as i18n from './translations';
 
 export interface Props {
@@ -21,11 +22,13 @@ export const RulesPageTourComponent: React.FC<Props> = ({ children }) => {
     tourPopoverWidth: 300,
   };
 
-  const [tourState, setTourState] = useState(() => {
-    const tourStateString = localStorage.getItem(NEW_TERMS_TOUR_ACTIVE_KEY);
+  const { storage } = useKibana().services;
 
-    if (tourStateString != null) {
-      return JSON.parse(tourStateString);
+  const [tourState, setTourState] = useState(() => {
+    const restoredTourState = storage.get(RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY);
+
+    if (restoredTourState != null) {
+      return restoredTourState;
     }
     return tourConfig;
   });
@@ -34,12 +37,7 @@ export const RulesPageTourComponent: React.FC<Props> = ({ children }) => {
     {
       step: 1,
       title: i18n.NEW_TERMS_TOUR_TITLE,
-      content: (
-        <span>
-          <p>{i18n.NEW_TERMS_TOUR_CONTENT}</p>
-          <EuiSpacer />
-        </span>
-      ),
+      content: <EuiText>{i18n.NEW_TERMS_TOUR_CONTENT}</EuiText>,
     },
   ];
   const finishTour = useCallback(() => {
@@ -50,8 +48,8 @@ export const RulesPageTourComponent: React.FC<Props> = ({ children }) => {
   }, [tourState]);
 
   useEffect(() => {
-    localStorage.setItem(NEW_TERMS_TOUR_ACTIVE_KEY, JSON.stringify(tourState));
-  }, [tourState]);
+    storage.set(RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY, tourState);
+  }, [tourState, storage]);
 
   return (
     <EuiTourStep

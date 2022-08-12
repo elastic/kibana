@@ -10,10 +10,7 @@ import type { UrlObject } from 'url';
 import Url from 'url';
 
 import type { ROLES } from '../../common/test';
-import {
-  NEW_TERMS_TOUR_ACTIVE_KEY,
-  RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY,
-} from '../../common/constants';
+import { RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY } from '../../common/constants';
 import { TIMELINE_FLYOUT_BODY } from '../screens/timeline';
 import { hostDetailsUrl, LOGOUT_URL, userDetailsUrl } from '../urls/navigation';
 
@@ -305,18 +302,6 @@ const disableFeatureTourForRuleManagementPage = (window: Window) => {
 };
 
 /**
- * Saves in localStorage new terms feature tour config with deactivated option
- * It prevents tour to appear during tests and cover UI elements
- * @param window - browser's window object
- */
-const disableNewTermsFeatureTour = (window: Window) => {
-  const tourConfig = {
-    isTourActive: false,
-  };
-  window.localStorage.setItem(NEW_TERMS_TOUR_ACTIVE_KEY, JSON.stringify(tourConfig));
-};
-
-/**
  * Authenticates with Kibana, visits the specified `url`, and waits for the
  * Kibana global nav to be displayed before continuing
  */
@@ -342,7 +327,6 @@ export const visit = (
           onBeforeLoadCallback(win);
         }
         disableFeatureTourForRuleManagementPage(win);
-        disableNewTermsFeatureTour(win);
       },
     }
   );
@@ -350,29 +334,20 @@ export const visit = (
 
 export const visitWithoutDateRange = (url: string, role?: ROLES) => {
   cy.visit(role ? getUrlWithRoute(role, url) : url, {
-    onBeforeLoad(win) {
-      disableFeatureTourForRuleManagementPage(win);
-      disableNewTermsFeatureTour(win);
-    },
+    onBeforeLoad: disableFeatureTourForRuleManagementPage,
   });
 };
 
 export const visitWithUser = (url: string, user: User) => {
   cy.visit(constructUrlWithUser(user, url), {
-    onBeforeLoad(win) {
-      disableFeatureTourForRuleManagementPage(win);
-      disableNewTermsFeatureTour(win);
-    },
+    onBeforeLoad: disableFeatureTourForRuleManagementPage,
   });
 };
 
 export const visitTimeline = (timelineId: string, role?: ROLES) => {
   const route = `/app/security/timelines?timeline=(id:'${timelineId}',isOpen:!t)`;
   cy.visit(role ? getUrlWithRoute(role, route) : route, {
-    onBeforeLoad(win) {
-      disableFeatureTourForRuleManagementPage(win);
-      disableNewTermsFeatureTour(win);
-    },
+    onBeforeLoad: disableFeatureTourForRuleManagementPage,
   });
   cy.get('[data-test-subj="headerGlobalNav"]');
   cy.get(TIMELINE_FLYOUT_BODY).should('be.visible');
