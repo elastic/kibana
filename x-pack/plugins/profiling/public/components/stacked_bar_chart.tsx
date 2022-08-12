@@ -18,12 +18,11 @@ import {
   XYChartElementEvent,
 } from '@elastic/charts';
 import { EuiPanel } from '@elastic/eui';
-import React, { useContext } from 'react';
+import React from 'react';
 import { TopNSample, TopNSubchart } from '../../common/topn';
 import { useKibanaTimeZoneSetting } from '../hooks/use_kibana_timezone_setting';
 import { useProfilingChartsTheme } from '../hooks/use_profiling_charts_theme';
 import { asPercentage } from '../utils/formatters/as_percentage';
-import { TopNContext } from './contexts/topn';
 import { SubChart } from './subchart';
 
 function SubchartTooltip({
@@ -51,6 +50,7 @@ export interface StackedBarChartProps {
   onSampleClick: (sample: TopNSample) => void;
   onSampleOut: () => void;
   highlightedSubchart?: TopNSubchart;
+  charts: TopNSubchart[];
 }
 
 export const StackedBarChart: React.FC<StackedBarChartProps> = ({
@@ -60,9 +60,8 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
   onSampleClick,
   onSampleOut,
   highlightedSubchart,
+  charts,
 }) => {
-  const ctx = useContext(TopNContext);
-
   const timeZone = useKibanaTimeZoneSetting();
 
   const { chartsBaseTheme, chartsTheme } = useProfilingChartsTheme();
@@ -96,7 +95,7 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
           onSampleOut();
         }}
       />
-      {ctx.charts.map((chart) => (
+      {charts.map((chart) => (
         <HistogramBarSeries
           key={chart.Category}
           id={chart.Category}

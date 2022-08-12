@@ -18,10 +18,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { keyBy, orderBy } from 'lodash';
-import React, { useContext, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { TopNFunctions, TopNFunctionSortField } from '../../common/functions';
 import { getCalleeFunction, getCalleeSource, StackFrameMetadata } from '../../common/profiling';
-import { FunctionContext } from './contexts/function';
 
 interface Row {
   rank: number;
@@ -61,6 +60,7 @@ export const TopNFunctionsTable = ({
   sortDirection,
   sortField,
   onSortChange,
+  topNFunctions,
   comparisonTopNFunctions,
 }: {
   sortDirection: 'asc' | 'desc';
@@ -69,20 +69,19 @@ export const TopNFunctionsTable = ({
     sortDirection: 'asc' | 'desc';
     sortField: TopNFunctionSortField;
   }) => void;
+  topNFunctions?: TopNFunctions;
   comparisonTopNFunctions?: TopNFunctions;
 }) => {
-  const ctx = useContext(FunctionContext);
-
   const totalCount: number = useMemo(() => {
-    if (!ctx || !ctx.TotalCount || ctx.TotalCount === 0) {
+    if (!topNFunctions || !topNFunctions.TotalCount || topNFunctions.TotalCount === 0) {
       return 0;
     }
 
-    return ctx.TotalCount;
-  }, [ctx]);
+    return topNFunctions.TotalCount;
+  }, [topNFunctions]);
 
   const rows: Row[] = useMemo(() => {
-    if (!ctx || !ctx.TotalCount || ctx.TotalCount === 0) {
+    if (!topNFunctions || !topNFunctions.TotalCount || topNFunctions.TotalCount === 0) {
       return [];
     }
 
@@ -90,11 +89,11 @@ export const TopNFunctionsTable = ({
       ? keyBy(comparisonTopNFunctions.TopN, 'Id')
       : {};
 
-    return ctx.TopN.filter((topN) => topN.CountExclusive > 0).map((topN, i) => {
+    return topNFunctions.TopN.filter((topN) => topN.CountExclusive > 0).map((topN, i) => {
       const comparisonRow = comparisonDataById?.[topN.Id];
 
-      const inclusiveCPU = (topN.CountInclusive / ctx.TotalCount) * 100;
-      const exclusiveCPU = (topN.CountExclusive / ctx.TotalCount) * 100;
+      const inclusiveCPU = (topN.CountInclusive / topNFunctions.TotalCount) * 100;
+      const exclusiveCPU = (topN.CountExclusive / topNFunctions.TotalCount) * 100;
 
       const diff =
         comparisonTopNFunctions && comparisonRow
@@ -118,7 +117,7 @@ export const TopNFunctionsTable = ({
         diff,
       };
     });
-  }, [ctx, comparisonTopNFunctions]);
+  }, [topNFunctions, comparisonTopNFunctions]);
 
   const theme = useEuiTheme();
 

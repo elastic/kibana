@@ -6,16 +6,17 @@
  */
 import { EuiButton, EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { StackTracesDisplayOption } from '../../../common/stack_traces';
 import { groupSamplesByCategory, TopNResponse, TopNSubchart } from '../../../common/topn';
+import { useAsync } from '../../hooks/use_async';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../../hooks/use_profiling_route_path';
 import { useTimeRange } from '../../hooks/use_time_range';
+import { AsyncComponent } from '../async_component';
 import { ChartGrid } from '../chart_grid';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
-import { TopNContext } from '../contexts/topn';
 import { ProfilingAppPageTemplate } from '../profiling_app_page_template';
 import { StackedBarChart } from '../stacked_bar_chart';
 import { getStackTracesTabs } from './get_stack_traces_tabs';
@@ -40,10 +41,6 @@ export function StackTracesView() {
     profilingRouter,
   });
 
-  const [topn, setTopN] = useState<{ charts: TopNSubchart[] }>({
-    charts: [],
-  });
-
   const {
     services: { fetchTopN },
   } = useProfilingDependencies();
@@ -53,13 +50,11 @@ export function StackTracesView() {
     rangeTo,
   });
 
-  useEffect(() => {
+  const state = useAsync(() => {
     if (!topNType) {
-      setTopN({ charts: [] });
-      return;
+      return Promise.resolve({ charts: [] });
     }
-
-    fetchTopN({
+    return fetchTopN({
       type: topNType,
       timeFrom: new Date(timeRange.start).getTime() / 1000,
       timeTo: new Date(timeRange.end).getTime() / 1000,
@@ -68,7 +63,7 @@ export function StackTracesView() {
       const totalCount = response.TotalCount;
       const samples = response.TopN;
       const charts = groupSamplesByCategory(samples, totalCount);
-      setTopN({ charts });
+      return { charts };
     });
   }, [topNType, timeRange.start, timeRange.end, fetchTopN, kuery]);
 
@@ -76,53 +71,56 @@ export function StackTracesView() {
     undefined
   );
 
+  const { data } = state;
+
   return (
     <ProfilingAppPageTemplate tabs={tabs}>
-      <TopNContext.Provider value={topn}>
-        <EuiFlexGroup direction="column" alignItems="center">
-          <EuiFlexItem style={{ width: '100%' }}>
-            <EuiPanel>
-              <EuiFlexGroup direction="column" gutterSize="m">
-                <EuiFlexItem>
-                  <EuiButtonGroup
-                    idSelected={displayAs}
-                    type="single"
-                    onChange={(nextValue) => {
-                      profilingRouter.push(routePath, {
-                        path,
-                        query: {
-                          ...query,
-                          displayAs: nextValue,
-                        },
-                      });
-                    }}
-                    options={[
-                      {
-                        id: StackTracesDisplayOption.StackTraces,
-                        iconType: 'visLine',
-                        label: i18n.translate(
-                          'xpack.profiling.stackTracesView.stackTracesCountButton',
-                          {
-                            defaultMessage: 'Stack traces',
-                          }
-                        ),
+      <EuiFlexGroup direction="column" alignItems="center">
+        <EuiFlexItem style={{ width: '100%' }}>
+          <EuiPanel>
+            <EuiFlexGroup direction="column" gutterSize="m">
+              <EuiFlexItem>
+                <EuiButtonGroup
+                  idSelected={displayAs}
+                  type="single"
+                  onChange={(nextValue) => {
+                    profilingRouter.push(routePath, {
+                      path,
+                      query: {
+                        ...query,
+                        displayAs: nextValue,
                       },
-                      {
-                        id: StackTracesDisplayOption.Percentage,
-                        iconType: 'percent',
-                        label: i18n.translate('xpack.profiling.stackTracesView.percentagesButton', {
-                          defaultMessage: 'Percentages',
-                        }),
-                      },
-                    ]}
-                    legend={i18n.translate('xpack.profiling.stackTracesView.displayOptionLegend', {
-                      defaultMessage: 'Display option',
-                    })}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem>
+                    });
+                  }}
+                  options={[
+                    {
+                      id: StackTracesDisplayOption.StackTraces,
+                      iconType: 'visLine',
+                      label: i18n.translate(
+                        'xpack.profiling.stackTracesView.stackTracesCountButton',
+                        {
+                          defaultMessage: 'Stack traces',
+                        }
+                      ),
+                    },
+                    {
+                      id: StackTracesDisplayOption.Percentage,
+                      iconType: 'percent',
+                      label: i18n.translate('xpack.profiling.stackTracesView.percentagesButton', {
+                        defaultMessage: 'Percentages',
+                      }),
+                    },
+                  ]}
+                  legend={i18n.translate('xpack.profiling.stackTracesView.displayOptionLegend', {
+                    defaultMessage: 'Display option',
+                  })}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem style={{ alignContent: 'center' }}>
+                <AsyncComponent size="xl" {...state} style={{ height: 400 }}>
                   <StackedBarChart
                     height={400}
+                    charts={data?.charts ?? []}
                     asPercentages={displayAs === StackTracesDisplayOption.Percentage}
                     onBrushEnd={(nextRange) => {
                       profilingRouter.push(routePath, {
@@ -136,7 +134,7 @@ export function StackTracesView() {
                     }}
                     onSampleClick={(sample) => {
                       setHighlightedSubchart(
-                        topn.charts.find((subchart) => subchart.Category === sample.Category)
+                        data?.charts.find((subchart) => subchart.Category === sample.Category)
                       );
                     }}
                     onSampleOut={() => {
@@ -144,34 +142,36 @@ export function StackTracesView() {
                     }}
                     highlightedSubchart={highlightedSubchart}
                   />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
+                </AsyncComponent>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+        </EuiFlexItem>
+        <EuiFlexItem style={{ width: '100%' }}>
+          <AsyncComponent size="m" mono {...state} style={{ minHeight: 200 }}>
+            <ChartGrid charts={data?.charts ?? []} limit={limit} />
+          </AsyncComponent>
+        </EuiFlexItem>
+        {(data?.charts.length ?? 0) > limit ? (
+          <EuiFlexItem>
+            <EuiButton
+              onClick={() => {
+                profilingRouter.push(routePath, {
+                  path,
+                  query: {
+                    ...query,
+                    limit: limit + 10,
+                  },
+                });
+              }}
+            >
+              {i18n.translate('xpack.profiling.stackTracesView.showMoreButton', {
+                defaultMessage: 'Show more',
+              })}
+            </EuiButton>
           </EuiFlexItem>
-          <EuiFlexItem style={{ width: '100%' }}>
-            <ChartGrid maximum={Math.min(limit, topn.charts.length)} />
-          </EuiFlexItem>
-          {topn.charts.length > limit ? (
-            <EuiFlexItem>
-              <EuiButton
-                onClick={() => {
-                  profilingRouter.push(routePath, {
-                    path,
-                    query: {
-                      ...query,
-                      limit: limit + 10,
-                    },
-                  });
-                }}
-              >
-                {i18n.translate('xpack.profiling.stackTracesView.showMoreButton', {
-                  defaultMessage: 'Show more',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
-          ) : null}
-        </EuiFlexGroup>
-      </TopNContext.Provider>
+        ) : null}
+      </EuiFlexGroup>
     </ProfilingAppPageTemplate>
   );
 }
