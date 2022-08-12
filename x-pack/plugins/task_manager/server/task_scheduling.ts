@@ -130,6 +130,33 @@ export class TaskScheduling {
   }
 
   /**
+   * Bulk schedules a task.
+   *
+   * @param tasks - The tasks being scheduled.
+   * @returns {Promise<ConcreteTaskInstance>}
+   */
+  public async bulkSchedule(
+    taskInstances: TaskInstanceWithDeprecatedFields[],
+    options?: Record<string, unknown>
+  ): Promise<ConcreteTaskInstance[]> {
+    const traceparent =
+      agent.currentTransaction && agent.currentTransaction.type !== 'request'
+        ? agent.currentTraceparent
+        : '';
+    const modifiedTasks = await Promise.all(
+      taskInstances.map(async (taskInstance) => {
+        const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
+          ...options,
+          taskInstance: ensureDeprecatedFieldsAreCorrected(taskInstance, this.logger),
+        });
+        return { ...modifiedTask, traceparent: traceparent || '' };
+      })
+    );
+
+    return await this.store.bulkSchedule(modifiedTasks);
+  }
+
+  /**
    * Bulk updates schedules for tasks by ids.
    * Only tasks with `idle` status will be updated, as for the tasks which have `running` status,
    * `schedule` and `runAt` will be recalculated after task run finishes

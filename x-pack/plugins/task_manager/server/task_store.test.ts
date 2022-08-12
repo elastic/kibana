@@ -670,6 +670,142 @@ describe('TaskStore', () => {
       return expect(store.getLifecycle(randomId())).rejects.toThrow('Bad Request');
     });
   });
+
+  describe('bulkSchedule', () => {
+    let store: TaskStore;
+
+    beforeAll(() => {
+      store = new TaskStore({
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+      });
+    });
+
+    async function testBulkSchedule(task: unknown) {
+      savedObjectsClient.bulkCreate.mockImplementation(async () => ({
+        saved_objects: [
+          {
+            id: 'testid',
+            type: 'test',
+            attributes: {
+              attempts: 0,
+              params: '{"hello":"world"}',
+              retryAt: null,
+              runAt: '2019-02-12T21:01:22.479Z',
+              scheduledAt: '2019-02-12T21:01:22.479Z',
+              startedAt: null,
+              state: '{"foo":"bar"}',
+              status: 'idle',
+              taskType: 'report',
+              traceparent: 'apmTraceparent',
+            },
+            references: [],
+            version: '123',
+          },
+        ],
+      }));
+      const result = await store.bulkSchedule(task as TaskInstance[]);
+
+      expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+
+      return result;
+    }
+
+    test('serializes the params and state', async () => {
+      const task = {
+        id: 'id',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        traceparent: 'apmTraceparent',
+      };
+      const result = await testBulkSchedule([task]);
+
+      expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+        [
+          {
+            id: 'id',
+            type: 'task',
+            attributes: {
+              attempts: 0,
+              params: '{"hello":"world"}',
+              retryAt: null,
+              runAt: '2019-02-12T21:01:22.479Z',
+              scheduledAt: '2019-02-12T21:01:22.479Z',
+              startedAt: null,
+              state: '{"foo":"bar"}',
+              status: 'idle',
+              taskType: 'report',
+              traceparent: 'apmTraceparent',
+            },
+          },
+        ],
+        { refresh: false }
+      );
+
+      expect(result).toEqual([
+        {
+          id: 'testid',
+          attempts: 0,
+          schedule: undefined,
+          params: { hello: 'world' },
+          retryAt: null,
+          runAt: mockedDate,
+          scheduledAt: mockedDate,
+          scope: undefined,
+          startedAt: null,
+          state: { foo: 'bar' },
+          status: 'idle',
+          taskType: 'report',
+          user: undefined,
+          version: '123',
+          traceparent: 'apmTraceparent',
+        },
+      ]);
+    });
+
+    test('returns a concrete task instance', async () => {
+      const task = {
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+      };
+      const result = await testBulkSchedule([task]);
+
+      expect(result).toMatchObject([
+        {
+          ...task,
+          id: 'testid',
+        },
+      ]);
+    });
+
+    test('errors if the task type is unknown', async () => {
+      await expect(testBulkSchedule([{ taskType: 'nope', params: {}, state: {} }])).rejects.toThrow(
+        /Unsupported task type "nope"/i
+      );
+    });
+
+    test('pushes error from saved objects client to errors$', async () => {
+      const task: TaskInstance = {
+        id: 'id',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+      };
+
+      const firstErrorPromise = store.errors$.pipe(first()).toPromise();
+      savedObjectsClient.bulkCreate.mockRejectedValue(new Error('Failure'));
+      await expect(store.bulkSchedule([task])).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failure"`
+      );
+      expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
+    });
+  });
 });
 
 const randomId = () => `id-${_.random(1, 20)}`;
