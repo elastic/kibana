@@ -69,7 +69,7 @@ describe('convertToLens for TimeSeries', () => {
           ...model.series[0],
           metrics: [
             {
-              type: 'std_deviation',
+              type: 'sum_of_squares_bucket',
             },
           ] as Series['metrics'],
         },

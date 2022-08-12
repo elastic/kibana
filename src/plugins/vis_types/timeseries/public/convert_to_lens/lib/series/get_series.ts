@@ -28,12 +28,25 @@ export interface VisSeries {
   seriesAgg?: string;
 }
 
-export const getSeries = (initialMetrics: Metric[], totalSeriesNum: number): VisSeries | null => {
+export const getSeries = (
+  initialMetrics: Metric[],
+  totalSeriesNum: number,
+  splitMode: string,
+  layerColor: string,
+  panelType: string,
+  timeRangeMode?: string
+): VisSeries | null => {
   const { metrics, seriesAgg } = getSeriesAgg(initialMetrics);
   const metricIdx = metrics.length - 1;
   const aggregation = metrics[metricIdx].type;
   const fieldName = metrics[metricIdx].field;
-  const aggregationMap = SUPPORTED_METRICS[aggregation];
+  const aggregationMap =
+    SUPPORTED_METRICS[aggregation] &&
+    SUPPORTED_METRICS[aggregation].supportedPanelTypes.includes(panelType) &&
+    (!timeRangeMode ||
+      SUPPORTED_METRICS[aggregation].supportedTimeRangeModes.includes(timeRangeMode))
+      ? SUPPORTED_METRICS[aggregation]
+      : undefined;
   if (!aggregationMap) {
     return null;
   }
@@ -44,6 +57,8 @@ export const getSeries = (initialMetrics: Metric[], totalSeriesNum: number): Vis
       if (percentiles?.length) {
         const percentilesSeries = getPercentilesSeries(
           percentiles,
+          splitMode,
+          layerColor,
           fieldName
         ) as VisualizeEditorLayersContext['metrics'];
         metricsArray = [...metricsArray, ...percentilesSeries];
@@ -57,6 +72,8 @@ export const getSeries = (initialMetrics: Metric[], totalSeriesNum: number): Vis
         const percentileRanksSeries = getPercentileRankSeries(
           values,
           colors,
+          splitMode,
+          layerColor,
           fieldName
         ) as VisualizeEditorLayersContext['metrics'];
         metricsArray = [...metricsArray, ...percentileRanksSeries];
@@ -220,6 +237,25 @@ export const getSeries = (initialMetrics: Metric[], totalSeriesNum: number): Vis
         },
       ];
       break;
+    }
+    case 'std_deviation': {
+      const currentMetric = metrics[metricIdx];
+      if (currentMetric.mode === 'upper' || currentMetric.mode === 'lower') {
+        const script = getFormulaEquivalent(currentMetric, metrics);
+        if (!script) return null;
+        metricsArray = getFormulaSeries(script);
+        break;
+      } else if (currentMetric.mode === 'band') {
+        [
+          { ...currentMetric, mode: 'upper' },
+          { ...currentMetric, mode: 'lower' },
+        ].forEach((metric) => {
+          const script = getFormulaEquivalent(metric, metrics);
+          if (!script) return null;
+          metricsArray.push(...getFormulaSeries(script));
+        });
+        break;
+      }
     }
     default: {
       const timeScale = getTimeScale(metrics[metricIdx]);

@@ -61,20 +61,6 @@ const model = {
 } as Panel;
 
 describe('convertToLens for Top N', () => {
-  test('should return null for a mixed metrics (splitted and not)', async () => {
-    const nonSupportedAggModel = {
-      ...model,
-      series: [
-        ...model.series,
-        {
-          split_mode: 'terms',
-        } as Series,
-      ],
-    };
-    const triggerOptions = await convertToLens(nonSupportedAggModel);
-    expect(triggerOptions).toBeNull();
-  });
-
   test('should return null for a non supported aggregation', async () => {
     const nonSupportedAggModel = {
       ...model,
@@ -83,7 +69,7 @@ describe('convertToLens for Top N', () => {
           ...model.series[0],
           metrics: [
             {
-              type: 'std_deviation',
+              type: 'sum_of_squares_bucket',
             },
           ] as Series['metrics'],
         },

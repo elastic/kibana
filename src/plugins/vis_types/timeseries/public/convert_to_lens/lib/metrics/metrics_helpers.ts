@@ -12,12 +12,17 @@ import { getFilterRatioFormula } from './filter_ratio_formula';
 import { getParentPipelineSeriesFormula } from './parent_pipeline_formula';
 import { getSiblingPipelineSeriesFormula } from './sibling_pipeline_formula';
 
-export const getPercentilesSeries = (percentiles: Metric['percentiles'], fieldName?: string) => {
+export const getPercentilesSeries = (
+  percentiles: Metric['percentiles'],
+  splitMode: string,
+  layerColor: string,
+  fieldName?: string
+) => {
   return percentiles?.map((percentile) => {
     return {
       agg: 'percentile',
       isFullReference: false,
-      color: percentile.color,
+      color: splitMode === 'everything' ? percentile.color : layerColor,
       fieldName: fieldName ?? 'document',
       params: { percentile: percentile.value },
     };
@@ -27,13 +32,15 @@ export const getPercentilesSeries = (percentiles: Metric['percentiles'], fieldNa
 export const getPercentileRankSeries = (
   values: Metric['values'],
   colors: Metric['colors'],
+  splitMode: string,
+  layerColor: string,
   fieldName?: string
 ) => {
   return values?.map((value, index) => {
     return {
       agg: 'percentile_rank',
       isFullReference: false,
-      color: colors?.[index],
+      color: splitMode === 'everything' ? colors?.[index] : layerColor,
       fieldName: fieldName ?? 'document',
       params: { value },
     };
@@ -121,6 +128,19 @@ export const getFormulaEquivalent = (
     }
     case 'static': {
       return `${currentMetric.value}`;
+    }
+    case 'std_deviation': {
+      if (currentMetric.mode === 'lower') {
+        return `average(${currentMetric.field}) - ${currentMetric.sigma || 1.5} * ${aggregation}(${
+          currentMetric.field
+        })`;
+      }
+      if (currentMetric.mode === 'upper') {
+        return `average(${currentMetric.field}) + ${currentMetric.sigma || 1.5} * ${aggregation}(${
+          currentMetric.field
+        })`;
+      }
+      return `${aggregation}(${currentMetric.field})`;
     }
     default: {
       return `${aggregation}(${currentMetric.field})`;

@@ -6,13 +6,40 @@
  * Side Public License, v 1.
  */
 
+import { utc } from 'moment';
+import { search } from '@kbn/data-plugin/public';
+import dateMath from '@kbn/datemath';
 import { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
+import { TimeRange, UI_SETTINGS } from '@kbn/data-plugin/common';
 import { PaletteOutput } from '@kbn/coloring';
 import { SUPPORTED_FORMATTERS } from '../formatters';
 import { convertSplitFilters } from '../split_chart';
 import { convertMetrics, convertFilter } from '../metrics';
 import type { Panel, Series } from '../../../../common/types';
+import { TIME_RANGE_DATA_MODES } from '../../../../common/enums';
+import { getUISettings } from '../../../services';
 import { VisSeries } from '../series';
+
+function getWindow(interval?: string, timeRange?: TimeRange) {
+  let window = interval || '1h';
+
+  if (timeRange && !interval) {
+    const { from, to } = timeRange;
+    const timerange = utc(to).valueOf() - utc(from).valueOf();
+    const maxBars = getUISettings().get<number>(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
+
+    const duration = search.aggs.calcAutoIntervalLessThan(maxBars, timerange);
+    const unit =
+      dateMath.units.find((u) => {
+        const value = duration.as(u);
+        return Number.isInteger(value);
+      }) || 'ms';
+
+    window = `${duration.as(unit)}${unit}`;
+  }
+
+  return window;
+}
 
 function getTermParams(layer: Series) {
   return {
@@ -43,14 +70,22 @@ export const getLayerConfiguration = (
   splitFields: string[],
   xFieldName?: string,
   xMode?: string,
-  splitWithDateHistogram?: boolean
+  splitWithDateHistogram?: boolean,
+  timeRange?: TimeRange
 ): VisualizeEditorLayersContext => {
   const layer = model.series[layerIdx];
   const palette = layer.palette as PaletteOutput;
   const splitFilters = convertSplitFilters(layer);
   const { metrics: metricsArray, seriesAgg } = series;
   const filter = convertFilter(layer);
-  const metrics = convertMetrics(layer, metricsArray, filter);
+  const metrics = convertMetrics(
+    layer,
+    metricsArray,
+    filter,
+    model.time_range_mode === TIME_RANGE_DATA_MODES.LAST_VALUE
+      ? getWindow(model.interval, timeRange)
+      : undefined
+  );
   return {
     indexPatternId,
     xFieldName,

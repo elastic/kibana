@@ -1651,7 +1651,9 @@ export function computeLayerFromContext(
         FormulaIndexPatternColumn,
         'managedReference'
       >;
-      const tempLayer = { indexPatternId: indexPattern.id, columns: {}, columnOrder: [] };
+      const tempLayer = isLast
+        ? { indexPatternId: indexPattern.id, columns: {}, columnOrder: [] }
+        : computeLayerFromContext(metricsArray.length === 1, metricsArray, indexPattern);
       let newColumn = operationDefinition.buildColumn({
         indexPattern,
         layer: tempLayer,

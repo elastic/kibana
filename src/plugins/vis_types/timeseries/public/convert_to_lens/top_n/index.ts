@@ -7,6 +7,7 @@
  */
 
 import { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
+import { PANEL_TYPES } from '../../../common/enums';
 import { getDataViewsStart } from '../../services';
 import { getDataSourceInfo } from '../lib/datasource';
 import { getSeries } from '../lib/series';
@@ -15,19 +16,12 @@ import { ConvertTsvbToLensVisualization } from '../types';
 import { isSplitWithDateHistogram } from '../lib/split_chart';
 import { getLayerConfiguration } from '../lib/layers';
 
-export const convertToLens: ConvertTsvbToLensVisualization = async (model) => {
+export const convertToLens: ConvertTsvbToLensVisualization = async (model, timeRange) => {
   const layersConfiguration: { [key: string]: VisualizeEditorLayersContext } = {};
 
   // get the active series number
   const seriesNum = model.series.filter((series) => !series.hidden).length;
   const dataViews = getDataViewsStart();
-  const hasLayersWithSplit = model.series.some((series) => series.split_mode !== 'everything');
-  const hasLayersWithoutSplit = model.series.some((series) => series.split_mode === 'everything');
-
-  // can not convert mixed series (splitted and not splitted)
-  if (hasLayersWithSplit && hasLayersWithoutSplit) {
-    return null;
-  }
 
   // handle multiple layers/series
   for (let layerIdx = 0; layerIdx < model.series.length; layerIdx++) {
@@ -45,7 +39,14 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model) => {
     );
 
     // handle multiple metrics
-    const series = getSeries(layer.metrics, seriesNum);
+    const series = getSeries(
+      layer.metrics,
+      seriesNum,
+      layer.split_mode,
+      layer.color,
+      PANEL_TYPES.TOP_N,
+      layer.time_range_mode
+    );
     if (!series || !series.metrics) {
       return null;
     }
@@ -73,7 +74,8 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model) => {
       splitFields,
       undefined,
       undefined,
-      splitWithDateHistogram
+      splitWithDateHistogram,
+      timeRange
     );
   }
 

@@ -7,6 +7,7 @@
  */
 
 import { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
+import { PANEL_TYPES } from '../../../common/enums';
 import { getDataViewsStart } from '../../services';
 import { getDataSourceInfo } from '../lib/datasource';
 import { getSeries } from '../lib/series';
@@ -39,7 +40,13 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model) => {
     );
 
     // handle multiple metrics
-    const series = getSeries(layer.metrics, seriesNum);
+    const series = getSeries(
+      layer.metrics,
+      seriesNum,
+      layer.split_mode,
+      layer.color,
+      PANEL_TYPES.TIMESERIES
+    );
     if (!series || !series.metrics) {
       return null;
     }
