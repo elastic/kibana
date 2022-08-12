@@ -147,6 +147,7 @@ export function getDisallowedTermsMessage(
                   fromDate: frame.dateRange.fromDate,
                   toDate: frame.dateRange.toDate,
                   size: currentColumn.params.size,
+                  spec: indexPattern.spec,
                 }),
               }
             );

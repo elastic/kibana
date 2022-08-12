@@ -237,6 +237,10 @@ async function refreshExistingFields({
           body.timeFieldName = pattern.timeFieldName;
         }
 
+        if (pattern.spec) {
+          body.spec = pattern.spec;
+        }
+
         return fetchJson(`${BASE_API_URL}/existing_fields/${pattern.id}`, {
           body: JSON.stringify(body),
         }) as Promise<ExistingFields>;
