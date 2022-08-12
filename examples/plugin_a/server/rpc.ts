@@ -30,16 +30,16 @@ function toZodEsque<T extends Type<unknown> = Type<unknown>>(
 
 export const rpc = trpc
   .router()
-  .query('getSomething', {
+  .query('pluginA.getSomething', {
     resolve: async () => ({
       okFromA: true,
     }),
   })
   // Expose your start contract over the RPC interface!
-  .query('somethingSpecialFromA' as keyof PluginASetup, {
+  .query(`pluginA.${'somethingSpecialFromA' as keyof PluginASetup}`, {
     resolve: async () => getContract().somethingSpecialFromA(),
   })
-  .mutation('updateSomething', {
+  .mutation('pluginA.updateSomething', {
     input: toZodEsque(mySchema),
     resolve: async () => {
       return {

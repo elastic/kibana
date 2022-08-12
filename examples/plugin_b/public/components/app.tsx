@@ -39,8 +39,11 @@ interface PluginBAppDeps {
 export const PluginBApp = ({ basename, notifications, navigation }: PluginBAppDeps) => {
   const [fetchData, setFetchData] = useState(true);
   const settle = () => setFetchData(false);
-  const result = rpc.useQuery(['getSomethingFromB'], { enabled: fetchData, onSettled: settle });
-  const resultFromA = rpc.useQuery(['somethingSpecialFromA'], {
+  const result = rpc.useQuery(['pluginB.getSomethingFromB'], {
+    enabled: fetchData,
+    onSettled: settle,
+  });
+  const resultFromA = rpc.useQuery(['pluginA.somethingSpecialFromA'], {
     enabled: fetchData,
     onSettled: settle,
   });
@@ -54,11 +57,14 @@ export const PluginBApp = ({ basename, notifications, navigation }: PluginBAppDe
 
   const onClickHandler = () => {
     // Imperative query
-    rpcClient.fetchQuery(['getSomethingFromB']).then(notifySuccess).catch(notifyError);
+    rpcClient.fetchQuery(['pluginB.getSomethingFromB']).then(notifySuccess).catch(notifyError);
 
     // Imperative mutation
     const procArgs = { inputA: 'test', inputB: 'test', inputC: 'test' };
-    rpcClient.client.mutation('updateSomething', procArgs).then(notifySuccess).catch(notifyError);
+    rpcClient.client
+      .mutation('pluginA.updateSomething', procArgs)
+      .then(notifySuccess)
+      .catch(notifyError);
   };
 
   const resultToOutput = (r: UseQueryResult) => {

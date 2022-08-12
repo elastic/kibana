@@ -8,9 +8,10 @@
 
 // import { schema } from '@kbn/config-schema';
 import * as trpc from '@trpc/server';
+// eslint-disable-next-line @kbn/imports/no_unresolvable_imports
 import type { PluginARPC } from '@kbn/plugin-a-plugin/common';
 
-export const rpc = trpc.router().query('getSomethingFromB', {
+export const rpc = trpc.router().query('pluginB.getSomethingFromB', {
   resolve: async () => ({
     okFromB: true,
   }),
