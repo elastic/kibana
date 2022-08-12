@@ -108,7 +108,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       const newColumnIds =
         currentIndex >= 0
           ? [...visibleColumns.slice(0, currentIndex), ...visibleColumns.slice(currentIndex + 1)]
-          : [...visibleColumns, columnId];
+          : [...visibleColumns, columnId].sort();
       onChangeVisibleColumns(newColumnIds);
     },
     [onChangeVisibleColumns, visibleColumns]

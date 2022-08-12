@@ -192,6 +192,7 @@ const AlertsTableState = ({
     },
     [id]
   );
+
   const onColumnsChange = useCallback(
     (newColumns: EuiDataGridColumn[], visibleColumns: string[]) => {
       setColumns(newColumns);
