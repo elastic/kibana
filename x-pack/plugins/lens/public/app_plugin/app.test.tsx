@@ -477,7 +477,7 @@ describe('Lens App', () => {
       expect(services.navigation.ui.TopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
           query: 'fake query',
-          indexPatterns: [{ id: 'mockip', isTimeBased: expect.any(Function) }],
+          indexPatterns: [{ id: 'mockip', isTimeBased: expect.any(Function), fields: [] }],
         }),
         {}
       );
