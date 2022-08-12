@@ -14,6 +14,7 @@ import { UserProfilesSelectable } from './user_profiles_selectable';
 const userProfiles = [
   {
     uid: 'u_BOulL4QMPSyV9jg5lQI2JmCkUnokHTazBnet3xVHNv0_0',
+    enabled: true,
     data: {},
     user: {
       username: 'delighted_nightingale',
@@ -23,6 +24,7 @@ const userProfiles = [
   },
   {
     uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
+    enabled: true,
     data: {},
     user: {
       username: 'damaged_raccoon',
@@ -32,6 +34,7 @@ const userProfiles = [
   },
   {
     uid: 'u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0',
+    enabled: true,
     data: {},
     user: {
       username: 'physical_dinosaur',
@@ -41,6 +44,7 @@ const userProfiles = [
   },
   {
     uid: 'u_9xDEQqUqoYCnFnPPLq5mIRHKL8gBTo_NiKgOnd5gGk0_0',
+    enabled: true,
     data: {},
     user: {
       username: 'wet_dingo',
