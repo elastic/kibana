@@ -9,7 +9,6 @@ import { SavedObjectsClientContract } from '@kbn/core/server';
 import { get } from 'lodash';
 import { ActionExecutionSource, isSavedObjectExecutionSource } from '../lib';
 import { ALERT_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
-import { ExecuteOptions } from '../create_execute_function';
 
 const LEGACY_VERSION = 'pre-7.10.0';
 
@@ -37,10 +36,11 @@ export async function getAuthorizationModeBySource(
 
 export async function getBulkAuthorizationModeBySource(
   unsecuredSavedObjectsClient: SavedObjectsClientContract,
-  executionOptions: ExecuteOptions[] = []
+  executionSources: Array<ActionExecutionSource<unknown>> = []
 ): Promise<Record<string, number>> {
   const count = { [AuthorizationMode.Legacy]: 0, [AuthorizationMode.RBAC]: 0 };
-  if (executionOptions.length === 0) {
+  if (executionSources.length === 0) {
+    count[AuthorizationMode.RBAC] = 1;
     return count;
   }
   const alerts = await unsecuredSavedObjectsClient.bulkGet<{
@@ -48,9 +48,9 @@ export async function getBulkAuthorizationModeBySource(
       versionApiKeyLastmodified?: string;
     };
   }>(
-    executionOptions.map((eo) => ({
+    executionSources.map((es) => ({
       type: ALERT_SAVED_OBJECT_TYPE,
-      id: get(eo, 'source.source.id'),
+      id: get(es, 'source.id'),
     }))
   );
   const legacyVersions: Record<string, boolean> = alerts.saved_objects.reduce(
@@ -60,11 +60,10 @@ export async function getBulkAuthorizationModeBySource(
     }),
     {}
   );
-  return executionOptions.reduce((acc, eo) => {
+  return executionSources.reduce((acc, es) => {
     const isAlertSavedObject =
-      isSavedObjectExecutionSource(eo.source) &&
-      eo.source?.source?.type === ALERT_SAVED_OBJECT_TYPE;
-    const isLegacyVersion = legacyVersions[get(eo, 'source.source.id')];
+      isSavedObjectExecutionSource(es) && es.source?.type === ALERT_SAVED_OBJECT_TYPE;
+    const isLegacyVersion = legacyVersions[get(es, 'source.id')];
     const key =
       isAlertSavedObject && isLegacyVersion ? AuthorizationMode.Legacy : AuthorizationMode.RBAC;
     acc[key]++;

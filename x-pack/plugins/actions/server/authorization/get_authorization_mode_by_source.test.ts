@@ -13,7 +13,6 @@ import {
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import uuid from 'uuid';
 import { asSavedObjectExecutionSource } from '../lib';
-import { ExecuteOptions } from '../create_execute_function';
 
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 
@@ -101,7 +100,7 @@ describe(`#getBulkAuthorizationModeBySource`, () => {
   test('should return RBAC if no source is provided', async () => {
     unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({ saved_objects: [] });
     expect(await getBulkAuthorizationModeBySource(unsecuredSavedObjectsClient)).toEqual({
-      [AuthorizationMode.RBAC]: 0,
+      [AuthorizationMode.RBAC]: 1,
       [AuthorizationMode.Legacy]: 0,
     });
   });
@@ -110,12 +109,10 @@ describe(`#getBulkAuthorizationModeBySource`, () => {
     unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({ saved_objects: [] });
     expect(
       await getBulkAuthorizationModeBySource(unsecuredSavedObjectsClient, [
-        {
-          source: asSavedObjectExecutionSource({
-            type: 'action',
-            id: uuid.v4(),
-          }),
-        } as ExecuteOptions,
+        asSavedObjectExecutionSource({
+          type: 'action',
+          id: uuid.v4(),
+        }),
       ])
     ).toEqual({ [AuthorizationMode.RBAC]: 1, [AuthorizationMode.Legacy]: 0 });
   });
@@ -125,12 +122,10 @@ describe(`#getBulkAuthorizationModeBySource`, () => {
     unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({ saved_objects: [mockAlert({ id })] });
     expect(
       await getBulkAuthorizationModeBySource(unsecuredSavedObjectsClient, [
-        {
-          source: asSavedObjectExecutionSource({
-            type: 'alert',
-            id,
-          }),
-        } as ExecuteOptions,
+        asSavedObjectExecutionSource({
+          type: 'alert',
+          id,
+        }),
       ])
     ).toEqual({ [AuthorizationMode.RBAC]: 1, [AuthorizationMode.Legacy]: 0 });
   });
@@ -144,12 +139,10 @@ describe(`#getBulkAuthorizationModeBySource`, () => {
     });
     expect(
       await getBulkAuthorizationModeBySource(unsecuredSavedObjectsClient, [
-        {
-          source: asSavedObjectExecutionSource({
-            type: 'alert',
-            id,
-          }),
-        } as ExecuteOptions,
+        asSavedObjectExecutionSource({
+          type: 'alert',
+          id,
+        }),
       ])
     ).toEqual({ [AuthorizationMode.RBAC]: 0, [AuthorizationMode.Legacy]: 1 });
   });
@@ -163,12 +156,10 @@ describe(`#getBulkAuthorizationModeBySource`, () => {
     });
     expect(
       await getBulkAuthorizationModeBySource(unsecuredSavedObjectsClient, [
-        {
-          source: asSavedObjectExecutionSource({
-            type: 'alert',
-            id,
-          }),
-        } as ExecuteOptions,
+        asSavedObjectExecutionSource({
+          type: 'alert',
+          id,
+        }),
       ])
     ).toEqual({ [AuthorizationMode.RBAC]: 1, [AuthorizationMode.Legacy]: 0 });
   });
@@ -180,12 +171,10 @@ describe(`#getBulkAuthorizationModeBySource`, () => {
     });
     expect(
       await getBulkAuthorizationModeBySource(unsecuredSavedObjectsClient, [
-        {
-          source: asSavedObjectExecutionSource({
-            type: 'alert',
-            id,
-          }),
-        } as ExecuteOptions,
+        asSavedObjectExecutionSource({
+          type: 'alert',
+          id,
+        }),
       ])
     ).toEqual({ [AuthorizationMode.RBAC]: 1, [AuthorizationMode.Legacy]: 0 });
   });

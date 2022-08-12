@@ -25,7 +25,13 @@ import { AuditLogger } from '@kbn/security-plugin/server';
 import { RunNowResult } from '@kbn/task-manager-plugin/server';
 import { ActionType } from '../common';
 import { ActionTypeRegistry } from './action_type_registry';
-import { validateConfig, validateSecrets, ActionExecutorContract, validateConnector } from './lib';
+import {
+  validateConfig,
+  validateSecrets,
+  ActionExecutorContract,
+  validateConnector,
+  ActionExecutionSource,
+} from './lib';
 import {
   ActionResult,
   FindActionResult,
@@ -663,9 +669,15 @@ export class ActionsClient {
   }
 
   public async bulkEnqueueExecution(options: EnqueueExecutionOptions[]): Promise<void> {
+    const sources: Array<ActionExecutionSource<unknown>> = [];
+    options.forEach((option) => {
+      if (option.source) {
+        sources.push(option.source);
+      }
+    });
     const authCounts = await getBulkAuthorizationModeBySource(
       this.unsecuredSavedObjectsClient,
-      options
+      sources
     );
     if (authCounts[AuthorizationMode.RBAC] > 0) {
       await this.authorization.ensureAuthorized('execute');
