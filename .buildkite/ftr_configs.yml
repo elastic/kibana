@@ -151,6 +151,7 @@ enabled:
   - x-pack/test/functional_synthetics/config.js
   - x-pack/test/functional_with_es_ssl/config.ts
   - x-pack/test/functional/apps/advanced_settings/config.ts
+  - x-pack/test/functional/apps/aiops/config.ts
   - x-pack/test/functional/apps/api_keys/config.ts
   - x-pack/test/functional/apps/apm/config.ts
   - x-pack/test/functional/apps/canvas/config.ts
@@ -249,6 +250,7 @@ enabled:
   - x-pack/test/security_functional/oidc.config.ts
   - x-pack/test/security_functional/saml.config.ts
   - x-pack/test/security_functional/insecure_cluster_warning.config.ts
+  - x-pack/test/security_functional/user_profiles.config.ts
   - x-pack/test/security_solution_endpoint_api_int/config.ts
   - x-pack/test/security_solution_endpoint/config.ts
   - x-pack/test/session_view/basic/config.ts
