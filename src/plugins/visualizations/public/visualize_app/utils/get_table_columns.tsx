@@ -91,9 +91,9 @@ export const getTableColumns = (
         defaultMessage: 'Title',
       }),
       sortable: true,
-      render: (field: string, { editApp, editUrl, title, error }: VisualizationListItem) => {
+      render: (field: string, { editApp, editUrl, title, error }: VisualizationListItem) =>
         // In case an error occurs i.e. the vis has wrong type, we render the vis but without the link
-        return !error ? (
+        !error ? (
           <RedirectAppLinks coreStart={core}>
             <EuiLink
               href={getVisualizeListItemLink(
@@ -109,8 +109,7 @@ export const getTableColumns = (
           </RedirectAppLinks>
         ) : (
           field
-        );
-      },
+        ),
     },
     {
       field: 'typeTitle',
