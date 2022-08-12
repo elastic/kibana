@@ -31,6 +31,7 @@ export interface MetricArguments {
   palette?: PaletteOutput<CustomPaletteState>;
   maxCols: number;
   minTiles?: number;
+  inspectorTableId: string;
 }
 
 export type MetricInput = Datatable;
@@ -53,12 +54,14 @@ export interface TrendlineArguments {
   timeField: ExpressionValueVisDimension | string;
   breakdownBy?: ExpressionValueVisDimension | string;
   table: Datatable;
+  inspectorTableId: string;
 }
 
 export interface TrendlineResult {
   type: typeof EXPRESSION_METRIC_TRENDLINE_NAME;
   trends: Record<string, MetricWTrend['trend']>;
   inspectorTable: ReturnType<typeof prepareLogTable>;
+  inspectorTableId: string;
 }
 
 export type TrendlineExpressionFunctionDefinition = ExpressionFunctionDefinition<

@@ -104,6 +104,14 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
           'Specifies the minimum number of tiles in the metric grid regardless of the input data.',
       }),
     },
+    inspectorTableId: {
+      types: ['string'],
+      help: i18n.translate('expressionMetricVis.function.inspectorTableId.help', {
+        defaultMessage: 'An ID for the inspector table',
+      }),
+      multi: false,
+      default: 'default',
+    },
   },
   fn(input, args, handlers) {
     validateAccessor(args.metric, input.columns);
@@ -151,9 +159,12 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       }
 
       const logTable = prepareLogTable(input, argsTable, true);
-      handlers.inspectorAdapters.tables.logDatatable('default', logTable);
+      handlers.inspectorAdapters.tables.logDatatable(args.inspectorTableId, logTable);
       if (args.trendline) {
-        handlers.inspectorAdapters.tables.logDatatable('trendline', args.trendline.inspectorTable);
+        handlers.inspectorAdapters.tables.logDatatable(
+          args.trendline.inspectorTableId,
+          args.trendline.inspectorTable
+        );
       }
     }
 

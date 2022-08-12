@@ -97,6 +97,7 @@ const getTrendlineExpression = (
           breakdownBy: state.trendlineBreakdownByAccessor
             ? [state.trendlineBreakdownByAccessor]
             : [],
+          inspectorTableId: [state.trendlineLayerId],
           ...(datasourceExpression
             ? {
                 table: [
@@ -208,6 +209,7 @@ const toExpression = (
             : [],
           maxCols: [state.maxCols ?? DEFAULT_MAX_COLUMNS],
           minTiles: maxPossibleTiles ? [maxPossibleTiles] : [],
+          inspectorTableId: [state.layerId],
         },
       },
     ],

@@ -54,6 +54,14 @@ export const metricTrendlineFunction = (): TrendlineExpressionFunctionDefinition
       }),
       multi: false,
     },
+    inspectorTableId: {
+      types: ['string'],
+      help: i18n.translate('expressionMetricTrendline.function.inspectorTableId.help', {
+        defaultMessage: 'An ID for the inspector table',
+      }),
+      multi: false,
+      default: 'trendline',
+    },
   },
   fn(input, args, handlers) {
     const table = args.table;
@@ -126,6 +134,11 @@ export const metricTrendlineFunction = (): TrendlineExpressionFunctionDefinition
       }
     }
 
-    return { type: EXPRESSION_METRIC_TRENDLINE_NAME, trends, inspectorTable };
+    return {
+      type: EXPRESSION_METRIC_TRENDLINE_NAME,
+      trends,
+      inspectorTable,
+      inspectorTableId: args.inspectorTableId,
+    };
   },
 });
