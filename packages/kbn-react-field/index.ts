@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export * from './technical_field_names';
-export * from './alerts_as_data_rbac';
-export * from './alerts_as_data_severity';
-export * from './alerts_as_data_status';
+export { FieldIcon } from './src/field_icon';
+export type { FieldIconProps } from './src/field_icon';
+export { FieldButton } from './src/field_button';
+export type { FieldButtonProps, ButtonSize } from './src/field_button';

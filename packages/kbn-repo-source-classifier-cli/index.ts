@@ -15,7 +15,7 @@ import { getRepoFiles } from '@kbn/get-repo-files';
 import { run } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 
-import { TypeTree } from './type_tree';
+import { TypeTree } from './src/type_tree';
 
 run(
   async ({ flags }) => {
