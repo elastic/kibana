@@ -8,6 +8,8 @@
 import React from 'react';
 
 import { ELASTICSEARCH_PLUGIN } from '../../../../../common/constants';
+import { useEnterpriseSearchData } from '../../../shared/enterprise_search_provider';
+import { NO_ACCESS } from '../../../shared/enterprise_search_provider/constants';
 import { SetElasticsearchChrome } from '../../../shared/kibana_chrome';
 import { EnterpriseSearchPageTemplateWrapper, PageTemplateProps } from '../../../shared/layout';
 import { useEnterpriseSearchNav } from '../../../shared/layout';
@@ -19,12 +21,14 @@ export const EnterpriseSearchElasticsearchPageTemplate: React.FC<PageTemplatePro
   pageViewTelemetry,
   ...pageTemplateProps
 }) => {
+  const { initialData } = useEnterpriseSearchData();
+
   return (
     <EnterpriseSearchPageTemplateWrapper
       {...pageTemplateProps}
       solutionNav={{
         name: ELASTICSEARCH_PLUGIN.NAME,
-        items: useEnterpriseSearchNav(),
+        items: useEnterpriseSearchNav(initialData.access || NO_ACCESS),
       }}
       setPageChrome={pageChrome && <SetElasticsearchChrome trail={pageChrome} />}
     >

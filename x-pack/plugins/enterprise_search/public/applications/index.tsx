@@ -21,6 +21,7 @@ import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-pl
 import { InitialAppData } from '../../common/types';
 import { PluginsStart, ClientConfigType, ClientData } from '../plugin';
 
+import { EnterpriseSearchProvider } from './shared/enterprise_search_provider';
 import { externalUrl } from './shared/enterprise_search_url';
 import { mountFlashMessagesLogic, Toasts } from './shared/flash_messages';
 import { mountHttpLogic } from './shared/http';
@@ -76,12 +77,14 @@ export const renderApp = (
       <KibanaThemeProvider theme$={params.theme$}>
         <KibanaContextProvider services={{ ...core, ...plugins }}>
           <CloudContext>
-            <Provider store={store}>
-              <Router history={params.history}>
-                <App {...initialData} />
-                <Toasts />
-              </Router>
-            </Provider>
+            <EnterpriseSearchProvider initialData={initialData}>
+              <Provider store={store}>
+                <Router history={params.history}>
+                  <App {...initialData} />
+                  <Toasts />
+                </Router>
+              </Provider>
+            </EnterpriseSearchProvider>
           </CloudContext>
         </KibanaContextProvider>
       </KibanaThemeProvider>

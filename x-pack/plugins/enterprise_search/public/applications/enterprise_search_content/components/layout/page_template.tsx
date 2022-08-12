@@ -8,6 +8,8 @@
 import React from 'react';
 
 import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../../common/constants';
+import { useEnterpriseSearchData } from '../../../shared/enterprise_search_provider';
+import { NO_ACCESS } from '../../../shared/enterprise_search_provider/constants';
 import { SetEnterpriseSearchChrome } from '../../../shared/kibana_chrome';
 import { EnterpriseSearchPageTemplateWrapper, PageTemplateProps } from '../../../shared/layout';
 import { useEnterpriseSearchNav } from '../../../shared/layout';
@@ -19,11 +21,13 @@ export const EnterpriseSearchContentPageTemplate: React.FC<PageTemplateProps> = 
   pageViewTelemetry,
   ...pageTemplateProps
 }) => {
+  const { initialData } = useEnterpriseSearchData();
+
   return (
     <EnterpriseSearchPageTemplateWrapper
       {...pageTemplateProps}
       solutionNav={{
-        items: useEnterpriseSearchNav(),
+        items: useEnterpriseSearchNav(initialData.access || NO_ACCESS),
         name: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAME,
       }}
       restrictWidth
