@@ -15,7 +15,10 @@ import {
   ManualPointEventAnnotationOutput,
   ManualRangeEventAnnotationOutput,
 } from './manual_event_annotation/types';
-import { QueryPointEventAnnotationOutput } from './query_event_annotation/types';
+import {
+  QueryPointEventAnnotationArgs,
+  QueryPointEventAnnotationOutput,
+} from './query_event_annotation/types';
 
 export type LineStyle = 'solid' | 'dashed' | 'dotted';
 export type Fill = 'inside' | 'outside' | 'none';
@@ -27,7 +30,7 @@ export type AvailableAnnotationIcon = $Values<typeof AvailableAnnotationIcons>;
 export type EventAnnotationArgs =
   | ManualPointEventAnnotationArgs
   | ManualRangeEventAnnotationArgs
-  | QueryPointEventAnnotationOutput;
+  | QueryPointEventAnnotationArgs;
 export type EventAnnotationOutput =
   | ManualPointEventAnnotationOutput
   | ManualRangeEventAnnotationOutput

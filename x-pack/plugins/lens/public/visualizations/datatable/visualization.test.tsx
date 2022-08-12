@@ -70,7 +70,7 @@ describe('Datatable Visualization', () => {
         layerType: layerTypes.DATA,
         columns: [{ columnId: 'a' }, { columnId: 'b' }, { columnId: 'c' }],
       };
-      expect(datatableVisualization.clearLayer(state, 'baz')).toMatchObject({
+      expect(datatableVisualization.clearLayer(state, 'baz', 'indexPattern1')).toMatchObject({
         layerId: 'baz',
         layerType: layerTypes.DATA,
         columns: [],

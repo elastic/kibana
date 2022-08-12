@@ -16,6 +16,7 @@ import { State } from '../../types';
 import { Position } from '@elastic/charts';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import moment from 'moment';
+import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
 
 jest.mock('lodash', () => {
   const original = jest.requireActual('lodash');
@@ -26,8 +27,9 @@ jest.mock('lodash', () => {
   };
 });
 
-const customLineStaticAnnotation = {
+const customLineStaticAnnotation: EventAnnotationConfig = {
   id: 'ann1',
+  type: 'manual',
   key: { type: 'point_in_time' as const, timestamp: '2022-03-18T08:25:00.000Z' },
   label: 'Event',
   icon: 'triangle' as const,
@@ -49,6 +51,7 @@ describe('AnnotationsPanel', () => {
         {
           layerType: layerTypes.ANNOTATIONS,
           layerId: 'annotation',
+          indexPatternId: 'indexPattern1',
           annotations: [customLineStaticAnnotation],
         },
       ],
@@ -109,6 +112,7 @@ describe('AnnotationsPanel', () => {
             color: 'red',
             icon: 'triangle',
             id: 'ann1',
+            type: 'manual',
             isHidden: undefined,
             key: {
               endTimestamp: '2022-03-21T10:49:00.000Z',
@@ -122,6 +126,7 @@ describe('AnnotationsPanel', () => {
         ],
         layerId: 'annotation',
         layerType: 'annotations',
+        indexPatternId: 'indexPattern1',
       };
       const component = mount(
         <AnnotationsPanel

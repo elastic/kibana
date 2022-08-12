@@ -38,6 +38,7 @@ import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 
 const exampleAnnotation: EventAnnotationConfig = {
   id: 'an1',
+  type: 'manual',
   label: 'Event 1',
   key: {
     type: 'point_in_time',
@@ -47,6 +48,7 @@ const exampleAnnotation: EventAnnotationConfig = {
 };
 const exampleAnnotation2: EventAnnotationConfig = {
   icon: 'circle',
+  type: 'manual',
   id: 'an2',
   key: {
     timestamp: '2022-04-18T11:01:59.135Z',
@@ -237,7 +239,12 @@ describe('xy_visualization', () => {
 
   describe('#appendLayer', () => {
     it('adds a layer', () => {
-      const layers = xyVisualization.appendLayer!(exampleState(), 'foo', layerTypes.DATA).layers;
+      const layers = xyVisualization.appendLayer!(
+        exampleState(),
+        'foo',
+        layerTypes.DATA,
+        'indexPattern1'
+      ).layers;
       expect(layers.length).toEqual(exampleState().layers.length + 1);
       expect(layers[layers.length - 1]).toMatchObject({ layerId: 'foo' });
     });
@@ -245,7 +252,7 @@ describe('xy_visualization', () => {
 
   describe('#clearLayer', () => {
     it('clears the specified layer', () => {
-      const layer = xyVisualization.clearLayer(exampleState(), 'first').layers[0];
+      const layer = xyVisualization.clearLayer(exampleState(), 'first', 'indexPattern1').layers[0];
       expect(layer).toMatchObject({
         accessors: [],
         layerId: 'first',
@@ -460,6 +467,7 @@ describe('xy_visualization', () => {
                 {
                   layerId: 'annotation',
                   layerType: layerTypes.ANNOTATIONS,
+                  indexPatternId: 'indexPattern1',
                   annotations: [exampleAnnotation],
                 },
               ],
@@ -495,6 +503,7 @@ describe('xy_visualization', () => {
                 {
                   layerId: 'annotation',
                   layerType: layerTypes.ANNOTATIONS,
+                  indexPatternId: 'indexPattern1',
                   annotations: [exampleAnnotation2],
                 },
               ],
@@ -530,6 +539,7 @@ describe('xy_visualization', () => {
                 {
                   layerId: 'annotation',
                   layerType: layerTypes.ANNOTATIONS,
+                  indexPatternId: 'indexPattern1',
                   annotations: [exampleAnnotation, exampleAnnotation2],
                 },
               ],
@@ -566,12 +576,14 @@ describe('xy_visualization', () => {
               layers: [
                 {
                   layerId: 'first',
-                  layerType: 'annotations',
+                  layerType: layerTypes.ANNOTATIONS,
+                  indexPatternId: 'indexPattern1',
                   annotations: [exampleAnnotation],
                 },
                 {
                   layerId: 'second',
-                  layerType: 'annotations',
+                  layerType: layerTypes.ANNOTATIONS,
+                  indexPatternId: 'indexPattern1',
                   annotations: [exampleAnnotation2],
                 },
               ],
@@ -614,12 +626,14 @@ describe('xy_visualization', () => {
               layers: [
                 {
                   layerId: 'first',
-                  layerType: 'annotations',
+                  layerType: layerTypes.ANNOTATIONS,
+                  indexPatternId: 'indexPattern1',
                   annotations: [exampleAnnotation],
                 },
                 {
                   layerId: 'second',
-                  layerType: 'annotations',
+                  layerType: layerTypes.ANNOTATIONS,
+                  indexPatternId: 'indexPattern1',
                   annotations: [exampleAnnotation2],
                 },
               ],
@@ -644,11 +658,13 @@ describe('xy_visualization', () => {
           {
             layerId: 'first',
             layerType: layerTypes.ANNOTATIONS,
+            indexPatternId: 'indexPattern1',
             annotations: [exampleAnnotation2],
           },
           {
             layerId: 'second',
             layerType: layerTypes.ANNOTATIONS,
+            indexPatternId: 'indexPattern1',
             annotations: [exampleAnnotation],
           },
         ]);
@@ -662,12 +678,14 @@ describe('xy_visualization', () => {
               layers: [
                 {
                   layerId: 'first',
-                  layerType: 'annotations',
+                  layerType: layerTypes.ANNOTATIONS,
+                  indexPatternId: 'indexPattern1',
                   annotations: [exampleAnnotation],
                 },
                 {
                   layerId: 'second',
-                  layerType: 'annotations',
+                  layerType: layerTypes.ANNOTATIONS,
+                  indexPatternId: 'indexPattern1',
                   annotations: [exampleAnnotation2],
                 },
               ],
@@ -692,11 +710,13 @@ describe('xy_visualization', () => {
           {
             layerId: 'first',
             layerType: layerTypes.ANNOTATIONS,
+            indexPatternId: 'indexPattern1',
             annotations: [],
           },
           {
             layerId: 'second',
             layerType: layerTypes.ANNOTATIONS,
+            indexPatternId: 'indexPattern1',
             annotations: [exampleAnnotation],
           },
         ]);
@@ -710,12 +730,14 @@ describe('xy_visualization', () => {
               layers: [
                 {
                   layerId: 'first',
-                  layerType: 'annotations',
+                  layerType: layerTypes.ANNOTATIONS,
+                  indexPatternId: 'indexPattern1',
                   annotations: [exampleAnnotation],
                 },
                 {
                   layerId: 'second',
-                  layerType: 'annotations',
+                  layerType: layerTypes.ANNOTATIONS,
+                  indexPatternId: 'indexPattern1',
                   annotations: [],
                 },
               ],
@@ -740,11 +762,13 @@ describe('xy_visualization', () => {
           {
             layerId: 'first',
             layerType: layerTypes.ANNOTATIONS,
+            indexPatternId: 'indexPattern1',
             annotations: [],
           },
           {
             layerId: 'second',
             layerType: layerTypes.ANNOTATIONS,
+            indexPatternId: 'indexPattern1',
             annotations: [exampleAnnotation],
           },
         ]);
@@ -1105,6 +1129,7 @@ describe('xy_visualization', () => {
               {
                 layerId: 'ann',
                 layerType: layerTypes.ANNOTATIONS,
+                indexPatternId: 'indexPattern1',
                 annotations: [exampleAnnotation, { ...exampleAnnotation, id: 'an2' }],
               },
             ],
@@ -1123,6 +1148,7 @@ describe('xy_visualization', () => {
         {
           layerId: 'ann',
           layerType: layerTypes.ANNOTATIONS,
+          indexPatternId: 'indexPattern1',
           annotations: [exampleAnnotation],
         },
       ]);
@@ -1842,6 +1868,7 @@ describe('xy_visualization', () => {
             {
               layerId: 'annotations',
               layerType: layerTypes.ANNOTATIONS,
+              indexPatternId: 'indexPattern1',
               annotations: [exampleAnnotation],
             },
           ],
