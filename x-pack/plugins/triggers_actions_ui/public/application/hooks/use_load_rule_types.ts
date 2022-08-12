@@ -23,14 +23,13 @@ export function useLoadRuleTypes({ filteredRuleTypes }: RuleTypesProps) {
   const { http } = useKibana().services;
   const isMounted = useRef(false);
   const [ruleTypesState, setRuleTypesState] = useState<RuleTypesState>({
-    isLoading: false,
+    isLoading: true,
     data: [],
     error: null,
   });
   const [ruleTypeIndex, setRuleTypeIndex] = useState<RuleTypeIndex>(new Map());
 
   async function fetchRuleTypes() {
-    setRuleTypesState({ ...ruleTypesState, isLoading: true });
     try {
       const response = await loadRuleTypes({ http });
       const index: RuleTypeIndex = new Map();
@@ -67,5 +66,6 @@ export function useLoadRuleTypes({ filteredRuleTypes }: RuleTypesProps) {
     ruleTypes: ruleTypesState.data,
     error: ruleTypesState.error,
     ruleTypeIndex,
+    ruleTypesIsLoading: ruleTypesState.isLoading,
   };
 }

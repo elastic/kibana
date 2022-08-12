@@ -13,6 +13,7 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiTitle,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { formatDuration } from '@kbn/alerting-plugin/common';
@@ -38,7 +39,7 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
 
   const [editFlyoutVisible, setEditFlyoutVisible] = useState<boolean>(false);
   const [ruleType, setRuleType] = useState<RuleType>();
-  const { ruleTypes, ruleTypeIndex } = useLoadRuleTypes({
+  const { ruleTypes, ruleTypeIndex, ruleTypesIsLoading } = useLoadRuleTypes({
     filteredRuleTypes,
   });
 
@@ -93,14 +94,20 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
               })}
             </EuiFlexItem>
           </EuiTitle>
-          {hasEditButton && (
+          {ruleTypesIsLoading ? (
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                data-test-subj="ruleDetailsEditButton"
-                iconType={'pencil'}
-                onClick={() => setEditFlyoutVisible(true)}
-              />
+              <EuiLoadingSpinner data-test-subj="ruleDetailsEditButtonLoadingSpinner" />
             </EuiFlexItem>
+          ) : (
+            hasEditButton && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  data-test-subj="ruleDetailsEditButton"
+                  iconType={'pencil'}
+                  onClick={() => setEditFlyoutVisible(true)}
+                />
+              </EuiFlexItem>
+            )
           )}
         </EuiFlexGroup>
 
@@ -114,10 +121,16 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
                   defaultMessage: 'Rule type',
                 })}
               </ItemTitleRuleSummary>
-              <ItemValueRuleSummary
-                data-test-subj="ruleSummaryRuleType"
-                itemValue={ruleTypeIndex.get(rule.ruleTypeId)?.name || rule.ruleTypeId}
-              />
+              {ruleTypesIsLoading ? (
+                <EuiFlexItem>
+                  <EuiLoadingSpinner data-test-subj="ruleSummaryRuleTypeLoadingSpinner" />
+                </EuiFlexItem>
+              ) : (
+                <ItemValueRuleSummary
+                  data-test-subj="ruleSummaryRuleType"
+                  itemValue={ruleTypeIndex.get(rule.ruleTypeId)?.name || rule.ruleTypeId}
+                />
+              )}
             </EuiFlexGroup>
 
             <EuiSpacer size="m" />
