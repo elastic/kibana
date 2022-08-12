@@ -21,7 +21,7 @@ export const MinifySVG: Task = {
       absolute: true,
     });
     const options = {
-      multipass: false,
+      multipass: true,
       removeComments: false,
     };
     for await (const file of files) {
