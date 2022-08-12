@@ -355,6 +355,8 @@ const getTrendlineLayerConfiguration = (
         supportFieldFormat: false,
         required: true,
         hidden: true,
+        hideGrouping: true,
+        nestingOrder: 2,
       },
       {
         groupId: GROUP_ID.TREND_TIME,
@@ -378,6 +380,8 @@ const getTrendlineLayerConfiguration = (
         groupTooltip: i18n.translate('xpack.lens.metric.timeFieldTooltip', {
           defaultMessage: 'This is the time axis for the trend line',
         }),
+        hideGrouping: true,
+        nestingOrder: 1,
       },
       {
         groupId: GROUP_ID.TREND_BREAKDOWN_BY,
@@ -401,6 +405,8 @@ const getTrendlineLayerConfiguration = (
         enableDimensionEditor: true,
         required: false,
         hidden: true,
+        hideGrouping: true,
+        nestingOrder: 0,
       },
     ],
   };
