@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export type { ServiceFactory, SharedUxServices, SharedUxServicesContext } from './types';
+export type { ServiceFactory, SharedUxServices, SharedUxServicesContext } from './src/types';
 export type {
   MockServicesFactoryParams,
   SharedUxApplicationService,
@@ -16,7 +16,7 @@ export type {
   SharedUxPlatformService,
   SharedUxUserPermissionsService,
   SharedUxDataService,
-} from './services';
+} from './src/services';
 
 export {
   SharedUxServicesProvider,
@@ -28,11 +28,11 @@ export {
   usePlatformService,
   useData,
   useSharedUxServices,
-} from './context';
+} from './src/context';
 
 export {
   mockServiceFactories,
   mockServicesFactory,
   stubServiceFactories,
   stubServicesFactory,
-} from './services';
+} from './src/services';
