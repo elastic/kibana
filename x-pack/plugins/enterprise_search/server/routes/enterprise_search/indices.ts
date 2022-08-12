@@ -100,7 +100,7 @@ export function registerIndexRoutes({ router, log }: RouteDependencies) {
       },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
-      const { indexName } = request.params;
+      const indexName = decodeURIComponent(request.params.indexName);
       const { client } = (await context.core).elasticsearch;
 
       try {
@@ -134,7 +134,7 @@ export function registerIndexRoutes({ router, log }: RouteDependencies) {
       },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
-      const { indexName } = request.params;
+      const indexName = decodeURIComponent(request.params.indexName);
       const { client } = (await context.core).elasticsearch;
       let indexExists: boolean;
 
@@ -172,7 +172,7 @@ export function registerIndexRoutes({ router, log }: RouteDependencies) {
       },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
-      const { indexName } = request.params;
+      const indexName = decodeURIComponent(request.params.indexName);
       const { client } = (await context.core).elasticsearch;
 
       const apiKey = await generateApiKey(client, indexName);
