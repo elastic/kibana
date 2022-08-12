@@ -8,6 +8,7 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { Logger } from '@kbn/core/server';
 
+import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
@@ -15,7 +16,6 @@ import { enrichFilterWithRuleTypeMapping } from '../../rules/enrich_filter_with_
 import type { FindExceptionReferencesOnRuleSchema } from '../../../../../common/detection_engine/schemas/request/find_exception_references_schema';
 import { findExceptionReferencesOnRuleSchema } from '../../../../../common/detection_engine/schemas/request/find_exception_references_schema';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
-import { getSavedObjectType, getSavedObjectTypes } from '@kbn/securitysolution-list-utils';
 
 export const findRuleExceptionReferencesRoute = (
   router: SecuritySolutionPluginRouter,
@@ -50,7 +50,7 @@ export const findRuleExceptionReferencesRoute = (
                 filter: enrichFilterWithRuleTypeMapping(null),
                 hasReference: {
                   id,
-                  type: getSavedObjectType({ namespaceType: namespace_types[index]}),
+                  type: getSavedObjectType({ namespaceType: namespace_types[index] }),
                 },
               },
             });
@@ -58,7 +58,7 @@ export const findRuleExceptionReferencesRoute = (
         );
 
         const a = results.reduce((acc, data, index) => {
-          const wantedData = data.data.map(({ name, id, params}) => ({
+          const wantedData = data.data.map(({ name, id, params }) => ({
             name,
             id,
             ruleId: params.ruleId,

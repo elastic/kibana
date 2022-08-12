@@ -386,7 +386,7 @@ export const findRuleExceptionReferences = async ({
   http,
   signal,
 }: unknown & { http: HttpStart }): Promise<unknown> => {
-  console.log({ LISTS: lists })
+  console.log({ LISTS: lists });
   return http.fetch<Rule>(`${DETECTION_ENGINE_RULES_URL}/exceptions/_find_references`, {
     method: 'GET',
     query: {
@@ -396,4 +396,4 @@ export const findRuleExceptionReferences = async ({
     },
     signal,
   });
-}
+};

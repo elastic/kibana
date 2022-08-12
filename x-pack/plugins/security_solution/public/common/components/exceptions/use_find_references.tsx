@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useEffect, useState, useCallback } from 'react';
-import type { ListArray, NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
+import { useEffect, useState } from 'react';
+import type { ListArray } from '@kbn/securitysolution-io-ts-list-types';
 
 import { findRuleExceptionReferences } from '../../../detections/containers/detection_engine/rules/api';
 import { useKibana } from '../../lib/kibana';
