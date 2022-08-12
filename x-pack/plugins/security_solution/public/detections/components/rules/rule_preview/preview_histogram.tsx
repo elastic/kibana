@@ -12,6 +12,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer, EuiLoadingChart } from '
 import styled from 'styled-components';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { useDispatch, useSelector } from 'react-redux';
+import type { DataViewBase } from '@kbn/es-query';
 import { eventsViewerSelector } from '../../../../common/components/events_viewer/selectors';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -63,7 +64,7 @@ interface PreviewHistogramProps {
   addNoiseWarning: () => void;
   spaceId: string;
   ruleType: Type;
-  index: string[];
+  indexPattern: DataViewBase;
   advancedOptions?: AdvancedPreviewOptions;
 }
 
@@ -75,7 +76,7 @@ export const PreviewHistogram = ({
   addNoiseWarning,
   spaceId,
   ruleType,
-  index,
+  indexPattern,
   advancedOptions,
 }: PreviewHistogramProps) => {
   const dispatch = useDispatch();
@@ -99,7 +100,7 @@ export const PreviewHistogram = ({
     startDate,
     endDate,
     spaceId,
-    index,
+    indexPattern,
     ruleType,
   });
 
@@ -118,7 +119,7 @@ export const PreviewHistogram = ({
 
   const {
     browserFields,
-    indexPattern,
+    indexPattern: selectedIndexPattern,
     runtimeMappings,
     dataViewId: selectedDataViewId,
     loading: isLoadingIndexPattern,
@@ -225,7 +226,7 @@ export const PreviewHistogram = ({
             hasAlertsCrud: false,
             id: TimelineId.rulePreview,
             indexNames: [`${DEFAULT_PREVIEW_INDEX}-${spaceId}`],
-            indexPattern,
+            indexPattern: selectedIndexPattern,
             isLive: false,
             isLoadingIndexPattern,
             itemsPerPage,

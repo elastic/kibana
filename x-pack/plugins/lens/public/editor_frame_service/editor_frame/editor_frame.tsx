@@ -28,6 +28,7 @@ import {
   selectVisualization,
 } from '../../state_management';
 import type { LensInspector } from '../../lens_inspector_service';
+import { ErrorBoundary, showMemoizedErrorNotification } from '../../lens_ui_errors';
 
 export interface EditorFrameProps {
   datasourceMap: DatasourceMap;
@@ -50,6 +51,7 @@ export function EditorFrame(props: EditorFrameProps) {
   const visualizationTypeIsKnown = Boolean(
     visualization.activeId && props.visualizationMap[visualization.activeId]
   );
+
   const framePublicAPI: FramePublicAPI = useLensSelector((state) =>
     selectFramePublicAPI(state, datasourceMap)
   );
@@ -85,54 +87,66 @@ export function EditorFrame(props: EditorFrameProps) {
     [getSuggestionForField, dispatchLens]
   );
 
+  const onError = useCallback((error: Error) => {
+    showMemoizedErrorNotification(error);
+  }, []);
+
   return (
     <RootDragDropProvider>
       <FrameLayout
         dataPanel={
-          <DataPanelWrapper
-            core={props.core}
-            plugins={props.plugins}
-            datasourceMap={datasourceMap}
-            showNoDataPopover={props.showNoDataPopover}
-            dropOntoWorkspace={dropOntoWorkspace}
-            hasSuggestionForField={hasSuggestionForField}
-          />
+          <ErrorBoundary onError={onError}>
+            <DataPanelWrapper
+              core={props.core}
+              plugins={props.plugins}
+              datasourceMap={datasourceMap}
+              showNoDataPopover={props.showNoDataPopover}
+              dropOntoWorkspace={dropOntoWorkspace}
+              hasSuggestionForField={hasSuggestionForField}
+            />
+          </ErrorBoundary>
         }
         configPanel={
           areDatasourcesLoaded && (
-            <ConfigPanelWrapper
-              core={props.core}
-              datasourceMap={datasourceMap}
-              visualizationMap={visualizationMap}
-              framePublicAPI={framePublicAPI}
-              uiActions={props.plugins.uiActions}
-            />
+            <ErrorBoundary onError={onError}>
+              <ConfigPanelWrapper
+                core={props.core}
+                datasourceMap={datasourceMap}
+                visualizationMap={visualizationMap}
+                framePublicAPI={framePublicAPI}
+                uiActions={props.plugins.uiActions}
+              />
+            </ErrorBoundary>
           )
         }
         workspacePanel={
           areDatasourcesLoaded &&
           isVisualizationLoaded && (
-            <WorkspacePanel
-              core={props.core}
-              plugins={props.plugins}
-              ExpressionRenderer={props.ExpressionRenderer}
-              lensInspector={props.lensInspector}
-              datasourceMap={datasourceMap}
-              visualizationMap={visualizationMap}
-              framePublicAPI={framePublicAPI}
-              getSuggestionForField={getSuggestionForField.current}
-            />
+            <ErrorBoundary onError={onError}>
+              <WorkspacePanel
+                core={props.core}
+                plugins={props.plugins}
+                ExpressionRenderer={props.ExpressionRenderer}
+                lensInspector={props.lensInspector}
+                datasourceMap={datasourceMap}
+                visualizationMap={visualizationMap}
+                framePublicAPI={framePublicAPI}
+                getSuggestionForField={getSuggestionForField.current}
+              />
+            </ErrorBoundary>
           )
         }
         suggestionsPanel={
           visualizationTypeIsKnown &&
           areDatasourcesLoaded && (
-            <SuggestionPanelWrapper
-              ExpressionRenderer={props.ExpressionRenderer}
-              datasourceMap={datasourceMap}
-              visualizationMap={visualizationMap}
-              frame={framePublicAPI}
-            />
+            <ErrorBoundary onError={onError}>
+              <SuggestionPanelWrapper
+                ExpressionRenderer={props.ExpressionRenderer}
+                datasourceMap={datasourceMap}
+                visualizationMap={visualizationMap}
+                frame={framePublicAPI}
+              />
+            </ErrorBoundary>
           )
         }
       />
