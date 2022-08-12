@@ -6,9 +6,18 @@
  * Side Public License, v 1.
  */
 
-export {
-  parseKibanaManifest,
-  readKibanaManifest,
-  validateKibanaManifest,
-} from './parse_kibana_manifest';
-export type { KibanaPackageManifest } from './kibana_manifest';
+const { stripJsonComments } = require('./src/strip_json_comments');
+
+/**
+ * @param {string} jsonWithComments
+ */
+function parse(jsonWithComments) {
+  return JSON.parse(
+    stripJsonComments(jsonWithComments, {
+      whitespace: false,
+      trailingCommas: true,
+    })
+  );
+}
+
+module.exports = { parse };

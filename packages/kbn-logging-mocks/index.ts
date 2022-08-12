@@ -6,8 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { createAbsolutePathSerializer } from './absolute_path_serializer';
-export { createStripAnsiSerializer } from './strip_ansi_serializer';
-export { createRecursiveSerializer } from './recursive_serializer';
-export { createAnyInstanceSerializer } from './any_instance_serizlizer';
-export { createReplaceSerializer } from './replace_serializer';
+export type { MockedLogger } from './src/logger.mock';
+export { loggerMock } from './src/logger.mock';
