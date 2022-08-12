@@ -967,6 +967,19 @@
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.AxisExtentConfig.enforce",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "enforce",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -1291,6 +1304,26 @@
             "signature": [
               "DataDecorationConfigResult",
               "[] | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.DataLayerArgs.curveType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "curveType",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressionXY",
+                "scope": "common",
+                "docId": "kibExpressionXYPluginApi",
+                "section": "def-common.XYCurveType",
+                "text": "XYCurveType"
+              },
+              " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false
@@ -5821,26 +5854,6 @@
           },
           {
             "parentPluginId": "lens",
-            "id": "def-public.XYArgs.curveType",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "curveType",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "expressionXY",
-                "scope": "common",
-                "docId": "kibExpressionXYPluginApi",
-                "section": "def-common.XYCurveType",
-                "text": "XYCurveType"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
             "id": "def-public.XYArgs.fillOpacity",
             "type": "number",
             "tags": [],
@@ -7200,7 +7213,7 @@
         "label": "FittingFunction",
         "description": [],
         "signature": [
-          "\"None\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\""
+          "\"None\" | \"Zero\" | \"Nearest\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Average\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
@@ -7384,7 +7397,7 @@
         "label": "LineStyle",
         "description": [],
         "signature": [
-          "\"solid\" | \"dashed\" | \"dotted\""
+          "\"solid\" | \"dashed\" | \"dotted\" | \"dot-dashed\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
@@ -7813,7 +7826,7 @@
         "label": "XYCurveType",
         "description": [],
         "signature": [
-          "\"LINEAR\" | \"CURVE_MONOTONE_X\""
+          "\"LINEAR\" | \"CURVE_MONOTONE_X\" | \"CURVE_STEP_AFTER\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,

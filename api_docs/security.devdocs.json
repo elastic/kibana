@@ -3802,6 +3802,18 @@
           },
           {
             "parentPluginId": "security",
+            "id": "def-common.UserProfile.enabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "enabled",
+            "description": [
+              "\nIndicates whether user profile is enabled or not."
+            ],
+            "path": "x-pack/plugins/security/common/model/user_profile.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "security",
             "id": "def-common.UserProfile.user",
             "type": "Object",
             "tags": [],
