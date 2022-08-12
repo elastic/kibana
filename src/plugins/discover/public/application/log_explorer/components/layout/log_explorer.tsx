@@ -16,14 +16,9 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useSelector } from '@xstate/react';
 import React, { memo, useCallback, useMemo } from 'react';
-import {
-  DOC_HIDE_TIME_COLUMN_SETTING,
-  SAMPLE_SIZE_SETTING,
-  SEARCH_FIELDS_FROM_SOURCE,
-} from '../../../../../common';
+import { SAMPLE_SIZE_SETTING } from '../../../../../common';
 import { DiscoverGrid } from '../../../../components/discover_grid/discover_grid';
 import { SortPairArr } from '../../../../components/doc_table/utils/get_sort';
-import { useColumns } from '../../../../hooks/use_data_grid_columns';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
 import { SavedSearch } from '../../../../services/saved_searches';
@@ -59,39 +54,11 @@ function LogExplorerComponent({
   stateContainer: GetStateReturn;
   stateMachine: DataAccessService;
 }) {
-  const { capabilities, dataViews, fieldFormats, uiSettings } = useDiscoverServices();
-  const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
+  const { fieldFormats, uiSettings } = useDiscoverServices();
   const sampleSize = useMemo(() => uiSettings.get(SAMPLE_SIZE_SETTING), [uiSettings]);
 
   const isLoading = useSelector(stateMachine, selectIsLoading);
   const isReloading = useSelector(stateMachine, selectIsReloading);
-
-  // const documentState: DataDocumentsMsg = useDataState(documents$);
-  // const rows = useMemo(() => documentState.result || [], [documentState.result]);
-  const rows = [];
-
-  const { columns, onAddColumn, onRemoveColumn, onSetColumns } = useColumns({
-    capabilities,
-    config: uiSettings,
-    dataView,
-    dataViews,
-    setAppState: stateContainer.setAppState,
-    state,
-    useNewFieldsApi,
-  });
-
-  const onResize = useCallback(
-    (colSettings: { columnId: string; width: number }) => {
-      const grid = { ...state.grid } || {};
-      const newColumns = { ...grid.columns } || {};
-      newColumns[colSettings.columnId] = {
-        width: colSettings.width,
-      };
-      const newGrid = { ...grid, columns: newColumns };
-      stateContainer.setAppState({ grid: newGrid });
-    },
-    [stateContainer, state]
-  );
 
   const onSort = useCallback(
     (sort: string[][]) => {
@@ -105,11 +72,6 @@ function LogExplorerComponent({
       stateContainer.setAppState({ rowHeight: newRowHeight });
     },
     [stateContainer]
-  );
-
-  const showTimeCol = useMemo(
-    () => !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false) && !!dataView.timeFieldName,
-    [uiSettings, dataView.timeFieldName]
   );
 
   if (isReloading) {
@@ -165,7 +127,7 @@ function LogExplorerComponent({
           onSetColumns={onSetColumns}
           onSort={onSort}
           onResize={onResize}
-          useNewFieldsApi={useNewFieldsApi}
+          useNewFieldsApi={true}
           rowHeightState={state.rowHeight}
           onUpdateRowHeight={onUpdateRowHeight}
         />

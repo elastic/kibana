@@ -9,7 +9,6 @@
 import {
   EuiButtonIcon,
   EuiDataGrid,
-  EuiDataGridColumn,
   EuiDataGridColumnVisibility,
   EuiDataGridControlColumn,
   EuiDataGridRefProps,
@@ -19,15 +18,26 @@ import {
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { i18n } from '@kbn/i18n';
 import classnames from 'classnames';
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo, useRef, useCallback } from 'react';
+import { useSelector } from '@xstate/react';
+import { convertValueToString } from '../../../../utils/convert_value_to_string';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import { getEuiGridColumns } from '../../../../components/discover_grid/discover_grid_columns';
 import { LOG_EXPLORER_VIRTUAL_GRID_ROWS } from '../../constants';
 import { LogExplorerCell, LogExplorerCellContext } from './log_explorer_grid_cell';
 import { useOnItemsRendered } from './use_on_items_rendered';
 import { useScrollInteractions } from './use_scroll_interactions';
+import { useDiscoverColumnsContext } from '../../hooks/discover_state/use_columns';
+import { useDiscoverStateContext } from '../../hooks/discover_state/use_discover_state';
+import { ValueToStringConverter } from '../../../../types';
+import { useStateMachineContext } from '../../hooks/query_data/use_state_machine';
+import { memoizedSelectRows } from '../../state_machines';
 
 const EuiDataGridMemoized = React.memo(EuiDataGrid);
 
 export function LogExplorerGrid({ fieldFormats }: { fieldFormats: FieldFormatsStart }) {
+  const stateMachine = useStateMachineContext();
+  const { rows } = useSelector(stateMachine, memoizedSelectRows);
   const imperativeGridRef = useRef<EuiDataGridRefProps | null>(null);
 
   const onItemsRendered = useOnItemsRendered({ imperativeGridRef });
@@ -35,13 +45,63 @@ export function LogExplorerGrid({ fieldFormats }: { fieldFormats: FieldFormatsSt
 
   const cellContextValue = useMemo(() => ({ fieldFormats }), [fieldFormats]);
 
+  const { columns, onAddColumn, onRemoveColumn, onResize, onSetColumns } =
+    useDiscoverColumnsContext();
+
+  // Access to Discover services
+  const services = useDiscoverServices();
+
+  // Access to "outer" Discover state
+  const { dataView, state } = useDiscoverStateContext();
+
+  const valueToStringConverter: ValueToStringConverter = useCallback(
+    (rowIndex, columnId, options) => {
+      return convertValueToString({
+        rowIndex,
+        rows,
+        dataView,
+        columnId,
+        services,
+        options,
+      });
+    },
+    [rows, dataView, services]
+  );
+
+  const euiGridColumns = useMemo(
+    () =>
+      getEuiGridColumns({
+        columns,
+        rowsCount: 0,
+        settings: state.grid,
+        dataView,
+        showTimeCol: false, // NOTE: This is handled as a default elsewhere. Ignores the advanced setting here.
+        defaultColumns: false, // NOTE: We don't need a differentiation here between default and not. We don't require the functionality that brings.
+        isSortEnabled: false, // NOTE: We disable sorting for the log explorer.
+        services,
+        valueToStringConverter,
+        onFilter: () => {}, // TODO: Possibly support
+        editField: () => {}, // TODO: Possibly support direct editing of fields for POC
+      }),
+    [columns, dataView, services, valueToStringConverter, state.grid]
+  );
+
+  const columnVisibility: EuiDataGridColumnVisibility = useMemo(() => {
+    return {
+      setVisibleColumns: (newColumns: string[]) => {
+        onSetColumns(newColumns, true);
+      },
+      visibleColumns: columns,
+    };
+  }, [columns, onSetColumns]);
+
   return (
     <span className="dscDiscoverGrid__inner">
       <div data-test-subj="discoverDocTable" className={classnames('dscDiscoverGrid__table')}>
         <LogExplorerCellContext.Provider value={cellContextValue}>
           <EuiDataGridMemoized
             aria-label="log explorer grid"
-            columns={columns}
+            columns={euiGridColumns}
             columnVisibility={columnVisibility}
             data-test-subj="logExplorerGrid"
             gridStyle={gridStyle}
@@ -90,16 +150,6 @@ const controlColumns: EuiDataGridControlColumn[] = [
   },
 ];
 
-const columns: EuiDataGridColumn[] = [
-  {
-    id: '@timestamp',
-    initialWidth: 250,
-    schema: 'datetime',
-  },
-  {
-    id: 'message',
-  },
-];
 const columnVisibility: EuiDataGridColumnVisibility = {
   setVisibleColumns: () => {},
   visibleColumns: ['@timestamp', 'message'],

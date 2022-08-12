@@ -15,6 +15,7 @@ import { DataTableRecord } from '../../types';
 import { StateMachineProvider as QueryDataProvider } from './hooks/query_data/use_state_machine';
 import { LOG_EXPLORER_VIRTUAL_GRID_ROWS } from './constants';
 import { DiscoverStateProvider } from './hooks/discover_state/use_discover_state';
+import { DiscoverColumnsProvider } from './hooks/discover_state/use_columns';
 
 const LogExplorerLayoutMemoized = React.memo(LogExplorerLayout);
 
@@ -37,12 +38,14 @@ export function LogExplorerMainApp(props: LogExplorerMainAppProps) {
   return (
     <DiscoverStateProvider savedSearch={savedSearch} setExpandedDoc={setExpandedDoc}>
       <QueryDataProvider virtualRowCount={LOG_EXPLORER_VIRTUAL_GRID_ROWS} query={data.query}>
-        <LogExplorerLayoutMemoized
-          dataViewList={dataViewList}
-          expandedDoc={expandedDoc}
-          setExpandedDoc={setExpandedDoc}
-          savedSearch={savedSearch}
-        />
+        <DiscoverColumnsProvider>
+          <LogExplorerLayoutMemoized
+            dataViewList={dataViewList}
+            expandedDoc={expandedDoc}
+            setExpandedDoc={setExpandedDoc}
+            savedSearch={savedSearch}
+          />
+        </DiscoverColumnsProvider>
       </QueryDataProvider>
     </DiscoverStateProvider>
   );
