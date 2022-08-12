@@ -103,6 +103,7 @@ describe('common utils', () => {
 
       expect(res).toMatchInlineSnapshot(`
         Object {
+          "assignees": Array [],
           "closed_at": null,
           "closed_by": null,
           "connector": Object {
@@ -155,6 +156,7 @@ describe('common utils', () => {
 
       expect(res).toMatchInlineSnapshot(`
         Object {
+          "assignees": Array [],
           "closed_at": null,
           "closed_by": null,
           "connector": Object {
@@ -192,6 +194,63 @@ describe('common utils', () => {
         }
       `);
     });
+
+    it('transform correctly with assignees provided', () => {
+      const myCase = {
+        newCase: { ...newCase, connector, assignees: [{ uid: '1' }] },
+        user: {
+          email: 'elastic@elastic.co',
+          full_name: 'Elastic',
+          username: 'elastic',
+        },
+      };
+
+      const res = transformNewCase(myCase);
+
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "assignees": Array [
+            Object {
+              "uid": "1",
+            },
+          ],
+          "closed_at": null,
+          "closed_by": null,
+          "connector": Object {
+            "fields": Object {
+              "issueType": "Task",
+              "parent": null,
+              "priority": "High",
+            },
+            "id": "123",
+            "name": "My connector",
+            "type": ".jira",
+          },
+          "created_at": "2020-04-09T09:43:51.778Z",
+          "created_by": Object {
+            "email": "elastic@elastic.co",
+            "full_name": "Elastic",
+            "username": "elastic",
+          },
+          "description": "A description",
+          "duration": null,
+          "external_service": null,
+          "owner": "securitySolution",
+          "settings": Object {
+            "syncAlerts": true,
+          },
+          "severity": "low",
+          "status": "open",
+          "tags": Array [
+            "new",
+            "case",
+          ],
+          "title": "My new case",
+          "updated_at": null,
+          "updated_by": null,
+        }
+      `);
+    });
   });
 
   describe('transformCases', () => {
@@ -214,6 +273,7 @@ describe('common utils', () => {
         Object {
           "cases": Array [
             Object {
+              "assignees": Array [],
               "closed_at": null,
               "closed_by": null,
               "comments": Array [],
@@ -254,6 +314,7 @@ describe('common utils', () => {
               "version": "WzAsMV0=",
             },
             Object {
+              "assignees": Array [],
               "closed_at": null,
               "closed_by": null,
               "comments": Array [],
@@ -294,6 +355,7 @@ describe('common utils', () => {
               "version": "WzQsMV0=",
             },
             Object {
+              "assignees": Array [],
               "closed_at": null,
               "closed_by": null,
               "comments": Array [],
@@ -338,6 +400,7 @@ describe('common utils', () => {
               "version": "WzUsMV0=",
             },
             Object {
+              "assignees": Array [],
               "closed_at": "2019-11-25T22:32:17.947Z",
               "closed_by": Object {
                 "email": "testemail@elastic.co",
@@ -407,6 +470,7 @@ describe('common utils', () => {
 
       expect(res).toMatchInlineSnapshot(`
         Object {
+          "assignees": Array [],
           "closed_at": null,
           "closed_by": null,
           "comments": Array [],
@@ -463,6 +527,7 @@ describe('common utils', () => {
 
       expect(res).toMatchInlineSnapshot(`
         Object {
+          "assignees": Array [],
           "closed_at": null,
           "closed_by": null,
           "comments": Array [],
@@ -520,6 +585,7 @@ describe('common utils', () => {
 
       expect(res).toMatchInlineSnapshot(`
         Object {
+          "assignees": Array [],
           "closed_at": null,
           "closed_by": null,
           "comments": Array [
@@ -600,6 +666,7 @@ describe('common utils', () => {
 
       expect(res).toMatchInlineSnapshot(`
         Object {
+          "assignees": Array [],
           "closed_at": null,
           "closed_by": null,
           "comments": Array [],

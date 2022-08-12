@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { RESET_GROUP_BY_FIELDS } from '../../../../../common/components/chart_settings_popover/configurations/default/translations';
@@ -83,5 +83,30 @@ describe('ChartContextMenu', () => {
 
     expect(setStackBy).toBeCalledWith('kibana.alert.rule.name');
     expect(setStackByField1).toBeCalledWith('host.name');
+  });
+
+  test('it invokes `onReset` when the `Reset group by fields` menu item clicked', () => {
+    const onReset = jest.fn();
+
+    render(
+      <TestProviders>
+        <ChartContextMenu
+          defaultStackByField={DEFAULT_STACK_BY_FIELD}
+          defaultStackByField1={DEFAULT_STACK_BY_FIELD1}
+          queryId={queryId}
+          onReset={onReset}
+          setStackBy={jest.fn()}
+          setStackByField1={jest.fn()}
+        />
+      </TestProviders>
+    );
+
+    const menuButton = screen.getByRole('button', { name: CHART_SETTINGS_POPOVER_ARIA_LABEL });
+    fireEvent.click(menuButton);
+
+    const resetMenuItem = screen.getByRole('button', { name: RESET_GROUP_BY_FIELDS });
+    fireEvent.click(resetMenuItem);
+
+    expect(onReset).toBeCalled();
   });
 });

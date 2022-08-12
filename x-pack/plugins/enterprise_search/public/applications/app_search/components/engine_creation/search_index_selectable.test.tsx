@@ -15,6 +15,7 @@ import { shallow } from 'enzyme';
 import { IndexStatusDetails, SearchIndexSelectableOption } from './search_index_selectable';
 
 const mockOption: SearchIndexSelectableOption = {
+  count: 123,
   label: 'string',
   alias: true,
   badge: {

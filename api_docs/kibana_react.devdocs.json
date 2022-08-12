@@ -4115,13 +4115,7 @@
           " | undefined; http?: ",
           "HttpSetup",
           " | undefined; savedObjects?: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-public.SavedObjectsStart",
-            "text": "SavedObjectsStart"
-          },
+          "SavedObjectsStart",
           " | undefined; i18n?: ",
           "I18nStart",
           " | undefined; notifications?: ",

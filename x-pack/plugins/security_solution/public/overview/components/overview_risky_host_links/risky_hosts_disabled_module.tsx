@@ -16,6 +16,7 @@ import { devToolPrebuiltContentUrl } from '../../../../common/constants';
 import { OpenInDevConsoleButton } from '../../../common/components/open_in_dev_console';
 import { useChcekSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_check_signal_index';
 import type { LinkPanelListItem } from '../link_panel';
+import { useSpaceId } from '../../../risk_score/containers/common';
 
 export const RISKY_HOSTS_DOC_LINK =
   'https://www.github.com/elastic/detection-rules/blob/main/docs/experimental-machine-learning/host-risk-score.md';
@@ -24,12 +25,16 @@ const emptyList: LinkPanelListItem[] = [];
 
 export const RiskyHostsDisabledModuleComponent = () => {
   const hostRiskScoreConsoleId = 'enable_host_risk_score';
+  const spaceId = useSpaceId();
   const loadFromUrl = useMemo(() => {
     const protocol = window.location.protocol;
     const hostname = window.location.hostname;
     const port = window.location.port;
-    return `${protocol}//${hostname}:${port}${devToolPrebuiltContentUrl(hostRiskScoreConsoleId)}`;
-  }, []);
+    return `${protocol}//${hostname}:${port}${devToolPrebuiltContentUrl(
+      spaceId ?? 'default',
+      hostRiskScoreConsoleId
+    )}`;
+  }, [spaceId]);
   const { signalIndexExists } = useChcekSignalIndex();
   return (
     <DisabledLinkPanel

@@ -29,15 +29,11 @@ import { getFailedTransactionsCorrelationImpactLabel } from './get_failed_transa
 const NARROW_COLUMN_WIDTH = '120px';
 
 const PAGINATION_SIZE_OPTIONS = [5, 10, 20, 50];
-const noDataText = i18n.translate('xpack.aiops.correlations.correlationsTable.noDataText', {
-  defaultMessage: 'No data',
-});
 const DEFAULT_SORT_FIELD = 'pValue';
 const DEFAULT_SORT_DIRECTION = 'asc';
 
 interface SpikeAnalysisTableProps {
   changePoints: ChangePoint[];
-  error?: string;
   loading: boolean;
   onPinnedChangePoint?: (changePoint: ChangePoint | null) => void;
   onSelectedChangePoint?: (changePoint: ChangePoint | null) => void;
@@ -46,7 +42,6 @@ interface SpikeAnalysisTableProps {
 
 export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
   changePoints,
-  error,
   loading,
   onPinnedChangePoint,
   onSelectedChangePoint,
@@ -206,16 +201,21 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
     };
   }, [pageIndex, pageSize, sortField, sortDirection, changePoints]);
 
+  // Don't pass on the `loading` state to the table itself because
+  // it disables hovering events. Because the mini histograms take a while
+  // to load, hovering would not update the main chart. Instead,
+  // the loading state is shown by the progress bar on the outer component level.
+  // The outer component also will display a prompt when no data was returned
+  // running the analysis and will hide this table.
+
   return (
     <EuiBasicTable
       compressed
       columns={columns}
       items={pageOfItems}
-      noItemsMessage={noDataText}
       onChange={onChange}
       pagination={pagination}
-      loading={loading}
-      error={error}
+      loading={false}
       sorting={sorting as EuiTableSortingType<ChangePoint>}
       rowProps={(changePoint) => {
         return {

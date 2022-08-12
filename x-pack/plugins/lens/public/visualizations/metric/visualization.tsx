@@ -14,12 +14,12 @@ import { PaletteOutput, PaletteRegistry, CUSTOM_PALETTE, CustomPaletteParams } f
 import { ThemeServiceStart } from '@kbn/core/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { LayoutDirection } from '@elastic/charts';
-import { euiLightVars } from '@kbn/ui-theme';
+import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { LayerType } from '../../../common';
 import { getSuggestions } from './suggestions';
 import { LensIconChartMetric } from '../../assets/chart_metric';
-import { Visualization, OperationMetadata, DatasourceLayers } from '../../types';
+import { Visualization, OperationMetadata, DatasourceLayers, AccessorConfig } from '../../types';
 import { layerTypes } from '../../../common';
 import { GROUP_ID, LENS_METRIC_ID } from './constants';
 import { DimensionEditor } from './dimension_editor';
@@ -27,6 +27,9 @@ import { Toolbar } from './toolbar';
 import { generateId } from '../../id_generator';
 
 export const DEFAULT_MAX_COLUMNS = 3;
+
+export const getDefaultColor = (hasMax: boolean) =>
+  hasMax ? euiLightVars.euiColorPrimary : euiThemeVars.euiColorLightestShade;
 
 export interface MetricVisualizationState {
   layerId: string;
@@ -75,7 +78,7 @@ const toExpression = (
   const maxPossibleTiles =
     // if there's a collapse function, no need to calculate since we're dealing with a single tile
     state.breakdownByAccessor && !state.collapseFn
-      ? datasource.getMaxPossibleNumValues(state.breakdownByAccessor)
+      ? datasource?.getMaxPossibleNumValues(state.breakdownByAccessor)
       : null;
 
   const getCollapseFnArguments = () => {
@@ -88,7 +91,7 @@ const toExpression = (
         return state.collapseFn;
       } else {
         const isMaxStatic = Boolean(
-          datasource.getOperationForColumnId(state.maxAccessor!)?.isStaticValue
+          datasource?.getOperationForColumnId(state.maxAccessor!)?.isStaticValue
         );
         // we do this because the user expects the static value they set to be the same
         // even if they define a collapse on the breakdown by
@@ -128,11 +131,7 @@ const toExpression = (
             state.breakdownByAccessor && !state.collapseFn ? [state.breakdownByAccessor] : [],
           subtitle: state.subtitle ? [state.subtitle] : [],
           progressDirection: state.progressDirection ? [state.progressDirection] : [],
-          color: state.color
-            ? [state.color]
-            : state.maxAccessor
-            ? [euiLightVars.euiColorPrimary]
-            : [],
+          color: [state.color || getDefaultColor(!!state.maxAccessor)],
           palette: state.palette?.params
             ? [
                 paletteService
@@ -217,29 +216,53 @@ export const getMetricVisualization = ({
   triggers: [VIS_EVENT_TO_TRIGGER.filter],
 
   getConfiguration(props) {
-    const hasColoring = props.state.palette != null;
-    const stops = props.state.palette?.params?.stops || [];
     const isSupportedMetric = (op: OperationMetadata) =>
       !op.isBucketed && supportedDataTypes.has(op.dataType);
 
     const isSupportedDynamicMetric = (op: OperationMetadata) =>
       !op.isBucketed && supportedDataTypes.has(op.dataType) && !op.isStaticValue;
 
+    const getPrimaryAccessorDisplayConfig = (): Partial<AccessorConfig> => {
+      const stops = props.state.palette?.params?.stops || [];
+      const hasStaticColoring = !!props.state.color;
+      const hasDynamicColoring = !!props.state.palette;
+      return hasDynamicColoring
+        ? {
+            triggerIcon: 'colorBy',
+            palette: stops.map(({ color }) => color),
+          }
+        : hasStaticColoring
+        ? {
+            triggerIcon: 'color',
+            color: props.state.color,
+          }
+        : {
+            triggerIcon: 'color',
+            color: getDefaultColor(!!props.state.maxAccessor),
+          };
+    };
+
     const isBucketed = (op: OperationMetadata) => op.isBucketed;
+
     return {
       groups: [
         {
           groupId: GROUP_ID.METRIC,
+          dataTestSubj: 'lnsMetric_primaryMetricDimensionPanel',
           groupLabel: i18n.translate('xpack.lens.primaryMetric.label', {
             defaultMessage: 'Primary metric',
           }),
+          paramEditorCustomProps: {
+            headingLabel: i18n.translate('xpack.lens.primaryMetric.headingLabel', {
+              defaultMessage: 'Value',
+            }),
+          },
           layerId: props.state.layerId,
           accessors: props.state.metricAccessor
             ? [
                 {
                   columnId: props.state.metricAccessor,
-                  triggerIcon: hasColoring ? 'colorBy' : undefined,
-                  palette: hasColoring ? stops.map(({ color }) => color) : undefined,
+                  ...getPrimaryAccessorDisplayConfig(),
                 },
               ]
             : [],
@@ -251,9 +274,15 @@ export const getMetricVisualization = ({
         },
         {
           groupId: GROUP_ID.SECONDARY_METRIC,
+          dataTestSubj: 'lnsMetric_secondaryMetricDimensionPanel',
           groupLabel: i18n.translate('xpack.lens.metric.secondaryMetric', {
             defaultMessage: 'Secondary metric',
           }),
+          paramEditorCustomProps: {
+            headingLabel: i18n.translate('xpack.lens.primaryMetric.headingLabel', {
+              defaultMessage: 'Value',
+            }),
+          },
           layerId: props.state.layerId,
           accessors: props.state.secondaryMetricAccessor
             ? [
@@ -270,7 +299,13 @@ export const getMetricVisualization = ({
         },
         {
           groupId: GROUP_ID.MAX,
+          dataTestSubj: 'lnsMetric_maxDimensionPanel',
           groupLabel: i18n.translate('xpack.lens.metric.max', { defaultMessage: 'Maximum value' }),
+          paramEditorCustomProps: {
+            headingLabel: i18n.translate('xpack.lens.primaryMetric.headingLabel', {
+              defaultMessage: 'Value',
+            }),
+          },
           layerId: props.state.layerId,
           accessors: props.state.maxAccessor
             ? [
@@ -292,6 +327,7 @@ export const getMetricVisualization = ({
         },
         {
           groupId: GROUP_ID.BREAKDOWN_BY,
+          dataTestSubj: 'lnsMetric_breakdownByDimensionPanel',
           groupLabel: i18n.translate('xpack.lens.metric.breakdownBy', {
             defaultMessage: 'Break down by',
           }),
@@ -364,12 +400,13 @@ export const getMetricVisualization = ({
     return updated;
   },
 
-  removeDimension({ prevState, layerId, columnId }) {
+  removeDimension({ prevState, columnId }) {
     const updated = { ...prevState };
 
     if (prevState.metricAccessor === columnId) {
       delete updated.metricAccessor;
       delete updated.palette;
+      delete updated.color;
     }
     if (prevState.secondaryMetricAccessor === columnId) {
       delete updated.secondaryMetricAccessor;

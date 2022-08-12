@@ -58,7 +58,8 @@ const getFilter = ({ runId, message }: { runId?: string; message?: string }) => 
   }
 
   if (message) {
-    filter.push(`message: "${message.replace(/([\)\(\<\>\}\{\"\:\\])/gm, '\\$&')}"`);
+    const escapedMessage = message.replace(/([\)\(\<\>\}\{\"\:\\])/gm, '\\$&');
+    filter.push(`message: "${escapedMessage}" OR error.message: "${escapedMessage}"`);
   }
 
   return filter;
