@@ -7,7 +7,7 @@
  */
 
 import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
-import type { ISearchSource, RefreshInterval, TimeRange } from '@kbn/data-plugin/public';
+import type { ISearchSource, RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
 
 export enum VIEW_MODE {
   DOCUMENT_LEVEL = 'documents',
