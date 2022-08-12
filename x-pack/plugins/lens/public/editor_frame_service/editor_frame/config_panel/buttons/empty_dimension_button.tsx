@@ -118,7 +118,7 @@ export function EmptyDimensionButton({
   onDrop: (source: DragDropIdentifier, dropTarget: DragDropIdentifier, dropType?: DropType) => void;
   onClick: (id: string) => void;
   group: VisualizationDimensionGroupConfig;
-  layerDatasource: Datasource<unknown, unknown>;
+  layerDatasource?: Datasource<unknown, unknown>;
   datasourceLayers: DatasourceLayers;
   state: unknown;
 }) {
