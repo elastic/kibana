@@ -181,9 +181,10 @@ async function legacyFetchFieldExistenceSampling({
 }) {
   const coreContext = await context.core;
   const metaFields: string[] = await coreContext.uiSettings.client.get(UI_SETTINGS.META_FIELDS);
-  const indexPattern = spec
-    ? await dataViewsService.create(spec)
-    : await dataViewsService.get(indexPatternId);
+  const indexPattern =
+    spec && Object.keys(spec).length !== 0
+      ? await dataViewsService.create(spec)
+      : await dataViewsService.get(indexPatternId);
 
   const fields = buildFieldList(indexPattern, metaFields);
   const runtimeMappings = indexPattern.getRuntimeMappings();
