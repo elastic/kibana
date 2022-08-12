@@ -219,7 +219,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
                         {field.lensAttributes && (
                           <LensEmbeddable
                             data-test-subj="embeddable-metric"
-                            height="63px"
+                            height="36px"
                             id={id}
                             lensAttributes={field.lensAttributes}
                             timerange={timerange}
@@ -237,9 +237,9 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
               </EuiFlexGroup>
 
               {(enableAreaChart || enableBarChart) && (
-                <EuiHorizontalRule data-test-subj="stat-item-separator" margin="none" />
+                <EuiHorizontalRule data-test-subj="stat-item-separator" />
               )}
-              <EuiFlexGroup>
+              <EuiFlexGroup gutterSize="none">
                 {enableBarChart && barChartLensAttributes && (
                   <FlexItem>
                     <LensEmbeddable
