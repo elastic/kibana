@@ -30,7 +30,7 @@ export function registerCreateAPIKeyRoute(
       },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
-      const { indexName } = request.params;
+      const indexName = decodeURIComponent(request.params.indexName);
       const { keyName } = request.body;
 
       const createResponse = await createApiKey(request, security, indexName, keyName);
