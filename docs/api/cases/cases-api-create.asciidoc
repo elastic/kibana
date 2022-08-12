@@ -118,6 +118,9 @@ connector, use `none`.
 (Required, string) The type of the connector. Valid values are: `.cases-webhook`,
 `.jira`, `.none`, `.resilient`,`.servicenow`, `.servicenow-sir`, and `.swimlane`.
 To create a case without a connector, use `.none`.
+
+
+For {webhook-cm} connectors, specify `null`.
 ====
 
 `description`::

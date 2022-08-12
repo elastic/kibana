@@ -125,6 +125,7 @@ use `none`. To retrieve connector IDs, use <<cases-api-find-connectors>>).
 `.jira`, `.none`, `.resilient`,`.servicenow`, `.servicenow-sir`, and `.swimlane`.
 To remove the connector, use `.none`.
 
+For {webhook-cm} connectors, specify `null`.
 =====
 
 `description`::
