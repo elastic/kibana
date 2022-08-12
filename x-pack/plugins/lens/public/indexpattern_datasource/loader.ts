@@ -172,7 +172,7 @@ export function loadInitialState({
 
   if (persistedState?.adHocIndexPatterns) {
     Object.entries(persistedState?.adHocIndexPatterns).forEach(([id, { name, title }]) => {
-      indexPatternRefs.push({ id, name, title: title || '', adHoc: true });
+      indexPatternRefs.push({ id, name, title: title || '' });
     });
   }
   const availableIndexPatterns = new Set(indexPatternRefs.map(({ id }: IndexPatternRef) => id));

@@ -51,7 +51,6 @@ export interface IndexPatternRef {
   id: string;
   title: string;
   name?: string;
-  adHoc?: boolean;
 }
 
 export interface IndexPattern {
