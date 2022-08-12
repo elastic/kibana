@@ -33,6 +33,7 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
             toDate: schema.string(),
             fieldName: schema.string(),
             size: schema.maybe(schema.number()),
+            spec: schema.object({}, { unknowns: 'allow' }),
           },
           { unknowns: 'allow' }
         ),
@@ -40,7 +41,7 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
     },
     async (context, req, res) => {
       const requestClient = (await context.core).elasticsearch.client.asCurrentUser;
-      const { fromDate, toDate, fieldName, dslQuery, size } = req.body;
+      const { fromDate, toDate, fieldName, dslQuery, size, spec } = req.body;
 
       const [{ savedObjects, elasticsearch }, { dataViews }] = await setup.getStartServices();
       const savedObjectsClient = savedObjects.getScopedClient(req);
@@ -51,7 +52,10 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
       );
 
       try {
-        const indexPattern = await indexPatternsService.get(req.params.indexPatternId);
+        const indexPattern =
+          spec && Object.keys(spec).length !== 0
+            ? await indexPatternsService.create(spec)
+            : await indexPatternsService.get(req.params.indexPatternId);
 
         const timeFieldName = indexPattern.timeFieldName;
         const field = indexPattern.fields.find((f) => f.name === fieldName);

@@ -282,6 +282,7 @@ describe('IndexPattern Data Source', () => {
               },
             },
           },
+          adHocIndexPatterns: {},
         },
         savedObjectReferences: [
           { name: 'indexpattern-datasource-layer-first', type: 'index-pattern', id: '1' },

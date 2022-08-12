@@ -9,6 +9,7 @@ import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { useStore } from 'react-redux';
+import { asyncForEach } from '@kbn/std';
 import { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { downloadMultipleAs } from '@kbn/share-plugin/public';
 import { tableHasFormulas } from '@kbn/data-plugin/common';
@@ -251,8 +252,14 @@ export const LensTopNavMenu = ({
     (state: Partial<LensAppState>) => dispatch(setState(state)),
     [dispatch]
   );
+  const [indexPatterns, setIndexPatterns] = useState<DataView[]>([]);
+  const [adHocDataViews, setAdHocDataViews] = useState<DataView[]>();
+  const [currentIndexPattern, setCurrentIndexPattern] = useState<DataView>();
+  const [rejectedIndexPatterns, setRejectedIndexPatterns] = useState<string[]>([]);
+
   const dispatchChangeIndexPattern = React.useCallback(
-    async (indexPatternId) => {
+    async (dataViewOrId) => {
+      const indexPatternId = typeof dataViewOrId === 'string' ? dataViewOrId : dataViewOrId.id;
       const [newIndexPatternRefs, newIndexPatterns] = await Promise.all([
         // Reload refs in case it's a new indexPattern created on the spot
         dataViews.indexPatternRefs[indexPatternId]
@@ -265,6 +272,18 @@ export const LensTopNavMenu = ({
           cache: dataViews.indexPatterns,
         }),
       ]);
+      // enhance the references with the adHoc dataviews
+      if (adHocDataViews?.length) {
+        adHocDataViews.forEach((adHoc) => {
+          if (adHoc.id) {
+            newIndexPatternRefs.push({
+              title: adHoc.title,
+              name: adHoc.name,
+              id: adHoc.id,
+            });
+          }
+        });
+      }
       dispatch(
         changeIndexPattern({
           dataViews: { indexPatterns: newIndexPatterns, indexPatternRefs: newIndexPatternRefs },
@@ -281,12 +300,10 @@ export const LensTopNavMenu = ({
       dispatch,
       indexPatternService,
       visualization.activeId,
+      adHocDataViews,
     ]
   );
 
-  const [indexPatterns, setIndexPatterns] = useState<DataView[]>([]);
-  const [currentIndexPattern, setCurrentIndexPattern] = useState<DataView>();
-  const [rejectedIndexPatterns, setRejectedIndexPatterns] = useState<string[]>([]);
   const canEditDataView = Boolean(dataViewEditor?.userPermissions.editDataView());
   const closeFieldEditor = useRef<() => void | undefined>();
   const closeDataViewEditor = useRef<() => void | undefined>();
@@ -343,6 +360,21 @@ export const LensTopNavMenu = ({
       setCurrentIndexPattern(indexPatterns[0]);
     }
   }, [indexPatterns]);
+
+  // add to the dataview picker list the adHoc dataviews
+  useEffect(() => {
+    const setAdHoc = async () => {
+      await asyncForEach(indexPatterns, async (indexPattern) => {
+        if (indexPattern.id && !adHocDataViews?.some((d) => d.id === indexPattern.id)) {
+          const dataViewInstance = await data.dataViews.get(indexPattern.id);
+          if (!dataViewInstance.isPersisted()) {
+            setAdHocDataViews([...(adHocDataViews ?? []), indexPattern]);
+          }
+        }
+      });
+    };
+    setAdHoc();
+  }, [adHocDataViews, data.dataViews, indexPatterns]);
 
   useEffect(() => {
     return () => {
@@ -703,14 +735,20 @@ export const LensTopNavMenu = ({
             closeDataViewEditor.current = dataViewEditor.openEditor({
               onSave: async (dataView) => {
                 if (dataView.id) {
-                  dispatchChangeIndexPattern(dataView.id);
+                  dispatchChangeIndexPattern(dataView);
+                  setCurrentIndexPattern(dataView);
+                  if (!dataView.isPersisted()) {
+                    // add the ad-hoc dataview on the indexPatterns list
+                    setIndexPatterns([...indexPatterns, dataView]);
+                  }
                   refreshFieldList();
                 }
               },
+              allowAdHocDataView: true,
             });
           }
         : undefined,
-    [canEditDataView, dataViewEditor, dispatchChangeIndexPattern, refreshFieldList]
+    [canEditDataView, dataViewEditor, dispatchChangeIndexPattern, refreshFieldList, indexPatterns]
   );
 
   const dataViewPickerProps = {
@@ -722,6 +760,7 @@ export const LensTopNavMenu = ({
     currentDataViewId: currentIndexPattern?.id,
     onAddField: addField,
     onDataViewCreated: createNewDataView,
+    adHocDataViews,
     onChangeDataView: (newIndexPatternId: string) => {
       const currentDataView = indexPatterns.find(
         (indexPattern) => indexPattern.id === newIndexPatternId

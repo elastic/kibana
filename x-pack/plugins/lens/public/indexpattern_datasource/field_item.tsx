@@ -165,6 +165,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
           fromDate: dateRange.fromDate,
           toDate: dateRange.toDate,
           fieldName: field.name,
+          spec: indexPattern.spec,
         }),
       })
       .then((results) => {

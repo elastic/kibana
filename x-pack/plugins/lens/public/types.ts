@@ -26,7 +26,7 @@ import type {
 } from '@kbn/ui-actions-plugin/public';
 import type { ClickTriggerEvent, BrushTriggerEvent } from '@kbn/charts-plugin/public';
 import type { IndexPatternAggRestrictions } from '@kbn/data-plugin/public';
-import type { FieldSpec } from '@kbn/data-views-plugin/common';
+import type { FieldSpec, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import type { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
 import type { DateRange, LayerType, SortingHint } from '../common';
@@ -68,6 +68,7 @@ export interface IndexPattern {
     }
   >;
   hasRestrictions: boolean;
+  spec?: DataViewSpec;
 }
 
 export type IndexPatternField = FieldSpec & {
@@ -273,6 +274,7 @@ export interface Datasource<T = unknown, P = unknown> {
   removeLayer: (state: T, layerId: string) => T;
   clearLayer: (state: T, layerId: string) => T;
   getLayers: (state: T) => string[];
+  getAdHocIndexSpecs?: (state: P) => Record<string, DataViewSpec> | undefined;
   removeColumn: (props: {
     prevState: T;
     layerId: string;
@@ -900,7 +902,7 @@ export interface Visualization<T = unknown> {
   /** Optional, if the visualization supports multiple layers */
   removeLayer?: (state: T, layerId: string) => T;
   /** Track added layers in internal state */
-  appendLayer?: (state: T, layerId: string, type: LayerType) => T;
+  appendLayer?: (state: T, layerId: string, type: LayerType, indexPatternId?: string) => T;
 
   /** Retrieve a list of supported layer types with initialization data */
   getSupportedLayers: (

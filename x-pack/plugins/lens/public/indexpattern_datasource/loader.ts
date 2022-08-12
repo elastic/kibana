@@ -49,16 +49,25 @@ function getLayerReferenceName(layerId: string) {
 
 export function extractReferences({ layers }: IndexPatternPrivateState) {
   const savedObjectReferences: SavedObjectReference[] = [];
-  const persistableLayers: Record<string, Omit<IndexPatternLayer, 'indexPatternId'>> = {};
+  const persistableState: IndexPatternPersistedState = {
+    layers: {},
+    adHocIndexPatterns: {},
+  };
   Object.entries(layers).forEach(([layerId, { indexPatternId, ...persistableLayer }]) => {
-    savedObjectReferences.push({
-      type: 'index-pattern',
-      id: indexPatternId,
-      name: getLayerReferenceName(layerId),
-    });
-    persistableLayers[layerId] = persistableLayer;
+    persistableState.layers[layerId] = persistableLayer;
+    if (persistableLayer.adHocSpec) {
+      if (!persistableState.adHocIndexPatterns![indexPatternId]) {
+        persistableState.adHocIndexPatterns![indexPatternId] = persistableLayer.adHocSpec!;
+      }
+    } else {
+      savedObjectReferences.push({
+        type: 'index-pattern',
+        id: indexPatternId,
+        name: getLayerReferenceName(layerId),
+      });
+    }
   });
-  return { savedObjectReferences, state: { layers: persistableLayers } };
+  return { savedObjectReferences, state: persistableState };
 }
 
 export function injectReferences(
@@ -69,11 +78,14 @@ export function injectReferences(
   Object.entries(state.layers).forEach(([layerId, persistedLayer]) => {
     layers[layerId] = {
       ...persistedLayer,
-      indexPatternId: references.find(({ name }) => name === getLayerReferenceName(layerId))!.id,
+      indexPatternId:
+        persistedLayer.adHocSpec?.id ||
+        references.find(({ name }) => name === getLayerReferenceName(layerId))!.id,
     };
   });
   return {
     layers,
+    adHocIndexPatterns: state.adHocIndexPatterns,
   };
 }
 
@@ -117,7 +129,11 @@ function getUsedIndexPatterns({
   const usedPatterns = (
     initialContext
       ? indexPatternIds
-      : uniq(state ? Object.values(state.layers).map((l) => l.indexPatternId) : [fallbackId])
+      : uniq(
+          state
+            ? Object.values(state.layers).map((l) => l.adHocSpec?.id ?? l.indexPatternId)
+            : [fallbackId]
+        )
   )
     // take out the undefined from the list
     .filter(Boolean);
@@ -154,6 +170,11 @@ export function loadInitialState({
     indexPatternRefs,
   });
 
+  if (persistedState?.adHocIndexPatterns) {
+    Object.entries(persistedState?.adHocIndexPatterns).forEach(([id, { name, title }]) => {
+      indexPatternRefs.push({ id, name, title: title || '' });
+    });
+  }
   const availableIndexPatterns = new Set(indexPatternRefs.map(({ id }: IndexPatternRef) => id));
 
   const notUsedPatterns: string[] = difference([...availableIndexPatterns], usedPatterns);
