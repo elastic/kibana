@@ -354,9 +354,9 @@ const getTrendlineLayerConfiguration = (
         enableDimensionEditor: true,
         supportFieldFormat: false,
         required: true,
-        hidden: true,
         hideGrouping: true,
         nestingOrder: 2,
+        hidden: true,
       },
       {
         groupId: GROUP_ID.TREND_TIME,
@@ -404,9 +404,9 @@ const getTrendlineLayerConfiguration = (
         filterOperations: () => false,
         enableDimensionEditor: true,
         required: false,
-        hidden: true,
         hideGrouping: true,
         nestingOrder: 0,
+        hidden: true,
       },
     ],
   };
@@ -509,7 +509,9 @@ export const getMetricVisualization = ({
         label: i18n.translate('xpack.lens.metric.layerType.trendLine', {
           defaultMessage: 'Trendline',
         }),
-        initialDimensions: [],
+        initialDimensions: [
+          { groupId: GROUP_ID.TREND_TIME, columnId: generateId(), autoTimeField: true },
+        ],
         disabled: Boolean(state?.trendlineLayerId),
       },
     ];

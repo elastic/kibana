@@ -890,6 +890,11 @@ function addInitialValueIfAvailable({
           activeDatasourceState: activeDatasource.initializeDimension(datasourceState, layerId, {
             ...info,
             columnId: columnId || info.columnId,
+            visualizationGroups: activeVisualization.getConfiguration({
+              layerId,
+              frame: framePublicAPI,
+              state: activeVisualizationState,
+            }).groups,
           }),
           activeVisualizationState,
         };
@@ -940,36 +945,35 @@ function syncLinkedDimensionsFunction(
     const dropType = 'duplicate_compatible';
 
     // TODO - always call onDrop with the TARGET's dimension groups throughout Lens
-    const dimensionGroups = activeVisualization.getConfiguration({
-      state: visualizationState,
-      layerId: to.layerId,
-      frame,
-    }).groups;
+    const getDimensionGroups = () =>
+      activeVisualization.getConfiguration({
+        state: visualizationState,
+        layerId: to.layerId,
+        frame,
+      }).groups;
 
-    const success = datasourceMap[activeDatasourceId].onDrop({
+    visualizationState = (activeVisualization.onDrop || onDropForVisualization)?.(
+      {
+        prevState: visualizationState,
+        frame,
+        target: dropTarget,
+        source: dropSource,
+        dropType,
+        group: getDimensionGroups().find(({ groupId }) => groupId === dropTarget.groupId),
+      },
+      activeVisualization
+    );
+
+    datasourceMap[activeDatasourceId].onDrop({
       source: dropSource,
       target: dropTarget,
       state: datasourceState,
       setState: (s) => {
         datasourceState = s;
       },
-      dimensionGroups,
+      dimensionGroups: getDimensionGroups(),
       dropType,
     });
-
-    if (success) {
-      visualizationState = (activeVisualization.onDrop || onDropForVisualization)?.(
-        {
-          prevState: visualizationState,
-          frame,
-          target: dropTarget,
-          source: dropSource,
-          dropType,
-          group: dimensionGroups.find(({ groupId }) => groupId === dropTarget.groupId),
-        },
-        activeVisualization
-      );
-    }
   });
 
   return { datasourceState, visualizationState };

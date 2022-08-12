@@ -240,6 +240,8 @@ export interface Datasource<T = unknown, P = unknown> {
       columnId: string;
       groupId: string;
       staticValue?: unknown;
+      autoTimeField?: boolean;
+      visualizationGroups: VisualizationDimensionGroupConfig[];
     }
   ) => T;
 
@@ -846,6 +848,7 @@ export interface Visualization<T = unknown> {
       columnId: string;
       groupId: string;
       staticValue?: unknown;
+      autoTimeField?: boolean;
     }>;
   }>;
   getLayerType: (layerId: string, state?: T) => LayerType | undefined;
