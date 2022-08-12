@@ -30,6 +30,7 @@ export const visualizationDefinitions = [
     id: `${SeriesTypes.BAR}_horizontal_percentage_stacked`,
     icon: IconChartBarHorizontalPercentage,
   },
+  { id: `${SeriesTypes.LINE}_stacked`, icon: IconChartLine },
   { id: SeriesTypes.LINE, icon: IconChartLine },
   { id: SeriesTypes.AREA, icon: IconChartArea },
   { id: `${SeriesTypes.AREA}_stacked`, icon: IconChartAreaStacked },
