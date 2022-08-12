@@ -235,6 +235,7 @@ export function DualBrush({
             return 'aiops-brush-' + b.id;
           })
           .attr('data-test-subj', (b: DualBrush) => {
+            // Uppercase the first character of the `id` so we get aiopsBrushBaseline/aiopsBrushDeviation.
             return 'aiopsBrush' + b.id.charAt(0).toUpperCase() + b.id.slice(1);
           })
           .each((brushObject: DualBrush, i, n) => {
