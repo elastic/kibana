@@ -105,6 +105,8 @@ For {swimlane} connectors, specify:
 
 `caseId`:::
 (Required, string) The case ID.
+
+For {webhook-cm} connectors, specify `null`.
 =====
 
 `id`::
@@ -121,8 +123,6 @@ connector, use `none`.
 `.jira`, `.none`, `.resilient`,`.servicenow`, `.servicenow-sir`, and `.swimlane`.
 To create a case without a connector, use `.none`.
 
-
-For {webhook-cm} connectors, specify `null`.
 ====
 
 `description`::
