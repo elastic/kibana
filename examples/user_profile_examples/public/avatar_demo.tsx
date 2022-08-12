@@ -8,10 +8,11 @@
 import React, { FunctionComponent } from 'react';
 import { EuiTitle, EuiSpacer } from '@elastic/eui';
 import { UserAvatar } from '@kbn/user-profile-components';
+import type { UserProfile, UserProfileAvatarData } from '@kbn/user-profile-components';
 import { PanelWithCodeBlock } from './panel_with_code_block';
 
 export const AvatarDemo: FunctionComponent = () => {
-  const userProfile = {
+  const userProfile: UserProfile<{ avatar: UserProfileAvatarData }> = {
     uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
     enabled: true,
     user: {
