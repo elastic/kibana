@@ -178,6 +178,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
 
     if (agg === PIVOT_SUPPORTED_AGGS.PERCENTILES) {
       updatedItem = {
+        ...aggConfigDef,
         agg,
         aggName,
         field: resultField,
@@ -186,6 +187,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
       };
     } else if (agg === PIVOT_SUPPORTED_AGGS.TERMS) {
       updatedItem = {
+        ...aggConfigDef,
         agg,
         aggName,
         field: resultField,

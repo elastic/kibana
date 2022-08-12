@@ -68,6 +68,34 @@ describe('getAggConfigFromEsAgg', () => {
     });
   });
 
+  test('should resolve percentiles agg in sub-aggregations', () => {
+    const esConfig = {
+      filter: {
+        exists: {
+          field: 'customer_phone',
+        },
+      },
+      aggs: {
+        'products.base_price.percentiles': {
+          percentiles: {
+            field: 'products.base_price',
+            percents: [1, 5, 25, 50, 75, 95, 99],
+          },
+        },
+      },
+    };
+
+    const result = getAggConfigFromEsAgg(esConfig, 'test_sub_percentiles');
+
+    expect(result.subAggs!['products.base_price.percentiles']).toMatchObject({
+      agg: 'percentiles',
+      aggName: 'products.base_price.percentiles',
+      dropDownName: 'products.base_price.percentiles',
+      field: 'products.base_price',
+      parentAgg: result,
+    });
+  });
+
   test('restore config for the exists filter', () => {
     expect(
       getAggConfigFromEsAgg({ filter: { exists: { field: 'instance' } } }, 'test_3')
