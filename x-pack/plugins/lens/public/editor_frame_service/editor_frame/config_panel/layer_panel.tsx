@@ -322,7 +322,6 @@ export function LayerPanel(
                         layerId,
                         visualizationId: activeVisualization.id,
                       }),
-                    defaultIndexPatternId: props.indexPatternService.getDefaultIndex(),
                   }}
                   activeVisualization={activeVisualization}
                 />
@@ -365,7 +364,6 @@ export function LayerPanel(
                       layerId,
                       visualizationId: activeVisualization.id,
                     }),
-                  defaultIndexPatternId: props.indexPatternService.getDefaultIndex(),
                 }}
               />
             )}

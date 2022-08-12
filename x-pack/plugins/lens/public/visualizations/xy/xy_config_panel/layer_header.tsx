@@ -73,7 +73,6 @@ function AnnotationLayerHeaderContent({
   state,
   layerId,
   onChangeIndexPattern,
-  defaultIndexPatternId,
 }: VisualizationLayerHeaderContentProps<State>) {
   const notFoundTitleLabel = i18n.translate('xpack.lens.layerPanel.missingDataView', {
     defaultMessage: 'Data view not found',
@@ -81,20 +80,17 @@ function AnnotationLayerHeaderContent({
   const layerIndex = state.layers.findIndex((l) => l.layerId === layerId);
   const layer = state.layers[layerIndex] as XYAnnotationLayerConfig;
 
-  // what if no indexPatternId has been set? Fallback to uiSettings default one for now
-  const indexPatternId = layer.indexPatternId ?? defaultIndexPatternId;
-
   return (
     <ChangeIndexPattern
       data-test-subj="indexPattern-switcher"
       trigger={{
-        label: frame.dataViews.indexPatterns[indexPatternId]?.name || notFoundTitleLabel,
-        title: frame.dataViews.indexPatterns[indexPatternId]?.title || notFoundTitleLabel,
+        label: frame.dataViews.indexPatterns[layer.indexPatternId]?.name || notFoundTitleLabel,
+        title: frame.dataViews.indexPatterns[layer.indexPatternId]?.title || notFoundTitleLabel,
         'data-test-subj': 'lns_layerIndexPatternLabel',
         size: 's',
         fontWeight: 'normal',
       }}
-      indexPatternId={indexPatternId}
+      indexPatternId={layer.indexPatternId}
       indexPatternRefs={frame.dataViews.indexPatternRefs}
       isMissingCurrent={false}
       onChangeIndexPattern={onChangeIndexPattern}
