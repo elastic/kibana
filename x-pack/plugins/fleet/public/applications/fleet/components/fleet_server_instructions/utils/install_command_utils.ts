@@ -32,7 +32,7 @@ function getArtifact(platform: PLATFORM_TYPE, kibanaVersion: string) {
     windows: {
       downloadCommand: [
         `$ProgressPreference = 'SilentlyContinue'`,
-        `wget ${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-windows-x86_64.zip -OutFile elastic-agent-${kibanaVersion}-windows-x86_64.zip`,
+        `Invoke-WebRequest -Uri https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-windows-x86_64.zip -OutFile elastic-agent-${kibanaVersion}-windows-x86_64.zip`,
         `Expand-Archive .\\elastic-agent-${kibanaVersion}-windows-x86_64.zip`,
         `cd elastic-agent-${kibanaVersion}-windows-x86_64`,
       ].join(`\n`),
