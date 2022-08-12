@@ -13,10 +13,6 @@ import {
   requestMock,
 } from '../../detection_engine/routes/__mocks__';
 import { getEmptySavedObjectsResponse } from '../../detection_engine/routes/__mocks__/request_responses';
-import {
-  expecteHostRiskScoreSavedObjectTemplate,
-  expecteUserRiskScoreSavedObjectTemplate,
-} from '../__mocks__';
 import { createPrebuiltSavedObjectsRoute } from './create_prebuilt_saved_objects';
 
 const createPrebuiltSavedObjectsRequest = (savedObjectTemplate: string) =>
@@ -50,29 +46,18 @@ describe('createPrebuiltSavedObjects', () => {
     createPrebuiltSavedObjectsRoute(server.router, securitySetup);
   });
 
-  test('should create saved objects from given template - hostRiskScoreDashboards', async () => {
-    const response = await server.inject(
-      createPrebuiltSavedObjectsRequest('hostRiskScoreDashboards'),
-      requestContextMock.convertContext(context)
-    );
+  it.each([['hostRiskScoreDashboards', 'userRiskScoreDashboards']])(
+    'should create saved objects from given template - %p',
+    async () => {
+      const response = await server.inject(
+        createPrebuiltSavedObjectsRequest('userRiskScoreDashboards'),
+        requestContextMock.convertContext(context)
+      );
 
-    expect(clients.savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
-      expecteHostRiskScoreSavedObjectTemplate,
-      { overwrite: true }
-    );
-    expect(response.status).toEqual(200);
-  });
+      expect(clients.savedObjectsClient.bulkCreate.mock.calls[0][1]).toEqual({ overwrite: true });
+      expect(clients.savedObjectsClient.bulkCreate.mock.calls[0][0]).toMatchSnapshot();
 
-  test('should create saved objects from given template - userRiskScoreDashboards', async () => {
-    const response = await server.inject(
-      createPrebuiltSavedObjectsRequest('userRiskScoreDashboards'),
-      requestContextMock.convertContext(context)
-    );
-
-    expect(clients.savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
-      expecteUserRiskScoreSavedObjectTemplate,
-      { overwrite: true }
-    );
-    expect(response.status).toEqual(200);
-  });
+      expect(response.status).toEqual(200);
+    }
+  );
 });
