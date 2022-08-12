@@ -273,7 +273,10 @@ export class Embeddable
 
     this.lensInspector = getLensInspectorService(deps.inspector);
     this.expressionRenderer = deps.expressionRenderer;
-    this.initializeSavedVis(initialInput).then(() => this.onContainerStateChanged(initialInput));
+    this.initializeSavedVis(initialInput)
+      .then(() => this.onContainerStateChanged(initialInput))
+      .catch((e) => this.onFatalError(e));
+
     this.subscription = this.getUpdated$().subscribe(() =>
       this.onContainerStateChanged(this.input)
     );
