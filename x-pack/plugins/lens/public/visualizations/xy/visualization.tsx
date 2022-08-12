@@ -121,7 +121,7 @@ export const getXyVisualization = ({
     };
   },
 
-  appendLayer(state, layerId, layerType, indexPatternId) {
+  appendLayer(state, layerId, layerType) {
     const firstUsedSeriesType = getDataLayers(state.layers)?.[0]?.seriesType;
     return {
       ...state,
@@ -131,7 +131,6 @@ export const getXyVisualization = ({
           seriesType: firstUsedSeriesType || state.preferredSeriesType,
           layerId,
           layerType,
-          indexPatternId: indexPatternId ?? core.uiSettings.get('defaultIndex'),
         }),
       ],
     };
@@ -146,7 +145,6 @@ export const getXyVisualization = ({
           : newLayerState({
               seriesType: state.preferredSeriesType,
               layerId,
-              indexPatternId: core.uiSettings.get('defaultIndex'),
             })
       ),
     };
