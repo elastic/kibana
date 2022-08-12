@@ -16,7 +16,7 @@ import {
   fetchAndCalculateFieldStats,
   SearchHandler,
   buildSearchParams,
-} from '../../common/services/field_stats/field_stats_utils';
+} from '../../common/utils/field_stats_utils';
 
 export async function initFieldStatsRoute(setup: CoreSetup<PluginStart>) {
   const router = setup.http.createRouter();

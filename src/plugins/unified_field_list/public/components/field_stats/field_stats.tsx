@@ -39,7 +39,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { buildEsQuery, Query, Filter, AggregateQuery } from '@kbn/es-query';
 import type { BucketedAggregation } from '../../../common/types';
-import { loadFieldStats, canProvideFieldStatsForField } from '../../../common/services/field_stats';
+import { loadFieldStats, canProvideStatsForField } from '../../services';
 import { useUnifiedFieldListServices } from '../../hooks/use_unified_field_list_services';
 import './field_stats.scss';
 
@@ -119,7 +119,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
 
       setDataView(loadedDataView);
 
-      if (state.isLoading || !canProvideFieldStatsForField(field)) {
+      if (state.isLoading || !canProvideStatsForField(field)) {
         return;
       }
 

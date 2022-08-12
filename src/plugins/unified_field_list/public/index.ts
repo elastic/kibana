@@ -24,4 +24,4 @@ export function plugin() {
 }
 export type { UnifiedFieldListPluginSetup, UnifiedFieldListPluginStart } from './types';
 
-export { loadFieldStats } from '../common/services/field_stats';
+export { loadFieldStats, canProvideStatsForField } from './services';

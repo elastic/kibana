@@ -10,7 +10,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import DateMath from '@kbn/datemath';
 import { ESSearchResponse } from '@kbn/core/types/elasticsearch';
 import type { DataViewFieldBase } from '@kbn/es-query';
-import type { FieldStatsResponse } from '../../types';
+import type { FieldStatsResponse } from '../types';
 
 export type SearchHandler = (
   aggs: Record<string, estypes.AggregationsAggregationContainer>
@@ -81,7 +81,7 @@ export async function fetchAndCalculateFieldStats({
   toDate: string;
   size?: number;
 }) {
-  if (!canProvideFieldStatsForField(field)) {
+  if (!canProvideStatsForField(field)) {
     return {};
   }
 
@@ -100,7 +100,7 @@ export async function fetchAndCalculateFieldStats({
   return await getStringSamples(searchHandler, field, size);
 }
 
-export function canProvideFieldStatsForField(field: DataViewFieldBase): boolean {
+export function canProvideStatsForField(field: DataViewFieldBase): boolean {
   return !(
     field.type === 'document' ||
     field.type.includes('range') ||

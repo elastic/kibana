@@ -10,8 +10,12 @@ import { lastValueFrom } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewFieldBase } from '@kbn/es-query';
-import type { FieldStatsResponse } from '../../types';
-import { fetchAndCalculateFieldStats, SearchHandler, buildSearchParams } from './field_stats_utils';
+import type { FieldStatsResponse } from '../types';
+import {
+  fetchAndCalculateFieldStats,
+  SearchHandler,
+  buildSearchParams,
+} from '../../common/utils/field_stats_utils';
 
 interface FetchFieldStatsParams {
   data: DataPublicPluginStart;

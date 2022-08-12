@@ -411,7 +411,7 @@ function DiscoverFieldComponent({
     const details = getDetails(field);
     const dateRange = data?.query?.timefilter.timefilter.getTime();
     const fieldForStats = multiFields ? multiFields[0].field : field; // TODO: how to handle multifields?
-    const showNewStatsPreviewInDiscover = true; // Toggle this variable to preview new stats locally
+    const showNewStatsPreviewInDiscover = false; // Toggle this variable to preview new stats locally
 
     return (
       <>
