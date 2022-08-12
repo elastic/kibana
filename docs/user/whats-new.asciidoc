@@ -21,9 +21,9 @@ coming::[8.4.0]
 [discrete]
 ==== {webhook-cm} connector
 
-The new <<cases-webhook-action-type,{webhook-cm} connector and action>> enable
-you to send POST, PUT, and GET requests to a case management RESTful API web
-service. You can use this connector with cases in {observability},
+The new {kibana-ref}/cases-webhook-action-type.html[{webhook-cm} connector and action]
+enable you to send POST, PUT, and GET requests to a case management RESTful API
+web service. You can use this connector with cases in {observability},
 {stack-manage-app}, and the {security-app}.
 
 [discrete]
