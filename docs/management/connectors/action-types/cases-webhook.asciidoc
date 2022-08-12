@@ -177,7 +177,7 @@ Description:: The details about the incident.
 Labels:: The labels for the incident.
 Additional comments:: Additional information for the client, such as how to troubleshoot the issue.
 
-
+////
 [float]
 [[cases-webhook-connector-full-example]]
 == Full example with third-party system
@@ -387,3 +387,4 @@ image::management/connectors/images/cases-webhook-create.gif[{webhook-cm} connec
 ====  Update and comment on a case
 [role="screenshot"]
 image::management/connectors/images/cases-webhook-update.gif[{webhook-cm} connector Update, {jira} example]
+////
