@@ -7,14 +7,16 @@
 
 import './data_panel_wrapper.scss';
 
-import React, { useMemo, memo, useContext, useState, useEffect } from 'react';
+import React, { useMemo, memo, useContext, useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiPopover, EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { Easteregg } from './easteregg';
 import { NativeRenderer } from '../../native_renderer';
 import { DragContext, DragDropIdentifier } from '../../drag_drop';
-import { StateSetter, DatasourceDataPanelProps, DatasourceMap } from '../../types';
+import { StateSetter, DatasourceDataPanelProps, DatasourceMap, FramePublicAPI } from '../../types';
 import {
   switchDatasource,
   useLensDispatch,
@@ -26,7 +28,10 @@ import {
   selectActiveDatasourceId,
   selectDatasourceStates,
 } from '../../state_management';
-import { initializeDatasources } from './state_helpers';
+import { initializeSources } from './state_helpers';
+import type { IndexPatternServiceAPI } from '../../indexpattern_service/service';
+import { changeIndexPattern } from '../../state_management/lens_slice';
+import { getInitialDataViewsObject } from '../../utils';
 
 interface DataPanelWrapperProps {
   datasourceMap: DatasourceMap;
@@ -34,7 +39,9 @@ interface DataPanelWrapperProps {
   core: DatasourceDataPanelProps['core'];
   dropOntoWorkspace: (field: DragDropIdentifier) => void;
   hasSuggestionForField: (field: DragDropIdentifier) => boolean;
-  plugins: { uiActions: UiActionsStart };
+  plugins: { uiActions: UiActionsStart; dataViews: DataViewsPublicPluginStart };
+  indexPatternService: IndexPatternServiceAPI;
+  frame: FramePublicAPI;
 }
 
 export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
@@ -64,10 +71,21 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
 
   useEffect(() => {
     if (activeDatasourceId && datasourceStates[activeDatasourceId].state === null) {
-      initializeDatasources(props.datasourceMap, datasourceStates, undefined, undefined, {
-        isFullEditor: true,
-      }).then((result) => {
-        const newDatasourceStates = Object.entries(result).reduce(
+      initializeSources(
+        {
+          datasourceMap: props.datasourceMap,
+          datasourceStates,
+          dataViews: props.plugins.dataViews,
+          references: undefined,
+          initialContext: undefined,
+          storage: new Storage(localStorage),
+          defaultIndexPatternId: props.core.uiSettings.get('defaultIndex'),
+        },
+        {
+          isFullEditor: true,
+        }
+      ).then(({ states, indexPatterns, indexPatternRefs }) => {
+        const newDatasourceStates = Object.entries(states).reduce(
           (state, [datasourceId, datasourceState]) => ({
             ...state,
             [datasourceId]: {
@@ -77,10 +95,42 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
           }),
           {}
         );
-        dispatchLens(setState({ datasourceStates: newDatasourceStates }));
+        dispatchLens(
+          setState({
+            datasourceStates: newDatasourceStates,
+            dataViews: getInitialDataViewsObject(indexPatterns, indexPatternRefs),
+          })
+        );
       });
     }
-  }, [datasourceStates, activeDatasourceId, props.datasourceMap, dispatchLens]);
+  }, [
+    datasourceStates,
+    activeDatasourceId,
+    props.datasourceMap,
+    dispatchLens,
+    props.plugins.dataViews,
+    props.core.uiSettings,
+  ]);
+
+  const onChangeIndexPattern = useCallback(
+    async (indexPatternId: string, datasourceId: string, layerId?: string) => {
+      // reload the indexpattern
+      const indexPatterns = await props.indexPatternService.ensureIndexPattern({
+        id: indexPatternId,
+        cache: props.frame.dataViews.indexPatterns,
+      });
+      // now update the state
+      dispatchLens(
+        changeIndexPattern({
+          dataViews: { indexPatterns },
+          datasourceIds: [datasourceId],
+          indexPatternId,
+          layerId,
+        })
+      );
+    },
+    [props.indexPatternService, props.frame.dataViews.indexPatterns, dispatchLens]
+  );
 
   const datasourceProps: DatasourceDataPanelProps = {
     ...externalContext,
@@ -92,6 +142,9 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
     dropOntoWorkspace: props.dropOntoWorkspace,
     hasSuggestionForField: props.hasSuggestionForField,
     uiActions: props.plugins.uiActions,
+    onChangeIndexPattern,
+    indexPatternService: props.indexPatternService,
+    frame: props.frame,
   };
 
   const [showDatasourceSwitcher, setDatasourceSwitcher] = useState(false);
