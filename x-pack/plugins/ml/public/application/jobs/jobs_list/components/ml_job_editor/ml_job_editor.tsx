@@ -6,7 +6,7 @@
  */
 
 import React, { FC } from 'react';
-import { XJsonLang } from '@kbn/monaco';
+import { monaco, XJsonLang } from '@kbn/monaco';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import { expandLiteralStrings, EuiCodeEditorProps } from '../../../../../../shared_imports';
 
@@ -43,12 +43,34 @@ export const MLJobEditor: FC<MlJobEditorProps> = ({
 
   return (
     <CodeEditor
-      languageId={mode}
+      languageId={'json'}
       value={value}
       width={width}
       height={height}
       onChange={onChange}
       languageConfiguration={{}}
+      editorDidMount={(editor) => {
+        monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+          validate: true,
+          schemas: [
+            {
+              uri: editor.getModel()!.uri.toString(),
+              fileMatch: ['*'],
+              schema: {
+                type: 'object',
+                properties: {
+                  p1: {
+                    enum: ['v1', 'v2'],
+                  },
+                  p2: {
+                    $ref: 'http://myserver/bar-schema.json',
+                  },
+                },
+              },
+            },
+          ],
+        });
+      }}
     />
   );
 };
