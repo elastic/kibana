@@ -57,11 +57,11 @@ export const loadAfter = ({
       timeRange,
     } = context;
 
-    if (bottomChunk.status !== 'loading-bottom') {
+    if (bottomChunk.status !== 'loading-bottom' && bottomChunk.status !== 'loaded') {
       return throwError(
         () =>
           new Error(
-            `Expected bottom chunk to have status "loading-bottom", but found "${bottomChunk.status}"`
+            `Expected bottom chunk to have status "loading-bottom" or "loaded", but found "${bottomChunk.status}"`
           )
       );
     }
@@ -81,7 +81,7 @@ export const loadAfter = ({
 
     const eventRequestParameters: LoadAfterParameters = {
       ...fetchAfterRequestParamters,
-      bottomStartRowIndex: bottomChunk.endRowIndex,
+      bottomStartRowIndex: bottomChunk.startRowIndex,
     };
 
     return boundFetchEntriesAfter(fetchAfterRequestParamters).pipe(

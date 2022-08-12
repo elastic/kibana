@@ -7,6 +7,12 @@
  */
 
 import { assign, createMachine, InterpreterFrom } from 'xstate';
+import {
+  hasEmptyBottomChunk,
+  hasEmptyTopChunk,
+  hasLoadedBottomChunk,
+  hasLoadedTopChunk,
+} from './chunk_guards';
 import { updateFilters } from './filters_actions';
 import { appendNewBottomChunk, updateChunksFromLoadAfter } from './load_after_service';
 import { updateChunksFromLoadAround } from './load_around_service';
@@ -270,19 +276,66 @@ export const dataAccessStateMachine = createMachine<
         },
       },
       reloading: {
-        invoke: {
-          src: 'reload',
-          id: 'reload',
+        type: 'parallel',
+        states: {
+          top: {
+            initial: 'loading',
+            states: {
+              loading: {
+                invoke: {
+                  src: 'loadBefore',
+                },
+                on: {
+                  loadBeforeSucceeded: {
+                    actions: 'updateChunksFromLoadBefore',
+                    target: 'loaded',
+                  },
+                  loadBeforeFailed: {
+                    target: 'loaded',
+                  },
+                },
+              },
+              loaded: {
+                type: 'final',
+              },
+            },
+          },
+          bottom: {
+            initial: 'loading',
+            states: {
+              loading: {
+                invoke: {
+                  src: 'loadAfter',
+                },
+                on: {
+                  loadAfterSucceeded: {
+                    actions: 'updateChunksFromLoadAfter',
+                    target: 'loaded',
+                  },
+                  loadAfterFailed: {
+                    target: 'loaded',
+                  },
+                },
+              },
+              loaded: {
+                type: 'final',
+              },
+            },
+          },
         },
-        on: {
-          reloadFailed: {
+        onDone: [
+          {
+            cond: 'hasLoadedTopChunk',
+            target: '#logExplorerData.loaded',
+          },
+          {
+            cond: 'hasLoadedBottomChunk',
+            target: '#logExplorerData.loaded',
+          },
+          {
             target: 'failedNoData',
           },
-          reloadSucceeded: {
-            actions: 'updateChunksFromReload',
-            target: 'loaded',
-          },
-        },
+        ],
       },
       uninitialized: {
         on: {
@@ -367,10 +420,10 @@ export const dataAccessStateMachine = createMachine<
     guards: {
       areVisibleEntriesNearStart,
       areVisibleEntriesNearEnd,
-      hasEmptyTopChunk: constantGuard(false),
-      hasEmptyBottomChunk: constantGuard(false),
-      hasLoadedTopChunk: constantGuard(true),
-      hasLoadedBottomChunk: constantGuard(true),
+      hasEmptyTopChunk,
+      hasEmptyBottomChunk,
+      hasLoadedTopChunk,
+      hasLoadedBottomChunk,
       isPositionNearStart: constantGuard(false),
       isPositionNearEnd: constantGuard(false),
       startTimestampExtendsLoadedTop: constantGuard(false),
