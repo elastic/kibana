@@ -14,6 +14,7 @@ import { isEmpty, isEqual } from 'lodash';
 import { merge, Subject, Subscription } from 'rxjs';
 import { debounceTime, map, distinctUntilChanged, skip } from 'rxjs/operators';
 
+import { i18n } from '@kbn/i18n';
 import {
   Filter,
   compareFilters,
@@ -27,18 +28,17 @@ import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
 import {
-  OptionsListEmbeddableInput,
   OptionsListField,
-  OptionsListReduxState,
   OPTIONS_LIST_CONTROL,
-} from './types';
-import { OptionsListComponent } from './options_list_component';
-import { ControlsOptionsListService } from '../../services/options_list';
-import { ControlsDataViewsService } from '../../services/data_views';
-import { optionsListReducers } from './options_list_reducers';
-import { OptionsListStrings } from './options_list_strings';
-import { ControlInput, ControlOutput } from '../..';
+  OptionsListReduxState,
+  OptionsListEmbeddableInput,
+} from '../types';
 import { pluginServices } from '../../services';
+import { ControlInput, ControlOutput } from '../..';
+import { optionsListReducers } from '../options_list_reducers';
+import { ControlsDataViewsService } from '../../services/data_views';
+import { OptionsListControl } from '../components/options_list_control';
+import { ControlsOptionsListService } from '../../services/options_list';
 
 const diffDataFetchProps = (
   last?: OptionsListDataFetchProps,
@@ -205,7 +205,12 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       try {
         this.dataView = await this.dataViewsService.get(dataViewId);
         if (!this.dataView)
-          throw new Error(OptionsListStrings.errors.getDataViewNotFoundError(dataViewId));
+          throw new Error(
+            i18n.translate('controls.optionsList.errors.dataViewNotFound', {
+              defaultMessage: 'Could not locate data view: {dataViewId}',
+              values: { dataViewId },
+            })
+          );
       } catch (e) {
         this.onFatalError(e);
       }
@@ -217,7 +222,12 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       try {
         const originalField = this.dataView.getFieldByName(fieldName);
         if (!originalField) {
-          throw new Error(OptionsListStrings.errors.getfieldNotFoundError(fieldName));
+          throw new Error(
+            i18n.translate('controls.optionsList.errors.fieldNotFound', {
+              defaultMessage: 'Could not locate field: {fieldName}',
+              values: { fieldName },
+            })
+          );
         }
 
         // pair up keyword / text fields for case insensitive search
@@ -361,7 +371,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     ReactDOM.render(
       <KibanaThemeProvider theme$={pluginServices.getServices().theme.theme$}>
         <OptionsListReduxWrapper>
-          <OptionsListComponent typeaheadSubject={this.typeaheadSubject} />
+          <OptionsListControl typeaheadSubject={this.typeaheadSubject} />
         </OptionsListReduxWrapper>
       </KibanaThemeProvider>,
       node
