@@ -216,8 +216,7 @@ variables to add the external system ID or external system title to the URL.For 
 https://testing-jira.atlassian.net/browse/{{{external.system.title}}}
 ----
 
-//For more information, refer to
-//<<cases-webhook-action-type>>.
+For more information, refer to <<cases-webhook-action-type>>.
 ====
 
 This object is not required for server log connectors.
