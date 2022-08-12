@@ -453,12 +453,6 @@ export class SettingsPageObject extends FtrService {
     await this.retry.try(async () => {
       await this.header.waitUntilLoadingHasFinished();
       await this.clickKibanaIndexPatterns();
-      const exists = await this.hasIndexPattern(indexPatternName);
-
-      if (exists) {
-        await this.clickIndexPatternByName(indexPatternName);
-        return;
-      }
 
       await this.header.waitUntilLoadingHasFinished();
       const flyOut = await this.testSubjects.exists('createAnyway');
@@ -500,8 +494,10 @@ export class SettingsPageObject extends FtrService {
 
     if (!isStandardIndexPattern) {
       const badges = await this.find.allByCssSelector('.euiBadge__text');
-      const text = await badges[0].getVisibleText();
-      expect(text).to.equal('Rollup');
+      const rollupBadge = badges.filter(async (badge) => {
+        return (await badge.getVisibleText()) === 'Rollup';
+      });
+      expect(rollupBadge.length).to.equal(1);
     }
 
     return await this.getIndexPatternIdFromUrl();
