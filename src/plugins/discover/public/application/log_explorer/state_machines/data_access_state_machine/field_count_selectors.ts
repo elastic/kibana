@@ -28,10 +28,8 @@ const getFieldCounts = (topChunk: LogExplorerChunk, bottomChunk: LogExplorerChun
 
   return entries.reduce<FieldCounts>((fieldCountsAcc, entry) => {
     return Object.keys(entry.flattened).reduce((countsAcc, field) => {
-      return {
-        ...countsAcc,
-        [field]: (countsAcc[field] || 0) + 1,
-      };
+      countsAcc[field] = (countsAcc[field] || 0) + 1;
+      return countsAcc;
     }, fieldCountsAcc);
   }, {});
 };
