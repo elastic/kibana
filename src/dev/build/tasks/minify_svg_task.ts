@@ -27,7 +27,7 @@ export const MinifySVG: Task = {
     for await (const file of files) {
       const input = await readFile(file.toString(), 'utf-8');
       const result = optimize(input, {
-        path: file.toString(),
+        path: config.getRepoRelativePath(file.toString()),
         ...options,
       }) as any;
       if (result.error) throw new Error(result.error);
