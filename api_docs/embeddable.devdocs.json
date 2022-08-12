@@ -4800,6 +4800,43 @@
       },
       {
         "parentPluginId": "embeddable",
+        "id": "def-public.isFilterableEmbeddable",
+        "type": "Function",
+        "tags": [],
+        "label": "isFilterableEmbeddable",
+        "description": [
+          "\nEnsure that embeddable supports filtering/querying"
+        ],
+        "signature": [
+          "(incoming: unknown) => boolean"
+        ],
+        "path": "src/plugins/embeddable/public/lib/filterable_embeddable/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.isFilterableEmbeddable.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "incoming",
+            "description": [
+              "Embeddable that is being tested to check if it is a FilterableEmbeddable"
+            ],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/plugins/embeddable/public/lib/filterable_embeddable/types.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "true if the incoming embeddable is a FilterableEmbeddable, false if it is not"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
         "id": "def-public.isRangeSelectTriggerContext",
         "type": "Function",
         "tags": [],
@@ -7426,6 +7463,61 @@
             "description": [],
             "path": "src/plugins/embeddable/public/types.ts",
             "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
+        "id": "def-public.FilterableEmbeddable",
+        "type": "Interface",
+        "tags": [],
+        "label": "FilterableEmbeddable",
+        "description": [
+          "\nAll embeddables that implement this interface should support being filtered\nand/or queried via the top navigation bar"
+        ],
+        "path": "src/plugins/embeddable/public/lib/filterable_embeddable/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.FilterableEmbeddable.getFilters",
+            "type": "Function",
+            "tags": [],
+            "label": "getFilters",
+            "description": [
+              "\nGets the embeddable's local filters"
+            ],
+            "signature": [
+              "() => Promise<",
+              "Filter",
+              "[]>"
+            ],
+            "path": "src/plugins/embeddable/public/lib/filterable_embeddable/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.FilterableEmbeddable.getQuery",
+            "type": "Function",
+            "tags": [],
+            "label": "getQuery",
+            "description": [
+              "\nGets the embeddable's local query"
+            ],
+            "signature": [
+              "() => Promise<",
+              "Query",
+              " | ",
+              "AggregateQuery",
+              " | undefined>"
+            ],
+            "path": "src/plugins/embeddable/public/lib/filterable_embeddable/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
