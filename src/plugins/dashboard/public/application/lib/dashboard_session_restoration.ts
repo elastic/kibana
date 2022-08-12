@@ -12,7 +12,6 @@ import type { Query } from '@kbn/es-query';
 import { DashboardAppLocatorParams, DashboardConstants } from '../..';
 import { DashboardState } from '../../types';
 import { getDashboardTitle } from '../../dashboard_strings';
-import { DashboardSavedObject } from '../../saved_dashboards';
 import { getQueryParams } from '../../services/kibana_utils';
 import {
   DataPublicPluginStart,
