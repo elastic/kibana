@@ -110,18 +110,16 @@ export const getTopNavLinks = ({
     iconType: 'save',
     emphasize: true,
     run: async (anchorElement: HTMLElement) => {
-      if (await shouldPersistDataView()) {
-        onSaveSearch({
-          savedSearch,
-          services,
-          dataView,
-          navigateTo,
-          state,
-          onClose: () => {
-            anchorElement?.focus();
-          },
-        });
-      }
+      onSaveSearch({
+        savedSearch,
+        services,
+        dataView,
+        navigateTo,
+        state,
+        onClose: () => {
+          anchorElement?.focus();
+        },
+      });
     },
   };
 
