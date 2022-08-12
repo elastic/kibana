@@ -51,7 +51,7 @@ const StatValue = styled(EuiTitle)`
 
 StatValue.displayName = 'StatValue';
 
-const ChartHeight = '120px';
+const ChartHeight = '90px';
 
 interface StatItem {
   color?: string;
@@ -59,7 +59,6 @@ interface StatItem {
   icon?: IconType;
   key: string;
   name?: string;
-  value: number | undefined | null;
   lensAttributes?: LensAttributes;
 }
 
@@ -201,10 +200,10 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
 
           {toggleStatus && (
             <>
-              <EuiFlexGroup>
+              <EuiFlexGroup gutterSize="none">
                 {fields.map((field) => (
                   <FlexItem key={`stat-items-field-${field.key}`}>
-                    <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+                    <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
                       {field.icon && (
                         <FlexItem grow={false}>
                           <EuiIcon
@@ -219,14 +218,15 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
                       <FlexItem>
                         {field.lensAttributes && (
                           <LensEmbeddable
-                            height="100px"
+                            data-test-subj="embeddable-metric"
+                            height="63px"
                             id={id}
                             lensAttributes={field.lensAttributes}
                             timerange={timerange}
                           />
                         )}
                       </FlexItem>
-                      {field.description && (
+                      {field.description != null && (
                         <FlexItem>
                           <EuiStat title={field.description} description={null} titleSize="s" />
                         </FlexItem>
@@ -236,11 +236,14 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
                 ))}
               </EuiFlexGroup>
 
-              {(enableAreaChart || enableBarChart) && <EuiHorizontalRule />}
+              {(enableAreaChart || enableBarChart) && (
+                <EuiHorizontalRule data-test-subj="stat-item-separator" margin="none" />
+              )}
               <EuiFlexGroup>
                 {enableBarChart && barChartLensAttributes && (
                   <FlexItem>
                     <LensEmbeddable
+                      data-test-subj="embeddable-bar-chart"
                       lensAttributes={barChartLensAttributes}
                       timerange={timerange}
                       id={id}
@@ -253,6 +256,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
                   <FlexItem>
                     {areaChartLensAttributes && (
                       <LensEmbeddable
+                        data-test-subj="embeddable-area-chart"
                         lensAttributes={areaChartLensAttributes}
                         timerange={timerange}
                         id={id}
