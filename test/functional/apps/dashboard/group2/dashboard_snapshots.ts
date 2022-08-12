@@ -70,7 +70,7 @@ export default function ({
       );
 
       await PageObjects.dashboard.clickExitFullScreenLogoButton();
-      expect(percentDifference).to.be.lessThan(0.01);
+      expect(percentDifference).to.be.lessThan(0.022);
     });
 
     it('compare area chart snapshot', async () => {
@@ -92,7 +92,7 @@ export default function ({
       );
 
       await PageObjects.dashboard.clickExitFullScreenLogoButton();
-      expect(percentDifference).to.be.lessThan(0.01);
+      expect(percentDifference).to.be.lessThan(0.029);
     });
 
     describe('compare controls snapshot', async () => {
@@ -119,7 +119,7 @@ export default function ({
           'dashboard_controls_light',
           updateBaselines
         );
-        expect(percentDifference).to.be.lessThan(0.01);
+        expect(percentDifference).to.be.lessThan(0.022);
       });
 
       it('in dark mode', async () => {
@@ -133,7 +133,7 @@ export default function ({
           'dashboard_controls_dark',
           updateBaselines
         );
-        expect(percentDifference).to.be.lessThan(0.01);
+        expect(percentDifference).to.be.lessThan(0.022);
       });
 
       after(async () => {
