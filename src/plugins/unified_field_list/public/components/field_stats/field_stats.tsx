@@ -128,6 +128,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
 
       setState((s) => ({ ...s, isLoading: true }));
 
+      abortControllerRef.current?.abort();
       abortControllerRef.current = new AbortController();
 
       const results = await fetchFieldStats({

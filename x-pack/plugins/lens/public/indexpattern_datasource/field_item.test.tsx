@@ -25,7 +25,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { fetchFieldStats } from '@kbn/unified-field-list-plugin/common/services/field_stats';
 import { DOCUMENT_FIELD_NAME } from '../../common';
 
-jest.mock('@kbn/unified-field-list-plugin/common/services/field_stats', () => ({
+jest.mock('@kbn/unified-field-list-plugin/common/services/field_stats/field_stats', () => ({
   fetchFieldStats: jest.fn().mockResolvedValue({}),
 }));
 
@@ -212,7 +212,10 @@ describe('IndexPattern Field Item', () => {
 
     await clickField(wrapper, 'bytes');
 
+    await wrapper.update();
+
     expect(fetchFieldStats).toHaveBeenCalledWith({
+      abortController: new AbortController(),
       data: mockedServices.data,
       dataView,
       dslQuery: {
@@ -227,8 +230,6 @@ describe('IndexPattern Field Item', () => {
       toDate: 'now',
       field: defaultProps.field,
     });
-
-    await wrapper.update();
 
     expect(wrapper.find(EuiPopover).prop('isOpen')).toEqual(true);
 
@@ -289,6 +290,7 @@ describe('IndexPattern Field Item', () => {
 
     expect(fetchFieldStats).toHaveBeenCalledTimes(2);
     expect(fetchFieldStats).toHaveBeenLastCalledWith({
+      abortController: new AbortController(),
       data: mockedServices.data,
       dataView,
       dslQuery: {
