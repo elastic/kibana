@@ -10,6 +10,7 @@ import Path from 'path';
 
 import globby from 'globby';
 import normalizePath from 'normalize-path';
+import { memoize } from 'lodash';
 import { REPO_ROOT } from '@kbn/utils';
 import { asyncMapWithLimit } from '@kbn/std';
 
@@ -47,10 +48,10 @@ export function discoverBazelPackageLocations(repoRoot: string) {
   return packagesWithPackageJson.filter((pkg) => packagesWithBuildBazel.includes(pkg));
 }
 
-export async function discoverBazelPackages(repoRoot: string = REPO_ROOT) {
+export const discoverBazelPackages = memoize(async function (repoRoot: string = REPO_ROOT) {
   return await asyncMapWithLimit(
     discoverBazelPackageLocations(repoRoot),
     100,
     async (dir) => await BazelPackage.fromDir(dir)
   );
-}
+});
