@@ -822,9 +822,10 @@ export interface Visualization<T = unknown> {
   removeLayer?: (state: T, layerId: string) => T;
   /** Track added layers in internal state */
   appendLayer?: (state: T, layerId: string, type: LayerType) => T;
-  /** Returns a list of layers the new layer ID should be linked to? */
-  reportLinkedLayers?: (state: T, newLayerId: string) => string[];
-  reportLinkedDimensions?: (state: T) => Array<{
+  /** Returns a list of layers the new layer ID should be linked to */
+  getLinkedLayers?: (state: T, newLayerId: string) => string[];
+  /** Returns a set of dimensions that should be kept in sync */
+  getLinkedDimensions?: (state: T) => Array<{
     from: { columnId: string; groupId: string; layerId: string };
     to: {
       columnId?: string;

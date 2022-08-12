@@ -521,11 +521,11 @@ export const getMetricVisualization = ({
     ];
   },
 
-  reportLinkedLayers(state, newLayerId: string): string[] {
+  getLinkedLayers(state, newLayerId: string): string[] {
     return newLayerId === state.trendlineLayerId ? [state.layerId] : [];
   },
 
-  reportLinkedDimensions(state) {
+  getLinkedDimensions(state) {
     if (!state.trendlineLayerId || !state.metricAccessor) {
       return [];
     }

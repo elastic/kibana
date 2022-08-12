@@ -678,8 +678,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         layerType
       );
 
-      const linkedLayers =
-        activeVisualization.reportLinkedLayers?.(visualizationState, layerId) ?? [];
+      const linkedLayers = activeVisualization.getLinkedLayers?.(visualizationState, layerId) ?? [];
 
       const framePublicAPI = {
         // any better idea to avoid `as`?
@@ -809,7 +808,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       const activeVisualization = visualizationMap[state.visualization.activeId];
 
       // TODO - should this logic be part of syncLinkedDimensionsFunction?
-      const links = activeVisualization.reportLinkedDimensions?.(state.visualization.state);
+      const links = activeVisualization.getLinkedDimensions?.(state.visualization.state);
 
       const linkedDimension = links?.find(
         ({ from: { columnId: fromId } }) => columnId === fromId
@@ -923,7 +922,7 @@ function syncLinkedDimensionsFunction(
   let visualizationState: unknown = state.visualization.state;
 
   const activeVisualization = visualizationMap[state.visualization.activeId!]; // TODO - double check the safety of this coercion
-  const linkedDimensions = activeVisualization.reportLinkedDimensions?.(visualizationState);
+  const linkedDimensions = activeVisualization.getLinkedDimensions?.(visualizationState);
   const frame = selectFramePublicAPI({ lens: state }, datasourceMap);
 
   linkedDimensions?.forEach(({ from, to }) => {
