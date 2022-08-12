@@ -40,6 +40,15 @@ export const DeletePackagePoliciesRequestSchema = {
   }),
 };
 
+export const DeleteOnePackagePolicyRequestSchema = {
+  params: schema.object({
+    packagePolicyId: schema.string(),
+  }),
+  query: schema.object({
+    force: schema.maybe(schema.boolean()),
+  }),
+};
+
 export const UpgradePackagePoliciesRequestSchema = {
   body: schema.object({
     packagePolicyIds: schema.arrayOf(schema.string()),

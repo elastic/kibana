@@ -8,8 +8,7 @@
 import React from 'react';
 
 import { createDnsRowRenderer } from '../../timeline/body/renderers/system/generic_row_renderer';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { mockEndgameDnsRequest } from '../../../../common/mock/mock_endgame_ecs_data';
+import { demoEndgameDnsRequest } from '../../../../common/demo_data/endgame_ecs/dns';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../constants';
 
 const SystemDnsExampleComponent: React.FC = () => {
@@ -18,7 +17,7 @@ const SystemDnsExampleComponent: React.FC = () => {
   return (
     <>
       {systemDnsRowRenderer.renderRow({
-        data: mockEndgameDnsRequest,
+        data: demoEndgameDnsRequest,
         isDraggable: false,
         timelineId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,
       })}
