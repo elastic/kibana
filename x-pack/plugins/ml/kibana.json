@@ -34,7 +34,8 @@
     "maps",
     "security",
     "spaces",
-    "usageCollection"
+    "usageCollection",
+    "cases"
   ],
   "server": true,
   "ui": true,

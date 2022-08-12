@@ -87,6 +87,7 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
     fieldFormats: deps.fieldFormats,
     dashboard: deps.dashboard,
     charts: deps.charts,
+    cases: deps.cases,
     ...coreStart,
   };
 

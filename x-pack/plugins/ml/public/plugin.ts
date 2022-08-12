@@ -44,6 +44,7 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DashboardSetup, DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { CasesUiSetup, CasesUiStart } from '@kbn/cases-plugin/public/types';
 import { registerManagementSection } from './application/management';
 import { MlLocatorDefinition, MlLocator } from './locator';
 import { setDependencyCache } from './application/util/dependency_cache';
@@ -66,6 +67,7 @@ export interface MlStartDependencies {
   dashboard: DashboardStart;
   charts: ChartsPluginStart;
   lens?: LensPublicStart;
+  cases?: CasesUiStart;
 }
 
 export interface MlSetupDependencies {
@@ -84,6 +86,7 @@ export interface MlSetupDependencies {
   usageCollection?: UsageCollectionSetup;
   fieldFormats: FieldFormatsSetup;
   dashboard: DashboardSetup;
+  cases?: CasesUiSetup;
 }
 
 export type MlCoreSetup = CoreSetup<MlStartDependencies, MlPluginStart>;
@@ -174,6 +177,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         registerSearchLinks,
         registerMlAlerts,
         registerMapExtension,
+        registerCasesAttachment,
       } = await import('./register_helper');
 
       const mlEnabled = isMlEnabled(license);
@@ -192,6 +196,10 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         if (fullLicense) {
           registerEmbeddables(pluginsSetup.embeddable, core);
           registerMlUiActions(pluginsSetup.uiActions, core);
+
+          if (pluginsSetup.cases) {
+            registerCasesAttachment(pluginsSetup.cases);
+          }
 
           const canUseMlAlerts = capabilities.ml?.canUseMlAlerts;
           if (pluginsSetup.triggersActionsUi && canUseMlAlerts) {

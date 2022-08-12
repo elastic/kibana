@@ -163,6 +163,19 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
           </EuiContextMenuItem>
         );
       }
+      // TODO check privileges
+      const canEditCase = true;
+      if (canEditCase) {
+        items.push(
+          <EuiContextMenuItem
+            key="addToCase"
+            onClick={setIsAddDashboardActive.bind(null, true)}
+            data-test-subj="mlAnomalyTimelinePanelAddToDashboardButton"
+          >
+            <FormattedMessage id="xpack.ml.explorer.addToCaseLabel" defaultMessage="Add to case" />
+          </EuiContextMenuItem>
+        );
+      }
       return items;
     }, [canEditDashboards]);
 
