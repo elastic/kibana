@@ -150,7 +150,7 @@ image:images/individual-enable-disable.png[Use the rule status dropdown to enabl
 
 When you snooze a rule, the rule checks continue to run on a schedule but the
 alert will not trigger any actions. You can snooze for a specified period of
-time, indefinitely, or schedule single or recurring downtimes. For example:
+time, indefinitely, or schedule single or recurring downtimes:
 
 [role="screenshot"]
 image:images/snooze-panel.png[Snooze notifications for a rule]
