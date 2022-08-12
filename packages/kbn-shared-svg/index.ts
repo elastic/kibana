@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import noResultsIllustrationDark from './assets/no_results_dark.svg';
-import noResultsIllustrationLight from './assets/no_results_light.svg';
+import noResultsIllustrationDark from './src/assets/no_results_dark.svg';
+import noResultsIllustrationLight from './src/assets/no_results_light.svg';
 
 export { noResultsIllustrationDark, noResultsIllustrationLight };
