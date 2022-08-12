@@ -24,7 +24,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const comboBox = getService('comboBox');
   const security = getPageObject('security');
-  const common = getPageObject('common');
 
   describe('View case', () => {
     describe('properties', () => {
@@ -211,13 +210,17 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         it('assigns the case to the current user when clicking the assign to self link', async () => {
           await testSubjects.click('case-view-assign-yourself-link');
-
+          await header.waitUntilLoadingHasFinished();
           await testSubjects.existOrFail('user-profile-assigned-user-group-cases_all_user');
         });
       });
 
       describe('logs in with default user', () => {
         createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
+
+        afterEach(async () => {
+          await cases.singleCase.closeAssigneesPopover();
+        });
 
         it('shows the assign users popover when clicked', async () => {
           await testSubjects.missingOrFail('euiSelectableList');
@@ -230,7 +233,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           await cases.singleCase.selectFirstRowInAssigneesPopover();
 
           // navigate out of the modal
-          await common.clickAndValidate('property-actions-ellipses', 'property-actions-trash');
+          await cases.singleCase.closeAssigneesPopover();
+          await header.waitUntilLoadingHasFinished();
           await testSubjects.existOrFail('user-profile-assigned-user-group-cases_all_user');
         });
       });
@@ -243,8 +247,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           await cases.singleCase.selectFirstRowInAssigneesPopover();
 
           // navigate out of the modal
-          await common.clickAndValidate('property-actions-ellipses', 'property-actions-trash');
-
+          await cases.singleCase.closeAssigneesPopover();
+          await header.waitUntilLoadingHasFinished();
           await testSubjects.existOrFail('user-profile-assigned-user-group-cases_all_user');
 
           // hover over the assigned user

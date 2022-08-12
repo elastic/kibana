@@ -35,11 +35,23 @@ export function CasesSingleViewServiceProvider({ getService, getPageObject }: Ft
     },
 
     async openAssigneesPopover() {
-      await common.clickAndValidate('case-view-assignees-edit-button', 'euiSelectableList');
+      if (!(await testSubjects.exists('euiSelectableList'))) {
+        await common.clickAndValidate('case-view-assignees-edit-button', 'euiSelectableList');
+        await header.waitUntilLoadingHasFinished();
+      }
+    },
+
+    async closeAssigneesPopover() {
+      if (await testSubjects.exists('euiSelectableList')) {
+        await testSubjects.click('case-view-assignees-edit-button');
+        await header.waitUntilLoadingHasFinished();
+        await testSubjects.missingOrFail('euiSelectableList');
+      }
     },
 
     async selectFirstRowInAssigneesPopover() {
       await (await find.byClassName('euiSelectableListItem__content')).click();
+      await header.waitUntilLoadingHasFinished();
     },
   };
 }
