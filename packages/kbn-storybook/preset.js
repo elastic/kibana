@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const webpackConfig = require('./target_node/webpack.config');
+const webpackConfig = require('./target_node/src/webpack.config');
 
 module.exports = {
   managerEntries: (entry = []) => {
