@@ -11,7 +11,7 @@ import React from 'react';
 
 import '../../../../common/mock/match_media';
 import { mockGlobalState, TestProviders } from '../../../../common/mock';
-import { ExpandableHostDetails } from './expandable_host';
+import { ExpandableUserDetails } from './expandable_user';
 import { mockAnomalies } from '../../../../common/components/ml/mock';
 import type { Anomalies } from '../../../../common/components/ml/types';
 import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
@@ -45,28 +45,29 @@ describe('Expandable Host Component', () => {
   });
   const mockProps = {
     contextID: 'text-context',
-    hostName: 'testHostName',
+    userName: 'testUserName',
+    isDraggable: true,
   };
 
-  describe('ExpandableHostDetails: rendering', () => {
-    test('it should render the HostOverview of the ExpandableHostDetails', () => {
+  describe('ExpandableUserDetails: rendering', () => {
+    test('it should render the UserOverview of the ExpandableUserDetails', () => {
       const wrapper = mount(
         <TestProviders>
-          <ExpandableHostDetails {...mockProps} />
+          <ExpandableUserDetails {...mockProps} />
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="host-overview"]').exists()).toBe(true);
+      expect(wrapper.find('[data-test-subj="user-overview"]').exists()).toBe(true);
     });
 
-    test('it should render the HostOverview of the ExpandableHostDetails with the correct indices', () => {
+    test('it should render the UserOverview of the ExpandableUserDetails with the correct indices', () => {
       const wrapper = mount(
         <TestProviders>
-          <ExpandableHostDetails {...mockProps} />
+          <ExpandableUserDetails {...mockProps} />
         </TestProviders>
       );
 
-      expect(wrapper.find('HostOverview').prop('indexNames')).toStrictEqual(
+      expect(wrapper.find('UserOverview').prop('indexPatterns')).toStrictEqual(
         mockGlobalState.sourcerer.sourcererScopes.default.selectedPatterns
       );
     });
@@ -74,7 +75,7 @@ describe('Expandable Host Component', () => {
     test('it should set date range to anomaly date range', async () => {
       const wrapper = mount(
         <TestProviders>
-          <ExpandableHostDetails {...mockProps} />
+          <ExpandableUserDetails {...mockProps} />
         </TestProviders>
       );
       wrapper.find('[data-test-subj="anomaly-score-popover"]').first().simulate('click');
