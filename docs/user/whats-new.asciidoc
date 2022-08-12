@@ -12,4 +12,21 @@ Previous versions: {kibana-ref-all}/8.3/whats-new.html[8.3] | {kibana-ref-all}/8
 
 // tag::notable-highlights[]
 coming::[8.4.0]
+
+[discrete]
+[[highlights-8.4-alerting]]
+=== Enhancements to Alerting
+
+[discrete]
+==== New metrics for rules and actions
+
+You can now ship metrics related to {alert-features} to your monitoring cluster
+by using the {agent} or {metricbeat}. Click *Overview* and *Instances* in the
+{kib} section of *{stack-monitor-app}* to see visualizations about the rules and
+actions that are queued, running, or failing.
+
+[role="screenshot"]
+image::images/highlights-rule-metrics.png[Stack Monitoring overview metrics for Kibana]
+
+
 // end::notable-highlights[]
