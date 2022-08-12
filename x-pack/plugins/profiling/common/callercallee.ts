@@ -155,16 +155,16 @@ export function createCallerCalleeIntermediateRoot(
     // Go through the callees, reverse iteration
     let currentNode = clone(root);
     root.samples += samples;
+
+    const ids: string[] = [];
     for (let i = callees.length - 1; i >= 0; i--) {
       const callee = callees[i];
       const calleeName = hashFrameGroup(defaultGroupBy(callee));
+      const id = objectHash([ids[ids.length - 1] ?? '', callee.FrameID]);
+      ids.push(id);
       let node = currentNode.callees.get(calleeName);
       if (node === undefined) {
-        node = createCallerCalleeIntermediateNode(
-          callee,
-          samples,
-          objectHash([currentNode?.id ?? '', callee.FrameID])
-        );
+        node = createCallerCalleeIntermediateNode(callee, samples, id);
         currentNode.callees.set(calleeName, node);
       } else {
         node.samples += samples;
