@@ -130,7 +130,7 @@ describe('Detection rules, bulk edit', () => {
 
     // proceed with custom rule editing
     cy.get(MODAL_CONFIRMATION_BTN)
-      .should('have.text', `Edit ${expectedNumberOfCustomRulesToBeEdited} Custom rules`)
+      .should('have.text', `Edit ${expectedNumberOfCustomRulesToBeEdited} custom rules`)
       .click();
 
     typeIndexPatterns([CUSTOM_INDEX_PATTERN_1]);
