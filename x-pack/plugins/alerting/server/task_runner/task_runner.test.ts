@@ -16,11 +16,7 @@ import {
   AlertInstanceContext,
   RuleExecutionStatusWarningReasons,
 } from '../types';
-import {
-  ConcreteTaskInstance,
-  isUnrecoverableError,
-  RunNowResult,
-} from '@kbn/task-manager-plugin/server';
+import { ConcreteTaskInstance, isUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { TaskRunner } from './task_runner';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
@@ -41,7 +37,6 @@ import { IEventLogger } from '@kbn/event-log-plugin/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { omit } from 'lodash';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
-import { ExecuteOptions } from '@kbn/actions-plugin/server/create_execute_function';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
 import moment from 'moment';
 import {
@@ -130,8 +125,6 @@ describe('Task Runner', () => {
     executionContext: ReturnType<typeof executionContextServiceMock.createInternalStartContract>;
   };
 
-  type EnqueueFunction = (options: ExecuteOptions) => Promise<void | RunNowResult>;
-
   const taskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType = {
     data: dataPlugin,
     savedObjects: savedObjectsService,
@@ -163,10 +156,11 @@ describe('Task Runner', () => {
     [
       nameExtension: string,
       customTaskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType,
-      enqueueFunction: EnqueueFunction
+      enqueueFunction: unknown,
+      inputIsArray: boolean
     ]
   > = [
-    ['', taskRunnerFactoryInitializerParams, actionsClient.enqueueExecution],
+    ['', taskRunnerFactoryInitializerParams, actionsClient.bulkEnqueueExecution, true],
     [
       ' (with ephemeral support)',
       {
@@ -174,6 +168,7 @@ describe('Task Runner', () => {
         supportsEphemeralTasks: true,
       },
       actionsClient.ephemeralEnqueuedExecution,
+      false,
     ],
   ];
 
@@ -294,7 +289,12 @@ describe('Task Runner', () => {
 
   test.each(ephemeralTestParams)(
     'actionsPlugin.execute is called per alert alert that is scheduled %s',
-    async (nameExtension, customTaskRunnerFactoryInitializerParams, enqueueFunction) => {
+    async (
+      nameExtension,
+      customTaskRunnerFactoryInitializerParams,
+      enqueueFunction,
+      inputIsArray
+    ) => {
       customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(
         true
       );
@@ -329,7 +329,7 @@ describe('Task Runner', () => {
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
       await taskRunner.run();
       expect(enqueueFunction).toHaveBeenCalledTimes(1);
-      expect(enqueueFunction).toHaveBeenCalledWith(generateEnqueueFunctionInput());
+      expect(enqueueFunction).toHaveBeenCalledWith(generateEnqueueFunctionInput(inputIsArray));
 
       expect(logger.debug).toHaveBeenCalledTimes(5);
       expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
@@ -536,7 +536,7 @@ describe('Task Runner', () => {
       await taskRunner.run();
 
       const expectedExecutions = shouldBeSnoozed ? 0 : 1;
-      expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(expectedExecutions);
+      expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(expectedExecutions);
       expect(actionsClient.ephemeralEnqueuedExecution).toHaveBeenCalledTimes(0);
 
       const expectedMessage = `no scheduling of actions for rule test:1: '${RULE_NAME}': rule is snoozed.`;
@@ -945,7 +945,12 @@ describe('Task Runner', () => {
 
   test.each(ephemeralTestParams)(
     'includes the apiKey in the request used to initialize the actionsClient %s',
-    async (nameExtension, customTaskRunnerFactoryInitializerParams, enqueueFunction) => {
+    async (
+      nameExtension,
+      customTaskRunnerFactoryInitializerParams,
+      enqueueFunction,
+      inputIsArray
+    ) => {
       customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(
         true
       );
@@ -998,7 +1003,7 @@ describe('Task Runner', () => {
       );
 
       expect(enqueueFunction).toHaveBeenCalledTimes(1);
-      expect(enqueueFunction).toHaveBeenCalledWith(generateEnqueueFunctionInput());
+      expect(enqueueFunction).toHaveBeenCalledWith(generateEnqueueFunctionInput(inputIsArray));
 
       testAlertingEventLogCalls({
         activeAlerts: 1,
@@ -1033,7 +1038,12 @@ describe('Task Runner', () => {
 
   test.each(ephemeralTestParams)(
     'fire recovered actions for execution for the alertInstances which is in the recovered state %s',
-    async (nameExtension, customTaskRunnerFactoryInitializerParams, enqueueFunction) => {
+    async (
+      nameExtension,
+      customTaskRunnerFactoryInitializerParams,
+      enqueueFunction,
+      inputIsArray
+    ) => {
       customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(
         true
       );
@@ -1149,14 +1159,19 @@ describe('Task Runner', () => {
       );
 
       expect(enqueueFunction).toHaveBeenCalledTimes(2);
-      expect(enqueueFunction).toHaveBeenCalledWith(generateEnqueueFunctionInput());
+      expect(enqueueFunction).toHaveBeenCalledWith(generateEnqueueFunctionInput(inputIsArray));
       expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
     }
   );
 
   test.each(ephemeralTestParams)(
     "should skip alertInstances which weren't active on the previous execution %s",
-    async (nameExtension, customTaskRunnerFactoryInitializerParams, enqueueFunction) => {
+    async (
+      nameExtension,
+      customTaskRunnerFactoryInitializerParams,
+      enqueueFunction,
+      inputIsArray
+    ) => {
       customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(
         true
       );
@@ -1231,15 +1246,25 @@ describe('Task Runner', () => {
       });
 
       expect(enqueueFunction).toHaveBeenCalledTimes(2);
-      expect((enqueueFunction as jest.Mock).mock.calls[1][0].id).toEqual('2');
-      expect((enqueueFunction as jest.Mock).mock.calls[0][0].id).toEqual('1');
+      if (inputIsArray) {
+        expect((enqueueFunction as jest.Mock).mock.calls[1][0][0].id).toEqual('2');
+        expect((enqueueFunction as jest.Mock).mock.calls[0][0][0].id).toEqual('1');
+      } else {
+        expect((enqueueFunction as jest.Mock).mock.calls[1][0].id).toEqual('2');
+        expect((enqueueFunction as jest.Mock).mock.calls[0][0].id).toEqual('1');
+      }
       expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
     }
   );
 
   test.each(ephemeralTestParams)(
     'fire actions under a custom recovery group when specified on an alert type for alertInstances which are in the recovered state %s',
-    async (nameExtension, customTaskRunnerFactoryInitializerParams, enqueueFunction) => {
+    async (
+      nameExtension,
+      customTaskRunnerFactoryInitializerParams,
+      enqueueFunction,
+      inputIsArray
+    ) => {
       customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(
         true
       );
@@ -1329,7 +1354,7 @@ describe('Task Runner', () => {
       });
 
       expect(enqueueFunction).toHaveBeenCalledTimes(2);
-      expect(enqueueFunction).toHaveBeenCalledWith(generateEnqueueFunctionInput());
+      expect(enqueueFunction).toHaveBeenCalledWith(generateEnqueueFunctionInput(inputIsArray));
       expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
     }
   );
@@ -2560,7 +2585,7 @@ describe('Task Runner', () => {
 
     const runnerResult = await taskRunner.run();
 
-    expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(actionsConfigMap.default.max);
+    expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
 
     expect(
       taskRunnerFactoryInitializerParams.internalSavedObjectsRepository.update
@@ -2712,8 +2737,8 @@ describe('Task Runner', () => {
 
     const runnerResult = await taskRunner.run();
 
-    // 1x(.server-log) and 2x(any-action) per alert
-    expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(5);
+    // 1x(.server-log) and 1x(any-action) per alert
+    expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(2);
 
     expect(
       taskRunnerFactoryInitializerParams.internalSavedObjectsRepository.update
@@ -2756,7 +2781,7 @@ describe('Task Runner', () => {
 
     expect(logger.debug).nthCalledWith(
       3,
-      'Rule "1" skipped scheduling action "1" because the maximum number of allowed actions for connector type .server-log has been reached.'
+      'Rule "1" skipped scheduling action "2" because the maximum number of allowed actions for connector type .server-log has been reached.'
     );
 
     testAlertingEventLogCalls({
