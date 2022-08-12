@@ -20,6 +20,9 @@ import { useDeepEqualSelector } from '../../hooks/use_selector';
 
 const LensComponentWrapper = styled.div<{ height?: string }>`
   height: ${({ height }) => height ?? 'auto'};
+  .expExpressionRenderer__expression {
+    padding: 0 !important;
+  }
 `;
 
 const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
