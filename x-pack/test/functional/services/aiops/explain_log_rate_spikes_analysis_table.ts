@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -79,28 +78,6 @@ export function ExplainLogRateSpikesAnalysisTableProvider({
       }
 
       return rows;
-    }
-
-    public rowSelector(analyticsId: string, subSelector?: string) {
-      const row = `~mlAnalyticsTable > ~row-${analyticsId}`;
-      return !subSelector ? row : `${row} > ${subSelector}`;
-    }
-
-    public async assertAnalyticsRowFields(
-      fieldName: string,
-      fieldValue: string,
-      expectedRow: object
-    ) {
-      const rows = await this.parseAnalysisTable();
-      const analyticsRow = rows.filter(
-        (row) => row.fieldName === fieldName && row.fieldValue === fieldValue
-      )[0];
-      expect(analyticsRow).to.eql(
-        expectedRow,
-        `Expected analytics row to be '${JSON.stringify(expectedRow)}' (got '${JSON.stringify(
-          analyticsRow
-        )}')`
-      );
     }
   })();
 }
