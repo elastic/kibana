@@ -7,7 +7,7 @@
  */
 
 // TODO: clintandrewhall - NoDataPageProps is a temporary addition until it is split into its own package
-export type { KibanaPageTemplateProps, NoDataPageProps } from './page_template';
+export type { KibanaPageTemplateProps, NoDataPageProps } from './src/page_template';
 
 // TODO: clintandrewhall - NoDataConfigPage is a temporary addition until it is split into its own package
-export { KibanaPageTemplate, NoDataConfigPage } from './page_template';
+export { KibanaPageTemplate, NoDataConfigPage } from './src/page_template';
