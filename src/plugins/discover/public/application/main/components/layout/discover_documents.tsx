@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataView } from '@kbn/data-views-plugin/public';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
 import { DiscoverGrid } from '../../../../components/discover_grid/discover_grid';
@@ -27,7 +28,6 @@ import {
   HIDE_ANNOUNCEMENTS,
 } from '../../../../../common';
 import { useColumns } from '../../../../hooks/use_data_grid_columns';
-import { SavedSearch } from '../../../../services/saved_searches';
 import { DataDocuments$, DataDocumentsMsg, RecordRawType } from '../../hooks/use_saved_search';
 import { AppState, GetStateReturn } from '../../services/discover_state';
 import { useDataState } from '../../hooks/use_data_state';

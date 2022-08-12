@@ -3187,7 +3187,6 @@
     "discover.savedSearch.savedObjectName": "保存検索",
     "discover.savedSearchAliasMatchRedirect.objectNoun": "{savedSearch}検索",
     "discover.savedSearchEmbeddable.action.viewSavedSearch.displayName": "Discoverで開く",
-    "discover.savedSearchEmbeddable.legacyURLConflict.errorMessage": "この検索にはレガシーエイリアスと同じURLがあります。このエラーを解決するには、エイリアスを無効にしてください：{json}",
     "discover.savedSearchURLConflictCallout.objectNoun": "{savedSearch}検索",
     "discover.searchGenerationWithDescription": "検索{searchTitle}で生成されたテーブル",
     "discover.searchGenerationWithDescriptionGrid": "検索{searchTitle}で生成されたテーブル（{searchDescription}）",

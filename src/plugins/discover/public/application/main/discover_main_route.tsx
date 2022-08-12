@@ -23,7 +23,7 @@ import {
   SavedSearch,
   getSavedSearch,
   getSavedSearchFullPathUrl,
-} from '../../services/saved_searches';
+} from '@kbn/saved-search-plugin/public';
 import { getState } from './services/discover_state';
 import { loadDataView, resolveDataView } from './utils/resolve_data_view';
 import { DiscoverMainApp } from './discover_main_app';

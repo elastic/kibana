@@ -8,13 +8,10 @@
 import { i18n } from '@kbn/i18n';
 import type { SavedSearchAttributes, SavedSearch } from './types';
 
-export {
-  getSavedSearchUrl,
-  getSavedSearchFullPathUrl,
-} from '../../../common/services/saved_searches';
+export { getSavedSearchUrl, getSavedSearchFullPathUrl } from '../../../common';
 
 export const getSavedSearchUrlConflictMessage = async (savedSearch: SavedSearch) =>
-  i18n.translate('discover.savedSearchEmbeddable.legacyURLConflict.errorMessage', {
+  i18n.translate('savedSearch.legacyURLConflict.errorMessage', {
     defaultMessage: `This search has the same URL as a legacy alias. Disable the alias to resolve this error : {json}`,
     values: {
       json: savedSearch.sharingSavedObjectProps?.errorJSON,
