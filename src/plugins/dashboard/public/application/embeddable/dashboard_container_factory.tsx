@@ -7,9 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
-
 import { identity, pickBy } from 'lodash';
+
 import {
   ControlGroupContainer,
   ControlGroupInput,
@@ -17,9 +16,8 @@ import {
   CONTROL_GROUP_TYPE,
 } from '@kbn/controls-plugin/public';
 import { getDefaultControlGroupInput } from '@kbn/controls-plugin/common';
-import { DashboardContainerInput } from '../..';
-import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
-import type { DashboardContainer, DashboardContainerServices } from './dashboard_container';
+import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
+
 import {
   Container,
   ErrorEmbeddable,
@@ -27,10 +25,10 @@ import {
   EmbeddableFactory,
   EmbeddableFactoryDefinition,
 } from '../../services/embeddable';
-import {
-  createExtract,
-  createInject,
-} from '../../../common/embeddable/dashboard_container_persistable_state';
+import { DashboardContainerInput } from '../..';
+import { createExtract, createInject } from '../../../common';
+import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
+import type { DashboardContainer, DashboardContainerServices } from './dashboard_container';
 
 export type DashboardContainerFactory = EmbeddableFactory<
   DashboardContainerInput,

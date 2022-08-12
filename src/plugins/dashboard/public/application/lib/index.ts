@@ -9,7 +9,6 @@
 export * from './filter_utils';
 export { getDashboardIdFromUrl } from './url';
 export { saveDashboard } from './save_dashboard';
-export { migrateAppState } from './migrate_app_state';
 export { addHelpMenuToAppChrome } from './help_menu_util';
 export { diffDashboardState } from './diff_dashboard_state';
 export { getTagsFromSavedDashboard } from './dashboard_tagging';
@@ -22,10 +21,7 @@ export { syncDashboardDataViews } from './sync_dashboard_data_views';
 export { syncDashboardContainerInput } from './sync_dashboard_container_input';
 export { loadDashboardHistoryLocationState } from './load_dashboard_history_location_state';
 export { buildDashboardContainer, tryDestroyDashboardContainer } from './build_dashboard_container';
-export {
-  stateToDashboardContainerInput,
-  savedObjectToDashboardState,
-} from './convert_dashboard_state';
+export { stateToDashboardContainerInput } from './convert_dashboard_state';
 export {
   createSessionRestorationDataProvider,
   enableDashboardSearchSessions,

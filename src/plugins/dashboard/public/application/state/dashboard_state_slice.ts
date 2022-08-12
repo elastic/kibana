@@ -11,7 +11,8 @@ import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 
 import { Filter, Query, TimeRange } from '../../services/data';
 import { ViewMode } from '../../services/embeddable';
-import { DashboardOptions, DashboardPanelMap, DashboardState } from '../../types';
+import { DashboardOptions, DashboardState } from '../../types';
+import { DashboardPanelMap } from '../../../common';
 
 export const dashboardStateSlice = createSlice({
   name: 'dashboardState',

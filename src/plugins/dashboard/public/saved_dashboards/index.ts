@@ -6,6 +6,5 @@
  * Side Public License, v 1.
  */
 
-export * from '../../common/saved_dashboard_references';
 export * from './saved_dashboard';
 export * from './saved_dashboards';

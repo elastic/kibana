@@ -176,6 +176,19 @@ export const serializeControlGroupToDashboardSavedObject = (
   }
 };
 
+export const serializeControlGroupInput = (
+  controlGroupInput: DashboardState['controlGroupInput']
+) => {
+  // only save to saved object if control group is not default
+  if (
+    !controlGroupInput ||
+    persistableControlGroupInputIsEqual(controlGroupInput, getDefaultControlGroupInput())
+  ) {
+    return undefined;
+  }
+  return controlGroupInputToRawControlGroupAttributes(controlGroupInput);
+};
+
 export const deserializeControlGroupFromDashboardSavedObject = (
   dashboardSavedObject: DashboardSavedObject
 ): Omit<ControlGroupInput, 'id'> | undefined => {

@@ -19,7 +19,6 @@ import {
   getDashboardTitle,
   leaveConfirmStrings,
 } from '../dashboard_strings';
-import { createDashboardEditUrl } from '../dashboard_constants';
 import { EmbeddableRenderer, ViewMode } from '../services/embeddable';
 import { DashboardTopNav, isCompleteDashboardAppState } from './top_nav/dashboard_top_nav';
 import { DashboardAppServices, DashboardEmbedSettings, DashboardRedirect } from '../types';
@@ -38,16 +37,8 @@ export function DashboardApp({
   redirectTo,
   history,
 }: DashboardAppProps) {
-  const {
-    core,
-    chrome,
-    embeddable,
-    onAppLeave,
-    uiSettings,
-    data,
-    spacesService,
-    screenshotModeService,
-  } = useKibana<DashboardAppServices>().services;
+  const { core, chrome, embeddable, onAppLeave, uiSettings, data, screenshotModeService } =
+    useKibana<DashboardAppServices>().services;
 
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
   const dashboardTitleRef = useRef<HTMLHeadingElement>(null);
@@ -160,17 +151,7 @@ export function DashboardApp({
             dashboardAppState={dashboardAppState}
           />
 
-          {dashboardAppState.savedDashboard.outcome === 'conflict' &&
-          dashboardAppState.savedDashboard.id &&
-          dashboardAppState.savedDashboard.aliasId
-            ? spacesService?.ui.components.getLegacyUrlConflict({
-                currentObjectId: dashboardAppState.savedDashboard.id,
-                otherObjectId: dashboardAppState.savedDashboard.aliasId,
-                otherObjectPath: `#${createDashboardEditUrl(
-                  dashboardAppState.savedDashboard.aliasId
-                )}${history.location.search}`,
-              })
-            : null}
+          {dashboardAppState.createConflictWarning?.()}
           <div
             className={`dashboardViewport ${
               screenshotModeService && screenshotModeService.isScreenshotMode()

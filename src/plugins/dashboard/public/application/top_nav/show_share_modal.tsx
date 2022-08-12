@@ -12,7 +12,6 @@ import moment from 'moment';
 import React, { ReactElement, useState } from 'react';
 import type { Capabilities } from '@kbn/core/public';
 import { SerializableControlGroupInput } from '@kbn/controls-plugin/common';
-import { DashboardSavedObject } from '../..';
 import { shareModalStrings } from '../../dashboard_strings';
 import { DashboardAppLocatorParams, DASHBOARD_APP_LOCATOR } from '../../locator';
 import { TimeRange } from '../../services/data';
@@ -22,8 +21,8 @@ import { SharePluginStart } from '../../services/share';
 import { DashboardAppCapabilities, DashboardState } from '../../types';
 import { dashboardUrlParams } from '../dashboard_router';
 import { stateToRawDashboardState } from '../lib/convert_dashboard_state';
-import { convertPanelMapToSavedPanels } from '../lib/convert_dashboard_panels';
 import { DashboardSessionStorage } from '../lib';
+import { convertPanelMapToSavedPanels } from '../../../common';
 
 const showFilterBarId = 'showFilterBar';
 
@@ -33,7 +32,6 @@ export interface ShowShareModalProps {
   kibanaVersion: string;
   share: SharePluginStart;
   anchorElement: HTMLElement;
-  savedDashboard: DashboardSavedObject;
   currentDashboardState: DashboardState;
   dashboardCapabilities: DashboardAppCapabilities;
   dashboardSessionStorage: DashboardSessionStorage;
@@ -53,7 +51,6 @@ export function ShowShareModal({
   timeRange,
   kibanaVersion,
   anchorElement,
-  savedDashboard,
   dashboardCapabilities,
   currentDashboardState,
   dashboardSessionStorage,
@@ -119,7 +116,9 @@ export function ShowShareModal({
     DashboardAppLocatorParams,
     'options' | 'query' | 'savedQuery' | 'filters' | 'panels' | 'controlGroupInput'
   > = {};
-  const unsavedDashboardState = dashboardSessionStorage.getState(savedDashboard.id);
+  const unsavedDashboardState = dashboardSessionStorage.getState(
+    currentDashboardState.savedObjectId
+  );
   if (unsavedDashboardState) {
     unsavedStateForLocator = {
       query: unsavedDashboardState.query,
@@ -133,8 +132,10 @@ export function ShowShareModal({
     };
   }
 
+  const { savedObjectId, title } = currentDashboardState;
+
   const locatorParams: DashboardAppLocatorParams = {
-    dashboardId: savedDashboard.id,
+    dashboardId: savedObjectId,
     preserveSavedFilters: true,
     refreshInterval: undefined, // We don't share refresh interval externally
     viewMode: ViewMode.VIEW, // For share locators we always load the dashboard in view mode
@@ -157,11 +158,11 @@ export function ShowShareModal({
       { useHash: false, storeInHashQuery: true },
       unhashUrl(window.location.href)
     ),
-    objectId: savedDashboard.id,
+    objectId: savedObjectId,
     objectType: 'dashboard',
     sharingData: {
       title:
-        savedDashboard.title ||
+        title ||
         i18n.translate('dashboard.share.defaultDashboardTitle', {
           defaultMessage: 'Dashboard [{date}]',
           values: { date: moment().toISOString(true) },

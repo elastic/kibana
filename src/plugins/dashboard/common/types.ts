@@ -16,8 +16,8 @@ import {
   PersistableControlGroupInput,
   RawControlGroupAttributes,
 } from '@kbn/controls-plugin/common';
+import { RefreshInterval } from '@kbn/data-plugin/common';
 import { SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/common/lib/saved_object_embeddable';
-import { RefreshInterval } from '../public/services/data';
 
 export interface DashboardCapabilities {
   showWriteControls: boolean;
@@ -33,7 +33,7 @@ export interface DashboardCapabilities {
  */
 export interface DashboardAttributes {
   controlGroupInput?: RawControlGroupAttributes;
-  refreshInterval: RefreshInterval;
+  refreshInterval?: RefreshInterval;
   timeRestore: boolean;
   optionsJSON?: string;
   useMargins?: boolean;

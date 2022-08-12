@@ -45,6 +45,13 @@ export const defaultDashboardState: DashboardState = {
   },
 };
 
+export const getFullPath = (aliasId?: string, id?: string) =>
+  `/app/dashboards#${createDashboardEditUrl(aliasId || id)}`;
+
+export const getFullEditPath = (id?: string, editMode?: boolean) => {
+  return `/app/dashboards#${createDashboardEditUrl(id, editMode)}`;
+};
+
 export function createDashboardEditUrl(id?: string, editMode?: boolean) {
   if (!id) {
     return `${DashboardConstants.CREATE_NEW_DASHBOARD_URL}`;

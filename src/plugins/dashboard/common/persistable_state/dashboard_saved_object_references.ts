@@ -24,15 +24,15 @@ import {
   convertSavedDashboardPanelToPanelState,
 } from '../lib/dashboard_panel_converters';
 
-export interface ExtractDeps {
+interface ExtractDeps {
   embeddablePersistableStateService: EmbeddablePersistableStateService;
 }
 
-export interface InjectDeps {
+interface InjectDeps {
   embeddablePersistableStateService: EmbeddablePersistableStateService;
 }
 
-export interface SavedObjectAttributesAndReferences {
+interface SavedObjectAttributesAndReferences {
   attributes: SavedObjectAttributes;
   references: SavedObjectReference[];
 }

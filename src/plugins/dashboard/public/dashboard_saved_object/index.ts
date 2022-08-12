@@ -7,3 +7,4 @@
  */
 
 export { loadDashboardStateFromSavedObject } from './load_dashboard_state_from_saved_object';
+export { saveDashboardStateToSavedObject } from './save_dashboard_state_to_saved_object';

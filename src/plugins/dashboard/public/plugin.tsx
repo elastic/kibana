@@ -118,7 +118,7 @@ export interface DashboardSetup {
 }
 
 export interface DashboardStart {
-  getSavedDashboardLoader: () => SavedObjectLoader;
+  getSavedDashboardLoader: () => SavedObjectLoader; // TODO SAVED DASHBOARDS - remove this
   getDashboardContainerByValueRenderer: () => ReturnType<
     typeof createDashboardContainerByValueRenderer
   >;

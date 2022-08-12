@@ -10,10 +10,9 @@ import _ from 'lodash';
 import { Subscription } from 'rxjs';
 import { debounceTime, tap } from 'rxjs/operators';
 
-import { compareFilters, COMPARE_ALL_OPTIONS, type Filter } from '@kbn/es-query';
+import { compareFilters, COMPARE_ALL_OPTIONS } from '@kbn/es-query';
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/public';
 import { DashboardContainer } from '../embeddable';
-import { Query } from '../../services/data';
 import { DashboardConstants } from '../..';
 import {
   setControlGroupState,
@@ -39,9 +38,7 @@ type ApplyStateChangesToContainerProps = SyncDashboardContainerCommon & {
   force: boolean;
 };
 
-type ApplyContainerChangesToStateProps = SyncDashboardContainerCommon & {
-  applyFilters: (query: Query, filters: Filter[]) => void;
-};
+type ApplyContainerChangesToStateProps = SyncDashboardContainerCommon;
 
 type SyncDashboardContainerProps = SyncDashboardContainerCommon & ApplyContainerChangesToStateProps;
 
@@ -91,7 +88,6 @@ export const syncDashboardContainerInput = (
 
 export const applyContainerChangesToState = ({
   query,
-  applyFilters,
   dashboardContainer,
   getLatestDashboardState,
   dispatchDashboardStateChange,
@@ -105,7 +101,6 @@ export const applyContainerChangesToState = ({
   if (!compareFilters(input.filters, filterManager.getFilters(), COMPARE_ALL_OPTIONS)) {
     // Add filters modifies the object passed to it, hence the clone deep.
     filterManager.addFilters(_.cloneDeep(input.filters));
-    applyFilters(latestState.query, input.filters);
   }
 
   if (!_.isEqual(input.panels, latestState.panels)) {

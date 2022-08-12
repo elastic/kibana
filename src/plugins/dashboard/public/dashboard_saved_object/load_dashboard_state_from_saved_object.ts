@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { ReactElement } from 'react';
 
 import { rawControlGroupAttributesToControlGroupInput } from '@kbn/controls-plugin/common';
-import { SavedObjectsClientContract, ScopedHistory } from '@kbn/core/public';
-import { convertSavedPanelsToPanelMap } from '@kbn/dashboard-plugin/common';
+import { SavedObjectAttributes, SavedObjectsClientContract, ScopedHistory } from '@kbn/core/public';
 
 import {
   DashboardConstants,
@@ -21,19 +21,20 @@ import {
   parseSearchSourceJSON,
   injectSearchSourceReferences,
 } from '../services/data';
-import { ViewMode } from '../services/embeddable';
+import { EmbeddableStart, ViewMode } from '../services/embeddable';
 import { DashboardAttributes } from '../application';
 import { SpacesPluginStart } from '../services/spaces';
 import { DashboardOptions, DashboardState } from '../types';
+import { convertSavedPanelsToPanelMap, injectReferences } from '../../common';
 import { cleanFiltersForSerialize } from '../application/lib';
 import { SavedObjectNotFound } from '../services/kibana_utils';
 import { migrateLegacyQuery } from '../application/lib/migrate_legacy_query';
 import { SavedObjectsTaggingApi } from '../services/saved_objects_tagging_oss';
-import { ReactElement } from 'react';
 
 interface LoadDashboardFromSavedObjectProps {
   id?: string;
   isScreenshotMode: boolean;
+  embeddableStart: EmbeddableStart;
   dataStart: DataPublicPluginStart;
   spacesService?: SpacesPluginStart;
   getScopedHistory: () => ScopedHistory;
@@ -44,7 +45,7 @@ interface LoadDashboardFromSavedObjectProps {
 interface LoadDashboardFromSavedObjectReturn {
   redirectedToAlias?: boolean;
   dashboardState?: DashboardState;
-  conflictWarningComponent?: ReactElement;
+  createConflictWarning?: () => ReactElement | undefined;
 }
 
 type SuccessfulLoadDashboardFromSavedObjectReturn = LoadDashboardFromSavedObjectReturn & {
@@ -62,6 +63,7 @@ export const loadDashboardStateFromSavedObject = async ({
   savedObjectsClient,
   getScopedHistory,
   isScreenshotMode,
+  embeddableStart,
   spacesService,
   dataStart,
   id,
@@ -93,6 +95,20 @@ export const loadDashboardStateFromSavedObject = async ({
   }
 
   /**
+   * Inject saved object references back into the saved object attributes
+   */
+  const { references, attributes: rawAttributes } = rawDashboardSavedObject;
+  const attributes = (() => {
+    if (!references || references.length === 0) return rawAttributes;
+    return injectReferences(
+      { references, attributes: rawAttributes as unknown as SavedObjectAttributes },
+      {
+        embeddablePersistableStateService: embeddableStart,
+      }
+    ) as unknown as DashboardAttributes;
+  })();
+
+  /**
    * Handle saved object resolve alias outcome by redirecting
    */
   const scopedHistory = getScopedHistory();
@@ -109,19 +125,19 @@ export const loadDashboardStateFromSavedObject = async ({
   /**
    * Create conflict warning component if there is a saved object id conflict
    */
-  const conflictWarningComponent =
+  const createConflictWarning =
     outcome === 'conflict' && aliasId
-      ? spacesService?.ui.components.getLegacyUrlConflict({
-          currentObjectId: id,
-          otherObjectId: aliasId,
-          otherObjectPath: `#${createDashboardEditUrl(aliasId)}${scopedHistory.location.search}`,
-        })
+      ? () =>
+          spacesService?.ui.components.getLegacyUrlConflict({
+            currentObjectId: id,
+            otherObjectId: aliasId,
+            otherObjectPath: `#${createDashboardEditUrl(aliasId)}${scopedHistory.location.search}`,
+          })
       : undefined;
 
   /**
    * Create search source and pull filters and query from it.
    */
-  const { attributes, references } = rawDashboardSavedObject;
   const searchSourceJSON = attributes.kibanaSavedObjectMeta.searchSourceJSON;
   const searchSource = await (async () => {
     if (!searchSourceJSON) {
@@ -139,7 +155,7 @@ export const loadDashboardStateFromSavedObject = async ({
   const filters = cleanFiltersForSerialize((searchSource?.getOwnField('filter') as Filter[]) ?? []);
 
   const query = migrateLegacyQuery(
-    searchSource?.getOwnField('query') || queryString.getDefaultQuery() // TODO determine if migrateLegacyQuery is still needed
+    searchSource?.getOwnField('query') || queryString.getDefaultQuery() // TODO SAVED DASHBOARDS determine if migrateLegacyQuery is still needed
   );
 
   const {
@@ -168,7 +184,7 @@ export const loadDashboardStateFromSavedObject = async ({
   const panels = convertSavedPanelsToPanelMap(panelsJSON ? JSON.parse(panelsJSON) : []);
 
   return {
-    conflictWarningComponent,
+    createConflictWarning,
     dashboardState: {
       ...defaultDashboardState,
 

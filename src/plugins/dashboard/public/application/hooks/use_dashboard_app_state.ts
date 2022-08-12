@@ -164,6 +164,7 @@ export const useDashboardAppState = ({
       const loadSavedDashboardResult = await loadDashboardStateFromSavedObject({
         isScreenshotMode: screenshotModeService?.isScreenshotMode(),
         getScopedHistory: scopedHistory,
+        embeddableStart: embeddable,
         id: savedDashboardId,
         savedObjectsTagging,
         savedObjectsClient,
@@ -175,7 +176,8 @@ export const useDashboardAppState = ({
         // Early return if the saved object has an aliasMatch and has redirected to it.
         return;
       }
-      const { dashboardState: savedDashboardState } = loadSavedDashboardResult;
+      const { dashboardState: savedDashboardState, createConflictWarning } =
+        loadSavedDashboardResult;
 
       /**
        * Combine initial state from the saved object, session storage, and URL, then dispatch it to Redux.
@@ -210,7 +212,7 @@ export const useDashboardAppState = ({
       /**
        * Start syncing dashboard state with the Query, Filters and Timepicker from the Query Service.
        */
-      const { applyFilters, stopSyncingDashboardFilterState } = syncDashboardFilterState({
+      const { stopSyncingDashboardFilterState } = syncDashboardFilterState({
         ...dashboardBuildContext,
         initialDashboardState,
       });
@@ -258,7 +260,6 @@ export const useDashboardAppState = ({
       const stopSyncingContainerInput = syncDashboardContainerInput({
         ...dashboardBuildContext,
         dashboardContainer,
-        applyFilters,
       });
 
       /**
@@ -324,9 +325,9 @@ export const useDashboardAppState = ({
       docTitle.change(savedDashboardState.title || getNewDashboardTitle());
       setDashboardAppState((s) => ({
         ...s,
-        applyFilters,
         dashboardContainer,
         updateLastSavedState,
+        createConflictWarning,
         getLatestDashboardState: dashboardBuildContext.getLatestDashboardState,
       }));
 
@@ -354,28 +355,29 @@ export const useDashboardAppState = ({
     $onLastSavedStateChange,
     dashboardSessionStorage,
     dashboardCapabilities,
+    screenshotModeService,
     isEmbeddedExternally,
     kbnUrlStateStorage,
     savedObjectsTagging,
     initializerContext,
+    savedObjectsClient,
+    setShowNoDataPage,
     savedDashboardId,
     getStateTransfer,
     savedDashboards,
     usageCollection,
+    showNoDataPage,
+    spacesService,
     scopedHistory,
     notifications,
-    dataViews,
     kibanaVersion,
+    dataViews,
     embeddable,
     docTitle,
     history,
     search,
     query,
     data,
-    showNoDataPage,
-    setShowNoDataPage,
-    spacesService?.ui,
-    screenshotModeService,
   ]);
 
   /**

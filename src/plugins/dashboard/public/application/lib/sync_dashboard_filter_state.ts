@@ -8,10 +8,8 @@
 
 import _ from 'lodash';
 import { merge } from 'rxjs';
-import { debounceTime, finalize, map, switchMap, tap } from 'rxjs/operators';
-import { setQuery } from '../state';
+import { finalize, map, switchMap, tap } from 'rxjs/operators';
 import { DashboardBuildContext, DashboardState } from '../../types';
-import { DashboardSavedObject } from '../../saved_dashboards';
 import { setFiltersAndQuery } from '../state/dashboard_state_slice';
 import {
   syncQueryStateWithUrl,
@@ -42,7 +40,7 @@ export const syncDashboardFilterState = ({
   $triggerDashboardRefresh,
   dispatchDashboardStateChange,
 }: SyncDashboardFilterStateProps) => {
-  const { filterManager, queryString, timefilter } = queryService;
+  const { queryString, timefilter } = queryService;
   const { timefilter: timefilterService } = timefilter;
 
   // apply initial dashboard filter state.
@@ -51,12 +49,6 @@ export const syncDashboardFilterState = ({
     kbnUrlStateStorage,
     queryService,
   });
-
-  // this callback will be used any time new filters and query need to be applied.
-  const applyFilters = (query: Query, filters: Filter[]) => {
-    console.log('HEY! Try deleting me later and see what happens');
-    dispatchDashboardStateChange(setQuery(query));
-  };
 
   // starts syncing `_g` portion of url with query services
   const { stop: stopSyncingQueryServiceStateWithUrl } = syncQueryStateWithUrl(
@@ -76,7 +68,6 @@ export const syncDashboardFilterState = ({
       set: ({ filters, query }) => {
         intermediateFilterState.filters = cleanFiltersForSerialize(filters ?? []) || [];
         intermediateFilterState.query = query || queryString.getDefaultQuery();
-        applyFilters(intermediateFilterState.query, intermediateFilterState.filters);
         dispatchDashboardStateChange(setFiltersAndQuery(intermediateFilterState));
       },
       state$: $onDashboardStateChange.pipe(
@@ -91,11 +82,6 @@ export const syncDashboardFilterState = ({
       filters: true,
     }
   );
-
-  // apply filters when the filter manager changes
-  const filterManagerSubscription = merge(filterManager.getUpdates$(), queryString.getUpdates$())
-    .pipe(debounceTime(100))
-    .subscribe(() => applyFilters(queryString.getQuery() as Query, filterManager.getFilters()));
 
   const timeRefreshSubscription = merge(
     timefilterService.getRefreshIntervalUpdate$(),
@@ -122,14 +108,13 @@ export const syncDashboardFilterState = ({
     .subscribe();
 
   const stopSyncingDashboardFilterState = () => {
-    filterManagerSubscription.unsubscribe();
     forceRefreshSubscription.unsubscribe();
     timeRefreshSubscription.unsubscribe();
     stopSyncingQueryServiceStateWithUrl();
     stopSyncingAppFilters();
   };
 
-  return { applyFilters, stopSyncingDashboardFilterState };
+  return { stopSyncingDashboardFilterState };
 };
 
 interface ApplyDashboardFilterStateProps {

@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { ReactElement } from 'react';
 
 import type {
   AppMountParameters,
@@ -39,7 +40,7 @@ import { ContainerInput, EmbeddableInput, ViewMode } from './services/embeddable
 import { SavedObjectLoader, SavedObjectsStart } from './services/saved_objects';
 import type { ScreenshotModePluginStart } from './services/screenshot_mode';
 import { IKbnUrlStateStorage } from './services/kibana_utils';
-import type { DashboardContainer, DashboardSavedObject } from '.';
+import type { DashboardContainer } from '.';
 import { DashboardAppLocatorParams } from './locator';
 import { SpacesPluginStart } from './services/spaces';
 
@@ -108,10 +109,10 @@ export interface DashboardAppState {
   updateLastSavedState?: () => void;
   resetToLastSavedState?: () => void;
   dashboardContainer?: DashboardContainer;
+  createConflictWarning?: () => ReactElement | undefined;
   getLatestDashboardState?: () => DashboardState;
   $triggerDashboardRefresh: Subject<{ force?: boolean }>;
   $onDashboardStateChange: BehaviorSubject<DashboardState>;
-  applyFilters?: (query: Query, filters: Filter[]) => void;
 }
 
 /**
