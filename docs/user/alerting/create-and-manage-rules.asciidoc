@@ -142,7 +142,7 @@ Actions are not required on rules. You can run a rule without actions to underst
 [[controlling-rules]]
 === Snooze and disable rules
 
-The rule listing enables you to quickly snooze, disable, or enable, and delete
+The rule listing enables you to quickly snooze, disable, enable, or delete
 individual rules. For example, you can change the state of a rule:
 
 [role="screenshot"]
