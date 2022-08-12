@@ -199,9 +199,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       describe('login with cases all user', () => {
         before(async () => {
-          await createAndNavigateToCase(getPageObject, getService);
           await security.forceLogout();
           await security.login(casesAllUser.username, casesAllUser.password);
+          await createAndNavigateToCase(getPageObject, getService);
         });
 
         after(async () => {

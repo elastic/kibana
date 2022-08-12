@@ -44,6 +44,7 @@ describe('SuggestUsers', () => {
       Array [
         Object {
           "data": Object {},
+          "enabled": true,
           "uid": "u_9xDEQqUqoYCnFnPPLq5mIRHKL8gBTo_NiKgOnd5gGk0_0",
           "user": Object {
             "email": "wet_dingo@elastic.co",

@@ -93,6 +93,7 @@ describe('UserProfilesPopover', () => {
               Array [
                 Object {
                   "data": Object {},
+                  "enabled": true,
                   "uid": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
                   "user": Object {
                     "email": "damaged_raccoon@profiles.elastic.co",
@@ -106,6 +107,7 @@ describe('UserProfilesPopover', () => {
               Array [
                 Object {
                   "data": Object {},
+                  "enabled": true,
                   "uid": "u_BOulL4QMPSyV9jg5lQI2JmCkUnokHTazBnet3xVHNv0_0",
                   "user": Object {
                     "email": "delighted_nightingale@profiles.elastic.co",
