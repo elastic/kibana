@@ -10,7 +10,7 @@ import { uniq } from 'lodash';
 import type { CoreStart } from '@kbn/core/public';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { FieldStatsResponse, fetchFieldStats } from '@kbn/unified-field-list-plugin/public';
+import { FieldStatsResponse, loadFieldStats } from '@kbn/unified-field-list-plugin/public';
 import { GenericIndexPatternColumn, operationDefinitionMap } from '..';
 import { defaultLabel } from '../filters';
 import { isReferenced } from '../../layer_helpers';
@@ -139,7 +139,7 @@ export function getDisallowedTermsMessage(
         if (!activeDataFieldNameMatch || currentTerms.length === 0) {
           if (fieldNames.length === 1) {
             const currentDataView = await data.dataViews.get(indexPattern.id);
-            const response: FieldStatsResponse<string | number> = await fetchFieldStats({
+            const response: FieldStatsResponse<string | number> = await loadFieldStats({
               data,
               dataView: currentDataView,
               field: indexPattern.getFieldByName(fieldNames[0])!,

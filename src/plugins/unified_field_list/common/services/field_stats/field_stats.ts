@@ -24,7 +24,7 @@ interface FetchFieldStatsParams {
   abortController?: AbortController;
 }
 
-export const fetchFieldStats = async ({
+export const loadFieldStats = async ({
   data,
   dataView,
   field,

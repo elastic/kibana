@@ -39,10 +39,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { buildEsQuery, Query, Filter, AggregateQuery } from '@kbn/es-query';
 import type { BucketedAggregation } from '../../../common/types';
-import {
-  fetchFieldStats,
-  canProvideFieldStatsForField,
-} from '../../../common/services/field_stats';
+import { loadFieldStats, canProvideFieldStatsForField } from '../../../common/services/field_stats';
 import { useUnifiedFieldListServices } from '../../hooks/use_unified_field_list_services';
 import './field_stats.scss';
 
@@ -131,7 +128,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
       abortControllerRef.current?.abort();
       abortControllerRef.current = new AbortController();
 
-      const results = await fetchFieldStats({
+      const results = await loadFieldStats({
         data,
         dataView: loadedDataView,
         field,

@@ -35,7 +35,7 @@ import { cloneDeep } from 'lodash';
 import { IncludeExcludeRow } from './include_exclude_options';
 
 jest.mock('@kbn/unified-field-list-plugin/common/services/field_stats', () => ({
-  fetchFieldStats: jest.fn().mockResolvedValue({
+  loadFieldStats: jest.fn().mockResolvedValue({
     topValues: {
       buckets: [
         {

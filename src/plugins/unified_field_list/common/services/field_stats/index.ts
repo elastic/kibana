@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { fetchFieldStats } from './field_stats';
+export { loadFieldStats } from './field_stats';
 export { canProvideFieldStatsForField } from './field_stats_utils';

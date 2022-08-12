@@ -22,11 +22,11 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { fetchFieldStats } from '@kbn/unified-field-list-plugin/common/services/field_stats';
+import { loadFieldStats } from '@kbn/unified-field-list-plugin/common/services/field_stats';
 import { DOCUMENT_FIELD_NAME } from '../../common';
 
 jest.mock('@kbn/unified-field-list-plugin/common/services/field_stats/field_stats', () => ({
-  fetchFieldStats: jest.fn().mockResolvedValue({}),
+  loadFieldStats: jest.fn().mockResolvedValue({}),
 }));
 
 const chartsThemeService = chartPluginMock.createSetupContract().theme;
@@ -202,7 +202,7 @@ describe('IndexPattern Field Item', () => {
   it('should request field stats every time the button is clicked', async () => {
     let resolveFunction: (arg: unknown) => void;
 
-    (fetchFieldStats as jest.Mock).mockImplementation(() => {
+    (loadFieldStats as jest.Mock).mockImplementation(() => {
       return new Promise((resolve) => {
         resolveFunction = resolve;
       });
@@ -214,7 +214,7 @@ describe('IndexPattern Field Item', () => {
 
     await wrapper.update();
 
-    expect(fetchFieldStats).toHaveBeenCalledWith({
+    expect(loadFieldStats).toHaveBeenCalledWith({
       abortController: new AbortController(),
       data: mockedServices.data,
       dataView,
@@ -257,7 +257,7 @@ describe('IndexPattern Field Item', () => {
 
     await wrapper.update();
 
-    expect(fetchFieldStats).toHaveBeenCalledTimes(1);
+    expect(loadFieldStats).toHaveBeenCalledTimes(1);
 
     act(() => {
       const closePopover = wrapper.find(EuiPopover).prop('closePopover');
@@ -288,8 +288,8 @@ describe('IndexPattern Field Item', () => {
 
     await wrapper.update();
 
-    expect(fetchFieldStats).toHaveBeenCalledTimes(2);
-    expect(fetchFieldStats).toHaveBeenLastCalledWith({
+    expect(loadFieldStats).toHaveBeenCalledTimes(2);
+    expect(loadFieldStats).toHaveBeenLastCalledWith({
       abortController: new AbortController(),
       data: mockedServices.data,
       dataView,
@@ -316,8 +316,8 @@ describe('IndexPattern Field Item', () => {
       field: defaultProps.field,
     });
 
-    (fetchFieldStats as jest.Mock).mockReset();
-    (fetchFieldStats as jest.Mock).mockImplementation(() => Promise.resolve({}));
+    (loadFieldStats as jest.Mock).mockReset();
+    (loadFieldStats as jest.Mock).mockImplementation(() => Promise.resolve({}));
   });
 
   it('should not request field stats for document field', async () => {
@@ -329,7 +329,7 @@ describe('IndexPattern Field Item', () => {
 
     await wrapper.update();
 
-    expect(fetchFieldStats).not.toHaveBeenCalled();
+    expect(loadFieldStats).not.toHaveBeenCalled();
     expect(wrapper.find(EuiPopover).prop('isOpen')).toEqual(true);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
   });
@@ -350,6 +350,6 @@ describe('IndexPattern Field Item', () => {
 
     await clickField(wrapper, 'ip_range');
 
-    expect(fetchFieldStats).not.toHaveBeenCalled();
+    expect(loadFieldStats).not.toHaveBeenCalled();
   });
 });
