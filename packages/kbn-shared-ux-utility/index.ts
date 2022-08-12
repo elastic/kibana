@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { Fallback } from './fallback';
-export { withSuspense } from './with_suspense';
-export { getClosestLink, hasActiveModifierKey } from './utils';
+export { Fallback } from './src/fallback';
+export { withSuspense } from './src/with_suspense';
+export { getClosestLink, hasActiveModifierKey } from './src/utils';

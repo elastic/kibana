@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export type { SomeDevLog, SomeLogLevel } from './some_dev_log';
+export type { SomeDevLog, SomeLogLevel } from './src/some_dev_log';
