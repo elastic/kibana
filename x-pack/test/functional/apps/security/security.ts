@@ -16,8 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const spaces = getService('spaces');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/60132
-  describe.skip('Security', function () {
+  describe('Security', function () {
     this.tags('includeFirefox');
     describe('Login Page', () => {
       before(async () => {
