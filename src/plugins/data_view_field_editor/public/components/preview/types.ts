@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { Observable } from 'rxjs';
+import { Subject } from 'rxjs';
 import type {
   RuntimeType,
   RuntimeField,
@@ -91,7 +91,7 @@ export type ChangeSet = Record<string, Change>;
 
 export interface Context {
   fields: FieldPreview[];
-  previewFields$: Observable<ChangeSet>;
+  fieldPreview$: Subject<FieldPreview[]>;
   error: PreviewError | null;
   fieldTypeInfo?: FieldTypeInfo[];
   initialPreviewComplete: boolean;

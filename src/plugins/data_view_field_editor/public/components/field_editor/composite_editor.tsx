@@ -23,82 +23,88 @@ import { ScriptField } from './form_fields';
 import { useFieldEditorContext } from '../field_editor_context';
 import { RUNTIME_FIELD_OPTIONS_PRIMITIVE } from './constants';
 import { valueToComboBoxOption } from './lib';
-import { RuntimePrimitiveTypes } from '../../shared_imports';
+import { RuntimePrimitiveTypes, UseField } from '../../shared_imports';
+import { FieldFormInternal } from './field_editor';
 
 export interface CompositeEditorProps {
   value: Record<string, RuntimePrimitiveTypes>;
   setValue: (newValue: Record<string, RuntimePrimitiveTypes>) => void;
 }
 
-export const CompositeEditor = ({ value, setValue }: CompositeEditorProps) => {
+export const CompositeEditor = () => {
   const { links, existingConcreteFields } = useFieldEditorContext();
-
-  const fields = Object.entries(value);
-
   return (
-    <div data-test-subj="compositeEditor">
-      <ScriptField existingConcreteFields={existingConcreteFields} links={links} />
-      <EuiSpacer size="xl" />
-      <>
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">
-              <FormattedMessage
-                id="indexPatternFieldEditor.editor.compositeFieldsCount"
-                defaultMessage="Generated fields"
-              />
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiNotificationBadge color="subdued">{fields.length}</EuiNotificationBadge>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        {Object.entries(value).map(([key, itemValue], idx) => {
-          return (
-            <div>
-              <EuiFlexGroup gutterSize="s">
-                <EuiFlexItem>
-                  <EuiFieldText value={key} disabled={true} />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiFormRow fullWidth>
-                    <EuiComboBox
-                      placeholder={i18n.translate(
-                        'indexPatternFieldEditor.editor.form.runtimeType.placeholderLabel',
-                        {
-                          defaultMessage: 'Select a type',
-                        }
-                      )}
-                      singleSelection={{ asPlainText: true }}
-                      options={RUNTIME_FIELD_OPTIONS_PRIMITIVE}
-                      selectedOptions={[valueToComboBoxOption(itemValue)!]}
-                      onChange={(newValue) => {
-                        if (newValue.length === 0) {
-                          // Don't allow clearing the type. One must always be selected
-                          return;
-                        }
-                        // update the type for the given field
-                        value[key] = newValue[0].value! as RuntimePrimitiveTypes;
-                        // retun new object as to trigger react hooks
-                        setValue({ ...value });
-                      }}
-                      isClearable={false}
-                      data-test-subj={`typeField_${idx}`}
-                      aria-label={i18n.translate(
-                        'indexPatternFieldEditor.editor.form.typeSelectAriaLabel',
-                        {
-                          defaultMessage: 'Type select',
-                        }
-                      )}
-                      fullWidth
+    <UseField<FieldFormInternal['fields']> path="fields">
+      {({ value = {}, setValue }) => {
+        return (
+          <div data-test-subj="compositeEditor">
+            <ScriptField existingConcreteFields={existingConcreteFields} links={links} />
+            <EuiSpacer size="xl" />
+            <>
+              <EuiFlexGroup gutterSize="s" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s">
+                    <FormattedMessage
+                      id="indexPatternFieldEditor.editor.compositeFieldsCount"
+                      defaultMessage="Generated fields"
                     />
-                  </EuiFormRow>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiNotificationBadge color="subdued">
+                    {Object.entries(value).length}
+                  </EuiNotificationBadge>
                 </EuiFlexItem>
               </EuiFlexGroup>
-            </div>
-          );
-        })}
-      </>
-    </div>
+              {Object.entries(value).map(([key, itemValue], idx) => {
+                return (
+                  <div>
+                    <EuiFlexGroup gutterSize="s">
+                      <EuiFlexItem>
+                        <EuiFieldText value={key} disabled={true} />
+                      </EuiFlexItem>
+                      <EuiFlexItem>
+                        <EuiFormRow fullWidth>
+                          <EuiComboBox
+                            placeholder={i18n.translate(
+                              'indexPatternFieldEditor.editor.form.runtimeType.placeholderLabel',
+                              {
+                                defaultMessage: 'Select a type',
+                              }
+                            )}
+                            singleSelection={{ asPlainText: true }}
+                            options={RUNTIME_FIELD_OPTIONS_PRIMITIVE}
+                            selectedOptions={[valueToComboBoxOption(itemValue.type)!]}
+                            onChange={(newValue) => {
+                              if (newValue.length === 0) {
+                                // Don't allow clearing the type. One must always be selected
+                                return;
+                              }
+                              // update the type for the given field
+                              value[key] = { type: newValue[0].value! as RuntimePrimitiveTypes };
+                              // retun new object as to trigger react hooks
+                              setValue({ ...value });
+                            }}
+                            isClearable={false}
+                            data-test-subj={`typeField_${idx}`}
+                            aria-label={i18n.translate(
+                              'indexPatternFieldEditor.editor.form.typeSelectAriaLabel',
+                              {
+                                defaultMessage: 'Type select',
+                              }
+                            )}
+                            fullWidth
+                          />
+                        </EuiFormRow>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </div>
+                );
+              })}
+            </>
+          </div>
+        );
+      }}
+    </UseField>
   );
 };

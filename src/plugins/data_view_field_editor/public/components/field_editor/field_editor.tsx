@@ -10,6 +10,8 @@ import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiCallOut } from '@elastic/eui';
+import { map, bufferCount, filter } from 'rxjs';
+import { differenceWith, isEqual } from 'lodash';
 
 import {
   Form,
@@ -21,6 +23,7 @@ import {
   TextField,
   RuntimeType,
   RuntimePrimitiveTypes,
+  RuntimeFieldSubFields,
 } from '../../shared_imports';
 import { Field } from '../../types';
 import { useFieldEditorContext } from '../field_editor_context';
@@ -34,6 +37,12 @@ import { FieldDetail } from './field_detail';
 import { CompositeEditor } from './composite_editor';
 import { TypeSelection } from './types';
 import { ChangeType } from '../preview/types';
+export interface Change {
+  changeType: ChangeType;
+  type?: RuntimePrimitiveTypes;
+}
+
+export type ChangeSet = Record<string, Change>;
 
 export interface FieldEditorFormState {
   isValid: boolean | undefined;
@@ -43,6 +52,7 @@ export interface FieldEditorFormState {
 }
 
 export interface FieldFormInternal extends Omit<Field, 'type' | 'internalType' | 'fields'> {
+  fields?: Record<string, { type: RuntimePrimitiveTypes }>;
   type: TypeSelection;
   __meta__: {
     isCustomLabelVisible: boolean;
@@ -105,10 +115,10 @@ const formSerializer = (field: FieldFormInternal): Field => {
 
 const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) => {
   // todo see if we can reduce renders
-  const { namesNotAllowed, fieldTypeToProcess, setSubfields, subfields } = useFieldEditorContext();
+  const { namesNotAllowed, fieldTypeToProcess } = useFieldEditorContext();
   const {
     params: { update: updatePreviewParams },
-    previewFields$,
+    fieldPreview$,
   } = useFieldPreviewContext();
   const { form } = useForm<Field, FieldFormInternal>({
     defaultValue: field,
@@ -144,30 +154,68 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
 
   const isValueVisible = get(formData, '__meta__.isValueVisible');
 
-  // look into using form.subscribe
   useEffect(() => {
-    console.log('*** subscribing');
+    const existingCompositeField = !!Object.keys(form.getFormData().fields || {}).length;
 
-    const sub = previewFields$.subscribe((previewFields) => {
-      console.log('*** from field editor:', previewFields);
+    const changes$ = fieldPreview$.pipe(
+      map((items) =>
+        // reduce the fields to make diffing easier
+        items.map((item) => {
+          const key = item.key.slice(item.key.search('\\.') + 1);
+          return { name: key, type: item.type! };
+        })
+      ),
+      bufferCount(2, 1),
+      // convert values into diff descriptions
+      map(([prev, next]) => {
+        const changes = differenceWith(next, prev, isEqual).reduce<ChangeSet>((col, item) => {
+          col[item.name] = {
+            changeType: ChangeType.UPSERT,
+            type: item.type as RuntimePrimitiveTypes,
+          };
+          return col;
+        }, {} as ChangeSet);
 
-      const modifiedFields = { ...subfields } as Record<string, RuntimePrimitiveTypes>;
+        prev.forEach((prevItem) => {
+          if (!next.find((nextItem) => nextItem.name === prevItem.name)) {
+            changes[prevItem.name] = { changeType: ChangeType.DELETE };
+          }
+        });
+        return changes;
+      }),
+      filter((fields) => Object.keys(fields).length > 0)
+    );
+
+    const sub = changes$.subscribe((previewFields) => {
+      const { fields } = form.getFormData();
+      const theseFields = Object.entries(fields || {}).reduce<RuntimeFieldSubFields>(
+        (acc, [key, value]) => {
+          acc[key] = { type: value.type };
+          return acc;
+        },
+        {}
+      );
+
+      const modifiedFields = { ...theseFields };
 
       Object.entries(previewFields).forEach(([name, change]) => {
         if (change.changeType === ChangeType.DELETE) {
           delete modifiedFields[name];
         } else {
-          modifiedFields[name] = change.type!;
+          modifiedFields[name] = { type: change.type! };
         }
       });
-      console.log('*** modified fields:', modifiedFields);
-
-      setSubfields(modifiedFields);
+      form.updateFieldValues({ ...form.getFormData(), fields: modifiedFields });
     });
+
+    // first preview value is skipped for saved fields, need to populate for new fields
+    if (!existingCompositeField) {
+      fieldPreview$.next([]);
+    }
     return () => {
       sub.unsubscribe();
     };
-  }, [previewFields$, subfields, setSubfields]);
+  }, [form, fieldPreview$]);
 
   useEffect(() => {
     if (onChange) {
@@ -263,12 +311,7 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
           <EuiSpacer size="xl" />
         </>
       )}
-      {updatedType && updatedType[0].value !== 'composite' ? (
-        <FieldDetail />
-      ) : (
-        // todo rename these subfields
-        <CompositeEditor value={subfields || {}} setValue={setSubfields} />
-      )}
+      {updatedType && updatedType[0].value !== 'composite' ? <FieldDetail /> : <CompositeEditor />}
     </Form>
   );
 };

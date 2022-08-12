@@ -8,14 +8,9 @@
 
 import React, { createContext, useContext, FunctionComponent, useMemo } from 'react';
 import { NotificationsStart, CoreStart } from '@kbn/core/public';
-import type {
-  DataView,
-  DataPublicPluginStart,
-  FieldFormatsStart,
-  RuntimePrimitiveTypes,
-} from '../shared_imports';
+import type { DataView, DataPublicPluginStart, FieldFormatsStart } from '../shared_imports';
 import { ApiService } from '../lib/api';
-import type { InternalFieldType, PluginStart, Field } from '../types';
+import type { InternalFieldType, PluginStart } from '../types';
 
 export interface Context {
   dataView: DataView;
@@ -47,16 +42,11 @@ export interface Context {
    * It is also used to provide the list of field autocomplete suggestions to the code editor.
    */
   existingConcreteFields: Array<{ name: string; type: string }>;
-  field?: Field;
-  setSubfields: (newValue: Record<string, RuntimePrimitiveTypes>) => void;
-  subfields?: Record<string, RuntimePrimitiveTypes>;
 }
 
 const fieldEditorContext = createContext<Context | undefined>(undefined);
 
-type FieldEditorProviderProps = Omit<Context, 'setSubfields'>;
-
-export const FieldEditorProvider: FunctionComponent<FieldEditorProviderProps> = ({
+export const FieldEditorProvider: FunctionComponent<Context> = ({
   services,
   dataView,
   links,
@@ -67,22 +57,7 @@ export const FieldEditorProvider: FunctionComponent<FieldEditorProviderProps> = 
   namesNotAllowed,
   existingConcreteFields,
   children,
-  field,
 }) => {
-  const fieldToSubfieldMap = field?.fields
-    ? Object.entries(field?.fields).reduce<Record<string, RuntimePrimitiveTypes>>(
-        (acc, [key, value]) => {
-          acc[key] = value.type;
-          return acc;
-        },
-        {}
-      )
-    : undefined;
-
-  const [subfields, setSubfields] = React.useState<
-    Record<string, RuntimePrimitiveTypes> | undefined
-  >(fieldToSubfieldMap);
-
   const ctx = useMemo<Context>(
     () => ({
       dataView,
@@ -94,8 +69,6 @@ export const FieldEditorProvider: FunctionComponent<FieldEditorProviderProps> = 
       fieldFormatEditors,
       namesNotAllowed,
       existingConcreteFields,
-      subfields,
-      setSubfields,
     }),
     [
       dataView,
@@ -107,8 +80,6 @@ export const FieldEditorProvider: FunctionComponent<FieldEditorProviderProps> = 
       fieldFormatEditors,
       namesNotAllowed,
       existingConcreteFields,
-      subfields,
-      setSubfields,
     ]
   );
 

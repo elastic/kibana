@@ -21,7 +21,6 @@ import { euiFlyoutClassname } from '../constants';
 import type { Field } from '../types';
 import { ModifiedFieldModal, SaveFieldTypeOrNameChangedModal } from './confirm_modals';
 
-import { fieldTypeMapToRuntimeSpecFormat } from './utils';
 import { FieldEditor, FieldEditorFormState } from './field_editor/field_editor';
 import { useFieldEditorContext } from './field_editor_context';
 import { FlyoutPanels } from './flyout_panels';
@@ -71,7 +70,7 @@ const FieldEditorFlyoutContentComponent = ({
 }: Props) => {
   const isMounted = useRef(false);
   const isEditingExistingField = !!fieldToEdit;
-  const { dataView, subfields } = useFieldEditorContext();
+  const { dataView } = useFieldEditorContext();
 
   const {
     panel: { isVisible: isPanelVisible },
@@ -120,14 +119,10 @@ const FieldEditorFlyoutContentComponent = ({
           confirmChangeNameOrType: true,
         });
       } else {
-        if (updatedField.type === 'composite' && subfields) {
-          // merge subfields into the updated field
-          updatedField.fields = fieldTypeMapToRuntimeSpecFormat(subfields);
-        }
         onSave(updatedField);
       }
     }
-  }, [onSave, submit, fieldToEdit, isEditingExistingField, subfields]);
+  }, [onSave, submit, fieldToEdit, isEditingExistingField]);
 
   const onClickCancel = useCallback(() => {
     const canClose = canCloseValidator();
