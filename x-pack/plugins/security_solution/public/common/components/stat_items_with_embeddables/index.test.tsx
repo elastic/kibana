@@ -16,7 +16,6 @@ import { fieldsMapping as fieldTitleChartMapping } from '../../../network/compon
 import {
   mockEmbeddablesData,
   mockNoChartMappings,
-  mockNarrowDateRange,
 } from '../../../network/components/kpi_network/mock';
 import {
   createSecuritySolutionStorageMock,
@@ -65,7 +64,6 @@ describe('Stat Items Component', () => {
     key: 'mock-keys',
     loading: false,
     to,
-    narrowDateRange: mockNarrowDateRange,
   };
   beforeEach(() => {
     jest.clearAllMocks();
