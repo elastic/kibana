@@ -16,14 +16,14 @@ import {
 
 import type { TimeRange } from '@kbn/es-query';
 
-import { SearchInput, SearchOutput } from './types';
-import { SEARCH_EMBEDDABLE_TYPE } from './constants';
-import { SavedSearchEmbeddable } from './saved_search_embeddable';
 import {
   getSavedSearch,
   getSavedSearchUrl,
   throwErrorOnSavedSearchUrlConflict,
-} from '../services/saved_searches';
+} from '@kbn/saved-search-plugin/public';
+import { SearchInput, SearchOutput } from './types';
+import { SEARCH_EMBEDDABLE_TYPE } from './constants';
+import { SavedSearchEmbeddable } from './saved_search_embeddable';
 import { DiscoverServices } from '../build_services';
 
 interface StartServices {
