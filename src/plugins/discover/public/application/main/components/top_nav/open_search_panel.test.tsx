@@ -19,7 +19,7 @@ describe('OpenSearchPanel', () => {
       useDiscoverServices: jest.fn().mockImplementation(() => ({
         addBasePath: (path: string) => path,
         capabilities: { savedObjectsManagement: { edit: true } },
-        savedObjectsFinder: { SavedObjectFinder: jest.fn() },
+        savedObjectsFinder: { Finder: jest.fn() },
       })),
     }));
     const { OpenSearchPanel } = await import('./open_search_panel');
@@ -35,7 +35,7 @@ describe('OpenSearchPanel', () => {
       useDiscoverServices: jest.fn().mockImplementation(() => ({
         addBasePath: (path: string) => path,
         capabilities: { savedObjectsManagement: { edit: false, delete: false } },
-        savedObjectsFinder: { SavedObjectFinder: jest.fn() },
+        savedObjectsFinder: { Finder: jest.fn() },
       })),
     }));
     const { OpenSearchPanel } = await import('./open_search_panel');
