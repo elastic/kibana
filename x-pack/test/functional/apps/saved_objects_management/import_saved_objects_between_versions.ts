@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Export import saved objects between versions', function () {
     before(async function () {
-      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await esArchiver.loadIfNeeded(
         'test/functional/fixtures/es_archiver/getting_started/shakespeare'
@@ -44,7 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
       await esArchiver.unload('test/functional/fixtures/es_archiver/getting_started/shakespeare');
-      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     it('should be able to import 7.13 saved objects into 8.0.0 and verfiy the rendering of two dashboards', async function () {

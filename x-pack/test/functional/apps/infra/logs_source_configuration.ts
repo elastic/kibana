@@ -21,13 +21,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'header', 'infraLogs']);
   const retry = getService('retry');
   const supertest = getService('supertest');
+  const kibanaServer = getService('kibanaServer');
 
   describe('Logs Source Configuration', function () {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('Allows indices configuration', () => {

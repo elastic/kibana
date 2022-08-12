@@ -15,6 +15,7 @@ const timepickerFormat = 'MMM D, YYYY @ HH:mm:ss.SSS';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const pageObjects = getPageObjects([
     'common',
     'infraHome',
@@ -26,7 +27,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('Metrics Explorer', function () {
     this.tags('includeFirefox');
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('Basic Functionality', () => {
