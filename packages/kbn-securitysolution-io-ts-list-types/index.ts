@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export * from './common';
-export * from './request';
-export * from './response';
-export * from './typescript_types';
+export * from './src/common';
+export * from './src/request';
+export * from './src/response';
+export * from './src/typescript_types';

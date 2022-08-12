@@ -6,6 +6,10 @@
  * Side Public License, v 1.
  */
 
-export * from './add_remove_id_to_item';
-export * from './transform_data_to_ndjson';
-export * from './path_validations';
+export * from './src/format_errors';
+export * from './src/parse_schedule_dates';
+export * from './src/exact_check';
+export * from './src/format_errors';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
+export * from './src/test_utils';
+export * from './src/validate';

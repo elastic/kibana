@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export * from './constants';
-export * from './utils';
+export * from './src/constants';
+export * from './src/utils';
 // eslint-disable-next-line @kbn/imports/no_boundary_crossing
-export * from './mock';
+export * from './src/mock';
