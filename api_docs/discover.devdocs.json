@@ -713,13 +713,13 @@
                 "section": "def-common.SearchSource",
                 "text": "SearchSource"
               },
-              " | undefined; fetch$: (options?: ",
+              " | undefined; fetch$: <T = {}>(options?: ",
               {
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
-                "section": "def-common.ISearchOptions",
-                "text": "ISearchOptions"
+                "section": "def-common.SearchSourceSearchOptions",
+                "text": "SearchSourceSearchOptions"
               },
               ") => ",
               "Observable",
@@ -733,19 +733,19 @@
               },
               "<",
               "SearchResponse",
-              "<any, Record<string, ",
+              "<T, Record<string, ",
               "AggregationsAggregate",
               ">>>>; fetch: (options?: ",
               {
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
-                "section": "def-common.ISearchOptions",
-                "text": "ISearchOptions"
+                "section": "def-common.SearchSourceSearchOptions",
+                "text": "SearchSourceSearchOptions"
               },
               ") => Promise<",
               "SearchResponse",
-              "<any, Record<string, ",
+              "<unknown, Record<string, ",
               "AggregationsAggregate",
               ">>>; onRequestStart: (handler: (searchSource: ",
               {
@@ -760,8 +760,8 @@
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
-                "section": "def-common.ISearchOptions",
-                "text": "ISearchOptions"
+                "section": "def-common.SearchSourceSearchOptions",
+                "text": "SearchSourceSearchOptions"
               },
               " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; destroy: () => void; getSerializedFields: (recurse?: boolean) => ",
               {

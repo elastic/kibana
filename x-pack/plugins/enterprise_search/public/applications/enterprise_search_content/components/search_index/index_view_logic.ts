@@ -49,7 +49,9 @@ export interface IndexViewActions {
   fetchIndexApiSuccess: FetchIndexApiValues['apiSuccess'];
   makeFetchIndexRequest: FetchIndexApiValues['makeRequest'];
   makeStartSyncRequest: StartSyncApiValues['makeRequest'];
+  recheckIndex: () => void;
   resetFetchIndexApi: FetchIndexApiValues['apiReset'];
+  resetRecheckIndexLoading: () => void;
   setFetchIndexTimeoutId(timeoutId: NodeJS.Timeout): { timeoutId: NodeJS.Timeout };
   startFetchIndexPoll(): void;
   startSync(): void;
@@ -69,6 +71,8 @@ export interface IndexViewValues {
   isWaitingForSync: boolean;
   lastUpdated: string | null;
   localSyncNowValue: boolean; // holds local value after update so UI updates correctly
+  recheckIndexLoading: boolean;
+  resetFetchIndexLoading: boolean;
   syncStatus: SyncStatus | null;
 }
 
@@ -77,6 +81,8 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
     clearFetchIndexTimeout: true,
     createNewFetchIndexTimeout: (duration) => ({ duration }),
     fetchIndex: true,
+    recheckIndex: true,
+    resetRecheckIndexLoading: true,
     setFetchIndexTimeoutId: (timeoutId) => ({ timeoutId }),
     startFetchIndexPoll: true,
     startSync: true,
@@ -136,8 +142,20 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
       if (isCrawlerIndex(index) && index.name === values.indexName) {
         actions.fetchCrawlerData();
       }
+      if (values.recheckIndexLoading) {
+        actions.resetRecheckIndexLoading();
+        flashSuccessToast(
+          i18n.translate(
+            'xpack.enterpriseSearch.content.searchIndex.index.recheckSuccess.message',
+            {
+              defaultMessage: 'Your connector has been rechecked.',
+            }
+          )
+        );
+      }
     },
     makeStartSyncRequest: () => clearFlashMessages(),
+    recheckIndex: () => actions.fetchIndex(),
     setIndexName: () => {
       if (values.fetchIndexTimeoutId) {
         clearTimeout(values.fetchIndexTimeoutId);
@@ -186,6 +204,13 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
         fetchIndexApiSuccess: (_, index) =>
           isConnectorIndex(index) ? index.connector.sync_now : false,
         startSyncApiSuccess: () => true,
+      },
+    ],
+    recheckIndexLoading: [
+      false,
+      {
+        recheckIndex: () => true,
+        resetRecheckIndexLoading: () => false,
       },
     ],
   },
