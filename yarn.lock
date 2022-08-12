@@ -3243,6 +3243,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/form-lib@link:bazel-bin/packages/kbn-form-lib":
+  version "0.0.0"
+  uid ""
+
 "@kbn/generate@link:bazel-bin/packages/kbn-generate":
   version "0.0.0"
   uid ""
@@ -7206,6 +7210,10 @@
   uid ""
 
 "@types/kbn__find-used-node-modules@link:bazel-bin/packages/kbn-find-used-node-modules/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__form-lib@link:bazel-bin/packages/kbn-form-lib/npm_module_types":
   version "0.0.0"
   uid ""
 

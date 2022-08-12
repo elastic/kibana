@@ -47,7 +47,20 @@ NPM_MODULE_EXTRA_FILES = [
 #    "@npm//name-of-package"
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
-  "@npm//react"
+  "//packages/elastic-safer-lodash-set",
+  "//packages/kbn-ambient-storybook-types",
+  "//packages/kbn-ambient-ui-types",
+  "//packages/kbn-i18n-react",
+  "//packages/kbn-i18n",
+  "//packages/kbn-test-jest-helpers",
+  "@npm//@elastic/eui",
+  "@npm//@storybook/addon-actions",
+  "@npm//classnames",
+  "@npm//lodash",
+  "@npm//react",
+  "@npm//react-ace",
+  "@npm//rxjs",
+  "@npm//uuid",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -60,9 +73,22 @@ RUNTIME_DEPS = [
 #
 #  References to NPM packages work the same as RUNTIME_DEPS
 TYPES_DEPS = [
+  "//packages/elastic-safer-lodash-set:npm_module_types",
+  "//packages/kbn-ambient-storybook-types:npm_module_types",
+  "//packages/kbn-ambient-ui-types:npm_module_types",
+  "//packages/kbn-i18n:npm_module_types",
+  "//packages/kbn-i18n-react:npm_module_types",
+  "//packages/kbn-test-jest-helpers:npm_module_types",
+  "@npm//@elastic/eui",
+  "@npm//@storybook/addon-actions",
+  "@npm//@types/classnames",
   "@npm//@types/node",
   "@npm//@types/jest",
-  "@npm//@types/react"
+  "@npm//@types/lodash",
+  "@npm//@types/react",
+  "@npm//@types/uuid",
+  "@npm//react-ace",
+  "@npm//rxjs",
 ]
 
 jsts_transpiler(
