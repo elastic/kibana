@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export * from './cli';
+export { extractor } from './src/extractor';
+export * from './src/cli';

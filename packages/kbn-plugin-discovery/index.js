@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-const { parseKibanaPlatformPlugin } = require('./parse_kibana_platform_plugin');
-const { getPluginSearchPaths } = require('./plugin_search_paths');
+const { parseKibanaPlatformPlugin } = require('./src/parse_kibana_platform_plugin');
+const { getPluginSearchPaths } = require('./src/plugin_search_paths');
 const {
   simpleKibanaPlatformPluginDiscovery,
-} = require('./simple_kibana_platform_plugin_discovery');
+} = require('./src/simple_kibana_platform_plugin_discovery');
 
 module.exports = {
   parseKibanaPlatformPlugin,
