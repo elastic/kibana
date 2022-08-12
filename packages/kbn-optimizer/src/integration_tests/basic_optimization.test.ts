@@ -18,7 +18,7 @@ import { tap, filter } from 'rxjs/operators';
 import { REPO_ROOT } from '@kbn/utils';
 import { ToolingLog } from '@kbn/tooling-log';
 import { createReplaceSerializer } from '@kbn/jest-serializers';
-import { runOptimizer, OptimizerConfig, OptimizerUpdate, logOptimizerState } from '..';
+import { runOptimizer, OptimizerConfig, OptimizerUpdate, logOptimizerState } from '../..';
 
 import { allValuesFrom } from '../common';
 

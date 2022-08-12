@@ -13,7 +13,7 @@ export type {
   WebpackIgnoredModule,
   WebpackNormalModule,
   WebpackResolveData,
-} from './webpack_helpers';
+} from './src/webpack_helpers';
 
 export {
   isFailureStats,
@@ -24,4 +24,4 @@ export {
   isExternalModule,
   isIgnoredModule,
   isNormalModule,
-} from './webpack_helpers';
+} from './src/webpack_helpers';
