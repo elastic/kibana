@@ -19,7 +19,7 @@ export const translations = {
       ),
       maxAlerts: i18n.translate('xpack.alerting.taskRunner.warning.maxAlerts', {
         defaultMessage:
-          'Rule reported more than the maximum allowed number of alerts. Alerts may be missed and recovery notifications may be delayed',
+          'Rule reported more than the maximum number of alerts in a single run. Alerts may be missed and recovery notifications may be delayed',
       }),
     },
   },
