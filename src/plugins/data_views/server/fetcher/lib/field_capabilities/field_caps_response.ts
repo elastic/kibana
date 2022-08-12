@@ -80,7 +80,6 @@ export function readFieldCapsResponse(
     (agg, fieldName) => {
       const capsByType = capsByNameThenType[fieldName];
       const types = Object.keys(capsByType);
-      const timeSeriesMetricProp = uniq(types.map((t) => capsByType[t].time_series_metric));
 
       // If a single type is marked as searchable or aggregatable, all the types are searchable or aggregatable
       const isSearchable = types.some((type) => {
@@ -98,6 +97,8 @@ export function readFieldCapsResponse(
             capsByType[type].non_aggregatable_indices!.length > 0)
         );
       });
+
+      const timeSeriesMetricProp = uniq(types.map((t) => capsByType[t].time_series_metric));
 
       // If there are multiple types but they all resolve to the same kibana type
       // ignore the conflict and carry on (my wayward son)
@@ -125,14 +126,13 @@ export function readFieldCapsResponse(
         return agg;
       }
 
-      let timeSeriesMetricType: 'counter' | 'gauge' | undefined;
+      let timeSeriesMetricType: 'gauge' | 'counter' | undefined;
       if (timeSeriesMetricProp.length === 1 && timeSeriesMetricProp[0] === 'gauge') {
         timeSeriesMetricType = 'gauge';
       }
       if (timeSeriesMetricProp.length === 1 && timeSeriesMetricProp[0] === 'counter') {
         timeSeriesMetricType = 'counter';
       }
-
       const esType = types[0];
       const field = {
         name: fieldName,
@@ -146,6 +146,10 @@ export function readFieldCapsResponse(
         timeZone: capsByType[types[0]].meta?.time_zone,
         readFromDocValues: shouldReadFieldFromDocValues(isAggregatable, esType),
         metadata_field: capsByType[types[0]].metadata_field,
+        fixedInterval: capsByType[types[0]].meta?.fixed_interval,
+        timeZone: capsByType[types[0]].meta?.time_zone,
+        timeSeriesMetric: timeSeriesMetricType,
+        timeSeriesDimension: capsByType[types[0]].time_series_dimension,
       };
       // This is intentionally using a "hash" and a "push" to be highly optimized with very large indexes
       agg.array.push(field);

@@ -622,42 +622,47 @@ export function DimensionEditor(props: DimensionEditorProps) {
         />
       </EuiFormRow>
       {hasSoftRestrictedSideNavItems && (
-        <EuiFormRow
-          fullWidth
-          label={
-            <>
-              {i18n.translate('xpack.lens.indexPattern.softRestrictedFunctionsLabel', {
-                defaultMessage: 'Partially applicable functions',
-              })}
-              <EuiIconTip
-                content={i18n.translate(
-                  'xpack.lens.indexPattern.softRestrictedFunctionsLabel.hint',
-                  {
-                    defaultMessage:
-                      "These functions can't be applied to the full time range of your data. This happens if you are rolling up historical data. You can stil use these functions - if the results are partial, a warning is shown on the chart",
-                  }
-                )}
-                position="right"
-              />
-            </>
-          }
-        >
+        <>
           <EuiSpacer size="s" />
-          <EuiListGroup
-            className={
-              softRestrictedSideNavItems.length > 3 ? 'lnsIndexPatternDimensionEditor__columns' : ''
+          <EuiFormRow
+            fullWidth
+            label={
+              <>
+                {i18n.translate('xpack.lens.indexPattern.softRestrictedFunctionsLabel', {
+                  defaultMessage: 'Partially applicable functions',
+                })}
+                <EuiIconTip
+                  content={i18n.translate(
+                    'xpack.lens.indexPattern.softRestrictedFunctionsLabel.hint',
+                    {
+                      defaultMessage:
+                        "These functions can't be applied to the full time range of your data. This happens if you are rolling up historical data. You can stil use these functions - if the results are partial, a warning is shown on the chart",
+                    }
+                  )}
+                  position="right"
+                />
+              </>
             }
-            gutterSize="none"
-            listItems={
-              // add a padding item containing a non breakable space if the number of operations is not even
-              // otherwise the column layout will break within an element
-              softRestrictedSideNavItems.length % 2 === 1
-                ? [...softRestrictedSideNavItems, { label: '\u00a0' }]
-                : softRestrictedSideNavItems
-            }
-            maxWidth={false}
-          />
-        </EuiFormRow>
+          >
+            <EuiListGroup
+              className={
+                softRestrictedSideNavItems.length > 3
+                  ? 'lnsIndexPatternDimensionEditor__columns'
+                  : ''
+              }
+              gutterSize="none"
+              color="primary"
+              listItems={
+                // add a padding item containing a non breakable space if the number of operations is not even
+                // otherwise the column layout will break within an element
+                softRestrictedSideNavItems.length % 2 === 1
+                  ? [...softRestrictedSideNavItems, { label: '\u00a0' }]
+                  : softRestrictedSideNavItems
+              }
+              maxWidth={false}
+            />
+          </EuiFormRow>
+        </>
       )}
 
       {shouldDisplayReferenceEditor ? (

@@ -27,8 +27,8 @@ export interface FieldDescriptor {
   metadata_field?: boolean;
   fixedInterval?: string[];
   timeZone?: string[];
-  timeSeriesMetricType?: 'gauge' | 'counter';
-  timeSeriesRollup?: boolean;
+  timeSeriesMetric?: 'histogram' | 'summary' | 'counter' | 'gauge';
+  timeSeriesDimension?: boolean;
 }
 
 interface FieldSubType {

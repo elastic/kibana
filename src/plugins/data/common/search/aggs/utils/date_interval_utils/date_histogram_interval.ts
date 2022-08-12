@@ -34,9 +34,9 @@ const calendarFixedConversion = {
  *
  * @param interval The interval string to return the appropriate date_histogram key for.
  */
-export function dateHistogramInterval(interval: string, enforceFixed?: boolean): Interval {
+export function dateHistogramInterval(interval: string, shouldForceFixed?: boolean): Interval {
   const { type, unit } = parseEsInterval(interval);
-  if (type === 'calendar' && !enforceFixed) {
+  if (type === 'calendar' && !shouldForceFixed) {
     return { calendar_interval: interval };
   } else {
     if (type === 'calendar') {
