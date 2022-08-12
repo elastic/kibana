@@ -14,15 +14,17 @@ import type { PluginASetup } from './plugin';
 const mySchema = schema.object({
   inputA: schema.string(),
   inputB: schema.maybe(schema.string()),
+  inputC: schema.string(),
 });
 
 function toZodEsque<T extends Type<unknown> = Type<unknown>>(
-  s: T
+  aSchema: T
 ): { _input: TypeOf<T>; _output: TypeOf<T> } {
   return {
-    _input: undefined as unknown as TypeOf<typeof s>,
-    _output: undefined as unknown as TypeOf<typeof s>,
-    ...s,
+    _input: undefined as unknown as TypeOf<typeof aSchema>,
+    _output: undefined as unknown as TypeOf<typeof aSchema>,
+    parse: aSchema.validate.bind(aSchema),
+    ...aSchema,
   };
 }
 
@@ -33,13 +35,17 @@ export const rpc = trpc
       okFromA: true,
     }),
   })
-  // Expose your start contract over the RPC interface
+  // Expose your start contract over the RPC interface!
   .query('somethingSpecialFromA' as keyof PluginASetup, {
     resolve: async () => getContract().somethingSpecialFromA(),
   })
   .mutation('updateSomething', {
     input: toZodEsque(mySchema),
-    resolve: async () => {},
+    resolve: async () => {
+      return {
+        ok: true,
+      };
+    },
   });
 
 export const [getContract, setContract] = createGetterSetter<PluginASetup>('pluginAContract');

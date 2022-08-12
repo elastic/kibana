@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { UseQueryResult } from 'react-query';
@@ -26,7 +26,6 @@ import {
 import { CoreStart } from '@kbn/core/public';
 import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 
-import { UseQueryResult } from 'react-query';
 import { PLUGIN_ID, PLUGIN_NAME } from '../../common';
 import { rpc } from '../rpc';
 
@@ -38,18 +37,28 @@ interface PluginBAppDeps {
 }
 
 export const PluginBApp = ({ basename, notifications, navigation }: PluginBAppDeps) => {
-  const result = rpc.useQuery(['getSomethingFromB']);
-  const resultFromA = rpc.useQuery(['somethingSpecialFromA']);
+  const [fetchData, setFetchData] = useState(true);
+  const settle = () => setFetchData(false);
+  const result = rpc.useQuery(['getSomethingFromB'], { enabled: fetchData, onSettled: settle });
+  const resultFromA = rpc.useQuery(['somethingSpecialFromA'], {
+    enabled: fetchData,
+    onSettled: settle,
+  });
 
-  const c = rpc.useContext();
+  const rpcClient = rpc.useContext();
+
+  const notifyError = (e: Error) => notifications.toasts.addError(e, { title: 'oh no!' });
+  const notifySuccess = (r: object) => {
+    notifications.toasts.addSuccess({ title: 'yeah!', text: JSON.stringify(r, null, 2) });
+  };
 
   const onClickHandler = () => {
-    c.fetchQuery(['getSomethingFromB'])
-      .then((r) => {
-        notifications.toasts.addSuccess({ title: 'yeah!', text: JSON.stringify(r, null, 2) });
-      })
-      .catch((e) => notifications.toasts.addError(e, { title: 'oh no!' }));
-    c.client.mutation('updateSomething', { inputA: 'test', inputB: 'test' });
+    // Imperative query
+    rpcClient.fetchQuery(['getSomethingFromB']).then(notifySuccess).catch(notifyError);
+
+    // Imperative mutation
+    const procArgs = { inputA: 'test', inputB: 'test', inputC: 'test' };
+    rpcClient.client.mutation('updateSomething', procArgs).then(notifySuccess).catch(notifyError);
   };
 
   const resultToOutput = (r: UseQueryResult) => {
