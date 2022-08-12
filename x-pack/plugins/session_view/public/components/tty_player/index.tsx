@@ -20,17 +20,17 @@ export const TTYPlayer = ({ sessionEntityId, onClose, isFullscreen }: TTYPlayerD
   const styles = useStyles();
   const ref = useRef(null);
 
-  const { data, error, fetchNextPage, hasNextPage, isFetching } = useFetchIOEvents(sessionEntityId);
+  const { data, fetchNextPage, hasNextPage } = useFetchIOEvents(sessionEntityId);
   const lines = useIOLines(data?.pages);
   const [isPlaying, setIsPlaying] = useState(false);
-  const { search, fit, currentLine, seekToLine } = useXtermPlayer(
+  const { search, currentLine, seekToLine } = useXtermPlayer({
     ref,
     isPlaying,
     lines,
     hasNextPage,
     fetchNextPage,
-    isFullscreen
-  );
+    isFullscreen,
+  });
 
   const onLineChange = useCallback(
     (event: ChangeEvent<HTMLInputElement> | MouseEvent<HTMLButtonElement>) => {

@@ -96,14 +96,23 @@ export const useIOLines = (pages: ProcessEventsPage[] | undefined) => {
   return lines;
 };
 
-export const useXtermPlayer = (
-  ref: React.RefObject<HTMLElement>,
-  isPlaying: boolean,
-  lines: IOLine[],
-  hasNextPage?: boolean,
-  fetchNextPage?: () => void,
-  isFullscreen?: boolean
-) => {
+export interface XtermPlayerDeps {
+  ref: React.RefObject<HTMLElement>;
+  isPlaying: boolean;
+  lines: IOLine[];
+  hasNextPage?: boolean;
+  fetchNextPage?: () => void;
+  isFullscreen?: boolean;
+}
+
+export const useXtermPlayer = ({
+  ref,
+  isPlaying,
+  lines,
+  hasNextPage,
+  fetchNextPage,
+  isFullscreen,
+}: XtermPlayerDeps) => {
   const { euiTheme } = useEuiTheme();
   const { font, colors } = euiTheme;
   const [currentLine, setCurrentLine] = useState(0);
@@ -213,7 +222,6 @@ export const useXtermPlayer = (
 
   return {
     terminal,
-    searchAddon,
     currentLine,
     seekToLine,
     search,

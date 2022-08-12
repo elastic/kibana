@@ -288,7 +288,7 @@ export const SessionView = ({
                 onClick={onToggleTTY}
                 size="m"
                 aria-label="Opens TTY player"
-                data-test-subj="sessionView:sessionViewTTYPlayerToggle"
+                data-test-subj="sessionView:TTYPlayerToggle"
               />
             </EuiFlexItem>
           )}
