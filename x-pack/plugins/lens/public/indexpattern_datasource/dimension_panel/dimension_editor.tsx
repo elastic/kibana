@@ -38,7 +38,7 @@ import {
   adjustColumnReferencesForChangedColumn,
 } from '../operations';
 import { mergeLayer } from '../state_helpers';
-import { hasField } from '../pure_utils';
+import { getReferencedField, hasField } from '../pure_utils';
 import { fieldIsInvalid } from '../utils';
 import { BucketNestingEditor } from './bucket_nesting_editor';
 import type { IndexPatternLayer } from '../types';
@@ -294,16 +294,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     currentIndexPattern.getFieldByName(selectedColumn.sourceField);
 
   const referencedField =
-    currentField ||
-    (selectedColumn &&
-      'references' in selectedColumn &&
-      currentIndexPattern.getFieldByName(
-        (
-          state.layers[layerId].columns[
-            selectedColumn.references[0]
-          ] as FieldBasedIndexPatternColumn
-        ).sourceField
-      ));
+    currentField || getReferencedField(selectedColumn, currentIndexPattern, state.layers[layerId]);
 
   // Operations are compatible if they match inputs. They are always compatible in
   // the empty state. Field-based operations are not compatible with field-less operations.
