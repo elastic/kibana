@@ -9,15 +9,14 @@
 import fs from 'fs';
 import Fsp from 'fs/promises';
 import { createHash } from 'crypto';
-import { Writable } from 'stream';
 import { pipeline } from 'stream/promises';
 import { resolve, dirname, isAbsolute, sep } from 'path';
 import { createGunzip } from 'zlib';
 import { inspect } from 'util';
 
 import archiver from 'archiver';
-import vfs from 'vinyl-fs';
-import File from 'vinyl';
+import globby from 'globby';
+import cpy from 'cpy';
 import del from 'del';
 import deleteEmpty from 'delete-empty';
 import tar, { ExtractOptions } from 'tar';
@@ -155,32 +154,24 @@ export async function copyAll(
   assertAbsolute(sourceDir);
   assertAbsolute(destination);
 
-  await pipeline(
-    vfs.src(select, {
-      buffer: false,
-      cwd: sourceDir,
-      base: sourceDir,
-      dot,
-    }),
-    vfs.dest(destination)
-  );
+  const copiedFiles = await cpy(select, destination, {
+    cwd: sourceDir,
+    parents: true,
+    ignoreJunk: false,
+    dot,
+  });
 
   // we must update access and modified file times after the file copy
   // has completed, otherwise the copy action can effect modify times.
   if (time) {
-    await pipeline(
-      vfs.src(select, {
-        buffer: false,
-        cwd: destination,
-        base: destination,
-        dot,
-      }),
-      new Writable({
-        objectMode: true,
-        write(file: File, _, cb) {
-          Fsp.utimes(file.path, time, time).then(() => cb(), cb);
-        },
-      })
+    const copiedDirectories = await globby(select, {
+      cwd: destination,
+      dot,
+      onlyDirectories: true,
+      absolute: true,
+    });
+    await Promise.all(
+      [...copiedFiles, ...copiedDirectories].map((entry) => Fsp.utimes(entry, time, time))
     );
   }
 }
