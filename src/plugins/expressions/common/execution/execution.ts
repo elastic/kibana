@@ -25,7 +25,7 @@ import {
 import { catchError, finalize, map, pluck, shareReplay, switchMap, tap } from 'rxjs/operators';
 import { now, AbortError } from '@kbn/kibana-utils-plugin/common';
 import { Adapters } from '@kbn/inspector-plugin/common';
-import { LoggerToken } from '../logger';
+import { LoggerToken } from '../module';
 import { Executor } from '../executor';
 import { ExecutionContainer } from './container';
 import { createError } from '../util';

@@ -15,12 +15,12 @@ interface UiSettingsClient {
   get<T>(key: string, defaultValue?: T): T | Promise<T>;
 }
 
-interface UiSettingStartDependencies {
-  uiSettings: UiSettingsClient;
-}
+export type UiSettingsClientFactory = (
+  getKibanaRequest: () => KibanaRequest
+) => Promise<UiSettingsClient>;
 
 interface UiSettingFnArguments {
-  getStartDependencies(getKibanaRequest: () => KibanaRequest): Promise<UiSettingStartDependencies>;
+  uiSettingsClientFactory: UiSettingsClientFactory;
 }
 
 export interface UiSettingArguments {
@@ -36,7 +36,7 @@ export type ExpressionFunctionUiSetting = ExpressionFunctionDefinition<
 >;
 
 export function getUiSettingFn({
-  getStartDependencies,
+  uiSettingsClientFactory,
 }: UiSettingFnArguments): ExpressionFunctionUiSetting {
   return {
     name: 'uiSetting',
@@ -59,7 +59,7 @@ export function getUiSettingFn({
       },
     },
     async fn(input, { default: defaultValue, parameter }, { getKibanaRequest }) {
-      const { uiSettings } = await getStartDependencies(() => {
+      const uiSettings = await uiSettingsClientFactory(() => {
         const request = getKibanaRequest?.();
         if (!request) {
           throw new Error(

@@ -8,6 +8,7 @@
 
 import { ContainerModule } from 'inversify';
 import { Execution, ExecutionModule } from '../execution';
+import { FunctionToken } from '../expression_functions';
 import { TypeToken } from '../expression_types';
 import { ContainerToken, Executor, ExecutionFactory, ExecutionFactoryToken } from './executor';
 import { createExecutorContainer } from './container';
@@ -30,12 +31,12 @@ export function ExecutorModule(): ContainerModule {
       .toSelf()
       .inSingletonScope()
       .onActivation(({ container }, executor) => {
-        if (!container.isBound(TypeToken)) {
-          return executor;
+        for (const type of container.isBound(TypeToken) ? container.getAll(TypeToken) : []) {
+          executor.registerType(type);
         }
 
-        for (const type of container.getAll(TypeToken)) {
-          executor.registerType(type);
+        for (const fn of container.isBound(FunctionToken) ? container.getAll(FunctionToken) : []) {
+          executor.registerFunction(fn);
         }
 
         return executor;

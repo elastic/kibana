@@ -7,10 +7,20 @@
  */
 
 import { Container } from 'inversify';
-import { pick } from 'lodash';
-import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import {
+  CoreStart,
+  CoreSetup,
+  Plugin,
+  PluginInitializerContext,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import { ExpressionsService, ExpressionsServiceSetup, ExpressionsServiceStart } from '../common';
-import { LoggerToken } from '../common/logger';
+import {
+  KibanaRequestToken,
+  LoggerToken,
+  SavedObjectsClientToken,
+  UiSettingsClientToken,
+} from '../common/module';
 
 export type ExpressionsServerSetup = ExpressionsServiceSetup;
 
@@ -28,13 +38,34 @@ export class ExpressionsServerPlugin
     this.container.bind(LoggerToken).toConstantValue(context.logger.get('expressions'));
   }
 
-  public setup(core: CoreSetup): ExpressionsServerSetup {
-    const setup = this.expressions.setup(pick(core, 'getStartServices'));
+  public setup({}: CoreSetup): ExpressionsServerSetup {
+    const setup = this.container.get(ExpressionsService).setup();
 
     return Object.freeze(setup);
   }
 
-  public start(core: CoreStart): ExpressionsServerStart {
+  public start({ savedObjects, uiSettings }: CoreStart): ExpressionsServerStart {
+    this.container
+      .bind(SavedObjectsClientToken)
+      .toDynamicValue(async ({ container }) => {
+        const kibanaRequest = container.get(KibanaRequestToken);
+        const savedObjectsClient = savedObjects.getScopedClient(kibanaRequest);
+
+        return savedObjectsClient;
+      })
+      .inRequestScope();
+    this.container
+      .bind(UiSettingsClientToken)
+      .toDynamicValue(async ({ container }) => {
+        const savedObjectsClient = await container.getAsync(SavedObjectsClientToken);
+        const uiSettingsClient = uiSettings.asScopedToClient(
+          savedObjectsClient as SavedObjectsClientContract
+        );
+
+        return uiSettingsClient;
+      })
+      .inRequestScope();
+
     const start = this.expressions.start();
 
     return Object.freeze(start);

@@ -23,23 +23,13 @@ import { Executor, ExecutorModule } from '../executor';
 import { AnyExpressionRenderDefinition, ExpressionRendererRegistry } from '../expression_renderers';
 import { ExpressionAstExpression } from '../ast';
 import { ExecutionContract, ExecutionResult } from '../execution';
-import { AnyExpressionTypeDefinition, ExpressionValueError } from '../expression_types';
-import { AnyExpressionFunctionDefinition } from '../expression_functions';
 import {
-  clog,
-  createTable,
-  font,
-  variableSet,
-  variable,
-  theme,
-  cumulativeSum,
-  derivative,
-  movingAverage,
-  mapColumn,
-  overallMetric,
-  math,
-  mathColumn,
-} from '../expression_functions';
+  AnyExpressionTypeDefinition,
+  ExpressionValueError,
+  TypesModule,
+} from '../expression_types';
+import { AnyExpressionFunctionDefinition } from '../expression_functions';
+import { FunctionsModule } from '../expression_functions';
 import { ExpressionsServiceFork } from './expressions_fork';
 
 /**
@@ -311,6 +301,9 @@ export class ExpressionsService
     renderers = new ExpressionRendererRegistry(),
   }: ExpressionServiceParams) {
     container.load(ExecutorModule());
+    container.load(FunctionsModule());
+    container.load(TypesModule());
+
     this.executor = container.get(Executor);
     this.renderers = renderers;
   }
@@ -437,24 +430,6 @@ export class ExpressionsService
    * same contract on server-side and browser-side.
    */
   public setup(...args: unknown[]): ExpressionsServiceSetup {
-    for (const fn of [
-      clog,
-      createTable,
-      font,
-      variableSet,
-      variable,
-      theme,
-      cumulativeSum,
-      derivative,
-      movingAverage,
-      overallMetric,
-      mapColumn,
-      math,
-      mathColumn,
-    ]) {
-      this.registerFunction(fn);
-    }
-
     return this;
   }
 

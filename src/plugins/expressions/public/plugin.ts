@@ -7,17 +7,11 @@
  */
 
 import { Container } from 'inversify';
-import { pick } from 'lodash';
 import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { ExpressionsServiceSetup, ExpressionsServiceStart } from '../common';
-import { LoggerToken } from '../common/logger';
-import {
-  ExpressionsService,
-  setRenderersRegistry,
-  setNotifications,
-  setExpressionsService,
-} from './services';
+import { ExpressionsService, ExpressionsServiceSetup, ExpressionsServiceStart } from '../common';
+import { LoggerToken, UiSettingsClientToken } from '../common/module';
+import { setRenderersRegistry, setNotifications, setExpressionsService } from './services';
 import { ReactExpressionRenderer } from './react_expression_renderer_wrapper';
 import type { IExpressionLoader } from './loader';
 import type { IExpressionRenderer } from './render';
@@ -56,13 +50,22 @@ export class ExpressionsPublicPlugin implements Plugin<ExpressionsSetup, Express
   }
 
   public setup(core: CoreSetup): ExpressionsSetup {
+    this.container
+      .bind(UiSettingsClientToken)
+      .toDynamicValue(async (context) => {
+        const [{ uiSettings }] = await core.getStartServices();
+
+        return uiSettings;
+      })
+      .inSingletonScope();
+
     const { expressions } = this;
     const { renderers } = expressions;
 
     setRenderersRegistry(renderers);
     setExpressionsService(expressions);
 
-    const setup = expressions.setup(pick(core, 'getStartServices'));
+    const setup = expressions.setup();
 
     return Object.freeze(setup);
   }
