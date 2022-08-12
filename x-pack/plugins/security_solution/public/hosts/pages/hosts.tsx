@@ -105,7 +105,6 @@ const HostsComponent = () => {
     }
     return filters;
   }, [severitySelection, tabName, filters]);
-
   const { indicesExist, indexPattern, selectedPatterns, loading } = useSourcererDataView();
   const [filterQuery, kqlError] = useMemo(
     () =>
@@ -199,7 +198,6 @@ const HostsComponent = () => {
               filterQuery={tabsFilterQuery || ''}
               isInitializing={isInitializing}
               indexNames={selectedPatterns}
-              setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
               setQuery={setQuery}
               from={from}
               type={hostsModel.HostsType.page}

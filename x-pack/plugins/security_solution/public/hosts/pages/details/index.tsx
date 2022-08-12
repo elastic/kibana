@@ -7,7 +7,7 @@
 
 import { EuiHorizontalRule, EuiSpacer, EuiWindowEvent } from '@elastic/eui';
 import { noop } from 'lodash/fp';
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
 import type { Filter } from '@kbn/es-query';
@@ -22,7 +22,6 @@ import { AnomalyTableProvider } from '../../../common/components/ml/anomaly/anom
 import { hostToCriteria } from '../../../common/components/ml/criteria/host_to_criteria';
 import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
-import { scoreIntervalToDateTime } from '../../../common/components/ml/score/score_interval_to_datetime';
 import { SecuritySolutionTabNavigation } from '../../../common/components/navigation';
 import { HostsDetailsKpiComponent } from '../../components/kpi_hosts';
 import { HostOverview } from '../../../overview/components/host_overview';
@@ -33,7 +32,6 @@ import { useKibana } from '../../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../../common/lib/keury';
 import { inputsSelectors } from '../../../common/store';
 import { setHostDetailsTablesActivePageToZero } from '../../store/actions';
-import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 
 import { HostDetailsTabs } from './details_tabs';
@@ -54,6 +52,8 @@ import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { LandingPageComponent } from '../../../common/components/landing_page';
+import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
+import { scoreIntervalToDateTime } from '../../../common/components/ml/score/score_interval_to_datetime';
 
 const HostOverviewManage = manageQuery(HostOverview);
 
@@ -81,6 +81,20 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     [detailName]
   );
   const getFilters = () => [...hostDetailsPageFilters, ...filters];
+
+  const narrowDateRange = useCallback(
+    (score, interval) => {
+      const fromTo = scoreIntervalToDateTime(score, interval);
+      dispatch(
+        setAbsoluteRangeDatePicker({
+          id: 'global',
+          from: fromTo.from,
+          to: fromTo.to,
+        })
+      );
+    },
+    [dispatch]
+  );
 
   const { indexPattern, indicesExist, selectedPatterns } = useSourcererDataView();
   const [loading, { inspect, hostDetails: hostOverview, id, refetch }] = useHostDetails({
@@ -147,14 +161,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                     loading={loading}
                     startDate={from}
                     endDate={to}
-                    narrowDateRange={(score, interval) => {
-                      const fromTo = scoreIntervalToDateTime(score, interval);
-                      setAbsoluteRangeDatePicker({
-                        id: 'global',
-                        from: fromTo.from,
-                        to: fromTo.to,
-                      });
-                    }}
+                    narrowDateRange={narrowDateRange}
                     setQuery={setQuery}
                     refetch={refetch}
                     inspect={inspect}
@@ -194,7 +201,6 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
               filterQuery={filterQuery}
               hostDetailsPagePath={hostDetailsPagePath}
               indexPattern={indexPattern}
-              setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
             />
           </SecuritySolutionPageWrapper>
         </>
