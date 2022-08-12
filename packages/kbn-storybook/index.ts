@@ -11,8 +11,8 @@ import {
   defaultConfigWebFinal,
   mergeWebpackFinal,
   StorybookConfig,
-} from './lib/default_config';
+} from './src/lib/default_config';
 export { defaultConfig, defaultConfigWebFinal, mergeWebpackFinal };
 export type { StorybookConfig };
-export { runStorybookCli } from './lib/run_storybook_cli';
-export { default as WebpackConfig } from './webpack.config';
+export { runStorybookCli } from './src/lib/run_storybook_cli';
+export { default as WebpackConfig } from './src/webpack.config';
