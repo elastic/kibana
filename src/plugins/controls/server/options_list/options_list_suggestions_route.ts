@@ -15,10 +15,7 @@ import { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
 import { SearchRequest } from '@kbn/data-plugin/common';
 import { schema } from '@kbn/config-schema';
 
-import {
-  OptionsListRequestBody,
-  OptionsListResponse,
-} from '../../../common/control_types/options_list/types';
+import { OptionsListRequestBody, OptionsListResponse } from '../../common/options_list/types';
 import {
   getSuggestionAggregationBuilder,
   getValidationAggregationBuilder,
