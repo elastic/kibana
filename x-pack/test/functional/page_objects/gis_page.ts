@@ -681,7 +681,7 @@ export class GisPageObject extends FtrService {
   }
 
   async getCategorySuggestions() {
-    return await this.comboBox.getOptionsList(`colorStopInput1`);
+    return await this.comboBox.getOptionsList(`colorStopInput0`);
   }
 
   async enableAutoFitToBounds() {

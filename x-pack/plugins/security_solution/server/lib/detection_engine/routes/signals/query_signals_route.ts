@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MappingRuntimeFields, Sort } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
@@ -34,14 +34,17 @@ export const querySignalsRoute = (
     },
     async (context, request, response) => {
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      const { query, aggs, _source, track_total_hits, size, runtime_mappings } = request.body;
+      const { query, aggs, _source, fields, track_total_hits, size, runtime_mappings, sort } =
+        request.body;
       const siemResponse = buildSiemResponse(response);
       if (
         query == null &&
         aggs == null &&
         _source == null &&
+        fields == null &&
         track_total_hits == null &&
-        size == null
+        size == null &&
+        sort == null
       ) {
         return siemResponse.error({
           statusCode: 400,
@@ -57,9 +60,11 @@ export const querySignalsRoute = (
             // Note: I use a spread operator to please TypeScript with aggs: { ...aggs }
             aggs: { ...aggs },
             _source,
+            fields,
             track_total_hits,
             size,
             runtime_mappings: runtime_mappings as MappingRuntimeFields,
+            sort: sort as Sort,
           },
           ignore_unavailable: true,
         });

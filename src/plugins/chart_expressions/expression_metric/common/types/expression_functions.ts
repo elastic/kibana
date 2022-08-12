@@ -12,7 +12,7 @@ import {
   Datatable,
   ExpressionFunctionDefinition,
   ExpressionValueRender,
-} from '@kbn/expressions-plugin';
+} from '@kbn/expressions-plugin/common';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { CustomPaletteState } from '@kbn/charts-plugin/common';
 import { VisParams, visType } from './expression_renderers';
@@ -21,11 +21,12 @@ import { EXPRESSION_METRIC_NAME } from '../constants';
 export interface MetricArguments {
   metric: ExpressionValueVisDimension | string;
   secondaryMetric?: ExpressionValueVisDimension | string;
+  max?: ExpressionValueVisDimension | string;
   breakdownBy?: ExpressionValueVisDimension | string;
   subtitle?: string;
-  extraText?: string;
-  progressMax?: ExpressionValueVisDimension | string;
+  secondaryPrefix?: string;
   progressDirection: LayoutDirection;
+  color?: string;
   palette?: PaletteOutput<CustomPaletteState>;
   maxCols: number;
   minTiles?: number;

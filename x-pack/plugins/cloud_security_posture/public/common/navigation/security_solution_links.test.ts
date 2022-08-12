@@ -6,34 +6,34 @@
  */
 
 import { cloudPosturePages } from './constants';
-import { getSecuritySolutionLinks } from './security_solution_links';
+import { getSecuritySolutionLink, getSecuritySolutionNavTab } from './security_solution_links';
 import { Chance } from 'chance';
 import type { CspPage } from './types';
 
 const chance = new Chance();
 
-describe('getSecuritySolutionLinks', () => {
+describe('getSecuritySolutionLink', () => {
   it('gets the correct link properties', () => {
     const cspPage = chance.pickone<CspPage>(['dashboard', 'findings', 'benchmarks', 'rules']);
 
-    const links = getSecuritySolutionLinks(cspPage);
+    const link = getSecuritySolutionLink(cspPage);
 
-    expect(links.id).toEqual(cloudPosturePages[cspPage].id);
-    expect(links.path).toEqual(cloudPosturePages[cspPage].path);
-    expect(links.title).toEqual(cloudPosturePages[cspPage].name);
+    expect(link.id).toEqual(cloudPosturePages[cspPage].id);
+    expect(link.path).toEqual(cloudPosturePages[cspPage].path);
+    expect(link.title).toEqual(cloudPosturePages[cspPage].name);
   });
+});
 
-  it('de-structures extensions correctly', () => {
+describe('getSecuritySolutionNavTab', () => {
+  it('gets the correct nav tab properties', () => {
     const cspPage = chance.pickone<CspPage>(['dashboard', 'findings', 'benchmarks', 'rules']);
-    const overwrittenTitle = chance.word();
-    const extensions = {
-      [cloudPosturePages[cspPage].id]: { title: overwrittenTitle },
-    };
+    const basePath = chance.word();
 
-    const links = getSecuritySolutionLinks(cspPage, extensions);
+    const navTab = getSecuritySolutionNavTab(cspPage, basePath);
 
-    expect(links.id).toEqual(cloudPosturePages[cspPage].id);
-    expect(links.path).toEqual(cloudPosturePages[cspPage].path);
-    expect(links.title).toEqual(overwrittenTitle);
+    expect(navTab.id).toEqual(cloudPosturePages[cspPage].id);
+    expect(navTab.name).toEqual(cloudPosturePages[cspPage].name);
+    expect(navTab.href).toEqual(`${basePath}${cloudPosturePages[cspPage].path}`);
+    expect(navTab.disabled).toEqual(!!cloudPosturePages[cspPage].disabled);
   });
 });

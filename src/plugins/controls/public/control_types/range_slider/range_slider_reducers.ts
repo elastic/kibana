@@ -6,16 +6,55 @@
  * Side Public License, v 1.
  */
 
+import { Filter } from '@kbn/es-query';
 import { PayloadAction } from '@reduxjs/toolkit';
 import { WritableDraft } from 'immer/dist/types/types-external';
+import { FieldSpec } from '@kbn/data-views-plugin/common';
 
-import { RangeSliderEmbeddableInput, RangeValue } from './types';
+import { RangeSliderReduxState, RangeValue } from './types';
+
+export const getDefaultComponentState = (): RangeSliderReduxState['componentState'] => ({
+  min: '',
+  max: '',
+  isInvalid: false,
+});
 
 export const rangeSliderReducers = {
-  selectRange: (
-    state: WritableDraft<RangeSliderEmbeddableInput>,
+  setSelectedRange: (
+    state: WritableDraft<RangeSliderReduxState>,
     action: PayloadAction<RangeValue>
   ) => {
-    state.value = action.payload;
+    state.explicitInput.value = action.payload;
+  },
+  setField: (
+    state: WritableDraft<RangeSliderReduxState>,
+    action: PayloadAction<FieldSpec | undefined>
+  ) => {
+    state.componentState.field = action.payload;
+  },
+  setDataViewId: (
+    state: WritableDraft<RangeSliderReduxState>,
+    action: PayloadAction<string | undefined>
+  ) => {
+    state.output.dataViewId = action.payload;
+  },
+  setLoading: (state: WritableDraft<RangeSliderReduxState>, action: PayloadAction<boolean>) => {
+    state.output.loading = action.payload;
+  },
+  setMinMax: (
+    state: WritableDraft<RangeSliderReduxState>,
+    action: PayloadAction<{ min: string; max: string }>
+  ) => {
+    state.componentState.min = action.payload.min;
+    state.componentState.max = action.payload.max;
+  },
+  publishFilters: (
+    state: WritableDraft<RangeSliderReduxState>,
+    action: PayloadAction<Filter[] | undefined>
+  ) => {
+    state.output.filters = action.payload;
+  },
+  setIsInvalid: (state: WritableDraft<RangeSliderReduxState>, action: PayloadAction<boolean>) => {
+    state.componentState.isInvalid = action.payload;
   },
 };

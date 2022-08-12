@@ -11,8 +11,7 @@ import { Redirect, Route, RouteComponentProps, type RouteProps, Switch } from 'r
 import { CLOUD_SECURITY_POSTURE_BASE_PATH, type CspSecuritySolutionContext } from '..';
 import { cloudPosturePages } from '../common/navigation/constants';
 import type { CloudSecurityPosturePageId, CspPageNavigationItem } from '../common/navigation/types';
-import { UnknownRoute } from '../components/unknown_route';
-import { pageToComponentMappingNoPageTemplate } from './constants';
+import { pageToComponentMapping } from './constants';
 import { SecuritySolutionContext } from './security_solution_context';
 
 type CspRouteProps = RouteProps & {
@@ -60,20 +59,14 @@ export const addSpyRouteComponentToRoute = (
   return newRoute;
 };
 
-const securitySolutionRoutes = getRoutesFromMapping(
-  cloudPosturePages,
-  pageToComponentMappingNoPageTemplate
-);
+const securitySolutionRoutes = getRoutesFromMapping(cloudPosturePages, pageToComponentMapping);
 
+/** Props for the cloud security posture router component */
 export interface CspRouterProps {
-  routes?: readonly CspRouteProps[];
   securitySolutionContext?: CspSecuritySolutionContext;
 }
 
-export const CspRouter = ({
-  routes = securitySolutionRoutes,
-  securitySolutionContext,
-}: CspRouterProps) => {
+export const CspRouter = ({ securitySolutionContext }: CspRouterProps) => {
   const SpyRoute = securitySolutionContext
     ? securitySolutionContext.getSpyRouteComponent()
     : undefined;
@@ -81,12 +74,11 @@ export const CspRouter = ({
   const routerElement = (
     <QueryClientProvider client={queryClient}>
       <Switch>
-        {routes.map((route) => {
+        {securitySolutionRoutes.map((route) => {
           const routeProps = SpyRoute ? addSpyRouteComponentToRoute(route, SpyRoute) : route;
           return <Route key={routeProps.path} {...routeProps} />;
         })}
         <Route exact path={CLOUD_SECURITY_POSTURE_BASE_PATH} component={RedirectToDashboard} />
-        <Route path={`${CLOUD_SECURITY_POSTURE_BASE_PATH}/*`} component={UnknownRoute} />
       </Switch>
     </QueryClientProvider>
   );

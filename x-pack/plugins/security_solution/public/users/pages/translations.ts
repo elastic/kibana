@@ -46,13 +46,6 @@ export const NAVIGATION_EVENTS_TITLE = i18n.translate(
   }
 );
 
-export const NAVIGATION_ALERTS_TITLE = i18n.translate(
-  'xpack.securitySolution.users.navigation.alertsTitle',
-  {
-    defaultMessage: 'External alerts',
-  }
-);
-
 export const USER_RISK_SCORE_OVER_TIME = i18n.translate(
   'xpack.securitySolution.users.navigation.userScoreOverTimeTitle',
   {

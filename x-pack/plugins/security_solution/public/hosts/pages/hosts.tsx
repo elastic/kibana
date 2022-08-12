@@ -74,12 +74,7 @@ const HostsComponent = () => {
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const graphEventId = useShallowEqualSelector(
-    (state) =>
-      (
-        getTimeline(state, TimelineId.hostsPageEvents) ??
-        getTimeline(state, TimelineId.hostsPageExternalAlerts) ??
-        timelineDefaults
-      ).graphEventId
+    (state) => (getTimeline(state, TimelineId.hostsPageEvents) ?? timelineDefaults).graphEventId
   );
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
@@ -102,7 +97,7 @@ const HostsComponent = () => {
   const { uiSettings } = useKibana().services;
   const { tabName } = useParams<{ tabName: string }>();
   const tabsFilters: Filter[] = React.useMemo(() => {
-    if (tabName === HostsTableType.alerts || tabName === HostsTableType.events) {
+    if (tabName === HostsTableType.events) {
       return filters.length > 0 ? [...filters, ...hostNameExistsFilter] : hostNameExistsFilter;
     }
 
@@ -113,7 +108,7 @@ const HostsComponent = () => {
     }
     return filters;
   }, [severitySelection, tabName, filters]);
-  const narrowDateRange = useCallback<UpdateDateRange>(
+  const updateDateRange = useCallback<UpdateDateRange>(
     ({ x }) => {
       if (!x) {
         return;
@@ -209,7 +204,7 @@ const HostsComponent = () => {
                 setQuery={setQuery}
                 to={to}
                 skip={isInitializing || !filterQuery}
-                narrowDateRange={narrowDateRange}
+                updateDateRange={updateDateRange}
               />
 
               <EuiSpacer />
@@ -230,7 +225,6 @@ const HostsComponent = () => {
               filterQuery={tabsFilterQuery || ''}
               isInitializing={isInitializing}
               indexNames={selectedPatterns}
-              setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
               setQuery={setQuery}
               from={from}
               type={hostsModel.HostsType.page}

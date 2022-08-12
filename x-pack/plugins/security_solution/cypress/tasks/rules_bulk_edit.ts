@@ -77,10 +77,6 @@ export const waitForBulkEditActionToFinish = ({ rulesCount }: { rulesCount: numb
   cy.contains(TOASTER_BODY, `You've successfully updated ${rulesCount} rule`);
 };
 
-export const waitForElasticRulesBulkEditModal = (rulesCount: number) => {
-  cy.get(MODAL_CONFIRMATION_TITLE).should('have.text', `${rulesCount} rules cannot be edited`);
-};
-
 export const checkElasticRulesCannotBeModified = (rulesCount: number) => {
   cy.get(MODAL_CONFIRMATION_BODY).contains(
     `${rulesCount} prebuilt Elastic rules (editing prebuilt rules is not supported)`
@@ -89,13 +85,13 @@ export const checkElasticRulesCannotBeModified = (rulesCount: number) => {
 
 export const checkMachineLearningRulesCannotBeModified = (rulesCount: number) => {
   cy.get(MODAL_CONFIRMATION_BODY).contains(
-    `${rulesCount} custom Machine Learning rule (these rules don't have index patterns)`
+    `${rulesCount} custom machine learning rule (these rules don't have index patterns)`
   );
 };
 
 export const waitForMixedRulesBulkEditModal = (customRulesCount: number) => {
   cy.get(MODAL_CONFIRMATION_TITLE).should(
     'have.text',
-    `The action will only be applied to ${customRulesCount} Custom rules you've selected`
+    `This action can only be applied to ${customRulesCount} custom rules`
   );
 };

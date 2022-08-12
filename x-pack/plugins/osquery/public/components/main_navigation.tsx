@@ -27,7 +27,7 @@ export const MainNavigation = () => {
     <Nav>
       <EuiFlexGroup gutterSize="l" alignItems="center">
         <EuiFlexItem>
-          <EuiTabs>
+          <EuiTabs bottomBorder={false}>
             <EuiTab
               isSelected={section === Section.LiveQueries}
               {...useRouterNavigate(Section.LiveQueries)}

@@ -15,6 +15,7 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
   const find = getService('find');
   const header = getPageObject('header');
   const common = getPageObject('common');
+  const toasts = getService('toasts');
 
   return {
     /**
@@ -67,6 +68,12 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
         `case-severity-selection-${severity}`
       );
       await testSubjects.click(`case-severity-selection-${severity}`);
+    },
+
+    async expectToasterToContain(content: string) {
+      const toast = await toasts.getToastElement(1);
+      expect(await toast.getVisibleText()).to.contain(content);
+      await toasts.dismissAllToasts();
     },
   };
 }

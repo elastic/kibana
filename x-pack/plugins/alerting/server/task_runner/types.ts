@@ -48,20 +48,6 @@ export interface RuleTaskInstance extends ConcreteTaskInstance {
   state: RuleTaskState;
 }
 
-export interface GenerateNewAndRecoveredAlertEventsParams<
-  State extends AlertInstanceState,
-  Context extends AlertInstanceContext,
-  ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
-> {
-  alertingEventLogger: AlertingEventLogger;
-  newAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
-  activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
-  recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
-  ruleLabel: string;
-  ruleRunMetricsStore: RuleRunMetricsStore;
-}
-
 export interface ScheduleActionsForRecoveredAlertsParams<
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext,
@@ -74,19 +60,6 @@ export interface ScheduleActionsForRecoveredAlertsParams<
   mutedAlertIdsSet: Set<string>;
   ruleLabel: string;
   ruleRunMetricsStore: RuleRunMetricsStore;
-}
-
-export interface LogActiveAndRecoveredAlertsParams<
-  State extends AlertInstanceState,
-  Context extends AlertInstanceContext,
-  ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
-> {
-  logger: Logger;
-  activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
-  recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
-  ruleLabel: string;
-  canSetRecoveryContext: boolean;
 }
 
 // / ExecutionHandler

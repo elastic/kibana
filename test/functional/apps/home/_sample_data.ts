@@ -35,6 +35,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('listing', () => {
+      before(async () => {
+        PageObjects.home.openSampleDataAccordion();
+      });
+
       it('should display registered flights sample data sets', async () => {
         await retry.try(async () => {
           const exists = await PageObjects.home.doesSampleDataSetExist('flights');

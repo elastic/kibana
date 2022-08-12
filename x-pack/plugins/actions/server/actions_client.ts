@@ -669,8 +669,8 @@ export class ActionsClient {
     return this.ephemeralExecutionEnqueuer(this.unsecuredSavedObjectsClient, options);
   }
 
-  public async listTypes(): Promise<ActionType[]> {
-    return this.actionTypeRegistry.list();
+  public async listTypes(featureId?: string): Promise<ActionType[]> {
+    return this.actionTypeRegistry.list(featureId);
   }
 
   public isActionTypeEnabled(

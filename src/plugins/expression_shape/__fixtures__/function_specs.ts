@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionFunction } from '@kbn/expressions-plugin';
+import { ExpressionFunction } from '@kbn/expressions-plugin/common';
 import { shapeFunction } from '../common/expression_functions';
 
 export const functionSpecs = [shapeFunction].map((fn) => new ExpressionFunction(fn()));

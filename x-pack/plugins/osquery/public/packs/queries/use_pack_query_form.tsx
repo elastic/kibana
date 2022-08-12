@@ -10,6 +10,7 @@ import uuid from 'uuid';
 import { produce } from 'immer';
 
 import { useMemo } from 'react';
+import type { ECSMapping } from '../../../common/schemas/common';
 import { convertECSMappingToObject } from '../../../common/schemas/common/utils';
 import type { FormConfig } from '../../shared_imports';
 import { useForm } from '../../shared_imports';
@@ -19,37 +20,38 @@ const FORM_ID = 'editQueryFlyoutForm';
 
 export interface UsePackQueryFormProps {
   uniqueQueryIds: string[];
-  defaultValue?: PackFormData | undefined;
-  handleSubmit: FormConfig<PackFormData, PackFormData>['onSubmit'];
+  defaultValue?: PackQueryFormData | undefined;
+  handleSubmit: FormConfig<PackQueryFormData, PackQueryFormData>['onSubmit'];
 }
 
-export interface PackSOFormData {
+export interface PackSOQueryFormData {
   id: string;
   query: string;
   interval: number;
   platform?: string | undefined;
   version?: string | undefined;
-  ecs_mapping?: Array<{ field: string; value: string }> | undefined;
+  ecs_mapping?: PackQuerySOECSMapping[] | undefined;
 }
 
-export interface PackFormData {
-  id: string;
+export type PackQuerySOECSMapping = Array<{ field: string; value: string }>;
+
+export interface PackQueryFormData {
+  id?: string;
+  description?: string;
   query: string;
-  interval: number;
+  interval?: number;
   platform?: string | undefined;
   version?: string | undefined;
-  ecs_mapping?:
-    | Array<
-        Record<
-          string,
-          {
-            field?: string;
-            value?: string;
-          }
-        >
-      >
-    | undefined;
+  ecs_mapping?: ECSMapping;
 }
+
+export type PackQueryECSMapping = Record<
+  string,
+  {
+    field?: string;
+    value?: string;
+  }
+>;
 
 export const usePackQueryForm = ({
   uniqueQueryIds,
@@ -65,7 +67,7 @@ export const usePackQueryForm = ({
     [idSet]
   );
 
-  return useForm<PackSOFormData, PackFormData>({
+  return useForm<PackSOQueryFormData, PackQueryFormData>({
     id: FORM_ID + uuid.v4(),
     onSubmit: async (formData, isValid) => {
       if (isValid && handleSubmit) {
@@ -109,7 +111,7 @@ export const usePackQueryForm = ({
       }),
     // @ts-expect-error update types
     deserializer: (payload) => {
-      if (!payload) return {} as PackFormData;
+      if (!payload) return {} as PackQueryFormData;
 
       return {
         id: payload.id,

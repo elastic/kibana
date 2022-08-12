@@ -12,7 +12,6 @@ import {
   EuiBadge,
   EuiBasicTable,
   EuiButtonIcon,
-  EuiCode,
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexGrid,
@@ -31,6 +30,8 @@ import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
 import { useConsoleStateDispatch } from '../hooks/state_selectors/use_console_state_dispatch';
 import { COMMON_ARGS, HELP_GROUPS } from '../service/builtin_commands';
 import { getCommandNameWithArgs } from '../service/utils';
+import { ConsoleCodeBlock } from './console_code_block';
+import { useKibana } from '../../../../common/lib/kibana';
 
 // @ts-expect-error TS2769
 const StyledEuiBasicTable = styled(EuiBasicTable)`
@@ -55,6 +56,17 @@ const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   padding-left: ${({ theme: { eui } }) => eui.euiSizeS};
 `;
 
+const StyledEuiFlexGrid = styled(EuiFlexGrid)`
+  max-width: 50%;
+`;
+
+const StyledEuiBadge = styled(EuiBadge)`
+  font-size: 10px !important;
+  span {
+    color: ${({ theme: { eui } }) => eui.euiShadowColor} !important;
+  }
+`;
+
 export interface CommandListProps {
   commands: CommandDefinition[];
   display?: 'default' | 'table';
@@ -63,16 +75,31 @@ export interface CommandListProps {
 export const CommandList = memo<CommandListProps>(({ commands, display = 'default' }) => {
   const getTestId = useTestIdGenerator(useDataTestSubj());
   const dispatch = useConsoleStateDispatch();
+  const { docLinks } = useKibana().services;
 
   const footerMessage = useMemo(() => {
     return (
-      <FormattedMessage
-        id="xpack.securitySolution.console.commandList.footerText"
-        defaultMessage="For more details on the commands above use the {helpOption} argument. Example: {cmdExample}"
-        values={{
-          helpOption: <EuiCode>{'--help'}</EuiCode>,
-          cmdExample: <EuiCode>{'some-command --help'}</EuiCode>,
-        }}
+      <EuiDescriptionList
+        compressed
+        listItems={[
+          {
+            title: (
+              <StyledEuiBadge>
+                <ConsoleCodeBlock inline bold>
+                  {COMMON_ARGS.find((current) => current.name === '--help')?.name}
+                </ConsoleCodeBlock>
+              </StyledEuiBadge>
+            ),
+            description: (
+              <EuiText color="subdued" size="xs">
+                <FormattedMessage
+                  id="xpack.securitySolution.console.commandList.footerText"
+                  defaultMessage="For more help with the individual commands use the --help argument. Ex: processes --help"
+                />
+              </EuiText>
+            ),
+          },
+        ]}
       />
     );
   }, []);
@@ -111,7 +138,7 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
 
           acc[current[0].helpGroupPosition] = sortBy(current, 'helpCommandPosition');
         } else if (current.length) {
-          acc.push(current);
+          acc.push(sortBy(current, 'helpCommandPosition'));
         }
         return acc;
       },
@@ -191,19 +218,37 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
     [getTestId, otherCommandsGroupLabel, updateInputText]
   );
 
+  const getFilteredCommands = useCallback(
+    (commandsByGroup): CommandDefinition[] =>
+      commandsByGroup.filter(
+        (current: CommandDefinition) => current.name !== 'help' && current.name !== 'clear'
+      ),
+    []
+  );
+
   if (display === 'table') {
     const calloutItems = [
       <FormattedMessage
         id="xpack.securitySolution.console.commandList.callout.multipleResponses"
-        defaultMessage="You may enter multiple response actions at the same time."
+        defaultMessage="You can enter consecutive response actions — no need to wait for previous actions to complete."
       />,
       <FormattedMessage
         id="xpack.securitySolution.console.commandList.callout.leavingResponder"
-        defaultMessage="Leaving the responder does not abort the actions."
+        defaultMessage="Leaving the response console does not terminate any actions that have been submitted."
       />,
       <FormattedMessage
         id="xpack.securitySolution.console.commandList.callout.visitSupportSections"
-        defaultMessage="Visit support section to read more about manual response actions."
+        defaultMessage="{learnMore} about response actions and using the console."
+        values={{
+          learnMore: (
+            <EuiLink href={docLinks.links.securitySolution.responseActions} target="_blank">
+              <FormattedMessage
+                id="xpack.securitySolution.console.commandList.callout.readMoreLink"
+                defaultMessage="Learn more"
+              />
+            </EuiLink>
+          ),
+        }}
       />,
     ];
 
@@ -212,24 +257,17 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
         title={
           <FormattedMessage
             id="xpack.securitySolution.console.commandList.callout.title"
-            defaultMessage="Do you know?"
+            defaultMessage="Helpful tips:"
           />
         }
       >
-        <ol>
+        <ul>
           {calloutItems.map((item, index) => (
             <li key={index}>
               <EuiText size="s">{item}</EuiText>
             </li>
           ))}
-        </ol>
-        {/* //TODO: Add link to the read more page */}
-        <EuiLink>
-          <FormattedMessage
-            id="xpack.securitySolution.console.commandList.callout.readMoreLink"
-            defaultMessage="Read more"
-          />
-        </EuiLink>
+        </ul>
       </StyledEuiCallOut>
     );
 
@@ -248,22 +286,37 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
 
   return (
     <>
-      <EuiSpacer />
+      <EuiSpacer size="s" />
       {commandsByGroups.map((commandsByGroup) => {
         const groupLabel = commandsByGroup[0].helpGroupLabel;
-        const groupedCommands =
-          groupLabel === HELP_GROUPS.supporting.label ? [...COMMON_ARGS] : commandsByGroup;
+        const filteredCommands = getFilteredCommands(commandsByGroup);
         return (
-          <EuiFlexGrid columns={3} responsive={false} gutterSize="m" key={groupLabel}>
-            {groupedCommands.map((command) => {
+          <StyledEuiFlexGrid
+            columns={3}
+            responsive={false}
+            gutterSize="l"
+            key={groupLabel}
+            direction="column"
+          >
+            {filteredCommands.map((command) => {
               return (
                 <EuiFlexItem key={command.name}>
                   <EuiDescriptionList
                     compressed
                     listItems={[
                       {
-                        title: <EuiBadge>{getCommandNameWithArgs(command)}</EuiBadge>,
-                        description: <>{command.about}</>,
+                        title: (
+                          <StyledEuiBadge>
+                            <ConsoleCodeBlock inline bold>
+                              {getCommandNameWithArgs(command)}{' '}
+                            </ConsoleCodeBlock>
+                          </StyledEuiBadge>
+                        ),
+                        description: (
+                          <EuiText color="subdued" size="xs">
+                            {command.about}
+                          </EuiText>
+                        ),
                       },
                     ]}
                     data-test-subj={getTestId('commandList-command')}
@@ -271,13 +324,11 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
                 </EuiFlexItem>
               );
             })}
-          </EuiFlexGrid>
+          </StyledEuiFlexGrid>
         );
       })}
-      <EuiSpacer />
-      <EuiText size="s" color="subdued">
-        {footerMessage}
-      </EuiText>
+      <EuiSpacer size="xl" />
+      {footerMessage}
     </>
   );
 });

@@ -199,6 +199,7 @@ describe('Cases API', () => {
         method: 'GET',
         query: {
           ...DEFAULT_QUERY_PARAMS,
+          searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
           reporters: [],
           tags: [],
           owner: [SECURITY_SOLUTION_OWNER],
@@ -227,6 +228,7 @@ describe('Cases API', () => {
           reporters,
           tags: ['coke', 'pepsi'],
           search: 'hello',
+          searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
           status: CaseStatuses.open,
           owner: [SECURITY_SOLUTION_OWNER],
         },
@@ -247,6 +249,7 @@ describe('Cases API', () => {
         method: 'GET',
         query: {
           ...DEFAULT_QUERY_PARAMS,
+          searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
           reporters: [],
           tags: [],
           severity: CaseSeverity.HIGH,
@@ -268,6 +271,7 @@ describe('Cases API', () => {
         method: 'GET',
         query: {
           ...DEFAULT_QUERY_PARAMS,
+          searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
           reporters: [],
           tags: [],
         },
@@ -297,6 +301,7 @@ describe('Cases API', () => {
           reporters,
           tags: ['(', '"double"'],
           search: 'hello',
+          searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
           status: CaseStatuses.open,
           owner: [SECURITY_SOLUTION_OWNER],
         },

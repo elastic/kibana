@@ -8,7 +8,7 @@
 
 import fn from './yaxis';
 import expect from '@kbn/expect';
-import invoke from './helpers/invoke_series_fn';
+import invoke from './test_helpers/invoke_series_fn';
 
 describe('yaxis.js', () => {
   let seriesList;

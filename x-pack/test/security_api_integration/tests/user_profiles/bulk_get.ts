@@ -14,8 +14,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const security = getService('security');
 
-  // Failing: See https://github.com/elastic/kibana/issues/136827
-  describe.skip('Getting user profiles in bulk', () => {
+  describe('Getting user profiles in bulk', () => {
     const usersSessions = new Map<string, { cookie: Cookie; uid: string }>();
     before(async () => {
       // 1. Create test users
@@ -30,7 +29,9 @@ export default function ({ getService }: FtrProviderContext) {
         )
       );
 
-      // 2. Activate user profiles
+      // 2. Activate user profiles (activation time affects the order in which Elasticsearch returns results, but the
+      // `bulk_get` operation should always manually sort the results before returning them to the consumers, and the
+      // activation order should not matter for these tests).
       await Promise.all(
         ['one', 'two', 'three'].map(async (userPrefix) => {
           const response = await supertestWithoutAuth
@@ -75,17 +76,17 @@ export default function ({ getService }: FtrProviderContext) {
           Object {
             "data": Object {},
             "user": Object {
-              "email": "two@elastic.co",
-              "full_name": "TWO",
-              "username": "user_two",
+              "email": "one@elastic.co",
+              "full_name": "ONE",
+              "username": "user_one",
             },
           },
           Object {
             "data": Object {},
             "user": Object {
-              "email": "one@elastic.co",
-              "full_name": "ONE",
-              "username": "user_one",
+              "email": "two@elastic.co",
+              "full_name": "TWO",
+              "username": "user_two",
             },
           },
         ]
@@ -119,17 +120,17 @@ export default function ({ getService }: FtrProviderContext) {
           Object {
             "data": Object {},
             "user": Object {
-              "email": "two@elastic.co",
-              "full_name": "TWO",
-              "username": "user_two",
+              "email": "one@elastic.co",
+              "full_name": "ONE",
+              "username": "user_one",
             },
           },
           Object {
             "data": Object {},
             "user": Object {
-              "email": "one@elastic.co",
-              "full_name": "ONE",
-              "username": "user_one",
+              "email": "two@elastic.co",
+              "full_name": "TWO",
+              "username": "user_two",
             },
           },
         ]
@@ -151,22 +152,22 @@ export default function ({ getService }: FtrProviderContext) {
         Array [
           Object {
             "data": Object {
-              "some": "data-two",
-            },
-            "user": Object {
-              "email": "two@elastic.co",
-              "full_name": "TWO",
-              "username": "user_two",
-            },
-          },
-          Object {
-            "data": Object {
               "some": "data-one",
             },
             "user": Object {
               "email": "one@elastic.co",
               "full_name": "ONE",
               "username": "user_one",
+            },
+          },
+          Object {
+            "data": Object {
+              "some": "data-two",
+            },
+            "user": Object {
+              "email": "two@elastic.co",
+              "full_name": "TWO",
+              "username": "user_two",
             },
           },
         ]

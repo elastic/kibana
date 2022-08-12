@@ -38,7 +38,7 @@ import {
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import { CasesUiStart } from '@kbn/cases-plugin/public';
-import { CloudSetup } from '@kbn/cloud-plugin/public';
+import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { PLUGIN } from '../common/constants/plugin';
 import { MONITORS_ROUTE } from '../common/constants/ui';
@@ -76,6 +76,7 @@ export interface ClientPluginsStart {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   cases: CasesUiStart;
   dataViews: DataViewsPublicPluginStart;
+  cloud?: CloudStart;
 }
 
 export interface UptimePluginServices extends Partial<CoreStart> {
@@ -121,7 +122,7 @@ export class UptimePlugin
       hasData: async () => {
         const dataHelper = await getUptimeDataHelper();
         const status = await dataHelper.indexStatus();
-        return { hasData: status.docCount > 0, indices: status.indices };
+        return { hasData: status.indexExists, indices: status.indices };
       },
       fetchData: async (params: FetchDataParams) => {
         const dataHelper = await getUptimeDataHelper();

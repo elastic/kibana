@@ -2,6 +2,7 @@
 
 exports[`useSecuritySolutionNavigation should create navigation config 1`] = `
 Object {
+  "canBeCollapsed": true,
   "icon": "logoSecurity",
   "items": Array [
     Object {
@@ -43,6 +44,16 @@ Object {
           "name": "Detection & Response",
           "onClick": [Function],
         },
+        Object {
+          "data-href": "securitySolutionUI/cloud_security_posture-dashboard",
+          "data-test-subj": "navigation-cloud_security_posture-dashboard",
+          "disabled": false,
+          "href": "securitySolutionUI/cloud_security_posture-dashboard",
+          "id": "cloud_security_posture-dashboard",
+          "isSelected": false,
+          "name": "Cloud Posture",
+          "onClick": [Function],
+        },
       ],
       "name": "Dashboards",
     },
@@ -81,6 +92,22 @@ Object {
         },
       ],
       "name": "Detect",
+    },
+    Object {
+      "id": "findings",
+      "items": Array [
+        Object {
+          "data-href": "securitySolutionUI/cloud_security_posture-findings",
+          "data-test-subj": "navigation-cloud_security_posture-findings",
+          "disabled": false,
+          "href": "securitySolutionUI/cloud_security_posture-findings",
+          "id": "cloud_security_posture-findings",
+          "isSelected": false,
+          "name": "Findings",
+          "onClick": [Function],
+        },
+      ],
+      "name": "Findings",
     },
     Object {
       "id": "explore",
@@ -195,6 +222,16 @@ Object {
           "id": "blocklist",
           "isSelected": false,
           "name": "Blocklist",
+          "onClick": [Function],
+        },
+        Object {
+          "data-href": "securitySolutionUI/cloud_security_posture-benchmarks",
+          "data-test-subj": "navigation-cloud_security_posture-benchmarks",
+          "disabled": false,
+          "href": "securitySolutionUI/cloud_security_posture-benchmarks",
+          "id": "cloud_security_posture-benchmarks",
+          "isSelected": false,
+          "name": "CSP Benchmarks",
           "onClick": [Function],
         },
       ],

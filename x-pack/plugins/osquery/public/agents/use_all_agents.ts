@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { useQuery } from 'react-query';
 
-import type { GetAgentsResponse } from '@kbn/fleet-plugin/common';
+import type { ListResult, Agent } from '@kbn/fleet-plugin/common';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 import { useKibana } from '../common/lib/kibana';
 import { useOsqueryPolicies } from './use_osquery_policies';
@@ -26,7 +26,7 @@ export const useAllAgents = (searchValue = '', opts: RequestOptions = { perPage:
 
   const { data: osqueryPolicies, isFetched } = useOsqueryPolicies();
 
-  return useQuery<GetAgentsResponse>(
+  return useQuery<Omit<ListResult<{}>, 'items'> & { agents: Agent[] }, unknown, Agent[]>(
     ['agents', osqueryPolicies, searchValue, perPage],
     () => {
       let kuery = '';
@@ -47,7 +47,6 @@ export const useAllAgents = (searchValue = '', opts: RequestOptions = { perPage:
       });
     },
     {
-      // @ts-expect-error update types
       select: (data) => data?.agents || [],
       enabled: isFetched && !!osqueryPolicies?.length,
       onSuccess: () => setErrorToast(),

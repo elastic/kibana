@@ -58,12 +58,7 @@ import type {
   MatrixHistogramRequestOptions,
   MatrixHistogramStrategyResponse,
 } from './matrix_histogram';
-import type {
-  TimerangeInput,
-  SortField,
-  PaginationInput,
-  PaginationInputPaginated,
-} from '../common';
+import type { TimerangeInput, SortField, PaginationInputPaginated } from '../common';
 import type {
   CtiEventEnrichmentRequestOptions,
   CtiEventEnrichmentStrategyResponse,
@@ -130,11 +125,6 @@ export interface RequestBasicOptions extends IEsSearchRequest {
 }
 
 /** A mapping of semantic fields to their document counterparts */
-
-export interface RequestOptions<Field = string> extends RequestBasicOptions {
-  pagination: PaginationInput;
-  sort: SortField<Field>;
-}
 
 export interface RequestOptionsPaginated<Field = string> extends RequestBasicOptions {
   pagination: PaginationInputPaginated;
@@ -265,11 +255,6 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? KpiRiskScoreRequestOptions
   : never;
 
-export interface DocValueFieldsInput {
-  field: string;
-
-  format: string;
-}
 export interface CommonFields {
   '@timestamp'?: string[];
 }

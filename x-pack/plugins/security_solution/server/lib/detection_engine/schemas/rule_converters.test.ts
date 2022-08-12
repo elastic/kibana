@@ -9,6 +9,7 @@ import { convertPatchAPIToInternalSchema, patchTypeSpecificSnakeToCamel } from '
 import {
   getEqlRuleParams,
   getMlRuleParams,
+  getNewTermsRuleParams,
   getQueryRuleParams,
   getSavedQueryRuleParams,
   getThreatRuleParams,
@@ -177,6 +178,29 @@ describe('rule_converters', () => {
       const rule = getMlRuleParams();
       expect(() => patchTypeSpecificSnakeToCamel(patchParams, rule)).toThrowError(
         'Invalid value "invalid" supplied to "anomaly_threshold"'
+      );
+    });
+
+    test('should accept new terms params when existing rule type is new terms', () => {
+      const patchParams = {
+        new_terms_fields: ['event.new_field'],
+      };
+      const rule = getNewTermsRuleParams();
+      const patchedParams = patchTypeSpecificSnakeToCamel(patchParams, rule);
+      expect(patchedParams).toEqual(
+        expect.objectContaining({
+          newTermsFields: ['event.new_field'],
+        })
+      );
+    });
+
+    test('should reject invalid new terms params when existing rule type is new terms', () => {
+      const patchParams = {
+        new_terms_fields: 'invalid',
+      };
+      const rule = getNewTermsRuleParams();
+      expect(() => patchTypeSpecificSnakeToCamel(patchParams, rule)).toThrowError(
+        'Invalid value "invalid" supplied to "new_terms_fields"'
       );
     });
   });

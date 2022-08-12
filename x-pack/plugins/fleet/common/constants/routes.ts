@@ -116,6 +116,7 @@ export const AGENT_API_ROUTES = {
   BULK_UNENROLL_PATTERN: `${API_ROOT}/agents/bulk_unenroll`,
   REASSIGN_PATTERN: `${API_ROOT}/agents/{agentId}/reassign`,
   BULK_REASSIGN_PATTERN: `${API_ROOT}/agents/bulk_reassign`,
+  AVAILABLE_VERSIONS_PATTERN: `${API_ROOT}/agents/available_versions`,
   STATUS_PATTERN: `${API_ROOT}/agent_status`,
   DATA_PATTERN: `${API_ROOT}/agent_status/data`,
   // deprecated since 8.0
@@ -123,6 +124,7 @@ export const AGENT_API_ROUTES = {
   UPGRADE_PATTERN: `${API_ROOT}/agents/{agentId}/upgrade`,
   BULK_UPGRADE_PATTERN: `${API_ROOT}/agents/bulk_upgrade`,
   CURRENT_UPGRADES_PATTERN: `${API_ROOT}/agents/current_upgrades`,
+  LIST_TAGS_PATTERN: `${API_ROOT}/agents/tags`,
 };
 
 export const ENROLLMENT_API_KEY_ROUTES = {

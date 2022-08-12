@@ -43,7 +43,7 @@ describe('AgentUpgradeAgentModal', () => {
     });
 
     const el = utils.container.querySelector(
-      '[data-test-subj="agentUpgradeModal.MaintainanceCombobox"]'
+      '[data-test-subj="agentUpgradeModal.MaintenanceCombobox"]'
     );
     expect(el).not.toBeNull();
     expect(el?.textContent).toBe('Immediately');
@@ -56,9 +56,8 @@ describe('AgentUpgradeAgentModal', () => {
     });
 
     const el = utils.container.querySelector(
-      '[data-test-subj="agentUpgradeModal.MaintainanceCombobox"]'
+      '[data-test-subj="agentUpgradeModal.MaintenanceCombobox"]'
     );
-    expect(el).not.toBeNull();
     expect(el).not.toBeNull();
     expect(el?.textContent).toBe('Immediately');
   });
@@ -70,7 +69,7 @@ describe('AgentUpgradeAgentModal', () => {
     });
 
     const el = utils.container.querySelector(
-      '[data-test-subj="agentUpgradeModal.MaintainanceCombobox"]'
+      '[data-test-subj="agentUpgradeModal.MaintenanceCombobox"]'
     );
 
     expect(el).not.toBeNull();

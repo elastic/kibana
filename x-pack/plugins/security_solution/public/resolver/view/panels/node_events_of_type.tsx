@@ -32,6 +32,7 @@ import { DescriptiveName } from './descriptive_name';
 import { useLinkProps } from '../use_link_props';
 import { useResolverDispatch } from '../use_resolver_dispatch';
 import { useFormattedDate } from './use_formatted_date';
+import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 
 /**
  * Render a list of events that are related to `nodeID` and that have a category of `eventType`.
@@ -104,7 +105,7 @@ const NodeEventsListItem = memo(function ({
   eventCategory: string;
 }) {
   const timestamp = eventModel.eventTimestamp(event);
-  const eventID = eventModel.eventID(event);
+  const eventID = eventModel.eventID(expandDottedObject(event));
   const winlogRecordID = eventModel.winlogRecordID(event);
   const date =
     useFormattedDate(timestamp) ||

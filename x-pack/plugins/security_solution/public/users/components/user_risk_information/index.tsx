@@ -60,8 +60,6 @@ const tableItems: TableItem[] = [
   { classification: RiskSeverity.unknown, range: i18n.UNKNOWN_RISK_DESCRIPTION },
 ];
 
-export const USER_RISK_INFO_BUTTON_CLASS = 'UserRiskInformation__button';
-
 export const UserRiskInformationButtonEmpty = () => {
   const [isFlyoutVisible, handleOnOpen, handleOnClose] = useOnOpenCloseHandler();
 

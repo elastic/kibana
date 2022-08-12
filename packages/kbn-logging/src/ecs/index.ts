@@ -19,6 +19,7 @@ import { EcsDns } from './dns';
 import { EcsEmail } from './email';
 import { EcsError } from './error';
 import { EcsEvent } from './event';
+import { EcsFaas } from './faas';
 import { EcsFile } from './file';
 import { EcsGroup } from './group';
 import { EcsHost } from './host';
@@ -48,13 +49,13 @@ export type { EcsEventCategory, EcsEventKind, EcsEventOutcome, EcsEventType } fr
 
 interface EcsField {
   /**
-   * These typings were written as of ECS 8.0.0.
+   * These typings were written as of ECS 8.4.0.
    * Don't change this value without checking the rest
    * of the types to conform to that ECS version.
    *
    * https://www.elastic.co/guide/en/ecs/master/index.html
    */
-  version: '8.0.0';
+  version: '8.4.0';
 }
 
 /**
@@ -77,6 +78,7 @@ export type Ecs = EcsBase &
     email?: EcsEmail;
     error?: EcsError;
     event?: EcsEvent;
+    faas?: EcsFaas;
     file?: EcsFile;
     group?: EcsGroup;
     host?: EcsHost;

@@ -14,6 +14,7 @@ interface TourStep {
   anchorPosition: EuiTourStepProps['anchorPosition'];
   title: EuiTourStepProps['title'];
   dataTestSubj: string;
+  offset?: number;
   imageConfig?: {
     name: string;
     altText: string;
@@ -70,20 +71,20 @@ export const tourStepsConfig: TourStep[] = [
     },
   },
   {
-    title: i18n.translate('xpack.observability.tour.tracesStep.tourTitle', {
+    title: i18n.translate('xpack.observability.tour.servicesStep.tourTitle', {
       defaultMessage: 'Identify and resolve application issues',
     }),
-    content: i18n.translate('xpack.observability.tour.tracesStep.tourContent', {
+    content: i18n.translate('xpack.observability.tour.servicesStep.tourContent', {
       defaultMessage:
         'Find and fix performance problems quickly by collecting detailed information about your services.',
     }),
-    anchor: `[data-nav-id="traces"]`,
+    anchor: `[data-nav-id="services"]`,
     anchorPosition: 'rightUp',
-    dataTestSubj: 'tracesStep',
+    dataTestSubj: 'servicesStep',
     imageConfig: {
-      name: 'onboarding_tour_step_traces.gif',
-      altText: i18n.translate('xpack.observability.tour.tracesStep.imageAltText', {
-        defaultMessage: 'Traces demonstration',
+      name: 'onboarding_tour_step_services.gif',
+      altText: i18n.translate('xpack.observability.tour.servicesStep.imageAltText', {
+        defaultMessage: 'Services demonstration',
       }),
     },
   },
@@ -116,5 +117,6 @@ export const tourStepsConfig: TourStep[] = [
     anchor: '#guidedSetupButton',
     anchorPosition: 'rightUp',
     dataTestSubj: 'guidedSetupStep',
+    offset: 10,
   },
 ];

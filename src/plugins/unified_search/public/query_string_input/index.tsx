@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import { AggregateQuery, Query } from '@kbn/es-query';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
 import type { QueryBarTopRowProps } from './query_bar_top_row';
 import type { QueryStringInputProps } from './query_string_input';
@@ -14,9 +15,12 @@ import type { QueryStringInputProps } from './query_string_input';
 const Fallback = () => <div />;
 
 const LazyQueryBarTopRow = React.lazy(() => import('./query_bar_top_row'));
-export const QueryBarTopRow = (props: QueryBarTopRowProps) => (
+
+export const QueryBarTopRow = <QT extends AggregateQuery | Query = Query>(
+  props: QueryBarTopRowProps<QT>
+) => (
   <React.Suspense fallback={<Fallback />}>
-    <LazyQueryBarTopRow {...props} />
+    <LazyQueryBarTopRow {...(props as unknown as QueryBarTopRowProps<AggregateQuery>)} />
   </React.Suspense>
 );
 

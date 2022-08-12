@@ -19,7 +19,7 @@ import {
 
 import { useReduxContainerContext } from '@kbn/presentation-util-plugin/public';
 import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
-import { ControlGroupInput } from '../types';
+import { ControlGroupReduxState } from '../types';
 import { pluginServices } from '../../services';
 import { EditControlButton } from '../editor/edit_control';
 import { ControlGroupStrings } from '../control_group_strings';
@@ -42,11 +42,11 @@ export const ControlFrame = ({
   const [hasFatalError, setHasFatalError] = useState(false);
 
   const {
-    useEmbeddableSelector,
+    useEmbeddableSelector: select,
     containerActions: { untilEmbeddableLoaded, removeEmbeddable },
-  } = useReduxContainerContext<ControlGroupInput>();
+  } = useReduxContainerContext<ControlGroupReduxState>();
 
-  const { controlStyle } = useEmbeddableSelector((state) => state);
+  const controlStyle = select((state) => state.explicitInput.controlStyle);
 
   // Controls Services Context
   const { overlays } = pluginServices.getHooks();

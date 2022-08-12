@@ -8,7 +8,7 @@
 
 import React, { memo } from 'react';
 
-import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin';
+import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import { TableGroup, TableVisConfig, TableVisUseUiStateProps } from '../types';
 import { TableVisBasic } from './table_vis_basic';
 

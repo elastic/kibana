@@ -38,10 +38,10 @@ interface OverviewLogicValues {
   data: typeof FetchIndexApiLogic.values.data;
   indexData: typeof FetchIndexApiLogic.values.data;
   isClientsPopoverOpen: boolean;
+  isError: boolean;
   isGenerateModalOpen: boolean;
   isLoading: boolean;
   isManageKeysPopoverOpen: boolean;
-  isSuccess: boolean;
   status: typeof FetchIndexApiLogic.values.status;
 }
 
@@ -99,10 +99,14 @@ export const OverviewLogic = kea<MakeLogicType<OverviewLogicValues, OverviewLogi
     apiKey: [
       () => [selectors.apiKeyStatus, selectors.apiKeyData],
       (apiKeyStatus, apiKeyData) =>
-        apiKeyStatus === Status.SUCCESS ? apiKeyData.apiKey.api_key : '',
+        apiKeyStatus === Status.SUCCESS ? apiKeyData.apiKey.encoded : '',
     ],
     indexData: [() => [selectors.data], (data) => data],
-    isLoading: [() => [selectors.status], (status) => status === Status.LOADING],
-    isSuccess: [() => [selectors.status], (status) => status === Status.SUCCESS],
+    isLoading: [
+      () => [selectors.status, selectors.data],
+      (status, data) =>
+        status === Status.IDLE || (typeof data === 'undefined' && status === Status.LOADING),
+    ],
+    isError: [() => [selectors.status], (status) => status === Status.ERROR],
   }),
 });

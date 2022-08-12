@@ -101,7 +101,7 @@ const getSteps = ({
 
   return tourStepsConfig.map((stepConfig, index) => {
     const step = index + 1;
-    const { dataTestSubj, content, imageConfig, ...tourStepProps } = stepConfig;
+    const { dataTestSubj, content, offset: stepOffset, imageConfig, ...tourStepProps } = stepConfig;
     return (
       <EuiTourStep
         {...tourStepProps}
@@ -109,7 +109,7 @@ const getSteps = ({
         step={step}
         minWidth={minWidth}
         maxWidth={maxWidth}
-        offset={offset}
+        offset={stepOffset ?? offset}
         repositionOnScroll={repositionOnScroll}
         stepsTotal={tourStepsConfig.length}
         isStepOpen={step === activeStep}

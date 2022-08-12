@@ -22,6 +22,8 @@ export { loadRules } from './rules';
 export { loadRuleState } from './state';
 export type { LoadExecutionLogAggregationsProps } from './load_execution_log_aggregations';
 export { loadExecutionLogAggregations } from './load_execution_log_aggregations';
+export type { LoadActionErrorLogProps } from './load_action_error_log';
+export { loadActionErrorLog } from './load_action_error_log';
 export { unmuteAlertInstance } from './unmute_alert';
 export { unmuteRule, unmuteRules } from './unmute';
 export { updateRule } from './update';

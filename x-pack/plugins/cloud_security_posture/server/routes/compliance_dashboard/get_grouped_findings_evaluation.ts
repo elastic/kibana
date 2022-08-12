@@ -30,14 +30,14 @@ export interface FailedFindingsBucket extends KeyDocCount {
 export const failedFindingsAggQuery = {
   aggs_by_resource_type: {
     terms: {
-      field: 'rule.section.keyword',
+      field: 'rule.section',
     },
     aggs: {
       failed_findings: {
-        filter: { term: { 'result.evaluation.keyword': 'failed' } },
+        filter: { term: { 'result.evaluation': 'failed' } },
       },
       passed_findings: {
-        filter: { term: { 'result.evaluation.keyword': 'passed' } },
+        filter: { term: { 'result.evaluation': 'passed' } },
       },
     },
   },

@@ -27,7 +27,7 @@ export type DocViewFilterFn = (
 
 export interface DocViewRenderProps {
   hit: DataTableRecord;
-  indexPattern: DataView;
+  dataView: DataView;
   columns?: string[];
   filter?: DocViewFilterFn;
   onAddColumn?: (columnName: string) => void;

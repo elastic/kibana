@@ -14,6 +14,7 @@ export * from './rewrite_request_case';
 export * from './mustache_template';
 export * from './validate_email_addresses';
 export * from './servicenow_config';
+export * from './connector_feature_config';
 
 export const BASE_ACTION_API_PATH = '/api/actions';
 export const INTERNAL_BASE_ACTION_API_PATH = '/internal/actions';
