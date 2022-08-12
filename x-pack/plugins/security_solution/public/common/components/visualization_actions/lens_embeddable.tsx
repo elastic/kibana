@@ -20,8 +20,14 @@ import { useDeepEqualSelector } from '../../hooks/use_selector';
 
 const LensComponentWrapper = styled.div<{ height?: string }>`
   height: ${({ height }) => height ?? 'auto'};
+  > div {
+    background-color: transparent;
+  }
   .expExpressionRenderer__expression {
     padding: 0 !important;
+  }
+  .legacyMtrVis__container {
+    padding: 0;
   }
 `;
 
