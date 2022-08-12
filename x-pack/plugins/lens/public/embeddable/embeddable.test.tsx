@@ -187,6 +187,64 @@ describe('embeddable', () => {
 | expression`);
   });
 
+  it('should not throw if render is called after destroy', async () => {
+    const embeddable = new Embeddable(
+      {
+        timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
+        attributeService,
+        data: dataMock,
+        expressionRenderer,
+        basePath,
+        indexPatternService: {} as DataViewsContract,
+        capabilities: {
+          canSaveDashboards: true,
+          canSaveVisualizations: true,
+          discover: {},
+          navLinks: {},
+        },
+        inspector: inspectorPluginMock.createStartContract(),
+        getTrigger,
+        theme: themeServiceMock.createStartContract(),
+        visualizationMap: {},
+        datasourceMap: {},
+        injectFilterReferences: jest.fn(mockInjectFilterReferences),
+        documentToExpression: () =>
+          Promise.resolve({
+            ast: {
+              type: 'expression',
+              chain: [
+                { type: 'function', function: 'my', arguments: {} },
+                { type: 'function', function: 'expression', arguments: {} },
+              ],
+            },
+            errors: undefined,
+          }),
+        uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
+      },
+      {
+        timeRange: {
+          from: 'now-15m',
+          to: 'now',
+        },
+      } as LensEmbeddableInput
+    );
+    let renderCalled = false;
+    let renderThrew = false;
+    // destroying completes output synchronously which might make a synchronous render call - this shouldn't throw
+    embeddable.getOutput$().subscribe(undefined, undefined, () => {
+      try {
+        embeddable.render(mountpoint);
+      } catch (e) {
+        renderThrew = true;
+      } finally {
+        renderCalled = true;
+      }
+    });
+    embeddable.destroy();
+    expect(renderCalled).toBe(true);
+    expect(renderThrew).toBe(false);
+  });
+
   it('should render once even if reload is called before embeddable is fully initialized', async () => {
     const embeddable = new Embeddable(
       {
