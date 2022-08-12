@@ -11,6 +11,7 @@ export { LegendSettingsPopover } from './legend_settings_popover';
 export { PalettePicker } from './palette_picker';
 export { FieldPicker, LensFieldIcon, TruncatedLabel } from './field_picker';
 export type { FieldOption, FieldOptionValue } from './field_picker';
+export { ChangeIndexPattern, fieldExists, fieldContainsData } from './dataview_picker';
 export { RangeInputField } from './range_input_field';
 export {
   BucketAxisBoundsControl,

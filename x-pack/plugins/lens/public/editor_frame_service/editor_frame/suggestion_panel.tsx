@@ -210,7 +210,8 @@ export function SuggestionPanel({
 
   const missingIndexPatterns = getMissingIndexPattern(
     activeDatasourceId ? datasourceMap[activeDatasourceId] : null,
-    activeDatasourceId ? datasourceStates[activeDatasourceId] : null
+    activeDatasourceId ? datasourceStates[activeDatasourceId] : null,
+    frame.dataViews.indexPatterns
   );
   const { suggestions, currentStateExpression, currentStateError } = useMemo(() => {
     const newSuggestions = missingIndexPatterns.length
@@ -224,6 +225,7 @@ export function SuggestionPanel({
             : undefined,
           visualizationState: currentVisualization.state,
           activeData,
+          dataViews: frame.dataViews,
         })
           .filter(
             ({
@@ -241,6 +243,7 @@ export function SuggestionPanel({
                   visualizationMap[visualizationId],
                   suggestionVisualizationState,
                   {
+                    dataViews: frame.dataViews,
                     datasourceLayers: getDatasourceLayers(
                       suggestionDatasourceId
                         ? {
@@ -250,7 +253,8 @@ export function SuggestionPanel({
                             },
                           }
                         : {},
-                      datasourceMap
+                      datasourceMap,
+                      frame.dataViews.indexPatterns
                     ),
                   }
                 ) == null
@@ -493,7 +497,6 @@ function getPreviewExpression(
   const suggestionFrameApi: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'> = {
     datasourceLayers: { ...frame.datasourceLayers },
   };
-
   try {
     // use current frame api and patch apis for changed datasource layers
     if (
@@ -513,6 +516,7 @@ function getPreviewExpression(
           updatedLayerApis[layerId] = datasource.getPublicAPI({
             layerId,
             state: datasourceState,
+            indexPatterns: frame.dataViews.indexPatterns,
           });
         }
       });
@@ -520,7 +524,8 @@ function getPreviewExpression(
 
     const datasourceExpressionsByLayers = getDatasourceExpressionsByLayers(
       datasources,
-      datasourceStates
+      datasourceStates,
+      frame.dataViews.indexPatterns
     );
 
     return visualization.toPreviewExpression(

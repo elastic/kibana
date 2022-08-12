@@ -18,19 +18,9 @@ import {
 import { generateId } from '../../../id_generator';
 
 const getDefaultProps = () => ({
+  indexPatterns: mockDataViews(),
   state: {
-    indexPatternRefs: [],
-    indexPatterns: mockDataViews(),
     currentIndexPatternId: 'first',
-    isFirstExistenceFetch: false,
-    existingFields: {
-      first: {
-        timestamp: true,
-        bytes: true,
-        memory: true,
-        source: true,
-      },
-    },
     layers: { first: mockedLayers.doubleColumnLayer(), second: mockedLayers.emptyLayer() },
   },
   target: mockedDndOperations.notFiltering,

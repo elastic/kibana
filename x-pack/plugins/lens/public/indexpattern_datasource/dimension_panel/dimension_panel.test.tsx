@@ -160,18 +160,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
   beforeEach(() => {
     state = {
-      indexPatternRefs: [],
-      indexPatterns: expectedIndexPatterns,
       currentIndexPatternId: '1',
-      isFirstExistenceFetch: false,
-      existingFields: {
-        'my-fake-index-pattern': {
-          timestamp: true,
-          bytes: true,
-          memory: true,
-          source: true,
-        },
-      },
       layers: {
         first: {
           indexPatternId: '1',
@@ -205,6 +194,15 @@ describe('IndexPatternDimensionEditorPanel', () => {
     });
 
     defaultProps = {
+      indexPatterns: expectedIndexPatterns,
+      existingFields: {
+        'my-fake-index-pattern': {
+          timestamp: true,
+          bytes: true,
+          memory: true,
+          source: true,
+        },
+      },
       state,
       setState,
       dateRange: { fromDate: 'now-1d', toDate: 'now' },
@@ -339,13 +337,10 @@ describe('IndexPatternDimensionEditorPanel', () => {
   it('should hide fields that have no data', () => {
     const props = {
       ...defaultProps,
-      state: {
-        ...defaultProps.state,
-        existingFields: {
-          'my-fake-index-pattern': {
-            timestamp: true,
-            source: true,
-          },
+      existingFields: {
+        'my-fake-index-pattern': {
+          timestamp: true,
+          source: true,
         },
       },
     };
@@ -1452,13 +1447,10 @@ describe('IndexPatternDimensionEditorPanel', () => {
       wrapper = mount(
         <IndexPatternDimensionEditorComponent
           {...props}
-          state={{
-            ...props.state,
-            indexPatterns: {
-              '1': {
-                ...props.state.indexPatterns['1'],
-                timeFieldName: undefined,
-              },
+          indexPatterns={{
+            '1': {
+              ...props.indexPatterns['1'],
+              timeFieldName: undefined,
             },
           }}
         />
@@ -1779,34 +1771,31 @@ describe('IndexPatternDimensionEditorPanel', () => {
   });
 
   it('should select operation directly if only one field is possible', () => {
-    const initialState = {
-      ...state,
-      indexPatterns: {
-        1: {
-          ...state.indexPatterns['1'],
-          fields: state.indexPatterns['1'].fields.filter((field) => field.name !== 'memory'),
-        },
-      },
-    };
-
     wrapper = mount(
       <IndexPatternDimensionEditorComponent
         {...defaultProps}
-        state={initialState}
         columnId={'col2'}
+        indexPatterns={{
+          1: {
+            ...defaultProps.indexPatterns['1'],
+            fields: defaultProps.indexPatterns['1'].fields.filter(
+              (field) => field.name !== 'memory'
+            ),
+          },
+        }}
       />
     );
 
     wrapper.find('button[data-test-subj="lns-indexPatternDimension-average"]').simulate('click');
 
     expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
-    expect(setState.mock.calls[0][0](initialState)).toEqual({
-      ...initialState,
+    expect(setState.mock.calls[0][0](state)).toEqual({
+      ...state,
       layers: {
         first: {
-          ...initialState.layers.first,
+          ...state.layers.first,
           columns: {
-            ...initialState.layers.first.columns,
+            ...state.layers.first.columns,
             col2: expect.objectContaining({
               sourceField: 'bytes',
               operationType: 'average',
@@ -2214,35 +2203,38 @@ describe('IndexPatternDimensionEditorPanel', () => {
           sourceField: 'bytes',
         },
       }),
-      indexPatterns: {
-        1: {
-          id: '1',
-          title: 'my-fake-index-pattern',
-          hasRestrictions: false,
-          fields: [
-            {
-              name: 'bytes',
-              displayName: 'bytes',
-              type: 'number',
-              aggregatable: true,
-              searchable: true,
-            },
-          ],
-          getFieldByName: getFieldByNameFactory([
-            {
-              name: 'bytes',
-              displayName: 'bytes',
-              type: 'number',
-              aggregatable: true,
-              searchable: true,
-            },
-          ]),
-        },
-      },
     };
 
     wrapper = mount(
-      <IndexPatternDimensionEditorComponent {...defaultProps} state={stateWithoutTime} />
+      <IndexPatternDimensionEditorComponent
+        {...defaultProps}
+        state={stateWithoutTime}
+        indexPatterns={{
+          1: {
+            id: '1',
+            title: 'my-fake-index-pattern',
+            hasRestrictions: false,
+            fields: [
+              {
+                name: 'bytes',
+                displayName: 'bytes',
+                type: 'number',
+                aggregatable: true,
+                searchable: true,
+              },
+            ],
+            getFieldByName: getFieldByNameFactory([
+              {
+                name: 'bytes',
+                displayName: 'bytes',
+                type: 'number',
+                aggregatable: true,
+                searchable: true,
+              },
+            ]),
+          },
+        }}
+      />
     );
 
     expect(wrapper.find('[data-test-subj="lns-indexPatternDimension-differences"]')).toHaveLength(

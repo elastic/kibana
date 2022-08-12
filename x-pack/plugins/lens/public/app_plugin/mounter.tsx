@@ -223,7 +223,7 @@ export async function mountApp(
   };
   const lensStore: LensRootStore = makeConfigureStore(storeDeps, {
     lens: getPreloadedState(storeDeps) as LensAppState,
-  } as PreloadedState<LensState>);
+  } as unknown as PreloadedState<LensState>);
 
   const EditorRenderer = React.memo(
     (props: { id?: string; history: History<unknown>; editByValue?: boolean }) => {

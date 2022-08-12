@@ -10,7 +10,7 @@ import React, { useState } from 'react';
 import { EuiPopover, EuiPopoverTitle, EuiSelectableProps } from '@elastic/eui';
 import { ToolbarButton, ToolbarButtonProps } from '@kbn/kibana-react-plugin/public';
 import { DataViewsList } from '@kbn/unified-search-plugin/public';
-import { IndexPatternRef } from './types';
+import type { IndexPatternRef } from '../types';
 
 export type ChangeIndexPatternTriggerProps = ToolbarButtonProps & {
   label: string;

@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { BaseIndexPatternColumn, OperationDefinition } from '..';
 import type { ReferenceBasedIndexPatternColumn } from '../column_types';
-import type { IndexPattern } from '../../../types';
+import type { IndexPattern } from '../../../../types';
 import { runASTValidation, tryToParse } from './validation';
 import { WrappedFormulaEditor } from './editor';
 import { insertOrReplaceFormulaColumn } from './parse';

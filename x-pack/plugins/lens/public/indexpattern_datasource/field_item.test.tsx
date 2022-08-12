@@ -13,7 +13,7 @@ import { InnerFieldItem, FieldItemProps } from './field_item';
 import { coreMock } from '@kbn/core/public/mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { IndexPattern } from './types';
+import { IndexPattern } from '../types';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { documentField } from './document_field';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';

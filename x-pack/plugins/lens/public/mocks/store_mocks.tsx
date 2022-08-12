@@ -58,6 +58,12 @@ export const defaultState = {
     activeId: 'testVis',
   },
   datasourceStates: mockDatasourceStates(),
+  dataViews: {
+    indexPatterns: {},
+    indexPatternRefs: [],
+    existingFields: {},
+    isFirstExistenceFetch: false,
+  },
 };
 
 export function makeLensStore({
@@ -78,7 +84,7 @@ export function makeLensStore({
       resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
       ...preloadedState,
     },
-  } as PreloadedState<LensState>);
+  } as unknown as PreloadedState<LensState>);
 
   const origDispatch = store.dispatch;
   store.dispatch = jest.fn(dispatch || origDispatch);

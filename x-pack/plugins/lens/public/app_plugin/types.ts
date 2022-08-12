@@ -47,6 +47,7 @@ import type {
 import type { LensAttributeService } from '../lens_attribute_service';
 import type { LensEmbeddableInput } from '../embeddable/embeddable';
 import type { LensInspector } from '../lens_inspector_service';
+import { IndexPatternServiceAPI } from '../indexpattern_service/service';
 
 export interface RedirectToOriginProps {
   input?: LensEmbeddableInput;
@@ -107,6 +108,7 @@ export interface LensTopNavMenuProps {
   topNavMenuEntryGenerators: LensTopNavMenuEntryGenerator[];
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
   theme$: Observable<CoreTheme>;
+  indexPatternService: IndexPatternServiceAPI;
 }
 
 export interface HistoryLocationState {

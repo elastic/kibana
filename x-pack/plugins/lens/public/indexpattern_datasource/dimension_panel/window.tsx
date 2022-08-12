@@ -17,7 +17,8 @@ import {
   GenericIndexPatternColumn,
   operationDefinitionMap,
 } from '../operations';
-import { IndexPattern, IndexPatternLayer } from '../types';
+import type { IndexPatternLayer } from '../types';
+import type { IndexPattern } from '../../types';
 import { windowOptions } from '../window_utils';
 
 export function setWindow(columnId: string, layer: IndexPatternLayer, window: string | undefined) {

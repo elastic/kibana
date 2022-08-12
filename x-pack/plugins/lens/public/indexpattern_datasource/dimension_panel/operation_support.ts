@@ -6,7 +6,7 @@
  */
 
 import memoizeOne from 'memoize-one';
-import { DatasourceDimensionDropProps, OperationMetadata } from '../../types';
+import { DatasourceDimensionDropProps, IndexPatternMap, OperationMetadata } from '../../types';
 import { OperationType } from '../indexpattern';
 import { memoizedGetAvailableOperationsByMetadata, OperationFieldTuple } from '../operations';
 import { IndexPatternPrivateState } from '../types';
@@ -20,7 +20,7 @@ export interface OperationSupportMatrix {
 type Props = Pick<
   DatasourceDimensionDropProps<IndexPatternPrivateState>['target'],
   'layerId' | 'columnId' | 'filterOperations'
-> & { state: IndexPatternPrivateState };
+> & { state: IndexPatternPrivateState; indexPatterns: IndexPatternMap };
 
 function computeOperationMatrix(
   operationsByMetadata: Array<{
@@ -67,7 +67,7 @@ const memoizedComputeOperationsMatrix = memoizeOne(computeOperationMatrix);
 // TODO: the support matrix should be available outside of the dimension panel
 export const getOperationSupportMatrix = (props: Props): OperationSupportMatrix => {
   const layerId = props.layerId;
-  const currentIndexPattern = props.state.indexPatterns[props.state.layers[layerId].indexPatternId];
+  const currentIndexPattern = props.indexPatterns[props.state.layers[layerId].indexPatternId];
 
   const operationsByMetadata = memoizedGetAvailableOperationsByMetadata(currentIndexPattern);
   return memoizedComputeOperationsMatrix(operationsByMetadata, props.filterOperations);

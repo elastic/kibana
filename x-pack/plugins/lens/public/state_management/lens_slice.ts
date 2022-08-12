@@ -14,13 +14,13 @@ import { LensEmbeddableInput } from '..';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
 import type { VisualizeEditorContext, Suggestion } from '../types';
 import { getInitialDatasourceId, getResolvedDateRange, getRemoveOperation } from '../utils';
-import { LensAppState, LensStoreDeps, VisualizationState } from './types';
-import { Datasource, Visualization } from '../types';
+import type { DataViewsState, LensAppState, LensStoreDeps, VisualizationState } from './types';
+import type { Datasource, Visualization } from '../types';
 import { generateId } from '../id_generator';
 import type { LayerType } from '../../common/types';
 import { getLayerType } from '../editor_frame_service/editor_frame/config_panel/add_layer';
 import { getVisualizeFieldSuggestions } from '../editor_frame_service/editor_frame/suggestion_helpers';
-import { FramePublicAPI, LensEditContextMapping, LensEditEvent } from '../types';
+import type { FramePublicAPI, LensEditContextMapping, LensEditEvent } from '../types';
 import { selectFramePublicAPI } from './selectors';
 
 export const initialState: LensAppState = {
@@ -38,6 +38,12 @@ export const initialState: LensAppState = {
   visualization: {
     state: null,
     activeId: null,
+  },
+  dataViews: {
+    indexPatternRefs: [],
+    indexPatterns: {},
+    existingFields: {},
+    isFirstExistenceFetch: true,
   },
 };
 
@@ -74,7 +80,7 @@ export const getPreloadedState = ({
     activeDatasourceId: initialDatasourceId,
     datasourceStates,
     visualization: {
-      state: null as unknown,
+      state: null,
       activeId: Object.keys(visualizationMap)[0] || null,
     },
   };
@@ -163,6 +169,17 @@ export const setLayerDefaultDimension = createAction<{
   groupId: string;
 }>('lens/setLayerDefaultDimension');
 
+export const updateIndexPatterns = createAction<Partial<DataViewsState>>(
+  'lens/updateIndexPatterns'
+);
+export const changeIndexPattern = createAction<{
+  visualizationIds?: string[];
+  datasourceIds?: string[];
+  indexPatternId: string;
+  layerId?: string;
+  dataViews: Partial<DataViewsState>;
+}>('lens/changeIndexPattern');
+
 export const lensActions = {
   setState,
   onActiveDataChange,
@@ -188,6 +205,8 @@ export const lensActions = {
   removeOrClearLayer,
   addLayer,
   setLayerDefaultDimension,
+  updateIndexPatterns,
+  changeIndexPattern,
 };
 
 export const makeLensReducer = (storeDeps: LensStoreDeps) => {
@@ -281,6 +300,107 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         isOnlyLayer || !activeVisualization.removeLayer
           ? activeVisualization.clearLayer(state.visualization.state, layerId)
           : activeVisualization.removeLayer(state.visualization.state, layerId);
+    },
+    [changeIndexPattern.type]: (
+      state,
+      {
+        payload,
+      }: {
+        payload: {
+          visualizationIds?: string;
+          datasourceIds?: string;
+          layerId?: string;
+          indexPatternId: string;
+          dataViews: Pick<DataViewsState, 'indexPatterns'>;
+        };
+      }
+    ) => {
+      const { visualizationIds, datasourceIds, layerId, indexPatternId, dataViews } = payload;
+      const newState: Partial<LensAppState> = { dataViews: { ...state.dataViews, ...dataViews } };
+      if (visualizationIds?.length) {
+        for (const visualizationId of visualizationIds) {
+          const activeVisualization =
+            visualizationId &&
+            state.visualization.activeId !== visualizationId &&
+            visualizationMap[visualizationId];
+          if (activeVisualization && layerId && activeVisualization?.onIndexPatternChange) {
+            newState.visualization = {
+              ...state.visualization,
+              state: activeVisualization.onIndexPatternChange(
+                state.visualization.state,
+                layerId,
+                indexPatternId
+              ),
+            };
+          }
+        }
+      }
+      if (datasourceIds?.length) {
+        newState.datasourceStates = { ...state.datasourceStates };
+        const frame = selectFramePublicAPI(
+          { lens: { ...current(state), dataViews: newState.dataViews! } },
+          datasourceMap
+        );
+        const datasourceLayers = frame.datasourceLayers;
+
+        for (const datasourceId of datasourceIds) {
+          const activeDatasource = datasourceId && datasourceMap[datasourceId];
+          if (activeDatasource && activeDatasource?.onIndexPatternChange) {
+            newState.datasourceStates = {
+              ...newState.datasourceStates,
+              [datasourceId]: {
+                isLoading: false,
+                state: activeDatasource.onIndexPatternChange(
+                  newState.datasourceStates[datasourceId].state,
+                  dataViews.indexPatterns,
+                  indexPatternId,
+                  layerId
+                ),
+              },
+            };
+            // Update the visualization columns
+            if (layerId && state.visualization.activeId) {
+              const nextPublicAPI = activeDatasource.getPublicAPI({
+                state: newState.datasourceStates[datasourceId].state,
+                layerId,
+                indexPatterns: dataViews.indexPatterns,
+              });
+              const nextTable = new Set(
+                nextPublicAPI.getTableSpec().map(({ columnId }) => columnId)
+              );
+              const datasourcePublicAPI = datasourceLayers[layerId];
+              if (datasourcePublicAPI) {
+                const removed = datasourcePublicAPI
+                  .getTableSpec()
+                  .map(({ columnId }) => columnId)
+                  .filter((columnId) => !nextTable.has(columnId));
+                const activeVisualization = visualizationMap[state.visualization.activeId];
+                let nextVisState = (newState.visualization || state.visualization).state;
+                removed.forEach((columnId) => {
+                  nextVisState = activeVisualization.removeDimension({
+                    layerId,
+                    columnId,
+                    prevState: nextVisState,
+                    frame,
+                  });
+                });
+                newState.visualization = {
+                  ...state.visualization,
+                  state: nextVisState,
+                };
+              }
+            }
+          }
+        }
+      }
+
+      return { ...state, ...newState };
+    },
+    [updateIndexPatterns.type]: (state, { payload }: { payload: Partial<DataViewsState> }) => {
+      return {
+        ...state,
+        dataViews: { ...state.dataViews, ...payload },
+      };
     },
     [updateDatasourceState.type]: (
       state,
@@ -449,6 +569,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         datasourceStates: newState.datasourceStates,
         visualizationMap,
         visualizeTriggerFieldContext: payload.initialContext,
+        dataViews: newState.dataViews,
       });
       if (suggestion) {
         return {
@@ -737,10 +858,15 @@ function addInitialValueIfAvailable({
 
       if (!noDatasource && activeDatasource?.initializeDimension) {
         return {
-          activeDatasourceState: activeDatasource.initializeDimension(datasourceState, layerId, {
-            ...info,
-            columnId: columnId || info.columnId,
-          }),
+          activeDatasourceState: activeDatasource.initializeDimension(
+            datasourceState,
+            layerId,
+            framePublicAPI.dataViews.indexPatterns,
+            {
+              ...info,
+              columnId: columnId || info.columnId,
+            }
+          ),
           activeVisualizationState,
         };
       } else {
