@@ -29,6 +29,5 @@ actions that are queued, running, or failing.
 image::images/highlights-rule-metrics.png[Stack Monitoring overview metrics for Kibana]
 
 
-=======
 
 // end::notable-highlights[]
