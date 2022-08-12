@@ -189,6 +189,19 @@ export function getLensAttributes(
         color: '#7B7B7B1A',
       });
     }
+    if (playTimeFilter) {
+      layer.annotations.push({
+        label: 'Playing...',
+        key: {
+          type: 'range',
+          timestamp: playTimeFilter.from,
+          endTimestamp: playTimeFilter.to,
+        },
+        id: 'layer3-play',
+        color: `${SELECTION_COLOR}AA`,
+        outside: true,
+      });
+    }
   }
 
   const xyConfig: XYState = {

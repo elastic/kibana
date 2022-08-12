@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import moment from 'moment';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiPanel, EuiTitle } from '@elastic/eui';
+import { EuiPanel, EuiTitle, EuiLoadingChart } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { FormulaPublicApi, LensPublicStart } from '@kbn/lens-plugin/public';
@@ -91,7 +91,7 @@ export function Timebar({ workspace, indexPattern, lens, onSetControl }: Timebar
     return (
       <EuiPanel className="gphTimebar">
         <EuiTitle size="m">
-          <FormattedMessage id="xpack.graph.timebar.loading" defaultMessage="loading..." />
+          <EuiLoadingChart size="xl" />
         </EuiTitle>
       </EuiPanel>
     );
@@ -128,26 +128,21 @@ export function Timebar({ workspace, indexPattern, lens, onSetControl }: Timebar
     </>
   );
 
-  const playLabel =
-    playIndex == null ? (
-      ''
-    ) : (
-      <FormattedMessage id="xpack.graph.timebar.playing" defaultMessage=" - playing..." />
-    );
+  const playLabel = playIndex == null ? '' : <EuiLoadingChart size="m" />;
 
   return (
     <EuiPanel className="gphTimebar">
       <EuiTitle size="m">
         <FormattedMessage
           id="xpack.graph.timebar.title"
-          defaultMessage="Graph timebar: {mainContent}{selectionLabel}{playLabel}"
+          defaultMessage="Graph timebar: {mainContent}{selectionLabel} {playLabel}"
           values={{
             mainContent: (
               <strong>
                 <span style={{ color: MAIN_COLOR }} className="gphTitleContent">
                   <FormattedMessage
                     id="xpack.graph.timebar.mainContent"
-                    defaultMessage="Edges traffic"
+                    defaultMessage="Connections traffic"
                   />
                 </span>
               </strong>

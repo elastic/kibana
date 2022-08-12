@@ -11,7 +11,7 @@ import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/publ
 import type { LensPublicStart, TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { TimeRange } from '../../types/workspace_state';
 
-export const TIME_STEPS = 5;
+export const TIME_STEPS = 4;
 export const DURATION = 15000;
 
 interface ActionFactoryProps {
