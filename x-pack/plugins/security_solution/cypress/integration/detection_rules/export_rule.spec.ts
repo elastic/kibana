@@ -78,7 +78,7 @@ describe('Export rules', () => {
 
     // proceed with exporting only custom rules
     cy.get(MODAL_CONFIRMATION_BTN)
-      .should('have.text', `Export ${expectedNumberCustomRulesToBeExported} Custom rule`)
+      .should('have.text', `Export ${expectedNumberCustomRulesToBeExported} custom rule`)
       .click();
 
     cy.get(TOASTER_BODY).should(

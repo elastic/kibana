@@ -234,7 +234,7 @@ export const BULK_ACTION_CONFIRMATION_PARTLY_TITLE = (customRulesCount: number) 
     {
       values: { customRulesCount },
       defaultMessage:
-        "The action will only be applied to {customRulesCount, plural, =1 {# Custom rule} other {# Custom rules}} you've selected",
+        'This action can only be applied to {customRulesCount, plural, =1 {# custom rule} other {# custom rules}}',
     }
   );
 
@@ -257,7 +257,7 @@ export const BULK_EDIT_CONFIRMATION_CONFIRM = (customRulesCount: number) =>
     'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditConfirmation.confirmButtonLabel',
     {
       values: { customRulesCount },
-      defaultMessage: 'Edit {customRulesCount, plural, =1 {# Custom rule} other {# Custom rules}}',
+      defaultMessage: 'Edit {customRulesCount, plural, =1 {# custom rule} other {# custom rules}}',
     }
   );
 
@@ -267,7 +267,7 @@ export const BULK_EXPORT_CONFIRMATION_CONFIRM = (customRulesCount: number) =>
     {
       values: { customRulesCount },
       defaultMessage:
-        'Export {customRulesCount, plural, =1 {# Custom rule} other {# Custom rules}}',
+        'Export {customRulesCount, plural, =1 {# custom rule} other {# custom rules}}',
     }
   );
 
