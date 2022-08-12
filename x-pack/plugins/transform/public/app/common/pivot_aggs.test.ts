@@ -33,6 +33,7 @@ describe('getAggConfigFromEsAgg', () => {
       aggConfig: {
         filterAgg: 'term',
         aggTypeConfig: {
+          fieldName: 'region',
           FilterAggFormComponent: FilterTermForm,
           filterAggConfig: {
             value: 'sa-west-1',
@@ -64,6 +65,86 @@ describe('getAggConfigFromEsAgg', () => {
       dropDownName: 'test_avg',
       field: 'test_field',
       parentAgg: result,
+    });
+  });
+
+  test('should resolve percentiles agg in sub-aggregations', () => {
+    const esConfig = {
+      filter: {
+        exists: {
+          field: 'customer_phone',
+        },
+      },
+      aggs: {
+        'products.base_price.percentiles': {
+          percentiles: {
+            field: 'products.base_price',
+            percents: [1, 5, 25, 50, 75, 95, 99],
+          },
+        },
+      },
+    };
+
+    const result = getAggConfigFromEsAgg(esConfig, 'test_sub_percentiles');
+
+    expect(result.subAggs!['products.base_price.percentiles']).toMatchObject({
+      agg: 'percentiles',
+      aggName: 'products.base_price.percentiles',
+      dropDownName: 'products.base_price.percentiles',
+      field: 'products.base_price',
+      parentAgg: result,
+    });
+  });
+
+  test('restore config for the exists filter', () => {
+    expect(
+      getAggConfigFromEsAgg({ filter: { exists: { field: 'instance' } } }, 'test_3')
+    ).toMatchObject({
+      agg: 'filter',
+      aggName: 'test_3',
+      dropDownName: 'test_3',
+      field: 'instance',
+      aggConfig: {
+        filterAgg: 'exists',
+        aggTypeConfig: {
+          fieldName: 'instance',
+        },
+      },
+    });
+  });
+
+  test('restore config for the range filter', () => {
+    expect(
+      getAggConfigFromEsAgg(
+        {
+          filter: {
+            range: {
+              'products.base_price': {
+                gte: 11,
+                lt: 20,
+              },
+            },
+          },
+        },
+        'test_4'
+      )
+    ).toMatchObject({
+      agg: 'filter',
+      aggName: 'test_4',
+      dropDownName: 'test_4',
+      field: 'products.base_price',
+      aggConfig: {
+        filterAgg: 'range',
+        aggTypeConfig: {
+          fieldName: 'products.base_price',
+          filterAggConfig: {
+            from: 11,
+            to: 20,
+            includeFrom: true,
+            includeTo: false,
+          },
+        },
+      },
     });
   });
 });

@@ -107,7 +107,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
 
   const [aggName, setAggName] = useState(defaultData.aggName);
   const [agg, setAgg] = useState(defaultData.agg);
-  const [field, setField] = useState<string | string[]>(
+  const [field, setField] = useState<string | string[] | null>(
     isPivotAggsConfigWithUiSupport(defaultData) ? defaultData.field : ''
   );
 
@@ -178,6 +178,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
 
     if (agg === PIVOT_SUPPORTED_AGGS.PERCENTILES) {
       updatedItem = {
+        ...aggConfigDef,
         agg,
         aggName,
         field: resultField,
@@ -186,6 +187,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
       };
     } else if (agg === PIVOT_SUPPORTED_AGGS.TERMS) {
       updatedItem = {
+        ...aggConfigDef,
         agg,
         aggName,
         field: resultField,
@@ -304,10 +306,14 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
                   label: v.text as string,
                 };
               })}
-              selectedOptions={(typeof field === 'string' ? [field] : field).map((v) => ({
-                value: v,
-                label: v,
-              }))}
+              selectedOptions={
+                !!field
+                  ? (typeof field === 'string' ? [field] : field).map((v) => ({
+                      value: v,
+                      label: v,
+                    }))
+                  : []
+              }
               onChange={(e) => {
                 const res = e.map((v) => v.value as string);
                 setField(res);
