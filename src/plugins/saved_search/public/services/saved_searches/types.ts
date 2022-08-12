@@ -8,8 +8,19 @@
 
 import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
 import type { ISearchSource } from '@kbn/data-plugin/public';
-import { DiscoverGridSettingsColumn } from '../../components/discover_grid/types';
-import { VIEW_MODE } from '../../components/view_mode_toggle';
+
+export enum VIEW_MODE {
+  DOCUMENT_LEVEL = 'documents',
+  AGGREGATED_LEVEL = 'aggregated',
+}
+
+export interface DiscoverGridSettings {
+  columns?: Record<string, DiscoverGridSettingsColumn>;
+}
+
+export interface DiscoverGridSettingsColumn {
+  width?: number;
+}
 
 /** @internal **/
 export interface SavedSearchAttributes {

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedSearch } from '../services/saved_searches';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewMock } from './data_view';
 import { dataViewWithTimefieldMock } from './data_view_with_timefield';

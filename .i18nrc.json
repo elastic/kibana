@@ -18,6 +18,7 @@
     "dataViews": "src/plugins/data_views",
     "devTools": "src/plugins/dev_tools",
     "discover": "src/plugins/discover",
+    "savedSearch": "src/plugins/saved_search",
     "embeddableApi": "src/plugins/embeddable",
     "embeddableExamples": "examples/embeddable_examples",
     "esQuery": "packages/kbn-es-query/src",

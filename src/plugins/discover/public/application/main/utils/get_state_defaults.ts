@@ -10,13 +10,13 @@ import { cloneDeep, isEqual } from 'lodash';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import {
   DEFAULT_COLUMNS_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../../../common';
-import { SavedSearch } from '../../../services/saved_searches';
 
 import { AppState } from '../services/discover_state';
 import { getDefaultSort, getSortArray } from '../../../components/doc_table';
