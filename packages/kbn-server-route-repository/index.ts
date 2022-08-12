@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-export { createServerRouteFactory } from './create_server_route_factory';
-export { formatRequest } from './format_request';
-export { parseEndpoint } from './parse_endpoint';
-export { decodeRequestParams } from './decode_request_params';
-export { routeValidationObject } from './route_validation_object';
+export { createServerRouteFactory } from './src/create_server_route_factory';
+export { formatRequest } from './src/format_request';
+export { parseEndpoint } from './src/parse_endpoint';
+export { decodeRequestParams } from './src/decode_request_params';
+export { routeValidationObject } from './src/route_validation_object';
 export type {
   RouteRepositoryClient,
   ReturnOf,
@@ -21,4 +21,4 @@ export type {
   ServerRoute,
   RouteParamsRT,
   RouteState,
-} from './typings';
+} from './src/typings';
