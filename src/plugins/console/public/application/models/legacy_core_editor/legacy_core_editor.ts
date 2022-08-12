@@ -228,6 +228,13 @@ export class LegacyCoreEditor implements CoreEditor {
     );
   }
 
+  detachCompleter() {
+    // In some situations we need to detach the autocomplete suggestions element manually,
+    // such as when navigating away from Console when the suggestions list is open.
+    const completer = (this.editor as unknown as { completer: { detach(): void } }).completer;
+    return completer?.detach();
+  }
+
   private forceRetokenize() {
     const session = this.editor.getSession();
     return new Promise<void>((resolve) => {
@@ -457,5 +464,20 @@ export class LegacyCoreEditor implements CoreEditor {
       // Lastly outdent any closing braces
       mode.autoOutdent(prevLineState, session, row);
     }
+  }
+
+  getAllFoldRanges(): Range[] {
+    const session = this.editor.getSession();
+    // @ts-ignore
+    // Brace does not expose type definition for session.getAllFolds, though we have access to this method provided by the underlying Ace editor.
+    // See https://github.com/ajaxorg/ace/blob/13dc911dbc0ea31ca343d5744b3f472767458fc3/ace.d.ts#L82
+    return session.getAllFolds().map((fold) => fold.range);
+  }
+
+  addFoldsAtRanges(foldRanges: Range[]) {
+    const session = this.editor.getSession();
+    foldRanges.forEach((range) => {
+      session.addFold('...', _AceRange.fromPoints(range.start, range.end));
+    });
   }
 }

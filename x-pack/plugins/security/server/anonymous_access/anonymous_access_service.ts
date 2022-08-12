@@ -12,9 +12,10 @@ import type {
   CapabilitiesStart,
   IBasePath,
   IClusterClient,
+  KibanaRequest,
   Logger,
 } from '@kbn/core/server';
-import { KibanaRequest } from '@kbn/core/server';
+import { CoreKibanaRequest } from '@kbn/core/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 
@@ -165,7 +166,7 @@ export class AnonymousAccessService {
    * anonymous service account credentials.
    */
   private createFakeAnonymousRequest({ authenticateRequest }: { authenticateRequest: boolean }) {
-    return KibanaRequest.from({
+    return CoreKibanaRequest.from({
       headers:
         authenticateRequest && this.httpAuthorizationHeader
           ? { authorization: this.httpAuthorizationHeader.toString() }

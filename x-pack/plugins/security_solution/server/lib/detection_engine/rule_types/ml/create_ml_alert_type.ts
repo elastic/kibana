@@ -9,15 +9,16 @@ import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { ML_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
-import { machineLearningRuleParams, MachineLearningRuleParams } from '../../schemas/rule_schemas';
+import type { MachineLearningRuleParams } from '../../schemas/rule_schemas';
+import { machineLearningRuleParams } from '../../schemas/rule_schemas';
 import { mlExecutor } from '../../signals/executors/ml';
-import { CreateRuleOptions, SecurityAlertType } from '../types';
+import type { CreateRuleOptions, SecurityAlertType } from '../types';
 import { validateImmutable } from '../utils';
 
 export const createMlAlertType = (
   createOptions: CreateRuleOptions
 ): SecurityAlertType<MachineLearningRuleParams, {}, {}, 'default'> => {
-  const { logger, ml } = createOptions;
+  const { ml } = createOptions;
   return {
     id: ML_RULE_TYPE_ID,
     name: 'Machine Learning Rule',
@@ -62,11 +63,11 @@ export const createMlAlertType = (
     async executor(execOptions) {
       const {
         runOpts: {
-          buildRuleMessage,
           bulkCreate,
+          completeRule,
           exceptionItems,
           listClient,
-          completeRule,
+          ruleExecutionLogger,
           tuple,
           wrapHits,
         },
@@ -75,15 +76,14 @@ export const createMlAlertType = (
       } = execOptions;
 
       const result = await mlExecutor({
-        buildRuleMessage,
-        bulkCreate,
-        exceptionItems,
-        listClient,
-        logger,
-        ml,
         completeRule,
-        services,
         tuple,
+        ml,
+        listClient,
+        exceptionItems,
+        services,
+        ruleExecutionLogger,
+        bulkCreate,
         wrapHits,
       });
       return { ...result, state };

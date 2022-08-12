@@ -7,14 +7,17 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from '../../http';
 import { InternalCoreUsageDataSetup } from '../../core_usage_data';
+import type { InternalSavedObjectRouter } from '../internal_types';
 
 interface RouteDependencies {
   coreUsageData: InternalCoreUsageDataSetup;
 }
 
-export const registerResolveRoute = (router: IRouter, { coreUsageData }: RouteDependencies) => {
+export const registerResolveRoute = (
+  router: InternalSavedObjectRouter,
+  { coreUsageData }: RouteDependencies
+) => {
   router.get(
     {
       path: '/resolve/{type}/{id}',

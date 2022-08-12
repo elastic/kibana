@@ -17,7 +17,7 @@ import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../
 
 interface Props {
   columns: string[];
-  indexPattern: DataView;
+  dataView: DataView;
   onChangeSortOrder?: (sortOrder: SortOrder[]) => void;
   onMoveColumn?: (name: string, index: number) => void;
   onRemoveColumn?: (name: string) => void;
@@ -26,7 +26,7 @@ interface Props {
 
 export function TableHeader({
   columns,
-  indexPattern,
+  dataView,
   onChangeSortOrder,
   onMoveColumn,
   onRemoveColumn,
@@ -41,7 +41,7 @@ export function TableHeader({
     ],
     [uiSettings]
   );
-  const displayedColumns = getDisplayedColumns(columns, indexPattern, hideTimeColumn, isShortDots);
+  const displayedColumns = getDisplayedColumns(columns, dataView, hideTimeColumn, isShortDots);
 
   return (
     <tr data-test-subj="docTableHeader" className="kbnDocTableHeader">
@@ -51,12 +51,12 @@ export function TableHeader({
           <TableHeaderColumn
             key={col.name}
             {...col}
-            customLabel={indexPattern.getFieldByName(col.name)?.customLabel}
-            isTimeColumn={indexPattern.timeFieldName === col.name}
+            customLabel={dataView.getFieldByName(col.name)?.customLabel}
+            isTimeColumn={dataView.timeFieldName === col.name}
             sortOrder={
               sortOrder.length
                 ? sortOrder
-                : getDefaultSort(indexPattern, defaultSortOrder, hideTimeColumn)
+                : getDefaultSort(dataView, defaultSortOrder, hideTimeColumn)
             }
             onMoveColumn={onMoveColumn}
             onRemoveColumn={onRemoveColumn}

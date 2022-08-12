@@ -11,15 +11,15 @@ import {
   SavedObjectMigrationContext,
 } from '@kbn/core/server';
 import {
-  CspRuleTemplateTypeV830,
-  CspRuleTemplateTypeV840,
+  CspRuleTemplateV830,
+  CspRuleTemplateV840,
 } from '../../../common/schemas/csp_rule_template';
 
 function migrateCspRuleMetadata(
-  doc: SavedObjectUnsanitizedDoc<CspRuleTemplateTypeV830>,
+  doc: SavedObjectUnsanitizedDoc<CspRuleTemplateV830>,
   context: SavedObjectMigrationContext
-): SavedObjectUnsanitizedDoc<CspRuleTemplateTypeV840> {
-  const { enabled, muted, ...metadata } = doc.attributes;
+): SavedObjectUnsanitizedDoc<CspRuleTemplateV840> {
+  const { enabled, muted, benchmark, ...metadata } = doc.attributes;
   return {
     ...doc,
     attributes: {
@@ -27,6 +27,7 @@ function migrateCspRuleMetadata(
       muted,
       metadata: {
         ...metadata,
+        benchmark: { ...benchmark, id: 'cis_k8s' },
         impact: metadata.impact || undefined,
         default_value: metadata.default_value || undefined,
         references: metadata.references || undefined,

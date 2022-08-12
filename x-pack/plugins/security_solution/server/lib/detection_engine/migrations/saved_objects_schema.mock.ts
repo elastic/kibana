@@ -6,7 +6,7 @@
  */
 
 import { signalsMigrationType } from './saved_objects';
-import { SignalsMigrationSO } from './saved_objects_schema';
+import type { SignalsMigrationSO } from './saved_objects_schema';
 
 export const getSignalsMigrationSavedObjectMock = (
   overrides: Partial<SignalsMigrationSO['attributes']> = {}

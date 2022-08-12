@@ -6,13 +6,12 @@
  * Side Public License, v 1.
  */
 
-import cpy from 'cpy';
 import Path from 'path';
 
 import { discoverBazelPackages } from '@kbn/bazel-packages';
 import { runBazel } from '@kbn/bazel-runner';
 
-import { Task, scanCopy, write, exec } from '../lib';
+import { Task, scanCopy, write } from '../lib';
 
 export const BuildBazelPackages: Task = {
   description: 'Building distributable versions of Bazel packages',
@@ -20,10 +19,7 @@ export const BuildBazelPackages: Task = {
     const packages = (await discoverBazelPackages()).filter((pkg) => !pkg.isDevOnly());
 
     log.info(`Preparing Bazel projects production build non-devOnly packages`);
-    await runBazel({
-      log,
-      bazelArgs: ['build', '//packages:build'],
-    });
+    await runBazel(['build', '//packages:build']);
 
     for (const pkg of packages) {
       log.info(`Copying build of`, pkg.pkg.name, 'into build');
@@ -41,22 +37,5 @@ export const BuildBazelPackages: Task = {
 
       await write(Path.resolve(pkgDirInBuild, 'package.json'), JSON.stringify(pkg.pkg, null, 2));
     }
-  },
-};
-
-export const BuildXpack: Task = {
-  description: 'Building distributable versions of x-pack',
-  async run(config, log, build) {
-    log.info('running x-pack build task');
-    await exec(log, 'yarn', ['build'], {
-      level: 'debug',
-      cwd: config.resolveFromRepo('x-pack'),
-    });
-
-    log.info('copying built x-pack into build dir');
-    await cpy('**/{.,}*', build.resolvePath('x-pack'), {
-      cwd: config.resolveFromRepo('x-pack/build/plugin/kibana/x-pack'),
-      parents: true,
-    });
   },
 };

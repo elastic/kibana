@@ -18,10 +18,10 @@ export const dataViewSavedObjectType: SavedObjectsType = {
   management: {
     displayName: 'data view',
     icon: 'indexPatternApp',
-    defaultSearchField: 'title',
+    defaultSearchField: 'name',
     importableAndExportable: true,
     getTitle(obj) {
-      return obj.attributes.title;
+      return obj.attributes.name || obj.attributes.title;
     },
     getEditUrl(obj) {
       return `/management/kibana/dataViews/dataView/${encodeURIComponent(obj.id)}`;
@@ -38,7 +38,15 @@ export const dataViewSavedObjectType: SavedObjectsType = {
     properties: {
       title: { type: 'text' },
       type: { type: 'keyword' },
+      name: {
+        type: 'text',
+        fields: {
+          keyword: {
+            type: 'keyword',
+          },
+        },
+      },
     },
   },
-  migrations: indexPatternSavedObjectTypeMigrations as any,
+  migrations: indexPatternSavedObjectTypeMigrations,
 };

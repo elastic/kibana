@@ -156,6 +156,8 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                 'number_of_pending_requests',
                 'start_time',
                 'throughput_last_minute',
+                'number_of_allocations',
+                'threads_per_allocation',
               ]),
               name: nodeName,
             } as AllocatedModel['node'],

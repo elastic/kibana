@@ -5,20 +5,18 @@
  * 2.0.
  */
 
-import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-import { Logger } from '@kbn/core/server';
-
-import {
+import type {
   AlertInstanceContext,
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
-import { IRuleDataReader } from '@kbn/rule-registry-plugin/server';
+import type { IRuleDataReader } from '@kbn/rule-registry-plugin/server';
 import { hasLargeValueItem } from '../../../../../common/detection_engine/utils';
-import { CompleteRule, ThresholdRuleParams } from '../../schemas/rule_schemas';
+import type { CompleteRule, ThresholdRuleParams } from '../../schemas/rule_schemas';
 import { getFilter } from '../get_filter';
 import {
   bulkCreateThresholdSignals,
@@ -26,22 +24,17 @@ import {
   getThresholdBucketFilters,
   getThresholdSignalHistory,
 } from '../threshold';
-import {
+import type {
   BulkCreate,
   RuleRangeTuple,
   SearchAfterAndBulkCreateReturnType,
   ThresholdAlertState,
   WrapHits,
 } from '../types';
-import {
-  createSearchAfterReturnType,
-  createSearchAfterReturnTypeFromResponse,
-  mergeReturns,
-} from '../utils';
-import { BuildRuleMessage } from '../rule_messages';
-import { ExperimentalFeatures } from '../../../../../common/experimental_features';
+import { createSearchAfterReturnType } from '../utils';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { buildThresholdSignalHistory } from '../threshold/build_signal_history';
+import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 
 export const thresholdExecutor = async ({
   inputIndex,
@@ -49,32 +42,32 @@ export const thresholdExecutor = async ({
   completeRule,
   tuple,
   exceptionItems,
-  experimentalFeatures,
+  ruleExecutionLogger,
   services,
   version,
-  logger,
-  buildRuleMessage,
   startedAt,
   state,
   bulkCreate,
   wrapHits,
   ruleDataReader,
+  primaryTimestamp,
+  secondaryTimestamp,
 }: {
   inputIndex: string[];
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   completeRule: CompleteRule<ThresholdRuleParams>;
   tuple: RuleRangeTuple;
   exceptionItems: ExceptionListItemSchema[];
-  experimentalFeatures: ExperimentalFeatures;
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
   version: string;
-  logger: Logger;
-  buildRuleMessage: BuildRuleMessage;
   startedAt: Date;
   state: ThresholdAlertState;
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
   ruleDataReader: IRuleDataReader;
+  primaryTimestamp: string;
+  secondaryTimestamp?: string;
 }): Promise<SearchAfterAndBulkCreateReturnType & { state: ThresholdAlertState }> => {
   let result = createSearchAfterReturnType();
   const ruleParams = completeRule.ruleParams;
@@ -91,7 +84,7 @@ export const thresholdExecutor = async ({
           ruleDataReader,
         });
 
-    if (!state.initialized) {
+    if (state.initialized) {
       // Clean up any signal history that has fallen outside the window
       const toDelete: string[] = [];
       for (const [hash, entry] of Object.entries(signalHistory)) {
@@ -114,7 +107,7 @@ export const thresholdExecutor = async ({
     // Eliminate dupes
     const bucketFilters = await getThresholdBucketFilters({
       signalHistory,
-      timestampOverride: ruleParams.timestampOverride,
+      primaryTimestamp,
     });
 
     // Combine dupe filter with other filters
@@ -130,31 +123,27 @@ export const thresholdExecutor = async ({
     });
 
     // Look for new events over threshold
-    const {
-      searchResult: thresholdResults,
-      searchErrors,
-      searchDuration: thresholdSearchDuration,
-    } = await findThresholdSignals({
+    const { buckets, searchErrors, searchDurations } = await findThresholdSignals({
       inputIndexPattern: inputIndex,
       from: tuple.from.toISOString(),
       to: tuple.to.toISOString(),
+      maxSignals: tuple.maxSignals,
       services,
-      logger,
+      ruleExecutionLogger,
       filter: esFilter,
       threshold: ruleParams.threshold,
-      timestampOverride: ruleParams.timestampOverride,
-      buildRuleMessage,
       runtimeMappings,
+      primaryTimestamp,
+      secondaryTimestamp,
     });
 
     // Build and index new alerts
     const { success, bulkCreateDuration, createdItemsCount, createdItems, errors } =
       await bulkCreateThresholdSignals({
-        someResult: thresholdResults,
+        buckets,
         completeRule,
         filter: esFilter,
         services,
-        logger,
         inputIndexPattern: inputIndex,
         signalsIndex: ruleParams.outputIndex,
         startedAt,
@@ -164,24 +153,18 @@ export const thresholdExecutor = async ({
         wrapHits,
       });
 
-    result = mergeReturns([
-      result,
-      createSearchAfterReturnTypeFromResponse({
-        searchResult: thresholdResults,
-        timestampOverride: ruleParams.timestampOverride,
-      }),
-      createSearchAfterReturnType({
-        success,
-        errors: [...errors, ...previousSearchErrors, ...searchErrors],
-        createdSignalsCount: createdItemsCount,
-        createdSignals: createdItems,
-        bulkCreateTimes: bulkCreateDuration ? [bulkCreateDuration] : [],
-        searchAfterTimes: [thresholdSearchDuration],
-      }),
-    ]);
+    result = {
+      ...result,
+      success,
+      errors: [...errors, ...previousSearchErrors, ...searchErrors],
+      createdSignalsCount: createdItemsCount,
+      createdSignals: createdItems,
+      bulkCreateTimes: bulkCreateDuration ? [bulkCreateDuration] : [],
+      searchAfterTimes: searchDurations,
+    };
 
     const createdAlerts = createdItems.map((alert) => {
-      const { _id, _index, ...source } = alert as { _id: string; _index: string };
+      const { _id, _index, ...source } = alert;
       return {
         _id,
         _index,

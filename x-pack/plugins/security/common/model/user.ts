@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+/**
+ * A set of fields describing Kibana user.
+ */
 export interface User {
   username: string;
   email?: string;

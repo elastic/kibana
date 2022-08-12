@@ -7,7 +7,7 @@
  */
 
 import { identity } from 'lodash';
-import type { ExpressionAstExpression } from '@kbn/expressions-plugin';
+import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 
 import { AggConfig, IAggConfig } from './agg_config';
 import { AggConfigs, CreateAggConfigParams } from './agg_configs';
@@ -563,11 +563,17 @@ describe('AggConfig', () => {
                 "enabled": Array [
                   true,
                 ],
+                "excludeIsRegex": Array [
+                  true,
+                ],
                 "field": Array [
                   "machine.os.keyword",
                 ],
                 "id": Array [
                   "1",
+                ],
+                "includeIsRegex": Array [
+                  true,
                 ],
                 "missingBucket": Array [
                   false,
@@ -629,11 +635,17 @@ describe('AggConfig', () => {
                   "enabled": Array [
                     true,
                   ],
+                  "excludeIsRegex": Array [
+                    true,
+                  ],
                   "field": Array [
                     "bytes",
                   ],
                   "id": Array [
                     "1-orderAgg",
+                  ],
+                  "includeIsRegex": Array [
+                    true,
                   ],
                   "missingBucket": Array [
                     false,

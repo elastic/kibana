@@ -7,9 +7,9 @@
 
 import moment from 'moment';
 
-import { SearchAfterAndBulkCreateReturnType, SignalSourceHit } from '../types';
+import type { SearchAfterAndBulkCreateReturnType, SignalSourceHit } from '../types';
 import { parseInterval } from '../utils';
-import { ThreatMatchNamedQuery, ThreatListItem } from './types';
+import type { ThreatMatchNamedQuery, ThreatListItem } from './types';
 
 /**
  * Given two timers this will take the max of each and add them to each other and return that addition.

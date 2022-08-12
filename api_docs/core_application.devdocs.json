@@ -1548,13 +1548,7 @@
             ],
             "signature": [
               "(menuMount: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.MountPoint",
-                "text": "MountPoint"
-              },
+              "MountPoint",
               "<HTMLElement> | undefined) => void"
             ],
             "path": "src/core/public/application/types.ts",
@@ -1568,13 +1562,7 @@
                 "label": "menuMount",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.MountPoint",
-                    "text": "MountPoint"
-                  },
+                  "MountPoint",
                   "<HTMLElement> | undefined"
                 ],
                 "path": "src/core/public/application/types.ts",
@@ -1823,6 +1811,21 @@
             ],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "src/core/public/application/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.NavigateToUrlOptions.state",
+            "type": "Unknown",
+            "tags": [],
+            "label": "state",
+            "description": [
+              "\noptional state to forward to the application"
+            ],
+            "signature": [
+              "unknown"
             ],
             "path": "src/core/public/application/types.ts",
             "deprecated": false
@@ -2165,7 +2168,7 @@
             "section": "def-public.AppStatus",
             "text": "AppStatus"
           },
-          " | undefined; searchable?: boolean | undefined; deepLinks?: ",
+          " | undefined; tooltip?: string | undefined; searchable?: boolean | undefined; deepLinks?: ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -2181,7 +2184,7 @@
             "section": "def-public.AppNavLinkStatus",
             "text": "AppNavLinkStatus"
           },
-          " | undefined; defaultPath?: string | undefined; tooltip?: string | undefined; }"
+          " | undefined; defaultPath?: string | undefined; }"
         ],
         "path": "src/core/public/application/types.ts",
         "deprecated": false,

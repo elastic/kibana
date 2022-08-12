@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import {
-  renderHook,
-  act,
-  RenderResult,
-  WaitForNextUpdate,
-  cleanup,
-} from '@testing-library/react-hooks';
-import { QueryToggle, useQueryToggle } from '.';
-import { RouteSpyState } from '../../utils/route/types';
+import type { RenderResult, WaitForNextUpdate } from '@testing-library/react-hooks';
+import { renderHook, act, cleanup } from '@testing-library/react-hooks';
+import type { QueryToggle } from '.';
+import { useQueryToggle } from '.';
+import type { RouteSpyState } from '../../utils/route/types';
 import { SecurityPageName } from '../../../../common/constants';
 import { useKibana } from '../../lib/kibana';
 

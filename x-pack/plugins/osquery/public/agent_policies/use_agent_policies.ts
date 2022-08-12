@@ -9,7 +9,7 @@ import { mapKeys } from 'lodash';
 import { useQuery } from 'react-query';
 
 import { i18n } from '@kbn/i18n';
-import { GetAgentPoliciesResponseItem } from '@kbn/fleet-plugin/common';
+import type { GetAgentPoliciesResponseItem } from '@kbn/fleet-plugin/common';
 import { useKibana } from '../common/lib/kibana';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 

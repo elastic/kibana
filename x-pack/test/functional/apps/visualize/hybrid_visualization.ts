@@ -11,18 +11,26 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common', 'visualize', 'timePicker', 'visChart']);
   const inspector = getService('inspector');
+  const kibanaServer = getService('kibanaServer');
 
   describe('hybrid index pattern', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/hybrid/kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/hybrid_dataview.json'
+      );
       await esArchiver.load('x-pack/test/functional/es_archives/hybrid/logstash');
       await esArchiver.load('x-pack/test/functional/es_archives/hybrid/rollup');
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/hybrid/kibana');
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/hybrid_dataview.json'
+      );
       await esArchiver.unload('x-pack/test/functional/es_archives/hybrid/logstash');
       await esArchiver.unload('x-pack/test/functional/es_archives/hybrid/rollup');
+      await kibanaServer.savedObjects.cleanStandardList();
+      await PageObjects.common.unsetTime();
     });
 
     it('should render histogram line chart', async () => {
@@ -77,12 +85,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         ['2019-08-22 00:00', 'php', '11'],
         ['2019-08-22 16:00', 'jpg', '3'],
       ];
-      const fromTime = 'Aug 19, 2019 @ 01:55:07.240';
-      const toTime = 'Aug 22, 2019 @ 23:09:36.205';
+      const from = 'Aug 19, 2019 @ 01:55:07.240';
+      const to = 'Aug 22, 2019 @ 23:09:36.205';
 
+      await PageObjects.common.setTime({ from, to });
       await PageObjects.common.navigateToApp('visualize');
       await PageObjects.visualize.openSavedVisualization('hybrid_histogram_line_chart');
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       await PageObjects.visChart.waitForVisualizationRenderingStabilized();
       await inspector.open();
       await inspector.setTablePageSize(50);

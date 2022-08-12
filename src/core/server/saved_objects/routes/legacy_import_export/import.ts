@@ -7,12 +7,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter, Logger, SavedObject } from '../../..';
+import type { Logger } from '@kbn/logging';
+import type { SavedObject } from '../../..';
 import { InternalCoreUsageDataSetup } from '../../../core_usage_data';
+import type { InternalSavedObjectRouter } from '../../internal_types';
 import { importDashboards } from './lib';
 
 export const registerLegacyImportRoute = (
-  router: IRouter,
+  router: InternalSavedObjectRouter,
   {
     maxImportPayloadBytes,
     coreUsageData,

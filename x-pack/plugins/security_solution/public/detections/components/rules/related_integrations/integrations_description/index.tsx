@@ -8,9 +8,9 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { RelatedIntegrationArray } from '../../../../../../common/detection_engine/schemas/common';
-import { ListItems } from '../../description_step/types';
-import { IntegrationDetails } from '../integration_details';
+import type { RelatedIntegrationArray } from '../../../../../../common/detection_engine/schemas/common';
+import type { ListItems } from '../../description_step/types';
+import type { IntegrationDetails } from '../integration_details';
 import { useRelatedIntegrations } from '../use_related_integrations';
 
 import { IntegrationLink } from './integration_link';

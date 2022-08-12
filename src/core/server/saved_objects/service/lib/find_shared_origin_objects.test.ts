@@ -8,9 +8,9 @@
 
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
+import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import type { CreatePointInTimeFinderFn, PointInTimeFinder } from './point_in_time_finder';
 import { savedObjectsPointInTimeFinderMock } from './point_in_time_finder.mock';
-import type { ISavedObjectsRepository } from './repository';
 import { savedObjectsRepositoryMock } from './repository.mock';
 import { findSharedOriginObjects } from './find_shared_origin_objects';
 
@@ -86,14 +86,14 @@ describe('findSharedOriginObjects', () => {
     [obj1, obj2, obj3].forEach(({ type, origin }, i) => {
       expect(kueryFilterArgs[i * 2].arguments).toEqual(
         expect.arrayContaining([
-          { type: 'literal', value: `${type}.id` },
-          { type: 'literal', value: `${type}:${origin}` },
+          { type: 'literal', value: `${type}.id`, isQuoted: false },
+          { type: 'literal', value: `${type}:${origin}`, isQuoted: false },
         ])
       );
       expect(kueryFilterArgs[i * 2 + 1].arguments).toEqual(
         expect.arrayContaining([
-          { type: 'literal', value: `${type}.originId` },
-          { type: 'literal', value: origin },
+          { type: 'literal', value: `${type}.originId`, isQuoted: false },
+          { type: 'literal', value: origin, isQuoted: false },
         ])
       );
     });

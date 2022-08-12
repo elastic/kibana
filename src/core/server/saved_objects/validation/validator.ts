@@ -7,9 +7,11 @@
  */
 
 import type { Logger } from '@kbn/logging';
+import type {
+  SavedObjectsValidationMap,
+  SavedObjectSanitizedDoc,
+} from '@kbn/core-saved-objects-server';
 import { createSavedObjectSanitizedDocSchema } from './schema';
-import { SavedObjectsValidationMap } from './types';
-import { SavedObjectSanitizedDoc } from '../serialization';
 
 /**
  * Helper class that takes a {@link SavedObjectsValidationMap} and runs validations for a

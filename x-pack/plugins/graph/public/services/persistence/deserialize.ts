@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { indexPatterns as indexPatternsUtils } from '@kbn/data-plugin/public';
+import { DataViewListItem, indexPatterns as indexPatternsUtils } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   SerializedNode,
@@ -14,7 +14,6 @@ import {
   WorkspaceField,
   GraphWorkspaceSavedObject,
   SerializedWorkspaceState,
-  IndexPatternSavedObject,
   AdvancedSettings,
   GraphData,
   Workspace,
@@ -65,24 +64,24 @@ function deserializeUrlTemplate({
  * Returns a status indicating successful migration or failure to look up the index pattern by title.
  * If the workspace is migrated already, a success status is returned as well.
  * @param savedWorkspace The workspace saved object to migrate. The migration will happen in-place and mutate the passed in object
- * @param indexPatterns All index patterns existing in the current space
+ * @param dataViews All data views existing in the current space
  */
 export function migrateLegacyIndexPatternRef(
   savedWorkspace: GraphWorkspaceSavedObject,
-  indexPatterns: IndexPatternSavedObject[]
+  dataViews: DataViewListItem[]
 ): { success: true } | { success: false; missingIndexPattern: string } {
   const legacyIndexPatternRef = savedWorkspace.legacyIndexPatternRef;
   if (!legacyIndexPatternRef) {
     return { success: true };
   }
-  const indexPatternId = indexPatterns.find(
-    (pattern) => pattern.attributes.title === legacyIndexPatternRef
+  const dataViewId = dataViews.find(
+    (dataViewItem) => dataViewItem.title === legacyIndexPatternRef
   )?.id;
-  if (!indexPatternId) {
+  if (!dataViewId) {
     return { success: false, missingIndexPattern: legacyIndexPatternRef };
   }
   const serializedWorkspaceState: SerializedWorkspaceState = JSON.parse(savedWorkspace.wsState);
-  serializedWorkspaceState.indexPattern = indexPatternId!;
+  serializedWorkspaceState.indexPattern = dataViewId!;
   savedWorkspace.wsState = JSON.stringify(serializedWorkspaceState);
   delete savedWorkspace.legacyIndexPatternRef;
   return { success: true };

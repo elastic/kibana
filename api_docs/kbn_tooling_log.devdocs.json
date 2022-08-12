@@ -17,6 +17,17 @@
         "tags": [],
         "label": "ToolingLog",
         "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "server",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-server.ToolingLog",
+            "text": "ToolingLog"
+          },
+          " implements ",
+          "SomeDevLog"
+        ],
         "path": "packages/kbn-tooling-log/src/tooling_log.ts",
         "deprecated": false,
         "children": [

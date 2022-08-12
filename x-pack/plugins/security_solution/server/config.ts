@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginInitializerContext } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { PluginInitializerContext } from '@kbn/core/server';
 import { SIGNALS_INDEX_KEY, DEFAULT_SIGNALS_INDEX } from '../common/constants';
+import type { ExperimentalFeatures } from '../common/experimental_features';
 import {
-  ExperimentalFeatures,
   getExperimentalAllowedValues,
   isValidExperimentalValue,
   parseExperimentalConfigValue,

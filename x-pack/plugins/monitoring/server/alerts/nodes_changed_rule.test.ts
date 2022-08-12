@@ -19,13 +19,6 @@ jest.mock('../lib/alerts/fetch_nodes_from_cluster_stats', () => ({
 jest.mock('../lib/alerts/fetch_clusters', () => ({
   fetchClusters: jest.fn(),
 }));
-jest.mock('moment', () => {
-  return function () {
-    return {
-      format: () => 'THE_DATE',
-    };
-  };
-});
 
 jest.mock('../static_globals', () => ({
   Globals: {
@@ -71,6 +64,7 @@ describe('NodesChangedAlert', () => {
 
   describe('execute', () => {
     function FakeDate() {}
+
     FakeDate.prototype.valueOf = () => 1;
 
     const nodeUuid = 'myNodeUuid';

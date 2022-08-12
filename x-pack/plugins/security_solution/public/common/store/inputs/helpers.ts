@@ -7,8 +7,8 @@
 
 import { get } from 'lodash/fp';
 
-import { InputsModel, TimeRange, Refetch, RefetchKql, InspectQuery } from './model';
-import { InputsModelId } from './constants';
+import type { InputsModel, TimeRange, Refetch, RefetchKql, InspectQuery } from './model';
+import type { InputsModelId } from './constants';
 
 export const updateInputFullScreen = (
   inputId: InputsModelId,

@@ -10,13 +10,13 @@ import { BehaviorSubject } from 'rxjs';
 import { schema } from '@kbn/config-schema';
 
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import {
   MockUiSettingsClientConstructor,
   MockUiSettingsDefaultsClientConstructor,
   getCoreSettingsMock,
 } from './ui_settings_service.test.mock';
 import { UiSettingsService, SetupDeps } from './ui_settings_service';
-import { httpServiceMock } from '../http/http_service.mock';
 import { savedObjectsClientMock } from '../mocks';
 import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
 import { uiSettingsType } from './saved_objects';

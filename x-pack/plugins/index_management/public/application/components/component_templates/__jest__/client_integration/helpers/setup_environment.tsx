@@ -7,15 +7,12 @@
 
 import React from 'react';
 
-import { HttpSetup } from '@kbn/core/public';
-import {
-  notificationServiceMock,
-  docLinksServiceMock,
-  applicationServiceMock,
-  executionContextServiceMock,
-} from '@kbn/core/public/mocks';
-
+import type { CoreStart, HttpSetup } from '@kbn/core/public';
+import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
+import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
+import { notificationServiceMock, applicationServiceMock, coreMock } from '@kbn/core/public/mocks';
 import { GlobalFlyout } from '@kbn/es-ui-shared-plugin/public';
+
 import { AppContextProvider } from '../../../../../app_context';
 import { MappingsEditorProvider } from '../../../../mappings_editor';
 import { ComponentTemplatesProvider } from '../../../component_templates_context';
@@ -30,7 +27,8 @@ const appDependencies = {
   docLinks: {} as any,
 } as any;
 
-export const componentTemplatesDependencies = (httpSetup: HttpSetup) => ({
+export const componentTemplatesDependencies = (httpSetup: HttpSetup, coreStart?: CoreStart) => ({
+  overlays: coreStart?.overlays ?? coreMock.createStart().overlays,
   httpClient: httpSetup,
   apiBasePath: API_BASE_PATH,
   trackMetric: () => {},
@@ -43,16 +41,17 @@ export const componentTemplatesDependencies = (httpSetup: HttpSetup) => ({
 
 export const setupEnvironment = initHttpRequests;
 
-export const WithAppDependencies = (Comp: any, httpSetup: HttpSetup) => (props: any) =>
-  (
-    <AppContextProvider value={appDependencies}>
-      <MappingsEditorProvider>
-        <ComponentTemplatesProvider value={componentTemplatesDependencies(httpSetup)}>
-          <GlobalFlyoutProvider>
-            <Comp {...props} />
-          </GlobalFlyoutProvider>
-        </ComponentTemplatesProvider>
-      </MappingsEditorProvider>
-      /
-    </AppContextProvider>
-  );
+export const WithAppDependencies =
+  (Comp: any, httpSetup: HttpSetup, coreStart?: CoreStart) => (props: any) =>
+    (
+      <AppContextProvider value={appDependencies}>
+        <MappingsEditorProvider>
+          <ComponentTemplatesProvider value={componentTemplatesDependencies(httpSetup, coreStart)}>
+            <GlobalFlyoutProvider>
+              <Comp {...props} />
+            </GlobalFlyoutProvider>
+          </ComponentTemplatesProvider>
+        </MappingsEditorProvider>
+        /
+      </AppContextProvider>
+    );

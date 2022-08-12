@@ -8,18 +8,18 @@
 import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { BlocklistConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
+import type { BlocklistConditionEntryField } from '@kbn/securitysolution-utils';
+import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { ENDPOINT_BLOCKLISTS_LIST_ID } from '@kbn/securitysolution-list-constants';
 
-import { BlocklistEntry, BlockListForm } from './blocklist_form';
-import {
+import type { BlocklistEntry } from './blocklist_form';
+import { BlockListForm } from './blocklist_form';
+import type {
   ArtifactFormComponentOnChangeCallbackProps,
   ArtifactFormComponentProps,
 } from '../../../../components/artifact_list_page';
-import {
-  AppContextTestRender,
-  createAppRootMockRenderer,
-} from '../../../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
 import { ERRORS } from '../../translations';
 import { licenseService } from '../../../../../common/hooks/use_license';
 import type { PolicyData } from '../../../../../../common/endpoint/types';

@@ -28,8 +28,7 @@ import { ACTION_VISUALIZE_LENS_FIELD } from '@kbn/ui-actions-plugin/public';
 import { ACTION_CONVERT_TO_LENS } from '@kbn/visualizations-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { syncQueryStateWithUrl } from '@kbn/data-plugin/public';
-import { LensReportManager, setReportManager, trackUiEvent } from '../lens_ui_telemetry';
+import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 
 import { App } from './app';
 import { EditorFrameStart, LensTopNavMenuEntryGenerator } from '../types';
@@ -134,20 +133,24 @@ export async function mountApp(
 
   const lensServices = await getLensServices(coreStart, startDependencies, attributeService);
 
-  const { stateTransfer, data, storage } = lensServices;
+  const { stateTransfer, data } = lensServices;
 
   const embeddableEditorIncomingState = stateTransfer?.getIncomingEditorState(APP_ID);
 
   addHelpMenuToAppChrome(coreStart.chrome, coreStart.docLinks);
+  if (!lensServices.application.capabilities.visualize.save) {
+    coreStart.chrome.setBadge({
+      text: i18n.translate('xpack.lens.badge.readOnly.text', {
+        defaultMessage: 'Read only',
+      }),
+      tooltip: i18n.translate('xpack.lens.badge.readOnly.tooltip', {
+        defaultMessage: 'Unable to save visualizations to the library',
+      }),
+      iconType: 'glasses',
+    });
+  }
   coreStart.chrome.docTitle.change(
     i18n.translate('xpack.lens.pageTitle', { defaultMessage: 'Lens' })
-  );
-
-  setReportManager(
-    new LensReportManager({
-      http: core.http,
-      storage,
-    })
   );
 
   const getInitialInput = (id?: string, editByValue?: boolean): LensEmbeddableInput | undefined => {
@@ -220,7 +223,7 @@ export async function mountApp(
   };
   const lensStore: LensRootStore = makeConfigureStore(storeDeps, {
     lens: getPreloadedState(storeDeps) as LensAppState,
-  } as PreloadedState<LensState>);
+  } as unknown as PreloadedState<LensState>);
 
   const EditorRenderer = React.memo(
     (props: { id?: string; history: History<unknown>; editByValue?: boolean }) => {
@@ -231,7 +234,7 @@ export async function mountApp(
           useHash: lensServices.uiSettings.get('state:storeInSessionStorage'),
           ...withNotifyOnErrors(lensServices.notifications.toasts),
         });
-        const { stop: stopSyncingQueryServiceStateWithUrl } = syncQueryStateWithUrl(
+        const { stop: stopSyncingQueryServiceStateWithUrl } = syncGlobalQueryStateWithUrl(
           data.query,
           kbnUrlStateStorage
         );
@@ -271,7 +274,6 @@ export async function mountApp(
           initCallback();
         })();
       }, [initCallback, initialInput, props.history, redirectCallback]);
-      trackUiEvent('loaded');
 
       if (editorState === 'loading') {
         return <EuiLoadingSpinner />;
@@ -332,7 +334,6 @@ export async function mountApp(
   };
 
   function NotFound() {
-    trackUiEvent('loaded_404');
     return <FormattedMessage id="xpack.lens.app404" defaultMessage="404 Not Found" />;
   }
   // dispatch synthetic hash change event to update hash history objects

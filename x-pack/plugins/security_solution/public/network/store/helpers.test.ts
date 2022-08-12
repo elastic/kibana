@@ -14,7 +14,8 @@ import {
   NetworkUsersFields,
 } from '../../../common/search_strategy';
 import { DEFAULT_TABLE_LIMIT } from '../../common/store/constants';
-import { NetworkModel, NetworkTableType, NetworkDetailsTableType, NetworkType } from './model';
+import type { NetworkModel } from './model';
+import { NetworkTableType, NetworkDetailsTableType, NetworkType } from './model';
 import { setNetworkQueriesActivePageToZero } from './helpers';
 
 export const mockNetworkState: NetworkModel = {

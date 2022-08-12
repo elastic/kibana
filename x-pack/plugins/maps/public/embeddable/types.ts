@@ -14,9 +14,8 @@ import {
   SavedObjectEmbeddableInput,
 } from '@kbn/embeddable-plugin/public';
 import type { Query, TimeRange } from '@kbn/es-query';
-import { MapCenterAndZoom, MapExtent } from '../../common/descriptor_types';
+import { MapCenterAndZoom, MapExtent, MapSettings } from '../../common/descriptor_types';
 import { MapSavedObjectAttributes } from '../../common/map_saved_object_type';
-import { MapSettings } from '../reducers/map';
 
 export interface MapEmbeddableConfig {
   editable: boolean;
@@ -33,13 +32,14 @@ interface MapEmbeddableState {
   filters?: Filter[];
   query?: Query;
   timeRange?: TimeRange;
+  filterByMapExtent?: boolean;
+  isMovementSynchronized?: boolean;
 }
 export type MapByValueInput = {
   attributes: MapSavedObjectAttributes;
-} & EmbeddableInput & { filterByMapExtent?: boolean } & MapEmbeddableState;
-export type MapByReferenceInput = SavedObjectEmbeddableInput & {
-  filterByMapExtent?: boolean;
-} & MapEmbeddableState;
+} & EmbeddableInput &
+  MapEmbeddableState;
+export type MapByReferenceInput = SavedObjectEmbeddableInput & MapEmbeddableState;
 export type MapEmbeddableInput = MapByValueInput | MapByReferenceInput;
 
 export type MapEmbeddableOutput = EmbeddableOutput & {

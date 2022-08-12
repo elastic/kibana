@@ -8,6 +8,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
@@ -27,6 +28,7 @@ const defaultProps = {
   savedObjectsClient: {} as SavedObjectsClientContract,
   dateRange: { fromDate: 'now-1d', toDate: 'now' },
   data: dataPluginMock.createStartContract(),
+  fieldFormats: fieldFormatsServiceMock.createStartContract(),
   unifiedSearch: unifiedSearchPluginMock.createStartContract(),
   dataViews: dataViewPluginMocks.createStartContract(),
   http: {} as HttpSetup,
@@ -36,6 +38,14 @@ const defaultProps = {
   toggleFullscreen: jest.fn(),
   setIsCloseable: jest.fn(),
   layerId: '1',
+  existingFields: {
+    my_index_pattern: {
+      timestamp: true,
+      bytes: true,
+      memory: true,
+      source: true,
+    },
+  },
 };
 
 // mocking random id generator function
@@ -304,7 +314,7 @@ describe('filters', () => {
         <InlineOptions
           {...defaultProps}
           layer={layer}
-          updateLayer={updateLayerSpy}
+          paramEditorUpdater={updateLayerSpy}
           columnId="col1"
           currentColumn={layer.columns.col1 as FiltersIndexPatternColumn}
         />
@@ -357,7 +367,7 @@ describe('filters', () => {
           <InlineOptions
             {...defaultProps}
             layer={layer}
-            updateLayer={updateLayerSpy}
+            paramEditorUpdater={updateLayerSpy}
             columnId="col1"
             currentColumn={layer.columns.col1 as FiltersIndexPatternColumn}
           />
@@ -382,7 +392,7 @@ describe('filters', () => {
           <InlineOptions
             {...defaultProps}
             layer={layer}
-            updateLayer={updateLayerSpy}
+            paramEditorUpdater={updateLayerSpy}
             columnId="col1"
             currentColumn={layer.columns.col1 as FiltersIndexPatternColumn}
           />
@@ -413,6 +423,14 @@ describe('filters', () => {
           },
         });
       });
+    });
+  });
+
+  describe('getMaxPossibleNumValues', () => {
+    it('reports number of filters', () => {
+      expect(
+        filtersOperation.getMaxPossibleNumValues!(layer.columns.col1 as FiltersIndexPatternColumn)
+      ).toBe(2);
     });
   });
 });

@@ -12,7 +12,8 @@ import {
   AGENT_POLICY_LABEL,
   AGENT_SELECTION_LABEL,
 } from './translations';
-import { AGENT_GROUP_KEY, Group, GroupOption, GroupedAgent } from './types';
+import type { Group, GroupOption, GroupedAgent } from './types';
+import { AGENT_GROUP_KEY } from './types';
 
 const getColor = generateColorPicker();
 

@@ -10,10 +10,10 @@ import { take } from 'rxjs/operators';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { elasticsearchClientMock } from '../../elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { KibanaMigratorOptions, KibanaMigrator } from './kibana_migrator';
 import { SavedObjectTypeRegistry } from '../saved_objects_type_registry';
-import { SavedObjectsType } from '../types';
 import { DocumentMigrator } from './core/document_migrator';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
@@ -99,9 +99,7 @@ describe('KibanaMigrator', () => {
     it('throws if prepareMigrations is not called first', async () => {
       const options = mockOptions();
 
-      options.client.cat.templates.mockResponse([], { statusCode: 404 });
-      options.client.indices.get.mockResponse({}, { statusCode: 404 });
-      options.client.indices.getAlias.mockResponse({}, { statusCode: 404 });
+      options.client.indices.get.mockResponse({}, { statusCode: 200 });
 
       const migrator = new KibanaMigrator(options);
 
@@ -112,8 +110,7 @@ describe('KibanaMigrator', () => {
 
     it('only runs migrations once if called multiple times', async () => {
       const options = mockOptions();
-      options.client.indices.get.mockResponse({}, { statusCode: 404 });
-      options.client.indices.getAlias.mockResponse({}, { statusCode: 404 });
+      options.client.indices.get.mockResponse({}, { statusCode: 200 });
 
       options.client.cluster.getSettings.mockResponse(
         {
@@ -250,6 +247,9 @@ const mockV2MigrationOptions = () => {
 };
 
 const mockOptions = () => {
+  const mockedClient = elasticsearchClientMock.createElasticsearchClient();
+  (mockedClient as any).child = jest.fn().mockImplementation(() => mockedClient);
+
   const options: MockedOptions = {
     logger: loggingSystemMock.create().get(),
     kibanaVersion: '8.2.3',
@@ -287,7 +287,7 @@ const mockOptions = () => {
       skip: false,
       retryAttempts: 20,
     },
-    client: elasticsearchClientMock.createElasticsearchClient(),
+    client: mockedClient,
     docLinks: docLinksServiceMock.createSetupContract(),
   };
   return options;

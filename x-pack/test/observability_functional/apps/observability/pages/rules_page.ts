@@ -21,6 +21,7 @@ export default ({ getService }: FtrProviderContext) => {
     expect(ruleResponse.status).to.eql(200);
     return ruleResponse.body.id;
   }
+
   async function deleteRuleById(ruleId: string) {
     const ruleResponse = await supertest
       .delete(`${RULE_ENDPOINT}/${ruleId}`)
@@ -34,8 +35,8 @@ export default ({ getService }: FtrProviderContext) => {
     for (const euiTableRow of tableRows) {
       const $ = await euiTableRow.parseDomContent();
       rows.push({
-        name: $.findTestSubjects('rulesTableCell-name').find('a').text(),
-        enabled: $.findTestSubjects('rulesTableCell-ContextStatus').find('button').attr('title'),
+        name: $.findTestSubjects('rulesTableCell-name').text(),
+        enabled: $.findTestSubjects('rulesTableCell-status').find('button').attr('title'),
       });
     }
     return rows;
@@ -131,9 +132,9 @@ export default ({ getService }: FtrProviderContext) => {
         const tableRows = await find.allByCssSelector('.euiTableRow');
         const rows = await getRulesList(tableRows);
         expect(rows.length).to.be(2);
-        expect(rows[0].name).to.be('error-log');
+        expect(rows[0].name).to.contain('error-log');
         expect(rows[0].enabled).to.be('Enabled');
-        expect(rows[1].name).to.be('uptime');
+        expect(rows[1].name).to.contain('uptime');
         expect(rows[1].enabled).to.be('Enabled');
       });
 

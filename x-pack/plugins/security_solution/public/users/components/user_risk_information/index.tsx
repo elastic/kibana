@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   useGeneratedHtmlId,
   EuiFlyout,
@@ -18,7 +19,6 @@ import {
   EuiFlyoutFooter,
   EuiButton,
   EuiSpacer,
-  EuiBasicTableColumn,
   EuiButtonEmpty,
   EuiLink,
 } from '@elastic/eui';
@@ -59,8 +59,6 @@ const tableItems: TableItem[] = [
   { classification: RiskSeverity.low, range: '20 - 40' },
   { classification: RiskSeverity.unknown, range: i18n.UNKNOWN_RISK_DESCRIPTION },
 ];
-
-export const USER_RISK_INFO_BUTTON_CLASS = 'UserRiskInformation__button';
 
 export const UserRiskInformationButtonEmpty = () => {
   const [isFlyoutVisible, handleOnOpen, handleOnClose] = useOnOpenCloseHandler();

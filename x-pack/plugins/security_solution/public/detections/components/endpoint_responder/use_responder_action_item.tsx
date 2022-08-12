@@ -23,7 +23,7 @@ export const useResponderActionItem = (
   const isResponseActionsConsoleEnabled = useIsExperimentalFeatureEnabled(
     'responseActionsConsoleEnabled'
   );
-  const { loading: isAuthzLoading, canAccessEndpointManagement } =
+  const { loading: isAuthzLoading, canAccessResponseConsole } =
     useUserPrivileges().endpointPrivileges;
 
   const isAlert = useMemo(() => {
@@ -42,12 +42,7 @@ export const useResponderActionItem = (
   return useMemo(() => {
     const actions: JSX.Element[] = [];
 
-    if (
-      isResponseActionsConsoleEnabled &&
-      !isAuthzLoading &&
-      canAccessEndpointManagement &&
-      isAlert
-    ) {
+    if (isResponseActionsConsoleEnabled && !isAuthzLoading && canAccessResponseConsole && isAlert) {
       actions.push(
         <ResponderContextMenuItem
           endpointId={isEndpointAlert ? endpointId : ''}
@@ -58,7 +53,7 @@ export const useResponderActionItem = (
 
     return actions;
   }, [
-    canAccessEndpointManagement,
+    canAccessResponseConsole,
     endpointId,
     isAlert,
     isAuthzLoading,

@@ -350,6 +350,7 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
         <EuiFlexItem>
           <EuiPanel paddingSize="none" panelRef={logsPanelRef}>
             <LogStream
+              logView={{ type: 'log-view-reference', logViewId: 'default' }}
               height={logPanelHeight}
               startTimestamp={dateRangeTimestamps.start}
               endTimestamp={dateRangeTimestamps.end}

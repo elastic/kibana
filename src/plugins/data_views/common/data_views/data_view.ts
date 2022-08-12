@@ -6,21 +6,31 @@
  * Side Public License, v 1.
  */
 
-import _, { each, reject } from 'lodash';
-import { castEsToKbnFieldTypeName, ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
-import {
-  FieldFormatsStartCommon,
+import type { DataViewBase } from '@kbn/es-query';
+import type {
   FieldFormat,
+  FieldFormatsStartCommon,
   SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
-import type { DataViewBase } from '@kbn/es-query';
-import { FieldAttrs, FieldAttrSet, DataViewAttributes } from '..';
-import type { RuntimeField, RuntimeFieldSpec, RuntimeType, FieldConfiguration } from '../types';
-import { DataViewField, IIndexPatternFieldList, fieldList } from '../fields';
+import { castEsToKbnFieldTypeName, ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
+import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
+import _, { cloneDeep, each, reject } from 'lodash';
+import type { DataViewAttributes, FieldAttrs, FieldAttrSet } from '..';
+import type { DataViewField, IIndexPatternFieldList } from '../fields';
+import { fieldList } from '../fields';
+import type {
+  DataViewFieldMap,
+  DataViewSpec,
+  FieldConfiguration,
+  FieldFormatMap,
+  RuntimeField,
+  RuntimeFieldSpec,
+  RuntimeType,
+  SourceFilter,
+  TypeMeta,
+} from '../types';
 import { flattenHitWrapper } from './flatten_hit';
-import { DataViewSpec, TypeMeta, SourceFilter, DataViewFieldMap } from '../types';
 import { removeFieldAttrs } from './utils';
 
 interface DataViewDeps {
@@ -70,7 +80,7 @@ export class DataView implements DataViewBase {
   /**
    * Map of field formats by field name
    */
-  public fieldFormatMap: Record<string, any>;
+  public fieldFormatMap: FieldFormatMap;
   /**
    * Only used by rollup indices, used by rollup specific endpoint to load field list.
    */
@@ -90,7 +100,7 @@ export class DataView implements DataViewBase {
   /**
    * @deprecated Use `flattenHit` utility method exported from data plugin instead.
    */
-  public flattenHit: (hit: Record<string, any>, deep?: boolean) => Record<string, any>;
+  public flattenHit: (hit: Record<string, unknown[]>, deep?: boolean) => Record<string, unknown>;
   /**
    * List of meta fields by name
    */
@@ -145,7 +155,7 @@ export class DataView implements DataViewBase {
     const { spec = {}, fieldFormats, shortDotsEnable = false, metaFields = [] } = config;
 
     // set dependencies
-    this.fieldFormats = fieldFormats;
+    this.fieldFormats = { ...fieldFormats };
     // set config
     this.shortDotsEnable = shortDotsEnable;
     this.metaFields = metaFields;
@@ -156,19 +166,19 @@ export class DataView implements DataViewBase {
 
     // set values
     this.id = spec.id;
-    this.fieldFormatMap = spec.fieldFormats || {};
+    this.fieldFormatMap = { ...spec.fieldFormats };
 
     this.version = spec.version;
 
     this.title = spec.title || '';
     this.timeFieldName = spec.timeFieldName;
-    this.sourceFilters = spec.sourceFilters;
+    this.sourceFilters = [...(spec.sourceFilters || [])];
     this.fields.replaceAll(Object.values(spec.fields || {}));
     this.type = spec.type;
     this.typeMeta = spec.typeMeta;
-    this.fieldAttrs = spec.fieldAttrs || {};
+    this.fieldAttrs = cloneDeep(spec.fieldAttrs) || {};
     this.allowNoIndex = spec.allowNoIndex || false;
-    this.runtimeFieldMap = spec.runtimeFieldMap || {};
+    this.runtimeFieldMap = cloneDeep(spec.runtimeFieldMap) || {};
     this.namespaces = spec.namespaces || [];
     this.name = spec.name || '';
   }
@@ -233,7 +243,7 @@ export class DataView implements DataViewBase {
       };
     }
 
-    // Date value returned in "_source" could be in any number of formats
+    // Date value returned in "_source" could be in a number of formats
     // Use a docvalue for each date field to ensure standardized formats when working with date fields
     // dataView.flattenHit will override "_source" values when the same field is also defined in "fields"
     const docvalueFields = reject(this.fields.getByType('date'), 'scripted').map((dateField) => {
@@ -271,24 +281,33 @@ export class DataView implements DataViewBase {
 
   /**
    * Creates static representation of the data view.
+   * @param includeFields Whether or not to include the `fields` list as part of this spec. If not included, the list
+   * will be fetched from Elasticsearch when instantiating a new Data View with this spec.
    */
-  public toSpec(): DataViewSpec {
-    return {
+  public toSpec(includeFields = true): DataViewSpec {
+    const fields =
+      includeFields && this.fields
+        ? this.fields.toSpec({ getFormatterForField: this.getFormatterForField.bind(this) })
+        : undefined;
+
+    const spec: DataViewSpec = {
       id: this.id,
       version: this.version,
-
       title: this.title,
       timeFieldName: this.timeFieldName,
-      sourceFilters: this.sourceFilters,
-      fields: this.fields.toSpec({ getFormatterForField: this.getFormatterForField.bind(this) }),
+      sourceFilters: [...(this.sourceFilters || [])],
+      fields,
       typeMeta: this.typeMeta,
       type: this.type,
-      fieldFormats: this.fieldFormatMap,
-      runtimeFieldMap: this.runtimeFieldMap,
-      fieldAttrs: this.fieldAttrs,
+      fieldFormats: { ...this.fieldFormatMap },
+      runtimeFieldMap: cloneDeep(this.runtimeFieldMap),
+      fieldAttrs: cloneDeep(this.fieldAttrs),
       allowNoIndex: this.allowNoIndex,
       name: this.name,
     };
+
+    // Filter undefined values from the spec
+    return Object.fromEntries(Object.entries(spec).filter(([, v]) => typeof v !== 'undefined'));
   }
 
   /**
@@ -477,6 +496,7 @@ export class DataView implements DataViewBase {
 
   /**
    * Get all runtime field definitions.
+   * NOTE: this does not strip out runtime fields that match mapped field names
    * @returns map of runtime field definitions by field name
    */
 
@@ -563,8 +583,19 @@ export class DataView implements DataViewBase {
    * Return the "runtime_mappings" section of the ES search query.
    */
   getRuntimeMappings(): estypes.MappingRuntimeFields {
-    // @ts-expect-error The ES client does not yet include the "composite" runtime type
-    return _.cloneDeep(this.runtimeFieldMap);
+    const mappedFields = this.getMappedFieldNames();
+    const records = Object.keys(this.runtimeFieldMap).reduce<Record<string, RuntimeFieldSpec>>(
+      (acc, fieldName) => {
+        // do not include fields that are mapped
+        if (!mappedFields.includes(fieldName)) {
+          acc[fieldName] = this.runtimeFieldMap[fieldName];
+        }
+
+        return acc;
+      },
+      {}
+    );
+    return records as estypes.MappingRuntimeFields;
   }
 
   /**
@@ -647,6 +678,15 @@ export class DataView implements DataViewBase {
   public readonly deleteFieldFormat = (fieldName: string) => {
     delete this.fieldFormatMap[fieldName];
   };
+
+  private getMappedFieldNames() {
+    return this.fields.getAll().reduce<string[]>((acc, dataViewField) => {
+      if (dataViewField.isMapped) {
+        acc.push(dataViewField.name);
+      }
+      return acc;
+    }, []);
+  }
 
   /**
    * Add composite runtime field and all subfields.

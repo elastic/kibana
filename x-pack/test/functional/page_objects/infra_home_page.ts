@@ -330,7 +330,9 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     },
 
     async waitForTourStep(tourStep: string) {
-      await retry.waitFor('tour step', () => testSubjects.exists(tourStep));
+      await retry.waitForWithTimeout(`tour step ${tourStep}`, 10000, () =>
+        testSubjects.exists(tourStep)
+      );
     },
 
     async ensureTourStepIsClosed(tourStep: string) {
@@ -338,15 +340,32 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     },
 
     async clickTourNextButton() {
-      await testSubjects.click('nextButton');
+      await testSubjects.click('onboarding--observTourNextStepButton');
     },
 
     async clickTourEndButton() {
-      await testSubjects.click('endButton');
+      await testSubjects.click('onboarding--observTourEndButton');
     },
 
     async clickTourSkipButton() {
-      await testSubjects.click('skipButton');
+      await testSubjects.click('onboarding--observTourSkipButton');
+    },
+
+    async clickGuidedSetupButton() {
+      await testSubjects.click('guidedSetupButton');
+    },
+
+    async clickQueryBar() {
+      await testSubjects.click('infraSearchField');
+    },
+
+    async inputQueryData() {
+      const queryBar = await testSubjects.find('infraSearchField');
+      await queryBar.type('h');
+    },
+
+    async ensureSuggestionsPanelVisible() {
+      await testSubjects.find('infraSuggestionsPanel');
     },
   };
 }

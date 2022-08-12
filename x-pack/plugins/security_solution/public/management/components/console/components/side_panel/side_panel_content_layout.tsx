@@ -5,13 +5,19 @@
  * 2.0.
  */
 
-import React, { memo, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
+import styled from 'styled-components';
 
 export interface SidePanelContentLayoutProps {
   children: ReactNode;
   headerContent?: ReactNode;
 }
+
+const StyledEuiFlexItemNoPadding = styled(EuiFlexItem)`
+  padding: 0 !important;
+`;
 
 /**
  * A layout component for displaying content in the right-side panel of the console
@@ -33,9 +39,9 @@ export const SidePanelContentLayout = memo<SidePanelContentLayoutProps>(
             <EuiHorizontalRule margin="none" />
           </>
         )}
-        <EuiFlexItem grow className="eui-scrollBar eui-yScroll layout-container">
+        <StyledEuiFlexItemNoPadding className="eui-scrollBar eui-yScroll layout-container">
           <div>{children}</div>
-        </EuiFlexItem>
+        </StyledEuiFlexItemNoPadding>
       </EuiFlexGroup>
     );
   }

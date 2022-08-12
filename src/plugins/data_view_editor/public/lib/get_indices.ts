@@ -9,7 +9,6 @@
 import { sortBy } from 'lodash';
 import { HttpStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { IEsSearchResponse } from '@kbn/data-plugin/public';
 import { Tag, INDEX_PATTERN_TYPE } from '../types';
 import { MatchedItem, ResolveIndexResponse, ResolveIndexResponseItemIndexAttrs } from '../types';
 
@@ -41,35 +40,6 @@ const getIndexTags = (isRollupIndex: (indexName: string) => boolean) => (indexNa
       ]
     : [];
 
-export const searchResponseToArray =
-  (getTags: (indexName: string) => Tag[], showAllIndices: boolean) =>
-  (response: IEsSearchResponse<any>) => {
-    const { rawResponse } = response;
-    if (!rawResponse.aggregations) {
-      return [];
-    } else {
-      // @ts-expect-error @elastic/elasticsearch no way to declare a type for aggregation in the search response
-      return rawResponse.aggregations.indices.buckets
-        .map((bucket: { key: string }) => {
-          return bucket.key;
-        })
-        .filter((indexName: string) => {
-          if (showAllIndices) {
-            return true;
-          } else {
-            return !indexName.startsWith('.');
-          }
-        })
-        .map((indexName: string) => {
-          return {
-            name: indexName,
-            tags: getTags(indexName),
-            item: {},
-          };
-        });
-    }
-  };
-
 export const getIndicesViaResolve = async ({
   http,
   pattern,
@@ -80,11 +50,15 @@ export const getIndicesViaResolve = async ({
   pattern: string;
   showAllIndices: boolean;
   isRollupIndex: (indexName: string) => boolean;
-}) =>
-  http
-    .get<ResolveIndexResponse>(`/internal/index-pattern-management/resolve_index/${pattern}`, {
-      query: showAllIndices ? { expand_wildcards: 'all' } : undefined,
-    })
+}) => {
+  const encodedPattern = encodeURIComponent(pattern);
+  return http
+    .get<ResolveIndexResponse>(
+      `/internal/index-pattern-management/resolve_index/${encodedPattern}`,
+      {
+        query: showAllIndices ? { expand_wildcards: 'all' } : undefined,
+      }
+    )
     .then((response) => {
       if (!response) {
         return [];
@@ -92,6 +66,7 @@ export const getIndicesViaResolve = async ({
         return responseToItemArray(response, getIndexTags(isRollupIndex));
       }
     });
+};
 
 export async function getIndices({
   http,

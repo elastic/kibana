@@ -48,6 +48,10 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
         await createBtn.click();
       }
     },
+    async getRulesListTitle() {
+      const noPermissionsTitle = await find.byCssSelector('[data-test-subj="rulesList"] .euiTitle');
+      return await noPermissionsTitle.getVisibleText();
+    },
     async clickCreateConnectorButton() {
       const createBtn = await testSubjects.find('createActionButton');
       const createBtnIsVisible = await createBtn.isDisplayed();

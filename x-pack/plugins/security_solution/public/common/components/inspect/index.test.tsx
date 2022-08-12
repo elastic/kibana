@@ -15,8 +15,10 @@ import {
   kibanaObservable,
   createSecuritySolutionStorageMock,
 } from '../../mock';
-import { createStore, State } from '../../store';
-import { UpdateQueryParams, upsertQuery } from '../../store/inputs/helpers';
+import type { State } from '../../store';
+import { createStore } from '../../store';
+import type { UpdateQueryParams } from '../../store/inputs/helpers';
+import { upsertQuery } from '../../store/inputs/helpers';
 
 import { InspectButton } from '.';
 import { cloneDeep } from 'lodash/fp';
@@ -68,6 +70,22 @@ describe('Inspect Button', () => {
       );
     });
 
+    test('it does NOT render the Empty Button when showInspectButton is false', () => {
+      const wrapper = mount(
+        <TestProviders store={store}>
+          <InspectButton
+            queryId={newQuery.id}
+            inputId="timeline"
+            showInspectButton={false}
+            title="My title"
+          />
+        </TestProviders>
+      );
+      expect(wrapper.find('button[data-test-subj="inspect-empty-button"]').first().exists()).toBe(
+        false
+      );
+    });
+
     test('Eui Icon Button', () => {
       const wrapper = mount(
         <TestProviders store={store}>
@@ -87,6 +105,17 @@ describe('Inspect Button', () => {
       );
       expect(wrapper.find('button[data-test-subj="inspect-icon-button"]').first().exists()).toBe(
         true
+      );
+    });
+
+    test('it does NOT render the Icon Button when showInspectButton is false', () => {
+      const wrapper = mount(
+        <TestProviders store={store}>
+          <InspectButton queryId={newQuery.id} showInspectButton={false} title="My title" />
+        </TestProviders>
+      );
+      expect(wrapper.find('button[data-test-subj="inspect-icon-button"]').first().exists()).toBe(
+        false
       );
     });
 

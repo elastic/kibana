@@ -6,8 +6,8 @@
  */
 import type { Filter } from '@kbn/es-query';
 import type { EntityType } from '@kbn/timelines-plugin/common';
-import { QueryTabBodyProps } from '../../../hosts/pages/navigation/types';
-import { TimelineIdLiteral, ColumnHeaderOptions } from '../../../../common/types/timeline';
+import type { QueryTabBodyProps } from '../../../hosts/pages/navigation/types';
+import type { TimelineIdLiteral, ColumnHeaderOptions } from '../../../../common/types/timeline';
 
 export interface SessionsComponentsProps extends Pick<QueryTabBodyProps, 'endDate' | 'startDate'> {
   timelineId: TimelineIdLiteral;

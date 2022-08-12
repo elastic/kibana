@@ -14,6 +14,9 @@
       "path": "../../synthetics/e2e/tsconfig.json",
     },
     {
+      "path": "../../observability/e2e/tsconfig.json"
+    },
+    {
       "path": "../tsconfig.json",
     }
   ]

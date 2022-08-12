@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { AppContextTestRender, createAppRootMockRenderer } from '../../../common/mock/endpoint';
-import {
-  EndpointAppliedPolicyStatus,
-  EndpointAppliedPolicyStatusProps,
-} from './endpoint_applied_policy_status';
+import type { AppContextTestRender } from '../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import type { EndpointAppliedPolicyStatusProps } from './endpoint_applied_policy_status';
+import { EndpointAppliedPolicyStatus } from './endpoint_applied_policy_status';
 import React from 'react';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import { POLICY_STATUS_TO_TEXT } from '../../pages/endpoint_hosts/view/host_constants';

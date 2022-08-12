@@ -47,7 +47,7 @@ describe('CauseStacktrace', () => {
 
         expect(
           shallow(<CauseStacktrace {...props} />).find(
-            'Styled(WithEuiTheme(EuiAccordionClass))'
+            'Styled(EuiAccordionClass)'
           )
         ).toHaveLength(1);
       });

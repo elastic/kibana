@@ -14,10 +14,10 @@ import {
   EuiBasicTableProps,
   useEuiTheme,
 } from '@elastic/eui';
-import moment from 'moment';
+import { i18n } from '@kbn/i18n';
+import { TimestampTableCell } from '../../components/timestamp_table_cell';
 import type { RulesState } from './rules_container';
 import * as TEST_SUBJECTS from './test_subjects';
-import * as TEXT from './translations';
 import type { RuleSavedObject } from './use_csp_rules';
 
 type RulesTableProps = Pick<
@@ -112,7 +112,9 @@ const getColumns = ({
 }: GetColumnProps): Array<EuiTableFieldDataColumnType<RuleSavedObject>> => [
   {
     field: 'attributes.metadata.name',
-    name: TEXT.RULE_NAME,
+    name: i18n.translate('xpack.csp.rules.rulesTable.nameColumnLabel', {
+      defaultMessage: 'Name',
+    }),
     width: '60%',
     truncateText: true,
     render: (name, rule) => (
@@ -131,23 +133,37 @@ const getColumns = ({
   },
   {
     field: 'attributes.metadata.section',
-    name: TEXT.CIS_SECTION,
+    name: i18n.translate('xpack.csp.rules.rulesTable.cisSectionColumnLabel', {
+      defaultMessage: 'CIS Section',
+    }),
     width: '15%',
   },
   {
     field: 'updatedAt',
-    name: TEXT.LAST_MODIFIED,
+    name: i18n.translate('xpack.csp.rules.rulesTable.lastModifiedColumnLabel', {
+      defaultMessage: 'Last Modified',
+    }),
     width: '15%',
-    render: (timestamp) => moment(timestamp).fromNow(),
+    render: (timestamp) => <TimestampTableCell timestamp={timestamp} />,
   },
   {
     field: 'attributes.enabled',
-    name: TEXT.ENABLED,
+    name: i18n.translate('xpack.csp.rules.rulesTable.enabledColumnLabel', {
+      defaultMessage: 'Enabled',
+    }),
     render: (enabled, rule) => (
       <EuiSwitch
         disabled={!canUpdate}
         showLabel={false}
-        label={enabled ? TEXT.DISABLE : TEXT.ENABLE}
+        label={
+          enabled
+            ? i18n.translate('xpack.csp.rules.rulesTable.enabledColumn.disableSwitchLabel', {
+                defaultMessage: 'Disable',
+              })
+            : i18n.translate('xpack.csp.rules.rulesTable.enabledColumn.enableSwitchLabel', {
+                defaultMessage: 'Enable',
+              })
+        }
         checked={enabled}
         onChange={() => toggleRule(rule)}
         data-test-subj={TEST_SUBJECTS.getCspRulesTableItemSwitchTestId(rule.id)}

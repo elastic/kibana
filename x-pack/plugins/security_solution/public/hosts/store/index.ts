@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Reducer, AnyAction } from 'redux';
+import type { Reducer, AnyAction } from 'redux';
 import * as hostsActions from './actions';
 import * as hostsModel from './model';
 import * as hostsSelectors from './selectors';

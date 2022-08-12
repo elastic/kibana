@@ -16,7 +16,7 @@ describe('RevertToBasic component', () => {
       },
       RevertToBasic
     );
-    expect(rendered.html()).toMatchSnapshot();
+    expect(rendered.render()).toMatchSnapshot();
   });
   test('should display when license is expired', () => {
     const rendered = getComponent(
@@ -25,7 +25,7 @@ describe('RevertToBasic component', () => {
       },
       RevertToBasic
     );
-    expect(rendered.html()).toMatchSnapshot();
+    expect(rendered.render()).toMatchSnapshot();
   });
   test('should display when license is about to expire', () => {
     // ten days from now
@@ -36,7 +36,7 @@ describe('RevertToBasic component', () => {
       },
       RevertToBasic
     );
-    expect(rendered.html()).toMatchSnapshot();
+    expect(rendered.render()).toMatchSnapshot();
   });
   test('should not display for active basic license', () => {
     const rendered = getComponent(

@@ -5,6 +5,7 @@
  * 2.0.
  */
 import uuid from 'uuid';
+import { escapeRegExp } from 'lodash';
 import { sortProcesses } from '../../../common/utils/sort_processes';
 import {
   AlertStatusEventEntityIdMap,
@@ -210,7 +211,10 @@ export const searchProcessTree = (
       // for now plain text search is limited to searching process.working_directory + process.args
       const text = `${workingDirectory ?? ''} ${args?.join(' ')}`;
 
-      process.searchMatched = text.includes(searchQuery) ? searchQuery : null;
+      const searchMatch = [...text.matchAll(new RegExp(escapeRegExp(searchQuery), 'gi'))];
+
+      process.searchMatched =
+        searchMatch.length > 0 ? getSearchMatchedIndices(text, searchMatch) : null;
 
       if (process.searchMatched) {
         results.push(process);
@@ -221,6 +225,21 @@ export const searchProcessTree = (
   }
 
   return results.sort(sortProcesses);
+};
+
+const getSearchMatchedIndices = (text: string, matches: RegExpMatchArray[]) => {
+  return text.split('').reduce((accum, _, idx) => {
+    const findMatch = matches.find(
+      (match) =>
+        match.index !== undefined && idx >= match.index && idx < match.index + match[0].length
+    );
+
+    if (findMatch) {
+      accum = [...accum, idx];
+    }
+
+    return accum;
+  }, [] as number[]);
 };
 
 // Iterate over all processes in processMap, and mark each process (and it's ancestors) for auto expansion if:

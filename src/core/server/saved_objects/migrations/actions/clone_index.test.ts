@@ -9,8 +9,9 @@
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { cloneIndex } from './clone_index';
 import { setWriteBlock } from './set_write_block';
-import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
+
 jest.mock('./catch_retryable_es_client_errors');
 
 describe('cloneIndex', () => {

@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import moment from 'moment';
 
-import { Unit } from '@kbn/datemath';
+import type { Unit } from '@kbn/datemath';
 import {
   RULE_PREVIEW_FROM,
   RULE_PREVIEW_INTERVAL,
   RULE_PREVIEW_INVOCATION_COUNT,
 } from '../../../../../common/detection_engine/constants';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import {
+import type {
   PreviewResponse,
   CreateRulesSchema,
 } from '../../../../../common/detection_engine/schemas/request';
@@ -22,6 +23,10 @@ import {
 import { previewRule } from './api';
 import * as i18n from './translations';
 import { transformOutput } from './transforms';
+import type { AdvancedPreviewOptions } from '../../../pages/detection_engine/rules/types';
+import { getTimeTypeValue } from '../../../pages/detection_engine/rules/create/helpers';
+
+const REASONABLE_INVOCATION_COUNT = 200;
 
 const emptyPreviewRule: PreviewResponse = {
   previewId: undefined,
@@ -29,14 +34,20 @@ const emptyPreviewRule: PreviewResponse = {
   isAborted: false,
 };
 
-export const usePreviewRule = (timeframe: Unit = 'h') => {
+export const usePreviewRule = ({
+  timeframe = 'h',
+  advancedOptions,
+}: {
+  timeframe: Unit;
+  advancedOptions?: AdvancedPreviewOptions;
+}) => {
   const [rule, setRule] = useState<CreateRulesSchema | null>(null);
   const [response, setResponse] = useState<PreviewResponse>(emptyPreviewRule);
   const [isLoading, setIsLoading] = useState(false);
   const { addError } = useAppToasts();
   let invocationCount = RULE_PREVIEW_INVOCATION_COUNT.HOUR;
-  let interval = RULE_PREVIEW_INTERVAL.HOUR;
-  let from = RULE_PREVIEW_FROM.HOUR;
+  let interval: string = RULE_PREVIEW_INTERVAL.HOUR;
+  let from: string = RULE_PREVIEW_FROM.HOUR;
 
   switch (timeframe) {
     case 'd':
@@ -55,6 +66,30 @@ export const usePreviewRule = (timeframe: Unit = 'h') => {
       from = RULE_PREVIEW_FROM.MONTH;
       break;
   }
+  const timeframeEnd = useMemo(
+    () => (advancedOptions ? advancedOptions.timeframeEnd.toISOString() : moment().toISOString()),
+    [advancedOptions]
+  );
+
+  if (advancedOptions) {
+    const timeframeDuration =
+      (advancedOptions.timeframeEnd.valueOf() / 1000 -
+        advancedOptions.timeframeStart.valueOf() / 1000) *
+      1000;
+
+    const { unit: intervalUnit, value: intervalValue } = getTimeTypeValue(advancedOptions.interval);
+    const duration = moment.duration(intervalValue, intervalUnit);
+    const ruleIntervalDuration = duration.asMilliseconds();
+
+    invocationCount = Math.max(Math.ceil(timeframeDuration / ruleIntervalDuration), 1);
+    interval = advancedOptions.interval;
+
+    const { unit: lookbackUnit, value: lookbackValue } = getTimeTypeValue(advancedOptions.lookback);
+    duration.add(lookbackValue, lookbackUnit);
+
+    from = `now-${duration.asSeconds()}s`;
+  }
+  const showInvocationCountWarning = invocationCount > REASONABLE_INVOCATION_COUNT;
 
   useEffect(() => {
     if (!rule) {
@@ -79,6 +114,7 @@ export const usePreviewRule = (timeframe: Unit = 'h') => {
                 from,
               }),
               invocationCount,
+              timeframeEnd,
             },
             signal: abortCtrl.signal,
           });
@@ -101,7 +137,7 @@ export const usePreviewRule = (timeframe: Unit = 'h') => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [rule, addError, invocationCount, from, interval]);
+  }, [rule, addError, invocationCount, from, interval, timeframeEnd]);
 
-  return { isLoading, response, rule, setRule };
+  return { isLoading, showInvocationCountWarning, response, rule, setRule };
 };

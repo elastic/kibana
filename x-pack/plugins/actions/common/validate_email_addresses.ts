@@ -27,13 +27,6 @@ export function validateEmailAddresses(
   addresses: string[],
   options: ValidateEmailAddressesOptions = {}
 ): ValidatedEmail[] {
-  // note: this is the legacy default, which would in theory allow
-  // mustache strings, so options.allowMustache is ignored in this
-  // case - everything is valid!
-  if (allowedDomains == null) {
-    return validateEmailAddressesAsAlwaysValid(addresses);
-  }
-
   return addresses.map((address) => validateEmailAddress(allowedDomains, address, options));
 }
 
@@ -60,7 +53,7 @@ export function invalidEmailsAsMessage(validatedEmails: ValidatedEmail[]): strin
 
 // in case the npm email-addresses returns unexpected things ...
 function validateEmailAddress(
-  allowedDomains: string[],
+  allowedDomains: string[] | null,
   address: string,
   options: ValidateEmailAddressesOptions
 ): ValidatedEmail {
@@ -80,32 +73,33 @@ function validateEmailAddress(
   }
 }
 
-function validateEmailAddress_(allowedDomains: string[], address: string): ValidatedEmail {
+function validateEmailAddress_(allowedDomains: string[] | null, address: string): ValidatedEmail {
   const emailAddresses = parseAddressList(address);
   if (emailAddresses == null) {
     return { address, valid: false, reason: InvalidEmailReason.invalid };
   }
 
-  const allowedDomainsSet = new Set(allowedDomains);
+  if (allowedDomains !== null) {
+    const allowedDomainsSet = new Set(allowedDomains);
 
-  for (const emailAddress of emailAddresses) {
-    let domains: string[] = [];
+    for (const emailAddress of emailAddresses) {
+      let domains: string[] = [];
 
-    if (emailAddress.type === 'group') {
-      domains = emailAddress.addresses.map((groupAddress) => groupAddress.domain);
-    } else if (emailAddress.type === 'mailbox') {
-      domains = [emailAddress.domain];
-    } else {
-      return { address, valid: false, reason: InvalidEmailReason.invalid };
-    }
+      if (emailAddress.type === 'group') {
+        domains = emailAddress.addresses.map((groupAddress) => groupAddress.domain);
+      } else if (emailAddress.type === 'mailbox') {
+        domains = [emailAddress.domain];
+      } else {
+        return { address, valid: false, reason: InvalidEmailReason.invalid };
+      }
 
-    for (const domain of domains) {
-      if (!allowedDomainsSet.has(domain)) {
-        return { address, valid: false, reason: InvalidEmailReason.notAllowed };
+      for (const domain of domains) {
+        if (!allowedDomainsSet.has(domain)) {
+          return { address, valid: false, reason: InvalidEmailReason.notAllowed };
+        }
       }
     }
   }
-
   return { address, valid: true };
 }
 

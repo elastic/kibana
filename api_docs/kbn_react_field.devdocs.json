@@ -233,7 +233,7 @@
               "\nUse the small size in condensed areas"
             ],
             "signature": [
-              "\"m\" | \"s\" | undefined"
+              "\"s\" | \"m\" | undefined"
             ],
             "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
             "deprecated": false
@@ -375,7 +375,7 @@
         "label": "ButtonSize",
         "description": [],
         "signature": [
-          "\"m\" | \"s\""
+          "\"s\" | \"m\""
         ],
         "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
         "deprecated": false,

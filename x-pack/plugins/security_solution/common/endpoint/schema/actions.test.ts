@@ -27,10 +27,10 @@ describe('actions schemas', () => {
       }).toThrow();
     });
 
-    it('should not accept an agent ID if not in an array', () => {
+    it('should accept an agent ID if not in an array', () => {
       expect(() => {
         EndpointActionListRequestSchema.query.validate({ agentIds: uuid.v4() });
-      }).toThrow();
+      }).not.toThrow();
     });
 
     it('should accept an agent ID in an array', () => {
@@ -68,9 +68,21 @@ describe('actions schemas', () => {
       }).not.toThrow();
     });
 
-    it('should not work without allowed page and pageSize params', () => {
+    it('should not work with invalid value for `page` query param', () => {
       expect(() => {
-        EndpointActionListRequestSchema.query.validate({ pageSize: 101 });
+        EndpointActionListRequestSchema.query.validate({ page: -1 });
+      }).toThrow();
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({ page: 0 });
+      }).toThrow();
+    });
+
+    it('should not work with invalid value for `pageSize` query param', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({ pageSize: 100001 });
+      }).toThrow();
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({ pageSize: 0 });
       }).toThrow();
     });
 

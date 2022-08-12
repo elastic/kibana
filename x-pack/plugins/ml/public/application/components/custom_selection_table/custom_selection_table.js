@@ -71,17 +71,17 @@ export function CustomSelectionTable({
     lastItemIndex: 1,
   });
   const [query, setQuery] = useState(EuiSearchBar.Query.MATCH_ALL);
-  const [error, setError] = useState(null); // eslint-disable-line
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     setCurrentItems(items);
     handleQueryChange({ query: query });
-  }, [items]); // eslint-disable-line
+  }, [items]);
 
   // When changes to selected ids made via badge removal - update selection in the table accordingly
   useEffect(() => {
     setItemIdToSelectedMap(getCurrentlySelectedItemIdsMap());
-  }, [selectedIds]); // eslint-disable-line
+  }, [selectedIds]);
 
   useEffect(() => {
     const tablePager = new Pager(currentItems.length, itemsPerPage, currentPage);

@@ -8,6 +8,7 @@
 
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
+import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import type {
   FatalState,
   State,
@@ -41,7 +42,6 @@ import type {
   CheckUnknownDocumentsState,
   CalculateExcludeFiltersState,
 } from '../state';
-import { SavedObjectsRawDoc } from '../../serialization';
 import { TransformErrorObjects, TransformSavedObjectDocumentError } from '../core';
 import { AliasAction, RetryableEsClientError } from '../actions';
 import { ResponseType } from '../next';
@@ -324,6 +324,29 @@ describe('migrations v2 model', () => {
           `"The .kibana alias is pointing to a newer version of Kibana: v7.12.0"`
         );
       });
+      test('INIT -> FATAL when .kibana points to multiple indices', () => {
+        const res: ResponseType<'INIT'> = Either.right({
+          '.kibana_7.12.0_001': {
+            aliases: {
+              '.kibana': {},
+              '.kibana_7.12.0': {},
+            },
+            mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+            settings: {},
+          },
+          '.kibana_7.11.0_001': {
+            aliases: { '.kibana': {}, '.kibana_7.11.0': {} },
+            mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+            settings: {},
+          },
+        });
+        const newState = model(initState, res) as FatalState;
+
+        expect(newState.controlState).toEqual('FATAL');
+        expect(newState.reason).toMatchInlineSnapshot(
+          `"The .kibana alias is pointing to multiple indices: .kibana_7.12.0_001,.kibana_7.11.0_001."`
+        );
+      });
       test('INIT -> WAIT_FOR_YELLOW_SOURCE when .kibana points to an index with an invalid version', () => {
         // If users tamper with our index version naming scheme we can no
         // longer accurately detect a newer version. Older Kibana versions
@@ -573,10 +596,10 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
-      test('LEGACY_CREATE_REINDEX_TARGET -> LEGACY_CREATE_REINDEX_TARGET if action fails with index_not_yellow_timeout', () => {
+      test('LEGACY_CREATE_REINDEX_TARGET -> LEGACY_CREATE_REINDEX_TARGET if action fails with index_not_green_timeout', () => {
         const res: ResponseType<'LEGACY_CREATE_REINDEX_TARGET'> = Either.left({
-          message: '[index_not_yellow_timeout] Timeout waiting for ...',
-          type: 'index_not_yellow_timeout',
+          message: '[index_not_green_timeout] Timeout waiting for ...',
+          type: 'index_not_green_timeout',
         });
         const newState = model(legacyCreateReindexTargetState, res);
         expect(newState.controlState).toEqual('LEGACY_CREATE_REINDEX_TARGET');
@@ -585,7 +608,7 @@ describe('migrations v2 model', () => {
         expect(newState.logs[0]).toMatchInlineSnapshot(`
           Object {
             "level": "error",
-            "message": "Action failed with '[index_not_yellow_timeout] Timeout waiting for ... Refer to repeatedTimeoutRequests for information on how to resolve the issue.'. Retrying attempt 1 in 2 seconds.",
+            "message": "Action failed with '[index_not_green_timeout] Timeout waiting for ... Refer to repeatedTimeoutRequests for information on how to resolve the issue.'. Retrying attempt 1 in 2 seconds.",
           }
         `);
       });
@@ -1026,10 +1049,10 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
-      it('CREATE_REINDEX_TEMP -> CREATE_REINDEX_TEMP if action fails with index_not_yellow_timeout', () => {
+      it('CREATE_REINDEX_TEMP -> CREATE_REINDEX_TEMP if action fails with index_not_green_timeout', () => {
         const res: ResponseType<'CREATE_REINDEX_TEMP'> = Either.left({
-          message: '[index_not_yellow_timeout] Timeout waiting for ...',
-          type: 'index_not_yellow_timeout',
+          message: '[index_not_green_timeout] Timeout waiting for ...',
+          type: 'index_not_green_timeout',
         });
         const newState = model(state, res);
         expect(newState.controlState).toEqual('CREATE_REINDEX_TEMP');
@@ -1038,7 +1061,7 @@ describe('migrations v2 model', () => {
         expect(newState.logs[0]).toMatchInlineSnapshot(`
           Object {
             "level": "error",
-            "message": "Action failed with '[index_not_yellow_timeout] Timeout waiting for ... Refer to repeatedTimeoutRequests for information on how to resolve the issue.'. Retrying attempt 1 in 2 seconds.",
+            "message": "Action failed with '[index_not_green_timeout] Timeout waiting for ... Refer to repeatedTimeoutRequests for information on how to resolve the issue.'. Retrying attempt 1 in 2 seconds.",
           }
         `);
       });
@@ -1411,10 +1434,10 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toBe(0);
         expect(newState.retryDelay).toBe(0);
       });
-      it('CLONE_TEMP_TO_TARGET -> CLONE_TEMP_TO_TARGET if action fails with index_not_yellow_timeout', () => {
+      it('CLONE_TEMP_TO_TARGET -> CLONE_TEMP_TO_TARGET if action fails with index_not_green_timeout', () => {
         const res: ResponseType<'CLONE_TEMP_TO_TARGET'> = Either.left({
-          message: '[index_not_yellow_timeout] Timeout waiting for ...',
-          type: 'index_not_yellow_timeout',
+          message: '[index_not_green_timeout] Timeout waiting for ...',
+          type: 'index_not_green_timeout',
         });
         const newState = model(state, res);
         expect(newState.controlState).toEqual('CLONE_TEMP_TO_TARGET');
@@ -1423,7 +1446,7 @@ describe('migrations v2 model', () => {
         expect(newState.logs[0]).toMatchInlineSnapshot(`
           Object {
             "level": "error",
-            "message": "Action failed with '[index_not_yellow_timeout] Timeout waiting for ... Refer to repeatedTimeoutRequests for information on how to resolve the issue.'. Retrying attempt 1 in 2 seconds.",
+            "message": "Action failed with '[index_not_green_timeout] Timeout waiting for ... Refer to repeatedTimeoutRequests for information on how to resolve the issue.'. Retrying attempt 1 in 2 seconds.",
           }
         `);
       });
@@ -1940,10 +1963,10 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
-      test('CREATE_NEW_TARGET -> CREATE_NEW_TARGET if action fails with index_not_yellow_timeout', () => {
+      test('CREATE_NEW_TARGET -> CREATE_NEW_TARGET if action fails with index_not_green_timeout', () => {
         const res: ResponseType<'CREATE_NEW_TARGET'> = Either.left({
-          message: '[index_not_yellow_timeout] Timeout waiting for ...',
-          type: 'index_not_yellow_timeout',
+          message: '[index_not_green_timeout] Timeout waiting for ...',
+          type: 'index_not_green_timeout',
         });
         const newState = model(createNewTargetState, res);
         expect(newState.controlState).toEqual('CREATE_NEW_TARGET');
@@ -2068,6 +2091,30 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toEqual('FATAL');
         expect(newState.reason).toMatchInlineSnapshot(
           `"Multiple versions of Kibana are attempting a migration in parallel. Another Kibana instance on version 7.12.0 completed this migration (this instance is running 7.11.0). Ensure that all Kibana instances are running on same version and try again."`
+        );
+        expect(newState.retryCount).toEqual(0);
+        expect(newState.retryDelay).toEqual(0);
+      });
+      test('MARK_VERSION_INDEX_READY_CONFLICT -> FATAL if the current alias is pointing to a multiple indices', () => {
+        const res: ResponseType<'MARK_VERSION_INDEX_READY_CONFLICT'> = Either.right({
+          '.kibana_7.11.0_001': {
+            aliases: { '.kibana': {}, '.kibana_7.11.0': {} },
+            mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+            settings: {},
+          },
+          '.kibana_7.12.0_001': {
+            aliases: {
+              '.kibana': {},
+              '.kibana_7.12.0': {},
+            },
+            mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+            settings: {},
+          },
+        });
+        const newState = model(markVersionIndexConflictState, res) as FatalState;
+        expect(newState.controlState).toEqual('FATAL');
+        expect(newState.reason).toMatchInlineSnapshot(
+          `"The .kibana alias is pointing to multiple indices: .kibana_7.11.0_001,.kibana_7.12.0_001."`
         );
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);

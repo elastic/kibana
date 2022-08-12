@@ -6,9 +6,9 @@
  */
 
 import actionCreatorFactory from 'typescript-fsa';
-import { usersModel } from '.';
-import { RiskScoreSortField, RiskSeverity } from '../../../common/search_strategy';
-import { SortUsersField } from '../../../common/search_strategy/security_solution/users/common';
+import type { usersModel } from '.';
+import type { RiskScoreSortField, RiskSeverity } from '../../../common/search_strategy';
+import type { SortUsersField } from '../../../common/search_strategy/security_solution/users/common';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/users');
 

@@ -15,6 +15,7 @@ import {
 import { firstValueFrom } from 'rxjs';
 import { asDuration } from '@kbn/observability-plugin/common/utils/formatters';
 import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { getAlertUrlTransaction } from '../../../common/utils/formatters';
 import { SearchAggregatedTransactionSetting } from '../../../common/aggregated_transactions';
 import {
@@ -33,7 +34,6 @@ import {
   getEnvironmentEsField,
   getEnvironmentLabel,
 } from '../../../common/environment_filter_values';
-import { ProcessorEvent } from '../../../common/processor_event';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getDurationFormatter } from '../../../common/utils/formatters';
 import {

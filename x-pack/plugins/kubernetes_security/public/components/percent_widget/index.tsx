@@ -10,12 +10,12 @@ import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiText } from '@elastic/eui';
 import { useStyles } from './styles';
 import type { IndexPattern, GlobalFilter } from '../../types';
 import { useSetFilter } from '../../hooks';
-import { addTimerangeToQuery } from '../../utils/add_timerange_to_query';
+import { addTimerangeAndDefaultFilterToQuery } from '../../utils/add_timerange_and_default_filter_to_query';
 import { AggregateResult } from '../../../common/types/aggregate';
 import { useFetchPercentWidgetData } from './hooks';
 
-export const LOADING_TEST_ID = 'kubernetesSecurity:percent-widget-loading';
-export const PERCENT_DATA_TEST_ID = 'kubernetesSecurity:percentage-widget-data';
+export const LOADING_TEST_ID = 'kubernetesSecurity:percentWidgetLoading';
+export const PERCENT_DATA_TEST_ID = 'kubernetesSecurity:percentWidgetData';
 
 export interface PercenWidgetDataValueMap {
   name: string;
@@ -32,7 +32,7 @@ export interface PercentWidgetDeps {
   globalFilter: GlobalFilter;
   groupedBy: string;
   countBy?: string;
-  onReduce: (result: AggregateResult[]) => Record<string, number>;
+  onReduce: (result: AggregateResult) => Record<string, number>;
 }
 
 interface FilterButtons {
@@ -54,7 +54,7 @@ export const PercentWidget = ({
   const styles = useStyles();
 
   const filterQueryWithTimeRange = useMemo(() => {
-    return addTimerangeToQuery(
+    return addTimerangeAndDefaultFilterToQuery(
       globalFilter.filterQuery,
       globalFilter.startDate,
       globalFilter.endDate
@@ -123,7 +123,7 @@ export const PercentWidget = ({
         />
       )}
       <div css={styles.title}>{title}</div>
-      <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiFlexGroup direction="column" gutterSize="s">
         {Object.keys(dataValueMap).map((groupedByValue, idx) => {
           const value = data?.[groupedByValue] || 0;
           return (

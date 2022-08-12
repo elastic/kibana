@@ -29,7 +29,7 @@ export interface ContextAppContentProps {
   onAddColumn: (columnsName: string) => void;
   onRemoveColumn: (columnsName: string) => void;
   onSetColumns: (columnsNames: string[], hideTimeColumn: boolean) => void;
-  indexPattern: DataView;
+  dataView: DataView;
   predecessorCount: number;
   successorCount: number;
   rows: DataTableRecord[];
@@ -42,6 +42,7 @@ export interface ContextAppContentProps {
   isLegacy: boolean;
   setAppState: (newState: Partial<AppState>) => void;
   addFilter: DocViewFilterFn;
+  onFieldEdited: () => void;
 }
 
 const controlColumnIds = ['openDetails'];
@@ -59,7 +60,7 @@ export function ContextAppContent({
   onAddColumn,
   onRemoveColumn,
   onSetColumns,
-  indexPattern,
+  dataView,
   predecessorCount,
   successorCount,
   rows,
@@ -72,6 +73,7 @@ export function ContextAppContent({
   isLegacy,
   setAppState,
   addFilter,
+  onFieldEdited,
 }: ContextAppContentProps) {
   const { uiSettings: config } = useDiscoverServices();
 
@@ -85,8 +87,8 @@ export function ContextAppContent({
     successorsStatus === LoadingStatus.LOADING || successorsStatus === LoadingStatus.UNINITIALIZED;
 
   const showTimeCol = useMemo(
-    () => !config.get(DOC_HIDE_TIME_COLUMN_SETTING, false) && !!indexPattern.timeFieldName,
-    [config, indexPattern]
+    () => !config.get(DOC_HIDE_TIME_COLUMN_SETTING, false) && !!dataView.timeFieldName,
+    [config, dataView]
   );
   const defaultStepSize = useMemo(() => parseInt(config.get(CONTEXT_STEP_SETTING), 10), [config]);
 
@@ -109,8 +111,8 @@ export function ContextAppContent({
     [setAppState]
   );
   const sort = useMemo(() => {
-    return [[indexPattern.timeFieldName!, SortDirection.desc]];
-  }, [indexPattern]);
+    return [[dataView.timeFieldName!, SortDirection.desc]];
+  }, [dataView]);
 
   return (
     <Fragment>
@@ -128,7 +130,7 @@ export function ContextAppContent({
       {isLegacy && rows && rows.length !== 0 && (
         <DocTableContextMemoized
           columns={columns}
-          indexPattern={indexPattern}
+          dataView={dataView}
           rows={rows}
           isLoading={isAnchorLoading}
           onFilter={addFilter}
@@ -145,7 +147,7 @@ export function ContextAppContent({
             ariaLabelledBy="surDocumentsAriaLabel"
             columns={columns}
             rows={rows}
-            indexPattern={indexPattern}
+            dataView={dataView}
             expandedDoc={expandedDoc}
             isLoading={isAnchorLoading}
             sampleSize={0}
@@ -160,6 +162,7 @@ export function ContextAppContent({
             onAddColumn={onAddColumn}
             onRemoveColumn={onRemoveColumn}
             onSetColumns={onSetColumns}
+            onFieldEdited={onFieldEdited}
           />
         </div>
       )}

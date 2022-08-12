@@ -7,7 +7,8 @@
 
 import React from 'react';
 
-import { PopoverItems, PopoverItemsProps } from '.';
+import type { PopoverItemsProps } from '.';
+import { PopoverItems } from '.';
 import { TestProviders } from '../../mock';
 import { render, screen } from '@testing-library/react';
 import { within } from '@testing-library/dom';

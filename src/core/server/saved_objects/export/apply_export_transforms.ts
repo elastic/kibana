@@ -6,10 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { SavedObject } from '../../../types';
-import { KibanaRequest } from '../../http';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type {
+  SavedObjectsExportTransform,
+  SavedObjectsExportTransformContext,
+} from '@kbn/core-saved-objects-server';
 import { SavedObjectsExportError } from './errors';
-import { SavedObjectsExportTransform, SavedObjectsExportTransformContext } from './types';
 import { getObjKey, SavedObjectComparator } from './utils';
 
 interface ApplyExportTransformsOptions {

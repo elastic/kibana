@@ -16,6 +16,8 @@ export const ManualInstructions = (
 ) => {
   const enrollArgs = getfleetServerHostsEnrollArgs(apiKey, fleetServerHosts);
 
+  const k8sCommand = 'kubectl apply -f elastic-agent-managed-kubernetes.yaml';
+
   const linuxCommand = `curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-linux-x86_64.tar.gz
 tar xzvf elastic-agent-${kibanaVersion}-linux-x86_64.tar.gz
 cd elastic-agent-${kibanaVersion}-linux-x86_64
@@ -46,5 +48,6 @@ sudo elastic-agent enroll ${enrollArgs} \nsudo systemctl enable elastic-agent \n
     windows: windowsCommand,
     deb: linuxDebCommand,
     rpm: linuxRpmCommand,
+    kubernetes: k8sCommand,
   };
 };

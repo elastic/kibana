@@ -99,7 +99,7 @@ export const config: PluginConfigDescriptor<APMConfig> = {
       { level: 'warning' }
     ),
     renameFromRoot(
-      'xpack.apm.maxServiceSelections',
+      'xpack.apm.maxServiceSelection',
       `uiSettings.overrides[${maxSuggestions}]`,
       { level: 'warning' }
     ),
@@ -126,5 +126,3 @@ export type {
   APIEndpoint,
 } from './routes/apm_routes/get_global_apm_server_route_repository';
 export type { APMRouteHandlerResources } from './routes/typings';
-
-export type { ProcessorEvent } from '../common/processor_event';

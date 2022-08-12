@@ -10,14 +10,14 @@ import React from 'react';
 
 import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
 
-import type { UserData } from '../../common';
+import type { UserProfileData } from '../../common';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import { UserAPIClient } from '../management';
 import { securityMock } from '../mocks';
 import { Providers } from './account_management_app';
 import { AccountManagementPage } from './account_management_page';
-import { UserProfileAPIClient } from './user_profile';
 import * as UserProfileImports from './user_profile/user_profile';
+import { UserProfileAPIClient } from './user_profile/user_profile_api_client';
 
 const UserProfileMock = jest.spyOn(UserProfileImports, 'UserProfile');
 
@@ -47,7 +47,7 @@ describe('<AccountManagementPage>', () => {
 
   it('should render user profile form and set breadcrumbs', async () => {
     const user = mockAuthenticatedUser();
-    const data: UserData = {};
+    const data: UserProfileData = {};
 
     authc.getCurrentUser.mockResolvedValue(user);
     coreStart.http.get.mockResolvedValue({ user, data });

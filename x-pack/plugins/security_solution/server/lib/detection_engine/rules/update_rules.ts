@@ -6,27 +6,17 @@
  */
 
 /* eslint-disable complexity */
-import { validate } from '@kbn/securitysolution-io-ts-utils';
-import { PartialRule } from '@kbn/alerting-plugin/server';
+import type { PartialRule } from '@kbn/alerting-plugin/server';
 import { DEFAULT_MAX_SIGNALS } from '../../../../common/constants';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 
-import { UpdateRulesOptions } from './types';
+import type { UpdateRulesOptions } from './types';
 import { typeSpecificSnakeToCamel } from '../schemas/rule_converters';
-import { internalRuleUpdate, RuleParams } from '../schemas/rule_schemas';
+import type { InternalRuleUpdate, RuleParams } from '../schemas/rule_schemas';
 import { maybeMute, transformToAlertThrottle, transformToNotifyWhen } from './utils';
-
-class UpdateError extends Error {
-  public readonly statusCode: number;
-  constructor(message: string, statusCode: number) {
-    super(message);
-    this.statusCode = statusCode;
-  }
-}
 
 export const updateRules = async ({
   rulesClient,
-  defaultOutputIndex,
   existingRule,
   ruleUpdate,
 }: UpdateRulesOptions): Promise<PartialRule<RuleParams> | null> => {
@@ -36,7 +26,7 @@ export const updateRules = async ({
 
   const typeSpecificParams = typeSpecificSnakeToCamel(ruleUpdate);
   const enabled = ruleUpdate.enabled ?? true;
-  const newInternalRule = {
+  const newInternalRule: InternalRuleUpdate = {
     name: ruleUpdate.name,
     tags: ruleUpdate.tags ?? [],
     params: {
@@ -49,7 +39,7 @@ export const updateRules = async ({
       // Unlike the create route, immutable comes from the existing rule here
       immutable: existingRule.params.immutable,
       license: ruleUpdate.license,
-      outputIndex: ruleUpdate.output_index ?? defaultOutputIndex,
+      outputIndex: ruleUpdate.output_index ?? '',
       timelineId: ruleUpdate.timeline_id,
       timelineTitle: ruleUpdate.timeline_title,
       meta: ruleUpdate.meta,
@@ -64,6 +54,7 @@ export const updateRules = async ({
       severityMapping: ruleUpdate.severity_mapping ?? [],
       threat: ruleUpdate.threat ?? [],
       timestampOverride: ruleUpdate.timestamp_override,
+      timestampOverrideFallbackDisabled: ruleUpdate.timestamp_override_fallback_disabled,
       to: ruleUpdate.to ?? 'now',
       references: ruleUpdate.references ?? [],
       namespace: ruleUpdate.namespace,
@@ -83,14 +74,9 @@ export const updateRules = async ({
     notifyWhen: transformToNotifyWhen(ruleUpdate.throttle),
   };
 
-  const [validated, errors] = validate(newInternalRule, internalRuleUpdate);
-  if (errors != null || validated === null) {
-    throw new UpdateError(`Applying update would create invalid rule: ${errors}`, 400);
-  }
-
   const update = await rulesClient.update({
     id: existingRule.id,
-    data: validated,
+    data: newInternalRule,
   });
 
   await maybeMute({

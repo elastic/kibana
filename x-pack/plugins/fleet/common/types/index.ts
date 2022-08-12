@@ -38,7 +38,6 @@ export interface FleetConfigType {
   };
   developer?: {
     disableRegistryVersionCheck?: boolean;
-    allowAgentUpgradeSourceUri?: boolean;
     bundledPackageLocation?: string;
   };
 }

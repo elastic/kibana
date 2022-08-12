@@ -15,6 +15,7 @@ import type {
   HttpSetup,
   CoreStart,
 } from '@kbn/core/public';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -22,12 +23,21 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createMockedIndexPattern } from '../../../mocks';
 import { ValuesInput } from './values_input';
 import type { TermsIndexPatternColumn } from '.';
-import { GenericOperationDefinition, termsOperation, LastValueIndexPatternColumn } from '..';
-import { IndexPattern, IndexPatternLayer, IndexPatternPrivateState } from '../../../types';
+import {
+  GenericOperationDefinition,
+  termsOperation,
+  LastValueIndexPatternColumn,
+  operationDefinitionMap,
+} from '..';
+import { IndexPatternLayer, IndexPatternPrivateState } from '../../../types';
 import { FrameDatasourceAPI } from '../../../../types';
 import { DateHistogramIndexPatternColumn } from '../date_histogram';
 import { getOperationSupportMatrix } from '../../../dimension_panel/operation_support';
 import { FieldSelect } from '../../../dimension_panel/field_select';
+import { ReferenceEditor } from '../../../dimension_panel/reference_editor';
+import { IndexPattern } from '../../../../types';
+import { cloneDeep } from 'lodash';
+import { IncludeExcludeRow } from './include_exclude_options';
 
 // mocking random id generator function
 jest.mock('@elastic/eui', () => {
@@ -60,16 +70,26 @@ const defaultProps = {
   savedObjectsClient: {} as SavedObjectsClientContract,
   dateRange: { fromDate: 'now-1d', toDate: 'now' },
   data: dataPluginMock.createStartContract(),
+  fieldFormats: fieldFormatsServiceMock.createStartContract(),
   unifiedSearch: unifiedSearchPluginMock.createStartContract(),
   dataViews: dataViewPluginMocks.createStartContract(),
   http: {} as HttpSetup,
   indexPattern: createMockedIndexPattern(),
   // need to provide the terms operation as some helpers use operation specific features
-  operationDefinitionMap: { terms: termsOperation as unknown as GenericOperationDefinition },
+  operationDefinitionMap,
   isFullscreen: false,
   toggleFullscreen: jest.fn(),
   setIsCloseable: jest.fn(),
   layerId: '1',
+  ReferenceEditor,
+  existingFields: {
+    'my-fake-index-pattern': {
+      timestamp: true,
+      bytes: true,
+      memory: true,
+      source: true,
+    },
+  },
 };
 
 describe('terms', () => {
@@ -136,7 +156,8 @@ describe('terms', () => {
         {} as IndexPattern,
         layer,
         uiSettingsMock,
-        []
+        [],
+        operationDefinitionMap
       );
       expect(esAggsFn).toEqual(
         expect.objectContaining({
@@ -229,6 +250,59 @@ describe('terms', () => {
       );
     });
 
+    it('should pass orderAgg correctly', () => {
+      const termsColumn = layer.columns.col1 as TermsIndexPatternColumn;
+      const esAggsFn = termsOperation.toEsAggsFn(
+        {
+          ...termsColumn,
+          params: {
+            ...termsColumn.params,
+            orderAgg: {
+              label: 'Maximum of price',
+              dataType: 'number',
+              operationType: 'max',
+              sourceField: 'price',
+              isBucketed: false,
+              scale: 'ratio',
+            },
+            orderBy: {
+              type: 'custom',
+            },
+          },
+        },
+        'col1',
+        {} as IndexPattern,
+        layer,
+        uiSettingsMock,
+        [],
+        operationDefinitionMap
+      );
+      expect(esAggsFn).toEqual(
+        expect.objectContaining({
+          arguments: expect.objectContaining({
+            orderAgg: [
+              {
+                chain: [
+                  {
+                    arguments: {
+                      enabled: [true],
+                      field: ['price'],
+                      id: ['col1-orderAgg'],
+                      schema: ['metric'],
+                    },
+                    function: 'aggMax',
+                    type: 'function',
+                  },
+                ],
+                type: 'expression',
+              },
+            ],
+            orderBy: ['custom'],
+          }),
+        })
+      );
+    });
+
     it('should default percentile rank with non integer value to alphabetical sort', () => {
       const newLayer = {
         ...layer,
@@ -260,6 +334,49 @@ describe('terms', () => {
           function: 'aggTerms',
           arguments: expect.objectContaining({
             orderBy: ['_key'],
+          }),
+        })
+      );
+    });
+
+    it('should reflect correct orderBy for multiple percentiles', () => {
+      const newLayer = {
+        ...layer,
+        columns: {
+          ...layer.columns,
+          col2: {
+            ...layer.columns.col2,
+            operationType: 'percentile',
+            params: {
+              percentile: 95,
+            },
+          },
+          col3: {
+            ...layer.columns.col2,
+            operationType: 'percentile',
+            params: {
+              percentile: 65,
+            },
+          },
+        },
+      };
+      const termsColumn = layer.columns.col1 as TermsIndexPatternColumn;
+      const esAggsFn = termsOperation.toEsAggsFn(
+        {
+          ...termsColumn,
+          params: { ...termsColumn.params, orderBy: { type: 'column', columnId: 'col3' } },
+        },
+        'col1',
+        {} as IndexPattern,
+        newLayer,
+        uiSettingsMock,
+        ['col1', 'col2', 'col3']
+      );
+      expect(esAggsFn).toEqual(
+        expect.objectContaining({
+          function: 'aggTerms',
+          arguments: expect.objectContaining({
+            orderBy: ['1.65'],
           }),
         })
       );
@@ -1091,7 +1208,7 @@ describe('terms', () => {
         fields[field.name] = true;
       }
       return {
-        [layer.indexPatternId]: fields,
+        [defaultProps.indexPattern.title]: fields,
       };
     }
 
@@ -1102,14 +1219,13 @@ describe('terms', () => {
       return getOperationSupportMatrix({
         state: {
           layers: { layer1: layer },
-          indexPatterns: {
-            [defaultProps.indexPattern.id]: defaultProps.indexPattern,
-          },
-          existingFields,
         } as unknown as IndexPatternPrivateState,
         layerId: 'layer1',
         filterOperations: () => true,
         columnId,
+        indexPatterns: {
+          [defaultProps.indexPattern.id]: defaultProps.indexPattern,
+        },
       });
     }
 
@@ -1275,7 +1391,7 @@ describe('terms', () => {
       ).toBe('Invalid field: "timestamp". Check your data view or pick another field.');
     });
 
-    it('should render the an add button for single layer, but no other hints', () => {
+    it('should render the an add button for single layer and disabled the remove button', () => {
       const updateLayerSpy = jest.fn();
       const existingFields = getExistingFields();
       const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
@@ -1295,7 +1411,15 @@ describe('terms', () => {
         instance.find('[data-test-subj="indexPattern-terms-add-field"]').exists()
       ).toBeTruthy();
 
-      expect(instance.find('[data-test-subj^="indexPattern-terms-removeField-"]').length).toBe(0);
+      expect(instance.find('[data-test-subj^="indexPattern-terms-removeField-"]').length).not.toBe(
+        0
+      );
+      expect(
+        instance
+          .find('[data-test-subj^="indexPattern-terms-removeField-"]')
+          .first()
+          .prop('isDisabled')
+      ).toBeTruthy();
     });
 
     it('should switch to the first supported operation when in single term mode and the picked field is not supported', () => {
@@ -1512,7 +1636,7 @@ describe('terms', () => {
       );
 
       expect(
-        instance.find('[data-test-subj="indexPattern-dimension-field"]').first().prop('options')
+        instance.find('[data-test-subj="indexPattern-dimension-field"]').at(1).prop('options')
       ).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
@@ -1801,7 +1925,7 @@ describe('terms', () => {
         <InlineOptions
           {...defaultProps}
           layer={layer}
-          updateLayer={updateLayerSpy}
+          paramEditorUpdater={updateLayerSpy}
           columnId="col1"
           currentColumn={layer.columns.col1 as TermsIndexPatternColumn}
         />
@@ -1824,7 +1948,7 @@ describe('terms', () => {
             ...createMockedIndexPattern(),
             hasRestrictions: true,
           }}
-          updateLayer={updateLayerSpy}
+          paramEditorUpdater={updateLayerSpy}
           columnId="col1"
           currentColumn={layer.columns.col1 as TermsIndexPatternColumn}
         />
@@ -1839,7 +1963,7 @@ describe('terms', () => {
         <InlineOptions
           {...defaultProps}
           layer={layer}
-          updateLayer={updateLayerSpy}
+          paramEditorUpdater={updateLayerSpy}
           columnId="col1"
           currentColumn={layer.columns.col1 as TermsIndexPatternColumn}
         />
@@ -1858,7 +1982,7 @@ describe('terms', () => {
         <InlineOptions
           {...defaultProps}
           layer={layer}
-          updateLayer={updateLayerSpy}
+          paramEditorUpdater={updateLayerSpy}
           columnId="col1"
           currentColumn={
             {
@@ -1885,7 +2009,7 @@ describe('terms', () => {
         <InlineOptions
           {...defaultProps}
           layer={layer}
-          updateLayer={updateLayerSpy}
+          paramEditorUpdater={updateLayerSpy}
           columnId="col1"
           currentColumn={{
             ...(layer.columns.col1 as TermsIndexPatternColumn),
@@ -1916,7 +2040,7 @@ describe('terms', () => {
           <InlineOptions
             {...defaultProps}
             layer={layer}
-            updateLayer={() => {}}
+            paramEditorUpdater={() => {}}
             columnId="col1"
             currentColumn={
               {
@@ -1959,13 +2083,60 @@ describe('terms', () => {
       });
     });
 
+    describe('include/exclude', () => {
+      const renderWithIncludeExclude = (dataType: string, hasSecondaryFields: boolean) =>
+        shallow(
+          <InlineOptions
+            {...defaultProps}
+            layer={layer}
+            paramEditorUpdater={() => {}}
+            columnId="col1"
+            currentColumn={
+              {
+                ...layer.columns.col1,
+                dataType,
+                params: {
+                  ...(layer.columns.col1 as TermsIndexPatternColumn).params,
+                  include: ['test'],
+                  exclude: ['pattern.*'],
+                  ...(hasSecondaryFields && { secondaryFields: ['field1'] }),
+                },
+              } as TermsIndexPatternColumn
+            }
+          />
+        );
+
+      const getComboboxes = (dataType: string, hasSecondaryFields: boolean) =>
+        renderWithIncludeExclude(dataType, hasSecondaryFields).find(IncludeExcludeRow);
+
+      it('should be present for a string dataType and not multifields', () => {
+        const combobox = getComboboxes('string', false);
+        expect(combobox.length).toBe(1);
+      });
+
+      it('should be present for a number dataType and not multifields', () => {
+        const combobox = getComboboxes('number', false);
+        expect(combobox.length).toBe(1);
+      });
+
+      it('should not be present for a boolean dataType and not multifields', () => {
+        const combobox = getComboboxes('boolean', false);
+        expect(combobox.length).toBe(0);
+      });
+
+      it('should not be present for multifields', () => {
+        const combobox = getComboboxes('string', true);
+        expect(combobox.length).toBe(0);
+      });
+    });
+
     it('should disable size input and show max doc count input', () => {
       const updateLayerSpy = jest.fn();
       const instance = shallow(
         <InlineOptions
           {...defaultProps}
           layer={layer}
-          updateLayer={updateLayerSpy}
+          paramEditorUpdater={updateLayerSpy}
           columnId="col1"
           currentColumn={{
             ...(layer.columns.col1 as TermsIndexPatternColumn),
@@ -1992,7 +2163,7 @@ describe('terms', () => {
         <InlineOptions
           {...defaultProps}
           layer={layer}
-          updateLayer={updateLayerSpy}
+          paramEditorUpdater={updateLayerSpy}
           columnId="col1"
           currentColumn={
             {
@@ -2020,7 +2191,7 @@ describe('terms', () => {
         <InlineOptions
           {...defaultProps}
           layer={layer}
-          updateLayer={updateLayerSpy}
+          paramEditorUpdater={updateLayerSpy}
           columnId="col1"
           currentColumn={layer.columns.col1 as TermsIndexPatternColumn}
         />
@@ -2056,7 +2227,7 @@ describe('terms', () => {
         <InlineOptions
           {...defaultProps}
           layer={layer}
-          updateLayer={updateLayerSpy}
+          paramEditorUpdater={updateLayerSpy}
           columnId="col1"
           currentColumn={layer.columns.col1 as TermsIndexPatternColumn}
         />
@@ -2070,6 +2241,7 @@ describe('terms', () => {
         'column$$$col2',
         'alphabetical',
         'rare',
+        'custom',
       ]);
     });
 
@@ -2079,7 +2251,7 @@ describe('terms', () => {
         <InlineOptions
           {...defaultProps}
           layer={layer}
-          updateLayer={updateLayerSpy}
+          paramEditorUpdater={updateLayerSpy}
           columnId="col1"
           currentColumn={
             { ...layer.columns.col1, sourceField: 'memory' } as TermsIndexPatternColumn
@@ -2094,6 +2266,7 @@ describe('terms', () => {
       expect(select.prop('options')!.map(({ value }) => value)).toEqual([
         'column$$$col2',
         'alphabetical',
+        'custom',
       ]);
     });
 
@@ -2103,7 +2276,7 @@ describe('terms', () => {
         <InlineOptions
           {...defaultProps}
           layer={layer}
-          updateLayer={updateLayerSpy}
+          paramEditorUpdater={updateLayerSpy}
           columnId="col1"
           currentColumn={layer.columns.col1 as TermsIndexPatternColumn}
         />
@@ -2143,7 +2316,7 @@ describe('terms', () => {
         <InlineOptions
           {...defaultProps}
           layer={layer}
-          updateLayer={updateLayerSpy}
+          paramEditorUpdater={updateLayerSpy}
           columnId="col1"
           currentColumn={layer.columns.col1 as TermsIndexPatternColumn}
         />
@@ -2160,7 +2333,7 @@ describe('terms', () => {
         <InlineOptions
           {...defaultProps}
           layer={layer}
-          updateLayer={updateLayerSpy}
+          paramEditorUpdater={updateLayerSpy}
           columnId="col1"
           currentColumn={layer.columns.col1 as TermsIndexPatternColumn}
         />
@@ -2183,13 +2356,210 @@ describe('terms', () => {
       });
     });
 
+    it('should render reference editor when order is set to custom metric', () => {
+      const updateLayerSpy = jest.fn();
+      const currentLayer = {
+        ...layer,
+        columns: {
+          ...layer.columns,
+          col1: {
+            ...layer.columns.col1,
+            params: {
+              ...(layer.columns.col1 as TermsIndexPatternColumn).params,
+              type: 'custom',
+              orderDirection: 'desc',
+              orderAgg: {
+                label: 'Median of bytes',
+                dataType: 'number',
+                operationType: 'median',
+                isBucketed: false,
+                scale: 'ratio',
+                sourceField: 'bytes',
+              },
+            },
+          },
+        },
+      };
+      const instance = shallow(
+        <InlineOptions
+          {...defaultProps}
+          layer={currentLayer}
+          paramEditorUpdater={updateLayerSpy}
+          columnId="col1"
+          currentColumn={currentLayer.columns.col1 as TermsIndexPatternColumn}
+        />
+      );
+
+      expect(instance.find(`ReferenceEditor`)).toHaveLength(1);
+
+      instance
+        .find(EuiSelect)
+        .find('[data-test-subj="indexPattern-terms-orderBy"]')
+        .simulate('change', {
+          target: {
+            value: 'column$$$col2',
+          },
+        });
+
+      expect(updateLayerSpy).toHaveBeenCalledWith({
+        ...currentLayer,
+        columns: {
+          ...currentLayer.columns,
+          col1: {
+            ...currentLayer.columns.col1,
+            params: {
+              ...(currentLayer.columns.col1 as TermsIndexPatternColumn).params,
+              orderAgg: undefined,
+              orderBy: {
+                columnId: 'col2',
+                type: 'column',
+              },
+            },
+          },
+        },
+      });
+    });
+
+    it('should update column when changing the operation for orderAgg', () => {
+      const updateLayerSpy = jest.fn();
+      const currentLayer = {
+        ...layer,
+        columns: {
+          ...layer.columns,
+          col1: {
+            ...layer.columns.col1,
+            params: {
+              ...(layer.columns.col1 as TermsIndexPatternColumn).params,
+              type: 'custom',
+              orderDirection: 'desc',
+              orderAgg: {
+                label: 'Median of bytes',
+                dataType: 'number',
+                operationType: 'median',
+                isBucketed: false,
+                scale: 'ratio',
+                sourceField: 'bytes',
+              },
+            },
+          },
+        },
+      };
+      const instance = mount(
+        <InlineOptions
+          {...defaultProps}
+          layer={currentLayer}
+          paramEditorUpdater={updateLayerSpy}
+          columnId="col1"
+          currentColumn={currentLayer.columns.col1 as TermsIndexPatternColumn}
+        />
+      );
+      const refEditor = instance.find(`ReferenceEditor`);
+      expect(refEditor).toHaveLength(1);
+
+      const functionComboBox = refEditor
+        .find(EuiComboBox)
+        .filter('[data-test-subj="indexPattern-reference-function"]');
+      const option = functionComboBox.prop('options')!.find(({ label }) => label === 'Average')!;
+
+      act(() => {
+        functionComboBox.prop('onChange')!([option]);
+      });
+
+      expect(updateLayerSpy).toHaveBeenCalledWith({
+        ...currentLayer,
+        columns: {
+          ...currentLayer.columns,
+          col1: {
+            ...currentLayer.columns.col1,
+            params: {
+              ...(currentLayer.columns.col1 as TermsIndexPatternColumn).params,
+              orderAgg: expect.objectContaining({
+                dataType: 'number',
+                isBucketed: false,
+                label: 'Average of bytes',
+                operationType: 'average',
+                sourceField: 'bytes',
+              }),
+            },
+          },
+        },
+      });
+    });
+
+    it('should update column when changing the field for orderAgg', () => {
+      const updateLayerSpy = jest.fn();
+      const currentLayer = {
+        ...layer,
+        columns: {
+          ...layer.columns,
+          col1: {
+            ...layer.columns.col1,
+            params: {
+              ...(layer.columns.col1 as TermsIndexPatternColumn).params,
+              type: 'custom',
+              orderDirection: 'desc',
+              orderAgg: {
+                label: 'Median of bytes',
+                dataType: 'number',
+                operationType: 'median',
+                isBucketed: false,
+                scale: 'ratio',
+                sourceField: 'bytes',
+              },
+            },
+          },
+        },
+      };
+      const instance = mount(
+        <InlineOptions
+          {...defaultProps}
+          layer={currentLayer}
+          paramEditorUpdater={updateLayerSpy}
+          columnId="col1"
+          currentColumn={currentLayer.columns.col1 as TermsIndexPatternColumn}
+        />
+      );
+      const refEditor = instance.find(`ReferenceEditor`);
+      expect(refEditor).toHaveLength(1);
+
+      const comboBoxes = refEditor.find(EuiComboBox);
+
+      const fieldComboBox = comboBoxes.filter('[data-test-subj="indexPattern-dimension-field"]');
+
+      const option = fieldComboBox
+        .prop('options')[0]
+        .options!.find(({ label }) => label === 'memory')!;
+      act(() => {
+        fieldComboBox.prop('onChange')!([option]);
+      });
+      expect(updateLayerSpy).toHaveBeenCalledWith({
+        ...currentLayer,
+        columns: {
+          ...currentLayer.columns,
+          col1: {
+            ...currentLayer.columns.col1,
+            params: {
+              ...(currentLayer.columns.col1 as TermsIndexPatternColumn).params,
+              orderAgg: expect.objectContaining({
+                dataType: 'number',
+                isBucketed: false,
+                label: 'Median of memory',
+                operationType: 'median',
+                sourceField: 'memory',
+              }),
+            },
+          },
+        },
+      });
+    });
+
     it('should render current size value', () => {
       const updateLayerSpy = jest.fn();
       const instance = mount(
         <InlineOptions
           {...defaultProps}
           layer={layer}
-          updateLayer={updateLayerSpy}
+          paramEditorUpdater={updateLayerSpy}
           columnId="col1"
           currentColumn={layer.columns.col1 as TermsIndexPatternColumn}
         />
@@ -2198,13 +2568,70 @@ describe('terms', () => {
       expect(instance.find(EuiFieldNumber).prop('value')).toEqual('3');
     });
 
+    it('should not update the column when the change creates incomplete column', () => {
+      const updateLayerSpy = jest.fn();
+      const currentLayer = {
+        ...layer,
+        columns: {
+          ...layer.columns,
+          col1: {
+            ...layer.columns.col1,
+            params: {
+              ...(layer.columns.col1 as TermsIndexPatternColumn).params,
+              type: 'custom',
+              orderDirection: 'desc',
+              orderAgg: {
+                label: 'Count of records',
+                dataType: 'number',
+                operationType: 'count',
+                isBucketed: false,
+                scale: 'ratio',
+                sourceField: '___records___',
+              },
+            },
+          },
+        },
+      };
+      const instance = mount(
+        <InlineOptions
+          {...defaultProps}
+          layer={currentLayer}
+          paramEditorUpdater={updateLayerSpy}
+          columnId="col1"
+          currentColumn={currentLayer.columns.col1 as TermsIndexPatternColumn}
+        />
+      );
+      const refEditor = instance.find(`ReferenceEditor`);
+      expect(refEditor).toHaveLength(1);
+
+      const comboBoxes = refEditor.find(EuiComboBox);
+
+      const functionComboBox = comboBoxes.filter(
+        '[data-test-subj="indexPattern-reference-function"]'
+      );
+      const option = functionComboBox.prop('options')!.find(({ label }) => label === 'Average')!;
+      act(() => {
+        functionComboBox.prop('onChange')!([option]);
+      });
+      instance.update();
+
+      expect(
+        instance
+          .find('ReferenceEditor')
+          .find(EuiComboBox)
+          .filter('[data-test-subj="indexPattern-dimension-field"]')
+          .prop('isInvalid')
+      ).toBeTruthy();
+      expect(updateLayerSpy).not.toHaveBeenCalled();
+    });
+
     it('should update state with the size value', () => {
       const updateLayerSpy = jest.fn();
       const instance = mount(
         <InlineOptions
           {...defaultProps}
           layer={layer}
-          updateLayer={updateLayerSpy}
+          paramEditorUpdater={updateLayerSpy}
           columnId="col1"
           currentColumn={layer.columns.col1 as TermsIndexPatternColumn}
         />
@@ -2699,6 +3126,22 @@ describe('terms', () => {
           defaultProps.indexPattern
         )
       ).toEqual(['unsupported']);
+    });
+  });
+
+  describe('getMaxPossibleNumValues', () => {
+    it('reports correct number of values', () => {
+      const termsSize = 5;
+
+      const withoutOther = cloneDeep(layer.columns.col1 as TermsIndexPatternColumn);
+      withoutOther.params.size = termsSize;
+      withoutOther.params.otherBucket = false;
+
+      const withOther = cloneDeep(withoutOther);
+      withOther.params.otherBucket = true;
+
+      expect(termsOperation.getMaxPossibleNumValues!(withoutOther)).toBe(termsSize);
+      expect(termsOperation.getMaxPossibleNumValues!(withOther)).toBe(termsSize + 1);
     });
   });
 });

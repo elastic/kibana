@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { HTMLAttributes, useState } from 'react';
+import type { HTMLAttributes } from 'react';
+import React, { useState } from 'react';
 
-import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
-import {
+import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
+import type {
   ColumnHeaderOptions,
   CellValueElementProps,
   TimelineTabs,

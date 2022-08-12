@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DownloadSourceBase } from '../models';
+import type { DownloadSourceBase, DownloadSource } from '../models';
 
 import type { ListResult } from './common';
 
@@ -28,18 +28,17 @@ export interface PutDownloadSourceRequest {
     outputId: string;
   };
   body: {
-    id: string;
     name: string;
-    hosts: string;
+    host: string;
     is_default?: boolean;
   };
 }
 
 export interface PostDownloadSourceRequest {
   body: {
-    id: string;
+    id?: string;
     name: string;
-    hosts: string;
+    host: string;
     is_default?: boolean;
   };
 }
@@ -48,4 +47,4 @@ export interface PutDownloadSourceResponse {
   item: DownloadSourceBase;
 }
 
-export type GetDownloadSourceResponse = ListResult<DownloadSourceBase>;
+export type GetDownloadSourceResponse = ListResult<DownloadSource>;

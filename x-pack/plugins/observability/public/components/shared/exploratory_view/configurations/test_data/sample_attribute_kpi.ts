@@ -63,14 +63,14 @@ export const sampleAttributeKpi = {
     },
     visualization: {
       axisTitlesVisibilitySettings: {
-        x: true,
+        x: false,
         yLeft: true,
         yRight: true,
       },
       curveType: 'CURVE_MONOTONE_X',
       fittingFunction: 'Linear',
       gridlinesVisibilitySettings: {
-        x: true,
+        x: false,
         yLeft: true,
         yRight: true,
       },
@@ -79,6 +79,7 @@ export const sampleAttributeKpi = {
           accessors: ['y-axis-column-layer0'],
           layerId: 'layer0',
           layerType: 'data',
+          palette: undefined,
           seriesType: 'line',
           xAccessor: 'x-axis-column-layer0',
           yConfig: [

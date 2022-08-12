@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type {
   AllActionStates,
   ReindexSourceToTempOpenPit,
@@ -42,7 +43,6 @@ import type {
 } from './state';
 import type { TransformRawDocs } from './types';
 import * as Actions from './actions';
-import type { ElasticsearchClient } from '../../elasticsearch';
 
 type ActionMap = ReturnType<typeof nextActionMap>;
 
@@ -61,7 +61,7 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
     INIT: (state: InitState) =>
       Actions.initAction({ client, indices: [state.currentAlias, state.versionAlias] }),
     WAIT_FOR_YELLOW_SOURCE: (state: WaitForYellowSourceState) =>
-      Actions.waitForIndexStatusYellow({ client, index: state.sourceIndex.value }),
+      Actions.waitForIndexStatus({ client, index: state.sourceIndex.value, status: 'yellow' }),
     CHECK_UNKNOWN_DOCUMENTS: (state: CheckUnknownDocumentsState) =>
       Actions.checkForUnknownDocs({
         client,

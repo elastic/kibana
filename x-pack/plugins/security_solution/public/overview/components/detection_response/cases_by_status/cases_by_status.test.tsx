@@ -7,7 +7,7 @@
 
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { BarChartComponentProps } from '../../../../common/components/charts/barchart';
+import type { BarChartComponentProps } from '../../../../common/components/charts/barchart';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { TestProviders } from '../../../../common/mock';
 import { CasesByStatus } from './cases_by_status';

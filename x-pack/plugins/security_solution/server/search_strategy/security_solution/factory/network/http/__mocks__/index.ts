@@ -7,13 +7,12 @@
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
-import {
-  Direction,
+import type {
   NetworkDnsFields,
   NetworkHttpRequestOptions,
-  NetworkQueries,
   SortField,
 } from '../../../../../../../common/search_strategy';
+import { Direction, NetworkQueries } from '../../../../../../../common/search_strategy';
 
 export const mockOptions: NetworkHttpRequestOptions = {
   defaultIndex: [

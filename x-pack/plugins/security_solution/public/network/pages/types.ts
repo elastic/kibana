@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { RouteComponentProps } from 'react-router-dom';
-import { ActionCreator } from 'typescript-fsa';
-import { InputsModelId } from '../../common/store/inputs/constants';
+import type { RouteComponentProps } from 'react-router-dom';
+import type { ActionCreator } from 'typescript-fsa';
+import type { InputsModelId } from '../../common/store/inputs/constants';
 
 export type SetAbsoluteRangeDatePicker = ActionCreator<{
   id: InputsModelId;

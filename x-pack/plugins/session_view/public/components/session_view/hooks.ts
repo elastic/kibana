@@ -61,10 +61,14 @@ export const useFetchSessionViewProcessEvents = (
       getNextPageParam: (lastPage, pages) => {
         const isRefetch = pages.length === 1 && jumpToCursor;
         if (isRefetch || lastPage.events.length >= PROCESS_EVENTS_PER_PAGE) {
-          return {
-            cursor: lastPage.events[lastPage.events.length - 1]['@timestamp'],
-            forward: true,
-          };
+          const cursor = lastPage.events?.[lastPage.events.length - 1]?.['@timestamp'];
+
+          if (cursor) {
+            return {
+              cursor,
+              forward: true,
+            };
+          }
         }
       },
       getPreviousPageParam: (firstPage, pages) => {

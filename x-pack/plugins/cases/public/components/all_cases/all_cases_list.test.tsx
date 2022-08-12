@@ -13,7 +13,12 @@ import { renderHook } from '@testing-library/react-hooks';
 import userEvent from '@testing-library/user-event';
 
 import '../../common/mock/match_media';
-import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../common/mock';
+import {
+  AppMockRenderer,
+  createAppMockRenderer,
+  noDeleteCasesPermissions,
+  TestProviders,
+} from '../../common/mock';
 import { casesStatus, useGetCasesMockState, mockCase, connectorsMock } from '../../containers/mock';
 
 import { StatusAll } from '../../../common/ui/types';
@@ -139,7 +144,6 @@ describe('AllCasesListGeneric', () => {
     handleIsLoading: jest.fn(),
     isLoadingCases: [],
     isSelectorView: false,
-    userCanCrud: true,
   };
 
   let appMockRenderer: AppMockRenderer;
@@ -504,6 +508,20 @@ describe('AllCasesListGeneric', () => {
     });
   });
 
+  it('should not render table utility bar when the user does not have permissions to delete', async () => {
+    const wrapper = mount(
+      <TestProviders permissions={noDeleteCasesPermissions()}>
+        <AllCasesList isSelectorView={true} />
+      </TestProviders>
+    );
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="case-table-selected-case-count"]').exists()).toBe(
+        false
+      );
+      expect(wrapper.find('[data-test-subj="case-table-bulk-actions"]').exists()).toBe(false);
+    });
+  });
+
   it('should render metrics when isSelectorView=false', async () => {
     const wrapper = mount(
       <TestProviders>
@@ -563,6 +581,7 @@ describe('AllCasesListGeneric', () => {
     wrapper.find('[data-test-subj="cases-table-row-select-1"]').first().simulate('click');
     await waitFor(() => {
       expect(onRowClick).toHaveBeenCalledWith({
+        assignees: [],
         closedAt: null,
         closedBy: null,
         comments: [],

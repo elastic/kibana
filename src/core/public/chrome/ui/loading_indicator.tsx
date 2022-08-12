@@ -10,9 +10,8 @@ import { EuiLoadingSpinner, EuiProgress, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import classNames from 'classnames';
-import { Subscription } from 'rxjs';
-
-import { HttpStart } from '../../http';
+import type { Subscription } from 'rxjs';
+import type { HttpStart } from '@kbn/core-http-browser';
 
 export interface LoadingIndicatorProps {
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;

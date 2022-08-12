@@ -139,7 +139,6 @@ exports[`User Summary Component rendering it renders the default User Summary 1`
   }
   data={
     Object {
-      "firstSeen": undefined,
       "host": Object {
         "ip": Array [
           "10.142.0.7",
@@ -154,7 +153,6 @@ exports[`User Summary Component rendering it renders the default User Summary 1`
           ],
         },
       },
-      "lastSeen": undefined,
       "user": Object {
         "domain": Array [
           "domain",
@@ -170,6 +168,7 @@ exports[`User Summary Component rendering it renders the default User Summary 1`
   }
   endDate="2019-06-18T06:00:00.000Z"
   id="userOverview"
+  indexPatterns={Array []}
   isInDetailsSidePanel={false}
   isLoadingAnomaliesData={false}
   loading={false}
@@ -318,7 +317,6 @@ exports[`User Summary Component rendering it renders the panel view User Summary
   }
   data={
     Object {
-      "firstSeen": undefined,
       "host": Object {
         "ip": Array [
           "10.142.0.7",
@@ -333,7 +331,6 @@ exports[`User Summary Component rendering it renders the panel view User Summary
           ],
         },
       },
-      "lastSeen": undefined,
       "user": Object {
         "domain": Array [
           "domain",
@@ -349,6 +346,7 @@ exports[`User Summary Component rendering it renders the panel view User Summary
   }
   endDate="2019-06-18T06:00:00.000Z"
   id="userOverview"
+  indexPatterns={Array []}
   isInDetailsSidePanel={true}
   isLoadingAnomaliesData={false}
   loading={false}

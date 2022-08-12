@@ -49,6 +49,9 @@ function getArtifact(platform: PLATFORM_TYPE, kibanaVersion: string) {
         `sudo rpm -vi elastic-agent-${kibanaVersion}-x86_64.rpm`,
       ].join(`\n`),
     },
+    kubernetes: {
+      downloadCommand: '',
+    },
   };
 
   return artifactMap[platform];
@@ -93,20 +96,23 @@ export function getInstallCommandForPlatform(
     commandArguments.push(['fleet-server-cert-key', '<PATH_TO_FLEET_SERVER_CERT_KEY>']);
   }
 
-  const commandArgumentsStr = commandArguments.reduce((acc, [key, val]) => {
-    if (acc === '' && key === 'url') {
-      return `--${key}=${val}`;
-    }
-    const valOrEmpty = val ? `=${val}` : '';
-    return (acc += ` ${newLineSeparator}  --${key}${valOrEmpty}`);
-  }, '');
+  const commandArgumentsStr = commandArguments
+    .reduce((acc, [key, val]) => {
+      if (acc === '' && key === 'url') {
+        return `--${key}=${val}`;
+      }
+      const valOrEmpty = val ? `=${val}` : '';
+      return (acc += ` ${newLineSeparator}  --${key}${valOrEmpty}`);
+    }, '')
+    .trim();
 
   const commands = {
-    linux: `${artifact.downloadCommand}\nsudo ./elastic-agent install${commandArgumentsStr}`,
+    linux: `${artifact.downloadCommand}\nsudo ./elastic-agent install ${commandArgumentsStr}`,
     mac: `${artifact.downloadCommand}\nsudo ./elastic-agent install ${commandArgumentsStr}`,
     windows: `${artifact.downloadCommand}\n.\\elastic-agent.exe install ${commandArgumentsStr}`,
     deb: `${artifact.downloadCommand}\nsudo elastic-agent enroll ${commandArgumentsStr}\nsudo systemctl enable elastic-agent\nsudo systemctl start elastic-agent`,
     rpm: `${artifact.downloadCommand}\nsudo elastic-agent enroll ${commandArgumentsStr}\nsudo systemctl enable elastic-agent\nsudo systemctl start elastic-agent`,
+    kubernetes: '',
   };
 
   return commands[platform];

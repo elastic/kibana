@@ -35,13 +35,13 @@ exports[`Storyshots components/datasource/DatasourceComponent datasource with ex
     </span>
   </button>
   <div
-    className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
+    className="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />
   <div
-    className="euiPanel euiPanel--warning euiPanel--paddingMedium euiCallOut euiCallOut--warning css-1yqbqzs-euiPanel-none-m-warning-euiCallOut"
+    className="euiPanel euiPanel--warning euiPanel--paddingMedium euiCallOut euiCallOut--warning emotion-euiPanel-none-m-warning-euiCallOut"
   >
     <div
-      className="euiText css-le6wmz-euiText-s-euiTextColor-default-euiCallOut__description"
+      className="euiText emotion-euiText-s-euiTextColor-default-euiCallOut__description"
       style={Object {}}
     >
       <p>
@@ -87,13 +87,13 @@ exports[`Storyshots components/datasource/DatasourceComponent simple datasource 
     </span>
   </button>
   <div
-    className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
+    className="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />
   <div
     className="render_to_dom"
   />
   <hr
-    className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium css-1y0qta5-euiHorizontalRule-full-m"
+    className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium emotion-euiHorizontalRule-full-m"
   />
   <div
     className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"

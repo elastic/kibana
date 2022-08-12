@@ -42,5 +42,20 @@ export const cspRuleSavedObjectMapping: SavedObjectsTypeMappingDefinition = {
 
 export const cspRuleTemplateSavedObjectMapping: SavedObjectsTypeMappingDefinition = {
   dynamic: false,
-  properties: {},
+  properties: {
+    metadata: {
+      type: 'object',
+      properties: {
+        benchmark: {
+          type: 'object',
+          properties: {
+            id: {
+              // Needed for filtering rule templates by benchmark.id
+              type: 'keyword',
+            },
+          },
+        },
+      },
+    },
+  },
 };

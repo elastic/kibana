@@ -4,7 +4,7 @@ exports[`<ExitFullScreenButton /> is rendered 1`] = `
 <div>
   <p
     aria-live="polite"
-    class="euiScreenReaderOnly"
+    class="emotion-euiScreenReaderOnly"
   >
     In full screen mode, press ESC to exit.
   </p>
@@ -30,7 +30,7 @@ exports[`<ExitFullScreenButton /> is rendered 1`] = `
         >
           <div>
             <div
-              class="euiText dshExitFullScreenButton__text css-1vkrgyt-euiText-s"
+              class="euiText dshExitFullScreenButton__text emotion-euiText-s"
             >
               <p>
                 Exit full screen

@@ -12,11 +12,14 @@ import {
   observabilityOnlyRead,
   globalRead as globalReadRole,
   noKibanaPrivileges as noKibanaPrivilegesRole,
+  noCasesPrivilegesSpace1 as noCasesPrivilegesSpace1Role,
   securitySolutionOnlyAllSpacesAll,
   securitySolutionOnlyReadSpacesAll,
   observabilityOnlyAllSpacesAll,
   observabilityOnlyReadSpacesAll,
   testDisabledPluginAll,
+  securitySolutionOnlyDelete,
+  securitySolutionOnlyNoDelete,
 } from './roles';
 import { User } from './types';
 
@@ -36,6 +39,18 @@ export const secOnly: User = {
   username: 'sec_only',
   password: 'sec_only',
   roles: [securitySolutionOnlyAll.name],
+};
+
+export const secOnlyDelete: User = {
+  username: 'sec_only_delete',
+  password: 'sec_only_delete',
+  roles: [securitySolutionOnlyDelete.name],
+};
+
+export const secOnlyNoDelete: User = {
+  username: 'sec_only_no_delete',
+  password: 'sec_only_no_delete',
+  roles: [securitySolutionOnlyNoDelete.name],
 };
 
 export const secOnlyRead: User = {
@@ -80,16 +95,25 @@ export const noKibanaPrivileges: User = {
   roles: [noKibanaPrivilegesRole.name],
 };
 
+export const noCasesPrivilegesSpace1: User = {
+  username: 'no_kibana_privileges_space1',
+  password: 'no_kibana_privileges_space1',
+  roles: [noCasesPrivilegesSpace1Role.name],
+};
+
 export const users = [
   superUser,
   secOnly,
   secOnlyRead,
+  secOnlyDelete,
+  secOnlyNoDelete,
   obsOnly,
   obsOnlyRead,
   obsSec,
   obsSecRead,
   globalRead,
   noKibanaPrivileges,
+  noCasesPrivilegesSpace1,
   testDisabled,
 ];
 

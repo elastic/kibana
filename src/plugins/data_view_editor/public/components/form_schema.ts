@@ -50,6 +50,7 @@ export const schema = {
       defaultMessage: 'Name',
     }),
     defaultValue: '',
+    validations: [],
   },
   timestampField: {
     label: i18n.translate('indexPatternEditor.editor.form.timeFieldLabel', {
@@ -80,5 +81,12 @@ export const schema = {
       defaultMessage: 'Data view type',
     }),
     defaultValue: INDEX_PATTERN_TYPE.DEFAULT,
+  },
+  isAdHoc: {
+    label: i18n.translate('indexPatternEditor.editor.form.IsAdHocLabel', {
+      defaultMessage: 'Creeate AdHoc DataView',
+    }),
+    defaultValue: false,
+    type: 'hidden',
   },
 };

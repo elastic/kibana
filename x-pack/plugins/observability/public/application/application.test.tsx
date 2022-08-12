@@ -73,7 +73,6 @@ describe('renderApp', () => {
         appMountParameters: params,
         observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
         ObservabilityPageTemplate: KibanaPageTemplate,
-        kibanaFeatures: [],
         usageCollection: {
           components: {
             ApplicationUsageTrackingProvider: (props) => null,

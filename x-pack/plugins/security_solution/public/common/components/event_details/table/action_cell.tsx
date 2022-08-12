@@ -9,8 +9,8 @@ import React, { useCallback, useState, useContext } from 'react';
 import { TimelineContext } from '@kbn/timelines-plugin/public';
 import { HoverActions } from '../../hover_actions';
 import { useActionCellDataProvider } from './use_action_cell_data_provider';
-import { EnrichedFieldInfo } from '../types';
-import { ColumnHeaderOptions } from '../../../../../common/types/timeline';
+import type { EnrichedFieldInfo } from '../types';
+import type { ColumnHeaderOptions } from '../../../../../common/types/timeline';
 
 interface Props extends EnrichedFieldInfo {
   contextId: string;
@@ -73,7 +73,7 @@ export const ActionCell: React.FC<Props> = React.memo(
         applyWidthAndPadding={applyWidthAndPadding}
         closeTopN={closeTopN}
         dataType={data.type}
-        dataProvider={actionCellConfig?.dataProvider}
+        dataProvider={actionCellConfig?.dataProviders}
         enableOverflowButton={true}
         field={data.field}
         isAggregatable={aggregatable}
@@ -86,7 +86,7 @@ export const ActionCell: React.FC<Props> = React.memo(
         timelineId={timelineId ?? timelineIdFind}
         toggleColumn={toggleColumn}
         toggleTopN={toggleTopN}
-        values={actionCellConfig?.stringValues}
+        values={actionCellConfig?.values}
       />
     );
   }

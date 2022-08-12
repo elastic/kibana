@@ -5,17 +5,11 @@
  * 2.0.
  */
 
-import React, {
-  useCallback,
-  useState,
-  useEffect,
-  useRef,
-  useLayoutEffect,
-  useContext,
-} from 'react';
+import type React from 'react';
+import { useCallback, useState, useEffect, useRef, useLayoutEffect, useContext } from 'react';
 import { useSelector } from 'react-redux';
 import { SideEffectContext } from './side_effect_context';
-import { Matrix3 } from '../types';
+import type { Matrix3 } from '../types';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as selectors from '../store/selectors';
 

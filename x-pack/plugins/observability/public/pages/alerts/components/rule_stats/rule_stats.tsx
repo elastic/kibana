@@ -40,13 +40,18 @@ const ConditionalWrap = ({
   children: JSX.Element;
 }): JSX.Element => (condition ? wrap(children) : children);
 
+const getStatCount = (stats: RuleStatsState, statType: StatType) => {
+  if (statType === 'snoozed') return stats.snoozed + stats.muted;
+  return stats[statType];
+};
+
 export const renderRuleStats = (
   ruleStats: RuleStatsState,
   manageRulesHref: string,
   ruleStatsLoading: boolean
 ) => {
   const createRuleStatsLink = (stats: RuleStatsState, statType: StatType) => {
-    const count = stats[statType];
+    const count = getStatCount(stats, statType);
     let statsLink = `${manageRulesHref}?_a=(lastResponse:!(),status:!())`;
     if (count > 0) {
       switch (statType) {

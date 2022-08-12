@@ -72,14 +72,12 @@ describe('pushes', () => {
             {
               type: 'literal',
               value: 'cases-user-actions.attributes.type',
+              isQuoted: false,
             },
             {
               type: 'literal',
               value: 'pushed',
-            },
-            {
-              type: 'literal',
-              value: false,
+              isQuoted: false,
             },
           ],
           function: 'is',

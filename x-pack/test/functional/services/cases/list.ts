@@ -141,6 +141,15 @@ export function CasesTableServiceProvider({ getService, getPageObject }: FtrProv
       await testSubjects.click(`options-filter-popover-item-${reporter}`);
     },
 
+    async filterByOwner(owner: string) {
+      await common.clickAndValidate(
+        'options-filter-popover-button-Solution',
+        `options-filter-popover-item-${owner}`
+      );
+
+      await testSubjects.click(`options-filter-popover-item-${owner}`);
+    },
+
     async refreshTable() {
       await testSubjects.click('all-cases-refresh');
     },

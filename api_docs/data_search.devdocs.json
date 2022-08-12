@@ -21,7 +21,15 @@
             "section": "def-common.IKibanaSearchResponse",
             "text": "IKibanaSearchResponse"
           },
-          "<any>, theme: ",
+          "<any>, { disableShardFailureWarning }: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.SearchSourceSearchOptions",
+            "text": "SearchSourceSearchOptions"
+          },
+          ", theme: ",
           "ThemeServiceStart",
           ") => ",
           {
@@ -74,6 +82,26 @@
           {
             "parentPluginId": "data",
             "id": "def-public.handleResponse.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "{ disableShardFailureWarning }",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSourceSearchOptions",
+                "text": "SearchSourceSearchOptions"
+              }
+            ],
+            "path": "src/plugins/data/public/search/fetch/handle_response.tsx",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.handleResponse.$4",
             "type": "Object",
             "tags": [],
             "label": "theme",
@@ -323,32 +351,14 @@
             "signature": [
               "{ create: ({ name, appId, locatorId, initialState, restoreState, sessionId, }: { name: string; appId: string; locatorId: string; initialState: Record<string, unknown>; restoreState: Record<string, unknown>; sessionId: string; }) => Promise<",
               "SearchSessionSavedObject",
-              ">; delete: (sessionId: string) => Promise<void>; find: (options: Omit<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsFindOptions",
-                "text": "SavedObjectsFindOptions"
-              },
+              ">; find: (options: Omit<",
+              "SavedObjectsFindOptions",
               ", \"type\">) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsFindResponse",
-                "text": "SavedObjectsFindResponse"
-              },
+              "SavedObjectsFindResponse",
               "<unknown, unknown>>; get: (sessionId: string) => Promise<",
               "SearchSessionSavedObject",
               ">; update: (sessionId: string, attributes: unknown) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsUpdateResponse",
-                "text": "SavedObjectsUpdateResponse"
-              },
+              "SavedObjectsUpdateResponse",
               "<",
               {
                 "pluginId": "data",
@@ -358,13 +368,7 @@
                 "text": "SearchSessionSavedObjectAttributes"
               },
               ">>; rename: (sessionId: string, newName: string) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsUpdateResponse",
-                "text": "SavedObjectsUpdateResponse"
-              },
+              "SavedObjectsUpdateResponse",
               "<Pick<",
               {
                 "pluginId": "data",
@@ -374,13 +378,7 @@
                 "text": "SearchSessionSavedObjectAttributes"
               },
               ", \"name\">>>; extend: (sessionId: string, expires: string) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsFindResponse",
-                "text": "SavedObjectsFindResponse"
-              },
+              "SavedObjectsFindResponse",
               "<",
               {
                 "pluginId": "data",
@@ -389,7 +387,7 @@
                 "section": "def-common.SearchSessionSavedObjectAttributes",
                 "text": "SearchSessionSavedObjectAttributes"
               },
-              ", unknown>>; }"
+              ", unknown>>; delete: (sessionId: string) => Promise<void>; }"
             ],
             "path": "src/plugins/data/public/search/types.ts",
             "deprecated": false
@@ -420,7 +418,13 @@
             ],
             "signature": [
               "{ calculateAutoTimeExpression: (range: ",
-              "TimeRange",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
               ") => string | undefined; createAggConfigs: (indexPattern: ",
               {
                 "pluginId": "dataViews",
@@ -695,32 +699,14 @@
             "signature": [
               "{ create: ({ name, appId, locatorId, initialState, restoreState, sessionId, }: { name: string; appId: string; locatorId: string; initialState: Record<string, unknown>; restoreState: Record<string, unknown>; sessionId: string; }) => Promise<",
               "SearchSessionSavedObject",
-              ">; delete: (sessionId: string) => Promise<void>; find: (options: Omit<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsFindOptions",
-                "text": "SavedObjectsFindOptions"
-              },
+              ">; find: (options: Omit<",
+              "SavedObjectsFindOptions",
               ", \"type\">) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsFindResponse",
-                "text": "SavedObjectsFindResponse"
-              },
+              "SavedObjectsFindResponse",
               "<unknown, unknown>>; get: (sessionId: string) => Promise<",
               "SearchSessionSavedObject",
               ">; update: (sessionId: string, attributes: unknown) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsUpdateResponse",
-                "text": "SavedObjectsUpdateResponse"
-              },
+              "SavedObjectsUpdateResponse",
               "<",
               {
                 "pluginId": "data",
@@ -730,13 +716,7 @@
                 "text": "SearchSessionSavedObjectAttributes"
               },
               ">>; rename: (sessionId: string, newName: string) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsUpdateResponse",
-                "text": "SavedObjectsUpdateResponse"
-              },
+              "SavedObjectsUpdateResponse",
               "<Pick<",
               {
                 "pluginId": "data",
@@ -746,13 +726,7 @@
                 "text": "SearchSessionSavedObjectAttributes"
               },
               ", \"name\">>>; extend: (sessionId: string, expires: string) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsFindResponse",
-                "text": "SavedObjectsFindResponse"
-              },
+              "SavedObjectsFindResponse",
               "<",
               {
                 "pluginId": "data",
@@ -761,7 +735,7 @@
                 "section": "def-common.SearchSessionSavedObjectAttributes",
                 "text": "SearchSessionSavedObjectAttributes"
               },
-              ", unknown>>; }"
+              ", unknown>>; delete: (sessionId: string) => Promise<void>; }"
             ],
             "path": "src/plugins/data/public/search/types.ts",
             "deprecated": false
@@ -1240,32 +1214,14 @@
         "signature": [
           "{ create: ({ name, appId, locatorId, initialState, restoreState, sessionId, }: { name: string; appId: string; locatorId: string; initialState: Record<string, unknown>; restoreState: Record<string, unknown>; sessionId: string; }) => Promise<",
           "SearchSessionSavedObject",
-          ">; delete: (sessionId: string) => Promise<void>; find: (options: Omit<",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-server.SavedObjectsFindOptions",
-            "text": "SavedObjectsFindOptions"
-          },
+          ">; find: (options: Omit<",
+          "SavedObjectsFindOptions",
           ", \"type\">) => Promise<",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-server.SavedObjectsFindResponse",
-            "text": "SavedObjectsFindResponse"
-          },
+          "SavedObjectsFindResponse",
           "<unknown, unknown>>; get: (sessionId: string) => Promise<",
           "SearchSessionSavedObject",
           ">; update: (sessionId: string, attributes: unknown) => Promise<",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-server.SavedObjectsUpdateResponse",
-            "text": "SavedObjectsUpdateResponse"
-          },
+          "SavedObjectsUpdateResponse",
           "<",
           {
             "pluginId": "data",
@@ -1275,13 +1231,7 @@
             "text": "SearchSessionSavedObjectAttributes"
           },
           ">>; rename: (sessionId: string, newName: string) => Promise<",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-server.SavedObjectsUpdateResponse",
-            "text": "SavedObjectsUpdateResponse"
-          },
+          "SavedObjectsUpdateResponse",
           "<Pick<",
           {
             "pluginId": "data",
@@ -1291,13 +1241,7 @@
             "text": "SearchSessionSavedObjectAttributes"
           },
           ", \"name\">>>; extend: (sessionId: string, expires: string) => Promise<",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-server.SavedObjectsFindResponse",
-            "text": "SavedObjectsFindResponse"
-          },
+          "SavedObjectsFindResponse",
           "<",
           {
             "pluginId": "data",
@@ -1306,7 +1250,7 @@
             "section": "def-common.SearchSessionSavedObjectAttributes",
             "text": "SearchSessionSavedObjectAttributes"
           },
-          ", unknown>>; }"
+          ", unknown>>; delete: (sessionId: string) => Promise<void>; }"
         ],
         "path": "src/plugins/data/public/search/session/sessions_client.ts",
         "deprecated": false,
@@ -1459,16 +1403,7 @@
             "docId": "kibDataSearchPluginApi",
             "section": "def-server.ISearchSessionService",
             "text": "ISearchSessionService"
-          },
-          "<",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.SearchSessionSavedObjectAttributes",
-            "text": "SearchSessionSavedObjectAttributes"
-          },
-          ">"
+          }
         ],
         "path": "src/plugins/data/server/search/session/session_service.ts",
         "deprecated": false,
@@ -1882,21 +1817,9 @@
                 "text": "AuthenticatedUser"
               },
               " | null, options: Omit<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsFindOptions",
-                "text": "SavedObjectsFindOptions"
-              },
+              "SavedObjectsFindOptions",
               ", \"type\">) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsFindResponse",
-                "text": "SavedObjectsFindResponse"
-              },
+              "SavedObjectsFindResponse",
               "<",
               {
                 "pluginId": "data",
@@ -1954,13 +1877,7 @@
                 "description": [],
                 "signature": [
                   "Omit<",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsFindOptions",
-                    "text": "SavedObjectsFindOptions"
-                  },
+                  "SavedObjectsFindOptions",
                   ", \"type\">"
                 ],
                 "path": "src/plugins/data/server/search/session/session_service.ts",
@@ -1997,13 +1914,7 @@
                 "text": "SearchSessionSavedObjectAttributes"
               },
               ">) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsUpdateResponse",
-                "text": "SavedObjectsUpdateResponse"
-              },
+              "SavedObjectsUpdateResponse",
               "<",
               {
                 "pluginId": "data",
@@ -2110,13 +2021,7 @@
                 "text": "AuthenticatedUser"
               },
               " | null, sessionId: string, expires: Date) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsUpdateResponse",
-                "text": "SavedObjectsUpdateResponse"
-              },
+              "SavedObjectsUpdateResponse",
               "<",
               {
                 "pluginId": "data",
@@ -2215,13 +2120,7 @@
                 "text": "AuthenticatedUser"
               },
               " | null, sessionId: string) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsUpdateResponse",
-                "text": "SavedObjectsUpdateResponse"
-              },
+              "SavedObjectsUpdateResponse",
               "<",
               {
                 "pluginId": "data",
@@ -2454,13 +2353,7 @@
                 "text": "CoreStart"
               },
               ") => (request: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>) => { getId: (args_0: ",
               {
                 "pluginId": "data",
@@ -2522,21 +2415,9 @@
                 "text": "SearchSessionSavedObjectAttributes"
               },
               ">>; find: (options: Omit<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsFindOptions",
-                "text": "SavedObjectsFindOptions"
-              },
+              "SavedObjectsFindOptions",
               ", \"type\">) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsFindResponse",
-                "text": "SavedObjectsFindResponse"
-              },
+              "SavedObjectsFindResponse",
               "<",
               {
                 "pluginId": "data",
@@ -2554,13 +2435,7 @@
                 "text": "SearchSessionSavedObjectAttributes"
               },
               ">) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsUpdateResponse",
-                "text": "SavedObjectsUpdateResponse"
-              },
+              "SavedObjectsUpdateResponse",
               "<",
               {
                 "pluginId": "data",
@@ -2570,13 +2445,7 @@
                 "text": "SearchSessionSavedObjectAttributes"
               },
               ">>; extend: (sessionId: string, expires: Date) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsUpdateResponse",
-                "text": "SavedObjectsUpdateResponse"
-              },
+              "SavedObjectsUpdateResponse",
               "<",
               {
                 "pluginId": "data",
@@ -2586,13 +2455,7 @@
                 "text": "SearchSessionSavedObjectAttributes"
               },
               ">>; cancel: (sessionId: string) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsUpdateResponse",
-                "text": "SavedObjectsUpdateResponse"
-              },
+              "SavedObjectsUpdateResponse",
               "<",
               {
                 "pluginId": "data",
@@ -2718,9 +2581,25 @@
             "label": "saveSession",
             "description": [],
             "signature": [
-              "(sessionId: string, attributes: Partial<unknown>) => Promise<",
+              "(sessionId: string, attributes: Partial<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionSavedObjectAttributes",
+                "text": "SearchSessionSavedObjectAttributes"
+              },
+              ">) => Promise<",
               "SavedObject",
-              "<unknown> | undefined>"
+              "<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionSavedObjectAttributes",
+                "text": "SearchSessionSavedObjectAttributes"
+              },
+              "> | undefined>"
             ],
             "path": "src/plugins/data/server/search/types.ts",
             "deprecated": false,
@@ -2744,7 +2623,27 @@
                 "label": "attributes",
                 "description": [],
                 "signature": [
-                  "{ [P in keyof T]?: T[P] | undefined; }"
+                  "{ sessionId?: string | undefined; name?: string | undefined; appId?: string | undefined; created?: string | undefined; touched?: string | undefined; expires?: string | undefined; completed?: string | null | undefined; status?: ",
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataSearchPluginApi",
+                    "section": "def-common.SearchSessionStatus",
+                    "text": "SearchSessionStatus"
+                  },
+                  " | undefined; locatorId?: string | undefined; initialState?: ",
+                  "SerializableRecord",
+                  " | undefined; restoreState?: ",
+                  "SerializableRecord",
+                  " | undefined; idMapping?: Record<string, ",
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataSearchPluginApi",
+                    "section": "def-common.SearchSessionRequestInfo",
+                    "text": "SearchSessionRequestInfo"
+                  },
+                  "> | undefined; persisted?: boolean | undefined; realmType?: string | undefined; realmName?: string | undefined; username?: string | undefined; version?: string | undefined; }"
                 ],
                 "path": "src/plugins/data/server/search/session/types.ts",
                 "deprecated": false
@@ -2761,7 +2660,15 @@
             "signature": [
               "(sessionId: string) => Promise<",
               "SavedObject",
-              "<unknown>>"
+              "<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionSavedObjectAttributes",
+                "text": "SearchSessionSavedObjectAttributes"
+              },
+              ">>"
             ],
             "path": "src/plugins/data/server/search/types.ts",
             "deprecated": false,
@@ -2788,22 +2695,18 @@
             "description": [],
             "signature": [
               "(options: Omit<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsFindOptions",
-                "text": "SavedObjectsFindOptions"
-              },
+              "SavedObjectsFindOptions",
               ", \"type\">) => Promise<",
+              "SavedObjectsFindResponse",
+              "<",
               {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsFindResponse",
-                "text": "SavedObjectsFindResponse"
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionSavedObjectAttributes",
+                "text": "SearchSessionSavedObjectAttributes"
               },
-              "<unknown, unknown>>"
+              ", unknown>>"
             ],
             "path": "src/plugins/data/server/search/types.ts",
             "deprecated": false,
@@ -2817,34 +2720,16 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "{ filter?: any; search?: string | undefined; aggs?: Record<string, ",
+                  "{ filter?: any; search?: string | undefined; page?: number | undefined; aggs?: Record<string, ",
                   "AggregationsAggregationContainer",
-                  "> | undefined; fields?: string[] | undefined; searchAfter?: string[] | undefined; page?: number | undefined; perPage?: number | undefined; sortField?: string | undefined; sortOrder?: ",
+                  "> | undefined; fields?: string[] | undefined; searchAfter?: string[] | undefined; perPage?: number | undefined; sortField?: string | undefined; sortOrder?: ",
                   "SortOrder",
                   " | undefined; searchFields?: string[] | undefined; rootSearchFields?: string[] | undefined; hasReference?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsFindOptionsReference",
-                    "text": "SavedObjectsFindOptionsReference"
-                  },
+                  "SavedObjectsFindOptionsReference",
                   " | ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsFindOptionsReference",
-                    "text": "SavedObjectsFindOptionsReference"
-                  },
+                  "SavedObjectsFindOptionsReference",
                   "[] | undefined; hasReferenceOperator?: \"AND\" | \"OR\" | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; namespaces?: string[] | undefined; typeToNamespacesMap?: Map<string, string[] | undefined> | undefined; preference?: string | undefined; pit?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsPitParams",
-                    "text": "SavedObjectsPitParams"
-                  },
+                  "SavedObjectsPitParams",
                   " | undefined; }"
                 ],
                 "path": "src/plugins/data/server/search/session/types.ts",
@@ -2860,15 +2745,25 @@
             "label": "updateSession",
             "description": [],
             "signature": [
-              "(sessionId: string, attributes: Partial<unknown>) => Promise<",
+              "(sessionId: string, attributes: Partial<",
               {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsUpdateResponse",
-                "text": "SavedObjectsUpdateResponse"
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionSavedObjectAttributes",
+                "text": "SearchSessionSavedObjectAttributes"
               },
-              "<unknown>>"
+              ">) => Promise<",
+              "SavedObjectsUpdateResponse",
+              "<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionSavedObjectAttributes",
+                "text": "SearchSessionSavedObjectAttributes"
+              },
+              ">>"
             ],
             "path": "src/plugins/data/server/search/types.ts",
             "deprecated": false,
@@ -2892,7 +2787,27 @@
                 "label": "attributes",
                 "description": [],
                 "signature": [
-                  "{ [P in keyof T]?: T[P] | undefined; }"
+                  "{ sessionId?: string | undefined; name?: string | undefined; appId?: string | undefined; created?: string | undefined; touched?: string | undefined; expires?: string | undefined; completed?: string | null | undefined; status?: ",
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataSearchPluginApi",
+                    "section": "def-common.SearchSessionStatus",
+                    "text": "SearchSessionStatus"
+                  },
+                  " | undefined; locatorId?: string | undefined; initialState?: ",
+                  "SerializableRecord",
+                  " | undefined; restoreState?: ",
+                  "SerializableRecord",
+                  " | undefined; idMapping?: Record<string, ",
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataSearchPluginApi",
+                    "section": "def-common.SearchSessionRequestInfo",
+                    "text": "SearchSessionRequestInfo"
+                  },
+                  "> | undefined; persisted?: boolean | undefined; realmType?: string | undefined; realmName?: string | undefined; username?: string | undefined; version?: string | undefined; }"
                 ],
                 "path": "src/plugins/data/server/search/session/types.ts",
                 "deprecated": false
@@ -2960,14 +2875,16 @@
             "description": [],
             "signature": [
               "(sessionId: string, expires: Date) => Promise<",
+              "SavedObjectsUpdateResponse",
+              "<",
               {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsUpdateResponse",
-                "text": "SavedObjectsUpdateResponse"
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionSavedObjectAttributes",
+                "text": "SearchSessionSavedObjectAttributes"
               },
-              "<unknown>>"
+              ">>"
             ],
             "path": "src/plugins/data/server/search/types.ts",
             "deprecated": false,
@@ -3008,16 +2925,6 @@
         "tags": [],
         "label": "ISearchSessionService",
         "description": [],
-        "signature": [
-          {
-            "pluginId": "data",
-            "scope": "server",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-server.ISearchSessionService",
-            "text": "ISearchSessionService"
-          },
-          "<T>"
-        ],
         "path": "src/plugins/data/server/search/session/types.ts",
         "deprecated": false,
         "children": [
@@ -3038,16 +2945,9 @@
                 "text": "CoreStart"
               },
               ") => (request: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>) => ",
-              "IScopedSearchSessionsClient",
-              "<T>"
+              "IScopedSearchSessionsClient"
             ],
             "path": "src/plugins/data/server/search/session/types.ts",
             "deprecated": false,
@@ -3395,331 +3295,7 @@
             "label": "savedObjectsClient",
             "description": [],
             "signature": [
-              "{ create: <T = unknown>(type: string, attributes: T, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsCreateOptions",
-                "text": "SavedObjectsCreateOptions"
-              },
-              " | undefined) => Promise<",
-              "SavedObject",
-              "<T>>; bulkCreate: <T = unknown>(objects: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBulkCreateObject",
-                "text": "SavedObjectsBulkCreateObject"
-              },
-              "<T>[], options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsCreateOptions",
-                "text": "SavedObjectsCreateOptions"
-              },
-              " | undefined) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBulkResponse",
-                "text": "SavedObjectsBulkResponse"
-              },
-              "<T>>; checkConflicts: (objects?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsCheckConflictsObject",
-                "text": "SavedObjectsCheckConflictsObject"
-              },
-              "[], options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBaseOptions",
-                "text": "SavedObjectsBaseOptions"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsCheckConflictsResponse",
-                "text": "SavedObjectsCheckConflictsResponse"
-              },
-              ">; delete: (type: string, id: string, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsDeleteOptions",
-                "text": "SavedObjectsDeleteOptions"
-              },
-              ") => Promise<{}>; find: <T = unknown, A = unknown>(options: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsFindOptions",
-                "text": "SavedObjectsFindOptions"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsFindResponse",
-                "text": "SavedObjectsFindResponse"
-              },
-              "<T, A>>; bulkGet: <T = unknown>(objects?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBulkGetObject",
-                "text": "SavedObjectsBulkGetObject"
-              },
-              "[], options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBaseOptions",
-                "text": "SavedObjectsBaseOptions"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBulkResponse",
-                "text": "SavedObjectsBulkResponse"
-              },
-              "<T>>; bulkResolve: <T = unknown>(objects: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBulkResolveObject",
-                "text": "SavedObjectsBulkResolveObject"
-              },
-              "[], options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBaseOptions",
-                "text": "SavedObjectsBaseOptions"
-              },
-              " | undefined) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBulkResolveResponse",
-                "text": "SavedObjectsBulkResolveResponse"
-              },
-              "<T>>; get: <T = unknown>(type: string, id: string, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBaseOptions",
-                "text": "SavedObjectsBaseOptions"
-              },
-              ") => Promise<",
-              "SavedObject",
-              "<T>>; resolve: <T = unknown>(type: string, id: string, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBaseOptions",
-                "text": "SavedObjectsBaseOptions"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsResolveResponse",
-                "text": "SavedObjectsResolveResponse"
-              },
-              "<T>>; update: <T = unknown>(type: string, id: string, attributes: Partial<T>, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsUpdateOptions",
-                "text": "SavedObjectsUpdateOptions"
-              },
-              "<T>) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsUpdateResponse",
-                "text": "SavedObjectsUpdateResponse"
-              },
-              "<T>>; collectMultiNamespaceReferences: (objects: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesObject",
-                "text": "SavedObjectsCollectMultiNamespaceReferencesObject"
-              },
-              "[], options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesOptions",
-                "text": "SavedObjectsCollectMultiNamespaceReferencesOptions"
-              },
-              " | undefined) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesResponse",
-                "text": "SavedObjectsCollectMultiNamespaceReferencesResponse"
-              },
-              ">; updateObjectsSpaces: (objects: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsUpdateObjectsSpacesObject",
-                "text": "SavedObjectsUpdateObjectsSpacesObject"
-              },
-              "[], spacesToAdd: string[], spacesToRemove: string[], options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsUpdateObjectsSpacesOptions",
-                "text": "SavedObjectsUpdateObjectsSpacesOptions"
-              },
-              " | undefined) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsUpdateObjectsSpacesResponse",
-                "text": "SavedObjectsUpdateObjectsSpacesResponse"
-              },
-              ">; bulkUpdate: <T = unknown>(objects: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBulkUpdateObject",
-                "text": "SavedObjectsBulkUpdateObject"
-              },
-              "<T>[], options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBulkUpdateOptions",
-                "text": "SavedObjectsBulkUpdateOptions"
-              },
-              " | undefined) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBulkUpdateResponse",
-                "text": "SavedObjectsBulkUpdateResponse"
-              },
-              "<T>>; removeReferencesTo: (type: string, id: string, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsRemoveReferencesToOptions",
-                "text": "SavedObjectsRemoveReferencesToOptions"
-              },
-              " | undefined) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsRemoveReferencesToResponse",
-                "text": "SavedObjectsRemoveReferencesToResponse"
-              },
-              ">; openPointInTimeForType: (type: string | string[], options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsOpenPointInTimeOptions",
-                "text": "SavedObjectsOpenPointInTimeOptions"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsOpenPointInTimeResponse",
-                "text": "SavedObjectsOpenPointInTimeResponse"
-              },
-              ">; closePointInTime: (id: string, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBaseOptions",
-                "text": "SavedObjectsBaseOptions"
-              },
-              " | undefined) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsClosePointInTimeResponse",
-                "text": "SavedObjectsClosePointInTimeResponse"
-              },
-              ">; createPointInTimeFinder: <T = unknown, A = unknown>(findOptions: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsCreatePointInTimeFinderOptions",
-                "text": "SavedObjectsCreatePointInTimeFinderOptions"
-              },
-              ", dependencies?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsCreatePointInTimeFinderDependencies",
-                "text": "SavedObjectsCreatePointInTimeFinderDependencies"
-              },
-              " | undefined) => ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.ISavedObjectsPointInTimeFinder",
-                "text": "ISavedObjectsPointInTimeFinder"
-              },
-              "<T, A>; errors: typeof ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsErrorHelpers",
-                "text": "SavedObjectsErrorHelpers"
-              },
-              "; }"
+              "SavedObjectsClientContract"
             ],
             "path": "src/plugins/data/server/search/types.ts",
             "deprecated": false
@@ -3732,13 +3308,7 @@
             "label": "esClient",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.IScopedClusterClient",
-                "text": "IScopedClusterClient"
-              }
+              "IScopedClusterClient"
             ],
             "path": "src/plugins/data/server/search/types.ts",
             "deprecated": false
@@ -3764,8 +3334,7 @@
             "label": "searchSessionsClient",
             "description": [],
             "signature": [
-              "IScopedSearchSessionsClient",
-              "<unknown>"
+              "IScopedSearchSessionsClient"
             ],
             "path": "src/plugins/data/server/search/types.ts",
             "deprecated": false
@@ -3778,13 +3347,7 @@
             "label": "request",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>"
             ],
             "path": "src/plugins/data/server/search/types.ts",
@@ -4493,7 +4056,15 @@
                 "section": "def-common.SerializedFieldFormat",
                 "text": "SerializedFieldFormat"
               },
-              "<T>"
+              "<T, ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.FieldFormatParams",
+                "text": "FieldFormatParams"
+              },
+              "<T>>"
             ],
             "path": "src/plugins/data/common/search/aggs/agg_config.ts",
             "deprecated": false,
@@ -6338,7 +5909,7 @@
             "label": "start",
             "description": [],
             "signature": [
-              "({ getConfig, fieldFormats, calculateBoundsOptions, }: ",
+              "({ getConfig, fieldFormats, calculateBounds, }: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -6363,7 +5934,7 @@
                 "id": "def-common.AggsCommonService.start.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    getConfig,\n    fieldFormats,\n    calculateBoundsOptions,\n  }",
+                "label": "{\n    getConfig,\n    fieldFormats,\n    calculateBounds,\n  }",
                 "description": [],
                 "signature": [
                   {
@@ -6927,7 +6498,7 @@
                     "section": "def-common.SearchSourceFields",
                     "text": "SearchSourceFields"
                   },
-                  "[K]; getOwnField: <K extends keyof ",
+                  "[K]; getActiveIndexFilter: () => string[]; getOwnField: <K extends keyof ",
                   {
                     "pluginId": "data",
                     "scope": "common",
@@ -6991,13 +6562,13 @@
                     "section": "def-common.SearchSource",
                     "text": "SearchSource"
                   },
-                  " | undefined; fetch$: (options?: ",
+                  " | undefined; fetch$: <T = {}>(options?: ",
                   {
                     "pluginId": "data",
                     "scope": "common",
                     "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.ISearchOptions",
-                    "text": "ISearchOptions"
+                    "section": "def-common.SearchSourceSearchOptions",
+                    "text": "SearchSourceSearchOptions"
                   },
                   ") => ",
                   "Observable",
@@ -7011,19 +6582,19 @@
                   },
                   "<",
                   "SearchResponse",
-                  "<any, Record<string, ",
+                  "<T, Record<string, ",
                   "AggregationsAggregate",
                   ">>>>; fetch: (options?: ",
                   {
                     "pluginId": "data",
                     "scope": "common",
                     "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.ISearchOptions",
-                    "text": "ISearchOptions"
+                    "section": "def-common.SearchSourceSearchOptions",
+                    "text": "SearchSourceSearchOptions"
                   },
                   ") => Promise<",
                   "SearchResponse",
-                  "<any, Record<string, ",
+                  "<unknown, Record<string, ",
                   "AggregationsAggregate",
                   ">>>; onRequestStart: (handler: (searchSource: ",
                   {
@@ -7038,8 +6609,8 @@
                     "pluginId": "data",
                     "scope": "common",
                     "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.ISearchOptions",
-                    "text": "ISearchOptions"
+                    "section": "def-common.SearchSourceSearchOptions",
+                    "text": "SearchSourceSearchOptions"
                   },
                   " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; destroy: () => void; getSerializedFields: (recurse?: boolean) => ",
                   {
@@ -7059,7 +6630,7 @@
                     "section": "def-common.ExpressionAstExpression",
                     "text": "ExpressionAstExpression"
                   },
-                  "; }"
+                  "; parseActiveIndexPatternFromQueryString: (queryString: string) => string[]; }"
                 ],
                 "path": "src/plugins/data/common/search/aggs/agg_type.ts",
                 "deprecated": false
@@ -7138,7 +6709,15 @@
                 "section": "def-common.SerializedFieldFormat",
                 "text": "SerializedFieldFormat"
               },
-              "<T>"
+              "<T, ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.FieldFormatParams",
+                "text": "FieldFormatParams"
+              },
+              "<T>>"
             ],
             "path": "src/plugins/data/common/search/aggs/agg_type.ts",
             "deprecated": false,
@@ -9645,6 +9224,21 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-common.SearchSource.getActiveIndexFilter",
+            "type": "Function",
+            "tags": [],
+            "label": "getActiveIndexFilter",
+            "description": [],
+            "signature": [
+              "() => string[]"
+            ],
+            "path": "src/plugins/data/common/search/search_source/search_source.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.SearchSource.getOwnField",
             "type": "Function",
             "tags": [],
@@ -9714,16 +9308,16 @@
             "deprecated": true,
             "references": [
               {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
+              },
+              {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/lib/wrap_search_source_client.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -9800,9 +9394,7 @@
             "parentPluginId": "data",
             "id": "def-common.SearchSource.setParent",
             "type": "Function",
-            "tags": [
-              "return"
-            ],
+            "tags": [],
             "label": "setParent",
             "description": [
               "\nSet a searchSource that this source should inherit from"
@@ -9875,17 +9467,13 @@
                 "isRequired": true
               }
             ],
-            "returnComment": [
-              "- chainable"
-            ]
+            "returnComment": []
           },
           {
             "parentPluginId": "data",
             "id": "def-common.SearchSource.getParent",
             "type": "Function",
-            "tags": [
-              "return"
-            ],
+            "tags": [],
             "label": "getParent",
             "description": [
               "\nGet the parent of this SearchSource"
@@ -9916,13 +9504,13 @@
               "\nFetch this source from Elasticsearch, returning an observable over the response(s)"
             ],
             "signature": [
-              "(options?: ",
+              "<T = {}>(options?: ",
               {
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
-                "section": "def-common.ISearchOptions",
-                "text": "ISearchOptions"
+                "section": "def-common.SearchSourceSearchOptions",
+                "text": "SearchSourceSearchOptions"
               },
               ") => ",
               "Observable",
@@ -9936,7 +9524,7 @@
               },
               "<",
               "SearchResponse",
-              "<any, Record<string, ",
+              "<T, Record<string, ",
               "AggregationsAggregate",
               ">>>>"
             ],
@@ -9955,8 +9543,8 @@
                     "pluginId": "data",
                     "scope": "common",
                     "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.ISearchOptions",
-                    "text": "ISearchOptions"
+                    "section": "def-common.SearchSourceSearchOptions",
+                    "text": "SearchSourceSearchOptions"
                   }
                 ],
                 "path": "src/plugins/data/common/search/search_source/search_source.ts",
@@ -9983,18 +9571,17 @@
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
-                "section": "def-common.ISearchOptions",
-                "text": "ISearchOptions"
+                "section": "def-common.SearchSourceSearchOptions",
+                "text": "SearchSourceSearchOptions"
               },
               ") => Promise<",
               "SearchResponse",
-              "<any, Record<string, ",
+              "<unknown, Record<string, ",
               "AggregationsAggregate",
               ">>>"
             ],
             "path": "src/plugins/data/common/search/search_source/search_source.ts",
             "deprecated": true,
-            "removeBy": "8.1",
             "references": [
               {
                 "plugin": "stackAlerts",
@@ -10074,8 +9661,8 @@
                     "pluginId": "data",
                     "scope": "common",
                     "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.ISearchOptions",
-                    "text": "ISearchOptions"
+                    "section": "def-common.SearchSourceSearchOptions",
+                    "text": "SearchSourceSearchOptions"
                   }
                 ],
                 "path": "src/plugins/data/common/search/search_source/search_source.ts",
@@ -10089,9 +9676,7 @@
             "parentPluginId": "data",
             "id": "def-common.SearchSource.onRequestStart",
             "type": "Function",
-            "tags": [
-              "return"
-            ],
+            "tags": [],
             "label": "onRequestStart",
             "description": [
               "\n Add a handler that will be notified whenever requests start"
@@ -10110,8 +9695,8 @@
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
-                "section": "def-common.ISearchOptions",
-                "text": "ISearchOptions"
+                "section": "def-common.SearchSourceSearchOptions",
+                "text": "SearchSourceSearchOptions"
               },
               " | undefined) => Promise<unknown>) => void"
             ],
@@ -10139,8 +9724,8 @@
                     "pluginId": "data",
                     "scope": "common",
                     "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.ISearchOptions",
-                    "text": "ISearchOptions"
+                    "section": "def-common.SearchSourceSearchOptions",
+                    "text": "SearchSourceSearchOptions"
                   },
                   " | undefined) => Promise<unknown>"
                 ],
@@ -10172,9 +9757,7 @@
             "parentPluginId": "data",
             "id": "def-common.SearchSource.destroy",
             "type": "Function",
-            "tags": [
-              "return"
-            ],
+            "tags": [],
             "label": "destroy",
             "description": [
               "\nCompletely destroy the SearchSource."
@@ -10282,9 +9865,37 @@
                 "isRequired": true
               }
             ],
-            "returnComment": [
-              "The expression AST."
-            ]
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.SearchSource.parseActiveIndexPatternFromQueryString",
+            "type": "Function",
+            "tags": [],
+            "label": "parseActiveIndexPatternFromQueryString",
+            "description": [],
+            "signature": [
+              "(queryString: string) => string[]"
+            ],
+            "path": "src/plugins/data/common/search/search_source/search_source.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.SearchSource.parseActiveIndexPatternFromQueryString.$1",
+                "type": "string",
+                "tags": [],
+                "label": "queryString",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data/common/search/search_source/search_source.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -11073,6 +10684,61 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-common.aggregateQueryToAst",
+        "type": "Function",
+        "tags": [],
+        "label": "aggregateQueryToAst",
+        "description": [],
+        "signature": [
+          "(query: ",
+          "AggregateQuery",
+          ", timeField?: string | undefined) => ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionAstFunction",
+            "text": "ExpressionAstFunction"
+          },
+          " | undefined"
+        ],
+        "path": "src/plugins/data/common/search/expressions/aggregate_query_to_ast.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.aggregateQueryToAst.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "AggregateQuery"
+            ],
+            "path": "src/plugins/data/common/search/expressions/aggregate_query_to_ast.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.aggregateQueryToAst.$2",
+            "type": "string",
+            "tags": [],
+            "label": "timeField",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data/common/search/expressions/aggregate_query_to_ast.ts",
+            "deprecated": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-common.aggSampler",
         "type": "Function",
         "tags": [],
@@ -11242,6 +10908,22 @@
           "() => FunctionDefinition"
         ],
         "path": "src/plugins/data/common/search/aggs/metrics/top_metrics_fn.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.aggValueCount",
+        "type": "Function",
+        "tags": [],
+        "label": "aggValueCount",
+        "description": [],
+        "signature": [
+          "() => FunctionDefinition"
+        ],
+        "path": "src/plugins/data/common/search/aggs/metrics/value_count_fn.ts",
         "deprecated": false,
         "children": [],
         "returnComment": [],
@@ -12276,7 +11958,13 @@
         "description": [],
         "signature": [
           "(getConfig: (key: string) => any) => (range: ",
-          "TimeRange",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
           ") => string | undefined"
         ],
         "path": "src/plugins/data/common/search/aggs/utils/calculate_auto_time_expression.ts",
@@ -12724,7 +12412,9 @@
         "label": "getFilterBucketAgg",
         "description": [],
         "signature": [
-          "({ getConfig }: { getConfig: <T = any>(key: string) => any; }) => ",
+          "({ getConfig, calculateBounds, }: { getConfig: <T = any>(key: string) => T; calculateBounds: ",
+          "CalculateBoundsFn",
+          "; }) => ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -12750,7 +12440,7 @@
             "id": "def-common.getFilterBucketAgg.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ getConfig }",
+            "label": "{\n  getConfig,\n  calculateBounds,\n}",
             "description": [],
             "path": "src/plugins/data/common/search/aggs/buckets/filter.ts",
             "deprecated": false,
@@ -12763,7 +12453,7 @@
                 "label": "getConfig",
                 "description": [],
                 "signature": [
-                  "<T = any>(key: string) => any"
+                  "<T = any>(key: string) => T"
                 ],
                 "path": "src/plugins/data/common/search/aggs/buckets/filter.ts",
                 "deprecated": false,
@@ -12784,6 +12474,44 @@
                   }
                 ],
                 "returnComment": []
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-common.getFilterBucketAgg.$1.calculateBounds",
+                "type": "Function",
+                "tags": [],
+                "label": "calculateBounds",
+                "description": [],
+                "signature": [
+                  "(timeRange: ",
+                  "TimeRange",
+                  ") => ",
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataQueryPluginApi",
+                    "section": "def-common.TimeRangeBounds",
+                    "text": "TimeRangeBounds"
+                  }
+                ],
+                "path": "src/plugins/data/common/search/aggs/buckets/filter.ts",
+                "deprecated": false,
+                "returnComment": [],
+                "children": [
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-common.getFilterBucketAgg.$1.calculateBounds.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "timeRange",
+                    "description": [],
+                    "signature": [
+                      "{ from: string; to: string; mode?: \"absolute\" | \"relative\" | undefined; }"
+                    ],
+                    "path": "src/plugins/data/common/search/aggs/buckets/date_histogram.ts",
+                    "deprecated": false
+                  }
+                ]
               }
             ]
           }
@@ -13135,13 +12863,7 @@
         "description": [],
         "signature": [
           "(getStartDependencies: (getKibanaRequest: (() => ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.KibanaRequest",
-            "text": "KibanaRequest"
-          },
+          "KibanaRequest",
           "<unknown, unknown, unknown, any>) | undefined) => Promise<",
           {
             "pluginId": "data",
@@ -13171,13 +12893,7 @@
             "description": [],
             "signature": [
               "(getKibanaRequest: (() => ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>) | undefined) => Promise<",
               {
                 "pluginId": "data",
@@ -14172,6 +13888,38 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-common.getValueCountMetricAgg",
+        "type": "Function",
+        "tags": [],
+        "label": "getValueCountMetricAgg",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.MetricAggType",
+            "text": "MetricAggType"
+          },
+          "<",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.IMetricAggConfig",
+            "text": "IMetricAggConfig"
+          },
+          ">"
+        ],
+        "path": "src/plugins/data/common/search/aggs/metrics/value_count.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-common.handleRequest",
         "type": "Function",
         "tags": [],
@@ -15090,7 +14838,7 @@
         "signature": [
           "(interval: string) => { value: number; unit: ",
           "Unit",
-          "; type: \"calendar\" | \"fixed\"; }"
+          "; type: \"fixed\" | \"calendar\"; }"
         ],
         "path": "src/plugins/data/common/search/aggs/utils/date_interval_utils/parse_es_interval.ts",
         "deprecated": false,
@@ -15709,7 +15457,13 @@
         "description": [],
         "signature": [
           "(timerange: ",
-          "TimeRange",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
           ") => ",
           {
             "pluginId": "expressions",
@@ -15730,7 +15484,13 @@
             "label": "timerange",
             "description": [],
             "signature": [
-              "TimeRange"
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              }
             ],
             "path": "src/plugins/data/common/search/expressions/timerange_to_ast.ts",
             "deprecated": false,
@@ -16815,6 +16575,52 @@
                 "text": "ExpressionFunctionDefinition"
               },
               "<\"aggCardinality\", any, AggArgs, ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggExpressionType",
+                "text": "AggExpressionType"
+              },
+              ", ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExecutionContext",
+                "text": "ExecutionContext"
+              },
+              "<",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Adapters",
+                "text": "Adapters"
+              },
+              ", ",
+              "SerializableRecord",
+              ">>"
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggFunctionsMapping.aggValueCount",
+            "type": "Object",
+            "tags": [],
+            "label": "aggValueCount",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionFunctionDefinition",
+                "text": "ExpressionFunctionDefinition"
+              },
+              "<\"aggValueCount\", any, AggArgs, ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -18694,6 +18500,19 @@
             ],
             "path": "src/plugins/data/common/search/aggs/buckets/filter.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsFilter.timeWindow",
+            "type": "string",
+            "tags": [],
+            "label": "timeWindow",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/filter.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -20325,6 +20144,19 @@
             "description": [],
             "path": "src/plugins/data/common/search/aggs/metrics/std_deviation.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsStdDeviation.showBounds",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showBounds",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/metrics/std_deviation.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -20538,12 +20370,12 @@
           {
             "parentPluginId": "data",
             "id": "def-common.AggParamsTerms.exclude",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "exclude",
             "description": [],
             "signature": [
-              "string | undefined"
+              "number[] | string[] | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
             "deprecated": false
@@ -20551,12 +20383,38 @@
           {
             "parentPluginId": "data",
             "id": "def-common.AggParamsTerms.include",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "include",
             "description": [],
             "signature": [
-              "string | undefined"
+              "number[] | string[] | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsTerms.includeIsRegex",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "includeIsRegex",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsTerms.excludeIsRegex",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "excludeIsRegex",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
             "deprecated": false
@@ -20609,7 +20467,7 @@
             "label": "aggregate",
             "description": [],
             "signature": [
-              "\"concat\" | \"min\" | \"max\" | \"sum\" | \"average\""
+              "\"min\" | \"max\" | \"sum\" | \"concat\" | \"average\""
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/top_hit.ts",
             "deprecated": false
@@ -20730,6 +20588,59 @@
               "number | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/top_metrics.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.AggParamsValueCount",
+        "type": "Interface",
+        "tags": [],
+        "label": "AggParamsValueCount",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.AggParamsValueCount",
+            "text": "AggParamsValueCount"
+          },
+          " extends ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.BaseAggParams",
+            "text": "BaseAggParams"
+          }
+        ],
+        "path": "src/plugins/data/common/search/aggs/metrics/value_count.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsValueCount.field",
+            "type": "string",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "path": "src/plugins/data/common/search/aggs/metrics/value_count.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsValueCount.emptyAsNull",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "emptyAsNull",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/metrics/value_count.ts",
             "deprecated": false
           }
         ],
@@ -20885,7 +20796,13 @@
             "description": [],
             "signature": [
               "(range: ",
-              "TimeRange",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
               ") => string | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -21287,16 +21204,41 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.AggsCommonStartDependencies.calculateBoundsOptions",
-            "type": "Object",
+            "id": "def-common.AggsCommonStartDependencies.calculateBounds",
+            "type": "Function",
             "tags": [],
-            "label": "calculateBoundsOptions",
+            "label": "calculateBounds",
             "description": [],
             "signature": [
-              "CalculateBoundsOptions"
+              "(timeRange: ",
+              "TimeRange",
+              ") => ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRangeBounds",
+                "text": "TimeRangeBounds"
+              }
             ],
             "path": "src/plugins/data/common/search/aggs/aggs_service.ts",
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.AggsCommonStartDependencies.calculateBounds.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "timeRange",
+                "description": [],
+                "signature": [
+                  "{ from: string; to: string; mode?: \"absolute\" | \"relative\" | undefined; }"
+                ],
+                "path": "src/plugins/data/common/search/aggs/buckets/date_histogram.ts",
+                "deprecated": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -21646,7 +21588,7 @@
                 "section": "def-common.SerializedFieldFormat",
                 "text": "SerializedFieldFormat"
               },
-              "<",
+              "<{}, ",
               "SerializableRecord",
               ">) | undefined"
             ],
@@ -22720,7 +22662,15 @@
                 "section": "def-common.IKibanaSearchResponse",
                 "text": "IKibanaSearchResponse"
               },
-              "<any>) => ",
+              "<any>, options: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSourceSearchOptions",
+                "text": "SearchSourceSearchOptions"
+              },
+              ") => ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -22763,6 +22713,26 @@
                     "text": "IKibanaSearchResponse"
                   },
                   "<any>"
+                ],
+                "path": "src/plugins/data/common/search/search_source/fetch/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-common.FetchHandlers.onResponse.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataSearchPluginApi",
+                    "section": "def-common.SearchSourceSearchOptions",
+                    "text": "SearchSourceSearchOptions"
+                  }
                 ],
                 "path": "src/plugins/data/common/search/search_source/fetch/types.ts",
                 "deprecated": false,
@@ -23227,7 +23197,7 @@
         "tags": [],
         "label": "IInspectorInfo",
         "description": [],
-        "path": "src/plugins/data/common/search/types.ts",
+        "path": "src/plugins/data/common/search/search_source/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -23247,7 +23217,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/data/common/search/types.ts",
+            "path": "src/plugins/data/common/search/search_source/types.ts",
             "deprecated": false
           },
           {
@@ -23257,7 +23227,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "path": "src/plugins/data/common/search/types.ts",
+            "path": "src/plugins/data/common/search/search_source/types.ts",
             "deprecated": false
           },
           {
@@ -23270,7 +23240,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/data/common/search/types.ts",
+            "path": "src/plugins/data/common/search/search_source/types.ts",
             "deprecated": false
           },
           {
@@ -23283,7 +23253,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/data/common/search/types.ts",
+            "path": "src/plugins/data/common/search/search_source/types.ts",
             "deprecated": false
           }
         ],
@@ -23902,6 +23872,22 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-common.ISearchOptions.executionContext",
+            "type": "Object",
+            "tags": [],
+            "label": "executionContext",
+            "description": [
+              "\nRepresents a meta-information about a Kibana entity intitating a saerch request."
+            ],
+            "signature": [
+              "KibanaExecutionContext",
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.ISearchOptions.indexPattern",
             "type": "Object",
             "tags": [],
@@ -23917,42 +23903,6 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              " | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.ISearchOptions.inspector",
-            "type": "Object",
-            "tags": [],
-            "label": "inspector",
-            "description": [
-              "\nInspector integration options"
-            ],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.IInspectorInfo",
-                "text": "IInspectorInfo"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.ISearchOptions.executionContext",
-            "type": "Object",
-            "tags": [],
-            "label": "executionContext",
-            "description": [],
-            "signature": [
-              "KibanaExecutionContext",
               " | undefined"
             ],
             "path": "src/plugins/data/common/search/types.ts",
@@ -25208,7 +25158,13 @@
             "description": [],
             "signature": [
               "{ calculateAutoTimeExpression: (range: ",
-              "TimeRange",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
               ") => string | undefined; createAggConfigs: (indexPattern: ",
               {
                 "pluginId": "dataViews",
@@ -25400,7 +25356,7 @@
           {
             "parentPluginId": "data",
             "id": "def-common.SearchSourceFields.query",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "query",
             "description": [
@@ -25408,6 +25364,8 @@
             ],
             "signature": [
               "Query",
+              " | ",
+              "AggregateQuery",
               " | undefined"
             ],
             "path": "src/plugins/data/common/search/search_source/types.ts",
@@ -25730,6 +25688,73 @@
             "tags": [],
             "label": "callParentStartHandlers",
             "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/common/search/search_source/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.SearchSourceSearchOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "SearchSourceSearchOptions",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.SearchSourceSearchOptions",
+            "text": "SearchSourceSearchOptions"
+          },
+          " extends ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.ISearchOptions",
+            "text": "ISearchOptions"
+          }
+        ],
+        "path": "src/plugins/data/common/search/search_source/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.SearchSourceSearchOptions.inspector",
+            "type": "Object",
+            "tags": [],
+            "label": "inspector",
+            "description": [
+              "\nInspector integration options"
+            ],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.IInspectorInfo",
+                "text": "IInspectorInfo"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/search_source/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.SearchSourceSearchOptions.disableShardFailureWarning",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "disableShardFailureWarning",
+            "description": [
+              "\nDisable default warnings of shard failures"
+            ],
             "signature": [
               "boolean | undefined"
             ],
@@ -26141,7 +26166,7 @@
         "label": "AggConfigOptions",
         "description": [],
         "signature": [
-          "{ id?: string | undefined; type: ",
+          "{ type: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -26149,7 +26174,7 @@
             "section": "def-common.IAggType",
             "text": "IAggType"
           },
-          "; enabled?: boolean | undefined; params?: {} | ",
+          "; id?: string | undefined; enabled?: boolean | undefined; params?: {} | ",
           "SerializableRecord",
           " | undefined; schema?: string | undefined; }"
         ],
@@ -26647,7 +26672,13 @@
         ],
         "signature": [
           "{ calculateAutoTimeExpression: (range: ",
-          "TimeRange",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
           ") => string | undefined; createAggConfigs: (indexPattern: ",
           {
             "pluginId": "dataViews",
@@ -26882,6 +26913,20 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-common.aggValueCountFnName",
+        "type": "string",
+        "tags": [],
+        "label": "aggValueCountFnName",
+        "description": [],
+        "signature": [
+          "\"aggValueCount\""
+        ],
+        "path": "src/plugins/data/common/search/aggs/metrics/value_count_fn.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-common.autoInterval",
         "type": "string",
         "tags": [],
@@ -26937,7 +26982,7 @@
         "label": "CreateAggConfigParams",
         "description": [],
         "signature": [
-          "{ id?: string | undefined; type: string | ",
+          "{ type: string | ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -26945,7 +26990,7 @@
             "section": "def-common.IAggType",
             "text": "IAggType"
           },
-          "; enabled?: boolean | undefined; params?: {} | ",
+          "; id?: string | undefined; enabled?: boolean | undefined; params?: {} | ",
           "SerializableRecord",
           " | undefined; schema?: string | undefined; }"
         ],
@@ -27325,7 +27370,13 @@
           " | ",
           "Query",
           "[] | undefined; timeRange?: ",
-          "TimeRange",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
           " | undefined; }"
         ],
         "path": "src/plugins/data/common/search/expressions/kibana_context_type.ts",
@@ -27925,7 +27976,13 @@
             "text": "ExpressionFunctionDefinition"
           },
           "<\"timerange\", null, ",
-          "TimeRange",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
           ", ",
           {
             "pluginId": "data",
@@ -29184,7 +29241,7 @@
             "section": "def-common.SearchSourceFields",
             "text": "SearchSourceFields"
           },
-          "[K]; getOwnField: <K extends keyof ",
+          "[K]; getActiveIndexFilter: () => string[]; getOwnField: <K extends keyof ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -29248,13 +29305,13 @@
             "section": "def-common.SearchSource",
             "text": "SearchSource"
           },
-          " | undefined; fetch$: (options?: ",
+          " | undefined; fetch$: <T = {}>(options?: ",
           {
             "pluginId": "data",
             "scope": "common",
             "docId": "kibDataSearchPluginApi",
-            "section": "def-common.ISearchOptions",
-            "text": "ISearchOptions"
+            "section": "def-common.SearchSourceSearchOptions",
+            "text": "SearchSourceSearchOptions"
           },
           ") => ",
           "Observable",
@@ -29268,19 +29325,19 @@
           },
           "<",
           "SearchResponse",
-          "<any, Record<string, ",
+          "<T, Record<string, ",
           "AggregationsAggregate",
           ">>>>; fetch: (options?: ",
           {
             "pluginId": "data",
             "scope": "common",
             "docId": "kibDataSearchPluginApi",
-            "section": "def-common.ISearchOptions",
-            "text": "ISearchOptions"
+            "section": "def-common.SearchSourceSearchOptions",
+            "text": "SearchSourceSearchOptions"
           },
           ") => Promise<",
           "SearchResponse",
-          "<any, Record<string, ",
+          "<unknown, Record<string, ",
           "AggregationsAggregate",
           ">>>; onRequestStart: (handler: (searchSource: ",
           {
@@ -29295,8 +29352,8 @@
             "pluginId": "data",
             "scope": "common",
             "docId": "kibDataSearchPluginApi",
-            "section": "def-common.ISearchOptions",
-            "text": "ISearchOptions"
+            "section": "def-common.SearchSourceSearchOptions",
+            "text": "SearchSourceSearchOptions"
           },
           " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; destroy: () => void; getSerializedFields: (recurse?: boolean) => ",
           {
@@ -29316,7 +29373,7 @@
             "section": "def-common.ExpressionAstExpression",
             "text": "ExpressionAstExpression"
           },
-          "; }"
+          "; parseActiveIndexPatternFromQueryString: (queryString: string) => string[]; }"
         ],
         "path": "src/plugins/data/common/search/search_source/types.ts",
         "deprecated": false,
@@ -29431,7 +29488,13 @@
         "description": [],
         "signature": [
           "{ type: \"timerange\"; } & ",
-          "TimeRange"
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          }
         ],
         "path": "src/plugins/data/common/search/expressions/timerange.ts",
         "deprecated": false,
@@ -29479,7 +29542,7 @@
         "signature": [
           "{ value: number; unit: ",
           "Unit",
-          "; type: \"calendar\" | \"fixed\"; }"
+          "; type: \"fixed\" | \"calendar\"; }"
         ],
         "path": "src/plugins/data/common/search/aggs/utils/date_interval_utils/parse_es_interval.ts",
         "deprecated": false,
@@ -29570,7 +29633,7 @@
         "label": "SearchTypes",
         "description": [],
         "signature": [
-          "string | number | boolean | object | string[] | number[] | boolean[] | object[] | undefined"
+          "string | number | boolean | object | number[] | string[] | boolean[] | object[] | undefined"
         ],
         "path": "src/plugins/data/common/search/expressions/eql_raw_response.ts",
         "deprecated": false,
@@ -29586,6 +29649,8 @@
         "signature": [
           "{ type?: string | undefined; query?: ",
           "Query",
+          " | ",
+          "AggregateQuery",
           " | undefined; filter?: ",
           "Filter",
           "[] | undefined; sort?: ",
@@ -29612,7 +29677,15 @@
           },
           "[] | undefined; fieldsFromSource?: ",
           "Fields",
-          " | undefined; index?: string | undefined; searchAfter?: ",
+          " | undefined; index?: string | ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewSpec",
+            "text": "DataViewSpec"
+          },
+          " | undefined; searchAfter?: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -32014,7 +32087,7 @@
             "label": "inputTypes",
             "description": [],
             "signature": [
-              "(\"kibana_context\" | \"null\")[]"
+              "(\"null\" | \"kibana_context\")[]"
             ],
             "path": "src/plugins/data/common/search/expressions/kibana.ts",
             "deprecated": false
@@ -32797,7 +32870,13 @@
             "description": [],
             "signature": [
               "(input: null, args: ",
-              "TimeRange",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
               ") => { type: \"timerange\"; from: string; to: string; mode: \"absolute\" | \"relative\" | undefined; }"
             ],
             "path": "src/plugins/data/common/search/expressions/timerange.ts",
@@ -32825,7 +32904,13 @@
                 "label": "args",
                 "description": [],
                 "signature": [
-                  "TimeRange"
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataQueryPluginApi",
+                    "section": "def-common.TimeRange",
+                    "text": "TimeRange"
+                  }
                 ],
                 "path": "src/plugins/data/common/search/expressions/timerange.ts",
                 "deprecated": false,
@@ -34928,7 +35013,13 @@
               " | ",
               "Query",
               "[] | undefined; timeRange?: ",
-              "TimeRange",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
               " | undefined; }"
             ],
             "path": "src/plugins/data/common/search/expressions/remove_filter.ts",
@@ -35225,7 +35316,13 @@
               " | ",
               "Query",
               "[] | undefined; timeRange?: ",
-              "TimeRange",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
               " | undefined; }"
             ],
             "path": "src/plugins/data/common/search/expressions/select_filter.ts",

@@ -1,0 +1,88 @@
+[[osquery-manager-packs-api-create]]
+=== Create pack API
+++++
+<titleabbrev>Create pack</titleabbrev>
+++++
+
+experimental[] Create packs.
+
+
+[[osquery-manager-packs-api-create-request]]
+==== Request
+
+`POST <kibana host>:<port>/api/osquery/packs`
+
+`POST <kibana host>:<port>/s/<space_id>/api/osquery/packs`
+
+
+[[osquery-manager-packs-api-create-path-params]]
+==== Path parameters
+
+`space_id`::
+  (Optional, string) The space identifier. When `space_id` is not provided in the URL, the default space is used.
+
+
+[[osquery-manager-packs-api-create-body-params]]
+==== Request body
+
+`name`:: (Required, string) The pack name.
+
+`description`:: (Optional, string) The pack description.
+
+`enabled`:: (Optional, boolean) Enables the pack.
+
+`policy_ids`:: (Optional, array) A list of agents policy IDs.
+
+`queries`:: (Required, object) An object of queries.
+
+
+[[osquery-manager-packs-api-create-request-codes]]
+==== Response code
+
+`200`::
+    Indicates a successful call.
+
+
+[[osquery-manager-packs-api-create-example]]
+==== Examples
+
+Create a pack:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X POST api/osquery/packs \
+{
+  "name": "my_pack",
+  "description": "My pack",
+  "enabled": true,
+  "policy_ids": [
+    "my_policy_id"
+  ],
+  "queries": {
+    "my_query": {
+      "query": "SELECT * FROM listening_ports;",
+      "interval": 60,
+      "ecs_mapping": {
+        "client.port": {
+          "field": "port"
+        },
+        "tags": {
+          "value": ["tag1", "tag2"]
+        }
+      }
+    }
+  }
+}
+
+--------------------------------------------------
+// KIBANA
+
+
+The API returns the pack object:
+
+[source,sh]
+--------------------------------------------------
+{
+    "data": {...}
+}
+--------------------------------------------------

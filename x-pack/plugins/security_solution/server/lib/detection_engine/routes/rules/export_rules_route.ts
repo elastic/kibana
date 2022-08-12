@@ -6,17 +6,19 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
+import type {
+  ExportRulesQuerySchemaDecoded,
+  ExportRulesSchemaDecoded,
+} from '../../../../../common/detection_engine/schemas/request/export_rules_schema';
 import {
   exportRulesQuerySchema,
-  ExportRulesQuerySchemaDecoded,
   exportRulesSchema,
-  ExportRulesSchemaDecoded,
 } from '../../../../../common/detection_engine/schemas/request/export_rules_schema';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { ConfigType } from '../../../../config';
+import type { ConfigType } from '../../../../config';
 import { getNonPackagedRulesCount } from '../../rules/get_existing_prepackaged_rules';
 import { getExportByObjectIds } from '../../rules/get_export_by_object_ids';
 import { getExportAll } from '../../rules/get_export_all';

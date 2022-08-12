@@ -6,7 +6,7 @@
  */
 
 import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
-import { FrameworkRequest } from '../../framework';
+import type { FrameworkRequest } from '../../framework';
 
 import {
   mockUniqueParsedObjects,
@@ -15,7 +15,7 @@ import {
   mockGetTimelineValue,
 } from '../__mocks__/import_timelines';
 
-import { CompareTimelinesStatus as TimelinesStatusType } from './compare_timelines_status';
+import type { CompareTimelinesStatus as TimelinesStatusType } from './compare_timelines_status';
 import {
   EMPTY_TITLE_ERROR_MESSAGE,
   UPDATE_STATUS_ERROR_MESSAGE,

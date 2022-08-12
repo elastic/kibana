@@ -9,6 +9,7 @@
 export enum ConfigKey {
   APM_SERVICE_NAME = 'service.name',
   CUSTOM_HEARTBEAT_ID = 'custom_heartbeat_id',
+  CONFIG_ID = 'config_id',
   ENABLED = 'enabled',
   HOSTS = 'hosts',
   IGNORE_HTTPS_ERRORS = 'ignore_https_errors',

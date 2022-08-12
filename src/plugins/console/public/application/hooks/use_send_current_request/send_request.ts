@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { HttpSetup, IHttpFetchError } from '@kbn/core/public';
+import type { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { extractWarningMessages } from '../../../lib/utils';
 import { send } from '../../../lib/es/es';

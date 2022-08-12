@@ -10,29 +10,28 @@ import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import type { Filter } from '@kbn/es-query';
 import type { EntityType } from '@kbn/timelines-plugin/common';
-import { TGridCellAction } from '@kbn/timelines-plugin/common/types';
+import type { TGridCellAction } from '@kbn/timelines-plugin/common/types';
 import { useBulkAddToCaseActions } from '../../../detections/components/alerts_table/timeline_actions/use_bulk_add_to_case_actions';
-import { inputsModel, State } from '../../store';
+import type { inputsModel, State } from '../../store';
 import { inputsActions } from '../../store/actions';
-import { ControlColumnProps, RowRenderer, TimelineId } from '../../../../common/types/timeline';
+import type { ControlColumnProps, RowRenderer } from '../../../../common/types/timeline';
+import { TimelineId } from '../../../../common/types/timeline';
 import { APP_UI_ID } from '../../../../common/constants';
 import { timelineActions } from '../../../timelines/store/timeline';
 import type { SubsetTimelineModel } from '../../../timelines/store/timeline/model';
-import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
+import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { InspectButtonContainer } from '../inspect';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { eventsViewerSelector } from './selectors';
-import { SourcererScopeName } from '../../store/sourcerer/model';
+import type { SourcererScopeName } from '../../store/sourcerer/model';
 import { useSourcererDataView } from '../../containers/sourcerer';
-import { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
+import type { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
 import { FIELDS_WITHOUT_CELL_ACTIONS } from '../../lib/cell_actions/constants';
 import { useKibana } from '../../lib/kibana';
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
-import {
-  useFieldBrowserOptions,
-  FieldEditorActions,
-} from '../../../timelines/components/fields_browser';
+import type { FieldEditorActions } from '../../../timelines/components/fields_browser';
+import { useFieldBrowserOptions } from '../../../timelines/components/fields_browser';
 import {
   useSessionViewNavigation,
   useSessionView,
@@ -119,7 +118,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   const {
     browserFields,
     dataViewId,
-    docValueFields,
     indexPattern,
     runtimeMappings,
     selectedPatterns,
@@ -226,7 +224,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
             defaultCellActions,
             deletedEventIds,
             disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
-            docValueFields,
             end,
             entityType,
             fieldBrowserOptions,

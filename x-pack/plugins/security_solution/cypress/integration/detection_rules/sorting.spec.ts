@@ -18,7 +18,6 @@ import {
 import {
   enableRule,
   changeRowsPerPageTo,
-  checkAutoRefresh,
   goToPage,
   sortByEnabledRules,
   waitForRulesTableToBeLoaded,
@@ -35,8 +34,6 @@ import {
   getNewRule,
   getNewThresholdRule,
 } from '../../objects/rule';
-
-const DEFAULT_RULE_REFRESH_INTERVAL_VALUE = 60000;
 
 describe('Alerts detection rules', () => {
   before(() => {
@@ -99,23 +96,5 @@ describe('Alerts detection rules', () => {
     cy.get(RULES_TABLE)
       .find(SECOND_PAGE_SELECTOR)
       .should('have.class', 'euiPaginationButton-isActive');
-  });
-
-  it('Auto refreshes rules', () => {
-    /**
-     * Ran into the error: timer created with setInterval() but cleared with cancelAnimationFrame()
-     * There are no cancelAnimationFrames in the codebase that are used to clear a setInterval so
-     * explicitly set the below overrides. see https://docs.cypress.io/api/commands/clock#Function-names
-     */
-
-    visit(DETECTIONS_RULE_MANAGEMENT_URL);
-
-    cy.clock(Date.now(), ['setInterval', 'clearInterval', 'Date']);
-
-    waitForRulesTableToBeLoaded();
-
-    // mock 1 minute passing to make sure refresh
-    // is conducted
-    checkAutoRefresh(DEFAULT_RULE_REFRESH_INTERVAL_VALUE, 'be.visible');
   });
 });

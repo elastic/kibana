@@ -17,7 +17,12 @@ import type {
 import { ExpressionsServiceSetup } from '@kbn/expressions-plugin/common';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
-import { AggsCommonService, aggsRequiredUiSettings } from '../../../common';
+import {
+  calculateBounds,
+  AggsCommonService,
+  aggsRequiredUiSettings,
+  TimeRange,
+} from '../../../common';
 import { AggsSetup, AggsStart } from './types';
 
 /** @internal */
@@ -48,6 +53,12 @@ async function getConfigFn(uiSettingsClient: IUiSettingsClient) {
 export class AggsService {
   private readonly aggsCommonService = new AggsCommonService({ shouldDetectTimeZone: false });
 
+  /**
+   * getForceNow uses window.location on the client, so we must have a
+   * separate implementation of calculateBounds on the server.
+   */
+  private calculateBounds = (timeRange: TimeRange) => calculateBounds(timeRange);
+
   public setup({ registerFunction }: AggsSetupDependencies): AggsSetup {
     return this.aggsCommonService.setup({
       registerFunction,
@@ -65,10 +76,10 @@ export class AggsService {
           this.aggsCommonService.start({
             getConfig: await getConfigFn(uiSettingsClient),
             fieldFormats: await fieldFormats.fieldFormatServiceFactory(uiSettingsClient),
-            calculateBoundsOptions: {},
             getIndexPattern: (
               await indexPatterns.dataViewsServiceFactory(savedObjectsClient, elasticsearchClient)
             ).get,
+            calculateBounds: this.calculateBounds,
           });
 
         return {

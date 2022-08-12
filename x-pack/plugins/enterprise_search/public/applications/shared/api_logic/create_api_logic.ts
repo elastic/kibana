@@ -11,53 +11,29 @@ import { ApiStatus, Status, HttpError } from '../../../../common/types/api';
 
 export interface Values<T> {
   apiStatus: ApiStatus<T>;
-  status: Status;
   data?: T;
   error: HttpError;
+  status: Status;
 }
 
-export interface Actions<Args extends Record<string, unknown> | undefined, Result> {
-  makeRequest(args: Args): Args;
+export interface Actions<Args, Result> {
   apiError(error: HttpError): HttpError;
-  apiSuccess(result: Result): Result;
   apiReset(): void;
+  apiSuccess(result: Result): Result;
+  makeRequest(args: Args): Args;
 }
 
-export const createApiLogic = <Result, Args extends Record<string, unknown> | undefined>(
+export const createApiLogic = <Result, Args>(
   path: string[],
   apiFunction: (args: Args) => Promise<Result>
 ) =>
   kea<MakeLogicType<Values<Result>, Actions<Args, Result>>>({
-    path: ['enterprise_search', ...path],
     actions: {
-      makeRequest: (args) => args,
       apiError: (error) => error,
-      apiSuccess: (result) => result,
       apiReset: true,
+      apiSuccess: (result) => result,
+      makeRequest: (args) => args,
     },
-    reducers: () => ({
-      apiStatus: [
-        {
-          status: Status.IDLE,
-        },
-        {
-          makeRequest: () => ({
-            status: Status.LOADING,
-          }),
-          apiError: (_, error) => ({
-            status: Status.ERROR,
-            error,
-          }),
-          apiSuccess: (_, data) => ({
-            status: Status.SUCCESS,
-            data,
-          }),
-          apiReset: () => ({
-            status: Status.IDLE,
-          }),
-        },
-      ],
-    }),
     listeners: ({ actions }) => ({
       makeRequest: async (args) => {
         try {
@@ -68,9 +44,34 @@ export const createApiLogic = <Result, Args extends Record<string, unknown> | un
         }
       },
     }),
+    path: ['enterprise_search', ...path],
+    reducers: () => ({
+      apiStatus: [
+        {
+          status: Status.IDLE,
+        },
+        {
+          apiError: (_, error) => ({
+            error,
+            status: Status.ERROR,
+          }),
+          apiReset: () => ({ status: Status.IDLE }),
+          apiSuccess: (_, data) => ({
+            data,
+            status: Status.SUCCESS,
+          }),
+          makeRequest: ({ data }) => {
+            return {
+              data,
+              status: Status.LOADING,
+            };
+          },
+        },
+      ],
+    }),
     selectors: ({ selectors }) => ({
-      status: [() => [selectors.apiStatus], (apiStatus: ApiStatus<Result>) => apiStatus.status],
       data: [() => [selectors.apiStatus], (apiStatus: ApiStatus<Result>) => apiStatus.data],
       error: [() => [selectors.apiStatus], (apiStatus: ApiStatus<Result>) => apiStatus.error],
+      status: [() => [selectors.apiStatus], (apiStatus: ApiStatus<Result>) => apiStatus.status],
     }),
   });

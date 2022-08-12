@@ -75,17 +75,17 @@ export interface RawMonitoringStats {
 }
 
 export function createAggregators(
-  taskPollingLifecycle: TaskPollingLifecycle,
-  ephemeralTaskLifecycle: EphemeralTaskLifecycle,
   taskStore: TaskStore,
   elasticsearchAndSOAvailability$: Observable<boolean>,
   config: TaskManagerConfig,
   managedConfig: ManagedConfiguration,
-  logger: Logger
+  logger: Logger,
+  taskPollingLifecycle?: TaskPollingLifecycle,
+  ephemeralTaskLifecycle?: EphemeralTaskLifecycle
 ): AggregatedStatProvider {
   const aggregators: AggregatedStatProvider[] = [
     createConfigurationAggregator(config, managedConfig),
-    createTaskRunAggregator(taskPollingLifecycle, config.monitored_stats_running_average_window),
+
     createWorkloadAggregator(
       taskStore,
       elasticsearchAndSOAvailability$,
@@ -94,7 +94,12 @@ export function createAggregators(
       logger
     ),
   ];
-  if (ephemeralTaskLifecycle.enabled) {
+  if (taskPollingLifecycle) {
+    aggregators.push(
+      createTaskRunAggregator(taskPollingLifecycle, config.monitored_stats_running_average_window)
+    );
+  }
+  if (ephemeralTaskLifecycle && ephemeralTaskLifecycle.enabled) {
     aggregators.push(
       createEphemeralTaskAggregator(
         ephemeralTaskLifecycle,

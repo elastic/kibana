@@ -1,0 +1,64 @@
+[[osquery-manager-live-queries-api-get-results]]
+=== Get live query results API
+++++
+<titleabbrev>Get live query results</titleabbrev>
+++++
+
+experimental[] Retrieve a single live query result by ID.
+
+
+[[osquery-manager-live-queries-api-get-results-request]]
+==== Request
+
+`GET <kibana host>:<port>/api/osquery/live_queries/<id>/results/<query_action_id>`
+
+`GET <kibana host>:<port>/s/<space_id>/api/osquery/live_queries/<query_action_id>`
+
+
+[[osquery-manager-live-queries-api-get-results-params]]
+==== Path parameters
+
+`space_id`::
+(Optional, string) The space identifier. When `space_id` is not provided in the URL, the default space is used.
+
+`id`::
+(Required, string) The ID of the live query result you want to retrieve.
+
+`query_action_id`::
+(Required, string) The ID of the query action that generated the live query results.
+
+
+
+[[osquery-manager-live-queries-api-get-results-codes]]
+==== Response code
+
+`200`::
+Indicates a successful call.
+
+`404`::
+The specified live query or <query_action_id> doesn't exist.
+
+
+[[osquery-manager-live-queries-api-get-results-example]]
+==== Example
+
+Retrieve the live query results for `3c42c847-eb30-4452-80e0-728584042334` ID and `609c4c66-ba3d-43fa-afdd-53e244577aa0` query action ID:
+
+
+[source,sh]
+--------------------------------------------------
+$ curl -X GET api/osquery/live_queries/3c42c847-eb30-4452-80e0-728584042334/results/609c4c66-ba3d-43fa-afdd-53e244577aa0
+--------------------------------------------------
+// KIBANA
+
+The API returns a live query action single query result:
+
+[source,sh]
+--------------------------------------------------
+{
+  "data": {
+    "total": 2,
+    "edges": [{...}, {...}],
+  }
+}
+--------------------------------------------------

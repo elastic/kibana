@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   EntriesArray,
   EntryMatch,
   EntryMatchAny,
@@ -13,9 +13,10 @@ import {
   EntryNested,
   NestedEntriesArray,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { AllConditionEntryFields, EntryFieldType, EntryTypes } from '@kbn/securitysolution-utils';
+import type { AllConditionEntryFields, EntryTypes } from '@kbn/securitysolution-utils';
+import { EntryFieldType } from '@kbn/securitysolution-utils';
 
-import { ConditionEntriesMap, ConditionEntry } from '../../../../common/endpoint/types';
+import type { ConditionEntriesMap, ConditionEntry } from '../../../../common/endpoint/types';
 
 const OPERATOR_VALUE = 'included';
 

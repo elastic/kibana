@@ -13,20 +13,23 @@ echo "--- KIBANA_DIR: $KIBANA_DIR"
 buildPlatformPlugins
 is_test_execution_step
 
-export JOB_NUM=$BUILDKITE_PARALLEL_JOB
-export JOB=ftr-configs-${JOB_NUM}
+FTR_CONFIG_GROUP_KEY=${FTR_CONFIG_GROUP_KEY:-}
+if [ "$FTR_CONFIG_GROUP_KEY" == "" ]; then
+  echo "Missing FTR_CONFIG_GROUP_KEY env var"
+  exit 1
+fi
+
+export JOB="$FTR_CONFIG_GROUP_KEY"
 
 functionalTarget="$KIBANA_DIR/target/kibana-coverage/functional"
-FAILED_CONFIGS_KEY="${BUILDKITE_STEP_ID}${BUILDKITE_PARALLEL_JOB:-0}"
+FAILED_CONFIGS_KEY="${BUILDKITE_STEP_ID}${FTR_CONFIG_GROUP_KEY}"
 
-# a FTR failure will result in the script returning an exit code of 10
-exitCode=0
 configs="${FTR_CONFIG:-}"
 
 if [[ "$configs" == "" ]]; then
   echo "--- Downloading ftr test run order"
   buildkite-agent artifact download ftr_run_order.json .
-  configs=$(jq -r '.groups[env.JOB_NUM | tonumber].names | .[]' ftr_run_order.json)
+  configs=$(jq -r '.[env.FTR_CONFIG_GROUP_KEY].names[]' ftr_run_order.json)
 fi
 
 echo "---   Config(s) for this FTR Group:"
@@ -77,7 +80,6 @@ while read -r config; do
     result: ${lastCode}")
 
   if [ $lastCode -ne 0 ]; then
-    exitCode=10
     echo "FTR exited with code $lastCode"
     echo "^^^ +++"
 

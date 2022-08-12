@@ -7,15 +7,15 @@
 
 import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { DataViewSelectPopover } from './data_view_select_popover';
+import { DataViewSelectPopover, DataViewSelectPopoverProps } from './data_view_select_popover';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { act } from 'react-dom/test-utils';
 
-const props = {
+const props: DataViewSelectPopoverProps = {
   onSelectDataView: () => {},
-  initialDataViewTitle: 'kibana_sample_data_logs',
-  initialDataViewId: 'mock-data-logs-id',
+  dataViewName: 'kibana_sample_data_logs',
+  dataViewId: 'mock-data-logs-id',
 };
 
 const dataViewOptions = [

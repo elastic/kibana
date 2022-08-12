@@ -14,7 +14,7 @@ import {
 } from '@kbn/embeddable-plugin/public';
 import type { Filter, TimeRange, Query } from '@kbn/es-query';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { SavedSearch } from '../services/saved_searches';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { SortOrder } from '../components/doc_table/components/table_header/helpers';
 
 export interface SearchInput extends EmbeddableInput {
@@ -25,6 +25,7 @@ export interface SearchInput extends EmbeddableInput {
   columns?: string[];
   sort?: SortOrder[];
   rowHeight?: number;
+  rowsPerPage?: number;
 }
 
 export interface SearchOutput extends EmbeddableOutput {

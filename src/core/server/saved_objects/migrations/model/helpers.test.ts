@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { FetchIndexResponse } from '../actions/fetch_indices';
 import {
   addExcludedTypesToBoolQuery,
   addMustClausesToBoolQuery,
   addMustNotClausesToBoolQuery,
+  getAliases,
 } from './helpers';
 
 describe('addExcludedTypesToBoolQuery', () => {
@@ -172,5 +174,59 @@ describe('addMustNotClausesToBoolQuery', () => {
         ],
       },
     });
+  });
+});
+
+describe('getAliases', () => {
+  it('returns a right record of alias to index name pairs', () => {
+    const indices: FetchIndexResponse = {
+      '.kibana_8.0.0_001': {
+        aliases: { '.kibana': {}, '.kibana_8.0.0': {} },
+        mappings: { properties: {} },
+        settings: {},
+      },
+      '.kibana_7.17.0_001': {
+        aliases: { '.kibana_7.17.0': {} },
+        mappings: { properties: {} },
+        settings: {},
+      },
+    };
+    expect(getAliases(indices)).toMatchInlineSnapshot(`
+      Object {
+        "_tag": "Right",
+        "right": Object {
+          ".kibana": ".kibana_8.0.0_001",
+          ".kibana_7.17.0": ".kibana_7.17.0_001",
+          ".kibana_8.0.0": ".kibana_8.0.0_001",
+        },
+      }
+    `);
+  });
+  it('returns a left multiple_indices_per_alias when one alias points to multiple indices', () => {
+    const indices: FetchIndexResponse = {
+      '.kibana_8.0.0_001': {
+        aliases: { '.kibana': {}, '.kibana_8.0.0': {} },
+        mappings: { properties: {} },
+        settings: {},
+      },
+      '.kibana_7.17.0_001': {
+        aliases: { '.kibana': {}, '.kibana_7.17.0': {} },
+        mappings: { properties: {} },
+        settings: {},
+      },
+    };
+    expect(getAliases(indices)).toMatchInlineSnapshot(`
+      Object {
+        "_tag": "Left",
+        "left": Object {
+          "alias": ".kibana",
+          "indices": Array [
+            ".kibana_8.0.0_001",
+            ".kibana_7.17.0_001",
+          ],
+          "type": "multiple_indices_per_alias",
+        },
+      }
+    `);
   });
 });

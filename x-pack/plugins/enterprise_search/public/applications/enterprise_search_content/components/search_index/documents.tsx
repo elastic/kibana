@@ -5,18 +5,82 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, ChangeEvent } from 'react';
 
-import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
+import { useActions, useValues } from 'kea';
+
+import {
+  EuiFieldSearch,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
+
+import { DocumentList } from './components/document_list/document_list';
+import { DocumentsLogic, DEFAULT_PAGINATION } from './documents_logic';
+
+import { IndexNameLogic } from './index_name_logic';
+
+import './documents.scss';
 
 export const SearchIndexDocuments: React.FC = () => {
+  const { indexName } = useValues(IndexNameLogic);
+  const { simplifiedMapping } = useValues(DocumentsLogic);
+  const { makeRequest, makeMappingRequest, setSearchQuery } = useActions(DocumentsLogic);
+
+  useEffect(() => {
+    makeRequest({
+      indexName,
+      pagination: DEFAULT_PAGINATION,
+      query: '',
+    });
+    makeMappingRequest({ indexName });
+  }, [indexName]);
+
   return (
-    <EnterpriseSearchContentPageTemplate
-      pageChrome={[]}
-      pageViewTelemetry="Documents"
-      isLoading={false}
-    >
-      <>Documents</>
-    </EnterpriseSearchContentPageTemplate>
+    <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none">
+      <EuiSpacer />
+      <EuiFlexGroup direction="column">
+        <EuiFlexItem>
+          <EuiFlexGroup direction="row" alignItems="center">
+            <EuiFlexItem className="enterpriseSearchDocumentsHeader" grow={false}>
+              <EuiTitle>
+                <h2>
+                  {i18n.translate('xpack.enterpriseSearch.content.searchIndex.documents.title', {
+                    defaultMessage: 'Browse documents',
+                  })}
+                </h2>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFieldSearch
+                placeholder={i18n.translate(
+                  'xpack.enterpriseSearch.content.searchIndex.documents.searchField.placeholder',
+                  {
+                    defaultMessage: 'Search documents in this index',
+                  }
+                )}
+                isClearable
+                onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                  setSearchQuery(event.target.value)
+                }
+                fullWidth
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          {!simplifiedMapping &&
+            i18n.translate('xpack.enterpriseSearch.content.searchIndex.documents.noMappings', {
+              defaultMessage: 'No mappings found for index',
+            })}
+          {simplifiedMapping && <DocumentList />}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
   );
 };

@@ -7,12 +7,13 @@
 
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { connect, ConnectedProps, useDispatch } from 'react-redux';
-import { Dispatch } from 'redux';
+import type { ConnectedProps } from 'react-redux';
+import { connect, useDispatch } from 'react-redux';
+import type { Dispatch } from 'redux';
 import type { Filter } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
-import { RowRendererId, TimelineIdLiteral } from '../../../../common/types/timeline';
+import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
+import type { RowRendererId, TimelineIdLiteral } from '../../../../common/types/timeline';
 import { StatefulEventsViewer } from '../../../common/components/events_viewer';
 import {
   displayErrorToast,
@@ -25,7 +26,8 @@ import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_exper
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { defaultCellActions } from '../../../common/lib/cell_actions/default_cell_actions';
 import { useKibana } from '../../../common/lib/kibana';
-import { inputsModel, inputsSelectors, State } from '../../../common/store';
+import type { inputsModel, State } from '../../../common/store';
+import { inputsSelectors } from '../../../common/store';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import * as i18nCommon from '../../../common/translations';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
@@ -34,7 +36,7 @@ import { defaultRowRenderers } from '../../../timelines/components/timeline/body
 import { combineQueries } from '../../../timelines/components/timeline/helpers';
 import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
-import { TimelineModel } from '../../../timelines/store/timeline/model';
+import type { TimelineModel } from '../../../timelines/store/timeline/model';
 import { columns, RenderCellValue } from '../../configurations/security_solution_detections';
 import { updateAlertStatusAction } from './actions';
 import { AditionalFiltersAction, AlertsUtilityBar } from './alerts_utility_bar';
@@ -45,7 +47,7 @@ import {
 } from './default_config';
 import { buildTimeRangeFilter } from './helpers';
 import * as i18n from './translations';
-import {
+import type {
   SetEventsDeletedProps,
   SetEventsLoadingProps,
   UpdateAlertsStatusCallback,

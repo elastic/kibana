@@ -18,23 +18,13 @@ yarn kbn bootstrap
 ----
 
 [discrete]
-=== Building Non Bazel Packages
-
-Non Bazel packages can be built independently with
-
-[source,bash]
-----
-yarn kbn run build -i PACKAGE_NAME
-----
-
-[discrete]
 === Building Bazel Packages
 
 Bazel packages are built as a whole for now. You can use:
 
 [source,bash]
 ----
-yarn kbn build
+yarn kbn bootstrap
 ----
 
 [discrete]

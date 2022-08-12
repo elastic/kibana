@@ -119,16 +119,12 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const settingsCalendar = MachineLearningSettingsCalendarProvider(context, commonUI);
   const settingsFilterList = MachineLearningSettingsFilterListProvider(context, commonUI);
   const singleMetricViewer = MachineLearningSingleMetricViewerProvider(context, commonUI);
-  const stackManagementJobs = MachineLearningStackManagementJobsProvider(
-    context,
-    jobTable,
-    dataFrameAnalyticsTable
-  );
+  const stackManagementJobs = MachineLearningStackManagementJobsProvider(context);
   const testExecution = MachineLearningTestExecutionProvider(context);
   const testResources = MachineLearningTestResourcesProvider(context, api);
   const alerting = MachineLearningAlertingProvider(context, api, commonUI);
   const swimLane = SwimLaneProvider(context);
-  const trainedModels = TrainedModelsProvider(context, api, commonUI);
+  const trainedModels = TrainedModelsProvider(context, commonUI);
   const trainedModelsTable = TrainedModelsTableProvider(context, commonUI);
   const mlNodesPanel = MlNodesPanelProvider(context);
 

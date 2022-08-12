@@ -7,7 +7,7 @@
 
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { take, filter } from 'rxjs/operators';
 
 import { i18n } from '@kbn/i18n';
 import type {
@@ -42,8 +42,14 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
-import type { FleetConfigType, FleetAuthz, ExperimentalFeatures } from '../common';
-import { INTEGRATIONS_PLUGIN_ID, parseExperimentalConfigValue } from '../common';
+import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
+
+import type { FleetConfigType } from '../common/types';
+import type { FleetAuthz } from '../common';
+import type { ExperimentalFeatures } from '../common/experimental_features';
+
+import { INTEGRATIONS_PLUGIN_ID } from '../common';
+import { parseExperimentalConfigValue } from '../common/experimental_features';
 
 import {
   PLUGIN_ID,
@@ -53,6 +59,7 @@ import {
   PACKAGES_SAVED_OBJECT_TYPE,
   ASSETS_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
+  DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
 } from './constants';
 import { registerSavedObjects, registerEncryptedSavedObjects } from './saved_objects';
 import {
@@ -110,6 +117,7 @@ export interface FleetStartDeps {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   security: SecurityPluginStart;
   telemetry?: TelemetryPluginStart;
+  savedObjectsTagging: SavedObjectTaggingStart;
 }
 
 export interface FleetAppContext {
@@ -123,6 +131,7 @@ export interface FleetAppContext {
   configInitialValue: FleetConfigType;
   experimentalFeatures: ExperimentalFeatures;
   savedObjects: SavedObjectsServiceStart;
+  savedObjectsTagging?: SavedObjectTaggingStart;
   isProductionMode: PluginInitializerContext['env']['mode']['prod'];
   kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   kibanaBranch: PluginInitializerContext['env']['packageInfo']['branch'];
@@ -141,6 +150,7 @@ const allSavedObjectTypes = [
   PACKAGES_SAVED_OBJECT_TYPE,
   ASSETS_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
+  DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
 ];
 
 /**
@@ -394,6 +404,7 @@ export class FleetPlugin
         this.configInitialValue.enableExperimental || []
       ),
       savedObjects: core.savedObjects,
+      savedObjectsTagging: plugins.savedObjectsTagging,
       isProductionMode: this.isProductionMode,
       kibanaVersion: this.kibanaVersion,
       kibanaBranch: this.kibanaBranch,
@@ -417,7 +428,18 @@ export class FleetPlugin
           summary: 'Fleet is setting up',
         });
 
-        await plugins.licensing.license$.pipe(take(1)).toPromise();
+        // We need to wait for the licence feature to be available,
+        // to have our internal saved object client with encrypted saved object working properly
+        await plugins.licensing.license$
+          .pipe(
+            filter(
+              (licence) =>
+                licence.getFeature('security').isEnabled &&
+                licence.getFeature('security').isAvailable
+            ),
+            take(1)
+          )
+          .toPromise();
 
         await setupFleet(
           new SavedObjectsClient(core.savedObjects.createInternalRepository()),

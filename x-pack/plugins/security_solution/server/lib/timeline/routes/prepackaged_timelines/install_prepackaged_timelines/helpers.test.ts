@@ -6,9 +6,9 @@
  */
 
 import { createPromiseFromStreams } from '@kbn/utils';
-import { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
-import { FrameworkRequest } from '../../../../framework';
+import type { FrameworkRequest } from '../../../../framework';
 import {
   createMockConfig,
   requestContextMock,
@@ -22,7 +22,7 @@ import {
 import * as helpers from './helpers';
 import { importTimelines } from '../../timelines/import_timelines/helpers';
 import { buildFrameworkRequest } from '../../../utils/common';
-import { ImportTimelineResultSchema } from '../../../../../../common/types/timeline';
+import type { ImportTimelineResultSchema } from '../../../../../../common/types/timeline';
 
 jest.mock('../../timelines/import_timelines/helpers');
 

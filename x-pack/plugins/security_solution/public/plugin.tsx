@@ -7,19 +7,19 @@
 
 import { i18n } from '@kbn/i18n';
 import reduceReducers from 'reduce-reducers';
-import { BehaviorSubject, Subject, Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { combineLatestWith, pluck } from 'rxjs/operators';
-import { AnyAction, Reducer } from 'redux';
-import {
+import type { AnyAction, Reducer } from 'redux';
+import type {
   AppMountParameters,
   AppUpdater,
   CoreSetup,
   CoreStart,
   PluginInitializerContext,
   Plugin as IPlugin,
-  DEFAULT_APP_CATEGORIES,
-  AppNavLinkStatus,
 } from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { TimelineState } from '@kbn/timelines-plugin/public';
 import type {
@@ -31,6 +31,7 @@ import type {
   AppObservableLibs,
   SubPlugins,
   StartedSubPlugins,
+  StartPluginsDependencies,
 } from './types';
 import { initTelemetry } from './common/lib/telemetry';
 import { KibanaServices } from './common/lib/kibana/services';
@@ -49,24 +50,24 @@ import {
 } from '../common/constants';
 
 import { getDeepLinks, registerDeepLinksUpdater } from './app/deep_links';
-import { LinksPermissions, updateAppLinks } from './common/links';
+import type { LinksPermissions } from './common/links';
+import { updateAppLinks } from './common/links';
 import { getSubPluginRoutesByCapabilities, manageOldSiemRoutes } from './helpers';
-import { SecurityAppStore } from './common/store/store';
+import type { SecurityAppStore } from './common/store/store';
 import { licenseService } from './common/hooks/use_license';
-import { SecuritySolutionUiConfigType } from './common/types';
+import type { SecuritySolutionUiConfigType } from './common/types';
 import { ExperimentalFeaturesService } from './common/experimental_features_service';
 
 import { getLazyEndpointPolicyEditExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_edit_extension';
 import { LazyEndpointPolicyCreateExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_create_extension';
 import { getLazyEndpointPackageCustomExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_package_custom_extension';
 import { getLazyEndpointPolicyResponseExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_response_extension';
-import {
-  ExperimentalFeatures,
-  parseExperimentalConfigValue,
-} from '../common/experimental_features';
+import type { ExperimentalFeatures } from '../common/experimental_features';
+import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_custom_assets_extension';
-import { initDataView, SourcererModel, KibanaDataView } from './common/store/sourcerer/model';
-import { SecurityDataView } from './common/containers/sourcerer/api';
+import type { SourcererModel, KibanaDataView } from './common/store/sourcerer/model';
+import { initDataView } from './common/store/sourcerer/model';
+import type { SecurityDataView } from './common/containers/sourcerer/api';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   readonly kibanaVersion: string;
@@ -94,7 +95,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
    */
   private _store?: SecurityAppStore;
 
-  public setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins): PluginSetup {
+  public setup(
+    core: CoreSetup<StartPluginsDependencies, PluginStart>,
+    plugins: SetupPlugins
+  ): PluginSetup {
     initTelemetry(
       {
         usageCollection: plugins.usageCollection,
@@ -122,15 +126,18 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
      * in the `setup` lifecycle phase.
      */
     const startServices: Promise<StartServices> = (async () => {
-      const [coreStart, startPlugins] = await core.getStartServices();
+      const [coreStart, startPluginsDeps] = await core.getStartServices();
       const { apm } = await import('@elastic/apm-rum');
+
+      const { savedObjectsTaggingOss, ...startPlugins } = startPluginsDeps;
 
       const services: StartServices = {
         ...coreStart,
         ...startPlugins,
         apm,
+        savedObjectsTagging: savedObjectsTaggingOss.getTaggingApi(),
         storage: this.storage,
-        security: plugins.security,
+        security: startPluginsDeps.security,
       };
       return services;
     })();
@@ -323,6 +330,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         timelines: new subPluginClasses.Timelines(),
         management: new subPluginClasses.Management(),
         landingPages: new subPluginClasses.LandingPages(),
+        cloudSecurityPosture: new subPluginClasses.CloudSecurityPosture(),
+        threatIntelligence: new subPluginClasses.ThreatIntelligence(),
       };
     }
     return this._subPlugins;
@@ -350,6 +359,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       kubernetes: subPlugins.kubernetes.start(),
       management: subPlugins.management.start(core, plugins),
       landingPages: subPlugins.landingPages.start(),
+      cloudSecurityPosture: subPlugins.cloudSecurityPosture.start(),
+      threatIntelligence: subPlugins.threatIntelligence.start(),
     };
   }
   /**
@@ -466,7 +477,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     const { links, getFilteredLinks } = await this.lazyApplicationLinks();
 
     const { license$ } = plugins.licensing;
-    const newNavEnabled$ = core.uiSettings.get$<boolean>(ENABLE_GROUPED_NAVIGATION, false);
+    const newNavEnabled$ = core.uiSettings.get$<boolean>(ENABLE_GROUPED_NAVIGATION, true);
 
     let appLinksSubscription: Subscription | null = null;
     license$.pipe(combineLatestWith(newNavEnabled$)).subscribe(async ([license, newNavEnabled]) => {

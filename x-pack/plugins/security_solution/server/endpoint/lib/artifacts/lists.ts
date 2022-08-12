@@ -13,32 +13,35 @@ import type {
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
-import { hasSimpleExecutableName, OperatingSystem } from '@kbn/securitysolution-utils';
+import type { OperatingSystem } from '@kbn/securitysolution-utils';
+import { hasSimpleExecutableName } from '@kbn/securitysolution-utils';
 
-import {
+import type {
   ENDPOINT_BLOCKLISTS_LIST_ID,
   ENDPOINT_EVENT_FILTERS_LIST_ID,
   ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
-  ENDPOINT_LIST_ID,
   ENDPOINT_TRUSTED_APPS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
-import { ExceptionListClient } from '@kbn/lists-plugin/server';
-import {
+import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import type { ExceptionListClient } from '@kbn/lists-plugin/server';
+import type {
   InternalArtifactCompleteSchema,
   TranslatedEntry,
   TranslatedPerformantEntries,
+  TranslatedEntryMatcher,
+  TranslatedEntryMatchWildcard,
+  TranslatedEntryMatchWildcardMatcher,
+  TranslatedEntryNestedEntry,
+  TranslatedExceptionListItem,
+  WrappedTranslatedExceptionList,
+} from '../../schemas';
+import {
   translatedPerformantEntries as translatedPerformantEntriesType,
   translatedEntry as translatedEntryType,
   translatedEntryMatchAnyMatcher,
-  TranslatedEntryMatcher,
   translatedEntryMatchMatcher,
-  TranslatedEntryMatchWildcard,
-  TranslatedEntryMatchWildcardMatcher,
   translatedEntryMatchWildcardMatcher,
-  TranslatedEntryNestedEntry,
   translatedEntryNestedEntry,
-  TranslatedExceptionListItem,
-  WrappedTranslatedExceptionList,
   wrappedTranslatedExceptionList,
 } from '../../schemas';
 

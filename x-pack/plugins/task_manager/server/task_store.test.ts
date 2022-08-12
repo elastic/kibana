@@ -16,7 +16,7 @@ import {
   SerializedConcreteTaskInstance,
 } from './task';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { TaskStore, SearchOpts } from './task_store';
+import { TaskStore, SearchOpts, AggregationOpts } from './task_store';
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import {
   SavedObjectsSerializer,
@@ -259,6 +259,103 @@ describe('TaskStore', () => {
       esClient.search.mockRejectedValue(new Error('Failure'));
       await expect(store.fetch()).rejects.toThrowErrorMatchingInlineSnapshot(`"Failure"`);
       expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
+    });
+  });
+
+  describe('aggregate', () => {
+    let store: TaskStore;
+    let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
+
+    beforeAll(() => {
+      esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      store = new TaskStore({
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        esClient,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+      });
+    });
+
+    async function testAggregate(
+      opts: AggregationOpts,
+      hits: Array<estypes.SearchHit<unknown>> = []
+    ) {
+      esClient.search.mockResponse({
+        hits: { hits, total: hits.length },
+        aggregations: {},
+      } as estypes.SearchResponse);
+
+      const result = await store.aggregate(opts);
+
+      expect(esClient.search).toHaveBeenCalledTimes(1);
+
+      return {
+        result,
+        args: esClient.search.mock.calls[0][0],
+      };
+    }
+
+    test('empty call filters by type, sets size to 0, passes aggregation to esClient', async () => {
+      const { args } = await testAggregate({
+        aggs: { testAgg: { terms: { field: 'task.taskType' } } },
+      });
+      expect(args).toMatchObject({
+        index: 'tasky',
+        body: {
+          size: 0,
+          query: { bool: { filter: [{ term: { type: 'task' } }] } },
+          aggs: { testAgg: { terms: { field: 'task.taskType' } } },
+        },
+      });
+    });
+
+    test('allows custom queries', async () => {
+      const { args } = await testAggregate({
+        aggs: { testAgg: { terms: { field: 'task.taskType' } } },
+        query: {
+          term: { 'task.taskType': 'bar' },
+        },
+      });
+
+      expect(args).toMatchObject({
+        body: {
+          size: 0,
+          query: {
+            bool: {
+              must: [
+                { bool: { filter: [{ term: { type: 'task' } }] } },
+                { term: { 'task.taskType': 'bar' } },
+              ],
+            },
+          },
+          aggs: { testAgg: { terms: { field: 'task.taskType' } } },
+        },
+      });
+    });
+
+    test('allows runtime mappings', async () => {
+      const { args } = await testAggregate({
+        aggs: { testAgg: { terms: { field: 'task.taskType' } } },
+        runtime_mappings: { testMapping: { type: 'long', script: { source: `` } } },
+      });
+
+      expect(args).toMatchObject({
+        body: {
+          size: 0,
+          query: { bool: { filter: [{ term: { type: 'task' } }] } },
+          aggs: { testAgg: { terms: { field: 'task.taskType' } } },
+          runtime_mappings: { testMapping: { type: 'long', script: { source: `` } } },
+        },
+      });
+    });
+
+    test('throws error when esClient.search throws error', async () => {
+      esClient.search.mockRejectedValue(new Error('Failure'));
+      await expect(store.aggregate({ aggs: {} })).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failure"`
+      );
     });
   });
 

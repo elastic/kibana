@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
-import { differenceBy } from 'lodash';
+import { differenceBy, isEqual } from 'lodash';
 import {
   EuiBasicTable,
   EuiFlexGroup,
@@ -33,6 +32,7 @@ import {
   useKibanaVersion,
   useStartServices,
   useFlyoutContext,
+  sendGetAgentTags,
 } from '../../../hooks';
 import { AgentEnrollmentFlyout, AgentPolicySummaryLine } from '../../../components';
 import { AgentStatusKueryHelper, isAgentUpgradeable } from '../../../services';
@@ -52,6 +52,7 @@ import { AgentTableHeader } from './components/table_header';
 import type { SelectionMode } from './components/types';
 import { SearchAndFilterBar } from './components/search_and_filter_bar';
 import { Tags } from './components/tags';
+import { TagsAddRemove } from './components/tags_add_remove';
 import { TableRowActions } from './components/table_row_actions';
 import { EmptyPrompt } from './components/empty_prompt';
 import { useCurrentUpgrades } from './hooks';
@@ -137,6 +138,9 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const [agentToReassign, setAgentToReassign] = useState<Agent | undefined>(undefined);
   const [agentToUnenroll, setAgentToUnenroll] = useState<Agent | undefined>(undefined);
   const [agentToUpgrade, setAgentToUpgrade] = useState<Agent | undefined>(undefined);
+  const [agentToAddRemoveTags, setAgentToAddRemoveTags] = useState<Agent | undefined>(undefined);
+  const [tagsPopoverButton, setTagsPopoverButton] = useState<HTMLElement>();
+  const [showTagsAddRemove, setShowTagsAddRemove] = useState(false);
 
   // Kuery
   const kuery = useMemo(() => {
@@ -217,17 +221,23 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     },
   };
 
+  const isLoadingVar = useRef<boolean>(false);
+
   // Request to fetch agents and agent status
   const currentRequestRef = useRef<number>(0);
   const fetchData = useCallback(
     ({ refreshTags = false }: { refreshTags?: boolean } = {}) => {
       async function fetchDataAsync() {
+        // skipping refresh if previous request is in progress
+        if (isLoadingVar.current) {
+          return;
+        }
         currentRequestRef.current++;
         const currentRequest = currentRequestRef.current;
-
+        isLoadingVar.current = true;
         try {
           setIsLoading(true);
-          const [agentsRequest, agentsStatusRequest] = await Promise.all([
+          const [agentsResponse, agentsStatusResponse, agentTagsResponse] = await Promise.all([
             sendGetAgents({
               page: pagination.currentPage,
               perPage: pagination.pageSize,
@@ -240,47 +250,56 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             sendGetAgentStatus({
               kuery: kuery && kuery !== '' ? kuery : undefined,
             }),
+            sendGetAgentTags({
+              kuery: kuery && kuery !== '' ? kuery : undefined,
+              showInactive,
+            }),
           ]);
-          // Return if a newer request as been triggered
+          isLoadingVar.current = false;
+          // Return if a newer request has been triggered
           if (currentRequestRef.current !== currentRequest) {
             return;
           }
-          if (agentsRequest.error) {
-            throw agentsRequest.error;
+          if (agentsResponse.error) {
+            throw agentsResponse.error;
           }
-          if (!agentsRequest.data) {
+          if (!agentsResponse.data) {
             throw new Error('Invalid GET /agents response');
           }
-          if (agentsStatusRequest.error) {
-            throw agentsStatusRequest.error;
+          if (agentsStatusResponse.error) {
+            throw agentsStatusResponse.error;
           }
-          if (!agentsStatusRequest.data) {
-            throw new Error('Invalid GET /agents-status response');
+          if (!agentsStatusResponse.data) {
+            throw new Error('Invalid GET /agents_status response');
+          }
+          if (agentTagsResponse.error) {
+            throw agentsStatusResponse.error;
+          }
+          if (!agentTagsResponse.data) {
+            throw new Error('Invalid GET /agent/tags response');
           }
 
           setAgentsStatus({
-            healthy: agentsStatusRequest.data.results.online,
-            unhealthy: agentsStatusRequest.data.results.error,
-            offline: agentsStatusRequest.data.results.offline,
-            updating: agentsStatusRequest.data.results.updating,
-            inactive: agentsRequest.data.totalInactive,
+            healthy: agentsStatusResponse.data.results.online,
+            unhealthy: agentsStatusResponse.data.results.error,
+            offline: agentsStatusResponse.data.results.offline,
+            updating: agentsStatusResponse.data.results.updating,
+            inactive: agentsResponse.data.totalInactive,
           });
 
-          const newAllTags = Array.from(
-            new Set(agentsRequest.data.items.flatMap((agent) => agent.tags ?? []))
-          );
+          const newAllTags = agentTagsResponse.data.items;
 
           // We only want to update the list of available tags if
           // - We haven't set any tags yet
-          // - We've received net-new tags from the API (e.g. more tags than we have rendered now)
           // - We've received the "refreshTags" flag which will force a refresh of the tags list when an agent is unenrolled
-          if (!allTags || newAllTags.length > allTags.length || refreshTags) {
+          // - Tags are modified (add, remove, edit)
+          if (!allTags || refreshTags || !isEqual(newAllTags, allTags)) {
             setAllTags(newAllTags);
           }
 
-          setAgents(agentsRequest.data.items);
-          setTotalAgents(agentsRequest.data.total);
-          setTotalInactiveAgents(agentsRequest.data.totalInactive);
+          setAgents(agentsResponse.data.items);
+          setTotalAgents(agentsResponse.data.total);
+          setTotalInactiveAgents(agentsResponse.data.totalInactive);
         } catch (error) {
           notifications.toasts.addError(error, {
             title: i18n.translate('xpack.fleet.agentList.errorFetchingDataTitle', {
@@ -350,6 +369,11 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         selectedAgents.length > 0 && differenceBy(selectedAgents, agents, 'id').length === 0;
       if (areSelectedAgentsStillVisible) {
         setSelectionMode('manual');
+      } else {
+        // force selecting all agents on current page if staying in query mode
+        if (tableRef?.current) {
+          tableRef.current.setSelection(agents);
+        }
       }
     }
   };
@@ -490,6 +514,14 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
               typeof agent.policy_id === 'string'
                 ? agentPoliciesIndexedById[agent.policy_id]
                 : undefined;
+
+            // refreshing agent tags passed to TagsAddRemove component
+            if (
+              agentToAddRemoveTags?.id === agent.id &&
+              !isEqual(agent.tags, agentToAddRemoveTags.tags)
+            ) {
+              setAgentToAddRemoveTags(agent);
+            }
             return (
               <TableRowActions
                 agent={agent}
@@ -497,6 +529,11 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
                 onReassignClick={() => setAgentToReassign(agent)}
                 onUnenrollClick={() => setAgentToUnenroll(agent)}
                 onUpgradeClick={() => setAgentToUpgrade(agent)}
+                onAddRemoveTagsClick={(button) => {
+                  setTagsPopoverButton(button);
+                  setAgentToAddRemoveTags(agent);
+                  setShowTagsAddRemove(!showTagsAddRemove);
+                }}
               />
             );
           },
@@ -558,6 +595,20 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           />
         </EuiPortal>
       )}
+      {showTagsAddRemove && (
+        <TagsAddRemove
+          agentId={agentToAddRemoveTags?.id!}
+          allTags={allTags ?? []}
+          selectedTags={agentToAddRemoveTags?.tags ?? []}
+          button={tagsPopoverButton!}
+          onTagsUpdated={() => {
+            fetchData();
+          }}
+          onClosePopover={() => {
+            setShowTagsAddRemove(false);
+          }}
+        />
+      )}
       {isFleetServerUnhealthy && (
         <>
           {cloud?.deploymentUrl ? (
@@ -599,6 +650,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           Promise.all([fetchData({ refreshTags }), refreshUpgrades()])
         }
         onClickAddAgent={() => setEnrollmentFlyoutState({ isOpen: true })}
+        onClickAddFleetServer={onClickAddFleetServer}
+        visibleAgents={agents}
       />
       <EuiSpacer size="m" />
       {/* Agent total, bulk actions and status bar */}

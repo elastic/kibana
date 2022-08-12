@@ -10,6 +10,7 @@ import { ObservabilityRuleTypeRegistry } from './create_observability_rule_type_
 const createRuleTypeRegistryMock = () => ({
   getFormatter: () => () => 'a reason',
   registerFormatter: () => {},
+  list: () => ['ruleType1', 'ruleType2'],
 });
 
 export const createObservabilityRuleTypeRegistryMock = () =>

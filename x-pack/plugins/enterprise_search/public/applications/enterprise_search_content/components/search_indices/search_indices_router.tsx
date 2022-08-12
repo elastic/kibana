@@ -11,7 +11,7 @@ import { Route, Switch } from 'react-router-dom';
 import { SEARCH_INDICES_PATH, SEARCH_INDEX_PATH, NEW_INDEX_PATH } from '../../routes';
 
 import { NewIndex } from '../new_index';
-import { SearchIndexRouter } from '../search_index';
+import { SearchIndexRouter } from '../search_index/search_index_router';
 
 import { SearchIndices } from './search_indices';
 

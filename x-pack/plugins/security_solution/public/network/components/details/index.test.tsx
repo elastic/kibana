@@ -7,7 +7,7 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
-import { ActionCreator } from 'typescript-fsa';
+import type { ActionCreator } from 'typescript-fsa';
 
 import '../../../common/mock/match_media';
 import {
@@ -17,13 +17,14 @@ import {
   kibanaObservable,
   createSecuritySolutionStorageMock,
 } from '../../../common/mock';
-import { createStore, State } from '../../../common/store';
+import type { State } from '../../../common/store';
+import { createStore } from '../../../common/store';
 import { networkModel } from '../../store';
 
 import { IpOverview } from '.';
 import { mockData } from './mock';
 import { mockAnomalies } from '../../../common/components/ml/mock';
-import { NarrowDateRange } from '../../../common/components/ml/types';
+import type { NarrowDateRange } from '../../../common/components/ml/types';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy';
 
 describe('IP Overview Component', () => {
@@ -53,6 +54,7 @@ describe('IP Overview Component', () => {
       updateFlowTargetAction: jest.fn() as unknown as ActionCreator<{
         flowTarget: FlowTargetSourceDest;
       }>,
+      indexPatterns: [],
     };
 
     test('it renders the default IP Overview', () => {

@@ -8,9 +8,9 @@
 import { act, renderHook } from '@testing-library/react-hooks';
 
 import { mockCasesResult, parsedCasesItems } from './mock_data';
-import { useCaseItems, UseCaseItemsProps } from './use_case_items';
+import { useCaseItems } from './use_case_items';
 
-import type { UseCaseItems } from './use_case_items';
+import type { UseCaseItems, UseCaseItemsProps } from './use_case_items';
 
 const dateNow = new Date('2022-04-08T12:00:00.000Z').valueOf();
 const mockDateNow = jest.fn().mockReturnValue(dateNow);

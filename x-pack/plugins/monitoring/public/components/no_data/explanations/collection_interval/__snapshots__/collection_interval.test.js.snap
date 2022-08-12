@@ -3,26 +3,26 @@
 exports[`ExplainCollectionInterval collection interval setting updates should show a success message while updated = true 1`] = `
 Array [
   <h2
-    class="euiTitle css-1bexacr-euiTitle-l"
+    class="euiTitle emotion-euiTitle-l"
   >
     Success! Wait a moment please.
   </h2>,
   <hr
-    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge css-16ybxy8-euiHorizontalRule-half-l"
+    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge emotion-euiHorizontalRule-half-l"
   />,
   <div
-    class="euiText css-1lo1kz-euiText-m"
+    class="euiText emotion-euiText-m"
   >
     <p>
       As soon as monitoring data appears in your cluster the page will automatically refresh with your monitoring dashboard. This only takes only a few seconds.
     </p>
   </div>,
   <div
-    class="euiSpacer euiSpacer--l css-p2o3x6-euiSpacer-l"
+    class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
   />,
   <span
     aria-label="Loading"
-    class="euiLoadingSpinner css-lh9wx8-euiLoadingSpinner-l"
+    class="euiLoadingSpinner emotion-euiLoadingSpinner-l"
     role="progressbar"
   />,
 ]
@@ -31,15 +31,15 @@ Array [
 exports[`ExplainCollectionInterval collection interval setting updates should show a waiting indicator while updating = true 1`] = `
 Array [
   <h2
-    class="euiTitle css-1bexacr-euiTitle-l"
+    class="euiTitle emotion-euiTitle-l"
   >
     Monitoring is currently off
   </h2>,
   <span
-    class="css-xv0fhq-euiTextColor-subdued"
+    class="emotion-euiTextColor-subdued"
   >
     <div
-      class="euiText css-1lo1kz-euiText-m"
+      class="euiText emotion-euiText-m"
     >
       <p>
         Monitoring provides insight to your hardware performance and load.
@@ -47,10 +47,10 @@ Array [
     </div>
   </span>,
   <hr
-    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge css-16ybxy8-euiHorizontalRule-half-l"
+    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge emotion-euiHorizontalRule-half-l"
   />,
   <div
-    class="euiText css-1lo1kz-euiText-m"
+    class="euiText emotion-euiText-m"
   >
     <p>
       We checked the cluster settings and found that 
@@ -71,7 +71,7 @@ Array [
     </p>
   </div>,
   <div
-    class="euiSpacer euiSpacer--l css-p2o3x6-euiSpacer-l"
+    class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
   />,
   <div
     class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -90,7 +90,7 @@ Array [
         >
           <span
             aria-label="Loading"
-            class="euiLoadingSpinner euiButtonContent__spinner css-155ohbx-euiLoadingSpinner-m"
+            class="euiLoadingSpinner euiButtonContent__spinner emotion-euiLoadingSpinner-m"
             role="progressbar"
           />
           <span
@@ -108,15 +108,15 @@ Array [
 exports[`ExplainCollectionInterval should explain about xpack.monitoring.collection.interval setting 1`] = `
 Array [
   <h2
-    class="euiTitle css-1bexacr-euiTitle-l"
+    class="euiTitle emotion-euiTitle-l"
   >
     Monitoring is currently off
   </h2>,
   <span
-    class="css-xv0fhq-euiTextColor-subdued"
+    class="emotion-euiTextColor-subdued"
   >
     <div
-      class="euiText css-1lo1kz-euiText-m"
+      class="euiText emotion-euiText-m"
     >
       <p>
         Monitoring provides insight to your hardware performance and load.
@@ -124,10 +124,10 @@ Array [
     </div>
   </span>,
   <hr
-    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge css-16ybxy8-euiHorizontalRule-half-l"
+    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge emotion-euiHorizontalRule-half-l"
   />,
   <div
-    class="euiText css-1lo1kz-euiText-m"
+    class="euiText emotion-euiText-m"
   >
     <p>
       We checked the cluster settings and found that 
@@ -148,7 +148,7 @@ Array [
     </p>
   </div>,
   <div
-    class="euiSpacer euiSpacer--l css-p2o3x6-euiSpacer-l"
+    class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
   />,
   <div
     class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"

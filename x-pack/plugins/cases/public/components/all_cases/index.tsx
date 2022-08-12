@@ -8,14 +8,12 @@
 import React, { useMemo } from 'react';
 import { CasesDeepLinkId } from '../../common/navigation';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
-import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesBreadcrumbs } from '../use_breadcrumbs';
 import { getActionLicenseError } from '../use_push_to_service/helpers';
 import { AllCasesList } from './all_cases_list';
 import { CasesTableHeader } from './header';
 
 export const AllCases: React.FC = () => {
-  const { userCanCrud } = useCasesContext();
   useCasesBreadcrumbs(CasesDeepLinkId.cases);
 
   const { data: actionLicense = null } = useGetActionLicense();
@@ -23,7 +21,7 @@ export const AllCases: React.FC = () => {
 
   return (
     <>
-      <CasesTableHeader actionsErrors={actionsErrors} userCanCrud={userCanCrud} />
+      <CasesTableHeader actionsErrors={actionsErrors} />
       <AllCasesList />
     </>
   );

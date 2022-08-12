@@ -17,6 +17,7 @@ import {
   AggsCommonStartDependencies,
   AggsCommonService,
 } from '../../../common/search/aggs';
+import { calculateBounds, TimeRange } from '../../../common';
 import type { AggsSetup, AggsStart } from './types';
 import type { NowProviderInternalContract } from '../../now_provider';
 
@@ -49,13 +50,13 @@ export function createGetConfig(
 export interface AggsSetupDependencies {
   uiSettings: IUiSettingsClient;
   registerFunction: ExpressionsServiceSetup['registerFunction'];
+  nowProvider: NowProviderInternalContract;
 }
 
 /** @internal */
 export interface AggsStartDependencies {
   fieldFormats: FieldFormatsStart;
   indexPatterns: DataViewsContract;
-  nowProvider: NowProviderInternalContract;
 }
 
 /**
@@ -69,8 +70,17 @@ export class AggsService {
   });
   private getConfig?: AggsCommonStartDependencies['getConfig'];
   private subscriptions: Subscription[] = [];
+  private nowProvider!: NowProviderInternalContract;
 
-  public setup({ registerFunction, uiSettings }: AggsSetupDependencies): AggsSetup {
+  /**
+   * NowGetter uses window.location, so we must have a separate implementation
+   * of calculateBounds on the client and the server.
+   */
+  private calculateBounds = (timeRange: TimeRange) =>
+    calculateBounds(timeRange, { forceNow: this.nowProvider.get() });
+
+  public setup({ registerFunction, uiSettings, nowProvider }: AggsSetupDependencies): AggsSetup {
+    this.nowProvider = nowProvider;
     this.getConfig = createGetConfig(uiSettings, aggsRequiredUiSettings, this.subscriptions);
 
     return this.aggsCommonService.setup({
@@ -78,14 +88,12 @@ export class AggsService {
     });
   }
 
-  public start({ indexPatterns, fieldFormats, nowProvider }: AggsStartDependencies): AggsStart {
+  public start({ indexPatterns, fieldFormats }: AggsStartDependencies): AggsStart {
     const { calculateAutoTimeExpression, types, createAggConfigs } = this.aggsCommonService.start({
       getConfig: this.getConfig!,
       getIndexPattern: indexPatterns.get,
+      calculateBounds: this.calculateBounds,
       fieldFormats,
-      calculateBoundsOptions: {
-        forceNow: nowProvider.get(),
-      },
     });
 
     return {

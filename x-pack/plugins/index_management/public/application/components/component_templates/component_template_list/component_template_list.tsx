@@ -30,6 +30,7 @@ import {
 import { EmptyPrompt } from './empty_prompt';
 import { ComponentTable } from './table';
 import { ComponentTemplatesDeleteModal } from './delete_modal';
+import { useRedirectPath } from '../../../hooks/redirect_path';
 
 interface Props {
   componentTemplateName?: string;
@@ -45,16 +46,17 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
   const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =
     useGlobalFlyout();
   const { api, trackMetric, documentation } = useComponentTemplatesContext();
+  const redirectTo = useRedirectPath(history);
 
   const { data, isLoading, error, resendRequest } = api.useLoadComponentTemplates();
 
   const [componentTemplatesToDelete, setComponentTemplatesToDelete] = useState<string[]>([]);
 
   const goToComponentTemplateList = useCallback(() => {
-    return history.push({
+    return redirectTo({
       pathname: 'component_templates',
     });
-  }, [history]);
+  }, [redirectTo]);
 
   const goToEditComponentTemplate = useCallback(
     (name: string) => {

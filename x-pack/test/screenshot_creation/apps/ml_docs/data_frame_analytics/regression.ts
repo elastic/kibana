@@ -123,8 +123,14 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.dataFrameAnalyticsResults.expandFeatureImportanceSection(false);
       await ml.dataFrameAnalyticsResults.expandScatterplotMatrixSection(false);
       await ml.dataFrameAnalyticsResults.scrollAnalysisIntoView();
+      await ml.dataFrameAnalyticsResults.enableResultsTablePreviewHistogramCharts(true);
       await mlScreenshots.removeFocusFromElement();
-      await mlScreenshots.takeScreenshot('flights-regression-results', screenshotDirectories);
+      await mlScreenshots.takeScreenshot(
+        'flights-regression-results',
+        screenshotDirectories,
+        1500,
+        1300
+      );
 
       await ml.testExecution.logTestStep('expand feature importance section and take screenshot');
       await ml.dataFrameAnalyticsResults.expandFeatureImportanceSection(true);

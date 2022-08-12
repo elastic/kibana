@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { FactoryQueryTypes } from '../../../../../common/search_strategy/security_solution';
+import type { FactoryQueryTypes } from '../../../../../common/search_strategy/security_solution';
 import { UsersQueries } from '../../../../../common/search_strategy/security_solution/users';
 
-import { SecuritySolutionFactory } from '../types';
+import type { SecuritySolutionFactory } from '../types';
 import { allUsers } from './all';
 import { authentications } from './authentications';
 import { userDetails } from './details';

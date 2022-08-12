@@ -33,6 +33,7 @@ import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
 import { applyCurrentSettings } from './apply_editor_settings';
 import { registerCommands } from './keyboard_shortcuts';
 import type { SenseEditor } from '../../../../models/sense_editor';
+import { StorageKeys } from '../../../../../services';
 
 const { useUIAceKeyboardMode } = ace;
 
@@ -53,10 +54,11 @@ const abs: CSSProperties = {
   right: '0',
 };
 
-const DEFAULT_INPUT_VALUE = `GET _search
+const DEFAULT_INPUT_VALUE = `# Click the Variables button, above, to create your own variables.
+GET \${exampleVariable1} // _search
 {
   "query": {
-    "match_all": {}
+    "\${exampleVariable2}": {} // match_all
   }
 }`;
 
@@ -71,6 +73,7 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
       esHostService,
       http,
       autocompleteInfo,
+      storage,
     },
     docLinkVersion,
   } = useServicesContext();
@@ -198,6 +201,26 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
       }
     }
 
+    function restoreFolds() {
+      if (editor) {
+        const foldRanges = storage.get(StorageKeys.FOLDS, []);
+        editor.getCoreEditor().addFoldsAtRanges(foldRanges);
+      }
+    }
+
+    restoreFolds();
+
+    function saveFoldsOnChange() {
+      if (editor) {
+        editor.getCoreEditor().on('changeFold', () => {
+          const foldRanges = editor.getCoreEditor().getAllFoldRanges();
+          storage.set(StorageKeys.FOLDS, foldRanges);
+        });
+      }
+    }
+
+    saveFoldsOnChange();
+
     setInputEditor(editor);
     setTextArea(editorRef.current!.querySelector('textarea'));
 
@@ -211,6 +234,8 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
       autocompleteInfo.clearSubscriptions();
       window.removeEventListener('hashchange', onHashChange);
       if (editorInstanceRef.current) {
+        // Close autocomplete popup on unmount
+        editorInstanceRef.current?.getCoreEditor().detachCompleter();
         editorInstanceRef.current.getCoreEditor().destroy();
       }
     };
@@ -223,6 +248,7 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
     settingsService,
     http,
     autocompleteInfo,
+    storage,
   ]);
 
   useEffect(() => {

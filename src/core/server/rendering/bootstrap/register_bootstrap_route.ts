@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { IRouter } from '../../http';
+import type { InternalRenderingRouter } from '../internal_types';
 import type { BootstrapRenderer } from './bootstrap_renderer';
 
 export const registerBootstrapRoute = ({
   router,
   renderer,
 }: {
-  router: IRouter;
+  router: InternalRenderingRouter;
   renderer: BootstrapRenderer;
 }) => {
   router.get(

@@ -2,7 +2,7 @@
 
 exports[`StatusByLocation component renders all locations are down 1`] = `
 <h2
-  class="euiTitle css-1mr6cet-euiTitle-s"
+  class="euiTitle emotion-euiTitle-s"
 >
   Down in 2 locations
 </h2>
@@ -29,7 +29,7 @@ exports[`StatusByLocation component renders properly against props 1`] = `
 
 exports[`StatusByLocation component renders when down in some locations 1`] = `
 <h2
-  class="euiTitle css-1mr6cet-euiTitle-s"
+  class="euiTitle emotion-euiTitle-s"
 >
   Down in 1/2 locations
 </h2>
@@ -37,7 +37,7 @@ exports[`StatusByLocation component renders when down in some locations 1`] = `
 
 exports[`StatusByLocation component renders when only one location and it is down 1`] = `
 <h2
-  class="euiTitle css-1mr6cet-euiTitle-s"
+  class="euiTitle emotion-euiTitle-s"
 >
   Down in 1 location
 </h2>
@@ -45,7 +45,7 @@ exports[`StatusByLocation component renders when only one location and it is dow
 
 exports[`StatusByLocation component renders when only one location and it is up 1`] = `
 <h2
-  class="euiTitle css-1mr6cet-euiTitle-s"
+  class="euiTitle emotion-euiTitle-s"
 >
   Up in 1 location
 </h2>
@@ -53,7 +53,7 @@ exports[`StatusByLocation component renders when only one location and it is up 
 
 exports[`StatusByLocation component renders when up in all locations 1`] = `
 <h2
-  class="euiTitle css-1mr6cet-euiTitle-s"
+  class="euiTitle emotion-euiTitle-s"
 >
   Up in 2 locations
 </h2>

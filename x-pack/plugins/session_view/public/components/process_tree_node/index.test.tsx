@@ -294,14 +294,23 @@ describe('ProcessTreeNode component', () => {
     });
     describe('Search', () => {
       it('highlights text within the process node line item if it matches the searchQuery', () => {
+        const searchQuery = '/vagr';
         // set a mock search matched indicator for the process (typically done by ProcessTree/helpers.ts)
-        processMock.searchMatched = '/vagr';
+        const processMockClone = { ...processMock, searchMatched: [5, 6, 7, 8, 9] };
 
-        renderResult = mockedContext.render(<ProcessTreeNode {...props} />);
+        renderResult = mockedContext.render(
+          <ProcessTreeNode {...props} process={processMockClone} />
+        );
 
+        expect(renderResult.queryAllByTestId(`sessionView:splitTextIsHighlighted`)).toHaveLength(
+          searchQuery.length
+        );
         expect(
-          renderResult.getByTestId('sessionView:processNodeSearchHighlight').textContent
-        ).toEqual('/vagr');
+          renderResult
+            .queryAllByTestId(`sessionView:splitTextIsHighlighted`)
+            .map(({ textContent }) => textContent)
+            .join('')
+        ).toEqual(searchQuery);
 
         // ensures we are showing the rest of the info, and not replacing it with just the match.
         const { process } = props.process.getDetails();

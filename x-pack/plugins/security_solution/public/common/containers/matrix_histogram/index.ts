@@ -11,19 +11,21 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
 import { isErrorResponse, isCompleteResponse } from '@kbn/data-plugin/common';
-import { MatrixHistogramQueryProps } from '../../components/matrix_histogram/types';
-import { inputsModel } from '../../store';
+import type { MatrixHistogramQueryProps } from '../../components/matrix_histogram/types';
+import type { inputsModel } from '../../store';
 import { createFilter } from '../helpers';
 import { useKibana } from '../../lib/kibana';
-import {
-  MatrixHistogramQuery,
+import type {
   MatrixHistogramRequestOptions,
   MatrixHistogramStrategyResponse,
   MatrixHistogramData,
+} from '../../../../common/search_strategy/security_solution';
+import {
+  MatrixHistogramQuery,
   MatrixHistogramTypeToAggName,
 } from '../../../../common/search_strategy/security_solution';
 import { getInspectResponse } from '../../../helpers';
-import { InspectResponse } from '../../../types';
+import type { InspectResponse } from '../../../types';
 import * as i18n from './translations';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 

@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
-import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/detection_engine/schemas/common';
+import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/detection_engine/rule_monitoring';
 import { CreateRulesSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
 
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
@@ -58,6 +58,24 @@ export default ({ getService }: FtrProviderContext) => {
       afterEach(async () => {
         await deleteSignalsIndex(supertest, log);
         await deleteAllAlerts(supertest, log);
+      });
+
+      describe('saved query', () => {
+        it('should create a saved query rule and query a data view', async () => {
+          const savedQueryRule = {
+            ...getSimpleRule(),
+            data_view_id: 'my-data-view',
+            type: 'saved_query',
+            saved_id: 'my-saved-query-id',
+          };
+          const { body } = await supertest
+            .post(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .send(savedQueryRule)
+            .expect(200);
+
+          expect(body.data_view_id).to.eql('my-data-view');
+        });
       });
 
       describe('elastic admin', () => {
@@ -164,7 +182,7 @@ export default ({ getService }: FtrProviderContext) => {
             interval: '5m',
             rule_id: 'rule-1',
             language: 'kuery',
-            output_index: '.siem-signals-default',
+            output_index: '',
             max_signals: 100,
             risk_score: 1,
             risk_score_mapping: [],

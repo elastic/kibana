@@ -38,6 +38,7 @@ export interface SubActionConnectorType<Config, Secrets> {
   id: string;
   name: string;
   minimumLicenseRequired: LicenseType;
+  supportedFeatureIds: string[];
   schema: {
     config: Type<Config>;
     secrets: Type<Secrets>;
@@ -61,9 +62,11 @@ export interface SubAction {
 }
 
 export interface PushToServiceParams {
-  externalId: string | null;
+  incident: {
+    externalId: string | null;
+    [x: string]: unknown;
+  };
   comments: Array<{ commentId: string; comment: string }>;
-  [x: string]: unknown;
 }
 
 export interface ExternalServiceIncidentResponse {

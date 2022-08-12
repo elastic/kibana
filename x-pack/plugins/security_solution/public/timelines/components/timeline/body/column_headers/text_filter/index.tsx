@@ -10,8 +10,8 @@ import { noop } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
-import { OnFilterChange } from '../../../events';
-import { ColumnId } from '../../column_id';
+import type { OnFilterChange } from '../../../events';
+import type { ColumnId } from '../../column_id';
 
 interface Props {
   columnId: ColumnId;

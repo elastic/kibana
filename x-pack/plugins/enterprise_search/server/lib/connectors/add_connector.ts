@@ -8,57 +8,91 @@
 import { IScopedClusterClient } from '@kbn/core/server';
 
 import { CONNECTORS_INDEX } from '../..';
+import { ConnectorDocument, ConnectorStatus } from '../../../common/types/connectors';
+import { ErrorCode } from '../../../common/types/error_codes';
+import { setupConnectorsIndices } from '../../index_management/setup_indices';
+import { isIndexNotFoundException } from '../../utils/identify_exceptions';
 
-interface ConnectorDocument {
-  index_name: string;
-}
+import { fetchCrawlerByIndexName } from '../crawler/fetch_crawlers';
+import { textAnalysisSettings } from '../indices/text_analysis';
 
-export const createConnectorsIndex = async (client: IScopedClusterClient): Promise<void> => {
-  const index = CONNECTORS_INDEX;
-  await client.asCurrentUser.indices.create({ index });
-};
+import { deleteConnectorById } from './delete_connector';
+
+import { fetchConnectorByIndexName } from './fetch_connectors';
 
 const createConnector = async (
-  index: string,
   document: ConnectorDocument,
-  client: IScopedClusterClient
-): Promise<{ id: string; apiKey: string }> => {
+  client: IScopedClusterClient,
+  language: string | null,
+  deleteExisting: boolean
+): Promise<{ id: string; index_name: string }> => {
+  const index = document.index_name;
+  const indexExists = await client.asCurrentUser.indices.exists({ index });
+  if (indexExists) {
+    {
+      throw new Error(ErrorCode.INDEX_ALREADY_EXISTS);
+    }
+  }
+
+  const connector = await fetchConnectorByIndexName(client, index);
+  if (connector) {
+    if (deleteExisting) {
+      await deleteConnectorById(client, connector.id);
+    } else {
+      throw new Error(ErrorCode.CONNECTOR_DOCUMENT_ALREADY_EXISTS);
+    }
+  }
+  const crawler = await fetchCrawlerByIndexName(client, index);
+
+  if (crawler) {
+    throw new Error(ErrorCode.CRAWLER_ALREADY_EXISTS);
+  }
+
   const result = await client.asCurrentUser.index({
-    index,
     document,
+    index: CONNECTORS_INDEX,
   });
-  await client.asCurrentUser.indices.create({ index: document.index_name });
-  const apiKeyResult = await client.asCurrentUser.security.createApiKey({
-    name: `${document.index_name}-connector`,
-    role_descriptors: {
-      [`${document.index_name}-connector-name`]: {
-        cluster: [],
-        index: [
-          {
-            names: [document.index_name, index],
-            privileges: ['all'],
-          },
-        ],
-      },
-    },
+  await client.asCurrentUser.indices.create({
+    index,
+    settings: textAnalysisSettings(language ?? undefined),
   });
-  return { apiKey: apiKeyResult.encoded, id: result._id };
+  await client.asCurrentUser.indices.refresh({ index: CONNECTORS_INDEX });
+
+  return { id: result._id, index_name: document.index_name };
 };
 
 export const addConnector = async (
   client: IScopedClusterClient,
-  document: ConnectorDocument
-): Promise<{ apiKey: string; id: string }> => {
-  const index = CONNECTORS_INDEX;
+  input: { delete_existing_connector?: boolean; index_name: string; language: string | null }
+): Promise<{ id: string; index_name: string }> => {
+  const document: ConnectorDocument = {
+    api_key_id: null,
+    configuration: {},
+    index_name: input.index_name,
+    language: input.language,
+    last_seen: null,
+    last_sync_error: null,
+    last_sync_status: null,
+    last_synced: null,
+    name: input.index_name.startsWith('search-') ? input.index_name.substring(7) : input.index_name,
+    scheduling: { enabled: false, interval: '0 0 0 * * ?' },
+    service_type: null,
+    status: ConnectorStatus.CREATED,
+    sync_now: false,
+  };
   try {
-    return createConnector(index, document, client);
+    return await createConnector(
+      document,
+      client,
+      input.language,
+      !!input.delete_existing_connector
+    );
   } catch (error) {
-    if (error.statusCode === 404) {
+    if (isIndexNotFoundException(error)) {
       // This means .ent-search-connectors index doesn't exist yet
       // So we first have to create it, and then try inserting the document again
-      // TODO: Move index creation to Kibana startup instead
-      await createConnectorsIndex(client);
-      return createConnector(index, document, client);
+      await setupConnectorsIndices(client.asCurrentUser);
+      return await createConnector(document, client, input.language, false);
     } else {
       throw error;
     }

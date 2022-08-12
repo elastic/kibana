@@ -13,17 +13,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const listingTable = getService('listingTable');
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   describe('lens rollup tests', () => {
     before(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/lens/rollup/data');
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/lens/rollup/config');
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/rollup/config.json'
+      );
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/lens/rollup/data');
-      await esArchiver.unload('x-pack/test/functional/es_archives/lens/rollup/config');
+      await kibanaServer.savedObjects.cleanStandardList();
       await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
     });
 
@@ -69,7 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should allow seamless transition to and from table view', async () => {
       await PageObjects.lens.switchToVisualization('lnsMetric');
-      await PageObjects.lens.assertMetric('Sum of bytes', '16,788');
+      await PageObjects.lens.assertLegacyMetric('Sum of bytes', '16,788');
       await PageObjects.lens.switchToVisualization('lnsDatatable');
       expect(await PageObjects.lens.getDatatableHeaderText()).to.eql('Sum of bytes');
       expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('16,788');
@@ -86,14 +90,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         operation: 'sum',
         field: 'bytes',
       });
-      await PageObjects.lens.waitForVisualization('mtrVis');
+      await PageObjects.lens.waitForVisualization('legacyMtrVis');
 
-      await PageObjects.lens.assertMetric('Sum of bytes', '16,788');
+      await PageObjects.lens.assertLegacyMetric('Sum of bytes', '16,788');
 
       await PageObjects.lens.switchFirstLayerIndexPattern('lens_rolled_up_data');
-      await PageObjects.lens.waitForVisualization('mtrVis');
+      await PageObjects.lens.waitForVisualization('legacyMtrVis');
 
-      await PageObjects.lens.assertMetric('Sum of bytes', '16,788');
+      await PageObjects.lens.assertLegacyMetric('Sum of bytes', '16,788');
     });
   });
 }

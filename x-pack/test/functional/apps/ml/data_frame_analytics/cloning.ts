@@ -135,8 +135,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     for (const testData of testDataList) {
-      // FLAKY: https://github.com/elastic/kibana/issues/134430
-      describe.skip(`${testData.suiteTitle}`, function () {
+      describe(`${testData.suiteTitle}`, function () {
         const cloneJobId = `${testData.job.id}_clone`;
         const cloneDestIndex = `${testData.job!.dest!.index}_clone`;
 

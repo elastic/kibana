@@ -25,7 +25,7 @@ type RequestBody = Pick<estypes.SearchRequest, 'body'>;
 export function useEsDocSearch({
   id,
   index,
-  indexPattern,
+  dataView,
   requestSource,
 }: DocProps): [ElasticRequestState, DataTableRecord | null, () => void] {
   const [status, setStatus] = useState(ElasticRequestState.Loading);
@@ -38,8 +38,8 @@ export function useEsDocSearch({
       const result = await lastValueFrom(
         data.search.search({
           params: {
-            index,
-            body: buildSearchBody(id, indexPattern, useNewFieldsApi, requestSource)?.body,
+            index: dataView.title,
+            body: buildSearchBody(id, index, dataView, useNewFieldsApi, requestSource)?.body,
           },
         })
       );
@@ -49,20 +49,20 @@ export function useEsDocSearch({
 
       if (hits?.hits?.[0]) {
         setStatus(ElasticRequestState.Found);
-        setHit(buildDataTableRecord(hits.hits[0], indexPattern));
+        setHit(buildDataTableRecord(hits.hits[0], dataView));
       } else {
         setStatus(ElasticRequestState.NotFound);
       }
     } catch (err) {
       if (err.savedObjectId) {
-        setStatus(ElasticRequestState.NotFoundIndexPattern);
+        setStatus(ElasticRequestState.NotFoundDataView);
       } else if (err.status === 404) {
         setStatus(ElasticRequestState.NotFound);
       } else {
         setStatus(ElasticRequestState.Error);
       }
     }
-  }, [id, index, indexPattern, data.search, useNewFieldsApi, requestSource]);
+  }, [id, index, dataView, data.search, useNewFieldsApi, requestSource]);
 
   useEffect(() => {
     requestData();
@@ -77,17 +77,18 @@ export function useEsDocSearch({
  */
 export function buildSearchBody(
   id: string,
-  indexPattern: DataView,
+  index: string,
+  dataView: DataView,
   useNewFieldsApi: boolean,
   requestAllFields?: boolean
 ): RequestBody | undefined {
-  const computedFields = indexPattern.getComputedFields();
+  const computedFields = dataView.getComputedFields();
   const runtimeFields = computedFields.runtimeFields as estypes.MappingRuntimeFields;
   const request: RequestBody = {
     body: {
       query: {
-        ids: {
-          values: [id],
+        bool: {
+          filter: [{ ids: { values: [id] } }, { term: { _index: index } }],
         },
       },
       stored_fields: computedFields.storedFields,

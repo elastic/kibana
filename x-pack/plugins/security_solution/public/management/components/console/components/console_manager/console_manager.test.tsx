@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { renderHook as _renderHook, RenderHookResult, act } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react-hooks';
+import { renderHook as _renderHook, act } from '@testing-library/react-hooks';
 import { useConsoleManager } from './console_manager';
 import React from 'react';
 import type {
@@ -13,10 +14,8 @@ import type {
   ConsoleRegistrationInterface,
   RegisteredConsoleClient,
 } from './types';
-import {
-  AppContextTestRender,
-  createAppRootMockRenderer,
-} from '../../../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
 import {
   ConsoleManagerTestComponent,
   getConsoleManagerMockRenderResultQueriesAndActions,
@@ -250,15 +249,21 @@ describe('When using ConsoleManager', () => {
       expect(renderResult.getByTestId('testRunningConsole')).toBeTruthy();
     });
 
-    it('should show `Done` button', async () => {
+    it('should not show `Done` button', async () => {
       await render();
 
-      expect(renderResult.getByTestId('consolePageOverlay-doneButton')).toBeTruthy();
+      expect(renderResult.queryByTestId('consolePageOverlay-doneButton')).toBeFalsy();
+    });
+
+    it('should show `Back` link', async () => {
+      await render();
+
+      expect(renderResult.getByTestId('consolePageOverlay-header-back-link')).toBeTruthy();
     });
 
     it('should hide the console page overlay', async () => {
       await render();
-      userEvent.click(renderResult.getByTestId('consolePageOverlay-doneButton'));
+      userEvent.click(renderResult.getByTestId('consolePageOverlay-header-back-link'));
 
       expect(renderResult.queryByTestId('consolePageOverlay')).toBeNull();
     });

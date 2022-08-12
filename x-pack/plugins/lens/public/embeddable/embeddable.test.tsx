@@ -23,7 +23,7 @@ import { Document } from '../persistence';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public/embeddable';
 import { coreMock, httpServiceMock, themeServiceMock } from '@kbn/core/public/mocks';
-import { IBasePath } from '@kbn/core/public';
+import { IBasePath, IUiSettingsClient } from '@kbn/core/public';
 import { AttributeService, ViewMode } from '@kbn/embeddable-plugin/public';
 import { LensAttributeService } from '../lens_attribute_service';
 import { OnSaveProps } from '@kbn/saved-objects-plugin/public/save_modal';
@@ -144,7 +144,7 @@ describe('embeddable', () => {
         data: dataMock,
         expressionRenderer,
         basePath,
-        indexPatternService: {} as DataViewsContract,
+        dataViews: {} as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -168,6 +168,7 @@ describe('embeddable', () => {
             },
             errors: undefined,
           }),
+        uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
       },
       {
         timeRange: {
@@ -186,7 +187,7 @@ describe('embeddable', () => {
 | expression`);
   });
 
-  it('should render once even if reload is called before embeddable is fully initialized', async () => {
+  it('should not throw if render is called after destroy', async () => {
     const embeddable = new Embeddable(
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
@@ -194,7 +195,66 @@ describe('embeddable', () => {
         data: dataMock,
         expressionRenderer,
         basePath,
-        indexPatternService: {} as DataViewsContract,
+        dataViews: {} as DataViewsContract,
+        capabilities: {
+          canSaveDashboards: true,
+          canSaveVisualizations: true,
+          discover: {},
+          navLinks: {},
+        },
+        inspector: inspectorPluginMock.createStartContract(),
+        getTrigger,
+        theme: themeServiceMock.createStartContract(),
+        visualizationMap: {},
+        datasourceMap: {},
+        injectFilterReferences: jest.fn(mockInjectFilterReferences),
+        documentToExpression: () =>
+          Promise.resolve({
+            ast: {
+              type: 'expression',
+              chain: [
+                { type: 'function', function: 'my', arguments: {} },
+                { type: 'function', function: 'expression', arguments: {} },
+              ],
+            },
+            errors: undefined,
+          }),
+        uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
+      },
+      {
+        timeRange: {
+          from: 'now-15m',
+          to: 'now',
+        },
+      } as LensEmbeddableInput
+    );
+    let renderCalled = false;
+    let renderThrew = false;
+    // destroying completes output synchronously which might make a synchronous render call - this shouldn't throw
+    embeddable.getOutput$().subscribe(undefined, undefined, () => {
+      try {
+        embeddable.render(mountpoint);
+      } catch (e) {
+        renderThrew = true;
+      } finally {
+        renderCalled = true;
+      }
+    });
+    embeddable.destroy();
+    expect(renderCalled).toBe(true);
+    expect(renderThrew).toBe(false);
+  });
+
+  it('should render once even if reload is called before embeddable is fully initialized', async () => {
+    const embeddable = new Embeddable(
+      {
+        timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
+        attributeService,
+        data: dataMock,
+        uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
+        expressionRenderer,
+        basePath,
+        dataViews: {} as DataViewsContract,
         inspector: inspectorPluginMock.createStartContract(),
         capabilities: {
           canSaveDashboards: true,
@@ -243,10 +303,11 @@ describe('embeddable', () => {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
         data: dataMock,
+        uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: {} as DataViewsContract,
+        dataViews: {} as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -304,10 +365,11 @@ describe('embeddable', () => {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
         data: dataMock,
+        uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         inspector: inspectorPluginMock.createStartContract(),
         expressionRenderer,
         basePath,
-        indexPatternService: {} as DataViewsContract,
+        dataViews: {} as DataViewsContract,
         spaces: spacesPluginStart,
         capabilities: {
           canSaveDashboards: true,
@@ -354,10 +416,11 @@ describe('embeddable', () => {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
         data: dataMock,
+        uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: {
+        dataViews: {
           get: (id: string) => Promise.resolve({ id, isTimeBased: jest.fn(() => true) }),
         } as unknown as DataViewsContract,
         capabilities: {
@@ -404,10 +467,11 @@ describe('embeddable', () => {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
         data: dataMock,
+        uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: {
+        dataViews: {
           get: (id: string) => Promise.resolve({ id, isTimeBased: () => false }),
         } as unknown as DataViewsContract,
         capabilities: {
@@ -452,10 +516,11 @@ describe('embeddable', () => {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
         data: dataMock,
+        uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: {} as DataViewsContract,
+        dataViews: {} as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -504,10 +569,11 @@ describe('embeddable', () => {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
         data: dataMock,
+        uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: {} as DataViewsContract,
+        dataViews: {} as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -560,10 +626,11 @@ describe('embeddable', () => {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
         data: dataMock,
+        uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: {} as DataViewsContract,
+        dataViews: {} as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -614,10 +681,11 @@ describe('embeddable', () => {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
         data: dataMock,
+        uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: {} as DataViewsContract,
+        dataViews: {} as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -675,10 +743,11 @@ describe('embeddable', () => {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
         data: dataMock,
+        uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: {} as DataViewsContract,
+        dataViews: {} as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -737,10 +806,11 @@ describe('embeddable', () => {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
         data: dataMock,
+        uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: {} as DataViewsContract,
+        dataViews: {} as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -802,10 +872,11 @@ describe('embeddable', () => {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
         data: dataMock,
+        uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: { get: jest.fn() } as unknown as DataViewsContract,
+        dataViews: { get: jest.fn() } as unknown as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -852,10 +923,11 @@ describe('embeddable', () => {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
         data: dataMock,
+        uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: {} as DataViewsContract,
+        dataViews: {} as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -904,10 +976,11 @@ describe('embeddable', () => {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
         data: dataMock,
+        uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: {} as DataViewsContract,
+        dataViews: {} as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -953,10 +1026,11 @@ describe('embeddable', () => {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
         data: dataMock,
+        uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: {} as DataViewsContract,
+        dataViews: {} as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -1017,10 +1091,11 @@ describe('embeddable', () => {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
         data: dataMock,
+        uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: {} as DataViewsContract,
+        dataViews: {} as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -1100,10 +1175,11 @@ describe('embeddable', () => {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
         data: dataMock,
+        uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: {} as DataViewsContract,
+        dataViews: {} as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -1158,10 +1234,11 @@ describe('embeddable', () => {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
         data: dataMock,
+        uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: {} as DataViewsContract,
+        dataViews: {} as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -1213,10 +1290,11 @@ describe('embeddable', () => {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
         data: dataMock,
+        uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: {} as DataViewsContract,
+        dataViews: {} as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -1289,10 +1367,11 @@ describe('embeddable', () => {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService: attributeServiceMockFromSavedVis(visDocument),
         data: dataMock,
+        uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: {} as DataViewsContract,
+        dataViews: {} as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,

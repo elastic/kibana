@@ -23,42 +23,16 @@ import {
 import type { Payload } from '@hapi/boom';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
-import {
-  SavedObjectsType,
-  SavedObject,
-  SavedObjectReference,
+import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-common';
+import type {
   SavedObjectsBaseOptions,
   SavedObjectsFindOptions,
-} from '../../types';
-import type { SavedObjectsUpdateObjectsSpacesResponse } from './update_objects_spaces';
-import {
+  SavedObjectsUpdateObjectsSpacesResponse,
   SavedObjectsDeleteByNamespaceOptions,
   SavedObjectsIncrementCounterField,
   SavedObjectsIncrementCounterOptions,
-  SavedObjectsRepository,
-} from './repository';
-import { SavedObjectsErrorHelpers } from './errors';
-import {
-  PointInTimeFinder,
   SavedObjectsCreatePointInTimeFinderDependencies,
   SavedObjectsCreatePointInTimeFinderOptions,
-} from './point_in_time_finder';
-import { ALL_NAMESPACES_STRING } from './utils';
-import { loggerMock } from '@kbn/logging-mocks';
-import {
-  SavedObjectsRawDocSource,
-  SavedObjectsSerializer,
-  SavedObjectUnsanitizedDoc,
-} from '../../serialization';
-import { encodeHitVersion } from '../../version';
-import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
-import { DocumentMigrator } from '../../migrations/core/document_migrator';
-import { mockKibanaMigrator } from '../../migrations/kibana_migrator.mock';
-import { LEGACY_URL_ALIAS_TYPE } from '../../object_types';
-import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
-import * as esKuery from '@kbn/es-query';
-import { errors as EsErrors } from '@elastic/elasticsearch';
-import {
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
   SavedObjectsBulkUpdateObject,
@@ -68,14 +42,33 @@ import {
   SavedObjectsOpenPointInTimeOptions,
   SavedObjectsResolveResponse,
   SavedObjectsUpdateOptions,
-} from '../saved_objects_client';
-import { SavedObjectsMappingProperties, SavedObjectsTypeMappingDefinition } from '../../mappings';
-import {
   SavedObjectsCollectMultiNamespaceReferencesObject,
   SavedObjectsCollectMultiNamespaceReferencesResponse,
   SavedObjectsUpdateObjectsSpacesObject,
   SavedObjectsUpdateObjectsSpacesOptions,
-} from '../../..';
+} from '@kbn/core-saved-objects-api-server';
+import type {
+  SavedObjectsType,
+  SavedObjectsRawDoc,
+  SavedObjectsRawDocSource,
+  SavedObjectUnsanitizedDoc,
+  SavedObjectsMappingProperties,
+  SavedObjectsTypeMappingDefinition,
+} from '@kbn/core-saved-objects-server';
+import { SavedObjectsRepository } from './repository';
+import { SavedObjectsErrorHelpers } from './errors';
+import { PointInTimeFinder } from './point_in_time_finder';
+import { ALL_NAMESPACES_STRING } from './utils';
+import { loggerMock } from '@kbn/logging-mocks';
+import { SavedObjectsSerializer } from '../../serialization';
+import { encodeHitVersion } from '../../version';
+import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import { DocumentMigrator } from '../../migrations/core/document_migrator';
+import { mockKibanaMigrator } from '../../migrations/kibana_migrator.mock';
+import { LEGACY_URL_ALIAS_TYPE } from '../../object_types';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import * as esKuery from '@kbn/es-query';
+import { errors as EsErrors } from '@elastic/elasticsearch';
 import { InternalBulkResolveError } from './internal_bulk_resolve';
 
 const { nodeTypes } = esKuery;
@@ -431,7 +424,6 @@ describe('SavedObjectsRepository', () => {
       id: '6.0.0-alpha1',
       attributes: { title: 'Test One' },
       references: [{ name: 'ref_0', type: 'test', id: '1' }],
-      originId: 'some-origin-id', // only one of the object args has an originId, this is intentional to test both a positive and negative case
     };
     const obj2 = {
       type: 'index-pattern',
@@ -611,6 +603,96 @@ describe('SavedObjectsRepository', () => {
           expect.objectContaining({ body }),
           expect.anything()
         );
+      });
+
+      describe('originId', () => {
+        it(`returns error if originId is set for non-multi-namespace type`, async () => {
+          const result = await savedObjectsRepository.bulkCreate([
+            { ...obj1, originId: 'some-originId' },
+            { ...obj2, type: NAMESPACE_AGNOSTIC_TYPE, originId: 'some-originId' },
+          ]);
+          expect(result.saved_objects).toEqual([
+            expect.objectContaining({ id: obj1.id, type: obj1.type, error: expect.anything() }),
+            expect.objectContaining({
+              id: obj2.id,
+              type: NAMESPACE_AGNOSTIC_TYPE,
+              error: expect.anything(),
+            }),
+          ]);
+          expect(client.bulk).not.toHaveBeenCalled();
+        });
+
+        it(`defaults to no originId`, async () => {
+          const objects = [
+            { ...obj1, type: MULTI_NAMESPACE_TYPE },
+            { ...obj2, type: MULTI_NAMESPACE_ISOLATED_TYPE },
+          ];
+
+          await bulkCreateSuccess(objects);
+          const expected = expect.not.objectContaining({ originId: expect.anything() });
+          const body = [expect.any(Object), expected, expect.any(Object), expected];
+          expect(client.bulk).toHaveBeenCalledWith(
+            expect.objectContaining({ body }),
+            expect.anything()
+          );
+        });
+
+        describe('with existing originId', () => {
+          beforeEach(() => {
+            mockPreflightCheckForCreate.mockImplementation(({ objects }) => {
+              const existingDocument = {
+                _source: { originId: 'existing-originId' },
+              } as SavedObjectsRawDoc;
+              return Promise.resolve(
+                objects.map(({ type, id }) => ({ type, id, existingDocument }))
+              );
+            });
+          });
+
+          it(`accepts custom originId for multi-namespace type`, async () => {
+            // The preflight result has `existing-originId`, but that is discarded
+            const objects = [
+              { ...obj1, type: MULTI_NAMESPACE_TYPE, originId: 'some-originId' },
+              { ...obj2, type: MULTI_NAMESPACE_ISOLATED_TYPE, originId: 'some-originId' },
+            ];
+            await bulkCreateSuccess(objects);
+            const expected = expect.objectContaining({ originId: 'some-originId' });
+            const body = [expect.any(Object), expected, expect.any(Object), expected];
+            expect(client.bulk).toHaveBeenCalledWith(
+              expect.objectContaining({ body }),
+              expect.anything()
+            );
+          });
+
+          it(`accepts undefined originId`, async () => {
+            // The preflight result has `existing-originId`, but that is discarded
+            const objects = [
+              { ...obj1, type: MULTI_NAMESPACE_TYPE, originId: undefined },
+              { ...obj2, type: MULTI_NAMESPACE_ISOLATED_TYPE, originId: undefined },
+            ];
+            await bulkCreateSuccess(objects);
+            const expected = expect.not.objectContaining({ originId: expect.anything() });
+            const body = [expect.any(Object), expected, expect.any(Object), expected];
+            expect(client.bulk).toHaveBeenCalledWith(
+              expect.objectContaining({ body }),
+              expect.anything()
+            );
+          });
+
+          it(`preserves existing originId if originId option is not set`, async () => {
+            const objects = [
+              { ...obj1, type: MULTI_NAMESPACE_TYPE },
+              { ...obj2, type: MULTI_NAMESPACE_ISOLATED_TYPE },
+            ];
+            await bulkCreateSuccess(objects);
+            const expected = expect.objectContaining({ originId: 'existing-originId' });
+            const body = [expect.any(Object), expected, expect.any(Object), expected];
+            expect(client.bulk).toHaveBeenCalledWith(
+              expect.objectContaining({ body }),
+              expect.anything()
+            );
+          });
+        });
       });
 
       it(`adds namespace to request body for any types that are single-namespace`, async () => {
@@ -2116,7 +2198,6 @@ describe('SavedObjectsRepository', () => {
     const attributes = { title: 'Logstash' };
     const id = 'logstash-*';
     const namespace = 'foo-namespace';
-    const originId = 'some-origin-id';
     const references = [
       {
         name: 'ref_0',
@@ -2226,24 +2307,73 @@ describe('SavedObjectsRepository', () => {
         await test(null);
       });
 
-      it(`defaults to no originId`, async () => {
-        await createSuccess(type, attributes, { id });
-        expect(client.create).toHaveBeenCalledWith(
-          expect.objectContaining({
-            body: expect.not.objectContaining({ originId: expect.anything() }),
-          }),
-          expect.anything()
-        );
-      });
+      describe('originId', () => {
+        for (const objType of [type, NAMESPACE_AGNOSTIC_TYPE]) {
+          it(`throws an error if originId is set for non-multi-namespace type`, async () => {
+            await expect(
+              savedObjectsRepository.create(objType, attributes, { originId: 'some-originId' })
+            ).rejects.toThrowError(
+              createBadRequestError('"originId" can only be set for multi-namespace object types')
+            );
+          });
+        }
 
-      it(`accepts custom originId`, async () => {
-        await createSuccess(type, attributes, { id, originId });
-        expect(client.create).toHaveBeenCalledWith(
-          expect.objectContaining({
-            body: expect.objectContaining({ originId }),
-          }),
-          expect.anything()
-        );
+        for (const objType of [MULTI_NAMESPACE_TYPE, MULTI_NAMESPACE_ISOLATED_TYPE]) {
+          it(`${objType} defaults to no originId`, async () => {
+            await createSuccess(objType, attributes, { id });
+            expect(client.create).toHaveBeenCalledWith(
+              expect.objectContaining({
+                body: expect.not.objectContaining({ originId: expect.anything() }),
+              }),
+              expect.anything()
+            );
+          });
+
+          describe(`${objType} with existing originId`, () => {
+            beforeEach(() => {
+              mockPreflightCheckForCreate.mockImplementation(({ objects }) => {
+                const existingDocument = {
+                  _source: { originId: 'existing-originId' },
+                } as SavedObjectsRawDoc;
+                return Promise.resolve(
+                  objects.map(({ type, id }) => ({ type, id, existingDocument }))
+                );
+              });
+            });
+
+            it(`accepts custom originId for multi-namespace type`, async () => {
+              // The preflight result has `existing-originId`, but that is discarded
+              await createSuccess(objType, attributes, { id, originId: 'some-originId' });
+              expect(client.create).toHaveBeenCalledWith(
+                expect.objectContaining({
+                  body: expect.objectContaining({ originId: 'some-originId' }),
+                }),
+                expect.anything()
+              );
+            });
+
+            it(`accepts undefined originId`, async () => {
+              // The preflight result has `existing-originId`, but that is discarded
+              await createSuccess(objType, attributes, { id, originId: undefined });
+              expect(client.create).toHaveBeenCalledWith(
+                expect.objectContaining({
+                  body: expect.not.objectContaining({ originId: expect.anything() }),
+                }),
+                expect.anything()
+              );
+            });
+
+            it(`preserves existing originId if originId option is not set`, async () => {
+              await createSuccess(objType, attributes, { id });
+              expect(client.create).toHaveBeenCalledWith(
+                expect.objectContaining({
+                  body: expect.objectContaining({ originId: 'existing-originId' }),
+                }),
+                expect.anything()
+              );
+            });
+          });
+        }
       });
 
       it(`defaults to a refresh setting of wait_for`, async () => {
@@ -2638,22 +2768,20 @@ describe('SavedObjectsRepository', () => {
 
     describe('returns', () => {
       it(`formats the ES response`, async () => {
-        const result = await createSuccess(type, attributes, {
+        const result = await createSuccess(MULTI_NAMESPACE_TYPE, attributes, {
           id,
           namespace,
           references,
-          originId,
         });
         expect(result).toEqual({
-          type,
+          type: MULTI_NAMESPACE_TYPE,
           id,
-          originId,
           ...mockTimestampFields,
           version: mockVersion,
           attributes,
           references,
           namespaces: [namespace ?? 'default'],
-          migrationVersion: { [type]: '1.1.1' },
+          migrationVersion: { [MULTI_NAMESPACE_TYPE]: '1.1.1' },
           coreMigrationVersion: KIBANA_VERSION,
         });
       });
@@ -3637,16 +3765,13 @@ describe('SavedObjectsRepository', () => {
           Object {
             "arguments": Array [
               Object {
+                "isQuoted": false,
                 "type": "literal",
                 "value": "dashboard.otherField",
               },
               Object {
                 "type": "wildcard",
                 "value": "@kuery-wildcard@",
-              },
-              Object {
-                "type": "literal",
-                "value": false,
               },
             ],
             "function": "is",
@@ -3677,16 +3802,13 @@ describe('SavedObjectsRepository', () => {
           Object {
             "arguments": Array [
               Object {
+                "isQuoted": false,
                 "type": "literal",
                 "value": "dashboard.otherField",
               },
               Object {
                 "type": "wildcard",
                 "value": "@kuery-wildcard@",
-              },
-              Object {
-                "type": "literal",
-                "value": false,
               },
             ],
             "function": "is",

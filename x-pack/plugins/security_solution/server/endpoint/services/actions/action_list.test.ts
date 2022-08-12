@@ -7,8 +7,8 @@
 
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
   EndpointActionResponse,
   LogsEndpointAction,
   LogsEndpointActionResponse,
@@ -21,7 +21,7 @@ import {
   createActionRequestsEsSearchResultsMock,
   createActionResponsesEsSearchResultsMock,
 } from './mocks';
-import { MockedLogger } from '@kbn/logging-mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
 
 describe('When using `getActionList()', () => {
   let esClient: ElasticsearchClientMock;
@@ -44,7 +44,7 @@ describe('When using `getActionList()', () => {
   it('should return expected output', async () => {
     const doc = actionRequests.hits.hits[0]._source;
     await expect(getActionList({ esClient, logger, page: 1, pageSize: 10 })).resolves.toEqual({
-      page: 0,
+      page: 1,
       pageSize: 10,
       commands: undefined,
       userIds: undefined,
@@ -153,6 +153,7 @@ describe('When using `getActionList()', () => {
 
   it('should return an empty array if no actions are found', async () => {
     actionRequests.hits.hits = [];
+    (actionRequests.hits.total as estypes.SearchTotalHits).value = 0;
     (actionResponses.hits.total as estypes.SearchTotalHits).value = 0;
     actionRequests = endpointActionGenerator.toEsSearchResponse([]);
 
@@ -162,8 +163,8 @@ describe('When using `getActionList()', () => {
         data: [],
         elasticAgentIds: undefined,
         endDate: undefined,
-        page: 0,
-        pageSize: undefined,
+        page: 1,
+        pageSize: 10,
         startDate: undefined,
         total: 0,
         userIds: undefined,

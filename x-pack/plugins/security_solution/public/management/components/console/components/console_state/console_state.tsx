@@ -5,17 +5,11 @@
  * 2.0.
  */
 
-import React, {
-  useReducer,
-  memo,
-  createContext,
-  PropsWithChildren,
-  useContext,
-  useEffect,
-  useCallback,
-} from 'react';
+import type { PropsWithChildren } from 'react';
+import React, { useReducer, memo, createContext, useContext, useEffect, useCallback } from 'react';
 import { useWithManagedConsoleState } from '../console_manager/console_manager';
-import { InitialStateInterface, initiateState, stateDataReducer } from './state_reducer';
+import type { InitialStateInterface } from './state_reducer';
+import { initiateState, stateDataReducer } from './state_reducer';
 import type { ConsoleDataState, ConsoleStore } from './types';
 
 const ConsoleStateContext = createContext<null | ConsoleStore>(null);
@@ -26,7 +20,7 @@ type ConsoleStateProviderProps = PropsWithChildren<{}> & InitialStateInterface;
  * A Console wide data store for internal state management between inner components
  */
 export const ConsoleStateProvider = memo<ConsoleStateProviderProps>(
-  ({ commands, scrollToBottom, HelpComponent, dataTestSubj, managedKey, children }) => {
+  ({ commands, scrollToBottom, keyCapture, HelpComponent, dataTestSubj, managedKey, children }) => {
     const [getConsoleState, storeConsoleState] = useWithManagedConsoleState(managedKey);
 
     const stateInitializer = useCallback(
@@ -38,7 +32,7 @@ export const ConsoleStateProvider = memo<ConsoleStateProviderProps>(
 
     const [state, dispatch] = useReducer(
       stateDataReducer,
-      { commands, scrollToBottom, HelpComponent, dataTestSubj },
+      { commands, scrollToBottom, keyCapture, HelpComponent, dataTestSubj },
       stateInitializer
     );
 

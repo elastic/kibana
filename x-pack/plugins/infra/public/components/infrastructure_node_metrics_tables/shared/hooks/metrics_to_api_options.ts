@@ -35,7 +35,7 @@ the metrics by their field names instead.
 The returned metricByField object, handles the translation from field name to "index name".
 For example, in the transform function passed to useInfrastructureNodeMetrics it can be used
 to find a field metric like this:
-row[metricByField['kubernetes.container.start_time']]
+row[metricByField['some.field']]
 
 If the endpoint where to change its return format to:
 { 'some.metric.field': 99, 'some.other.metric.field': 88 }

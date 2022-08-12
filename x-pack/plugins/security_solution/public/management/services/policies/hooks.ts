@@ -4,19 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { QueryObserverResult, useQuery, UseQueryOptions } from 'react-query';
-import { HttpFetchError } from '@kbn/core/public';
-import {
-  AGENT_POLICY_SAVED_OBJECT_TYPE,
-  GetAgentPoliciesResponse,
-  GetPackagesResponse,
-} from '@kbn/fleet-plugin/common';
+import type { QueryObserverResult, UseQueryOptions } from 'react-query';
+import { useQuery } from 'react-query';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
+import type { GetAgentPoliciesResponse, GetPackagesResponse } from '@kbn/fleet-plugin/common';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { useHttp } from '../../../common/lib/kibana';
 import { MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../common/constants';
 import { sendGetAgentPolicyList, sendGetEndpointSecurityPackage } from './ingest';
-import { GetPolicyListResponse } from '../../pages/policy/types';
+import type { GetPolicyListResponse } from '../../pages/policy/types';
 import { sendGetEndpointSpecificPackagePolicies } from './policies';
-import { ServerApiError } from '../../../common/types';
+import type { ServerApiError } from '../../../common/types';
 
 export function useGetEndpointSpecificPolicies(
   {
@@ -59,10 +57,10 @@ export function useGetAgentCountForPolicy({
   customQueryOptions,
 }: {
   policyIds: string[];
-  customQueryOptions?: UseQueryOptions<GetAgentPoliciesResponse, HttpFetchError>;
-}): QueryObserverResult<GetAgentPoliciesResponse, HttpFetchError> {
+  customQueryOptions?: UseQueryOptions<GetAgentPoliciesResponse, IHttpFetchError>;
+}): QueryObserverResult<GetAgentPoliciesResponse, IHttpFetchError> {
   const http = useHttp();
-  return useQuery<GetAgentPoliciesResponse, HttpFetchError>(
+  return useQuery<GetAgentPoliciesResponse, IHttpFetchError>(
     ['endpointCountForPolicy', policyIds],
     () => {
       return sendGetAgentPolicyList(http, {
@@ -82,10 +80,10 @@ export function useGetAgentCountForPolicy({
 export function useGetEndpointSecurityPackage({
   customQueryOptions,
 }: {
-  customQueryOptions?: UseQueryOptions<GetPackagesResponse['items'][number], HttpFetchError>;
-}): QueryObserverResult<GetPackagesResponse['items'][number], HttpFetchError> {
+  customQueryOptions?: UseQueryOptions<GetPackagesResponse['items'][number], IHttpFetchError>;
+}): QueryObserverResult<GetPackagesResponse['items'][number], IHttpFetchError> {
   const http = useHttp();
-  return useQuery<GetPackagesResponse['items'][number], HttpFetchError>(
+  return useQuery<GetPackagesResponse['items'][number], IHttpFetchError>(
     ['endpointPackageVersion', customQueryOptions],
     () => {
       return sendGetEndpointSecurityPackage(http);

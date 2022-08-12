@@ -14,9 +14,10 @@ import { defaultHeaders, mockTimelineData } from '../../../../common/mock';
 import '../../../../common/mock/match_media';
 import { TestProviders } from '../../../../common/mock/test_providers';
 
-import { QueryTabContentComponent, Props as QueryTabContentComponentProps } from '.';
+import type { Props as QueryTabContentComponentProps } from '.';
+import { QueryTabContentComponent } from '.';
 import { defaultRowRenderers } from '../body/renderers';
-import { Sort } from '../body/sort';
+import type { Sort } from '../body/sort';
 import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { TimelineId, TimelineStatus, TimelineTabs } from '../../../../../common/types/timeline';
@@ -74,10 +75,12 @@ jest.mock('../../../../common/lib/kibana', () => {
         savedObjects: {
           client: {},
         },
+        triggersActionsUi: {
+          getFieldBrowser: jest.fn(),
+        },
         timelines: {
           getLastUpdated: jest.fn(),
           getLoadingPanel: jest.fn(),
-          getFieldBrowser: jest.fn(),
           getUseDraggableKeyboardWrapper: () =>
             jest.fn().mockReturnValue({
               onBlur: jest.fn(),

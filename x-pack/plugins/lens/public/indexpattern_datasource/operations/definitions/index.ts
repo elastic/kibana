@@ -11,13 +11,14 @@ import {
   HttpSetup,
   CoreStart,
 } from '@kbn/core/public';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import {
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type {
   ExpressionAstExpressionBuilder,
   ExpressionAstFunction,
 } from '@kbn/expressions-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { termsOperation } from './terms';
 import { filtersOperation } from './filters';
@@ -30,6 +31,7 @@ import {
   sumOperation,
   maxOperation,
   medianOperation,
+  standardDeviationOperation,
 } from './metrics';
 import { dateHistogramOperation } from './date_histogram';
 import {
@@ -47,23 +49,25 @@ import { countOperation } from './count';
 import { mathOperation, formulaOperation } from './formula';
 import { staticValueOperation } from './static_value';
 import { lastValueOperation } from './last_value';
-import { FrameDatasourceAPI, OperationMetadata, ParamEditorCustomProps } from '../../../types';
+import {
+  FrameDatasourceAPI,
+  IndexPattern,
+  IndexPatternField,
+  OperationMetadata,
+  ParamEditorCustomProps,
+} from '../../../types';
 import type {
   BaseIndexPatternColumn,
   IncompleteColumn,
   GenericIndexPatternColumn,
   ReferenceBasedIndexPatternColumn,
 } from './column_types';
-import {
-  DataViewDragDropOperation,
-  IndexPattern,
-  IndexPatternField,
-  IndexPatternLayer,
-} from '../../types';
+import { DataViewDragDropOperation, IndexPatternLayer } from '../../types';
 import { DateRange, LayerType } from '../../../../common';
 import { rangeOperation } from './ranges';
 import { IndexPatternDimensionEditorProps, OperationSupportMatrix } from '../../dimension_panel';
 import type { OriginalColumn } from '../../to_expression';
+import { ReferenceEditorProps } from '../../dimension_panel/reference_editor';
 
 export type {
   IncompleteColumn,
@@ -83,6 +87,7 @@ export type {
   SumIndexPatternColumn,
   MaxIndexPatternColumn,
   MedianIndexPatternColumn,
+  StandardDeviationIndexPatternColumn,
 } from './metrics';
 export type { DateHistogramIndexPatternColumn } from './date_histogram';
 export type {
@@ -114,6 +119,7 @@ const internalOperationDefinitions = [
   averageOperation,
   cardinalityOperation,
   sumOperation,
+  standardDeviationOperation,
   medianOperation,
   percentileOperation,
   percentileRanksOperation,
@@ -138,7 +144,13 @@ export { termsOperation } from './terms';
 export { rangeOperation } from './ranges';
 export { filtersOperation } from './filters';
 export { dateHistogramOperation } from './date_histogram';
-export { minOperation, averageOperation, sumOperation, maxOperation } from './metrics';
+export {
+  minOperation,
+  averageOperation,
+  sumOperation,
+  maxOperation,
+  standardDeviationOperation,
+} from './metrics';
 export { percentileOperation } from './percentile';
 export { percentileRanksOperation } from './percentile_ranks';
 export { countOperation } from './count';
@@ -160,12 +172,14 @@ export { staticValueOperation } from './static_value';
 /**
  * Properties passed to the operation-specific part of the popover editor
  */
-export interface ParamEditorProps<C> {
+export interface ParamEditorProps<
+  C,
+  U = IndexPatternLayer | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
+> {
   currentColumn: C;
   layer: IndexPatternLayer;
-  updateLayer: (
-    setter: IndexPatternLayer | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
-  ) => void;
+  paramEditorUpdater: (setter: U) => void;
+  ReferenceEditor?: (props: ReferenceEditorProps) => JSX.Element | null;
   toggleFullscreen: () => void;
   setIsCloseable: (isCloseable: boolean) => void;
   isFullscreen: boolean;
@@ -178,11 +192,14 @@ export interface ParamEditorProps<C> {
   http: HttpSetup;
   dateRange: DateRange;
   data: DataPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   activeData?: IndexPatternDimensionEditorProps['activeData'];
   operationDefinitionMap: Record<string, GenericOperationDefinition>;
   paramEditorCustomProps?: ParamEditorCustomProps;
+  existingFields: Record<string, Record<string, boolean>>;
+  isReferenced?: boolean;
 }
 
 export interface FieldInputProps<C> {
@@ -218,16 +235,16 @@ export interface HelpProps<C> {
 export type TimeScalingMode = 'disabled' | 'mandatory' | 'optional';
 
 export interface AdvancedOption {
-  title: string;
-  optionElement?: React.ReactElement;
   dataTestSubj: string;
-  onClick: () => void;
-  showInPopover: boolean;
   inlineElement: React.ReactElement | null;
   helpPopup?: string | null;
 }
 
-interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn, P = {}> {
+interface BaseOperationDefinitionProps<
+  C extends BaseIndexPatternColumn,
+  AR extends boolean,
+  P = {}
+> {
   type: C['operationType'];
   /**
    * The priority of the operation. If multiple operations are possible in
@@ -258,7 +275,10 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn, P = {}>
   /**
    * React component for operation specific settings shown in the flyout editor
    */
-  paramEditor?: React.ComponentType<ParamEditorProps<C>>;
+  allowAsReference?: AR;
+  paramEditor?: React.ComponentType<
+    AR extends true ? ParamEditorProps<C, GenericIndexPatternColumn> : ParamEditorProps<C>
+  >;
   getAdvancedOptions?: (params: ParamEditorProps<C>) => AdvancedOption[] | undefined;
   /**
    * Returns true if the `column` can also be used on `newIndexPattern`.
@@ -327,6 +347,10 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn, P = {}>
    * autocomplete.
    */
   filterable?: boolean | { helpMessage: string };
+  /**
+   * Windowable operations can have a time window defined at the dimension level - under the hood this will be translated into a filter on the defined time field
+   */
+  windowable?: boolean;
   shiftable?: boolean;
 
   getHelpMessage?: (props: HelpProps<C>) => React.ReactNode;
@@ -394,6 +418,13 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn, P = {}>
     aggs: ExpressionAstExpressionBuilder[];
     esAggsIdMap: Record<string, OriginalColumn[]>;
   };
+
+  /**
+   * Returns the maximum possible number of values for this column
+   * (e.g. with a top 5 values operation, we can be sure that there will never be
+   *    more than 5 values returned or 6 if the "Other" bucket is enabled)
+   */
+  getMaxPossibleNumValues?: (column: C) => number;
 }
 
 interface BaseBuildColumnArgs {
@@ -468,6 +499,7 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn, P = {}
       kql?: string;
       lucene?: string;
       shift?: string;
+      window?: string;
       usedInMath?: boolean;
     }
   ) => C;
@@ -498,7 +530,8 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn, P = {}
     indexPattern: IndexPattern,
     layer: IndexPatternLayer,
     uiSettings: IUiSettingsClient,
-    orderedColumnIds: string[]
+    orderedColumnIds: string[],
+    operationDefinitionMap?: Record<string, GenericOperationDefinition>
   ) => ExpressionAstFunction;
   /**
    * Validate that the operation has the right preconditions in the state. For example:
@@ -533,7 +566,11 @@ export interface RequiredReference {
   // Limit the input types, usually used to prevent other references from being used
   input: Array<GenericOperationDefinition['input']>;
   // Function which is used to determine if the reference is bucketed, or if it's a number
-  validateMetadata: (metadata: OperationMetadata) => boolean;
+  validateMetadata: (
+    metadata: OperationMetadata,
+    operation?: OperationType,
+    field?: string
+  ) => boolean;
   // Do not use specificOperations unless you need to limit to only one or two exact
   // operation types. The main use case is Cumulative Sum, where we need to only take the
   // sum of Count or sum of Sum.
@@ -646,8 +683,9 @@ interface OperationDefinitionMap<C extends BaseIndexPatternColumn, P = {}> {
 export type OperationDefinition<
   C extends BaseIndexPatternColumn,
   Input extends keyof OperationDefinitionMap<C>,
-  P = {}
-> = BaseOperationDefinitionProps<C> & OperationDefinitionMap<C, P>[Input];
+  P = {},
+  AR extends boolean = false
+> = BaseOperationDefinitionProps<C, AR> & OperationDefinitionMap<C, P>[Input];
 
 /**
  * A union type of all available operation types. The operation type is a unique id of an operation.

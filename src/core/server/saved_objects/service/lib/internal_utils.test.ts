@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
-import type { SavedObjectsRawDoc } from '../../serialization';
 import { encodeHitVersion } from '../../version';
 import {
   getBulkOperationError,
