@@ -1,5 +1,5 @@
-[role="xpack"]
 [[rule-type-es-query]]
+[role="xpack"]
 === {es} query
 
 The {es} query rule type runs a user-configured query, compares the number of 
@@ -85,6 +85,22 @@ which can be used to access any runtime fields defined by the {ref}/runtime-sear
 {{#context.hits}}
 timestamp: {{_source.@timestamp}}
 day of the week: {{fields.day_of_week}}
+{{/context.hits}}
+--------------------------------------------------
+// NOTCONSOLE
+--
++
+As the {ref}/search-fields.html#search-fields-response[`fields`] response always returns an array of values for each field, 
+the https://mustache.github.io/[Mustache] template array syntax is used to iterate over these values in your actions.
++
+--
+[source]
+--------------------------------------------------
+{{#context.hits}}
+Labels:
+{{#fields.labels}}
+- {{.}}
+{{/fields.labels}}
 {{/context.hits}}
 --------------------------------------------------
 // NOTCONSOLE
