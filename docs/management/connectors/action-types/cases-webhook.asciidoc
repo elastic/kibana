@@ -1,17 +1,17 @@
 [role="xpack"]
 [[cases-webhook-action-type]]
-== Webhook - Case Management connector and action
+== {webhook-cm} connector and action
 ++++
-<titleabbrev>Webhook - Case Management</titleabbrev>
+<titleabbrev>{webhook-cm}</titleabbrev>
 ++++
 
-The Webhook - Case Management connector uses https://github.com/axios/axios[axios] to send POST, PUT, and GET requests to a case management RESTful API web service.
+The {webhook-cm} connector uses https://github.com/axios/axios[axios] to send POST, PUT, and GET requests to a case management RESTful API web service.
 
 [float]
 [[cases-webhook-connector-configuration]]
 === Connector configuration
 
-Webhook - Case Management connectors have the following configuration properties:
+{webhook-cm} connectors have the following configuration properties:
 
 Name::      The name of the connector. The name is used to identify a connector in the management UI connector listing and in the connector list when configuring an action.
 Require authentication:: If true, a username and password for login type authentication must be provided.
@@ -156,21 +156,21 @@ Use the <<action-settings,action configuration settings>> to customize connector
 [[define-cases-webhook-ui]]
 === Define connector in {stack-manage-app}
 
-Define Webhook - Case Management connector properties:
+Define {webhook-cm} connector properties:
 
 [role="screenshot"]
-image::management/connectors/images/cases-webhook-connector.gif[Webhook - Case Management connector]
+image::management/connectors/images/cases-webhook-connector.gif[{webhook-cm} connector]
 
-Test Webhook - Case Management action parameters:
+Test {webhook-cm} action parameters:
 
 [role="screenshot"]
-image::management/connectors/images/cases-webhook-test.gif[Webhook - Case Management params test]
+image::management/connectors/images/cases-webhook-test.gif[{webhook-cm} params test]
 
 [float]
 [[cases-webhook-action-configuration]]
 === Action configuration
 
-Webhook - Case Management actions have the following configuration properties:
+{webhook-cm} actions have the following configuration properties:
 
 Title:: A title for the issue, which is used for searching the contents of the knowledge base.
 Description:: The details about the incident.
@@ -182,17 +182,17 @@ Additional comments:: Additional information for the client, such as how to trou
 [[cases-webhook-connector-full-example]]
 == Full example with third-party system
 
-In the following example, we connect the Webhook - Case Management Connector with a demo instance of {jira} (a third-party case management system). Refer to the https://developer.atlassian.com/cloud/jira/platform/rest/v2/api-group-issues/[{Jira} API documentation] to learn how to create an issue.
+In the following example, we connect the {webhook-cm} Connector with a demo instance of {jira} (a third-party case management system). Refer to the https://developer.atlassian.com/cloud/jira/platform/rest/v2/api-group-issues/[{Jira} API documentation] to learn how to create an issue.
 
 NOTE: If you want to connect with {jira} quickly, we recommend using the <<jira-action-type,preconfigured {jira} connector>>.
 
 [float]
 ====  Step 1 - Set up connector
 
-In the Webhook - Case Management connector create flyout, begin by entering a connector *Name*, for example, `Jira Test Connector`. Basic authentication will be used in this example, so keep the *Require authentication* option selected and enter the *Username* and *Password* for the test instance, for example, `test-user@elastic.co` and `notarealpassword`. We will not be setting any *Headers* for the requests.
+In the {webhook-cm} connector create flyout, begin by entering a connector *Name*, for example, `Jira Test Connector`. Basic authentication will be used in this example, so keep the *Require authentication* option selected and enter the *Username* and *Password* for the test instance, for example, `test-user@elastic.co` and `notarealpassword`. We will not be setting any *Headers* for the requests.
 
 [role="screenshot"]
-image::management/connectors/images/cases-webhook-step1.png[Webhook - Case Management connector Step 1, {jira} example]
+image::management/connectors/images/cases-webhook-step1.png[{webhook-cm} connector Step 1, {jira} example]
 
 [float]
 ====  Step 2 - Create case
@@ -235,7 +235,7 @@ To find the required values for this step, refer to the https://developer.atlass
 --
 In the following screen capture, we enter `POST` as the *Create Case Method* and `https://testing-jira.atlassian.net/rest/api/2/issue` as the **Create Case Url**. In our example {jira} instance, the project key is "ROC" and the issuetype ID is "10024". We have entered the {jira} request JSON as the *Create Case Object*, updating the project key to "ROC" and the issuetype ID to "10024". We then use the Case variable selector to enter where we will map the Kibana case title, Kibana case description, and Kibana case tags. The {jira} response body contains an ID with the JSON key of "id", so we enter `id` as the *Create Case Response - Case ID Key*.
 [role="screenshot"]
-image::management/connectors/images/cases-webhook-step2.gif[Webhook - Case Management connector Step 2, {jira} example]
+image::management/connectors/images/cases-webhook-step2.gif[{webhook-cm} connector Step 2, {jira} example]
 
 [float]
 ====  Step 3 - Get case information
@@ -326,7 +326,7 @@ In the response JSON we can see the title of the case is "ROC-538". The key for 
 
 We also need the *External Case View URL*. https://support.atlassian.com/jira-software-cloud/docs/link-an-issue/[{jira}'s documentation] instructs you to get the link from the issue itself. The format for this link looks like `https://<user’s subdomain>.atlassian.net/browse/<issueKey>`. We mapped `key` to the *Get Case Response External Title Key* and using the variable selector on the *External Case View URL* input, we can see the issue key is stored as a Mustache value `{{{external.system.title}}}`. Using this, the value for *External Case View URL* is `https://testing-jira.atlassian.net/browse/{{{external.system.title}}}`.
 [role="screenshot"]
-image::management/connectors/images/cases-webhook-step3.gif[Webhook - Case Management connector Step 3, {jira} example]
+image::management/connectors/images/cases-webhook-step3.gif[{webhook-cm} connector Step 3, {jira} example]
 
 [float]
 ====  Step 4 - Comments and updates
@@ -353,7 +353,7 @@ During this step, we need to set the REST API data for updates and comments. Let
 
 In the screen capture below, on Step 4 we enter `PUT` as the *Update Case Method* and `https://testing-jira.atlassian.net/rest/api/2/issue/{{{external.system.id}}}` as the **Update Case Url** using the variable selector to insert the `{{{external.system.id}}}`. Just like the create case JSON, have entered the {jira} request JSON as the *Update Case Object*, updating the project key to "ROC" and the issuetype ID to "10024". We then use the Case variable selector to enter where we will map the Kibana case title, Kibana case description, and Kibana case tags.
 [role="screenshot"]
-image::management/connectors/images/cases-webhook-step4a.gif[Webhook - Case Management connector Step 4 Update, {jira} example]
+image::management/connectors/images/cases-webhook-step4a.gif[{webhook-cm} connector Step 4 Update, {jira} example]
 
 Lastly we will look at {jira}'s https://developer.atlassian.com/cloud/jira/platform/rest/v2/api-group-issue-comments/#api-rest-api-2-issue-issueidorkey-comment-post[Add comment documentation] to fill out the optional comment REST fields.
 
@@ -371,19 +371,19 @@ Lastly we will look at {jira}'s https://developer.atlassian.com/cloud/jira/platf
 
 In the following screen capture, we enter `POST` as the *Create Comment Method* and `https://testing-jira.atlassian.net/rest/api/2/issue/{{{external.system.id}}}/comment` as the **Create Comment Url** using the variable selector to insert the `{{{external.system.id}}}`. We enter the {jira} request JSON as the *Create Comment Object*, using the case variable selector to enter where we will map the case comment.
 [role="screenshot"]
-image::management/connectors/images/cases-webhook-step4b.gif[Webhook - Case Management connector Step 4 Comments, {jira} example]
+image::management/connectors/images/cases-webhook-step4b.gif[{webhook-cm} connector Step 4 Comments, {jira} example]
 
 [float]
 [[cases-webhook-example-implementation]]
 === Implement connector in Kibana Cases
-Let's take a look at how our new Webhook - Case Management connector works within the case workflow.
+Let's take a look at how our new {webhook-cm} connector works within the case workflow.
 
 [float]
 ====  Create a case
 [role="screenshot"]
-image::management/connectors/images/cases-webhook-create.gif[Webhook - Case Management connector Create, {jira} example]
+image::management/connectors/images/cases-webhook-create.gif[{webhook-cm} connector Create, {jira} example]
 
 [float]
 ====  Update and comment on a case
 [role="screenshot"]
-image::management/connectors/images/cases-webhook-update.gif[Webhook - Case Management connector Update, {jira} example]
+image::management/connectors/images/cases-webhook-update.gif[{webhook-cm} connector Update, {jira} example]
