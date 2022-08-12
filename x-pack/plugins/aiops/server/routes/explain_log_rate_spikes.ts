@@ -21,7 +21,7 @@ import {
   addChangePointsAction,
   addChangePointsHistogramAction,
   aiopsExplainLogRateSpikesSchema,
-  errorAction,
+  addErrorAction,
   resetAction,
   updateLoadingStateAction,
   AiopsExplainLogRateSpikesApiAction,
@@ -112,7 +112,7 @@ export const defineExplainLogRateSpikesRoute = (
         try {
           fieldCandidates = await fetchFieldCandidates(client, request.body);
         } catch (e) {
-          push(errorAction(e.toString()));
+          push(addErrorAction(e.toString()));
           end();
           return;
         }
@@ -154,7 +154,7 @@ export const defineExplainLogRateSpikesRoute = (
           try {
             pValues = await fetchChangePointPValues(client, request.body, fieldCandidatesChunk);
           } catch (e) {
-            push(errorAction(e.toString()));
+            push(addErrorAction(e.toString()));
             end();
             return;
           }

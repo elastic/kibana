@@ -170,6 +170,7 @@ export function TraceList({ response }: Props) {
       initialSortField="impact"
       initialSortDirection="desc"
       noItemsMessage={noItemsMessage}
+      initialPageSize={25}
     />
   );
 }

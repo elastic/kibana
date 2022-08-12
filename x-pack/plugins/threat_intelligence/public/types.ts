@@ -30,6 +30,11 @@ export type Services = {
   dataViews: DataViewsPublicPluginStart;
 } & CoreStart;
 
+export interface LicenseAware {
+  isEnterprise(): boolean;
+}
+
 export interface ThreatIntelligenceSecuritySolutionContext {
   getFiltersGlobalComponent: () => ComponentType<{ children: ReactNode }>;
+  licenseService: LicenseAware;
 }

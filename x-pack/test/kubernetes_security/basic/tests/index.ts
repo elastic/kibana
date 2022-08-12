@@ -14,5 +14,6 @@ export default function kubernetesSecurityApiIntegrationTests({
   describe('Kubernetes security API (basic)', function () {
     loadTestFile(require.resolve('./aggregate'));
     loadTestFile(require.resolve('./count'));
+    loadTestFile(require.resolve('./multi_terms_aggregate'));
   });
 }
