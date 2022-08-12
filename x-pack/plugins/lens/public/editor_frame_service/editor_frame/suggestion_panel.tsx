@@ -40,6 +40,7 @@ import {
 } from '../../types';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
 import { getDatasourceExpressionsByLayers } from './expression_helpers';
+import { showMemoizedErrorNotification } from '../../lens_ui_errors/memoized_error_notification';
 import {
   getMissingIndexPattern,
   validateDatasourceAndVisualization,
@@ -493,39 +494,44 @@ function getPreviewExpression(
     datasourceLayers: { ...frame.datasourceLayers },
   };
 
-  // use current frame api and patch apis for changed datasource layers
-  if (
-    visualizableState.keptLayerIds &&
-    visualizableState.datasourceId &&
-    visualizableState.datasourceState
-  ) {
-    const datasource = datasources[visualizableState.datasourceId];
-    const datasourceState = visualizableState.datasourceState;
-    const updatedLayerApis: DatasourceLayers = pick(
-      frame.datasourceLayers,
-      visualizableState.keptLayerIds
+  try {
+    // use current frame api and patch apis for changed datasource layers
+    if (
+      visualizableState.keptLayerIds &&
+      visualizableState.datasourceId &&
+      visualizableState.datasourceState
+    ) {
+      const datasource = datasources[visualizableState.datasourceId];
+      const datasourceState = visualizableState.datasourceState;
+      const updatedLayerApis: DatasourceLayers = pick(
+        frame.datasourceLayers,
+        visualizableState.keptLayerIds
+      );
+      const changedLayers = datasource.getLayers(visualizableState.datasourceState);
+      changedLayers.forEach((layerId) => {
+        if (updatedLayerApis[layerId]) {
+          updatedLayerApis[layerId] = datasource.getPublicAPI({
+            layerId,
+            state: datasourceState,
+          });
+        }
+      });
+    }
+
+    const datasourceExpressionsByLayers = getDatasourceExpressionsByLayers(
+      datasources,
+      datasourceStates
     );
-    const changedLayers = datasource.getLayers(visualizableState.datasourceState);
-    changedLayers.forEach((layerId) => {
-      if (updatedLayerApis[layerId]) {
-        updatedLayerApis[layerId] = datasource.getPublicAPI({
-          layerId,
-          state: datasourceState,
-        });
-      }
-    });
+
+    return visualization.toPreviewExpression(
+      visualizableState.visualizationState,
+      suggestionFrameApi.datasourceLayers,
+      datasourceExpressionsByLayers ?? undefined
+    );
+  } catch (error) {
+    showMemoizedErrorNotification(error);
+    return null;
   }
-
-  const datasourceExpressionsByLayers = getDatasourceExpressionsByLayers(
-    datasources,
-    datasourceStates
-  );
-
-  return visualization.toPreviewExpression(
-    visualizableState.visualizationState,
-    suggestionFrameApi.datasourceLayers,
-    datasourceExpressionsByLayers ?? undefined
-  );
 }
 
 function preparePreviewExpression(
