@@ -11,9 +11,9 @@ import { CoreSetup, Plugin } from '@kbn/core/server';
 import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { PluginSetup as DataSetup } from '@kbn/data-plugin/server';
 import { PluginSetup as UnifiedSearchSetup } from '@kbn/unified-search-plugin/server';
-import { setupOptionsListSuggestionsRoute } from './control_types/options_list/options_list_suggestions_route';
+import { setupOptionsListSuggestionsRoute } from './options_list/options_list_suggestions_route';
 import { controlGroupContainerPersistableStateServiceFactory } from './control_group/control_group_container_factory';
-import { optionsListPersistableStateServiceFactory } from './control_types/options_list/options_list_embeddable_factory';
+import { optionsListPersistableStateServiceFactory } from './options_list/options_list_embeddable_factory';
 // import { timeSliderPersistableStateServiceFactory } from './control_types/time_slider/time_slider_embeddable_factory';
 
 interface SetupDeps {

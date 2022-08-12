@@ -11,7 +11,7 @@ import { get, isEmpty } from 'lodash';
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { getFieldSubtypeNested } from '@kbn/data-views-plugin/common';
 
-import { OptionsListRequestBody } from '../../../common/control_types/options_list/types';
+import { OptionsListRequestBody } from '../../common/options_list/types';
 
 export interface OptionsListAggregationBuilder {
   buildAggregation: (req: OptionsListRequestBody) => unknown;

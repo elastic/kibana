@@ -33,10 +33,7 @@ export {
 } from './control_group/control_group_constants';
 
 // Control Type exports
-export {
-  OPTIONS_LIST_CONTROL,
-  type OptionsListEmbeddableInput,
-} from './control_types/options_list/types';
+export { OPTIONS_LIST_CONTROL, type OptionsListEmbeddableInput } from './options_list/types';
 export {
   type RangeSliderEmbeddableInput,
   RANGE_SLIDER_CONTROL,

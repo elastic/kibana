@@ -7,10 +7,11 @@
  */
 
 import React, { useState } from 'react';
+
 import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 
-import { OptionsListEmbeddableInput } from './types';
 import { OptionsListStrings } from './options_list_strings';
+import { OptionsListEmbeddableInput } from '../types';
 import { ControlEditorProps } from '../..';
 
 interface OptionsListEditorState {

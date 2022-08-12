@@ -16,7 +16,7 @@ import { ControlEmbeddable, DataControlField, IEditableControlFactory } from '..
 import {
   createOptionsListExtract,
   createOptionsListInject,
-} from '../../../common/control_types/options_list/options_list_persistable_state';
+} from '../../../common/options_list/options_list_persistable_state';
 import { TimeSliderControlEmbeddableInput } from '../../../common/control_types/time_slider/types';
 import { TimeSliderStrings } from './time_slider_strings';
 
