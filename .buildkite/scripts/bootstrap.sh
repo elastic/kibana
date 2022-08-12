@@ -7,6 +7,11 @@ source .buildkite/scripts/common/setup_bazel.sh
 
 echo "--- yarn install and bootstrap"
 
+BOOTSTRAP_PARAMS=()
+if [[ "${BOOTSTRAP_ALWAYS_FORCE_INSTALL:-}" ]]; then
+  BOOTSTRAP_PARAMS+=(--force-install)
+fi
+
 # Use the node_modules that is baked into the agent image, if it exists, as a cache
 # But only for agents not mounting the workspace on a local ssd or in memory
 # It actually ends up being slower to move all of the tiny files between the disks vs extracting archives from the yarn cache
@@ -15,7 +20,7 @@ if [[ -d ~/.kibana/node_modules && "$(pwd)" != *"/local-ssd/"* && "$(pwd)" != "/
   mv ~/.kibana/node_modules ./
 fi
 
-if ! yarn kbn bootstrap; then
+if ! yarn kbn bootstrap "${BOOTSTRAP_PARAMS[@]}"; then
   echo "bootstrap failed, trying again in 15 seconds"
   sleep 15
 

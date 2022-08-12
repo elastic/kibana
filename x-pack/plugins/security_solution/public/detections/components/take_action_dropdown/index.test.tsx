@@ -234,11 +234,11 @@ describe('take action dropdown', () => {
         );
       });
     });
-    test('should render "Launch responder"', async () => {
+    test('should render "Respond"', async () => {
       await waitFor(() => {
         expect(
           wrapper.find('[data-test-subj="endpointResponseActions-action-item"]').first().text()
-        ).toEqual('Launch responder');
+        ).toEqual('Respond');
       });
     });
   });
@@ -366,7 +366,7 @@ describe('take action dropdown', () => {
       });
     });
 
-    describe('should correctly enable/disable the "Launch responder" button', () => {
+    describe('should correctly enable/disable the "Respond" button', () => {
       let wrapper: ReactWrapper;
       let apiMocks: ReturnType<typeof endpointMetadataHttpMocks>;
 
