@@ -5,23 +5,18 @@
  * 2.0.
  */
 
-import { isArray, isEmpty, xor, map } from 'lodash';
-import uuid from 'uuid';
+import { isArray, isEmpty, map, xor } from 'lodash';
+
+import { useForm as useHookForm } from 'react-hook-form';
 import { produce } from 'immer';
-
 import { useMemo } from 'react';
-import type { ECSMapping } from '../../../common/schemas/common';
 import { convertECSMappingToObject } from '../../../common/schemas/common/utils';
-import type { FormConfig } from '../../shared_imports';
-import { useForm } from '../../shared_imports';
-import { createFormSchema } from './schema';
-
-const FORM_ID = 'editQueryFlyoutForm';
+import type { EcsMappingFormField } from './ecs_mapping_editor_field';
+import { defaultEcsFormData } from './ecs_mapping_editor_field';
 
 export interface UsePackQueryFormProps {
   uniqueQueryIds: string[];
-  defaultValue?: PackQueryFormData | undefined;
-  handleSubmit: FormConfig<PackQueryFormData, PackQueryFormData>['onSubmit'];
+  defaultValue?: PackSOQueryFormData | undefined;
 }
 
 export interface PackSOQueryFormData {
@@ -30,19 +25,19 @@ export interface PackSOQueryFormData {
   interval: number;
   platform?: string | undefined;
   version?: string | undefined;
-  ecs_mapping?: PackQuerySOECSMapping[] | undefined;
+  ecs_mapping: PackQuerySOECSMapping[] | undefined;
 }
 
 export type PackQuerySOECSMapping = Array<{ field: string; value: string }>;
 
 export interface PackQueryFormData {
-  id?: string;
+  id: string;
   description?: string;
   query: string;
-  interval?: number;
+  interval: number;
   platform?: string | undefined;
-  version?: string | undefined;
-  ecs_mapping?: ECSMapping;
+  version?: string | string[] | undefined;
+  ecs_mapping: EcsMappingFormField[];
 }
 
 export type PackQueryECSMapping = Record<
@@ -53,86 +48,75 @@ export type PackQueryECSMapping = Record<
   }
 >;
 
-export const usePackQueryForm = ({
-  uniqueQueryIds,
-  defaultValue,
-  handleSubmit,
-}: UsePackQueryFormProps) => {
+const deserializer = (payload: PackSOQueryFormData): PackQueryFormData => ({
+  id: payload.id,
+  query: payload.query,
+  interval: payload.interval,
+  platform: payload.platform,
+  version: payload.version ? [payload.version] : [],
+  ecs_mapping: !isEmpty(payload.ecs_mapping)
+    ? (map(payload.ecs_mapping, (value: { field: string }, key: string) => {
+        const name = Object.keys(value)[0] as string;
+
+        return {
+          key,
+          result: {
+            type: name,
+            value: name,
+          },
+        };
+      }) as unknown as EcsMappingFormField[])
+    : [defaultEcsFormData],
+});
+
+const serializer = (payload: PackQueryFormData): PackSOQueryFormData =>
+  // @ts-expect-error update types
+  produce(payload, (draft) => {
+    if (isArray(draft.platform)) {
+      draft.platform.join(',');
+    }
+
+    if (isArray(draft.version)) {
+      if (!draft.version.length) {
+        delete draft.version;
+      } else {
+        draft.version = draft.version[0];
+      }
+    }
+
+    if (typeof draft.interval === 'string') {
+      draft.interval = parseInt(draft.interval, 10);
+    }
+
+    if (isEmpty(draft.ecs_mapping)) {
+      // @ts-expect-error update types
+      delete draft.ecs_mapping;
+    } else {
+      // @ts-expect-error update types
+      draft.ecs_mapping = convertECSMappingToObject(payload.ecs_mapping);
+    }
+
+    return draft;
+  });
+
+export const usePackQueryForm = ({ uniqueQueryIds, defaultValue }: UsePackQueryFormProps) => {
   const idSet = useMemo<Set<string>>(
     () => new Set<string>(xor(uniqueQueryIds, defaultValue?.id ? [defaultValue.id] : [])),
     [uniqueQueryIds, defaultValue]
   );
-  const formSchema = useMemo<ReturnType<typeof createFormSchema>>(
-    () => createFormSchema(idSet),
-    [idSet]
-  );
 
-  return useForm<PackSOQueryFormData, PackQueryFormData>({
-    id: FORM_ID + uuid.v4(),
-    onSubmit: async (formData, isValid) => {
-      if (isValid && handleSubmit) {
-        // @ts-expect-error update types
-        return handleSubmit(formData, isValid);
-      }
-    },
-    options: {
-      stripEmptyFields: true,
-    },
-    // @ts-expect-error update types
-    defaultValue: defaultValue || {
-      id: '',
-      query: '',
-      interval: 3600,
-      ecs_mapping: [],
-    },
-    // @ts-expect-error update types
-    serializer: (payload) =>
-      produce(payload, (draft) => {
-        if (isArray(draft.platform)) {
-          draft.platform.join(',');
-        }
-
-        if (isArray(draft.version)) {
-          if (!draft.version.length) {
-            delete draft.version;
-          } else {
-            draft.version = draft.version[0];
-          }
-        }
-
-        if (isEmpty(draft.ecs_mapping)) {
-          delete draft.ecs_mapping;
-        } else {
-          // @ts-expect-error update types
-          draft.ecs_mapping = convertECSMappingToObject(payload.ecs_mapping);
-        }
-
-        return draft;
-      }),
-    // @ts-expect-error update types
-    deserializer: (payload) => {
-      if (!payload) return {} as PackQueryFormData;
-
-      return {
-        id: payload.id,
-        query: payload.query,
-        interval: payload.interval,
-        platform: payload.platform,
-        version: payload.version ? [payload.version] : [],
-        ecs_mapping: !isArray(payload.ecs_mapping)
-          ? map(payload.ecs_mapping, (value, key) => ({
-              key,
-              result: {
-                // @ts-expect-error update types
-                type: Object.keys(value)[0],
-                // @ts-expect-error update types
-                value: Object.values(value)[0],
-              },
-            }))
-          : payload.ecs_mapping,
-      };
-    },
-    // @ts-expect-error update types
-    schema: formSchema,
-  });
+  return {
+    serializer,
+    idSet,
+    ...useHookForm<PackQueryFormData>({
+      defaultValues: defaultValue
+        ? deserializer(defaultValue)
+        : {
+            id: '',
+            query: '',
+            interval: 3600,
+            ecs_mapping: [defaultEcsFormData],
+          },
+    }),
+  };
 };

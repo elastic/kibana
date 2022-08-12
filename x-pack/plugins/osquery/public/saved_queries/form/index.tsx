@@ -17,12 +17,18 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ALL_OSQUERY_VERSIONS_OPTIONS } from '../../packs/queries/constants';
+import {
+  createFormIdFieldValidations,
+  intervalFieldValidations,
+} from '../../packs/queries/validations';
+import { ComboBoxField, NumberField } from '../../form';
 import { PlatformCheckBoxGroupField } from '../../packs/queries/platform_checkbox_group_field';
-import { Field, getUseField, UseField } from '../../shared_imports';
-import { CodeEditorField } from './code_editor_field';
+import { TextField } from '../../form/TextField';
+import { ALL_OSQUERY_VERSIONS_OPTIONS } from '../../packs/queries/constants';
+import { Field, getUseField } from '../../shared_imports';
 import { ECSMappingEditorField } from '../../packs/queries/lazy_ecs_mapping_editor_field';
 import { PlaygroundFlyout } from './playground_flyout';
+import { CodeEditorField } from './code_editor_field';
 
 export const CommonUseField = getUseField({ component: Field });
 
@@ -30,12 +36,14 @@ interface SavedQueryFormProps {
   viewMode?: boolean;
   hasPlayground?: boolean;
   isValid?: boolean;
+  idSet?: any;
 }
 
 const SavedQueryFormComponent: React.FC<SavedQueryFormProps> = ({
   viewMode,
   hasPlayground,
   isValid,
+  idSet,
 }) => {
   const [playgroundVisible, setPlaygroundVisible] = useState(false);
 
@@ -77,11 +85,24 @@ const SavedQueryFormComponent: React.FC<SavedQueryFormProps> = ({
 
   return (
     <>
-      <CommonUseField path="id" euiFieldProps={euiFieldProps} />
+      <TextField
+        name="id"
+        label={i18n.translate('xpack.osquery.pack.queryFlyoutForm.idFieldLabel', {
+          defaultMessage: 'ID',
+        })}
+        euiFieldProps={euiFieldProps}
+        rules={createFormIdFieldValidations(idSet)}
+      />
       <EuiSpacer />
-      <CommonUseField path="description" euiFieldProps={euiFieldProps} />
+      <TextField
+        name="description"
+        label={i18n.translate('xpack.osquery.pack.form.descriptionFieldLabel', {
+          defaultMessage: 'Description (optional)',
+        })}
+        euiFieldProps={euiFieldProps}
+      />
       <EuiSpacer />
-      <UseField path="query" component={CodeEditorField} euiFieldProps={euiFieldProps} />
+      <CodeEditorField name={'query'} euiFieldProps={euiFieldProps} />
       <EuiSpacer size="xl" />
       <EuiFlexGroup>
         <EuiFlexItem>
@@ -119,16 +140,47 @@ const SavedQueryFormComponent: React.FC<SavedQueryFormProps> = ({
       <EuiSpacer />
       <EuiFlexGroup>
         <EuiFlexItem>
-          <CommonUseField path="interval" euiFieldProps={intervalEuiFieldProps} />
+          <NumberField
+            name="interval"
+            defaultValue={3600}
+            label={i18n.translate('xpack.osquery.pack.queryFlyoutForm.intervalFieldLabel', {
+              defaultMessage: 'Interval (s)',
+            })}
+            validation={intervalFieldValidations}
+            euiFieldProps={intervalEuiFieldProps}
+          />
           <EuiSpacer size="m" />
-          <CommonUseField path="version" euiFieldProps={versionEuiFieldProps} />
+          <ComboBoxField
+            name="version"
+            label={
+              (
+                <EuiFlexGroup gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <FormattedMessage
+                      id="xpack.osquery.pack.queryFlyoutForm.versionFieldLabel"
+                      defaultMessage="Minimum Osquery version"
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              ) as unknown as string
+            }
+            euiFieldProps={versionEuiFieldProps}
+            labelAppend={
+              (
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued">
+                    <FormattedMessage
+                      id="xpack.osquery.queryFlyoutForm.versionFieldOptionalLabel"
+                      defaultMessage="(optional)"
+                    />
+                  </EuiText>
+                </EuiFlexItem>
+              ) as unknown as string
+            }
+          />
         </EuiFlexItem>
         <EuiFlexItem>
-          <CommonUseField
-            path="platform"
-            component={PlatformCheckBoxGroupField}
-            euiFieldProps={euiFieldProps}
-          />
+          <PlatformCheckBoxGroupField euiFieldProps={euiFieldProps} />
         </EuiFlexItem>
       </EuiFlexGroup>
       {playgroundVisible && (

@@ -50,7 +50,7 @@ import { OsqueryIcon } from '../../components/osquery_icon';
 import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
 import { prepareEcsFieldsToValidate } from '../../common/helpers';
 
-interface EcsMappingFormField {
+export interface EcsMappingFormField {
   key: string;
   result: {
     type: string;
@@ -77,6 +77,7 @@ const typeMap = {
   constant_keyword: 'string',
 };
 
+// @ts-expect-error update types
 const ResultComboBox = styled(EuiComboBox)`
   &.euiComboBox {
     position: relative;
@@ -544,7 +545,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
             options={(item.result.type === 'field' && euiFieldProps.options) || EMPTY_ARRAY}
             idAria={idAria}
             helpText={selectedOptions[0]?.value?.description}
-            euiFieldProps={euiFieldProps}
+            {...euiFieldProps}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

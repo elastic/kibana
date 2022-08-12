@@ -11,10 +11,10 @@ import styled from 'styled-components';
 
 import { useController } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
-import { MAX_QUERY_LENGTH } from './schema';
 import type { EuiCodeEditorProps } from '../../shared_imports';
 import { OsqueryEditor } from '../../editor';
 import { useKibana } from '../../common/lib/kibana';
+import { MAX_QUERY_LENGTH } from '../../packs/queries/validations';
 
 const StyledEuiCodeBlock = styled(EuiCodeBlock)`
   min-height: 100px;

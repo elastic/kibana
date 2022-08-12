@@ -5,9 +5,23 @@
  * 2.0.
  */
 
+import type React from 'react';
+
 export interface IFormField<T> {
   name: string;
   onChange: (data: T) => void;
   value: T;
   onBlur?: () => void;
+}
+
+export interface IFormFieldProps<T> {
+  name: string;
+  label: string | Element;
+  labelAppend?: string;
+  helpText?: string | (() => React.ReactNode);
+  idAria?: string;
+  euiFieldProps?: Record<string, unknown>;
+  defaultValue?: T;
+  required?: boolean;
+  rules?: Record<string, unknown>;
 }
