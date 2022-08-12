@@ -33,7 +33,7 @@ exports[`Transform: <AggLabelForm /> Date histogram aggregation 1`] = `
           />
         }
         closePopover={[Function]}
-        display="inlineBlock"
+        display="inline-block"
         hasArrow={true}
         id="transformFormPopover"
         isOpen={false}

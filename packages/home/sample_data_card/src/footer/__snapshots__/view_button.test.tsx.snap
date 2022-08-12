@@ -2,12 +2,12 @@
 
 exports[`should render popover when appLinks is not empty 1`] = `
 <div
-  class="euiPopover euiPopover--anchorDownCenter"
+  class="euiPopover emotion-euiPopover"
   data-test-subj="launchSampleDataSetecommerce"
   id="sampleDataLinksecommerce"
 >
   <div
-    class="euiPopover__anchor"
+    class="euiPopover__anchor css-16vtueo-render"
   >
     <button
       aria-label="View Sample eCommerce orders"
@@ -35,12 +35,12 @@ exports[`should render popover when appLinks is not empty 1`] = `
 
 exports[`should render popover with ordered appLinks 1`] = `
 <div
-  class="euiPopover euiPopover--anchorDownCenter"
+  class="euiPopover emotion-euiPopover"
   data-test-subj="launchSampleDataSetecommerce"
   id="sampleDataLinksecommerce"
 >
   <div
-    class="euiPopover__anchor"
+    class="euiPopover__anchor css-16vtueo-render"
   >
     <button
       aria-label="View Sample eCommerce orders"

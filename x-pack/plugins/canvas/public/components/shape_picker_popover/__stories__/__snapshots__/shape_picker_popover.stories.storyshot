@@ -2,10 +2,10 @@
 
 exports[`Storyshots components/Shapes/ShapePickerPopover default 1`] = `
 <div
-  className="euiPopover euiPopover--anchorDownCenter"
+  className="euiPopover emotion-euiPopover"
 >
   <div
-    className="euiPopover__anchor"
+    className="euiPopover__anchor css-16vtueo-render"
   >
     <div
       className="euiPanel euiPanel--plain euiPanel--paddingSmall emotion-euiPanel-grow-m-s-plain"
@@ -32,10 +32,10 @@ exports[`Storyshots components/Shapes/ShapePickerPopover default 1`] = `
 
 exports[`Storyshots components/Shapes/ShapePickerPopover interactive 1`] = `
 <div
-  className="euiPopover euiPopover--anchorDownCenter"
+  className="euiPopover emotion-euiPopover"
 >
   <div
-    className="euiPopover__anchor"
+    className="euiPopover__anchor css-16vtueo-render"
   >
     <div
       className="euiPanel euiPanel--plain euiPanel--paddingSmall emotion-euiPanel-grow-m-s-plain"
@@ -76,10 +76,10 @@ exports[`Storyshots components/Shapes/ShapePickerPopover interactive 1`] = `
 
 exports[`Storyshots components/Shapes/ShapePickerPopover shape selected 1`] = `
 <div
-  className="euiPopover euiPopover--anchorDownCenter"
+  className="euiPopover emotion-euiPopover"
 >
   <div
-    className="euiPopover__anchor"
+    className="euiPopover__anchor css-16vtueo-render"
   >
     <div
       className="euiPanel euiPanel--plain euiPanel--paddingSmall emotion-euiPanel-grow-m-s-plain"

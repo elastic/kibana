@@ -6,6 +6,7 @@
  */
 
 import { render, screen } from '@testing-library/react';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import React from 'react';
 
 import { TestProviders } from '../../../../../common/mock';
@@ -23,7 +24,7 @@ describe('ChartSelect', () => {
     expect(screen.getByRole('button', { name: SELECT_A_CHART_ARIA_LABEL })).toBeInTheDocument();
   });
 
-  test('it invokes `setAlertViewSelection` with the expected value when a chart is selected', () => {
+  test('it invokes `setAlertViewSelection` with the expected value when a chart is selected', async () => {
     const setAlertViewSelection = jest.fn();
 
     render(
@@ -34,6 +35,7 @@ describe('ChartSelect', () => {
 
     const selectButton = screen.getByRole('button', { name: SELECT_A_CHART_ARIA_LABEL });
     selectButton.click();
+    await waitForEuiPopoverOpen();
 
     const treemapMenuItem = screen.getByRole('button', { name: TREEMAP });
     treemapMenuItem.click();

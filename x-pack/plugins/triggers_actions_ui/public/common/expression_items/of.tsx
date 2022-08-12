@@ -105,7 +105,7 @@ export const OfExpression = ({
       closePopover={() => {
         setAggFieldPopoverOpen(false);
       }}
-      display={display === 'fullWidth' ? 'block' : 'inlineBlock'}
+      display={display === 'fullWidth' ? 'block' : 'inline-block'}
       anchorPosition={popupPosition ?? 'downRight'}
       zIndex={8000}
       repositionOnScroll

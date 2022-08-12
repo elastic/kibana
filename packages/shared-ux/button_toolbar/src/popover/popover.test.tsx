@@ -16,7 +16,7 @@ describe('<ToolbarPopover />', () => {
     const isOpen = true;
     const component = mountWithIntl(<ToolbarPopover label="test" children={() => !isOpen} />);
 
-    expect(component).toMatchSnapshot();
+    expect(component.render()).toMatchSnapshot();
   });
 
   test('accepts an onClick handler', () => {

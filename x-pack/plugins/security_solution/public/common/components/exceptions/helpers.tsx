@@ -104,7 +104,7 @@ export const getFormattedComments = (comments: CommentsArray): EuiCommentProps[]
     username: commentItem.created_by,
     timestamp: moment(commentItem.created_at).format('on MMM Do YYYY @ HH:mm:ss'),
     event: i18n.COMMENT_EVENT,
-    timelineIcon: <EuiAvatar size="l" name={commentItem.created_by.toUpperCase()} />,
+    timelineAvatar: <EuiAvatar size="l" name={commentItem.created_by.toUpperCase()} />,
     children: <EuiText size="s">{commentItem.comment}</EuiText>,
     actions: (
       <WithCopyToClipboard

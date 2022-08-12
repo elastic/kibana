@@ -24,7 +24,7 @@
 
   // TODO: remove if fix is provided for https://github.com/elastic/eui/issues/833
   // temp fix for SVGs not appearing in the EuiImage fullscreen view
-  .euiImageFullScreen {
+  .euiImageFullScreenWrapper {
     min-width: 100px;
   }
 }

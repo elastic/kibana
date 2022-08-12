@@ -81,7 +81,7 @@ Array [
           className="euiFormRow__fieldWrapper"
         >
           <div
-            className="euiPopover euiPopover--anchorDownLeft euiPopover--displayBlock euiInputPopover euiSuperSelect"
+            className="euiPopover euiInputPopover euiSuperSelect emotion-euiPopover-EuiInputPopover"
             onKeyDown={[Function]}
             onMouseDown={[Function]}
             onMouseUp={[Function]}
@@ -89,7 +89,7 @@ Array [
             onTouchStart={[Function]}
           >
             <div
-              className="euiPopover__anchor"
+              className="euiPopover__anchor css-zih94u-render"
             />
           </div>
         </div>
@@ -374,7 +374,7 @@ Array [
           className="euiFormRow__fieldWrapper"
         >
           <div
-            className="euiPopover euiPopover--anchorDownLeft euiPopover--displayBlock euiInputPopover euiSuperSelect"
+            className="euiPopover euiInputPopover euiSuperSelect emotion-euiPopover-EuiInputPopover"
             onKeyDown={[Function]}
             onMouseDown={[Function]}
             onMouseUp={[Function]}
@@ -382,7 +382,7 @@ Array [
             onTouchStart={[Function]}
           >
             <div
-              className="euiPopover__anchor"
+              className="euiPopover__anchor css-zih94u-render"
             />
           </div>
         </div>
@@ -608,7 +608,7 @@ Array [
           className="euiFormRow__fieldWrapper"
         >
           <div
-            className="euiPopover euiPopover--anchorDownLeft euiPopover--displayBlock euiInputPopover euiSuperSelect"
+            className="euiPopover euiInputPopover euiSuperSelect emotion-euiPopover-EuiInputPopover"
             onKeyDown={[Function]}
             onMouseDown={[Function]}
             onMouseUp={[Function]}
@@ -616,7 +616,7 @@ Array [
             onTouchStart={[Function]}
           >
             <div
-              className="euiPopover__anchor"
+              className="euiPopover__anchor css-zih94u-render"
             />
           </div>
         </div>
@@ -819,7 +819,7 @@ Array [
           className="euiFormRow__fieldWrapper"
         >
           <div
-            className="euiPopover euiPopover--anchorDownLeft euiPopover--displayBlock euiInputPopover euiSuperSelect"
+            className="euiPopover euiInputPopover euiSuperSelect emotion-euiPopover-EuiInputPopover"
             onKeyDown={[Function]}
             onMouseDown={[Function]}
             onMouseUp={[Function]}
@@ -827,7 +827,7 @@ Array [
             onTouchStart={[Function]}
           >
             <div
-              className="euiPopover__anchor"
+              className="euiPopover__anchor css-zih94u-render"
             />
           </div>
         </div>

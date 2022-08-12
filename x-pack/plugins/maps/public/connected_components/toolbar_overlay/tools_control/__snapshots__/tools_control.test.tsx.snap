@@ -25,7 +25,7 @@ exports[`Should render cancel button when drawing 1`] = `
       }
       closePopover={[Function]}
       data-test-subj="mapToolsControlPopover"
-      display="inlineBlock"
+      display="inline-block"
       hasArrow={true}
       id="toolsControlPopover"
       isOpen={false}
@@ -126,7 +126,7 @@ exports[`renders 1`] = `
   }
   closePopover={[Function]}
   data-test-subj="mapToolsControlPopover"
-  display="inlineBlock"
+  display="inline-block"
   hasArrow={true}
   id="toolsControlPopover"
   isOpen={false}

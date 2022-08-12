@@ -29,7 +29,7 @@ export const getFormattedComments = (comments: CommentsArray): EuiCommentProps[]
       <FormattedRelativePreferenceDate value={commentItem.created_at} dateFormat="MMM D, YYYY" />
     ),
     event: COMMENT_EVENT,
-    timelineIcon: <CustomEuiAvatar size="s" name={commentItem.created_by} />,
+    timelineAvatar: <CustomEuiAvatar size="s" name={commentItem.created_by} />,
     children: <EuiText size="s">{commentItem.comment}</EuiText>,
   }));
 };

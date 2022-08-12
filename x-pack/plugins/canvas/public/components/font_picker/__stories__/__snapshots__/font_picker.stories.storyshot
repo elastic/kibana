@@ -2,7 +2,7 @@
 
 exports[`Storyshots components/FontPicker default 1`] = `
 <div
-  className="euiPopover euiPopover--anchorDownLeft euiPopover--displayBlock euiInputPopover euiSuperSelect"
+  className="euiPopover euiInputPopover euiSuperSelect emotion-euiPopover-EuiInputPopover"
   onKeyDown={[Function]}
   onMouseDown={[Function]}
   onMouseUp={[Function]}
@@ -10,14 +10,14 @@ exports[`Storyshots components/FontPicker default 1`] = `
   onTouchStart={[Function]}
 >
   <div
-    className="euiPopover__anchor"
+    className="euiPopover__anchor css-zih94u-render"
   />
 </div>
 `;
 
 exports[`Storyshots components/FontPicker with value 1`] = `
 <div
-  className="euiPopover euiPopover--anchorDownLeft euiPopover--displayBlock euiInputPopover euiSuperSelect"
+  className="euiPopover euiInputPopover euiSuperSelect emotion-euiPopover-EuiInputPopover"
   onKeyDown={[Function]}
   onMouseDown={[Function]}
   onMouseUp={[Function]}
@@ -25,7 +25,7 @@ exports[`Storyshots components/FontPicker with value 1`] = `
   onTouchStart={[Function]}
 >
   <div
-    className="euiPopover__anchor"
+    className="euiPopover__anchor css-zih94u-render"
   />
 </div>
 `;

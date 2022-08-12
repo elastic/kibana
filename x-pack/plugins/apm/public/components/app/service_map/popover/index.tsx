@@ -200,7 +200,6 @@ export function Popover({
       isOpen={isOpen}
       ref={popoverRef}
       style={popoverStyle}
-      initialFocus={false}
     >
       <EuiFlexGroup
         direction="column"

@@ -67,7 +67,7 @@ const MyEuiCommentList = styled(EuiCommentList)`
       flex-grow: 1;
     }
 
-    & .comment-action.empty-comment .euiCommentEvent--regular {
+    & .comment-action.empty-comment [class*="euiCommentEvent-regular] {
       box-shadow: none;
       .euiCommentEvent__header {
         padding: ${theme.eui.euiSizeM} ${theme.eui.euiSizeS};
@@ -243,7 +243,7 @@ export const UserActions = React.memo(
               />
             ),
             'data-test-subj': 'add-comment',
-            timelineIcon: (
+            timelineAvatar: (
               <UserActionAvatar username={currentUser?.username} fullName={currentUser?.fullName} />
             ),
             className: 'isEdit',

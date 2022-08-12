@@ -304,7 +304,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
             className="euiFormRow__fieldWrapper"
           >
             <div
-              className="euiPopover euiPopover--anchorDownLeft euiPopover--displayBlock euiInputPopover euiSuperSelect"
+              className="euiPopover euiInputPopover euiSuperSelect emotion-euiPopover-EuiInputPopover"
               onKeyDown={[Function]}
               onMouseDown={[Function]}
               onMouseUp={[Function]}
@@ -312,7 +312,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
               onTouchStart={[Function]}
             >
               <div
-                className="euiPopover__anchor"
+                className="euiPopover__anchor css-zih94u-render"
               />
             </div>
           </div>
@@ -386,11 +386,11 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
             className="euiFormRow__fieldWrapper"
           >
             <div
-              className="euiPopover euiPopover--anchorUpCenter"
+              className="euiPopover emotion-euiPopover"
               id="color-picker-popover"
             >
               <div
-                className="euiPopover__anchor"
+                className="euiPopover__anchor css-16vtueo-render"
               >
                 <button
                   aria-label="Border white"
@@ -721,7 +721,7 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
           className="euiFormRow__fieldWrapper"
         >
           <div
-            className="euiPopover euiPopover--anchorDownLeft euiPopover--displayBlock euiInputPopover euiSuperSelect"
+            className="euiPopover euiInputPopover euiSuperSelect emotion-euiPopover-EuiInputPopover"
             onKeyDown={[Function]}
             onMouseDown={[Function]}
             onMouseUp={[Function]}
@@ -729,7 +729,7 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
             onTouchStart={[Function]}
           >
             <div
-              className="euiPopover__anchor"
+              className="euiPopover__anchor css-zih94u-render"
             />
           </div>
         </div>
@@ -803,11 +803,11 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
           className="euiFormRow__fieldWrapper"
         >
           <div
-            className="euiPopover euiPopover--anchorUpCenter"
+            className="euiPopover emotion-euiPopover"
             id="color-picker-popover"
           >
             <div
-              className="euiPopover__anchor"
+              className="euiPopover__anchor css-16vtueo-render"
             >
               <button
                 aria-label="Border black"
@@ -1150,7 +1150,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
             className="euiFormRow__fieldWrapper"
           >
             <div
-              className="euiPopover euiPopover--anchorDownLeft euiPopover--displayBlock euiInputPopover euiSuperSelect"
+              className="euiPopover euiInputPopover euiSuperSelect emotion-euiPopover-EuiInputPopover"
               onKeyDown={[Function]}
               onMouseDown={[Function]}
               onMouseUp={[Function]}
@@ -1158,7 +1158,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
               onTouchStart={[Function]}
             >
               <div
-                className="euiPopover__anchor"
+                className="euiPopover__anchor css-zih94u-render"
               />
             </div>
           </div>
@@ -1232,11 +1232,11 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
             className="euiFormRow__fieldWrapper"
           >
             <div
-              className="euiPopover euiPopover--anchorUpCenter"
+              className="euiPopover emotion-euiPopover"
               id="color-picker-popover"
             >
               <div
-                className="euiPopover__anchor"
+                className="euiPopover__anchor css-16vtueo-render"
               >
                 <button
                   aria-label="Border white"

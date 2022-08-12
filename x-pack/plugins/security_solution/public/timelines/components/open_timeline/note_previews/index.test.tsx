@@ -83,7 +83,7 @@ describe('NotePreviews', () => {
 
     const wrapper = mountWithIntl(<NotePreviews notes={nonUniqueNotes} />);
 
-    expect(wrapper.find('.euiCommentEvent__headerUsername').at(1).text()).toEqual('bob');
+    expect(wrapper.find('div.euiCommentEvent__headerUsername').at(1).text()).toEqual('bob');
   });
 
   test('it filters-out null savedObjectIds', () => {
@@ -110,7 +110,7 @@ describe('NotePreviews', () => {
 
     const wrapper = mountWithIntl(<NotePreviews notes={nonUniqueNotes} />);
 
-    expect(wrapper.find(`.euiCommentEvent__headerUsername`).at(2).text()).toEqual('bob');
+    expect(wrapper.find('div.euiCommentEvent__headerUsername').at(2).text()).toEqual('bob');
   });
 
   test('it filters-out undefined savedObjectIds', () => {
@@ -136,7 +136,7 @@ describe('NotePreviews', () => {
 
     const wrapper = mountWithIntl(<NotePreviews notes={nonUniqueNotes} />);
 
-    expect(wrapper.find(`.euiCommentEvent__headerUsername`).at(2).text()).toEqual('bob');
+    expect(wrapper.find('div.euiCommentEvent__headerUsername').at(2).text()).toEqual('bob');
   });
 
   test('it renders timeline description as a note when showTimelineDescription is true and timelineId is defined', () => {

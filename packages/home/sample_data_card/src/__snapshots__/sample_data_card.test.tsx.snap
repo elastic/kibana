@@ -76,12 +76,12 @@ exports[`SampleDataCard installed renders with app links 1`] = `
         class="euiFlexItem euiFlexItem--flexGrowZero"
       >
         <div
-          class="euiPopover euiPopover--anchorDownCenter"
+          class="euiPopover emotion-euiPopover"
           data-test-subj="launchSampleDataSetsample-data-set"
           id="sampleDataLinkssample-data-set"
         >
           <div
-            class="euiPopover__anchor"
+            class="euiPopover__anchor css-16vtueo-render"
           >
             <button
               aria-label="View Sample Data Set"
