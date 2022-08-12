@@ -19,7 +19,6 @@ Array [
     "references": Array [],
     "type": "index-pattern",
     "updated_at": "2022-06-22T21:55:25.560Z",
-    "version": "WzIyMzg0MzgsMV0=",
   },
   Object {
     "attributes": Object {
@@ -35,7 +34,6 @@ Array [
     "references": Array [],
     "type": "tag",
     "updated_at": "2022-06-22T21:55:25.560Z",
-    "version": "WzIyMzg0MzksMV0=",
   },
   Object {
     "attributes": Object {
@@ -187,7 +185,6 @@ Array [
     ],
     "type": "lens",
     "updated_at": "2022-06-22T22:06:12.160Z",
-    "version": "WzIyNDEwMjIsMV0=",
   },
   Object {
     "attributes": Object {
@@ -206,7 +203,6 @@ Array [
     "references": Array [],
     "type": "index-pattern",
     "updated_at": "2022-06-22T21:55:25.560Z",
-    "version": "WzIyMzg0NDAsMV0=",
   },
   Object {
     "attributes": Object {
@@ -233,7 +229,6 @@ Array [
     ],
     "type": "visualization",
     "updated_at": "2022-06-22T22:01:24.771Z",
-    "version": "WzIyMzk4NDIsMV0=",
   },
   Object {
     "attributes": Object {
@@ -260,7 +255,6 @@ Array [
     ],
     "type": "visualization",
     "updated_at": "2022-06-22T21:55:25.560Z",
-    "version": "WzIyMzg0NDIsMV0=",
   },
   Object {
     "attributes": Object {
@@ -287,7 +281,6 @@ Array [
     ],
     "type": "visualization",
     "updated_at": "2022-06-22T21:55:25.560Z",
-    "version": "WzIyMzg0NDMsMV0=",
   },
   Object {
     "attributes": Object {
@@ -303,7 +296,6 @@ Array [
     "references": Array [],
     "type": "tag",
     "updated_at": "2022-06-22T21:55:25.560Z",
-    "version": "WzIyMzg0NDQsMV0=",
   },
   Object {
     "attributes": Object {
@@ -319,7 +311,6 @@ Array [
     "references": Array [],
     "type": "tag",
     "updated_at": "2022-06-22T21:55:25.560Z",
-    "version": "WzIyMzg0NDUsMV0=",
   },
   Object {
     "attributes": Object {
@@ -378,7 +369,6 @@ Array [
     ],
     "type": "dashboard",
     "updated_at": "2022-06-22T21:55:26.622Z",
-    "version": "WzIyMzg0NDgsMV0=",
   },
   Object {
     "attributes": Object {
@@ -397,7 +387,6 @@ Array [
     "references": Array [],
     "type": "index-pattern",
     "updated_at": "2022-06-22T19:49:24.075Z",
-    "version": "WzIyMTEzNDQsMV0=",
   },
   Object {
     "attributes": Object {
@@ -416,7 +405,6 @@ Array [
     "references": Array [],
     "type": "index-pattern",
     "updated_at": "2022-06-22T21:55:25.560Z",
-    "version": "WzIyMzg0NDYsMV0=",
   },
   Object {
     "attributes": Object {
@@ -564,7 +552,6 @@ Array [
     ],
     "type": "lens",
     "updated_at": "2022-06-22T22:07:54.553Z",
-    "version": "WzIyNDE1MTcsMV0=",
   },
   Object {
     "attributes": Object {
@@ -618,7 +605,6 @@ Array [
     ],
     "type": "dashboard",
     "updated_at": "2022-06-22T21:55:26.622Z",
-    "version": "WzIyMzg0NTAsMV0=",
   },
 ]
 `;

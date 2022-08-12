@@ -30,73 +30,32 @@ PUT _scripts/ml_userriskscore_reduce_script_{{space_name}}
 # 4. Upload ingest pipeline
 PUT _ingest/pipeline/ml_userriskscore_ingest_pipeline_{{space_name}}
 {
-  "dest": {
-    "index": "ml_user_risk_score_{{space_name}}",
-    "pipeline": "ml_userriskscore_ingest_pipeline_{{space_name}}"
-  },
-  "frequency": "1h",
-  "pivot": {
-    "aggregations": {
-      "@timestamp": {
-        "max": {
-          "field": "@timestamp"
-        }
-      },
-      "risk_stats": {
-        "scripted_metric": {
-          "combine_script": "return state",
-          "init_script": "state.rule_risk_stats = new HashMap();",
-          "map_script": {
-            "id": "ml_userriskscore_map_script_{{space_name}}"
-          },
-          "params": {
-            "max_risk": 100,
-            "p": 1.5,
-            "zeta_constant": 2.612
-          },
-          "reduce_script": {
-            "id": "ml_userriskscore_reduce_script_{{space_name}}"
-          }
-        }
+  "processors": [
+    {
+      "set": {
+        "field": "ingest_timestamp",
+        "value": "{{_ingest.timestamp}}"
       }
     },
-    "group_by": {
-      "user.name": {
-        "terms": {
-          "field": "user.name"
+    {
+      "fingerprint": {
+        "fields": [
+          "@timestamp",
+          "_id"
+        ],
+        "method": "SHA-256",
+        "target_field": "_id"
+      }
+    },
+    {
+      "script": {
+        "id": "ml_userriskscore_levels_script_{{space_name}}",
+        "params": {
+          "risk_score": "risk_stats.risk_score"
         }
       }
     }
-  },
-  "source": {
-    "index": [
-      ".siem-signals-{{space_name}}"
-    ],
-    "query": {
-      "bool": {
-        "filter": [
-          {
-            "range": {
-              "@timestamp": {
-                "gte": "now-90d"
-              }
-            }
-          },
-          {
-            "match": {
-              "signal.status": "open"
-            }
-          }
-        ]
-      }
-    }
-  },
-  "sync": {
-    "time": {
-      "delay": "120s",
-      "field": "@timestamp"
-    }
-  }
+  ]
 }
 
 # 5. Upload the pivot transform
@@ -217,13 +176,13 @@ POST _transform/ml_userriskscore_latest_transform_{{space_name}}/_start
 
 # Hint: If you don't see data after running any of the transforms, stop and restart the transforms
 # Stop the pivot transform
-POST _transform/ml_userriskscore_pivot_transform_{{space_name}}/_start
+POST _transform/ml_userriskscore_pivot_transform_default/_stop
 
 # Start the pivot transform
-POST _transform/ml_userriskscore_pivot_transform_{{space_name}}/_stop
+POST _transform/ml_userriskscore_pivot_transform_default/_start
 
 # Stop the latest transform
-POST _transform/ml_userriskscore_latest_transform_{{space_name}}/_start
+POST _transform/ml_userriskscore_latest_transform_default/_stop
 
 # Start the latest transform
-POST _transform/ml_userriskscore_latest_transform_{{space_name}}/_stop
+POST _transform/ml_userriskscore_latest_transform_default/_start

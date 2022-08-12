@@ -23,7 +23,6 @@ export const userRiskScoreDashboards: SavedObject[] = [
     references: [],
     type: 'index-pattern',
     updated_at: '2022-06-22T21:55:25.560Z',
-    version: 'WzIyMzg0MzgsMV0=',
   },
   {
     attributes: { color: '#32057a', description: '', name: 'ueba' },
@@ -33,7 +32,6 @@ export const userRiskScoreDashboards: SavedObject[] = [
     references: [],
     type: 'tag',
     updated_at: '2022-06-22T21:55:25.560Z',
-    version: 'WzIyMzg0MzksMV0=',
   },
   {
     attributes: {
@@ -156,7 +154,6 @@ export const userRiskScoreDashboards: SavedObject[] = [
     ],
     type: 'lens',
     updated_at: '2022-06-22T22:06:12.160Z',
-    version: 'WzIyNDEwMjIsMV0=',
   },
   {
     attributes: {
@@ -174,7 +171,6 @@ export const userRiskScoreDashboards: SavedObject[] = [
     references: [],
     type: 'index-pattern',
     updated_at: '2022-06-22T21:55:25.560Z',
-    version: 'WzIyMzg0NDAsMV0=',
   },
   {
     attributes: {
@@ -201,7 +197,6 @@ export const userRiskScoreDashboards: SavedObject[] = [
     ],
     type: 'visualization',
     updated_at: '2022-06-22T22:01:24.771Z',
-    version: 'WzIyMzk4NDIsMV0=',
   },
   {
     attributes: {
@@ -228,7 +223,6 @@ export const userRiskScoreDashboards: SavedObject[] = [
     ],
     type: 'visualization',
     updated_at: '2022-06-22T21:55:25.560Z',
-    version: 'WzIyMzg0NDIsMV0=',
   },
   {
     attributes: {
@@ -255,7 +249,6 @@ export const userRiskScoreDashboards: SavedObject[] = [
     ],
     type: 'visualization',
     updated_at: '2022-06-22T21:55:25.560Z',
-    version: 'WzIyMzg0NDMsMV0=',
   },
   {
     attributes: { color: '#D36086', description: '', name: 'experimental' },
@@ -265,7 +258,6 @@ export const userRiskScoreDashboards: SavedObject[] = [
     references: [],
     type: 'tag',
     updated_at: '2022-06-22T21:55:25.560Z',
-    version: 'WzIyMzg0NDQsMV0=',
   },
   {
     attributes: { color: '#8aa96b', description: '', name: 'release' },
@@ -275,7 +267,6 @@ export const userRiskScoreDashboards: SavedObject[] = [
     references: [],
     type: 'tag',
     updated_at: '2022-06-22T21:55:25.560Z',
-    version: 'WzIyMzg0NDUsMV0=',
   },
   {
     attributes: {
@@ -334,7 +325,6 @@ export const userRiskScoreDashboards: SavedObject[] = [
     ],
     type: 'dashboard',
     updated_at: '2022-06-22T21:55:26.622Z',
-    version: 'WzIyMzg0NDgsMV0=',
   },
   {
     attributes: {
@@ -351,7 +341,6 @@ export const userRiskScoreDashboards: SavedObject[] = [
     references: [],
     type: 'index-pattern',
     updated_at: '2022-06-22T19:49:24.075Z',
-    version: 'WzIyMTEzNDQsMV0=',
   },
   {
     attributes: {
@@ -368,7 +357,6 @@ export const userRiskScoreDashboards: SavedObject[] = [
     references: [],
     type: 'index-pattern',
     updated_at: '2022-06-22T21:55:25.560Z',
-    version: 'WzIyMzg0NDYsMV0=',
   },
   {
     attributes: {
@@ -483,7 +471,6 @@ export const userRiskScoreDashboards: SavedObject[] = [
     ],
     type: 'lens',
     updated_at: '2022-06-22T22:07:54.553Z',
-    version: 'WzIyNDE1MTcsMV0=',
   },
   {
     attributes: {
@@ -537,6 +524,5 @@ export const userRiskScoreDashboards: SavedObject[] = [
     ],
     type: 'dashboard',
     updated_at: '2022-06-22T21:55:26.622Z',
-    version: 'WzIyMzg0NTAsMV0=',
   },
 ];
