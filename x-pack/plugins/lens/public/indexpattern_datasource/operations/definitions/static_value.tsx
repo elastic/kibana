@@ -13,7 +13,7 @@ import {
   GenericIndexPatternColumn,
   ValueFormatConfig,
 } from './column_types';
-import type { IndexPattern } from '../../types';
+import type { IndexPattern } from '../../../types';
 import { useDebouncedValue } from '../../../shared_components';
 import { getFormatFromPreviousColumn, isValidNumber } from './helpers';
 import { getColumnOrder } from '../layer_helpers';

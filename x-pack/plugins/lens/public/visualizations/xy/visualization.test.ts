@@ -23,7 +23,6 @@ import type {
   XYReferenceLineLayerConfig,
   SeriesType,
 } from './types';
-import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
 import { layerTypes } from '../../../common';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { LensIconChartBar } from '../../assets/chart_bar';
@@ -31,9 +30,11 @@ import type { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/pu
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { Datatable } from '@kbn/expressions-plugin/common';
-import { themeServiceMock } from '@kbn/core/public/mocks';
+import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
 import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 
 const exampleAnnotation: EventAnnotationConfig = {
   id: 'an1',
@@ -75,12 +76,14 @@ const paletteServiceMock = chartPluginMock.createPaletteRegistry();
 const fieldFormatsMock = fieldFormatsServiceMock.createStartContract();
 
 const xyVisualization = getXyVisualization({
-  datatableUtilities: createDatatableUtilitiesMock(),
   paletteService: paletteServiceMock,
   fieldFormats: fieldFormatsMock,
   useLegacyTimeAxis: false,
   kibanaTheme: themeServiceMock.createStartContract(),
   eventAnnotationService: eventAnnotationServiceMock,
+  core: coreMock.createStart(),
+  storage: {} as IStorageWrapper,
+  data: dataPluginMock.createStartContract(),
 });
 
 describe('xy_visualization', () => {
@@ -342,6 +345,7 @@ describe('xy_visualization', () => {
       ]);
 
       frame = {
+        ...frame,
         datasourceLayers: {
           first: mockDatasource.publicAPIMock,
         },

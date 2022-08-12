@@ -22,7 +22,7 @@ import type {
 } from '@kbn/unified-search-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { parseTimeShift } from '@kbn/data-plugin/common';
-import { IndexPattern } from '../../../../types';
+import type { IndexPattern } from '../../../../../types';
 import { memoizedGetAvailableOperationsByMetadata } from '../../../operations';
 import { tinymathFunctions, groupArgsByType, unquotedStringRegex } from '../util';
 import type { GenericOperationDefinition } from '../..';

@@ -20,7 +20,7 @@ import { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { OperationDefinition } from '.';
 import { FieldBasedIndexPatternColumn, ValueFormatConfig } from './column_types';
-import { IndexPatternField, IndexPattern } from '../../types';
+import type { IndexPatternField, IndexPattern } from '../../../types';
 import { DataType } from '../../../types';
 import {
   getFormatFromPreviousColumn,

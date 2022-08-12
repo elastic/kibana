@@ -41,7 +41,7 @@ import { mergeLayer } from '../state_helpers';
 import { hasField } from '../pure_utils';
 import { fieldIsInvalid } from '../utils';
 import { BucketNestingEditor } from './bucket_nesting_editor';
-import type { IndexPattern, IndexPatternField, IndexPatternLayer } from '../types';
+import type { IndexPatternLayer } from '../types';
 import { FormatSelector } from './format_selector';
 import { ReferenceEditor } from './reference_editor';
 import { TimeScaling } from './time_scaling';
@@ -67,7 +67,8 @@ import { NameInput } from '../../shared_components';
 import { ParamEditorProps } from '../operations/definitions';
 import { WrappingHelpPopover } from '../help_popover';
 import { isColumn } from '../operations/definitions/helpers';
-import { FieldChoiceWithOperationType } from './field_select';
+import type { FieldChoiceWithOperationType } from './field_select';
+import type { IndexPattern, IndexPatternField } from '../../types';
 import { documentField } from '../document_field';
 
 export interface DimensionEditorProps extends IndexPatternDimensionEditorProps {
@@ -310,7 +311,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
       disabledStatus:
         definition.getDisabledStatus &&
         definition.getDisabledStatus(
-          state.indexPatterns[state.currentIndexPatternId],
+          props.indexPatterns[state.currentIndexPatternId],
           state.layers[layerId],
           layerType
         ),
@@ -562,7 +563,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     setIsCloseable,
     paramEditorCustomProps,
     ReferenceEditor,
-    existingFields: state.existingFields,
+    existingFields: props.existingFields,
     ...services,
   };
 
@@ -661,7 +662,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 }}
                 validation={validation}
                 currentIndexPattern={currentIndexPattern}
-                existingFields={state.existingFields}
+                existingFields={props.existingFields}
                 selectionStyle={selectedOperationDefinition.selectionStyle}
                 dateRange={dateRange}
                 labelAppend={selectedOperationDefinition?.getHelpMessage?.({
@@ -687,7 +688,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
           selectedColumn={selectedColumn as FieldBasedIndexPatternColumn}
           columnId={columnId}
           indexPattern={currentIndexPattern}
-          existingFields={state.existingFields}
+          existingFields={props.existingFields}
           operationSupportMatrix={operationSupportMatrix}
           updateLayer={(newLayer) => {
             if (temporaryQuickFunction) {
@@ -717,7 +718,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const customParamEditor = ParamEditor ? (
     <>
       <ParamEditor
-        existingFields={state.existingFields}
+        existingFields={props.existingFields}
         layer={state.layers[layerId]}
         activeData={props.activeData}
         paramEditorUpdater={
@@ -835,11 +836,11 @@ export function DimensionEditor(props: DimensionEditorProps) {
         selectedColumn &&
           operationDefinitionMap[selectedColumn.operationType].getDefaultLabel(
             selectedColumn,
-            state.indexPatterns[state.layers[layerId].indexPatternId],
+            props.indexPatterns[state.layers[layerId].indexPatternId],
             state.layers[layerId].columns
           )
       ),
-    [layerId, selectedColumn, state.indexPatterns, state.layers]
+    [layerId, selectedColumn, props.indexPatterns, state.layers]
   );
 
   const shouldDisplayAdvancedOptions =
@@ -992,7 +993,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                         customLabel:
                           operationDefinitionMap[selectedColumn.operationType].getDefaultLabel(
                             selectedColumn,
-                            state.indexPatterns[state.layers[layerId].indexPatternId],
+                            props.indexPatterns[state.layers[layerId].indexPatternId],
                             state.layers[layerId].columns
                           ) !== value,
                       },

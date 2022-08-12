@@ -21,7 +21,7 @@ import { Capabilities } from '@kbn/core/public';
 import { partition } from 'lodash';
 import { showMemoizedErrorNotification } from '../lens_ui_errors';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
-import { Datasource, DatasourcePublicAPI } from '../types';
+import { Datasource, DatasourcePublicAPI, IndexPatternMap } from '../types';
 
 /**
  * Joins a series of queries.
@@ -62,6 +62,7 @@ export function getLayerMetaInfo(
   currentDatasource: Datasource | undefined,
   datasourceState: unknown,
   activeData: TableInspectorAdapter | undefined,
+  indexPatterns: IndexPatternMap,
   timeRange: TimeRange | undefined,
   capabilities: RecursiveReadonly<{
     navLinks: Capabilities['navLinks'];
@@ -90,7 +91,6 @@ export function getLayerMetaInfo(
       isVisible,
     };
   }
-
   let datasourceAPI: DatasourcePublicAPI;
 
   try {
@@ -98,6 +98,7 @@ export function getLayerMetaInfo(
     datasourceAPI = currentDatasource.getPublicAPI({
       layerId: firstLayerId,
       state: datasourceState,
+      indexPatterns,
     });
   } catch (error) {
     showMemoizedErrorNotification(error);

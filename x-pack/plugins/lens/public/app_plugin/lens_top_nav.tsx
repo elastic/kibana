@@ -15,7 +15,6 @@ import { tableHasFormulas } from '@kbn/data-plugin/common';
 import { exporters, getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { StateSetter } from '../types';
 import {
   LensAppServices,
   LensTopNavActions,
@@ -29,16 +28,15 @@ import {
   useLensDispatch,
   LensAppState,
   DispatchSetState,
-  updateDatasourceState,
 } from '../state_management';
 import {
   getIndexPatternsObjects,
   getIndexPatternsIds,
   getResolvedDateRange,
-  handleIndexPatternChange,
   refreshIndexPatternsList,
 } from '../utils';
 import { combineQueryAndFilters, getLayerMetaInfo } from './show_underlying_data';
+import { changeIndexPattern } from '../state_management/lens_slice';
 
 function getLensTopNavConfig(options: {
   showSaveAndReturn: boolean;
@@ -219,6 +217,7 @@ export const LensTopNavMenu = ({
   topNavMenuEntryGenerators,
   initialContext,
   theme$,
+  indexPatternService,
 }: LensTopNavMenuProps) => {
   const {
     data,
@@ -231,21 +230,8 @@ export const LensTopNavMenu = ({
     dashboardFeatureFlag,
     dataViewFieldEditor,
     dataViewEditor,
-    dataViews,
+    dataViews: dataViewsService,
   } = useKibana<LensAppServices>().services;
-
-  const dispatch = useLensDispatch();
-  const dispatchSetState: DispatchSetState = React.useCallback(
-    (state: Partial<LensAppState>) => dispatch(setState(state)),
-    [dispatch]
-  );
-
-  const [indexPatterns, setIndexPatterns] = useState<DataView[]>([]);
-  const [currentIndexPattern, setCurrentIndexPattern] = useState<DataView>();
-  const [rejectedIndexPatterns, setRejectedIndexPatterns] = useState<string[]>([]);
-  const canEditDataView = Boolean(dataViewEditor?.userPermissions.editDataView());
-  const closeFieldEditor = useRef<() => void | undefined>();
-  const closeDataViewEditor = useRef<() => void | undefined>();
 
   const {
     isSaveable,
@@ -257,7 +243,53 @@ export const LensTopNavMenu = ({
     datasourceStates,
     visualization,
     filters,
+    dataViews,
   } = useLensSelector((state) => state.lens);
+
+  const dispatch = useLensDispatch();
+  const dispatchSetState: DispatchSetState = React.useCallback(
+    (state: Partial<LensAppState>) => dispatch(setState(state)),
+    [dispatch]
+  );
+  const dispatchChangeIndexPattern = React.useCallback(
+    async (indexPatternId) => {
+      const [newIndexPatternRefs, newIndexPatterns] = await Promise.all([
+        // Reload refs in case it's a new indexPattern created on the spot
+        dataViews.indexPatternRefs[indexPatternId]
+          ? dataViews.indexPatternRefs
+          : indexPatternService.loadIndexPatternRefs({
+              isFullEditor: true,
+            }),
+        indexPatternService.ensureIndexPattern({
+          id: indexPatternId,
+          cache: dataViews.indexPatterns,
+        }),
+      ]);
+      dispatch(
+        changeIndexPattern({
+          dataViews: { indexPatterns: newIndexPatterns, indexPatternRefs: newIndexPatternRefs },
+          datasourceIds: Object.keys(datasourceStates),
+          visualizationIds: visualization.activeId ? [visualization.activeId] : [],
+          indexPatternId,
+        })
+      );
+    },
+    [
+      dataViews.indexPatternRefs,
+      dataViews.indexPatterns,
+      datasourceStates,
+      dispatch,
+      indexPatternService,
+      visualization.activeId,
+    ]
+  );
+
+  const [indexPatterns, setIndexPatterns] = useState<DataView[]>([]);
+  const [currentIndexPattern, setCurrentIndexPattern] = useState<DataView>();
+  const [rejectedIndexPatterns, setRejectedIndexPatterns] = useState<string[]>([]);
+  const canEditDataView = Boolean(dataViewEditor?.userPermissions.editDataView());
+  const closeFieldEditor = useRef<() => void | undefined>();
+  const closeDataViewEditor = useRef<() => void | undefined>();
 
   const allLoaded = Object.values(datasourceStates).every(({ isLoading }) => isLoading === false);
 
@@ -290,7 +322,7 @@ export const LensTopNavMenu = ({
 
     // Update the cached index patterns if the user made a change to any of them
     if (hasIndexPatternsChanged) {
-      getIndexPatternsObjects(indexPatternIds, dataViews).then(
+      getIndexPatternsObjects(indexPatternIds, dataViewsService).then(
         ({ indexPatterns: indexPatternObjects, rejectedIds }) => {
           setIndexPatterns(indexPatternObjects);
           setRejectedIndexPatterns(rejectedIds);
@@ -303,7 +335,7 @@ export const LensTopNavMenu = ({
     rejectedIndexPatterns,
     datasourceMap,
     indexPatterns,
-    dataViews,
+    dataViewsService,
   ]);
 
   useEffect(() => {
@@ -366,6 +398,7 @@ export const LensTopNavMenu = ({
       datasourceMap[activeDatasourceId],
       datasourceStates[activeDatasourceId].state,
       activeData,
+      dataViews.indexPatterns,
       data.query.timefilter.timefilter.getTime(),
       application.capabilities
     );
@@ -375,6 +408,7 @@ export const LensTopNavMenu = ({
     datasourceMap,
     datasourceStates,
     activeData,
+    dataViews.indexPatterns,
     data.query.timefilter.timefilter,
     application.capabilities,
   ]);
@@ -604,20 +638,8 @@ export const LensTopNavMenu = ({
     });
   }, [data.query.filterManager, data.query.queryString, dispatchSetState]);
 
-  const setDatasourceState: StateSetter<unknown> = useMemo(() => {
-    return (updater) => {
-      dispatch(
-        updateDatasourceState({
-          updater,
-          datasourceId: activeDatasourceId!,
-          clearStagedPreview: true,
-        })
-      );
-    };
-  }, [activeDatasourceId, dispatch]);
-
   const refreshFieldList = useCallback(async () => {
-    if (currentIndexPattern && currentIndexPattern.id) {
+    if (currentIndexPattern?.id) {
       refreshIndexPatternsList({
         activeDatasources: Object.keys(datasourceStates).reduce(
           (acc, datasourceId) => ({
@@ -627,7 +649,8 @@ export const LensTopNavMenu = ({
           {}
         ),
         indexPatternId: currentIndexPattern.id,
-        setDatasourceState,
+        indexPatternService,
+        indexPatternsCache: dataViews.indexPatterns,
       });
     }
     // start a new session so all charts are refreshed
@@ -637,7 +660,8 @@ export const LensTopNavMenu = ({
     data.search.session,
     datasourceMap,
     datasourceStates,
-    setDatasourceState,
+    indexPatternService,
+    dataViews.indexPatterns,
   ]);
 
   const editField = useMemo(
@@ -679,32 +703,14 @@ export const LensTopNavMenu = ({
             closeDataViewEditor.current = dataViewEditor.openEditor({
               onSave: async (dataView) => {
                 if (dataView.id) {
-                  handleIndexPatternChange({
-                    activeDatasources: Object.keys(datasourceStates).reduce(
-                      (acc, datasourceId) => ({
-                        ...acc,
-                        [datasourceId]: datasourceMap[datasourceId],
-                      }),
-                      {}
-                    ),
-                    datasourceStates,
-                    indexPatternId: dataView.id,
-                    setDatasourceState,
-                  });
+                  dispatchChangeIndexPattern(dataView.id);
                   refreshFieldList();
                 }
               },
             });
           }
         : undefined,
-    [
-      dataViewEditor,
-      canEditDataView,
-      datasourceMap,
-      datasourceStates,
-      refreshFieldList,
-      setDatasourceState,
-    ]
+    [canEditDataView, dataViewEditor, dispatchChangeIndexPattern, refreshFieldList]
   );
 
   const dataViewPickerProps = {
@@ -721,18 +727,7 @@ export const LensTopNavMenu = ({
         (indexPattern) => indexPattern.id === newIndexPatternId
       );
       setCurrentIndexPattern(currentDataView);
-      handleIndexPatternChange({
-        activeDatasources: Object.keys(datasourceStates).reduce(
-          (acc, datasourceId) => ({
-            ...acc,
-            [datasourceId]: datasourceMap[datasourceId],
-          }),
-          {}
-        ),
-        datasourceStates,
-        indexPatternId: newIndexPatternId,
-        setDatasourceState,
-      });
+      dispatchChangeIndexPattern(newIndexPatternId);
     },
   };
 
@@ -759,7 +754,8 @@ export const LensTopNavMenu = ({
           allLoaded &&
             activeDatasourceId &&
             datasourceMap[activeDatasourceId].isTimeBased(
-              datasourceStates[activeDatasourceId].state
+              datasourceStates[activeDatasourceId].state,
+              dataViews.indexPatterns
             )
         )
       }

@@ -17,13 +17,14 @@ import {
   GenericIndexPatternColumn,
   operationDefinitionMap,
 } from '../operations';
-import { IndexPattern, IndexPatternLayer } from '../types';
-import { IndexPatternDimensionEditorProps } from './dimension_panel';
+import type { IndexPatternLayer } from '../types';
+import type { IndexPatternDimensionEditorProps } from './dimension_panel';
 import {
   getDateHistogramInterval,
   getLayerTimeShiftChecks,
   timeShiftOptions,
 } from '../time_shift_utils';
+import type { IndexPattern } from '../../types';
 
 // to do: get the language from uiSettings
 export const defaultFilter: Query = {

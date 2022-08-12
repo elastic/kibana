@@ -17,7 +17,8 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createMockedIndexPattern } from '../../mocks';
 import { staticValueOperation } from '.';
-import { IndexPattern, IndexPatternLayer } from '../../types';
+import { IndexPatternLayer } from '../../types';
+import { IndexPattern } from '../../../types';
 import { StaticValueIndexPatternColumn } from './static_value';
 import { TermsIndexPatternColumn } from './terms';
 

@@ -10,9 +10,11 @@ import { DataPanelWrapper } from './data_panel_wrapper';
 import { Datasource, DatasourceDataPanelProps } from '../../types';
 import { DragDropIdentifier } from '../../drag_drop';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { mockStoreDeps, mountWithProvider } from '../../mocks';
+import { createMockFramePublicAPI, mockStoreDeps, mountWithProvider } from '../../mocks';
 import { disableAutoApply } from '../../state_management/lens_slice';
 import { selectTriggerApplyChanges } from '../../state_management';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { createIndexPatternServiceMock } from '../../mocks/data_views_service_mock';
 
 describe('Data Panel Wrapper', () => {
   describe('Datasource data panel properties', () => {
@@ -34,7 +36,9 @@ describe('Data Panel Wrapper', () => {
           core={{} as DatasourceDataPanelProps['core']}
           dropOntoWorkspace={(field: DragDropIdentifier) => {}}
           hasSuggestionForField={(field: DragDropIdentifier) => true}
-          plugins={{ uiActions: {} as UiActionsStart }}
+          plugins={{ uiActions: {} as UiActionsStart, dataViews: {} as DataViewsPublicPluginStart }}
+          indexPatternService={createIndexPatternServiceMock()}
+          frame={createMockFramePublicAPI()}
         />,
         {
           preloadedState: {

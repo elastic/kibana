@@ -14,7 +14,7 @@ import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { TimeScaleUnit } from '../../../../common/expressions';
 import { OperationDefinition, ParamEditorProps } from '.';
 import { FieldBasedIndexPatternColumn, ValueFormatConfig } from './column_types';
-import { IndexPatternField } from '../../types';
+import type { IndexPatternField } from '../../../types';
 import {
   getInvalidFieldMessage,
   getFilter,

@@ -21,7 +21,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { Markdown } from '@kbn/kibana-react-plugin/public';
-import { IndexPattern } from '../../../../types';
+import type { IndexPattern } from '../../../../../types';
 import { tinymathFunctions } from '../util';
 import { getPossibleFunctions } from './math_completion';
 import { hasFunctionFieldArgument } from '../validation';

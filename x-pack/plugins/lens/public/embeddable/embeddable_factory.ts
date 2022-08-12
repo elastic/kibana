@@ -42,7 +42,7 @@ export interface LensEmbeddableStartServices {
   attributeService: LensAttributeService;
   capabilities: RecursiveReadonly<Capabilities>;
   expressionRenderer: ReactExpressionRendererType;
-  indexPatternService: DataViewsContract;
+  dataViews: DataViewsContract;
   uiActions?: UiActionsStart;
   usageCollection?: UsageCollectionSetup;
   documentToExpression: (
@@ -107,7 +107,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
         uiActions,
         coreHttp,
         attributeService,
-        indexPatternService,
+        dataViews,
         capabilities,
         usageCollection,
         theme,
@@ -122,7 +122,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
         {
           attributeService,
           data,
-          indexPatternService,
+          dataViews,
           timefilter,
           inspector,
           expressionRenderer,

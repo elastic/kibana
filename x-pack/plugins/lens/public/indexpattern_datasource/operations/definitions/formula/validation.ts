@@ -27,7 +27,8 @@ import type {
   GenericIndexPatternColumn,
   GenericOperationDefinition,
 } from '..';
-import type { IndexPattern, IndexPatternLayer } from '../../../types';
+import type { IndexPatternLayer } from '../../../types';
+import type { IndexPattern } from '../../../../types';
 import type { TinymathNodeTypes } from './types';
 
 interface ValidationErrors {
