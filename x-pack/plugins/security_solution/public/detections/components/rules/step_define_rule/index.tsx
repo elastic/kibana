@@ -164,8 +164,6 @@ const RuleTypeEuiFormRow = styled(EuiFormRow).attrs<{ $isVisible: boolean }>(({ 
   },
 }))<{ $isVisible: boolean }>``;
 
-export const DATA_VIEW_TOUR_ACTIVE_KEY = 'security.dataViewRulesTourActive';
-
 const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   addPadding = false,
   defaultValues,
