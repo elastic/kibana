@@ -63,7 +63,7 @@ export class ApmSynthtraceKibanaClient {
     const bestMatch = validPackageVersions[0];
     if (!bestMatch) {
       throw new Error(
-        `None of the available APM package versions matches the current Kibana version (${currentKibanaVersion}). The latest available version is ${packageVersions[0]}. This can happen if the Kibana version was recently bumped, and no matching APM package has been released yet. Reach out to the fleet team if this persists.`
+        `None of the available APM package versions matches the current Kibana version (${currentKibanaVersion}). The latest available version is ${packageVersions[0]}. This can happen if the Kibana version was recently bumped, and no matching APM package was released. Reach out to the fleet team if this persists.`
       );
     }
     return bestMatch;
