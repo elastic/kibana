@@ -150,6 +150,27 @@ export async function getIndexPatternsObjects(
   return { indexPatterns: fullfilled.map((response) => response.value), rejectedIds };
 }
 
+export async function getAdHocIndexSpecs(
+  dataSource: Datasource,
+  dataSourceState: unknown,
+  dataViews: DataViewsContract
+): Promise<{ adHocDataviews: DataView[] }> {
+  const adHocIndexPatterns = dataSource?.getAdHocIndexSpecs?.(dataSourceState);
+
+  const adHocDataviews: DataView[] = [];
+
+  if (adHocIndexPatterns) {
+    const adHocSpecs = Object.values(adHocIndexPatterns);
+    if (adHocSpecs?.length) {
+      for (const addHocDataView of adHocSpecs) {
+        const d = await dataViews.create(addHocDataView);
+        adHocDataviews.push(d);
+      }
+    }
+  }
+  return { adHocDataviews };
+}
+
 export function getRemoveOperation(
   activeVisualization: Visualization,
   visualizationState: VisualizationState['state'],

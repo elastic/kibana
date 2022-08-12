@@ -74,7 +74,12 @@ import { LensAttributeService } from '../lens_attribute_service';
 import type { ErrorMessage, TableInspectorAdapter } from '../editor_frame_service/types';
 import { getLensInspectorService, LensInspector } from '../lens_inspector_service';
 import { SharingSavedObjectProps, VisualizationDisplayOptions } from '../types';
-import { getActiveDatasourceIdFromDoc, getIndexPatternsObjects, inferTimeField } from '../utils';
+import {
+  getActiveDatasourceIdFromDoc,
+  getIndexPatternsObjects,
+  inferTimeField,
+  getAdHocIndexSpecs,
+} from '../utils';
 import { getLayerMetaInfo, combineQueryAndFilters } from '../app_plugin/show_underlying_data';
 import { convertDataViewIntoLensIndexPattern } from '../indexpattern_service/loader';
 
@@ -840,6 +845,19 @@ export class Embeddable
       this.savedVis?.references.map(({ id }) => id) || [],
       this.deps.dataViews
     );
+    const activeDatasourceId = getActiveDatasourceIdFromDoc(this.savedVis);
+    if (activeDatasourceId) {
+      const activeDatasource = this.deps.datasourceMap[activeDatasourceId];
+      const dataSourceState = this.savedVis?.state.datasourceStates[activeDatasourceId];
+      const { adHocDataviews } = await getAdHocIndexSpecs(
+        activeDatasource,
+        dataSourceState,
+        this.deps.dataViews
+      );
+      if (adHocDataviews.length) {
+        indexPatterns.push(...adHocDataviews);
+      }
+    }
 
     this.indexPatterns = uniqBy(indexPatterns, 'id');
 
