@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { IKibanaSearchResponse } from '../../../common';
+import { IKibanaSearchResponse, SearchSourceSearchOptions } from '../../../common';
 import { ShardFailureOpenModalButton } from '../../shard_failure_modal';
 import { getNotifications } from '../../services';
 import type { SearchRequest } from '..';
@@ -21,6 +21,7 @@ const SUPPRESSED_TYPES = ['illegal_argument_exception'];
 export function handleResponse(
   request: SearchRequest,
   response: IKibanaSearchResponse,
+  { disableShardFailureWarning }: SearchSourceSearchOptions,
   theme: ThemeServiceStart
 ) {
   const { rawResponse } = response;
@@ -38,7 +39,8 @@ export function handleResponse(
     rawResponse._shards.failed &&
     rawResponse._shards.failures.some(
       (failure: any) => !SUPPRESSED_TYPES.includes(failure.reason?.type)
-    )
+    ) &&
+    !disableShardFailureWarning
   ) {
     const title = i18n.translate('data.search.searchSource.fetch.shardsFailedNotificationMessage', {
       defaultMessage: '{shardsFailed} of {shardsTotal} shards failed',

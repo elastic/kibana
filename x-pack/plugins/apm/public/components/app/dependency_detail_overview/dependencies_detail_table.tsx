@@ -107,6 +107,7 @@ export function DependenciesDetailTable() {
       )}
       status={status}
       compact={false}
+      initialPageSize={25}
     />
   );
 }

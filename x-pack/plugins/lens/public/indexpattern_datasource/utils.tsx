@@ -17,10 +17,8 @@ import { Adapters } from '@kbn/inspector-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { groupBy, escape, uniq } from 'lodash';
 import type { Query } from '@kbn/data-plugin/common';
-import type { FramePublicAPI, StateSetter } from '../types';
+import type { FramePublicAPI, IndexPattern, IndexPatternField, StateSetter } from '../types';
 import type {
-  IndexPattern,
-  IndexPatternField,
   IndexPatternLayer,
   IndexPatternPersistedState,
   IndexPatternPrivateState,
@@ -222,7 +220,7 @@ export function getTSDBRollupWarningMessages(
 export function getPrecisionErrorWarningMessages(
   datatableUtilities: DatatableUtilitiesService,
   state: IndexPatternPrivateState,
-  { activeData }: FramePublicAPI,
+  { activeData, dataViews }: FramePublicAPI,
   docLinks: DocLinksStart,
   setState: StateSetter<IndexPatternPrivateState>
 ) {
@@ -241,7 +239,7 @@ export function getPrecisionErrorWarningMessages(
         const currentLayer = state.layers[layerId];
         const currentColumn = currentLayer?.columns[column.id];
         if (currentLayer && currentColumn && datatableUtilities.hasPrecisionError(column)) {
-          const indexPattern = state.indexPatterns[currentLayer.indexPatternId];
+          const indexPattern = dataViews.indexPatterns[currentLayer.indexPatternId];
           // currentColumnIsTerms is mostly a type guard. If there's a precision error,
           // we already know that we're dealing with a terms-based operation (at least for now).
           const currentColumnIsTerms = isColumnOfType<TermsIndexPatternColumn>(

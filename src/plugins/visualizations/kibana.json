@@ -19,7 +19,7 @@
     "dataViewEditor"
   ],
   "optionalPlugins": ["home", "share", "spaces", "savedObjectsTaggingOss"],
-  "requiredBundles": ["kibanaUtils", "discover", "kibanaReact", "charts"],
+  "requiredBundles": ["kibanaUtils", "savedSearch", "kibanaReact", "savedSearch"],
   "extraPublicDirs": ["common/constants", "common/utils", "common/expression_functions"],
   "owner": {
     "name": "Vis Editors",
