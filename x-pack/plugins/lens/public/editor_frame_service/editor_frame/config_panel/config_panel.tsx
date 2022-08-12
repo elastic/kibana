@@ -12,6 +12,7 @@ import {
   UPDATE_FILTER_REFERENCES_ACTION,
   UPDATE_FILTER_REFERENCES_TRIGGER,
 } from '@kbn/unified-search-plugin/public';
+import { LayerType } from '../../../../common';
 import { removeDimension } from '../../../state_management/lens_slice';
 import { Visualization } from '../../../types';
 import { LayerPanel } from './layer_panel';
@@ -22,7 +23,7 @@ import {
   setLayerDefaultDimension,
   useLensDispatch,
   removeOrClearLayer,
-  addLayer,
+  addLayer as addLayerAction,
   updateState,
   updateDatasourceState,
   updateVisualizationState,
@@ -149,6 +150,12 @@ export function LayerPanels(
     [dispatchLens]
   );
 
+  const addLayer = (layerType: LayerType) => {
+    const layerId = generateId();
+    dispatchLens(addLayerAction({ layerId, layerType }));
+    setNextFocusedLayerId(layerId);
+  };
+
   return (
     <EuiForm className="lnsConfigPanel">
       {layerInfos.map(
@@ -166,6 +173,7 @@ export function LayerPanels(
               updateDatasource={updateDatasource}
               updateDatasourceAsync={updateDatasourceAsync}
               updateAll={updateAll}
+              addLayer={(layerType) => addLayer(layerType)}
               isOnlyLayer={
                 getRemoveOperation(
                   activeVisualization,
@@ -194,8 +202,8 @@ export function LayerPanels(
                 const datasourceId = datasourcePublicAPI?.datasourceId;
                 dispatchLens(removeDimension({ ...dimensionProps, datasourceId }));
               }}
-              onRemoveLayer={() => {
-                const datasourcePublicAPI = props.framePublicAPI.datasourceLayers?.[layerId];
+              onRemoveLayer={(layerToRemove: string) => {
+                const datasourcePublicAPI = props.framePublicAPI.datasourceLayers?.[layerToRemove];
                 const datasourceId = datasourcePublicAPI?.datasourceId;
                 const layerDatasource = datasourceMap[datasourceId];
                 const layerDatasourceState = datasourceStates?.[datasourceId]?.state;
@@ -205,7 +213,10 @@ export function LayerPanels(
 
                 action?.execute({
                   trigger,
-                  fromDataView: layerDatasource.getUsedDataView(layerDatasourceState, layerId),
+                  fromDataView: layerDatasource.getUsedDataView(
+                    layerDatasourceState,
+                    layerToRemove
+                  ),
                   usedDataViews: layerDatasource
                     .getLayers(layerDatasourceState)
                     .map((layer) => layerDatasource.getUsedDataView(layerDatasourceState, layer)),
@@ -215,11 +226,11 @@ export function LayerPanels(
                 dispatchLens(
                   removeOrClearLayer({
                     visualizationId: activeVisualization.id,
-                    layerId,
+                    layerId: layerToRemove,
                     layerIds: layerInfos.map(({ id }) => id),
                   })
                 );
-                removeLayerRef(layerId);
+                removeLayerRef(layerToRemove);
               }}
               toggleFullscreen={toggleFullscreen}
             />
@@ -229,11 +240,7 @@ export function LayerPanels(
         visualization={activeVisualization}
         visualizationState={visualization.state}
         layersMeta={props.framePublicAPI}
-        onAddLayerClick={(layerType) => {
-          const layerId = generateId();
-          dispatchLens(addLayer({ layerId, layerType }));
-          setNextFocusedLayerId(layerId);
-        }}
+        onAddLayerClick={(layerType) => addLayer(layerType)}
       />
     </EuiForm>
   );

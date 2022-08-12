@@ -578,6 +578,8 @@ export type VisualizationDimensionEditorProps<T = unknown> = VisualizationConfig
   accessor: string;
   setState(newState: T | ((currState: T) => T)): void;
   panelRef: MutableRefObject<HTMLDivElement | null>;
+  addLayer: (layerType: LayerType) => void;
+  removeLayer: (layerId: string) => void;
 };
 
 export interface AccessorConfig {

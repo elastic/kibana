@@ -10,6 +10,7 @@ import './layer_panel.scss';
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiText, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { LayerType } from '../../../../common';
 import { NativeRenderer } from '../../../native_renderer';
 import {
   StateSetter,
@@ -48,12 +49,13 @@ export function LayerPanel(
     updateVisualization: StateSetter<unknown>;
     updateDatasource: (datasourceId: string, newState: unknown) => void;
     updateDatasourceAsync: (datasourceId: string, newState: unknown) => void;
+    addLayer: (layerType: LayerType) => void;
     updateAll: (
       datasourceId: string,
       newDatasourcestate: unknown,
       newVisualizationState: unknown
     ) => void;
-    onRemoveLayer: () => void;
+    onRemoveLayer: (layerId: string) => void;
     onRemoveDimension: (props: { columnId: string; layerId: string }) => void;
     registerNewLayerRef: (layerId: string, instance: HTMLDivElement | null) => void;
     toggleFullscreen: () => void;
@@ -595,6 +597,8 @@ export function LayerPanel(
                         accessor: activeId,
                         setState: props.updateVisualization,
                         panelRef,
+                        addLayer: props.addLayer,
+                        removeLayer: props.onRemoveLayer,
                       }}
                     />
                   </div>

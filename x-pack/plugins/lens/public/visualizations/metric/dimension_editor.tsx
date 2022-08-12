@@ -17,6 +17,7 @@ import {
   htmlIdGenerator,
   EuiColorPicker,
   euiPaletteColorBlind,
+  EuiSwitch,
 } from '@elastic/eui';
 import { LayoutDirection } from '@elastic/charts';
 import React, { useCallback, useState } from 'react';
@@ -241,7 +242,34 @@ function PrimaryMetricEditor(props: Props) {
       <EuiFormRow
         display="columnCompressed"
         fullWidth
-        label={i18n.translate('xpack.lens.metric.dynamicColoring.label', {
+        label={i18n.translate('xpack.lens.metric.enableTrendline.label', {
+          defaultMessage: 'Enable trendline',
+        })}
+        css={css`
+          align-items: center;
+        `}
+      >
+        {/* // TODO - find a way to disable this if the dataview doesn't have a time field! */}
+        <EuiSwitch
+          label={i18n.translate('xpack.lens.metric.enableTrendline.label', {
+            defaultMessage: 'Enable trendline',
+          })}
+          showLabel={false}
+          compressed
+          checked={Boolean(state.trendlineLayerId)}
+          onChange={() => {
+            if (!state.trendlineLayerId) {
+              props.addLayer('metricTrendline');
+            } else {
+              props.removeLayer(state.trendlineLayerId);
+            }
+          }}
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        display="columnCompressed"
+        fullWidth
+        label={i18n.translate('xpack.lens.metric.enableTrendline.label', {
           defaultMessage: 'Color mode',
         })}
         css={css`
@@ -314,7 +342,7 @@ function PrimaryMetricEditor(props: Props) {
             >
               <EuiFlexItem>
                 <EuiColorPaletteDisplay
-                  data-test-subj="lnsMetric_dynamicColoring_palette"
+                  data-test-subj="lnsMetric_enableTrendline_palette"
                   palette={displayStops.map(({ color }) => color)}
                   type={FIXED_PROGRESSION}
                   onClick={togglePalette}
@@ -322,7 +350,7 @@ function PrimaryMetricEditor(props: Props) {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
-                  data-test-subj="lnsMetric_dynamicColoring_trigger"
+                  data-test-subj="lnsMetric_enableTrendline_trigger"
                   iconType="controlsHorizontal"
                   onClick={togglePalette}
                   size="xs"
