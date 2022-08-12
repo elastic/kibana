@@ -27,7 +27,7 @@ data-type="inline"
 
 Use drag and drop to organize the columns and improve the view of the data.
 
-* To move a single column, columns, click its header. In the dropdown menu,
+* To move a single column, click its header. In the dropdown menu,
 click *Move left* or *Move right*.
 
 * To move multiple columns, click *Columns*.
