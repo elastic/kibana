@@ -122,7 +122,7 @@ export const getXyVisualization = ({
     };
   },
 
-  appendLayer(state, layerId, layerType) {
+  appendLayer(state, layerId, layerType, indexPatternId) {
     const firstUsedSeriesType = getDataLayers(state.layers)?.[0]?.seriesType;
     return {
       ...state,
@@ -132,12 +132,13 @@ export const getXyVisualization = ({
           seriesType: firstUsedSeriesType || state.preferredSeriesType,
           layerId,
           layerType,
+          indexPatternId,
         }),
       ],
     };
   },
 
-  clearLayer(state, layerId) {
+  clearLayer(state, layerId, indexPatternId) {
     return {
       ...state,
       layers: state.layers.map((l) =>
@@ -146,6 +147,7 @@ export const getXyVisualization = ({
           : newLayerState({
               seriesType: state.preferredSeriesType,
               layerId,
+              indexPatternId,
             })
       ),
     };

@@ -904,11 +904,11 @@ export interface Visualization<T = unknown> {
   /** Frame needs to know which layers the visualization is currently using */
   getLayerIds: (state: T) => string[];
   /** Reset button on each layer triggers this */
-  clearLayer: (state: T, layerId: string) => T;
+  clearLayer: (state: T, layerId: string, indexPatternId: string) => T;
   /** Optional, if the visualization supports multiple layers */
   removeLayer?: (state: T, layerId: string) => T;
   /** Track added layers in internal state */
-  appendLayer?: (state: T, layerId: string, type: LayerType) => T;
+  appendLayer?: (state: T, layerId: string, type: LayerType, indexPatternId: string) => T;
 
   /** Retrieve a list of supported layer types with initialization data */
   getSupportedLayers: (
