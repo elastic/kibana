@@ -42,7 +42,7 @@ to re-open the flyout and change the rule properties.
 [[defining-rules-general-details]]
 ==== General rule details
 
-All rules share the following four properties.
+All rules share the following four properties:
 
 Name:: The name of the rule. While this name does not have to be unique, the
 name can be referenced in actions and also appears in the searchable rule
