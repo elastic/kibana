@@ -15,14 +15,14 @@ import { defaultLabel } from '../filters';
 import { isReferenced } from '../../layer_helpers';
 
 import type { FieldStatsResponse } from '../../../../../common';
-import type { FrameDatasourceAPI } from '../../../../types';
+import type { FrameDatasourceAPI, IndexPattern, IndexPatternField } from '../../../../types';
 import type { FiltersIndexPatternColumn } from '..';
 import type { TermsIndexPatternColumn } from './types';
-import { LastValueIndexPatternColumn } from '../last_value';
+import type { LastValueIndexPatternColumn } from '../last_value';
 import type { PercentileRanksIndexPatternColumn } from '../percentile_ranks';
 import type { PercentileIndexPatternColumn } from '../percentile';
 
-import type { IndexPatternLayer, IndexPattern, IndexPatternField } from '../../../types';
+import type { IndexPatternLayer } from '../../../types';
 import { MULTI_KEY_VISUAL_SEPARATOR, supportedTypes } from './constants';
 import { isColumnOfType } from '../helpers';
 

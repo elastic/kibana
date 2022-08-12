@@ -13,6 +13,7 @@ import { ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT } from '../../../common/c
 
 import { fetchSearchResults } from '../../lib/fetch_search_results';
 import { RouteDependencies } from '../../plugin';
+import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 
 const calculateMeta = (searchResults: SearchResponseBody, page: number, size: number) => {
   let totalResults = 0;
@@ -35,7 +36,7 @@ const calculateMeta = (searchResults: SearchResponseBody, page: number, size: nu
   };
 };
 
-export function registerSearchRoute({ router }: RouteDependencies) {
+export function registerSearchRoute({ router, log }: RouteDependencies) {
   router.get(
     {
       path: '/internal/enterprise_search/indices/{index_name}/search',
@@ -52,34 +53,29 @@ export function registerSearchRoute({ router }: RouteDependencies) {
         }),
       },
     },
-    async (context, request, response) => {
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const indexName = decodeURIComponent(request.params.index_name);
       const { client } = (await context.core).elasticsearch;
       const { page = 0, size = ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT } = request.query;
       const from = page * size;
-      try {
-        const searchResults: SearchResponseBody = await fetchSearchResults(
-          client,
-          request.params.index_name,
-          '',
-          from,
-          size
-        );
+      const searchResults: SearchResponseBody = await fetchSearchResults(
+        client,
+        indexName,
+        '',
+        from,
+        size
+      );
 
-        return response.ok({
-          body: {
-            meta: calculateMeta(searchResults, page, size),
-            results: searchResults,
-          },
-          headers: { 'content-type': 'application/json' },
-        });
-      } catch (error) {
-        return response.customError({
-          body: 'Error fetching data from Enterprise Search',
-          statusCode: 502,
-        });
-      }
-    }
+      return response.ok({
+        body: {
+          meta: calculateMeta(searchResults, page, size),
+          results: searchResults,
+        },
+        headers: { 'content-type': 'application/json' },
+      });
+    })
   );
+
   router.get(
     {
       path: '/internal/enterprise_search/indices/{index_name}/search/{query}',
@@ -97,32 +93,27 @@ export function registerSearchRoute({ router }: RouteDependencies) {
         }),
       },
     },
-    async (context, request, response) => {
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const indexName = decodeURIComponent(request.params.index_name);
       const { client } = (await context.core).elasticsearch;
       const { page = 0, size = ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT } = request.query;
       const from = page * size;
-      try {
-        const searchResults = await fetchSearchResults(
-          client,
-          request.params.index_name,
-          request.params.query,
-          from,
-          size
-        );
 
-        return response.ok({
-          body: {
-            meta: calculateMeta(searchResults, page, size),
-            results: searchResults,
-          },
-          headers: { 'content-type': 'application/json' },
-        });
-      } catch (error) {
-        return response.customError({
-          body: 'Error fetching data from Enterprise Search',
-          statusCode: 502,
-        });
-      }
-    }
+      const searchResults = await fetchSearchResults(
+        client,
+        indexName,
+        request.params.query,
+        from,
+        size
+      );
+
+      return response.ok({
+        body: {
+          meta: calculateMeta(searchResults, page, size),
+          results: searchResults,
+        },
+        headers: { 'content-type': 'application/json' },
+      });
+    })
   );
 }
