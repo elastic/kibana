@@ -105,7 +105,7 @@ https://testing-jira.atlassian.net/rest/api/2/issue/{{{external.system.id}}}/com
 ----
 
 `createIncidentJson`::
-(TBD, string) A JSON payload sent to the create case URL to create a case. You
+(Required, string) A JSON payload sent to the create case URL to create a case. You
 can use variables to add case data to the payload. Required variables are
 `case.title` and `case.description`. For example:
 +
@@ -162,8 +162,8 @@ when REST method runs. Manually ensure that the JSON is valid, disregarding the
 Mustache variables, so the later validation will pass.
 
 `hasAuth`::
-(TBD, boolean) If true, a username and password for login type authentication
-must be provided.
+(Optional, boolean) If true, a username and password for login type authentication
+must be provided. The default value is `true`.
 
 `headers`::
 (Optional, string) A set of key-value pairs sent as headers with the request
