@@ -146,36 +146,10 @@ const StyledMinHeightTabContainer = styled.div`
 export enum RuleDetailTabs {
   alerts = 'alerts',
   exceptions = 'exceptions',
+  endpointExceptions = 'endpointExceptions',
   executionResults = 'executionResults',
   executionEvents = 'executionEvents',
 }
-
-const ruleDetailTabs = [
-  {
-    id: RuleDetailTabs.alerts,
-    name: detectionI18n.ALERT,
-    disabled: false,
-    dataTestSubj: 'alertsTab',
-  },
-  {
-    id: RuleDetailTabs.exceptions,
-    name: i18n.EXCEPTIONS_TAB,
-    disabled: false,
-    dataTestSubj: 'exceptionsTab',
-  },
-  {
-    id: RuleDetailTabs.executionResults,
-    name: i18n.EXECUTION_RESULTS_TAB,
-    disabled: false,
-    dataTestSubj: 'executionResultsTab',
-  },
-  {
-    id: RuleDetailTabs.executionEvents,
-    name: i18n.EXECUTION_EVENTS_TAB,
-    disabled: false,
-    dataTestSubj: 'executionEventsTab',
-  },
-];
 
 type DetectionEngineComponentProps = PropsFromRedux;
 
@@ -238,7 +212,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     runtimeMappings,
     loading: isLoadingIndexPattern,
   } = useSourcererDataView(SourcererScopeName.detections);
-
   const loading = userInfoLoading || listsConfigLoading;
   const { detailName: ruleId } = useParams<{ detailName: string }>();
   const {
@@ -250,6 +223,79 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const { pollForSignalIndex } = useSignalHelpers();
   const [rule, setRule] = useState<Rule | null>(null);
   const isLoading = ruleLoading && rule == null;
+
+  const exceptionLists = useMemo((): {
+    lists: ExceptionListIdentifiers[];
+    allowedExceptionListTypes: ExceptionListTypeEnum[];
+  } => {
+    if (rule != null && rule.exceptions_list != null) {
+      return rule.exceptions_list.reduce<{
+        lists: ExceptionListIdentifiers[];
+        allowedExceptionListTypes: ExceptionListTypeEnum[];
+      }>(
+        (acc, { id, list_id: listId, namespace_type: namespaceType, type }) => {
+          const { allowedExceptionListTypes, lists } = acc;
+          const shouldAddEndpoint =
+            type === ExceptionListTypeEnum.ENDPOINT &&
+            !allowedExceptionListTypes.includes(ExceptionListTypeEnum.ENDPOINT);
+          return {
+            lists: [...lists, { id, listId, namespaceType, type }],
+            allowedExceptionListTypes: shouldAddEndpoint
+              ? [...allowedExceptionListTypes, ExceptionListTypeEnum.ENDPOINT]
+              : allowedExceptionListTypes,
+          };
+        },
+        { lists: [], allowedExceptionListTypes: [ExceptionListTypeEnum.DETECTION] }
+      );
+    } else {
+      return { lists: [], allowedExceptionListTypes: [ExceptionListTypeEnum.DETECTION] };
+    }
+  }, [rule]);
+
+  const ruleDetailTabsDefault = useMemo(
+    () => [
+      {
+        id: RuleDetailTabs.alerts,
+        name: detectionI18n.ALERT,
+        disabled: false,
+        dataTestSubj: 'alertsTab',
+      },
+      {
+        id: RuleDetailTabs.executionResults,
+        name: i18n.EXECUTION_RESULTS_TAB,
+        disabled: false,
+        dataTestSubj: 'executionResultsTab',
+      },
+      {
+        id: RuleDetailTabs.executionEvents,
+        name: i18n.EXECUTION_EVENTS_TAB,
+        disabled: false,
+        dataTestSubj: 'executionEventsTab',
+      },
+      {
+        id: RuleDetailTabs.exceptions,
+        name: i18n.EXCEPTIONS_TAB,
+        disabled: false,
+        dataTestSubj: 'exceptionsTab',
+      },
+    ],
+    []
+  );
+
+  const ruleDetailTabs = useMemo(() => {
+    return exceptionLists.allowedExceptionListTypes.includes(ExceptionListTypeEnum.ENDPOINT)
+      ? [
+          ...ruleDetailTabsDefault,
+          {
+            id: RuleDetailTabs.endpointExceptions,
+            name: i18n.ENDPOINT_EXCEPTIONS_TAB,
+            disabled: false,
+            dataTestSubj: 'endpointExceptionsTab',
+          },
+        ]
+      : ruleDetailTabsDefault;
+  }, [ruleDetailTabsDefault, exceptionLists]);
+
   const [ruleDetailTab, setRuleDetailTab] = useState(RuleDetailTabs.alerts);
   const [pageTabs, setTabs] = useState(ruleDetailTabs);
   const { aboutRuleData, modifiedAboutRuleDetailsData, defineRuleData, scheduleRuleData } =
@@ -614,34 +660,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     [setShowOnlyThreatIndicatorAlerts]
   );
 
-  const exceptionLists = useMemo((): {
-    lists: ExceptionListIdentifiers[];
-    allowedExceptionListTypes: ExceptionListTypeEnum[];
-  } => {
-    if (rule != null && rule.exceptions_list != null) {
-      return rule.exceptions_list.reduce<{
-        lists: ExceptionListIdentifiers[];
-        allowedExceptionListTypes: ExceptionListTypeEnum[];
-      }>(
-        (acc, { id, list_id: listId, namespace_type: namespaceType, type }) => {
-          const { allowedExceptionListTypes, lists } = acc;
-          const shouldAddEndpoint =
-            type === ExceptionListTypeEnum.ENDPOINT &&
-            !allowedExceptionListTypes.includes(ExceptionListTypeEnum.ENDPOINT);
-          return {
-            lists: [...lists, { id, listId, namespaceType, type }],
-            allowedExceptionListTypes: shouldAddEndpoint
-              ? [...allowedExceptionListTypes, ExceptionListTypeEnum.ENDPOINT]
-              : allowedExceptionListTypes,
-          };
-        },
-        { lists: [], allowedExceptionListTypes: [ExceptionListTypeEnum.DETECTION] }
-      );
-    } else {
-      return { lists: [], allowedExceptionListTypes: [ExceptionListTypeEnum.DETECTION] };
-    }
-  }, [rule]);
-
   const onSkipFocusBeforeEventsTable = useCallback(() => {
     focusUtilityBarAction(containerElement.current);
   }, [containerElement]);
@@ -868,8 +886,18 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                   ruleName={rule?.name ?? ''}
                   ruleIndices={rule?.index ?? DEFAULT_INDEX_PATTERN}
                   dataViewId={rule?.data_view_id}
-                  availableListTypes={exceptionLists.allowedExceptionListTypes}
-                  commentsAccordionId={'ruleDetailsTabExceptions'}
+                  listType={ExceptionListTypeEnum.DETECTION}
+                  exceptionListsMeta={exceptionLists.lists}
+                  onRuleChange={refreshRule}
+                />
+              )}
+              {ruleDetailTab === RuleDetailTabs.endpointExceptions && (
+                <ExceptionsViewer
+                  ruleId={ruleId ?? ''}
+                  ruleName={rule?.name ?? ''}
+                  ruleIndices={rule?.index ?? DEFAULT_INDEX_PATTERN}
+                  dataViewId={rule?.data_view_id}
+                  listType={ExceptionListTypeEnum.ENDPOINT}
                   exceptionListsMeta={exceptionLists.lists}
                   onRuleChange={refreshRule}
                 />

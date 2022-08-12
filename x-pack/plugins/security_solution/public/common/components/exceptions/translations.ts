@@ -74,7 +74,7 @@ export const ADD_EXCEPTION_LABEL = i18n.translate(
 export const ADD_TO_ENDPOINT_LIST = i18n.translate(
   'xpack.securitySolution.exceptions.viewer.addToEndpointListLabel',
   {
-    defaultMessage: 'Add Endpoint exception',
+    defaultMessage: 'Add endpoint exception',
   }
 );
 
@@ -122,9 +122,9 @@ export const DELETE_EXCEPTION_ERROR = i18n.translate(
 );
 
 export const ITEMS_PER_PAGE = (items: number) =>
-  i18n.translate('xpack.securitySolution.exceptions.exceptionsPaginationLabel', {
+  i18n.translate('xpack.securitySolution.exceptions.exceptionItemsPaginationLabel', {
     values: { items },
-    defaultMessage: 'Items per page: {items}',
+    defaultMessage: 'Rows per page: {items}',
   });
 
 export const NUMBER_OF_ITEMS = (items: number) =>

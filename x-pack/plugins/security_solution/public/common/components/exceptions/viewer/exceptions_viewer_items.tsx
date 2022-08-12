@@ -6,96 +6,99 @@
  */
 
 import React from 'react';
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiLoadingLogo } from '@elastic/eui';
 import styled from 'styled-components';
 
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import * as i18n from '../translations';
+import type {
+  ExceptionListItemSchema,
+  ExceptionListTypeEnum,
+} from '@kbn/securitysolution-io-ts-list-types';
+import * as i18n from './translations';
 import { ExceptionItemCard } from './exception_item_card';
 import type { ExceptionListItemIdentifiers } from '../types';
+import { ExeptionItemsViewerEmptySearchResults } from './no_search_results';
+import { ExeptionItemsViewerNoItems } from './no_exception_items';
 
 const MyFlexItem = styled(EuiFlexItem)`
   margin: ${({ theme }) => `${theme.eui.euiSize} 0`};
-
   &:first-child {
     margin: ${({ theme }) => `${theme.eui.euiSizeXS} 0 ${theme.eui.euiSize}`};
   }
 `;
 
-const MyExceptionItemContainer = styled(EuiFlexGroup)`
-  margin: ${({ theme }) => `0 ${theme.eui.euiSize} ${theme.eui.euiSize} 0`};
-`;
-
-interface ExceptionsViewerItemsProps {
+interface ExceptionItemsViewerProps {
   showEmpty: boolean;
   showNoResults: boolean;
   isInitLoading: boolean;
   disableActions: boolean;
   exceptions: ExceptionListItemSchema[];
   loadingItemIds: ExceptionListItemIdentifiers[];
+  listType: ExceptionListTypeEnum;
+  ruleReferences: unknown;
+  onCreateExceptionListItem: () => void;
   onDeleteException: (arg: ExceptionListItemIdentifiers) => void;
   onEditExceptionItem: (item: ExceptionListItemSchema) => void;
 }
 
-const ExceptionsViewerItemsComponent: React.FC<ExceptionsViewerItemsProps> = ({
+const ExceptionItemsViewerComponent: React.FC<ExceptionItemsViewerProps> = ({
   showEmpty,
   showNoResults,
   isInitLoading,
   exceptions,
   loadingItemIds,
+  listType,
+  disableActions,
+  ruleReferences,
   onDeleteException,
   onEditExceptionItem,
-  disableActions,
-}): JSX.Element => (
-  <EuiFlexGroup direction="column" className="eui-yScrollWithShadows">
-    {showEmpty || showNoResults || isInitLoading ? (
-      <EuiFlexItem grow={1}>
+  onCreateExceptionListItem,
+}): JSX.Element => {
+  return (
+    <EuiFlexGroup direction="column" className="eui-yScrollWithShadows">
+      {isInitLoading && (
         <EuiEmptyPrompt
-          iconType={showNoResults ? 'searchProfilerApp' : 'list'}
-          title={
-            <h2 data-test-subj="exceptionsEmptyPromptTitle">
-              {showNoResults ? '' : i18n.EXCEPTION_EMPTY_PROMPT_TITLE}
-            </h2>
-          }
-          body={
-            <p data-test-subj="exceptionsEmptyPromptBody">
-              {showNoResults
-                ? i18n.EXCEPTION_NO_SEARCH_RESULTS_PROMPT_BODY
-                : i18n.EXCEPTION_EMPTY_PROMPT_BODY}
-            </p>
-          }
-          data-test-subj="exceptionsEmptyPrompt"
+          icon={<EuiLoadingLogo logo="logoKibana" size="xl" />}
+          title={<h2>{i18n.EXCEPTION_LOADING_TITLE}</h2>}
+          data-test-subj="exceptionsLoadingPrompt"
         />
-      </EuiFlexItem>
-    ) : (
-      <EuiFlexItem grow={false} className="eui-yScrollWithShadows">
-        <MyExceptionItemContainer
-          data-test-subj="exceptionsContainer"
-          gutterSize="none"
-          direction="column"
-        >
-          {!isInitLoading &&
-            exceptions.length > 0 &&
-            exceptions.map((exception) => (
-              <MyFlexItem data-test-subj="exceptionItemContainer" grow={false} key={exception.id}>
-                <ExceptionItemCard
-                  disableActions={disableActions}
-                  loadingItemIds={loadingItemIds}
-                  exceptionItem={exception}
-                  onDeleteException={onDeleteException}
-                  onEditException={onEditExceptionItem}
-                  dataTestSubj={`exceptionItemCard-${exception.name}`}
-                />
-              </MyFlexItem>
-            ))}
-        </MyExceptionItemContainer>
-      </EuiFlexItem>
-    )}
-  </EuiFlexGroup>
-);
+      )}
+      {showNoResults && <ExeptionItemsViewerEmptySearchResults />}
+      {showEmpty && (
+        <ExeptionItemsViewerNoItems
+          listType={listType}
+          onCreateExceptionListItem={onCreateExceptionListItem}
+        />
+      )}
+      {!showEmpty && !showNoResults && !isInitLoading && (
+        <EuiFlexItem grow={false} className="eui-yScrollWithShadows">
+          <EuiFlexGroup data-test-subj="exceptionsContainer" gutterSize="none" direction="column">
+            {!isInitLoading &&
+              exceptions.length > 0 &&
+              exceptions.map((exception) => (
+                <MyFlexItem data-test-subj="exceptionItemContainer" grow={false} key={exception.id}>
+                  <ExceptionItemCard
+                    disableActions={disableActions}
+                    loadingItemIds={loadingItemIds}
+                    exceptionItem={exception}
+                    listType={listType}
+                    ruleReferences={
+                      ruleReferences != null ? ruleReferences[exception.list_id] : null
+                    }
+                    onDeleteException={onDeleteException}
+                    onEditException={onEditExceptionItem}
+                    dataTestSubj="exceptionItemsViewerItem"
+                  />
+                </MyFlexItem>
+              ))}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
+  );
+};
 
-ExceptionsViewerItemsComponent.displayName = 'ExceptionsViewerItemsComponent';
+ExceptionItemsViewerComponent.displayName = 'ExceptionItemsViewerComponent';
 
-export const ExceptionsViewerItems = React.memo(ExceptionsViewerItemsComponent);
+export const ExceptionsViewerItems = React.memo(ExceptionItemsViewerComponent);
 
 ExceptionsViewerItems.displayName = 'ExceptionsViewerItems';

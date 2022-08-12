@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import React, { useMemo, useCallback } from 'react';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 import { getFormattedComments } from '../../helpers';
 import type { ExceptionListItemIdentifiers } from '../../types';
@@ -28,16 +29,20 @@ import { ExceptionItemCardMetaInfo } from './exception_item_card_meta';
 export interface ExceptionItemProps {
   loadingItemIds: ExceptionListItemIdentifiers[];
   exceptionItem: ExceptionListItemSchema;
+  listType: ExceptionListTypeEnum;
   onDeleteException: (arg: ExceptionListItemIdentifiers) => void;
   onEditException: (item: ExceptionListItemSchema) => void;
   disableActions: boolean;
   dataTestSubj: string;
+  ruleReferences: unknown;
 }
 
 const ExceptionItemCardComponent = ({
   disableActions,
   loadingItemIds,
   exceptionItem,
+  listType,
+  ruleReferences,
   onDeleteException,
   onEditException,
   dataTestSubj,
@@ -73,14 +78,20 @@ const ExceptionItemCardComponent = ({
             actions={[
               {
                 key: 'edit',
-                icon: 'pencil',
-                label: i18n.EXCEPTION_ITEM_EDIT_BUTTON,
+                icon: 'controlsHorizontal',
+                label:
+                  listType === ExceptionListTypeEnum.ENDPOINT
+                    ? i18n.ENDPOINT_EXCEPTION_ITEM_EDIT_BUTTON
+                    : i18n.EXCEPTION_ITEM_EDIT_BUTTON,
                 onClick: handleEdit,
               },
               {
                 key: 'delete',
                 icon: 'trash',
-                label: i18n.EXCEPTION_ITEM_DELETE_BUTTON,
+                label:
+                  listType === ExceptionListTypeEnum.ENDPOINT
+                    ? i18n.ENDPOINT_EXCEPTION_ITEM_DELETE_BUTTON
+                    : i18n.EXCEPTION_ITEM_DELETE_BUTTON,
                 onClick: handleDelete,
               },
             ]}
@@ -91,6 +102,7 @@ const ExceptionItemCardComponent = ({
         <EuiFlexItem data-test-subj={`${dataTestSubj}-meta`}>
           <ExceptionItemCardMetaInfo
             item={exceptionItem}
+            references={ruleReferences}
             dataTestSubj="exceptionItemCardMetaInfo"
           />
         </EuiFlexItem>

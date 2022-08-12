@@ -371,3 +371,29 @@ export const fetchInstalledIntegrations = async ({
       signal,
     }
   );
+
+/**
+ * Fetch a Rule by providing a Rule ID
+ *
+ * @param id Rule ID's (not rule_id)
+ * @param http Kibana http service
+ * @param signal to cancel request
+ *
+ * @throws An error if response is not OK
+ */
+export const findRuleExceptionReferences = async ({
+  lists,
+  http,
+  signal,
+}: unknown & { http: HttpStart }): Promise<unknown> => {
+  console.log({ LISTS: lists })
+  return http.fetch<Rule>(`${DETECTION_ENGINE_RULES_URL}/exceptions/_find_references`, {
+    method: 'GET',
+    query: {
+      list_ids: lists.map((l) => l.id).join(','),
+      list_list_ids: lists.map((l) => l.listId).join(','),
+      namespace_types: lists.map((l) => l.type).join(','),
+    },
+    signal,
+  });
+}

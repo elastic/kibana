@@ -10,14 +10,28 @@ import { i18n } from '@kbn/i18n';
 export const EXCEPTION_ITEM_EDIT_BUTTON = i18n.translate(
   'xpack.securitySolution.exceptions.exceptionItem.editItemButton',
   {
-    defaultMessage: 'Edit item',
+    defaultMessage: 'Edit rule exception',
   }
 );
 
 export const EXCEPTION_ITEM_DELETE_BUTTON = i18n.translate(
   'xpack.securitySolution.exceptions.exceptionItem.deleteItemButton',
   {
-    defaultMessage: 'Delete item',
+    defaultMessage: 'Delete rule exception',
+  }
+);
+
+export const ENDPOINT_EXCEPTION_ITEM_EDIT_BUTTON = i18n.translate(
+  'xpack.securitySolution.exceptions.exceptionItem.endpoint.editItemButton',
+  {
+    defaultMessage: 'Edit endpoint exception',
+  }
+);
+
+export const ENDPOINT_EXCEPTION_ITEM_DELETE_BUTTON = i18n.translate(
+  'xpack.securitySolution.exceptions.exceptionItem.endpoint.deleteItemButton',
+  {
+    defaultMessage: 'Delete endpoint exception',
   }
 );
 
@@ -159,3 +173,9 @@ export const OS_MAC = i18n.translate(
     defaultMessage: 'Mac',
   }
 );
+
+export const AFFECTED_RULES = (numRules: number) =>
+  i18n.translate('xpack.securitySolution.exceptions.exceptionItem.affectedRules', {
+    values: { numRules },
+    defaultMessage: 'Affects {numRules} {numRules, plural, =1 {rule} other {rules}}',
+  });

@@ -31,8 +31,6 @@ export interface State {
   exceptionListTypeToEdit: ExceptionListType | null;
   totalEndpointItems: number;
   totalDetectionsItems: number;
-  showEndpointListsOnly: boolean;
-  showDetectionsListsOnly: boolean;
 }
 
 export type Action =
@@ -80,8 +78,7 @@ export const allExceptionItemsReducer =
         };
       }
       case 'updateFilterOptions': {
-        const { filter, pagination, showEndpointListsOnly, showDetectionsListsOnly } =
-          action.filters;
+        const { filter, pagination } = action.filters;
         return {
           ...state,
           filterOptions: {
@@ -92,8 +89,6 @@ export const allExceptionItemsReducer =
             ...state.pagination,
             ...pagination,
           },
-          showEndpointListsOnly: showEndpointListsOnly ?? state.showEndpointListsOnly,
-          showDetectionsListsOnly: showDetectionsListsOnly ?? state.showDetectionsListsOnly,
         };
       }
       case 'setExceptionItemTotals': {

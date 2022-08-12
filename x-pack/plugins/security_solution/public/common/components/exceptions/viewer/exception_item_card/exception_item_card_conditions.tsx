@@ -6,7 +6,14 @@
  */
 
 import React, { memo, useMemo, useCallback } from 'react';
-import { EuiExpression, EuiToken, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
+import {
+  EuiExpression,
+  EuiToken,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiBadge,
+  EuiPanel,
+} from '@elastic/eui';
 import styled from 'styled-components';
 import type {
   EntryExists,
@@ -57,6 +64,12 @@ const EuiFlexItemNested = styled(EuiFlexItem)`
 
 const StyledCondition = styled('span')`
   margin-right: 6px;
+`;
+
+const StyledConditionContent = styled(EuiPanel)`
+  border: 1px;
+  border-color: #d3dae6;
+  border-style: solid;
 `;
 
 export interface CriteriaConditionsProps {
@@ -163,7 +176,13 @@ export const ExceptionItemCardConditions = memo<CriteriaConditionsProps>(
           const operator = 'operator' in entry ? entry.operator : '';
 
           return (
-            <div data-test-subj={`${dataTestSubj}-condition`} key={field + type + value + index}>
+            <StyledConditionContent
+              color="subdued"
+              hasBorder={true}
+              hasShadow={false}
+              data-test-subj={`${dataTestSubj}-condition`}
+              key={field + type + value + index}
+            >
               <div className="eui-xScroll">
                 <EuiExpression
                   description={
@@ -178,7 +197,7 @@ export const ExceptionItemCardConditions = memo<CriteriaConditionsProps>(
                 />
               </div>
               {nestedEntries != null && getNestedEntriesContent(type, nestedEntries)}
-            </div>
+            </StyledConditionContent>
           );
         })}
       </div>
