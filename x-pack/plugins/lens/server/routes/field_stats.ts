@@ -52,9 +52,10 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
       );
 
       try {
-        const indexPattern = spec
-          ? await indexPatternsService.create(spec)
-          : await indexPatternsService.get(req.params.indexPatternId);
+        const indexPattern =
+          spec && Object.keys(spec).length !== 0
+            ? await indexPatternsService.create(spec)
+            : await indexPatternsService.get(req.params.indexPatternId);
 
         const timeFieldName = indexPattern.timeFieldName;
         const field = indexPattern.fields.find((f) => f.name === fieldName);

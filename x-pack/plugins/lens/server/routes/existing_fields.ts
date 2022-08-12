@@ -142,9 +142,10 @@ async function fetchFieldExistence({
 
   const uiSettingsClient = (await context.core).uiSettings.client;
   const metaFields: string[] = await uiSettingsClient.get(UI_SETTINGS.META_FIELDS);
-  const dataView = spec
-    ? await dataViewsService.create(spec)
-    : await dataViewsService.get(indexPatternId);
+  const dataView =
+    spec && Object.keys(spec).length !== 0
+      ? await dataViewsService.create(spec)
+      : await dataViewsService.get(indexPatternId);
   const allFields = buildFieldList(dataView, metaFields);
   const existingFieldList = await dataViewsService.getFieldsForIndexPattern(dataView, {
     // filled in by data views service
