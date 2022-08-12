@@ -38,7 +38,6 @@ import type {
   FetchDocError,
   FieldPreview,
   ChangeSet,
-  Change,
 } from './types';
 
 import { ChangeType } from './types';
@@ -95,12 +94,6 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     fieldFormats,
   } = useFieldEditorContext();
 
-  /*
-  useEffect(() => {
-
-  }, [subfield]);
-  */
-
   const [previewFields$, previewFieldsObservable] = useMemo(() => {
     const savedSubfieldsToPreviews = Object.entries(subfields || {}).reduce<FieldPreview[]>(
       (col, [key, type]) => {
@@ -109,8 +102,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       },
       []
     );
-    console.log('*** HERE');
-    // todo
+
     const subj = savedSubfieldsToPreviews.length
       ? new Subject<Context['fields']>()
       : new BehaviorSubject<Context['fields']>(savedSubfieldsToPreviews);
@@ -125,7 +117,6 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       bufferCount(2, 1),
       // convert values into diff descriptions
       map(([prev, next]) => {
-        console.log('*** prev next', prev, next);
         const changes = differenceWith(next, prev, isEqual).reduce<ChangeSet>((col, item) => {
           col[item.name] = {
             changeType: ChangeType.UPSERT,
@@ -139,15 +130,12 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
             changes[prevItem.name] = { changeType: ChangeType.DELETE };
           }
         });
-        console.log('*** CHANGES', changes);
         return changes;
       }),
       filter((fields) => Object.keys(fields).length > 0)
     );
 
     return [subj, observable];
-    // curious how I might factor this out as its causing
-    // // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [subfields]);
 
   /** Response from the Painless _execute API */

@@ -139,6 +139,9 @@ export const schema = {
       },
     ],
   },
+  fields: {
+    defaultValue: {},
+  },
   __meta__: {
     isCustomLabelVisible: {
       defaultValue: false,
