@@ -7,7 +7,7 @@
 
 import { Ast } from '@kbn/interpreter';
 import { ScaleType } from '@elastic/charts';
-import { PaletteRegistry } from 'src/plugins/charts/public';
+import { PaletteRegistry } from '@kbn/charts-plugin/public';
 import { State } from './types';
 import { OperationMetadata, DatasourcePublicAPI } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
