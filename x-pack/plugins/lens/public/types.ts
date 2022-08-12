@@ -908,7 +908,7 @@ export interface Visualization<T = unknown> {
   /** Optional, if the visualization supports multiple layers */
   removeLayer?: (state: T, layerId: string) => T;
   /** Track added layers in internal state */
-  appendLayer?: (state: T, layerId: string, type: LayerType, indexPatternId?: string) => T;
+  appendLayer?: (state: T, layerId: string, type: LayerType) => T;
 
   /** Retrieve a list of supported layer types with initialization data */
   getSupportedLayers: (
