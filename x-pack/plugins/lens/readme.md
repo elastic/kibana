@@ -109,6 +109,14 @@ if (!dataView) {
 }
 const dataViewIdForLens = dataView.id;
 ```
+## Refreshing a Lens embeddable
+
+The Lens embeddable is handling data fetching internally, this means as soon as the props change, it will trigger a new request if necessary. However, in some situations it's necessary to trigger a refresh even if the configuration of the chart doesn't change at all. Refreshing is managed using search sessions is Lens. To trigger a refresh without changing the actual configuration of a Lens embeddable, follow these steps:
+* Pull in the contract of the `data` plugin. It contains the session service at `plugins.data.search.session`.
+* When loading the app containing a Lens embeddable, start a new session using `session.start`. It returns the current session id - keep it in the state of our app (e.g. a `useState` hook or your redux store)
+* Pass the current session id to the Lens embeddable component via the `searchSessionId` property
+* When refreshing, simply call `session.start` again and update your state - Lens will discard the existing cache and re-fetch even if the query doesn't change at all
+* When unmounting your app, call `session.clear` to end the current session
 
 # Lens Development
 

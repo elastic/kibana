@@ -126,6 +126,9 @@ export const App = (props: {
     from: 'now-5d',
     to: 'now',
   });
+  const [searchSession, setSearchSession] = useState(() =>
+    props.plugins.data.search.session.start()
+  );
 
   const LensComponent = props.plugins.lens.EmbeddableComponent;
   const LensSaveModalComponent = props.plugins.lens.SaveModalComponent;
@@ -239,6 +242,18 @@ export const App = (props: {
                   Change time range
                 </EuiButton>
               </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  aria-label="Refresh"
+                  data-test-subj="lns-example-refresh"
+                  isDisabled={!attributes}
+                  onClick={() => {
+                    setSearchSession(props.plugins.data.search.session.start());
+                  }}
+                >
+                  Refresh
+                </EuiButton>
+              </EuiFlexItem>
             </EuiFlexGroup>
             <LensComponent
               id=""
@@ -246,6 +261,7 @@ export const App = (props: {
               style={{ height: 500 }}
               timeRange={time}
               attributes={attributes}
+              searchSessionId={searchSession}
               onLoad={(val) => {
                 setIsLoading(val);
               }}
