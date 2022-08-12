@@ -104,13 +104,11 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         'aiopsBrushDeviation'
       );
 
-      // Assert the adjusted brush: The selection width should have changed,
-      // because the brush selection is a few pixel wider as the bucket interval,
-      // we test if the selection is larger than one bucket interval but smaller
-      // than two bucket intervals. Finally, the adjusted brush should trigger
+      // Assert the adjusted brush: The selection width should have changed and
+      // we test if the selection is smaller than two bucket intervals.
+      // Finally, the adjusted brush should trigger
       // a warning on the "Rerun analysis" button.
       expect(brushSelectionWidthBefore).not.to.be(brushSelectionWidthAfter);
-      expect(brushSelectionWidthAfter).to.be.greaterThan(intervalPx);
       expect(brushSelectionWidthAfter).not.to.be.greaterThan(intervalPx * 2);
 
       await aiops.explainLogRateSpikes.assertRerunAnalysisButton(true);
