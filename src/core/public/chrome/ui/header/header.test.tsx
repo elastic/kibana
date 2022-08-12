@@ -96,7 +96,7 @@ describe('Header', () => {
     act(() => isLocked$.next(true));
     component.update();
     expect(component.find('[data-test-subj="collapsibleNav"]').exists()).toBeTruthy();
-    expect(component).toMatchSnapshot();
+    expect(component.render()).toMatchSnapshot();
 
     act(() =>
       breadcrumbsAppendExtension$.next({

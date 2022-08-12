@@ -1493,8 +1493,6 @@
     "core.euiHeaderLinks.appNavigation": "应用菜单",
     "core.euiHeaderLinks.openNavigationMenu": "打开菜单",
     "core.euiHue.label": "选择 HSV 颜色模式“色调”值",
-    "core.euiImage.closeImage": "关闭全屏 {alt} 图像",
-    "core.euiImage.openImage": "打开全屏 {alt} 图像",
     "core.euiLink.external.ariaLabel": "外部链接",
     "core.euiLink.newTarget.screenReaderOnlyText": "（在新选项卡或窗口中打开）",
     "core.euiLoadingChart.ariaLabel": "正在加载",

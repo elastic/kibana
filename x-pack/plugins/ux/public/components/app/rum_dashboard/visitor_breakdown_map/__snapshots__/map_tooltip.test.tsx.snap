@@ -3,7 +3,7 @@
 exports[`Map Tooltip it renders 1`] = `
 Array [
   <div
-    class="euiPopoverTitle"
+    class="euiPopoverTitle emotion-euiPopoverTitle-l"
   />,
   .c1.c1.c1 {
   width: 25%;

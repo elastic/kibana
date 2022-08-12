@@ -221,11 +221,11 @@ Array [
           class="euiDescriptionList__description"
         >
           <div
-            class="euiPopover euiPopover--anchorDownCenter"
+            class="euiPopover emotion-euiPopover"
             id="phaseExecutionPopover"
           >
             <div
-              class="euiPopover__anchor"
+              class="euiPopover__anchor css-16vtueo-render"
             >
               <button
                 class="euiLink emotion-euiLink-primary"

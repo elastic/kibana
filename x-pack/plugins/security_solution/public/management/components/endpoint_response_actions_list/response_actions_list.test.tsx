@@ -9,6 +9,7 @@ import uuid from 'uuid';
 import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { ResponseActionsList } from './response_actions_list';
@@ -219,6 +220,7 @@ describe('Response Actions List', () => {
 
       // toggle page size popover
       userEvent.click(renderResult.getByTestId('tablePaginationPopoverButton'));
+      await waitForEuiPopoverOpen();
       // click size 20
       userEvent.click(renderResult.getByTestId('tablePagination-20-rows'));
 
@@ -264,6 +266,7 @@ describe('Response Actions List', () => {
 
       const quickMenuButton = renderResult.getByTestId('superDatePickerToggleQuickMenuButton');
       userEvent.click(quickMenuButton);
+      await waitForEuiPopoverOpen();
 
       const toggle = renderResult.getByTestId('superDatePickerToggleRefreshButton');
       const intervalInput = renderResult.getByTestId('superDatePickerRefreshIntervalInput');
@@ -296,6 +299,7 @@ describe('Response Actions List', () => {
 
       // pick another relative date
       userEvent.click(quickMenuButton);
+      await waitForEuiPopoverOpen();
       userEvent.click(renderResult.getByTestId('superDatePickerCommonlyUsed_Last_15 minutes'));
       expect(startDatePopoverButton).toHaveTextContent('Last 15 minutes');
     });

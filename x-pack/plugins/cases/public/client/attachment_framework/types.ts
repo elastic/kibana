@@ -12,10 +12,11 @@ import {
   CommentRequestPersistableStateType,
 } from '../../../common/api';
 import { Case } from '../../containers/types';
+import { SupportedUserActionTypes } from '../../components/user_actions/types';
 
 export interface AttachmentViewObject<Props = {}> {
-  type?: EuiCommentProps['type'];
-  timelineIcon?: EuiCommentProps['timelineIcon'];
+  type?: SupportedUserActionTypes;
+  timelineAvatar?: EuiCommentProps['timelineAvatar'];
   actions?: EuiCommentProps['actions'];
   event?: EuiCommentProps['event'];
   children?: React.LazyExoticComponent<React.FC<Props>>;

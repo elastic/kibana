@@ -95,7 +95,7 @@ export const createRegisteredAttachmentUserActionBuilder = <
         event: attachmentViewObject.event,
         'data-test-subj': `comment-${comment.type}-${attachmentTypeId}`,
         timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
-        timelineIcon: attachmentViewObject.timelineIcon,
+        timelineAvatar: attachmentViewObject.timelineAvatar,
         actions: (
           <>
             <UserActionCopyLink id={comment.id} />
