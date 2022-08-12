@@ -148,10 +148,12 @@ export const CaseViewActivity = ({
         {isLoadingUserActions && (
           <EuiLoadingContent lines={8} data-test-subj="case-view-loading-content" />
         )}
-        {!isLoadingUserActions && userActionsData && (
+        {!isLoadingUserActions && userActionsData && userProfiles && (
           <EuiFlexGroup direction="column" responsive={false} data-test-subj="case-view-activity">
             <EuiFlexItem>
               <UserActions
+                userProfiles={userProfiles}
+                currentUserProfile={currentUserProfile}
                 getRuleDetailsHref={ruleDetailsNavigation?.href}
                 onRuleDetailsClick={ruleDetailsNavigation?.onClick}
                 caseServices={userActionsData.caseServices}
