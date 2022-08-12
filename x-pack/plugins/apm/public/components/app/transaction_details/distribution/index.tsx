@@ -10,6 +10,7 @@ import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 
@@ -17,7 +18,6 @@ import type { TabContentProps } from '../types';
 import { useWaterfallFetcher } from '../use_waterfall_fetcher';
 import { WaterfallWithSummary } from '../waterfall_with_summary';
 
-import { ProcessorEvent } from '../../../../../common/processor_event';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';

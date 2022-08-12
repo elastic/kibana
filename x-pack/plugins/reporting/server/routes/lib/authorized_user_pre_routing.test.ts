@@ -145,7 +145,10 @@ describe('authorized_user_pre_routing', function () {
           getMockRequest(),
           getMockResponseFactory()
         )
-      ).toMatchObject({ body: `Sorry, you don't have access to Reporting` });
+      ).toMatchObject({
+        body: `Ask your administrator for access to reporting features. <a href=https://www.elastic.co/guide/en/kibana/test-branch/secure-reporting.html#grant-user-access style=\"font-weight: 600;\"
+                    target=\"_blank\" rel=\"noopener\">Learn more</a>.`,
+      });
     });
 
     it('should return from handler when security is enabled and user has explicitly allowed role', async function () {

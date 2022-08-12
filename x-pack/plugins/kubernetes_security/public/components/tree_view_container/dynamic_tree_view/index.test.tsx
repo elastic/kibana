@@ -48,10 +48,10 @@ describe('DynamicTreeView component', () => {
             }}
             tree={[
               {
-                key: 'cluster',
-                name: 'cluster',
+                key: 'clusterId',
+                name: 'clusterId',
                 namePlural: 'clusters',
-                type: 'cluster',
+                type: 'clusterId',
                 iconProps: {
                   type: 'cluster',
                 },
@@ -75,13 +75,13 @@ describe('DynamicTreeView component', () => {
   });
 
   describe('DynamicTreeView parent level', () => {
-    const key = 'cluster-test';
+    const key = 'orchestrator.cluster.id';
     const tree = [
       {
         key,
         name: 'cluster',
         namePlural: 'clusters',
-        type: 'cluster',
+        type: 'clusterId',
         iconProps: {
           type: 'cluster',
         },
@@ -94,15 +94,18 @@ describe('DynamicTreeView component', () => {
       });
       await waitForApiCall();
 
-      expect(mockedApi).toHaveBeenCalledWith('/internal/kubernetes_security/aggregate', {
-        query: {
-          groupBy: key,
-          index: '*-logs',
-          page: 0,
-          perPage: 50,
-          query: '{"bool":{"filter":[],"must":[],"must_not":[],"should":[]}}',
-        },
-      });
+      expect(mockedApi).toHaveBeenCalledWith(
+        '/internal/kubernetes_security/multi_terms_aggregate',
+        {
+          query: {
+            groupBys: `[{"field":"${key}"},{"field":"orchestrator.cluster.name","missing":""}]`,
+            index: '*-logs',
+            page: 0,
+            perPage: 50,
+            query: '{"bool":{"filter":[],"must":[],"must_not":[],"should":[]}}',
+          },
+        }
+      );
     });
 
     it('should render the parent level based on api response', async () => {
@@ -130,10 +133,10 @@ describe('DynamicTreeView component', () => {
   describe('DynamicTreeView children', () => {
     const tree = [
       {
-        key: 'cluster',
-        name: 'cluster',
+        key: 'orchestrator.cluster.id',
+        name: 'clusterId',
         namePlural: 'clusters',
-        type: 'cluster',
+        type: 'clusterId',
         iconProps: {
           type: 'cluster',
         },
@@ -165,7 +168,7 @@ describe('DynamicTreeView component', () => {
           index: '*-logs',
           page: 0,
           perPage: 50,
-          query: `{"bool":{"filter":[{"term":{"cluster":"${parent}"}}],"must":[],"must_not":[],"should":[]}}`,
+          query: `{"bool":{"filter":[{"term":{"orchestrator.cluster.id":"${parent}"}}],"must":[],"must_not":[],"should":[]}}`,
         },
       });
     });

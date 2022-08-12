@@ -54,21 +54,21 @@ import type {
 import type {
   XyVisualization as XyVisualizationType,
   XyVisualizationPluginSetupPlugins,
-} from './xy_visualization';
+} from './visualizations/xy';
 import type {
   LegacyMetricVisualization as LegacyMetricVisualizationType,
   LegacyMetricVisualizationPluginSetupPlugins,
-} from './metric_visualization';
+} from './visualizations/legacy_metric';
 import type { MetricVisualization as MetricVisualizationType } from './visualizations/metric';
 import type {
   DatatableVisualization as DatatableVisualizationType,
   DatatableVisualizationPluginSetupPlugins,
-} from './datatable_visualization';
+} from './visualizations/datatable';
 import type {
   PieVisualization as PieVisualizationType,
   PieVisualizationPluginSetupPlugins,
-} from './pie_visualization';
-import type { HeatmapVisualization as HeatmapVisualizationType } from './heatmap_visualization';
+} from './visualizations/partition';
+import type { HeatmapVisualization as HeatmapVisualizationType } from './visualizations/heatmap';
 import type { GaugeVisualization as GaugeVisualizationType } from './visualizations/gauge';
 
 import { APP_ID, getEditPath, NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common/constants';
@@ -253,7 +253,8 @@ export class LensPlugin {
     const startServices = createStartServicesGetter(core.getStartServices);
 
     const getStartServices = async (): Promise<LensEmbeddableStartServices> => {
-      const { getLensAttributeService, setUsageCollectionStart } = await import('./async_services');
+      const { getLensAttributeService, setUsageCollectionStart, initMemoizedErrorNotification } =
+        await import('./async_services');
       const { core: coreStart, plugins } = startServices();
 
       await this.initParts(
@@ -271,6 +272,8 @@ export class LensPlugin {
       if (plugins.usageCollection) {
         setUsageCollectionStart(plugins.usageCollection);
       }
+
+      initMemoizedErrorNotification(coreStart);
 
       return {
         attributeService: getLensAttributeService(coreStart, plugins),
@@ -339,13 +342,17 @@ export class LensPlugin {
           eventAnnotation
         );
 
-        const { mountApp, getLensAttributeService, setUsageCollectionStart } = await import(
-          './async_services'
-        );
+        const {
+          mountApp,
+          getLensAttributeService,
+          setUsageCollectionStart,
+          initMemoizedErrorNotification,
+        } = await import('./async_services');
 
         if (deps.usageCollection) {
           setUsageCollectionStart(deps.usageCollection);
         }
+        initMemoizedErrorNotification(coreStart);
 
         const frameStart = this.editorFrameService!.start(coreStart, deps);
         return mountApp(core, params, {
@@ -504,7 +511,7 @@ export class LensPlugin {
         return Boolean(core.application.capabilities.visualize?.show);
       },
       getXyVisTypes: async () => {
-        const { visualizationTypes } = await import('./xy_visualization/types');
+        const { visualizationTypes } = await import('./visualizations/xy/types');
         return visualizationTypes;
       },
 

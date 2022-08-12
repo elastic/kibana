@@ -21,7 +21,15 @@
             "section": "def-common.IKibanaSearchResponse",
             "text": "IKibanaSearchResponse"
           },
-          "<any>, theme: ",
+          "<any>, { disableShardFailureWarning }: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.SearchSourceSearchOptions",
+            "text": "SearchSourceSearchOptions"
+          },
+          ", theme: ",
           "ThemeServiceStart",
           ") => ",
           {
@@ -74,6 +82,26 @@
           {
             "parentPluginId": "data",
             "id": "def-public.handleResponse.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "{ disableShardFailureWarning }",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSourceSearchOptions",
+                "text": "SearchSourceSearchOptions"
+              }
+            ],
+            "path": "src/plugins/data/public/search/fetch/handle_response.tsx",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.handleResponse.$4",
             "type": "Object",
             "tags": [],
             "label": "theme",
@@ -6534,13 +6562,13 @@
                     "section": "def-common.SearchSource",
                     "text": "SearchSource"
                   },
-                  " | undefined; fetch$: (options?: ",
+                  " | undefined; fetch$: <T = {}>(options?: ",
                   {
                     "pluginId": "data",
                     "scope": "common",
                     "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.ISearchOptions",
-                    "text": "ISearchOptions"
+                    "section": "def-common.SearchSourceSearchOptions",
+                    "text": "SearchSourceSearchOptions"
                   },
                   ") => ",
                   "Observable",
@@ -6554,19 +6582,19 @@
                   },
                   "<",
                   "SearchResponse",
-                  "<any, Record<string, ",
+                  "<T, Record<string, ",
                   "AggregationsAggregate",
                   ">>>>; fetch: (options?: ",
                   {
                     "pluginId": "data",
                     "scope": "common",
                     "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.ISearchOptions",
-                    "text": "ISearchOptions"
+                    "section": "def-common.SearchSourceSearchOptions",
+                    "text": "SearchSourceSearchOptions"
                   },
                   ") => Promise<",
                   "SearchResponse",
-                  "<any, Record<string, ",
+                  "<unknown, Record<string, ",
                   "AggregationsAggregate",
                   ">>>; onRequestStart: (handler: (searchSource: ",
                   {
@@ -6581,8 +6609,8 @@
                     "pluginId": "data",
                     "scope": "common",
                     "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.ISearchOptions",
-                    "text": "ISearchOptions"
+                    "section": "def-common.SearchSourceSearchOptions",
+                    "text": "SearchSourceSearchOptions"
                   },
                   " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; destroy: () => void; getSerializedFields: (recurse?: boolean) => ",
                   {
@@ -9366,9 +9394,7 @@
             "parentPluginId": "data",
             "id": "def-common.SearchSource.setParent",
             "type": "Function",
-            "tags": [
-              "return"
-            ],
+            "tags": [],
             "label": "setParent",
             "description": [
               "\nSet a searchSource that this source should inherit from"
@@ -9441,17 +9467,13 @@
                 "isRequired": true
               }
             ],
-            "returnComment": [
-              "- chainable"
-            ]
+            "returnComment": []
           },
           {
             "parentPluginId": "data",
             "id": "def-common.SearchSource.getParent",
             "type": "Function",
-            "tags": [
-              "return"
-            ],
+            "tags": [],
             "label": "getParent",
             "description": [
               "\nGet the parent of this SearchSource"
@@ -9482,13 +9504,13 @@
               "\nFetch this source from Elasticsearch, returning an observable over the response(s)"
             ],
             "signature": [
-              "(options?: ",
+              "<T = {}>(options?: ",
               {
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
-                "section": "def-common.ISearchOptions",
-                "text": "ISearchOptions"
+                "section": "def-common.SearchSourceSearchOptions",
+                "text": "SearchSourceSearchOptions"
               },
               ") => ",
               "Observable",
@@ -9502,7 +9524,7 @@
               },
               "<",
               "SearchResponse",
-              "<any, Record<string, ",
+              "<T, Record<string, ",
               "AggregationsAggregate",
               ">>>>"
             ],
@@ -9521,8 +9543,8 @@
                     "pluginId": "data",
                     "scope": "common",
                     "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.ISearchOptions",
-                    "text": "ISearchOptions"
+                    "section": "def-common.SearchSourceSearchOptions",
+                    "text": "SearchSourceSearchOptions"
                   }
                 ],
                 "path": "src/plugins/data/common/search/search_source/search_source.ts",
@@ -9549,12 +9571,12 @@
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
-                "section": "def-common.ISearchOptions",
-                "text": "ISearchOptions"
+                "section": "def-common.SearchSourceSearchOptions",
+                "text": "SearchSourceSearchOptions"
               },
               ") => Promise<",
               "SearchResponse",
-              "<any, Record<string, ",
+              "<unknown, Record<string, ",
               "AggregationsAggregate",
               ">>>"
             ],
@@ -9639,8 +9661,8 @@
                     "pluginId": "data",
                     "scope": "common",
                     "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.ISearchOptions",
-                    "text": "ISearchOptions"
+                    "section": "def-common.SearchSourceSearchOptions",
+                    "text": "SearchSourceSearchOptions"
                   }
                 ],
                 "path": "src/plugins/data/common/search/search_source/search_source.ts",
@@ -9654,9 +9676,7 @@
             "parentPluginId": "data",
             "id": "def-common.SearchSource.onRequestStart",
             "type": "Function",
-            "tags": [
-              "return"
-            ],
+            "tags": [],
             "label": "onRequestStart",
             "description": [
               "\n Add a handler that will be notified whenever requests start"
@@ -9675,8 +9695,8 @@
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
-                "section": "def-common.ISearchOptions",
-                "text": "ISearchOptions"
+                "section": "def-common.SearchSourceSearchOptions",
+                "text": "SearchSourceSearchOptions"
               },
               " | undefined) => Promise<unknown>) => void"
             ],
@@ -9704,8 +9724,8 @@
                     "pluginId": "data",
                     "scope": "common",
                     "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.ISearchOptions",
-                    "text": "ISearchOptions"
+                    "section": "def-common.SearchSourceSearchOptions",
+                    "text": "SearchSourceSearchOptions"
                   },
                   " | undefined) => Promise<unknown>"
                 ],
@@ -9737,9 +9757,7 @@
             "parentPluginId": "data",
             "id": "def-common.SearchSource.destroy",
             "type": "Function",
-            "tags": [
-              "return"
-            ],
+            "tags": [],
             "label": "destroy",
             "description": [
               "\nCompletely destroy the SearchSource."
@@ -9847,9 +9865,7 @@
                 "isRequired": true
               }
             ],
-            "returnComment": [
-              "The expression AST."
-            ]
+            "returnComment": []
           },
           {
             "parentPluginId": "data",
@@ -12396,7 +12412,9 @@
         "label": "getFilterBucketAgg",
         "description": [],
         "signature": [
-          "({ getConfig }: { getConfig: <T = any>(key: string) => any; }) => ",
+          "({ getConfig, calculateBounds, }: { getConfig: <T = any>(key: string) => T; calculateBounds: ",
+          "CalculateBoundsFn",
+          "; }) => ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -12422,7 +12440,7 @@
             "id": "def-common.getFilterBucketAgg.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ getConfig }",
+            "label": "{\n  getConfig,\n  calculateBounds,\n}",
             "description": [],
             "path": "src/plugins/data/common/search/aggs/buckets/filter.ts",
             "deprecated": false,
@@ -12435,7 +12453,7 @@
                 "label": "getConfig",
                 "description": [],
                 "signature": [
-                  "<T = any>(key: string) => any"
+                  "<T = any>(key: string) => T"
                 ],
                 "path": "src/plugins/data/common/search/aggs/buckets/filter.ts",
                 "deprecated": false,
@@ -12456,6 +12474,44 @@
                   }
                 ],
                 "returnComment": []
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-common.getFilterBucketAgg.$1.calculateBounds",
+                "type": "Function",
+                "tags": [],
+                "label": "calculateBounds",
+                "description": [],
+                "signature": [
+                  "(timeRange: ",
+                  "TimeRange",
+                  ") => ",
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataQueryPluginApi",
+                    "section": "def-common.TimeRangeBounds",
+                    "text": "TimeRangeBounds"
+                  }
+                ],
+                "path": "src/plugins/data/common/search/aggs/buckets/filter.ts",
+                "deprecated": false,
+                "returnComment": [],
+                "children": [
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-common.getFilterBucketAgg.$1.calculateBounds.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "timeRange",
+                    "description": [],
+                    "signature": [
+                      "{ from: string; to: string; mode?: \"absolute\" | \"relative\" | undefined; }"
+                    ],
+                    "path": "src/plugins/data/common/search/aggs/buckets/date_histogram.ts",
+                    "deprecated": false
+                  }
+                ]
               }
             ]
           }
@@ -18444,6 +18500,19 @@
             ],
             "path": "src/plugins/data/common/search/aggs/buckets/filter.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsFilter.timeWindow",
+            "type": "string",
+            "tags": [],
+            "label": "timeWindow",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/filter.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -22593,7 +22662,15 @@
                 "section": "def-common.IKibanaSearchResponse",
                 "text": "IKibanaSearchResponse"
               },
-              "<any>) => ",
+              "<any>, options: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSourceSearchOptions",
+                "text": "SearchSourceSearchOptions"
+              },
+              ") => ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -22636,6 +22713,26 @@
                     "text": "IKibanaSearchResponse"
                   },
                   "<any>"
+                ],
+                "path": "src/plugins/data/common/search/search_source/fetch/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-common.FetchHandlers.onResponse.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataSearchPluginApi",
+                    "section": "def-common.SearchSourceSearchOptions",
+                    "text": "SearchSourceSearchOptions"
+                  }
                 ],
                 "path": "src/plugins/data/common/search/search_source/fetch/types.ts",
                 "deprecated": false,
@@ -23100,7 +23197,7 @@
         "tags": [],
         "label": "IInspectorInfo",
         "description": [],
-        "path": "src/plugins/data/common/search/types.ts",
+        "path": "src/plugins/data/common/search/search_source/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -23120,7 +23217,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/data/common/search/types.ts",
+            "path": "src/plugins/data/common/search/search_source/types.ts",
             "deprecated": false
           },
           {
@@ -23130,7 +23227,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "path": "src/plugins/data/common/search/types.ts",
+            "path": "src/plugins/data/common/search/search_source/types.ts",
             "deprecated": false
           },
           {
@@ -23143,7 +23240,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/data/common/search/types.ts",
+            "path": "src/plugins/data/common/search/search_source/types.ts",
             "deprecated": false
           },
           {
@@ -23156,7 +23253,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/data/common/search/types.ts",
+            "path": "src/plugins/data/common/search/search_source/types.ts",
             "deprecated": false
           }
         ],
@@ -23775,6 +23872,22 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-common.ISearchOptions.executionContext",
+            "type": "Object",
+            "tags": [],
+            "label": "executionContext",
+            "description": [
+              "\nRepresents a meta-information about a Kibana entity intitating a saerch request."
+            ],
+            "signature": [
+              "KibanaExecutionContext",
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.ISearchOptions.indexPattern",
             "type": "Object",
             "tags": [],
@@ -23790,42 +23903,6 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              " | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.ISearchOptions.inspector",
-            "type": "Object",
-            "tags": [],
-            "label": "inspector",
-            "description": [
-              "\nInspector integration options"
-            ],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.IInspectorInfo",
-                "text": "IInspectorInfo"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.ISearchOptions.executionContext",
-            "type": "Object",
-            "tags": [],
-            "label": "executionContext",
-            "description": [],
-            "signature": [
-              "KibanaExecutionContext",
               " | undefined"
             ],
             "path": "src/plugins/data/common/search/types.ts",
@@ -25611,6 +25688,73 @@
             "tags": [],
             "label": "callParentStartHandlers",
             "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/common/search/search_source/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.SearchSourceSearchOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "SearchSourceSearchOptions",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.SearchSourceSearchOptions",
+            "text": "SearchSourceSearchOptions"
+          },
+          " extends ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.ISearchOptions",
+            "text": "ISearchOptions"
+          }
+        ],
+        "path": "src/plugins/data/common/search/search_source/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.SearchSourceSearchOptions.inspector",
+            "type": "Object",
+            "tags": [],
+            "label": "inspector",
+            "description": [
+              "\nInspector integration options"
+            ],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.IInspectorInfo",
+                "text": "IInspectorInfo"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/search_source/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.SearchSourceSearchOptions.disableShardFailureWarning",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "disableShardFailureWarning",
+            "description": [
+              "\nDisable default warnings of shard failures"
+            ],
             "signature": [
               "boolean | undefined"
             ],
@@ -29161,13 +29305,13 @@
             "section": "def-common.SearchSource",
             "text": "SearchSource"
           },
-          " | undefined; fetch$: (options?: ",
+          " | undefined; fetch$: <T = {}>(options?: ",
           {
             "pluginId": "data",
             "scope": "common",
             "docId": "kibDataSearchPluginApi",
-            "section": "def-common.ISearchOptions",
-            "text": "ISearchOptions"
+            "section": "def-common.SearchSourceSearchOptions",
+            "text": "SearchSourceSearchOptions"
           },
           ") => ",
           "Observable",
@@ -29181,19 +29325,19 @@
           },
           "<",
           "SearchResponse",
-          "<any, Record<string, ",
+          "<T, Record<string, ",
           "AggregationsAggregate",
           ">>>>; fetch: (options?: ",
           {
             "pluginId": "data",
             "scope": "common",
             "docId": "kibDataSearchPluginApi",
-            "section": "def-common.ISearchOptions",
-            "text": "ISearchOptions"
+            "section": "def-common.SearchSourceSearchOptions",
+            "text": "SearchSourceSearchOptions"
           },
           ") => Promise<",
           "SearchResponse",
-          "<any, Record<string, ",
+          "<unknown, Record<string, ",
           "AggregationsAggregate",
           ">>>; onRequestStart: (handler: (searchSource: ",
           {
@@ -29208,8 +29352,8 @@
             "pluginId": "data",
             "scope": "common",
             "docId": "kibDataSearchPluginApi",
-            "section": "def-common.ISearchOptions",
-            "text": "ISearchOptions"
+            "section": "def-common.SearchSourceSearchOptions",
+            "text": "SearchSourceSearchOptions"
           },
           " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; destroy: () => void; getSerializedFields: (recurse?: boolean) => ",
           {

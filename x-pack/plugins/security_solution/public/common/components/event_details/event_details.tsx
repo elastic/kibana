@@ -202,6 +202,7 @@ const EventDetailsComponent: React.FC<Props> = ({
                     eventId={id}
                     timelineId={timelineId}
                     enrichments={allEnrichments}
+                    isReadOnly={isReadOnly}
                   />
                 )}
 

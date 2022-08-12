@@ -17,7 +17,7 @@ describe('<IndicatorsFlyout />', () => {
   it('should render expand button if flyout is closed', () => {
     const { getByTestId } = render(
       <TestProvidersComponent>
-        <OpenIndicatorFlyoutButton indicator={mockIndicator} />
+        <OpenIndicatorFlyoutButton indicator={mockIndicator} isOpen={false} onOpen={jest.fn()} />
       </TestProvidersComponent>
     );
 
@@ -27,7 +27,7 @@ describe('<IndicatorsFlyout />', () => {
   it(`should render minimize button if flyout is open`, () => {
     const { getByTestId } = render(
       <TestProvidersComponent>
-        <OpenIndicatorFlyoutButton indicator={{ fields: {} }} />
+        <OpenIndicatorFlyoutButton indicator={mockIndicator} isOpen={true} onOpen={jest.fn()} />
       </TestProvidersComponent>
     );
 

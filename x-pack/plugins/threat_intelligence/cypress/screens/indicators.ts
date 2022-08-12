@@ -32,3 +32,5 @@ export const EMPTY_STATE = '[data-test-subj="indicatorsTableEmptyState"]';
 export const TABLE_CONTROLS = '[data-test-sub="dataGridControls"]';
 
 export const INDICATOR_TYPE_CELL = '[data-gridcell-column-id="threat.indicator.type"]';
+
+export const FIELD_SELECTOR = '[data-test-subj="tiIndicatorFieldSelectorDropdown"]';

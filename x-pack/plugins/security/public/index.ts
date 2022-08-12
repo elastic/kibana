@@ -20,7 +20,11 @@ export type { AuthenticatedUser } from '../common/model';
 export type { SecurityLicense, SecurityLicenseFeatures } from '../common/licensing';
 export type { UiApi, ChangePasswordProps, PersonalInfoProps } from './ui_api';
 export type { UserMenuLink, SecurityNavControlServiceStart } from './nav_control';
-export type { UserProfileBulkGetParams, UserProfileGetCurrentParams } from './account_management';
+export type {
+  UserProfileBulkGetParams,
+  UserProfileGetCurrentParams,
+  UserProfileSuggestParams,
+} from './account_management';
 
 export type { AuthenticationServiceStart, AuthenticationServiceSetup } from './authentication';
 

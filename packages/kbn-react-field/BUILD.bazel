@@ -52,6 +52,7 @@ jsts_transpiler(
   name = "target_webpack",
   srcs = SRCS,
   build_pkg_name = package_name(),
+  root_input_dir = "src",
   web = True,
   additional_args = [
     "--copy-files",
@@ -63,6 +64,7 @@ jsts_transpiler(
   name = "target_node",
   srcs = SRCS,
   build_pkg_name = package_name(),
+  root_input_dir = "src",
   additional_args = [
     "--copy-files",
     "--quiet"

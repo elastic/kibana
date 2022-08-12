@@ -61,6 +61,7 @@ const ResourceFindingsTableComponent = ({
       ),
       createColumnWithFilters(baseFindingsColumns['rule.name'], { onAddFilter }),
       baseFindingsColumns['rule.section'],
+      baseFindingsColumns['rule.tags'],
       createColumnWithFilters(baseFindingsColumns.cluster_id, { onAddFilter }),
       baseFindingsColumns['@timestamp'],
     ],

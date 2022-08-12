@@ -109,6 +109,7 @@ describe('Security Plugin', () => {
           "userProfiles": Object {
             "bulkGet": [Function],
             "getCurrent": [Function],
+            "suggest": [Function],
           },
         }
       `);
