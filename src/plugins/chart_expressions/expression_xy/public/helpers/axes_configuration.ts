@@ -131,11 +131,26 @@ export function groupAxesByType(
 
     let axisGroupId = LEFT_GLOBAL_AXIS_ID;
 
-    if (series[LEFT_GLOBAL_AXIS_ID].length === 0 || leftAxisGroupId) {
+    const rightSeriesCount = rightSeriesKeys.reduce((acc, key) => {
+      return acc + series[key].length;
+    });
+    const leftSeriesCount = leftSeriesKeys.reduce((acc, key) => {
+      return acc + series[key].length;
+    });
+
+    if (
+      (series[LEFT_GLOBAL_AXIS_ID].length === 0 && leftSeriesKeys.length === 1) ||
+      (leftSeriesKeys.length === 1 && leftAxisGroupId === LEFT_GLOBAL_AXIS_ID) ||
+      (leftAxisGroupId && leftAxisGroupId !== LEFT_GLOBAL_AXIS_ID)
+    ) {
       axisGroupId = leftAxisGroupId || LEFT_GLOBAL_AXIS_ID;
-    } else if (series[RIGHT_GLOBAL_AXIS_ID].length === 0 || rightAxisGroupId) {
+    } else if (
+      (series[RIGHT_GLOBAL_AXIS_ID].length === 0 && rightSeriesKeys.length === 1) ||
+      (rightSeriesKeys.length === 1 && rightAxisGroupId === RIGHT_GLOBAL_AXIS_ID) ||
+      (rightAxisGroupId && rightAxisGroupId !== RIGHT_GLOBAL_AXIS_ID)
+    ) {
       axisGroupId = rightAxisGroupId || RIGHT_GLOBAL_AXIS_ID;
-    } else if (series[RIGHT_GLOBAL_AXIS_ID].length >= series[LEFT_GLOBAL_AXIS_ID].length) {
+    } else if (rightSeriesCount >= leftSeriesCount) {
       axisGroupId = LEFT_GLOBAL_AXIS_ID;
     } else {
       axisGroupId = RIGHT_GLOBAL_AXIS_ID;
