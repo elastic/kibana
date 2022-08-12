@@ -7,7 +7,7 @@
  */
 
 import { ValidationFunc } from '../../hook_form_lib';
-import { isLowerCaseString } from '../../validators/string';
+import { isLowerCaseString } from '../validators/string';
 import { ERROR_CODE } from './types';
 
 export const lowerCaseStringField =

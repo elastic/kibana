@@ -7,7 +7,7 @@
  */
 
 import { ValidationFunc } from '../../hook_form_lib';
-import { isJSON } from '../../validators/string';
+import { isJSON } from '../validators/string';
 import { ERROR_CODE } from './types';
 
 export const isJsonField =

@@ -7,7 +7,7 @@
  */
 
 import { ValidationFunc, ValidationError } from '../../hook_form_lib';
-import { isNumberSmallerThan } from '../../validators/number';
+import { isNumberSmallerThan } from '../validators/number';
 import { ERROR_CODE } from './types';
 
 export const numberSmallerThanField =

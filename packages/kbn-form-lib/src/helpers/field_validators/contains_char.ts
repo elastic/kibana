@@ -7,7 +7,7 @@
  */
 
 import { ValidationFunc, ValidationError } from '../../hook_form_lib';
-import { containsChars } from '../../validators/string';
+import { containsChars } from '../validators/string';
 import { ERROR_CODE } from './types';
 
 export const containsCharsField =

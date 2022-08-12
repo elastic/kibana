@@ -7,8 +7,8 @@
  */
 
 import { ValidationFunc, ValidationError } from '../../hook_form_lib';
-import { hasMinLengthString } from '../../validators/string';
-import { hasMinLengthArray } from '../../validators/array';
+import { hasMinLengthString } from '../validators/string';
+import { hasMinLengthArray } from '../validators/array';
 import { ERROR_CODE } from './types';
 
 export const minLengthField =

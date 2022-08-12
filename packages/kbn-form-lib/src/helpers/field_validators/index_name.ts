@@ -7,7 +7,7 @@
  */
 
 import { ValidationFunc } from '../../hook_form_lib';
-import { startsWith, containsChars } from '../../validators/string';
+import { startsWith, containsChars } from '../validators/string';
 import { ERROR_CODE } from './types';
 
 // start copy from 'es_ui_shared/public/index' plugin

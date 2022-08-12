@@ -7,7 +7,7 @@
  */
 
 import { ValidationFunc, ValidationError } from '../../hook_form_lib';
-import { isUrl } from '../../validators/string';
+import { isUrl } from '../validators/string';
 import { ERROR_CODE } from './types';
 
 export const urlField =

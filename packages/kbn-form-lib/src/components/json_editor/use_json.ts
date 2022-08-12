@@ -9,7 +9,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { isJSON } from '../../validators/string';
+import { isJSON } from '../../helpers/validators/string';
 
 export interface JsonEditorState<T = { [key: string]: any }> {
   data: {

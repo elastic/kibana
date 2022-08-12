@@ -7,7 +7,7 @@
  */
 
 import { ValidationFunc } from '../../hook_form_lib';
-import { containsChars } from '../../validators/string';
+import { containsChars } from '../validators/string';
 import { ERROR_CODE } from './types';
 
 // --- start copy from Dataview plugin
