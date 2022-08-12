@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { isMetricsTabHidden, isJVMsTabHidden } from '.';
+import { isMetricsTabHidden, isMetricsJVMsTabHidden } from '.';
 
 describe('APM service template', () => {
   describe('isMetricsTabHidden', () => {
@@ -41,8 +41,8 @@ describe('APM service template', () => {
       });
     });
   });
-  describe('isJVMsTabHidden', () => {
-    describe('hides JVMs tab', () => {
+  describe('isMetricsJVMsTabHidden', () => {
+    describe('hides metrics JVMs tab', () => {
       [
         { agentName: undefined },
         { agentName: 'ruby', runtimeName: 'ruby' },
@@ -55,18 +55,18 @@ describe('APM service template', () => {
         { runtimeName: 'aws_lambda' },
       ].map((input) => {
         it(`when input ${JSON.stringify(input)}`, () => {
-          expect(isJVMsTabHidden(input)).toBeTruthy();
+          expect(isMetricsJVMsTabHidden(input)).toBeTruthy();
         });
       });
     });
-    describe('shows JVMs tab', () => {
+    describe('shows metrics JVMs tab', () => {
       [
         { agentName: 'java' },
         { agentName: 'opentelemetry/java' },
         { agentName: 'ruby', runtimeName: 'jruby' },
       ].map((input) => {
         it(`when input ${JSON.stringify(input)}`, () => {
-          expect(isJVMsTabHidden(input)).toBeFalsy();
+          expect(isMetricsJVMsTabHidden(input)).toBeFalsy();
         });
       });
     });
