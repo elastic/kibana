@@ -45,35 +45,32 @@ export function FiltersBuilder({
     }
   }, [filters, onChange, state.filters]);
 
-  const onDragEnd: DragDropContextProps['onDragEnd'] = useCallback(
-    ({ combine, source, destination }) => {
-      if (source && destination) {
-        dispatch({
-          type: 'moveFilter',
-          payload: {
-            pathFrom: source?.droppableId,
-            pathTo: destination!.droppableId,
-            conditionalType: ConditionTypes.AND,
-          },
-        });
-      }
-
-      if (source && combine) {
-        dispatch({
-          type: 'moveFilter',
-          payload: {
-            pathFrom: source?.droppableId,
-            pathTo: combine.droppableId,
-            conditionalType: ConditionTypes.OR,
-          },
-        });
-      }
-
-      setDropTarget('');
-      setCurrentDragElement('');
+  const handleMoveFilter = useCallback(
+    (pathFrom: string, pathTo: string, conditionalType: ConditionTypes) => {
+      dispatch({
+        type: 'moveFilter',
+        payload: {
+          pathFrom,
+          pathTo,
+          conditionalType,
+        },
+      });
     },
     []
   );
+
+  const onDragEnd: DragDropContextProps['onDragEnd'] = ({ combine, source, destination }) => {
+    if (source && destination) {
+      handleMoveFilter(source?.droppableId, destination!.droppableId, ConditionTypes.AND);
+    }
+
+    if (source && combine) {
+      handleMoveFilter(source?.droppableId, combine.droppableId, ConditionTypes.OR);
+    }
+
+    setDropTarget('');
+    setCurrentDragElement('');
+  };
 
   const onDragActive: DragDropContextProps['onDragUpdate'] = ({ destination, combine }) => {
     if (destination) {
