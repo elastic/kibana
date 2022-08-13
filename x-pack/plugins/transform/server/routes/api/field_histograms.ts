@@ -40,7 +40,6 @@ export function registerFieldHistogramsRoutes({ router, license }: RouteDependen
             query,
             fields,
             samplerShardSize,
-            // @ts-expect-error @elasticsearch/elasticsearch does not support yet "composite" type for runtime fields
             runtimeMappings
           );
 
