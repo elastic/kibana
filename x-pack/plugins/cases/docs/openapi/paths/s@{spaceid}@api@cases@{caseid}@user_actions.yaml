@@ -8,7 +8,6 @@ get:
   operationId: getCaseActivity
   tags:
     - cases
-    - kibana
   parameters:
     - $ref: '../components/parameters/case_id.yaml'
     - $ref: '../components/parameters/space_id.yaml'

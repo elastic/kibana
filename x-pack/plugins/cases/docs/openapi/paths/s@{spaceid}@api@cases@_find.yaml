@@ -7,7 +7,6 @@ get:
     feature privileges, depending on the owner of the cases you're seeking.
   tags:
     - cases
-    - kibana
   parameters:
     - $ref: '../components/parameters/space_id.yaml'
     - name: defaultSearchOperator
