@@ -28,35 +28,36 @@ export async function fetchEsQuery(
   const esClient = scopedClusterClient.asCurrentUser;
   const { parsedQuery, dateStart, dateEnd } = getSearchParams(params);
 
-  const filter = timestamp
-    ? {
-        bool: {
-          filter: [
-            parsedQuery.query,
-            {
-              bool: {
-                must_not: [
-                  {
-                    bool: {
-                      filter: [
-                        {
-                          range: {
-                            [params.timeField]: {
-                              lte: timestamp,
-                              format: 'strict_date_optional_time',
+  const filter =
+    timestamp && params.excludeHitsFromPreviousRun
+      ? {
+          bool: {
+            filter: [
+              parsedQuery.query,
+              {
+                bool: {
+                  must_not: [
+                    {
+                      bool: {
+                        filter: [
+                          {
+                            range: {
+                              [params.timeField]: {
+                                lte: timestamp,
+                                format: 'strict_date_optional_time',
+                              },
                             },
                           },
-                        },
-                      ],
+                        ],
+                      },
                     },
-                  },
-                ],
+                  ],
+                },
               },
-            },
-          ],
-        },
-      }
-    : parsedQuery.query;
+            ],
+          },
+        }
+      : parsedQuery.query;
 
   const query = buildSortedEventsQuery({
     index: params.index,

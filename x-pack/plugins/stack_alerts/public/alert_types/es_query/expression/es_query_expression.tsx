@@ -48,6 +48,7 @@ export const EsQueryExpression: React.FC<
     threshold,
     timeWindowSize,
     timeWindowUnit,
+    excludeHitsFromPreviousRun,
   } = ruleParams;
 
   const [currentRuleParams, setCurrentRuleParams] = useState<
@@ -61,6 +62,7 @@ export const EsQueryExpression: React.FC<
     size: size ?? DEFAULT_VALUES.SIZE,
     esQuery: esQuery ?? DEFAULT_VALUES.QUERY,
     searchType: SearchType.esQuery,
+    excludeHitsFromPreviousRun: excludeHitsFromPreviousRun ?? DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
   });
 
   const setParam = useCallback(
@@ -247,6 +249,10 @@ export const EsQueryExpression: React.FC<
         errors={errors}
         hasValidationErrors={hasValidationErrors()}
         onTestFetch={onTestQuery}
+        excludeHitsFromPreviousRun={excludeHitsFromPreviousRun}
+        onChangeExcludeHitsFromPreviousRun={(exclude) => {
+          setParam('excludeHitsFromPreviousRun', exclude);
+        }}
       />
 
       <EuiSpacer />
