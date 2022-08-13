@@ -1814,7 +1814,9 @@
           "ActionsConfigurationUtilities",
           ") => Promise<{ accessToken: string | null; }>; enqueueExecution: (options: ",
           "ExecuteOptions",
-          ") => Promise<void>; ephemeralEnqueuedExecution: (options: ",
+          ") => Promise<void>; bulkEnqueueExecution: (options: ",
+          "ExecuteOptions",
+          "[]) => Promise<void>; ephemeralEnqueuedExecution: (options: ",
           "ExecuteOptions",
           ") => Promise<",
           {

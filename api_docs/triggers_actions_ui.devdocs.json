@@ -1716,7 +1716,7 @@
           },
           "<string, string>[]; error: string | null; ruleTypeIndex: ",
           "RuleTypeIndex",
-          "; }"
+          "; ruleTypesIsLoading: boolean; }"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/application/hooks/use_load_rule_types.ts",
         "deprecated": false,
