@@ -1493,8 +1493,6 @@
     "core.euiHeaderLinks.appNavigation": "アプリメニュー",
     "core.euiHeaderLinks.openNavigationMenu": "メニューを開く",
     "core.euiHue.label": "HSV カラーモードの「色相」値を選択",
-    "core.euiImage.closeImage": "全画面 {alt} 画像を閉じる",
-    "core.euiImage.openImage": "全画面 {alt} 画像を開く",
     "core.euiLink.external.ariaLabel": "外部リンク",
     "core.euiLink.newTarget.screenReaderOnlyText": "（新しいタブまたはウィンドウで開く）",
     "core.euiLoadingChart.ariaLabel": "読み込み中",
