@@ -6,34 +6,34 @@
  */
 
 import { KubernetesCollection, DynamicTree } from '../../../types';
-import { KUBERNETES_COLLECTION_FIELDS } from '../helpers';
+import { KUBERNETES_COLLECTION_FIELDS, KUBERNETES_COLLECTION_ICONS_PROPS } from '../helpers';
 import { translations } from './translations';
 
 const LOGICAL_TREE_VIEW: DynamicTree[] = [
   {
-    key: KUBERNETES_COLLECTION_FIELDS.cluster,
-    iconProps: { type: 'heatmap', color: 'success' },
-    type: KubernetesCollection.cluster,
+    key: KUBERNETES_COLLECTION_FIELDS.clusterId,
+    iconProps: KUBERNETES_COLLECTION_ICONS_PROPS.clusterId,
+    type: KubernetesCollection.clusterId,
     name: translations.cluster(),
     namePlural: translations.cluster(true),
   },
   {
     key: KUBERNETES_COLLECTION_FIELDS.namespace,
-    iconProps: { type: 'nested', color: 'primary' },
+    iconProps: KUBERNETES_COLLECTION_ICONS_PROPS.namespace,
     type: KubernetesCollection.namespace,
     name: translations.namespace(),
     namePlural: translations.namespace(true),
   },
   {
     key: KUBERNETES_COLLECTION_FIELDS.pod,
-    iconProps: { type: 'package', color: 'warning' },
+    iconProps: KUBERNETES_COLLECTION_ICONS_PROPS.pod,
     type: KubernetesCollection.pod,
     name: translations.pod(),
     namePlural: translations.pod(true),
   },
   {
     key: KUBERNETES_COLLECTION_FIELDS.containerImage,
-    iconProps: { type: 'image', color: 'danger' },
+    iconProps: KUBERNETES_COLLECTION_ICONS_PROPS.containerImage,
     type: KubernetesCollection.containerImage,
     name: translations.containerImage(),
     namePlural: translations.containerImage(true),
@@ -44,7 +44,7 @@ const INFRASTRUCTURE_TREE_VIEW = LOGICAL_TREE_VIEW.map((tree, index) => {
   if (index === 1) {
     return {
       key: KUBERNETES_COLLECTION_FIELDS.node,
-      iconProps: { type: 'node', color: 'primary' },
+      iconProps: KUBERNETES_COLLECTION_ICONS_PROPS.node,
       type: KubernetesCollection.node,
       name: translations.node(),
       namePlural: translations.node(true),

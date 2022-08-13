@@ -21,7 +21,11 @@ export type { GetCreateCaseFlyoutProps } from './client/ui/get_create_case_flyou
 export type { GetAllCasesSelectorModalProps } from './client/ui/get_all_cases_selector_modal';
 export type { GetRecentCasesProps } from './client/ui/get_recent_cases';
 
-export type { CaseAttachments, SupportedCaseAttachment } from './types';
+export type {
+  CaseAttachments,
+  SupportedCaseAttachment,
+  CaseAttachmentsWithoutOwner,
+} from './types';
 
 export type { ICasesDeepLinkId } from './common/navigation';
 export {

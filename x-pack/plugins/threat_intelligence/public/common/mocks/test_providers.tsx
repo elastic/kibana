@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment/moment';
 import React, { FC } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -16,8 +17,6 @@ import { mockUiSetting } from './mock_kibana_ui_setting';
 import { KibanaContextProvider } from '../../hooks/use_kibana';
 import { Services, ThreatIntelligenceSecuritySolutionContext } from '../../types';
 import { SecuritySolutionContext } from '../../containers/security_solution_context';
-
-const mockCoreStart = coreMock.createStart();
 
 export const localStorageMock = (): IStorage => {
   let store: Record<string, unknown> = {};
@@ -46,11 +45,12 @@ export const createTiStorageMock = () => {
   };
 };
 
-const data = dataPluginMock.createStartContract();
 const { storage } = createTiStorageMock();
 
 export const unifiedSearch = unifiedSearchPluginMock.createStartContract();
 
+const validDate: string = '1 Jan 2022 00:00:00 GMT';
+const data = dataPluginMock.createStartContract();
 const dataServiceMock = {
   ...data,
   query: {
@@ -72,6 +72,14 @@ const dataServiceMock = {
         })
       ),
     },
+    timefilter: {
+      timefilter: {
+        calculateBounds: jest.fn().mockImplementation(() => ({
+          min: moment(validDate),
+          max: moment(validDate).add(1, 'days'),
+        })),
+      },
+    },
   },
   search: {
     ...data.search,
@@ -92,17 +100,26 @@ const dataServiceMock = {
   },
 };
 
+const core = coreMock.createStart();
+const coreServiceMock = {
+  ...core,
+  uiSettings: { get: jest.fn().mockImplementation(mockUiSetting) },
+};
+
 const mockSecurityContext: ThreatIntelligenceSecuritySolutionContext = {
   getFiltersGlobalComponent:
     () =>
     ({ children }) =>
       <div>{children}</div>,
+  licenseService: {
+    isEnterprise() {
+      return true;
+    },
+  },
 };
 
-mockCoreStart.uiSettings.get.mockImplementation(mockUiSetting);
-
 const mockedServices = {
-  ...mockCoreStart,
+  ...coreServiceMock,
   data: dataServiceMock,
   storage,
   unifiedSearch,

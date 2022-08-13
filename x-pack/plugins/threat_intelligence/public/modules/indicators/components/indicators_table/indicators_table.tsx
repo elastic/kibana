@@ -6,20 +6,16 @@
  */
 
 import React, { VFC, useState, useMemo } from 'react';
-import {
-  EuiDataGrid,
-  EuiDataGridCellValueElementProps,
-  EuiLoadingSpinner,
-  EuiText,
-} from '@elastic/eui';
+import { EuiDataGrid, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
 import { UseIndicatorsValue } from '../../hooks/use_indicators';
 import { cellRendererFactory, ComputedIndicatorFieldId } from './cell_renderer';
-import { ActionsRowCell } from './actions_row_cell';
 import { EmptyState } from '../../../../components/empty_state';
+import { IndicatorsTableContext, IndicatorsTableContextValue } from './context';
+import { IndicatorsFlyout } from '../indicators_flyout/indicators_flyout';
 
 interface Column {
   id: RawIndicatorFieldId | ComputedIndicatorFieldId;
@@ -87,34 +83,50 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
   const [visibleColumns, setVisibleColumns] = useState<Array<Column['id']>>(
     columns.map((column) => column.id)
   );
+
+  const [expanded, setExpanded] = useState<Indicator>();
+
   const renderCellValue = useMemo(
-    () => cellRendererFactory(indicators, pagination.pageIndex * pagination.pageSize),
-    [indicators, pagination.pageIndex, pagination.pageSize]
+    () => cellRendererFactory(pagination.pageIndex * pagination.pageSize),
+    [pagination.pageIndex, pagination.pageSize]
+  );
+
+  const indicatorTableContextValue = useMemo<IndicatorsTableContextValue>(
+    () => ({ expanded, setExpanded, indicators }),
+    [expanded, indicators]
   );
 
   const start = pagination.pageIndex * pagination.pageSize;
   const end = start + pagination.pageSize;
 
+  const flyoutFragment = useMemo(
+    () =>
+      expanded ? (
+        <IndicatorsFlyout indicator={expanded} closeFlyout={() => setExpanded(undefined)} />
+      ) : null,
+    [expanded]
+  );
+
+  const leadingControlColumns = useMemo(
+    () => [
+      {
+        id: 'Actions',
+        width: 72,
+        headerCellRender: () => (
+          <FormattedMessage
+            id="xpack.threatIntelligence.indicator.table.actionColumnLabel"
+            defaultMessage="Actions"
+          />
+        ),
+        rowCellRender: renderCellValue,
+      },
+    ],
+    [renderCellValue]
+  );
+
   if (firstLoad) {
     return <EuiLoadingSpinner size="m" />;
   }
-
-  const leadingControlColumns = [
-    {
-      id: 'Actions',
-      width: 72,
-      headerCellRender: () => (
-        <FormattedMessage
-          id="xpack.threatIntelligence.indicator.table.actionColumnLabel"
-          defaultMessage="Actions"
-        />
-      ),
-      rowCellRender: (cveProps: EuiDataGridCellValueElementProps) => {
-        const indicator: Indicator = indicators[cveProps.rowIndex];
-        return <ActionsRowCell indicator={indicator} />;
-      },
-    },
-  ];
 
   if (!loading && !indicatorCount) {
     return <EmptyState />;
@@ -122,43 +134,47 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
 
   return (
     <div>
-      <EuiDataGrid
-        aria-labelledby={'indicators-table'}
-        leadingControlColumns={leadingControlColumns}
-        columns={columns}
-        columnVisibility={{
-          visibleColumns,
-          setVisibleColumns: setVisibleColumns as (cols: string[]) => void,
-        }}
-        rowCount={indicatorCount}
-        renderCellValue={renderCellValue}
-        toolbarVisibility={{
-          showDisplaySelector: false,
-          showFullScreenSelector: false,
-          additionalControls: {
-            left: {
-              prepend: (
-                <EuiText style={{ display: 'inline' }} size="xs">
-                  Showing {start + 1}-{end > indicatorCount ? indicatorCount : end} of{' '}
-                  {indicatorCount} indicators
-                </EuiText>
-              ),
+      <IndicatorsTableContext.Provider value={indicatorTableContextValue}>
+        <EuiDataGrid
+          aria-labelledby={'indicators-table'}
+          leadingControlColumns={leadingControlColumns}
+          columns={columns}
+          columnVisibility={{
+            visibleColumns,
+            setVisibleColumns: setVisibleColumns as (cols: string[]) => void,
+          }}
+          rowCount={indicatorCount}
+          renderCellValue={renderCellValue}
+          toolbarVisibility={{
+            showDisplaySelector: false,
+            showFullScreenSelector: false,
+            additionalControls: {
+              left: {
+                prepend: (
+                  <EuiText style={{ display: 'inline' }} size="xs">
+                    Showing {start + 1}-{end > indicatorCount ? indicatorCount : end} of{' '}
+                    {indicatorCount} indicators
+                  </EuiText>
+                ),
+              },
             },
-          },
-        }}
-        pagination={{
-          ...pagination,
-          onChangeItemsPerPage,
-          onChangePage,
-        }}
-        gridStyle={{
-          border: 'horizontal',
-          header: 'underline',
-          cellPadding: 'm',
-          fontSize: 's',
-        }}
-        data-test-subj={TABLE_TEST_ID}
-      />
+          }}
+          pagination={{
+            ...pagination,
+            onChangeItemsPerPage,
+            onChangePage,
+          }}
+          gridStyle={{
+            border: 'horizontal',
+            header: 'underline',
+            cellPadding: 'm',
+            fontSize: 's',
+          }}
+          data-test-subj={TABLE_TEST_ID}
+        />
+      </IndicatorsTableContext.Provider>
+
+      {flyoutFragment}
     </div>
   );
 };

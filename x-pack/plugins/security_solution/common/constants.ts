@@ -107,7 +107,7 @@ export enum SecurityPageName {
   network = 'network',
   networkAnomalies = 'network-anomalies',
   networkDns = 'network-dns',
-  networkExternalAlerts = 'network-external_alerts',
+  networkEvents = 'network-events',
   networkHttp = 'network-http',
   networkTls = 'network-tls',
   noPage = '',
@@ -126,7 +126,6 @@ export enum SecurityPageName {
   usersAnomalies = 'users-anomalies',
   usersAuthentications = 'users-authentications',
   usersEvents = 'users-events',
-  usersExternalAlerts = 'users-external_alerts',
   usersRisk = 'users-risk',
 }
 
@@ -275,8 +274,8 @@ export const DETECTION_ENGINE_RULES_BULK_UPDATE =
 
 export const DEV_TOOL_PREBUILT_CONTENT =
   `/internal/prebuilt_content/dev_tool/{console_id}` as const;
-export const devToolPrebuiltContentUrl = (consoleId: string) =>
-  `/internal/prebuilt_content/dev_tool/${consoleId}` as const;
+export const devToolPrebuiltContentUrl = (spaceId: string, consoleId: string) =>
+  `/s/${spaceId}/internal/prebuilt_content/dev_tool/${consoleId}` as const;
 export const PREBUILT_SAVED_OBJECTS_BULK_CREATE =
   '/internal/prebuilt_content/saved_objects/_bulk_create/{template_name}';
 export const prebuiltSavedObjectsBulkCreateUrl = (templateName: string) =>
@@ -432,7 +431,7 @@ export const RULES_TABLE_PAGE_SIZE_OPTIONS = [5, 10, 20, 50, RULES_TABLE_MAX_PAG
  * we will need to update this constant with the corresponding version.
  */
 export const RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY =
-  'securitySolution.rulesManagementPage.newFeaturesTour.v8.2';
+  'securitySolution.rulesManagementPage.newFeaturesTour.v8.4';
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
   'securitySolution.ruleDetails.ruleExecutionLog.showMetrics.v8.2';

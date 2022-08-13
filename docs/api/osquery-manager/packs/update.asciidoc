@@ -1,0 +1,74 @@
+[[osquery-manager-packs-api-update]]
+=== Update pack API
+++++
+<titleabbrev>Update pack</titleabbrev>
+++++
+
+experimental[] Update packs.
+
+WARNING: You are unable to update a prebuilt pack (`read_only = true`).
+
+
+[[osquery-manager-packs-api-update-request]]
+==== Request
+
+`PUT <kibana host>:<port>/api/osquery/packs/<id>`
+
+`PUT <kibana host>:<port>/s/<space_id>/api/osquery/packs/<id>`
+
+
+[[osquery-manager-packs-api-update-path-params]]
+==== Path parameters
+
+`space_id`::
+  (Optional, string) The space identifier. When `space_id` is not provided in the URL, the default space is used.
+
+`id`::
+  (Required, string) The ID of the pack you want to update.
+
+
+[[osquery-manager-packs-api-update-body-params]]
+==== Request body
+
+`name`:: (Optional, string) The pack name.
+
+`description`:: (Optional, string) The pack description.
+
+`enabled`:: (Optional, boolean) Enables the pack.
+
+`policy_ids`:: (Optional, array) A list of agent policy IDs.
+
+`queries`:: (Required, object) An object of queries.
+
+
+[[osquery-manager-packs-api-update-request-codes]]
+==== Response code
+
+`200`::
+    Indicates a successful call.
+
+
+[[osquery-manager-packs-api-update-example]]
+==== Examples
+
+Update a name of the <my_pack> pack:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X PUT api/osquery/packs/<id> \
+{
+  "name": "updated_my_pack_name",
+}
+
+--------------------------------------------------
+// KIBANA
+
+
+The API returns the pack saved object:
+
+[source,sh]
+--------------------------------------------------
+{
+    "data": {...}
+}
+--------------------------------------------------
