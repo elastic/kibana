@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import React from 'react';
 import { act, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { ConnectorTypes } from '../../../common/api';
 import { AppMockRenderer, createAppMockRenderer } from '../../common/mock';
 import '../../common/mock/match_media';
@@ -141,6 +142,7 @@ describe('CaseViewPage', () => {
 
     const dropdown = result.getByTestId('case-view-status-dropdown');
     userEvent.click(dropdown.querySelector('button')!);
+    await waitForEuiPopoverOpen();
     userEvent.click(result.getByTestId('case-view-status-dropdown-closed'));
 
     await waitFor(() => {
@@ -251,6 +253,7 @@ describe('CaseViewPage', () => {
     );
     userEvent.click(result.getByTestId('connector-edit').querySelector('button')!);
     userEvent.click(result.getByTestId('dropdown-connectors'));
+    await waitForEuiPopoverOpen();
     userEvent.click(result.getByTestId('dropdown-connector-resilient-2'));
 
     await waitFor(() => {
