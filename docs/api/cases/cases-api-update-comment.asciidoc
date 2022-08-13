@@ -29,6 +29,7 @@ The identifier for the case. To retrieve case IDs, use
 (Optional, string) An identifier for the space. If it is not specified, the
 default space is used.
 
+[role="child_attributes"]
 === {api-request-body-title}
 
 `alertId`::
