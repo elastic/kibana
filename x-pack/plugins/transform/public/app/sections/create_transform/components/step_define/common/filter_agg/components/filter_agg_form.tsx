@@ -63,10 +63,13 @@ export const FilterAggForm: PivotAggsConfigFilter['AggFormComponent'] = ({
     [dataView, selectedField, runtimeMappings]
   );
 
-  useUpdateEffect(() => {
-    // reset filter agg on field change
-    onChange({});
-  }, [selectedField]);
+  useUpdateEffect(
+    function resetConfigOnFieldChange() {
+      // reset filter agg on field change
+      onChange({});
+    },
+    [selectedField]
+  );
 
   const filterAggTypeConfig = aggConfig?.aggTypeConfig;
   const filterAgg = aggConfig?.filterAgg ?? '';
@@ -109,7 +112,7 @@ export const FilterAggForm: PivotAggsConfigFilter['AggFormComponent'] = ({
               const filterAggUpdate = e.target.value as FilterAggType;
               onChange({
                 filterAgg: filterAggUpdate,
-                aggTypeConfig: getFilterAggTypeConfig(filterAggUpdate),
+                aggTypeConfig: getFilterAggTypeConfig(filterAggUpdate, selectedField),
               });
             }}
             data-test-subj="transformFilterAggTypeSelector"
