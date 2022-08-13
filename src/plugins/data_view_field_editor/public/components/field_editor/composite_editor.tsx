@@ -16,6 +16,7 @@ import {
   EuiFieldText,
   EuiComboBox,
   EuiFormRow,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -27,11 +28,10 @@ import { RuntimePrimitiveTypes, UseField } from '../../shared_imports';
 import { FieldFormInternal } from './field_editor';
 
 export interface CompositeEditorProps {
-  value: Record<string, RuntimePrimitiveTypes>;
-  setValue: (newValue: Record<string, RuntimePrimitiveTypes>) => void;
+  onReset: () => void;
 }
 
-export const CompositeEditor = () => {
+export const CompositeEditor = ({ onReset }: CompositeEditorProps) => {
   const { links, existingConcreteFields } = useFieldEditorContext();
   return (
     <UseField<FieldFormInternal['fields']> path="fields">
@@ -41,19 +41,26 @@ export const CompositeEditor = () => {
             <ScriptField existingConcreteFields={existingConcreteFields} links={links} />
             <EuiSpacer size="xl" />
             <>
-              <EuiFlexGroup gutterSize="s" alignItems="center">
+              <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
+                <EuiFlexGroup gutterSize="s" alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="s">
+                      <FormattedMessage
+                        id="indexPatternFieldEditor.editor.compositeFieldsCount"
+                        defaultMessage="Generated fields"
+                      />
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiNotificationBadge color="subdued">
+                      {Object.entries(value).length}
+                    </EuiNotificationBadge>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
                 <EuiFlexItem grow={false}>
-                  <EuiText size="s">
-                    <FormattedMessage
-                      id="indexPatternFieldEditor.editor.compositeFieldsCount"
-                      defaultMessage="Generated fields"
-                    />
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiNotificationBadge color="subdued">
-                    {Object.entries(value).length}
-                  </EuiNotificationBadge>
+                  <EuiButtonEmpty flush="right" iconType="refresh" onClick={onReset}>
+                    Refresh
+                  </EuiButtonEmpty>
                 </EuiFlexItem>
               </EuiFlexGroup>
               {Object.entries(value).map(([key, itemValue], idx) => {

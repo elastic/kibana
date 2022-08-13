@@ -68,6 +68,9 @@ export interface Field extends RuntimeField {
    * name / path used for the field
    */
   name: FieldSpec['name'];
+  /**
+   * Name of parent field. Used for composite subfields
+   */
   parentName?: string;
 }
 

@@ -21,6 +21,9 @@ import { CloseEditor } from './types';
 import { DeleteFieldModal } from './components/confirm_modals/delete_field_modal';
 import { removeFields } from './lib/remove_fields';
 
+/**
+ * Options for opening the field editor
+ */
 export interface OpenFieldDeleteModalOptions {
   ctx: {
     dataView: DataView;
@@ -35,6 +38,10 @@ interface Dependencies {
   usageCollection: UsageCollectionStart;
 }
 
+/**
+ * Error throw when there's an attempt to directly delete a composite subfield
+ * @param fieldName - the name of the field to delete
+ */
 export class DeleteCompositeSubfield extends Error {
   constructor(fieldName: string) {
     super(`Field '${fieldName} cannot be deleted because it is a composite subfield.`);
@@ -58,6 +65,11 @@ export const getFieldDeleteModalOpener =
 
     let overlayRef: OverlayRef | null = null;
 
+    /**
+     * Open the delete field modal
+     * @param Options for delete field modal
+     * @returns Function to close the delete field modal
+     */
     const openDeleteModal = ({
       onDelete,
       fieldName,

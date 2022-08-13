@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiCallOut } from '@elastic/eui';
-import { map, bufferCount, filter } from 'rxjs';
+import { map, bufferCount, filter, BehaviorSubject } from 'rxjs';
 import { differenceWith, isEqual } from 'lodash';
 
 import {
@@ -35,7 +35,7 @@ import { TypeField } from './form_fields';
 import { FieldDetail } from './field_detail';
 import { CompositeEditor } from './composite_editor';
 import { TypeSelection } from './types';
-import { ChangeType } from '../preview/types';
+import { ChangeType, FieldPreview } from '../preview/types';
 export interface Change {
   changeType: ChangeType;
   type?: RuntimePrimitiveTypes;
@@ -152,9 +152,27 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
 
   const isValueVisible = get(formData, '__meta__.isValueVisible');
 
+  const lastPreview$ = useMemo(() => {
+    const replaySubj = new BehaviorSubject<FieldPreview[]>([]);
+    fieldPreview$.subscribe(replaySubj);
+    return replaySubj;
+  }, [fieldPreview$]);
+
+  const resetTypes = useMemo(
+    () => () => {
+      const lastVal = lastPreview$.getValue();
+      // resets the preview history to an empty set
+      fieldPreview$.next([]);
+      // apply the last preview to get all the types
+      fieldPreview$.next(lastVal);
+    },
+    [fieldPreview$, lastPreview$]
+  );
+
   useEffect(() => {
     const existingCompositeField = !!Object.keys(form.getFormData().fields || {}).length;
-
+    // need to keep this.
+    // also need to push empty object and last fieldPreview
     const changes$ = fieldPreview$.pipe(
       map((items) =>
         // reduce the fields to make diffing easier
@@ -192,7 +210,8 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
       Object.entries(previewFields).forEach(([name, change]) => {
         if (change.changeType === ChangeType.DELETE) {
           delete modifiedFields[name];
-        } else {
+        }
+        if (change.changeType === ChangeType.UPSERT) {
           modifiedFields[name] = { type: change.type! };
         }
       });
@@ -302,7 +321,11 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
           <EuiSpacer size="xl" />
         </>
       )}
-      {updatedType && updatedType[0].value !== 'composite' ? <FieldDetail /> : <CompositeEditor />}
+      {updatedType && updatedType[0].value !== 'composite' ? (
+        <FieldDetail />
+      ) : (
+        <CompositeEditor onReset={resetTypes} />
+      )}
     </Form>
   );
 };
