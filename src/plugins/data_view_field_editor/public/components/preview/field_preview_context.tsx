@@ -137,7 +137,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   // If no documents could be fetched from the cluster (and we are not trying to load
   // a custom doc ID) then we disable preview as the script field validation expect the result
   // of the preview to before resolving. If there are no documents we can't have a preview
-  // (the _execute API expects one) and thus the validation should not expect any value.
+  // (the _execute API expects one) and thus the validation should not expect a value.
   if (!isFetchingDocument && !isCustomDocId && documents.length === 0) {
     isPreviewAvailable = false;
   }

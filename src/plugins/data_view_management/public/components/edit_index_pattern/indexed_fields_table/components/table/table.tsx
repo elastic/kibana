@@ -167,13 +167,13 @@ const labelDescription = i18n.translate(
 function runtimeIconTipTitle(fld: IndexedFieldItem) {
   // composite runtime fields
   if (fld.runtimeField?.type === 'composite') {
-    // subfields have types
-    if (fld.type) {
+    // subfields definitions
+    if (fld.type !== 'composite') {
       return i18n.translate(
         'indexPatternManagement.editIndexPattern.fields.table.runtimeIconTipTitleCompositeSubfield',
         { defaultMessage: 'Composite runtime subfield' }
       );
-      // composite definitions don't
+      // composite definitions
     } else {
       return i18n.translate(
         'indexPatternManagement.editIndexPattern.fields.table.runtimeIconTipTitleComposite',
@@ -252,8 +252,7 @@ export const renderFieldName = (field: IndexedFieldItem, timeFieldName?: string)
         <EuiIconTip
           type="indexRuntime"
           title={runtimeIconTipTitle(field)}
-          // todo improve this
-          content={<span>{runtimeIconTipText}</span>}
+          content={runtimeIconTipText}
         />
       </span>
     ) : null}

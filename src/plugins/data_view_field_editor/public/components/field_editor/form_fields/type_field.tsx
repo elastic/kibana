@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiFormRow, EuiComboBox } from '@elastic/eui';
 
-import { UseField, RuntimeType } from '../../../shared_imports';
+import { UseField } from '../../../shared_imports';
 import { RUNTIME_FIELD_OPTIONS, RUNTIME_FIELD_OPTIONS_PRIMITIVE } from '../constants';
 import { TypeSelection } from '../types';
 
@@ -20,7 +20,6 @@ interface Props {
   includeComposite?: boolean;
   path: string;
   defaultValue?: TypeSelection;
-  onChange?: (value: RuntimeType) => void;
 }
 
 export const TypeField = ({
@@ -28,7 +27,6 @@ export const TypeField = ({
   includeComposite,
   path,
   defaultValue = [RUNTIME_FIELD_OPTIONS_PRIMITIVE[0]],
-  onChange = () => {},
 }: Props) => {
   return (
     <UseField<TypeSelection> path={path}>
@@ -55,8 +53,6 @@ export const TypeField = ({
                     return;
                   }
                   setValue(newValue);
-                  // todo - might be able to remove this once using forms lib
-                  onChange(newValue[0].value!);
                 }}
                 isClearable={false}
                 isDisabled={isDisabled}

@@ -23,7 +23,6 @@ import {
   TextField,
   RuntimeType,
   RuntimePrimitiveTypes,
-  RuntimeFieldSubFields,
 } from '../../shared_imports';
 import { Field } from '../../types';
 import { useFieldEditorContext } from '../field_editor_context';
@@ -114,7 +113,6 @@ const formSerializer = (field: FieldFormInternal): Field => {
 };
 
 const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) => {
-  // todo see if we can reduce renders
   const { namesNotAllowed, fieldTypeToProcess } = useFieldEditorContext();
   const {
     params: { update: updatePreviewParams },
@@ -188,15 +186,8 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
 
     const sub = changes$.subscribe((previewFields) => {
       const { fields } = form.getFormData();
-      const theseFields = Object.entries(fields || {}).reduce<RuntimeFieldSubFields>(
-        (acc, [key, value]) => {
-          acc[key] = { type: value.type };
-          return acc;
-        },
-        {}
-      );
 
-      const modifiedFields = { ...theseFields };
+      const modifiedFields = { ...fields };
 
       Object.entries(previewFields).forEach(([name, change]) => {
         if (change.changeType === ChangeType.DELETE) {
