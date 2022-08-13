@@ -194,51 +194,19 @@ export const updateFilter = (
   let filter = Object.assign({}, changedFilter);
 
   if (field && operator && params) {
-    filter = {
-      ...filter,
-      meta: {
-        ...filter.meta,
-        params: { ...filter.meta.params, query: params },
-      },
-      query: { match_phrase: { ...filter!.query?.match_phrase, [filter.meta.key!]: params } },
-    };
+    if (Array.isArray(params)) {
+      filter = updateArrayParams(filter, operator, params);
+    } else {
+      filter = updateParams(filter, operator, params);
+    }
   } else if (field && operator) {
     if (operator.type === 'exists') {
-      filter = {
-        ...filter,
-        meta: {
-          ...filter.meta,
-          negate: operator?.negate,
-          type: operator?.type,
-          params: undefined,
-          value: 'exists',
-        },
-        query: { exists: { ...filter!.query?.exists, [filter.meta.key!]: undefined } },
-      };
+      filter = updateOperatorWithExistsType(filter, operator);
+    } else {
+      filter = updateOperator(filter, operator);
     }
-    filter = {
-      ...filter,
-      meta: {
-        ...filter.meta,
-        negate: operator?.negate,
-        type: operator?.type,
-        params: { ...filter.meta.params, query: undefined },
-        value: undefined,
-      },
-      query: { match_phrase: { ...filter!.query?.match_phrase, [filter.meta.key!]: undefined } },
-    };
   } else {
-    filter = {
-      ...filter,
-      meta: {
-        ...filter.meta,
-        key: field?.name,
-        params: { query: undefined },
-        value: undefined,
-        type: undefined,
-      },
-      query: undefined,
-    };
+    filter = updateField(filter, field);
   }
 
   const pathInArray = getPathInArray(path);
@@ -249,17 +217,67 @@ export const updateFilter = (
   return newFilters;
 };
 
-export const updateFilterParams = (
-  filters: Filter[],
-  path: string,
-  operator?: Operator | undefined,
-  params?: Array<Filter['meta']['params']>
-) => {
-  const newFilters = [...filters];
-  const changedFilter = getFilterByPath(newFilters, path) as Filter;
-  let filter = Object.assign({}, changedFilter);
+function updateField(filter: Filter, field?: DataViewField) {
+  return {
+    ...filter,
+    meta: {
+      ...filter.meta,
+      key: field?.name,
+      params: { query: undefined },
+      value: undefined,
+      type: undefined,
+    },
+    query: undefined,
+  };
+}
 
-  filter = {
+function updateOperator(filter: Filter, operator?: Operator) {
+  return {
+    ...filter,
+    meta: {
+      ...filter.meta,
+      negate: operator?.negate,
+      type: operator?.type,
+      params: { ...filter.meta.params, query: undefined },
+      value: undefined,
+    },
+    query: { match_phrase: { ...filter!.query?.match_phrase, [filter.meta.key!]: undefined } },
+  };
+}
+
+function updateOperatorWithExistsType(filter: Filter, operator?: Operator) {
+  return {
+    ...filter,
+    meta: {
+      ...filter.meta,
+      negate: operator?.negate,
+      type: operator?.type,
+      params: undefined,
+      value: 'exists',
+    },
+    query: { exists: { ...filter!.query?.exists, [filter.meta.key!]: undefined } },
+  };
+}
+
+function updateParams(filter: Filter, operator?: Operator, params?: Filter['meta']['params']) {
+  return {
+    ...filter,
+    meta: {
+      ...filter.meta,
+      negate: operator?.negate,
+      type: operator?.type,
+      params: { ...filter.meta.params, query: params },
+    },
+    query: { match_phrase: { ...filter!.query?.match_phrase, [filter.meta.key!]: params } },
+  };
+}
+
+function updateArrayParams(
+  filter: Filter,
+  operator?: Operator,
+  params?: Array<Filter['meta']['params']>
+) {
+  return {
     ...filter,
     meta: {
       ...filter.meta,
@@ -277,11 +295,4 @@ export const updateFilterParams = (
       },
     },
   };
-
-  const pathInArray = getPathInArray(path);
-  const { targetArray } = getContainerMetaByPath(newFilters, pathInArray);
-  const selector = pathInArray[pathInArray.length - 1];
-  targetArray.splice(selector, 1, filter);
-
-  return newFilters;
-};
+}

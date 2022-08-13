@@ -11,13 +11,7 @@ import type { Filter } from '@kbn/es-query';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { Path } from './filters_builder_types';
 import type { ConditionTypes } from './filters_builder_condition_types';
-import {
-  addFilter,
-  moveFilter,
-  removeFilter,
-  updateFilter,
-  updateFilterParams,
-} from './filters_builder_utils';
+import { addFilter, moveFilter, removeFilter, updateFilter } from './filters_builder_utils';
 
 // todo: {start} should be refactored cause shared component cannot be linked with non-shared components
 import type { Operator } from '../filter_editor';
@@ -44,20 +38,6 @@ export interface UpdateFilterPayload {
 }
 
 /** @internal **/
-export interface UpdateFilterParamsPayload {
-  path: string;
-  operator?: Operator;
-  params?: Filter['meta']['params'];
-}
-
-/** @internal **/
-export interface UpdateFilterParamsPayload {
-  path: string;
-  operator?: Operator;
-  params?: Filter['meta']['params'];
-}
-
-/** @internal **/
 export interface RemoveFilterPayload {
   path: Path;
 }
@@ -74,8 +54,7 @@ export type FiltersBuilderActions =
   | { type: 'addFilter'; payload: AddFilterPayload }
   | { type: 'removeFilter'; payload: RemoveFilterPayload }
   | { type: 'moveFilter'; payload: MoveFilterPayload }
-  | { type: 'updateFilter'; payload: UpdateFilterPayload }
-  | { type: 'updateFilterParams'; payload: UpdateFilterParamsPayload };
+  | { type: 'updateFilter'; payload: UpdateFilterPayload };
 
 export const FiltersBuilderReducer: Reducer<FiltersBuilderState, FiltersBuilderActions> = (
   state,
@@ -113,16 +92,6 @@ export const FiltersBuilderReducer: Reducer<FiltersBuilderState, FiltersBuilderA
           state.filters,
           action.payload.path,
           action.payload.field,
-          action.payload.operator,
-          action.payload.params
-        ),
-      };
-    case 'updateFilterParams':
-      return {
-        ...state,
-        filters: updateFilterParams(
-          state.filters,
-          action.payload.path,
           action.payload.operator,
           action.payload.params
         ),

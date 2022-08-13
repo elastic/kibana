@@ -122,7 +122,7 @@ export function FilterItem({
   const onHandleParamsUpdate = useCallback(
     (value: Filter['meta']['params']) => {
       dispatch({
-        type: 'updateFilterParams',
+        type: 'updateFilter',
         payload: { path, params: [value, ...(params || [])] },
       });
     },
