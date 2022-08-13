@@ -1665,9 +1665,9 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "discover",
+                "pluginId": "savedSearch",
                 "scope": "public",
-                "docId": "kibDiscoverPluginApi",
+                "docId": "kibSavedSearchPluginApi",
                 "section": "def-public.SavedSearch",
                 "text": "SavedSearch"
               },
