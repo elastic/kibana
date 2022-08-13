@@ -191,7 +191,6 @@ export const getFiltersMockOrHide = () =>
         store: 'appState',
       },
     },
-
     {
       meta: {
         index: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
@@ -234,7 +233,6 @@ export const getFiltersMockOrHide = () =>
         store: 'appState',
       },
     },
-
     {
       meta: {
         index: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
@@ -256,7 +254,6 @@ export const getFiltersMockOrHide = () =>
         store: 'appState',
       },
     },
-
     {
       meta: {
         index: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
