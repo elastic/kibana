@@ -160,6 +160,12 @@ taken into consideration until another solution is implemented:
 
 Remember that minimizing the number of times the web page is loaded, we minimize as well the execution time.
 
+### Accessibility
+
+The `checkA11y({ skipFailures: false });` call uses [axe-core](https://github.com/dequelabs/axe-core) to perform a full page check for accessibility violations.
+
+See [axe-core](https://github.com/dequelabs/axe-core)'s documentation for details on what is checked for. 
+
 ## Linting
 
 Optional linting rules for Cypress and linting setup can be found [here](https://github.com/cypress-io/eslint-plugin-cypress#usage)

@@ -68,7 +68,7 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
   const header = (
     <EuiFlyoutHeader hasBorder aria-labelledby="CreateAgentPolicyFlyoutTitle">
       <EuiTitle size="m">
-        <h2 id="CreateAgentPolicyFlyoutTitle">
+        <h2 id="CreateAgentPolicyFlyoutTitle" data-test-subj="createAgentPolicyFlyoutTitle">
           <FormattedMessage
             id="xpack.fleet.createAgentPolicy.flyoutTitle"
             defaultMessage="Create agent policy"
