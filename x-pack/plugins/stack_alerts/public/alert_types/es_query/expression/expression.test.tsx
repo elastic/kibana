@@ -34,6 +34,7 @@ const defaultEsQueryRuleParams: EsQueryAlertParams<SearchType.esQuery> = {
   timeField: '@timestamp',
   esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
   searchType: SearchType.esQuery,
+  excludeHitsFromPreviousRun: true,
 };
 const defaultSearchSourceRuleParams: EsQueryAlertParams<SearchType.searchSource> = {
   size: 100,
@@ -45,6 +46,7 @@ const defaultSearchSourceRuleParams: EsQueryAlertParams<SearchType.searchSource>
   timeField: '@timestamp',
   searchType: SearchType.searchSource,
   searchConfiguration: {},
+  excludeHitsFromPreviousRun: true,
 };
 
 const dataViewPluginMock = dataViewPluginMocks.createStartContract();
