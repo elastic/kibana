@@ -239,9 +239,9 @@ describe('Create case', () => {
       });
     });
 
-    it('does not submits the title when the length is longer than 64 characters', async () => {
+    it('does not submits the title when the length is longer than 128 characters', async () => {
       const longTitle =
-        'This is a title that should not be saved as it is longer than 64 characters.';
+        'This is a title that should not be saved as it is longer than 128 characters.';
 
       const wrapper = mount(
         <TestProviders>
@@ -263,7 +263,7 @@ describe('Create case', () => {
       await waitFor(() => {
         wrapper.update();
         expect(wrapper.find('[data-test-subj="caseTitle"] .euiFormErrorText').text()).toBe(
-          'The length of the title is too long. The maximum length is 64.'
+          'The length of the title is too long. The maximum length is 128.'
         );
       });
       expect(postCase).not.toHaveBeenCalled();

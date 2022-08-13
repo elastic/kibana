@@ -126,7 +126,7 @@ export const MAX_CONCURRENT_SEARCHES = 10 as const;
  * Validation
  */
 
-export const MAX_TITLE_LENGTH = 64 as const;
+export const MAX_TITLE_LENGTH = 128 as const;
 
 /**
  * Cases features
