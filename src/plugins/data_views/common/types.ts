@@ -23,12 +23,13 @@ export type { SavedObject };
 export type FieldFormatMap = Record<string, SerializedFieldFormat>;
 
 /**
- * Runtime field - type of value returned
- * @public
+ * Runtime field types
  */
-
 export type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
 
+/**
+ * Runtime field primitive types - excluding composite
+ */
 export type RuntimePrimitiveTypes = Exclude<RuntimeType, 'composite'>;
 
 /**
@@ -56,6 +57,9 @@ export type RuntimeFieldBase = {
  * The RuntimeField that will be sent in the ES Query "runtime_mappings" object
  */
 export type RuntimeFieldSpec = RuntimeFieldBase & {
+  /**
+   * Composite subfields
+   */
   fields?: Record<
     string,
     {

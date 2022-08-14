@@ -202,7 +202,7 @@ interface IndexedFieldProps {
   indexPattern: DataView;
   items: IndexedFieldItem[];
   editField: (field: IndexedFieldItem) => void;
-  deleteField: (fieldName: string) => void;
+  deleteField: (fieldName: string[]) => void;
   openModal: OverlayModalStart['open'];
   theme: ThemeServiceStart;
 }
@@ -476,7 +476,16 @@ export class Table extends PureComponent<IndexedFieldProps> {
             name: deleteLabel,
             description: deleteDescription,
             icon: 'trash',
-            onClick: (field) => deleteField(field.name),
+            onClick: (field) => {
+              const toDelete = [field.name];
+              if (field.spec?.runtimeField?.fields) {
+                const childFieldNames = Object.keys(field.spec.runtimeField.fields).map(
+                  (key) => `${field.name}.${key}`
+                );
+                toDelete.push(...childFieldNames);
+              }
+              deleteField(toDelete);
+            },
             type: 'icon',
             'data-test-subj': 'deleteField',
             available: showDelete,

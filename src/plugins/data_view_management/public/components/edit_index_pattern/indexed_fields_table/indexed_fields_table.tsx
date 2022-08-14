@@ -21,7 +21,7 @@ interface IndexedFieldsTableProps {
   schemaFieldTypeFilter: string[];
   helpers: {
     editField: (fieldName: string) => void;
-    deleteField: (fieldName: string) => void;
+    deleteField: (fieldName: string[]) => void;
     getFieldInfo: (indexPattern: DataView, field: DataViewField) => string[];
   };
   fieldWildcardMatcher: (filters: string[] | undefined) => (val: string) => boolean;
@@ -110,6 +110,7 @@ export class IndexedFieldsTable extends Component<
           runtimeField: {
             type: 'composite',
             script: fld.script,
+            fields: fld.fields,
           },
         },
         name,
@@ -124,6 +125,7 @@ export class IndexedFieldsTable extends Component<
         runtimeField: {
           type: 'composite',
           script: fld.script,
+          fields: fld.fields,
         },
       };
     });
@@ -190,7 +192,7 @@ export class IndexedFieldsTable extends Component<
           indexPattern={indexPattern}
           items={fields}
           editField={(field) => this.props.helpers.editField(field.name)}
-          deleteField={(fieldName) => this.props.helpers.deleteField(fieldName)}
+          deleteField={(fieldNames) => this.props.helpers.deleteField(fieldNames)}
           openModal={this.props.openModal}
           theme={this.props.theme}
         />

@@ -303,8 +303,6 @@ describe('Field editor Preview panel', () => {
         { key: 'myRuntimeField', value: scriptEmitResponse },
       ]);
     });
-    // todo do with composite
-    // todo do with composite subfield
 
     describe('read from _source', () => {
       test('should display the _source value when no script is provided and the name matched one of the fields in _source', async () => {
