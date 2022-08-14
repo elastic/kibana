@@ -10,6 +10,12 @@ import { parseEsInterval } from './parse_es_interval';
 
 type Interval = { fixed_interval: string } | { calendar_interval: string };
 
+const calendarFixedConversion = {
+  w: '7d',
+  M: '30d',
+  y: '365d',
+};
+
 /**
  * Checks whether a given Elasticsearch interval is a calendar or fixed interval
  * and returns an object containing the appropriate date_histogram property for that
@@ -28,11 +34,14 @@ type Interval = { fixed_interval: string } | { calendar_interval: string };
  *
  * @param interval The interval string to return the appropriate date_histogram key for.
  */
-export function dateHistogramInterval(interval: string): Interval {
-  const { type } = parseEsInterval(interval);
-  if (type === 'calendar') {
+export function dateHistogramInterval(interval: string, shouldForceFixed?: boolean): Interval {
+  const { type, unit } = parseEsInterval(interval);
+  if (type === 'calendar' && !shouldForceFixed) {
     return { calendar_interval: interval };
   } else {
+    if (type === 'calendar') {
+      return { fixed_interval: calendarFixedConversion[unit as 'w' | 'M' | 'y'] || interval };
+    }
     return { fixed_interval: interval };
   }
 }
