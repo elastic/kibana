@@ -37,6 +37,7 @@ export interface OpenFieldEditorOptions {
   };
   /**
    * action to take after field is saved
+   * @param field - the fields that were saved
    */
   onSave?: (field: DataViewField[]) => void;
   /**

@@ -36,14 +36,27 @@ export interface PluginSetup {
  */
 export interface PluginStart {
   /**
-   * method to open the data view field editor fly-out
+   * Method to open the data view field editor fly-out
    */
   openEditor(options: OpenFieldEditorOptions): () => void;
+  /**
+   * Method to open the data view field delete fly-out
+   * @param options Configuration options for the fly-out
+   */
   openDeleteModal(options: OpenFieldDeleteModalOptions): () => void;
   fieldFormatEditors: FormatEditorServiceStart['fieldFormatEditors'];
+  /**
+   * Convenience method for user permissions checks
+   */
   userPermissions: {
+    /**
+     * Whether the user has permission to edit data views
+     */
     editIndexPattern: () => boolean;
   };
+  /**
+   * Context provider for delete runtime field modal
+   */
   DeleteRuntimeFieldProvider: FunctionComponent<DeleteFieldProviderProps>;
 }
 

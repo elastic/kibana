@@ -25,10 +25,20 @@ import { removeFields } from './lib/remove_fields';
  * Options for opening the field editor
  */
 export interface OpenFieldDeleteModalOptions {
+  /**
+   * Config for the delete modal
+   */
   ctx: {
     dataView: DataView;
   };
+  /**
+   * Callback fired when fields are deleted
+   * @param fieldNames - the names of the deleted fields
+   */
   onDelete?: (fieldNames: string[]) => void;
+  /**
+   * Names of the fields to be deleted
+   */
   fieldName: string | string[];
 }
 
