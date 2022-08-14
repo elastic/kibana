@@ -56,7 +56,7 @@ const ExceptionsViewerUtilityComponent: React.FC<ExceptionsViewerUtilityProps> =
       </UtilityBar>
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
-      <EuiText size="s" data-test-subj='exceptionsViewerLastUpdated'>
+      <EuiText size="s" data-test-subj="exceptionsViewerLastUpdated">
         <FormattedMessage
           id="xpack.securitySolution.exceptions.viewer.lastUpdated"
           defaultMessage="Updated {updated}"
