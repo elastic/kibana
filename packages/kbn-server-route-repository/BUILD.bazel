@@ -66,7 +66,7 @@ jsts_transpiler(
 jsts_transpiler(
   name = "target_web",
   srcs = [
-    "web_index.ts",
+    "src/web_index.ts",
     "src/format_request.ts",
     "src/parse_endpoint.ts",
   ],

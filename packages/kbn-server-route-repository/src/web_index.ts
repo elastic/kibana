@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { formatRequest } from './src/format_request';
-export { parseEndpoint } from './src/parse_endpoint';
+export { formatRequest } from './format_request';
+export { parseEndpoint } from './parse_endpoint';
 export type {
   RouteRepositoryClient,
   ReturnOf,
@@ -18,4 +18,4 @@ export type {
   ServerRoute,
   RouteParamsRT,
   RouteState,
-} from './src/typings';
+} from './typings';
