@@ -18,11 +18,11 @@ exports[`Storyshots arguments/ContainerStyle simple 1`] = `
     }
   >
     <div
-      className="euiPopover euiPopover--anchorLeftCenter"
+      className="euiPopover emotion-euiPopover"
       id="color-picker-popover"
     >
       <div
-        className="euiPopover__anchor"
+        className="euiPopover__anchor css-16vtueo-render"
       >
         <button
           aria-label="Container style white"
@@ -76,11 +76,11 @@ exports[`Storyshots arguments/ContainerStyle/components simple template 1`] = `
     }
   >
     <div
-      className="euiPopover euiPopover--anchorLeftCenter"
+      className="euiPopover emotion-euiPopover"
       id="color-picker-popover"
     >
       <div
-        className="euiPopover__anchor"
+        className="euiPopover__anchor css-16vtueo-render"
       >
         <button
           aria-label="Container style white"

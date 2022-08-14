@@ -23,7 +23,7 @@ export const getCspNewPolicyMock = (type: BenchmarkId = 'cis_k8s'): NewPackagePo
       enabled: type === 'cis_k8s',
       streams: [
         {
-          enabled: true,
+          enabled: type === 'cis_k8s',
           data_stream: {
             type: 'logs',
             dataset: 'cloud_security_posture.findings',
@@ -37,7 +37,7 @@ export const getCspNewPolicyMock = (type: BenchmarkId = 'cis_k8s'): NewPackagePo
       enabled: type === 'cis_eks',
       streams: [
         {
-          enabled: false,
+          enabled: type === 'cis_eks',
           data_stream: {
             type: 'logs',
             dataset: 'cloud_security_posture.findings',
