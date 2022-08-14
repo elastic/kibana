@@ -125,8 +125,8 @@ describe('create CSP rules with post package create callback', () => {
 
     // Both enabled falls back to default
     mockPackagePolicy.inputs = [
-      { type: 'cloudbeat/vanilla', enabled: true, streams: [] },
-      { type: 'cloudbeat/eks', enabled: true, streams: [] },
+      { type: 'cloudbeat/cis_k8s', enabled: true, streams: [] },
+      { type: 'cloudbeat/cis_eks', enabled: true, streams: [] },
     ];
     const type = getBenchmarkInputType(mockPackagePolicy.inputs);
     expect(type).toMatch('cis_k8s');
@@ -137,8 +137,8 @@ describe('create CSP rules with post package create callback', () => {
 
     // None enabled falls back to default
     mockPackagePolicy.inputs = [
-      { type: 'cloudbeat/vanilla', enabled: false, streams: [] },
-      { type: 'cloudbeat/eks', enabled: false, streams: [] },
+      { type: 'cloudbeat/cis_k8s', enabled: false, streams: [] },
+      { type: 'cloudbeat/cis_eks', enabled: false, streams: [] },
     ];
     const type = getBenchmarkInputType(mockPackagePolicy.inputs);
     expect(type).toMatch('cis_k8s');
@@ -149,8 +149,8 @@ describe('create CSP rules with post package create callback', () => {
 
     // Single EKS selected
     mockPackagePolicy.inputs = [
-      { type: 'cloudbeat/eks', enabled: true, streams: [] },
-      { type: 'cloudbeat/vanilla', enabled: false, streams: [] },
+      { type: 'cloudbeat/cis_eks', enabled: true, streams: [] },
+      { type: 'cloudbeat/cis_k8s', enabled: false, streams: [] },
     ];
     const typeEks = getBenchmarkInputType(mockPackagePolicy.inputs);
     expect(typeEks).toMatch('cis_eks');
@@ -161,8 +161,8 @@ describe('create CSP rules with post package create callback', () => {
 
     // Single k8s selected
     mockPackagePolicy.inputs = [
-      { type: 'cloudbeat/eks', enabled: false, streams: [] },
-      { type: 'cloudbeat/vanilla', enabled: true, streams: [] },
+      { type: 'cloudbeat/cis_eks', enabled: false, streams: [] },
+      { type: 'cloudbeat/cis_k8s', enabled: true, streams: [] },
     ];
     const typeK8s = getBenchmarkInputType(mockPackagePolicy.inputs);
     expect(typeK8s).toMatch('cis_k8s');
