@@ -66,22 +66,21 @@ export const getCspRules = (
 };
 
 const getEnabledRulesByBenchmark = (rules: SavedObjectsFindResponse<CspRule>['saved_objects']) =>
-  rules.reduce<CspRulesConfiguration['data_yaml']['activated_rules']>(
-    (benchmarks, rule) => {
-      const benchmark = benchmarks[rule.attributes.metadata.benchmark.id];
-      if (!rule.attributes.enabled || !benchmark) return benchmarks;
+  rules.reduce<CspRulesConfiguration['runtime_cfg']['activated_rules']>((benchmarks, rule) => {
+    const benchmark = rule.attributes.metadata.benchmark.id;
+    if (!rule.attributes.enabled || !benchmark) return benchmarks;
+    if (!benchmarks[benchmark]) {
+      benchmarks[benchmark] = [];
+    }
 
-      benchmark.push(rule.attributes.metadata.rego_rule_id);
-
-      return benchmarks;
-    },
-    { cis_k8s: [], cis_eks: [] }
-  );
+    benchmarks[benchmark].push(rule.attributes.metadata.rego_rule_id);
+    return benchmarks;
+  }, {});
 
 export const createRulesConfig = (
   cspRules: SavedObjectsFindResponse<CspRule>
 ): CspRulesConfiguration => ({
-  data_yaml: {
+  runtime_cfg: {
     activated_rules: getEnabledRulesByBenchmark(cspRules.saved_objects),
   },
 });
@@ -92,15 +91,15 @@ export const convertRulesConfigToYaml = (config: CspRulesConfiguration): string 
 
 export const setVarToPackagePolicy = (
   packagePolicy: PackagePolicy,
-  dataYaml: string
+  runtimeCfg: string
 ): PackagePolicy => {
   const configFile: PackagePolicyConfigRecord = {
-    dataYaml: { type: 'yaml', value: dataYaml },
+    runtimeCfg: { type: 'yaml', value: runtimeCfg },
   };
   const updatedPackagePolicy = produce(packagePolicy, (draft) => {
     unset(draft, 'id');
     if (draft.vars) {
-      draft.vars.dataYaml = configFile.dataYaml;
+      draft.vars.runtimeCfg = configFile.runtimeCfg;
     } else {
       draft.vars = configFile;
     }
@@ -117,8 +116,8 @@ export const updateAgentConfiguration = async (
 ): Promise<PackagePolicy> => {
   const cspRules = await getCspRules(soClient, packagePolicy);
   const rulesConfig = createRulesConfig(cspRules);
-  const dataYaml = convertRulesConfigToYaml(rulesConfig);
-  const updatedPackagePolicy = setVarToPackagePolicy(packagePolicy, dataYaml);
+  const runtimeCfg = convertRulesConfigToYaml(rulesConfig);
+  const updatedPackagePolicy = setVarToPackagePolicy(packagePolicy, runtimeCfg);
   const options = { user: user ? user : undefined };
   return packagePolicyService.update(
     soClient,
