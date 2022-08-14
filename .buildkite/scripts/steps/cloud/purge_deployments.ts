@@ -31,9 +31,13 @@ for (const deployment of prDeployments) {
     if (pullRequest.state !== 'OPEN') {
       console.log(`Pull Request #${prNumber} is no longer open, will delete associated deployment`);
       deploymentsToPurge.push(deployment);
-    } else if (!pullRequest.labels.filter((label: any) => label.name === 'ci:deploy-cloud')) {
+    } else if (
+      !pullRequest.labels.filter((label: any) =>
+        /^ci:(deploy-cloud|cloud-deploy|cloud-redeploy)$/.test(label.name)
+      )
+    ) {
       console.log(
-        `Pull Request #${prNumber} no longer has the ci:deploy-cloud label, will delete associated deployment`
+        `Pull Request #${prNumber} no longer has the a cloud deployment label, will delete associated deployment`
       );
       deploymentsToPurge.push(deployment);
     } else if (lastCommitTimestamp < NOW - 60 * 60 * 24 * 7) {
