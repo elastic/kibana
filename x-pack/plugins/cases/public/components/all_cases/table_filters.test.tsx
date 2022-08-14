@@ -7,6 +7,8 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
+import userEvent from '@testing-library/user-event';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 import { CaseStatuses } from '../../../common/api';
 import { OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
@@ -14,7 +16,6 @@ import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../com
 import { useGetReporters } from '../../containers/use_get_reporters';
 import { DEFAULT_FILTER_OPTIONS } from '../../containers/use_get_cases';
 import { CasesTableFilters } from './table_filters';
-import userEvent from '@testing-library/user-event';
 import { useGetTags } from '../../containers/use_get_tags';
 
 jest.mock('../../containers/use_get_reporters');
@@ -65,9 +66,10 @@ describe('CasesTableFilters ', () => {
     expect(result.getByTestId('case-severity-filter')).toBeTruthy();
   });
 
-  it('should call onFilterChange when the severity filter changes', () => {
+  it('should call onFilterChange when the severity filter changes', async () => {
     const result = appMockRender.render(<CasesTableFilters {...props} />);
     userEvent.click(result.getByTestId('case-severity-filter'));
+    await waitForEuiPopoverOpen();
     userEvent.click(result.getByTestId('case-severity-filter-high'));
 
     expect(onFilterChanged).toBeCalledWith({ severity: 'high' });
