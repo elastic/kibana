@@ -6,22 +6,22 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiPageHeaderContentProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
-import { Redirect } from 'react-router-dom';
 import { TypeOf } from '@kbn/typed-react-router-config';
+import React, { useState } from 'react';
 import { TopNFunctions } from '../../../common/functions';
 import { TimeRange } from '../../../common/types';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../../hooks/use_profiling_route_path';
 import { useTimeRange } from '../../hooks/use_time_range';
+import { ProfilingRoutes } from '../../routing';
 import { FunctionContext } from '../contexts/function';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 import { FunctionNavigation } from '../function_nav';
 import { PrimaryAndComparisonSearchBar } from '../primary_and_comparison_search_bar';
 import { ProfilingAppPageTemplate } from '../profiling_app_page_template';
+import { RedirectTo } from '../redirect_to';
 import { TopNFunctionsTable } from '../topn_functions';
-import { ProfilingRoutes } from '../../routing';
 
 export function FunctionsView({ children }: { children: React.ReactElement }) {
   const {
@@ -82,7 +82,7 @@ export function FunctionsView({ children }: { children: React.ReactElement }) {
   ];
 
   if (routePath === '/functions') {
-    return <Redirect to="/functions/topn" />;
+    return <RedirectTo pathname="/functions/topn" />;
   }
 
   return (

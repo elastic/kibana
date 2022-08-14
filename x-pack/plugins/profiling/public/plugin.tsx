@@ -13,8 +13,9 @@ import {
   Plugin,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { from, map } from 'rxjs';
 import type { NavigationSection } from '@kbn/observability-plugin/public';
+import { Location } from 'history';
+import { BehaviorSubject, combineLatest, from, map } from 'rxjs';
 import { getServices } from './services';
 import type { ProfilingPluginPublicSetupDeps, ProfilingPluginPublicStartDeps } from './types';
 
@@ -46,8 +47,10 @@ export class ProfilingPlugin implements Plugin {
       },
     ];
 
-    const section$ = from(coreSetup.getStartServices()).pipe(
-      map(() => {
+    const kuerySubject = new BehaviorSubject<string>('');
+
+    const section$ = combineLatest([from(coreSetup.getStartServices()), kuerySubject]).pipe(
+      map(([_, kuery]) => {
         const sections: NavigationSection[] = [
           {
             // TODO: add beta badge to section label, needs support in Observability plugin
@@ -58,7 +61,10 @@ export class ProfilingPlugin implements Plugin {
               return {
                 app: 'profiling',
                 label: link.title,
-                path: link.path,
+                path: `${link.path}?kuery=${kuery ?? ''}`,
+                matchPath: (path) => {
+                  return path.startsWith(link.path);
+                },
               };
             }),
             sortKey: 700,
@@ -86,7 +92,17 @@ export class ProfilingPlugin implements Plugin {
 
         const profilingFetchServices = getServices(coreStart);
         const { renderApp } = await import('./app');
-        return renderApp(
+
+        function pushKueryToSubject(location: Location) {
+          const query = new URLSearchParams(location.search);
+          kuerySubject.next(query.get('kuery') ?? '');
+        }
+
+        pushKueryToSubject(history.location);
+
+        history.listen(pushKueryToSubject);
+
+        const unmount = renderApp(
           {
             profilingFetchServices,
             coreStart,
@@ -98,6 +114,11 @@ export class ProfilingPlugin implements Plugin {
           },
           element
         );
+
+        return () => {
+          unmount();
+          kuerySubject.next('');
+        };
       },
     });
   }
