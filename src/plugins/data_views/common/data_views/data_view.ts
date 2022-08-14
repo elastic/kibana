@@ -349,6 +349,13 @@ export class DataView implements DataViewBase {
   }
 
   /**
+   * returns true if dataview contains TSDB fields
+   */
+  isTSDBMode() {
+    return this.fields.some((field) => field.timeSeriesDimension || field.timeSeriesMetric);
+  }
+
+  /**
    * Does the data view have a timestamp field?
    */
 
