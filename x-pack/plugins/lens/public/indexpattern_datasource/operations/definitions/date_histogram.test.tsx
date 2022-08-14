@@ -18,7 +18,8 @@ import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { dataPluginMock, getCalculateAutoTimeExpression } from '@kbn/data-plugin/public/mocks';
 import { createMockedIndexPattern } from '../../mocks';
-import type { IndexPatternLayer, IndexPattern } from '../../types';
+import type { IndexPatternLayer } from '../../types';
+import type { IndexPattern } from '../../../types';
 import { getFieldByNameFactory } from '../../pure_helpers';
 import { act } from 'react-dom/test-utils';
 
