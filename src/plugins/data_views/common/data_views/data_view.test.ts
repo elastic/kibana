@@ -97,6 +97,29 @@ describe('IndexPattern', () => {
     });
   });
 
+  describe('isTSDBMode', () => {
+    const tsdbField: FieldSpec = {
+      name: 'tsdb-metric-field',
+      type: 'number',
+      aggregatable: true,
+      searchable: true,
+      timeSeriesMetric: 'gauge',
+    };
+
+    test('should return false if no fields are tsdb fields', () => {
+      expect(indexPattern.isTSDBMode()).toBe(false);
+    });
+
+    test('should return true if some fields are tsdb fields', () => {
+      indexPattern.fields.add(tsdbField);
+      expect(indexPattern.isTSDBMode()).toBe(true);
+    });
+
+    afterAll(() => {
+      indexPattern.fields.remove(tsdbField);
+    });
+  });
+
   describe('getScriptedFields', () => {
     test('should return all scripted fields', () => {
       const scriptedNames = stubLogstashFields
