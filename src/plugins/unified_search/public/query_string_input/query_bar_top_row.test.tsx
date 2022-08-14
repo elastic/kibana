@@ -20,7 +20,9 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { stubIndexPattern } from '@kbn/data-plugin/public/stubs';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { unifiedSearchPluginMock } from '../mocks';
 
+const { autocomplete: autocompleteStartMock } = unifiedSearchPluginMock.createStartContract();
 const startMock = coreMock.createStart();
 
 const mockTimeHistory = {
@@ -94,6 +96,7 @@ function wrapQueryBarTopRowInContext(testProps: any) {
 
   const services = {
     ...startMock,
+    autocomplete: autocompleteStartMock,
     data: dataPluginMock.createStartContract(),
     appName: 'discover',
     storage: createMockStorage(),
