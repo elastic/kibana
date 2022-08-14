@@ -7,25 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const DETECTION_LIST = i18n.translate(
-  'xpack.securitySolution.exceptions.detectionListLabel',
-  {
-    defaultMessage: 'Detection list',
-  }
-);
-
-export const ENDPOINT_LIST = i18n.translate('xpack.securitySolution.exceptions.endpointListLabel', {
-  defaultMessage: 'Endpoint list',
-});
-
-export const EDIT = i18n.translate('xpack.securitySolution.exceptions.editButtonLabel', {
-  defaultMessage: 'Edit',
-});
-
-export const REMOVE = i18n.translate('xpack.securitySolution.exceptions.removeButtonLabel', {
-  defaultMessage: 'Remove',
-});
-
 export const COMMENTS_SHOW = (comments: number) =>
   i18n.translate('xpack.securitySolution.exceptions.showCommentsLabel', {
     values: { comments },
@@ -37,14 +18,6 @@ export const COMMENTS_HIDE = (comments: number) =>
     values: { comments },
     defaultMessage: 'Hide ({comments}) {comments, plural, =1 {Comment} other {Comments}}',
   });
-
-export const NAME = i18n.translate('xpack.securitySolution.exceptions.nameLabel', {
-  defaultMessage: 'Name',
-});
-
-export const COMMENT = i18n.translate('xpack.securitySolution.exceptions.commentLabel', {
-  defaultMessage: 'Comment',
-});
 
 export const COMMENT_EVENT = i18n.translate('xpack.securitySolution.exceptions.commentEventLabel', {
   defaultMessage: 'added a comment',
@@ -64,13 +37,6 @@ export const SEARCH_DEFAULT = i18n.translate(
   }
 );
 
-export const ADD_EXCEPTION_LABEL = i18n.translate(
-  'xpack.securitySolution.exceptions.viewer.addExceptionLabel',
-  {
-    defaultMessage: 'Add new exception',
-  }
-);
-
 export const ADD_TO_ENDPOINT_LIST = i18n.translate(
   'xpack.securitySolution.exceptions.viewer.addToEndpointListLabel',
   {
@@ -82,28 +48,6 @@ export const ADD_TO_DETECTIONS_LIST = i18n.translate(
   'xpack.securitySolution.exceptions.viewer.addToDetectionsListLabel',
   {
     defaultMessage: 'Add rule exception',
-  }
-);
-
-export const EXCEPTION_EMPTY_PROMPT_TITLE = i18n.translate(
-  'xpack.securitySolution.exceptions.viewer.emptyPromptTitle',
-  {
-    defaultMessage: 'This rule has no exceptions',
-  }
-);
-
-export const EXCEPTION_NO_SEARCH_RESULTS_PROMPT_BODY = i18n.translate(
-  'xpack.securitySolution.exceptions.viewer.noSearchResultsPromptBody',
-  {
-    defaultMessage: 'No search results found.',
-  }
-);
-
-export const EXCEPTION_EMPTY_PROMPT_BODY = i18n.translate(
-  'xpack.securitySolution.exceptions.viewer.emptyPromptBody',
-  {
-    defaultMessage:
-      'You can add exceptions to fine tune the rule so that detection alerts are not created when exception conditions are met. Exceptions improve detection accuracy, which can help reduce the number of false positives.',
   }
 );
 
@@ -133,36 +77,6 @@ export const NUMBER_OF_ITEMS = (items: number) =>
     defaultMessage: '{items} items',
   });
 
-export const REFRESH = i18n.translate('xpack.securitySolution.exceptions.utilityRefreshLabel', {
-  defaultMessage: 'Refresh',
-});
-
-export const SHOWING_EXCEPTIONS = (items: number) =>
-  i18n.translate('xpack.securitySolution.exceptions.utilityNumberExceptionsLabel', {
-    values: { items },
-    defaultMessage: 'Showing {items} {items, plural, =1 {exception} other {exceptions}}',
-  });
-
-export const FIELD = i18n.translate('xpack.securitySolution.exceptions.fieldDescription', {
-  defaultMessage: 'Field',
-});
-
-export const OPERATOR = i18n.translate('xpack.securitySolution.exceptions.operatorDescription', {
-  defaultMessage: 'Operator',
-});
-
-export const VALUE = i18n.translate('xpack.securitySolution.exceptions.valueDescription', {
-  defaultMessage: 'Value',
-});
-
-export const AND = i18n.translate('xpack.securitySolution.exceptions.andDescription', {
-  defaultMessage: 'AND',
-});
-
-export const OR = i18n.translate('xpack.securitySolution.exceptions.orDescription', {
-  defaultMessage: 'OR',
-});
-
 export const ADD_COMMENT_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.exceptions.viewer.addCommentPlaceholder',
   {
@@ -176,10 +90,6 @@ export const ADD_TO_CLIPBOARD = i18n.translate(
     defaultMessage: 'Comment',
   }
 );
-
-export const DESCRIPTION = i18n.translate('xpack.securitySolution.exceptions.descriptionLabel', {
-  defaultMessage: 'Description',
-});
 
 export const TOTAL_ITEMS_FETCH_ERROR = i18n.translate(
   'xpack.securitySolution.exceptions.viewer.fetchTotalsError',
@@ -262,5 +172,12 @@ export const OPERATING_SYSTEM_LINUX = i18n.translate(
   'xpack.securitySolution.exceptions.operatingSystemLinux',
   {
     defaultMessage: 'Linux',
+  }
+);
+
+export const ERROR_FETCHING_REFERENCES_TITLE = i18n.translate(
+  'xpack.securitySolution.exceptions.fetchingReferencesErrorToastTitle',
+  {
+    defaultMessage: 'Error fetching exception references',
   }
 );

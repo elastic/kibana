@@ -6,40 +6,53 @@
  */
 
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
 import { mount } from 'enzyme';
 
 import { ExceptionItemCard } from '.';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import { getCommentsArrayMock } from '@kbn/lists-plugin/common/schemas/types/comment.mock';
-import { getMockTheme } from '../../../../lib/kibana/kibana_react.mock';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { TestProviders } from '../../../../mock';
 
 jest.mock('../../../../lib/kibana');
-
-const mockTheme = getMockTheme({
-  eui: {
-    euiColorDanger: '#ece',
-    euiColorLightestShade: '#ece',
-    euiColorPrimary: '#ece',
-    euiFontWeightSemiBold: 1,
-  },
-});
 
 describe('ExceptionItemCard', () => {
   it('it renders header, item meta information and conditions', () => {
     const exceptionItem = { ...getExceptionListItemSchemaMock(), comments: [] };
 
     const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
+      <TestProviders>
         <ExceptionItemCard
           disableActions={false}
           loadingItemIds={[]}
           onDeleteException={jest.fn()}
           onEditException={jest.fn()}
           exceptionItem={exceptionItem}
+          listType={ExceptionListTypeEnum.DETECTION}
+          ruleReferences={[
+            {
+              exception_lists: [
+                {
+                  id: '123',
+                  list_id: 'i_exist',
+                  namespace_type: 'single',
+                  type: 'detection',
+                },
+                {
+                  id: '456',
+                  list_id: 'i_exist_2',
+                  namespace_type: 'single',
+                  type: 'detection',
+                },
+              ],
+              id: '1a2b3c',
+              name: 'Simple Rule Query',
+              rule_id: 'rule-2',
+            },
+          ]}
           dataTestSubj="item"
         />
-      </ThemeProvider>
+      </TestProviders>
     );
 
     expect(wrapper.find('ExceptionItemCardHeader')).toHaveLength(1);
@@ -54,7 +67,7 @@ describe('ExceptionItemCard', () => {
     const exceptionItem = { ...getExceptionListItemSchemaMock(), comments: getCommentsArrayMock() };
 
     const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
+      <TestProviders>
         <ExceptionItemCard
           disableActions={false}
           loadingItemIds={[]}
@@ -62,8 +75,30 @@ describe('ExceptionItemCard', () => {
           onEditException={jest.fn()}
           exceptionItem={exceptionItem}
           dataTestSubj="item"
+          listType={ExceptionListTypeEnum.DETECTION}
+          ruleReferences={[
+            {
+              exception_lists: [
+                {
+                  id: '123',
+                  list_id: 'i_exist',
+                  namespace_type: 'single',
+                  type: 'detection',
+                },
+                {
+                  id: '456',
+                  list_id: 'i_exist_2',
+                  namespace_type: 'single',
+                  type: 'detection',
+                },
+              ],
+              id: '1a2b3c',
+              name: 'Simple Rule Query',
+              rule_id: 'rule-2',
+            },
+          ]}
         />
-      </ThemeProvider>
+      </TestProviders>
     );
 
     expect(wrapper.find('ExceptionItemCardHeader')).toHaveLength(1);
@@ -78,7 +113,7 @@ describe('ExceptionItemCard', () => {
     const exceptionItem = getExceptionListItemSchemaMock();
 
     const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
+      <TestProviders>
         <ExceptionItemCard
           disableActions
           loadingItemIds={[]}
@@ -86,8 +121,30 @@ describe('ExceptionItemCard', () => {
           onEditException={jest.fn()}
           exceptionItem={exceptionItem}
           dataTestSubj="item"
+          listType={ExceptionListTypeEnum.DETECTION}
+          ruleReferences={[
+            {
+              exception_lists: [
+                {
+                  id: '123',
+                  list_id: 'i_exist',
+                  namespace_type: 'single',
+                  type: 'detection',
+                },
+                {
+                  id: '456',
+                  list_id: 'i_exist_2',
+                  namespace_type: 'single',
+                  type: 'detection',
+                },
+              ],
+              id: '1a2b3c',
+              name: 'Simple Rule Query',
+              rule_id: 'rule-2',
+            },
+          ]}
         />
-      </ThemeProvider>
+      </TestProviders>
     );
 
     expect(wrapper.find('button[data-test-subj="item-actionButton"]').exists()).toBeFalsy();
@@ -98,7 +155,7 @@ describe('ExceptionItemCard', () => {
     const exceptionItem = getExceptionListItemSchemaMock();
 
     const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
+      <TestProviders>
         <ExceptionItemCard
           disableActions={false}
           loadingItemIds={[]}
@@ -106,8 +163,30 @@ describe('ExceptionItemCard', () => {
           onEditException={mockOnEditException}
           exceptionItem={exceptionItem}
           dataTestSubj="item"
+          listType={ExceptionListTypeEnum.DETECTION}
+          ruleReferences={[
+            {
+              exception_lists: [
+                {
+                  id: '123',
+                  list_id: 'i_exist',
+                  namespace_type: 'single',
+                  type: 'detection',
+                },
+                {
+                  id: '456',
+                  list_id: 'i_exist_2',
+                  namespace_type: 'single',
+                  type: 'detection',
+                },
+              ],
+              id: '1a2b3c',
+              name: 'Simple Rule Query',
+              rule_id: 'rule-2',
+            },
+          ]}
         />
-      </ThemeProvider>
+      </TestProviders>
     );
 
     // click on popover
@@ -127,7 +206,7 @@ describe('ExceptionItemCard', () => {
     const exceptionItem = getExceptionListItemSchemaMock();
 
     const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
+      <TestProviders>
         <ExceptionItemCard
           disableActions={false}
           loadingItemIds={[]}
@@ -135,8 +214,30 @@ describe('ExceptionItemCard', () => {
           onEditException={jest.fn()}
           exceptionItem={exceptionItem}
           dataTestSubj="item"
+          listType={ExceptionListTypeEnum.DETECTION}
+          ruleReferences={[
+            {
+              exception_lists: [
+                {
+                  id: '123',
+                  list_id: 'i_exist',
+                  namespace_type: 'single',
+                  type: 'detection',
+                },
+                {
+                  id: '456',
+                  list_id: 'i_exist_2',
+                  namespace_type: 'single',
+                  type: 'detection',
+                },
+              ],
+              id: '1a2b3c',
+              name: 'Simple Rule Query',
+              rule_id: 'rule-2',
+            },
+          ]}
         />
-      </ThemeProvider>
+      </TestProviders>
     );
 
     // click on popover
@@ -158,7 +259,7 @@ describe('ExceptionItemCard', () => {
     const exceptionItem = getExceptionListItemSchemaMock();
     exceptionItem.comments = getCommentsArrayMock();
     const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
+      <TestProviders>
         <ExceptionItemCard
           disableActions={false}
           loadingItemIds={[]}
@@ -166,8 +267,30 @@ describe('ExceptionItemCard', () => {
           onEditException={jest.fn()}
           exceptionItem={exceptionItem}
           dataTestSubj="item"
+          listType={ExceptionListTypeEnum.DETECTION}
+          ruleReferences={[
+            {
+              exception_lists: [
+                {
+                  id: '123',
+                  list_id: 'i_exist',
+                  namespace_type: 'single',
+                  type: 'detection',
+                },
+                {
+                  id: '456',
+                  list_id: 'i_exist_2',
+                  namespace_type: 'single',
+                  type: 'detection',
+                },
+              ],
+              id: '1a2b3c',
+              name: 'Simple Rule Query',
+              rule_id: 'rule-2',
+            },
+          ]}
         />
-      </ThemeProvider>
+      </TestProviders>
     );
 
     expect(wrapper.find('.euiAccordion-isOpen')).toHaveLength(0);

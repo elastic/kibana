@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { ThemeProvider } from 'styled-components';
 
 import { ExceptionsViewer } from '.';
 import { useKibana } from '../../../lib/kibana';
@@ -16,20 +15,39 @@ import { useExceptionListItems, useApi } from '@kbn/securitysolution-list-hooks'
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
 import { getFoundExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/found_exception_list_item_schema.mock';
-import { getMockTheme } from '../../../lib/kibana/kibana_react.mock';
-
-const mockTheme = getMockTheme({
-  eui: {
-    euiColorEmptyShade: '#ece',
-    euiBreakpoints: {
-      l: '1200px',
-    },
-    euiSizeM: '10px',
-  },
-});
+import { TestProviders } from '../../../mock';
 
 jest.mock('../../../lib/kibana');
 jest.mock('@kbn/securitysolution-list-hooks');
+jest.mock('../use_find_references');
+
+const mockRule = {
+  id: 'myfakeruleid',
+  author: [],
+  severity_mapping: [],
+  risk_score_mapping: [],
+  rule_id: 'rule-1',
+  risk_score: 50,
+  description: 'some description',
+  from: 'now-5m',
+  to: 'now',
+  name: 'some-name',
+  severity: 'low',
+  type: 'query',
+  query: 'some query',
+  index: ['index-1'],
+  interval: '5m',
+  references: [],
+  actions: [],
+  enabled: false,
+  false_positives: [],
+  max_signals: 100,
+  tags: [],
+  threat: [],
+  throttle: null,
+  version: 1,
+  exceptions_list: [],
+};
 
 describe('ExceptionsViewer', () => {
   const ruleName = 'test rule';
@@ -75,7 +93,7 @@ describe('ExceptionsViewer', () => {
       jest.fn(),
     ]);
     const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
+      <TestProviders>
         <ExceptionsViewer
           ruleId={'123'}
           ruleIndices={['filebeat-*']}
@@ -91,7 +109,7 @@ describe('ExceptionsViewer', () => {
           availableListTypes={[ExceptionListTypeEnum.DETECTION]}
           commentsAccordionId="commentsAccordion"
         />
-      </ThemeProvider>
+      </TestProviders>
     );
 
     expect(wrapper.find('[data-test-subj="loadingPanelAllRulesTable"]').exists()).toBeTruthy();
@@ -99,7 +117,7 @@ describe('ExceptionsViewer', () => {
 
   it('it renders empty prompt if no "exceptionListMeta" passed in', () => {
     const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
+      <TestProviders>
         <ExceptionsViewer
           ruleIndices={['filebeat-*']}
           ruleId={'123'}
@@ -108,7 +126,7 @@ describe('ExceptionsViewer', () => {
           availableListTypes={[ExceptionListTypeEnum.DETECTION]}
           commentsAccordionId="commentsAccordion"
         />
-      </ThemeProvider>
+      </TestProviders>
     );
 
     expect(wrapper.find('[data-test-subj="exceptionsEmptyPrompt"]').exists()).toBeTruthy();
@@ -128,7 +146,7 @@ describe('ExceptionsViewer', () => {
     ]);
 
     const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
+      <TestProviders>
         <ExceptionsViewer
           ruleIndices={['filebeat-*']}
           ruleId={'123'}
@@ -144,7 +162,7 @@ describe('ExceptionsViewer', () => {
           availableListTypes={[ExceptionListTypeEnum.DETECTION]}
           commentsAccordionId="commentsAccordion"
         />
-      </ThemeProvider>
+      </TestProviders>
     );
 
     expect(wrapper.find('[data-test-subj="exceptionsEmptyPrompt"]').exists()).toBeTruthy();

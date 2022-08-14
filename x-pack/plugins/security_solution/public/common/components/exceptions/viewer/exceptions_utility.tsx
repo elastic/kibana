@@ -45,7 +45,6 @@ const ExceptionsViewerUtilityComponent: React.FC<ExceptionsViewerUtilityProps> =
               <FormattedMessage
                 id="xpack.securitySolution.exceptions.viewer.paginationDetails"
                 defaultMessage="Showing {partOne} of {partTwo}"
-                data-test-subj="exceptionsEndpointMessage"
                 values={{
                   partOne: <StyledText>{`1-${pagination.totalItemCount}`}</StyledText>,
                   partTwo: <StyledText>{`${pagination.totalItemCount}`}</StyledText>,
@@ -57,11 +56,10 @@ const ExceptionsViewerUtilityComponent: React.FC<ExceptionsViewerUtilityProps> =
       </UtilityBar>
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
-      <EuiText size="s">
+      <EuiText size="s" data-test-subj='exceptionsViewerLastUpdated'>
         <FormattedMessage
           id="xpack.securitySolution.exceptions.viewer.lastUpdated"
           defaultMessage="Updated {updated}"
-          data-test-subj="exceptionsEndpointMessage"
           values={{
             updated: (
               <StyledCondition>

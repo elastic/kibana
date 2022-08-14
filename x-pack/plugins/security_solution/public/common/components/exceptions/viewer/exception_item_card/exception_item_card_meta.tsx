@@ -28,6 +28,7 @@ import { APP_UI_ID, SecurityPageName } from '../../../../../../common/constants'
 import { useKibana } from '../../../../lib/kibana';
 import { getRuleDetailsUrl } from '../../../link_to/redirect_to_detection_engine';
 import { useGetSecuritySolutionUrl } from '../../../link_to';
+import type { RuleReferenceSchema } from '../../../../../../common/detection_engine/schemas/response';
 
 const StyledFlexItem = styled(EuiFlexItem)`
   border-right: 1px solid #d3dae6;
@@ -36,7 +37,7 @@ const StyledFlexItem = styled(EuiFlexItem)`
 
 export interface ExceptionItemCardMetaInfoProps {
   item: ExceptionListItemSchema;
-  references: unknown;
+  references: RuleReferenceSchema[];
   dataTestSubj: string;
 }
 
@@ -92,7 +93,7 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
           <MetaInfoDetails
             fieldName="created_by"
             label={i18n.EXCEPTION_ITEM_CREATED_LABEL}
-            value1={<FormattedDate fieldName="created_by" value={item.created_at} />}
+            value1={<FormattedDate fieldName="created_at" value={item.created_at} />}
             value2={item.created_by}
             dataTestSubj={`${dataTestSubj}-createdBy`}
           />
@@ -101,32 +102,30 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
           <MetaInfoDetails
             fieldName="updated_by"
             label={i18n.EXCEPTION_ITEM_UPDATED_LABEL}
-            value1={<FormattedDate fieldName="updated_by" value={item.updated_by} />}
+            value1={<FormattedDate fieldName="updated_at" value={item.updated_at} />}
             value2={item.updated_by}
             dataTestSubj={`${dataTestSubj}-updatedBy`}
           />
         </StyledFlexItem>
-        {references != null && (
-          <EuiFlexItem grow={false}>
-            <EuiPopover
-              button={
-                <EuiButtonEmpty
-                  onClick={onAffectedRulesClick}
-                  iconType="list"
-                  data-test-subj={`${dataTestSubj}-affectedRulesButton`}
-                >
-                  {i18n.AFFECTED_RULES(references.length)}
-                </EuiButtonEmpty>
-              }
-              panelPaddingSize="none"
-              isOpen={isPopoverOpen}
-              closePopover={onClosePopover}
-              data-test-subj={`${dataTestSubj}-items`}
-            >
-              <EuiContextMenuPanel size="s" items={itemActions} />
-            </EuiPopover>
-          </EuiFlexItem>
-        )}
+        <EuiFlexItem grow={false}>
+          <EuiPopover
+            button={
+              <EuiButtonEmpty
+                onClick={onAffectedRulesClick}
+                iconType="list"
+                data-test-subj={`${dataTestSubj}-affectedRulesButton`}
+              >
+                {i18n.AFFECTED_RULES(references.length)}
+              </EuiButtonEmpty>
+            }
+            panelPaddingSize="none"
+            isOpen={isPopoverOpen}
+            closePopover={onClosePopover}
+            data-test-subj={`${dataTestSubj}-items`}
+          >
+            <EuiContextMenuPanel size="s" items={itemActions} />
+          </EuiPopover>
+        </EuiFlexItem>
       </EuiFlexGroup>
     );
   }
@@ -144,12 +143,12 @@ interface MetaInfoDetailsProps {
 const MetaInfoDetails = memo<MetaInfoDetailsProps>(({ label, value1, value2, dataTestSubj }) => {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false} responsive={false}>
-      <EuiFlexItem grow={false} data-test-subj={`${dataTestSubj}-value1`}>
+      <EuiFlexItem grow={false}>
         <EuiText size="xs" style={{ fontFamily: 'Inter' }}>
           {label}
         </EuiText>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} data-test-subj={`${dataTestSubj}-value1`}>
         <EuiBadge color="default" style={{ fontFamily: 'Inter' }}>
           {value1}
         </EuiBadge>
@@ -159,7 +158,7 @@ const MetaInfoDetails = memo<MetaInfoDetailsProps>(({ label, value1, value2, dat
           {i18n.EXCEPTION_ITEM_META_BY}
         </EuiText>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} data-test-subj={`${dataTestSubj}-value2`}>
         <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center" wrap={false}>
           <EuiFlexItem grow={false}>
             <EuiBadge color="hollow" style={{ fontFamily: 'Inter' }}>

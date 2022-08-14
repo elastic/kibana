@@ -160,7 +160,12 @@ export const ExceptionItemCardConditions = memo<CriteriaConditionsProps>(
     );
 
     return (
-      <div data-test-subj={dataTestSubj}>
+      <StyledConditionContent
+        color="subdued"
+        hasBorder={true}
+        hasShadow={false}
+        data-test-subj={dataTestSubj}
+      >
         {osLabel != null && (
           <div data-test-subj={`${dataTestSubj}-os`}>
             <strong>
@@ -176,13 +181,7 @@ export const ExceptionItemCardConditions = memo<CriteriaConditionsProps>(
           const operator = 'operator' in entry ? entry.operator : '';
 
           return (
-            <StyledConditionContent
-              color="subdued"
-              hasBorder={true}
-              hasShadow={false}
-              data-test-subj={`${dataTestSubj}-condition`}
-              key={field + type + value + index}
-            >
+            <div data-test-subj={`${dataTestSubj}-condition`} key={field + type + value + index}>
               <div className="eui-xScroll">
                 <EuiExpression
                   description={
@@ -197,10 +196,10 @@ export const ExceptionItemCardConditions = memo<CriteriaConditionsProps>(
                 />
               </div>
               {nestedEntries != null && getNestedEntriesContent(type, nestedEntries)}
-            </StyledConditionContent>
+            </div>
           );
         })}
-      </div>
+      </StyledConditionContent>
     );
   }
 );

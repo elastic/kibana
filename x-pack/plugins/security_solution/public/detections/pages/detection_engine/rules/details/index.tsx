@@ -79,7 +79,7 @@ import { SecurityPageName } from '../../../../../app/types';
 import { LinkButton } from '../../../../../common/components/links';
 import { useFormatUrl } from '../../../../../common/components/link_to';
 import { ExceptionsViewer } from '../../../../../common/components/exceptions/viewer';
-import { APP_UI_ID, DEFAULT_INDEX_PATTERN } from '../../../../../../common/constants';
+import { APP_UI_ID } from '../../../../../../common/constants';
 import { useGlobalFullScreen } from '../../../../../common/containers/use_full_screen';
 import { Display } from '../../../../../hosts/pages/display';
 
@@ -418,7 +418,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
 
     setTabs(visibleTabs);
     setRuleDetailTab(currentTab);
-  }, [hasIndexRead, ruleExecutionSettings]);
+  }, [hasIndexRead, ruleDetailTabs, ruleExecutionSettings]);
 
   const showUpdating = useMemo(
     () => isLoadingIndexPattern || isAlertsLoading || loading,
@@ -880,26 +880,22 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                   )}
                 </>
               )}
-              {ruleDetailTab === RuleDetailTabs.exceptions && (
+              {rule != null && ruleDetailTab === RuleDetailTabs.exceptions && (
                 <ExceptionsViewer
-                  ruleId={ruleId ?? ''}
-                  ruleName={rule?.name ?? ''}
-                  ruleIndices={rule?.index ?? DEFAULT_INDEX_PATTERN}
-                  dataViewId={rule?.data_view_id}
+                  rule={rule}
                   listType={ExceptionListTypeEnum.DETECTION}
                   exceptionListsMeta={exceptionLists.lists}
                   onRuleChange={refreshRule}
+                  data-test-subj="exceptionTab"
                 />
               )}
-              {ruleDetailTab === RuleDetailTabs.endpointExceptions && (
+              {rule != null && ruleDetailTab === RuleDetailTabs.endpointExceptions && (
                 <ExceptionsViewer
-                  ruleId={ruleId ?? ''}
-                  ruleName={rule?.name ?? ''}
-                  ruleIndices={rule?.index ?? DEFAULT_INDEX_PATTERN}
-                  dataViewId={rule?.data_view_id}
+                  rule={rule}
                   listType={ExceptionListTypeEnum.ENDPOINT}
                   exceptionListsMeta={exceptionLists.lists}
                   onRuleChange={refreshRule}
+                  data-test-subj="endpointExceptionsTab"
                 />
               )}
               {ruleDetailTab === RuleDetailTabs.executionResults && (

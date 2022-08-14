@@ -7,15 +7,20 @@
 
 import * as t from 'io-ts';
 import { NonEmptyStringArray } from '@kbn/securitysolution-io-ts-types';
+import { DefaultNamespaceArray } from '@kbn/securitysolution-io-ts-list-types';
 
 export const findExceptionReferencesOnRuleSchema = t.exact(
-  t.partial({
+  t.type({
+    ids: NonEmptyStringArray,
     list_ids: NonEmptyStringArray,
-    list_list_ids: NonEmptyStringArray,
-    namespace_types: NonEmptyStringArray,
+    namespace_types: DefaultNamespaceArray,
   })
 );
 
 export type FindExceptionReferencesOnRuleSchema = t.OutputOf<
+  typeof findExceptionReferencesOnRuleSchema
+>;
+
+export type FindExceptionReferencesOnRuleSchemaDecoded = t.TypeOf<
   typeof findExceptionReferencesOnRuleSchema
 >;

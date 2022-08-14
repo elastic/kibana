@@ -17,7 +17,7 @@ import type {
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { useApi, useExceptionListItems } from '@kbn/securitysolution-list-hooks';
 
-import { useRuleAsync } from '../../../../detections/containers/detection_engine/rules/use_rule_async';
+import { DEFAULT_INDEX_PATTERN } from '../../../../../common/constants';
 import { useStateToaster } from '../../toasters';
 import { useUserData } from '../../../../detections/components/user_info';
 import { useKibana } from '../../../lib/kibana';
@@ -34,6 +34,7 @@ import { EditExceptionFlyout } from '../edit_exception_flyout';
 import { AddExceptionFlyout } from '../add_exception_flyout';
 import * as i18n from '../translations';
 import { useFindExceptionListReferences } from '../use_find_references';
+import type { Rule } from '../../../../detections/containers/detection_engine/rules/types';
 
 const initialState: State = {
   filterOptions: { filter: '', tags: [] },
@@ -54,20 +55,14 @@ const initialState: State = {
 };
 
 interface ExceptionsViewerProps {
-  ruleId: string;
-  ruleName: string;
-  ruleIndices: string[];
-  dataViewId?: string;
+  rule: Rule;
   exceptionListsMeta: ExceptionListIdentifiers[];
   listType: ExceptionListTypeEnum;
   onRuleChange?: () => void;
 }
 
 const ExceptionsViewerComponent = ({
-  ruleId,
-  ruleName,
-  ruleIndices,
-  dataViewId,
+  rule,
   exceptionListsMeta,
   listType,
   onRuleChange,
@@ -107,12 +102,8 @@ const ExceptionsViewerComponent = ({
   const { deleteExceptionItem, getExceptionListsItems } = useApi(services.http);
   const [isReadOnly, setReadOnly] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<null | string | number>(null);
-
-  // With upcoming redesign for 8.5, you'll probably have all the lists already and won't
-  // need to fetch the rule
-  const { rule: maybeRule } = useRuleAsync(ruleId);
   const [isLoadingReferences, allReferences] = useFindExceptionListReferences(
-    maybeRule != null ? maybeRule?.exceptions_list ?? [] : []
+    rule.exceptions_list ?? []
   );
 
   const [{ canUserCRUD, hasIndexWrite }] = useUserData();
@@ -344,17 +335,17 @@ const ExceptionsViewerComponent = ({
 
   const showNoResults: boolean =
     exceptions.length === 0 && (totalEndpointItems > 0 || totalDetectionsItems > 0);
-  console.log({ allReferences });
+
   return (
     <>
       {currentModal === 'editException' &&
         exceptionToEdit != null &&
         exceptionListTypeToEdit != null && (
           <EditExceptionFlyout
-            ruleName={ruleName}
-            ruleId={ruleId}
-            ruleIndices={ruleIndices}
-            dataViewId={dataViewId}
+            ruleName={rule.name}
+            ruleId={rule.rule_id}
+            ruleIndices={rule.index ?? DEFAULT_INDEX_PATTERN}
+            dataViewId={rule.data_view_id}
             exceptionListType={exceptionListTypeToEdit}
             exceptionItem={exceptionToEdit}
             onCancel={handleOnCancelExceptionModal}
@@ -365,10 +356,10 @@ const ExceptionsViewerComponent = ({
 
       {currentModal === 'addException' && exceptionListTypeToEdit != null && (
         <AddExceptionFlyout
-          ruleName={ruleName}
-          ruleIndices={ruleIndices}
-          dataViewId={dataViewId}
-          ruleId={ruleId}
+          ruleName={rule.name}
+          ruleIndices={rule.index ?? DEFAULT_INDEX_PATTERN}
+          dataViewId={rule.data_view_id}
+          ruleId={rule.rule_id}
           exceptionListType={exceptionListTypeToEdit}
           onCancel={handleOnCancelExceptionModal}
           onConfirm={handleOnConfirmExceptionModal}
@@ -384,6 +375,7 @@ const ExceptionsViewerComponent = ({
             {!showEmpty && (
               <>
                 <ExceptionsViewerHeader
+                  isReadOnly={isReadOnly}
                   isInitLoading={isInitLoading}
                   listType={listType}
                   onFilterChange={handleFilterChange}

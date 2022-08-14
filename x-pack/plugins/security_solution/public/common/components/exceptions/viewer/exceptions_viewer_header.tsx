@@ -13,6 +13,7 @@ import * as i18n from '../translations';
 import type { Filter } from '../types';
 
 interface ExceptionsViewerHeaderProps {
+  isReadOnly: boolean;
   isInitLoading: boolean;
   listType: ExceptionListTypeEnum;
   onFilterChange: (arg: Partial<Filter>) => void;
@@ -20,9 +21,10 @@ interface ExceptionsViewerHeaderProps {
 }
 
 /**
- * Collection of filters and toggles for filtering exception items.
+ * Search exception items and take actions (to creat an item)
  */
 const ExceptionsViewerHeaderComponent = ({
+  isReadOnly,
   isInitLoading,
   listType,
   onFilterChange,
@@ -81,17 +83,18 @@ const ExceptionsViewerHeaderComponent = ({
           fullWidth
         />
       </EuiFlexItem>
-
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          data-test-subj="exceptionsHeaderAddExceptionBtn"
-          onClick={handleAddException}
-          isDisabled={isInitLoading}
-          fill
-        >
-          {addExceptionButtonText}
-        </EuiButton>
-      </EuiFlexItem>
+      {!isReadOnly && (
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            data-test-subj="exceptionsHeaderAddExceptionBtn"
+            onClick={handleAddException}
+            isDisabled={isInitLoading}
+            fill
+          >
+            {addExceptionButtonText}
+          </EuiButton>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };

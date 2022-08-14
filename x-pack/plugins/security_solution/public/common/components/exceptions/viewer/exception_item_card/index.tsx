@@ -25,16 +25,17 @@ import * as i18n from './translations';
 import { ExceptionItemCardHeader } from './exception_item_card_header';
 import { ExceptionItemCardConditions } from './exception_item_card_conditions';
 import { ExceptionItemCardMetaInfo } from './exception_item_card_meta';
+import type { RuleReferenceSchema } from '../../../../../../common/detection_engine/schemas/response';
 
 export interface ExceptionItemProps {
   loadingItemIds: ExceptionListItemIdentifiers[];
   exceptionItem: ExceptionListItemSchema;
   listType: ExceptionListTypeEnum;
+  disableActions: boolean;
+  ruleReferences: RuleReferenceSchema[];
   onDeleteException: (arg: ExceptionListItemIdentifiers) => void;
   onEditException: (item: ExceptionListItemSchema) => void;
-  disableActions: boolean;
   dataTestSubj: string;
-  ruleReferences: unknown;
 }
 
 const ExceptionItemCardComponent = ({

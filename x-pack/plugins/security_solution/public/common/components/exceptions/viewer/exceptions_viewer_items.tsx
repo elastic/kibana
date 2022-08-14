@@ -18,6 +18,7 @@ import { ExceptionItemCard } from './exception_item_card';
 import type { ExceptionListItemIdentifiers } from '../types';
 import { ExeptionItemsViewerEmptySearchResults } from './no_search_results';
 import { ExeptionItemsViewerNoItems } from './no_exception_items';
+import type { RuleReferences } from '../use_find_references';
 
 const MyFlexItem = styled(EuiFlexItem)`
   margin: ${({ theme }) => `${theme.eui.euiSize} 0`};
@@ -34,7 +35,7 @@ interface ExceptionItemsViewerProps {
   exceptions: ExceptionListItemSchema[];
   loadingItemIds: ExceptionListItemIdentifiers[];
   listType: ExceptionListTypeEnum;
-  ruleReferences: unknown;
+  ruleReferences: RuleReferences | null;
   onCreateExceptionListItem: () => void;
   onDeleteException: (arg: ExceptionListItemIdentifiers) => void;
   onEditExceptionItem: (item: ExceptionListItemSchema) => void;
@@ -81,9 +82,7 @@ const ExceptionItemsViewerComponent: React.FC<ExceptionItemsViewerProps> = ({
                     loadingItemIds={loadingItemIds}
                     exceptionItem={exception}
                     listType={listType}
-                    ruleReferences={
-                      ruleReferences != null ? ruleReferences[exception.list_id] : null
-                    }
+                    ruleReferences={ruleReferences != null ? ruleReferences[exception.list_id] : []}
                     onDeleteException={onDeleteException}
                     onEditException={onEditExceptionItem}
                     dataTestSubj="exceptionItemsViewerItem"
