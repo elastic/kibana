@@ -29,6 +29,7 @@ import {
 } from '../../state_management';
 import type { LensInspector } from '../../lens_inspector_service';
 import { ErrorBoundary, showMemoizedErrorNotification } from '../../lens_ui_errors';
+import { IndexPatternServiceAPI } from '../../indexpattern_service/service';
 
 export interface EditorFrameProps {
   datasourceMap: DatasourceMap;
@@ -38,6 +39,7 @@ export interface EditorFrameProps {
   plugins: EditorFrameStartPlugins;
   showNoDataPopover: () => void;
   lensInspector: LensInspector;
+  indexPatternService: IndexPatternServiceAPI;
 }
 
 export function EditorFrame(props: EditorFrameProps) {
@@ -67,7 +69,8 @@ export function EditorFrame(props: EditorFrameProps) {
       datasourceStates,
       visualizationMap,
       datasourceMap[activeDatasourceId],
-      field
+      field,
+      framePublicAPI.dataViews
     );
   };
 
@@ -103,6 +106,8 @@ export function EditorFrame(props: EditorFrameProps) {
               showNoDataPopover={props.showNoDataPopover}
               dropOntoWorkspace={dropOntoWorkspace}
               hasSuggestionForField={hasSuggestionForField}
+              indexPatternService={props.indexPatternService}
+              frame={framePublicAPI}
             />
           </ErrorBoundary>
         }
@@ -115,6 +120,7 @@ export function EditorFrame(props: EditorFrameProps) {
                 visualizationMap={visualizationMap}
                 framePublicAPI={framePublicAPI}
                 uiActions={props.plugins.uiActions}
+                indexPatternService={props.indexPatternService}
               />
             </ErrorBoundary>
           )
