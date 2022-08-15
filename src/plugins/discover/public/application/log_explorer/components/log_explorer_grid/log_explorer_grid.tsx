@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 import classnames from 'classnames';
 import React, { useMemo, useRef, useCallback } from 'react';
 import { useSelector } from '@xstate/react';
-import { convertValueToString } from '../../../../utils/convert_value_to_string';
+import { convertValueToString } from '../../utils/convert_value_to_string';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getEuiGridColumns } from '../../../../components/discover_grid/discover_grid_columns';
 import { LOG_EXPLORER_VIRTUAL_GRID_ROWS } from '../../constants';
@@ -45,8 +45,7 @@ export function LogExplorerGrid({ fieldFormats }: { fieldFormats: FieldFormatsSt
 
   const cellContextValue = useMemo(() => ({ fieldFormats }), [fieldFormats]);
 
-  const { columns, onAddColumn, onRemoveColumn, onResize, onSetColumns } =
-    useDiscoverColumnsContext();
+  const { columns, onSetColumns } = useDiscoverColumnsContext();
 
   // Access to Discover services
   const services = useDiscoverServices();
@@ -72,7 +71,7 @@ export function LogExplorerGrid({ fieldFormats }: { fieldFormats: FieldFormatsSt
     () =>
       getEuiGridColumns({
         columns,
-        rowsCount: 0,
+        rowsCount: rows.size,
         settings: state.grid,
         dataView,
         showTimeCol: false, // NOTE: This is handled as a default elsewhere. Ignores the advanced setting here.
@@ -83,7 +82,7 @@ export function LogExplorerGrid({ fieldFormats }: { fieldFormats: FieldFormatsSt
         onFilter: () => {}, // TODO: Possibly support
         editField: () => {}, // TODO: Possibly support direct editing of fields for POC
       }),
-    [columns, dataView, services, valueToStringConverter, state.grid]
+    [columns, dataView, services, valueToStringConverter, state.grid, rows.size]
   );
 
   const columnVisibility: EuiDataGridColumnVisibility = useMemo(() => {
@@ -149,11 +148,6 @@ const controlColumns: EuiDataGridControlColumn[] = [
     ),
   },
 ];
-
-const columnVisibility: EuiDataGridColumnVisibility = {
-  setVisibleColumns: () => {},
-  visibleColumns: ['@timestamp', 'message'],
-};
 
 const gridStyle: EuiDataGridStyle = {
   border: 'all',
