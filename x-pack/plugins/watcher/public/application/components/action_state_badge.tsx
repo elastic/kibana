@@ -15,19 +15,21 @@ interface Props {
   size?: EuiTextProps['size'];
 }
 
-const stateToIconMap = {
-  [ACTION_STATES.OK]: <EuiIcon type="check" color="success" />,
-  [ACTION_STATES.ACKNOWLEDGED]: <EuiIcon type="check" color="success" />,
-  [ACTION_STATES.THROTTLED]: <EuiIcon type="clock" color="warning" />,
-  [ACTION_STATES.UNKNOWN]: <EuiIcon type="cross" color="subdued" />,
-  [ACTION_STATES.CONFIG_ERROR]: <EuiIcon type="crossInACircleFilled" color="danger" />,
-  [ACTION_STATES.ERROR]: <EuiIcon type="crossInACircleFilled" color="danger" />,
+const stateToColorMap = {
+  [ACTION_STATES.OK]: 'success',
+  [ACTION_STATES.ACKNOWLEDGED]: 'success',
+  [ACTION_STATES.THROTTLED]: 'warning',
+  [ACTION_STATES.UNKNOWN]: 'subdued',
+  [ACTION_STATES.CONFIG_ERROR]: 'danger',
+  [ACTION_STATES.ERROR]: 'danger',
 };
 
 export const ActionStateBadge = ({ state, size = 's' }: Props) => {
   return (
     <EuiFlexGroup gutterSize="xs" alignItems="center">
-      <EuiFlexItem grow={false}>{stateToIconMap[state]}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiIcon type="dot" color={stateToColorMap[state]} />
+      </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
         <EuiText size={size}>{state}</EuiText>

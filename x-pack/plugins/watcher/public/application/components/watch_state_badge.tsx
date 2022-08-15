@@ -15,17 +15,19 @@ interface Props {
   size?: EuiTextProps['size'];
 }
 
-const stateToIconMap = {
-  [WATCH_STATES.ACTIVE]: <EuiIcon type="check" color="success" />,
-  [WATCH_STATES.INACTIVE]: <EuiIcon type="minusInCircleFilled" color="subdued" />,
-  [WATCH_STATES.CONFIG_ERROR]: <EuiIcon type="cross" color="subdued" />,
-  [WATCH_STATES.ERROR]: <EuiIcon type="cross" color="subdued" />,
+const stateToColorMap = {
+  [WATCH_STATES.ACTIVE]: 'success',
+  [WATCH_STATES.INACTIVE]: 'subdued',
+  [WATCH_STATES.CONFIG_ERROR]: 'subdued',
+  [WATCH_STATES.ERROR]: 'subdued',
 };
 
 export const WatchStateBadge = ({ state, size = 's' }: Props) => {
   return (
     <EuiFlexGroup gutterSize="xs" alignItems="center">
-      <EuiFlexItem grow={false}>{stateToIconMap[state]}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiIcon type="dot" color={stateToColorMap[state]} />
+      </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
         <EuiText size={size}>{state}</EuiText>
