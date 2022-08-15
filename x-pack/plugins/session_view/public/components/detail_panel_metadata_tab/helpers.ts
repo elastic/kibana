@@ -115,7 +115,9 @@ export const getOrchestratorData = (
   detailPanelOrchestrator.namespace = dataOrDash(orchestrator?.namespace).toString();
   detailPanelOrchestrator.cluster.name = dataOrDash(orchestrator?.cluster?.name).toString();
   detailPanelOrchestrator.cluster.id = dataOrDash(orchestrator?.cluster?.id).toString();
-  detailPanelOrchestrator.resource.parent.type = dataOrDash(orchestrator?.resource?.parent?.type).toString();
+  detailPanelOrchestrator.resource.parent.type = dataOrDash(
+    orchestrator?.resource?.parent?.type
+  ).toString();
 
   return detailPanelOrchestrator;
 };
