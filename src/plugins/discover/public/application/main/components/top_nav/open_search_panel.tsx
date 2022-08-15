@@ -67,6 +67,7 @@ export function OpenSearchPanel(props: OpenSearchPanelProps) {
             props.onOpenSavedSearch(id);
             props.onClose();
           }}
+          showFilter={true}
         />
       </EuiFlyoutBody>
       {hasSavedObjectPermission && (
