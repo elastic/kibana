@@ -20,6 +20,9 @@ import {
   INDICATOR_TYPE_CELL,
   EMPTY_STATE,
   FIELD_SELECTOR,
+  BREADCRUMBS,
+  LEADING_BREADCRUMB,
+  ENDING_BREADCRUMB,
 } from '../../screens/indicators';
 import { login } from '../../tasks/login';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
@@ -33,10 +36,10 @@ before(() => {
  * TODO: https://github.com/elastic/security-team/issues/4595
  */
 const THREAT_INTELLIGENCE_15Y_DATA =
-  '/app/security/threat_intelligence?indicators=(filterQuery:(language:kuery,query:%27%27),filters:!(),timeRange:(from:now-15y/d,to:now))';
+  '/app/security/threat_intelligence/indicators?indicators=(filterQuery:(language:kuery,query:%27%27),filters:!(),timeRange:(from:now-15y/d,to:now))';
 
 const URL_WITH_CONTRADICTORY_FILTERS =
-  '/app/security/threat_intelligence?indicators=(filterQuery:(language:kuery,query:%27%27),filters:!((%27$state%27:(store:appState),meta:(alias:!n,disabled:!f,index:%27%27,key:threat.indicator.type,negate:!f,params:(query:file),type:phrase),query:(match_phrase:(threat.indicator.type:file))),(%27$state%27:(store:appState),meta:(alias:!n,disabled:!f,index:%27%27,key:threat.indicator.type,negate:!f,params:(query:url),type:phrase),query:(match_phrase:(threat.indicator.type:url)))),timeRange:(from:now/d,to:now/d))';
+  '/app/security/threat_intelligence/indicators?indicators=(filterQuery:(language:kuery,query:%27%27),filters:!((%27$state%27:(store:appState),meta:(alias:!n,disabled:!f,index:%27%27,key:threat.indicator.type,negate:!f,params:(query:file),type:phrase),query:(match_phrase:(threat.indicator.type:file))),(%27$state%27:(store:appState),meta:(alias:!n,disabled:!f,index:%27%27,key:threat.indicator.type,negate:!f,params:(query:url),type:phrase),query:(match_phrase:(threat.indicator.type:url)))),timeRange:(from:now/d,to:now/d))';
 
 describe('Indicators', () => {
   before(() => {
@@ -52,6 +55,12 @@ describe('Indicators', () => {
     });
 
     it('should render the basic page elements', () => {
+      cy.get(BREADCRUMBS).should('exist');
+
+      cy.get(LEADING_BREADCRUMB).should('have.text', 'Security');
+
+      cy.get(ENDING_BREADCRUMB).should('have.text', 'Intelligence');
+
       cy.get(DEFAULT_LAYOUT_TITLE).should('have.text', 'Indicators');
 
       cy.get(INDICATORS_TABLE).should('exist');

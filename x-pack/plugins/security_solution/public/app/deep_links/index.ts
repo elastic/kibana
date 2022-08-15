@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 import { getSecuritySolutionLink } from '@kbn/cloud-security-posture-plugin/public';
+import { getSecuritySolutionDeepLink } from '@kbn/threat-intelligence-plugin/public';
 import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 import { getCasesDeepLinks } from '@kbn/cases-plugin/public';
 import {
@@ -22,56 +23,54 @@ import { AppNavLinkStatus } from '@kbn/core/public';
 import type { Subject, Subscription } from 'rxjs';
 import { SecurityPageName } from '../types';
 import {
-  OVERVIEW,
-  DETECTION_RESPONSE,
-  DETECT,
   ALERTS,
-  RULES,
+  BLOCKLIST,
+  CREATE_NEW_RULE,
+  DASHBOARDS,
+  DETECT,
+  DETECTION_RESPONSE,
+  ENDPOINTS,
+  EVENT_FILTERS,
   EXCEPTIONS,
   EXPLORE,
+  GETTING_STARTED,
+  HOST_ISOLATION_EXCEPTIONS,
   HOSTS,
   INVESTIGATE,
-  NETWORK,
-  TIMELINES,
-  MANAGE,
-  USERS,
   KUBERNETES,
-  HOST_ISOLATION_EXCEPTIONS,
-  EVENT_FILTERS,
-  BLOCKLIST,
-  TRUSTED_APPLICATIONS,
+  MANAGE,
+  NETWORK,
+  OVERVIEW,
   POLICIES,
-  ENDPOINTS,
-  GETTING_STARTED,
-  DASHBOARDS,
-  CREATE_NEW_RULE,
   RESPONSE_ACTIONS,
-  THREAT_INTELLIGENCE,
+  RULES,
+  TIMELINES,
+  TRUSTED_APPLICATIONS,
+  USERS,
 } from '../translations';
 import {
-  OVERVIEW_PATH,
-  LANDING_PATH,
-  DETECTION_RESPONSE_PATH,
   ALERTS_PATH,
-  RULES_PATH,
-  EXCEPTIONS_PATH,
-  HOSTS_PATH,
-  NETWORK_PATH,
-  TIMELINES_PATH,
-  CASES_PATH,
-  ENDPOINTS_PATH,
-  POLICIES_PATH,
-  TRUSTED_APPS_PATH,
-  EVENT_FILTERS_PATH,
   BLOCKLIST_PATH,
   CASES_FEATURE_ID,
+  CASES_PATH,
+  DETECTION_RESPONSE_PATH,
+  ENDPOINTS_PATH,
+  EVENT_FILTERS_PATH,
+  EXCEPTIONS_PATH,
   HOST_ISOLATION_EXCEPTIONS_PATH,
-  SERVER_APP_ID,
-  USERS_PATH,
+  HOSTS_PATH,
   KUBERNETES_PATH,
-  RULES_CREATE_PATH,
+  LANDING_PATH,
+  NETWORK_PATH,
+  OVERVIEW_PATH,
+  POLICIES_PATH,
   RESPONSE_ACTIONS_PATH,
-  THREAT_INTELLIGENCE_PATH,
+  RULES_CREATE_PATH,
+  RULES_PATH,
+  SERVER_APP_ID,
+  TIMELINES_PATH,
+  TRUSTED_APPS_PATH,
+  USERS_PATH,
 } from '../../../common/constants';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import { hasCapabilities, subscribeAppLinks } from '../../common/links';
@@ -384,15 +383,10 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         ],
       },
       {
-        id: SecurityPageName.threatIntelligence,
-        title: THREAT_INTELLIGENCE,
-        path: THREAT_INTELLIGENCE_PATH,
-        navLinkStatus: AppNavLinkStatus.hidden,
-        keywords: [
-          i18n.translate('xpack.securitySolution.search.threatIntelligence', {
-            defaultMessage: 'Threat Intelligence',
-          }),
-        ],
+        ...getSecuritySolutionDeepLink<SecurityPageName>('indicators'),
+        navLinkStatus: AppNavLinkStatus.visible,
+        order: 9006,
+        features: [FEATURE.general],
       },
       {
         id: SecurityPageName.kubernetes,
@@ -465,7 +459,7 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
     path: ENDPOINTS_PATH,
     features: [FEATURE.general],
     navLinkStatus: AppNavLinkStatus.visible,
-    order: 9006,
+    order: 9007,
     searchable: false,
     keywords: [
       i18n.translate('xpack.securitySolution.search.manage', {

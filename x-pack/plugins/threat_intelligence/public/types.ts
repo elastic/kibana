@@ -34,7 +34,16 @@ export interface LicenseAware {
   isEnterprise(): boolean;
 }
 
+/**
+ * Methods exposed from the security solution to the threat intelligence application.
+ */
 export interface ThreatIntelligenceSecuritySolutionContext {
+  /**
+   * Gets the `FiltersGlobal` component for embedding a filter bar in the security solution application.
+   * */
   getFiltersGlobalComponent: () => ComponentType<{ children: ReactNode }>;
+  /**
+   * Get the user's license to drive the Threat Intelligence plugin's visibility.
+   */
   licenseService: LicenseAware;
 }
