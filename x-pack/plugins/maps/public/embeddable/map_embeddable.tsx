@@ -207,7 +207,6 @@ export class MapEmbeddable
           })
         );
       } catch (e) {
-        console.log(e);
         // ignore malformed mapStateJSON, not a critical error for viewing map - map will just use defaults
       }
     }
