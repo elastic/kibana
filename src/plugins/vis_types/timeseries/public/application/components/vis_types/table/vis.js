@@ -272,10 +272,12 @@ class TableVis extends Component {
     return (
       <RenderCounter initialRender={initialRender}>
         <RedirectAppLinks coreStart={getCoreStart()} className="tvbVis" data-test-subj="tableView">
-          <table className="table">
-            <thead>{header}</thead>
-            <tbody>{rows}</tbody>
-          </table>
+          <div className="tvbVis" data-test-subj="tableView">
+            <table className="table">
+              <thead>{header}</thead>
+              <tbody>{rows}</tbody>
+            </table>
+          </div>
         </RedirectAppLinks>
         {accessDeniedDrilldownUrl && (
           <ExternalUrlErrorModal
