@@ -8,6 +8,7 @@
 
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { buildEmptyFilter, Filter } from '@kbn/es-query';
+import { cloneDeep } from 'lodash';
 import { ConditionTypes } from './filters_builder_condition_types';
 
 // todo: {start} should be refactored cause shared component cannot be linked with non-shared components
@@ -134,7 +135,7 @@ export const addFilter = (
   path: string,
   conditionalType: ConditionTypes
 ) => {
-  const newFilters = [...filters];
+  const newFilters = cloneDeep(filters);
   const pathInArray = getPathInArray(path);
   const { targetArray, parentConditionType } = getContainerMetaByPath(newFilters, pathInArray);
   const selector = pathInArray[pathInArray.length - 1];
@@ -154,7 +155,7 @@ export const addFilter = (
 };
 
 export const removeFilter = (filters: Filter[], path: string) => {
-  const newFilters = [...filters];
+  const newFilters = cloneDeep(filters);
   const pathInArray = getPathInArray(path);
   const { targetArray } = getContainerMetaByPath(newFilters, pathInArray);
   const selector = pathInArray[pathInArray.length - 1];
@@ -170,15 +171,19 @@ export const moveFilter = (
   to: string,
   conditionalType: ConditionTypes
 ) => {
-  const newFilters = [...filters];
-  const movingFilter = getFilterByPath(newFilters, from);
+  try {
+    const newFilters = cloneDeep(filters);
+    const movingFilter = getFilterByPath(newFilters, from);
 
-  if (getPathInArray(to).length > 1) {
-    const newFilterWithFilter = addFilter(newFilters, movingFilter, to, conditionalType);
-    return removeFilter(newFilterWithFilter, from);
-  } else {
-    const newFiltersWithoutFilter = removeFilter(newFilters, from);
-    return addFilter(newFiltersWithoutFilter, movingFilter, to, conditionalType);
+    if (getPathInArray(to).length >= getPathInArray(from).length) {
+      const newFilterWithFilter = addFilter(newFilters, movingFilter, to, conditionalType);
+      return removeFilter(newFilterWithFilter, from);
+    } else {
+      const newFiltersWithoutFilter = removeFilter(newFilters, from);
+      return addFilter(newFiltersWithoutFilter, movingFilter, to, conditionalType);
+    }
+  } catch (e) {
+    return filters;
   }
 };
 

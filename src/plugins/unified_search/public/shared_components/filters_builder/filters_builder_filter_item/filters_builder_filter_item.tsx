@@ -21,7 +21,6 @@ import { buildEmptyFilter, FieldFilter, Filter, getFilterParams } from '@kbn/es-
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { cx, css } from '@emotion/css';
-import uuid from 'uuid';
 
 import returnKey from '../assets/return_key.svg';
 import plus from '../assets/plus.svg';
@@ -194,7 +193,12 @@ export function FilterItem({
                 className={cx({ [cursorReturnKey]: dropTarget === path && !hideOr })}
               >
                 <EuiFlexItem>
-                  <EuiPanel color={color} paddingSize={'none'} hasShadow={false} key={uuid()}>
+                  <EuiPanel
+                    color={color}
+                    paddingSize={'none'}
+                    hasShadow={false}
+                    key={JSON.stringify(filter)}
+                  >
                     <EuiFlexGroup
                       gutterSize="m"
                       responsive={false}

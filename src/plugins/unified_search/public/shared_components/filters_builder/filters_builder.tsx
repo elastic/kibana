@@ -37,7 +37,6 @@ export function FiltersBuilder({
 }: FiltersBuilderProps) {
   const [state, dispatch] = useReducer(FiltersBuilderReducer, { filters });
   const [dropTarget, setDropTarget] = useState('');
-  const [currentDragElement, setCurrentDragElement] = useState('');
 
   useEffect(() => {
     if (state.filters !== filters) {
@@ -67,9 +66,7 @@ export function FiltersBuilder({
     if (source && combine) {
       handleMoveFilter(source?.droppableId, combine.droppableId, ConditionTypes.OR);
     }
-
     setDropTarget('');
-    setCurrentDragElement('');
   };
 
   const onDragActive: DragDropContextProps['onDragUpdate'] = ({ destination, combine }) => {
@@ -82,10 +79,6 @@ export function FiltersBuilder({
     }
   };
 
-  const onBeforeCapture: DragDropContextProps['onBeforeCapture'] = ({ draggableId }) => {
-    setCurrentDragElement(draggableId);
-  };
-
   return (
     <FiltersBuilderContextType.Provider
       value={{
@@ -93,14 +86,9 @@ export function FiltersBuilder({
         dataView,
         dispatch,
         dropTarget,
-        currentDragElement,
       }}
     >
-      <EuiDragDropContext
-        onDragEnd={onDragEnd}
-        onDragUpdate={onDragActive}
-        onBeforeCapture={onBeforeCapture}
-      >
+      <EuiDragDropContext onDragEnd={onDragEnd} onDragUpdate={onDragActive}>
         <FilterGroup
           filters={state.filters}
           conditionType={rootLevelConditionType}

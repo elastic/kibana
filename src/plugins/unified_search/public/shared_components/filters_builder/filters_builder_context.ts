@@ -18,7 +18,6 @@ interface FiltersBuilderContextType {
     hideOr: boolean;
   };
   dropTarget: string;
-  currentDragElement: string;
 }
 
 export const FiltersBuilderContextType = React.createContext<FiltersBuilderContextType>(
