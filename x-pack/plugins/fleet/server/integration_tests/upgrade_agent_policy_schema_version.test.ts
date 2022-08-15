@@ -19,6 +19,7 @@ import { AGENT_POLICY_SAVED_OBJECT_TYPE, FLEET_AGENT_POLICIES_SCHEMA_VERSION } f
 import { upgradeAgentPolicySchemaVersion } from '../services/setup/upgrade_agent_policy_schema_version';
 import { AGENT_POLICY_INDEX } from '../../common';
 import { agentPolicyService } from '../services';
+
 import { useDockerRegistry, waitForFleetSetup } from './helpers';
 
 const fakeRequest = {

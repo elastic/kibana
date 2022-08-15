@@ -18,6 +18,8 @@ import type {
 
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 
+import { AGENT_POLICY_INDEX } from '../../common';
+
 import { agentPolicyService } from './agent_policy';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
 
@@ -27,7 +29,6 @@ import { appContextService } from './app_context';
 import { outputService } from './output';
 import { downloadSourceService } from './download_source';
 import { getFullAgentPolicy } from './agent_policies';
-import { AGENT_POLICY_INDEX } from '../../common';
 
 function getSavedObjectMock(agentPolicyAttributes: any) {
   const mock = savedObjectsClientMock.create();

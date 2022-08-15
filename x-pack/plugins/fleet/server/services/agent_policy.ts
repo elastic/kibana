@@ -780,7 +780,7 @@ class AgentPolicyService {
     if (bulkResponse.errors) {
       const logger = appContextService.getLogger();
       const erroredDocuments = bulkResponse.items.reduce((acc, item) => {
-        const value: BulkResponseItem | undefined = item['index'];
+        const value: BulkResponseItem | undefined = item.index;
         if (!value || !value.error) {
           return acc;
         }
