@@ -143,7 +143,7 @@ export const Layout = withTheme(({ metrics, onChangeRangeTime, theme }: LayoutPr
           <ChartSectionVis
             type="bar"
             stacked={true}
-            formatter="highPercision"
+            formatter="highPrecision"
             formatterTemplate={'{{value}} ms'}
             seriesOverrides={{
               read: {
