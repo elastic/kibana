@@ -105,26 +105,6 @@ describe('WatchStatusModel utils', () => {
       ];
       expect(deriveComment(isActive, actionStatuses)).toBe(WATCH_STATE_COMMENTS.OK);
     });
-
-    describe('is ACKABLE', () => {
-      it(`when one action is ackable`, () => {
-        const isActive = true;
-        const actionStatuses = [mockActionStatus({ state: ACTION_STATES.ACTIVE, isAckable: true })];
-        expect(deriveComment(isActive, actionStatuses)).toBe(WATCH_STATE_COMMENTS.IS_ACKABLE);
-      });
-
-      it(`but other comments take precedence`, () => {
-        const isActive = true;
-        const actionStatuses = [
-          mockActionStatus({ state: ACTION_STATES.ACKNOWLEDGED }),
-          mockActionStatus({ state: ACTION_STATES.ACTIVE }),
-          mockActionStatus({ state: ACTION_STATES.THROTTLED }),
-          mockActionStatus({ state: ACTION_STATES.ERROR }),
-          mockActionStatus({ state: ACTION_STATES.ACTIVE, isAckable: true }),
-        ];
-        expect(deriveComment(isActive, actionStatuses)).not.toBe(WATCH_STATE_COMMENTS.IS_ACKABLE);
-      });
-    });
   });
 
   describe('deriveState', () => {

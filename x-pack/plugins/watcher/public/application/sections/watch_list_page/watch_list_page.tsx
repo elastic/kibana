@@ -357,7 +357,7 @@ export const WatchListPage = () => {
               'xpack.watcher.sections.watchList.watchTable.commentHeader.tooltipText',
               {
                 defaultMessage:
-                  'Whether any actions are acknowledgeable or have been acknowledged, throttled, or failed to execute.',
+                  'Whether any actions have been acknowledged, throttled, or failed to execute.',
               }
             )}
           >

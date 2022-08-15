@@ -95,11 +95,5 @@ export const deriveComment = (
     return WATCH_STATE_COMMENTS.PARTIALLY_THROTTLED;
   }
 
-  const isAckable =
-    actionStatuses.findIndex((actionStatus) => actionStatus.isAckable === true) !== -1;
-  if (isAckable) {
-    return WATCH_STATE_COMMENTS.IS_ACKABLE;
-  }
-
   return WATCH_STATE_COMMENTS.OK;
 };

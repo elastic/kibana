@@ -199,7 +199,7 @@ export const ExecutionHistoryPanel = () => {
             'xpack.watcher.sections.watchHistory.watchTable.commentHeader.tooltipText',
             {
               defaultMessage:
-                'Whether the action was throttled, acknowledged, acknowledgeable, or failed to execute.',
+                'Whether the action was throttled, acknowledged, or failed to execute.',
             }
           )}
         >

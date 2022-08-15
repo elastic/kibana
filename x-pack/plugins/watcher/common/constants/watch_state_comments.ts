@@ -38,10 +38,6 @@ export const WATCH_STATE_COMMENTS: { [key: string]: string } = {
     }
   ),
 
-  IS_ACKABLE: i18n.translate('xpack.watcher.constants.watchStateComments.ackableStateCommentText', {
-    defaultMessage: 'Acknowledgeable',
-  }),
-
   FAILING: i18n.translate(
     'xpack.watcher.constants.watchStateComments.executionFailingStateCommentText',
     {
