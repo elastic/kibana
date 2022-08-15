@@ -4,8 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import fetch, { BodyInit, HeadersInit, Response } from 'node-fetch';
 import uuid from 'uuid';
 import expect from '@kbn/expect';
+import { format as formatUrl } from 'url';
 import { ConfigKey, ProjectMonitorsRequest } from '@kbn/synthetics-plugin/common/runtime_types';
 import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { syntheticsMonitorType } from '@kbn/synthetics-plugin/server/legacy_uptime/lib/saved_objects/synthetics_monitor';
@@ -20,9 +22,12 @@ export default function ({ getService }: FtrProviderContext) {
     this.tags('skipCloud');
 
     const supertest = getService('supertest');
+    const config = getService('config');
+    const kibanaServerUrl = formatUrl(config.get('servers.kibana'));
     const supertestWithoutAuth = getService('supertestWithoutAuth');
     const security = getService('security');
     const kibanaServer = getService('kibanaServer');
+    const projectMonitorEndpoint = kibanaServerUrl + API_URLS.SYNTHETICS_MONITORS_PROJECT;
 
     let projectMonitors: ProjectMonitorsRequest;
 
@@ -86,14 +91,15 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('project monitors - returns a list of successfully created monitors', async () => {
       try {
-        const apiResponse = await supertest
-          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT)
-          .set('kbn-xsrf', 'true')
-          .send(projectMonitors);
+        const messages = await parseStreamApiResponse(
+          projectMonitorEndpoint,
+          JSON.stringify(projectMonitors)
+        );
 
-        expect(apiResponse.body.updatedMonitors).eql([]);
-        expect(apiResponse.body.failedMonitors).eql([]);
-        expect(apiResponse.body.createdMonitors).eql(
+        expect(messages).to.have.length(2);
+        expect(messages[1].updatedMonitors).eql([]);
+        expect(messages[1].failedMonitors).eql([]);
+        expect(messages[1].createdMonitors).eql(
           projectMonitors.monitors.map((monitor) => monitor.id)
         );
       } finally {
@@ -112,14 +118,15 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'true')
           .send(projectMonitors);
 
-        const apiResponse = await supertest
-          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT)
-          .set('kbn-xsrf', 'true')
-          .send(projectMonitors);
+        const messages = await parseStreamApiResponse(
+          projectMonitorEndpoint,
+          JSON.stringify(projectMonitors)
+        );
 
-        expect(apiResponse.body.createdMonitors).eql([]);
-        expect(apiResponse.body.failedMonitors).eql([]);
-        expect(apiResponse.body.updatedMonitors).eql(
+        expect(messages).to.have.length(2);
+        expect(messages[1].createdMonitors).eql([]);
+        expect(messages[1].failedMonitors).eql([]);
+        expect(messages[1].updatedMonitors).eql(
           projectMonitors.monitors.map((monitor) => monitor.id)
         );
       } finally {
@@ -218,15 +225,19 @@ export default function ({ getService }: FtrProviderContext) {
           .send({
             ...projectMonitors,
             monitors: testMonitors,
-          })
-          .expect(200);
+          });
 
-        const apiResponse = await supertest
-          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT)
-          .set('kbn-xsrf', 'true')
-          .send(projectMonitors)
-          .expect(200);
+        const messages = await parseStreamApiResponse(
+          projectMonitorEndpoint,
+          JSON.stringify(projectMonitors)
+        );
 
+        expect(messages).to.have.length(2);
+        expect(messages[1].createdMonitors).eql([]);
+        expect(messages[1].failedMonitors).eql([]);
+        expect(messages[1].deletedMonitors).eql([]);
+        expect(messages[1].updatedMonitors).eql([projectMonitors.monitors[0].id]);
+        expect(messages[1].staleMonitors).eql([secondMonitor.id]);
         // does not delete the stale monitor
         const getResponse = await supertest
           .get(API_URLS.SYNTHETICS_MONITORS)
@@ -239,12 +250,6 @@ export default function ({ getService }: FtrProviderContext) {
         const { monitors } = getResponse.body;
 
         expect(monitors.length).eql(1);
-
-        expect(apiResponse.body.createdMonitors).eql([]);
-        expect(apiResponse.body.failedMonitors).eql([]);
-        expect(apiResponse.body.deletedMonitors).eql([]);
-        expect(apiResponse.body.updatedMonitors).eql([projectMonitors.monitors[0].id]);
-        expect(apiResponse.body.staleMonitors).eql([secondMonitor.id]);
       } finally {
         await Promise.all([
           testMonitors.map((monitor) => {
@@ -266,14 +271,16 @@ export default function ({ getService }: FtrProviderContext) {
             ...projectMonitors,
             keep_stale: false,
             monitors: testMonitors,
-          })
-          .expect(200);
+          });
 
-        const projectResponse = await supertest
-          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT)
-          .set('kbn-xsrf', 'true')
-          .send({ ...projectMonitors, keep_stale: false })
-          .expect(200);
+        const messages = await parseStreamApiResponse(
+          projectMonitorEndpoint,
+          JSON.stringify({
+            ...projectMonitors,
+            keep_stale: false,
+          })
+        );
+        expect(messages).to.have.length(3);
 
         // expect monitor to have been deleted
         const getResponse = await supertest
@@ -288,11 +295,11 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(monitors[0]).eql(undefined);
 
-        expect(projectResponse.body.createdMonitors).eql([]);
-        expect(projectResponse.body.failedMonitors).eql([]);
-        expect(projectResponse.body.updatedMonitors).eql([projectMonitors.monitors[0].id]);
-        expect(projectResponse.body.deletedMonitors).eql([secondMonitor.id]);
-        expect(projectResponse.body.staleMonitors).eql([]);
+        expect(messages[2].createdMonitors).eql([]);
+        expect(messages[2].failedMonitors).eql([]);
+        expect(messages[2].updatedMonitors).eql([projectMonitors.monitors[0].id]);
+        expect(messages[2].deletedMonitors).eql([secondMonitor.id]);
+        expect(messages[2].staleMonitors).eql([]);
       } finally {
         await Promise.all([
           testMonitors.map((monitor) => {
@@ -307,21 +314,30 @@ export default function ({ getService }: FtrProviderContext) {
       const testMonitors = [projectMonitors.monitors[0], secondMonitor];
       const testprojectId = 'test-suite-2';
       try {
-        await supertest
-          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT)
-          .set('kbn-xsrf', 'true')
-          .send({
+        await parseStreamApiResponse(
+          projectMonitorEndpoint,
+          JSON.stringify({
             ...projectMonitors,
             keep_stale: false,
             monitors: testMonitors,
           })
-          .expect(200);
+        );
 
-        const projectResponse = await supertest
-          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT)
-          .set('kbn-xsrf', 'true')
-          .send({ ...projectMonitors, keep_stale: false, project: testprojectId })
-          .expect(200);
+        const messages = await parseStreamApiResponse(
+          projectMonitorEndpoint,
+          JSON.stringify({
+            ...projectMonitors,
+            keep_stale: false,
+            project: testprojectId,
+          })
+        );
+
+        expect(messages).to.have.length(2);
+        expect(messages[1].createdMonitors).eql([projectMonitors.monitors[0].id]);
+        expect(messages[1].failedMonitors).eql([]);
+        expect(messages[1].deletedMonitors).eql([]);
+        expect(messages[1].updatedMonitors).eql([]);
+        expect(messages[1].staleMonitors).eql([]);
 
         // expect monitor not to have been deleted
         const getResponse = await supertest
@@ -335,12 +351,6 @@ export default function ({ getService }: FtrProviderContext) {
         const { monitors } = getResponse.body;
 
         expect(monitors.length).eql(1);
-
-        expect(projectResponse.body.createdMonitors).eql([projectMonitors.monitors[0].id]);
-        expect(projectResponse.body.failedMonitors).eql([]);
-        expect(projectResponse.body.deletedMonitors).eql([]);
-        expect(projectResponse.body.updatedMonitors).eql([]);
-        expect(projectResponse.body.staleMonitors).eql([]);
       } finally {
         await Promise.all([
           testMonitors.map((monitor) => {
@@ -381,23 +391,32 @@ export default function ({ getService }: FtrProviderContext) {
           roles: [roleName],
           full_name: 'a kibana user',
         });
-        await supertestWithoutAuth
-          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT)
-          .auth(username, password)
-          .set('kbn-xsrf', 'true')
-          .send({
-            ...projectMonitors,
-            keep_stale: false,
-            monitors: testMonitors,
-          })
-          .expect(200);
-        const projectResponse = await supertestWithoutAuth
-          .put(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS_PROJECT}`)
-          .auth(username, password)
-          .set('kbn-xsrf', 'true')
-          .send({ ...projectMonitors, keep_stale: false })
-          .expect(200);
-        // expect monitor not to have been deleted
+        await parseStreamApiResponse(
+          projectMonitorEndpoint,
+          JSON.stringify({ ...projectMonitors, keep_stale: false, monitors: testMonitors }),
+          {
+            Authorization:
+              'Basic ' + Buffer.from(`${username}:${password}`, 'binary').toString('base64'),
+          }
+        );
+
+        const spaceUrl = kibanaServerUrl + `/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS_PROJECT}`;
+
+        const messages = await parseStreamApiResponse(
+          spaceUrl,
+          JSON.stringify({ ...projectMonitors, keep_stale: false }),
+          {
+            Authorization:
+              'Basic ' + Buffer.from(`${username}:${password}`, 'binary').toString('base64'),
+          }
+        );
+        expect(messages).to.have.length(2);
+        expect(messages[1].createdMonitors).eql([projectMonitors.monitors[0].id]);
+        expect(messages[1].failedMonitors).eql([]);
+        expect(messages[1].deletedMonitors).eql([]);
+        expect(messages[1].updatedMonitors).eql([]);
+        expect(messages[1].staleMonitors).eql([]);
+
         const getResponse = await supertestWithoutAuth
           .get(API_URLS.SYNTHETICS_MONITORS)
           .auth(username, password)
@@ -408,11 +427,6 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
         const { monitors } = getResponse.body;
         expect(monitors.length).eql(1);
-        expect(projectResponse.body.createdMonitors).eql([projectMonitors.monitors[0].id]);
-        expect(projectResponse.body.failedMonitors).eql([]);
-        expect(projectResponse.body.deletedMonitors).eql([]);
-        expect(projectResponse.body.updatedMonitors).eql([]);
-        expect(projectResponse.body.staleMonitors).eql([]);
       } finally {
         await Promise.all([
           testMonitors.map((monitor) => {
@@ -439,16 +453,17 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('project monitors - validates monitor type', async () => {
       try {
-        const apiResponse = await supertest
-          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT)
-          .set('kbn-xsrf', 'true')
-          .send({
+        const messages = await parseStreamApiResponse(
+          projectMonitorEndpoint,
+          JSON.stringify({
             ...projectMonitors,
             monitors: [{ ...projectMonitors.monitors[0], schedule: '3m', tags: '' }],
-          });
+          })
+        );
 
-        expect(apiResponse.body.updatedMonitors).eql([]);
-        expect(apiResponse.body.failedMonitors).eql([
+        expect(messages).to.have.length(1);
+        expect(messages[0].updatedMonitors).eql([]);
+        expect(messages[0].failedMonitors).eql([
           {
             details:
               'Invalid value "3m" supplied to "schedule" | Invalid value "" supplied to "tags"',
@@ -478,7 +493,7 @@ export default function ({ getService }: FtrProviderContext) {
             reason: 'Failed to save or update monitor. Configuration is not valid',
           },
         ]);
-        expect(apiResponse.body.createdMonitors).eql([]);
+        expect(messages[0].createdMonitors).eql([]);
       } finally {
         await Promise.all([
           projectMonitors.monitors.map((monitor) => {
@@ -630,12 +645,12 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         // update project monitor via push api
-        const apiResponse = await supertest
-          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT)
-          .set('kbn-xsrf', 'true')
-          .send(projectMonitors)
-          .expect(200);
-        expect(apiResponse.body.updatedMonitors).eql([projectMonitors.monitors[0].id]);
+        const messages = await parseStreamApiResponse(
+          projectMonitorEndpoint,
+          JSON.stringify(projectMonitors)
+        );
+        expect(messages).to.have.length(2);
+        expect(messages[1].updatedMonitors).eql([projectMonitors.monitors[0].id]);
 
         // ensure that monitor can still be decrypted
         await supertest
@@ -689,62 +704,6 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    it('handles location formatting for both private and public locations', async () => {
-      try {
-        await supertest
-          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT)
-          .set('kbn-xsrf', 'true')
-          .send({
-            ...projectMonitors,
-            monitors: [
-              { ...projectMonitors.monitors[0], privateLocations: ['Test private location 0'] },
-            ],
-          });
-
-        const updatedMonitorsResponse = await Promise.all(
-          projectMonitors.monitors.map((monitor) => {
-            return supertest
-              .get(API_URLS.SYNTHETICS_MONITORS)
-              .query({ filter: `${syntheticsMonitorType}.attributes.journey_id: ${monitor.id}` })
-              .set('kbn-xsrf', 'true')
-              .expect(200);
-          })
-        );
-
-        updatedMonitorsResponse.forEach((response) => {
-          expect(response.body.monitors[0].attributes.locations).eql([
-            {
-              id: 'localhost',
-              label: 'Local Synthetics Service',
-              geo: { lat: 0, lon: 0 },
-              url: 'mockDevUrl',
-              isServiceManaged: true,
-              status: 'experimental',
-              isInvalid: false,
-            },
-            {
-              label: 'Test private location 0',
-              isServiceManaged: false,
-              isInvalid: false,
-              agentPolicyId: testPolicyId,
-              id: testPolicyId,
-              geo: {
-                lat: '',
-                lon: '',
-              },
-              concurrentMonitors: 1,
-            },
-          ]);
-        });
-      } finally {
-        await Promise.all([
-          projectMonitors.monitors.map((monitor) => {
-            return deleteMonitor(monitor.id, projectMonitors.project);
-          }),
-        ]);
-      }
-    });
-
     it('project monitors - returns a failed monitor when user defines a private location without fleet permissions', async () => {
       const secondMonitor = {
         ...projectMonitors.monitors[0],
@@ -771,51 +730,61 @@ export default function ({ getService }: FtrProviderContext) {
           roles: [roleName],
           full_name: 'a kibana user',
         });
-        const projectResponse = await supertestWithoutAuth
-          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT)
-          .auth(username, password)
-          .set('kbn-xsrf', 'true')
-          .send({
+
+        const messages = await parseStreamApiResponse(
+          kibanaServerUrl + API_URLS.SYNTHETICS_MONITORS_PROJECT,
+          JSON.stringify({
             ...projectMonitors,
             keep_stale: false,
             monitors: testMonitors,
-          });
-
-        expect(projectResponse.body.createdMonitors).eql([testMonitors[0].id]);
-        expect(projectResponse.body.failedMonitors).eql([
+          }),
           {
-            details:
-              'Insufficient permissions. In order to configure private locations, you must have Fleet and Integrations write permissions. To resolve, please generate a new API key with a user who has Fleet and Integrations write permissions.',
-            id: 'test-id-2',
-            payload: {
-              content:
-                'UEsDBBQACAAIAON5qVQAAAAAAAAAAAAAAAAfAAAAZXhhbXBsZXMvdG9kb3MvYmFzaWMuam91cm5leS50c22Q0WrDMAxF3/sVF7MHB0LMXlc6RvcN+wDPVWNviW0sdUsp/fe5SSiD7UFCWFfHujIGlpnkybwxFTZfoY/E3hsaLEtwhs9RPNWKDU12zAOxkXRIbN4tB9d9pFOJdO6EN2HMqQguWN9asFBuQVMmJ7jiWNII9fIXrbabdUYr58l9IhwhQQZCYORCTFFUC31Btj21NRc7Mq4Nds+4bDD/pNVgT9F52Jyr2Fa+g75LAPttg8yErk+S9ELpTmVotlVwnfNCuh2lepl3+JflUmSBJ3uggt1v9INW/lHNLKze9dJe1J3QJK8pSvWkm6aTtCet5puq+x63+AFQSwcIAPQ3VfcAAACcAQAAUEsBAi0DFAAIAAgA43mpVAD0N1X3AAAAnAEAAB8AAAAAAAAAAAAgAKSBAAAAAGV4YW1wbGVzL3RvZG9zL2Jhc2ljLmpvdXJuZXkudHNQSwUGAAAAAAEAAQBNAAAARAEAAAAA',
-              filter: {
-                match: 'check if title is present',
-              },
+            Authorization:
+              'Basic ' + Buffer.from(`${username}:${password}`, 'binary').toString('base64'),
+          }
+        );
+
+        expect(messages).to.have.length(3);
+        expect(messages[0]).to.eql(`${testMonitors[0].id}: monitor created successfully`);
+        expect(messages[1]).to.eql('test-id-2: failed to create or update monitor');
+        expect(messages[2]).to.eql({
+          createdMonitors: [testMonitors[0].id],
+          updatedMonitors: [],
+          staleMonitors: [],
+          deletedMonitors: [],
+          failedMonitors: [
+            {
+              details:
+                'Insufficient permissions. In order to configure private locations, you must have Fleet and Integrations write permissions. To resolve, please generate a new API key with a user who has Fleet and Integrations write permissions.',
               id: 'test-id-2',
-              locations: ['localhost'],
-              name: 'check if title is present',
-              params: {},
-              playwrightOptions: {
-                chromiumSandbox: false,
-                headless: true,
+              payload: {
+                content:
+                  'UEsDBBQACAAIAON5qVQAAAAAAAAAAAAAAAAfAAAAZXhhbXBsZXMvdG9kb3MvYmFzaWMuam91cm5leS50c22Q0WrDMAxF3/sVF7MHB0LMXlc6RvcN+wDPVWNviW0sdUsp/fe5SSiD7UFCWFfHujIGlpnkybwxFTZfoY/E3hsaLEtwhs9RPNWKDU12zAOxkXRIbN4tB9d9pFOJdO6EN2HMqQguWN9asFBuQVMmJ7jiWNII9fIXrbabdUYr58l9IhwhQQZCYORCTFFUC31Btj21NRc7Mq4Nds+4bDD/pNVgT9F52Jyr2Fa+g75LAPttg8yErk+S9ELpTmVotlVwnfNCuh2lepl3+JflUmSBJ3uggt1v9INW/lHNLKze9dJe1J3QJK8pSvWkm6aTtCet5puq+x63+AFQSwcIAPQ3VfcAAACcAQAAUEsBAi0DFAAIAAgA43mpVAD0N1X3AAAAnAEAAB8AAAAAAAAAAAAgAKSBAAAAAGV4YW1wbGVzL3RvZG9zL2Jhc2ljLmpvdXJuZXkudHNQSwUGAAAAAAEAAQBNAAAARAEAAAAA',
+                filter: {
+                  match: 'check if title is present',
+                },
+                id: 'test-id-2',
+                locations: ['localhost'],
+                name: 'check if title is present',
+                params: {},
+                playwrightOptions: {
+                  chromiumSandbox: false,
+                  headless: true,
+                },
+                privateLocations: ['Test private location 0'],
+                schedule: 10,
+                tags: [],
+                throttling: {
+                  download: 5,
+                  latency: 20,
+                  upload: 3,
+                },
               },
-              privateLocations: ['Test private location 0'],
-              schedule: 10,
-              tags: [],
-              throttling: {
-                download: 5,
-                latency: 20,
-                upload: 3,
-              },
+              reason: 'Failed to create or update monitor',
             },
-            reason: 'Failed to create or update monitor',
-          },
-        ]);
-        expect(projectResponse.body.deletedMonitors).eql([]);
-        expect(projectResponse.body.updatedMonitors).eql([]);
-        expect(projectResponse.body.staleMonitors).eql([]);
+          ],
+          failedStaleMonitors: [],
+        });
       } finally {
         await Promise.all([
           testMonitors.map((monitor) => {
@@ -861,21 +830,27 @@ export default function ({ getService }: FtrProviderContext) {
           roles: [roleName],
           full_name: 'a kibana user',
         });
-        const projectResponse = await supertestWithoutAuth
-          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT)
-          .auth(username, password)
-          .set('kbn-xsrf', 'true')
-          .send({
+        const messages = await parseStreamApiResponse(
+          projectMonitorEndpoint,
+          JSON.stringify({
             ...projectMonitors,
             keep_stale: false,
             monitors: testMonitors,
-          });
-
-        expect(projectResponse.body.createdMonitors).eql([testMonitors[0].id, testMonitors[1].id]);
-        expect(projectResponse.body.failedMonitors).eql([]);
-        expect(projectResponse.body.deletedMonitors).eql([]);
-        expect(projectResponse.body.updatedMonitors).eql([]);
-        expect(projectResponse.body.staleMonitors).eql([]);
+          })
+        );
+        expect(messages).to.have.length(3);
+        expect(messages).to.eql([
+          `${testMonitors[0].id}: monitor created successfully`,
+          'test-id-2: monitor created successfully',
+          {
+            createdMonitors: [testMonitors[0].id, 'test-id-2'],
+            updatedMonitors: [],
+            staleMonitors: [],
+            deletedMonitors: [],
+            failedMonitors: [],
+            failedStaleMonitors: [],
+          },
+        ]);
       } finally {
         await Promise.all([
           testMonitors.map((monitor) => {
@@ -1170,5 +1145,145 @@ export default function ({ getService }: FtrProviderContext) {
         expect(apiResponsePolicy2.body.items.length).eql(0);
       }
     });
+
+    it('handles location formatting for both private and public locations', async () => {
+      try {
+        await supertest
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT)
+          .set('kbn-xsrf', 'true')
+          .send({
+            ...projectMonitors,
+            monitors: [
+              { ...projectMonitors.monitors[0], privateLocations: ['Test private location 0'] },
+            ],
+          });
+
+        const updatedMonitorsResponse = await Promise.all(
+          projectMonitors.monitors.map((monitor) => {
+            return supertest
+              .get(API_URLS.SYNTHETICS_MONITORS)
+              .query({ filter: `${syntheticsMonitorType}.attributes.journey_id: ${monitor.id}` })
+              .set('kbn-xsrf', 'true')
+              .expect(200);
+          })
+        );
+
+        updatedMonitorsResponse.forEach((response) => {
+          expect(response.body.monitors[0].attributes.locations).eql([
+            {
+              id: 'localhost',
+              label: 'Local Synthetics Service',
+              geo: { lat: 0, lon: 0 },
+              url: 'mockDevUrl',
+              isServiceManaged: true,
+              status: 'experimental',
+              isInvalid: false,
+            },
+            {
+              label: 'Test private location 0',
+              isServiceManaged: false,
+              isInvalid: false,
+              agentPolicyId: testPolicyId,
+              id: testPolicyId,
+              geo: {
+                lat: '',
+                lon: '',
+              },
+              concurrentMonitors: 1,
+            },
+          ]);
+        });
+      } finally {
+        await Promise.all([
+          projectMonitors.monitors.map((monitor) => {
+            return deleteMonitor(monitor.id, projectMonitors.project);
+          }),
+        ]);
+      }
+    });
   });
 }
+
+/**
+ * Borrowed from AIOPS test code: https://github.com/elastic/kibana/blob/23a7ac2c2e2b1f64daa17b914e86989b1fde750c/x-pack/test/api_integration/apis/aiops/explain_log_rate_spikes.ts
+ * Receives a stream and parses the messages until the stream closes.
+ */
+async function* parseStream(stream: NodeJS.ReadableStream) {
+  let partial = '';
+
+  try {
+    for await (const value of stream) {
+      const full = `${partial}${value}`;
+      const parts = full.split('\n');
+      const last = parts.pop();
+
+      partial = last ?? '';
+
+      const event = parts.map((p) => JSON.parse(p));
+
+      for (const events of event) {
+        yield events;
+      }
+    }
+  } catch (error) {
+    yield { type: 'error', payload: error.toString() };
+  }
+}
+
+/**
+ * Helper function to process the results of the module's stream parsing helper function.
+ */
+async function getMessages(stream: NodeJS.ReadableStream | null) {
+  if (stream === null) return [];
+  const data: any[] = [];
+  for await (const action of parseStream(stream)) {
+    data.push(action);
+  }
+  return data;
+}
+
+/**
+ * This type is intended to highlight any break between shared parameter contracts defined in
+ * the module's streaming endpoint helper functions.
+ */
+type StreamApiFunction<T = unknown> = (
+  url: string,
+  body?: BodyInit,
+  extraHeaders?: HeadersInit,
+  method?: string
+) => T;
+
+/**
+ * This helps the test file have DRY code when it comes to calling
+ * the same streaming endpoint over and over by defining some selective defaults.
+ */
+const parseStreamApiResponse: StreamApiFunction<Promise<any[]>> = async (
+  url: string,
+  body?: BodyInit,
+  extraHeaders?: HeadersInit,
+  method = 'PUT'
+) => {
+  const streamResponse = await callStreamApi(url, body, extraHeaders, method);
+  return getMessages(streamResponse.body);
+};
+
+/**
+ * This helps the test file have DRY code when it comes to calling
+ * the same streaming endpoint over and over by defining some selective defaults.
+ */
+const callStreamApi: StreamApiFunction<Promise<Response>> = async (
+  url: string,
+  body?: BodyInit,
+  extraHeaders?: HeadersInit,
+  method = 'PUT'
+) => {
+  return fetch(url, {
+    method,
+    headers: {
+      'Content-Type': 'application/json',
+      'kbn-xsrf': 'stream',
+      ...extraHeaders,
+    },
+    body,
+  });
+};
