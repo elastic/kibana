@@ -6,25 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { EuiFilterButton, EuiFilterGroup, EuiPopover, useResizeObserver } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { Subject } from 'rxjs';
 import classNames from 'classnames';
 import { debounce, isEmpty } from 'lodash';
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 
+import { EuiFilterButton, EuiFilterGroup, EuiPopover, useResizeObserver } from '@elastic/eui';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
+
 import { OptionsListStrings } from './options_list_strings';
-import { optionsListReducers } from './options_list_reducers';
-import { OptionsListPopover } from './options_list_popover_component';
+import { OptionsListPopover } from './options_list_popover';
+import { optionsListReducers } from '../options_list_reducers';
+import { OptionsListReduxState } from '../types';
 
 import './options_list.scss';
-import { OptionsListReduxState } from './types';
 
-export const OptionsListComponent = ({
-  typeaheadSubject,
-}: {
-  typeaheadSubject: Subject<string>;
-}) => {
+export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Subject<string> }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const resizeRef = useRef(null);
@@ -79,11 +76,11 @@ export const OptionsListComponent = ({
       selectionDisplayNode: (
         <>
           {validSelections && (
-            <span>{validSelections?.join(OptionsListStrings.summary.getSeparator())}</span>
+            <span>{validSelections?.join(OptionsListStrings.control.getSeparator())}</span>
           )}
           {invalidSelections && (
             <span className="optionsList__filterInvalid">
-              {invalidSelections.join(OptionsListStrings.summary.getSeparator())}
+              {invalidSelections.join(OptionsListStrings.control.getSeparator())}
             </span>
           )}
         </>
@@ -106,7 +103,7 @@ export const OptionsListComponent = ({
         numActiveFilters={validSelectionsCount}
         hasActiveFilters={Boolean(validSelectionsCount)}
       >
-        {hasSelections ? selectionDisplayNode : OptionsListStrings.summary.getPlaceholder()}
+        {hasSelections ? selectionDisplayNode : OptionsListStrings.control.getPlaceholder()}
       </EuiFilterButton>
     </div>
   );
