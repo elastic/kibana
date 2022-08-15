@@ -404,6 +404,19 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 placeholder: '',
               }}
             />
+            <EuiSpacer size="l" />
+            <UseField
+              path="groupBy"
+              component={AutocompleteField}
+              componentProps={{
+                dataTestSubj: 'detectionEngineStepAboutRuleGroupByField',
+                fieldType: 'string',
+                idAria: 'detectionEngineStepAboutRuleGroupByField',
+                indices: indexPattern,
+                isDisabled: isLoading || indexPatternLoading,
+                placeholder: '',
+              }}
+            />
             {!!formTimestampOverride && formTimestampOverride !== '@timestamp' && (
               <>
                 <CommonUseField

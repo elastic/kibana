@@ -183,6 +183,7 @@ export const mockAboutStepRule = (): AboutStepRule => ({
   tags: ['tag1', 'tag2'],
   threat: getThreatMock(),
   note: '# this is some markdown documentation',
+  groupBy: '',
 });
 
 export const mockActionsStepRule = (enabled = false): ActionsStepRule => ({

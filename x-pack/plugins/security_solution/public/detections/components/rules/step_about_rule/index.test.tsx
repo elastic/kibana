@@ -258,6 +258,7 @@ describe('StepAboutRuleComponent', () => {
       riskScore: { value: 21, mapping: [], isMappingChecked: false },
       severity: { value: 'low', mapping: fillEmptySeverityMappings([]), isMappingChecked: false },
       tags: [],
+      groupBy: '',
       threat: [
         {
           framework: 'MITRE ATT&CK',
@@ -322,6 +323,7 @@ describe('StepAboutRuleComponent', () => {
       riskScore: { value: 80, mapping: [], isMappingChecked: false },
       severity: { value: 'low', mapping: fillEmptySeverityMappings([]), isMappingChecked: false },
       tags: [],
+      groupBy: '',
       threat: [
         {
           framework: 'MITRE ATT&CK',
