@@ -7,13 +7,13 @@
 
 import { EuiFlexGrid, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { take } from 'lodash';
-import React, { useContext } from 'react';
+import React from 'react';
 import { TopNSubchart } from '../../common/topn';
-import { TopNContext } from './contexts/topn';
 import { SubChart } from './subchart';
 
 export interface ChartGridProps {
-  maximum: number;
+  limit: number;
+  charts: TopNSubchart[];
 }
 
 function printSubCharts(subcharts: TopNSubchart[], maximum: number) {
@@ -35,18 +35,17 @@ function printSubCharts(subcharts: TopNSubchart[], maximum: number) {
   ));
 }
 
-export const ChartGrid: React.FC<ChartGridProps> = ({ maximum }) => {
-  const ctx = useContext(TopNContext);
-
+export const ChartGrid: React.FC<ChartGridProps> = ({ limit, charts }) => {
+  const maximum = Math.min(limit, charts.length ?? 0);
   return (
     <>
       <EuiSpacer />
       <EuiTitle size="s">
-        <h1>Top {ctx.charts.length}</h1>
+        <h1>Top {charts.length}</h1>
       </EuiTitle>
       <EuiSpacer />
       <EuiFlexGrid columns={2} gutterSize="m">
-        {printSubCharts(ctx.charts, maximum)}
+        {printSubCharts(charts, maximum)}
       </EuiFlexGrid>
     </>
   );

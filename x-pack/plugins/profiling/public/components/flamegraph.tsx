@@ -8,12 +8,11 @@
 import { Chart, Datum, Flame, PartialTheme, Settings } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useContext, useMemo } from 'react';
 import { isNumber } from 'lodash';
+import React, { useMemo } from 'react';
+import { ElasticFlameGraph, FlameGraphComparisonMode } from '../../common/flamegraph';
 import { asPercentage } from '../utils/formatters/as_percentage';
-import { FlameGraphContext } from './contexts/flamegraph';
 import { getFlamegraphModel } from '../utils/get_flamegraph_model';
-import { FlameGraphComparisonMode } from '../../common/flamegraph';
 
 function TooltipRow({
   value,
@@ -148,11 +147,17 @@ export interface FlameGraphProps {
   id: string;
   height: number;
   comparisonMode: FlameGraphComparisonMode;
+  primaryFlamegraph?: ElasticFlameGraph;
+  comparisonFlamegraph?: ElasticFlameGraph;
 }
 
-export const FlameGraph: React.FC<FlameGraphProps> = ({ id, height, comparisonMode }) => {
-  const { primaryFlamegraph, comparisonFlamegraph } = useContext(FlameGraphContext) || {};
-
+export const FlameGraph: React.FC<FlameGraphProps> = ({
+  id,
+  height,
+  comparisonMode,
+  primaryFlamegraph,
+  comparisonFlamegraph,
+}) => {
   const theme = useEuiTheme();
 
   const columnarData = useMemo(() => {

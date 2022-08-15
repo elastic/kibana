@@ -7,17 +7,15 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPageHeaderContentProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TypeOf } from '@kbn/typed-react-router-config';
-import React, { useState } from 'react';
-import { TopNFunctions } from '../../../common/functions';
-import { TimeRange } from '../../../common/types';
+import React from 'react';
+import { useAsync } from '../../hooks/use_async';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../../hooks/use_profiling_route_path';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { ProfilingRoutes } from '../../routing';
-import { FunctionContext } from '../contexts/function';
+import { AsyncComponent } from '../async_component';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
-import { FunctionNavigation } from '../function_nav';
 import { PrimaryAndComparisonSearchBar } from '../primary_and_comparison_search_bar';
 import { ProfilingAppPageTemplate } from '../profiling_app_page_template';
 import { RedirectTo } from '../redirect_to';
@@ -40,13 +38,32 @@ export function FunctionsView({ children }: { children: React.ReactElement }) {
 
   const comparisonKuery = 'comparisonKuery' in query ? query.comparisonKuery : '';
 
-  const [topnFunctions, setTopNFunctions] = useState<TopNFunctions>();
-
-  const [topnComparisonFunctions, setTopNComparisonFunctions] = useState<TopNFunctions>();
-
   const {
     services: { fetchTopNFunctions },
   } = useProfilingDependencies();
+
+  const state = useAsync(() => {
+    return fetchTopNFunctions({
+      timeFrom: new Date(timeRange.start).getTime() / 1000,
+      timeTo: new Date(timeRange.end).getTime() / 1000,
+      startIndex: 0,
+      endIndex: 1000,
+      kuery,
+    });
+  }, [timeRange.start, timeRange.end, kuery, fetchTopNFunctions]);
+
+  const comparisonState = useAsync(() => {
+    if (!comparisonTimeRange.start || !comparisonTimeRange.end) {
+      return undefined;
+    }
+    return fetchTopNFunctions({
+      timeFrom: new Date(comparisonTimeRange.start).getTime() / 1000,
+      timeTo: new Date(comparisonTimeRange.end).getTime() / 1000,
+      startIndex: 0,
+      endIndex: 1000,
+      kuery: comparisonKuery,
+    });
+  }, [comparisonTimeRange.start, comparisonTimeRange.end, comparisonKuery, fetchTopNFunctions]);
 
   const routePath = useProfilingRoutePath() as
     | '/functions'
@@ -97,14 +114,9 @@ export function FunctionsView({ children }: { children: React.ReactElement }) {
           <EuiFlexItem>
             <EuiFlexGroup direction="row" gutterSize="s">
               <EuiFlexItem>
-                <FunctionContext.Provider value={topnFunctions}>
-                  <FunctionNavigation
-                    timeRange={timeRange}
-                    kuery={kuery}
-                    getter={fetchTopNFunctions}
-                    setter={setTopNFunctions}
-                  />
+                <AsyncComponent {...state} size="xl" alignTop>
                   <TopNFunctionsTable
+                    topNFunctions={state.data}
                     sortDirection={sortDirection}
                     sortField={sortField}
                     onSortChange={(nextSort) => {
@@ -118,17 +130,11 @@ export function FunctionsView({ children }: { children: React.ReactElement }) {
                       });
                     }}
                   />
-                </FunctionContext.Provider>
+                </AsyncComponent>
               </EuiFlexItem>
               {isDifferentialView && comparisonTimeRange.start && comparisonTimeRange.end ? (
                 <EuiFlexItem>
-                  <FunctionContext.Provider value={topnComparisonFunctions}>
-                    <FunctionNavigation
-                      timeRange={comparisonTimeRange as TimeRange}
-                      kuery={comparisonKuery}
-                      getter={fetchTopNFunctions}
-                      setter={setTopNComparisonFunctions}
-                    />
+                  <AsyncComponent {...comparisonState} size="xl" alignTop>
                     <TopNFunctionsTable
                       sortDirection={sortDirection}
                       sortField={sortField}
@@ -145,9 +151,10 @@ export function FunctionsView({ children }: { children: React.ReactElement }) {
                           },
                         });
                       }}
-                      comparisonTopNFunctions={topnFunctions}
+                      topNFunctions={comparisonState.data}
+                      comparisonTopNFunctions={state.data}
                     />
-                  </FunctionContext.Provider>
+                  </AsyncComponent>
                 </EuiFlexItem>
               ) : null}
             </EuiFlexGroup>
