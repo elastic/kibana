@@ -25,7 +25,7 @@ describe('Caller-callee operations', () => {
       SourceLine: 30,
       ExeFileName: 'libc-2.26.so',
     });
-    const parent = createCallerCalleeIntermediateNode(parentFrame, 10);
+    const parent = createCallerCalleeIntermediateNode(parentFrame, 10, 'parent');
 
     const childFrame = createStackFrameMetadata({
       FileID: '8d8696a4fd51fa88da70d3fde138247d',
@@ -36,9 +36,9 @@ describe('Caller-callee operations', () => {
       SourceLine: 150,
       ExeFileName: 'auditd',
     });
-    const child = createCallerCalleeIntermediateNode(childFrame, 10);
+    const child = createCallerCalleeIntermediateNode(childFrame, 10, 'child');
 
-    const root = createCallerCalleeIntermediateNode(createStackFrameMetadata(), 10);
+    const root = createCallerCalleeIntermediateNode(createStackFrameMetadata(), 10, 'root');
     root.callees.set(hashFrameGroup(child.frameGroup), child);
     root.callees.set(hashFrameGroup(parent.frameGroup), parent);
 

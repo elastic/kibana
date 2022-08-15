@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import objectHash from 'object-hash';
 import { CallerCalleeNode, createCallerCalleeDiagram } from './callercallee';
 import {
   describeFrameType,
@@ -24,6 +24,7 @@ interface ColumnarCallerCallee {
   Color: number[];
   CountInclusive: number[];
   CountExclusive: number[];
+  ID: string[];
 }
 
 export interface ElasticFlameGraph {
@@ -34,6 +35,12 @@ export interface ElasticFlameGraph {
   Color: number[];
   CountInclusive: number[];
   CountExclusive: number[];
+  ID: string[];
+}
+
+export enum FlameGraphComparisonMode {
+  Absolute = 'absolute',
+  Relative = 'relative',
 }
 
 /*
@@ -71,7 +78,7 @@ function frameTypeToRGB(frameType: number, x: number): number {
   return frameTypeToColors[frameType][x % 4];
 }
 
-function normalizeColor(rgb: number): number[] {
+export function normalizeColorForFlamegraph(rgb: number): number[] {
   return [
     Math.floor(rgb / 65536) / 255,
     (Math.floor(rgb / 256) % 256) / 255,
@@ -159,11 +166,12 @@ export class FlameGraph {
       Color: [],
       CountInclusive: [],
       CountExclusive: [],
+      ID: [],
     };
-    const queue = [{ x: 0, depth: 1, node: root }];
+    const queue = [{ x: 0, depth: 1, node: root, parentID: 'root' }];
 
     while (queue.length > 0) {
-      const { x, depth, node } = queue.pop()!;
+      const { x, depth, node, parentID } = queue.pop()!;
 
       if (x === 0 && depth === 1) {
         columnar.Label.push('root: Represents 100% of CPU time.');
@@ -178,6 +186,10 @@ export class FlameGraph {
       columnar.CountInclusive.push(node.CountInclusive);
       columnar.CountExclusive.push(node.CountExclusive);
 
+      const id = objectHash([parentID, node.FrameGroupID]);
+
+      columnar.ID.push(id);
+
       node.Callees.sort((a: CallerCalleeNode, b: CallerCalleeNode) => b.Samples - a.Samples);
 
       let delta = 0;
@@ -187,7 +199,7 @@ export class FlameGraph {
 
       for (let i = node.Callees.length - 1; i >= 0; i--) {
         delta -= node.Callees[i].Samples;
-        queue.push({ x: x + delta, depth: depth + 1, node: node.Callees[i] });
+        queue.push({ x: x + delta, depth: depth + 1, node: node.Callees[i], parentID: id });
       }
     }
 
@@ -205,12 +217,14 @@ export class FlameGraph {
       Color: [],
       CountInclusive: [],
       CountExclusive: [],
+      ID: [],
     };
 
     graph.Label = columnar.Label;
     graph.Value = columnar.Value;
     graph.CountInclusive = columnar.CountInclusive;
     graph.CountExclusive = columnar.CountExclusive;
+    graph.ID = columnar.ID;
 
     const maxX = columnar.Value[0];
     const maxY = columnar.Y.reduce((max, n) => (n > max ? n : max), 0);
@@ -224,7 +238,7 @@ export class FlameGraph {
     graph.Size = graph.Value.map((n) => normalize(n, 0, maxX));
 
     for (const color of columnar.Color) {
-      graph.Color.push(...normalizeColor(color));
+      graph.Color.push(...normalizeColorForFlamegraph(color));
     }
 
     return graph;

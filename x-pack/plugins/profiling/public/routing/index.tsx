@@ -9,13 +9,14 @@ import { toNumberRt } from '@kbn/io-ts-utils';
 import { createRouter, Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
-import { Redirect } from 'react-router-dom';
+import { TopNFunctionSortField, topNFunctionSortFieldRt } from '../../common/functions';
 import { StackTracesDisplayOption, TopNType } from '../../common/stack_traces';
+import { FlameGraphComparisonMode } from '../../common/flamegraph';
 import { FlameGraphsView } from '../components/flame_graphs_view';
 import { FunctionsView } from '../components/functions_view';
+import { RedirectTo } from '../components/redirect_to';
 import { RouteBreadcrumb } from '../components/route_breadcrumb';
 import { StackTracesView } from '../components/stack_traces_view';
-import { TopNFunctionSortField, topNFunctionSortFieldRt } from '../../common/functions';
 
 const routes = {
   '/': {
@@ -60,7 +61,7 @@ const routes = {
             },
           },
           '/stacktraces': {
-            element: <Redirect to="/stacktraces/containers" />,
+            element: <RedirectTo pathname="/stacktraces/containers" />,
           },
           '/flamegraphs': {
             element: (
@@ -104,8 +105,17 @@ const routes = {
                     comparisonRangeFrom: t.string,
                     comparisonRangeTo: t.string,
                     comparisonKuery: t.string,
+                    comparisonMode: t.union([
+                      t.literal(FlameGraphComparisonMode.Absolute),
+                      t.literal(FlameGraphComparisonMode.Relative),
+                    ]),
                   }),
                 }),
+                defaults: {
+                  query: {
+                    comparisonMode: FlameGraphComparisonMode.Absolute,
+                  },
+                },
               },
             },
           },
@@ -169,7 +179,7 @@ const routes = {
             },
           },
           '/': {
-            element: <Redirect to="/stacktraces/containers" />,
+            element: <RedirectTo pathname="/stacktraces/containers" />,
           },
         },
         element: <Outlet />,

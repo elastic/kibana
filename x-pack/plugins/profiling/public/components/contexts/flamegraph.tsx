@@ -8,4 +8,6 @@
 import { createContext } from 'react';
 import { ElasticFlameGraph } from '../../../common/flamegraph';
 
-export const FlameGraphContext = createContext<ElasticFlameGraph | undefined>(undefined);
+export const FlameGraphContext = createContext<
+  { primaryFlamegraph: ElasticFlameGraph; comparisonFlamegraph?: ElasticFlameGraph } | undefined
+>(undefined);

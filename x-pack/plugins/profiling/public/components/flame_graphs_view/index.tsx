@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiPageHeaderContentProps } from '@elastic/eui';
+import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiPageHeaderContentProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { Redirect } from 'react-router-dom';
-import { ElasticFlameGraph } from '../../../common/flamegraph';
+import { ElasticFlameGraph, FlameGraphComparisonMode } from '../../../common/flamegraph';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../../hooks/use_profiling_route_path';
@@ -19,16 +18,31 @@ import { FlameGraph } from '../flamegraph';
 import { FlameGraphNavigation } from '../flamegraph_nav';
 import { PrimaryAndComparisonSearchBar } from '../primary_and_comparison_search_bar';
 import { ProfilingAppPageTemplate } from '../profiling_app_page_template';
+import { RedirectTo } from '../redirect_to';
 
 export function FlameGraphsView({ children }: { children: React.ReactElement }) {
   const {
+    path,
     query,
     query: { rangeFrom, rangeTo, kuery },
   } = useProfilingParams('/flamegraphs/*');
 
   const timeRange = useTimeRange({ rangeFrom, rangeTo });
 
-  const [elasticFlamegraph, setElasticFlamegraph] = useState<ElasticFlameGraph>();
+  const comparisonTimeRange = useTimeRange(
+    'comparisonRangeFrom' in query
+      ? { rangeFrom: query.comparisonRangeFrom, rangeTo: query.comparisonRangeTo, optional: true }
+      : { rangeFrom: undefined, rangeTo: undefined, optional: true }
+  );
+
+  const comparisonKuery = 'comparisonKuery' in query ? query.comparisonKuery : '';
+  const comparisonMode =
+    'comparisonMode' in query ? query.comparisonMode : FlameGraphComparisonMode.Absolute;
+
+  const [elasticFlamegraph, setElasticFlamegraph] = useState<{
+    primaryFlamegraph: ElasticFlameGraph;
+    comparisonFlamegraph?: ElasticFlameGraph;
+  }>();
 
   const {
     services: { fetchElasticFlamechart },
@@ -59,13 +73,14 @@ export function FlameGraphsView({ children }: { children: React.ReactElement }) 
           comparisonRangeFrom: query.rangeFrom,
           comparisonRangeTo: query.rangeTo,
           comparisonKuery: query.kuery,
+          comparisonMode,
         },
       }),
     },
   ];
 
   if (routePath === '/flamegraphs') {
-    return <Redirect to="/flamegraphs/flamegraph" />;
+    return <RedirectTo pathname="/flamegraphs/flamegraph" />;
   }
 
   return (
@@ -74,17 +89,70 @@ export function FlameGraphsView({ children }: { children: React.ReactElement }) 
         <EuiFlexGroup direction="column">
           {isDifferentialView ? (
             <EuiFlexItem>
-              <PrimaryAndComparisonSearchBar />
+              <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+                <EuiFlexItem grow>
+                  <PrimaryAndComparisonSearchBar />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonGroup
+                    legend={i18n.translate(
+                      'xpack.profiling.flameGraphsView.differentialFlameGraphComparisonModeLegend',
+                      {
+                        defaultMessage:
+                          'This switch allows you to switch between an absolute and relative comparison between both graphs',
+                      }
+                    )}
+                    type="single"
+                    buttonSize="m"
+                    idSelected={comparisonMode}
+                    onChange={(nextComparisonMode) => {
+                      if (!('comparisonRangeFrom' in query)) {
+                        return;
+                      }
+
+                      profilingRouter.push(routePath, {
+                        path,
+                        query: {
+                          ...query,
+                          comparisonMode: nextComparisonMode as FlameGraphComparisonMode,
+                        },
+                      });
+                    }}
+                    options={[
+                      {
+                        id: FlameGraphComparisonMode.Absolute,
+                        label: i18n.translate(
+                          'xpack.profiling.flameGraphsView.differentialFlameGraphComparisonModeAbsoluteButtonLabel',
+                          {
+                            defaultMessage: 'Abs',
+                          }
+                        ),
+                      },
+                      {
+                        id: FlameGraphComparisonMode.Relative,
+                        label: i18n.translate(
+                          'xpack.profiling.flameGraphsView.differentialFlameGraphComparisonModeRelativeButtonLabel',
+                          {
+                            defaultMessage: 'Rel',
+                          }
+                        ),
+                      },
+                    ]}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
           ) : null}
           <EuiFlexItem>
             <FlameGraphNavigation
               timeRange={timeRange}
               kuery={kuery}
+              comparisonTimeRange={comparisonTimeRange}
+              comparisonKuery={comparisonKuery}
               getter={fetchElasticFlamechart}
               setter={setElasticFlamegraph}
             />
-            <FlameGraph id="flamechart" height={600} />
+            <FlameGraph id="flamechart" height={600} comparisonMode={comparisonMode} />
             {children}
           </EuiFlexItem>
         </EuiFlexGroup>

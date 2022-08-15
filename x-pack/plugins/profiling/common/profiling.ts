@@ -60,6 +60,8 @@ export interface Executable {
 }
 
 export interface StackFrameMetadata {
+  // StackTrace.FrameID
+  FrameID: string;
   // StackTrace.FileID
   FileID: FileID;
   // StackTrace.Type
@@ -98,6 +100,7 @@ export function createStackFrameMetadata(
 ): StackFrameMetadata {
   const metadata = {} as StackFrameMetadata;
 
+  metadata.FrameID = options.FrameID ?? '';
   metadata.FileID = options.FileID ?? '';
   metadata.FrameType = options.FrameType ?? 0;
   metadata.AddressOrLine = options.AddressOrLine ?? 0;
@@ -157,11 +160,14 @@ export function groupStackFrameMetadataByStackTrace(
   for (const [stackTraceID, trace] of stackTraces) {
     const frameMetadata = new Array<StackFrameMetadata>();
     for (let i = 0; i < trace.FrameIDs.length; i++) {
-      const frame = stackFrames.get(trace.FrameIDs[i])!;
-      const executable = executables.get(trace.FileIDs[i])!;
+      const frameID = trace.FrameIDs[i];
+      const fileID = trace.FileIDs[i];
+      const frame = stackFrames.get(frameID)!;
+      const executable = executables.get(fileID)!;
 
       const metadata = createStackFrameMetadata({
-        FileID: trace.FileIDs[i],
+        FrameID: frameID,
+        FileID: fileID,
         FrameType: trace.Types[i],
         AddressOrLine: frame.LineNumber,
         FunctionName: frame.FunctionName,
