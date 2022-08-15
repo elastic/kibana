@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-export const formatHighPrecision = (val: number) => {
-  return Number(val).toLocaleString('en', {
-    maximumFractionDigits: 5,
-  });
-};
+export interface PartitionLabelsArguments {
+  show: boolean;
+  position: 'inside' | 'default';
+  values: boolean;
+  valuesFormat: 'percent' | 'value';
+  percentDecimals: number;
+}
+
+export type Fields = keyof PartitionLabelsArguments;
