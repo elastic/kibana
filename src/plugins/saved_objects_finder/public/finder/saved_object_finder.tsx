@@ -143,7 +143,7 @@ class SavedObjectFinderUi extends React.Component<
 
     const perPage = this.props.savedObjectsPlugin.settings.getListingLimit();
     const response = await this.props.savedObjects.client.find<FinderAttributes>({
-      type: visibleTypes ?? [],
+      type: visibleTypes ?? Object.keys(metaDataMap),
       fields: [...new Set(fields)],
       search: queryText ? `${queryText}*` : undefined,
       page: 1,
@@ -252,7 +252,7 @@ class SavedObjectFinderUi extends React.Component<
         }
       : undefined;
     const typeColumn: EuiTableFieldDataColumnType<SavedObjectFinderItem> | undefined =
-      new Set(this.state.items.map((item) => item.type)).size > 1
+      savedObjectMetaData.length > 1
         ? {
             field: 'type',
             name: i18n.translate('savedObjectsFinder.typeName', {
@@ -362,10 +362,12 @@ class SavedObjectFinderUi extends React.Component<
       box: {
         incremental: true,
       },
-      filters: [
-        ...(this.props.showFilter ? [typeFilter] : []),
-        ...(taggingApi ? [taggingApi.ui.getSearchBarFilter({ useName: true })] : []),
-      ],
+      filters: this.props.showFilter
+        ? [
+            ...(savedObjectMetaData.length > 1 ? [typeFilter] : []),
+            ...(taggingApi ? [taggingApi.ui.getSearchBarFilter({ useName: true })] : []),
+          ]
+        : undefined,
       toolsRight: this.props.children ? <>{this.props.children}</> : undefined,
       'data-test-subj': 'savedObjectFinderSearchInput',
     };
