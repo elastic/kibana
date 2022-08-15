@@ -39,7 +39,9 @@ export const useStyles = () => {
     const terminal: CSSObject = {
       width: '100%',
       height: 'calc(100% - 142px)',
-      '.xterm-viewport': css`${euiScrollBar}`,
+      '.xterm-viewport': css`
+        ${euiScrollBar}
+      `,
       border: border.thin,
     };
 
