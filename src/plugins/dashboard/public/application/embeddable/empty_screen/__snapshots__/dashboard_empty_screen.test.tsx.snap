@@ -44,11 +44,11 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
       role="main"
     >
       <figure
-        class="euiImage euiImage--original"
+        class="euiImageWrapper emotion-euiImageWrapper"
       >
         <img
           alt=""
-          class="euiImage__img"
+          class="euiImage emotion-euiImage-original"
           src="/plugins/home/assets/welcome_graphic_light_2x.png"
         />
       </figure>
@@ -85,11 +85,11 @@ exports[`DashboardEmptyScreen renders correctly with view mode 1`] = `
       role="main"
     >
       <figure
-        class="euiImage euiImage--original"
+        class="euiImageWrapper emotion-euiImageWrapper"
       >
         <img
           alt=""
-          class="euiImage__img"
+          class="euiImage emotion-euiImage-original"
           src="/plugins/home/assets/welcome_graphic_light_2x.png"
         />
       </figure>

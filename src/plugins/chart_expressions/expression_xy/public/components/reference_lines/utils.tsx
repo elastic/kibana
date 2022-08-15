@@ -72,6 +72,13 @@ export const getSharedStyle = (config: ReferenceLineAnnotationConfig) => ({
       ? [(config.lineWidth || 1) * 3, config.lineWidth || 1]
       : config.lineStyle === 'dotted'
       ? [config.lineWidth || 1, config.lineWidth || 1]
+      : config.lineStyle === 'dot-dashed'
+      ? [
+          (config.lineWidth || 1) * 5,
+          config.lineWidth || 1,
+          config.lineWidth || 1,
+          config.lineWidth || 1,
+        ]
       : undefined,
 });
 
