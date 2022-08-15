@@ -249,6 +249,21 @@ export default async function ({ readConfigFile }) {
           kibana: [],
         },
 
+        test_index: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['test-index'],
+                privileges: ['read', 'view_index_metadata', 'manage', 'create_index', 'index'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
+
         index_a: {
           elasticsearch: {
             cluster: [],
