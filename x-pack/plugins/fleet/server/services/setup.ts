@@ -41,6 +41,7 @@ import type { UpgradeManagedPackagePoliciesResult } from './managed_package_poli
 import { upgradeManagedPackagePolicies } from './managed_package_policies';
 import { getBundledPackages } from './epm/packages';
 import { upgradePackageInstallVersion } from './setup/upgrade_package_install_version';
+import { upgradeAgentPolicySchemaVersion } from './setup/upgrade_agent_policy_schema_version';
 
 export interface SetupStatus {
   isInitialized: boolean;
@@ -129,6 +130,9 @@ async function createSetupSideEffects(
 
   logger.debug('Upgrade Fleet package install versions');
   await upgradePackageInstallVersion({ soClient, esClient, logger });
+
+  logger.debug('Upgrade Agent policy schema version');
+  await upgradeAgentPolicySchemaVersion(soClient);
 
   logger.debug('Setting up Fleet enrollment keys');
   await ensureDefaultEnrollmentAPIKeysExists(soClient, esClient);
