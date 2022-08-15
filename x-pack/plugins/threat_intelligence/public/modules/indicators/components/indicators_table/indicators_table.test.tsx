@@ -23,6 +23,7 @@ const tableProps: IndicatorsTableProps = {
   indicatorCount: 0,
   firstLoad: false,
   loading: false,
+  indexPatterns: [],
 };
 
 const indicatorsFixture: Indicator[] = [

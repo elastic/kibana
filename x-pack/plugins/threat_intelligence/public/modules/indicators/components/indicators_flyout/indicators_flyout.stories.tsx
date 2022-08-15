@@ -19,6 +19,10 @@ export default {
 };
 
 const mockIndicator: Indicator = generateMockIndicator();
+const mockFieldTypesMap: { [id: string]: string } = {
+  'threat.indicator.ip': 'ip',
+  'threat.indicator.first_seen': 'date',
+};
 
 const coreMock = {
   uiSettings: {
@@ -32,7 +36,6 @@ const coreMock = {
     },
   },
 } as unknown as CoreStart;
-
 const KibanaReactContext = createKibanaReactContext(coreMock);
 
 export const Default: Story<void> = () => {
@@ -40,6 +43,7 @@ export const Default: Story<void> = () => {
     <KibanaReactContext.Provider>
       <IndicatorsFlyout
         indicator={mockIndicator}
+        fieldTypesMap={mockFieldTypesMap}
         // eslint-disable-next-line no-console
         closeFlyout={() => console.log('closing')}
       />
@@ -52,6 +56,7 @@ export const EmtpyIndicator: Story<void> = () => {
     <KibanaReactContext.Provider>
       <IndicatorsFlyout
         indicator={{ fields: {} } as Indicator}
+        fieldTypesMap={{}}
         // eslint-disable-next-line no-console
         closeFlyout={() => console.log('closing')}
       />

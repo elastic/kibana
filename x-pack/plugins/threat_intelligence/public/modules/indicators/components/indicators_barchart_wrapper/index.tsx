@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export interface Feed {
-  name: string;
-  lastSeen: Date;
-}
+export * from './indicators_barchart_wrapper';

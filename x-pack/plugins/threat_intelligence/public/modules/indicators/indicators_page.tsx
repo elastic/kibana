@@ -69,7 +69,7 @@ export const IndicatorsPage: VFC = () => {
         />
       </FiltersGlobal>
       <IndicatorsBarChartWrapper timeRange={timeRange} indexPatterns={indexPatterns} />
-      <IndicatorsTable {...indicators} />
+      <IndicatorsTable {...indicators} indexPatterns={indexPatterns} />
     </DefaultPageLayout>
   );
 };

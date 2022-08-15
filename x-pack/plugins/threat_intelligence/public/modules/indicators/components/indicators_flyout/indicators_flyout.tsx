@@ -37,10 +37,15 @@ const enum TAB_IDS {
 
 export interface IndicatorsFlyoutProps {
   indicator: Indicator;
+  fieldTypesMap: { [id: string]: string };
   closeFlyout: () => void;
 }
 
-export const IndicatorsFlyout: VFC<IndicatorsFlyoutProps> = ({ indicator, closeFlyout }) => {
+export const IndicatorsFlyout: VFC<IndicatorsFlyoutProps> = ({
+  indicator,
+  fieldTypesMap,
+  closeFlyout,
+}) => {
   const [selectedTabId, setSelectedTabId] = useState(TAB_IDS.table);
 
   const tabs = useMemo(
@@ -53,7 +58,7 @@ export const IndicatorsFlyout: VFC<IndicatorsFlyoutProps> = ({ indicator, closeF
             defaultMessage="Table"
           />
         ),
-        content: <IndicatorsFlyoutTable indicator={indicator} />,
+        content: <IndicatorsFlyoutTable indicator={indicator} fieldTypesMap={fieldTypesMap} />,
       },
       {
         id: TAB_IDS.json,
@@ -66,7 +71,7 @@ export const IndicatorsFlyout: VFC<IndicatorsFlyoutProps> = ({ indicator, closeF
         content: <IndicatorsFlyoutJson indicator={indicator} />,
       },
     ],
-    [indicator]
+    [indicator, fieldTypesMap]
   );
   const onSelectedTabChanged = (id: number) => setSelectedTabId(id);
 
