@@ -31,7 +31,8 @@
     "triggersActionsUi",
     "inspector",
     "unifiedSearch",
-    "sharedUX"
+    "sharedUX",
+    "security"
   ],
   "ui": true,
   "server": true,

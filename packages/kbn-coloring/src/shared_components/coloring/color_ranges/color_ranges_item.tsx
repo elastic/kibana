@@ -8,7 +8,8 @@
 
 import { i18n } from '@kbn/i18n';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
-import React, { useState, useCallback, Dispatch, FocusEvent, useContext } from 'react';
+import React, { useState, useCallback, Dispatch, FocusEvent, useContext, useMemo } from 'react';
+import { css } from '@emotion/react';
 
 import {
   EuiFieldNumber,
@@ -19,6 +20,7 @@ import {
   EuiColorPickerSwatch,
   EuiButtonIcon,
   EuiFieldNumberProps,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import {
@@ -111,6 +113,8 @@ export function ColorRangeItem({
   const ActionButton = getActionButton(mode);
   const isValid = validation?.isValid ?? true;
 
+  const { euiTheme } = useEuiTheme();
+
   const onLeaveFocus = useCallback(
     (e: FocusEvent<HTMLDivElement>) => {
       const prevStartValue = colorRanges[index - 1]?.start ?? Number.NEGATIVE_INFINITY;
@@ -162,15 +166,28 @@ export function ColorRangeItem({
     }
   );
 
+  const styles = useMemo(
+    () => css`
+      display: block;
+      min-width: ${euiTheme.size.xl};
+      text-align: center;
+    `,
+    [euiTheme.size.xl]
+  );
+
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false} responsive={false}>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} css={isLast ? styles : null}>
         {!isLast ? (
           <EuiColorPicker
             onChange={onUpdateColor}
             button={
               isColorValid ? (
-                <EuiColorPickerSwatch color={colorRange.color} aria-label={selectNewColorText} />
+                <EuiColorPickerSwatch
+                  color={colorRange.color}
+                  aria-label={selectNewColorText}
+                  style={{ width: euiTheme.size.xl, height: euiTheme.size.xl }}
+                />
               ) : (
                 <EuiButtonIcon
                   color="danger"
@@ -190,7 +207,7 @@ export function ColorRangeItem({
             isInvalid={!isColorValid}
           />
         ) : (
-          <EuiIcon type={RelatedIcon} size="l" />
+          <EuiIcon type={RelatedIcon} size="m" color={euiTheme.colors.disabled} />
         )}
       </EuiFlexItem>
       <EuiFlexItem grow={true}>

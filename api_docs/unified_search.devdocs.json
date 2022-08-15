@@ -11,7 +11,7 @@
         "label": "DataViewPicker",
         "description": [],
         "signature": [
-          "({ isMissingCurrent, currentDataViewId, onChangeDataView, onAddField, onDataViewCreated, trigger, selectableProps, showNewMenuTour, textBasedLanguages, onSaveTextLanguageQuery, onTextLangQuerySubmit, textBasedLanguage, }: ",
+          "({ isMissingCurrent, currentDataViewId, onChangeDataView, onAddField, onDataViewCreated, trigger, selectableProps, textBasedLanguages, onSaveTextLanguageQuery, onTextLangQuerySubmit, textBasedLanguage, }: ",
           "DataViewPickerPropsExtended",
           ") => JSX.Element"
         ],
@@ -23,7 +23,7 @@
             "id": "def-public.DataViewPicker.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  isMissingCurrent,\n  currentDataViewId,\n  onChangeDataView,\n  onAddField,\n  onDataViewCreated,\n  trigger,\n  selectableProps,\n  showNewMenuTour,\n  textBasedLanguages,\n  onSaveTextLanguageQuery,\n  onTextLangQuerySubmit,\n  textBasedLanguage,\n}",
+            "label": "{\n  isMissingCurrent,\n  currentDataViewId,\n  onChangeDataView,\n  onAddField,\n  onDataViewCreated,\n  trigger,\n  selectableProps,\n  textBasedLanguages,\n  onSaveTextLanguageQuery,\n  onTextLangQuerySubmit,\n  textBasedLanguage,\n}",
             "description": [],
             "signature": [
               "DataViewPickerPropsExtended"
@@ -75,7 +75,9 @@
         "type": "Function",
         "tags": [],
         "label": "FilterItem",
-        "description": [],
+        "description": [
+          "\nRenders a single filter pill"
+        ],
         "signature": [
           "(props: ",
           "FilterItemProps",
@@ -104,11 +106,78 @@
       },
       {
         "parentPluginId": "unifiedSearch",
+        "id": "def-public.FilterItems",
+        "type": "Function",
+        "tags": [],
+        "label": "FilterItems",
+        "description": [
+          "\nRenders a group of filter pills"
+        ],
+        "signature": [
+          "(props: Pick<",
+          {
+            "pluginId": "unifiedSearch",
+            "scope": "public",
+            "docId": "kibUnifiedSearchPluginApi",
+            "section": "def-public.FilterItemsProps",
+            "text": "FilterItemsProps"
+          },
+          ", \"filters\" | \"indexPatterns\" | \"readOnly\" | \"onFiltersUpdated\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\"> & React.RefAttributes<React.Component<Pick<",
+          {
+            "pluginId": "unifiedSearch",
+            "scope": "public",
+            "docId": "kibUnifiedSearchPluginApi",
+            "section": "def-public.FilterItemsProps",
+            "text": "FilterItemsProps"
+          },
+          ", \"filters\" | \"indexPatterns\" | \"readOnly\" | \"onFiltersUpdated\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\">, any, any>>) => JSX.Element"
+        ],
+        "path": "src/plugins/unified_search/public/filter_bar/index.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.FilterItems.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "Pick<",
+              {
+                "pluginId": "unifiedSearch",
+                "scope": "public",
+                "docId": "kibUnifiedSearchPluginApi",
+                "section": "def-public.FilterItemsProps",
+                "text": "FilterItemsProps"
+              },
+              ", \"filters\" | \"indexPatterns\" | \"readOnly\" | \"onFiltersUpdated\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\"> & React.RefAttributes<React.Component<Pick<",
+              {
+                "pluginId": "unifiedSearch",
+                "scope": "public",
+                "docId": "kibUnifiedSearchPluginApi",
+                "section": "def-public.FilterItemsProps",
+                "text": "FilterItemsProps"
+              },
+              ", \"filters\" | \"indexPatterns\" | \"readOnly\" | \"onFiltersUpdated\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\">, any, any>>"
+            ],
+            "path": "src/plugins/unified_search/public/filter_bar/index.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedSearch",
         "id": "def-public.FilterLabel",
         "type": "Function",
         "tags": [],
         "label": "FilterLabel",
-        "description": [],
+        "description": [
+          "\nRenders the label for a single filter pill"
+        ],
         "signature": [
           "(props: ",
           "FilterLabelProps",
@@ -504,21 +573,6 @@
           },
           {
             "parentPluginId": "unifiedSearch",
-            "id": "def-public.DataViewPickerProps.showNewMenuTour",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "showNewMenuTour",
-            "description": [
-              "\nFlag to show the tour component for the first time."
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "unifiedSearch",
             "id": "def-public.DataViewPickerProps.textBasedLanguages",
             "type": "Array",
             "tags": [],
@@ -566,6 +620,155 @@
               }
             ],
             "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedSearch",
+        "id": "def-public.FilterItemsProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "FilterItemsProps",
+        "description": [
+          "\nProperties for the filter items component, which will render a single filter pill for every filter that is sent in\nas part of the `Filter[]` property."
+        ],
+        "path": "src/plugins/unified_search/public/filter_bar/filter_item/filter_items.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.FilterItemsProps.filters",
+            "type": "Array",
+            "tags": [],
+            "label": "filters",
+            "description": [
+              "Array of filters that will be rendered as filter pills"
+            ],
+            "signature": [
+              "Filter",
+              "[]"
+            ],
+            "path": "src/plugins/unified_search/public/filter_bar/filter_item/filter_items.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.FilterItemsProps.readOnly",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "readOnly",
+            "description": [
+              "Optional property that controls whether or not clicking the filter pill opens a popover *and* whether\nor not the `x` button to remove the filter is rendered."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/unified_search/public/filter_bar/filter_item/filter_items.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.FilterItemsProps.onFiltersUpdated",
+            "type": "Function",
+            "tags": [],
+            "label": "onFiltersUpdated",
+            "description": [
+              "If not read only, this is called whenever a filter is removed and/or updated"
+            ],
+            "signature": [
+              "((filters: ",
+              "Filter",
+              "[]) => void) | undefined"
+            ],
+            "path": "src/plugins/unified_search/public/filter_bar/filter_item/filter_items.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "unifiedSearch",
+                "id": "def-public.FilterItemsProps.onFiltersUpdated.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "filters",
+                "description": [],
+                "signature": [
+                  "Filter",
+                  "[]"
+                ],
+                "path": "src/plugins/unified_search/public/filter_bar/filter_item/filter_items.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.FilterItemsProps.indexPatterns",
+            "type": "Array",
+            "tags": [],
+            "label": "indexPatterns",
+            "description": [
+              "A list of all dataviews that are used for the filters"
+            ],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              "[]"
+            ],
+            "path": "src/plugins/unified_search/public/filter_bar/filter_item/filter_items.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.FilterItemsProps.intl",
+            "type": "Object",
+            "tags": [],
+            "label": "intl",
+            "description": [
+              "This is injected by the lazer loader"
+            ],
+            "signature": [
+              "ReactIntl.InjectedIntl"
+            ],
+            "path": "src/plugins/unified_search/public/filter_bar/filter_item/filter_items.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.FilterItemsProps.timeRangeForSuggestionsOverride",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "timeRangeForSuggestionsOverride",
+            "description": [
+              "Controls whether or not filter suggestions are influenced by the global time"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/unified_search/public/filter_bar/filter_item/filter_items.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.FilterItemsProps.hiddenPanelOptions",
+            "type": "Array",
+            "tags": [],
+            "label": "hiddenPanelOptions",
+            "description": [
+              "Array of panel options that controls the styling of each filter pill"
+            ],
+            "signature": [
+              "FilterPanelOption",
+              "[] | undefined"
+            ],
+            "path": "src/plugins/unified_search/public/filter_bar/filter_item/filter_items.tsx",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
