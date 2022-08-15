@@ -155,7 +155,6 @@ export const createCustomRuleEnabled = (
       failOnStatusCode: false,
     });
   } else if (rule.dataSource.type === 'dataView') {
-    console.log(rule.dataSource.dataView)
     cy.request({
       method: 'POST',
       url: 'api/detection_engine/rules',

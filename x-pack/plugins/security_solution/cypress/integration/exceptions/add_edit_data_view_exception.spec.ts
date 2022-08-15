@@ -46,9 +46,7 @@ describe('Adds rule exception using data views', () => {
     esArchiverLoad('exceptions');
     login();
 
-    postDataView('exceptions-*').then((response) => {
-      cy.wrap({ dataViewId: response.body.index_pattern.id }).as('postDataView');
-    });
+    postDataView('exceptions-*');
   });
 
   beforeEach(() => {
@@ -57,7 +55,7 @@ describe('Adds rule exception using data views', () => {
       {
         ...getNewRule(),
         customQuery: 'agent.name:*',
-        dataSource: { dataView: this.postDataView?.dataViewId, type: 'dataView' },
+        dataSource: { dataView: 'exceptions-*', type: 'dataView' },
       },
       'rule_testing',
       '1s'

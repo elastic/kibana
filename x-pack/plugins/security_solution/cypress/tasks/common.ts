@@ -180,11 +180,12 @@ export const deleteCases = () => {
 };
 
 export const postDataView = (dataSource: string) => {
-  return cy.request({
+  cy.request({
     method: 'POST',
     url: `/api/index_patterns/index_pattern`,
     body: {
       index_pattern: {
+        id: dataSource,
         fieldAttrs: '{}',
         title: dataSource,
         timeFieldName: '@timestamp',

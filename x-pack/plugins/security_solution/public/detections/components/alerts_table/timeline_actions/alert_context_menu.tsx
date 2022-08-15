@@ -328,15 +328,6 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
     }
   }, [data?.hits.hits, isLoadingAlertData]);
 
-  const memoDataViewId = useMemo(() => {
-    if (
-      enrichedAlert != null &&
-      enrichedAlert['kibana.alert.rule.parameters']?.data_view_id != null
-    ) {
-      return enrichedAlert['kibana.alert.rule.parameters'].data_view_id;
-    }
-  }, [enrichedAlert]);
-
   /**
    * This should be re-visited after UEBA work is merged
    */
@@ -349,6 +340,15 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
       return Array.isArray(enrichedAlert.signal.rule.index)
         ? enrichedAlert.signal.rule.index
         : [enrichedAlert.signal.rule.index];
+    }
+  }, [enrichedAlert]);
+
+  const memoDataViewId = useMemo(() => {
+    if (
+      enrichedAlert != null &&
+      enrichedAlert['kibana.alert.rule.parameters']?.data_view_id != null
+    ) {
+      return enrichedAlert['kibana.alert.rule.parameters'].data_view_id;
     }
   }, [enrichedAlert]);
 
