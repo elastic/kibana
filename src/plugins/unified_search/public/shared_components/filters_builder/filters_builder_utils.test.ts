@@ -6,13 +6,26 @@
  * Side Public License, v 1.
  */
 
-import { getFilterByPath } from './filters_builder_utils';
+import { buildEmptyFilter, Filter } from '@kbn/es-query';
+import { ConditionTypes } from './filters_builder_condition_types';
+import {
+  getFilterByPath,
+  getConditionalOperationType,
+  getPathInArray,
+  addFilter,
+  FilterItem,
+  removeFilter,
+} from './filters_builder_utils';
 
 import { getFiltersMock } from './__mock__/filters';
-describe('filters_builder_utils', () => {
-  describe('getFilterByPath', () => {
-    const filters = getFiltersMock();
 
+describe('filters_builder_utils', () => {
+  let filters: Filter[];
+  beforeAll(() => {
+    filters = getFiltersMock();
+  });
+
+  describe('getFilterByPath', () => {
     test('should return correct filterByPath', () => {
       expect(getFilterByPath(filters, '0')).toMatchInlineSnapshot(`
         Object {
@@ -154,4 +167,68 @@ describe('filters_builder_utils', () => {
       `);
     });
   });
+
+  describe('getConditionalOperationType', () => {
+    let filter: Filter;
+    let filtersWithOrRelationships: FilterItem;
+    let groupOfFilters: FilterItem;
+
+    beforeAll(() => {
+      filter = filters[0];
+      filtersWithOrRelationships = filters[1];
+      groupOfFilters = filters[1].meta.params;
+    });
+
+    test('should return correct ConditionalOperationType', () => {
+      expect(getConditionalOperationType(filter)).toBeUndefined();
+      expect(getConditionalOperationType(filtersWithOrRelationships)).toBe(ConditionTypes.OR);
+      expect(getConditionalOperationType(groupOfFilters)).toBe(ConditionTypes.AND);
+    });
+  });
+
+  describe('getPathInArray', () => {
+    test('should return correct path in array from path', () => {
+      expect(getPathInArray('0')).toStrictEqual([0]);
+      expect(getPathInArray('1.1')).toStrictEqual([1, 1]);
+      expect(getPathInArray('1.0.2')).toStrictEqual([1, 0, 2]);
+    });
+  });
+
+  describe('addFilter', () => {
+    const emptyFilter = buildEmptyFilter(false);
+
+    test('should add filter into filters after zero element', () => {
+      const enlargedFilters = addFilter(filters, emptyFilter, '0', ConditionTypes.AND);
+      expect(getFilterByPath(enlargedFilters, '1')).toMatchInlineSnapshot(`
+        Object {
+          "$state": Object {
+            "store": "appState",
+          },
+          "meta": Object {
+            "alias": null,
+            "disabled": false,
+            "index": undefined,
+            "negate": false,
+          },
+        }
+      `);
+    });
+  });
+
+  describe('removeFilter', () => {
+    test('should remove filter from filters', () => {
+      const filterBeforeRemoved = getFilterByPath(filters, '1.1');
+      const filtersAfterRemoveFilter = removeFilter(filters, '1.1');
+      const filterObtainedAfterFilterRemovalFromFilters = getFilterByPath(
+        filtersAfterRemoveFilter,
+        '1.1'
+      );
+
+      expect(filterBeforeRemoved).not.toBe(filterObtainedAfterFilterRemovalFromFilters);
+    });
+  });
+
+  describe('moveFilter', () => {});
+
+  describe('updateFilter', () => {});
 });

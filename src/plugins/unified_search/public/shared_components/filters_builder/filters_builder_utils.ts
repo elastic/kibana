@@ -18,7 +18,7 @@ import type { Operator } from '../filter_editor';
 const PATH_SEPARATOR = '.';
 
 /** @internal **/
-type FilterItem = Filter | FilterItem[];
+export type FilterItem = Filter | FilterItem[];
 
 /** to: @kbn/es-query **/
 const buildOrFilter = (filters: FilterItem) => {
