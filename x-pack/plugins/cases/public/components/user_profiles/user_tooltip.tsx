@@ -8,9 +8,10 @@
 import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
-import { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { UserProfileUserInfo, UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { CaseUserAvatar } from './user_avatar';
 import { getName } from './display_name';
+import * as i18n from './translations';
 
 const UserFullInformation: React.FC<{ profile?: UserProfileWithAvatar }> = React.memo(
   ({ profile }) => {
@@ -40,11 +41,19 @@ const UserFullInformation: React.FC<{ profile?: UserProfileWithAvatar }> = React
         className="eui-textBreakWord"
         data-test-subj="user-profile-tooltip-single-name"
       >
-        <strong>{getName(profile?.user)}</strong>
+        <strong>{getNameOrMissingText(profile?.user)}</strong>
       </EuiText>
     );
   }
 );
+
+const getNameOrMissingText = (user?: UserProfileUserInfo) => {
+  if (!user) {
+    return i18n.MISSING_PROFILE;
+  }
+
+  return getName(user);
+};
 
 UserFullInformation.displayName = 'UserFullInformation';
 

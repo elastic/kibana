@@ -129,10 +129,11 @@ const AssignUsersComponent: React.FC<AssignUsersProps> = ({
 
   const onUsersChange = useCallback(
     (users: UserProfileWithAvatar[]) => {
-      // TODO: ask Shani if this is what we want
+      // if users are selected then also include the users without profiles
       if (users.length > 0) {
         setSelectedAssignees([...users, ...assigneesWithoutProfiles]);
       } else {
+        // all users were deselected so lets remove the users without profiles as well
         setSelectedAssignees([]);
       }
     },

@@ -6,7 +6,7 @@
  */
 
 import { UserProfileUserInfo } from '@kbn/user-profile-components/target_types/user_profile';
-import * as i18n from '../../common/translations';
+import * as i18n from './translations';
 
 export const getName = (user?: UserProfileUserInfo): string => {
   if (!user) {

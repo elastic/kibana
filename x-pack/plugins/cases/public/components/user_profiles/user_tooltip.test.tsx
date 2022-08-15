@@ -177,7 +177,7 @@ describe('UserToolTip', () => {
     fireEvent.mouseOver(screen.getByText('case user'));
 
     await waitFor(() => screen.getByTestId('user-profile-tooltip'));
-    expect(screen.getByText('Unknown')).toBeInTheDocument();
+    expect(screen.getByText('Unable to find user profile')).toBeInTheDocument();
     expect(screen.getByText('U')).toBeInTheDocument();
   });
 });

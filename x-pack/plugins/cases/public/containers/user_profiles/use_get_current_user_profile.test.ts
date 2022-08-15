@@ -57,4 +57,35 @@ describe('useGetCurrentUserProfile', () => {
 
     expect(addError).toHaveBeenCalled();
   });
+
+  it('does not show a toast error message when a 404 error is returned', async () => {
+    const spyOnGetCurrentUserProfile = jest.spyOn(api, 'getCurrentUserProfile');
+
+    spyOnGetCurrentUserProfile.mockImplementation(() => {
+      throw new MockServerError('profile not found', 404);
+    });
+
+    const addError = jest.fn();
+    (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
+
+    const { result, waitFor } = renderHook(() => useGetCurrentUserProfile(), {
+      wrapper: appMockRender.AppWrapper,
+    });
+
+    await waitFor(() => result.current.isError);
+
+    expect(addError).not.toHaveBeenCalled();
+  });
 });
+
+class MockServerError extends Error {
+  public readonly body: {
+    statusCode: number;
+  };
+
+  constructor(message?: string, statusCode: number = 200) {
+    super(message);
+    this.name = this.constructor.name;
+    this.body = { statusCode };
+  }
+}

@@ -19,3 +19,7 @@ export const REMOVE_ASSIGNEE_ARIA_LABEL = i18n.translate(
     defaultMessage: 'click to remove assignee',
   }
 );
+
+export const MISSING_PROFILE = i18n.translate('xpack.cases.userProfile.missingProfile', {
+  defaultMessage: 'Unable to find user profile',
+});

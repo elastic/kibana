@@ -26,7 +26,9 @@ export const useGetCurrentUserProfile = () => {
     {
       retry: false,
       onError: (error: ServerError) => {
-        if (error.name !== 'AbortError') {
+        // Anonymous users (users authenticated via a proxy or configured in the kibana config) will result in a 404
+        // from the security plugin. If this happens we'll silence the error and operate without the current user profile
+        if (error.name !== 'AbortError' && error.body?.statusCode !== 404) {
           toasts.addError(
             error.body && error.body.message ? new Error(error.body.message) : error,
             {
