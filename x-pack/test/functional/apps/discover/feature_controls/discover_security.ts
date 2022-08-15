@@ -205,6 +205,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             expectSpaceSelector: false,
           }
         );
+
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.common.waitForTopNavToBeVisible();
       });
 
       after(async () => {
@@ -233,6 +236,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.waitForTopNavToBeVisible();
         await PageObjects.discover.selectIndexPattern('logstash-*');
         await setDiscoverTimeRange();
+        await PageObjects.common.waitForTopNavToBeVisible();
         await PageObjects.discover.clickFieldListItem('bytes');
         await PageObjects.discover.expectMissingFieldListItemVisualize('bytes');
       });
@@ -328,6 +332,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.common.waitForTopNavToBeVisible();
         await setDiscoverTimeRange();
+        await PageObjects.common.waitForTopNavToBeVisible();
         await PageObjects.discover.clickFieldListItem('bytes');
         await PageObjects.discover.expectMissingFieldListItemVisualize('bytes');
       });
