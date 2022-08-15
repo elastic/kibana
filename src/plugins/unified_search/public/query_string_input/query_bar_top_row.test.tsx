@@ -96,7 +96,9 @@ function wrapQueryBarTopRowInContext(testProps: any) {
 
   const services = {
     ...startMock,
-    autocomplete: autocompleteStartMock,
+    unifiedSearch: {
+      autocomplete: autocompleteStartMock,
+    },
     data: dataPluginMock.createStartContract(),
     appName: 'discover',
     storage: createMockStorage(),
