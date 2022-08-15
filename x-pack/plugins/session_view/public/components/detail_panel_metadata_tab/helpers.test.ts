@@ -48,7 +48,7 @@ const MOCK_ORCHESTRATOR_DATA: ProcessEventOrchestrator = {
     type: 'pod',
     ip: 'PLACEHOLDER_FOR_RESOURCE.IP',
     parent: {
-      type: 'PLACEHOLDER_FOR_PARENT.TYPE',
+      type: 'PLACEHOLDER_FOR_RESOURCE.PARENT.TYPE',
     },
   },
   namespace: 'kube-system',
@@ -165,7 +165,7 @@ describe('detail panel host tab helpers tests', () => {
         type: 'pod',
         ip: undefined,
         parent: {
-          type: 'PLACEHOLDER_FOR_PARENT.TYPE',
+          type: 'PLACEHOLDER_FOR_RESOURCE.PARENT.TYPE',
         },
       },
       namespace: 'kube-system',

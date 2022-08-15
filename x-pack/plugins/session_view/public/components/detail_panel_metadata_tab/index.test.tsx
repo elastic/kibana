@@ -41,9 +41,9 @@ const TEST_ORCHESTRATOR_RESOURCE_NAME = 'pdcsi-node-6hvsp';
 const TEST_ORCHESTRATOR_RESOURCE_TYPE = 'pod';
 const TEST_ORCHESTRATOR_RESOURCE_IP = 'PLACEHOLDER_FOR_RESOURCE.IP';
 const TEST_ORCHESTRATOR_NAMESPACE = 'kube-system';
-const TEST_ORCHESTRATOR_PARENT_TYPE = 'elastic-k8s-cluster';
+const TEST_ORCHESTRATOR_RESOURCE_PARENT_TYPE = 'elastic-k8s-cluster';
 const TEST_ORCHESTRATOR_CLUSTER_ID = 'PLACEHOLDER_FOR_CLUSTER.ID';
-const TEST_ORCHESTRATOR_CLUSTER_NAME = 'PLACEHOLDER_FOR_PARENT.TYPE';
+const TEST_ORCHESTRATOR_CLUSTER_NAME = 'PLACEHOLDER_FOR_CLUSTER.NAME';
 
 // Cloud data
 const TEST_CLOUD_INSTANCE_NAME = 'gke-cluster-1-paulo-default-pool-f0fea4ab-lhx2';
@@ -87,7 +87,7 @@ const TEST_ORCHESTRATOR: ProcessEventOrchestrator = {
     type: TEST_ORCHESTRATOR_RESOURCE_TYPE,
     ip: TEST_ORCHESTRATOR_RESOURCE_IP,
     parent: {
-      type: TEST_ORCHESTRATOR_PARENT_TYPE,
+      type: TEST_ORCHESTRATOR_RESOURCE_PARENT_TYPE,
     },
   },
   namespace: TEST_ORCHESTRATOR_NAMESPACE,
@@ -222,7 +222,7 @@ describe('DetailPanelMetadataTab component', () => {
       expect(renderResult.queryByText(TEST_ORCHESTRATOR_RESOURCE_TYPE)).toBeVisible();
       expect(renderResult.queryByText(TEST_ORCHESTRATOR_RESOURCE_IP)).toBeVisible();
       expect(renderResult.queryByText(TEST_ORCHESTRATOR_NAMESPACE)).toBeVisible();
-      expect(renderResult.queryByText(TEST_ORCHESTRATOR_PARENT_TYPE)).toBeVisible();
+      expect(renderResult.queryByText(TEST_ORCHESTRATOR_RESOURCE_PARENT_TYPE)).toBeVisible();
       expect(renderResult.queryByText(TEST_ORCHESTRATOR_CLUSTER_ID)).toBeVisible();
       expect(renderResult.queryByText(TEST_ORCHESTRATOR_CLUSTER_NAME)).toBeVisible();
 

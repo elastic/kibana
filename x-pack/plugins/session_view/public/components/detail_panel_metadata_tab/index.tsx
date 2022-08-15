@@ -434,6 +434,21 @@ export const DetailPanelMetadataTab = ({
                 ),
               },
               {
+                title: orchestratorData.resource.parent.type && (
+                  <DetailPanelListItem>resource.parent.type</DetailPanelListItem>
+                ),
+                description: (
+                  <DetailPanelCopy
+                    textToCopy={`orchestrator.resource.parent.type: "${orchestratorData.resource.parent.type}"`}
+                    tooltipContent={orchestratorData.resource.parent.type}
+                  >
+                    <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                      {orchestratorData.resource.parent.type}
+                    </EuiTextColor>
+                  </DetailPanelCopy>
+                ),
+              },
+              {
                 title: <DetailPanelListItem>namespace</DetailPanelListItem>,
                 description: (
                   <DetailPanelCopy
@@ -468,21 +483,6 @@ export const DetailPanelMetadataTab = ({
                   >
                     <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
                       {orchestratorData.cluster.name}
-                    </EuiTextColor>
-                  </DetailPanelCopy>
-                ),
-              },
-              {
-                title: orchestratorData.resource.parent.type && (
-                  <DetailPanelListItem>resource.parent.type</DetailPanelListItem>
-                ),
-                description: orchestratorData.resource.parent.type && (
-                  <DetailPanelCopy
-                    textToCopy={`orchestrator.resource.parent.type: "${orchestratorData.resource.parent.type}"`}
-                    tooltipContent={orchestratorData.resource.parent.type}
-                  >
-                    <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                      {orchestratorData.resource.parent.type}
                     </EuiTextColor>
                   </DetailPanelCopy>
                 ),
