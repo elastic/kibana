@@ -16,7 +16,6 @@ interface Props {
 }
 
 const stateToIconMap = {
-  [ACTION_STATES.FIRING]: <EuiIcon type="play" color="primary" />,
   [ACTION_STATES.OK]: <EuiIcon type="check" color="success" />,
   [ACTION_STATES.ACKNOWLEDGED]: <EuiIcon type="check" color="success" />,
   [ACTION_STATES.THROTTLED]: <EuiIcon type="clock" color="warning" />,

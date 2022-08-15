@@ -115,11 +115,11 @@ describe('<WatchStatusPage />', () => {
           ...watchHistory1,
           watchId: watch.id,
           watchStatus: {
-            state: WATCH_STATES.FIRING,
+            state: WATCH_STATES.ACTIVE,
             actionStatuses: [
               {
                 id: 'my_logging_action_1',
-                state: ACTION_STATES.FIRING,
+                state: ACTION_STATES.OK,
                 isAckable: true,
               },
             ],
@@ -207,7 +207,7 @@ describe('<WatchStatusPage />', () => {
 
         httpRequestsMockHelpers.setActivateWatchResponse(WATCH_ID, {
           watchStatus: {
-            state: WATCH_STATES.FIRING,
+            state: WATCH_STATES.ACTIVE,
             isActive: true,
           },
         });
@@ -249,7 +249,7 @@ describe('<WatchStatusPage />', () => {
         const { actions, table } = testBed;
         const watchHistoryItem = {
           watchStatus: {
-            state: WATCH_STATES.FIRING,
+            state: WATCH_STATES.ACTIVE,
             isActive: true,
             comment: 'Acked',
             actionStatuses: [
