@@ -17,12 +17,20 @@ import { unwrapValue } from '../../lib/unwrap_value';
 import { displayValue } from '../../lib/display_value';
 
 const mockIndicator = generateMockIndicator();
+const mockFieldTypesMap: { [id: string]: string } = {
+  '@timestamp': 'date',
+  'threat.feed.name': 'string',
+};
 
 describe('<IndicatorsFlyout />', () => {
   it('should render ioc id in title and first_seen in subtitle', () => {
     const { getByTestId } = render(
       <TestProvidersComponent>
-        <IndicatorsFlyout indicator={mockIndicator} closeFlyout={() => {}} />
+        <IndicatorsFlyout
+          indicator={mockIndicator}
+          fieldTypesMap={mockFieldTypesMap}
+          closeFlyout={() => {}}
+        />
       </TestProvidersComponent>
     );
 
@@ -41,7 +49,7 @@ describe('<IndicatorsFlyout />', () => {
   it(`should render ${EMPTY_VALUE} in on invalid indicator first_seen value`, () => {
     const { getByTestId } = render(
       <TestProvidersComponent>
-        <IndicatorsFlyout indicator={{ fields: {} }} closeFlyout={() => {}} />
+        <IndicatorsFlyout indicator={{ fields: {} }} fieldTypesMap={{}} closeFlyout={() => {}} />
       </TestProvidersComponent>
     );
 
@@ -54,6 +62,7 @@ describe('<IndicatorsFlyout />', () => {
       <TestProvidersComponent>
         <IndicatorsFlyout
           indicator={{ fields: { 'threat.indicator.first_seen': ['abc'] } }}
+          fieldTypesMap={mockFieldTypesMap}
           closeFlyout={() => {}}
         />
       </TestProvidersComponent>

@@ -12,6 +12,7 @@ export interface IndicatorsTableContextValue {
   expanded: Indicator | undefined;
   setExpanded: Dispatch<SetStateAction<Indicator | undefined>>;
   indicators: Indicator[];
+  fieldTypesMap: { [id: string]: string };
 }
 
 export const IndicatorsTableContext = createContext<IndicatorsTableContextValue | undefined>(
