@@ -90,7 +90,7 @@ export const EnablementEmptyState = () => {
             <h3>{labels.LEARN_MORE_LABEL}</h3>
           </EuiTitle>
           <EuiLink
-            href="https://docs.google.com/document/d/1hkzFibu9LggPWXQqfbAd0mMlV75wCME7_BebXlEH-oI"
+            href="https://www.elastic.co/guide/en/observability/current/uptime-set-up-choose-agent.html#private-locations"
             target="_blank"
           >
             {labels.DOCS_LABEL}
