@@ -48,7 +48,10 @@ export const EmptyLocations = ({
       footer={
         <EuiText size="s">
           {LEARN_MORE}{' '}
-          <EuiLink href="#" target="_blank">
+          <EuiLink
+            href="https://www.elastic.co/guide/en/observability/current/uptime-set-up-choose-agent.html#private-locations"
+            target="_blank"
+          >
             {READ_DOCS}
           </EuiLink>
         </EuiText>
