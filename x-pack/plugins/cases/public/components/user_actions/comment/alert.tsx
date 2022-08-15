@@ -71,7 +71,7 @@ const getSingleAlertUserAction = ({
       ),
       'data-test-subj': `user-action-alert-${userAction.type}-${userAction.action}-action-${userAction.actionId}`,
       timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
-      timelineIcon: 'bell',
+      timelineAvatar: 'bell',
       actions: (
         <EuiFlexGroup responsive={false}>
           <EuiFlexItem grow={false}>
@@ -128,7 +128,7 @@ const getMultipleAlertsUserAction = ({
       ),
       'data-test-subj': `user-action-alert-${userAction.type}-${userAction.action}-action-${userAction.actionId}`,
       timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
-      timelineIcon: 'bell',
+      timelineAvatar: 'bell',
       actions: (
         <EuiFlexGroup responsive={false}>
           <EuiFlexItem grow={false}>

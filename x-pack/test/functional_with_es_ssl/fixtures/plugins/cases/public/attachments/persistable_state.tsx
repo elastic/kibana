@@ -60,7 +60,7 @@ export const getPersistableStateAttachmentRegular = (
   displayName: 'Test',
   getAttachmentViewObject: () => ({
     event: 'added an embeddable',
-    timelineIcon: 'casesApp',
+    timelineAvatar: 'casesApp',
     actions: <AttachmentActions />,
     children: getLazyComponent(EmbeddableComponent),
   }),

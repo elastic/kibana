@@ -28,7 +28,7 @@ export const getExternalReferenceAttachmentRegular = (): ExternalReferenceAttach
   displayName: 'Test',
   getAttachmentViewObject: () => ({
     event: 'added a chart',
-    timelineIcon: 'casesApp',
+    timelineAvatar: 'casesApp',
     actions: <AttachmentActions />,
     children: AttachmentContentLazy,
   }),
