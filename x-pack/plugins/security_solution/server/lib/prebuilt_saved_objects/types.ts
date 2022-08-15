@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export type SavedObjectTemplate = 'hostRiskScoreDashboards';
+export type SavedObjectTemplate = 'hostRiskScoreDashboards' | 'userRiskScoreDashboards';
