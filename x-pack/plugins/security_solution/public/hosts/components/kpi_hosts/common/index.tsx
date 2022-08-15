@@ -39,6 +39,7 @@ interface KpiBaseComponentProps {
   setQuerySkip: (skip: boolean) => void;
 }
 
+// TODO: remove this file once all KPIs moved to lens Embeddables
 export const KpiBaseComponent = React.memo<KpiBaseComponentProps>(
   ({ fieldsMapping, data, id, loading = false, from, to, updateDateRange, setQuerySkip }) => {
     const statItemsProps: StatItemsProps[] = useKpiMatrixStatus(

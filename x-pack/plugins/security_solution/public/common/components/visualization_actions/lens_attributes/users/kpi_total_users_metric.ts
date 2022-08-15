@@ -19,7 +19,7 @@ export const kpiTotalUsersMetricLensAttributes: LensAttributes = {
               '3e51b035-872c-4b44-824b-fe069c222e91': {
                 dataType: 'number',
                 isBucketed: false,
-                label: 'Unique count of user.name',
+                label: '',
                 operationType: 'unique_count',
                 scale: 'ratio',
                 sourceField: 'user.name',

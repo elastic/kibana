@@ -6,15 +6,12 @@
  */
 
 import { euiPaletteColorBlind } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
-import { UsersQueries } from '../../../../../common/search_strategy/security_solution/users';
+import React from 'react';
 import type { StatItems } from '../../../../common/components/stat_items';
-import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
-import { KpiBaseComponentManage } from '../../../../hosts/components/kpi_hosts/common';
+import { KpiBaseComponentManage } from '../../../../hosts/components/kpi_hosts/common/kpi_embeddable_component';
 import { kpiTotalUsersMetricLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/users/kpi_total_users_metric';
 import { kpiTotalUsersAreaLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/users/kpi_total_users_area';
 import * as i18n from './translations';
-import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import type { UsersKpiProps } from '../types';
 
 const euiVisColorPalette = euiPaletteColorBlind();
@@ -40,55 +37,15 @@ export const fieldsMapping: Readonly<StatItems[]> = [
 
 const QUERY_ID = 'TotalUsersKpiQuery';
 
-const TotalUsersKpiComponent: React.FC<UsersKpiProps> = ({
-  filterQuery,
-  from,
-  indexNames,
-  to,
-  updateDateRange,
-  setQuery,
-  skip,
-}) => {
-  const { toggleStatus } = useQueryToggle(QUERY_ID);
-  const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
-  useEffect(() => {
-    setQuerySkip(skip || !toggleStatus);
-  }, [skip, toggleStatus]);
-  const { loading, result, search, refetch, inspect } =
-    useSearchStrategy<UsersQueries.kpiTotalUsers>({
-      factoryQueryType: UsersQueries.kpiTotalUsers,
-      initialResult: { users: 0, usersHistogram: [] },
-      errorMessage: i18n.ERROR_USERS_KPI,
-      abort: querySkip,
-    });
-
-  useEffect(() => {
-    if (!querySkip) {
-      search({
-        filterQuery,
-        defaultIndex: indexNames,
-        timerange: {
-          interval: '12h',
-          from,
-          to,
-        },
-      });
-    }
-  }, [search, from, to, filterQuery, indexNames, querySkip]);
-
+const TotalUsersKpiComponent: React.FC<UsersKpiProps> = ({ from, to, setQuery }) => {
   return (
     <KpiBaseComponentManage
-      data={result}
-      id={QUERY_ID}
-      inspect={inspect}
-      loading={loading}
       fieldsMapping={fieldsMapping}
       from={from}
+      id={QUERY_ID}
       to={to}
-      updateDateRange={updateDateRange}
-      refetch={refetch}
+      loading={false}
       setQuery={setQuery}
-      setQuerySkip={setQuerySkip}
     />
   );
 };

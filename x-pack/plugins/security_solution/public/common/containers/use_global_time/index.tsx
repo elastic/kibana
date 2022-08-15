@@ -22,8 +22,18 @@ export const useGlobalTime = (clearAllQuery: boolean = true) => {
   const [isInitializing, setIsInitializing] = useState(true);
 
   const setQuery = useCallback(
-    ({ id, inspect, loading, refetch }: SetQuery) =>
-      dispatch(inputsActions.setQuery({ inputId: 'global', id, inspect, loading, refetch })),
+    ({ id, inspect, loading, refetch, searchSessionId }: SetQuery) => {
+      dispatch(
+        inputsActions.setQuery({
+          inputId: 'global',
+          id,
+          inspect,
+          loading,
+          refetch,
+          searchSessionId,
+        })
+      );
+    },
     [dispatch]
   );
 

@@ -25,3 +25,13 @@ export interface VisualizationActionsProps {
   timerange: { from: string; to: string };
   title: React.ReactNode;
 }
+
+export interface LensEmbeddableComponentProps {
+  getLensAttributes?: GetLensAttributes;
+  height?: string;
+  id: string;
+  inputsModelId?: InputsModelId;
+  lensAttributes: LensAttributes;
+  stackByField?: string;
+  timerange: { from: string; to: string };
+}
