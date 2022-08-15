@@ -93,6 +93,9 @@ describe('getAggConfigFromEsAgg', () => {
       dropDownName: 'products.base_price.percentiles',
       field: 'products.base_price',
       parentAgg: result,
+      aggConfig: {
+        percents: '1,5,25,50,75,95,99',
+      },
     });
   });
 
