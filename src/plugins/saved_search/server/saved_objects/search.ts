@@ -54,8 +54,6 @@ export function getSavedSearchObjectType(
         timeRestore: { type: 'boolean', index: false, doc_values: false },
         timeRange: {
           dynamic: false,
-          index: false,
-          doc_values: false,
           properties: {
             from: { type: 'keyword', index: false, doc_values: false },
             to: { type: 'keyword', index: false, doc_values: false },
@@ -63,8 +61,6 @@ export function getSavedSearchObjectType(
         },
         refreshInterval: {
           dynamic: false,
-          index: false,
-          doc_values: false,
           properties: {
             pause: { type: 'boolean', index: false, doc_values: false },
             value: { type: 'integer', index: false, doc_values: false },
