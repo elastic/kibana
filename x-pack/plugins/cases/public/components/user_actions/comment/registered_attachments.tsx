@@ -90,7 +90,6 @@ export const createRegisteredAttachmentUserActionBuilder = <
             fullName={comment.createdBy.fullName}
           />
         ),
-        type: attachmentViewObject.type,
         className: `comment-${comment.type}-attachment-${attachmentTypeId}`,
         event: attachmentViewObject.event,
         'data-test-subj': `comment-${comment.type}-${attachmentTypeId}`,
