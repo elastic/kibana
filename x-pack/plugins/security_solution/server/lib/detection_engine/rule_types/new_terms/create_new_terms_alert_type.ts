@@ -28,10 +28,6 @@ import {
   buildRecentTermsAgg,
   buildNewTermsAgg,
 } from './build_new_terms_aggregation';
-import {
-  buildTimestampRuntimeMapping,
-  TIMESTAMP_RUNTIME_FIELD,
-} from './build_timestamp_runtime_mapping';
 import type { SignalSource } from '../../signals/types';
 import { validateImmutable, validateIndexPatterns } from '../utils';
 import { parseDateString, validateHistoryWindowStart } from './utils';
@@ -127,6 +123,7 @@ export const createNewTermsAlertType = (
           runtimeMappings,
           primaryTimestamp,
           secondaryTimestamp,
+          aggregatableTimestampField,
         },
         services,
         params,
@@ -171,18 +168,6 @@ export const createNewTermsAlertType = (
         searchDurations: [],
         searchErrors: [],
       };
-
-      // If we have a timestampOverride, we'll compute a runtime field that emits the override for each document if it exists,
-      // otherwise it emits @timestamp. If we don't have a timestamp override we don't want to pay the cost of using a
-      // runtime field, so we just use @timestamp directly.
-      const { timestampField, timestampRuntimeMappings } = params.timestampOverride
-        ? {
-            timestampField: TIMESTAMP_RUNTIME_FIELD,
-            timestampRuntimeMappings: buildTimestampRuntimeMapping({
-              timestampOverride: params.timestampOverride,
-            }),
-          }
-        : { timestampField: '@timestamp', timestampRuntimeMappings: undefined };
 
       // There are 2 conditions that mean we're finished: either there were still too many alerts to create
       // after deduplication and the array of alerts was truncated before being submitted to ES, or there were
@@ -246,14 +231,11 @@ export const createNewTermsAlertType = (
         } = await singleSearchAfter({
           aggregations: buildNewTermsAgg({
             newValueWindowStart: tuple.from,
-            timestampField,
+            timestampField: aggregatableTimestampField,
             field: params.newTermsFields[0],
             include: includeValues,
           }),
-          runtimeMappings: {
-            ...runtimeMappings,
-            ...timestampRuntimeMappings,
-          },
+          runtimeMappings,
           searchAfterSortIds: undefined,
           index: inputIndex,
           // For Phase 2, we expand the time range to aggregate over the history window
@@ -292,14 +274,11 @@ export const createNewTermsAlertType = (
             searchErrors: docFetchSearchErrors,
           } = await singleSearchAfter({
             aggregations: buildDocFetchAgg({
-              timestampField,
+              timestampField: aggregatableTimestampField,
               field: params.newTermsFields[0],
               include: actualNewTerms,
             }),
-            runtimeMappings: {
-              ...runtimeMappings,
-              ...timestampRuntimeMappings,
-            },
+            runtimeMappings,
             searchAfterSortIds: undefined,
             index: inputIndex,
             // For phase 3, we go back to aggregating only over the rule interval - excluding the history window
