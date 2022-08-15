@@ -16,6 +16,7 @@ import {
   noUpdateCasesPermissions,
 } from '../../../common/mock';
 import { AssignUsers, AssignUsersProps } from './assign_users';
+import { waitForEuiPopoverClose, waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 jest.mock('../../../containers/user_profiles/use_suggest_user_profiles');
 jest.mock('../../../containers/user_profiles/use_get_current_user_profile');
@@ -109,7 +110,7 @@ describe('AssignUsers', () => {
     expect(screen.queryByTestId('case-view-assignees-loading')).not.toBeInTheDocument();
   });
 
-  it('shows the popover when the pencil is clicked', () => {
+  it('shows the popover when the pencil is clicked', async () => {
     const props = {
       ...defaultProps,
       userProfiles: userProfilesMap,
@@ -117,11 +118,12 @@ describe('AssignUsers', () => {
     appMockRender.render(<AssignUsers {...props} />);
 
     fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
+    await waitForEuiPopoverOpen();
 
     expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
   });
 
-  it('shows the popover when the assign a user link is clicked', () => {
+  it('shows the popover when the assign a user link is clicked', async () => {
     const props = {
       ...defaultProps,
       userProfiles: userProfilesMap,
@@ -129,6 +131,7 @@ describe('AssignUsers', () => {
     appMockRender.render(<AssignUsers {...props} />);
 
     fireEvent.click(screen.getByText('Assign a user'));
+    await waitForEuiPopoverOpen();
 
     expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
   });
@@ -194,11 +197,13 @@ describe('AssignUsers', () => {
     appMockRender.render(<AssignUsers {...props} />);
 
     fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
+    await waitForEuiPopoverOpen();
 
     fireEvent.click(screen.getByText('Damaged Raccoon'));
 
     // close the popover
     fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
+    await waitForEuiPopoverClose();
 
     await waitFor(() => expect(onAssigneesChanged).toBeCalledTimes(1));
 
@@ -229,8 +234,11 @@ describe('AssignUsers', () => {
     appMockRender.render(<AssignUsers {...props} />);
 
     fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
+    await waitForEuiPopoverOpen();
+
     // close the popover
     fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
+    await waitForEuiPopoverClose();
 
     await waitFor(() => expect(onAssigneesChanged).toBeCalledTimes(0));
   });
@@ -283,11 +291,13 @@ describe('AssignUsers', () => {
     appMockRender.render(<AssignUsers {...props} />);
 
     fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
+    await waitForEuiPopoverOpen();
 
     fireEvent.click(screen.getByText('Damaged Raccoon'));
 
     // close the popover
     fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
+    await waitForEuiPopoverClose();
 
     await waitFor(() => expect(onAssigneesChanged).toBeCalledTimes(1));
 
@@ -324,11 +334,13 @@ describe('AssignUsers', () => {
     appMockRender.render(<AssignUsers {...props} />);
 
     fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
+    await waitForEuiPopoverOpen();
 
     fireEvent.click(screen.getByText('Damaged Raccoon'));
 
     // close the popover
     fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
+    await waitForEuiPopoverClose();
 
     await waitFor(() => expect(onAssigneesChanged).toBeCalledTimes(1));
 
