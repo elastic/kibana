@@ -120,7 +120,15 @@ class SavedObjectFinderUi extends React.Component<
 
   private debouncedFetch = debounce(async (query: Query) => {
     const metaDataMap = this.getSavedObjectMetaDataMap();
-    const { queryText, selectedTags } = this.props.savedObjectsManagement.parseQuery(query, []);
+    const { queryText, visibleTypes, selectedTags } = this.props.savedObjectsManagement.parseQuery(
+      query,
+      Object.values(metaDataMap).map((metadata) => ({
+        name: metadata.type,
+        namespaceType: 'single',
+        hidden: false,
+        displayName: metadata.name,
+      }))
+    );
 
     const fields = Object.values(metaDataMap)
       .map((metaData) => metaData.includeFields || [])
@@ -135,7 +143,7 @@ class SavedObjectFinderUi extends React.Component<
 
     const perPage = this.props.savedObjectsPlugin.settings.getListingLimit();
     const response = await this.props.savedObjects.client.find<FinderAttributes>({
-      type: Object.keys(metaDataMap),
+      type: visibleTypes ?? [],
       fields: [...new Set(fields)],
       search: queryText ? `${queryText}*` : undefined,
       page: 1,
@@ -332,7 +340,7 @@ class SavedObjectFinderUi extends React.Component<
       pageIndex: this.state.page,
       pageSize: this.state.perPage,
       totalItemCount: this.state.items.length,
-      pageSizeOptions: [5, 10, 20, 50],
+      pageSizeOptions: [5, 10, 15, 25],
       showPerPageOptions: !this.props.fixedPageSize,
     };
     const typeFilter: SearchFilterConfig = {
