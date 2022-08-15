@@ -6,7 +6,6 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import dateMath from '@elastic/datemath';
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { NEW_TERMS_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../common/constants';
@@ -35,6 +34,7 @@ import {
 } from './build_timestamp_runtime_mapping';
 import type { SignalSource } from '../../signals/types';
 import { validateImmutable, validateIndexPatterns } from '../utils';
+import { parseDateString, validateHistoryWindowStart } from './utils';
 
 interface BulkCreateResults {
   bulkCreateTimes: string[];
@@ -81,6 +81,10 @@ export const createNewTermsAlertType = (
           if (validated == null) {
             throw new Error('Validation of rule params failed');
           }
+          validateHistoryWindowStart({
+            historyWindowStart: validated.historyWindowStart,
+            from: validated.from,
+          });
           return validated;
         },
         /**
@@ -129,6 +133,13 @@ export const createNewTermsAlertType = (
         spaceId,
       } = execOptions;
 
+      // Validate the history window size compared to `from` at runtime as well as in the `validate`
+      // function because rule preview does not use the `validate` function defined on the rule type
+      validateHistoryWindowStart({
+        historyWindowStart: params.historyWindowStart,
+        from: params.from,
+      });
+
       const filter = await getFilter({
         filters: params.filters,
         index: inputIndex,
@@ -140,12 +151,11 @@ export const createNewTermsAlertType = (
         lists: exceptionItems,
       });
 
-      const parsedHistoryWindowSize = dateMath.parse(params.historyWindowStart, {
+      const parsedHistoryWindowSize = parseDateString({
+        date: params.historyWindowStart,
         forceNow: tuple.to.toDate(),
+        name: 'historyWindowStart',
       });
-      if (parsedHistoryWindowSize == null) {
-        throw Error(`Failed to parse 'historyWindowStart'`);
-      }
 
       let afterKey;
       let bulkCreateResults: BulkCreateResults = {
@@ -207,7 +217,7 @@ export const createNewTermsAlertType = (
         });
         const searchResultWithAggs = searchResult as RecentTermsAggResult;
         if (!searchResultWithAggs.aggregations) {
-          throw new Error('expected to find aggregations on search result');
+          throw new Error('Aggregations were missing on recent terms search result');
         }
         logger.debug(`Time spent on composite agg: ${searchDuration}`);
 
@@ -264,7 +274,7 @@ export const createNewTermsAlertType = (
 
         const pageSearchResultWithAggs = pageSearchResult as NewTermsAggResult;
         if (!pageSearchResultWithAggs.aggregations) {
-          throw new Error('expected to find aggregations on page search result');
+          throw new Error('Aggregations were missing on new terms search result');
         }
 
         // PHASE 3: For each term that is not in the history window, fetch the oldest document in
@@ -308,7 +318,7 @@ export const createNewTermsAlertType = (
           const docFetchResultWithAggs = docFetchSearchResult as DocFetchAggResult;
 
           if (!docFetchResultWithAggs.aggregations) {
-            throw new Error('expected to find aggregations on page search result');
+            throw new Error('Aggregations were missing on document fetch search result');
           }
 
           const eventsAndTerms: Array<{

@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 import { useKibana, useGetUserCasesPermissions } from '../../../../common/lib/kibana';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
@@ -68,6 +69,8 @@ describe('AddToCaseButton', () => {
       </TestProviders>
     );
     userEvent.click(screen.getByTestId('attach-timeline-case-button'));
+    await waitForEuiPopoverOpen();
+
     userEvent.click(screen.getByTestId('attach-timeline-existing-case'));
 
     expect(navigateToApp).toHaveBeenCalledWith('securitySolutionUI', {
@@ -90,6 +93,8 @@ describe('AddToCaseButton', () => {
       </TestProviders>
     );
     userEvent.click(screen.getByTestId('attach-timeline-case-button'));
+    await waitForEuiPopoverOpen();
+
     userEvent.click(screen.getByTestId('attach-timeline-existing-case'));
 
     expect(navigateToApp).toHaveBeenCalledWith('securitySolutionUI', {
