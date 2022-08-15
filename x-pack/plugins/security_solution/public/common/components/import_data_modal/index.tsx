@@ -76,7 +76,7 @@ export const ImportDataModalComponent = ({
     closeModal();
     setOverwrite(false);
     setOverwriteExceptions(false);
-  }, [setIsImporting, setSelectedFiles, closeModal]);
+  }, [setIsImporting, setSelectedFiles, closeModal, setOverwrite, setOverwriteExceptions]);
 
   const importDataCallback = useCallback(async () => {
     if (selectedFiles != null) {
