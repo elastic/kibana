@@ -68,7 +68,7 @@ describe('getAggConfigFromEsAgg', () => {
     });
   });
 
-  test('should resolve percentiles agg in sub-aggregations', () => {
+  test('should resolve percentiles and terms agg in sub-aggregations', () => {
     const esConfig = {
       filter: {
         exists: {
@@ -80,6 +80,12 @@ describe('getAggConfigFromEsAgg', () => {
           percentiles: {
             field: 'products.base_price',
             percents: [1, 5, 25, 50, 75, 95, 99],
+          },
+        },
+        check_terms: {
+          terms: {
+            field: 'products.base_price',
+            size: 3,
           },
         },
       },
@@ -95,6 +101,17 @@ describe('getAggConfigFromEsAgg', () => {
       parentAgg: result,
       aggConfig: {
         percents: '1,5,25,50,75,95,99',
+      },
+    });
+
+    expect(result.subAggs!.check_terms).toMatchObject({
+      agg: 'terms',
+      aggName: 'check_terms',
+      dropDownName: 'check_terms',
+      field: 'products.base_price',
+      parentAgg: result,
+      aggConfig: {
+        size: 3,
       },
     });
   });
