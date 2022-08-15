@@ -40,8 +40,8 @@ import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
 import { prepareEcsFieldsToValidate } from '../../common/helpers';
-import ECSSchema from '../../common/schemas/ecs/v8.2.0.json';
-import osquerySchema from '../../common/schemas/osquery/v5.2.2.json';
+import ECSSchema from '../../common/schemas/ecs/v8.4.0.json';
+import osquerySchema from '../../common/schemas/osquery/v5.4.0.json';
 
 import { FieldIcon } from '../../common/lib/kibana';
 import type { FieldHook, ValidationFuncArg, ArrayItem, FormArrayField } from '../../shared_imports';

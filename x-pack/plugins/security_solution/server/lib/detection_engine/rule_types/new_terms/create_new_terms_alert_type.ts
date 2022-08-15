@@ -6,7 +6,6 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import dateMath from '@elastic/datemath';
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { NEW_TERMS_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../common/constants';
@@ -29,12 +28,9 @@ import {
   buildRecentTermsAgg,
   buildNewTermsAgg,
 } from './build_new_terms_aggregation';
-import {
-  buildTimestampRuntimeMapping,
-  TIMESTAMP_RUNTIME_FIELD,
-} from './build_timestamp_runtime_mapping';
 import type { SignalSource } from '../../signals/types';
 import { validateImmutable, validateIndexPatterns } from '../utils';
+import { parseDateString, validateHistoryWindowStart } from './utils';
 
 interface BulkCreateResults {
   bulkCreateTimes: string[];
@@ -81,6 +77,10 @@ export const createNewTermsAlertType = (
           if (validated == null) {
             throw new Error('Validation of rule params failed');
           }
+          validateHistoryWindowStart({
+            historyWindowStart: validated.historyWindowStart,
+            from: validated.from,
+          });
           return validated;
         },
         /**
@@ -123,11 +123,19 @@ export const createNewTermsAlertType = (
           runtimeMappings,
           primaryTimestamp,
           secondaryTimestamp,
+          aggregatableTimestampField,
         },
         services,
         params,
         spaceId,
       } = execOptions;
+
+      // Validate the history window size compared to `from` at runtime as well as in the `validate`
+      // function because rule preview does not use the `validate` function defined on the rule type
+      validateHistoryWindowStart({
+        historyWindowStart: params.historyWindowStart,
+        from: params.from,
+      });
 
       const filter = await getFilter({
         filters: params.filters,
@@ -140,12 +148,11 @@ export const createNewTermsAlertType = (
         lists: exceptionItems,
       });
 
-      const parsedHistoryWindowSize = dateMath.parse(params.historyWindowStart, {
+      const parsedHistoryWindowSize = parseDateString({
+        date: params.historyWindowStart,
         forceNow: tuple.to.toDate(),
+        name: 'historyWindowStart',
       });
-      if (parsedHistoryWindowSize == null) {
-        throw Error(`Failed to parse 'historyWindowStart'`);
-      }
 
       let afterKey;
       let bulkCreateResults: BulkCreateResults = {
@@ -161,18 +168,6 @@ export const createNewTermsAlertType = (
         searchDurations: [],
         searchErrors: [],
       };
-
-      // If we have a timestampOverride, we'll compute a runtime field that emits the override for each document if it exists,
-      // otherwise it emits @timestamp. If we don't have a timestamp override we don't want to pay the cost of using a
-      // runtime field, so we just use @timestamp directly.
-      const { timestampField, timestampRuntimeMappings } = params.timestampOverride
-        ? {
-            timestampField: TIMESTAMP_RUNTIME_FIELD,
-            timestampRuntimeMappings: buildTimestampRuntimeMapping({
-              timestampOverride: params.timestampOverride,
-            }),
-          }
-        : { timestampField: '@timestamp', timestampRuntimeMappings: undefined };
 
       // There are 2 conditions that mean we're finished: either there were still too many alerts to create
       // after deduplication and the array of alerts was truncated before being submitted to ES, or there were
@@ -236,14 +231,11 @@ export const createNewTermsAlertType = (
         } = await singleSearchAfter({
           aggregations: buildNewTermsAgg({
             newValueWindowStart: tuple.from,
-            timestampField,
+            timestampField: aggregatableTimestampField,
             field: params.newTermsFields[0],
             include: includeValues,
           }),
-          runtimeMappings: {
-            ...runtimeMappings,
-            ...timestampRuntimeMappings,
-          },
+          runtimeMappings,
           searchAfterSortIds: undefined,
           index: inputIndex,
           // For Phase 2, we expand the time range to aggregate over the history window
@@ -282,14 +274,11 @@ export const createNewTermsAlertType = (
             searchErrors: docFetchSearchErrors,
           } = await singleSearchAfter({
             aggregations: buildDocFetchAgg({
-              timestampField,
+              timestampField: aggregatableTimestampField,
               field: params.newTermsFields[0],
               include: actualNewTerms,
             }),
-            runtimeMappings: {
-              ...runtimeMappings,
-              ...timestampRuntimeMappings,
-            },
+            runtimeMappings,
             searchAfterSortIds: undefined,
             index: inputIndex,
             // For phase 3, we go back to aggregating only over the rule interval - excluding the history window

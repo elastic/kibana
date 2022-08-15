@@ -157,7 +157,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const title = '93.28.27.24';
       await clickMetric(title);
 
-      retry.try(async () => {
+      await retry.try(async () => {
         const labels = await filterBar.getFiltersLabel();
         expect(labels.length).to.be(1);
         expect(labels[0]).to.be(`ip: ${title}`);
@@ -173,6 +173,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
 
       const colorPicker = await testSubjects.find('euiColorPickerAnchor');
+
+      colorPicker.clearValue();
       await colorPicker.type('#000000');
 
       await PageObjects.lens.waitForVisualization('mtrVis');
