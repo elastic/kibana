@@ -15,7 +15,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
 
   // FLAKY: https://github.com/elastic/kibana/issues/135508
-  describe.skip('Dashboard controls a11y tests', () => {
+  // trying this on flaky test runner
+  describe('Dashboard controls a11y tests', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
