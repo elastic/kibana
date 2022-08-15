@@ -76,16 +76,11 @@ export const fetchIndices = async (
     index: indexPattern,
   });
 
-  // Index names that either themselves or one of their aliases match with the alwaysShowSearchPattern
+  // Index names that with one of their aliases match with the alwaysShowSearchPattern
   const alwaysShowPatternMatches = new Set<string>();
 
   const indexAndAliasNames = Object.keys(totalIndices).reduce((accum, indexName) => {
     accum.push(indexName);
-
-    // Add indexName to the set if it matches the pattern
-    if (alwaysShowSearchPattern && indexName.startsWith(alwaysShowSearchPattern)) {
-      alwaysShowPatternMatches.add(indexName);
-    }
 
     if (includeAliases) {
       const aliases = Object.keys(totalIndices[indexName].aliases!);
@@ -138,16 +133,6 @@ export const fetchIndices = async (
         })
         .flatMap(({ name, aliases, ...indexData }) => {
           const indicesAndAliases = [] as ElasticsearchIndexWithPrivileges[];
-          if (name.startsWith(alwaysShowSearchPattern)) {
-            // Add index if it matches.
-            indicesAndAliases.push({
-              alias: false,
-              count: indexCounts[name] ?? 0,
-              name,
-              privileges: { manage: false, read: false, ...indexPrivileges[name] },
-              ...indexData,
-            });
-          }
 
           if (includeAliases) {
             aliases.forEach((alias) => {

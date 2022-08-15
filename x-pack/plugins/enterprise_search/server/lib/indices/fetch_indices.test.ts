@@ -398,7 +398,6 @@ describe('fetchIndices lib function', () => {
           'alias-search-prefixed-regular-index',
           'search-alias-search-prefixed-regular-index',
           'search-alias-hidden-index',
-          'search-prefixed-hidden-index',
           'search-alias-search-prefixed-hidden-index',
         ].map(getIndexReturnValue)
       );
