@@ -27,19 +27,19 @@ export const WATCH_STATE_COMMENTS: { [key: string]: string } = {
   PARTIALLY_ACKNOWLEDGED: i18n.translate(
     'xpack.watcher.constants.watchStateComments.partiallyAcknowledgedStateCommentText',
     {
-      defaultMessage: 'Partially acked',
+      defaultMessage: 'Partially acknowledged',
     }
   ),
 
   ACKNOWLEDGED: i18n.translate(
     'xpack.watcher.constants.watchStateComments.acknowledgedStateCommentText',
     {
-      defaultMessage: 'Acked',
+      defaultMessage: 'Acknowledged',
     }
   ),
 
   IS_ACKABLE: i18n.translate('xpack.watcher.constants.watchStateComments.ackableStateCommentText', {
-    defaultMessage: 'Ackable',
+    defaultMessage: 'Acknowledgeable',
   }),
 
   FAILING: i18n.translate(

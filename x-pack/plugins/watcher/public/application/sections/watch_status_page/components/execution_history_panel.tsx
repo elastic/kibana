@@ -143,7 +143,7 @@ export const ExecutionHistoryPanel = () => {
           content={i18n.translate(
             'xpack.watcher.sections.watchHistory.watchTable.stateHeader.tooltipText',
             {
-              defaultMessage: 'Active or error state',
+              defaultMessage: 'Active or error state.',
             }
           )}
         >
@@ -166,7 +166,7 @@ export const ExecutionHistoryPanel = () => {
           content={i18n.translate(
             'xpack.watcher.sections.watchHistory.watchTable.metConditionHeader.tooltipText',
             {
-              defaultMessage: `Whether the watch's condition was met and its actions were executed`,
+              defaultMessage: 'Whether the condition was met and action taken.',
             }
           )}
         >
@@ -199,7 +199,7 @@ export const ExecutionHistoryPanel = () => {
             'xpack.watcher.sections.watchHistory.watchTable.commentHeader.tooltipText',
             {
               defaultMessage:
-                'Information about whether the watch was throttled, acknowledged, or failed to execute',
+                'Whether the action was throttled, acknowledged, acknowledgeable, or failed to execute.',
             }
           )}
         >
@@ -275,7 +275,7 @@ export const ExecutionHistoryPanel = () => {
               content={i18n.translate(
                 'xpack.watcher.sections.watchHistory.watchActionStatusTable.state.tooltipText',
                 {
-                  defaultMessage: 'OK, acked, throttled, or error state',
+                  defaultMessage: 'OK, acknowledged, throttled, or error.',
                 }
               )}
             >

@@ -83,7 +83,7 @@ export const ActionStatusesPanel = () => {
           content={i18n.translate(
             'xpack.watcher.sections.watchDetail.watchTable.stateHeader.tooltipText',
             {
-              defaultMessage: 'OK, acked, throttled, or error state',
+              defaultMessage: 'OK, acknowledged, throttled, or error.',
             }
           )}
         >
@@ -106,7 +106,7 @@ export const ActionStatusesPanel = () => {
           content={i18n.translate(
             'xpack.watcher.sections.watchHistory.watchActionStatusTable.lastExecuted.tooltipText',
             {
-              defaultMessage: `When this action was last executed`,
+              defaultMessage: `The last time this action was executed.`,
             }
           )}
         >

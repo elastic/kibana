@@ -281,7 +281,7 @@ export const WatchListPage = () => {
             content={i18n.translate(
               'xpack.watcher.sections.watchList.watchTable.stateHeader.tooltipText',
               {
-                defaultMessage: 'Active, inactive, or error state',
+                defaultMessage: 'Active, inactive, or error.',
               }
             )}
           >
@@ -304,7 +304,7 @@ export const WatchListPage = () => {
             content={i18n.translate(
               'xpack.watcher.sections.watchList.watchTable.lastFiredHeader.tooltipText',
               {
-                defaultMessage: `The most recent time this watch's condition was met and its actions were executed`,
+                defaultMessage: `The last time the condition was met and action taken.`,
               }
             )}
           >
@@ -330,7 +330,7 @@ export const WatchListPage = () => {
             content={i18n.translate(
               'xpack.watcher.sections.watchList.watchTable.lastTriggeredHeader.tooltipText',
               {
-                defaultMessage: `The most recent time this watch's condition was checked`,
+                defaultMessage: `The last time the condition was checked.`,
               }
             )}
           >
@@ -357,7 +357,7 @@ export const WatchListPage = () => {
               'xpack.watcher.sections.watchList.watchTable.commentHeader.tooltipText',
               {
                 defaultMessage:
-                  'Information about whether the watch is throttled, acknowledged, or has failed to execute',
+                  'Whether any actions are acknowledgeable or have been acknowledged, throttled, or failed to execute.',
               }
             )}
           >

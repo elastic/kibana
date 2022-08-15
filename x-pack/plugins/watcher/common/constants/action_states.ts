@@ -15,7 +15,7 @@ export const ACTION_STATES: { [key: string]: string } = {
 
   // Action has been acknowledged by user
   ACKNOWLEDGED: i18n.translate('xpack.watcher.constants.actionStates.acknowledgedStateText', {
-    defaultMessage: 'Acked',
+    defaultMessage: 'Acknowledged',
   }),
 
   // Action has been throttled (time-based) by the system
