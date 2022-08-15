@@ -37,7 +37,6 @@ import { i18n } from '@kbn/i18n';
 import { BatchedFunc, BfetchPublicSetup, DISABLE_BFETCH } from '@kbn/bfetch-plugin/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { AbortError, KibanaServerError } from '@kbn/kibana-utils-plugin/public';
-import { ResponseWarning } from '@kbn/inspector-plugin/common';
 import {
   ENHANCED_ES_SEARCH_STRATEGY,
   IAsyncSearchOptions,
@@ -462,10 +461,6 @@ export class SearchInterceptor {
       this.showTimeoutErrorToast(e, sessionId);
     }
   };
-
-  public showWarning(warning: ResponseWarning) {
-    this.deps.toasts.addWarning(warning);
-  }
 
   public showError(e: Error) {
     if (e instanceof AbortError || e instanceof SearchTimeoutError) {

@@ -81,6 +81,24 @@ export interface IKibanaSearchResponse<RawResponse = any> {
   rawResponse: RawResponse;
 }
 
+/**
+ * The format of warning messages which may be preset in search response body (shard failures, timeouts).
+ */
+export interface SearchResponseWarning {
+  /**
+   * Title for the heading of the warning toast notification
+   */
+  title?: string;
+  /**
+   * Text for the body of the warning toast notification
+   */
+  text?: string;
+  /**
+   * data-test-subj for testing the warning toast notification
+   */
+  ['data-test-subj']?: string;
+}
+
 export interface IKibanaSearchRequest<Params = any> {
   /**
    * An id can be used to uniquely identify this request.

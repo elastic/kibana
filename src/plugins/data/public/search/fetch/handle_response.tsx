@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { IKibanaSearchResponse, SearchSourceSearchOptions } from '../../../common';
-import { ShardFailureOpenModalButton } from '../../shard_failure_modal';
-import { getNotifications } from '../../services';
+import React from 'react';
 import type { SearchRequest } from '..';
+import { IKibanaSearchResponse, SearchSourceSearchOptions } from '../../../common';
+import { getNotifications } from '../../services';
+import { ShardFailureOpenModalButton } from '../../shard_failure_modal';
+import { extractWarnings } from './extract_warnings';
 
 export function handleResponse(
   request: SearchRequest,
@@ -23,33 +23,17 @@ export function handleResponse(
   theme: ThemeServiceStart
 ) {
   const { rawResponse } = response;
+  const { timedOut, shardFailures } = extractWarnings(rawResponse);
 
-  if (rawResponse.timed_out) {
-    getNotifications().toasts.addWarning({
-      title: i18n.translate('data.search.searchSource.fetch.requestTimedOutNotificationMessage', {
-        defaultMessage: 'Data might be incomplete because your request timed out',
-      }),
-    });
+  if (timedOut) {
+    getNotifications().toasts.addWarning(timedOut.title!);
   }
 
-  if (rawResponse._shards && rawResponse._shards.failed && !disableShardFailureWarning) {
-    const title = i18n.translate('data.search.searchSource.fetch.shardsFailedNotificationMessage', {
-      defaultMessage: '{shardsFailed} of {shardsTotal} shards failed',
-      values: {
-        shardsFailed: rawResponse._shards.failed,
-        shardsTotal: rawResponse._shards.total,
-      },
-    });
-    const description = i18n.translate(
-      'data.search.searchSource.fetch.shardsFailedNotificationDescription',
-      {
-        defaultMessage: 'The data you are seeing might be incomplete or wrong.',
-      }
-    );
-
+  if (shardFailures && !disableShardFailureWarning) {
+    const title = shardFailures.title!;
     const text = toMountPoint(
       <>
-        {description}
+        {shardFailures.text}
         <EuiSpacer size="s" />
         <ShardFailureOpenModalButton
           request={request.body}

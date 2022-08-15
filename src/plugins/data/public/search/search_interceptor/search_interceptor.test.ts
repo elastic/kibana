@@ -6,23 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { BfetchPublicSetup } from '@kbn/bfetch-plugin/public';
-import { bfetchPluginMock } from '@kbn/bfetch-plugin/public/mocks';
+import type { MockedKeys } from '@kbn/utility-types-jest';
 import { CoreSetup, CoreStart } from '@kbn/core/public';
 import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
-import { ResponseWarning } from '@kbn/inspector-plugin/common';
-import { AbortError } from '@kbn/kibana-utils-plugin/public';
-import type { MockedKeys } from '@kbn/utility-types-jest';
-import { BehaviorSubject } from 'rxjs';
-import { ISessionService, SearchSessionState } from '..';
-import { UI_SETTINGS } from '../../../common';
 import { IEsSearchRequest } from '../../../common/search';
-import * as resourceNotFoundException from '../../../common/search/test_data/resource_not_found_exception.json';
-import * as searchPhaseException from '../../../common/search/test_data/search_phase_execution_exception.json';
-import { dataPluginMock } from '../../mocks';
-import { EsError, PainlessError, SearchTimeoutError, TimeoutErrorMode } from '../errors';
-import { SearchSessionIncompleteWarning } from '../errors/search_session_incomplete_warning';
 import { SearchInterceptor } from './search_interceptor';
+import { AbortError } from '@kbn/kibana-utils-plugin/public';
+import { SearchTimeoutError, PainlessError, TimeoutErrorMode, EsError } from '../errors';
+import { ISessionService, SearchSessionState } from '..';
+import { bfetchPluginMock } from '@kbn/bfetch-plugin/public/mocks';
+import { BfetchPublicSetup } from '@kbn/bfetch-plugin/public';
+
+import * as searchPhaseException from '../../../common/search/test_data/search_phase_execution_exception.json';
+import * as resourceNotFoundException from '../../../common/search/test_data/resource_not_found_exception.json';
+import { BehaviorSubject } from 'rxjs';
+import { dataPluginMock } from '../../mocks';
+import { UI_SETTINGS } from '../../../common';
 
 jest.mock('./utils', () => ({
   createRequestHash: jest.fn().mockImplementation((input) => {
@@ -33,6 +32,8 @@ jest.mock('./utils', () => ({
 jest.mock('../errors/search_session_incomplete_warning', () => ({
   SearchSessionIncompleteWarning: jest.fn(),
 }));
+
+import { SearchSessionIncompleteWarning } from '../errors/search_session_incomplete_warning';
 
 let searchInterceptor: SearchInterceptor;
 let mockCoreSetup: MockedKeys<CoreSetup>;
@@ -153,22 +154,6 @@ describe('SearchInterceptor', () => {
       searchInterceptor.showError(new Error('Oopsy'));
       expect(mockCoreSetup.notifications.toasts.addDanger).not.toBeCalled();
       expect(mockCoreSetup.notifications.toasts.addError).toBeCalledTimes(1);
-    });
-  });
-
-  describe('showWarning', () => {
-    test('Renders a ResponseWarning', () => {
-      const warning: ResponseWarning = {
-        title: 'this is a test warning',
-        text: 'this is a test warning message',
-      };
-      searchInterceptor.showWarning(warning);
-      expect(mockCoreSetup.notifications.toasts.addError).not.toBeCalled();
-      expect(mockCoreSetup.notifications.toasts.addWarning).toBeCalledTimes(1);
-      expect(mockCoreSetup.notifications.toasts.addWarning).toBeCalledWith({
-        text: 'this is a test warning message',
-        title: 'this is a test warning',
-      });
     });
   });
 

@@ -17,7 +17,6 @@ import {
 import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { ResponseWarning } from '@kbn/inspector-plugin/common';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
@@ -68,7 +67,7 @@ import { AggsService } from './aggs';
 import { createUsageCollector, SearchUsageCollector } from './collectors';
 import { getEql, getEsaggs, getEsdsl, getEssql } from './expressions';
 import { getKibanaContext } from './expressions/kibana_context';
-import { handleResponse } from './fetch';
+import { extractWarnings, handleResponse } from './fetch';
 import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
 import { ISessionsClient, ISessionService, SessionsClient, SessionService } from './session';
 import { registerSearchSessionsMgmt } from './session/sessions_mgmt';
@@ -267,14 +266,26 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     return {
       aggs,
       search,
-      showError: (e: Error) => {
+      showError: (e) => {
         this.searchInterceptor.showError(e);
       },
-      showWarnings: (warnings: ResponseWarning[]) => {
-        for (const warning of warnings) {
-          this.searchInterceptor.showWarning(warning);
-        }
-        return true;
+      showWarnings: (inspector, cb) => {
+        inspector.adapter?.getRequests().map((req) => {
+          let handled = false;
+          if (cb != null) {
+            // use the callback to handle warnings from the request
+            handled = cb(extractWarnings(req.json));
+          }
+
+          if (!handled) {
+            handleResponse(
+              { body: req.json },
+              (req.response?.json ?? {}) as IKibanaSearchResponse<unknown>,
+              { disableShardFailureWarning: false },
+              theme
+            );
+          }
+        });
       },
       session: this.sessionService,
       sessionsClient: this.sessionsClient,

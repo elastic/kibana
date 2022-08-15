@@ -39,7 +39,6 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { ResponseWarning } from '@kbn/inspector-plugin/common';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
@@ -108,7 +107,6 @@ export const SearchExamplesApp = ({
   const [currentAbortController, setAbortController] = useState<AbortController>();
   const [rawResponse, setRawResponse] = useState<Record<string, any>>({});
   const [selectedTab, setSelectedTab] = useState(0);
-  const [searchSourceWarnings, setSearchSourceWarnings] = useState<ResponseWarning[] | undefined>();
 
   function setResponse(response: IKibanaSearchResponse) {
     setRawResponse(response.rawResponse);
@@ -257,11 +255,7 @@ export const SearchExamplesApp = ({
       });
   };
 
-  const doSearchSourceSearch = async (
-    otherBucket: boolean,
-    addWarning = false,
-    warningsShown = true
-  ) => {
+  const doSearchSourceSearch = async (otherBucket: boolean, warningsShown = true) => {
     if (!dataView) return;
 
     const query = data.query.queryString.getQuery();
@@ -269,23 +263,6 @@ export const SearchExamplesApp = ({
     const timefilter = data.query.timefilter.timefilter.createFilter(dataView);
     if (timefilter) {
       filters.push(timefilter);
-    }
-    if (addWarning) {
-      // use a special ES query type called "error_query" for debugging
-      filters.push({
-        meta: { index: dataView.title, params: {} },
-        query: {
-          bool: {
-            must: [
-              {
-                error_query: {
-                  indices: [{ name: dataView.title, error_type: 'warning', message: 'Watch out!' }],
-                },
-              },
-            ],
-          },
-        },
-      });
     }
 
     try {
@@ -318,7 +295,7 @@ export const SearchExamplesApp = ({
       setRequest(searchSource.getSearchRequestBody());
       const abortController = new AbortController();
       const inspector: IInspectorInfo = {
-        adapter: new RequestAdapter({ handleWarnings: data.search.showWarnings }),
+        adapter: new RequestAdapter(),
         title: 'Example App Inspector!',
         id: 'greatest-example-app-inspector',
         description: 'Use the `description` field for more info about the inspector.',
@@ -334,10 +311,16 @@ export const SearchExamplesApp = ({
       );
       setRawResponse(result.rawResponse);
 
-      inspector.adapter?.handleWarnings((warnings) => {
-        setSearchSourceWarnings(warnings);
-        // return "true" if the warnings were handled here, so they're not shown automatically
-        return !warningsShown;
+      /* Here is an example of using showWarnings on the search service, using an optional callback to
+       * intercept the warnings before notification warnings are shown.
+       *
+       * Suppressing the shard failure warning notification from appearing by default requires setting
+       * { disableShardFailureWarning: true } in the SearchSourceSearchOptions passed to $fetch
+       */
+      data.search.showWarnings(inspector, (warnings) => {
+        console.log('time outs:', warnings.timedOut);
+        console.log('shard failures:', warnings.shardFailures);
+        return false; // optional: set to `true` to prevent fetch from following the callback with default behavior
       });
 
       const message = <EuiText>Searched {result.rawResponse.hits.total} documents.</EuiText>;
@@ -356,14 +339,6 @@ export const SearchExamplesApp = ({
     } finally {
       setIsLoading(false);
     }
-  };
-
-  // click handler for "See warning notifications"
-  const showSearchSourceSearchWarnings = () => {
-    if (searchSourceWarnings) {
-      data.search.showWarnings(searchSourceWarnings);
-    }
-    setSearchSourceWarnings([]);
   };
 
   const onClickHandler = () => {
@@ -451,16 +426,8 @@ export const SearchExamplesApp = ({
     }
   };
 
-  const onSearchSourceClickHandler = ({
-    withOtherBucket,
-    addWarning,
-    withWarningsShown,
-  }: {
-    withOtherBucket: boolean;
-    addWarning?: boolean;
-    withWarningsShown?: boolean;
-  }) => {
-    doSearchSourceSearch(withOtherBucket, addWarning, withWarningsShown);
+  const onSearchSourceClickHandler = (withOtherBucket: boolean) => {
+    doSearchSourceSearch(withOtherBucket);
   };
 
   const reqTabs: EuiTabbedContentTab[] = [
@@ -633,7 +600,7 @@ export const SearchExamplesApp = ({
                 </EuiText>
                 <EuiButtonEmpty
                   size="xs"
-                  onClick={() => onSearchSourceClickHandler({ withOtherBucket: true })}
+                  onClick={() => onSearchSourceClickHandler(true)}
                   iconType="play"
                   data-test-subj="searchSourceWithOther"
                 >
@@ -650,7 +617,7 @@ export const SearchExamplesApp = ({
                 </EuiText>
                 <EuiButtonEmpty
                   size="xs"
-                  onClick={() => onSearchSourceClickHandler({ withOtherBucket: false })}
+                  onClick={() => onSearchSourceClickHandler(false)}
                   iconType="play"
                   data-test-subj="searchSourceWithoutOther"
                 >
@@ -700,34 +667,15 @@ export const SearchExamplesApp = ({
                 <EuiText />
                 <EuiButtonEmpty
                   size="xs"
-                  onClick={() =>
-                    onSearchSourceClickHandler({
-                      withOtherBucket: false,
-                      addWarning: true,
-                      withWarningsShown: false,
-                    })
-                  }
+                  onClick={onErrorSearchClickHandler}
                   iconType="play"
                   data-test-subj="searchSourceWithoutWarningsShown"
                 >
                   <FormattedMessage
                     id="searchExamples.searchSource.buttonText"
-                    defaultMessage="Request with a warning in response, notification not automatically shown."
+                    defaultMessage="Request with shard failure warnings, notification not automatically shown."
                   />
                 </EuiButtonEmpty>
-                <EuiText size="xs" color="subdued" className="searchExampleStepDsc">
-                  <EuiButtonEmpty
-                    size="xs"
-                    onClick={showSearchSourceSearchWarnings}
-                    iconType="play"
-                    data-test-subj="searchSourceSeeWarnings"
-                  >
-                    <FormattedMessage
-                      id="searchExamples.searchSource.buttonText"
-                      defaultMessage="See warning notification"
-                    />
-                  </EuiButtonEmpty>
-                </EuiText>
               </EuiText>
               <EuiSpacer />
               <EuiTitle size="xs">

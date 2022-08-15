@@ -29,7 +29,7 @@ import {
   TimelineTabs,
 } from '../../../../common/types/timeline';
 import type { ISearchStart } from '@kbn/data-plugin/public';
-import { searchServiceMock } from '@kbn/data-plugin/public/search/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { getTimelineTemplate } from '../../../timelines/containers/api';
 import { defaultHeaders } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 import { KibanaServices } from '../../../common/lib/kibana';
@@ -239,8 +239,11 @@ describe('alert actions', () => {
     });
 
     searchStrategyClient = {
-      ...searchServiceMock.createStartContract(),
+      ...dataPluginMock.createStartContract().search,
+      aggs: {} as ISearchStart['aggs'],
+      showError: jest.fn(),
       search: jest.fn().mockImplementation(() => of({ data: mockTimelineDetails })),
+      searchSource: {} as ISearchStart['searchSource'],
     };
 
     (getTimelineTemplate as jest.Mock).mockResolvedValue(mockTimelineResult);

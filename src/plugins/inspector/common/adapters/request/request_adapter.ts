@@ -6,28 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import { EventEmitter } from 'events';
 import uuid from 'uuid/v4';
 import { RequestResponder } from './request_responder';
-import { Request, RequestParams, RequestStatus, ResponseWarning } from './types';
-
-/**
- * A type of function the caller will use to handle warnings on their own. If the function
- * returns false, the request adapter will show warnings using {@link RequestAdapterOptions['handleWarnings']}
- * @return boolean - true if the caller has handled the warnings on their own.
- */
-export type WarningsHandler = (warnings: ResponseWarning[]) => boolean | undefined;
-/**
- * @public
- */
-export interface RequestAdapterOptions {
-  /**
-   * A callback function to show any warnings that are found in the request adapter's
-   * collection of responses.
-   */
-  handleWarnings: WarningsHandler;
-}
+import { Request, RequestParams, RequestStatus } from './types';
 
 /**
  * An generic inspector adapter to log requests.
@@ -35,12 +17,11 @@ export interface RequestAdapterOptions {
  * The adapter is not coupled to a specific implementation or even Elasticsearch
  * instead it offers a generic API to log requests of any kind.
  * @extends EventEmitter
- * @public
  */
 export class RequestAdapter extends EventEmitter {
   private requests: Map<string, Request>;
 
-  constructor(private options?: RequestAdapterOptions) {
+  constructor() {
     super();
     this.requests = new Map();
   }
@@ -85,50 +66,6 @@ export class RequestAdapter extends EventEmitter {
 
   public getRequests(): Request[] {
     return Array.from(this.requests.values());
-  }
-
-  /**
-   * Extract a string warning field from the json object
-   */
-  public extractWarnings(): ResponseWarning[] | undefined {
-    const response = Array.from(this.requests.values())
-      .filter((req) => {
-        const warning = (req.response?.json as { warning: string } | undefined)?.warning;
-        return warning != null;
-      })
-      .map((req) => {
-        return {
-          title: i18n.translate('inspector.responseWarningTitle', {
-            defaultMessage: 'Warning',
-          }),
-          text: (req.response?.json as { warning: string } | undefined)?.warning,
-        };
-      });
-
-    return response;
-  }
-
-  /**
-   * Call an indirect dependency to show a toast warning message
-   */
-  public handleWarnings(cb?: WarningsHandler) {
-    if (!this.options?.handleWarnings && cb == null) {
-      throw new Error('Can not handleWarnings without a WarningsHandler provided!');
-    }
-
-    const warnings = this.extractWarnings();
-    if (!warnings) {
-      return;
-    }
-
-    let warningsHandled: boolean | undefined = false;
-    if (cb) {
-      warningsHandled = cb(warnings);
-    }
-
-    if (!warningsHandled) {
-      this.options?.handleWarnings(warnings);
-    }
   }
 
   private _onChange(): void {
