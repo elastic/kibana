@@ -15,8 +15,179 @@ Previous versions: {kibana-ref-all}/8.3/whats-new.html[8.3] | {kibana-ref-all}/8
 coming::[8.4.0]
 
 [discrete]
+[[highlights-8.4-release-docs]]
+=== Elastic release docs now in one place
+Want to learn about all the latest Elastic features and updates?
+We’ve made it easy for you to find everything you need to know with
+the new
+https://www.elastic.co/guide/en/welcome-to-elastic/current/new.html[Check out the latest from Elastic] page.
+Now you can access all release information you need in a single location.
+
+[role="screenshot"]
+image:images/highlights-release-docs.png[New release docs page on elastic.co, width=75%]
+
+[discrete]
+[[highlights-8.4-data-views]]
+=== Meaningful data view names
+
+You can now change the name of your data views, unique from the pattern of
+indices they match. This allows you to give data views more meaningful names, so
+they are easier to find and manage.
+
+[role="screenshot"]
+image:images/highlights-edit-data-view.png[UI where you can edit the data view name, width=75%]
+
+The pattern is still easily visible
+via a tooltip in most places.
+
+[role="screenshot"]
+image::images/highlights-data-views.png[New release docs page on elastic.co]
+
+[discrete]
+[[highlights-8.4-visualization-editors]]
+=== Visualization editors
+
+[discrete]
+==== Metric visualization
+
+preview:[] The new Metric visualization in *Lens* supports a consistent
+font sizing, allowing you to create more beautiful, multi-metric dashboards.
+For additional context, you can now add a Secondary metric, which is useful
+for time shifts. Need to get multiple metrics arranged in a grid?
+Add the Break down by field. To boost your customization options, you can also include a range of values defined by a known static domain, dynamic quick function, or even a custom formula.
+
+[role="screenshot"]
+image:images/highlights-metric-viz.png[Metric visualization in Lens, , width=75%]
+
+[discrete]
+==== Rank by custom metrics
+The new *Rank by* option in *Lens* allows you to rank your top values
+by an additional custom metric.
+
+[role="screenshot"]
+image:images/highlights-rank-by.png[Metric visualization in Lens, , width=75%]
+
+[discrete]
+==== Standard deviation quick function
+This simple, but powerful, statistical summary helps you understand
+more about how your metrics behave in *Lens*.
+
+[discrete]
+==== Drag and drop between layers
+Now it’s easier than ever to work with multiple layers in *Lens*.
+Drag and drop fields between your layers when they are coming from the same data view.
+
+[discrete]
+==== Custom ranges in number histograms
+In *Lens*, create custom ranges for your number histograms,
+which helps you understand the domain of your data for when you want to
+have a fixed set of histogram buckets.
+
+[role="screenshot"]
+image:images/highlights-histogram.png[Custom ranges in histogram in Lens, width=75%]
+
+[discrete]
+==== Filter top values for specific terms
+Now you can customize *Top values* function in *Lens*
+to include or exclude specific terms. To filter for fields with multiple values,
+you can choose to use this functionality over the global search,
+which helps prevent you from accidentally filtering out too much data.
+
+[discrete]
+[[highlights-8.4-maps]]
+=== Maps
+
+[discrete]
+==== Synchronize maps in dashboards
+If you have more than one map in a dashboard, you can now synchronize them,
+so when you zoom or move in a map the other maps move altogether.
+This will allow you to see the same geo location for different data accelerating
+time-to-insights.
+
+[role="screenshot"]
+image::images/highlights-maps-synchronize.png[Synchronize maps in a dashboard]
+
+[discrete]
+==== Keyboard controls for zoom
+You can now zoom in and out using shift+scroll instead of clicking the map options.
+This makes maps more usable in dashboards, while saving you time to get insights.
+
+[role="screenshot"]
+image::images/highlights-maps-zoom.png[Map in dashboard with prompts for using keyboard controls]
+
+[discrete]
+==== Filter by cluster
+You can filter your map by cluster with one click. Before, filtering was only possible
+for individual documents.
+
+[role="screenshot"]
+image::images/highlights-maps-filter-cluster.png[Tooltip showing filter by cluster option in a map]
+
+[discrete]
+==== Customize basemap color
+You can now customize the color of your Elastic Basemaps to
+adapt it to your brand colors or just to make it more beautiful and readable.
+
+[role="screenshot"]
+image::images/highlights-maps-color.gif[Customize the basemap color in a map]
+
+[discrete]
+[[highlights-8.4-ml]]
+=== Machine Learning
+
+[discrete]
+==== Inference threading parameters
+When starting a trained model deployment, performance can be improved by
+the threading parameters of `number of allocations` and `threads per allocation`.
+
+Each allocation means the model gets another CPU thread for executing parallel
+inference requests, so increasing the number of allocations increases the
+throughput of all requests. In turn, threads per allocation sets the number of
+threads used by each model allocation during inference,
+so increasing this parameter improves the latency for each request.
+
+From 8.4, you can now set these two parameters in the UI when starting
+a trained model deployment.
+
+[role="screenshot"]
+image::images/highlights-ml-threads.png[Using the UI to set `number of allocations` and `threads per allocation`]
+
+[discrete]
+==== Log rate spikes in AIOps
+Log spike analysis provides an on-demand option to quickly discover
+possible root cause of a log rate increase. This option compares the data across
+the other fields and values in the index and identifies which ones most
+likely correlate to the spike in a recent baseline.
+
+[role="screenshot"]
+image::images/highlights-ml-spike.png[Log spike in a baseline]
+
+
+[discrete]
+==== Data Visualizer chart optimized
+The Data Visualizer now uses the
+{ref}/search-aggregations-random-sampler-aggregation.html[random sampler aggregation]
+when creating the document count histogram chart. The new sampling method ensures
+that a sufficient sample size is used to draw the chart and calculate the
+document count. Random sampling is on by default and automatically calculates
+the optimal possibility. You can also set it manually or turn it off.
+
+[role="screenshot"]
+image::images/highlights-ml-data-visualizer.png[Data Visualizer chart optimized with random sampler aggregation]
+
+
+[discrete]
 [[highlights-8.4-alerting]]
-=== Enhancements to Alerting
+=== Alerting
+
+[discrete]
+==== Set query type for {es} query
+You can now specify a KQL or Lucene query when building {es} query rules
+in *Stack Management*.
+
+[role="screenshot"]
+image:images/highlights-alerting-query.png[Select a KQL or Lucene query type for your Elasticsearch query rules, width=75%]
+
 
 [discrete]
 ==== {webhook-cm} connector
@@ -27,7 +198,7 @@ web service. You can use this connector with cases in {observability},
 {stack-manage-app}, and the {security-app}.
 
 [discrete]
-==== Add schedules for snoozing rule notifications
+==== Schedules for snoozing notifications
 
 Starting in 8.2, you could suppress the notifications and actions for your rules
 for a specific duration. Now you can also schedule these single or recurring
@@ -46,5 +217,39 @@ actions that are queued, running, or failing.
 
 [role="screenshot"]
 image::images/highlights-rule-metrics.png[Stack Monitoring overview metrics for Kibana]
+
+[discrete]
+[[highlights-8.4-console]]
+=== Console
+
+[discrete]
+==== Comments in request body
+
+Ever look at a massive request body and struggle to recall why you configured
+it that way? In 8.4, you can write comments inside the request body and
+leave yourself notes about its configuration. You can even comment out specific
+lines to temporarily disable them and try out other variations of the request.
+
+[discrete]
+==== Variable definitions
+
+In 8.4, you can define variables in Console and reuse them in your requests.
+You can refer to variables in the paths and bodies of your requests, as many times as you like.
+
+[role="screenshot"]
+image::images/highlights-console-variables.png[What it looks like to define variables and consume them in a request in Console]
+
+[discrete]
+==== HTTP status badges
+
+We added HTTP status badges next to each response. This makes it even easier
+to tell which request failed and which succeeded. The most severe status is
+at the top of the UI, so you can quickly get a sense of whether any of
+your requests had trouble.
+
+[role="screenshot"]
+image::images/highlights-console-badges.png[What it looks like to define variables and consume them in a request in Console]
+
+
 
 // end::notable-highlights[]
