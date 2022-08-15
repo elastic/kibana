@@ -303,6 +303,7 @@ export class GisPageObject extends FtrService {
     const isTooltipOpen = await this.testSubjects.exists(`layerTocTooltip`, { timeout: 5000 });
     if (isTooltipOpen) {
       await this.testSubjects.click(`layerTocTooltip`);
+      // Wait for tooltip to go away
       await this.common.sleep(1000);
     }
   }
@@ -315,7 +316,7 @@ export class GisPageObject extends FtrService {
     await this.clearLegendTooltip();
     await this.openLayerTocActionsPanel(layerName);
     await this.testSubjects.click('layerVisibilityToggleButton');
-    await this.common.sleep(3000);
+    await this.waitForLayersToLoad();
     await this.clearLegendTooltip();
   }
 
