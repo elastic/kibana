@@ -243,53 +243,58 @@ class SavedObjectFinderUi extends React.Component<
               : '',
         }
       : undefined;
+    const typeColumn: EuiTableFieldDataColumnType<SavedObjectFinderItem> | undefined =
+      new Set(this.state.items.map((item) => item.type)).size > 1
+        ? {
+            field: 'type',
+            name: i18n.translate('savedObjectsFinder.typeName', {
+              defaultMessage: 'Type',
+            }),
+            width: '50px',
+            align: 'center',
+            description: i18n.translate('savedObjectsFinder.typeDescription', {
+              defaultMessage: 'Type of the saved object',
+            }),
+            sortable: ({ type }) => {
+              const currentSavedObjectMetaData = savedObjectMetaData.find(
+                (metaData) => metaData.type === type
+              );
+
+              return currentSavedObjectMetaData?.name ?? '';
+            },
+            'data-test-subj': 'savedObjectFinderType',
+            render: (_, item) => {
+              const currentSavedObjectMetaData = savedObjectMetaData.find(
+                (metaData) => metaData.type === item.type
+              )!;
+              const iconType = (
+                currentSavedObjectMetaData ||
+                ({
+                  getIconForSavedObject: () => 'document',
+                } as Pick<SavedObjectMetaData<{ title: string }>, 'getIconForSavedObject'>)
+              ).getIconForSavedObject(item.simple);
+
+              return (
+                <EuiToolTip position="top" content={currentSavedObjectMetaData.name}>
+                  <EuiIcon
+                    aria-label={currentSavedObjectMetaData.name}
+                    type={iconType}
+                    size="s"
+                    data-test-subj="objectType"
+                  />
+                </EuiToolTip>
+              );
+            },
+          }
+        : undefined;
     const columns: Array<EuiTableFieldDataColumnType<SavedObjectFinderItem>> = [
-      {
-        field: 'type',
-        name: i18n.translate('savedObjectsFinder.typeName', {
-          defaultMessage: 'Type',
-        }),
-        width: '50px',
-        align: 'center',
-        description: i18n.translate('savedObjectsFinder.typeDescription', {
-          defaultMessage: 'Type of the saved object',
-        }),
-        sortable: ({ type }) => {
-          const currentSavedObjectMetaData = savedObjectMetaData.find(
-            (metaData) => metaData.type === type
-          );
-
-          return currentSavedObjectMetaData?.name ?? '';
-        },
-        'data-test-subj': 'savedObjectFinderType',
-        render: (type, item) => {
-          const currentSavedObjectMetaData = savedObjectMetaData.find(
-            (metaData) => metaData.type === item.type
-          )!;
-          const iconType = (
-            currentSavedObjectMetaData ||
-            ({
-              getIconForSavedObject: () => 'document',
-            } as Pick<SavedObjectMetaData<{ title: string }>, 'getIconForSavedObject'>)
-          ).getIconForSavedObject(item.simple);
-
-          return (
-            <EuiToolTip position="top" content={currentSavedObjectMetaData.name}>
-              <EuiIcon
-                aria-label={currentSavedObjectMetaData.name}
-                type={iconType}
-                size="s"
-                data-test-subj="objectType"
-              />
-            </EuiToolTip>
-          );
-        },
-      },
+      ...(typeColumn ? [typeColumn] : []),
       {
         field: 'title',
         name: i18n.translate('savedObjectsFinder.titleName', {
           defaultMessage: 'Title',
         }),
+        width: '55%',
         description: i18n.translate('savedObjectsFinder.titleDescription', {
           defaultMessage: 'Title of the saved object',
         }),
