@@ -5,7 +5,6 @@
  * 2.0.
  */
 import {
-  EuiBetaBadge,
   EuiCard,
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,8 +16,8 @@ import {
 import React from 'react';
 import styled from 'styled-components';
 import { withSecuritySolutionLink } from '../../common/components/links';
+import { NavItemBetaBadge } from '../../common/components/navigation/nav_item_beta_badge';
 import type { NavLinkItem } from '../../common/components/navigation/types';
-import { BETA } from '../../common/translations';
 
 interface LandingImagesProps {
   items: NavLinkItem[];
@@ -54,13 +53,6 @@ const TitleText = styled.h2`
   display: inline;
 `;
 
-// Remove explicit typing after eui update https://github.com/elastic/eui/pull/6086
-const BetaBadge: typeof EuiBetaBadge = styled(EuiBetaBadge)`
-  vertical-align: text-top;
-  margin-left: ${({ theme }) => theme.eui.euiSizeS};
-  color: ${(props) => props.theme.eui.euiTextColor};
-`;
-
 const SecuritySolutionLink = withSecuritySolutionLink(Link);
 
 export const LandingLinksImages: React.FC<LandingImagesProps> = ({ items }) => (
@@ -86,7 +78,7 @@ export const LandingLinksImages: React.FC<LandingImagesProps> = ({ items }) => (
                 <PrimaryEuiTitle size="s">
                   <FlexTitle>
                     <TitleText>{title}</TitleText>
-                    {isBeta && <BetaBadge label={BETA} size="s" />}
+                    {isBeta && <NavItemBetaBadge />}
                   </FlexTitle>
                 </PrimaryEuiTitle>
                 <LandingLinksDescripton size="s" color="text">
@@ -142,10 +134,10 @@ export const LandingImageCards: React.FC<LandingImagesProps> = React.memo(({ ite
           }
           title={
             <PrimaryEuiTitle size="xs">
-              <div>
+              <FlexTitle>
                 <TitleText>{title}</TitleText>
-                {isBeta && <BetaBadge label={BETA} size="s" />}
-              </div>
+                {isBeta && <NavItemBetaBadge />}
+              </FlexTitle>
             </PrimaryEuiTitle>
           }
           description={<LandingCardDescription>{description}</LandingCardDescription>}
