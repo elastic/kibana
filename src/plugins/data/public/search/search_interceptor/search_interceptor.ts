@@ -421,7 +421,7 @@ export class SearchInterceptor {
     );
   }
 
-  private showTimeoutErrorToast = (e: SearchTimeoutError, _sessionId?: string) => {
+  private showTimeoutErrorToast = (e: SearchTimeoutError, sessionId?: string) => {
     this.deps.toasts.addDanger({
       title: 'Timed out',
       text: toMountPoint(e.getErrorMessage(this.application), { theme$: this.deps.theme.theme$ }),
@@ -435,7 +435,7 @@ export class SearchInterceptor {
     }
   );
 
-  private showRestoreWarningToast = (_sessionId?: string) => {
+  private showRestoreWarningToast = (sessionId?: string) => {
     this.deps.toasts.addWarning(
       {
         title: 'Your search session is still running',
