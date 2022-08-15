@@ -91,7 +91,7 @@ day of the week: {{fields.day_of_week}}
 --
 +
 As the {ref}/search-fields.html#search-fields-response[`fields`] response always returns an array of values for each field, 
-the https://mustache.github.io/[Mustache] template array syntax is used to iterate over these values in your actions.
+the https://mustache.github.io/[Mustache] template array syntax is used to iterate over these values in your actions as the following example shows:
 +
 --
 [source]
