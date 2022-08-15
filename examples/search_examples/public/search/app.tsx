@@ -35,6 +35,7 @@ import {
   isCompleteResponse,
   isErrorResponse,
 } from '@kbn/data-plugin/public';
+import { SearchResponseWarnings } from '@kbn/data-plugin/public/search/fetch';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -106,6 +107,7 @@ export const SearchExamplesApp = ({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [currentAbortController, setAbortController] = useState<AbortController>();
   const [rawResponse, setRawResponse] = useState<Record<string, any>>({});
+  const [warnings, setWarnings] = useState<SearchResponseWarnings | undefined>({});
   const [selectedTab, setSelectedTab] = useState(0);
 
   function setResponse(response: IKibanaSearchResponse) {
@@ -317,9 +319,8 @@ export const SearchExamplesApp = ({
        * Suppressing the shard failure warning notification from appearing by default requires setting
        * { disableShardFailureWarning: true } in the SearchSourceSearchOptions passed to $fetch
        */
-      data.search.showWarnings(inspector, (warnings) => {
-        console.log('time outs:', warnings.timedOut);
-        console.log('shard failures:', warnings.shardFailures);
+      data.search.showWarnings(inspector, (responseWarnings) => {
+        setWarnings(responseWarnings);
         return false; // optional: set to `true` to prevent fetch from following the callback with default behavior
       });
 
@@ -436,8 +437,8 @@ export const SearchExamplesApp = ({
       name: <EuiText data-test-subj="requestTab">Request</EuiText>,
       content: (
         <>
-          <EuiSpacer />
-          <EuiText size="xs">Search body sent to ES</EuiText>
+          {' '}
+          <EuiSpacer /> <EuiText size="xs">Search body sent to ES</EuiText>{' '}
           <EuiCodeBlock
             language="json"
             fontSize="s"
@@ -446,8 +447,9 @@ export const SearchExamplesApp = ({
             isCopyable
             data-test-subj="requestCodeBlock"
           >
-            {JSON.stringify(request, null, 2)}
-          </EuiCodeBlock>
+            {' '}
+            {JSON.stringify(request, null, 2)}{' '}
+          </EuiCodeBlock>{' '}
         </>
       ),
     },
@@ -456,15 +458,17 @@ export const SearchExamplesApp = ({
       name: <EuiText data-test-subj="responseTab">Response</EuiText>,
       content: (
         <>
-          <EuiSpacer />
+          {' '}
+          <EuiSpacer />{' '}
           <EuiText size="xs">
+            {' '}
             <FormattedMessage
               id="searchExamples.timestampText"
               defaultMessage="Took: {time} ms"
               values={{ time: timeTook ?? 'Unknown' }}
-            />
-          </EuiText>
-          <EuiProgress value={loaded} max={total} size="xs" data-test-subj="progressBar" />
+            />{' '}
+          </EuiText>{' '}
+          <EuiProgress value={loaded} max={total} size="xs" data-test-subj="progressBar" />{' '}
           <EuiCodeBlock
             language="json"
             fontSize="s"
@@ -473,8 +477,38 @@ export const SearchExamplesApp = ({
             isCopyable
             data-test-subj="responseCodeBlock"
           >
-            {JSON.stringify(rawResponse, null, 2)}
-          </EuiCodeBlock>
+            {' '}
+            {JSON.stringify(rawResponse, null, 2)}{' '}
+          </EuiCodeBlock>{' '}
+        </>
+      ),
+    },
+    {
+      id: 'warnings',
+      name: <EuiText data-test-subj="warningsTab">Warnings</EuiText>,
+      content: (
+        <>
+          {' '}
+          <EuiSpacer />{' '}
+          <EuiText size="xs">
+            {' '}
+            <FormattedMessage
+              id="searchExamples.warningsObject"
+              defaultMessage="Timeout and shard failure warnings may be handled in a callback to the showWarnings method on the search service."
+            />{' '}
+          </EuiText>{' '}
+          <EuiProgress value={loaded} max={total} size="xs" data-test-subj="progressBar" />{' '}
+          <EuiCodeBlock
+            language="json"
+            fontSize="s"
+            paddingSize="s"
+            overflowHeight={450}
+            isCopyable
+            data-test-subj="responseCodeBlock"
+          >
+            {' '}
+            {JSON.stringify(warnings, null, 2)}{' '}
+          </EuiCodeBlock>{' '}
         </>
       ),
     },
@@ -643,6 +677,18 @@ export const SearchExamplesApp = ({
                 <EuiSpacer />
                 <EuiButtonEmpty
                   size="xs"
+                  onClick={onWarningSearchClickHandler}
+                  iconType="play"
+                  data-test-subj="searchWithWarning"
+                >
+                  <FormattedMessage
+                    id="searchExamples.searchWithWarningButtonText"
+                    defaultMessage="Request with a warning in response"
+                  />
+                </EuiButtonEmpty>
+                <EuiText />
+                <EuiButtonEmpty
+                  size="xs"
                   onClick={onErrorSearchClickHandler}
                   iconType="play"
                   data-test-subj="searchWithError"
@@ -650,30 +696,6 @@ export const SearchExamplesApp = ({
                   <FormattedMessage
                     id="searchExamples.searchWithErrorButtonText"
                     defaultMessage="Request with an error in response"
-                  />
-                </EuiButtonEmpty>
-                <EuiText />
-                <EuiButtonEmpty
-                  size="xs"
-                  onClick={onWarningSearchClickHandler}
-                  iconType="play"
-                  data-test-subj="searchWithWarning"
-                >
-                  <FormattedMessage
-                    id="searchExamples.searchWithWarningButtonText"
-                    defaultMessage="Request with a warning in response, notification automatically shown"
-                  />
-                </EuiButtonEmpty>
-                <EuiText />
-                <EuiButtonEmpty
-                  size="xs"
-                  onClick={onErrorSearchClickHandler}
-                  iconType="play"
-                  data-test-subj="searchSourceWithoutWarningsShown"
-                >
-                  <FormattedMessage
-                    id="searchExamples.searchSource.buttonText"
-                    defaultMessage="Request with shard failure warnings, notification not automatically shown."
                   />
                 </EuiButtonEmpty>
               </EuiText>

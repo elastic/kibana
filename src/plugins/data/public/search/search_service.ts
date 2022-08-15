@@ -271,7 +271,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       },
       showWarnings: (inspector, cb) => {
         inspector.adapter?.getRequests().map((req) => {
-          let handled = false;
+          let handled: boolean | undefined;
           if (cb != null) {
             // use the callback to handle warnings from the request
             handled = cb(extractWarnings(req.json));

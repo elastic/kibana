@@ -61,7 +61,7 @@ export interface ISearchStart {
    */
   showWarnings: (
     inspector: IInspectorInfo,
-    cb?: (warnings: SearchResponseWarnings) => boolean
+    cb?: (warnings: SearchResponseWarnings) => boolean | undefined
   ) => void;
   /**
    * high level search
