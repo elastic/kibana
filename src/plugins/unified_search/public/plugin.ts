@@ -77,7 +77,9 @@ export class UnifiedSearchPublicPlugin
       storage: this.storage,
       usageCollection: this.usageCollection,
       isScreenshotMode: Boolean(screenshotMode?.isScreenshotMode()),
-      autocomplete: autocompleteStart,
+      unifiedSearch: {
+        autocomplete: autocompleteStart,
+      },
     });
 
     uiActions.addTriggerAction(

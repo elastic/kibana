@@ -30,10 +30,12 @@ interface StatefulSearchBarDeps {
   storage: IStorageWrapper;
   usageCollection?: UsageCollectionSetup;
   isScreenshotMode?: boolean;
-  autocomplete: {
-    getQuerySuggestions: QuerySuggestionGetFn;
-    hasQuerySuggestions: (language: string) => boolean;
-    getValueSuggestions: ValueSuggestionsGetFn;
+  unifiedSearch: {
+    autocomplete: {
+      getQuerySuggestions: QuerySuggestionGetFn;
+      hasQuerySuggestions: (language: string) => boolean;
+      getValueSuggestions: ValueSuggestionsGetFn;
+    };
   };
 }
 
@@ -134,7 +136,7 @@ export function createSearchBar({
   data,
   usageCollection,
   isScreenshotMode = false,
-  autocomplete,
+  unifiedSearch: { autocomplete },
 }: StatefulSearchBarDeps) {
   // App name should come from the core application service.
   // Until it's available, we'll ask the user to provide it for the pre-wired component.

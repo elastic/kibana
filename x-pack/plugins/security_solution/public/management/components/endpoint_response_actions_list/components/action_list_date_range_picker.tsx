@@ -7,7 +7,6 @@
 
 import React, { useCallback, memo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker, EuiSuperUpdateButton } from '@elastic/eui';
-import type { IDataPluginServices } from '@kbn/data-plugin/public';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import type { EuiSuperDatePickerRecentRange } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -16,6 +15,7 @@ import type {
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import type { IUnifiedSearchPluginServices } from '@kbn/unified-search-plugin/public';
 import type { useGetEndpointActionList } from '../../../hooks';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
@@ -50,7 +50,7 @@ export const ActionListDateRangePicker = memo(
     onClick: ReturnType<typeof useGetEndpointActionList>['refetch'];
   }) => {
     const getTestId = useTestIdGenerator('response-actions-list');
-    const kibana = useKibana<IDataPluginServices>();
+    const kibana = useKibana<IUnifiedSearchPluginServices>();
     const { uiSettings } = kibana.services;
     const [commonlyUsedRanges] = useState(() => {
       return (

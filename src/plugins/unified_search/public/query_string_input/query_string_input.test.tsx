@@ -69,7 +69,9 @@ const QueryStringInput = withKibana(QueryStringInputUI);
 function wrapQueryStringInputInContext(testProps: any, storage?: any) {
   const services = {
     ...startMock,
-    autocomplete: autocompleteStartMock,
+    unifiedSearch: {
+      autocomplete: autocompleteStartMock,
+    },
     data: dataPluginMock.createStartContract(),
     appName: testProps.appName || 'test',
     storage: storage || createMockStorage(),

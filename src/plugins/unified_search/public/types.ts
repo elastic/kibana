@@ -74,7 +74,9 @@ export type FilterPanelOption =
   | 'deleteFilter';
 
 export interface IUnifiedSearchPluginServices extends Partial<CoreStart> {
-  autocomplete: AutocompleteStart;
+  unifiedSearch: {
+    autocomplete: AutocompleteStart;
+  };
   appName: string;
   uiSettings: CoreStart['uiSettings'];
   savedObjects: CoreStart['savedObjects'];

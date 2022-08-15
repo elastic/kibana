@@ -12,9 +12,9 @@ import { i18n } from '@kbn/i18n';
 import { connect } from 'react-redux';
 import { toElasticsearchQuery, fromKueryExpression, Query } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { IDataPluginServices } from '@kbn/data-plugin/public';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { IUnifiedSearchPluginServices } from '@kbn/unified-search-plugin/public/types';
 import { IndexPatternSavedObject, IndexPatternProvider, WorkspaceField } from '../types';
 import { openSourceModal } from '../services/source_modal';
 import {
@@ -95,7 +95,7 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
     fetchPattern();
   }, [currentDatasource, indexPatternProvider, onIndexPatternChange]);
 
-  const kibana = useKibana<IDataPluginServices>();
+  const kibana = useKibana<IUnifiedSearchPluginServices>();
   const { services, overlays } = kibana;
   const { savedObjects, uiSettings } = services;
   if (!overlays) return null;
