@@ -50,15 +50,15 @@ export async function scheduleActionsForAlerts<
 
   // execute recovered alerts
   const recoveredIds = Object.keys(recoveredAlerts);
-  for (const id of recoveredIds) {
-    if (mutedAlertIdsSet.has(id)) {
+  for (const alertId of recoveredIds) {
+    if (mutedAlertIdsSet.has(alertId)) {
       logger.debug(
-        `skipping scheduling of actions for '${id}' in rule ${ruleLabel}: instance is muted`
+        `skipping scheduling of actions for '${alertId}' in rule ${ruleLabel}: instance is muted`
       );
     } else {
-      const alert = recoveredAlerts[id];
+      const alert = recoveredAlerts[alertId];
       await executeAlert(
-        id,
+        alertId,
         alert,
         executionHandler,
         ruleRunMetricsStore,
