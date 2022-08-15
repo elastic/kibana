@@ -62,7 +62,7 @@ export function DiscoverChart({
   interval?: string;
 }) {
   const { uiSettings, data, storage } = useDiscoverServices();
-  const shouldPersistDataView = usePersistedDataView(dataView);
+  const dataViewIsPersisted = usePersistedDataView(dataView);
   const [showChartOptionsPopover, setShowChartOptionsPopover] = useState(false);
   const showViewModeToggle = uiSettings.get(SHOW_FIELD_STATISTICS) ?? false;
 
@@ -74,6 +74,12 @@ export function DiscoverChart({
   const timeField = dataView.timeFieldName && dataView.getFieldByName(dataView.timeFieldName);
   const [canVisualize, setCanVisualize] = useState(false);
 
+  const onUpdateDiscoverViewMode = async (newViewMode: VIEW_MODE) => {
+    if (await dataViewIsPersisted()) {
+      setDiscoverViewMode(newViewMode);
+    }
+  };
+
   useEffect(() => {
     if (!timeField) return;
     getVisualizeInformation(timeField, dataView.id, savedSearch.columns || []).then((info) => {
@@ -82,11 +88,11 @@ export function DiscoverChart({
   }, [dataView, savedSearch.columns, timeField]);
 
   const onEditVisualization = useCallback(async () => {
-    if (!timeField || !(await shouldPersistDataView())) {
+    if (!timeField || !(await dataViewIsPersisted())) {
       return;
     }
     triggerVisualizeActions(timeField, dataView.id, savedSearch.columns || []);
-  }, [dataView.id, savedSearch.columns, shouldPersistDataView, timeField]);
+  }, [dataView.id, savedSearch.columns, dataViewIsPersisted, timeField]);
 
   const onShowChartOptions = useCallback(() => {
     setShowChartOptionsPopover(!showChartOptionsPopover);
@@ -145,7 +151,7 @@ export function DiscoverChart({
             <EuiFlexItem grow={false}>
               <DocumentViewModeToggle
                 viewMode={viewMode}
-                setDiscoverViewMode={setDiscoverViewMode}
+                onUpdateDiscoverViewMode={onUpdateDiscoverViewMode}
               />
             </EuiFlexItem>
           )}

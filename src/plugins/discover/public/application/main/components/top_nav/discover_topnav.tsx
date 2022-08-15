@@ -55,7 +55,7 @@ export const DiscoverTopNav = ({
   onFieldEdited,
 }: DiscoverTopNavProps) => {
   const history = useHistory();
-  const shouldPersistDataView = usePersistedDataView(dataView);
+  const dataViewIsPersisted = usePersistedDataView(dataView);
 
   const showDatePicker = useMemo(
     () => dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP,
@@ -149,7 +149,7 @@ export const DiscoverTopNav = ({
         searchSource,
         onOpenSavedSearch,
         isPlainRecord,
-        shouldPersistDataView,
+        dataViewIsPersisted,
       }),
     [
       dataView,
@@ -161,7 +161,7 @@ export const DiscoverTopNav = ({
       searchSource,
       onOpenSavedSearch,
       isPlainRecord,
-      shouldPersistDataView,
+      dataViewIsPersisted,
     ]
   );
 

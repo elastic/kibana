@@ -46,7 +46,7 @@ export const usePersistedDataView = (dataView: DataView) => {
     services.toastNotifications,
   ]);
 
-  const shouldPersistDataView: () => Promise<boolean> = useCallback(async () => {
+  const dataViewPersisted: () => Promise<boolean> = useCallback(async () => {
     const dataViewList = await getDataViewList();
     if (!isHocDataView(dataViewList, dataView)) {
       return true;
@@ -63,7 +63,7 @@ export const usePersistedDataView = (dataView: DataView) => {
     );
   }, [dataView, getDataViewList, persistDataView]);
 
-  return shouldPersistDataView;
+  return dataViewPersisted;
 };
 
 function isHocDataView(persistedDataViews: DataViewListItem[], checkDataView: DataView) {
