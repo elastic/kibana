@@ -51,7 +51,7 @@ export const NETWORK = '[data-test-subj="groupedNavPanelLink-network"]';
 
 export const USERS = '[data-test-subj="groupedNavPanelLink-users"]';
 
-export const THREAT_INTELLIGENCE = '[data-test-subj="groupedNavPanelLink-threat-intelligence"]';
+export const INDICATORS = '[data-test-subj="groupedNavItemLink-threat_intelligence-indicators"]';
 
 export const RULES = '[data-test-subj="groupedNavPanelLink-rules"]';
 
@@ -80,8 +80,7 @@ export const openNavigationPanelFor = (page: string) => {
     }
     case HOSTS:
     case NETWORK:
-    case USERS:
-    case THREAT_INTELLIGENCE: {
+    case USERS: {
       panel = EXPLORE;
       break;
     }

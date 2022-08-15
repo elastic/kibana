@@ -152,6 +152,6 @@ export const NO_PERMISSIONS_TITLE = i18n.translate('xpack.securitySolution.noPer
 export const THREAT_INTELLIGENCE = i18n.translate(
   'xpack.securitySolution.navigation.threatIntelligence',
   {
-    defaultMessage: 'Threat Intelligence',
+    defaultMessage: 'Intelligence',
   }
 );
