@@ -434,9 +434,7 @@ export const DetailPanelMetadataTab = ({
                 ),
               },
               {
-                title: orchestratorData.resource.parent.type && (
-                  <DetailPanelListItem>resource.parent.type</DetailPanelListItem>
-                ),
+                title: <DetailPanelListItem>resource.parent.type</DetailPanelListItem>,
                 description: (
                   <DetailPanelCopy
                     textToCopy={`orchestrator.resource.parent.type: "${orchestratorData.resource.parent.type}"`}
