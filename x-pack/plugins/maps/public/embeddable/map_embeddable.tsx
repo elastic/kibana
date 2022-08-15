@@ -268,12 +268,16 @@ export class MapEmbeddable
   }
 
   public async getFilters() {
-    const embeddableSearchContext = getEmbeddableSearchContext(this._savedMap.getStore().getState());
+    const embeddableSearchContext = getEmbeddableSearchContext(
+      this._savedMap.getStore().getState()
+    );
     return embeddableSearchContext ? embeddableSearchContext.filters : [];
   }
 
   public async getQuery() {
-    const embeddableSearchContext = getEmbeddableSearchContext(this._savedMap.getStore().getState());
+    const embeddableSearchContext = getEmbeddableSearchContext(
+      this._savedMap.getStore().getState()
+    );
     return embeddableSearchContext.query;
   }
 
