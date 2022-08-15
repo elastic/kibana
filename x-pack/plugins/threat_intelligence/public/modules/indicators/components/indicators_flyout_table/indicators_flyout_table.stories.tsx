@@ -7,8 +7,11 @@
 
 import React from 'react';
 import { Story } from '@storybook/react';
-import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
+import { CoreStart } from '@kbn/core/public';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_FORMAT_TZ } from '../../../../../common/constants';
 import { IndicatorsFlyoutTable } from './indicators_flyout_table';
+import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
 
 export default {
   component: IndicatorsFlyoutTable,
@@ -16,11 +19,40 @@ export default {
 };
 
 const mockIndicator: Indicator = generateMockIndicator();
+const mockFieldTypesMap: { [id: string]: string } = {
+  'threat.indicator.ip': 'ip',
+  'threat.indicator.first_seen': 'date',
+};
+
+const coreMock = {
+  uiSettings: {
+    get: (key: string) => {
+      const settings = {
+        [DEFAULT_DATE_FORMAT]: '',
+        [DEFAULT_DATE_FORMAT_TZ]: 'UTC',
+      };
+      // @ts-expect-error
+      return settings[key];
+    },
+  },
+} as unknown as CoreStart;
+const KibanaReactContext = createKibanaReactContext(coreMock);
 
 export const Default: Story<void> = () => {
-  return <IndicatorsFlyoutTable indicator={mockIndicator} />;
+  return (
+    <KibanaReactContext.Provider>
+      <IndicatorsFlyoutTable indicator={mockIndicator} fieldTypesMap={mockFieldTypesMap} />
+    </KibanaReactContext.Provider>
+  );
 };
 
 export const EmptyIndicator: Story<void> = () => {
-  return <IndicatorsFlyoutTable indicator={{} as unknown as Indicator} />;
+  return (
+    <KibanaReactContext.Provider>
+      <IndicatorsFlyoutTable
+        indicator={{ fields: {} } as unknown as Indicator}
+        fieldTypesMap={{}}
+      />
+    </KibanaReactContext.Provider>
+  );
 };
