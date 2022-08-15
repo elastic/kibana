@@ -22,7 +22,7 @@ import {
   DASHBOARDS,
   CSP_DASHBOARD,
   KUBERNETES,
-  THREAT_INTELLIGENCE,
+  INDICATORS,
   BLOCKLIST,
   CSP_BENCHMARKS,
   CSP_FINDINGS,
@@ -54,11 +54,11 @@ import {
   MANAGE_URL,
   CSP_DASHBOARD_URL,
   KUBERNETES_URL,
-  THREAT_INTELLIGENCE_URL,
   BLOCKLIST_URL,
   CSP_BENCHMARKS_URL,
   CSP_FINDINGS_URL,
   POLICIES_URL,
+  INDICATORS_URL,
 } from '../../urls/navigation';
 import {
   openKibanaNavigation,
@@ -72,6 +72,7 @@ import {
   DASHBOARDS_PAGE,
   TIMELINES_PAGE,
   FINDINGS_PAGE,
+  THREAT_INTELLIGENCE_PAGE,
 } from '../../screens/kibana_navigation';
 
 before(() => {
@@ -143,9 +144,9 @@ describe('top-level navigation common to all pages in the Security app', () => {
     cy.url().should('include', USERS_URL);
   });
 
-  it('navigates to the Threat Intelligence page', () => {
-    navigateFromHeaderTo(THREAT_INTELLIGENCE);
-    cy.url().should('include', THREAT_INTELLIGENCE_URL);
+  it('navigates to the Indicators page', () => {
+    navigateFromHeaderTo(INDICATORS);
+    cy.url().should('include', INDICATORS_URL);
   });
 
   it('navigates to the Rules page', () => {
@@ -229,6 +230,11 @@ describe('Kibana navigation to all pages in the Security app ', () => {
   it('navigates to the Explore page', () => {
     navigateFromKibanaCollapsibleTo(EXPLORE_PAGE);
     cy.url().should('include', EXPLORE_URL);
+  });
+
+  it('navigates to the Threat Intelligence page', () => {
+    navigateFromKibanaCollapsibleTo(THREAT_INTELLIGENCE_PAGE);
+    cy.url().should('include', INDICATORS_URL);
   });
 
   it('navigates to the Manage page', () => {

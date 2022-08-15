@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { getSecuritySolutionNavTab } from '@kbn/cloud-security-posture-plugin/public';
+import { getSecuritySolutionNavTab as getSecuritySolutionCSPNavTab } from '@kbn/cloud-security-posture-plugin/public';
+import { getSecuritySolutionNavTab as getSecuritySolutionTINavTab } from '@kbn/threat-intelligence-plugin/public';
 import * as i18n from '../translations';
 import type { SecurityNav, SecurityNavGroup } from '../../common/components/navigation/types';
 import { SecurityNavGroupKey } from '../../common/components/navigation/types';
@@ -30,7 +31,6 @@ import {
   APP_KUBERNETES_PATH,
   APP_LANDING_PATH,
   APP_RESPONSE_ACTIONS_PATH,
-  APP_THREAT_INTELLIGENCE_PATH,
   APP_PATH,
 } from '../../../common/constants';
 
@@ -168,27 +168,24 @@ export const navTabs: SecurityNav = {
     disabled: false,
     urlKey: 'administration',
   },
-  [SecurityPageName.threatIntelligence]: {
-    id: SecurityPageName.threatIntelligence,
-    name: i18n.THREAT_INTELLIGENCE,
-    href: APP_THREAT_INTELLIGENCE_PATH,
-    disabled: false,
-    urlKey: 'threat_intelligence',
+  [SecurityPageName.threatIntelligenceIndicators]: {
+    ...getSecuritySolutionTINavTab<SecurityPageName>('indicators', APP_PATH),
+    urlKey: 'indicators',
   },
   [SecurityPageName.cloudSecurityPostureFindings]: {
-    ...getSecuritySolutionNavTab<SecurityPageName>('findings', APP_PATH),
+    ...getSecuritySolutionCSPNavTab<SecurityPageName>('findings', APP_PATH),
     urlKey: 'findings',
   },
   [SecurityPageName.cloudSecurityPostureDashboard]: {
-    ...getSecuritySolutionNavTab<SecurityPageName>('dashboard', APP_PATH),
+    ...getSecuritySolutionCSPNavTab<SecurityPageName>('dashboard', APP_PATH),
     urlKey: 'cloud_posture',
   },
   [SecurityPageName.cloudSecurityPostureBenchmarks]: {
-    ...getSecuritySolutionNavTab<SecurityPageName>('benchmarks', APP_PATH),
+    ...getSecuritySolutionCSPNavTab<SecurityPageName>('benchmarks', APP_PATH),
     urlKey: 'administration',
   },
   [SecurityPageName.cloudSecurityPostureRules]: {
-    ...getSecuritySolutionNavTab<SecurityPageName>('rules', APP_PATH),
+    ...getSecuritySolutionCSPNavTab<SecurityPageName>('rules', APP_PATH),
     urlKey: 'administration',
   },
 };
@@ -209,6 +206,10 @@ export const securityNavGroup: SecurityNavGroup = {
   [SecurityNavGroupKey.explore]: {
     id: SecurityNavGroupKey.explore,
     name: i18n.EXPLORE,
+  },
+  [SecurityNavGroupKey.intelligence]: {
+    id: SecurityNavGroupKey.intelligence,
+    name: i18n.THREAT_INTELLIGENCE,
   },
   [SecurityNavGroupKey.investigate]: {
     id: SecurityNavGroupKey.investigate,

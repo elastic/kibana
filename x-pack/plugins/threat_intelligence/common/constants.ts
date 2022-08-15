@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export const API_ROUTE_SOURCES = '/internal/threat_intelligence/source';
-
 export const EMPTY_VALUE = '-';
 
 export const DEFAULT_THREAT_INDEX_KEY = 'securitySolution:defaultThreatIndex' as const;
