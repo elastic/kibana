@@ -38,6 +38,7 @@ import { useDiscoverStateContext } from '../../hooks/discover_state/use_discover
 import { useSidebarState } from '../../hooks/ui/use_sidebar_state';
 import { useDiscoverColumnsContext } from '../../hooks/discover_state/use_columns';
 import { SavedSearchURLConflictCallout } from '../../../../components/saved_search_url_conflict_callout/saved_search_url_conflict_callout';
+import { LogExplorerHistogram } from './log_explorer_histogram';
 
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
@@ -200,7 +201,7 @@ export function LogExplorerLayout({
               </div>
             </EuiFlexItem>
           </EuiHideFor>
-          <EuiFlexItem className="dscPageContent__wrapper">
+          <EuiFlexItem className="dscPageContent__wrapper" style={{ paddingRight: 0 }}>
             <EuiPageContent
               verticalPosition={contentCentered ? 'center' : undefined}
               horizontalPosition={contentCentered ? 'center' : undefined}
@@ -246,6 +247,9 @@ export function LogExplorerLayout({
                 </EuiFlexGroup>
               )}
             </EuiPageContent>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <LogExplorerHistogram stateMachine={stateMachine} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPageBody>
