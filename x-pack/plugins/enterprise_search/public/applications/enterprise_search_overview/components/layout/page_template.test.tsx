@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import '../../../__mocks__/kea_logic';
+
 jest.mock('../../../shared/layout/nav', () => ({
   useEnterpriseSearchNav: () => [],
 }));

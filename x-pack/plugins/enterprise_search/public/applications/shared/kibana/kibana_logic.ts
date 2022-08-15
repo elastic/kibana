@@ -22,7 +22,6 @@ import { createHref, CreateHrefOptions } from '../react_router_helpers';
 type RequiredFieldsOnly<T> = {
   [K in keyof T as T[K] extends Required<T>[K] ? K : never]: T[K];
 };
-
 interface KibanaLogicProps {
   config: { host?: string };
   productAccess: ProductAccess;
