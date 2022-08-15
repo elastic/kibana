@@ -212,7 +212,7 @@ export interface PivotAggsConfigWithExtra<T, ESConfig extends { [key: string]: a
     aggConfig: Partial<T>;
     onChange: (arg: Partial<T>) => void;
     selectedField: string;
-    isValid: boolean;
+    isValid?: boolean;
   }>;
   /** Aggregation specific configuration */
   aggConfig: Partial<T>;
