@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useCallback, useEffect, useState } from 'react';
-import { EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiBetaBadge, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 
 import type { DataProvider } from '../../../../../common/types';
 import { TimelineId } from '../../../../../common/types/timeline';
@@ -17,7 +17,13 @@ import { InsightAccordion } from './insight_accordion';
 import { SimpleAlertTable } from './simple_alert_table';
 import { InvestigateInTimelineButton } from '../table/investigate_in_timeline_button';
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/components/alerts_table/translations';
-import { PROCESS_ANCESTRY, PROCESS_ANCESTRY_COUNT, PROCESS_ANCESTRY_ERROR } from './translations';
+import {
+  PROCESS_ANCESTRY,
+  PROCESS_ANCESTRY_COUNT,
+  PROCESS_ANCESTRY_EMPTY,
+  PROCESS_ANCESTRY_ERROR,
+} from './translations';
+import { BETA } from '../../../translations';
 
 interface Props {
   data: TimelineEventsDetailsItem;
@@ -65,12 +71,15 @@ export const RelatedAlertsByProcessAncestry = React.memo<Props>(
     const [cache, setCache] = useState<Partial<Cache>>({});
 
     const onToggle = useCallback((isOpen: boolean) => setShowContent(isOpen), []);
+    const isEmpty = !!cache.alertIds && cache.alertIds.length === 0;
 
     // Makes sure the component is not fetching data before the accordion
     // has been openend.
     const renderContent = useCallback(() => {
       if (!showContent) {
         return null;
+      } else if (isEmpty) {
+        return PROCESS_ANCESTRY_EMPTY;
       } else if (cache.alertIds) {
         return (
           <ActualRelatedAlertsByProcessAncestry
@@ -90,22 +99,21 @@ export const RelatedAlertsByProcessAncestry = React.memo<Props>(
           onCacheLoad={setCache}
         />
       );
-    }, [showContent, cache, data, eventId, timelineId, index, originalDocumentId]);
-
-    const isEmpty = !!cache.alertIds && cache.alertIds.length === 0;
+    }, [showContent, cache, data, eventId, timelineId, index, originalDocumentId, isEmpty]);
 
     return (
       <InsightAccordion
         prefix="RelatedAlertsByProcessAncestry"
         // `renderContent` and the associated sub-components are making sure to
         // render the correct loading and error states so we can omit these states here
-        state={isEmpty ? 'empty' : 'success'}
+        state="success"
         text={
           // If we have fetched the alerts, display the count here, otherwise omit the count
           cache.alertIds ? PROCESS_ANCESTRY_COUNT(cache.alertIds.length) : PROCESS_ANCESTRY
         }
         renderContent={renderContent}
         onToggle={onToggle}
+        extraAction={<EuiBetaBadge size="s" label={BETA} color="subdued" />}
       />
     );
   }
