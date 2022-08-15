@@ -17,22 +17,25 @@ import {
 import { generateId } from '../../id_generator';
 import { getXyVisualization } from './xy_visualization';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
 import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
 import type { PaletteOutput } from '@kbn/coloring';
 import { layerTypes } from '../../../common';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { themeServiceMock } from '@kbn/core/public/mocks';
+import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 
 jest.mock('../../id_generator');
 
 const xyVisualization = getXyVisualization({
-  datatableUtilities: createDatatableUtilitiesMock(),
   paletteService: chartPluginMock.createPaletteRegistry(),
   fieldFormats: fieldFormatsServiceMock.createStartContract(),
   useLegacyTimeAxis: false,
   kibanaTheme: themeServiceMock.createStartContract(),
   eventAnnotationService: eventAnnotationServiceMock,
+  core: coreMock.createStart(),
+  storage: {} as IStorageWrapper,
+  data: dataPluginMock.createStartContract(),
 });
 
 describe('xy_suggestions', () => {
