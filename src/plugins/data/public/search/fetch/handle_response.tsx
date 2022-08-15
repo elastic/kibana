@@ -24,9 +24,8 @@ export function handleResponse(
 ) {
   const { rawResponse } = response;
   const { timedOut, shardFailures } = extractWarnings(rawResponse);
-
   if (timedOut) {
-    getNotifications().toasts.addWarning(timedOut.title!);
+    getNotifications().toasts.addWarning(timedOut);
   }
 
   if (shardFailures && !disableShardFailureWarning) {
