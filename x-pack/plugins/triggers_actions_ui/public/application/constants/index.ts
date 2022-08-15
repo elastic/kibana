@@ -42,6 +42,8 @@ export const DEFAULT_SEARCH_PAGE_SIZE: number = 10;
 export const DEFAULT_RULE_INTERVAL = '1m';
 
 export const RULE_EXECUTION_LOG_COLUMN_IDS = [
+  'rule_id',
+  'rule_name',
   'id',
   'timestamp',
   'execution_duration',
@@ -74,6 +76,7 @@ export const RULE_EXECUTION_LOG_ALERT_COUNT_COLUMNS = [
 ];
 
 export const LOCKED_COLUMNS = [
+  'rule_name',
   'timestamp',
   'execution_duration',
   'status',
@@ -82,4 +85,5 @@ export const LOCKED_COLUMNS = [
   'num_errored_actions',
 ];
 
-export const RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS = [...LOCKED_COLUMNS];
+export const RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS = [...LOCKED_COLUMNS.slice(1)];
+export const GLOBAL_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS = ['rule_name', ...LOCKED_COLUMNS];

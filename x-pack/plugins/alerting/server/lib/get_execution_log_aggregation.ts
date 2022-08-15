@@ -63,6 +63,7 @@ interface IExecutionUuidAggBucket extends estypes.AggregationsStringTermsBucketK
     numRecoveredAlerts: estypes.AggregationsMaxAggregate;
     numNewAlerts: estypes.AggregationsMaxAggregate;
     outcomeAndMessage: estypes.AggregationsTopHitsAggregate;
+    ruleId?: estypes.AggregationsTopHitsAggregate;
   };
   actionExecution: {
     actionOutcomes: IActionExecution;

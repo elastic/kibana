@@ -5,27 +5,24 @@
  * 2.0.
  */
 
-import React from 'react';
 import { suspendedComponentWithProps } from '../../../lib/suspended_component_with_props';
-import { RuleEventLogListWithApi } from '../../rule_details/components/rule_event_log_list';
+import { RuleEventLogListTableWithApi } from '../../rule_details/components/rule_event_log_list_table';
+
+const GLOBAL_EVENT_LOG_LIST_STORAGE_KEY =
+  'xpack.triggersActionsUI.globalEventLogList.initialColumns';
 
 export const LogsList = () => {
   const refreshToken = 0;
 
   return suspendedComponentWithProps(
-    RuleEventLogListWithApi,
+    RuleEventLogListTableWithApi,
     'xl'
   )({
-    fetchRuleSummary: false,
-    hideChart: true,
     ruleId: '*',
-    ruleType: '',
-    ruleSummary: '',
-    numberOfExecutions: 0,
     refreshToken,
-    isLoadingRuleSummary: false,
-    onChangeDuration: () => {},
-    requestRefresh: async () => {},
+    initialPageSize: 50,
+    hasRuleNames: true,
+    localStorageKey: GLOBAL_EVENT_LOG_LIST_STORAGE_KEY,
   });
 };
 
