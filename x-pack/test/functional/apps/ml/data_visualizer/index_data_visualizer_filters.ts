@@ -109,6 +109,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await ml.testExecution.logTestStep(`${testData.suiteTitle} navigates to Discover`);
       await ml.navigation.navigateToDiscoverViaAppsMenu();
+      await PageObjects.timePicker.setAbsoluteRange(startTime, endTime);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await ml.dataVisualizerIndexBased.assertFilterBarFilterContent(PINNED_FILTER);
     });
