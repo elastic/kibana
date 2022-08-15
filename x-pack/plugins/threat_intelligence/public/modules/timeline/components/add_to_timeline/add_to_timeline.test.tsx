@@ -1,0 +1,62 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { render } from '@testing-library/react';
+import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
+import { EMPTY_VALUE } from '../../../../../common/constants';
+import { AddToTimeline } from './add_to_timeline';
+import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
+
+describe('<AddToTimeline />', () => {
+  it('should render timeline button when Indicator data', () => {
+    const mockField: string = 'threat.indicator.ip';
+    const mockData: Indicator = generateMockIndicator();
+
+    const component = render(
+      <TestProvidersComponent>
+        <AddToTimeline field={mockField} data={mockData} />
+      </TestProvidersComponent>
+    );
+    expect(component).toMatchSnapshot();
+  });
+
+  it('should render timeline button when string data', () => {
+    const mockField: string = 'threat.indicator.ip';
+    const mockString: string = 'ip';
+
+    const component = render(
+      <TestProvidersComponent>
+        <AddToTimeline field={mockField} data={mockString} />
+      </TestProvidersComponent>
+    );
+    expect(component).toMatchSnapshot();
+  });
+
+  it(`should render empty component when field doesn't exist in data`, () => {
+    const mockField: string = 'abc';
+    const mockData: Indicator = generateMockIndicator();
+
+    const component = render(
+      <TestProvidersComponent>
+        <AddToTimeline field={mockField} data={mockData} />
+      </TestProvidersComponent>
+    );
+    expect(component).toMatchSnapshot();
+  });
+
+  it(`should render empty component when data is ${EMPTY_VALUE}`, () => {
+    const mockField: string = 'threat.indicator.ip';
+
+    const component = render(
+      <TestProvidersComponent>
+        <AddToTimeline field={mockField} data={EMPTY_VALUE} />
+      </TestProvidersComponent>
+    );
+    expect(component).toMatchSnapshot();
+  });
+});
