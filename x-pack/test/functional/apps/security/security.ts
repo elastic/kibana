@@ -11,22 +11,21 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['security', 'spaceSelector']);
   const testSubjects = getService('testSubjects');
   const spaces = getService('spaces');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/60132
-  describe.skip('Security', function () {
+  describe('Security', function () {
     this.tags('includeFirefox');
     describe('Login Page', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+        await kibanaServer.savedObjects.cleanStandardList();
         await PageObjects.security.forceLogout();
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
+        await kibanaServer.savedObjects.cleanStandardList();
       });
 
       afterEach(async () => {
