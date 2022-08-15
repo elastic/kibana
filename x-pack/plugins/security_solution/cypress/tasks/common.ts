@@ -180,7 +180,7 @@ export const deleteCases = () => {
 };
 
 export const postDataView = (dataSource: string) => {
-  cy.request({
+  return cy.request({
     method: 'POST',
     url: `/api/index_patterns/index_pattern`,
     body: {

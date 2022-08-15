@@ -328,22 +328,6 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
     }
   }, [data?.hits.hits, isLoadingAlertData]);
 
-  /**
-   * This should be re-visited after UEBA work is merged
-   */
-  const useRuleIndices = useMemo(() => {
-    if (enrichedAlert != null && enrichedAlert['kibana.alert.rule.parameters']?.index != null) {
-      return Array.isArray(enrichedAlert['kibana.alert.rule.parameters'].index)
-        ? enrichedAlert['kibana.alert.rule.parameters'].index
-        : [enrichedAlert['kibana.alert.rule.parameters'].index];
-    } else if (enrichedAlert != null && enrichedAlert?.signal?.rule?.index != null) {
-      return Array.isArray(enrichedAlert.signal.rule.index)
-        ? enrichedAlert.signal.rule.index
-        : [enrichedAlert.signal.rule.index];
-    }
-    return ruleIndices;
-  }, [enrichedAlert, ruleIndices]);
-
   const memoDataViewId = useMemo(() => {
     if (
       enrichedAlert != null &&
@@ -353,13 +337,28 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
     }
   }, [enrichedAlert]);
 
+  /**
+   * This should be re-visited after UEBA work is merged
+   */
+  const memoRuleIndices = useMemo(() => {
+    if (enrichedAlert != null && enrichedAlert['kibana.alert.rule.parameters']?.index != null) {
+      return Array.isArray(enrichedAlert['kibana.alert.rule.parameters'].index)
+        ? enrichedAlert['kibana.alert.rule.parameters'].index
+        : [enrichedAlert['kibana.alert.rule.parameters'].index];
+    } else if (enrichedAlert != null && enrichedAlert?.signal?.rule?.index != null) {
+      return Array.isArray(enrichedAlert.signal.rule.index)
+        ? enrichedAlert.signal.rule.index
+        : [enrichedAlert.signal.rule.index];
+    }
+  }, [enrichedAlert]);
+
   const isLoading = isLoadingAlertData && isSignalIndexLoading;
 
   return (
     <AddExceptionFlyout
       ruleName={ruleName}
       ruleId={ruleId}
-      ruleIndices={useRuleIndices}
+      ruleIndices={memoRuleIndices ?? []}
       dataViewId={memoDataViewId}
       exceptionListType={exceptionListType}
       alertData={enrichedAlert}
