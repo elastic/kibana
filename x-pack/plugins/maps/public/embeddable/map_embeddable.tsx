@@ -199,10 +199,12 @@ export class MapEmbeddable
     if (mapStateJSON) {
       try {
         const mapState = JSON.parse(mapStateJSON);
-        store.dispatch(setEmbeddableSearchContext({
-          filters: mapState.filters ? mapState.filters : [],
-          query: mapState.query,
-        }));
+        store.dispatch(
+          setEmbeddableSearchContext({
+            filters: mapState.filters ? mapState.filters : [],
+            query: mapState.query,
+          })
+        );
       } catch (e) {
         console.log(e);
         // ignore malformed mapStateJSON, not a critical error for viewing map - map will just use defaults
