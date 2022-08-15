@@ -7,6 +7,7 @@
 
 import React from 'react';
 import userEvent from '@testing-library/user-event';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import {
   render,
   forNearestButton,
@@ -34,6 +35,7 @@ describe('ToggleAlertFlyoutButtonComponent', () => {
         { core: makeUptimePermissionsCore({ save: true }) }
       );
       userEvent.click(getByText('Alerts and rules'));
+      await waitForEuiPopoverOpen();
       userEvent.hover(getByText(ToggleFlyoutTranslations.openAlertContextPanelLabel));
       await new Promise((r) => setTimeout(r, 250)); // wait for the default time for tooltips to show up
       await expect(
@@ -60,6 +62,7 @@ describe('ToggleAlertFlyoutButtonComponent', () => {
         { core: makeUptimePermissionsCore({ save: false }) }
       );
       userEvent.click(getByText('Alerts and rules'));
+      await waitForEuiPopoverOpen();
       userEvent.hover(getByText(ToggleFlyoutTranslations.openAlertContextPanelLabel));
       expect(
         await findByText('You need read-write access to Uptime to create alerts in this app.')
