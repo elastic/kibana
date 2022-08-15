@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiCallOut } from '@elastic/eui';
@@ -169,10 +169,14 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
     [fieldPreview$, lastPreview$]
   );
 
+  const lastPreview = useRef<FieldPreview[]>();
+
   useEffect(() => {
     const existingCompositeField = !!Object.keys(form.getFormData().fields || {}).length;
-    // need to keep this.
-    // also need to push empty object and last fieldPreview
+
+    const subLastPreview = fieldPreview$.subscribe((val) => {
+      lastPreview.current = val;
+    });
     const changes$ = fieldPreview$.pipe(
       map((items) =>
         // reduce the fields to make diffing easier
@@ -202,7 +206,7 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
       filter((fields) => Object.keys(fields).length > 0)
     );
 
-    const sub = changes$.subscribe((previewFields) => {
+    const subChanges = changes$.subscribe((previewFields) => {
       const { fields } = form.getFormData();
 
       const modifiedFields = { ...fields };
@@ -218,12 +222,16 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
       form.updateFieldValues({ ...form.getFormData(), fields: modifiedFields });
     });
 
-    // first preview value is skipped for saved fields, need to populate for new fields
+    // first preview value is skipped for saved fields, need to populate for new fields and rerenders
     if (!existingCompositeField) {
       fieldPreview$.next([]);
+    } else if (lastPreview.current) {
+      fieldPreview$.next(lastPreview.current);
     }
+
     return () => {
-      sub.unsubscribe();
+      subChanges.unsubscribe();
+      subLastPreview.unsubscribe();
     };
   }, [form, fieldPreview$]);
 
