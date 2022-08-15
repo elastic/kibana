@@ -10,6 +10,7 @@ import expect from '@kbn/expect';
 import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/detection_engine/rule_monitoring';
 import { QueryCreateSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
 import { getCreateRulesSchemaMock } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request/rule_schemas.mock';
+import { get } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createRule,
@@ -54,7 +55,7 @@ export default ({ getService }: FtrProviderContext) => {
         ...getCreateRulesSchemaMock('rule-1'),
         query: '*',
         from: 'now-100000h',
-        max_signals: 2,
+        max_signals: 5,
         alertGrouping: {
           groupBy: ['host.name'],
         },
@@ -70,9 +71,14 @@ export default ({ getService }: FtrProviderContext) => {
       await waitForSignalsToBePresent(supertest, log, 2, [createdRule.id]);
 
       const signalsOpen = await getOpenSignals(supertest, log, es, createdRule);
-      expect(signalsOpen.hits.hits.length).eql(2);
+      expect(signalsOpen.hits.hits.length).eql(5);
 
-      // TODO: more specific testing
+      const hits = signalsOpen.hits.hits;
+      expect(get(hits[0]._source, 'host.name')).eql('suricata-zeek-sensor-toronto');
+      expect(get(hits[1]._source, 'host.name')).eql('suricata-sensor-london');
+      expect(get(hits[2]._source, 'host.name')).eql('suricata-sensor-amsterdam');
+      expect(get(hits[3]._source, 'host.name')).eql('zeek-sensor-amsterdam');
+      expect(get(hits[4]._source, 'host.name')).eql('zeek-sensor-san-francisco');
     });
   });
 };
