@@ -15,13 +15,43 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "AWS IAM Assume Role Policy Update",
-  "note": "## Config\n\nThe AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "note": "## Triage and analysis\n\n### Investigating AWS IAM Assume Role Policy Update\n\nAn IAM role is an IAM identity that you can create in your account that has specific permissions. An IAM role is similar\nto an IAM user, in that it is an AWS identity with permission policies that determine what the identity can and cannot\ndo in AWS. However, instead of being uniquely associated with one person, a role is intended to be assumable by anyone\nwho needs it. Also, a role does not have standard long-term credentials such as a password or access keys associated\nwith it. Instead, when you assume a role, it provides you with temporary security credentials for your role session.\n\nThe role trust policy is a JSON document in which you define the principals you trust to assume the role. This policy is\na required resource-based policy that is attached to a role in IAM. An attacker may attempt to modify this policy by\nusing the `UpdateAssumeRolePolicy` API action to gain the privileges of that role.\n\n#### Possible investigation steps\n\n- Identify the user account that performed the action and whether it should perform this kind of action.\n- Investigate other alerts associated with the user account during the past 48 hours.\n- Contact the account and resource owners and confirm whether they are aware of this activity.\n- Check if this operation was approved and performed according to the organization's change management policy.\n- If you suspect the account has been compromised, scope potentially compromised assets by tracking servers, services,\nand data accessed by the account in the last 24 hours.\n\n### False positive analysis\n\n- False positives may occur due to the intended usage of the service. Tuning is needed in order to have higher\nconfidence. Consider adding exceptions \u2014 preferably with a combination of the user agent and user ID conditions \u2014 to\ncover administrator activities and infrastructure as code tooling.\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Disable or limit the account during the investigation and response.\n- Identify the possible impact of the incident and prioritize accordingly; the following actions can help you gain context:\n    - Identify the account role in the cloud environment.\n    - Assess the criticality of affected services and servers.\n    - Work with your IT team to identify and minimize the impact on users.\n    - Identify if the attacker is moving laterally and compromising other accounts, servers, or services.\n    - Identify any regulatory or legal ramifications related to this activity.\n- Use AWS [policy versioning](https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_managed-versioning.html) to restore the trust policy to the desired state.\n- Investigate credential exposure on systems compromised or used by the attacker to ensure all compromised accounts are\nidentified. Reset passwords or delete API keys as needed to revoke the attacker's access to the environment. Work with\nyour IT teams to minimize the impact on business operations during these actions.\n- Check if unauthorized new users were created, remove unauthorized new accounts, and request password resets for other\nIAM users.\n- Consider enabling multi-factor authentication for users.\n- Review the permissions assigned to the implicated user to ensure that the least privilege principle is being followed.\n- Implement security best practices [outlined](https://aws.amazon.com/premiumsupport/knowledge-center/security-best-practices/) by AWS.\n- Determine the initial vector abused by the attacker and take action to prevent reinfection via the same vector.\n- Using the incident response data, update logging and audit policies to improve the mean time to detect (MTTD) and the\nmean time to respond (MTTR).",
   "query": "event.dataset:aws.cloudtrail and event.provider:iam.amazonaws.com and event.action:UpdateAssumeRolePolicy and event.outcome:success\n",
   "references": [
     "https://labs.bishopfox.com/tech-blog/5-privesc-attack-vectors-in-aws"
   ],
+  "related_integrations": [
+    {
+      "integration": "cloudtrail",
+      "package": "aws",
+      "version": "1.10.2"
+    }
+  ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.action",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.dataset",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.outcome",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.provider",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 21,
   "rule_id": "a60326d7-dca7-4fb7-93eb-1ca03a1febbd",
+  "setup": "The AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
   "severity": "low",
   "tags": [
     "Elastic",
@@ -50,5 +80,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 5
+  "version": 7
 }

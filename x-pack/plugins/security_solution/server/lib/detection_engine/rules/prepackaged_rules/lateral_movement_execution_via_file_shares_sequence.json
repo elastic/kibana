@@ -16,6 +16,38 @@
   "references": [
     "https://blog.menasec.net/2020/08/new-trick-to-detect-lateral-movement.html"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "file.extension",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "file.path",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "host.id",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.executable",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.pid",
+      "type": "long"
+    }
+  ],
   "risk_score": 47,
   "rule_id": "ab75c24b-2502-43a0-bf7c-e60e662c811e",
   "severity": "medium",
@@ -51,5 +83,5 @@
     }
   ],
   "type": "eql",
-  "version": 2
+  "version": 3
 }

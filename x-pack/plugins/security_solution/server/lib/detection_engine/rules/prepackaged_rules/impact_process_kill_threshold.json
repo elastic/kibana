@@ -1,0 +1,72 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "This rule identifies a high number (10) of process terminations via pkill from the same host within a short time period.",
+  "from": "now-9m",
+  "index": [
+    "logs-endpoint.events.*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "High Number of Process Terminations",
+  "note": "## Triage and analysis\n\n### Investigating High Number of Process Terminations\n\nAttackers can kill processes for a variety of purposes. For example, they can kill process associated\nwith business applications and databases to release the lock on files used by these applications so they may be\nencrypted,or stop security and backup solutions, etc.\n\nThis rule identifies a high number (10) of process terminations via pkill from the same\nhost within a short time period.\n\n#### Possible investigation steps\n\nDetection alerts from this rule indicate High Number of Process Terminations from the same host\nHere are some possible avenues of investigation:\n- Examine the entry point to the host and user in action via the Analyse View.\n  - Identify the session entry leader and session user\n- Examine the contents of session leading to the process termination(s) via the Session View.\n  - Examine the command execution pattern in the session, which may lead to suspricous activities\n- Examine the process killed during the malicious execution\n  - Identify imment threat to the system from the process killed\n  - Take necessary incident response actions to respawn necessary process\n\n### False positive analysis\n\n- This activity is unlikely to happen legitimately. Benign true positives (B-TPs) can be added as exceptions if necessary.\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Isolate the involved host to prevent further destructive behavior, which is commonly associated with this activity.\n- Investigate credential exposure on systems compromised or used by the attacker to ensure all compromised accounts are\nidentified. Reset passwords for these accounts and other potentially compromised credentials, such as email, business\nsystems, and web services.\n- Reimage the host operating system or restore it to the operational state.\n- If any other destructive action was identified on the host, it is recommended to prioritize the investigation and look\nfor ransomware preparation and execution activities.\n- Run a full antimalware scan. This may reveal additional artifacts left in the system, persistence mechanisms, and\nmalware components.\n- Determine the initial vector abused by the attacker and take action to prevent reinfection through the same vector.\n- Using the incident response data, update logging and audit policies to improve the mean time to detect (MTTD) and the\nmean time to respond (MTTR).\n",
+  "query": "event.category:process and event.type:start and process.name:\"pkill\" and process.args:\"-f\"\n",
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.category",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.args",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.name",
+      "type": "keyword"
+    }
+  ],
+  "risk_score": 47,
+  "rule_id": "67f8443a-4ff3-4a70-916d-3cfa3ae9f02b",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Linux",
+    "Threat Detection",
+    "Impact"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0040",
+        "name": "Impact",
+        "reference": "https://attack.mitre.org/tactics/TA0040/"
+      },
+      "technique": [
+        {
+          "id": "T1489",
+          "name": "Service Stop",
+          "reference": "https://attack.mitre.org/techniques/T1489/"
+        }
+      ]
+    }
+  ],
+  "threshold": {
+    "field": [
+      "host.id"
+    ],
+    "value": 10
+  },
+  "type": "threshold",
+  "version": 2
+}
