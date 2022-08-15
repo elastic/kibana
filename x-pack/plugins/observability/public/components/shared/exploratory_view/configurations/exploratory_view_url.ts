@@ -62,7 +62,7 @@ export function createExploratoryViewUrl(
  *
  * @param uri Non encoded URI
  */
-function encodeUriIfNeeded(uri: string) {
+export function encodeUriIfNeeded(uri: string) {
   if (!uri) {
     return uri;
   }
