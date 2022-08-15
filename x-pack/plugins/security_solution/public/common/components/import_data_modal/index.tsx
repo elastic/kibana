@@ -74,7 +74,9 @@ export const ImportDataModalComponent = ({
     setIsImporting(false);
     setSelectedFiles(null);
     closeModal();
-  }, [setIsImporting, setSelectedFiles, closeModal]);
+    setOverwrite(false);
+    setOverwriteExceptions(false);
+  }, [setIsImporting, setSelectedFiles, closeModal, setOverwrite, setOverwriteExceptions]);
 
   const importDataCallback = useCallback(async () => {
     if (selectedFiles != null) {
@@ -122,9 +124,8 @@ export const ImportDataModalComponent = ({
   ]);
 
   const handleCloseModal = useCallback(() => {
-    setSelectedFiles(null);
-    closeModal();
-  }, [closeModal]);
+    cleanupAndCloseModal();
+  }, [cleanupAndCloseModal]);
 
   const handleCheckboxClick = useCallback(() => {
     setOverwrite((shouldOverwrite) => !shouldOverwrite);
@@ -149,6 +150,7 @@ export const ImportDataModalComponent = ({
 
             <EuiSpacer size="s" />
             <EuiFilePicker
+              data-test-subj="rule-file-picker"
               accept=".ndjson"
               id="rule-file-picker"
               initialPromptText={subtitle}
@@ -163,6 +165,7 @@ export const ImportDataModalComponent = ({
             {showCheckBox && (
               <>
                 <EuiCheckbox
+                  data-test-subj="import-data-modal-checkbox-label"
                   id="import-data-modal-checkbox-label"
                   label={checkBoxLabel}
                   checked={overwrite}
@@ -170,6 +173,7 @@ export const ImportDataModalComponent = ({
                 />
                 {showExceptionsCheckBox && (
                   <EuiCheckbox
+                    data-test-subj="import-data-modal-exceptions-checkbox-label"
                     id="import-data-modal-exceptions-checkbox-label"
                     label={i18n.OVERWRITE_EXCEPTIONS_LABEL}
                     checked={overwriteExceptions}
