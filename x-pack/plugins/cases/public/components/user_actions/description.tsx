@@ -65,7 +65,7 @@ export const getDescriptionUserAction = ({
         onChangeEditable={handleManageMarkdownEditId}
       />
     ),
-    timelineIcon: (
+    timelineAvatar: (
       <UserActionAvatar
         username={caseData.createdBy.username}
         fullName={caseData.createdBy.fullName}
