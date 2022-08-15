@@ -15,6 +15,7 @@ import { UserProfilesSelectable } from './user_profiles_selectable';
 const userProfiles: UserProfile[] = [
   {
     uid: 'u_BOulL4QMPSyV9jg5lQI2JmCkUnokHTazBnet3xVHNv0_0',
+    enabled: true,
     data: {},
     enabled: true,
     user: {
@@ -25,6 +26,7 @@ const userProfiles: UserProfile[] = [
   },
   {
     uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
+    enabled: true,
     data: {},
     enabled: true,
     user: {
@@ -35,6 +37,7 @@ const userProfiles: UserProfile[] = [
   },
   {
     uid: 'u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0',
+    enabled: true,
     data: {},
     enabled: true,
     user: {
@@ -45,6 +48,7 @@ const userProfiles: UserProfile[] = [
   },
   {
     uid: 'u_9xDEQqUqoYCnFnPPLq5mIRHKL8gBTo_NiKgOnd5gGk0_0',
+    enabled: true,
     data: {},
     enabled: true,
     user: {

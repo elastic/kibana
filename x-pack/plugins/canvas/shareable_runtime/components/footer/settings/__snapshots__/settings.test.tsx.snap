@@ -9,14 +9,15 @@ exports[`<Settings /> can navigate Autoplay Settings 1`] = `
       aria-describedby="generated-id"
       aria-live="off"
       aria-modal="true"
-      class="euiPanel euiPanel--plain euiPopover__panel euiPopover__panel--top emotion-euiPanel-grow-m-plain"
+      class="euiPanel euiPanel--plain euiPopover__panel emotion-euiPanel-grow-m-plain-euiPopover__panel"
       data-popover-panel="true"
       role="dialog"
       style="top: -16px; left: -22px; will-change: transform, opacity; z-index: 2000;"
       tabindex="0"
     >
       <div
-        class="euiPopover__panelArrow euiPopover__panelArrow--top"
+        class="emotion-euiPopoverArrow-top"
+        data-popover-arrow="top"
         style="left: 10px; top: 0px;"
       />
       <p
@@ -108,14 +109,16 @@ exports[`<Settings /> can navigate Autoplay Settings 2`] = `
       aria-describedby="generated-id"
       aria-live="off"
       aria-modal="true"
-      class="euiPanel euiPanel--plain euiPopover__panel euiPopover__panel--top euiPopover__panel-isOpen emotion-euiPanel-grow-m-plain"
+      class="euiPanel euiPanel--plain euiPopover__panel emotion-euiPanel-grow-m-plain-euiPopover__panel-isOpen-top"
+      data-popover-open="true"
       data-popover-panel="true"
       role="dialog"
       style="top: -16px; left: -22px; z-index: 2000;"
       tabindex="0"
     >
       <div
-        class="euiPopover__panelArrow euiPopover__panelArrow--top"
+        class="emotion-euiPopoverArrow-top"
+        data-popover-arrow="top"
         style="left: 10px; top: 0px;"
       />
       <p
@@ -360,14 +363,15 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 1`] =
       aria-describedby="generated-id"
       aria-live="off"
       aria-modal="true"
-      class="euiPanel euiPanel--plain euiPopover__panel euiPopover__panel--top emotion-euiPanel-grow-m-plain"
+      class="euiPanel euiPanel--plain euiPopover__panel emotion-euiPanel-grow-m-plain-euiPopover__panel"
       data-popover-panel="true"
       role="dialog"
       style="top: -16px; left: -22px; will-change: transform, opacity; z-index: 2000;"
       tabindex="0"
     >
       <div
-        class="euiPopover__panelArrow euiPopover__panelArrow--top"
+        class="emotion-euiPopoverArrow-top"
+        data-popover-arrow="top"
         style="left: 10px; top: 0px;"
       />
       <p
@@ -459,14 +463,16 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 2`] =
       aria-describedby="generated-id"
       aria-live="off"
       aria-modal="true"
-      class="euiPanel euiPanel--plain euiPopover__panel euiPopover__panel--top euiPopover__panel-isOpen emotion-euiPanel-grow-m-plain"
+      class="euiPanel euiPanel--plain euiPopover__panel emotion-euiPanel-grow-m-plain-euiPopover__panel-isOpen-top"
+      data-popover-open="true"
       data-popover-panel="true"
       role="dialog"
       style="top: -16px; left: -22px; z-index: 2000;"
       tabindex="0"
     >
       <div
-        class="euiPopover__panelArrow euiPopover__panelArrow--top"
+        class="emotion-euiPopoverArrow-top"
+        data-popover-arrow="top"
         style="left: 10px; top: 0px;"
       />
       <p
@@ -644,14 +650,15 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 3`] =
       aria-describedby="generated-id"
       aria-live="off"
       aria-modal="true"
-      class="euiPanel euiPanel--plain euiPopover__panel euiPopover__panel--top emotion-euiPanel-grow-m-plain"
+      class="euiPanel euiPanel--plain euiPopover__panel emotion-euiPanel-grow-m-plain-euiPopover__panel"
       data-popover-panel="true"
       role="dialog"
       style="top: -16px; left: -22px; z-index: 2000;"
       tabindex="0"
     >
       <div
-        class="euiPopover__panelArrow euiPopover__panelArrow--top"
+        class="emotion-euiPopoverArrow-top"
+        data-popover-arrow="top"
         style="left: 10px; top: 0px;"
       />
       <p
