@@ -221,6 +221,7 @@ export const useGetCaseUserActions = (caseId: string, caseConnectorId: string) =
 
       const caseUserActions = !isEmpty(response) ? response : [];
       const pushedInfo = getPushedInfo(caseUserActions, caseConnectorId);
+
       return {
         caseUserActions,
         participants,
@@ -241,3 +242,5 @@ export const useGetCaseUserActions = (caseId: string, caseConnectorId: string) =
 };
 
 export type UseGetCaseUserActions = ReturnType<typeof useGetCaseUserActions>;
+
+// TODO: extract the assigned and unassigned users so their profiles can be retrieved

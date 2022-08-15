@@ -13,6 +13,7 @@ import { UserToolTip } from './user_tooltip';
 import { getName } from './display_name';
 import * as i18n from './translations';
 import { Assignee } from './types';
+import { getUsernameDataTestSubj } from './data_test_subject';
 
 const UserAvatarWithName: React.FC<{ profile?: UserProfileWithAvatar }> = ({ profile }) => {
   return (
@@ -53,7 +54,7 @@ const UserRepresentationComponent: React.FC<UserRepresentationProps> = ({
   const onMouseEnter = useCallback(() => setIsHovering(true), []);
   const onMouseLeave = useCallback(() => setIsHovering(false), []);
 
-  const usernameDataTestSubj = assignee.profile?.user.username ?? assignee.uid;
+  const usernameDataTestSubj = getUsernameDataTestSubj(assignee);
 
   return (
     <EuiFlexGroup
