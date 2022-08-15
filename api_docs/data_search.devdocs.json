@@ -11308,7 +11308,7 @@
           "\nChecks whether a given Elasticsearch interval is a calendar or fixed interval\nand returns an object containing the appropriate date_histogram property for that\ninterval. So it will return either an object containing the fixed_interval key for\nthat interval or a calendar_interval. If the specified interval was not a valid Elasticsearch\ninterval this method will throw an error.\n\nYou can simply spread the returned value of this method into your date_histogram."
         ],
         "signature": [
-          "(interval: string) => Interval"
+          "(interval: string, shouldForceFixed: boolean | undefined) => Interval"
         ],
         "path": "src/plugins/data/common/search/aggs/utils/date_interval_utils/date_histogram_interval.ts",
         "deprecated": false,
@@ -11328,6 +11328,20 @@
             "path": "src/plugins/data/common/search/aggs/utils/date_interval_utils/date_histogram_interval.ts",
             "deprecated": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.dateHistogramInterval.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "shouldForceFixed",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/utils/date_interval_utils/date_histogram_interval.ts",
+            "deprecated": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
