@@ -7,9 +7,10 @@
 
 import React from 'react';
 
+import { useValues } from 'kea';
+
 import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../../common/constants';
-import { useEnterpriseSearchData } from '../../../shared/enterprise_search_provider';
-import { NO_ACCESS } from '../../../shared/enterprise_search_provider/constants';
+import { KibanaLogic } from '../../../shared/kibana';
 import { SetEnterpriseSearchChrome } from '../../../shared/kibana_chrome';
 import { EnterpriseSearchPageTemplateWrapper, PageTemplateProps } from '../../../shared/layout';
 import { useEnterpriseSearchNav } from '../../../shared/layout';
@@ -21,14 +22,14 @@ export const EnterpriseSearchOverviewPageTemplate: React.FC<PageTemplateProps> =
   pageViewTelemetry,
   ...pageTemplateProps
 }) => {
-  const { initialData } = useEnterpriseSearchData();
+  const { productAccess } = useValues(KibanaLogic);
 
   return (
     <EnterpriseSearchPageTemplateWrapper
       {...pageTemplateProps}
       solutionNav={{
         name: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAME,
-        items: useEnterpriseSearchNav(initialData.access || NO_ACCESS),
+        items: useEnterpriseSearchNav(productAccess),
       }}
       setPageChrome={pageChrome && <SetEnterpriseSearchChrome trail={pageChrome} />}
     >

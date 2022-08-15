@@ -18,10 +18,9 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
-import { InitialAppData } from '../../common/types';
+import { InitialAppData, ProductAccess } from '../../common/types';
 import { PluginsStart, ClientConfigType, ClientData } from '../plugin';
 
-import { EnterpriseSearchProvider } from './shared/enterprise_search_provider';
 import { externalUrl } from './shared/enterprise_search_url';
 import { mountFlashMessagesLogic, Toasts } from './shared/flash_messages';
 import { mountHttpLogic } from './shared/http';
@@ -42,6 +41,12 @@ export const renderApp = (
   const { publicUrl, errorConnectingMessage, ...initialData } = data;
   externalUrl.enterpriseSearchUrl = publicUrl || config.host || '';
 
+  const noProductAccess: ProductAccess = {
+    hasAppSearchAccess: false,
+    hasWorkplaceSearchAccess: false,
+  };
+  const productAccess = data.access || noProductAccess;
+
   const EmptyContext: FC = ({ children }) => <>{children}</>;
   const CloudContext = plugins.cloud?.CloudContextProvider || EmptyContext;
 
@@ -50,6 +55,7 @@ export const renderApp = (
 
   const unmountKibanaLogic = mountKibanaLogic({
     config,
+    productAccess,
     charts: plugins.charts,
     cloud: plugins.cloud,
     history: params.history,
@@ -77,14 +83,12 @@ export const renderApp = (
       <KibanaThemeProvider theme$={params.theme$}>
         <KibanaContextProvider services={{ ...core, ...plugins }}>
           <CloudContext>
-            <EnterpriseSearchProvider initialData={initialData}>
-              <Provider store={store}>
-                <Router history={params.history}>
-                  <App {...initialData} />
-                  <Toasts />
-                </Router>
-              </Provider>
-            </EnterpriseSearchProvider>
+            <Provider store={store}>
+              <Router history={params.history}>
+                <App {...initialData} />
+                <Toasts />
+              </Router>
+            </Provider>
           </CloudContext>
         </KibanaContextProvider>
       </KibanaThemeProvider>
