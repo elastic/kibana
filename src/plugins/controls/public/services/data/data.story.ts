@@ -9,7 +9,6 @@
 import { of, Observable } from 'rxjs';
 import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/common';
 import { ControlsDataService } from './types';
 
 export type DataServiceFactory = PluginServiceFactory<ControlsDataService>;
@@ -30,7 +29,4 @@ export const dataServiceFactory: DataServiceFactory = () => ({
     createFilter: () => {},
   } as unknown as DataPublicPluginStart['query']['timefilter']['timefilter'],
   fetchFieldRange: () => Promise.resolve({ min: 0, max: 100 }),
-  fetchFieldRange$: () => new Observable<{ min: number; max: number }>(),
-  getDataView: () => Promise.resolve({} as DataView),
-  getDataView$: () => new Observable({} as any),
 });

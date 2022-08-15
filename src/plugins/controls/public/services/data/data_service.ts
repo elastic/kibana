@@ -8,7 +8,7 @@
 
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { get } from 'lodash';
-import { from, lastValueFrom } from 'rxjs';
+import { lastValueFrom } from 'rxjs';
 import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { ControlsDataService } from './types';
 import { ControlsPluginStartDeps } from '../../types';
@@ -91,10 +91,6 @@ export const dataServiceFactory: DataServiceFactory = ({ startPlugins }) => {
 
   return {
     fetchFieldRange,
-    fetchFieldRange$: (dataView, fieldName, input) =>
-      from(fetchFieldRange(dataView, fieldName, input)),
-    getDataView: data.dataViews.get,
-    getDataView$: (id: string) => from(data.dataViews.get(id)),
     query: queryPlugin,
     searchSource: search.searchSource,
     timefilter: queryPlugin.timefilter.timefilter,
