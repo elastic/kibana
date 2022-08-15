@@ -102,7 +102,7 @@ export const TimeSlider: FC<Props> = (props) => {
   const to = value ? value[TO_INDEX] : timeRangeMax;
   
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup gutterSize="none">
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
           onClick={() => {
