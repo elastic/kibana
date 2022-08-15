@@ -343,7 +343,7 @@ const ExceptionsViewerComponent = ({
         exceptionListTypeToEdit != null && (
           <EditExceptionFlyout
             ruleName={rule.name}
-            ruleId={rule.rule_id}
+            ruleId={rule.id}
             ruleIndices={rule.index ?? DEFAULT_INDEX_PATTERN}
             dataViewId={rule.data_view_id}
             exceptionListType={exceptionListTypeToEdit}
@@ -359,7 +359,7 @@ const ExceptionsViewerComponent = ({
           ruleName={rule.name}
           ruleIndices={rule.index ?? DEFAULT_INDEX_PATTERN}
           dataViewId={rule.data_view_id}
-          ruleId={rule.rule_id}
+          ruleId={rule.id}
           exceptionListType={exceptionListTypeToEdit}
           onCancel={handleOnCancelExceptionModal}
           onConfirm={handleOnConfirmExceptionModal}
