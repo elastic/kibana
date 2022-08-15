@@ -40,6 +40,7 @@ exports[`OpenSearchPanel render 1`] = `
           },
         ]
       }
+      showFilter={true}
     />
   </EuiFlyoutBody>
   <EuiFlyoutFooter>
