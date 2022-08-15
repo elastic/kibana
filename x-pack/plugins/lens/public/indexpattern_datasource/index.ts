@@ -17,7 +17,7 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { FieldFormatsStart, FieldFormatsSetup } from '@kbn/field-formats-plugin/public';
 import type { EditorFrameSetup } from '../types';
 
-export type { PersistedIndexPatternLayer, IndexPattern, FormulaPublicApi } from './types';
+export type { PersistedIndexPatternLayer, FormulaPublicApi } from './types';
 
 export interface IndexPatternDatasourceSetupPlugins {
   expressions: ExpressionsSetup;
