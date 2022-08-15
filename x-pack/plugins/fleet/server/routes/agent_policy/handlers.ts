@@ -51,10 +51,18 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const { full: withPackagePolicies = false, ...restOfQuery } = request.query;
   try {
-    const { items, total, page, perPage } = await agentPolicyService.list(soClient, {
-      withPackagePolicies,
-      ...restOfQuery,
-    });
+    const { items, total, page, perPage } =
+      'ids' in request.query
+        ? await (async (ids: string[]) => {
+            const res = await agentPolicyService.getByIDs(soClient, ids, { withPackagePolicies });
+
+            return { items: res, total: res.length, page: 1, perPage: res.length };
+          })(request.query.ids)
+        : await agentPolicyService.list(soClient, {
+            withPackagePolicies,
+            ...restOfQuery,
+          });
+
     const body: GetAgentPoliciesResponse = {
       items,
       total,

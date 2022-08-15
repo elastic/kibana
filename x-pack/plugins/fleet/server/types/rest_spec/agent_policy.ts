@@ -9,12 +9,17 @@ import { schema } from '@kbn/config-schema';
 
 import { NewAgentPolicySchema } from '../models';
 
-import { ListWithKuerySchema } from '.';
+import { ListWithKuerySchema, BulkGetSchema } from '.';
 
 export const GetAgentPoliciesRequestSchema = {
-  query: ListWithKuerySchema.extends({
-    full: schema.maybe(schema.boolean()),
-  }),
+  query: schema.oneOf([
+    ListWithKuerySchema.extends({
+      full: schema.maybe(schema.boolean()),
+    }),
+    BulkGetSchema.extends({
+      full: schema.maybe(schema.boolean()),
+    }),
+  ]),
 };
 
 export const GetOneAgentPolicyRequestSchema = {
