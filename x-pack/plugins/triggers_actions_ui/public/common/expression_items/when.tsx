@@ -66,7 +66,7 @@ export const WhenExpression = ({
         setAggTypePopoverOpen(false);
       }}
       ownFocus
-      display={display === 'fullWidth' ? 'block' : 'inlineBlock'}
+      display={display === 'fullWidth' ? 'block' : 'inline-block'}
       anchorPosition={popupPosition ?? 'downLeft'}
       repositionOnScroll
     >
