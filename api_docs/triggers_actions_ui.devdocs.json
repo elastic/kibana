@@ -1716,7 +1716,7 @@
           },
           "<string, string>[]; error: string | null; ruleTypeIndex: ",
           "RuleTypeIndex",
-          "; }"
+          "; ruleTypesIsLoading: boolean; }"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/application/hooks/use_load_rule_types.ts",
         "deprecated": false,
@@ -1983,6 +1983,19 @@
             "description": [],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.AlertsTableFlyoutBaseProps.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -2082,6 +2095,19 @@
             "description": [],
             "signature": [
               "number[]"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.AlertsTableProps.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false

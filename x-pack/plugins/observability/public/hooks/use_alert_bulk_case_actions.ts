@@ -15,7 +15,6 @@ import {
 } from '../pages/alerts/containers/alerts_table_t_grid/translations';
 import { useGetUserCasesPermissions } from './use_get_user_cases_permissions';
 import { ObservabilityAppServices } from '../application/types';
-import { observabilityFeatureId } from '../../common';
 
 export interface UseAddToCaseActions {
   onClose?: () => void;
@@ -46,9 +45,7 @@ export const useBulkAddToCaseActions = ({ onClose, onSuccess }: UseAddToCaseActi
             disableOnQuery: true,
             disabledLabel: ADD_TO_CASE_DISABLED,
             onClick: (items?: TimelineItem[]) => {
-              const caseAttachments = items
-                ? casesUi.helpers.groupAlertsByRule(items, observabilityFeatureId)
-                : [];
+              const caseAttachments = items ? casesUi.helpers.groupAlertsByRule(items) : [];
               createCaseFlyout.open({ attachments: caseAttachments });
             },
           },
@@ -59,9 +56,7 @@ export const useBulkAddToCaseActions = ({ onClose, onSuccess }: UseAddToCaseActi
             disabledLabel: ADD_TO_CASE_DISABLED,
             'data-test-subj': 'attach-existing-case',
             onClick: (items?: TimelineItem[]) => {
-              const caseAttachments = items
-                ? casesUi.helpers.groupAlertsByRule(items, observabilityFeatureId)
-                : [];
+              const caseAttachments = items ? casesUi.helpers.groupAlertsByRule(items) : [];
               selectCaseModal.open({ attachments: caseAttachments });
             },
           },

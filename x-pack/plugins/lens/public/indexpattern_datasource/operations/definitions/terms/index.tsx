@@ -42,13 +42,14 @@ import {
   getErrorMessage,
 } from '../../../dimension_panel/field_input';
 import type { TermsIndexPatternColumn } from './types';
-import type { IndexPatternField } from '../../../types';
+import type { IndexPatternField } from '../../../../types';
 import {
   getDisallowedTermsMessage,
   getMultiTermsScriptedFieldErrorMessage,
   getFieldsByValidationState,
   isSortableByColumn,
   isPercentileRankSortable,
+  computeOrderForMultiplePercentiles,
 } from './helpers';
 import {
   DEFAULT_MAX_DOC_COUNT,
@@ -262,6 +263,14 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       if (!isPercentileRankSortable(orderColumn)) {
         orderBy = '_key';
       }
+
+      const orderByMultiplePercentiles = computeOrderForMultiplePercentiles(
+        orderColumn,
+        layer,
+        orderedColumnIds
+      );
+
+      orderBy = orderByMultiplePercentiles ?? orderBy;
     }
 
     // To get more accurate results, we set shard_size to a minimum of 1000

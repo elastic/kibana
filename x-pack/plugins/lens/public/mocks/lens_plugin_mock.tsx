@@ -8,7 +8,7 @@
 import React from 'react';
 import { createFormulaPublicApi } from '../async_services';
 import { LensPublicStart } from '..';
-import { visualizationTypes } from '../xy_visualization/types';
+import { visualizationTypes } from '../visualizations/xy/types';
 
 type Start = jest.Mocked<LensPublicStart>;
 
