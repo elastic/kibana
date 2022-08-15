@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
 import type { StatItems } from '../../../../common/components/stat_items';
 import { kpiUniqueIpsAreaLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_unique_ips_area';
 import { kpiUniqueIpsBarLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_unique_ips_bar';
 import { kpiUniqueIpsDestinationMetricLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_unique_ips_destination_metric';
 import { kpiUniqueIpsSourceMetricLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_unique_ips_source_metric';
-import { useHostsKpiUniqueIps, ID } from '../../../containers/kpi_hosts/unique_ips';
-import { KpiBaseComponentManage } from '../common';
+import { ID } from '../../../containers/kpi_hosts/unique_ips';
+import { KpiBaseComponentManage } from '../common/kpi_embeddable_component';
 import type { HostsKpiProps } from '../types';
 import { HostsKpiChartColors } from '../types';
 import * as i18n from './translations';
-import { useQueryToggle } from '../../../../common/containers/query_toggle';
 
 export const fieldsMapping: Readonly<StatItems[]> = [
   {
@@ -50,41 +49,15 @@ export const fieldsMapping: Readonly<StatItems[]> = [
   },
 ];
 
-const HostsKpiUniqueIpsComponent: React.FC<HostsKpiProps> = ({
-  filterQuery,
-  from,
-  indexNames,
-  to,
-  updateDateRange,
-  setQuery,
-  skip,
-}) => {
-  const { toggleStatus } = useQueryToggle(ID);
-  const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
-  useEffect(() => {
-    setQuerySkip(skip || !toggleStatus);
-  }, [skip, toggleStatus]);
-  const [loading, { refetch, id, inspect, ...data }] = useHostsKpiUniqueIps({
-    filterQuery,
-    endDate: to,
-    indexNames,
-    startDate: from,
-    skip: querySkip,
-  });
-
+const HostsKpiUniqueIpsComponent: React.FC<HostsKpiProps> = ({ from, to, setQuery }) => {
   return (
     <KpiBaseComponentManage
-      data={data}
-      id={id}
-      inspect={inspect}
-      loading={loading}
       fieldsMapping={fieldsMapping}
       from={from}
-      to={to}
-      updateDateRange={updateDateRange}
-      refetch={refetch}
+      id={ID}
+      loading={false}
       setQuery={setQuery}
-      setQuerySkip={setQuerySkip}
+      to={to}
     />
   );
 };

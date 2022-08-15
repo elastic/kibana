@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { login, visit } from '../../tasks/login';
+import { login, visitHostsPage } from '../../tasks/login';
 
-import { HOSTS_URL } from '../../urls/navigation';
 import { cleanKibana } from '../../tasks/common';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { TABLE_CELL } from '../../screens/alerts_details';
@@ -25,9 +24,9 @@ describe('All hosts table', () => {
   });
 
   it('it renders risk column', () => {
-    visit(HOSTS_URL);
+    visitHostsPage();
     kqlSearch('host.name: "siem-kibana" {enter}');
-
+    cy.get('[data-test-subj="loading-spinner"]').should('not.exist');
     cy.get('[data-test-subj="tableHeaderCell_node.risk_4"]').should('exist');
     cy.get(`${TABLE_CELL} .euiTableCellContent`).eq(4).should('have.text', 'Low');
   });

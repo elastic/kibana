@@ -16,85 +16,57 @@ import { RISKY_HOSTS_DOC_LINK } from '../../../overview/components/overview_risk
 import * as i18n from './translations';
 import { useHostRiskScore } from '../../../risk_score/containers';
 
-export const HostsKpiComponent = React.memo<HostsKpiProps>(
-  ({ filterQuery, from, indexNames, to, setQuery, skip, updateDateRange }) => {
-    const [_, { isModuleEnabled }] = useHostRiskScore({});
+export const HostsKpiComponent = React.memo<HostsKpiProps>(({ setQuery, from, to }) => {
+  const [_, { isModuleEnabled }] = useHostRiskScore({});
 
-    return (
-      <>
-        {isModuleEnabled === false && (
-          <>
-            <CallOutSwitcher
-              namespace="hosts"
-              condition
-              message={{
-                type: 'primary',
-                id: 'hostRiskModule',
-                title: i18n.ENABLE_HOST_RISK_TEXT,
-                description: (
-                  <>
-                    {i18n.LEARN_MORE}{' '}
-                    <EuiLink href={RISKY_HOSTS_DOC_LINK} target="_blank">
-                      {i18n.HOST_RISK_DATA}
-                    </EuiLink>
-                    <EuiSpacer />
-                  </>
-                ),
-              }}
-            />
-            <EuiSpacer size="l" />
-          </>
-        )}
+  return (
+    <>
+      {isModuleEnabled === false && (
+        <>
+          <CallOutSwitcher
+            namespace="hosts"
+            condition
+            message={{
+              type: 'primary',
+              id: 'hostRiskModule',
+              title: i18n.ENABLE_HOST_RISK_TEXT,
+              description: (
+                <>
+                  {i18n.LEARN_MORE}{' '}
+                  <EuiLink href={RISKY_HOSTS_DOC_LINK} target="_blank">
+                    {i18n.HOST_RISK_DATA}
+                  </EuiLink>
+                  <EuiSpacer />
+                </>
+              ),
+            }}
+          />
+          <EuiSpacer size="l" />
+        </>
+      )}
 
-        <EuiFlexGroup wrap>
-          <EuiFlexItem grow={1}>
-            <HostsKpiHosts
-              filterQuery={filterQuery}
-              from={from}
-              indexNames={indexNames}
-              to={to}
-              updateDateRange={updateDateRange}
-              setQuery={setQuery}
-              skip={skip}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={2}>
-            <HostsKpiUniqueIps
-              filterQuery={filterQuery}
-              from={from}
-              indexNames={indexNames}
-              to={to}
-              updateDateRange={updateDateRange}
-              setQuery={setQuery}
-              skip={skip}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </>
-    );
-  }
-);
+      <EuiFlexGroup wrap>
+        <EuiFlexItem grow={1}>
+          <HostsKpiHosts from={from} to={to} setQuery={setQuery} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={2}>
+          <HostsKpiUniqueIps from={from} to={to} setQuery={setQuery} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
+  );
+});
 
 HostsKpiComponent.displayName = 'HostsKpiComponent';
 
-export const HostsDetailsKpiComponent = React.memo<HostsKpiProps>(
-  ({ filterQuery, from, indexNames, to, setQuery, skip, updateDateRange }) => {
-    return (
-      <EuiFlexGroup wrap>
-        <EuiFlexItem grow={1}>
-          <HostsKpiUniqueIps
-            filterQuery={filterQuery}
-            from={from}
-            indexNames={indexNames}
-            to={to}
-            updateDateRange={updateDateRange}
-            setQuery={setQuery}
-            skip={skip}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
-);
+export const HostsDetailsKpiComponent = React.memo<HostsKpiProps>(({ from, to, setQuery }) => {
+  return (
+    <EuiFlexGroup wrap>
+      <EuiFlexItem grow={1}>
+        <HostsKpiUniqueIps from={from} to={to} setQuery={setQuery} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+});
 
 HostsDetailsKpiComponent.displayName = 'HostsDetailsKpiComponent';
