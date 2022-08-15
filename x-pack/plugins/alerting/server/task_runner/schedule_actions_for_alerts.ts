@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { AlertInstanceState, AlertInstanceContext } from '../../types';
-import { Alert } from '../../alert';
-import { ExecutionHandler } from '../../task_runner/create_execution_handler';
-import { RuleRunMetricsStore } from '../../lib/rule_run_metrics_store';
-import { ScheduleActionsForAlertsParams } from '../../task_runner/types';
+import { ExecutionHandler } from './create_execution_handler';
+import { ScheduleActionsForAlertsParams } from './types';
+import { AlertInstanceState, AlertInstanceContext } from '../types';
+import { Alert } from '../alert';
+import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 
 export async function scheduleActionsForAlerts<
   InstanceState extends AlertInstanceState,

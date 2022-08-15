@@ -69,7 +69,7 @@ import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event
 import { SearchMetrics } from '../lib/types';
 import { loadRule } from './rule_loader';
 import { logAlerts } from './log_alerts';
-import { scheduleActionsForAlerts } from '../rules_client/lib';
+import { scheduleActionsForAlerts } from './schedule_actions_for_alerts';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
