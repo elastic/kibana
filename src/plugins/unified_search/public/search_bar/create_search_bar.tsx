@@ -136,7 +136,7 @@ export function createSearchBar({
   data,
   usageCollection,
   isScreenshotMode = false,
-  unifiedSearch: { autocomplete },
+  unifiedSearch,
 }: StatefulSearchBarDeps) {
   // App name should come from the core application service.
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
@@ -189,7 +189,7 @@ export function createSearchBar({
           data,
           storage,
           usageCollection,
-          autocomplete,
+          unifiedSearch,
           ...core,
         }}
       >
