@@ -1,0 +1,194 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { buildEsQuery, TimeRange } from '@kbn/es-query';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Subscription } from 'rxjs';
+import {
+  IEsSearchRequest,
+  IKibanaSearchResponse,
+  isCompleteResponse,
+  isErrorResponse,
+  TimeRangeBounds,
+} from '@kbn/data-plugin/common';
+import { convertAggregationToChartSeries } from '../../../common/utils/barchart';
+import { RawIndicatorFieldId } from '../../../../common/types/indicator';
+import { DEFAULT_THREAT_INDEX_KEY, THREAT_QUERY_BASE } from '../../../../common/constants';
+import { calculateBarchartColumnTimeInterval } from '../../../common/utils/dates';
+import { useKibana } from '../../../hooks/use_kibana';
+import { DEFAULT_TIME_RANGE } from './use_filters/utils';
+
+export interface UseAggregatedIndicatorsParam {
+  timeRange?: TimeRange;
+}
+
+export interface UseAggregatedIndicatorsValue {
+  indicators: ChartSeries[];
+  onFieldChange: (field: string) => void;
+  dateRange: TimeRangeBounds;
+}
+
+export interface Aggregation {
+  doc_count: number;
+  key: string;
+  events: {
+    buckets: AggregationValue[];
+  };
+}
+
+export interface AggregationValue {
+  doc_count: number;
+  key: number;
+  key_as_string: string;
+}
+
+export interface ChartSeries {
+  x: string;
+  y: number;
+  g: string;
+}
+
+const TIMESTAMP_FIELD = RawIndicatorFieldId.TimeStamp;
+const DEFAULT_FIELD = RawIndicatorFieldId.Feed;
+export const AGGREGATION_NAME = 'barchartAggregation';
+
+export interface RawAggregatedIndicatorsResponse {
+  aggregations: {
+    [AGGREGATION_NAME]: {
+      buckets: Aggregation[];
+    };
+  };
+}
+
+export const useAggregatedIndicators = ({
+  timeRange = DEFAULT_TIME_RANGE,
+}: UseAggregatedIndicatorsParam): UseAggregatedIndicatorsValue => {
+  const {
+    services: {
+      data: { search: searchService, query: queryService },
+      uiSettings,
+    },
+  } = useKibana();
+  const defaultThreatIndices = uiSettings.get<string[]>(DEFAULT_THREAT_INDEX_KEY);
+
+  const searchSubscription$ = useRef(new Subscription());
+  const abortController = useRef(new AbortController());
+
+  const [indicators, setIndicators] = useState<ChartSeries[]>([]);
+  const [field, setField] = useState<string>(DEFAULT_FIELD);
+
+  const dateRange: TimeRangeBounds = useMemo(
+    () => queryService.timefilter.timefilter.calculateBounds(timeRange),
+    [queryService, timeRange]
+  );
+
+  const loadData = useCallback(async () => {
+    const dateFrom: number = (dateRange.min as moment.Moment).toDate().getTime();
+    const dateTo: number = (dateRange.max as moment.Moment).toDate().getTime();
+    const interval = calculateBarchartColumnTimeInterval(dateFrom, dateTo);
+
+    abortController.current = new AbortController();
+
+    const queryToExecute = buildEsQuery(
+      undefined,
+      [
+        {
+          query: THREAT_QUERY_BASE,
+          language: 'kuery',
+        },
+      ],
+      [
+        {
+          query: {
+            range: {
+              [TIMESTAMP_FIELD]: {
+                gte: timeRange.from,
+                lte: timeRange.to,
+              },
+            },
+          },
+          meta: {},
+        },
+      ]
+    );
+
+    searchSubscription$.current = searchService
+      .search<IEsSearchRequest, IKibanaSearchResponse<RawAggregatedIndicatorsResponse>>(
+        {
+          params: {
+            index: defaultThreatIndices,
+            body: {
+              aggregations: {
+                [AGGREGATION_NAME]: {
+                  terms: {
+                    field,
+                  },
+                  aggs: {
+                    events: {
+                      date_histogram: {
+                        field: TIMESTAMP_FIELD,
+                        fixed_interval: interval,
+                        min_doc_count: 0,
+                        extended_bounds: {
+                          min: dateFrom,
+                          max: dateTo,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              fields: [TIMESTAMP_FIELD, field], // limit the response to only the fields we need
+              size: 0, // we don't need hits, just aggregations
+              query: queryToExecute,
+            },
+          },
+        },
+        {
+          abortSignal: abortController.current.signal,
+        }
+      )
+      .subscribe({
+        next: (response) => {
+          const aggregations: Aggregation[] =
+            response.rawResponse.aggregations[AGGREGATION_NAME]?.buckets;
+          const chartSeries: ChartSeries[] = convertAggregationToChartSeries(aggregations);
+          setIndicators(chartSeries);
+
+          if (isCompleteResponse(response)) {
+            searchSubscription$.current.unsubscribe();
+          } else if (isErrorResponse(response)) {
+            searchSubscription$.current.unsubscribe();
+          }
+        },
+        error: (msg) => {
+          searchService.showError(msg);
+          searchSubscription$.current.unsubscribe();
+        },
+      });
+  }, [dateRange, defaultThreatIndices, field, searchService, timeRange]);
+
+  const onFieldChange = useCallback(
+    async (f: string) => {
+      setField(f);
+      loadData();
+    },
+    [loadData, setField]
+  );
+
+  useEffect(() => {
+    loadData();
+
+    return () => abortController.current.abort();
+  }, [loadData]);
+
+  return {
+    dateRange,
+    indicators,
+    onFieldChange,
+  };
+};

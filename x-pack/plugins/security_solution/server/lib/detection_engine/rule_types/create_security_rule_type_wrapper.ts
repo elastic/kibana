@@ -176,6 +176,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           // check if rule has permissions to access given index pattern
           // move this collection of lines into a function in utils
           // so that we can use it in create rules route, bulk, etc.
+          let skipExecution: boolean = false;
           try {
             if (!isMachineLearningParams(params)) {
               const privileges = await checkPrivilegesFromEsClient(esClient, inputIndex);
@@ -196,17 +197,21 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                         : [primaryTimestamp],
                       include_unmapped: true,
                       runtime_mappings: runtimeMappings,
+                      ignore_unavailable: true,
                     },
                     { meta: true }
                   )
                 );
 
-                wroteWarningStatus = await hasTimestampFields({
-                  timestampField: primaryTimestamp,
-                  timestampFieldCapsResponse: timestampFieldCaps,
-                  inputIndices: inputIndex,
-                  ruleExecutionLogger,
-                });
+                const { wroteWarningStatus: wroteWarningStatusResult, foundNoIndices } =
+                  await hasTimestampFields({
+                    timestampField: primaryTimestamp,
+                    timestampFieldCapsResponse: timestampFieldCaps,
+                    inputIndices: inputIndex,
+                    ruleExecutionLogger,
+                  });
+                wroteWarningStatus = wroteWarningStatusResult;
+                skipExecution = foundNoIndices;
               }
             }
           } catch (exc) {
@@ -277,45 +282,59 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               indicesToQuery: inputIndex,
             });
 
-            for (const tuple of tuples) {
-              const runResult = await type.executor({
-                ...options,
-                services,
-                state: runState,
-                runOpts: {
-                  completeRule,
-                  inputIndex,
-                  exceptionItems,
-                  runtimeMappings,
-                  searchAfterSize,
-                  tuple,
-                  bulkCreate,
-                  wrapHits,
-                  wrapSequences,
-                  listClient,
-                  ruleDataReader: ruleDataClient.getReader({ namespace: options.spaceId }),
-                  mergeStrategy,
-                  primaryTimestamp,
-                  secondaryTimestamp,
-                  ruleExecutionLogger,
-                },
-              });
+            if (!skipExecution) {
+              for (const tuple of tuples) {
+                const runResult = await type.executor({
+                  ...options,
+                  services,
+                  state: runState,
+                  runOpts: {
+                    completeRule,
+                    inputIndex,
+                    exceptionItems,
+                    runtimeMappings,
+                    searchAfterSize,
+                    tuple,
+                    bulkCreate,
+                    wrapHits,
+                    wrapSequences,
+                    listClient,
+                    ruleDataReader: ruleDataClient.getReader({ namespace: options.spaceId }),
+                    mergeStrategy,
+                    primaryTimestamp,
+                    secondaryTimestamp,
+                    ruleExecutionLogger,
+                  },
+                });
 
-              const createdSignals = result.createdSignals.concat(runResult.createdSignals);
-              const warningMessages = result.warningMessages.concat(runResult.warningMessages);
+                const createdSignals = result.createdSignals.concat(runResult.createdSignals);
+                const warningMessages = result.warningMessages.concat(runResult.warningMessages);
+                result = {
+                  bulkCreateTimes: result.bulkCreateTimes.concat(runResult.bulkCreateTimes),
+                  createdSignals,
+                  createdSignalsCount: createdSignals.length,
+                  errors: result.errors.concat(runResult.errors),
+                  lastLookbackDate: runResult.lastLookBackDate,
+                  searchAfterTimes: result.searchAfterTimes.concat(runResult.searchAfterTimes),
+                  state: runResult.state,
+                  success: result.success && runResult.success,
+                  warning: warningMessages.length > 0,
+                  warningMessages,
+                };
+                runState = runResult.state;
+              }
+            } else {
               result = {
-                bulkCreateTimes: result.bulkCreateTimes.concat(runResult.bulkCreateTimes),
-                createdSignals,
-                createdSignalsCount: createdSignals.length,
-                errors: result.errors.concat(runResult.errors),
-                lastLookbackDate: runResult.lastLookBackDate,
-                searchAfterTimes: result.searchAfterTimes.concat(runResult.searchAfterTimes),
-                state: runResult.state,
-                success: result.success && runResult.success,
-                warning: warningMessages.length > 0,
-                warningMessages,
+                bulkCreateTimes: [],
+                createdSignals: [],
+                createdSignalsCount: 0,
+                errors: [],
+                searchAfterTimes: [],
+                state,
+                success: true,
+                warning: false,
+                warningMessages: [],
               };
-              runState = runResult.state;
             }
 
             if (result.warningMessages.length) {
