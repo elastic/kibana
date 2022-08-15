@@ -127,7 +127,6 @@ export default function ({ getService }: FtrProviderContext) {
 
           await transform.testExecution.logTestStep('should delete the transform');
           await transform.table.confirmDeleteTransform();
-          await transform.wizard.assertErrorToastsNotExist();
           await transform.table.assertTransformRowNotExists(testData.originalConfig.id);
         });
       });
