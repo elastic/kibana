@@ -23,7 +23,7 @@ import { operationDefinitionMap, OperationType } from '.';
 import { TermsIndexPatternColumn } from './definitions/terms';
 import { DateHistogramIndexPatternColumn } from './definitions/date_histogram';
 import { AvgIndexPatternColumn } from './definitions/metrics';
-import type { IndexPattern, IndexPatternLayer, IndexPatternPrivateState } from '../types';
+import type { IndexPatternLayer, IndexPatternPrivateState } from '../types';
 import { documentField } from '../document_field';
 import { getFieldByNameFactory } from '../pure_helpers';
 import { generateId } from '../../id_generator';
@@ -38,6 +38,7 @@ import {
 } from './definitions';
 import { TinymathAST } from '@kbn/tinymath';
 import { CoreStart } from '@kbn/core/public';
+import { IndexPattern } from '../../types';
 
 jest.mock('.');
 jest.mock('../../id_generator');
