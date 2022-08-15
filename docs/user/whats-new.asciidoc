@@ -11,11 +11,20 @@ Previous versions: {kibana-ref-all}/8.3/whats-new.html[8.3] | {kibana-ref-all}/8
 //Installation and Upgrade Guide
 
 // tag::notable-highlights[]
+
 coming::[8.4.0]
 
 [discrete]
 [[highlights-8.4-alerting]]
 === Enhancements to Alerting
+
+[discrete]
+==== {webhook-cm} connector
+
+The new {kibana-ref}/cases-webhook-action-type.html[{webhook-cm} connector and action]
+enable you to send POST, PUT, and GET requests to a case management RESTful API
+web service. You can use this connector with cases in {observability},
+{stack-manage-app}, and the {security-app}.
 
 [discrete]
 ==== Add schedules for snoozing rule notifications
@@ -26,5 +35,16 @@ downtimes to start and end at specific dates and times.
 
 [role="screenshot"]
 image::images/highlights-snooze-schedule.png[Snooze notifications for a rule in {stack-manage-app} > {rules-ui} ]
+
+[discrete]
+==== New metrics for rules and actions
+
+You can now ship metrics related to {alert-features} to your monitoring cluster
+by using the {agent} or {metricbeat}. Click *Overview* and *Instances* in the
+{kib} section of *{stack-monitor-app}* to see visualizations about the rules and
+actions that are queued, running, or failing.
+
+[role="screenshot"]
+image::images/highlights-rule-metrics.png[Stack Monitoring overview metrics for Kibana]
 
 // end::notable-highlights[]
