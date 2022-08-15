@@ -31,7 +31,7 @@ interface Args {
 
 export const createFilesClient = ({ http, fileKind }: Args): FilesClient => {
   return {
-    create(args) {
+    create: (args) => {
       return http.post(apiRoutes.getCreateFileRoute(fileKind), {
         headers: {
           'content-type': 'application/json',
@@ -39,19 +39,19 @@ export const createFilesClient = ({ http, fileKind }: Args): FilesClient => {
         body: JSON.stringify(args),
       });
     },
-    delete(args) {
+    delete: (args) => {
       return http.delete(apiRoutes.getDeleteRoute(fileKind, args.id));
     },
-    download(args) {
+    download: (args) => {
       return http.get(apiRoutes.getDownloadRoute(fileKind, args.id, args.fileName));
     },
-    getById(args) {
+    getById: (args) => {
       return http.get(apiRoutes.getByIdRoute(fileKind, args.id));
     },
-    list(args) {
+    list: (args) => {
       return http.get(apiRoutes.getListRoute(fileKind, args.page, args.perPage));
     },
-    update({ id, ...body }) {
+    update: ({ id, ...body }) => {
       return http.patch(apiRoutes.getUpdateRoute(fileKind, id), {
         headers: {
           'content-type': 'application/json',
@@ -59,7 +59,7 @@ export const createFilesClient = ({ http, fileKind }: Args): FilesClient => {
         body: JSON.stringify(body),
       });
     },
-    upload(args) {
+    upload: (args) => {
       return http.put(apiRoutes.getUploadRoute(fileKind, args.id), {
         body: args.body,
       });
