@@ -264,16 +264,28 @@ class AgentPolicyService {
   public async getByIDs(
     soClient: SavedObjectsClientContract,
     ids: string[],
-    options: { fields?: string[] } = {}
+    options: { fields?: string[]; withPackagePolicies?: boolean } = {}
   ): Promise<AgentPolicy[]> {
     const objects = ids.map((id) => ({ ...options, id, type: SAVED_OBJECT_TYPE }));
     const agentPolicySO = await soClient.bulkGet<AgentPolicySOAttributes>(objects);
 
-    return agentPolicySO.saved_objects.map((so) => ({
-      id: so.id,
-      version: so.version,
-      ...so.attributes,
-    }));
+    return await pMap(
+      agentPolicySO.saved_objects,
+      async (so) => {
+        const agentPolicy = {
+          id: so.id,
+          version: so.version,
+          ...so.attributes,
+          ...so.attributes,
+        };
+        if (options.withPackagePolicies) {
+          agentPolicy.package_policies =
+            (await packagePolicyService.findAllForPolicy(soClient, so.id)) || [];
+        }
+        return agentPolicy;
+      },
+      { concurrency: 20 }
+    );
   }
 
   public async list(
