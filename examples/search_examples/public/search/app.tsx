@@ -251,7 +251,6 @@ export const SearchExamplesApp = ({
         },
         error: (e) => {
           setIsLoading(false);
-          setRawResponse(e.body);
           data.search.showError(e);
         },
       });
@@ -394,7 +393,6 @@ export const SearchExamplesApp = ({
         },
         error: (e) => {
           setIsLoading(false);
-          setRawResponse(e.body);
           data.search.showError(e);
         },
       });
@@ -420,7 +418,6 @@ export const SearchExamplesApp = ({
 
       notifications.toasts.addSuccess(`Server returned ${JSON.stringify(res)}`);
     } catch (e) {
-      setRawResponse(e.body);
       data.search.showError(e);
     } finally {
       setIsLoading(false);
@@ -437,8 +434,8 @@ export const SearchExamplesApp = ({
       name: <EuiText data-test-subj="requestTab">Request</EuiText>,
       content: (
         <>
-          {' '}
-          <EuiSpacer /> <EuiText size="xs">Search body sent to ES</EuiText>{' '}
+          <EuiSpacer />
+          <EuiText size="xs">Search body sent to ES</EuiText>
           <EuiCodeBlock
             language="json"
             fontSize="s"
@@ -447,9 +444,8 @@ export const SearchExamplesApp = ({
             isCopyable
             data-test-subj="requestCodeBlock"
           >
-            {' '}
-            {JSON.stringify(request, null, 2)}{' '}
-          </EuiCodeBlock>{' '}
+            {JSON.stringify(request, null, 2)}
+          </EuiCodeBlock>
         </>
       ),
     },
@@ -458,17 +454,15 @@ export const SearchExamplesApp = ({
       name: <EuiText data-test-subj="responseTab">Response</EuiText>,
       content: (
         <>
-          {' '}
-          <EuiSpacer />{' '}
+          <EuiSpacer />
           <EuiText size="xs">
-            {' '}
             <FormattedMessage
               id="searchExamples.timestampText"
               defaultMessage="Took: {time} ms"
               values={{ time: timeTook ?? 'Unknown' }}
-            />{' '}
-          </EuiText>{' '}
-          <EuiProgress value={loaded} max={total} size="xs" data-test-subj="progressBar" />{' '}
+            />
+          </EuiText>
+          <EuiProgress value={loaded} max={total} size="xs" data-test-subj="progressBar" />
           <EuiCodeBlock
             language="json"
             fontSize="s"
@@ -477,9 +471,8 @@ export const SearchExamplesApp = ({
             isCopyable
             data-test-subj="responseCodeBlock"
           >
-            {' '}
-            {JSON.stringify(rawResponse, null, 2)}{' '}
-          </EuiCodeBlock>{' '}
+            {JSON.stringify(rawResponse, null, 2)}
+          </EuiCodeBlock>
         </>
       ),
     },

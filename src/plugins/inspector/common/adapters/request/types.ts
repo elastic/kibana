@@ -51,30 +51,7 @@ export interface RequestStatistic {
   value: any;
 }
 
-/**
- * The format of a response as seen from Inspector
- */
 export interface Response {
-  /**
-   * Unknown data of response. Not assumed to be from Elasticsearch;
-   */
   json?: object;
-  /**
-   * Response load time metric
-   */
   time?: number;
-}
-
-/**
- * The format of a warning in an Elasticsearch search response.
- */
-export interface ResponseWarning {
-  /**
-   * Title string for context
-   */
-  title?: string;
-  /**
-   * Text of the warning message from the remote
-   */
-  text?: string;
 }

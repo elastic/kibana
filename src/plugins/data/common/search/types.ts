@@ -93,10 +93,6 @@ export interface SearchResponseWarning {
    * Text for the body of the warning toast notification
    */
   text?: string;
-  /**
-   * data-test-subj for testing the warning toast notification
-   */
-  ['data-test-subj']?: string;
 }
 
 export interface IKibanaSearchRequest<Params = any> {
