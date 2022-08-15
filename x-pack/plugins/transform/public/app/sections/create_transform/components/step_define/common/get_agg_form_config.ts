@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getPercentilesAggConfig } from './percentiles_agg';
 import {
   PivotSupportedAggs,
   PIVOT_SUPPORTED_AGGS,
@@ -26,6 +27,8 @@ export function getAggFormConfig(
       return getFilterAggConfig(commonConfig);
     case PIVOT_SUPPORTED_AGGS.TOP_METRICS:
       return getTopMetricsAggConfig(commonConfig);
+    case PIVOT_SUPPORTED_AGGS.PERCENTILES:
+      return getPercentilesAggConfig(commonConfig);
     default:
       return commonConfig;
   }

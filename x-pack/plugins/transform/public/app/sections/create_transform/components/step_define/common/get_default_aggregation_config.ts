@@ -10,11 +10,9 @@ import {
   PivotSupportedAggs,
   PIVOT_SUPPORTED_AGGS,
 } from '../../../../../../../common/types/pivot_aggs';
-import {
-  PERCENTILES_AGG_DEFAULT_PERCENTS,
-  PivotAggsConfigWithUiSupport,
-} from '../../../../../common';
+import { PivotAggsConfigWithUiSupport } from '../../../../../common';
 import { getFilterAggConfig } from './filter_agg/config';
+import { getPercentilesAggConfig } from './percentiles_agg';
 import { getTopMetricsAggConfig } from './top_metrics_agg/config';
 
 /**
@@ -35,11 +33,7 @@ export function getDefaultAggregationConfig(
 
   switch (agg) {
     case PIVOT_SUPPORTED_AGGS.PERCENTILES:
-      return {
-        ...commonConfig,
-        agg,
-        percents: PERCENTILES_AGG_DEFAULT_PERCENTS,
-      };
+      return getPercentilesAggConfig(commonConfig);
     case PIVOT_SUPPORTED_AGGS.FILTER:
       return getFilterAggConfig(commonConfig);
     case PIVOT_SUPPORTED_AGGS.TOP_METRICS:

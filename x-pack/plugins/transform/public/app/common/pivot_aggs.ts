@@ -10,10 +10,12 @@ import { FC } from 'react';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 import type { AggName } from '../../../common/types/aggregations';
 import type { Dictionary } from '../../../common/types/common';
 import type { EsFieldName } from '../../../common/types/fields';
-import type { PivotAgg, PivotSupportedAggs } from '../../../common/types/pivot_aggs';
+import type { PivotSupportedAggs } from '../../../common/types/pivot_aggs';
 import { PIVOT_SUPPORTED_AGGS } from '../../../common/types/pivot_aggs';
 
 import { getAggFormConfig } from '../sections/create_transform/components/step_define/common/get_agg_form_config';
@@ -205,19 +207,21 @@ export interface PivotAggsConfigWithUiBase extends PivotAggsConfigBase {
   field: EsFieldName | EsFieldName[] | null;
 }
 
-export interface PivotAggsConfigWithExtra<T> extends PivotAggsConfigWithUiBase {
+export interface PivotAggsConfigWithExtra<T, ESConfig extends { [key: string]: any }>
+  extends PivotAggsConfigWithUiBase {
   /** Form component */
   AggFormComponent: FC<{
     aggConfig: Partial<T>;
     onChange: (arg: Partial<T>) => void;
     selectedField: string;
+    isValid: boolean;
   }>;
   /** Aggregation specific configuration */
   aggConfig: Partial<T>;
   /** Set UI configuration from ES aggregation definition */
-  setUiConfigFromEs: (arg: { [key: string]: any }) => void;
+  setUiConfigFromEs: (arg: ESConfig) => void;
   /** Converts UI agg config form to ES agg request object */
-  getEsAggConfig: () => { [key: string]: any } | null;
+  getEsAggConfig: () => ESConfig | null;
   /** Indicates if the configuration is valid */
   isValid: () => boolean;
   /** Provides aggregation name generated based on the configuration */
@@ -242,7 +246,7 @@ export type PivotAggsConfigWithUiSupport =
   | PivotAggsConfigTerms
   | PivotAggsConfigWithExtendedForm;
 
-export function isPivotAggsConfigWithUiSupport(arg: unknown): arg is PivotAggsConfigWithUiSupport {
+export function isPivotAggsConfigWithUiSupport(arg: unknown): arg is PivotAggsConfigWithUiBase {
   return (
     isPopulatedObject(arg, ['agg', 'aggName', 'dropDownName', 'field']) &&
     isPivotSupportedAggs(arg.agg)
@@ -256,8 +260,7 @@ type PivotAggsConfigWithExtendedForm = PivotAggsConfigFilter | PivotAggsConfigTo
 
 export function isPivotAggsWithExtendedForm(arg: unknown): arg is PivotAggsConfigWithExtendedForm {
   return (
-    (isPopulatedObject(arg) && arg.hasOwnProperty('setUiConfigFromEs')) ||
-    isPopulatedObject(arg, ['AggFormComponent'])
+    isPopulatedObject(arg, ['setUiConfigFromEs']) || isPopulatedObject(arg, ['AggFormComponent'])
   );
 }
 
@@ -287,8 +290,8 @@ export type PivotAggsConfigDict = Dictionary<PivotAggsConfig>;
  */
 export function getEsAggFromAggConfig(
   pivotAggsConfig: PivotAggsConfigBase | PivotAggsConfigWithExtendedForm
-): PivotAgg | null {
-  let esAgg: { [key: string]: any } | null = { ...pivotAggsConfig };
+): estypes.TransformPivot | null {
+  let esAgg: { [key: string]: any } = { ...pivotAggsConfig };
 
   delete esAgg.agg;
   delete esAgg.aggName;
@@ -305,7 +308,7 @@ export function getEsAggFromAggConfig(
 
   const result = {
     [pivotAggsConfig.agg]: esAgg,
-  };
+  } as estypes.TransformPivot;
 
   if (
     isPivotAggsConfigWithUiSupport(pivotAggsConfig) &&
@@ -314,7 +317,9 @@ export function getEsAggFromAggConfig(
   ) {
     result.aggs = {};
     for (const subAggConfig of Object.values(pivotAggsConfig.subAggs)) {
-      result.aggs[subAggConfig.aggName] = getEsAggFromAggConfig(subAggConfig);
+      result.aggs[subAggConfig.aggName] = getEsAggFromAggConfig(
+        subAggConfig
+      ) as estypes.TransformPivot;
     }
   }
 
