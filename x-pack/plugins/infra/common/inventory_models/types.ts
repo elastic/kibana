@@ -31,7 +31,7 @@ export const InventoryFormatterTypeRT = rt.keyof({
   bytes: null,
   number: null,
   percent: null,
-  highPercision: null,
+  highPrecision: null,
 });
 export type InventoryFormatterType = rt.TypeOf<typeof InventoryFormatterTypeRT>;
 export type InventoryItemType = rt.TypeOf<typeof ItemTypeRT>;
