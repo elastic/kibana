@@ -67,34 +67,39 @@ export const deriveComment = (
 ) => {
   const totals = deriveActionStatusTotals(actionStatuses);
   const totalActions = actionStatuses ? actionStatuses.length : 0;
-  let result = WATCH_STATE_COMMENTS.OK;
 
-  if (totals[ACTION_STATES.THROTTLED] > 0 && totals[ACTION_STATES.THROTTLED] < totalActions) {
-    result = WATCH_STATE_COMMENTS.PARTIALLY_THROTTLED;
+  if (!isActive) {
+    return WATCH_STATE_COMMENTS.OK;
   }
 
-  if (totals[ACTION_STATES.THROTTLED] > 0 && totals[ACTION_STATES.THROTTLED] === totalActions) {
-    result = WATCH_STATE_COMMENTS.THROTTLED;
-  }
-
-  if (totals[ACTION_STATES.ACKNOWLEDGED] > 0 && totals[ACTION_STATES.ACKNOWLEDGED] < totalActions) {
-    result = WATCH_STATE_COMMENTS.PARTIALLY_ACKNOWLEDGED;
+  if (totals[ACTION_STATES.ERROR] > 0) {
+    return WATCH_STATE_COMMENTS.FAILING;
   }
 
   if (
     totals[ACTION_STATES.ACKNOWLEDGED] > 0 &&
     totals[ACTION_STATES.ACKNOWLEDGED] === totalActions
   ) {
-    result = WATCH_STATE_COMMENTS.ACKNOWLEDGED;
+    return WATCH_STATE_COMMENTS.ACKNOWLEDGED;
   }
 
-  if (totals[ACTION_STATES.ERROR] > 0) {
-    result = WATCH_STATE_COMMENTS.FAILING;
+  if (totals[ACTION_STATES.ACKNOWLEDGED] > 0 && totals[ACTION_STATES.ACKNOWLEDGED] < totalActions) {
+    return WATCH_STATE_COMMENTS.PARTIALLY_ACKNOWLEDGED;
   }
 
-  if (!isActive) {
-    result = WATCH_STATE_COMMENTS.OK;
+  if (totals[ACTION_STATES.THROTTLED] > 0 && totals[ACTION_STATES.THROTTLED] === totalActions) {
+    return WATCH_STATE_COMMENTS.THROTTLED;
   }
 
-  return result;
+  if (totals[ACTION_STATES.THROTTLED] > 0 && totals[ACTION_STATES.THROTTLED] < totalActions) {
+    return WATCH_STATE_COMMENTS.PARTIALLY_THROTTLED;
+  }
+
+  const isAckable =
+    actionStatuses.findIndex((actionStatus) => actionStatus.isAckable === true) !== -1;
+  if (isAckable) {
+    return WATCH_STATE_COMMENTS.IS_ACKABLE;
+  }
+
+  return WATCH_STATE_COMMENTS.OK;
 };
