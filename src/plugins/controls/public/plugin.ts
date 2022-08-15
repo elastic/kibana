@@ -17,6 +17,7 @@ import {
 } from '.';
 import { OptionsListEmbeddableFactory, OptionsListEmbeddableInput } from './options_list';
 import { RangeSliderEmbeddableFactory, RangeSliderEmbeddableInput } from './range_slider';
+import { controlsService } from './services/controls/controls_service';
 import {
   ControlsPluginSetup,
   ControlsPluginStart,
