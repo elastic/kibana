@@ -332,7 +332,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.discover.expectMissingFieldListItemVisualize('bytes');
       });
 
-      it('Permalinks shows create short-url button1', async () => {
+      it('Permalinks shows create the short-url button', async () => {
         await PageObjects.share.openShareMenuItem('Permalinks');
         await PageObjects.share.createShortUrlExistOrFail();
         // close the menu
