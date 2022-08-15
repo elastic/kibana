@@ -658,7 +658,7 @@ class AgentPolicyService {
 
     const packagePolicies = await packagePolicyService.findAllForPolicy(soClient, id);
 
-    if (agentPolicy.package_policies && agentPolicy.package_policies.length) {
+    if (packagePolicies.length) {
       const deletedPackagePolicies: DeletePackagePoliciesResponse =
         await packagePolicyService.delete(
           soClient,

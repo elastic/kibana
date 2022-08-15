@@ -216,9 +216,7 @@ export const fleetGetAgentPolicyListHttpMock =
 
         return {
           items: requiredPolicyIds.map((packagePolicyId) => {
-            return agentPolicyGenerator.generate({
-              package_policies: [packagePolicyId],
-            });
+            return agentPolicyGenerator.generate({});
           }),
           perPage: Math.max(requiredPolicyIds.length, 10),
           total: requiredPolicyIds.length,
