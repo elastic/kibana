@@ -63,7 +63,7 @@ export class InternalFileService {
     }
   }
 
-  public async updateFile({ attributes, fileKind, id }: UpdateFileArgs): Promise<IFile> {
+  public async updateFile({ attributes, fileKind, id }: UpdateFileArgs): Promise<FileJSON> {
     const file = await this.getById({ fileKind, id });
     return await file.update(attributes);
   }
@@ -126,7 +126,7 @@ export class InternalFileService {
           this.metadataClient,
           this.blobStorageService.createBlobStorageClient(fileKind.blobStoreSettings)
         ),
-      this,
+      this.auditLogger,
       this.fileShareService,
       this.logger.get(`file-${id}`)
     );

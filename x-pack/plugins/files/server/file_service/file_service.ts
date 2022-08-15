@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { File, FileJSON, FilesMetrics } from '../../common';
+import type { FileJSON, FilesMetrics } from '../../common';
 import type { FileShareServiceStart } from '../file_share_service/types';
 import type {
   CreateFileArgs,
@@ -27,14 +27,14 @@ export interface FileServiceStart {
    *
    * @param args - create file arg
    */
-  create<M>(args: CreateFileArgs<M>): Promise<File<M>>;
+  create<M>(args: CreateFileArgs<M>): Promise<FileJSON<M>>;
 
   /**
    * Update updatable file attributes like name and meta.
    *
    * @param args - update file args
    */
-  update<M>(args: UpdateFileArgs): Promise<File<M>>;
+  update(args: UpdateFileArgs): Promise<void>;
 
   /**
    * Delete a file.
@@ -48,7 +48,7 @@ export interface FileServiceStart {
    *
    * @param args - get file by ID args
    */
-  getById<M>(args: GetByIdArgs): Promise<File<M>>;
+  getById<M>(args: GetByIdArgs): Promise<FileJSON<M>>;
 
   /**
    * Find files given a set of parameters.
@@ -62,7 +62,7 @@ export interface FileServiceStart {
    *
    * @param args - list files args
    */
-  list<M>(args: ListFilesArgs): Promise<Array<File<M>>>;
+  list<M>(args: ListFilesArgs): Promise<Array<FileJSON<M>>>;
 
   /**
    * Get an instance of a share object
@@ -104,5 +104,5 @@ export interface FileServiceStart {
    *
    * @param token - secret token
    */
-  getByToken<M>(token: string): Promise<File<M>>;
+  getByToken<M>(token: string): Promise<FileJSON<M>>;
 }

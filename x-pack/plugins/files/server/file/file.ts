@@ -6,25 +6,16 @@
  */
 
 import { Logger } from '@kbn/core/server';
-import mimeType from 'mime';
 import { Readable } from 'stream';
 import type { FileCompression, FileShareJSON, FileShareJSONWithToken } from '../../common/types';
 import type {
   File as IFile,
-  FileKind,
   FileMetadata,
   FileStatus,
   UpdatableFileMetadata,
   FileJSON,
 } from '../../common';
-import {
-  fileAttributesReducer,
-  Action,
-  createDefaultFileAttributes,
-} from './file_attributes_reducer';
-import { createAuditEvent } from '../audit_events';
-import { InternalFileService } from '../file_service/internal_file_service';
-import { InternalFileShareService } from '../file_share_service';
+import { fileAttributesReducer, Action } from './file_attributes_reducer';
 import type { FileClientImpl } from '../file_client/file_client';
 import { toJSON } from './to_json';
 import {
@@ -35,31 +26,21 @@ import {
 } from './errors';
 
 /**
- * Public class that provides all data and functionality consumers will need at the
- * individual file level
- *
- * @note Instantiation should not happen outside of this plugin
+ * @internal
  */
 export class File<M = unknown> implements IFile {
-  private readonly logAuditEvent: InternalFileService['writeAuditLog'];
-
   constructor(
     public readonly id: string,
-    private fileMetadata: FileMetadata,
+    private readonly fileMetadata: FileMetadata,
     private readonly fileClient: FileClientImpl,
-    private readonly internalFileService: InternalFileService,
-    private readonly fileShareService: InternalFileShareService,
     private readonly logger: Logger
-  ) {
-    this.logAuditEvent = this.internalFileService.writeAuditLog.bind(this.internalFileService);
-  }
+  ) {}
 
-  private async updateFileState(action: Action) {
-    const { metadata } = await this.fileClient.update({
+  private async updateFileState(action: Action): Promise<File<M>> {
+    return await this.fileClient.update<M>({
       id: this.id,
       metadata: fileAttributesReducer(this.metadata, action),
     });
-    this.fileMetadata = metadata;
   }
 
   private isReady(): boolean {
@@ -74,12 +55,11 @@ export class File<M = unknown> implements IFile {
     return this.status === 'UPLOADING';
   }
 
-  public async update(attrs: Partial<UpdatableFileMetadata>): Promise<IFile> {
-    await this.updateFileState({
+  public async update(attrs: Partial<UpdatableFileMetadata>): Promise<File<M>> {
+    return this.updateFileState({
       action: 'updateFile',
       payload: attrs,
     });
-    return this;
   }
 
   public async uploadContent(content: Readable): Promise<void> {
@@ -126,48 +106,28 @@ export class File<M = unknown> implements IFile {
     await this.updateFileState({
       action: 'delete',
     });
-    // Stop sharing this file
-    await this.fileShareService.deleteForFile({ file: this });
     await this.fileClient.delete({ id: this.id, hasContent: this.isReady() });
-    this.logAuditEvent(
-      createAuditEvent({
-        action: 'delete',
-        outcome: 'success',
-        message: `Deleted file "${this.name}" of kind "${this.fileKind}" with id "${this.id}"`,
-      })
-    );
   }
 
   public async share({
     name,
     validUntil,
   }: {
-    name?: string;
+    name: string;
     validUntil?: number;
   }): Promise<FileShareJSONWithToken> {
-    const shareObject = await this.fileShareService.share({ file: this, name, validUntil });
-    this.internalFileService.writeAuditLog(
-      createAuditEvent({
-        action: 'create',
-        message: `Shared file "${this.name}" with id "${this.id}"`,
-      })
-    );
-    return shareObject;
+    return this.fileClient.share({ name, validUntil, file: this });
   }
 
   async listShares(): Promise<FileShareJSON[]> {
-    const { shares } = await this.fileShareService.list({ fileId: this.id });
+    const { shares } = await this.fileClient.listShares({
+      fileId: this.id,
+    });
     return shares;
   }
 
   async unshare(opts: { shareId: string }): Promise<void> {
-    await this.fileShareService.delete({ id: opts.shareId });
-    this.internalFileService.writeAuditLog(
-      createAuditEvent({
-        action: 'delete',
-        message: `Removed share for "${this.name}" with id "${this.id}"`,
-      })
-    );
+    await this.fileClient.unshare({ id: opts.shareId });
   }
 
   public toJSON(): FileJSON<M> {
@@ -224,44 +184,5 @@ export class File<M = unknown> implements IFile {
 
   public get extension(): undefined | string {
     return this.metadata.extension;
-  }
-
-  /**
-   * Static method for creating files so that we can keep all of the audit logging for files
-   * in the same place.
-   */
-  public static async create(
-    {
-      name,
-      fileKind,
-      alt,
-      meta,
-      mime,
-    }: { name: string; fileKind: FileKind; alt?: string; meta?: unknown; mime?: string },
-    internalFileService: InternalFileService,
-    fileClient: FileClientImpl
-  ) {
-    const fileMeta = await fileClient.create({
-      metadata: {
-        ...createDefaultFileAttributes(),
-        name,
-        mime_type: mime,
-        Alt: alt,
-        Meta: meta,
-        FileKind: fileKind.id,
-        extension: (mime && mimeType.getExtension(mime)) ?? undefined,
-      },
-    });
-
-    const file = internalFileService.toFile(fileMeta.id, fileMeta.metadata, fileKind, fileClient);
-
-    internalFileService.writeAuditLog(
-      createAuditEvent({
-        action: 'create',
-        message: `Created file "${file.name}" of kind "${file.fileKind}" and id "${file.id}"`,
-      })
-    );
-
-    return file;
   }
 }
