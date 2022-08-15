@@ -139,11 +139,7 @@ describe('SessionView component', () => {
 
     describe('TTYPlayer button', () => {
       it('should show tty player button, if session has output', async () => {
-        mockedApi.mockImplementation(async (options) => {
-          // for some reason the typescript interface for options says its an object with a field called path.
-          // in reality options is a string (which equals the path...)
-          const path = String(options);
-
+        mockedApi.mockImplementation(async (path: any) => {
           if (path === PROCESS_EVENTS_ROUTE) {
             return sessionViewProcessEventsMock;
           } else if (path === GET_TOTAL_IO_BYTES_ROUTE) {
