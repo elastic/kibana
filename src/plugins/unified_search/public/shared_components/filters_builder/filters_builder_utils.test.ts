@@ -15,6 +15,7 @@ import {
   addFilter,
   FilterItem,
   removeFilter,
+  moveFilter,
 } from './filters_builder_utils';
 
 import { getFiltersMock } from './__mock__/filters';
@@ -217,18 +218,24 @@ describe('filters_builder_utils', () => {
 
   describe('removeFilter', () => {
     test('should remove filter from filters', () => {
-      const filterBeforeRemoved = getFilterByPath(filters, '1.1');
-      const filtersAfterRemoveFilter = removeFilter(filters, '1.1');
+      const path = '1.1';
+      const filterBeforeRemoved = getFilterByPath(filters, path);
+      const filtersAfterRemoveFilter = removeFilter(filters, path);
       const filterObtainedAfterFilterRemovalFromFilters = getFilterByPath(
         filtersAfterRemoveFilter,
-        '1.1'
+        path
       );
 
       expect(filterBeforeRemoved).not.toBe(filterObtainedAfterFilterRemovalFromFilters);
     });
   });
 
-  describe('moveFilter', () => {});
-
-  describe('updateFilter', () => {});
+  describe('moveFilter', () => {
+    test('should move filter from "0" path to "2" path into filters', () => {
+      const filterBeforeMoving = getFilterByPath(filters, '0');
+      const filtersAfterMovingFilter = moveFilter(filters, '0', '2', ConditionTypes.AND);
+      const filterObtainedAfterFilterMovingFilters = getFilterByPath(filtersAfterMovingFilter, '2');
+      expect(filterBeforeMoving).toEqual(filterObtainedAfterFilterMovingFilters);
+    });
+  });
 });
