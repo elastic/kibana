@@ -38,7 +38,11 @@ export const CompositeEditor = ({ onReset }: CompositeEditorProps) => {
       {({ value = {}, setValue }) => {
         return (
           <div data-test-subj="compositeEditor">
-            <ScriptField existingConcreteFields={existingConcreteFields} links={links} />
+            <ScriptField
+              existingConcreteFields={existingConcreteFields}
+              links={links}
+              placeholder={"emit('field_name', 'hello world');"}
+            />
             <EuiSpacer size="xl" />
             <>
               <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
