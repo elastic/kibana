@@ -298,6 +298,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             expectSpaceSelector: false,
           }
         );
+
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.common.waitForTopNavToBeVisible();
       });
 
       after(async () => {
@@ -329,7 +332,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.discover.expectMissingFieldListItemVisualize('bytes');
       });
 
-      it('Permalinks shows create short-url button', async () => {
+      it('Permalinks shows create short-url button1', async () => {
         await PageObjects.share.openShareMenuItem('Permalinks');
         await PageObjects.share.createShortUrlExistOrFail();
         // close the menu
