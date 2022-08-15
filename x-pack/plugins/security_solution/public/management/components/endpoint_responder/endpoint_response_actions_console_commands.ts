@@ -16,7 +16,10 @@ import { GetProcessesActionResult } from './get_processes_action';
 import type { ParsedArgData } from '../console/service/parsed_command_input';
 import type { ImmutableArray } from '../../../../common/endpoint/types';
 import { UPGRADE_ENDPOINT_FOR_RESPONDER } from '../../../common/translations';
-import { RESPONDER_CAPABILITIES } from '../../../../common/endpoint/constants';
+import type {
+  ResponderCapabilities,
+  ResponderCommands,
+} from '../../../../common/endpoint/constants';
 
 const emptyArgumentValidator = (argData: ParsedArgData): true | string => {
   if (argData?.length > 0 && argData[0]?.trim().length > 0) {
@@ -41,15 +44,18 @@ const pidValidator = (argData: ParsedArgData): true | string => {
   }
 };
 
+const commandToCapabilitiesMap = new Map<ResponderCommands, ResponderCapabilities>([
+  ['isolate', 'isolation'],
+  ['release', 'isolation'],
+  ['kill-process', 'kill_process'],
+  ['suspend-process', 'suspend_process'],
+  ['processes', 'running_processes'],
+]);
+
 const capabilitiesValidator = (command: Command): true | string => {
   const endpointCapabilities = command.commandDefinition.meta.capabilities;
-  if (endpointCapabilities.length === 0) {
-    return UPGRADE_ENDPOINT_FOR_RESPONDER;
-  } else if (
-    RESPONDER_CAPABILITIES.every((capability) =>
-      command.commandDefinition.meta.capabilities.includes(capability)
-    ) === true
-  ) {
+  const responderCapability = command.commandDefinition.name;
+  if (endpointCapabilities.includes(commandToCapabilitiesMap.get(responderCapability)) === true) {
     return true;
   }
 
@@ -90,7 +96,7 @@ export const getEndpointResponseActionsConsoleCommands = ({
   endpointCapabilities,
 }: {
   endpointAgentId: string;
-  endpointCapabilities?: ImmutableArray<string>;
+  endpointCapabilities: ImmutableArray<string>;
 }): CommandDefinition[] => {
   return [
     {
@@ -101,9 +107,11 @@ export const getEndpointResponseActionsConsoleCommands = ({
       RenderComponent: IsolateActionResult,
       meta: {
         endpointId: endpointAgentId,
+        capabilities: endpointCapabilities,
       },
       exampleUsage: 'isolate --comment "isolate this host"',
       exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
+      validate: capabilitiesValidator,
       args: {
         comment: {
           required: false,
@@ -123,9 +131,11 @@ export const getEndpointResponseActionsConsoleCommands = ({
       RenderComponent: ReleaseActionResult,
       meta: {
         endpointId: endpointAgentId,
+        capabilities: endpointCapabilities,
       },
       exampleUsage: 'release --comment "release this host"',
       exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
+      validate: capabilitiesValidator,
       args: {
         comment: {
           required: false,
@@ -145,7 +155,7 @@ export const getEndpointResponseActionsConsoleCommands = ({
       RenderComponent: KillProcessActionResult,
       meta: {
         endpointId: endpointAgentId,
-        capabilities: endpointCapabilities ?? [],
+        capabilities: endpointCapabilities,
       },
       exampleUsage: 'kill-process --pid 123 --comment "kill this process"',
       exampleInstruction: ENTER_PID_OR_ENTITY_ID_INSTRUCTION,
@@ -192,9 +202,11 @@ export const getEndpointResponseActionsConsoleCommands = ({
       RenderComponent: SuspendProcessActionResult,
       meta: {
         endpointId: endpointAgentId,
+        capabilities: endpointCapabilities,
       },
       exampleUsage: 'suspend-process --pid 123 --comment "suspend this process"',
       exampleInstruction: ENTER_PID_OR_ENTITY_ID_INSTRUCTION,
+      validate: capabilitiesValidator,
       mustHaveArgs: true,
       args: {
         comment: {
@@ -252,9 +264,11 @@ export const getEndpointResponseActionsConsoleCommands = ({
       RenderComponent: GetProcessesActionResult,
       meta: {
         endpointId: endpointAgentId,
+        capabilities: endpointCapabilities,
       },
       exampleUsage: 'processes --comment "get the processes"',
       exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
+      validate: capabilitiesValidator,
       args: {
         comment: {
           required: false,

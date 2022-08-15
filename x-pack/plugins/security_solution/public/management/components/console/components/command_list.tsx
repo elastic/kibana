@@ -195,14 +195,14 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
                     <EuiFlexItem grow={false}>
                       <EuiToolTip
                         content={
-                          command.helpDisabled === false
+                          command.helpDisabled === true
                             ? i18n.translate(
-                                'xpack.securitySolution.console.commandList.addButtonTooltip',
-                                { defaultMessage: 'Add to text bar' }
-                              )
-                            : i18n.translate(
                                 'xpack.securitySolution.console.commandList.disabledButtonTooltip',
                                 { defaultMessage: 'Disabled command' }
+                              )
+                            : i18n.translate(
+                                'xpack.securitySolution.console.commandList.addButtonTooltip',
+                                { defaultMessage: 'Add to text bar' }
                               )
                         }
                       >
