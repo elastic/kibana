@@ -6,16 +6,16 @@
  */
 import { ElementFactory } from '../../../types';
 
-export const heatmap: ElementFactory = () => ({
-  name: 'heatmap',
-  displayName: 'Heatmap',
+export const pieVis: ElementFactory = () => ({
+  name: 'pieVis',
+  displayName: '(New) Pie Vis',
   type: 'chart',
-  help: 'Heatmap visualization',
-  icon: 'heatmap',
+  help: 'Pie visualization',
+  icon: 'visPie',
   expression: `kibana
 | selectFilter
 | demodata
 | head 10
-| heatmap xAccessor={visdimension "age"} yAccessor={visdimension "project"} valueAccessor={visdimension "cost"}
+| pieVis metric={visdimension "age"} buckets={visdimension "project"} buckets={visdimension "cost"} legendDisplay="default"
 | render`,
 });
