@@ -63,7 +63,7 @@ describe('Setup Indices', () => {
     },
     properties: {
       completed_at: { type: 'date' },
-      connector: connectorsMappings.properties,
+      connector: { properties: connectorsMappings.properties },
       connector_id: {
         type: 'keyword',
       },
@@ -157,7 +157,7 @@ describe('Setup Indices', () => {
       expect(mockClient.asCurrentUser.indices.create).toHaveBeenCalledWith({
         index: connectorsIndexName,
         mappings: connectorsMappings,
-        settings: { hidden: true },
+        settings: { auto_expand_replicas: '0-3', hidden: true, number_of_replicas: 0 },
       });
       expect(mockClient.asCurrentUser.indices.updateAliases).toHaveBeenCalledWith({
         actions: [
@@ -191,7 +191,7 @@ describe('Setup Indices', () => {
       expect(mockClient.asCurrentUser.indices.create).toHaveBeenCalledWith({
         index: jobsIndexName,
         mappings: connectorsJobsMappings,
-        settings: { hidden: true },
+        settings: { auto_expand_replicas: '0-3', hidden: true, number_of_replicas: 0 },
       });
       expect(mockClient.asCurrentUser.indices.updateAliases).toHaveBeenCalledWith({
         actions: [
