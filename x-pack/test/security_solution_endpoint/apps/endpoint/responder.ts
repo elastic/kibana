@@ -38,7 +38,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await pageObjects.responder.closeResponder();
   };
 
-  describe.only('Response Actions Responder', function () {
+  describe('Response Actions Responder', function () {
     let indexedData: IndexedHostsAndAlertsResponse;
     let endpointAgentId: string;
 
@@ -81,12 +81,23 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         timeline = await timelineTestService.createTimeline('endpoint responder test');
 
         await pageObjects.timeline.navigateToTimelineList();
-        await detectionsTestService.waitForAlerts();
+        await detectionsTestService.waitForAlerts(
+          {
+            bool: {
+              must: [
+                { match: { 'agent.id': endpointAgentId } },
+                { match: { 'agent.type': 'endpoint' } },
+              ],
+            },
+          },
+          120_000
+        );
 
         // Add all alerts for the Endpoint to the timeline created
         await timelineTestService.updateTimeline(
           timeline.data.persistTimeline.timeline.savedObjectId,
           {
+            title: timeline.data.persistTimeline.timeline.title,
             kqlQuery: {
               filterQuery: {
                 kuery: {
@@ -117,9 +128,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           timeline.data.persistTimeline.timeline.savedObjectId
         );
 
-        // FIXME:PT need to click on alert, then then show responder from the actions button.
+        // Show event/alert details for the first one in the list
+        await pageObjects.timeline.showEventDetails();
 
-        await new Promise((r) => setTimeout(r, 20_000));
+        // Click responder from the take action button
+        await testSubjects.click('take-action-dropdown-btn');
+        await testSubjects.clickWhenNotDisabled('endpointResponseActions-action-item');
+        await testSubjects.existOrFail('consolePageOverlay');
+
+        await performResponderSanityChecks();
 
         await pageObjects.timeline.closeTimeline();
       });
