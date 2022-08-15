@@ -100,6 +100,10 @@ export function LogExplorerLayout({
   // Columns
   const { columns, onAddColumn, onRemoveColumn } = useDiscoverColumnsContext();
 
+  const loadData = useCallback(() => {
+    stateMachine.send('load');
+  }, [stateMachine]);
+
   const onFieldEdited = useCallback(() => {
     // TODO: Refetch via state machine
     // savedSearchRefetch$.next('reset');
@@ -217,9 +221,7 @@ export function LogExplorerLayout({
                   onDisableFilters={onDisableFilters}
                 />
               ) : dataAccessState.matches('uninitialized') ? (
-                <DiscoverUninitialized
-                // onRefresh={() => TODO: Refetch via state machine}
-                />
+                <DiscoverUninitialized onRefresh={loadData} />
               ) : dataAccessState.matches('loadingAround') ? (
                 <LoadingSpinner />
               ) : (

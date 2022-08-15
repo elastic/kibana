@@ -82,6 +82,9 @@ export type LogExplorerExternalEvent =
 
 export type LogExplorerInternalEvent =
   | {
+      type: 'load';
+    }
+  | {
       type: 'retry';
     }
   | {

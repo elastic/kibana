@@ -349,6 +349,9 @@ export const dataAccessStateMachine = createMachine<
           columnsChanged: {
             target: 'loadingAround',
           },
+          load: {
+            target: 'loadingAround',
+          },
         },
       },
       tailing: {
