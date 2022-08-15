@@ -16,6 +16,12 @@ import {
   UUID,
   LimitedSizeArray,
 } from '@kbn/securitysolution-io-ts-types';
+import {
+  throttle,
+  action_group as actionGroup,
+  action_params as actionParams,
+  action_id as actionId,
+} from '@kbn/securitysolution-io-ts-alerting-types';
 import * as t from 'io-ts';
 
 export const author = t.array(t.string);
@@ -379,6 +385,8 @@ export enum BulkActionEditType {
   'delete_index_patterns' = 'delete_index_patterns',
   'set_index_patterns' = 'set_index_patterns',
   'set_timeline' = 'set_timeline',
+  'add_actions' = 'add_actions',
+  'set_actions' = 'set_actions',
 }
 
 const bulkActionEditPayloadTags = t.type({
@@ -418,16 +426,47 @@ const bulkActionEditPayloadTimeline = t.type({
 
 export type BulkActionEditPayloadTimeline = t.TypeOf<typeof bulkActionEditPayloadTimeline>;
 
+const bulkActionEditPayloadActions = t.type({
+  type: t.union([
+    t.literal(BulkActionEditType.add_actions),
+    t.literal(BulkActionEditType.set_actions),
+  ]),
+  value: t.type({
+    throttle,
+    // actions: t.array(t.UnknownRecord),
+    actions: t.array(
+      t.exact(
+        t.type({
+          group: actionGroup,
+          id: actionId,
+          params: actionParams,
+        })
+      )
+    ),
+  }),
+});
+
+export type BulkActionEditPayloadSActions = t.TypeOf<typeof bulkActionEditPayloadActions>;
+
 export const bulkActionEditPayload = t.union([
   bulkActionEditPayloadTags,
   bulkActionEditPayloadIndexPatterns,
   bulkActionEditPayloadTimeline,
+  bulkActionEditPayloadActions,
 ]);
 
 export type BulkActionEditPayload = t.TypeOf<typeof bulkActionEditPayload>;
 
-export type BulkActionEditForRuleAttributes = BulkActionEditPayloadTags;
+/**
+ * actions that modifies rules attributes
+ */
+export type BulkActionEditForRuleAttributes =
+  | BulkActionEditPayloadTags
+  | BulkActionEditPayloadSActions;
 
+/**
+ * actions that modifies rules params
+ */
 export type BulkActionEditForRuleParams =
   | BulkActionEditPayloadIndexPatterns
   | BulkActionEditPayloadTimeline;

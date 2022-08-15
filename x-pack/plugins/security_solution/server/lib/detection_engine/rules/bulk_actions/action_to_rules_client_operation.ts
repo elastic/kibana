@@ -11,6 +11,20 @@ import type { BulkActionEditForRuleAttributes } from '../../../../../common/dete
 import { BulkActionEditType } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { assertUnreachable } from '../../../../../common/utility_types';
 
+import { transformToAlertThrottle, transformToNotifyWhen } from '../utils';
+
+const getThrottleOperation = (throttle: string) => ({
+  field: 'throttle',
+  operation: 'set',
+  value: transformToAlertThrottle(throttle),
+});
+
+const getNotifyWhenOperation = (throttle: string) => ({
+  field: 'notifyWhen',
+  operation: 'set',
+  value: transformToNotifyWhen(throttle),
+});
+
 /**
  * converts bulk edit action to format of rulesClient.bulkEdit operation
  * @param action BulkActionEditForRuleAttributes
@@ -18,29 +32,58 @@ import { assertUnreachable } from '../../../../../common/utility_types';
  */
 export const bulkEditActionToRulesClientOperation = (
   action: BulkActionEditForRuleAttributes
-): BulkEditOperation => {
+): BulkEditOperation[] => {
   switch (action.type) {
     // tags actions
     case BulkActionEditType.add_tags:
-      return {
-        field: 'tags',
-        operation: 'add',
-        value: action.value,
-      };
+      return [
+        {
+          field: 'tags',
+          operation: 'add',
+          value: action.value,
+        },
+      ];
 
     case BulkActionEditType.delete_tags:
-      return {
-        field: 'tags',
-        operation: 'delete',
-        value: action.value,
-      };
+      return [
+        {
+          field: 'tags',
+          operation: 'delete',
+          value: action.value,
+        },
+      ];
 
     case BulkActionEditType.set_tags:
-      return {
-        field: 'tags',
-        operation: 'set',
-        value: action.value,
-      };
+      return [
+        {
+          field: 'tags',
+          operation: 'set',
+          value: action.value,
+        },
+      ];
+
+    // rule actions
+    case BulkActionEditType.add_actions:
+      return [
+        {
+          field: 'actions',
+          operation: 'add',
+          value: action.value.actions,
+        },
+        getThrottleOperation(action.value.throttle),
+        getNotifyWhenOperation(action.value.throttle),
+      ];
+
+    case BulkActionEditType.set_actions:
+      return [
+        {
+          field: 'actions',
+          operation: 'set',
+          value: action.value.actions,
+        },
+        getThrottleOperation(action.value.throttle),
+        getNotifyWhenOperation(action.value.throttle),
+      ];
 
     default:
       return assertUnreachable(action.type);

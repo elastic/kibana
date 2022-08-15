@@ -43,7 +43,7 @@ export const bulkEditRules = ({
 
   return rulesClient.bulkEdit({
     ...(ids ? { ids } : { filter: enrichFilterWithRuleTypeMapping(filter) }),
-    operations: attributesActions.map(bulkEditActionToRulesClientOperation),
+    operations: attributesActions.map(bulkEditActionToRulesClientOperation).flat(),
     paramsModifier: async (ruleParams: RuleAlertType['params']) => {
       await validateBulkEditRule({ mlAuthz, ruleType: ruleParams.type });
       return ruleParamsModifier(ruleParams, paramsActions);

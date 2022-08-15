@@ -76,6 +76,9 @@ export const retryIfBulkEditConflicts = async (
         if (item.type === 'alert' && item?.error?.statusCode === 409) {
           return acc.set(item.id, { message: item.error.message });
         }
+        if (item?.error) {
+          acc.set(item.id, { message: item.error.message });
+        }
         return acc;
       },
       new Map()

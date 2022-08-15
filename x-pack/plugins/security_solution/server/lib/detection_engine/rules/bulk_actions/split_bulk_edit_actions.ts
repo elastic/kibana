@@ -32,6 +32,8 @@ export const splitBulkEditActions = (actions: BulkActionEditPayload[]) => {
       case BulkActionEditType.add_tags:
       case BulkActionEditType.set_tags:
       case BulkActionEditType.delete_tags:
+      case BulkActionEditType.add_actions:
+      case BulkActionEditType.set_actions:
         acc.attributesActions.push(action);
         break;
       default:
