@@ -28,15 +28,15 @@ export const TTYSearchBar = ({ lines, seekToLine, xTermSearchFn }: TTYSearchBarD
     if (currentMatch) {
       const goToLine = lines.indexOf(currentMatch.line);
       seekToLine(goToLine);
-
-      const timeout = setTimeout(() => {
-        return xTermSearchFn(searchQuery, currentMatch.index);
-      }, 100);
-
-      return () => {
-        clearTimeout(timeout);
-      };
     }
+
+    const timeout = setTimeout(() => {
+      return xTermSearchFn(searchQuery, currentMatch?.index || 0);
+    }, 100);
+
+    return () => {
+      clearTimeout(timeout);
+    };
   }, [currentMatch, searchQuery, lines, xTermSearchFn, seekToLine]);
 
   const searchResults = useMemo(() => {
@@ -71,6 +71,7 @@ export const TTYSearchBar = ({ lines, seekToLine, xTermSearchFn }: TTYSearchBarD
 
   const onSearch = useCallback((query) => {
     setSearchQuery(query);
+    setCurrentMatch(null);
   }, []);
 
   const onSetCurrentMatch = useCallback(
