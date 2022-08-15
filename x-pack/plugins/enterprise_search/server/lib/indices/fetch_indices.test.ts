@@ -387,9 +387,18 @@ describe('fetchIndices lib function', () => {
     });
 
     it('overrides hidden indices setting', async () => {
-      await expect(
-        fetchIndices(mockClient as unknown as IScopedClusterClient, '*', false, true, 'search-')
-      ).resolves.toEqual(
+      const returnValue = await fetchIndices(
+        mockClient as unknown as IScopedClusterClient,
+        '*',
+        false,
+        true,
+        'search-'
+      );
+
+      // This is the list of mock indices and aliases that are:
+      // - Non-hidden indices and aliases
+      // - search- prefixed aliases that point to hidden indices
+      expect(returnValue).toEqual(
         [
           'regular-index',
           'alias-regular-index',
@@ -400,6 +409,20 @@ describe('fetchIndices lib function', () => {
           'search-alias-hidden-index',
           'search-alias-search-prefixed-hidden-index',
         ].map(getIndexReturnValue)
+      );
+
+      // This is the list of mock indices and aliases that are:
+      // - Hidden indices
+      // - aliases to hidden indices that has no prefix
+      expect(returnValue).toEqual(
+        expect.not.arrayContaining(
+          [
+            'hidden-index',
+            'search-prefixed-hidden-index',
+            'alias-hidden-index',
+            'alias-search-prefixed-hidden-index',
+          ].map(getIndexReturnValue)
+        )
       );
 
       expect(mockClient.asCurrentUser.indices.get).toHaveBeenCalledWith({
@@ -426,9 +449,15 @@ describe('fetchIndices lib function', () => {
     });
 
     it('returns everything if hidden indices set', async () => {
-      await expect(
-        fetchIndices(mockClient as unknown as IScopedClusterClient, '*', true, true, 'search-')
-      ).resolves.toEqual(
+      const returnValue = await fetchIndices(
+        mockClient as unknown as IScopedClusterClient,
+        '*',
+        true,
+        true,
+        'search-'
+      );
+
+      expect(returnValue).toEqual(
         expect.arrayContaining(Object.keys(mockMultiStatsResponse.indices).map(getIndexReturnValue))
       );
 
