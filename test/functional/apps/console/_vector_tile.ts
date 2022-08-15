@@ -12,9 +12,11 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'console', 'header', 'home']);
   const retry = getService('retry');
+  const security = getService('security');
 
   describe('console vector tiles response validation', function describeIndexTests() {
     before(async () => {
+      await security.testUser.setRoles(['kibana_admin', 'kibana_sample_admin']);
       await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
       });
@@ -41,6 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.home.removeSampleDataSet('logs');
+      await security.testUser.restoreDefaults();
     });
   });
 }
