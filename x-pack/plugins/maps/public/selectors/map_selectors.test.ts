@@ -76,6 +76,7 @@ describe('getDataFilters', () => {
       timeslice,
       query,
       filters,
+      undefined, // embeddableSearchContext
       searchSessionId,
       searchSessionMapBuffer,
       isReadOnly
@@ -92,6 +93,7 @@ describe('getDataFilters', () => {
       timeslice,
       query,
       filters,
+      undefined, // embeddableSearchContext
       searchSessionId,
       undefined,
       isReadOnly

@@ -277,7 +277,7 @@ export class MapEmbeddable
     const embeddableSearchContext = getEmbeddableSearchContext(
       this._savedMap.getStore().getState()
     );
-    return embeddableSearchContext.query;
+    return embeddableSearchContext?.query;
   }
 
   public supportedTriggers(): string[] {
