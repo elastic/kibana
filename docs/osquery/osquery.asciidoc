@@ -45,7 +45,7 @@ and you'll get suggestions for agents by name, ID, platform, and policy.
 ** *Query*: Select a saved query or enter a new one in the text box. After you enter the query, you can expand the **Advanced** section to view or set {kibana-ref}/osquery.html#osquery-map-fields[mapped ECS fields] included in the results from the live query. Mapping ECS fields is optional.
 ** *Pack*: Select from query packs that have been loaded and activated. After you select a pack, all of the queries in the pack are displayed.
 +
-TIP: Refer to {kibana-ref}/osquery.html#osquery-prebuilt-packs-queries[prebuilt packs] to learn about using and managing Elastic prebuilt packs.
+TIP: Refer to <<osquery-prebuilt-packs,prebuilt packs>> to learn about using and managing Elastic prebuilt packs.
 +
 [role="screenshot"]
 image::images/enter-query.png[Select saved query dropdown name showing query name and description]
