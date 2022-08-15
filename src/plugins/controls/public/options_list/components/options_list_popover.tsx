@@ -7,6 +7,8 @@
  */
 
 import React, { useMemo, useState } from 'react';
+import { isEmpty } from 'lodash';
+
 import {
   EuiFilterSelectItem,
   EuiPopoverTitle,
@@ -21,20 +23,18 @@ import {
   EuiIcon,
   EuiTitle,
 } from '@elastic/eui';
-import { isEmpty } from 'lodash';
-
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
-import { optionsListReducers } from './options_list_reducers';
-import { OptionsListStrings } from './options_list_strings';
-import { OptionsListReduxState } from './types';
 
-export const OptionsListPopover = ({
-  width,
-  updateSearchString,
-}: {
+import { optionsListReducers } from '../options_list_reducers';
+import { OptionsListStrings } from './options_list_strings';
+import { OptionsListReduxState } from '../types';
+
+export interface OptionsListPopoverProps {
   width: number;
   updateSearchString: (newSearchString: string) => void;
-}) => {
+}
+
+export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPopoverProps) => {
   // Redux embeddable container Context
   const {
     useEmbeddableDispatch,
@@ -137,6 +137,7 @@ export const OptionsListPopover = ({
                     color={showOnlySelected ? 'primary' : 'text'}
                     display={showOnlySelected ? 'base' : 'empty'}
                     aria-label={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
+                    data-test-subj="optionsList-control-show-only-selected"
                     onClick={() => setShowOnlySelected(!showOnlySelected)}
                   />
                 </EuiToolTip>
@@ -175,7 +176,10 @@ export const OptionsListPopover = ({
             ))}
 
             {!loading && (!availableOptions || availableOptions.length === 0) && (
-              <div className="euiFilterSelect__note">
+              <div
+                className="euiFilterSelect__note"
+                data-test-subj="optionsList-control-noSelectionsMessage"
+              >
                 <div className="euiFilterSelect__noteContent">
                   <EuiIcon type="minusInCircle" />
                   <EuiSpacer size="xs" />
@@ -229,7 +233,10 @@ export const OptionsListPopover = ({
                 </EuiFilterSelectItem>
               ))}
             {(!selectedOptions || selectedOptions.length === 0) && (
-              <div className="euiFilterSelect__note">
+              <div
+                className="euiFilterSelect__note"
+                data-test-subj="optionsList-control-selectionsEmptyMessage"
+              >
                 <div className="euiFilterSelect__noteContent">
                   <EuiIcon type="minusInCircle" />
                   <EuiSpacer size="xs" />

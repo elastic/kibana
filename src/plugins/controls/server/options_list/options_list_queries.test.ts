@@ -13,7 +13,7 @@ import {
   getSuggestionAggregationBuilder,
   getValidationAggregationBuilder,
 } from './options_list_queries';
-import { OptionsListRequestBody } from '../../../common/control_types/options_list/types';
+import { OptionsListRequestBody } from '../../common/options_list/types';
 
 describe('options list queries', () => {
   let rawSearchResponseMock: SearchResponse = {} as SearchResponse;
