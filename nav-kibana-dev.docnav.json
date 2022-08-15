@@ -429,6 +429,9 @@
         },
         {
           "id": "kibVisualizationsPluginApi"
+        },
+        {
+          "id": "kibDevDocsOpsTest"
         }
       ]
     },
@@ -502,45 +505,50 @@
         {
           "label": "Utilities",
           "items": [
-            {
-              "id": "kibDevDocsToolingLog"
-            },
-            {
-              "id": "kibDevDocsOpsJestSerializers"
-            },
-            {
-              "id": "kibDevDocsOpsExpect"
-            },
-            {
-              "id": "kibDevDocsOpsAmbientStorybookTypes"
-            },
-            {
-              "id": "kibDevDocsOpsAmbientUiTypes"
-            },
-            {
-              "id": "kibDevDocsOpsTestSubjSelector"
-            },
-            {
-              "id": "kibDevDocsOpsBazelRunner"
-            },
-            {
-              "id": "kibDevDocsOpsCliDevMode"
-            },
-            {
-              "id": "kibDevDocsOpsEs"
-            },
-            {
-              "id": "kibDevDocsOpsSomeDevLog"
-            },
-            {
-              "id": "kibDevDocsOpsDevCliRunner"
-            },
-            {
-              "id": "kibDevDocsOpsGetRepoFiles"
-            },
-            {
-              "id": "kibDevDocsOpsRepoSourceClassifier"
-            }
+            [
+              {
+                "id": "kibDevDocsOpsAmbientStorybookTypes"
+              },
+              {
+                "id": "kibDevDocsOpsAmbientUiTypes"
+              },
+              {
+                "id": "kibDevDocsOpsBazelRunner"
+              },
+              {
+                "id": "kibDevDocsOpsCliDevMode"
+              },
+              {
+                "id": "kibDevDocsOpsDevCliRunner"
+              },
+              {
+                "id": "kibDevDocsOpsEs"
+              },
+              {
+                "id": "kibDevDocsOpsExpect"
+              },
+              {
+                "id": "kibDevDocsOpsGetRepoFiles"
+              },
+              {
+                "id": "kibDevDocsOpsJestSerializers"
+              },
+              {
+                "id": "kibDevDocsOpsRepoSourceClassifier"
+              },
+              {
+                "id": "kibDevDocsOpsSomeDevLog"
+              },
+              {
+                "id": "kibDevDocsOpsTest"
+              },
+              {
+                "id": "kibDevDocsOpsTestSubjSelector"
+              },
+              {
+                "id": "kibDevDocsToolingLog"
+              }
+            ]
           ]
         }
       ]
