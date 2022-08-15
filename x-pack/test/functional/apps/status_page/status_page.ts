@@ -11,13 +11,13 @@ export default function statusPageFunctonalTests({
   getService,
   getPageObjects,
 }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['security', 'statusPage', 'common']);
 
   describe('Status Page', function () {
     this.tags(['skipCloud', 'includeFirefox']);
-    before(async () => await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana'));
-    after(async () => await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana'));
+    before(async () => await kibanaServer.savedObjects.cleanStandardList());
+    after(async () => await kibanaServer.savedObjects.cleanStandardList());
 
     it('allows user to navigate without authentication', async () => {
       await PageObjects.security.forceLogout();
