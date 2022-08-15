@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { euiPaletteColorBlind } from '@elastic/eui';
 
 import type { StatItems } from '../../../../common/components/stat_items';
-import { ID, useNetworkKpiNetworkEvents } from '../../../containers/kpi_network/network_events';
+import { ID } from '../../../containers/kpi_network/network_events';
 import type { NetworkKpiProps } from '../types';
 import * as i18n from './translations';
 import { kpiNetworkEventsLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/network/kpi_network_events';
-import { KpiBaseComponentManage } from '../../../../hosts/components/kpi_hosts/common';
-import { useQueryToggle } from '../../../../common/containers/query_toggle';
+import { KpiBaseComponentManage } from '../../../../hosts/components/kpi_hosts/common/kpi_embeddable_component';
 
 const euiVisColorPalette = euiPaletteColorBlind();
 const euiColorVis1 = euiVisColorPalette[1];
@@ -34,41 +33,15 @@ export const fieldsMapping: Readonly<StatItems[]> = [
   },
 ];
 
-const NetworkKpiNetworkEventsComponent: React.FC<NetworkKpiProps> = ({
-  filterQuery,
-  from,
-  indexNames,
-  to,
-  updateDateRange,
-  setQuery,
-  skip,
-}) => {
-  const { toggleStatus } = useQueryToggle(ID);
-  const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
-  useEffect(() => {
-    setQuerySkip(skip || !toggleStatus);
-  }, [skip, toggleStatus]);
-  const [loading, { refetch, id, inspect, ...data }] = useNetworkKpiNetworkEvents({
-    filterQuery,
-    endDate: to,
-    indexNames,
-    startDate: from,
-    skip: querySkip,
-  });
-
+const NetworkKpiNetworkEventsComponent: React.FC<NetworkKpiProps> = ({ from, to, setQuery }) => {
   return (
     <KpiBaseComponentManage
-      data={data}
-      id={id}
-      inspect={inspect}
-      loading={loading}
       fieldsMapping={fieldsMapping}
       from={from}
-      to={to}
-      updateDateRange={updateDateRange}
-      refetch={refetch}
+      id={ID}
+      loading={false}
       setQuery={setQuery}
-      setQuerySkip={setQuerySkip}
+      to={to}
     />
   );
 };
