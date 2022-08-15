@@ -53,11 +53,15 @@ export interface ISearchStart {
    */
   search: ISearchGeneric;
   /**
-   * show toast for caught error
+   * Show toast for caught error
+   * @param e Error
    */
   showError: (e: Error) => void;
   /**
-   * show warnings, or customize how they're shown
+   * Show warnings, or customize how they're shown
+   * @param inspector IInspectorInfo - an inspector object with requests internally collected
+   * @param cb Function - an optional callback function which can intercept warnings. Pass `true` from the
+   *                      function to prevent the search service from showing warning notifications by default.
    */
   showWarnings: (
     inspector: IInspectorInfo,
