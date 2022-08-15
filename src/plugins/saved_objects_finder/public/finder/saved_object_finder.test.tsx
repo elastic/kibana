@@ -12,16 +12,7 @@ jest.mock('lodash', () => ({
 
 const nextTick = () => new Promise((res) => process.nextTick(res));
 
-import {
-  EuiEmptyPrompt,
-  EuiInMemoryTable,
-  EuiLink,
-  EuiListGroup,
-  EuiLoadingSpinner,
-  EuiPagination,
-  EuiTablePagination,
-  Query,
-} from '@elastic/eui';
+import { EuiInMemoryTable, EuiLink, EuiSearchBarProps, Pagination, Query } from '@elastic/eui';
 import { IconType } from '@elastic/eui';
 import { mount, shallow } from 'enzyme';
 import React from 'react';
@@ -61,11 +52,17 @@ describe('SavedObjectsFinder', () => {
 
   const savedObjectsManagement = savedObjectsManagementPluginMock.createStartContract();
   savedObjectsManagement.parseQuery.mockImplementation(
-    (query: Query, types: SavedObjectManagementTypeInfo[]) => ({
-      queryText: query.text,
-      visibleTypes: types.map((type) => type.name),
-      selectedTags: [],
-    })
+    (query: Query, types: SavedObjectManagementTypeInfo[]) => {
+      const queryTypes = query.ast.getFieldClauses('type')?.[0].value as string[] | undefined;
+      return {
+        queryText: query.ast
+          .getTermClauses()
+          .map((clause: any) => clause.value)
+          .join(' '),
+        visibleTypes: queryTypes?.filter((name) => types.some((type) => type.name === name)),
+        selectedTags: [],
+      };
+    }
   );
 
   const savedObjectsPlugin = savedObjectsPluginMock.createStartContract();
@@ -205,7 +202,7 @@ describe('SavedObjectsFinder', () => {
       wrapper.instance().componentDidMount!();
       await nextTick();
       findTestSubject(
-        findTestSubject(wrapper, 'tableHeaderCell_title_1'),
+        findTestSubject(wrapper, 'tableHeaderCell_title_0'),
         'tableHeaderSortButton'
       ).simulate('click');
       const titleLinks = wrapper.find(EuiLink);
@@ -241,7 +238,7 @@ describe('SavedObjectsFinder', () => {
     wrapper.instance().componentDidMount!();
     await nextTick();
     const items: any[] = wrapper.find(EuiInMemoryTable).prop('items');
-    expect(items.length).toBe(1);
+    expect(items).toHaveLength(1);
     expect(items[0].attributes.title).toBe(doc2.attributes.title);
   });
 
@@ -331,7 +328,7 @@ describe('SavedObjectsFinder', () => {
         Promise.resolve({ savedObjects: [doc, doc2] })
       );
 
-      const wrapper = shallow(
+      const wrapper = mount(
         <SavedObjectFinder
           savedObjects={core.savedObjects}
           uiSettings={core.uiSettings}
@@ -345,13 +342,11 @@ describe('SavedObjectsFinder', () => {
       wrapper.instance().componentDidMount!();
       await nextTick();
       wrapper
-        .find('[data-test-subj="savedObjectFinderSearchInput"]')
-        .first()
-        .simulate('change', { target: { value: 'abc' } });
-      await nextTick();
-      const list = wrapper.find(EuiListGroup);
-      expect(list.childAt(0).key()).toBe('1');
-      expect(list.childAt(1).key()).toBe('2');
+        .find('[data-test-subj="savedObjectFinderSearchInput"] input')
+        .simulate('keyup', { key: 'Enter', target: { value: 'abc' } });
+      const titleLinks = wrapper.find(EuiLink);
+      expect(titleLinks.at(0).text()).toEqual(doc.attributes.title);
+      expect(titleLinks.at(1).text()).toEqual(doc2.attributes.title);
     });
   });
 
@@ -410,6 +405,31 @@ describe('SavedObjectsFinder', () => {
       },
     ];
 
+    it('should render filter buttons if enabled', async () => {
+      const core = coreMock.createStart();
+      (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({
+          savedObjects: [doc, doc2, doc3],
+        })
+      );
+
+      const wrapper = mount(
+        <SavedObjectFinder
+          savedObjects={core.savedObjects}
+          uiSettings={core.uiSettings}
+          savedObjectsManagement={savedObjectsManagement}
+          savedObjectsPlugin={savedObjectsPlugin}
+          savedObjectsTagging={savedObjectsTagging}
+          showFilter={true}
+          savedObjectMetaData={metaDataConfig}
+        />
+      );
+
+      wrapper.instance().componentDidMount!();
+      await nextTick();
+      expect(wrapper.find('.euiFilterButton')).toHaveLength(2);
+    });
+
     it('should not render filter buttons if disabled', async () => {
       const core = coreMock.createStart();
       (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
@@ -418,7 +438,7 @@ describe('SavedObjectsFinder', () => {
         })
       );
 
-      const wrapper = shallow(
+      const wrapper = mount(
         <SavedObjectFinder
           savedObjects={core.savedObjects}
           uiSettings={core.uiSettings}
@@ -432,12 +452,10 @@ describe('SavedObjectsFinder', () => {
 
       wrapper.instance().componentDidMount!();
       await nextTick();
-      expect(wrapper.find('[data-test-subj="savedObjectFinderFilter-search"]').exists()).toBe(
-        false
-      );
+      expect(wrapper.find('.euiFilterButton')).toHaveLength(0);
     });
 
-    it('should not render filter buttons if there is only one type in the list', async () => {
+    it('should not render type filter button if there is only one type in the metadata list', async () => {
       const core = coreMock.createStart();
       (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
         Promise.resolve({
@@ -445,7 +463,7 @@ describe('SavedObjectsFinder', () => {
         })
       );
 
-      const wrapper = shallow(
+      const wrapper = mount(
         <SavedObjectFinder
           savedObjects={core.savedObjects}
           uiSettings={core.uiSettings}
@@ -453,18 +471,21 @@ describe('SavedObjectsFinder', () => {
           savedObjectsPlugin={savedObjectsPlugin}
           savedObjectsTagging={savedObjectsTagging}
           showFilter={true}
-          savedObjectMetaData={metaDataConfig}
+          savedObjectMetaData={searchMetaData}
         />
       );
 
       wrapper.instance().componentDidMount!();
       await nextTick();
-      expect(wrapper.find('[data-test-subj="savedObjectFinderFilter-search"]').exists()).toBe(
-        false
-      );
+      expect(
+        wrapper
+          .find('.euiFilterButton')
+          .findWhere((button) => button.text() === 'Types')
+          .exists()
+      ).toBe(false);
     });
 
-    it('should apply filter if selected', async () => {
+    it('should apply type filter if selected', async () => {
       const core = coreMock.createStart();
       (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
         Promise.resolve({
@@ -472,7 +493,7 @@ describe('SavedObjectsFinder', () => {
         })
       );
 
-      const wrapper = shallow(
+      const wrapper = mount(
         <SavedObjectFinder
           savedObjects={core.savedObjects}
           uiSettings={core.uiSettings}
@@ -486,13 +507,30 @@ describe('SavedObjectsFinder', () => {
 
       wrapper.instance().componentDidMount!();
       await nextTick();
-      wrapper.setState({ filteredTypes: ['vis'] });
-      const list = wrapper.find(EuiListGroup);
-      expect(list.childAt(0).key()).toBe('3');
-      expect(list.children().length).toBe(1);
-
-      wrapper.setState({ filteredTypes: ['vis', 'search'] });
-      expect(wrapper.find(EuiListGroup).children().length).toBe(3);
+      const table = wrapper.find<EuiInMemoryTable<any>>(EuiInMemoryTable);
+      const search = table.prop('search') as EuiSearchBarProps;
+      search.onChange?.({ query: Query.parse('type:(vis)'), queryText: '', error: null });
+      expect(core.savedObjects.client.find).toHaveBeenLastCalledWith({
+        type: ['vis'],
+        fields: ['title', 'name'],
+        search: undefined,
+        hasReference: undefined,
+        page: 1,
+        perPage: 10,
+        searchFields: ['title^3', 'description'],
+        defaultSearchOperator: 'AND',
+      });
+      search.onChange?.({ query: Query.parse('type:(search or vis)'), queryText: '', error: null });
+      expect(core.savedObjects.client.find).toHaveBeenLastCalledWith({
+        type: ['search', 'vis'],
+        fields: ['title', 'name'],
+        search: undefined,
+        hasReference: undefined,
+        page: 1,
+        perPage: 10,
+        searchFields: ['title^3', 'description'],
+        defaultSearchOperator: 'AND',
+      });
     });
   });
 
@@ -503,7 +541,7 @@ describe('SavedObjectsFinder', () => {
     );
 
     const noItemsMessage = <span id="myNoItemsMessage" />;
-    const wrapper = shallow(
+    const wrapper = mount(
       <SavedObjectFinder
         savedObjects={core.savedObjects}
         uiSettings={core.uiSettings}
@@ -518,7 +556,7 @@ describe('SavedObjectsFinder', () => {
     wrapper.instance().componentDidMount!();
     await nextTick();
 
-    expect(wrapper.find(EuiEmptyPrompt).first().prop('body')).toEqual(noItemsMessage);
+    expect(wrapper.find(EuiInMemoryTable).prop('message')).toEqual(noItemsMessage);
   });
 
   describe('pagination', () => {
@@ -536,7 +574,7 @@ describe('SavedObjectsFinder', () => {
         Promise.resolve({ savedObjects: longItemList })
       );
 
-      const wrapper = shallow(
+      const wrapper = mount(
         <SavedObjectFinder
           savedObjects={core.savedObjects}
           uiSettings={core.uiSettings}
@@ -550,8 +588,11 @@ describe('SavedObjectsFinder', () => {
 
       wrapper.instance().componentDidMount!();
       await nextTick();
-      expect(wrapper.find(EuiTablePagination).first().prop('itemsPerPage')).toEqual(15);
-      expect(wrapper.find(EuiListGroup).children().length).toBe(15);
+      wrapper.update();
+      const pagination = wrapper.find(EuiInMemoryTable).prop('pagination') as Pagination;
+      expect(pagination.showPerPageOptions).toBe(true);
+      expect(pagination.pageSize).toEqual(15);
+      expect(wrapper.find(EuiInMemoryTable).find('tbody tr')).toHaveLength(15);
     });
 
     it('should allow switching the page size', async () => {
@@ -560,7 +601,7 @@ describe('SavedObjectsFinder', () => {
         Promise.resolve({ savedObjects: longItemList })
       );
 
-      const wrapper = shallow(
+      const wrapper = mount(
         <SavedObjectFinder
           savedObjects={core.savedObjects}
           uiSettings={core.uiSettings}
@@ -574,8 +615,18 @@ describe('SavedObjectsFinder', () => {
 
       wrapper.instance().componentDidMount!();
       await nextTick();
-      wrapper.find(EuiTablePagination).first().prop('onChangeItemsPerPage')!(5);
-      expect(wrapper.find(EuiListGroup).children().length).toBe(5);
+      const table = wrapper.find<EuiInMemoryTable<any>>(EuiInMemoryTable);
+      const pagination = table.prop('pagination') as Pagination;
+      const sort = table.prop('sorting');
+      table.prop('onChange')!({
+        page: {
+          index: pagination.pageIndex,
+          size: 5,
+        },
+        sort: typeof sort === 'object' ? sort?.sort : undefined,
+      });
+      wrapper.update();
+      expect(wrapper.find(EuiInMemoryTable).find('tbody tr')).toHaveLength(5);
     });
 
     it('should switch page correctly', async () => {
@@ -584,7 +635,7 @@ describe('SavedObjectsFinder', () => {
         Promise.resolve({ savedObjects: longItemList })
       );
 
-      const wrapper = shallow(
+      const wrapper = mount(
         <SavedObjectFinder
           savedObjects={core.savedObjects}
           uiSettings={core.uiSettings}
@@ -598,8 +649,20 @@ describe('SavedObjectsFinder', () => {
 
       wrapper.instance().componentDidMount!();
       await nextTick();
-      wrapper.find(EuiTablePagination).first().prop('onChangePage')!(1);
-      expect(wrapper.find(EuiListGroup).children().first().key()).toBe('15');
+      wrapper.update();
+      expect(wrapper.find(EuiInMemoryTable).find('tbody tr')).toHaveLength(15);
+      const table = wrapper.find<EuiInMemoryTable<any>>(EuiInMemoryTable);
+      const pagination = table.prop('pagination') as Pagination;
+      const sort = table.prop('sorting');
+      table.prop('onChange')!({
+        page: {
+          index: 3,
+          size: pagination.pageSize,
+        },
+        sort: typeof sort === 'object' ? sort?.sort : undefined,
+      });
+      wrapper.update();
+      expect(wrapper.find(EuiInMemoryTable).find('tbody tr')).toHaveLength(5);
     });
 
     it('should show an ordinary pagination for fixed page sizes', async () => {
@@ -608,7 +671,7 @@ describe('SavedObjectsFinder', () => {
         Promise.resolve({ savedObjects: longItemList })
       );
 
-      const wrapper = shallow(
+      const wrapper = mount(
         <SavedObjectFinder
           savedObjects={core.savedObjects}
           uiSettings={core.uiSettings}
@@ -622,8 +685,11 @@ describe('SavedObjectsFinder', () => {
 
       wrapper.instance().componentDidMount!();
       await nextTick();
-      expect(wrapper.find(EuiPagination).first().prop('pageCount')).toEqual(2);
-      expect(wrapper.find(EuiListGroup).children().length).toBe(33);
+      wrapper.update();
+      const pagination = wrapper.find(EuiInMemoryTable).prop('pagination') as Pagination;
+      expect(pagination.showPerPageOptions).toBe(false);
+      expect(pagination.pageSize).toEqual(33);
+      expect(wrapper.find(EuiInMemoryTable).find('tbody tr')).toHaveLength(33);
     });
 
     it('should switch page correctly for fixed page sizes', async () => {
@@ -632,7 +698,7 @@ describe('SavedObjectsFinder', () => {
         Promise.resolve({ savedObjects: longItemList })
       );
 
-      const wrapper = shallow(
+      const wrapper = mount(
         <SavedObjectFinder
           savedObjects={core.savedObjects}
           uiSettings={core.uiSettings}
@@ -646,17 +712,29 @@ describe('SavedObjectsFinder', () => {
 
       wrapper.instance().componentDidMount!();
       await nextTick();
-      wrapper.find(EuiPagination).first().prop('onPageClick')!(1);
-      expect(wrapper.find(EuiListGroup).children().first().key()).toBe('33');
+      wrapper.update();
+      expect(wrapper.find(EuiInMemoryTable).find('tbody tr')).toHaveLength(33);
+      const table = wrapper.find<EuiInMemoryTable<any>>(EuiInMemoryTable);
+      const pagination = table.prop('pagination') as Pagination;
+      const sort = table.prop('sorting');
+      table.prop('onChange')!({
+        page: {
+          index: 1,
+          size: pagination.pageSize,
+        },
+        sort: typeof sort === 'object' ? sort?.sort : undefined,
+      });
+      wrapper.update();
+      expect(wrapper.find(EuiInMemoryTable).find('tbody tr')).toHaveLength(17);
     });
   });
 
   describe('loading state', () => {
-    it('should display a spinner during initial loading', () => {
+    it('should display a loading indicator during initial loading', () => {
       const core = coreMock.createStart();
       (core.savedObjects.client.find as jest.Mock).mockResolvedValue({ savedObjects: [] });
 
-      const wrapper = shallow(
+      const wrapper = mount(
         <SavedObjectFinder
           savedObjects={core.savedObjects}
           uiSettings={core.uiSettings}
@@ -667,16 +745,16 @@ describe('SavedObjectsFinder', () => {
         />
       );
 
-      expect(wrapper.containsMatchingElement(<EuiLoadingSpinner />)).toBe(true);
+      expect(wrapper.find('.euiBasicTable-loading')).toHaveLength(1);
     });
 
-    it('should hide the spinner if data is shown', async () => {
+    it('should hide the loading indicator if data is shown', async () => {
       const core = coreMock.createStart();
       (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
         Promise.resolve({ savedObjects: [doc] })
       );
 
-      const wrapper = shallow(
+      const wrapper = mount(
         <SavedObjectFinder
           savedObjects={core.savedObjects}
           uiSettings={core.uiSettings}
@@ -695,16 +773,17 @@ describe('SavedObjectsFinder', () => {
 
       wrapper.instance().componentDidMount!();
       await nextTick();
-      expect(wrapper.containsMatchingElement(<EuiLoadingSpinner />)).toBe(false);
+      wrapper.update();
+      expect(wrapper.find('.euiBasicTable-loading')).toHaveLength(0);
     });
 
-    it('should not show the spinner if there are already items', async () => {
+    it('should show the loading indicator if there are already items and the search is updated', async () => {
       const core = coreMock.createStart();
       (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
         Promise.resolve({ savedObjects: [doc] })
       );
 
-      const wrapper = shallow(
+      const wrapper = mount(
         <SavedObjectFinder
           savedObjects={core.savedObjects}
           uiSettings={core.uiSettings}
@@ -717,14 +796,13 @@ describe('SavedObjectsFinder', () => {
 
       wrapper.instance().componentDidMount!();
       await nextTick();
-      wrapper
-        .find('[data-test-subj="savedObjectFinderSearchInput"]')
-        .first()
-        .simulate('change', { target: { value: 'abc' } });
-
       wrapper.update();
-
-      expect(wrapper.containsMatchingElement(<EuiLoadingSpinner />)).toBe(false);
+      expect(wrapper.find('.euiBasicTable-loading')).toHaveLength(0);
+      wrapper
+        .find('[data-test-subj="savedObjectFinderSearchInput"] input')
+        .simulate('keyup', { key: 'Enter', target: { value: 'abc' } });
+      wrapper.update();
+      expect(wrapper.find('.euiBasicTable-loading')).toHaveLength(1);
     });
   });
 
@@ -734,7 +812,7 @@ describe('SavedObjectsFinder', () => {
       Promise.resolve({ savedObjects: [doc, doc2] })
     );
 
-    const wrapper = shallow(
+    const wrapper = mount(
       <SavedObjectFinder
         savedObjects={core.savedObjects}
         uiSettings={core.uiSettings}
