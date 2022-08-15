@@ -46,19 +46,18 @@ export class DetectionsTestService extends FtrService {
 
   /**
    * Waits for alerts to have been loaded into `.alerts-security.alerts-default` index
+   * @param query
    */
-  async waitForAlerts() {
+  async waitForAlerts(query: object = { match_all: {} }, timeoutMs?: number) {
     await this.retry.waitForWithTimeout(
       'Checking alerts index for data',
-      this.defaultTimeout,
+      timeoutMs ?? this.defaultTimeout,
       async (): Promise<boolean> => {
         const res = await this.supertest
           .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
           .set('kbn-xsrf', 'true')
           .send({
-            query: {
-              match_all: {},
-            },
+            query,
             size: 1,
           })
           .then(this.getHttpResponseFailureHandler())
