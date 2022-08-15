@@ -12,6 +12,7 @@ import { PopoverItems } from '.';
 import { TestProviders } from '../../mock';
 import { render, screen } from '@testing-library/react';
 import { within } from '@testing-library/dom';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 const mockTags = ['Elastic', 'Endpoint', 'Data Protection', 'ML', 'Continuous Monitoring'];
 
@@ -44,7 +45,8 @@ describe('Component PopoverItems', () => {
     });
 
     getButton().click();
-    expect(await screen.findByTestId('tagsDisplayPopoverWrapper')).toBeInTheDocument();
+    await waitForEuiPopoverOpen();
+    expect(await screen.findByTestId('tagsDisplayPopoverWrapper')).toBeVisible();
 
     // items rendered in popup
     mockTags.slice(2).forEach((tag) => {
@@ -52,12 +54,13 @@ describe('Component PopoverItems', () => {
     });
   });
 
-  it('shoud render popover button and items in popover without popover title', () => {
+  it('shoud render popover button and items in popover without popover title', async () => {
     renderHelper();
     mockTags.forEach((tag) => {
       expect(screen.queryByText(tag)).toBeNull();
     });
     getButton().click();
+    await waitForEuiPopoverOpen();
 
     mockTags.forEach((tag) => {
       expect(withinPopover().queryByText(tag)).toBeInTheDocument();
