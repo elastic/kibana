@@ -122,7 +122,6 @@ describe('Service Overview', () => {
   describe('transactions', () => {
     beforeEach(() => {
       cy.loginAsViewerUser();
-      cy.visit(baseUrl);
     });
 
     it('persists transaction type selected when clicking on Transactions tab', () => {
@@ -130,6 +129,11 @@ describe('Service Overview', () => {
         'GET',
         '/internal/apm/services/opbeans-node/transaction_types?*'
       ).as('transactionTypesRequest');
+
+      cy.visit(baseUrl);
+
+      cy.contains('opbeans-node');
+
       cy.wait('@transactionTypesRequest');
 
       cy.get('[data-test-subj="headerFilterTransactionType"]').should(
@@ -148,11 +152,16 @@ describe('Service Overview', () => {
       );
     });
 
-    it.skip('persists transaction type selected when clicking on View Transactions link', () => {
+    it('persists transaction type selected when clicking on View Transactions link', () => {
       cy.intercept(
         'GET',
         '/internal/apm/services/opbeans-node/transaction_types?*'
       ).as('transactionTypesRequest');
+
+      cy.visit(baseUrl);
+
+      cy.contains('opbeans-node');
+
       cy.wait('@transactionTypesRequest');
       cy.get('[data-test-subj="headerFilterTransactionType"]').should(
         'have.value',
@@ -204,13 +213,6 @@ describe('Service Overview', () => {
   describe('Calls APIs', () => {
     beforeEach(() => {
       cy.loginAsViewerUser();
-      cy.visit(baseUrl);
-      apiRequestsToIntercept.map(({ endpoint, aliasName }) => {
-        cy.intercept('GET', endpoint).as(aliasName);
-      });
-      apiRequestsToInterceptWithComparison.map(({ endpoint, aliasName }) => {
-        cy.intercept('GET', endpoint).as(aliasName);
-      });
     });
 
     it.skip('with the correct environment when changing the environment', () => {
@@ -240,6 +242,17 @@ describe('Service Overview', () => {
     });
 
     it('when clicking the refresh button', () => {
+      apiRequestsToIntercept.map(({ endpoint, aliasName }) => {
+        cy.intercept('GET', endpoint).as(aliasName);
+      });
+      apiRequestsToInterceptWithComparison.map(({ endpoint, aliasName }) => {
+        cy.intercept('GET', endpoint).as(aliasName);
+      });
+
+      cy.visit(baseUrl);
+      cy.wait(aliasNames, { requestTimeout: 10000 });
+
+      cy.contains('opbeans-node');
       cy.contains('Refresh').click();
       cy.wait(aliasNames, { requestTimeout: 10000 });
     });
@@ -263,6 +276,16 @@ describe('Service Overview', () => {
     });
 
     it('when selecting a different comparison window', () => {
+      apiRequestsToIntercept.map(({ endpoint, aliasName }) => {
+        cy.intercept('GET', endpoint).as(aliasName);
+      });
+      apiRequestsToInterceptWithComparison.map(({ endpoint, aliasName }) => {
+        cy.intercept('GET', endpoint).as(aliasName);
+      });
+
+      cy.visit(baseUrl);
+      cy.contains('opbeans-node');
+
       cy.get('[data-test-subj="comparisonSelect"]').should('have.value', '1d');
 
       // selects another comparison type
