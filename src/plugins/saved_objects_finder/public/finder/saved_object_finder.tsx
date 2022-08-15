@@ -9,10 +9,7 @@
 import { debounce } from 'lodash';
 import PropTypes from 'prop-types';
 import React from 'react';
-import {
-  SavedObjectManagementTypeInfo,
-  SavedObjectsManagementPluginStart,
-} from '@kbn/saved-objects-management-plugin/public';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 
 import {
   EuiInMemoryTable,
@@ -72,7 +69,6 @@ interface SavedObjectFinderState {
   page: number;
   perPage: number;
   sort?: PropertySort;
-  allowedTypes: SavedObjectManagementTypeInfo[];
 }
 
 interface BaseSavedObjectFinder {
@@ -124,10 +120,7 @@ class SavedObjectFinderUi extends React.Component<
 
   private debouncedFetch = debounce(async (query: Query) => {
     const metaDataMap = this.getSavedObjectMetaDataMap();
-    const { queryText, visibleTypes, selectedTags } = this.props.savedObjectsManagement.parseQuery(
-      query,
-      this.state.allowedTypes
-    );
+    const { queryText, selectedTags } = this.props.savedObjectsManagement.parseQuery(query, []);
 
     const fields = Object.values(metaDataMap)
       .map((metaData) => metaData.includeFields || [])
@@ -140,13 +133,9 @@ class SavedObjectFinderUi extends React.Component<
       return col;
     }, []);
 
-    const searchTypes = Object.keys(metaDataMap).filter(
-      (type) => !visibleTypes || visibleTypes.includes(type)
-    );
-
     const perPage = this.props.savedObjectsPlugin.settings.getListingLimit();
     const response = await this.props.savedObjects.client.find<FinderAttributes>({
-      type: searchTypes,
+      type: Object.keys(metaDataMap),
       fields: [...new Set(fields)],
       search: queryText ? `${queryText}*` : undefined,
       page: 1,
@@ -207,7 +196,6 @@ class SavedObjectFinderUi extends React.Component<
       page: 0,
       perPage: props.initialPageSize || props.fixedPageSize || 10,
       query: Query.parse(''),
-      allowedTypes: [],
     };
   }
 
@@ -218,7 +206,7 @@ class SavedObjectFinderUi extends React.Component<
 
   public componentDidMount() {
     this.isComponentMounted = true;
-    this.fetchAllowedTypes();
+    this.fetchItems();
   }
 
   private getSavedObjectMetaDataMap(): Record<string, SavedObjectMetaData> {
@@ -235,11 +223,6 @@ class SavedObjectFinderUi extends React.Component<
       },
       this.debouncedFetch.bind(null, this.state.query)
     );
-  };
-
-  private fetchAllowedTypes = async () => {
-    const allowedTypes = await this.props.savedObjectsManagement.getAllowedTypes();
-    this.setState({ allowedTypes }, this.fetchItems);
   };
 
   // server-side paging not supported
@@ -272,17 +255,14 @@ class SavedObjectFinderUi extends React.Component<
           defaultMessage: 'Type of the saved object',
         }),
         sortable: ({ type }) => {
-          return this.props.savedObjectsManagement.getSavedObjectLabel(
-            type,
-            this.state.allowedTypes
+          const currentSavedObjectMetaData = savedObjectMetaData.find(
+            (metaData) => metaData.type === type
           );
+
+          return currentSavedObjectMetaData?.name ?? '';
         },
         'data-test-subj': 'savedObjectFinderType',
         render: (type, item) => {
-          const typeLabel = this.props.savedObjectsManagement.getSavedObjectLabel(
-            type,
-            this.state.allowedTypes
-          );
           const currentSavedObjectMetaData = savedObjectMetaData.find(
             (metaData) => metaData.type === item.type
           )!;
@@ -294,9 +274,9 @@ class SavedObjectFinderUi extends React.Component<
           ).getIconForSavedObject(item.simple);
 
           return (
-            <EuiToolTip position="top" content={typeLabel}>
+            <EuiToolTip position="top" content={currentSavedObjectMetaData.name}>
               <EuiIcon
-                aria-label={typeLabel}
+                aria-label={currentSavedObjectMetaData.name}
                 type={iconType}
                 size="s"
                 data-test-subj="objectType"
@@ -379,9 +359,9 @@ class SavedObjectFinderUi extends React.Component<
 
     return (
       <EuiInMemoryTable
-        loading={this.state.isFetchingItems || !this.state.allowedTypes.length}
+        loading={this.state.isFetchingItems}
         itemId="id"
-        items={this.state.allowedTypes.length ? this.state.items : []}
+        items={this.state.items}
         columns={columns}
         message={this.props.noItemsMessage}
         search={search}

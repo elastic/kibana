@@ -67,16 +67,6 @@ describe('SavedObjectsFinder', () => {
       selectedTags: [],
     })
   );
-  savedObjectsManagement.getAllowedTypes.mockImplementation(() =>
-    Promise.resolve([
-      {
-        name: 'search',
-        displayName: 'search',
-        hidden: false,
-        namespaceType: 'single',
-      },
-    ])
-  );
 
   const savedObjectsPlugin = savedObjectsPluginMock.createStartContract();
   jest.spyOn(savedObjectsPlugin.settings, 'getListingLimit').mockImplementation(() => 10);
