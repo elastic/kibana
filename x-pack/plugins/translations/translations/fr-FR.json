@@ -1378,7 +1378,6 @@
     "core.euiBottomBar.customScreenReaderAnnouncement": "Il y a un nouveau repère de région nommé {landmarkHeading} avec des commandes de niveau de page à la fin du document.",
     "core.euiBottomBar.screenReaderAnnouncement": "Il y a un nouveau repère de région avec des commandes de niveau de page à la fin du document.",
     "core.euiBottomBar.screenReaderHeading": "Commandes de niveau de page",
-    "core.euiBreadcrumbs.collapsedBadge.ariaLabel": "Voir le fil d’Ariane réduit",
     "core.euiBreadcrumbs.nav.ariaLabel": "Fil d’Ariane",
     "core.euiCardSelect.select": "Sélectionner",
     "core.euiCardSelect.selected": "Sélectionné",
