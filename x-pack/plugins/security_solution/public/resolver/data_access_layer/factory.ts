@@ -89,7 +89,7 @@ export function dataAccessLayerFactory(
           indexPatterns,
         },
       };
-      if (category === 'alerts') {
+      if (category === 'alert') {
         return context.services.http.post('/api/endpoint/resolver/events', {
           query: commonFields.query,
           body: JSON.stringify({
@@ -193,7 +193,7 @@ export function dataAccessLayerFactory(
                 filter: [{ term: { 'event.id': eventID } }],
               },
             };
-      if (eventCategory.includes('alerts') === false) {
+      if (eventCategory.includes('alert') === false) {
         const response: ResolverPaginatedEvents = await context.services.http.post(
           '/api/endpoint/resolver/events',
           {

@@ -104,9 +104,10 @@ const NodeEventsListItem = memo(function ({
   nodeID: string;
   eventCategory: string;
 }) {
-  const timestamp = eventModel.eventTimestamp(event);
-  const eventID = eventModel.eventID(expandDottedObject(event));
-  const winlogRecordID = eventModel.winlogRecordID(event);
+  const expandedEvent = expandDottedObject(event);
+  const timestamp = eventModel.eventTimestamp(expandedEvent);
+  const eventID = eventModel.eventID(expandedEvent);
+  const winlogRecordID = eventModel.winlogRecordID(expandedEvent);
   const date =
     useFormattedDate(timestamp) ||
     i18n.translate('xpack.securitySolution.enpdoint.resolver.panelutils.noTimestampRetrieved', {
@@ -129,8 +130,8 @@ const NodeEventsListItem = memo(function ({
           <FormattedMessage
             id="xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.categoryAndType"
             values={{
-              category: eventModel.eventCategory(event).join(', '),
-              eventType: eventModel.eventType(event).join(', '),
+              category: eventModel.eventCategory(expandedEvent).join(', '),
+              eventType: eventModel.eventType(expandedEvent).join(', '),
             }}
             defaultMessage="{category} {eventType}"
           />
@@ -148,7 +149,7 @@ const NodeEventsListItem = memo(function ({
         data-test-subj="resolver:panel:node-events-in-category:event-link"
         {...linkProps}
       >
-        <DescriptiveName event={event} />
+        <DescriptiveName event={expandedEvent} />
       </EuiButtonEmpty>
     </>
   );
