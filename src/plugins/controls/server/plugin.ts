@@ -10,12 +10,7 @@ import { CoreSetup, Plugin } from '@kbn/core/server';
 import { PluginSetup as DataSetup } from '@kbn/data-plugin/server';
 import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { PluginSetup as UnifiedSearchSetup } from '@kbn/unified-search-plugin/server';
-<<<<<<< HEAD
 import { setupOptionsListSuggestionsRoute } from './options_list/options_list_suggestions_route';
-=======
-
-import { setupOptionsListSuggestionsRoute } from './control_types/options_list/options_list_suggestions_route';
->>>>>>> 1334922a5e1 (Organized imports)
 import { controlGroupContainerPersistableStateServiceFactory } from './control_group/control_group_container_factory';
 import { optionsListPersistableStateServiceFactory } from './options_list/options_list_embeddable_factory';
 import { rangeSliderPersistableStateServiceFactory } from './range_slider/range_slider_embeddable_factory';

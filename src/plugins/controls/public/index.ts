@@ -42,11 +42,7 @@ export {
   OptionsListEmbeddableFactory,
   OptionsListEmbeddable,
   type OptionsListEmbeddableInput,
-<<<<<<< HEAD
 } from './options_list';
-=======
-} from './control_types';
->>>>>>> fcf35064384 (Refactor range slider)
 
 export {
   RangeSliderEmbeddableFactory,
