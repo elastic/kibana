@@ -7,7 +7,7 @@
 
 import { Datatable } from '@kbn/expressions-plugin/common';
 import { createMockDatasource } from '../../mocks';
-import { FramePublicAPI, OperationDescriptor } from '../../types';
+import { OperationDescriptor, DatasourcePublicAPI } from '../../types';
 import {
   hasNumericHistogramDimension,
   validateAxisDomain,
@@ -58,7 +58,7 @@ describe('validateZeroInclusivityExtent', () => {
 });
 
 describe('hasNumericHistogramDimension', () => {
-  const datasourceLayers: FramePublicAPI['datasourceLayers'] = {
+  const datasourceLayers: Record<string, DatasourcePublicAPI> = {
     first: createMockDatasource('test').publicAPIMock,
   };
   it('should return true if a numeric histogram is present', () => {
