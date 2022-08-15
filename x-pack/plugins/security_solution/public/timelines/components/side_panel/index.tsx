@@ -26,6 +26,7 @@ interface DetailsPanelProps {
   browserFields: BrowserFields;
   entityType?: EntityType;
   handleOnPanelClosed?: () => void;
+  indexPatternOverride?: string;
   isFlyoutView?: boolean;
   runtimeMappings: MappingRuntimeFields;
   tabType?: TimelineTabs;
@@ -44,6 +45,7 @@ export const DetailsPanel = React.memo(
     entityType,
     handleOnPanelClosed,
     isFlyoutView,
+    indexPatternOverride,
     runtimeMappings,
     tabType,
     timelineId,
@@ -87,6 +89,7 @@ export const DetailsPanel = React.memo(
           entityType={entityType}
           expandedEvent={currentTabDetail?.params}
           handleOnEventClosed={closePanel}
+          indexPatternOverride={indexPatternOverride}
           isDraggable={isDraggable}
           isFlyoutView={isFlyoutView}
           runtimeMappings={runtimeMappings}
