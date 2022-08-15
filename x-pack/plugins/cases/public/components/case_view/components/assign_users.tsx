@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,16 +18,18 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { UserProfileWithAvatar, UserProfile } from '@kbn/user-profile-components';
+import { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { useAssignees } from '../../../containers/user_profiles/use_assignees';
 import { CaseAssignees } from '../../../../common/api/cases/assignee';
 import * as i18n from '../translations';
 import { SuggestUsers } from '../../user_profiles/suggest_users';
 import { SidebarTitle } from './sidebar_title';
 import { UserRepresentation } from '../../user_profiles/user_representation';
 import { useCasesContext } from '../../cases_context/use_cases_context';
+import { Assignee } from '../../user_profiles/types';
 
 interface AssigneesListProps {
-  assigneesWithProfiles: UserProfileWithAvatar[];
+  assignees: Assignee[];
   currentUserProfile?: UserProfileWithAvatar;
   assignSelf: () => void;
   togglePopOver: () => void;
@@ -35,7 +37,7 @@ interface AssigneesListProps {
 }
 
 const AssigneesList: React.FC<AssigneesListProps> = ({
-  assigneesWithProfiles,
+  assignees,
   currentUserProfile,
   assignSelf,
   togglePopOver,
@@ -43,7 +45,7 @@ const AssigneesList: React.FC<AssigneesListProps> = ({
 }) => {
   return (
     <>
-      {assigneesWithProfiles.length === 0 ? (
+      {assignees.length === 0 ? (
         <EuiFlexGroup direction="column" gutterSize="none">
           <EuiFlexItem grow={false}>
             <EuiText size="s">
@@ -68,9 +70,9 @@ const AssigneesList: React.FC<AssigneesListProps> = ({
         </EuiFlexGroup>
       ) : (
         <EuiFlexGroup direction="column" gutterSize="s">
-          {assigneesWithProfiles.map((profile) => (
-            <EuiFlexItem key={profile.uid} grow={false}>
-              <UserRepresentation profile={profile} onRemoveAssignee={onAssigneeRemoved} />
+          {assignees.map((assignee) => (
+            <EuiFlexItem key={assignee.uid} grow={false}>
+              <UserRepresentation assignee={assignee} onRemoveAssignee={onAssigneeRemoved} />
             </EuiFlexItem>
           ))}
         </EuiFlexGroup>
@@ -81,32 +83,25 @@ const AssigneesList: React.FC<AssigneesListProps> = ({
 AssigneesList.displayName = 'AssigneesList';
 
 export interface AssignUsersProps {
-  assignees: CaseAssignees;
+  caseAssignees: CaseAssignees;
   currentUserProfile?: UserProfileWithAvatar;
   userProfiles: Map<string, UserProfileWithAvatar>;
-  onAssigneesChanged: (assignees: UserProfile[]) => void;
+  onAssigneesChanged: (assignees: Assignee[]) => void;
   isLoading: boolean;
 }
 
 const AssignUsersComponent: React.FC<AssignUsersProps> = ({
-  assignees,
+  caseAssignees,
   userProfiles,
   currentUserProfile,
   onAssigneesChanged,
   isLoading,
 }) => {
-  const assigneesWithProfiles = useMemo(() => {
-    return assignees.reduce<UserProfileWithAvatar[]>((acc, assignee) => {
-      const profile = userProfiles.get(assignee.uid);
-      if (profile) {
-        acc.push(profile);
-      }
-
-      return acc;
-    }, []);
-  }, [assignees, userProfiles]);
-
-  const [selectedAssignees, setSelectedAssignees] = useState<UserProfileWithAvatar[] | undefined>();
+  const { assigneesWithProfiles, assigneesWithoutProfiles, allAssignees } = useAssignees({
+    caseAssignees,
+    userProfiles,
+  });
+  const [selectedAssignees, setSelectedAssignees] = useState<Assignee[] | undefined>();
   const [needToUpdateAssignees, setNeedToUpdateAssignees] = useState(false);
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -123,28 +118,37 @@ const AssignUsersComponent: React.FC<AssignUsersProps> = ({
 
   const onAssigneeRemoved = useCallback(
     (removedAssigneeUID: string) => {
-      const remainingAssignees = assigneesWithProfiles.filter(
+      const remainingAssignees = allAssignees.filter(
         (assignee) => assignee.uid !== removedAssigneeUID
       );
       setSelectedAssignees(remainingAssignees);
       setNeedToUpdateAssignees(true);
     },
-    [assigneesWithProfiles]
+    [allAssignees]
   );
 
-  const onUsersChange = useCallback((users: UserProfileWithAvatar[]) => {
-    setSelectedAssignees(users);
-  }, []);
+  const onUsersChange = useCallback(
+    (users: UserProfileWithAvatar[]) => {
+      // if users are selected then also include the users without profiles
+      if (users.length > 0) {
+        setSelectedAssignees([...users, ...assigneesWithoutProfiles]);
+      } else {
+        // all users were deselected so lets remove the users without profiles as well
+        setSelectedAssignees([]);
+      }
+    },
+    [assigneesWithoutProfiles]
+  );
 
   const assignSelf = useCallback(() => {
     if (!currentUserProfile) {
       return;
     }
 
-    const newAssignees = [...assigneesWithProfiles, currentUserProfile];
+    const newAssignees = [currentUserProfile, ...allAssignees];
     setSelectedAssignees(newAssignees);
     setNeedToUpdateAssignees(true);
-  }, [currentUserProfile, assigneesWithProfiles]);
+  }, [currentUserProfile, allAssignees]);
 
   const { permissions } = useCasesContext();
 
@@ -204,7 +208,7 @@ const AssignUsersComponent: React.FC<AssignUsersProps> = ({
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <AssigneesList
-        assigneesWithProfiles={assigneesWithProfiles}
+        assignees={allAssignees}
         currentUserProfile={currentUserProfile}
         assignSelf={assignSelf}
         togglePopOver={togglePopOver}

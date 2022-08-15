@@ -7,7 +7,6 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import { UserProfile } from '@kbn/security-plugin/common';
 import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_get_current_user_profile';
 import { useBulkGetUserProfiles } from '../../../containers/user_profiles/use_bulk_get_user_profiles';
 import { useGetConnectors } from '../../../containers/configure/use_connectors';
@@ -30,6 +29,7 @@ import { SeveritySidebarSelector } from '../../severity/sidebar_selector';
 import { useGetCaseUserActions } from '../../../containers/use_get_case_user_actions';
 import { AssignUsers } from './assign_users';
 import { SidebarSection } from './sidebar_section';
+import { Assignee } from '../../user_profiles/types';
 
 export const CaseViewActivity = ({
   ruleDetailsNavigation,
@@ -111,7 +111,7 @@ export const CaseViewActivity = ({
   );
 
   const onUpdateAssignees = useCallback(
-    (newAssignees: UserProfile[]) => {
+    (newAssignees: Assignee[]) => {
       const value = newAssignees.map((assignee) => ({ uid: assignee.uid }));
       onUpdateField({ key: 'assignees', value });
     },
@@ -182,7 +182,7 @@ export const CaseViewActivity = ({
       <EuiFlexItem grow={2}>
         <SidebarSection>
           <AssignUsers
-            assignees={caseData.assignees}
+            caseAssignees={caseData.assignees}
             currentUserProfile={currentUserProfile}
             onAssigneesChanged={onUpdateAssignees}
             isLoading={isLoadingAssigneeData}

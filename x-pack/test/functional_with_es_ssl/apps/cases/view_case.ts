@@ -24,6 +24,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const comboBox = getService('comboBox');
   const security = getPageObject('security');
+  const kibanaServer = getService('kibanaServer');
 
   describe('View case', () => {
     describe('properties', () => {
@@ -194,6 +195,42 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       after(async () => {
         await deleteUsersAndRoles(getService, users, roles);
+      });
+
+      describe('unknown users', () => {
+        beforeEach(async () => {
+          await kibanaServer.importExport.load(
+            'x-pack/test/functional/fixtures/kbn_archiver/cases/8.5.0/cases_assignees.json'
+          );
+
+          await cases.navigation.navigateToApp();
+          await cases.casesTable.waitForCasesToBeListed();
+          await cases.casesTable.goToFirstListedCase();
+          await header.waitUntilLoadingHasFinished();
+        });
+
+        afterEach(async () => {
+          await kibanaServer.importExport.unload(
+            'x-pack/test/functional/fixtures/kbn_archiver/cases/8.5.0/cases_assignees.json'
+          );
+
+          await cases.api.deleteAllCases();
+        });
+
+        it('shows the unknown assignee', async () => {
+          await testSubjects.existOrFail('user-profile-assigned-user-group-abc');
+        });
+
+        it('removes the unknown assignee when selecting the remove all users in the popover', async () => {
+          await testSubjects.existOrFail('user-profile-assigned-user-group-abc');
+
+          await cases.singleCase.openAssigneesPopover();
+          await cases.singleCase.selectFirstRowInAssigneesPopover();
+
+          await (await find.byButtonText('Remove all users')).click();
+          await cases.singleCase.closeAssigneesPopover();
+          await testSubjects.missingOrFail('user-profile-assigned-user-group-abc');
+        });
       });
 
       describe('login with cases all user', () => {

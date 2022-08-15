@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { UserProfilesSelectable, UserProfileWithAvatar } from '@kbn/user-profile-components';
 
 import { useSuggestUserProfiles } from '../../containers/user_profiles/use_suggest_user_profiles';
 import { useCasesContext } from '../cases_context/use_cases_context';
+import { AssigneeWithProfile } from './types';
 
 interface SuggestUsersProps {
-  selectedUsers: UserProfileWithAvatar[];
+  selectedUsers: AssigneeWithProfile[];
   isLoading: boolean;
   currentUserProfile?: UserProfileWithAvatar;
   onUsersChange: (users: UserProfileWithAvatar[]) => void;
@@ -26,8 +27,14 @@ const SuggestUsersComponent: React.FC<SuggestUsersProps> = ({
 }) => {
   const { owner } = useCasesContext();
   const [searchTerm, setSearchTerm] = useState('');
+
+  const selectedProfiles = useMemo(
+    () => selectedUsers.map((assignee) => ({ ...assignee.profile })),
+    [selectedUsers]
+  );
+
   const [currentSelectedUsers, setCurrentSelectedUsers] =
-    useState<UserProfileWithAvatar[]>(selectedUsers);
+    useState<UserProfileWithAvatar[]>(selectedProfiles);
 
   const onChange = useCallback(
     (users: UserProfileWithAvatar[]) => {

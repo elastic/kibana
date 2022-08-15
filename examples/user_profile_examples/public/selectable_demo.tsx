@@ -72,6 +72,7 @@ const code = `import { UserProfilesSelectable } from '@kbn/user-profile-componen
 const [selectedOptions, setSelectedOptions] = useState([
   {
     uid: 'u_BOulL4QMPSyV9jg5lQI2JmCkUnokHTazBnet3xVHNv0_0',
+    enabled: true,
     data: {},
     user: {
       username: 'delighted_nightingale',

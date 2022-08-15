@@ -15,8 +15,8 @@ import { UserProfilesSelectable } from './user_profiles_selectable';
 const userProfiles: UserProfile[] = [
   {
     uid: 'u_BOulL4QMPSyV9jg5lQI2JmCkUnokHTazBnet3xVHNv0_0',
-    data: {},
     enabled: true,
+    data: {},
     user: {
       username: 'delighted_nightingale',
       email: 'delighted_nightingale@profiles.elastic.co',
@@ -25,8 +25,8 @@ const userProfiles: UserProfile[] = [
   },
   {
     uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
-    data: {},
     enabled: true,
+    data: {},
     user: {
       username: 'damaged_raccoon',
       email: 'damaged_raccoon@profiles.elastic.co',
@@ -35,8 +35,8 @@ const userProfiles: UserProfile[] = [
   },
   {
     uid: 'u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0',
-    data: {},
     enabled: true,
+    data: {},
     user: {
       username: 'physical_dinosaur',
       email: 'physical_dinosaur@profiles.elastic.co',
@@ -45,8 +45,8 @@ const userProfiles: UserProfile[] = [
   },
   {
     uid: 'u_9xDEQqUqoYCnFnPPLq5mIRHKL8gBTo_NiKgOnd5gGk0_0',
-    data: {},
     enabled: true,
+    data: {},
     user: {
       username: 'wet_dingo',
       email: 'wet_dingo@profiles.elastic.co',

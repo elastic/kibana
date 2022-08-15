@@ -8,17 +8,14 @@
 import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
-import { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { UserProfileUserInfo, UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { CaseUserAvatar } from './user_avatar';
 import { getName } from './display_name';
+import * as i18n from './translations';
 
-interface UserFullRepresentationProps {
-  profile: UserProfileWithAvatar;
-}
-
-const UserFullInformation: React.FC<{ profile: UserProfileWithAvatar }> = React.memo(
+const UserFullInformation: React.FC<{ profile?: UserProfileWithAvatar }> = React.memo(
   ({ profile }) => {
-    if (profile.user.display_name && profile.user.full_name) {
+    if (profile?.user.display_name && profile?.user.full_name) {
       return (
         <>
           <EuiText
@@ -44,13 +41,25 @@ const UserFullInformation: React.FC<{ profile: UserProfileWithAvatar }> = React.
         className="eui-textBreakWord"
         data-test-subj="user-profile-tooltip-single-name"
       >
-        <strong>{getName(profile.user)}</strong>
+        <strong>{getNameOrMissingText(profile?.user)}</strong>
       </EuiText>
     );
   }
 );
 
+const getNameOrMissingText = (user?: UserProfileUserInfo) => {
+  if (!user) {
+    return i18n.MISSING_PROFILE;
+  }
+
+  return getName(user);
+};
+
 UserFullInformation.displayName = 'UserFullInformation';
+
+interface UserFullRepresentationProps {
+  profile?: UserProfileWithAvatar;
+}
 
 const UserFullRepresentationComponent: React.FC<UserFullRepresentationProps> = ({ profile }) => {
   return (
@@ -63,7 +72,7 @@ const UserFullRepresentationComponent: React.FC<UserFullRepresentationProps> = (
           <EuiFlexItem>
             <UserFullInformation profile={profile} />
           </EuiFlexItem>
-          {displayEmail(profile) && (
+          {profile && displayEmail(profile) && (
             <EuiFlexItem grow={false}>
               <EuiText
                 size="s"
@@ -82,13 +91,13 @@ const UserFullRepresentationComponent: React.FC<UserFullRepresentationProps> = (
 
 UserFullRepresentationComponent.displayName = 'UserFullRepresentation';
 
-const displayEmail = (profile: UserProfileWithAvatar) => {
-  return (profile.user.display_name || profile.user.full_name) && profile.user.email;
+const displayEmail = (profile?: UserProfileWithAvatar) => {
+  return (profile?.user.display_name || profile?.user.full_name) && profile?.user.email;
 };
 
 export interface UserToolTipProps {
   children: React.ReactElement;
-  profile: UserProfileWithAvatar;
+  profile?: UserProfileWithAvatar;
 }
 
 const UserToolTipComponent: React.FC<UserToolTipProps> = ({ children, profile }) => {
