@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { uniq, omit, isEqual } from 'lodash';
-import uuid from 'uuid/v4';
+import { uniq, omit, isEqual, keyBy } from 'lodash';
 import uuidv5 from 'uuid/v5';
 import { safeDump } from 'js-yaml';
 import pMap from 'p-map';
+import { lt } from 'semver';
 import type {
   ElasticsearchClient,
   SavedObjectsClientContract,
@@ -17,6 +17,7 @@ import type {
 } from '@kbn/core/server';
 
 import type { AuthenticatedUser } from '@kbn/security-plugin/server';
+import type { BulkResponseItem } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
@@ -25,6 +26,7 @@ import {
   AGENTS_PREFIX,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
+  FLEET_AGENT_POLICIES_SCHEMA_VERSION,
 } from '../constants';
 import type {
   PackagePolicy,
@@ -204,6 +206,7 @@ class AgentPolicyService {
         revision: 1,
         updated_at: new Date().toISOString(),
         updated_by: options?.user?.username || 'system',
+        schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
       } as AgentPolicy,
       options
     );
@@ -707,6 +710,10 @@ class AgentPolicyService {
   }
 
   public async deployPolicy(soClient: SavedObjectsClientContract, agentPolicyId: string) {
+    await this.deployPolicies(soClient, [agentPolicyId]);
+  }
+
+  public async deployPolicies(soClient: SavedObjectsClientContract, agentPolicyIds: string[]) {
     // Use internal ES client so we have permissions to write to .fleet* indices
     const esClient = appContextService.getInternalUserESClient();
     const defaultOutputId = await outputService.getDefaultDataOutputId(soClient);
@@ -715,31 +722,93 @@ class AgentPolicyService {
       return;
     }
 
-    const policy = await agentPolicyService.get(soClient, agentPolicyId);
-    const fullPolicy = await agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId);
-    if (!policy || !fullPolicy || !fullPolicy.revision) {
-      return;
-    }
+    const policies = await agentPolicyService.getByIDs(soClient, agentPolicyIds);
+    const policiesMap = keyBy(policies, 'id');
+    const fullPolicies = await Promise.all(
+      agentPolicyIds.map((agentPolicyId) =>
+        // There are some potential performance concerns around using `getFullAgentPolicy` in this context, e.g.
+        // re-fetching outputs, settings, and upgrade download source URI data for each policy. This could potentially
+        // be a bottleneck in environments with several thousand agent policies being deployed here.
+        agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId)
+      )
+    );
 
-    const fleetServerPolicy: FleetServerPolicy = {
-      '@timestamp': new Date().toISOString(),
-      revision_idx: fullPolicy.revision,
-      coordinator_idx: 0,
-      data: fullPolicy as unknown as FleetServerPolicy['data'],
-      policy_id: fullPolicy.id,
-      default_fleet_server: policy.is_default_fleet_server === true,
-    };
+    const fleetServerPolicies = fullPolicies.reduce((acc, fullPolicy) => {
+      if (!fullPolicy || !fullPolicy.revision) {
+        return acc;
+      }
 
-    if (policy.unenroll_timeout) {
-      fleetServerPolicy.unenroll_timeout = policy.unenroll_timeout;
-    }
+      const policy = policiesMap[fullPolicy.id];
+      if (!policy) {
+        return acc;
+      }
 
-    await esClient.create({
+      const fleetServerPolicy: FleetServerPolicy = {
+        '@timestamp': new Date().toISOString(),
+        revision_idx: fullPolicy.revision,
+        coordinator_idx: 0,
+        data: fullPolicy as unknown as FleetServerPolicy['data'],
+        policy_id: fullPolicy.id,
+        default_fleet_server: policy.is_default_fleet_server === true,
+      };
+
+      if (policy.unenroll_timeout) {
+        fleetServerPolicy.unenroll_timeout = policy.unenroll_timeout;
+      }
+
+      return [...acc, fleetServerPolicy];
+    }, [] as FleetServerPolicy[]);
+
+    const fleetServerPoliciesBulkBody = fleetServerPolicies.flatMap((fleetServerPolicy) => [
+      {
+        index: {
+          _id: uuidv5(
+            `${fleetServerPolicy.policy_id}:${fleetServerPolicy.revision_idx}`,
+            uuidv5.DNS
+          ),
+        },
+      },
+      fleetServerPolicy,
+    ]);
+
+    const bulkResponse = await esClient.bulk({
       index: AGENT_POLICY_INDEX,
-      body: fleetServerPolicy,
-      id: uuid(),
+      body: fleetServerPoliciesBulkBody,
       refresh: 'wait_for',
     });
+
+    if (bulkResponse.errors) {
+      const logger = appContextService.getLogger();
+      const erroredDocuments = bulkResponse.items.reduce((acc, item) => {
+        const value: BulkResponseItem | undefined = item.index;
+        if (!value || !value.error) {
+          return acc;
+        }
+
+        return [...acc, value];
+      }, [] as BulkResponseItem[]);
+
+      logger.debug(
+        `Failed to index documents during policy deployment: ${JSON.stringify(erroredDocuments)}`
+      );
+    }
+
+    await Promise.all(
+      fleetServerPolicies
+        .filter((fleetServerPolicy) => {
+          const policy = policiesMap[fleetServerPolicy.policy_id];
+          return (
+            !policy.schema_version || lt(policy.schema_version, FLEET_AGENT_POLICIES_SCHEMA_VERSION)
+          );
+        })
+        .map((fleetServerPolicy) =>
+          // There are some potential performance concerns around using `agentPolicyService.update` in this context.
+          // This could potentially be a bottleneck in environments with several thousand agent policies being deployed here.
+          agentPolicyService.update(soClient, esClient, fleetServerPolicy.policy_id, {
+            schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
+          })
+        )
+    );
   }
 
   public async deleteFleetServerPoliciesForPolicyId(

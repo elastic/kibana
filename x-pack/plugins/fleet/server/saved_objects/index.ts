@@ -84,6 +84,7 @@ const getSavedObjectTypes = (
     mappings: {
       properties: {
         name: { type: 'keyword' },
+        schema_version: { type: 'version' },
         description: { type: 'text' },
         namespace: { type: 'keyword' },
         is_managed: { type: 'boolean' },
