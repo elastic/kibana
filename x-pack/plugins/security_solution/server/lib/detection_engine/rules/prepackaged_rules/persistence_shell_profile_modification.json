@@ -18,6 +18,33 @@
   "references": [
     "https://www.anomali.com/blog/pulling-linux-rabbit-rabbot-malware-out-of-a-hat"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.category",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "file.path",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.executable",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.name",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 47,
   "rule_id": "e6c1a552-7776-44ad-ae0f-8746cc07773c",
   "severity": "medium",
@@ -55,5 +82,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 2
+  "version": 3
 }

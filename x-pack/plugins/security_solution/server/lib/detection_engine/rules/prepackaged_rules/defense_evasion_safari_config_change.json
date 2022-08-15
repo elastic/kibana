@@ -15,6 +15,28 @@
   "references": [
     "https://objectivebythesea.com/v2/talks/OBTS_v2_Zohar.pdf"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.category",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.args",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.name",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 47,
   "rule_id": "6482255d-f468-45ea-a5b3-d3a7de1331ae",
   "severity": "medium",
@@ -51,5 +73,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 2
 }

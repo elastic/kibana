@@ -15,14 +15,44 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "AWS GuardDuty Detector Deletion",
-  "note": "## Config\n\nThe AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "note": "",
   "query": "event.dataset:aws.cloudtrail and event.provider:guardduty.amazonaws.com and event.action:DeleteDetector and event.outcome:success\n",
   "references": [
     "https://awscli.amazonaws.com/v2/documentation/api/latest/reference/guardduty/delete-detector.html",
     "https://docs.aws.amazon.com/guardduty/latest/APIReference/API_DeleteDetector.html"
   ],
+  "related_integrations": [
+    {
+      "integration": "cloudtrail",
+      "package": "aws",
+      "version": "1.10.2"
+    }
+  ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.action",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.dataset",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.outcome",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.provider",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 73,
   "rule_id": "523116c0-d89d-4d7c-82c2-39e6845a78ef",
+  "setup": "The AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
   "severity": "high",
   "tags": [
     "Elastic",
@@ -58,5 +88,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 7
+  "version": 9
 }

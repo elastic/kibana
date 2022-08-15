@@ -18,6 +18,28 @@
   "references": [
     "https://www.iana.org/assignments/iana-ipv4-special-registry/iana-ipv4-special-registry.xhtml"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "destination.ip",
+      "type": "ip"
+    },
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.entity_id",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.name",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 47,
   "rule_id": "1b21abcc-4d9f-4b08-a7f5-316f5f94b973",
   "severity": "medium",
@@ -46,5 +68,5 @@
     }
   ],
   "type": "eql",
-  "version": 6
+  "version": 7
 }

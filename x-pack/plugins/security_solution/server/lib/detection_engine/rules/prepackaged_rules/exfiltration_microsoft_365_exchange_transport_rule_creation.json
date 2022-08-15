@@ -14,14 +14,48 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Microsoft 365 Exchange Transport Rule Creation",
-  "note": "## Config\n\nThe Office 365 Logs Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "note": "",
   "query": "event.dataset:o365.audit and event.provider:Exchange and event.category:web and event.action:\"New-TransportRule\" and event.outcome:success\n",
   "references": [
     "https://docs.microsoft.com/en-us/powershell/module/exchange/new-transportrule?view=exchange-ps",
     "https://docs.microsoft.com/en-us/exchange/security-and-compliance/mail-flow-rules/mail-flow-rules"
   ],
+  "related_integrations": [
+    {
+      "package": "o365",
+      "version": "1.3.0"
+    }
+  ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.action",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.category",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.dataset",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.outcome",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.provider",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 47,
   "rule_id": "ff4dd44a-0ac6-44c4-8609-3f81bc820f02",
+  "setup": "The Office 365 Logs Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
   "severity": "medium",
   "tags": [
     "Elastic",
@@ -50,5 +84,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 6
+  "version": 8
 }

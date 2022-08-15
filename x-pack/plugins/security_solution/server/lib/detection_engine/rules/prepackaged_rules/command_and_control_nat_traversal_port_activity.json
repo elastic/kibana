@@ -17,6 +17,23 @@
   "license": "Elastic License v2",
   "name": "IPSEC NAT Traversal Port Activity",
   "query": "event.category:(network or network_traffic) and network.transport:udp and destination.port:4500\n",
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "destination.port",
+      "type": "long"
+    },
+    {
+      "ecs": true,
+      "name": "event.category",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "network.transport",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 21,
   "rule_id": "a9cb3641-ff4b-4cdc-a063-b4b8d02a67c7",
   "severity": "low",
@@ -41,5 +58,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 8
+  "version": 9
 }

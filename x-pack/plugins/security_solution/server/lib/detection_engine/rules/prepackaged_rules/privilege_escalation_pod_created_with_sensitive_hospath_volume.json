@@ -1,0 +1,69 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "This rule detects when a pod is created with a sensitive volume of type hostPath. A hostPath volume type mounts a sensitive file or folder from the node to the container. If the container gets compromised, the attacker can use this mount for gaining access to the node. There are many ways a container with unrestricted access to the host filesystem can escalate privileges, including reading data from other containers, and accessing tokens of more privileged pods.",
+  "false_positives": [
+    "An administrator may need to attach a hostPath volume for a legitimate reason. This alert should be investigated for legitimacy by determining if the kuberenetes.audit.requestObject.spec.volumes.hostPath.path triggered is one needed by its target container/pod. For example, when the fleet managed elastic agent is deployed as a daemonset it creates several hostPath volume mounts, some of which are sensitive host directories like /proc, /etc/kubernetes, and /var/log."
+  ],
+  "index": [
+    "logs-kubernetes.*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Kubernetes Pod created with a Sensitive hostPath Volume",
+  "note": "",
+  "query": "kubernetes.audit.objectRef.resource:\"pods\" \n  and kubernetes.audit.verb:(\"create\" or \"update\" or \"patch\") \n  and kubernetes.audit.requestObject.spec.volumes.hostPath.path:(\"/\" or \"/proc\" or \"/root\" or \"/var\" or \"/var/run/docker.sock\" or \"/var/run/crio/crio.sock\" or \"/var/run/cri-dockerd.sock\" or \"/var/lib/kubelet\" or \"/var/lib/kubelet/pki\" or \"/var/lib/docker/overlay2\" or \"/etc\" or \"/etc/kubernetes\" or \"/etc/kubernetes/manifests\" or \"/home/admin\")\n",
+  "references": [
+    "https://blog.appsecco.com/kubernetes-namespace-breakout-using-insecure-host-path-volume-part-1-b382f2a6e216",
+    "https://kubernetes.io/docs/concepts/storage/volumes/#hostpath"
+  ],
+  "required_fields": [
+    {
+      "ecs": false,
+      "name": "kubernetes.audit.objectRef.resource",
+      "type": "unknown"
+    },
+    {
+      "ecs": false,
+      "name": "kubernetes.audit.requestObject.spec.volumes.hostPath.path",
+      "type": "unknown"
+    },
+    {
+      "ecs": false,
+      "name": "kubernetes.audit.verb",
+      "type": "unknown"
+    }
+  ],
+  "risk_score": 47,
+  "rule_id": "2abda169-416b-4bb3-9a6b-f8d239fd78ba",
+  "setup": "The Kubernetes Fleet integration with Audit Logs enabled or similarly structured data is required to be compatible with this rule.",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Kubernetes",
+    "Continuous Monitoring",
+    "Execution",
+    "Privilege Escalation"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0004",
+        "name": "Privilege Escalation",
+        "reference": "https://attack.mitre.org/tactics/TA0004/"
+      },
+      "technique": [
+        {
+          "id": "T1611",
+          "name": "Escape to Host",
+          "reference": "https://attack.mitre.org/techniques/T1611/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 2
+}

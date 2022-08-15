@@ -11,14 +11,32 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "KRBTGT Delegation Backdoor",
-  "note": "## Config\n\nThe 'Audit User Account Management' logging policy must be configured for (Success, Failure).\nSteps to implement the logging policy with Advanced Audit Configuration:\n\n```\nComputer Configuration > \nPolicies > \nWindows Settings > \nSecurity Settings > \nAdvanced Audit Policies Configuration > \nAudit Policies > \nAccount Management > \nAudit User Account Management (Success,Failure)\n```\n",
+  "note": "",
   "query": "event.action:modified-user-account and event.code:4738 and winlog.event_data.AllowedToDelegateTo:*krbtgt*\n",
   "references": [
     "https://skyblue.team/posts/delegate-krbtgt",
     "https://github.com/atc-project/atomic-threat-coverage/blob/master/Atomic_Threat_Coverage/Logging_Policies/LP_0026_windows_audit_user_account_management.md"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.action",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.code",
+      "type": "keyword"
+    },
+    {
+      "ecs": false,
+      "name": "winlog.event_data.AllowedToDelegateTo",
+      "type": "unknown"
+    }
+  ],
   "risk_score": 73,
   "rule_id": "e052c845-48d0-4f46-8a13-7d0aba05df82",
+  "setup": "The 'Audit User Account Management' logging policy must be configured for (Success, Failure).\nSteps to implement the logging policy with Advanced Audit Configuration:\n\n```\nComputer Configuration >\nPolicies >\nWindows Settings >\nSecurity Settings >\nAdvanced Audit Policies Configuration >\nAudit Policies >\nAccount Management >\nAudit User Account Management (Success,Failure)\n```",
   "severity": "high",
   "tags": [
     "Elastic",
@@ -62,5 +80,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 2
+  "version": 4
 }

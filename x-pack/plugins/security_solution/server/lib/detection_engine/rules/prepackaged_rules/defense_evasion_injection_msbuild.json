@@ -14,6 +14,18 @@
   "license": "Elastic License v2",
   "name": "Process Injection by the Microsoft Build Engine",
   "query": "process.name:MSBuild.exe and event.action:\"CreateRemoteThread detected (rule: CreateRemoteThread)\"\n",
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.action",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.name",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 21,
   "rule_id": "9d110cb3-5f4b-4c9a-b9f5-53f0a1707ae9",
   "severity": "low",
@@ -58,5 +70,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 5
+  "version": 6
 }

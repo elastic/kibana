@@ -12,15 +12,43 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Microsoft Exchange Worker Spawning Suspicious Processes",
-  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
+  "note": "",
   "query": "process where event.type == \"start\" and\n  process.parent.name : \"w3wp.exe\" and process.parent.args : \"MSExchange*AppPool\" and\n  (process.name : (\"cmd.exe\", \"powershell.exe\", \"pwsh.exe\", \"powershell_ise.exe\") or\n  process.pe.original_file_name in (\"cmd.exe\", \"powershell.exe\", \"pwsh.dll\", \"powershell_ise.exe\"))\n",
   "references": [
     "https://www.microsoft.com/security/blog/2021/03/02/hafnium-targeting-exchange-servers",
     "https://www.volexity.com/blog/2021/03/02/active-exploitation-of-microsoft-exchange-zero-day-vulnerabilities",
     "https://discuss.elastic.co/t/detection-and-response-for-hafnium-activity/266289"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.name",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.parent.args",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.parent.name",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.pe.original_file_name",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 73,
   "rule_id": "f81ee52c-297e-46d9-9205-07e66931df26",
+  "setup": "If enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.",
   "severity": "high",
   "tags": [
     "Elastic",
@@ -48,5 +76,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 3
+  "version": 5
 }

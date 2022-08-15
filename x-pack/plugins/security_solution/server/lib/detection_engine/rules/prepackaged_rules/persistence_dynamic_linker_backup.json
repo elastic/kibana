@@ -1,0 +1,86 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Detects the copying of the Linux dynamic loader binary and subsequent file creation for the purpose of creating a backup copy. This technique was seen recently being utilized by Linux malware prior to patching the dynamic loader in order to inject and preload a malicious shared object file. This activity should never occur and if it does then it should be considered highly suspicious or malicious.",
+  "from": "now-9m",
+  "index": [
+    "logs-*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Dynamic Linker Copy",
+  "query": "sequence by process.entity_id with maxspan=1m\n[process where event.type == \"start\" and process.name : (\"cp\", \"rsync\") and process.args : (\"/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2\", \"/etc/ld.so.preload\")]\n[file where event.action == \"creation\" and file.extension == \"so\"]\n",
+  "references": [
+    "https://www.intezer.com/blog/incident-response/orbit-new-undetected-linux-threat/"
+  ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.action",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "file.extension",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.args",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.entity_id",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.name",
+      "type": "keyword"
+    }
+  ],
+  "risk_score": 85,
+  "rule_id": "df6f62d9-caab-4b88-affa-044f4395a1e0",
+  "severity": "high",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Linux",
+    "Threat Detection",
+    "Persistence",
+    "Orbit"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1574",
+          "name": "Hijack Execution Flow",
+          "reference": "https://attack.mitre.org/techniques/T1574/",
+          "subtechnique": [
+            {
+              "id": "T1574.006",
+              "name": "Dynamic Linker Hijacking",
+              "reference": "https://attack.mitre.org/techniques/T1574/006/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "type": "eql",
+  "version": 2
+}

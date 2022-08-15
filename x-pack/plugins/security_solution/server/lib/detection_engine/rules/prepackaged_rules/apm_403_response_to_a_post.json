@@ -17,6 +17,18 @@
   "references": [
     "https://en.wikipedia.org/wiki/HTTP_403"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "http.request.method",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "http.response.status_code",
+      "type": "long"
+    }
+  ],
   "risk_score": 47,
   "rule_id": "a87a4e42-1d82-44bd-b0bf-d9b7f91fb89e",
   "severity": "medium",
@@ -26,5 +38,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 8
+  "version": 9
 }

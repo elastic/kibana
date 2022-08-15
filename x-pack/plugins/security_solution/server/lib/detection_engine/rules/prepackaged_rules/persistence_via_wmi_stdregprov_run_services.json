@@ -14,6 +14,23 @@
   "references": [
     "https://docs.microsoft.com/en-us/previous-versions/windows/desktop/regprov/stdregprov"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "process.name",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "registry.data.strings",
+      "type": "wildcard"
+    },
+    {
+      "ecs": true,
+      "name": "registry.path",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 73,
   "rule_id": "70d12c9c-0dbd-4a1a-bc44-1467502c9cf6",
   "severity": "high",
@@ -77,5 +94,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 3
 }

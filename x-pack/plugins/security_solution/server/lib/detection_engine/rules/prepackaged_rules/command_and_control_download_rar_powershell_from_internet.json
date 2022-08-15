@@ -23,6 +23,38 @@
     "https://www.justice.gov/opa/press-release/file/1084361/download",
     "https://www.iana.org/assignments/iana-ipv4-special-registry/iana-ipv4-special-registry.xhtml"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "destination.ip",
+      "type": "ip"
+    },
+    {
+      "ecs": true,
+      "name": "event.category",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "network.protocol",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "source.ip",
+      "type": "ip"
+    },
+    {
+      "ecs": true,
+      "name": "url.extension",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "url.path",
+      "type": "wildcard"
+    }
+  ],
   "risk_score": 47,
   "rule_id": "ff013cb4-274d-434a-96bb-fe15ddd3ae92",
   "severity": "medium",
@@ -52,5 +84,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 9
+  "version": 10
 }

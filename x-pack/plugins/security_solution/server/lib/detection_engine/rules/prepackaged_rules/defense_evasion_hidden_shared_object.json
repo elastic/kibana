@@ -1,0 +1,72 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies the creation of a hidden shared object (.so) file. Users can mark specific files as hidden simply by putting a \".\" as the first character in the file or folder name. Adversaries can use this to their advantage to hide files and folders on the system for persistence and defense evasion.",
+  "from": "now-9m",
+  "index": [
+    "auditbeat-*",
+    "logs-endpoint.events.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "max_signals": 33,
+  "name": "Creation of Hidden Shared Object File",
+  "note": "",
+  "query": "file where event.action : \"creation\" and file.extension == \"so\" and file.name : \".*.so\" \n",
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.action",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "file.extension",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "file.name",
+      "type": "keyword"
+    }
+  ],
+  "risk_score": 47,
+  "rule_id": "766d3f91-3f12-448c-b65f-20123e9e9e8c",
+  "setup": "If enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Linux",
+    "Threat Detection",
+    "Defense Evasion"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1564",
+          "name": "Hide Artifacts",
+          "reference": "https://attack.mitre.org/techniques/T1564/",
+          "subtechnique": [
+            {
+              "id": "T1564.001",
+              "name": "Hidden Files and Directories",
+              "reference": "https://attack.mitre.org/techniques/T1564/001/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 2
+}

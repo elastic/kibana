@@ -13,15 +13,34 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Administrator Privileges Assigned to an Okta Group",
-  "note": "## Config\n\nThe Okta Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "note": "",
   "query": "event.dataset:okta.system and event.action:group.privilege.grant\n",
   "references": [
     "https://help.okta.com/en/prod/Content/Topics/Security/administrators-admin-comparison.htm",
     "https://developer.okta.com/docs/reference/api/system-log/",
     "https://developer.okta.com/docs/reference/api/event-types/"
   ],
+  "related_integrations": [
+    {
+      "package": "okta",
+      "version": "1.3.0"
+    }
+  ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.action",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.dataset",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 47,
   "rule_id": "b8075894-0b62-46e5-977c-31275da34419",
+  "setup": "The Okta Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
   "severity": "medium",
   "tags": [
     "Elastic",
@@ -50,5 +69,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 6
+  "version": 8
 }

@@ -11,13 +11,31 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "System Log File Deletion",
-  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
-  "query": "file where event.type == \"deletion\" and \n  file.path : \n    (\n    \"/var/run/utmp\", \n    \"/var/log/wtmp\", \n    \"/var/log/btmp\", \n    \"/var/log/lastlog\", \n    \"/var/log/faillog\",\n    \"/var/log/syslog\", \n    \"/var/log/messages\", \n    \"/var/log/secure\", \n    \"/var/log/auth.log\"\n    )\n",
+  "note": "",
+  "query": "file where event.type == \"deletion\" and\n  file.path :\n    (\n    \"/var/run/utmp\",\n    \"/var/log/wtmp\",\n    \"/var/log/btmp\",\n    \"/var/log/lastlog\",\n    \"/var/log/faillog\",\n    \"/var/log/syslog\",\n    \"/var/log/messages\",\n    \"/var/log/secure\",\n    \"/var/log/auth.log\"\n    ) and\n    not process.name : (\"gzip\")\n",
   "references": [
     "https://www.fireeye.com/blog/threat-research/2020/11/live-off-the-land-an-overview-of-unc1945.html"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "file.path",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.name",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 47,
   "rule_id": "aa895aea-b69c-4411-b110-8d7599634b30",
+  "setup": "If enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.",
   "severity": "medium",
   "tags": [
     "Elastic",
@@ -45,5 +63,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 4
+  "version": 6
 }

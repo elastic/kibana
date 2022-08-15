@@ -16,14 +16,32 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Microsoft Exchange Server UM Spawning Suspicious Processes",
-  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
-  "query": "process where event.type == \"start\" and\n  process.parent.name : (\"UMService.exe\", \"UMWorkerProcess.exe\") and\n    not process.name : (\"werfault.exe\", \"wermgr.exe\")\n",
+  "note": "",
+  "query": "process where event.type == \"start\" and\n  process.parent.name : (\"UMService.exe\", \"UMWorkerProcess.exe\") and\n    not process.executable :\n              (\"?:\\\\Windows\\\\System32\\\\werfault.exe\",\n               \"?:\\\\Windows\\\\System32\\\\wermgr.exe\",\n               \"?:\\\\Program Files\\\\Microsoft\\\\Exchange Server\\\\V??\\\\Bin\\\\UMWorkerProcess.exe\",\n               \"D:\\\\Exchange 2016\\\\Bin\\\\UMWorkerProcess.exe\",\n               \"E:\\\\ExchangeServer\\\\Bin\\\\UMWorkerProcess.exe\")\n",
   "references": [
     "https://www.microsoft.com/security/blog/2021/03/02/hafnium-targeting-exchange-servers",
     "https://www.volexity.com/blog/2021/03/02/active-exploitation-of-microsoft-exchange-zero-day-vulnerabilities"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.executable",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.parent.name",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 47,
   "rule_id": "483c4daf-b0c6-49e0-adf3-0bfa93231d6b",
+  "setup": "If enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.",
   "severity": "medium",
   "tags": [
     "Elastic",
@@ -51,5 +69,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 4
 }

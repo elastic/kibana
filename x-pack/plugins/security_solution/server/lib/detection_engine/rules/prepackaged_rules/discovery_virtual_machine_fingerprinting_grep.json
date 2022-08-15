@@ -14,13 +14,41 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Virtual Machine Fingerprinting via Grep",
-  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
-  "query": "process where event.type == \"start\" and\n process.name in (\"grep\", \"egrep\") and user.id != \"0\" and\n process.args : (\"parallels*\", \"vmware*\", \"virtualbox*\") and process.args : \"Manufacturer*\" and \n not process.parent.executable in (\"/Applications/Docker.app/Contents/MacOS/Docker\", \"/usr/libexec/kcare/virt-what\")\n",
+  "note": "",
+  "query": "process where event.type == \"start\" and\n process.name in (\"grep\", \"egrep\") and user.id != \"0\" and\n process.args : (\"parallels*\", \"vmware*\", \"virtualbox*\") and process.args : \"Manufacturer*\" and\n not process.parent.executable in (\"/Applications/Docker.app/Contents/MacOS/Docker\", \"/usr/libexec/kcare/virt-what\")\n",
   "references": [
     "https://objective-see.com/blog/blog_0x4F.html"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.args",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.name",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.parent.executable",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "user.id",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 47,
   "rule_id": "c85eb82c-d2c8-485c-a36f-534f914b7663",
+  "setup": "If enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.",
   "severity": "medium",
   "tags": [
     "Elastic",
@@ -49,5 +77,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 4
 }
