@@ -44,6 +44,18 @@ export const getPackagePoliciesHandler: RequestHandler<
 > = async (context, request, response) => {
   const soClient = (await context.core).savedObjects.client;
   try {
+    if ('ids' in request.query) {
+      const items = await packagePolicyService.getByIDs(soClient, request.query.ids);
+      return response.ok({
+        body: {
+          items,
+          total: items?.length,
+          page: 1,
+          perPage: items?.length,
+        },
+      });
+    }
+
     const { items, total, page, perPage } = await packagePolicyService.list(
       soClient,
       request.query

@@ -22,4 +22,8 @@ export const ListWithKuerySchema = schema.object({
   ),
 });
 
+export const BulkGetSchema = schema.object({
+  ids: schema.arrayOf(schema.string(), { minSize: 1 }),
+});
+
 export type ListWithKuery = TypeOf<typeof ListWithKuerySchema>;

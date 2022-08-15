@@ -12,6 +12,7 @@ import type {
   GetPackagesResponse,
   GetAgentPoliciesRequest,
   GetAgentPoliciesResponse,
+  GetPackagePoliciesResponse,
 } from '@kbn/fleet-plugin/common';
 import type { NewPolicyData } from '../../../../common/endpoint/types';
 import type { GetPolicyResponse, UpdatePolicyResponse } from '../../pages/policy/types';
@@ -35,6 +36,25 @@ export const sendGetPackagePolicy = (
   options?: HttpFetchOptions
 ) => {
   return http.get<GetPolicyResponse>(`${INGEST_API_PACKAGE_POLICIES}/${packagePolicyId}`, options);
+};
+
+/**
+ * Retrieves multiple package policies by ids
+ * @param http
+ * @param packagePolicyIds
+ * @param options
+ */
+export const sendGetPackagePolicies = (
+  http: HttpStart,
+  packagePolicyIds: string[],
+  options?: HttpFetchOptions
+) => {
+  return http.get<GetPackagePoliciesResponse>(`${INGEST_API_PACKAGE_POLICIES}`, {
+    ...options,
+    query: {
+      ids: packagePolicyIds,
+    },
+  });
 };
 
 /**

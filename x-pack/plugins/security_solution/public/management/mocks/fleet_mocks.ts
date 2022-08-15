@@ -10,6 +10,7 @@ import type {
   CheckPermissionsResponse,
   GetAgentPoliciesResponse,
   GetAgentStatusResponse,
+  GetPackagePoliciesResponse,
   GetPackagesResponse,
 } from '@kbn/fleet-plugin/common';
 import {
@@ -25,6 +26,7 @@ import { httpHandlerMockFactory } from '../../common/mock/endpoint/http_handler_
 import { EndpointDocGenerator } from '../../../common/endpoint/generate_data';
 import type { GetPolicyListResponse, GetPolicyResponse } from '../pages/policy/types';
 import { FleetAgentPolicyGenerator } from '../../../common/endpoint/data_generators/fleet_agent_policy_generator';
+import { FleetPackagePolicyGenerator } from '../../../common/endpoint/data_generators/fleet_package_policy_generator';
 
 interface KqlArgumentType {
   type: string;
@@ -226,6 +228,55 @@ export const fleetGetAgentPolicyListHttpMock =
     },
   ]);
 
+export type FleetGetPackagePoliciesListHttpMockInterface = ResponseProvidersInterface<{
+  packagePolicies: () => GetPackagePoliciesResponse;
+}>;
+export const fleetGetPackagePoliciesListHttpMock =
+  httpHandlerMockFactory<FleetGetPackagePoliciesListHttpMockInterface>([
+    {
+      id: 'packagePolicies',
+      path: PACKAGE_POLICY_API_ROUTES.LIST_PATTERN,
+      method: 'get',
+      handler: ({ query }) => {
+        const generator = new EndpointDocGenerator('seed');
+        const fleetPackagePolicyGenerator = new FleetPackagePolicyGenerator('seed');
+        const endpointMetadata = generator.generateHostMetadata();
+        const requiredPolicyIds: string[] = [
+          // Make sure that the Agent policy returned from the API has the Integration Policy ID that
+          // the first endpoint metadata generated is using. This is needed especially when testing the
+          // Endpoint Details flyout where certain actions might be disabled if we know the endpoint integration policy no
+          // longer exists.
+          endpointMetadata.Endpoint.policy.applied.id,
+
+          // In addition, some of our UI logic looks for the existence of certain Endpoint Integration policies
+          // using the Agents Policy API (normally when checking IDs since query by ids is not supported via API)
+          // so also add the first two package policy IDs that the `fleetGetEndpointPackagePolicyListHttpMock()`
+          // method above creates (which Trusted Apps HTTP mocks also use)
+          // FIXME: remove hard-coded IDs below and get them from the new FleetPackagePolicyGenerator (#2262)
+          'ddf6570b-9175-4a6d-b288-61a09771c647',
+          'b8e616ae-44fc-4be7-846c-ce8fa5c082dd',
+
+          // And finally, include any kql filters for package policies ids
+          ...getPackagePoliciesFromKueryString(
+            `${AGENT_POLICY_SAVED_OBJECT_TYPE}.package_policies: (${(query?.ids as string[]).join(
+              ' or '
+            )} )`
+          ),
+        ];
+
+        return {
+          items: requiredPolicyIds.map((packagePolicyId) => {
+            return fleetPackagePolicyGenerator.generate({
+              id: packagePolicyId,
+            });
+          }),
+          perPage: Math.max(requiredPolicyIds.length, 10),
+          total: requiredPolicyIds.length,
+          page: 1,
+        };
+      },
+    },
+  ]);
 export type FleetGetCheckPermissionsInterface = ResponseProvidersInterface<{
   checkPermissions: () => CheckPermissionsResponse;
 }>;
