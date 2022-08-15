@@ -313,7 +313,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
 
   function combineWithTitleAndFooter(el: React.ReactElement) {
     const countsElement = totalDocuments ? (
-      <EuiText color="subdued" size="xs">
+      <EuiText color="subdued" size="xs" data-test-subj={`${testSubject}-statsFooter`}>
         {sampledDocuments && (
           <>
             {i18n.translate('unifiedFieldList.fieldStats.percentageOfLabel', {
@@ -321,9 +321,9 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
               values: {
                 percentage: Math.round((sampledDocuments / totalDocuments) * 100),
               },
-            })}
+            })}{' '}
           </>
-        )}{' '}
+        )}
         <strong>
           {fieldFormats
             .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
@@ -452,7 +452,11 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
                 gutterSize="xs"
                 responsive={false}
               >
-                <EuiFlexItem grow={true} className="eui-textTruncate">
+                <EuiFlexItem
+                  grow={true}
+                  className="eui-textTruncate"
+                  data-test-subj={`${testSubject}-topValues-value`}
+                >
                   {formatted === '' ? (
                     <EuiText size="xs" color="subdued">
                       <em>
@@ -469,7 +473,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
                     </EuiToolTip>
                   )}
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>
+                <EuiFlexItem grow={false} data-test-subj={`${testSubject}-topValues-valueCount`}>
                   <EuiText size="xs" textAlign="left" color="accent">
                     {(Math.round((topValue.count / sampledValues!) * 1000) / 10).toFixed(
                       digitsRequired ? 1 : 0

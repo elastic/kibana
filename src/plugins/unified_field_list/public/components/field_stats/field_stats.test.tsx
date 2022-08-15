@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiProgress } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
@@ -93,6 +93,13 @@ describe('UnifiedFieldList <FieldStats />', () => {
           aggregatable: true,
           searchable: true,
         },
+        {
+          name: 'machine.ram',
+          displayName: 'machine.ram',
+          type: 'number',
+          aggregatable: true,
+          searchable: true,
+        },
       ],
       getFormatterForField: jest.fn(() => ({
         convert: jest.fn((s: unknown) => JSON.stringify(s)),
@@ -115,6 +122,11 @@ describe('UnifiedFieldList <FieldStats />', () => {
     (mockedServices.dataViews.get as jest.Mock).mockImplementation(() => {
       return Promise.resolve(dataView);
     });
+  });
+
+  beforeEach(() => {
+    (loadFieldStats as jest.Mock).mockReset();
+    (loadFieldStats as jest.Mock).mockImplementation(() => Promise.resolve({}));
   });
 
   it('should request field stats with correct params', async () => {
@@ -191,9 +203,6 @@ describe('UnifiedFieldList <FieldStats />', () => {
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
 
     expect(loadFieldStats).toHaveBeenCalledTimes(1);
-
-    (loadFieldStats as jest.Mock).mockReset();
-    (loadFieldStats as jest.Mock).mockImplementation(() => Promise.resolve({}));
   });
 
   it('should not request field stats for range fields', async () => {
@@ -211,5 +220,327 @@ describe('UnifiedFieldList <FieldStats />', () => {
     );
 
     expect(loadFieldStats).not.toHaveBeenCalled();
+  });
+
+  it('should not request field stats for geo fields', async () => {
+    mountWithIntl(
+      <FieldStatsWrapper
+        {...defaultProps}
+        field={
+          {
+            name: 'geo_shape',
+            displayName: 'geo_shape',
+            type: 'geo_shape',
+          } as DataViewField
+        }
+      />
+    );
+
+    expect(loadFieldStats).not.toHaveBeenCalled();
+  });
+
+  it('should render nothing if no data is found', async () => {
+    const wrapper = mountWithIntl(<FieldStatsWrapper {...defaultProps} />);
+
+    await wrapper.update();
+
+    expect(loadFieldStats).toHaveBeenCalled();
+
+    expect(wrapper.text()).toBe('');
+  });
+
+  it('should render Top Values field stats correctly for a keyword field', async () => {
+    let resolveFunction: (arg: unknown) => void;
+
+    (loadFieldStats as jest.Mock).mockImplementation(() => {
+      return new Promise((resolve) => {
+        resolveFunction = resolve;
+      });
+    });
+
+    const wrapper = mountWithIntl(
+      <FieldStatsWrapper
+        {...defaultProps}
+        query={{ language: 'kuery', query: '' }}
+        filters={[]}
+        fromDate="now-7d"
+        toDate="now"
+      />
+    );
+
+    await wrapper.update();
+
+    expect(loadFieldStats).toHaveBeenCalledWith({
+      abortController: new AbortController(),
+      data: mockedServices.data,
+      dataView,
+      fromDate: 'now-7d',
+      toDate: 'now',
+      dslQuery: {
+        bool: {
+          must: [],
+          filter: [],
+          should: [],
+          must_not: [],
+        },
+      },
+      field: defaultProps.field,
+    });
+
+    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(1);
+
+    await act(async () => {
+      resolveFunction!({
+        totalDocuments: 1624,
+        sampledDocuments: 1624,
+        sampledValues: 3248,
+        topValues: {
+          buckets: [
+            {
+              count: 1349,
+              key: 'success',
+            },
+            {
+              count: 1206,
+              key: 'info',
+            },
+            {
+              count: 329,
+              key: 'security',
+            },
+            {
+              count: 164,
+              key: 'warning',
+            },
+            {
+              count: 111,
+              key: 'error',
+            },
+            {
+              count: 89,
+              key: 'login',
+            },
+          ],
+        },
+      });
+    });
+
+    await wrapper.update();
+
+    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
+    expect(wrapper.find(EuiProgress)).toHaveLength(6);
+
+    expect(loadFieldStats).toHaveBeenCalledTimes(1);
+
+    const stats = wrapper.find('[data-test-subj="testing-topValues"]');
+    const firstValue = stats.childAt(0);
+
+    expect(stats).toHaveLength(1);
+    expect(firstValue.find('[data-test-subj="testing-topValues-value"]').first().text()).toBe(
+      '"success"'
+    );
+    expect(firstValue.find('[data-test-subj="testing-topValues-valueCount"]').first().text()).toBe(
+      '41.5%'
+    );
+
+    expect(wrapper.find('[data-test-subj="testing-statsFooter"]').first().text()).toBe(
+      '100% of 1624 documents'
+    );
+
+    expect(wrapper.text()).toBe(
+      'Top values"success"41.5%"info"37.1%"security"10.1%"warning"5.0%"error"3.4%"login"2.7%100% of 1624 documents'
+    );
+  });
+
+  it('should render Histogram field stats correctly for a date field', async () => {
+    let resolveFunction: (arg: unknown) => void;
+
+    (loadFieldStats as jest.Mock).mockImplementation(() => {
+      return new Promise((resolve) => {
+        resolveFunction = resolve;
+      });
+    });
+
+    const wrapper = mountWithIntl(
+      <FieldStatsWrapper
+        {...defaultProps}
+        field={dataView.fields[0]}
+        query={{ language: 'kuery', query: '' }}
+        filters={[]}
+        fromDate="now-1h"
+        toDate="now"
+      />
+    );
+
+    await wrapper.update();
+
+    expect(loadFieldStats).toHaveBeenCalledWith({
+      abortController: new AbortController(),
+      data: mockedServices.data,
+      dataView,
+      fromDate: 'now-1h',
+      toDate: 'now',
+      dslQuery: {
+        bool: {
+          must: [],
+          filter: [],
+          should: [],
+          must_not: [],
+        },
+      },
+      field: dataView.fields[0],
+    });
+
+    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(1);
+
+    await act(async () => {
+      resolveFunction!({
+        totalDocuments: 13,
+        histogram: {
+          buckets: [
+            {
+              count: 1,
+              key: 1660564080000,
+            },
+            {
+              count: 2,
+              key: 1660564440000,
+            },
+            {
+              count: 3,
+              key: 1660564800000,
+            },
+            {
+              count: 1,
+              key: 1660565160000,
+            },
+            {
+              count: 2,
+              key: 1660565520000,
+            },
+            {
+              count: 0,
+              key: 1660565880000,
+            },
+            {
+              count: 1,
+              key: 1660566240000,
+            },
+            {
+              count: 1,
+              key: 1660566600000,
+            },
+            {
+              count: 1,
+              key: 1660566960000,
+            },
+            {
+              count: 1,
+              key: 1660567320000,
+            },
+          ],
+        },
+      });
+    });
+
+    await wrapper.update();
+
+    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
+
+    expect(loadFieldStats).toHaveBeenCalledTimes(1);
+
+    expect(wrapper.find('[data-test-subj="testing-topValues"]')).toHaveLength(0);
+    expect(wrapper.find('[data-test-subj="testing-histogram"]')).toHaveLength(1);
+    expect(wrapper.find('[data-test-subj="testing-statsFooter"]').first().text()).toBe(
+      '13 documents'
+    );
+
+    expect(wrapper.text()).toBe('Time distribution13 documents');
+  });
+
+  it('should render Top Values & Distribution field stats correctly for a number field', async () => {
+    let resolveFunction: (arg: unknown) => void;
+
+    (loadFieldStats as jest.Mock).mockImplementation(() => {
+      return new Promise((resolve) => {
+        resolveFunction = resolve;
+      });
+    });
+
+    const field = dataView.fields.find((f) => f.name === 'machine.ram')!;
+
+    const wrapper = mountWithIntl(
+      <FieldStatsWrapper
+        {...defaultProps}
+        field={field}
+        query={{ language: 'kuery', query: '' }}
+        filters={[]}
+        fromDate="now-1h"
+        toDate="now"
+      />
+    );
+
+    await wrapper.update();
+
+    expect(loadFieldStats).toHaveBeenCalledWith({
+      abortController: new AbortController(),
+      data: mockedServices.data,
+      dataView,
+      fromDate: 'now-1h',
+      toDate: 'now',
+      dslQuery: {
+        bool: {
+          must: [],
+          filter: [],
+          should: [],
+          must_not: [],
+        },
+      },
+      field,
+    });
+
+    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(1);
+
+    await act(async () => {
+      resolveFunction!({
+        totalDocuments: 23,
+        sampledDocuments: 23,
+        sampledValues: 23,
+        histogram: {
+          buckets: [
+            {
+              count: 17,
+              key: 12,
+            },
+            {
+              count: 6,
+              key: 13,
+            },
+          ],
+        },
+        topValues: {
+          buckets: [
+            {
+              count: 17,
+              key: 12,
+            },
+            {
+              count: 6,
+              key: 13,
+            },
+          ],
+        },
+      });
+    });
+
+    await wrapper.update();
+
+    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
+
+    expect(loadFieldStats).toHaveBeenCalledTimes(1);
+
+    expect(wrapper.text()).toBe(
+      'Toggle either theTop valuesDistribution1273.9%1326.1%100% of 23 documents'
+    );
   });
 });
