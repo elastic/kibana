@@ -294,14 +294,14 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
   public async findAllForPolicy(
     soClient: SavedObjectsClientContract,
     agentPolicyId: string
-  ): Promise<PackagePolicy[] | null> {
+  ): Promise<PackagePolicy[]> {
     const packagePolicySO = await soClient.find<PackagePolicySOAttributes>({
       type: SAVED_OBJECT_TYPE,
       filter: `${SAVED_OBJECT_TYPE}.attributes.policy_id:${escapeSearchQueryPhrase(agentPolicyId)}`,
       perPage: SO_SEARCH_LIMIT,
     });
     if (!packagePolicySO) {
-      return null;
+      return [];
     }
 
     return packagePolicySO.saved_objects.map((so) => ({

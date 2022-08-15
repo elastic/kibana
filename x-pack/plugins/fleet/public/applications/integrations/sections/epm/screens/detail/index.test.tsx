@@ -718,9 +718,9 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
         description: 'Default agent policy created by Kibana',
         status: 'active',
         package_policies: [
-          '4d09bd78-b0ad-4238-9fa3-d87d3c887c73',
-          '2babac18-eb8e-4ce4-b53b-4b7c5f507019',
-          'e8a37031-2907-44f6-89d2-98bd493f60dc',
+          // '4d09bd78-b0ad-4238-9fa3-d87d3c887c73',
+          // '2babac18-eb8e-4ce4-b53b-4b7c5f507019',
+          // 'e8a37031-2907-44f6-89d2-98bd493f60dc',
         ],
         is_managed: false,
         monitoring_enabled: ['logs', 'metrics'],
@@ -735,7 +735,9 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
         namespace: 'default',
         description: 'Protect EU from COVID',
         status: 'active',
-        package_policies: ['e8a37031-2907-44f6-89d2-98bd493f60cd'],
+        package_policies: [
+          // 'e8a37031-2907-44f6-89d2-98bd493f60cd'
+        ],
         is_managed: false,
         monitoring_enabled: ['logs', 'metrics'],
         revision: 2,
