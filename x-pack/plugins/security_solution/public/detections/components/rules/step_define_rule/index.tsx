@@ -80,6 +80,7 @@ import { getIsRulePreviewDisabled } from '../rule_preview/helpers';
 import { NewTermsFields } from '../new_terms_fields';
 import { ScheduleItem } from '../schedule_item_form';
 import { DocLink } from '../../../../common/components/links_to_docs/doc_link';
+import { StepDefineRuleNewFeaturesTour } from './new_features_tour';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -511,10 +512,15 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       />
     );
   }, [kibanaDataViews]);
+
   const DataSource = useMemo(() => {
     return (
-      <RuleTypeEuiFormRow label={i18n.SOURCE} $isVisible={true} fullWidth>
-        <EuiFlexGroup direction="column" gutterSize="s">
+      <RuleTypeEuiFormRow id="dataSourceSelector" label={i18n.SOURCE} $isVisible={true} fullWidth>
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="s"
+          data-test-subj="dataViewIndexPatternButtonGroupFlexGroup"
+        >
           <EuiFlexItem>
             <EuiText size="xs">
               <FormattedMessage
@@ -582,11 +588,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     );
   }, [
     dataSourceType,
+    onChangeDataSource,
     dataViewIndexPatternToggleButtonOptions,
     DataViewSelectorMemo,
     indexModified,
     handleResetIndices,
-    onChangeDataSource,
   ]);
 
   const QueryBarMemo = useMemo(
@@ -679,6 +685,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   ) : (
     <>
       <StepContentWrapper addPadding={!isUpdateView}>
+        <StepDefineRuleNewFeaturesTour />
         <Form form={form} data-test-subj="stepDefineRule">
           <StyledVisibleContainer isVisible={false}>
             <UseField
