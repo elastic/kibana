@@ -27,7 +27,7 @@ export function registerIndexRoutes({ router, log }: RouteDependencies) {
     { path: '/internal/enterprise_search/search_indices', validate: false },
     elasticsearchErrorHandler(log, async (context, _, response) => {
       const { client } = (await context.core).elasticsearch;
-      const indices = await fetchIndices(client, '*', false, true);
+      const indices = await fetchIndices(client, '*', false, true, 'search-');
 
       return response.ok({
         body: indices,
