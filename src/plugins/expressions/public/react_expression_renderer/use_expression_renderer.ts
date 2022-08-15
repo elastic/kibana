@@ -8,7 +8,7 @@
 
 import type { Reducer, RefObject } from 'react';
 import { useRef, useEffect, useLayoutEffect, useReducer } from 'react';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import {
@@ -17,6 +17,8 @@ import {
   isExpressionValueError,
 } from '../../common';
 import { ExpressionLoader } from '../loader';
+import { ExpressionLoaderProviderToken } from '../module';
+import { getContainer } from '../services';
 import { IExpressionLoaderParams, ExpressionRenderError, ExpressionRendererEvent } from '../types';
 import { useDebouncedValue } from './use_debounced_value';
 import { useShallowMemo } from './use_shallow_memo';
@@ -80,29 +82,36 @@ export function useExpressionRenderer(
   /* eslint-disable react-hooks/exhaustive-deps */
   // OK to ignore react-hooks/exhaustive-deps because options update is handled by calling .update()
   useEffect(() => {
-    expressionLoaderRef.current =
-      nodeRef.current &&
-      new ExpressionLoader(nodeRef.current, debouncedExpression, {
-        ...debouncedLoaderParams,
-        // react component wrapper provides different
-        // error handling api which is easier to work with from react
-        // if custom renderError is not provided then we fallback to default error handling from ExpressionLoader
-        onRenderError: (domNode, newError, handlers) => {
-          errorRenderHandlerRef.current = handlers;
-          setState({
-            error: newError,
-            isEmpty: false,
-            isLoading: false,
-          });
+    let subscription: Subscription | undefined;
+    (async () => {
+      expressionLoaderRef.current =
+        nodeRef.current &&
+        (await getContainer().get(ExpressionLoaderProviderToken)(
+          nodeRef.current,
+          debouncedExpression,
+          {
+            ...debouncedLoaderParams,
+            // react component wrapper provides different
+            // error handling api which is easier to work with from react
+            // if custom renderError is not provided then we fallback to default error handling from ExpressionLoader
+            onRenderError: (domNode, newError, handlers) => {
+              errorRenderHandlerRef.current = handlers;
+              setState({
+                error: newError,
+                isEmpty: false,
+                isLoading: false,
+              });
 
-          return debouncedLoaderParams.onRenderError?.(domNode, newError, handlers);
-        },
+              return debouncedLoaderParams.onRenderError?.(domNode, newError, handlers);
+            },
+          }
+        ));
+
+      subscription = expressionLoaderRef.current?.loading$.subscribe(() => {
+        hasHandledErrorRef.current = false;
+        setState({ isLoading: true });
       });
-
-    const subscription = expressionLoaderRef.current?.loading$.subscribe(() => {
-      hasHandledErrorRef.current = false;
-      setState({ isLoading: true });
-    });
+    })();
 
     return () => {
       subscription?.unsubscribe();

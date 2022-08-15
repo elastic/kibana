@@ -6,15 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { Container } from 'inversify';
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
-import type { NotificationsStart } from '@kbn/core/public';
-import type { ExpressionsService, ExpressionRendererRegistry } from '../common';
 
-export const [getNotifications, setNotifications] =
-  createGetterSetter<NotificationsStart>('Notifications');
-
-export const [getRenderersRegistry, setRenderersRegistry] =
-  createGetterSetter<ExpressionRendererRegistry>('Renderers registry');
-
-export const [getExpressionsService, setExpressionsService] =
-  createGetterSetter<ExpressionsService>('ExpressionsService');
+export const [getContainer, setContainer] = createGetterSetter<Container>('Container');

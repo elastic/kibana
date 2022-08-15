@@ -8,10 +8,15 @@
 
 import { Container } from 'inversify';
 import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import type { SerializableRecord } from '@kbn/utility-types';
 import { ExpressionsService, ExpressionsServiceSetup, ExpressionsServiceStart } from '../common';
-import { ExpressionsModule, LoggerToken, UiSettingsClientToken } from '../common/module';
-import { setRenderersRegistry, setNotifications, setExpressionsService } from './services';
+import { ExpressionsModule, UiSettingsClientToken } from '../common/module';
+import {
+  ExpressionsPublicModule,
+  ExpressionLoaderProviderToken,
+  ExpressionRenderHandlerProviderToken,
+  NotificationsToken,
+} from './module';
+import { setContainer } from './services';
 import { ReactExpressionRenderer } from './react_expression_renderer_wrapper';
 import type { IExpressionLoader } from './loader';
 import type { IExpressionRenderer } from './render';
@@ -31,67 +36,33 @@ export interface ExpressionsStart extends ExpressionsServiceStart {
 }
 
 export class ExpressionsPublicPlugin implements Plugin<ExpressionsSetup, ExpressionsStart> {
-  private static logger = {
-    ...console,
-    // eslint-disable-next-line no-console
-    fatal: console.error,
-    get() {
-      return this;
-    },
-  };
-
   private readonly container = new Container({ skipBaseClassChecks: true });
 
   constructor(context: PluginInitializerContext) {
     this.container.load(ExpressionsModule());
-    this.container.bind(LoggerToken).toConstantValue(ExpressionsPublicPlugin.logger);
+    this.container.load(ExpressionsPublicModule());
   }
 
-  public setup(core: CoreSetup): ExpressionsSetup {
-    this.container
-      .bind(UiSettingsClientToken)
-      .toDynamicValue(async (context) => {
-        const [{ uiSettings }] = await core.getStartServices();
+  public setup({}: CoreSetup): ExpressionsSetup {
+    setContainer(this.container);
 
-        return uiSettings;
-      })
-      .inSingletonScope();
-
-    const expressions = this.container.get(ExpressionsService);
-    const { renderers } = expressions;
-
-    setRenderersRegistry(renderers);
-    setExpressionsService(expressions);
-
-    const setup = expressions.setup();
+    const setup = this.container.get(ExpressionsService).setup();
 
     return Object.freeze(setup);
   }
 
-  public start(core: CoreStart): ExpressionsStart {
-    setNotifications(core.notifications);
+  public start({ notifications, uiSettings }: CoreStart): ExpressionsStart {
+    this.container.bind(NotificationsToken).toConstantValue(notifications);
+    this.container.bind(UiSettingsClientToken).toConstantValue(uiSettings);
 
-    const expressions = this.container.get(ExpressionsService);
-    const loader: IExpressionLoader = async (element, expression, params) => {
-      const { ExpressionLoader } = await import('./loader');
-      return new ExpressionLoader(element, expression, params);
-    };
+    const start = this.container.get(ExpressionsService).start();
 
-    const render: IExpressionRenderer = async (element, data, options) => {
-      const { ExpressionRenderHandler } = await import('./render');
-      const handler = new ExpressionRenderHandler(element, options);
-      handler.render(data as SerializableRecord);
-      return handler;
-    };
-
-    const start = {
-      ...expressions.start(),
-      loader,
-      render,
+    return Object.freeze({
+      ...start,
+      loader: this.container.get(ExpressionLoaderProviderToken),
+      render: this.container.get(ExpressionRenderHandlerProviderToken),
       ReactExpressionRenderer,
-    };
-
-    return Object.freeze(start);
+    });
   }
 
   public stop() {

@@ -6,23 +6,29 @@
  * Side Public License, v 1.
  */
 
+import { inject, injectable, interfaces, optional } from 'inversify';
 import * as Rx from 'rxjs';
 import { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { isNumber } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import type { NotificationsStart } from '@kbn/core/public';
 import { SerializableRecord } from '@kbn/utility-types';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 
+import {
+  ExpressionsService,
+  IInterpreterRenderHandlers,
+  IInterpreterRenderUpdateParams,
+  RenderMode,
+} from '../common';
+import { NotificationsToken } from './module';
 import {
   ExpressionRenderError,
   RenderErrorHandlerFnType,
   IExpressionLoaderParams,
   ExpressionRendererEvent,
 } from './types';
-import { renderErrorHandler as defaultRenderErrorHandler } from './render_error_handler';
-import { IInterpreterRenderHandlers, IInterpreterRenderUpdateParams, RenderMode } from '../common';
-
-import { getRenderersRegistry } from './services';
 
 export type IExpressionRendererExtraHandlers = Record<string, unknown>;
 
@@ -38,6 +44,11 @@ export interface ExpressionRenderHandlerParams {
 
 type UpdateValue = IInterpreterRenderUpdateParams<IExpressionLoaderParams>;
 
+export const ElementToken: interfaces.ServiceIdentifier<HTMLElement> = Symbol.for('Element');
+export const ExpressionRenderHandlerParamsToken: interfaces.ServiceIdentifier<ExpressionRenderHandlerParams> =
+  Symbol.for('ExpressionRenderHandlerParams');
+
+@injectable()
 export class ExpressionRenderHandler {
   render$: Observable<number>;
   update$: Observable<UpdateValue | null>;
@@ -50,10 +61,13 @@ export class ExpressionRenderHandler {
   private eventsSubject: Rx.Subject<unknown>;
   private updateSubject: Rx.Subject<UpdateValue | null>;
   private handlers: IInterpreterRenderHandlers;
-  private onRenderError: RenderErrorHandlerFnType;
 
   constructor(
-    element: HTMLElement,
+    @inject(ElementToken) element: HTMLElement,
+    @inject(ExpressionsService) private readonly expressions: ExpressionsService,
+    @inject(NotificationsToken) private readonly notifications: NotificationsStart,
+    @inject(ExpressionRenderHandlerParamsToken)
+    @optional()
     {
       onRenderError,
       renderMode,
@@ -69,7 +83,7 @@ export class ExpressionRenderHandler {
     this.eventsSubject = new Rx.Subject();
     this.events$ = this.eventsSubject.asObservable() as Observable<ExpressionRendererEvent>;
 
-    this.onRenderError = onRenderError || defaultRenderErrorHandler;
+    this.onRenderError = onRenderError ?? this.onRenderError.bind(this);
 
     this.renderSubject = new Rx.BehaviorSubject<number | null>(null);
     this.render$ = this.renderSubject.asObservable().pipe(filter(isNumber));
@@ -128,18 +142,16 @@ export class ExpressionRenderHandler {
       }
     }
 
-    if (!getRenderersRegistry().get(value.as as string)) {
+    if (!this.expressions.renderers.get(value.as as string)) {
       return this.handleRenderError(new Error(`invalid renderer id '${value.as}'`));
     }
 
     try {
       // Rendering is asynchronous, completed by handlers.done()
-      await getRenderersRegistry()
-        .get(value.as as string)!
-        .render(this.element, value.value, {
-          ...this.handlers,
-          uiState,
-        });
+      await this.expressions.renderers.get(value.as as string)!.render(this.element, value.value, {
+        ...this.handlers,
+        uiState,
+      });
     } catch (e) {
       return this.handleRenderError(e as ExpressionRenderError);
     }
@@ -161,6 +173,25 @@ export class ExpressionRenderHandler {
   handleRenderError = (error: ExpressionRenderError) => {
     this.onRenderError(this.element, error, this.handlers);
   };
+
+  onRenderError(
+    element: HTMLElement,
+    error: ExpressionRenderError,
+    handlers: IInterpreterRenderHandlers
+  ) {
+    if (error.name === 'AbortError') {
+      handlers.done();
+      return;
+    }
+
+    this.notifications.toasts.addError(error, {
+      title: i18n.translate('expressions.defaultErrorRenderer.errorTitle', {
+        defaultMessage: 'Error in visualisation',
+      }),
+      toastMessage: error.message,
+    });
+    handlers.done();
+  }
 }
 
 export type IExpressionRenderer = (
@@ -168,9 +199,3 @@ export type IExpressionRenderer = (
   data: unknown,
   options?: ExpressionRenderHandlerParams
 ) => Promise<ExpressionRenderHandler>;
-
-export const render: IExpressionRenderer = async (element, data, options) => {
-  const handler = new ExpressionRenderHandler(element, options);
-  handler.render(data as SerializableRecord);
-  return handler;
-};

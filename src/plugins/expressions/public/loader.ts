@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
+import { inject, injectable, interfaces, optional } from 'inversify';
 import { BehaviorSubject, Observable, Subject, Subscription, identity, timer } from 'rxjs';
 import { delay, filter, finalize, map, shareReplay, takeWhile } from 'rxjs/operators';
 import { defaults } from 'lodash';
 import { SerializableRecord, UnwrapObservable } from '@kbn/utility-types';
 import { Adapters } from '@kbn/inspector-plugin/public';
 import { IExpressionLoaderParams } from './types';
-import { ExpressionAstExpression } from '../common';
+import { ExpressionAstExpression, ExpressionsService } from '../common';
 import { ExecutionContract } from '../common/execution/execution_contract';
 
 import { ExpressionRenderHandler } from './render';
-import { getExpressionsService } from './services';
 
 type Data = unknown;
 
@@ -75,6 +75,12 @@ function throttle<T>(timeout: number) {
     });
 }
 
+export const ExpressionToken: interfaces.ServiceIdentifier<string | ExpressionAstExpression> =
+  Symbol.for('Expression');
+export const ExpressionLoaderParamsToken: interfaces.ServiceIdentifier<IExpressionLoaderParams> =
+  Symbol.for('ExpressionLoaderParams');
+
+@injectable()
 export class ExpressionLoader {
   data$: ReturnType<ExecutionContract['getData']>;
   update$: ExpressionRenderHandler['update$'];
@@ -83,7 +89,6 @@ export class ExpressionLoader {
   loading$: Observable<void>;
 
   private execution: ExecutionContract | undefined;
-  private renderHandler: ExpressionRenderHandler;
   private dataSubject: Subject<UnwrapObservable<ExpressionLoader['data$']>>;
   private loadingSubject: Subject<boolean>;
   private data: Data;
@@ -91,9 +96,10 @@ export class ExpressionLoader {
   private subscription?: Subscription;
 
   constructor(
-    element: HTMLElement,
-    expression?: string | ExpressionAstExpression,
-    params?: IExpressionLoaderParams
+    @inject(ExpressionsService) private readonly expressions: ExpressionsService,
+    @inject(ExpressionRenderHandler) private readonly renderHandler: ExpressionRenderHandler,
+    @inject(ExpressionToken) @optional() expression?: string | ExpressionAstExpression,
+    @inject(ExpressionLoaderParamsToken) @optional() params?: IExpressionLoaderParams
   ) {
     this.dataSubject = new Subject();
     this.data$ = this.dataSubject.asObservable();
@@ -108,18 +114,9 @@ export class ExpressionLoader {
       map(() => void 0)
     );
 
-    this.renderHandler = new ExpressionRenderHandler(element, {
-      interactive: params?.interactive,
-      onRenderError: params && params.onRenderError,
-      renderMode: params?.renderMode,
-      syncColors: params?.syncColors,
-      syncTooltips: params?.syncTooltips,
-      hasCompatibleActions: params?.hasCompatibleActions,
-      executionContext: params?.executionContext,
-    });
-    this.render$ = this.renderHandler.render$;
-    this.update$ = this.renderHandler.update$;
-    this.events$ = this.renderHandler.events$;
+    this.render$ = renderHandler.render$;
+    this.update$ = renderHandler.update$;
+    this.events$ = renderHandler.events$;
 
     this.update$.subscribe((value) => {
       if (value) {
@@ -192,7 +189,7 @@ export class ExpressionLoader {
       this.execution.cancel();
     }
     this.setParams(params);
-    this.execution = getExpressionsService().execute(expression, params.context, {
+    this.execution = this.expressions.execute(expression, params.context, {
       searchContext: params.searchContext,
       variables: params.variables || {},
       inspectorAdapters: params.inspectorAdapters,
@@ -255,7 +252,3 @@ export type IExpressionLoader = (
   expression?: string | ExpressionAstExpression,
   params?: IExpressionLoaderParams
 ) => Promise<ExpressionLoader>;
-
-export const loader: IExpressionLoader = async (element, expression?, params?) => {
-  return new ExpressionLoader(element, expression, params);
-};
