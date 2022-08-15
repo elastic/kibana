@@ -75,6 +75,9 @@ export type LogExplorerExternalEvent =
       type: 'visibleEntriesChanged';
       visibleStartRowIndex: number;
       visibleEndRowIndex: number;
+    }
+  | {
+      type: 'startedReload';
     };
 
 export type LogExplorerInternalEvent =

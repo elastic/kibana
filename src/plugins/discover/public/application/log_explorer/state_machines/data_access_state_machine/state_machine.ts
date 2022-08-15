@@ -395,6 +395,10 @@ export const dataAccessStateMachine = createMachine<
         target: '.tailing',
         internal: false,
       },
+      startedReload: {
+        target: '.reloading',
+        internal: false,
+      },
     },
   },
   {

@@ -20,6 +20,7 @@ import { i18n } from '@kbn/i18n';
 import classnames from 'classnames';
 import React, { useMemo, useRef, useCallback } from 'react';
 import { useSelector } from '@xstate/react';
+import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
 import { convertValueToString } from '../../utils/convert_value_to_string';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getEuiGridColumns } from '../../../../components/discover_grid/discover_grid_columns';
@@ -32,6 +33,7 @@ import { useDiscoverStateContext } from '../../hooks/discover_state/use_discover
 import { ValueToStringConverter } from '../../../../types';
 import { useStateMachineContext } from '../../hooks/query_data/use_state_machine';
 import { memoizedSelectRows } from '../../state_machines';
+import { useFieldEditor } from '../../hooks/ui/use_field_editor';
 
 const EuiDataGridMemoized = React.memo(EuiDataGrid);
 
@@ -51,7 +53,14 @@ export function LogExplorerGrid({ fieldFormats }: { fieldFormats: FieldFormatsSt
   const services = useDiscoverServices();
 
   // Access to "outer" Discover state
-  const { dataView, state } = useDiscoverStateContext();
+  const { dataView, state, onAddFilter } = useDiscoverStateContext();
+
+  // In place editing of fields
+  const onFieldEdited = useCallback(() => {
+    stateMachine.send({ type: 'startedReload' });
+  }, [stateMachine]);
+
+  const { editField } = useFieldEditor({ dataView, onFieldEdited });
 
   const valueToStringConverter: ValueToStringConverter = useCallback(
     (rowIndex, columnId, options) => {
@@ -79,10 +88,19 @@ export function LogExplorerGrid({ fieldFormats }: { fieldFormats: FieldFormatsSt
         isSortEnabled: false, // NOTE: We disable sorting for the log explorer.
         services,
         valueToStringConverter,
-        onFilter: () => {}, // TODO: Possibly support
-        editField: () => {}, // TODO: Possibly support direct editing of fields for POC
+        onFilter: onAddFilter as DocViewFilterFn, // TODO: Fix this if there's time. It's broken due to discover_grid_cell_actions handling of rows (and looking up state from the rows). It needs changing to understand our log explorer rows Map.
+        editField,
       }),
-    [columns, dataView, services, valueToStringConverter, state.grid, rows.size]
+    [
+      columns,
+      dataView,
+      services,
+      valueToStringConverter,
+      state.grid,
+      rows.size,
+      onAddFilter,
+      editField,
+    ]
   );
 
   const columnVisibility: EuiDataGridColumnVisibility = useMemo(() => {
