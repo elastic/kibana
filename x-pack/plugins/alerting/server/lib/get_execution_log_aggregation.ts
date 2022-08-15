@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { KueryNode } from '@kbn/core-saved-objects-api-server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import Boom from '@hapi/boom';
 import { flatMap, get } from 'lodash';
@@ -80,7 +81,7 @@ interface ExcludeExecuteStartAggResult extends estypes.AggregationsAggregateBase
   };
 }
 export interface IExecutionLogAggOptions {
-  filter?: string;
+  filter?: string | KueryNode;
   page: number;
   perPage: number;
   sort: estypes.Sort;
@@ -129,7 +130,8 @@ export function getExecutionLogAggregation({
 
   let dslFilterQuery: estypes.QueryDslBoolQuery['filter'];
   try {
-    dslFilterQuery = filter ? toElasticsearchQuery(fromKueryExpression(filter)) : undefined;
+    const filterKueryNode = typeof filter === 'string' ? fromKueryExpression(filter) : filter;
+    dslFilterQuery = filter ? toElasticsearchQuery(filterKueryNode) : undefined;
   } catch (err) {
     throw Boom.badRequest(`Invalid kuery syntax for filter ${filter}`);
   }

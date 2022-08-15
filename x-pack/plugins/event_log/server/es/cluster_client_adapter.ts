@@ -446,9 +446,15 @@ export function getQueryBody(
   const { start, end, filter } = queryOptions ?? {};
 
   const namespaceQuery = getNamespaceQuery(namespace);
+  let filterKueryNode;
+  try {
+    filterKueryNode = JSON.parse(filter ?? '');
+  } catch (e) {
+    filterKueryNode = filter ? fromKueryExpression(filter) : null;
+  }
   let dslFilterQuery: estypes.QueryDslBoolQuery['filter'];
   try {
-    dslFilterQuery = filter ? toElasticsearchQuery(fromKueryExpression(filter)) : undefined;
+    dslFilterQuery = filterKueryNode ? toElasticsearchQuery(filterKueryNode) : undefined;
   } catch (err) {
     logger.debug(
       `esContext: Invalid kuery syntax for the filter (${filter}) error: ${JSON.stringify({

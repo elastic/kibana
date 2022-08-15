@@ -814,30 +814,25 @@ export class RulesClient {
     sort,
   }: GetExecutionLogByIdParams): Promise<IExecutionLogResult> {
     this.logger.debug(`getExecutionLogForRule(): getting execution log for rule ${id}`);
-    const rule =
-      id === '*'
-        ? { legacyId: null }
-        : ((await this.get({ id, includeLegacyId: true })) as SanitizedRuleWithLegacyId);
+    const rule = (await this.get({ id, includeLegacyId: true })) as SanitizedRuleWithLegacyId;
 
-    if (id !== '*') {
-      try {
-        // Make sure user has access to this rule
-        await this.authorization.ensureAuthorized({
-          ruleTypeId: rule.alertTypeId,
-          consumer: rule.consumer,
-          operation: ReadOperations.GetExecutionLog,
-          entity: AlertingAuthorizationEntity.Rule,
-        });
-      } catch (error) {
-        this.auditLogger?.log(
-          ruleAuditEvent({
-            action: RuleAuditAction.GET_EXECUTION_LOG,
-            savedObject: { type: 'alert', id },
-            error,
-          })
-        );
-        throw error;
-      }
+    try {
+      // Make sure user has access to this rule
+      await this.authorization.ensureAuthorized({
+        ruleTypeId: rule.alertTypeId,
+        consumer: rule.consumer,
+        operation: ReadOperations.GetExecutionLog,
+        entity: AlertingAuthorizationEntity.Rule,
+      });
+    } catch (error) {
+      this.auditLogger?.log(
+        ruleAuditEvent({
+          action: RuleAuditAction.GET_EXECUTION_LOG,
+          savedObject: { type: 'alert', id },
+          error,
+        })
+      );
+      throw error;
     }
 
     this.auditLogger?.log(
@@ -875,6 +870,77 @@ export class RulesClient {
     } catch (err) {
       this.logger.debug(
         `rulesClient.getExecutionLogForRule(): error searching event log for rule ${id}: ${err.message}`
+      );
+      throw err;
+    }
+  }
+
+  public async getGlobalExecutionLogWithAuth({
+    dateStart,
+    dateEnd,
+    filter,
+    page,
+    perPage,
+    sort,
+  }: GetExecutionLogByIdParams): Promise<IExecutionLogResult> {
+    this.logger.debug(`getExecutionLogForRule(): getting global execution log`);
+
+    let authorizationTuple;
+    try {
+      authorizationTuple = await this.authorization.getFindAuthorizationFilter(
+        AlertingAuthorizationEntity.Alert,
+        alertingAuthorizationFilterOpts
+      );
+    } catch (error) {
+      this.auditLogger?.log(
+        ruleAuditEvent({
+          action: RuleAuditAction.GET_GLOBAL_EXECUTION_LOG,
+          error,
+        })
+      );
+      throw error;
+    }
+
+    // getFindAuthorizationFilter doesn't return the exact property names needed to filter event logs, so find/replace them
+    const authorizationFilter = JSON.parse(
+      JSON.stringify(authorizationTuple.filter)
+        .replace(/alert\.attributes/g, 'kibana.alert.rule')
+        .replace(/alertTypeId/g, 'rule_type_id')
+    );
+    const filterKueryNode = filter ? fromKueryExpression(filter) : null;
+    const aggFilter = filterKueryNode
+      ? nodeBuilder.and([filterKueryNode, authorizationFilter as KueryNode])
+      : authorizationFilter;
+
+    this.auditLogger?.log(
+      ruleAuditEvent({
+        action: RuleAuditAction.GET_GLOBAL_EXECUTION_LOG,
+      })
+    );
+
+    // default duration of instance summary is 60 * rule interval
+    const dateNow = new Date();
+    const parsedDateStart = parseDate(dateStart, 'dateStart', dateNow);
+    const parsedDateEnd = parseDate(dateEnd, 'dateEnd', dateNow);
+
+    const eventLogClient = await this.getEventLogClient();
+
+    try {
+      const aggResult = await eventLogClient.aggregateEventsBySavedObjectIds('alert', ['*'], {
+        start: parsedDateStart.toISOString(),
+        end: parsedDateEnd.toISOString(),
+        aggs: getExecutionLogAggregation({
+          filter: aggFilter,
+          page,
+          perPage,
+          sort,
+        }),
+      });
+
+      return formatExecutionLogResult(aggResult);
+    } catch (err) {
+      this.logger.debug(
+        `rulesClient.getExecutionLogForRule(): error searching global event log: ${err.message}`
       );
       throw err;
     }
