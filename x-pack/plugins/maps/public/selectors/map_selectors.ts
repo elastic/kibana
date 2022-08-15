@@ -202,7 +202,7 @@ export const getEmbeddableSearchContext = ({ map }: MapStoreState) =>
   map.mapState.embeddableSearchContext;
 
 export const getSearchSessionId = ({ map }: MapStoreState): string | undefined =>
-  -map.mapState.searchSessionId;
+  map.mapState.searchSessionId;
 
 export const getSearchSessionMapBuffer = ({ map }: MapStoreState): MapExtent | undefined =>
   map.mapState.searchSessionMapBuffer;
