@@ -147,6 +147,49 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       }
     });
 
+    it(`runs correctly: fetches field formatting in esQuery search type`, async () => {
+      const reIsNumeric = /^\d+$/;
+
+      // write documents from now to the future end date in groups
+      await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
+      await createRule({
+        name: 'always fire',
+        esQuery: `
+          {
+            "fields": [
+              {
+                "field": "@timestamp",
+                "format": "epoch_millis" 
+              }
+            ],
+            "query": {
+                "match_all": { }
+            }
+        }`.replace(`"`, `\"`),
+        size: 100,
+        thresholdComparator: '>',
+        threshold: [-1],
+      });
+
+      const docs = await waitForDocs(2);
+      for (let i = 0; i < docs.length; i++) {
+        const doc = docs[i];
+        const { name, title } = doc._source.params;
+        expect(name).to.be('always fire');
+        expect(title).to.be(`rule 'always fire' matched query`);
+
+        const hits = JSON.parse(doc._source.hits);
+        expect(hits).not.to.be.empty();
+
+        hits.forEach((hit: any) => {
+          expect(hit.fields).not.to.be.empty();
+          hit.fields['@timestamp'].forEach((timestamp: string) => {
+            expect(reIsNumeric.test(timestamp)).to.be(true);
+          });
+        });
+      }
+    });
+
     async function createRule(params: CreateRuleParams): Promise<string> {
       const action = {
         id: connectorId,
