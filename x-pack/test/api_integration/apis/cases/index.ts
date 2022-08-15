@@ -33,5 +33,6 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
 
     loadTestFile(require.resolve('./privileges'));
     loadTestFile(require.resolve('./suggest_user_profiles'));
+    loadTestFile(require.resolve('./bulk_get_user_profiles'));
   });
 }
