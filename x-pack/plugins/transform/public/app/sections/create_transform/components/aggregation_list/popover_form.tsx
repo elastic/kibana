@@ -13,7 +13,6 @@ import {
   EuiButton,
   EuiCodeBlock,
   EuiComboBox,
-  EuiFieldNumber,
   EuiFieldText,
   EuiForm,
   EuiFormRow,
@@ -25,17 +24,12 @@ import { cloneDeep } from 'lodash';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import { AggName } from '../../../../../../common/types/aggregations';
 import { dictionaryToArray } from '../../../../../../common/types/common';
-import {
-  PivotSupportedAggs,
-  PIVOT_SUPPORTED_AGGS,
-} from '../../../../../../common/types/pivot_aggs';
+import { PivotSupportedAggs } from '../../../../../../common/types/pivot_aggs';
 
 import {
   isAggName,
-  isPivotAggsConfigTerms,
   isPivotAggsConfigWithUiSupport,
   getEsAggFromAggConfig,
-  TERMS_AGG_DEFAULT_SIZE,
   PivotAggsConfig,
   PivotAggsConfigWithUiSupportDict,
 } from '../../../../common';
@@ -49,25 +43,6 @@ interface Props {
   onChange(d: PivotAggsConfig): void;
 }
 
-function getDefaultSize(defaultData: PivotAggsConfig): number | undefined {
-  if (isPivotAggsConfigTerms(defaultData)) {
-    return defaultData.size;
-  }
-}
-
-function parseSizeInput(inputValue: string | undefined) {
-  if (inputValue !== undefined && isValidSizeInput(inputValue)) {
-    return parseInt(inputValue, 10);
-  }
-
-  return TERMS_AGG_DEFAULT_SIZE;
-}
-
-// Input string should only include numbers
-function isValidSizeInput(inputValue: string) {
-  return /^\d+$/.test(inputValue);
-}
-
 export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onChange, options }) => {
   const [aggConfigDef, setAggConfigDef] = useState(cloneDeep(defaultData));
 
@@ -76,9 +51,6 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
   const [field, setField] = useState<string | string[] | null>(
     isPivotAggsConfigWithUiSupport(defaultData) ? defaultData.field : ''
   );
-
-  const [size, setSize] = useState(getDefaultSize(defaultData));
-  const [validSize, setValidSize] = useState(agg === PIVOT_SUPPORTED_AGGS.TERMS);
 
   const isUnsupportedAgg = !isPivotAggsConfigWithUiSupport(defaultData);
 
@@ -110,20 +82,10 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
   const availableAggs: EuiSelectOption[] = [];
 
   function updateAgg(aggVal: PivotSupportedAggs) {
-    if (aggVal === PIVOT_SUPPORTED_AGGS.TERMS && size === undefined) {
-      setSize(TERMS_AGG_DEFAULT_SIZE);
-    }
     setAgg(aggVal);
   }
 
-  function updateSize(inputValue: string) {
-    setSize(parseSizeInput(inputValue));
-    setValidSize(isValidSizeInput(inputValue));
-  }
-
   function getUpdatedItem(): PivotAggsConfig {
-    let updatedItem: PivotAggsConfig;
-
     let resultField = field;
     if (
       isPivotAggsConfigWithUiSupport(aggConfigDef) &&
@@ -134,24 +96,13 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
       resultField = field[0];
     }
 
-    if (agg === PIVOT_SUPPORTED_AGGS.TERMS) {
-      updatedItem = {
-        ...aggConfigDef,
-        agg,
-        aggName,
-        field: resultField,
-        dropDownName: defaultData.dropDownName,
-        size,
-      };
-    } else {
-      updatedItem = {
-        ...aggConfigDef,
-        agg,
-        aggName,
-        field: resultField,
-        dropDownName: defaultData.dropDownName,
-      };
-    }
+    const updatedItem = {
+      ...aggConfigDef,
+      agg,
+      aggName,
+      field: resultField,
+      dropDownName: defaultData.dropDownName,
+    };
 
     return updatedItem;
   }
@@ -195,16 +146,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
     });
   }
 
-  let sizeText;
-  if (size !== undefined) {
-    sizeText = size.toString();
-  }
-
   let formValid = validAggName;
-
-  if (formValid && agg === PIVOT_SUPPORTED_AGGS.TERMS) {
-    formValid = validSize;
-  }
 
   if (isPivotAggsWithExtendedForm(aggConfigDef)) {
     formValid = validAggName && aggConfigDef.isValid();
@@ -307,23 +249,6 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
           isValid={aggConfigDef.isValid()}
         />
       ) : null}
-      {agg === PIVOT_SUPPORTED_AGGS.TERMS && (
-        <EuiFormRow
-          label={i18n.translate('xpack.transform.agg.popoverForm.sizeLabel', {
-            defaultMessage: 'Size',
-          })}
-          error={
-            !validSize && [
-              i18n.translate('xpack.transform.groupBy.popoverForm.invalidSizeErrorMessage', {
-                defaultMessage: 'Enter a valid positive number',
-              }),
-            ]
-          }
-          isInvalid={!validSize}
-        >
-          <EuiFieldNumber defaultValue={sizeText} onChange={(e) => updateSize(e.target.value)} />
-        </EuiFormRow>
-      )}
       {isUnsupportedAgg && (
         <EuiCodeBlock
           aria-label={i18n.translate('xpack.transform.agg.popoverForm.codeBlock', {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getTermsAggConfig } from './terms_agg';
 import { EsFieldName } from '../../../../../../../common/types/fields';
 import {
   PivotSupportedAggs,
@@ -42,6 +43,8 @@ export function getDefaultAggregationConfig(
         // top_metrics agg has different naming convention by default
         aggName: PIVOT_SUPPORTED_AGGS.TOP_METRICS,
       });
+    case PIVOT_SUPPORTED_AGGS.TERMS:
+      return getTermsAggConfig(commonConfig);
     default:
       return commonConfig;
   }
