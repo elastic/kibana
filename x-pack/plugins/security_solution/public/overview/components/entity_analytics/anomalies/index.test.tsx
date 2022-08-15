@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+// import { act, fireEvent, render } from '@testing-library/react';
+// import React from 'react';
 
-export const TOTAL_LABEL = i18n.translate('xpack.securitySolution.entityAnalytics.totalLabel', {
-  defaultMessage: 'Total',
+describe('???', () => {
+  it('???', () => {
+  });
+
 });
