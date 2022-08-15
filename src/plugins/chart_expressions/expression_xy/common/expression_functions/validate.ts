@@ -171,7 +171,7 @@ export const validateExtents = (
   xAxisConfig?: XAxisConfigResult
 ) => {
   yAxisConfigs?.forEach((axis) => {
-    if (!axis.extent) {
+    if (!axis.extent || axis.extent.enforce) {
       return;
     }
     if (

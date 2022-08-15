@@ -54,6 +54,14 @@
             "docId": "kibEmbeddablePluginApi",
             "section": "def-public.SelfStyledEmbeddable",
             "text": "SelfStyledEmbeddable"
+          },
+          ",",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.FilterableEmbeddable",
+            "text": "FilterableEmbeddable"
           }
         ],
         "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
@@ -595,6 +603,48 @@
           },
           {
             "parentPluginId": "lens",
+            "id": "def-public.Embeddable.getFilters",
+            "type": "Function",
+            "tags": [],
+            "label": "getFilters",
+            "description": [
+              "\nGets the Lens embeddable's local filters"
+            ],
+            "signature": [
+              "() => Promise<",
+              "Filter",
+              "[]>"
+            ],
+            "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": [
+              "Local/panel-level array of filters for Lens embeddable"
+            ]
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.Embeddable.getQuery",
+            "type": "Function",
+            "tags": [],
+            "label": "getQuery",
+            "description": [
+              "\nGets the Lens embeddable's local query"
+            ],
+            "signature": [
+              "() => Promise<",
+              "Query",
+              " | undefined>"
+            ],
+            "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": [
+              "Local/panel-level query for Lens embeddable"
+            ]
+          },
+          {
+            "parentPluginId": "lens",
             "id": "def-public.Embeddable.getSavedVis",
             "type": "Function",
             "tags": [],
@@ -914,6 +964,19 @@
             "description": [],
             "signature": [
               "number | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.AxisExtentConfig.enforce",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "enforce",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false
@@ -1241,6 +1304,26 @@
             "signature": [
               "DataDecorationConfigResult",
               "[] | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.DataLayerArgs.curveType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "curveType",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressionXY",
+                "scope": "common",
+                "docId": "kibExpressionXYPluginApi",
+                "section": "def-common.XYCurveType",
+                "text": "XYCurveType"
+              },
+              " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false
@@ -4438,7 +4521,7 @@
             "tags": [],
             "label": "renderLayerHeader",
             "description": [
-              "\nHeader rendered as layer title This can be used for both static and dynamic content lioke\nfor extra configurability, such as for switch chart type"
+              "\nHeader rendered as layer title. This can be used for both static and dynamic content like\nfor extra configurability, such as for switch chart type"
             ],
             "signature": [
               "((domElement: Element, props: ",
@@ -4465,6 +4548,55 @@
               {
                 "parentPluginId": "lens",
                 "id": "def-public.Visualization.renderLayerHeader.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "VisualizationLayerWidgetProps",
+                  "<T>"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.Visualization.renderLayerPanel",
+            "type": "Function",
+            "tags": [],
+            "label": "renderLayerPanel",
+            "description": [
+              "\nLayer panel content rendered. This can be used to render a custom content below the title,\nlike a custom dataview switch"
+            ],
+            "signature": [
+              "((domElement: Element, props: ",
+              "VisualizationLayerWidgetProps",
+              "<T>) => void | ((cleanupElement: Element) => void)) | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.renderLayerPanel.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "domElement",
+                "description": [],
+                "signature": [
+                  "Element"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.renderLayerPanel.$2",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "props",
@@ -5413,6 +5545,66 @@
           },
           {
             "parentPluginId": "lens",
+            "id": "def-public.Visualization.onIndexPatternChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onIndexPatternChange",
+            "description": [
+              "\nSome visualization track indexPattern changes (i.e. annotations)\nThis method makes it aware of the change and produces a new updated state"
+            ],
+            "signature": [
+              "((state: T, indexPatternId: string, layerId?: string | undefined) => T) | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.onIndexPatternChange.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.onIndexPatternChange.$2",
+                "type": "string",
+                "tags": [],
+                "label": "indexPatternId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.onIndexPatternChange.$3",
+                "type": "string",
+                "tags": [],
+                "label": "layerId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
             "id": "def-public.Visualization.getDisplayOptions",
             "type": "Function",
             "tags": [],
@@ -5763,26 +5955,6 @@
                 "docId": "kibExpressionXYPluginApi",
                 "section": "def-common.FittingFunction",
                 "text": "FittingFunction"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-public.XYArgs.curveType",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "curveType",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "expressionXY",
-                "scope": "common",
-                "docId": "kibExpressionXYPluginApi",
-                "section": "def-common.XYCurveType",
-                "text": "XYCurveType"
               },
               " | undefined"
             ],
@@ -7150,7 +7322,7 @@
         "label": "FittingFunction",
         "description": [],
         "signature": [
-          "\"None\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\""
+          "\"None\" | \"Zero\" | \"Nearest\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Average\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
@@ -7334,7 +7506,7 @@
         "label": "LineStyle",
         "description": [],
         "signature": [
-          "\"solid\" | \"dashed\" | \"dotted\""
+          "\"solid\" | \"dashed\" | \"dotted\" | \"dot-dashed\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
@@ -7763,7 +7935,7 @@
         "label": "XYCurveType",
         "description": [],
         "signature": [
-          "\"LINEAR\" | \"CURVE_MONOTONE_X\""
+          "\"LINEAR\" | \"CURVE_MONOTONE_X\" | \"CURVE_STEP_AFTER\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
