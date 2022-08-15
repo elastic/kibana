@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export const API_ROUTE_SOURCES = '/internal/threat_intelligence/source';
-
 export const EMPTY_VALUE = '-';
 
 export const DEFAULT_THREAT_INDEX_KEY = 'securitySolution:defaultThreatIndex' as const;
@@ -14,3 +12,5 @@ export const DEFAULT_THREAT_INDEX_KEY = 'securitySolution:defaultThreatIndex' as
 export const DEFAULT_DATE_FORMAT = 'dateFormat' as const;
 
 export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz' as const;
+
+export const THREAT_QUERY_BASE = 'event.type: indicator and event.category : threat';

@@ -121,6 +121,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       apiKeys: `${KIBANA_DOCS}api-keys.html`,
       bulkApi: `${ELASTICSEARCH_DOCS}docs-bulk.html`,
       configuration: `${ENTERPRISE_SEARCH_DOCS}configuration.html`,
+      connectors: `${ENTERPRISE_SEARCH_DOCS}connectors.html`,
       crawlerGettingStarted: `${ENTERPRISE_SEARCH_DOCS}crawler-getting-started.html`,
       crawlerManaging: `${ENTERPRISE_SEARCH_DOCS}crawler-managing.html`,
       crawlerOverview: `${ENTERPRISE_SEARCH_DOCS}crawler.html`,
@@ -356,8 +357,9 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       policyResponseTroubleshooting: {
         full_disk_access: `${SECURITY_SOLUTION_DOCS}deploy-elastic-endpoint.html#enable-fda-endpoint`,
         macos_system_ext: `${SECURITY_SOLUTION_DOCS}deploy-elastic-endpoint.html#system-extension-endpoint`,
-        linux_deadlock: `${SECURITY_SOLUTION_DOCS}ts-management.html`,
+        linux_deadlock: `${SECURITY_SOLUTION_DOCS}ts-management.html#linux-deadlock`,
       },
+      responseActions: `${SECURITY_SOLUTION_DOCS}response-actions.html`,
     },
     query: {
       eql: `${ELASTICSEARCH_DOCS}eql.html`,
@@ -486,6 +488,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     },
     reporting: {
       cloudMinimumRequirements: `${KIBANA_DOCS}reporting-getting-started.html#reporting-on-cloud-resource-requirements`,
+      grantUserAccess: `${KIBANA_DOCS}secure-reporting.html#grant-user-access`,
       browserSystemDependencies: `${KIBANA_DOCS}secure-reporting.html#install-reporting-packages`,
       browserSandboxDependencies: `${KIBANA_DOCS}reporting-troubleshooting.html#reporting-troubleshooting-sandbox-dependency`,
     },

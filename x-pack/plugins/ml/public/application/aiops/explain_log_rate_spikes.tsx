@@ -43,9 +43,7 @@ export const ExplainLogRateSpikesPage: FC = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </MlPageHeader>
-      {dataView.timeFieldName && (
-        <ExplainLogRateSpikes dataView={dataView} savedSearch={savedSearch} />
-      )}
+      {dataView && <ExplainLogRateSpikes dataView={dataView} savedSearch={savedSearch} />}
       <HelpMenu docLink={docLinks.links.ml.guide} />
     </>
   );

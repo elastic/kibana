@@ -18,7 +18,8 @@ export type {
   IUnifiedSearchPluginServices,
 } from './types';
 export { SearchBar } from './search_bar';
-export { FilterLabel, FilterItem } from './filter_bar';
+export type { FilterItemsProps } from './filter_bar';
+export { FilterLabel, FilterItem, FilterItems } from './filter_bar';
 export { DataViewsList } from './dataview_picker/dataview_list';
 export { DataViewPicker } from './dataview_picker';
 

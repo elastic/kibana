@@ -107,7 +107,7 @@ export enum SecurityPageName {
   network = 'network',
   networkAnomalies = 'network-anomalies',
   networkDns = 'network-dns',
-  networkExternalAlerts = 'network-external_alerts',
+  networkEvents = 'network-events',
   networkHttp = 'network-http',
   networkTls = 'network-tls',
   noPage = '',
@@ -117,7 +117,11 @@ export enum SecurityPageName {
   rules = 'rules',
   rulesCreate = 'rules-create',
   sessions = 'sessions',
-  threatIntelligence = 'threat-intelligence',
+  /*
+   * Warning: Computed values are not permitted in an enum with string valued members
+   * All threat intelligence page names must match `TIPageId` in x-pack/plugins/threat_intelligence/public/common/navigation/types.ts
+   */
+  threatIntelligenceIndicators = 'threat_intelligence-indicators',
   timelines = 'timelines',
   timelinesTemplates = 'timelines-templates',
   trustedApps = 'trusted_apps',
@@ -126,7 +130,6 @@ export enum SecurityPageName {
   usersAnomalies = 'users-anomalies',
   usersAuthentications = 'users-authentications',
   usersEvents = 'users-events',
-  usersExternalAlerts = 'users-external_alerts',
   usersRisk = 'users-risk',
 }
 
@@ -156,7 +159,6 @@ export const HOST_ISOLATION_EXCEPTIONS_PATH =
   `${MANAGEMENT_PATH}/host_isolation_exceptions` as const;
 export const BLOCKLIST_PATH = `${MANAGEMENT_PATH}/blocklist` as const;
 export const RESPONSE_ACTIONS_PATH = `${MANAGEMENT_PATH}/response_actions` as const;
-export const THREAT_INTELLIGENCE_PATH = '/threat_intelligence' as const;
 
 export const APP_OVERVIEW_PATH = `${APP_PATH}${OVERVIEW_PATH}` as const;
 export const APP_LANDING_PATH = `${APP_PATH}${LANDING_PATH}` as const;
@@ -181,7 +183,6 @@ export const APP_HOST_ISOLATION_EXCEPTIONS_PATH =
   `${APP_PATH}${HOST_ISOLATION_EXCEPTIONS_PATH}` as const;
 export const APP_BLOCKLIST_PATH = `${APP_PATH}${BLOCKLIST_PATH}` as const;
 export const APP_RESPONSE_ACTIONS_PATH = `${APP_PATH}${RESPONSE_ACTIONS_PATH}` as const;
-export const APP_THREAT_INTELLIGENCE_PATH = `${APP_PATH}${THREAT_INTELLIGENCE_PATH}` as const;
 
 // cloud logs to exclude from default index pattern
 export const EXCLUDE_ELASTIC_CLOUD_INDICES = ['-*elastic-cloud-logs-*'];
@@ -275,8 +276,8 @@ export const DETECTION_ENGINE_RULES_BULK_UPDATE =
 
 export const DEV_TOOL_PREBUILT_CONTENT =
   `/internal/prebuilt_content/dev_tool/{console_id}` as const;
-export const devToolPrebuiltContentUrl = (consoleId: string) =>
-  `/internal/prebuilt_content/dev_tool/${consoleId}` as const;
+export const devToolPrebuiltContentUrl = (spaceId: string, consoleId: string) =>
+  `/s/${spaceId}/internal/prebuilt_content/dev_tool/${consoleId}` as const;
 export const PREBUILT_SAVED_OBJECTS_BULK_CREATE =
   '/internal/prebuilt_content/saved_objects/_bulk_create/{template_name}';
 export const prebuiltSavedObjectsBulkCreateUrl = (templateName: string) =>
@@ -432,7 +433,7 @@ export const RULES_TABLE_PAGE_SIZE_OPTIONS = [5, 10, 20, 50, RULES_TABLE_MAX_PAG
  * we will need to update this constant with the corresponding version.
  */
 export const RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY =
-  'securitySolution.rulesManagementPage.newFeaturesTour.v8.2';
+  'securitySolution.rulesManagementPage.newFeaturesTour.v8.4';
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
   'securitySolution.ruleDetails.ruleExecutionLog.showMetrics.v8.2';

@@ -8,11 +8,9 @@
 import type { Filter } from '@kbn/es-query';
 import type { ESTermQuery } from '../../../../common/typed_json';
 
-import type { NarrowDateRange } from '../../../common/components/ml/types';
 import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import type { HostsTableType, HostsType } from '../../store/model';
 import type { NavTab } from '../../../common/components/navigation/types';
-import type { UpdateDateRange } from '../../../common/components/charts/common';
 
 export type KeyHostsNavTabWithoutMlPermission = HostsTableType.hosts &
   HostsTableType.authentications &
@@ -38,8 +36,6 @@ export type HostsComponentsQueryProps = QueryTabBodyProps & {
   pageFilters?: Filter[];
   skip: boolean;
   setQuery: GlobalTimeArgs['setQuery'];
-  updateDateRange?: UpdateDateRange;
-  narrowDateRange?: NarrowDateRange;
 };
 
 export type AlertsComponentQueryProps = HostsComponentsQueryProps & {
