@@ -7,7 +7,6 @@
 import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiPageHeaderContentProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { Redirect } from 'react-router-dom';
 import { FlameGraphComparisonMode } from '../../../common/flamegraph';
 import { useAsync } from '../../hooks/use_async';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
@@ -19,6 +18,7 @@ import { useProfilingDependencies } from '../contexts/profiling_dependencies/use
 import { FlameGraph } from '../flamegraph';
 import { PrimaryAndComparisonSearchBar } from '../primary_and_comparison_search_bar';
 import { ProfilingAppPageTemplate } from '../profiling_app_page_template';
+import { RedirectTo } from '../redirect_to';
 
 export function FlameGraphsView({ children }: { children: React.ReactElement }) {
   const {
@@ -107,7 +107,7 @@ export function FlameGraphsView({ children }: { children: React.ReactElement }) 
   ];
 
   if (routePath === '/flamegraphs') {
-    return <Redirect to="/flamegraphs/flamegraph" />;
+    return <RedirectTo pathname="/flamegraphs/flamegraph" />;
   }
 
   return (

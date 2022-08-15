@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import objectHash from 'object-hash';
 import { CallerCalleeNode, createCallerCalleeDiagram } from './callercallee';
 import {
   describeFrameType,
@@ -168,10 +168,10 @@ export class FlameGraph {
       CountExclusive: [],
       ID: [],
     };
-    const queue = [{ x: 0, depth: 1, node: root }];
+    const queue = [{ x: 0, depth: 1, node: root, parentID: 'root' }];
 
     while (queue.length > 0) {
-      const { x, depth, node } = queue.pop()!;
+      const { x, depth, node, parentID } = queue.pop()!;
 
       if (x === 0 && depth === 1) {
         columnar.Label.push('root: Represents 100% of CPU time.');
@@ -186,7 +186,9 @@ export class FlameGraph {
       columnar.CountInclusive.push(node.CountInclusive);
       columnar.CountExclusive.push(node.CountExclusive);
 
-      columnar.ID.push(node.ID);
+      const id = objectHash([parentID, node.FrameGroupID]);
+
+      columnar.ID.push(id);
 
       node.Callees.sort((a: CallerCalleeNode, b: CallerCalleeNode) => b.Samples - a.Samples);
 
@@ -197,7 +199,7 @@ export class FlameGraph {
 
       for (let i = node.Callees.length - 1; i >= 0; i--) {
         delta -= node.Callees[i].Samples;
-        queue.push({ x: x + delta, depth: depth + 1, node: node.Callees[i] });
+        queue.push({ x: x + delta, depth: depth + 1, node: node.Callees[i], parentID: id });
       }
     }
 

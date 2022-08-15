@@ -178,6 +178,7 @@ const DEV_PATTERNS = [
   'src/dev/**/*',
   'x-pack/{dev-tools,tasks,scripts,test,build_chromium}/**/*',
   'x-pack/plugins/*/server/scripts/**/*',
+  'x-pack/plugins/fleet/cypress',
 ];
 
 /** Restricted imports with suggested alternatives */

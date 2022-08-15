@@ -6,8 +6,6 @@
  */
 
 import { clone } from 'lodash';
-import objectHash from 'object-hash';
-
 import {
   compareFrameGroup,
   createStackFrameMetadata,
@@ -27,19 +25,19 @@ import {
 
 export interface CallerCalleeIntermediateNode {
   frameGroup: FrameGroup;
+  frameGroupID: string;
   callers: Map<FrameGroupID, CallerCalleeIntermediateNode>;
   callees: Map<FrameGroupID, CallerCalleeIntermediateNode>;
   frameMetadata: Set<StackFrameMetadata>;
   samples: number;
   countInclusive: number;
   countExclusive: number;
-  id: string;
 }
 
 export function createCallerCalleeIntermediateNode(
   frameMetadata: StackFrameMetadata,
   samples: number,
-  id: string
+  frameGroupID: string
 ): CallerCalleeIntermediateNode {
   return {
     frameGroup: defaultGroupBy(frameMetadata),
@@ -49,7 +47,7 @@ export function createCallerCalleeIntermediateNode(
     samples,
     countInclusive: 0,
     countExclusive: 0,
-    id,
+    frameGroupID,
   };
 }
 
@@ -155,16 +153,13 @@ export function createCallerCalleeIntermediateRoot(
     // Go through the callees, reverse iteration
     let currentNode = clone(root);
     root.samples += samples;
+
     for (let i = callees.length - 1; i >= 0; i--) {
       const callee = callees[i];
       const calleeName = hashFrameGroup(defaultGroupBy(callee));
       let node = currentNode.callees.get(calleeName);
       if (node === undefined) {
-        node = createCallerCalleeIntermediateNode(
-          callee,
-          samples,
-          objectHash([currentNode?.id ?? '', callee.FrameID])
-        );
+        node = createCallerCalleeIntermediateNode(callee, samples, calleeName);
         currentNode.callees.set(calleeName, node);
       } else {
         node.samples += samples;
@@ -187,7 +182,7 @@ export function createCallerCalleeIntermediateRoot(
 }
 
 export interface CallerCalleeNode {
-  ID: string;
+  FrameGroupID: string;
   Callers: CallerCalleeNode[];
   Callees: CallerCalleeNode[];
   FileID: string;
@@ -209,7 +204,7 @@ export interface CallerCalleeNode {
 export function createCallerCalleeNode(options: Partial<CallerCalleeNode> = {}): CallerCalleeNode {
   const node = {} as CallerCalleeNode;
 
-  node.ID = options.ID ?? '';
+  node.FrameGroupID = options.FrameGroupID ?? '';
   node.Callers = clone(options.Callers ?? []);
   node.Callees = clone(options.Callees ?? []);
   node.FileID = options.FileID ?? '';
@@ -282,7 +277,7 @@ export function fromCallerCalleeIntermediateNode(
   root: CallerCalleeIntermediateNode
 ): CallerCalleeNode {
   const node = createCallerCalleeNode({
-    ID: root.id,
+    FrameGroupID: root.frameGroupID,
     Samples: root.samples,
     CountInclusive: root.countInclusive,
     CountExclusive: root.countExclusive,

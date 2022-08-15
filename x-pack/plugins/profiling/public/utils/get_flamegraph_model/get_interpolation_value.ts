@@ -12,7 +12,7 @@ const MAX_NEGATIVE_CHANGE = 0.5;
 
 export function getInterpolationValue(foreground: number, background: number | null | undefined) {
   if (background === null || background === undefined) {
-    return 0;
+    return -1;
   }
 
   const change = clamp(background / foreground - 1, -MAX_NEGATIVE_CHANGE, MAX_POSITIVE_CHANGE) || 0;

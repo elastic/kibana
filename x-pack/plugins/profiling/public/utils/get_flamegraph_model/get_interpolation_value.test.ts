@@ -11,8 +11,12 @@ describe('getInterpolationValue', () => {
     expect(getInterpolationValue(100, 100)).toBe(0);
   });
 
-  it('returns 0 when the background is undefined', () => {
-    expect(getInterpolationValue(100, undefined)).toBe(0);
+  it('returns -1 when the background is undefined', () => {
+    expect(getInterpolationValue(100, undefined)).toBe(-1);
+  });
+
+  it('returns -1 when the background is 0', () => {
+    expect(getInterpolationValue(100, 0)).toBe(-1);
   });
 
   it('returns 0 when both values are 0', () => {

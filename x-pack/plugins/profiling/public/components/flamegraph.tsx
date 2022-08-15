@@ -76,6 +76,7 @@ function FlameGraphTooltip({
   totalSamples,
   comparisonCountInclusive,
   comparisonCountExclusive,
+  comparisonSamples,
   comparisonTotalSamples,
 }: {
   samples: number;
@@ -85,6 +86,7 @@ function FlameGraphTooltip({
   totalSamples: number;
   comparisonCountInclusive?: number;
   comparisonCountExclusive?: number;
+  comparisonSamples?: number;
   comparisonTotalSamples?: number;
 }) {
   return (
@@ -130,7 +132,7 @@ function FlameGraphTooltip({
                 defaultMessage: `Samples:`,
               })}
               value={samples}
-              comparison={comparisonTotalSamples}
+              comparison={comparisonSamples}
               formatAsPercentage={false}
               showChange={false}
             />
@@ -214,6 +216,7 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({
                     comparisonCountExclusive={comparisonNode?.CountExclusive}
                     totalSamples={totalSamples}
                     comparisonTotalSamples={comparisonFlamegraph?.Value[0]}
+                    comparisonSamples={comparisonNode?.Value}
                   />
                 );
               },
