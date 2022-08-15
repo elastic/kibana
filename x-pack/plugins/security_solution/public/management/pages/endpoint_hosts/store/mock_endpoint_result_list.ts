@@ -120,9 +120,6 @@ const endpointListApiPathHandlerMocks = ({
     // Do policies referenced in endpoint list exist
     // just returns 1 single agent policy that includes all of the packagePolicy IDs provided
     [INGEST_API_AGENT_POLICIES]: (): GetAgentPoliciesResponse => {
-      (agentPolicy.package_policies as string[]).push(
-        ...endpointPackagePolicies.map((packagePolicy) => packagePolicy.id)
-      );
       return {
         items: [agentPolicy],
         total: 10,
