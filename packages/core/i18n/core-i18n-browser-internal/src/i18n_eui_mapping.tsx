@@ -415,9 +415,41 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiDataGridHeaderCell.headerActions': i18n.translate(
       'core.euiDataGridHeaderCell.headerActions',
       {
-        defaultMessage: 'Header actions',
+        defaultMessage: 'Click to view column header actions',
       }
     ),
+    'euiDataGridHeaderCell.sortedByAscendingSingle': i18n.translate(
+      'core.euiDataGridHeaderCell.sortedByAscendingSingle',
+      {
+        defaultMessage: 'Sorted ascending',
+      }
+    ),
+    'euiDataGridHeaderCell.sortedByDescendingSingle': i18n.translate(
+      'core.euiDataGridHeaderCell.sortedByDescendingSingle',
+      {
+        defaultMessage: 'Sorted descending',
+      }
+    ),
+    'euiDataGridHeaderCell.sortedByAscendingFirst': ({ columnId }: EuiValues) =>
+      i18n.translate('core.euiDataGridHeaderCell.sortedByAscendingFirst', {
+        defaultMessage: 'Sorted by {columnId}, ascending',
+        values: { columnId },
+      }),
+    'euiDataGridHeaderCell.sortedByDescendingFirst': ({ columnId }: EuiValues) =>
+      i18n.translate('core.euiDataGridHeaderCell.sortedByDescendingFirst', {
+        defaultMessage: 'Sorted by {columnId}, descending',
+        values: { columnId },
+      }),
+    'euiDataGridHeaderCell.sortedByAscendingMultiple': ({ columnId }: EuiValues) =>
+      i18n.translate('core.euiDataGridHeaderCell.sortedByAscendingMultiple', {
+        defaultMessage: ', then sorted by {columnId}, ascending',
+        values: { columnId },
+      }),
+    'euiDataGridHeaderCell.sortedByDescendingMultiple': ({ columnId }: EuiValues) =>
+      i18n.translate('core.euiDataGridHeaderCell.sortedByDescendingMultiple', {
+        defaultMessage: ', then sorted by {columnId}, descending',
+        values: { columnId },
+      }),
     'euiDataGridHeaderCell.actionsPopoverScreenReaderText': i18n.translate(
       'core.euiDataGridHeaderCell.actionsPopoverScreenReaderText',
       {
@@ -612,16 +644,12 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiHue.label': i18n.translate('core.euiHue.label', {
       defaultMessage: 'Select the HSV color mode "hue" value',
     }),
-    'euiImage.closeImage': ({ alt }: EuiValues) =>
-      i18n.translate('core.euiImage.closeImage', {
-        defaultMessage: 'Close fullscreen {alt} image',
-        values: { alt },
-      }),
-    'euiImage.openImage': ({ alt }: EuiValues) =>
-      i18n.translate('core.euiImage.openImage', {
-        defaultMessage: 'Open fullscreen {alt} image',
-        values: { alt },
-      }),
+    'euiImageButton.openFullScreen': i18n.translate('core.euiImageButton.openFullScreen', {
+      defaultMessage: 'Click to open this image in fullscreen mode',
+    }),
+    'euiImageButton.closeFullScreen': i18n.translate('core.euiImageButton.closeFullScreen', {
+      defaultMessage: 'Press Escape or click to close image fullscreen mode',
+    }),
     'euiLink.external.ariaLabel': i18n.translate('core.euiLink.external.ariaLabel', {
       defaultMessage: 'External link',
     }),
