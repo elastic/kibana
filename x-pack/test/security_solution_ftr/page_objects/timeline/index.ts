@@ -21,6 +21,9 @@ export class TimelinePageObject extends FtrService {
     await this.pageObjects.header.waitUntilLoadingHasFinished();
   }
 
+  /**
+   * Ensure that the timeline bottom bar is accessible
+   */
   async ensureTimelineAccessible(): Promise<void> {
     await this.testSubjects.existOrFail(TIMELINE_BOTTOM_BAR_CONTAINER_TEST_SUBJ);
   }
@@ -46,7 +49,7 @@ export class TimelinePageObject extends FtrService {
     const timelineSelectModel = await this.testSubjects.find('open-timeline-modal');
 
     await (await this.testSubjects.findDescendant(`title-${id}`, timelineSelectModel)).click();
-    await this.testSubjects.existOrFail(TIMELINE_MODAL_PAGE_TEST_SUBJ);
+    await this.ensureTimelineIsOpen();
   }
 
   async closeTimeline(): Promise<void> {
@@ -54,5 +57,26 @@ export class TimelinePageObject extends FtrService {
       await this.testSubjects.click(TIMELINE_CLOSE_BUTTON_TEST_SUBJ);
       await this.testSubjects.waitForHidden(TIMELINE_MODAL_PAGE_TEST_SUBJ);
     }
+  }
+
+  async ensureTimelineIsOpen(): Promise<void> {
+    await this.testSubjects.existOrFail(TIMELINE_MODAL_PAGE_TEST_SUBJ);
+  }
+
+  /**
+   * From a visible timeline, clicks the "view details" for an event on the list
+   * @param index
+   */
+  async showEventDetails(index: number = 0) {
+    await this.ensureTimelineIsOpen();
+
+    const event = (await this.testSubjects.findAll('event'))[index];
+
+    if (!event) {
+      throw new Error(`Timeline event at index [${index}] not found`);
+    }
+
+    await (await this.testSubjects.findDescendant('expand-event', event)).click();
+    await this.testSubjects.existOrFail('event-details');
   }
 }
