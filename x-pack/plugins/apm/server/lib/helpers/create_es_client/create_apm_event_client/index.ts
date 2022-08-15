@@ -20,9 +20,9 @@ import {
 } from '@kbn/core/types/elasticsearch';
 import { unwrapEsResponse } from '@kbn/observability-plugin/server';
 import { omit } from 'lodash';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { Profile } from '../../../../../typings/es_schemas/ui/profile';
 import { withApmSpan } from '../../../../utils/with_apm_span';
-import { ProcessorEvent } from '../../../../../common/processor_event';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { Metric } from '../../../../../typings/es_schemas/ui/metric';
 import { Span } from '../../../../../typings/es_schemas/ui/span';

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Type } from 'io-ts';
+import type { Mixed } from 'io-ts';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, Subject, combineLatest, from, merge } from 'rxjs';
 import {
@@ -43,7 +43,7 @@ import { ContextService } from './context_service';
 import { schemaToIoTs, validateSchema } from '../schema/validation';
 
 interface EventDebugLogMeta extends LogMeta {
-  ebt_event: Event;
+  ebt_event: Event<unknown>;
 }
 
 export class AnalyticsClient implements IAnalyticsClient {
@@ -65,7 +65,7 @@ export class AnalyticsClient implements IAnalyticsClient {
   private readonly shipperRegistered$ = new Subject<void>();
   private readonly eventTypeRegistry = new Map<
     EventType,
-    EventTypeOpts<unknown> & { validator?: Type<Record<string, unknown>> }
+    EventTypeOpts<unknown> & { validator?: Mixed }
   >();
   private readonly contextService: ContextService;
   private readonly context$ = new BehaviorSubject<Partial<EventContext>>({});
@@ -88,7 +88,7 @@ export class AnalyticsClient implements IAnalyticsClient {
     this.reportEnqueuedEventsWhenClientIsReady();
   }
 
-  public reportEvent = <EventTypeData extends Record<string, unknown>>(
+  public reportEvent = <EventTypeData extends object>(
     eventType: EventType,
     eventData: EventTypeData
   ) => {
@@ -119,14 +119,18 @@ export class AnalyticsClient implements IAnalyticsClient {
 
     // If the validator is registered (dev-mode only), perform the validation.
     if (eventTypeOpts.validator) {
-      validateSchema(`Event Type '${eventType}'`, eventTypeOpts.validator, eventData);
+      validateSchema<EventTypeData>(
+        `Event Type '${eventType}'`,
+        eventTypeOpts.validator,
+        eventData
+      );
     }
 
     const event: Event = {
       timestamp,
       event_type: eventType,
       context: this.context$.value,
-      properties: eventData,
+      properties: eventData as unknown as Record<string, unknown>,
     };
 
     // debug-logging before checking the opt-in status to help during development

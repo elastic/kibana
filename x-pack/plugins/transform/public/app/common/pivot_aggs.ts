@@ -171,6 +171,8 @@ export function getAggConfigFromEsAgg(
   }
 
   const commonConfig: PivotAggsConfigBase = {
+    // FIXME this spread operator set the field property
+    // Check if there are some extra props involved
     ...esAggDefinition[agg],
     agg,
     aggName,
@@ -200,7 +202,7 @@ export function getAggConfigFromEsAgg(
 }
 
 export interface PivotAggsConfigWithUiBase extends PivotAggsConfigBase {
-  field: EsFieldName | EsFieldName[];
+  field: EsFieldName | EsFieldName[] | null;
 }
 
 export interface PivotAggsConfigWithExtra<T> extends PivotAggsConfigWithUiBase {
@@ -253,7 +255,10 @@ export function isPivotAggsConfigWithUiSupport(arg: unknown): arg is PivotAggsCo
 type PivotAggsConfigWithExtendedForm = PivotAggsConfigFilter | PivotAggsConfigTopMetrics;
 
 export function isPivotAggsWithExtendedForm(arg: unknown): arg is PivotAggsConfigWithExtendedForm {
-  return isPopulatedObject(arg, ['AggFormComponent']);
+  return (
+    (isPopulatedObject(arg) && arg.hasOwnProperty('setUiConfigFromEs')) ||
+    isPopulatedObject(arg, ['AggFormComponent'])
+  );
 }
 
 export function isPivotAggConfigTopMetric(arg: unknown): arg is PivotAggsConfigTopMetrics {

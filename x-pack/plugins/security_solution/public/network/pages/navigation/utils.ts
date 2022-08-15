@@ -5,25 +5,13 @@
  * 2.0.
  */
 
-import { NETWORK_PATH } from '../../../../common/constants';
+import { NETWORK_PATH_WITH_ANOMALIES, NETWORK_PATH_WITHOUT_ANOMALIES } from '../constants';
 import type { GetNetworkRoutePath } from './types';
-import { NetworkRouteType } from './types';
 
 export const getNetworkRoutePath: GetNetworkRoutePath = (
   capabilitiesFetched,
   hasMlUserPermission
-) => {
-  if (capabilitiesFetched && !hasMlUserPermission) {
-    return `${NETWORK_PATH}/:tabName(${NetworkRouteType.flows}|${NetworkRouteType.dns}|${NetworkRouteType.http}|${NetworkRouteType.tls}|${NetworkRouteType.alerts})`;
-  }
-
-  return (
-    `${NETWORK_PATH}/:tabName(` +
-    `${NetworkRouteType.flows}|` +
-    `${NetworkRouteType.dns}|` +
-    `${NetworkRouteType.anomalies}|` +
-    `${NetworkRouteType.http}|` +
-    `${NetworkRouteType.tls}|` +
-    `${NetworkRouteType.alerts})`
-  );
-};
+) =>
+  capabilitiesFetched && !hasMlUserPermission
+    ? NETWORK_PATH_WITHOUT_ANOMALIES
+    : NETWORK_PATH_WITH_ANOMALIES;

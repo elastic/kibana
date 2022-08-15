@@ -10,6 +10,7 @@ import dateMath from '@kbn/datemath';
 import type { Unit } from '@kbn/datemath';
 import type { ThreatMapping, Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import styled from 'styled-components';
+import type { DataViewBase } from '@kbn/es-query';
 import type { EuiButtonGroupOptionProps, OnTimeChangeProps } from '@elastic/eui';
 import {
   EuiButtonGroup,
@@ -39,7 +40,10 @@ import { useStartTransaction } from '../../../../common/lib/apm/use_start_transa
 import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { Form, UseField, useForm, useFormData } from '../../../../shared_imports';
 import { ScheduleItem } from '../schedule_item_form';
-import type { AdvancedPreviewForm } from '../../../pages/detection_engine/rules/types';
+import type {
+  AdvancedPreviewForm,
+  DataSourceType,
+} from '../../../pages/detection_engine/rules/types';
 import { schema } from './schema';
 
 const HelpTextComponent = (
@@ -70,9 +74,11 @@ const advancedOptionsDefaultValue = {
 
 export interface RulePreviewProps {
   index: string[];
+  indexPattern: DataViewBase;
   isDisabled: boolean;
   query: FieldValueQueryBar;
   dataViewId?: string;
+  dataSourceType: DataSourceType;
   ruleType: Type;
   threatIndex: string[];
   threatMapping: ThreatMapping;
@@ -97,7 +103,9 @@ const defaultTimeRange: Unit = 'h';
 
 const RulePreviewComponent: React.FC<RulePreviewProps> = ({
   index,
+  indexPattern,
   dataViewId,
+  dataSourceType,
   isDisabled,
   query,
   ruleType,
@@ -140,9 +148,10 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
       return true; // Don't do the expensive logic if we don't need it
     }
     if (isMlLoading) {
-      const selectedJobs = jobs.filter(({ id }) => machineLearningJobId.includes(id));
-      return selectedJobs.every((job) => isJobStarted(job.jobState, job.datafeedState));
+      return false;
     }
+    const selectedJobs = jobs.filter(({ id }) => machineLearningJobId.includes(id));
+    return selectedJobs.every((job) => isJobStarted(job.jobState, job.datafeedState));
   }, [jobs, machineLearningJobId, ruleType, isMlLoading]);
 
   const [queryPreviewIdSelected, setQueryPreviewRadioIdSelected] = useState(QUICK_QUERY_SELECT_ID);
@@ -196,6 +205,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
     index,
     isDisabled,
     dataViewId,
+    dataSourceType,
     query,
     threatIndex,
     threatQuery,
@@ -235,7 +245,6 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
 
   return (
     <>
-      <EuiSpacer />
       <EuiButtonGroup
         legend="Quick query or advanced query preview selector"
         data-test-subj="quickAdvancedToggleButtonGroup"
@@ -244,7 +253,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
         options={quickAdvancedToggleButtonOptions}
         color="primary"
       />
-      <EuiSpacer />
+      <EuiSpacer size="s" />
       {showAdvancedOptions && showInvocationCountWarning && (
         <>
           <EuiCallOut
@@ -334,7 +343,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
           previewId={previewId}
           addNoiseWarning={addNoiseWarning}
           spaceId={spaceId}
-          index={index}
+          indexPattern={indexPattern}
           advancedOptions={advancedOptions}
         />
       )}
