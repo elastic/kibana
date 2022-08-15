@@ -13,7 +13,7 @@ import { KibanaRequest, Logger } from '@kbn/core/server';
 import { ConcreteTaskInstance, throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import { nanosToMillis } from '@kbn/event-log-plugin/server';
 import { TaskRunnerContext } from './task_runner_factory';
-import { createExecutionHandler, ExecutionHandler } from './create_execution_handler';
+import { createExecutionHandler } from './create_execution_handler';
 import { Alert, createAlertFactory } from '../alert';
 import {
   ElasticsearchError,
@@ -58,7 +58,6 @@ import { InMemoryMetrics, IN_MEMORY_METRICS } from '../monitoring';
 import {
   RuleTaskInstance,
   RuleTaskRunResult,
-  ScheduleActionsForRecoveredAlertsParams,
   RuleRunResult,
   RuleTaskStateAndMetrics,
 } from './types';
@@ -70,6 +69,7 @@ import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event
 import { SearchMetrics } from '../lib/types';
 import { loadRule } from './rule_loader';
 import { logAlerts } from './log_alerts';
+import { scheduleActionsForAlerts } from '../rules_client/lib';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -220,30 +220,6 @@ export class TaskRunner<
         });
       }
     }
-  }
-
-  private async executeAlert(
-    alertId: string,
-    alert: Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>,
-    executionHandler: ExecutionHandler<ActionGroupIds | RecoveryActionGroupId>,
-    ruleRunMetricsStore: RuleRunMetricsStore
-  ) {
-    const {
-      actionGroup,
-      subgroup: actionSubgroup,
-      context,
-      state,
-    } = alert.getScheduledActionOptions()!;
-    alert.updateLastScheduledActions(actionGroup, actionSubgroup);
-    alert.unscheduleActions();
-    return executionHandler({
-      actionGroup,
-      actionSubgroup,
-      context,
-      state,
-      alertId,
-      ruleRunMetricsStore,
-    });
   }
 
   private async executeRule(
@@ -473,14 +449,8 @@ export class TaskRunner<
         }
       );
 
-      await Promise.all(
-        alertsWithExecutableActions.map(
-          ([alertId, alert]: [string, Alert<State, Context, ActionGroupIds>]) =>
-            this.executeAlert(alertId, alert, executionHandler, ruleRunMetricsStore)
-        )
-      );
-
-      await scheduleActionsForRecoveredAlerts<State, Context, RecoveryActionGroupId>({
+      await scheduleActionsForAlerts<State, Context, ActionGroupIds, RecoveryActionGroupId>({
+        alertsWithExecutableActions,
         recoveryActionGroup: this.ruleType.recoveryActionGroup,
         recoveredAlerts,
         executionHandler,
@@ -784,49 +754,6 @@ export class TaskRunner<
     await this.updateRuleSavedObject(ruleId, namespace, {
       executionStatus: ruleExecutionStatusToRaw(executionStatus),
     });
-  }
-}
-
-async function scheduleActionsForRecoveredAlerts<
-  InstanceState extends AlertInstanceState,
-  InstanceContext extends AlertInstanceContext,
-  RecoveryActionGroupId extends string
->(
-  params: ScheduleActionsForRecoveredAlertsParams<
-    InstanceState,
-    InstanceContext,
-    RecoveryActionGroupId
-  >
-): Promise<void> {
-  const {
-    logger,
-    recoveryActionGroup,
-    recoveredAlerts,
-    executionHandler,
-    mutedAlertIdsSet,
-    ruleLabel,
-    ruleRunMetricsStore,
-  } = params;
-  const recoveredIds = Object.keys(recoveredAlerts);
-
-  for (const id of recoveredIds) {
-    if (mutedAlertIdsSet.has(id)) {
-      logger.debug(
-        `skipping scheduling of actions for '${id}' in rule ${ruleLabel}: instance is muted`
-      );
-    } else {
-      const alert = recoveredAlerts[id];
-      alert.updateLastScheduledActions(recoveryActionGroup.id);
-      alert.unscheduleActions();
-      await executionHandler({
-        actionGroup: recoveryActionGroup.id,
-        context: alert.getContext(),
-        state: {},
-        alertId: id,
-        ruleRunMetricsStore,
-      });
-      alert.scheduleActions(recoveryActionGroup.id);
-    }
   }
 }
 
