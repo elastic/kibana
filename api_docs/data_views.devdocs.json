@@ -658,6 +658,23 @@
           },
           {
             "parentPluginId": "dataViews",
+            "id": "def-public.DataView.isTSDBMode",
+            "type": "Function",
+            "tags": [],
+            "label": "isTSDBMode",
+            "description": [
+              "\nreturns true if dataview contains TSDB fields"
+            ],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
             "id": "def-public.DataView.isTimeBased",
             "type": "Function",
             "tags": [],
@@ -1599,7 +1616,7 @@
                 "section": "def-common.RuntimeFieldSpec",
                 "text": "RuntimeFieldSpec"
               },
-              " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; }"
+              " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: \"gauge\" | \"histogram\" | \"summary\" | \"counter\" | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; }"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
             "deprecated": false
@@ -1917,6 +1934,78 @@
             "label": "aggregatable",
             "description": [
               "\nReturns true if field is aggregatable"
+            ],
+            "path": "src/plugins/data_views/common/fields/data_view_field.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewField.timeSeriesDimension",
+            "type": "boolean",
+            "tags": [],
+            "label": "timeSeriesDimension",
+            "description": [
+              "\nreturns true if field is a TSDB dimension field"
+            ],
+            "path": "src/plugins/data_views/common/fields/data_view_field.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewField.timeSeriesMetric",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "timeSeriesMetric",
+            "description": [
+              "\nreturns type of TSDB metric or undefined"
+            ],
+            "signature": [
+              "\"gauge\" | \"histogram\" | \"summary\" | \"counter\" | undefined"
+            ],
+            "path": "src/plugins/data_views/common/fields/data_view_field.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewField.fixedInterval",
+            "type": "Array",
+            "tags": [],
+            "label": "fixedInterval",
+            "description": [
+              "\nreturns list of alloeed fixed intervals"
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/plugins/data_views/common/fields/data_view_field.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewField.isRolledUpField",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isRolledUpField",
+            "description": [
+              "\nreturns true if the field is of rolled up type"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data_views/common/fields/data_view_field.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewField.timeZone",
+            "type": "Array",
+            "tags": [],
+            "label": "timeZone",
+            "description": [
+              "\nreturn list of allowed time zones"
+            ],
+            "signature": [
+              "string[] | undefined"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
             "deprecated": false
@@ -6055,7 +6144,7 @@
             "section": "def-common.RuntimeFieldSpec",
             "text": "RuntimeFieldSpec"
           },
-          " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; }"
+          " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: \"gauge\" | \"histogram\" | \"summary\" | \"counter\" | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; }"
         ],
         "path": "src/plugins/data_views/common/types.ts",
         "deprecated": false,
@@ -6857,6 +6946,23 @@
                 "path": "src/plugins/data_view_management/public/components/edit_index_pattern/scripted_fields_table/scripted_fields_table.tsx"
               }
             ],
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-server.DataView.isTSDBMode",
+            "type": "Function",
+            "tags": [],
+            "label": "isTSDBMode",
+            "description": [
+              "\nreturns true if dataview contains TSDB fields"
+            ],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false,
             "children": [],
             "returnComment": []
           },
@@ -9967,6 +10073,58 @@
             ],
             "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-server.FieldDescriptor.fixedInterval",
+            "type": "Array",
+            "tags": [],
+            "label": "fixedInterval",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-server.FieldDescriptor.timeZone",
+            "type": "Array",
+            "tags": [],
+            "label": "timeZone",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-server.FieldDescriptor.timeSeriesMetric",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "timeSeriesMetric",
+            "description": [],
+            "signature": [
+              "\"gauge\" | \"histogram\" | \"summary\" | \"counter\" | undefined"
+            ],
+            "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-server.FieldDescriptor.timeSeriesDimension",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "timeSeriesDimension",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -10419,7 +10577,7 @@
             "section": "def-common.RuntimeFieldSpec",
             "text": "RuntimeFieldSpec"
           },
-          " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; }"
+          " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: \"gauge\" | \"histogram\" | \"summary\" | \"counter\" | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; }"
         ],
         "path": "src/plugins/data_views/common/types.ts",
         "deprecated": false,
@@ -12600,6 +12758,23 @@
           },
           {
             "parentPluginId": "dataViews",
+            "id": "def-common.DataView.isTSDBMode",
+            "type": "Function",
+            "tags": [],
+            "label": "isTSDBMode",
+            "description": [
+              "\nreturns true if dataview contains TSDB fields"
+            ],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
             "id": "def-common.DataView.isTimeBased",
             "type": "Function",
             "tags": [],
@@ -13541,7 +13716,7 @@
                 "section": "def-common.RuntimeFieldSpec",
                 "text": "RuntimeFieldSpec"
               },
-              " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; }"
+              " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: \"gauge\" | \"histogram\" | \"summary\" | \"counter\" | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; }"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
             "deprecated": false
@@ -13859,6 +14034,78 @@
             "label": "aggregatable",
             "description": [
               "\nReturns true if field is aggregatable"
+            ],
+            "path": "src/plugins/data_views/common/fields/data_view_field.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.DataViewField.timeSeriesDimension",
+            "type": "boolean",
+            "tags": [],
+            "label": "timeSeriesDimension",
+            "description": [
+              "\nreturns true if field is a TSDB dimension field"
+            ],
+            "path": "src/plugins/data_views/common/fields/data_view_field.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.DataViewField.timeSeriesMetric",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "timeSeriesMetric",
+            "description": [
+              "\nreturns type of TSDB metric or undefined"
+            ],
+            "signature": [
+              "\"gauge\" | \"histogram\" | \"summary\" | \"counter\" | undefined"
+            ],
+            "path": "src/plugins/data_views/common/fields/data_view_field.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.DataViewField.fixedInterval",
+            "type": "Array",
+            "tags": [],
+            "label": "fixedInterval",
+            "description": [
+              "\nreturns list of alloeed fixed intervals"
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/plugins/data_views/common/fields/data_view_field.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.DataViewField.isRolledUpField",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isRolledUpField",
+            "description": [
+              "\nreturns true if the field is of rolled up type"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data_views/common/fields/data_view_field.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.DataViewField.timeZone",
+            "type": "Array",
+            "tags": [],
+            "label": "timeZone",
+            "description": [
+              "\nreturn list of allowed time zones"
+            ],
+            "signature": [
+              "string[] | undefined"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
             "deprecated": false
@@ -19894,7 +20141,7 @@
             "section": "def-common.RuntimeFieldSpec",
             "text": "RuntimeFieldSpec"
           },
-          " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; }"
+          " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: \"gauge\" | \"histogram\" | \"summary\" | \"counter\" | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; }"
         ],
         "path": "src/plugins/data_views/common/types.ts",
         "deprecated": false,
