@@ -29,6 +29,8 @@ import { login, visitWithoutDateRange } from '../../tasks/login';
 
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 
+const exceptionList = getExceptionList();
+
 describe('Export rules', () => {
   before(() => {
     cleanKibana();
@@ -90,13 +92,10 @@ describe('Export rules', () => {
   });
 
   context('rules with exceptions', () => {
-    before(() => {
-      deleteExceptionList(getExceptionList().list_id, getExceptionList().namespace_type);
-    });
-
     beforeEach(() => {
+      deleteExceptionList(exceptionList.list_id, exceptionList.namespace_type);
       // create rule with exceptions
-      createExceptionList(getExceptionList(), getExceptionList().list_id).then((response) =>
+      createExceptionList(exceptionList, exceptionList.list_id).then((response) =>
         createCustomRule(
           {
             ...getNewRule(),
@@ -104,9 +103,9 @@ describe('Export rules', () => {
             exceptionLists: [
               {
                 id: response.body.id,
-                list_id: getExceptionList().list_id,
-                type: getExceptionList().type,
-                namespace_type: getExceptionList().namespace_type,
+                list_id: exceptionList.list_id,
+                type: exceptionList.type,
+                namespace_type: exceptionList.namespace_type,
               },
             ],
           },
@@ -126,7 +125,7 @@ describe('Export rules', () => {
 
       // should display correct number of custom rules when one of them has exceptions
       cy.get(MODAL_CONFIRMATION_BTN)
-        .should('have.text', `Export ${expectedNumberCustomRulesToBeExported} Custom rules`)
+        .should('have.text', `Export ${expectedNumberCustomRulesToBeExported} custom rules`)
         .click();
 
       cy.get(TOASTER_BODY).should(
