@@ -13,7 +13,7 @@ import {
 
 import { PivotAggsConfigBase, PivotAggsConfigWithUiBase } from '../../../../../common/pivot_aggs';
 import { getFilterAggConfig } from './filter_agg/config';
-import { getTopMetricsAggConfig } from './top_metrics_agg/config';
+import { getTopMetricsAggConfig } from './top_metrics_agg';
 
 /**
  * Gets form configuration for provided aggregation type.

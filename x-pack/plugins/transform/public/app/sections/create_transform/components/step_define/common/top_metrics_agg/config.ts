@@ -6,6 +6,8 @@
  */
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   isPivotAggsConfigWithUiSupport,
   isSpecialSortField,
@@ -56,23 +58,34 @@ export function getTopMetricsAggConfig(
             },
           };
         } else {
-          sort = { [sortField!]: sortSettings.order };
+          sort = { [sortField!]: sortSettings.order as estypes.SortOrder };
         }
       }
 
       return {
-        metrics: (Array.isArray(this.field) ? this.field : [this.field]).map((f) => ({ field: f })),
-        sort,
+        metrics: (Array.isArray(this.field) ? this.field : [this.field]).map((f) => ({
+          field: f as string,
+        })),
+        sort: sort!,
         ...(unsupportedConfig ?? {}),
       };
     },
     setUiConfigFromEs(esAggDefinition) {
       const { metrics, sort, ...unsupportedConfig } = esAggDefinition;
 
-      this.field = (Array.isArray(metrics) ? metrics : [metrics]).map((v) => v.field);
+      this.field = (Array.isArray(metrics) ? metrics : [metrics]).map((v) => v!.field);
 
       if (isSpecialSortField(sort)) {
         this.aggConfig.sortField = sort;
+        return;
+      }
+
+      if (!sort) {
+        this.aggConfig = {
+          ...this.aggConfig,
+          ...(unsupportedConfig ?? {}),
+        };
+
         return;
       }
 
@@ -93,13 +106,13 @@ export function getTopMetricsAggConfig(
         this.aggConfig.sortSettings = rest;
 
         if (isValidSortDirection(order)) {
-          this.aggConfig.sortSettings.order = order;
+          this.aggConfig.sortSettings!.order = order;
         }
         if (isValidSortMode(mode)) {
-          this.aggConfig.sortSettings.mode = mode;
+          this.aggConfig.sortSettings!.mode = mode;
         }
         if (isValidSortNumericType(numType)) {
-          this.aggConfig.sortSettings.numericType = numType;
+          this.aggConfig.sortSettings!.numericType = numType;
         }
       }
 

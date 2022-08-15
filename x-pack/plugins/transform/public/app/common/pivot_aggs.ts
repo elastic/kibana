@@ -10,13 +10,11 @@ import { FC } from 'react';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-
 import type { AggName } from '../../../common/types/aggregations';
 import type { Dictionary } from '../../../common/types/common';
 import type { EsFieldName } from '../../../common/types/fields';
 import type { PivotSupportedAggs } from '../../../common/types/pivot_aggs';
-import { PIVOT_SUPPORTED_AGGS } from '../../../common/types/pivot_aggs';
+import { PIVOT_SUPPORTED_AGGS, PivotAgg } from '../../../common/types/pivot_aggs';
 
 import { getAggFormConfig } from '../sections/create_transform/components/step_define/common/get_agg_form_config';
 import { PivotAggsConfigFilter } from '../sections/create_transform/components/step_define/common/filter_agg/types';
@@ -117,7 +115,7 @@ export const TOP_METRICS_SPECIAL_SORT_FIELDS = {
   _SCORE: '_score',
 } as const;
 
-export const isSpecialSortField = (sortField: unknown) => {
+export const isSpecialSortField = (sortField: unknown): sortField is string => {
   return Object.values(TOP_METRICS_SPECIAL_SORT_FIELDS).some((v) => v === sortField);
 };
 
@@ -290,7 +288,7 @@ export type PivotAggsConfigDict = Dictionary<PivotAggsConfig>;
  */
 export function getEsAggFromAggConfig(
   pivotAggsConfig: PivotAggsConfigBase | PivotAggsConfigWithExtendedForm
-): estypes.TransformPivot | null {
+): PivotAgg | null {
   let esAgg: { [key: string]: any } = { ...pivotAggsConfig };
 
   delete esAgg.agg;
@@ -299,7 +297,7 @@ export function getEsAggFromAggConfig(
   delete esAgg.parentAgg;
 
   if (isPivotAggsWithExtendedForm(pivotAggsConfig)) {
-    esAgg = pivotAggsConfig.getEsAggConfig();
+    esAgg = pivotAggsConfig.getEsAggConfig() as PivotAgg;
 
     if (esAgg === null) {
       return null;
@@ -308,7 +306,7 @@ export function getEsAggFromAggConfig(
 
   const result = {
     [pivotAggsConfig.agg]: esAgg,
-  } as estypes.TransformPivot;
+  } as PivotAgg;
 
   if (
     isPivotAggsConfigWithUiSupport(pivotAggsConfig) &&
@@ -317,9 +315,7 @@ export function getEsAggFromAggConfig(
   ) {
     result.aggs = {};
     for (const subAggConfig of Object.values(pivotAggsConfig.subAggs)) {
-      result.aggs[subAggConfig.aggName] = getEsAggFromAggConfig(
-        subAggConfig
-      ) as estypes.TransformPivot;
+      result.aggs[subAggConfig.aggName] = getEsAggFromAggConfig(subAggConfig) as PivotAgg;
     }
   }
 

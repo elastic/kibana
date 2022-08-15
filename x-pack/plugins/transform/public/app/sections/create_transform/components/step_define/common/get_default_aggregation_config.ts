@@ -13,7 +13,7 @@ import {
 import { PivotAggsConfigWithUiSupport } from '../../../../../common';
 import { getFilterAggConfig } from './filter_agg/config';
 import { getPercentilesAggConfig } from './percentiles_agg';
-import { getTopMetricsAggConfig } from './top_metrics_agg/config';
+import { getTopMetricsAggConfig } from './top_metrics_agg';
 
 /**
  * Provides a configuration based on the aggregation type.

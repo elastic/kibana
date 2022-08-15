@@ -50,6 +50,7 @@ export function getFilterAggConfig(
     },
     setUiConfigFromEs(esAggDefinition) {
       const filterAgg = Object.keys(esAggDefinition)[0] as FilterAggType;
+      // @ts-ignore conflicts with a union type
       const filterAggConfig = esAggDefinition[filterAgg];
 
       const aggTypeConfig = getFilterAggTypeConfig(filterAgg, field as string, filterAggConfig);
