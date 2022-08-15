@@ -24,7 +24,7 @@ import {
   SavedSearch,
   getSavedSearch,
   getSavedSearchFullPathUrl,
-} from '../../services/saved_searches';
+} from '@kbn/saved-search-plugin/public';
 import { getState } from '../main/services/discover_state';
 import { loadDataView, resolveDataView } from '../main/utils/resolve_data_view';
 import { LogExplorerMainApp } from './log_explorer_main_app';

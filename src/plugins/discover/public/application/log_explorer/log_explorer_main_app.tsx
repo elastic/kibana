@@ -8,8 +8,8 @@
 import React, { useState } from 'react';
 import type { DataViewAttributes } from '@kbn/data-views-plugin/public';
 import type { SavedObject } from '@kbn/data-plugin/public';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { LogExplorerLayout } from './components/layout/log_explorer_layout';
-import { SavedSearch } from '../../services/saved_searches';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { DataTableRecord } from '../../types';
 import { StateMachineProvider as QueryDataProvider } from './hooks/query_data/use_state_machine';

@@ -30,7 +30,6 @@ import { DiscoverLayoutProps } from '../../../main/components/layout/types';
 import { DiscoverTopNav } from '../../../main/components/top_nav/discover_topnav';
 import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
 import { DiscoverUninitialized } from '../../../main/components/uninitialized/uninitialized';
-import { SavedSearchURLConflictCallout } from '../../../../services/saved_searches';
 import { hasActiveFilter } from '../../../main/components/layout/utils';
 import { LogExplorer } from './log_explorer';
 import { useStateMachineContext } from '../../hooks/query_data/use_state_machine';
@@ -38,6 +37,7 @@ import { useFieldCounts } from '../../hooks/use_field_counts';
 import { useDiscoverStateContext } from '../../hooks/discover_state/use_discover_state';
 import { useSidebarState } from '../../hooks/ui/use_sidebar_state';
 import { useDiscoverColumnsContext } from '../../hooks/discover_state/use_columns';
+import { SavedSearchURLConflictCallout } from '../../../../components/saved_search_url_conflict_callout/saved_search_url_conflict_callout';
 
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);

@@ -16,12 +16,12 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useSelector } from '@xstate/react';
 import React, { memo, useCallback, useMemo } from 'react';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { SAMPLE_SIZE_SETTING } from '../../../../../common';
 import { DiscoverGrid } from '../../../../components/discover_grid/discover_grid';
 import { SortPairArr } from '../../../../components/doc_table/utils/get_sort';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
-import { SavedSearch } from '../../../../services/saved_searches';
 import { DataTableRecord } from '../../../../types';
 import { AppState, GetStateReturn } from '../../../main/services/discover_state';
 import {

@@ -12,9 +12,9 @@ import { useHistory } from 'react-router-dom';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { SavedSearch, getSavedSearch } from '@kbn/saved-search-plugin/public';
 import { getState } from '../../../main/services/discover_state';
 import { getStateDefaults } from '../../../main/utils/get_state_defaults';
-import { SavedSearch, getSavedSearch } from '../../../../services/saved_searches';
 import { loadDataView } from '../../../main/utils/resolve_data_view';
 import { MODIFY_COLUMNS_ON_SWITCH, SORT_DEFAULT_ORDER_SETTING } from '../../../../../common';
 import { getDataViewAppState } from '../../../main/utils/get_switch_data_view_app_state';
@@ -24,7 +24,7 @@ import { useUrl } from '../../../main/hooks/use_url';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { setBreadcrumbsTitle } from '../../../../utils/breadcrumbs';
 import { addHelpMenuToAppChrome } from '../../../../components/help_menu/help_menu_util';
-import { useSavedSearchAliasMatchRedirect } from '../../../../services/saved_searches';
+import { useSavedSearchAliasMatchRedirect } from '../../../../hooks/saved_search_alias_match_redirect';
 import { popularizeField } from '../../../../utils/popularize_field';
 
 /**
