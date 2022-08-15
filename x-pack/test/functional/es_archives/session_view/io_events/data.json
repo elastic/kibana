@@ -44,7 +44,7 @@
           "total_bytes_captured": 1024,
           "total_bytes_skipped": 0,
           "bytes_skipped": [],
-          "text": "256\n,\n                             Some Companies Puppet instance\n             |  |    |       CentOS Stream release 8 on x86_64\n  .=/ =  =  =| =| = === =    Load average: 1.23, 1.01, 0.63\n  | || || || || || | | | |   \n  /=  =  =  =' =' =' '  ='   Hostname ********\n  \\                          Type       xyz\n  o                          Datacenter ********\n                             Cluster ********\n\n\n\n\n,0 loaded units listed. Pass --all to see loaded but inactive units, too.\nTo show all installed unit files use 'systemctl list-unit-files'.\n"
+          "text": "256\n,\n                             Some host somewhere in the cloud\n             |  |    |       CentOS Stream release 8 on x86_64\n  .Load average: 1.23, 1.01, 0.63\n\nHostname ********\nType       xyz\n  o                          Datacenter ********\n                             Cluster ********\n\n\n\n\n,0 loaded units listed. Pass --all to see loaded but inactive units, too.\nTo show all installed unit files use 'systemctl list-unit-files'.\n"
         }
       }
     }
