@@ -8,11 +8,11 @@
 import { Chart, Datum, Flame, PartialTheme, Settings } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
 import { isNumber } from 'lodash';
+import React, { useMemo } from 'react';
+import { ElasticFlameGraph, FlameGraphComparisonMode } from '../../common/flamegraph';
 import { asPercentage } from '../utils/formatters/as_percentage';
 import { getFlamegraphModel } from '../utils/get_flamegraph_model';
-import { ElasticFlameGraph, FlameGraphComparisonMode } from '../../common/flamegraph';
 
 function TooltipRow({
   value,
