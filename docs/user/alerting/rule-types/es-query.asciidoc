@@ -77,17 +77,18 @@ image::images/rule-types-es-query-example-action-variable.png[Iterate over hits 
 +
 The documents returned by `context.hits` include the {ref}/mapping-source-field.html[`_source`] field.
 If the {es} query search API's {ref}/search-fields.html#search-fields-param[`fields`] parameter is used, documents will also return the `fields` field, 
-which can be used to access any runtime fields defined by the {ref}/runtime-search-request.html[`runtime_mappings`] parameter.
+which can be used to access any runtime fields defined by the {ref}/runtime-search-request.html[`runtime_mappings`] parameter as the following example shows:
 +
 --
 [source]
 --------------------------------------------------
 {{#context.hits}}
 timestamp: {{_source.@timestamp}}
-day of the week: {{fields.day_of_week}}
+day of the week: {{fields.day_of_week}} <1>
 {{/context.hits}}
 --------------------------------------------------
 // NOTCONSOLE
+<1> The `fields` parameter here is used to access the `day_of_week` runtime field.
 --
 +
 As the {ref}/search-fields.html#search-fields-response[`fields`] response always returns an array of values for each field, 
