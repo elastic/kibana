@@ -67,6 +67,68 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-browser-mocks",
+        "id": "def-common.simpleSavedObjectMock",
+        "type": "Object",
+        "tags": [],
+        "label": "simpleSavedObjectMock",
+        "description": [],
+        "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-browser-mocks",
+            "id": "def-common.simpleSavedObjectMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "(client: ",
+              "SavedObjectsClientContract",
+              ", savedObject: ",
+              "SavedObject",
+              "<unknown>) => ",
+              "SimpleSavedObjectImpl",
+              "<unknown>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-browser-mocks",
+                "id": "def-common.simpleSavedObjectMock.create.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "client",
+                "description": [],
+                "signature": [
+                  "SavedObjectsClientContract"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-browser-mocks",
+                "id": "def-common.simpleSavedObjectMock.create.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "savedObject",
+                "description": [],
+                "signature": [
+                  "SavedObject",
+                  "<unknown>"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
       }
     ]
   }

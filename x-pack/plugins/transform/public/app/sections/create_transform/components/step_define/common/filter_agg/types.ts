@@ -18,6 +18,8 @@ type FilterAggForm<T> = FC<{
   onChange: (arg: Partial<{ config: Partial<T> }>) => void;
   /** Selected field for the aggregation */
   selectedField?: string;
+  /** Whether the configuration is valid */
+  isValid?: boolean;
 }>;
 
 interface FilterAggTypeConfig<U, R> {
@@ -27,11 +29,14 @@ interface FilterAggTypeConfig<U, R> {
   filterAggConfig?: U extends undefined ? undefined : U;
   /** Converts UI agg config form to ES agg request object */
   getEsAggConfig: (field?: string) => R;
+  /** Validation result of the filter agg config */
   isValid?: () => boolean;
   /** Provides aggregation name generated based on the configuration */
   getAggName?: () => string | undefined;
   /** Helper text for the aggregation reflecting some configuration info */
   helperText?: () => string | undefined;
+  /** Field name. In some cases, e.g. `exists` filter, it's resolved from the filter agg definition */
+  fieldName?: string;
 }
 
 /** Filter agg type definition */
