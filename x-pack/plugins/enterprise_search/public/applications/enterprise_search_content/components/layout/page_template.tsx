@@ -7,10 +7,7 @@
 
 import React from 'react';
 
-import { useValues } from 'kea';
-
 import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../../common/constants';
-import { KibanaLogic } from '../../../shared/kibana';
 import { SetEnterpriseSearchChrome } from '../../../shared/kibana_chrome';
 import { EnterpriseSearchPageTemplateWrapper, PageTemplateProps } from '../../../shared/layout';
 import { useEnterpriseSearchNav } from '../../../shared/layout';
@@ -22,13 +19,11 @@ export const EnterpriseSearchContentPageTemplate: React.FC<PageTemplateProps> = 
   pageViewTelemetry,
   ...pageTemplateProps
 }) => {
-  const { productAccess } = useValues(KibanaLogic);
-
   return (
     <EnterpriseSearchPageTemplateWrapper
       {...pageTemplateProps}
       solutionNav={{
-        items: useEnterpriseSearchNav(productAccess),
+        items: useEnterpriseSearchNav(),
         name: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAME,
       }}
       restrictWidth

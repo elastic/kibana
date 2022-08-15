@@ -9,18 +9,25 @@ jest.mock('./nav_link_helpers', () => ({
   generateNavLink: jest.fn(({ to, items }) => ({ href: to, items })),
 }));
 
+import { setMockValues } from '../../__mocks__/kea_logic';
+
 import { ProductAccess } from '../../../../common/types';
 
 import { useEnterpriseSearchNav } from './nav';
 
 describe('useEnterpriseSearchContentNav', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('returns an array of top-level Enterprise Search nav items', () => {
     const fullProductAccess: ProductAccess = {
       hasAppSearchAccess: true,
       hasWorkplaceSearchAccess: true,
     };
+    setMockValues({ productAccess: fullProductAccess });
 
-    expect(useEnterpriseSearchNav(fullProductAccess)).toEqual([
+    expect(useEnterpriseSearchNav()).toEqual([
       {
         href: '/app/enterprise_search/overview',
         id: 'es_overview',
@@ -67,7 +74,9 @@ describe('useEnterpriseSearchContentNav', () => {
       hasWorkplaceSearchAccess: false,
     };
 
-    expect(useEnterpriseSearchNav(noProductAccess)[2]).toEqual({
+    setMockValues({ productAccess: noProductAccess });
+
+    expect(useEnterpriseSearchNav()[2]).toEqual({
       id: 'search',
       items: [
         {
@@ -86,7 +95,9 @@ describe('useEnterpriseSearchContentNav', () => {
       hasWorkplaceSearchAccess: true,
     };
 
-    expect(useEnterpriseSearchNav(workplaceSearchProductAccess)[2]).toEqual({
+    setMockValues({ productAccess: workplaceSearchProductAccess });
+
+    expect(useEnterpriseSearchNav()[2]).toEqual({
       id: 'search',
       items: [
         {
@@ -110,7 +121,9 @@ describe('useEnterpriseSearchContentNav', () => {
       hasWorkplaceSearchAccess: false,
     };
 
-    expect(useEnterpriseSearchNav(appSearchProductAccess)[2]).toEqual({
+    setMockValues({ productAccess: appSearchProductAccess });
+
+    expect(useEnterpriseSearchNav()[2]).toEqual({
       id: 'search',
       items: [
         {

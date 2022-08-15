@@ -7,10 +7,7 @@
 
 import React from 'react';
 
-import { useValues } from 'kea';
-
 import { ELASTICSEARCH_PLUGIN } from '../../../../../common/constants';
-import { KibanaLogic } from '../../../shared/kibana';
 import { SetElasticsearchChrome } from '../../../shared/kibana_chrome';
 import { EnterpriseSearchPageTemplateWrapper, PageTemplateProps } from '../../../shared/layout';
 import { useEnterpriseSearchNav } from '../../../shared/layout';
@@ -22,14 +19,12 @@ export const EnterpriseSearchElasticsearchPageTemplate: React.FC<PageTemplatePro
   pageViewTelemetry,
   ...pageTemplateProps
 }) => {
-  const { productAccess } = useValues(KibanaLogic);
-
   return (
     <EnterpriseSearchPageTemplateWrapper
       {...pageTemplateProps}
       solutionNav={{
         name: ELASTICSEARCH_PLUGIN.NAME,
-        items: useEnterpriseSearchNav(productAccess),
+        items: useEnterpriseSearchNav(),
       }}
       setPageChrome={pageChrome && <SetElasticsearchChrome trail={pageChrome} />}
     >

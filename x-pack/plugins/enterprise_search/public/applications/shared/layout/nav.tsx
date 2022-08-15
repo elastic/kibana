@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { useValues } from 'kea';
+
 import { EuiSideNavItemType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -15,12 +17,14 @@ import {
   ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
 } from '../../../../common/constants';
-import { ProductAccess } from '../../../../common/types';
 import { SEARCH_INDICES_PATH } from '../../enterprise_search_content/routes';
+import { KibanaLogic } from '../kibana';
 
 import { generateNavLink } from './nav_link_helpers';
 
-export const useEnterpriseSearchNav = (access: ProductAccess) => {
+export const useEnterpriseSearchNav = () => {
+  const { productAccess } = useValues(KibanaLogic);
+
   const navItems: Array<EuiSideNavItemType<unknown>> = [
     {
       id: 'es_overview',
@@ -64,7 +68,7 @@ export const useEnterpriseSearchNav = (access: ProductAccess) => {
             to: ELASTICSEARCH_PLUGIN.URL,
           }),
         },
-        ...(access.hasAppSearchAccess
+        ...(productAccess.hasAppSearchAccess
           ? [
               {
                 id: 'app_search',
@@ -78,7 +82,7 @@ export const useEnterpriseSearchNav = (access: ProductAccess) => {
               },
             ]
           : []),
-        ...(access.hasWorkplaceSearchAccess
+        ...(productAccess.hasWorkplaceSearchAccess
           ? [
               {
                 id: 'workplace_search',
