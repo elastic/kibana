@@ -1492,8 +1492,6 @@
     "core.euiHeaderLinks.appNavigation": "Menu de l'application",
     "core.euiHeaderLinks.openNavigationMenu": "Ouvrir le menu",
     "core.euiHue.label": "Sélectionner la valeur \"hue\" du mode de couleur HSV",
-    "core.euiImage.closeImage": "Fermer l'image {alt} en plein écran",
-    "core.euiImage.openImage": "Ouvrir l'image {alt} en plein écran",
     "core.euiLink.external.ariaLabel": "Lien externe",
     "core.euiLink.newTarget.screenReaderOnlyText": "(s’ouvre dans un nouvel onglet ou une nouvelle fenêtre)",
     "core.euiLoadingChart.ariaLabel": "Chargement",
