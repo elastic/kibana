@@ -10,26 +10,8 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export function MapsHelper({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['maps', 'common']);
   const testSubjects = getService('testSubjects');
-  const log = getService('log');
 
   return {
-    async clearLegendTooltip() {
-      const isTooltipOpen = await testSubjects.exists(`layerTocTooltip`, { timeout: 5000 });
-      if (isTooltipOpen) {
-        await testSubjects.click(`layerTocTooltip`);
-        await PageObjects.common.sleep(1000);
-      }
-    },
-
-    async toggleLayerVisibility(layerName: string) {
-      log.debug('Inside toggleLayerVisibility');
-      await this.clearLegendTooltip();
-      await PageObjects.maps.openLayerTocActionsPanel(layerName);
-      await testSubjects.click('layerVisibilityToggleButton');
-      await PageObjects.common.sleep(3000);
-      await this.clearLegendTooltip();
-    },
-
     // In v7.16, e-commerce sample data was re-worked so that geo.src field to match country code of geo.coordinates
     // https://github.com/elastic/kibana/pull/110885
     // Maps created before this change will have a layer called "Total Requests by Country"
@@ -46,10 +28,10 @@ export function MapsHelper({ getPageObjects, getService }: FtrProviderContext) {
         throw new Error('Layer total requests not found');
       }
       if (isRequestByCountry) {
-        await this.toggleLayerVisibility('Total Requests by Country');
+        await PageObjects.maps.toggleLayerVisibility('Total Requests by Country');
       }
       if (isRequestByDestination) {
-        await this.toggleLayerVisibility('Total Requests by Destination');
+        await PageObjects.maps.toggleLayerVisibility('Total Requests by Destination');
       }
     },
   };
