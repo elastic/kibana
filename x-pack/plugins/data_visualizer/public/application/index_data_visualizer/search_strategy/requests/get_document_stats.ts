@@ -83,10 +83,11 @@ export const getDocumentCountStats = async (
     runtimeFieldMap,
     searchQuery,
     intervalMs,
-    fieldsToFetch,
   } = params;
 
-  const result = { randomlySampled: false, took: 0, totalCount: 0 };
+  // Probability = 1 represents no sampling
+  const result = { randomlySampled: false, took: 0, totalCount: 0, probability: 1 };
+
   const filterCriteria = buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, searchQuery);
 
   const query = {
@@ -121,16 +122,13 @@ export const getDocumentCountStats = async (
     },
   });
 
+  const hasTimeField = timeFieldName !== undefined && intervalMs !== undefined && intervalMs > 0;
+
   const getSearchParams = (aggregations: unknown, trackTotalHits = false) => ({
     index,
     body: {
       query,
-      ...(!fieldsToFetch &&
-      timeFieldName !== undefined &&
-      intervalMs !== undefined &&
-      intervalMs > 0
-        ? { aggs: aggregations }
-        : {}),
+      ...(hasTimeField ? { aggs: aggregations } : {}),
       ...(isPopulatedObject(runtimeFieldMap) ? { runtime_mappings: runtimeFieldMap } : {}),
     },
     track_total_hits: trackTotalHits,
@@ -241,7 +239,7 @@ export const processDocumentCountStats = (
   body: estypes.SearchResponse | undefined,
   params: OverallStatsSearchStrategyParams,
   randomlySampled = false
-): DocumentCountStats | undefined => {
+): Omit<DocumentCountStats, 'probability'> | undefined => {
   if (!body) return undefined;
 
   let totalCount = 0;
