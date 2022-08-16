@@ -52,9 +52,6 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   timelineId,
   isReadOnly,
 }) => {
-  // The referenced alert _index is .internal.alerts-security.alerts-spaceId,
-  // but we always want to use the alias .alerts-security.alerts-spaceId.
-
   const currentSpaceId = useSpaceId();
   const { indexName } = expandedEvent;
   const eventIndex = getAlertIndexAlias(indexName, currentSpaceId) ?? indexName;

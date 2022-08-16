@@ -53,6 +53,12 @@ export const useBasicDataFromDetailsData = (
   );
 };
 
+/*
+The referenced alert _index in the flyout uses the `.internal.` such as 
+`.internal.alerts-security.alerts-spaceId` in the alert page flyout and
+.internal.preview.alerts-security.alerts-spaceId` in the rule creation preview flyout
+but we always want to use their respective aliase indices rather than accessing their backing .internal. indices.
+*/
 export const getAlertIndexAlias = (
   index: string,
   spaceId: string = 'default'
