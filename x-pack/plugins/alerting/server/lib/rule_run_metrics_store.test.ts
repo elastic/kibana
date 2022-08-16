@@ -24,6 +24,7 @@ describe('RuleRunMetricsStore', () => {
     expect(ruleRunMetricsStore.getNumberOfRecoveredAlerts()).toBe(0);
     expect(ruleRunMetricsStore.getNumberOfNewAlerts()).toBe(0);
     expect(ruleRunMetricsStore.getStatusByConnectorType('any')).toBe(undefined);
+    expect(ruleRunMetricsStore.getHasReachedAlertLimit()).toBe(false);
   });
 
   test('sets and returns numSearches', () => {
@@ -77,6 +78,11 @@ describe('RuleRunMetricsStore', () => {
     expect(ruleRunMetricsStore.getTriggeredActionsStatus()).toBe(ActionsCompletion.PARTIAL);
   });
 
+  test('sets and returns hasReachedAlertLimit', () => {
+    ruleRunMetricsStore.setHasReachedAlertLimit(true);
+    expect(ruleRunMetricsStore.getHasReachedAlertLimit()).toBe(true);
+  });
+
   test('gets metrics', () => {
     expect(ruleRunMetricsStore.getMetrics()).toEqual({
       triggeredActionsStatus: 'partial',
@@ -88,6 +94,7 @@ describe('RuleRunMetricsStore', () => {
       numberOfRecoveredAlerts: 11,
       numberOfTriggeredActions: 5,
       totalSearchDurationMs: 2,
+      hasReachedAlertLimit: true,
     });
   });
 

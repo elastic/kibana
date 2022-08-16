@@ -30,26 +30,31 @@ export function executionStatusFromState(
 ): IExecutionStatusAndMetrics {
   const alertIds = Object.keys(stateWithMetrics.alertInstances ?? {});
 
-  const hasIncompleteAlertExecution =
-    stateWithMetrics.metrics.triggeredActionsStatus === ActionsCompletion.PARTIAL;
-
   let status: RuleExecutionStatuses =
     alertIds.length === 0 ? RuleExecutionStatusValues[0] : RuleExecutionStatusValues[1];
 
-  if (hasIncompleteAlertExecution) {
+  // Check for warning states
+  let warning = null;
+  // We only have a single warning field so prioritizing the alert circuit breaker over the actions circuit breaker
+  if (stateWithMetrics.metrics.hasReachedAlertLimit) {
     status = RuleExecutionStatusValues[5];
+    warning = {
+      reason: RuleExecutionStatusWarningReasons.MAX_ALERTS,
+      message: translations.taskRunner.warning.maxAlerts,
+    };
+  } else if (stateWithMetrics.metrics.triggeredActionsStatus === ActionsCompletion.PARTIAL) {
+    status = RuleExecutionStatusValues[5];
+    warning = {
+      reason: RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
+      message: translations.taskRunner.warning.maxExecutableActions,
+    };
   }
 
   return {
     status: {
       lastExecutionDate: lastExecutionDate ?? new Date(),
       status,
-      ...(hasIncompleteAlertExecution && {
-        warning: {
-          reason: RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
-          message: translations.taskRunner.warning.maxExecutableActions,
-        },
-      }),
+      ...(warning ? { warning } : {}),
     },
     metrics: stateWithMetrics.metrics,
   };
