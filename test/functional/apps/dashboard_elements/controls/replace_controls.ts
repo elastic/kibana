@@ -48,12 +48,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
   };
 
-  const replaceWithTimeSlider = async (controlId: string) => {
-    await changeFieldType(controlId, '@timestamp', TIME_SLIDER_CONTROL);
-    await testSubjects.waitForDeleted('timeSlider-loading-spinner');
-    await dashboardControls.verifyControlType(controlId, 'timeSlider');
-  };
-
   describe('Replacing controls', async () => {
     let controlId: string;
 
@@ -83,12 +77,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('with range slider', async () => {
         await replaceWithRangeSlider(controlId);
       });
-
-      /** Because the time slider is temporarily disabled as of https://github.com/elastic/kibana/pull/130978,
-       ** I simply skipped all time slider tests for now :) **/
-      it.skip('with time slider', async () => {
-        await replaceWithTimeSlider(controlId);
-      });
     });
 
     describe('Replace range slider', async () => {
@@ -109,35 +97,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('with options list', async () => {
         await replaceWithOptionsList(controlId);
-      });
-
-      it.skip('with time slider', async () => {
-        await replaceWithTimeSlider(controlId);
-      });
-    });
-
-    describe.skip('Replace time slider', async () => {
-      beforeEach(async () => {
-        await dashboardControls.clearAllControls();
-        await dashboardControls.createControl({
-          controlType: TIME_SLIDER_CONTROL,
-          dataViewTitle: 'animals-*',
-          fieldName: '@timestamp',
-        });
-        await testSubjects.waitForDeleted('timeSlider-loading-spinner');
-        controlId = (await dashboardControls.getAllControlIds())[0];
-      });
-
-      afterEach(async () => {
-        await dashboard.clearUnsavedChanges();
-      });
-
-      it('with options list', async () => {
-        await replaceWithOptionsList(controlId);
-      });
-
-      it('with range slider', async () => {
-        await replaceWithRangeSlider(controlId);
       });
     });
   });
