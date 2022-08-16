@@ -18,7 +18,6 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 
 import { chromeServiceMock, coreMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import { SavedObjectLoader, SavedObjectLoaderFindOptions } from '../../services/saved_objects';
-import { SavedQueryService } from '../../services/data';
 import { DashboardAppServices, DashboardAppCapabilities } from '../../types';
 import { NavigationPublicPluginStart } from '../../services/navigation';
 import { getSavedDashboardMock } from './get_saved_dashboard_mock';
@@ -84,7 +83,6 @@ export function makeDefaultServices(): DashboardAppServices {
     savedObjectsClient: core.savedObjects.client,
     dashboardCapabilities: defaultCapabilities,
     data: dataPluginMock.createStartContract(),
-    savedQueryService: {} as SavedQueryService,
     scopedHistory: () => ({} as ScopedHistory),
     setHeaderActionMenu: (mountPoint) => {},
     urlForwarding: {} as UrlForwardingStart,

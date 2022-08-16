@@ -218,6 +218,5 @@ export interface DashboardAppServices {
   screenshotModeService: ScreenshotModePluginStart;
   dashboardSessionStorage: DashboardSessionStorage;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-  savedQueryService: DataPublicPluginStart['query']['savedQueries'];
   spacesService?: SpacesPluginStart;
 }

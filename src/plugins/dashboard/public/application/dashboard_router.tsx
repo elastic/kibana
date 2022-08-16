@@ -113,7 +113,6 @@ export async function mountApp({
     scopedHistory: () => scopedHistory,
     screenshotModeService: screenshotMode,
     dataViews: dataStart.dataViews,
-    savedQueryService: dataStart.query.savedQueries,
     savedObjectsClient: coreStart.savedObjects.client,
     savedDashboards: dashboardStart.getSavedDashboardLoader(),
     savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
