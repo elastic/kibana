@@ -429,6 +429,9 @@
         },
         {
           "id": "kibVisualizationsPluginApi"
+        },
+        {
+          "id": "kibDevDocsOpsTest"
         }
       ]
     },
@@ -563,6 +566,9 @@
             },
             {
               "id": "kibDevDocsOpsManagedVscodeConfigCli"
+            },
+            {
+              "id": "kibDevDocsOpsTest"
             }
           ]
         }
