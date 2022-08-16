@@ -107,7 +107,7 @@ export const RulesTables = React.memo<RulesTableProps>(
         setSortingOptions,
       },
     } = rulesTableContext;
-
+    debugger;
     const prePackagedRuleStatus = getPrePackagedRuleStatus(
       rulesInstalled,
       rulesNotInstalled,
@@ -337,7 +337,7 @@ export const RulesTables = React.memo<RulesTableProps>(
             <AllRulesUtilityBar
               canBulkEdit={hasPermissions}
               hasPagination={hasPagination}
-              paginationTotal={pagination.total ?? 0}
+              pagination={pagination}
               numberSelectedItems={selectedItemsCount}
               onGetBulkItemsPopoverContent={getBulkItemsPopoverContent}
               onRefresh={handleRefreshRules}

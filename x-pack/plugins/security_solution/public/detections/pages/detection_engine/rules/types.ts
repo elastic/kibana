@@ -51,6 +51,12 @@ export interface EuiBasicTableOnChange {
   sort?: EuiBasicTableSortTypes;
 }
 
+export type Pagination = {
+  page: number,
+  perPage: number,
+  total: number,
+}
+
 export type RuleStatusType = 'passive' | 'active' | 'valid';
 
 export enum RuleStep {

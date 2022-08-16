@@ -11,7 +11,7 @@ import * as i18nRules from './translations';
 import type { RouteSpyState } from '../../../../common/utils/route/types';
 import { SecurityPageName } from '../../../../app/types';
 import { RULES_PATH } from '../../../../../common/constants';
-import type { RuleStepsOrder } from './types';
+import type { Pagination, RuleStepsOrder } from './types';
 import { RuleStep } from './types';
 import type { GetSecuritySolutionUrl } from '../../../../common/components/link_to';
 
@@ -69,3 +69,10 @@ export const getTrailingBreadcrumbs = (
 
   return breadcrumb;
 };
+
+export const getShowingRulesParams = ({ page, perPage, total: totalRules }: Pagination)  => {
+  const firstInPage = (page - 1) * perPage + 1;
+  const lastInPage = page * perPage > totalRules ? totalRules : page * perPage;
+
+  return [firstInPage, lastInPage, totalRules] as const;
+}

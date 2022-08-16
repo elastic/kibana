@@ -26,6 +26,8 @@ import {
 import * as i18n from '../translations';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useRulesTableContextOptional } from './rules_table/rules_table_context';
+import { getShowingRulesParams } from '../utils';
+import { Pagination } from '../types';
 
 interface AllRulesUtilityBarProps {
   canBulkEdit: boolean;
@@ -36,7 +38,7 @@ interface AllRulesUtilityBarProps {
   onRefresh?: () => void;
   onRefreshSwitch?: (checked: boolean) => void;
   onToggleSelectAll?: () => void;
-  paginationTotal: number;
+  pagination: Pagination;
   hasBulkActions: boolean;
   hasPagination?: boolean;
   isBulkActionInProgress?: boolean;
@@ -53,7 +55,7 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
     onRefresh,
     onRefreshSwitch,
     onToggleSelectAll,
-    paginationTotal,
+    pagination,
     hasBulkActions = true,
     hasPagination,
     isBulkActionInProgress,
@@ -121,17 +123,19 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
       [isAutoRefreshOn, handleAutoRefreshSwitch, isAnyRuleSelected]
     );
 
+    const showingRulesParams = getShowingRulesParams(pagination);
+
     return (
       <UtilityBar border>
         <UtilityBarSection>
           <UtilityBarGroup>
             {hasBulkActions ? (
               <UtilityBarText dataTestSubj="showingRules">
-                {i18n.SHOWING_RULES(paginationTotal)}
+                {i18n.SHOWING_RULES(...showingRulesParams)}
               </UtilityBarText>
             ) : (
               <UtilityBarText dataTestSubj="showingExceptionLists">
-                {i18n.SHOWING_EXCEPTION_LISTS(paginationTotal)}
+                {i18n.SHOWING_EXCEPTION_LISTS(pagination.total)}
               </UtilityBarText>
             )}
           </UtilityBarGroup>
@@ -151,7 +155,7 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
                     iconSide="left"
                     onClick={onToggleSelectAll}
                   >
-                    {isAllSelected ? i18n.CLEAR_SELECTION : i18n.SELECT_ALL_RULES(paginationTotal)}
+                    {isAllSelected ? i18n.CLEAR_SELECTION : i18n.SELECT_ALL_RULES(pagination.total)}
                   </UtilityBarAction>
                 )}
 
