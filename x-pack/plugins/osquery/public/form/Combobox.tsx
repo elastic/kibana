@@ -65,7 +65,7 @@ export const ComboBoxField = ({
       <EuiComboBox
         isInvalid={hasError}
         noSuggestions
-        placeholder={i18n.translate('esUi.forms.comboBoxField.placeHolderText', {
+        placeholder={i18n.translate('xpack.osquery.comboBoxField.placeHolderText', {
           defaultMessage: 'Type and then hit "ENTER"',
         })}
         selectedOptions={value.map((v: string) => ({ label: v }))}
