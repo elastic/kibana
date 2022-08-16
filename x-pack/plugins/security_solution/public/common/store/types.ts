@@ -40,7 +40,7 @@ export type StoreState = HostsPluginState &
  * `combineReducers` returns a type wrapped in `CombinedState`.
  * `CombinedState` is required for redux to know what keys to make optional when preloaded state into a store.
  */
-export type State = CombinedState<StoreState>;
+export type State = StoreState;
 
 /**
  * like redux's `MiddlewareAPI` but `getState` returns an `Immutable` version of
