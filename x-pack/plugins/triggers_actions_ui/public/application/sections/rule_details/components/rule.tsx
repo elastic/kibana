@@ -205,6 +205,12 @@ export function alertToListItem(
           actionGroup: getActionGroupName(ruleType, alert?.actionGroupId),
           healthColor: 'primary',
         }
+      : alert?.isFlapping
+      ? {
+          label: 'Flapping! 🦇',
+          actionGroup: getActionGroupName(ruleType, alert?.actionGroupId),
+          healthColor: 'warning',
+        }
       : { label: INACTIVE_LABEL, healthColor: 'subdued' };
   const start = alert?.activeStartDate ? new Date(alert.activeStartDate) : undefined;
   const duration = start ? durationEpoch - start.valueOf() : 0;

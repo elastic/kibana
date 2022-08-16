@@ -8,6 +8,10 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { validateDurationSchema, parseDuration } from './lib';
 
+const FLAP_LOOK_BACK_DEFAULT = 6;
+const FLAP_COUNT_DEFAULT = 3;
+const FLAP_QUIET_TIME_DEFAULT = 6;
+
 const ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
 const ruleTypeSchema = schema.object({
   id: schema.string(),
@@ -46,9 +50,9 @@ const rulesSchema = schema.object({
     ruleTypeOverrides: schema.maybe(schema.arrayOf(ruleTypeSchema)),
   }),
   flapping: schema.object({
-    lookBack: schema.number({ defaultValue: 6, min: 0 }),
-    count: schema.number({ defaultValue: 3, min: 1 }),
-    quietTime: schema.number({ defaultValue: 6, min: 0 }),
+    lookBack: schema.number({ defaultValue: FLAP_LOOK_BACK_DEFAULT, min: 0 }),
+    count: schema.number({ defaultValue: FLAP_COUNT_DEFAULT, min: 1 }),
+    quietTime: schema.number({ defaultValue: FLAP_QUIET_TIME_DEFAULT, min: 0 }),
   }),
 });
 

@@ -23,26 +23,28 @@ import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { monitoringCollectionMock } from '@kbn/monitoring-collection-plugin/server/mocks';
 import { PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
+import { configSchema } from './config';
 
-const generateAlertingConfig = (): AlertingConfig => ({
-  healthCheck: {
-    interval: '5m',
-  },
-  invalidateApiKeysTask: {
-    interval: '5m',
-    removalDelay: '1h',
-  },
-  maxEphemeralActionsPerAlert: 10,
-  cancelAlertsOnRuleTimeout: true,
-  rules: {
-    minimumScheduleInterval: { value: '1m', enforce: false },
-    run: {
-      actions: {
-        max: 1000,
+const generateAlertingConfig = (): AlertingConfig =>
+  configSchema.validate({
+    healthCheck: {
+      interval: '5m',
+    },
+    invalidateApiKeysTask: {
+      interval: '5m',
+      removalDelay: '1h',
+    },
+    maxEphemeralActionsPerAlert: 10,
+    cancelAlertsOnRuleTimeout: true,
+    rules: {
+      minimumScheduleInterval: { value: '1m', enforce: false },
+      run: {
+        actions: {
+          max: 1000,
+        },
       },
     },
-  },
-});
+  });
 
 const sampleRuleType: RuleType<never, never, never, never, never, 'default'> = {
   id: 'test',

@@ -27,7 +27,7 @@ export function configureFlapping(config: AlertingConfig, logger_: Logger): void
 }
 
 // return flapping alerts
-export async function getFlappingAlerts(ruleId: string): Promise<string[]> {
+export function getFlappingAlerts(ruleId: string): string[] {
   const flappingAlerts: string[] = [];
 
   for (const [alertId, alert] of getAlerts(ruleId)) {

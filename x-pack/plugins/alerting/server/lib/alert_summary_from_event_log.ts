@@ -9,7 +9,7 @@ import { mean } from 'lodash';
 import { IEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
 import { SanitizedRule, AlertSummary, AlertStatus } from '../types';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER, LEGACY_EVENT_LOG_ACTIONS } from '../plugin';
-
+import { getFlappingAlerts } from '../flapping';
 export interface AlertSummaryFromEventLogParams {
   rule: SanitizedRule<{ bar: boolean }>;
   events: IEvent[];
@@ -45,6 +45,7 @@ export function alertSummaryFromEventLog(params: AlertSummaryFromEventLogParams)
   const alerts = new Map<string, AlertStatus>();
   const eventDurations: number[] = [];
   const eventDurationsWithTimestamp: Record<string, number> = {};
+  const flappingAlerts = getFlappingAlerts(rule.id);
 
   // loop through the events
   // should be sorted newest to oldest, we want oldest to newest, so reverse
@@ -133,6 +134,11 @@ export function alertSummaryFromEventLog(params: AlertSummaryFromEventLogParams)
     }
   }
 
+  // set the status to flapping for flapping alerts
+  for (const alertId of flappingAlerts) {
+    getAlertStatus(alerts, alertId).isFlapping = true;
+  }
+
   alertSummary.errorMessages.sort((a, b) => a.date.localeCompare(b.date));
 
   if (eventDurations.length > 0) {
@@ -155,6 +161,7 @@ function getAlertStatus(alerts: Map<string, AlertStatus>, alertId: string): Aler
     actionGroupId: undefined,
     actionSubgroup: undefined,
     activeStartDate: undefined,
+    isFlapping: false,
   };
   alerts.set(alertId, status);
   return status;

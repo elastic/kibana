@@ -37,4 +37,5 @@ export interface AlertStatus {
   actionGroupId?: string;
   actionSubgroup?: string;
   activeStartDate?: string;
+  isFlapping?: boolean;
 }
