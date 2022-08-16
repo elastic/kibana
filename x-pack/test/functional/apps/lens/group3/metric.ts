@@ -230,6 +230,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await testSubjects.setValue('lnsMetric_max_cols', '1');
 
+      await PageObjects.lens.waitForVisualization('mtrVis');
+
       await PageObjects.lens.closeDimensionEditor();
 
       const tiles = await getMetricTiles();
