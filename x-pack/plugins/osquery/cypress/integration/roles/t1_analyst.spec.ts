@@ -12,7 +12,7 @@ import { checkResults, selectAllAgents, submitQuery } from '../../tasks/live_que
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 import { getSavedQueriesDropdown, LIVE_QUERY_EDITOR } from '../../screens/live_query';
 
-describe.skip('T1 Analyst - READ + runSavedQueries ', () => {
+describe('T1 Analyst - READ + runSavedQueries ', () => {
   const SAVED_QUERY_ID = 'Saved-Query-Id';
 
   beforeEach(() => {

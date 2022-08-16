@@ -59,7 +59,7 @@ describe('ALL - Packs', () => {
       cy.react('EuiFormRow', { props: { label: 'Interval (s)' } })
         .click()
         .clear()
-        .type('10');
+        .type('5');
       cy.react('EuiFlyoutFooter').react('EuiButton').contains('Save').click();
       cy.react('EuiTableRow').contains(SAVED_QUERY_ID);
       findAndClickButton('Save pack');
@@ -85,6 +85,7 @@ describe('ALL - Packs', () => {
       findAndClickButton('Update pack');
       cy.contains('Save and deploy changes');
       findAndClickButton('Save and deploy changes');
+      cy.contains(`Successfully updated "${PACK_NAME}" pack`);
     });
 
     it('should trigger validation when saved query is being chosen', () => {
@@ -97,6 +98,7 @@ describe('ALL - Packs', () => {
       cy.contains('ID must be unique').should('exist');
       cy.react('EuiFlyoutFooter').react('EuiButtonEmpty').contains('Cancel').click();
     });
+
     it.skip('should open lens in new tab', () => {
       let lensUrl = '';
       cy.window().then((win) => {
@@ -159,6 +161,28 @@ describe('ALL - Packs', () => {
       cy.getBySel('confirmModalConfirmButton').click();
       cy.contains(`Successfully activated "${PACK_NAME}" pack`).should('not.exist');
       cy.contains(`Successfully activated "${PACK_NAME}" pack`).should('exist');
+    });
+
+    it.skip('should verify that packs are triggered', () => {
+      cy.waitForReact();
+      preparePack(PACK_NAME);
+      cy.contains(`${PACK_NAME} details`).should('exist');
+
+      cy.getBySel('docsLoading').should('exist');
+      cy.getBySel('docsLoading').should('not.exist');
+      cy.react('ScheduledQueryLastResults')
+        .should('exist')
+        .within(() => {
+          cy.react('FormattedRelative');
+        });
+
+      cy.react('DocsColumnResults').within(() => {
+        cy.react('EuiNotificationBadge').contains('1');
+      });
+      cy.react('AgentsColumnResults').within(() => {
+        cy.react('EuiNotificationBadge').contains('1');
+      });
+      cy.getBySel('packResultsErrorsEmpty').should('have.length', 2);
     });
 
     it('delete all queries in the pack', () => {
@@ -260,6 +284,7 @@ describe('ALL - Packs', () => {
         .click();
       cy.contains(/^Delete integration$/).click();
       closeModalIfVisible();
+      cy.contains(/^Deleted integration 'osquery_manager-3'$/);
       navigateTo('app/osquery/packs');
       cy.contains(REMOVING_PACK).click();
       cy.contains(`${REMOVING_PACK} details`).should('exist');

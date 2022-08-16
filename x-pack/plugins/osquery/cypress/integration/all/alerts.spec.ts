@@ -49,7 +49,7 @@ describe('Alert Event Details', () => {
     closeModalIfVisible();
     cy.contains(PACK_NAME);
     cy.visit('/app/security/rules');
-    cy.contains(RULE_NAME).click();
+    cy.contains(RULE_NAME);
     cy.wait(2000);
     cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'true');
     cy.getBySel('ruleSwitch').click();
@@ -58,13 +58,23 @@ describe('Alert Event Details', () => {
     cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'true');
   });
 
-  it.skip('should be able to run live query and add to timeline (-depending on the previous test)', () => {
+  it('should be able to run live query and add to timeline (-depending on the previous test)', () => {
     const TIMELINE_NAME = 'Untitled timeline';
     cy.visit('/app/security/alerts');
     cy.getBySel('header-page-title').contains('Alerts').should('exist');
-    cy.getBySel('timeline-context-menu-button').first().click();
-    cy.getBySel('osquery-action-item').should('exist').contains('Run Osquery');
-    cy.getBySel('expand-event').first().click();
+    cy.getBySel('expand-event')
+      .first()
+      .within(() => {
+        cy.get(`[data-is-loading="true"]`).should('exist');
+      });
+    cy.getBySel('expand-event')
+      .first()
+      .within(() => {
+        cy.get(`[data-is-loading="true"]`).should('not.exist');
+      });
+    cy.getBySel('timeline-context-menu-button').first().click({ force: true });
+    cy.contains('Run Osquery');
+    cy.getBySel('expand-event').first().click({ force: true });
     cy.getBySel('take-action-dropdown-btn').click();
     cy.getBySel('osquery-action-item').click();
     cy.contains('1 agent selected.');
