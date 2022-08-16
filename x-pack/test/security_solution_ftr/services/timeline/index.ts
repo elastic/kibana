@@ -10,6 +10,7 @@ import { EndpointError } from '@kbn/security-solution-plugin/common/endpoint/err
 import { TIMELINE_DRAFT_URL, TIMELINE_URL } from '@kbn/security-solution-plugin/common/constants';
 import { TimelineResponse } from '@kbn/security-solution-plugin/common/types';
 import { TimelineInput } from '@kbn/security-solution-plugin/common/search_strategy';
+import moment from 'moment';
 import { FtrService } from '../../../functional/ftr_provider_context';
 
 export class TimelineTestService extends FtrService {
@@ -59,6 +60,13 @@ export class TimelineTestService extends FtrService {
 
     const titleUpdate: TimelineInput = {
       title,
+      // Set date range to the last 24 hours
+      dateRange: {
+        start: moment().subtract(1, 'days').toISOString(),
+        end: moment().toISOString(),
+        // Not sure why `start`/`end` are defined as numbers in the type, but looking at the
+        // UI's use of it, I can see they are being set to strings, so I'm forcing a cast here
+      } as unknown as TimelineInput['dateRange'],
     };
 
     // Update the title

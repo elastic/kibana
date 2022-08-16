@@ -13,6 +13,7 @@ import { FtrService } from '../../../functional/ftr_provider_context';
 
 export class DetectionsTestService extends FtrService {
   private readonly supertest = this.ctx.getService('supertest');
+  private readonly log = this.ctx.getService('log');
   private readonly retry = this.ctx.getService('retry');
   private readonly config = this.ctx.getService('config');
   private readonly defaultTimeout = this.config.get('timeouts.waitFor');
@@ -63,7 +64,14 @@ export class DetectionsTestService extends FtrService {
           .then(this.getHttpResponseFailureHandler())
           .then((response) => response.body as estypes.SearchResponse);
 
-        return Boolean((res.hits.total as estypes.SearchTotalHits)?.value ?? 0);
+        const hitsTotal = (res.hits.total as estypes.SearchTotalHits)?.value;
+        const response = Boolean(hitsTotal ?? 0);
+
+        if (response) {
+          this.log.info(`Found ${hitsTotal} alerts for query: ${JSON.stringify(query)}`);
+        }
+
+        return response;
       }
     );
   }
