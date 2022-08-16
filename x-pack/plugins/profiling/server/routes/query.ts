@@ -67,7 +67,7 @@ export function aggregateByFieldAndTimestamp(
       execution_hint: executionHint,
     },
     aggs: {
-      group_by: {
+      over_time: {
         date_histogram: {
           field: '@timestamp',
           fixed_interval: interval,
