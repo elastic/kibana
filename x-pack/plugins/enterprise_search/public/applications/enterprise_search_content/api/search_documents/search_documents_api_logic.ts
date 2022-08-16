@@ -24,15 +24,16 @@ export const searchDocuments = async ({
   query?: string;
 }) => {
   const newIndexName = encodeURIComponent(indexName);
-  const route = `/internal/enterprise_search/indices/${newIndexName}/search${
-    searchQuery ? `/${searchQuery}` : ''
-  }`;
+  const route = `/internal/enterprise_search/indices/${newIndexName}/search`;
   const query = {
     page: pagination.pageIndex,
     size: docsPerPage || pagination.pageSize,
   };
 
-  return await HttpLogic.values.http.get<{ meta: Meta; results: SearchResponseBody }>(route, {
+  return await HttpLogic.values.http.post<{ meta: Meta; results: SearchResponseBody }>(route, {
+    body: JSON.stringify({
+      searchQuery,
+    }),
     query,
   });
 };

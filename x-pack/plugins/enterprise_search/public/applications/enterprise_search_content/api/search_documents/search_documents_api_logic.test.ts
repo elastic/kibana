@@ -19,7 +19,7 @@ describe('SearchDocumentsApiLogic', () => {
   describe('searchDocuments', () => {
     it('calls correct api', async () => {
       const promise = Promise.resolve('result');
-      http.get.mockReturnValue(promise);
+      http.post.mockReturnValue(promise);
       const result = searchDocuments({
         indexName: 'indexName',
         pagination: {
@@ -28,15 +28,18 @@ describe('SearchDocumentsApiLogic', () => {
         },
       });
       await nextTick();
-      expect(http.get).toHaveBeenCalledWith(
+      expect(http.post).toHaveBeenCalledWith(
         '/internal/enterprise_search/indices/indexName/search',
-        { query: { page: 0, size: 10 } }
+        {
+          body: JSON.stringify({}),
+          query: { page: 0, size: 10 },
+        }
       );
       await expect(result).resolves.toEqual('result');
     });
     it('calls correct api with query set', async () => {
       const promise = Promise.resolve('result');
-      http.get.mockReturnValue(promise);
+      http.post.mockReturnValue(promise);
       const result = searchDocuments({
         indexName: 'düsseldorf',
         pagination: {
@@ -46,15 +49,20 @@ describe('SearchDocumentsApiLogic', () => {
         query: 'abcd',
       });
       await nextTick();
-      expect(http.get).toHaveBeenCalledWith(
-        '/internal/enterprise_search/indices/d%C3%BCsseldorf/search/abcd',
-        { query: { page: 0, size: 10 } }
+      expect(http.post).toHaveBeenCalledWith(
+        '/internal/enterprise_search/indices/d%C3%BCsseldorf/search',
+        {
+          body: JSON.stringify({
+            searchQuery: 'abcd',
+          }),
+          query: { page: 0, size: 10 },
+        }
       );
       await expect(result).resolves.toEqual('result');
     });
     it('calls with correct pageSize with docsPerPage set', async () => {
       const promise = Promise.resolve('result');
-      http.get.mockReturnValue(promise);
+      http.post.mockReturnValue(promise);
       const result = searchDocuments({
         docsPerPage: 25,
         indexName: 'indexName',
@@ -64,9 +72,12 @@ describe('SearchDocumentsApiLogic', () => {
         },
       });
       await nextTick();
-      expect(http.get).toHaveBeenCalledWith(
+      expect(http.post).toHaveBeenCalledWith(
         '/internal/enterprise_search/indices/indexName/search',
-        { query: { page: 0, size: 25 } }
+        {
+          body: JSON.stringify({}),
+          query: { page: 0, size: 25 },
+        }
       );
       await expect(result).resolves.toEqual('result');
     });

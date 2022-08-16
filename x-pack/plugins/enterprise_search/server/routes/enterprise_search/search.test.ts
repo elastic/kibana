@@ -27,8 +27,8 @@ describe('Elasticsearch Search', () => {
 
     mockRouter = new MockRouter({
       context,
-      method: 'get',
-      path: '/internal/enterprise_search/indices/{index_name}/search/{query}',
+      method: 'post',
+      path: '/internal/enterprise_search/indices/{index_name}/search',
     });
 
     registerSearchRoute({
@@ -37,14 +37,9 @@ describe('Elasticsearch Search', () => {
     });
   });
 
-  describe('GET /internal/enterprise_search/indices/{index_name}/search/{query}', () => {
+  describe('POST /internal/enterprise_search/indices/{index_name}/search with query on request body', () => {
     it('fails validation without index_name', () => {
-      const request = { params: { query: 'banana' } };
-      mockRouter.shouldThrow(request);
-    });
-
-    it('fails validation without query', () => {
-      const request = { params: { index_name: 'search-banana' } };
+      const request = { body: { searchQuery: '' }, params: {} };
       mockRouter.shouldThrow(request);
     });
 
@@ -73,7 +68,10 @@ describe('Elasticsearch Search', () => {
       });
 
       await mockRouter.callRoute({
-        params: { index_name: 'search-index-name', query: 'banana' },
+        body: {
+          searchQuery: 'banana',
+        },
+        params: { index_name: 'search-index-name' },
       });
 
       expect(fetchSearchResults).toHaveBeenCalledWith(
@@ -102,7 +100,7 @@ describe('Elasticsearch Search', () => {
     });
   });
 
-  describe('GET /internal/enterprise_search/indices/{index_name}/search', () => {
+  describe('POST /internal/enterprise_search/indices/{index_name}/search', () => {
     let mockRouterNoQuery: MockRouter;
     beforeEach(() => {
       const context = {
@@ -111,7 +109,7 @@ describe('Elasticsearch Search', () => {
 
       mockRouterNoQuery = new MockRouter({
         context,
-        method: 'get',
+        method: 'post',
         path: '/internal/enterprise_search/indices/{index_name}/search',
       });
 

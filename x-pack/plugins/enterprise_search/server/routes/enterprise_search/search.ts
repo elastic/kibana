@@ -37,10 +37,15 @@ const calculateMeta = (searchResults: SearchResponseBody, page: number, size: nu
 };
 
 export function registerSearchRoute({ router, log }: RouteDependencies) {
-  router.get(
+  router.post(
     {
       path: '/internal/enterprise_search/indices/{index_name}/search',
       validate: {
+        body: schema.object({
+          searchQuery: schema.string({
+            defaultValue: '',
+          }),
+        }),
         params: schema.object({
           index_name: schema.string(),
         }),
@@ -55,54 +60,14 @@ export function registerSearchRoute({ router, log }: RouteDependencies) {
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const indexName = decodeURIComponent(request.params.index_name);
+      const searchQuery = request.body.searchQuery;
       const { client } = (await context.core).elasticsearch;
       const { page = 0, size = ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT } = request.query;
       const from = page * size;
       const searchResults: SearchResponseBody = await fetchSearchResults(
         client,
         indexName,
-        '',
-        from,
-        size
-      );
-
-      return response.ok({
-        body: {
-          meta: calculateMeta(searchResults, page, size),
-          results: searchResults,
-        },
-        headers: { 'content-type': 'application/json' },
-      });
-    })
-  );
-
-  router.get(
-    {
-      path: '/internal/enterprise_search/indices/{index_name}/search/{query}',
-      validate: {
-        params: schema.object({
-          index_name: schema.string(),
-          query: schema.string(),
-        }),
-        query: schema.object({
-          page: schema.number({ defaultValue: 0, min: 0 }),
-          size: schema.number({
-            defaultValue: ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT,
-            min: 0,
-          }),
-        }),
-      },
-    },
-    elasticsearchErrorHandler(log, async (context, request, response) => {
-      const indexName = decodeURIComponent(request.params.index_name);
-      const { client } = (await context.core).elasticsearch;
-      const { page = 0, size = ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT } = request.query;
-      const from = page * size;
-
-      const searchResults = await fetchSearchResults(
-        client,
-        indexName,
-        request.params.query,
+        searchQuery,
         from,
         size
       );
