@@ -40,7 +40,7 @@ import type { VisualizationDimensionEditorProps } from '../../types';
 import { defaultNumberPaletteParams, defaultPercentagePaletteParams } from './palette_config';
 import { DEFAULT_MAX_COLUMNS, getDefaultColor, MetricVisualizationState } from './visualization';
 import { CollapseSetting } from '../../shared_components/collapse_setting';
-import { InputWithDefault } from '../../shared_components/input_with_default';
+import { DebouncedInput } from '../../shared_components/debounced_input';
 
 type Props = VisualizationDimensionEditorProps<MetricVisualizationState> & {
   paletteService: PaletteRegistry;
@@ -49,7 +49,7 @@ type Props = VisualizationDimensionEditorProps<MetricVisualizationState> & {
 type SubProps = Props & { idPrefix: string };
 
 export function DimensionEditor(props: Props) {
-  const { state, setState, accessor, frame, layerId } = props;
+  const { state, accessor } = props;
 
   const idPrefix = htmlIdGenerator()();
 
@@ -173,7 +173,7 @@ function MaximumEditor({ setState, state, idPrefix }: SubProps) {
   );
 }
 
-function SecondaryMetricEditor({ accessor, frame, layerId, setState, state }: SubProps) {
+function SecondaryMetricEditor({ accessor, idPrefix, frame, layerId, setState, state }: SubProps) {
   const columnName = getColumnByAccessor(accessor, frame.activeData?.[layerId].columns)?.name;
   const defaultPrefix = columnName || '';
 
@@ -186,14 +186,67 @@ function SecondaryMetricEditor({ accessor, frame, layerId, setState, state }: Su
           defaultMessage: 'Prefix',
         })}
       >
-        <InputWithDefault
-          compressed
-          fullWidth
-          value={state.secondaryPrefix || defaultPrefix}
-          onChange={(value: string) => setState({ ...state, secondaryPrefix: value })}
-          defaultValue={defaultPrefix}
+        <EuiButtonGroup
+          isFullWidth
+          buttonSize="compressed"
+          legend={i18n.translate('xpack.lens.metric.prefix.label', {
+            defaultMessage: 'Prefix',
+          })}
+          data-test-subj="lnsMetric_prefix_buttons"
+          options={[
+            {
+              id: `${idPrefix}auto`,
+              label: i18n.translate('xpack.lens.metric.prefix.auto', {
+                defaultMessage: 'Auto',
+              }),
+              'data-test-subj': 'lnsMetric_prefix_auto',
+            },
+            {
+              id: `${idPrefix}custom`,
+              label: i18n.translate('xpack.lens.metric.prefix.custom', {
+                defaultMessage: 'Custom',
+              }),
+              'data-test-subj': 'lnsMetric_prefix_custom',
+            },
+            {
+              id: `${idPrefix}none`,
+              label: i18n.translate('xpack.lens.metric.prefix.none', {
+                defaultMessage: 'None',
+              }),
+              'data-test-subj': 'lnsMetric_prefix_none',
+            },
+          ]}
+          idSelected={`${idPrefix}${
+            state.secondaryPrefix === undefined
+              ? 'auto'
+              : state.secondaryPrefix === ''
+              ? 'none'
+              : 'custom'
+          }`}
+          onChange={(id) => {
+            const mode = id.replace(idPrefix, '') as 'auto' | 'custom' | 'none';
+            const secondaryPrefix = { auto: undefined, custom: defaultPrefix, none: '' }[mode];
+            setState({
+              ...state,
+              secondaryPrefix,
+            });
+          }}
         />
       </EuiFormRow>
+      {state.secondaryPrefix && (
+        <EuiFormRow display="columnCompressed">
+          <DebouncedInput
+            compressed
+            value={state.secondaryPrefix}
+            onChange={(newPrefix) => {
+              setState({
+                ...state,
+                secondaryPrefix: newPrefix,
+              });
+            }}
+          />
+        </EuiFormRow>
+      )}
     </div>
   );
 }

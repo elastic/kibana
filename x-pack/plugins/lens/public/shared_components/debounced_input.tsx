@@ -7,20 +7,30 @@
 
 import React from 'react';
 import { EuiFieldText, EuiFieldTextProps } from '@elastic/eui';
-import { useDebouncedValue } from '.';
+import { useDebouncedValue } from './debounced_value';
 
 type Props = {
   value: string;
   onChange: (value: string) => void;
   defaultValue?: string;
+  allowFalsyValue?: boolean;
 } & Omit<EuiFieldTextProps, 'value' | 'onChange' | 'defaultValue'>;
 
-const DebouncedInput = ({ onChange, value, defaultValue, ...rest }: Props) => {
-  const { inputValue, handleInputChange, initialValue } = useDebouncedValue({
-    onChange,
-    value,
-    defaultValue,
-  });
+const DebouncedInputHelper = ({
+  onChange,
+  value,
+  defaultValue,
+  allowFalsyValue,
+  ...rest
+}: Props) => {
+  const { inputValue, handleInputChange, initialValue } = useDebouncedValue(
+    {
+      onChange,
+      value,
+      defaultValue,
+    },
+    { allowFalsyValue }
+  );
 
   return (
     <EuiFieldText
@@ -34,8 +44,8 @@ const DebouncedInput = ({ onChange, value, defaultValue, ...rest }: Props) => {
   );
 };
 
-export const InputWithDefault = (props: Props) => (
+export const DebouncedInput = (props: Props) => (
   // need this extra layer to force a rerender whenever the default value changes.
   // this is because we need a new initialValue to be computed from the debounce hook.
-  <DebouncedInput {...props} key={props.defaultValue} />
+  <DebouncedInputHelper {...props} key={props.defaultValue} />
 );

@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow } from '@elastic/eui';
-import { InputWithDefault } from './input_with_default';
+import { DebouncedInput } from './debounced_input';
 
 export const NameInput = ({
   value,
@@ -28,7 +28,7 @@ export const NameInput = ({
       display="columnCompressed"
       fullWidth
     >
-      <InputWithDefault
+      <DebouncedInput
         fullWidth
         compressed
         data-test-subj="column-label-edit"

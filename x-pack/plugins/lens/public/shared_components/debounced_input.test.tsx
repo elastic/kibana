@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiFieldText } from '@elastic/eui';
 import { mount } from 'enzyme';
-import { InputWithDefault } from './input_with_default';
+import { DebouncedInput } from './debounced_input';
 import { act } from 'react-dom/test-utils';
 
 jest.mock('lodash', () => {
@@ -20,11 +20,11 @@ jest.mock('lodash', () => {
   };
 });
 
-describe('InputWithDefault', () => {
+describe('DebouncedInput', () => {
   it('should render', () => {
     const mockOnChange = jest.fn();
     const wrapper = mount(
-      <InputWithDefault value={'my value'} onChange={mockOnChange} defaultValue={'default value'} />
+      <DebouncedInput value={'my value'} onChange={mockOnChange} defaultValue={'default value'} />
     );
 
     const textProps = wrapper.find(EuiFieldText).props();
@@ -41,7 +41,7 @@ describe('InputWithDefault', () => {
 
   it('should update placeholder when default value changes', () => {
     const wrapper = mount(
-      <InputWithDefault value={'my value'} onChange={() => {}} defaultValue={'old default'} />
+      <DebouncedInput value={'my value'} onChange={() => {}} defaultValue={'old default'} />
     );
 
     expect(wrapper.find(EuiFieldText).props().placeholder).toBe('old default');
@@ -55,7 +55,7 @@ describe('InputWithDefault', () => {
 
   it('should forward text field props', () => {
     const wrapper = mount(
-      <InputWithDefault
+      <DebouncedInput
         compressed
         fullWidth
         readOnly
