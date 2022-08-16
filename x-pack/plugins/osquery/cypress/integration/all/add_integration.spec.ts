@@ -128,13 +128,10 @@ describe('ALL - Add Integration', () => {
       .should('contain', 'osquery_manager-2')
       .and('contain', 'Osquery Manager')
       .and('contain', 'v')
-      .and('contain', `v${oldVersion}`)
-      .should('not.exist');
+      .and('not.contain', `v${oldVersion}`);
     cy.contains('Actions').click();
     cy.contains('View policy').click();
     cy.contains('name: osquery_manager-2');
-    cy.contains(`version: `);
-    cy.contains(`version: ${oldVersion}`).should('not.exist');
 
     // test list of prebuilt queries
     navigateTo('/app/osquery/saved_queries');
