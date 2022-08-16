@@ -7,7 +7,7 @@
 
 import { DETECTION_ENGINE_EXCEPTIONS_GET_FILTER } from '../../../../../common/constants';
 import { KibanaServices } from '../../../../common/lib/kibana';
-import {
+import type {
   ExceptionFilterResponse,
   GetExceptionFilterFromExceptionListIdProps,
   GetExceptionFilterFromExceptionsProps,

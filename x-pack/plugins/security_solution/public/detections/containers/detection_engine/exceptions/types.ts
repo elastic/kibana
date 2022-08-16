@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Filter } from '@kbn/es-query';
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { Filter } from '@kbn/es-query';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 export interface GetExceptionFilterOptionalProps {
   signal?: AbortSignal;

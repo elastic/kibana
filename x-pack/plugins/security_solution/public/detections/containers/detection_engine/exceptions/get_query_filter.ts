@@ -13,8 +13,8 @@ import type {
 import type { Filter, EsQueryConfig, DataViewBase } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 
-import type { ESBoolQuery } from '../typed_json';
-import type { Query, Index } from './schemas/common/schemas';
+import type { Query, Index } from '../../../../../common/detection_engine/schemas/common';
+import type { ESBoolQuery } from '../../../../../common/typed_json';
 import { getExceptionFilterFromExceptions } from './api';
 
 export const getQueryFilter = async (
@@ -41,7 +41,7 @@ export const getQueryFilter = async (
   // Discussion at https://issues.apache.org/jira/browse/LUCENE-4835 indicates that 1024 is a
   // very conservative value.
   const { filter } = await getExceptionFilterFromExceptions({
-    exceptions: lists,
+    exceptions: lists, // TODO fix this type
     excludeExceptions,
     chunkSize: 1024,
   });
