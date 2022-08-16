@@ -18,7 +18,9 @@ import {
 } from '../../common/utils/field_stats_utils';
 
 interface FetchFieldStatsParams {
-  data: DataPublicPluginStart;
+  services: {
+    data: DataPublicPluginStart;
+  };
   dataView: DataView;
   field: DataViewFieldBase;
   fromDate: string;
@@ -28,8 +30,19 @@ interface FetchFieldStatsParams {
   abortController?: AbortController;
 }
 
+/**
+ * Loads and aggregates stats data for a data view field
+ * @param services
+ * @param dataView
+ * @param field
+ * @param fromDate
+ * @param toDate
+ * @param dslQuery
+ * @param size
+ * @param abortController
+ */
 export const loadFieldStats = async ({
-  data,
+  services,
   dataView,
   field,
   fromDate,
@@ -38,6 +51,8 @@ export const loadFieldStats = async ({
   size,
   abortController,
 }: FetchFieldStatsParams): Promise<FieldStatsResponse<string | number>> => {
+  const { data } = services;
+
   try {
     if (!dataView?.id || !field?.type) {
       return {};

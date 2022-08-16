@@ -425,6 +425,7 @@ function DiscoverFieldComponent({
                 <EuiSpacer size="s" />
                 {Boolean(dateRange) && (
                   <FieldStats
+                    services={services}
                     query={state.query!}
                     filters={state.filters!}
                     fromDate={dateRange.from}

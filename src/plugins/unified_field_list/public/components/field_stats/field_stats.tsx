@@ -14,6 +14,11 @@ import {
   getEsQueryConfig,
   KBN_FIELD_TYPES,
 } from '@kbn/data-plugin/common';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import DateMath from '@kbn/datemath';
 import {
   EuiButtonGroup,
@@ -42,7 +47,6 @@ import { i18n } from '@kbn/i18n';
 import { buildEsQuery, Query, Filter, AggregateQuery } from '@kbn/es-query';
 import type { BucketedAggregation } from '../../../common/types';
 import { loadFieldStats, canProvideStatsForField } from '../../services';
-import { useUnifiedFieldListServices } from '../../hooks/use_unified_field_list_services';
 
 interface State {
   isLoading: boolean;
@@ -53,7 +57,16 @@ interface State {
   topValues?: BucketedAggregation<number | string>;
 }
 
+export interface FieldStatsServices {
+  uiSettings: IUiSettingsClient;
+  dataViews: DataViewsContract;
+  data: DataPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
+  charts: ChartsPluginSetup;
+}
+
 export interface FieldStatsProps {
+  services: FieldStatsServices;
   query: Query | AggregateQuery;
   filters: Filter[];
   fromDate: string;
@@ -70,6 +83,7 @@ export interface FieldStatsProps {
 }
 
 const FieldStatsComponent: React.FC<FieldStatsProps> = ({
+  services,
   query,
   filters,
   fromDate,
@@ -81,7 +95,6 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   overrideFooter,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const services = useUnifiedFieldListServices();
   const { fieldFormats, uiSettings, charts, dataViews, data } = services;
   const [state, changeState] = useState<State>({
     isLoading: false,
@@ -153,7 +166,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
       abortControllerRef.current = new AbortController();
 
       const results = await loadFieldStats({
-        data,
+        services: { data },
         dataView: loadedDataView,
         field,
         fromDate,
@@ -554,6 +567,11 @@ class ErrorBoundary extends React.Component<{}, { hasError: boolean }> {
   }
 }
 
+/**
+ * Component which fetches and renders stats for a data view field
+ * @param props
+ * @constructor
+ */
 export const FieldStats: React.FC<FieldStatsProps> = (props) => {
   return (
     <ErrorBoundary>

@@ -140,7 +140,7 @@ export function getDisallowedTermsMessage(
           if (fieldNames.length === 1) {
             const currentDataView = await data.dataViews.get(indexPattern.id);
             const response: FieldStatsResponse<string | number> = await loadFieldStats({
-              data,
+              services: { data },
               dataView: currentDataView,
               field: indexPattern.getFieldByName(fieldNames[0])!,
               dslQuery: buildEsQuery(

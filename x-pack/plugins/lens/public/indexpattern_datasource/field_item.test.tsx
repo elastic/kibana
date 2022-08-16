@@ -216,7 +216,7 @@ describe('IndexPattern Field Item', () => {
 
     expect(loadFieldStats).toHaveBeenCalledWith({
       abortController: new AbortController(),
-      data: mockedServices.data,
+      services: { data: mockedServices.data },
       dataView,
       dslQuery: {
         bool: {
@@ -291,7 +291,7 @@ describe('IndexPattern Field Item', () => {
     expect(loadFieldStats).toHaveBeenCalledTimes(2);
     expect(loadFieldStats).toHaveBeenLastCalledWith({
       abortController: new AbortController(),
-      data: mockedServices.data,
+      services: { data: mockedServices.data },
       dataView,
       dslQuery: {
         bool: {

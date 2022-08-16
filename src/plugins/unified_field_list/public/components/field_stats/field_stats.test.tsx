@@ -13,7 +13,6 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -31,14 +30,6 @@ const mockedServices = {
   fieldFormats: fieldFormatsServiceMock.createStartContract(),
   charts: chartPluginMock.createSetupContract(),
   uiSettings: coreMock.createStart().uiSettings,
-};
-
-const FieldStatsWrapper: React.FC<FieldStatsProps> = (props) => {
-  return (
-    <KibanaContextProvider services={mockedServices}>
-      <FieldStats {...props} />
-    </KibanaContextProvider>
-  );
 };
 
 describe('UnifiedFieldList <FieldStats />', () => {
@@ -107,6 +98,7 @@ describe('UnifiedFieldList <FieldStats />', () => {
     } as unknown as DataView;
 
     defaultProps = {
+      services: mockedServices,
       dataViewOrDataViewId: dataView,
       field: {
         name: 'bytes',
@@ -139,7 +131,7 @@ describe('UnifiedFieldList <FieldStats />', () => {
     });
 
     const wrapper = mountWithIntl(
-      <FieldStatsWrapper
+      <FieldStats
         {...defaultProps}
         query={{ query: 'geo.src : "US"', language: 'kuery' }}
         filters={[
@@ -157,7 +149,7 @@ describe('UnifiedFieldList <FieldStats />', () => {
 
     expect(loadFieldStats).toHaveBeenCalledWith({
       abortController: new AbortController(),
-      data: mockedServices.data,
+      services: { data: mockedServices.data },
       dataView,
       dslQuery: {
         bool: {
@@ -207,7 +199,7 @@ describe('UnifiedFieldList <FieldStats />', () => {
 
   it('should not request field stats for range fields', async () => {
     mountWithIntl(
-      <FieldStatsWrapper
+      <FieldStats
         {...defaultProps}
         field={
           {
@@ -224,7 +216,7 @@ describe('UnifiedFieldList <FieldStats />', () => {
 
   it('should not request field stats for geo fields', async () => {
     mountWithIntl(
-      <FieldStatsWrapper
+      <FieldStats
         {...defaultProps}
         field={
           {
@@ -240,7 +232,7 @@ describe('UnifiedFieldList <FieldStats />', () => {
   });
 
   it('should render nothing if no data is found', async () => {
-    const wrapper = mountWithIntl(<FieldStatsWrapper {...defaultProps} />);
+    const wrapper = mountWithIntl(<FieldStats {...defaultProps} />);
 
     await wrapper.update();
 
@@ -259,7 +251,7 @@ describe('UnifiedFieldList <FieldStats />', () => {
     });
 
     const wrapper = mountWithIntl(
-      <FieldStatsWrapper
+      <FieldStats
         {...defaultProps}
         query={{ language: 'kuery', query: '' }}
         filters={[]}
@@ -272,7 +264,7 @@ describe('UnifiedFieldList <FieldStats />', () => {
 
     expect(loadFieldStats).toHaveBeenCalledWith({
       abortController: new AbortController(),
-      data: mockedServices.data,
+      services: { data: mockedServices.data },
       dataView,
       fromDate: 'now-7d',
       toDate: 'now',
@@ -362,7 +354,7 @@ describe('UnifiedFieldList <FieldStats />', () => {
     });
 
     const wrapper = mountWithIntl(
-      <FieldStatsWrapper
+      <FieldStats
         {...defaultProps}
         field={dataView.fields[0]}
         query={{ language: 'kuery', query: '' }}
@@ -376,7 +368,7 @@ describe('UnifiedFieldList <FieldStats />', () => {
 
     expect(loadFieldStats).toHaveBeenCalledWith({
       abortController: new AbortController(),
-      data: mockedServices.data,
+      services: { data: mockedServices.data },
       dataView,
       fromDate: 'now-1h',
       toDate: 'now',
@@ -470,7 +462,7 @@ describe('UnifiedFieldList <FieldStats />', () => {
     const field = dataView.fields.find((f) => f.name === 'machine.ram')!;
 
     const wrapper = mountWithIntl(
-      <FieldStatsWrapper
+      <FieldStats
         {...defaultProps}
         field={field}
         query={{ language: 'kuery', query: '' }}
@@ -484,7 +476,7 @@ describe('UnifiedFieldList <FieldStats />', () => {
 
     expect(loadFieldStats).toHaveBeenCalledWith({
       abortController: new AbortController(),
-      data: mockedServices.data,
+      services: { data: mockedServices.data },
       dataView,
       fromDate: 'now-1h',
       toDate: 'now',

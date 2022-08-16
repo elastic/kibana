@@ -11,5 +11,5 @@
   "ui": true,
   "requiredPlugins": ["dataViews", "data", "fieldFormats", "charts"],
   "optionalPlugins": [],
-  "requiredBundles": ["kibanaReact"]
+  "requiredBundles": []
 }

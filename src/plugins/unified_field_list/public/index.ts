@@ -14,8 +14,8 @@ export type {
   NumberStatsResult,
   TopValuesResult,
 } from '../common/types';
-export type { FieldStatsProps, FieldStatsFromHitsProps } from './components/field_stats';
-export { FieldStats, FieldStatsFromHits } from './components/field_stats';
+export type { FieldStatsProps, FieldStatsServices } from './components/field_stats';
+export { FieldStats } from './components/field_stats';
 
 // This exports static code and TypeScript types,
 // as well as, Kibana Platform `plugin()` initializer.

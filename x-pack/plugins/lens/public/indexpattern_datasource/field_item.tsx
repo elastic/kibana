@@ -22,6 +22,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FieldButton } from '@kbn/react-field';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { EuiHighlight } from '@elastic/eui';
@@ -38,7 +39,7 @@ import type { DraggedField } from './types';
 import { LensFieldIcon } from '../shared_components/field_picker/lens_field_icon';
 import { VisualizeGeoFieldButton } from './visualize_geo_field_button';
 import { getVisualizeGeoFieldMessage } from '../utils';
-
+import type { LensAppServices } from '../app_plugin/types';
 import { debouncedComponent } from '../debounced_component';
 
 export interface FieldItemProps {
@@ -318,6 +319,7 @@ function FieldItemPopoverContents(props: FieldItemProps) {
     uiActions,
     core,
   } = props;
+  const services = useKibana<LensAppServices>().services;
 
   const panelHeader = (
     <FieldPanelHeader
@@ -338,11 +340,12 @@ function FieldItemPopoverContents(props: FieldItemProps) {
     <>
       <EuiPopoverTitle>{panelHeader}</EuiPopoverTitle>
       <FieldStats
+        services={services}
         query={query}
         filters={filters}
         fromDate={dateRange.fromDate}
         toDate={dateRange.toDate}
-        dataViewOrDataViewId={indexPattern.id} // TODO: Refactor to pass a variable with DataView type instead
+        dataViewOrDataViewId={indexPattern.id} // TODO: Refactor to pass a variable with DataView type instead of IndexPattern
         field={field as DataViewField}
         testSubject="lnsFieldListPanel"
         overrideFooter={({ element }) => <EuiPopoverFooter>{element}</EuiPopoverFooter>}
