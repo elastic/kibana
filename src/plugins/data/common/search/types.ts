@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { Observable } from 'rxjs';

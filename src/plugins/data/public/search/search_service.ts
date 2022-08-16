@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { BfetchPublicSetup } from '@kbn/bfetch-plugin/public';
 import {
   CoreSetup,
@@ -72,7 +73,7 @@ import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
 import { ISessionsClient, ISessionService, SessionsClient, SessionService } from './session';
 import { registerSearchSessionsMgmt } from './session/sessions_mgmt';
 import { createConnectedSearchSessionIndicator } from './session/session_indicator';
-import type { ISearchSetup, ISearchStart } from './types';
+import { ISearchSetup, ISearchStart } from './types';
 
 /** @internal */
 export interface SearchServiceSetupDependencies {
@@ -270,13 +271,15 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         this.searchInterceptor.showError(e);
       },
       showWarnings: (inspector, cb) => {
-        inspector.adapter?.getRequests().map((req) => {
+        inspector.adapter?.getRequests().forEach((req) => {
           let handled: boolean | undefined;
           if (cb != null) {
-            // use the callback to handle warnings from the request
-            handled = cb(extractWarnings(req.json));
+            const warnings = extractWarnings(req.json as estypes.SearchResponseBody | undefined);
+            // use the consumer callback to handle warnings from the request
+            handled = !!warnings && cb(warnings);
           }
 
+          // test if the consumer callback specifies to skip the default behavior
           if (!handled) {
             handleResponse(
               { body: req.json },
