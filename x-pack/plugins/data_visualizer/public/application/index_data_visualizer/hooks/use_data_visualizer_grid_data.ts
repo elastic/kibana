@@ -84,6 +84,7 @@ export const useDataVisualizerGridData = (
       visibleFieldNames: input?.visibleFieldNames ?? [],
       currentFilters: input?.filters,
       fieldsToFetch: input?.fieldsToFetch,
+      samplingMode: input?.samplingMode,
     }),
     [input]
   );
@@ -238,9 +239,8 @@ export const useDataVisualizerGridData = (
   const { overallStats, progress: overallStatsProgress } = useOverallStats(
     fieldStatsRequest,
     lastRefresh,
-    // @todo
     browserSessionSeed,
-    dataVisualizerListState.probability
+    input?.samplingMode === 'autoRandomSampler' ? null : dataVisualizerListState.probability
   );
 
   const configsWithoutStats = useMemo(() => {

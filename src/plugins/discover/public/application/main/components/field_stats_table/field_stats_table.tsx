@@ -155,6 +155,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
         onAddFilter,
         sessionId: searchSessionId,
         fieldsToFetch: availableFields$?.getValue().fields,
+        samplingMode: 'autoRandomSampler',
       });
       embeddable.reload();
     }
