@@ -9,7 +9,6 @@ import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { useStore } from 'react-redux';
-import { asyncForEach } from '@kbn/std';
 import { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { downloadMultipleAs } from '@kbn/share-plugin/public';
 import { tableHasFormulas } from '@kbn/data-plugin/common';
@@ -253,40 +252,19 @@ export const LensTopNavMenu = ({
     [dispatch]
   );
   const [indexPatterns, setIndexPatterns] = useState<DataView[]>([]);
-  const [adHocDataViews, setAdHocDataViews] = useState<DataView[]>();
   const [currentIndexPattern, setCurrentIndexPattern] = useState<DataView>();
   const [rejectedIndexPatterns, setRejectedIndexPatterns] = useState<string[]>([]);
 
   const dispatchChangeIndexPattern = React.useCallback(
-    async (dataViewOrId) => {
-      const indexPatternId = typeof dataViewOrId === 'string' ? dataViewOrId : dataViewOrId.id;
-      const [newIndexPatternRefs, newIndexPatterns] = await Promise.all([
-        // Reload refs in case it's a new indexPattern created on the spot
-        dataViews.indexPatternRefs[indexPatternId]
-          ? dataViews.indexPatternRefs
-          : indexPatternService.loadIndexPatternRefs({
-              isFullEditor: true,
-            }),
-        indexPatternService.ensureIndexPattern({
-          id: indexPatternId,
-          cache: dataViews.indexPatterns,
-        }),
-      ]);
-      // enhance the references with the adHoc dataviews
-      if (adHocDataViews?.length) {
-        adHocDataViews.forEach((adHoc) => {
-          if (adHoc.id) {
-            newIndexPatternRefs.push({
-              title: adHoc.title,
-              name: adHoc.name,
-              id: adHoc.id,
-            });
-          }
-        });
-      }
+    async (dataViewOrId: DataView | string) => {
+      const indexPatternId = typeof dataViewOrId === 'string' ? dataViewOrId : dataViewOrId.id!;
+      const newIndexPatterns = await indexPatternService.ensureIndexPattern({
+        id: indexPatternId,
+        cache: dataViews.indexPatterns,
+      });
       dispatch(
         changeIndexPattern({
-          dataViews: { indexPatterns: newIndexPatterns, indexPatternRefs: newIndexPatternRefs },
+          dataViews: { indexPatterns: newIndexPatterns },
           datasourceIds: Object.keys(datasourceStates),
           visualizationIds: visualization.activeId ? [visualization.activeId] : [],
           indexPatternId,
@@ -294,13 +272,11 @@ export const LensTopNavMenu = ({
       );
     },
     [
-      dataViews.indexPatternRefs,
       dataViews.indexPatterns,
       datasourceStates,
       dispatch,
       indexPatternService,
       visualization.activeId,
-      adHocDataViews,
     ]
   );
 
@@ -360,21 +336,6 @@ export const LensTopNavMenu = ({
       setCurrentIndexPattern(indexPatterns[0]);
     }
   }, [indexPatterns]);
-
-  // add to the dataview picker list the adHoc dataviews
-  useEffect(() => {
-    const setAdHoc = async () => {
-      await asyncForEach(indexPatterns, async (indexPattern) => {
-        if (indexPattern.id && !adHocDataViews?.some((d) => d.id === indexPattern.id)) {
-          const dataViewInstance = await data.dataViews.get(indexPattern.id);
-          if (!dataViewInstance.isPersisted()) {
-            setAdHocDataViews([...(adHocDataViews ?? []), indexPattern]);
-          }
-        }
-      });
-    };
-    setAdHoc();
-  }, [adHocDataViews, data.dataViews, indexPatterns]);
 
   useEffect(() => {
     return () => {
@@ -707,8 +668,12 @@ export const LensTopNavMenu = ({
                   dataView: indexPatternInstance,
                 },
                 fieldName,
-                onSave: async () => {
-                  refreshFieldList();
+                onSave: () => {
+                  if (indexPatternInstance.isPersisted()) {
+                    refreshFieldList();
+                  } else {
+                    indexPatternService.replaceDataViewId(indexPatternInstance);
+                  }
                 },
               });
             }
@@ -719,6 +684,7 @@ export const LensTopNavMenu = ({
       currentIndexPattern?.id,
       data.dataViews,
       dataViewFieldEditor,
+      indexPatternService,
       refreshFieldList,
     ]
   );
@@ -737,18 +703,13 @@ export const LensTopNavMenu = ({
                 if (dataView.id) {
                   dispatchChangeIndexPattern(dataView);
                   setCurrentIndexPattern(dataView);
-                  if (!dataView.isPersisted()) {
-                    // add the ad-hoc dataview on the indexPatterns list
-                    setIndexPatterns([...indexPatterns, dataView]);
-                  }
-                  refreshFieldList();
                 }
               },
               allowAdHocDataView: true,
             });
           }
         : undefined,
-    [canEditDataView, dataViewEditor, dispatchChangeIndexPattern, refreshFieldList, indexPatterns]
+    [canEditDataView, dataViewEditor, dispatchChangeIndexPattern]
   );
 
   const dataViewPickerProps = {
@@ -760,7 +721,7 @@ export const LensTopNavMenu = ({
     currentDataViewId: currentIndexPattern?.id,
     onAddField: addField,
     onDataViewCreated: createNewDataView,
-    adHocDataViews,
+    adHocDataViews: indexPatterns.filter((pattern) => !pattern.isPersisted()),
     onChangeDataView: (newIndexPatternId: string) => {
       const currentDataView = indexPatterns.find(
         (indexPattern) => indexPattern.id === newIndexPatternId

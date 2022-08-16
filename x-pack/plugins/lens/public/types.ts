@@ -274,7 +274,6 @@ export interface Datasource<T = unknown, P = unknown> {
   removeLayer: (state: T, layerId: string) => T;
   clearLayer: (state: T, layerId: string) => T;
   getLayers: (state: T) => string[];
-  getAdHocIndexSpecs?: (state: P) => Record<string, DataViewSpec> | undefined;
   removeColumn: (props: {
     prevState: T;
     layerId: string;
@@ -338,6 +337,12 @@ export interface Datasource<T = unknown, P = unknown> {
     indexPatternId: string,
     layerId?: string
   ) => T;
+  onIndexPatternRename?: (state: T, oldIndexPatternId: string, newIndexPatternId: string) => T;
+  triggerOnIndexPatternChange?: (
+    state: T,
+    oldIndexPatternId: string,
+    newIndexPatternId: string
+  ) => void;
 
   onRefreshIndexPattern: () => void;
 
@@ -1079,6 +1084,7 @@ export interface Visualization<T = unknown> {
    * This method makes it aware of the change and produces a new updated state
    */
   onIndexPatternChange?: (state: T, indexPatternId: string, layerId?: string) => T;
+  onIndexPatternRename?: (state: T, oldIndexPatternId: string, newIndexPatternId: string) => T;
   /**
    * Gets custom display options for showing the visualization.
    */

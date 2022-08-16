@@ -41,6 +41,7 @@ import {
   injectReferences,
   loadInitialState,
   onRefreshIndexPattern,
+  renameIndexPattern,
   triggerActionOnIndexPatternChange,
 } from './loader';
 import { toExpression } from './to_expression';
@@ -200,10 +201,6 @@ export function getIndexPatternDatasource({
 
     getLayers(state: IndexPatternPrivateState) {
       return Object.keys(state.layers);
-    },
-
-    getAdHocIndexSpecs(state: IndexPatternPersistedState) {
-      return state?.adHocIndexPatterns;
     },
 
     removeColumn({ prevState, layerId, columnId, indexPatterns }) {
@@ -458,6 +455,9 @@ export function getIndexPatternDatasource({
       }
       return changeIndexPattern({ indexPatternId, state, storage, indexPatterns });
     },
+    onIndexPatternRename: (state, oldIndexPatternId, newIndexPatternId) => {
+      return renameIndexPattern({ state, oldIndexPatternId, newIndexPatternId });
+    },
     getRenderEventCounters(state: IndexPatternPrivateState): string[] {
       const additionalEvents = {
         time_shift: false,
@@ -545,7 +545,7 @@ export function getIndexPatternDatasource({
           return null;
         },
         getSourceId: () => {
-          return layer.adHocSpec?.id || layer.indexPatternId;
+          return layer.indexPatternId;
         },
         getFilters: (activeData: FramePublicAPI['activeData'], timeRange?: TimeRange) => {
           return getFiltersInLayer(

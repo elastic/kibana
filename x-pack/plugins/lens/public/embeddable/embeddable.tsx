@@ -76,12 +76,7 @@ import { LensAttributeService } from '../lens_attribute_service';
 import type { ErrorMessage, TableInspectorAdapter } from '../editor_frame_service/types';
 import { getLensInspectorService, LensInspector } from '../lens_inspector_service';
 import { SharingSavedObjectProps, VisualizationDisplayOptions } from '../types';
-import {
-  getActiveDatasourceIdFromDoc,
-  getIndexPatternsObjects,
-  inferTimeField,
-  getAdHocIndexSpecs,
-} from '../utils';
+import { getActiveDatasourceIdFromDoc, getIndexPatternsObjects, inferTimeField } from '../utils';
 import { getLayerMetaInfo, combineQueryAndFilters } from '../app_plugin/show_underlying_data';
 import { convertDataViewIntoLensIndexPattern } from '../indexpattern_service/loader';
 
@@ -775,8 +770,7 @@ export class Embeddable
 
     this.activeDataInfo.activeDatasource = this.deps.datasourceMap[activeDatasourceId];
     const docDatasourceState = this.savedVis?.state.datasourceStates[activeDatasourceId];
-    const adHocIndexPatterns =
-      this.activeDataInfo.activeDatasource?.getAdHocIndexSpecs?.(docDatasourceState);
+    const adHocIndexPatterns = this.savedVis?.state.adHocDataViews;
 
     const adHocDataviews: DataView[] = [];
 
@@ -802,7 +796,7 @@ export class Embeddable
     if (!this.activeDataInfo.activeDatasourceState) {
       this.activeDataInfo.activeDatasourceState = this.activeDataInfo.activeDatasource.initialize(
         docDatasourceState,
-        this.savedVis?.references,
+        [...(this.savedVis?.references || []), ...(this.savedVis?.state.internalReferences || [])],
         undefined,
         undefined,
         indexPatternsCache
@@ -851,19 +845,13 @@ export class Embeddable
       this.savedVis?.references.map(({ id }) => id) || [],
       this.deps.dataViews
     );
-    const activeDatasourceId = getActiveDatasourceIdFromDoc(this.savedVis);
-    if (activeDatasourceId) {
-      const activeDatasource = this.deps.datasourceMap[activeDatasourceId];
-      const dataSourceState = this.savedVis?.state.datasourceStates[activeDatasourceId];
-      const { adHocDataviews } = await getAdHocIndexSpecs(
-        activeDatasource,
-        dataSourceState,
-        this.deps.dataViews
-      );
-      if (adHocDataviews.length) {
-        indexPatterns.push(...adHocDataviews);
-      }
-    }
+    (
+      await Promise.all(
+        Object.values(this.savedVis?.state.adHocDataViews || {}).map((spec) =>
+          this.deps.dataViews.create(spec)
+        )
+      )
+    ).forEach((dataView) => indexPatterns.push(dataView));
 
     this.indexPatterns = uniqBy(indexPatterns, 'id');
 

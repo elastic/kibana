@@ -97,13 +97,22 @@ export function convertDataViewIntoLensIndexPattern(
 }
 
 export async function loadIndexPatternRefs(
-  dataViews: MinimalDataViewsContract
+  dataViews: MinimalDataViewsContract,
+  adHocDataViews?: Record<string, DataViewSpec>
 ): Promise<IndexPatternRef[]> {
   const indexPatterns = await dataViews.getIdsWithTitle();
 
-  return indexPatterns.sort((a, b) => {
-    return a.title.localeCompare(b.title);
-  });
+  return indexPatterns
+    .concat(
+      Object.values(adHocDataViews || {}).map((dataViewSpec) => ({
+        id: dataViewSpec.id!,
+        name: dataViewSpec.name,
+        title: dataViewSpec.title!,
+      }))
+    )
+    .sort((a, b) => {
+      return a.title.localeCompare(b.title);
+    });
 }
 
 /**
@@ -123,19 +132,20 @@ export async function loadIndexPatterns({
   patterns,
   notUsedPatterns,
   cache,
-  adHocDataviews,
+  adHocDataViews,
   onIndexPatternRefresh,
 }: {
   dataViews: MinimalDataViewsContract;
   patterns: string[];
   notUsedPatterns?: string[];
   cache: Record<string, IndexPattern>;
-  adHocDataviews?: DataViewSpec[];
+  adHocDataViews?: Record<string, DataViewSpec>;
   onIndexPatternRefresh?: () => void;
 }) {
-  const missingIds = patterns.filter((id) => !cache[id]);
+  const missingIds = patterns.filter((id) => !cache[id] && !adHocDataViews?.[id]);
+  const hasAdHocDataViews = Object.values(adHocDataViews || {}).length > 0;
 
-  if (missingIds.length === 0) {
+  if (missingIds.length === 0 && !hasAdHocDataViews) {
     return cache;
   }
 
@@ -150,7 +160,7 @@ export async function loadIndexPatterns({
     .map((response) => response.value);
 
   // if all of the used index patterns failed to load, try loading one of not used ones till one succeeds
-  if (!indexPatterns.length && notUsedPatterns) {
+  if (!indexPatterns.length && !hasAdHocDataViews && notUsedPatterns) {
     for (const notUsedPattern of notUsedPatterns) {
       const resp = await dataViews.get(notUsedPattern).catch((e) => {
         // do nothing
@@ -160,12 +170,11 @@ export async function loadIndexPatterns({
       }
     }
   }
-  if (adHocDataviews?.length) {
-    for (const addHocDataView of adHocDataviews) {
-      const d = await dataViews.create(addHocDataView);
-      indexPatterns.push(d);
-    }
-  }
+  indexPatterns.push(
+    ...(await Promise.all(
+      Object.values(adHocDataViews || {}).map((spec) => dataViews.create(spec))
+    ))
+  );
 
   const indexPatternsObject = indexPatterns.reduce(
     (acc, indexPattern) => ({

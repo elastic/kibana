@@ -523,11 +523,24 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 dataView: indexPatternInstance,
               },
               fieldName,
-              onSave: () => refreshFieldList(),
+              onSave: () => {
+                if (indexPatternInstance.isPersisted()) {
+                  refreshFieldList();
+                } else {
+                  indexPatternService.replaceDataViewId(indexPatternInstance);
+                }
+              },
             });
           }
         : undefined,
-    [editPermission, dataViews, currentIndexPattern.id, indexPatternFieldEditor, refreshFieldList]
+    [
+      editPermission,
+      dataViews,
+      currentIndexPattern.id,
+      indexPatternFieldEditor,
+      refreshFieldList,
+      indexPatternService,
+    ]
   );
 
   const removeField = useMemo(
@@ -540,11 +553,24 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 dataView: indexPatternInstance,
               },
               fieldName,
-              onDelete: () => refreshFieldList(),
+              onDelete: () => {
+                if (indexPatternInstance.isPersisted()) {
+                  refreshFieldList();
+                } else {
+                  indexPatternService.replaceDataViewId(indexPatternInstance);
+                }
+              },
             });
           }
         : undefined,
-    [currentIndexPattern.id, dataViews, editPermission, indexPatternFieldEditor, refreshFieldList]
+    [
+      currentIndexPattern.id,
+      dataViews,
+      editPermission,
+      indexPatternFieldEditor,
+      indexPatternService,
+      refreshFieldList,
+    ]
   );
 
   const fieldProps = useMemo(

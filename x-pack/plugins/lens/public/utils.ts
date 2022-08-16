@@ -93,14 +93,11 @@ export async function refreshIndexPatternsList({
     .map((datasource) => datasource?.onRefreshIndexPattern)
     .filter(Boolean);
 
-  const [newlyMappedIndexPattern, indexPatternRefs] = await Promise.all([
-    indexPatternService.loadIndexPatterns({
-      cache: {},
-      patterns: [indexPatternId],
-      onIndexPatternRefresh: () => onRefreshCallbacks.forEach((fn) => fn()),
-    }),
-    indexPatternService.loadIndexPatternRefs({ isFullEditor: true }),
-  ]);
+  const newlyMappedIndexPattern = await indexPatternService.loadIndexPatterns({
+    cache: {},
+    patterns: [indexPatternId],
+    onIndexPatternRefresh: () => onRefreshCallbacks.forEach((fn) => fn()),
+  });
   const indexPattern = newlyMappedIndexPattern[indexPatternId];
   // But what about existingFields here?
   // When the indexPatterns cache object gets updated, the data panel will
@@ -110,7 +107,6 @@ export async function refreshIndexPatternsList({
       ...indexPatternsCache,
       [indexPatternId]: indexPattern,
     },
-    indexPatternRefs,
   });
 }
 
@@ -151,27 +147,6 @@ export async function getIndexPatternsObjects(
     .filter((id, i) => responses[i].status === 'rejected');
   // return also the rejected ids in case we want to show something later on
   return { indexPatterns: fullfilled.map((response) => response.value), rejectedIds };
-}
-
-export async function getAdHocIndexSpecs(
-  dataSource: Datasource,
-  dataSourceState: unknown,
-  dataViews: DataViewsContract
-): Promise<{ adHocDataviews: DataView[] }> {
-  const adHocIndexPatterns = dataSource?.getAdHocIndexSpecs?.(dataSourceState);
-
-  const adHocDataviews: DataView[] = [];
-
-  if (adHocIndexPatterns) {
-    const adHocSpecs = Object.values(adHocIndexPatterns);
-    if (adHocSpecs?.length) {
-      for (const addHocDataView of adHocSpecs) {
-        const d = await dataViews.create(addHocDataView);
-        adHocDataviews.push(d);
-      }
-    }
-  }
-  return { adHocDataviews };
 }
 
 export function getRemoveOperation(

@@ -51,21 +51,14 @@ export function extractReferences({ layers }: IndexPatternPrivateState) {
   const savedObjectReferences: SavedObjectReference[] = [];
   const persistableState: IndexPatternPersistedState = {
     layers: {},
-    adHocIndexPatterns: {},
   };
   Object.entries(layers).forEach(([layerId, { indexPatternId, ...persistableLayer }]) => {
     persistableState.layers[layerId] = persistableLayer;
-    if (persistableLayer.adHocSpec) {
-      if (!persistableState.adHocIndexPatterns![indexPatternId]) {
-        persistableState.adHocIndexPatterns![indexPatternId] = persistableLayer.adHocSpec!;
-      }
-    } else {
-      savedObjectReferences.push({
-        type: 'index-pattern',
-        id: indexPatternId,
-        name: getLayerReferenceName(layerId),
-      });
-    }
+    savedObjectReferences.push({
+      type: 'index-pattern',
+      id: indexPatternId,
+      name: getLayerReferenceName(layerId),
+    });
   });
   return { savedObjectReferences, state: persistableState };
 }
@@ -78,14 +71,11 @@ export function injectReferences(
   Object.entries(state.layers).forEach(([layerId, persistedLayer]) => {
     layers[layerId] = {
       ...persistedLayer,
-      indexPatternId:
-        persistedLayer.adHocSpec?.id ||
-        references.find(({ name }) => name === getLayerReferenceName(layerId))!.id,
+      indexPatternId: references.find(({ name }) => name === getLayerReferenceName(layerId))!.id,
     };
   });
   return {
     layers,
-    adHocIndexPatterns: state.adHocIndexPatterns,
   };
 }
 
@@ -129,11 +119,7 @@ function getUsedIndexPatterns({
   const usedPatterns = (
     initialContext
       ? indexPatternIds
-      : uniq(
-          state
-            ? Object.values(state.layers).map((l) => l.adHocSpec?.id ?? l.indexPatternId)
-            : [fallbackId]
-        )
+      : uniq(state ? Object.values(state.layers).map((l) => l.indexPatternId) : [fallbackId])
   )
     // take out the undefined from the list
     .filter(Boolean);
@@ -170,11 +156,6 @@ export function loadInitialState({
     indexPatternRefs,
   });
 
-  if (persistedState?.adHocIndexPatterns) {
-    Object.entries(persistedState?.adHocIndexPatterns).forEach(([id, { name, title }]) => {
-      indexPatternRefs.push({ id, name, title: title || '' });
-    });
-  }
   const availableIndexPatterns = new Set(indexPatternRefs.map(({ id }: IndexPatternRef) => id));
 
   const notUsedPatterns: string[] = difference([...availableIndexPatterns], usedPatterns);
@@ -221,6 +202,29 @@ export function changeIndexPattern({
   };
 }
 
+export function renameIndexPattern({
+  oldIndexPatternId,
+  newIndexPatternId,
+  state,
+}: {
+  oldIndexPatternId: string;
+  newIndexPatternId: string;
+  state: IndexPatternPrivateState;
+}) {
+  return {
+    ...state,
+    layers: !isSingleEmptyLayer(state.layers)
+      ? mapValues(state.layers, (layer) =>
+          layer.indexPatternId === oldIndexPatternId
+            ? { ...layer, indexPatternId: newIndexPatternId }
+            : layer
+        )
+      : state.layers,
+    currentIndexPatternId:
+      state.currentIndexPatternId === oldIndexPatternId ? newIndexPatternId : oldIndexPatternId,
+  };
+}
+
 export function triggerActionOnIndexPatternChange({
   state,
   layerId,
@@ -232,7 +236,8 @@ export function triggerActionOnIndexPatternChange({
   state: IndexPatternPrivateState;
   uiActions: UiActionsStart;
 }) {
-  const fromDataView = state.layers[layerId].indexPatternId;
+  const fromDataView = state.layers[layerId]?.indexPatternId;
+  if (!fromDataView) return;
   const toDataView = indexPatternId;
 
   const trigger = uiActions.getTrigger(UPDATE_FILTER_REFERENCES_TRIGGER);

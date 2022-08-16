@@ -17,6 +17,12 @@ export const selectQuery = (state: LensState) => state.lens.query;
 export const selectSearchSessionId = (state: LensState) => state.lens.searchSessionId;
 export const selectFilters = (state: LensState) => state.lens.filters;
 export const selectResolvedDateRange = (state: LensState) => state.lens.resolvedDateRange;
+export const selectAdHocDataViews = (state: LensState) =>
+  Object.fromEntries(
+    Object.values(state.lens.dataViews.indexPatterns)
+      .filter((indexPattern) => indexPattern.spec)
+      .map((indexPattern) => [indexPattern.id, indexPattern.spec!])
+  );
 export const selectVisualization = (state: LensState) => state.lens.visualization;
 export const selectStagedPreview = (state: LensState) => state.lens.stagedPreview;
 export const selectStagedActiveData = (state: LensState) =>
@@ -69,6 +75,7 @@ export const selectSavedObjectFormat = createSelector(
     selectQuery,
     selectFilters,
     selectActiveDatasourceId,
+    selectAdHocDataViews,
     selectInjectedDependencies as SelectInjectedDependenciesFunction<{
       datasourceMap: DatasourceMap;
       visualizationMap: VisualizationMap;
@@ -82,6 +89,7 @@ export const selectSavedObjectFormat = createSelector(
     query,
     filters,
     activeDatasourceId,
+    adHocDataViews,
     { datasourceMap, visualizationMap, extractFilterReferences }
   ) => {
     const activeVisualization =
@@ -105,12 +113,19 @@ export const selectSavedObjectFormat = createSelector(
 
     const persistibleDatasourceStates: Record<string, unknown> = {};
     const references: SavedObjectReference[] = [];
+    const internalReferences: SavedObjectReference[] = [];
     Object.entries(activeDatasources).forEach(([id, datasource]) => {
       const { state: persistableState, savedObjectReferences } = datasource.getPersistableState(
         datasourceStates[id].state
       );
       persistibleDatasourceStates[id] = persistableState;
-      references.push(...savedObjectReferences);
+      savedObjectReferences.forEach((r) => {
+        if (r.type === 'index-pattern' && adHocDataViews[r.id]) {
+          internalReferences.push(r);
+        } else {
+          references.push(r);
+        }
+      });
     });
 
     const adHocFilters = filters
@@ -138,6 +153,8 @@ export const selectSavedObjectFormat = createSelector(
         query,
         filters: [...persistableFilters, ...adHocFilters],
         datasourceStates: persistibleDatasourceStates,
+        internalReferences,
+        adHocDataViews,
       },
     };
   }
