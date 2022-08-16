@@ -27,7 +27,7 @@ export const getDateFieldsStatsRequest = (
   params: FieldStatsCommonRequestParams,
   fields: Field[]
 ) => {
-  const { index, query, runtimeFieldMap, samplerShardSize } = params;
+  const { index, query, runtimeFieldMap } = params;
 
   const size = 0;
 

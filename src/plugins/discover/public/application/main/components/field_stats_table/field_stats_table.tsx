@@ -29,13 +29,32 @@ export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
   query?: Query | AggregateQuery;
   visibleFieldNames?: string[];
   filters?: Filter[];
+  /**
+   * Whether to show the mini chart distributions when table is first rendered
+   */
   showPreviewByDefault?: boolean;
+  /**
+   * Whether to show option directly in table rows to edit the fields in the data view
+   */
+  allowEditDataView?: boolean;
   /**
    * Callback to add a filter to filter bar
    */
   onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
+  /**
+   * Session ID used for Kibana's search to save and restore search sessions
+   */
   sessionId?: string;
+  /**
+   * List of fields to fetch field statistics for
+   * since we might not have fetch all fields at once, but rather all that are available
+   */
   fieldsToFetch?: string[];
+  /**
+   * The preferred mode for sampling data for the field statistics
+   * default as 'autoRandomSampler'
+   */
+  samplingMode?: string;
 }
 export interface DataVisualizerGridEmbeddableOutput extends EmbeddableOutput {
   showDistributions?: boolean;

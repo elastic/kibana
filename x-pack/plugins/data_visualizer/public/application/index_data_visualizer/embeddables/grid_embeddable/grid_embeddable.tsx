@@ -43,17 +43,41 @@ export interface DataVisualizerGridInput {
   dataView: DataView;
   savedSearch?: SavedSearch | SavedSearchSavedObject | null;
   query?: Query;
+  /**
+   * List of fields/rows to show in the table (e.g. Discover's 'Selected fields')
+   */
   visibleFieldNames?: string[];
   filters?: Filter[];
+  /**
+   * Whether to show the mini chart distributions when table is first rendered
+   */
   showPreviewByDefault?: boolean;
+  /**
+   * Whether to show option directly in table rows to edit the fields in the data view
+   */
   allowEditDataView?: boolean;
+  /**
+   * Unique embeddable id as there might be multiple instances in Dashboard
+   */
   id?: string;
   /**
    * Callback to add a filter to filter bar
    */
   onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
+  /**
+   * Session ID used for Kibana's search to save and restore search sessions
+   */
   sessionId?: string;
+  /**
+   * List of fields to fetch field statistics for
+   * since we might not have fetch all fields at once, but rather all that are available
+   */
   fieldsToFetch?: string[];
+  /**
+   * The preferred mode for sampling data for the field statistics
+   * default as 'autoRandomSampler'
+   */
+  samplingMode?: string;
 }
 export type DataVisualizerGridEmbeddableInput = EmbeddableInput & DataVisualizerGridInput;
 export type DataVisualizerGridEmbeddableOutput = EmbeddableOutput;
@@ -82,8 +106,15 @@ export const EmbeddableWrapper = ({
     [dataVisualizerListState, onOutputChange]
   );
 
-  const { configs, searchQueryLanguage, searchString, extendedColumns, progress, setLastRefresh } =
-    useDataVisualizerGridData(input, dataVisualizerListState);
+  const {
+    configs,
+    searchQueryLanguage,
+    searchString,
+    extendedColumns,
+    progress,
+    setLastRefresh,
+    overallStats,
+  } = useDataVisualizerGridData(input, dataVisualizerListState);
 
   useEffect(() => {
     setLastRefresh(Date.now());
@@ -141,6 +172,7 @@ export const EmbeddableWrapper = ({
       showPreviewByDefault={input?.showPreviewByDefault}
       onChange={onOutputChange}
       loading={progress < 100}
+      totalCount={overallStats?.documentCountStats?.totalCount ?? 0}
     />
   );
 };

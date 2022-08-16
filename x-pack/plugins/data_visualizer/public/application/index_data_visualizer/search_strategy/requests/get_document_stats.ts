@@ -125,7 +125,12 @@ export const getDocumentCountStats = async (
     index,
     body: {
       query,
-      aggs: aggregations,
+      ...(Array.isArray(fieldsToFetch) &&
+      timeFieldName !== undefined &&
+      intervalMs !== undefined &&
+      intervalMs > 0
+        ? { aggs: aggregations }
+        : {}),
       ...(isPopulatedObject(runtimeFieldMap) ? { runtime_mappings: runtimeFieldMap } : {}),
     },
     track_total_hits: false,

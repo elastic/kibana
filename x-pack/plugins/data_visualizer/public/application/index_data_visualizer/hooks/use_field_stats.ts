@@ -179,7 +179,6 @@ export function useFieldStatsSearchStrategy(
       sessionId: searchStrategyParams?.sessionId,
     };
 
-    console.log('samplingProbability', samplingProbability);
     const batches = createBatchedRequests(
       pageOfConfigs.map((config, idx) => ({
         fieldName: config.fieldName,

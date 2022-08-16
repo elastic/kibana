@@ -211,22 +211,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
 
     const sub = rateLimitingForkJoin<
       AggregatableFieldOverallStats | NonAggregatableFieldOverallStats | undefined
-    >(
-      [
-        // from(
-        //   getDocumentCountStats(
-        //     data.search,
-        //     searchStrategyParams,
-        //     searchOptions,
-        //     browserSessionSeed,
-        //     probability
-        //   )
-        // ),
-        ...aggregatableOverallStatsObs,
-        ...nonAggregatableFieldsObs,
-      ],
-      MAX_CONCURRENT_REQUESTS
-    );
+    >([...aggregatableOverallStatsObs, ...nonAggregatableFieldsObs], MAX_CONCURRENT_REQUESTS);
 
     searchSubscription$.current = sub.subscribe({
       next: (value) => {
@@ -245,7 +230,6 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
         });
 
         const totalCount = documentCountStats?.totalCount ?? 0;
-        console.log('aggregatableOverallStatsResp', aggregatableOverallStatsResp);
 
         const aggregatableOverallStats = processAggregatableFieldsExistResponse(
           aggregatableOverallStatsResp,

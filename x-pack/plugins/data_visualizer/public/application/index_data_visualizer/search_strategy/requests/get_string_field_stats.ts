@@ -33,7 +33,7 @@ export const getStringFieldStatsRequest = (
   params: FieldStatsCommonRequestParams,
   fields: Field[]
 ) => {
-  const { index, query, runtimeFieldMap, samplerShardSize } = params;
+  const { index, query, runtimeFieldMap } = params;
 
   const size = 0;
 
@@ -50,9 +50,7 @@ export const getStringFieldStatsRequest = (
       } as AggregationsTermsAggregation,
     };
 
-    // If cardinality >= SAMPLE_TOP_TERMS_THRESHOLD, run the top terms aggregation
-    // in a sampler aggregation, even if no sampling has been specified (samplerShardSize < 1).
-    if (samplerShardSize < 1 && field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD) {
+    if (field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD) {
       aggs[`${safeFieldName}_top`] = {
         sampler: {
           shard_size: SAMPLER_TOP_TERMS_SHARD_SIZE,
@@ -107,9 +105,6 @@ export const fetchStringFieldsStats = (
         const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
         const batchStats: StringFieldStats[] = [];
 
-        console.log('fields', fields);
-        console.log('aggregations', aggregations);
-
         fields.forEach((field, i) => {
           const safeFieldName = field.safeFieldName;
 
@@ -128,7 +123,6 @@ export const fetchStringFieldsStats = (
             // @todo: remove
             topValuesSamplerShardSize: get(aggregations, ['sample', 'doc_count']),
           };
-          console.log(stats.fieldName, stats);
 
           batchStats.push(stats);
         });
