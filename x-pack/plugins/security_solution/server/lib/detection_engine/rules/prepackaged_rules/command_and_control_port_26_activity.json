@@ -21,6 +21,28 @@
     "https://unit42.paloaltonetworks.com/unit42-badpatch/",
     "https://isc.sans.edu/forums/diary/Next+up+whats+up+with+TCP+port+26/25564/"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "destination.port",
+      "type": "long"
+    },
+    {
+      "ecs": true,
+      "name": "event.category",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.dataset",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "network.transport",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 21,
   "rule_id": "d7e62693-aab9-4f66-a21a-3d79ecdd603d",
   "severity": "low",
@@ -60,5 +82,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 8
+  "version": 9
 }

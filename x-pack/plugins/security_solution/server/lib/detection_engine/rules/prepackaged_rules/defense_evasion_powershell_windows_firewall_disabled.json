@@ -15,7 +15,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Windows Firewall Disabled via PowerShell",
-  "note": "## Triage and analysis\n\n### Investigating Windows Firewall Disabled via PowerShell\n\nWindows Defender Firewall is a native component that provides host-based, two-way network traffic filtering for a\ndevice and blocks unauthorized network traffic flowing into or out of the local device.\n\nAttackers can disable the Windows firewall or its rules to enable lateral movement and command and control activity.\n\nThis rule identifies patterns related to disabling the Windows firewall or its rules using the `Set-NetFirewallProfile`\nPowerShell cmdlet.\n\n#### Possible investigation steps\n\n- Investigate the process execution chain (parent process tree) for unknown processes. Examine their executable files\nfor prevalence, whether they are located in expected locations, and if they are signed with valid digital signatures.\n- Identify the user account that performed the action and whether it should perform this kind of action.\n- Contact the account owner and confirm whether they are aware of this activity.\n- Investigate other alerts associated with the user/host during the past 48 hours.\n- Inspect the host for suspicious or abnormal behaviors in the alert timeframe.\n\n### False positive analysis\n\n- This mechanism can be used legitimately. Check whether the user is an administrator and is legitimately performing\ntroubleshooting.\n- In case of an allowed benign true positive (B-TP), assess adding rules to allow needed traffic and re-enable the firewall.\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Isolate the involved hosts to prevent further post-compromise behavior.\n- Re-enable the firewall with its desired configurations.\n- Investigate credential exposure on systems compromised or used by the attacker to ensure all compromised accounts are\nidentified. Reset passwords for these accounts and other potentially compromised credentials, such as email, business\nsystems, and web services.\n- Review the privileges assigned to the involved users to ensure that the least privilege principle is being followed.\n- Determine the initial vector abused by the attacker and take action to prevent reinfection through the same vector.\n- Using the incident response data, update logging and audit policies to improve the mean time to detect (MTTD) and the\nmean time to respond (MTTR).\n\n## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
+  "note": "## Triage and analysis\n\n### Investigating Windows Firewall Disabled via PowerShell\n\nWindows Defender Firewall is a native component that provides host-based, two-way network traffic filtering for a\ndevice and blocks unauthorized network traffic flowing into or out of the local device.\n\nAttackers can disable the Windows firewall or its rules to enable lateral movement and command and control activity.\n\nThis rule identifies patterns related to disabling the Windows firewall or its rules using the `Set-NetFirewallProfile`\nPowerShell cmdlet.\n\n#### Possible investigation steps\n\n- Investigate the process execution chain (parent process tree) for unknown processes. Examine their executable files\nfor prevalence, whether they are located in expected locations, and if they are signed with valid digital signatures.\n- Identify the user account that performed the action and whether it should perform this kind of action.\n- Contact the account owner and confirm whether they are aware of this activity.\n- Investigate other alerts associated with the user/host during the past 48 hours.\n- Inspect the host for suspicious or abnormal behaviors in the alert timeframe.\n\n### False positive analysis\n\n- This mechanism can be used legitimately. Check whether the user is an administrator and is legitimately performing\ntroubleshooting.\n- In case of an allowed benign true positive (B-TP), assess adding rules to allow needed traffic and re-enable the firewall.\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Isolate the involved hosts to prevent further post-compromise behavior.\n- Re-enable the firewall with its desired configurations.\n- Investigate credential exposure on systems compromised or used by the attacker to ensure all compromised accounts are\nidentified. Reset passwords for these accounts and other potentially compromised credentials, such as email, business\nsystems, and web services.\n- Review the privileges assigned to the involved users to ensure that the least privilege principle is being followed.\n- Determine the initial vector abused by the attacker and take action to prevent reinfection through the same vector.\n- Using the incident response data, update logging and audit policies to improve the mean time to detect (MTTD) and the\nmean time to respond (MTTR).",
   "query": "process where event.action == \"start\" and\n  (process.name : (\"powershell.exe\", \"pwsh.exe\", \"powershell_ise.exe\") or process.pe.original_file_name == \"PowerShell.EXE\") and\n   process.args : \"*Set-NetFirewallProfile*\" and\n  (process.args : \"*-Enabled*\" and process.args : \"*False*\") and\n  (process.args : \"*-All*\" or process.args : (\"*Public*\", \"*Domain*\", \"*Private*\"))\n",
   "references": [
     "https://docs.microsoft.com/en-us/powershell/module/netsecurity/set-netfirewallprofile?view=windowsserver2019-ps",
@@ -23,8 +23,31 @@
     "http://powershellhelp.space/commands/set-netfirewallrule-psv5.php",
     "http://woshub.com/manage-windows-firewall-powershell/"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.action",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.args",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.name",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.pe.original_file_name",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 47,
   "rule_id": "f63c8e3c-d396-404f-b2ea-0379d3942d73",
+  "setup": "If enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.",
   "severity": "medium",
   "tags": [
     "Elastic",
@@ -59,5 +82,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 5
+  "version": 7
 }

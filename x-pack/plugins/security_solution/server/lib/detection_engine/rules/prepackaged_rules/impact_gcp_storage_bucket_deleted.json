@@ -13,13 +13,32 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "GCP Storage Bucket Deletion",
-  "note": "## Config\n\nThe GCP Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
-  "query": "event.dataset:(googlecloud.audit or gcp.audit) and event.action:\"storage.buckets.delete\"\n",
+  "note": "",
+  "query": "event.dataset:gcp.audit and event.action:\"storage.buckets.delete\"\n",
   "references": [
     "https://cloud.google.com/storage/docs/key-terms#buckets"
   ],
+  "related_integrations": [
+    {
+      "package": "gcp",
+      "version": "1.10.0"
+    }
+  ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.action",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.dataset",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 47,
   "rule_id": "bc0f2d83-32b8-4ae2-b0e6-6a45772e9331",
+  "setup": "The GCP Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
   "severity": "medium",
   "tags": [
     "Elastic",
@@ -48,5 +67,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 6
+  "version": 8
 }
