@@ -6,14 +6,14 @@
  */
 import { i18n } from '@kbn/i18n';
 
-export const beta = i18n.translate('xpack.sessionView.beta', {
+export const BETA = i18n.translate('xpack.sessionView.beta', {
   defaultMessage: 'Beta',
 });
 
-export const refreshSession = i18n.translate('xpack.sessionView.refreshSession', {
+export const REFRESH_SESSION = i18n.translate('xpack.sessionView.refreshSession', {
   defaultMessage: 'Refresh session',
 });
 
-export const openTTYPlayer = i18n.translate('xpack.sessionView.openTTYPlayer', {
+export const OPEN_TTY_PLAYER = i18n.translate('xpack.sessionView.openTTYPlayer', {
   defaultMessage: 'Open TTY player',
 });

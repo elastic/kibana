@@ -26,9 +26,6 @@ export const registerGetTotalIOBytesRoute = (router: IRouter) => {
       const client = (await context.core).elasticsearch.client.asCurrentUser;
       const { sessionEntityId } = request.query;
 
-      // for testing with mock data
-      //      sessionEntityId = '1';
-
       try {
         const search = await client.search({
           index: [PROCESS_EVENTS_INDEX],

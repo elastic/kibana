@@ -30,9 +30,6 @@ export const registerIOEventsRoute = (router: IRouter) => {
       const { cursor } = request.query;
       const { sessionEntityId } = request.query;
 
-      // for testing with mock data
-      //      sessionEntityId = '1';
-
       try {
         const search = await client.search({
           index: [PROCESS_EVENTS_INDEX],
