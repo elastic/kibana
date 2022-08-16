@@ -170,7 +170,7 @@ export const dataAccessStateMachine = createMachine<
               cond: 'endTimestampReducesLoadedBottom',
             },
             {
-              actions: 'resetPosition',
+              actions: ['updateTimeRange', 'resetPosition'],
               target: 'loadingAround',
             },
           ],
