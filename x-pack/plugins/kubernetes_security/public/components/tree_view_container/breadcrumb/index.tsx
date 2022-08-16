@@ -53,23 +53,28 @@ export const Breadcrumb = ({ treeNavSelection, onSelect }: BreadcrumbDeps) => {
       icon: JSX.Element,
       isBolded: boolean,
       hasRightArrow: boolean = true
-    ) => (
-      <>
-        {hasRightArrow && <EuiIcon css={styles.breadcrumbRightIcon} type="arrowRight" size="s" />}
-        {icon}
-        <EuiToolTip content={treeNavSelection[collectionType]}>
-          <EuiButtonEmpty
-            css={isBolded ? styles.breadcrumbButtonBold : styles.breadcrumbButton}
-            color="text"
-            onClick={() => onBreadCrumbClick(collectionType)}
-          >
-            {collectionType === 'clusterId'
-              ? treeNavSelection.clusterName || treeNavSelection.clusterId
-              : treeNavSelection[collectionType]}
-          </EuiButtonEmpty>
-        </EuiToolTip>
-      </>
-    ),
+    ) => {
+      const content =
+        collectionType === "clusterId"
+          ? treeNavSelection.clusterName || treeNavSelection.clusterId
+          : treeNavSelection[collectionType];
+
+      return (
+        <>
+          {hasRightArrow && <EuiIcon css={styles.breadcrumbRightIcon} type="arrowRight" size="s" />}
+          {icon}
+          <EuiToolTip content={content}>
+            <EuiButtonEmpty
+              css={isBolded ? styles.breadcrumbButtonBold : styles.breadcrumbButton}
+              color="text"
+              onClick={() => onBreadCrumbClick(collectionType)}
+            >
+              {content}
+            </EuiButtonEmpty>
+          </EuiToolTip>
+        </>
+      );
+    },
     [
       onBreadCrumbClick,
       styles.breadcrumbButton,
