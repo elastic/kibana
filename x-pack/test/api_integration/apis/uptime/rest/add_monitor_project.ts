@@ -292,9 +292,8 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         const { monitors } = getResponse.body;
-
         expect(monitors[0]).eql(undefined);
-
+        expect(messages[1]).eql(`Monitor ${projectMonitors.monitors[0].id} deleted successfully`);
         expect(messages[2].createdMonitors).eql([]);
         expect(messages[2].failedMonitors).eql([]);
         expect(messages[2].updatedMonitors).eql([projectMonitors.monitors[0].id]);
@@ -951,7 +950,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         comparePolicies(packagePolicy, getTestProjectSyntheticsPolicy());
 
-        await supertest
+        const response = await supertest
           .put(API_URLS.SYNTHETICS_MONITORS_PROJECT)
           .set('kbn-xsrf', 'true')
           .send({
