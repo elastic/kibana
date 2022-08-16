@@ -63,12 +63,18 @@ export default function ({ getService }: FtrProviderContext) {
         },
       });
       // 1 agent reassigned to a new policy
-      await es.update({
+      await es.create({
         id: 'agent5',
         refresh: 'wait_for',
         index: AGENTS_INDEX,
         body: {
           doc: {
+            access_api_key_id: 'api-key-4',
+            policy_id: 'policy1',
+            type: 'PERMANENT',
+            local_metadata: { host: { hostname: 'host5' } },
+            user_provided_metadata: {},
+            enrolled_at: '2022-06-21T12:17:25Z',
             last_checkin: new Date().toISOString(),
             policy_revision_idx: null,
           },
