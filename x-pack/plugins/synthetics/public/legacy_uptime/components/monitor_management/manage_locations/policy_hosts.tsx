@@ -123,7 +123,7 @@ const AGENTS_LABEL = i18n.translate('xpack.synthetics.monitorManagement.agentsLa
 });
 
 const SELECT_POLICY_HOSTS = i18n.translate('xpack.synthetics.monitorManagement.selectPolicyHost', {
-  defaultMessage: 'Select agent policy',
+  defaultMessage: 'We recommend using a single Elastic agent per agent policy.',
 });
 
 const POLICY_HOST_LABEL = i18n.translate('xpack.synthetics.monitorManagement.policyHost', {

@@ -154,27 +154,31 @@ export const CustomFields = memo<Props>(
                 <EuiCallOut
                   title={
                     <FormattedMessage
-                      id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorType.browser.warning.description"
-                      defaultMessage='To create a "Browser" monitor, please ensure you are using the elastic-agent-complete Docker container, which contains the dependencies to run these monitors. For more information, please visit our {link}.'
-                      values={{
-                        link: (
-                          <EuiLink
-                            target="_blank"
-                            href="https://www.elastic.co/guide/en/observability/current/synthetics-quickstart-fleet.html"
-                            external
-                          >
-                            <FormattedMessage
-                              id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorType.browser.warning.link"
-                              defaultMessage="synthetics documentation"
-                            />
-                          </EuiLink>
-                        ),
-                      }}
+                      id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorType.browser.warning.title"
+                      defaultMessage="Requirement"
                     />
                   }
-                  iconType="help"
                   size="s"
-                />
+                >
+                  <FormattedMessage
+                    id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorType.browser.warning.description"
+                    defaultMessage='To create a "Browser" monitor, please ensure you are using the elastic-agent-complete Docker container, which contains the dependencies to run these monitors. For more information, please visit our {link}.'
+                    values={{
+                      link: (
+                        <EuiLink
+                          target="_blank"
+                          href="https://www.elastic.co/guide/en/observability/current/synthetics-quickstart-fleet.html"
+                          external
+                        >
+                          <FormattedMessage
+                            id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorType.browser.warning.link"
+                            defaultMessage="synthetics documentation"
+                          />
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </EuiCallOut>
               )}
               <EuiSpacer size="s" />
               {renderSimpleFields(monitorType)}
