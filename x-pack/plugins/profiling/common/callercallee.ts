@@ -8,14 +8,16 @@
 import { clone } from 'lodash';
 import {
   compareFrameGroup,
-  createStackFrameMetadata,
-  defaultGroupBy,
-  Executable,
-  FileID,
+  createFrameGroup,
+  createFrameGroupID,
   FrameGroup,
   FrameGroupID,
+} from './frame_group';
+import {
+  createStackFrameMetadata,
+  Executable,
+  FileID,
   groupStackFrameMetadataByStackTrace,
-  hashFrameGroup,
   StackFrame,
   StackFrameID,
   StackFrameMetadata,
@@ -40,7 +42,7 @@ export function createCallerCalleeIntermediateNode(
   frameGroupID: string
 ): CallerCalleeIntermediateNode {
   return {
-    frameGroup: defaultGroupBy(frameMetadata),
+    frameGroup: createFrameGroup(frameMetadata),
     callers: new Map<FrameGroupID, CallerCalleeIntermediateNode>(),
     callees: new Map<FrameGroupID, CallerCalleeIntermediateNode>(),
     frameMetadata: new Set<StackFrameMetadata>([frameMetadata]),
@@ -70,7 +72,7 @@ function selectRelevantTraces(
   frames: Map<StackTraceID, StackFrameMetadata[]>
 ): Map<StackTraceID, RelevantTrace> {
   const result = new Map<StackTraceID, RelevantTrace>();
-  const rootString = hashFrameGroup(defaultGroupBy(rootFrame));
+  const rootString = createFrameGroupID(createFrameGroup(rootFrame));
   for (const [stackTraceID, frameMetadata] of frames) {
     if (rootFrame.FileID === '' && rootFrame.AddressOrLine === 0) {
       // If the root frame is empty, every trace is relevant, and all elements
@@ -85,7 +87,7 @@ function selectRelevantTraces(
       // Search for the right index of the root frame in the frameMetadata, and
       // set it in the result.
       for (let i = 0; i < frameMetadata.length; i++) {
-        if (rootString === hashFrameGroup(defaultGroupBy(frameMetadata[i]))) {
+        if (rootString === createFrameGroupID(createFrameGroup(frameMetadata[i]))) {
           result.set(stackTraceID, {
             frames: frameMetadata,
             index: i,
@@ -156,7 +158,7 @@ export function createCallerCalleeIntermediateRoot(
 
     for (let i = callees.length - 1; i >= 0; i--) {
       const callee = callees[i];
-      const calleeName = hashFrameGroup(defaultGroupBy(callee));
+      const calleeName = createFrameGroupID(createFrameGroup(callee));
       let node = currentNode.callees.get(calleeName);
       if (node === undefined) {
         node = createCallerCalleeIntermediateNode(callee, samples, calleeName);

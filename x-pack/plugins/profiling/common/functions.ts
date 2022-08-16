@@ -7,13 +7,15 @@
 import * as t from 'io-ts';
 import {
   compareFrameGroup,
-  defaultGroupBy,
-  Executable,
-  FileID,
+  createFrameGroup,
+  createFrameGroupID,
   FrameGroup,
   FrameGroupID,
+} from './frame_group';
+import {
+  Executable,
+  FileID,
   groupStackFrameMetadataByStackTrace,
-  hashFrameGroup,
   StackFrame,
   StackFrameID,
   StackFrameMetadata,
@@ -66,8 +68,8 @@ export function createTopNFunctions(
     // e.g. when stopping the host agent or on network errors.
     const frames = metadata.get(traceHash) ?? [];
     for (let i = 0; i < frames.length; i++) {
-      const frameGroup = defaultGroupBy(frames[i]);
-      const frameGroupID = hashFrameGroup(frameGroup);
+      const frameGroup = createFrameGroup(frames[i]);
+      const frameGroupID = createFrameGroupID(frameGroup);
 
       if (!topNFunctions.has(frameGroupID)) {
         topNFunctions.set(frameGroupID, {
@@ -119,7 +121,7 @@ export function createTopNFunctions(
     Frame: frameAndCount.Frame,
     CountExclusive: frameAndCount.CountExclusive,
     CountInclusive: frameAndCount.CountInclusive,
-    Id: hashFrameGroup(frameAndCount.FrameGroup),
+    Id: createFrameGroupID(frameAndCount.FrameGroup),
   }));
 
   return {
