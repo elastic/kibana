@@ -1500,9 +1500,9 @@
             "section": "def-common.WithoutReservedActionGroups",
             "text": "WithoutReservedActionGroups"
           },
-          "<TActionGroupIds, never>>) => Promise<void | TState>; id: string; name: string; validate?: { params?: ",
+          "<TActionGroupIds, never>>) => Promise<void | TState>; validate?: { params?: ",
           "RuleTypeParamsValidator",
-          "<TParams> | undefined; } | undefined; cancelAlertsOnRuleTimeout?: boolean | undefined; actionGroups: ",
+          "<TParams> | undefined; } | undefined; id: string; name: string; cancelAlertsOnRuleTimeout?: boolean | undefined; actionGroups: ",
           {
             "pluginId": "alerting",
             "scope": "common",
