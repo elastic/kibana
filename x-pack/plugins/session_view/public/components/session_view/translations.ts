@@ -14,6 +14,6 @@ export const refreshSession = i18n.translate('xpack.sessionView.refreshSession',
   defaultMessage: 'Refresh session',
 });
 
-export const refreshSession = i18n.translate('xpack.sessionView.openTTYPlayer', {
+export const openTTYPlayer = i18n.translate('xpack.sessionView.openTTYPlayer', {
   defaultMessage: 'Open TTY player',
 });

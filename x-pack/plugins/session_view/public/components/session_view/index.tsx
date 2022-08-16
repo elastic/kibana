@@ -39,7 +39,7 @@ import {
   useFetchGetTotalIOBytes,
 } from './hooks';
 import { LOCAL_STORAGE_DISPLAY_OPTIONS_KEY } from '../../../common/constants';
-import translations from './translations';
+import { beta, refreshSession, openTTYPlayer } from './translations';
 
 /**
  * The main wrapper component for the session view.
@@ -251,7 +251,7 @@ export const SessionView = ({
       <EuiPanel hasShadow={false} borderRadius="none" className="sessionViewerToolbar">
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiBetaBadge label={translations.beta} size="s" css={styles.betaBadge} />
+            <EuiBetaBadge label={beta} size="s" css={styles.betaBadge} />
           </EuiFlexItem>
           <EuiFlexItem data-test-subj="sessionView:sessionViewProcessEventsSearch">
             <SessionViewSearchBar
@@ -269,7 +269,7 @@ export const SessionView = ({
               display="empty"
               onClick={handleRefresh}
               size="m"
-              aria-label={translations.refreshSession}
+              aria-label={refreshSession}
               data-test-subj="sessionView:sessionViewRefreshButton"
               isLoading={isFetching}
             />
@@ -283,7 +283,7 @@ export const SessionView = ({
                 iconType="videoPlayer"
                 onClick={onToggleTTY}
                 size="m"
-                aria-label={translations.openTTYPlayer}
+                aria-label={openTTYPlayer}
                 data-test-subj="sessionView:TTYPlayerToggle"
               />
             </EuiFlexItem>
