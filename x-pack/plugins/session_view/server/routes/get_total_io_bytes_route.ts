@@ -1,6 +1,4 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
+/* * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
@@ -26,9 +24,10 @@ export const registerGetTotalIOBytesRoute = (router: IRouter) => {
     },
     async (context, request, response) => {
       const client = (await context.core).elasticsearch.client.asCurrentUser;
-      let { sessionEntityId } = request.query;
+      const { sessionEntityId } = request.query;
 
-      sessionEntityId = '1';
+      // for testing with mock data
+      //      sessionEntityId = '1';
 
       try {
         const search = await client.search({

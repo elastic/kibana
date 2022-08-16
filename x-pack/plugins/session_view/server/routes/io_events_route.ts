@@ -28,9 +28,10 @@ export const registerIOEventsRoute = (router: IRouter) => {
     async (context, request, response) => {
       const client = (await context.core).elasticsearch.client.asCurrentUser;
       const { cursor } = request.query;
-      let { sessionEntityId } = request.query;
+      const { sessionEntityId } = request.query;
 
-      sessionEntityId = '1';
+      // for testing with mock data
+      //      sessionEntityId = '1';
 
       try {
         const search = await client.search({
