@@ -7,6 +7,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 import Boom from '@hapi/boom';
+import { withSpan } from '@kbn/apm-utils';
 
 import uuid from 'uuid';
 
@@ -170,44 +171,46 @@ async function runReassignAsync(
     );
 
   const outgoingErrors: Record<Agent['id'], Error> = {};
-  processAgentsInBatches(
-    esClient,
-    {
-      kuery: options.kuery,
-      showInactive: options.showInactive ?? false,
-      batchSize: options.batchSize,
-      pitId,
-    },
-    async (agents: Agent[], skipSuccess: boolean, searchAfter?: SortResults, total?: number) => {
-      lastSearchAfter = searchAfter;
-      return await reassignBatch(
-        soClient,
-        esClient,
-        { newAgentPolicyId, actionId },
-        agents,
-        outgoingErrors,
-        undefined,
-        skipSuccess,
-        total
-      );
-    }
-  ).catch(async (error) => {
-    appContextService.getLogger().error(`Reassign in batches failed: ${error.message}`);
-
-    const taskId = await appContextService.getBulkActionsResolver()!.run(
+  withSpan({ name: 'Bulk reassign', type: 'action' }, () =>
+    processAgentsInBatches(
+      esClient,
       {
-        ...options,
-        actionId,
-        newAgentPolicyId,
+        kuery: options.kuery,
+        showInactive: options.showInactive ?? false,
+        batchSize: options.batchSize,
         pitId,
-        searchAfter: lastSearchAfter,
-        retryCount: 1,
       },
-      BulkActionTaskType.REASSIGN_RETRY
-    );
+      async (agents: Agent[], skipSuccess: boolean, searchAfter?: SortResults, total?: number) => {
+        lastSearchAfter = searchAfter;
+        return await reassignBatch(
+          soClient,
+          esClient,
+          { newAgentPolicyId, actionId },
+          agents,
+          outgoingErrors,
+          undefined,
+          skipSuccess,
+          total
+        );
+      }
+    ).catch(async (error) => {
+      appContextService.getLogger().error(`Reassign in batches failed: ${error.message}`);
 
-    appContextService.getLogger().info(`Retrying in task: ${taskId}`);
-  });
+      const taskId = await appContextService.getBulkActionsResolver()!.run(
+        {
+          ...options,
+          actionId,
+          newAgentPolicyId,
+          pitId,
+          searchAfter: lastSearchAfter,
+          retryCount: 1,
+        },
+        BulkActionTaskType.REASSIGN_RETRY
+      );
+
+      appContextService.getLogger().info(`Retrying in task: ${taskId}`);
+    })
+  );
 
   return { items: [] };
 }

@@ -269,6 +269,7 @@ export async function processAgentsInBatches(
     total?: number
   ) => Promise<{ items: BulkActionResult[] }>
 ): Promise<{ items: BulkActionResult[] }> {
+  const start = Date.now();
   const pitId = options.pitId ?? (await openPointInTime(esClient));
 
   const perPage = options.batchSize ?? SO_SEARCH_LIMIT;
@@ -319,6 +320,7 @@ export async function processAgentsInBatches(
 
   await closePointInTime(esClient, pitId);
 
+  appContextService.getLogger().info(`processAgentsInBatches took ${Date.now() - start}ms`);
   return { ...results };
 }
 
