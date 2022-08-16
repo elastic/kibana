@@ -98,7 +98,7 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
   }, [selectedValue]);
 
   const handleSpacesWarning = useCallback(
-    (param: string) => setShowSpacesWarning(paramContainsSpace(param)),
+    (param: string) => setShowSpacesWarning(!!paramContainsSpace(param)),
     [setShowSpacesWarning]
   );
 
@@ -131,11 +131,11 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
     (newOptions: EuiComboBoxOptionOption[]): void => {
       const [newValue] = newOptions.map(({ label }) => optionsMemo[labels.indexOf(label)]);
 
-      setShowSpacesWarning(false);
+      handleSpacesWarning(newValue);
       handleError(undefined);
       onChange(newValue ?? '');
     },
-    [handleError, labels, onChange, optionsMemo, setShowSpacesWarning]
+    [handleError, handleSpacesWarning, labels, onChange, optionsMemo]
   );
 
   const handleSearchChange = useCallback(

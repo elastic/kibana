@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export const paramContainsSpace = (param: string) => param.trim().length !== param.length;
+export const paramContainsSpace = (param: string) => param && param.trim().length !== param.length;

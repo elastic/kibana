@@ -24,4 +24,7 @@ describe('param_contains_space', () => {
   test('should return false if no spaces were found', () => {
     expect(paramContainsSpace('test test')).toBeFalsy();
   });
+  test('should return false if param is falsy', () => {
+    expect(paramContainsSpace('')).toBeFalsy();
+  });
 });

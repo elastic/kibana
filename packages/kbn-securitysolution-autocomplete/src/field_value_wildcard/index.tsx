@@ -91,7 +91,7 @@ export const AutocompleteFieldWildcardComponent: React.FC<AutocompleteFieldWildc
     }, [selectedValue]);
 
     const handleSpacesWarning = useCallback(
-      (param: string) => setShowSpacesWarning(paramContainsSpace(param)),
+      (param: string) => setShowSpacesWarning(!!paramContainsSpace(param)),
       [setShowSpacesWarning]
     );
     const handleError = useCallback(
@@ -130,12 +130,12 @@ export const AutocompleteFieldWildcardComponent: React.FC<AutocompleteFieldWildc
       (newOptions: EuiComboBoxOptionOption[]): void => {
         const [newValue] = newOptions.map(({ label }) => optionsMemo[labels.indexOf(label)]);
         handleError(undefined);
-        handleWarning(undefined);
+        handleSpacesWarning(newValue);
         setShowSpacesWarning(false);
 
         onChange(newValue ?? '');
       },
-      [handleError, handleWarning, labels, onChange, optionsMemo]
+      [handleError, handleSpacesWarning, labels, onChange, optionsMemo]
     );
 
     const handleSearchChange = useCallback(

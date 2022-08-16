@@ -81,7 +81,8 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
     [optionsMemo, selectedValue, getLabel]
   );
   const handleSpacesWarning = useCallback(
-    (param: string) => setShowSpacesWarning(paramContainsSpace(param)),
+    (params: string[]) =>
+      setShowSpacesWarning(!!params.find((param: string) => paramContainsSpace(param))),
     [setShowSpacesWarning]
   );
   const handleError = useCallback(
@@ -103,10 +104,10 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
     (newOptions: EuiComboBoxOptionOption[]): void => {
       const newValues: string[] = newOptions.map(({ label }) => optionsMemo[labels.indexOf(label)]);
       handleError(undefined);
-      setShowSpacesWarning(false);
+      handleSpacesWarning(newValues);
       onChange(newValues);
     },
-    [handleError, labels, onChange, optionsMemo]
+    [handleError, handleSpacesWarning, labels, onChange, optionsMemo]
   );
 
   const handleSearchChange = useCallback(
@@ -119,7 +120,7 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
         const err = paramIsValid(searchVal, selectedField, isRequired, touched);
         handleError(err);
 
-        if (!err) handleSpacesWarning(searchVal);
+        if (!err) handleSpacesWarning([searchVal]);
 
         setSearchQuery(searchVal);
       }
@@ -139,7 +140,7 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
       }
 
       onChange([...(selectedValue || []), option]);
-      handleSpacesWarning(option);
+      handleSpacesWarning([option]);
       return true;
     },
     [handleError, handleSpacesWarning, isRequired, onChange, selectedField, selectedValue, touched]
