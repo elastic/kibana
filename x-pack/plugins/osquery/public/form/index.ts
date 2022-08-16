@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { ComboBoxField } from './Combobox';
-export { TextField } from './TextField';
-export { NumberField } from './NumberField';
+export { ComboBoxField } from './combo_box_field';
+export { TextField } from './text_field';
+export { NumberField } from './number_field';
 export type { IFormField } from './types';
