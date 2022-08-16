@@ -48,12 +48,12 @@ const AssigneesList: React.FC<AssigneesListProps> = ({
       {assignees.length === 0 ? (
         <EuiFlexGroup direction="column" gutterSize="none">
           <EuiFlexItem grow={false}>
-            <EuiText size="s">
+            <EuiText size="s" color="subdued">
               <p>{i18n.NO_ASSIGNEES}</p>
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiText size="s">
+            <EuiText size="s" color="subdued">
               <EuiLink data-test-subj="case-view-assign-users-link" onClick={togglePopOver}>
                 {i18n.ASSIGN_A_USER}
               </EuiLink>
@@ -195,6 +195,8 @@ const AssignUsersComponent: React.FC<AssignUsersProps> = ({
               panelStyle={{
                 minWidth: 520,
               }}
+              panelPaddingSize="none"
+              initialFocus="[name=userProfilesSearchBox]"
             >
               <SuggestUsers
                 isLoading={isLoading}

@@ -20,6 +20,7 @@ const CaseUserAvatarComponent: React.FC<UserAvatarProps> = ({ profile }) => {
       user={profile.user}
       avatar={profile.data.avatar}
       data-test-subj="case-user-profile-avatar"
+      size="s"
     />
   ) : (
     <CaseUnknownUserAvatar />

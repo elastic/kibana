@@ -8,9 +8,17 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { UserProfilesSelectable, UserProfileWithAvatar } from '@kbn/user-profile-components';
 
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiText,
+  useEuiPaddingSize,
+} from '@elastic/eui';
 import { useSuggestUserProfiles } from '../../containers/user_profiles/use_suggest_user_profiles';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { AssigneeWithProfile } from './types';
+import * as i18n from './translations';
 
 interface SuggestUsersProps {
   selectedUsers: AssigneeWithProfile[];
@@ -52,14 +60,38 @@ const SuggestUsersComponent: React.FC<SuggestUsersProps> = ({
   const defaultOptions = currentUserProfile ? [currentUserProfile] : [];
 
   return (
-    <UserProfilesSelectable
-      onChange={onChange}
-      onSearchChange={setSearchTerm}
-      options={userProfiles}
-      selectedOptions={currentSelectedUsers}
-      defaultOptions={defaultOptions}
-      isLoading={isLoadingSuggest || isLoading}
-    />
+    <EuiFlexGroup
+      direction="column"
+      justifyContent="spaceBetween"
+      gutterSize="xs"
+      responsive={false}
+    >
+      <EuiFlexItem grow={false}>
+        <EuiText
+          size="s"
+          css={`
+            padding: ${useEuiPaddingSize('xs')};
+          `}
+        >
+          <strong>{i18n.EDIT_ASSIGNEES}</strong>
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiHorizontalRule margin="none" />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <UserProfilesSelectable
+          onChange={onChange}
+          onSearchChange={setSearchTerm}
+          options={userProfiles}
+          selectedOptions={currentSelectedUsers}
+          defaultOptions={defaultOptions}
+          isLoading={isLoadingSuggest || isLoading}
+          height="full"
+          searchPlaceholder={i18n.SEARCH_USERS}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 

@@ -243,6 +243,7 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
         onChange: onSearchChange,
         isLoading,
         isClearable: !isLoading,
+        name: 'userProfilesSearchBox',
       }}
       isPreFiltered
       listProps={{ onFocusBadge: false }}
