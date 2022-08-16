@@ -16,7 +16,7 @@ export const sessionViewIOEventsMock: ProcessEventResults = {
         '@timestamp': '2022-07-14T11:16:29.570Z',
         message: 'hello world security',
         event: {
-          action: 'tty_output',
+          action: 'text_output',
         },
         process: {
           entity_id: '1',
@@ -43,7 +43,7 @@ export const sessionViewIOEventsMock: ProcessEventResults = {
         '@timestamp': '2022-07-14T11:16:30.570Z',
         message: 'hello world security',
         event: {
-          action: 'tty_output',
+          action: 'text_output',
         },
         process: {
           entity_id: '2',
@@ -70,7 +70,7 @@ export const sessionViewIOEventsMock: ProcessEventResults = {
         '@timestamp': '2022-07-14T11:16:31.570Z',
         message: 'hello world security',
         event: {
-          action: 'tty_output',
+          action: 'text_output',
         },
         process: {
           entity_id: '2',
@@ -97,7 +97,7 @@ export const sessionViewIOEventsMock: ProcessEventResults = {
         '@timestamp': '2022-07-14T11:16:32.570Z',
         message: 'hello world security',
         event: {
-          action: 'tty_output',
+          action: 'text_output',
         },
         process: {
           entity_id: '2',
@@ -124,7 +124,7 @@ export const sessionViewIOEventsMock: ProcessEventResults = {
         '@timestamp': '2022-07-14T11:16:33.570Z',
         message: 'hello world security',
         event: {
-          action: 'tty_output',
+          action: 'text_output',
         },
         process: {
           entity_id: '2',
@@ -151,7 +151,7 @@ export const sessionViewIOEventsMock: ProcessEventResults = {
         '@timestamp': '2022-07-14T11:16:34.570Z',
         message: 'hello world security',
         event: {
-          action: 'tty_output',
+          action: 'text_output',
         },
         process: {
           entity_id: '2',
@@ -178,7 +178,7 @@ export const sessionViewIOEventsMock: ProcessEventResults = {
         '@timestamp': '2022-07-14T11:16:35.570Z',
         message: 'hello world security',
         event: {
-          action: 'tty_output',
+          action: 'text_output',
         },
         process: {
           entity_id: '2',
@@ -205,7 +205,7 @@ export const sessionViewIOEventsMock: ProcessEventResults = {
         '@timestamp': '2022-07-14T11:16:36.570Z',
         message: 'hello world security',
         event: {
-          action: 'tty_output',
+          action: 'text_output',
         },
         process: {
           entity_id: '1',

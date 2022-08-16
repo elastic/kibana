@@ -40,7 +40,7 @@ export const registerIOEventsRoute = (router: IRouter) => {
               bool: {
                 must: [
                   { term: { [ENTRY_SESSION_ENTITY_ID_PROPERTY]: sessionEntityId } },
-                  { term: { [EVENT_ACTION]: 'tty_output' } },
+                  { term: { [EVENT_ACTION]: 'text_output' } },
                 ],
               },
             },

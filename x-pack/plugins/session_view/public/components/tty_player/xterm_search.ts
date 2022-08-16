@@ -43,7 +43,6 @@ type LineCacheEntry = [
   lineOffsets: number[]
 ];
 
-const NON_WORD_CHARACTERS = ' ~!@#$%^&*()+`-=[]{}|\\;:"\',./<>?';
 const LINES_CACHE_TIME_TO_LIVE = 15 * 1000; // 15 secs
 
 export class SearchAddon implements ITerminalAddon {
@@ -274,7 +273,7 @@ export class SearchAddon implements ITerminalAddon {
    * started on an earlier line then it is skipped since it will be properly searched when the terminal line that the
    * text starts on is searched.
    * @param term The search term.
-   * @param position The position to start the search.
+   * @param searchPosition The position to start the search.
    * @param searchOptions Search options.
    * @param isReverseSearch Whether the search should start from the right side of the terminal and search to the left.
    * @return The search result if it was found.
@@ -427,7 +426,7 @@ export class SearchAddon implements ITerminalAddon {
    * Wide characters will count as two columns in the resulting string. This
    * function is useful for getting the actual text underneath the raw selection
    * position.
-   * @param line The line being translated.
+   * @param lineIndex The line being translated.
    * @param trimRight Whether to trim whitespace to the right.
    */
   private _translateBufferLineToStringWithWrap(

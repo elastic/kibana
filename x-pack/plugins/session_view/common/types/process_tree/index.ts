@@ -21,7 +21,7 @@ export const enum EventAction {
   fork = 'fork',
   exec = 'exec',
   end = 'end',
-  tty_output = 'tty_output',
+  text_output = 'text_output',
 }
 
 export interface User {
@@ -62,7 +62,7 @@ export interface Teletype {
   };
 }
 
-// used by tty_output viewer component to split process.io.text into lines of IO
+// used by tty_player component to split process.io.text into lines of IO
 export interface IOLine {
   value?: string;
 
