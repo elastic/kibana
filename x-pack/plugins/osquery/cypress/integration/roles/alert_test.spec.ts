@@ -13,7 +13,7 @@ import { preparePack } from '../../tasks/packs';
 import { closeModalIfVisible } from '../../tasks/integrations';
 import { navigateTo } from '../../tasks/navigation';
 
-describe.skip('Alert_Test', () => {
+describe('Alert_Test', () => {
   before(() => {
     runKbnArchiverScript(ArchiverMethod.LOAD, 'pack');
     runKbnArchiverScript(ArchiverMethod.LOAD, 'rule');
