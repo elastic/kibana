@@ -33,6 +33,7 @@ interface AutocompleteFieldListsProps {
   rowLabel?: string;
   selectedField: DataViewFieldBase | undefined;
   selectedValue: string | undefined;
+  allowLargeValueLists?: boolean;
 }
 
 export interface AutocompleteListsData {
@@ -50,6 +51,7 @@ export const AutocompleteFieldListsComponent: React.FC<AutocompleteFieldListsPro
   rowLabel,
   selectedField,
   selectedValue,
+  allowLargeValueLists,
 }): JSX.Element => {
   const [error, setError] = useState<string | undefined>(undefined);
   const [listData, setListData] = useState<AutocompleteListsData>({
@@ -78,9 +80,9 @@ export const AutocompleteFieldListsComponent: React.FC<AutocompleteFieldListsPro
         getLabel,
         options: [...optionsMemo.smallLists, ...optionsMemo.largeLists],
         selectedOptions: selectedOptionsMemo,
-        disabledOptions: optionsMemo.largeLists,
+        disabledOptions: !allowLargeValueLists ? optionsMemo.largeLists : [], // Disable large lists if the rule type doesn't allow it
       }),
-    [optionsMemo, selectedOptionsMemo, getLabel]
+    [optionsMemo, selectedOptionsMemo, getLabel, allowLargeValueLists]
   );
 
   const handleValuesChange = useCallback(

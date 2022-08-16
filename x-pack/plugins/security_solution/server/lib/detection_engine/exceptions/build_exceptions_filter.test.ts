@@ -14,31 +14,41 @@ import {
   buildExceptionItemFilter,
   buildExclusionClause,
   buildExistsClause,
+  buildListClause,
   buildMatchAnyClause,
   buildMatchClause,
   buildMatchWildcardClause,
   buildNestedClause,
   createOrClauses,
-} from '@kbn/securitysolution-list-utils';
+} from './build_exception_filter';
 
-import { getEntryMatchExcludeMock, getEntryMatchMock } from '../schemas/types/entry_match.mock';
 import {
   getEntryMatchAnyExcludeMock,
   getEntryMatchAnyMock,
-} from '../schemas/types/entry_match_any.mock';
-import { getEntryExistsExcludedMock, getEntryExistsMock } from '../schemas/types/entry_exists.mock';
+} from '@kbn/lists-plugin/common/schemas/types/entry_match_any.mock';
+import {
+  getEntryExistsExcludedMock,
+  getEntryExistsMock,
+} from '@kbn/lists-plugin/common/schemas/types/entry_exists.mock';
 import {
   getEntryNestedExcludeMock,
   getEntryNestedMixedEntries,
   getEntryNestedMock,
-} from '../schemas/types/entry_nested.mock';
-import { getExceptionListItemSchemaMock } from '../schemas/response/exception_list_item_schema.mock';
+} from '@kbn/lists-plugin/common/schemas/types/entry_nested.mock';
+import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import {
   getEntryMatchWildcardExcludeMock,
   getEntryMatchWildcardMock,
-} from '../schemas/types/entry_match_wildcard.mock';
-
-// TODO: Port the test over to packages/kbn-securitysolution-list-utils/src/build_exception_filter/index.test.ts once the mocks are ported to kbn
+} from '@kbn/lists-plugin/common/schemas/types/entry_match_wildcard.mock';
+import {
+  getEntryMatchExcludeMock,
+  getEntryMatchMock,
+} from '@kbn/lists-plugin/common/schemas/types/entry_match.mock';
+import { getListClientMock } from '@kbn/lists-plugin/server/services/lists/list_client.mock';
+import {
+  getEntryListExcludedMock,
+  getEntryListMock,
+} from '@kbn/lists-plugin/common/schemas/types/entry_list.mock';
 
 const modifiedGetEntryMatchAnyMock = (): EntryMatchAny => ({
   ...getEntryMatchAnyMock(),
@@ -46,27 +56,31 @@ const modifiedGetEntryMatchAnyMock = (): EntryMatchAny => ({
   value: ['some "host" name', 'some other host name'],
 });
 
+const listClient = getListClientMock();
+
 describe('build_exceptions_filter', () => {
   describe('buildExceptionFilter', () => {
-    test('it should return undefined if no exception items', () => {
-      const booleanFilter = buildExceptionFilter({
+    test('it should return undefined if no exception items', async () => {
+      const { filter } = await buildExceptionFilter({
         alias: null,
         chunkSize: 1,
         excludeExceptions: false,
         lists: [],
+        listClient,
       });
-      expect(booleanFilter).toBeUndefined();
+      expect(filter).toBeUndefined();
     });
 
-    test('it should build a filter given an exception list', () => {
-      const booleanFilter = buildExceptionFilter({
+    test('it should build a filter given an exception list', async () => {
+      const { filter } = await buildExceptionFilter({
         alias: null,
         chunkSize: 1,
         excludeExceptions: false,
         lists: [getExceptionListItemSchemaMock()],
+        listClient,
       });
 
-      expect(booleanFilter).toEqual({
+      expect(filter).toEqual({
         meta: { alias: null, disabled: false, negate: false },
         query: {
           bool: {
@@ -103,7 +117,7 @@ describe('build_exceptions_filter', () => {
       });
     });
 
-    test('it should build a filter without chunking exception items', () => {
+    test('it should build a filter without chunking exception items', async () => {
       const exceptionItem1: ExceptionListItemSchema = {
         ...getExceptionListItemSchemaMock(),
         entries: [
@@ -115,13 +129,14 @@ describe('build_exceptions_filter', () => {
         ...getExceptionListItemSchemaMock(),
         entries: [{ field: 'user.name', operator: 'included', type: 'match', value: 'name' }],
       };
-      const exceptionFilter = buildExceptionFilter({
+      const { filter } = await buildExceptionFilter({
         alias: null,
         chunkSize: 2,
         excludeExceptions: true,
         lists: [exceptionItem1, exceptionItem2],
+        listClient,
       });
-      expect(exceptionFilter).toEqual({
+      expect(filter).toEqual({
         meta: {
           alias: null,
           disabled: false,
@@ -178,7 +193,7 @@ describe('build_exceptions_filter', () => {
       });
     });
 
-    test('it should properly chunk exception items', () => {
+    test('it should properly chunk exception items', async () => {
       const exceptionItem1: ExceptionListItemSchema = {
         ...getExceptionListItemSchemaMock(),
         entries: [
@@ -194,14 +209,15 @@ describe('build_exceptions_filter', () => {
         ...getExceptionListItemSchemaMock(),
         entries: [{ field: 'file.path', operator: 'included', type: 'match', value: '/safe/path' }],
       };
-      const exceptionFilter = buildExceptionFilter({
+      const { filter } = await buildExceptionFilter({
         alias: null,
         chunkSize: 2,
         excludeExceptions: true,
         lists: [exceptionItem1, exceptionItem2, exceptionItem3],
+        listClient,
       });
 
-      expect(exceptionFilter).toEqual({
+      expect(filter).toEqual({
         meta: {
           alias: null,
           disabled: false,
@@ -282,7 +298,7 @@ describe('build_exceptions_filter', () => {
       });
     });
 
-    test('it should format all exception items and their entries as expected', () => {
+    test('it should format all exception items and their entries as expected', async () => {
       const exceptions = [
         { ...getExceptionListItemSchemaMock(), entries: [getEntryNestedMixedEntries()] },
         { ...getExceptionListItemSchemaMock(), entries: [modifiedGetEntryMatchAnyMock()] },
@@ -292,14 +308,15 @@ describe('build_exceptions_filter', () => {
         },
       ];
 
-      const booleanFilter = buildExceptionFilter({
+      const { filter } = await buildExceptionFilter({
         alias: null,
         chunkSize: 1,
         excludeExceptions: true,
         lists: exceptions,
+        listClient,
       });
 
-      expect(booleanFilter).toEqual({
+      expect(filter).toEqual({
         meta: { alias: null, disabled: false, negate: true },
         query: {
           bool: {
@@ -318,7 +335,9 @@ describe('build_exceptions_filter', () => {
                                   minimum_should_match: 1,
                                   should: [
                                     {
-                                      match_phrase: { 'parent.field.host.name': 'some host name' },
+                                      match_phrase: {
+                                        'parent.field.host.name': 'some host name',
+                                      },
                                     },
                                   ],
                                 },
@@ -434,26 +453,29 @@ describe('build_exceptions_filter', () => {
   });
 
   describe('createOrClauses', () => {
-    test('it should create filter with one item if only one exception item exists', () => {
-      const booleanFilter = createOrClauses([
-        {
-          ...getExceptionListItemSchemaMock(),
-          entries: [getEntryNestedMock(), getEntryMatchMock()],
-        },
-        {
-          ...getExceptionListItemSchemaMock(),
-          entries: [
-            getEntryNestedMixedEntries(),
-            modifiedGetEntryMatchAnyMock(),
-            getEntryMatchExcludeMock(),
-            getEntryExistsExcludedMock(),
-          ],
-        },
-        {
-          ...getExceptionListItemSchemaMock(),
-          entries: [getEntryExistsExcludedMock()],
-        },
-      ]);
+    test('it should create filter with one item if only one exception item exists', async () => {
+      const booleanFilter = await createOrClauses(
+        [
+          {
+            ...getExceptionListItemSchemaMock(),
+            entries: [getEntryNestedMock(), getEntryMatchMock()],
+          },
+          {
+            ...getExceptionListItemSchemaMock(),
+            entries: [
+              getEntryNestedMixedEntries(),
+              modifiedGetEntryMatchAnyMock(),
+              getEntryMatchExcludeMock(),
+              getEntryExistsExcludedMock(),
+            ],
+          },
+          {
+            ...getExceptionListItemSchemaMock(),
+            entries: [getEntryExistsExcludedMock()],
+          },
+        ],
+        listClient
+      );
 
       expect(booleanFilter).toEqual([
         {
@@ -611,16 +633,19 @@ describe('build_exceptions_filter', () => {
   });
 
   describe('buildExceptionItemFilter', () => {
-    test('it should build exception item boolean filter from entries', () => {
-      const exceptionItemFilter = buildExceptionItemFilter({
-        ...getExceptionListItemSchemaMock(),
-        entries: [
-          getEntryNestedMixedEntries(),
-          modifiedGetEntryMatchAnyMock(),
-          getEntryMatchExcludeMock(),
-          getEntryExistsExcludedMock(),
-        ],
-      });
+    test('it should build exception item boolean filter from entries', async () => {
+      const exceptionItemFilter = await buildExceptionItemFilter(
+        {
+          ...getExceptionListItemSchemaMock(),
+          entries: [
+            getEntryNestedMixedEntries(),
+            modifiedGetEntryMatchAnyMock(),
+            getEntryMatchExcludeMock(),
+            getEntryExistsExcludedMock(),
+          ],
+        },
+        listClient
+      );
       expect(exceptionItemFilter).toEqual([
         {
           bool: {
@@ -898,8 +923,8 @@ describe('build_exceptions_filter', () => {
   });
 
   describe('buildNestedClause', () => {
-    test('it should build nested filter when operator is "included"', () => {
-      const nestedFilter = buildNestedClause(getEntryNestedMock());
+    test('it should build nested filter when operator is "included"', async () => {
+      const nestedFilter = await buildNestedClause(getEntryNestedMock(), listClient);
 
       expect(nestedFilter).toEqual({
         nested: {
@@ -927,8 +952,8 @@ describe('build_exceptions_filter', () => {
       });
     });
 
-    test('it should build nested filter when operator is "excluded"', () => {
-      const nestedFilter = buildNestedClause(getEntryNestedExcludeMock());
+    test('it should build nested filter when operator is "excluded"', async () => {
+      const nestedFilter = await buildNestedClause(getEntryNestedExcludeMock(), listClient);
 
       expect(nestedFilter).toEqual({
         nested: {
@@ -985,8 +1010,8 @@ describe('build_exceptions_filter', () => {
       });
     });
 
-    test('it should build nested filter with mixed entry types', () => {
-      const nestedFilter = buildNestedClause(getEntryNestedMixedEntries());
+    test('it should build nested filter with mixed entry types', async () => {
+      const nestedFilter = await buildNestedClause(getEntryNestedMixedEntries(), listClient);
 
       expect(nestedFilter).toEqual({
         nested: {
@@ -1073,6 +1098,36 @@ describe('build_exceptions_filter', () => {
                   'host.name': 'some host name',
                 },
               },
+            },
+          },
+        },
+      });
+    });
+  });
+
+  describe('buildListClause', () => {
+    test('it should build list filter when operator is "included"', async () => {
+      const booleanFilter = await buildListClause(getEntryListMock(), listClient);
+
+      expect(booleanFilter).toEqual({
+        bool: {
+          must: {
+            terms: {
+              'host.name': ['127.0.0.1'],
+            },
+          },
+        },
+      });
+    });
+
+    test('it should build boolean filter when operator is "excluded"', async () => {
+      const booleanFilter = await buildListClause(getEntryListExcludedMock(), listClient);
+
+      expect(booleanFilter).toEqual({
+        bool: {
+          must_not: {
+            terms: {
+              'host.name': ['127.0.0.1'],
             },
           },
         },

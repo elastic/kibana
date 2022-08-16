@@ -39,10 +39,7 @@ import type { ExceptionsBuilderExceptionItem } from '@kbn/securitysolution-list-
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { DataViewBase } from '@kbn/es-query';
 import { useRuleIndices } from '../../../../detections/containers/detection_engine/rules/use_rule_indices';
-import {
-  hasEqlSequenceQuery,
-  isEqlRule,
-} from '../../../../../common/detection_engine/utils';
+import { hasEqlSequenceQuery, isEqlRule } from '../../../../../common/detection_engine/utils';
 import type { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import * as i18nCommon from '../../../translations';
 import * as i18n from './translations';
@@ -442,6 +439,15 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     return hasOsSelection && selectedOs === undefined;
   }, [hasOsSelection, selectedOs]);
 
+  const allowLargeValueLists = useMemo(
+    () =>
+      maybeRule?.type === 'query' ||
+      maybeRule?.type === 'machine_learning' ||
+      maybeRule?.type === 'saved_query' ||
+      maybeRule?.type === 'threat_match',
+    [maybeRule]
+  );
+
   return (
     <EuiFlyout
       ownFocus
@@ -522,7 +528,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
                 </>
               )}
               {getExceptionBuilderComponentLazy({
-                allowLargeValueLists: true,
+                allowLargeValueLists,
                 httpService: http,
                 autocompleteService: unifiedSearch.autocomplete,
                 exceptionListItems: initialExceptionItems,

@@ -333,6 +333,15 @@ export const EditExceptionFlyout = memo(function EditExceptionFlyout({
       .slice(0, -2);
   };
 
+  const allowLargeValueLists = useMemo(
+    () =>
+      maybeRule?.type === 'query' ||
+      maybeRule?.type === 'machine_learning' ||
+      maybeRule?.type === 'saved_query' ||
+      maybeRule?.type === 'threat_match',
+    [maybeRule]
+  );
+
   return (
     <EuiFlyout size="l" onClose={onCancel} data-test-subj="edit-exception-flyout">
       <FlyoutHeader>
@@ -381,7 +390,7 @@ export const EditExceptionFlyout = memo(function EditExceptionFlyout({
                 </>
               )}
               {getExceptionBuilderComponentLazy({
-                allowLargeValueLists: true,
+                allowLargeValueLists,
                 httpService: http,
                 autocompleteService: unifiedSearch.autocomplete,
                 exceptionListItems: [exceptionItem],
