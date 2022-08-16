@@ -19,9 +19,9 @@ import getPort from 'get-port';
 
 import { request } from '../builtin_action_types/lib/axios_utils';
 import { ByteSizeValue } from '@kbn/config-schema';
-import { Logger } from '@kbn/core/server';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { createReadySignal } from '@kbn/event-log-plugin/server/lib/ready_signal';
+import { Logger } from 'src/core/server';
+import { loggingSystemMock } from 'src/core/server/mocks';
+import { createReadySignal } from '../../../event_log/server';
 import { ActionsConfig } from '../config';
 import { ActionsConfigurationUtilities, getActionsConfigurationUtilities } from '../actions_config';
 import { resolveCustomHosts } from '../lib/custom_host_settings';
@@ -576,6 +576,7 @@ function getUrl(useHttps: boolean, requiresAuth: boolean, port: number) {
 }
 
 const BaseActionsConfig: ActionsConfig = {
+  enabled: true,
   allowedHosts: ['*'],
   enabledActionTypes: ['*'],
   preconfiguredAlertHistoryEsIndex: false,
