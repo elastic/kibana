@@ -8,6 +8,7 @@
 import { createSelector } from '@reduxjs/toolkit';
 import { FilterManager } from '@kbn/data-plugin/public';
 import { SavedObjectReference } from '@kbn/core/public';
+import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import { LensState } from './types';
 import { Datasource, DatasourceMap, VisualizationMap } from '../types';
 import { getDatasourceLayers } from '../editor_frame_service/editor_frame';
@@ -128,6 +129,15 @@ export const selectSavedObjectFormat = createSelector(
       });
     });
 
+    const persistableAdHocDataViews = Object.fromEntries(
+      Object.entries(adHocDataViews).map(([id, dataView]) => {
+        const { references: dataViewReferences, state } =
+          DataViewPersistableStateService.extract(dataView);
+        references.push(...dataViewReferences);
+        return [id, state];
+      })
+    );
+
     const adHocFilters = filters
       .filter((f) => !references.some((r) => r.type === 'index-pattern' && r.id === f.meta.index))
       .map((f) => ({ ...f, meta: { ...f.meta, value: undefined } }));
@@ -154,7 +164,7 @@ export const selectSavedObjectFormat = createSelector(
         filters: [...persistableFilters, ...adHocFilters],
         datasourceStates: persistibleDatasourceStates,
         internalReferences,
-        adHocDataViews,
+        adHocDataViews: persistableAdHocDataViews,
       },
     };
   }

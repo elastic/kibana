@@ -55,6 +55,7 @@ import type {
 } from '@kbn/core/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { BrushTriggerEvent, ClickTriggerEvent } from '@kbn/charts-plugin/public';
+import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import { getExecutionContextEvents, trackUiCounterEvents } from '../lens_ui_telemetry';
 import { Document } from '../persistence';
 import { ExpressionWrapper, ExpressionWrapperProps } from './expression_wrapper';
@@ -770,19 +771,17 @@ export class Embeddable
 
     this.activeDataInfo.activeDatasource = this.deps.datasourceMap[activeDatasourceId];
     const docDatasourceState = this.savedVis?.state.datasourceStates[activeDatasourceId];
-    const adHocIndexPatterns = this.savedVis?.state.adHocDataViews;
+    const adHocDataviews = await Promise.all(
+      Object.values(this.savedVis?.state.adHocDataViews || {})
+        .map((persistedSpec) => {
+          return DataViewPersistableStateService.inject(
+            persistedSpec,
+            this.savedVis?.references || []
+          );
+        })
+        .map((spec) => this.deps.dataViews.create(spec))
+    );
 
-    const adHocDataviews: DataView[] = [];
-
-    if (adHocIndexPatterns) {
-      const adHocSpecs = Object.values(adHocIndexPatterns);
-      if (adHocSpecs?.length) {
-        for (const addHocDataView of adHocSpecs) {
-          const d = await this.deps.dataViews.create(addHocDataView);
-          adHocDataviews.push(d);
-        }
-      }
-    }
     const allIndexPatterns = [...this.indexPatterns, ...adHocDataviews];
 
     const indexPatternsCache = allIndexPatterns.reduce(

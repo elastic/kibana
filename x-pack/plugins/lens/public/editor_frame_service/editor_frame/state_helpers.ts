@@ -12,6 +12,7 @@ import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { difference } from 'lodash';
 import type { DataViewsContract, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import {
   Datasource,
   DatasourceLayers,
@@ -91,7 +92,7 @@ export async function initializeDataViews(
     defaultIndexPatternId,
     references,
     initialContext,
-    adHocDataViews,
+    adHocDataViews: persistedAdHocDataViews,
   }: {
     dataViews: DataViewsContract;
     datasourceMap: DatasourceMap;
@@ -104,6 +105,12 @@ export async function initializeDataViews(
   },
   options?: InitializationOptions
 ) {
+  const adHocDataViews = Object.fromEntries(
+    Object.entries(persistedAdHocDataViews || {}).map(([id, persistedSpec]) => {
+      const spec = DataViewPersistableStateService.inject(persistedSpec, references || []);
+      return [id, spec];
+    })
+  );
   const { isFullEditor } = options ?? {};
   // make it explicit or TS will infer never[] and break few lines down
   const indexPatternRefs: IndexPatternRef[] = await (isFullEditor
