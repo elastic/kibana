@@ -154,7 +154,7 @@ export class FileClientImpl implements FileClient {
       createAuditEvent({
         action: 'delete',
         outcome: 'success',
-        message: `Deleted file of kind "${this.fileKind}" with id "${id}"`,
+        message: `Deleted file with "${id}"`,
       })
     );
   }
@@ -221,7 +221,7 @@ export class FileClientImpl implements FileClient {
     this.logAuditEvent(
       createAuditEvent({
         action: 'delete',
-        message: `Removed share for with id "${arg.id}"`,
+        message: `Removed share with id "${arg.id}"`,
       })
     );
 

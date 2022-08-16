@@ -339,7 +339,7 @@ describe('FileService', () => {
           action: 'delete',
           outcome: 'success',
         },
-        message: expect.stringContaining('Removed share for "myfile"'),
+        message: expect.stringContaining('Removed share with'),
       });
     });
   });
