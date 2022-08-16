@@ -602,6 +602,79 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       })
     );
 
+    describe('excludeHitsFromPreviousRun', () => {
+      it('excludes hits from the previous rule run when excludeHitsFromPreviousRun is true', async () => {
+        endDate = new Date().toISOString();
+
+        await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE);
+
+        await createRule({
+          name: 'always fire',
+          esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+          size: 100,
+          thresholdComparator: '>',
+          threshold: [0],
+          timeWindowSize: 300,
+          excludeHitsFromPreviousRun: true,
+        });
+
+        const docs = await waitForDocs(2);
+
+        expect(docs[0]._source.hits.length).greaterThan(0);
+        expect(docs[0]._source.params.message).to.match(/rule 'always fire' is active/);
+
+        expect(docs[1]._source.hits.length).to.be(0);
+        expect(docs[1]._source.params.message).to.match(/rule 'always fire' is recovered/);
+      });
+
+      it('excludes hits from the previous rule run when excludeHitsFromPreviousRun is undefined', async () => {
+        endDate = new Date().toISOString();
+
+        await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE);
+
+        await createRule({
+          name: 'always fire',
+          esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+          size: 100,
+          thresholdComparator: '>',
+          threshold: [0],
+          timeWindowSize: 300,
+        });
+
+        const docs = await waitForDocs(2);
+
+        expect(docs[0]._source.hits.length).greaterThan(0);
+        expect(docs[0]._source.params.message).to.match(/rule 'always fire' is active/);
+
+        expect(docs[1]._source.hits.length).to.be(0);
+        expect(docs[1]._source.params.message).to.match(/rule 'always fire' is recovered/);
+      });
+
+      it('does not exclude hits from the previous rule run when excludeHitsFromPreviousRun is false', async () => {
+        endDate = new Date().toISOString();
+
+        await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE);
+
+        await createRule({
+          name: 'always fire',
+          esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+          size: 100,
+          thresholdComparator: '>',
+          threshold: [0],
+          timeWindowSize: 300,
+          excludeHitsFromPreviousRun: false,
+        });
+
+        const docs = await waitForDocs(2);
+
+        expect(docs[0]._source.hits.length).greaterThan(0);
+        expect(docs[0]._source.params.message).to.match(/rule 'always fire' is active/);
+
+        expect(docs[1]._source.hits.length).greaterThan(0);
+        expect(docs[1]._source.params.message).to.match(/rule 'always fire' is active/);
+      });
+    });
+
     async function createEsDocumentsInGroups(
       groups: number,
       indexTool: ESTestIndexTool = esTestIndexTool,
@@ -638,6 +711,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       searchType?: 'searchSource';
       notifyWhen?: string;
       indexName?: string;
+      excludeHitsFromPreviousRun?: boolean;
     }
 
     async function createRule(params: CreateRuleParams): Promise<string> {
@@ -713,6 +787,9 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             thresholdComparator: params.thresholdComparator,
             threshold: params.threshold,
             searchType: params.searchType,
+            ...(params.excludeHitsFromPreviousRun && {
+              excludeHitsFromPreviousRun: params.excludeHitsFromPreviousRun,
+            }),
             ...ruleParams,
           },
         })
