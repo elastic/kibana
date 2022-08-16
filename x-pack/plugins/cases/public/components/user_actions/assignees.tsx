@@ -17,6 +17,62 @@ import type { UserActionBuilder, UserActionResponse } from './types';
 import * as i18n from './translations';
 import { getUsernameDataTestSubj } from '../user_profiles/data_test_subject';
 
+const FormatListItem: React.FC<{
+  children: React.ReactElement;
+  index: number;
+  listSize: number;
+}> = ({ children, index, listSize }) => {
+  if (shouldAddAnd(index, listSize)) {
+    return (
+      <>
+        {i18n.AND_SPACE}
+        {children}
+      </>
+    );
+  } else if (shouldAddComma(index, listSize)) {
+    return (
+      <>
+        {children}
+        {','}
+      </>
+    );
+  }
+
+  return children;
+};
+FormatListItem.displayName = 'FormatListItem';
+
+const shouldAddComma = (index: number, arrayLength: number) => {
+  return arrayLength > 0 && index !== arrayLength - 1;
+};
+
+const shouldAddAnd = (index: number, arrayLength: number) => {
+  return arrayLength > 1 && index === arrayLength - 1;
+};
+
+const Themselves: React.FC<{
+  index: number;
+  numOfAssigness: number;
+}> = ({ index, numOfAssigness }) => (
+  <FormatListItem index={index} listSize={numOfAssigness}>
+    <>{i18n.THEMSELVES}</>
+  </FormatListItem>
+);
+Themselves.displayName = 'Themselves';
+
+const AssigneeComponent: React.FC<{
+  assignee: Assignee;
+  index: number;
+  numOfAssigness: number;
+}> = ({ assignee, index, numOfAssigness }) => (
+  <FormatListItem index={index} listSize={numOfAssigness}>
+    <UserToolTip profile={assignee.profile}>
+      <strong>{getName(assignee.profile?.user)}</strong>
+    </UserToolTip>
+  </FormatListItem>
+);
+AssigneeComponent.displayName = 'Assignee';
+
 interface AssigneesProps {
   assignees: Assignee[];
   currentUserProfile?: UserProfileWithAvatar;
@@ -35,17 +91,17 @@ const AssigneesComponent = ({ assignees, currentUserProfile }: AssigneesProps) =
               grow={false}
               key={assignee.uid}
             >
-              <UserToolTip profile={assignee.profile}>
-                <EuiText size="s" className="eui-textBreakWord">
-                  {shouldAddAnd(index, assignees.length) && <>{i18n.AND_SPACE}</>}
-                  {isCurrentUser(assignee, currentUserProfile) ? (
-                    <>{i18n.THEMSELVES}</>
-                  ) : (
-                    <strong>{getName(assignee.profile?.user)}</strong>
-                  )}
-                  {shouldAddComma(index, assignees.length) && <>{','}</>}
-                </EuiText>
-              </UserToolTip>
+              <EuiText size="s" className="eui-textBreakWord">
+                {isCurrentUser(assignee, currentUserProfile) ? (
+                  <Themselves index={index} numOfAssigness={assignees.length} />
+                ) : (
+                  <AssigneeComponent
+                    assignee={assignee}
+                    index={index}
+                    numOfAssigness={assignees.length}
+                  />
+                )}
+              </EuiText>
             </EuiFlexItem>
           );
         })}
@@ -58,14 +114,6 @@ const Assignees = memo(AssigneesComponent);
 
 const isCurrentUser = (assignee: Assignee, currentUserProfile?: UserProfileWithAvatar) => {
   return assignee.uid === currentUserProfile?.uid;
-};
-
-const shouldAddComma = (index: number, length: number) => {
-  return length > 0 && index !== length - 1;
-};
-
-const shouldAddAnd = (index: number, length: number) => {
-  return length > 1 && index === length - 1;
 };
 
 const getLabelTitle = (
