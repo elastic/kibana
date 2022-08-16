@@ -40,11 +40,11 @@ interface FilterAggTypeConfig<U, R> {
 }
 
 /** Filter agg type definition */
-interface FilterAggProps<K extends FilterAggType, U, R = { [key: string]: any }> {
+interface FilterAggProps<K extends FilterAggType, U, ESConfig extends { [key: string]: any }> {
   /** Filter aggregation type */
   filterAgg: K;
   /** Definition of the filter agg config */
-  aggTypeConfig: FilterAggTypeConfig<U, R>;
+  aggTypeConfig: FilterAggTypeConfig<U, ESConfig>;
 }
 
 /** Filter term agg */
@@ -62,10 +62,14 @@ export type FilterAggConfigRange = FilterAggProps<
 /** Filter exists agg */
 export type FilterAggConfigExists = FilterAggProps<'exists', undefined, { field: string }>;
 /** Filter bool agg */
-export type FilterAggConfigBool = FilterAggProps<'bool', string>;
+export type FilterAggConfigBool = FilterAggProps<
+  'bool',
+  string,
+  { must?: object[]; must_not?: object[]; should?: object[] }
+>;
 
 /** General type for filter agg */
-export type FilterAggConfigEditor = FilterAggProps<FilterAggType, string>;
+export type FilterAggConfigEditor = FilterAggProps<FilterAggType, string, Record<string, unknown>>;
 
 export type FilterAggConfigUnion =
   | FilterAggConfigTerm
@@ -78,7 +82,7 @@ export type FilterAggConfigUnion =
  * TODO find out if it's possible to use {@link FilterAggConfigUnion} instead of {@link FilterAggConfigBase}.
  * ATM TS is not able to infer a type.
  */
-export type PivotAggsConfigFilter = PivotAggsConfigWithExtra<FilterAggConfigBase>;
+export type PivotAggsConfigFilter = PivotAggsConfigWithExtra<FilterAggConfigBase, {}>;
 
 export interface FilterAggConfigBase {
   filterAgg?: FilterAggType;

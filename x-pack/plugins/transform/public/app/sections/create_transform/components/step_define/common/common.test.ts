@@ -9,6 +9,7 @@ import { getPivotDropdownOptions } from '.';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { FilterAggForm } from './filter_agg/components';
 import type { RuntimeField } from '@kbn/data-views-plugin/common';
+import { PercentilesAggForm } from './percentiles_agg/percentiles_form_component';
 
 describe('Transform: Define Pivot Common', () => {
   test('getPivotDropdownOptions()', () => {
@@ -78,7 +79,8 @@ describe('Transform: Define Pivot Common', () => {
           field: ' the-f[i]e>ld ',
           aggName: 'the-field.percentiles',
           dropDownName: 'percentiles( the-f[i]e>ld )',
-          percents: [1, 5, 25, 50, 75, 95, 99],
+          AggFormComponent: PercentilesAggForm,
+          aggConfig: { percents: '1,5,25,50,75,95,99' },
         },
         'filter( the-f[i]e>ld )': {
           agg: 'filter',
@@ -182,7 +184,8 @@ describe('Transform: Define Pivot Common', () => {
           aggName: 'the-field.percentiles',
           dropDownName: 'percentiles( the-f[i]e>ld )',
           field: ' the-f[i]e>ld ',
-          percents: [1, 5, 25, 50, 75, 95, 99],
+          AggFormComponent: PercentilesAggForm,
+          aggConfig: { percents: '1,5,25,50,75,95,99' },
         },
         'sum( the-f[i]e>ld )': {
           agg: 'sum',
@@ -233,7 +236,8 @@ describe('Transform: Define Pivot Common', () => {
           aggName: 'rt_bytes_bigger.percentiles',
           dropDownName: 'percentiles(rt_bytes_bigger)',
           field: 'rt_bytes_bigger',
-          percents: [1, 5, 25, 50, 75, 95, 99],
+          AggFormComponent: PercentilesAggForm,
+          aggConfig: { percents: '1,5,25,50,75,95,99' },
         },
         'sum(rt_bytes_bigger)': {
           agg: 'sum',
