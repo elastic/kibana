@@ -75,7 +75,7 @@ image::images/live-query-check-results.png[Results of OSquery]
 [[osquery-schedule-query]]
 == Schedule queries with packs
 
-Packs, sometimes referred to as query packs, are queries that have been grouped together because they perform a similar function or address a common problem.   You can create your own custom packs or download and use <<osquery-prebuilt-packs, Prebuilt Elastic packs>>. For example, when creating custom packs, you might create one pack that checks for IT compliance-type issues, and another pack that monitors for evidence of malware.
+Packs, sometimes referred to as query packs, are queries that have been grouped together because they perform a similar function or address a common problem. You can create your own custom packs or download and use <<osquery-prebuilt-packs, Prebuilt Elastic packs>>. For example, when creating custom packs, you might create one pack that checks for IT compliance-type issues, and another pack that monitors for evidence of malware.
 
 After creating packs, you can run them as live queries or schedule them. When you schedule a pack, queries in the pack will run on one or more agent policies and at the set intervals for agents in those policies. Scheduling packs is optional.
 
