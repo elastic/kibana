@@ -192,5 +192,5 @@ export interface ActionsService {
     newAgentAction: Omit<AgentAction, 'id'>
   ) => Promise<AgentAction>;
 
-  getAgentActions: (esClient: ElasticsearchClient, actionId: string) => Promise<AgentAction[]>;
+  getAgentActions: (esClient: ElasticsearchClient, actionId: string) => Promise<any[]>;
 }

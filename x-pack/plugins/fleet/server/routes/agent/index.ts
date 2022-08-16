@@ -135,6 +135,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       getAgent: AgentService.getAgentById,
       cancelAgentAction: AgentService.cancelAgentAction,
       createAgentAction: AgentService.createAgentAction,
+      getAgentActions: AgentService.getAgentActions,
     })
   );
 
@@ -150,6 +151,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       getAgent: AgentService.getAgentById,
       cancelAgentAction: AgentService.cancelAgentAction,
       createAgentAction: AgentService.createAgentAction,
+      getAgentActions: AgentService.getAgentActions,
     })
   );
 
