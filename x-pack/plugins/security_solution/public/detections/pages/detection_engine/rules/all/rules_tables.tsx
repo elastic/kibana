@@ -107,7 +107,7 @@ export const RulesTables = React.memo<RulesTableProps>(
         setSortingOptions,
       },
     } = rulesTableContext;
-    debugger;
+
     const prePackagedRuleStatus = getPrePackagedRuleStatus(
       rulesInstalled,
       rulesNotInstalled,
