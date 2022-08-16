@@ -46,6 +46,7 @@ export const useStyles = ({ height = 500, isFullScreen }: StylesDeps) => {
     };
 
     const sessionViewerComponent: CSSObject = {
+      position: 'relative',
       border: border.thin,
       borderRadius: border.radius.medium,
       '.sessionViewerToolbar': {

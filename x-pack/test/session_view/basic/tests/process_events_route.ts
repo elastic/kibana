@@ -9,10 +9,11 @@ import expect from '@kbn/expect';
 import {
   PROCESS_EVENTS_ROUTE,
   PROCESS_EVENTS_PER_PAGE,
-  ALERTS_IN_FIRST_PAGE,
 } from '@kbn/session-view-plugin/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { User } from '../../../rule_registry/common/lib/authentication/types';
+
+const ALERTS_IN_FIRST_PAGE = 8;
 
 import {
   superUser,
