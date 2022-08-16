@@ -6,4 +6,5 @@
  */
 
 export { getEndpointAuthzInitialState, calculateEndpointAuthz } from './authz';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 export { getEndpointAuthzInitialStateMock } from './mocks';

@@ -190,17 +190,19 @@ export function LayerPanels(
             const layerDatasource = datasourceMap[datasourceId];
             const layerDatasourceState = datasourceStates?.[datasourceId]?.state;
 
-            const trigger = props.uiActions.getTrigger(UPDATE_FILTER_REFERENCES_TRIGGER);
-            const action = props.uiActions.getAction(UPDATE_FILTER_REFERENCES_ACTION);
+            if (datasourceId) {
+              const trigger = props.uiActions.getTrigger(UPDATE_FILTER_REFERENCES_TRIGGER);
+              const action = props.uiActions.getAction(UPDATE_FILTER_REFERENCES_ACTION);
 
-            action?.execute({
-              trigger,
-              fromDataView: layerDatasource.getUsedDataView(layerDatasourceState, layerId),
-              usedDataViews: layerDatasource
-                .getLayers(layerDatasourceState)
-                .map((layer) => layerDatasource.getUsedDataView(layerDatasourceState, layer)),
-              defaultDataView: layerDatasource.getCurrentIndexPatternId(layerDatasourceState),
-            } as ActionExecutionContext);
+              action?.execute({
+                trigger,
+                fromDataView: layerDatasource.getUsedDataView(layerDatasourceState, layerId),
+                usedDataViews: layerDatasource
+                  .getLayers(layerDatasourceState)
+                  .map((layer) => layerDatasource.getUsedDataView(layerDatasourceState, layer)),
+                defaultDataView: layerDatasource.getCurrentIndexPatternId(layerDatasourceState),
+              } as ActionExecutionContext);
+            }
 
             dispatchLens(
               removeOrClearLayer({

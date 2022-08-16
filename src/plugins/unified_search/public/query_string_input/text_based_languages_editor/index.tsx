@@ -9,8 +9,10 @@
 import React, { useRef, memo, useEffect, useState, useCallback } from 'react';
 import classNames from 'classnames';
 import { EsqlLang, monaco } from '@kbn/monaco';
+import { IDataPluginServices } from '@kbn/data-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getAggregateQueryMode } from '@kbn/es-query';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import { i18n } from '@kbn/i18n';
 import {
@@ -94,6 +96,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     Array<{ startLineNumber: number; message: string }>
   >([]);
   const [documentationSections, setDocumentationSections] = useState<DocumentationSections>();
+  const kibana = useKibana<IDataPluginServices>();
+  const { uiSettings } = kibana.services;
 
   const styles = textBasedLanguagedEditorStyles(
     euiTheme,
@@ -103,6 +107,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     Boolean(errors?.length),
     isCodeEditorExpandedFocused
   );
+  const isDark = uiSettings.get('theme:darkMode');
   const editorModel = useRef<monaco.editor.ITextModel>();
   const editor1 = useRef<monaco.editor.IStandaloneCodeEditor>();
   const containerRef = useRef<HTMLElement>(null);
@@ -303,7 +308,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     minimap: { enabled: false },
     wordWrap: isWordWrapped ? 'on' : 'off',
     lineNumbers: showLineNumbers ? 'on' : 'off',
-    theme: 'vs',
+    theme: isDark ? 'vs-dark' : 'vs',
     lineDecorationsWidth: 12,
     autoIndent: 'none',
     wrappingIndent: 'none',

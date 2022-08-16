@@ -7,6 +7,7 @@
 
 import React from 'react';
 
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { mockTimelineData } from '../../../../common/mock/mock_timeline_data';
 import { createGenericAuditRowRenderer } from '../../timeline/body/renderers/auditd/generic_row_renderer';
 import { CONNECTED_USING } from '../../timeline/body/renderers/auditd/translations';

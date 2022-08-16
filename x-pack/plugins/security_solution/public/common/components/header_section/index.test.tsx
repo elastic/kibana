@@ -11,8 +11,28 @@ import React from 'react';
 
 import { TestProviders } from '../../mock';
 import { getHeaderAlignment, HeaderSection } from '.';
+import { ModalInspectQuery } from '../inspect/modal';
+
+jest.mock('../inspect/modal', () => {
+  const actual = jest.requireActual('../inspect/modal');
+  return {
+    ...actual,
+    ModalInspectQuery: jest.fn().mockReturnValue(null),
+  };
+});
+
+jest.mock('../inspect/use_inspect', () => ({
+  useInspect: () => ({
+    isShowingModal: true,
+    handleClick: jest.fn(),
+    request: 'fake request',
+    response: 'fake response',
+  }),
+}));
 
 describe('HeaderSection', () => {
+  beforeEach(() => jest.clearAllMocks());
+
   test('it renders', () => {
     const wrapper = shallow(<HeaderSection title="Test title" />);
 
@@ -179,6 +199,35 @@ describe('HeaderSection', () => {
     );
 
     expect(wrapper.find('[data-test-subj="inspect-icon-button"]').first().exists()).toBe(false);
+  });
+
+  test('it defaults to using `title` for the inspect modal when `inspectTitle` is NOT provided', () => {
+    const title = 'Use this by default';
+
+    mount(
+      <TestProviders>
+        <HeaderSection id="abcd" title={title}>
+          <p>{'Test children'}</p>
+        </HeaderSection>
+      </TestProviders>
+    );
+
+    expect((ModalInspectQuery as jest.Mock).mock.calls[0][0].title).toEqual(title);
+  });
+
+  test('it uses `inspectTitle` instead of `title` for the inspect modal when `inspectTitle` is provided', () => {
+    const title = `Don't use this`;
+    const inspectTitle = 'Use this instead';
+
+    mount(
+      <TestProviders>
+        <HeaderSection id="abcd" inspectTitle={inspectTitle} title={title}>
+          <p>{'Test children'}</p>
+        </HeaderSection>
+      </TestProviders>
+    );
+
+    expect((ModalInspectQuery as jest.Mock).mock.calls[0][0].title).toEqual(inspectTitle);
   });
 
   test('it does not render query-toggle-header when no arguments provided', () => {

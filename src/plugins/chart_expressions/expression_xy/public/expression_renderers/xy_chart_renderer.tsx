@@ -24,6 +24,7 @@ import { isDataLayer } from '../../common/utils/layer_types_guards';
 import { LayerTypes, SeriesTypes } from '../../common/constants';
 import type { CommonXYLayerConfig, XYChartProps } from '../../common';
 import type { BrushEvent, FilterEvent } from '../types';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { extractContainerType, extractVisualizationType } from '../../../common';
 
 export type GetStartDepsFn = () => Promise<{

@@ -1273,6 +1273,16 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/bulk_upgrade_agents"
+              },
+              "example": {
+                "version": "8.4.0",
+                "source_uri": "https://artifacts.elastic.co/downloads/beats/elastic-agent",
+                "rollout_duration_seconds": 3600,
+                "agents": [
+                  "agent1",
+                  "agent2"
+                ],
+                "start_time": "2022-08-03T14:00:00.000Z"
               }
             }
           }
@@ -1745,18 +1755,21 @@
                 "type": "object",
                 "properties": {
                   "policy_id": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "new agent policy id"
                   },
                   "agents": {
                     "oneOf": [
                       {
-                        "type": "string"
+                        "type": "string",
+                        "description": "KQL query string, leave empty to action all agents"
                       },
                       {
                         "type": "array",
                         "items": {
                           "type": "string"
-                        }
+                        },
+                        "description": "list of agent IDs"
                       }
                     ]
                   }
@@ -1765,6 +1778,10 @@
                   "policy_id",
                   "agents"
                 ]
+              },
+              "example": {
+                "policy_id": "policy_id",
+                "agents": "fleet-agents.policy_id : (\"policy1\" or \"policy2\")"
               }
             }
           }
@@ -1814,27 +1831,39 @@
                 "type": "object",
                 "properties": {
                   "revoke": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "description": "Revokes API keys of agents"
                   },
                   "force": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "description": "Unenroll hosted agents too"
                   },
                   "agents": {
                     "oneOf": [
                       {
-                        "type": "string"
+                        "type": "string",
+                        "description": "KQL query string, leave empty to action all agents"
                       },
                       {
                         "type": "array",
                         "items": {
                           "type": "string"
-                        }
+                        },
+                        "description": "list of agent IDs"
                       }
                     ]
                   }
                 },
                 "required": [
                   "agents"
+                ]
+              },
+              "example": {
+                "revoke": true,
+                "force": false,
+                "agents": [
+                  "agent1",
+                  "agent2"
                 ]
               }
             }
@@ -1888,7 +1917,7 @@
                     "oneOf": [
                       {
                         "type": "string",
-                        "description": "KQL query string, can be empty"
+                        "description": "KQL query string, leave empty to action all agents"
                       },
                       {
                         "type": "array",
@@ -1917,6 +1946,18 @@
                 },
                 "required": [
                   "agents"
+                ]
+              },
+              "example": {
+                "agents": [
+                  "agent1",
+                  "agent2"
+                ],
+                "tagsToAdd": [
+                  "newTag"
+                ],
+                "tagsToRemove": [
+                  "existingTag"
                 ]
               }
             }
@@ -4236,27 +4277,33 @@
         "type": "object",
         "properties": {
           "version": {
-            "type": "string"
+            "type": "string",
+            "description": "version to upgrade to"
           },
           "source_uri": {
-            "type": "string"
+            "type": "string",
+            "description": "alternative upgrade binary download url"
           },
           "rollout_duration_seconds": {
-            "type": "number"
+            "type": "number",
+            "description": "rolling upgrade window duration in seconds"
           },
           "start_time": {
-            "type": "string"
+            "type": "string",
+            "description": "start time of upgrade in ISO 8601 format"
           },
           "agents": {
             "oneOf": [
               {
+                "type": "string",
+                "description": "KQL query string, leave empty to action all agents"
+              },
+              {
                 "type": "array",
                 "items": {
                   "type": "string"
-                }
-              },
-              {
-                "type": "string"
+                },
+                "description": "list of agent IDs"
               }
             ]
           }

@@ -11,8 +11,9 @@ import {
   isCompleteResponse,
   isErrorResponse,
 } from '@kbn/data-plugin/common';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Subscription } from 'rxjs';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { Subscription } from 'rxjs';
+import { buildEsQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { Indicator } from '../../../../common/types/indicator';
 import { useKibana } from '../../../hooks/use_kibana';
 import { DEFAULT_THREAT_INDEX_KEY } from '../../../../common/constants';
@@ -21,14 +22,21 @@ const PAGE_SIZES = [10, 25, 50];
 
 export const DEFAULT_PAGE_SIZE = PAGE_SIZES[1];
 
+export interface UseIndicatorsParams {
+  filterQuery: Query;
+  filters: Filter[];
+  timeRange?: TimeRange;
+}
+
 export interface UseIndicatorsValue {
-  loadData: (from: number, size: number) => void;
+  handleRefresh: () => void;
   indicators: Indicator[];
   indicatorCount: number;
   pagination: Pagination;
   onChangeItemsPerPage: (value: number) => void;
   onChangePage: (value: number) => void;
   firstLoad: boolean;
+  loading: boolean;
 }
 
 export interface RawIndicatorsResponse {
@@ -44,22 +52,31 @@ interface Pagination {
   pageSizeOptions: number[];
 }
 
-export const useIndicators = (): UseIndicatorsValue => {
+const THREAT_QUERY_BASE = 'event.type: indicator and event.category : threat';
+
+export const useIndicators = ({
+  filters,
+  filterQuery,
+  timeRange,
+}: UseIndicatorsParams): UseIndicatorsValue => {
   const {
     services: {
       data: { search: searchService },
       uiSettings,
     },
   } = useKibana();
+  const defaultThreatIndices = useMemo(
+    () => uiSettings.get(DEFAULT_THREAT_INDEX_KEY),
+    [uiSettings]
+  );
 
-  const defaultThreatIndices = uiSettings.get<string[]>(DEFAULT_THREAT_INDEX_KEY);
-
-  const searchSubscription$ = useRef(new Subscription());
+  const searchSubscription$ = useRef<Subscription>();
   const abortController = useRef(new AbortController());
 
   const [indicators, setIndicators] = useState<Indicator[]>([]);
   const [indicatorCount, setIndicatorCount] = useState<number>(0);
   const [firstLoad, setFirstLoad] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   const [pagination, setPagination] = useState({
     pageIndex: 0,
@@ -67,9 +84,43 @@ export const useIndicators = (): UseIndicatorsValue => {
     pageSizeOptions: PAGE_SIZES,
   });
 
-  const refresh = useCallback(
+  const queryToExecute = useMemo(
+    () =>
+      buildEsQuery(
+        undefined,
+        [
+          {
+            query: THREAT_QUERY_BASE,
+            language: 'kuery',
+          },
+          {
+            query: filterQuery.query as string,
+            language: 'kuery',
+          },
+        ],
+        [
+          ...filters,
+          {
+            query: {
+              range: {
+                ['@timestamp']: {
+                  gte: timeRange?.from,
+                  lte: timeRange?.to,
+                },
+              },
+            },
+            meta: {},
+          },
+        ]
+      ),
+    [filterQuery, filters, timeRange?.from, timeRange?.to]
+  );
+
+  const loadData = useCallback(
     async (from: number, size: number) => {
       abortController.current = new AbortController();
+
+      setLoading(true);
 
       searchSubscription$.current = searchService
         .search<IEsSearchRequest, IKibanaSearchResponse<RawIndicatorsResponse>>(
@@ -80,26 +131,7 @@ export const useIndicators = (): UseIndicatorsValue => {
                 size,
                 from,
                 fields: [{ field: '*', include_unmapped: true }],
-                query: {
-                  bool: {
-                    must: [
-                      {
-                        term: {
-                          'event.category': {
-                            value: 'threat',
-                          },
-                        },
-                      },
-                      {
-                        term: {
-                          'event.type': {
-                            value: 'indicator',
-                          },
-                        },
-                      },
-                    ],
-                  },
-                },
+                query: queryToExecute,
               },
             },
           },
@@ -113,22 +145,24 @@ export const useIndicators = (): UseIndicatorsValue => {
             setIndicatorCount(response.rawResponse.hits.total || 0);
 
             if (isCompleteResponse(response)) {
-              searchSubscription$.current.unsubscribe();
+              searchSubscription$.current?.unsubscribe();
             } else if (isErrorResponse(response)) {
-              searchSubscription$.current.unsubscribe();
+              searchSubscription$.current?.unsubscribe();
             }
 
             setFirstLoad(false);
+            setLoading(false);
           },
           error: (msg) => {
             searchService.showError(msg);
-            searchSubscription$.current.unsubscribe();
+            searchSubscription$.current?.unsubscribe();
 
             setFirstLoad(false);
+            setLoading(false);
           },
         });
     },
-    [defaultThreatIndices, searchService]
+    [queryToExecute, defaultThreatIndices, searchService]
   );
 
   const onChangeItemsPerPage = useCallback(
@@ -139,32 +173,38 @@ export const useIndicators = (): UseIndicatorsValue => {
         pageIndex: 0,
       }));
 
-      refresh(0, pageSize);
+      loadData(0, pageSize);
     },
-    [refresh, setPagination]
+    [loadData]
   );
 
   const onChangePage = useCallback(
     async (pageIndex) => {
       setPagination((currentPagination) => ({ ...currentPagination, pageIndex }));
-      refresh(pageIndex * pagination.pageSize, pagination.pageSize);
+      loadData(pageIndex * pagination.pageSize, pagination.pageSize);
     },
-    [pagination.pageSize, refresh]
+    [loadData, pagination.pageSize]
   );
 
+  const handleRefresh = useCallback(() => {
+    onChangePage(0);
+  }, [onChangePage]);
+
+  // Initial data load (on mount)
   useEffect(() => {
-    refresh(0, DEFAULT_PAGE_SIZE);
+    handleRefresh();
 
     return () => abortController.current.abort();
-  }, [refresh]);
+  }, [handleRefresh]);
 
   return {
-    loadData: refresh,
     indicators,
     indicatorCount,
     pagination,
     onChangePage,
     onChangeItemsPerPage,
     firstLoad,
+    loading,
+    handleRefresh,
   };
 };

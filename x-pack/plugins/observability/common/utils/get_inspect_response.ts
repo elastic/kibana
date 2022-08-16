@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { KibanaRequest } from '@kbn/core/server';
 import type { RequestStatistics, RequestStatus } from '@kbn/inspector-plugin/common';
 import { InspectResponse } from '../../typings/common';

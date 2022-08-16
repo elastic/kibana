@@ -7,21 +7,13 @@
 
 import type { Logger } from '@kbn/core/server';
 import { isEmpty, mapValues, merge, omitBy, reduce } from 'lodash';
+import { MonitoredProduct } from '../types';
 
 enum CollectionMode {
   Internal = 'internal-monitoring',
   Metricbeat7 = 'metricbeat-7',
   Metricbeat8 = 'metricbeat-8',
   Unknown = 'unknown',
-}
-
-enum MonitoredProduct {
-  Cluster = 'cluster',
-  Elasticsearch = 'elasticsearch',
-  Kibana = 'kibana',
-  Beats = 'beats',
-  Logstash = 'logstash',
-  EnterpriseSearch = 'enterpriseSearch',
 }
 
 interface MonitoredMetricsets {

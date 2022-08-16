@@ -16,7 +16,7 @@ import { RuntimeAttachmentSettings } from '.';
 
 interface Props {
   isValid: boolean;
-  version: string | null;
+  version: string;
   onChange: (nextVersion: RuntimeAttachmentSettings['version']) => void;
 }
 
@@ -31,24 +31,13 @@ export function JavaAgentVersionInput({ isValid, version, onChange }: Props) {
     return callApmApi('GET /internal/apm/fleet/java_agent_versions');
   }, []);
 
-  useEffect(() => {
-    // When version is not available on the fleet package sets it to "latest"
-    if (version === null) {
-      // This is necessary due to a possible bug in Fleet where even thought the form is valid
-      // the save button is still disabled: https://github.com/elastic/kibana/issues/135131
-      setTimeout(() => {
-        onChange('latest');
-      }, 1);
-    }
-  }, [version, onChange]);
-
   const isLoading = status === FETCH_STATUS.LOADING;
   const agentJavaVersions =
     !isLoading && data?.versions
       ? data.versions.map((label) => ({ label }))
       : [];
   const hasOptions = !!agentJavaVersions.length;
-  const selectedOption = [{ label: version || '' }];
+  const selectedOption = [{ label: version }];
 
   const comboProps = !hasOptions
     ? {

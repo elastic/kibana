@@ -240,7 +240,7 @@ describe('Navigation Breadcrumbs', () => {
           hostsBreadcrumbs,
           {
             text: 'siem-kibana',
-            href: 'securitySolutionUI/hosts/siem-kibana',
+            href: 'securitySolutionUI/hosts/name/siem-kibana',
           },
           { text: 'Authentications', href: '' },
         ]);
@@ -257,7 +257,7 @@ describe('Navigation Breadcrumbs', () => {
           networkBreadcrumb,
           {
             text: ipv4,
-            href: `securitySolutionUI/network/ip/${ipv4}/source`,
+            href: `securitySolutionUI/network/ip/${ipv4}/source/flows`,
           },
           { text: 'Flows', href: '' },
         ]);
@@ -274,7 +274,7 @@ describe('Navigation Breadcrumbs', () => {
           networkBreadcrumb,
           {
             text: ipv6,
-            href: `securitySolutionUI/network/ip/${ipv6Encoded}/source`,
+            href: `securitySolutionUI/network/ip/${ipv6Encoded}/source/flows`,
           },
           { text: 'Flows', href: '' },
         ]);
@@ -458,7 +458,7 @@ describe('Navigation Breadcrumbs', () => {
           }),
           expect.objectContaining({
             text: 'siem-kibana',
-            href: 'securitySolutionUI/hosts/siem-kibana',
+            href: 'securitySolutionUI/hosts/name/siem-kibana',
             onClick: expect.any(Function),
           }),
           {
@@ -556,7 +556,7 @@ describe('Navigation Breadcrumbs', () => {
           hostsBreadcrumbs,
           {
             text: 'siem-kibana',
-            href: 'securitySolutionUI/hosts/siem-kibana',
+            href: 'securitySolutionUI/hosts/name/siem-kibana',
           },
           { text: 'Authentications', href: '' },
         ]);
@@ -574,7 +574,7 @@ describe('Navigation Breadcrumbs', () => {
           networkBreadcrumb,
           {
             text: ipv4,
-            href: `securitySolutionUI/network/ip/${ipv4}/source`,
+            href: `securitySolutionUI/network/ip/${ipv4}/source/flows`,
           },
           { text: 'Flows', href: '' },
         ]);
@@ -592,7 +592,7 @@ describe('Navigation Breadcrumbs', () => {
           networkBreadcrumb,
           {
             text: ipv6,
-            href: `securitySolutionUI/network/ip/${ipv6Encoded}/source`,
+            href: `securitySolutionUI/network/ip/${ipv6Encoded}/source/flows`,
           },
           { text: 'Flows', href: '' },
         ]);
@@ -787,7 +787,7 @@ describe('Navigation Breadcrumbs', () => {
           }),
           expect.objectContaining({
             text: 'siem-kibana',
-            href: 'securitySolutionUI/hosts/siem-kibana',
+            href: 'securitySolutionUI/hosts/name/siem-kibana',
             onClick: expect.any(Function),
           }),
           {

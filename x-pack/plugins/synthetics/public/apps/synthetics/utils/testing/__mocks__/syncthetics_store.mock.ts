@@ -66,6 +66,7 @@ export const mockState: SyntheticsAppState = {
       sortOrder: 'asc',
       sortField: `${ConfigKey.NAME}.keyword`,
     },
+    monitorUpsertStatuses: {},
     data: {
       total: 0,
       monitors: [],

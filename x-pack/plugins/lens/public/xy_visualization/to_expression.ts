@@ -469,6 +469,7 @@ const dataLayerToExpression = (
               )
             : [],
           seriesType: [seriesType],
+          showLines: seriesType === 'line' || seriesType === 'area' ? [true] : [false],
           accessors: layer.accessors,
           columnToLabel: [JSON.stringify(columnToLabel)],
           ...(datasourceExpression

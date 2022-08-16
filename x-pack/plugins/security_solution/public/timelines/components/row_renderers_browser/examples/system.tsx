@@ -9,6 +9,7 @@ import React from 'react';
 
 import { TERMINATED_PROCESS } from '../../timeline/body/renderers/system/translations';
 import { createGenericSystemRowRenderer } from '../../timeline/body/renderers/system/generic_row_renderer';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { mockEndgameTerminationEvent } from '../../../../common/mock/mock_endgame_ecs_data';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../constants';
 
