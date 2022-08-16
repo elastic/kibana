@@ -83,11 +83,7 @@ describe('AllRules', () => {
         <AllRulesUtilityBar
           canBulkEdit
           onRefresh={jest.fn()}
-          pagination={{
-            page: 1,
-            perPage: 10,
-            total: 4,
-          }}
+          totalExceptionLists={7}
           numberSelectedItems={1}
           onGetBulkItemsPopoverContent={jest.fn()}
           isAutoRefreshOn={true}
@@ -100,7 +96,7 @@ describe('AllRules', () => {
     expect(wrapper.find('[data-test-subj="showingRules"]').exists()).toBeFalsy();
     expect(wrapper.find('[data-test-subj="tableBulkActions"]').exists()).toBeFalsy();
     expect(wrapper.find('[data-test-subj="showingExceptionLists"]').at(0).text()).toEqual(
-      'Showing 4 lists'
+      'Showing 7 lists'
     );
   });
 
