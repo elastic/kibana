@@ -10,7 +10,10 @@ import expect from '@kbn/expect';
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_URL,
+  NOTIFICATION_THROTTLE_NO_ACTIONS,
+  NOTIFICATION_THROTTLE_RULE,
 } from '@kbn/security-solution-plugin/common/constants';
+
 import {
   BulkAction,
   BulkActionEditType,
@@ -30,6 +33,7 @@ import {
   getLegacyActionSO,
   installPrePackagedRules,
   getSimpleMlRule,
+  getWebHookAction,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -42,8 +46,22 @@ export default ({ getService }: FtrProviderContext): void => {
     supertest.post(DETECTION_ENGINE_RULES_BULK_ACTION).set('kbn-xsrf', 'true');
   const fetchRule = (ruleId: string) =>
     supertest.get(`${DETECTION_ENGINE_RULES_URL}?rule_id=${ruleId}`).set('kbn-xsrf', 'true');
+  /**
+   * allows to get access to internal property: notifyWhen
+   */
+  const fetchRuleByAlertApi = (ruleId: string) =>
+    supertest.get(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'true');
 
-  describe('perform_bulk_action', () => {
+  const createWebHookAction = async () =>
+    (
+      await supertest
+        .post('/api/actions/action')
+        .set('kbn-xsrf', 'true')
+        .send(getWebHookAction())
+        .expect(200)
+    ).body;
+
+  describe.only('perform_bulk_action', () => {
     beforeEach(async () => {
       await createSignalsIndex(supertest, log);
     });
@@ -1019,6 +1037,404 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(setIndexRule.index).to.eql(['simple-index-*']);
         expect(setIndexRule.data_view_id).to.eql(dataViewId);
+      });
+    });
+
+    describe('rule actions', () => {
+      const webHookActionMock = {
+        group: 'default',
+        params: {
+          body: '{}',
+        },
+      };
+
+      describe('add_actions', () => {
+        it('should set action correctly', async () => {
+          const ruleId = 'ruleId';
+          const createdRule = await createRule(supertest, log, getSimpleRule(ruleId));
+
+          // create a new action
+          const hookAction = await createWebHookAction();
+
+          const { body } = await postBulkAction()
+            .send({
+              ids: [createdRule.id],
+              action: BulkAction.edit,
+              [BulkAction.edit]: [
+                {
+                  type: BulkActionEditType.set_actions,
+                  value: {
+                    throttle: '1h',
+                    actions: [
+                      {
+                        ...webHookActionMock,
+                        id: hookAction.id,
+                      },
+                    ],
+                  },
+                },
+              ],
+            })
+            .expect(200);
+
+          // Check that the updated rule is returned with the response
+          expect(body.attributes.results.updated[0].actions).to.eql([
+            {
+              ...webHookActionMock,
+              id: hookAction.id,
+              action_type_id: '.webhook',
+            },
+          ]);
+
+          // Check that the updates have been persisted
+          const { body: readRule } = await fetchRule(ruleId).expect(200);
+
+          expect(readRule.actions).to.eql([
+            {
+              ...webHookActionMock,
+              id: hookAction.id,
+              action_type_id: '.webhook',
+            },
+          ]);
+        });
+
+        it('should set actions to empty if list of action is empty in payload', async () => {
+          // create a new action
+          const hookAction = await createWebHookAction();
+
+          const defaultRuleAction = {
+            id: hookAction.id,
+            action_type_id: '.webhook',
+            group: 'default',
+            params: {
+              body: '{"test":"a default action"}',
+            },
+          };
+
+          const ruleId = 'ruleId';
+          const createdRule = await createRule(supertest, log, {
+            ...getSimpleRule(ruleId),
+            actions: [defaultRuleAction],
+            throttle: '1d',
+          });
+
+          const { body } = await postBulkAction()
+            .send({
+              ids: [createdRule.id],
+              action: BulkAction.edit,
+              [BulkAction.edit]: [
+                {
+                  type: BulkActionEditType.set_actions,
+                  value: {
+                    throttle: '1h',
+                    actions: [],
+                  },
+                },
+              ],
+            })
+            .expect(200);
+
+          // Check that the updated rule is returned with the response
+          expect(body.attributes.results.updated[0].actions).to.eql([]);
+
+          // Check that the updates have been persisted
+          const { body: readRule } = await fetchRule(ruleId).expect(200);
+
+          expect(readRule.actions).to.eql([]);
+        });
+      });
+
+      describe('add_actions', () => {
+        it('should add action correctly to empty actions list', async () => {
+          const ruleId = 'ruleId';
+          const createdRule = await createRule(supertest, log, getSimpleRule(ruleId));
+
+          // create a new action
+          const hookAction = await createWebHookAction();
+
+          const { body } = await postBulkAction()
+            .send({
+              ids: [createdRule.id],
+              action: BulkAction.edit,
+              [BulkAction.edit]: [
+                {
+                  type: BulkActionEditType.add_actions,
+                  value: {
+                    throttle: '1h',
+                    actions: [
+                      {
+                        ...webHookActionMock,
+                        id: hookAction.id,
+                      },
+                    ],
+                  },
+                },
+              ],
+            })
+            .expect(200);
+
+          // Check that the updated rule is returned with the response
+          expect(body.attributes.results.updated[0].actions).to.eql([
+            {
+              ...webHookActionMock,
+              id: hookAction.id,
+              action_type_id: '.webhook',
+            },
+          ]);
+
+          // Check that the updates have been persisted
+          const { body: readRule } = await fetchRule(ruleId).expect(200);
+
+          expect(readRule.actions).to.eql([
+            {
+              ...webHookActionMock,
+              id: hookAction.id,
+              action_type_id: '.webhook',
+            },
+          ]);
+        });
+
+        it('should add action correctly to non empty actions list', async () => {
+          // create a new action
+          const hookAction = await createWebHookAction();
+
+          const defaultRuleAction = {
+            id: hookAction.id,
+            action_type_id: '.webhook',
+            group: 'default',
+            params: {
+              body: '{"test":"a default action"}',
+            },
+          };
+
+          const ruleId = 'ruleId';
+          const createdRule = await createRule(supertest, log, {
+            ...getSimpleRule(ruleId),
+            actions: [defaultRuleAction],
+            throttle: '1d',
+          });
+
+          const { body } = await postBulkAction()
+            .send({
+              ids: [createdRule.id],
+              action: BulkAction.edit,
+              [BulkAction.edit]: [
+                {
+                  type: BulkActionEditType.add_actions,
+                  value: {
+                    throttle: '1h',
+                    actions: [
+                      {
+                        ...webHookActionMock,
+                        id: hookAction.id,
+                      },
+                    ],
+                  },
+                },
+              ],
+            })
+            .expect(200);
+
+          // Check that the updated rule is returned with the response
+          expect(body.attributes.results.updated[0].actions).to.eql([
+            defaultRuleAction,
+            {
+              ...webHookActionMock,
+              id: hookAction.id,
+              action_type_id: '.webhook',
+            },
+          ]);
+
+          // Check that the updates have been persisted
+          const { body: readRule } = await fetchRule(ruleId).expect(200);
+
+          expect(readRule.actions).to.eql([
+            defaultRuleAction,
+            {
+              ...webHookActionMock,
+              id: hookAction.id,
+              action_type_id: '.webhook',
+            },
+          ]);
+        });
+
+        it('should not change actions of rule if empty list of actions added', async () => {
+          // create a new action
+          const hookAction = await createWebHookAction();
+
+          const defaultRuleAction = {
+            id: hookAction.id,
+            action_type_id: '.webhook',
+            group: 'default',
+            params: {
+              body: '{"test":"a default action"}',
+            },
+          };
+
+          const ruleId = 'ruleId';
+          const createdRule = await createRule(supertest, log, {
+            ...getSimpleRule(ruleId),
+            actions: [defaultRuleAction],
+            throttle: '1d',
+          });
+
+          const { body } = await postBulkAction()
+            .send({
+              ids: [createdRule.id],
+              action: BulkAction.edit,
+              [BulkAction.edit]: [
+                {
+                  type: BulkActionEditType.add_actions,
+                  value: {
+                    throttle: '1h',
+                    actions: [],
+                  },
+                },
+              ],
+            })
+            .expect(200);
+
+          // Check that the updated rule is returned with the response
+          expect(body.attributes.results.updated[0].actions).to.eql([defaultRuleAction]);
+
+          // Check that the updates have been persisted
+          const { body: readRule } = await fetchRule(ruleId).expect(200);
+
+          expect(readRule.actions).to.eql([defaultRuleAction]);
+        });
+      });
+
+      describe('throttle', () => {
+        const casesForEmptyActions = [
+          {
+            payload: { throttle: NOTIFICATION_THROTTLE_NO_ACTIONS },
+          },
+          {
+            payload: { throttle: NOTIFICATION_THROTTLE_RULE },
+          },
+          {
+            payload: { throttle: '1h' },
+          },
+        ];
+        casesForEmptyActions.forEach(({ payload }) => {
+          it(`is set correctly, if payload throttle="${payload.throttle}" and actions empty`, async () => {
+            const ruleId = 'ruleId';
+            const createdRule = await createRule(supertest, log, getSimpleRule(ruleId));
+
+            const { body } = await postBulkAction()
+              .send({
+                ids: [createdRule.id],
+                action: BulkAction.edit,
+                [BulkAction.edit]: [
+                  {
+                    type: BulkActionEditType.set_actions,
+                    value: {
+                      throttle: payload.throttle,
+                      actions: [],
+                    },
+                  },
+                ],
+              })
+              .expect(200);
+
+            // Check that the updated rule is returned with the response
+            expect(body.attributes.results.updated[0].throttle).to.eql(
+              NOTIFICATION_THROTTLE_NO_ACTIONS
+            );
+
+            // Check that the updates have been persisted
+            const { body: rule } = await fetchRule(ruleId).expect(200);
+
+            expect(rule.throttle).to.eql(NOTIFICATION_THROTTLE_NO_ACTIONS);
+          });
+        });
+
+        // const casesForNonEmptyActions = [
+        //   {
+        //     payload: { throttle: NOTIFICATION_THROTTLE_NO_ACTIONS },
+        //   },
+        //   {
+        //     payload: { throttle: NOTIFICATION_THROTTLE_RULE },
+        //   },
+        //   {
+        //     payload: { throttle: '1h' },
+        //   },
+        // ];
+        // casesForNonEmptyActions.forEach(({ payload, expected }) => {
+        //   it.only(`is set correctly, if payload throttle="${payload.throttle}" and actions empty`, async () => {
+        //     const ruleId = 'ruleId';
+        //     const createdRule = await createRule(supertest, log, getSimpleRule(ruleId));
+
+        //     const { body } = await postBulkAction()
+        //       .send({
+        //         ids: [createdRule.id],
+        //         action: BulkAction.edit,
+        //         [BulkAction.edit]: [
+        //           {
+        //             type: BulkActionEditType.set_actions,
+        //             value: {
+        //               throttle: payload.throttle,
+        //               actions: [],
+        //             },
+        //           },
+        //         ],
+        //       })
+        //       .expect(200);
+
+        //     // Check that the updated rule is returned with the response
+        //     expect(body.attributes.results.updated[0].throttle).to.eql(expected.throttle);
+
+        //     // Check that the updates have been persisted
+        //     const { body: rule } = await fetchRule(ruleId).expect(200);
+
+        //     console.log('>>>>>', JSON.stringify(rule, null, 2));
+        //     expect(rule.throttle).to.eql(expected.throttle);
+        //   });
+        // });
+      });
+
+      describe('notifyWhen', () => {
+        const cases = [
+          {
+            payload: { throttle: NOTIFICATION_THROTTLE_NO_ACTIONS },
+            // keeps existing default value which is onActiveAlert
+            expected: { notifyWhen: 'onActiveAlert' },
+          },
+          {
+            payload: { throttle: '1d' },
+            expected: { notifyWhen: 'onThrottleInterval' },
+          },
+          {
+            payload: { throttle: NOTIFICATION_THROTTLE_RULE },
+            expected: { notifyWhen: 'onActiveAlert' },
+          },
+        ];
+        cases.forEach(({ payload, expected }) => {
+          it(`is set correctly, if payload throttle="${payload.throttle}"`, async () => {
+            const createdRule = await createRule(supertest, log, getSimpleRule('ruleId'));
+
+            await postBulkAction()
+              .send({
+                ids: [createdRule.id],
+                action: BulkAction.edit,
+                [BulkAction.edit]: [
+                  {
+                    type: BulkActionEditType.set_actions,
+                    value: {
+                      throttle: payload.throttle,
+                      actions: [],
+                    },
+                  },
+                ],
+              })
+              .expect(200);
+
+            // Check whether notifyWhen set correctly
+            const { body: rule } = await fetchRuleByAlertApi(createdRule.id).expect(200);
+
+            expect(rule.notify_when).to.eql(expected.notifyWhen);
+          });
+        });
       });
     });
 

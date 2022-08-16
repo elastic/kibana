@@ -446,7 +446,7 @@ const bulkActionEditPayloadActions = t.type({
   }),
 });
 
-export type BulkActionEditPayloadSActions = t.TypeOf<typeof bulkActionEditPayloadActions>;
+export type BulkActionEditPayloadActions = t.TypeOf<typeof bulkActionEditPayloadActions>;
 
 export const bulkActionEditPayload = t.union([
   bulkActionEditPayloadTags,
@@ -462,7 +462,7 @@ export type BulkActionEditPayload = t.TypeOf<typeof bulkActionEditPayload>;
  */
 export type BulkActionEditForRuleAttributes =
   | BulkActionEditPayloadTags
-  | BulkActionEditPayloadSActions;
+  | BulkActionEditPayloadActions;
 
 /**
  * actions that modifies rules params

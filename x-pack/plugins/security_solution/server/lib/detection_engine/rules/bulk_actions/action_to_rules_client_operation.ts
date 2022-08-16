@@ -13,17 +13,19 @@ import { assertUnreachable } from '../../../../../common/utility_types';
 
 import { transformToAlertThrottle, transformToNotifyWhen } from '../utils';
 
-const getThrottleOperation = (throttle: string) => ({
-  field: 'throttle',
-  operation: 'set',
-  value: transformToAlertThrottle(throttle),
-});
+const getThrottleOperation = (throttle: string) =>
+  ({
+    field: 'throttle',
+    operation: 'set',
+    value: transformToAlertThrottle(throttle),
+  } as const);
 
-const getNotifyWhenOperation = (throttle: string) => ({
-  field: 'notifyWhen',
-  operation: 'set',
-  value: transformToNotifyWhen(throttle),
-});
+const getNotifyWhenOperation = (throttle: string) =>
+  ({
+    field: 'notifyWhen',
+    operation: 'set',
+    value: transformToNotifyWhen(throttle),
+  } as const);
 
 /**
  * converts bulk edit action to format of rulesClient.bulkEdit operation

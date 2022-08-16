@@ -5,8 +5,12 @@
  * 2.0.
  */
 
+import pMap from 'p-map';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import type { BulkActionEditPayload } from '../../../../common/detection_engine/schemas/common';
+import type {
+  BulkActionEditPayload,
+  BulkActionEditPayloadActions,
+} from '../../../../common/detection_engine/schemas/common';
 import { enrichFilterWithRuleTypeMapping } from './enrich_filter_with_rule_type_mappings';
 import type { MlAuthz } from '../../machine_learning/authz';
 
@@ -14,6 +18,9 @@ import { ruleParamsModifier } from './bulk_actions/rule_params_modifier';
 import { splitBulkEditActions } from './bulk_actions/split_bulk_edit_actions';
 import { validateBulkEditRule } from './bulk_actions/validations';
 import { bulkEditActionToRulesClientOperation } from './bulk_actions/action_to_rules_client_operation';
+import { NOTIFICATION_THROTTLE_NO_ACTIONS } from '../../../../common/constants';
+import { BulkActionEditType } from '../../../../common/detection_engine/schemas/common/schemas';
+import { readRules } from './read_rules';
 
 import type { RuleAlertType } from './types';
 
@@ -32,7 +39,7 @@ export interface BulkEditRulesArguments {
  * @param BulkEditRulesArguments
  * @returns edited rules and caught errors
  */
-export const bulkEditRules = ({
+export const bulkEditRules = async ({
   rulesClient,
   ids,
   actions,
@@ -41,7 +48,7 @@ export const bulkEditRules = ({
 }: BulkEditRulesArguments) => {
   const { attributesActions, paramsActions } = splitBulkEditActions(actions);
 
-  return rulesClient.bulkEdit({
+  const result = await rulesClient.bulkEdit({
     ...(ids ? { ids } : { filter: enrichFilterWithRuleTypeMapping(filter) }),
     operations: attributesActions.map(bulkEditActionToRulesClientOperation).flat(),
     paramsModifier: async (ruleParams: RuleAlertType['params']) => {
@@ -49,4 +56,40 @@ export const bulkEditRules = ({
       return ruleParamsModifier(ruleParams, paramsActions);
     },
   });
+
+  // rulesClient bulkEdit currently doesn't support bulk mute/unmute.
+  // this is a workaround to mitigate this
+  // if rule actions has been applied:
+  // - we go through each rule
+  // - mute/unmute if needed, refetch rule
+  // calling mute for rule needed only when rule was unmuted before and throttle value is  NOTIFICATION_THROTTLE_NO_ACTIONS
+  // calling unmute needed only if rule was muted and throttle value is not NOTIFICATION_THROTTLE_NO_ACTIONS
+  // TODO: error handlers (?)
+  const rulesAction = attributesActions.find(({ type }) =>
+    [BulkActionEditType.set_actions, BulkActionEditType.add_actions].includes(type)
+  ) as BulkActionEditPayloadActions;
+  if (rulesAction) {
+    const rules = await pMap(
+      result.rules,
+      async (rule) => {
+        if (rule.muteAll && rulesAction.value.throttle !== NOTIFICATION_THROTTLE_NO_ACTIONS) {
+          await rulesClient.unmuteAll({ id: rule.id });
+          return readRules({ rulesClient, id: rule.id, ruleId: undefined });
+        } else if (
+          !rule.muteAll &&
+          rulesAction.value.throttle === NOTIFICATION_THROTTLE_NO_ACTIONS
+        ) {
+          await rulesClient.muteAll({ id: rule.id });
+          return readRules({ rulesClient, id: rule.id, ruleId: undefined });
+        }
+
+        return rule;
+      },
+      { concurrency: 50 }
+    );
+
+    return { ...result, rules };
+  }
+
+  return result;
 };
