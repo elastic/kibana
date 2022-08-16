@@ -29082,7 +29082,6 @@
     "xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval": "频率",
     "xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval.error": "监测频率必填",
     "xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorType": "监测类型",
-    "xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorType.browser.warning.description": "要创建“浏览器”监测，请确保使用 elastic-agent-complete Docker 容器，其中包含运行这些监测的依赖项。有关更多信息，请访问我们的 {link}。",
     "xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorType.browser.warning.link": "Synthetics 文档",
     "xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorType.error": "“监测类型”必填。",
     "xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.password.helpText": "用于在服务器上进行身份验证的密码。",

@@ -28976,7 +28976,6 @@
     "xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval": "Fréquence",
     "xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval.error": "La fréquence du moniteur est requise",
     "xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorType": "Type de moniteur",
-    "xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorType.browser.warning.description": "Pour créer un moniteur \"Navigateur\", veuillez vous assurer que vous utilisez le conteneur Docker elastic-agent-complete, qui inclut les dépendances permettant d'exécuter ces moniteurs. Pour en savoir plus, visitez notre {link}.",
     "xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorType.browser.warning.link": "documentation Synthetics",
     "xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorType.error": "Le type de moniteur est requis",
     "xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.password.helpText": "Mot de passe pour l'authentification avec le serveur.",

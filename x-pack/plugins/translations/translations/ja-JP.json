@@ -29055,7 +29055,6 @@
     "xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval": "頻度",
     "xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval.error": "監視頻度は必須です",
     "xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorType": "モニタータイプ",
-    "xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorType.browser.warning.description": "「Browser」モニターを作成するには、elastic-agent-complete Dockerコンテナーを使用していることを確認します。これには、これらのモニターを実行するための依存関係が含まれています。詳細については、{link}をご覧ください。",
     "xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorType.browser.warning.link": "Syntheticsドキュメンテーション",
     "xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorType.error": "モニタータイプは必須です",
     "xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.password.helpText": "サーバーと認証するためのパスワード。",

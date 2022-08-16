@@ -162,7 +162,7 @@ export const CustomFields = memo<Props>(
                   size="s"
                 >
                   <FormattedMessage
-                    id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorType.browser.warning.description"
+                    id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorType.browser.warning.content"
                     defaultMessage='To create a "Browser" monitor, please ensure you are using the {agent} Docker container, which contains the dependencies to run these monitors. For more information, please visit our {link}.'
                     values={{
                       agent: <EuiCode>elastic-agent-complete</EuiCode>,
