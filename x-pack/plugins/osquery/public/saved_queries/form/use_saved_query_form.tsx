@@ -18,7 +18,7 @@ import { useSavedQueries } from '../use_saved_queries';
 export interface SavedQuerySOFormData {
   id?: string;
   description?: string;
-  query: string;
+  query?: string;
   interval?: string;
   platform?: string;
   version?: string | undefined;
@@ -26,9 +26,9 @@ export interface SavedQuerySOFormData {
 }
 
 export interface SavedQueryFormData {
-  id: string;
+  id?: string;
   description?: string;
-  query: string;
+  query?: string;
   interval?: number;
   platform?: string;
   version?: string[];

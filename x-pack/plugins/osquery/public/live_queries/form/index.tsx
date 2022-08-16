@@ -23,6 +23,7 @@ import { useForm as useHookForm, FormProvider, useController } from 'react-hook-
 
 import { isEmpty, map, find, pickBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import type { SavedQuerySOFormData } from '../../saved_queries/form/use_saved_query_form';
 import { defaultEcsFormData } from '../../packs/queries/ecs_mapping_editor_field';
 import { convertECSMappingToObject } from '../../../common/schemas/common/utils';
 import { useKibana } from '../../common/lib/kibana';
@@ -40,7 +41,7 @@ import { AgentsTableField } from './agents_table_field';
 import { PacksComboBoxField } from './packs_combobox_field';
 
 export interface ILiveQueryFormFields {
-  query: string;
+  query?: string;
   agentSelection: AgentSelection;
   savedQueryId?: string | null;
   ecs_mapping: Array<{
@@ -280,7 +281,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     [commands]
   );
 
-  const flyoutFormDefaultValue = useMemo(
+  const flyoutFormDefaultValue: SavedQuerySOFormData = useMemo(
     () => ({ savedQueryId, query, ecs_mapping: convertECSMappingToObject(ecsMapping) }),
     [savedQueryId, ecsMapping, query]
   );
