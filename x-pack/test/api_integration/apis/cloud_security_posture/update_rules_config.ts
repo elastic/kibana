@@ -4,34 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '@kbn/cloud-security-posture-plugin/common/constants';
-// import expect from '@kbn/expect';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
-import { FtrProviderContext } from '../../ftr_provider_context';
 import expect from '@kbn/expect';
 import Chance from 'chance';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService, providerContext }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
+  // const kibanaServer = getService('kibanaServer');
   const chance = new Chance();
 
   describe('POST /internal/cloud_security_posture/update_rules_config', () => {
     let agentPolicyId: string;
 
     before(async () => {
-      await getService('esArchiver').load('x-pack/test/functional/es_archives/empty_kibana');
-      await getService('esArchiver').load(
-        'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
-      );
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
 
     after(async () => {
-      await getService('esArchiver').unload('x-pack/test/functional/es_archives/empty_kibana');
-      await getService('esArchiver').unload(
-        'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
-      );
+      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
+      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
 
     before(async function () {
@@ -52,7 +45,7 @@ export default function ({ getService, providerContext }: FtrProviderContext) {
         .send({ agentPolicyId });
     });
 
-    it(`will receive error code 500 - package policy not exist`, async () => {
+    it(`expect error code 500 - package policy not exist`, async () => {
       const packagePolicyId = chance.guid();
 
       const { body: response } = await supertest
@@ -66,8 +59,8 @@ export default function ({ getService, providerContext }: FtrProviderContext) {
       expect(response.message).to.be(`package policy Id '${packagePolicyId}' is not exist`);
     });
 
-    it(`create package policy`, async () => {
-      const { body: responseWithForce } = await supertest
+    it(`creates Cloud Posture package policy and execute valid API call to update configuration`, async () => {
+      const { body: response } = await supertest
         .post(`/api/fleet/package_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
@@ -91,7 +84,7 @@ export default function ({ getService, providerContext }: FtrProviderContext) {
         .post(`/internal/cloud_security_posture/update_rules_config`)
         .set('kbn-xsrf', 'xxxx')
         .send({
-          package_policy_id: responseWithForce.item.id,
+          package_policy_id: response.item.id,
         })
         .expect(200);
     });

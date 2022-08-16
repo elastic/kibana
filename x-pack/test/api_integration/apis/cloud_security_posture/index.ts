@@ -8,23 +8,12 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
-  const cloudPosture = getService('transform');
-
   describe('cloud_security_posture', function () {
     this.tags(['cloud_security_posture']);
 
-    before(async () => {
-      await cloudPosture.securityCommon.createTransformRoles();
-      await cloudPosture.securityCommon.createTransformUsers();
-    });
+    before(async () => {});
 
-    after(async () => {
-      await cloudPosture.securityCommon.cleanTransformUsers();
-      await cloudPosture.securityCommon.cleanTransformRoles();
-      await esArchiver.unload('x-pack/test/functional/es_archives/ml/farequote');
-      await cloudPosture.testResources.resetKibanaTimeZone();
-    });
+    after(async () => {});
 
     loadTestFile(require.resolve('./update_rules_config'));
   });
