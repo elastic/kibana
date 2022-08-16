@@ -12,13 +12,36 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Suspicious PrintSpooler SPL File Created",
-  "note": "## Threat intel\n\nRefer to CVEs, CVE-2020-1048 and CVE-2020-1337 for further information on the vulnerability and exploit. Verify that the relevant system is patched.\n\n## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
+  "note": "## Threat intel\n\nRefer to CVEs, CVE-2020-1048 and CVE-2020-1337 for further information on the vulnerability and exploit. Verify that the relevant system is patched.",
   "query": "file where event.type != \"deletion\" and\n  file.extension : \"spl\" and\n  file.path : \"?:\\\\Windows\\\\System32\\\\spool\\\\PRINTERS\\\\*\" and\n  not process.name : (\"spoolsv.exe\",\n                      \"printfilterpipelinesvc.exe\",\n                      \"PrintIsolationHost.exe\",\n                      \"splwow64.exe\",\n                      \"msiexec.exe\",\n                      \"poqexec.exe\")\n",
   "references": [
     "https://safebreach.com/Post/How-we-bypassed-CVE-2020-1048-Patch-and-got-CVE-2020-1337"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "file.extension",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "file.path",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.name",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 73,
   "rule_id": "a7ccae7b-9d2c-44b2-a061-98e5946971fa",
+  "setup": "If enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.",
   "severity": "high",
   "tags": [
     "Elastic",
@@ -46,5 +69,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 5
+  "version": 7
 }
