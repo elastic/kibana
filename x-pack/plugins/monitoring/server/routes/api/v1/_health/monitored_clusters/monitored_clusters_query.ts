@@ -9,6 +9,11 @@ import { TimeRange } from '../../../../../../common/http_api/shared';
 
 const MAX_BUCKET_SIZE = 100;
 
+const getDataset = (product: string) => (metricset: string) => `${product}.${metricset}`;
+const getElasticsearchDataset = getDataset('elasticsearch');
+const getKibanaDataset = getDataset('kibana');
+const getLogstashDataset = getDataset('logstash');
+
 interface QueryOptions {
   timeRange?: TimeRange;
   timeout: number; // in seconds
@@ -72,6 +77,11 @@ export const persistentMetricsetsQuery = ({ timeout }: QueryOptions) => {
         'metricset.name': 'shard',
       },
     },
+    {
+      term: {
+        'data_stream.dataset': getElasticsearchDataset('shard'),
+      },
+    },
   ];
 
   const logstashStateMatches = [
@@ -83,6 +93,11 @@ export const persistentMetricsetsQuery = ({ timeout }: QueryOptions) => {
     {
       term: {
         'metricset.name': 'node',
+      },
+    },
+    {
+      term: {
+        'data_stream.dataset': getLogstashDataset('node'),
       },
     },
   ];
@@ -260,6 +275,11 @@ const clusterAggregation = {
                 'metricset.name': 'cluster_stats',
               },
             },
+            {
+              term: {
+                'data_stream.dataset': getElasticsearchDataset('cluster_stats'),
+              },
+            },
           ],
         },
       },
@@ -277,6 +297,11 @@ const clusterAggregation = {
             {
               term: {
                 'metricset.name': 'ccr',
+              },
+            },
+            {
+              term: {
+                'data_stream.dataset': getElasticsearchDataset('ccr'),
               },
             },
           ],
@@ -298,6 +323,11 @@ const clusterAggregation = {
                 'metricset.name': 'index',
               },
             },
+            {
+              term: {
+                'data_stream.dataset': getElasticsearchDataset('index'),
+              },
+            },
           ],
         },
       },
@@ -317,6 +347,11 @@ const clusterAggregation = {
                 'metricset.name': 'index_summary',
               },
             },
+            {
+              term: {
+                'data_stream.dataset': getElasticsearchDataset('index_summary'),
+              },
+            },
           ],
         },
       },
@@ -334,6 +369,11 @@ const clusterAggregation = {
             {
               term: {
                 'metricset.name': 'index_recovery',
+              },
+            },
+            {
+              term: {
+                'data_stream.dataset': getElasticsearchDataset('index_recovery'),
               },
             },
           ],
@@ -364,6 +404,11 @@ const esAggregation = {
                 'metricset.name': 'node_stats',
               },
             },
+            {
+              term: {
+                'data_stream.dataset': getElasticsearchDataset('node_stats'),
+              },
+            },
           ],
         },
       },
@@ -391,6 +436,11 @@ const kibanaAggregation = {
                 'metricset.name': 'stats',
               },
             },
+            {
+              term: {
+                'data_stream.dataset': getKibanaDataset('stats'),
+              },
+            },
           ],
         },
       },
@@ -416,6 +466,11 @@ const logstashAggregation = {
             {
               term: {
                 'metricset.name': 'node_stats',
+              },
+            },
+            {
+              term: {
+                'data_stream.dataset': getLogstashDataset('node_stats'),
               },
             },
           ],
