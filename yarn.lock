@@ -13928,10 +13928,10 @@ elastic-apm-http-client@11.0.1:
     semver "^6.3.0"
     stream-chopper "^3.0.1"
 
-elastic-apm-node@^3.37.0:
-  version "3.37.0"
-  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.37.0.tgz#475cdd38f6c51992952fa00e9be86f01c0e03eb5"
-  integrity sha512-WjfhMXK3l3aMO/vOSD4LFn9ActPrujOqjQUO4vEFQu5+HGNJIYW+zT4Mqvq0dIZAsdaat0NX/dzzAkBHaQu21Q==
+elastic-apm-node@^3.38.0:
+  version "3.38.0"
+  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.38.0.tgz#4d0dc9279c0e23e09b3b30aa4a9f9aeccfa59cc0"
+  integrity sha512-/d6YuWFtsfkVRpFD0YJ2rYJVq0rI0PGqG/C+cW1JpMZ4IOU8dA9xzUkxbT0G3B8gpHNug07Xo6bJdQa2oUaFbQ==
   dependencies:
     "@elastic/ecs-pino-format" "^1.2.0"
     "@opentelemetry/api" "^1.1.0"
