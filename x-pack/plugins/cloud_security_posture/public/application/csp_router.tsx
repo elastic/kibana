@@ -73,6 +73,7 @@ export const CspRouter = ({ securitySolutionContext }: CspRouterProps) => {
 
   const routerElement = (
     <QueryClientProvider client={queryClient}>
+      <h1>HEY TEST</h1>
       <Switch>
         {securitySolutionRoutes.map((route) => {
           const routeProps = SpyRoute ? addSpyRouteComponentToRoute(route, SpyRoute) : route;
@@ -91,12 +92,7 @@ export const CspRouter = ({ securitySolutionContext }: CspRouterProps) => {
     );
   }
 
-  return (
-    <>
-      <h1>HEY TEST</h1>
-      {routerElement}
-    </>
-  );
+  return <>{routerElement}</>;
 };
 
 const RedirectToDashboard = () => <Redirect to={cloudPosturePages.dashboard.path} />;
