@@ -48,7 +48,7 @@ export async function scheduleActionsForAlerts<
       throttle,
       notifyWhen
     );
-    if (executeAction) {
+    if (executeAction && alert.hasScheduledActions()) {
       const { actionGroup, subgroup: actionSubgroup, state } = alert.getScheduledActionOptions()!;
       await executeAlert(
         alertId,
