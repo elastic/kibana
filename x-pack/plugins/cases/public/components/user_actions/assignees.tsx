@@ -26,7 +26,7 @@ const AssigneesComponent = ({ assignees, currentUserProfile }: AssigneesProps) =
   <>
     {assignees.length > 0 && (
       <EuiFlexGroup alignItems="center" gutterSize="xs">
-        {assignees.map((assignee) => {
+        {assignees.map((assignee, index) => {
           const usernameDataTestSubj = getUsernameDataTestSubj(assignee);
 
           return (
@@ -35,17 +35,17 @@ const AssigneesComponent = ({ assignees, currentUserProfile }: AssigneesProps) =
               grow={false}
               key={assignee.uid}
             >
-              {isCurrentUser(assignee, currentUserProfile) ? (
-                <UserToolTip profile={assignee.profile}>
-                  <EuiText size="s">{'themselves'}</EuiText>
-                </UserToolTip>
-              ) : (
-                <UserToolTip profile={assignee.profile}>
-                  <EuiText size="s" className="eui-textBreakWord">
+              <UserToolTip profile={assignee.profile}>
+                <EuiText size="s" className="eui-textBreakWord">
+                  {shouldAddAnd(index, assignees.length) && <>{i18n.AND_SPACE}</>}
+                  {isCurrentUser(assignee, currentUserProfile) ? (
+                    <>{i18n.THEMSELVES}</>
+                  ) : (
                     <strong>{getName(assignee.profile?.user)}</strong>
-                  </EuiText>
-                </UserToolTip>
-              )}
+                  )}
+                  {shouldAddComma(index, assignees.length) && <>{','}</>}
+                </EuiText>
+              </UserToolTip>
             </EuiFlexItem>
           );
         })}
@@ -58,6 +58,14 @@ const Assignees = memo(AssigneesComponent);
 
 const isCurrentUser = (assignee: Assignee, currentUserProfile?: UserProfileWithAvatar) => {
   return assignee.uid === currentUserProfile?.uid;
+};
+
+const shouldAddComma = (index: number, length: number) => {
+  return length > 0 && index !== length - 1;
+};
+
+const shouldAddAnd = (index: number, length: number) => {
+  return length > 1 && index === length - 1;
 };
 
 const getLabelTitle = (

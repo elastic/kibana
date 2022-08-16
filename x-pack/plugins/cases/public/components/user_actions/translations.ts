@@ -86,3 +86,11 @@ export const ASSIGNED = i18n.translate('xpack.cases.caseView.assigned', {
 export const UNASSIGNED = i18n.translate('xpack.cases.caseView.unAssigned', {
   defaultMessage: 'unassigned',
 });
+
+export const THEMSELVES = i18n.translate('xpack.cases.caseView.assignee.themselves', {
+  defaultMessage: 'themselves',
+});
+
+export const AND_SPACE = i18n.translate('xpack.cases.caseView.assignee.and', {
+  defaultMessage: 'and ',
+});

@@ -43,4 +43,23 @@ describe('createAssigneesUserActionBuilder', () => {
     expect(screen.getByText('themselves')).toBeInTheDocument();
     expect(screen.getByText('Physical Dinosaur')).toBeInTheDocument();
   });
+
+  it('renders unassigned users', async () => {
+    const userAction = getUserAction('assignees', Actions.delete);
+    const builder = createAssigneesUserActionBuilder({
+      ...builderArgs,
+      userAction,
+    });
+
+    const createdUserAction = builder.build();
+    render(
+      <TestProviders>
+        <EuiCommentList comments={createdUserAction} />
+      </TestProviders>
+    );
+
+    expect(screen.getByText('unassigned')).toBeInTheDocument();
+    expect(screen.getByText('themselves')).toBeInTheDocument();
+    expect(screen.getByText('Physical Dinosaur')).toBeInTheDocument();
+  });
 });

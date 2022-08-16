@@ -82,6 +82,7 @@ export const UserActions = React.memo(
     caseServices,
     caseUserActions,
     userProfiles,
+    currentUserProfile,
     data: caseData,
     getRuleDetailsHref,
     actionsNavigation,
@@ -185,6 +186,7 @@ export const UserActions = React.memo(
               persistableStateAttachmentTypeRegistry,
               userAction,
               userProfiles,
+              currentUserProfile,
               caseServices,
               comments: caseData.comments,
               index,
@@ -211,6 +213,7 @@ export const UserActions = React.memo(
       [
         caseUserActions,
         userProfiles,
+        currentUserProfile,
         externalReferenceAttachmentTypeRegistry,
         persistableStateAttachmentTypeRegistry,
         descriptionCommentListObj,
