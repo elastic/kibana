@@ -156,32 +156,59 @@ export interface RegistryImage extends PackageSpecIcon {
   path: string;
 }
 
-export enum RegistryPolicyTemplateKeys {
+enum BaseTemplateKeys {
   name = 'name',
   title = 'title',
   description = 'description',
   icons = 'icons',
   screenshots = 'screenshots',
+}
+interface BaseTemplate {
+  [BaseTemplateKeys.name]: string;
+  [BaseTemplateKeys.title]: string;
+  [BaseTemplateKeys.description]: string;
+  [BaseTemplateKeys.icons]?: RegistryImage[];
+  [BaseTemplateKeys.screenshots]?: RegistryImage[];
+}
+
+export enum RegistryPolicyIntegrationTemplateKeys {
   categories = 'categories',
   data_streams = 'data_streams',
   inputs = 'inputs',
   readme = 'readme',
   multiple = 'multiple',
 }
-
-export interface RegistryPolicyTemplate {
-  [RegistryPolicyTemplateKeys.name]: string;
-  [RegistryPolicyTemplateKeys.title]: string;
-  [RegistryPolicyTemplateKeys.description]: string;
-  [RegistryPolicyTemplateKeys.icons]?: RegistryImage[];
-  [RegistryPolicyTemplateKeys.screenshots]?: RegistryImage[];
-  [RegistryPolicyTemplateKeys.categories]?: Array<PackageSpecCategory | undefined>;
-  [RegistryPolicyTemplateKeys.data_streams]?: string[];
-  [RegistryPolicyTemplateKeys.inputs]?: RegistryInput[];
-  [RegistryPolicyTemplateKeys.readme]?: string;
-  [RegistryPolicyTemplateKeys.multiple]?: boolean;
+export interface RegistryPolicyIntegrationTemplate extends BaseTemplate {
+  [RegistryPolicyIntegrationTemplateKeys.categories]?: Array<PackageSpecCategory | undefined>;
+  [RegistryPolicyIntegrationTemplateKeys.data_streams]?: string[];
+  [RegistryPolicyIntegrationTemplateKeys.inputs]?: RegistryInput[];
+  [RegistryPolicyIntegrationTemplateKeys.readme]?: string;
+  [RegistryPolicyIntegrationTemplateKeys.multiple]?: boolean;
 }
 
+export enum RegistryPolicyInputOnlyTemplateKeys {
+  type = 'type',
+  vars = 'vars',
+  input = 'input',
+  template_path = 'template_path',
+}
+
+export interface RegistryPolicyInputOnlyTemplate extends BaseTemplate {
+  [RegistryPolicyInputOnlyTemplateKeys.type]: string;
+  [RegistryPolicyInputOnlyTemplateKeys.input]: string;
+  [RegistryPolicyInputOnlyTemplateKeys.vars]?: RegistryVarsEntry[];
+  [RegistryPolicyInputOnlyTemplateKeys.template_path]?: string;
+}
+
+const RegistryPolicyTemplateKeys = {
+  ...BaseTemplateKeys,
+  ...RegistryPolicyIntegrationTemplateKeys,
+  ...RegistryPolicyInputOnlyTemplateKeys,
+};
+export type RegistryPolicyTemplateKeys = typeof RegistryPolicyTemplateKeys;
+export type RegistryPolicyTemplate =
+  | RegistryPolicyIntegrationTemplate
+  | RegistryPolicyInputOnlyTemplate;
 export enum RegistryInputKeys {
   type = 'type',
   title = 'title',
