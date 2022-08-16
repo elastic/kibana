@@ -106,13 +106,13 @@ export function getTopMetricsAggConfig(
         this.aggConfig.sortSettings = rest;
 
         if (isValidSortDirection(order)) {
-          this.aggConfig.sortSettings!.order = order;
+          this.aggConfig.sortSettings.order = order;
         }
         if (isValidSortMode(mode)) {
-          this.aggConfig.sortSettings!.mode = mode;
+          this.aggConfig.sortSettings.mode = mode;
         }
         if (isValidSortNumericType(numType)) {
-          this.aggConfig.sortSettings!.numericType = numType;
+          this.aggConfig.sortSettings.numericType = numType;
         }
       }
 
