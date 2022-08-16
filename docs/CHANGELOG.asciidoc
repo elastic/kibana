@@ -38,14 +38,14 @@ Before you upgrade to 8.4.0, review the breaking changes, then mitigate the impa
 
 [discrete]
 [[breaking-135669]]
-.Fixes xpack.agents.* to not be editable in UI if defined in kibana.yml
+.xpack.agents.* are uneditable in UI when defined in kibana.yml
 [%collapsible]
 ====
 *Details* +
-!!TODO!! For more information, refer to {kibana-pull}135669[#135669]
+When you configure `setxpack.fleet.agents.fleet_server.hosts` and `xpack.fleet.agents.elasticsearch.hosts` in kibana.yml, you are unable to update the fields on the Fleet UI. For more information, refer to {kibana-pull}135669[#135669].
 
 *Impact* +
-!!TODO!!
+To configure `setxpack.fleet.agents.fleet_server.hosts` and `xpack.fleet.agents.elasticsearch.hosts` on the Fleet UI, avoid configuring the settings in kibana.yml.
 ====
       
 [discrete]
@@ -54,13 +54,12 @@ Before you upgrade to 8.4.0, review the breaking changes, then mitigate the impa
 [%collapsible]
 ====
 *Details* +
-!!TODO!! For more information, refer to {kibana-pull}134336[#134336]
+The legacy implementation of the *Timelion* visualization charts library has been removed. All *Timelion* visualizations now use the elastic-charts library, which was introduced in 7.15.0. For more information, refer to {kibana-pull}134336[#134336].
 
 *Impact* +
-!!TODO!!
+In 8.4.0 and later, you are unable to configure the *Timelion* legacy charts library advanced setting. For information about visualization Advanced Settings, check link:https://www.elastic.co/guide/en/kibana/8.4/advanced-options.html#kibana-visualization-settings[Visualization].
 ====
       
-
 // end::notable-breaking-changes[]
 
 [float]
@@ -73,14 +72,14 @@ you make the necessary updates after you upgrade to 8.4.0.
 
 [discrete]
 [[deprecation-136422]]
-.Interactive users authenticating via ApiKey is deprecated and support will be removed in a future version
+.Deprecates interactive users that authenticate with ApiKey is deprecated and support will be removed in a future version
 [%collapsible]
 ====
 *Details* +
-!!TODO!! For more information, refer to {kibana-pull}136422[#136422]
+The ability to authenticate interactive users authenticating with ApiKey has been deprecated, and will be removed in a future version. For more information, refer to {kibana-pull}136422[#136422].
 
 *Impact* +
-!!TODO!!
+To authenticate interactive users, use <<kibana-authentication,another authentication method>>. 
 ====
       
 [float]
@@ -90,53 +89,60 @@ you make the necessary updates after you upgrade to 8.4.0.
 
 Alerting::
 * Adds the "updated at" feature in new alerts table {kibana-pull}136949[#136949]
-* Rule detail table with bulk actions {kibana-pull}136601[#136601]
-* Bulk Actions for Alerts Table {kibana-pull}135797[#135797]
-* Alerting stack-monitoring PoC {kibana-pull}135365[#135365]
-* Custom inline/row actions for alerts table {kibana-pull}134015[#134015]
+* Adds a rule detail table with bulk actions {kibana-pull}136601[#136601]
+* Adds bulk Actions for Alerts Table {kibana-pull}135797[#135797]
+* Adds the Alerting stack-monitoring PoC {kibana-pull}135365[#135365]
+* Adds custom inline/row actions for alerts table {kibana-pull}134015[#134015]
+
 Discover::
-* Allow for custom number of rows in the results and save the specified number with a Saved Search {kibana-pull}135726[#135726]
+Adds the ability to add a custom number of rows in the results and save the specified number with a Saved Search {kibana-pull}135726[#135726]
+
 Elastic Security::
 For the Elastic Security 8.4.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+
 Fleet::
-* Enable package signature verification feature {kibana-pull}137239[#137239]
+* Enables package signature verification feature {kibana-pull}137239[#137239]
 * Modal to allow user to force install an unverified package {kibana-pull}136108[#136108]
 * Display package verification status {kibana-pull}135928[#135928]
 * Tag rename and delete feature {kibana-pull}135712[#135712]
 * Bulk update agent tags ui {kibana-pull}135646[#135646]
-* Added API to bulk update tags {kibana-pull}135520[#135520]
+* Adds API to bulk update tags {kibana-pull}135520[#135520]
 * Adds and remove agent tags {kibana-pull}135320[#135320]
 * Support sorting agent list {kibana-pull}135218[#135218]
 * Promote Logstash output support to GA {kibana-pull}135028[#135028]
 * Create new API to manage download_source setting {kibana-pull}134889[#134889]
+
 Lens & Visualizations::
-* Supports include and exclude terms in *Lens* {kibana-pull}136179[#136179]
+* Adds supports for include and exclude terms in *Lens* {kibana-pull}136179[#136179]
+
 Machine Learning::
 * Adds random sampler to Data visualizer document count chart {kibana-pull}136150[#136150]
 * Adds explain log rate spikes feature to the ML plugin {kibana-pull}135948[#135948]
+
 Management::
 * Run packs live {kibana-pull}132198[#132198]
 * Ability to set human readable title of data view & ability to edit data view {kibana-pull}124191[#124191]
+
 Monitoring::
-* Adds stale status reporting for Kibana {kibana-pull}132613[#132613]
+Adds stale status reporting for Kibana {kibana-pull}132613[#132613]
+
 Observability::
 * Adds Beta label to Infrastructure tab {kibana-pull}136710[#136710]
 * Create and add Rule Alerts Summary as a sharable component to the O11y Rule Details {kibana-pull}135805[#135805]
 * Rule Details Page - Use RuleStatusPanel from triggersActionsUI {kibana-pull}135643[#135643]
-* Adds support for deletion sub feature privilege {kibana-pull}135487[#135487]
-////
-!!TODO!! The above PR had a lengthy release note description:
-Cases permissions can be customized to prevent a user from deleting Cases entities (cases themselves, and attachments/comments).
-////
+* Cases permissions can be customized to prevent a user from deleting Cases entities (cases themselves, and attachments/comments) {kibana-pull}135487[#135487]
 * Top erroneous transactions {kibana-pull}134929[#134929]
 * Introduce Alerts tab on service overview page {kibana-pull}134350[#134350]
 * Adds single metric report type {kibana-pull}132446[#132446]
+
 Platform::
-* Adds new method to Task Manager - bulkUpdatesSchedules, that allow bulk updates of scheduled tasks {kibana-pull}132637[#132637]
+Adds new bulkUpdatesSchedules method to Task Manager {kibana-pull}132637[#132637]
+
 Security::
-* Users can have their personal avatars now {kibana-pull}132522[#132522]
+Adds the ability to create personal avatars {kibana-pull}132522[#132522]
+
 Sharing::
-* Adds new metric visualization {kibana-pull}136567[#136567]
+Adds the new metric visualization {kibana-pull}136567[#136567]
 
 For more information about the features introduced in 8.4.0, refer to <<whats-new,What's new in 8.4>>.
 
@@ -144,136 +150,77 @@ For more information about the features introduced in 8.4.0, refer to <<whats-ne
 === Enhancements and bug fixes
 
 For detailed information about the 8.4.0 release, review the enhancements and bug fixes.
-
-[float]
-[[breaking-v8.4.0]]
-=== Breaking
-[discrete]
-[[breaking-135669]]
-.Fixes xpack.agents.* to not be editable in UI if defined in kibana.yml
-[%collapsible]
-====
-*Details* +
-!!TODO!! For more information, refer to {kibana-pull}135669[#135669]
-
-*Impact* +
-!!TODO!!
-====
       
-[discrete]
-[[breaking-134336]]
-.Removes the legacy charts library
-[%collapsible]
-====
-*Details* +
-!!TODO!! For more information, refer to {kibana-pull}134336[#134336]
-
-*Impact* +
-!!TODO!!
-====
-      
-
-[float]
-[[deprecation-v8.4.0]]
-=== Deprecations
-[discrete]
-[[deprecation-136422]]
-.Interactive users authenticating via ApiKey is deprecated and support will be removed in a future version
-[%collapsible]
-====
-*Details* +
-!!TODO!! For more information, refer to {kibana-pull}136422[#136422]
-
-*Impact* +
-!!TODO!!
-====
-      
-
 [float]
 [[enhancement-v8.4.0]]
 === Enhancements
 Alerting::
-* Adds the "updated at" feature in new alerts table {kibana-pull}136949[#136949]
-* Rule detail table with bulk actions {kibana-pull}136601[#136601]
-* Bulk Actions for Alerts Table {kibana-pull}135797[#135797]
-* Alerting stack-monitoring PoC {kibana-pull}135365[#135365]
 * Adds snooze state UI to Rule Details page {kibana-pull}135146[#135146]
 * {REDO} Add Snooze Scheduling UI and API {kibana-pull}134512[#134512]
-* Custom inline/row actions for alerts table {kibana-pull}134015[#134015]
 * Adds recovery context for ES query rule type {kibana-pull}132839[#132839]
 * Visualize alerting metrics in Stack Monitoring {kibana-pull}123726[#123726]
+
 Canvas::
 * Markdown element auto-applies text changes {kibana-pull}133318[#133318]
 * Lines operations keybindings {kibana-pull}132914[#132914]
 * Detailed tooltip {kibana-pull}131116[#131116]
+
 Cases::
-* Limiting search fields {kibana-pull}136776[#136776]
-////
-!!TODO!! The above PR had a lengthy release note description:
-Improved the cases search bar functionality. The search functionality will only consider the title and description fields.
-////
-* Write performance improvements by reducing index refreshes {kibana-pull}136452[#136452]
-////
-!!TODO!! The above PR had a lengthy release note description:
-Performance improvements were made to reduce the time required to create, update, and delete cases and comments. In our testing we saw around a half second reduction in the round trip time for the UI requests.
-////
+* Improved the cases search bar functionality. The search functionality will only consider the title and description fields {kibana-pull}136776[#136776]
+* Performance improvements were made to reduce the time required to create, update, and delete cases and comments. In our testing we saw around a half second reduction in the round trip time for the UI requests {kibana-pull}136452[#136452]
+
 Dashboard::
-* Hide controls callout when the `hideAnnouncements` setting is `true` {kibana-pull}136410[#136410]
+Hide controls callout when the `hideAnnouncements` setting is `true` {kibana-pull}136410[#136410]
+
 Design::
 * Adds an H1 tag with the workpad title when viewing workpads {kibana-pull}135504[#135504]
 * Improve keyboard navigation in Discover top nav menu {kibana-pull}134788[#134788]
+
 Discover::
-* Improve HTML formatting of fields with a list of values {kibana-pull}136684[#136684]
-* Allow for custom number of rows in the results and save the specified number with a Saved Search {kibana-pull}135726[#135726]
+* Improves the HTML formatting of fields with a list of values {kibana-pull}136684[#136684]
 * Adds support for accessing the edit field flyout from the document explorer column popover {kibana-pull}135277[#135277]
 * Adds support for copying the query from the add rule flyout {kibana-pull}135098[#135098]
 * Adds focus to h1 on navigate for single document and surrounding document views {kibana-pull}134942[#134942]
-* Improve creation and editing of "Elasticsearch query" rule in Management {kibana-pull}134763[#134763]
+* Improves the creation and editing of "Elasticsearch query" rule in Management {kibana-pull}134763[#134763]
 * Adds data view changed warning after alert rule created {kibana-pull}134674[#134674]
 * Make 'Test query' button pretty {kibana-pull}134605[#134605]
-* Improve document explorer timestamp tooltip accessibility {kibana-pull}134411[#134411]
-* Added focus to h1 element when client side routing is executed {kibana-pull}133846[#133846]
+* Improves the document explorer timestamp tooltip accessibility {kibana-pull}134411[#134411]
+* Adds focus to h1 element when client side routing is executed {kibana-pull}133846[#133846]
 * Adds an option to copy column values to Clipboard in Document Explorer {kibana-pull}132330[#132330]
+
 Elastic Security::
 For the Elastic Security 8.4.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+
 Fleet::
-* Enable package signature verification feature {kibana-pull}137239[#137239]
 * Remove Kubernetes Package granularity {kibana-pull}136622[#136622]
 * Elastic-agent manifests: align with elastic-agent repo; add comments {kibana-pull}136394[#136394]
 * Configure source URI in global settings and in agent policy settings {kibana-pull}136263[#136263]
 * Adds Kubernetes in platforms selection list && update managed agent installation steps {kibana-pull}136109[#136109]
-* Modal to allow user to force install an unverified package {kibana-pull}136108[#136108]
-* Display package verification status {kibana-pull}135928[#135928]
-* Tag rename and delete feature {kibana-pull}135712[#135712]
-* Bulk update agent tags ui {kibana-pull}135646[#135646]
-* Added API to bulk update tags {kibana-pull}135520[#135520]
-* Adds and remove agent tags {kibana-pull}135320[#135320]
-* Support sorting agent list {kibana-pull}135218[#135218]
-* Promote Logstash output support to GA {kibana-pull}135028[#135028]
-* Create new API to manage download_source setting {kibana-pull}134889[#134889]
 * That PR will enable user to write custom ingest pipeline for Fleet installed datastream {kibana-pull}134578[#134578]
 * Update manifests for agent on kubernetes with new permissions {kibana-pull}133495[#133495]
 * Adds support for a textarea type in integrations {kibana-pull}133070[#133070]
+
 Kibana Home & Add Data::
-* Adds AnalyticsNoDataPage {kibana-pull}134172[#134172]
+Adds AnalyticsNoDataPage {kibana-pull}134172[#134172]
+
 Lens & Visualizations::
-* Set top values limit to 10,000 in *Lens* {kibana-pull}136399[#136399]
-* Adds value count in *Lens* {kibana-pull}136385[#136385]
+* Adds the ability to set top values limit to 10,000 in *Lens* {kibana-pull}136399[#136399]
+* Addss value count to *Lens* {kibana-pull}136385[#136385]
 * Adds standard deviation function in *Lens* {kibana-pull}136323[#136323]
-* Supports include and exclude terms in *Lens* {kibana-pull}136179[#136179]
-* Set font size for mosaic outer level in *Lens* {kibana-pull}135911[#135911]
-* Rank top values by custom metric in *Lens* {kibana-pull}134811[#134811]
-* Convert TSVB series agg to *Lens* configuration {kibana-pull}134681[#134681]
-* Allow multiple split accessors {kibana-pull}134566[#134566]
+* Adds the ability to set the font size for mosaic outer level in *Lens* {kibana-pull}135911[#135911]
+* Adds the ability to rank top values by custom metric in *Lens* {kibana-pull}134811[#134811]
+* Adds the ability to convert TSVB series agg to *Lens* configuration {kibana-pull}134681[#134681]
+* Adds the ability to allow multiple split accessors {kibana-pull}134566[#134566]
 * Adds xExtent validation within expression {kibana-pull}134546[#134546]
-* Render newlines in data table in *Lens* {kibana-pull}134441[#134441]
+* Adds the ability to render newlines in data table in *Lens* {kibana-pull}134441[#134441]
 * Extends Axis bounds for XY chart when using Interval operation in *Lens* {kibana-pull}134020[#134020]
-* Use pick_max instead of clamp for positive only {kibana-pull}133460[#133460]
-* New pick_min/max operation and clamp fixes in *Lens* {kibana-pull}132449[#132449]
-* Supports percentile_ranks aggregation in *Lens* {kibana-pull}132430[#132430]
-* Implement drag and drop between layers in *Lens* {kibana-pull}132018[#132018]
-* Optimize percentiles fetching in *Lens* {kibana-pull}131875[#131875]
+* Adds the ability to use pick_max instead of clamp for positive only {kibana-pull}133460[#133460]
+* Adds a new pick_min/max operation and clamp fixes in *Lens* {kibana-pull}132449[#132449]
+* Adds support for percentile_ranks aggregation in *Lens* {kibana-pull}132430[#132430]
+* Implements the ability to drag and drop between layers in *Lens* {kibana-pull}132018[#132018]
+* Adds optimization for percentiles fetching in *Lens* {kibana-pull}131875[#131875]
 * Adds `axes` support {kibana-pull}129476[#129476]
+
 Machine Learning::
 * Adds tooltips for disabled actions in the Trained Models list {kibana-pull}137176[#137176]
 * Data visualizer: Add field types in-product help {kibana-pull}137121[#137121]
@@ -281,8 +228,6 @@ Machine Learning::
 * One-way cursor sync added from Anomaly detection swimlane to other charts {kibana-pull}136775[#136775]
 * Adds action to view datafeed counts chart to jobs list rows {kibana-pull}136274[#136274]
 * Data Visualizer: Remove duplicated geo examples, support 'version' type, add filters for boolean fields, and add sticky header to Discover {kibana-pull}136236[#136236]
-* Adds random sampler to Data visualizer document count chart {kibana-pull}136150[#136150]
-* Adds explain log rate spikes feature to the ML plugin {kibana-pull}135948[#135948]
 * Adds a link to ML trained models list from ID in Stack Management app table {kibana-pull}135700[#135700]
 * Adds information callouts to trained model testing flyout {kibana-pull}135566[#135566]
 * Limit Use full data button in anomaly detection job wizards to past data only {kibana-pull}135449[#135449]
@@ -291,6 +236,7 @@ Machine Learning::
 * Management page refactor {kibana-pull}134893[#134893]
 * Disable the Single Metric Viewer button for not viewable jobs {kibana-pull}134048[#134048]
 * Anomaly Detection: allow snapshot to be reverted from the view datafeed flyout {kibana-pull}133842[#133842]
+
 Management::
 * Transforms: Adds per-transform setting for num_failure_retries to creation wizard and edit flyout and authorization info {kibana-pull}135486[#135486]
 * Adds sorting to Transform's Audit Messages {kibana-pull}135047[#135047]
@@ -298,16 +244,11 @@ Management::
 * Render most severe response status code from Console response pane {kibana-pull}134627[#134627]
 * You can now create variables in Console {kibana-pull}134215[#134215]
 * Make index template previews copyable {kibana-pull}134060[#134060]
-* Support request-body comments {kibana-pull}133852[#133852]
-////
-!!TODO!! The above PR had a lengthy release note description:
-Console now supports adding comments in the body of a request by using `//` for a single line and `/*....*/` for multiline comments.
-////
+* Console now supports adding comments in the body of a request by using `//` for a single line and `/*....*/` for multiline comments {kibana-pull}133852[#133852]
 * Improve UX around handling multiple requests {kibana-pull}132494[#132494]
 * Adds updated `essql` expression function {kibana-pull}132332[#132332]
-* Run packs live {kibana-pull}132198[#132198]
 * Adds a "get all" REST API for data views: `GET /api/data_views` {kibana-pull}131683[#131683]
-* Ability to set human readable title of data view & ability to edit data view {kibana-pull}124191[#124191]
+
 Maps::
 * Automatically display the maps legend {kibana-pull}136872[#136872]
 * Custom raster source example plugin {kibana-pull}136761[#136761]
@@ -318,44 +259,31 @@ Maps::
 * Synchronize map views in dashboard and canvas {kibana-pull}134272[#134272]
 * Adds spatial filter from cluster {kibana-pull}133673[#133673]
 * Customizable colors in basemaps {kibana-pull}131576[#131576]
-Monitoring::
-* Adds stale status reporting for Kibana {kibana-pull}132613[#132613]
+
 Observability::
-* Adds Beta label to Infrastructure tab {kibana-pull}136710[#136710]
 * Prefer DataView client over SavedObjects client when possible {kibana-pull}136694[#136694]
 * Use proper header nesting {kibana-pull}136559[#136559]
 * Removes "no data" redirects for observability overview {kibana-pull}136442[#136442]
 * Allow connectors to explicitly register which features they will be available in {kibana-pull}136331[#136331]
-* Create and add Rule Alerts Summary as a sharable component to the O11y Rule Details {kibana-pull}135805[#135805]
-* Rule Details Page - Use RuleStatusPanel from triggersActionsUI {kibana-pull}135643[#135643]
 * Display node details metrics for kubernetes containers {kibana-pull}135585[#135585]
-* Adds support for deletion sub feature privilege {kibana-pull}135487[#135487]
-////
-!!TODO!! The above PR had a lengthy release note description:
-Cases permissions can be customized to prevent a user from deleting Cases entities (cases themselves, and attachments/comments).
-////
-* Top erroneous transactions {kibana-pull}134929[#134929]
 * Replace sourceId with mandatory logView prop in LogStream component {kibana-pull}134850[#134850]
 * Backend operation distribution chart {kibana-pull}134561[#134561]
-* Introduce Alerts tab on service overview page {kibana-pull}134350[#134350]
 * Display top spans for operation {kibana-pull}134179[#134179]
 * Show descriptive loading, empty and error states in the metrics table {kibana-pull}133947[#133947]
 * Backend operations detail view + metric charts {kibana-pull}133866[#133866]
 * Backend operations list view {kibana-pull}133653[#133653]
-* Adds single metric report type {kibana-pull}132446[#132446]
+
 Platform::
 * Upgrade Kibana logs to ECS 8.4 {kibana-pull}136362[#136362]
 * Adds error messaging to the report contents when there is a timeout in page setup {kibana-pull}134868[#134868]
 * Adds migrations.discardCorruptObjects flag {kibana-pull}132984[#132984]
-* Adds new method to Task Manager - bulkUpdatesSchedules, that allow bulk updates of scheduled tasks {kibana-pull}132637[#132637]
 * Adds migrations.discardUnknownObjects flag {kibana-pull}132167[#132167]
+
 Querying & Filtering::
-* Hides the tour component when the hideAnnouncements uiSetting is on {kibana-pull}135990[#135990]
+Hides the tour component when the hideAnnouncements uiSetting is on {kibana-pull}135990[#135990]
+
 Security::
-* Navigate to profile without full page reload {kibana-pull}135543[#135543]
-* Users can have their personal avatars now {kibana-pull}132522[#132522]
-Sharing::
-* Adds new metric visualization {kibana-pull}136567[#136567]
+Adds the ability to navigate to a profile without full page reload {kibana-pull}135543[#135543]
 
 [float]
 [[fixes-v8.4.0]]
@@ -363,6 +291,7 @@ Sharing::
 Alerting::
 * Error message hidden after closing action accordion {kibana-pull}136570[#136570]
 * Allow wildcard search on rule's name and tags {kibana-pull}136312[#136312]
+
 Canvas::
 * Fixes Filter not saving the selected Sort field option {kibana-pull}136085[#136085]
 * Fixes "Element status" is inaccurate for grouped elements {kibana-pull}135829[#135829]
@@ -370,44 +299,50 @@ Canvas::
 * Fixes Uploaded asset not being saved {kibana-pull}133166[#133166]
 * Lines operations keybindings {kibana-pull}132914[#132914]
 * Fixes pointseries don't get updated on datasource change {kibana-pull}132831[#132831]
+
 Connectors::
 * Fixing ES index connector so that it can index into data streams as well as indices {kibana-pull}136011[#136011]
 * Verify emails when creating an email connector, even if allowedDomain… {kibana-pull}133859[#133859]
+
 Dashboard::
-* Fixes Copy to dashboard includes filters {kibana-pull}136275[#136275]
+Fixes Copy to dashboard includes filters {kibana-pull}136275[#136275]
+
 Discover::
 * Fixes hiding histogram for rollup data views {kibana-pull}137157[#137157]
 * Fixes filtering out custom meta fields of Elasticsearch plugins enhanced documents {kibana-pull}137147[#137147]
-* Disable refresh interval for data views without time fields and rollups {kibana-pull}137134[#137134]
+* Disables refresh interval for data views without time fields and rollups {kibana-pull}137134[#137134]
 * Fixes Discover breadcrumb losing context after page refresh or when opening in a new tab {kibana-pull}136749[#136749]
-* Improve support for pinned filters in surrounding documents {kibana-pull}135722[#135722]
+* Improves support for pinned filters in surrounding documents {kibana-pull}135722[#135722]
 * Fixes flaky accessibility functional tests {kibana-pull}135596[#135596]
-* Improve alerts popover accessibility and semantics {kibana-pull}135270[#135270]
+* Improves alerts popover accessibility and semantics {kibana-pull}135270[#135270]
 * Migrate from savedObjectsClient to dataViews and fix the displayed data view name {kibana-pull}135142[#135142]
-* Remove _type of metaFields to remove of sidebar {kibana-pull}134453[#134453]
+* Removes _type of metaFields to remove of sidebar {kibana-pull}134453[#134453]
 * Fixes legacy sort parameter provided by URL {kibana-pull}134447[#134447]
 * Make footer visible under Document Explorer if sample size is less than hits number {kibana-pull}134231[#134231]
 * Do not update defaultIndex in case of insufficient permissions {kibana-pull}134202[#134202]
 * Fixes flaky test for "allows editing of a newly created field" {kibana-pull}132812[#132812]
 * Fixes flaky test for "context encoded URL params" {kibana-pull}132808[#132808]
+
 Elastic Security::
 For the Elastic Security 8.4.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+
 Fleet::
-* Using point in time for agent status query to avoid discrepancy {kibana-pull}135816[#135816]
+Using point in time for agent status query to avoid discrepancy {kibana-pull}135816[#135816]
+
 Lens & Visualizations::
 * Make reference line chart more robust in *Lens* {kibana-pull}137101[#137101]
 * Format the label with the right default formatter in *TSVB* {kibana-pull}136934[#136934]
 * Removes extra space from the legend when it is positioned on top/bottom {kibana-pull}135982[#135982]
 * Display Y-axis tick labels {kibana-pull}135976[#135976]
-* Fixed Date histogram bounds calculation doesn't update "now" {kibana-pull}135899[#135899]
+* Fixes Date histogram bounds calculation doesn't update "now" {kibana-pull}135899[#135899]
 * Fixes internal links in *Vega* {kibana-pull}135890[#135890]
 * Do not set non-unique id for legend action popovers in *Lens* {kibana-pull}135656[#135656]
 * Fixes non-editable Lens panel when using prefix wildcard in *Lens* {kibana-pull}135654[#135654]
-* Remove saved search references from all places on unlink in *Visualize* {kibana-pull}135628[#135628]
-* Heatmap: Fix multi-field top values in *Lens* {kibana-pull}135581[#135581]
+* Removes saved search references from all places on unlink in *Visualize* {kibana-pull}135628[#135628]
+* Fix multi-field top values for Heatmap visualizations in *Lens* {kibana-pull}135581[#135581]
 * Fixes styling issues in *Lens* {kibana-pull}135406[#135406]
 * Show badge for read-only in *Lens* {kibana-pull}135313[#135313]
-* Dont let reference line fills on different axes collide in *Lens* {kibana-pull}135299[#135299]
+* Don't let reference line fills on different axes collide in *Lens* {kibana-pull}135299[#135299]
 * Fixes css specificity issue in *TSVB* {kibana-pull}135245[#135245]
 * Always show palette on first dimension for mosaic in *Lens* {kibana-pull}135198[#135198]
 * Wrong `visType` for `horizontal_bar` visualization {kibana-pull}135013[#135013]
@@ -417,17 +352,20 @@ Lens & Visualizations::
 * Fixes application of suffix formats in *Lens* {kibana-pull}133780[#133780]
 * Error messages not centered in *TSVB* {kibana-pull}133288[#133288]
 * Use correct time zone for time shifting {kibana-pull}133141[#133141]
+
 Machine Learning::
 * Lock the delete annotation button on click {kibana-pull}137306[#137306]
 * Fixes globally pinned filters in Data visualizer and query search bar not clearing properly for saved searches {kibana-pull}136897[#136897]
 * Fixes overflow in start datafeed modal {kibana-pull}136292[#136292]
 * Fixes error in categorization wizard summary step {kibana-pull}134228[#134228]
+
 Management::
 * The ILM UI now supports configuring policies with rollover based on `max_primary_shard_docs` {kibana-pull}137364[#137364]
-* Fixed a bug in Console when sending a request with encoded characters resulted in an error {kibana-pull}136788[#136788]
-* Fixed a bug where the autocomplete popup remains open when navigating away from Console {kibana-pull}136268[#136268]
-* Fixed a bug in Index Management where the number of documents for an index could appear wrong {kibana-pull}135748[#135748]
-* Fixed a bug in the Painless code editor that was incorrectly handling expressions with multiple division operators {kibana-pull}135423[#135423]
+* Fixes a bug in Console when sending a request with encoded characters resulted in an error {kibana-pull}136788[#136788]
+* Fixes a bug where the autocomplete popup remains open when navigating away from Console {kibana-pull}136268[#136268]
+* Fixes a bug in Index Management where the number of documents for an index could appear wrong {kibana-pull}135748[#135748]
+* Fixes a bug in the Painless code editor that was incorrectly handling expressions with multiple division operators {kibana-pull}135423[#135423]
+
 Maps::
 * Fixes "other" is always shown in legend for category styling rules {kibana-pull}137008[#137008]
 * Fixes Tooltip loses pages on refresh {kibana-pull}135593[#135593]
@@ -437,8 +375,10 @@ Maps::
 * Fixes onDataLoadEnd and onDataLoadError event handler callbacks only called for source data requests {kibana-pull}134786[#134786]
 * Fixes sort not applied to vector tile search request {kibana-pull}134607[#134607]
 * Fixes array values out of order in tooltips {kibana-pull}134588[#134588]
+
 Monitoring::
-* Removes beta icon from logstash pipeline {kibana-pull}131752[#131752]
+Removes beta icon from logstash pipeline {kibana-pull}131752[#131752]
+
 Observability::
 * Invalid array value is permitted in Origin Headers for RUM configuration {kibana-pull}137228[#137228]
 * When comparison feature is disabled, we still see the shaded area {kibana-pull}137223[#137223]
@@ -457,6 +397,7 @@ Observability::
 * Fixes Metrics Table Pod link to Details Page {kibana-pull}134354[#134354]
 * Adds last updated at label and fix started at label {kibana-pull}134254[#134254]
 * Adds event module filter to metrics table {kibana-pull}133872[#133872]
+
 Platform::
 * Migrations wait for index status green if create index returns acknowledged=false or shardsAcknowledged=false {kibana-pull}136605[#136605]
 * Fixes CSV generator to include unmapped fields in the search source {kibana-pull}132972[#132972]
@@ -473,8 +414,6 @@ Review the {kib} 8.0.0 changes, then use the {kibana-ref-all}/7.17/upgrade-assis
 Breaking changes can prevent your application from optimal operation and performance.
 Before you upgrade to 8.0.0, review the breaking change, then mitigate the impact to your application.
 
-// tag::notable-breaking-changes[]
-
 [discrete]
 [[breaking-123754]]
 .Removes the `console.ssl` setting
@@ -486,9 +425,6 @@ The `console.ssl` setting has been removed. For more information, refer to {kiba
 *Impact* +
 Before you upgrade to 8.0.0, remove `console.ssl` from kibana.yml.
 ====
-
-// end::notable-breaking-changes[]
-
 
 To review the breaking changes in previous versions, refer to the following: 
 
