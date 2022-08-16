@@ -19,7 +19,11 @@ describe('AllRules', () => {
         <AllRulesUtilityBar
           canBulkEdit
           onRefresh={jest.fn()}
-          paginationTotal={4}
+          pagination={{
+            page: 1,
+            perPage: 10,
+            total: 21
+          }}
           numberSelectedItems={1}
           onGetBulkItemsPopoverContent={jest.fn()}
           isAutoRefreshOn={true}
@@ -29,11 +33,45 @@ describe('AllRules', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="showingRules"]').at(0).text()).toEqual('Showing 4 rules');
+    expect(wrapper.find('[data-test-subj="showingRules"]').at(0).text()).toEqual('Showing 1-10 of 21 rules');
     expect(wrapper.find('[data-test-subj="selectedRules"]').at(0).text()).toEqual(
       'Selected 1 rule'
     );
   });
+
+  describe("renders correct pagination label when", () => {
+    it.each([
+      [1, 1, 1, "Showing 1-1 of 1 rule"],
+      [1, 10, 21, "Showing 1-10 of 21 rules"],
+      [1, 10, 8, "Showing 1-8 of 8 rules"],
+      [2, 10, 31, "Showing 11-20 of 31 rules"],
+      [4, 10, 31, "Showing 31-31 of 31 rules"],
+      [1, 5, 4, "Showing 1-4 of 4 rules"],
+      [1, 100, 100, "Showing 1-100 of 100 rules"],
+      [2, 100, 101, "Showing 101-101 of 101 rules"],
+    ])("current page is %s, showing %s rules per page and total rules is %s", (page, perPage, total, label) => {
+      const wrapper = mount(
+        <TestProviders>
+          <AllRulesUtilityBar
+            canBulkEdit
+            onRefresh={jest.fn()}
+            pagination={{
+              page,
+              perPage,
+              total
+            }}
+            numberSelectedItems={1}
+            onGetBulkItemsPopoverContent={jest.fn()}
+            isAutoRefreshOn={true}
+            onRefreshSwitch={jest.fn()}
+            hasBulkActions
+          />
+        </TestProviders>
+      );
+      expect(wrapper.find('[data-test-subj="showingRules"]').at(0).text()).toEqual(label);
+    })
+  })
+
 
   it('does not render total selected and bulk actions when "hasBulkActions" is false', () => {
     const wrapper = mount(
@@ -41,7 +79,11 @@ describe('AllRules', () => {
         <AllRulesUtilityBar
           canBulkEdit
           onRefresh={jest.fn()}
-          paginationTotal={4}
+          pagination={{
+            page: 1,
+            perPage: 10,
+            total: 4
+          }}
           numberSelectedItems={1}
           onGetBulkItemsPopoverContent={jest.fn()}
           isAutoRefreshOn={true}
@@ -64,7 +106,11 @@ describe('AllRules', () => {
         <AllRulesUtilityBar
           canBulkEdit
           onRefresh={jest.fn()}
-          paginationTotal={4}
+          pagination={{
+            page: 1,
+            perPage: 10,
+            total: 21
+          }}
           numberSelectedItems={1}
           onGetBulkItemsPopoverContent={jest.fn()}
           isAutoRefreshOn={true}
@@ -83,7 +129,11 @@ describe('AllRules', () => {
         <AllRulesUtilityBar
           canBulkEdit={false}
           onRefresh={jest.fn()}
-          paginationTotal={4}
+          pagination={{
+            page: 1,
+            perPage: 10,
+            total: 21
+          }}
           numberSelectedItems={1}
           onGetBulkItemsPopoverContent={jest.fn()}
           isAutoRefreshOn={true}
@@ -103,7 +153,11 @@ describe('AllRules', () => {
         <AllRulesUtilityBar
           canBulkEdit
           onRefresh={mockRefresh}
-          paginationTotal={4}
+          pagination={{
+            page: 1,
+            perPage: 10,
+            total: 21
+          }}
           numberSelectedItems={1}
           onGetBulkItemsPopoverContent={jest.fn()}
           isAutoRefreshOn={true}
@@ -125,7 +179,11 @@ describe('AllRules', () => {
         <AllRulesUtilityBar
           canBulkEdit
           onRefresh={jest.fn()}
-          paginationTotal={4}
+          pagination={{
+            page: 1,
+            perPage: 10,
+            total: 21
+          }}
           numberSelectedItems={0}
           onGetBulkItemsPopoverContent={jest.fn()}
           isAutoRefreshOn={true}
@@ -149,7 +207,11 @@ describe('AllRules', () => {
         <AllRulesUtilityBar
           canBulkEdit
           onRefresh={jest.fn()}
-          paginationTotal={4}
+          pagination={{
+            page: 1,
+            perPage: 10,
+            total: 21
+          }}
           numberSelectedItems={1}
           onGetBulkItemsPopoverContent={jest.fn()}
           isAutoRefreshOn={true}
