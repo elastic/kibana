@@ -27,3 +27,6 @@ export const NUMBER_ERR = i18n.translate('autocomplete.invalidNumberError', {
 export const DATE_ERR = i18n.translate('autocomplete.invalidDateError', {
   defaultMessage: 'Not a valid date',
 });
+export const FIELD_SPACE_WARNING = i18n.translate('autocomplete.fieldSpaceWarning', {
+  defaultMessage: 'Warning: there is whitespace that isn’t being displayed',
+});
