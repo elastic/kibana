@@ -6,7 +6,13 @@
  */
 
 import { euiPaletteColorBlind } from '@elastic/eui';
+import { InferSearchResponseOf } from '@kbn/core/types/elasticsearch';
+import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
+
+export const OTHER_BUCKET_LABEL = i18n.translate('xpack.profiling.topn.otherBucketLabel', {
+  defaultMessage: 'Other',
+});
 
 export interface CountPerTime {
   Timestamp: number;
@@ -26,33 +32,127 @@ export interface TopNResponse extends TopNSamples {
 }
 
 export interface TopNSamplesHistogramResponse {
+  sum_other_doc_count: number;
   buckets: Array<{
     key: string | number;
     doc_count: number;
     count: { value: number | null };
-    group_by: {
+    over_time: {
       buckets: Array<{ doc_count: number; key: string | number; count: { value: number | null } }>;
     };
   }>;
 }
 
+export function getTopNAggregationRequest({
+  searchField,
+  highCardinality,
+  fixedInterval,
+}: {
+  searchField: string;
+  highCardinality: boolean;
+  fixedInterval: string;
+}) {
+  return {
+    group_by: {
+      terms: {
+        field: searchField,
+        order: { count: 'desc' as const },
+        size: 99,
+        execution_hint: highCardinality ? ('map' as const) : ('global_ordinals' as const),
+      },
+      aggs: {
+        over_time: {
+          date_histogram: {
+            field: '@timestamp',
+            fixed_interval: fixedInterval,
+          },
+          aggs: {
+            count: {
+              sum: {
+                field: 'Count',
+              },
+            },
+          },
+        },
+        count: {
+          sum: {
+            field: 'Count',
+          },
+        },
+      },
+    },
+    over_time: {
+      date_histogram: {
+        field: '@timestamp',
+        fixed_interval: fixedInterval,
+      },
+      aggs: {
+        count: {
+          sum: {
+            field: 'Count',
+          },
+        },
+      },
+    },
+    total_count: {
+      sum_bucket: {
+        buckets_path: 'over_time>count',
+      },
+    },
+  };
+}
+
 export function createTopNSamples(
-  histogram: TopNSamplesHistogramResponse | undefined
+  response: Required<
+    InferSearchResponseOf<unknown, { body: { aggs: ReturnType<typeof getTopNAggregationRequest> } }>
+  >['aggregations']
 ): TopNSample[] {
   const bucketsByCategories = new Map();
   const uniqueTimestamps = new Set<number>();
 
-  // Convert the histogram into nested maps and record the unique timestamps
-  const histogramBuckets = histogram?.buckets ?? [];
-  for (let i = 0; i < histogramBuckets.length; i++) {
+  const groupByBuckets = response.group_by.buckets ?? [];
+
+  // keep track of the sum per timestamp to subtract it from the 'other' bucket
+  const sumsOfKnownFieldsByTimestamp = new Map<number, number>();
+
+  // Convert the buckets into nested maps and record the unique timestamps
+  for (let i = 0; i < groupByBuckets.length; i++) {
     const frameCountsByTimestamp = new Map();
-    const items = histogramBuckets[i].group_by.buckets;
+    const items = groupByBuckets[i].over_time.buckets;
 
     for (let j = 0; j < items.length; j++) {
-      uniqueTimestamps.add(Number(items[j].key));
-      frameCountsByTimestamp.set(items[j].key, items[j].count.value);
+      const timestamp = Number(items[j].key);
+      const count = items[j].count.value ?? 0;
+      uniqueTimestamps.add(timestamp);
+      const sumAtTimestamp = (sumsOfKnownFieldsByTimestamp.get(timestamp) ?? 0) + count;
+      sumsOfKnownFieldsByTimestamp.set(timestamp, sumAtTimestamp);
+      frameCountsByTimestamp.set(items[j].key, count);
     }
-    bucketsByCategories.set(histogramBuckets[i].key, frameCountsByTimestamp);
+    bucketsByCategories.set(groupByBuckets[i].key, frameCountsByTimestamp);
+  }
+
+  // create the 'other' bucket by subtracting the sum of all known buckets
+  // from the total
+  const otherFrameCountsByTimestamp = new Map<number, number>();
+
+  let addOtherBucket = false;
+
+  for (let i = 0; i < response.over_time.buckets.length; i++) {
+    const bucket = response.over_time.buckets[i];
+    const timestamp = Number(bucket.key);
+    const valueForOtherBucket =
+      (bucket.count.value ?? 0) - (sumsOfKnownFieldsByTimestamp.get(timestamp) ?? 0);
+
+    if (valueForOtherBucket > 0) {
+      addOtherBucket = true;
+    }
+
+    otherFrameCountsByTimestamp.set(timestamp, valueForOtherBucket);
+  }
+
+  // only add the 'other' bucket if at least one value per timestamp is > 0
+  if (addOtherBucket) {
+    bucketsByCategories.set(OTHER_BUCKET_LABEL, otherFrameCountsByTimestamp);
   }
 
   // Normalize samples so there are an equal number of data points per each timestamp
@@ -96,7 +196,7 @@ export function groupSamplesByCategory(samples: TopNSample[], totalCount: number
   const subcharts: Array<Omit<TopNSubchart, 'Color' | 'Index'>> = [];
 
   for (const [category, series] of seriesByCategory) {
-    const totalPerCategory = series.reduce((sum, { Count }) => sum + (Count ?? 0), 0);
+    const totalPerCategory = series.reduce((sumOf, { Count }) => sumOf + (Count ?? 0), 0);
     subcharts.push({
       Category: category,
       Percentage: (totalPerCategory / totalCount) * 100,

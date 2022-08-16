@@ -11,17 +11,13 @@ import { RouteRegisterParameters } from '.';
 import { fromMapToRecord, getRoutePaths, INDEX_EVENTS } from '../../common';
 import { groupStackFrameMetadataByStackTrace, StackTraceID } from '../../common/profiling';
 import { getFieldNameForTopNType, TopNType } from '../../common/stack_traces';
-import { createTopNSamples } from '../../common/topn';
+import { createTopNSamples, getTopNAggregationRequest } from '../../common/topn';
 import { ProfilingRequestHandlerContext } from '../types';
 import { createProfilingEsClient, ProfilingESClient } from '../utils/create_profiling_es_client';
 import { withProfilingSpan } from '../utils/with_profiling_span';
 import { getClient } from './compat';
 import { findDownsampledIndex } from './downsampling';
-import {
-  aggregateByFieldAndTimestamp,
-  createCommonFilter,
-  findFixedIntervalForBucketsPerTimeRange,
-} from './query';
+import { createCommonFilter, findFixedIntervalForBucketsPerTimeRange } from './query';
 import { mgetExecutables, mgetStackFrames, mgetStackTraces } from './stacktrace';
 
 export async function topNElasticSearchQuery({
@@ -59,20 +55,19 @@ export async function topNElasticSearchQuery({
     index: eventsIndex.name,
     size: 0,
     query: filter,
-    aggs: {
-      histogram: aggregateByFieldAndTimestamp(searchField, highCardinality, fixedInterval),
-      total_count: {
-        sum: {
-          field: 'Count',
-        },
-      },
-    },
+    aggs: getTopNAggregationRequest({
+      searchField,
+      highCardinality,
+      fixedInterval,
+    }),
     // Adrien and Dario found out this is a work-around for some bug in 8.1.
     // It reduces the query time by avoiding unneeded searches.
     pre_filter_shard_size: 1,
   });
 
-  if (!resEvents.aggregations) {
+  const { aggregations } = resEvents;
+
+  if (!aggregations) {
     return response.ok({
       body: {
         TotalCount: 0,
@@ -82,11 +77,9 @@ export async function topNElasticSearchQuery({
     });
   }
 
-  const {
-    histogram,
-    total_count: { value: totalSampledStackTraces },
-  } = resEvents.aggregations;
-  const topN = createTopNSamples(histogram);
+  const topN = createTopNSamples(aggregations);
+
+  const totalSampledStackTraces = aggregations.total_count.value ?? 0;
 
   logger.info('total sampled stacktraces: ' + totalSampledStackTraces);
 
@@ -97,12 +90,12 @@ export async function topNElasticSearchQuery({
   }
 
   const stackTraceEvents = new Map<StackTraceID, number>();
-  const histogramBuckets = histogram?.buckets ?? [];
+  const groupByBuckets = aggregations.group_by.buckets ?? [];
   let totalAggregatedStackTraces = 0;
 
-  for (let i = 0; i < histogramBuckets.length; i++) {
-    const stackTraceID = String(histogramBuckets[i].key);
-    const count = histogramBuckets[i].count.value ?? 0;
+  for (let i = 0; i < groupByBuckets.length; i++) {
+    const stackTraceID = String(groupByBuckets[i].key);
+    const count = groupByBuckets[i].count.value ?? 0;
     totalAggregatedStackTraces += count;
     stackTraceEvents.set(stackTraceID, count);
   }
