@@ -70,6 +70,7 @@ import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event
 import { SearchMetrics } from '../lib/types';
 import { loadRule } from './rule_loader';
 import { logAlerts } from './log_alerts';
+import { AlertsClient } from '../alerts_service/alerts_client';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -109,6 +110,7 @@ export class TaskRunner<
   private readonly ruleTypeRegistry: RuleTypeRegistry;
   private readonly inMemoryMetrics: InMemoryMetrics;
   private alertingEventLogger: AlertingEventLogger;
+  private alertsClient: AlertsClient;
   private usageCounter?: UsageCounter;
   private searchAbortController: AbortController;
   private cancelled: boolean;
@@ -138,6 +140,9 @@ export class TaskRunner<
     this.cancelled = false;
     this.executionId = uuid.v4();
     this.inMemoryMetrics = inMemoryMetrics;
+    this.alertsClient = context.alertsService.createAlertsClient(
+      ruleType as UntypedNormalizedRuleType
+    );
     this.alertingEventLogger = new AlertingEventLogger(this.context.eventLogger);
   }
 

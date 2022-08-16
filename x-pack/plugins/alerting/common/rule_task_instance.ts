@@ -18,6 +18,7 @@ export const ruleStateSchema = t.partial({
   alertTypeState: t.record(t.string, t.unknown),
   alertInstances: t.record(t.string, rawAlertInstance),
   previousStartedAt: t.union([t.null, DateFromString]),
+  previousExecutionUuid: t.string,
 });
 
 // This is serialized in the rule task document

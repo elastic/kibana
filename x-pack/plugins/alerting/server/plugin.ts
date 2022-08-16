@@ -80,6 +80,7 @@ import { getSecurityHealth, SecurityHealth } from './lib/get_security_health';
 import { registerNodeCollector, registerClusterCollector, InMemoryMetrics } from './monitoring';
 import { getRuleTaskTimeout } from './lib/get_rule_task_timeout';
 import { getActionsConfigMap } from './lib/get_actions_config_map';
+import { AlertsService } from './alerts_service/alerts_service';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -173,6 +174,7 @@ export class AlertingPlugin {
   private kibanaBaseUrl: string | undefined;
   private usageCounter: UsageCounter | undefined;
   private inMemoryMetrics: InMemoryMetrics;
+  private alertsService?: AlertsService;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
@@ -229,6 +231,14 @@ export class AlertingPlugin {
       inMemoryMetrics: this.inMemoryMetrics,
     });
     this.ruleTypeRegistry = ruleTypeRegistry;
+
+    this.alertsService = new AlertsService({
+      logger: this.logger,
+      elasticsearchClientPromise: core
+        .getStartServices()
+        .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
+    });
+    this.alertsService!.initialize();
 
     const usageCollection = plugins.usageCollection;
     if (usageCollection) {
@@ -333,6 +343,7 @@ export class AlertingPlugin {
         ruleType.cancelAlertsOnRuleTimeout =
           ruleType.cancelAlertsOnRuleTimeout ?? this.config.cancelAlertsOnRuleTimeout;
         ruleType.doesSetRecoveryContext = ruleType.doesSetRecoveryContext ?? false;
+        ruleType.autoRecoverAlerts = ruleType.autoRecoverAlerts ?? true;
         ruleTypeRegistry.register(ruleType);
       },
       getSecurityHealth: async () => {
@@ -438,6 +449,7 @@ export class AlertingPlugin {
       internalSavedObjectsRepository: core.savedObjects.createInternalRepository(['alert']),
       executionContext: core.executionContext,
       ruleTypeRegistry: this.ruleTypeRegistry!,
+      alertsService: this.alertsService!,
       kibanaBaseUrl: this.kibanaBaseUrl,
       supportsEphemeralTasks: plugins.taskManager.supportsEphemeralTasks(),
       maxEphemeralActionsPerRule: this.config.maxEphemeralActionsPerAlert,

@@ -173,6 +173,7 @@ export interface RuleType<
   ruleTaskTimeout?: string;
   cancelAlertsOnRuleTimeout?: boolean;
   doesSetRecoveryContext?: boolean;
+  autoRecoverAlerts?: boolean;
 }
 export type UntypedRuleType = RuleType<
   RuleTypeParams,
