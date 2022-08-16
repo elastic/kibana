@@ -32,7 +32,6 @@ NPM_MODULE_EXTRA_FILES = [
   "jest_integration_node/jest-preset.js",
   "jest_node/jest-preset.js",
   "jest.config.js",
-  "README.md",
   "package.json",
 ]
 
