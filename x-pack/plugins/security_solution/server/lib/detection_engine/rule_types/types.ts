@@ -71,6 +71,7 @@ export interface RunOpts<TParams extends RuleParams> {
   mergeStrategy: ConfigType['alertMergeStrategy'];
   primaryTimestamp: string;
   secondaryTimestamp?: string;
+  aggregatableTimestampField: string;
 }
 
 export type SecurityAlertType<
