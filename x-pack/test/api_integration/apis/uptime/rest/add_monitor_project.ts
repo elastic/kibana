@@ -950,7 +950,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         comparePolicies(packagePolicy, getTestProjectSyntheticsPolicy());
 
-        const response = await supertest
+        await supertest
           .put(API_URLS.SYNTHETICS_MONITORS_PROJECT)
           .set('kbn-xsrf', 'true')
           .send({
