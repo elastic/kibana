@@ -113,8 +113,13 @@ export function groupAxesByType(
 
   const tablesExist = layers.filter(({ table }) => Boolean(table)).length > 0;
 
-  leftSeriesKeys.push(LEFT_GLOBAL_AXIS_ID);
-  rightSeriesKeys.push(RIGHT_GLOBAL_AXIS_ID);
+  if (!leftSeriesKeys.length) {
+    leftSeriesKeys.push(LEFT_GLOBAL_AXIS_ID);
+  }
+
+  if (!rightSeriesKeys.length) {
+    rightSeriesKeys.push(RIGHT_GLOBAL_AXIS_ID);
+  }
 
   series.auto.forEach((currentSeries) => {
     const leftAxisGroupId = tablesExist
@@ -129,31 +134,23 @@ export function groupAxesByType(
         )
       : undefined;
 
-    let axisGroupId = LEFT_GLOBAL_AXIS_ID;
-
     const rightSeriesCount = rightSeriesKeys.reduce((acc, key) => {
       return acc + series[key].length;
-    });
+    }, 0);
     const leftSeriesCount = leftSeriesKeys.reduce((acc, key) => {
       return acc + series[key].length;
-    });
+    }, 0);
 
-    if (
-      (series[LEFT_GLOBAL_AXIS_ID].length === 0 && leftSeriesKeys.length === 1) ||
-      (leftSeriesKeys.length === 1 && leftAxisGroupId === LEFT_GLOBAL_AXIS_ID) ||
-      (leftAxisGroupId && leftAxisGroupId !== LEFT_GLOBAL_AXIS_ID)
-    ) {
-      axisGroupId = leftAxisGroupId || LEFT_GLOBAL_AXIS_ID;
-    } else if (
-      (series[RIGHT_GLOBAL_AXIS_ID].length === 0 && rightSeriesKeys.length === 1) ||
-      (rightSeriesKeys.length === 1 && rightAxisGroupId === RIGHT_GLOBAL_AXIS_ID) ||
-      (rightAxisGroupId && rightAxisGroupId !== RIGHT_GLOBAL_AXIS_ID)
-    ) {
-      axisGroupId = rightAxisGroupId || RIGHT_GLOBAL_AXIS_ID;
+    let axisGroupId;
+
+    if (leftSeriesCount === 0 || leftAxisGroupId) {
+      axisGroupId = leftAxisGroupId || leftSeriesKeys[0];
+    } else if (rightSeriesCount === 0 || rightAxisGroupId) {
+      axisGroupId = rightAxisGroupId || rightSeriesKeys[0];
     } else if (rightSeriesCount >= leftSeriesCount) {
-      axisGroupId = LEFT_GLOBAL_AXIS_ID;
+      axisGroupId = leftSeriesKeys[0];
     } else {
-      axisGroupId = RIGHT_GLOBAL_AXIS_ID;
+      axisGroupId = rightSeriesKeys[0];
     }
 
     series[axisGroupId].push(currentSeries);
