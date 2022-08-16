@@ -238,7 +238,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.waitForTopNavToBeVisible();
         await PageObjects.discover.selectIndexPattern('logstash-*');
         await setDiscoverTimeRange();
-        await PageObjects.common.waitForTopNavToBeVisible();
+        await PageObjects.discover.waitForDocTableLoadingComplete();
         await PageObjects.discover.clickFieldListItem('bytes');
         await PageObjects.discover.expectMissingFieldListItemVisualize('bytes');
       });
@@ -336,7 +336,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.common.waitForTopNavToBeVisible();
         await setDiscoverTimeRange();
-        await PageObjects.common.waitForTopNavToBeVisible();
+        await PageObjects.discover.waitForDocTableLoadingComplete();
         await PageObjects.discover.clickFieldListItem('bytes');
         await PageObjects.discover.expectMissingFieldListItemVisualize('bytes');
       });
