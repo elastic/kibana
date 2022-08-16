@@ -371,7 +371,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
       )}
       {isFlyoutOpen && selectedRunLog && (
         <RuleActionErrorLogFlyout
-          ruleId={ruleId}
+          ruleId={hasRuleNames ? selectedRunLog.rule_id! : ruleId}
           runLog={selectedRunLog}
           refreshToken={refreshToken}
           onClose={onFlyoutClose}

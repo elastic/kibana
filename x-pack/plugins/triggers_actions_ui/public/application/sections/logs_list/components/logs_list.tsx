@@ -12,14 +12,12 @@ const GLOBAL_EVENT_LOG_LIST_STORAGE_KEY =
   'xpack.triggersActionsUI.globalEventLogList.initialColumns';
 
 export const LogsList = () => {
-  const refreshToken = 0;
-
   return suspendedComponentWithProps(
     RuleEventLogListTableWithApi,
     'xl'
   )({
     ruleId: '*',
-    refreshToken,
+    refreshToken: 0,
     initialPageSize: 50,
     hasRuleNames: true,
     localStorageKey: GLOBAL_EVENT_LOG_LIST_STORAGE_KEY,

@@ -62,6 +62,10 @@ export interface IEventLogClient {
     options?: Partial<AggregateOptionsType>,
     legacyIds?: string[]
   ): Promise<AggregateEventsBySavedObjectResult>;
+  aggregateEventsBySavedObjectType(
+    type: string,
+    options?: Partial<AggregateOptionsType>
+  ): Promise<AggregateEventsBySavedObjectResult>;
 }
 
 export interface IEventLogger {
