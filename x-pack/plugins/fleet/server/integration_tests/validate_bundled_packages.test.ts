@@ -19,7 +19,6 @@ import { appContextService } from '../services';
 
 import { useDockerRegistry } from './helpers';
 
-// Failing: https://github.com/elastic/kibana/issues/138905
 describe('validate bundled packages', () => {
   const registryUrl = useDockerRegistry();
   let mockContract: ReturnType<typeof createAppContextStartContractMock>;
