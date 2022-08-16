@@ -6950,7 +6950,7 @@
         "label": "TimelineKpiStrategyRequest",
         "description": [],
         "signature": [
-          "{ id?: string | undefined; params?: ",
+          "{ params?: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -6958,7 +6958,7 @@
             "section": "def-common.ISearchRequestParams",
             "text": "ISearchRequestParams"
           },
-          " | undefined; timerange: ",
+          " | undefined; id?: string | undefined; timerange: ",
           {
             "pluginId": "timelines",
             "scope": "common",

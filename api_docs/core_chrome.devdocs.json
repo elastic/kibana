@@ -1912,7 +1912,7 @@
         "signature": [
           "React.HTMLAttributes<HTMLElement> & ",
           "CommonProps",
-          " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; text: React.ReactNode; truncate?: boolean | undefined; color?: \"primary\" | \"success\" | \"accent\" | \"warning\" | \"danger\" | \"text\" | \"subdued\" | \"ghost\" | undefined; 'aria-current'?: boolean | \"true\" | \"false\" | \"page\" | \"step\" | \"location\" | \"date\" | \"time\" | undefined; }"
+          " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; text: React.ReactNode; truncate?: boolean | undefined; color?: \"warning\" | \"primary\" | \"success\" | \"accent\" | \"danger\" | \"text\" | \"subdued\" | \"ghost\" | undefined; 'aria-current'?: boolean | \"date\" | \"location\" | \"true\" | \"false\" | \"page\" | \"step\" | \"time\" | undefined; }"
         ],
         "path": "src/core/public/chrome/types.ts",
         "deprecated": false,

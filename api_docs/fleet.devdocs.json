@@ -8944,6 +8944,16 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-common.FullAgentPolicyInput.package_policy_id",
+            "type": "string",
+            "tags": [],
+            "label": "package_policy_id",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-common.FullAgentPolicyInput.meta",
             "type": "Object",
             "tags": [],
@@ -10253,6 +10263,19 @@
             "description": [],
             "signature": [
               "string | null | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.NewAgentPolicy.schema_version",
+            "type": "string",
+            "tags": [],
+            "label": "schema_version",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
             "deprecated": false
@@ -13910,7 +13933,7 @@
         "label": "RegistrySearchResult",
         "description": [],
         "signature": [
-          "{ type?: \"integration\" | undefined; name: string; path: string; version: string; title: string; download: string; description: string; icons?: (",
+          "{ type?: \"integration\" | undefined; path: string; name: string; version: string; title: string; download: string; description: string; icons?: (",
           {
             "pluginId": "fleet",
             "scope": "common",

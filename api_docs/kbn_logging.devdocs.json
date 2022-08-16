@@ -618,7 +618,7 @@
         "label": "EcsEventCategory",
         "description": [],
         "signature": [
-          "\"database\" | \"email\" | \"package\" | \"network\" | \"web\" | \"file\" | \"host\" | \"session\" | \"registry\" | \"process\" | \"authentication\" | \"configuration\" | \"driver\" | \"iam\" | \"intrusion_detection\" | \"malware\""
+          "\"host\" | \"database\" | \"email\" | \"package\" | \"network\" | \"web\" | \"file\" | \"session\" | \"registry\" | \"process\" | \"authentication\" | \"configuration\" | \"driver\" | \"iam\" | \"intrusion_detection\" | \"malware\""
         ],
         "path": "packages/kbn-logging/src/ecs/event.ts",
         "deprecated": false,
@@ -660,7 +660,7 @@
         "label": "EcsEventType",
         "description": [],
         "signature": [
-          "\"start\" | \"error\" | \"end\" | \"group\" | \"user\" | \"info\" | \"admin\" | \"protocol\" | \"connection\" | \"access\" | \"allowed\" | \"change\" | \"creation\" | \"deletion\" | \"denied\" | \"installation\""
+          "\"start\" | \"error\" | \"connection\" | \"end\" | \"group\" | \"user\" | \"info\" | \"admin\" | \"protocol\" | \"access\" | \"allowed\" | \"change\" | \"creation\" | \"deletion\" | \"denied\" | \"installation\""
         ],
         "path": "packages/kbn-logging/src/ecs/event.ts",
         "deprecated": false,
