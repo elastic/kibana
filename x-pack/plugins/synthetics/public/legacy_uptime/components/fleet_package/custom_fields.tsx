@@ -16,6 +16,7 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiCallOut,
+  EuiCode,
   EuiLink,
 } from '@elastic/eui';
 import { DescribedFormGroupWithWrap } from './common/described_form_group_with_wrap';
@@ -162,8 +163,9 @@ export const CustomFields = memo<Props>(
                 >
                   <FormattedMessage
                     id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorType.browser.warning.description"
-                    defaultMessage='To create a "Browser" monitor, please ensure you are using the elastic-agent-complete Docker container, which contains the dependencies to run these monitors. For more information, please visit our {link}.'
+                    defaultMessage='To create a "Browser" monitor, please ensure you are using the {code} Docker container, which contains the dependencies to run these monitors. For more information, please visit our {link}.'
                     values={{
+                      code: <EuiCode>elastic-agent-complete</EuiCode>,
                       link: (
                         <EuiLink
                           target="_blank"
