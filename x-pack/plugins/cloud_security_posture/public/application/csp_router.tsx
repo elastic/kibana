@@ -91,7 +91,12 @@ export const CspRouter = ({ securitySolutionContext }: CspRouterProps) => {
     );
   }
 
-  return <>{routerElement}</>;
+  return (
+    <>
+      <h1>HEY TEST</h1>
+      {routerElement}
+    </>
+  );
 };
 
 const RedirectToDashboard = () => <Redirect to={cloudPosturePages.dashboard.path} />;
