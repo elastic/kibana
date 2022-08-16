@@ -429,6 +429,9 @@
         },
         {
           "id": "kibVisualizationsPluginApi"
+        },
+        {
+          "id": "kibDevDocsOpsTest"
         }
       ]
     },
@@ -548,6 +551,24 @@
             },
             {
               "id": "kibDevDocsOpsRepoSourceClassifier"
+            },
+            {
+              "id": "kibDevDocsOpsJsonc"
+            },
+            {
+              "id": "kibDevDocsOpsKibanaManifestParser"
+            },
+            {
+              "id": "kibDevDocsOpsKibanaManifestSchema"
+            },
+            {
+              "id": "kibDevDocsOpsManagedVscodeConfig"
+            },
+            {
+              "id": "kibDevDocsOpsManagedVscodeConfigCli"
+            },
+            {
+              "id": "kibDevDocsOpsTest"
             }
           ]
         }

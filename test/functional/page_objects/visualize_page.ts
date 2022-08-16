@@ -69,7 +69,7 @@ export class VisualizePageObject extends FtrService {
   }
 
   public async clickNewVisualization() {
-    await this.listingTable.clickNewButton('createVisualizationPromptButton');
+    await this.listingTable.clickNewButton();
   }
 
   public async clickAggBasedVisualizations() {
@@ -81,7 +81,7 @@ export class VisualizePageObject extends FtrService {
   }
 
   public async createVisualizationPromptButton() {
-    await this.testSubjects.click('createVisualizationPromptButton');
+    await this.testSubjects.click('newItemButton');
   }
 
   public async getChartTypes() {
@@ -255,7 +255,7 @@ export class VisualizePageObject extends FtrService {
       await this.listingTable.checkListingSelectAllCheckbox();
       await this.listingTable.clickDeleteSelected();
       await this.common.clickConfirmOnModal();
-      await this.testSubjects.find('createVisualizationPromptButton');
+      await this.testSubjects.find('newItemButton');
     });
   }
 

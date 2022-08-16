@@ -33,6 +33,7 @@ const initialCaseValue: FormProps = {
   fields: null,
   syncAlerts: true,
   selectedOwner: null,
+  assignees: [],
 };
 
 interface Props {
