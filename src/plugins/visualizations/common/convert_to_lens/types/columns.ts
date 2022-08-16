@@ -29,7 +29,6 @@ import {
   DerivativeParams,
   MovingAverageParams,
   FormulaParams,
-  MathParams,
   TimeScaleParams,
   StaticValueParams,
 } from './params';
@@ -83,11 +82,6 @@ export type CounterRateColumn = ColumnWithReferences<'counter_rate', CounterRate
 export type DerivativeColumn = ColumnWithReferences<'differences', DerivativeParams>;
 export type MovingAverageColumn = ColumnWithReferences<'moving_average', MovingAverageParams>;
 export type FormulaColumn = ColumnWithReferences<'formula', FormulaParams>;
-export type MathColumn = ColumnWithReferences<'math', MathParams>;
-export type OverallSumColumn = ColumnWithReferences<'overall_sum'>;
-export type OverallMinColumn = ColumnWithReferences<'overall_min'>;
-export type OverallMaxColumn = ColumnWithReferences<'overall_max'>;
-export type OverallAvgColumn = ColumnWithReferences<'overall_average'>;
 export type StaticValueColumn = ColumnWithReferences<'static_value', StaticValueParams>;
 export type TimeScaleColumn = ColumnWithReferences<'normalize_by_unit', TimeScaleParams>;
 
@@ -114,11 +108,6 @@ export type AnyColumnWithReferences =
   | DerivativeColumn
   | MovingAverageColumn
   | FormulaColumn
-  | MathColumn
-  | OverallSumColumn
-  | OverallMinColumn
-  | OverallMaxColumn
-  | OverallAvgColumn
   | StaticValueColumn
   | TimeScaleColumn;
 

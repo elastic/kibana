@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { TinymathAST } from '@kbn/tinymath';
 import { Column } from './columns';
 import { Filter, NumberValueFormat } from './common';
 
@@ -132,11 +131,6 @@ export interface MovingAverageParams {
 export interface FormulaParams {
   formula?: string;
   isFormulaBroken?: boolean;
-  format?: NumberValueFormat;
-}
-
-export interface MathParams {
-  tinymathAst: TinymathAST | string;
   format?: NumberValueFormat;
 }
 

@@ -30,11 +30,6 @@ export const OperationsWithReferences = {
   DIFFERENCES: 'differences',
   MOVING_AVERAGE: 'moving_average',
   FORMULA: 'formula',
-  MATH: 'math',
-  OVERALL_SUM: 'overall_sum',
-  OVERALL_MIN: 'overall_min',
-  OVERALL_MAX: 'overall_max',
-  OVERALL_AVERAGE: 'overall_average',
   STATIC_VALUE: 'static_value',
   NORMALIZE_BY_UNIT: 'normalize_by_unit',
 } as const;

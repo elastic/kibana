@@ -10,5 +10,5 @@ import { $Values } from '@kbn/utility-types';
 import { Operations, OperationsWithReferences, OperationsWithSourceField } from '../constants';
 
 export type Operation = $Values<typeof Operations>;
-export type OperationWithSourceField = $Values<typeof OperationsWithReferences>;
-export type OperationWithReferences = $Values<typeof OperationsWithSourceField>;
+export type OperationWithSourceField = $Values<typeof OperationsWithSourceField>;
+export type OperationWithReferences = $Values<typeof OperationsWithReferences>;
