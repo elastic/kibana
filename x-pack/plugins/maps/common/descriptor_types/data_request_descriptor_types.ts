@@ -21,8 +21,12 @@ export type Timeslice = {
 export type DataFilters = {
   buffer?: MapExtent; // extent with additional buffer
   extent?: MapExtent; // map viewport
-  filters: Filter[];
-  query?: Query;
+  filters: Filter[]; // search bar filters
+  query?: Query; // search bar query
+  embeddableSearchContext?: {
+    query?: Query;
+    filters: Filter[];
+  };
   searchSessionId?: string;
   timeFilters: TimeRange;
   timeslice?: Timeslice;
