@@ -41,8 +41,8 @@ yarn kbn watch
 [discrete]
 === List of Already Migrated Packages to Bazel
 
-- @elastic/eslint-config-kibana
-- @elastic/safer-lodash-set
+- @kbn/eslint-config-kibana
+- @kbn/safer-lodash-set
 - @kbn/ace
 - @kbn/analytics
 - @kbn/apm-config-loader
