@@ -29,12 +29,15 @@ import {
   importListItemSchema,
   listItemIndexExistSchema,
   listSchema,
+  FoundSmallListSchema,
+  foundSmallListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
   LIST_INDEX,
   LIST_ITEM_URL,
   LIST_PRIVILEGES_URL,
   LIST_URL,
+  INTERNAL_LIST_URL,
 } from '@kbn/securitysolution-list-constants';
 import { toError, toPromise } from '../fp_utils';
 
@@ -103,6 +106,46 @@ const findListsWithValidation = async ({
   );
 
 export { findListsWithValidation as findLists };
+
+const findSmallLists = async ({
+  http,
+  cursor,
+  page,
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  per_page,
+  signal,
+}: ApiParams & FindListSchemaEncoded): Promise<FoundSmallListSchema> => {
+  return http.fetch(`${INTERNAL_LIST_URL}/_find_small`, {
+    method: 'GET',
+    query: {
+      cursor,
+      page,
+      per_page,
+    },
+    signal,
+  });
+};
+
+const findSmallListsWithValidation = async ({
+  cursor,
+  http,
+  pageIndex,
+  pageSize,
+  signal,
+}: FindListsParams): Promise<FoundSmallListSchema> =>
+  pipe(
+    {
+      cursor: cursor != null ? cursor.toString() : undefined,
+      page: pageIndex != null ? pageIndex.toString() : undefined,
+      per_page: pageSize != null ? pageSize.toString() : undefined,
+    },
+    (payload) => fromEither(validateEither(findListSchema, payload)),
+    chain((payload) => tryCatch(() => findSmallLists({ http, signal, ...payload }), toError)),
+    chain((response) => fromEither(validateEither(foundSmallListSchema, response))),
+    flow(toPromise)
+  );
+
+export { findSmallListsWithValidation as findSmallLists };
 
 const importList = async ({
   file,

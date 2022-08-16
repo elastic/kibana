@@ -10,6 +10,7 @@ export * from './create_list_item';
 export * from './create_list_items_bulk';
 export * from './delete_list_item_by_value';
 export * from './delete_list_item';
+export * from './find_all_list_items';
 export * from './find_list_item';
 export * from './get_list_item_by_value';
 export * from './get_list_item_by_values';

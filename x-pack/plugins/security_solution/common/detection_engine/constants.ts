@@ -26,4 +26,4 @@ export enum RULE_PREVIEW_FROM {
   MONTH = 'now-25h',
 }
 
-export const MAXIMUM_VALUE_LIST_SIZE_FOR_EXCEPTIONS = 64000;
+export const MAXIMUM_SMALL_VALUE_LIST_SIZE = 64000;

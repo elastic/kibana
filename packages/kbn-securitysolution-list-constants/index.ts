@@ -15,6 +15,11 @@ export const LIST_ITEM_URL = `${LIST_URL}/items`;
 export const LIST_PRIVILEGES_URL = `${LIST_URL}/privileges`;
 
 /**
+ * Internal value list routes
+ */
+export const INTERNAL_LIST_URL = '/internal/lists';
+
+/**
  * Exception list routes
  */
 export const EXCEPTION_LIST_URL = '/api/exception_lists';
@@ -52,6 +57,8 @@ export const ENDPOINT_LIST_NAME = 'Endpoint Security Exception List';
 export const ENDPOINT_LIST_DESCRIPTION = 'Endpoint Security Exception List';
 
 export const MAX_EXCEPTION_LIST_SIZE = 10000;
+
+export const MAXIMUM_SMALL_VALUE_LIST_SIZE = 64000;
 
 /** ID of trusted apps agnostic list */
 export const ENDPOINT_TRUSTED_APPS_LIST_ID = 'endpoint_trusted_apps';

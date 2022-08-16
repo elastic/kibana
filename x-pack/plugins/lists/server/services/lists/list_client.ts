@@ -20,6 +20,7 @@ import {
   setPolicy,
 } from '@kbn/securitysolution-es-utils';
 import type {
+  FoundAllListItemsSchema,
   FoundListItemSchema,
   FoundListSchema,
   ListItemArraySchema,
@@ -34,6 +35,7 @@ import {
   deleteListItem,
   deleteListItemByValue,
   exportListItemsToStream,
+  findAllListItems,
   findListItem,
   getListItem,
   getListItemByValue,
@@ -56,6 +58,7 @@ import type {
   DeleteListItemOptions,
   DeleteListOptions,
   ExportListItemsToStreamOptions,
+  FindAllListItemsOptions,
   FindListItemOptions,
   FindListOptions,
   GetListItemByValueOptions,
@@ -861,6 +864,26 @@ export class ListClient {
       page,
       perPage,
       searchAfter,
+      sortField,
+      sortOrder,
+    });
+  };
+
+  public findAllListItems = async ({
+    listId,
+    filter,
+    sortField,
+    sortOrder,
+  }: FindAllListItemsOptions): Promise<FoundAllListItemsSchema | null> => {
+    const { esClient } = this;
+    const listIndex = this.getListIndex();
+    const listItemIndex = this.getListItemIndex();
+    return findAllListItems({
+      esClient,
+      filter,
+      listId,
+      listIndex,
+      listItemIndex,
       sortField,
       sortOrder,
     });

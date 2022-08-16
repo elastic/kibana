@@ -78,8 +78,6 @@ export const createQueryAlertType = (
         services,
         state,
       } = execOptions;
-      const start = performance.now();
-
       const result = await queryExecutor({
         completeRule,
         tuple,
@@ -98,9 +96,6 @@ export const createQueryAlertType = (
         primaryTimestamp,
         secondaryTimestamp,
       });
-      const end = performance.now();
-      console.log(`QUERY EXECUTOR TIME: ${end - start} ms`);
-
       return { ...result, state };
     },
   };

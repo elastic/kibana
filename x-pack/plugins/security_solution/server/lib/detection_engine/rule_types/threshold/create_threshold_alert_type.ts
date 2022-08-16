@@ -82,7 +82,6 @@ export const createThresholdAlertType = (
         startedAt,
         state,
       } = execOptions;
-      const start = performance.now();
       const result = await thresholdExecutor({
         completeRule,
         tuple,
@@ -102,8 +101,6 @@ export const createThresholdAlertType = (
         aggregatableTimestampField,
         listClient,
       });
-      const end = performance.now();
-      console.log(`THRESHOLD EXECUTOR TIME: ${end - start} ms`);
       return result;
     },
   };

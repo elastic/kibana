@@ -9,7 +9,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { useFindLists } from '@kbn/securitysolution-list-hooks';
+import { useFindSmallLists } from '@kbn/securitysolution-list-hooks';
 import { DataViewFieldBase } from '@kbn/es-query';
 
 import { filterFieldToList } from '../filter_field_to_list';
@@ -35,6 +35,11 @@ interface AutocompleteFieldListsProps {
   selectedValue: string | undefined;
 }
 
+export interface AutocompleteListsData {
+  smallLists: ListSchema[];
+  largeLists: ListSchema[];
+}
+
 export const AutocompleteFieldListsComponent: React.FC<AutocompleteFieldListsProps> = ({
   httpService,
   isClearable = false,
@@ -47,35 +52,41 @@ export const AutocompleteFieldListsComponent: React.FC<AutocompleteFieldListsPro
   selectedValue,
 }): JSX.Element => {
   const [error, setError] = useState<string | undefined>(undefined);
-  const [lists, setLists] = useState<ListSchema[]>([]);
-  const { loading, result, start } = useFindLists();
+  const [listData, setListData] = useState<AutocompleteListsData>({
+    smallLists: [],
+    largeLists: [],
+  });
+  const { loading, result, start } = useFindSmallLists();
   const getLabel = useCallback(({ name }) => name, []);
 
   const optionsMemo = useMemo(
-    () => filterFieldToList(lists, selectedField),
-    [lists, selectedField]
+    () => filterFieldToList(listData, selectedField),
+    [listData, selectedField]
   );
   const selectedOptionsMemo = useMemo(() => {
     if (selectedValue != null) {
-      const list = lists.filter(({ id }) => id === selectedValue);
+      const combinedLists = [...listData.smallLists, ...listData.largeLists];
+      const list = combinedLists.filter(({ id }) => id === selectedValue);
       return list ?? [];
     } else {
       return [];
     }
-  }, [selectedValue, lists]);
+  }, [selectedValue, listData]);
   const { comboOptions, labels, selectedComboOptions } = useMemo(
     () =>
       getGenericComboBoxProps<ListSchema>({
         getLabel,
-        options: optionsMemo,
+        options: [...optionsMemo.smallLists, ...optionsMemo.largeLists],
         selectedOptions: selectedOptionsMemo,
+        disabledOptions: optionsMemo.largeLists,
       }),
     [optionsMemo, selectedOptionsMemo, getLabel]
   );
 
   const handleValuesChange = useCallback(
     (newOptions: EuiComboBoxOptionOption[]) => {
-      const [newValue] = newOptions.map(({ label }) => optionsMemo[labels.indexOf(label)]);
+      const combinedLists = [...optionsMemo.smallLists, ...optionsMemo.largeLists];
+      const [newValue] = newOptions.map(({ label }) => combinedLists[labels.indexOf(label)]);
       onChange(newValue ?? '');
     },
     [labels, optionsMemo, onChange]
@@ -87,7 +98,7 @@ export const AutocompleteFieldListsComponent: React.FC<AutocompleteFieldListsPro
 
   useEffect(() => {
     if (result != null) {
-      setLists(result.data);
+      setListData(result);
     }
   }, [result]);
 

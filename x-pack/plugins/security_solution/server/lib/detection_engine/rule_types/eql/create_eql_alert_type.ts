@@ -79,7 +79,6 @@ export const createEqlAlertType = (
         services,
         state,
       } = execOptions;
-      const start = performance.now();
       const result = await eqlExecutor({
         completeRule,
         tuple,
@@ -96,8 +95,6 @@ export const createEqlAlertType = (
         secondaryTimestamp,
         listClient,
       });
-      const end = performance.now();
-      console.log(`EQL EXECUTOR TIME: ${end - start} ms`);
       return { ...result, state };
     },
   };

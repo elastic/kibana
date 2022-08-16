@@ -304,6 +304,21 @@ export interface FindListItemOptions {
 }
 
 /**
+ * ListClient.findListItem
+ * {@link ListClient.findListItem}
+ */
+export interface FindAllListItemsOptions {
+  /** A KQL string filter to find list items. */
+  filter: Filter;
+  /** The list id to search for the list items */
+  listId: ListId;
+  /** Which field to sort on, "undefined" for no sort field */
+  sortField?: SortFieldOrUndefined;
+  /** "asc" or "desc" to sort, otherwise "undefined" if there is no sort order */
+  sortOrder?: SortOrderOrUndefined;
+}
+
+/**
  * ListClient.searchListItemByValues
  * {@link ListClient.findListItem}
  */
