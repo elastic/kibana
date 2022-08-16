@@ -341,6 +341,7 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
         ? enrichedAlert.signal.rule.index
         : [enrichedAlert.signal.rule.index];
     }
+    return [];
   }, [enrichedAlert]);
 
   const memoDataViewId = useMemo(() => {
@@ -358,7 +359,7 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
     <AddExceptionFlyout
       ruleName={ruleName}
       ruleId={ruleId}
-      ruleIndices={memoRuleIndices ?? []}
+      ruleIndices={memoRuleIndices}
       dataViewId={memoDataViewId}
       exceptionListType={exceptionListType}
       alertData={enrichedAlert}
