@@ -56,7 +56,6 @@ export function createAlertFactory<
       }
 
       if (numAlertsCreated++ >= maxAlerts) {
-        logger.warn(`Rule run generated greater than ${maxAlerts} alerts.`);
         hasReachedAlertLimit = true;
         throw new Error(`Rule reported more than ${maxAlerts} alerts.`);
       }

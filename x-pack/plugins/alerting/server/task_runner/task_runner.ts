@@ -403,6 +403,9 @@ export class TaskRunner<
     } catch (err) {
       // Check if this error is due to reaching the alert limit
       if (alertFactory.hasReachedAlertLimit()) {
+        this.logger.warn(
+          `rule execution generated greater than ${this.maxAlerts} alerts: ${ruleLabel}`
+        );
         ruleRunMetricsStore.setHasReachedAlertLimit(true);
       } else {
         this.alertingEventLogger.setExecutionFailed(
