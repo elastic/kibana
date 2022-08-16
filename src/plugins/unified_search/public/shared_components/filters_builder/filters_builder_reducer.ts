@@ -14,7 +14,7 @@ import type { ConditionTypes } from './filters_builder_condition_types';
 import { addFilter, moveFilter, removeFilter, updateFilter } from './filters_builder_utils';
 
 // todo: {start} should be refactored cause shared component cannot be linked with non-shared components
-import type { Operator } from '../filter_editor';
+import type { Operator } from '../../filter_bar/filter_editor';
 // todo: {end}
 
 /** @internal **/
