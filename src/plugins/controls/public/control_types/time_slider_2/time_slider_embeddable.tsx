@@ -7,7 +7,7 @@
  */
 
 import _ from 'lodash';
-import { timer } from 'rxjs';
+import { timer, BehaviorSubject } from 'rxjs';
 import moment from 'moment-timezone';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
@@ -39,6 +39,7 @@ export class TimeSliderControlEmbeddable extends Embeddable<
   private getDateFormat: ControlsSettingsService['getDateFormat'];
   private getTimezone: ControlsSettingsService['getTimezone'];
   private timefilter: ControlsDataService['timefilter'];
+  private waitForPanelsToLoad$ = new BehaviorSubject<boolean>(false);
 
   private reduxEmbeddableTools: ReduxEmbeddableTools<
     TimeSliderReduxState,
@@ -62,7 +63,9 @@ export class TimeSliderControlEmbeddable extends Embeddable<
     this.getTimezone = getTimezone;
     this.timefilter = timefilter;
 
-    const timeRangeBounds = timefilter.calculateBounds(input.timeRange ? input.timeRange : getDefaultTimeRange());
+    const timeRangeBounds = timefilter.calculateBounds(
+      input.timeRange ? input.timeRange : getDefaultTimeRange()
+    );
 
     this.reduxEmbeddableTools = reduxEmbeddablePackage.createTools<
       TimeSliderReduxState,
@@ -73,7 +76,7 @@ export class TimeSliderControlEmbeddable extends Embeddable<
       initialComponentState: {
         ticks: getTicks(timeRangeBounds[FROM_INDEX], timeRangeBounds[TO_INDEX], getTimezone()),
         timeRangeBounds,
-      }
+      },
     });
 
     this.inputSubscription = this.getInput$().subscribe(() => this.onInputChange());
@@ -99,7 +102,7 @@ export class TimeSliderControlEmbeddable extends Embeddable<
         dispatch(
           actions.setTimeRangeBounds({
             ticks: getTicks(nextBounds[FROM_INDEX], nextBounds[TO_INDEX], this.getTimezone()),
-            timeRangeBounds: nextBounds, 
+            timeRangeBounds: nextBounds,
           })
         );
         const value = getState().explicitInput.value;
@@ -123,6 +126,10 @@ export class TimeSliderControlEmbeddable extends Embeddable<
     return;
   }
 
+  public setAllDashboardPanelsLoaded(value: boolean) {
+    this.waitForPanelsToLoad$.next(value);
+  }
+
   private debouncedPublishChange = _.debounce((value: [number, number]) => {
     const { actions, dispatch } = this.reduxEmbeddableTools;
     dispatch(actions.publishValue({ value }));
@@ -140,9 +147,8 @@ export class TimeSliderControlEmbeddable extends Embeddable<
     const ticks = getState().componentState.ticks;
     const timeRangeBounds = getState().componentState.timeRangeBounds;
     const timeRangeMax = timeRangeBounds[TO_INDEX];
-    const from = value === undefined || value[TO_INDEX] === timeRangeMax
-      ? ticks[0].value
-      : value[TO_INDEX];
+    const from =
+      value === undefined || value[TO_INDEX] === timeRangeMax ? ticks[0].value : value[TO_INDEX];
     const range = getRange(timeRangeBounds, value);
     const to = from + range;
     this.onTimesliceChange([from, Math.min(to, timeRangeMax)]);
@@ -154,9 +160,10 @@ export class TimeSliderControlEmbeddable extends Embeddable<
     const ticks = getState().componentState.ticks;
     const timeRangeBounds = getState().componentState.timeRangeBounds;
     const timeRangeMin = timeRangeBounds[FROM_INDEX];
-    const to = value === undefined || value[FROM_INDEX] === timeRangeMin
-      ? ticks[ticks.length - 1].value
-      : value[FROM_INDEX];
+    const to =
+      value === undefined || value[FROM_INDEX] === timeRangeMin
+        ? ticks[ticks.length - 1].value
+        : value[FROM_INDEX];
     const range = getRange(timeRangeBounds, value);
     const from = to - range;
     this.onTimesliceChange([Math.max(from, timeRangeMin), to]);
@@ -178,12 +185,12 @@ export class TimeSliderControlEmbeddable extends Embeddable<
 
     ReactDOM.render(
       <TimeSliderControlReduxWrapper>
-        <TimeSlider 
+        <TimeSlider
           formatDate={this.epochToKbnDateFormat}
           onChange={this.onTimesliceChange}
           onNext={this.onNext}
           onPrevious={this.onPrevious}
-          waitForPanelsToLoad$={mockWaitForPanelsToLoad$}
+          waitForPanelsToLoad$={this.waitForPanelsToLoad$}
         />
       </TimeSliderControlReduxWrapper>,
       node
