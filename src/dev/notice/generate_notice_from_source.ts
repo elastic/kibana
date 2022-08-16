@@ -36,7 +36,7 @@ export async function generateNoticeFromSource({ productName, directory, log }: 
   const select = [
     '**/*.{js,mjs,scss,css,ts,tsx}',
     '!{node_modules,build,data}/**',
-    '!**/target/**',
+    '!**/{shared_built_assets,target}/**',
   ];
 
   log.info(`Searching ${directory} for multi-line comments starting with @notice`);
