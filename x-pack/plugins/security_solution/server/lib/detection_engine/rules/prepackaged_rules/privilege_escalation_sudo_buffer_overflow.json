@@ -21,6 +21,28 @@
     "https://www.bleepingcomputer.com/news/security/latest-macos-big-sur-also-has-sudo-root-privilege-escalation-flaw",
     "https://www.sudo.ws/alerts/unescape_overflow.html"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.category",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.args",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.name",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 73,
   "rule_id": "f37f3054-d40b-49ac-aa9b-a786c74c58b8",
   "severity": "high",
@@ -56,5 +78,5 @@
     "value": 100
   },
   "type": "threshold",
-  "version": 1
+  "version": 2
 }
