@@ -57,7 +57,7 @@ export function getTopNAggregationRequest({
       terms: {
         field: searchField,
         order: { count: 'desc' as const },
-        size: 100,
+        size: 99,
         execution_hint: highCardinality ? ('map' as const) : ('global_ordinals' as const),
       },
       aggs: {
