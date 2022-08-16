@@ -5,7 +5,7 @@
  * 2.0.
  */
 import moment from 'moment';
-import { FileMetadata, UpdatableFileMetadata } from '../../common';
+import { FileJSON, UpdatableFileMetadata } from '../../common';
 
 export type Action =
   | {
@@ -20,51 +20,36 @@ export type Action =
   | { action: 'uploadError'; payload?: undefined }
   | { action: 'updateFile'; payload: Partial<UpdatableFileMetadata> };
 
-export function createDefaultFileAttributes(): Pick<
-  FileMetadata,
-  'created' | 'Updated' | 'Status'
-> {
-  const dateString = new Date().toISOString();
-  return {
-    created: dateString,
-    Status: 'AWAITING_UPLOAD',
-    Updated: dateString,
-  };
-}
-
-export function fileAttributesReducer(
-  state: FileMetadata,
-  { action, payload }: Action
-): FileMetadata {
+export function fileAttributesReducer(state: FileJSON, { action, payload }: Action): FileJSON {
   switch (action) {
     case 'delete':
-      return { ...state, Status: 'DELETED' };
+      return { ...state, status: 'DELETED' };
     case 'uploading':
       return {
         ...state,
-        Status: 'UPLOADING',
-        Updated: moment().toISOString(),
+        status: 'UPLOADING',
+        updated: moment().toISOString(),
       };
     case 'uploaded':
       return {
         ...state,
         ...payload,
-        Status: 'READY',
-        Updated: moment().toISOString(),
+        status: 'READY',
+        updated: moment().toISOString(),
       };
     case 'uploadError':
       return {
         ...state,
-        Status: 'UPLOAD_ERROR',
-        Updated: moment().toISOString(),
+        status: 'UPLOAD_ERROR',
+        updated: moment().toISOString(),
       };
     case 'updateFile':
       return {
         ...state,
         name: payload.name ?? state.name,
-        Alt: payload.alt ?? state.Alt,
-        Meta: payload.meta ?? state.Meta,
-        Updated: moment().toISOString(),
+        alt: payload.alt ?? state.alt,
+        meta: payload.meta ?? state.meta,
+        updated: moment().toISOString(),
       };
     default:
       return state;

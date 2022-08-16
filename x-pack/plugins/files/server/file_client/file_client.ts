@@ -9,164 +9,29 @@ import mimeType from 'mime';
 import cuid from 'cuid';
 import type { Logger } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/security-plugin/server';
-import { FileKind, FileMetadata, FileShareJSONWithToken } from '../../common/types';
+import type {
+  File,
+  FileJSON,
+  FileKind,
+  FileMetadata,
+  FileShareJSONWithToken,
+} from '../../common/types';
 import type { FileMetadataClient } from './file_metadata_client';
 import type {
   BlobStorageClient,
   UploadOptions as BlobUploadOptions,
 } from '../blob_storage_service';
-import { File } from '../file';
-import { createDefaultFileAttributes } from '../file/file_attributes_reducer';
+import { File as FileImpl } from '../file';
 import { FileShareServiceStart, InternalFileShareService } from '../file_share_service';
 import { enforceMaxByteSizeTransform } from './stream_transforms';
 import { createAuditEvent } from '../audit_events';
-
-type P1<F extends (...args: any[]) => any> = Parameters<F>[0];
-
-export interface DeleteArgs {
-  /** ID of the file to delete */
-  id: string;
-  /**
-   * If `true`, the file will be deleted from the blob storage.
-   *
-   * @default true
-   */
-  hasContent?: boolean;
-}
-
-/**
- * Args to create a file
- */
-export interface CreateArgs {
-  /**
-   * Unique file ID
-   */
-  id?: string;
-  /**
-   * The file's metadata
-   */
-  metadata: Omit<FileMetadata, 'FileKind'> & { FileKind?: string };
-}
-
-/**
- * File share args
- */
-interface ShareArgs {
-  /**
-   * Name of the file share
-   */
-  name?: string;
-  /**
-   * Unix timestamp (in milliseconds) when the file share will expire
-   */
-  validUntil?: number;
-  /**
-   * The file to share
-   */
-  file: File;
-}
+import type { FileClient, CreateArgs, DeleteArgs, P1, ShareArgs } from './types';
+import { isFile } from '../file/file';
+import { serializeJSON } from '../file/to_json';
+import { createDefaultFileAttributes } from './utils';
 
 export type UploadOptions = Omit<BlobUploadOptions, 'id'>;
 
-/**
- * Wraps the {@link FileMetadataClient} and {@link BlobStorageClient} client
- * to provide basic file CRUD functionality.
- *
- * For now this is just a shallow type of the implementation for export purposes.
- */
-export interface FileClient {
-  /** See {@link FileMetadata.FileKind}.  */
-  fileKind: string;
-
-  /**
-   * See {@link FileMetadataClient.create}.
-   *
-   * @param arg - Arg to create a file.
-   * */
-  create<M = unknown>(arg: CreateArgs): Promise<File<M>>;
-
-  /**
-   * See {@link FileMetadataClient.get}
-   *
-   * @param arg - Argument to get a file
-   */
-  get<M = unknown>(arg: P1<FileMetadataClient['get']>): Promise<File<M>>;
-
-  /**
-   * {@link FileMetadataClient.update}
-   *
-   * @param arg - Argument to get a file
-   */
-  update<M = unknown>(arg: P1<FileMetadataClient['update']>): Promise<File<M>>;
-
-  /**
-   * Delete a file.
-   * @param arg - Argument to delete a file
-   */
-  delete(arg: DeleteArgs): Promise<void>;
-
-  /**
-   * See {@link BlobStorageClient.delete}
-   *
-   * @param id - Argument to delete a file
-   */
-  deleteContent: BlobStorageClient['delete'];
-
-  /**
-   * See {@link FileMetadataClient.list}
-   *
-   * @param arg - Argument to list files
-   */
-  list: FileMetadataClient['list'];
-
-  /**
-   * See {@link FileMetadataClient.find}.
-   *
-   * @param arg - Argument to find files
-   */
-  find: FileMetadataClient['find'];
-
-  /**
-   * See {@link BlobStorageClient.upload}
-   *
-   * @param id - Readable stream to upload
-   * @param rs - Readable stream to upload
-   * @param opts - Argument for uploads
-   */
-  upload(id: string, rs: Readable, opts?: UploadOptions): ReturnType<BlobStorageClient['upload']>;
-
-  /**
-   * See {@link BlobStorageClient.download}
-   *
-   * @param args - to download a file
-   */
-  download: BlobStorageClient['download'];
-
-  /**
-   * Create a file share instance for this file.
-   *
-   * @note this will only work for files that are share capable.
-   *
-   * @param args - Arguments to create a file share
-   */
-  share(args: ShareArgs): Promise<FileShareJSONWithToken>;
-  /**
-   * Create a file share instance for this file.
-   *
-   * @note this will only work for files that are share capable.
-   *
-   * @param args - Arguments to remove a file share
-   */
-  unshare: FileShareServiceStart['delete'];
-  /**
-   * Create a file share instance for this file.
-   *
-   * @note this will only work for files that are share capable.
-   *
-   * @param arg - Arguments to remove a file share
-   */
-  listShares: FileShareServiceStart['list'];
-}
 export class FileClientImpl implements FileClient {
   private readonly logAuditEvent: AuditLogger['log'];
 
@@ -192,6 +57,7 @@ export class FileClientImpl implements FileClient {
       id: id || cuid(),
       metadata: {
         ...metadata,
+        extension: (metadata.mime_type && mimeType.getExtension(metadata.mime_type)) ?? undefined,
         FileKind: this.fileKind,
       },
     });
@@ -201,34 +67,46 @@ export class FileClientImpl implements FileClient {
         message: `Created file "${result.metadata.name}" of kind "${this.fileKind}" and id "${result.id}"`,
       })
     );
-    return this.instantiateFile({
+    return this.instantiateFile(result.id, {
       ...result.metadata,
-      id: result.id,
-      fileKind: this.fileKind,
-    });
+      FileKind: this.fileKind,
+    }) as File<M>;
   }
 
   public async get<M = unknown>(arg: P1<FileMetadataClient['get']>): Promise<File<M>> {
     const { id, metadata } = await this.metadataClient.get(arg);
-    return this.instantiateFile({
+    return this.instantiateFile(id, metadata as FileMetadata<M>);
+  }
+
+  public async update<M = unknown>(file: File<M>, metadata: FileJSON<M>): Promise<File<M>>;
+  public async update<M = unknown>(id: string, metadata: FileJSON<M>): Promise<void>;
+  public async update<M = unknown>(
+    idOrFile: File<M> | string,
+    metadata: FileJSON<M>
+  ): Promise<void | File<M>> {
+    if (isFile(idOrFile)) {
+      const { id, metadata: newMetadata } = await this.metadataClient.update({
+        id: idOrFile.data.id,
+        metadata: serializeJSON(metadata),
+      });
+
+      return this.instantiateFile(id, newMetadata as FileMetadata<M>);
+    }
+
+    const id = idOrFile as string;
+    await this.metadataClient.update({
       id,
-      ...metadata,
-      fileKind: this.fileKind,
+      metadata,
     });
   }
 
-  public async update<M = unknown>(arg: P1<FileMetadataClient['update']>): Promise<File<M>> {
-    const { id, metadata } = await this.metadataClient.update(arg);
-    return this.instantiateFile({
-      id,
-      ...metadata,
-      fileKind: this.fileKind,
-    });
+  public async find<M = unknown>(arg: P1<FileMetadataClient['find']>): Promise<Array<File<M>>> {
+    return this.metadataClient
+      .find(arg)
+      .then((r) =>
+        r.map(({ id, metadata }) => this.instantiateFile(id, metadata as FileMetadata<M>))
+      );
   }
-
-  public find: FileMetadataClient['find'] = (arg) => {
-    return this.metadataClient.find(arg);
-  };
 
   public async delete({ id, hasContent = true }: DeleteArgs) {
     if (this.internalFileShareService) {
@@ -279,31 +157,12 @@ export class FileClientImpl implements FileClient {
     return this.blobStorageClient.download(args);
   };
 
-  private instantiateFile<M = unknown>({
-    id,
-    name,
-    mime,
-    alt,
-    meta,
-    fileKind,
-  }: {
-    id: string;
-    name: string;
-    fileKind: string;
-    alt?: string;
-    meta?: unknown;
-    mime?: string;
-  }): File<M> {
-    return new File(
+  private instantiateFile<M = unknown>(id: string, metadata: FileMetadata<M>): File<M> {
+    return new FileImpl(
       id,
       {
         ...createDefaultFileAttributes(),
-        name,
-        mime_type: mime,
-        Alt: alt,
-        Meta: meta,
-        FileKind: fileKind,
-        extension: (mime && mimeType.getExtension(mime)) ?? undefined,
+        ...metadata,
       },
       this,
       this.logger
@@ -322,7 +181,7 @@ export class FileClientImpl implements FileClient {
     this.logAuditEvent(
       createAuditEvent({
         action: 'create',
-        message: `Shared file "${file.name}" with id "${file.id}"`,
+        message: `Shared file "${file.data.name}" with id "${file.data.id}"`,
       })
     );
     return shareObject;

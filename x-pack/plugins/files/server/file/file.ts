@@ -7,14 +7,8 @@
 
 import { Logger } from '@kbn/core/server';
 import { Readable } from 'stream';
-import type { FileCompression, FileShareJSON, FileShareJSONWithToken } from '../../common/types';
-import type {
-  File as IFile,
-  FileMetadata,
-  FileStatus,
-  UpdatableFileMetadata,
-  FileJSON,
-} from '../../common';
+import type { FileShareJSON, FileShareJSONWithToken } from '../../common/types';
+import type { File as IFile, FileMetadata, UpdatableFileMetadata, FileJSON } from '../../common';
 import { fileAttributesReducer, Action } from './file_attributes_reducer';
 import type { FileClientImpl } from '../file_client/file_client';
 import { toJSON } from './to_json';
@@ -25,10 +19,19 @@ import {
   UploadInProgressError,
 } from './errors';
 
+const FILE_SYMBOL = Symbol.for('files.file');
+
+export function isFile(v: unknown): v is IFile {
+  return (v as File)?.brand === FILE_SYMBOL;
+}
+
 /**
- * @internal
+ * Scopes file actions to an ID and set of attributes.
+ *
+ * Also exposes the upload and download functionality.
  */
 export class File<M = unknown> implements IFile {
+  public brand = FILE_SYMBOL;
   constructor(
     public readonly id: string,
     private readonly fileMetadata: FileMetadata,
@@ -36,26 +39,23 @@ export class File<M = unknown> implements IFile {
     private readonly logger: Logger
   ) {}
 
-  private async updateFileState(action: Action): Promise<File<M>> {
-    return await this.fileClient.update<M>({
-      id: this.id,
-      metadata: fileAttributesReducer(this.metadata, action),
-    });
+  private async updateFileState(action: Action): Promise<IFile<M>> {
+    return this.fileClient.update<M>(this, fileAttributesReducer(this.data, action) as FileJSON<M>);
   }
 
   private isReady(): boolean {
-    return this.status === 'READY';
+    return this.data.status === 'READY';
   }
 
   private isDeleted(): boolean {
-    return this.status === 'DELETED';
+    return this.data.status === 'DELETED';
   }
 
   private uploadInProgress(): boolean {
-    return this.status === 'UPLOADING';
+    return this.data.status === 'UPLOADING';
   }
 
-  public async update(attrs: Partial<UpdatableFileMetadata>): Promise<File<M>> {
+  public async update(attrs: Partial<UpdatableFileMetadata>): Promise<IFile<M>> {
     return this.updateFileState({
       action: 'updateFile',
       payload: attrs,
@@ -69,7 +69,7 @@ export class File<M = unknown> implements IFile {
     if (this.isReady()) {
       throw new ContentAlreadyUploadedError('Already uploaded file content.');
     }
-    this.logger.debug(`Uploading file [id = ${this.id}][name = ${this.name}].`);
+    this.logger.debug(`Uploading file [id = ${this.id}][name = ${this.data.name}].`);
     await this.updateFileState({
       action: 'uploading',
     });
@@ -88,7 +88,7 @@ export class File<M = unknown> implements IFile {
   }
 
   public downloadContent(): Promise<Readable> {
-    const { size } = this.metadata;
+    const { size } = this.fileMetadata;
     if (!this.isReady()) {
       throw new NoDownloadAvailableError('This file content is not available for download.');
     }
@@ -131,58 +131,14 @@ export class File<M = unknown> implements IFile {
   }
 
   public toJSON(): FileJSON<M> {
-    return toJSON<M>(this.id, this.metadata);
+    return this.data;
   }
 
-  private get metadata(): FileMetadata {
-    return this.fileMetadata;
-  }
-
-  public get created(): string {
-    return this.metadata.created;
-  }
-
-  public get updated(): string {
-    return this.metadata.Updated;
-  }
-
-  public get chunkSize(): number | undefined {
-    return this.metadata.ChunkSize;
-  }
-
-  public get fileKind(): string {
-    return this.fileClient.fileKind;
-  }
-
-  public get name(): string {
-    return this.metadata.name;
-  }
-
-  public get status(): FileStatus {
-    return this.metadata.Status;
-  }
-
-  public get compression(): undefined | FileCompression {
-    return this.metadata.Compression;
-  }
-
-  public get size(): undefined | number {
-    return this.metadata.size;
-  }
-
-  public get meta(): M {
-    return this.metadata.Meta as M;
-  }
-
-  public get alt(): undefined | string {
-    return this.metadata.Alt;
-  }
-
-  public get mimeType(): undefined | string {
-    return this.metadata.mime_type;
-  }
-
-  public get extension(): undefined | string {
-    return this.metadata.extension;
+  private transformedData: undefined | FileJSON<M>;
+  public get data(): FileJSON<M> {
+    if (!this.transformedData) {
+      this.transformedData = toJSON(this.id, this.fileMetadata);
+    }
+    return this.transformedData;
   }
 }

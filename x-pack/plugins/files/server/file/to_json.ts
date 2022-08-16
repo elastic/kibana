@@ -7,6 +7,22 @@
 
 import type { FileMetadata, FileJSON } from '../../common/types';
 
+export function serializeJSON<M = unknown>(attrs: FileJSON): FileMetadata {
+  const { name, mimeType, size, created, updated, fileKind, status, alt, extension, meta } = attrs;
+  return {
+    name,
+    mime_type: mimeType,
+    size,
+    created,
+    extension,
+    Alt: alt,
+    Status: status,
+    Meta: meta as M,
+    Updated: updated,
+    FileKind: fileKind,
+  };
+}
+
 export function toJSON<M = unknown>(id: string, attrs: FileMetadata): FileJSON<M> {
   const {
     name,

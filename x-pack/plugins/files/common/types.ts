@@ -332,7 +332,8 @@ export interface FileUnshareOptions {
  * A class with set of properties and behaviors of the "smart" file object and adds
  * behaviours for interacting with files on top of the pure data.
  */
-export interface File<Meta = unknown> extends FileJSON<Meta> {
+export interface File<Meta = unknown> {
+  data: FileJSON<Meta>;
   /**
    * Update a file object's metadatathat can be updated.
    *
