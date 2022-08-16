@@ -107,8 +107,8 @@ export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
       (data) => (data?.indices ? data.indices.map(indexToViewIndex) : []),
     ],
     isLoading: [
-      () => [selectors.status],
-      (status) => [Status.LOADING, Status.IDLE].includes(status),
+      () => [selectors.status, selectors.isFirstRequest],
+      (status, isFirstRequest) => [Status.LOADING, Status.IDLE].includes(status) && isFirstRequest,
     ],
   }),
 });
