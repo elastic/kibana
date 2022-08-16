@@ -9,7 +9,7 @@ import { spawn } from 'child_process';
 import { Readable } from 'stream';
 import uuid from 'uuid';
 import { schema } from '@kbn/config-schema';
-import { IRouter, Logger } from '@kbn/core/server';
+import { IRouter, Logger, SavedObject } from '@kbn/core/server';
 import { SampleDataInstallError } from '../errors';
 import { getSavedObjectsClient } from './utils';
 import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
@@ -30,10 +30,34 @@ const dataView = (indexName: string) => {
   };
 };
 
+const LARGE_DATASET_ID = 'large_dataset';
+
+const largeDatasetProvider = function (
+  name: string,
+  description: string,
+  defaultIndex: string,
+  savedObjects: SavedObject[]
+): SampleDatasetSchema {
+  return {
+    id: LARGE_DATASET_ID,
+    name,
+    description,
+    previewImagePath: '/plugins/home/assets/sample_data_resources/flights/dashboard.webp',
+    darkPreviewImagePath: '/plugins/home/assets/sample_data_resources/flights/dashboard_dark.webp',
+    overviewDashboard: '',
+    defaultIndex: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
+    savedObjects,
+    dataIndices: [],
+    status: 'installed',
+    iconPath: '/plugins/home/assets/sample_data_resources/flights/icon.svg',
+  };
+};
+
 export function createInstallLargeDatasetRoute(
   router: IRouter,
   sampleDatasets: SampleDatasetSchema[],
-  logger: Logger
+  logger: Logger,
+  installCompleteCallback: (id: SampleDatasetSchema) => void
 ): void {
   router.post(
     {
@@ -59,11 +83,6 @@ export function createInstallLargeDatasetRoute(
       );
 
       pythonProcess.stdout.setEncoding('utf8');
-      pythonProcess.stdout.on('data', function (data) {
-        // Here is where the output goes
-
-        logger.info('stdout: ' + data);
-      });
 
       pythonProcess.stderr.setEncoding('utf8');
       pythonProcess.stderr.on('error', function (data) {
@@ -72,7 +91,7 @@ export function createInstallLargeDatasetRoute(
       });
 
       const core = await context.core;
-      const { getImporter, client: soClient } = core.savedObjects;
+      const { getImporter } = core.savedObjects;
       const objectTypes = ['index-pattern'];
       const savedObjectsClient = await getSavedObjectsClient(context, objectTypes);
       const soImporter = getImporter(savedObjectsClient);
@@ -93,6 +112,15 @@ export function createInstallLargeDatasetRoute(
         throw new SampleDataInstallError(errMsg, 500);
       }
 
+      pythonProcess.stdout.on('data', function (data) {
+        // Here is where the output goes
+
+        logger.info('stdout: ' + data);
+        installCompleteCallback(
+          largeDatasetProvider(indexName, 'Large dataset', indexName, savedObjects)
+        );
+      });
+
       if (errorOccured) {
         return res.customError({
           statusCode: 500,
@@ -108,6 +136,26 @@ export function createInstallLargeDatasetRoute(
         body: {
           elasticsearchIndicesCreated: 10,
           kibanaSavedObjectsLoaded: 10,
+        },
+      });
+    }
+  );
+}
+
+export function createIsLargeDataSetInstalledRoute(
+  router: IRouter,
+  sampleDatasets: SampleDatasetSchema[]
+) {
+  router.get(
+    { path: '/api/sample_data/large_dataset/installed', validate: false },
+    async (context, _req, res) => {
+      const sampleDataset = await sampleDatasets.find(({ id }) => id === 'large_dataset');
+      if (!sampleDataset) {
+        return res.notFound();
+      }
+      return res.ok({
+        body: {
+          status: 'installed',
         },
       });
     }

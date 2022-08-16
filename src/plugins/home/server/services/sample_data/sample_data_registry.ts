@@ -19,7 +19,12 @@ import {
 import { sampleDataSchema } from './lib/sample_dataset_schema';
 
 import { flightsSpecProvider, logsSpecProvider, ecommerceSpecProvider } from './data_sets';
-import { createListRoute, createInstallRoute, createInstallLargeDatasetRoute } from './routes';
+import {
+  createListRoute,
+  createInstallRoute,
+  createInstallLargeDatasetRoute,
+  createIsLargeDataSetInstalledRoute,
+} from './routes';
 import { makeSampleDataUsageCollector, usage } from './usage';
 import { createUninstallRoute } from './routes/uninstall';
 import { registerSampleDatasetWithIntegration } from './lib/register_with_integrations';
@@ -28,6 +33,16 @@ export class SampleDataRegistry {
   constructor(private readonly initContext: PluginInitializerContext) {}
   private readonly sampleDatasets: SampleDatasetSchema[] = [];
   private readonly appLinksMap = new Map<string, AppLinkData[]>();
+
+  private registerGeneratedDataset(specProvider: SampleDatasetProvider) {
+    let value: SampleDatasetSchema;
+    try {
+      value = sampleDataSchema.validate(specProvider());
+    } catch (error) {
+      throw new Error(`Unable to register sample dataset spec because it's invalid. ${error}`);
+    }
+    return value;
+  }
 
   private registerSampleDataSet(specProvider: SampleDatasetProvider) {
     let value: SampleDatasetSchema;
@@ -74,7 +89,13 @@ export class SampleDataRegistry {
     createListRoute(router, this.sampleDatasets, this.appLinksMap, logger);
     createInstallRoute(router, this.sampleDatasets, logger, usageTracker);
     createUninstallRoute(router, this.sampleDatasets, logger, usageTracker);
-    createInstallLargeDatasetRoute(router, this.sampleDatasets, logger);
+    createIsLargeDataSetInstalledRoute(router, this.sampleDatasets);
+    createInstallLargeDatasetRoute(
+      router,
+      this.sampleDatasets,
+      logger,
+      this.registerGeneratedDataset
+    );
 
     this.registerSampleDataSet(flightsSpecProvider);
     this.registerSampleDataSet(logsSpecProvider);

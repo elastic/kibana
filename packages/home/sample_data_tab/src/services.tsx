@@ -35,6 +35,7 @@ interface Services {
   notifyError: NotifyFn;
   logClick: (metric: string) => void;
   installLargeDataset: (params: LargeDataSetParams) => Promise<void>;
+  checkLargeDatasetInstalled: () => Promise<boolean>;
 }
 
 /**
@@ -48,7 +49,13 @@ const Context = React.createContext<Services | null>(null);
  * A Context Provider that provides services to the component and its dependencies.
  */
 export const SampleDataTabProvider: FC<SampleDataTabServices> = ({ children, ...services }) => {
-  const { fetchSampleDataSets, notifyError, logClick, installLargeDataset } = services;
+  const {
+    fetchSampleDataSets,
+    notifyError,
+    logClick,
+    installLargeDataset,
+    checkLargeDatasetInstalled,
+  } = services;
 
   return (
     <Context.Provider
@@ -57,6 +64,7 @@ export const SampleDataTabProvider: FC<SampleDataTabServices> = ({ children, ...
         notifyError,
         logClick,
         installLargeDataset,
+        checkLargeDatasetInstalled,
       }}
     >
       <SampleDataCardProvider {...services}>{children}</SampleDataCardProvider>
@@ -106,11 +114,19 @@ export const SampleDataTabKibanaProvider: FC<SampleDataTabKibanaDependencies> = 
     await http.post(`${URL_SAMPLE_DATA_API}/large_dataset/${indexName}/${nrOfDocuments}`);
   };
 
+  const checkLargeDatasetInstalled = async () => {
+    const status = (await http.get(`${URL_SAMPLE_DATA_API}/large_dataset/installed`)) as {
+      status: string;
+    };
+    return status.status === 'installed';
+  };
+
   const value: Services = {
     fetchSampleDataSets: async () => (await http.get(URL_SAMPLE_DATA_API)) as SampleDataSet[],
     notifyError: (input) => notifications.toasts.addDanger(input),
     logClick: (eventName) => trackUiMetric('click', eventName),
     installLargeDataset,
+    checkLargeDatasetInstalled,
   };
 
   return (

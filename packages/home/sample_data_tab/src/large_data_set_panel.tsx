@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import {
   EuiPanel,
   EuiFlexGroup,
@@ -65,9 +65,10 @@ const useSVG: () => [string | null, boolean] = () => {
 
 interface Props {
   install: (params: LargeDataSetParams) => Promise<void>;
+  checkInstalled: () => Promise<boolean>;
 }
 
-export const LargeDatasetPanel = ({ install }: Props) => {
+export const LargeDatasetPanel = ({ install, checkInstalled }: Props) => {
   const [imageSrc] = useSVG();
   const [installed, setInstalled] = useState<boolean>(false);
   const [checked, setChecked] = useState<boolean>(false);
@@ -78,7 +79,6 @@ export const LargeDatasetPanel = ({ install }: Props) => {
 
   const onClick = async () => {
     await install({ indexName, nrOfDocuments });
-    setInstalled(true);
   };
 
   const onChange = async () => {
@@ -123,10 +123,8 @@ export const LargeDatasetPanel = ({ install }: Props) => {
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem grow={1}>
         <EuiText size="s">
-          <h2>Started generation of a large dataset</h2>
-          <p>
-            This may take a while. You will be able to see your data in Discover once it is ready
-          </p>
+          <h2>Large dataset installed or installation is in progress</h2>
+          <p>You will be able to see your data in Discover once it is ready</p>
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={1} style={{ textAlign: 'center' }}>
@@ -154,6 +152,16 @@ export const LargeDatasetPanel = ({ install }: Props) => {
       </EuiFlexItem>
     </EuiFlexGroup>
   );
+
+  const getDatasetInstalledStatus = useCallback(async () => {
+    const installStatus = await checkInstalled();
+    setInstalled(installStatus);
+  }, [checkInstalled]);
+
+  useEffect(() => {
+    getDatasetInstalledStatus();
+  }, [getDatasetInstalledStatus]);
+
   return (
     <EuiPanel hasBorder paddingSize="xl">
       {installed ? installedLayout : uninstalledLayout}
