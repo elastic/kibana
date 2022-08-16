@@ -79,17 +79,7 @@ export const getNumericFieldsStatsRequest = (
       } as AggregationsTermsAggregation,
     };
 
-    if (field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD) {
-      aggs[`${safeFieldName}_top`] = buildRandomSamplerAggregation(
-        {
-          top,
-        },
-        params.samplingProbability,
-        params.browserSessionSeed
-      );
-    } else {
-      aggs[`${safeFieldName}_top`] = top;
-    }
+    aggs[`${safeFieldName}_top`] = top;
   });
 
   const searchBody = {
@@ -149,9 +139,6 @@ export const fetchNumericFieldsStats = (
           );
 
           const topAggsPath = [...aggsPath, `${safeFieldName}_top`];
-          if (field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD) {
-            topAggsPath.push('top');
-          }
 
           const topValues: Bucket[] = get(aggregations, [...topAggsPath, 'buckets'], []);
 

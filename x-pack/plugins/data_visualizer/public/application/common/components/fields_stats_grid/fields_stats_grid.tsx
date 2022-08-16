@@ -112,6 +112,7 @@ export const FieldsStatsGrid: FC<Props> = ({ results }) => {
         pageState={dataVisualizerListState}
         updatePageState={setDataVisualizerListState}
         getItemIdToExpandedRowMap={getItemIdToExpandedRowMap}
+        totalCount={results.num_messages_analyzed}
       />
     </div>
   );
