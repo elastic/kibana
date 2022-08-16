@@ -8,7 +8,7 @@
 :issue: https://github.com/elastic/kibana/issues/
 :pull: https://github.com/elastic/kibana/pull/
 
-Review important information about the {kib} 8.0.0 releases.
+Review important information about the {kib} 8.4.x releases.
 
 * <<release-notes-8.4.0>>
 //* <<release-notes-8.3.3>>
@@ -85,7 +85,7 @@ you make the necessary updates after you upgrade to 8.4.0.
 
 [discrete]
 [[deprecation-136422]]
-.Deprecates interactive users that authenticate with ApiKey is deprecated and support will be removed in a future version
+.Deprecates ApiKey authentication for interactive users
 [%collapsible]
 ====
 *Details* +
