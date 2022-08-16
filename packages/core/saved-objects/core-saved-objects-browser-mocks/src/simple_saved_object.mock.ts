@@ -13,20 +13,35 @@ import type {
 import type { SavedObject } from '@kbn/core-saved-objects-common';
 
 type T = unknown;
+
+const simpleSavedObjectMockDefaults: Partial<SimpleSavedObject<T>> = {
+  attributes: {},
+  _version: '',
+  id: 'id',
+  type: 'type',
+  migrationVersion: {},
+  coreMigrationVersion: '8.0.0',
+  error: undefined,
+  references: [],
+  updatedAt: '',
+  namespaces: undefined,
+};
+
 const createSimpleSavedObjectMock = (
   savedObject: SavedObject
 ): jest.Mocked<SimpleSavedObject<T>> => {
   const mock = {
-    attributes: savedObject.attributes || ({} as T),
-    _version: savedObject.version ?? '',
-    id: savedObject.id ?? 'id',
-    type: savedObject.type ?? 'type',
-    migrationVersion: savedObject.migrationVersion ?? {},
-    coreMigrationVersion: savedObject.coreMigrationVersion ?? '8.0.0',
-    error: undefined,
-    references: savedObject.references ?? [],
-    updatedAt: savedObject.updated_at ?? '',
-    namespaces: savedObject.namespaces ?? undefined,
+    ...simpleSavedObjectMockDefaults,
+    attributes: savedObject.attributes,
+    _version: savedObject.version,
+    id: savedObject.id,
+    type: savedObject.type,
+    migrationVersion: savedObject.migrationVersion,
+    coreMigrationVersion: savedObject.coreMigrationVersion,
+    error: savedObject.error,
+    references: savedObject.references,
+    updatedAt: savedObject.updated_at,
+    namespaces: savedObject.namespaces,
     get: jest.fn(),
     set: jest.fn(),
     has: jest.fn(),
