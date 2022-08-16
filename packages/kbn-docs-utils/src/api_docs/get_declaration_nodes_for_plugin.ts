@@ -34,7 +34,7 @@ export function getDeclarationNodesForPluginScope(
 
   const path = plugin.isPlugin
     ? Path.join(`${plugin.directory}`, scope.toString(), 'index.ts')
-    : Path.join(`${plugin.directory}`, 'src', 'index.ts');
+    : Path.join(`${plugin.directory}`, 'index.ts');
   const file = getSourceFileMatching(project, path);
 
   if (file) {
