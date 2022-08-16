@@ -8,9 +8,16 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 import Boom from '@hapi/boom';
 
+import uuid from 'uuid';
+
+import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
+
 import type { Agent, BulkActionResult } from '../../types';
+import { appContextService } from '..';
 import { agentPolicyService } from '../agent_policy';
 import { AgentReassignmentError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
+
+import { SO_SEARCH_LIMIT } from '../../constants';
 
 import {
   getAgentDocuments,
@@ -19,11 +26,15 @@ import {
   bulkUpdateAgents,
   processAgentsInBatches,
   errorsToResults,
+  openPointInTime,
+  getAgentsByKuery,
 } from './crud';
 import type { GetAgentsOptions } from '.';
 import { createAgentAction } from './actions';
 import { searchHitToAgent } from './helpers';
 import { getHostedPolicies, isHostedAgent } from './hosted_agent';
+
+import { BulkActionTaskType } from './bulk_actions_resolver';
 
 export async function reassignAgent(
   soClient: SavedObjectsClientContract,
@@ -79,9 +90,13 @@ function isMgetDoc(doc?: estypes.MgetResponseItem<unknown>): doc is estypes.GetG
 export async function reassignAgents(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  options: ({ agents: Agent[] } | GetAgentsOptions) & { force?: boolean; batchSize?: number },
+  options: ({ agents: Agent[] } | GetAgentsOptions) & {
+    force?: boolean;
+    batchSize?: number;
+    totalAgents?: number;
+  },
   newAgentPolicyId: string
-): Promise<{ items: BulkActionResult[] }> {
+): Promise<{ items: BulkActionResult[]; taskId?: string }> {
   const newAgentPolicy = await agentPolicyService.get(soClient, newAgentPolicyId);
   if (!newAgentPolicy) {
     throw Boom.notFound(`Agent policy not found: ${newAgentPolicyId}`);
@@ -108,44 +123,107 @@ export async function reassignAgents(
       }
     }
   } else if ('kuery' in options) {
-    return await processAgentsInBatches(
-      esClient,
-      {
+    if ((options.totalAgents ?? 0) > (options.batchSize ?? SO_SEARCH_LIMIT)) {
+      return await runReassignAsync(soClient, esClient, options, newAgentPolicyId);
+    } else {
+      const res = await getAgentsByKuery(esClient, {
         kuery: options.kuery,
         showInactive: options.showInactive ?? false,
-        batchSize: options.batchSize,
-      },
-      async (agents: Agent[], skipSuccess: boolean) =>
-        await reassignBatch(
-          soClient,
-          esClient,
-          newAgentPolicyId,
-          agents,
-          outgoingErrors,
-          undefined,
-          skipSuccess
-        )
-    );
+        page: 1,
+        perPage: options.batchSize,
+      });
+      givenAgents = res.agents;
+    }
   }
 
   return await reassignBatch(
     soClient,
     esClient,
-    newAgentPolicyId,
+    { newAgentPolicyId },
     givenAgents,
     outgoingErrors,
     'agentIds' in options ? options.agentIds : undefined
   );
 }
 
-async function reassignBatch(
+async function runReassignAsync(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  newAgentPolicyId: string,
+  options: {
+    kuery: string;
+    showInactive?: boolean;
+    force?: boolean;
+    batchSize?: number;
+    totalAgents?: number;
+  },
+  newAgentPolicyId: string
+) {
+  const pitId = await openPointInTime(esClient);
+  const actionId = uuid();
+
+  let lastSearchAfter: SortResults | undefined;
+
+  appContextService
+    .getLogger()
+    .info(
+      `Running reassign asynchronously, actionId: ${actionId}, total agents: ${options.totalAgents}`
+    );
+
+  const outgoingErrors: Record<Agent['id'], Error> = {};
+  processAgentsInBatches(
+    esClient,
+    {
+      kuery: options.kuery,
+      showInactive: options.showInactive ?? false,
+      batchSize: options.batchSize,
+      pitId,
+    },
+    async (agents: Agent[], skipSuccess: boolean, searchAfter?: SortResults, total?: number) => {
+      lastSearchAfter = searchAfter;
+      return await reassignBatch(
+        soClient,
+        esClient,
+        { newAgentPolicyId, actionId },
+        agents,
+        outgoingErrors,
+        undefined,
+        skipSuccess,
+        total
+      );
+    }
+  ).catch(async (error) => {
+    appContextService.getLogger().error(`Reassign in batches failed: ${error.message}`);
+
+    const taskId = await appContextService.getBulkActionsResolver()!.run(
+      {
+        ...options,
+        actionId,
+        newAgentPolicyId,
+        pitId,
+        searchAfter: lastSearchAfter,
+        retryCount: 1,
+      },
+      BulkActionTaskType.REASSIGN_RETRY
+    );
+
+    appContextService.getLogger().info(`Retrying in task: ${taskId}`);
+  });
+
+  return { items: [] };
+}
+
+export async function reassignBatch(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  options: {
+    newAgentPolicyId: string;
+    actionId?: string;
+  },
   givenAgents: Agent[],
   outgoingErrors: Record<Agent['id'], Error>,
   agentIds?: string[],
-  skipSuccess?: boolean
+  skipSuccess?: boolean,
+  total?: number
 ): Promise<{ items: BulkActionResult[] }> {
   const errors: Record<Agent['id'], Error> = { ...outgoingErrors };
 
@@ -154,8 +232,10 @@ async function reassignBatch(
   // which are allowed to unenroll
   const agentResults = await Promise.allSettled(
     givenAgents.map(async (agent, index) => {
-      if (agent.policy_id === newAgentPolicyId) {
-        throw new AgentReassignmentError(`${agent.id} is already assigned to ${newAgentPolicyId}`);
+      if (agent.policy_id === options.newAgentPolicyId) {
+        throw new AgentReassignmentError(
+          `${agent.id} is already assigned to ${options.newAgentPolicyId}`
+        );
       }
 
       if (isHostedAgent(hostedPolicies, agent)) {
@@ -179,12 +259,22 @@ async function reassignBatch(
     return agents;
   }, []);
 
+  const result = { items: errorsToResults(givenAgents, errors, agentIds, skipSuccess) };
+
+  if (agentsToUpdate.length === 0) {
+    // early return if all agents failed validation
+    appContextService
+      .getLogger()
+      .debug('No agents to update, skipping agent update and action creation');
+    return result;
+  }
+
   await bulkUpdateAgents(
     esClient,
     agentsToUpdate.map((agent) => ({
       agentId: agent.id,
       data: {
-        policy_id: newAgentPolicyId,
+        policy_id: options.newAgentPolicyId,
         policy_revision: null,
       },
     }))
@@ -192,10 +282,12 @@ async function reassignBatch(
 
   const now = new Date().toISOString();
   await createAgentAction(esClient, {
+    id: options.actionId,
     agents: agentsToUpdate.map((agent) => agent.id),
     created_at: now,
     type: 'POLICY_REASSIGN',
+    total,
   });
 
-  return { items: errorsToResults(givenAgents, errors, agentIds, skipSuccess) };
+  return result;
 }

@@ -260,16 +260,19 @@ export async function getCurrentBulkUpgrades(
         },
       });
 
+      const nbAgents = upgradeAction.total ?? upgradeAction.nbAgents;
+
       return {
         ...upgradeAction,
+        nbAgents,
         nbAgentsAck: count,
-        complete: upgradeAction.nbAgents <= count,
+        complete: nbAgents <= count,
       };
     },
     { concurrency: 20 }
   );
 
-  upgradeActions = upgradeActions.filter((action) => !action.complete);
+  // upgradeActions = upgradeActions.filter((action) => !action.complete);
 
   return upgradeActions;
 }
@@ -314,11 +317,11 @@ async function _getUpgradeActions(esClient: ElasticsearchClient, now = new Date(
     query: {
       bool: {
         must: [
-          {
-            term: {
-              type: 'UPGRADE',
-            },
-          },
+          // {
+          //   term: {
+          //     type: 'UPGRADE',
+          //   },
+          // },
           {
             exists: {
               field: 'agents',
@@ -327,6 +330,11 @@ async function _getUpgradeActions(esClient: ElasticsearchClient, now = new Date(
           {
             range: {
               expiration: { gte: now },
+            },
+          },
+          {
+            range: {
+              '@timestamp': { gte: 'now-1h' },
             },
           },
         ],
@@ -347,7 +355,9 @@ async function _getUpgradeActions(esClient: ElasticsearchClient, now = new Date(
           complete: false,
           nbAgentsAck: 0,
           version: hit._source.data?.version as string,
-          startTime: hit._source?.start_time,
+          startTime: hit._source?.start_time ?? hit._source?.['@timestamp'],
+          type: hit._source?.type,
+          total: hit._source?.total,
         };
       }
 

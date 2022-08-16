@@ -261,7 +261,7 @@ export const postBulkAgentsReassignHandler: RequestHandler<
     const results = await AgentService.reassignAgents(
       soClient,
       esClient,
-      { ...agentOptions, batchSize: request.body.batchSize },
+      { ...agentOptions, batchSize: request.body.batchSize, totalAgents: request.body.totalAgents },
       request.body.policy_id
     );
 
@@ -273,7 +273,7 @@ export const postBulkAgentsReassignHandler: RequestHandler<
       return acc;
     }, {});
 
-    return response.ok({ body });
+    return response.ok({ body: { ...body, taskId: results.taskId } });
   } catch (error) {
     return defaultIngestErrorHandler({ error, response });
   }

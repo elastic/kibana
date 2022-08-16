@@ -259,13 +259,17 @@ export async function processAgentsInBatches(
   options: Omit<ListWithKuery, 'page' | 'perPage'> & {
     showInactive: boolean;
     batchSize?: number;
+    pitId?: string;
+    searchAfter?: SortResults;
   },
   processAgents: (
     agents: Agent[],
-    includeSuccess: boolean
+    includeSuccess: boolean,
+    searchAfter?: SortResults,
+    total?: number
   ) => Promise<{ items: BulkActionResult[] }>
 ): Promise<{ items: BulkActionResult[] }> {
-  const pitId = await openPointInTime(esClient);
+  const pitId = options.pitId ?? (await openPointInTime(esClient));
 
   const perPage = options.batchSize ?? SO_SEARCH_LIMIT;
 
@@ -274,33 +278,48 @@ export async function processAgentsInBatches(
     page: 1,
     perPage,
     pitId,
+    searchAfter: options.searchAfter,
   });
 
   let currentAgents = res.agents;
+  if (currentAgents.length === 0) {
+    appContextService
+      .getLogger()
+      .debug('currentAgents returned 0 hits, returning from bulk action query');
+    return { items: [] }; // stop executing if there are no more results
+  }
   // include successful agents if total agents does not exceed 10k
   const skipSuccess = res.total > SO_SEARCH_LIMIT;
 
-  let results = await processAgents(currentAgents, skipSuccess);
+  let results = await processAgents(currentAgents, skipSuccess, options.searchAfter, res.total);
   let allAgentsProcessed = currentAgents.length;
 
   while (allAgentsProcessed < res.total) {
     const lastAgent = currentAgents[currentAgents.length - 1];
+    const searchAfter = lastAgent.sort!;
     const nextPage = await getAgentsByKuery(esClient, {
       ...options,
       page: 1,
       perPage,
       pitId,
-      searchAfter: lastAgent.sort!,
+      searchAfter,
     });
     currentAgents = nextPage.agents;
-    const currentResults = await processAgents(currentAgents, skipSuccess);
+    if (currentAgents.length === 0) {
+      appContextService
+        .getLogger()
+        .debug('currentAgents returned 0 hits, returning from bulk action query');
+      break; // stop executing if there are no more results
+    }
+    const currentResults = await processAgents(currentAgents, skipSuccess, searchAfter, res.total);
     results = { items: results.items.concat(currentResults.items) };
     allAgentsProcessed += currentAgents.length;
+    // if (allAgentsProcessed === 15) throw new Error('simulating error after batch processed ' + searchAfter);
   }
 
   await closePointInTime(esClient, pitId);
 
-  return results;
+  return { ...results };
 }
 
 export function errorsToResults(

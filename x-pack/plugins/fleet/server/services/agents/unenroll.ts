@@ -7,6 +7,8 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
+import uuid from 'uuid';
+
 import type { Agent, BulkActionResult } from '../../types';
 import { invalidateAPIKeys } from '../api_keys';
 import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
@@ -78,6 +80,7 @@ export async function unenrollAgents(
     const givenAgents = await getAgents(esClient, options);
     return await unenrollBatch(soClient, esClient, givenAgents, options);
   }
+  const actionId = uuid();
   return await processAgentsInBatches(
     esClient,
     {
@@ -86,7 +89,7 @@ export async function unenrollAgents(
       batchSize: options.batchSize,
     },
     async (agents: Agent[], skipSuccess?: boolean) =>
-      await unenrollBatch(soClient, esClient, agents, options, skipSuccess)
+      await unenrollBatch(soClient, esClient, agents, { ...options, actionId }, skipSuccess)
   );
 }
 
@@ -97,6 +100,7 @@ async function unenrollBatch(
   options: {
     force?: boolean;
     revoke?: boolean;
+    actionId?: string;
   },
   skipSuccess?: boolean
 ): Promise<{ items: BulkActionResult[] }> {
@@ -134,6 +138,7 @@ async function unenrollBatch(
   } else {
     // Create unenroll action for each agent
     await createAgentAction(esClient, {
+      id: options.actionId,
       agents: agentsToUpdate.map((agent) => agent.id),
       created_at: now,
       type: 'UNENROLL',

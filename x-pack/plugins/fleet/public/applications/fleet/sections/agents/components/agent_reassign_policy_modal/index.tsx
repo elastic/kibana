@@ -30,11 +30,13 @@ import { SO_SEARCH_LIMIT } from '../../../../constants';
 interface Props {
   onClose: () => void;
   agents: Agent[] | string;
+  totalAgents: number;
 }
 
 export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
   onClose,
   agents,
+  totalAgents,
 }) => {
   const { notifications } = useStartServices();
   const isSingleAgent = Array.isArray(agents) && agents.length === 1;
@@ -77,6 +79,7 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
         : await sendPostBulkAgentReassign({
             policy_id: selectedAgentPolicyId,
             agents: Array.isArray(agents) ? agents.map((agent) => agent.id) : agents,
+            totalAgents,
           });
       if (res.error) {
         throw res.error;

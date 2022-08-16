@@ -49,6 +49,7 @@ export interface NewAgentAction {
   start_time?: string;
   minimum_execution_duration?: number;
   source_uri?: string;
+  total?: number;
 }
 
 export interface AgentAction extends NewAgentAction {
@@ -103,6 +104,8 @@ export interface CurrentUpgrade {
   nbAgentsAck: number;
   version: string;
   startTime?: string;
+  type?: string;
+  total?: number;
 }
 
 // Generated from FleetServer schema.json
@@ -284,5 +287,7 @@ export interface FleetServerAgentAction {
   data?: {
     [k: string]: unknown;
   };
+
+  total?: number;
   [k: string]: unknown;
 }
