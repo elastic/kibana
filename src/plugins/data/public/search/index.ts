@@ -53,7 +53,7 @@ export {
   waitUntilNextSessionCompletes$,
 } from './session';
 export { getEsPreference } from './es_search';
-export { handleResponse, SearchResponseWarnings } from './fetch';
+export type { handleResponse, SearchResponseWarnings } from './fetch';
 
 export type { SearchInterceptorDeps } from './search_interceptor';
 export { SearchInterceptor } from './search_interceptor';
