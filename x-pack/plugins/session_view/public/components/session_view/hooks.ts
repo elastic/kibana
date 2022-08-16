@@ -20,8 +20,10 @@ import {
   PROCESS_EVENTS_PER_PAGE,
   ALERTS_PER_PAGE,
   ALERT_STATUS_ROUTE,
+  GET_TOTAL_IO_BYTES_ROUTE,
   QUERY_KEY_PROCESS_EVENTS,
   QUERY_KEY_ALERTS,
+  QUERY_KEY_GET_TOTAL_IO_BYTES,
 } from '../../../common/constants';
 
 export const useFetchSessionViewProcessEvents = (
@@ -175,6 +177,30 @@ export const useFetchAlertStatus = (
           processEntityId: events[0]?.process?.entity_id ?? '',
         },
       };
+    },
+    {
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      cacheTime: 0,
+    }
+  );
+
+  return query;
+};
+
+// TODO: we should not load by session id, but instead a combo of process.tty.major+minor, session time range, and host.boot_id (see Rabbitholes section of epic).
+export const useFetchGetTotalIOBytes = (sessionEntityId: string) => {
+  const { http } = useKibana<CoreStart>().services;
+  const cachingKeys = [QUERY_KEY_GET_TOTAL_IO_BYTES, sessionEntityId];
+  const query = useQuery<number, Error>(
+    cachingKeys,
+    async () => {
+      return http.get<number>(GET_TOTAL_IO_BYTES_ROUTE, {
+        query: {
+          sessionEntityId,
+        },
+      });
     },
     {
       refetchOnWindowFocus: false,
