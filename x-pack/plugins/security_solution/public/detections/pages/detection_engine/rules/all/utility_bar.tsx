@@ -27,7 +27,7 @@ import * as i18n from '../translations';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useRulesTableContextOptional } from './rules_table/rules_table_context';
 import { getShowingRulesParams } from '../utils';
-import { Pagination } from '../types';
+import type { Pagination } from '../types';
 
 interface AllRulesUtilityBarProps {
   canBulkEdit: boolean;

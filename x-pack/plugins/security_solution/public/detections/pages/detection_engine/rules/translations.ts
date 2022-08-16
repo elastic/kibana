@@ -440,7 +440,8 @@ export const SEARCH_PLACEHOLDER = i18n.translate(
 export const SHOWING_RULES = (firstInPage: number, lastOfPage: number, totalRules: number) =>
   i18n.translate('xpack.securitySolution.detectionEngine.rules.allRules.showingRulesTitle', {
     values: { firstInPage, lastOfPage, totalRules },
-    defaultMessage: 'Showing {firstInPage}-{lastOfPage} of {totalRules} {totalRules, plural, =1 {rule} other {rules}}',
+    defaultMessage:
+      'Showing {firstInPage}-{lastOfPage} of {totalRules} {totalRules, plural, =1 {rule} other {rules}}',
   });
 
 export const SELECT_ALL_RULES = (totalRules: number) =>
