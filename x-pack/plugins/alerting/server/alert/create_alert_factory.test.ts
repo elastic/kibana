@@ -29,6 +29,7 @@ describe('createAlertFactory()', () => {
     const alertFactory = createAlertFactory({
       alerts: {},
       logger,
+      maxAlerts: 1000,
     });
     const result = alertFactory.create('1');
     expect(result).toMatchInlineSnapshot(`
@@ -51,6 +52,7 @@ describe('createAlertFactory()', () => {
         '1': alert,
       },
       logger,
+      maxAlerts: 1000,
     });
     const result = alertFactory.create('1');
     expect(result).toMatchInlineSnapshot(`
@@ -73,6 +75,7 @@ describe('createAlertFactory()', () => {
     const alertFactory = createAlertFactory({
       alerts,
       logger,
+      maxAlerts: 1000,
     });
     alertFactory.create('1');
     expect(alerts).toMatchInlineSnapshot(`
@@ -85,10 +88,30 @@ describe('createAlertFactory()', () => {
         `);
   });
 
+  test('throws error and sets flag when more alerts are created than allowed', () => {
+    const alertFactory = createAlertFactory({
+      alerts: {},
+      logger,
+      maxAlerts: 3,
+    });
+
+    expect(alertFactory.hasReachedAlertLimit()).toBe(false);
+    alertFactory.create('1');
+    alertFactory.create('2');
+    alertFactory.create('3');
+
+    expect(() => {
+      alertFactory.create('4');
+    }).toThrowErrorMatchingInlineSnapshot(`"Rule reported more than 3 alerts."`);
+
+    expect(alertFactory.hasReachedAlertLimit()).toBe(true);
+  });
+
   test('throws error when creating alerts after done() is called', () => {
     const alertFactory = createAlertFactory({
       alerts: {},
       logger,
+      maxAlerts: 1000,
     });
     const result = alertFactory.create('1');
     expect(result).toEqual({
@@ -127,6 +150,7 @@ describe('createAlertFactory()', () => {
       alerts: {},
       logger,
       canSetRecoveryContext: true,
+      maxAlerts: 1000,
     });
     const result = alertFactory.create('1');
     expect(result).toEqual({
@@ -149,6 +173,7 @@ describe('createAlertFactory()', () => {
     const alertFactory = createAlertFactory({
       alerts: {},
       logger,
+      maxAlerts: 1000,
       canSetRecoveryContext: true,
     });
     const result = alertFactory.create('1');
@@ -171,6 +196,7 @@ describe('createAlertFactory()', () => {
     const alertFactory = createAlertFactory({
       alerts: {},
       logger,
+      maxAlerts: 1000,
       canSetRecoveryContext: true,
     });
     const result = alertFactory.create('1');
@@ -192,6 +218,7 @@ describe('createAlertFactory()', () => {
     const alertFactory = createAlertFactory({
       alerts: {},
       logger,
+      maxAlerts: 1000,
       canSetRecoveryContext: false,
     });
     const result = alertFactory.create('1');
