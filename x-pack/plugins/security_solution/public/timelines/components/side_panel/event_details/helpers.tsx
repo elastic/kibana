@@ -9,6 +9,7 @@ import { some } from 'lodash/fp';
 import { useMemo } from 'react';
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy';
 import { getFieldValue } from '../../../../detections/components/host_isolation/helpers';
+import { DEFAULT_ALERTS_INDEX, DEFAULT_PREVIEW_INDEX } from '../../../../../common/constants';
 
 interface GetBasicDataFromDetailsData {
   alertId: string;
@@ -50,4 +51,15 @@ export const useBasicDataFromDetailsData = (
     }),
     [alertId, hostName, isAlert, ruleName, timestamp]
   );
+};
+
+export const getAlertIndexAlias = (
+  index: string,
+  spaceId: string = 'default'
+): string | undefined => {
+  if (index.startsWith(`.internal${DEFAULT_ALERTS_INDEX}`)) {
+    return `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
+  } else if (index.startsWith(`.internal${DEFAULT_PREVIEW_INDEX}`)) {
+    return `${DEFAULT_PREVIEW_INDEX}-${spaceId}`;
+  }
 };

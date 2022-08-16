@@ -21,7 +21,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
 import { useTimelineEventsDetails } from '../../../containers/details';
 import { allCasesPermissions } from '../../../../cases_test_utils';
-import { DEFAULT_ALERTS_INDEX } from '../../../../../common/constants';
+import { DEFAULT_ALERTS_INDEX, DEFAULT_PREVIEW_INDEX } from '../../../../../common/constants';
 
 const ecsData: Ecs = {
   _id: '1',
@@ -177,7 +177,7 @@ describe('event details footer component', () => {
       ...defaultProps,
       expandedEvent: {
         eventId: ecsData._id,
-        indexName: `.internal.${DEFAULT_ALERTS_INDEX}-testSpace`,
+        indexName: `.internal${DEFAULT_ALERTS_INDEX}-testSpace`,
       },
     };
     test('it uses the alias alerts index', () => {
@@ -190,6 +190,54 @@ describe('event details footer component', () => {
         entityType: 'events',
         indexName: `${DEFAULT_ALERTS_INDEX}-testSpace`,
         eventId: propsWithAlertIndex.expandedEvent.eventId ?? '',
+        runtimeMappings: mockRuntimeMappings,
+        skip: false,
+      });
+    });
+
+    test('it uses the alias alerts preview index', () => {
+      const alertPreviewProps = {
+        ...propsWithAlertIndex,
+        expandedEvent: {
+          ...propsWithAlertIndex.expandedEvent,
+          indexName: `.internal${DEFAULT_PREVIEW_INDEX}-testSpace`,
+        },
+      };
+      render(
+        <TestProviders>
+          <EventDetailsPanel {...{ ...alertPreviewProps }} />
+        </TestProviders>
+      );
+
+      expect(useTimelineEventsDetails).toHaveBeenCalledWith({
+        entityType: 'events',
+        indexName: `${DEFAULT_PREVIEW_INDEX}-testSpace`,
+        eventId: propsWithAlertIndex.expandedEvent.eventId,
+        runtimeMappings: mockRuntimeMappings,
+        skip: false,
+      });
+    });
+
+    test(`it does NOT use the alerts alias when regular events happen to include a trailing '${DEFAULT_ALERTS_INDEX}' in the index name`, () => {
+      const indexName = `.ds-logs-endpoint.alerts-default-2022.08.09-000001${DEFAULT_ALERTS_INDEX}`; // a regular event, that happens to include a trailing `.alerts-security.alerts`
+      const propsWithEventIndex = {
+        ...defaultProps,
+        expandedEvent: {
+          eventId: ecsData._id,
+          indexName,
+        },
+      };
+
+      render(
+        <TestProviders>
+          <EventDetailsPanel {...{ ...propsWithEventIndex }} />
+        </TestProviders>
+      );
+
+      expect(useTimelineEventsDetails).toHaveBeenCalledWith({
+        entityType: 'events',
+        indexName, // <-- use the original index name, not the alerts alias
+        eventId: propsWithEventIndex.expandedEvent.eventId,
         runtimeMappings: mockRuntimeMappings,
         skip: false,
       });
