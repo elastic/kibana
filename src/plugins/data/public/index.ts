@@ -160,6 +160,7 @@ export type {
   ISearchGeneric,
   ISearchSource,
   SearchRequest,
+  SearchResponseWarnings,
   SearchSourceFields,
   SerializedSearchSourceFields,
   // errors
