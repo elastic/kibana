@@ -11,7 +11,7 @@ export const USER_RISK_TOOLTIP = i18n.translate(
   'xpack.securitySolution.usersRiskDashboard.userRiskToolTip',
   {
     defaultMessage:
-      'User risk classifcation is determined by User risk score. Hosts classified as Critical or High are indicated as risky.',
+      'User risk classification is determined by User risk score. Users classified as Critical or High are indicated as risky.',
   }
 );
 
