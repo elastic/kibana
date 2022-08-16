@@ -1,4 +1,4 @@
-schedule[[osquery]]
+[[osquery]]
 = Osquery
 
 [partintro]
