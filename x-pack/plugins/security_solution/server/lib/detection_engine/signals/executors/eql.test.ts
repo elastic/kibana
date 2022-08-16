@@ -17,6 +17,7 @@ import type { EqlRuleParams } from '../../schemas/rule_schemas';
 import { getCompleteRuleMock, getEqlRuleParams } from '../../schemas/rule_schemas.mock';
 import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import { eqlExecutor } from './eql';
+import { getListClientMock } from '@kbn/lists-plugin/server/services/lists/list_client.mock';
 
 jest.mock('../../routes/index/get_index_version');
 
@@ -60,6 +61,7 @@ describe('eql_executor', () => {
         wrapHits: jest.fn(),
         wrapSequences: jest.fn(),
         primaryTimestamp: '@timestamp',
+        listClient: getListClientMock(),
       });
       expect(response.warningMessages.length).toEqual(1);
     });

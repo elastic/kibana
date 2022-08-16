@@ -94,6 +94,7 @@ export const createNewTermsAlertType = (
           primaryTimestamp,
           secondaryTimestamp,
           aggregatableTimestampField,
+          listClient,
         },
         services,
         params,
@@ -108,7 +109,7 @@ export const createNewTermsAlertType = (
         from: params.from,
       });
 
-      const filter = await getFilter({
+      const { esFilter } = await getFilter({
         filters: params.filters,
         index: inputIndex,
         language: params.language,
@@ -117,6 +118,7 @@ export const createNewTermsAlertType = (
         type: params.type,
         query: params.query,
         lists: exceptionItems,
+        listClient,
       });
 
       const parsedHistoryWindowSize = parseDateString({
@@ -151,7 +153,7 @@ export const createNewTermsAlertType = (
           to: tuple.to.toISOString(),
           services,
           ruleExecutionLogger,
-          filter,
+          filter: esFilter,
           pageSize: 0,
           primaryTimestamp,
           secondaryTimestamp,
@@ -201,7 +203,7 @@ export const createNewTermsAlertType = (
           to: tuple.to.toISOString(),
           services,
           ruleExecutionLogger,
-          filter,
+          filter: esFilter,
           pageSize: 0,
           primaryTimestamp,
           secondaryTimestamp,
@@ -243,7 +245,7 @@ export const createNewTermsAlertType = (
             to: tuple.to.toISOString(),
             services,
             ruleExecutionLogger,
-            filter,
+            filter: esFilter,
             pageSize: 0,
             primaryTimestamp,
             secondaryTimestamp,

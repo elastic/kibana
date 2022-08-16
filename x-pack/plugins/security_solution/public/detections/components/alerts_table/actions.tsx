@@ -598,14 +598,13 @@ const createNewTermsTimeline = async (
 
     const { from, to, dataProviders } = getNewTermsData(alertDoc);
     const exceptions = await getExceptions(ecsData);
-    const exceptionsFilter =
-      buildExceptionFilter({
-        lists: exceptions,
-        excludeExceptions: true,
-        chunkSize: 10000,
-        alias: 'Exceptions',
-      }) ?? [];
-    const allFilters = (templateValues.filters ?? augmentedFilters).concat(exceptionsFilter);
+    const { filter } = await getExceptionFilterFromExceptions({
+      exceptions,
+      excludeExceptions: true,
+      chunkSize: 10000,
+      alias: 'Exceptions',
+    });
+    const allFilters = (templateValues.filters ?? augmentedFilters).concat(filter);
     return createTimeline({
       from,
       notes: null,
