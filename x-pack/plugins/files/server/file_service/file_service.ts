@@ -55,7 +55,7 @@ export interface FileServiceStart {
    *
    * @param args - find files args
    */
-  find<M>(args: FindFileArgs): Promise<Array<File<M>>>;
+  find<M>(args: FindFileArgs): Promise<Array<FileJSON<M>>>;
 
   /**
    * List all files of specific file kind.
@@ -104,5 +104,5 @@ export interface FileServiceStart {
    *
    * @param token - secret token
    */
-  getByToken<M>(token: string): Promise<FileJSON<M>>;
+  getByToken<M>(token: string): Promise<File<M>>;
 }

@@ -133,7 +133,7 @@ export class InternalFileService {
   ): IFile {
     return new File(
       id,
-      fileMetadata,
+      toJSON(id, fileMetadata),
       fileClient ?? this.createFileClient(fileKind),
       this.logger.get(`file-${id}`)
     );

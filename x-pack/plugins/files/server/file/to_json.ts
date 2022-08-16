@@ -40,17 +40,20 @@ export function toJSON<M = unknown>(id: string, attrs: FileMetadata): FileJSON<M
     extension,
     Meta,
   } = attrs;
-  return {
-    id,
-    name,
-    mimeType,
-    size,
-    created,
-    extension,
-    alt: Alt,
-    status: Status,
-    meta: Meta as M,
-    updated: Updated,
-    fileKind: FileKind,
-  };
+  return pickBy<FileJSON<M>>(
+    {
+      id,
+      name,
+      mimeType,
+      size,
+      created,
+      extension,
+      alt: Alt,
+      status: Status,
+      meta: Meta as M,
+      updated: Updated,
+      fileKind: FileKind,
+    },
+    (v) => v != null
+  ) as FileJSON<M>;
 }

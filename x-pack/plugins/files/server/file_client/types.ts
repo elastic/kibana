@@ -34,7 +34,7 @@ export interface CreateArgs {
   /**
    * The file's metadata
    */
-  metadata: CreateFileArgs;
+  metadata: Omit<CreateFileArgs, 'fileKind'>;
 }
 
 /**
@@ -86,13 +86,6 @@ export interface FileClient {
    * @param metadata - new file metadata
    */
   update<M = unknown>(id: string, metadata: UpdatableFileMetadata<M>): Promise<void>;
-  /**
-   * {@link FileMetadataClient.update}
-   *
-   * @param file - See {@link File}
-   * @param metadata - new file metadata
-   */
-  update<M = unknown>(file: File<M>, metadata: UpdatableFileMetadata<M>): Promise<File<M>>;
 
   /**
    * Delete a file.
@@ -105,7 +98,7 @@ export interface FileClient {
    *
    * @param arg - Argument to list files
    */
-  list(arg: P1<FileMetadataClient['list']>): Promise<File[]>;
+  list(arg?: P1<FileMetadataClient['list']>): Promise<File[]>;
 
   /**
    * See {@link FileMetadataClient.find}.

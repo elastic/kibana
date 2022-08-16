@@ -8,10 +8,9 @@
 import { Logger } from '@kbn/core/server';
 import { Readable } from 'stream';
 import type { FileShareJSON, FileShareJSONWithToken } from '../../common/types';
-import type { File as IFile, FileMetadata, UpdatableFileMetadata, FileJSON } from '../../common';
+import type { File as IFile, UpdatableFileMetadata, FileJSON } from '../../common';
 import { fileAttributesReducer, Action } from './file_attributes_reducer';
 import type { FileClientImpl } from '../file_client/file_client';
-import { toJSON } from './to_json';
 import {
   AlreadyDeletedError,
   ContentAlreadyUploadedError,
@@ -19,28 +18,23 @@ import {
   UploadInProgressError,
 } from './errors';
 
-const FILE_SYMBOL = Symbol.for('files.file');
-
-export function isFile(v: unknown): v is IFile {
-  return (v as File)?.brand === FILE_SYMBOL;
-}
-
 /**
  * Scopes file actions to an ID and set of attributes.
  *
  * Also exposes the upload and download functionality.
  */
 export class File<M = unknown> implements IFile {
-  public brand = FILE_SYMBOL;
   constructor(
     public readonly id: string,
-    private readonly fileMetadata: FileMetadata,
+    private metadata: FileJSON<M>,
     private readonly fileClient: FileClientImpl,
     private readonly logger: Logger
   ) {}
 
-  private async updateFileState(action: Action): Promise<IFile<M>> {
-    return this.fileClient.update<M>(this, fileAttributesReducer(this.data, action) as FileJSON<M>);
+  private async updateFileState(action: Action): Promise<void> {
+    const metadata = fileAttributesReducer(this.data, action);
+    await this.fileClient.internalUpdate(this.id, metadata);
+    this.data = metadata as FileJSON<M>;
   }
 
   private isReady(): boolean {
@@ -56,13 +50,14 @@ export class File<M = unknown> implements IFile {
   }
 
   public async update(attrs: Partial<UpdatableFileMetadata>): Promise<IFile<M>> {
-    return this.updateFileState({
+    await this.updateFileState({
       action: 'updateFile',
       payload: attrs,
     });
+    return this;
   }
 
-  public async uploadContent(content: Readable): Promise<void> {
+  public async uploadContent(content: Readable): Promise<IFile<M>> {
     if (this.uploadInProgress()) {
       throw new UploadInProgressError('Upload already in progress.');
     }
@@ -80,6 +75,7 @@ export class File<M = unknown> implements IFile {
         action: 'uploaded',
         payload: { size },
       });
+      return this;
     } catch (e) {
       await this.updateFileState({ action: 'uploadError' });
       this.fileClient.deleteContent(this.id).catch(() => {}); // Best effort to remove any uploaded content
@@ -88,7 +84,7 @@ export class File<M = unknown> implements IFile {
   }
 
   public downloadContent(): Promise<Readable> {
-    const { size } = this.fileMetadata;
+    const { size } = this.data;
     if (!this.isReady()) {
       throw new NoDownloadAvailableError('This file content is not available for download.');
     }
@@ -134,11 +130,10 @@ export class File<M = unknown> implements IFile {
     return this.data;
   }
 
-  private transformedData: undefined | FileJSON<M>;
   public get data(): FileJSON<M> {
-    if (!this.transformedData) {
-      this.transformedData = toJSON(this.id, this.fileMetadata);
-    }
-    return this.transformedData;
+    return this.metadata;
+  }
+  private set data(v: FileJSON<M>) {
+    this.metadata = v;
   }
 }
