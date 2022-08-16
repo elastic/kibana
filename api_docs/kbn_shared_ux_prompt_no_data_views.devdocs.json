@@ -229,7 +229,7 @@
               "The background color of the prompt; defaults to `plain`."
             ],
             "signature": [
-              "\"primary\" | \"success\" | \"accent\" | \"warning\" | \"danger\" | \"subdued\" | \"transparent\" | \"plain\" | undefined"
+              "\"warning\" | \"primary\" | \"success\" | \"accent\" | \"danger\" | \"subdued\" | \"transparent\" | \"plain\" | undefined"
             ],
             "path": "node_modules/@kbn/shared-ux-prompt-no-data-views-types/index.d.ts",
             "deprecated": false
