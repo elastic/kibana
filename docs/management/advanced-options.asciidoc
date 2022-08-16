@@ -314,7 +314,7 @@ Controls whether a search is executed when *Discover* first loads. This setting
 does not have an effect when loading a saved search.
 
 [[discover:showFieldStatistics]]`discover:showFieldStatistics`::
-beta[] Enable the Field statistics view. Examine details such as
+beta[] Enables the Field statistics view. Examine details such as
 the minimum and maximum values of a numeric field or a map of a geo field.
 
 [[discover:showMultiFields]]`discover:showMultiFields`::
