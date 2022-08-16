@@ -29,7 +29,7 @@ import {
 import { OverlayRef } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { Container, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-
+import { TIME_SLIDER_CONTROL } from '../..';
 import {
   ControlGroupInput,
   ControlGroupOutput,
@@ -50,6 +50,7 @@ import { ControlGroup } from '../component/control_group_component';
 import { controlGroupReducers } from '../state/control_group_reducers';
 import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
 import { CreateControlButton, CreateControlButtonTypes } from '../editor/create_control';
+import { TimeSliderControlEmbeddable } from '../../control_types/time_slider_2/time_slider_embeddable';
 
 let flyoutRef: OverlayRef | undefined;
 export const setFlyoutRef = (newRef: OverlayRef | undefined) => {
@@ -391,10 +392,15 @@ export class ControlGroupContainer extends Container<
     return Promise.resolve();
   };
 
-  public setAllPanelsLoadedState(value: boolean) {
-    this.allPanelsLoaded = value;
-    console.log(`allPanelsLoaded: ${this.allPanelsLoaded}`);
-    return;
+  public setAllPanelsLoadedState(allDashboardPanelsLoaded: boolean) {
+    console.log(`setAllPanelsLoadedState:: ${allDashboardPanelsLoaded}`);
+    const childIds = this.getChildIds();
+    childIds.forEach((id) => {
+      const child = this.getChild(id);
+      if (child.type === TIME_SLIDER_CONTROL) {
+        (child as TimeSliderControlEmbeddable).setAllDashboardPanelsLoaded(allDashboardPanelsLoaded);
+      }
+    });
   }
 
   public render(dom: HTMLElement) {

@@ -12,12 +12,7 @@ import { Observable, Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
-import {
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiInputPopover,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiInputPopover } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 import { timeSliderReducers } from '../time_slider_reducers';
@@ -53,7 +48,7 @@ export const TimeSlider: FC<Props> = (props) => {
   const value = select((state) => {
     return state.explicitInput.value;
   });
-  
+
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isPaused, setIsPaused] = useState(true);
   const [timeoutId, setTimeoutId] = useState<number | undefined>(undefined);
@@ -69,21 +64,25 @@ export const TimeSlider: FC<Props> = (props) => {
 
     // use waitForPanelsToLoad$ observable to wait until next frame loaded
     // .pipe(first()) waits until the first value is emitted from an observable and then automatically unsubscribes
-    const nextSubscription = props.waitForPanelsToLoad$.pipe(first()).subscribe(() => {
-      // use timeout to display frame for small time period before moving to next frame
-      const nextTimeoutId = window.setTimeout(() => {
-        playNextFrame();
-      }, 1750);
-      setTimeoutId(nextTimeoutId);
-    });
+    const nextSubscription = props.waitForPanelsToLoad$
+      .pipe(first((value) => value === true, false))
+      .subscribe((ready: boolean) => {
+        if (ready) {
+          // use timeout to display frame for small time period before moving to next frame
+          const nextTimeoutId = window.setTimeout(() => {
+            playNextFrame();
+          }, 1750);
+          setTimeoutId(nextTimeoutId);
+        }
+      });
     setSubscription(nextSubscription);
-  }
+  };
 
   const onPlay = () => {
     setIsPopoverOpen(true);
     setIsPaused(false);
     playNextFrame();
-  }
+  };
 
   const onPause = () => {
     setIsPopoverOpen(true);
@@ -96,11 +95,11 @@ export const TimeSlider: FC<Props> = (props) => {
       clearTimeout(timeoutId);
       setTimeoutId(undefined);
     }
-  }
+  };
 
   const from = value ? value[FROM_INDEX] : timeRangeMin;
   const to = value ? value[TO_INDEX] : timeRangeMax;
-  
+
   return (
     <EuiFlexGroup gutterSize="none">
       <EuiFlexItem grow={false}>
@@ -150,7 +149,14 @@ export const TimeSlider: FC<Props> = (props) => {
       <EuiFlexItem grow={true}>
         <EuiInputPopover
           className="timeSlider__popoverOverride"
-          input={<TimeSliderPopoverButton onClick={togglePopover} formatDate={props.formatDate} from={from} to={to} />}
+          input={
+            <TimeSliderPopoverButton
+              onClick={togglePopover}
+              formatDate={props.formatDate}
+              from={from}
+              to={to}
+            />
+          }
           isOpen={isPopoverOpen}
           closePopover={() => setIsPopoverOpen(false)}
           panelPaddingSize="s"
