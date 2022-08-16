@@ -108,7 +108,7 @@ const StyledEuiAccordion = styled(EuiAccordion)`
 type FormType = 'simple' | 'steps';
 
 interface LiveQueryFormProps {
-  defaultValue: IDefaultLiveQueryFormFields;
+  defaultValue?: IDefaultLiveQueryFormFields;
   onSuccess?: () => void;
   queryField?: boolean;
   ecsMappingField?: boolean;
@@ -549,6 +549,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
             </EuiFlexItem>
             {submitButtonContent}
             <EuiSpacer />
+
             {liveQueryDetails?.queries?.length || selectedPackData?.attributes?.queries?.length ? (
               <>
                 <EuiFlexItem>

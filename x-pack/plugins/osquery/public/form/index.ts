@@ -8,4 +8,4 @@
 export { ComboBoxField } from './Combobox';
 export { TextField } from './TextField';
 export { NumberField } from './NumberField';
-export { IFormField } from './types';
+export type { IFormField } from './types';

@@ -19,7 +19,7 @@ export interface SavedQuerySOFormData {
   id?: string;
   description?: string;
   query: string;
-  interval?: number;
+  interval?: string;
   platform?: string;
   version?: string | undefined;
   ecs_mapping?: ECSMapping | undefined;
@@ -31,7 +31,7 @@ export interface SavedQueryFormData {
   query: string;
   interval?: number;
   platform?: string;
-  version?: string[] | string;
+  version?: string[];
   ecs_mapping: EcsMappingFormField[];
 }
 
@@ -43,7 +43,7 @@ const deserializer = (payload: SavedQuerySOFormData): SavedQueryFormData => ({
   id: payload.id,
   description: payload.description,
   query: payload.query,
-  interval: payload.interval ?? 3600,
+  interval: payload.interval ? parseInt(payload.interval, 10) : 3600,
   platform: payload.platform,
   version: payload.version ? [payload.version] : [],
   ecs_mapping: !isEmpty(payload.ecs_mapping)
@@ -62,8 +62,10 @@ export const savedQueryDataSerializer = (payload: SavedQueryFormData): SavedQuer
   produce(payload, (draft) => {
     if (isArray(draft.version)) {
       if (!draft.version.length) {
+        // @ts-expect-error this is a STRING!
         draft.version = '';
       } else {
+        // @ts-expect-error this is a STRING!
         draft.version = draft.version[0];
       }
     }

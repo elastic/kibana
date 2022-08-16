@@ -22,7 +22,7 @@ export interface UsePackQueryFormProps {
 export interface PackSOQueryFormData {
   id: string;
   query: string;
-  interval: number;
+  interval: string;
   platform?: string | undefined;
   version?: string | undefined;
   ecs_mapping: PackQuerySOECSMapping[] | undefined;
@@ -36,7 +36,7 @@ export interface PackQueryFormData {
   query: string;
   interval: number;
   platform?: string | undefined;
-  version?: string | string[] | undefined;
+  version?: string[] | undefined;
   ecs_mapping: EcsMappingFormField[];
 }
 
@@ -48,45 +48,50 @@ export type PackQueryECSMapping = Record<
   }
 >;
 
-const deserializer = (payload: PackSOQueryFormData): PackQueryFormData => ({
-  id: payload.id,
-  query: payload.query,
-  interval: payload.interval,
-  platform: payload.platform,
-  version: payload.version ? [payload.version] : [],
-  ecs_mapping: !isEmpty(payload.ecs_mapping)
-    ? (map(payload.ecs_mapping, (value: { field: string }, key: string) => {
-        const name = Object.keys(value)[0] as string;
-
-        return {
-          key,
-          result: {
-            type: name,
-            value: name,
-          },
-        };
-      }) as unknown as EcsMappingFormField[])
-    : [defaultEcsFormData],
-});
+const deserializer = (payload: PackSOQueryFormData): PackQueryFormData =>
+  ({
+    id: payload.id,
+    query: payload.query,
+    interval: payload.interval ? parseInt(payload.interval, 10) : 3600,
+    platform: payload.platform,
+    version: payload.version ? [payload.version] : [],
+    ecs_mapping: !isEmpty(payload.ecs_mapping)
+      ? !isArray(payload.ecs_mapping)
+        ? map(payload.ecs_mapping, (value, key) => ({
+            key,
+            result: {
+              // @ts-expect-error update types
+              type: Object.keys(value)[0],
+              // @ts-expect-error update types
+              value: Object.values(value)[0],
+            },
+          }))
+        : payload.ecs_mapping
+      : [defaultEcsFormData],
+  } as PackQueryFormData);
 
 const serializer = (payload: PackQueryFormData): PackSOQueryFormData =>
   // @ts-expect-error update types
   produce(payload, (draft) => {
     if (isArray(draft.platform)) {
-      draft.platform.join(',');
+      if (draft.platform.length) {
+        draft.platform.join(',');
+      } else {
+        delete draft.platform;
+      }
     }
 
     if (isArray(draft.version)) {
       if (!draft.version.length) {
         delete draft.version;
       } else {
+        // @ts-expect-error this is a STRING!
         draft.version = draft.version[0];
       }
     }
 
-    if (typeof draft.interval === 'string') {
-      draft.interval = parseInt(draft.interval, 10);
-    }
+    // @ts-expect-error update types
+    draft.interval = draft.interval + '';
 
     if (isEmpty(draft.ecs_mapping)) {
       // @ts-expect-error update types
