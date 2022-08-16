@@ -91,7 +91,7 @@ export const PolicyHostsField = ({
     <EuiFormRow
       fullWidth
       label={POLICY_HOST_LABEL}
-      helpText={!errors?.agentPolicyId ? SELECT_POLICY_HOSTS : undefined}
+      helpText={!errors?.agentPolicyId ? SELECT_POLICY_HOSTS_HELP_TEXT : undefined}
       isInvalid={!!errors?.agentPolicyId}
       error={SELECT_POLICY_HOSTS}
     >
@@ -125,6 +125,13 @@ const AGENTS_LABEL = i18n.translate('xpack.synthetics.monitorManagement.agentsLa
 const SELECT_POLICY_HOSTS = i18n.translate('xpack.synthetics.monitorManagement.selectPolicyHost', {
   defaultMessage: 'Select agent policy',
 });
+
+const SELECT_POLICY_HOSTS_HELP_TEXT = i18n.translate(
+  'xpack.synthetics.monitorManagement.selectPolicyHost.helpText',
+  {
+    defaultMessage: 'We recommend using a single Elastic agent per agent policy.',
+  }
+);
 
 const POLICY_HOST_LABEL = i18n.translate('xpack.synthetics.monitorManagement.policyHost', {
   defaultMessage: 'Agent policy',
