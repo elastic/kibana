@@ -337,9 +337,9 @@ export class ProjectMonitorFormatter {
         request: this.request,
       });
       this.deletedMonitors.push(journeyId);
-      this.handleStreamingMessage({ message: `Monitor ${monitorId} deleted successfully` });
+      this.handleStreamingMessage({ message: `Monitor ${journeyId} deleted successfully` });
     } catch (e) {
-      this.handleStreamingMessage({ message: `Monitor ${monitorId} could not be deleted` });
+      this.handleStreamingMessage({ message: `Monitor ${journeyId} could not be deleted` });
       this.failedStaleMonitors.push({
         id: monitorId,
         reason: 'Failed to delete stale monitor',
