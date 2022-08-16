@@ -143,6 +143,7 @@ describe('Task Runner', () => {
     kibanaBaseUrl: 'https://localhost:5601',
     supportsEphemeralTasks: false,
     maxEphemeralActionsPerRule: 10,
+    maxAlerts: 1000,
     cancelAlertsOnRuleTimeout: true,
     usageCounter: mockUsageCounter,
     actionsConfigMap: {
@@ -262,7 +263,7 @@ describe('Task Runner', () => {
     );
     expect(logger.debug).nthCalledWith(
       3,
-      'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":0,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":0,"triggeredActionsStatus":"complete"}'
+      'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":0,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":0,"hasReachedAlertLimit":false,"triggeredActionsStatus":"complete"}'
     );
 
     testAlertingEventLogCalls({ status: 'ok' });
@@ -343,7 +344,7 @@ describe('Task Runner', () => {
       );
       expect(logger.debug).nthCalledWith(
         4,
-        'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":1,"numberOfGeneratedActions":1,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":1,"triggeredActionsStatus":"complete"}'
+        'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":1,"numberOfGeneratedActions":1,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":1,"hasReachedAlertLimit":false,"triggeredActionsStatus":"complete"}'
       );
 
       testAlertingEventLogCalls({
@@ -430,7 +431,7 @@ describe('Task Runner', () => {
     );
     expect(logger.debug).nthCalledWith(
       5,
-      'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":1,"triggeredActionsStatus":"complete"}'
+      'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":1,"hasReachedAlertLimit":false,"triggeredActionsStatus":"complete"}'
     );
 
     testAlertingEventLogCalls({
@@ -604,7 +605,7 @@ describe('Task Runner', () => {
       );
       expect(logger.debug).nthCalledWith(
         5,
-        'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":1,"numberOfGeneratedActions":1,"numberOfActiveAlerts":2,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":2,"triggeredActionsStatus":"complete"}'
+        'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":1,"numberOfGeneratedActions":1,"numberOfActiveAlerts":2,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":2,"hasReachedAlertLimit":false,"triggeredActionsStatus":"complete"}'
       );
       expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
     }
@@ -1119,7 +1120,7 @@ describe('Task Runner', () => {
       );
       expect(logger.debug).nthCalledWith(
         5,
-        'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":2,"numberOfGeneratedActions":2,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":1,"numberOfNewAlerts":0,"triggeredActionsStatus":"complete"}'
+        'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":2,"numberOfGeneratedActions":2,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":1,"numberOfNewAlerts":0,"hasReachedAlertLimit":false,"triggeredActionsStatus":"complete"}'
       );
 
       testAlertingEventLogCalls({
@@ -1232,7 +1233,7 @@ describe('Task Runner', () => {
       );
       expect(logger.debug).nthCalledWith(
         5,
-        `ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":2,"numberOfGeneratedActions":2,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":1,"numberOfNewAlerts":0,"triggeredActionsStatus":"complete"}`
+        `ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":2,"numberOfGeneratedActions":2,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":1,"numberOfNewAlerts":0,"hasReachedAlertLimit":false,"triggeredActionsStatus":"complete"}`
       );
 
       testAlertingEventLogCalls({
@@ -2362,7 +2363,7 @@ describe('Task Runner', () => {
     );
     expect(logger.debug).nthCalledWith(
       3,
-      'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":0,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":0,"triggeredActionsStatus":"complete"}'
+      'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":0,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":0,"hasReachedAlertLimit":false,"triggeredActionsStatus":"complete"}'
     );
 
     testAlertingEventLogCalls({
@@ -2859,6 +2860,7 @@ describe('Task Runner', () => {
     setRuleName = true,
     logAlert = 0,
     logAction = 0,
+    hasReachedAlertLimit = false,
   }: {
     status: string;
     ruleContext?: RuleContextOpts;
@@ -2873,6 +2875,7 @@ describe('Task Runner', () => {
     logAction?: number;
     errorReason?: string;
     errorMessage?: string;
+    hasReachedAlertLimit?: boolean;
   }) {
     expect(alertingEventLogger.initialize).toHaveBeenCalledWith(ruleContext);
     expect(alertingEventLogger.start).toHaveBeenCalled();
@@ -2905,6 +2908,7 @@ describe('Task Runner', () => {
           numberOfRecoveredAlerts: recoveredAlerts,
           numberOfTriggeredActions: triggeredActions,
           totalSearchDurationMs: 23423,
+          hasReachedAlertLimit,
           triggeredActionsStatus: 'partial',
         },
         status: {
@@ -2927,6 +2931,7 @@ describe('Task Runner', () => {
           numberOfRecoveredAlerts: recoveredAlerts,
           numberOfTriggeredActions: triggeredActions,
           totalSearchDurationMs: 23423,
+          hasReachedAlertLimit,
           triggeredActionsStatus: 'complete',
         },
         status: {

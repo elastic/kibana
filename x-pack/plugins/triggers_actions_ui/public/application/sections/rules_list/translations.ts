@@ -128,6 +128,13 @@ export const ALERT_WARNING_MAX_EXECUTABLE_ACTIONS_REASON = i18n.translate(
   }
 );
 
+export const ALERT_WARNING_MAX_ALERTS_REASON = i18n.translate(
+  'xpack.triggersActionsUI.sections.rulesList.ruleWarningReasonMaxAlerts',
+  {
+    defaultMessage: 'Alert limit exceeded',
+  }
+);
+
 export const ALERT_WARNING_UNKNOWN_REASON = i18n.translate(
   'xpack.triggersActionsUI.sections.rulesList.ruleWarningReasonUnknown',
   {
@@ -148,5 +155,6 @@ export const rulesErrorReasonTranslationsMapping = {
 
 export const rulesWarningReasonTranslationsMapping = {
   maxExecutableActions: ALERT_WARNING_MAX_EXECUTABLE_ACTIONS_REASON,
+  maxAlerts: ALERT_WARNING_MAX_ALERTS_REASON,
   unknown: ALERT_WARNING_UNKNOWN_REASON,
 };

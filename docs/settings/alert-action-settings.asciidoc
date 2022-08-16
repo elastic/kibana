@@ -226,6 +226,9 @@ Specifies the behavior when a new or changed rule has a schedule interval less t
 `xpack.alerting.rules.run.actions.max` {ess-icon}::
 Specifies the maximum number of actions that a rule can generate each time detection checks run.
 
+`xpack.alerting.rules.run.alerts.max` {ess-icon}::
+Specifies the maximum number of alerts that a rule can generate each time detection checks run. Default: 1000.
+
 `xpack.alerting.rules.run.timeout` {ess-icon}::
 Specifies the default timeout for tasks associated with all types of rules. The time is formatted as:
 +

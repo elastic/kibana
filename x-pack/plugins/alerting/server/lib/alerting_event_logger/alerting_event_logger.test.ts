@@ -653,6 +653,7 @@ describe('AlertingEventLogger', () => {
           numSearches: 6,
           esSearchDurationMs: 3300,
           totalSearchDurationMs: 10333,
+          hasReachedAlertLimit: false,
           triggeredActionsStatus: ActionsCompletion.COMPLETE,
         },
       });

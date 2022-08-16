@@ -18,6 +18,7 @@ interface State {
   numberOfActiveAlerts: number;
   numberOfRecoveredAlerts: number;
   numberOfNewAlerts: number;
+  hasReachedAlertLimit: boolean;
   connectorTypes: {
     [key: string]: {
       triggeredActionsStatus: ActionsCompletion;
@@ -40,6 +41,7 @@ export class RuleRunMetricsStore {
     numberOfActiveAlerts: 0,
     numberOfRecoveredAlerts: 0,
     numberOfNewAlerts: 0,
+    hasReachedAlertLimit: false,
     connectorTypes: {},
   };
 
@@ -84,6 +86,9 @@ export class RuleRunMetricsStore {
       triggeredActionsStatus: this.getTriggeredActionsStatus(),
     };
   };
+  public getHasReachedAlertLimit = () => {
+    return this.state.hasReachedAlertLimit;
+  };
 
   // Setters
   public setNumSearches = (numSearches: number) => {
@@ -118,6 +123,9 @@ export class RuleRunMetricsStore {
     status: ActionsCompletion;
   }) => {
     set(this.state, `connectorTypes["${actionTypeId}"].triggeredActionsStatus`, status);
+  };
+  public setHasReachedAlertLimit = (hasReachedAlertLimit: boolean) => {
+    this.state.hasReachedAlertLimit = hasReachedAlertLimit;
   };
 
   // Checkers

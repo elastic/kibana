@@ -221,6 +221,7 @@ kibana_vars=(
     xpack.alerting.rules.minimumScheduleInterval.value
     xpack.alerting.rules.minimumScheduleInterval.enforce
     xpack.alerting.rules.run.actions.max
+    xpack.alerting.rules.run.alerts.max
     xpack.alerting.rules.run.actions.connectorTypeOverrides
     xpack.alerts.healthCheck.interval
     xpack.alerts.invalidateApiKeysTask.interval
