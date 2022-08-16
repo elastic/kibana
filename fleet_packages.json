@@ -1,15 +1,14 @@
 /*
 
-  Packages in this file are considered "bundled" and are installed as part of Fleet's setup process. Each entry points to a valid version name
-  avaiable in the Elastic Package Registry service, and must include a sha-512 checksum of the `.zip` archive for the given package.
+  Packages listed in this file are "bundled" with Kibana's built distributable, and are available
+  on disk rather than only in the configured package registry service. This allows Kibana to install
+  "stack-aligned" packages or those that are installed by default in an airgapped or offline environment.
 
-  You may opt in to using the "snapshot" environment of the EPR service by passing the `--use-epr-snapshot-registry` flag to `yarn build`. This will
-  cause the package archive download to pull from the "spapshot" environment instead of the "production" environment. Be aware that not all packages
-  exist in the snapshot environment, so you may have errors when fetching package versions. It's recommended to alter this file to contain _only_ the
-  packages you're testing when using the snapshot environment.
+  Packages will be fetched from https://epr-snapshot.elastic.co by default. This can be overridden
+  via the `--epr-registry=production` command line argument when building Kibana. Fetching from the
+  snapshot registry allows Kibana to bundle packages that have yet to be published to production in
+  order to prepare build candidates for the next release.
 
-  These files don't include any kind of checksum, but they should eventually include a package signature as introduced in https://github.com/elastic/elastic-package/issues/583
-  in order to verify package integrity.
 */
 
 [
@@ -23,7 +22,7 @@
   },
   {
     "name": "endpoint",
-    "version": "8.3.0"
+    "version": "8.4.1"
   },
   {
     "name": "fleet_server",
