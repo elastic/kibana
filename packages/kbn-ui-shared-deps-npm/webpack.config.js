@@ -70,10 +70,10 @@ module.exports = (_, argv) => {
 
         // modules from npm
         '@elastic/charts',
-        '@elastic/eui',
         '@elastic/eui/dist/eui_charts_theme',
-        '@elastic/eui/lib/services',
-        '@elastic/eui/lib/services/format',
+        '@elastic/eui/optimize/es',
+        '@elastic/eui/optimize/es/services',
+        '@elastic/eui/optimize/es/services/format',
         '@elastic/eui/dist/eui_theme_light.json',
         '@elastic/eui/dist/eui_theme_dark.json',
         '@elastic/numeral',
