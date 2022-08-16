@@ -18,4 +18,4 @@ export const getTabsOnUsersDetailsUrl = (
 ) => `/name/${detailName}/${tabName}${appendSearch(search)}`;
 
 export const getTabsOnUsersUrl = (tabName: UsersTableType, search?: string) =>
-  `/name/${tabName}${appendSearch(search)}`;
+  `/${tabName}${appendSearch(search)}`;
