@@ -5,7 +5,7 @@
   "main": "index.js",
   "types": "index.d.ts",
   "scripts": {
-    "lint": "../../node_modules/.bin/dependency-check --missing ../../package.json ./packages/elastic-safer-lodash-set/set.js ./packages/elastic-safer-lodash-set/setWith.js ./packages/elastic-safer-lodash-set/fp/*.js",
+    "lint": "../../node_modules/.bin/dependency-check --missing ../../package.json ./packages/kbn-safer-lodash-set/set.js ./packages/kbn-safer-lodash-set/setWith.js ./packages/kbn-safer-lodash-set/fp/*.js",
     "test": "npm run lint && ../../node_modules/.bin/tape test/*.js && npm run test:types",
     "test:types": "../../node_modules/.bin/tsc --noEmit",
     "update": "./scripts/update.sh",
