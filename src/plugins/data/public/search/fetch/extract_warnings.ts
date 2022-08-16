@@ -75,9 +75,11 @@ export function extractWarnings(
     types = rawResponse._shards.failures?.map((f) => f.reason.type);
   }
 
+  const shardStats = timedOut || shardFailures ? rawResponse._shards : undefined;
+
   return {
     types,
-    shardStats: rawResponse._shards,
+    shardStats,
     timedOut: rawResponse.timed_out,
     notifications: {
       timedOut,

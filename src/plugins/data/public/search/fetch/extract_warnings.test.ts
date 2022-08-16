@@ -119,6 +119,23 @@ describe('extract search response warnings', () => {
     expect(warnings?.notifications?.timedOut?.title).toBeDefined();
   });
 
+  it('should not include shardStats or types fields if there are no warnings', () => {
+    const warnings = extractWarnings({
+      timed_out: false,
+      _shards: {
+        failed: 0,
+        total: 9000,
+      },
+    } as estypes.SearchResponse);
+
+    expect(warnings).toEqual({
+      notifications: { shardFailures: undefined, timedOut: undefined },
+      shardStats: undefined,
+      timedOut: false,
+      types: undefined,
+    });
+  });
+
   it('should return undefined if rawResponse is undefined', () => {
     expect(extractWarnings(undefined)).toEqual(undefined);
   });
