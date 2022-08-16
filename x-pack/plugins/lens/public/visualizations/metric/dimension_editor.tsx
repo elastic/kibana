@@ -46,14 +46,18 @@ type Props = VisualizationDimensionEditorProps<MetricVisualizationState> & {
   paletteService: PaletteRegistry;
 };
 
+type SubProps = Props & { idPrefix: string };
+
 export function DimensionEditor(props: Props) {
   const { state, setState, accessor, frame, layerId } = props;
+
+  const idPrefix = htmlIdGenerator()();
 
   switch (accessor) {
     case state?.metricAccessor:
       return (
         <div data-test-subj="lnsMetricDimensionEditor_primary_metric">
-          <PrimaryMetricEditor {...props} />
+          <PrimaryMetricEditor {...props} idPrefix={idPrefix} />
         </div>
       );
     case state.secondaryMetricAccessor:
@@ -82,13 +86,13 @@ export function DimensionEditor(props: Props) {
     case state.maxAccessor:
       return (
         <div data-test-subj="lnsMetricDimensionEditor_secondary_metric">
-          <MaximumEditor {...props} />
+          <MaximumEditor {...props} idPrefix={idPrefix} />
         </div>
       );
     case state.breakdownByAccessor:
       return (
         <div data-test-subj="lnsMetricDimensionEditor_breakdown">
-          <BreakdownByEditor {...props} />
+          <BreakdownByEditor {...props} idPrefix={idPrefix} />
         </div>
       );
     default:
@@ -96,7 +100,7 @@ export function DimensionEditor(props: Props) {
   }
 }
 
-function BreakdownByEditor({ setState, state }: Props) {
+function BreakdownByEditor({ setState, state }: SubProps) {
   const setMaxCols = useCallback(
     (columns: string) => {
       setState({ ...state, maxCols: parseInt(columns, 10) });
@@ -140,8 +144,7 @@ function BreakdownByEditor({ setState, state }: Props) {
   );
 }
 
-function MaximumEditor({ setState, state }: Props) {
-  const idPrefix = htmlIdGenerator()();
+function MaximumEditor({ setState, state, idPrefix }: SubProps) {
   return (
     <EuiFormRow
       label={i18n.translate('xpack.lens.metric.progressDirectionLabel', {
@@ -187,8 +190,8 @@ function MaximumEditor({ setState, state }: Props) {
   );
 }
 
-function PrimaryMetricEditor(props: Props) {
-  const { state, setState, frame, accessor } = props;
+function PrimaryMetricEditor(props: SubProps) {
+  const { state, setState, frame, accessor, idPrefix } = props;
 
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
 
@@ -227,7 +230,6 @@ function PrimaryMetricEditor(props: Props) {
 
   const togglePalette = () => setIsPaletteOpen(!isPaletteOpen);
 
-  const idPrefix = htmlIdGenerator()();
   return (
     <>
       <EuiFormRow
