@@ -1,4 +1,4 @@
-[[osquery]]
+schedule[[osquery]]
 = Osquery
 
 [partintro]
@@ -52,14 +52,10 @@ image::images/enter-query.png[Select saved query dropdown name showing query nam
 
 . Click **Submit**. Queries will timeout after 5 minutes if there are no responses.
 +
-TIP: To save the query for future use, click *Save for later* and define the ID,
-description, and other {kibana-ref}/osquery.html#osquery-manage-query[details].
+TIP: To save a single query for future use, click *Save for later* and define the ID, description, and other {kibana-ref}/osquery.html#osquery-manage-query[details].
 
-. Review the results in a table, or navigate to *Discover* to dive deeper into the response,
-or to the drag-and-drop *Lens* editor to create visualizations.
+. Review the results. Next, navigate to *Discover* to dive deeper into the response or to the drag-and-drop *Lens* editor to create visualizations.
 . To view more information about the request, such as failures, open the *Status* tab.
-. To save the query for future use, click *Save for later* and define the ID,
-description, and other <<osquery-manage-query,details>>.
 
 [float]
 [[osquery-view-history]]
@@ -75,17 +71,15 @@ Each query has the following options:
 [role="screenshot"]
 image::images/live-query-check-results.png[Results of OSquery]
 
-
 [float]
 [[osquery-schedule-query]]
 == Schedule queries with packs
 
-Create packs to organize sets of queries. For example, you might create one pack that checks
-for IT compliance-type issues, and another pack that monitors for evidence of malware.
-You can schedule packs to run for one or more agent policies. When scheduled, queries in the pack are run at the set intervals for all agents in those policies. Scheduling packs is optional.
+Packs, sometimes referred to as query packs, are queries that have been grouped together because they perform a similar function or address a common problem.   You can create your own custom packs or download and use <<osquery-prebuilt-packs, Prebuilt Elastic packs>>. For example, when creating custom packs, you might create one pack that checks for IT compliance-type issues, and another pack that monitors for evidence of malware.
 
-. Open the **Packs** tab.
+After creating packs, you can run them as live queries or schedule them. When you schedule a pack, queries in the pack will run on one or more agent policies and at the set intervals for agents in those policies. Scheduling packs is optional.
 
+. Click the **Packs** tab.
 . Click **Add pack** to create a new pack, or click the name of an existing pack, then **Edit** to add queries to an existing pack.
 
 . Provide the following fields:
