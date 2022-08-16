@@ -6,11 +6,11 @@
  */
 
 import { AGENT_POLLING_THRESHOLD_MS } from '../constants';
-import type { Agent, AgentStatus } from '../types';
+import type { Agent, AgentStatus, FleetServerAgent } from '../types';
 
 const offlineTimeoutIntervalCount = 10; // 30s*10 = 5m timeout
 
-export function getAgentStatus(agent: Agent): AgentStatus {
+export function getAgentStatus(agent: Agent | FleetServerAgent): AgentStatus {
   const { last_checkin: lastCheckIn } = agent;
 
   if (!agent.active) {
@@ -33,7 +33,15 @@ export function getAgentStatus(agent: Agent): AgentStatus {
   if (agent.last_checkin_status === 'degraded') {
     return 'degraded';
   }
-  if (!agent.policy_revision || (agent.upgrade_started_at && !agent.upgraded_at)) {
+
+  const policyRevision =
+    'policy_revision' in agent
+      ? agent.policy_revision
+      : 'policy_revision_idx' in agent
+      ? agent.policy_revision_idx
+      : undefined;
+
+  if (!policyRevision || (agent.upgrade_started_at && !agent.upgraded_at)) {
     return 'updating';
   }
   if (intervalsSinceLastCheckIn >= offlineTimeoutIntervalCount) {
