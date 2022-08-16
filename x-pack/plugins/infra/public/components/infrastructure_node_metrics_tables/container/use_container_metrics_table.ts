@@ -47,7 +47,7 @@ export const metricByField = createMetricByFieldLookup(containerMetricsQueryConf
 const unpackMetric = makeUnpackMetric(metricByField);
 
 export interface ContainerNodeMetricsRow {
-  name: string;
+  id: string;
   averageCpuUsagePercent: number | null;
   averageMemoryUsageMegabytes: number | null;
 }
@@ -91,14 +91,14 @@ function seriesToContainerNodeMetricsRow(series: MetricsExplorerSeries): Contain
   }
 
   return {
-    name: series.id,
+    id: series.id,
     ...calculateMetricAverages(series.rows),
   };
 }
 
-function rowWithoutMetrics(name: string) {
+function rowWithoutMetrics(id: string) {
   return {
-    name,
+    id,
     averageCpuUsagePercent: null,
     averageMemoryUsageMegabytes: null,
   };
@@ -148,7 +148,7 @@ function collectMetricValues(rows: MetricsExplorerRow[]) {
   };
 }
 
-function unpackMetrics(row: MetricsExplorerRow): Omit<ContainerNodeMetricsRow, 'name'> {
+function unpackMetrics(row: MetricsExplorerRow): Omit<ContainerNodeMetricsRow, 'id'> {
   return {
     averageCpuUsagePercent: unpackMetric(row, 'kubernetes.container.cpu.usage.limit.pct'),
     averageMemoryUsageMegabytes: unpackMetric(row, 'kubernetes.container.memory.usage.bytes'),
