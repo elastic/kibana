@@ -14,11 +14,33 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Suspicious Calendar File Modification",
-  "query": "event.category:file and event.action:modification and\n  file.path:/Users/*/Library/Calendars/*.calendar/Events/*.ics and\n  process.executable:\n  (* and not \n    (\n      /System/Library/* or \n      /System/Applications/Calendar.app/Contents/MacOS/* or \n      /usr/libexec/xpcproxy or \n      /sbin/launchd or \n      /Applications/*\n    )\n  )\n",
+  "query": "event.category:file and event.action:modification and\n  file.path:/Users/*/Library/Calendars/*.calendar/Events/*.ics and\n  process.executable:\n  (* and not\n    (\n      /System/Library/* or\n      /System/Applications/Calendar.app/Contents/MacOS/* or\n      /System/Applications/Mail.app/Contents/MacOS/Mail or\n      /usr/libexec/xpcproxy or\n      /sbin/launchd or\n      /Applications/*\n    )\n  )\n",
   "references": [
     "https://labs.f-secure.com/blog/operationalising-calendar-alerts-persistence-on-macos",
     "https://github.com/FSecureLABS/CalendarPersist",
     "https://github.com/D00MFist/PersistentJXA/blob/master/CalendarPersist.js"
+  ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.action",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.category",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "file.path",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.executable",
+      "type": "keyword"
+    }
   ],
   "risk_score": 47,
   "rule_id": "cb71aa62-55c8-42f0-b0dd-afb0bb0b1f51",
@@ -49,5 +71,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 3
 }

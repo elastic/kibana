@@ -259,12 +259,12 @@
             "id": "def-common.HttpFetchQuery.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[key: string]: string | number | boolean | number[] | string[] | boolean[] | null | undefined",
+            "label": "[key: string]: string | number | boolean | string[] | number[] | boolean[] | null | undefined",
             "description": [
               "\nTypeScript note: Technically we should use this interface instead, but @types/node uses the below stricter\ndefinition, so to avoid TypeScript errors, we'll restrict our version.\n\n[key: string]:\n  | string\n  | number\n  | boolean\n  | Array<string | number | boolean>\n  | undefined\n  | null;"
             ],
             "signature": [
-              "[key: string]:  string | number | boolean | number[] | string[] | boolean[] | null | undefined"
+              "[key: string]:  string | number | boolean | string[] | number[] | boolean[] | null | undefined"
             ],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false
