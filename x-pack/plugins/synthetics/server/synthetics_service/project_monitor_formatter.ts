@@ -17,7 +17,6 @@ import { SyntheticsMonitorClient } from './synthetics_monitor/synthetics_monitor
 import {
   BrowserFields,
   ConfigKey,
-  MonitorFields,
   SyntheticsMonitorWithSecrets,
   EncryptedSyntheticsMonitor,
   ServiceLocationErrors,
@@ -230,17 +229,10 @@ export class ProjectMonitorFormatter {
   };
 
   private createMonitor = async (normalizedMonitor: BrowserFields) => {
-    const newMonitor = await this.savedObjectsClient.create<EncryptedSyntheticsMonitor>(
-      syntheticsMonitorType,
-      formatSecrets({
-        ...normalizedMonitor,
-        revision: 1,
-      })
-    );
     await syncNewMonitor({
-      server: this.server,
+      normalizedMonitor,
       monitor: normalizedMonitor,
-      monitorSavedObject: newMonitor,
+      server: this.server,
       syntheticsMonitorClient: this.syntheticsMonitorClient,
       savedObjectsClient: this.savedObjectsClient,
       request: this.request,
@@ -273,20 +265,11 @@ export class ProjectMonitorFormatter {
         ? (previousMonitor.attributes[ConfigKey.REVISION] || 0) + 1
         : previousMonitor.attributes[ConfigKey.REVISION],
     });
-    const editedMonitor: SavedObjectsUpdateResponse<EncryptedSyntheticsMonitor> =
-      await this.savedObjectsClient.update<MonitorFields>(
-        syntheticsMonitorType,
-        previousMonitor.id,
-        {
-          ...monitorWithRevision,
-          urls: '',
-        }
-      );
 
     if (hasMonitorBeenEdited) {
-      await syncEditedMonitor({
-        editedMonitor: normalizedMonitor,
-        editedMonitorSavedObject: editedMonitor,
+      const { editedMonitor } = await syncEditedMonitor({
+        normalizedMonitor,
+        monitorWithRevision,
         previousMonitor,
         decryptedPreviousMonitor,
         server: this.server,
@@ -294,9 +277,10 @@ export class ProjectMonitorFormatter {
         savedObjectsClient: this.savedObjectsClient,
         request: this.request,
       });
+      return { editedMonitor, errors: [] };
     }
 
-    return { editedMonitor, errors: [] };
+    return { errors: [], editedMonitor: decryptedPreviousMonitor };
   };
 
   private handleStaleMonitors = async () => {

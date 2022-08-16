@@ -106,7 +106,7 @@ export const deleteMonitor = async ({
 
     const normalizedMonitor = normalizeSecrets(monitor);
 
-    const errors = await syntheticsMonitorClient.deleteMonitor(
+    const deleteSyncPromise = syntheticsMonitorClient.deleteMonitor(
       {
         ...normalizedMonitor.attributes,
         id:
@@ -116,7 +116,9 @@ export const deleteMonitor = async ({
       request,
       savedObjectsClient
     );
-    await savedObjectsClient.delete(syntheticsMonitorType, monitorId);
+    const deletePromise = savedObjectsClient.delete(syntheticsMonitorType, monitorId);
+
+    const [errors] = await Promise.all([deleteSyncPromise, deletePromise]);
 
     sendTelemetryEvents(
       logger,
