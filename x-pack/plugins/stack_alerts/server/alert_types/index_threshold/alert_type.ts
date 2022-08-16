@@ -135,7 +135,7 @@ export function getAlertType(
     options: RuleExecutorOptions<Params, {}, {}, ActionContext, typeof ActionGroupId>
   ) {
     const { alertId: ruleId, name, services, params } = options;
-    const { alertFactory, scopedClusterClient } = services;
+    const { alertsClient, alertFactory, scopedClusterClient } = services;
 
     const compareFn = ComparatorFns.get(params.thresholdComparator);
     if (compareFn == null) {
@@ -216,7 +216,31 @@ export function getAlertType(
       const actionContext = addMessages(options, baseContext, params);
       const alert = alertFactory.create(alertId);
       alert.scheduleActions(ActionGroupId, actionContext);
+
+      alertsClient.create({
+        id: alertId,
+        actionGroup: ActionGroupId,
+        ...actionContext,
+      });
+
       logger.debug(`scheduled actionGroup: ${JSON.stringify(actionContext)}`);
+    }
+
+    const recovered = alertsClient.getRecoveredAlerts();
+    for (const r of recovered) {
+      const alertId = r.id;
+      const baseContext: BaseActionContext = {
+        date,
+        value: unmetGroupValues[alertId] ?? 'unknown',
+        group: alertId,
+        conditions: `${agg} is NOT ${getHumanReadableComparator(
+          params.thresholdComparator
+        )} ${params.threshold.join(' and ')}`,
+      };
+      const recoveryContext = addMessages(options, baseContext, params, true);
+      alertsClient.update(alertId, {
+        ...recoveryContext,
+      });
     }
 
     const { getRecoveredAlerts } = services.alertFactory.done();

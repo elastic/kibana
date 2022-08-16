@@ -69,6 +69,12 @@ export const alertType: RuleType<
           .create(id)
           .replaceState({ triggerdOnCycle: count })
           .scheduleActions(getTShirtSizeByIdAndThreshold(id, thresholds));
+
+        services.alertsClient.create({
+          id,
+          actionGroup: getTShirtSizeByIdAndThreshold(id, thresholds),
+          triggerdOnCycle: count,
+        });
       });
 
     return {

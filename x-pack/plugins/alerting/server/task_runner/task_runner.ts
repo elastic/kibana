@@ -141,10 +141,11 @@ export class TaskRunner<
     this.cancelled = false;
     this.executionId = uuid.v4();
     this.inMemoryMetrics = inMemoryMetrics;
-    this.alertsClient = context.alertsService.createAlertsClient(
-      ruleType as UntypedNormalizedRuleType
-    );
     this.maxAlerts = context.maxAlerts;
+    this.alertsClient = context.alertsService.createAlertsClient(
+      ruleType as UntypedNormalizedRuleType,
+      this.maxAlerts
+    );
     this.alertingEventLogger = new AlertingEventLogger(this.context.eventLogger);
   }
 
@@ -372,6 +373,7 @@ export class TaskRunner<
             searchSourceClient: wrappedSearchSourceClient.searchSourceClient,
             uiSettingsClient: this.context.uiSettings.asScopedToClient(savedObjectsClient),
             scopedClusterClient: wrappedScopedClusterClient.client(),
+            alertsClient: this.alertsClient.getExecutorServices(),
             alertFactory,
             shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
             shouldStopExecution: () => this.cancelled,
@@ -442,6 +444,12 @@ export class TaskRunner<
     ruleRunMetricsStore.setNumSearches(searchMetrics.numSearches);
     ruleRunMetricsStore.setTotalSearchDurationMs(searchMetrics.totalSearchDurationMs);
     ruleRunMetricsStore.setEsSearchDurationMs(searchMetrics.esSearchDurationMs);
+
+    const {
+      newAlerts: newNewAlerts,
+      activeAlerts: newActiveAlerts,
+      recoveredAlerts: newRecoveredAlerts,
+    } = await this.alertsClient.writeAlerts();
 
     const { newAlerts, activeAlerts, recoveredAlerts } = processAlerts<
       State,
@@ -561,6 +569,14 @@ export class TaskRunner<
       alertingEventLogger: this.alertingEventLogger,
     });
 
+    this.alertsClient.setRuleData({
+      id: rule.id,
+      name: rule.name,
+      consumer: rule.consumer,
+      type: this.ruleType.id,
+      execution: { id: this.executionId },
+    });
+
     if (apm.currentTransaction) {
       apm.currentTransaction.name = `Execute Alerting Rule: "${rule.name}"`;
       apm.currentTransaction.addLabels({
@@ -594,6 +610,8 @@ export class TaskRunner<
       schedule: taskSchedule,
     } = this.taskInstance;
 
+    const { previousExecutionUuid } = originalState;
+
     // Initially use consumer as stored inside the task instance
     // Replace this with consumer as read from the rule saved object after
     // we successfully read the rule SO. This allows us to populate a consumer
@@ -618,6 +636,14 @@ export class TaskRunner<
     this.logger.debug(`executing rule ${this.ruleType.id}:${ruleId} at ${runDateString}`);
 
     const namespace = this.context.spaceIdToNamespace(spaceId);
+
+    // Query for alerts from previous execution
+    // if (previousExecutionUuid) {
+    //   this.alertsClient.getExistingAlerts({
+    //     ruleId,
+    //     previousRuleExecutionUuid: previousExecutionUuid,
+    //   });
+    // }
 
     this.alertingEventLogger.initialize({
       ruleId,
@@ -718,6 +744,7 @@ export class TaskRunner<
       return {
         ...omit(runStateWithMetrics, ['metrics']),
         previousStartedAt: startedAt,
+        previousExecutionUuid: this.executionId,
       };
     };
 

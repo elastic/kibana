@@ -8,26 +8,14 @@
 import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { AlertsClient } from './alerts_client';
-
-export const DEFAULT_ALERTS_INDEX = '.alerts-default';
-const ILM_POLICY_NAME = 'alerts-default-policy';
-const INDEX_TEMPLATE_NAME = 'alerts-default-template';
-const DEFAULT_ILM_POLICY = {
-  policy: {
-    phases: {
-      hot: {
-        actions: {
-          rollover: {
-            max_age: '30d',
-            max_primary_shard_size: '50gb',
-          },
-        },
-      },
-    },
-  },
-};
-const ALERTS_COMPONENT_TEMPLATE_NAME = 'alerts-mappings';
-const ECS_COMPONENT_TEMPLATE_NAME = 'ecs-mappings';
+import {
+  DEFAULT_ALERTS_INDEX,
+  ILM_POLICY_NAME,
+  DEFAULT_ILM_POLICY,
+  INDEX_TEMPLATE_NAME,
+  ALERTS_COMPONENT_TEMPLATE_NAME,
+  ECS_COMPONENT_TEMPLATE_NAME,
+} from './types';
 
 interface AlertsServiceParams {
   logger: Logger;
@@ -49,7 +37,7 @@ interface IAlertsService {
   /**
    * Creates and returns a new AlertsClient
    */
-  createAlertsClient(ruleType: UntypedNormalizedRuleType): void;
+  createAlertsClient(ruleType: UntypedNormalizedRuleType, maxAlerts: number): void;
 }
 
 export class AlertsService implements IAlertsService {
@@ -78,11 +66,12 @@ export class AlertsService implements IAlertsService {
     });
   }
 
-  public createAlertsClient(ruleType: UntypedNormalizedRuleType) {
+  public createAlertsClient(ruleType: UntypedNormalizedRuleType, maxAlerts: number) {
     return new AlertsClient({
       logger: this.options.logger,
       elasticsearchClientPromise: this.options.elasticsearchClientPromise,
       ruleType,
+      maxAlerts,
     });
   }
 
