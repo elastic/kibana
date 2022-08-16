@@ -276,15 +276,15 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
       name: i18n.translate(
         'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.featureIdsTitle',
         {
-          defaultMessage: 'Availability',
+          defaultMessage: 'Compatibility',
         }
       ),
       sortable: false,
       truncateText: true,
-      render: (availability: string[]) => {
+      render: (compatibility: string[]) => {
         return (
           <EuiFlexGroup wrap responsive={false} gutterSize="xs">
-            {(availability ?? []).map((featureId: string) => (
+            {(compatibility ?? []).map((featureId: string) => (
               <EuiFlexItem grow={false} key={featureId}>
                 <EuiBadge data-test-subj="connectorsTableCell-featureIds" color="default">
                   {getConnectorFeatureName(featureId)}
