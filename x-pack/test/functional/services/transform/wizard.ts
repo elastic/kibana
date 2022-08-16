@@ -27,6 +27,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
   const retry = getService('retry');
   const find = getService('find');
   const ml = getService('ml');
+  const toasts = getService('toasts');
   const PageObjects = getPageObjects(['discover', 'timePicker', 'unifiedSearch']);
 
   return {
@@ -109,7 +110,8 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
           `EuiDataGrid rows should be '${expectedNumberOfRows}' (got '${rowsData.length}')`
         );
 
-        // cell virtualization means the last column is cutoff in the functional tests
+        // cell virtualization means the last column is cutoff in the f
+        // ctional tests
         // https://github.com/elastic/eui/issues/4470
         // rowsData.map((r, i) =>
         //   expect(r).to.length(
@@ -1068,6 +1070,16 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
         // escape popover
         await browser.pressKeys(browser.keys.ESCAPE);
       });
+    },
+
+    async assertErrorToastsNotExist() {
+      const toastCount = await toasts.getToastCount();
+      // Toast element index starts at 1, not 0
+      for (let toastIdx = 1; toastIdx < toastCount + 1; toastIdx++) {
+        const toast = await toasts.getToastElement(toastIdx);
+        const isErrorToast = await toast.elementHasClass('euiToast--danger');
+        expect(isErrorToast).to.eql(false, `Expected toast message to be successful, got error.`);
+      }
     },
   };
 }
