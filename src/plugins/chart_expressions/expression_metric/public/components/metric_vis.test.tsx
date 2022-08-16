@@ -754,6 +754,7 @@ describe('MetricVisComponent', function () {
           />
         )
           .find('div')
+          .at(0)
           .props() as HtmlAttributes & { css: { styles: string } }
       ).css.styles;
 
@@ -763,6 +764,7 @@ describe('MetricVisComponent', function () {
               width: 100%;
               max-height: 100%;
               max-width: 100%;
+              overflow-y: auto;
             "
     `);
 
@@ -772,6 +774,7 @@ describe('MetricVisComponent', function () {
               width: 300px;
               max-height: 100%;
               max-width: 100%;
+              overflow-y: auto;
             "
     `);
 
@@ -781,6 +784,7 @@ describe('MetricVisComponent', function () {
               width: 1000px;
               max-height: 100%;
               max-width: 100%;
+              overflow-y: auto;
             "
     `);
   });
