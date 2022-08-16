@@ -36,7 +36,7 @@ export interface PackQueryFormData {
   query: string;
   interval: number;
   platform?: string | undefined;
-  version?: string[] | undefined;
+  version?: string | undefined;
   ecs_mapping: EcsMappingFormField[];
 }
 
@@ -54,7 +54,7 @@ const deserializer = (payload: PackSOQueryFormData): PackQueryFormData =>
     query: payload.query,
     interval: payload.interval ? parseInt(payload.interval, 10) : 3600,
     platform: payload.platform,
-    version: payload.version ? [payload.version] : [],
+    version: (payload.version ? [payload.version] : []) as unknown, // TODO NEED TO FIX THIS BEFORE MERGE
     ecs_mapping: !isEmpty(payload.ecs_mapping)
       ? !isArray(payload.ecs_mapping)
         ? map(payload.ecs_mapping, (value, key) => ({
@@ -85,7 +85,6 @@ const serializer = (payload: PackQueryFormData): PackSOQueryFormData =>
       if (!draft.version.length) {
         delete draft.version;
       } else {
-        // @ts-expect-error this is a STRING!
         draft.version = draft.version[0];
       }
     }
