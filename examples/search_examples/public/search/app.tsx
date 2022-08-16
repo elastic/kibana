@@ -107,10 +107,11 @@ export const SearchExamplesApp = ({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [currentAbortController, setAbortController] = useState<AbortController>();
   const [rawResponse, setRawResponse] = useState<Record<string, any>>({});
-  const [warnings, setWarnings] = useState<SearchResponseWarnings | undefined>({});
+  const [warnings, setWarnings] = useState<SearchResponseWarnings | undefined>();
   const [selectedTab, setSelectedTab] = useState(0);
 
   function setResponse(response: IKibanaSearchResponse) {
+    setWarnings(undefined);
     setRawResponse(response.rawResponse);
     setLoaded(response.loaded!);
     setTotal(response.total!);
@@ -311,6 +312,7 @@ export const SearchExamplesApp = ({
         })
       );
       setRawResponse(result.rawResponse);
+      setWarnings(undefined);
 
       /* Here is an example of using showWarnings on the search service, using an optional callback to
        * intercept the warnings before notification warnings are shown.
@@ -487,7 +489,7 @@ export const SearchExamplesApp = ({
             {' '}
             <FormattedMessage
               id="searchExamples.warningsObject"
-              defaultMessage="Timeout and shard failure warnings may be handled in a callback to the showWarnings method on the search service."
+              defaultMessage="Timeout and shard failure warnings for high-level search may be handled in a callback to the showWarnings method on the search service."
             />{' '}
           </EuiText>{' '}
           <EuiProgress value={loaded} max={total} size="xs" data-test-subj="progressBar" />{' '}
