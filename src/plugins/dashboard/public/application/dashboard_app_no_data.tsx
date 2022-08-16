@@ -11,10 +11,10 @@ import {
   AnalyticsNoDataPageKibanaProvider,
   AnalyticsNoDataPage,
 } from '@kbn/shared-ux-page-analytics-no-data';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 import { DashboardAppServices } from '../types';
 import { useKibana } from '../services/kibana_react';
+import { DashboardDataViewsService } from '../services/data_views/types';
 
 export const DashboardAppNoDataPage = ({
   onDataViewCreated,
@@ -22,13 +22,13 @@ export const DashboardAppNoDataPage = ({
   onDataViewCreated: () => void;
 }) => {
   const {
-    services: { core, data, dataViewEditor },
+    services: { core, dataViews, dataViewEditor },
   } = useKibana<DashboardAppServices>();
   const analyticsServices = {
     coreStart: core as unknown as React.ComponentProps<
       typeof AnalyticsNoDataPageKibanaProvider
     >['coreStart'],
-    dataViews: data.dataViews,
+    dataViews,
     dataViewEditor,
   };
   return (
@@ -38,9 +38,7 @@ export const DashboardAppNoDataPage = ({
   );
 };
 
-export const isDashboardAppInNoDataState = async (
-  dataViews: DataPublicPluginStart['dataViews']
-) => {
+export const isDashboardAppInNoDataState = async (dataViews: DashboardDataViewsService) => {
   const hasUserDataView = await dataViews.hasData.hasUserDataView().catch(() => false);
   return !hasUserDataView;
 };

@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
+import { DataView } from '@kbn/data-views-plugin/common';
 import deepEqual from 'fast-deep-equal';
 import { Observable, pipe, combineLatest } from 'rxjs';
 import { distinctUntilChanged, switchMap, filter, map } from 'rxjs/operators';
 
 import { DashboardContainer } from '..';
+import { DashboardDataViewsService } from '../../services/data_views/types';
 import { isErrorEmbeddable } from '../../services/embeddable';
-import { DataViewsContract } from '../../services/data';
-import { DataView } from '../../services/data_views';
 
 interface SyncDashboardDataViewsProps {
   dashboardContainer: DashboardContainer;
-  dataViews: DataViewsContract;
+  dataViews: DashboardDataViewsService;
   onUpdateDataViews: (newDataViewIds: string[]) => void;
 }
 

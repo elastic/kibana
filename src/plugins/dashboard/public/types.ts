@@ -6,6 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { History } from 'history';
+import { AnyAction, Dispatch } from 'redux';
+import { BehaviorSubject, Subject } from 'rxjs';
+
 import type {
   AppMountParameters,
   CoreStart,
@@ -16,25 +20,21 @@ import type {
   PluginInitializerContext,
   KibanaExecutionContext,
 } from '@kbn/core/public';
-import { History } from 'history';
 import type { Filter } from '@kbn/es-query';
-import { AnyAction, Dispatch } from 'redux';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { DataView } from '@kbn/data-views-plugin/common';
 
 import { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import { VisualizationsStart } from '@kbn/visualizations-plugin/public';
 import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import { DataView } from './services/data_views';
 import { SharePluginStart } from './services/share';
 import { EmbeddableStart } from './services/embeddable';
 import { DashboardSessionStorage } from './application/lib';
 import { UsageCollectionSetup } from './services/usage_collection';
 import { NavigationPublicPluginStart } from './services/navigation';
-import { Query, RefreshInterval, TimeRange } from './services/data';
+import { Query, RefreshInterval, TimeRange } from './services/data/types';
 import { DashboardPanelState, SavedDashboardPanel } from '../common/types';
 import { SavedObjectsTaggingApi } from './services/saved_objects_tagging_oss';
-import { DataPublicPluginStart, DataViewsContract } from './services/data';
 import { ContainerInput, EmbeddableInput, ViewMode } from './services/embeddable';
 import { SavedObjectLoader, SavedObjectsStart } from './services/saved_objects';
 import type { ScreenshotModePluginStart } from './services/screenshot_mode';
@@ -42,6 +42,8 @@ import { IKbnUrlStateStorage } from './services/kibana_utils';
 import type { DashboardContainer, DashboardSavedObject } from '.';
 import { DashboardAppLocatorParams } from './locator';
 import { SpacesPluginStart } from './services/spaces';
+import { DashboardDataService } from './services/data/types';
+import { DashboardDataViewsService } from './services/data_views/types';
 
 export type { SavedDashboardPanel };
 
@@ -197,7 +199,7 @@ export interface DashboardAppServices {
   chrome: ChromeStart;
   share?: SharePluginStart;
   embeddable: EmbeddableStart;
-  data: DataPublicPluginStart;
+  data: DashboardDataService;
   uiSettings: IUiSettingsClient;
   restorePreviousUrl: () => void;
   savedObjects: SavedObjectsStart;
@@ -207,7 +209,7 @@ export interface DashboardAppServices {
   scopedHistory: () => ScopedHistory;
   visualizations: VisualizationsStart;
   dataViewEditor: DataViewEditorStart;
-  dataViews: DataViewsContract;
+  dataViews: DashboardDataViewsService;
   usageCollection?: UsageCollectionSetup;
   navigation: NavigationPublicPluginStart;
   dashboardCapabilities: DashboardAppCapabilities;
