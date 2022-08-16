@@ -240,7 +240,13 @@ describe('transform connector for export', () => {
 
   it('should not change connectors without secrets', () => {
     expect(transformConnectorsForExport(connectorsWithNoSecrets, actionTypeRegistry)).toEqual(
-      connectorsWithNoSecrets
+      connectorsWithNoSecrets.map((connector) => ({
+        ...connector,
+        attributes: {
+          ...connector.attributes,
+          secrets: {},
+        },
+      }))
     );
   });
 
@@ -250,6 +256,7 @@ describe('transform connector for export', () => {
         ...connector,
         attributes: {
           ...connector.attributes,
+          secrets: {},
           isMissingSecrets: true,
         },
       }))

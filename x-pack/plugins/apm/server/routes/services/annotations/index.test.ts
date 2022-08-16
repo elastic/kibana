@@ -217,21 +217,17 @@ describe('getServiceAnnotations', () => {
       .mockImplementation(
         () =>
           new Promise((resolve, reject) => {
-            setTimeout(() => {
-              reject(
-                new WrappedElasticsearchClientError(
-                  new errors.RequestAbortedError('foo')
-                )
-              );
-            }, 20);
+            reject(
+              new WrappedElasticsearchClientError(
+                new errors.RequestAbortedError('foo')
+              )
+            );
           })
       );
     jest.spyOn(GetStoredAnnotations, 'getStoredAnnotations').mockImplementation(
       async () =>
         new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(storedAnnotations);
-          }, 10);
+          resolve(storedAnnotations);
         })
     );
 

@@ -6,6 +6,7 @@
  */
 
 import {
+  castArray,
   each,
   isEmpty,
   find,
@@ -16,7 +17,6 @@ import {
   reduce,
   trim,
   get,
-  castArray,
 } from 'lodash';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { EuiComboBoxProps, EuiComboBoxOptionOption } from '@elastic/eui';
@@ -41,8 +41,8 @@ import deepEqual from 'fast-deep-equal';
 
 import { useController, useFieldArray, useFormContext, useWatch } from 'react-hook-form';
 import type { IFormField } from '../../form/types';
-import ECSSchema from '../../common/schemas/ecs/v8.2.0.json';
-import osquerySchema from '../../common/schemas/osquery/v5.2.2.json';
+import ECSSchema from '../../common/schemas/ecs/v8.4.0.json';
+import osquerySchema from '../../common/schemas/osquery/v5.4.0.json';
 
 import { FieldIcon } from '../../common/lib/kibana';
 import type { FormArrayField } from '../../shared_imports';

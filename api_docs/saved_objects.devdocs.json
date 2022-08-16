@@ -821,13 +821,7 @@
         "description": [],
         "signature": [
           "(savedObject: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-public.SavedObjectsStart",
-            "text": "SavedObjectsStart"
-          },
+          "SavedObjectsStart",
           ", uiSettings: ",
           "IUiSettingsClient",
           ") => (props: ",
@@ -845,13 +839,7 @@
             "label": "savedObject",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-public.SavedObjectsStart",
-                "text": "SavedObjectsStart"
-              }
+              "SavedObjectsStart"
             ],
             "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
             "deprecated": false,
@@ -2663,6 +2651,19 @@
             ],
             "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "savedObjects",
+            "id": "def-public.SavedObjectMetaData.defaultSearchField",
+            "type": "string",
+            "tags": [],
+            "label": "defaultSearchField",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -2887,13 +2888,7 @@
         "description": [],
         "signature": [
           "{ savedObjects: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-public.SavedObjectsStart",
-            "text": "SavedObjectsStart"
-          },
+          "SavedObjectsStart",
           "; uiSettings: ",
           "IUiSettingsClient",
           "; } & ",

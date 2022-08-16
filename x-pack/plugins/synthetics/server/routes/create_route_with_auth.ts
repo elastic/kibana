@@ -8,13 +8,14 @@
 import { UMServerLibs } from '../legacy_uptime/lib/lib';
 import {
   SyntheticsRestApiRouteFactory,
+  SyntheticsStreamingRouteFactory,
   SyntheticsRoute,
   SyntheticsRouteHandler,
 } from '../legacy_uptime/routes';
 
 export const createSyntheticsRouteWithAuth = (
   libs: UMServerLibs,
-  routeCreator: SyntheticsRestApiRouteFactory
+  routeCreator: SyntheticsRestApiRouteFactory | SyntheticsStreamingRouteFactory
 ): SyntheticsRoute => {
   const restRoute = routeCreator(libs);
   const { handler, method, path, options, ...rest } = restRoute;
