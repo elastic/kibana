@@ -78,7 +78,7 @@ const toExpression = (
   const maxPossibleTiles =
     // if there's a collapse function, no need to calculate since we're dealing with a single tile
     state.breakdownByAccessor && !state.collapseFn
-      ? datasource.getMaxPossibleNumValues(state.breakdownByAccessor)
+      ? datasource?.getMaxPossibleNumValues(state.breakdownByAccessor)
       : null;
 
   const getCollapseFnArguments = () => {
@@ -91,7 +91,7 @@ const toExpression = (
         return state.collapseFn;
       } else {
         const isMaxStatic = Boolean(
-          datasource.getOperationForColumnId(state.maxAccessor!)?.isStaticValue
+          datasource?.getOperationForColumnId(state.maxAccessor!)?.isStaticValue
         );
         // we do this because the user expects the static value they set to be the same
         // even if they define a collapse on the breakdown by
