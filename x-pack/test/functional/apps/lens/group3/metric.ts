@@ -225,7 +225,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         dimension: 'lnsMetric_breakdownByDimensionPanel > lns-empty-dimension',
         operation: 'date_histogram',
         field: '@timestamp',
+        keepOpen: true,
       });
+
+      await testSubjects.setValue('lnsMetric_max_cols', '1');
+
+      await PageObjects.lens.closeDimensionEditor();
 
       const tiles = await getMetricTiles();
       const lastTile = tiles[tiles.length - 1];
