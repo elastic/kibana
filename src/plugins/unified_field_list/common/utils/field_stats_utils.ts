@@ -14,7 +14,7 @@ import type { FieldStatsResponse } from '../types';
 
 export type SearchHandler = (
   aggs: Record<string, estypes.AggregationsAggregationContainer>
-) => Promise<estypes.SearchResponse<any>>;
+) => Promise<estypes.SearchResponse<unknown>>;
 
 const SHARD_SIZE = 5000;
 const DEFAULT_TOP_VALUES_SIZE = 10;
@@ -146,8 +146,8 @@ export async function getNumberHistogram(
   const minMaxResult = (await aggSearchWithBody(
     useTopHits ? searchWithHits : searchWithoutHits
   )) as
-    | ESSearchResponse<any, { body: { aggs: typeof searchWithHits } }>
-    | ESSearchResponse<any, { body: { aggs: typeof searchWithoutHits } }>;
+    | ESSearchResponse<unknown, { body: { aggs: typeof searchWithHits } }>
+    | ESSearchResponse<unknown, { body: { aggs: typeof searchWithoutHits } }>;
 
   const minValue = minMaxResult.aggregations!.sample.min_value.value;
   const maxValue = minMaxResult.aggregations!.sample.max_value.value;
