@@ -95,6 +95,8 @@ export class Popover extends Component<Props, State> {
         isOpen={this.state.isPopoverOpen}
         closePopover={this.closePopover}
         container={appWrapper}
+        hasArrow={false}
+        offset={10}
       >
         {children({ closePopover: this.closePopover })}
       </EuiPopoverAny>
