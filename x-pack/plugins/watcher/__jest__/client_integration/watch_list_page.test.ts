@@ -86,17 +86,17 @@ describe('<WatchListPage />', () => {
           // Expect "watch1" is only visible in the table
           expect(tableCellsValues.length).toEqual(1);
           const row = tableCellsValues[0];
-          const { name, id, watchStatus } = watch1;
+          const { name, id } = watch1;
 
           const expectedRow = [
             '', // checkbox
             id,
             name,
-            watchStatus.state,
-            '', // comment
+            '', // state
             '', // lastMetCondition
             '', // lastChecked
-            '', // actions
+            '', // comment
+            '', // row actions
           ];
 
           expect(row).toEqual(expectedRow);
@@ -128,7 +128,7 @@ describe('<WatchListPage />', () => {
           const { table } = testBed;
           const { tableCellsValues } = table.getMetaData('watchesTable');
 
-          const getExpectedValue = (value: any) => (typeof value === 'undefined' ? '' : value);
+          const getExpectedValue = (value: any) => value ?? '';
 
           tableCellsValues.forEach((row, i) => {
             const watch = watches[i];
@@ -138,11 +138,11 @@ describe('<WatchListPage />', () => {
               '',
               id, // required value
               getExpectedValue(name),
-              watchStatus.state, // required value
-              getExpectedValue(watchStatus.comment),
+              '', // state
               getExpectedValue(watchStatus.lastMetCondition),
               getExpectedValue(watchStatus.lastChecked),
-              '',
+              getExpectedValue(watchStatus.comment),
+              '', // row actions
             ]);
           });
         });
