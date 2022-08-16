@@ -49,8 +49,8 @@ export const baseBreadcrumbs = [
 ];
 
 export const SearchIndices: React.FC = () => {
-  const { fetchIndices, onPaginate } = useActions(IndicesLogic);
-  const { meta, indices, hasNoIndices, isLoading } = useValues(IndicesLogic);
+  const { fetchIndices, onPaginate, setIsFirstRequest } = useActions(IndicesLogic);
+  const { meta, indices, hasNoIndices, isLoading, isFirstRequest } = useValues(IndicesLogic);
   const [showHiddenIndices, setShowHiddenIndices] = useState(false);
   const [searchQuery, setSearchValue] = useState('');
 
@@ -58,42 +58,56 @@ export const SearchIndices: React.FC = () => {
     'enterprise-search-indices-callout-dismissed',
     false
   );
+
   useEffect(() => {
-    fetchIndices({ meta, returnHiddenIndices: showHiddenIndices, searchQuery });
+    setIsFirstRequest();
+  }, []);
+
+  useEffect(() => {
+    fetchIndices({
+      meta,
+      returnHiddenIndices: showHiddenIndices,
+      searchQuery,
+    });
   }, [searchQuery, meta.page.current, showHiddenIndices]);
 
-  const pageTitle = isLoading
-    ? ''
-    : indices.length !== 0
-    ? i18n.translate('xpack.enterpriseSearch.content.searchIndices.searchIndices.pageTitle', {
-        defaultMessage: 'Elasticsearch indices',
-      })
-    : i18n.translate('xpack.enterpriseSearch.content.searchIndices.searchIndices.emptyPageTitle', {
-        defaultMessage: 'Welcome to Enterprise Search',
-      });
+  const pageTitle =
+    isFirstRequest && isLoading
+      ? ''
+      : hasNoIndices
+      ? i18n.translate(
+          'xpack.enterpriseSearch.content.searchIndices.searchIndices.emptyPageTitle',
+          {
+            defaultMessage: 'Welcome to Enterprise Search',
+          }
+        )
+      : i18n.translate('xpack.enterpriseSearch.content.searchIndices.searchIndices.pageTitle', {
+          defaultMessage: 'Elasticsearch indices',
+        });
 
   return (
     <>
       <EnterpriseSearchContentPageTemplate
         pageChrome={baseBreadcrumbs}
         pageViewTelemetry="Search indices"
-        isLoading={isLoading}
+        isLoading={isFirstRequest && isLoading}
         pageHeader={{
           pageTitle,
-          rightSideItems: isLoading
-            ? []
-            : [
-                <EuiLinkTo data-test-subj="create-new-index-button" to={NEW_INDEX_PATH}>
-                  <EuiButton iconType="plusInCircle" color="primary" fill>
-                    {i18n.translate(
-                      'xpack.enterpriseSearch.content.searchIndices.create.buttonTitle',
-                      {
-                        defaultMessage: 'Create new index',
-                      }
-                    )}
-                  </EuiButton>
-                </EuiLinkTo>,
-              ],
+          rightSideItems:
+            isFirstRequest && isLoading
+              ? []
+              : [
+                  <EuiLinkTo data-test-subj="create-new-index-button" to={NEW_INDEX_PATH}>
+                    <EuiButton iconType="plusInCircle" color="primary" fill>
+                      {i18n.translate(
+                        'xpack.enterpriseSearch.content.searchIndices.create.buttonTitle',
+                        {
+                          defaultMessage: 'Create new index',
+                        }
+                      )}
+                    </EuiButton>
+                  </EuiLinkTo>,
+                ],
         }}
       >
         {!hasNoIndices ? (
