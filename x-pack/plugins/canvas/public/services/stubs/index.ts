@@ -25,6 +25,7 @@ import { reportingServiceFactory } from './reporting';
 import { visualizationsServiceFactory } from './visualizations';
 import { workpadServiceFactory } from './workpad';
 import { filtersServiceFactory } from './filters';
+import { dataViewsServiceFactory } from './data_views';
 
 export { customElementServiceFactory } from './custom_element';
 export { expressionsServiceFactory } from './expressions';
@@ -36,6 +37,7 @@ export { platformServiceFactory } from './platform';
 export { reportingServiceFactory } from './reporting';
 export { visualizationsServiceFactory } from './visualizations';
 export { workpadServiceFactory } from './workpad';
+export { dataViewsServiceFactory } from './data_views';
 
 export const pluginServiceProviders: PluginServiceProviders<CanvasPluginServices> = {
   customElement: new PluginServiceProvider(customElementServiceFactory),
@@ -49,6 +51,7 @@ export const pluginServiceProviders: PluginServiceProviders<CanvasPluginServices
   reporting: new PluginServiceProvider(reportingServiceFactory),
   visualizations: new PluginServiceProvider(visualizationsServiceFactory),
   workpad: new PluginServiceProvider(workpadServiceFactory),
+  dataViews: new PluginServiceProvider(dataViewsServiceFactory),
 };
 
 export const pluginServiceRegistry = new PluginServiceRegistry<CanvasPluginServices>(

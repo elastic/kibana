@@ -21,6 +21,7 @@ import {
 } from '@kbn/core/public';
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { DataViewsService } from '@kbn/data-views-plugin/public';
 import { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
@@ -62,6 +63,7 @@ export interface CanvasStartDeps {
   uiActions: UiActionsStart;
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
+  dataViews: DataViewsService;
   presentationUtil: PresentationUtilPluginStart;
   visualizations: VisualizationsStart;
   spaces?: SpacesPluginStart;

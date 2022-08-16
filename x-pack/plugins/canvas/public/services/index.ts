@@ -9,17 +9,18 @@ export * from './legacy';
 
 import { PluginServices } from '@kbn/presentation-util-plugin/public';
 
-import { CanvasCustomElementService } from './custom_element';
-import { CanvasEmbeddablesService } from './embeddables';
-import { CanvasExpressionsService } from './expressions';
-import { CanvasFiltersService } from './filters';
-import { CanvasLabsService } from './labs';
-import { CanvasNavLinkService } from './nav_link';
-import { CanvasNotifyService } from './notify';
-import { CanvasPlatformService } from './platform';
-import { CanvasReportingService } from './reporting';
-import { CanvasVisualizationsService } from './visualizations';
-import { CanvasWorkpadService } from './workpad';
+import type { CanvasCustomElementService } from './custom_element';
+import type { CanvasEmbeddablesService } from './embeddables';
+import type { CanvasExpressionsService } from './expressions';
+import type { CanvasFiltersService } from './filters';
+import type { CanvasLabsService } from './labs';
+import type { CanvasNavLinkService } from './nav_link';
+import type { CanvasNotifyService } from './notify';
+import type { CanvasPlatformService } from './platform';
+import type { CanvasReportingService } from './reporting';
+import type { CanvasVisualizationsService } from './visualizations';
+import type { CanvasWorkpadService } from './workpad';
+import type { DataViewsService } from './data_views';
 
 export interface CanvasPluginServices {
   customElement: CanvasCustomElementService;
@@ -33,6 +34,7 @@ export interface CanvasPluginServices {
   reporting: CanvasReportingService;
   visualizations: CanvasVisualizationsService;
   workpad: CanvasWorkpadService;
+  dataViews: DataViewsService;
 }
 
 export const pluginServices = new PluginServices<CanvasPluginServices>();

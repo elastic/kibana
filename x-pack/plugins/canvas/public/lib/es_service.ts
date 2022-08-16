@@ -20,14 +20,14 @@ const getApiPath = function () {
   return basePath + API_ROUTE;
 };
 
-const getSavedObjectsClient = function () {
-  const platformService = pluginServices.getServices().platform;
-  return platformService.getSavedObjectsClient();
+const getDataViewsIdsWithTitle = function () {
+  const { dataViews } = pluginServices.getServices();
+  return dataViews.getIdsWithTitle();
 };
 
-const getAdvancedSettings = function () {
-  const platformService = pluginServices.getServices().platform;
-  return platformService.getUISettings();
+const getDefaultDataView = function () {
+  const { dataViews } = pluginServices.getServices();
+  return dataViews.getDefaultDataView();
 };
 
 export const getFields = (index = '_all') => {
@@ -47,33 +47,17 @@ export const getFields = (index = '_all') => {
 };
 
 export const getIndices = () =>
-  getSavedObjectsClient()
-    .find<{ title: string }>({
-      type: 'index-pattern',
-      fields: ['title'],
-      searchFields: ['title'],
-      perPage: 1000,
-    })
-    .then((resp) => {
-      return resp.savedObjects.map((savedObject) => {
-        return savedObject.attributes.title;
-      });
-    })
+  getDataViewsIdsWithTitle()
+    .then((ids) => ids.map((id) => id.title))
     .catch((err: Error) => {
       const notifyService = pluginServices.getServices().notify;
       notifyService.error(err, { title: strings.getIndicesFetchErrorMessage() });
     });
 
-export const getDefaultIndex = () => {
-  const defaultIndexId = getAdvancedSettings().get('defaultIndex');
-
-  return defaultIndexId
-    ? getSavedObjectsClient()
-        .get<{ title: string }>('index-pattern', defaultIndexId)
-        .then((defaultIndex) => defaultIndex.attributes.title)
-        .catch((err) => {
-          const notifyService = pluginServices.getServices().notify;
-          notifyService.error(err, { title: strings.getDefaultIndexFetchErrorMessage() });
-        })
-    : Promise.resolve('');
-};
+export const getDefaultIndex = () =>
+  getDefaultDataView()
+    .then((dataView) => dataView?.title ?? '')
+    .catch((err: Error) => {
+      const notifyService = pluginServices.getServices().notify;
+      notifyService.error(err, { title: strings.getDefaultIndexFetchErrorMessage() });
+    });
