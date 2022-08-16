@@ -31,7 +31,6 @@ export interface RangeParams {
 
 export interface TermsParams {
   size: number;
-  accuracyMode?: boolean;
   include?: string[] | number[];
   exclude?: string[] | number[];
   includeIsRegex?: boolean;
@@ -58,37 +57,30 @@ export interface DateHistogramParams {
 }
 
 export interface MinParams {
-  emptyAsNull?: boolean;
   format?: NumberValueFormat;
 }
 
 export interface MaxParams {
-  emptyAsNull?: boolean;
   format?: NumberValueFormat;
 }
 
 export interface AvgParams {
-  emptyAsNull?: boolean;
   format?: NumberValueFormat;
 }
 
 export interface SumParams {
-  emptyAsNull?: boolean;
   format?: NumberValueFormat;
 }
 
 export interface MedianParams {
-  emptyAsNull?: boolean;
   format?: NumberValueFormat;
 }
 
 export interface StandardDeviationParams {
-  emptyAsNull?: boolean;
   format?: NumberValueFormat;
 }
 
 export interface CardinalityParams {
-  emptyAsNull?: boolean;
   format?: NumberValueFormat;
 }
 
@@ -102,7 +94,6 @@ export interface PercentileRanksParams {
 }
 
 export interface CountParams {
-  emptyAsNull?: boolean;
   format?: NumberValueFormat;
 }
 

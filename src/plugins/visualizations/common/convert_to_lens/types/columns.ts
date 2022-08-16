@@ -29,7 +29,6 @@ import {
   DerivativeParams,
   MovingAverageParams,
   FormulaParams,
-  TimeScaleParams,
   StaticValueParams,
 } from './params';
 
@@ -43,7 +42,6 @@ export interface BaseColumn<OperationType extends Operation, Params = undefined>
   timeScale?: TimeScaleUnit; // ?
   timeShift?: string;
   window?: string;
-  scale?: 'ordinal' | 'interval' | 'ratio'; // ?
   isStaticValue?: boolean;
   filter?: FilterQuery;
   params: Params;
@@ -83,7 +81,6 @@ export type DerivativeColumn = ColumnWithReferences<'differences', DerivativePar
 export type MovingAverageColumn = ColumnWithReferences<'moving_average', MovingAverageParams>;
 export type FormulaColumn = ColumnWithReferences<'formula', FormulaParams>;
 export type StaticValueColumn = ColumnWithReferences<'static_value', StaticValueParams>;
-export type TimeScaleColumn = ColumnWithReferences<'normalize_by_unit', TimeScaleParams>;
 
 export type AnyColumnWithSourceField =
   | FitlersColumn
@@ -108,7 +105,6 @@ export type AnyColumnWithReferences =
   | DerivativeColumn
   | MovingAverageColumn
   | FormulaColumn
-  | StaticValueColumn
-  | TimeScaleColumn;
+  | StaticValueColumn;
 
 export type Column = AnyColumnWithReferences | AnyColumnWithSourceField;
