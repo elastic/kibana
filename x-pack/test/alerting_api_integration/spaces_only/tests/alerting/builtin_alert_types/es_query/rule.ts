@@ -787,7 +787,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             thresholdComparator: params.thresholdComparator,
             threshold: params.threshold,
             searchType: params.searchType,
-            ...(params.excludeHitsFromPreviousRun && {
+            ...(params.excludeHitsFromPreviousRun !== undefined && {
               excludeHitsFromPreviousRun: params.excludeHitsFromPreviousRun,
             }),
             ...ruleParams,
