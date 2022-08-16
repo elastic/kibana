@@ -63,7 +63,7 @@ export function FieldPicker({
           aria-disabled={!hasFields}
           onClick={() => {
             if (hasFields) {
-              setOpen(true);
+              setOpen(!open);
             }
           }}
           onClickAriaLabel={badgeDescription}

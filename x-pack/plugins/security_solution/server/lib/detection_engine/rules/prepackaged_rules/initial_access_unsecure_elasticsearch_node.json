@@ -16,7 +16,7 @@
   "language": "lucene",
   "license": "Elastic License v2",
   "name": "Inbound Connection to an Unsecure Elasticsearch Node",
-  "note": "## Config\n\nThis rule requires the addition of port `9200` and `send_all_headers` to the `HTTP` protocol configuration in `packetbeat.yml`. See the References section for additional configuration documentation.",
+  "note": "",
   "query": "event.category:network_traffic AND network.protocol:http AND status:OK AND destination.port:9200 AND network.direction:inbound AND NOT http.response.headers.content-type:\"image/x-icon\" AND NOT _exists_:http.request.headers.authorization\n",
   "references": [
     "https://www.elastic.co/guide/en/elasticsearch/reference/current/configuring-security.html",
@@ -24,6 +24,7 @@
   ],
   "risk_score": 47,
   "rule_id": "31295df3-277b-4c56-a1fb-84e31b4222a9",
+  "setup": "This rule requires the addition of port `9200` and `send_all_headers` to the `HTTP` protocol configuration in `packetbeat.yml`. See the References section for additional configuration documentation.",
   "severity": "medium",
   "tags": [
     "Elastic",
@@ -51,5 +52,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 5
+  "version": 7
 }
