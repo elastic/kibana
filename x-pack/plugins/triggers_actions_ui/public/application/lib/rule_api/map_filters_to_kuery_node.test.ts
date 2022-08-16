@@ -97,7 +97,7 @@ describe('mapFiltersToKueryNode', () => {
     ).toEqual(
       toElasticsearchQuery(
         fromKueryExpression(
-          `alert.attributes.enabled: true and
+          `alert.attributes.enabled: true or
           (alert.attributes.muteAll: true OR alert.attributes.snoozeSchedule: { duration > 0 })`
         )
       )
@@ -112,7 +112,7 @@ describe('mapFiltersToKueryNode', () => {
     ).toEqual(
       toElasticsearchQuery(
         fromKueryExpression(
-          `alert.attributes.enabled: false and
+          `alert.attributes.enabled: false or
           (alert.attributes.muteAll: true OR alert.attributes.snoozeSchedule: { duration > 0 })`
         )
       )
@@ -127,8 +127,8 @@ describe('mapFiltersToKueryNode', () => {
     ).toEqual(
       toElasticsearchQuery(
         fromKueryExpression(
-          `alert.attributes.enabled: true and
-          alert.attributes.enabled: false and
+          `alert.attributes.enabled: true or
+          alert.attributes.enabled: false or
           (alert.attributes.muteAll: true OR alert.attributes.snoozeSchedule: { duration > 0 })`
         )
       )
