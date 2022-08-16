@@ -171,19 +171,15 @@ export const moveFilter = (
   to: string,
   conditionalType: ConditionTypes
 ) => {
-  try {
-    const newFilters = cloneDeep(filters);
-    const movingFilter = getFilterByPath(newFilters, from);
+  const newFilters = cloneDeep(filters);
+  const movingFilter = getFilterByPath(newFilters, from);
 
-    if (getPathInArray(to).length >= getPathInArray(from).length) {
-      const newFilterWithFilter = addFilter(newFilters, movingFilter, to, conditionalType);
-      return removeFilter(newFilterWithFilter, from);
-    } else {
-      const newFiltersWithoutFilter = removeFilter(newFilters, from);
-      return addFilter(newFiltersWithoutFilter, movingFilter, to, conditionalType);
-    }
-  } catch (e) {
-    return filters;
+  if (getPathInArray(to).length >= getPathInArray(from).length) {
+    const newFilterWithFilter = addFilter(newFilters, movingFilter, to, conditionalType);
+    return removeFilter(newFilterWithFilter, from);
+  } else {
+    const newFiltersWithoutFilter = removeFilter(newFilters, from);
+    return addFilter(newFiltersWithoutFilter, movingFilter, to, conditionalType);
   }
 };
 
