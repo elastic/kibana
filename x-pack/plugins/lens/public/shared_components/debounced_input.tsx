@@ -44,6 +44,9 @@ const DebouncedInputHelper = ({
   );
 };
 
+/**
+ * When testing this component, mock the "debounce" function in lodash (see this module test for an example)
+ */
 export const DebouncedInput = (props: Props) => (
   // need this extra layer to force a rerender whenever the default value changes.
   // this is because we need a new initialValue to be computed from the debounce hook.

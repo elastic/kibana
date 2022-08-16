@@ -200,6 +200,7 @@ function SecondaryMetricEditor({ accessor, idPrefix, frame, layerId, setState, s
                 defaultMessage: 'Auto',
               }),
               'data-test-subj': 'lnsMetric_prefix_auto',
+              value: undefined,
             },
             {
               id: `${idPrefix}custom`,
@@ -207,6 +208,7 @@ function SecondaryMetricEditor({ accessor, idPrefix, frame, layerId, setState, s
                 defaultMessage: 'Custom',
               }),
               'data-test-subj': 'lnsMetric_prefix_custom',
+              value: defaultPrefix,
             },
             {
               id: `${idPrefix}none`,
@@ -214,6 +216,7 @@ function SecondaryMetricEditor({ accessor, idPrefix, frame, layerId, setState, s
                 defaultMessage: 'None',
               }),
               'data-test-subj': 'lnsMetric_prefix_none',
+              value: '',
             },
           ]}
           idSelected={`${idPrefix}${
@@ -223,9 +226,7 @@ function SecondaryMetricEditor({ accessor, idPrefix, frame, layerId, setState, s
               ? 'none'
               : 'custom'
           }`}
-          onChange={(id) => {
-            const mode = id.replace(idPrefix, '') as 'auto' | 'custom' | 'none';
-            const secondaryPrefix = { auto: undefined, custom: defaultPrefix, none: '' }[mode];
+          onChange={(_id, secondaryPrefix) => {
             setState({
               ...state,
               secondaryPrefix,
