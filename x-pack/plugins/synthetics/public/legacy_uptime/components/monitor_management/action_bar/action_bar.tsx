@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useContext, useState, useEffect } from 'react';
+import React, { useCallback, useContext, useState, useEffect, useRef } from 'react';
 import { useParams, Redirect } from 'react-router-dom';
 import {
   EuiFlexGroup,
@@ -14,6 +14,7 @@ import {
   EuiButtonEmpty,
   EuiText,
   EuiPopover,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -37,6 +38,11 @@ import { TestRun } from '../test_now_mode/test_now_mode';
 import { monitorManagementListSelector } from '../../../state/selectors';
 
 import { kibanaService } from '../../../state/kibana_service';
+
+import {
+  PRIVATE_AVAILABLE_LABEL,
+  TEST_SCHEDULED_LABEL,
+} from '../../overview/monitor_list/translations';
 
 export interface ActionBarProps {
   monitor: SyntheticsMonitor;
@@ -63,6 +69,7 @@ export const ActionBar = ({
   const [isSaving, setIsSaving] = useState(false);
   const [isSuccessful, setIsSuccessful] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean | undefined>(undefined);
+  const mouseMoveTimeoutIds = useRef<[number, number]>([0, 0]);
   const isReadOnly = monitor[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT;
 
   const hasServiceManagedLocation = monitor.locations?.some((loc) => loc.isServiceManaged);
@@ -139,11 +146,23 @@ export const ActionBar = ({
             <EuiFlexItem grow={false}>
               <WarningText>{!isValid && hasBeenSubmitted && VALIDATION_ERROR_LABEL}</WarningText>
             </EuiFlexItem>
+
+            <EuiToolTip
+              position="top"
+              content={<p>Works on any kind of element &mdash; buttons, inputs, you name it!</p>}
+            >
+              <EuiButton disabled={true} onClick={() => {}}>
+                Hover me
+              </EuiButton>
+            </EuiToolTip>
+
             {onTestNow && (
               <EuiFlexItem grow={false}>
                 {/* Popover is used instead of EuiTooltip until the resolution of https://github.com/elastic/eui/issues/5604 */}
                 <EuiPopover
                   repositionOnScroll={true}
+                  ownFocus={false}
+                  initialFocus={''}
                   button={
                     <EuiButton
                       css={{ width: '100%' }}
@@ -154,11 +173,24 @@ export const ActionBar = ({
                       disabled={!isValid || isTestRunInProgress || !hasServiceManagedLocation}
                       data-test-subj={'monitorTestNowRunBtn'}
                       onClick={() => onTestNow()}
-                      onMouseEnter={() => {
-                        setIsPopoverOpen(true);
+                      onMouseOver={() => {
+                        // We need this custom logic to display a popover even when button is disabled.
+                        clearInterval(mouseMoveTimeoutIds.current[1]);
+                        if (mouseMoveTimeoutIds.current[0] === 0) {
+                          mouseMoveTimeoutIds.current[0] = setTimeout(() => {
+                            clearTimeout(mouseMoveTimeoutIds.current[1]);
+                            setIsPopoverOpen(true);
+                          }, 250) as unknown as number;
+                        }
                       }}
-                      onMouseLeave={() => {
-                        setIsPopoverOpen(false);
+                      onMouseOut={() => {
+                        // We need this custom logic to display a popover even when button is disabled.
+                        clearTimeout(mouseMoveTimeoutIds.current[1]);
+                        mouseMoveTimeoutIds.current[1] = setTimeout(() => {
+                          clearTimeout(mouseMoveTimeoutIds.current[0]);
+                          setIsPopoverOpen(false);
+                          mouseMoveTimeoutIds.current = [0, 0];
+                        }, 100) as unknown as number;
                       }}
                     >
                       {testRun ? RE_RUN_TEST_LABEL : RUN_TEST_LABEL}
@@ -167,7 +199,13 @@ export const ActionBar = ({
                   isOpen={isPopoverOpen}
                 >
                   <EuiText style={{ width: 260, outline: 'none' }}>
-                    <p>{TEST_NOW_DESCRIPTION}</p>
+                    <p>
+                      {isTestRunInProgress
+                        ? TEST_SCHEDULED_LABEL
+                        : isValid && !hasServiceManagedLocation
+                        ? PRIVATE_AVAILABLE_LABEL
+                        : TEST_NOW_DESCRIPTION}
+                    </p>
                   </EuiText>
                 </EuiPopover>
               </EuiFlexItem>
