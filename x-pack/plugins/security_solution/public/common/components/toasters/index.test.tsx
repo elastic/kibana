@@ -206,7 +206,7 @@ describe('Toaster', () => {
         'Test & Test'
       );
       wrapper.find('button[data-test-subj="delete-toast"]').simulate('click');
-      expect(wrapper.find('.euiToast').length).toBe(1);
+      expect(wrapper.find('div.euiToast').length).toBe(1);
       expect(wrapper.find('[data-test-subj="euiToastHeader__title"]').at(1).text()).toBe(
         'Test & Test II'
       );
@@ -286,7 +286,7 @@ describe('Toaster', () => {
       expect(wrapper.find('.euiToast').length).toBe(0);
 
       wrapper.find('button[data-test-subj="modal-all-errors-close"]').simulate('click');
-      expect(wrapper.find('.euiToast').length).toBe(1);
+      expect(wrapper.find('div.euiToast').length).toBe(1);
       expect(wrapper.find('[data-test-subj="euiToastHeader__title"]').at(1).text()).toBe(
         'Test & Test'
       );
