@@ -13,7 +13,7 @@ import { findObjectByTitle } from './find_object_by_title';
 import { displayDuplicateTitleConfirmModal } from './display_duplicate_title_confirm_modal';
 
 /**
- * check for an existing SavedObject with the same title in ES
+ * check for an existing VisSavedObject with the same title in ES
  * returns Promise<true> when it's no duplicate, or the modal displaying the warning
  * that's there's a duplicate is confirmed, else it returns a rejected Promise<ErrorMsg>
  * @param savedObject
