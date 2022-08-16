@@ -5,26 +5,19 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { SecurityPageName, SERVER_APP_ID, THREAT_INTELLIGENCE_PATH } from '../../common/constants';
-import { THREAT_INTELLIGENCE } from '../app/translations';
+import { getSecuritySolutionLink } from '@kbn/threat-intelligence-plugin/public';
+import type { SecurityPageName } from '../../common/constants';
+import { SERVER_APP_ID } from '../../common/constants';
 import type { LinkItem } from '../common/links';
-import threatIntelligencePageImg from '../common/images/threat_intelligence.png';
 
-export const links: LinkItem = {
-  id: SecurityPageName.threatIntelligence,
-  title: THREAT_INTELLIGENCE,
-  path: THREAT_INTELLIGENCE_PATH,
+/**
+ * Adds the Threat Intelligence entry to Kibana global sidenav as well as the Security sidenav.
+ * Most of the properties are coming from the Threat Intelligence plugin directly through {@link getSecuritySolutionLink}.
+ * The ones added below are more related to the Security Solution plugin.
+ */
+export const indicatorsLinks: LinkItem = {
+  ...getSecuritySolutionLink<SecurityPageName>('indicators'),
   experimentalKey: 'threatIntelligenceEnabled',
-  landingImage: threatIntelligencePageImg,
-  description: i18n.translate('xpack.securitySolution.appLinks.threatIntelligence.description', {
-    defaultMessage:
-      'Elastic threat intelligence helps you see if you are open to or have been subject to current or historical known threats.',
-  }),
+  globalNavPosition: 7,
   capabilities: [`${SERVER_APP_ID}.show`],
-  globalSearchKeywords: [
-    i18n.translate('xpack.securitySolution.appLinks.threatIntelligence', {
-      defaultMessage: 'Threat Intelligence',
-    }),
-  ],
 };
