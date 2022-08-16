@@ -35,8 +35,13 @@ interface Options {
 export async function generateNoticeFromSource({ productName, directory, log }: Options) {
   const select = [
     '**/*.{js,mjs,scss,css,ts,tsx}',
-    '!{node_modules,build,data}/**',
-    '!**/{shared_built_assets,target}/**',
+    '!{node_modules,build,dist,data,built_assets,shared_built_assets}/**',
+    '!packages/*/{node_modules,build,dist}/**',
+    '!src/plugins/*/{node_modules,build,dist}/**',
+    '!x-pack/{node_modules,build,dist,data}/**',
+    '!x-pack/packages/*/{node_modules,build,dist}/**',
+    '!x-pack/plugins/**/{node_modules,build,dist}/**',
+    '!**/target/**',
   ];
 
   log.info(`Searching ${directory} for multi-line comments starting with @notice`);
