@@ -24,7 +24,7 @@ interface DataViewData {
   /**
    * Id of the requested data view
    */
-  stateVal: string;
+  stateVal?: string;
   /**
    * Determines if requested data view was found
    */
@@ -75,29 +75,34 @@ export function getDataViewId(
  * Function to load the given data view by id, providing a fallback if it doesn't exist
  */
 export async function loadDataView(
-  id: string,
   dataViews: DataViewsContract,
-  config: IUiSettingsClient
+  config: IUiSettingsClient,
+  id?: string
 ): Promise<DataViewData> {
-  let loadedDataView: DataView | undefined;
+  const dataViewList = (await dataViews.getCache()) as unknown as DataViewSavedObject[];
+
   try {
-    // fetch hoc data view
-    loadedDataView = await dataViews.get(id);
+    const fetchedDataView = id ? await dataViews.get(id) : undefined;
+    if (fetchedDataView && !fetchedDataView.isPersisted()) {
+      return {
+        list: dataViewList || [],
+        loaded: fetchedDataView,
+        stateVal: id,
+        stateValFound: true,
+      };
+    }
+    // Skipping error handling, since 'get' call trying to fetch
+    // adhoc data view which only created using Promise.resolve(dataView),
+    // Any other error will be handled by the next 'get' call below.
     // eslint-disable-next-line no-empty
   } catch (e) {}
 
-  const dataViewList = (await dataViews.getCache()) as unknown as DataViewSavedObject[];
-  let actualId: string | undefined;
-  if (!loadedDataView) {
-    actualId = getDataViewId(id, dataViewList, config.get('defaultIndex'));
-    loadedDataView = await dataViews.get(actualId);
-  }
-
+  const actualId = getDataViewId(id, dataViewList, config.get('defaultIndex'));
   return {
     list: dataViewList || [],
-    loaded: loadedDataView,
+    loaded: await dataViews.get(actualId),
     stateVal: id,
-    stateValFound: !!id && (actualId ? actualId === id : true),
+    stateValFound: !!id && actualId === id,
   };
 }
 

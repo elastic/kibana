@@ -14,14 +14,14 @@ import { configMock } from '../../../__mocks__/config';
 describe('Resolve data view tests', () => {
   test('returns valid data for an existing data view', async () => {
     const dataViewId = 'the-data-view-id';
-    const result = await loadDataView(dataViewId, dataViewsMock, configMock);
+    const result = await loadDataView(dataViewsMock, configMock, dataViewId);
     expect(result.loaded).toEqual(dataViewMock);
     expect(result.stateValFound).toEqual(true);
     expect(result.stateVal).toEqual(dataViewId);
   });
   test('returns fallback data for an invalid data view', async () => {
     const dataViewId = 'invalid-id';
-    const result = await loadDataView(dataViewId, dataViewsMock, configMock);
+    const result = await loadDataView(dataViewsMock, configMock, dataViewId);
     expect(result.loaded).toEqual(dataViewMock);
     expect(result.stateValFound).toBe(false);
     expect(result.stateVal).toBe(dataViewId);

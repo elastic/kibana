@@ -93,7 +93,24 @@ export function ChangeDataView({
   useEffect(() => {
     const fetchDataViews = async () => {
       const dataViewsRefs = await data.dataViews.getIdsWithTitle();
-      setDataViewsList(dataViewsRefs);
+
+      const dataViewExists = !!dataViewsRefs.find(({ id }) => id === currentDataViewId);
+      const currentDataView =
+        !dataViewExists && currentDataViewId
+          ? await data.dataViews.get(currentDataViewId)
+          : undefined;
+      if (currentDataView && !currentDataView.isPersisted()) {
+        dataViewsRefs.push({
+          title: currentDataView.title,
+          name: currentDataView.name,
+          id: currentDataView.id!,
+        });
+      }
+
+      setDataViewsList((prevDataViews) => [
+        ...dataViewsRefs,
+        ...prevDataViews.filter(({ id }) => !dataViewsRefs.find(({ id: newId }) => newId === id)),
+      ]);
     };
     fetchDataViews();
   }, [data, currentDataViewId]);

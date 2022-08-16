@@ -24,6 +24,10 @@ async function popularizeField(
 
   field.count++;
 
+  if (!dataView.isPersisted()) {
+    return;
+  }
+
   // Catch 409 errors caused by user adding columns in a higher frequency that the changes can be persisted to Elasticsearch
   try {
     await DataViewsService.updateSavedObject(dataView, 0, true);

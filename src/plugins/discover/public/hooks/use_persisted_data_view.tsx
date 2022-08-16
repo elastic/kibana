@@ -10,17 +10,13 @@ import React, { useCallback } from 'react';
 import ReactDOM from 'react-dom';
 import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { useDiscoverServices } from './use_discover_services';
 
 let isOpenConfirmPanel = false;
 
 export const usePersistedDataView = (dataView: DataView) => {
   const services = useDiscoverServices();
-
-  const getDataViewList = useCallback(async () => {
-    return await services.dataViews.getIdsWithTitle();
-  }, [services.dataViews]);
 
   const persistDataView = useCallback(async () => {
     try {
@@ -47,8 +43,7 @@ export const usePersistedDataView = (dataView: DataView) => {
   ]);
 
   const dataViewPersisted: () => Promise<boolean> = useCallback(async () => {
-    const dataViewList = await getDataViewList();
-    if (!isHocDataView(dataViewList, dataView)) {
+    if (dataView.isPersisted()) {
       return true;
     }
 
@@ -61,14 +56,10 @@ export const usePersistedDataView = (dataView: DataView) => {
         onCancel: () => resolve(false),
       })
     );
-  }, [dataView, getDataViewList, persistDataView]);
+  }, [dataView, persistDataView]);
 
   return dataViewPersisted;
 };
-
-function isHocDataView(persistedDataViews: DataViewListItem[], checkDataView: DataView) {
-  return !persistedDataViews.find((item) => item.id === checkDataView.id);
-}
 
 function showConfirmPanel({
   onConfirm,
