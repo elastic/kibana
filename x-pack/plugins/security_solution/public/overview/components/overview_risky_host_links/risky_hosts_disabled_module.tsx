@@ -16,7 +16,7 @@ import { devToolPrebuiltContentUrl } from '../../../../common/constants';
 import { OpenInDevConsoleButton } from '../../../common/components/open_in_dev_console';
 import { useChcekSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_check_signal_index';
 import type { LinkPanelListItem } from '../link_panel';
-import { useSpaceId } from '../../../risk_score/containers/common';
+import { useSpaceId } from '../../../common/hooks/use_space_id';
 
 export const RISKY_HOSTS_DOC_LINK =
   'https://www.github.com/elastic/detection-rules/blob/main/docs/experimental-machine-learning/host-risk-score.md';

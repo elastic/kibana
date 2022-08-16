@@ -9,7 +9,7 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { OpenInDevConsoleButton } from '.';
 import { TestProviders } from '../../mock';
 
-jest.mock('../../../risk_score/containers/common', () => ({
+jest.mock('../../hooks/use_space_id', () => ({
   useSpaceId: jest.fn().mockReturnValue('myspace'),
 }));
 

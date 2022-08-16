@@ -6,7 +6,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { useKibana } from '../../../common/lib/kibana';
+import { useKibana } from '../lib/kibana';
 
 export const useSpaceId = () => {
   const { spaces } = useKibana().services;
