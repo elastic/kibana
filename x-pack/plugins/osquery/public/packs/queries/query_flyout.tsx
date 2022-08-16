@@ -80,6 +80,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
         setValue('query', savedQuery.query);
         // setValue('description', savedQuery.description); // TODO do we need it?
         setValue('platform', savedQuery.platform ? savedQuery.platform : 'linux,windows,darwin');
+        // @ts-expect-error IT IS A STRING
         setValue('version', savedQuery.version ? [savedQuery.version] : []); // TODO check version string vs string[]
         setValue('interval', savedQuery.interval);
         setValue(

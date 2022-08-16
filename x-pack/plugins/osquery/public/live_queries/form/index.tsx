@@ -54,11 +54,11 @@ export interface ILiveQueryFormFields {
 }
 
 interface IDefaultLiveQueryFormFields {
-  query: string;
-  agentSelection: AgentSelection;
+  query?: string;
+  agentSelection?: AgentSelection;
   savedQueryId?: string | null;
-  ecs_mapping: Record<string, Record<'field', string>>;
-  packId: string;
+  ecs_mapping?: Record<string, unknown>;
+  packId?: string;
 }
 
 const StyledEuiCard = styled(EuiCard)`
@@ -445,13 +445,16 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
         setValue(
           'ecs_mapping',
           !isEmpty(defaultValue.ecs_mapping)
-            ? map(defaultValue.ecs_mapping, (value, key) => ({
-                key,
-                result: {
-                  type: Object.keys(value)[0],
-                  value: Object.values(value)[0],
-                },
-              }))
+            ? map(
+                defaultValue.ecs_mapping as Record<string, Record<'field', string>>,
+                (value, key) => ({
+                  key,
+                  result: {
+                    type: Object.keys(value)[0],
+                    value: Object.values(value)[0],
+                  },
+                })
+              )
             : [defaultEcsFormData]
         );
 

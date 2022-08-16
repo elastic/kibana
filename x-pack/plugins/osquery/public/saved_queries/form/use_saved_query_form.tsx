@@ -26,7 +26,7 @@ export interface SavedQuerySOFormData {
 }
 
 export interface SavedQueryFormData {
-  id?: string;
+  id: string;
   description?: string;
   query: string;
   interval?: number;
