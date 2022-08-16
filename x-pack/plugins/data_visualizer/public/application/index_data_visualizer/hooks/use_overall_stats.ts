@@ -187,7 +187,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
               index,
               searchQuery,
               aggregatableFieldsChunk,
-              documentCountStats.probability,
+              documentCountStats.probability ?? 1,
               documentCountStats.totalCount,
               browserSessionSeed,
               timeFieldName,
@@ -217,7 +217,6 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
       next: (value) => {
         const aggregatableOverallStatsResp: AggregatableFieldOverallStats[] = [];
         const nonAggregatableOverallStatsResp: NonAggregatableFieldOverallStats[] = [];
-        // const documentCountStats = value[0] as DocumentCountStats;
 
         value.forEach((resp, idx) => {
           if (isAggregatableFieldOverallStats(resp)) {

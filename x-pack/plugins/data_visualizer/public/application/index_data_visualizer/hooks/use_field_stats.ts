@@ -170,7 +170,8 @@ export function useFieldStatsSearchStrategy(
         },
       },
       maxExamples: MAX_EXAMPLES_DEFAULT,
-      samplingProbability,
+      // @todo get correct sampling prob for indices without time field
+      samplingProbability: samplingProbability ?? 1,
       browserSessionSeed: searchStrategyParams.browserSessionSeed,
       totalCount,
     };

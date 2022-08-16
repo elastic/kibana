@@ -95,7 +95,7 @@ export interface DocumentCountStats {
   timeRangeEarliest?: number;
   timeRangeLatest?: number;
   totalCount: number;
-  probability?: number | null;
+  probability: number | null;
   took?: number;
   randomlySampled?: boolean;
 }

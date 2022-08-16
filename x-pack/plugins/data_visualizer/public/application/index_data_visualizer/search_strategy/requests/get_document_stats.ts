@@ -86,7 +86,9 @@ export const getDocumentCountStats = async (
     fieldsToFetch,
   } = params;
 
-  const result = { randomlySampled: false, took: 0, totalCount: 0 };
+  // Probability = 1 represents no sampling
+  const result = { randomlySampled: false, took: 0, totalCount: 0, probability: 1 };
+
   const filterCriteria = buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, searchQuery);
 
   const query = {
@@ -121,21 +123,23 @@ export const getDocumentCountStats = async (
     },
   });
 
+  const hasTimeField =
+    Array.isArray(fieldsToFetch) &&
+    timeFieldName !== undefined &&
+    intervalMs !== undefined &&
+    intervalMs > 0;
+
   const getSearchParams = (aggregations: unknown) => ({
     index,
     body: {
       query,
-      ...(Array.isArray(fieldsToFetch) &&
-      timeFieldName !== undefined &&
-      intervalMs !== undefined &&
-      intervalMs > 0
-        ? { aggs: aggregations }
-        : {}),
+      ...(hasTimeField ? { aggs: aggregations } : {}),
       ...(isPopulatedObject(runtimeFieldMap) ? { runtime_mappings: runtimeFieldMap } : {}),
     },
-    track_total_hits: false,
+    track_total_hits: !hasTimeField,
     size: 0,
   });
+
   const firstResp = await search
     .search(
       {
@@ -152,6 +156,19 @@ export const getDocumentCountStats = async (
       )}`
     );
   }
+
+  if (!hasTimeField && isDefined(firstResp.rawResponse)) {
+    return {
+      ...result,
+      took: firstResp.rawResponse.took,
+      totalCount:
+        (typeof firstResp.rawResponse.hits?.total === 'number'
+          ? firstResp.rawResponse.hits?.total
+          : firstResp.rawResponse.hits?.total?.value) ?? 0,
+      probability: 1,
+    };
+  }
+
   if (isDefined(probability)) {
     return {
       ...result,
@@ -184,6 +201,7 @@ export const getDocumentCountStats = async (
           searchOptions
         )
         .toPromise();
+
       return {
         ...result,
         randomlySampled: false,
@@ -221,7 +239,7 @@ export const processDocumentCountStats = (
   body: estypes.SearchResponse | undefined,
   params: OverallStatsSearchStrategyParams,
   randomlySampled = false
-): DocumentCountStats | undefined => {
+): Omit<DocumentCountStats, 'probability'> | undefined => {
   if (!body) return undefined;
 
   let totalCount = 0;
