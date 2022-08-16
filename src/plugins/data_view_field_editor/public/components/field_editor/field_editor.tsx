@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiCallOut } from '@elastic/eui';
@@ -158,16 +158,13 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
     return replaySubj;
   }, [fieldPreview$]);
 
-  const resetTypes = useMemo(
-    () => () => {
-      const lastVal = lastPreview$.getValue();
-      // resets the preview history to an empty set
-      fieldPreview$.next([]);
-      // apply the last preview to get all the types
-      fieldPreview$.next(lastVal);
-    },
-    [fieldPreview$, lastPreview$]
-  );
+  const resetTypes = useCallback(() => {
+    const lastVal = lastPreview$.getValue();
+    // resets the preview history to an empty set
+    fieldPreview$.next([]);
+    // apply the last preview to get all the types
+    fieldPreview$.next(lastVal);
+  }, [fieldPreview$, lastPreview$]);
 
   const lastPreview = useRef<FieldPreview[]>();
 

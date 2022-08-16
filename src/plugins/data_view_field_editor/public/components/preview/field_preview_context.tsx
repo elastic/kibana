@@ -89,7 +89,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     fieldFormats,
   } = useFieldEditorContext();
 
-  const fieldPreview$ = useMemo(() => new Subject<FieldPreview[]>(), []);
+  const fieldPreview$ = useRef(new Subject<FieldPreview[]>());
 
   /** Response from the Painless _execute API */
   const [previewResponse, setPreviewResponse] = useState<{
@@ -372,7 +372,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
         // ...and sort alphabetically
         .sort((a, b) => a.key.localeCompare(b.key));
 
-      fieldPreview$.next(fields);
+      fieldPreview$.current.next(fields);
       setPreviewResponse({
         fields,
         error: null,
@@ -509,7 +509,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     () => ({
       fields: previewResponse.fields,
       error: previewResponse.error,
-      fieldPreview$,
+      fieldPreview$: fieldPreview$.current,
       isPreviewAvailable,
       isLoadingPreview,
       initialPreviewComplete,

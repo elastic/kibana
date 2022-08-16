@@ -72,7 +72,7 @@ export const EditIndexPattern = withRouter(
     const [fields, setFields] = useState<DataViewField[]>(indexPattern.getNonScriptedFields());
     const [compositeRuntimeFields, setCompositeRuntimeFields] = useState<
       Record<string, RuntimeField>
-    >(getCompositeRuntimeFields(indexPattern));
+    >(() => getCompositeRuntimeFields(indexPattern));
     const [conflictedFields, setConflictedFields] = useState<DataViewField[]>(
       indexPattern.fields.getAll().filter((field) => field.type === 'conflict')
     );
