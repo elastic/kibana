@@ -28,7 +28,7 @@ import { PivotSupportedAggs } from '../../../../../../common/types/pivot_aggs';
 
 import {
   isAggName,
-  isPivotAggsConfigWithUiSupport,
+  isPivotAggsConfigWithUiBase,
   getEsAggFromAggConfig,
   PivotAggsConfig,
   PivotAggsConfigWithUiSupportDict,
@@ -49,10 +49,10 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
   const [aggName, setAggName] = useState(defaultData.aggName);
   const [agg, setAgg] = useState(defaultData.agg);
   const [field, setField] = useState<string | string[] | null>(
-    isPivotAggsConfigWithUiSupport(defaultData) ? defaultData.field : ''
+    isPivotAggsConfigWithUiBase(defaultData) ? defaultData.field : ''
   );
 
-  const isUnsupportedAgg = !isPivotAggsConfigWithUiSupport(defaultData);
+  const isUnsupportedAgg = !isPivotAggsConfigWithUiBase(defaultData);
 
   // Update configuration based on the aggregation type
   useEffect(() => {
@@ -88,7 +88,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
   function getUpdatedItem(): PivotAggsConfig {
     let resultField = field;
     if (
-      isPivotAggsConfigWithUiSupport(aggConfigDef) &&
+      isPivotAggsConfigWithUiBase(aggConfigDef) &&
       !aggConfigDef.isMultiField &&
       Array.isArray(field)
     ) {
@@ -119,7 +119,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
     optionsArr
       .filter(
         (o) =>
-          isPivotAggsConfigWithUiSupport(defaultData) &&
+          isPivotAggsConfigWithUiBase(defaultData) &&
           (Array.isArray(defaultData.field)
             ? defaultData.field.includes(o.field as string)
             : o.field === defaultData.field)

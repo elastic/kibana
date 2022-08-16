@@ -9,7 +9,7 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
-  isPivotAggsConfigWithUiSupport,
+  isPivotAggsConfigWithUiBase,
   isSpecialSortField,
   isValidSortDirection,
   isValidSortMode,
@@ -30,7 +30,7 @@ export function getTopMetricsAggConfig(
     ...commonConfig,
     isSubAggsSupported: false,
     isMultiField: true,
-    field: isPivotAggsConfigWithUiSupport(commonConfig) ? commonConfig.field : '',
+    field: isPivotAggsConfigWithUiBase(commonConfig) ? commonConfig.field : '',
     AggFormComponent: TopMetricsAggForm,
     aggConfig: {},
     getEsAggConfig() {

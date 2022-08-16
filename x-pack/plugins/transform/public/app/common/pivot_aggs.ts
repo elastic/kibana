@@ -244,7 +244,7 @@ export type PivotAggsConfigWithUiSupport =
   | PivotAggsConfigTerms
   | PivotAggsConfigWithExtendedForm;
 
-export function isPivotAggsConfigWithUiSupport(arg: unknown): arg is PivotAggsConfigWithUiBase {
+export function isPivotAggsConfigWithUiBase(arg: unknown): arg is PivotAggsConfigWithUiBase {
   return (
     isPopulatedObject(arg, ['agg', 'aggName', 'dropDownName', 'field']) &&
     isPivotSupportedAggs(arg.agg)
@@ -309,7 +309,7 @@ export function getEsAggFromAggConfig(
   } as PivotAgg;
 
   if (
-    isPivotAggsConfigWithUiSupport(pivotAggsConfig) &&
+    isPivotAggsConfigWithUiBase(pivotAggsConfig) &&
     pivotAggsConfig.subAggs !== undefined &&
     Object.keys(pivotAggsConfig.subAggs).length > 0
   ) {

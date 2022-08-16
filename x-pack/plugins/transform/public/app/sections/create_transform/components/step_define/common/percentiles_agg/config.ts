@@ -8,7 +8,7 @@
 import { PercentilesAggForm } from './percentiles_form_component';
 import { IPivotAggsConfigPercentiles } from './types';
 import {
-  isPivotAggsConfigWithUiSupport,
+  isPivotAggsConfigWithUiBase,
   PERCENTILES_AGG_DEFAULT_PERCENTS,
   PivotAggsConfigBase,
 } from '../../../../../../common';
@@ -47,7 +47,7 @@ function isValidPercentsInput(inputValue: string) {
 export function getPercentilesAggConfig(
   commonConfig: PivotAggsConfigWithUiBase | PivotAggsConfigBase
 ): IPivotAggsConfigPercentiles {
-  const field = isPivotAggsConfigWithUiSupport(commonConfig) ? commonConfig.field : null;
+  const field = isPivotAggsConfigWithUiBase(commonConfig) ? commonConfig.field : null;
 
   return {
     ...commonConfig,

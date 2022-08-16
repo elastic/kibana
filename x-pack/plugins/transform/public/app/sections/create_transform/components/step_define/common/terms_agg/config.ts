@@ -7,7 +7,7 @@
 
 import { TermsAggForm } from './terms_form_component';
 import {
-  isPivotAggsConfigWithUiSupport,
+  isPivotAggsConfigWithUiBase,
   PivotAggsConfigBase,
   PivotAggsConfigWithUiBase,
   TERMS_AGG_DEFAULT_SIZE,
@@ -17,7 +17,7 @@ import { IPivotAggsConfigTerms } from './types';
 export function getTermsAggConfig(
   commonConfig: PivotAggsConfigWithUiBase | PivotAggsConfigBase
 ): IPivotAggsConfigTerms {
-  const field = isPivotAggsConfigWithUiSupport(commonConfig) ? commonConfig.field : null;
+  const field = isPivotAggsConfigWithUiBase(commonConfig) ? commonConfig.field : null;
 
   return {
     ...commonConfig,
