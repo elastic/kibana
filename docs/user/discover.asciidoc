@@ -54,7 +54,7 @@ Tell {kib} where to find the data you want to explore, and then specify the time
 +
 {kib} uses a <<data-views,{data-source}>> to tell it where to find
 your {es} data.
-To view the ecommerce sample data, open the {data-source} menu, and select **Kibana Sample Data Ecommerce**.
+To view the ecommerce sample data, open the {data-source} menu, and then select **Kibana Sample Data Ecommerce**.
 +
 [role="screenshot"]
 image::images/discover-data-view.png[How to set the {data-source} in Discover, width=50%]
