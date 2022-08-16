@@ -55,7 +55,7 @@ export const Breadcrumb = ({ treeNavSelection, onSelect }: BreadcrumbDeps) => {
       hasRightArrow: boolean = true
     ) => {
       const content =
-        collectionType === "clusterId"
+        collectionType === 'clusterId'
           ? treeNavSelection.clusterName || treeNavSelection.clusterId
           : treeNavSelection[collectionType];
 

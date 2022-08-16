@@ -299,9 +299,9 @@ const DynamicTreeViewItem = ({
       Object.entries({
         ...selectionDepth,
         [tree[depth].type]: aggData.key,
-        ...(tree[depth].type === KubernetesCollection.clusterId &&
+        ...(tree[depth].type === 'clusterId' &&
           aggData.key_as_string && {
-            [KubernetesCollection.clusterName]: aggData.key_as_string,
+            clusterName: aggData.key_as_string,
           }),
       })
         .map(([k, v]) => `${k}.${v}`)
