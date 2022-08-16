@@ -78,7 +78,7 @@ export const ManageLocationsFlyout = () => {
   const flyout = (
     <EuiFlyout onClose={closeFlyout} size="m" style={{ width: 540 }}>
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
+        <EuiTitle size="s">
           <h2>{PRIVATE_LOCATIONS}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>

@@ -251,7 +251,9 @@ describe('<CustomFields />', () => {
       expect(node).toBeInTheDocument();
     });
     expect(
-      getByText(/To create a "Browser" monitor, please ensure you are using the/)
+      getByText(
+        /To create a "Browser" monitor, please ensure you are using the elastic-agent-complete Docker container, which contains the dependencies to run these mon/
+      )
     ).toBeInTheDocument();
 
     // expect tls options to be available for browser
