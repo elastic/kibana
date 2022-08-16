@@ -1,19 +1,17 @@
 ---
 id: kibDevDocsOpsTest
 slug: /kibana-dev-docs/ops/test
-title: "@kbn/test"
+title: '@kbn/test'
 description: A package provide ways to run tests
 date: 2022-08-15
 tags: ['kibana', 'dev', 'contributor', 'operations', 'cli', 'dev', 'mode', 'test']
 ---
 
-Kibana Testing Library
-======================
+# Kibana Testing Library
 
 The @kbn/test package provides ways to run tests. Currently only functional testing is provided by this library, with unit and other testing possibly added here.
 
-Functional Testing
--------------------
+## Functional Testing
 
 ### Dependencies
 
@@ -21,14 +19,16 @@ Functional testing methods exist in the `src/functional_tests` directory. They d
 
 ### Exposed methods
 
-#### runTests(configPaths: Array<string>)
+#### `runTests(configPaths: Array<string>)`
+
 For each config file specified in configPaths, starts Elasticsearch and Kibana once, runs tests specified in that config file, and shuts down Elasticsearch and Kibana once completed. (Repeats for every config file.)
 
 `configPaths`: array of strings, each an absolute path to a config file that looks like [this](../../test/functional/config.base.js), following the config schema specified [here](../../src/functional_test_runner/lib/config/schema.js).
 
 Internally the method that starts Elasticsearch comes from [kbn-es](../../packages/kbn-es).
 
-#### startServers(configPath: string)
+#### `startServers(configPath: string)`
+
 Starts Elasticsearch and Kibana servers given a specified config.
 
 `configPath`: absolute path to a config file that looks like [this](../../test/functional/config.base.js), following the config schema specified [here](../../src/functional_test_runner/lib/config/schema.js).
