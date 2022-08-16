@@ -1242,6 +1242,7 @@
     "postcss-scss": "^4.0.4",
     "prettier": "^2.7.1",
     "pretty-format": "^27.5.1",
+    "proxy": "^1.0.2",
     "q": "^1.5.1",
     "raw-loader": "^3.1.0",
     "react-test-renderer": "^16.14.0",
