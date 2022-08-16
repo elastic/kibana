@@ -187,6 +187,7 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
     tags,
     threat,
     threat_indicator_path: threatIndicatorPath,
+    groupBy,
   } = rule;
 
   return {
@@ -216,6 +217,7 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
     falsePositives,
     threat: threat as Threats,
     threatIndicatorPath,
+    groupBy: groupBy?.[0] ?? '',
   };
 };
 
