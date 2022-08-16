@@ -81,7 +81,6 @@ describe('ALL - Add Integration', () => {
   it('should have integration and packs copied when upgrading integration', () => {
     const packageName = 'osquery_manager';
     const oldVersion = '1.2.0';
-    const newVersion = '1.3.2';
 
     cy.visit(`app/integrations/detail/${packageName}-${oldVersion}/overview`);
     cy.contains('Add Osquery Manager').click();
@@ -128,11 +127,14 @@ describe('ALL - Add Integration', () => {
     cy.get('tr')
       .should('contain', 'osquery_manager-2')
       .and('contain', 'Osquery Manager')
-      .and('contain', `v${newVersion}`);
+      .and('contain', 'v')
+      .and('contain', `v${oldVersion}`)
+      .should('not.exist');
     cy.contains('Actions').click();
     cy.contains('View policy').click();
     cy.contains('name: osquery_manager-2');
-    cy.contains(`version: ${newVersion}`);
+    cy.contains(`version: `);
+    cy.contains(`version: ${oldVersion}`).should('not.exist');
 
     // test list of prebuilt queries
     navigateTo('/app/osquery/saved_queries');
