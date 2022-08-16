@@ -43,11 +43,13 @@ export interface IndicesActions {
   }): { meta: Meta; returnHiddenIndices: boolean; searchQuery?: string };
   makeRequest: typeof FetchIndicesAPILogic.actions.makeRequest;
   onPaginate(newPageIndex: number): { newPageIndex: number };
+  setIsFirstRequest(): boolean;
 }
 export interface IndicesValues {
   data: typeof FetchIndicesAPILogic.values.data;
   hasNoIndices: boolean;
   indices: ElasticsearchViewIndex[];
+  isFirstRequest: boolean;
   isLoading: boolean;
   meta: Meta;
   status: typeof FetchIndicesAPILogic.values.status;
@@ -61,6 +63,7 @@ export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
       searchQuery,
     }),
     onPaginate: (newPageIndex) => ({ newPageIndex }),
+    setIsFirstRequest: () => true,
   },
   connect: {
     actions: [FetchIndicesAPILogic, ['makeRequest', 'apiSuccess', 'apiError']],
@@ -76,6 +79,14 @@ export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
   }),
   path: ['enterprise_search', 'content', 'indices_logic'],
   reducers: () => ({
+    isFirstRequest: [
+      true,
+      {
+        apiError: () => false,
+        apiSuccess: () => false,
+        setIsFirstRequest: () => true,
+      },
+    ],
     meta: [
       DEFAULT_META,
       {
@@ -96,8 +107,8 @@ export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
       (data) => (data?.indices ? data.indices.map(indexToViewIndex) : []),
     ],
     isLoading: [
-      () => [selectors.status],
-      (status) => [Status.LOADING, Status.IDLE].includes(status),
+      () => [selectors.status, selectors.isFirstRequest],
+      (status, isFirstRequest) => [Status.LOADING, Status.IDLE].includes(status) && isFirstRequest,
     ],
   }),
 });
