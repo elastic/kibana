@@ -6,13 +6,4 @@
  * Side Public License, v 1.
  */
 
-// TODO: https://github.com/elastic/kibana/issues/110891
-/* eslint-disable @kbn/eslint/no_export_all */
-
-/** @public types */
-export * from './types';
-export * from './utils';
-export * from './expression_functions';
-export * from './convert_to_lens';
-
-export { LegendSize, LegendSizeToPixels, DEFAULT_LEGEND_SIZE } from './constants';
+export { convertToPercentileColumns } from './percentile';

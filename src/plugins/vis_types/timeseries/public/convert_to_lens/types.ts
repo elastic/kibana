@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { Column } from '@kbn/visualizations-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { NavigateToLensContext } from '@kbn/visualizations-plugin/public';
-import type { Panel } from '../../common/types';
+import type { Metric, Panel, Series } from '../../common/types';
 
 export type ConvertTsvbToLensVisualization = (
   model: Panel
@@ -17,3 +19,9 @@ export interface Filter {
   kql?: string | { [key: string]: any } | undefined;
   lucene?: string | { [key: string]: any } | undefined;
 }
+
+export type ConvertToColumnsFn<C extends Column> = (
+  series: Series,
+  metric: Metric,
+  dataView: DataView
+) => C[];

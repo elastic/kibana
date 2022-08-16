@@ -1,0 +1,34 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { BaseColumn, Operation, DataType, Column } from '@kbn/visualizations-plugin/common';
+import uuid from 'uuid';
+import type { Metric, Series } from '../../../../common/types';
+import { ConvertToColumnsFn } from '../../types';
+
+export const createColumn = (
+  series: Series,
+  metric: Metric,
+  field: DataViewField,
+  isBucketed: boolean = false
+): Omit<BaseColumn<Operation, unknown>, 'operationType' | 'params'> => ({
+  columnId: uuid(),
+  dataType: field.type as DataType,
+  label: series.label ?? field.name,
+  customLabel: series.label ? true : false,
+  isBucketed,
+  window: metric.window?.toString(),
+  filter: series.filter,
+});
+
+export const convertMetricsToColumns = <C extends Column>(
+  series: Series,
+  metrics: Metric[],
+  dataView: DataView,
+  convertToFn: ConvertToColumnsFn<C>
+) => metrics.flatMap((metric) => convertToFn(series, metric, dataView));
