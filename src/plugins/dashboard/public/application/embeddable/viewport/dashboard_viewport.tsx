@@ -160,7 +160,6 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
                 }
                 isEditMode={isEditMode}
                 uiSettings={this.context.services.uiSettings}
-                http={this.context.services.http}
               />
             </div>
           )}

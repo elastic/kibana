@@ -6,11 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { DashboardDataService } from './data/types';
-import { DashboardHTTPService } from './http/types';
+import { CoreSetup } from '@kbn/core/public';
 
-export interface DashboardServices {
-  // dependency services
-  data: DashboardDataService;
-  http: DashboardHTTPService;
+export interface DashboardHTTPService {
+  basePath: CoreSetup['http']['basePath'];
 }

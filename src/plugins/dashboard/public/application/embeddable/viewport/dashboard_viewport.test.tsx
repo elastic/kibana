@@ -44,7 +44,6 @@ function getProps(props?: Partial<DashboardViewportProps>): {
   const options: DashboardContainerServices = {
     application: applicationServiceMock.createStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
-    http: coreMock.createStart().http,
     theme: coreMock.createStart().theme,
     embeddable: {
       getTriggerCompatibleActions: (() => []) as any,

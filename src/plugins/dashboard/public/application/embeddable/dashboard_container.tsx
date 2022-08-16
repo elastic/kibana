@@ -52,6 +52,7 @@ import {
   combineDashboardFiltersWithControlGroupFilters,
   syncDashboardControlGroup,
 } from '../lib/dashboard_control_group';
+import { pluginServices } from '../../services/plugin_services';
 
 export interface DashboardContainerServices {
   ExitFullScreenButton: React.ComponentType<any>;
@@ -66,7 +67,6 @@ export interface DashboardContainerServices {
   embeddable: EmbeddableStart;
   uiActions: UiActionsStart;
   theme: CoreStart['theme'];
-  http: CoreStart['http'];
   analytics?: CoreStart['analytics'];
 }
 
@@ -324,17 +324,22 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     const controlsEnabled = this.services.presentationUtil.labsService.isProjectEnabled(
       'labs:dashboard:dashboardControls'
     );
+    const DashboardServicesProvider = pluginServices.getContextProvider();
+
     ReactDOM.render(
       <I18nProvider>
         <KibanaContextProvider services={this.services}>
           <KibanaThemeProvider theme$={this.services.theme.theme$}>
             <this.services.presentationUtil.ContextProvider>
-              <DashboardViewport
-                controlsEnabled={controlsEnabled}
-                container={this}
-                controlGroup={this.controlGroup}
-                onDataLoaded={this.onDataLoaded.bind(this)}
-              />
+              <DashboardServicesProvider>
+                <DashboardViewport
+                  controlsEnabled={controlsEnabled}
+                  container={this}
+                  controlGroup={this.controlGroup}
+                  onDataLoaded={this.onDataLoaded.bind(this)}
+                />
+              </DashboardServicesProvider>
+              s
             </this.services.presentationUtil.ContextProvider>
           </KibanaThemeProvider>
         </KibanaContextProvider>

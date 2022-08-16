@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { PluginInitializerContext, ScopedHistory } from '@kbn/core/public';
@@ -14,9 +13,8 @@ import { savedObjectsPluginMock } from '@kbn/saved-objects-plugin/public/mocks';
 import { visualizationsPluginMock } from '@kbn/visualizations-plugin/public/mocks';
 import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 import { indexPatternEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
-import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-
 import { chromeServiceMock, coreMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
+
 import { SavedObjectLoader, SavedObjectLoaderFindOptions } from '../../services/saved_objects';
 import { DashboardAppServices, DashboardAppCapabilities } from '../../types';
 import { NavigationPublicPluginStart } from '../../services/navigation';
@@ -77,12 +75,10 @@ export function makeDefaultServices(): DashboardAppServices {
     savedObjects: savedObjectsPluginMock.createStartContract(),
     embeddable: embeddablePluginMock.createInstance().doStart(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
-    dataViews: dataViewPluginMocks.createStartContract(),
     chrome: chromeServiceMock.createStartContract(),
     navigation: {} as NavigationPublicPluginStart,
     savedObjectsClient: core.savedObjects.client,
     dashboardCapabilities: defaultCapabilities,
-    data: dataPluginMock.createStartContract(),
     scopedHistory: () => ({} as ScopedHistory),
     setHeaderActionMenu: (mountPoint) => {},
     urlForwarding: {} as UrlForwardingStart,

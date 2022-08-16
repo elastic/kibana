@@ -145,7 +145,7 @@ export const useDashboardAppState = ({
       /**
        * Ensure default data view exists and there is data in elasticsearch
        */
-      const isEmpty = await isDashboardAppInNoDataState(dataViews);
+      const isEmpty = await isDashboardAppInNoDataState();
       if (showNoDataPage || isEmpty) {
         setShowNoDataPage(true);
         return;

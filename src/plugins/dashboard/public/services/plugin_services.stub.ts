@@ -8,28 +8,21 @@
 
 import {
   PluginServiceProviders,
-  KibanaPluginServiceParams,
   PluginServiceProvider,
-  PluginServiceRegistry,
   PluginServices,
+  PluginServiceRegistry,
 } from '@kbn/presentation-util-plugin/public';
 
-import { dataServiceFactory } from './data/data_service';
-import { httpServiceFactory } from './http/http_service';
 import { DashboardServices } from './types';
-import { DashboardStartDependencies } from '../plugin';
 
-export const providers: PluginServiceProviders<
-  DashboardServices,
-  KibanaPluginServiceParams<DashboardStartDependencies>
-> = {
+import { httpServiceFactory } from './http/http.stub';
+import { dataServiceFactory } from './data/data.stub';
+
+export const providers: PluginServiceProviders<DashboardServices> = {
   http: new PluginServiceProvider(httpServiceFactory),
   data: new PluginServiceProvider(dataServiceFactory),
 };
 
 export const pluginServices = new PluginServices<DashboardServices>();
 
-export const registry = new PluginServiceRegistry<
-  DashboardServices,
-  KibanaPluginServiceParams<DashboardStartDependencies>
->(providers);
+export const registry = new PluginServiceRegistry<DashboardServices>(providers);
