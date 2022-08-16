@@ -38,7 +38,8 @@ interface AllRulesUtilityBarProps {
   onRefresh?: () => void;
   onRefreshSwitch?: (checked: boolean) => void;
   onToggleSelectAll?: () => void;
-  pagination: Pagination;
+  pagination?: Pagination;
+  totalExceptionLists?: number;
   hasBulkActions: boolean;
   hasPagination?: boolean;
   isBulkActionInProgress?: boolean;
@@ -56,6 +57,7 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
     onRefreshSwitch,
     onToggleSelectAll,
     pagination,
+    totalExceptionLists,
     hasBulkActions = true,
     hasPagination,
     isBulkActionInProgress,
@@ -123,19 +125,17 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
       [isAutoRefreshOn, handleAutoRefreshSwitch, isAnyRuleSelected]
     );
 
-    const showingRulesParams = getShowingRulesParams(pagination);
-
     return (
       <UtilityBar border>
         <UtilityBarSection>
           <UtilityBarGroup>
-            {hasBulkActions ? (
+            {hasBulkActions && pagination ? (
               <UtilityBarText dataTestSubj="showingRules">
-                {i18n.SHOWING_RULES(...showingRulesParams)}
+                {i18n.SHOWING_RULES(...getShowingRulesParams(pagination))}
               </UtilityBarText>
             ) : (
               <UtilityBarText dataTestSubj="showingExceptionLists">
-                {i18n.SHOWING_EXCEPTION_LISTS(pagination.total)}
+                {i18n.SHOWING_EXCEPTION_LISTS(totalExceptionLists ?? 0)}
               </UtilityBarText>
             )}
           </UtilityBarGroup>
@@ -147,7 +147,7 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
                   {i18n.SELECTED_RULES(numberSelectedItems)}
                 </UtilityBarText>
 
-                {canBulkEdit && onToggleSelectAll && hasPagination && (
+                {canBulkEdit && onToggleSelectAll && hasPagination && pagination && (
                   <UtilityBarAction
                     disabled={hasDisabledActions}
                     dataTestSubj="selectAllRules"
