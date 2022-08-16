@@ -58,7 +58,7 @@ export const deriveState = (serverActionStatusModel: ServerActionStatusModel) =>
     if (lastSuccessfulExecution) {
       // Might be null
       if (ackState === 'ackable' && lastSuccessfulExecution >= lastExecution) {
-        return ACTION_STATES.FIRING;
+        return ACTION_STATES.OK;
       }
 
       if (ackState === 'ackable' && lastSuccessfulExecution < lastExecution) {
@@ -71,12 +71,4 @@ export const deriveState = (serverActionStatusModel: ServerActionStatusModel) =>
   // We should never get to this point in the code. If we do, it means we are
   // missing an action status and the logic to determine it.
   return ACTION_STATES.UNKNOWN;
-};
-
-export const deriveIsAckable = (state: keyof typeof ACTION_STATES) => {
-  if (state === ACTION_STATES.THROTTLED || state === ACTION_STATES.FIRING) {
-    return true;
-  }
-
-  return false;
 };
