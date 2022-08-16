@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Logger } from '@kbn/core/server';
 import { ExecutionHandler } from './create_execution_handler';
 import { ScheduleActionsForAlertsParams } from './types';
 import { AlertInstanceState, AlertInstanceContext } from '../types';
@@ -26,31 +27,43 @@ export async function scheduleActionsForAlerts<
 ): Promise<void> {
   const {
     logger,
-    alertsWithExecutableActions,
+    activeAlerts,
     recoveryActionGroup,
     recoveredAlerts,
     executionHandler,
     mutedAlertIdsSet,
     ruleLabel,
     ruleRunMetricsStore,
+    throttle,
+    notifyWhen,
   } = params;
   // execute alerts with executable actions
-  for (const [alertId, alert] of alertsWithExecutableActions) {
-    const { actionGroup, subgroup: actionSubgroup, state } = alert.getScheduledActionOptions()!;
-    await executeAlert(
+  for (const [alertId, alert] of Object.entries(activeAlerts)) {
+    const executeAction: boolean = await shouldExecuteAction(
       alertId,
       alert,
-      executionHandler,
-      ruleRunMetricsStore,
-      actionGroup,
-      state,
-      actionSubgroup
+      mutedAlertIdsSet,
+      ruleLabel,
+      logger,
+      throttle,
+      notifyWhen
     );
+    if (executeAction) {
+      const { actionGroup, subgroup: actionSubgroup, state } = alert.getScheduledActionOptions()!;
+      await executeAlert(
+        alertId,
+        alert,
+        executionHandler,
+        ruleRunMetricsStore,
+        actionGroup,
+        state,
+        actionSubgroup
+      );
+    }
   }
 
   // execute recovered alerts
-  const recoveredIds = Object.keys(recoveredAlerts);
-  for (const alertId of recoveredIds) {
+  for (const alertId of Object.keys(recoveredAlerts)) {
     if (mutedAlertIdsSet.has(alertId)) {
       logger.debug(
         `skipping scheduling of actions for '${alertId}' in rule ${ruleLabel}: instance is muted`
@@ -94,4 +107,41 @@ async function executeAlert<
     alertId,
     ruleRunMetricsStore,
   });
+}
+
+async function shouldExecuteAction<
+  InstanceState extends AlertInstanceState,
+  InstanceContext extends AlertInstanceContext,
+  ActionGroupIds extends string
+>(
+  alertId: string,
+  alert: Alert<InstanceState, InstanceContext, ActionGroupIds>,
+  mutedAlertIdsSet: Set<string>,
+  ruleLabel: string,
+  logger: Logger,
+  throttle: string | null,
+  notifyWhen: string | null
+) {
+  const throttled = alert.isThrottled(throttle);
+  const muted = mutedAlertIdsSet.has(alertId);
+  let executeAction = true;
+
+  if (throttled || muted) {
+    executeAction = false;
+    logger.debug(
+      `skipping scheduling of actions for '${alertId}' in rule ${ruleLabel}: rule is ${
+        muted ? 'muted' : 'throttled'
+      }`
+    );
+  } else if (
+    notifyWhen === 'onActionGroupChange' &&
+    !alert.scheduledActionGroupOrSubgroupHasChanged()
+  ) {
+    executeAction = false;
+    logger.debug(
+      `skipping scheduling of actions for '${alertId}' in rule ${ruleLabel}: alert is active but action group has not changed`
+    );
+  }
+
+  return executeAction;
 }

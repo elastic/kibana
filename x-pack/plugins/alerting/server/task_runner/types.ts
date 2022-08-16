@@ -61,9 +61,9 @@ export interface ScheduleActionsForAlertsParams<
   mutedAlertIdsSet: Set<string>;
   ruleLabel: string;
   ruleRunMetricsStore: RuleRunMetricsStore;
-  alertsWithExecutableActions: Array<
-    [string, Alert<InstanceState, InstanceContext, ActionGroupIds>]
-  >;
+  activeAlerts: Record<string, Alert<InstanceState, InstanceContext, ActionGroupIds>>;
+  throttle: string | null;
+  notifyWhen: string | null;
 }
 
 // / ExecutionHandler
