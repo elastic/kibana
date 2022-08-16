@@ -46,9 +46,9 @@ const rulesSchema = schema.object({
     ruleTypeOverrides: schema.maybe(schema.arrayOf(ruleTypeSchema)),
   }),
   flapping: schema.object({
-    lookBack: schema.number({ defaultValue: 3, min: 0 }),
+    lookBack: schema.number({ defaultValue: 6, min: 0 }),
     count: schema.number({ defaultValue: 3, min: 1 }),
-    quietTime: schema.number({ defaultValue: 3, min: 0 }),
+    quietTime: schema.number({ defaultValue: 6, min: 0 }),
   }),
 });
 

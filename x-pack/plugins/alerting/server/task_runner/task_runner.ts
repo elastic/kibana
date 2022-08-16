@@ -70,6 +70,7 @@ import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event
 import { SearchMetrics } from '../lib/types';
 import { loadRule } from './rule_loader';
 import { logAlerts } from './log_alerts';
+import { updateFlappingState } from '../flapping';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -427,6 +428,25 @@ export class TaskRunner<
       ActionGroupIds,
       RecoveryActionGroupId
     >(alerts, originalAlerts);
+
+    const flappingStates = await updateFlappingState(
+      ruleId,
+      Object.keys(activeAlerts),
+      Object.keys(recoveredAlerts)
+    );
+    for (const [alertId, flappingState] of flappingStates.entries()) {
+      const activeRuns = flappingState.activeRuns.map((active) => (active ? 'X' : '-')).join('');
+      this.logger.info(
+        [
+          `rule: ${ruleId}`,
+          `alert: ${alertId}`,
+          `pre: ${flappingState.previousIsFlapping ? 'X' : '-'}`,
+          `isF: ${flappingState.isFlapping ? 'X' : '-'}`,
+          `isP: ${flappingState.isPreFlapping ? 'X' : '-'}`,
+          `runs: ${activeRuns}`,
+        ].join('; ')
+      );
+    }
 
     logAlerts({
       logger: this.logger,
