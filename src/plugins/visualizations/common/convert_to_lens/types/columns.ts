@@ -35,8 +35,7 @@ import {
 export interface BaseColumn<OperationType extends Operation, Params = undefined> {
   columnId: string;
   operationType: OperationType;
-  customLabel?: boolean;
-  label: string;
+  label?: string;
   isBucketed: boolean;
   dataType: DataType;
   timeScale?: TimeScaleUnit; // ?

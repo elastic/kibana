@@ -19,8 +19,7 @@ export const createColumn = (
 ): Omit<BaseColumn<Operation, unknown>, 'operationType' | 'params'> => ({
   columnId: uuid(),
   dataType: field.type as DataType,
-  label: series.label ?? field.name,
-  customLabel: series.label ? true : false,
+  label: series.label,
   isBucketed,
   window: metric.window?.toString(),
   filter: series.filter,
