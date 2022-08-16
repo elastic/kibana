@@ -23,7 +23,10 @@ export function handleResponse(
   theme: ThemeServiceStart
 ) {
   const { rawResponse } = response;
-  const { timedOut, shardFailures } = extractWarnings(rawResponse);
+
+  // display warning toast notifications for timeouts and/or shard failures
+  const { shardFailures, timedOut } = extractWarnings(rawResponse)?.notifications ?? {};
+
   if (timedOut) {
     getNotifications().toasts.addWarning(timedOut);
   }

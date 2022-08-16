@@ -10,50 +10,104 @@ import { estypes } from '@elastic/elasticsearch';
 import { extractWarnings } from './extract_warnings';
 
 describe('extract search response warnings', () => {
-  it('extracts timeout warning', () => {
-    expect(
-      extractWarnings({
-        took: 999,
-        timed_out: true,
-        _shards: {} as estypes.ShardStatistics,
-        hits: { hits: [] },
-      })
-    ).toEqual({
-      shardFailures: undefined,
-      timedOut: { title: 'Data might be incomplete because your request timed out' },
-      rawResponse: {
-        took: 999,
-        timed_out: true,
-        _shards: {} as estypes.ShardStatistics,
-        hits: { hits: [] },
+  it('should extract warnings from response with shard failures', () => {
+    const response = {
+      took: 25,
+      timed_out: false,
+      _shards: {
+        total: 4,
+        successful: 2,
+        skipped: 0,
+        failed: 2,
+        failures: [
+          {
+            shard: 0,
+            index: 'sample-01-rollup',
+            node: 'VFTFJxpHSdaoiGxJFLSExQ',
+            reason: {
+              type: 'illegal_argument_exception',
+              reason:
+                'Field [kubernetes.container.memory.available.bytes] of type [aggregate_metric_double] is not supported for aggregation [percentiles]',
+            },
+          },
+        ],
       },
+      hits: { total: 18239, max_score: null, hits: [] },
+      aggregations: {},
+    };
+
+    expect(extractWarnings(response)).toEqual({
+      notifications: {
+        shardFailures: {
+          text: 'The data you are seeing might be incomplete or wrong.',
+          title: '2 of 4 shards failed',
+        },
+        timedOut: undefined,
+      },
+      shardStats: response._shards,
+      timedOut: false,
+      types: ['illegal_argument_exception'],
     });
   });
 
-  it('extracts shards failed warning', () => {
-    expect(
-      extractWarnings({
-        _shards: {
-          failed: 77,
-          total: 79,
-        },
-      } as estypes.SearchResponse)
-    ).toEqual({
-      shardFailures: {
-        text: 'The data you are seeing might be incomplete or wrong.',
-        title: '77 of 79 shards failed',
+  it('should extract timeout warning', () => {
+    const warnings = {
+      took: 999,
+      timed_out: true,
+      _shards: {} as estypes.ShardStatistics,
+      hits: { hits: [] },
+    };
+    expect(extractWarnings(warnings)).toEqual({
+      notifications: {
+        shardFailures: undefined,
+        timedOut: { title: 'Data might be incomplete because your request timed out' },
       },
+      shardStats: {},
+      timedOut: true,
+    });
+  });
+
+  it('should extract shards failed warning notification', () => {
+    const warnings = {
+      _shards: {
+        failed: 77,
+        total: 79,
+      },
+    } as estypes.SearchResponse;
+    expect(extractWarnings(warnings)).toEqual({
+      notifications: {
+        shardFailures: {
+          text: 'The data you are seeing might be incomplete or wrong.',
+          title: '77 of 79 shards failed',
+        },
+        timedOut: undefined,
+      },
+      shardStats: { failed: 77, total: 79 },
       timedOut: undefined,
-      rawResponse: {
-        _shards: {
-          failed: 77,
-          total: 79,
-        },
-      },
     });
   });
 
-  it('extracts multiple warning types', () => {
+  it('should extract shards failed warning failure reason type', () => {
+    const warnings = extractWarnings({
+      _shards: {
+        failed: 77,
+        total: 79,
+      },
+    } as estypes.SearchResponse);
+    expect(warnings).toEqual({
+      notifications: {
+        shardFailures: {
+          text: 'The data you are seeing might be incomplete or wrong.',
+          title: '77 of 79 shards failed',
+        },
+        timedOut: undefined,
+      },
+      shardStats: { failed: 77, total: 79 },
+      timedOut: undefined,
+    });
+  });
+
+  it('extracts multiple warning notifications', () => {
     const warnings = extractWarnings({
       timed_out: true,
       _shards: {
@@ -61,7 +115,11 @@ describe('extract search response warnings', () => {
         total: 79,
       },
     } as estypes.SearchResponse);
-    expect(warnings.shardFailures?.title).toBeDefined();
-    expect(warnings.timedOut?.title).toBeDefined();
+    expect(warnings?.notifications?.shardFailures?.title).toBeDefined();
+    expect(warnings?.notifications?.timedOut?.title).toBeDefined();
+  });
+
+  it('should return undefined if rawResponse is undefined', () => {
+    expect(extractWarnings(undefined)).toEqual(undefined);
   });
 });

@@ -8,18 +8,33 @@
 
 import { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
-import { SearchResponseWarning } from '../../../common/search/types';
 
 /**
+ * The format of warning notifications sourced from info in a search response body
+ */
+export interface SearchResponseWarningNotification {
+  /**
+   * Title for the heading of the warning toast notification
+   */
+  title?: string;
+  /**
+   * Text for the body of the warning toast notification
+   */
+  text?: string;
+}
+
+/**
+ * The format of warning data which may be preset in search response body (shard failures, timeouts).
  * @public
  */
 export interface SearchResponseWarnings {
-  timedOut?: SearchResponseWarning;
-  shardFailures?: SearchResponseWarning;
-  /**
-   * Fields from the response that are needed for logic to handle warnings on a case-by-case basis
-   */
-  rawResponse?: estypes.SearchResponse;
+  notifications?: {
+    timedOut?: SearchResponseWarningNotification;
+    shardFailures?: SearchResponseWarningNotification;
+  };
+  types?: string[]; // shard stats can have multiple shard failure reasons, such as "illegal_argument_exception", etc
+  shardStats?: estypes.ShardStatistics;
+  timedOut?: boolean;
 }
 
 /**
@@ -27,37 +42,46 @@ export interface SearchResponseWarnings {
  */
 export function extractWarnings(
   rawResponse: estypes.SearchResponse | undefined
-): SearchResponseWarnings {
+): SearchResponseWarnings | undefined {
   if (!rawResponse) {
-    return { rawResponse };
+    return;
   }
 
-  const timedOut: SearchResponseWarning | undefined = rawResponse.timed_out
-    ? {
-        title: i18n.translate('data.search.searchSource.fetch.requestTimedOutNotificationMessage', {
-          defaultMessage: 'Data might be incomplete because your request timed out',
-        }),
-      }
-    : undefined;
+  let timedOut: SearchResponseWarningNotification | undefined;
+  if (rawResponse.timed_out === true) {
+    timedOut = {
+      title: i18n.translate('data.search.searchSource.fetch.requestTimedOutNotificationMessage', {
+        defaultMessage: 'Data might be incomplete because your request timed out',
+      }),
+    };
+  }
 
-  const shardFailures: SearchResponseWarning | undefined =
-    rawResponse._shards && rawResponse._shards.failed
-      ? {
-          title: i18n.translate('data.search.searchSource.fetch.shardsFailedNotificationMessage', {
-            defaultMessage: '{shardsFailed} of {shardsTotal} shards failed',
-            values: {
-              shardsFailed: rawResponse._shards.failed,
-              shardsTotal: rawResponse._shards.total,
-            },
-          }),
-          text: i18n.translate(
-            'data.search.searchSource.fetch.shardsFailedNotificationDescription',
-            {
-              defaultMessage: 'The data you are seeing might be incomplete or wrong.',
-            }
-          ),
-        }
-      : undefined;
+  let shardFailures: SearchResponseWarningNotification | undefined;
+  let types: string[] | undefined;
+  if (rawResponse._shards && rawResponse._shards.failed) {
+    shardFailures = {
+      title: i18n.translate('data.search.searchSource.fetch.shardsFailedNotificationMessage', {
+        defaultMessage: '{shardsFailed} of {shardsTotal} shards failed',
+        values: {
+          shardsFailed: rawResponse._shards.failed,
+          shardsTotal: rawResponse._shards.total,
+        },
+      }),
+      text: i18n.translate('data.search.searchSource.fetch.shardsFailedNotificationDescription', {
+        defaultMessage: 'The data you are seeing might be incomplete or wrong.',
+      }),
+    };
 
-  return { timedOut, shardFailures, rawResponse };
+    types = rawResponse._shards.failures?.map((f) => f.reason.type);
+  }
+
+  return {
+    types,
+    shardStats: rawResponse._shards,
+    timedOut: rawResponse.timed_out,
+    notifications: {
+      timedOut,
+      shardFailures,
+    },
+  };
 }

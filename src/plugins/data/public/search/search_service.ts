@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { estypes } from '@elastic/elasticsearch';
 import { BfetchPublicSetup } from '@kbn/bfetch-plugin/public';
 import {
   CoreSetup,
@@ -274,7 +273,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         inspector.adapter?.getRequests().forEach((req) => {
           let handled: boolean | undefined;
           if (cb != null) {
-            const warnings = extractWarnings(req.json as estypes.SearchResponseBody | undefined);
+            const rawResponse = (req.response?.json as IKibanaSearchResponse)?.rawResponse;
+            const warnings = extractWarnings(rawResponse);
             // use the consumer callback to handle warnings from the request
             handled = !!warnings && cb(warnings);
           }
