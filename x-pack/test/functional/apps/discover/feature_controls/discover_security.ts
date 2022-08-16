@@ -205,7 +205,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             expectSpaceSelector: false,
           }
         );
+      });
 
+      beforeEach(async () => {
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.common.waitForTopNavToBeVisible();
       });
@@ -302,7 +304,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             expectSpaceSelector: false,
           }
         );
+      });
 
+      beforeEach(async () => {
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.common.waitForTopNavToBeVisible();
       });
