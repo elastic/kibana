@@ -31,7 +31,7 @@ export const CASE_DETAILS_USER_ACTION_DESCRIPTION_USERNAME =
 
 export const CASE_DETAILS_USERNAMES = '[data-test-subj="case-view-username"]';
 
-export const CASE_EVENT_UPDATE = '.euiCommentEvent--update';
+export const CASE_EVENT_UPDATE = '.euiCommentEvent[data-type="update"]';
 
 export const CASE_IN_PROGRESS_STATUS = '[data-test-subj="status-badge-in-progress"]';
 
