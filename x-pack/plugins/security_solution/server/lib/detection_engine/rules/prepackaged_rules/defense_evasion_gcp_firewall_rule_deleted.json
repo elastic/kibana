@@ -2,7 +2,7 @@
   "author": [
     "Elastic"
   ],
-  "description": "Identifies when a firewall rule is deleted in Google Cloud Platform (GCP). Virtual Private Cloud (VPC) firewall rules can be configured to allow or deny connections to or from virtual machine (VM) instances. An adversary may delete a firewall rule in order to weaken their target's security controls.",
+  "description": "Identifies when a firewall rule is deleted in Google Cloud Platform (GCP) for Virtual Private Cloud (VPC) or App Engine. These firewall rules can be configured to allow or deny connections to or from virtual machine (VM) instances or specific applications. An adversary may delete a firewall rule in order to weaken their target's security controls.",
   "false_positives": [
     "Firewall rules may be deleted by system administrators. Verify that the firewall configuration change was expected. Exceptions can be added to this rule to filter expected behavior."
   ],
@@ -13,13 +13,33 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "GCP Firewall Rule Deletion",
-  "note": "## Config\n\nThe GCP Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
-  "query": "event.dataset:(googlecloud.audit or gcp.audit) and event.action:v*.compute.firewalls.delete\n",
+  "note": "",
+  "query": "event.dataset:gcp.audit and event.action:(*.compute.firewalls.delete or google.appengine.*.Firewall.Delete*Rule)\n",
   "references": [
-    "https://cloud.google.com/vpc/docs/firewalls"
+    "https://cloud.google.com/vpc/docs/firewalls",
+    "https://cloud.google.com/appengine/docs/standard/python/understanding-firewalls"
+  ],
+  "related_integrations": [
+    {
+      "package": "gcp",
+      "version": "1.10.0"
+    }
+  ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.action",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.dataset",
+      "type": "keyword"
+    }
   ],
   "risk_score": 47,
   "rule_id": "ff9b571e-61d6-4f6c-9561-eb4cca3bafe1",
+  "setup": "The GCP Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
   "severity": "medium",
   "tags": [
     "Elastic",
@@ -48,5 +68,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 5
+  "version": 7
 }
