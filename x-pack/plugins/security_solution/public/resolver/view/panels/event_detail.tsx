@@ -39,6 +39,7 @@ import type { SafeResolverEvent } from '../../../../common/endpoint/types';
 import { deepObjectEntries } from './deep_object_entries';
 import { useFormattedDate } from './use_formatted_date';
 import * as nodeDataModel from '../../models/node_data';
+import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 
 const eventDetailRequestError = i18n.translate(
   'xpack.securitySolution.resolver.panel.eventDetail.requestError',
@@ -158,9 +159,10 @@ function EventDetailFields({ event }: { event: SafeResolverEvent }) {
       namespace: React.ReactNode;
       descriptions: Array<{ title: React.ReactNode; description: React.ReactNode }>;
     }> = [];
-    for (const [key, value] of Object.entries(event)) {
+    const expandedEventObject: object = expandDottedObject(event);
+    for (const [key, value] of Object.entries(expandedEventObject)) {
       // ignore these keys
-      if (key === 'agent' || key === 'ecs' || key === '@timestamp') {
+      if (key === 'agent' || key === 'ecs' || key === '@timestamp' || !value) {
         continue;
       }
 
