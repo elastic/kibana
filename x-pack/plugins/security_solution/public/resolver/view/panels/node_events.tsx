@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-/* eslint-disable react/display-name */
-
 import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiButtonEmpty, EuiSpacer, EuiInMemoryTable } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiButtonEmpty, EuiSpacer, EuiInMemoryTable, EuiStat, EuiToolTip } from '@elastic/eui';
+import numeral from '@elastic/numeral';
 import { useSelector } from 'react-redux';
+import { DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
+import { useUiSetting$ } from '../../../common/lib/kibana';
 import { Breadcrumbs } from './breadcrumbs';
 import * as event from '../../../../common/endpoint/models/event';
 import type { EventStats } from '../../../../common/endpoint/types';
@@ -72,6 +72,8 @@ const EventCategoryLinks = memo(function ({
     eventType: string;
     count: number;
   }
+  const eventCountFormat = '0,0.[000]a';
+  const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
 
   const rows = useMemo(() => {
     return Object.entries(relatedStats.byCategory).map(
@@ -94,6 +96,17 @@ const EventCategoryLinks = memo(function ({
         'data-test-subj': 'resolver:panel:node-events:event-type-count',
         width: '20%',
         sortable: true,
+        render(count: string) {
+          return (
+            <EuiToolTip position="right" content={numeral(count).format(defaultNumberFormat)}>
+              <EuiStat
+                title={numeral(count).format(eventCountFormat)}
+                titleSize={'xxs'}
+                description={null}
+              />
+            </EuiToolTip>
+          );
+        },
       },
       {
         field: 'eventType',
@@ -111,10 +124,12 @@ const EventCategoryLinks = memo(function ({
         },
       },
     ],
-    [nodeID]
+    [nodeID, eventCountFormat, defaultNumberFormat]
   );
   return <EuiInMemoryTable<EventCountsTableView> items={rows} columns={columns} sorting />;
 });
+
+EventCategoryLinks.displayName = 'EventCategoryLinks';
 
 const NodeEventsBreadcrumbs = memo(function ({
   nodeID,
@@ -163,6 +178,8 @@ const NodeEventsBreadcrumbs = memo(function ({
     />
   );
 });
+
+NodeEventsBreadcrumbs.displayName = 'NodeEventsBreadcrumbs';
 
 const NodeEventsLink = memo(
   ({
