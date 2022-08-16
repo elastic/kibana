@@ -48,6 +48,7 @@ interface QueryOptionsEventsBySavedObjectFilter {
   type: string;
   ids: string[];
   legacyIds?: string[];
+  getAllIds?: boolean;
 }
 
 export type FindEventsOptionsBySavedObjectFilter = QueryOptionsEventsBySavedObjectFilter & {
@@ -442,7 +443,7 @@ export function getQueryBody(
   opts: FindEventsOptionsBySavedObjectFilter | AggregateEventsOptionsBySavedObjectFilter,
   queryOptions: QueryOptionsType
 ) {
-  const { namespace, type, ids, legacyIds } = opts;
+  const { namespace, type, ids, legacyIds, getAllIds = false } = opts;
   const { start, end, filter } = queryOptions ?? {};
 
   const namespaceQuery = getNamespaceQuery(namespace);
@@ -498,7 +499,8 @@ export function getQueryBody(
   ];
 
   const shouldQuery = [];
-  if (ids[0] !== '*') {
+  // Only filter by ID if getAllIds is false
+  if (!getAllIds) {
     shouldQuery.push({
       bool: {
         must: [

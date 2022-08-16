@@ -926,7 +926,7 @@ export class RulesClient {
     const eventLogClient = await this.getEventLogClient();
 
     try {
-      const aggResult = await eventLogClient.aggregateEventsBySavedObjectIds('alert', ['*'], {
+      const aggResult = await eventLogClient.aggregateEventsBySavedObjectType('alert', {
         start: parsedDateStart.toISOString(),
         end: parsedDateEnd.toISOString(),
         aggs: getExecutionLogAggregation({

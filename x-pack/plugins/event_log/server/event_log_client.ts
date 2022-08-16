@@ -126,8 +126,7 @@ export class EventLogClient implements IEventLogClient {
     const aggregateOptions = queryOptionsSchema.validate(omit(options, 'aggs') ?? {});
 
     // verify the user has the required permissions to view this saved object
-    // FIXME do not let me merge this PR with this line unchanged
-    if (ids[0] !== '*') await this.savedObjectGetter(type, ids);
+    await this.savedObjectGetter(type, ids);
 
     return await this.esContext.esAdapter.aggregateEventsBySavedObjects({
       index: this.esContext.esNames.indexPattern,
@@ -136,6 +135,26 @@ export class EventLogClient implements IEventLogClient {
       ids,
       aggregateOptions: { ...aggregateOptions, aggs } as AggregateOptionsType,
       legacyIds,
+    });
+  }
+
+  public async aggregateEventsBySavedObjectType(type: string, options?: AggregateOptionsType) {
+    const aggs = options?.aggs;
+    if (!aggs) {
+      throw new Error('No aggregation defined!');
+    }
+
+    // validate other query options separately from
+    const aggregateOptions = queryOptionsSchema.validate(omit(options, 'aggs') ?? {});
+
+    return await this.esContext.esAdapter.aggregateEventsBySavedObjects({
+      index: this.esContext.esNames.indexPattern,
+      namespace: await this.getNamespace(),
+      type,
+      ids: [],
+      aggregateOptions: { ...aggregateOptions, aggs } as AggregateOptionsType,
+      legacyIds: [],
+      getAllIds: true,
     });
   }
 
