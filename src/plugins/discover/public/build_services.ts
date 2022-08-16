@@ -83,6 +83,7 @@ export interface DiscoverServices {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   locator: DiscoverAppLocator;
   expressions: ExpressionsStart;
+  charts: ChartsPluginStart;
 }
 
 export const buildServices = memoize(function (
@@ -128,5 +129,6 @@ export const buildServices = memoize(function (
     triggersActionsUi: plugins.triggersActionsUi,
     locator,
     expressions: plugins.expressions,
+    charts: plugins.charts,
   };
 });

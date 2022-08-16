@@ -116,6 +116,7 @@ export function DiscoverSidebarComponent({
   viewMode,
   createNewDataView,
   showDataViewPicker,
+  state,
 }: DiscoverSidebarProps) {
   const { uiSettings, dataViewFieldEditor } = useDiscoverServices();
   const [fields, setFields] = useState<DataViewField[] | null>(null);
@@ -412,6 +413,7 @@ export function DiscoverSidebarComponent({
                                 onEditField={editField}
                                 onDeleteField={deleteField}
                                 showFieldStats={showFieldStats}
+                                state={state}
                               />
                             </li>
                           );
@@ -472,6 +474,7 @@ export function DiscoverSidebarComponent({
                                 onEditField={editField}
                                 onDeleteField={deleteField}
                                 showFieldStats={showFieldStats}
+                                state={state}
                               />
                             </li>
                           );
@@ -501,6 +504,7 @@ export function DiscoverSidebarComponent({
                             onEditField={editField}
                             onDeleteField={deleteField}
                             showFieldStats={showFieldStats}
+                            state={state}
                           />
                         </li>
                       );
