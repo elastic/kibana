@@ -98,10 +98,10 @@ const EventCategoryLinks = memo(function ({
         sortable: true,
         render(count: string) {
           return (
-            <EuiToolTip position="right" content={numeral(count).format(defaultNumberFormat)}>
+            <EuiToolTip position="bottom" content={numeral(count).format(defaultNumberFormat)}>
               <EuiStat
                 title={numeral(count).format(eventCountFormat)}
-                titleSize={'xxs'}
+                titleSize={'xxxs'}
                 description={null}
               />
             </EuiToolTip>
