@@ -68,6 +68,7 @@ import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/vie
 import type { SourcererModel, KibanaDataView } from './common/store/sourcerer/model';
 import { initDataView } from './common/store/sourcerer/model';
 import type { SecurityDataView } from './common/containers/sourcerer/api';
+import { MyInspectorComponent } from './common/components/inspect/my_inspector';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   readonly kibanaVersion: string;
@@ -119,6 +120,27 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         order: 300,
       });
     }
+
+    const SecuritySolutionInspectorView = {
+      // Title shown to select this view
+      title: 'Display Name',
+      // An icon id from the EUI icon list
+      icon: 'iconName',
+      // An order to sort the views (lower means first)
+      order: 10,
+      // An additional helptext, that wil
+      help: `And additional help text, that will be shown in the inspector help.`,
+      shouldShow(adapters) {
+        // Only show if `someAdapter` is available. Make sure to check for
+        // all adapters that you want to access in your view later on and
+        // any additional condition you want to be true to be shown.
+        return Boolean(adapters.tables);
+      },
+      // A React component, that will be used for rendering
+      component: MyInspectorComponent,
+    };
+
+    plugins.inspector.registerView(SecuritySolutionInspectorView);
 
     /**
      * `StartServices` which are needed by the `renderApp` function when mounting any of the subPlugin applications.

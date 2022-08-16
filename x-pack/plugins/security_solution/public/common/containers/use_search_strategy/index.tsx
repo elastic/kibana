@@ -89,7 +89,7 @@ const searchComplete = <ResponseType extends IKibanaSearchResponse>(
   const { adapters: inspectorAdapters, startTime, ...searchProps } = props;
   return search<ResponseType>(searchProps).pipe(
     tap({
-      next({ rawResponse, took, inspect }) {
+      next({ rawResponse, inspect }) {
         logInspectorRequest(inspectorAdapters, startTime)
           .stats({
             hits: {
@@ -107,7 +107,7 @@ const searchComplete = <ResponseType extends IKibanaSearchResponse>(
               }),
               value: i18n.translate('data.search.es_search.queryTimeValue', {
                 defaultMessage: '{queryTime}ms',
-                values: { queryTime: took },
+                values: { queryTime: rawResponse?.took },
               }),
               description: i18n.translate('data.search.es_search.queryTimeDescription', {
                 defaultMessage:

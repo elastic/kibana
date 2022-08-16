@@ -114,6 +114,7 @@ class DataViewComponent extends Component<DataViewComponentProps, DataViewCompon
   }
 
   render() {
+    console.log(this.state.adapters.tables.tables);
     if (!this.state.datatable) {
       return DataViewComponent.renderNoData();
     }

@@ -137,6 +137,37 @@ export class DataTableFormat extends Component<DataTableFormatProps, DataTableFo
                 </EuiToolTip>
               </EuiFlexItem>
             )}
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                position="bottom"
+                content={
+                  <FormattedMessage
+                    id="data.inspector.table.filterOutValueButtonTooltip"
+                    defaultMessage="Filter out value"
+                  />
+                }
+              >
+                <EuiButtonIcon
+                  iconType="minusInCircle"
+                  color="text"
+                  aria-label={i18n.translate(
+                    'data.inspector.table.filterOutValueButtonAriaLabel2',
+                    {
+                      defaultMessage: 'Custom Button',
+                    }
+                  )}
+                  data-test-subj="filterOutInspectorCellValue"
+                  className="insDataTableFormat__filter"
+                  onClick={() => {
+                    const value = table.rows[rowIndex][column.id];
+                    const eventData = { table, column: columnIndex, row: rowIndex, value };
+                    uiActions.executeTriggerActions('VALUE_CLICK_TRIGGER', {
+                      data: { data: [eventData], negate: true },
+                    });
+                  }}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -155,7 +186,6 @@ export class DataTableFormat extends Component<DataTableFormatProps, DataTableFo
         rows: null,
       };
     }
-
     const columns = data.columns.map((dataColumn: any, index: number) => {
       const formatParams = { id: 'string', ...dataColumn.meta.params };
       const fieldFormatter = fieldFormats.deserialize(formatParams);
