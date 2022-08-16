@@ -6,15 +6,15 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { getExceptionFilterSchema } from '../../../../../common/detection_engine/schemas/request';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { DETECTION_ENGINE_EXCEPTIONS } from '../../../../../common/constants';
+import { DETECTION_ENGINE_EXCEPTIONS_GET_FILTER } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 
-import { ConfigType } from '../../../../config';
-import { SetupPlugins } from '../../../../plugin';
+import type { ConfigType } from '../../../../config';
+import type { SetupPlugins } from '../../../../plugin';
 import { buildExceptionFilter } from '../../exceptions/build_exception_filter';
 
 export const getExceptionFilterRoute = (
@@ -24,7 +24,7 @@ export const getExceptionFilterRoute = (
 ) => {
   router.post(
     {
-      path: `${DETECTION_ENGINE_EXCEPTIONS}/_create_filter`,
+      path: `${DETECTION_ENGINE_EXCEPTIONS_GET_FILTER}`,
       validate: {
         body: buildRouteValidation(getExceptionFilterSchema),
       },

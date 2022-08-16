@@ -368,7 +368,7 @@ describe('findThresholdSignals', () => {
       inputIndexPattern: ['*'],
       services: mockService,
       ruleExecutionLogger,
-      filter: queryFilter,
+      filter,
       threshold: {
         cardinality: [
           {
