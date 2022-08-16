@@ -12,7 +12,7 @@ import { act } from 'react-dom/test-utils';
 import { EuiLoadingElastic } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { NoDataViewsPrompt } from '@kbn/shared-ux-prompt-no-data-views';
-import { NoDataConfigPage } from '@kbn/shared-ux-components';
+import { NoDataConfigPage } from '@kbn/shared-ux-page-no-data-config';
 import { getKibanaNoDataPageServicesMock } from '@kbn/shared-ux-page-kibana-no-data-mocks';
 
 import { KibanaNoDataPage } from './kibana_no_data_page';
@@ -32,18 +32,13 @@ describe('Kibana No Data Page', () => {
   };
 
   const onDataViewCreated = jest.fn();
-  const config = {
-    hasESData: false,
-    hasDataView: false,
-    hasUserDataView: false,
-  };
 
   afterEach(() => {
     jest.resetAllMocks();
   });
 
   test('renders NoDataConfigPage', async () => {
-    const services = getKibanaNoDataPageServicesMock({ config: { ...config, hasESData: false } });
+    const services = getKibanaNoDataPageServicesMock({ hasESData: false });
     const component = mountWithIntl(
       <KibanaNoDataPageProvider {...services}>
         <KibanaNoDataPage {...{ noDataConfig, onDataViewCreated }} />
@@ -58,7 +53,7 @@ describe('Kibana No Data Page', () => {
   });
 
   test('renders NoDataViews', async () => {
-    const services = getKibanaNoDataPageServicesMock({ config: { ...config, hasESData: true } });
+    const services = getKibanaNoDataPageServicesMock({ hasESData: true });
     const component = mountWithIntl(
       <KibanaNoDataPageProvider {...services}>
         <KibanaNoDataPage noDataConfig={noDataConfig} onDataViewCreated={onDataViewCreated} />

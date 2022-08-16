@@ -54,9 +54,9 @@ TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
   "//packages/shared-ux/page/kibana_no_data/types:npm_module_types",
-  "//packages/kbn-shared-ux-components:npm_module_types",
   "//packages/shared-ux/prompt/no_data_views/mocks:npm_module_types",
   "//packages/shared-ux/card/no_data/mocks:npm_module_types",
+  "//packages/shared-ux/page/no_data/types",
 ]
 
 jsts_transpiler(

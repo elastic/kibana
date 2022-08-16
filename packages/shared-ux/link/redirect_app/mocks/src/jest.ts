@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Subject } from 'rxjs';
+import { Observable } from 'rxjs';
 
 import {
   RedirectAppLinksServices,
@@ -29,7 +29,9 @@ export const getRedirectAppLinksKibanaDependenciesMock = (): RedirectAppLinksKib
   return {
     coreStart: {
       application: {
-        currentAppId$: new Subject<string>(),
+        currentAppId$: new Observable<string>((subscriber) => {
+          subscriber.next('currentAppId');
+        }),
         navigateToUrl: jest.fn(),
       },
     },
