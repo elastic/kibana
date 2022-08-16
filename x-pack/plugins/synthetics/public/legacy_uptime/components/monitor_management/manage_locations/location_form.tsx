@@ -77,7 +77,7 @@ export const LocationForm = ({
                       external
                     >
                       <FormattedMessage
-                        id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorType.browser.warning.link"
+                        id="xpack.synthetics.monitorManagement.agentCallout.link"
                         defaultMessage="read the docs"
                       />
                     </EuiLink>
