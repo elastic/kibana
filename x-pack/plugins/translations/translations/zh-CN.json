@@ -30601,7 +30601,6 @@
     "xpack.synthetics.charts.mlAnnotation.severity": "严重性：{severity}",
     "xpack.synthetics.controls.selectSeverity.scoreDetailsDescription": "{value} 及以上分数",
     "xpack.synthetics.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.throttling_exceeded.message": "您已超出 Synthetic 节点的 { throttlingField } 限制。{ throttlingField } 值不能大于 { limit }Mbps。",
-    "xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorType.browser.warning.description": "要创建“浏览器”监测，请确保使用 elastic-agent-complete Docker 容器，其中包含运行这些监测的依赖项。有关更多信息，请访问我们的 {link}。",
     "xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.params.helpText": "请使用 JSON 来定义可在您的脚本中通过 {code} 引用的参数",
     "xpack.synthetics.durationChart.emptyPrompt.description": "在选定时间范围内此监测从未{emphasizedText}。",
     "xpack.synthetics.editMonitorRoute.title": "编辑监测 | {baseTitle}",
