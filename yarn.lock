@@ -6471,10 +6471,6 @@
   resolved "https://registry.yarnpkg.com/@types/ejs/-/ejs-3.0.6.tgz#aca442289df623bfa8e47c23961f0357847b83fe"
   integrity sha512-fj1hi+ZSW0xPLrJJD+YNwIh9GZbyaIepG26E/gXvp8nCa2pYokxUYO1sK9qjGxp2g8ryZYuon7wmjpwE2cyASQ==
 
-"@types/elastic__apm-synthtrace@link:bazel-bin/packages/kbn-apm-synthtrace/npm_module_types":
-  version "0.0.0"
-  uid ""
-
 "@types/enzyme@^3.10.8":
   version "3.10.8"
   resolved "https://registry.yarnpkg.com/@types/enzyme/-/enzyme-3.10.8.tgz#ad7ac9d3af3de6fd0673773123fafbc63db50d42"
@@ -6914,6 +6910,10 @@
   uid ""
 
 "@types/kbn__apm-config-loader@link:bazel-bin/packages/kbn-apm-config-loader/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__apm-synthtrace@link:bazel-bin/packages/kbn-apm-synthtrace/npm_module_types":
   version "0.0.0"
   uid ""
 
