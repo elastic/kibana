@@ -113,7 +113,6 @@ describe('cloneDescriptor', () => {
             right: {
               id: '557d0f15',
               indexPatternId: 'myIndexPattern',
-              indexPatternTitle: 'logs-*',
               term: 'myTermField',
               type: 'joinSource',
             } as unknown as ESTermSourceDescriptor,

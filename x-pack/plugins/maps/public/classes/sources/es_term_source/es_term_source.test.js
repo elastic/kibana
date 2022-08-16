@@ -9,7 +9,6 @@ import { ESTermSource, extractPropertiesMap } from './es_term_source';
 
 jest.mock('../../layers/vector_layer', () => {});
 
-const indexPatternTitle = 'myIndex';
 const termFieldName = 'myTermField';
 const sumFieldName = 'myFieldGettingSummed';
 const metricExamples = [
@@ -33,7 +32,6 @@ describe('getMetricFields', () => {
   it('should override name and label of count metric', async () => {
     const source = new ESTermSource({
       id: '1234',
-      indexPatternTitle: indexPatternTitle,
       term: termFieldName,
       indexPatternId: 'foobar',
     });
@@ -45,7 +43,6 @@ describe('getMetricFields', () => {
   it('should override name and label of sum metric', async () => {
     const source = new ESTermSource({
       id: '1234',
-      indexPatternTitle: indexPatternTitle,
       term: termFieldName,
       metrics: metricExamples,
       indexPatternId: 'foobar',
@@ -114,7 +111,6 @@ describe('getSyncMeta', () => {
   it('should contain meta requiring source re-fetch when changed', () => {
     const source = new ESTermSource({
       id: '1234',
-      indexPatternTitle: indexPatternTitle,
       term: termFieldName,
       indexPatternId: 'foobar',
       size: 10,
