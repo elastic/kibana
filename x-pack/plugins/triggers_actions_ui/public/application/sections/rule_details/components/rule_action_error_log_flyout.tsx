@@ -25,18 +25,17 @@ import { RuleErrorLogWithApi } from './rule_error_log';
 import { RuleActionErrorBadge } from './rule_action_error_badge';
 
 export interface RuleActionErrorLogFlyoutProps {
-  ruleId: string;
   runLog: IExecutionLog;
   refreshToken?: number;
   onClose: () => void;
 }
 
 export const RuleActionErrorLogFlyout = (props: RuleActionErrorLogFlyoutProps) => {
-  const { ruleId, runLog, refreshToken, onClose } = props;
+  const { runLog, refreshToken, onClose } = props;
 
   const { euiTheme } = useEuiTheme();
 
-  const { id, message, num_errored_actions: totalErrors } = runLog;
+  const { id, rule_id: ruleId, message, num_errored_actions: totalErrors } = runLog;
 
   const isFlyoutPush = useIsWithinBreakpoints(['xl']);
 

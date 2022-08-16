@@ -171,6 +171,25 @@ const aggregateResults = {
                 value: 1.646667512617e12,
                 value_as_string: '2022-03-07T15:38:32.617Z',
               },
+              ruleId: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 1.0,
+                  hits: [
+                    {
+                      _index: '.kibana-event-log-8.2.0-000001',
+                      _id: 'S4wIZX8B8TGQpG7XQZns',
+                      _score: 1.0,
+                      _source: {
+                        rule: { id: 'abc123' },
+                      },
+                    },
+                  ],
+                },
+              },
             },
             actionExecution: {
               meta: {},
@@ -254,6 +273,25 @@ const aggregateResults = {
                 value: 1.646667545604e12,
                 value_as_string: '2022-03-07T15:39:05.604Z',
               },
+              ruleId: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 1.0,
+                  hits: [
+                    {
+                      _index: '.kibana-event-log-8.2.0-000001',
+                      _id: 'S4wIZX8B8TGQpG7XQZns',
+                      _score: 1.0,
+                      _source: {
+                        rule: { id: 'abc123' },
+                      },
+                    },
+                  ],
+                },
+              },
             },
             actionExecution: {
               meta: {},
@@ -333,6 +371,7 @@ describe('getExecutionLogForRule()', () => {
           es_search_duration_ms: 0,
           timed_out: false,
           schedule_delay_ms: 3126,
+          rule_id: 'abc123',
         },
         {
           id: '41b2755e-765a-4044-9745-b03875d5e79a',
@@ -353,6 +392,7 @@ describe('getExecutionLogForRule()', () => {
           es_search_duration_ms: 0,
           timed_out: false,
           schedule_delay_ms: 3345,
+          rule_id: 'abc123',
         },
       ],
     });

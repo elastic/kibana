@@ -961,7 +961,7 @@ export class RulesClient {
       };
     } catch (err) {
       this.logger.debug(
-        `rulesClient.getExecutionLogForRule(): error searching global event log: ${err.message}`
+        `rulesClient.getGlobalExecutionLogWithAuth(): error searching global event log: ${err.message}`
       );
       throw err;
     }
