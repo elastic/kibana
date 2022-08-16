@@ -42,7 +42,7 @@ export class InternalFileService {
   ) {}
 
   public async createFile(args: CreateFileArgs): Promise<IFile> {
-    return this.createFileClient(args.fileKind).create({ metadata: args });
+    return this.createFileClient(args.fileKind).create({ metadata: { ...args } });
   }
 
   public writeAuditLog(event: AuditEvent) {
