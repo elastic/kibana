@@ -95,7 +95,7 @@ export class FileClientImpl implements FileClient {
   }
 
   public async create<M = unknown>({ id, metadata }: CreateArgs): Promise<File<M>> {
-    const serializedMetadata = serializeJSON(metadata);
+    const serializedMetadata = serializeJSON({ ...metadata, mimeType: metadata.mime });
     const result = await this.metadataClient.create({
       id: id || cuid(),
       metadata: {
