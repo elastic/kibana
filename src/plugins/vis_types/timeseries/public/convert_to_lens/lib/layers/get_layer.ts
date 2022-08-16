@@ -16,7 +16,7 @@ import { SUPPORTED_FORMATTERS } from '../formatters';
 import { convertSplitFilters } from '../split_chart';
 import { convertMetrics, convertFilter } from '../metrics';
 import type { Panel, Series } from '../../../../common/types';
-import { TIME_RANGE_DATA_MODES } from '../../../../common/enums';
+import { PANEL_TYPES, TIME_RANGE_DATA_MODES } from '../../../../common/enums';
 import { getUISettings } from '../../../services';
 import { VisSeries } from '../series';
 
@@ -82,7 +82,8 @@ export const getLayerConfiguration = (
     layer,
     metricsArray,
     filter,
-    model.time_range_mode === TIME_RANGE_DATA_MODES.LAST_VALUE
+    model.time_range_mode === TIME_RANGE_DATA_MODES.LAST_VALUE &&
+      model.type !== PANEL_TYPES.TIMESERIES
       ? getWindow(model.interval, timeRange)
       : undefined
   );
