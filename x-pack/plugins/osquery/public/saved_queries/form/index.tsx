@@ -23,7 +23,7 @@ import {
 } from '../../packs/queries/validations';
 import { ComboBoxField, NumberField } from '../../form';
 import { PlatformCheckBoxGroupField } from '../../packs/queries/platform_checkbox_group_field';
-import { TextField } from '../../form/TextField';
+import { TextField } from '../../form';
 import { ALL_OSQUERY_VERSIONS_OPTIONS } from '../../packs/queries/constants';
 import { Field, getUseField } from '../../shared_imports';
 import { ECSMappingEditorField } from '../../packs/queries/lazy_ecs_mapping_editor_field';
