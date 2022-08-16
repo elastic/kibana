@@ -49,7 +49,7 @@ export const useStyles = () => {
       container,
       terminal,
     };
-  }, [euiTheme]);
+  }, [euiScrollBar, euiTheme]);
 
   return cached;
 };
