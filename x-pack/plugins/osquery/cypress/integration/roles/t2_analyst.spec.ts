@@ -19,7 +19,7 @@ import {
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 import { getSavedQueriesComplexTest } from '../../tasks/saved_queries';
 
-describe.skip('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
+describe('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
   const SAVED_QUERY_ID = 'Saved-Query-Id';
   const NEW_SAVED_QUERY_ID = 'Saved-Query-Id-T2';
   const NEW_SAVED_QUERY_DESCRIPTION = 'Test saved query description T2';
