@@ -44,7 +44,7 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DashboardSetup, DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import type { CasesUiSetup, CasesUiStart } from '@kbn/cases-plugin/public/types';
+import type { CasesUiSetup, CasesUiStart } from '@kbn/cases-plugin/public';
 import { registerManagementSection } from './application/management';
 import { MlLocatorDefinition, MlLocator } from './locator';
 import { setDependencyCache } from './application/util/dependency_cache';
@@ -136,6 +136,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             usageCollection: pluginsSetup.usageCollection,
             fieldFormats: pluginsStart.fieldFormats,
             lens: pluginsStart.lens,
+            cases: pluginsStart.cases,
           },
           params
         );

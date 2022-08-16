@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { NavigateToPath } from '../../contexts/kibana';
+import { NavigateToPath, useMlKibana } from '../../contexts/kibana';
 
 import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
 
@@ -96,6 +96,10 @@ interface ExplorerUrlStateManagerProps {
 }
 
 const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTimeRange }) => {
+  const {
+    services: { cases },
+  } = useMlKibana();
+
   const [, , explorerUrlStateService] = useExplorerUrlState();
 
   const anomalyExplorerContext = useAnomalyExplorerContextValue(explorerUrlStateService);
@@ -245,6 +249,18 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     return null;
   }
 
+  const CasesContext = cases?.ui.getCasesContext() ?? React.Fragment;
+
+  // TODO retrieve permissions
+  const casesPermissions = {
+    all: true,
+    create: true,
+    read: true,
+    update: true,
+    delete: true,
+    push: true,
+  };
+
   return (
     <div className="ml-explorer">
       <MlPageHeader>
@@ -260,27 +276,29 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
           </EuiFlexItem>
         </EuiFlexGroup>
       </MlPageHeader>
-      <AnomalyExplorerContext.Provider value={anomalyExplorerContext}>
-        {jobsWithTimeRange.length === 0 ? (
-          <AnomalyDetectionEmptyState />
-        ) : (
-          <Explorer
-            {...{
-              explorerState,
-              overallSwimlaneData,
-              showCharts,
-              severity: tableSeverity.val,
-              stoppedPartitions,
-              invalidTimeRangeError,
-              selectedJobsRunning,
-              timeBuckets,
-              timefilter,
-              selectedCells,
-              swimLaneSeverity,
-            }}
-          />
-        )}
-      </AnomalyExplorerContext.Provider>
+      <CasesContext owner={[]} permissions={casesPermissions}>
+        <AnomalyExplorerContext.Provider value={anomalyExplorerContext}>
+          {jobsWithTimeRange.length === 0 ? (
+            <AnomalyDetectionEmptyState />
+          ) : (
+            <Explorer
+              {...{
+                explorerState,
+                overallSwimlaneData,
+                showCharts,
+                severity: tableSeverity.val,
+                stoppedPartitions,
+                invalidTimeRangeError,
+                selectedJobsRunning,
+                timeBuckets,
+                timefilter,
+                selectedCells,
+                swimLaneSeverity,
+              }}
+            />
+          )}
+        </AnomalyExplorerContext.Provider>
+      </CasesContext>
     </div>
   );
 };

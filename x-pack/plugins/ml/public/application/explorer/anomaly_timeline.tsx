@@ -25,6 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
 import useObservable from 'react-use/lib/useObservable';
+import { PLUGIN_ID } from '../../../common/constants/app';
 import { OVERALL_LABEL, SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from './explorer_constants';
 import { AddSwimlaneToDashboardControl } from './dashboard_controls/add_swimlane_to_dashboard_controls';
 import { useMlKibana } from '../contexts/kibana';
@@ -61,8 +62,12 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
       services: {
         application: { capabilities },
         charts: chartsService,
+        cases,
       },
     } = useMlKibana();
+
+    const createCaseFlyout = cases?.hooks.getUseCasesAddToNewCaseFlyout();
+    const selectCaseModal = cases?.hooks.getUseCasesAddToExistingCaseModal();
 
     const { anomalyExplorerCommonStateService, anomalyTimelineStateService } =
       useAnomalyExplorerContext();
@@ -145,6 +150,15 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
       [severityUpdate, swimLaneSeverity]
     );
 
+    const attachments = [
+      {
+        type: 'persistableState' as const,
+        persistableStateAttachmentTypeId: '.test',
+        persistableStateAttachmentState: {},
+        owner: PLUGIN_ID,
+      },
+    ];
+
     const annotations = useMemo(() => overallAnnotations.annotationsData, [overallAnnotations]);
 
     const menuItems = useMemo(() => {
@@ -163,19 +177,38 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
           </EuiContextMenuItem>
         );
       }
-      // TODO check privileges
-      const canEditCase = true;
-      if (canEditCase) {
+      const canCreateCase = true;
+      if (canCreateCase && createCaseFlyout) {
         items.push(
           <EuiContextMenuItem
             key="addToCase"
-            onClick={setIsAddDashboardActive.bind(null, true)}
-            data-test-subj="mlAnomalyTimelinePanelAddToDashboardButton"
+            onClick={() => createCaseFlyout.open({ attachments })}
+            data-test-subj="mlAnomalyTimelinePanelAttachToNewCaseButton"
           >
-            <FormattedMessage id="xpack.ml.explorer.addToCaseLabel" defaultMessage="Add to case" />
+            <FormattedMessage
+              id="xpack.ml.explorer.attachToANewCaseLabel"
+              defaultMessage="Attach to a new case"
+            />
           </EuiContextMenuItem>
         );
       }
+      // TODO check privileges
+      const canEditCase = true;
+      if (canEditCase && selectCaseModal) {
+        items.push(
+          <EuiContextMenuItem
+            key="addToCase"
+            onClick={() => selectCaseModal.open({ attachments })}
+            data-test-subj="mlAnomalyTimelinePanelAttachToExistingCaseButton"
+          >
+            <FormattedMessage
+              id="xpack.ml.explorer.attachToAnExistingCaseLabel"
+              defaultMessage="Attach to an existing case"
+            />
+          </EuiContextMenuItem>
+        );
+      }
+
       return items;
     }, [canEditDashboards]);
 
