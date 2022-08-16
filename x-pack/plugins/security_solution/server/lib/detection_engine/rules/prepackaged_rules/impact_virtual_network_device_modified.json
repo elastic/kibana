@@ -14,13 +14,38 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Azure Virtual Network Device Modified or Deleted",
-  "note": "## Config\n\nThe Azure Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
-  "query": "event.dataset:azure.activitylogs and azure.activitylogs.operation_name:(\"MICROSOFT.NETWORK/NETWORKINTERFACES/TAPCONFIGURATIONS/WRITE\" or\n\"MICROSOFT.NETWORK/NETWORKINTERFACES/TAPCONFIGURATIONS/DELETE\" or \"MICROSOFT.NETWORK/NETWORKINTERFACES/WRITE\" or\n\"MICROSOFT.NETWORK/NETWORKINTERFACES/JOIN/ACTION\" or \"MICROSOFT.NETWORK/NETWORKINTERFACES/DELETE\" or\n\"MICROSOFT.NETWORK/NETWORKVIRTUALAPPLIANCES/DELETE\" or \"MICROSOFT.NETWORK/NETWORKVIRTUALAPPLIANCES/WRITE\" or\n\"MICROSOFT.NETWORK/VIRTUALHUBS/DELETE\" or \"MICROSOFT.NETWORK/VIRTUALHUBS/WRITE\" or\n\"MICROSOFT.NETWORK/VIRTUALROUTERS/WRITE\" or \"MICROSOFT.NETWORK/VIRTUALROUTERS/DELETE\") and \nevent.outcome:(Success or success)\n",
+  "note": "",
+  "query": "event.dataset:azure.activitylogs and azure.activitylogs.operation_name:(\"MICROSOFT.NETWORK/NETWORKINTERFACES/TAPCONFIGURATIONS/WRITE\" or\n\"MICROSOFT.NETWORK/NETWORKINTERFACES/TAPCONFIGURATIONS/DELETE\" or \"MICROSOFT.NETWORK/NETWORKINTERFACES/WRITE\" or\n\"MICROSOFT.NETWORK/NETWORKINTERFACES/JOIN/ACTION\" or \"MICROSOFT.NETWORK/NETWORKINTERFACES/DELETE\" or\n\"MICROSOFT.NETWORK/NETWORKVIRTUALAPPLIANCES/DELETE\" or \"MICROSOFT.NETWORK/NETWORKVIRTUALAPPLIANCES/WRITE\" or\n\"MICROSOFT.NETWORK/VIRTUALHUBS/DELETE\" or \"MICROSOFT.NETWORK/VIRTUALHUBS/WRITE\" or\n\"MICROSOFT.NETWORK/VIRTUALROUTERS/WRITE\" or \"MICROSOFT.NETWORK/VIRTUALROUTERS/DELETE\") and\nevent.outcome:(Success or success)\n",
   "references": [
     "https://docs.microsoft.com/en-us/azure/role-based-access-control/resource-provider-operations"
   ],
+  "related_integrations": [
+    {
+      "integration": "activitylogs",
+      "package": "azure",
+      "version": "0.12.0"
+    }
+  ],
+  "required_fields": [
+    {
+      "ecs": false,
+      "name": "azure.activitylogs.operation_name",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.dataset",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.outcome",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 21,
   "rule_id": "573f6e7a-7acf-4bcd-ad42-c4969124d3c0",
+  "setup": "The Azure Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
   "severity": "low",
   "tags": [
     "Elastic",
@@ -28,7 +53,8 @@
     "Azure",
     "Continuous Monitoring",
     "SecOps",
-    "Network Security"
+    "Network Security",
+    "Impact"
   ],
   "threat": [
     {
@@ -43,5 +69,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 2
+  "version": 4
 }

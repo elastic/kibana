@@ -1580,7 +1580,7 @@
         "label": "ActionParamsType",
         "description": [],
         "signature": [
-          "{ readonly subAction: \"pushToService\"; readonly subActionParams: Readonly<{} & { incident: Readonly<{} & { title: string; description: string | null; tags: string[] | null; externalId: string | null; }>; comments: Readonly<{} & { comment: string; commentId: string; }>[] | null; }>; }"
+          "{ readonly subAction: \"pushToService\"; readonly subActionParams: Readonly<{} & { incident: Readonly<{} & { tags: string[] | null; title: string; description: string | null; externalId: string | null; }>; comments: Readonly<{} & { comment: string; commentId: string; }>[] | null; }>; }"
         ],
         "path": "x-pack/plugins/actions/server/builtin_action_types/cases_webhook/index.ts",
         "deprecated": false,
@@ -1622,7 +1622,7 @@
         "label": "ActionParamsType",
         "description": [],
         "signature": [
-          "{ readonly group?: string | undefined; readonly source?: string | undefined; readonly component?: string | undefined; readonly summary?: string | undefined; readonly timestamp?: string | undefined; readonly eventAction?: \"resolve\" | \"trigger\" | \"acknowledge\" | undefined; readonly dedupKey?: string | undefined; readonly severity?: \"error\" | \"warning\" | \"info\" | \"critical\" | undefined; readonly class?: string | undefined; }"
+          "{ readonly group?: string | undefined; readonly source?: string | undefined; readonly summary?: string | undefined; readonly component?: string | undefined; readonly timestamp?: string | undefined; readonly eventAction?: \"resolve\" | \"trigger\" | \"acknowledge\" | undefined; readonly dedupKey?: string | undefined; readonly severity?: \"error\" | \"warning\" | \"info\" | \"critical\" | undefined; readonly class?: string | undefined; }"
         ],
         "path": "x-pack/plugins/actions/server/builtin_action_types/pagerduty.ts",
         "deprecated": false,
@@ -1748,7 +1748,17 @@
         "label": "ActionsClient",
         "description": [],
         "signature": [
-          "{ execute: ({ actionId, params, source, relatedSavedObjects, }: Omit<",
+          "{ get: ({ id }: { id: string; }) => Promise<",
+          {
+            "pluginId": "actions",
+            "scope": "server",
+            "docId": "kibActionsPluginApi",
+            "section": "def-server.ActionResult",
+            "text": "ActionResult"
+          },
+          "<",
+          "ActionTypeConfig",
+          ">>; delete: ({ id }: { id: string; }) => Promise<{}>; execute: ({ actionId, params, source, relatedSavedObjects, }: Omit<",
           "ExecuteOptions",
           "<unknown>, \"request\">) => Promise<",
           {
@@ -1770,16 +1780,6 @@
           },
           "<",
           "ActionTypeConfig",
-          ">>; get: ({ id }: { id: string; }) => Promise<",
-          {
-            "pluginId": "actions",
-            "scope": "server",
-            "docId": "kibActionsPluginApi",
-            "section": "def-server.ActionResult",
-            "text": "ActionResult"
-          },
-          "<",
-          "ActionTypeConfig",
           ">>; update: ({ id, action }: ",
           "UpdateOptions",
           ") => Promise<",
@@ -1792,7 +1792,7 @@
           },
           "<",
           "ActionTypeConfig",
-          ">>; delete: ({ id }: { id: string; }) => Promise<{}>; getAll: () => Promise<",
+          ">>; getAll: () => Promise<",
           {
             "pluginId": "actions",
             "scope": "server",
@@ -1810,11 +1810,13 @@
           },
           "<",
           "ActionTypeConfig",
-          ">[]>; getOAuthAccessToken: ({ type, options }: Readonly<{} & { type: \"client\" | \"jwt\"; options: Readonly<{} & { config: Readonly<{} & { clientId: string; jwtKeyId: string; userIdentifierValue: string; }>; tokenUrl: string; secrets: Readonly<{ privateKeyPassword?: string | undefined; } & { clientSecret: string; privateKey: string; }>; }> | Readonly<{} & { scope: string; config: Readonly<{} & { clientId: string; tenantId: string; }>; tokenUrl: string; secrets: Readonly<{} & { clientSecret: string; }>; }>; }>, configurationUtilities: ",
+          ">[]>; getOAuthAccessToken: ({ type, options }: Readonly<{} & { options: Readonly<{} & { config: Readonly<{} & { clientId: string; jwtKeyId: string; userIdentifierValue: string; }>; tokenUrl: string; secrets: Readonly<{ privateKeyPassword?: string | undefined; } & { clientSecret: string; privateKey: string; }>; }> | Readonly<{} & { scope: string; config: Readonly<{} & { clientId: string; tenantId: string; }>; tokenUrl: string; secrets: Readonly<{} & { clientSecret: string; }>; }>; type: \"client\" | \"jwt\"; }>, configurationUtilities: ",
           "ActionsConfigurationUtilities",
           ") => Promise<{ accessToken: string | null; }>; enqueueExecution: (options: ",
           "ExecuteOptions",
-          ") => Promise<void>; ephemeralEnqueuedExecution: (options: ",
+          ") => Promise<void>; bulkEnqueueExecution: (options: ",
+          "ExecuteOptions",
+          "[]) => Promise<void>; ephemeralEnqueuedExecution: (options: ",
           "ExecuteOptions",
           ") => Promise<",
           {

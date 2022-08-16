@@ -13,7 +13,7 @@ import { LOGS_INDEX_PATTERN } from '..';
 
 export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
-  const mlScreenshots = getService('mlScreenshots');
+  const commonScreenshots = getService('commonScreenshots');
   const transform = getService('transform');
 
   const screenshotDirectories = ['ml_docs', 'data_frame_analytics'];
@@ -79,7 +79,7 @@ export default function ({ getService }: FtrProviderContext) {
       await transform.wizard.assertDefineStepActive();
 
       await ml.testExecution.logTestStep('take screenshot');
-      await mlScreenshots.takeScreenshot('logs-transform-preview', screenshotDirectories);
+      await commonScreenshots.takeScreenshot('logs-transform-preview', screenshotDirectories);
     });
 
     it('wizard screenshots', async () => {
@@ -95,12 +95,12 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
 
       await ml.testExecution.logTestStep('take screenshot');
-      await mlScreenshots.takeScreenshot('weblog-outlier-job-1', screenshotDirectories);
+      await commonScreenshots.takeScreenshot('weblog-outlier-job-1', screenshotDirectories);
 
       await ml.testExecution.logTestStep('scroll to scatterplot matrix and take screenshot');
       await ml.dataFrameAnalyticsCreation.assertScatterplotMatrixLoaded();
       await ml.dataFrameAnalyticsCreation.scrollScatterplotMatrixIntoView();
-      await mlScreenshots.takeScreenshot('weblog-outlier-scatterplot', screenshotDirectories);
+      await commonScreenshots.takeScreenshot('weblog-outlier-scatterplot', screenshotDirectories);
     });
 
     it('results view screenshots', async () => {
@@ -118,15 +118,15 @@ export default function ({ getService }: FtrProviderContext) {
 
       await ml.testExecution.logTestStep('fold scatterplot section and take screenshot');
       await ml.dataFrameAnalyticsResults.expandScatterplotMatrixSection(false);
-      await mlScreenshots.removeFocusFromElement();
-      await mlScreenshots.takeScreenshot('outliers', screenshotDirectories);
+      await commonScreenshots.removeFocusFromElement();
+      await commonScreenshots.takeScreenshot('outliers', screenshotDirectories);
 
       await ml.testExecution.logTestStep('scroll to scatterplot matrix and take screenshot');
       await ml.dataFrameAnalyticsResults.expandScatterplotMatrixSection(true);
-      await mlScreenshots.removeFocusFromElement();
+      await commonScreenshots.removeFocusFromElement();
       await ml.dataFrameAnalyticsResults.assertScatterplotMatrixLoaded();
       await ml.dataFrameAnalyticsResults.scrollScatterplotMatrixIntoView();
-      await mlScreenshots.takeScreenshot('outliers-scatterplot', screenshotDirectories);
+      await commonScreenshots.takeScreenshot('outliers-scatterplot', screenshotDirectories);
     });
   });
 }

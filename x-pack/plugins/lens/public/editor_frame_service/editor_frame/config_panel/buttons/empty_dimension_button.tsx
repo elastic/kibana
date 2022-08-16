@@ -18,6 +18,7 @@ import {
   DropType,
   DatasourceLayers,
   isOperation,
+  IndexPatternMap,
 } from '../../../../types';
 import {
   getCustomDropTarget,
@@ -111,6 +112,7 @@ export function EmptyDimensionButton({
   onClick,
   onDrop,
   datasourceLayers,
+  indexPatterns,
 }: {
   layerId: string;
   groupIndex: number;
@@ -121,6 +123,7 @@ export function EmptyDimensionButton({
   layerDatasource?: Datasource<unknown, unknown>;
   datasourceLayers: DatasourceLayers;
   state: unknown;
+  indexPatterns: IndexPatternMap;
 }) {
   const { dragging } = useContext(DragContext);
   const sharedDatasource =
@@ -148,6 +151,7 @@ export function EmptyDimensionButton({
         prioritizedOperation: group.prioritizedOperation,
         isNewColumn: true,
       },
+      indexPatterns,
     },
     sharedDatasource
   );
