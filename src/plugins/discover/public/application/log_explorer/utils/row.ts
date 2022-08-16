@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { LogExplorerChunk, LogExplorerRow } from '../types';
+import { LogExplorerChunk, LogExplorerRow, Timestamp } from '../types';
+import { getTimestampFromPosition } from './cursor';
 
 export const getStartRowIndex = (chunk: LogExplorerChunk): number => {
   // TODO: the zero fallback should never happen, but the typestate is not strict enough
@@ -51,5 +52,31 @@ export const getRowsFromChunk = (chunk: LogExplorerChunk): Array<[number, LogExp
     case 'loading-top':
     case 'loading-bottom':
       return [[rowIndexOffset, { type: 'loading' }]];
+  }
+};
+
+export const getStartRowTimestamp = (chunk: LogExplorerChunk): Timestamp | undefined => {
+  switch (chunk.status) {
+    case 'loaded':
+    case 'loading-bottom':
+    case 'empty':
+      return getTimestampFromPosition(chunk.startPosition);
+    case 'loading-top':
+      return getTimestampFromPosition(chunk.endPosition);
+    case 'uninitialized':
+      return;
+  }
+};
+
+export const getEndRowTimestamp = (chunk: LogExplorerChunk): Timestamp | undefined => {
+  switch (chunk.status) {
+    case 'loaded':
+    case 'loading-top':
+    case 'empty':
+      return getTimestampFromPosition(chunk.endPosition);
+    case 'loading-bottom':
+      return getTimestampFromPosition(chunk.startPosition);
+    case 'uninitialized':
+      return;
   }
 };

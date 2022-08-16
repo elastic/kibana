@@ -11,51 +11,61 @@ import {
   Axis,
   Chart,
   CurveType,
+  DomainRange,
   PartialTheme,
   Position,
+  RectAnnotation,
+  RectAnnotationDatum,
   ScaleType,
   Settings,
 } from '@elastic/charts';
 import { EuiPanel, useEuiTheme } from '@elastic/eui';
 import { CSSObject } from '@emotion/react';
+import { useSelector } from '@xstate/react';
 import moment from 'moment';
 import React, { useMemo } from 'react';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { DataAccessService } from '../../state_machines';
+import { DataAccessService, selectVisibleTimeRange } from '../../state_machines';
+import {
+  selectHistogramDataPoints,
+  selectTimeRange,
+} from '../../state_machines/data_access_state_machine';
 
-export interface LogExplorerHistogramDataPoint {
-  startTime: string;
-  countByBreakdownCriterion: Record<string, number>;
-}
-
-export interface LogExplorerHistogramProps {
-  stateMachine: DataAccessService;
-}
-
-export function LogExplorerHistogram({ stateMachine }: LogExplorerHistogramProps) {
+export function LogExplorerHistogram({
+  dataAccessService,
+}: {
+  dataAccessService: DataAccessService;
+}) {
   const styles = useLogExplorerHistogramStyles();
   const { chartBaseTheme, chartThemes } = useLogExplorerHistogramThemes();
 
-  // TODO: fetch data from state machine instead of test data
-  const data = useLogExplorerHistogramData();
+  const { timeDomain } = useLogExplorerHistogramDomains(dataAccessService);
+  const { countSeries } = useLogExplorerHistogramSeries(dataAccessService);
+  const { visibleRangeAnnotation } = useLogExplorerHistogramAnnotations(dataAccessService);
 
   // TODO: handle state machine states that don't have data
   return (
     <div css={styles.outerWrapper}>
       <EuiPanel css={styles.panel} grow hasBorder hasShadow={false} paddingSize="none">
         <Chart>
-          <Settings rotation={90} theme={chartThemes} baseTheme={chartBaseTheme} />
-          <Axis id="left-time-axis" position={Position.Left} title="time" hide />
-          <AreaSeries
-            id="entry-count"
-            xScaleType={ScaleType.Time}
-            yScaleType={ScaleType.Linear}
-            xAccessor={0}
-            splitSeriesAccessors={[1]}
-            yAccessors={[2]}
-            curve={CurveType.CURVE_STEP_AFTER}
-            data={data}
+          <Settings
+            baseTheme={chartBaseTheme}
+            rotation={90}
+            theme={chartThemes}
+            xDomain={timeDomain}
           />
+          <Axis hide id="left-time-axis" position={Position.Left} title="time" />
+          <AreaSeries
+            curve={CurveType.CURVE_STEP_AFTER}
+            data={countSeries}
+            id="entry-count"
+            splitSeriesAccessors={[1]}
+            xAccessor={0}
+            xScaleType={ScaleType.Time}
+            yAccessors={[2]}
+            yScaleType={ScaleType.Linear}
+          />
+          <RectAnnotation dataValues={visibleRangeAnnotation} id="visible-entries-range" />
         </Chart>
       </EuiPanel>
     </div>
@@ -102,45 +112,66 @@ const useLogExplorerHistogramStyles = (): Record<string, CSSObject> => {
         display: 'flex',
       },
       panel: {
-        width: 200,
+        width: 150,
       },
     }),
     [size.s]
   );
 };
 
-const useLogExplorerHistogramData = () =>
-  testData.flatMap(({ startTime, countByBreakdownCriterion }) => {
-    const startTimestamp = moment.utc(startTime).valueOf();
+const useLogExplorerHistogramDomains = (dataAccessService: DataAccessService) => {
+  const timeRange = useSelector(dataAccessService, selectTimeRange);
 
-    return Object.entries(countByBreakdownCriterion).map(
-      ([breakdownCriterion, count]) => [startTimestamp, breakdownCriterion, count] as const
-    );
-  });
+  const timeDomain = useMemo(
+    (): DomainRange => ({
+      min: moment.utc(timeRange.from).valueOf(),
+      max: moment.utc(timeRange.to).valueOf(),
+    }),
+    [timeRange.from, timeRange.to]
+  );
 
-const testData: LogExplorerHistogramDataPoint[] = [
-  {
-    startTime: '2022-08-15T00:00:00.000Z',
-    countByBreakdownCriterion: {
-      field1: 10,
-    },
-  },
-  {
-    startTime: '2022-08-15T01:00:00.000Z',
-    countByBreakdownCriterion: {
-      field1: 2,
-    },
-  },
-  {
-    startTime: '2022-08-15T02:00:00.000Z',
-    countByBreakdownCriterion: {
-      field1: 5,
-    },
-  },
-  {
-    startTime: '2022-08-15T03:00:00.000Z',
-    countByBreakdownCriterion: {
-      field1: 4,
-    },
-  },
-];
+  return { timeDomain };
+};
+
+const useLogExplorerHistogramSeries = (dataAccessService: DataAccessService) => {
+  const histogramDataPoints = useSelector(dataAccessService, selectHistogramDataPoints);
+
+  const countSeries = useMemo(
+    () =>
+      histogramDataPoints.flatMap(({ startTime, countByBreakdownCriterion }) => {
+        const startTimestamp = moment.utc(startTime).valueOf();
+
+        return Object.entries(countByBreakdownCriterion).map(
+          ([breakdownCriterion, count]) => [startTimestamp, breakdownCriterion, count] as const
+        );
+      }),
+    [histogramDataPoints]
+  );
+
+  return {
+    countSeries,
+  };
+};
+
+const useLogExplorerHistogramAnnotations = (dataAccessService: DataAccessService) => {
+  const { startTimestamp, endTimestamp } = useSelector(dataAccessService, selectVisibleTimeRange);
+
+  const visibleRangeAnnotation = useMemo((): RectAnnotationDatum[] => {
+    if (startTimestamp != null && endTimestamp != null) {
+      return [
+        {
+          coordinates: {
+            x0: startTimestamp,
+            x1: startTimestamp,
+          },
+        },
+      ];
+    } else {
+      return [];
+    }
+  }, [startTimestamp, endTimestamp]);
+
+  return {
+    visibleRangeAnnotation,
+  };
+};

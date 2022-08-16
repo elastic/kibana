@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { LogExplorerCursor, LogExplorerCursorRT, LogExplorerPosition } from '../types';
+import { LogExplorerCursor, LogExplorerCursorRT, LogExplorerPosition, Timestamp } from '../types';
 import { decodeOrThrow } from './runtime_types';
 
 export const getCursorFromPosition = (position: LogExplorerPosition): LogExplorerCursor => [
@@ -26,6 +26,9 @@ export const getPositionFromTimestamp = (timestamp: string) => ({
   timestamp,
   tiebreaker: 0,
 });
+
+export const getTimestampFromPosition = ({ timestamp }: LogExplorerPosition): Timestamp =>
+  timestamp;
 
 export const getPredecessorPosition = (position: LogExplorerPosition): LogExplorerPosition => ({
   ...position,

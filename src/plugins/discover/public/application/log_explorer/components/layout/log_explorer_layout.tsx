@@ -249,7 +249,7 @@ export function LogExplorerLayout({
             </EuiPageContent>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <LogExplorerHistogram stateMachine={stateMachine} />
+            <LogExplorerHistogram dataAccessService={stateMachine} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPageBody>

@@ -7,8 +7,14 @@
  */
 
 import memoizeOne from 'memoize-one';
-import { LogExplorerChunk, LogExplorerRow } from '../../types';
-import { getEndRowIndex, getRowsFromChunk, getStartRowIndex } from '../../utils/row';
+import { LogExplorerChunk, LogExplorerRow, Timestamp } from '../../types';
+import {
+  getEndRowIndex,
+  getEndRowTimestamp,
+  getRowsFromChunk,
+  getStartRowIndex,
+  getStartRowTimestamp,
+} from '../../utils/row';
 import { DataAccessService } from './state_machine';
 import { selectIsReloading } from './status_selectors';
 
@@ -51,3 +57,16 @@ const getRowMapFromChunks = (topChunk: LogExplorerChunk, bottomChunk: LogExplore
   new Map([...getRowsFromChunk(topChunk), ...getRowsFromChunk(bottomChunk)]);
 
 const memoizedGetRowMapFromChunksForSelector = memoizeOne(getRowMapFromChunks);
+
+export const selectVisibleTimeRange = (
+  state: DataAccessService['state']
+): {
+  startTimestamp?: Timestamp;
+  endTimestamp?: Timestamp;
+} => {
+  // TODO: use real data from parallel histogram sub-state
+  return {
+    startTimestamp: getStartRowTimestamp(state.context.topChunk),
+    endTimestamp: getEndRowTimestamp(state.context.bottomChunk),
+  };
+};
