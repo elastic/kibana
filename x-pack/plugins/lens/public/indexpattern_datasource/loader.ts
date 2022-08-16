@@ -213,13 +213,11 @@ export function renameIndexPattern({
 }) {
   return {
     ...state,
-    layers: !isSingleEmptyLayer(state.layers)
-      ? mapValues(state.layers, (layer) =>
-          layer.indexPatternId === oldIndexPatternId
-            ? { ...layer, indexPatternId: newIndexPatternId }
-            : layer
-        )
-      : state.layers,
+    layers: mapValues(state.layers, (layer) =>
+      layer.indexPatternId === oldIndexPatternId
+        ? { ...layer, indexPatternId: newIndexPatternId }
+        : layer
+    ),
     currentIndexPatternId:
       state.currentIndexPatternId === oldIndexPatternId ? newIndexPatternId : oldIndexPatternId,
   };

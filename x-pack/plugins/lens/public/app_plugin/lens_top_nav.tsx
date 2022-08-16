@@ -294,19 +294,28 @@ export const LensTopNavMenu = ({
     if (!activeDatasource) {
       return;
     }
-    const indexPatternIds = getIndexPatternsIds({
-      activeDatasources: Object.keys(datasourceStates).reduce(
-        (acc, datasourceId) => ({
-          ...acc,
-          [datasourceId]: datasourceMap[datasourceId],
-        }),
-        {}
-      ),
-      datasourceStates,
-    });
+    const indexPatternIds = new Set(
+      getIndexPatternsIds({
+        activeDatasources: Object.keys(datasourceStates).reduce(
+          (acc, datasourceId) => ({
+            ...acc,
+            [datasourceId]: datasourceMap[datasourceId],
+          }),
+          {}
+        ),
+        datasourceStates,
+      })
+    );
+    // Add ad-hoc data views from the Lens state even if they are not used
+    Object.values(dataViews.indexPatterns)
+      .filter((indexPattern) => indexPattern.spec)
+      .forEach((indexPattern) => {
+        indexPatternIds.add(indexPattern.id);
+      });
+
     const hasIndexPatternsChanged =
-      indexPatterns.length + rejectedIndexPatterns.length !== indexPatternIds.length ||
-      indexPatternIds.some(
+      indexPatterns.length + rejectedIndexPatterns.length !== indexPatternIds.size ||
+      [...indexPatternIds].some(
         (id) =>
           ![...indexPatterns.map((ip) => ip.id), ...rejectedIndexPatterns].find(
             (loadedId) => loadedId === id
@@ -315,7 +324,7 @@ export const LensTopNavMenu = ({
 
     // Update the cached index patterns if the user made a change to any of them
     if (hasIndexPatternsChanged) {
-      getIndexPatternsObjects(indexPatternIds, dataViewsService).then(
+      getIndexPatternsObjects([...indexPatternIds], dataViewsService).then(
         ({ indexPatterns: indexPatternObjects, rejectedIds }) => {
           setIndexPatterns(indexPatternObjects);
           setRejectedIndexPatterns(rejectedIds);
@@ -329,6 +338,7 @@ export const LensTopNavMenu = ({
     datasourceMap,
     indexPatterns,
     dataViewsService,
+    dataViews,
   ]);
 
   useEffect(() => {

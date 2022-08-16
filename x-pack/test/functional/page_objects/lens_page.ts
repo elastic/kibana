@@ -1208,6 +1208,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click('indexPattern-add-field');
     },
 
+    async createAdHocDataView(name: string) {
+      await testSubjects.click('lns-dataView-switch-link');
+      await PageObjects.unifiedSearch.createNewDataView(name, true);
+    },
+
     /** resets visualization/layer or removes a layer */
     async removeLayer() {
       await retry.try(async () => {
