@@ -24,7 +24,7 @@ import { ControlOutput } from '../../types';
 import { TimeSlider } from './components';
 import { timeSliderReducers } from './time_slider_reducers';
 import { TimeSliderReduxState } from './types';
-import { getMomentTimezone, getTicks, getRange, FROM_INDEX, TO_INDEX } from './time_utils';
+import { getMomentTimezone, getTicks, FROM_INDEX, TO_INDEX } from './time_utils';
 
 export class TimeSliderControlEmbeddable extends Embeddable<
   TimeSliderControlEmbeddableInput,
@@ -109,6 +109,7 @@ export class TimeSliderControlEmbeddable extends Embeddable<
         // unset value when its not valid for next time bounds
         if (value && (value[0] < nextBounds[0] || value[1] > nextBounds[1])) {
           this.onTimesliceChange();
+          this.onRangeChange();
         }
       }
     }
@@ -141,32 +142,63 @@ export class TimeSliderControlEmbeddable extends Embeddable<
     this.debouncedPublishChange(value);
   };
 
+  private onRangeChange = (range?: number) => {
+    const { actions, dispatch } = this.reduxEmbeddableTools;
+    dispatch(actions.setRange({ range }));
+  };
+
   private onNext = () => {
     const { actions, dispatch, getState } = this.reduxEmbeddableTools;
     const value = getState().explicitInput.value;
+    const range = getState().componentState.range;
     const ticks = getState().componentState.ticks;
+    const tickRange = ticks[1].value - ticks[0].value;
     const timeRangeBounds = getState().componentState.timeRangeBounds;
-    const timeRangeMax = timeRangeBounds[TO_INDEX];
-    const from =
-      value === undefined || value[TO_INDEX] === timeRangeMax ? ticks[0].value : value[TO_INDEX];
-    const range = getRange(timeRangeBounds, value);
-    const to = from + range;
-    this.onTimesliceChange([from, Math.min(to, timeRangeMax)]);
+
+    if (value === undefined || value[TO_INDEX] >= timeRangeBounds[TO_INDEX]) {
+      const from = timeRangeBounds[FROM_INDEX];
+      if (range === undefined || range === tickRange) {
+        const to = ticks[0].value;
+        this.onTimesliceChange([from, to]);
+        this.onRangeChange(tickRange);
+      } else {
+        const to = from + range;
+        this.onTimesliceChange([from, Math.min(to, timeRangeBounds[TO_INDEX])]);
+      }
+      return;
+    }
+
+    const from = value[TO_INDEX];
+    const safeRange = range === undefined ? tickRange : range;
+    const to = from + safeRange;
+    this.onTimesliceChange([from, Math.min(to, timeRangeBounds[TO_INDEX])]);
   };
 
   private onPrevious = () => {
     const { actions, dispatch, getState } = this.reduxEmbeddableTools;
     const value = getState().explicitInput.value;
+    const range = getState().componentState.range;
     const ticks = getState().componentState.ticks;
+    const tickRange = ticks[1].value - ticks[0].value;
     const timeRangeBounds = getState().componentState.timeRangeBounds;
-    const timeRangeMin = timeRangeBounds[FROM_INDEX];
-    const to =
-      value === undefined || value[FROM_INDEX] === timeRangeMin
-        ? ticks[ticks.length - 1].value
-        : value[FROM_INDEX];
-    const range = getRange(timeRangeBounds, value);
-    const from = to - range;
-    this.onTimesliceChange([Math.max(from, timeRangeMin), to]);
+
+    if (value === undefined || value[FROM_INDEX] <= timeRangeBounds[FROM_INDEX]) {
+      const to = timeRangeBounds[TO_INDEX];
+      if (range === undefined || range === tickRange) {
+        const from = ticks[ticks.length - 1].value;
+        this.onTimesliceChange([from, to]);
+        this.onRangeChange(tickRange);
+      } else {
+        const from = to - range;
+        this.onTimesliceChange([Math.max(from, timeRangeBounds[FROM_INDEX]), to]);
+      }
+      return;
+    }
+
+    const to = value[FROM_INDEX];
+    const safeRange = range === undefined ? tickRange : range;
+    const from = to - safeRange;
+    this.onTimesliceChange([Math.max(from, timeRangeBounds[FROM_INDEX]), to]);
   };
 
   private epochToKbnDateFormat = (epoch: number) => {
@@ -187,7 +219,13 @@ export class TimeSliderControlEmbeddable extends Embeddable<
       <TimeSliderControlReduxWrapper>
         <TimeSlider
           formatDate={this.epochToKbnDateFormat}
-          onChange={this.onTimesliceChange}
+          onChange={(value?: [number, number]) => {
+            this.onTimesliceChange(value);
+            if (value) {
+              const range = value[TO_INDEX] - value[FROM_INDEX];
+              this.onRangeChange(range);
+            }
+          }}
           onNext={this.onNext}
           onPrevious={this.onPrevious}
           waitForPanelsToLoad$={this.waitForPanelsToLoad$}

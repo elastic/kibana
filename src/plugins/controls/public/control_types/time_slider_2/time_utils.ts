@@ -17,12 +17,6 @@ export function getMomentTimezone(dateFormatTZ: string) {
   return dateFormatTZ === undefined | dateFormatTZ === 'Browser' ? detectedTimezone : dateFormatTZ;
 }
 
-export function getRange(timeRangeBounds: [number, number], value?: [number, number]) {
-  return value 
-    ? value[TO_INDEX] - value[FROM_INDEX] 
-    : timeRangeBounds[TO_INDEX] - timeRangeBounds[FROM_INDEX];
-}
-
 function getScaledDateFormat(interval: number): string {
   if (interval >= moment.duration(1, 'y').asMilliseconds()) {
     return 'YYYY';
