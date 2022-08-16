@@ -61,7 +61,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(200)
     ).body;
 
-  describe.only('perform_bulk_action', () => {
+  describe('perform_bulk_action', () => {
     beforeEach(async () => {
       await createSignalsIndex(supertest, log);
     });
