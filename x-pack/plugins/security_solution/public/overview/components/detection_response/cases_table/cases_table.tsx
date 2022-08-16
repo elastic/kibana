@@ -101,9 +101,7 @@ const getTableColumns: GetTableColumns = () => [
   {
     field: 'id',
     name: i18n.CASES_TABLE_COLUMN_NAME,
-
     'data-test-subj': 'recentlyCreatedCaseName',
-
     render: (id: string, { name }) => (
       <EuiToolTip
         title={i18n.OPEN_CASE_DETAIL_TOOLTIP}
