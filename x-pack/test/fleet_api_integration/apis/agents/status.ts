@@ -62,9 +62,21 @@ export default function ({ getService }: FtrProviderContext) {
           },
         },
       });
+      // 1 agent reassigned to a new policy
+      await es.update({
+        id: 'agent5',
+        refresh: 'wait_for',
+        index: AGENTS_INDEX,
+        body: {
+          doc: {
+            last_checkin: new Date().toISOString(),
+            policy_revision_idx: null,
+          },
+        },
+      });
       // 1 agent inactive
       await es.create({
-        id: 'agent5',
+        id: 'agent6',
         refresh: 'wait_for',
         index: AGENTS_INDEX,
         body: {
@@ -91,11 +103,11 @@ export default function ({ getService }: FtrProviderContext) {
       expect(apiResponse).to.eql({
         results: {
           events: 0,
-          total: 4,
+          total: 5,
           online: 2,
           error: 0,
           offline: 1,
-          updating: 1,
+          updating: 2,
           other: 2,
           inactive: 1,
         },

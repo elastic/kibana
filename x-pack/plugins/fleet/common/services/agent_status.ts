@@ -33,7 +33,7 @@ export function getAgentStatus(agent: Agent): AgentStatus {
   if (agent.last_checkin_status === 'degraded') {
     return 'degraded';
   }
-  if (agent.upgrade_started_at && !agent.upgraded_at) {
+  if (!agent.policy_revision || (agent.upgrade_started_at && !agent.upgraded_at)) {
     return 'updating';
   }
   if (intervalsSinceLastCheckIn >= offlineTimeoutIntervalCount) {
@@ -76,7 +76,7 @@ export function buildKueryForUpgradingAgents(path: string = '') {
 export function buildKueryForUpdatingAgents(path: string = '') {
   return `(${buildKueryForUpgradingAgents(path)}) or (${buildKueryForEnrollingAgents(
     path
-  )}) or (${buildKueryForUnenrollingAgents(path)})`;
+  )}) or (${buildKueryForUnenrollingAgents(path)}) or (not ${path}policy_revision_idx:*)`;
 }
 
 export function buildKueryForInactiveAgents(path: string = '') {
