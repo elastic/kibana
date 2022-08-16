@@ -195,6 +195,7 @@ export const CleanExtraFilesFromModules: Task = {
       '**/*.xml',
 
       '**/@elastic/eui/es',
+      '**/@elastic/eui/lib',
       '**/@elastic/eui/test-env',
       '**/@elastic/eui/optimize',
       '**/@elastic/eui/i18ntokens.json',
