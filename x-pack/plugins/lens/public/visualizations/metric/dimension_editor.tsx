@@ -61,31 +61,14 @@ export function DimensionEditor(props: Props) {
         </div>
       );
     case state.secondaryMetricAccessor:
-      const columnName = getColumnByAccessor(accessor, frame.activeData?.[layerId].columns)?.name;
-      const defaultPrefix = columnName || '';
-
       return (
         <div data-test-subj="lnsMetricDimensionEditor_secondary_metric">
-          <EuiFormRow
-            display="columnCompressed"
-            fullWidth
-            label={i18n.translate('xpack.lens.metric.prefixText.label', {
-              defaultMessage: 'Prefix',
-            })}
-          >
-            <InputWithDefault
-              compressed
-              fullWidth
-              value={state.secondaryPrefix || defaultPrefix}
-              onChange={(value: string) => setState({ ...state, secondaryPrefix: value })}
-              defaultValue={defaultPrefix}
-            />
-          </EuiFormRow>
+          <SecondaryMetricEditor {...props} idPrefix={idPrefix} />
         </div>
       );
     case state.maxAccessor:
       return (
-        <div data-test-subj="lnsMetricDimensionEditor_secondary_metric">
+        <div data-test-subj="lnsMetricDimensionEditor_maximum">
           <MaximumEditor {...props} idPrefix={idPrefix} />
         </div>
       );
@@ -187,6 +170,31 @@ function MaximumEditor({ setState, state, idPrefix }: SubProps) {
         }}
       />
     </EuiFormRow>
+  );
+}
+
+function SecondaryMetricEditor({ accessor, frame, layerId, setState, state }: SubProps) {
+  const columnName = getColumnByAccessor(accessor, frame.activeData?.[layerId].columns)?.name;
+  const defaultPrefix = columnName || '';
+
+  return (
+    <div data-test-subj="lnsMetricDimensionEditor_secondary_metric">
+      <EuiFormRow
+        display="columnCompressed"
+        fullWidth
+        label={i18n.translate('xpack.lens.metric.prefixText.label', {
+          defaultMessage: 'Prefix',
+        })}
+      >
+        <InputWithDefault
+          compressed
+          fullWidth
+          value={state.secondaryPrefix || defaultPrefix}
+          onChange={(value: string) => setState({ ...state, secondaryPrefix: value })}
+          defaultValue={defaultPrefix}
+        />
+      </EuiFormRow>
+    </div>
   );
 }
 
