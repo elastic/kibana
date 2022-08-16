@@ -234,7 +234,7 @@ function SecondaryMetricEditor({ accessor, idPrefix, frame, layerId, setState, s
         />
       </EuiFormRow>
       {state.secondaryPrefix && (
-        <EuiFormRow display="columnCompressed">
+        <EuiFormRow label=" " fullWidth display="columnCompressed">
           <DebouncedInput
             compressed
             value={state.secondaryPrefix}
