@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { FastifyReply } from 'fastify';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { CoreKibanaRequest } from '@kbn/core/server';
 import { spacesServiceMock } from '@kbn/spaces-plugin/server/spaces_service/spaces_service.mock';
@@ -12,9 +13,9 @@ import { spacesServiceMock } from '@kbn/spaces-plugin/server/spaces_service/spac
 import { getSpaceId } from './get_space_id';
 
 describe('get_space_id', () => {
-  let request = CoreKibanaRequest.from(httpServerMock.createRawRequest({}));
+  let request = CoreKibanaRequest.from(httpServerMock.createRawRequest({}), {} as FastifyReply);
   beforeEach(() => {
-    request = CoreKibanaRequest.from(httpServerMock.createRawRequest({}));
+    request = CoreKibanaRequest.from(httpServerMock.createRawRequest({}), {} as FastifyReply);
     jest.clearAllMocks();
   });
 

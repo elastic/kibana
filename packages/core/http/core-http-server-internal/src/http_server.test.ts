@@ -195,7 +195,7 @@ test('valid params', async () => {
 
   await server.start();
 
-  await supertest(innerServer.listener)
+  await supertest(innerServer.server)
     .get('/foo/some-string')
     .expect(200)
     .then((res) => {
@@ -225,7 +225,7 @@ test('invalid params', async () => {
 
   await server.start();
 
-  await supertest(innerServer.listener)
+  await supertest(innerServer.server)
     .get('/foo/some-string')
     .expect(400)
     .then((res) => {
@@ -260,7 +260,7 @@ test('valid query', async () => {
 
   await server.start();
 
-  await supertest(innerServer.listener)
+  await supertest(innerServer.server)
     .get('/foo/?bar=test&quux=123')
     .expect(200)
     .then((res) => {
@@ -290,7 +290,7 @@ test('invalid query', async () => {
 
   await server.start();
 
-  await supertest(innerServer.listener)
+  await supertest(innerServer.server)
     .get('/foo/?bar=test')
     .expect(400)
     .then((res) => {
@@ -325,7 +325,7 @@ test('valid body', async () => {
 
   await server.start();
 
-  await supertest(innerServer.listener)
+  await supertest(innerServer.server)
     .post('/foo/')
     .send({
       bar: 'test',
@@ -363,7 +363,7 @@ test('valid body with validate function', async () => {
 
   await server.start();
 
-  await supertest(innerServer.listener)
+  await supertest(innerServer.server)
     .post('/foo/')
     .send({
       bar: 'test',
@@ -406,7 +406,7 @@ test('not inline validation - specifying params', async () => {
 
   await server.start();
 
-  await supertest(innerServer.listener)
+  await supertest(innerServer.server)
     .post('/foo/')
     .send({
       bar: 'test',
@@ -449,7 +449,7 @@ test('not inline validation - specifying validation handler', async () => {
 
   await server.start();
 
-  await supertest(innerServer.listener)
+  await supertest(innerServer.server)
     .post('/foo/')
     .send({
       bar: 'test',
@@ -499,7 +499,7 @@ test('not inline handler - KibanaRequest', async () => {
 
   await server.start();
 
-  await supertest(innerServer.listener)
+  await supertest(innerServer.server)
     .post('/foo/')
     .send({
       bar: 'test',
@@ -548,7 +548,7 @@ test('not inline handler - RequestHandler', async () => {
 
   await server.start();
 
-  await supertest(innerServer.listener)
+  await supertest(innerServer.server)
     .post('/foo/')
     .send({
       bar: 'test',
@@ -582,7 +582,7 @@ test('invalid body', async () => {
 
   await server.start();
 
-  await supertest(innerServer.listener)
+  await supertest(innerServer.server)
     .post('/foo/')
     .send({ bar: 'test' })
     .expect(400)
@@ -617,7 +617,7 @@ test('handles putting', async () => {
 
   await server.start();
 
-  await supertest(innerServer.listener)
+  await supertest(innerServer.server)
     .put('/foo/')
     .send({ key: 'new value' })
     .expect(200)
@@ -648,7 +648,7 @@ test('handles deleting', async () => {
 
   await server.start();
 
-  await supertest(innerServer.listener)
+  await supertest(innerServer.server)
     .delete('/foo/3')
     .expect(200)
     .then((res) => {
@@ -677,7 +677,7 @@ describe('with `basepath: /bar` and `rewriteBasePath: false`', () => {
     registerRouter(router);
 
     await server.start();
-    innerServerListener = innerServer.listener;
+    innerServerListener = innerServer.server;
   });
 
   test('/bar => 404', async () => {
@@ -732,7 +732,7 @@ describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
     registerRouter(router);
 
     await server.start();
-    innerServerListener = innerServer.listener;
+    innerServerListener = innerServer.server;
   });
 
   test('/bar => /', async () => {
@@ -812,9 +812,9 @@ test('allows attaching metadata to attach meta-data tag strings to a route', asy
   registerRouter(router);
 
   await server.start();
-  await supertest(innerServer.listener).get('/with-tags').expect(200, { tags });
+  await supertest(innerServer.server).get('/with-tags').expect(200, { tags });
 
-  await supertest(innerServer.listener).get('/without-tags').expect(200, { tags: [] });
+  await supertest(innerServer.server).get('/without-tags').expect(200, { tags: [] });
 });
 
 test('exposes route details of incoming request to a route handler', async () => {
@@ -825,7 +825,7 @@ test('exposes route details of incoming request to a route handler', async () =>
   registerRouter(router);
 
   await server.start();
-  await supertest(innerServer.listener)
+  await supertest(innerServer.server)
     .get('/')
     .expect(200, {
       method: 'get',
@@ -851,7 +851,7 @@ describe('conditional compression', () => {
     router.get({ path: '/', validate: false }, (_context, _req, res) => res.ok(largeRequest));
     registerRouter(router);
     await server.start();
-    return innerServer.listener;
+    return innerServer.server;
   }
 
   test('with `compression.enabled: true`', async () => {
@@ -929,7 +929,7 @@ describe('response headers', () => {
     registerRouter(router);
 
     await server.start();
-    const response = await supertest(innerServer.listener)
+    const response = await supertest(innerServer.server)
       .get('/')
       .set('Connection', 'keep-alive')
       .expect(200);
@@ -946,7 +946,7 @@ describe('response headers', () => {
     registerRouter(router);
 
     await server.start();
-    const response = await supertest(innerServer.listener).get('/').expect(200);
+    const response = await supertest(innerServer.server).get('/').expect(200);
 
     const restHeaders = omit(response.header, ['date', 'content-length']);
     expect(restHeaders).toMatchInlineSnapshot(`
@@ -975,7 +975,7 @@ test('exposes route details of incoming request to a route handler (POST + paylo
   registerRouter(router);
 
   await server.start();
-  await supertest(innerServer.listener)
+  await supertest(innerServer.server)
     .post('/')
     .send({ test: 1 })
     .expect(200, {
@@ -1014,7 +1014,7 @@ describe('body options', () => {
     registerRouter(router);
 
     await server.start();
-    await supertest(innerServer.listener).post('/').send({ test: 1 }).expect(415, {
+    await supertest(innerServer.server).post('/').send({ test: 1 }).expect(415, {
       statusCode: 415,
       error: 'Unsupported Media Type',
       message: 'Unsupported Media Type',
@@ -1036,7 +1036,7 @@ describe('body options', () => {
     registerRouter(router);
 
     await server.start();
-    await supertest(innerServer.listener).post('/').send({ test: 1 }).expect(413, {
+    await supertest(innerServer.server).post('/').send({ test: 1 }).expect(413, {
       statusCode: 413,
       error: 'Request Entity Too Large',
       message: 'Payload content length greater than maximum allowed: 1',
@@ -1062,7 +1062,7 @@ describe('body options', () => {
     registerRouter(router);
 
     await server.start();
-    await supertest(innerServer.listener).post('/').send({ test: 1 }).expect(200, {
+    await supertest(innerServer.server).post('/').send({ test: 1 }).expect(200, {
       parse: false,
       maxBytes: 1024, // hapi populates the default
       output: 'data',
@@ -1096,7 +1096,7 @@ describe('timeout options', () => {
       );
       registerRouter(router);
       await server.start();
-      await supertest(innerServer.listener)
+      await supertest(innerServer.server)
         .post('/')
         .send({ test: 1 })
         .expect(200, {
@@ -1130,7 +1130,7 @@ describe('timeout options', () => {
       );
       registerRouter(router);
       await server.start();
-      await supertest(innerServer.listener)
+      await supertest(innerServer.server)
         .delete('/')
         .expect(200, {
           timeout: {
@@ -1163,7 +1163,7 @@ describe('timeout options', () => {
       );
       registerRouter(router);
       await server.start();
-      await supertest(innerServer.listener)
+      await supertest(innerServer.server)
         .put('/')
         .expect(200, {
           timeout: {
@@ -1196,7 +1196,7 @@ describe('timeout options', () => {
       );
       registerRouter(router);
       await server.start();
-      await supertest(innerServer.listener)
+      await supertest(innerServer.server)
         .patch('/')
         .expect(200, {
           timeout: {
@@ -1230,7 +1230,7 @@ describe('timeout options', () => {
       registerRouter(router);
 
       await server.start();
-      await supertest(innerServer.listener)
+      await supertest(innerServer.server)
         .get('/')
         .send()
         .expect(200, {
@@ -1264,7 +1264,7 @@ describe('timeout options', () => {
       registerRouter(router);
 
       await server.start();
-      await supertest(innerServer.listener)
+      await supertest(innerServer.server)
         .get('/')
         .send()
         .expect(200, {
@@ -1319,7 +1319,7 @@ test('should return a stream in the body', async () => {
   registerRouter(router);
 
   await server.start();
-  await supertest(innerServer.listener).put('/').send({ test: 1 }).expect(200, {
+  await supertest(innerServer.server).put('/').send({ test: 1 }).expect(200, {
     parse: true,
     maxBytes: 1024, // hapi populates the default
     output: 'stream',
@@ -1345,23 +1345,23 @@ test('closes sockets on timeout', async () => {
 
   await server.start();
 
-  expect(supertest(innerServer.listener).get('/a')).rejects.toThrow('socket hang up');
+  expect(supertest(innerServer.server).get('/a')).rejects.toThrow('socket hang up');
 
-  await supertest(innerServer.listener).get('/b').expect(200);
+  await supertest(innerServer.server).get('/b').expect(200);
 });
 
 describe('setup contract', () => {
   describe('#createSessionStorage', () => {
     test('creates session storage factory', async () => {
       const { createCookieSessionStorageFactory } = await server.setup(config);
-      const sessionStorageFactory = await createCookieSessionStorageFactory(cookieOptions);
+      const sessionStorageFactory = createCookieSessionStorageFactory(cookieOptions);
 
       expect(sessionStorageFactory.asScoped).toBeDefined();
     });
 
     test('creates session storage factory only once', async () => {
       const { createCookieSessionStorageFactory } = await server.setup(config);
-      const create = async () => await createCookieSessionStorageFactory(cookieOptions);
+      const create = async () => createCookieSessionStorageFactory(cookieOptions);
 
       await create();
       expect(create()).rejects.toThrowError('A cookieSessionStorageFactory was already created');
@@ -1437,7 +1437,7 @@ describe('setup contract', () => {
       registerStaticDir('/static/{path*}', assetFolder);
 
       await server.start();
-      const response = await supertest(innerServer.listener)
+      const response = await supertest(innerServer.server)
         .get('/static/some_json.json')
         .expect(200);
 
@@ -1451,7 +1451,7 @@ describe('setup contract', () => {
       registerStaticDir('/static/{path*}', assetFolder);
 
       await server.start();
-      const response = await supertest(innerServer.listener)
+      const response = await supertest(innerServer.server)
         .get('/static/compression_available.json')
         .set('accept-encoding', 'gzip')
         .expect(200);
@@ -1467,7 +1467,7 @@ describe('setup contract', () => {
       registerStaticDir('/static/{path*}', assetFolder);
 
       await server.start();
-      const response = await supertest(innerServer.listener)
+      const response = await supertest(innerServer.server)
         .get('/static/some_json.json')
         .set('accept-encoding', 'gzip')
         .expect(200);
@@ -1483,14 +1483,14 @@ describe('setup contract', () => {
       registerStaticDir('/static/{path*}', assetFolder);
 
       await server.start();
-      const response = await supertest(innerServer.listener)
+      const response = await supertest(innerServer.server)
         .get('/static/some_json.json')
         .expect(200);
 
       const etag = response.get('etag');
       expect(etag).not.toBeUndefined();
 
-      await supertest(innerServer.listener)
+      await supertest(innerServer.server)
         .get('/static/some_json.json')
         .set('If-None-Match', etag)
         .expect(304);
@@ -1503,7 +1503,7 @@ describe('setup contract', () => {
 
       await server.start();
 
-      await supertest(innerServer.listener)
+      await supertest(innerServer.server)
         .get('/static/some_json.json')
         .set('If-None-Match', `"definitely not a valid etag"`)
         .expect(200);
@@ -1517,19 +1517,17 @@ describe('setup contract', () => {
 
       await server.start();
 
-      await supertest(innerServer.listener).get('/static/some_file.json').expect(404);
+      await supertest(innerServer.server).get('/static/some_file.json').expect(404);
 
       await writeFile(tempFile, `{ "over": 9000 }`);
 
-      let response = await supertest(innerServer.listener)
-        .get('/static/some_file.json')
-        .expect(200);
+      let response = await supertest(innerServer.server).get('/static/some_file.json').expect(200);
 
       const etag1 = response.get('etag');
 
       await writeFile(tempFile, `{ "over": 42 }`);
 
-      response = await supertest(innerServer.listener).get('/static/some_file.json').expect(200);
+      response = await supertest(innerServer.server).get('/static/some_file.json').expect(200);
 
       const etag2 = response.get('etag');
 

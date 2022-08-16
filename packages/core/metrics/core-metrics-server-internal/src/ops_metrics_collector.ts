@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Server as HapiServer } from '@hapi/hapi';
+import type { FastifyInstance } from 'fastify';
 import type { OpsMetrics, MetricsCollector } from '@kbn/core-metrics-server';
 import {
   ProcessMetricsCollector,
@@ -20,7 +20,7 @@ export class OpsMetricsCollector implements MetricsCollector<OpsMetrics> {
   private readonly osCollector: OsMetricsCollector;
   private readonly serverCollector: ServerMetricsCollector;
 
-  constructor(server: HapiServer, opsOptions: OpsMetricsCollectorOptions) {
+  constructor(server: FastifyInstance, opsOptions: OpsMetricsCollectorOptions) {
     this.processCollector = new ProcessMetricsCollector();
     this.osCollector = new OsMetricsCollector(opsOptions);
     this.serverCollector = new ServerMetricsCollector(server);

@@ -11,7 +11,7 @@ import { mockHttpServer } from './http_service.test.mocks';
 import { noop } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import { REPO_ROOT } from '@kbn/utils';
-import { hapiMocks } from '@kbn/hapi-mocks';
+import { fastifyMocks } from '@kbn/hapi-mocks';
 import { ConfigService, Env } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -149,7 +149,7 @@ test('spins up `preboot` server until started if configured with `autoListen:tru
   };
 
   const [[{ handler }]] = prebootHapiServer.route.mock.calls;
-  const response503 = await handler(hapiMocks.createRequest(), mockResponseToolkit);
+  const response503 = await handler(fastifyMocks.createRequest(), mockResponseToolkit);
   expect(response503).toBe(mockResponse);
   expect({
     body: mockResponseToolkit.response.mock.calls,

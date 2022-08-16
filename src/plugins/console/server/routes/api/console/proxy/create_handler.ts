@@ -78,14 +78,13 @@ function getProxyHeaders(req: KibanaRequest) {
     obj[property] = (obj[property] ? obj[property] + ',' : '') + value;
   }
 
-  const _req = ensureRawRequest(req);
-
-  if (_req?.info?.remotePort && _req?.info?.remoteAddress) {
-    // see https://git.io/vytQ7
-    extendCommaList(headers, 'x-forwarded-for', _req.info.remoteAddress);
-    extendCommaList(headers, 'x-forwarded-port', _req.info.remotePort);
-    extendCommaList(headers, 'x-forwarded-proto', _req.server.info.protocol);
-    extendCommaList(headers, 'x-forwarded-host', _req.info.host);
+  const fastifyReq = ensureRawRequest(req);
+  const { remoteAddress, remotePort } = fastifyReq.socket;
+  if (remoteAddress !== undefined && remotePort !== undefined) {
+    extendCommaList(headers, 'x-forwarded-for', remoteAddress);
+    extendCommaList(headers, 'x-forwarded-port', String(remotePort));
+    extendCommaList(headers, 'x-forwarded-proto', fastifyReq.protocol); // TODO: In Hapi this was taken from the servers config
+    extendCommaList(headers, 'x-forwarded-host', fastifyReq.hostname); // TODO: In Hapi this was just `host` and not `hostname`: https://hapi.dev/api/?v=20.2.2#-requestinfo
   }
 
   const contentType = req.headers['content-type'];

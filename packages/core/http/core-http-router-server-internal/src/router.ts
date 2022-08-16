@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Request, ResponseToolkit } from '@hapi/hapi';
+import type { FastifyRequest, FastifyReply } from 'fastify';
 import { isConfigSchema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/logging';
 import {
@@ -26,7 +26,7 @@ import type {
 import { validBodyOutput } from '@kbn/core-http-server';
 import { CoreKibanaRequest } from './request';
 import { kibanaResponseFactory } from './response';
-import { HapiResponseAdapter } from './response_adapter';
+import { FastifyResponseAdapter } from './response_adapter';
 import { wrapErrors } from './error_wrapper';
 import { RouteValidator } from './validator';
 
@@ -143,11 +143,11 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
         const routeSchemas = routeSchemasFromRouteConfig(route, method);
 
         this.routes.push({
-          handler: async (req, responseToolkit) =>
+          handler: async (request, reply) =>
             await this.handle({
               routeSchemas,
-              request: req,
-              responseToolkit,
+              request,
+              reply,
               handler: this.enhanceWithContext(handler),
             }),
           method,
@@ -172,34 +172,38 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
   private async handle<P, Q, B>({
     routeSchemas,
     request,
-    responseToolkit,
+    reply,
     handler,
   }: {
-    request: Request;
-    responseToolkit: ResponseToolkit;
-    handler: RequestHandlerEnhanced<P, Q, B, typeof request.method>;
+    request: FastifyRequest;
+    reply: FastifyReply;
+    // TODO: Convert the following to Fastify
+    // handler: RequestHandlerEnhanced<P, Q, B, typeof request.method>;
+    handler: RequestHandlerEnhanced<P, Q, B, any>;
     routeSchemas?: RouteValidator<P, Q, B>;
   }) {
-    let kibanaRequest: KibanaRequest<P, Q, B, typeof request.method>;
-    const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
+    // TODO: Convert the following to Fastify
+    // let kibanaRequest: KibanaRequest<P, Q, B, typeof request.method>;
+    let kibanaRequest: KibanaRequest<P, Q, B, any>;
+    const fastifyResponseAdapter = new FastifyResponseAdapter(reply);
     try {
-      kibanaRequest = CoreKibanaRequest.from(request, routeSchemas);
+      kibanaRequest = CoreKibanaRequest.from(request, reply, routeSchemas);
     } catch (e) {
-      return hapiResponseAdapter.toBadRequest(e.message);
+      return fastifyResponseAdapter.toBadRequest(e.message);
     }
 
     try {
       const kibanaResponse = await handler(kibanaRequest, kibanaResponseFactory);
-      return hapiResponseAdapter.handle(kibanaResponse);
+      return fastifyResponseAdapter.handle(kibanaResponse);
     } catch (e) {
       this.log.error(e);
       // forward 401 errors from ES client
       if (isElasticsearchUnauthorizedError(e)) {
-        return hapiResponseAdapter.handle(
+        return fastifyResponseAdapter.handle(
           kibanaResponseFactory.unauthorized(convertEsUnauthorized(e))
         );
       }
-      return hapiResponseAdapter.toInternalError();
+      return fastifyResponseAdapter.toInternalError();
     }
   }
 }

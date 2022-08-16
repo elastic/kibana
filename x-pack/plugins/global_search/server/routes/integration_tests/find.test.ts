@@ -58,7 +58,7 @@ describe('POST /internal/global_search/find', () => {
   });
 
   it('calls the handler context with correct parameters', async () => {
-    await supertest(httpSetup.server.listener)
+    await supertest(httpSetup.server.server)
       .post('/internal/global_search/find')
       .send({
         params: {
@@ -85,7 +85,7 @@ describe('POST /internal/global_search/find', () => {
       of(createBatch('1', '2'), createBatch('3', '4'))
     );
 
-    const response = await supertest(httpSetup.server.listener)
+    const response = await supertest(httpSetup.server.server)
       .post('/internal/global_search/find')
       .send({
         params: {
@@ -104,7 +104,7 @@ describe('POST /internal/global_search/find', () => {
       throwError(GlobalSearchFindError.invalidLicense('invalid-license-message'))
     );
 
-    const response = await supertest(httpSetup.server.listener)
+    const response = await supertest(httpSetup.server.server)
       .post('/internal/global_search/find')
       .send({
         params: {
@@ -124,7 +124,7 @@ describe('POST /internal/global_search/find', () => {
   it('returns the default error when the observable throws any other error', async () => {
     globalSearchHandlerContext.find.mockReturnValue(throwError('any-error'));
 
-    const response = await supertest(httpSetup.server.listener)
+    const response = await supertest(httpSetup.server.server)
       .post('/internal/global_search/find')
       .send({
         params: {

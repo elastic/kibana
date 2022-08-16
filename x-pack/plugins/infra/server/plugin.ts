@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { Server } from '@hapi/hapi';
 import { schema } from '@kbn/config-schema';
 import {
   CoreStart,
@@ -83,10 +82,6 @@ export const config: PluginConfigDescriptor<InfraConfig> = {
 };
 
 export type { InfraConfig };
-
-export interface KbnServer extends Server {
-  usage: any;
-}
 
 const logsSampleDataLinkLabel = i18n.translate('xpack.infra.sampleDataLinkLabel', {
   defaultMessage: 'Logs',

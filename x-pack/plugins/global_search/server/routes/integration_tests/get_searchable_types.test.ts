@@ -44,7 +44,7 @@ describe('GET /internal/global_search/searchable_types', () => {
   });
 
   it('calls the handler context with correct parameters', async () => {
-    await supertest(httpSetup.server.listener)
+    await supertest(httpSetup.server.server)
       .get('/internal/global_search/searchable_types')
       .expect(200);
 
@@ -54,7 +54,7 @@ describe('GET /internal/global_search/searchable_types', () => {
   it('returns the types returned from the service', async () => {
     globalSearchHandlerContext.getSearchableTypes.mockResolvedValue(['type-a', 'type-b']);
 
-    const response = await supertest(httpSetup.server.listener)
+    const response = await supertest(httpSetup.server.server)
       .get('/internal/global_search/searchable_types')
       .expect(200);
 
@@ -66,7 +66,7 @@ describe('GET /internal/global_search/searchable_types', () => {
   it('returns the default error when the observable throws any other error', async () => {
     globalSearchHandlerContext.getSearchableTypes.mockRejectedValue(new Error());
 
-    const response = await supertest(httpSetup.server.listener)
+    const response = await supertest(httpSetup.server.server)
       .get('/internal/global_search/searchable_types')
       .expect(500);
 

@@ -219,7 +219,7 @@ export interface HttpServiceSetup<
    */
   createCookieSessionStorageFactory: <T>(
     cookieOptions: SessionStorageCookieOptions<T>
-  ) => Promise<SessionStorageFactory<T>>;
+  ) => SessionStorageFactory<T>;
 
   /**
    * To define custom logic to perform for incoming requests before server performs a route lookup.

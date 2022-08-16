@@ -58,7 +58,7 @@ describe('POST /api/saved_objects/_bulk_create', () => {
     };
     savedObjectsClient.bulkCreate.mockResolvedValue(clientResponse);
 
-    const result = await supertest(httpSetup.server.listener)
+    const result = await supertest(httpSetup.server.server)
       .post('/api/saved_objects/_bulk_create')
       .send([
         {
@@ -97,7 +97,7 @@ describe('POST /api/saved_objects/_bulk_create', () => {
       },
     ];
 
-    await supertest(httpSetup.server.listener)
+    await supertest(httpSetup.server.server)
       .post('/api/saved_objects/_bulk_create')
       .send(docs)
       .expect(200);
@@ -108,7 +108,7 @@ describe('POST /api/saved_objects/_bulk_create', () => {
   });
 
   it('passes along the overwrite option', async () => {
-    await supertest(httpSetup.server.listener)
+    await supertest(httpSetup.server.server)
       .post('/api/saved_objects/_bulk_create?overwrite=true')
       .send([
         {

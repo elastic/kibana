@@ -6,58 +6,59 @@
  * Side Public License, v 1.
  */
 
-import { Lifecycle, Request, ResponseToolkit, Util } from '@hapi/hapi';
-import { ValidationError } from 'joi';
-import Hoek from '@hapi/hoek';
+// import { Lifecycle, Request, ResponseToolkit, Util } from '@hapi/hapi';
+// import { ValidationError } from 'joi';
+// import Hoek from '@hapi/hoek';
 
 /**
  * Hapi extends the ValidationError interface to add this output key with more data.
  */
-export interface HapiValidationError extends ValidationError {
-  output: {
-    statusCode: number;
-    headers: Util.Dictionary<string | string[]>;
-    payload: {
-      statusCode: number;
-      error: string;
-      message?: string;
-      validation: {
-        source: string;
-        keys: string[];
-      };
-    };
-  };
-}
+// export interface HapiValidationError extends ValidationError {
+//   output: {
+//     statusCode: number;
+//     headers: Util.Dictionary<string | string[]>;
+//     payload: {
+//       statusCode: number;
+//       error: string;
+//       message?: string;
+//       validation: {
+//         source: string;
+//         keys: string[];
+//       };
+//     };
+//   };
+// }
 
+// TODO: This function is for validation by Hapi and specific to the Hapi API. Once we have a similar API set up for Fastify we can update it
 /**
  * Used to replicate Hapi v16 and below's validation responses. Should be used in the routes.validate.failAction key.
  */
-export function defaultValidationErrorHandler(
-  request: Request,
-  h: ResponseToolkit,
-  err?: Error
-): Lifecycle.ReturnValue {
-  // Newer versions of Joi don't format the key for missing params the same way. This shim
-  // provides backwards compatibility. Unfortunately, Joi doesn't export it's own Error class
-  // in JS so we have to rely on the `name` key before we can cast it.
-  //
-  // The Hapi code we're 'overwriting' can be found here:
-  //     https://github.com/hapijs/hapi/blob/master/lib/validation.js#L102
-  if (err && err.name === 'ValidationError' && err.hasOwnProperty('output')) {
-    const validationError: HapiValidationError = err as HapiValidationError;
-    const validationKeys: string[] = [];
+// export function defaultValidationErrorHandler(
+//   request: Request,
+//   h: ResponseToolkit,
+//   err?: Error
+// ): Lifecycle.ReturnValue {
+//   // Newer versions of Joi don't format the key for missing params the same way. This shim
+//   // provides backwards compatibility. Unfortunately, Joi doesn't export it's own Error class
+//   // in JS so we have to rely on the `name` key before we can cast it.
+//   //
+//   // The Hapi code we're 'overwriting' can be found here:
+//   //     https://github.com/hapijs/hapi/blob/master/lib/validation.js#L102
+//   if (err && err.name === 'ValidationError' && err.hasOwnProperty('output')) {
+//     const validationError: HapiValidationError = err as HapiValidationError;
+//     const validationKeys: string[] = [];
 
-    validationError.details.forEach((detail) => {
-      if (detail.path.length > 0) {
-        validationKeys.push(Hoek.escapeHtml(detail.path.join('.')));
-      } else {
-        // If no path, use the value sigil to signal the entire value had an issue.
-        validationKeys.push('value');
-      }
-    });
+//     validationError.details.forEach((detail) => {
+//       if (detail.path.length > 0) {
+//         validationKeys.push(Hoek.escapeHtml(detail.path.join('.')));
+//       } else {
+//         // If no path, use the value sigil to signal the entire value had an issue.
+//         validationKeys.push('value');
+//       }
+//     });
 
-    validationError.output.payload.validation.keys = validationKeys;
-  }
+//     validationError.output.payload.validation.keys = validationKeys;
+//   }
 
-  throw err;
-}
+//   throw err;
+// }

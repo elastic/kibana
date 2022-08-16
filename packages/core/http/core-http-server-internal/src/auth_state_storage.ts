@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { Request } from '@hapi/hapi';
+import { FastifyRequest } from 'fastify';
 import type { KibanaRequest, IsAuthenticated } from '@kbn/core-http-server';
 import { AuthStatus } from '@kbn/core-http-server';
 import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
 
 /** @internal */
 export class AuthStateStorage {
-  private readonly storage = new WeakMap<Request, unknown>();
+  private readonly storage = new WeakMap<FastifyRequest, unknown>();
 
   constructor(private readonly canBeAuthenticated: () => boolean) {}
 
-  public set = (request: KibanaRequest | Request, state: unknown) => {
+  public set = (request: KibanaRequest | FastifyRequest, state: unknown) => {
     this.storage.set(ensureRawRequest(request), state);
   };
 
-  public get = <T = unknown>(request: KibanaRequest | Request) => {
+  public get = <T = unknown>(request: KibanaRequest | FastifyRequest) => {
     const key = ensureRawRequest(request);
     const state = this.storage.get(key) as T;
     const status: AuthStatus = this.storage.has(key)

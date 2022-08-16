@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
+import type { IncomingHttpHeaders } from 'http';
 import querystring from 'querystring';
 import { isBoom } from '@hapi/boom';
-import type { Request } from '@hapi/hapi';
 import numeral from '@elastic/numeral';
+import type { FastifyRequest, FastifyReply } from 'fastify';
 import type { LogMeta, Logger } from '@kbn/logging';
-import type { KibanaRequestState } from '@kbn/core-http-server';
+import type { ResponseHeaders } from '@kbn/core-http-server';
 import { getResponsePayloadBytes } from './get_payload_size';
 
 // If you are updating these, consider whether they should also be updated in the
@@ -27,13 +28,13 @@ function redactSensitiveHeaders(key: string, value: string | string[]): string |
 }
 
 // Shallow clone the headers so they are not mutated if filtered by a RewriteAppender.
-function cloneAndFilterHeaders(headers?: HapiHeaders) {
-  const result = {} as HapiHeaders;
+function cloneAndFilterHeaders(headers?: IncomingHttpHeaders | ResponseHeaders) {
+  const result = {} as IncomingHttpHeaders;
   if (headers) {
-    for (const key of Object.keys(headers)) {
+    for (const [key, value] of Object.entries(headers)) {
       result[key] = redactSensitiveHeaders(
         key,
-        Array.isArray(headers[key]) ? [...headers[key]] : headers[key]
+        Array.isArray(value) ? [...value] : (value as string | string[]) // TODO: Annoying that I have to use `as` here instead of being able to set `value` to the correct type upon creation
       );
     }
   }
@@ -45,39 +46,39 @@ function cloneAndFilterHeaders(headers?: HapiHeaders) {
  *
  * @internal
  */
-export function getEcsResponseLog(request: Request, log: Logger) {
-  const { path, response } = request;
+export function getEcsResponseLog(request: FastifyRequest, reply: FastifyReply, log: Logger) {
+  const { url: path } = request.raw;
   const method = request.method.toUpperCase();
 
-  const query = querystring.stringify(request.query);
+  const query = querystring.stringify(request.query as any);
   const pathWithQuery = query.length > 0 ? `${path}?${query}` : path;
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  const status_code = isBoom(response) ? response.output.statusCode : response.statusCode;
+  const status_code = isBoom(reply) ? reply.output.statusCode : reply.statusCode; // TODO: Complete conversion to Fastify - A Fastify reply is never boom
 
   const requestHeaders = cloneAndFilterHeaders(request.headers);
   const responseHeaders = cloneAndFilterHeaders(
-    isBoom(response) ? (response.output.headers as HapiHeaders) : response.headers
+    isBoom(reply) ? (reply.output.headers as HapiHeaders) : reply.getHeaders()
   );
 
-  // borrowed from the hapi/good implementation
-  const responseTime = (request.info.completed || request.info.responded) - request.info.received;
-  const responseTimeMsg = !isNaN(responseTime) ? ` ${responseTime}ms` : '';
+  const responseTime = reply.getResponseTime();
+  const responseTimeMsg = ` ${responseTime}ms`;
 
-  const bytes = getResponsePayloadBytes(response, log);
+  const bytes = getResponsePayloadBytes(reply, log);
   const bytesMsg = bytes ? ` - ${numeral(bytes).format('0.0b')}` : '';
 
-  const traceId = (request.app as KibanaRequestState).traceId;
+  // TODO: Where to get this from APM directly?
+  // const traceId = (request.context.config as KibanaRequestState).traceId;
 
   const meta: LogMeta = {
     client: {
-      ip: request.info.remoteAddress,
+      ip: request.socket.remoteAddress,
     },
     http: {
       request: {
         method,
-        mime_type: request.mime,
-        referrer: request.info.referrer,
+        mime_type: 'TODO', // request.mime, // TODO: Convert to Fastify. This is where hapi gets `request.mime`: https://github.com/hapijs/hapi/blob/b8ba0adc7c3255995cb56a9a740c4f9750b80e6b/lib/route.js#L433
+        referrer: (request.raw.headers.referrer || request.raw.headers.referer || '') as string, // TODO: Not sure we need to correctly spelled `referrer`? It's just copied from https://github.com/hapijs/hapi/blob/b8ba0adc7c3255995cb56a9a740c4f9750b80e6b/lib/request.js#L636
         // @ts-expect-error ECS custom field: https://github.com/elastic/ecs/issues/232.
         headers: requestHeaders,
       },
@@ -88,8 +89,7 @@ export function getEcsResponseLog(request: Request, log: Logger) {
         status_code,
         // @ts-expect-error ECS custom field: https://github.com/elastic/ecs/issues/232.
         headers: responseHeaders,
-        // responseTime is a custom non-ECS field
-        responseTime: !isNaN(responseTime) ? responseTime : undefined,
+        responseTime, // custom non-ECS field
       },
     },
     url: {
@@ -99,7 +99,7 @@ export function getEcsResponseLog(request: Request, log: Logger) {
     user_agent: {
       original: request.headers['user-agent'],
     },
-    trace: traceId ? { id: traceId } : undefined,
+    // trace: traceId ? { id: traceId } : undefined,
   };
 
   return {

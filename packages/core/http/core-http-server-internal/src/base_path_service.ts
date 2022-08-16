@@ -7,7 +7,7 @@
  */
 
 import { modifyUrl } from '@kbn/std';
-import { Request } from '@hapi/hapi';
+import { FastifyRequest } from 'fastify';
 import type { KibanaRequest, IBasePath } from '@kbn/core-http-server';
 import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
 
@@ -17,7 +17,7 @@ import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
  * @internal
  */
 export class BasePath implements IBasePath {
-  private readonly basePathCache = new WeakMap<Request, string>();
+  private readonly basePathCache = new WeakMap<FastifyRequest, string>();
 
   public readonly serverBasePath: string;
   public readonly publicBaseUrl?: string;

@@ -6,37 +6,32 @@
  * Side Public License, v 1.
  */
 
-import type { Request } from '@hapi/hapi';
-import { format as formatUrl, URL } from 'url';
+// TODO: Rename package to @kbn/fastify-mocks
+
+import type { FastifyRequest } from 'fastify';
 import { merge } from 'lodash';
 import type { DeepPartial } from '@kbn/utility-types';
 
-export const createRequestMock = (customization: DeepPartial<Request> = {}): Request => {
-  const pathname = customization.url?.pathname || '/';
-  const path = `${pathname}${customization.url?.search || ''}`;
-  const url = new URL(
-    formatUrl(Object.assign({ pathname, path, href: path }, customization.url)),
-    'http://localhost'
-  );
+export const createRequestMock = (
+  customization: DeepPartial<FastifyRequest> = {}
+): FastifyRequest => {
+  const pathname = customization.url === undefined ? '/' : new URL(customization.url).pathname;
+  const url = `${pathname}${customization.url?.search || ''}`;
 
   return merge(
     {},
     {
-      app: { xsrfRequired: true } as any,
-      auth: {
-        isAuthenticated: true,
-      },
+      context: { config: { xsrfRequired: true } } as any,
+      // auth: {
+      //   isAuthenticated: true,
+      // },
       headers: {},
-      path,
-      route: { settings: {} },
       url,
+      socket: {},
       raw: {
-        req: {
-          url: path,
-          socket: {},
-        },
+        url,
       },
     },
     customization
-  ) as Request;
+  ) as FastifyRequest;
 };

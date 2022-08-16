@@ -10,7 +10,7 @@ export { filterHeaders } from './headers';
 export { Router } from './router';
 export { isKibanaRequest, isRealRequest, ensureRawRequest, CoreKibanaRequest } from './request';
 export { isSafeMethod } from './route';
-export { HapiResponseAdapter } from './response_adapter';
+export { FastifyResponseAdapter } from './response_adapter';
 export {
   kibanaResponseFactory,
   lifecycleResponseFactory,

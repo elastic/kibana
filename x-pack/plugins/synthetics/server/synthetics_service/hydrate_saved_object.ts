@@ -100,6 +100,7 @@ export const hydrateSavedObjects = async ({
           }
         });
 
+      // @ts-expect-error: TODO: Not sure why the `urls` field is complaining about `null` is not assignalbe to type `string | undefined`
       await server.authSavedObjectsClient?.bulkUpdate(updatedObjects);
     }
   } catch (e) {

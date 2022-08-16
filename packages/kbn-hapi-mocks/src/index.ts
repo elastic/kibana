@@ -8,6 +8,6 @@
 
 import { createRequestMock } from './request';
 
-export const hapiMocks = {
+export const fastifyMocks = {
   createRequest: createRequestMock,
 };

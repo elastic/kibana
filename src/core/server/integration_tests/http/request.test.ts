@@ -52,7 +52,7 @@ describe('KibanaRequest', () => {
         );
         await server.start();
 
-        await supertest(innerServer.listener).get('/').expect(200, {
+        await supertest(innerServer.server).get('/').expect(200, {
           isAuthenticated: false,
         });
       });
@@ -66,7 +66,7 @@ describe('KibanaRequest', () => {
         );
         await server.start();
 
-        await supertest(innerServer.listener).get('/').expect(200, {
+        await supertest(innerServer.server).get('/').expect(200, {
           isAuthenticated: false,
         });
       });
@@ -80,7 +80,7 @@ describe('KibanaRequest', () => {
         );
         await server.start();
 
-        await supertest(innerServer.listener).get('/').expect(200, {
+        await supertest(innerServer.server).get('/').expect(200, {
           isAuthenticated: false,
         });
       });
@@ -94,7 +94,7 @@ describe('KibanaRequest', () => {
         );
         await server.start();
 
-        await supertest(innerServer.listener).get('/').expect(200, {
+        await supertest(innerServer.server).get('/').expect(200, {
           isAuthenticated: true,
         });
       });
@@ -108,7 +108,7 @@ describe('KibanaRequest', () => {
         );
         await server.start();
 
-        await supertest(innerServer.listener).get('/').expect(200, {
+        await supertest(innerServer.server).get('/').expect(200, {
           isAuthenticated: true,
         });
       });
@@ -127,7 +127,7 @@ describe('KibanaRequest', () => {
         );
         await server.start();
 
-        await supertest(innerServer.listener).get('/').expect(200, {
+        await supertest(innerServer.server).get('/').expect(200, {
           authRequired: false,
         });
       });
@@ -141,7 +141,7 @@ describe('KibanaRequest', () => {
         );
         await server.start();
 
-        await supertest(innerServer.listener).get('/').expect(200, {
+        await supertest(innerServer.server).get('/').expect(200, {
           authRequired: 'optional',
         });
       });
@@ -155,7 +155,7 @@ describe('KibanaRequest', () => {
         );
         await server.start();
 
-        await supertest(innerServer.listener).get('/').expect(200, {
+        await supertest(innerServer.server).get('/').expect(200, {
           authRequired: true,
         });
       });
@@ -186,7 +186,7 @@ describe('KibanaRequest', () => {
 
         await server.start();
 
-        const incomingRequest = supertest(innerServer.listener)
+        const incomingRequest = supertest(innerServer.server)
           .get('/')
           // end required to send request
           .end();
@@ -221,7 +221,7 @@ describe('KibanaRequest', () => {
 
         await server.start();
 
-        const incomingRequest = supertest(innerServer.listener)
+        const incomingRequest = supertest(innerServer.server)
           .post('/')
           .send({ hello: 'dolly' })
           // end required to send request
@@ -249,7 +249,7 @@ describe('KibanaRequest', () => {
 
         await server.start();
 
-        await supertest(innerServer.listener).get('/');
+        await supertest(innerServer.server).get('/');
 
         expect(nextSpy).toHaveBeenCalledTimes(0);
         expect(completeSpy).toHaveBeenCalledTimes(1);
@@ -272,7 +272,7 @@ describe('KibanaRequest', () => {
 
         await server.start();
 
-        await supertest(innerServer.listener).get('/');
+        await supertest(innerServer.server).get('/');
 
         expect(nextSpy).toHaveBeenCalledTimes(0);
         expect(completeSpy).toHaveBeenCalledTimes(1);
@@ -307,7 +307,7 @@ describe('KibanaRequest', () => {
 
         await server.start();
 
-        await supertest(innerServer.listener).post('/').send({ data: 'test' }).expect(200);
+        await supertest(innerServer.server).post('/').send({ data: 'test' }).expect(200);
 
         expect(nextSpy).toHaveBeenCalledTimes(0);
         expect(completeSpy).toHaveBeenCalledTimes(1);
@@ -335,7 +335,7 @@ describe('KibanaRequest', () => {
 
         await server.start();
 
-        await supertest(innerServer.listener).get('/').expect(200);
+        await supertest(innerServer.server).get('/').expect(200);
         expect(nextSpy).toHaveBeenCalledTimes(1);
         expect(completeSpy).toHaveBeenCalledTimes(1);
       });
@@ -362,7 +362,7 @@ describe('KibanaRequest', () => {
 
         await server.start();
 
-        const incomingRequest = supertest(innerServer.listener)
+        const incomingRequest = supertest(innerServer.server)
           .get('/')
           // end required to send request
           .end();
@@ -396,7 +396,7 @@ describe('KibanaRequest', () => {
 
         await server.start();
 
-        const incomingRequest = supertest(innerServer.listener)
+        const incomingRequest = supertest(innerServer.server)
           .post('/')
           .send({ foo: 'bar' })
           // end required to send request
@@ -417,7 +417,7 @@ describe('KibanaRequest', () => {
       });
       await server.start();
 
-      const st = supertest(innerServer.listener);
+      const st = supertest(innerServer.server);
 
       const resp1 = await st.get('/').set({ 'x-opaque-id': 'alpha' }).expect(200);
       expect(resp1.body).toEqual({ requestId: 'alpha' });
@@ -436,7 +436,7 @@ describe('KibanaRequest', () => {
       });
       await server.start();
 
-      const st = supertest(innerServer.listener);
+      const st = supertest(innerServer.server);
 
       const resp1 = await st.get('/').expect(200);
       expect(resp1.body.requestUuid).toBe('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx');

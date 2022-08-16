@@ -58,7 +58,7 @@ describe('CapabilitiesService', () => {
 
   describe('/api/core/capabilities route', () => {
     it('is exposed', async () => {
-      const result = await supertest(httpSetup.server.listener)
+      const result = await supertest(httpSetup.server.server)
         .post('/api/core/capabilities')
         .send({ applications: [] })
         .expect(200);
@@ -84,7 +84,7 @@ describe('CapabilitiesService', () => {
       const switcher = jest.fn((_, capabilities) => capabilities);
       serviceSetup.registerSwitcher(switcher);
 
-      const result = await supertest(httpSetup.server.listener)
+      const result = await supertest(httpSetup.server.server)
         .post('/api/core/capabilities')
         .send({ applications: [] })
         .expect(200);
@@ -115,7 +115,7 @@ describe('CapabilitiesService', () => {
       const switcher = jest.fn((_, capabilities) => capabilities);
       serviceSetup.registerSwitcher(switcher);
 
-      const result = await supertest(httpSetup.server.listener)
+      const result = await supertest(httpSetup.server.server)
         .post('/api/core/capabilities?useDefaultCapabilities=true')
         .send({ applications: [] })
         .expect(200);

@@ -85,7 +85,7 @@ describe('POST /api/saved_objects/_export', () => {
 
     exporter.exportByTypes.mockResolvedValueOnce(createListStream(sortedObjects));
 
-    const result = await supertest(httpSetup.server.listener)
+    const result = await supertest(httpSetup.server.server)
       .post('/api/saved_objects/_export')
       .send({
         type: 'search',

@@ -108,7 +108,7 @@ describe('POST /api/reporting/generate', () => {
 
     await server.start();
 
-    await supertest(httpSetup.server.listener)
+    await supertest(httpSetup.server.server)
       .post('/api/reporting/generate/printablePdf')
       .expect(400)
       .then(({ body }) =>
@@ -123,7 +123,7 @@ describe('POST /api/reporting/generate', () => {
 
     await server.start();
 
-    await supertest(httpSetup.server.listener)
+    await supertest(httpSetup.server.server)
       .post('/api/reporting/generate/printablePdf?jobParams=foo:')
       .expect(400)
       .then(({ body }) => expect(body.message).toMatchInlineSnapshot('"invalid rison: foo:"'));
@@ -134,7 +134,7 @@ describe('POST /api/reporting/generate', () => {
 
     await server.start();
 
-    await supertest(httpSetup.server.listener)
+    await supertest(httpSetup.server.server)
       .post('/api/reporting/generate/printablePdf')
       .send({ jobParams: `foo:` })
       .expect(400)
@@ -146,7 +146,7 @@ describe('POST /api/reporting/generate', () => {
 
     await server.start();
 
-    await supertest(httpSetup.server.listener)
+    await supertest(httpSetup.server.server)
       .post('/api/reporting/generate/TonyHawksProSkater2')
       .send({ jobParams: rison.encode({ title: `abc` }) })
       .expect(400)
@@ -162,7 +162,7 @@ describe('POST /api/reporting/generate', () => {
 
     await server.start();
 
-    await supertest(httpSetup.server.listener)
+    await supertest(httpSetup.server.server)
       .post('/api/reporting/generate/printablePdf')
       .send({ jobParams: rison.encode({ title: `abc` }) })
       .expect(500);
@@ -173,7 +173,7 @@ describe('POST /api/reporting/generate', () => {
 
     await server.start();
 
-    await supertest(httpSetup.server.listener)
+    await supertest(httpSetup.server.server)
       .post('/api/reporting/generate/printablePdf')
       .send({ jobParams: rison.encode({ title: `abc` }) })
       .expect(200)

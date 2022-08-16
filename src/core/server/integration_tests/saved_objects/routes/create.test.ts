@@ -53,7 +53,7 @@ describe('POST /api/saved_objects/{type}', () => {
   });
 
   it('formats successful response and records usage stats', async () => {
-    const result = await supertest(httpSetup.server.listener)
+    const result = await supertest(httpSetup.server.server)
       .post('/api/saved_objects/index-pattern')
       .send({
         attributes: {
@@ -69,7 +69,7 @@ describe('POST /api/saved_objects/{type}', () => {
   });
 
   it('requires attributes', async () => {
-    const result = await supertest(httpSetup.server.listener)
+    const result = await supertest(httpSetup.server.server)
       .post('/api/saved_objects/index-pattern')
       .send({})
       .expect(400);
@@ -81,7 +81,7 @@ describe('POST /api/saved_objects/{type}', () => {
   });
 
   it('calls upon savedObjectClient.create', async () => {
-    await supertest(httpSetup.server.listener)
+    await supertest(httpSetup.server.server)
       .post('/api/saved_objects/index-pattern')
       .send({
         attributes: {
@@ -99,7 +99,7 @@ describe('POST /api/saved_objects/{type}', () => {
   });
 
   it('can specify an id', async () => {
-    await supertest(httpSetup.server.listener)
+    await supertest(httpSetup.server.server)
       .post('/api/saved_objects/index-pattern/logstash-*')
       .send({
         attributes: {

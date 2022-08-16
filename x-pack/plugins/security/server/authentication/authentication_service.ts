@@ -108,7 +108,9 @@ export class AuthenticationService {
       (config.authc.sortedProviders.length > 0 &&
         shouldProviderUseLoginForm(config.authc.sortedProviders[0].type));
 
+    // The is THE place where the authentication logic is set up
     http.registerAuth(async (request, response, t) => {
+      // This function is supposed to do the actula authentication
       if (!license.isLicenseAvailable()) {
         this.logger.error('License is not available, authentication is not possible.');
         return response.customError({

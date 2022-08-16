@@ -57,7 +57,7 @@ describe(`GET ${API_GET_ILM_POLICY_STATUS}`, () => {
     registerDeprecationsRoutes(core, loggingSystemMock.createLogger());
     await server.start();
 
-    await supertest(httpSetup.server.listener)
+    await supertest(httpSetup.server.server)
       .get(API_GET_ILM_POLICY_STATUS)
       .expect(200)
       .then(/* Ignore result */);
@@ -71,7 +71,7 @@ describe(`GET ${API_GET_ILM_POLICY_STATUS}`, () => {
     registerDeprecationsRoutes(core, loggingSystemMock.createLogger());
     await server.start();
 
-    await supertest(httpSetup.server.listener)
+    await supertest(httpSetup.server.server)
       .get(API_GET_ILM_POLICY_STATUS)
       .expect(200)
       .then(/* Ignore result */);

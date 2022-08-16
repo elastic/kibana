@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Request } from '@hapi/hapi';
+import { FastifyRequest } from 'fastify';
 import type {
   KibanaRequest,
   AuthHeaders,
@@ -17,9 +17,9 @@ import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
 
 /** @internal */
 export class AuthHeadersStorage implements IAuthHeadersStorage {
-  private authHeadersCache = new WeakMap<Request, AuthHeaders>();
+  private authHeadersCache = new WeakMap<FastifyRequest, AuthHeaders>();
 
-  public set = (request: KibanaRequest | Request, headers: AuthHeaders) => {
+  public set = (request: KibanaRequest | FastifyRequest, headers: AuthHeaders) => {
     this.authHeadersCache.set(ensureRawRequest(request), headers);
   };
 

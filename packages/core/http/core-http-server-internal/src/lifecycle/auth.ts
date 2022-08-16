@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Lifecycle, Request, ResponseToolkit } from '@hapi/hapi';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { Logger } from '@kbn/logging';
 import type {
   AuthenticationHandler,
@@ -20,7 +20,7 @@ import type {
 } from '@kbn/core-http-server';
 import { AuthResultType } from '@kbn/core-http-server';
 import {
-  HapiResponseAdapter,
+  FastifyResponseAdapter,
   CoreKibanaRequest,
   lifecycleResponseFactory,
   isKibanaResponse,
@@ -64,23 +64,22 @@ const toolkit: AuthToolkit = {
 };
 
 /** @internal */
-export function adoptToHapiAuthFormat(
+export function adoptToFastifyAuthFormat(
   fn: AuthenticationHandler,
   log: Logger,
-  onAuth: (request: Request, data: AuthResultParams) => void = () => undefined
+  onAuth: (request: FastifyRequest, data: AuthResultParams) => void = () => undefined
 ) {
-  return async function interceptAuth(
-    request: Request,
-    responseToolkit: ResponseToolkit
-  ): Promise<Lifecycle.ReturnValue> {
-    const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
-    const kibanaRequest = CoreKibanaRequest.from(request, undefined, false);
+  return async function verifyLogin(request: FastifyRequest, reply: FastifyReply) {
+    const fastifyResponseAdapter = new FastifyResponseAdapter(reply);
+    const kibanaRequest = CoreKibanaRequest.from(request, reply, undefined, false);
 
     try {
+      // The fn function does the actual authentication
       const result = await fn(kibanaRequest, lifecycleResponseFactory, toolkit);
 
       if (isKibanaResponse(result)) {
-        return hapiResponseAdapter.handle(result);
+        fastifyResponseAdapter.handle(result);
+        return;
       }
 
       if (authResult.isAuthenticated(result)) {
@@ -89,35 +88,38 @@ export function adoptToHapiAuthFormat(
           requestHeaders: result.requestHeaders,
           responseHeaders: result.responseHeaders,
         });
-        return responseToolkit.authenticated({ credentials: result.state || {} });
+        // TODO: Concert to Fastify
+        // reply.authenticated({ credentials: result.state || {} });
+        return;
       }
 
       if (authResult.isRedirected(result)) {
         // we cannot redirect a user when resources with optional auth requested
         if (kibanaRequest.route.options.authRequired === 'optional') {
-          return responseToolkit.continue;
+          return;
         }
 
-        return hapiResponseAdapter.handle(
+        fastifyResponseAdapter.handle(
           lifecycleResponseFactory.redirected({
-            // hapi doesn't accept string[] as a valid header
-            headers: result.headers as any,
+            headers: result.headers,
           })
         );
+        return;
       }
 
       if (authResult.isNotHandled(result)) {
         if (kibanaRequest.route.options.authRequired === 'optional') {
-          return responseToolkit.continue;
+          return;
         }
-        return hapiResponseAdapter.handle(lifecycleResponseFactory.unauthorized());
+        fastifyResponseAdapter.handle(lifecycleResponseFactory.unauthorized());
+        return;
       }
       throw new Error(
         `Unexpected result from Authenticate. Expected AuthResult or KibanaResponse, but given: ${result}.`
       );
     } catch (error) {
       log.error(error);
-      return hapiResponseAdapter.toInternalError();
+      throw fastifyResponseAdapter.toInternalError();
     }
   };
 }

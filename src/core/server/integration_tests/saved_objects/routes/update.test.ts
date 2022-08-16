@@ -65,7 +65,7 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
     };
     savedObjectsClient.update.mockResolvedValue(clientResponse);
 
-    const result = await supertest(httpSetup.server.listener)
+    const result = await supertest(httpSetup.server.server)
       .put('/api/saved_objects/index-pattern/logstash-*')
       .send({
         attributes: {
@@ -82,7 +82,7 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
   });
 
   it('calls upon savedObjectClient.update', async () => {
-    await supertest(httpSetup.server.listener)
+    await supertest(httpSetup.server.server)
       .put('/api/saved_objects/index-pattern/logstash-*')
       .send({
         attributes: { title: 'Testing' },

@@ -62,7 +62,7 @@ describe('bundle routes', () => {
     registerFooPluginRoute(createRouter(''));
     await server.start();
 
-    const response = await supertest(innerServer.listener)
+    const response = await supertest(innerServer.server)
       .get(`/${buildNum}/bundles/plugin/foo/image.png`)
       .expect(200);
 
@@ -80,7 +80,7 @@ describe('bundle routes', () => {
     registerFooPluginRoute(createRouter(''));
     await server.start();
 
-    const response = await supertest(innerServer.listener)
+    const response = await supertest(innerServer.server)
       .get(`/${buildNum}/bundles/plugin/foo/plugin.js`)
       .expect(200);
 
@@ -98,7 +98,7 @@ describe('bundle routes', () => {
     registerFooPluginRoute(createRouter(''));
     await server.start();
 
-    await supertest(innerServer.listener)
+    await supertest(innerServer.server)
       .get(`/${buildNum}/bundles/plugin/foo/../outside_output.js`)
       .expect(404);
   });
@@ -112,7 +112,7 @@ describe('bundle routes', () => {
     registerFooPluginRoute(createRouter(''));
     await server.start();
 
-    await supertest(innerServer.listener)
+    await supertest(innerServer.server)
       .get(`/${buildNum}/bundles/plugin/foo/missing.js`)
       .expect(404);
   });
@@ -126,7 +126,7 @@ describe('bundle routes', () => {
     registerFooPluginRoute(createRouter(''));
     await server.start();
 
-    const response = await supertest(innerServer.listener)
+    const response = await supertest(innerServer.server)
       .get(`/${buildNum}/bundles/plugin/foo/gzip_chunk.js`)
       .expect(200);
 
@@ -151,7 +151,7 @@ describe('bundle routes', () => {
       registerFooPluginRoute(createRouter(''), { isDist: true });
       await server.start();
 
-      const response = await supertest(innerServer.listener)
+      const response = await supertest(innerServer.server)
         .get(`/${buildNum}/bundles/plugin/foo/gzip_chunk.js`)
         .expect(200);
 
@@ -170,7 +170,7 @@ describe('bundle routes', () => {
       registerFooPluginRoute(createRouter(''), { isDist: false });
       await server.start();
 
-      const response = await supertest(innerServer.listener)
+      const response = await supertest(innerServer.server)
         .get(`/${buildNum}/bundles/plugin/foo/gzip_chunk.js`)
         .expect(200);
 

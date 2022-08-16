@@ -8,8 +8,9 @@
 
 export type { IHttpConfig, ISslConfig, ICorsConfig } from './types';
 export { createServer } from './create_server';
-export { defaultValidationErrorHandler } from './default_validation_error_handler';
+// export { defaultValidationErrorHandler } from './default_validation_error_handler';
 export { getListenerOptions } from './get_listener_options';
 export { getServerOptions } from './get_server_options';
+export { getCorsOptions } from './get_cors_options';
 export { getRequestId } from './get_request_id';
 export { sslSchema, SslConfig } from './ssl';

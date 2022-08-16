@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { hapiMocks } from '@kbn/hapi-mocks';
+import { fastifyMocks } from '@kbn/hapi-mocks';
 import type {
   LifecycleResponseFactory,
   OnPreResponseToolkit,
@@ -37,7 +37,7 @@ const createToolkitMock = (): ToolkitMock => {
 
 export const httpServerMock = {
   createKibanaRequest: mockRouter.createKibanaRequest,
-  createRawRequest: hapiMocks.createRequest,
+  createRawRequest: fastifyMocks.createRequest,
   createResponseFactory: mockRouter.createResponseFactory,
   createLifecycleResponseFactory: createLifecycleResponseFactoryMock,
   createToolkit: createToolkitMock,

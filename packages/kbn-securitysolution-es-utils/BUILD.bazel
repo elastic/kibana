@@ -30,7 +30,6 @@ NPM_MODULE_EXTRA_FILES = [
 RUNTIME_DEPS = [
   "@npm//@elastic/elasticsearch",
   "@npm//@hapi/boom",
-  "@npm//@hapi/hapi",
   "@npm//tslib",
 ]
 
@@ -38,7 +37,6 @@ TYPES_DEPS = [
   "@npm//@elastic/elasticsearch",
   "@npm//@hapi/boom",
   "@npm//tslib",
-  "@npm//@types/hapi__hapi",
   "@npm//@types/jest",
   "@npm//@types/node",
 ]

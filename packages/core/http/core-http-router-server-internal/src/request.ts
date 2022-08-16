@@ -8,8 +8,10 @@
 
 import { URL } from 'url';
 import uuid from 'uuid';
-import type { Request, RouteOptions } from '@hapi/hapi';
-import { fromEvent, NEVER } from 'rxjs';
+// @ts-expect-error: Could not find a declaration file for module 'fastify/lib/request'.
+import { Request as FastifyRequestObject } from 'fastify/lib/request';
+import type { FastifyRequest, FastifyReply } from 'fastify';
+import { fromEvent } from 'rxjs';
 import { shareReplay, first, filter } from 'rxjs/operators';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { deepFreeze } from '@kbn/std';
@@ -17,7 +19,7 @@ import {
   KibanaRequest,
   Headers,
   RouteMethod,
-  validBodyOutput,
+  // validBodyOutput,
   IKibanaSocket,
   RouteValidatorFullConfig,
   KibanaRequestRoute,
@@ -27,7 +29,7 @@ import {
   KibanaRouteOptions,
   KibanaRequestRouteOptions,
 } from '@kbn/core-http-server';
-import { isSafeMethod } from './route';
+// import { isSafeMethod } from './route';
 import { KibanaSocket } from './socket';
 import { RouteValidator } from './validator';
 
@@ -52,14 +54,16 @@ export class CoreKibanaRequest<
    * @internal
    */
   public static from<P, Q, B>(
-    req: Request,
+    request: FastifyRequest,
+    reply: FastifyReply,
     routeSchemas: RouteValidator<P, Q, B> | RouteValidatorFullConfig<P, Q, B> = {},
     withoutSecretHeaders: boolean = true
   ) {
     const routeValidator = RouteValidator.from<P, Q, B>(routeSchemas);
-    const requestParts = CoreKibanaRequest.validate(req, routeValidator);
+    const requestParts = CoreKibanaRequest.validate(request, routeValidator);
     return new CoreKibanaRequest(
-      req,
+      request,
+      reply,
       requestParts.params,
       requestParts.query,
       requestParts.body,
@@ -74,7 +78,7 @@ export class CoreKibanaRequest<
    * @internal
    */
   private static validate<P, Q, B>(
-    req: Request,
+    req: FastifyRequest,
     routeValidator: RouteValidator<P, Q, B>
   ): {
     params: P;
@@ -83,7 +87,7 @@ export class CoreKibanaRequest<
   } {
     const params = routeValidator.getParams(req.params, 'request params');
     const query = routeValidator.getQuery(req.query, 'request query');
-    const body = routeValidator.getBody(req.payload, 'request body');
+    const body = routeValidator.getBody(req.body, 'request body');
     return { query, params, body };
   }
 
@@ -109,10 +113,11 @@ export class CoreKibanaRequest<
   public readonly rewrittenUrl?: URL;
 
   /** @internal */
-  protected readonly [requestSymbol]: Request;
+  protected readonly [requestSymbol]: FastifyRequest;
 
   constructor(
-    request: Request,
+    request: FastifyRequest,
+    reply: FastifyReply,
     public readonly params: Params,
     public readonly query: Query,
     public readonly body: Body,
@@ -120,15 +125,16 @@ export class CoreKibanaRequest<
     // until that time we have to expose all the headers
     private readonly withoutSecretHeaders: boolean
   ) {
-    // The `requestId` and `requestUuid` properties will not be populated for requests that are 'faked' by internal systems that leverage
+    // The `request.context.config.requestId` and `request.id` properties will not be populated for requests that are 'faked' by internal systems that leverage
     // KibanaRequest in conjunction with scoped Elasticsearch and SavedObjectsClient in order to pass credentials.
     // In these cases, the ids default to a newly generated UUID.
-    const appState = request.app as KibanaRequestState | undefined;
-    this.id = appState?.requestId ?? uuid.v4();
-    this.uuid = appState?.requestUuid ?? uuid.v4();
-    this.rewrittenUrl = appState?.rewrittenUrl;
+    const appState = request.context.config as KibanaRequestState;
+    this.id = appState.requestId ?? uuid.v4();
+    this.uuid = request.id ?? uuid.v4(); // TODO: Is the uuid.v4() fallback needed with Fastify?
+    this.rewrittenUrl = appState.rewrittenUrl;
 
-    this.url = request.url;
+    this.url = new URL(request.url);
+    // @ts-expect-error TODO: Figure out how to fix this TS issue
     this.headers = deepFreeze({ ...request.headers });
     this.isSystemRequest = request.headers['kbn-system-request'] === 'true';
 
@@ -138,27 +144,29 @@ export class CoreKibanaRequest<
       enumerable: false,
     });
 
-    this.route = deepFreeze(this.getRouteInfo(request));
-    this.socket = new KibanaSocket(request.raw.req.socket);
-    this.events = this.getEvents(request);
+    this.route = deepFreeze(this.getRouteInfo(request, reply));
+    this.socket = new KibanaSocket(request.socket);
+    this.events = this.getEvents(reply);
 
     this.auth = {
       // missing in fakeRequests, so we cast to false
-      isAuthenticated: Boolean(request.auth?.isAuthenticated),
+      // @ts-expect-error: Property 'session' does not exist on type FastifyRequest
+      isAuthenticated: Boolean(request.session.get('data')), // TODO: Is this really the best way to see if the session is authenticated?
     };
   }
 
-  private getEvents(request: Request): KibanaRequestEvents {
-    if (!request.raw.res) {
-      return {
-        aborted$: NEVER,
-        completed$: NEVER,
-      };
-    }
+  private getEvents(reply: FastifyReply): KibanaRequestEvents {
+    // TODO: Originally in hapi this was `!request.raw.res`, which I guess can happen, but when? In Fastify reply.raw will always be present
+    // if (!reply.raw) {
+    //   return {
+    //     aborted$: NEVER,
+    //     completed$: NEVER,
+    //   };
+    // }
 
-    const completed$ = fromEvent<void>(request.raw.res, 'close').pipe(shareReplay(1), first());
+    const completed$ = fromEvent<void>(reply.raw, 'close').pipe(shareReplay(1), first());
     // the response's underlying connection was terminated prematurely
-    const aborted$ = completed$.pipe(filter(() => !isCompleted(request)));
+    const aborted$ = completed$.pipe(filter(() => !isCompleted(reply)));
 
     return {
       aborted$,
@@ -166,86 +174,57 @@ export class CoreKibanaRequest<
     } as const;
   }
 
-  private getRouteInfo(request: Request): KibanaRequestRoute<Method> {
+  private getRouteInfo(request: FastifyRequest, reply: FastifyReply): KibanaRequestRoute<Method> {
     const method = request.method as Method;
-    const {
-      parse,
-      maxBytes,
-      allow,
-      output,
-      timeout: payloadTimeout,
-    } = request.route.settings.payload || {};
+    // TODO: Convert to Fastify
+    // const {
+    //   parse,
+    //   maxBytes,
+    //   allow,
+    //   output,
+    //   timeout: payloadTimeout,
+    // } = request.route.settings.payload || {};
 
-    // net.Socket#timeout isn't documented, yet, and isn't part of the types... https://github.com/nodejs/node/pull/34543
-    // the socket is also undefined when using @hapi/shot, or when a "fake request" is used
-    const socketTimeout = (request.raw.req.socket as any)?.timeout;
+    const socketTimeout = request.socket.timeout;
     const options = {
       authRequired: this.getAuthRequired(request),
-      // TypeScript note: Casting to `RouterOptions` to fix the following error:
-      //
-      //     Property 'app' does not exist on type 'RouteSettings'
-      //
-      // In @types/hapi__hapi v18, `request.route.settings` is of type
-      // `RouteSettings`, which doesn't have an `app` property. I think this is
-      // a mistake. In v19, the `RouteSettings` interface does have an `app`
-      // property.
-      xsrfRequired:
-        ((request.route.settings as RouteOptions).app as KibanaRouteOptions)?.xsrfRequired ?? true, // some places in LP call KibanaRequest.from(request) manually. remove fallback to true before v8
-      tags: request.route.settings.tags || [],
+      xsrfRequired: (reply.context.config as KibanaRouteOptions)?.xsrfRequired ?? true, // some places in LP call KibanaRequest.from(request) manually. remove fallback to true before v8
+      tags: (request.context.config as KibanaRouteOptions).tags || [],
       timeout: {
-        payload: payloadTimeout,
+        // payload: payloadTimeout, // TODO: Convert to Fastify
         idleSocket: socketTimeout === 0 ? undefined : socketTimeout,
       },
-      body: isSafeMethod(method)
-        ? undefined
-        : {
-            parse,
-            maxBytes,
-            accepts: allow,
-            output: output as typeof validBodyOutput[number], // We do not support all the HAPI-supported outputs and TS complains
-          },
+      // TODO: Convert to Fastify
+      // body: isSafeMethod(method)
+      //   ? undefined
+      //   : {
+      //       parse,
+      //       maxBytes,
+      //       accepts: allow,
+      //       output, // TODO: Do we still need this code? `output: output as typeof validBodyOutput[number],` // We do not support all the HAPI-supported outputs and TS complains
+      //     },
     } as unknown as KibanaRequestRouteOptions<Method>; // TS does not understand this is OK so I'm enforced to do this enforced casting
 
     return {
-      path: request.path,
+      path: request.url,
       method,
       options,
     };
   }
 
-  private getAuthRequired(request: Request): boolean | 'optional' {
-    const authOptions = request.route.settings.auth;
-    if (typeof authOptions === 'object') {
-      // 'try' is used in the legacy platform
-      if (authOptions.mode === 'optional' || authOptions.mode === 'try') {
-        return 'optional';
-      }
-      if (authOptions.mode === 'required') {
-        return true;
-      }
-    }
-
-    // legacy platform routes
-    if (authOptions === undefined) {
-      return true;
-    }
-
-    // @ts-expect-error According to @types/hapi__hapi, `route.settings` should be of type `RouteSettings`, but it seems that it's actually `RouteOptions` (https://github.com/hapijs/hapi/blob/v18.4.2/lib/route.js#L139)
-    if (authOptions === false) return false;
-    throw new Error(
-      `unexpected authentication options: ${JSON.stringify(authOptions)} for route: ${
-        this.url.pathname
-      }${this.url.search}`
-    );
+  private getAuthRequired(request: FastifyRequest) {
+    const { authRequired } = request.context.config as KibanaRouteOptions;
+    // is `undefined if legacy platform route
+    return authRequired === undefined ? true : authRequired;
   }
 }
 
 /**
- * Returns underlying Hapi Request
+ * Returns underlying Fastify Request
  * @internal
  */
-export const ensureRawRequest = (request: KibanaRequest | Request) =>
-  isKibanaRequest(request) ? request[requestSymbol] : (request as Request);
+export const ensureRawRequest = (request: KibanaRequest | FastifyRequest) =>
+  isKibanaRequest(request) ? request[requestSymbol] : (request as FastifyRequest);
 
 /**
  * Checks if an incoming request is a {@link KibanaRequest}
@@ -255,22 +234,18 @@ export function isKibanaRequest(request: unknown): request is CoreKibanaRequest 
   return request instanceof CoreKibanaRequest;
 }
 
-function isRequest(request: any): request is Request {
-  try {
-    return request.raw.req && typeof request.raw.req === 'object';
-  } catch {
-    return false;
-  }
+function isRequest(request: any): request is FastifyRequest {
+  return request instanceof FastifyRequestObject;
 }
 
 /**
- * Checks if an incoming request either KibanaRequest or Hapi.Request
+ * Checks if an incoming request either KibanaRequest or FastifyRequest
  * @internal
  */
-export function isRealRequest(request: unknown): request is KibanaRequest | Request {
+export function isRealRequest(request: unknown): request is KibanaRequest | FastifyRequest {
   return isKibanaRequest(request) || isRequest(request);
 }
 
-function isCompleted(request: Request) {
-  return request.raw.res.writableFinished;
+function isCompleted(reply: FastifyReply) {
+  return reply.raw.writableFinished;
 }

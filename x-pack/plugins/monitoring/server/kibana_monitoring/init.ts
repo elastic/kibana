@@ -15,8 +15,6 @@ export type InitBulkUploaderOptions = Omit<BulkUploaderOptions, 'interval'>;
  * - Ops Events - essentially Kibana's /api/status
  * - Usage Stats - essentially Kibana's /api/stats
  * - Kibana Settings - select uiSettings
- * @param {Object} kbnServer manager of Kibana services - see `src/legacy/server/kbn_server` in Kibana core
- * @param {Object} server HapiJS server instance
  */
 export function initBulkUploader({ config, ...params }: InitBulkUploaderOptions) {
   const interval = config.kibana.collection.interval;

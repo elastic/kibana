@@ -63,7 +63,7 @@ describe('POST /api/saved_objects/_bulk_resolve', () => {
     };
     savedObjectsClient.bulkResolve.mockImplementation(() => Promise.resolve(clientResponse));
 
-    const result = await supertest(httpSetup.server.listener)
+    const result = await supertest(httpSetup.server.server)
       .post('/api/saved_objects/_bulk_resolve')
       .send([
         {
@@ -87,7 +87,7 @@ describe('POST /api/saved_objects/_bulk_resolve', () => {
       },
     ];
 
-    await supertest(httpSetup.server.listener)
+    await supertest(httpSetup.server.server)
       .post('/api/saved_objects/_bulk_resolve')
       .send(docs)
       .expect(200);

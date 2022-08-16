@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { Request } from '@hapi/hapi';
+import type { FastifyRequest } from 'fastify';
 import uuid from 'uuid';
 
 export function getRequestId(
-  request: Request,
+  request: FastifyRequest,
   { allowFromAnyIp, ipAllowlist }: { allowFromAnyIp: boolean; ipAllowlist: string[] }
 ): string {
-  const remoteAddress = request.raw.req.socket?.remoteAddress;
+  const remoteAddress = request.socket.remoteAddress;
   return allowFromAnyIp ||
     // socket may be undefined in integration tests that connect via the http listener directly
     (remoteAddress && ipAllowlist.includes(remoteAddress))
-    ? request.headers['x-opaque-id'] ?? uuid.v4()
+    ? (request.headers['x-opaque-id'] as string | undefined) ?? uuid.v4() // TODO(fastify): I don't like that I have to use `as`. Can request.headers['x-opaque-id'] really be of type string[]?
     : uuid.v4();
 }

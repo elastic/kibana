@@ -70,7 +70,7 @@ describe('POST /api/dashboards/export', () => {
   });
 
   it('calls exportDashboards and records usage stats', async () => {
-    const result = await supertest(httpSetup.server.listener).get(
+    const result = await supertest(httpSetup.server.server).get(
       '/api/kibana/dashboards/export?dashboard=942dcef0-b2cd-11e8-ad8e-85441f0c2e5c'
     );
 

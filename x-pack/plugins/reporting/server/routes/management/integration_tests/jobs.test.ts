@@ -118,7 +118,7 @@ describe('GET /api/reporting/jobs/download', () => {
 
     await server.start();
 
-    await supertest(httpSetup.server.listener)
+    await supertest(httpSetup.server.server)
       .get('/api/reporting/jobs/download/1')
       .expect(400)
       .then(({ body }) =>
@@ -144,7 +144,7 @@ describe('GET /api/reporting/jobs/download', () => {
 
     await server.start();
 
-    await supertest(httpSetup.server.listener)
+    await supertest(httpSetup.server.server)
       .get('/api/reporting/jobs/download/dope')
       .expect(401)
       .then(({ body }) =>
@@ -158,7 +158,7 @@ describe('GET /api/reporting/jobs/download', () => {
 
     await server.start();
 
-    await supertest(httpSetup.server.listener).get('/api/reporting/jobs/download/poo').expect(404);
+    await supertest(httpSetup.server.server).get('/api/reporting/jobs/download/poo').expect(404);
   });
 
   it('returns a 401 if not a valid job type', async () => {
@@ -172,7 +172,7 @@ describe('GET /api/reporting/jobs/download', () => {
 
     await server.start();
 
-    await supertest(httpSetup.server.listener).get('/api/reporting/jobs/download/poo').expect(401);
+    await supertest(httpSetup.server.server).get('/api/reporting/jobs/download/poo').expect(401);
   });
 
   it(`returns job's info`, async () => {
@@ -187,7 +187,7 @@ describe('GET /api/reporting/jobs/download', () => {
 
     await server.start();
 
-    await supertest(httpSetup.server.listener).get('/api/reporting/jobs/info/test').expect(200);
+    await supertest(httpSetup.server.server).get('/api/reporting/jobs/info/test').expect(200);
   });
 
   it(`returns 403 if a user cannot view a job's info`, async () => {
@@ -202,7 +202,7 @@ describe('GET /api/reporting/jobs/download', () => {
 
     await server.start();
 
-    await supertest(httpSetup.server.listener).get('/api/reporting/jobs/info/test').expect(403);
+    await supertest(httpSetup.server.server).get('/api/reporting/jobs/info/test').expect(403);
   });
 
   it('when a job is incomplete', async () => {
@@ -216,7 +216,7 @@ describe('GET /api/reporting/jobs/download', () => {
     registerJobInfoRoutes(core);
 
     await server.start();
-    await supertest(httpSetup.server.listener)
+    await supertest(httpSetup.server.server)
       .get('/api/reporting/jobs/download/dank')
       .expect(503)
       .expect('Content-Type', 'text/plain; charset=utf-8')
@@ -236,7 +236,7 @@ describe('GET /api/reporting/jobs/download', () => {
     registerJobInfoRoutes(core);
 
     await server.start();
-    await supertest(httpSetup.server.listener)
+    await supertest(httpSetup.server.server)
       .get('/api/reporting/jobs/download/dank')
       .expect(500)
       .expect('Content-Type', 'application/json; charset=utf-8')
@@ -264,7 +264,7 @@ describe('GET /api/reporting/jobs/download', () => {
       registerJobInfoRoutes(core);
 
       await server.start();
-      await supertest(httpSetup.server.listener)
+      await supertest(httpSetup.server.server)
         .get('/api/reporting/jobs/download/dank')
         .expect(200)
         .expect('Content-Type', 'text/plain; charset=utf-8')
@@ -281,7 +281,7 @@ describe('GET /api/reporting/jobs/download', () => {
 
       await server.start();
 
-      await supertest(httpSetup.server.listener)
+      await supertest(httpSetup.server.server)
         .get('/api/reporting/jobs/download/dope')
         .expect(200)
         .expect('Content-Type', 'text/plain; charset=utf-8')
@@ -297,7 +297,7 @@ describe('GET /api/reporting/jobs/download', () => {
       registerJobInfoRoutes(core);
 
       await server.start();
-      await supertest(httpSetup.server.listener)
+      await supertest(httpSetup.server.server)
         .get('/api/reporting/jobs/download/dank')
         .expect(200)
         .expect('Content-Type', 'text/plain; charset=utf-8')
@@ -314,7 +314,7 @@ describe('GET /api/reporting/jobs/download', () => {
       registerJobInfoRoutes(core);
 
       await server.start();
-      await supertest(httpSetup.server.listener)
+      await supertest(httpSetup.server.server)
         .get('/api/reporting/jobs/download/dank')
         .expect(400)
         .then(({ body }) => {
@@ -354,7 +354,7 @@ describe('GET /api/reporting/jobs/download', () => {
 
       await server.start();
 
-      await supertest(httpSetup.server.listener)
+      await supertest(httpSetup.server.server)
         .get('/api/reporting/jobs/download/dope')
         .expect(403)
         .then(({ body }) =>

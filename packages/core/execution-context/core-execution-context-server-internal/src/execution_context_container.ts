@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { IncomingHttpHeaders } from 'http';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { IExecutionContextContainer } from '@kbn/core-execution-context-server';
 
@@ -14,16 +15,16 @@ import type { IExecutionContextContainer } from '@kbn/core-execution-context-ser
 export const BAGGAGE_HEADER = 'x-kbn-context';
 
 export function getParentContextFrom(
-  headers: Record<string, string>
+  headers: IncomingHttpHeaders
 ): KibanaExecutionContext | undefined {
   const header = headers[BAGGAGE_HEADER];
   return parseHeader(header);
 }
 
-function parseHeader(header?: string): KibanaExecutionContext | undefined {
+function parseHeader(header?: string | string[]): KibanaExecutionContext | undefined {
   if (!header) return undefined;
   try {
-    return JSON.parse(decodeURIComponent(header));
+    return JSON.parse(decodeURIComponent(Array.isArray(header) ? header[0] : header)); // TODO: Can header really be of these types and is this the right way to handle it?
   } catch (e) {
     return undefined;
   }

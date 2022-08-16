@@ -5,7 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { IncomingHttpHeaders } from 'http';
 import { AsyncLocalStorage } from 'async_hooks';
+
 import type apm from 'elastic-apm-node';
 import { isUndefined, omitBy } from 'lodash';
 import type { Subscription } from 'rxjs';
@@ -21,7 +24,7 @@ import { ExecutionContextContainer, getParentContextFrom } from './execution_con
  * @internal
  */
 export interface IExecutionContext {
-  getParentContextFrom(headers: Record<string, string>): KibanaExecutionContext | undefined;
+  getParentContextFrom(headers: IncomingHttpHeaders): KibanaExecutionContext | undefined;
 
   setRequestId(requestId: string): void;
 

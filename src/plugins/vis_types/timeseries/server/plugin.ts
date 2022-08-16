@@ -16,7 +16,6 @@ import {
   IUiSettingsClient,
 } from '@kbn/core/server';
 import { firstValueFrom, Observable } from 'rxjs';
-import { Server } from '@hapi/hapi';
 import { map } from 'rxjs/operators';
 import { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import { PluginStart } from '@kbn/data-plugin/server';
@@ -39,10 +38,6 @@ import {
   RollupSearchStrategy,
 } from './lib/search_strategies';
 import type { TimeseriesVisData, VisPayload } from '../common/types';
-
-export interface LegacySetup {
-  server: Server;
-}
 
 interface VisTypeTimeseriesPluginSetupDependencies {
   home?: HomeServerPluginSetup;

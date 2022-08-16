@@ -7,15 +7,21 @@
  */
 
 import Url from 'url';
+import type { ParsedUrlQuery } from 'querystring';
 import { Agent as HttpsAgent, ServerOptions as TlsOptions } from 'https';
+import proxy from '@fastify/http-proxy';
 import apm from 'elastic-apm-node';
-import { Server, Request } from '@hapi/hapi';
-import HapiProxy from '@hapi/h2o2';
+import type { FastifyInstance } from 'fastify';
 import { sampleSize } from 'lodash';
 import * as Rx from 'rxjs';
 import { take } from 'rxjs/operators';
 import { ByteSizeValue } from '@kbn/config-schema';
-import { createServer, getListenerOptions, getServerOptions } from '@kbn/server-http-tools';
+import {
+  createServer,
+  getCorsOptions,
+  getListenerOptions,
+  getServerOptions,
+} from '@kbn/server-http-tools';
 
 import { DevConfig, HttpConfig } from './config';
 import { Log } from './log';
@@ -24,6 +30,11 @@ const ONE_GIGABYTE = 1024 * 1024 * 1024;
 const alphabet = 'abcdefghijklmnopqrztuvwxyz'.split('');
 const getRandomBasePath = () => sampleSize(alphabet, 3).join('');
 
+interface OldBasePathParams {
+  oldBasePath: string;
+  kbnPath?: string;
+}
+
 export interface BasePathProxyServerOptions {
   shouldRedirectFromOldBasePath: (path: string) => boolean;
   delayUntil: () => Rx.Observable<void>;
@@ -31,7 +42,7 @@ export interface BasePathProxyServerOptions {
 
 export class BasePathProxyServer {
   private readonly httpConfig: HttpConfig;
-  private server?: Server;
+  private server?: FastifyInstance;
   private httpsAgent?: HttpsAgent;
 
   constructor(
@@ -64,15 +75,13 @@ export class BasePathProxyServer {
 
   public async start(options: BasePathProxyServerOptions) {
     const serverOptions = getServerOptions(this.httpConfig);
+    const corsOptions = getCorsOptions(this.httpConfig);
     const listenerOptions = getListenerOptions(this.httpConfig);
-    this.server = createServer(serverOptions, listenerOptions);
-
-    // Register hapi plugin that adds proxying functionality. It can be configured
-    // through the route configuration object (see { handler: { proxy: ... } }).
-    await this.server.register([HapiProxy]);
+    this.server = createServer(serverOptions, corsOptions);
 
     if (this.httpConfig.ssl.enabled) {
-      const tlsOptions = serverOptions.tls as TlsOptions;
+      // @ts-expect-error: The property `https` isn't defined on Fastify FastifyServerOptions type, but is the official way to specify tls options
+      const tlsOptions = serverOptions.https as TlsOptions;
       this.httpsAgent = new HttpsAgent({
         ca: tlsOptions.ca,
         cert: tlsOptions.cert,
@@ -82,13 +91,13 @@ export class BasePathProxyServer {
       });
     }
 
-    this.setupRoutes(options);
+    await this.setupRoutes(options);
 
-    await this.server.start();
+    await this.server.listen(listenerOptions);
 
     this.log.write(
       `basepath proxy server running at ${Url.format({
-        host: this.server.info.uri,
+        host: this.httpConfig.host, // TODO: Is that the same as this hapi code: `this.server.info.uri`?
         pathname: this.httpConfig.basePath,
       })}`
     );
@@ -99,7 +108,7 @@ export class BasePathProxyServer {
       return;
     }
 
-    await this.server.stop();
+    await this.server.close();
     this.server = undefined;
 
     if (this.httpsAgent !== undefined) {
@@ -108,7 +117,7 @@ export class BasePathProxyServer {
     }
   }
 
-  private setupRoutes({
+  private async setupRoutes({
     delayUntil,
     shouldRedirectFromOldBasePath,
   }: Readonly<BasePathProxyServerOptions>) {
@@ -117,109 +126,78 @@ export class BasePathProxyServer {
     }
 
     // Always redirect from root URL to the URL with basepath.
-    this.server.route({
-      handler: (request, responseToolkit) => {
-        return responseToolkit.redirect(this.httpConfig.basePath);
-      },
-      method: 'GET',
-      path: '/',
-    });
+    this.server.get('/', (request, reply) => reply.redirect(this.httpConfig.basePath as string)); // TODO: Are we sure `basePath` can never be undefined? If it is, this might result in an infinite loop!
 
-    this.server.route({
-      handler: {
-        proxy: {
-          agent: this.httpsAgent,
-          passThrough: true,
-          xforward: true,
-          mapUri: async (request: Request) => {
-            return {
-              // Passing in this header to merge it is a workaround until this is fixed:
-              // https://github.com/hapijs/h2o2/issues/124
-              headers:
-                request.headers['content-length'] != null
-                  ? { 'content-length': request.headers['content-length'] }
-                  : undefined,
-              uri: Url.format({
-                hostname: request.server.info.host,
-                port: this.devConfig.basePathProxyTargetPort,
-                protocol: request.server.info.protocol,
-                pathname: request.path,
-                query: request.query,
-              }),
-            };
-          },
+    // TODO: Convert payload validation from hapi implementation
+    // TODO: `proxy` is actually an async function for some unknown reason, but I'm not sure if that's needed? So maybe we don't need the await here?
+    // @ts-expect-error: TODO: figure out if this error is for real: No overload matches this call. It's only present if the `http.agents` option is used
+    await this.server.register(proxy, {
+      upstream: Url.format({
+        protocol: this.httpConfig.ssl.enabled ? 'https' : 'http',
+        hostname: this.httpConfig.host, // TODO: Is that the same as this hapi code: `request.server.info.host`?
+        port: this.devConfig.basePathProxyTargetPort,
+      }),
+      prefix: this.httpConfig.basePath,
+      http: {
+        agents: {
+          'http:': this.httpsAgent, // TODO: Seems like we HAVE to specify an http agent, but I'm not sure if we can get away with just reusing the https agent
+          'https:': this.httpsAgent,
         },
       },
-      method: '*',
-      options: {
-        pre: [
-          // Before we proxy request to a target port we may want to wait until some
-          // condition is met (e.g. until target listener is ready).
-          async (request, responseToolkit) => {
-            apm.setTransactionName(`${request.method.toUpperCase()} /{basePath}/{kbnPath*}`);
-            await delayUntil().pipe(take(1)).toPromise();
-            return responseToolkit.continue;
-          },
-        ],
-        validate: { payload: true },
+      // Before we proxy request to a target port we may want to wait until some
+      // condition is met (e.g. until target listener is ready).
+      async preHandler(request) {
+        apm.setTransactionName(`${request.method.toUpperCase()} /{basePath}/{kbnPath*}`);
+        await delayUntil().pipe(take(1)).toPromise();
       },
-      path: `${this.httpConfig.basePath}/{kbnPath*}`,
     });
 
-    this.server.route({
-      handler: {
-        proxy: {
-          agent: this.httpsAgent,
-          passThrough: true,
-          xforward: true,
-          mapUri: async (request: Request) => ({
-            uri: Url.format({
-              hostname: request.server.info.host,
-              port: this.devConfig.basePathProxyTargetPort,
-              protocol: request.server.info.protocol,
-              pathname: `${this.httpConfig.basePath}/${request.params.kbnPath}`,
-              query: request.query,
-            }),
-            headers: request.headers,
-          }),
+    // TODO: Convert payload validation from hapi implementation
+    // TODO: `proxy` is actually an async function for some unknown reason, but I'm not sure if that's needed? So maybe we don't need the await here?
+    // @ts-expect-error: TODO: figure out if this error is for real: No overload matches this call. It's only present if the `http.agents` option is used
+    await this.server.register(proxy, {
+      upstream: Url.format({
+        protocol: this.httpConfig.ssl.enabled ? 'https' : 'http',
+        hostname: this.httpConfig.host, // TODO: Is that the same as this hapi code: `request.server.info.host`?
+        port: this.devConfig.basePathProxyTargetPort,
+      }),
+      prefix: '/__UNSAFE_bypassBasePath',
+      rewritePrefix: this.httpConfig.basePath,
+      http: {
+        agents: {
+          'http:': this.httpsAgent, // TODO: Seems like we HAVE to specify an http agent, but I'm not sure if we can get away with just reusing the https agent
+          'https:': this.httpsAgent,
         },
       },
-      method: '*',
-      options: {
-        pre: [
-          // Before we proxy request to a target port we may want to wait until some
-          // condition is met (e.g. until target listener is ready).
-          async (request, responseToolkit) => {
-            await delayUntil().pipe(take(1)).toPromise();
-            return responseToolkit.continue;
-          },
-        ],
-        validate: { payload: true },
+      // Before we proxy request to a target port we may want to wait until some
+      // condition is met (e.g. until target listener is ready).
+      async preHandler() {
+        await delayUntil().pipe(take(1)).toPromise();
       },
-      path: `/__UNSAFE_bypassBasePath/{kbnPath*}`,
     });
 
     // It may happen that basepath has changed, but user still uses the old one,
     // so we can try to check if that's the case and just redirect user to the
     // same URL, but with valid basepath.
-    this.server.route({
-      handler: (request, responseToolkit) => {
+    this.server.all<{ Params: OldBasePathParams }>(
+      `/{oldBasePath}/{kbnPath*}`,
+      (request, reply) => {
         const { oldBasePath, kbnPath = '' } = request.params;
 
         const isGet = request.method === 'get';
         const isBasepathLike = oldBasePath.length === 3;
 
-        const newUrl = Url.format({
-          pathname: `${this.httpConfig.basePath}/${kbnPath}`,
-          query: request.query,
-        });
-
-        return isGet && isBasepathLike && shouldRedirectFromOldBasePath(kbnPath)
-          ? responseToolkit.redirect(newUrl)
-          : responseToolkit.response('Not Found').code(404);
-      },
-      method: '*',
-      path: `/{oldBasePath}/{kbnPath*}`,
-    });
+        if (isGet && isBasepathLike && shouldRedirectFromOldBasePath(kbnPath)) {
+          reply.redirect(
+            Url.format({
+              pathname: `${this.httpConfig.basePath}/${kbnPath}`,
+              query: request.query as ParsedUrlQuery, // `request.query` can be of other types if `querystringParser` is used: https://www.fastify.io/docs/latest/Reference/Server/#querystringparser
+            })
+          );
+        } else {
+          reply.callNotFound();
+        }
+      }
+    );
   }
 }

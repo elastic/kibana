@@ -44,7 +44,7 @@ describe('DELETE /api/saved_objects/{type}/{id}', () => {
   });
 
   it('formats successful response and records usage stats', async () => {
-    const result = await supertest(httpSetup.server.listener)
+    const result = await supertest(httpSetup.server.server)
       .delete('/api/saved_objects/index-pattern/logstash-*')
       .expect(200);
 
@@ -55,7 +55,7 @@ describe('DELETE /api/saved_objects/{type}/{id}', () => {
   });
 
   it('calls upon savedObjectClient.delete', async () => {
-    await supertest(httpSetup.server.listener)
+    await supertest(httpSetup.server.server)
       .delete('/api/saved_objects/index-pattern/logstash-*')
       .expect(200);
 
@@ -65,7 +65,7 @@ describe('DELETE /api/saved_objects/{type}/{id}', () => {
   });
 
   it('can specify `force` option', async () => {
-    await supertest(httpSetup.server.listener)
+    await supertest(httpSetup.server.server)
       .delete('/api/saved_objects/index-pattern/logstash-*')
       .query({ force: true })
       .expect(200);

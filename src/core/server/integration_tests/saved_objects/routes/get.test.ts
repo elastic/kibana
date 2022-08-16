@@ -77,7 +77,7 @@ describe('GET /api/saved_objects/{type}/{id}', () => {
 
     savedObjectsClient.get.mockResolvedValue(clientResponse);
 
-    const result = await supertest(httpSetup.server.listener)
+    const result = await supertest(httpSetup.server.server)
       .get('/api/saved_objects/index-pattern/logstash-*')
       .expect(200);
 
@@ -88,7 +88,7 @@ describe('GET /api/saved_objects/{type}/{id}', () => {
   });
 
   it('calls upon savedObjectClient.get', async () => {
-    await supertest(httpSetup.server.listener)
+    await supertest(httpSetup.server.server)
       .get('/api/saved_objects/index-pattern/logstash-*')
       .expect(200);
 

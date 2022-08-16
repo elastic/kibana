@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Request } from '@hapi/hapi';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 import Boom from '@hapi/boom';
 import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
 import { getEcsResponseLog } from './get_response_log';
@@ -41,7 +41,7 @@ function createMockHapiRequest({
   query = {},
   response = { headers: {}, statusCode: 200 },
   app = {},
-}: RequestFixtureOptions = {}): Request {
+}: RequestFixtureOptions = {}): FastifyRequest {
   return {
     auth,
     body,
@@ -53,7 +53,7 @@ function createMockHapiRequest({
     query,
     response,
     app,
-  } as unknown as Request;
+  } as unknown as FastifyRequest;
 }
 
 describe('getEcsResponseLog', () => {
@@ -71,7 +71,7 @@ describe('getEcsResponseLog', () => {
         received: 1610660231000,
       },
     });
-    const result = getEcsResponseLog(req, logger);
+    const result = getEcsResponseLog(req, {} as FastifyReply, logger);
     expect(result.message).toMatchInlineSnapshot(`"GET /path 200 1000ms - 1.2KB"`);
   });
 
@@ -83,7 +83,7 @@ describe('getEcsResponseLog', () => {
           received: 1610660231000,
         },
       });
-      const result = getEcsResponseLog(req, logger);
+      const result = getEcsResponseLog(req, {} as FastifyReply, logger);
       // @ts-expect-error ECS custom field
       expect(result.meta.http.response.responseTime).toBe(1000);
     });
@@ -95,14 +95,14 @@ describe('getEcsResponseLog', () => {
           received: 1610660233000,
         },
       });
-      const result = getEcsResponseLog(req, logger);
+      const result = getEcsResponseLog(req, {} as FastifyReply, logger);
       // @ts-expect-error ECS custom field
       expect(result.meta.http.response.responseTime).toBe(500);
     });
 
     test('excludes responseTime from message if none is provided', () => {
       const req = createMockHapiRequest();
-      const result = getEcsResponseLog(req, logger);
+      const result = getEcsResponseLog(req, {} as FastifyReply, logger);
       expect(result.message).toMatchInlineSnapshot(`"GET /path 200 - 1.2KB"`);
       // @ts-expect-error ECS custom field
       expect(result.meta.http.response.responseTime).toBeUndefined();
@@ -117,7 +117,7 @@ describe('getEcsResponseLog', () => {
           b: 'world',
         },
       });
-      const result = getEcsResponseLog(req, logger);
+      const result = getEcsResponseLog(req, {} as FastifyReply, logger);
       expect(result.meta.url!.query).toMatchInlineSnapshot(`"a=hello&b=world"`);
       expect(result.message).toMatchInlineSnapshot(`"GET /path?a=hello&b=world 200 - 1.2KB"`);
     });
@@ -126,7 +126,7 @@ describe('getEcsResponseLog', () => {
       const req = createMockHapiRequest({
         query: { a: '¡hola!' },
       });
-      const result = getEcsResponseLog(req, logger);
+      const result = getEcsResponseLog(req, {} as FastifyReply, logger);
       expect(result.meta.url!.query).toMatchInlineSnapshot(`"a=%C2%A1hola!"`);
       expect(result.message).toMatchInlineSnapshot(`"GET /path?a=%C2%A1hola! 200 - 1.2KB"`);
     });
@@ -135,14 +135,14 @@ describe('getEcsResponseLog', () => {
   test('calls getResponsePayloadBytes to calculate payload bytes', () => {
     const response = { headers: {}, source: '...' };
     const req = createMockHapiRequest({ response });
-    getEcsResponseLog(req, logger);
+    getEcsResponseLog(req, {} as FastifyReply, logger);
     expect(getResponsePayloadBytes).toHaveBeenCalledWith(response, logger);
   });
 
   test('excludes payload bytes from message if unavailable', () => {
     (getResponsePayloadBytes as jest.Mock).mockReturnValueOnce(undefined);
     const req = createMockHapiRequest();
-    const result = getEcsResponseLog(req, logger);
+    const result = getEcsResponseLog(req, {} as FastifyReply, logger);
     expect(result.message).toMatchInlineSnapshot(`"GET /path 200"`);
   });
 
@@ -153,7 +153,7 @@ describe('getEcsResponseLog', () => {
         traceId: 'trace_id',
       },
     });
-    const result = getEcsResponseLog(req, logger);
+    const result = getEcsResponseLog(req, {} as FastifyReply, logger);
     expect(result.meta?.trace?.id).toBe('trace_id');
   });
 
@@ -161,7 +161,7 @@ describe('getEcsResponseLog', () => {
     const req = createMockHapiRequest({
       response: Boom.badRequest(),
     });
-    const result = getEcsResponseLog(req, logger);
+    const result = getEcsResponseLog(req, {} as FastifyReply, logger);
     expect(result.meta.http!.response!.status_code).toBe(400);
   });
 
@@ -171,7 +171,7 @@ describe('getEcsResponseLog', () => {
         headers: { authorization: 'a', cookie: 'b', 'user-agent': 'hi' },
         response: { headers: { 'content-length': 123, 'set-cookie': 'c' } },
       });
-      const result = getEcsResponseLog(req, logger);
+      const result = getEcsResponseLog(req, {} as FastifyReply, logger);
       // @ts-expect-error ECS custom field
       expect(result.meta.http.request.headers).toMatchInlineSnapshot(`
         Object {
@@ -194,7 +194,7 @@ describe('getEcsResponseLog', () => {
         headers: { 'x-elastic-app-auth': 'hello', 'user-agent': 'world' },
         response: { headers: { 'content-length': '123', 'x-elastic-app-auth': 'abc' } },
       });
-      const result = getEcsResponseLog(req, logger);
+      const result = getEcsResponseLog(req, {} as FastifyReply, logger);
       // @ts-expect-error ECS custom field
       expect(result.meta.http.request.headers).toMatchInlineSnapshot(`
         Object {
@@ -219,7 +219,7 @@ describe('getEcsResponseLog', () => {
         response: { headers: resHeaders },
       });
 
-      const responseLog = getEcsResponseLog(req, logger);
+      const responseLog = getEcsResponseLog(req, {} as FastifyReply, logger);
       expect(reqHeaders).toMatchInlineSnapshot(`
         Object {
           "a": "foo",
@@ -268,7 +268,7 @@ describe('getEcsResponseLog', () => {
         headers: reqHeaders,
         response: { headers: resHeaders },
       });
-      getEcsResponseLog(req, logger);
+      getEcsResponseLog(req, {} as FastifyReply, logger);
       expect(reqHeaders).toMatchInlineSnapshot(`
         Object {
           "authorization": "a",
@@ -290,7 +290,7 @@ describe('getEcsResponseLog', () => {
   describe('ecs', () => {
     test('provides an ECS-compatible response', () => {
       const req = createMockHapiRequest();
-      const result = getEcsResponseLog(req, logger);
+      const result = getEcsResponseLog(req, {} as FastifyReply, logger);
       expect(result).toMatchInlineSnapshot(`
         Object {
           "message": "GET /path 200 - 1.2KB",

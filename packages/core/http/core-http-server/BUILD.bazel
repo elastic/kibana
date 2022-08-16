@@ -33,10 +33,8 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
+  "@npm//fastify",
   "@npm//rxjs",
-  "@npm//@hapi/hapi",
-  "@npm//@types/hapi__hapi",
-  "@npm//@hapi/boom",
   "//packages/kbn-config-schema:npm_module_types",
   "//packages/kbn-utility-types:npm_module_types",
   "//packages/core/base/core-base-common:npm_module_types",

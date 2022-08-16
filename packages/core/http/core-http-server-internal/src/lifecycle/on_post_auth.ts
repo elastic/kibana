@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Lifecycle, Request, ResponseToolkit as HapiResponseToolkit } from '@hapi/hapi';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { Logger } from '@kbn/logging';
 import type {
   OnPostAuthNextResult,
@@ -16,7 +16,7 @@ import type {
 } from '@kbn/core-http-server';
 import { OnPostAuthResultType } from '@kbn/core-http-server';
 import {
-  HapiResponseAdapter,
+  FastifyResponseAdapter,
   CoreKibanaRequest,
   lifecycleResponseFactory,
   isKibanaResponse,
@@ -40,19 +40,24 @@ const toolkit: OnPostAuthToolkit = {
  * @param fn - an extension point allowing to perform custom logic for
  * incoming HTTP requests.
  */
-export function adoptToHapiOnPostAuthFormat(fn: OnPostAuthHandler, log: Logger) {
+export function adoptToFastifyOnPostAuthFormat(fn: OnPostAuthHandler, log: Logger) {
   return async function interceptRequest(
-    request: Request,
-    responseToolkit: HapiResponseToolkit
-  ): Promise<Lifecycle.ReturnValue> {
-    const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
+    request: FastifyRequest,
+    reply: FastifyReply
+  ): Promise<void> {
+    const hapiResponseAdapter = new FastifyResponseAdapter(reply);
     try {
-      const result = await fn(CoreKibanaRequest.from(request), lifecycleResponseFactory, toolkit);
+      const result = await fn(
+        CoreKibanaRequest.from(request, reply),
+        lifecycleResponseFactory,
+        toolkit
+      );
       if (isKibanaResponse(result)) {
-        return hapiResponseAdapter.handle(result);
+        hapiResponseAdapter.handle(result);
+        return;
       }
       if (postAuthResult.isNext(result)) {
-        return responseToolkit.continue;
+        return;
       }
 
       throw new Error(
@@ -60,7 +65,7 @@ export function adoptToHapiOnPostAuthFormat(fn: OnPostAuthHandler, log: Logger) 
       );
     } catch (error) {
       log.error(error);
-      return hapiResponseAdapter.toInternalError();
+      throw hapiResponseAdapter.toInternalError();
     }
   };
 }

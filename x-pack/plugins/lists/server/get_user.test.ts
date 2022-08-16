@@ -8,14 +8,15 @@
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { CoreKibanaRequest } from '@kbn/core/server';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
+import type { FastifyReply } from 'fastify';
 
 import { getUser } from './get_user';
 
 describe('get_user', () => {
-  let request = CoreKibanaRequest.from(httpServerMock.createRawRequest({}));
+  let request = CoreKibanaRequest.from(httpServerMock.createRawRequest({}), {} as FastifyReply);
   beforeEach(() => {
     jest.clearAllMocks();
-    request = CoreKibanaRequest.from(httpServerMock.createRawRequest({}));
+    request = CoreKibanaRequest.from(httpServerMock.createRawRequest({}), {} as FastifyReply);
   });
 
   afterEach(() => {

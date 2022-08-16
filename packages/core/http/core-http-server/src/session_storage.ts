@@ -16,7 +16,7 @@ export interface SessionStorage<T> {
   /**
    * Retrieves session value from the session storage.
    */
-  get(): Promise<T | null>;
+  get(): T | null;
 
   /**
    * Puts current session value into the session storage.

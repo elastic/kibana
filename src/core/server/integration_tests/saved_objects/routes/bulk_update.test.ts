@@ -68,7 +68,7 @@ describe('PUT /api/saved_objects/_bulk_update', () => {
     ];
     savedObjectsClient.bulkUpdate.mockResolvedValue({ saved_objects: clientResponse });
 
-    const result = await supertest(httpSetup.server.listener)
+    const result = await supertest(httpSetup.server.server)
       .put('/api/saved_objects/_bulk_update')
       .send([
         {
@@ -97,7 +97,7 @@ describe('PUT /api/saved_objects/_bulk_update', () => {
   it('calls upon savedObjectClient.bulkUpdate', async () => {
     savedObjectsClient.bulkUpdate.mockResolvedValue({ saved_objects: [] });
 
-    await supertest(httpSetup.server.listener)
+    await supertest(httpSetup.server.server)
       .put('/api/saved_objects/_bulk_update')
       .send([
         {

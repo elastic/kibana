@@ -54,7 +54,7 @@ describe('GET /api/saved_objects/_find', () => {
   });
 
   it('returns with status 400 when type is missing', async () => {
-    const result = await supertest(httpSetup.server.listener)
+    const result = await supertest(httpSetup.server.server)
       .get('/api/saved_objects/_find')
       .expect(400);
 
@@ -95,7 +95,7 @@ describe('GET /api/saved_objects/_find', () => {
     };
     savedObjectsClient.find.mockResolvedValue(findResponse);
 
-    const result = await supertest(httpSetup.server.listener)
+    const result = await supertest(httpSetup.server.server)
       .get('/api/saved_objects/_find?type=index-pattern')
       .expect(200);
 
@@ -106,7 +106,7 @@ describe('GET /api/saved_objects/_find', () => {
   });
 
   it('calls upon savedObjectClient.find with defaults', async () => {
-    await supertest(httpSetup.server.listener)
+    await supertest(httpSetup.server.server)
       .get('/api/saved_objects/_find?type=foo&type=bar')
       .expect(200);
 
@@ -123,7 +123,7 @@ describe('GET /api/saved_objects/_find', () => {
   });
 
   it('accepts the query parameter page/per_page', async () => {
-    await supertest(httpSetup.server.listener)
+    await supertest(httpSetup.server.server)
       .get('/api/saved_objects/_find?type=foo&per_page=10&page=50')
       .expect(200);
 
@@ -134,7 +134,7 @@ describe('GET /api/saved_objects/_find', () => {
   });
 
   it('accepts the optional query parameter has_reference', async () => {
-    await supertest(httpSetup.server.listener).get('/api/saved_objects/_find?type=foo').expect(200);
+    await supertest(httpSetup.server.server).get('/api/saved_objects/_find?type=foo').expect(200);
 
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
 
@@ -149,7 +149,7 @@ describe('GET /api/saved_objects/_find', () => {
         type: 'reference',
       })
     );
-    await supertest(httpSetup.server.listener)
+    await supertest(httpSetup.server.server)
       .get(`/api/saved_objects/_find?type=foo&has_reference=${references}`)
       .expect(200);
 
@@ -175,7 +175,7 @@ describe('GET /api/saved_objects/_find', () => {
         },
       ])
     );
-    await supertest(httpSetup.server.listener)
+    await supertest(httpSetup.server.server)
       .get(`/api/saved_objects/_find?type=foo&has_reference=${references}`)
       .expect(200);
 
@@ -195,7 +195,7 @@ describe('GET /api/saved_objects/_find', () => {
   });
 
   it('accepts the query parameter has_reference_operator', async () => {
-    await supertest(httpSetup.server.listener)
+    await supertest(httpSetup.server.server)
       .get('/api/saved_objects/_find?type=foo&has_reference_operator=AND')
       .expect(200);
 
@@ -210,7 +210,7 @@ describe('GET /api/saved_objects/_find', () => {
   });
 
   it('accepts the query parameter search_fields', async () => {
-    await supertest(httpSetup.server.listener)
+    await supertest(httpSetup.server.server)
       .get('/api/saved_objects/_find?type=foo&search_fields=title')
       .expect(200);
 
@@ -225,7 +225,7 @@ describe('GET /api/saved_objects/_find', () => {
   });
 
   it('accepts the query parameter fields as a string', async () => {
-    await supertest(httpSetup.server.listener)
+    await supertest(httpSetup.server.server)
       .get('/api/saved_objects/_find?type=foo&fields=title')
       .expect(200);
 
@@ -240,7 +240,7 @@ describe('GET /api/saved_objects/_find', () => {
   });
 
   it('accepts the query parameter fields as an array', async () => {
-    await supertest(httpSetup.server.listener)
+    await supertest(httpSetup.server.server)
       .get('/api/saved_objects/_find?type=foo&fields=title&fields=description')
       .expect(200);
 
@@ -255,7 +255,7 @@ describe('GET /api/saved_objects/_find', () => {
   });
 
   it('accepts the query parameter type as a string', async () => {
-    await supertest(httpSetup.server.listener)
+    await supertest(httpSetup.server.server)
       .get('/api/saved_objects/_find?type=index-pattern')
       .expect(200);
 
@@ -270,7 +270,7 @@ describe('GET /api/saved_objects/_find', () => {
   });
 
   it('accepts the query parameter type as an array', async () => {
-    await supertest(httpSetup.server.listener)
+    await supertest(httpSetup.server.server)
       .get('/api/saved_objects/_find?type=index-pattern&type=visualization')
       .expect(200);
 
@@ -285,7 +285,7 @@ describe('GET /api/saved_objects/_find', () => {
   });
 
   it('accepts the query parameter namespaces as a string', async () => {
-    await supertest(httpSetup.server.listener)
+    await supertest(httpSetup.server.server)
       .get('/api/saved_objects/_find?type=index-pattern&namespaces=foo')
       .expect(200);
 
@@ -300,7 +300,7 @@ describe('GET /api/saved_objects/_find', () => {
   });
 
   it('accepts the query parameter namespaces as an array', async () => {
-    await supertest(httpSetup.server.listener)
+    await supertest(httpSetup.server.server)
       .get('/api/saved_objects/_find?type=index-pattern&namespaces=default&namespaces=foo')
       .expect(200);
 

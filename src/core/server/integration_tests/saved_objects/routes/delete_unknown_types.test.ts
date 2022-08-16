@@ -54,7 +54,7 @@ describe('POST /internal/saved_objects/deprecations/_delete_unknown_types', () =
   });
 
   it('formats successful response', async () => {
-    const result = await supertest(httpSetup.server.listener)
+    const result = await supertest(httpSetup.server.server)
       .post('/internal/saved_objects/deprecations/_delete_unknown_types')
       .expect(200);
 
@@ -62,7 +62,7 @@ describe('POST /internal/saved_objects/deprecations/_delete_unknown_types', () =
   });
 
   it('calls upon esClient.deleteByQuery', async () => {
-    await supertest(httpSetup.server.listener)
+    await supertest(httpSetup.server.server)
       .post('/internal/saved_objects/deprecations/_delete_unknown_types')
       .expect(200);
 

@@ -6,7 +6,6 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Lifecycle } from '@hapi/hapi';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { JsonArray, JsonValue } from '@kbn/utility-types';
 import { RouteConfig, RouteMethod } from '@kbn/core/server';
@@ -54,8 +53,6 @@ export interface CallWithRequestParams extends estypes.RequestBase {
   track_total_hits?: boolean | number;
   body?: any;
 }
-
-export type InfraResponse = Lifecycle.ReturnValue;
 
 export interface InfraFrameworkPluginOptions {
   register: any;

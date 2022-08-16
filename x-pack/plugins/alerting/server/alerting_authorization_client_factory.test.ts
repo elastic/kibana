@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Request } from '@hapi/hapi';
+import type { FastifyRequest, FastifyReply } from 'fastify';
 import { ruleTypeRegistryMock } from './rule_type_registry.mock';
 import { CoreKibanaRequest } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
@@ -47,7 +47,8 @@ const fakeRequest = {
     },
   },
   getSavedObjectsClient: () => savedObjectsClient,
-} as unknown as Request;
+} as unknown as FastifyRequest;
+const fakeReply = {} as FastifyReply;
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -60,7 +61,7 @@ test('creates an alerting authorization client with proper constructor arguments
     securityPluginStart,
     ...alertingAuthorizationClientFactoryParams,
   });
-  const request = CoreKibanaRequest.from(fakeRequest);
+  const request = CoreKibanaRequest.from(fakeRequest, fakeReply);
 
   factory.create(request);
 
@@ -78,7 +79,7 @@ test('creates an alerting authorization client with proper constructor arguments
 test('creates an alerting authorization client with proper constructor arguments', async () => {
   const factory = new AlertingAuthorizationClientFactory();
   factory.initialize(alertingAuthorizationClientFactoryParams);
-  const request = CoreKibanaRequest.from(fakeRequest);
+  const request = CoreKibanaRequest.from(fakeRequest, fakeReply);
 
   factory.create(request);
 

@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Request, ResponseObject, ResponseToolkit } from '@hapi/hapi';
-import type Boom from '@hapi/boom';
+import type { FastifyRequest, FastifyReply } from 'fastify';
 import type { RouteConfig, RouteMethod } from './route';
 import type { RequestHandler, RequestHandlerWrapper } from './request_handler';
 import type { RequestHandlerContextBase } from './request_handler_context';
@@ -92,8 +91,5 @@ export interface RouterRoute {
   method: RouteMethod;
   path: string;
   options: RouteConfigOptions<RouteMethod>;
-  handler: (
-    req: Request,
-    responseToolkit: ResponseToolkit
-  ) => Promise<ResponseObject | Boom.Boom<any>>;
+  handler: (request: FastifyRequest, reply: FastifyReply) => void;
 }

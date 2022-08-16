@@ -184,7 +184,8 @@ describe('#asScoped', () => {
       recordAuditLoggingUsage,
     });
     const request = httpServerMock.createKibanaRequest({
-      kibanaRequestState: { requestId: 'REQUEST_ID', requestUuid: 'REQUEST_UUID' },
+      id: 'REQUEST_UUID',
+      kibanaRequestState: { requestId: 'REQUEST_ID' },
     });
 
     await auditSetup.asScoped(request).log({ message: 'MESSAGE', event: { action: 'ACTION' } });
@@ -219,7 +220,8 @@ describe('#asScoped', () => {
       recordAuditLoggingUsage,
     });
     const request = httpServerMock.createKibanaRequest({
-      kibanaRequestState: { requestId: 'REQUEST_ID', requestUuid: 'REQUEST_UUID' },
+      id: 'REQUEST_UUID',
+      kibanaRequestState: { requestId: 'REQUEST_ID' },
     });
 
     await auditSetup.asScoped(request).log({ message: 'MESSAGE', event: { action: 'ACTION' } });
@@ -249,7 +251,8 @@ describe('#asScoped', () => {
       recordAuditLoggingUsage,
     });
     const request = httpServerMock.createKibanaRequest({
-      kibanaRequestState: { requestId: 'REQUEST_ID', requestUuid: 'REQUEST_UUID' },
+      id: 'REQUEST_UUID',
+      kibanaRequestState: { requestId: 'REQUEST_ID' },
     });
 
     await auditSetup.asScoped(request).log(undefined);

@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import Hapi from '@hapi/hapi';
-import h2o2 from '@hapi/h2o2';
+import proxy from '@fastify/http-proxy';
+import Fastify from 'fastify';
+import type { FastifyInstance } from 'fastify';
 import { URL } from 'url';
 import type { SavedObject } from '@kbn/core-saved-objects-common';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
@@ -29,7 +30,7 @@ import {
 } from './repository_with_proxy_utils';
 
 let esServer: kbnTestServer.TestElasticsearchUtils;
-let hapiServer: Hapi.Server;
+let httpServer: FastifyInstance;
 
 const registerSOTypes = (setup: InternalCoreSetup) => {
   setup.savedObjects.registerType({
@@ -75,28 +76,29 @@ describe('404s from proxies', () => {
       ? parseInt(process.env.TEST_PROXY_SERVER_PORT, 10)
       : 5698;
 
-    // Setup custom hapi hapiServer with h2o2 plugin for proxying
-    hapiServer = Hapi.server({
-      port: proxyPort,
-    });
+    // Setup custom Fastify server with @fastify/http-proxy plugin for proxying
+    httpServer = Fastify();
 
-    await hapiServer.register(h2o2);
+    // TODO: `proxy` is actually an async function for some unknown reason, but I'm not sure if that's needed? So maybe we don't need the await here?
+    await httpServer.register(proxy);
     // register specific routes to modify the response and a catch-all to relay the request/response as-is
 
-    declareGetRoute(hapiServer, esHostname, esPort);
-    declareDeleteRoute(hapiServer, esHostname, esPort);
-    declarePostUpdateRoute(hapiServer, esHostname, esPort);
+    declareGetRoute(httpServer, esHostname, esPort);
+    declareDeleteRoute(httpServer, esHostname, esPort);
+    declarePostUpdateRoute(httpServer, esHostname, esPort);
 
-    declareGetSearchRoute(hapiServer, esHostname, esPort);
-    declarePostSearchRoute(hapiServer, esHostname, esPort);
-    declarePostBulkRoute(hapiServer, esHostname, esPort);
-    declarePostMgetRoute(hapiServer, esHostname, esPort);
-    declarePostPitRoute(hapiServer, esHostname, esPort);
-    declarePostUpdateByQueryRoute(hapiServer, esHostname, esPort);
+    declareGetSearchRoute(httpServer, esHostname, esPort);
+    declarePostSearchRoute(httpServer, esHostname, esPort);
+    declarePostBulkRoute(httpServer, esHostname, esPort);
+    declarePostMgetRoute(httpServer, esHostname, esPort);
+    declarePostPitRoute(httpServer, esHostname, esPort);
+    declarePostUpdateByQueryRoute(httpServer, esHostname, esPort);
 
-    declarePassthroughRoute(hapiServer, esHostname, esPort);
+    declarePassthroughRoute(httpServer, esHostname, esPort);
 
-    await hapiServer.start();
+    await httpServer.listen({
+      port: proxyPort,
+    });
 
     // Setup kibana configured to use proxy as ES backend
     root = kbnTestServer.createRootWithCorePlugins({
@@ -116,7 +118,7 @@ describe('404s from proxies', () => {
 
   afterAll(async () => {
     await root.shutdown();
-    await hapiServer.stop({ timeout: 1000 });
+    await httpServer.close(); // TODO: Fastify currently doesn't support a close timeout (was { timeout: 1000 } in hapi). For details see: https://github.com/fastify/fastify/issues/3617
     await esServer.stop();
   });
 

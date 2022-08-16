@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import Hapi from '@hapi/hapi';
 import type {
   DocLinksServiceSetup,
   IBasePath,
@@ -37,6 +36,7 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { FastifyRequest, FastifyReply } from 'fastify';
 import * as Rx from 'rxjs';
 import { filter, first, map, switchMap, take } from 'rxjs/operators';
 import type { ReportingConfig, ReportingSetup } from '.';
@@ -324,13 +324,14 @@ export class ReportingCore {
   }
 
   public getFakeRequest(baseRequest: object, spaceId: string | undefined, logger = this.logger) {
-    const fakeRequest = CoreKibanaRequest.from({
-      path: '/',
-      route: { settings: {} },
-      url: { href: '/' },
-      raw: { req: { url: '/' } },
-      ...baseRequest,
-    } as Hapi.Request);
+    const fakeRequest = CoreKibanaRequest.from(
+      {
+        url: '/',
+        raw: { url: '/' },
+        ...baseRequest,
+      } as FastifyRequest,
+      {} as FastifyReply
+    );
 
     const spacesService = this.getPluginSetupDeps().spaces?.spacesService;
     if (spacesService) {

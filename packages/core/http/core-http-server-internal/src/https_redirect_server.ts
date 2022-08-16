@@ -6,15 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { Request, ResponseToolkit, Server } from '@hapi/hapi';
+import type { FastifyInstance } from 'fastify';
 import { format as formatUrl } from 'url';
-import { createServer, getListenerOptions, getServerOptions } from '@kbn/server-http-tools';
+import {
+  createServer,
+  getServerOptions,
+  getCorsOptions,
+  getListenerOptions,
+} from '@kbn/server-http-tools';
 import type { Logger } from '@kbn/logging';
 
 import { HttpConfig } from './http_config';
 
 export class HttpsRedirectServer {
-  private server?: Server;
+  private server?: FastifyInstance;
 
   constructor(private readonly log: Logger) {}
 
@@ -32,30 +37,30 @@ export class HttpsRedirectServer {
     // within the platform with the only exception that it should always be a
     // plain HTTP server, so we just ignore `tls` part of options.
     this.server = createServer(
-      {
-        ...getServerOptions(config, { configureTLS: false }),
-        port: config.ssl.redirectHttpFromPort,
-      },
-      getListenerOptions(config)
+      getServerOptions(config, { configureTLS: false }),
+      getCorsOptions(config)
     );
 
-    this.server.ext('onRequest', (request: Request, responseToolkit: ResponseToolkit) => {
-      return responseToolkit
+    this.server.addHook('onRequest', (request, reply) => {
+      return reply
         .redirect(
           formatUrl({
             hostname: config.host,
-            pathname: request.url.pathname,
+            pathname: request.url,
             port: config.port,
             protocol: 'https',
-            search: request.url.search,
+            search: new URLSearchParams(request.query as any).toString(),
           })
         )
-        .takeover();
+        .hijack();
     });
 
     try {
-      await this.server.start();
-      this.log.debug(`http --> https redirect server running at ${this.server.info.uri}`);
+      await this.server.listen({
+        ...getListenerOptions(config),
+        port: config.ssl.redirectHttpFromPort,
+      });
+      this.log.debug(`http --> https redirect server running at ${'TODO'}`); // TODO: Convert this TODO from hapi to Fastify: `this.server.info.uri`
     } catch (err) {
       if (err.code === 'EADDRINUSE') {
         throw new Error(
@@ -75,7 +80,7 @@ export class HttpsRedirectServer {
     }
 
     this.log.debug('stopping http --> https redirect server');
-    await this.server.stop();
+    await this.server.close();
     this.server = undefined;
   }
 }

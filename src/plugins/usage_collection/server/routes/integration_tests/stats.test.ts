@@ -77,7 +77,7 @@ describe('/api/stats', () => {
   });
 
   it('successfully returns data', async () => {
-    const response = await supertest(httpSetup.server.listener).get('/api/stats').expect(200);
+    const response = await supertest(httpSetup.server.server).get('/api/stats').expect(200);
     expect(response.body).toMatchObject({
       kibana: {
         uuid: 'xxx-xxxxx',

@@ -81,7 +81,7 @@ describe('POST /diagnose/browser', () => {
 
     screenshotting.diagnose.mockReturnValue(Rx.of(devtoolMessage));
 
-    return supertest(httpSetup.server.listener)
+    return supertest(httpSetup.server.server)
       .post('/api/reporting/diagnose/browser')
       .expect(200)
       .then(({ body }) => {
@@ -97,7 +97,7 @@ describe('POST /diagnose/browser', () => {
     await server.start();
     screenshotting.diagnose.mockReturnValue(Rx.of(logs));
 
-    return supertest(httpSetup.server.listener)
+    return supertest(httpSetup.server.server)
       .post('/api/reporting/diagnose/browser')
       .expect(200)
       .then(({ body }) => {
@@ -119,7 +119,7 @@ describe('POST /diagnose/browser', () => {
     await server.start();
     screenshotting.diagnose.mockReturnValue(Rx.of(`${devtoolMessage}\n${fontNotFoundMessage}`));
 
-    return supertest(httpSetup.server.listener)
+    return supertest(httpSetup.server.server)
       .post('/api/reporting/diagnose/browser')
       .expect(200)
       .then(({ body }) => {

@@ -147,14 +147,10 @@ describe('Cookie based SessionStorage', () => {
         return res.ok({});
       });
 
-      const factory = await createCookieSessionStorageFactory(
-        logger.get(),
-        innerServer,
-        cookieOptions
-      );
+      const factory = createCookieSessionStorageFactory(logger.get(), innerServer, cookieOptions);
       await server.start();
 
-      const response = await supertest(innerServer.listener).get('/').expect(200);
+      const response = await supertest(innerServer.server).get('/').expect(200);
 
       const cookies = response.get('set-cookie');
       expect(cookies).toBeDefined();
@@ -185,14 +181,10 @@ describe('Cookie based SessionStorage', () => {
         return res.ok({ body: { value: sessionValue.value } });
       });
 
-      const factory = await createCookieSessionStorageFactory(
-        logger.get(),
-        innerServer,
-        cookieOptions
-      );
+      const factory = createCookieSessionStorageFactory(logger.get(), innerServer, cookieOptions);
       await server.start();
 
-      const response = await supertest(innerServer.listener).get('/').expect(200);
+      const response = await supertest(innerServer.server).get('/').expect(200);
 
       const cookies = response.get('set-cookie');
       expect(cookies).toBeDefined();
@@ -200,7 +192,7 @@ describe('Cookie based SessionStorage', () => {
 
       const sessionCookie = retrieveSessionCookie(cookies[0]);
 
-      await supertest(innerServer.listener)
+      await supertest(innerServer.server)
         .get('/')
         .set('Cookie', `${sessionCookie.key}=${sessionCookie.value}`)
         .expect(200, { value: userData });
@@ -217,14 +209,10 @@ describe('Cookie based SessionStorage', () => {
         return res.ok({ body: { value: sessionValue } });
       });
 
-      const factory = await createCookieSessionStorageFactory(
-        logger.get(),
-        innerServer,
-        cookieOptions
-      );
+      const factory = createCookieSessionStorageFactory(logger.get(), innerServer, cookieOptions);
       await server.start();
 
-      const response = await supertest(innerServer.listener).get('/').expect(200, { value: null });
+      const response = await supertest(innerServer.server).get('/').expect(200, { value: null });
 
       const cookies = response.get('set-cookie');
       expect(cookies).not.toBeDefined();
@@ -248,14 +236,10 @@ describe('Cookie based SessionStorage', () => {
         return res.ok({ body: { value: sessionValue } });
       });
 
-      const factory = await createCookieSessionStorageFactory(
-        logger.get(),
-        innerServer,
-        cookieOptions
-      );
+      const factory = createCookieSessionStorageFactory(logger.get(), innerServer, cookieOptions);
       await server.start();
 
-      const response = await supertest(innerServer.listener)
+      const response = await supertest(innerServer.server)
         .get('/')
         .expect(200, { value: userData });
 
@@ -265,7 +249,7 @@ describe('Cookie based SessionStorage', () => {
       await delay(sessionDurationMs);
 
       const sessionCookie = retrieveSessionCookie(cookies[0]);
-      const response2 = await supertest(innerServer.listener)
+      const response2 = await supertest(innerServer.server)
         .get('/')
         .set('Cookie', `${sessionCookie.key}=${sessionCookie.value}`)
         .expect(200, { value: null });
@@ -294,14 +278,10 @@ describe('Cookie based SessionStorage', () => {
         return res.ok({ body: { value: sessionValue } });
       });
 
-      const factory = await createCookieSessionStorageFactory(
-        logger.get(),
-        innerServer,
-        cookieOptions
-      );
+      const factory = createCookieSessionStorageFactory(logger.get(), innerServer, cookieOptions);
       await server.start();
 
-      const response = await supertest(innerServer.listener)
+      const response = await supertest(innerServer.server)
         .get('/')
         .expect(200, { value: userData });
 
@@ -309,7 +289,7 @@ describe('Cookie based SessionStorage', () => {
       expect(cookies).toBeDefined();
 
       const sessionCookie = retrieveSessionCookie(cookies[0]);
-      const response2 = await supertest(innerServer.listener)
+      const response2 = await supertest(innerServer.server)
         .get('/')
         .set('Cookie', `${sessionCookie.key}=${sessionCookie.value}`)
         .expect(200, { value: null });
@@ -332,7 +312,7 @@ describe('Cookie based SessionStorage', () => {
 
       const mockRequest = httpServerMock.createKibanaRequest();
 
-      const factory = await createCookieSessionStorageFactory(
+      const factory = createCookieSessionStorageFactory(
         logger.get(),
         mockServer as any,
         cookieOptions
@@ -366,7 +346,7 @@ describe('Cookie based SessionStorage', () => {
 
       const mockRequest = httpServerMock.createKibanaRequest();
 
-      const factory = await createCookieSessionStorageFactory(
+      const factory = createCookieSessionStorageFactory(
         logger.get(),
         mockServer as any,
         cookieOptions
@@ -398,7 +378,7 @@ describe('Cookie based SessionStorage', () => {
 
       const mockRequest = httpServerMock.createKibanaRequest();
 
-      const factory = await createCookieSessionStorageFactory(
+      const factory = createCookieSessionStorageFactory(
         logger.get(),
         mockServer as any,
         cookieOptions
@@ -431,19 +411,15 @@ describe('Cookie based SessionStorage', () => {
         return res.ok({});
       });
 
-      const factory = await createCookieSessionStorageFactory(
-        logger.get(),
-        innerServer,
-        cookieOptions
-      );
+      const factory = createCookieSessionStorageFactory(logger.get(), innerServer, cookieOptions);
       await server.start();
 
-      const response = await supertest(innerServer.listener).get('/').expect(200);
+      const response = await supertest(innerServer.server).get('/').expect(200);
 
       const cookies = response.get('set-cookie');
       const sessionCookie = retrieveSessionCookie(cookies[0]);
 
-      const response2 = await supertest(innerServer.listener)
+      const response2 = await supertest(innerServer.server)
         .get('/')
         .set('Cookie', `${sessionCookie.key}=${sessionCookie.value}`)
         .expect(200);
@@ -487,7 +463,7 @@ describe('Cookie based SessionStorage', () => {
             return res.ok({ body: { value: sessionValue.value } });
           });
 
-          const factory = await createCookieSessionStorageFactory(logger.get(), innerServer, {
+          const factory = createCookieSessionStorageFactory(logger.get(), innerServer, {
             ...cookieOptions,
             isSecure: true,
             name: `sid-${sameSite}`,
@@ -495,7 +471,7 @@ describe('Cookie based SessionStorage', () => {
           });
           await server.start();
 
-          const response = await supertest(innerServer.listener).get('/').expect(200);
+          const response = await supertest(innerServer.server).get('/').expect(200);
 
           const cookies = response.get('set-cookie');
           expect(cookies).toBeDefined();
@@ -504,7 +480,7 @@ describe('Cookie based SessionStorage', () => {
           const sessionCookie = retrieveSessionCookie(cookies[0]);
           expect(sessionCookie.sameSite).toEqual(sameSite.toLowerCase());
 
-          await supertest(innerServer.listener)
+          await supertest(innerServer.server)
             .get('/')
             .set('Cookie', `${sessionCookie.key}=${sessionCookie.value}`)
             .expect(200, { value: userData });

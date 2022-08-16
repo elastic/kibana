@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Request } from '@hapi/hapi';
+import type { FastifyReply } from 'fastify';
 import Boom from '@hapi/boom';
 
 import mockFs from 'mock-fs';
@@ -17,8 +17,6 @@ import { createGunzip, createGzip } from 'zlib';
 import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
 
 import { getResponsePayloadBytes } from './get_payload_size';
-
-type Response = Request['response'];
 
 describe('getPayloadSize', () => {
   let logger: MockedLogger;
@@ -38,7 +36,7 @@ describe('getPayloadSize', () => {
         {
           variety: 'buffer',
           source: Buffer.from('heya'),
-        } as Response,
+        } as FastifyReply,
         logger
       );
       expect(result).toBe(4);
@@ -49,7 +47,7 @@ describe('getPayloadSize', () => {
         {
           variety: 'buffer',
           source: Buffer.from('¡hola!'),
-        } as Response,
+        } as FastifyReply,
         logger
       );
       expect(result).toBe(7);
@@ -64,7 +62,7 @@ describe('getPayloadSize', () => {
         {
           variety: 'stream',
           source: new PassThrough(),
-        } as Response,
+        } as FastifyReply,
         logger
       );
 
@@ -85,7 +83,7 @@ describe('getPayloadSize', () => {
           {
             variety: 'stream',
             source,
-          } as Response,
+          } as FastifyReply,
           logger
         );
 
@@ -105,7 +103,7 @@ describe('getPayloadSize', () => {
           {
             variety: 'stream',
             source,
-          } as Response,
+          } as FastifyReply,
           logger
         );
 
@@ -128,7 +126,7 @@ describe('getPayloadSize', () => {
           {
             variety: 'stream',
             source,
-          } as Response,
+          } as FastifyReply,
           logger
         );
 
@@ -150,7 +148,7 @@ describe('getPayloadSize', () => {
           {
             variety: 'stream',
             source,
-          } as Response,
+          } as FastifyReply,
           logger
         );
 
@@ -166,7 +164,7 @@ describe('getPayloadSize', () => {
         {
           variety: 'plain',
           source: 'heya',
-        } as Response,
+        } as FastifyReply,
         logger
       );
       expect(result).toBe(4);
@@ -177,7 +175,7 @@ describe('getPayloadSize', () => {
         {
           variety: 'plain',
           source: '¡hola!',
-        } as Response,
+        } as FastifyReply,
         logger
       );
       expect(result).toBe(7);
@@ -189,7 +187,7 @@ describe('getPayloadSize', () => {
         {
           variety: 'plain',
           source: payload,
-        } as Response,
+        } as FastifyReply,
         logger
       );
       expect(result).toBe(JSON.stringify(payload).length);
@@ -201,7 +199,7 @@ describe('getPayloadSize', () => {
         {
           variety: 'plain',
           source: payload,
-        } as Response,
+        } as FastifyReply,
         logger
       );
       expect(result).toBe(JSON.stringify(payload).length);
@@ -215,7 +213,7 @@ describe('getPayloadSize', () => {
         {
           variety: 'plain',
           source: new TestClass(),
-        } as Response,
+        } as FastifyReply,
         logger
       );
       expect(result).toBe(undefined);
@@ -230,7 +228,7 @@ describe('getPayloadSize', () => {
           headers,
           variety: 'plain',
           source: 'abc',
-        } as unknown as Response,
+        } as unknown as FastifyReply,
         logger
       );
       expect(result).toBe(123);
@@ -238,19 +236,19 @@ describe('getPayloadSize', () => {
 
     test('uses first value when hapi header is an array', () => {
       const headers = { 'content-length': ['123', '456'] };
-      const result = getResponsePayloadBytes({ headers } as unknown as Response, logger);
+      const result = getResponsePayloadBytes({ headers } as unknown as FastifyReply, logger);
       expect(result).toBe(123);
     });
 
     test('returns undefined if length is NaN', () => {
       const headers = { 'content-length': 'oops' };
-      const result = getResponsePayloadBytes({ headers } as unknown as Response, logger);
+      const result = getResponsePayloadBytes({ headers } as unknown as FastifyReply, logger);
       expect(result).toBeUndefined();
     });
   });
 
   test('defaults to undefined', () => {
-    const result = getResponsePayloadBytes({} as unknown as Response, logger);
+    const result = getResponsePayloadBytes({} as unknown as FastifyReply, logger);
     expect(result).toBeUndefined();
   });
 
@@ -265,7 +263,7 @@ describe('getPayloadSize', () => {
       {
         variety: 'plain',
         source: payload.circular,
-      } as unknown as Response,
+      } as unknown as FastifyReply,
       logger
     );
     expect(result).toBeUndefined();
@@ -282,7 +280,7 @@ describe('getPayloadSize', () => {
       {
         variety: 'plain',
         source: payload.circular,
-      } as unknown as Response,
+      } as unknown as FastifyReply,
       logger
     );
     expect(logger.warn.mock.calls[0][0]).toMatchInlineSnapshot(

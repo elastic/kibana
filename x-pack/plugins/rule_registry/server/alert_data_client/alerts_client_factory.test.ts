@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Request } from '@hapi/hapi';
+import type { FastifyRequest, FastifyReply } from 'fastify';
 
 import { AlertsClientFactory, AlertsClientFactoryProps } from './alerts_client_factory';
 import { ElasticsearchClient, KibanaRequest, CoreKibanaRequest } from '@kbn/core/server';
@@ -42,7 +42,8 @@ const fakeRequest = {
       url: '/',
     },
   },
-} as unknown as Request;
+} as unknown as FastifyRequest;
+const fakeReply = {} as FastifyReply;
 
 const auditLogger = auditLoggerMock.create();
 
@@ -56,7 +57,7 @@ describe('AlertsClientFactory', () => {
   test('creates an alerts client with proper constructor arguments', async () => {
     const factory = new AlertsClientFactory();
     factory.initialize({ ...alertsClientFactoryParams });
-    const request = CoreKibanaRequest.from(fakeRequest);
+    const request = CoreKibanaRequest.from(fakeRequest, fakeReply);
     await factory.create(request);
 
     expect(jest.requireMock('./alerts_client').AlertsClient).toHaveBeenCalledWith({

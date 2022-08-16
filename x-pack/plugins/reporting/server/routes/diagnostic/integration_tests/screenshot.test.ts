@@ -66,7 +66,7 @@ describe('POST /diagnose/screenshot', () => {
     setScreenshotResponse({ warnings: [] });
     await server.start();
 
-    await supertest(httpSetup.server.listener)
+    await supertest(httpSetup.server.server)
       .post('/api/reporting/diagnose/screenshot')
       .expect(200)
       .then(({ body }) => {
@@ -85,7 +85,7 @@ describe('POST /diagnose/screenshot', () => {
     setScreenshotResponse({ warnings: [`Timeout waiting for .dank to load`] });
     await server.start();
 
-    await supertest(httpSetup.server.listener)
+    await supertest(httpSetup.server.server)
       .post('/api/reporting/diagnose/screenshot')
       .expect(200)
       .then(({ body }) => {
@@ -106,7 +106,7 @@ describe('POST /diagnose/screenshot', () => {
     setScreenshotResponse(new Error('Failure to start chromium!'));
     await server.start();
 
-    await supertest(httpSetup.server.listener)
+    await supertest(httpSetup.server.server)
       .post('/api/reporting/diagnose/screenshot')
       .expect(200)
       .then(({ body }) => {

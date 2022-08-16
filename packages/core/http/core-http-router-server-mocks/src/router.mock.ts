@@ -9,8 +9,9 @@
 import { URL } from 'url';
 import { Socket } from 'net';
 import { stringify } from 'query-string';
-import { hapiMocks } from '@kbn/hapi-mocks';
-import { schema } from '@kbn/config-schema';
+import type { FastifyReply } from 'fastify';
+import { fastifyMocks } from '@kbn/hapi-mocks'; // TODO: Rename package to `@kbn/fastify-mocks
+// import { schema } from '@kbn/config-schema';
 import type {
   IRouter,
   KibanaRequest,
@@ -50,6 +51,7 @@ export interface RequestFixtureOptions<P = any, Q = any, B = any> {
   method?: RouteMethod;
   socket?: Socket;
   routeTags?: string[];
+  id?: string;
   kibanaRouteOptions?: KibanaRouteOptions;
   kibanaRequestState?: KibanaRequestState;
   routeAuthRequired?: false;
@@ -68,50 +70,51 @@ function createKibanaRequestMock<P = any, Q = any, B = any>({
   query = {},
   method = 'get',
   socket = new Socket(),
+  id = '123e4567-e89b-12d3-a456-426614174000',
   routeTags,
   routeAuthRequired,
   validation = {},
   kibanaRouteOptions = { xsrfRequired: true },
   kibanaRequestState = {
     requestId: '123',
-    requestUuid: '123e4567-e89b-12d3-a456-426614174000',
   },
   auth = { isAuthenticated: true },
 }: RequestFixtureOptions<P, Q, B> = {}): KibanaRequest<P, Q, B> {
   const queryString = stringify(query, { sort: false });
-  const url = new URL(`${path}${queryString ? `?${queryString}` : ''}`, 'http://localhost');
+  const url = new URL(`${path}${queryString ? `?${queryString}` : ''}`, 'http://localhost')
+    .pathname;
 
   return CoreKibanaRequest.from<P, Q, B>(
-    hapiMocks.createRequest({
-      app: kibanaRequestState,
-      auth,
+    fastifyMocks.createRequest({
+      context: {
+        config: {
+          // TODO: Not sure about these properties
+          ...kibanaRequestState,
+          ...kibanaRouteOptions,
+          auth: routeAuthRequired,
+          tags: routeTags,
+        },
+      },
+      id,
       headers,
       params,
       query,
-      payload: body,
-      path,
+      body,
       method,
       url,
-      route: {
-        // @ts-expect-error According to types/hapi__hapi the following settings-fields have problems:
-        // - `auth` can't be a boolean, but it can according to the @hapi/hapi source (https://github.com/hapijs/hapi/blob/v18.4.2/lib/route.js#L139)
-        // - `app` isn't a valid property, but it is and this was fixed in the types in v19.0.1 (https://github.com/DefinitelyTyped/DefinitelyTyped/pull/41968)
-        settings: { tags: routeTags, auth: routeAuthRequired, app: kibanaRouteOptions },
-      },
+      socket,
       raw: {
-        req: {
-          socket,
-          // these are needed to avoid an error when consuming KibanaRequest.events
-          on: jest.fn(),
-          off: jest.fn(),
-        },
+        // these are needed to avoid an error when consuming KibanaRequest.events
+        on: jest.fn(),
+        off: jest.fn(),
       },
     }),
     {
-      params: validation.params || schema.any(),
-      body: validation.body || schema.any(),
-      query: validation.query || schema.any(),
-    }
+      // TODO: How do we make a proper mock reply?
+      // params: validation.params || schema.any(),
+      // body: validation.body || schema.any(),
+      // query: validation.query || schema.any(),
+    } as FastifyReply
   );
 }
 

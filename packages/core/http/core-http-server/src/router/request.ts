@@ -7,7 +7,6 @@
  */
 
 import type { URL } from 'url';
-import type { RequestApplicationState, RouteOptionsApp } from '@hapi/hapi';
 import type { Observable } from 'rxjs';
 import type { RecursiveReadonly } from '@kbn/utility-types';
 import type { IKibanaSocket } from './socket';
@@ -17,18 +16,20 @@ import type { Headers } from './headers';
 /**
  * @public
  */
-export interface KibanaRouteOptions extends RouteOptionsApp {
+export interface KibanaRouteOptions {
   xsrfRequired: boolean;
+  authRequired?: boolean | 'optional';
+  tags?: string[];
 }
 
 /**
  * @public
  */
-export interface KibanaRequestState extends RequestApplicationState {
+export interface KibanaRequestState {
   requestId: string;
-  requestUuid: string;
+  // requestUuid: string;
   rewrittenUrl?: URL;
-  traceId?: string;
+  // traceId?: string;
 }
 
 /**

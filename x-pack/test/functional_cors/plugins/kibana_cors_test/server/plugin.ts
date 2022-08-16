@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import Hapi from '@hapi/hapi';
+import type { FastifyInstance } from 'fastify';
+import Fastify from 'fastify';
 import { kbnTestConfig } from '@kbn/test';
 import Url from 'url';
 import abab from 'abab';
@@ -45,7 +46,7 @@ fetch('${url}', {
 }
 
 export class CorsTestPlugin implements Plugin {
-  private server?: Hapi.Server;
+  private server?: FastifyInstance;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
@@ -59,28 +60,27 @@ export class CorsTestPlugin implements Plugin {
   start(core: CoreStart) {
     const config = this.initializerContext.config.get<ConfigSchema>();
 
-    const server = new Hapi.Server({
-      port: config.port,
-    });
-    this.server = server;
+    const server = (this.server = Fastify());
 
     const { protocol, port, hostname } = core.http.getServerInfo();
 
     const kibanaUrl = Url.format({ protocol, hostname, port });
 
     server.route({
-      path: '/',
+      url: '/',
       method: 'GET',
-      handler(_, h) {
-        return h.response(renderBody(kibanaUrl));
+      handler(_, reply) {
+        return reply.send(renderBody(kibanaUrl));
       },
     });
-    server.start();
+    server.listen({
+      port: config.port,
+    });
   }
 
   public stop() {
     if (this.server) {
-      this.server.stop();
+      this.server.close();
     }
   }
 }

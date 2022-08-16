@@ -37,8 +37,7 @@ TYPES_DEPS = [
   "@npm//@types/jest",
   "@npm//moment",
   "@npm//@types/getos",
-  "@npm//@hapi/hapi",
-  "@npm//@types/hapi__hapi",
+  "@npm//fastify",
   "//packages/kbn-logging:npm_module_types",
   "//packages/core/metrics/core-metrics-server:npm_module_types",
 ]

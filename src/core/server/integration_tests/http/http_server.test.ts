@@ -9,7 +9,7 @@
 import { Server } from 'http';
 import supertest from 'supertest';
 import moment from 'moment';
-import { of } from 'rxjs';
+// import { of } from 'rxjs';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { Router } from '@kbn/core-http-router-server-internal';
@@ -42,7 +42,8 @@ describe('Http server', () => {
       shutdownTimeout: moment.duration(5, 's'),
     } as any;
 
-    server = new HttpServer(loggingService, 'tests', of(config.shutdownTimeout));
+    // server = new HttpServer(loggingService, 'tests', of(config.shutdownTimeout));
+    server = new HttpServer(loggingService, 'tests');
   });
 
   describe('Graceful shutdown', () => {
@@ -52,7 +53,7 @@ describe('Http server', () => {
     beforeEach(async () => {
       shutdownTimeout = config.shutdownTimeout.asMilliseconds();
       const { registerRouter, server: innerServer } = await server.setup(config);
-      innerServerListener = innerServer.listener;
+      innerServerListener = innerServer.server;
 
       const router = new Router('', logger, enhanceWithContext);
       router.post(

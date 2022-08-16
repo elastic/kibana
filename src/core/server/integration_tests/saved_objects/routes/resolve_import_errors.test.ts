@@ -94,7 +94,7 @@ describe(`POST ${URL}`, () => {
   });
 
   it('formats successful response and records usage stats', async () => {
-    const result = await supertest(httpSetup.server.listener)
+    const result = await supertest(httpSetup.server.server)
       .post(URL)
       .set('content-Type', 'multipart/form-data; boundary=BOUNDARY')
       .send(
@@ -124,7 +124,7 @@ describe(`POST ${URL}`, () => {
   it('defaults migrationVersion to empty object', async () => {
     savedObjectsClient.bulkCreate.mockResolvedValueOnce({ saved_objects: [mockDashboard] });
 
-    const result = await supertest(httpSetup.server.listener)
+    const result = await supertest(httpSetup.server.server)
       .post(URL)
       .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
       .send(
@@ -166,7 +166,7 @@ describe(`POST ${URL}`, () => {
     // NOTE: changes to this scenario should be reflected in the docs
     savedObjectsClient.bulkCreate.mockResolvedValueOnce({ saved_objects: [mockDashboard] });
 
-    const result = await supertest(httpSetup.server.listener)
+    const result = await supertest(httpSetup.server.server)
       .post(URL)
       .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
       .send(
@@ -204,7 +204,7 @@ describe(`POST ${URL}`, () => {
     // NOTE: changes to this scenario should be reflected in the docs
     savedObjectsClient.bulkCreate.mockResolvedValueOnce({ saved_objects: [mockDashboard] });
 
-    const result = await supertest(httpSetup.server.listener)
+    const result = await supertest(httpSetup.server.server)
       .post(URL)
       .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
       .send(
@@ -244,7 +244,7 @@ describe(`POST ${URL}`, () => {
     savedObjectsClient.bulkCreate.mockResolvedValueOnce({ saved_objects: [mockVisualization] });
     savedObjectsClient.bulkGet.mockResolvedValueOnce({ saved_objects: [mockIndexPattern] });
 
-    const result = await supertest(httpSetup.server.listener)
+    const result = await supertest(httpSetup.server.server)
       .post(URL)
       .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
       .send(
@@ -292,7 +292,7 @@ describe(`POST ${URL}`, () => {
     // NOTE: changes to this scenario should be reflected in the docs
     savedObjectsClient.bulkCreate.mockResolvedValueOnce({ saved_objects: [mockVisualization] });
 
-    const result = await supertest(httpSetup.server.listener)
+    const result = await supertest(httpSetup.server.server)
       .post(URL)
       .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
       .send(
@@ -352,7 +352,7 @@ describe(`POST ${URL}`, () => {
       };
       savedObjectsClient.bulkCreate.mockResolvedValueOnce({ saved_objects: [obj1, obj2] });
 
-      const result = await supertest(httpSetup.server.listener)
+      const result = await supertest(httpSetup.server.server)
         .post(`${URL}?createNewCopies=true`)
         .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
         .send(

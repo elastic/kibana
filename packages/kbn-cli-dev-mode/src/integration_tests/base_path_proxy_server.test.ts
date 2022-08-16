@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { Server } from '@hapi/hapi';
+import type { FastifyInstance, FastifyListenOptions } from 'fastify';
 import { EMPTY } from 'rxjs';
 import moment from 'moment';
 import supertest from 'supertest';
 import {
   getServerOptions,
+  getCorsOptions,
   getListenerOptions,
   createServer,
   IHttpConfig,
@@ -23,7 +24,8 @@ import { DevConfig } from '../config/dev_config';
 import { TestLog } from '../log';
 
 describe('BasePathProxyServer', () => {
-  let server: Server;
+  let server: FastifyInstance;
+  let listenerOptions: FastifyListenOptions | undefined;
   let proxyServer: BasePathProxyServer;
   let logger: TestLog;
   let config: IHttpConfig;
@@ -49,8 +51,9 @@ describe('BasePathProxyServer', () => {
     };
 
     const serverOptions = getServerOptions(config);
-    const listenerOptions = getListenerOptions(config);
-    server = createServer(serverOptions, listenerOptions);
+    listenerOptions = getListenerOptions(config);
+    const corsOptions = getCorsOptions(config);
+    server = createServer(serverOptions, corsOptions);
 
     // setup and start the proxy server
     const proxyConfig: IHttpConfig = { ...config, port: 10013 };
@@ -72,7 +75,7 @@ describe('BasePathProxyServer', () => {
   });
 
   afterEach(async () => {
-    await server.stop();
+    await server.close();
     await proxyServer.stop();
     jest.clearAllMocks();
   });
@@ -90,12 +93,12 @@ describe('BasePathProxyServer', () => {
   test('forwards request with the correct path', async () => {
     server.route({
       method: 'GET',
-      path: `${basePath}/foo/{test}`,
-      handler: (request, h) => {
-        return h.response(request.params.test);
+      url: `${basePath}/foo/{test}`,
+      handler: (request, reply) => {
+        return reply.send(request.params.test);
       },
     });
-    await server.start();
+    await server.listen(listenerOptions);
 
     await proxySupertest
       .get(`${basePath}/foo/some-string`)
@@ -108,13 +111,13 @@ describe('BasePathProxyServer', () => {
   test('forwards request with the correct query params', async () => {
     server.route({
       method: 'GET',
-      path: `${basePath}/foo/`,
-      handler: (request, h) => {
-        return h.response(request.query);
+      url: `${basePath}/foo/`,
+      handler: (request, reply) => {
+        return reply.send(request.query);
       },
     });
 
-    await server.start();
+    await server.listen(listenerOptions);
 
     await proxySupertest
       .get(`${basePath}/foo/?bar=test&quux=123`)
@@ -127,13 +130,13 @@ describe('BasePathProxyServer', () => {
   test('forwards the request body', async () => {
     server.route({
       method: 'POST',
-      path: `${basePath}/foo/`,
-      handler: (request, h) => {
-        return h.response(request.payload);
+      url: `${basePath}/foo/`,
+      handler: (request, reply) => {
+        return reply.send(request.body);
       },
     });
 
-    await server.start();
+    await server.listen(listenerOptions);
 
     await proxySupertest
       .post(`${basePath}/foo/`)
@@ -150,13 +153,13 @@ describe('BasePathProxyServer', () => {
   test('returns the correct status code', async () => {
     server.route({
       method: 'GET',
-      path: `${basePath}/foo/`,
-      handler: (request, h) => {
-        return h.response({ foo: 'bar' }).code(417);
+      url: `${basePath}/foo/`,
+      handler: (request, reply) => {
+        return reply.send({ foo: 'bar' }).code(417);
       },
     });
 
-    await server.start();
+    await server.listen(listenerOptions);
 
     await proxySupertest
       .get(`${basePath}/foo/`)
@@ -169,13 +172,13 @@ describe('BasePathProxyServer', () => {
   test('returns the response headers', async () => {
     server.route({
       method: 'GET',
-      path: `${basePath}/foo/`,
-      handler: (request, h) => {
-        return h.response({ foo: 'bar' }).header('foo', 'bar');
+      url: `${basePath}/foo/`,
+      handler: (request, reply) => {
+        return reply.send({ foo: 'bar' }).header('foo', 'bar');
       },
     });
 
-    await server.start();
+    await server.listen(listenerOptions);
 
     await proxySupertest
       .get(`${basePath}/foo/`)
@@ -200,18 +203,18 @@ describe('BasePathProxyServer', () => {
 
     server.route({
       method: 'GET',
-      path: `${basePath}/foo/{test}`,
+      url: `${basePath}/foo/{test}`,
       handler: async (request, h) => {
         notifyRequestReceived();
 
-        request.raw.req.once('aborted', () => {
+        request.raw.once('aborted', () => {
           notifyRequestAborted();
           propagated = true;
         });
         return await new Promise((resolve) => undefined);
       },
     });
-    await server.start();
+    await server.listen(listenerOptions);
 
     const request = proxySupertest.get(`${basePath}/foo/some-string`).end();
 
@@ -227,13 +230,13 @@ describe('BasePathProxyServer', () => {
   test('handles putting', async () => {
     server.route({
       method: 'PUT',
-      path: `${basePath}/foo/`,
-      handler: (request, h) => {
-        return h.response(request.payload);
+      url: `${basePath}/foo/`,
+      handler: (request, reply) => {
+        return reply.send(request.body);
       },
     });
 
-    await server.start();
+    await server.listen(listenerOptions);
 
     await proxySupertest
       .put(`${basePath}/foo/`)
@@ -250,12 +253,12 @@ describe('BasePathProxyServer', () => {
   test('handles deleting', async () => {
     server.route({
       method: 'DELETE',
-      path: `${basePath}/foo/{test}`,
-      handler: (request, h) => {
-        return h.response(request.params.test);
+      url: `${basePath}/foo/{test}`,
+      handler: (request, reply) => {
+        return reply.send(request.params.test);
       },
     });
-    await server.start();
+    await server.listen(listenerOptions);
 
     await proxySupertest
       .delete(`${basePath}/foo/some-string`)
@@ -274,25 +277,26 @@ describe('BasePathProxyServer', () => {
       } as IHttpConfig;
 
       const serverOptions = getServerOptions(configWithBasePath);
-      const listenerOptions = getListenerOptions(configWithBasePath);
-      server = createServer(serverOptions, listenerOptions);
+      const corsOptions = getCorsOptions(configWithBasePath);
+      listenerOptions = getListenerOptions(configWithBasePath);
+      server = createServer(serverOptions, corsOptions);
 
       server.route({
         method: 'GET',
-        path: `${basePath}/`,
-        handler: (request, h) => {
-          return h.response('value:/');
+        url: `${basePath}/`,
+        handler: (request, reply) => {
+          return reply.send('value:/');
         },
       });
       server.route({
         method: 'GET',
-        path: `${basePath}/foo`,
-        handler: (request, h) => {
-          return h.response('value:/foo');
+        url: `${basePath}/foo`,
+        handler: (request, reply) => {
+          return reply.send('value:/foo');
         },
       });
 
-      await server.start();
+      await server.listen(listenerOptions);
     });
 
     test('/bar => 404', async () => {

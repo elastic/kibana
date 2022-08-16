@@ -34,8 +34,7 @@ TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
   "@npm//@types/lodash",
-  "@npm//@hapi/hapi",
-  "@npm//@types/hapi__hapi",
+  "@npm//fastify",
   "//packages/kbn-utility-types:npm_module_types",
 ]
 

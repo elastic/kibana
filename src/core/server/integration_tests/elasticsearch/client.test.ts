@@ -79,7 +79,7 @@ describe.skip('fake elasticsearch', () => {
     esServer = createFakeElasticsearchServer();
 
     const kibanaPreboot = await kibanaServer.preboot();
-    kibanaHttpServer = kibanaPreboot.http.server.listener; // Mind that we are using the prebootServer at this point because the migration gets hanging, while waiting for ES to be correct
+    kibanaHttpServer = kibanaPreboot.http.server.server; // Mind that we are using the prebootServer at this point because the migration gets hanging, while waiting for ES to be correct
     await kibanaServer.setup();
   });
 

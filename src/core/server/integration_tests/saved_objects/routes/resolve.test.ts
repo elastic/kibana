@@ -80,7 +80,7 @@ describe('GET /api/saved_objects/resolve/{type}/{id}', () => {
 
     savedObjectsClient.resolve.mockResolvedValue(clientResponse);
 
-    const result = await supertest(httpSetup.server.listener)
+    const result = await supertest(httpSetup.server.server)
       .get('/api/saved_objects/resolve/index-pattern/logstash-*')
       .expect(200);
 
@@ -88,7 +88,7 @@ describe('GET /api/saved_objects/resolve/{type}/{id}', () => {
   });
 
   it('calls upon savedObjectClient.resolve', async () => {
-    await supertest(httpSetup.server.listener)
+    await supertest(httpSetup.server.server)
       .get('/api/saved_objects/resolve/index-pattern/logstash-*')
       .expect(200);
 

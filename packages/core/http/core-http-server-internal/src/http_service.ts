@@ -75,9 +75,11 @@ export class HttpService
       configService.atPath<CspConfigType>(cspConfig.path),
       configService.atPath<ExternalUrlConfigType>(externalUrlConfig.path),
     ]).pipe(map(([http, csp, externalUrl]) => new HttpConfig(http, csp, externalUrl)));
-    const shutdownTimeout$ = this.config$.pipe(map(({ shutdownTimeout }) => shutdownTimeout));
-    this.prebootServer = new HttpServer(logger, 'Preboot', shutdownTimeout$);
-    this.httpServer = new HttpServer(logger, 'Kibana', shutdownTimeout$);
+    // const shutdownTimeout$ = this.config$.pipe(map(({ shutdownTimeout }) => shutdownTimeout));
+    // this.prebootServer = new HttpServer(logger, 'Preboot', shutdownTimeout$);
+    // this.httpServer = new HttpServer(logger, 'Kibana', shutdownTimeout$);
+    this.prebootServer = new HttpServer(logger, 'Preboot');
+    this.httpServer = new HttpServer(logger, 'Kibana');
     this.httpsRedirectServer = new HttpsRedirectServer(logger.get('http', 'redirect', 'server'));
   }
 
@@ -86,20 +88,13 @@ export class HttpService
     const config = await firstValueFrom(this.config$);
 
     const prebootSetup = await this.prebootServer.setup(config);
-    prebootSetup.server.route({
-      path: '/{p*}',
-      method: '*',
-      handler: (req, responseToolkit) => {
-        this.log.debug(`Kibana server is not ready yet ${req.method}:${req.url.href}.`);
+    prebootSetup.server.all('/{p*}', (request, reply) => {
+      this.log.debug(`Kibana server is not ready yet ${request.method}:${request.url}.`);
 
-        // If server is not ready yet, because plugins or core can perform
-        // long running tasks (build assets, saved objects migrations etc.)
-        // we should let client know that and ask to retry after 30 seconds.
-        return responseToolkit
-          .response('Kibana server is not ready yet')
-          .code(503)
-          .header('Retry-After', '30');
-      },
+      // If server is not ready yet, because plugins or core can perform
+      // long running tasks (build assets, saved objects migrations etc.)
+      // we should let client know that and ask to retry after 30 seconds.
+      return reply.send('Kibana server is not ready yet').code(503).header('Retry-After', '30');
     });
 
     if (this.shouldListen(config)) {

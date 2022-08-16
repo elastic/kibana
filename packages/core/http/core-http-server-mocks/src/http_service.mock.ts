@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Server } from '@hapi/hapi';
+import type { FastifyInstance } from 'fastify';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { configMock } from '@kbn/config-mocks';
 import type {
@@ -108,8 +108,8 @@ const createInternalPrebootContractMock = () => {
       start: jest.fn(),
       stop: jest.fn(),
       config: jest.fn().mockReturnValue(configMock.create()),
-      // @ts-expect-error somehow it thinks that `Server` isn't a `Construtable`
-    } as unknown as jest.MockedClass<Server>,
+      // @ts-expect-error somehow it thinks that `FastifyInstance` isn't a `Construtable`
+    } as unknown as jest.MockedClass<FastifyInstance>,
   };
   return mock;
 };
@@ -128,7 +128,7 @@ const createPrebootContractMock = () => {
 
 const createInternalSetupContractMock = () => {
   const mock: InternalHttpServiceSetupMock = {
-    // we can mock other hapi server methods when we need it
+    // we can mock other FastifyInstance methods when we need it
     server: {
       name: 'http-server-test',
       version: 'kibana',
@@ -136,8 +136,8 @@ const createInternalSetupContractMock = () => {
       start: jest.fn(),
       stop: jest.fn(),
       config: jest.fn().mockReturnValue(configMock.create()),
-      // @ts-expect-error somehow it thinks that `Server` isn't a `Construtable`
-    } as unknown as jest.MockedClass<Server>,
+      // @ts-expect-error somehow it thinks that `FastifyInstance` isn't a `Construtable`
+    } as unknown as jest.MockedClass<FastifyInstance>,
     createCookieSessionStorageFactory: jest.fn(),
     registerOnPreRouting: jest.fn(),
     registerOnPreAuth: jest.fn(),
@@ -156,7 +156,7 @@ const createInternalSetupContractMock = () => {
     registerPrebootRoutes: jest.fn(),
     registerRouterAfterListening: jest.fn(),
   };
-  mock.createCookieSessionStorageFactory.mockResolvedValue(sessionStorageMock.createFactory());
+  mock.createCookieSessionStorageFactory.mockReturnValue(sessionStorageMock.createFactory());
   mock.createRouter.mockImplementation(() => mockRouter.create());
   mock.authRequestHeaders.get.mockReturnValue({ authorization: 'authorization-header' });
   mock.getServerInfo.mockReturnValue({

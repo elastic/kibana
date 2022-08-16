@@ -70,7 +70,7 @@ describe('POST /api/dashboards/import', () => {
   });
 
   it('calls importDashboards and records usage stats', async () => {
-    const result = await supertest(httpSetup.server.listener)
+    const result = await supertest(httpSetup.server.server)
       .post('/api/kibana/dashboards/import')
       .send({ version: '7.14.0', objects: importObjects });
 

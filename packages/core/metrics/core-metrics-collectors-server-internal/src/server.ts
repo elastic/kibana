@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ResponseObject, Server as HapiServer } from '@hapi/hapi';
+import type { FastifyInstance } from 'fastify';
 import type { OpsServerMetrics, MetricsCollector } from '@kbn/core-metrics-server';
 
 interface ServerResponseTime {
@@ -27,33 +27,34 @@ export class ServerMetricsCollector implements MetricsCollector<OpsServerMetrics
     max: 0,
   };
 
-  constructor(private readonly server: HapiServer) {
-    this.server.ext('onRequest', (request, h) => {
+  constructor(private readonly server: FastifyInstance) {
+    this.server.addHook('onRequest', (request) => {
       this.requests.total++;
-      request.events.once('disconnect', () => {
-        this.requests.disconnects++;
-      });
-      return h.continue;
+      // TODO: Convert to Fastify
+      // request.events.once('disconnect', () => {
+      //   this.requests.disconnects++;
+      // });
     });
-    this.server.events.on('response', (request) => {
-      const statusCode = (request.response as ResponseObject)?.statusCode;
-      if (statusCode) {
-        if (!this.requests.statusCodes[statusCode]) {
-          this.requests.statusCodes[statusCode] = 0;
-        }
-        this.requests.statusCodes[statusCode]++;
-      }
+    // TODO: Convert to Fastify
+    // this.server.events.on('response', (request) => {
+    //   const statusCode = (request.response as ResponseObject)?.statusCode;
+    //   if (statusCode) {
+    //     if (!this.requests.statusCodes[statusCode]) {
+    //       this.requests.statusCodes[statusCode] = 0;
+    //     }
+    //     this.requests.statusCodes[statusCode]++;
+    //   }
 
-      const duration = Date.now() - request.info.received;
-      this.responseTimes.count++;
-      this.responseTimes.total += duration;
-      this.responseTimes.max = Math.max(this.responseTimes.max, duration);
-    });
+    //   const duration = Date.now() - request.info.received;
+    //   this.responseTimes.count++;
+    //   this.responseTimes.total += duration;
+    //   this.responseTimes.max = Math.max(this.responseTimes.max, duration);
+    // });
   }
 
   public async collect(): Promise<OpsServerMetrics> {
     const connections = await new Promise<number>((resolve) => {
-      this.server.listener.getConnections((_, count) => {
+      this.server.server.getConnections((_, count) => {
         resolve(count);
       });
     });

@@ -111,12 +111,12 @@ describe('GET /api/status', () => {
   describe('allowAnonymous: false', () => {
     it('rejects requests with no credentials', async () => {
       await setupServer({ allowAnonymous: false });
-      await supertest(httpSetup.server.listener).get('/api/status').expect(401);
+      await supertest(httpSetup.server.server).get('/api/status').expect(401);
     });
 
     it('rejects requests with bad credentials', async () => {
       await setupServer({ allowAnonymous: false });
-      await supertest(httpSetup.server.listener)
+      await supertest(httpSetup.server.server)
         .get('/api/status')
         .set('Authorization', 'fake creds')
         .expect(401);
@@ -124,7 +124,7 @@ describe('GET /api/status', () => {
 
     it('accepts authenticated requests', async () => {
       await setupServer({ allowAnonymous: false });
-      await supertest(httpSetup.server.listener)
+      await supertest(httpSetup.server.server)
         .get('/api/status')
         .set('Authorization', 'let me in')
         .expect(200);
@@ -133,7 +133,7 @@ describe('GET /api/status', () => {
 
   it('returns basic server info & metrics', async () => {
     await setupServer();
-    const result = await supertest(httpSetup.server.listener).get('/api/status').expect(200);
+    const result = await supertest(httpSetup.server.server).get('/api/status').expect(200);
 
     expect(result.body.name).toEqual('xkibana');
     expect(result.body.uuid).toEqual('xxxx-xxxxx');
@@ -219,7 +219,7 @@ describe('GET /api/status', () => {
 
     it('returns legacy status format when v7format=true is provided', async () => {
       await setupServer();
-      const result = await supertest(httpSetup.server.listener)
+      const result = await supertest(httpSetup.server.server)
         .get('/api/status?v7format=true')
         .expect(200);
       expect(result.body.status).toEqual(legacyFormat);
@@ -229,7 +229,7 @@ describe('GET /api/status', () => {
 
     it('returns legacy status format when v8format=false is provided', async () => {
       await setupServer();
-      const result = await supertest(httpSetup.server.listener)
+      const result = await supertest(httpSetup.server.server)
         .get('/api/status?v8format=false')
         .expect(200);
       expect(result.body.status).toEqual(legacyFormat);
@@ -276,14 +276,14 @@ describe('GET /api/status', () => {
 
     it('returns new status format when no query params are provided', async () => {
       await setupServer();
-      const result = await supertest(httpSetup.server.listener).get('/api/status').expect(200);
+      const result = await supertest(httpSetup.server.server).get('/api/status').expect(200);
       expect(result.body.status).toEqual(newFormat);
       expect(incrementUsageCounter).not.toHaveBeenCalled();
     });
 
     it('returns new status format when v8format=true is provided', async () => {
       await setupServer();
-      const result = await supertest(httpSetup.server.listener)
+      const result = await supertest(httpSetup.server.server)
         .get('/api/status?v8format=true')
         .expect(200);
       expect(result.body.status).toEqual(newFormat);
@@ -292,7 +292,7 @@ describe('GET /api/status', () => {
 
     it('returns new status format when v7format=false is provided', async () => {
       await setupServer();
-      const result = await supertest(httpSetup.server.listener)
+      const result = await supertest(httpSetup.server.server)
         .get('/api/status?v7format=false')
         .expect(200);
       expect(result.body.status).toEqual(newFormat);
@@ -303,7 +303,7 @@ describe('GET /api/status', () => {
   describe('invalid query parameters', () => {
     it('v8format=true and v7format=true', async () => {
       await setupServer();
-      await supertest(httpSetup.server.listener)
+      await supertest(httpSetup.server.server)
         .get('/api/status?v8format=true&v7format=true')
         .expect(400);
       expect(incrementUsageCounter).not.toHaveBeenCalled();
@@ -311,7 +311,7 @@ describe('GET /api/status', () => {
 
     it('v8format=true and v7format=false', async () => {
       await setupServer();
-      await supertest(httpSetup.server.listener)
+      await supertest(httpSetup.server.server)
         .get('/api/status?v8format=true&v7format=false')
         .expect(400);
       expect(incrementUsageCounter).not.toHaveBeenCalled();
@@ -319,7 +319,7 @@ describe('GET /api/status', () => {
 
     it('v8format=false and v7format=false', async () => {
       await setupServer();
-      await supertest(httpSetup.server.listener)
+      await supertest(httpSetup.server.server)
         .get('/api/status?v8format=false&v7format=false')
         .expect(400);
       expect(incrementUsageCounter).not.toHaveBeenCalled();
@@ -327,7 +327,7 @@ describe('GET /api/status', () => {
 
     it('v8format=false and v7format=true', async () => {
       await setupServer();
-      await supertest(httpSetup.server.listener)
+      await supertest(httpSetup.server.server)
         .get('/api/status?v8format=false&v7format=true')
         .expect(400);
       expect(incrementUsageCounter).not.toHaveBeenCalled();
@@ -340,25 +340,25 @@ describe('GET /api/status', () => {
         await setupServer({
           coreOverall: createServiceStatus(ServiceStatusLevels.available),
         });
-        await supertest(httpSetup.server.listener).get('/api/status?v8format=true').expect(200);
+        await supertest(httpSetup.server.server).get('/api/status?v8format=true').expect(200);
       });
       it('respond with a 200 when core.overall.status is degraded', async () => {
         await setupServer({
           coreOverall: createServiceStatus(ServiceStatusLevels.degraded),
         });
-        await supertest(httpSetup.server.listener).get('/api/status?v8format=true').expect(200);
+        await supertest(httpSetup.server.server).get('/api/status?v8format=true').expect(200);
       });
       it('respond with a 503 when core.overall.status is unavailable', async () => {
         await setupServer({
           coreOverall: createServiceStatus(ServiceStatusLevels.unavailable),
         });
-        await supertest(httpSetup.server.listener).get('/api/status?v8format=true').expect(503);
+        await supertest(httpSetup.server.server).get('/api/status?v8format=true').expect(503);
       });
       it('respond with a 503 when core.overall.status is critical', async () => {
         await setupServer({
           coreOverall: createServiceStatus(ServiceStatusLevels.critical),
         });
-        await supertest(httpSetup.server.listener).get('/api/status?v8format=true').expect(503);
+        await supertest(httpSetup.server.server).get('/api/status?v8format=true').expect(503);
       });
     });
 
@@ -367,25 +367,25 @@ describe('GET /api/status', () => {
         await setupServer({
           coreOverall: createServiceStatus(ServiceStatusLevels.available),
         });
-        await supertest(httpSetup.server.listener).get('/api/status?v7format=true').expect(200);
+        await supertest(httpSetup.server.server).get('/api/status?v7format=true').expect(200);
       });
       it('respond with a 200 when core.overall.status is degraded', async () => {
         await setupServer({
           coreOverall: createServiceStatus(ServiceStatusLevels.degraded),
         });
-        await supertest(httpSetup.server.listener).get('/api/status?v7format=true').expect(200);
+        await supertest(httpSetup.server.server).get('/api/status?v7format=true').expect(200);
       });
       it('respond with a 503 when core.overall.status is unavailable', async () => {
         await setupServer({
           coreOverall: createServiceStatus(ServiceStatusLevels.unavailable),
         });
-        await supertest(httpSetup.server.listener).get('/api/status?v7format=true').expect(503);
+        await supertest(httpSetup.server.server).get('/api/status?v7format=true').expect(503);
       });
       it('respond with a 503 when core.overall.status is critical', async () => {
         await setupServer({
           coreOverall: createServiceStatus(ServiceStatusLevels.critical),
         });
-        await supertest(httpSetup.server.listener).get('/api/status?v7format=true').expect(503);
+        await supertest(httpSetup.server.server).get('/api/status?v7format=true').expect(503);
       });
     });
   });

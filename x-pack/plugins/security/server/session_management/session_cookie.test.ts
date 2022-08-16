@@ -34,7 +34,7 @@ describe('Session cookie', () => {
     mockSessionStorage = sessionStorageMock.create();
     mockSessionStorageFactory = sessionStorageMock.createFactory();
     mockSessionStorageFactory.asScoped.mockReturnValue(mockSessionStorage);
-    httpSetupMock.createCookieSessionStorageFactory.mockResolvedValue(mockSessionStorageFactory);
+    httpSetupMock.createCookieSessionStorageFactory.mockReturnValue(mockSessionStorageFactory);
 
     sessionCookieOptions = {
       logger: loggingSystemMock.createLogger(),

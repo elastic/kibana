@@ -72,7 +72,7 @@ describe('APMEventClient', () => {
 
     expect(abortSignal?.aborted).toBeFalsy();
 
-    const incomingRequest = supertest(innerServer.listener)
+    const incomingRequest = supertest(innerServer.server)
       .get('/')
       // end required to send request
       .end();

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Lifecycle, Request, ResponseToolkit as HapiResponseToolkit } from '@hapi/hapi';
+import type { onRequestAsyncHookHandler } from 'fastify';
 import type { Logger } from '@kbn/logging';
 import type {
   KibanaRequestState,
@@ -18,7 +18,7 @@ import type {
 } from '@kbn/core-http-server';
 import { OnPreRoutingResultType } from '@kbn/core-http-server';
 import {
-  HapiResponseAdapter,
+  FastifyResponseAdapter,
   CoreKibanaRequest,
   isKibanaResponse,
   lifecycleResponseFactory,
@@ -45,44 +45,50 @@ const toolkit: OnPreRoutingToolkit = {
 };
 
 /**
- * Adopt custom request interceptor to Hapi lifecycle system.
+ * Adopt custom request interceptor to Fastify lifecycle system.
  * @param fn - an extension point allowing to perform custom logic for
  * incoming HTTP requests.
  */
-export function adoptToHapiOnRequest(fn: OnPreRoutingHandler, log: Logger) {
-  return async function interceptPreRoutingRequest(
-    request: Request,
-    responseToolkit: HapiResponseToolkit
-  ): Promise<Lifecycle.ReturnValue> {
-    const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
+export function adoptToFastifyOnRequest(
+  fn: OnPreRoutingHandler,
+  log: Logger
+): onRequestAsyncHookHandler {
+  return async function interceptPreRoutingRequest(request, reply) {
+    const fastifyResponseAdapter = new FastifyResponseAdapter(reply);
 
     try {
-      const result = await fn(CoreKibanaRequest.from(request), lifecycleResponseFactory, toolkit);
+      const result = await fn(
+        CoreKibanaRequest.from(request, reply),
+        lifecycleResponseFactory,
+        toolkit
+      );
       if (isKibanaResponse(result)) {
-        return hapiResponseAdapter.handle(result);
+        fastifyResponseAdapter.handle(result);
+        return;
       }
 
       if (preRoutingResult.isNext(result)) {
-        return responseToolkit.continue;
+        return;
       }
 
       if (preRoutingResult.isRewriteUrl(result)) {
-        const appState = request.app as KibanaRequestState;
-        appState.rewrittenUrl = appState.rewrittenUrl ?? request.url;
+        const appState = request.context.config as KibanaRequestState;
+        appState.rewrittenUrl = appState.rewrittenUrl ?? new URL(request.url);
 
         const { url } = result;
-        request.setUrl(url);
+        // @ts-expect-error: Cannot assign to 'url' because it is a read-only property.
+        request.url = url; // TODO: Find a proper way to do this in Fastify
 
         // We should update raw request as well since it can be proxied to the old platform
-        request.raw.req.url = url;
-        return responseToolkit.continue;
+        request.raw.url = url;
+        return;
       }
       throw new Error(
         `Unexpected result from OnPreRouting. Expected OnPreRoutingResult or KibanaResponse, but given: ${result}.`
       );
     } catch (error) {
       log.error(error);
-      return hapiResponseAdapter.toInternalError();
+      throw fastifyResponseAdapter.toInternalError();
     }
   };
 }

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Lifecycle, Request, ResponseToolkit as HapiResponseToolkit } from '@hapi/hapi';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { Logger } from '@kbn/logging';
 import type {
   OnPreAuthResult,
@@ -16,7 +16,7 @@ import type {
 } from '@kbn/core-http-server';
 import { OnPreAuthResultType } from '@kbn/core-http-server';
 import {
-  HapiResponseAdapter,
+  FastifyResponseAdapter,
   CoreKibanaRequest,
   isKibanaResponse,
   lifecycleResponseFactory,
@@ -40,21 +40,23 @@ const toolkit: OnPreAuthToolkit = {
  * @param fn - an extension point allowing to perform custom logic for
  * incoming HTTP requests before a user has been authenticated.
  */
-export function adoptToHapiOnPreAuth(fn: OnPreAuthHandler, log: Logger) {
-  return async function interceptPreAuthRequest(
-    request: Request,
-    responseToolkit: HapiResponseToolkit
-  ): Promise<Lifecycle.ReturnValue> {
-    const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
+export function adoptToFastifyOnPreAuth(fn: OnPreAuthHandler, log: Logger) {
+  return async function interceptPreAuthRequest(request: FastifyRequest, reply: FastifyReply) {
+    const fastifyResponseAdapter = new FastifyResponseAdapter(reply);
 
     try {
-      const result = await fn(CoreKibanaRequest.from(request), lifecycleResponseFactory, toolkit);
+      const result = await fn(
+        CoreKibanaRequest.from(request, reply),
+        lifecycleResponseFactory,
+        toolkit
+      );
       if (isKibanaResponse(result)) {
-        return hapiResponseAdapter.handle(result);
+        fastifyResponseAdapter.handle(result);
+        return;
       }
 
       if (preAuthResult.isNext(result)) {
-        return responseToolkit.continue;
+        return;
       }
 
       throw new Error(
@@ -62,7 +64,7 @@ export function adoptToHapiOnPreAuth(fn: OnPreAuthHandler, log: Logger) {
       );
     } catch (error) {
       log.error(error);
-      return hapiResponseAdapter.toInternalError();
+      throw fastifyResponseAdapter.toInternalError();
     }
   };
 }

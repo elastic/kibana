@@ -6,9 +6,9 @@
  */
 
 import { PublicMethodsOf } from '@kbn/utility-types';
-import type { Request } from '@hapi/hapi';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 import { CoreKibanaRequest } from '@kbn/core/server';
+import type { FastifyRequest, FastifyReply } from 'fastify';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ErrorWithReason, validateRuleTypeParams } from '../lib';
 import {
@@ -127,19 +127,22 @@ export function getFakeKibanaRequest(
 
   const path = addSpaceIdToPath('/', spaceId);
 
-  const fakeRequest = CoreKibanaRequest.from({
-    headers: requestHeaders,
-    path: '/',
-    route: { settings: {} },
-    url: {
-      href: '/',
-    },
-    raw: {
-      req: {
-        url: '/',
+  const fakeRequest = CoreKibanaRequest.from(
+    {
+      headers: requestHeaders,
+      path: '/',
+      route: { settings: {} },
+      url: {
+        href: '/',
       },
-    },
-  } as unknown as Request);
+      raw: {
+        req: {
+          url: '/',
+        },
+      },
+    } as unknown as FastifyRequest,
+    {} as FastifyReply
+  );
 
   context.basePathService.set(fakeRequest, path);
 

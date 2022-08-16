@@ -127,7 +127,7 @@ describe('http service', () => {
 
         const { http } = await root.setup();
         const { createCookieSessionStorageFactory, createRouter, registerAuth, auth } = http;
-        const sessionStorageFactory = await createCookieSessionStorageFactory(cookieOptions);
+        const sessionStorageFactory = createCookieSessionStorageFactory(cookieOptions);
         registerAuth((req, res, toolkit) => {
           sessionStorageFactory.asScoped(req).set({ value: user });
           return toolkit.authenticated({ state: user });

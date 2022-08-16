@@ -6,16 +6,13 @@
  * Side Public License, v 1.
  */
 
+import type { FastifyListenOptions } from 'fastify';
 import { IHttpConfig } from './types';
 
-export interface ListenerOptions {
-  keepaliveTimeout: number;
-  socketTimeout: number;
-}
-
-export function getListenerOptions(config: IHttpConfig): ListenerOptions {
+export function getListenerOptions(config?: IHttpConfig): FastifyListenOptions | undefined {
+  if (config === undefined) return undefined;
   return {
-    keepaliveTimeout: config.keepaliveTimeout,
-    socketTimeout: config.socketTimeout,
+    host: config.host,
+    port: config.port,
   };
 }

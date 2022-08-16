@@ -86,7 +86,7 @@ describe(`POST ${URL}`, () => {
   });
 
   it('formats successful response and records usage stats', async () => {
-    const result = await supertest(httpSetup.server.listener)
+    const result = await supertest(httpSetup.server.server)
       .post(URL)
       .set('content-Type', 'multipart/form-data; boundary=BOUNDARY')
       .send(
@@ -113,7 +113,7 @@ describe(`POST ${URL}`, () => {
   it('defaults migrationVersion to empty object', async () => {
     savedObjectsClient.bulkCreate.mockResolvedValueOnce({ saved_objects: [mockIndexPattern] });
 
-    const result = await supertest(httpSetup.server.listener)
+    const result = await supertest(httpSetup.server.server)
       .post(URL)
       .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
       .send(
@@ -154,7 +154,7 @@ describe(`POST ${URL}`, () => {
       saved_objects: [mockIndexPattern, mockDashboard],
     });
 
-    const result = await supertest(httpSetup.server.listener)
+    const result = await supertest(httpSetup.server.server)
       .post(URL)
       .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
       .send(
@@ -202,7 +202,7 @@ describe(`POST ${URL}`, () => {
       errors: [{ type: mockIndexPattern.type, id: mockIndexPattern.id, error }],
     });
 
-    const result = await supertest(httpSetup.server.listener)
+    const result = await supertest(httpSetup.server.server)
       .post(URL)
       .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
       .send(
@@ -253,7 +253,7 @@ describe(`POST ${URL}`, () => {
       saved_objects: [mockIndexPattern, mockDashboard],
     });
 
-    const result = await supertest(httpSetup.server.listener)
+    const result = await supertest(httpSetup.server.server)
       .post(`${URL}?overwrite=true`)
       .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
       .send(
@@ -301,7 +301,7 @@ describe(`POST ${URL}`, () => {
       saved_objects: [{ ...mockIndexPattern, error }],
     });
 
-    const result = await supertest(httpSetup.server.listener)
+    const result = await supertest(httpSetup.server.server)
       .post(URL)
       .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
       .send(
@@ -364,7 +364,7 @@ describe(`POST ${URL}`, () => {
       errors: [{ type: 'visualization', id: 'my-vis', error: error2 }],
     });
 
-    const result = await supertest(httpSetup.server.listener)
+    const result = await supertest(httpSetup.server.server)
       .post(URL)
       .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
       .send(
@@ -433,7 +433,7 @@ describe(`POST ${URL}`, () => {
       errors: [{ type: 'visualization', id: 'my-vis', error: error2 }],
     });
 
-    const result = await supertest(httpSetup.server.listener)
+    const result = await supertest(httpSetup.server.server)
       .post(`${URL}?overwrite=true`)
       .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
       .send(
@@ -505,7 +505,7 @@ describe(`POST ${URL}`, () => {
       };
       savedObjectsClient.bulkCreate.mockResolvedValueOnce({ saved_objects: [obj1, obj2] });
 
-      const result = await supertest(httpSetup.server.listener)
+      const result = await supertest(httpSetup.server.server)
         .post(`${URL}?createNewCopies=true`)
         .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
         .send(

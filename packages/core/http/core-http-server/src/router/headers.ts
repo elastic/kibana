@@ -55,5 +55,5 @@ export type Headers = { [header in KnownHeaders]?: string | string[] | undefined
  * @public
  */
 export type ResponseHeaders =
-  | Record<KnownHeaders, string | string[]>
-  | Record<string, string | string[]>;
+  | Record<KnownHeaders, string | number | string[] | undefined>
+  | Record<string, string | number | string[] | undefined>;

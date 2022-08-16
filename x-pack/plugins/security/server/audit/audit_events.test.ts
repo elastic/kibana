@@ -425,9 +425,9 @@ describe('#httpRequestEvent', () => {
         request: httpServerMock.createKibanaRequest({
           path: '/path',
           query: { query: 'param' },
+          id: '123e4567-e89b-12d3-a456-426614174000',
           kibanaRequestState: {
             requestId: '123',
-            requestUuid: '123e4567-e89b-12d3-a456-426614174000',
             rewrittenUrl: new URL('http://localhost/original/path?query=param'),
           },
         }),

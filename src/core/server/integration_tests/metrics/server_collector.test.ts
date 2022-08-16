@@ -9,7 +9,7 @@
 import { BehaviorSubject, Subject } from 'rxjs';
 import { take, filter } from 'rxjs/operators';
 import supertest from 'supertest';
-import { Server as HapiServer } from '@hapi/hapi';
+import type { FastifyInstance } from 'fastify';
 import { createHttpServer } from '@kbn/core-http-server-mocks';
 import type { IRouter } from '@kbn/core-http-server';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
@@ -21,11 +21,11 @@ import { setTimeout as setTimeoutPromise } from 'timers/promises';
 describe('ServerMetricsCollector', () => {
   let server: HttpService;
   let collector: ServerMetricsCollector;
-  let hapiServer: HapiServer;
+  let fastifyServer: FastifyInstance;
   let router: IRouter;
 
   const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-  const sendGet = (path: string) => supertest(hapiServer.listener).get(path);
+  const sendGet = (path: string) => supertest(fastifyServer.server).get(path);
 
   beforeEach(async () => {
     server = createHttpServer();
@@ -35,9 +35,9 @@ describe('ServerMetricsCollector', () => {
       context: contextSetup,
       executionContext: executionContextServiceMock.createInternalSetupContract(),
     });
-    hapiServer = httpSetup.server;
+    fastifyServer = httpSetup.server;
     router = httpSetup.createRouter('/');
-    collector = new ServerMetricsCollector(hapiServer);
+    collector = new ServerMetricsCollector(fastifyServer);
   });
 
   afterEach(async () => {

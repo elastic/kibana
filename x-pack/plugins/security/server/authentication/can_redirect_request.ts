@@ -15,7 +15,7 @@ const KIBANA_VERSION_HEADER = 'kbn-version';
 /**
  * Checks whether we can reply to the request with redirect response. We can do that
  * only for non-AJAX and non-API requests.
- * @param request HapiJS request instance to check redirection possibility for.
+ * @param request Kibana request instance to check redirection possibility for.
  */
 export function canRedirectRequest(request: KibanaRequest) {
   const headers = request.headers;

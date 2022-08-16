@@ -57,7 +57,7 @@ describe('Options', () => {
         );
         await server.start();
 
-        await supertest(innerServer.listener).get('/').expect(200, {
+        await supertest(innerServer.server).get('/').expect(200, {
           httpAuthIsAuthenticated: false,
           requestIsAuthenticated: false,
         });
@@ -87,7 +87,7 @@ describe('Options', () => {
         );
         await server.start();
 
-        await supertest(innerServer.listener).get('/').expect(200, {
+        await supertest(innerServer.server).get('/').expect(200, {
           httpAuthIsAuthenticated: true,
           requestIsAuthenticated: true,
         });
@@ -116,7 +116,7 @@ describe('Options', () => {
         );
         await server.start();
 
-        await supertest(innerServer.listener).get('/').expect(200, {
+        await supertest(innerServer.server).get('/').expect(200, {
           httpAuthIsAuthenticated: false,
           requestIsAuthenticated: false,
         });
@@ -145,7 +145,7 @@ describe('Options', () => {
         );
         await server.start();
 
-        await supertest(innerServer.listener).get('/').expect(200, {
+        await supertest(innerServer.server).get('/').expect(200, {
           httpAuthIsAuthenticated: false,
           requestIsAuthenticated: false,
         });
@@ -178,7 +178,7 @@ describe('Options', () => {
         );
         await server.start();
 
-        await supertest(innerServer.listener).get('/').expect(200, {
+        await supertest(innerServer.server).get('/').expect(200, {
           httpAuthIsAuthenticated: false,
           requestIsAuthenticated: false,
         });
@@ -202,7 +202,7 @@ describe('Options', () => {
         );
         await server.start();
 
-        await supertest(innerServer.listener).get('/').expect(200, {
+        await supertest(innerServer.server).get('/').expect(200, {
           httpAuthIsAuthenticated: false,
           requestIsAuthenticated: false,
         });
@@ -232,7 +232,7 @@ describe('Options', () => {
         );
         await server.start();
 
-        await supertest(innerServer.listener).get('/').expect(200, {
+        await supertest(innerServer.server).get('/').expect(200, {
           httpAuthIsAuthenticated: true,
           requestIsAuthenticated: true,
         });
@@ -249,7 +249,7 @@ describe('Options', () => {
         );
         await server.start();
 
-        await supertest(innerServer.listener).get('/').expect(401);
+        await supertest(innerServer.server).get('/').expect(401);
       });
 
       it('User with invalid credentials cannot access a route', async () => {
@@ -264,7 +264,7 @@ describe('Options', () => {
         );
         await server.start();
 
-        await supertest(innerServer.listener).get('/').expect(401);
+        await supertest(innerServer.server).get('/').expect(401);
       });
 
       it('allows redirecting an user', async () => {
@@ -284,7 +284,7 @@ describe('Options', () => {
         );
         await server.start();
 
-        const result = await supertest(innerServer.listener).get('/').expect(302);
+        const result = await supertest(innerServer.server).get('/').expect(302);
 
         expect(result.header.location).toBe(redirectUrl);
       });
@@ -314,7 +314,7 @@ describe('Options', () => {
         );
         await server.start();
 
-        await supertest(innerServer.listener).get('/').expect(200, {
+        await supertest(innerServer.server).get('/').expect(200, {
           httpAuthIsAuthenticated: false,
           requestIsAuthenticated: false,
         });
@@ -368,7 +368,7 @@ describe('Options', () => {
         await server.start();
 
         // start the request
-        const request = supertest(innerServer.listener)
+        const request = supertest(innerServer.server)
           .post('/a')
           .set('Content-Type', 'application/json')
           .set('Transfer-Encoding', 'chunked');
@@ -393,7 +393,7 @@ describe('Options', () => {
         await server.start();
 
         // start the request
-        const request = supertest(innerServer.listener)
+        const request = supertest(innerServer.server)
           .post('/a')
           .set('Content-Type', 'application/json')
           .set('Transfer-Encoding', 'chunked');
@@ -428,7 +428,7 @@ describe('Options', () => {
         await server.start();
 
         // start the request
-        const request = supertest(innerServer.listener)
+        const request = supertest(innerServer.server)
           .post('/a')
           .set('Content-Type', 'application/json')
           .set('Transfer-Encoding', 'chunked');
@@ -461,7 +461,7 @@ describe('Options', () => {
         await server.start();
 
         // start the request
-        const request = supertest(innerServer.listener)
+        const request = supertest(innerServer.server)
           .post('/a')
           .set('Content-Type', 'application/json')
           .set('Transfer-Encoding', 'chunked');
@@ -493,7 +493,7 @@ describe('Options', () => {
         );
 
         await server.start();
-        await expect(supertest(innerServer.listener).post('/a')).rejects.toThrow('socket hang up');
+        await expect(supertest(innerServer.server).post('/a')).rejects.toThrow('socket hang up');
       });
 
       it('should not timeout if servers response is quick', async () => {
@@ -518,7 +518,7 @@ describe('Options', () => {
         );
 
         await server.start();
-        await expect(supertest(innerServer.listener).post('/a')).resolves.toHaveProperty(
+        await expect(supertest(innerServer.server).post('/a')).resolves.toHaveProperty(
           'status',
           200
         );
@@ -535,7 +535,7 @@ describe('Cache-Control', () => {
     router.get({ path: '/', validate: false, options: {} }, (context, req, res) => res.ok());
     await server.start();
 
-    await supertest(innerServer.listener)
+    await supertest(innerServer.server)
       .get('/')
       .expect('Cache-Control', 'private, no-cache, no-store, must-revalidate');
   });
@@ -553,7 +553,7 @@ describe('Cache-Control', () => {
     );
     await server.start();
 
-    await supertest(innerServer.listener).get('/').expect('Cache-Control', 'public, max-age=1200');
+    await supertest(innerServer.server).get('/').expect('Cache-Control', 'public, max-age=1200');
   });
 });
 
@@ -567,7 +567,7 @@ describe('Handler', () => {
     });
     await server.start();
 
-    const result = await supertest(innerServer.listener).get('/').expect(500);
+    const result = await supertest(innerServer.server).get('/').expect(500);
 
     expect(result.body.message).toBe(
       'An internal server error occurred. Check Kibana server logs for details.'
@@ -590,7 +590,7 @@ describe('Handler', () => {
     });
     await server.start();
 
-    const result = await supertest(innerServer.listener).get('/').expect(500);
+    const result = await supertest(innerServer.server).get('/').expect(500);
 
     expect(result.body.message).toBe(
       'An internal server error occurred. Check Kibana server logs for details.'
@@ -611,7 +611,7 @@ describe('Handler', () => {
     router.get({ path: '/', validate: false }, (context, req, res) => 'ok' as any);
     await server.start();
 
-    const result = await supertest(innerServer.listener).get('/').expect(500);
+    const result = await supertest(innerServer.server).get('/').expect(500);
 
     expect(result.body.message).toBe(
       'An internal server error occurred. Check Kibana server logs for details.'
@@ -642,10 +642,7 @@ describe('Handler', () => {
     );
     await server.start();
 
-    const result = await supertest(innerServer.listener)
-      .get('/')
-      .query({ page: 'one' })
-      .expect(400);
+    const result = await supertest(innerServer.server).get('/').query({ page: 'one' }).expect(400);
 
     expect(result.body).toEqual({
       error: 'Bad Request',
@@ -673,7 +670,7 @@ describe('Handler', () => {
     );
     await server.start();
 
-    await supertest(innerServer.listener)
+    await supertest(innerServer.server)
       .post('/')
       .send([{ foo: 'bar' }, { foo: 'dolly' }])
       .expect(200);
@@ -700,7 +697,7 @@ describe('Handler', () => {
     );
     await server.start();
 
-    await supertest(innerServer.listener).post('/').type('json').send('12').expect(200);
+    await supertest(innerServer.server).post('/').type('json').send('12').expect(200);
 
     expect(body).toEqual(12);
   });
@@ -719,7 +716,7 @@ describe('handleLegacyErrors', () => {
     );
     await server.start();
 
-    const result = await supertest(innerServer.listener).get('/').expect(404);
+    const result = await supertest(innerServer.server).get('/').expect(404);
 
     expect(result.body.message).toBe('Not Found');
   });
@@ -739,7 +736,7 @@ describe('handleLegacyErrors', () => {
     );
     await server.start();
 
-    const result = await supertest(innerServer.listener).get('/').expect(500);
+    const result = await supertest(innerServer.server).get('/').expect(500);
 
     expect(result.body).toEqual({
       error: 'Internal Server Error',
@@ -761,7 +758,7 @@ describe('Response factory', () => {
 
       await server.start();
 
-      const result = await supertest(innerServer.listener).get('/').expect(200);
+      const result = await supertest(innerServer.server).get('/').expect(200);
 
       expect(result.body).toEqual({ key: 'value' });
       expect(result.header['content-type']).toBe('application/json; charset=utf-8');
@@ -777,7 +774,7 @@ describe('Response factory', () => {
 
       await server.start();
 
-      const result = await supertest(innerServer.listener).get('/').expect(200);
+      const result = await supertest(innerServer.server).get('/').expect(200);
 
       expect(result.text).toBe('result');
       expect(result.header['content-type']).toBe('text/html; charset=utf-8');
@@ -793,7 +790,7 @@ describe('Response factory', () => {
 
       await server.start();
 
-      await supertest(innerServer.listener).get('/').expect(200);
+      await supertest(innerServer.server).get('/').expect(200);
     });
 
     it('supports answering with Stream (without custom Content-Type)', async () => {
@@ -815,7 +812,7 @@ describe('Response factory', () => {
 
       await server.start();
 
-      const result = await supertest(innerServer.listener).get('/').expect(200);
+      const result = await supertest(innerServer.server).get('/').expect(200);
 
       expect(result.text).toBe(undefined);
       expect(result.body.toString()).toBe('abc');
@@ -846,7 +843,7 @@ describe('Response factory', () => {
 
       await server.start();
 
-      const result = await supertest(innerServer.listener).get('/').expect(200);
+      const result = await supertest(innerServer.server).get('/').expect(200);
 
       expect(result.text).toBe('abc');
       expect(result.header['content-type']).toBe('text/plain; charset=utf-8');
@@ -875,7 +872,7 @@ describe('Response factory', () => {
 
       await server.start();
 
-      const result = await supertest(innerServer.listener).get('/').expect(200);
+      const result = await supertest(innerServer.server).get('/').expect(200);
 
       expect(result.text).toBe('abc');
       expect(result.header['transfer-encoding']).toBe('chunked');
@@ -898,7 +895,7 @@ describe('Response factory', () => {
 
       await server.start();
 
-      const result = await supertest(innerServer.listener).get('/').expect(200).buffer(true);
+      const result = await supertest(innerServer.server).get('/').expect(200).buffer(true);
 
       expect(result.header['content-encoding']).toBe('binary');
       expect(result.header['content-length']).toBe('1028');
@@ -922,7 +919,7 @@ describe('Response factory', () => {
 
       await server.start();
 
-      const result = await supertest(innerServer.listener).get('/').expect(200).buffer(true);
+      const result = await supertest(innerServer.server).get('/').expect(200).buffer(true);
 
       expect(result.text).toBe('abc');
       expect(result.header['content-length']).toBe('3');
@@ -944,7 +941,7 @@ describe('Response factory', () => {
 
       await server.start();
 
-      const result = await supertest(innerServer.listener).get('/').expect(200);
+      const result = await supertest(innerServer.server).get('/').expect(200);
 
       expect(result.text).toEqual('value');
       expect(result.header.age).toBe('42');
@@ -966,7 +963,7 @@ describe('Response factory', () => {
 
       await server.start();
 
-      const result = await supertest(innerServer.listener).get('/').expect(200);
+      const result = await supertest(innerServer.server).get('/').expect(200);
 
       expect(result.text).toEqual('value');
       expect(result.header.age).toBe('42');
@@ -988,7 +985,7 @@ describe('Response factory', () => {
 
       await server.start();
 
-      const result = await supertest(innerServer.listener).get('/').expect(200);
+      const result = await supertest(innerServer.server).get('/').expect(200);
 
       expect(result.header.age).toBe('42');
     });
@@ -1008,7 +1005,7 @@ describe('Response factory', () => {
 
       await server.start();
 
-      const result = await supertest(innerServer.listener).get('/').expect(200);
+      const result = await supertest(innerServer.server).get('/').expect(200);
 
       expect(result.header['set-cookie']).toEqual(['foo', 'bar']);
     });
@@ -1025,7 +1022,7 @@ describe('Response factory', () => {
 
       await server.start();
 
-      await supertest(innerServer.listener).get('/').expect(500);
+      await supertest(innerServer.server).get('/').expect(500);
 
       // error happens within hapi when route handler already finished execution.
       expect(loggingSystemMock.collect(logger).error).toHaveLength(0);
@@ -1041,7 +1038,7 @@ describe('Response factory', () => {
 
       await server.start();
 
-      const result = await supertest(innerServer.listener).get('/').expect(200);
+      const result = await supertest(innerServer.server).get('/').expect(200);
 
       expect(result.body).toEqual({ key: 'value' });
       expect(result.header['content-type']).toBe('application/json; charset=utf-8');
@@ -1057,7 +1054,7 @@ describe('Response factory', () => {
 
       await server.start();
 
-      const result = await supertest(innerServer.listener).get('/').expect(202);
+      const result = await supertest(innerServer.server).get('/').expect(202);
 
       expect(result.body).toEqual({ location: 'somewhere' });
       expect(result.header['content-type']).toBe('application/json; charset=utf-8');
@@ -1073,7 +1070,7 @@ describe('Response factory', () => {
 
       await server.start();
 
-      const result = await supertest(innerServer.listener).get('/').expect(204);
+      const result = await supertest(innerServer.server).get('/').expect(204);
 
       expect(result.noContent).toBe(true);
     });
@@ -1096,7 +1093,7 @@ describe('Response factory', () => {
 
       await server.start();
 
-      const result = await supertest(innerServer.listener).get('/').expect(302);
+      const result = await supertest(innerServer.server).get('/').expect(302);
 
       expect(result.text).toBe('The document has moved');
       expect(result.header.location).toBe('/new-url');
@@ -1117,7 +1114,7 @@ describe('Response factory', () => {
 
       await server.start();
 
-      const result = await supertest(innerServer.listener).get('/').expect(500);
+      const result = await supertest(innerServer.server).get('/').expect(500);
 
       expect(result.body.message).toBe(
         'An internal server error occurred. Check Kibana server logs for details.'
@@ -1144,7 +1141,7 @@ describe('Response factory', () => {
 
       await server.start();
 
-      const result = await supertest(innerServer.listener).get('/').expect(400);
+      const result = await supertest(innerServer.server).get('/').expect(400);
 
       expect(result.body).toEqual({
         error: 'Bad Request',
@@ -1163,7 +1160,7 @@ describe('Response factory', () => {
 
       await server.start();
 
-      const result = await supertest(innerServer.listener).get('/').expect(400);
+      const result = await supertest(innerServer.server).get('/').expect(400);
 
       expect(result.body).toEqual({
         error: 'Bad Request',
@@ -1184,7 +1181,7 @@ describe('Response factory', () => {
 
       await server.start();
 
-      const result = await supertest(innerServer.listener).get('/').expect(400);
+      const result = await supertest(innerServer.server).get('/').expect(400);
 
       expect(result.body).toEqual({
         error: 'Bad Request',
@@ -1220,7 +1217,7 @@ describe('Response factory', () => {
 
       await server.start();
 
-      await supertest(innerServer.listener)
+      await supertest(innerServer.server)
         .post('/foo/')
         .send({
           bar: 'test',
@@ -1231,7 +1228,7 @@ describe('Response factory', () => {
           expect(res.body).toEqual({ bar: 'test', baz: 123 });
         });
 
-      await supertest(innerServer.listener)
+      await supertest(innerServer.server)
         .post('/foo/')
         .send({
           bar: 'test',
@@ -1268,7 +1265,7 @@ describe('Response factory', () => {
 
       await server.start();
 
-      await supertest(innerServer.listener)
+      await supertest(innerServer.server)
         .post('/foo/')
         .send({
           bar: 'test',
@@ -1279,7 +1276,7 @@ describe('Response factory', () => {
           expect(res.body).toEqual({ bar: 'test', baz: 123 });
         });
 
-      await supertest(innerServer.listener)
+      await supertest(innerServer.server)
         .post('/foo/')
         .send({
           bar: 'test',
@@ -1290,7 +1287,7 @@ describe('Response factory', () => {
           expect(res.body).toEqual({ bar: 'test', baz: 123 });
         });
 
-      await supertest(innerServer.listener)
+      await supertest(innerServer.server)
         .post('/foo/')
         .send({
           bar: 'test',
@@ -1322,7 +1319,7 @@ describe('Response factory', () => {
 
       await server.start();
 
-      const result = await supertest(innerServer.listener).get('/').expect(401);
+      const result = await supertest(innerServer.server).get('/').expect(401);
 
       expect(result.body.message).toBe('no access');
       expect(result.header['www-authenticate']).toBe('challenge');
@@ -1338,7 +1335,7 @@ describe('Response factory', () => {
 
       await server.start();
 
-      const result = await supertest(innerServer.listener).get('/').expect(401);
+      const result = await supertest(innerServer.server).get('/').expect(401);
 
       expect(result.body.message).toBe('Unauthorized');
     });
@@ -1354,7 +1351,7 @@ describe('Response factory', () => {
 
       await server.start();
 
-      const result = await supertest(innerServer.listener).get('/').expect(403);
+      const result = await supertest(innerServer.server).get('/').expect(403);
 
       expect(result.body.message).toBe('reason');
     });
@@ -1369,7 +1366,7 @@ describe('Response factory', () => {
 
       await server.start();
 
-      const result = await supertest(innerServer.listener).get('/').expect(403);
+      const result = await supertest(innerServer.server).get('/').expect(403);
 
       expect(result.body.message).toBe('Forbidden');
     });
@@ -1385,7 +1382,7 @@ describe('Response factory', () => {
 
       await server.start();
 
-      const result = await supertest(innerServer.listener).get('/').expect(404);
+      const result = await supertest(innerServer.server).get('/').expect(404);
 
       expect(result.body.message).toBe('file is not found');
     });
@@ -1400,7 +1397,7 @@ describe('Response factory', () => {
 
       await server.start();
 
-      const result = await supertest(innerServer.listener).get('/').expect(404);
+      const result = await supertest(innerServer.server).get('/').expect(404);
 
       expect(result.body.message).toBe('Not Found');
     });
@@ -1416,7 +1413,7 @@ describe('Response factory', () => {
 
       await server.start();
 
-      const result = await supertest(innerServer.listener).get('/').expect(409);
+      const result = await supertest(innerServer.server).get('/').expect(409);
 
       expect(result.body.message).toBe('stale version');
     });
@@ -1431,7 +1428,7 @@ describe('Response factory', () => {
 
       await server.start();
 
-      const result = await supertest(innerServer.listener).get('/').expect(409);
+      const result = await supertest(innerServer.server).get('/').expect(409);
 
       expect(result.body.message).toBe('Conflict');
     });
@@ -1450,7 +1447,7 @@ describe('Response factory', () => {
 
       await server.start();
 
-      const result = await supertest(innerServer.listener).get('/').expect(418);
+      const result = await supertest(innerServer.server).get('/').expect(418);
 
       expect(result.body).toEqual({
         error: "I'm a teapot",
@@ -1474,7 +1471,7 @@ describe('Response factory', () => {
 
       await server.start();
 
-      const result = await supertest(innerServer.listener).get('/').expect(500);
+      const result = await supertest(innerServer.server).get('/').expect(500);
 
       expect(result.body).toEqual({
         error: 'Internal Server Error',
@@ -1498,7 +1495,7 @@ describe('Response factory', () => {
 
       await server.start();
 
-      const result = await supertest(innerServer.listener).get('/').expect(500);
+      const result = await supertest(innerServer.server).get('/').expect(500);
 
       expect(result.body).toEqual({
         error: 'Internal Server Error',
@@ -1521,7 +1518,7 @@ describe('Response factory', () => {
 
       await server.start();
 
-      const result = await supertest(innerServer.listener).get('/').expect(500);
+      const result = await supertest(innerServer.server).get('/').expect(500);
 
       expect(result.body).toEqual({
         error: 'Internal Server Error',
@@ -1555,7 +1552,7 @@ describe('Response factory', () => {
 
       await server.start();
 
-      const result = await supertest(innerServer.listener).get('/').expect(201);
+      const result = await supertest(innerServer.server).get('/').expect(201);
 
       expect(result.header.location).toBe('somewhere');
     });
@@ -1576,7 +1573,7 @@ describe('Response factory', () => {
 
       await server.start();
 
-      const result = await supertest(innerServer.listener).get('/').expect(301);
+      const result = await supertest(innerServer.server).get('/').expect(301);
 
       expect(result.header.location).toBe('/new-url');
     });
@@ -1595,7 +1592,7 @@ describe('Response factory', () => {
 
       await server.start();
 
-      await supertest(innerServer.listener).get('/').expect(500);
+      await supertest(innerServer.server).get('/').expect(500);
 
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
@@ -1620,7 +1617,7 @@ describe('Response factory', () => {
 
       await server.start();
 
-      const result = await supertest(innerServer.listener).get('/').expect(401);
+      const result = await supertest(innerServer.server).get('/').expect(401);
 
       expect(result.body.message).toBe('unauthorized');
     });
@@ -1641,7 +1638,7 @@ describe('Response factory', () => {
 
       await server.start();
 
-      const result = await supertest(innerServer.listener).get('/').expect(401);
+      const result = await supertest(innerServer.server).get('/').expect(401);
 
       expect(result.body).toEqual({
         error: 'Unauthorized',
@@ -1667,7 +1664,7 @@ describe('Response factory', () => {
 
       await server.start();
 
-      const result = await supertest(innerServer.listener).get('/').expect(401);
+      const result = await supertest(innerServer.server).get('/').expect(401);
 
       expect(result.body).toEqual({
         error: 'Unauthorized',
@@ -1691,7 +1688,7 @@ describe('Response factory', () => {
 
       await server.start();
 
-      const result = await supertest(innerServer.listener).get('/').expect(401);
+      const result = await supertest(innerServer.server).get('/').expect(401);
 
       expect(result.body.message).toBe('Unauthorized');
     });
@@ -1709,7 +1706,7 @@ describe('Response factory', () => {
 
       await server.start();
 
-      const result = await supertest(innerServer.listener).get('/').expect(500);
+      const result = await supertest(innerServer.server).get('/').expect(500);
 
       expect(result.body).toEqual({
         error: 'Internal Server Error',
@@ -1732,7 +1729,7 @@ describe('Response factory', () => {
 
       await server.start();
 
-      const result = await supertest(innerServer.listener).get('/').expect(500);
+      const result = await supertest(innerServer.server).get('/').expect(500);
 
       expect(result.body.message).toBe(
         'An internal server error occurred. Check Kibana server logs for details.'
@@ -1758,7 +1755,7 @@ describe('Response factory', () => {
 
       await server.start();
 
-      const result = await supertest(innerServer.listener).get('/').expect(500);
+      const result = await supertest(innerServer.server).get('/').expect(500);
 
       expect(result.body.message).toBe(
         'An internal server error occurred. Check Kibana server logs for details.'
@@ -1783,7 +1780,7 @@ describe('Response factory', () => {
 
       await server.start();
 
-      const result = await supertest(innerServer.listener).get('/').expect(500);
+      const result = await supertest(innerServer.server).get('/').expect(500);
 
       expect(result.body.message).toBe(
         'An internal server error occurred. Check Kibana server logs for details.'
@@ -1808,7 +1805,7 @@ describe('Response factory', () => {
 
       await server.start();
 
-      const result = await supertest(innerServer.listener).get('/').expect(500);
+      const result = await supertest(innerServer.server).get('/').expect(500);
 
       expect(result.body.message).toBe(
         'An internal server error occurred. Check Kibana server logs for details.'
@@ -1844,9 +1841,7 @@ describe('ETag', () => {
     );
 
     await server.start();
-    const response = await supertest(innerServer.listener)
-      .get('/route')
-      .expect(200, { foo: 'bar' });
+    const response = await supertest(innerServer.server).get('/route').expect(200, { foo: 'bar' });
     expect(response.get('etag')).toEqual('"etag-1"');
   });
 
@@ -1869,7 +1864,7 @@ describe('ETag', () => {
     );
 
     await server.start();
-    await supertest(innerServer.listener)
+    await supertest(innerServer.server)
       .get('/route')
       .set('If-None-Match', '"etag-1"')
       .expect(304, '');
@@ -1900,8 +1895,8 @@ describe('registerRouterAfterListening', () => {
 
     await server.start();
 
-    await supertest(innerServer.listener).get('/').expect(200);
-    await supertest(innerServer.listener).get('/test/afterListening').expect(200);
+    await supertest(innerServer.server).get('/').expect(200);
+    await supertest(innerServer.server).get('/test/afterListening').expect(200);
   });
 
   it('allows a router to be registered after server has started listening', async () => {
@@ -1918,8 +1913,8 @@ describe('registerRouterAfterListening', () => {
 
     await server.start();
 
-    await supertest(innerServer.listener).get('/').expect(200);
-    await supertest(innerServer.listener).get('/test/afterListening').expect(404);
+    await supertest(innerServer.server).get('/').expect(200);
+    await supertest(innerServer.server).get('/test/afterListening').expect(404);
 
     const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
 
@@ -1930,6 +1925,6 @@ describe('registerRouterAfterListening', () => {
 
     registerRouterAfterListening(otherRouter);
 
-    await supertest(innerServer.listener).get('/test/afterListening').expect(200);
+    await supertest(innerServer.server).get('/test/afterListening').expect(200);
   });
 });

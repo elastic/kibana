@@ -59,9 +59,7 @@ export class SessionCookie {
   /**
    * Promise containing initialized cookie session storage factory.
    */
-  private readonly cookieSessionValueStorage: Promise<
-    SessionStorageFactory<Readonly<SessionCookieValue>>
-  >;
+  private readonly cookieSessionValueStorage: SessionStorageFactory<Readonly<SessionCookieValue>>;
 
   /**
    * Session cookie logger.

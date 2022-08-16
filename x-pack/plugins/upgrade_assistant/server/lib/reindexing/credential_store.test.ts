@@ -8,6 +8,7 @@
 import { CoreKibanaRequest } from '@kbn/core/server';
 import { loggingSystemMock, httpServerMock } from '@kbn/core/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
+import type { FastifyReply } from 'fastify';
 import { ReindexStep, ReindexStatus, ReindexSavedObject } from '../../../common/types';
 import { credentialStoreFactory } from './credential_store';
 
@@ -19,7 +20,8 @@ const requestMock = CoreKibanaRequest.from(
     headers: {
       authorization: basicAuthHeader,
     },
-  })
+  }),
+  {} as FastifyReply
 );
 const securityStartMock = securityMock.createStart();
 

@@ -109,18 +109,18 @@ describe('core lifecycle handlers', () => {
     });
 
     it('accepts requests with the correct version passed in the version header', async () => {
-      await supertest(innerServer.listener)
+      await supertest(innerServer.server)
         .get(testRoute)
         .set(versionHeader, actualVersion)
         .expect(200, 'ok');
     });
 
     it('accepts requests that do not include a version header', async () => {
-      await supertest(innerServer.listener).get(testRoute).expect(200, 'ok');
+      await supertest(innerServer.server).get(testRoute).expect(200, 'ok');
     });
 
     it('rejects requests with an incorrect version passed in the version header', async () => {
-      await supertest(innerServer.listener)
+      await supertest(innerServer.server)
         .get(testRoute)
         .set(versionHeader, 'invalid-version')
         .expect(400, /Browser client is out of date/);
@@ -149,13 +149,13 @@ describe('core lifecycle handlers', () => {
     });
 
     it('adds the expected headers in case of success', async () => {
-      const result = await supertest(innerServer.listener).get(testRoute).expect(200, 'ok');
+      const result = await supertest(innerServer.server).get(testRoute).expect(200, 'ok');
       const headers = result.header as Record<string, string>;
       expect(headers).toEqual(expect.objectContaining(expectedHeaders));
     });
 
     it('adds the expected headers in case of error', async () => {
-      const result = await supertest(innerServer.listener).get(testErrorRoute).expect(400);
+      const result = await supertest(innerServer.server).get(testErrorRoute).expect(400);
       const headers = result.header as Record<string, string>;
       expect(headers).toEqual(expect.objectContaining(expectedHeaders));
     });
@@ -167,7 +167,7 @@ describe('core lifecycle handlers', () => {
     const nonDestructiveMethods = ['GET', 'HEAD'];
 
     const getSupertest = (method: string, path: string): supertest.Test => {
-      return (supertest(innerServer.listener) as any)[method.toLowerCase()](path) as supertest.Test;
+      return (supertest(innerServer.server) as any)[method.toLowerCase()](path) as supertest.Test;
     };
 
     beforeEach(async () => {

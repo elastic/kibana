@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import Hapi from '@hapi/hapi';
-import { IncomingMessage } from 'http';
+
+import url from 'url';
+import type { FastifyInstance, FastifyReply } from 'fastify';
 import { kibanaPackageJson as pkg } from '@kbn/utils';
 
 // proxy setup
@@ -14,7 +15,7 @@ const defaultProxyOptions = (hostname: string, port: string) => ({
   host: hostname,
   port,
   protocol: 'http' as 'http',
-  passThrough: true,
+  // passThrough: true, // TODO: Is this the default with Fastify
 });
 
 let proxyInterrupt: string | null | undefined = null;
@@ -31,215 +32,206 @@ export const setProxyInterrupt = (
     | null
 ) => (proxyInterrupt = testArg);
 
-// passes the req/response directly as is
-const relayHandler = (h: Hapi.ResponseToolkit, hostname: string, port: string) => {
-  return h.proxy(defaultProxyOptions(hostname, port));
-};
+interface IdParams {
+  _id: string;
+}
 
-const proxyResponseHandler = (h: Hapi.ResponseToolkit, hostname: string, port: string) => {
-  return h.proxy({
-    ...defaultProxyOptions(hostname, port),
-    // eslint-disable-next-line @typescript-eslint/no-shadow
-    onResponse: async (err, res, request, h, settings, ttl) => proxyOnResponseHandler(res, h),
+interface TypeParams {
+  type: string;
+}
+
+// passes the req/response directly as is
+const relayHandler = (reply: FastifyReply, hostname: string, port: string) => {
+  return reply.from('/', {
+    getUpstream(req, base) {
+      return url.format(defaultProxyOptions(hostname, port));
+    },
   });
 };
 
-// mimics a 404 'unexpected' response from the proxy
-const proxyOnResponseHandler = async (res: IncomingMessage, h: Hapi.ResponseToolkit) => {
-  return h
-    .response(res)
-    .header('x-elastic-product', 'somethingitshouldnotbe', { override: true })
-    .code(404);
+const proxyResponseHandler = (reply: FastifyReply, hostname: string, port: string) => {
+  return reply.from('/', {
+    getUpstream(req, base) {
+      return url.format(defaultProxyOptions(hostname, port));
+    },
+    // mimics a 404 'unexpected' response from the proxy
+    onResponse(request, _reply, res) {
+      return _reply.send(res).header('x-elastic-product', 'somethingitshouldnotbe').code(404);
+    },
+  });
 };
 
 const kbnIndex = `.kibana_${pkg.version}`;
 
 // GET /.kibana_8.0.0/_doc/{type*} route (repository.get calls)
-export const declareGetRoute = (hapiServer: Hapi.Server, hostname: string, port: string) =>
-  hapiServer.route({
-    method: 'GET',
-    path: `/${kbnIndex}/_doc/{type*}`,
-    options: {
-      handler: (req, h) => {
-        if (req.params.type === 'my_type:myTypeId1' || req.params.type === 'my_type:myType_123') {
-          return proxyResponseHandler(h, hostname, port);
-        } else {
-          return relayHandler(h, hostname, port);
-        }
-      },
-    },
+export const declareGetRoute = (server: FastifyInstance, hostname: string, port: string) =>
+  server.get<{ Params: TypeParams }>(`/${kbnIndex}/_doc/{type*}`, (request, reply) => {
+    if (
+      request.params.type === 'my_type:myTypeId1' ||
+      request.params.type === 'my_type:myType_123'
+    ) {
+      return proxyResponseHandler(reply, hostname, port);
+    } else {
+      return relayHandler(reply, hostname, port);
+    }
   });
 // DELETE /.kibana_8.0.0/_doc/{type*} route (repository.delete calls)
-export const declareDeleteRoute = (hapiServer: Hapi.Server, hostname: string, port: string) =>
-  hapiServer.route({
-    method: 'DELETE',
-    path: `/${kbnIndex}/_doc/{_id*}`,
-    options: {
-      payload: {
-        output: 'data',
-        parse: false,
-      },
-      handler: (req, h) => {
-        if (req.params._id === 'my_type:myTypeId1') {
-          return proxyResponseHandler(h, hostname, port);
-        } else {
-          return relayHandler(h, hostname, port);
-        }
-      },
-    },
-  });
+export const declareDeleteRoute = (server: FastifyInstance, hostname: string, port: string) =>
+  server.delete<{ Params: IdParams }>(
+    `/${kbnIndex}/_doc/{_id*}`,
+    // {
+    //   payload: {
+    //     output: 'data',
+    //     parse: false,
+    //   },
+    // },
+    (request, reply) => {
+      if (request.params._id === 'my_type:myTypeId1') {
+        return proxyResponseHandler(reply, hostname, port);
+      } else {
+        return relayHandler(reply, hostname, port);
+      }
+    }
+  );
 
 // POST _bulk route
-export const declarePostBulkRoute = (hapiServer: Hapi.Server, hostname: string, port: string) =>
-  hapiServer.route({
-    method: 'POST',
-    path: '/_bulk',
-    options: {
-      payload: {
-        output: 'data',
-        parse: false,
-      },
-      handler: (req, h) => {
-        if (proxyInterrupt === 'bulkCreate') {
-          return proxyResponseHandler(h, hostname, port);
-        } else {
-          return relayHandler(h, hostname, port);
-        }
-      },
-    },
-  });
+export const declarePostBulkRoute = (server: FastifyInstance, hostname: string, port: string) =>
+  server.post(
+    '/_bulk',
+    // {
+    //   payload: {
+    //     output: 'data',
+    //     parse: false,
+    //   },
+    // },
+    (request, reply) => {
+      if (proxyInterrupt === 'bulkCreate') {
+        return proxyResponseHandler(reply, hostname, port);
+      } else {
+        return relayHandler(reply, hostname, port);
+      }
+    }
+  );
 // POST _mget route (repository.bulkGet calls)
-export const declarePostMgetRoute = (hapiServer: Hapi.Server, hostname: string, port: string) =>
-  hapiServer.route({
-    method: 'POST',
-    path: '/_mget',
-    options: {
-      payload: {
-        output: 'data',
-        parse: false,
-      },
-      handler: (req, h) => {
-        if (
-          proxyInterrupt === 'bulkGetMyType' ||
-          proxyInterrupt === 'checkConficts' ||
-          proxyInterrupt === 'internalBulkResolve'
-        ) {
-          return proxyResponseHandler(h, hostname, port);
-        } else {
-          return relayHandler(h, hostname, port);
-        }
-      },
-    },
-  });
+export const declarePostMgetRoute = (server: FastifyInstance, hostname: string, port: string) =>
+  server.post(
+    '/_mget',
+    // {
+    //   payload: {
+    //     output: 'data',
+    //     parse: false,
+    //   },
+    // },
+    (request, reply) => {
+      if (
+        proxyInterrupt === 'bulkGetMyType' ||
+        proxyInterrupt === 'checkConficts' ||
+        proxyInterrupt === 'internalBulkResolve'
+      ) {
+        return proxyResponseHandler(reply, hostname, port);
+      } else {
+        return relayHandler(reply, hostname, port);
+      }
+    }
+  );
 // GET _search route
-export const declareGetSearchRoute = (hapiServer: Hapi.Server, hostname: string, port: string) =>
-  hapiServer.route({
-    method: 'GET',
-    path: `/${kbnIndex}/_search`,
-    options: {
-      handler: (req, h) => {
-        const payload = req.payload;
-        if (!payload) {
-          return proxyResponseHandler(h, hostname, port);
-        } else {
-          return relayHandler(h, hostname, port);
-        }
-      },
-    },
+export const declareGetSearchRoute = (server: FastifyInstance, hostname: string, port: string) =>
+  server.get(`/${kbnIndex}/_search`, (request, reply) => {
+    const payload = request.body;
+    if (!payload) {
+      return proxyResponseHandler(reply, hostname, port);
+    } else {
+      return relayHandler(reply, hostname, port);
+    }
   });
 // POST _search route (`find` calls)
-export const declarePostSearchRoute = (hapiServer: Hapi.Server, hostname: string, port: string) =>
-  hapiServer.route({
-    method: 'POST',
-    path: `/${kbnIndex}/_search`,
-    options: {
-      payload: {
-        output: 'data',
-        parse: false,
-      },
-      handler: (req, h) => {
-        if (proxyInterrupt === 'find') {
-          return proxyResponseHandler(h, hostname, port);
-        } else {
-          return relayHandler(h, hostname, port);
-        }
-      },
-    },
-  });
+export const declarePostSearchRoute = (server: FastifyInstance, hostname: string, port: string) =>
+  server.post(
+    `/${kbnIndex}/_search`,
+    // {
+    //   payload: {
+    //     output: 'data',
+    //     parse: false,
+    //   },
+    // },
+    (request, reply) => {
+      if (proxyInterrupt === 'find') {
+        return proxyResponseHandler(reply, hostname, port);
+      } else {
+        return relayHandler(reply, hostname, port);
+      }
+    }
+  );
 // POST _update
-export const declarePostUpdateRoute = (hapiServer: Hapi.Server, hostname: string, port: string) =>
-  hapiServer.route({
-    method: 'POST',
-    path: `/${kbnIndex}/_update/{_id*}`,
-    options: {
-      payload: {
-        output: 'data',
-        parse: false,
-      },
-      handler: (req, h) => {
-        if (req.params._id === 'my_type:myTypeToUpdate') {
-          return proxyResponseHandler(h, hostname, port);
-        } else {
-          return relayHandler(h, hostname, port);
-        }
-      },
-    },
-  });
+export const declarePostUpdateRoute = (server: FastifyInstance, hostname: string, port: string) =>
+  server.post<{ Params: IdParams }>(
+    `/${kbnIndex}/_update/{_id*}`,
+    // {
+    //   payload: {
+    //     output: 'data',
+    //     parse: false,
+    //   },
+    // },
+    (request, reply) => {
+      if (request.params._id === 'my_type:myTypeToUpdate') {
+        return proxyResponseHandler(reply, hostname, port);
+      } else {
+        return relayHandler(reply, hostname, port);
+      }
+    }
+  );
 // POST _pit
-export const declarePostPitRoute = (hapiServer: Hapi.Server, hostname: string, port: string) =>
-  hapiServer.route({
-    method: 'POST',
-    path: `/${kbnIndex}/_pit`,
-    options: {
-      payload: {
-        output: 'data',
-        parse: false,
-      },
-      handler: (req, h) => {
-        if (proxyInterrupt === 'openPit') {
-          return proxyResponseHandler(h, hostname, port);
-        } else {
-          return relayHandler(h, hostname, port);
-        }
-      },
-    },
-  });
+export const declarePostPitRoute = (server: FastifyInstance, hostname: string, port: string) =>
+  server.post(
+    `/${kbnIndex}/_pit`,
+    // {
+    //   payload: {
+    //     output: 'data',
+    //     parse: false,
+    //   },
+    // },
+    (request, reply) => {
+      if (proxyInterrupt === 'openPit') {
+        return proxyResponseHandler(reply, hostname, port);
+      } else {
+        return relayHandler(reply, hostname, port);
+      }
+    }
+  );
 // POST _update_by_query
 export const declarePostUpdateByQueryRoute = (
-  hapiServer: Hapi.Server,
+  server: FastifyInstance,
   hostname: string,
   port: string
 ) =>
-  hapiServer.route({
-    method: 'POST',
-    path: `/${kbnIndex}/_update_by_query`,
-    options: {
-      payload: {
-        output: 'data',
-        parse: false,
-      },
-      handler: (req, h) => {
-        if (proxyInterrupt === 'deleteByNamespace') {
-          return proxyResponseHandler(h, hostname, port);
-        } else {
-          return relayHandler(h, hostname, port);
-        }
-      },
-    },
-  });
+  server.post(
+    `/${kbnIndex}/_update_by_query`,
+    // {
+    //   payload: {
+    //     output: 'data',
+    //     parse: false,
+    //   },
+    // },
+    (request, reply) => {
+      if (proxyInterrupt === 'deleteByNamespace') {
+        return proxyResponseHandler(reply, hostname, port);
+      } else {
+        return relayHandler(reply, hostname, port);
+      }
+    }
+  );
 
 // catch-all passthrough route
-export const declarePassthroughRoute = (hapiServer: Hapi.Server, hostname: string, port: string) =>
-  hapiServer.route({
-    method: '*',
-    path: '/{any*}',
-    options: {
-      payload: {
-        output: 'data',
-        parse: false,
-      },
-      handler: (req, h) => {
-        return relayHandler(h, hostname, port);
-      },
-    },
-  });
+export const declarePassthroughRoute = (server: FastifyInstance, hostname: string, port: string) =>
+  server.all(
+    '/{any*}',
+    // {
+    //   payload: {
+    //     output: 'data',
+    //     parse: false,
+    //   },
+    // },
+    (request, reply) => {
+      return relayHandler(reply, hostname, port);
+    }
+  );

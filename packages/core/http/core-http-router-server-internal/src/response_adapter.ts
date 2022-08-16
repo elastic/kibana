@@ -6,10 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  ResponseObject as HapiResponseObject,
-  ResponseToolkit as HapiResponseToolkit,
-} from '@hapi/hapi';
+import type { FastifyReply } from 'fastify';
 import typeDetect from 'type-detect';
 import Boom from '@hapi/boom';
 import * as stream from 'stream';
@@ -20,25 +17,14 @@ import {
 import { HttpResponsePayload, ResponseError, ResponseErrorAttributes } from '@kbn/core-http-server';
 import { KibanaResponse } from './response';
 
-function setHeaders(response: HapiResponseObject, headers: Record<string, string | string[]> = {}) {
-  Object.entries(headers).forEach(([header, value]) => {
-    if (value !== undefined) {
-      // Hapi typings for header accept only strings, although string[] is a valid value
-      response.header(header, value as any);
-    }
-  });
-  applyEtag(response, headers);
-  return response;
-}
-
 const statusHelpers = {
   isSuccess: (code: number) => code >= 100 && code < 300,
   isRedirect: (code: number) => code >= 300 && code < 400,
   isError: (code: number) => code >= 400 && code < 600,
 };
 
-export class HapiResponseAdapter {
-  constructor(private readonly responseToolkit: HapiResponseToolkit) {}
+export class FastifyResponseAdapter {
+  constructor(private readonly reply: FastifyReply) {}
 
   public toBadRequest(message: string) {
     const error = Boom.badRequest();
@@ -66,10 +52,10 @@ export class HapiResponseAdapter {
       );
     }
 
-    return this.toHapiResponse(kibanaResponse);
+    return this.toFastifyResponse(kibanaResponse);
   }
 
-  private toHapiResponse(kibanaResponse: KibanaResponse) {
+  private toFastifyResponse(kibanaResponse: KibanaResponse) {
     if (kibanaResponse.options.bypassErrorFormat) {
       return this.toSuccess(kibanaResponse);
     }
@@ -88,11 +74,10 @@ export class HapiResponseAdapter {
   }
 
   private toSuccess(kibanaResponse: KibanaResponse<HttpResponsePayload>) {
-    const response = this.responseToolkit
-      .response(kibanaResponse.payload)
-      .code(kibanaResponse.status);
-    setHeaders(response, kibanaResponse.options.headers);
-    return response;
+    return this.reply
+      .send(kibanaResponse.payload)
+      .code(kibanaResponse.status)
+      .headers(kibanaResponse.options.headers ?? {});
   }
 
   private toRedirect(kibanaResponse: KibanaResponse<HttpResponsePayload>) {
@@ -101,14 +86,12 @@ export class HapiResponseAdapter {
       throw new Error("expected 'location' header to be set");
     }
 
-    const response = this.responseToolkit
-      .response(kibanaResponse.payload)
+    return this.reply
+      .send(kibanaResponse.payload)
       .redirect(headers.location)
       .code(kibanaResponse.status)
-      .takeover();
-
-    setHeaders(response, kibanaResponse.options.headers);
-    return response;
+      .headers(kibanaResponse.options.headers ?? {})
+      .hijack();
   }
 
   private toError(kibanaResponse: KibanaResponse<ResponseError | Buffer | stream.Readable>) {
@@ -116,12 +99,10 @@ export class HapiResponseAdapter {
 
     // Special case for when we are proxying requests and want to enable streaming back error responses opaquely.
     if (Buffer.isBuffer(payload) || payload instanceof stream.Readable) {
-      const response = this.responseToolkit
-        .response(kibanaResponse.payload)
-        .code(kibanaResponse.status);
-      setHeaders(response, kibanaResponse.options.headers);
-
-      return response;
+      return this.reply
+        .send(kibanaResponse.payload)
+        .code(kibanaResponse.status)
+        .headers(kibanaResponse.options.headers ?? {});
     }
 
     // we use for BWC with Boom payload for error responses - {error: string, message: string, statusCode: string}
@@ -162,11 +143,4 @@ function getErrorMessage(payload?: ResponseError): string {
 
 function getErrorAttributes(payload?: ResponseError): ResponseErrorAttributes | undefined {
   return typeof payload === 'object' && 'attributes' in payload ? payload.attributes : undefined;
-}
-
-function applyEtag(response: HapiResponseObject, headers: Record<string, string | string[]>) {
-  const etagHeader = Object.keys(headers).find((header) => header.toLowerCase() === 'etag');
-  if (etagHeader) {
-    response.etag(headers[etagHeader] as string);
-  }
 }

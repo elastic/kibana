@@ -6,7 +6,7 @@
  */
 
 import { pick } from 'lodash';
-import type { Request } from '@hapi/hapi';
+import type { FastifyRequest, FastifyReply } from 'fastify';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fromNullable, getOrElse } from 'fp-ts/lib/Option';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
@@ -227,19 +227,22 @@ function getFakeRequest(apiKey?: string) {
 
   // Since we're using API keys and accessing elasticsearch can only be done
   // via a request, we're faking one with the proper authorization headers.
-  const fakeRequest = CoreKibanaRequest.from({
-    headers: requestHeaders,
-    path: '/',
-    route: { settings: {} },
-    url: {
-      href: '/',
-    },
-    raw: {
-      req: {
-        url: '/',
+  const fakeRequest = CoreKibanaRequest.from(
+    {
+      headers: requestHeaders,
+      path: '/',
+      route: { settings: {} },
+      url: {
+        href: '/',
       },
-    },
-  } as unknown as Request);
+      raw: {
+        req: {
+          url: '/',
+        },
+      },
+    } as unknown as FastifyRequest,
+    {} as FastifyReply
+  );
 
   return fakeRequest;
 }

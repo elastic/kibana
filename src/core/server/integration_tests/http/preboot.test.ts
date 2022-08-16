@@ -44,14 +44,14 @@ describe('Preboot HTTP server', () => {
     });
 
     // Preboot routes should work now.
-    await supertest(innerPrebootServer.listener).get('/preboot-get').expect(200, 'hello-get');
-    await supertest(innerPrebootServer.listener).post('/preboot-post').expect(200, 'hello-post');
+    await supertest(innerPrebootServer.server).get('/preboot-get').expect(200, 'hello-get');
+    await supertest(innerPrebootServer.server).post('/preboot-post').expect(200, 'hello-post');
 
     // All non-preboot routes should get `503` (e.g. if client tries to access any standard API).
-    await supertest(innerPrebootServer.listener)
+    await supertest(innerPrebootServer.server)
       .get('/standard-get')
       .expect(503, 'Kibana server is not ready yet');
-    await supertest(innerPrebootServer.listener)
+    await supertest(innerPrebootServer.server)
       .post('/standard-post')
       .expect(503, 'Kibana server is not ready yet');
   });
@@ -77,22 +77,22 @@ describe('Preboot HTTP server', () => {
     );
 
     // Preboot routes should still work.
-    await supertest(innerPrebootServer.listener).get('/preboot-get').expect(200, 'hello-get');
-    await supertest(innerPrebootServer.listener).post('/preboot-post').expect(200, 'hello-post');
+    await supertest(innerPrebootServer.server).get('/preboot-get').expect(200, 'hello-get');
+    await supertest(innerPrebootServer.server).post('/preboot-post').expect(200, 'hello-post');
 
     // All non-preboot routes should still get `503` (e.g. if client tries to access any standard API).
-    await supertest(innerPrebootServer.listener)
+    await supertest(innerPrebootServer.server)
       .get('/standard-get')
       .expect(503, 'Kibana server is not ready yet');
-    await supertest(innerPrebootServer.listener)
+    await supertest(innerPrebootServer.server)
       .post('/standard-post')
       .expect(503, 'Kibana server is not ready yet');
 
     // Standard HTTP server isn't functional yet.
-    await supertest(innerStandardServer.listener)
+    await supertest(innerStandardServer.server)
       .get('/standard-get')
       .expect(404, { statusCode: 404, error: 'Not Found', message: 'Not Found' });
-    await supertest(innerStandardServer.listener)
+    await supertest(innerStandardServer.server)
       .post('/standard-post')
       .expect(404, { statusCode: 404, error: 'Not Found', message: 'Not Found' });
   });
@@ -120,27 +120,27 @@ describe('Preboot HTTP server', () => {
     await server.start();
 
     // Preboot routes should no longer work.
-    await supertest(innerPrebootServer.listener).get('/preboot-get').expect(503, {
+    await supertest(innerPrebootServer.server).get('/preboot-get').expect(503, {
       statusCode: 503,
       error: 'Service Unavailable',
       message: 'Kibana is shutting down and not accepting new incoming requests',
     });
-    await supertest(innerPrebootServer.listener).post('/preboot-post').expect(503, {
+    await supertest(innerPrebootServer.server).post('/preboot-post').expect(503, {
       statusCode: 503,
       error: 'Service Unavailable',
       message: 'Kibana is shutting down and not accepting new incoming requests',
     });
 
     // Preboot routes should simply become unknown routes for the standard server.
-    await supertest(innerStandardServer.listener)
+    await supertest(innerStandardServer.server)
       .get('/preboot-get')
       .expect(404, { statusCode: 404, error: 'Not Found', message: 'Not Found' });
-    await supertest(innerStandardServer.listener)
+    await supertest(innerStandardServer.server)
       .post('/preboot-post')
       .expect(404, { statusCode: 404, error: 'Not Found', message: 'Not Found' });
 
     // All non-preboot routes should finally function as expected (e.g. if client tries to access any standard API).
-    await supertest(innerStandardServer.listener).get('/standard-get').expect(200, 'hello-get');
-    await supertest(innerStandardServer.listener).post('/standard-post').expect(200, 'hello-post');
+    await supertest(innerStandardServer.server).get('/standard-get').expect(200, 'hello-get');
+    await supertest(innerStandardServer.server).post('/standard-post').expect(200, 'hello-post');
   });
 });
