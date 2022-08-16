@@ -14,7 +14,7 @@ import {
 
 import { DashboardAppServices } from '../types';
 import { useKibana } from '../services/kibana_react';
-import { DashboardDataViewsService } from '../services/data_views/types';
+import { pluginServices } from '../services/plugin_services';
 
 export const DashboardAppNoDataPage = ({
   onDataViewCreated,
@@ -22,8 +22,12 @@ export const DashboardAppNoDataPage = ({
   onDataViewCreated: () => void;
 }) => {
   const {
-    services: { core, dataViews, dataViewEditor },
+    services: { core, dataViewEditor },
   } = useKibana<DashboardAppServices>();
+  const {
+    data: { dataViews },
+  } = pluginServices.getServices();
+
   const analyticsServices = {
     coreStart: core as unknown as React.ComponentProps<
       typeof AnalyticsNoDataPageKibanaProvider
@@ -38,7 +42,11 @@ export const DashboardAppNoDataPage = ({
   );
 };
 
-export const isDashboardAppInNoDataState = async (dataViews: DashboardDataViewsService) => {
+export const isDashboardAppInNoDataState = async () => {
+  const {
+    data: { dataViews },
+  } = pluginServices.getServices();
+
   const hasUserDataView = await dataViews.hasData.hasUserDataView().catch(() => false);
   return !hasUserDataView;
 };

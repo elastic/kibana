@@ -10,7 +10,7 @@ import _ from 'lodash';
 import moment, { Moment } from 'moment';
 import { Optional } from '@kbn/utility-types';
 
-import { Filter, TimeRange, RefreshInterval } from '../../services/data';
+import { Filter, TimeRange, RefreshInterval } from '../../services/data/types';
 
 type TimeRangeCompare = Optional<TimeRange>;
 type RefreshIntervalCompare = Optional<RefreshInterval>;

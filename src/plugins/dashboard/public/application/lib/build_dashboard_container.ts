@@ -9,12 +9,7 @@
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { DashboardSavedObject } from '../../saved_dashboards';
 import { DashboardContainer, DASHBOARD_CONTAINER_TYPE } from '../embeddable';
-import {
-  DashboardBuildContext,
-  DashboardState,
-  DashboardContainerInput,
-  DashboardAppServices,
-} from '../../types';
+import { DashboardBuildContext, DashboardState, DashboardContainerInput } from '../../types';
 import {
   enableDashboardSearchSessions,
   getSearchSessionIdFromURL,
@@ -28,9 +23,9 @@ import {
   ErrorEmbeddable,
   isErrorEmbeddable,
 } from '../../services/embeddable';
+import { pluginServices } from '../../services/plugin_services';
 
 type BuildDashboardContainerProps = DashboardBuildContext & {
-  data: DashboardAppServices['data']; // the whole data service is required here because it is required by getLocatorParams
   savedDashboard: DashboardSavedObject;
   initialDashboardState: DashboardState;
   incomingEmbeddable?: EmbeddablePackageState;
@@ -50,9 +45,10 @@ export const buildDashboardContainer = async ({
   kibanaVersion,
   embeddable,
   history,
-  data,
   executionContext,
 }: BuildDashboardContainerProps) => {
+  const { data } = pluginServices.getServices();
+
   const {
     search: { session },
   } = data;
@@ -101,7 +97,6 @@ export const buildDashboardContainer = async ({
     dashboardState: initialDashboardState,
     dashboardCapabilities,
     incomingEmbeddable,
-    query: data.query,
     searchSessionId,
     savedDashboard,
     executionContext,

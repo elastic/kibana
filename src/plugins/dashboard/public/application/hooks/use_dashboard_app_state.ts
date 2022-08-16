@@ -39,6 +39,7 @@ import {
   areRefreshIntervalsEqual,
 } from '../lib';
 import { isDashboardAppInNoDataState } from '../dashboard_app_no_data';
+import { pluginServices } from '../../services/plugin_services';
 
 export interface UseDashboardStateProps {
   history: History;
@@ -81,11 +82,9 @@ export const useDashboardAppState = ({
    */
   const services = useKibana<DashboardAppServices>().services;
   const {
-    data,
     core,
     chrome,
     embeddable,
-    dataViews,
     usageCollection,
     savedDashboards,
     initializerContext,
@@ -96,9 +95,13 @@ export const useDashboardAppState = ({
     spacesService,
     screenshotModeService,
   } = services;
+
+  const {
+    data: { search, query, dataViews },
+  } = pluginServices.getServices();
+
   const { docTitle } = chrome;
   const { notifications } = core;
-  const { query, search } = data;
   const { getStateTransfer } = embeddable;
   const { version: kibanaVersion } = initializerContext.env.packageInfo;
 
@@ -121,11 +124,8 @@ export const useDashboardAppState = ({
      * from the dashboardId. This build context doesn't contain any extrenuous services.
      */
     const dashboardBuildContext: DashboardBuildContext = {
-      query,
-      search,
       history,
       embeddable,
-      dataViews,
       notifications,
       kibanaVersion,
       savedDashboards,
@@ -236,7 +236,6 @@ export const useDashboardAppState = ({
         initialDashboardState,
         incomingEmbeddable,
         savedDashboard,
-        data,
         executionContext: {
           type: 'dashboard',
           description: savedDashboard.title,
@@ -253,7 +252,6 @@ export const useDashboardAppState = ({
        */
       const dataViewsSubscription = syncDashboardDataViews({
         dashboardContainer,
-        dataViews: dashboardBuildContext.dataViews,
         onUpdateDataViews: async (newDataViewIds: string[]) => {
           if (newDataViewIds?.[0]) {
             dashboardContainer.controlGroup?.setRelevantDataViewId(newDataViewIds[0]);
@@ -279,7 +277,8 @@ export const useDashboardAppState = ({
        * Any time the redux state, or the last saved state changes, compare them, set the unsaved
        * changes state, and and push the unsaved changes to session storage.
        */
-      const { timefilter } = dashboardBuildContext.query.timefilter;
+
+      const { timefilter } = query.timefilter;
       const lastSavedSubscription = combineLatest([
         $onLastSavedStateChange,
         dashboardAppState.$onDashboardStateChange,
@@ -399,7 +398,6 @@ export const useDashboardAppState = ({
     history,
     search,
     query,
-    data,
     showNoDataPage,
     setShowNoDataPage,
     spacesService?.ui,
@@ -419,7 +417,7 @@ export const useDashboardAppState = ({
     }
 
     if (dashboardAppState.getLatestDashboardState().timeRestore) {
-      const { timefilter } = data.query.timefilter;
+      const { timefilter } = query.timefilter;
       const { timeFrom: from, timeTo: to, refreshInterval } = dashboardAppState.savedDashboard;
       if (from && to) timefilter.setTime({ from, to });
       if (refreshInterval) timefilter.setRefreshInterval(refreshInterval);
@@ -430,7 +428,7 @@ export const useDashboardAppState = ({
         viewMode: ViewMode.VIEW,
       })
     );
-  }, [lastSavedState, dashboardAppState, data.query.timefilter, dispatchDashboardStateChange]);
+  }, [lastSavedState, dashboardAppState, query.timefilter, dispatchDashboardStateChange]);
 
   /**
    *  publish state to the state change observable when redux state changes

@@ -73,12 +73,10 @@ export const syncDashboardUrlState = ({
     .pipe(debounceTime(10)) // debounce URL updates so react has time to unsubscribe when changing URLs
     .subscribe(() => {
       const stateFromUrl = loadAndRemoveDashboardState();
-
       const updatedDashboardState = { ...getLatestDashboardState(), ...stateFromUrl };
       applyDashboardFilterState({
         currentDashboardState: updatedDashboardState,
         kbnUrlStateStorage,
-        queryService,
         savedDashboard,
       });
 

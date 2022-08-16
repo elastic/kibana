@@ -25,6 +25,8 @@ import { DashboardTopNav, isCompleteDashboardAppState } from './top_nav/dashboar
 import { DashboardAppServices, DashboardEmbedSettings, DashboardRedirect } from '../types';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '../services/kibana_utils';
 import { DashboardAppNoDataPage } from './dashboard_app_no_data';
+import { pluginServices } from '../services/plugin_services';
+
 export interface DashboardAppProps {
   history: History;
   savedDashboardId?: string;
@@ -38,16 +40,14 @@ export function DashboardApp({
   redirectTo,
   history,
 }: DashboardAppProps) {
+  const { core, chrome, embeddable, onAppLeave, uiSettings, spacesService, screenshotModeService } =
+    useKibana<DashboardAppServices>().services;
+
   const {
-    core,
-    chrome,
-    embeddable,
-    onAppLeave,
-    uiSettings,
-    data,
-    spacesService,
-    screenshotModeService,
-  } = useKibana<DashboardAppServices>().services;
+    data: {
+      search: { session },
+    },
+  } = pluginServices.getServices();
 
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
   const dashboardTitleRef = useRef<HTMLHeadingElement>(null);
@@ -127,9 +127,9 @@ export function DashboardApp({
   // clear search session when leaving dashboard route
   useEffect(() => {
     return () => {
-      data.search.session.clear();
+      session.clear();
     };
-  }, [data.search.session]);
+  }, [session]);
 
   const printMode = useMemo(
     () => dashboardAppState.getLatestDashboardState?.().viewMode === ViewMode.PRINT,

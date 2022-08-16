@@ -19,7 +19,7 @@ import {
 import { DashboardSavedObject } from '../../saved_dashboards';
 import { getTagsFromSavedDashboard, migrateAppState } from '.';
 import { EmbeddablePackageState, ViewMode } from '../../services/embeddable';
-import { TimeRange } from '../../services/data';
+import { TimeRange } from '../../services/data/types';
 import { convertPanelStateToSavedDashboardPanel } from '../../../common/embeddable/embeddable_saved_object_converters';
 import {
   DashboardState,
@@ -30,6 +30,7 @@ import {
 } from '../../types';
 import { convertSavedPanelsToPanelMap } from './convert_dashboard_panels';
 import { deserializeControlGroupFromDashboardSavedObject } from './dashboard_control_group';
+import { pluginServices } from '../../services/plugin_services';
 
 interface SavedObjectToDashboardStateProps {
   version: string;
@@ -44,7 +45,6 @@ interface StateToDashboardContainerInputProps {
   isEmbeddedExternally?: boolean;
   dashboardState: DashboardState;
   savedDashboard: DashboardSavedObject;
-  query: DashboardBuildContext['query'];
   incomingEmbeddable?: EmbeddablePackageState;
   dashboardCapabilities: DashboardBuildContext['dashboardCapabilities'];
   executionContext?: KibanaExecutionContext;
@@ -97,13 +97,17 @@ export const savedObjectToDashboardState = ({
 export const stateToDashboardContainerInput = ({
   dashboardCapabilities,
   isEmbeddedExternally,
-  query: queryService,
   searchSessionId,
   savedDashboard,
   dashboardState,
   executionContext,
 }: StateToDashboardContainerInputProps): DashboardContainerInput => {
+  const {
+    data: { query: queryService },
+  } = pluginServices.getServices();
+
   const { filterManager, timefilter: timefilterService } = queryService;
+
   const { timefilter } = timefilterService;
 
   const {

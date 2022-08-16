@@ -11,6 +11,7 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 export interface DashboardDataService {
   query: DataPublicPluginStart['query'];
   search: DataPublicPluginStart['search'];
+  dataViews: DataPublicPluginStart['dataViews'];
 }
 
 export type { RefreshInterval } from '@kbn/data-plugin/public';

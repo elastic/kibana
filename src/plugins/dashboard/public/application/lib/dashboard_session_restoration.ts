@@ -9,18 +9,19 @@
 import { History } from 'history';
 import { createQueryParamObservable } from '@kbn/kibana-utils-plugin/public';
 import type { Query } from '@kbn/es-query';
+import {
+  noSearchSessionStorageCapabilityMessage,
+  SearchSessionInfoProvider,
+} from '@kbn/data-plugin/public';
+
 import { DashboardAppLocatorParams, DashboardConstants } from '../..';
 import { DashboardState } from '../../types';
 import { getDashboardTitle } from '../../dashboard_strings';
 import { DashboardSavedObject } from '../../saved_dashboards';
 import { getQueryParams } from '../../services/kibana_utils';
-import {
-  DataPublicPluginStart,
-  noSearchSessionStorageCapabilityMessage,
-  SearchSessionInfoProvider,
-} from '../../services/data';
 import { stateToRawDashboardState } from './convert_dashboard_state';
 import { DASHBOARD_APP_LOCATOR } from '../../locator';
+import { DashboardDataService } from '../../services/data/types';
 
 export const getSearchSessionIdFromURL = (history: History): string | undefined =>
   getQueryParams(history.location)[DashboardConstants.SEARCH_SESSION_ID] as string | undefined;
@@ -30,7 +31,7 @@ export const getSessionURLObservable = (history: History) =>
 
 export function createSessionRestorationDataProvider(deps: {
   kibanaVersion: string;
-  data: DataPublicPluginStart;
+  data: DashboardDataService;
   getAppState: () => DashboardState;
   getDashboardTitle: () => string;
   getDashboardId: () => string;
@@ -57,7 +58,7 @@ export function enableDashboardSearchSessions({
   data,
 }: {
   kibanaVersion: string;
-  data: DataPublicPluginStart;
+  data: DashboardDataService;
   canStoreSearchSession: boolean;
   savedDashboard: DashboardSavedObject;
   initialDashboardState: DashboardState;
@@ -101,7 +102,7 @@ function getLocatorParams({
   shouldRestoreSearchSession,
 }: {
   kibanaVersion: string;
-  data: DataPublicPluginStart;
+  data: DashboardDataService;
   getAppState: () => DashboardState;
   getDashboardId: () => string;
   shouldRestoreSearchSession: boolean;

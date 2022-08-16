@@ -24,11 +24,12 @@ import {
   SolutionToolbar,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
+import { SavedQuery } from '@kbn/data-plugin/common';
+
 import { saveDashboard } from '../lib';
 import { TopNavIds } from './top_nav_ids';
 import { EditorMenu } from './editor_menu';
 import { UI_SETTINGS } from '../../../common';
-import { SavedQuery } from '../../services/data';
 import { DashboardSaveModal } from './save_modal';
 import { showCloneModal } from './show_clone_modal';
 import { ShowShareModal } from './show_share_modal';
@@ -54,6 +55,7 @@ import {
   useDashboardDispatch,
   useDashboardSelector,
 } from '../state';
+import { pluginServices } from '../../services/plugin_services';
 
 export interface DashboardTopNavState {
   chromeIsVisible: boolean;
@@ -95,7 +97,6 @@ export function DashboardTopNav({
 }: DashboardTopNavProps) {
   const {
     core,
-    data,
     share,
     chrome,
     embeddable,
@@ -110,8 +111,13 @@ export function DashboardTopNav({
     dashboardSessionStorage,
     allowByValueEmbeddables,
   } = useKibana<DashboardAppServices>().services;
+
+  const {
+    data: { query, search },
+  } = pluginServices.getServices();
+
   const { version: kibanaVersion } = initializerContext.env.packageInfo;
-  const timefilter = data.query.timefilter.timefilter;
+  const timefilter = query.timefilter.timefilter;
   const { notifications, theme } = core;
   const { toasts } = notifications;
   const { theme$ } = theme;
@@ -205,11 +211,11 @@ export function DashboardTopNav({
         path,
         state: {
           originatingApp: DashboardConstants.DASHBOARDS_ID,
-          searchSessionId: data.search.session.getSessionId(),
+          searchSessionId: search.session.getSessionId(),
         },
       });
     },
-    [stateTransferService, data.search.session, trackUiMetric]
+    [stateTransferService, search.session, trackUiMetric]
   );
 
   const closeAllFlyouts = useCallback(() => {
@@ -487,8 +493,7 @@ export function DashboardTopNav({
       (forceShow || state.chromeIsVisible) && !dashboardState.fullScreenMode;
 
     const shouldShowFilterBar = (forceHide: boolean): boolean =>
-      !forceHide &&
-      (data.query.filterManager.getFilters().length > 0 || !dashboardState.fullScreenMode);
+      !forceHide && (query.filterManager.getFilters().length > 0 || !dashboardState.fullScreenMode);
 
     const isFullScreenMode = dashboardState.fullScreenMode;
     const showTopNavMenu = shouldShowNavBarComponent(Boolean(embedSettings?.forceShowTopNavMenu));

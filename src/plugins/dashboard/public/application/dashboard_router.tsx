@@ -39,6 +39,7 @@ import {
   PluginInitializerContext,
   ScopedHistory,
 } from '../services/core';
+import { pluginServices } from '../services/plugin_services';
 
 export const dashboardUrlParams = {
   showTopMenu: 'show-top-menu',
@@ -102,7 +103,6 @@ export async function mountApp({
     visualizations,
     usageCollection,
     core: coreStart,
-    data: dataStart,
     share: shareStart,
     initializerContext,
     restorePreviousUrl,
@@ -112,7 +112,6 @@ export async function mountApp({
     uiSettings: coreStart.uiSettings,
     scopedHistory: () => scopedHistory,
     screenshotModeService: screenshotMode,
-    dataViews: dataStart.dataViews,
     savedObjectsClient: coreStart.savedObjects.client,
     savedDashboards: dashboardStart.getSavedDashboardLoader(),
     savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
@@ -175,13 +174,18 @@ export async function mountApp({
     if (!routerHistory) {
       routerHistory = routeProps.history;
     }
+
+    const DashboardServicesProvider = pluginServices.getContextProvider();
+
     return (
-      <DashboardApp
-        history={routeProps.history}
-        embedSettings={globalEmbedSettings}
-        savedDashboardId={routeProps.match.params.id}
-        redirectTo={redirect}
-      />
+      <DashboardServicesProvider>
+        <DashboardApp
+          history={routeProps.history}
+          embedSettings={globalEmbedSettings}
+          savedDashboardId={routeProps.match.params.id}
+          redirectTo={redirect}
+        />
+      </DashboardServicesProvider>
     );
   };
 
@@ -193,13 +197,18 @@ export async function mountApp({
     if (!routerHistory) {
       routerHistory = routeProps.history;
     }
+
+    const DashboardServicesProvider = pluginServices.getContextProvider();
+
     return (
-      <DashboardListing
-        initialFilter={filter}
-        title={title}
-        kbnUrlStateStorage={getUrlStateStorage(routeProps.history)}
-        redirectTo={redirect}
-      />
+      <DashboardServicesProvider>
+        <DashboardListing
+          initialFilter={filter}
+          title={title}
+          kbnUrlStateStorage={getUrlStateStorage(routeProps.history)}
+          redirectTo={redirect}
+        />
+      </DashboardServicesProvider>
     );
   };
 

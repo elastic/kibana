@@ -13,12 +13,12 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import type {
   AppMountParameters,
   CoreStart,
-  SavedObjectsClientContract,
   ScopedHistory,
   ChromeStart,
   IUiSettingsClient,
   PluginInitializerContext,
   KibanaExecutionContext,
+  SavedObjectsClientContract,
 } from '@kbn/core/public';
 import type { Filter } from '@kbn/es-query';
 import { DataView } from '@kbn/data-views-plugin/common';
@@ -42,8 +42,6 @@ import { IKbnUrlStateStorage } from './services/kibana_utils';
 import type { DashboardContainer, DashboardSavedObject } from '.';
 import { DashboardAppLocatorParams } from './locator';
 import { SpacesPluginStart } from './services/spaces';
-import { DashboardDataService } from './services/data/types';
-import { DashboardDataViewsService } from './services/data_views/types';
 
 export type { SavedDashboardPanel };
 
@@ -128,15 +126,12 @@ export interface DashboardAppState {
 export type DashboardBuildContext = Pick<
   DashboardAppServices,
   | 'embeddable'
-  | 'dataViews'
   | 'savedDashboards'
   | 'usageCollection'
   | 'initializerContext'
   | 'savedObjectsTagging'
   | 'dashboardCapabilities'
 > & {
-  query: DashboardAppServices['data']['query'];
-  search: DashboardAppServices['data']['search'];
   notifications: DashboardAppServices['core']['notifications'];
 
   locatorState?: DashboardAppLocatorParams;
@@ -199,7 +194,6 @@ export interface DashboardAppServices {
   chrome: ChromeStart;
   share?: SharePluginStart;
   embeddable: EmbeddableStart;
-  data: DashboardDataService;
   uiSettings: IUiSettingsClient;
   restorePreviousUrl: () => void;
   savedObjects: SavedObjectsStart;
@@ -209,7 +203,6 @@ export interface DashboardAppServices {
   scopedHistory: () => ScopedHistory;
   visualizations: VisualizationsStart;
   dataViewEditor: DataViewEditorStart;
-  dataViews: DashboardDataViewsService;
   usageCollection?: UsageCollectionSetup;
   navigation: NavigationPublicPluginStart;
   dashboardCapabilities: DashboardAppCapabilities;

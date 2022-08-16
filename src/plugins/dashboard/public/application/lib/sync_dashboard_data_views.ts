@@ -12,20 +12,22 @@ import { Observable, pipe, combineLatest } from 'rxjs';
 import { distinctUntilChanged, switchMap, filter, map } from 'rxjs/operators';
 
 import { DashboardContainer } from '..';
-import { DashboardDataViewsService } from '../../services/data_views/types';
 import { isErrorEmbeddable } from '../../services/embeddable';
+import { pluginServices } from '../../services/plugin_services';
 
 interface SyncDashboardDataViewsProps {
   dashboardContainer: DashboardContainer;
-  dataViews: DashboardDataViewsService;
   onUpdateDataViews: (newDataViewIds: string[]) => void;
 }
 
 export const syncDashboardDataViews = ({
   dashboardContainer,
-  dataViews,
   onUpdateDataViews,
 }: SyncDashboardDataViewsProps) => {
+  const {
+    data: { dataViews },
+  } = pluginServices.getServices();
+
   const updateDataViewsOperator = pipe(
     filter((container: DashboardContainer) => !!container && !isErrorEmbeddable(container)),
     map((container: DashboardContainer): string[] | undefined => {

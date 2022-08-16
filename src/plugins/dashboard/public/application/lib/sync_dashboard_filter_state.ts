@@ -9,19 +9,21 @@
 import _ from 'lodash';
 import { merge } from 'rxjs';
 import { debounceTime, finalize, map, switchMap, tap } from 'rxjs/operators';
+
+import {
+  connectToQueryState,
+  GlobalQueryStateFromUrl,
+  syncQueryStateWithUrl,
+  waitUntilNextSessionCompletes$,
+} from '@kbn/data-plugin/public';
+
 import { setQuery } from '../state';
 import { DashboardBuildContext, DashboardState } from '../../types';
 import { DashboardSavedObject } from '../../saved_dashboards';
 import { setFiltersAndQuery } from '../state/dashboard_state_slice';
-import {
-  syncQueryStateWithUrl,
-  connectToQueryState,
-  Filter,
-  Query,
-  waitUntilNextSessionCompletes$,
-  GlobalQueryStateFromUrl,
-} from '../../services/data';
+import { Filter, Query } from '../../services/data/types';
 import { cleanFiltersForSerialize } from '.';
+import { pluginServices } from '../../services/plugin_services';
 
 type SyncDashboardFilterStateProps = DashboardBuildContext & {
   initialDashboardState: DashboardState;
@@ -34,16 +36,18 @@ type SyncDashboardFilterStateProps = DashboardBuildContext & {
  * and the dashboard Redux store.
  */
 export const syncDashboardFilterState = ({
-  search,
   savedDashboard,
   kbnUrlStateStorage,
-  query: queryService,
   initialDashboardState,
   $checkForUnsavedChanges,
   $onDashboardStateChange,
   $triggerDashboardRefresh,
   dispatchDashboardStateChange,
 }: SyncDashboardFilterStateProps) => {
+  const {
+    data: { search, query: queryService },
+  } = pluginServices.getServices();
+
   const { filterManager, queryString, timefilter } = queryService;
   const { timefilter: timefilterService } = timefilter;
 
@@ -52,7 +56,6 @@ export const syncDashboardFilterState = ({
     currentDashboardState: initialDashboardState,
     kbnUrlStateStorage,
     savedDashboard,
-    queryService,
   });
 
   // this callback will be used any time new filters and query need to be applied.
@@ -138,7 +141,6 @@ export const syncDashboardFilterState = ({
 
 interface ApplyDashboardFilterStateProps {
   kbnUrlStateStorage: DashboardBuildContext['kbnUrlStateStorage'];
-  queryService: DashboardBuildContext['query'];
   currentDashboardState: DashboardState;
   savedDashboard: DashboardSavedObject;
 }
@@ -147,8 +149,11 @@ export const applyDashboardFilterState = ({
   currentDashboardState,
   kbnUrlStateStorage,
   savedDashboard,
-  queryService,
 }: ApplyDashboardFilterStateProps) => {
+  const {
+    data: { query: queryService },
+  } = pluginServices.getServices();
+
   const { filterManager, queryString, timefilter } = queryService;
   const { timefilter: timefilterService } = timefilter;
 

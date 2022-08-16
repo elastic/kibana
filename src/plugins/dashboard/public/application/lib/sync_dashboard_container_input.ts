@@ -13,7 +13,7 @@ import { debounceTime, tap } from 'rxjs/operators';
 import { compareFilters, COMPARE_ALL_OPTIONS, type Filter } from '@kbn/es-query';
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/public';
 import { DashboardContainer } from '../embeddable';
-import { Query } from '../../services/data';
+import { Query } from '../../services/data/types';
 import { DashboardConstants, DashboardSavedObject } from '../..';
 import {
   setControlGroupState,
@@ -30,6 +30,7 @@ import {
   getSessionURLObservable,
   stateToDashboardContainerInput,
 } from '.';
+import { pluginServices } from '../../services/plugin_services';
 
 type SyncDashboardContainerCommon = DashboardBuildContext & {
   dashboardContainer: DashboardContainer;
@@ -91,7 +92,6 @@ export const syncDashboardContainerInput = (
 };
 
 export const applyContainerChangesToState = ({
-  query,
   applyFilters,
   dashboardContainer,
   getLatestDashboardState,
@@ -102,7 +102,13 @@ export const applyContainerChangesToState = ({
   if (Object.keys(latestState).length === 0) {
     return;
   }
-  const { filterManager } = query;
+
+  const {
+    data: {
+      query: { filterManager },
+    },
+  } = pluginServices.getServices();
+
   if (!compareFilters(input.filters, filterManager.getFilters(), COMPARE_ALL_OPTIONS)) {
     // Add filters modifies the object passed to it, hence the clone deep.
     filterManager.addFilters(_.cloneDeep(input.filters));
@@ -133,16 +139,20 @@ export const applyContainerChangesToState = ({
 
 export const applyStateChangesToContainer = ({
   force,
-  search,
   history,
   savedDashboard,
   dashboardContainer,
   kbnUrlStateStorage,
-  query: queryService,
   isEmbeddedExternally,
   dashboardCapabilities,
   getLatestDashboardState,
 }: ApplyStateChangesToContainerProps) => {
+  const {
+    data: {
+      search: { session },
+    },
+  } = pluginServices.getServices();
+
   const latestState = getLatestDashboardState();
   if (Object.keys(latestState).length === 0) {
     return;
@@ -151,7 +161,6 @@ export const applyStateChangesToContainer = ({
     dashboardState: latestState,
     isEmbeddedExternally,
     dashboardCapabilities,
-    query: queryService,
     savedDashboard,
   });
   const differences = diffDashboardContainerInput(
@@ -171,7 +180,7 @@ export const applyStateChangesToContainer = ({
       // do not update session id if this is irrelevant state change to prevent excessive searches
       if (!shouldRefetch) return;
 
-      const sessionApi = search.session;
+      const sessionApi = session;
       let searchSessionIdFromURL = getSearchSessionIdFromURL(history);
       if (searchSessionIdFromURL) {
         if (sessionApi.isRestore() && sessionApi.isCurrentSession(searchSessionIdFromURL)) {
