@@ -2,7 +2,135 @@
   "id": "threatIntelligence",
   "client": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "threatIntelligence",
+        "id": "def-public.getSecuritySolutionDeepLink",
+        "type": "Function",
+        "tags": [],
+        "label": "getSecuritySolutionDeepLink",
+        "description": [
+          "\nGets the threat intelligence properties of a TI page for deep linking in the security solution."
+        ],
+        "signature": [
+          "<TId extends string = \"threat_intelligence-indicators\">(threatIntelligencePage: \"indicators\") => TIDeepLink<TId>"
+        ],
+        "path": "x-pack/plugins/threat_intelligence/public/common/navigation/security_solution_links.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "threatIntelligence",
+            "id": "def-public.getSecuritySolutionDeepLink.$1",
+            "type": "string",
+            "tags": [],
+            "label": "threatIntelligencePage",
+            "description": [
+              "the name of the threat intelligence page."
+            ],
+            "signature": [
+              "\"indicators\""
+            ],
+            "path": "x-pack/plugins/threat_intelligence/public/common/navigation/security_solution_links.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "a {@link TIDeepLink }"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "threatIntelligence",
+        "id": "def-public.getSecuritySolutionLink",
+        "type": "Function",
+        "tags": [],
+        "label": "getSecuritySolutionLink",
+        "description": [
+          "\nGets the threat intelligence properties of a TI page for navigation in the security solution."
+        ],
+        "signature": [
+          "<TId extends string = \"threat_intelligence-indicators\">(threatIntelligencePage: \"indicators\") => TILinkItem<TId>"
+        ],
+        "path": "x-pack/plugins/threat_intelligence/public/common/navigation/security_solution_links.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "threatIntelligence",
+            "id": "def-public.getSecuritySolutionLink.$1",
+            "type": "string",
+            "tags": [],
+            "label": "threatIntelligencePage",
+            "description": [
+              "the name of the threat intelligence page."
+            ],
+            "signature": [
+              "\"indicators\""
+            ],
+            "path": "x-pack/plugins/threat_intelligence/public/common/navigation/security_solution_links.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "a {@link TILinkItem }"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "threatIntelligence",
+        "id": "def-public.getSecuritySolutionNavTab",
+        "type": "Function",
+        "tags": [],
+        "label": "getSecuritySolutionNavTab",
+        "description": [
+          "\nGets the threat intelligence properties of a TI page for navigation in the old security solution navigation."
+        ],
+        "signature": [
+          "<TId extends string = \"threat_intelligence-indicators\">(threatIntelligencePage: \"indicators\", basePath: string) => TINavTab<TId>"
+        ],
+        "path": "x-pack/plugins/threat_intelligence/public/common/navigation/security_solution_links.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "threatIntelligence",
+            "id": "def-public.getSecuritySolutionNavTab.$1",
+            "type": "string",
+            "tags": [],
+            "label": "threatIntelligencePage",
+            "description": [
+              "the name of the threat intelligence page."
+            ],
+            "signature": [
+              "\"indicators\""
+            ],
+            "path": "x-pack/plugins/threat_intelligence/public/common/navigation/security_solution_links.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "threatIntelligence",
+            "id": "def-public.getSecuritySolutionNavTab.$2",
+            "type": "string",
+            "tags": [],
+            "label": "basePath",
+            "description": [
+              "the base path for links."
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/threat_intelligence/public/common/navigation/security_solution_links.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "a {@link TINavTab }"
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "threatIntelligence",
@@ -58,7 +186,9 @@
         "type": "Interface",
         "tags": [],
         "label": "ThreatIntelligenceSecuritySolutionContext",
-        "description": [],
+        "description": [
+          "\nMethods exposed from the security solution to the threat intelligence application."
+        ],
         "path": "x-pack/plugins/threat_intelligence/public/types.ts",
         "deprecated": false,
         "children": [
@@ -68,7 +198,9 @@
             "type": "Function",
             "tags": [],
             "label": "getFiltersGlobalComponent",
-            "description": [],
+            "description": [
+              "\nGets the `FiltersGlobal` component for embedding a filter bar in the security solution application."
+            ],
             "signature": [
               "() => React.ComponentType<{ children: React.ReactNode; }>"
             ],
@@ -83,7 +215,9 @@
             "type": "Object",
             "tags": [],
             "label": "licenseService",
-            "description": [],
+            "description": [
+              "\nGet the user's license to drive the Threat Intelligence plugin's visibility."
+            ],
             "signature": [
               "LicenseAware"
             ],
@@ -95,7 +229,40 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "threatIntelligence",
+        "id": "def-public.THREAT_INTELLIGENCE_BASE_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "THREAT_INTELLIGENCE_BASE_PATH",
+        "description": [
+          "\nBase path for all the pages within the Threat Intelligence plugin."
+        ],
+        "signature": [
+          "\"/threat_intelligence\""
+        ],
+        "path": "x-pack/plugins/threat_intelligence/public/common/navigation/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "threatIntelligence",
+        "id": "def-public.TIPageId",
+        "type": "Type",
+        "tags": [],
+        "label": "TIPageId",
+        "description": [
+          "\nAll the IDs for the threat intelligence pages.\nThis needs to match the threat intelligence page entries in SecurityPageName` (x-pack/plugins/security_solution/common/constants.ts).\n\nExample to add more IDs:\n  export type TIPageId = 'threat_intelligence-indicators' | 'threat_intelligence-feed';"
+        ],
+        "signature": [
+          "\"threat_intelligence-indicators\""
+        ],
+        "path": "x-pack/plugins/threat_intelligence/public/common/navigation/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   },
   "server": {

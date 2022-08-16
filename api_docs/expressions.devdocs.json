@@ -11784,7 +11784,7 @@
           "\nTypes used in Expressions that don't map to a primitive cleanly:\n\n`date` is typed as a number or string, and represents a date"
         ],
         "signature": [
-          "\"filter\" | \"date\""
+          "\"date\" | \"filter\""
         ],
         "path": "src/plugins/expressions/common/types/common.ts",
         "deprecated": false,
@@ -20782,7 +20782,7 @@
           "\nTypes used in Expressions that don't map to a primitive cleanly:\n\n`date` is typed as a number or string, and represents a date"
         ],
         "signature": [
-          "\"filter\" | \"date\""
+          "\"date\" | \"filter\""
         ],
         "path": "src/plugins/expressions/common/types/common.ts",
         "deprecated": false,
@@ -35093,7 +35093,7 @@
           "\nTypes used in Expressions that don't map to a primitive cleanly:\n\n`date` is typed as a number or string, and represents a date"
         ],
         "signature": [
-          "\"filter\" | \"date\""
+          "\"date\" | \"filter\""
         ],
         "path": "src/plugins/expressions/common/types/common.ts",
         "deprecated": false,

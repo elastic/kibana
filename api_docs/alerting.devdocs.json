@@ -43,7 +43,7 @@
               "The rule to view"
             ],
             "signature": [
-              "{ id: string; name: string; monitoring?: ",
+              "{ params: never; tags: string[]; id: string; name: string; monitoring?: ",
               {
                 "pluginId": "alerting",
                 "scope": "common",
@@ -51,7 +51,7 @@
                 "section": "def-common.RuleMonitoring",
                 "text": "RuleMonitoring"
               },
-              " | undefined; tags: string[]; enabled: boolean; params: never; actions: ",
+              " | undefined; enabled: boolean; actions: ",
               {
                 "pluginId": "alerting",
                 "scope": "common",
@@ -1732,7 +1732,7 @@
                 "section": "def-common.SanitizedRule",
                 "text": "SanitizedRule"
               },
-              "<never>, \"name\" | \"tags\" | \"enabled\" | \"actions\" | \"throttle\" | \"consumer\" | \"schedule\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"notifyWhen\"> & { producer: string; ruleTypeId: string; ruleTypeName: string; }"
+              "<never>, \"tags\" | \"name\" | \"enabled\" | \"actions\" | \"throttle\" | \"consumer\" | \"schedule\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"notifyWhen\"> & { producer: string; ruleTypeId: string; ruleTypeName: string; }"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false
@@ -2569,7 +2569,25 @@
         "label": "RulesClient",
         "description": [],
         "signature": [
-          "{ aggregate: ({ options: { fields, filter, ...options }, }?: { options?: ",
+          "{ get: <Params extends ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.RuleTypeParams",
+            "text": "RuleTypeParams"
+          },
+          " = never>({ id, includeLegacyId, includeSnoozeData, excludeFromPublicApi, }: { id: string; includeLegacyId?: boolean | undefined; includeSnoozeData?: boolean | undefined; excludeFromPublicApi?: boolean | undefined; }) => Promise<",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.SanitizedRule",
+            "text": "SanitizedRule"
+          },
+          "<Params> | ",
+          "SanitizedRuleWithLegacyId",
+          "<Params>>; delete: ({ id }: { id: string; }) => Promise<{}>; aggregate: ({ options: { fields, filter, ...options }, }?: { options?: ",
           "AggregateOptions",
           " | undefined; }) => Promise<",
           "AggregateResult",
@@ -2609,24 +2627,6 @@
             "section": "def-server.FindResult",
             "text": "FindResult"
           },
-          "<Params>>; get: <Params extends ",
-          {
-            "pluginId": "alerting",
-            "scope": "common",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-common.RuleTypeParams",
-            "text": "RuleTypeParams"
-          },
-          " = never>({ id, includeLegacyId, includeSnoozeData, excludeFromPublicApi, }: { id: string; includeLegacyId?: boolean | undefined; includeSnoozeData?: boolean | undefined; excludeFromPublicApi?: boolean | undefined; }) => Promise<",
-          {
-            "pluginId": "alerting",
-            "scope": "common",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-common.SanitizedRule",
-            "text": "SanitizedRule"
-          },
-          "<Params> | ",
-          "SanitizedRuleWithLegacyId",
           "<Params>>; update: <Params extends ",
           {
             "pluginId": "alerting",
@@ -2645,7 +2645,7 @@
             "section": "def-server.PartialRule",
             "text": "PartialRule"
           },
-          "<Params>>; delete: ({ id }: { id: string; }) => Promise<{}>; resolve: <Params extends ",
+          "<Params>>; resolve: <Params extends ",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -4069,7 +4069,7 @@
             "label": "freq",
             "description": [],
             "signature": [
-              "0 | 2 | 1 | 6 | 4 | 3 | 5 | undefined"
+              "0 | 2 | 1 | 3 | 4 | 5 | 6 | undefined"
             ],
             "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
             "deprecated": false
@@ -5817,7 +5817,7 @@
         "label": "SanitizedRule",
         "description": [],
         "signature": [
-          "{ id: string; name: string; monitoring?: ",
+          "{ params: Params; tags: string[]; id: string; name: string; monitoring?: ",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -5825,7 +5825,7 @@
             "section": "def-common.RuleMonitoring",
             "text": "RuleMonitoring"
           },
-          " | undefined; tags: string[]; enabled: boolean; params: Params; actions: ",
+          " | undefined; enabled: boolean; actions: ",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -5887,7 +5887,7 @@
             "section": "def-common.SanitizedRule",
             "text": "SanitizedRule"
           },
-          "<never>, \"name\" | \"tags\" | \"enabled\" | \"actions\" | \"throttle\" | \"consumer\" | \"schedule\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"notifyWhen\"> & { producer: string; ruleTypeId: string; ruleTypeName: string; }"
+          "<never>, \"tags\" | \"name\" | \"enabled\" | \"actions\" | \"throttle\" | \"consumer\" | \"schedule\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"notifyWhen\"> & { producer: string; ruleTypeId: string; ruleTypeName: string; }"
         ],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
