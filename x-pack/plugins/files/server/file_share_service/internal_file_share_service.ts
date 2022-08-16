@@ -144,7 +144,7 @@ export class InternalFileShareService implements FileShareServiceStart {
         token: generateShareToken(),
       },
       {
-        references: [{ name: file.name, id: file.id, type: FILE_SO_TYPE }],
+        references: [{ name: file.data.name, id: file.data.id, type: FILE_SO_TYPE }],
       }
     );
 

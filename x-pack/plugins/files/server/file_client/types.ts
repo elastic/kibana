@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { File, FileMetadata, FileJSON, FileShareJSONWithToken } from '../../common/types';
+import type { File, FileShareJSONWithToken, UpdatableFileMetadata } from '../../common/types';
+import { CreateFileArgs } from '../file_service';
 import { FileShareServiceStart } from '../file_share_service';
 import { FileMetadataClient } from './file_metadata_client';
 
@@ -33,7 +34,7 @@ export interface CreateArgs {
   /**
    * The file's metadata
    */
-  metadata: Omit<FileMetadata, 'FileKind'> & { FileKind?: string };
+  metadata: CreateFileArgs;
 }
 
 /**
@@ -84,14 +85,14 @@ export interface FileClient {
    * @param id - File id
    * @param metadata - new file metadata
    */
-  update<M = unknown>(id: string, metadata: FileJSON<M>): Promise<void>;
+  update<M = unknown>(id: string, metadata: UpdatableFileMetadata<M>): Promise<void>;
   /**
    * {@link FileMetadataClient.update}
    *
    * @param file - See {@link File}
    * @param metadata - new file metadata
    */
-  update<M = unknown>(file: File<M>, metadata: FileJSON<M>): Promise<File<M>>;
+  update<M = unknown>(file: File<M>, metadata: UpdatableFileMetadata<M>): Promise<File<M>>;
 
   /**
    * Delete a file.

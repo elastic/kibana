@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import moment from 'moment';
 import { Readable } from 'stream';
 import mimeType from 'mime';
 import cuid from 'cuid';
@@ -11,10 +12,10 @@ import type { Logger } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/security-plugin/server';
 import type {
   File,
-  FileJSON,
   FileKind,
   FileMetadata,
   FileShareJSONWithToken,
+  UpdatableFileMetadata,
 } from '../../common/types';
 import type { FileMetadataClient } from './file_metadata_client';
 import type {
@@ -32,6 +33,31 @@ import { createDefaultFileAttributes } from './utils';
 
 export type UploadOptions = Omit<BlobUploadOptions, 'id'>;
 
+export function createFileClient({
+  fileKindDescriptor,
+  auditLogger,
+  blobStorageClient,
+  internalFileShareService,
+  logger,
+  metadataClient,
+}: {
+  fileKindDescriptor: FileKind;
+  metadataClient: FileMetadataClient;
+  blobStorageClient: BlobStorageClient;
+  internalFileShareService: undefined | InternalFileShareService;
+  auditLogger: undefined | AuditLogger;
+  logger: Logger;
+}) {
+  return new FileClientImpl(
+    fileKindDescriptor,
+    metadataClient,
+    blobStorageClient,
+    internalFileShareService,
+    auditLogger,
+    logger
+  );
+}
+
 export class FileClientImpl implements FileClient {
   private readonly logAuditEvent: AuditLogger['log'];
 
@@ -48,16 +74,35 @@ export class FileClientImpl implements FileClient {
       ((e) => e && this.logger.info(JSON.stringify(e.event, null, 2)));
   }
 
+  static create({}) {}
+
+  private instantiateFile<M = unknown>(id: string, metadata: FileMetadata<M>): File<M> {
+    return new FileImpl(
+      id,
+      {
+        ...createDefaultFileAttributes(),
+        ...metadata,
+      },
+      this,
+      this.logger
+    );
+  }
+
   public get fileKind(): string {
     return this.fileKindDescriptor.id;
   }
 
   public async create<M = unknown>({ id, metadata }: CreateArgs): Promise<File<M>> {
+    const serializedMetadata = serializeJSON(metadata);
     const result = await this.metadataClient.create({
       id: id || cuid(),
       metadata: {
-        ...metadata,
-        extension: (metadata.mime_type && mimeType.getExtension(metadata.mime_type)) ?? undefined,
+        ...createDefaultFileAttributes(),
+        ...serializedMetadata,
+        name: serializedMetadata.name!,
+        extension:
+          (serializedMetadata.mime_type && mimeType.getExtension(serializedMetadata.mime_type)) ??
+          undefined,
         FileKind: this.fileKind,
       },
     });
@@ -78,25 +123,30 @@ export class FileClientImpl implements FileClient {
     return this.instantiateFile(id, metadata as FileMetadata<M>);
   }
 
-  public async update<M = unknown>(file: File<M>, metadata: FileJSON<M>): Promise<File<M>>;
-  public async update<M = unknown>(id: string, metadata: FileJSON<M>): Promise<void>;
   public async update<M = unknown>(
-    idOrFile: File<M> | string,
-    metadata: FileJSON<M>
+    file: File<M>,
+    metadata: UpdatableFileMetadata<M>
+  ): Promise<File<M>>;
+  public async update<M = unknown>(id: string, metadata: UpdatableFileMetadata<M>): Promise<void>;
+  public async update<M = unknown>(
+    fileOrId: File<M> | string,
+    metadata: UpdatableFileMetadata<M>
   ): Promise<void | File<M>> {
-    if (isFile(idOrFile)) {
+    const { name, Alt, Meta } = serializeJSON(metadata);
+    const payload = { name, Alt, Meta, Updated: moment().toISOString() };
+    if (isFile(fileOrId)) {
       const { id, metadata: newMetadata } = await this.metadataClient.update({
-        id: idOrFile.data.id,
-        metadata: serializeJSON(metadata),
+        id: fileOrId.data.id,
+        metadata: payload,
       });
 
       return this.instantiateFile(id, newMetadata as FileMetadata<M>);
     }
 
-    const id = idOrFile as string;
+    const id = fileOrId as string;
     await this.metadataClient.update({
       id,
-      metadata,
+      metadata: payload,
     });
   }
 
@@ -128,9 +178,11 @@ export class FileClientImpl implements FileClient {
     return this.blobStorageClient.delete(arg);
   };
 
-  public list: FileMetadataClient['list'] = (arg) => {
-    return this.metadataClient.list(arg);
-  };
+  public async list(arg: P1<FileMetadataClient['list']>): Promise<File[]> {
+    return this.metadataClient
+      .list(arg)
+      .then((r) => r.map(({ id, metadata }) => this.instantiateFile(id, metadata)));
+  }
 
   /**
    * Upload a blob
@@ -156,18 +208,6 @@ export class FileClientImpl implements FileClient {
   public download: BlobStorageClient['download'] = (args) => {
     return this.blobStorageClient.download(args);
   };
-
-  private instantiateFile<M = unknown>(id: string, metadata: FileMetadata<M>): File<M> {
-    return new FileImpl(
-      id,
-      {
-        ...createDefaultFileAttributes(),
-        ...metadata,
-      },
-      this,
-      this.logger
-    );
-  }
 
   async share({ file, name, validUntil }: ShareArgs): Promise<FileShareJSONWithToken> {
     if (!this.internalFileShareService) {
