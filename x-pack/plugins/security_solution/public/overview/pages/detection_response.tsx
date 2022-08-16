@@ -6,6 +6,7 @@
  */
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { SocTrends } from '../components/detection_response/soc_trends';
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
@@ -88,17 +89,27 @@ const DetectionResponseComponent = () => {
                   </EuiFlexGroup>
                 </EuiFlexItem>
 
-                {canReadAlerts && (
-                  <EuiFlexItem>
-                    <RuleAlertsTable signalIndexName={signalIndexName} />
-                  </EuiFlexItem>
-                )}
-
-                {canReadCases && (
-                  <EuiFlexItem>
-                    <CasesTable />
-                  </EuiFlexItem>
-                )}
+                <EuiFlexItem>
+                  <EuiFlexGroup>
+                    <EuiFlexItem>
+                      <EuiFlexGroup direction="column">
+                        {canReadAlerts && (
+                          <EuiFlexItem>
+                            <RuleAlertsTable signalIndexName={signalIndexName} />
+                          </EuiFlexItem>
+                        )}
+                        {canReadCases && (
+                          <EuiFlexItem>
+                            <CasesTable />
+                          </EuiFlexItem>
+                        )}
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <SocTrends />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
 
                 {canReadAlerts && (
                   <EuiFlexItem>
