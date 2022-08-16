@@ -6,5 +6,5 @@
  */
 
 export * from './watch';
-export * from './watch_history';
+export * from './get_watch_history';
 export * from './execute_details';

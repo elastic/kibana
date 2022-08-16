@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 
 import { ActionStatusModelEs, ServerActionStatusModel } from '../../../common/types';
 import { getMoment } from '../../../common/lib/get_moment';
-import { deriveState, deriveIsAckable } from './action_status_model_utils';
+import { deriveState } from './action_status_model_utils';
 
 export const buildServerActionStatusModel = (
   actionStatusModelEs: ActionStatusModelEs
@@ -62,7 +62,7 @@ export const buildClientActionStatusModel = (serverActionStatusModel: ServerActi
     lastSuccessfulExecution,
   } = serverActionStatusModel;
   const state = deriveState(serverActionStatusModel);
-  const isAckable = deriveIsAckable(state);
+  const isAckable = serverActionStatusModel.actionStatusJson.ack.state === 'ackable';
 
   return {
     id,

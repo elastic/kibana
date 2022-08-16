@@ -6,7 +6,8 @@
  */
 
 import React, { Fragment, useContext } from 'react';
-
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiBasicTable,
   EuiCodeBlock,
@@ -17,15 +18,14 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+
 import {
   ExecutedWatchDetails,
   ExecutedWatchResults,
 } from '../../../../../../common/types/watch_types';
+import { ActionStateBadge, WatchStateBadge, SectionError } from '../../../../components';
 import { getTypeFromAction } from '../../watch_edit_actions';
 import { WatchContext } from '../../watch_context';
-import { WatchStatus, SectionError } from '../../../../components';
 
 export const SimulateWatchResultsFlyout = ({
   executeResults,
@@ -104,7 +104,7 @@ export const SimulateWatchResultsFlyout = ({
       ),
       dataType: 'string' as const,
       render: (actionState: string, _item: typeof actionsTableData[number]) => (
-        <WatchStatus status={actionState} />
+        <ActionStateBadge state={actionState} />
       ),
     },
     {
@@ -171,9 +171,10 @@ export const SimulateWatchResultsFlyout = ({
     >
       <EuiFlyoutHeader hasBorder>
         {flyoutTitle}
-        <EuiSpacer size="xs" />
-        <WatchStatus status={state} size="m" />
+        <EuiSpacer size="s" />
+        <WatchStateBadge state={state} size="m" />
       </EuiFlyoutHeader>
+
       <EuiFlyoutBody>
         {actionsTableData && actionsTableData.length > 0 && (
           <Fragment>
