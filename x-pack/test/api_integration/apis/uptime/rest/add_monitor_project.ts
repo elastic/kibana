@@ -292,9 +292,8 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         const { monitors } = getResponse.body;
-
         expect(monitors[0]).eql(undefined);
-
+        expect(messages[1]).eql(`Monitor ${secondMonitor.id} deleted successfully`);
         expect(messages[2].createdMonitors).eql([]);
         expect(messages[2].failedMonitors).eql([]);
         expect(messages[2].updatedMonitors).eql([projectMonitors.monitors[0].id]);
