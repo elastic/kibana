@@ -26,11 +26,10 @@ export const EmptyLocations = ({
     <EuiEmptyPrompt
       hasBorder
       title={<h2>{ADD_FIRST_LOCATION}</h2>}
-      titleSize="s"
       body={
-        <EuiText size="s">
+        <p>
           {!inFlyout ? FIRST_MONITOR : ''} {START_ADDING_LOCATIONS_DESCRIPTION}
-        </EuiText>
+        </p>
       }
       actions={
         <EuiButton

@@ -15,6 +15,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiSpacer,
   EuiTitle,
   EuiFlyout,
   EuiButton,
@@ -76,6 +77,8 @@ export const AddLocationFlyout = ({
               <p>{NEED_FLEET_READ_AGENT_POLICIES_PERMISSION}</p>
             </EuiCallOut>
           )}
+
+          <EuiSpacer />
           <LocationForm privateLocations={privateLocations} />
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
