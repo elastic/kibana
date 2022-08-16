@@ -13,8 +13,8 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { AggName } from '../../../common/types/aggregations';
 import type { Dictionary } from '../../../common/types/common';
 import type { EsFieldName } from '../../../common/types/fields';
-import type { PivotAgg, PivotSupportedAggs } from '../../../common/types/pivot_aggs';
-import { PIVOT_SUPPORTED_AGGS } from '../../../common/types/pivot_aggs';
+import type { PivotSupportedAggs } from '../../../common/types/pivot_aggs';
+import { PIVOT_SUPPORTED_AGGS, PivotAgg } from '../../../common/types/pivot_aggs';
 
 import { getAggFormConfig } from '../sections/create_transform/components/step_define/common/get_agg_form_config';
 import { PivotAggsConfigFilter } from '../sections/create_transform/components/step_define/common/filter_agg/types';
@@ -115,7 +115,7 @@ export const TOP_METRICS_SPECIAL_SORT_FIELDS = {
   _SCORE: '_score',
 } as const;
 
-export const isSpecialSortField = (sortField: unknown) => {
+export const isSpecialSortField = (sortField: unknown): sortField is string => {
   return Object.values(TOP_METRICS_SPECIAL_SORT_FIELDS).some((v) => v === sortField);
 };
 
@@ -205,19 +205,21 @@ export interface PivotAggsConfigWithUiBase extends PivotAggsConfigBase {
   field: EsFieldName | EsFieldName[] | null;
 }
 
-export interface PivotAggsConfigWithExtra<T> extends PivotAggsConfigWithUiBase {
+export interface PivotAggsConfigWithExtra<T, ESConfig extends { [key: string]: any }>
+  extends PivotAggsConfigWithUiBase {
   /** Form component */
   AggFormComponent: FC<{
     aggConfig: Partial<T>;
     onChange: (arg: Partial<T>) => void;
     selectedField: string;
+    isValid?: boolean;
   }>;
   /** Aggregation specific configuration */
   aggConfig: Partial<T>;
   /** Set UI configuration from ES aggregation definition */
-  setUiConfigFromEs: (arg: { [key: string]: any }) => void;
+  setUiConfigFromEs: (arg: ESConfig) => void;
   /** Converts UI agg config form to ES agg request object */
-  getEsAggConfig: () => { [key: string]: any } | null;
+  getEsAggConfig: () => ESConfig | null;
   /** Indicates if the configuration is valid */
   isValid: () => boolean;
   /** Provides aggregation name generated based on the configuration */
@@ -242,7 +244,7 @@ export type PivotAggsConfigWithUiSupport =
   | PivotAggsConfigTerms
   | PivotAggsConfigWithExtendedForm;
 
-export function isPivotAggsConfigWithUiSupport(arg: unknown): arg is PivotAggsConfigWithUiSupport {
+export function isPivotAggsConfigWithUiBase(arg: unknown): arg is PivotAggsConfigWithUiBase {
   return (
     isPopulatedObject(arg, ['agg', 'aggName', 'dropDownName', 'field']) &&
     isPivotSupportedAggs(arg.agg)
@@ -256,8 +258,7 @@ type PivotAggsConfigWithExtendedForm = PivotAggsConfigFilter | PivotAggsConfigTo
 
 export function isPivotAggsWithExtendedForm(arg: unknown): arg is PivotAggsConfigWithExtendedForm {
   return (
-    (isPopulatedObject(arg) && arg.hasOwnProperty('setUiConfigFromEs')) ||
-    isPopulatedObject(arg, ['AggFormComponent'])
+    isPopulatedObject(arg, ['setUiConfigFromEs']) || isPopulatedObject(arg, ['AggFormComponent'])
   );
 }
 
@@ -288,7 +289,7 @@ export type PivotAggsConfigDict = Dictionary<PivotAggsConfig>;
 export function getEsAggFromAggConfig(
   pivotAggsConfig: PivotAggsConfigBase | PivotAggsConfigWithExtendedForm
 ): PivotAgg | null {
-  let esAgg: { [key: string]: any } | null = { ...pivotAggsConfig };
+  let esAgg: { [key: string]: any } = { ...pivotAggsConfig };
 
   delete esAgg.agg;
   delete esAgg.aggName;
@@ -296,7 +297,7 @@ export function getEsAggFromAggConfig(
   delete esAgg.parentAgg;
 
   if (isPivotAggsWithExtendedForm(pivotAggsConfig)) {
-    esAgg = pivotAggsConfig.getEsAggConfig();
+    esAgg = pivotAggsConfig.getEsAggConfig() as PivotAgg;
 
     if (esAgg === null) {
       return null;
@@ -305,16 +306,16 @@ export function getEsAggFromAggConfig(
 
   const result = {
     [pivotAggsConfig.agg]: esAgg,
-  };
+  } as PivotAgg;
 
   if (
-    isPivotAggsConfigWithUiSupport(pivotAggsConfig) &&
+    isPivotAggsConfigWithUiBase(pivotAggsConfig) &&
     pivotAggsConfig.subAggs !== undefined &&
     Object.keys(pivotAggsConfig.subAggs).length > 0
   ) {
     result.aggs = {};
     for (const subAggConfig of Object.values(pivotAggsConfig.subAggs)) {
-      result.aggs[subAggConfig.aggName] = getEsAggFromAggConfig(subAggConfig);
+      result.aggs[subAggConfig.aggName] = getEsAggFromAggConfig(subAggConfig) as PivotAgg;
     }
   }
 

@@ -64,20 +64,25 @@ export const cloneIndex = ({
         index: source,
         target,
         wait_for_active_shards: WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE,
-        body: {
-          settings: {
-            index: {
-              // The source we're cloning from will have a write block set, so
-              // we need to remove it to allow writes to our newly cloned index
-              'blocks.write': false,
-              number_of_shards: INDEX_NUMBER_OF_SHARDS,
-              auto_expand_replicas: INDEX_AUTO_EXPAND_REPLICAS,
-              // Set an explicit refresh interval so that we don't inherit the
-              // value from incorrectly configured index templates (not required
-              // after we adopt system indices)
-              refresh_interval: '1s',
-              // Bump priority so that recovery happens before newer indices
-              priority: 10,
+        settings: {
+          index: {
+            // The source we're cloning from will have a write block set, so
+            // we need to remove it to allow writes to our newly cloned index
+            'blocks.write': false,
+            // The rest of the index settings should have already been applied
+            // to the source index and will be copied to the clone target. But
+            // we repeat it here for explicitness.
+            number_of_shards: INDEX_NUMBER_OF_SHARDS,
+            auto_expand_replicas: INDEX_AUTO_EXPAND_REPLICAS,
+            // Set an explicit refresh interval so that we don't inherit the
+            // value from incorrectly configured index templates (not required
+            // after we adopt system indices)
+            refresh_interval: '1s',
+            // Bump priority so that recovery happens before newer indices
+            priority: 10,
+            // Increase the fields limit beyond the default of 1000
+            mapping: {
+              total_fields: { limit: 1500 },
             },
           },
         },

@@ -18,7 +18,7 @@ import pRetry from 'p-retry';
 const BEFORE_SETUP_TIMEOUT = 30 * 60 * 1000; // 30 minutes;
 
 const DOCKER_START_TIMEOUT = 5 * 60 * 1000; // 5 minutes
-const DOCKER_IMAGE = `docker.elastic.co/package-registry/distribution:433d99a96f3289c5013ae35826877adf408eb9c9`;
+const DOCKER_IMAGE = `docker.elastic.co/package-registry/distribution:c9f9a83da2c00118d5451cc69c680ade74494d4e`;
 
 function firstWithTimeout(source$: Rx.Observable<any>, errorMsg: string, ms = 30 * 1000) {
   return Rx.race(
