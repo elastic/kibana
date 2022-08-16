@@ -38,14 +38,51 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await pageObjects.responder.closeResponder();
   };
 
-  describe('Response Actions Responder', function () {
+  const getEndpointAlertsQueryForAgentId = (
+    agentId: string
+  ): object & { $stringify: () => string } => {
+    return Object.assign(
+      Object.create({
+        $stringify() {
+          return JSON.stringify(this);
+        },
+      }),
+
+      {
+        bool: {
+          filter: [
+            {
+              bool: {
+                should: [{ match_phrase: { 'agent.type': 'endpoint' } }],
+                minimum_should_match: 1,
+              },
+            },
+            {
+              bool: {
+                should: [{ match_phrase: { 'agent.id': agentId } }],
+                minimum_should_match: 1,
+              },
+            },
+            {
+              bool: {
+                should: [{ exists: { field: 'kibana.alert.rule.uuid' } }],
+                minimum_should_match: 1,
+              },
+            },
+          ],
+        },
+      }
+    );
+  };
+
+  describe.only('Response Actions Responder', function () {
     let indexedData: IndexedHostsAndAlertsResponse;
     let endpointAgentId: string;
 
     before(async () => {
       indexedData = await endpointTestResources.loadEndpointData({
         numHosts: 2,
-        generatorSeed: 'responder',
+        generatorSeed: `responder ${Math.random()}`,
       });
 
       endpointAgentId = indexedData.hosts[0].agent.id;
@@ -80,19 +117,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       before(async () => {
         timeline = await timelineTestService.createTimeline('endpoint responder test');
 
-        await pageObjects.timeline.navigateToTimelineList();
-        await detectionsTestService.waitForAlerts(
-          {
-            bool: {
-              must: [
-                { match: { 'agent.id': endpointAgentId } },
-                { match: { 'agent.type': 'endpoint' } },
-              ],
-            },
-          },
-          120_000
-        );
-
         // Add all alerts for the Endpoint to the timeline created
         await timelineTestService.updateTimeline(
           timeline.data.persistTimeline.timeline.savedObjectId,
@@ -104,12 +128,21 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
                   kind: 'kuery',
                   expression: `agent.type: "endpoint" AND agent.id : "${endpointAgentId}" AND kibana.alert.rule.uuid : *`,
                 },
-                serializedQuery: `{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"agent.type":"endpoint"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"agent.id":"${endpointAgentId}"}}],"minimum_should_match":1}},{"bool":{"should":[{"exists":{"field":"kibana.alert.rule.uuid"}}],"minimum_should_match":1}}]}}`,
+                serializedQuery: getEndpointAlertsQueryForAgentId(endpointAgentId).$stringify(),
               },
             },
           },
           timeline.data.persistTimeline.timeline.version
         );
+
+        await detectionsTestService.waitForAlerts(
+          getEndpointAlertsQueryForAgentId(endpointAgentId),
+          // The Alerts rule seems to run every 5 minutes, so we wait here a max of 6 to
+          // ensure it runs and completes.
+          60_000 * 6
+        );
+
+        await pageObjects.timeline.navigateToTimelineList();
       });
 
       after(async () => {
