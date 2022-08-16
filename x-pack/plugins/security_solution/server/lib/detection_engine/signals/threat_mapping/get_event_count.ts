@@ -54,13 +54,8 @@ export const getEventList = async ({
     to: tuple.to.toISOString(),
     services,
     ruleExecutionLogger,
-<<<<<<< HEAD
-    filter,
     pageSize: calculatedPerPage,
-=======
     filter: queryFilter,
-    pageSize: Math.ceil(Math.min(tuple.maxSignals, calculatedPerPage)),
->>>>>>> cfc05d0d885 (adds backend versions of existing logic)
     primaryTimestamp,
     secondaryTimestamp,
     sortOrder: 'desc',
