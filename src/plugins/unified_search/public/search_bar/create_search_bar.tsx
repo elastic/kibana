@@ -21,22 +21,15 @@ import { useFilterManager } from './lib/use_filter_manager';
 import { useTimefilter } from './lib/use_timefilter';
 import { useSavedQuery } from './lib/use_saved_query';
 import { useQueryStringManager } from './lib/use_query_string_manager';
-import { QuerySuggestionGetFn } from '../autocomplete';
-import { ValueSuggestionsGetFn } from '../autocomplete/providers/value_suggestion_provider';
+import { UnifiedSearchPublicPluginStart } from '../types';
 
 interface StatefulSearchBarDeps {
   core: CoreStart;
-  data: Omit<DataPublicPluginStart, 'ui'>;
+  data: DataPublicPluginStart;
   storage: IStorageWrapper;
   usageCollection?: UsageCollectionSetup;
   isScreenshotMode?: boolean;
-  unifiedSearch: {
-    autocomplete: {
-      getQuerySuggestions: QuerySuggestionGetFn;
-      hasQuerySuggestions: (language: string) => boolean;
-      getValueSuggestions: ValueSuggestionsGetFn;
-    };
-  };
+  unifiedSearch: Omit<UnifiedSearchPublicPluginStart, 'ui'>;
 }
 
 export type StatefulSearchBarProps<QT extends Query | AggregateQuery = Query> =
