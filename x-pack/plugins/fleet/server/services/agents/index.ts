@@ -14,6 +14,7 @@ export * from './actions';
 export * from './reassign';
 export * from './setup';
 export * from './update_agent_tags';
+export * from './action_status';
 export { AgentServiceImpl } from './agent_service';
 export type { AgentClient, AgentService } from './agent_service';
 export { BulkActionsResolver } from './bulk_actions_resolver';

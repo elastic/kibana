@@ -50,12 +50,6 @@ export const CurrentBulkUpgradeCallout: React.FunctionComponent<CurrentBulkUpgra
     return startDate > now;
   }, [currentUpgrade]);
 
-  const actionNames: { [key: string]: string } = {
-    POLICY_REASSIGN: 'Reassign',
-    UPGRADE: 'Upgrade',
-    UNENROLL: 'Unenroll',
-  };
-
   const calloutTitle =
     isScheduled && currentUpgrade.startTime ? (
       <FormattedMessage
@@ -81,19 +75,15 @@ export const CurrentBulkUpgradeCallout: React.FunctionComponent<CurrentBulkUpgra
     ) : (
       <FormattedMessage
         id="xpack.fleet.currentUpgrade.calloutTitle"
-        defaultMessage="{type} {status}, {nbAgentsAck} of {nbAgents} done"
+        defaultMessage="Upgrading {nbAgents, plural, one {# agent} other {# agents}} to version {version}"
         values={{
-          // TODO failed status
-          status: currentUpgrade.complete ? 'completed' : 'in progress',
-          type: actionNames[currentUpgrade.type ?? 'UPGRADE'],
-          nbAgents: currentUpgrade.nbAgents,
-          nbAgentsAck: currentUpgrade.nbAgentsAck,
+          nbAgents: currentUpgrade.nbAgents - currentUpgrade.nbAgentsAck,
           version: currentUpgrade.version,
         }}
       />
     );
   return (
-    <EuiCallOut color={currentUpgrade.complete ? 'success' : 'primary'}>
+    <EuiCallOut color="primary">
       <EuiFlexGroup
         className="euiCallOutHeader__title"
         justifyContent="spaceBetween"
@@ -102,31 +92,23 @@ export const CurrentBulkUpgradeCallout: React.FunctionComponent<CurrentBulkUpgra
       >
         <EuiFlexItem grow={false}>
           <div>
-            {isScheduled ? (
-              <EuiIcon type="iInCircle" />
-            ) : !currentUpgrade.complete ? (
-              <EuiLoadingSpinner />
-            ) : (
-              <EuiIcon type="check" />
-            )}
+            {isScheduled ? <EuiIcon type="iInCircle" /> : <EuiLoadingSpinner />}
             &nbsp;&nbsp;
             {calloutTitle}
           </div>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          {currentUpgrade.type === 'UPGRADE' ? (
-            <EuiButton
-              size="s"
-              onClick={onClickAbortUpgrade}
-              isLoading={isAborting}
-              data-test-subj="abortUpgradeBtn"
-            >
-              <FormattedMessage
-                id="xpack.fleet.currentUpgrade.abortUpgradeButtom"
-                defaultMessage="Abort upgrade"
-              />
-            </EuiButton>
-          ) : null}
+          <EuiButton
+            size="s"
+            onClick={onClickAbortUpgrade}
+            isLoading={isAborting}
+            data-test-subj="abortUpgradeBtn"
+          >
+            <FormattedMessage
+              id="xpack.fleet.currentUpgrade.abortUpgradeButtom"
+              defaultMessage="Abort upgrade"
+            />
+          </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
       <FormattedMessage

@@ -104,6 +104,15 @@ export interface CurrentUpgrade {
   nbAgentsAck: number;
   version: string;
   startTime?: string;
+}
+
+export interface CurrentAction {
+  actionId: string;
+  complete: boolean;
+  nbAgents: number;
+  nbAgentsAck: number;
+  version: string;
+  startTime?: string;
   type?: string;
   total?: number;
 }

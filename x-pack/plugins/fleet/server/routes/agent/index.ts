@@ -48,6 +48,7 @@ import {
 } from './actions_handlers';
 import { postAgentUnenrollHandler, postBulkAgentsUnenrollHandler } from './unenroll_handler';
 import {
+  getActionStatusHandler,
   getCurrentUpgradesHandler,
   postAgentUpgradeHandler,
   postBulkAgentsUpgradeHandler,
@@ -239,6 +240,18 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       },
     },
     getCurrentUpgradesHandler
+  );
+
+  // Current actions
+  router.get(
+    {
+      path: AGENT_API_ROUTES.ACTION_STATUS_PATTERN,
+      validate: false,
+      fleetAuthz: {
+        fleet: { all: true },
+      },
+    },
+    getActionStatusHandler
   );
 
   // Bulk reassign
