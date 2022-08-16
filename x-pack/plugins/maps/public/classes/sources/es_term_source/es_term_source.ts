@@ -63,9 +63,6 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
     }
     return {
       ...normalizedDescriptor,
-      indexPatternTitle: descriptor.indexPatternTitle
-        ? descriptor.indexPatternTitle
-        : descriptor.indexPatternId,
       term: descriptor.term!,
       type: SOURCE_TYPES.ES_TERM_SOURCE,
     };
