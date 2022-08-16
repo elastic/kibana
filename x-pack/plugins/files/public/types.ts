@@ -6,14 +6,21 @@
  */
 
 import type {
-  HttpApiInterfaceEntryDefinition,
-  CreateFileKindHttpEndpoint,
-  DeleteFileKindHttpEndpoint,
-  DownloadFileKindHttpEndpoint,
-  GetByIdFileKindHttpEndpoint,
+  FindFilesHttpEndpoint,
+  FileShareHttpEndpoint,
+  FileUnshareHttpEndpoint,
+  FileGetShareHttpEndpoint,
+  FilesMetricsHttpEndpoint,
   ListFileKindHttpEndpoint,
+  CreateFileKindHttpEndpoint,
+  FileListSharesHttpEndpoint,
   UpdateFileKindHttpEndpoint,
   UploadFileKindHttpEndpoint,
+  DeleteFileKindHttpEndpoint,
+  GetByIdFileKindHttpEndpoint,
+  DownloadFileKindHttpEndpoint,
+  FilePublicDownloadHttpEndpoint,
+  HttpApiInterfaceEntryDefinition,
 } from '../common/api_routes';
 
 /**
@@ -52,6 +59,12 @@ export interface FilesClient {
    */
   list: ClientMethodFrom<ListFileKindHttpEndpoint>;
   /**
+   * Find a set of files given some filters.
+   *
+   * @param args - File filters
+   */
+  find: ClientMethodFrom<FindFilesHttpEndpoint>;
+  /**
    * Update a set of of metadata values of the file object.
    *
    * @param args - update file args
@@ -69,6 +82,47 @@ export interface FilesClient {
    * @param args - download file args
    */
   download: ClientMethodFrom<DownloadFileKindHttpEndpoint>;
+  /**
+   * Share a file by creating a new file share instance.
+   *
+   * @note This returns the secret token that can be used
+   * to access a file via the public download enpoint.
+   *
+   * @param args - File share arguments
+   */
+  share: ClientMethodFrom<FileShareHttpEndpoint>;
+  /**
+   * Delete a file share instance.
+   *
+   * @param args - File unshare arguments
+   */
+  unshare: ClientMethodFrom<FileUnshareHttpEndpoint>;
+  /**
+   * Get a file share instance.
+   *
+   * @param args - Get file share arguments
+   */
+  getShare: ClientMethodFrom<FileGetShareHttpEndpoint>;
+  /**
+   * List all file shares. Optionally scoping to a specific
+   * file.
+   *
+   * @param args - Get file share arguments
+   */
+  listShares: ClientMethodFrom<FileListSharesHttpEndpoint>;
+  /**
+   * Get metrics of file system, like storage usage.
+   *
+   * @param args - Get metrics arguments
+   */
+  getMetrics: ClientMethodFrom<FilesMetricsHttpEndpoint>;
+  /**
+   * Download a file, bypassing regular security by way of a
+   * secret share token.
+   *
+   * @param args - Get public download arguments.
+   */
+  publicDownload: ClientMethodFrom<FilePublicDownloadHttpEndpoint>;
 }
 
 /**
