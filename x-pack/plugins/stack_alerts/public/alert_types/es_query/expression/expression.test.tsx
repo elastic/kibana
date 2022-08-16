@@ -24,6 +24,24 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
 
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+  return {
+    ...original,
+    // Mocking CodeEditor
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    CodeEditor: (props: any) => (
+      <input
+        data-test-subj="mockCodeEditor"
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        onChange={(syntheticEvent: any) => {
+          props.onChange(syntheticEvent.jsonString);
+        }}
+      />
+    ),
+  };
+});
+
 const defaultEsQueryRuleParams: EsQueryAlertParams<SearchType.esQuery> = {
   size: 100,
   thresholdComparator: '>',
@@ -188,7 +206,7 @@ describe('EsQueryAlertTypeExpression', () => {
     wrapper = await wrapper.update();
 
     expect(findTestSubject(wrapper, 'queryFormTypeChooserTitle').exists()).toBeFalsy();
-    expect(findTestSubject(wrapper, 'queryJsonEditor').exists()).toBeTruthy();
+    expect(wrapper.exists('[data-test-subj="queryJsonEditor"]')).toBeTruthy();
     expect(findTestSubject(wrapper, 'selectIndexExpression').exists()).toBeTruthy();
 
     await act(async () => {

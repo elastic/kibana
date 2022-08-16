@@ -109,6 +109,7 @@ export class TaskRunner<
   private readonly executionId: string;
   private readonly ruleTypeRegistry: RuleTypeRegistry;
   private readonly inMemoryMetrics: InMemoryMetrics;
+  private readonly maxAlerts: number;
   private alertingEventLogger: AlertingEventLogger;
   private alertsClient: AlertsClient;
   private usageCounter?: UsageCounter;
@@ -143,6 +144,7 @@ export class TaskRunner<
     this.alertsClient = context.alertsService.createAlertsClient(
       ruleType as UntypedNormalizedRuleType
     );
+    this.maxAlerts = context.maxAlerts;
     this.alertingEventLogger = new AlertingEventLogger(this.context.eventLogger);
   }
 
@@ -233,22 +235,26 @@ export class TaskRunner<
     executionHandler: ExecutionHandler<ActionGroupIds | RecoveryActionGroupId>,
     ruleRunMetricsStore: RuleRunMetricsStore
   ) {
-    const {
-      actionGroup,
-      subgroup: actionSubgroup,
-      context,
-      state,
-    } = alert.getScheduledActionOptions()!;
-    alert.updateLastScheduledActions(actionGroup, actionSubgroup);
-    alert.unscheduleActions();
-    return executionHandler({
-      actionGroup,
-      actionSubgroup,
-      context,
-      state,
-      alertId,
-      ruleRunMetricsStore,
-    });
+    if (alert.hasScheduledActions()) {
+      const {
+        actionGroup,
+        subgroup: actionSubgroup,
+        context,
+        state,
+      } = alert.getScheduledActionOptions()!;
+      alert.updateLastScheduledActions(actionGroup, actionSubgroup);
+      alert.unscheduleActions();
+      return executionHandler({
+        actionGroup,
+        actionSubgroup,
+        context,
+        state,
+        alertId,
+        ruleRunMetricsStore,
+      });
+    }
+
+    return Promise.resolve();
   }
 
   private async executeRule(
@@ -283,6 +289,8 @@ export class TaskRunner<
         previousStartedAt,
       },
     } = this.taskInstance;
+
+    const ruleRunMetricsStore = new RuleRunMetricsStore();
 
     const executionHandler = this.getExecutionHandler(
       ruleId,
@@ -330,6 +338,16 @@ export class TaskRunner<
       searchSourceClient,
     });
 
+    const alertFactory = createAlertFactory<
+      State,
+      Context,
+      WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
+    >({
+      alerts,
+      logger: this.logger,
+      maxAlerts: this.maxAlerts,
+      canSetRecoveryContext: ruleType.doesSetRecoveryContext ?? false,
+    });
     let updatedRuleTypeState: void | Record<string, unknown>;
     try {
       const ctx = {
@@ -354,15 +372,7 @@ export class TaskRunner<
             searchSourceClient: wrappedSearchSourceClient.searchSourceClient,
             uiSettingsClient: this.context.uiSettings.asScopedToClient(savedObjectsClient),
             scopedClusterClient: wrappedScopedClusterClient.client(),
-            alertFactory: createAlertFactory<
-              State,
-              Context,
-              WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
-            >({
-              alerts,
-              logger: this.logger,
-              canSetRecoveryContext: ruleType.doesSetRecoveryContext ?? false,
-            }),
+            alertFactory,
             shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
             shouldStopExecution: () => this.cancelled,
           },
@@ -396,15 +406,23 @@ export class TaskRunner<
         })
       );
     } catch (err) {
-      this.alertingEventLogger.setExecutionFailed(
-        `rule execution failure: ${ruleLabel}`,
-        err.message
-      );
-      this.logger.error(err, {
-        tags: [this.ruleType.id, ruleId, 'rule-run-failed'],
-        error: { stack_trace: err.stack },
-      });
-      throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Execute, err);
+      // Check if this error is due to reaching the alert limit
+      if (alertFactory.hasReachedAlertLimit()) {
+        this.logger.warn(
+          `rule execution generated greater than ${this.maxAlerts} alerts: ${ruleLabel}`
+        );
+        ruleRunMetricsStore.setHasReachedAlertLimit(true);
+      } else {
+        this.alertingEventLogger.setExecutionFailed(
+          `rule execution failure: ${ruleLabel}`,
+          err.message
+        );
+        this.logger.error(err, {
+          tags: [this.ruleType.id, ruleId, 'rule-run-failed'],
+          error: { stack_trace: err.stack },
+        });
+        throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Execute, err);
+      }
     }
 
     this.alertingEventLogger.setExecutionSucceeded(`rule executed: ${ruleLabel}`);
@@ -420,7 +438,6 @@ export class TaskRunner<
         scopedClusterClientMetrics.esSearchDurationMs +
         searchSourceClientMetrics.esSearchDurationMs,
     };
-    const ruleRunMetricsStore = new RuleRunMetricsStore();
 
     ruleRunMetricsStore.setNumSearches(searchMetrics.numSearches);
     ruleRunMetricsStore.setTotalSearchDurationMs(searchMetrics.totalSearchDurationMs);
@@ -431,7 +448,12 @@ export class TaskRunner<
       Context,
       ActionGroupIds,
       RecoveryActionGroupId
-    >(alerts, originalAlerts);
+    >({
+      alerts,
+      existingAlerts: originalAlerts,
+      hasReachedAlertLimit: alertFactory.hasReachedAlertLimit(),
+      alertLimit: this.maxAlerts,
+    });
 
     logAlerts({
       logger: this.logger,
