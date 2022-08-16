@@ -74,13 +74,13 @@ export const bulkEditRules = async ({
       async (rule) => {
         if (rule.muteAll && rulesAction.value.throttle !== NOTIFICATION_THROTTLE_NO_ACTIONS) {
           await rulesClient.unmuteAll({ id: rule.id });
-          return readRules({ rulesClient, id: rule.id, ruleId: undefined });
+          return (await readRules({ rulesClient, id: rule.id, ruleId: undefined })) ?? rule;
         } else if (
           !rule.muteAll &&
           rulesAction.value.throttle === NOTIFICATION_THROTTLE_NO_ACTIONS
         ) {
           await rulesClient.muteAll({ id: rule.id });
-          return readRules({ rulesClient, id: rule.id, ruleId: undefined });
+          return (await readRules({ rulesClient, id: rule.id, ruleId: undefined })) ?? rule;
         }
 
         return rule;

@@ -88,6 +88,6 @@ export const bulkEditActionToRulesClientOperation = (
       ];
 
     default:
-      return assertUnreachable(action.type);
+      return assertUnreachable(action);
   }
 };
