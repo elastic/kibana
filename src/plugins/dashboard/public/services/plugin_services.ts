@@ -16,6 +16,7 @@ import {
 
 import { dataServiceFactory } from './data/data_service';
 import { httpServiceFactory } from './http/http_service';
+import { visualizationsServiceFactory } from './visualizations/visualizations_service';
 import { DashboardServices } from './types';
 import { DashboardStartDependencies } from '../plugin';
 
@@ -25,6 +26,7 @@ export const providers: PluginServiceProviders<
 > = {
   http: new PluginServiceProvider(httpServiceFactory),
   data: new PluginServiceProvider(dataServiceFactory),
+  visualizations: new PluginServiceProvider(visualizationsServiceFactory),
 };
 
 export const pluginServices = new PluginServices<DashboardServices>();

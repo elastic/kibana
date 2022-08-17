@@ -102,7 +102,6 @@ export function DashboardTopNav({
     embeddable,
     navigation,
     uiSettings,
-    visualizations,
     usageCollection,
     initializerContext,
     savedObjectsTagging,
@@ -112,8 +111,9 @@ export function DashboardTopNav({
     allowByValueEmbeddables,
   } = useKibana<DashboardAppServices>().services;
 
-  const { data } = pluginServices.getHooks();
+  const { data, visualizations } = pluginServices.getHooks();
   const { query, search } = data.useService();
+  const { getAliases, get } = visualizations.useService();
 
   const { version: kibanaVersion } = initializerContext.env.packageInfo;
   const timefilter = query.timefilter.timefilter;
@@ -128,7 +128,7 @@ export function DashboardTopNav({
   const [state, setState] = useState<DashboardTopNavState>({ chromeIsVisible: false });
   const [isLabsShown, setIsLabsShown] = useState(false);
 
-  const lensAlias = visualizations.getAliases().find(({ name }) => name === 'lens');
+  const lensAlias = getAliases().find(({ name }) => name === 'lens');
   const quickButtonVisTypes = ['markdown', 'maps'];
   const stateTransferService = embeddable.getStateTransfer();
   const IS_DARK_THEME = uiSettings.get('theme:darkMode');
@@ -560,9 +560,7 @@ export function DashboardTopNav({
   const { TopNavMenu } = navigation.ui;
 
   const getVisTypeQuickButton = (visTypeName: string) => {
-    const visType =
-      visualizations.get(visTypeName) ||
-      visualizations.getAliases().find(({ name }) => name === visTypeName);
+    const visType = get(visTypeName) || getAliases().find(({ name }) => name === visTypeName);
 
     if (visType) {
       if ('aliasPath' in visType) {

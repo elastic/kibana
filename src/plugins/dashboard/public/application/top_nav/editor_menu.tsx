@@ -29,6 +29,7 @@ import { DashboardAppServices } from '../../types';
 import { DashboardContainer } from '..';
 import { DashboardConstants } from '../../dashboard_constants';
 import { dashboardReplacePanelAction } from '../../dashboard_strings';
+import { pluginServices } from '../../services/plugin_services';
 
 interface Props {
   /** Dashboard container */
@@ -51,8 +52,10 @@ interface UnwrappedEmbeddableFactory {
 }
 
 export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
-  const { core, embeddable, visualizations, usageCollection, uiSettings } =
+  const { core, embeddable, usageCollection, uiSettings } =
     useKibana<DashboardAppServices>().services;
+  const { visualizations } = pluginServices.getHooks();
+  const { getAliases, getByGroup, showNewVisModal } = visualizations.useService();
 
   const embeddableFactories = useMemo(
     () => (embeddable ? Array.from(embeddable.getEmbeddableFactories()) : []),
@@ -83,18 +86,17 @@ export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
 
   const createNewAggsBasedVis = useCallback(
     (visType?: BaseVisType) => () =>
-      visualizations.showNewVisModal({
+      showNewVisModal({
         originatingApp: DashboardConstants.DASHBOARDS_ID,
         outsideVisualizeApp: true,
         showAggsSelection: true,
         selectedVisType: visType,
       }),
-    [visualizations]
+    [showNewVisModal]
   );
 
   const getVisTypesByGroup = (group: VisGroups) =>
-    visualizations
-      .getByGroup(group)
+    getByGroup(group)
       .sort(({ name: a }: BaseVisType | VisTypeAlias, { name: b }: BaseVisType | VisTypeAlias) => {
         if (a < b) {
           return -1;
@@ -111,11 +113,10 @@ export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
   const promotedVisTypes = getVisTypesByGroup(VisGroups.PROMOTED);
   const aggsBasedVisTypes = getVisTypesByGroup(VisGroups.AGGBASED);
   const toolVisTypes = getVisTypesByGroup(VisGroups.TOOLS);
-  const visTypeAliases = visualizations
-    .getAliases()
-    .sort(({ promotion: a = false }: VisTypeAlias, { promotion: b = false }: VisTypeAlias) =>
+  const visTypeAliases = getAliases().sort(
+    ({ promotion: a = false }: VisTypeAlias, { promotion: b = false }: VisTypeAlias) =>
       a === b ? 0 : a ? -1 : 1
-    );
+  );
 
   const factories = unwrappedEmbeddableFactories.filter(
     ({ isEditable, factory: { type, canCreateNew, isContainerType } }) =>

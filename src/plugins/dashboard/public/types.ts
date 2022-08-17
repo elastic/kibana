@@ -24,7 +24,6 @@ import type { Filter } from '@kbn/es-query';
 import { DataView } from '@kbn/data-views-plugin/common';
 
 import { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
-import { VisualizationsStart } from '@kbn/visualizations-plugin/public';
 import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { SharePluginStart } from './services/share';
@@ -201,7 +200,6 @@ export interface DashboardAppServices {
   urlForwarding: UrlForwardingStart;
   savedDashboards: SavedObjectLoader;
   scopedHistory: () => ScopedHistory;
-  visualizations: VisualizationsStart;
   dataViewEditor: DataViewEditorStart;
   usageCollection?: UsageCollectionSetup;
   navigation: NavigationPublicPluginStart;

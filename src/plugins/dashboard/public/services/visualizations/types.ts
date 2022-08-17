@@ -6,13 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { DashboardDataService } from './data/types';
-import { DashboardHTTPService } from './http/types';
-import { DashboardVisualizationsService } from './visualizations/types';
+import { VisualizationsStart } from '@kbn/visualizations-plugin/public';
 
-export interface DashboardServices {
-  // dependency services
-  data: DashboardDataService;
-  http: DashboardHTTPService;
-  visualizations: DashboardVisualizationsService;
+export interface DashboardVisualizationsService {
+  get: VisualizationsStart['get'];
+  getAliases: VisualizationsStart['getAliases'];
+  getByGroup: VisualizationsStart['getByGroup'];
+  showNewVisModal: VisualizationsStart['showNewVisModal'];
 }
