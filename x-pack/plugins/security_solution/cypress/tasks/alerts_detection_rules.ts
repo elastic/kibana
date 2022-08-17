@@ -315,11 +315,6 @@ export const openRefreshSettingsPopover = () => {
   cy.get(REFRESH_SETTINGS_SWITCH).should('be.visible');
 };
 
-export const closeRefreshSettingsPopover = () => {
-  cy.get(REFRESH_SETTINGS_POPOVER).click();
-  cy.get(REFRESH_SETTINGS_SWITCH).should('not.be.visible');
-};
-
 export const checkAutoRefreshIsDisabled = () => {
   cy.get(REFRESH_SETTINGS_SWITCH).should('have.attr', 'aria-checked', 'false');
 };
