@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { memo, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiFilterGroup } from '@elastic/eui';
+import React, { memo, useCallback, useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiFilterGroup, EuiSuperUpdateButton } from '@elastic/eui';
 import type {
   DurationRange,
   OnRefreshChangeProps,
@@ -15,6 +15,7 @@ import type { DateRangePickerValues } from './action_list_date_range_picker';
 import { ActionListDateRangePicker } from './action_list_date_range_picker';
 import { ActionListFilter } from './action_list_filter';
 import type { FilterName } from './hooks';
+import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
 export const ActionListFilters = memo(
   ({
@@ -34,6 +35,7 @@ export const ActionListFilters = memo(
     onTimeChange: ({ start, end }: DurationRange) => void;
     onClick: ReturnType<typeof useGetEndpointActionList>['refetch'];
   }) => {
+    const getTestId = useTestIdGenerator('response-actions-list');
     const filters = useMemo(() => {
       // TODO: add more filter names here (Users, Hosts, Statuses)
       const filterNames: FilterName[] = ['Actions'];
@@ -45,13 +47,15 @@ export const ActionListFilters = memo(
         />
       ));
     }, [onChangeCommandsFilter]);
+
+    const onClickRefreshButton = useCallback(() => onClick(), [onClick]);
+
     return (
       <EuiFlexGroup responsive gutterSize="s">
         <EuiFlexItem>
           <ActionListDateRangePicker
             dateRangePickerState={dateRangePickerState}
             isDataLoading={isDataLoading}
-            onClick={onClick}
             onRefresh={onRefresh}
             onRefreshChange={onRefreshChange}
             onTimeChange={onTimeChange}
@@ -59,6 +63,15 @@ export const ActionListFilters = memo(
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFilterGroup>{filters}</EuiFilterGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiSuperUpdateButton
+            data-test-subj={getTestId('super-refresh-button')}
+            fill={false}
+            isLoading={isDataLoading}
+            onClick={onClickRefreshButton}
+            responsive={false}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     );

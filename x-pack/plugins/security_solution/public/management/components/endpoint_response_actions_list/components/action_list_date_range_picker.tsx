@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, memo, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker, EuiSuperUpdateButton } from '@elastic/eui';
+import React, { memo, useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker } from '@elastic/eui';
 import type { IDataPluginServices } from '@kbn/data-plugin/public';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import type { EuiSuperDatePickerRecentRange } from '@elastic/eui';
@@ -16,7 +16,7 @@ import type {
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import type { useGetEndpointActionList } from '../../../hooks';
+
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
 export interface DateRangePickerValues {
@@ -40,14 +40,12 @@ export const ActionListDateRangePicker = memo(
     onRefresh,
     onRefreshChange,
     onTimeChange,
-    onClick,
   }: {
     dateRangePickerState: DateRangePickerValues;
     isDataLoading: boolean;
     onRefresh: () => void;
     onRefreshChange: (evt: OnRefreshChangeProps) => void;
     onTimeChange: ({ start, end }: DurationRange) => void;
-    onClick: ReturnType<typeof useGetEndpointActionList>['refetch'];
   }) => {
     const getTestId = useTestIdGenerator('response-actions-list');
     const kibana = useKibana<IDataPluginServices>();
@@ -65,7 +63,6 @@ export const ActionListDateRangePicker = memo(
           }) ?? []
       );
     });
-    const onClickRefreshButton = useCallback(() => onClick(), [onClick]);
 
     return (
       <DatePickerWrapper data-test-subj={getTestId('super-date-picker')}>
@@ -86,15 +83,6 @@ export const ActionListDateRangePicker = memo(
               showUpdateButton={false}
               updateButtonProps={{ iconOnly: true, fill: false }}
               width="auto"
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiSuperUpdateButton
-              data-test-subj={getTestId('super-date-picker-refresh-button')}
-              fill={false}
-              iconOnly
-              isLoading={isDataLoading}
-              onClick={onClickRefreshButton}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

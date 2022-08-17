@@ -282,9 +282,7 @@ describe('Response Actions List', () => {
     it('should refresh data when super date picker refresh button is clicked', async () => {
       render();
 
-      const superRefreshButton = renderResult.getByTestId(
-        `${testPrefix}-super-date-picker-refresh-button`
-      );
+      const superRefreshButton = renderResult.getByTestId(`${testPrefix}-super-refresh-button`);
       userEvent.click(superRefreshButton);
       expect(refetchFunction).toHaveBeenCalledTimes(1);
     });
