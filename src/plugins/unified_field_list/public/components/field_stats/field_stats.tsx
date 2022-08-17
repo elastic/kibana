@@ -35,7 +35,7 @@ import { i18n } from '@kbn/i18n';
 import { buildEsQuery, Query, Filter, AggregateQuery } from '@kbn/es-query';
 import type { BucketedAggregation } from '../../../common/types';
 import { loadFieldStats, canProvideStatsForField } from '../../services';
-import { FieldTopValues } from './field_top_values';
+import { FieldTopValues, getOtherCount, getBucketsValuesCount } from './field_top_values';
 
 interface State {
   isLoading: boolean;
@@ -177,20 +177,18 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   const fromDateParsed = DateMath.parse(fromDate);
   const toDateParsed = DateMath.parse(toDate);
 
-  // TODO: extract into an util function
-  const totalValuesCount =
-    topValues && topValues.buckets.reduce((prev, bucket) => bucket.count + prev, 0);
-  const otherCount = sampledValues && totalValuesCount ? sampledValues - totalValuesCount : 0;
+  const bucketsValuesCount = getBucketsValuesCount(topValues?.buckets);
+  const otherCount = getOtherCount(bucketsValuesCount, sampledValues!);
 
   if (
-    totalValuesCount &&
+    bucketsValuesCount &&
     histogram &&
     histogram.buckets.length &&
     topValues &&
     topValues.buckets.length
   ) {
     // Default to histogram when top values are less than 10% of total
-    histogramDefault = otherCount / totalValuesCount > 0.9;
+    histogramDefault = otherCount / bucketsValuesCount > 0.9;
   }
 
   const [showingHistogram, setShowingHistogram] = useState(histogramDefault);

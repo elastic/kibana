@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { DataView, DataViewField } from '@kbn/data-plugin/common';
-import { i18n } from '@kbn/i18n';
 import type { BucketedAggregation } from '../../../common/types';
 import { FieldTopValuesBucket } from './field_top_values_bucket';
 
@@ -33,11 +32,9 @@ export const FieldTopValues: React.FC<FieldTopValuesProps> = ({
   }
 
   const formatter = dataView.getFormatterForField(field);
-  const totalValuesCount = buckets.reduce((prev, bucket) => bucket.count + prev, 0);
-  const otherCount =
-    sampledValuesCount && totalValuesCount ? sampledValuesCount - totalValuesCount : 0;
+  const otherCount = getOtherCount(getBucketsValuesCount(buckets), sampledValuesCount);
   const digitsRequired = buckets.some(
-    (topValue) => !Number.isInteger(topValue.count / sampledValuesCount!)
+    (topValue) => !Number.isInteger(topValue.count / sampledValuesCount)
   );
 
   return (
@@ -46,37 +43,60 @@ export const FieldTopValues: React.FC<FieldTopValuesProps> = ({
         const formatted = formatter.convert(topValue.key);
 
         return (
-          <>
+          <Fragment key={topValue.key}>
             {index > 0 && <EuiSpacer size="s" />}
             <FieldTopValuesBucket
-              key={topValue.key}
               formattedLabel={formatted}
-              formattedValue={`${(
-                Math.round((topValue.count / sampledValuesCount!) * 1000) / 10
-              ).toFixed(digitsRequired ? 1 : 0)}%`}
-              progressValue={topValue.count / sampledValuesCount!}
+              formattedValue={getFormattedPercentageValue(
+                topValue.count,
+                sampledValuesCount,
+                digitsRequired
+              )}
+              progressValue={getProgressValue(topValue.count, sampledValuesCount)}
               testSubject={testSubject}
             />
-          </>
+          </Fragment>
         );
       })}
       {otherCount > 0 && (
         <>
           <EuiSpacer size="s" />
           <FieldTopValuesBucket
-            key="other"
-            formattedLabel={i18n.translate('unifiedFieldList.fieldStats.otherDocsLabel', {
-              defaultMessage: 'Other',
-            })}
-            formattedValue={`${(Math.round((otherCount / sampledValuesCount!) * 1000) / 10).toFixed(
-              digitsRequired ? 1 : 0
-            )}%`}
-            progressValue={otherCount / sampledValuesCount!}
-            progressColor="subdued"
+            type="other"
+            formattedValue={getFormattedPercentageValue(
+              otherCount,
+              sampledValuesCount,
+              digitsRequired
+            )}
+            progressValue={getProgressValue(otherCount, sampledValuesCount)}
             testSubject={testSubject}
           />
         </>
       )}
     </div>
   );
+};
+
+export const getFormattedPercentageValue = (
+  currentValue: number,
+  totalCount: number,
+  digitsRequired: boolean
+): string => {
+  return totalCount > 0
+    ? `${(Math.round((currentValue / totalCount) * 1000) / 10).toFixed(digitsRequired ? 1 : 0)}%`
+    : '';
+};
+
+export const getProgressValue = (currentValue: number, totalCount: number): number => {
+  return totalCount > 0 ? currentValue / totalCount : 0;
+};
+
+export const getBucketsValuesCount = (
+  buckets?: BucketedAggregation<number | string>['buckets']
+): number => {
+  return buckets?.reduce((prev, bucket) => bucket.count + prev, 0) || 0;
+};
+
+export const getOtherCount = (bucketsValuesCount: number, sampledValuesCount: number): number => {
+  return sampledValuesCount && bucketsValuesCount ? sampledValuesCount - bucketsValuesCount : 0;
 };

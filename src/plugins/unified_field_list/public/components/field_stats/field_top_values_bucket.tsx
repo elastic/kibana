@@ -12,25 +12,25 @@ import {
   EuiFlexItem,
   euiPaletteColorBlind,
   EuiProgress,
-  EuiProgressProps,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 
 export interface FieldTopValuesBucketProps {
-  formattedLabel: string;
+  type?: 'normal' | 'other';
+  formattedLabel?: string;
   formattedValue: string;
   progressValue: number;
-  progressColor?: EuiProgressProps['color'];
   testSubject: string;
 }
 
 export const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
+  type = 'normal',
   formattedLabel,
   formattedValue,
   progressValue,
-  progressColor,
   testSubject,
 }) => {
   const euiVisColorPalette = euiPaletteColorBlind();
@@ -40,7 +40,7 @@ export const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
     <EuiFlexGroup alignItems="stretch" gutterSize="s" responsive={false}>
       <EuiFlexItem
         grow={1}
-        css={`
+        css={css`
           min-width: 0;
         `}
       >
@@ -50,17 +50,23 @@ export const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
             className="eui-textTruncate"
             data-test-subj={`${testSubject}-topValues-formattedLabel`}
           >
-            {formattedLabel === '' ? (
+            {!formattedLabel ? (
               <EuiText size="xs">
-                <em>
-                  {i18n.translate('unifiedFieldList.fieldStats.emptyStringValueLabel', {
-                    defaultMessage: 'Empty string',
-                  })}
-                </em>
+                {type === 'other'
+                  ? i18n.translate('unifiedFieldList.fieldStats.otherDocsLabel', {
+                      defaultMessage: 'Other',
+                    })
+                  : formattedValue === '' && (
+                      <em>
+                        {i18n.translate('unifiedFieldList.fieldStats.emptyStringValueLabel', {
+                          defaultMessage: 'Empty string',
+                        })}
+                      </em>
+                    )}
               </EuiText>
             ) : (
               <EuiToolTip content={formattedLabel} delay="long">
-                <EuiText size="xs" className="eui-textTruncate">
+                <EuiText size="xs" className="eui-textTruncate" color="subdued">
                   {formattedLabel}
                 </EuiText>
               </EuiToolTip>
@@ -76,7 +82,7 @@ export const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
           value={progressValue}
           max={1}
           size="s"
-          color={progressColor || euiColorVis1}
+          color={type === 'other' ? 'subdued' : euiColorVis1}
           aria-label={`${formattedLabel} (${formattedValue})`}
         />
       </EuiFlexItem>
