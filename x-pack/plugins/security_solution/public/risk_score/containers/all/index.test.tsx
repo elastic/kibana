@@ -17,7 +17,7 @@ jest.mock('../../../common/containers/use_search_strategy', () => ({
   useSearchStrategy: jest.fn(),
 }));
 
-jest.mock('../common', () => ({
+jest.mock('../../../common/hooks/use_space_id', () => ({
   useSpaceId: jest.fn().mockReturnValue('default'),
 }));
 
