@@ -38,7 +38,6 @@ export const getDocumentCountStats = async (
     runtimeFieldMap,
     searchQuery,
     intervalMs,
-    fieldsToFetch,
   } = params;
 
   // Probability = 1 represents no sampling
@@ -78,11 +77,7 @@ export const getDocumentCountStats = async (
     },
   });
 
-  const hasTimeField =
-    Array.isArray(fieldsToFetch) &&
-    timeFieldName !== undefined &&
-    intervalMs !== undefined &&
-    intervalMs > 0;
+  const hasTimeField = timeFieldName !== undefined && intervalMs !== undefined && intervalMs > 0;
 
   const getSearchParams = (aggregations: unknown) => ({
     index,
