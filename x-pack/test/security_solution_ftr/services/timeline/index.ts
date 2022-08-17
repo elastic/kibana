@@ -44,7 +44,13 @@ export class TimelineTestService extends FtrService {
     };
   }
 
-  /** Creates a new timeline */
+  /**
+   * Creates a new timeline.
+   *
+   * Note: Although the timeline is created, when displayed on the UI, no events are retrieved
+   * for display (not sure why). TO get around this, just select a date range from the user date
+   * picker and that seems to trigger the events to be fetched.
+   */
   async createTimeline(title: string): Promise<TimelineResponse> {
     // Create a new timeline draft
     const createdTimeline = (
@@ -66,13 +72,24 @@ export class TimelineTestService extends FtrService {
     const timelineUpdate: TimelineInput = {
       ...(timelineDoc as TimelineInput),
       title,
-      // Set date range to the last 24 hours
+      // Set date range to the last 1 year
       dateRange: {
         start: moment().subtract(1, 'year').toISOString(),
         end: moment().toISOString(),
         // Not sure why `start`/`end` are defined as numbers in the type, but looking at the
         // UI's use of it, I can see they are being set to strings, so I'm forcing a cast here
       } as unknown as TimelineInput['dateRange'],
+
+      // Not sure why, but the following fields are not in the created timeline, which causes
+      // the timeline to not be able to pull in the event for display
+      indexNames: [],
+      eqlOptions: {
+        tiebreakerField: '',
+        size: 100,
+        query: '',
+        eventCategoryField: 'event.category',
+        timestampField: '@timestamp',
+      },
     };
 
     // Update the timeline

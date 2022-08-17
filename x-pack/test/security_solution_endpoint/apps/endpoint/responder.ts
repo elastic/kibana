@@ -8,6 +8,7 @@
 import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import { TimelineResponse } from '@kbn/security-solution-plugin/common/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { DATE_RANGE_OPTION_TO_TEST_SUBJ_MAP } from '../../../security_solution_ftr/page_objects/helpers/super_date_picker';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects([
@@ -31,7 +32,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     // Ensure the popover in the action log date quick select picker is accessible
     // (this is especially important for when Responder is displayed from a Timeline)
     await pageObjects.responder.clickActionLogSuperDatePickerQuickMenuButton();
-    await (await testSubjects.find('superDatePickerCommonlyUsed_Last_1 year')).click();
+    await testSubjects.click(DATE_RANGE_OPTION_TO_TEST_SUBJ_MAP['Last 1 year']);
     await pageObjects.responder.closeActionLogFlyout();
 
     // Close responder
@@ -75,7 +76,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     );
   };
 
-  describe.only('Response Actions Responder', function () {
+  describe('Response Actions Responder', function () {
     let indexedData: IndexedHostsAndAlertsResponse;
     let endpointAgentId: string;
 
@@ -160,7 +161,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.timeline.openTimelineById(
           timeline.data.persistTimeline.timeline.savedObjectId
         );
-
+        await pageObjects.timeline.setDateRange('Last 1 year');
         await pageObjects.timeline.waitForEvents(60_000);
 
         // Show event/alert details for the first one in the list

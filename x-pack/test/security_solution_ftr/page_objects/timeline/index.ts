@@ -7,6 +7,7 @@
 
 import { FtrService } from '../../../functional/ftr_provider_context';
 import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
+import { DATE_RANGE_OPTION_TO_TEST_SUBJ_MAP } from '../helpers/super_date_picker';
 
 const TIMELINE_BOTTOM_BAR_CONTAINER_TEST_SUBJ = 'timeline-bottom-bar-container';
 const TIMELINE_CLOSE_BUTTON_TEST_SUBJ = 'close-timeline';
@@ -110,8 +111,6 @@ export class TimelinePageObject extends FtrService {
    * @param timeoutMs
    */
   async waitForEvents(timeoutMs?: number) {
-    await this.ensureTimelineIsOpen();
-
     const timeline = await this.testSubjects.find(TIMELINE_MODAL_PAGE_TEST_SUBJ);
 
     await this.retry.waitForWithTimeout(
@@ -123,5 +122,26 @@ export class TimelinePageObject extends FtrService {
         return Boolean((await this.testSubjects.findAllDescendant('event', timeline)).length);
       }
     );
+  }
+
+  /**
+   * Sets the date range on the timeline by clicking on a commonly used preset from the super date picker
+   * @param range
+   */
+  async setDateRange(range: keyof typeof DATE_RANGE_OPTION_TO_TEST_SUBJ_MAP): Promise<void> {
+    await this.ensureTimelineIsOpen();
+
+    const timelineContentQueryArea = await this.testSubjects.find('timeline-tab-content-query');
+
+    await (
+      await this.testSubjects.findDescendant(
+        'superDatePickerToggleQuickMenuButton',
+        timelineContentQueryArea
+      )
+    ).click();
+
+    await this.testSubjects.existOrFail('superDatePickerQuickMenu');
+    await this.testSubjects.click(DATE_RANGE_OPTION_TO_TEST_SUBJ_MAP[range]);
+    await this.testSubjects.missingOrFail('superDatePickerQuickMenu');
   }
 }
