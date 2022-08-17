@@ -183,11 +183,14 @@ export const moveFilter = (
 
     const filterMovementDirection = Number(filterPositionTo) - Number(filterPositionFrom);
 
-    if (filterMovementDirection === -1) {
+    const parentFilter = getFilterByPath(newFilters, getParentFilterPath(pathInArrayTo));
+    const parentConditionType = getConditionalOperationType(parentFilter) ?? ConditionTypes.AND;
+
+    if (filterMovementDirection === -1 && parentConditionType === conditionalType) {
       return filters;
     }
 
-    if (filterMovementDirection > 0) {
+    if (filterMovementDirection >= -1) {
       const newFilterWithFilter = addFilter(newFilters, movingFilter, to, conditionalType);
       return removeFilter(newFilterWithFilter, from);
     } else {
