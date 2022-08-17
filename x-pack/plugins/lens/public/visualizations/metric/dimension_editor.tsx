@@ -235,7 +235,7 @@ function SecondaryMetricEditor({ accessor, idPrefix, frame, layerId, setState, s
               });
             }}
           />
-          <EuiSpacer size="xs" />
+          <EuiSpacer size="s" />
           {state.secondaryPrefix && (
             <DebouncedInput
               compressed
