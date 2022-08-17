@@ -6,7 +6,14 @@
  */
 
 import React, { VFC, useState, useMemo } from 'react';
-import { EuiDataGrid, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import {
+  EuiDataGrid,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiPanel,
+  EuiText,
+} from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -80,7 +87,6 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
   onChangePage,
   onChangeItemsPerPage,
   pagination,
-  firstLoad,
   loading,
   indexPatterns,
 }) => {
@@ -141,11 +147,19 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
     [renderCellValue]
   );
 
-  if (firstLoad) {
-    return <EuiLoadingSpinner size="m" />;
+  if (loading) {
+    return (
+      <EuiFlexGroup justifyContent="spaceAround">
+        <EuiFlexItem grow={false}>
+          <EuiPanel hasShadow={false} hasBorder={false} paddingSize="xl">
+            <EuiLoadingSpinner size="xl" />
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
   }
 
-  if (!loading && !indicatorCount) {
+  if (!indicatorCount) {
     return <EmptyState />;
   }
 
