@@ -15,6 +15,8 @@ const TIMELINE_MODAL_PAGE_TEST_SUBJ = 'timeline';
 export class TimelinePageObject extends FtrService {
   private readonly pageObjects = this.ctx.getPageObjects(['common', 'header']);
   private readonly testSubjects = this.ctx.getService('testSubjects');
+  private readonly retry = this.ctx.getService('retry');
+  private readonly defaultTimeoutMs = this.ctx.getService('config').get('timeouts.waitFor');
 
   async navigateToTimelineList(): Promise<void> {
     await this.pageObjects.common.navigateToUrlWithBrowserHistory('securitySolutionTimelines');
@@ -77,6 +79,49 @@ export class TimelinePageObject extends FtrService {
     }
 
     await (await this.testSubjects.findDescendant('expand-event', event)).click();
-    await this.testSubjects.existOrFail('event-details');
+    await this.testSubjects.existOrFail('eventDetails');
+  }
+
+  /**
+   * Clicks the Refresh button at the top of the timeline page and waits for the refresh to complete
+   */
+  async clickRefresh(): Promise<void> {
+    await this.ensureTimelineIsOpen();
+
+    // There are multiple buttons on the page with the same test subject as the Refresh button.
+    // We specifically want the one that is always visible at the top of timeline page.
+    const timelineContentQueryArea = await this.testSubjects.find('timeline-tab-content-query');
+    const refreshButton = await this.testSubjects.findDescendant(
+      'superDatePickerApplyTimeButton',
+      timelineContentQueryArea
+    );
+    await refreshButton.click();
+
+    await this.retry.waitFor(
+      'Timeline refresh button to be enabled',
+      async (): Promise<boolean> => {
+        return refreshButton.isEnabled();
+      }
+    );
+  }
+
+  /**
+   * Waits for events to be displayed in the timeline. It will click on the "Refresh" button to trigger a data fetch
+   * @param timeoutMs
+   */
+  async waitForEvents(timeoutMs?: number) {
+    await this.ensureTimelineIsOpen();
+
+    const timeline = await this.testSubjects.find(TIMELINE_MODAL_PAGE_TEST_SUBJ);
+
+    await this.retry.waitForWithTimeout(
+      'waiting for events to show up on timeline',
+      timeoutMs ?? this.defaultTimeoutMs,
+      async (): Promise<boolean> => {
+        await this.clickRefresh();
+
+        return Boolean((await this.testSubjects.findAllDescendant('event', timeline)).length);
+      }
+    );
   }
 }
