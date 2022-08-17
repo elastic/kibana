@@ -29,8 +29,8 @@ import { SubChart } from './subchart';
 function SubchartTooltip({
   highlightedSubchart,
 }: TooltipInfo & { highlightedSubchart: TopNSubchart }) {
-  // max tooltip width
-  const width = 256;
+  // max tooltip width - 2 * padding (16px)
+  const width = 224;
   return (
     <EuiPanel>
       <SubChart
@@ -39,8 +39,9 @@ function SubchartTooltip({
         category={highlightedSubchart.Category}
         percentage={highlightedSubchart.Percentage}
         data={highlightedSubchart.Series}
-        height={200}
+        height={128}
         width={width}
+        showAxes={false}
       />
     </EuiPanel>
   );

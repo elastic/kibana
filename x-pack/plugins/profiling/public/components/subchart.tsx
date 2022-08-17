@@ -23,6 +23,7 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { getFieldNameForTopNType, TopNType } from '../../common/stack_traces';
 import { CountPerTime } from '../../common/topn';
@@ -40,6 +41,7 @@ export interface SubChartProps {
   category: string;
   percentage: number;
   data: CountPerTime[];
+  showAxes: boolean;
 }
 
 export const SubChart: React.FC<SubChartProps> = ({
@@ -50,6 +52,7 @@ export const SubChart: React.FC<SubChartProps> = ({
   height,
   data,
   width,
+  showAxes,
 }) => {
   const theme = useEuiTheme();
 
@@ -98,7 +101,7 @@ export const SubChart: React.FC<SubChartProps> = ({
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiSpacer />
-      <EuiFlexItem>
+      <EuiFlexItem style={{ position: 'relative' }}>
         <Chart size={{ height, width }}>
           <Settings
             showLegend={false}
@@ -118,18 +121,35 @@ export const SubChart: React.FC<SubChartProps> = ({
             curve={CurveType.CURVE_STEP_AFTER}
             color={color}
           />
-          <Axis
-            id="bottom-axis"
-            position="bottom"
-            tickFormat={timeFormatter('YYYY-MM-DD HH:mm:ss')}
-          />
+          {showAxes ? (
+            <Axis
+              id="bottom-axis"
+              position="bottom"
+              tickFormat={timeFormatter('YYYY-MM-DD HH:mm:ss')}
+            />
+          ) : null}
           <Axis
             id="left-axis"
             position="left"
             showGridLines
-            tickFormat={(d) => Number(d).toFixed(0)}
+            tickFormat={(d) => (showAxes ? Number(d).toFixed(0) : '')}
           />
         </Chart>
+        {!showAxes ? (
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              backgroundColor: `rgba(255, 255, 255, 0.75)`,
+            }}
+          >
+            {i18n.translate('xpack.profiling.maxValue', {
+              defaultMessage: 'Max: {max}',
+              values: { max: Math.max(...data.map((value) => value.Count ?? 0)) },
+            })}
+          </div>
+        ) : null}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
