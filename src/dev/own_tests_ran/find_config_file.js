@@ -27,7 +27,7 @@ export const findConfigFile = async (filePath) => {
 
   for await (const x of readDir(directory))
     if (isConfig(x)) return resolve(directory, x);
-    
+
   // Recurse case.
   return await findConfigFile(directory);
 };

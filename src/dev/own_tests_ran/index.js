@@ -36,14 +36,14 @@ blah blah blah
 async function process({ flags, log }) {
   log.info('\n### Running runCheckOwnTestsRanCli()');
 
-  const isTestWith = isTest(
+  const isTestFromRoots = isTest(
     testDirectoryRegexes('src/dev/own_tests_ran/test_roots.yml')
   );
 
   from(flags.mock ? mockData() : await getPrChanges())
     .pipe(
       pluck('filename'),
-      filter(isTestWith),
+      filter(isTestFromRoots),
       switchMap(async (x) => await findConfigFile(x))
     )
     .subscribe({
