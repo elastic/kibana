@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 
 import { CoreStart } from '@kbn/core/public';
+import { DetailsFlyout } from './details_flyout';
 // @ts-ignore
 import imageBase64 from '!!raw-loader!../assets/image.png.base64';
 
@@ -67,8 +68,10 @@ export const FilesExampleApp = ({ basename, notifications, http, files }: FilesE
         meta: { myValue: 'test' },
         mimeType: 'image/png',
       });
-      const blob = new Blob([imageBase64], { type: 'image/png' });
-      await files.upload({ id: file.id, body: blob.stream() });
+      const blob = new Blob([Uint8Array.from(atob(imageBase64), (c) => c.charCodeAt(0))], {
+        type: 'image/png',
+      });
+      await files.upload({ id: file.id, body: blob });
       refetch();
     } finally {
       setIsUploadingImage(false);
@@ -90,33 +93,46 @@ export const FilesExampleApp = ({ basename, notifications, http, files }: FilesE
 
   const items = data?.files ?? [];
   return (
-    <EuiPageTemplate
-      pageHeader={{
-        pageTitle: 'Files example',
-      }}
-    >
-      <EuiInMemoryTable
-        columns={columns.concat({
-          name: 'Actions',
-          actions: [
-            {
-              name: 'View',
-              description: 'View file',
-              render: (item) => (
-                <EuiButtonIcon iconType="eye" onClick={() => setSelectedItem(item)} />
-              ),
-            },
-          ],
-        })}
-        items={items}
-        itemId="id"
-        loading={isLoading}
-        error={error ? JSON.stringify(error) : undefined}
-        sorting
-        search={{
-          toolsRight: renderToolsRight(),
+    <>
+      <EuiPageTemplate
+        pageHeader={{
+          pageTitle: 'Files example',
         }}
-      />
-    </EuiPageTemplate>
+      >
+        <EuiInMemoryTable
+          columns={columns.concat({
+            name: 'Actions',
+            actions: [
+              {
+                name: 'View',
+                description: 'View file',
+                render: (item) => (
+                  <EuiButtonIcon
+                    aria-label="View file details"
+                    iconType="eye"
+                    onClick={() => setSelectedItem(item)}
+                  />
+                ),
+              },
+            ],
+          })}
+          items={items}
+          itemId="id"
+          loading={isLoading}
+          error={error ? JSON.stringify(error) : undefined}
+          sorting
+          search={{
+            toolsRight: renderToolsRight(),
+          }}
+        />
+      </EuiPageTemplate>
+      {selectedItem && (
+        <DetailsFlyout
+          files={files}
+          file={selectedItem}
+          onDismiss={() => setSelectedItem(undefined)}
+        />
+      )}
+    </>
   );
 };

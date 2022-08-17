@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { FileJSON } from '../common';
 import type {
   FindFilesHttpEndpoint,
   FileShareHttpEndpoint,
@@ -127,6 +128,12 @@ export interface FilesClient {
    * @param args - Get public download arguments.
    */
   publicDownload: ClientMethodFrom<FilePublicDownloadHttpEndpoint>;
+
+  /**
+   * Get a string for downloading a file that can be passed to a button element's
+   * href for download.
+   */
+  downloadSrc: (file: FileJSON) => string;
 }
 
 export type FilesClientResponses = {

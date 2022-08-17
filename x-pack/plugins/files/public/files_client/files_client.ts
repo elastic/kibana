@@ -77,7 +77,7 @@ const commonBodyHeaders = {
 };
 
 export const createFilesClient = ({ http, fileKind }: Args): FilesClient => {
-  return {
+  const api: FilesClient = {
     create: (args) => {
       return http.post(apiRoutes.getCreateFileRoute(fileKind), {
         headers: commonBodyHeaders,
@@ -88,7 +88,9 @@ export const createFilesClient = ({ http, fileKind }: Args): FilesClient => {
       return http.delete(apiRoutes.getDeleteRoute(fileKind, args.id));
     },
     download: (args) => {
-      return http.get(apiRoutes.getDownloadRoute(fileKind, args.id, args.fileName));
+      return http.get(apiRoutes.getDownloadRoute(fileKind, args.id, args.fileName), {
+        headers: { Accept: '*/*' },
+      });
     },
     getById: (args) => {
       return http.get(apiRoutes.getByIdRoute(fileKind, args.id));
@@ -107,6 +109,7 @@ export const createFilesClient = ({ http, fileKind }: Args): FilesClient => {
         headers: {
           'Content-Type': 'application/octet-stream',
         },
+
         body: args.body as BodyInit,
       });
     },
@@ -137,5 +140,9 @@ export const createFilesClient = ({ http, fileKind }: Args): FilesClient => {
     publicDownload: ({ token, fileName }) => {
       return http.get(apiRoutes.getPublicDownloadRoute(token, fileName));
     },
+    downloadSrc: ({ id }) => {
+      return `${http.basePath.prepend(apiRoutes.getDownloadRoute(fileKind, id))}`;
+    },
   };
+  return api;
 };
