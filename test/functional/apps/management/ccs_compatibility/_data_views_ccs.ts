@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('index pattern wizard ccs', () => {
       describe('remote cluster only', async () => {
-        this.beforeEach(async function () {
+        beforeEach(async function () {
           // delete .kibana index and then wait for Kibana to re-create it
           await kibanaServer.uiSettings.replace({});
           await PageObjects.settings.navigateTo();
@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(indexPatternList.length).to.eql(1);
         });
 
-        this.afterEach(async () => {
+        afterEach(async () => {
           await PageObjects.header.waitUntilLoadingHasFinished();
           await testSubjects.exists('indexPatternTable');
           await kibanaServer.savedObjects.cleanStandardList();
@@ -57,7 +57,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
         });
 
-        this.beforeEach(async function () {
+        beforeEach(async function () {
           // delete .kibana index and then wait for Kibana to re-create it
           await kibanaServer.uiSettings.replace({});
           await PageObjects.settings.navigateTo();
@@ -76,7 +76,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(indexPatternList.length).to.eql(1);
         });
 
-        this.afterEach(async () => {
+        afterEach(async () => {
           await PageObjects.header.waitUntilLoadingHasFinished();
           await testSubjects.exists('indexPatternTable');
           await kibanaServer.savedObjects.cleanStandardList();
