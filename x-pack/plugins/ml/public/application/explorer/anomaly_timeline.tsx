@@ -236,7 +236,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                 />
               ),
               onClick: openCasesModal.bind(null, 'overall'),
-              'data-test-subj': 'mlAnomalyTimelinePanelAttachToNewCaseButton',
+              'data-test-subj': 'mlAnomalyTimelinePanelAttachOverallButton',
             },
             {
               name: (
@@ -247,7 +247,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                 />
               ),
               onClick: openCasesModal.bind(null, 'viewBy'),
-              'data-test-subj': 'mlAnomalyTimelinePanelAttachToNewCaseButton',
+              'data-test-subj': 'mlAnomalyTimelinePanelAttachViewByButton',
             },
           ],
         });

@@ -22,7 +22,7 @@ const AttachmentActions: React.FC = () => {
     <EuiButtonIcon
       data-test-subj="test-attachment-action"
       onClick={() => {}}
-      iconType="arrowRight"
+      iconType="boxesHorizontal"
       aria-label="See attachment"
     />
   );
@@ -47,7 +47,7 @@ export function registerCasesAttachment(
           defaultMessage="added the Anomaly Swim Lane embeddable"
         />
       ),
-      timelineIcon: PLUGIN_ICON,
+      timelineAvatar: PLUGIN_ICON,
       actions: <AttachmentActions />,
       children: React.lazy(() => {
         return Promise.resolve().then(() => {
