@@ -140,7 +140,7 @@ export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
         <EuiCheckbox
           data-test-subj="excludeHitsFromPreviousRunExpression"
           checked={excludeHitsFromPreviousRun}
-          id="generated_42069051-1983-11ed-abf3-23049257d20d"
+          id="excludeHitsFromPreviousRunExpressionId"
           onChange={(event) => {
             onChangeExcludeHitsFromPreviousRun(event.target.checked);
           }}
