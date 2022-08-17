@@ -161,6 +161,11 @@ function generateSchemaLines(lineWriter, prop, mappings) {
     return;
   }
 
+  if (mappings.type === 'boolean') {
+    lineWriter.addLine(`${propKey}: ecsBoolean(),`);
+    return;
+  }
+
   // only handling objects for the rest of this function
   if (mappings.properties == null) {
     logError(`unknown properties to map: ${prop}: ${JSON.stringify(mappings)}`);
@@ -338,6 +343,10 @@ function ecsVersion() {
 function validateVersion(version: string) {
   if (semver.valid(version)) return;
   return 'string is not a valid version: ' + version;
+}
+
+function ecsBoolean() {
+  return schema.maybe(schema.boolean());
 }
 `.trim();
 

@@ -26,6 +26,7 @@ interface CreateAlertEventLogRecordParams {
   subgroup?: string;
   namespace?: string;
   timestamp?: string;
+  flapping?: boolean;
   task?: {
     scheduled?: string;
     scheduleDelay?: number;
@@ -52,6 +53,7 @@ export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecor
     namespace,
     consumer,
     spaceId,
+    flapping,
   } = params;
   const alerting =
     params.instanceId || group || subgroup
@@ -82,6 +84,7 @@ export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecor
             ? {
                 execution: {
                   uuid: executionId,
+                  flapping: flapping ? true : undefined,
                 },
               }
             : {}),

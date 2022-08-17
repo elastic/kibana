@@ -73,6 +73,9 @@ exports.EcsCustomPropertyMappings = {
                   status_order: {
                     type: 'long',
                   },
+                  flapping: {
+                    type: 'boolean',
+                  },
                   metrics: {
                     properties: {
                       number_of_triggered_actions: {

@@ -127,6 +127,7 @@ export const EventSchema = schema.maybe(
                     uuid: ecsString(),
                     status: ecsString(),
                     status_order: ecsStringOrNumber(),
+                    flapping: ecsBoolean(),
                     metrics: schema.maybe(
                       schema.object({
                         number_of_triggered_actions: ecsStringOrNumber(),
@@ -204,4 +205,8 @@ function ecsVersion() {
 function validateVersion(version: string) {
   if (semver.valid(version)) return;
   return 'string is not a valid version: ' + version;
+}
+
+function ecsBoolean() {
+  return schema.maybe(schema.boolean());
 }

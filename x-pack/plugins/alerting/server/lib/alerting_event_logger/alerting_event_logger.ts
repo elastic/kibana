@@ -42,6 +42,7 @@ interface AlertOpts {
   group?: string;
   subgroup?: string;
   state?: AlertInstanceState;
+  flapping?: boolean;
 }
 
 interface ActionOpts {
@@ -218,6 +219,7 @@ export function createAlertRecord(context: RuleContextOpts, alert: AlertOpts) {
     group: alert.group,
     subgroup: alert.subgroup,
     message: alert.message,
+    flapping: alert.flapping,
     savedObjects: [
       {
         id: context.ruleId,

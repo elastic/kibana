@@ -434,7 +434,12 @@ export class TaskRunner<
       Object.keys(activeAlerts),
       Object.keys(recoveredAlerts)
     );
+
+    const flappingAlertIdsSet = new Set<string>();
+
     for (const [alertId, flappingState] of flappingStates.entries()) {
+      if (flappingState.isFlapping) flappingAlertIdsSet.add(alertId);
+
       const activeRuns = flappingState.activeRuns.map((active) => (active ? 'X' : '-')).join('');
       this.logger.info(
         [
@@ -458,6 +463,7 @@ export class TaskRunner<
       ruleRunMetricsStore,
       canSetRecoveryContext: ruleType.doesSetRecoveryContext ?? false,
       shouldPersistAlerts: this.shouldLogAndScheduleActionsForAlerts(),
+      flappingAlerts: flappingAlertIdsSet,
     });
 
     await rulesClient.clearExpiredSnoozes({ id: rule.id });
@@ -470,9 +476,15 @@ export class TaskRunner<
         ([alertName, alert]: [string, Alert<State, Context, ActionGroupIds>]) => {
           const throttled = alert.isThrottled(throttle);
           const muted = mutedAlertIdsSet.has(alertName);
+          const flapping = flappingAlertIdsSet.has(alertName);
           let shouldExecuteAction = true;
 
-          if (throttled || muted) {
+          if (flapping) {
+            shouldExecuteAction = false;
+            this.logger.debug(
+              `skipping scheduling of actions for '${alertName}' in rule ${ruleLabel}: rule is flapping`
+            );
+          } else if (throttled || muted) {
             shouldExecuteAction = false;
             this.logger.debug(
               `skipping scheduling of actions for '${alertName}' in rule ${ruleLabel}: rule is ${

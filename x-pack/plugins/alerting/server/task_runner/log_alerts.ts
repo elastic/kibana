@@ -24,6 +24,7 @@ export interface LogAlertsParams<
   newAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
   activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
   recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
+  flappingAlerts: Set<string>;
   ruleLogPrefix: string;
   ruleRunMetricsStore: RuleRunMetricsStore;
   canSetRecoveryContext: boolean;
@@ -41,6 +42,7 @@ export function logAlerts<
   newAlerts,
   activeAlerts,
   recoveredAlerts,
+  flappingAlerts,
   ruleLogPrefix,
   ruleRunMetricsStore,
   canSetRecoveryContext,
@@ -104,6 +106,7 @@ export function logAlerts<
         subgroup: actionSubgroup,
         message,
         state,
+        flapping: flappingAlerts.has(id),
       });
     }
 
@@ -119,6 +122,7 @@ export function logAlerts<
         subgroup: actionSubgroup,
         message,
         state,
+        flapping: flappingAlerts.has(id),
       });
     }
 
@@ -138,6 +142,7 @@ export function logAlerts<
         subgroup: actionSubgroup,
         message,
         state,
+        flapping: flappingAlerts.has(id),
       });
     }
   }
