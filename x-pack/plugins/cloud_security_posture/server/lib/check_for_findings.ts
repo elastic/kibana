@@ -24,7 +24,7 @@ export const checkForFindings = async (
 
     return !!queryResult.hits.hits.length;
   } catch (e) {
-    logger.error(e);
+    logger.debug(e);
     return false;
   }
 };
