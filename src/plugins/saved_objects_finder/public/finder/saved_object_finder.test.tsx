@@ -21,9 +21,9 @@ import { SavedObjectFinderUi as SavedObjectFinder } from './saved_object_finder'
 import { coreMock } from '@kbn/core/public/mocks';
 import { savedObjectsManagementPluginMock } from '@kbn/saved-objects-management-plugin/public/mocks';
 import { savedObjectsPluginMock } from '@kbn/saved-objects-plugin/public/mocks';
-import { savedObjectTaggingOssPluginMock } from '@kbn/saved-objects-tagging-oss-plugin/public/mocks';
 import { findTestSubject } from '@kbn/test-jest-helpers';
 import { SavedObjectManagementTypeInfo } from '@kbn/saved-objects-management-plugin/public';
+import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 
 describe('SavedObjectsFinder', () => {
   const doc = {
@@ -50,6 +50,19 @@ describe('SavedObjectsFinder', () => {
     },
   ];
 
+  const metaDataConfig = [
+    {
+      type: 'search',
+      name: 'Search',
+      getIconForSavedObject: () => 'search' as IconType,
+    },
+    {
+      type: 'vis',
+      name: 'Vis',
+      getIconForSavedObject: () => 'document' as IconType,
+    },
+  ];
+
   const savedObjectsManagement = savedObjectsManagementPluginMock.createStartContract();
   savedObjectsManagement.parseQuery.mockImplementation(
     (query: Query, types: SavedObjectManagementTypeInfo[]) => {
@@ -60,15 +73,36 @@ describe('SavedObjectsFinder', () => {
           .map((clause: any) => clause.value)
           .join(' '),
         visibleTypes: queryTypes?.filter((name) => types.some((type) => type.name === name)),
-        selectedTags: [],
+        selectedTags: query.ast.getFieldClauses('tag')?.[0].value as string[] | undefined,
       };
     }
+  );
+  savedObjectsManagement.getTagFindReferences.mockImplementation(
+    ({ selectedTags }) => selectedTags as any
   );
 
   const savedObjectsPlugin = savedObjectsPluginMock.createStartContract();
   jest.spyOn(savedObjectsPlugin.settings, 'getListingLimit').mockImplementation(() => 10);
 
-  const savedObjectsTagging = savedObjectTaggingOssPluginMock.createStart().getTaggingApi();
+  const savedObjectsTagging = {
+    ui: {
+      getTableColumnDefinition: jest.fn(() => ({
+        field: 'references',
+        name: 'Tags',
+        description: 'Tags associated with this saved object',
+        'data-test-subj': 'listingTableRowTags',
+        sortable: (item: any) => `tag-${item.id}`,
+        render: (_: any, item: any) => <span>{`tag-${item.id}`}</span>,
+      })),
+      getSearchBarFilter: jest.fn(() => ({
+        type: 'field_value_selection',
+        field: 'tag',
+        name: 'Tags',
+        multiSelect: 'or',
+        options: [],
+      })),
+    },
+  } as any as SavedObjectsTaggingApi;
 
   it('should call saved object client on startup', async () => {
     const core = coreMock.createStart();
@@ -157,6 +191,68 @@ describe('SavedObjectsFinder', () => {
   });
 
   describe('sorting', () => {
+    it('should list items by type ascending', async () => {
+      const core = coreMock.createStart();
+      (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ savedObjects: [doc, doc3, doc2] })
+      );
+
+      const wrapper = mount(
+        <SavedObjectFinder
+          savedObjects={core.savedObjects}
+          uiSettings={core.uiSettings}
+          savedObjectsManagement={savedObjectsManagement}
+          savedObjectsPlugin={savedObjectsPlugin}
+          savedObjectsTagging={savedObjectsTagging}
+          savedObjectMetaData={metaDataConfig}
+        />
+      );
+
+      wrapper.instance().componentDidMount!();
+      await nextTick();
+      findTestSubject(
+        findTestSubject(wrapper, 'tableHeaderCell_type_0'),
+        'tableHeaderSortButton'
+      ).simulate('click');
+      const titleLinks = wrapper.find(EuiLink);
+      expect(titleLinks.at(0).text()).toEqual(doc.attributes.title);
+      expect(titleLinks.at(1).text()).toEqual(doc2.attributes.title);
+      expect(titleLinks.at(2).text()).toEqual(doc3.attributes.title);
+    });
+
+    it('should list items by type descending', async () => {
+      const core = coreMock.createStart();
+      (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ savedObjects: [doc, doc3, doc2] })
+      );
+
+      const wrapper = mount(
+        <SavedObjectFinder
+          savedObjects={core.savedObjects}
+          uiSettings={core.uiSettings}
+          savedObjectsManagement={savedObjectsManagement}
+          savedObjectsPlugin={savedObjectsPlugin}
+          savedObjectsTagging={savedObjectsTagging}
+          savedObjectMetaData={metaDataConfig}
+        />
+      );
+
+      wrapper.instance().componentDidMount!();
+      await nextTick();
+      findTestSubject(
+        findTestSubject(wrapper, 'tableHeaderCell_type_0'),
+        'tableHeaderSortButton'
+      ).simulate('click');
+      findTestSubject(
+        findTestSubject(wrapper, 'tableHeaderCell_type_0'),
+        'tableHeaderSortButton'
+      ).simulate('click');
+      const titleLinks = wrapper.find(EuiLink);
+      expect(titleLinks.at(0).text()).toEqual(doc3.attributes.title);
+      expect(titleLinks.at(1).text()).toEqual(doc.attributes.title);
+      expect(titleLinks.at(2).text()).toEqual(doc2.attributes.title);
+    });
+
     it('should list items by title ascending', async () => {
       const core = coreMock.createStart();
       (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
@@ -208,6 +304,68 @@ describe('SavedObjectsFinder', () => {
       const titleLinks = wrapper.find(EuiLink);
       expect(titleLinks.at(0).text()).toEqual(doc2.attributes.title);
       expect(titleLinks.at(1).text()).toEqual(doc.attributes.title);
+    });
+
+    it('should list items by tag ascending', async () => {
+      const core = coreMock.createStart();
+      (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ savedObjects: [doc, doc3, doc2] })
+      );
+
+      const wrapper = mount(
+        <SavedObjectFinder
+          savedObjects={core.savedObjects}
+          uiSettings={core.uiSettings}
+          savedObjectsManagement={savedObjectsManagement}
+          savedObjectsPlugin={savedObjectsPlugin}
+          savedObjectsTagging={savedObjectsTagging}
+          savedObjectMetaData={metaDataConfig}
+        />
+      );
+
+      wrapper.instance().componentDidMount!();
+      await nextTick();
+      findTestSubject(
+        findTestSubject(wrapper, 'tableHeaderCell_references_2'),
+        'tableHeaderSortButton'
+      ).simulate('click');
+      const titleLinks = wrapper.find(EuiLink);
+      expect(titleLinks.at(0).text()).toEqual(doc.attributes.title);
+      expect(titleLinks.at(1).text()).toEqual(doc2.attributes.title);
+      expect(titleLinks.at(2).text()).toEqual(doc3.attributes.title);
+    });
+
+    it('should list items by tag descending', async () => {
+      const core = coreMock.createStart();
+      (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ savedObjects: [doc, doc3, doc2] })
+      );
+
+      const wrapper = mount(
+        <SavedObjectFinder
+          savedObjects={core.savedObjects}
+          uiSettings={core.uiSettings}
+          savedObjectsManagement={savedObjectsManagement}
+          savedObjectsPlugin={savedObjectsPlugin}
+          savedObjectsTagging={savedObjectsTagging}
+          savedObjectMetaData={metaDataConfig}
+        />
+      );
+
+      wrapper.instance().componentDidMount!();
+      await nextTick();
+      findTestSubject(
+        findTestSubject(wrapper, 'tableHeaderCell_references_2'),
+        'tableHeaderSortButton'
+      ).simulate('click');
+      findTestSubject(
+        findTestSubject(wrapper, 'tableHeaderCell_references_2'),
+        'tableHeaderSortButton'
+      ).simulate('click');
+      const titleLinks = wrapper.find(EuiLink);
+      expect(titleLinks.at(0).text()).toEqual(doc3.attributes.title);
+      expect(titleLinks.at(1).text()).toEqual(doc2.attributes.title);
+      expect(titleLinks.at(2).text()).toEqual(doc.attributes.title);
     });
   });
 
@@ -392,19 +550,6 @@ describe('SavedObjectsFinder', () => {
   });
 
   describe('filter', () => {
-    const metaDataConfig = [
-      {
-        type: 'search',
-        name: 'Search',
-        getIconForSavedObject: () => 'search' as IconType,
-      },
-      {
-        type: 'vis',
-        name: 'Vis',
-        getIconForSavedObject: () => 'document' as IconType,
-      },
-    ];
-
     it('should render filter buttons if enabled', async () => {
       const core = coreMock.createStart();
       (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
@@ -427,7 +572,9 @@ describe('SavedObjectsFinder', () => {
 
       wrapper.instance().componentDidMount!();
       await nextTick();
-      expect(wrapper.find('.euiFilterButton')).toHaveLength(2);
+      expect(wrapper.find('button.euiFilterButton')).toHaveLength(2);
+      expect(wrapper.find('button.euiFilterButton [data-text="Types"]')).toHaveLength(1);
+      expect(wrapper.find('button.euiFilterButton [data-text="Tags"]')).toHaveLength(1);
     });
 
     it('should not render filter buttons if disabled', async () => {
@@ -452,10 +599,10 @@ describe('SavedObjectsFinder', () => {
 
       wrapper.instance().componentDidMount!();
       await nextTick();
-      expect(wrapper.find('.euiFilterButton')).toHaveLength(0);
+      expect(wrapper.find('button.euiFilterButton')).toHaveLength(0);
     });
 
-    it('should not render type filter button if there is only one type in the metadata list', async () => {
+    it('should not render types filter button if there is only one type in the metadata list', async () => {
       const core = coreMock.createStart();
       (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
         Promise.resolve({
@@ -477,15 +624,37 @@ describe('SavedObjectsFinder', () => {
 
       wrapper.instance().componentDidMount!();
       await nextTick();
-      expect(
-        wrapper
-          .find('.euiFilterButton')
-          .findWhere((button) => button.text() === 'Types')
-          .exists()
-      ).toBe(false);
+      expect(wrapper.find('button.euiFilterButton [data-text="Types"]')).toHaveLength(0);
+      expect(wrapper.find('button.euiFilterButton')).toHaveLength(1);
     });
 
-    it('should apply type filter if selected', async () => {
+    it('should not render tags filter button if savedObjectsTagging is undefined', async () => {
+      const core = coreMock.createStart();
+      (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({
+          savedObjects: [doc, doc2, doc3],
+        })
+      );
+
+      const wrapper = mount(
+        <SavedObjectFinder
+          savedObjects={core.savedObjects}
+          uiSettings={core.uiSettings}
+          savedObjectsManagement={savedObjectsManagement}
+          savedObjectsPlugin={savedObjectsPlugin}
+          savedObjectsTagging={undefined}
+          showFilter={true}
+          savedObjectMetaData={metaDataConfig}
+        />
+      );
+
+      wrapper.instance().componentDidMount!();
+      await nextTick();
+      expect(wrapper.find('button.euiFilterButton [data-text="Tags"]')).toHaveLength(0);
+      expect(wrapper.find('button.euiFilterButton')).toHaveLength(1);
+    });
+
+    it('should apply types filter if selected', async () => {
       const core = coreMock.createStart();
       (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
         Promise.resolve({
@@ -526,6 +695,54 @@ describe('SavedObjectsFinder', () => {
         fields: ['title', 'name'],
         search: undefined,
         hasReference: undefined,
+        page: 1,
+        perPage: 10,
+        searchFields: ['title^3', 'description'],
+        defaultSearchOperator: 'AND',
+      });
+    });
+
+    it('should apply tags filter if selected', async () => {
+      const core = coreMock.createStart();
+      (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({
+          savedObjects: [doc, doc2, doc3],
+        })
+      );
+
+      const wrapper = mount(
+        <SavedObjectFinder
+          savedObjects={core.savedObjects}
+          uiSettings={core.uiSettings}
+          savedObjectsManagement={savedObjectsManagement}
+          savedObjectsPlugin={savedObjectsPlugin}
+          savedObjectsTagging={savedObjectsTagging}
+          showFilter={true}
+          savedObjectMetaData={metaDataConfig}
+        />
+      );
+
+      wrapper.instance().componentDidMount!();
+      await nextTick();
+      const table = wrapper.find<EuiInMemoryTable<any>>(EuiInMemoryTable);
+      const search = table.prop('search') as EuiSearchBarProps;
+      search.onChange?.({ query: Query.parse('tag:(tag1)'), queryText: '', error: null });
+      expect(core.savedObjects.client.find).toHaveBeenLastCalledWith({
+        type: ['search', 'vis'],
+        fields: ['title', 'name'],
+        search: undefined,
+        hasReference: ['tag1'],
+        page: 1,
+        perPage: 10,
+        searchFields: ['title^3', 'description'],
+        defaultSearchOperator: 'AND',
+      });
+      search.onChange?.({ query: Query.parse('tag:(tag1 or tag2)'), queryText: '', error: null });
+      expect(core.savedObjects.client.find).toHaveBeenLastCalledWith({
+        type: ['search', 'vis'],
+        fields: ['title', 'name'],
+        search: undefined,
+        hasReference: ['tag1', 'tag2'],
         page: 1,
         perPage: 10,
         searchFields: ['title^3', 'description'],
@@ -836,5 +1053,85 @@ describe('SavedObjectsFinder', () => {
       </SavedObjectFinder>
     );
     expect(wrapper.exists('#testChildButton')).toBe(true);
+  });
+
+  describe('columns', () => {
+    it('should show all columns', async () => {
+      const core = coreMock.createStart();
+      (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ savedObjects: [doc, doc2, doc3] })
+      );
+
+      const wrapper = mount(
+        <SavedObjectFinder
+          savedObjects={core.savedObjects}
+          uiSettings={core.uiSettings}
+          savedObjectsManagement={savedObjectsManagement}
+          savedObjectsPlugin={savedObjectsPlugin}
+          savedObjectsTagging={savedObjectsTagging}
+          savedObjectMetaData={metaDataConfig}
+        />
+      );
+
+      wrapper.instance().componentDidMount!();
+      await nextTick();
+      wrapper.update();
+      expect(wrapper.find(EuiInMemoryTable).find('th')).toHaveLength(3);
+      expect(findTestSubject(wrapper, 'tableHeaderCell_type_0')).toHaveLength(1);
+      expect(findTestSubject(wrapper, 'tableHeaderCell_title_1')).toHaveLength(1);
+      expect(findTestSubject(wrapper, 'tableHeaderCell_references_2')).toHaveLength(1);
+    });
+
+    it('should hide the type column if there is only one type in the metadata list', async () => {
+      const core = coreMock.createStart();
+      (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ savedObjects: [doc, doc2] })
+      );
+
+      const wrapper = mount(
+        <SavedObjectFinder
+          savedObjects={core.savedObjects}
+          uiSettings={core.uiSettings}
+          savedObjectsManagement={savedObjectsManagement}
+          savedObjectsPlugin={savedObjectsPlugin}
+          savedObjectsTagging={savedObjectsTagging}
+          savedObjectMetaData={searchMetaData}
+        />
+      );
+
+      wrapper.instance().componentDidMount!();
+      await nextTick();
+      wrapper.update();
+      expect(wrapper.find(EuiInMemoryTable).find('th')).toHaveLength(2);
+      expect(findTestSubject(wrapper, 'tableHeaderCell_type_0')).toHaveLength(0);
+      expect(findTestSubject(wrapper, 'tableHeaderCell_title_0')).toHaveLength(1);
+      expect(findTestSubject(wrapper, 'tableHeaderCell_references_1')).toHaveLength(1);
+    });
+
+    it('should hide the tags column if savedObjectsTagging is undefined', async () => {
+      const core = coreMock.createStart();
+      (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ savedObjects: [doc, doc2, doc3] })
+      );
+
+      const wrapper = mount(
+        <SavedObjectFinder
+          savedObjects={core.savedObjects}
+          uiSettings={core.uiSettings}
+          savedObjectsManagement={savedObjectsManagement}
+          savedObjectsPlugin={savedObjectsPlugin}
+          savedObjectsTagging={undefined}
+          savedObjectMetaData={metaDataConfig}
+        />
+      );
+
+      wrapper.instance().componentDidMount!();
+      await nextTick();
+      wrapper.update();
+      expect(wrapper.find(EuiInMemoryTable).find('th')).toHaveLength(2);
+      expect(findTestSubject(wrapper, 'tableHeaderCell_type_0')).toHaveLength(1);
+      expect(findTestSubject(wrapper, 'tableHeaderCell_title_1')).toHaveLength(1);
+      expect(findTestSubject(wrapper, 'tableHeaderCell_references_2')).toHaveLength(0);
+    });
   });
 });
