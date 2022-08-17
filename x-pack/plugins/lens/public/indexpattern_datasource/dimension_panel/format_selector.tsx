@@ -157,7 +157,7 @@ export function FormatSelector(props: FormatSelectorProps) {
           />
           {currentFormat ? (
             <>
-              <EuiSpacer size="xs" />
+              <EuiSpacer size="s" />
               <EuiRange
                 showInput="inputWithPopover"
                 value={decimals}
@@ -183,7 +183,7 @@ export function FormatSelector(props: FormatSelectorProps) {
               />
               {!props.options?.disableSuffix && (
                 <>
-                  <EuiSpacer size="xs" />
+                  <EuiSpacer size="s" />
                   <EuiFieldText
                     value={suffix}
                     onChange={(e) => {
