@@ -33,20 +33,13 @@ export const getSeries = (
   totalSeriesNum: number,
   splitMode: string,
   layerColor: string,
-  panelType: string,
-  timeRangeMode?: string
+  window?: string
 ): VisSeries | null => {
   const { metrics, seriesAgg } = getSeriesAgg(initialMetrics);
   const metricIdx = metrics.length - 1;
   const aggregation = metrics[metricIdx].type;
   const fieldName = metrics[metricIdx].field;
-  const aggregationMap =
-    SUPPORTED_METRICS[aggregation] &&
-    SUPPORTED_METRICS[aggregation].supportedPanelTypes.includes(panelType) &&
-    (!timeRangeMode ||
-      SUPPORTED_METRICS[aggregation].supportedTimeRangeModes.includes(timeRangeMode))
-      ? SUPPORTED_METRICS[aggregation]
-      : undefined;
+  const aggregationMap = SUPPORTED_METRICS[aggregation];
   if (!aggregationMap) {
     return null;
   }
@@ -109,12 +102,17 @@ export const getSeries = (
             const [_, meta] = variable?.field?.split('[') ?? [];
             const metaValue = Number(meta?.replace(']', ''));
             if (!metaValue) return;
-            const script = getFormulaEquivalent(currentMetric, layerMetricsArray, metaValue);
+            const script = getFormulaEquivalent(
+              currentMetric,
+              layerMetricsArray,
+              metaValue,
+              window
+            );
             if (!script) return;
             finalScript = finalScript?.replace(`params.${variable.name}`, script);
           });
         } else {
-          const script = getFormulaEquivalent(currentMetric, layerMetricsArray);
+          const script = getFormulaEquivalent(currentMetric, layerMetricsArray, undefined, window);
           if (!script) return null;
           const variable = variables.find((v) => v.field === currentMetric.id);
           finalScript = finalScript?.replaceAll(`params.${variable?.name}`, script);
@@ -130,7 +128,8 @@ export const getSeries = (
       metricsArray = getParentPipelineSeries(
         aggregation,
         metricIdx,
-        metrics
+        metrics,
+        window
       ) as VisualizeEditorLayersContext['metrics'];
       break;
     }
@@ -154,7 +153,8 @@ export const getSeries = (
           subFunctionMetric,
           pipelineAgg,
           aggregation,
-          metaValue
+          metaValue,
+          window
         );
         if (!formula) return null;
         metricsArray = getFormulaSeries(formula);
@@ -163,7 +163,9 @@ export const getSeries = (
           aggregation,
           metrics[metricIdx],
           subFunctionMetric,
-          pipelineAgg
+          pipelineAgg,
+          undefined,
+          window
         );
         if (!series) return null;
         metricsArray = series;
@@ -171,7 +173,12 @@ export const getSeries = (
       break;
     }
     case 'positive_only': {
-      const formula = getSiblingPipelineSeriesFormula(aggregation, metrics[metricIdx], metrics);
+      const formula = getSiblingPipelineSeriesFormula(
+        aggregation,
+        metrics[metricIdx],
+        metrics,
+        window
+      );
       if (!formula) {
         return null;
       }
@@ -182,7 +189,12 @@ export const getSeries = (
     case 'max_bucket':
     case 'min_bucket':
     case 'sum_bucket': {
-      const formula = getSiblingPipelineSeriesFormula(aggregation, metrics[metricIdx], metrics);
+      const formula = getSiblingPipelineSeriesFormula(
+        aggregation,
+        metrics[metricIdx],
+        metrics,
+        window
+      );
       if (!formula) {
         return null;
       }
@@ -190,7 +202,7 @@ export const getSeries = (
       break;
     }
     case 'filter_ratio': {
-      const formula = getFilterRatioFormula(metrics[metricIdx]);
+      const formula = getFilterRatioFormula(metrics[metricIdx], window);
       if (!formula) {
         return null;
       }
@@ -241,7 +253,7 @@ export const getSeries = (
     case 'std_deviation': {
       const currentMetric = metrics[metricIdx];
       if (currentMetric.mode === 'upper' || currentMetric.mode === 'lower') {
-        const script = getFormulaEquivalent(currentMetric, metrics);
+        const script = getFormulaEquivalent(currentMetric, metrics, undefined, window);
         if (!script) return null;
         metricsArray = getFormulaSeries(script);
         break;
@@ -250,7 +262,7 @@ export const getSeries = (
           { ...currentMetric, mode: 'upper' },
           { ...currentMetric, mode: 'lower' },
         ].forEach((metric) => {
-          const script = getFormulaEquivalent(metric, metrics);
+          const script = getFormulaEquivalent(metric, metrics, undefined, window);
           if (!script) return null;
           metricsArray.push(...getFormulaSeries(script));
         });

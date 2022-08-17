@@ -6,6 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { utc } from 'moment';
+import { search } from '@kbn/data-plugin/public';
+import dateMath from '@kbn/datemath';
+import { TimeRange, UI_SETTINGS } from '@kbn/data-plugin/common';
+import { getUISettings } from '../../../services';
 import type { Metric } from '../../../../common/types';
 import { SUPPORTED_METRICS } from './supported_metrics';
 import { getFilterRatioFormula } from './filter_ratio_formula';
@@ -47,6 +52,27 @@ export const getPercentileRankSeries = (
   });
 };
 
+export const getWindow = (interval?: string, timeRange?: TimeRange) => {
+  let window = interval || '1h';
+
+  if (timeRange && !interval) {
+    const { from, to } = timeRange;
+    const timerange = utc(to).valueOf() - utc(from).valueOf();
+    const maxBars = getUISettings().get<number>(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
+
+    const duration = search.aggs.calcAutoIntervalLessThan(maxBars, timerange);
+    const unit =
+      dateMath.units.find((u) => {
+        const value = duration.as(u);
+        return Number.isInteger(value);
+      }) || 'ms';
+
+    window = `${duration.as(unit)}${unit}`;
+  }
+
+  return window;
+};
+
 export const getTimeScale = (metric: Metric) => {
   const supportedTimeScales = ['1s', '1m', '1h', '1d'];
   let timeScale;
@@ -67,6 +93,10 @@ export const getFormulaSeries = (script: string) => {
   ];
 };
 
+export const addTimeRangeToFormula = (window?: string) => {
+  return window ? `, timeRange='${window}'` : '';
+};
+
 export const getPipelineAgg = (subFunctionMetric: Metric) => {
   const pipelineAggMap = SUPPORTED_METRICS[subFunctionMetric.type];
   if (!pipelineAggMap) {
@@ -78,7 +108,8 @@ export const getPipelineAgg = (subFunctionMetric: Metric) => {
 export const getFormulaEquivalent = (
   currentMetric: Metric,
   metrics: Metric[],
-  metaValue?: number
+  metaValue?: number,
+  window?: string
 ) => {
   const aggregation = SUPPORTED_METRICS[currentMetric.type]?.name;
   switch (currentMetric.type) {
@@ -87,7 +118,7 @@ export const getFormulaEquivalent = (
     case 'min_bucket':
     case 'sum_bucket':
     case 'positive_only': {
-      return getSiblingPipelineSeriesFormula(currentMetric.type, currentMetric, metrics);
+      return getSiblingPipelineSeriesFormula(currentMetric.type, currentMetric, metrics, window);
     }
     case 'count': {
       return `${aggregation}()`;
@@ -95,10 +126,12 @@ export const getFormulaEquivalent = (
     case 'percentile': {
       return `${aggregation}(${currentMetric.field}${
         metaValue ? `, percentile=${metaValue}` : ''
-      })`;
+      }${addTimeRangeToFormula(window)})`;
     }
     case 'percentile_rank': {
-      return `${aggregation}(${currentMetric.field}${metaValue ? `, value=${metaValue}` : ''})`;
+      return `${aggregation}(${currentMetric.field}${
+        metaValue ? `, value=${metaValue}` : ''
+      }${addTimeRangeToFormula(window)})`;
     }
     case 'cumulative_sum':
     case 'derivative':
@@ -117,33 +150,34 @@ export const getFormulaEquivalent = (
         subFunctionMetric,
         pipelineAgg,
         currentMetric.type,
-        metaValue
+        metaValue,
+        window
       );
     }
     case 'positive_rate': {
-      return `${aggregation}(max(${currentMetric.field}))`;
+      return `${aggregation}(max(${currentMetric.field}${addTimeRangeToFormula(window)}))`;
     }
     case 'filter_ratio': {
-      return getFilterRatioFormula(currentMetric);
+      return getFilterRatioFormula(currentMetric, window);
     }
     case 'static': {
       return `${currentMetric.value}`;
     }
     case 'std_deviation': {
       if (currentMetric.mode === 'lower') {
-        return `average(${currentMetric.field}) - ${currentMetric.sigma || 1.5} * ${aggregation}(${
-          currentMetric.field
-        })`;
+        return `average(${currentMetric.field}${addTimeRangeToFormula(window)}) - ${
+          currentMetric.sigma || 1.5
+        } * ${aggregation}(${currentMetric.field}${addTimeRangeToFormula(window)})`;
       }
       if (currentMetric.mode === 'upper') {
-        return `average(${currentMetric.field}) + ${currentMetric.sigma || 1.5} * ${aggregation}(${
-          currentMetric.field
-        })`;
+        return `average(${currentMetric.field}${addTimeRangeToFormula(window)}) + ${
+          currentMetric.sigma || 1.5
+        } * ${aggregation}(${currentMetric.field}${addTimeRangeToFormula(window)})`;
       }
       return `${aggregation}(${currentMetric.field})`;
     }
     default: {
-      return `${aggregation}(${currentMetric.field})`;
+      return `${aggregation}(${currentMetric.field}${addTimeRangeToFormula(window)})`;
     }
   }
 };

@@ -13,7 +13,8 @@ import { SUPPORTED_METRICS } from './supported_metrics';
 export const getSiblingPipelineSeriesFormula = (
   aggregation: MetricType,
   currentMetric: Metric,
-  metrics: Metric[]
+  metrics: Metric[],
+  window?: string
 ) => {
   const [nestedFieldId, nestedMeta] = currentMetric.field?.split('[') ?? [];
   const subFunctionMetric = metrics.find((metric) => metric.id === nestedFieldId);
@@ -46,7 +47,7 @@ export const getSiblingPipelineSeriesFormula = (
   } else {
     const nestedMetaValue = Number(nestedMeta?.replace(']', ''));
 
-    const subFormula = getFormulaEquivalent(subFunctionMetric, metrics, nestedMetaValue);
+    const subFormula = getFormulaEquivalent(subFunctionMetric, metrics, nestedMetaValue, window);
 
     if (!subFormula) {
       return null;

@@ -7,7 +7,7 @@
  */
 
 import { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
-import { PANEL_TYPES } from '../../../common/enums';
+import { PANEL_TYPES, TIME_RANGE_DATA_MODES } from '../../../common/enums';
 import { getDataViewsStart } from '../../services';
 import { getDataSourceInfo } from '../lib/datasource';
 import { getSeries } from '../lib/series';
@@ -15,6 +15,7 @@ import { getFieldsForTerms } from '../../../common/fields_utils';
 import { ConvertTsvbToLensVisualization } from '../types';
 import { isSplitWithDateHistogram } from '../lib/split_chart';
 import { getLayerConfiguration } from '../lib/layers';
+import { getWindow, isValidMetrics } from '../lib/metrics';
 
 export const convertToLens: ConvertTsvbToLensVisualization = async (model, timeRange) => {
   const layersConfiguration: { [key: string]: VisualizeEditorLayersContext } = {};
@@ -30,6 +31,10 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model, timeR
       continue;
     }
 
+    if (!isValidMetrics(layer.metrics, PANEL_TYPES.TOP_N, layer.time_range_mode)) {
+      return null;
+    }
+
     const { indexPatternId } = await getDataSourceInfo(
       model.index_pattern,
       model.time_field,
@@ -38,15 +43,13 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model, timeR
       dataViews
     );
 
+    const window =
+      model.time_range_mode === TIME_RANGE_DATA_MODES.LAST_VALUE
+        ? getWindow(model.interval, timeRange)
+        : undefined;
+
     // handle multiple metrics
-    const series = getSeries(
-      layer.metrics,
-      seriesNum,
-      layer.split_mode,
-      layer.color,
-      PANEL_TYPES.TOP_N,
-      layer.time_range_mode
-    );
+    const series = getSeries(layer.metrics, seriesNum, layer.split_mode, layer.color, window);
     if (!series || !series.metrics) {
       return null;
     }
@@ -75,7 +78,7 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model, timeR
       undefined,
       undefined,
       splitWithDateHistogram,
-      timeRange
+      window
     );
   }
 
