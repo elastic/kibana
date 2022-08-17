@@ -5,39 +5,27 @@
  * 2.0.
  */
 
-import type {
-  RegistryPolicyIntegrationTemplate,
-  RegistryPolicyInputOnlyTemplate,
-  RegistryVarsEntry,
-} from './epm';
+import type { RegistryPolicyTemplate, RegistryVarsEntry } from './epm';
 
 // Based on https://github.com/elastic/package-spec/blob/master/versions/1/manifest.spec.yml#L8
-export interface BasePackageSpecManifest {
+export interface PackageSpecManifest {
   format_version: string;
   name: string;
   title: string;
   description: string;
   version: string;
   license?: 'basic';
-  type: string;
+  type?: 'integration' | 'input';
   release?: 'experimental' | 'beta' | 'ga';
   categories?: Array<PackageSpecCategory | undefined>;
   conditions?: PackageSpecConditions;
   icons?: PackageSpecIcon[];
   screenshots?: PackageSpecScreenshot[];
+  policy_templates?: RegistryPolicyTemplate[];
   vars?: RegistryVarsEntry[];
   owner: { github: string };
 }
 
-export interface IntegrationPackageSpecManifest extends BasePackageSpecManifest {
-  type: 'integration';
-  policy_templates?: RegistryPolicyIntegrationTemplate[];
-}
-export interface InputPackageSpecManifest extends BasePackageSpecManifest {
-  type: 'input';
-  policy_templates?: RegistryPolicyInputOnlyTemplate[];
-}
-export type PackageSpecManifest = IntegrationPackageSpecManifest | InputPackageSpecManifest;
 export type PackageSpecPackageType = 'integration' | 'input';
 
 export type PackageSpecCategory =
