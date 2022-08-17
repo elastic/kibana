@@ -228,7 +228,7 @@ export interface DiscoverFieldProps {
   /**
    * Callback to add a filter to filter bar
    */
-  onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
+  onAddFilter?: (field: DataViewField | string, value: unknown, type: '+' | '-') => void;
   /**
    * Callback to remove/deselect a the field
    * @param fieldName
@@ -433,6 +433,7 @@ function DiscoverFieldComponent({
                     dataViewOrDataViewId={dataView}
                     field={fieldForStats}
                     testSubject="dscFieldListPanel"
+                    onAddFilter={onAddFilter}
                     overrideMissingContent={(params) => {
                       if (params?.noDataFound) {
                         return (

@@ -22,6 +22,10 @@ export { FieldStats } from './components/field_stats';
 export function plugin() {
   return new UnifiedFieldListPlugin();
 }
-export type { UnifiedFieldListPluginSetup, UnifiedFieldListPluginStart } from './types';
+export type {
+  UnifiedFieldListPluginSetup,
+  UnifiedFieldListPluginStart,
+  AddFieldFilterHandler,
+} from './types';
 
 export { loadFieldStats, canProvideStatsForField } from './services';

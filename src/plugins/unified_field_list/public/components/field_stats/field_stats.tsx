@@ -34,6 +34,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { buildEsQuery, Query, Filter, AggregateQuery } from '@kbn/es-query';
 import type { BucketedAggregation } from '../../../common/types';
+import type { AddFieldFilterHandler } from '../../types';
 import { loadFieldStats, canProvideStatsForField } from '../../services';
 import {
   FieldTopValues,
@@ -75,6 +76,7 @@ export interface FieldStatsProps {
     totalDocuments?: number;
     sampledDocuments?: number;
   }) => JSX.Element;
+  onAddFilter?: AddFieldFilterHandler;
 }
 
 const FieldStatsComponent: React.FC<FieldStatsProps> = ({
@@ -89,6 +91,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   testSubject,
   overrideMissingContent,
   overrideFooter,
+  onAddFilter,
 }) => {
   const { fieldFormats, uiSettings, charts, dataViews, data } = services;
   const [state, changeState] = useState<State>({
@@ -444,6 +447,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
         sampledValuesCount={sampledValues!}
         color={color}
         testSubject={testSubject}
+        onAddFilter={onAddFilter}
       />
     );
   }

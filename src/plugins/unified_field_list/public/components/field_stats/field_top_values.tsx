@@ -10,6 +10,7 @@ import React, { Fragment } from 'react';
 import { euiPaletteColorBlind, EuiSpacer } from '@elastic/eui';
 import { DataView, DataViewField } from '@kbn/data-plugin/common';
 import type { BucketedAggregation } from '../../../common/types';
+import type { AddFieldFilterHandler } from '../../types';
 import { FieldTopValuesBucket } from './field_top_values_bucket';
 
 export interface FieldTopValuesProps {
@@ -19,6 +20,7 @@ export interface FieldTopValuesProps {
   sampledValuesCount: number;
   color?: string;
   testSubject: string;
+  onAddFilter?: AddFieldFilterHandler;
 }
 
 export const FieldTopValues: React.FC<FieldTopValuesProps> = ({
@@ -28,6 +30,7 @@ export const FieldTopValues: React.FC<FieldTopValuesProps> = ({
   sampledValuesCount,
   color = getDefaultColor(),
   testSubject,
+  onAddFilter,
 }) => {
   if (!buckets?.length) {
     return null;
@@ -42,12 +45,15 @@ export const FieldTopValues: React.FC<FieldTopValuesProps> = ({
   return (
     <div data-test-subj={`${testSubject}-topValues`}>
       {buckets.map((topValue, index) => {
-        const formatted = formatter.convert(topValue.key);
+        const fieldValue = topValue.key;
+        const formatted = formatter.convert(fieldValue);
 
         return (
-          <Fragment key={topValue.key}>
+          <Fragment key={fieldValue}>
             {index > 0 && <EuiSpacer size="s" />}
             <FieldTopValuesBucket
+              field={field}
+              fieldValue={fieldValue}
               formattedLabel={formatted}
               formattedValue={getFormattedPercentageValue(
                 topValue.count,
@@ -57,6 +63,7 @@ export const FieldTopValues: React.FC<FieldTopValuesProps> = ({
               progressValue={getProgressValue(topValue.count, sampledValuesCount)}
               color={color}
               testSubject={testSubject}
+              onAddFilter={onAddFilter}
             />
           </Fragment>
         );
@@ -66,6 +73,8 @@ export const FieldTopValues: React.FC<FieldTopValuesProps> = ({
           <EuiSpacer size="s" />
           <FieldTopValuesBucket
             type="other"
+            field={field}
+            fieldValue={undefined}
             formattedValue={getFormattedPercentageValue(
               otherCount,
               sampledValuesCount,
@@ -74,6 +83,7 @@ export const FieldTopValues: React.FC<FieldTopValuesProps> = ({
             progressValue={getProgressValue(otherCount, sampledValuesCount)}
             color={color}
             testSubject={testSubject}
+            onAddFilter={onAddFilter}
           />
         </>
       )}
