@@ -40,6 +40,7 @@ const generateTestData = memoizeOne((timeRange: TimeRange) => {
       startTime: startDate.toISOString(),
       countByBreakdownCriterion: {
         field1: Math.floor(Math.random() * 100),
+        field2: Math.floor(Math.random() * 100),
       },
     })
   );
