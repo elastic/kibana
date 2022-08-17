@@ -97,13 +97,11 @@ export function DashboardTopNav({
 }: DashboardTopNavProps) {
   const {
     core,
-    // data,
     share,
     chrome,
     embeddable,
     navigation,
     uiSettings,
-    visualizations,
     usageCollection,
     initializerContext,
     savedObjectsTagging,
@@ -112,10 +110,13 @@ export function DashboardTopNav({
     dashboardSessionStorage,
     allowByValueEmbeddables,
   } = useKibana<DashboardAppServices>().services;
-  const { data } = pluginServices.getServices();
+  const {
+    data: { query, search },
+    visualizations: { get: getVisualization, getAliases: getVisTypeAliases },
+  } = pluginServices.getServices();
 
   const { version: kibanaVersion } = initializerContext.env.packageInfo;
-  const timefilter = data.query.timefilter.timefilter;
+  const timefilter = query.timefilter.timefilter;
   const { notifications, theme } = core;
   const { toasts } = notifications;
   const { theme$ } = theme;
@@ -127,7 +128,7 @@ export function DashboardTopNav({
   const [state, setState] = useState<DashboardTopNavState>({ chromeIsVisible: false });
   const [isLabsShown, setIsLabsShown] = useState(false);
 
-  const lensAlias = visualizations.getAliases().find(({ name }) => name === 'lens');
+  const lensAlias = getVisTypeAliases().find(({ name }) => name === 'lens');
   const quickButtonVisTypes = ['markdown', 'maps'];
   const stateTransferService = embeddable.getStateTransfer();
   const IS_DARK_THEME = uiSettings.get('theme:darkMode');
@@ -209,11 +210,11 @@ export function DashboardTopNav({
         path,
         state: {
           originatingApp: DashboardConstants.DASHBOARDS_ID,
-          searchSessionId: data.search.session.getSessionId(),
+          searchSessionId: search.session.getSessionId(),
         },
       });
     },
-    [stateTransferService, data.search.session, trackUiMetric]
+    [stateTransferService, search.session, trackUiMetric]
   );
 
   const closeAllFlyouts = useCallback(() => {
@@ -491,8 +492,7 @@ export function DashboardTopNav({
       (forceShow || state.chromeIsVisible) && !dashboardState.fullScreenMode;
 
     const shouldShowFilterBar = (forceHide: boolean): boolean =>
-      !forceHide &&
-      (data.query.filterManager.getFilters().length > 0 || !dashboardState.fullScreenMode);
+      !forceHide && (query.filterManager.getFilters().length > 0 || !dashboardState.fullScreenMode);
 
     const isFullScreenMode = dashboardState.fullScreenMode;
     const showTopNavMenu = shouldShowNavBarComponent(Boolean(embedSettings?.forceShowTopNavMenu));
@@ -561,8 +561,7 @@ export function DashboardTopNav({
 
   const getVisTypeQuickButton = (visTypeName: string) => {
     const visType =
-      visualizations.get(visTypeName) ||
-      visualizations.getAliases().find(({ name }) => name === visTypeName);
+      getVisualization(visTypeName) || getVisTypeAliases().find(({ name }) => name === visTypeName);
 
     if (visType) {
       if ('aliasPath' in visType) {

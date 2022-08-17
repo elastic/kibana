@@ -34,7 +34,7 @@ import {
 } from '@kbn/embeddable-plugin/public';
 import { VisualizationsStart } from '@kbn/visualizations-plugin/public';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+// import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 
@@ -96,7 +96,7 @@ export interface DashboardSetupDependencies {
   uiActions: UiActionsSetup;
   usageCollection?: UsageCollectionSetup;
   screenshotMode: ScreenshotModePluginSetup;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
+  // unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 export interface DashboardStartDependencies {
@@ -115,7 +115,7 @@ export interface DashboardStartDependencies {
   visualizations: VisualizationsStart;
   screenshotMode: ScreenshotModePluginStart;
   dataViewEditor: DataViewEditorStart;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
+  // unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 export interface DashboardSetup {

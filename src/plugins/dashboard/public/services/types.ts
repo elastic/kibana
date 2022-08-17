@@ -9,12 +9,12 @@
 import { DashboardDataService } from './data/types';
 // import { DashboardDataViewEditorService } from './data_view_editor/types';
 import { DashboardHTTPService } from './http/types';
-// import { DashboardVisualizationsService } from './visualizations/types';
+import { DashboardVisualizationsService } from './visualizations/types';
 
 export interface DashboardServices {
   // dependency services
   data: DashboardDataService;
   // dataViewEditor: DashboardDataViewEditorService;
   http: DashboardHTTPService;
-  // visualizations: DashboardVisualizationsService;
+  visualizations: DashboardVisualizationsService;
 }

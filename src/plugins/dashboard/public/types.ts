@@ -22,7 +22,6 @@ import type {
 } from '@kbn/core/public';
 import type { Filter } from '@kbn/es-query';
 import { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
-import { VisualizationsStart } from '@kbn/visualizations-plugin/public';
 import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { EmbeddableInput, ViewMode } from '@kbn/embeddable-plugin/common';
@@ -202,7 +201,6 @@ export interface DashboardAppServices {
   chrome: ChromeStart;
   share?: SharePluginStart;
   embeddable: EmbeddableStart;
-  // data: DataPublicPluginStart;
   uiSettings: IUiSettingsClient;
   restorePreviousUrl: () => void;
   savedObjects: SavedObjectsStart;
@@ -210,9 +208,7 @@ export interface DashboardAppServices {
   urlForwarding: UrlForwardingStart;
   savedDashboards: SavedObjectLoader;
   scopedHistory: () => ScopedHistory;
-  visualizations: VisualizationsStart;
   dataViewEditor: DataViewEditorStart;
-  // dataViews: DataViewsContract;
   usageCollection?: UsageCollectionSetup;
   navigation: NavigationPublicPluginStart;
   dashboardCapabilities: DashboardAppCapabilities;
