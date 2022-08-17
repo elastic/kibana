@@ -59,6 +59,7 @@ export const getTableColumns: GetTableColumns = ({ getAppUrl, navigateTo, openRu
           data-test-subj={`${id}-tooltip`}
           title={i18n.OPEN_RULE_DETAIL_TOOLTIP}
           content={name}
+          anchorClassName="eui-textTruncate"
         >
           {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
           <EuiLink
