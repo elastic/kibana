@@ -19,7 +19,7 @@ import {
   getEsQueryConfig,
   mapAndFlattenFilters,
 } from '@kbn/data-plugin/public';
-import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
+import type { Adapters, Start as InspectorStart } from '@kbn/inspector-plugin/public';
 
 import { Subscription } from 'rxjs';
 import { toExpression, Ast } from '@kbn/interpreter';
@@ -98,7 +98,7 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
   style?: React.CSSProperties;
   className?: string;
   onBrushEnd?: (data: BrushTriggerEvent['data']) => void;
-  onLoad?: (isLoading: boolean) => void;
+  onLoad?: (isLoading: boolean, adapters: Adapters | undefined) => void;
   onFilter?: (data: ClickTriggerEvent['data']) => void;
   onTableRowClick?: (data: LensTableRowContextMenuEvent['data']) => void;
 }
@@ -486,7 +486,7 @@ export class Embeddable
     this.activeDataInfo.activeData = adapters?.tables?.tables;
     if (this.input.onLoad) {
       // once onData$ is get's called from expression renderer, loading becomes false
-      this.input.onLoad(false);
+      this.input.onLoad(false, adapters);
     }
 
     const { type, error } = data as { type: string; error: ErrorLike };
@@ -566,7 +566,7 @@ export class Embeddable
     }
     super.render(domNode as HTMLElement);
     if (this.input.onLoad) {
-      this.input.onLoad(true);
+      this.input.onLoad(true, this.getInspectorAdapters());
     }
 
     this.domNode.setAttribute('data-shared-item', '');
