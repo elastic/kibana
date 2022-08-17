@@ -7975,7 +7975,7 @@ any-observable@^0.3.0:
   resolved "https://registry.yarnpkg.com/any-observable/-/any-observable-0.3.0.tgz#af933475e5806a67d0d7df090dd5e8bef65d119b"
   integrity sha512-/FQM1EDkTsf63Ub2C6O7GuYFDsSXUwsaZDurV0np41ocwq0jthUAYCmhBX9f+KwlaCgIuWyr/4WlUQUBfKfZog==
 
-any-promise@^1.0.0, any-promise@^1.1.0:
+any-promise@^1.0.0:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/any-promise/-/any-promise-1.3.0.tgz#abc6afeedcea52e809cdc0376aed3ce39635d17f"
   integrity sha1-q8av7tzqUugJzcA3au0845Y10X8=
@@ -9687,7 +9687,7 @@ bytes@3.0.0:
   resolved "https://registry.yarnpkg.com/bytes/-/bytes-3.0.0.tgz#d32815404d689699f85a4ea4fa8755dd13a96048"
   integrity sha1-0ygVQE1olpn4Wk6k+odV3ROpYEg=
 
-bytes@3.1.2, bytes@^3.0.0:
+bytes@3.1.2:
   version "3.1.2"
   resolved "https://registry.yarnpkg.com/bytes/-/bytes-3.1.2.tgz#8b0beeb98605adf1b128fa4386403c009e0221a5"
   integrity sha512-/Nf7TyzTx6S3yRJObOAV7956r8cr2+Oj8AC5dt8wSP3BQAoeX58NoHyCU8P8zGkNXStjTSi6fzO6F0pBdcYbEg==
@@ -15706,18 +15706,6 @@ gulp-cli@^2.2.0:
     v8flags "^3.0.1"
     yargs "^7.1.0"
 
-gulp-gzip@^1.4.2:
-  version "1.4.2"
-  resolved "https://registry.yarnpkg.com/gulp-gzip/-/gulp-gzip-1.4.2.tgz#0422a94014248655b5b1a9eea1c2abee1d4f4337"
-  integrity sha512-ZIxfkUwk2XmZPTT9pPHrHUQlZMyp9nPhg2sfoeN27mBGpi7OaHnOD+WCN41NXjfJQ69lV1nQ9LLm1hYxx4h3UQ==
-  dependencies:
-    ansi-colors "^1.0.1"
-    bytes "^3.0.0"
-    fancy-log "^1.3.2"
-    plugin-error "^1.0.0"
-    stream-to-array "^2.3.0"
-    through2 "^2.0.3"
-
 gulp-postcss@^9.0.1:
   version "9.0.1"
   resolved "https://registry.yarnpkg.com/gulp-postcss/-/gulp-postcss-9.0.1.tgz#d43caa2f2ce1018f889f7c1296faf82e9928b66f"
@@ -15746,12 +15734,12 @@ gulp-sourcemaps@2.6.5:
     through2 "2.X"
 
 gulp-terser@^2.0.1:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/gulp-terser/-/gulp-terser-2.0.1.tgz#5f8f4fc54588b79519243809cc8eef4936286d0d"
-  integrity sha512-XCrnCXP8ovNpgLK9McJIXlgm0j3W2TsiWu7K9y3m+Sn5XZgUzi6U8MPHtS3NdLMic9poCj695N0ARJ2B6atypw==
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/gulp-terser/-/gulp-terser-2.1.0.tgz#149b693a1adbde922807b60b844bb7351dafbde1"
+  integrity sha512-lQ3+JUdHDVISAlUIUSZ/G9Dz/rBQHxOiYDQ70IVWFQeh4b33TC1MCIU+K18w07PS3rq/CVc34aQO4SUbdaNMPQ==
   dependencies:
     plugin-error "^1.0.1"
-    terser "5.4.0"
+    terser "^5.9.0"
     through2 "^4.0.2"
     vinyl-sourcemaps-apply "^0.2.1"
 
@@ -22376,7 +22364,7 @@ playwright@^1.17.1:
   dependencies:
     playwright-core "=1.17.1"
 
-plugin-error@^1.0.0, plugin-error@^1.0.1:
+plugin-error@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/plugin-error/-/plugin-error-1.0.1.tgz#77016bd8919d0ac377fdcdd0322328953ca5781c"
   integrity sha512-L1zP0dk7vGweZME2i+EeakvUNqSrdiI3F91TwEoYiGrAfUXmVv6fJIq4g82PAXxNsWOp0J7ZqQy/3Szz0ajTxA==
@@ -26039,7 +26027,7 @@ source-map-support@0.5.9:
     buffer-from "^1.0.0"
     source-map "^0.6.0"
 
-source-map-support@^0.5.16, source-map-support@^0.5.19, source-map-support@^0.5.20, source-map-support@~0.5.12, source-map-support@~0.5.19, source-map-support@~0.5.20:
+source-map-support@^0.5.16, source-map-support@^0.5.19, source-map-support@^0.5.20, source-map-support@~0.5.12, source-map-support@~0.5.20:
   version "0.5.21"
   resolved "https://registry.yarnpkg.com/source-map-support/-/source-map-support-0.5.21.tgz#04fe7c7f9e1ed2d662233c28cb2b35b9f63f6e4f"
   integrity sha512-uBHU3L3czsIyYXKX88fdrGovxdSCoTGDRZ6SYXtSRxLZUzHg5P/66Ht6uoUlHu9EZod+inXhKo3qQgwXUT/y1w==
@@ -26532,13 +26520,6 @@ stream-splicer@^2.0.0:
   dependencies:
     inherits "^2.0.1"
     readable-stream "^2.0.2"
-
-stream-to-array@^2.3.0:
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/stream-to-array/-/stream-to-array-2.3.0.tgz#bbf6b39f5f43ec30bc71babcb37557acecf34353"
-  integrity sha1-u/azn19D7DC8cbq8s3VXrOzzQ1M=
-  dependencies:
-    any-promise "^1.1.0"
 
 stream-to-async-iterator@^0.2.0:
   version "0.2.0"
@@ -27330,15 +27311,6 @@ terser-webpack-plugin@^5.1.3:
     serialize-javascript "^6.0.0"
     terser "^5.14.1"
 
-terser@5.4.0:
-  version "5.4.0"
-  resolved "https://registry.yarnpkg.com/terser/-/terser-5.4.0.tgz#9815c0839072d5c894e22c6fc508fbe9f5e7d7e8"
-  integrity sha512-3dZunFLbCJis9TAF2VnX+VrQLctRUmt1p3W2kCsJuZE4ZgWqh//+1MZ62EanewrqKoUf4zIaDGZAvml4UDc0OQ==
-  dependencies:
-    commander "^2.20.0"
-    source-map "~0.7.2"
-    source-map-support "~0.5.19"
-
 terser@^4.1.2, terser@^4.6.3:
   version "4.8.1"
   resolved "https://registry.yarnpkg.com/terser/-/terser-4.8.1.tgz#a00e5634562de2239fd404c649051bf6fc21144f"
@@ -27348,7 +27320,7 @@ terser@^4.1.2, terser@^4.6.3:
     source-map "~0.6.1"
     source-map-support "~0.5.12"
 
-terser@^5.14.1:
+terser@^5.14.1, terser@^5.9.0:
   version "5.16.5"
   resolved "https://registry.yarnpkg.com/terser/-/terser-5.16.5.tgz#1c285ca0655f467f92af1bbab46ab72d1cb08e5a"
   integrity sha512-qcwfg4+RZa3YvlFh0qjifnzBHjKGNbtDo9yivMqMFDy9Q6FSaQWSB/j1xKhsoUFJIqDOM3TsN6D5xbrMrFcHbg==
