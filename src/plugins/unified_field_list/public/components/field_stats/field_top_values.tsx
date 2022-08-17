@@ -7,7 +7,7 @@
  */
 
 import React, { Fragment } from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import { euiPaletteColorBlind, EuiSpacer } from '@elastic/eui';
 import { DataView, DataViewField } from '@kbn/data-plugin/common';
 import type { BucketedAggregation } from '../../../common/types';
 import { FieldTopValuesBucket } from './field_top_values_bucket';
@@ -17,6 +17,7 @@ export interface FieldTopValuesProps {
   dataView: DataView;
   field: DataViewField;
   sampledValuesCount: number;
+  color?: string;
   testSubject: string;
 }
 
@@ -24,8 +25,9 @@ export const FieldTopValues: React.FC<FieldTopValuesProps> = ({
   buckets,
   dataView,
   field,
-  testSubject,
   sampledValuesCount,
+  color = getDefaultColor(),
+  testSubject,
 }) => {
   if (!buckets?.length) {
     return null;
@@ -53,6 +55,7 @@ export const FieldTopValues: React.FC<FieldTopValuesProps> = ({
                 digitsRequired
               )}
               progressValue={getProgressValue(topValue.count, sampledValuesCount)}
+              color={color}
               testSubject={testSubject}
             />
           </Fragment>
@@ -69,6 +72,7 @@ export const FieldTopValues: React.FC<FieldTopValuesProps> = ({
               digitsRequired
             )}
             progressValue={getProgressValue(otherCount, sampledValuesCount)}
+            color={color}
             testSubject={testSubject}
           />
         </>
@@ -76,6 +80,8 @@ export const FieldTopValues: React.FC<FieldTopValuesProps> = ({
     </div>
   );
 };
+
+export const getDefaultColor = () => euiPaletteColorBlind()[1];
 
 export const getFormattedPercentageValue = (
   currentValue: number,

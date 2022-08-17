@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   DataView,
   DataViewField,
@@ -35,7 +35,12 @@ import { i18n } from '@kbn/i18n';
 import { buildEsQuery, Query, Filter, AggregateQuery } from '@kbn/es-query';
 import type { BucketedAggregation } from '../../../common/types';
 import { loadFieldStats, canProvideStatsForField } from '../../services';
-import { FieldTopValues, getOtherCount, getBucketsValuesCount } from './field_top_values';
+import {
+  FieldTopValues,
+  getOtherCount,
+  getBucketsValuesCount,
+  getDefaultColor,
+} from './field_top_values';
 
 interface State {
   isLoading: boolean;
@@ -62,6 +67,7 @@ export interface FieldStatsProps {
   toDate: string;
   dataViewOrDataViewId: DataView | string;
   field: DataViewField;
+  color?: string;
   testSubject: string;
   overrideMissingContent?: (params?: { noDataFound?: boolean }) => JSX.Element | null;
   overrideFooter?: (params: {
@@ -79,6 +85,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   toDate,
   dataViewOrDataViewId,
   field,
+  color = getDefaultColor(),
   testSubject,
   overrideMissingContent,
   overrideFooter,
@@ -169,6 +176,20 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
 
   const chartTheme = charts.theme.useChartsTheme();
   const chartBaseTheme = charts.theme.useChartsBaseTheme();
+  const customChartTheme: typeof chartTheme = useMemo(() => {
+    return color
+      ? {
+          ...chartTheme,
+          barSeriesStyle: {
+            ...chartTheme.barSeriesStyle,
+            rect: {
+              ...(chartTheme.barSeriesStyle?.rect || {}),
+              fill: color,
+            },
+          },
+        }
+      : chartTheme;
+  }, [chartTheme, color]);
 
   const { isLoading, histogram, topValues, sampledValues, sampledDocuments, totalDocuments } =
     state;
@@ -345,7 +366,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
         <Chart data-test-subj={`${testSubject}-histogram`} size={{ height: 200, width: 300 - 32 }}>
           <Settings
             tooltip={{ type: TooltipType.None }}
-            theme={chartTheme}
+            theme={customChartTheme}
             baseTheme={chartBaseTheme}
             xDomain={
               fromDateParsed && toDateParsed
@@ -390,7 +411,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
           <Settings
             rotation={90}
             tooltip={{ type: TooltipType.None }}
-            theme={chartTheme}
+            theme={customChartTheme}
             baseTheme={chartBaseTheme}
           />
 
@@ -421,6 +442,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
         dataView={dataView}
         field={field}
         sampledValuesCount={sampledValues!}
+        color={color}
         testSubject={testSubject}
       />
     );

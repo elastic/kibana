@@ -7,14 +7,7 @@
  */
 
 import React from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  euiPaletteColorBlind,
-  EuiProgress,
-  EuiText,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 
@@ -23,6 +16,7 @@ export interface FieldTopValuesBucketProps {
   formattedLabel?: string;
   formattedValue: string;
   progressValue: number;
+  color: string;
   testSubject: string;
 }
 
@@ -31,11 +25,9 @@ export const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
   formattedLabel,
   formattedValue,
   progressValue,
+  color,
   testSubject,
 }) => {
-  const euiVisColorPalette = euiPaletteColorBlind();
-  const euiColorVis1 = euiVisColorPalette[1];
-
   return (
     <EuiFlexGroup alignItems="stretch" gutterSize="s" responsive={false}>
       <EuiFlexItem
@@ -73,7 +65,7 @@ export const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
             )}
           </EuiFlexItem>
           <EuiFlexItem grow={false} data-test-subj={`${testSubject}-topValues-formattedValue`}>
-            <EuiText size="xs" textAlign="left" color={euiColorVis1}>
+            <EuiText size="xs" textAlign="left" color={color}>
               {formattedValue}
             </EuiText>
           </EuiFlexItem>
@@ -82,7 +74,7 @@ export const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
           value={progressValue}
           max={1}
           size="s"
-          color={type === 'other' ? 'subdued' : euiColorVis1}
+          color={type === 'other' ? 'subdued' : color}
           aria-label={`${formattedLabel} (${formattedValue})`}
         />
       </EuiFlexItem>
