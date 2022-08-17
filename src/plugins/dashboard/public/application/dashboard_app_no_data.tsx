@@ -22,9 +22,9 @@ export const DashboardAppNoDataPage = ({
   onDataViewCreated: () => void;
 }) => {
   const {
-    services: { core, dataViewEditor },
+    services: { core },
   } = useKibana<DashboardAppServices>();
-  const { data } = pluginServices.getHooks();
+  const { data, dataViewEditor } = pluginServices.getHooks();
   const { dataViews } = data.useService();
 
   const analyticsServices = {
@@ -32,7 +32,7 @@ export const DashboardAppNoDataPage = ({
       typeof AnalyticsNoDataPageKibanaProvider
     >['coreStart'],
     dataViews,
-    dataViewEditor,
+    dataViewEditor: dataViewEditor.useService(),
   };
   return (
     <AnalyticsNoDataPageKibanaProvider {...analyticsServices}>

@@ -25,7 +25,6 @@ import { DataView } from '@kbn/data-views-plugin/common';
 
 import { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
-import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { SharePluginStart } from './services/share';
 import { EmbeddableStart } from './services/embeddable';
 import { DashboardSessionStorage } from './application/lib';
@@ -200,7 +199,6 @@ export interface DashboardAppServices {
   urlForwarding: UrlForwardingStart;
   savedDashboards: SavedObjectLoader;
   scopedHistory: () => ScopedHistory;
-  dataViewEditor: DataViewEditorStart;
   usageCollection?: UsageCollectionSetup;
   navigation: NavigationPublicPluginStart;
   dashboardCapabilities: DashboardAppCapabilities;
