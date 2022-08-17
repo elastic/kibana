@@ -21,6 +21,7 @@ interface Props {
 }
 
 function RegionMapVisualization(props: Props) {
+  console.log(props);
   const mapCenter = {
     lat: props.visConfig.mapCenter[0],
     lon: props.visConfig.mapCenter[1],
