@@ -72,7 +72,7 @@ export const bulkGetPackagePoliciesHandler: RequestHandler<
   const { ids, ignoreMissing } = request.body;
   try {
     const items = await packagePolicyService.getByIDs(soClient, ids, {
-      ignoreMissing: !!ignoreMissing,
+      ignoreMissing,
     });
 
     if (!items) {
