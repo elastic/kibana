@@ -251,15 +251,13 @@ export const runSaveLensVisualization = async (
         {
           id: originalSavedObjectId,
           title: docToSave.title,
-          copyOnSave: saveProps.newCopyOnSave,
+          displayName: i18n.translate('xpack.lens.app.saveModalType', {
+            defaultMessage: 'Lens visualization',
+          }),
           lastSavedTitle: lastKnownDoc.title,
-          getEsType: () => 'lens',
-          getDisplayName: () =>
-            i18n.translate('xpack.lens.app.saveModalType', {
-              defaultMessage: 'Lens visualization',
-            }),
+          copyOnSave: saveProps.newCopyOnSave,
+          isTitleDuplicateConfirmed: saveProps.isTitleDuplicateConfirmed,
         },
-        saveProps.isTitleDuplicateConfirmed,
         saveProps.onTitleDuplicate,
         {
           savedObjectsClient,
