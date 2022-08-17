@@ -156,8 +156,8 @@ export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummary
                         defaultMessage="All alerts"
                       />
                     </EuiText>
-                    <EuiText data-test-subj="totalAlertCount">
-                      <h4>{active + recovered}</h4>
+                    <EuiText>
+                      <h4 data-test-subj="totalAlertsCount">{active + recovered}</h4>
                     </EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -169,11 +169,8 @@ export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummary
                         defaultMessage="Active"
                       />
                     </EuiText>
-                    <EuiText
-                      data-test-subj="activeAlertsCount"
-                      color={LIGHT_THEME.colors.vizColors[2]}
-                    >
-                      <h4>{active}</h4>
+                    <EuiText color={LIGHT_THEME.colors.vizColors[2]}>
+                      <h4 data-test-subj="activeAlertsCount">{active}</h4>
                     </EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -186,11 +183,8 @@ export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummary
                       />
                     </EuiText>
                     <EuiFlexItem>
-                      <EuiText
-                        data-test-subj="recoveredAlertsCount"
-                        color={LIGHT_THEME.colors.vizColors[1]}
-                      >
-                        <h4>{recovered}</h4>
+                      <EuiText color={LIGHT_THEME.colors.vizColors[1]}>
+                        <h4 data-test-subj="recoveredAlertsCount">{recovered}</h4>
                       </EuiText>
                     </EuiFlexItem>
                   </EuiFlexItem>
