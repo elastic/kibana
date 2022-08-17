@@ -51,7 +51,7 @@ export const CopySource: Task = {
     });
 
     const globbyOptions = { cwd: config.resolveFromRepo('.') };
-    (
+    const tasks = (
       await Promise.all([
         globby(select, globbyOptions),
         globby(
@@ -66,8 +66,9 @@ export const CopySource: Task = {
       ])
     )
       .flat()
-      .forEach((source) => piscina.run({ source }));
+      .map((source) => piscina.run({ source }));
 
-    await new Promise((done) => piscina.on('drain', done));
+    await Promise.all(tasks);
+    await piscina.destroy();
   },
 };
