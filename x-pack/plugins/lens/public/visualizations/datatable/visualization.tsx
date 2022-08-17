@@ -14,13 +14,13 @@ import { PaletteRegistry, CUSTOM_PALETTE } from '@kbn/coloring';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
+import { IconChartDatatable } from '@kbn/chart-icons';
 import type {
   SuggestionRequest,
   Visualization,
   VisualizationSuggestion,
   DatasourceLayers,
 } from '../../types';
-import { LensIconChartDatatable } from '../../assets/chart_datatable';
 import { TableDimensionEditor } from './components/dimension_editor';
 import { TableDimensionEditorAdditionalSection } from './components/dimension_editor_addtional_section';
 import { LayerType, layerTypes } from '../../../common';
@@ -56,7 +56,7 @@ export const getDatatableVisualization = ({
   visualizationTypes: [
     {
       id: 'lnsDatatable',
-      icon: LensIconChartDatatable,
+      icon: IconChartDatatable,
       label: visualizationLabel,
       groupLabel: i18n.translate('xpack.lens.datatable.groupLabel', {
         defaultMessage: 'Tabular',
@@ -82,7 +82,7 @@ export const getDatatableVisualization = ({
 
   getDescription() {
     return {
-      icon: LensIconChartDatatable,
+      icon: IconChartDatatable,
       label: visualizationLabel,
     };
   },
@@ -164,7 +164,7 @@ export const getDatatableVisualization = ({
             columnId: col.columnId,
           })),
         },
-        previewIcon: LensIconChartDatatable,
+        previewIcon: IconChartDatatable,
         // tables are hidden from suggestion bar, but used for drag & drop and chart switching
         hide: true,
       },

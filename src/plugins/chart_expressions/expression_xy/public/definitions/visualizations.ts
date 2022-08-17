@@ -6,30 +6,33 @@
  * Side Public License, v 1.
  */
 
-import { SeriesTypes } from '../../common/constants';
 import {
-  BarIcon,
-  LineIcon,
-  AreaIcon,
-  BarStackedIcon,
-  AreaStackedIcon,
-  BarHorizontalIcon,
-  BarPercentageIcon,
-  AreaPercentageIcon,
-  BarHorizontalStackedIcon,
-  BarHorizontalPercentageIcon,
-} from '../icons';
+  IconChartBarHorizontalPercentage,
+  IconChartBarHorizontalStacked,
+  IconChartBarPercentage,
+  IconChartBarHorizontal,
+  IconChartAreaStacked,
+  IconChartBarStacked,
+  IconChartLine,
+  IconChartBar,
+  IconChartArea,
+  IconChartAreaPercentage,
+} from '@kbn/chart-icons';
+import { SeriesTypes } from '../../common/constants';
 
 export const visualizationDefinitions = [
-  { id: SeriesTypes.BAR, icon: BarIcon },
-  { id: `${SeriesTypes.BAR}_stacked`, icon: BarStackedIcon },
-  { id: `${SeriesTypes.BAR}_horizontal`, icon: BarHorizontalIcon },
-  { id: `${SeriesTypes.BAR}_percentage_stacked`, icon: BarPercentageIcon },
-  { id: `${SeriesTypes.BAR}_horizontal_stacked`, icon: BarHorizontalStackedIcon },
-  { id: `${SeriesTypes.BAR}_horizontal_percentage_stacked`, icon: BarHorizontalPercentageIcon },
-  { id: SeriesTypes.LINE, icon: LineIcon },
-  { id: `${SeriesTypes.LINE}_stacked`, icon: LineIcon },
-  { id: SeriesTypes.AREA, icon: AreaIcon },
-  { id: `${SeriesTypes.AREA}_stacked`, icon: AreaStackedIcon },
-  { id: `${SeriesTypes.AREA}_percentage_stacked`, icon: AreaPercentageIcon },
+  { id: SeriesTypes.BAR, icon: IconChartBar },
+  { id: `${SeriesTypes.BAR}_stacked`, icon: IconChartBarStacked },
+  { id: `${SeriesTypes.BAR}_horizontal`, icon: IconChartBarHorizontal },
+  { id: `${SeriesTypes.BAR}_percentage_stacked`, icon: IconChartBarPercentage },
+  { id: `${SeriesTypes.BAR}_horizontal_stacked`, icon: IconChartBarHorizontalStacked },
+  {
+    id: `${SeriesTypes.BAR}_horizontal_percentage_stacked`,
+    icon: IconChartBarHorizontalPercentage,
+  },
+  { id: `${SeriesTypes.LINE}_stacked`, icon: IconChartLine },
+  { id: SeriesTypes.LINE, icon: IconChartLine },
+  { id: SeriesTypes.AREA, icon: IconChartArea },
+  { id: `${SeriesTypes.AREA}_stacked`, icon: IconChartAreaStacked },
+  { id: `${SeriesTypes.AREA}_percentage_stacked`, icon: IconChartAreaPercentage },
 ];

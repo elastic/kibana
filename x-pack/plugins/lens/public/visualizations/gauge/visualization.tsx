@@ -21,9 +21,8 @@ import {
   getMaxValue,
   getMinValue,
   getValueFromAccessor,
-  VerticalBulletIcon,
-  HorizontalBulletIcon,
 } from '@kbn/expression-gauge-plugin/public';
+import { IconChartHorizontalBullet, IconChartVerticalBullet } from '@kbn/chart-icons';
 import type { DatasourceLayers, OperationMetadata, Visualization } from '../../types';
 import { getSuggestions } from './suggestions';
 import {
@@ -56,14 +55,14 @@ export const isNumericDynamicMetric = (op: OperationMetadata) =>
 
 export const CHART_NAMES = {
   horizontalBullet: {
-    icon: HorizontalBulletIcon,
+    icon: IconChartHorizontalBullet,
     label: i18n.translate('xpack.lens.gaugeHorizontal.gaugeLabel', {
       defaultMessage: 'Gauge horizontal',
     }),
     groupLabel: groupLabelForGauge,
   },
   verticalBullet: {
-    icon: VerticalBulletIcon,
+    icon: IconChartVerticalBullet,
     label: i18n.translate('xpack.lens.gaugeVertical.gaugeLabel', {
       defaultMessage: 'Gauge vertical',
     }),

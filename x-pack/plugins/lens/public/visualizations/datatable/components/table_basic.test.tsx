@@ -14,7 +14,7 @@ import { IAggType } from '@kbn/data-plugin/public';
 import { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { VisualizationContainer } from '../../../visualization_container';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
-import { LensIconChartDatatable } from '../../../assets/chart_datatable';
+import { IconChartDatatable } from '@kbn/chart-icons';
 import { DataContext, DatatableComponent } from './table_basic';
 import { DatatableProps } from '../../../../common/expressions';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
@@ -369,7 +369,7 @@ describe('DatatableComponent', () => {
       />
     );
     expect(component.find(VisualizationContainer)).toHaveLength(1);
-    expect(component.find(EmptyPlaceholder).prop('icon')).toEqual(LensIconChartDatatable);
+    expect(component.find(EmptyPlaceholder).prop('icon')).toEqual(IconChartDatatable);
   });
 
   test('it renders the table with the given sorting', () => {

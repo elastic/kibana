@@ -9,8 +9,8 @@ import { partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { FileLayer } from '@elastic/ems-client';
 import type { SuggestionRequest, VisualizationSuggestion } from '@kbn/lens-plugin/public';
+import { IconRegionMap } from '@kbn/chart-icons';
 import type { ChoroplethChartState } from './types';
-import { Icon } from './icon';
 import { getEmsSuggestion } from './get_ems_suggestion';
 
 /**
@@ -72,7 +72,7 @@ export function getSuggestions(
                 valueAccessor: metric.columnId,
                 regionAccessor: bucket.columnId,
               },
-              previewIcon: Icon,
+              previewIcon: IconRegionMap,
             });
           }
         }
