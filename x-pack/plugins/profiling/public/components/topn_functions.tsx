@@ -127,6 +127,7 @@ export const TopNFunctionsTable = ({
       name: i18n.translate('xpack.profiling.functionsView.rankColumnLabel', {
         defaultMessage: 'Rank',
       }),
+      align: 'right',
     },
     {
       field: TopNFunctionSortField.Frame,
