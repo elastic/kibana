@@ -19,7 +19,7 @@ import { navigateTo } from '../../tasks/navigation';
 import { RESULTS_TABLE, RESULTS_TABLE_BUTTON } from '../../screens/live_query';
 import { ROLES } from '../../test';
 
-describe.skip('Alert Event Details', () => {
+describe('Alert Event Details', () => {
   before(() => {
     runKbnArchiverScript(ArchiverMethod.LOAD, 'pack');
     runKbnArchiverScript(ArchiverMethod.LOAD, 'rule');
