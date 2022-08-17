@@ -6,11 +6,7 @@
  */
 
 import { Embeddable } from '@kbn/embeddable-plugin/public';
-import { Vis } from '@kbn/visualizations-plugin/public';
-
-type VisualizeEmbeddable = Embeddable & {
-  getVis: () => Vis;
-}
+import type { VisualizeEmbeddable } from '@kbn/visualizations-plugin/public';
 
 export function isLegacyMap(embeddable: Embeddable) {
   return (
