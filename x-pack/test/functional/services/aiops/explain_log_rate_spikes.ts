@@ -156,8 +156,7 @@ export function ExplainLogRateSpikesProvider({ getService }: FtrProviderContext)
       const handle = (await brush.findAllByClassName(handlerClassName))[0];
       const handleRect = await handle._webElement.getRect();
       const handlePx = handleRect.x - dualBrushWrapperRect.x;
-      const handleFactor = handlePx < targetPx ? 1 : -1;
-      const dragAndDropOffsetPx = Math.abs(handlePx - targetPx) * handleFactor;
+      const dragAndDropOffsetPx = targetPx - handlePx;
 
       await browser.dragAndDrop(
         { location: handle, offset: { x: 0, y: 0 } },
