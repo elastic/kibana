@@ -41,6 +41,26 @@ describe('ALL - Live Query', () => {
     runKbnArchiverScript(ArchiverMethod.UNLOAD, 'example_pack');
   });
 
+  it('should validate the form', () => {
+    cy.contains('New live query').click();
+    submitQuery();
+    cy.contains('Agents is a required field');
+    cy.contains('Query is a required field');
+    cy.contains('ECS field is required.');
+    selectAllAgents();
+    inputQuery('select * from uptime; ');
+    submitQuery();
+    checkResults();
+    getAdvancedButton().click();
+    typeInOsqueryFieldInput('days{downArrow}{enter}');
+    submitQuery();
+    cy.contains('ECS field is required.');
+    typeInECSFieldInput('message{downArrow}{enter}');
+    submitQuery();
+
+    checkResults();
+  });
+
   it('should run query and enable ecs mapping', () => {
     const cmd = Cypress.platform === 'darwin' ? '{meta}{enter}' : '{ctrl}{enter}';
     cy.contains('New live query').click();

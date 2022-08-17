@@ -344,6 +344,13 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
     ecsMappingFormData: EcsMappingFormField[]
   ): string | undefined => {
     const currentMapping = ecsMappingFormData[index];
+
+    if (!value.length && currentMapping.key.length) {
+      return i18n.translate('xpack.osquery.pack.queryFlyoutForm.osqueryFieldRequiredErrorMessage', {
+        defaultMessage: 'Value field is required.',
+      });
+    }
+
     if (!value.length || currentMapping.result.type !== 'field') return;
 
     const osqueryColumnExists = find(euiFieldProps.options, [
