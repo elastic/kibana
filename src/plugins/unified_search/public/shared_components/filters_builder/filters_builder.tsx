@@ -46,6 +46,10 @@ export function FiltersBuilder({
 
   const handleMoveFilter = useCallback(
     (pathFrom: string, pathTo: string, conditionalType: ConditionTypes) => {
+      if (pathFrom === pathTo) {
+        return null;
+      }
+
       dispatch({
         type: 'moveFilter',
         payload: {
@@ -59,11 +63,11 @@ export function FiltersBuilder({
   );
 
   const onDragEnd: DragDropContextProps['onDragEnd'] = ({ combine, source, destination }) => {
-    if (source && destination && source.droppableId !== destination.droppableId) {
+    if (source && destination) {
       handleMoveFilter(source.droppableId, destination.droppableId, ConditionTypes.AND);
     }
 
-    if (source && combine && source.droppableId !== combine.droppableId) {
+    if (source && combine) {
       handleMoveFilter(source.droppableId, combine.droppableId, ConditionTypes.OR);
     }
     setDropTarget('');
