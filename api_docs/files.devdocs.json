@@ -182,6 +182,55 @@
           },
           {
             "parentPluginId": "files",
+            "id": "def-public.FilesClient.find",
+            "type": "Function",
+            "tags": [],
+            "label": "find",
+            "description": [
+              "\nFind a set of files given some filters.\n"
+            ],
+            "signature": [
+              "(args: { kind?: string[] | undefined; name?: string[] | undefined; meta?: {} | undefined; extension?: string[] | undefined; status?: string[] | undefined; } & ",
+              {
+                "pluginId": "files",
+                "scope": "common",
+                "docId": "kibFilesPluginApi",
+                "section": "def-common.Pagination",
+                "text": "Pagination"
+              },
+              ") => Promise<{ files: ",
+              {
+                "pluginId": "files",
+                "scope": "common",
+                "docId": "kibFilesPluginApi",
+                "section": "def-common.FileJSON",
+                "text": "FileJSON"
+              },
+              "<unknown>[]; }>"
+            ],
+            "path": "x-pack/plugins/files/public/types.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "files",
+                "id": "def-public.FilesClient.find.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "args",
+                "description": [
+                  "- File filters"
+                ],
+                "signature": [
+                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"]"
+                ],
+                "path": "x-pack/plugins/files/public/types.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "files",
             "id": "def-public.FilesClient.update",
             "type": "Function",
             "tags": [],
@@ -278,6 +327,246 @@
                 "label": "args",
                 "description": [
                   "- download file args"
+                ],
+                "signature": [
+                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"]"
+                ],
+                "path": "x-pack/plugins/files/public/types.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-public.FilesClient.share",
+            "type": "Function",
+            "tags": [
+              "note"
+            ],
+            "label": "share",
+            "description": [
+              "\nShare a file by creating a new file share instance.\n"
+            ],
+            "signature": [
+              "(args: { validUntil?: number | undefined; name?: string | undefined; } & { fileId: string; }) => Promise<",
+              {
+                "pluginId": "files",
+                "scope": "common",
+                "docId": "kibFilesPluginApi",
+                "section": "def-common.FileShareJSONWithToken",
+                "text": "FileShareJSONWithToken"
+              },
+              ">"
+            ],
+            "path": "x-pack/plugins/files/public/types.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "files",
+                "id": "def-public.FilesClient.share.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "args",
+                "description": [
+                  "- File share arguments"
+                ],
+                "signature": [
+                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"]"
+                ],
+                "path": "x-pack/plugins/files/public/types.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-public.FilesClient.unshare",
+            "type": "Function",
+            "tags": [],
+            "label": "unshare",
+            "description": [
+              "\nDelete a file share instance.\n"
+            ],
+            "signature": [
+              "(args: { id: string; }) => Promise<{ ok: true; }>"
+            ],
+            "path": "x-pack/plugins/files/public/types.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "files",
+                "id": "def-public.FilesClient.unshare.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "args",
+                "description": [
+                  "- File unshare arguments"
+                ],
+                "signature": [
+                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"]"
+                ],
+                "path": "x-pack/plugins/files/public/types.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-public.FilesClient.getShare",
+            "type": "Function",
+            "tags": [],
+            "label": "getShare",
+            "description": [
+              "\nGet a file share instance.\n"
+            ],
+            "signature": [
+              "(args: { id: string; }) => Promise<{ share: ",
+              {
+                "pluginId": "files",
+                "scope": "common",
+                "docId": "kibFilesPluginApi",
+                "section": "def-common.FileShareJSON",
+                "text": "FileShareJSON"
+              },
+              "; }>"
+            ],
+            "path": "x-pack/plugins/files/public/types.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "files",
+                "id": "def-public.FilesClient.getShare.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "args",
+                "description": [
+                  "- Get file share arguments"
+                ],
+                "signature": [
+                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"]"
+                ],
+                "path": "x-pack/plugins/files/public/types.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-public.FilesClient.listShares",
+            "type": "Function",
+            "tags": [],
+            "label": "listShares",
+            "description": [
+              "\nList all file shares. Optionally scoping to a specific\nfile.\n"
+            ],
+            "signature": [
+              "(args: ",
+              {
+                "pluginId": "files",
+                "scope": "common",
+                "docId": "kibFilesPluginApi",
+                "section": "def-common.Pagination",
+                "text": "Pagination"
+              },
+              " & { forFileId?: string | undefined; }) => Promise<{ shares: ",
+              {
+                "pluginId": "files",
+                "scope": "common",
+                "docId": "kibFilesPluginApi",
+                "section": "def-common.FileShareJSON",
+                "text": "FileShareJSON"
+              },
+              "[]; }>"
+            ],
+            "path": "x-pack/plugins/files/public/types.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "files",
+                "id": "def-public.FilesClient.listShares.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "args",
+                "description": [
+                  "- Get file share arguments"
+                ],
+                "signature": [
+                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"]"
+                ],
+                "path": "x-pack/plugins/files/public/types.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-public.FilesClient.getMetrics",
+            "type": "Function",
+            "tags": [],
+            "label": "getMetrics",
+            "description": [
+              "\nGet metrics of file system, like storage usage.\n"
+            ],
+            "signature": [
+              "(args: unknown) => Promise<",
+              {
+                "pluginId": "files",
+                "scope": "common",
+                "docId": "kibFilesPluginApi",
+                "section": "def-common.FilesMetrics",
+                "text": "FilesMetrics"
+              },
+              ">"
+            ],
+            "path": "x-pack/plugins/files/public/types.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "files",
+                "id": "def-public.FilesClient.getMetrics.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "args",
+                "description": [
+                  "- Get metrics arguments"
+                ],
+                "signature": [
+                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"]"
+                ],
+                "path": "x-pack/plugins/files/public/types.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-public.FilesClient.publicDownload",
+            "type": "Function",
+            "tags": [],
+            "label": "publicDownload",
+            "description": [
+              "\nDownload a file, bypassing regular security by way of a\nsecret share token.\n"
+            ],
+            "signature": [
+              "(args: { fileName?: string | undefined; } & { token: string; }) => Promise<any>"
+            ],
+            "path": "x-pack/plugins/files/public/types.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "files",
+                "id": "def-public.FilesClient.publicDownload.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "args",
+                "description": [
+                  "- Get public download arguments."
                 ],
                 "signature": [
                   "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"]"
