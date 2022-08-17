@@ -55,7 +55,6 @@ export function registerV1HealthRoute(server: MonitoringCore) {
         getNewIndexPatterns({ config, moduleType: 'kibana' }),
         getNewIndexPatterns({ config, moduleType: 'logstash' }),
         getLegacyIndexPattern({ config, moduleType: 'beats' }),
-        ,
       ].join(',');
       const entSearchIndex = getLegacyIndexPattern({ config, moduleType: 'enterprisesearch' });
 
