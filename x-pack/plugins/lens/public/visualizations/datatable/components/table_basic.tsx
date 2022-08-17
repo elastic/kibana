@@ -29,12 +29,12 @@ import {
 } from '@elastic/eui';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { ClickTriggerEvent } from '@kbn/charts-plugin/public';
+import { IconChartDatatable } from '@kbn/chart-icons';
 import type { LensTableRowContextMenuEvent } from '../../../types';
 import type { FormatFactory } from '../../../../common';
 import type { LensGridDirection } from '../../../../common/expressions';
 import { VisualizationContainer } from '../../../visualization_container';
 import { findMinMaxByColumnId } from '../../../shared_components';
-import { LensIconChartDatatable } from '../../../assets/chart_datatable';
 import type {
   DataContextType,
   DatatableRenderProps,
@@ -413,7 +413,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   if (isEmpty) {
     return (
       <VisualizationContainer className="lnsDataTableContainer">
-        <EmptyPlaceholder icon={LensIconChartDatatable} />
+        <EmptyPlaceholder icon={IconChartDatatable} />
       </VisualizationContainer>
     );
   }
