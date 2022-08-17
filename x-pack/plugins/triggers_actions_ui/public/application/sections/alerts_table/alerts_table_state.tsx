@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useCallback, useRef, useMemo, useReducer } from 'react';
+import React, { useState, useCallback, useRef, useMemo, useReducer, useEffect } from 'react';
 import { isEmpty } from 'lodash';
 import {
   EuiDataGridColumn,
@@ -135,8 +135,6 @@ const AlertsTableState = ({
     featureIds,
   });
 
-  console.log(browserFields);
-
   const hasAlertsTableConfiguration =
     alertsTableConfigurationRegistry?.has(configurationId) ?? false;
   const alertsTableConfiguration = hasAlertsTableConfiguration
@@ -146,16 +144,12 @@ const AlertsTableState = ({
   const storage = useRef(new Storage(window.localStorage));
   const localAlertsTableConfig = storage.current.get(id) as Partial<AlertsTableStorage>;
 
-  const columnsLocal = useMemo(() => {
-    const columnsInConfig =
-      localAlertsTableConfig &&
-      localAlertsTableConfig.columns &&
-      !isEmpty(localAlertsTableConfig?.columns)
-        ? localAlertsTableConfig?.columns ?? []
-        : alertsTableConfiguration?.columns ?? [];
-
-    return populateColumns(columnsInConfig, browserFields);
-  }, [alertsTableConfiguration?.columns, browserFields, localAlertsTableConfig]);
+  const columnsLocal =
+    localAlertsTableConfig &&
+    localAlertsTableConfig.columns &&
+    !isEmpty(localAlertsTableConfig?.columns)
+      ? localAlertsTableConfig?.columns ?? []
+      : alertsTableConfiguration?.columns ?? [];
 
   const storageAlertsTable = useRef<AlertsTableStorage>({
     columns: columnsLocal,
@@ -178,8 +172,16 @@ const AlertsTableState = ({
     ...DefaultPagination,
     pageSize: pageSize ?? DefaultPagination.pageSize,
   });
+  const [isColumnsPopulated, setIsColumnsPopulated] = useState(false);
   const [columns, setColumns] = useState<EuiDataGridColumn[]>(storageAlertsTable.current.columns);
-  console.log(columns);
+
+  useEffect(() => {
+    if (isBrowserFieldDataLoading || isColumnsPopulated) return;
+
+    setIsColumnsPopulated(true);
+    setColumns(populateColumns(columns, browserFields));
+  }, [browserFields, columns, isBrowserFieldDataLoading, isColumnsPopulated]);
+
   const [
     isLoading,
     {
