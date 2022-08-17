@@ -16,7 +16,7 @@ import { EuiLink, EuiTextColor, EuiButton, EuiSpacer } from '@elastic/eui';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { groupBy, escape } from 'lodash';
 import type { Query } from '@kbn/data-plugin/common';
-import type { FramePublicAPI, IndexPattern, StateSetter } from '../types';
+import type { FramePublicAPI, IndexPattern, IndexPatternField, StateSetter } from '../types';
 import type { IndexPatternLayer, IndexPatternPrivateState } from './types';
 import type { ReferenceBasedIndexPatternColumn } from './operations/definitions/column_types';
 
@@ -158,6 +158,13 @@ const accuracyModeEnabledWarning = (columnName: string, docLink: string) => (
     }}
   />
 );
+
+export function getFieldType(field: IndexPatternField) {
+  if (field.timeSeriesMetricType) {
+    return field.timeSeriesMetricType;
+  }
+  return field.type;
+}
 
 export function getPrecisionErrorWarningMessages(
   datatableUtilities: DatatableUtilitiesService,

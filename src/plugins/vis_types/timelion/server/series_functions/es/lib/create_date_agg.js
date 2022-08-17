@@ -23,7 +23,7 @@ export default function createDateAgg(config, tlConfig, scriptFields) {
           max: tlConfig.time.to,
         },
         min_doc_count: 0,
-        ...dateHistogramInterval(config.interval),
+        ...dateHistogramInterval(config.interval, config.forceFixedInterval),
       },
     },
   };

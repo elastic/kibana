@@ -62,6 +62,19 @@ export function getSortScoreByPriority(
   return (b.priority || Number.NEGATIVE_INFINITY) - (a.priority || Number.NEGATIVE_INFINITY);
 }
 
+export const getSortScoreByPriorityForField =
+  (field?: IndexPatternField) => (a: GenericOperationDefinition, b: GenericOperationDefinition) => {
+    if (
+      field &&
+      field.softRestrictions &&
+      field.softRestrictions[a.type] !== field.softRestrictions[b.type]
+    ) {
+      if (field.softRestrictions[a.type]) return 1;
+      return -1;
+    }
+    return (b.priority || Number.NEGATIVE_INFINITY) - (a.priority || Number.NEGATIVE_INFINITY);
+  };
+
 export function getCurrentFieldsForOperation(targetColumn: BaseIndexPatternColumn) {
   if (!hasField(targetColumn)) {
     return [];
@@ -111,7 +124,7 @@ export function getOperationTypesForField(
         ? possibleOperation && filterOperations(possibleOperation)
         : possibleOperation;
     })
-    .sort(getSortScoreByPriority)
+    .sort(getSortScoreByPriorityForField(field))
     .map(({ type }) => type);
 }
 

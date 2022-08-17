@@ -38,7 +38,7 @@ import {
   adjustColumnReferencesForChangedColumn,
 } from '../operations';
 import { mergeLayer } from '../state_helpers';
-import { hasField } from '../pure_utils';
+import { getReferencedField, hasField } from '../pure_utils';
 import { fieldIsInvalid } from '../utils';
 import { BucketNestingEditor } from './bucket_nesting_editor';
 import type { IndexPatternLayer } from '../types';
@@ -288,15 +288,19 @@ export function DimensionEditor(props: DimensionEditorProps) {
     };
   }, []);
 
+  const currentField =
+    selectedColumn &&
+    hasField(selectedColumn) &&
+    currentIndexPattern.getFieldByName(selectedColumn.sourceField);
+
+  const referencedField =
+    currentField || getReferencedField(selectedColumn, currentIndexPattern, state.layers[layerId]);
+
   // Operations are compatible if they match inputs. They are always compatible in
   // the empty state. Field-based operations are not compatible with field-less operations.
   const operationsWithCompatibility = possibleOperations.map((operationType) => {
     const definition = operationDefinitionMap[operationType];
 
-    const currentField =
-      selectedColumn &&
-      hasField(selectedColumn) &&
-      currentIndexPattern.getFieldByName(selectedColumn.sourceField);
     return {
       operationType,
       compatibleWithCurrentField: canTransition({
@@ -327,7 +331,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     temporaryState === 'none' ||
     (selectedColumn?.operationType != null && isQuickFunction(selectedColumn?.operationType));
 
-  const sideNavItems: EuiListGroupItemProps[] = operationsWithCompatibility.map(
+  let sideNavItems: EuiListGroupItemProps[] = operationsWithCompatibility.map(
     ({ operationType, compatibleWithCurrentField, disabledStatus }) => {
       const isActive = Boolean(
         incompleteOperation === operationType ||
@@ -516,6 +520,21 @@ export function DimensionEditor(props: DimensionEditorProps) {
       };
     }
   );
+  const softRestrictedSideNavItems = sideNavItems.filter(
+    (navItem) =>
+      referencedField &&
+      referencedField.softRestrictions &&
+      referencedField.softRestrictions[navItem.id!]
+  );
+  if (softRestrictedSideNavItems.length > 0) {
+    sideNavItems = sideNavItems.filter(
+      (navItem) =>
+        !referencedField ||
+        !referencedField.softRestrictions ||
+        !referencedField.softRestrictions[navItem.id!]
+    );
+  }
+  const hasSoftRestrictedSideNavItems = softRestrictedSideNavItems.length > 0;
 
   const shouldDisplayExtraOptions =
     !currentFieldIsInvalid &&
@@ -570,9 +589,15 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const quickFunctions = (
     <>
       <EuiFormRow
-        label={i18n.translate('xpack.lens.indexPattern.functionsLabel', {
-          defaultMessage: 'Function',
-        })}
+        label={
+          hasSoftRestrictedSideNavItems
+            ? i18n.translate('xpack.lens.indexPattern.regularFunctionsLabel', {
+                defaultMessage: 'Regular functions',
+              })
+            : i18n.translate('xpack.lens.indexPattern.functionsLabel', {
+                defaultMessage: 'Functions',
+              })
+        }
         fullWidth
       >
         <EuiListGroup
@@ -587,6 +612,49 @@ export function DimensionEditor(props: DimensionEditorProps) {
           maxWidth={false}
         />
       </EuiFormRow>
+      {hasSoftRestrictedSideNavItems && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiFormRow
+            fullWidth
+            label={
+              <>
+                {i18n.translate('xpack.lens.indexPattern.softRestrictedFunctionsLabel', {
+                  defaultMessage: 'Partially applicable functions',
+                })}
+                <EuiIconTip
+                  content={i18n.translate(
+                    'xpack.lens.indexPattern.softRestrictedFunctionsLabel.hint',
+                    {
+                      defaultMessage:
+                        "These functions can't be applied to the full time range of your data. This happens if you are rolling up historical data. You can stil use these functions - if the results are partial, a warning is shown on the chart",
+                    }
+                  )}
+                  position="right"
+                />
+              </>
+            }
+          >
+            <EuiListGroup
+              className={
+                softRestrictedSideNavItems.length > 3
+                  ? 'lnsIndexPatternDimensionEditor__columns'
+                  : ''
+              }
+              gutterSize="none"
+              color="primary"
+              listItems={
+                // add a padding item containing a non breakable space if the number of operations is not even
+                // otherwise the column layout will break within an element
+                softRestrictedSideNavItems.length % 2 === 1
+                  ? [...softRestrictedSideNavItems, { label: '\u00a0' }]
+                  : softRestrictedSideNavItems
+              }
+              maxWidth={false}
+            />
+          </EuiFormRow>
+        </>
+      )}
 
       {shouldDisplayReferenceEditor ? (
         <>

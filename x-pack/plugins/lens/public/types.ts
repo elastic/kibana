@@ -73,6 +73,12 @@ export interface IndexPattern {
 export type IndexPatternField = FieldSpec & {
   displayName: string;
   aggregationRestrictions?: Partial<IndexPatternAggRestrictions>;
+  /**
+   * Map of fields which can be used, but may fail partially (ranked lower than others)
+   */
+  softRestrictions?: Partial<Record<string, boolean>>;
+  timeSeriesMetricType?: 'histogram' | 'summary' | 'gauge' | 'counter';
+  timeSeriesRollup?: boolean;
   meta?: boolean;
   runtime?: boolean;
 };
@@ -591,6 +597,8 @@ export type FieldOnlyDataType =
   | 'histogram'
   | 'geo_point'
   | 'geo_shape'
+  | 'counter'
+  | 'gauge'
   | 'murmur3';
 export type DataType = 'string' | 'number' | 'date' | 'boolean' | FieldOnlyDataType;
 
