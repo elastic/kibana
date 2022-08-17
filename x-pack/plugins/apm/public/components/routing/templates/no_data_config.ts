@@ -22,7 +22,7 @@ export function getNoDataConfig({
   basePath?: string;
   hasApmData?: boolean;
   hasApmIntegrations?: boolean;
-}): NoDataConfig {
+}): NoDataConfig | undefined {
   // don't show "no data screen" when there is APM data or it should be bypassed
   if (hasApmData || shouldBypassNoDataScreen || loading) {
     return;

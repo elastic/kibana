@@ -32,13 +32,18 @@ describe('Kibana No Data Page', () => {
   };
 
   const onDataViewCreated = jest.fn();
+  const config = {
+    hasESData: false,
+    hasDataView: false,
+    hasUserDataView: false,
+  };
 
   afterEach(() => {
     jest.resetAllMocks();
   });
 
   test('renders NoDataConfigPage', async () => {
-    const services = getKibanaNoDataPageServicesMock({ hasESData: false });
+    const services = getKibanaNoDataPageServicesMock(config);
     const component = mountWithIntl(
       <KibanaNoDataPageProvider {...services}>
         <KibanaNoDataPage {...{ noDataConfig, onDataViewCreated }} />
@@ -53,7 +58,7 @@ describe('Kibana No Data Page', () => {
   });
 
   test('renders NoDataViews', async () => {
-    const services = getKibanaNoDataPageServicesMock({ hasESData: true });
+    const services = getKibanaNoDataPageServicesMock({ ...config, hasESData: true });
     const component = mountWithIntl(
       <KibanaNoDataPageProvider {...services}>
         <KibanaNoDataPage noDataConfig={noDataConfig} onDataViewCreated={onDataViewCreated} />

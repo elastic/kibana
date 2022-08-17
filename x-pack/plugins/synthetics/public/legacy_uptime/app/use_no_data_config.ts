@@ -14,7 +14,7 @@ import { UptimeSettingsContext } from '../contexts';
 import { ClientPluginsStart } from '../../plugin';
 import { indexStatusSelector } from '../state/selectors';
 
-export function useNoDataConfig(): NoDataConfig {
+export function useNoDataConfig(): NoDataConfig | undefined {
   const { basePath } = useContext(UptimeSettingsContext);
 
   const {

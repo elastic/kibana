@@ -17,7 +17,7 @@ export function getNoDataConfig({
   docsLink: string;
   basePath: IBasePath;
   hasData?: boolean;
-}): NoDataConfig {
+}): NoDataConfig | undefined {
   if (hasData === false) {
     return {
       solution: i18n.translate('xpack.observability.noDataConfig.solutionName', {

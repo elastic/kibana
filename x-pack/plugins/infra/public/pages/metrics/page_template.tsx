@@ -33,7 +33,7 @@ export const MetricsPageTemplate: React.FC<MetricsPageTemplateProps> = ({
     },
   } = useKibanaContextForPlugin();
 
-  const noDataConfig: NoDataConfig = hasData
+  const noDataConfig: NoDataConfig | undefined = hasData
     ? undefined
     : {
         solution: i18n.translate('xpack.infra.metrics.noDataConfig.solutionName', {

@@ -8,15 +8,16 @@
 
 import { EuiPageTemplateProps } from '@elastic/eui';
 import { SolutionNavProps } from '@kbn/shared-ux-page-solution-nav';
+
 import {
-  NoDataPageProps,
+  NoDataConfig,
   NoDataConfigPageServices,
   NoDataConfigPageKibanaDependencies,
 } from '@kbn/shared-ux-page-no-data-config-types';
 
 export type KibanaPageTemplateKibanaDependencies = NoDataConfigPageKibanaDependencies;
 export type KibanaPageTemplateServices = NoDataConfigPageServices;
-export type NoDataConfig = NoDataPageProps;
+export type { NoDataConfig } from '@kbn/shared-ux-page-no-data-config-types';
 
 export type KibanaPageTemplateProps = EuiPageTemplateProps & {
   /**

@@ -13,26 +13,46 @@ import {
   RedirectAppLinksKibanaDependencies,
 } from '@kbn/shared-ux-link-redirect-app-types';
 
+type Params = Pick<RedirectAppLinksServices, 'navigateToUrl'>;
+
+const defaultParams: Params = {
+  navigateToUrl: jest.fn(),
+};
+
 /**
  * Returns the Jest-compatible service abstractions for the `NoDataCard` Provider.
  */
-export const getRedirectAppLinksServicesMock = () => {
+export const getRedirectAppLinksServicesMock = (
+  params?: Partial<Params>
+): RedirectAppLinksServices => {
+  const navigateToUrl =
+    params && params.navigateToUrl !== undefined
+      ? params.navigateToUrl
+      : defaultParams.navigateToUrl;
+
   const services: RedirectAppLinksServices = {
-    navigateToUrl: jest.fn(),
+    navigateToUrl,
     currentAppId: 'currentAppId',
   };
 
   return services;
 };
 
-export const getRedirectAppLinksKibanaDependenciesMock = (): RedirectAppLinksKibanaDependencies => {
+export const getRedirectAppLinksKibanaDependenciesMock = (
+  params?: Partial<Params>
+): RedirectAppLinksKibanaDependencies => {
+  const navigateToUrl =
+    params && params.navigateToUrl !== undefined
+      ? params.navigateToUrl
+      : defaultParams.navigateToUrl;
+
   return {
     coreStart: {
       application: {
         currentAppId$: new Observable<string>((subscriber) => {
           subscriber.next('currentAppId');
         }),
-        navigateToUrl: jest.fn(),
+        navigateToUrl,
       },
     },
   };

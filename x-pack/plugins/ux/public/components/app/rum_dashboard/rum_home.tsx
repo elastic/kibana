@@ -30,7 +30,7 @@ export function RumHome() {
 
   const { hasData, loading: isLoading } = useHasRumData();
 
-  const noDataConfig: NoDataConfig = !hasData
+  const noDataConfig: NoDataConfig | undefined = !hasData
     ? {
         solution: i18n.translate('xpack.ux.overview.solutionName', {
           defaultMessage: 'Observability',

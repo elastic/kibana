@@ -35,7 +35,7 @@ export const LogsPageTemplate: React.FC<LogsPageTemplateProps> = ({
   const { http } = useKibana().services;
   const basePath = http!.basePath.get();
 
-  const noDataConfig: NoDataConfig = hasData
+  const noDataConfig: NoDataConfig | undefined = hasData
     ? undefined
     : {
         solution: i18n.translate('xpack.infra.logs.noDataConfig.solutionName', {

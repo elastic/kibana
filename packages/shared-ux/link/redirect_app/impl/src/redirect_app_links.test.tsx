@@ -255,8 +255,8 @@ describe('RedirectAppLinks', () => {
     navigateToUrl.mockReset();
   });
 
-  const kibana = getRedirectAppLinksKibanaDependenciesMock();
-  const services = getRedirectAppLinksServicesMock();
+  const kibana = getRedirectAppLinksKibanaDependenciesMock({ navigateToUrl });
+  const services = getRedirectAppLinksServicesMock({ navigateToUrl });
 
   const provider = (node: React.ReactElement) =>
     enzymeMount(<RedirectAppLinksProvider {...services}>{node}</RedirectAppLinksProvider>);
