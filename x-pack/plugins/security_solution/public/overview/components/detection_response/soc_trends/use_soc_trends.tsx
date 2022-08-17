@@ -37,7 +37,7 @@ export const useSocTrends = ({ skip = false }) => {
           abortCtrl.signal
         );
 
-        if (isSubscribed && casesResponse.mttr) {
+        if (isSubscribed && casesResponse.mttr !== undefined) {
           setCasesMttr(casesResponse.mttr);
         }
       } catch (error) {

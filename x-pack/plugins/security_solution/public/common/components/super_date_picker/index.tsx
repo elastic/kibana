@@ -70,6 +70,7 @@ export type DispatchUpdateReduxTime = ({
 interface OwnProps {
   disabled?: boolean;
   id: InputsModelId;
+  showUpdateButton?: boolean | 'iconOnly';
   timelineId?: string;
 }
 
@@ -86,6 +87,7 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
     policy,
     queries,
     setDuration,
+    showUpdateButton = true,
     start,
     startAutoReload,
     stopAutoReload,
@@ -94,6 +96,7 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
     updateReduxTime,
     disabled,
   }) => {
+    console.log('super date picker id', id);
     const [recentlyUsedRanges, setRecentlyUsedRanges] = useState<EuiSuperDatePickerRecentRange[]>(
       []
     );
@@ -201,7 +204,7 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
         onTimeChange={onTimeChange}
         recentlyUsedRanges={recentlyUsedRanges}
         refreshInterval={duration}
-        showUpdateButton={true}
+        showUpdateButton={showUpdateButton}
         start={startDate}
         isDisabled={disabled}
       />
@@ -246,6 +249,10 @@ export const dispatchUpdateReduxTime =
     start,
     timelineId,
   }: UpdateReduxTime): ReturnUpdateReduxTime => {
+    console.log('dispatchUpdateReduxTime', {
+      end,
+      start,
+    });
     const fromDate = formatDate(start);
     let toDate = formatDate(end, { roundUp: true });
     if (isQuickSelection) {
@@ -313,7 +320,6 @@ export const makeMapStateToProps = () => {
   const getToStrSelector = toStrSelector();
   return (state: State, { id }: OwnProps) => {
     const inputsRange: InputsRange = getOr({}, `inputs.${id}`, state);
-
     return {
       duration: getDurationSelector(inputsRange),
       end: getEndSelector(inputsRange),

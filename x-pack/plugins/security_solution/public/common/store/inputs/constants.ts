@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export type InputsModelId = 'global' | 'timeline';
+export type InputsModelId = 'global' | 'timeline' | 'socTrends';
 export type TimeRangeKinds = 'absolute' | 'relative';

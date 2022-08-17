@@ -93,6 +93,7 @@ export interface LinkTo {
 export interface InputsModel {
   global: InputsRange;
   timeline: InputsRange;
+  socTrends: InputsRange;
 }
 export interface UrlInputsModelInputs {
   linkTo: InputsModelId[];

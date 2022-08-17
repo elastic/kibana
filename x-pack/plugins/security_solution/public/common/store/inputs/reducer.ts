@@ -77,6 +77,21 @@ export const initialInputsState: InputsState = {
     filters: [],
     fullScreen: false,
   },
+  socTrends: {
+    timerange: {
+      kind: 'relative',
+      ...getTimeRangeSettings(false),
+    },
+    queries: [],
+    policy: getIntervalSettings(false),
+    linkTo: ['socTrends'],
+    query: {
+      query: '',
+      language: 'kuery',
+    },
+    filters: [],
+    fullScreen: false,
+  },
 };
 
 export const createInitialInputsState = (): InputsState => {
@@ -126,6 +141,27 @@ export const createInitialInputsState = (): InputsState => {
       filters: [],
       fullScreen: false,
     },
+    socTrends: {
+      timerange: {
+        kind: 'relative',
+        fromStr,
+        toStr,
+        from,
+        to,
+      },
+      queries: [],
+      policy: {
+        kind,
+        duration,
+      },
+      linkTo: ['socTrends'],
+      query: {
+        query: '',
+        language: 'kuery',
+      },
+      filters: [],
+      fullScreen: false,
+    },
   };
 };
 
@@ -153,6 +189,7 @@ export const inputsReducer = reducerWithInitialState(initialInputsState)
   .case(
     setAbsoluteRangeDatePicker,
     (state, { id, from, to, fromStr = undefined, toStr = undefined }) => {
+      console.log('setAbsoluteRangeDatePicker', id);
       const timerange: TimeRange = {
         kind: 'absolute',
         fromStr,
@@ -164,6 +201,7 @@ export const inputsReducer = reducerWithInitialState(initialInputsState)
     }
   )
   .case(setRelativeRangeDatePicker, (state, { id, fromStr, from, to, toStr }) => {
+    console.log('setRelativeRangeDatePicker', id);
     const timerange: TimeRange = {
       kind: 'relative',
       fromStr,
