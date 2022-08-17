@@ -8,6 +8,7 @@
 import React, { memo, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
+import { parsedPidOrEntityIdParameter } from './utils';
 import { ActionSuccess } from './action_success';
 import type {
   ActionDetails,
@@ -17,7 +18,6 @@ import { useGetActionDetails } from '../../hooks/endpoint/use_get_action_details
 import type { EndpointCommandDefinitionMeta } from './types';
 import { useSendKillProcessRequest } from '../../hooks/endpoint/use_send_kill_process_endpoint_request';
 import type { CommandExecutionComponentProps } from '../console/types';
-import { parsedPidOrEntityIdParameter } from '../console/service/parsed_command_input';
 import { ActionError } from './action_error';
 import { ACTION_DETAILS_REFRESH_INTERVAL } from './constants';
 
