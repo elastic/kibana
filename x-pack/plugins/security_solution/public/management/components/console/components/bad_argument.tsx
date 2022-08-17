@@ -31,7 +31,7 @@ export const BadArgument = memo<CommandExecutionComponentProps<{}, { errorMessag
     return (
       <UnsupportedMessageCallout
         header={
-          <ConsoleCodeBlock textColor="error">
+          <ConsoleCodeBlock textColor="danger">
             <FormattedMessage
               id="xpack.securitySolution.console.badArgument.title"
               defaultMessage="Unsupported argument"

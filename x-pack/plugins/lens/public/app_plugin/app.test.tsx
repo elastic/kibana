@@ -897,8 +897,7 @@ describe('Lens App', () => {
           });
         });
         expect(checkForDuplicateTitle).toHaveBeenCalledWith(
-          expect.objectContaining({ id: '123' }),
-          false,
+          expect.objectContaining({ id: '123', isTitleDuplicateConfirmed: false }),
           onTitleDuplicate,
           expect.anything()
         );
