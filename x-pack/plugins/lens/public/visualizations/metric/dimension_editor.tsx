@@ -16,6 +16,7 @@ import {
   htmlIdGenerator,
   EuiColorPicker,
   euiPaletteColorBlind,
+  EuiSpacer,
 } from '@elastic/eui';
 import { LayoutDirection } from '@elastic/charts';
 import React, { useCallback, useState } from 'react';
@@ -186,68 +187,69 @@ function SecondaryMetricEditor({ accessor, idPrefix, frame, layerId, setState, s
           defaultMessage: 'Prefix',
         })}
       >
-        <EuiButtonGroup
-          isFullWidth
-          buttonSize="compressed"
-          legend={i18n.translate('xpack.lens.metric.prefix.label', {
-            defaultMessage: 'Prefix',
-          })}
-          data-test-subj="lnsMetric_prefix_buttons"
-          options={[
-            {
-              id: `${idPrefix}auto`,
-              label: i18n.translate('xpack.lens.metric.prefix.auto', {
-                defaultMessage: 'Auto',
-              }),
-              'data-test-subj': 'lnsMetric_prefix_auto',
-              value: undefined,
-            },
-            {
-              id: `${idPrefix}custom`,
-              label: i18n.translate('xpack.lens.metric.prefix.custom', {
-                defaultMessage: 'Custom',
-              }),
-              'data-test-subj': 'lnsMetric_prefix_custom',
-              value: defaultPrefix,
-            },
-            {
-              id: `${idPrefix}none`,
-              label: i18n.translate('xpack.lens.metric.prefix.none', {
-                defaultMessage: 'None',
-              }),
-              'data-test-subj': 'lnsMetric_prefix_none',
-              value: '',
-            },
-          ]}
-          idSelected={`${idPrefix}${
-            state.secondaryPrefix === undefined
-              ? 'auto'
-              : state.secondaryPrefix === ''
-              ? 'none'
-              : 'custom'
-          }`}
-          onChange={(_id, secondaryPrefix) => {
-            setState({
-              ...state,
-              secondaryPrefix,
-            });
-          }}
-        />
-      </EuiFormRow>
-      {state.secondaryPrefix && (
-        <EuiFormRow label=" " fullWidth display="columnCompressed">
-          <DebouncedInput
-            compressed
-            value={state.secondaryPrefix}
-            onChange={(newPrefix) => {
+        <div>
+          <EuiButtonGroup
+            isFullWidth
+            buttonSize="compressed"
+            legend={i18n.translate('xpack.lens.metric.prefix.label', {
+              defaultMessage: 'Prefix',
+            })}
+            data-test-subj="lnsMetric_prefix_buttons"
+            options={[
+              {
+                id: `${idPrefix}auto`,
+                label: i18n.translate('xpack.lens.metric.prefix.auto', {
+                  defaultMessage: 'Auto',
+                }),
+                'data-test-subj': 'lnsMetric_prefix_auto',
+                value: undefined,
+              },
+              {
+                id: `${idPrefix}custom`,
+                label: i18n.translate('xpack.lens.metric.prefix.custom', {
+                  defaultMessage: 'Custom',
+                }),
+                'data-test-subj': 'lnsMetric_prefix_custom',
+                value: defaultPrefix,
+              },
+              {
+                id: `${idPrefix}none`,
+                label: i18n.translate('xpack.lens.metric.prefix.none', {
+                  defaultMessage: 'None',
+                }),
+                'data-test-subj': 'lnsMetric_prefix_none',
+                value: '',
+              },
+            ]}
+            idSelected={`${idPrefix}${
+              state.secondaryPrefix === undefined
+                ? 'auto'
+                : state.secondaryPrefix === ''
+                ? 'none'
+                : 'custom'
+            }`}
+            onChange={(_id, secondaryPrefix) => {
               setState({
                 ...state,
-                secondaryPrefix: newPrefix,
+                secondaryPrefix,
               });
             }}
           />
-        </EuiFormRow>
-      )}
+          <EuiSpacer size="s" />
+          {state.secondaryPrefix && (
+            <DebouncedInput
+              compressed
+              value={state.secondaryPrefix}
+              onChange={(newPrefix) => {
+                setState({
+                  ...state,
+                  secondaryPrefix: newPrefix,
+                });
+              }}
+            />
+          )}
+        </div>
+      </EuiFormRow>
     </div>
   );
 }
