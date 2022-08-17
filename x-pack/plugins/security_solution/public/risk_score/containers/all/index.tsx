@@ -23,6 +23,7 @@ import { isIndexNotFoundError } from '../../../common/utils/exceptions';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import type { inputsModel } from '../../../common/store';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
+import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
 
 export interface RiskScoreState<T extends RiskQueries.hostsRiskScore | RiskQueries.usersRiskScore> {
   data: undefined | StrategyResponseType<T>['data'];
