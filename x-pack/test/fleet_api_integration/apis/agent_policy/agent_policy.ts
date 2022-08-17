@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import { FLEET_AGENT_POLICIES_SCHEMA_VERSION } from '@kbn/fleet-plugin/server/constants';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
@@ -16,17 +17,20 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-
   describe('fleet_agent_policies', () => {
     skipIfNoDockerRegistry(providerContext);
     describe('POST /api/fleet/agent_policies', () => {
+      let systemPkgVersion: string;
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
         await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
       });
       setupFleetAndAgents(providerContext);
-      const packagePoliciesToDeleteIds: string[] = [];
+      let packagePoliciesToDeleteIds: string[] = [];
       after(async () => {
+        if (systemPkgVersion) {
+          await supertest.delete(`/api/fleet/epm/packages/system-${systemPkgVersion}`);
+        }
         if (packagePoliciesToDeleteIds.length > 0) {
           await kibanaServer.savedObjects.bulkDelete({
             objects: packagePoliciesToDeleteIds.map((id) => ({
@@ -173,20 +177,36 @@ export default function (providerContext: FtrProviderContext) {
 
       it('should allow to create policy with the system integration policy and increment correctly the name if there is more than 10 package policy', async () => {
         // load a bunch of fake system integration policy
-        for (let i = 0; i < 10; i++) {
-          await kibanaServer.savedObjects.create({
-            id: `package-policy-test-${i}`,
-            type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-            overwrite: true,
-            attributes: {
-              name: `system-${i + 1}`,
-              package: {
-                name: 'system',
+        const policyIds = new Array(10).fill(null).map((_, i) => `package-policy-test-${i}`);
+        packagePoliciesToDeleteIds = packagePoliciesToDeleteIds.concat(policyIds);
+        const getPkRes = await supertest
+          .get(`/api/fleet/epm/packages/system`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+        systemPkgVersion = getPkRes.body.item.version;
+        // we must first force install the system package to override package verification error on policy create
+        const installPromise = supertest
+          .post(`/api/fleet/epm/packages/system-${systemPkgVersion}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ force: true })
+          .expect(200);
+
+        await Promise.all([
+          installPromise,
+          ...policyIds.map((policyId, i) =>
+            kibanaServer.savedObjects.create({
+              id: policyId,
+              type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+              overwrite: true,
+              attributes: {
+                name: `system-${i + 1}`,
+                package: {
+                  name: 'system',
+                },
               },
-            },
-          });
-          packagePoliciesToDeleteIds.push(`package-policy-test-${i}`);
-        }
+            })
+          ),
+        ]);
 
         // first one succeeds
         const res = await supertest
@@ -293,6 +313,7 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
           monitoring_enabled: ['logs', 'metrics'],
           revision: 1,
+          schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
           updated_by: 'elastic',
           package_policies: [],
         });
@@ -473,6 +494,7 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
           is_managed: false,
           revision: 2,
+          schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
           updated_by: 'elastic',
           package_policies: [],
         });
@@ -575,7 +597,8 @@ export default function (providerContext: FtrProviderContext) {
         );
       });
 
-      it('should return a 200 if updating monitoring_enabled on a policy', async () => {
+      // Skipped as cannot force install the system and agent integrations as part of policy creation https://github.com/elastic/kibana/issues/137450
+      it.skip('should return a 200 if updating monitoring_enabled on a policy', async () => {
         const fetchPackageList = async () => {
           const response = await supertest
             .get('/api/fleet/epm/packages')
@@ -632,6 +655,7 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
           is_managed: false,
           revision: 2,
+          schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
           updated_by: 'elastic',
           package_policies: [],
           monitoring_enabled: ['logs', 'metrics'],

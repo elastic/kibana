@@ -5,21 +5,24 @@
  * 2.0.
  */
 
-import React, { useState, VFC } from 'react';
+import React, { VFC } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Indicator } from '../../../../../common/types/indicator';
-import { IndicatorsFlyout } from '../indicators_flyout/indicators_flyout';
 
 export const BUTTON_TEST_ID = 'tiToggleIndicatorFlyoutButton';
 
 export interface OpenIndicatorFlyoutButtonProps {
   indicator: Indicator;
+  onOpen: (indicator: Indicator) => void;
+  isOpen: boolean;
 }
 
-export const OpenIndicatorFlyoutButton: VFC<OpenIndicatorFlyoutButtonProps> = ({ indicator }) => {
-  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
-
+export const OpenIndicatorFlyoutButton: VFC<OpenIndicatorFlyoutButtonProps> = ({
+  indicator,
+  onOpen,
+  isOpen,
+}) => {
   const buttonLabel: string = i18n.translate(
     'xpack.threatIntelligence.indicator.table.viewDetailsButton',
     {
@@ -32,17 +35,14 @@ export const OpenIndicatorFlyoutButton: VFC<OpenIndicatorFlyoutButtonProps> = ({
       <EuiToolTip content={buttonLabel} delay="long">
         <EuiButtonIcon
           data-test-subj={BUTTON_TEST_ID}
-          color={isFlyoutOpen ? 'primary' : 'text'}
-          iconType={isFlyoutOpen ? 'minimize' : 'expand'}
-          isSelected={isFlyoutOpen}
+          color={isOpen ? 'primary' : 'text'}
+          iconType={isOpen ? 'minimize' : 'expand'}
+          isSelected={isOpen}
           iconSize="s"
           aria-label={buttonLabel}
-          onClick={() => setIsFlyoutOpen(!isFlyoutOpen)}
+          onClick={() => onOpen(indicator)}
         />
       </EuiToolTip>
-      {isFlyoutOpen && (
-        <IndicatorsFlyout indicator={indicator} closeFlyout={() => setIsFlyoutOpen(false)} />
-      )}
     </>
   );
 };

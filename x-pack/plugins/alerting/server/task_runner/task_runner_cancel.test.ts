@@ -120,6 +120,7 @@ describe('Task Runner Cancel', () => {
     kibanaBaseUrl: 'https://localhost:5601',
     supportsEphemeralTasks: false,
     maxEphemeralActionsPerRule: 10,
+    maxAlerts: 1000,
     cancelAlertsOnRuleTimeout: true,
     usageCounter: mockUsageCounter,
     actionsConfigMap: {
@@ -414,7 +415,7 @@ describe('Task Runner Cancel', () => {
     );
     expect(logger.debug).nthCalledWith(
       7,
-      'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":1,"numberOfGeneratedActions":1,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":1,"triggeredActionsStatus":"complete"}'
+      'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":1,"numberOfGeneratedActions":1,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":1,"hasReachedAlertLimit":false,"triggeredActionsStatus":"complete"}'
     );
   }
 
@@ -428,6 +429,7 @@ describe('Task Runner Cancel', () => {
     status,
     logAlert = 0,
     logAction = 0,
+    hasReachedAlertLimit = false,
   }: {
     status: string;
     ruleContext?: RuleContextOpts;
@@ -439,6 +441,7 @@ describe('Task Runner Cancel', () => {
     setRuleName?: boolean;
     logAlert?: number;
     logAction?: number;
+    hasReachedAlertLimit?: boolean;
   }) {
     expect(alertingEventLogger.initialize).toHaveBeenCalledWith(ruleContext);
     expect(alertingEventLogger.start).toHaveBeenCalled();
@@ -455,6 +458,7 @@ describe('Task Runner Cancel', () => {
         numberOfRecoveredAlerts: recoveredAlerts,
         numberOfTriggeredActions: triggeredActions,
         totalSearchDurationMs: 23423,
+        hasReachedAlertLimit,
         triggeredActionsStatus: 'complete',
       },
       status: {

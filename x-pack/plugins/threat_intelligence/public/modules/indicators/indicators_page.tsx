@@ -6,9 +6,10 @@
  */
 
 import React, { VFC } from 'react';
+import { IndicatorsBarChartWrapper } from './components/indicators_barchart_wrapper/indicators_barchart_wrapper';
 import { IndicatorsTable } from './components/indicators_table/indicators_table';
 import { useIndicators } from './hooks/use_indicators';
-import { EmptyPage } from '../../components/empty_page';
+import { EmptyPage } from '../empty_page';
 import { useIndicatorsTotalCount } from './hooks/use_indicators_total_count';
 import { DefaultPageLayout } from '../../components/layout';
 import { useFilters } from './hooks/use_filters';
@@ -18,7 +19,6 @@ import QueryBar from './components/query_bar';
 export const IndicatorsPage: VFC = () => {
   const { count: indicatorsTotalCount, isLoading: isIndicatorsTotalCountLoading } =
     useIndicatorsTotalCount();
-  const showEmptyPage = !isIndicatorsTotalCountLoading && indicatorsTotalCount === 0;
 
   const {
     timeRange,
@@ -37,6 +37,15 @@ export const IndicatorsPage: VFC = () => {
     filterQuery,
     timeRange,
   });
+
+  // This prevents indicators table flash when total count is loading.
+  // TODO: Improve this with custom loader component. It would require changes to security solutions' template wrapper - to allow
+  // 'template' overrides.
+  if (isIndicatorsTotalCountLoading) {
+    return null;
+  }
+
+  const showEmptyPage = indicatorsTotalCount === 0;
 
   return showEmptyPage ? (
     <EmptyPage />
@@ -59,8 +68,8 @@ export const IndicatorsPage: VFC = () => {
           onSubmitDateRange={handleSubmitTimeRange}
         />
       </FiltersGlobal>
-
-      <IndicatorsTable {...indicators} />
+      <IndicatorsBarChartWrapper timeRange={timeRange} indexPatterns={indexPatterns} />
+      <IndicatorsTable {...indicators} indexPatterns={indexPatterns} />
     </DefaultPageLayout>
   );
 };

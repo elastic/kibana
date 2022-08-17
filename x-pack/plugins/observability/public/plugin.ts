@@ -37,6 +37,7 @@ import {
   ActionTypeRegistryContract,
   RuleTypeRegistryContract,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { observabilityAppId, observabilityFeatureId, casesPath } from '../common';
 import { createLazyObservabilityPageTemplate } from './components/shared';
 import { registerDataHandler } from './data_handler';
@@ -51,6 +52,7 @@ import { getExploratoryViewEmbeddable } from './components/shared/exploratory_vi
 import { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/exploratory_view_url';
 import { createUseRulesLink } from './hooks/create_use_rules_link';
 import getAppDataView from './utils/observability_data_views/get_app_data_view';
+
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
 
 export interface ObservabilityPublicPluginsSetup {
@@ -73,6 +75,7 @@ export interface ObservabilityPublicPluginsStart {
   sharedUX: SharedUXPluginStart;
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
+  security: SecurityPluginStart;
 }
 
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;

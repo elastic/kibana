@@ -202,7 +202,14 @@
           "MapByValueInput",
           ", ",
           "MapByReferenceInput",
-          ">"
+          ">,",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.FilterableEmbeddable",
+            "text": "FilterableEmbeddable"
+          }
         ],
         "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
         "deprecated": false,
@@ -447,6 +454,40 @@
             "description": [],
             "signature": [
               "() => string | undefined"
+            ],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.MapEmbeddable.getFilters",
+            "type": "Function",
+            "tags": [],
+            "label": "getFilters",
+            "description": [],
+            "signature": [
+              "() => Promise<",
+              "Filter",
+              "[]>"
+            ],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.MapEmbeddable.getQuery",
+            "type": "Function",
+            "tags": [],
+            "label": "getQuery",
+            "description": [],
+            "signature": [
+              "() => Promise<",
+              "Query",
+              " | undefined>"
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
@@ -1299,6 +1340,23 @@
             "signature": [
               "Query",
               " | undefined"
+            ],
+            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.BoundsRequestMeta.embeddableSearchContext",
+            "type": "Object",
+            "tags": [],
+            "label": "embeddableSearchContext",
+            "description": [],
+            "signature": [
+              "{ query?: ",
+              "Query",
+              " | undefined; filters: ",
+              "Filter",
+              "[]; } | undefined"
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false

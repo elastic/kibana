@@ -29,6 +29,8 @@ const mockDeserialize = jest.fn((params) => {
   const converter =
     params.id === 'terms'
       ? (val: string) => (val === '__other__' ? 'Other' : val)
+      : params.id === 'string'
+      ? (val: string) => (val === '' ? '(empty)' : val)
       : () => 'formatted duration';
   return { getConverterFor: jest.fn(() => converter) };
 });
@@ -752,6 +754,7 @@ describe('MetricVisComponent', function () {
           />
         )
           .find('div')
+          .at(0)
           .props() as HtmlAttributes & { css: { styles: string } }
       ).css.styles;
 
@@ -761,6 +764,7 @@ describe('MetricVisComponent', function () {
               width: 100%;
               max-height: 100%;
               max-width: 100%;
+              overflow-y: auto;
             "
     `);
 
@@ -770,6 +774,7 @@ describe('MetricVisComponent', function () {
               width: 300px;
               max-height: 100%;
               max-width: 100%;
+              overflow-y: auto;
             "
     `);
 
@@ -779,6 +784,7 @@ describe('MetricVisComponent', function () {
               width: 1000px;
               max-height: 100%;
               max-width: 100%;
+              overflow-y: auto;
             "
     `);
   });
@@ -1077,8 +1083,8 @@ describe('MetricVisComponent', function () {
 
   describe('metric value formatting', () => {
     const getFormattedMetrics = (
-      value: number,
-      secondaryValue: number,
+      value: number | string,
+      secondaryValue: number | string,
       fieldFormatter: SerializedFieldFormat<SerializableRecord>
     ) => {
       const config: Props['config'] = {
@@ -1128,6 +1134,12 @@ describe('MetricVisComponent', function () {
       const { primary, secondary } = getFormattedMetrics(394.2393, 983123.984, { id: 'number' });
       expect(primary).toBe('394.24');
       expect(secondary).toBe('983.12K');
+    });
+
+    it('correctly formats strings', () => {
+      const { primary, secondary } = getFormattedMetrics('', '', { id: 'string' });
+      expect(primary).toBe('(empty)');
+      expect(secondary).toBe('(empty)');
     });
 
     it('correctly formats currency', () => {
