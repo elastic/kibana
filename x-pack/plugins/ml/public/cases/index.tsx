@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import type { CasesUiSetup } from '@kbn/cases-plugin/public/types';
 import React from 'react';
-import { EuiButtonIcon } from '@elastic/eui';
+import type { CasesUiSetup } from '@kbn/cases-plugin/public/types';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiButtonIcon, EuiDescriptionList } from '@elastic/eui';
 import type { PersistableStateAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import type { CoreStart } from '@kbn/core/public';
 import { getAnomalySwimLaneEmbeddableComponent } from '../embeddables/anomaly_swimlane';
@@ -34,9 +36,17 @@ export function registerCasesAttachment(
   cases.attachmentFramework.registerPersistableState({
     id: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
     icon: PLUGIN_ICON,
-    displayName: 'Test',
+    // TODO check where this name is presented
+    displayName: i18n.translate('xpack.ml.cases.anomalySwimLane.displayName', {
+      defaultMessage: 'Anomaly swim lane',
+    }),
     getAttachmentViewObject: () => ({
-      event: 'added an embeddable',
+      event: (
+        <FormattedMessage
+          id="xpack.ml.cases.anomalySwimLane.embeddableAddedEvent"
+          defaultMessage="added the Anomaly Swim Lane embeddable"
+        />
+      ),
       timelineIcon: PLUGIN_ICON,
       actions: <AttachmentActions />,
       children: React.lazy(() => {
@@ -50,7 +60,48 @@ export function registerCasesAttachment(
               const inputProps =
                 persistableStateAttachmentState as unknown as AnomalySwimlaneEmbeddableInput;
 
-              return <EmbeddableComponent {...inputProps} />;
+              return (
+                <>
+                  <EuiDescriptionList
+                    compressed
+                    type={'inline'}
+                    listItems={[
+                      {
+                        title: (
+                          <FormattedMessage
+                            id="xpack.ml.cases.anomalySwimLane.description.jobIdsLabel"
+                            defaultMessage="Job IDs"
+                          />
+                        ),
+                        description: inputProps.jobIds.join(', '),
+                      },
+                      ...(inputProps.viewBy
+                        ? [
+                            {
+                              title: (
+                                <FormattedMessage
+                                  id="xpack.ml.cases.anomalySwimLane.description.viewByLabel"
+                                  defaultMessage="View by"
+                                />
+                              ),
+                              description: inputProps.viewBy,
+                            },
+                          ]
+                        : []),
+                      {
+                        title: (
+                          <FormattedMessage
+                            id="xpack.ml.cases.anomalySwimLane.description.timeRangeLabel"
+                            defaultMessage="Time range"
+                          />
+                        ),
+                        description: `${inputProps.timeRange.from} - ${inputProps.timeRange.to}`,
+                      },
+                    ]}
+                  />
+                  <EmbeddableComponent {...inputProps} />
+                </>
+              );
             }),
           };
         });
