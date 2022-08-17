@@ -82,7 +82,7 @@ export async function getDuration({
     chartBase: { ...chartBase, series: { transactionDurationAvg } },
     aggs: {
       transactionDurationAvg: {
-        sum: { field: TRANSACTION_DURATION_HISTOGRAM },
+        avg: { field: TRANSACTION_DURATION_HISTOGRAM },
       },
     },
     additionalFilters: [{ exists: { field: TRANSACTION_DURATION_HISTOGRAM } }],
