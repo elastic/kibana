@@ -18,7 +18,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { UserProfileWithAvatar, USER_PROFILES_SELECTABLE_NAME } from '@kbn/user-profile-components';
 import { useAssignees } from '../../../containers/user_profiles/use_assignees';
 import { CaseAssignees } from '../../../../common/api/cases/assignee';
 import * as i18n from '../translations';
@@ -196,7 +196,7 @@ const AssignUsersComponent: React.FC<AssignUsersProps> = ({
                 minWidth: 520,
               }}
               panelPaddingSize="none"
-              initialFocus="[name=userProfilesSearchBox]"
+              initialFocus={`[name=${USER_PROFILES_SELECTABLE_NAME}]`}
             >
               <SuggestUsers
                 isLoading={isLoading}

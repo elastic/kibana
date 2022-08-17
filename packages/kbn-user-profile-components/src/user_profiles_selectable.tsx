@@ -29,6 +29,11 @@ import type { UserProfileWithAvatar } from './user_avatar';
 import { UserAvatar } from './user_avatar';
 
 /**
+ * The string value to use for the input's name property
+ */
+export const USER_PROFILES_SELECTABLE_NAME = 'userProfilesSearchBox' as const;
+
+/**
  * Props of {@link UserProfilesSelectable} component
  */
 export interface UserProfilesSelectableProps
@@ -243,7 +248,7 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
         onChange: onSearchChange,
         isLoading,
         isClearable: !isLoading,
-        name: 'userProfilesSearchBox',
+        name: USER_PROFILES_SELECTABLE_NAME,
       }}
       isPreFiltered
       listProps={{ onFocusBadge: false }}

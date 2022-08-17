@@ -7,15 +7,8 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { UserProfilesSelectable, UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { euiStyled, css } from '@kbn/kibana-react-plugin/common';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiText,
-  useEuiPaddingSize,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText, useEuiTheme } from '@elastic/eui';
 import { isEmpty, sortBy } from 'lodash';
 import { useSuggestUserProfiles } from '../../containers/user_profiles/use_suggest_user_profiles';
 import { useCasesContext } from '../cases_context/use_cases_context';
@@ -23,20 +16,12 @@ import { AssigneeWithProfile } from './types';
 import * as i18n from './translations';
 import { getSortField } from './sort';
 
-const FlexItemWithBorder = euiStyled(EuiFlexItem)`
-  ${({ theme }) => css`
-    & {
-      padding-right: ${theme.eui.euiSizeS};
-      border-right: ${theme.eui.euiBorderThin};
-    }
-  `}
-`;
-
 const SelectedStatusMessageComponent: React.FC<{
   searchResultSize: number | undefined;
   defaultOptionsSize: number | undefined;
   selectedCount: number;
 }> = ({ searchResultSize, defaultOptionsSize, selectedCount }) => {
+  const { euiTheme } = useEuiTheme();
   const totalUsers = useMemo(
     () => defaultOptionsSize ?? searchResultSize ?? 0,
     [defaultOptionsSize, searchResultSize]
@@ -44,11 +29,19 @@ const SelectedStatusMessageComponent: React.FC<{
 
   return (
     <EuiFlexGroup gutterSize="none">
-      <FlexItemWithBorder grow={false}>{i18n.TOTAL_USERS(totalUsers)}</FlexItemWithBorder>
       <EuiFlexItem
-        css={`
-          padding-left: ${useEuiPaddingSize('s')};
-        `}
+        grow={false}
+        css={{
+          paddingRight: euiTheme.size.s,
+          borderRight: euiTheme.border.thin,
+        }}
+      >
+        {i18n.TOTAL_USERS(totalUsers)}
+      </EuiFlexItem>
+      <EuiFlexItem
+        css={{
+          paddingLeft: euiTheme.size.s,
+        }}
         grow={false}
       >
         {i18n.TOTAL_USERS_ASSIGNED(selectedCount)}
@@ -71,6 +64,7 @@ const SuggestUsersComponent: React.FC<SuggestUsersProps> = ({
   currentUserProfile,
   onUsersChange,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const { owner } = useCasesContext();
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -133,9 +127,9 @@ const SuggestUsersComponent: React.FC<SuggestUsersProps> = ({
       <EuiFlexItem grow={false}>
         <EuiText
           size="s"
-          css={`
-            padding: ${useEuiPaddingSize('s')};
-          `}
+          css={{
+            padding: euiTheme.size.s,
+          }}
         >
           <strong>{i18n.EDIT_ASSIGNEES}</strong>
         </EuiText>
