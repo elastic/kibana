@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { useValues } from 'kea';
+
 import { EuiSideNavItemType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -16,10 +18,13 @@ import {
   WORKPLACE_SEARCH_PLUGIN,
 } from '../../../../common/constants';
 import { SEARCH_INDICES_PATH } from '../../enterprise_search_content/routes';
+import { KibanaLogic } from '../kibana';
 
 import { generateNavLink } from './nav_link_helpers';
 
 export const useEnterpriseSearchNav = () => {
+  const { productAccess } = useValues(KibanaLogic);
+
   const navItems: Array<EuiSideNavItemType<unknown>> = [
     {
       id: 'es_overview',
@@ -63,26 +68,34 @@ export const useEnterpriseSearchNav = () => {
             to: ELASTICSEARCH_PLUGIN.URL,
           }),
         },
-        {
-          id: 'app_search',
-          name: i18n.translate('xpack.enterpriseSearch.nav.appSearchTitle', {
-            defaultMessage: 'App Search',
-          }),
-          ...generateNavLink({
-            shouldNotCreateHref: true,
-            to: APP_SEARCH_PLUGIN.URL,
-          }),
-        },
-        {
-          id: 'workplace_search',
-          name: i18n.translate('xpack.enterpriseSearch.nav.workplaceSearchTitle', {
-            defaultMessage: 'Workplace Search',
-          }),
-          ...generateNavLink({
-            shouldNotCreateHref: true,
-            to: WORKPLACE_SEARCH_PLUGIN.URL,
-          }),
-        },
+        ...(productAccess.hasAppSearchAccess
+          ? [
+              {
+                id: 'app_search',
+                name: i18n.translate('xpack.enterpriseSearch.nav.appSearchTitle', {
+                  defaultMessage: 'App Search',
+                }),
+                ...generateNavLink({
+                  shouldNotCreateHref: true,
+                  to: APP_SEARCH_PLUGIN.URL,
+                }),
+              },
+            ]
+          : []),
+        ...(productAccess.hasWorkplaceSearchAccess
+          ? [
+              {
+                id: 'workplace_search',
+                name: i18n.translate('xpack.enterpriseSearch.nav.workplaceSearchTitle', {
+                  defaultMessage: 'Workplace Search',
+                }),
+                ...generateNavLink({
+                  shouldNotCreateHref: true,
+                  to: WORKPLACE_SEARCH_PLUGIN.URL,
+                }),
+              },
+            ]
+          : []),
       ],
       name: i18n.translate('xpack.enterpriseSearch.nav.searchExperiencesTitle', {
         defaultMessage: 'Search',

@@ -5,6 +5,13 @@
  * 2.0.
  */
 
+import {
+  getIndexReturnValue,
+  mockMultiIndexResponse,
+  mockMultiStatsResponse,
+  mockPrivilegesResponse,
+} from '../../__mocks__/fetch_indices.mock';
+
 import { ByteSizeValue } from '@kbn/config-schema';
 import { IScopedClusterClient } from '@kbn/core/server';
 
@@ -13,6 +20,7 @@ import { fetchIndices } from './fetch_indices';
 describe('fetchIndices lib function', () => {
   const mockClient = {
     asCurrentUser: {
+      count: jest.fn().mockReturnValue({ count: 100 }),
       indices: {
         get: jest.fn(),
         stats: jest.fn(),
@@ -20,7 +28,6 @@ describe('fetchIndices lib function', () => {
       security: {
         hasPrivileges: jest.fn(),
       },
-      count: jest.fn().mockReturnValue({ count: 100 }),
     },
     asInternalUser: {},
   };
@@ -53,11 +60,11 @@ describe('fetchIndices lib function', () => {
 
   mockClient.asCurrentUser.security.hasPrivileges.mockImplementation(() => ({
     index: {
-      'index-without-prefix': { read: true, manage: true },
-      'search-aliased': { read: true, manage: true },
-      'search-double-aliased': { read: true, manage: true },
-      'search-regular-index': { read: true, manage: true },
-      'second-index': { read: true, manage: true },
+      'index-without-prefix': { manage: true, read: true },
+      'search-aliased': { manage: true, read: true },
+      'search-double-aliased': { manage: true, read: true },
+      'search-regular-index': { manage: true, read: true },
+      'second-index': { manage: true, read: true },
     },
   }));
 
@@ -76,12 +83,12 @@ describe('fetchIndices lib function', () => {
       fetchIndices(mockClient as unknown as IScopedClusterClient, 'search-*', false, true)
     ).resolves.toEqual([
       {
+        alias: false,
         count: 100,
         health: 'green',
         name: 'search-regular-index',
+        privileges: { manage: true, read: true },
         status: 'open',
-        alias: false,
-        privileges: { read: true, manage: true },
         total: {
           docs: {
             count: 100,
@@ -125,12 +132,12 @@ describe('fetchIndices lib function', () => {
       fetchIndices(mockClient as unknown as IScopedClusterClient, 'search-*', true, true)
     ).resolves.toEqual([
       {
+        alias: false,
         count: 100,
         health: 'green',
         name: 'search-regular-index',
+        privileges: { manage: true, read: true },
         status: 'open',
-        alias: false,
-        privileges: { read: true, manage: true },
         total: {
           docs: {
             count: 100,
@@ -367,5 +374,114 @@ describe('fetchIndices lib function', () => {
       fetchIndices(mockClient as unknown as IScopedClusterClient, 'search-*', false, true)
     ).resolves.toEqual([]);
     expect(mockClient.asCurrentUser.indices.stats).not.toHaveBeenCalled();
+  });
+
+  describe('alwaysShowSearchPattern', () => {
+    beforeEach(() => {
+      mockClient.asCurrentUser.indices.get.mockImplementation(() => mockMultiIndexResponse);
+      mockClient.asCurrentUser.indices.stats.mockImplementation(() => mockMultiStatsResponse);
+
+      mockClient.asCurrentUser.security.hasPrivileges.mockImplementation(() => ({
+        index: mockPrivilegesResponse,
+      }));
+    });
+
+    it('overrides hidden indices setting', async () => {
+      const returnValue = await fetchIndices(
+        mockClient as unknown as IScopedClusterClient,
+        '*',
+        false,
+        true,
+        'search-'
+      );
+
+      // This is the list of mock indices and aliases that are:
+      // - Non-hidden indices and aliases
+      // - search- prefixed aliases that point to hidden indices
+      expect(returnValue).toEqual(
+        [
+          'regular-index',
+          'alias-regular-index',
+          'search-alias-regular-index',
+          'search-prefixed-regular-index',
+          'alias-search-prefixed-regular-index',
+          'search-alias-search-prefixed-regular-index',
+          'search-alias-hidden-index',
+          'search-alias-search-prefixed-hidden-index',
+        ].map(getIndexReturnValue)
+      );
+
+      // This is the list of mock indices and aliases that are:
+      // - Hidden indices
+      // - aliases to hidden indices that has no prefix
+      expect(returnValue).toEqual(
+        expect.not.arrayContaining(
+          [
+            'hidden-index',
+            'search-prefixed-hidden-index',
+            'alias-hidden-index',
+            'alias-search-prefixed-hidden-index',
+          ].map(getIndexReturnValue)
+        )
+      );
+
+      expect(mockClient.asCurrentUser.indices.get).toHaveBeenCalledWith({
+        expand_wildcards: ['hidden', 'all'],
+        features: ['aliases', 'settings'],
+        filter_path: ['*.aliases', '*.settings.index.hidden'],
+        index: '*',
+      });
+
+      expect(mockClient.asCurrentUser.indices.stats).toHaveBeenCalledWith({
+        expand_wildcards: ['hidden', 'all'],
+        index: '*',
+        metric: ['docs', 'store'],
+      });
+
+      expect(mockClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith({
+        index: [
+          {
+            names: expect.arrayContaining(Object.keys(mockMultiStatsResponse.indices)),
+            privileges: ['read', 'manage'],
+          },
+        ],
+      });
+    });
+
+    it('returns everything if hidden indices set', async () => {
+      const returnValue = await fetchIndices(
+        mockClient as unknown as IScopedClusterClient,
+        '*',
+        true,
+        true,
+        'search-'
+      );
+
+      expect(returnValue).toEqual(
+        expect.arrayContaining(Object.keys(mockMultiStatsResponse.indices).map(getIndexReturnValue))
+      );
+
+      expect(mockClient.asCurrentUser.indices.get).toHaveBeenCalledWith({
+        expand_wildcards: ['hidden', 'all'],
+        features: ['aliases', 'settings'],
+        filter_path: ['*.aliases', '*.settings.index.hidden'],
+        index: '*',
+      });
+
+      expect(mockClient.asCurrentUser.indices.stats).toHaveBeenCalledWith({
+        expand_wildcards: ['hidden', 'all'],
+        index: '*',
+        metric: ['docs', 'store'],
+      });
+
+      expect(mockClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith({
+        index: [
+          {
+            names: expect.arrayContaining(Object.keys(mockMultiStatsResponse.indices)),
+            privileges: ['read', 'manage'],
+          },
+        ],
+      });
+    });
   });
 });
