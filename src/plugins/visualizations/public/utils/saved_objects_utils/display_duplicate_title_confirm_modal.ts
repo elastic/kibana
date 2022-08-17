@@ -13,7 +13,7 @@ import { SAVE_DUPLICATE_REJECTED } from './constants';
 import { confirmModalPromise } from './confirm_modal_promise';
 
 export function displayDuplicateTitleConfirmModal(
-  savedObject: VisSavedObject,
+  savedObject: Pick<VisSavedObject, 'title' | 'getDisplayName'>,
   overlays: OverlayStart
 ): Promise<boolean> {
   const confirmMessage = i18n.translate(
