@@ -101,6 +101,12 @@ export const UX_MESSAGES = Object.freeze({
   fetchError: i18n.translate('xpack.securitySolution.responseActionsList.list.errorMessage', {
     defaultMessage: 'Error while retrieving response actions',
   }),
+  filterClearAll: i18n.translate(
+    'xpack.securitySolution.responseActionsList.list.filter.clearAll',
+    {
+      defaultMessage: 'Clear all',
+    }
+  ),
   badge: {
     completed: i18n.translate(
       'xpack.securitySolution.responseActionsList.list.item.badge.completed',
