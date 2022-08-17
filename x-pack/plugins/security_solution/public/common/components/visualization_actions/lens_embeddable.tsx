@@ -11,10 +11,11 @@ import { useDispatch } from 'react-redux';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import styled from 'styled-components';
+import { getOr } from 'lodash/fp';
 import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { useKibana } from '../../lib/kibana';
 import { useLensAttributes } from './use_lens_attributes';
-import type { LensEmbeddableComponentProps } from './types';
+import type { LensEmbeddableComponentProps, Request } from './types';
 import { useActions } from './use_actions';
 import { inputsSelectors } from '../../store';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
@@ -42,9 +43,12 @@ interface State {
   isLoading: boolean;
 }
 
-export type Action =
-  | { type: 'setData'; responses: Responses; requests: Requests }
-  | { type: 'setLoading'; isLoading: boolean };
+export interface Action {
+  type: 'setData';
+  responses: Responses;
+  requests: Requests;
+  isLoading: boolean;
+}
 
 function reducer(state: State, action: Action) {
   switch (action.type) {
@@ -53,9 +57,10 @@ function reducer(state: State, action: Action) {
         ...state,
         responses: action.responses,
         requests: action.requests,
+        isLoading: action.isLoading,
       };
-    case 'setLoading':
-      return { ...state, loading: action.isLoading };
+    default:
+      return state;
   }
 }
 
@@ -127,6 +132,34 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   const [request, ...additionalRequests] = visData.requests ?? [];
   const [response, ...additionalResponses] = visData.responses ?? [];
 
+  const onLoad = useCallback((isLoading, adapters) => {
+    const data = adapters?.requests?.getRequests().reduce(
+      (acc: { requests: string[]; responses: string[] }, d: Request) => {
+        return {
+          requests: [
+            ...acc.requests,
+            JSON.stringify(
+              { body: d?.json, index: getOr('', 'stats.indexFilter.value', d).split(',') },
+              null,
+              2
+            ),
+          ],
+          responses: [
+            ...acc.responses,
+            JSON.stringify(getOr({}, 'response.json.rawResponse', d), null, 2),
+          ],
+        };
+      },
+      { requests: [], responses: [] }
+    );
+    dispatchData({
+      type: 'setData',
+      requests: data.requests,
+      responses: data.responses,
+      isLoading,
+    });
+  }, []);
+
   return (
     <>
       {attributes && searchSessionId ? (
@@ -136,27 +169,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
             style={{ height: '100%' }}
             timeRange={timerange}
             attributes={attributes}
-            onLoad={(isLoading, adapters) => {
-              dispatchData({ type: 'setLoading', isLoading });
-              console.log(adapters?.requests?.getRequests());
-
-              const data = Array.from(adapters?.requests?.requests ?? []).map((myData) => {
-                const d = myData[1];
-                return {
-                  request: JSON.stringify(
-                    { body: d?.json, index: [d.stats?.indexFilter.value.split(',')] },
-                    null,
-                    2
-                  ),
-                  response: JSON.stringify(d?.response?.json?.rawResponse ?? {}, null, 2),
-                };
-              });
-              dispatchData({
-                type: 'setData',
-                requests: data?.map((d) => d.request) ?? [],
-                responses: data?.map((d) => d.response) ?? [],
-              });
-            }}
+            onLoad={onLoad}
             onBrushEnd={onBrushEnd}
             viewMode={ViewMode.VIEW}
             withDefaultActions={false}
