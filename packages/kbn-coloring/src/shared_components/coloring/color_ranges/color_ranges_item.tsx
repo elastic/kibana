@@ -52,6 +52,7 @@ export interface ColorRangesItemProps {
   continuity: PaletteContinuity;
   accessor: ColorRangeAccessor;
   validation?: ColorRangeValidation;
+  displayInfinity: boolean;
 }
 
 type ColorRangeItemMode = 'value' | 'auto' | 'edit';
@@ -69,8 +70,16 @@ const getMode = (
 
 const getPlaceholderForAutoMode = (isLast: boolean) =>
   isLast
-    ? i18n.translate('coloring.dynamicColoring.customPalette.maxValuePlaceholder', {
-        defaultMessage: 'Max. value',
+    ? true
+      ? i18n.translate('coloring.dynamicColoring.customPalette.extentPlaceholderInfinity', {
+          defaultMessage: 'Infinity',
+        })
+      : i18n.translate('coloring.dynamicColoring.customPalette.maxValuePlaceholder', {
+          defaultMessage: 'Max. value',
+        })
+    : true
+    ? i18n.translate('coloring.dynamicColoring.customPalette.extentPlaceholderInfinity', {
+        defaultMessage: '-Infinity',
       })
     : i18n.translate('coloring.dynamicColoring.customPalette.minValuePlaceholder', {
         defaultMessage: 'Min. value',
@@ -102,6 +111,7 @@ export function ColorRangeItem({
   validation,
   continuity,
   dispatch,
+  displayInfinity,
 }: ColorRangesItemProps) {
   const { dataBounds, palettes } = useContext(ColorRangesContext);
   const [popoverInFocus, setPopoverInFocus] = useState<boolean>(false);
@@ -241,6 +251,7 @@ export function ColorRangeItem({
             continuity={continuity}
             rangeType={rangeType}
             colorRanges={colorRanges}
+            displayInfinity={displayInfinity}
             dispatch={dispatch}
             accessor={accessor}
           />
