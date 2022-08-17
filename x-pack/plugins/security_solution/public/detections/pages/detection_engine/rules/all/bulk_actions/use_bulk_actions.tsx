@@ -361,6 +361,16 @@ export const useBulkActions = ({
               panel: 1,
             },
             {
+              key: i18n.BULK_ACTION_ADD_RULE_ACTIONS,
+              name: i18n.BULK_ACTION_ADD_RULE_ACTIONS,
+              'data-test-subj': 'addRuleActionsBulk',
+              disabled: isEditDisabled,
+              onClick: handleBulkEdit(BulkActionEditType.add_actions),
+              toolTipContent: missingActionPrivileges ? i18n.EDIT_RULE_SETTINGS_TOOLTIP : undefined,
+              toolTipPosition: 'right',
+              icon: undefined,
+            },
+            {
               key: i18n.BULK_ACTION_APPLY_TIMELINE_TEMPLATE,
               name: i18n.BULK_ACTION_APPLY_TIMELINE_TEMPLATE,
               'data-test-subj': 'applyTimelineTemplateBulk',

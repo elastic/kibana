@@ -13,6 +13,7 @@ import { BulkActionEditType } from '../../../../../../../common/detection_engine
 import { IndexPatternsForm } from './forms/index_patterns_form';
 import { TagsForm } from './forms/tags_form';
 import { TimelineTemplateForm } from './forms/timeline_template_form';
+import { RuleActionsForm } from './forms/rule_actions_form';
 
 interface BulkEditFlyoutProps {
   onClose: () => void;
@@ -36,6 +37,10 @@ const BulkEditFlyoutComponent = ({ editAction, tags, ...props }: BulkEditFlyoutP
 
     case BulkActionEditType.set_timeline:
       return <TimelineTemplateForm {...props} />;
+
+    case BulkActionEditType.add_actions:
+    case BulkActionEditType.set_actions:
+      return <RuleActionsForm {...props} />;
 
     default:
       return null;

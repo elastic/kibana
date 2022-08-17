@@ -10,6 +10,7 @@ import {
   BulkAction,
   BulkActionEditType,
 } from '../../../../../../../../common/detection_engine/schemas/common/schemas';
+import { assertUnreachable } from '../../../../../../../../common/utility_types';
 
 /**
  * helper utility that creates payload for _bulk_action API in dry mode
@@ -53,5 +54,17 @@ export const computeDryRunPayload = (
           value: { timeline_id: '', timeline_title: '' },
         },
       ];
+
+    case BulkActionEditType.add_actions:
+    case BulkActionEditType.set_actions:
+      return [
+        {
+          type: editAction,
+          value: { throttle: '1h', actions: [] },
+        },
+      ];
+
+    default:
+      assertUnreachable(editAction);
   }
 };
