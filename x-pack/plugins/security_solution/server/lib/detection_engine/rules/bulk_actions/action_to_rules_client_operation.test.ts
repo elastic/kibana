@@ -10,29 +10,35 @@ import { BulkActionEditType } from '../../../../../common/detection_engine/schem
 import { bulkEditActionToRulesClientOperation } from './action_to_rules_client_operation';
 
 describe('bulkEditActionToRulesClientOperation', () => {
-  test('should transform tags bulk edit actions correctly f', () => {
+  test('should transform tags bulk edit actions correctly', () => {
     expect(
       bulkEditActionToRulesClientOperation({ type: BulkActionEditType.add_tags, value: ['test'] })
-    ).toEqual({
-      field: 'tags',
-      operation: 'add',
-      value: ['test'],
-    });
+    ).toEqual([
+      {
+        field: 'tags',
+        operation: 'add',
+        value: ['test'],
+      },
+    ]);
   });
 
   expect(
     bulkEditActionToRulesClientOperation({ type: BulkActionEditType.set_tags, value: ['test'] })
-  ).toEqual({
-    field: 'tags',
-    operation: 'set',
-    value: ['test'],
-  });
+  ).toEqual([
+    {
+      field: 'tags',
+      operation: 'set',
+      value: ['test'],
+    },
+  ]);
 
   expect(
     bulkEditActionToRulesClientOperation({ type: BulkActionEditType.delete_tags, value: ['test'] })
-  ).toEqual({
-    field: 'tags',
-    operation: 'delete',
-    value: ['test'],
-  });
+  ).toEqual([
+    {
+      field: 'tags',
+      operation: 'delete',
+      value: ['test'],
+    },
+  ]);
 });
