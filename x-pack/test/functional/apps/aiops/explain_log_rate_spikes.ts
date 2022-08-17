@@ -138,6 +138,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
     });
 
     after(async () => {
+      await elasticChart.setNewChartUiDebugFlag(false);
       await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
     });
 
