@@ -35,7 +35,6 @@ export interface UseIndicatorsValue {
   pagination: Pagination;
   onChangeItemsPerPage: (value: number) => void;
   onChangePage: (value: number) => void;
-  firstLoad: boolean;
   loading: boolean;
 }
 
@@ -75,7 +74,6 @@ export const useIndicators = ({
 
   const [indicators, setIndicators] = useState<Indicator[]>([]);
   const [indicatorCount, setIndicatorCount] = useState<number>(0);
-  const [firstLoad, setFirstLoad] = useState(true);
   const [loading, setLoading] = useState(true);
 
   const [pagination, setPagination] = useState({
@@ -150,14 +148,12 @@ export const useIndicators = ({
               searchSubscription$.current?.unsubscribe();
             }
 
-            setFirstLoad(false);
             setLoading(false);
           },
           error: (msg) => {
             searchService.showError(msg);
             searchSubscription$.current?.unsubscribe();
 
-            setFirstLoad(false);
             setLoading(false);
           },
         });
@@ -203,7 +199,6 @@ export const useIndicators = ({
     pagination,
     onChangePage,
     onChangeItemsPerPage,
-    firstLoad,
     loading,
     handleRefresh,
   };

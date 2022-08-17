@@ -24,7 +24,6 @@ export function WithIndicators() {
   return (
     <KibanaContextProvider>
       <IndicatorsTable
-        firstLoad={false}
         loading={false}
         pagination={{
           pageSize: 10,
@@ -43,7 +42,6 @@ export function WithIndicators() {
 export function WithNoIndicators() {
   return (
     <IndicatorsTable
-      firstLoad={false}
       pagination={{
         pageSize: 10,
         pageIndex: 0,
@@ -54,6 +52,24 @@ export function WithNoIndicators() {
       onChangeItemsPerPage={stub}
       indicatorCount={0}
       loading={false}
+    />
+  );
+}
+
+export function Loading() {
+  return (
+    <IndicatorsTable
+      pagination={{
+        pageSize: 10,
+        pageIndex: 0,
+        pageSizeOptions: [10, 25, 50],
+      }}
+      indicators={[]}
+      onChangePage={stub}
+      onChangeItemsPerPage={stub}
+      indicatorCount={0}
+      loading={true}
+      indexPatterns={[]}
     />
   );
 }
