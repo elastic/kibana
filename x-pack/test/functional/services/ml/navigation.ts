@@ -48,7 +48,10 @@ export function MachineLearningNavigationProvider({
     async navigateToDiscoverViaAppsMenu() {
       await retry.tryForTime(60 * 1000, async () => {
         await appsMenu.clickLink('Discover');
-        await PageObjects.discover.waitForDiscoverAppOnScreen();
+        await testSubjects.existOrFail('discover-dataView-switch-link', { timeout: 5000 });
+        if (await testSubjects.exists('dataViewPickerTourLink', { timeout: 1000 })) {
+          await testSubjects.click('dataViewPickerTourLink');
+        }
       });
     },
 
