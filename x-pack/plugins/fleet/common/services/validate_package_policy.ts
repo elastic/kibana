@@ -19,7 +19,7 @@ import type {
   RegistryVarsEntry,
 } from '../types';
 
-import { isValidNamespace, doesPackageHaveIntegrations } from '.';
+import { isValidNamespace, doesPackageHaveIntegrations, isInputOnlyPolicyTemplate } from '.';
 
 type Errors = string[] | null;
 
@@ -90,7 +90,8 @@ export const validatePackagePolicy = (
     !packageInfo.policy_templates ||
     packageInfo.policy_templates.length === 0 ||
     !packageInfo.policy_templates.find(
-      (policyTemplate) => policyTemplate.inputs && policyTemplate.inputs.length > 0
+      (policyTemplate) =>
+        'inputs' in policyTemplate && policyTemplate.inputs && policyTemplate.inputs.length > 0
     )
   ) {
     validationResults.inputs = null;
@@ -101,6 +102,7 @@ export const validatePackagePolicy = (
   const inputVarDefsByPolicyTemplateAndType = packageInfo.policy_templates.reduce<
     Record<string, Record<string, RegistryVarsEntry>>
   >((varDefs, policyTemplate) => {
+    if (isInputOnlyPolicyTemplate(policyTemplate)) return varDefs;
     (policyTemplate.inputs || []).forEach((input) => {
       const varDefKey = hasIntegrations ? `${policyTemplate.name}-${input.type}` : input.type;
 

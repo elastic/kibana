@@ -10,6 +10,8 @@ import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiLink } from '@elas
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { isIntegrationPolicyTemplate } from '../../../../../../../../common/services';
+
 import { useFleetStatus, useStartServices } from '../../../../../../../hooks';
 import { isPackageUnverified } from '../../../../../../../services';
 import type { PackageInfo, RegistryPolicyTemplate } from '../../../../../types';
@@ -78,7 +80,13 @@ export const OverviewPage: React.FC<Props> = memo(({ packageInfo, integrationInf
         {isUnverified && <UnverifiedCallout />}
         {packageInfo.readme ? (
           <Readme
-            readmePath={integrationInfo?.readme || packageInfo.readme}
+            readmePath={
+              integrationInfo &&
+              isIntegrationPolicyTemplate(integrationInfo) &&
+              integrationInfo?.readme
+                ? integrationInfo?.readme
+                : packageInfo.readme
+            }
             packageName={packageInfo.name}
             version={packageInfo.version}
           />

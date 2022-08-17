@@ -7,9 +7,12 @@
 
 import type { PackageInfo, AgentPolicy } from '../types';
 
+import { isIntegrationPolicyTemplate } from './policy_template';
+
 export const isPackageLimited = (packageInfo: PackageInfo): boolean => {
   return (packageInfo.policy_templates || []).some(
-    (policyTemplate) => policyTemplate.multiple === false
+    (policyTemplate) =>
+      isIntegrationPolicyTemplate(policyTemplate) && policyTemplate.multiple === false
   );
 };
 

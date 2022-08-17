@@ -18,6 +18,7 @@ import type {
 } from '../types';
 
 import { doesPackageHaveIntegrations } from '.';
+import { isInputOnlyPolicyTemplate } from './policy_template';
 
 export const getStreamsForInputType = (
   inputType: string,
@@ -76,6 +77,7 @@ export const packageToPackagePolicyInputs = (
   } = {};
 
   packageInfo.policy_templates?.forEach((packagePolicyTemplate) => {
+    if (isInputOnlyPolicyTemplate(packagePolicyTemplate)) return;
     packagePolicyTemplate.inputs?.forEach((packageInput) => {
       const inputKey = `${packagePolicyTemplate.name}-${packageInput.type}`;
       const input = {
