@@ -50,26 +50,26 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep(
         `${testData.suiteTitle} displays elements in the doc count panel correctly`
       );
-      await aiops.explainLogRateSpikes.assertTotalDocCountHeaderExist();
-      await aiops.explainLogRateSpikes.assertTotalDocCountChartExist();
+      await aiops.explainLogRateSpikes.assertTotalDocCountHeaderExists();
+      await aiops.explainLogRateSpikes.assertTotalDocCountChartExists();
 
       await ml.testExecution.logTestStep(
         `${testData.suiteTitle} displays elements in the page correctly`
       );
-      await aiops.explainLogRateSpikes.assertSearchPanelExist();
+      await aiops.explainLogRateSpikes.assertSearchPanelExists();
 
       await ml.testExecution.logTestStep('displays empty prompt');
-      await aiops.explainLogRateSpikes.assertNoWindowParametersEmptyPromptExist();
+      await aiops.explainLogRateSpikes.assertNoWindowParametersEmptyPromptExists();
 
       await ml.testExecution.logTestStep('clicks the document count chart to start analysis');
       await aiops.explainLogRateSpikes.clickDocumentCountChart();
-      await aiops.explainLogRateSpikes.assertAnalysisSectionExist();
+      await aiops.explainLogRateSpikes.assertAnalysisSectionExists();
 
       await ml.testExecution.logTestStep('displays the no results found prompt');
-      await aiops.explainLogRateSpikes.assertNoResultsFoundEmptyPromptExist();
+      await aiops.explainLogRateSpikes.assertNoResultsFoundEmptyPromptExists();
 
       await ml.testExecution.logTestStep('adjusts the brushes to get analysis results');
-      await aiops.explainLogRateSpikes.assertRerunAnalysisButton(false);
+      await aiops.explainLogRateSpikes.assertRerunAnalysisButtonExists(false);
 
       // Get the current width of the deviation brush for later comparison.
       const brushSelectionWidthBefore = await aiops.explainLogRateSpikes.getBrushSelectionWidth(
@@ -107,14 +107,14 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       expect(brushSelectionWidthBefore).not.to.be(brushSelectionWidthAfter);
       expect(brushSelectionWidthAfter).not.to.be.greaterThan(intervalPx * 2);
 
-      await aiops.explainLogRateSpikes.assertRerunAnalysisButton(true);
+      await aiops.explainLogRateSpikes.assertRerunAnalysisButtonExists(true);
 
       await ml.testExecution.logTestStep('rerun the analysis with adjusted settings');
 
       await aiops.explainLogRateSpikes.clickRerunAnalysisButton(true);
       await aiops.explainLogRateSpikes.assertProgressTitle('Progress: 100% — Done.');
 
-      await aiops.explainLogRateSpikesAnalysisTable.assertSpikeAnalysisTableExist();
+      await aiops.explainLogRateSpikesAnalysisTable.assertSpikeAnalysisTableExists();
 
       const analysisTable = await aiops.explainLogRateSpikesAnalysisTable.parseAnalysisTable();
 

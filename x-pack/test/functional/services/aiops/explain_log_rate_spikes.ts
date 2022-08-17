@@ -38,27 +38,27 @@ export function ExplainLogRateSpikesProvider({ getService }: FtrProviderContext)
       });
     },
 
-    async assertTotalDocCountHeaderExist() {
+    async assertTotalDocCountHeaderExists() {
       await retry.tryForTime(5000, async () => {
         await testSubjects.existOrFail(`aiopsTotalDocCountHeader`);
       });
     },
 
-    async assertTotalDocCountChartExist() {
+    async assertTotalDocCountChartExists() {
       await retry.tryForTime(5000, async () => {
         await testSubjects.existOrFail(`aiopsDocumentCountChart`);
       });
     },
 
-    async assertSearchPanelExist() {
+    async assertSearchPanelExists() {
       await testSubjects.existOrFail(`aiopsSearchPanel`);
     },
 
-    async assertNoWindowParametersEmptyPromptExist() {
+    async assertNoWindowParametersEmptyPromptExists() {
       await testSubjects.existOrFail(`aiopsNoWindowParametersEmptyPrompt`);
     },
 
-    async assertNoResultsFoundEmptyPromptExist() {
+    async assertNoResultsFoundEmptyPromptExists() {
       await testSubjects.existOrFail(`aiopsNoResultsFoundEmptyPrompt`);
     },
 
@@ -91,13 +91,13 @@ export function ExplainLogRateSpikesProvider({ getService }: FtrProviderContext)
       });
     },
 
-    async assertAnalysisSectionExist() {
+    async assertAnalysisSectionExists() {
       await retry.tryForTime(5000, async () => {
         await testSubjects.existOrFail(`aiopsExplainLogRateSpikesAnalysis`);
       });
     },
 
-    async assertRerunAnalysisButton(shouldRerun: boolean) {
+    async assertRerunAnalysisButtonExists(shouldRerun: boolean) {
       await testSubjects.existOrFail(
         `aiopsRerunAnalysisButton${shouldRerun ? ' shouldRerun' : ''}`
       );

@@ -28,7 +28,7 @@ export function ExplainLogRateSpikesAnalysisTableProvider({
   const testSubjects = getService('testSubjects');
 
   return new (class AnalysisTable {
-    public async assertSpikeAnalysisTableExist() {
+    public async assertSpikeAnalysisTableExists() {
       await testSubjects.existOrFail(`aiopsSpikeAnalysisTable`);
     }
 
