@@ -9,7 +9,7 @@
 import React from 'react';
 import { ReactWrapper, mount } from 'enzyme';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormHelpText } from '@elastic/eui';
-import { act } from '@testing-library/react';
+import { act, waitFor } from '@testing-library/react';
 
 import { AutocompleteFieldMatchAnyComponent } from '.';
 import { getField, fields } from '../fields/index.mock';
@@ -23,6 +23,9 @@ jest.mock('../hooks/use_field_value_autocomplete', () => {
     useFieldValueAutocomplete: jest.fn(),
   };
 });
+jest.mock('../translations', () => ({
+  FIELD_SPACE_WARNING: 'Warning: there is a space',
+}));
 
 describe('AutocompleteFieldMatchAnyComponent', () => {
   let wrapper: ReactWrapper;
@@ -273,7 +276,50 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
       selectedField: getField('machine.os.raw'),
     });
   });
+  test('should show the warning helper text if the new value contains spaces when change', async () => {
+    (useFieldValueAutocomplete as jest.Mock).mockReturnValue([
+      false,
+      true,
+      [' value 1 ', 'value 2'],
+      getValueSuggestionsMock,
+    ]);
+    const mockOnChange = jest.fn();
+    wrapper = mount(
+      <AutocompleteFieldMatchAnyComponent
+        autocompleteService={{
+          ...autocompleteStartMock,
+        }}
+        indexPattern={{
+          fields,
+          id: '1234',
+          title: 'logstash-*',
+        }}
+        isClearable={false}
+        isDisabled={false}
+        isLoading={false}
+        onChange={mockOnChange}
+        placeholder="Placeholder text"
+        rowLabel={'Row Label'}
+        selectedField={getField('machine.os.raw')}
+        selectedValue={[]}
+      />
+    );
 
+    await waitFor(() =>
+      (
+        wrapper.find(EuiComboBox).props() as unknown as {
+          onChange: (a: EuiComboBoxOptionOption[]) => void;
+        }
+      ).onChange([{ label: ' value 1 ' }])
+    );
+    wrapper.update();
+    expect(mockOnChange).toHaveBeenCalledWith([' value 1 ']);
+
+    expect(wrapper).toMatchSnapshot();
+
+    const euiFormHelptext = wrapper.find(EuiFormHelpText);
+    expect(euiFormHelptext.length).toBeTruthy();
+  });
   test('should show the warning helper text if the new value contains spaces when searching a new query', () => {
     wrapper = mount(
       <AutocompleteFieldMatchAnyComponent
@@ -308,5 +354,6 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
 
     const euiFormHelptext = wrapper.find(EuiFormHelpText);
     expect(euiFormHelptext.length).toBeTruthy();
+    expect(euiFormHelptext.text()).toEqual('Warning: there is a space');
   });
 });

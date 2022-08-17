@@ -21,7 +21,9 @@ import { fields, getField } from '../fields/index.mock';
 import { autocompleteStartMock } from '../autocomplete/index.mock';
 
 jest.mock('../hooks/use_field_value_autocomplete');
-
+jest.mock('../translations', () => ({
+  FIELD_SPACE_WARNING: 'Warning: there is a space',
+}));
 describe('AutocompleteFieldMatchComponent', () => {
   let wrapper: ReactWrapper;
 
@@ -348,6 +350,7 @@ describe('AutocompleteFieldMatchComponent', () => {
 
     const euiFormHelptext = wrapper.find(EuiFormHelpText);
     expect(euiFormHelptext.length).toBeTruthy();
+    expect(euiFormHelptext.text()).toEqual('Warning: there is a space');
   });
 
   describe('boolean type', () => {
