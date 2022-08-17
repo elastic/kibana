@@ -599,7 +599,8 @@ export function LayerPanel(
                   setState: updateDataLayerState,
                   supportStaticValue: Boolean(activeGroup.supportStaticValue),
                   paramEditorCustomProps: activeGroup.paramEditorCustomProps,
-                  supportFieldFormat: activeGroup.supportFieldFormat !== false,
+                  enableFormatSelector: activeGroup.enableFormatSelector !== false,
+                  formatSelectorOptions: activeGroup.formatSelectorOptions,
                   layerType: activeVisualization.getLayerType(layerId, visualizationState),
                   activeData: layerVisualizationConfigProps.activeData,
                 }}

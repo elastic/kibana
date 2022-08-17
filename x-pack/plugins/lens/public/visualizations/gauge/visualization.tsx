@@ -249,7 +249,7 @@ export const getGaugeVisualization = ({
     return {
       groups: [
         {
-          supportFieldFormat: true,
+          enableFormatSelector: true,
           layerId: state.layerId,
           groupId: GROUP_ID.METRIC,
           groupLabel: i18n.translate('xpack.lens.gauge.metricLabel', {
@@ -282,7 +282,7 @@ export const getGaugeVisualization = ({
         },
         {
           supportStaticValue: true,
-          supportFieldFormat: false,
+          enableFormatSelector: false,
           layerId: state.layerId,
           groupId: GROUP_ID.MIN,
           groupLabel: i18n.translate('xpack.lens.gauge.minValueLabel', {
@@ -308,7 +308,7 @@ export const getGaugeVisualization = ({
         },
         {
           supportStaticValue: true,
-          supportFieldFormat: false,
+          enableFormatSelector: false,
           layerId: state.layerId,
           groupId: GROUP_ID.MAX,
           groupLabel: i18n.translate('xpack.lens.gauge.maxValueLabel', {
@@ -334,7 +334,7 @@ export const getGaugeVisualization = ({
         },
         {
           supportStaticValue: true,
-          supportFieldFormat: false,
+          enableFormatSelector: false,
           layerId: state.layerId,
           groupId: GROUP_ID.GOAL,
           groupLabel: i18n.translate('xpack.lens.gauge.goalValueLabel', {

@@ -10,6 +10,7 @@ import { mount, shallow } from 'enzyme';
 import { FormatSelector } from './format_selector';
 import { act } from 'react-dom/test-utils';
 import { GenericIndexPatternColumn } from '../..';
+import { EuiRange } from '@elastic/eui';
 
 jest.mock('lodash', () => {
   const original = jest.requireActual('lodash');
@@ -85,5 +86,20 @@ describe('FormatSelector', () => {
     });
     component.update();
     expect(props.onChange).toBeCalledWith({ id: 'bytes', params: { suffix: 'GB' } });
+  });
+  describe('options', () => {
+    it('can disable the suffix', () => {
+      const props = getDefaultProps();
+      const component = mount(<FormatSelector {...props} options={{ disableSuffix: true }} />);
+      expect(component.exists('[data-test-subj="indexPattern-dimension-formatSuffix"]')).toBe(
+        false
+      );
+    });
+    it('can specify the max decimal places', () => {
+      const max = 2;
+      const props = getDefaultProps();
+      const component = mount(<FormatSelector {...props} options={{ maxDecimals: max }} />);
+      expect(component.find(EuiRange).props().max).toBe(max);
+    });
   });
 });

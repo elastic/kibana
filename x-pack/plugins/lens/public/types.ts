@@ -41,6 +41,7 @@ import {
   LENS_EDIT_PAGESIZE_ACTION,
 } from './visualizations/datatable/components/constants';
 import type { LensInspector } from './lens_inspector_service';
+import { FormatSelectorOptions } from './indexpattern_datasource/dimension_panel/format_selector';
 
 export type ErrorCallback = (e: { message: string }) => void;
 
@@ -464,7 +465,8 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
   layerType: LayerType | undefined;
   supportStaticValue: boolean;
   paramEditorCustomProps?: ParamEditorCustomProps;
-  supportFieldFormat?: boolean;
+  enableFormatSelector: boolean;
+  formatSelectorOptions: FormatSelectorOptions | undefined;
 };
 
 export type DatasourceDimensionTriggerProps<T> = DatasourceDimensionProps<T>;
@@ -617,7 +619,8 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   requiresPreviousColumnOnDuplicate?: boolean;
   supportStaticValue?: boolean;
   paramEditorCustomProps?: ParamEditorCustomProps;
-  supportFieldFormat?: boolean;
+  enableFormatSelector?: boolean;
+  formatSelectorOptions?: FormatSelectorOptions; // only relevant if supportFieldFormat is true
   labels?: { buttonAriaLabel: string; buttonLabel: string };
 };
 
