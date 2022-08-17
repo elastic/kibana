@@ -46,10 +46,11 @@ describe('ALL - Live Query', () => {
     submitQuery();
     cy.contains('Agents is a required field');
     cy.contains('Query is a required field');
-    cy.contains('ECS field is required.');
     selectAllAgents();
     inputQuery('select * from uptime; ');
     submitQuery();
+    cy.contains('Agents is a required field').should('not.exist');
+    cy.contains('Query is a required field').should('not.exist');
     checkResults();
     getAdvancedButton().click();
     typeInOsqueryFieldInput('days{downArrow}{enter}');
@@ -57,6 +58,7 @@ describe('ALL - Live Query', () => {
     cy.contains('ECS field is required.');
     typeInECSFieldInput('message{downArrow}{enter}');
     submitQuery();
+    cy.contains('ECS field is required.').should('not.exist');
 
     checkResults();
   });
