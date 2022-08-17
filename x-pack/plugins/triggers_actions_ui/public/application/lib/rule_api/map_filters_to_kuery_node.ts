@@ -85,8 +85,8 @@ export const mapFiltersToKueryNode = ({
   if (searchText && searchText !== '') {
     filterKueryNode.push(
       nodeBuilder.or([
-        nodeBuilder.is('alert.attributes.name', nodeTypes.wildcard.buildNode(searchText)),
-        nodeBuilder.is('alert.attributes.tags', nodeTypes.wildcard.buildNode(searchText)),
+        nodeBuilder.is('alert.attributes.name', nodeTypes.literal.buildNode(searchText, true)),
+        nodeBuilder.is('alert.attributes.tags', nodeTypes.literal.buildNode(searchText, true)),
       ])
     );
   }

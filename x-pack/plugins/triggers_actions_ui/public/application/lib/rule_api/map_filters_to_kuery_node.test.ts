@@ -167,7 +167,7 @@ describe('mapFiltersToKueryNode', () => {
     expect(
       toElasticsearchQuery(
         mapFiltersToKueryNode({
-          searchText: 'fo*',
+          searchText: 'fo',
         }) as KueryNode
       )
     ).toMatchInlineSnapshot(`
@@ -180,11 +180,8 @@ describe('mapFiltersToKueryNode', () => {
                 "minimum_should_match": 1,
                 "should": Array [
                   Object {
-                    "query_string": Object {
-                      "fields": Array [
-                        "alert.attributes.name",
-                      ],
-                      "query": "fo*",
+                    "match_phrase": Object {
+                      "alert.attributes.name": "fo",
                     },
                   },
                 ],
@@ -195,11 +192,8 @@ describe('mapFiltersToKueryNode', () => {
                 "minimum_should_match": 1,
                 "should": Array [
                   Object {
-                    "query_string": Object {
-                      "fields": Array [
-                        "alert.attributes.tags",
-                      ],
-                      "query": "fo*",
+                    "match_phrase": Object {
+                      "alert.attributes.tags": "fo",
                     },
                   },
                 ],
