@@ -58,6 +58,11 @@ export interface IAlertsClient {
   setRuleData(rule: AlertRuleSchema): void;
 
   /**
+   * Flag indicating whether max number of alerts has been reported.
+   */
+  hasReachedAlertLimit(): boolean;
+
+  /**
    * Get alerts matching given rule ID and rule execution uuid
    * - Allow specifying a different index than the default (for security alerts)
    */

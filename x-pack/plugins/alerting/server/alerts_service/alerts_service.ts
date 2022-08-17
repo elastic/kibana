@@ -62,7 +62,9 @@ export class AlertsService implements IAlertsService {
       // Currently setting dynamic: true and allowing all fields
       // this.createOrUpdateComponentTemplates(esClient);
       this.createOrUpdateIndexTemplate(esClient);
-      this.createConcreteWriteIndex(esClient);
+
+      // TODO - check if it exists first
+      // this.createConcreteWriteIndex(esClient);
     });
   }
 
@@ -153,7 +155,7 @@ export class AlertsService implements IAlertsService {
       });
     } catch (err) {
       this.options.logger.error(`Error creating concrete write index - ${err.message}`);
-      throw err;
+      // throw err;
     }
   }
 }

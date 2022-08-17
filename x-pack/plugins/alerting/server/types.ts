@@ -44,7 +44,7 @@ import {
   MappedParams,
   RuleSnooze,
 } from '../common';
-import type { PublicAlertsClient } from './alerts_service/types';
+import type { AlertSchema, PublicAlertsClient } from './alerts_service/types';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 export type { RuleTypeParams };
@@ -177,6 +177,11 @@ export interface RuleType<
   cancelAlertsOnRuleTimeout?: boolean;
   doesSetRecoveryContext?: boolean;
   autoRecoverAlerts?: boolean;
+  // For framework alerts as data, we want to store everything inside the alert
+  // document but for backwards compatibility with existing action variables, we want
+  // to be able to pull out context and state variables from the alert document
+  // Allow rule types to specify mapping function
+  getContextAndState?: (alert: AlertSchema) => { context: InstanceContext; state: InstanceState };
 }
 export type UntypedRuleType = RuleType<
   RuleTypeParams,

@@ -29,7 +29,7 @@ export class AlertsClient implements IAlertsClient {
   private rule: AlertRuleSchema | null = null;
 
   private hasCalledGetRecoveredAlerts: boolean = false;
-  private hasReachedAlertLimit: boolean = false;
+  private reachedAlertLimit: boolean = false;
 
   // Alerts from the previous rule execution
   // TODO - Alerts can be large, should we strip these down to the bare minimum
@@ -53,11 +53,18 @@ export class AlertsClient implements IAlertsClient {
     this.rule = rule;
   }
 
+  public hasReachedAlertLimit() {
+    return this.reachedAlertLimit;
+  }
+
   public async loadExistingAlerts({
     ruleId,
     previousRuleExecutionUuid,
     alertsIndex,
   }: LoadExistingAlertsParams): Promise<AlertSchema[]> {
+    this.options.logger.info(
+      `loadExistingAlerts rule id ${ruleId}, execution ${previousRuleExecutionUuid}`
+    );
     const esClient = await this.options.elasticsearchClientPromise;
     const indexToQuery = alertsIndex ?? DEFAULT_ALERTS_INDEX;
 
@@ -76,12 +83,18 @@ export class AlertsClient implements IAlertsClient {
               filter: [
                 {
                   term: {
-                    'rule.id': ruleId,
+                    // Using .keyword because index mapping is set to dynamic = true
+                    // so rule.id is auto-mapped as text. Update when we're using an actual
+                    // index mapping
+                    'rule.id.keyword': ruleId,
                   },
                 },
                 {
                   term: {
-                    'rule.execution.id': previousRuleExecutionUuid,
+                    // Using .keyword because index mapping is set to dynamic = true
+                    // so rule.id is auto-mapped as text. Update when we're using an actual
+                    // index mapping
+                    'rule.execution.id.keyword': previousRuleExecutionUuid,
                   },
                 },
               ],
@@ -111,7 +124,7 @@ export class AlertsClient implements IAlertsClient {
     }
 
     if (this.createdAlerts.length + 1 >= this.options.maxAlerts) {
-      this.hasReachedAlertLimit = true;
+      this.reachedAlertLimit = true;
       throw new Error(`Can't create new alerts as max allowed alerts have been created!`);
     }
 
@@ -139,12 +152,30 @@ export class AlertsClient implements IAlertsClient {
   public update(id: string, updatedAlert: Partial<AlertSchema>) {}
 
   public async writeAlerts() {
+    this.options.logger.info(`writeAlerts`);
+    this.options.logger.info(`${this.existingAlerts.length} existing alerts`);
+    this.options.logger.info(`${this.createdAlerts.length} created alerts`);
     // Update alert with status and prepare for writing
+    // TODO - Lifecycle alerts set some other fields based on alert status
+    // Do we need to move those to the framework? Otherwise we would need to
+    // allow rule types to set these fields but they won't know the status
+    // of the alert beforehand
+    // Example: workflow status - default to 'open' if not set
+    // event action: new alert = 'new', active alert: 'active', otherwise 'close'
     this.prepareAlerts(this.options.ruleType.autoRecoverAlerts ?? true);
+
+    this.options.logger.info(`preparedAlerts ${JSON.stringify(this.preparedAlerts)}`);
 
     // Bulk index alerts
     const esClient = await this.options.elasticsearchClientPromise;
-    await esClient.bulk({});
+    await esClient.bulk({
+      body: this.preparedAlerts.flatMap((alert) => [
+        { index: { _id: alert.uuid, _index: DEFAULT_ALERTS_INDEX, require_alias: false } },
+        alert,
+      ]),
+    });
+
+    // TODO - write event log documents
   }
 
   public getExecutorServices(): PublicAlertsClient {
@@ -187,9 +218,12 @@ export class AlertsClient implements IAlertsClient {
 
     // Recovered alerts
     if (shouldRecover) {
+      this.options.logger.info('calculating recovery alerts');
       const recoveredAlerts = this.existingAlerts.filter(
         ({ id: id1 }) => !this.createdAlerts.some(({ id: id2 }) => id2 === id1)
       );
+
+      this.options.logger.info(`recoveredAlerts ${recoveredAlerts.length}`);
 
       for (const alert of recoveredAlerts) {
         // Look for updates to this alert
@@ -198,7 +232,7 @@ export class AlertsClient implements IAlertsClient {
           this.preparedAlerts.push({
             ...alert,
             ...updatedAlert,
-            actionGroup: RecoveredActionGroup.id,
+            actionGroup: this.options.ruleType.recoveryActionGroup.id,
             status: 'recovered',
             end: currentTime,
           });
@@ -208,6 +242,12 @@ export class AlertsClient implements IAlertsClient {
           //  - 1. Strip out previous information and write it with the bare minimum of information?
           //  - 2. Persist information from previous run? This could include context and state
           //         fields that might not be relevant anymore
+          this.preparedAlerts.push({
+            ...alert,
+            actionGroup: this.options.ruleType.recoveryActionGroup.id,
+            status: 'recovered',
+            end: currentTime,
+          });
         }
       }
     }

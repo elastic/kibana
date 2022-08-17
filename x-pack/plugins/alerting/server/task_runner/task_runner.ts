@@ -374,7 +374,14 @@ export class TaskRunner<
             uiSettingsClient: this.context.uiSettings.asScopedToClient(savedObjectsClient),
             scopedClusterClient: wrappedScopedClusterClient.client(),
             alertsClient: this.alertsClient.getExecutorServices(),
+            /**
+             * Deprecate alertFactory
+             * Could update alertFactory to act as a pass through to the alerts client
+             * until we can onboard all rules
+             */
             alertFactory,
+
+            /* can move these into alerts client as well */
             shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
             shouldStopExecution: () => this.cancelled,
           },
@@ -445,12 +452,12 @@ export class TaskRunner<
     ruleRunMetricsStore.setTotalSearchDurationMs(searchMetrics.totalSearchDurationMs);
     ruleRunMetricsStore.setEsSearchDurationMs(searchMetrics.esSearchDurationMs);
 
-    const {
-      newAlerts: newNewAlerts,
-      activeAlerts: newActiveAlerts,
-      recoveredAlerts: newRecoveredAlerts,
-    } = await this.alertsClient.writeAlerts();
+    await this.alertsClient.writeAlerts();
 
+    /**
+     * processAlerts and logAlerts should eventually be replaced by
+     * alertsClient.writeAlerts
+     */
     const { newAlerts, activeAlerts, recoveredAlerts } = processAlerts<
       State,
       Context,
@@ -481,6 +488,17 @@ export class TaskRunner<
     if (!ruleIsSnoozed && this.shouldLogAndScheduleActionsForAlerts()) {
       const mutedAlertIdsSet = new Set(mutedInstanceIds);
 
+      /**
+       * With alerts client, we would want to decouple action scheduling
+       * We would want to store the a lastNotifiedTime on the alert document
+       * so during action scheduling:
+       * - alertsClient.getAlerts - get active and recovered alerts
+       * - look at lastNotifiedTime on each alert to determine whether we want to
+       *   schedule an action for it based on throttle/mute/snooze settings
+       * - if we want to schedule an action, update the alert doc with new lastNotifiedTime
+       * - alternatively, if configured, schedule a summary notification with
+       *   the alert data.
+       */
       const alertsWithExecutableActions = Object.entries(activeAlerts).filter(
         ([alertName, alert]: [string, Alert<State, Context, ActionGroupIds>]) => {
           const throttled = alert.isThrottled(throttle);
@@ -638,12 +656,12 @@ export class TaskRunner<
     const namespace = this.context.spaceIdToNamespace(spaceId);
 
     // Query for alerts from previous execution
-    // if (previousExecutionUuid) {
-    //   this.alertsClient.getExistingAlerts({
-    //     ruleId,
-    //     previousRuleExecutionUuid: previousExecutionUuid,
-    //   });
-    // }
+    if (previousExecutionUuid) {
+      this.alertsClient.loadExistingAlerts({
+        ruleId,
+        previousRuleExecutionUuid: previousExecutionUuid,
+      });
+    }
 
     this.alertingEventLogger.initialize({
       ruleId,
