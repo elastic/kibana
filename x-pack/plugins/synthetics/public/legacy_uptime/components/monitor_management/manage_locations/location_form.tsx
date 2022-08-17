@@ -5,7 +5,16 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiFieldText, EuiForm, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  EuiFieldText,
+  EuiForm,
+  EuiFormRow,
+  EuiSpacer,
+  EuiCallOut,
+  EuiCode,
+  EuiLink,
+} from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { useFormContext, useFormState } from 'react-hook-form';
@@ -52,10 +61,43 @@ export const LocationForm = ({
         </EuiFormRow>
         <EuiSpacer />
         <PolicyHostsField errors={errors} control={control} privateLocations={privateLocations} />
+        <EuiSpacer />
+        <EuiCallOut title={AGENT_CALLOUT_TITLE} size="s" style={{ textAlign: 'left' }}>
+          <p>
+            {
+              <FormattedMessage
+                id="xpack.synthetics.monitorManagement.agentCallout.content"
+                defaultMessage='If you intend to run "Browser" monitors on this private location, please ensure you are using the {code} Docker container, which contains the dependencies to run these monitors. For more information, {link}.'
+                values={{
+                  code: <EuiCode>elastic-agent-complete</EuiCode>,
+                  link: (
+                    <EuiLink
+                      target="_blank"
+                      href="https://www.elastic.co/guide/en/observability/current/uptime-set-up-choose-agent.html#private-locations"
+                      external
+                    >
+                      <FormattedMessage
+                        id="xpack.synthetics.monitorManagement.agentCallout.link"
+                        defaultMessage="read the docs"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            }
+          </p>
+        </EuiCallOut>
       </EuiForm>
     </>
   );
 };
+
+export const AGENT_CALLOUT_TITLE = i18n.translate(
+  'xpack.synthetics.monitorManagement.agentCallout.title',
+  {
+    defaultMessage: 'Requirement',
+  }
+);
 
 export const LOCATION_NAME_LABEL = i18n.translate(
   'xpack.synthetics.monitorManagement.locationName',
