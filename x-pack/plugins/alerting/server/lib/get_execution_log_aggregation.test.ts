@@ -1090,6 +1090,25 @@ describe('formatExecutionLogResult', () => {
                     value: 1.646844973039e12,
                     value_as_string: '2022-03-09T16:56:13.039Z',
                   },
+                  ruleId: {
+                    hits: {
+                      total: {
+                        value: 1,
+                        relation: 'eq',
+                      },
+                      max_score: 1.0,
+                      hits: [
+                        {
+                          _index: '.kibana-event-log-8.2.0-000001',
+                          _id: 'S4wIZX8B8TGQpG7XQZns',
+                          _score: 1.0,
+                          _source: {
+                            rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef' },
+                          },
+                        },
+                      ],
+                    },
+                  },
                 },
                 actionExecution: {
                   meta: {},
@@ -1173,6 +1192,25 @@ describe('formatExecutionLogResult', () => {
                     value: 1.646844917518e12,
                     value_as_string: '2022-03-09T16:55:17.518Z',
                   },
+                  ruleId: {
+                    hits: {
+                      total: {
+                        value: 1,
+                        relation: 'eq',
+                      },
+                      max_score: 1.0,
+                      hits: [
+                        {
+                          _index: '.kibana-event-log-8.2.0-000001',
+                          _id: 'S4wIZX8B8TGQpG7XQZns',
+                          _score: 1.0,
+                          _source: {
+                            rule: { id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef' },
+                          },
+                        },
+                      ],
+                    },
+                  },
                 },
                 actionExecution: {
                   meta: {},
@@ -1221,6 +1259,7 @@ describe('formatExecutionLogResult', () => {
           es_search_duration_ms: 0,
           timed_out: false,
           schedule_delay_ms: 3126,
+          rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
         },
         {
           id: '61bb867b-661a-471f-bf92-23471afa10b3',
@@ -1241,6 +1280,7 @@ describe('formatExecutionLogResult', () => {
           es_search_duration_ms: 0,
           timed_out: false,
           schedule_delay_ms: 3133,
+          rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
         },
       ],
     });
