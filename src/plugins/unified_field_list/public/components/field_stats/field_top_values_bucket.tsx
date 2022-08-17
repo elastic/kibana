@@ -67,17 +67,15 @@ export const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
               </EuiToolTip>
             ) : (
               <EuiText size="xs">
-                {type === 'other' ? (
-                  i18n.translate('unifiedFieldList.fieldStats.otherDocsLabel', {
-                    defaultMessage: 'Other',
-                  })
-                ) : (
-                  <em>
-                    {i18n.translate('unifiedFieldList.fieldStats.emptyStringValueLabel', {
-                      defaultMessage: 'Empty string',
-                    })}
-                  </em>
-                )}
+                {type === 'other'
+                  ? i18n.translate('unifiedFieldList.fieldStats.otherDocsLabel', {
+                      defaultMessage: 'Other',
+                    })
+                  : formattedFieldValue === ''
+                  ? i18n.translate('unifiedFieldList.fieldStats.emptyStringValueLabel', {
+                      defaultMessage: '(empty)',
+                    })
+                  : '-'}
               </EuiText>
             )}
           </EuiFlexItem>
