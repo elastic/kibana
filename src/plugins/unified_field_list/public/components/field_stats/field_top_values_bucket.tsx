@@ -50,26 +50,26 @@ export const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
             className="eui-textTruncate"
             data-test-subj={`${testSubject}-topValues-formattedLabel`}
           >
-            {!formattedLabel ? (
-              <EuiText size="xs">
-                {type === 'other'
-                  ? i18n.translate('unifiedFieldList.fieldStats.otherDocsLabel', {
-                      defaultMessage: 'Other',
-                    })
-                  : formattedValue === '' && (
-                      <em>
-                        {i18n.translate('unifiedFieldList.fieldStats.emptyStringValueLabel', {
-                          defaultMessage: 'Empty string',
-                        })}
-                      </em>
-                    )}
-              </EuiText>
-            ) : (
+            {(formattedLabel?.length ?? 0) > 0 ? (
               <EuiToolTip content={formattedLabel} delay="long">
                 <EuiText size="xs" className="eui-textTruncate" color="subdued">
                   {formattedLabel}
                 </EuiText>
               </EuiToolTip>
+            ) : (
+              <EuiText size="xs">
+                {type === 'other' ? (
+                  i18n.translate('unifiedFieldList.fieldStats.otherDocsLabel', {
+                    defaultMessage: 'Other',
+                  })
+                ) : (
+                  <em>
+                    {i18n.translate('unifiedFieldList.fieldStats.emptyStringValueLabel', {
+                      defaultMessage: 'Empty string',
+                    })}
+                  </em>
+                )}
+              </EuiText>
             )}
           </EuiFlexItem>
           <EuiFlexItem grow={false} data-test-subj={`${testSubject}-topValues-formattedValue`}>
