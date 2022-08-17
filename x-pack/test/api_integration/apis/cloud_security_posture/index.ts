@@ -7,13 +7,9 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService, loadTestFile }: FtrProviderContext) {
+export default function ({ loadTestFile }: FtrProviderContext) {
   describe('cloud_security_posture', function () {
     this.tags(['cloud_security_posture']);
-
-    before(async () => {});
-
-    after(async () => {});
 
     loadTestFile(require.resolve('./update_rules_config'));
   });

@@ -11,7 +11,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
-  // const kibanaServer = getService('kibanaServer');
   const chance = new Chance();
 
   describe('POST /internal/cloud_security_posture/update_rules_config', () => {
@@ -38,14 +37,7 @@ export default function ({ getService }: FtrProviderContext) {
       agentPolicyId = agentPolicyResponse.item.id;
     });
 
-    after(async function () {
-      await supertest
-        .post(`/api/fleet/agent_policies/delete`)
-        .set('kbn-xsrf', 'xxxx')
-        .send({ agentPolicyId });
-    });
-
-    it(`expect error code 500 - package policy not exist`, async () => {
+    it(`should return 500 when package policy id not exist`, async () => {
       const packagePolicyId = chance.guid();
 
       const { body: response } = await supertest
@@ -59,7 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response.message).to.be(`package policy Id '${packagePolicyId}' is not exist`);
     });
 
-    it(`creates Cloud Posture package policy and execute valid API call to update configuration`, async () => {
+    it(`should return 200 for existing package policy id`, async () => {
       const { body: response } = await supertest
         .post(`/api/fleet/package_policies`)
         .set('kbn-xsrf', 'xxxx')
@@ -75,7 +67,7 @@ export default function ({ getService }: FtrProviderContext) {
           package: {
             name: 'cloud_security_posture',
             title: 'Kubernetes Security Posture Management',
-            version: '0.0.26',
+            version: '0.0.26', // TODO: Find a method of maintaining the most recent version of the package
           },
         })
         .expect(200);
