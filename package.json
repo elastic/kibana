@@ -140,6 +140,7 @@
     "@kbn/analytics-shippers-fullstory": "link:bazel-bin/packages/analytics/shippers/fullstory",
     "@kbn/apm-config-loader": "link:bazel-bin/packages/kbn-apm-config-loader",
     "@kbn/apm-utils": "link:bazel-bin/packages/kbn-apm-utils",
+    "@kbn/chart-icons": "link:bazel-bin/packages/kbn-chart-icons",
     "@kbn/coloring": "link:bazel-bin/packages/kbn-coloring",
     "@kbn/config": "link:bazel-bin/packages/kbn-config",
     "@kbn/config-mocks": "link:bazel-bin/packages/kbn-config-mocks",
@@ -579,6 +580,8 @@
     "vinyl": "^2.2.0",
     "whatwg-fetch": "^3.0.0",
     "xml2js": "^0.4.22",
+    "xterm": "^4.18.0",
+    "xterm-addon-fit": "^0.5.0",
     "yauzl": "^2.10.0"
   },
   "devDependencies": {
@@ -777,6 +780,7 @@
     "@types/kbn__axe-config": "link:bazel-bin/packages/kbn-axe-config/npm_module_types",
     "@types/kbn__bazel-packages": "link:bazel-bin/packages/kbn-bazel-packages/npm_module_types",
     "@types/kbn__bazel-runner": "link:bazel-bin/packages/kbn-bazel-runner/npm_module_types",
+    "@types/kbn__chart-icons": "link:bazel-bin/packages/kbn-chart-icons/npm_module_types",
     "@types/kbn__ci-stats-core": "link:bazel-bin/packages/kbn-ci-stats-core/npm_module_types",
     "@types/kbn__ci-stats-performance-metrics": "link:bazel-bin/packages/kbn-ci-stats-performance-metrics/npm_module_types",
     "@types/kbn__ci-stats-reporter": "link:bazel-bin/packages/kbn-ci-stats-reporter/npm_module_types",
@@ -1242,6 +1246,7 @@
     "postcss-scss": "^4.0.4",
     "prettier": "^2.7.1",
     "pretty-format": "^27.5.1",
+    "proxy": "^1.0.2",
     "q": "^1.5.1",
     "raw-loader": "^3.1.0",
     "react-test-renderer": "^16.14.0",

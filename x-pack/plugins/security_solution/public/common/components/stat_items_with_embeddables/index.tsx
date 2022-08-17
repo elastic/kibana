@@ -223,6 +223,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
                             id={id}
                             lensAttributes={field.lensAttributes}
                             timerange={timerange}
+                            inspectTitle={description}
                           />
                         )}
                       </FlexItem>
@@ -248,6 +249,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
                       timerange={timerange}
                       id={id}
                       height={ChartHeight}
+                      inspectTitle={description}
                     />
                   </FlexItem>
                 )}
@@ -261,6 +263,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
                         timerange={timerange}
                         id={id}
                         height={ChartHeight}
+                        inspectTitle={description}
                       />
                     )}
                   </FlexItem>
