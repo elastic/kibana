@@ -9,7 +9,9 @@ import { Embeddable } from '@kbn/embeddable-plugin/public';
 import type { VisualizeEmbeddable } from '@kbn/visualizations-plugin/public';
 
 export function isLegacyMap(embeddable: Embeddable) {
-    return embeddable.type === 'visualization' &&
-      typeof (embeddable as VisualizeEmbeddable).getVis === 'function' &&
-      ['region_map', 'tile_map'].includes((embeddable as VisualizeEmbeddable).getVis()?.type?.name);
+  return (
+    embeddable.type === 'visualization' &&
+    typeof (embeddable as VisualizeEmbeddable).getVis === 'function' &&
+    ['region_map', 'tile_map'].includes((embeddable as VisualizeEmbeddable).getVis()?.type?.name)
+  );
 }

@@ -59,7 +59,10 @@ export const filterByMapExtentAction = createAction<FilterByMapExtentActionConte
     return 'filter';
   },
   isCompatible: async ({ embeddable }: FilterByMapExtentActionContext) => {
-    return (embeddable.type === MAP_SAVED_OBJECT_TYPE || isLegacyMap(embeddable)) && !embeddable.getInput().disableTriggers;
+    return (
+      (embeddable.type === MAP_SAVED_OBJECT_TYPE || isLegacyMap(embeddable)) &&
+      !embeddable.getInput().disableTriggers
+    );
   },
   execute: async (context: FilterByMapExtentActionContext) => {
     const { FilterByMapExtentModal } = await import('./filter_by_map_extent_modal');
