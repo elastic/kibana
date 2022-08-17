@@ -34,20 +34,6 @@ export const CleanPackageManagerRelatedFiles: Task = {
   },
 };
 
-export const CleanTypescript: Task = {
-  description: 'Cleaning typescript source files that have been transpiled to JS',
-
-  async run(config, log, build) {
-    log.info(
-      'Deleted %d files',
-      await scanDelete({
-        directory: build.resolvePath(),
-        regularExpressions: [/\.(ts|tsx|d\.ts)$/, /tsconfig.*\.(json|tsbuildinfo)$/],
-      })
-    );
-  },
-};
-
 export const CleanExtraFilesFromModules: Task = {
   description: 'Cleaning tests, examples, docs, etc. from node_modules',
 
@@ -198,7 +184,7 @@ export const CleanExtraFilesFromModules: Task = {
       '**/@elastic/eui/test-env',
       '**/@elastic/eui/optimize',
       '**/@elastic/eui/i18ntokens.json',
-    ]);
+    ]).concat([/\.(ts|tsx|d\.ts)$/, /tsconfig.*\.(json|tsbuildinfo)$/]);
 
     log.info(
       'Deleted %d files',
