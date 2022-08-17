@@ -165,6 +165,28 @@ export const removeFilter = (filters: Filter[], path: string) => {
   return normalizeFilters(newFilters);
 };
 
+const addFilterThenRemoveFilter = (
+  filters: Filter[],
+  filter: FilterItem,
+  from: string,
+  to: string,
+  conditionalType: ConditionTypes
+) => {
+  const newFiltersWithFilter = addFilter(filters, filter, to, conditionalType);
+  return removeFilter(newFiltersWithFilter, from);
+};
+
+const removeFilterThenAddFilter = (
+  filters: Filter[],
+  filter: FilterItem,
+  from: string,
+  to: string,
+  conditionalType: ConditionTypes
+) => {
+  const newFiltersWithoutFilter = removeFilter(filters, from);
+  return addFilter(newFiltersWithoutFilter, filter, to, conditionalType);
+};
+
 export const moveFilter = (
   filters: Filter[],
   from: string,
@@ -181,30 +203,24 @@ export const moveFilter = (
     const filterPositionTo = pathInArrayTo.at(-1);
     const filterPositionFrom = pathInArrayFrom.at(-1);
 
+    const { parentConditionType } = getContainerMetaByPath(newFilters, pathInArrayTo);
     const filterMovementDirection = Number(filterPositionTo) - Number(filterPositionFrom);
-
-    const parentFilter = getFilterByPath(newFilters, getParentFilterPath(pathInArrayTo));
-    const parentConditionType = getConditionalOperationType(parentFilter) ?? ConditionTypes.AND;
 
     if (filterMovementDirection === -1 && parentConditionType === conditionalType) {
       return filters;
     }
 
     if (filterMovementDirection >= -1) {
-      const newFilterWithFilter = addFilter(newFilters, movingFilter, to, conditionalType);
-      return removeFilter(newFilterWithFilter, from);
+      return addFilterThenRemoveFilter(newFilters, movingFilter, from, to, conditionalType);
     } else {
-      const newFiltersWithoutFilter = removeFilter(newFilters, from);
-      return addFilter(newFiltersWithoutFilter, movingFilter, to, conditionalType);
+      return removeFilterThenAddFilter(newFilters, movingFilter, from, to, conditionalType);
     }
   }
 
   if (pathInArrayTo.length > pathInArrayFrom.length) {
-    const newFilterWithFilter = addFilter(newFilters, movingFilter, to, conditionalType);
-    return removeFilter(newFilterWithFilter, from);
+    return addFilterThenRemoveFilter(newFilters, movingFilter, from, to, conditionalType);
   } else {
-    const newFiltersWithoutFilter = removeFilter(newFilters, from);
-    return addFilter(newFiltersWithoutFilter, movingFilter, to, conditionalType);
+    return removeFilterThenAddFilter(newFilters, movingFilter, from, to, conditionalType);
   }
 };
 
