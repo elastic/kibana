@@ -8,9 +8,15 @@
 import { FramePublicAPI } from '../../../types';
 import { getStaticDate } from './helpers';
 
-const frame = {
+const frame: FramePublicAPI = {
   datasourceLayers: {},
   dateRange: { fromDate: '2022-02-01T00:00:00.000Z', toDate: '2022-04-20T00:00:00.000Z' },
+  dataViews: {
+    indexPatterns: {},
+    indexPatternRefs: [],
+    existingFields: {},
+    isFirstExistenceFetch: true,
+  },
 };
 
 describe('annotations helpers', () => {
