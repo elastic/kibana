@@ -17,6 +17,7 @@ const STORYBOOKS = [
   'ci_composite',
   'cloud',
   'coloring',
+  'chart_icons',
   'controls',
   'custom_integrations',
   'dashboard_enhanced',

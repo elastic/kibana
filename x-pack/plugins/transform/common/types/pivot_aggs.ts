@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AggName } from './aggregations';
-import { EsFieldName } from './fields';
 
 export const PIVOT_SUPPORTED_AGGS = {
   AVG: 'avg',
@@ -23,11 +23,7 @@ export const PIVOT_SUPPORTED_AGGS = {
 
 export type PivotSupportedAggs = typeof PIVOT_SUPPORTED_AGGS[keyof typeof PIVOT_SUPPORTED_AGGS];
 
-export type PivotAgg = {
-  [key in PivotSupportedAggs]?: {
-    field: EsFieldName;
-  };
-};
+export type PivotAgg = estypes.AggregationsAggregationContainer;
 
 export type PivotAggDict = {
   [key in AggName]: PivotAgg;
