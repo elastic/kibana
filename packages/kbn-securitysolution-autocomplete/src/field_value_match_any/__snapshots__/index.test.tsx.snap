@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`AutocompleteFieldMatchComponent should show the warning helper text if the new value contains spaces when change 1`] = `
-<AutocompleteFieldMatch
+exports[`AutocompleteFieldMatchAnyComponent should show the warning helper text if the new value contains spaces when change 1`] = `
+<AutocompleteFieldMatchAny
   autocompleteService={
     Object {
       "getQuerySuggestions": [MockFunction],
@@ -398,22 +398,9 @@ exports[`AutocompleteFieldMatchComponent should show the warning helper text if 
     [MockFunction] {
       "calls": Array [
         Array [
-          " value 1 ",
-        ],
-      ],
-      "results": Array [
-        Object {
-          "type": "return",
-          "value": undefined,
-        },
-      ],
-    }
-  }
-  onError={
-    [MockFunction] {
-      "calls": Array [
-        Array [
-          false,
+          Array [
+            " value 1 ",
+          ],
         ],
       ],
       "results": Array [
@@ -425,7 +412,7 @@ exports[`AutocompleteFieldMatchComponent should show the warning helper text if 
     }
   }
   placeholder="Placeholder text"
-  rowLabel="Test"
+  rowLabel="Row Label"
   selectedField={
     Object {
       "aggregatable": true,
@@ -445,10 +432,9 @@ exports[`AutocompleteFieldMatchComponent should show the warning helper text if 
       "type": "string",
     }
   }
-  selectedValue=""
+  selectedValue={Array []}
 >
   <EuiFormRow
-    data-test-subj="valuesAutocompleteMatchLabel"
     describedByIds={Array []}
     display="row"
     fullWidth={true}
@@ -456,12 +442,11 @@ exports[`AutocompleteFieldMatchComponent should show the warning helper text if 
     hasEmptyLabelSpace={false}
     helpText="Warning: there is a space"
     isInvalid={false}
-    label="Test"
+    label="Row Label"
     labelType="label"
   >
     <div
       className="euiFormRow euiFormRow--fullWidth euiFormRow--hasLabel"
-      data-test-subj="valuesAutocompleteMatchLabel"
       id="generated-id-row"
     >
       <div
@@ -482,7 +467,7 @@ exports[`AutocompleteFieldMatchComponent should show the warning helper text if 
             htmlFor="generated-id"
             id="generated-id-label"
           >
-            Test
+            Row Label
           </label>
         </EuiFormLabel>
       </div>
@@ -493,7 +478,7 @@ exports[`AutocompleteFieldMatchComponent should show the warning helper text if 
           aria-describedby="generated-id-help-0"
           async={true}
           compressed={false}
-          data-test-subj="valuesAutocompleteMatch"
+          data-test-subj="valuesAutocompleteMatchAny"
           disabled={false}
           fullWidth={true}
           id="generated-id"
@@ -518,22 +503,16 @@ exports[`AutocompleteFieldMatchComponent should show the warning helper text if 
           }
           placeholder="Placeholder text"
           selectedOptions={Array []}
-          singleSelection={
-            Object {
-              "asPlainText": true,
-            }
-          }
-          sortMatchesBy="startsWith"
-          style={Object {}}
+          singleSelection={false}
+          sortMatchesBy="none"
         >
           <div
             aria-describedby="generated-id-help-0"
             className="euiComboBox euiComboBox--fullWidth"
-            data-test-subj="valuesAutocompleteMatch"
+            data-test-subj="valuesAutocompleteMatchAny"
             disabled={false}
             onFocus={[Function]}
             onKeyDown={[Function]}
-            style={Object {}}
           >
             <EuiComboBoxInput
               autoSizeInputRef={[Function]}
@@ -556,11 +535,7 @@ exports[`AutocompleteFieldMatchComponent should show the warning helper text if 
               rootId={[Function]}
               searchValue=""
               selectedOptions={Array []}
-              singleSelection={
-                Object {
-                  "asPlainText": true,
-                }
-              }
+              singleSelection={false}
               toggleButtonRef={[Function]}
               updatePosition={[Function]}
               value=""
@@ -590,7 +565,7 @@ exports[`AutocompleteFieldMatchComponent should show the warning helper text if 
                     className="euiFormControlLayout__childrenWrapper"
                   >
                     <div
-                      className="euiComboBox__inputWrap euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap"
+                      className="euiComboBox__inputWrap euiComboBox__inputWrap--fullWidth"
                       data-test-subj="comboBoxInput"
                       onClick={[Function]}
                       tabIndex={-1}
@@ -742,11 +717,11 @@ exports[`AutocompleteFieldMatchComponent should show the warning helper text if 
       </div>
     </div>
   </EuiFormRow>
-</AutocompleteFieldMatch>
+</AutocompleteFieldMatchAny>
 `;
 
-exports[`AutocompleteFieldMatchComponent should show the warning helper text if the new value contains spaces when searching a new query 1`] = `
-<AutocompleteFieldMatch
+exports[`AutocompleteFieldMatchAnyComponent should show the warning helper text if the new value contains spaces when searching a new query 1`] = `
+<AutocompleteFieldMatchAny
   autocompleteService={
     Object {
       "getQuerySuggestions": [MockFunction],
@@ -1140,22 +1115,8 @@ exports[`AutocompleteFieldMatchComponent should show the warning helper text if 
   isDisabled={false}
   isLoading={false}
   onChange={[MockFunction]}
-  onError={
-    [MockFunction] {
-      "calls": Array [
-        Array [
-          false,
-        ],
-      ],
-      "results": Array [
-        Object {
-          "type": "return",
-          "value": undefined,
-        },
-      ],
-    }
-  }
   placeholder="Placeholder text"
+  rowLabel="Row Label"
   selectedField={
     Object {
       "aggregatable": true,
@@ -1175,10 +1136,9 @@ exports[`AutocompleteFieldMatchComponent should show the warning helper text if 
       "type": "string",
     }
   }
-  selectedValue=""
+  selectedValue={Array []}
 >
   <EuiFormRow
-    data-test-subj="valuesAutocompleteMatchLabel"
     describedByIds={Array []}
     display="row"
     fullWidth={true}
@@ -1186,13 +1146,35 @@ exports[`AutocompleteFieldMatchComponent should show the warning helper text if 
     hasEmptyLabelSpace={false}
     helpText="Warning: there is a space"
     isInvalid={false}
+    label="Row Label"
     labelType="label"
   >
     <div
-      className="euiFormRow euiFormRow--fullWidth"
-      data-test-subj="valuesAutocompleteMatchLabel"
+      className="euiFormRow euiFormRow--fullWidth euiFormRow--hasLabel"
       id="generated-id-row"
     >
+      <div
+        className="euiFormRow__labelWrapper"
+      >
+        <EuiFormLabel
+          aria-invalid={false}
+          className="euiFormRow__label"
+          htmlFor="generated-id"
+          id="generated-id-label"
+          isFocused={false}
+          isInvalid={false}
+          type="label"
+        >
+          <label
+            aria-invalid={false}
+            className="euiFormLabel euiFormRow__label"
+            htmlFor="generated-id"
+            id="generated-id-label"
+          >
+            Row Label
+          </label>
+        </EuiFormLabel>
+      </div>
       <div
         className="euiFormRow__fieldWrapper"
       >
@@ -1200,7 +1182,7 @@ exports[`AutocompleteFieldMatchComponent should show the warning helper text if 
           aria-describedby="generated-id-help-0"
           async={true}
           compressed={false}
-          data-test-subj="valuesAutocompleteMatch"
+          data-test-subj="valuesAutocompleteMatchAny"
           disabled={false}
           fullWidth={true}
           id="generated-id"
@@ -1225,22 +1207,16 @@ exports[`AutocompleteFieldMatchComponent should show the warning helper text if 
           }
           placeholder="Placeholder text"
           selectedOptions={Array []}
-          singleSelection={
-            Object {
-              "asPlainText": true,
-            }
-          }
-          sortMatchesBy="startsWith"
-          style={Object {}}
+          singleSelection={false}
+          sortMatchesBy="none"
         >
           <div
             aria-describedby="generated-id-help-0"
             className="euiComboBox euiComboBox--fullWidth"
-            data-test-subj="valuesAutocompleteMatch"
+            data-test-subj="valuesAutocompleteMatchAny"
             disabled={false}
             onFocus={[Function]}
             onKeyDown={[Function]}
-            style={Object {}}
           >
             <EuiComboBoxInput
               autoSizeInputRef={[Function]}
@@ -1263,11 +1239,7 @@ exports[`AutocompleteFieldMatchComponent should show the warning helper text if 
               rootId={[Function]}
               searchValue=""
               selectedOptions={Array []}
-              singleSelection={
-                Object {
-                  "asPlainText": true,
-                }
-              }
+              singleSelection={false}
               toggleButtonRef={[Function]}
               updatePosition={[Function]}
               value=""
@@ -1297,7 +1269,7 @@ exports[`AutocompleteFieldMatchComponent should show the warning helper text if 
                     className="euiFormControlLayout__childrenWrapper"
                   >
                     <div
-                      className="euiComboBox__inputWrap euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap"
+                      className="euiComboBox__inputWrap euiComboBox__inputWrap--fullWidth"
                       data-test-subj="comboBoxInput"
                       onClick={[Function]}
                       tabIndex={-1}
@@ -1449,5 +1421,5 @@ exports[`AutocompleteFieldMatchComponent should show the warning helper text if 
       </div>
     </div>
   </EuiFormRow>
-</AutocompleteFieldMatch>
+</AutocompleteFieldMatchAny>
 `;
