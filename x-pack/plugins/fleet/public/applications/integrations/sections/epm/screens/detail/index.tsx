@@ -61,6 +61,7 @@ import { OverviewPage } from './overview';
 import { PackagePoliciesPage } from './policies';
 import { SettingsPage } from './settings';
 import { CustomViewPage } from './custom';
+import { DocumentationPage } from './documentation';
 
 import './index.scss';
 
@@ -491,6 +492,22 @@ export function Detail() {
       });
     }
 
+    tabs.push({
+      id: 'documentation',
+      name: (
+        <FormattedMessage
+          id="xpack.fleet.epm.packageDetailsNav.documentationLinkText"
+          defaultMessage="Documentation"
+        />
+      ),
+      isSelected: panel === 'documentation',
+      'data-test-subj': `tab-documentation`,
+      href: getHref('integration_details_documentation', {
+        pkgkey: packageInfoKey,
+        ...(integration ? { integration } : {}),
+      }),
+    });
+
     return tabs;
   }, [
     packageInfo,
@@ -576,6 +593,9 @@ export function Detail() {
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_custom}>
             <CustomViewPage packageInfo={packageInfo} />
+          </Route>
+          <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_documentation}>
+            <DocumentationPage packageInfo={packageInfo} />
           </Route>
           <Redirect to={INTEGRATIONS_ROUTING_PATHS.integration_details_overview} />
         </Switch>
