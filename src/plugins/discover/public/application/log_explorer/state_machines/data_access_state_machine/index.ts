@@ -14,6 +14,7 @@ export * from './histogram_selectors';
 export * from './load_after_service';
 export * from './load_around_service';
 export * from './load_before_service';
+export * from './position_actions';
 export * from './state_machine';
 export * from './status_selectors';
 export * from './types';

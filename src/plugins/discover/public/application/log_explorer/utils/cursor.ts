@@ -27,6 +27,11 @@ export const getPositionFromTimestamp = (timestamp: string) => ({
   tiebreaker: 0,
 });
 
+export const getPositionFromMsEpoch = (msEpoch: number) => ({
+  timestamp: new Date(msEpoch).toISOString(),
+  tiebreaker: 0,
+});
+
 export const getTimestampFromPosition = ({ timestamp }: LogExplorerPosition): Timestamp =>
   timestamp;
 

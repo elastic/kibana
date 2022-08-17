@@ -7,30 +7,37 @@
  */
 
 import {
-  AreaSeries,
   Axis,
+  BarSeries,
   Chart,
-  CurveType,
   DomainRange,
+  ElementClickListener,
+  niceTimeFormatByDay,
   PartialTheme,
   Position,
+  ProjectionClickListener,
   RectAnnotation,
   RectAnnotationDatum,
   RectAnnotationStyle,
   ScaleType,
   Settings,
+  timeFormatter,
 } from '@elastic/charts';
 import { EuiPanel, useEuiTheme } from '@elastic/eui';
 import { CSSObject } from '@emotion/react';
 import { useSelector } from '@xstate/react';
+import { fold } from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/lib/pipeable';
+import * as rt from 'io-ts';
 import moment from 'moment';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DataAccessService, selectVisibleTimeRange } from '../../state_machines';
 import {
   selectHistogramDataPoints,
   selectTimeRange,
 } from '../../state_machines/data_access_state_machine';
+import { getPositionFromMsEpoch } from '../../utils/cursor';
 
 export function LogExplorerHistogram({
   dataAccessService,
@@ -44,6 +51,8 @@ export function LogExplorerHistogram({
   const { countSeries } = useLogExplorerHistogramSeries(dataAccessService);
   const { visibleRangeAnnotation } = useLogExplorerHistogramAnnotations(dataAccessService);
 
+  const histogramEventHandlers = useLogExplorerHistogramEventHandlers(dataAccessService);
+
   // TODO: handle state machine states that don't have data
   return (
     <div css={styles.outerWrapper}>
@@ -54,13 +63,20 @@ export function LogExplorerHistogram({
             rotation={90}
             theme={chartThemes}
             xDomain={timeDomain}
+            {...histogramEventHandlers}
           />
-          <Axis hide id="left-time-axis" position={Position.Left} title="time" />
-          <AreaSeries
-            curve={CurveType.CURVE_STEP_AFTER}
+          <Axis
+            hide
+            id="left-time-axis"
+            position={Position.Left}
+            tickFormat={timeTickFormatter}
+            title="time"
+          />
+          <BarSeries
             data={countSeries}
             id="entry-count"
             splitSeriesAccessors={[1]}
+            stackAccessors={[0]}
             xAccessor={0}
             xScaleType={ScaleType.Time}
             yAccessors={[2]}
@@ -185,3 +201,52 @@ const useLogExplorerHistogramAnnotations = (dataAccessService: DataAccessService
     visibleRangeAnnotation,
   };
 };
+
+const useLogExplorerHistogramEventHandlers = (dataAccessService: DataAccessService) => {
+  const onProjectionClick = useCallback<ProjectionClickListener>(
+    ({ x }) => {
+      if (typeof x === 'number') {
+        dataAccessService.send({
+          type: 'positionChanged',
+          position: getPositionFromMsEpoch(x),
+        });
+      }
+    },
+    [dataAccessService]
+  );
+
+  const onElementClick = useCallback<ElementClickListener>(
+    ([elementClickEvent]) => {
+      const clickedTimestamp = pipe(
+        numericXYEvent.decode(elementClickEvent),
+        fold(
+          () => undefined,
+          ([{ x }]) => x
+        )
+      );
+
+      if (clickedTimestamp != null) {
+        dataAccessService.send({
+          type: 'positionChanged',
+          position: getPositionFromMsEpoch(clickedTimestamp),
+        });
+      }
+    },
+    [dataAccessService]
+  );
+
+  return {
+    onProjectionClick,
+    onElementClick,
+  };
+};
+
+const timeTickFormatter = timeFormatter(niceTimeFormatByDay(1));
+
+const numericXYEvent = rt.tuple([
+  rt.type({
+    x: rt.number,
+    y: rt.number,
+  }),
+  rt.type({}),
+]);

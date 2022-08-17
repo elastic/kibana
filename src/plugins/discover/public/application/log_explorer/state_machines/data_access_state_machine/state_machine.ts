@@ -12,12 +12,14 @@ import {
   hasEmptyTopChunk,
   hasLoadedBottomChunk,
   hasLoadedTopChunk,
+  isWithinLoadedChunks,
 } from './chunk_guards';
 import { updateFilters } from './filters_actions';
 import { appendNewBottomChunk, updateChunksFromLoadAfter } from './load_after_service';
 import { updateChunksFromLoadAround } from './load_around_service';
 import { prependNewTopChunk, updateChunksFromLoadBefore } from './load_before_service';
 import { updateChunksFromLoadTail } from './load_tail_service';
+import { updatePosition } from './position_actions';
 import { updateTimeRange } from './time_range_actions';
 import { LogExplorerContext, LogExplorerEvent, LogExplorerState } from './types';
 import { areVisibleEntriesNearEnd, areVisibleEntriesNearStart } from './visible_entry_guards';
@@ -49,6 +51,7 @@ export const dataAccessStateMachine = createMachine<
             target: 'loaded',
           },
           positionChanged: {
+            actions: 'updatePosition',
             target: 'loadingAround',
             internal: false,
           },
@@ -91,10 +94,6 @@ export const dataAccessStateMachine = createMachine<
               },
               loaded: {
                 on: {
-                  positionChanged: {
-                    cond: 'isPositionNearStart',
-                    target: '#logExplorerData.loadingTop',
-                  },
                   visibleEntriesChanged: {
                     cond: 'areVisibleEntriesNearStart',
                     target: '#logExplorerData.loadingTop',
@@ -131,10 +130,6 @@ export const dataAccessStateMachine = createMachine<
               },
               loaded: {
                 on: {
-                  positionChanged: {
-                    cond: 'isPositionNearEnd',
-                    target: '#logExplorerData.loadingBottom',
-                  },
                   visibleEntriesChanged: {
                     cond: 'areVisibleEntriesNearEnd',
                     target: '#logExplorerData.loadingBottom',
@@ -146,10 +141,17 @@ export const dataAccessStateMachine = createMachine<
           },
         },
         on: {
-          positionChanged: {
-            cond: '!isWithinLoadedChunks',
-            target: 'loadingAround',
-          },
+          positionChanged: [
+            {
+              actions: 'updatePosition',
+              cond: 'isWithinLoadedChunks',
+              target: undefined,
+            },
+            {
+              actions: 'updatePosition',
+              target: 'loadingAround',
+            },
+          ],
           timeRangeChanged: [
             {
               actions: 'updateTimeRange',
@@ -182,6 +184,7 @@ export const dataAccessStateMachine = createMachine<
       failedNoData: {
         on: {
           positionChanged: {
+            actions: 'updatePosition',
             target: 'loadingAround',
           },
           retry: {
@@ -340,6 +343,7 @@ export const dataAccessStateMachine = createMachine<
       uninitialized: {
         on: {
           positionChanged: {
+            actions: 'updatePosition',
             target: 'loadingAround',
           },
           timeRangeChanged: {
@@ -420,6 +424,7 @@ export const dataAccessStateMachine = createMachine<
       updateChunksFromLoadAfter,
       updateChunksFromLoadTail,
       updateFilters,
+      updatePosition,
       updateTimeRange,
       prependNewTopChunk,
       appendNewBottomChunk,
@@ -431,8 +436,7 @@ export const dataAccessStateMachine = createMachine<
       hasEmptyBottomChunk,
       hasLoadedTopChunk,
       hasLoadedBottomChunk,
-      isPositionNearStart: constantGuard(false),
-      isPositionNearEnd: constantGuard(false),
+      isWithinLoadedChunks,
       startTimestampExtendsLoadedTop: constantGuard(false),
       startTimestampReducesLoadedTop: constantGuard(false),
       endTimestampExtendsLoadedBottom: constantGuard(false),
