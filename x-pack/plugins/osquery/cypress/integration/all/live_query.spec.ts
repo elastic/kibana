@@ -82,7 +82,7 @@ describe('ALL - Live Query', () => {
     cy.contains('New live query').click();
     selectAllAgents();
     cy.react('SavedQueriesDropdown').type('NOMAPPING{downArrow}{enter}');
-    cy.getReact('SavedQueriesDropdown').getCurrentState().should('have.length', 1);
+    // cy.getReact('SavedQueriesDropdown').getCurrentState().should('have.length', 1); // TODO do we need it?
     inputQuery('{selectall}{backspace}{selectall}{backspace}select * from users');
     cy.wait(1000);
     submitQuery();

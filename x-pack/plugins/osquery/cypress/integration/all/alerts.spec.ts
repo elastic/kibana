@@ -8,7 +8,6 @@
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 import { login } from '../../tasks/login';
 import {
-  checkResults,
   findAndClickButton,
   findFormFieldByRowsLabelAndType,
   inputQuery,
@@ -20,7 +19,7 @@ import { navigateTo } from '../../tasks/navigation';
 import { RESULTS_TABLE, RESULTS_TABLE_BUTTON } from '../../screens/live_query';
 import { ROLES } from '../../test';
 
-describe('Alert Event Details', () => {
+describe.skip('Alert Event Details', () => {
   before(() => {
     runKbnArchiverScript(ArchiverMethod.LOAD, 'pack');
     runKbnArchiverScript(ArchiverMethod.LOAD, 'rule');
@@ -80,7 +79,8 @@ describe('Alert Event Details', () => {
     cy.contains('1 agent selected.');
     inputQuery('select * from uptime;');
     submitQuery();
-    checkResults();
+    cy.contains('Results');
+    cy.contains('Add to timeline investigation');
     cy.contains('Save for later').click();
     cy.contains('Save query');
     cy.get('.euiButtonEmpty--flushLeft').contains('Cancel').click();

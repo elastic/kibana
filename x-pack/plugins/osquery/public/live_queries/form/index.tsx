@@ -241,37 +241,41 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     [setValue]
   );
 
-  const onSubmit = useCallback(async () => {
-    const serializedData = pickBy(
-      {
-        agentSelection: watchedValues.agentSelection,
-        savedQueryId: watchedValues.savedQueryId,
-        query: watchedValues.query,
-        pack_id: packId?.length ? packId[0] : undefined,
-        ...(watchedValues.ecs_mapping
-          ? { ecs_mapping: convertECSMappingToObject(watchedValues.ecs_mapping) }
-          : {}),
-      },
-      (value) => !isEmpty(value)
-    );
-    if (isEmpty(errors)) {
-      try {
-        // @ts-expect-error update types
-        await mutateAsync(serializedData);
-        // eslint-disable-next-line no-empty
-      } catch (e) {}
-    }
-  }, [errors, mutateAsync, packId, watchedValues]);
-
+  const onSubmit = useCallback(
+    // not sure why, but submitOnCmdEnter doesn't have proper form values so I am passing them in manually
+    async (values: ILiveQueryFormFields = watchedValues) => {
+      const serializedData = pickBy(
+        {
+          agentSelection: values.agentSelection,
+          saved_query_id: values.savedQueryId,
+          query: values.query,
+          pack_id: packId?.length ? packId[0] : undefined,
+          ...(values.ecs_mapping
+            ? { ecs_mapping: convertECSMappingToObject(values.ecs_mapping) }
+            : {}),
+        },
+        (value) => !isEmpty(value)
+      );
+      if (isEmpty(errors)) {
+        try {
+          // @ts-expect-error update types
+          await mutateAsync(serializedData);
+          // eslint-disable-next-line no-empty
+        } catch (e) {}
+      }
+    },
+    [errors, mutateAsync, packId, watchedValues]
+  );
   const commands = useMemo(
     () => [
       {
         name: 'submitOnCmdEnter',
         bindKey: { win: 'ctrl+enter', mac: 'cmd+enter' },
-        exec: handleSubmit(onSubmit),
+        // @ts-expect-error update types - explanation in onSubmit()
+        exec: () => handleSubmit(onSubmit)(watchedValues),
       },
     ],
-    [handleSubmit, onSubmit]
+    [handleSubmit, onSubmit, watchedValues]
   );
 
   const queryComponentProps = useMemo(
