@@ -9,7 +9,7 @@ import './toolbar_popover.scss';
 import React, { useState } from 'react';
 import { EuiFlexItem, EuiPopover, EuiIcon, EuiPopoverTitle, IconType } from '@elastic/eui';
 import { ToolbarButton, ToolbarButtonProps } from '@kbn/kibana-react-plugin/public';
-import { EuiIconLegend } from '../assets/legend';
+import { EuiIconLegend } from '@kbn/chart-icons';
 
 const typeToIconMap: { [type: string]: string | IconType } = {
   legend: EuiIconLegend as IconType,
