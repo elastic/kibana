@@ -263,7 +263,10 @@ class AgentPolicyService {
       agentPolicy.package_policies =
         (await packagePolicyService.getByIDs(
           soClient,
-          (agentPolicySO.attributes.package_policies as string[]) || []
+          (agentPolicySO.attributes.package_policies as string[]) || [],
+          {
+            ignoreMissing: true,
+          }
         )) || [];
     }
 
