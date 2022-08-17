@@ -182,6 +182,11 @@ export const moveFilter = (
     const filterPositionFrom = pathInArrayFrom.at(-1);
 
     const filterMovementDirection = Number(filterPositionTo) - Number(filterPositionFrom);
+
+    if (filterMovementDirection === -1) {
+      return filters;
+    }
+
     if (filterMovementDirection > 0) {
       const newFilterWithFilter = addFilter(newFilters, movingFilter, to, conditionalType);
       return removeFilter(newFilterWithFilter, from);
