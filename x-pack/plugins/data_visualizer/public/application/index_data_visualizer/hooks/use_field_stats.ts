@@ -311,7 +311,7 @@ export function useFieldStatsSearchStrategy(
     retries$.current?.unsubscribe();
     retries$.current = undefined;
 
-    abortCtrl.current.abort();
+    abortCtrl.current?.abort();
     setFetchState({
       isRunning: false,
     });

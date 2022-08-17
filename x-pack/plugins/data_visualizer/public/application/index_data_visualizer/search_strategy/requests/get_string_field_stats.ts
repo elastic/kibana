@@ -15,10 +15,8 @@ import type {
   ISearchOptions,
   ISearchStart,
 } from '@kbn/data-plugin/public';
-import { getSamplerAggregationsResponsePath } from '@kbn/ml-agg-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { buildRandomSamplerAggregation } from './build_random_sampler_agg';
-import { SAMPLER_TOP_TERMS_SHARD_SIZE, SAMPLER_TOP_TERMS_THRESHOLD } from './constants';
 import type {
   Aggs,
   Bucket,
@@ -50,18 +48,7 @@ export const getStringFieldStatsRequest = (
       } as AggregationsTermsAggregation,
     };
 
-    if (field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD) {
-      aggs[`${safeFieldName}_top`] = {
-        sampler: {
-          shard_size: SAMPLER_TOP_TERMS_SHARD_SIZE,
-        },
-        aggs: {
-          top,
-        },
-      };
-    } else {
-      aggs[`${safeFieldName}_top`] = top;
-    }
+    aggs[`${safeFieldName}_top`] = top;
   });
 
   const searchBody = {
@@ -87,7 +74,6 @@ export const fetchStringFieldsStats = (
   fields: Field[],
   options: ISearchOptions
 ): Observable<StringFieldStats[] | FieldStatsError> => {
-  const { samplerShardSize } = params;
   const request: estypes.SearchRequest = getStringFieldStatsRequest(params, fields);
 
   return dataSearch
@@ -102,16 +88,12 @@ export const fetchStringFieldsStats = (
       map((resp) => {
         if (!isIKibanaSearchResponse(resp)) return resp;
         const aggregations = resp.rawResponse.aggregations;
-        const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
         const batchStats: StringFieldStats[] = [];
 
         fields.forEach((field, i) => {
           const safeFieldName = field.safeFieldName;
 
-          const topAggsPath = [...aggsPath, `${safeFieldName}_top`];
-          if (samplerShardSize < 1 && field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD) {
-            topAggsPath.push('top');
-          }
+          const topAggsPath = ['sample', `${safeFieldName}_top`];
 
           const topValues: Bucket[] = get(aggregations, [...topAggsPath, 'buckets'], []);
 

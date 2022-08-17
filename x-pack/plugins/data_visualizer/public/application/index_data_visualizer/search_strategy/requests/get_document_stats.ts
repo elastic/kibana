@@ -38,7 +38,6 @@ export const getDocumentCountStats = async (
     runtimeFieldMap,
     searchQuery,
     intervalMs,
-    fieldsToFetch,
   } = params;
 
   // Probability = 1 represents no sampling
@@ -66,7 +65,7 @@ export const getDocumentCountStats = async (
   // If probability is provided, use that
   // Else, make an initial query using very low p
   // so that we can calculate the next p value that's appropriate for the data set
-  const initialDefaultProbability = probability ?? 0.000001;
+  const initialDefaultProbability = probability ?? 1e-5;
 
   const getAggsWithRandomSampling = (p: number) => ({
     sampler: {
@@ -78,11 +77,7 @@ export const getDocumentCountStats = async (
     },
   });
 
-  const hasTimeField =
-    Array.isArray(fieldsToFetch) &&
-    timeFieldName !== undefined &&
-    intervalMs !== undefined &&
-    intervalMs > 0;
+  const hasTimeField = timeFieldName !== undefined && intervalMs !== undefined && intervalMs > 0;
 
   const getSearchParams = (aggregations: unknown) => ({
     index,
@@ -137,17 +132,13 @@ export const getDocumentCountStats = async (
   // @ts-expect-error ES types needs to be updated with doc_count as part random sampler aggregation
   const numSampled = firstResp.rawResponse.aggregations?.sampler?.doc_count;
   const numDocs = minimumRandomSamplerDocCount ?? MINIMUM_RANDOM_SAMPLER_DOC_COUNT;
-  if (firstResp !== undefined && numSampled < numDocs) {
+  if (firstResp !== undefined) {
     const newProbability =
       (initialDefaultProbability * numDocs) / (numSampled - 2 * Math.sqrt(numSampled));
 
     // If the number of docs sampled is indicative of query with < 10 million docs
     // proceed to make a vanilla aggregation without any sampling
-    if (
-      numSampled === 0 ||
-      newProbability === Infinity ||
-      numSampled / initialDefaultProbability < 1e7
-    ) {
+    if (numSampled === 0 || newProbability === Infinity || numSampled < 109) {
       const vanillaAggResp = await search
         .search(
           {
