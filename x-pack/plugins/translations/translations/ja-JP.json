@@ -32758,7 +32758,6 @@
     "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.runConnectorDisabledDescription": "コネクターを実行できません",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.runConnectorName": "実行",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actionTypeTitle": "型",
-    "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.featureIdsTitle": "可用性",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.fixButtonLabel": "修正",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.nameTitle": "名前",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.filters.actionTypeIdName": "型",

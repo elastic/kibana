@@ -32792,7 +32792,6 @@
     "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.runConnectorDisabledDescription": "无法运行连接器",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.runConnectorName": "运行",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actionTypeTitle": "类型",
-    "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.featureIdsTitle": "可用性",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.fixButtonLabel": "修复",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.nameTitle": "名称",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.filters.actionTypeIdName": "类型",

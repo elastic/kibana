@@ -32783,7 +32783,6 @@
     "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.runConnectorDisabledDescription": "Impossible d'exécuter les connecteurs",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.runConnectorName": "Exécuter",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actionTypeTitle": "Type",
-    "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.featureIdsTitle": "Disponibilité",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.fixButtonLabel": "Corriger",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.nameTitle": "Nom",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.filters.actionTypeIdName": "Type",
