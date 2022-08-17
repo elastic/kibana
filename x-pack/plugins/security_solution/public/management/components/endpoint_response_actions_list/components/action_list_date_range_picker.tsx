@@ -65,7 +65,7 @@ export const ActionListDateRangePicker = memo(
           }) ?? []
       );
     });
-    const onClickCallback = useCallback(() => onClick(), [onClick]);
+    const onClickRefreshButton = useCallback(() => onClick(), [onClick]);
 
     return (
       <DatePickerWrapper data-test-subj={getTestId('super-date-picker')}>
@@ -94,7 +94,7 @@ export const ActionListDateRangePicker = memo(
               fill={false}
               iconOnly
               isLoading={isDataLoading}
-              onClick={onClickCallback}
+              onClick={onClickRefreshButton}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

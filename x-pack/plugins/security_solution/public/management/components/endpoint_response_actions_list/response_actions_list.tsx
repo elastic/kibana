@@ -37,7 +37,7 @@ import { useGetEndpointActionList } from '../../hooks';
 import { OUTPUT_MESSAGES, TABLE_COLUMN_NAMES, UX_MESSAGES } from './translations';
 import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../common/constants';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
-import { ActionListDateRangePicker } from './components/action_list_date_range_picker';
+import { ActionListFilters } from './components/action_list_filters';
 import { useDateRangePicker } from './components/hooks';
 
 const emptyValue = getEmptyValue();
@@ -106,7 +106,7 @@ const StyledEuiCodeBlock = euiStyled(EuiCodeBlock).attrs({
 
 export const ResponseActionsList = memo<
   Pick<EndpointActionListRequestQuery, 'agentIds' | 'commands' | 'userIds'>
->(({ agentIds, commands, userIds }) => {
+>(({ agentIds }) => {
   const getTestId = useTestIdGenerator('response-actions-list');
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<{
     [k: ActionDetails['id']]: React.ReactNode;
@@ -116,8 +116,8 @@ export const ResponseActionsList = memo<
     page: 1,
     pageSize: 10,
     agentIds,
-    commands,
-    userIds,
+    commands: [],
+    userIds: [],
   });
 
   // date range picker state and handlers
@@ -142,6 +142,14 @@ export const ResponseActionsList = memo<
       reFetchEndpointActionList();
     }
   }, [dateRangePickerState.autoRefreshOptions.enabled, reFetchEndpointActionList]);
+
+  // handle on change actions filter
+  const onChangeCommandsFilter = useCallback(
+    (selectedCommands: string[]) => {
+      setQueryParams((prevState) => ({ ...prevState, commands: selectedCommands }));
+    },
+    [setQueryParams]
+  );
 
   // total actions
   const totalItemCount = useMemo(() => actionList?.total ?? 0, [actionList]);
@@ -488,10 +496,11 @@ export const ResponseActionsList = memo<
 
   return (
     <>
-      <ActionListDateRangePicker
+      <ActionListFilters
         dateRangePickerState={dateRangePickerState}
         isDataLoading={isFetching}
         onClick={reFetchEndpointActionList}
+        onChangeCommandsFilter={onChangeCommandsFilter}
         onRefresh={onRefresh}
         onRefreshChange={onRefreshChange}
         onTimeChange={onTimeChange}
