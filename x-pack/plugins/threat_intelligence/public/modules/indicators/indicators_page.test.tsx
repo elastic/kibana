@@ -32,10 +32,9 @@ const stub = () => {};
 describe('<IndicatorsPage />', () => {
   beforeAll(() => {
     (useIndicators as jest.MockedFunction<typeof useIndicators>).mockReturnValue({
-      indicators: [],
-      indicatorCount: 0,
-      firstLoad: false,
-      loading: true,
+      indicators: [{ fields: {} }],
+      indicatorCount: 1,
+      loading: false,
       pagination: { pageIndex: 0, pageSize: 10, pageSizeOptions: [10] },
       onChangeItemsPerPage: stub,
       onChangePage: stub,
