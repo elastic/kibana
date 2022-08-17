@@ -26178,7 +26178,6 @@
     "xpack.securitySolution.networkHttpTable.column.statusTitle": "ステータス",
     "xpack.securitySolution.networkHttpTable.rows": "{numRows} {numRows, plural, other  {行}}",
     "xpack.securitySolution.networkHttpTable.title": "HTTPリクエスト",
-    "xpack.securitySolution.networkHttpTable.unit": "{totalCount, plural, other  {リクエスト}}",
     "xpack.securitySolution.networkTls.errorSearchDescription": "ネットワークTLS検索でエラーが発生しました",
     "xpack.securitySolution.networkTls.failSearchDescription": "ネットワークTLSで検索を実行できませんでした",
     "xpack.securitySolution.networkTopCountries.failSearchDescription": "ネットワーク上位の国で検索を実行できませんでした",

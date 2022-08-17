@@ -26030,7 +26030,6 @@
     "xpack.securitySolution.networkHttpTable.column.statusTitle": "状态",
     "xpack.securitySolution.networkHttpTable.rows": "{numRows} {numRows, plural, other {行}}",
     "xpack.securitySolution.networkHttpTable.title": "HTTP 请求",
-    "xpack.securitySolution.networkHttpTable.unit": "{totalCount, plural, other {个请求}}",
     "xpack.securitySolution.networkTls.errorSearchDescription": "搜索网络 TLS 时发生错误",
     "xpack.securitySolution.networkTls.failSearchDescription": "无法对网络 TLS 执行搜索",
     "xpack.securitySolution.networkTopCountries.failSearchDescription": "无法对网络热门国家/地区执行搜索",
