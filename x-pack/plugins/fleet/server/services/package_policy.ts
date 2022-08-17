@@ -295,7 +295,7 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
   public async getByIDs(
     soClient: SavedObjectsClientContract,
     ids: string[],
-    options: { ignoreMissing?: boolean } = {}
+    options: { ignoreMissing?: boolean } = { ignoreMissing: true }
   ): Promise<PackagePolicy[] | null> {
     const packagePolicySO = await soClient.bulkGet<PackagePolicySOAttributes>(
       ids.map((id) => ({
