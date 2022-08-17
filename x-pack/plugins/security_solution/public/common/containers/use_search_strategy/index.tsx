@@ -118,8 +118,6 @@ const searchComplete = <ResponseType extends IKibanaSearchResponse>(
           })
           .json(JSON.parse(inspect?.dsl[0] ?? {})?.body)
           .ok({ json: rawResponse });
-
-
       },
       error(error) {
         logInspectorRequest(inspectorAdapters, startTime).error({ json: error });
