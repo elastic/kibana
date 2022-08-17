@@ -9,4 +9,4 @@ source .buildkite/scripts/common/util.sh
 #checks-reporter-with-killswitch "Check Own Tests Ran" \
 #  node scripts/check_own_tests_ran.js
 
-node scripts/check_own_tests_ran.js
+node scripts/check_own_tests_ran.js --mock

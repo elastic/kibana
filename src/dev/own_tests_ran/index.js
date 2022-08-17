@@ -9,7 +9,7 @@
 import { run } from '@kbn/dev-cli-runner';
 // import { createFlagError, createFailError } from '@kbn/dev-cli-errors';
 import { getPrChanges } from '../../../.buildkite/pipeline-utils';
-import { filter, from, mergeMap } from 'rxjs';
+import { filter, from, switchMap } from 'rxjs';
 import { pluck } from 'rxjs/operators';
 import { testDirectoryRegexes, isTest } from './helpers';
 import { findConfigFile } from './find_config_file';
@@ -44,7 +44,7 @@ async function process({ flags, log }) {
     .pipe(
       pluck('filename'),
       filter(isTestWith),
-      mergeMap(async (x) => await findConfigFile(x))
+      switchMap(async (x) => await findConfigFile(x))
     )
     .subscribe({
       next: (x) => console.log(`\n### Config: \n\t${x}`),
