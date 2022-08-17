@@ -32,11 +32,11 @@ NPM_MODULE_EXTRA_FILES = [
 RUNTIME_DEPS = [
   "//packages/kbn-babel-preset",
   "//packages/kbn-i18n",
+  "@npm//@babel/runtime",
   "@npm//antlr4ts",
   "@npm//babel-loader",
   "@npm//monaco-editor",
   "@npm//raw-loader",
-  "@npm//regenerator-runtime",
   "@npm//rxjs",
 ]
 
