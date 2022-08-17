@@ -83,9 +83,14 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await run(Tasks.CreatePackageJson);
     await run(Tasks.InstallDependencies);
     await run(Tasks.GeneratePackagesOptimizedAssets);
-    await run(Tasks.DeleteBazelPackagesFromBuildRoot);
+
+    // Run on all source files
+    // **/packages need to be read
+    // before DeleteBazelPackagesFromBuildRoot
     await run(Tasks.CreateNoticeFile);
     await run(Tasks.CreateXPackNoticeFile);
+
+    await run(Tasks.DeleteBazelPackagesFromBuildRoot);
     await run(Tasks.UpdateLicenseFile);
     await run(Tasks.RemovePackageJsonDeps);
     await run(Tasks.CleanPackageManagerRelatedFiles);
