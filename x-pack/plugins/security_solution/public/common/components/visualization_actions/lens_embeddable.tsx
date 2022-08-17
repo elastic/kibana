@@ -33,15 +33,13 @@ const LensComponentWrapper = styled.div<{ height?: string }>`
   }
 `;
 
-type Responses = string[] | undefined; // todo
-type Requests = string[] | undefined; // todo
-type Stats = Array<{}> | undefined; // todo
+type Responses = string[] | undefined;
+type Requests = string[] | undefined;
 
 interface State {
   responses: Responses;
   requests: Requests;
-  stats: Stats;
-  isLoading: boolean | undefined;
+  isLoading: boolean;
 }
 
 export type Action =
@@ -64,7 +62,7 @@ function reducer(state: State, action: Action) {
 const initialState = {
   requests: undefined,
   responses: undefined,
-  isLoading: undefined,
+  isLoading: true,
   stats: undefined,
 };
 
@@ -81,7 +79,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   const { lens } = useKibana().services;
   const dispatch = useDispatch();
   const [isShowingModal, setIsShowingModal] = useState(false);
-  const [state, dispatchData] = useReducer<Reducer<State, Action>>(reducer, initialState);
+  const [visData, dispatchData] = useReducer<Reducer<State, Action>>(reducer, initialState);
 
   const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();
   const { searchSessionId } = useDeepEqualSelector((state) => getGlobalQuery(state, id));
@@ -98,9 +96,9 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
       onInspectActionClicked: () => {
         setIsShowingModal(true);
       },
-      isDisabled: state.isLoading,
+      isDisabled: visData.isLoading,
     }),
-    [state.isLoading]
+    [visData.isLoading]
   );
   const actions = useActions({
     withActions: true,
@@ -126,8 +124,8 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     [dispatch, inputsModelId]
   );
 
-  const [request, ...additionalRequests] = state.requests ?? [];
-  const [response, ...additionalResponses] = state.responses ?? [];
+  const [request, ...additionalRequests] = visData.requests ?? [];
+  const [response, ...additionalResponses] = visData.responses ?? [];
 
   return (
     <>
@@ -140,16 +138,17 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
             attributes={attributes}
             onLoad={(isLoading, adapters) => {
               dispatchData({ type: 'setLoading', isLoading });
+              console.log(adapters?.requests?.getRequests());
 
-              const data = Array.from(adapters?.requests?.requests ?? []).map((data) => {
-                const d = data[1];
+              const data = Array.from(adapters?.requests?.requests ?? []).map((myData) => {
+                const d = myData[1];
                 return {
                   request: JSON.stringify(
-                    { body: d?.json, index: d.stats.indexFilter.value.split(',') },
+                    { body: d?.json, index: [d.stats?.indexFilter.value.split(',')] },
                     null,
                     2
                   ),
-                  response: JSON.stringify(d?.response?.json.rawResponse, null, 2),
+                  response: JSON.stringify(d?.response?.json?.rawResponse ?? {}, null, 2),
                 };
               });
               dispatchData({
