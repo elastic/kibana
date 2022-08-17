@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { observabilityFeatureId } from '..';
-
-export const observabilityRuleRegistrySettings = {
-  name: observabilityFeatureId,
+module.exports = {
+  preset: '@kbn/test/jest_integration_node',
+  rootDir: '../../..',
+  roots: ['<rootDir>/x-pack/plugins/actions'],
 };
