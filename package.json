@@ -1182,7 +1182,6 @@
     "geckodriver": "^3.0.2",
     "gulp-babel": "^8.0.0",
     "gulp-brotli": "^3.0.0",
-    "gulp-gzip": "^1.4.2",
     "gulp-postcss": "^9.0.1",
     "gulp-sourcemaps": "2.6.5",
     "gulp-terser": "^2.1.0",
