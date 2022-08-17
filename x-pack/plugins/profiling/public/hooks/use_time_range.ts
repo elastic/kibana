@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { useContext, useMemo } from 'react';
+import { useMemo } from 'react';
 import { TimeRange } from '../../common/types';
 import { getNextTimeRange } from '../utils/get_next_time_range';
-import { TimeRangeContext } from '../components/contexts/time_range_context';
+import { useTimeRangeContext } from './use_time_range_context';
 
 interface TimeRangeAPI {
   timeRangeId: string;
-  refresh: () => void;
 }
 
 type PartialTimeRange = Pick<Partial<TimeRange>, 'start' | 'end'>;
@@ -37,11 +36,7 @@ export function useTimeRange({
   rangeTo?: string;
   optional?: boolean;
 }): TimeRangeAPI & (TimeRange | PartialTimeRange) {
-  const timeRangeApi = useContext(TimeRangeContext);
-
-  if (!timeRangeApi) {
-    throw new Error('TimeRangeContext has not been provided');
-  }
+  const timeRangeApi = useTimeRangeContext();
 
   const { start, end } = useMemo(() => {
     return getNextTimeRange({
@@ -59,6 +54,6 @@ export function useTimeRange({
   return {
     start,
     end,
-    ...timeRangeApi,
+    timeRangeId: timeRangeApi.timeRangeId,
   };
 }

@@ -4,16 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { TypeOf } from '@kbn/typed-react-router-config';
-import { PrimaryProfilingSearchBar } from './profiling_app_page_template/primary_profiling_search_bar';
-import { ProfilingSearchBar } from './profiling_app_page_template/profiling_search_bar';
+import React from 'react';
 import { useAnyOfProfilingParams } from '../hooks/use_profiling_params';
 import { useProfilingRouter } from '../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../hooks/use_profiling_route_path';
+import { useTimeRangeContext } from '../hooks/use_time_range_context';
 import { ProfilingRoutes } from '../routing';
-import { useTimeRange } from '../hooks/use_time_range';
+import { PrimaryProfilingSearchBar } from './profiling_app_page_template/primary_profiling_search_bar';
+import { ProfilingSearchBar } from './profiling_app_page_template/profiling_search_bar';
 
 export function PrimaryAndComparisonSearchBar() {
   const {
@@ -22,7 +22,7 @@ export function PrimaryAndComparisonSearchBar() {
     query: { comparisonKuery, comparisonRangeFrom, comparisonRangeTo },
   } = useAnyOfProfilingParams('/flamegraphs/differential', '/functions/differential');
 
-  const { refresh } = useTimeRange({ rangeFrom: comparisonRangeFrom, rangeTo: comparisonRangeTo });
+  const { refresh } = useTimeRangeContext();
 
   const profilingRouter = useProfilingRouter();
   const routePath = useProfilingRoutePath() as

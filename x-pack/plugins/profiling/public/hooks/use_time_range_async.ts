@@ -6,10 +6,10 @@
  */
 
 import { UseAsync, useAsync } from './use_async';
-import { useTimeRange } from './use_time_range';
+import { useTimeRangeContext } from './use_time_range_context';
 
 export const useTimeRangeAsync: UseAsync = (fn, dependencies) => {
-  const { timeRangeId } = useTimeRange({ optional: true });
+  const { timeRangeId } = useTimeRangeContext();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   return useAsync(fn, dependencies.concat(timeRangeId));
 };
