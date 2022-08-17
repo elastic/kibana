@@ -27,3 +27,22 @@ export const getPreviousTimeRange = <
     to: previousEnd,
   };
 };
+
+export const getFutureTimeRange = <
+  T extends URLTimeRange | { to: string | number; from: string | number }
+>(
+  dateRange: T,
+  uiSettings = true
+): AbsoluteTimeRange => {
+  const { from, to } = normalizeTimeRange(dateRange, uiSettings);
+  const duration = moment(to).diff(moment(from));
+  const previousStart = moment(from).add(duration).toISOString();
+  const previousEnd = moment(to).add(duration).toISOString();
+  return {
+    kind: 'absolute',
+    fromStr: undefined,
+    toStr: undefined,
+    from: previousStart,
+    to: previousEnd,
+  };
+};

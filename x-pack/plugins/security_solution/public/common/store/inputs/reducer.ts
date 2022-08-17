@@ -112,7 +112,7 @@ export const createInitialInputsState = (): InputsState => {
         kind,
         duration,
       },
-      linkTo: ['timeline'],
+      linkTo: ['timeline', 'socTrends'],
       query: {
         query: '',
         language: 'kuery',
@@ -154,7 +154,7 @@ export const createInitialInputsState = (): InputsState => {
         kind,
         duration,
       },
-      linkTo: ['socTrends'],
+      linkTo: ['global'],
       query: {
         query: '',
         language: 'kuery',

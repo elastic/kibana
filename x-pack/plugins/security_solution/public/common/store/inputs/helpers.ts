@@ -7,6 +7,7 @@
 
 import { get } from 'lodash/fp';
 
+import { getFutureTimeRange, getPreviousTimeRange } from '../../utils/get_time_range';
 import type { InputsModel, TimeRange, Refetch, RefetchKql, InspectQuery } from './model';
 import type { InputsModelId } from './constants';
 
@@ -25,6 +26,16 @@ export const updateInputFullScreen = (
     fullScreen: inputId === 'timeline' ? fullScreen : state.timeline.fullScreen,
   },
 });
+
+const getTimeRange = (timerange: TimeRange, inputId: InputsModelId, linkToId: InputsModelId) => {
+  if (inputId === 'global' && linkToId === 'socTrends') {
+    return getPreviousTimeRange(timerange);
+  }
+  if (inputId === 'socTrends' && linkToId === 'global') {
+    return getFutureTimeRange(timerange);
+  }
+  return timerange;
+};
 
 export const updateInputTimerange = (
   inputId: InputsModelId,

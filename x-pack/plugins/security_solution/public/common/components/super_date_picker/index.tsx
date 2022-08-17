@@ -96,7 +96,6 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
     updateReduxTime,
     disabled,
   }) => {
-    console.log('super date picker id', id);
     const [recentlyUsedRanges, setRecentlyUsedRanges] = useState<EuiSuperDatePickerRecentRange[]>(
       []
     );

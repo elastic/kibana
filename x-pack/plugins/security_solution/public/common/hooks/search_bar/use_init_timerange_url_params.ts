@@ -47,6 +47,11 @@ const initializeTimerangeFromUrlParam = (
     const timelineLinkTo: LinkTo = { linkTo: get('timeline.linkTo', initialState) };
     const timelineType: TimeRangeKinds = get('timeline.timerange.kind', initialState);
 
+    const socTrendsId: InputsModelId = 'socTrends';
+    const socTrendsLinkTo: LinkTo = { linkTo: get('socTrends.linkTo', initialState) };
+    const socTrendsType: TimeRangeKinds = get('socTrends.timerange.kind', initialState);
+
+    // TODO: socTrendsLinkTo
     if (isEmpty(globalLinkTo.linkTo)) {
       dispatch(inputsActions.removeGlobalLinkTo());
     } else {
@@ -121,6 +126,40 @@ const initializeTimerangeFromUrlParam = (
           inputsActions.setRelativeRangeDatePicker({
             ...relativeRange,
             id: globalId,
+          })
+        );
+      }
+    }
+
+    if (socTrendsType) {
+      if (socTrendsType === 'absolute') {
+        const absoluteRange = normalizeTimeRange<AbsoluteTimeRange>(
+          get('socTrends.timerange', initialState)
+        );
+
+        dispatch(
+          inputsActions.setAbsoluteRangeDatePicker({
+            ...absoluteRange,
+            id: socTrendsId,
+          })
+        );
+      }
+
+      if (socTrendsType === 'relative') {
+        const relativeRange = normalizeTimeRange<RelativeTimeRange>(
+          get('socTrends.timerange', initialState)
+        );
+
+        // Updates date values when timerange is relative
+        relativeRange.from = formatDate(relativeRange.fromStr);
+        relativeRange.to = formatDate(relativeRange.toStr, {
+          roundUp: true,
+        });
+
+        dispatch(
+          inputsActions.setRelativeRangeDatePicker({
+            ...relativeRange,
+            id: socTrendsId,
           })
         );
       }
