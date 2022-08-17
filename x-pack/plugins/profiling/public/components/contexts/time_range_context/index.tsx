@@ -19,7 +19,6 @@ export function TimeRangeContextProvider({ children }: { children: React.ReactEl
     return {
       timeRangeId,
       refresh: () => {
-        console.log('refreshing');
         setTimeRangeId(uniqueId());
       },
     };
