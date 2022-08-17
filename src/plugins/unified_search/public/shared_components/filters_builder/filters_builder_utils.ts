@@ -170,7 +170,7 @@ export const moveFilter = (
   from: string,
   to: string,
   conditionalType: ConditionTypes
-) => {
+): Filter[] => {
   const newFilters = cloneDeep(filters);
   const movingFilter = getFilterByPath(newFilters, from);
 
@@ -191,6 +191,8 @@ export const moveFilter = (
     const newFiltersWithoutFilter = removeFilter(newFilters, from);
     return addFilter(newFiltersWithoutFilter, movingFilter, to, conditionalType);
   }
+
+  return filters;
 };
 
 export const updateFilter = (
