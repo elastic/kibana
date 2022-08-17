@@ -248,10 +248,6 @@ export const dispatchUpdateReduxTime =
     start,
     timelineId,
   }: UpdateReduxTime): ReturnUpdateReduxTime => {
-    console.log('dispatchUpdateReduxTime', {
-      end,
-      start,
-    });
     const fromDate = formatDate(start);
     let toDate = formatDate(end, { roundUp: true });
     if (isQuickSelection) {
@@ -319,6 +315,7 @@ export const makeMapStateToProps = () => {
   const getToStrSelector = toStrSelector();
   return (state: State, { id }: OwnProps) => {
     const inputsRange: InputsRange = getOr({}, `inputs.${id}`, state);
+
     return {
       duration: getDurationSelector(inputsRange),
       end: getEndSelector(inputsRange),

@@ -44,13 +44,14 @@ export const updateInputTimerange = (
 ): InputsModel => {
   const input = get(inputId, state);
   if (input != null) {
+    // TODO: need socTrends to update timeline if socTrends.linkTo === ['global'] && global.linkTo === ['socTrends', 'timeline']
     return {
       ...[inputId, ...input.linkTo].reduce<InputsModel>(
         (acc: InputsModel, linkToId: InputsModelId) => ({
           ...acc,
           [linkToId]: {
             ...get(linkToId, state),
-            timerange,
+            timerange: getTimeRange(timerange, inputId, linkToId),
           },
         }),
         inputId === 'timeline' ? { ...state, global: { ...state.global, linkTo: [] } } : state

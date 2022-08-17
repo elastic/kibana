@@ -37,19 +37,16 @@ export const getCasesMetrics = async (
 
   try {
     const handlers = buildHandlers(queryParams, casesClient, clientArgs);
-    console.log('cases handlers', handlers);
 
     const computedMetrics = await Promise.all(
       Array.from(handlers).map(async (handler) => {
         return handler.compute();
       })
     );
-    console.log('cases computedMetrics', computedMetrics);
 
     const mergedResults = computedMetrics.reduce((acc, metric) => {
       return merge(acc, metric);
     }, {}) as CasesMetricsResponse;
-    console.log('cases mergedResults', mergedResults);
 
     return CasesMetricsResponseRt.encode(mergedResults);
   } catch (error) {

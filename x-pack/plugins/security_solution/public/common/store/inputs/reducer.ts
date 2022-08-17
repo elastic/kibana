@@ -189,7 +189,6 @@ export const inputsReducer = reducerWithInitialState(initialInputsState)
   .case(
     setAbsoluteRangeDatePicker,
     (state, { id, from, to, fromStr = undefined, toStr = undefined }) => {
-      console.log('setAbsoluteRangeDatePicker', id);
       const timerange: TimeRange = {
         kind: 'absolute',
         fromStr,
@@ -201,7 +200,6 @@ export const inputsReducer = reducerWithInitialState(initialInputsState)
     }
   )
   .case(setRelativeRangeDatePicker, (state, { id, fromStr, from, to, toStr }) => {
-    console.log('setRelativeRangeDatePicker', id);
     const timerange: TimeRange = {
       kind: 'relative',
       fromStr,
