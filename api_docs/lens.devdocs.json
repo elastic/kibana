@@ -3835,7 +3835,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ size: number; accuracyMode?: boolean | undefined; include?: number[] | string[] | undefined; exclude?: number[] | string[] | undefined; includeIsRegex?: boolean | undefined; excludeIsRegex?: boolean | undefined; orderBy: { type: \"alphabetical\"; fallback?: boolean | undefined; } | { type: \"rare\"; maxDocCount: number; } | { type: \"column\"; columnId: string; } | { type: \"custom\"; }; orderAgg?: ",
+              "{ size: number; accuracyMode?: boolean | undefined; include?: string[] | number[] | undefined; exclude?: string[] | number[] | undefined; includeIsRegex?: boolean | undefined; excludeIsRegex?: boolean | undefined; orderBy: { type: \"alphabetical\"; fallback?: boolean | undefined; } | { type: \"rare\"; maxDocCount: number; } | { type: \"column\"; columnId: string; } | { type: \"custom\"; }; orderAgg?: ",
               {
                 "pluginId": "lens",
                 "scope": "public",
@@ -4521,7 +4521,7 @@
             "tags": [],
             "label": "renderLayerHeader",
             "description": [
-              "\nHeader rendered as layer title This can be used for both static and dynamic content lioke\nfor extra configurability, such as for switch chart type"
+              "\nHeader rendered as layer title. This can be used for both static and dynamic content like\nfor extra configurability, such as for switch chart type"
             ],
             "signature": [
               "((domElement: Element, props: ",
@@ -4548,6 +4548,55 @@
               {
                 "parentPluginId": "lens",
                 "id": "def-public.Visualization.renderLayerHeader.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "VisualizationLayerWidgetProps",
+                  "<T>"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.Visualization.renderLayerPanel",
+            "type": "Function",
+            "tags": [],
+            "label": "renderLayerPanel",
+            "description": [
+              "\nLayer panel content rendered. This can be used to render a custom content below the title,\nlike a custom dataview switch"
+            ],
+            "signature": [
+              "((domElement: Element, props: ",
+              "VisualizationLayerWidgetProps",
+              "<T>) => void | ((cleanupElement: Element) => void)) | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.renderLayerPanel.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "domElement",
+                "description": [],
+                "signature": [
+                  "Element"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.renderLayerPanel.$2",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "props",
@@ -5490,6 +5539,66 @@
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.Visualization.onIndexPatternChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onIndexPatternChange",
+            "description": [
+              "\nSome visualization track indexPattern changes (i.e. annotations)\nThis method makes it aware of the change and produces a new updated state"
+            ],
+            "signature": [
+              "((state: T, indexPatternId: string, layerId?: string | undefined) => T) | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.onIndexPatternChange.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.onIndexPatternChange.$2",
+                "type": "string",
+                "tags": [],
+                "label": "indexPatternId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.onIndexPatternChange.$3",
+                "type": "string",
+                "tags": [],
+                "label": "layerId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -9006,7 +9115,7 @@
         "label": "OperationTypePost712",
         "description": [],
         "signature": [
-          "\"min\" | \"max\" | \"sum\" | \"filters\" | \"count\" | \"date_histogram\" | \"percentile\" | \"average\" | \"range\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"unique_count\" | \"last_value\" | \"counter_rate\" | \"differences\""
+          "\"range\" | \"min\" | \"max\" | \"sum\" | \"filters\" | \"count\" | \"date_histogram\" | \"percentile\" | \"average\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"unique_count\" | \"last_value\" | \"counter_rate\" | \"differences\""
         ],
         "path": "x-pack/plugins/lens/server/migrations/types.ts",
         "deprecated": false,
@@ -9020,7 +9129,7 @@
         "label": "OperationTypePre712",
         "description": [],
         "signature": [
-          "\"min\" | \"max\" | \"sum\" | \"filters\" | \"count\" | \"date_histogram\" | \"percentile\" | \"range\" | \"terms\" | \"avg\" | \"median\" | \"cumulative_sum\" | \"derivative\" | \"moving_average\" | \"last_value\" | \"counter_rate\" | \"cardinality\""
+          "\"range\" | \"min\" | \"max\" | \"sum\" | \"filters\" | \"count\" | \"date_histogram\" | \"percentile\" | \"terms\" | \"avg\" | \"median\" | \"cumulative_sum\" | \"derivative\" | \"moving_average\" | \"last_value\" | \"counter_rate\" | \"cardinality\""
         ],
         "path": "x-pack/plugins/lens/server/migrations/types.ts",
         "deprecated": false,

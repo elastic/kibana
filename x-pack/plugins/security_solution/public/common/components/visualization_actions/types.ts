@@ -31,7 +31,55 @@ export interface LensEmbeddableComponentProps {
   height?: string;
   id: string;
   inputsModelId?: InputsModelId;
+  inspectTitle?: string;
   lensAttributes: LensAttributes;
   stackByField?: string;
   timerange: { from: string; to: string };
+}
+
+export enum RequestStatus {
+  /**
+   * The request hasn't finished yet.
+   */
+  PENDING,
+  /**
+   * The request has successfully finished.
+   */
+  OK,
+  /**
+   * The request failed.
+   */
+  ERROR,
+}
+
+export interface Request extends RequestParams {
+  id: string;
+  name: string;
+  json?: object;
+  response?: Response;
+  startTime: number;
+  stats?: RequestStatistics;
+  status: RequestStatus;
+  time?: number;
+}
+
+export interface RequestParams {
+  id?: string;
+  description?: string;
+  searchSessionId?: string;
+}
+
+export interface RequestStatistics {
+  [key: string]: RequestStatistic;
+}
+
+export interface RequestStatistic {
+  label: string;
+  description?: string;
+  value: unknown;
+}
+
+export interface Response {
+  json?: object;
+  time?: number;
 }

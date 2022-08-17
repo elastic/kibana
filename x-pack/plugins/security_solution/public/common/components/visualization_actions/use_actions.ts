@@ -13,6 +13,7 @@ import { useAddToNewCase } from './use_add_to_new_case';
 
 import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE, OPEN_IN_LENS } from './translations';
 import type { LensAttributes } from './types';
+import { INSPECT } from '../inspect/translations';
 
 export type ActionTypes = 'addToExistingCase' | 'addToNewCase' | 'openInLens';
 
@@ -20,16 +21,20 @@ export const useActions = ({
   withActions,
   attributes,
   timeRange,
+  inspectActionProps,
 }: {
   withActions?: boolean | ActionTypes[];
 
   attributes: LensAttributes | null;
 
   timeRange: { from: string; to: string };
+
+  inspectActionProps?: { onInspectActionClicked: () => void; isDisabled: boolean };
 }) => {
   const { lens } = useKibana().services;
   const { navigateToPrefilledEditor } = lens;
   const [defaultActions, setDefaultActions] = useState([
+    'inspect',
     'openInLens',
     'addToNewCase',
     'addToExistingCase',
@@ -74,6 +79,15 @@ export const useActions = ({
   const actions = useMemo(
     () =>
       defaultActions.reduce<Action[]>((acc, action) => {
+        if (action === 'inspect' && inspectActionProps != null) {
+          return [
+            ...acc,
+            getInspectAction({
+              callback: inspectActionProps?.onInspectActionClicked,
+              disabled: inspectActionProps?.isDisabled,
+            }),
+          ];
+        }
         if (action === 'addToExistingCase') {
           return [
             ...acc,
@@ -100,11 +114,12 @@ export const useActions = ({
       }, []),
     [
       defaultActions,
+      inspectActionProps,
       onAddToExistingCaseClicked,
-      onAddToNewCaseClicked,
-      onOpenInLens,
       isAddToExistingCaseDisabled,
+      onAddToNewCaseClicked,
       isAddToNewCaseDisabled,
+      onOpenInLens,
     ]
   );
 
@@ -128,6 +143,7 @@ const getOpenInLensAction = ({ callback }: { callback: () => void }): Action => 
     async execute(context: ActionExecutionContext<object>): Promise<void> {
       callback();
     },
+    order: 3,
   };
 };
 
@@ -154,6 +170,34 @@ const getAddToNewCaseAction = ({
       callback();
     },
     disabled,
+    order: 2,
+  };
+};
+
+const getInspectAction = ({
+  callback,
+  disabled,
+}: {
+  callback: () => void;
+  disabled?: boolean;
+}): Action => {
+  return {
+    id: 'inspect',
+    getDisplayName(context: ActionExecutionContext<object>): string {
+      return INSPECT;
+    },
+    getIconType(context: ActionExecutionContext<object>): string | undefined {
+      return 'inspect';
+    },
+    type: 'actionButton',
+    async isCompatible(context: ActionExecutionContext<object>): Promise<boolean> {
+      return true;
+    },
+    async execute(context: ActionExecutionContext<object>): Promise<void> {
+      callback();
+    },
+    disabled,
+    order: 4,
   };
 };
 
@@ -180,5 +224,6 @@ const getAddToExistingCaseAction = ({
       callback();
     },
     disabled,
+    order: 1,
   };
 };

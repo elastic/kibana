@@ -144,7 +144,7 @@ describe('embeddable', () => {
         data: dataMock,
         expressionRenderer,
         basePath,
-        indexPatternService: {} as DataViewsContract,
+        dataViews: {} as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -195,7 +195,7 @@ describe('embeddable', () => {
         data: dataMock,
         expressionRenderer,
         basePath,
-        indexPatternService: {} as DataViewsContract,
+        dataViews: {} as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -254,7 +254,7 @@ describe('embeddable', () => {
         uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         expressionRenderer,
         basePath,
-        indexPatternService: {} as DataViewsContract,
+        dataViews: {} as DataViewsContract,
         inspector: inspectorPluginMock.createStartContract(),
         capabilities: {
           canSaveDashboards: true,
@@ -307,7 +307,7 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: {} as DataViewsContract,
+        dataViews: {} as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -369,7 +369,7 @@ describe('embeddable', () => {
         inspector: inspectorPluginMock.createStartContract(),
         expressionRenderer,
         basePath,
-        indexPatternService: {} as DataViewsContract,
+        dataViews: {} as DataViewsContract,
         spaces: spacesPluginStart,
         capabilities: {
           canSaveDashboards: true,
@@ -420,7 +420,7 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: {
+        dataViews: {
           get: (id: string) => Promise.resolve({ id, isTimeBased: jest.fn(() => true) }),
         } as unknown as DataViewsContract,
         capabilities: {
@@ -471,7 +471,7 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: {
+        dataViews: {
           get: (id: string) => Promise.resolve({ id, isTimeBased: () => false }),
         } as unknown as DataViewsContract,
         capabilities: {
@@ -520,7 +520,7 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: {} as DataViewsContract,
+        dataViews: {} as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -573,7 +573,7 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: {} as DataViewsContract,
+        dataViews: {} as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -630,7 +630,7 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: {} as DataViewsContract,
+        dataViews: {} as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -685,7 +685,7 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: {} as DataViewsContract,
+        dataViews: {} as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -747,7 +747,7 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: {} as DataViewsContract,
+        dataViews: {} as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -810,7 +810,7 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: {} as DataViewsContract,
+        dataViews: {} as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -876,7 +876,7 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: { get: jest.fn() } as unknown as DataViewsContract,
+        dataViews: { get: jest.fn() } as unknown as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -927,7 +927,7 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: {} as DataViewsContract,
+        dataViews: {} as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -980,7 +980,7 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: {} as DataViewsContract,
+        dataViews: {} as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -1030,7 +1030,7 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: {} as DataViewsContract,
+        dataViews: {} as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -1095,7 +1095,7 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: {} as DataViewsContract,
+        dataViews: {} as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -1125,14 +1125,41 @@ describe('embeddable', () => {
     await embeddable.initializeSavedVis({ id: '123' } as LensEmbeddableInput);
     embeddable.render(mountpoint);
 
-    expect(onLoad).toHaveBeenCalledWith(true);
+    expect(onLoad.mock.calls[0][0]).toEqual(true);
+    expect(onLoad.mock.calls[0][1]).toMatchInlineSnapshot(`
+      Object {
+        "expression": ExpressionsInspectorAdapter {
+          "_ast": Object {},
+          "_events": Object {},
+          "_eventsCount": 0,
+          "_maxListeners": undefined,
+          Symbol(kCapture): false,
+        },
+        "requests": RequestAdapter {
+          "_events": Object {},
+          "_eventsCount": 0,
+          "_maxListeners": undefined,
+          "requests": Map {},
+          Symbol(kCapture): false,
+        },
+        "tables": TablesAdapter {
+          "_events": Object {},
+          "_eventsCount": 0,
+          "_maxListeners": undefined,
+          "_tables": Object {},
+          Symbol(kCapture): false,
+        },
+      }
+    `);
     expect(onLoad).toHaveBeenCalledTimes(1);
 
     await new Promise((resolve) => setTimeout(resolve, 20));
 
     // loading should become false
     expect(onLoad).toHaveBeenCalledTimes(2);
-    expect(onLoad).toHaveBeenNthCalledWith(2, false);
+
+    expect(onLoad.mock.calls[1][0]).toEqual(false);
+    expect(onLoad.mock.calls[1][1]).toMatchInlineSnapshot(`undefined`);
 
     expect(expressionRenderer).toHaveBeenCalledTimes(1);
 
@@ -1143,7 +1170,33 @@ describe('embeddable', () => {
 
     // loading should become again true
     expect(onLoad).toHaveBeenCalledTimes(3);
-    expect(onLoad).toHaveBeenNthCalledWith(3, true);
+
+    expect(onLoad.mock.calls[2][0]).toEqual(true);
+    expect(onLoad.mock.calls[2][1]).toMatchInlineSnapshot(`
+      Object {
+        "expression": ExpressionsInspectorAdapter {
+          "_ast": Object {},
+          "_events": Object {},
+          "_eventsCount": 0,
+          "_maxListeners": undefined,
+          Symbol(kCapture): false,
+        },
+        "requests": RequestAdapter {
+          "_events": Object {},
+          "_eventsCount": 0,
+          "_maxListeners": undefined,
+          "requests": Map {},
+          Symbol(kCapture): false,
+        },
+        "tables": TablesAdapter {
+          "_events": Object {},
+          "_eventsCount": 0,
+          "_maxListeners": undefined,
+          "_tables": Object {},
+          Symbol(kCapture): false,
+        },
+      }
+    `);
 
     await new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -1153,7 +1206,9 @@ describe('embeddable', () => {
 
     // loading should again become false
     expect(onLoad).toHaveBeenCalledTimes(4);
-    expect(onLoad).toHaveBeenNthCalledWith(4, false);
+
+    expect(onLoad.mock.calls[3][0]).toEqual(false);
+    expect(onLoad.mock.calls[3][1]).toMatchInlineSnapshot(`undefined`);
   });
 
   it('should call onFilter event on filter call ', async () => {
@@ -1179,7 +1234,7 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: {} as DataViewsContract,
+        dataViews: {} as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -1238,7 +1293,7 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: {} as DataViewsContract,
+        dataViews: {} as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -1294,7 +1349,7 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: {} as DataViewsContract,
+        dataViews: {} as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -1371,7 +1426,7 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: {} as DataViewsContract,
+        dataViews: {} as DataViewsContract,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
