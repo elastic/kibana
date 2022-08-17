@@ -315,7 +315,7 @@ export async function processAgentsInBatches(
     const currentResults = await processAgents(currentAgents, skipSuccess, searchAfter, res.total);
     results = { items: results.items.concat(currentResults.items) };
     allAgentsProcessed += currentAgents.length;
-    // if (allAgentsProcessed === 15) throw new Error('simulating error after batch processed ' + searchAfter);
+    // if (allAgentsProcessed > 10) throw new Error('simulating error after batch processed ' + searchAfter);
   }
 
   await closePointInTime(esClient, pitId);

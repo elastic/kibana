@@ -47,7 +47,7 @@ import {
 } from '../components';
 import { useFleetServerUnhealthy } from '../hooks/use_fleet_server_unhealthy';
 
-import { CurrentBulkUpgradeCallout } from './components';
+import { ActionStatusCallout, CurrentBulkUpgradeCallout } from './components';
 import { AgentTableHeader } from './components/table_header';
 import type { SelectionMode } from './components/types';
 import { SearchAndFilterBar } from './components/search_and_filter_bar';
@@ -627,6 +627,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           <EuiSpacer size="l" />
         </React.Fragment>
       ))}
+      <ActionStatusCallout />
       {/* Search and filter bar */}
       <SearchAndFilterBar
         agentPolicies={agentPolicies}

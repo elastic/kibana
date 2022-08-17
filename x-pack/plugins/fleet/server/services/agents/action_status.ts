@@ -128,15 +128,18 @@ async function _getActions(esClient: ElasticsearchClient, now = new Date().toISO
       }
 
       if (!acc[hit._source.action_id]) {
+        const startTime = hit._source?.start_time ?? hit._source?.['@timestamp'];
+        const timedOut = new Date().getTime() - new Date(startTime || 0).getTime() > 5 * 60 * 1000; // 5 min timeout
         acc[hit._source.action_id] = {
           actionId: hit._source.action_id,
           nbAgents: 0,
           complete: false,
           nbAgentsAck: 0,
           version: hit._source.data?.version as string,
-          startTime: hit._source?.start_time ?? hit._source?.['@timestamp'],
+          startTime,
           type: hit._source?.type,
           total: hit._source?.total,
+          timedOut,
         };
       }
 

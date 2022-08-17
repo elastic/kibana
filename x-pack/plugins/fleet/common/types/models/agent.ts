@@ -115,6 +115,7 @@ export interface CurrentAction {
   startTime?: string;
   type?: string;
   total?: number;
+  timedOut: boolean;
 }
 
 // Generated from FleetServer schema.json

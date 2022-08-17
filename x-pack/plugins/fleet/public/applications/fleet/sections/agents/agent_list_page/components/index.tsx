@@ -7,3 +7,4 @@
 
 export { CurrentBulkUpgradeCallout } from './current_bulk_upgrade_callout';
 export type { CurrentBulkUpgradeCalloutProps } from './current_bulk_upgrade_callout';
+export { ActionStatusCallout } from './action_status';
