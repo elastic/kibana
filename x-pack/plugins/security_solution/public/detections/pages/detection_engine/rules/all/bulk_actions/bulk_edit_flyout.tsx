@@ -38,8 +38,8 @@ const BulkEditFlyoutComponent = ({ editAction, tags, ...props }: BulkEditFlyoutP
     case BulkActionEditType.set_timeline:
       return <TimelineTemplateForm {...props} />;
 
-    case BulkActionEditType.add_actions:
-    case BulkActionEditType.set_actions:
+    case BulkActionEditType.add_rule_actions:
+    case BulkActionEditType.set_rule_actions:
       return <RuleActionsForm {...props} />;
 
     default:

@@ -385,8 +385,8 @@ export enum BulkActionEditType {
   'delete_index_patterns' = 'delete_index_patterns',
   'set_index_patterns' = 'set_index_patterns',
   'set_timeline' = 'set_timeline',
-  'add_actions' = 'add_actions',
-  'set_actions' = 'set_actions',
+  'add_rule_actions' = 'add_rule_actions',
+  'set_rule_actions' = 'set_rule_actions',
 }
 
 const bulkActionEditPayloadTags = t.type({
@@ -426,14 +426,13 @@ const bulkActionEditPayloadTimeline = t.type({
 
 export type BulkActionEditPayloadTimeline = t.TypeOf<typeof bulkActionEditPayloadTimeline>;
 
-const bulkActionEditPayloadActions = t.type({
+const bulkActionEditPayloadRuleActions = t.type({
   type: t.union([
-    t.literal(BulkActionEditType.add_actions),
-    t.literal(BulkActionEditType.set_actions),
+    t.literal(BulkActionEditType.add_rule_actions),
+    t.literal(BulkActionEditType.set_rule_actions),
   ]),
   value: t.type({
     throttle,
-    // actions: t.array(t.UnknownRecord),
     actions: t.array(
       t.exact(
         t.type({
@@ -446,13 +445,13 @@ const bulkActionEditPayloadActions = t.type({
   }),
 });
 
-export type BulkActionEditPayloadActions = t.TypeOf<typeof bulkActionEditPayloadActions>;
+export type bulkActionEditPayloadRuleActions = t.TypeOf<typeof bulkActionEditPayloadRuleActions>;
 
 export const bulkActionEditPayload = t.union([
   bulkActionEditPayloadTags,
   bulkActionEditPayloadIndexPatterns,
   bulkActionEditPayloadTimeline,
-  bulkActionEditPayloadActions,
+  bulkActionEditPayloadRuleActions,
 ]);
 
 export type BulkActionEditPayload = t.TypeOf<typeof bulkActionEditPayload>;
@@ -462,7 +461,7 @@ export type BulkActionEditPayload = t.TypeOf<typeof bulkActionEditPayload>;
  */
 export type BulkActionEditForRuleAttributes =
   | BulkActionEditPayloadTags
-  | BulkActionEditPayloadActions;
+  | bulkActionEditPayloadRuleActions;
 
 /**
  * actions that modifies rules params

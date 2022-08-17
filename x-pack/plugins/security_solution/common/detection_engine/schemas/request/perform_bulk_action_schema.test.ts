@@ -379,7 +379,7 @@ describe('perform_bulk_action_schema', () => {
         const payload = {
           query: 'name: test',
           action: BulkAction.edit,
-          [BulkAction.edit]: [{ type: BulkActionEditType.add_actions, value: [] }],
+          [BulkAction.edit]: [{ type: BulkActionEditType.add_rule_actions, value: [] }],
         };
 
         const message = retrieveValidationMessage(payload);
@@ -396,7 +396,7 @@ describe('perform_bulk_action_schema', () => {
           action: BulkAction.edit,
           [BulkAction.edit]: [
             {
-              type: BulkActionEditType.add_actions,
+              type: BulkActionEditType.add_rule_actions,
               value: {
                 actions: [],
               },
@@ -418,7 +418,7 @@ describe('perform_bulk_action_schema', () => {
           action: BulkAction.edit,
           [BulkAction.edit]: [
             {
-              type: BulkActionEditType.add_actions,
+              type: BulkActionEditType.add_rule_actions,
               value: {
                 throttle: '1h',
               },
@@ -440,7 +440,7 @@ describe('perform_bulk_action_schema', () => {
           action: BulkAction.edit,
           [BulkAction.edit]: [
             {
-              type: BulkActionEditType.add_actions,
+              type: BulkActionEditType.add_rule_actions,
               value: {
                 throttle: '1h',
                 actions: [
@@ -467,13 +467,13 @@ describe('perform_bulk_action_schema', () => {
         expect(message.schema).toEqual({});
       });
 
-      test('valid request: add_actions edit action', () => {
+      test('valid request: add_rule_actions edit action', () => {
         const payload: PerformBulkActionSchema = {
           query: 'name: test',
           action: BulkAction.edit,
           [BulkAction.edit]: [
             {
-              type: BulkActionEditType.add_actions,
+              type: BulkActionEditType.add_rule_actions,
               value: {
                 throttle: '1h',
                 actions: [
@@ -498,13 +498,13 @@ describe('perform_bulk_action_schema', () => {
         expect(message.schema).toEqual(payload);
       });
 
-      test('valid request: set_actions edit action', () => {
+      test('valid request: set_rule_actions edit action', () => {
         const payload: PerformBulkActionSchema = {
           query: 'name: test',
           action: BulkAction.edit,
           [BulkAction.edit]: [
             {
-              type: BulkActionEditType.set_actions,
+              type: BulkActionEditType.set_rule_actions,
               value: {
                 throttle: '1h',
                 actions: [

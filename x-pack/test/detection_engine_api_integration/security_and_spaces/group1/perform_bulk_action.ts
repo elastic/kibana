@@ -1048,7 +1048,7 @@ export default ({ getService }: FtrProviderContext): void => {
         },
       };
 
-      describe('add_actions', () => {
+      describe('add_rule_actions', () => {
         it('should set action correctly', async () => {
           const ruleId = 'ruleId';
           const createdRule = await createRule(supertest, log, getSimpleRule(ruleId));
@@ -1062,7 +1062,7 @@ export default ({ getService }: FtrProviderContext): void => {
               action: BulkAction.edit,
               [BulkAction.edit]: [
                 {
-                  type: BulkActionEditType.set_actions,
+                  type: BulkActionEditType.set_rule_actions,
                   value: {
                     throttle: '1h',
                     actions: [
@@ -1124,7 +1124,7 @@ export default ({ getService }: FtrProviderContext): void => {
               action: BulkAction.edit,
               [BulkAction.edit]: [
                 {
-                  type: BulkActionEditType.set_actions,
+                  type: BulkActionEditType.set_rule_actions,
                   value: {
                     throttle: '1h',
                     actions: [],
@@ -1144,7 +1144,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      describe('add_actions', () => {
+      describe('add_rule_actions', () => {
         it('should add action correctly to empty actions list', async () => {
           const ruleId = 'ruleId';
           const createdRule = await createRule(supertest, log, getSimpleRule(ruleId));
@@ -1158,7 +1158,7 @@ export default ({ getService }: FtrProviderContext): void => {
               action: BulkAction.edit,
               [BulkAction.edit]: [
                 {
-                  type: BulkActionEditType.add_actions,
+                  type: BulkActionEditType.add_rule_actions,
                   value: {
                     throttle: '1h',
                     actions: [
@@ -1220,7 +1220,7 @@ export default ({ getService }: FtrProviderContext): void => {
               action: BulkAction.edit,
               [BulkAction.edit]: [
                 {
-                  type: BulkActionEditType.add_actions,
+                  type: BulkActionEditType.add_rule_actions,
                   value: {
                     throttle: '1h',
                     actions: [
@@ -1284,7 +1284,7 @@ export default ({ getService }: FtrProviderContext): void => {
               action: BulkAction.edit,
               [BulkAction.edit]: [
                 {
-                  type: BulkActionEditType.add_actions,
+                  type: BulkActionEditType.add_rule_actions,
                   value: {
                     throttle: '1h',
                     actions: [],
@@ -1327,7 +1327,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 action: BulkAction.edit,
                 [BulkAction.edit]: [
                   {
-                    type: BulkActionEditType.set_actions,
+                    type: BulkActionEditType.set_rule_actions,
                     value: {
                       throttle: payload.throttle,
                       actions: [],
@@ -1371,7 +1371,7 @@ export default ({ getService }: FtrProviderContext): void => {
         //         action: BulkAction.edit,
         //         [BulkAction.edit]: [
         //           {
-        //             type: BulkActionEditType.set_actions,
+        //             type: BulkActionEditType.set_rule_actions,
         //             value: {
         //               throttle: payload.throttle,
         //               actions: [],
@@ -1419,7 +1419,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 action: BulkAction.edit,
                 [BulkAction.edit]: [
                   {
-                    type: BulkActionEditType.set_actions,
+                    type: BulkActionEditType.set_rule_actions,
                     value: {
                       throttle: payload.throttle,
                       actions: [],

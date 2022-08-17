@@ -65,7 +65,7 @@ export const bulkEditActionToRulesClientOperation = (
       ];
 
     // rule actions
-    case BulkActionEditType.add_actions:
+    case BulkActionEditType.add_rule_actions:
       return [
         {
           field: 'actions',
@@ -76,7 +76,7 @@ export const bulkEditActionToRulesClientOperation = (
         getNotifyWhenOperation(action.value.throttle),
       ];
 
-    case BulkActionEditType.set_actions:
+    case BulkActionEditType.set_rule_actions:
       return [
         {
           field: 'actions',

@@ -9,7 +9,7 @@ import pMap from 'p-map';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type {
   BulkActionEditPayload,
-  BulkActionEditPayloadActions,
+  bulkActionEditPayloadRuleActions,
 } from '../../../../common/detection_engine/schemas/common';
 import { enrichFilterWithRuleTypeMapping } from './enrich_filter_with_rule_type_mappings';
 import type { MlAuthz } from '../../machine_learning/authz';
@@ -66,8 +66,8 @@ export const bulkEditRules = async ({
   // calling unmute needed only if rule was muted and throttle value is not NOTIFICATION_THROTTLE_NO_ACTIONS
   // TODO: error handlers (?)
   const rulesAction = attributesActions.find(({ type }) =>
-    [BulkActionEditType.set_actions, BulkActionEditType.add_actions].includes(type)
-  ) as BulkActionEditPayloadActions;
+    [BulkActionEditType.set_rule_actions, BulkActionEditType.add_rule_actions].includes(type)
+  ) as bulkActionEditPayloadRuleActions;
   if (rulesAction) {
     const rules = await pMap(
       result.rules,

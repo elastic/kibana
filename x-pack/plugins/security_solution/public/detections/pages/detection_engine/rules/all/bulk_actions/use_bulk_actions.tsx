@@ -365,7 +365,7 @@ export const useBulkActions = ({
               name: i18n.BULK_ACTION_ADD_RULE_ACTIONS,
               'data-test-subj': 'addRuleActionsBulk',
               disabled: isEditDisabled,
-              onClick: handleBulkEdit(BulkActionEditType.add_actions),
+              onClick: handleBulkEdit(BulkActionEditType.add_rule_actions),
               toolTipContent: missingActionPrivileges ? i18n.EDIT_RULE_SETTINGS_TOOLTIP : undefined,
               toolTipPosition: 'right',
               icon: undefined,

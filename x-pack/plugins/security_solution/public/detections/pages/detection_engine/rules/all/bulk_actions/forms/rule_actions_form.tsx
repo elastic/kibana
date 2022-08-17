@@ -101,8 +101,8 @@ const RuleActionsFormComponent = ({ rulesCount, onClose, onConfirm }: RuleAction
     }
 
     const editAction = data.overwrite
-      ? BulkActionEditType.set_actions
-      : BulkActionEditType.add_actions;
+      ? BulkActionEditType.set_rule_actions
+      : BulkActionEditType.add_rule_actions;
 
     onConfirm({
       type: editAction,
