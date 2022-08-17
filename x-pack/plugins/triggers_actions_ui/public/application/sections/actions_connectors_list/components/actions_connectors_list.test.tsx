@@ -146,7 +146,7 @@ describe('actions_connectors_list', () => {
             config: {},
           },
           {
-            id: '5',
+            id: '6',
             actionTypeId: 'test4',
             description: 'only cases',
             referencedByCount: 1,
@@ -177,7 +177,7 @@ describe('actions_connectors_list', () => {
         },
         {
           id: 'test4',
-          name: 'Test3',
+          name: 'Test4',
           enabled: true,
           supportedFeatureIds: ['cases'],
         },
