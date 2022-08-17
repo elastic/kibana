@@ -29,8 +29,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await pageObjects.responder.openActionLogFlyout();
 
     // Ensure the popover in the action log date quick select picker is accessible
-    // (this is especially important for when Responder is displayed from a Timeline
-    await (await testSubjects.find('superDatePickerToggleQuickMenuButton')).click();
+    // (this is especially important for when Responder is displayed from a Timeline)
+    await pageObjects.responder.clickActionLogSuperDatePickerQuickMenuButton();
     await (await testSubjects.find('superDatePickerCommonlyUsed_Last_1 year')).click();
     await pageObjects.responder.closeActionLogFlyout();
 
@@ -118,7 +118,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         timeline = await timelineTestService.createTimeline('endpoint responder test');
 
         // Add all alerts for the Endpoint to the timeline created
-        await timelineTestService.updateTimeline(
+        timeline = await timelineTestService.updateTimeline(
           timeline.data.persistTimeline.timeline.savedObjectId,
           {
             title: timeline.data.persistTimeline.timeline.title,
@@ -137,8 +137,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await detectionsTestService.waitForAlerts(
           getEndpointAlertsQueryForAgentId(endpointAgentId),
-          // The Alerts rule seems to run every 5 minutes, so we wait here a max of 6 to
-          // ensure it runs and completes.
+          // The Alerts rules seems to run every 5 minutes, so we wait here a max
+          // of 6 minutes to ensure it runs and completes and alerts are available.
           60_000 * 6
         );
 
@@ -160,6 +160,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.timeline.openTimelineById(
           timeline.data.persistTimeline.timeline.savedObjectId
         );
+
+        await pageObjects.timeline.waitForEvents(60_000);
 
         // Show event/alert details for the first one in the list
         await pageObjects.timeline.showEventDetails();
