@@ -125,7 +125,8 @@ const toExpression = (
         arguments: {
           metric: state.metricAccessor ? [state.metricAccessor] : [],
           secondaryMetric: state.secondaryMetricAccessor ? [state.secondaryMetricAccessor] : [],
-          secondaryPrefix: state.secondaryPrefix ? [state.secondaryPrefix] : [],
+          secondaryPrefix:
+            typeof state.secondaryPrefix !== 'undefined' ? [state.secondaryPrefix] : [],
           max: state.maxAccessor ? [state.maxAccessor] : [],
           breakdownBy:
             state.breakdownByAccessor && !state.collapseFn ? [state.breakdownByAccessor] : [],
