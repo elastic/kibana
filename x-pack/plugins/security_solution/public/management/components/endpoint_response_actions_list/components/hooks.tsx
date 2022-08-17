@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import type {
   DurationRange,
   OnRefreshChangeProps,
@@ -93,13 +93,25 @@ export type FilterItems = Array<{
   checked: 'on' | undefined;
 }>;
 
+// get a normalized command
+// e.g. kill-process -> Kill process
+const getActionFilterLabel = (value: string): string => {
+  if (value === 'unisolate') {
+    return 'Release';
+  }
+  // readable command e.g. Kill process
+  const normalizeCommand = value.split('-');
+  normalizeCommand[0] = normalizeCommand[0].charAt(0).toUpperCase() + normalizeCommand[0].slice(1);
+  return normalizeCommand.join(' ');
+};
+
 // TODO: add more filter names here
 export type FilterName = 'Actions';
 export const useActionListFilter = () => {
   const [items, setItems] = useState<FilterItems>(
     RESPONSE_ACTION_COMMANDS.slice().map((filter) => ({
       key: filter,
-      label: filter === 'unisolate' ? 'release' : filter,
+      label: getActionFilterLabel(filter),
       checked: undefined,
     }))
   );
