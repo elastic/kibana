@@ -625,6 +625,7 @@ export class DataViewsService {
    */
 
   savedObjectToSpec = (savedObject: SavedObject<DataViewAttributes>): DataViewSpec => {
+    // @ts-ignore
     const {
       id,
       version,
@@ -642,6 +643,8 @@ export class DataViewsService {
         allowNoIndex,
         name,
       },
+      // @ts-ignore
+      updatedAt,
     } = savedObject;
 
     const parsedSourceFilters = sourceFilters ? JSON.parse(sourceFilters) : undefined;
@@ -668,6 +671,7 @@ export class DataViewsService {
       allowNoIndex,
       runtimeFieldMap: parsedRuntimeFieldMap,
       name,
+      updatedAt,
     };
   };
 

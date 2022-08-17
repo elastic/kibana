@@ -506,6 +506,10 @@ export type DataViewSpec = {
    * Name of the data view. Human readable name used to differentiate data view.
    */
   name?: string;
+  /**
+   * Timestamp of the last time this data view was updated.
+   */
+  updatedAt?: string;
 };
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions

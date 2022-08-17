@@ -145,6 +145,10 @@ export class DataView implements DataViewBase {
    * Name of the data view. Human readable name used to differentiate data view.
    */
   public name: string = '';
+  /**
+   * Timestamp of the last time this data view was updated.
+   */
+  public updatedAt: string | undefined;
 
   /**
    * constructor
@@ -181,6 +185,7 @@ export class DataView implements DataViewBase {
     this.runtimeFieldMap = cloneDeep(spec.runtimeFieldMap) || {};
     this.namespaces = spec.namespaces || [];
     this.name = spec.name || '';
+    this.updatedAt = spec.updatedAt;
   }
 
   /**
@@ -304,6 +309,7 @@ export class DataView implements DataViewBase {
       fieldAttrs: cloneDeep(this.fieldAttrs),
       allowNoIndex: this.allowNoIndex,
       name: this.name,
+      updatedAt: this.updatedAt,
     };
 
     // Filter undefined values from the spec

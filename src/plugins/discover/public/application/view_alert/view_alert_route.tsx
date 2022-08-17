@@ -104,9 +104,8 @@ export function ViewAlertRoute() {
         return;
       }
 
-      const dataViewSavedObject = await core.savedObjects.client.get('index-pattern', dataView.id!);
       const alertUpdatedAt = fetchedAlert.updatedAt;
-      const dataViewUpdatedAt = dataViewSavedObject.updatedAt!;
+      const dataViewUpdatedAt = dataView.updatedAt!;
       // data view updated after the last update of the alert rule
       if (
         openActualAlert &&
