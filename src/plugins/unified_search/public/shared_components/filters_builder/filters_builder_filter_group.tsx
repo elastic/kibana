@@ -24,25 +24,23 @@ export interface FilterGroupProps {
   reverseBackground?: boolean;
 }
 
-const Delimiter = ({ conditionType }: { conditionType: ConditionTypes }) =>
-  conditionType === ConditionTypes.OR ? (
-    <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-      <EuiFlexItem grow={1}>
-        <EuiHorizontalRule margin="s" />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiText size="s" color="subdued">
-          {i18n.translate('unifiedSearch.filter.filtersBuilder.orDelimiterLabel', {
-            defaultMessage: 'OR',
-          })}
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={10}>
-        <EuiHorizontalRule margin="s" />
-      </EuiFlexItem>{' '}
-    </EuiFlexGroup>
-  ) : null;
-
+const Delimiter = () => (
+  <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+    <EuiFlexItem grow={1}>
+      <EuiHorizontalRule margin="s" />
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiText size="s" color="subdued">
+        {i18n.translate('unifiedSearch.filter.filtersBuilder.orDelimiterLabel', {
+          defaultMessage: 'OR',
+        })}
+      </EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem grow={10}>
+      <EuiHorizontalRule margin="s" />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
 export const FilterGroup = ({
   filters,
   conditionType,
@@ -55,8 +53,7 @@ export const FilterGroup = ({
   } = useContext(FiltersBuilderContextType);
 
   const pathInArray = getPathInArray(path);
-
-  const isDepthReached = maxDepth === pathInArray.length;
+  const isDepthReached = maxDepth <= pathInArray.length;
   const orDisabled = hideOr || (isDepthReached && conditionType === ConditionTypes.AND);
   const andDisabled = isDepthReached && conditionType === ConditionTypes.OR;
   const removeDisabled = pathInArray.length <= 1 && filters.length === 1;
@@ -80,9 +77,9 @@ export const FilterGroup = ({
             />
           </EuiFlexItem>
 
-          {index + 1 < acc.length ? (
+          {conditionType === ConditionTypes.OR && index + 1 < acc.length ? (
             <EuiFlexItem>
-              <Delimiter conditionType={conditionType} />
+              <Delimiter />
             </EuiFlexItem>
           ) : null}
         </EuiFlexGroup>
