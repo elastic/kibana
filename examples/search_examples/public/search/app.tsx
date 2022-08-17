@@ -16,6 +16,7 @@ import {
   EuiFlexGrid,
   EuiFlexItem,
   EuiFormLabel,
+  EuiHorizontalRule,
   EuiPageBody,
   EuiPageContent,
   EuiPageContentBody,
@@ -34,8 +35,8 @@ import {
   IKibanaSearchResponse,
   isCompleteResponse,
   isErrorResponse,
+  SearchResponseWarning,
 } from '@kbn/data-plugin/public';
-import { SearchResponseWarnings } from '@kbn/data-plugin/public/search/fetch';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -81,6 +82,9 @@ function formatFieldsToComboBox(fields?: DataViewField[]) {
   });
 }
 
+const bucketAggType = 'terms';
+const metricAggType = 'avg';
+
 export const SearchExamplesApp = ({
   http,
   notifications,
@@ -107,11 +111,11 @@ export const SearchExamplesApp = ({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [currentAbortController, setAbortController] = useState<AbortController>();
   const [rawResponse, setRawResponse] = useState<Record<string, any>>({});
-  const [warnings, setWarnings] = useState<SearchResponseWarnings | undefined>();
+  const [warnings, setWarnings] = useState<SearchResponseWarning[]>([]);
   const [selectedTab, setSelectedTab] = useState(0);
 
   function setResponse(response: IKibanaSearchResponse) {
-    setWarnings(undefined);
+    setWarnings([]);
     setRawResponse(response.rawResponse);
     setLoaded(response.loaded!);
     setTotal(response.total!);
@@ -178,7 +182,7 @@ export const SearchExamplesApp = ({
     }
 
     // Construct the aggregations portion of the search request by using the `data.search.aggs` service.
-    const aggs = [{ type: 'avg', params: { field: selectedNumericField!.name } }];
+    const aggs = [{ type: metricAggType, params: { field: selectedNumericField!.name } }];
     const aggsDsl = data.search.aggs.createAggConfigs(dataView, aggs).toDsl();
 
     const req = {
@@ -281,13 +285,13 @@ export const SearchExamplesApp = ({
       const aggDef = [];
       if (selectedBucketField) {
         aggDef.push({
-          type: 'terms',
+          type: bucketAggType,
           schema: 'split',
           params: { field: selectedBucketField.name, size: 2, otherBucket },
         });
       }
       if (selectedNumericField) {
-        aggDef.push({ type: 'avg', params: { field: selectedNumericField.name } });
+        aggDef.push({ type: metricAggType, params: { field: selectedNumericField.name } });
       }
       if (aggDef.length > 0) {
         const ac = data.search.aggs.createAggConfigs(dataView, aggDef);
@@ -312,7 +316,7 @@ export const SearchExamplesApp = ({
         })
       );
       setRawResponse(result.rawResponse);
-      setWarnings(undefined);
+      setWarnings([]);
 
       /* Here is an example of using showWarnings on the search service, using an optional callback to
        * intercept the warnings before notification warnings are shown.
@@ -551,7 +555,7 @@ export const SearchExamplesApp = ({
               />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiFormLabel>Field (bucket)</EuiFormLabel>
+              <EuiFormLabel>Field (using {bucketAggType} buckets)</EuiFormLabel>
               <EuiComboBox
                 options={formatFieldsToComboBox(getAggregatableStrings(fields))}
                 selectedOptions={formatFieldToComboBox(selectedBucketField)}
@@ -569,7 +573,7 @@ export const SearchExamplesApp = ({
               />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiFormLabel>Numeric Field (metric)</EuiFormLabel>
+              <EuiFormLabel>Numeric Field (using {metricAggType} metrics)</EuiFormLabel>
               <EuiComboBox
                 options={formatFieldsToComboBox(getNumeric(fields))}
                 selectedOptions={formatFieldToComboBox(selectedNumericField)}
@@ -602,6 +606,9 @@ export const SearchExamplesApp = ({
               />
             </EuiFlexItem>
           </EuiFlexGrid>
+
+          <EuiHorizontalRule />
+
           <EuiFlexGrid columns={2}>
             <EuiFlexItem style={{ width: '40%' }}>
               <EuiSpacer />

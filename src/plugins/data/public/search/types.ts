@@ -13,7 +13,7 @@ import { SearchUsageCollector } from './collectors';
 import { AggsSetup, AggsSetupDependencies, AggsStartDependencies, AggsStart } from './aggs';
 import { IInspectorInfo, ISearchGeneric, ISearchStartSearchSource } from '../../common/search';
 import { ISessionsClient, ISessionService } from './session';
-import { SearchResponseWarnings } from './fetch';
+import { estypes } from '@elastic/elasticsearch';
 
 export type { ISearchStartSearchSource, SearchUsageCollector };
 
@@ -65,7 +65,7 @@ export interface ISearchStart {
    */
   showWarnings: (
     inspector: IInspectorInfo,
-    cb?: (warnings: SearchResponseWarnings) => boolean | undefined
+    cb?: (warnings: SearchResponseWarning[]) => boolean | undefined
   ) => void;
   /**
    * high level search
@@ -97,4 +97,12 @@ export interface SearchServiceSetupDependencies {
 export interface SearchServiceStartDependencies {
   fieldFormats: AggsStartDependencies['fieldFormats'];
   indexPatterns: DataViewsContract;
+}
+
+export interface SearchResponseWarning {
+  type: 'timed_out' | 'generic_shard_warning' | estypes.ShardFailure['reason']['reason'];
+  isTimeout?: boolean;
+  isShardFailure?: boolean;
+  message: string;
+  text?: string;
 }

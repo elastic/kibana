@@ -36,18 +36,14 @@ describe('extract search response warnings', () => {
       aggregations: {},
     };
 
-    expect(extractWarnings(response)).toEqual({
-      notifications: {
-        shardFailures: {
-          text: 'The data you are seeing might be incomplete or wrong.',
-          title: '2 of 4 shards failed',
-        },
-        timedOut: undefined,
+    expect(extractWarnings(response)).toEqual([
+      {
+        isShardFailure: true,
+        message: '2 of 4 shards failed',
+        text: 'The data you are seeing might be incomplete or wrong.',
+        type: 'illegal_argument_exception',
       },
-      shardStats: response._shards,
-      timedOut: false,
-      types: ['illegal_argument_exception'],
-    });
+    ]);
   });
 
   it('should extract timeout warning', () => {
@@ -57,14 +53,13 @@ describe('extract search response warnings', () => {
       _shards: {} as estypes.ShardStatistics,
       hits: { hits: [] },
     };
-    expect(extractWarnings(warnings)).toEqual({
-      notifications: {
-        shardFailures: undefined,
-        timedOut: { title: 'Data might be incomplete because your request timed out' },
+    expect(extractWarnings(warnings)).toEqual([
+      {
+        isTimeout: true,
+        message: 'Data might be incomplete because your request timed out',
+        type: 'timed_out',
       },
-      shardStats: {},
-      timedOut: true,
-    });
+    ]);
   });
 
   it('should extract shards failed warning notification', () => {
@@ -74,17 +69,14 @@ describe('extract search response warnings', () => {
         total: 79,
       },
     } as estypes.SearchResponse;
-    expect(extractWarnings(warnings)).toEqual({
-      notifications: {
-        shardFailures: {
-          text: 'The data you are seeing might be incomplete or wrong.',
-          title: '77 of 79 shards failed',
-        },
-        timedOut: undefined,
+    expect(extractWarnings(warnings)).toEqual([
+      {
+        isShardFailure: true,
+        message: '77 of 79 shards failed',
+        text: 'The data you are seeing might be incomplete or wrong.',
+        type: 'generic_shard_warning',
       },
-      shardStats: { failed: 77, total: 79 },
-      timedOut: undefined,
-    });
+    ]);
   });
 
   it('should extract shards failed warning failure reason type', () => {
@@ -94,17 +86,14 @@ describe('extract search response warnings', () => {
         total: 79,
       },
     } as estypes.SearchResponse);
-    expect(warnings).toEqual({
-      notifications: {
-        shardFailures: {
-          text: 'The data you are seeing might be incomplete or wrong.',
-          title: '77 of 79 shards failed',
-        },
-        timedOut: undefined,
+    expect(warnings).toEqual([
+      {
+        isShardFailure: true,
+        message: '77 of 79 shards failed',
+        text: 'The data you are seeing might be incomplete or wrong.',
+        type: 'generic_shard_warning',
       },
-      shardStats: { failed: 77, total: 79 },
-      timedOut: undefined,
-    });
+    ]);
   });
 
   it('extracts multiple warning notifications', () => {
@@ -115,8 +104,12 @@ describe('extract search response warnings', () => {
         total: 79,
       },
     } as estypes.SearchResponse);
-    expect(warnings?.notifications?.shardFailures?.title).toBeDefined();
-    expect(warnings?.notifications?.timedOut?.title).toBeDefined();
+    const [shardFailures, timedOut] = [
+      warnings.filter(({ isShardFailure }) => isShardFailure === true),
+      warnings.filter(({ isTimeout }) => isTimeout === true),
+    ];
+    expect(shardFailures[0]!.message).toBeDefined();
+    expect(timedOut[0]!.message).toBeDefined();
   });
 
   it('should not include shardStats or types fields if there are no warnings', () => {
@@ -128,15 +121,10 @@ describe('extract search response warnings', () => {
       },
     } as estypes.SearchResponse);
 
-    expect(warnings).toEqual({
-      notifications: { shardFailures: undefined, timedOut: undefined },
-      shardStats: undefined,
-      timedOut: false,
-      types: undefined,
-    });
+    expect(warnings).toEqual([]);
   });
 
-  it('should return undefined if rawResponse is undefined', () => {
-    expect(extractWarnings(undefined)).toEqual(undefined);
+  it('should return [] if rawResponse is undefined', () => {
+    expect(extractWarnings(undefined)).toEqual([]);
   });
 });

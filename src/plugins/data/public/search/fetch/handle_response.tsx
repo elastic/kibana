@@ -25,29 +25,33 @@ export function handleResponse(
   const { rawResponse } = response;
 
   // display warning toast notifications for timeouts and/or shard failures
-  const { shardFailures, timedOut } = extractWarnings(rawResponse)?.notifications ?? {};
+  const warnings = extractWarnings(rawResponse);
 
+  const timedOut = warnings.find((w) => w.isTimeout === true);
   if (timedOut) {
-    getNotifications().toasts.addWarning(timedOut);
+    getNotifications().toasts.addWarning({ title: timedOut.message });
   }
 
+  const shardFailures = warnings.filter((w) => w.isShardFailure === true);
   if (shardFailures && !disableShardFailureWarning) {
-    const title = shardFailures.title!;
-    const text = toMountPoint(
-      <>
-        {shardFailures.text}
-        <EuiSpacer size="s" />
-        <ShardFailureOpenModalButton
-          request={request.body}
-          response={rawResponse}
-          theme={theme}
-          title={title}
-        />
-      </>,
-      { theme$: theme.theme$ }
-    );
+    shardFailures.forEach((w) => {
+      const title = w.message;
+      const text = toMountPoint(
+        <>
+          {w.text}
+          <EuiSpacer size="s" />
+          <ShardFailureOpenModalButton
+            request={request.body}
+            response={rawResponse}
+            theme={theme}
+            title={title}
+          />
+        </>,
+        { theme$: theme.theme$ }
+      );
 
-    getNotifications().toasts.addWarning({ title, text });
+      getNotifications().toasts.addWarning({ title, text });
+    });
   }
 
   return response;

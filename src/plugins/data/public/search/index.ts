@@ -13,6 +13,7 @@ export type {
   ISearchStart,
   ISearchStartSearchSource,
   SearchUsageCollector,
+  SearchResponseWarning,
 } from './types';
 
 export type {
@@ -53,7 +54,6 @@ export {
   waitUntilNextSessionCompletes$,
 } from './session';
 export { getEsPreference } from './es_search';
-export type { SearchResponseWarnings } from './fetch';
 export { handleResponse } from './fetch';
 
 export type { SearchInterceptorDeps } from './search_interceptor';
