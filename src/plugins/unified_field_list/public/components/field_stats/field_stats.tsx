@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   DataView,
   DataViewField,
@@ -20,19 +20,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import DateMath from '@kbn/datemath';
-import {
-  EuiButtonGroup,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiProgress,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-  EuiToolTip,
-  useEuiTheme,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiButtonGroup, EuiLoadingSpinner, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import {
   Axis,
   Chart,
@@ -47,6 +35,7 @@ import { i18n } from '@kbn/i18n';
 import { buildEsQuery, Query, Filter, AggregateQuery } from '@kbn/es-query';
 import type { BucketedAggregation } from '../../../common/types';
 import { loadFieldStats, canProvideStatsForField } from '../../services';
+import { FieldTopValues } from './field_top_values';
 
 interface State {
   isLoading: boolean;
@@ -94,7 +83,6 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   overrideMissingContent,
   overrideFooter,
 }) => {
-  const { euiTheme } = useEuiTheme();
   const { fieldFormats, uiSettings, charts, dataViews, data } = services;
   const [state, changeState] = useState<State>({
     isLoading: false,
@@ -102,28 +90,6 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   const [dataView, changeDataView] = useState<DataView | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const isCanceledRef = useRef<boolean>(false);
-
-  const topValueStyles = useMemo(
-    () => css`
-      margin-bottom: ${euiTheme.size.s};
-
-      &:last-of-type {
-        margin-bottom: 0;
-      }
-    `,
-    [euiTheme]
-  );
-
-  const topValueProgressStyles = useMemo(
-    () => css`
-      background-color: ${euiTheme.colors.lightestShade};
-
-      &::-webkit-progress-bar {
-        background-color: ${euiTheme.colors.lightestShade};
-      }
-    `,
-    [euiTheme]
-  );
 
   const setState: typeof changeState = useCallback(
     (nextState) => {
@@ -211,6 +177,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   const fromDateParsed = DateMath.parse(fromDate);
   const toDateParsed = DateMath.parse(toDate);
 
+  // TODO: extract into an util function
   const totalValuesCount =
     topValues && topValues.buckets.reduce((prev, bucket) => bucket.count + prev, 0);
   const otherCount = sampledValues && totalValuesCount ? sampledValues - totalValuesCount : 0;
@@ -450,94 +417,14 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   }
 
   if (topValues && topValues.buckets.length) {
-    const digitsRequired = topValues.buckets.some(
-      (topValue) => !Number.isInteger(topValue.count / sampledValues!)
-    );
     return combineWithTitleAndFooter(
-      <div data-test-subj={`${testSubject}-topValues`}>
-        {topValues.buckets.map((topValue) => {
-          const formatted = formatter.convert(topValue.key);
-          return (
-            <div css={topValueStyles} key={topValue.key}>
-              <EuiFlexGroup
-                alignItems="stretch"
-                key={topValue.key}
-                gutterSize="xs"
-                responsive={false}
-              >
-                <EuiFlexItem
-                  grow={true}
-                  className="eui-textTruncate"
-                  data-test-subj={`${testSubject}-topValues-value`}
-                >
-                  {formatted === '' ? (
-                    <EuiText size="xs" color="subdued">
-                      <em>
-                        {i18n.translate('unifiedFieldList.fieldStats.emptyStringValueLabel', {
-                          defaultMessage: 'Empty string',
-                        })}
-                      </em>
-                    </EuiText>
-                  ) : (
-                    <EuiToolTip content={formatted} delay="long">
-                      <EuiText size="xs" color="subdued" className="eui-textTruncate">
-                        {formatted}
-                      </EuiText>
-                    </EuiToolTip>
-                  )}
-                </EuiFlexItem>
-                <EuiFlexItem grow={false} data-test-subj={`${testSubject}-topValues-valueCount`}>
-                  <EuiText size="xs" textAlign="left" color="accent">
-                    {(Math.round((topValue.count / sampledValues!) * 1000) / 10).toFixed(
-                      digitsRequired ? 1 : 0
-                    )}
-                    %
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiProgress
-                css={topValueProgressStyles}
-                value={topValue.count / sampledValues!}
-                max={1}
-                size="s"
-                color="accent"
-              />
-            </div>
-          );
-        })}
-        {otherCount ? (
-          <>
-            <EuiFlexGroup alignItems="stretch" gutterSize="xs" responsive={false}>
-              <EuiFlexItem grow={true} className="eui-textTruncate">
-                <EuiText size="xs" className="eui-textTruncate" color="subdued">
-                  {i18n.translate('unifiedFieldList.fieldStats.otherDocsLabel', {
-                    defaultMessage: 'Other',
-                  })}
-                </EuiText>
-              </EuiFlexItem>
-
-              <EuiFlexItem grow={false} className="eui-textTruncate">
-                <EuiText size="xs" color="subdued">
-                  {(Math.round((otherCount / sampledValues!) * 1000) / 10).toFixed(
-                    digitsRequired ? 1 : 0
-                  )}
-                  %
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-
-            <EuiProgress
-              css={topValueProgressStyles}
-              value={otherCount / sampledValues!}
-              max={1}
-              size="s"
-              color="subdued"
-            />
-          </>
-        ) : (
-          <></>
-        )}
-      </div>
+      <FieldTopValues
+        buckets={topValues.buckets}
+        dataView={dataView}
+        field={field}
+        sampledValuesCount={sampledValues!}
+        testSubject={testSubject}
+      />
     );
   }
 
