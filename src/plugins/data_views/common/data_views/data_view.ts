@@ -309,7 +309,6 @@ export class DataView implements DataViewBase {
       fieldAttrs: cloneDeep(this.fieldAttrs),
       allowNoIndex: this.allowNoIndex,
       name: this.name,
-      updatedAt: this.updatedAt,
     };
 
     // Filter undefined values from the spec
