@@ -5,17 +5,6 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.Thank you for reaching out to us.
-Monitors can always be ordered through IT but if they are already purchased you can expense them.
-
-I’ll go ahead and set your case as closed but you can always reopen a case by replying to the closed ticket.
-
- */
-
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { AgentPolicyServiceInterface, AgentService } from '@kbn/fleet-plugin/server';
