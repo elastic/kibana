@@ -6,6 +6,7 @@
  */
 import { uniq, pickBy, sumBy, keyBy } from 'lodash';
 import { IlmExplainLifecycleLifecycleExplainManaged } from '@elastic/elasticsearch/lib/api/types';
+import { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
 import { Setup } from '../../../lib/helpers/setup_request';
 import { ApmPluginRequestHandlerContext } from '../../typings';
 import { IndexLifecyclePhaseSelectOption } from '../../../../common/storage_explorer_types';
@@ -75,4 +76,42 @@ async function getApmIndicesForIndexLifecyclePhase({
     .map((idx) => idx.index);
 
   return keyBy(filteredApmIndices);
+}
+
+export async function getTotalIndicesStats({
+  context,
+  setup,
+}: {
+  context: ApmPluginRequestHandlerContext;
+  setup: Setup;
+}) {
+  const {
+    indices: { transaction, span, metric, error },
+  } = setup;
+  const index = uniq([transaction, span, metric, error]).join();
+  const esClient = (await context.core).elasticsearch.client;
+  const indicesStats = (await esClient.asCurrentUser.indices.stats({ index }))
+    .indices;
+
+  return indicesStats;
+}
+
+export function getEstimatedSizeForDocumentsInIndex({
+  allIndicesStats,
+  indexName,
+  numberOfDocs,
+}: {
+  allIndicesStats: Record<string, IndicesStatsIndicesStats>;
+  indexName: string;
+  numberOfDocs: number;
+}) {
+  const indexStats = allIndicesStats[indexName];
+  const indexTotalSize = indexStats?.total?.store?.size_in_bytes ?? 0;
+  const indexTotalDocCount = indexStats?.total?.docs?.count;
+
+  const estimatedSize = indexTotalDocCount
+    ? (numberOfDocs / indexTotalDocCount) * indexTotalSize
+    : 0;
+
+  return estimatedSize;
 }

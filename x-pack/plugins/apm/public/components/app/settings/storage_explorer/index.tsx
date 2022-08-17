@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, ReactNode } from 'react';
 import {
   EuiInMemoryTable,
   EuiBasicTableColumn,
@@ -17,6 +17,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiButtonIcon,
+  EuiScreenReaderOnly,
+  RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -46,6 +49,8 @@ import { ServiceLink } from '../../../shared/service_link';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { getComparisonEnabled } from '../../../shared/time_comparison/get_comparison_enabled';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { StorageDetailsPerService } from './storage_details_per_service';
+import { BetaBadge } from '../../../shared/beta_badge';
 
 type StorageExplorerItem =
   APIReturnType<'GET /internal/apm/storage_explorer'>['serviceStatistics'][0];
@@ -64,11 +69,30 @@ export function StorageExplorer() {
   const { core } = useApmPluginContext();
   const comparisonEnabled = getComparisonEnabled({ core });
 
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
+    Record<string, ReactNode>
+  >({});
+
   const {
     query: { rangeFrom, rangeTo, environment, kuery },
   } = useApmParams('/settings/storage-explorer');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
+  const toggleRowDetails = (selectedServiceName: string) => {
+    const expandedRowMapValues = { ...itemIdToExpandedRowMap };
+    if (expandedRowMapValues[selectedServiceName]) {
+      delete expandedRowMapValues[selectedServiceName];
+    } else {
+      expandedRowMapValues[selectedServiceName] = (
+        <StorageDetailsPerService
+          serviceName={selectedServiceName}
+          indexLifecyclePhase={indexLifecyclePhase}
+        />
+      );
+    }
+    setItemIdToExpandedRowMap(expandedRowMapValues);
+  };
 
   const { data, status } = useProgressiveFetcher(
     (callApmApi) => {
@@ -86,6 +110,11 @@ export function StorageExplorer() {
     },
     [indexLifecyclePhase, start, end, environment, kuery]
   );
+
+  useEffect(() => {
+    // Closes any open rows when fetching new items
+    setItemIdToExpandedRowMap({});
+  }, [status]);
 
   const items = data?.serviceStatistics ?? [];
 
@@ -160,44 +189,28 @@ export function StorageExplorer() {
       sortable: true,
     },
     {
-      field: 'transactionDocs',
-      name: i18n.translate(
-        'xpack.apm.settings.storageExplorer.table.transactionsColumnName',
-        {
-          defaultMessage: 'Transactions',
-        }
+      align: RIGHT_ALIGNMENT,
+      width: '40px',
+      isExpander: true,
+      name: (
+        <EuiScreenReaderOnly>
+          <span>Expand rows</span>
+        </EuiScreenReaderOnly>
       ),
-      sortable: true,
-    },
-    {
-      field: 'spanDocs',
-      name: i18n.translate(
-        'xpack.apm.settings.storageExplorer.table.spansColumnName',
-        {
-          defaultMessage: 'Spans',
-        }
-      ),
-      sortable: true,
-    },
-    {
-      field: 'errorDocs',
-      name: i18n.translate(
-        'xpack.apm.settings.storageExplorer.table.errorsColumnName',
-        {
-          defaultMessage: 'Errors',
-        }
-      ),
-      sortable: true,
-    },
-    {
-      field: 'metricDocs',
-      name: i18n.translate(
-        'xpack.apm.settings.storageExplorer.table.metricsColumnName',
-        {
-          defaultMessage: 'Metrics',
-        }
-      ),
-      sortable: true,
+      render: ({ serviceName }: { serviceName: string }) => {
+        return (
+          <EuiButtonIcon
+            data-test-subj={`storageDetailsButton_${serviceName}`}
+            onClick={() => toggleRowDetails(serviceName)}
+            aria-label={
+              itemIdToExpandedRowMap[serviceName] ? 'Collapse' : 'Expand'
+            }
+            iconType={
+              itemIdToExpandedRowMap[serviceName] ? 'arrowUp' : 'arrowDown'
+            }
+          />
+        );
+      },
     },
   ];
 
@@ -246,13 +259,20 @@ export function StorageExplorer() {
 
   return (
     <>
-      <EuiTitle size="s">
-        <h2>
-          {i18n.translate('xpack.apm.settings.storageExplorer.title', {
-            defaultMessage: 'Storage explorer',
-          })}
-        </h2>
-      </EuiTitle>
+      <EuiFlexGroup justifyContent="flexStart" gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="s">
+            <h2>
+              {i18n.translate('xpack.apm.settings.storageExplorer.title', {
+                defaultMessage: 'Storage explorer',
+              })}
+            </h2>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <BetaBadge />
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
       <EuiHorizontalRule />
 
@@ -320,6 +340,8 @@ export function StorageExplorer() {
         columns={columns}
         pagination={true}
         sorting={true}
+        itemId="serviceName"
+        itemIdToExpandedRowMap={itemIdToExpandedRowMap}
       />
     </>
   );

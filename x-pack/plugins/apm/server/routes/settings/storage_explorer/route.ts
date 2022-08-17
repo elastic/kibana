@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
 import { getSearchAggregatedTransactions } from '../../../lib/helpers/transactions';
 import { setupRequest } from '../../../lib/helpers/setup_request';
@@ -20,6 +21,7 @@ import {
   rangeRt,
 } from '../../default_api_types';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
+import { getStorageDetailsForService } from './get_storage_details_for_service';
 
 const storageExplorerRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/storage_explorer',
@@ -42,10 +44,6 @@ const storageExplorerRoute = createApmServerRoute({
       environments: string[];
       size?: number;
       agentName: AgentName;
-      transactionDocs: number;
-      spanDocs: number;
-      errorDocs: number;
-      metricDocs: number;
       sampling: number;
     }>;
   }> => {
@@ -103,6 +101,65 @@ const storageExplorerRoute = createApmServerRoute({
   },
 });
 
+const storageExplorerServiceDetailsRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/services/{serviceName}/storage_details',
+  options: { tags: ['access:apm'] },
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([
+      indexLifecyclePhaseRt,
+      probabilityRt,
+      environmentRt,
+      kueryRt,
+      rangeRt,
+    ]),
+  }),
+  handler: async (
+    resources
+  ): Promise<{
+    processorEventStats: Array<{
+      processorEvent:
+        | ProcessorEvent.transaction
+        | ProcessorEvent.error
+        | ProcessorEvent.metric
+        | ProcessorEvent.span;
+      docs: number;
+      size: number;
+    }>;
+  }> => {
+    const setup = await setupRequest(resources);
+    const { params, context } = resources;
+    const {
+      path: { serviceName },
+      query: {
+        indexLifecyclePhase,
+        probability,
+        environment,
+        kuery,
+        start,
+        end,
+      },
+    } = params;
+
+    const processorEventStats = await getStorageDetailsForService({
+      setup,
+      context,
+      indexLifecyclePhase,
+      probability,
+      environment,
+      kuery,
+      start,
+      end,
+      serviceName,
+    });
+
+    return { processorEventStats };
+  },
+});
+
 export const storageExplorerRouteRepository = {
   ...storageExplorerRoute,
+  ...storageExplorerServiceDetailsRoute,
 };

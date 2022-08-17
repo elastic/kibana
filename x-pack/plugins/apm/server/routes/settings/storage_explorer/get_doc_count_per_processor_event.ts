@@ -153,23 +153,6 @@ export async function getDocCountPerProcessorEvent({
         (x) => x.key === 'transaction'
       )?.sampled_transactions.buckets[0].doc_count;
 
-      const docsPerProcessorEvent = bucket.processor_event.buckets.reduce(
-        (
-          acc: Record<Exclude<ProcessorEvent, ProcessorEvent.profile>, number>,
-          { key, doc_count: docCount }
-        ) => {
-          acc[key as Exclude<ProcessorEvent, ProcessorEvent.profile>] =
-            docCount;
-          return acc;
-        },
-        {
-          [ProcessorEvent.transaction]: 0,
-          [ProcessorEvent.span]: 0,
-          [ProcessorEvent.metric]: 0,
-          [ProcessorEvent.error]: 0,
-        }
-      );
-
       const estimatedSize = indicesStats
         ? bucket.indices.buckets.reduce((prev, curr) => {
             const indexName = curr.key as string;
@@ -194,10 +177,6 @@ export async function getDocCountPerProcessorEvent({
         sampledTransactionDocs,
         size: estimatedSize,
         agentName: bucket.sample.hits.hits[0]?._source.agent.name as AgentName,
-        transactionDocs: docsPerProcessorEvent.transaction,
-        spanDocs: docsPerProcessorEvent.span,
-        metricDocs: docsPerProcessorEvent.metric,
-        errorDocs: docsPerProcessorEvent.error,
       };
     }
   );
