@@ -47,7 +47,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('displays to define default connector', async () => {
-      await testSubjects.click('uptimeDismissSyntheticsCallout');
       await hideErrorToast();
       await testSubjects.click('uptimeDisplayDefineConnector');
       await testSubjects.existOrFail('uptimeSettingsDefineConnector');

@@ -46,8 +46,4 @@ journey(`Getting Started Page`, async ({ page, params }: { page: Page; params: a
     await createBasicMonitor();
     await syntheticsApp.confirmAndSave();
   });
-
-  step('it navigates to details page after saving', async () => {
-    await page.click('text=Dismiss');
-  });
 });
