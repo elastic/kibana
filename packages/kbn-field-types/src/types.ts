@@ -47,8 +47,6 @@ export enum ES_FIELD_TYPES {
   UNSIGNED_LONG = 'unsigned_long',
   AGGREGATE_METRIC_DOUBLE = 'aggregate_metric_double',
 
-  AGGREGATE_METRIC_DOUBLE = 'aggregate_metric_double',
-
   FLOAT_RANGE = 'float_range',
   DOUBLE_RANGE = 'double_range',
   INTEGER_RANGE = 'integer_range',
