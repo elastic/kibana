@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import type { Reducer } from 'react';
+import React, { useCallback, useMemo, useState, useReducer } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
@@ -17,6 +18,7 @@ import type { LensEmbeddableComponentProps } from './types';
 import { useActions } from './use_actions';
 import { inputsSelectors } from '../../store';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
+import { ModalInspectQuery } from '../inspect/modal';
 
 const LensComponentWrapper = styled.div<{ height?: string }>`
   height: ${({ height }) => height ?? 'auto'};
@@ -31,6 +33,41 @@ const LensComponentWrapper = styled.div<{ height?: string }>`
   }
 `;
 
+type Responses = string[] | undefined; // todo
+type Requests = string[] | undefined; // todo
+type Stats = Array<{}> | undefined; // todo
+
+interface State {
+  responses: Responses;
+  requests: Requests;
+  stats: Stats;
+  isLoading: boolean | undefined;
+}
+
+export type Action =
+  | { type: 'setData'; responses: Responses; requests: Requests }
+  | { type: 'setLoading'; isLoading: boolean };
+
+function reducer(state: State, action: Action) {
+  switch (action.type) {
+    case 'setData':
+      return {
+        ...state,
+        responses: action.responses,
+        requests: action.requests,
+      };
+    case 'setLoading':
+      return { ...state, loading: action.isLoading };
+  }
+}
+
+const initialState = {
+  requests: undefined,
+  responses: undefined,
+  isLoading: undefined,
+  stats: undefined,
+};
+
 const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   getLensAttributes,
   height,
@@ -39,9 +76,12 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   lensAttributes,
   stackByField,
   timerange,
+  inspectTitle,
 }) => {
   const { lens } = useKibana().services;
   const dispatch = useDispatch();
+  const [isShowingModal, setIsShowingModal] = useState(false);
+  const [state, dispatchData] = useReducer<Reducer<State, Action>>(reducer, initialState);
 
   const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();
   const { searchSessionId } = useDeepEqualSelector((state) => getGlobalQuery(state, id));
@@ -53,12 +93,25 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   });
 
   const LensComponent = lens.EmbeddableComponent;
-
+  const inspectActionProps = useMemo(
+    () => ({
+      onInspectActionClicked: () => {
+        setIsShowingModal(true);
+      },
+      isDisabled: state.isLoading,
+    }),
+    [state.isLoading]
+  );
   const actions = useActions({
     withActions: true,
     attributes,
     timeRange: timerange,
+    inspectActionProps,
   });
+
+  const handleCloseModal = useCallback(() => {
+    setIsShowingModal(false);
+  }, []);
 
   const onBrushEnd = useCallback(
     ({ range }: { range: number[] }) => {
@@ -72,33 +125,62 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     },
     [dispatch, inputsModelId]
   );
-  return attributes && searchSessionId ? (
-    <LensComponentWrapper height={height}>
-      <LensComponent
-        id={id}
-        style={{ height: '100%' }}
-        timeRange={timerange}
-        attributes={attributes}
-        // onLoad={(val) => {
-        // }}
-        onBrushEnd={onBrushEnd}
-        viewMode={ViewMode.VIEW}
-        // onFilter={
-        //   (/* _data*/) => {
-        //     // call back event for on filter event
-        //   }
-        // }
-        // onTableRowClick={
-        //   (/* _data*/) => {
-        //     // call back event for on table row click event
-        //   }
-        // }
-        withDefaultActions={false}
-        extraActions={actions}
-        searchSessionId={searchSessionId}
-      />
-    </LensComponentWrapper>
-  ) : null;
+
+  const [request, ...additionalRequests] = state.requests ?? [];
+  const [response, ...additionalResponses] = state.responses ?? [];
+
+  return (
+    <>
+      {attributes && searchSessionId ? (
+        <LensComponentWrapper height={height}>
+          <LensComponent
+            id={id}
+            style={{ height: '100%' }}
+            timeRange={timerange}
+            attributes={attributes}
+            onLoad={(isLoading, adapters) => {
+              dispatchData({ type: 'setLoading', isLoading });
+
+              const data = Array.from(adapters?.requests?.requests ?? []).map((data) => {
+                const d = data[1];
+                return {
+                  request: JSON.stringify(
+                    { body: d?.json, index: d.stats.indexFilter.value.split(',') },
+                    null,
+                    2
+                  ),
+                  response: JSON.stringify(d?.response?.json.rawResponse, null, 2),
+                };
+              });
+              dispatchData({
+                type: 'setData',
+                requests: data?.map((d) => d.request) ?? [],
+                responses: data?.map((d) => d.response) ?? [],
+              });
+            }}
+            onBrushEnd={onBrushEnd}
+            viewMode={ViewMode.VIEW}
+            withDefaultActions={false}
+            extraActions={actions}
+            searchSessionId={searchSessionId}
+            showInspector={false}
+          />
+        </LensComponentWrapper>
+      ) : null}
+      {isShowingModal && request !== null && response !== null && (
+        <ModalInspectQuery
+          additionalRequests={additionalRequests}
+          additionalResponses={additionalResponses}
+          closeModal={handleCloseModal}
+          data-test-subj="inspect-modal"
+          inputId={inputsModelId}
+          request={request}
+          response={response}
+          title={inspectTitle}
+        />
+      )}
+    </>
+  );
 };
 
 export const LensEmbeddable = React.memo(LensEmbeddableComponent);
