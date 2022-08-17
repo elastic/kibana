@@ -23,7 +23,8 @@ import {
   EmbeddableFactory,
   EmbeddableFactoryDefinition,
   EmbeddableInput,
-} from '../../services/embeddable';
+} from '@kbn/embeddable-plugin/public';
+
 import { useKibana } from '../../services/kibana_react';
 import { DashboardAppServices } from '../../types';
 import { DashboardContainer } from '..';

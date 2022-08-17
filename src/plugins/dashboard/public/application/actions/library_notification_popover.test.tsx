@@ -20,14 +20,14 @@ import { CoreStart } from '@kbn/core/public';
 import { coreMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { EuiPopover } from '@elastic/eui';
-import { isErrorEmbeddable } from '../../services/embeddable';
+import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import {
-  CONTACT_CARD_EMBEDDABLE,
+  ContactCardEmbeddable,
   ContactCardEmbeddableFactory,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
-  ContactCardEmbeddable,
-} from '../../services/embeddable_test_samples';
+  CONTACT_CARD_EMBEDDABLE,
+} from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
 import { getStubPluginServices } from '@kbn/presentation-util-plugin/public';
 import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 

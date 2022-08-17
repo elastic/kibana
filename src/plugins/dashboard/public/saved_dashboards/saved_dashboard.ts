@@ -11,8 +11,8 @@ import { SavedObjectsClientContract } from '@kbn/core/public';
 import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
 import { SavedObjectAttributes, SavedObjectReference } from '@kbn/core/types';
 import { RawControlGroupAttributes } from '@kbn/controls-plugin/common';
+import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { ISearchSource } from '@kbn/data-plugin/common';
-import { EmbeddableStart } from '../services/embeddable';
 import { SavedObject, SavedObjectsStart } from '../services/saved_objects';
 import { Filter, Query, RefreshInterval } from '../services/data/types';
 

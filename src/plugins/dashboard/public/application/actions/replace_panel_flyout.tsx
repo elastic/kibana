@@ -9,7 +9,6 @@
 import React from 'react';
 import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { NotificationsStart, Toast } from '@kbn/core/public';
-import { DashboardPanelState } from '../embeddable';
 import {
   EmbeddableInput,
   EmbeddableOutput,
@@ -17,7 +16,8 @@ import {
   IContainer,
   IEmbeddable,
   SavedObjectEmbeddableInput,
-} from '../../services/embeddable';
+} from '@kbn/embeddable-plugin/public';
+import { DashboardPanelState } from '../embeddable';
 import { dashboardReplacePanelAction } from '../../dashboard_strings';
 
 interface Props {

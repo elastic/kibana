@@ -8,8 +8,8 @@
 
 import React from 'react';
 import { CoreStart, OverlayStart } from '@kbn/core/public';
+import { EmbeddableStateTransfer, IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { dashboardCopyToDashboardAction } from '../../dashboard_strings';
-import { EmbeddableStateTransfer, IEmbeddable } from '../../services/embeddable';
 import { toMountPoint } from '../../services/kibana_react';
 import { PresentationUtilPluginStart } from '../../services/presentation_util';
 import { Action, IncompatibleActionError } from '../../services/ui_actions';

@@ -11,6 +11,7 @@ import { of } from 'rxjs';
 import { Provider } from 'react-redux';
 import { createBrowserHistory } from 'history';
 import { renderHook, act, RenderHookResult } from '@testing-library/react-hooks';
+import { createKbnUrlStateStorage, defer } from '@kbn/kibana-utils-plugin/public';
 
 import { DashboardSessionStorage } from '../lib';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -20,10 +21,8 @@ import { SavedObjectLoader } from '../../services/saved_objects';
 import { DashboardAppServices, DashboardAppState } from '../../types';
 import { DashboardContainer } from '../embeddable/dashboard_container';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { EmbeddableFactory, ViewMode } from '../../services/embeddable';
 import { dashboardStateStore, setDescription, setViewMode } from '../state';
 import { DashboardContainerServices } from '../embeddable/dashboard_container';
-import { createKbnUrlStateStorage, defer } from '@kbn/kibana-utils-plugin/public';
 import { useDashboardAppState, UseDashboardStateProps } from './use_dashboard_app_state';
 import {
   getSampleDashboardInput,

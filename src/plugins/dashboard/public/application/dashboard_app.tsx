@@ -9,6 +9,7 @@
 import { History } from 'history';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
+import { EmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public';
 import { useKibana, useExecutionContext } from '@kbn/kibana-react-plugin/public';
 
 import { useDashboardSelector } from './state';
@@ -20,7 +21,6 @@ import {
   leaveConfirmStrings,
 } from '../dashboard_strings';
 import { createDashboardEditUrl } from '../dashboard_constants';
-import { EmbeddableRenderer, ViewMode } from '../services/embeddable';
 import { DashboardTopNav, isCompleteDashboardAppState } from './top_nav/dashboard_top_nav';
 import { DashboardAppServices, DashboardEmbedSettings, DashboardRedirect } from '../types';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '../services/kibana_utils';

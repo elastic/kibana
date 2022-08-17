@@ -18,9 +18,9 @@ import { getSampleDashboardInput } from '../../test_helpers';
 import { KibanaContextProvider } from '../../../services/kibana_react';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import {
-  CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,
-} from '../../../services/embeddable_test_samples';
+  CONTACT_CARD_EMBEDDABLE,
+} from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
 import { coreMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import { getStubPluginServices } from '@kbn/presentation-util-plugin/public';
 import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';

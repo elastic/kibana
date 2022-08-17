@@ -15,11 +15,11 @@ import {
   isFilterableEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { IEmbeddable, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 
 import { type AggregateQuery } from '@kbn/es-query';
 import { Action, IncompatibleActionError } from '../../services/ui_actions';
 import { toMountPoint } from '../../services/kibana_react';
-import { IEmbeddable, isErrorEmbeddable } from '../../services/embeddable';
 import { dashboardFilterNotificationBadge } from '../../dashboard_strings';
 
 export const BADGE_FILTERS_NOTIFICATION = 'ACTION_FILTERS_NOTIFICATION';

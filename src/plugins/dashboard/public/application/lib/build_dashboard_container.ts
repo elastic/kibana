@@ -7,6 +7,15 @@
  */
 
 import type { KibanaExecutionContext } from '@kbn/core/public';
+import {
+  ContainerOutput,
+  EmbeddableFactoryNotFoundError,
+  EmbeddableInput,
+  EmbeddablePackageState,
+  ErrorEmbeddable,
+  isErrorEmbeddable,
+} from '@kbn/embeddable-plugin/public';
+
 import { DashboardSavedObject } from '../../saved_dashboards';
 import { DashboardContainer, DASHBOARD_CONTAINER_TYPE } from '../embeddable';
 import {
@@ -20,14 +29,6 @@ import {
   getSearchSessionIdFromURL,
   stateToDashboardContainerInput,
 } from '.';
-import {
-  ContainerOutput,
-  EmbeddableFactoryNotFoundError,
-  EmbeddableInput,
-  EmbeddablePackageState,
-  ErrorEmbeddable,
-  isErrorEmbeddable,
-} from '../../services/embeddable';
 import { pluginServices } from '../../services/plugin_services';
 
 type BuildDashboardContainerProps = DashboardBuildContext & {

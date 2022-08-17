@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { ViewMode, EmbeddableInput } from '@kbn/embeddable-plugin/public';
 import { DashboardContainerInput } from '../..';
 import { DashboardPanelState } from '../embeddable';
-import { ViewMode, EmbeddableInput } from '../../services/embeddable';
 
 export function getSampleDashboardInput(
   overrides?: Partial<DashboardContainerInput>

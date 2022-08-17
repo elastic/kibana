@@ -6,6 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { History } from 'history';
+import { AnyAction, Dispatch } from 'redux';
+import { BehaviorSubject, Subject } from 'rxjs';
+
 import type {
   AppMountParameters,
   CoreStart,
@@ -16,25 +20,23 @@ import type {
   PluginInitializerContext,
   KibanaExecutionContext,
 } from '@kbn/core/public';
-import { History } from 'history';
 import type { Filter } from '@kbn/es-query';
-import { AnyAction, Dispatch } from 'redux';
-import { BehaviorSubject, Subject } from 'rxjs';
-
 import { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import { VisualizationsStart } from '@kbn/visualizations-plugin/public';
 import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import { EmbeddableInput, ViewMode } from '@kbn/embeddable-plugin/common';
+import { ContainerInput, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public/types';
+
 import { DataView } from './services/data_views';
 import { SharePluginStart } from './services/share';
-import { EmbeddableStart } from './services/embeddable';
 import { DashboardSessionStorage } from './application/lib';
 import { UsageCollectionSetup } from './services/usage_collection';
 import { NavigationPublicPluginStart } from './services/navigation';
 import { Query, RefreshInterval, TimeRange } from './services/data/types';
 import { DashboardPanelState, SavedDashboardPanel } from '../common/types';
 import { SavedObjectsTaggingApi } from './services/saved_objects_tagging_oss';
-import { ContainerInput, EmbeddableInput, ViewMode } from './services/embeddable';
 import { SavedObjectLoader, SavedObjectsStart } from './services/saved_objects';
 import type { ScreenshotModePluginStart } from './services/screenshot_mode';
 import { IKbnUrlStateStorage } from './services/kibana_utils';

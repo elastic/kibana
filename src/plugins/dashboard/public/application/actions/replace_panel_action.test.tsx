@@ -13,14 +13,14 @@ import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helper
 import { coreMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import { CoreStart } from '@kbn/core/public';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
-import { isErrorEmbeddable } from '../../services/embeddable';
+import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import {
-  CONTACT_CARD_EMBEDDABLE,
-  ContactCardEmbeddableFactory,
   ContactCardEmbeddable,
+  ContactCardEmbeddableFactory,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
-} from '../../services/embeddable_test_samples';
+  CONTACT_CARD_EMBEDDABLE,
+} from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
 import { getStubPluginServices } from '@kbn/presentation-util-plugin/public';
 import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 

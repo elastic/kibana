@@ -17,16 +17,17 @@ import {
   CONTROL_GROUP_TYPE,
 } from '@kbn/controls-plugin/public';
 import { getDefaultControlGroupInput } from '@kbn/controls-plugin/common';
-import { DashboardContainerInput } from '../..';
-import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
-import type { DashboardContainer, DashboardContainerServices } from './dashboard_container';
 import {
   Container,
   ErrorEmbeddable,
   ContainerOutput,
   EmbeddableFactory,
   EmbeddableFactoryDefinition,
-} from '../../services/embeddable';
+} from '@kbn/embeddable-plugin/public';
+
+import { DashboardContainerInput } from '../..';
+import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
+import type { DashboardContainer, DashboardContainerServices } from './dashboard_container';
 import {
   createExtract,
   createInject,

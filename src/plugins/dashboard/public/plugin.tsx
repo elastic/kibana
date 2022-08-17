@@ -25,6 +25,13 @@ import {
   PluginInitializerContext,
   SavedObjectsClientContract,
 } from '@kbn/core/public';
+import {
+  CONTEXT_MENU_TRIGGER,
+  EmbeddableSetup,
+  EmbeddableStart,
+  PANEL_BADGE_TRIGGER,
+  PANEL_NOTIFICATION_TRIGGER,
+} from '@kbn/embeddable-plugin/public';
 import { VisualizationsStart } from '@kbn/visualizations-plugin/public';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
@@ -48,13 +55,6 @@ import {
   SavedObjectLoader,
   SavedObjectsStart,
 } from './services/saved_objects';
-import {
-  CONTEXT_MENU_TRIGGER,
-  EmbeddableSetup,
-  EmbeddableStart,
-  PANEL_BADGE_TRIGGER,
-  PANEL_NOTIFICATION_TRIGGER,
-} from './services/embeddable';
 import {
   ExitFullScreenButton as ExitFullScreenButtonUi,
   ExitFullScreenButtonProps,

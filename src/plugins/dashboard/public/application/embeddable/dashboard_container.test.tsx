@@ -21,20 +21,20 @@ import {
   EmbeddablePanel,
   isErrorEmbeddable,
   ViewMode,
-} from '../../services/embeddable';
+} from '@kbn/embeddable-plugin/public';
 import {
-  CONTACT_CARD_EMBEDDABLE,
+  ContactCardEmbeddable,
   ContactCardEmbeddableFactory,
   ContactCardEmbeddableInput,
-  ContactCardEmbeddable,
-  EMPTY_EMBEDDABLE,
   ContactCardEmbeddableOutput,
-  createEditModeAction,
-} from '../../services/embeddable_test_samples';
+  CONTACT_CARD_EMBEDDABLE,
+  EMPTY_EMBEDDABLE,
+} from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
 import { applicationServiceMock, coreMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { getStubPluginServices } from '@kbn/presentation-util-plugin/public';
+import { createEditModeAction } from '@kbn/embeddable-plugin/public/lib/test_samples';
 
 const presentationUtil = getStubPluginServices();
 const theme = coreMock.createStart().theme;

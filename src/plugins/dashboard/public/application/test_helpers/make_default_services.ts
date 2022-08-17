@@ -15,10 +15,10 @@ import { visualizationsPluginMock } from '@kbn/visualizations-plugin/public/mock
 import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 import { indexPatternEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { SavedQueryService } from '@kbn/data-plugin/public';
 
 import { chromeServiceMock, coreMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import { SavedObjectLoader, SavedObjectLoaderFindOptions } from '../../services/saved_objects';
-import { SavedQueryService } from '../../services/data';
 import { DashboardAppServices, DashboardAppCapabilities } from '../../types';
 import { NavigationPublicPluginStart } from '../../services/navigation';
 import { getSavedDashboardMock } from './get_saved_dashboard_mock';
@@ -78,12 +78,12 @@ export function makeDefaultServices(): DashboardAppServices {
     savedObjects: savedObjectsPluginMock.createStartContract(),
     embeddable: embeddablePluginMock.createInstance().doStart(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
-    dataViews: dataViewPluginMocks.createStartContract(),
+    // dataViews: dataViewPluginMocks.createStartContract(),
     chrome: chromeServiceMock.createStartContract(),
     navigation: {} as NavigationPublicPluginStart,
     savedObjectsClient: core.savedObjects.client,
     dashboardCapabilities: defaultCapabilities,
-    data: dataPluginMock.createStartContract(),
+    // data: dataPluginMock.createStartContract(),
     savedQueryService: {} as SavedQueryService,
     scopedHistory: () => ({} as ScopedHistory),
     setHeaderActionMenu: (mountPoint) => {},

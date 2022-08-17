@@ -11,17 +11,17 @@ import { DashboardContainer } from '../embeddable/dashboard_container';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
 
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
-import { isErrorEmbeddable } from '../../services/embeddable';
+import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import { getStubPluginServices } from '@kbn/presentation-util-plugin/public';
 import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
-
 import {
-  CONTACT_CARD_EMBEDDABLE,
-  ContactCardEmbeddableFactory,
   ContactCardEmbeddable,
+  ContactCardEmbeddableFactory,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
-} from '../../services/embeddable_test_samples';
+  CONTACT_CARD_EMBEDDABLE,
+} from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
+
 import { coreMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
 
 const { setup, doStart } = embeddablePluginMock.createInstance();

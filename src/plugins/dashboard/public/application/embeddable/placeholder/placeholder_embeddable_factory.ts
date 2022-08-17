@@ -12,7 +12,7 @@ import {
   EmbeddableFactoryDefinition,
   EmbeddableInput,
   IContainer,
-} from '../../../services/embeddable';
+} from '@kbn/embeddable-plugin/public';
 import {
   PlaceholderEmbeddable,
   PlaceholderEmbeddableServices,

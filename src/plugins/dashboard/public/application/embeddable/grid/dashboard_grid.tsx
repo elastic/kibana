@@ -11,13 +11,13 @@ import 'react-resizable/css/styles.css';
 
 import sizeMe from 'react-sizeme';
 import { injectI18n } from '@kbn/i18n-react';
+import { ViewMode, EmbeddablePhaseEvent } from '@kbn/embeddable-plugin/public';
 import classNames from 'classnames';
 import _ from 'lodash';
 import React from 'react';
 import { Subscription } from 'rxjs';
 import ReactGridLayout, { Layout, ReactGridLayoutProps } from 'react-grid-layout';
 import { GridData } from '../../../../common';
-import { ViewMode, EmbeddablePhaseEvent } from '../../../services/embeddable';
 import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../dashboard_constants';
 import { DashboardLoadedEventStatus, DashboardPanelState } from '../types';
 import { withKibana } from '../../../services/kibana_react';

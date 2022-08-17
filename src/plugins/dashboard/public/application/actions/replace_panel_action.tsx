@@ -7,7 +7,7 @@
  */
 
 import { CoreStart } from '@kbn/core/public';
-import { IEmbeddable, ViewMode, EmbeddableStart } from '../../services/embeddable';
+import { IEmbeddable, ViewMode, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '../embeddable';
 import { Action, IncompatibleActionError } from '../../services/ui_actions';
 import { openReplacePanelFlyout } from './open_replace_panel_flyout';

@@ -13,7 +13,7 @@ import {
   ControlGroupContainer,
   LazyControlsCallout,
 } from '@kbn/controls-plugin/public';
-import { ViewMode } from '../../../services/embeddable';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import {
   DashboardContainer,
   DashboardReactContextValue,

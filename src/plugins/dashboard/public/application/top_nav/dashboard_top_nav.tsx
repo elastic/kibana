@@ -25,6 +25,8 @@ import {
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
 import { SavedQuery } from '@kbn/data-plugin/common';
+import { isErrorEmbeddable, openAddPanelFlyout, ViewMode } from '@kbn/embeddable-plugin/public';
+
 import { saveDashboard } from '../lib';
 import { TopNavIds } from './top_nav_ids';
 import { EditorMenu } from './editor_menu';
@@ -38,7 +40,6 @@ import { showOptionsPopover } from './show_options_popover';
 import { DashboardConstants } from '../../dashboard_constants';
 import { confirmDiscardUnsavedChanges } from '../listing/confirm_overlays';
 import { DashboardAppState, DashboardSaveOptions, NavAction } from '../../types';
-import { isErrorEmbeddable, openAddPanelFlyout, ViewMode } from '../../services/embeddable';
 import { DashboardAppServices, DashboardEmbedSettings, DashboardRedirect } from '../../types';
 import { getSavedObjectFinder, SaveResult, showSaveModal } from '../../services/saved_objects';
 import { getCreateVisualizationButtonTitle, unsavedChangesBadge } from '../../dashboard_strings';

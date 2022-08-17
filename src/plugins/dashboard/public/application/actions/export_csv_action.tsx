@@ -9,10 +9,11 @@
 import { Datatable } from '@kbn/expressions-plugin/public';
 import { CoreStart } from '@kbn/core/public';
 import { FormatFactory } from '@kbn/field-formats-plugin/common';
-import { DataPublicPluginStart, exporters } from '@kbn/data-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public/types';
+import { exporters } from '@kbn/data-plugin/public';
+import { Adapters, IEmbeddable } from '@kbn/embeddable-plugin/public';
 
 import { downloadMultipleAs } from '../../services/share';
-import { Adapters, IEmbeddable } from '../../services/embeddable';
 import { Action } from '../../services/ui_actions';
 import { dashboardExportCsvAction } from '../../dashboard_strings';
 

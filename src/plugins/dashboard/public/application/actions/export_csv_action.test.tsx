@@ -7,8 +7,8 @@
  */
 
 import { CoreStart } from '@kbn/core/public';
+import { isErrorEmbeddable, IContainer, ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 
-import { isErrorEmbeddable, IContainer, ErrorEmbeddable } from '../../services/embeddable';
 import { DashboardContainer } from '../embeddable/dashboard_container';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
 import {
@@ -17,7 +17,7 @@ import {
   ContactCardEmbeddableOutput,
   ContactCardExportableEmbeddableFactory,
   CONTACT_CARD_EXPORTABLE_EMBEDDABLE,
-} from '../../services/embeddable_test_samples';
+} from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
 import { coreMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import { ExportCSVAction } from './export_csv_action';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
