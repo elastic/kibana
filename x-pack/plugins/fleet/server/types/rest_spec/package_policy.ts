@@ -12,17 +12,14 @@ import {
   UpdatePackagePolicyRequestBodySchema,
 } from '../models';
 
-import { ListWithKuerySchema } from '.';
+import { ListWithKuerySchema, BulkRequestBodySchema } from './common';
 
 export const GetPackagePoliciesRequestSchema = {
   query: ListWithKuerySchema,
 };
 
 export const BulkGetPackagePoliciesRequestSchema = {
-  body: schema.object({
-    ids: schema.arrayOf(schema.string(), { minSize: 1 }),
-    ignoreMissing: schema.maybe(schema.boolean()),
-  }),
+  body: BulkRequestBodySchema,
 };
 
 export const GetOnePackagePolicyRequestSchema = {

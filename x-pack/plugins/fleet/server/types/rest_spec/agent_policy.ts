@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 import { NewAgentPolicySchema } from '../models';
 
-import { ListWithKuerySchema } from '.';
+import { ListWithKuerySchema, BulkRequestBodySchema } from './common';
 
 export const GetAgentPoliciesRequestSchema = {
   query: ListWithKuerySchema.extends({
@@ -18,10 +18,8 @@ export const GetAgentPoliciesRequestSchema = {
 };
 
 export const BulkGetAgentPoliciesRequestSchema = {
-  body: ListWithKuerySchema.extends({
-    ids: schema.arrayOf(schema.string(), { minSize: 1 }),
+  body: BulkRequestBodySchema.extends({
     full: schema.maybe(schema.boolean()),
-    ignoreMissing: schema.maybe(schema.boolean()),
   }),
 };
 
