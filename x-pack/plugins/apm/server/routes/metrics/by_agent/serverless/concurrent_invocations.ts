@@ -78,7 +78,7 @@ export async function getConcurrentInvocations({
   );
   return {
     title: i18n.translate(
-      'xpack.apm.agentMetrics.serveless.concurrentInvocations',
+      'xpack.apm.agentMetrics.serverless.concurrentInvocations',
       { defaultMessage: 'Concurrent invocations' }
     ),
     key: 'concurrent_invocations',

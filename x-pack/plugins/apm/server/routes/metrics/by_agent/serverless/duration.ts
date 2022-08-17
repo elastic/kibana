@@ -18,20 +18,20 @@ import {
 import { ChartBase } from '../../types';
 
 const billedDurationAvg = {
-  title: i18n.translate('xpack.apm.agentMetrics.serveless.billedDurationAvg', {
+  title: i18n.translate('xpack.apm.agentMetrics.serverless.billedDurationAvg', {
     defaultMessage: 'Billed Duration',
   }),
 };
 
 const transactionDurationAvg = {
   title: i18n.translate(
-    'xpack.apm.agentMetrics.serveless.transactionDuration',
+    'xpack.apm.agentMetrics.serverless.transactionDuration',
     { defaultMessage: 'Transaction Duration' }
   ),
 };
 
 const chartBase: ChartBase = {
-  title: i18n.translate('xpack.apm.agentMetrics.serveless.avgDuration', {
+  title: i18n.translate('xpack.apm.agentMetrics.serverless.avgDuration', {
     defaultMessage: 'Avg. Duration',
   }),
   key: 'avg_duration',

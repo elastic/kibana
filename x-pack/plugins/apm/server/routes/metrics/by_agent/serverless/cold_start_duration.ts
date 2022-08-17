@@ -6,45 +6,28 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  FAAS_BILLED_DURATION,
-  FAAS_COLDSTART_DURATION,
-  METRIC_SYSTEM_TOTAL_MEMORY,
-} from '../../../../../common/elasticsearch_fieldnames';
+import { FAAS_COLDSTART_DURATION } from '../../../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../../../lib/helpers/setup_request';
 import { fetchAndTransformMetrics } from '../../fetch_and_transform_metrics';
 import { ChartBase } from '../../types';
 
 const chartBase: ChartBase = {
-  title: i18n.translate('xpack.apm.agentMetrics.serveless.computeUsage', {
-    defaultMessage: 'Compute usage',
+  title: i18n.translate('xpack.apm.agentMetrics.serverless.coldStart', {
+    defaultMessage: 'Cold start',
   }),
   key: 'cold_start',
   type: 'linemark',
   yUnit: 'number',
   series: {
-    computeUsage: {
-      title: i18n.translate('xpack.apm.agentMetrics.serveless.computeUsage', {
-        defaultMessage: 'Compute usage',
+    coldStart: {
+      title: i18n.translate('xpack.apm.agentMetrics.serverless.coldStart', {
+        defaultMessage: 'Cold start',
       }),
     },
   },
 };
 
-const computeUsageScript = {
-  lang: 'painless',
-  source: `
-    if(doc.containsKey('${METRIC_SYSTEM_TOTAL_MEMORY}') && doc.containsKey('${FAAS_BILLED_DURATION}')){
-      double faasBilledDurationValue =  doc['${FAAS_BILLED_DURATION}'].value;
-      double totalMemoryValue = doc['${METRIC_SYSTEM_TOTAL_MEMORY}'].value;
-      return totalMemoryValue * faasBilledDurationValue
-    }
-    
-    return null;
-  `,
-} as const;
-
-export function getComputeUsage({
+export function getColdStartDuration({
   environment,
   kuery,
   setup,
@@ -70,10 +53,8 @@ export function getComputeUsage({
     start,
     end,
     chartBase,
-    aggs: {
-      computeUsage: { sum: { script: computeUsageScript } },
-    },
+    aggs: { coldStart: { avg: { field: FAAS_COLDSTART_DURATION } } },
     additionalFilters: [{ exists: { field: FAAS_COLDSTART_DURATION } }],
-    operationName: 'get_compute_usage',
+    operationName: 'get_cold_start_duration',
   });
 }

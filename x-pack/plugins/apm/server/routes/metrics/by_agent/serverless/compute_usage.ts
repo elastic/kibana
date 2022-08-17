@@ -6,28 +6,45 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FAAS_COLDSTART_DURATION } from '../../../../../common/elasticsearch_fieldnames';
+import {
+  FAAS_BILLED_DURATION,
+  FAAS_COLDSTART_DURATION,
+  METRIC_SYSTEM_TOTAL_MEMORY,
+} from '../../../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../../../lib/helpers/setup_request';
 import { fetchAndTransformMetrics } from '../../fetch_and_transform_metrics';
 import { ChartBase } from '../../types';
 
 const chartBase: ChartBase = {
-  title: i18n.translate('xpack.apm.agentMetrics.serveless.coldStart', {
-    defaultMessage: 'Cold start',
+  title: i18n.translate('xpack.apm.agentMetrics.serverless.computeUsage', {
+    defaultMessage: 'Compute usage',
   }),
   key: 'cold_start',
   type: 'linemark',
   yUnit: 'number',
   series: {
-    coldStart: {
-      title: i18n.translate('xpack.apm.agentMetrics.serveless.coldStart', {
-        defaultMessage: 'Cold start',
+    computeUsage: {
+      title: i18n.translate('xpack.apm.agentMetrics.serverless.computeUsage', {
+        defaultMessage: 'Compute usage',
       }),
     },
   },
 };
 
-export function getColdStartDuration({
+const computeUsageScript = {
+  lang: 'painless',
+  source: `
+    if(doc.containsKey('${METRIC_SYSTEM_TOTAL_MEMORY}') && doc.containsKey('${FAAS_BILLED_DURATION}')){
+      double faasBilledDurationValue =  doc['${FAAS_BILLED_DURATION}'].value;
+      double totalMemoryValue = doc['${METRIC_SYSTEM_TOTAL_MEMORY}'].value;
+      return totalMemoryValue * faasBilledDurationValue
+    }
+    
+    return null;
+  `,
+} as const;
+
+export function getComputeUsage({
   environment,
   kuery,
   setup,
@@ -53,8 +70,10 @@ export function getColdStartDuration({
     start,
     end,
     chartBase,
-    aggs: { coldStart: { avg: { field: FAAS_COLDSTART_DURATION } } },
+    aggs: {
+      computeUsage: { sum: { script: computeUsageScript } },
+    },
     additionalFilters: [{ exists: { field: FAAS_COLDSTART_DURATION } }],
-    operationName: 'get_cold_start_duration',
+    operationName: 'get_compute_usage',
   });
 }

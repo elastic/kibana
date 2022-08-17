@@ -13,7 +13,7 @@ import { getMemoryChartData } from '../shared/memory';
 import { getComputeUsage } from './compute_usage';
 import { getConcurrentInvocations } from './concurrent_invocations';
 
-export function getServelessAgentMetricCharts({
+export function getServerlessAgentMetricCharts({
   environment,
   kuery,
   setup,
@@ -30,7 +30,7 @@ export function getServelessAgentMetricCharts({
   start: number;
   end: number;
 }) {
-  return withApmSpan('get_serveless_agent_metric_charts', async () => {
+  return withApmSpan('get_serverless_agent_metric_charts', async () => {
     const options = {
       environment,
       kuery,
