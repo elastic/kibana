@@ -6,19 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import { DataView, DataViewField } from '@kbn/data-plugin/common';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiProgress,
-  EuiText,
-  EuiToolTip,
-  useEuiTheme,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { BucketedAggregation } from '../../../common/types';
+import { FieldTopValuesBucket } from './field_top_values_bucket';
 
 export interface FieldTopValuesProps {
   buckets: BucketedAggregation<number | string>['buckets'];
@@ -35,19 +28,6 @@ export const FieldTopValues: React.FC<FieldTopValuesProps> = ({
   testSubject,
   sampledValuesCount,
 }) => {
-  const { euiTheme } = useEuiTheme();
-
-  const topValueStyles = useMemo(
-    () => css`
-      margin-bottom: ${euiTheme.size.s};
-
-      &:last-of-type {
-        margin-bottom: 0;
-      }
-    `,
-    [euiTheme]
-  );
-
   if (!buckets?.length) {
     return null;
   }
@@ -62,81 +42,40 @@ export const FieldTopValues: React.FC<FieldTopValuesProps> = ({
 
   return (
     <div data-test-subj={`${testSubject}-topValues`}>
-      {buckets.map((topValue) => {
+      {buckets.map((topValue, index) => {
         const formatted = formatter.convert(topValue.key);
 
         return (
-          <div css={topValueStyles} key={topValue.key}>
-            <EuiFlexGroup
-              alignItems="stretch"
+          <>
+            {index > 0 && <EuiSpacer size="s" />}
+            <FieldTopValuesBucket
               key={topValue.key}
-              gutterSize="xs"
-              responsive={false}
-            >
-              <EuiFlexItem
-                grow={true}
-                className="eui-textTruncate"
-                data-test-subj={`${testSubject}-topValues-value`}
-              >
-                {formatted === '' ? (
-                  <EuiText size="xs" color="subdued">
-                    <em>
-                      {i18n.translate('unifiedFieldList.fieldStats.emptyStringValueLabel', {
-                        defaultMessage: 'Empty string',
-                      })}
-                    </em>
-                  </EuiText>
-                ) : (
-                  <EuiToolTip content={formatted} delay="long">
-                    <EuiText size="xs" color="subdued" className="eui-textTruncate">
-                      {formatted}
-                    </EuiText>
-                  </EuiToolTip>
-                )}
-              </EuiFlexItem>
-              <EuiFlexItem grow={false} data-test-subj={`${testSubject}-topValues-valueCount`}>
-                <EuiText size="xs" textAlign="left" color={euiTheme.colors.primaryText}>
-                  {(Math.round((topValue.count / sampledValuesCount!) * 1000) / 10).toFixed(
-                    digitsRequired ? 1 : 0
-                  )}
-                  %
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiProgress
-              value={topValue.count / sampledValuesCount!}
-              max={1}
-              size="s"
-              color="primary"
+              formattedLabel={formatted}
+              formattedValue={`${(
+                Math.round((topValue.count / sampledValuesCount!) * 1000) / 10
+              ).toFixed(digitsRequired ? 1 : 0)}%`}
+              progressValue={topValue.count / sampledValuesCount!}
+              testSubject={testSubject}
             />
-          </div>
+          </>
         );
       })}
-      {otherCount ? (
+      {otherCount > 0 && (
         <>
-          <EuiFlexGroup alignItems="stretch" gutterSize="xs" responsive={false}>
-            <EuiFlexItem grow={true} className="eui-textTruncate">
-              <EuiText size="xs" className="eui-textTruncate" color="subdued">
-                {i18n.translate('unifiedFieldList.fieldStats.otherDocsLabel', {
-                  defaultMessage: 'Other',
-                })}
-              </EuiText>
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false} className="eui-textTruncate">
-              <EuiText size="xs" color="subdued">
-                {(Math.round((otherCount / sampledValuesCount!) * 1000) / 10).toFixed(
-                  digitsRequired ? 1 : 0
-                )}
-                %
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-
-          <EuiProgress value={otherCount / sampledValuesCount!} max={1} size="s" color="subdued" />
+          <EuiSpacer size="s" />
+          <FieldTopValuesBucket
+            key="other"
+            formattedLabel={i18n.translate('unifiedFieldList.fieldStats.otherDocsLabel', {
+              defaultMessage: 'Other',
+            })}
+            formattedValue={`${(Math.round((otherCount / sampledValuesCount!) * 1000) / 10).toFixed(
+              digitsRequired ? 1 : 0
+            )}%`}
+            progressValue={otherCount / sampledValuesCount!}
+            progressColor="subdued"
+            testSubject={testSubject}
+          />
         </>
-      ) : (
-        <></>
       )}
     </div>
   );
