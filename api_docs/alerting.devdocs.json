@@ -1912,7 +1912,7 @@
                 "section": "def-server.PublicAlert",
                 "text": "PublicAlert"
               },
-              "<InstanceState, InstanceContext, ActionGroupIds>; done: () => ",
+              "<InstanceState, InstanceContext, ActionGroupIds>; hasReachedAlertLimit: () => boolean; done: () => ",
               "AlertFactoryDoneUtils",
               "<InstanceState, InstanceContext, ActionGroupIds>; }"
             ],
@@ -2396,7 +2396,7 @@
         "label": "AlertingRulesConfig",
         "description": [],
         "signature": [
-          "Pick<Readonly<{} & { run: Readonly<{ timeout?: string | undefined; ruleTypeOverrides?: Readonly<{ timeout?: string | undefined; } & { id: string; }>[] | undefined; } & { actions: Readonly<{ connectorTypeOverrides?: Readonly<{ max?: number | undefined; } & { id: string; }>[] | undefined; } & { max: number; }>; }>; minimumScheduleInterval: Readonly<{} & { value: string; enforce: boolean; }>; }>, \"minimumScheduleInterval\"> & { isUsingSecurity: boolean; }"
+          "Pick<Readonly<{} & { run: Readonly<{ timeout?: string | undefined; ruleTypeOverrides?: Readonly<{ timeout?: string | undefined; } & { id: string; }>[] | undefined; } & { actions: Readonly<{ connectorTypeOverrides?: Readonly<{ max?: number | undefined; } & { id: string; }>[] | undefined; } & { max: number; }>; alerts: Readonly<{} & { max: number; }>; }>; minimumScheduleInterval: Readonly<{} & { value: string; enforce: boolean; }>; }>, \"minimumScheduleInterval\"> & { isUsingSecurity: boolean; }"
         ],
         "path": "x-pack/plugins/alerting/server/config.ts",
         "deprecated": false,
@@ -5325,6 +5325,17 @@
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.RuleExecutionStatusWarningReasons",
+        "type": "Enum",
+        "tags": [],
+        "label": "RuleExecutionStatusWarningReasons",
+        "description": [],
+        "path": "x-pack/plugins/alerting/common/rule.ts",
+        "deprecated": false,
+        "initialIsOpen": false
       }
     ],
     "misc": [
@@ -5668,17 +5679,6 @@
         "signature": [
           "\"error\" | \"warning\" | \"unknown\" | \"pending\" | \"ok\" | \"active\""
         ],
-        "path": "x-pack/plugins/alerting/common/rule.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "alerting",
-        "id": "def-common.RuleExecutionStatusWarningReasons",
-        "type": "string",
-        "tags": [],
-        "label": "RuleExecutionStatusWarningReasons",
-        "description": [],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
         "initialIsOpen": false
