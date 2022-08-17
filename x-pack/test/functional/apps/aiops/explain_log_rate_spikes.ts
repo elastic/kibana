@@ -56,23 +56,19 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep(
         `${testData.suiteTitle} displays elements in the page correctly`
       );
-
       await aiops.explainLogRateSpikes.assertSearchPanelExist();
 
       await ml.testExecution.logTestStep('displays empty prompt');
       await aiops.explainLogRateSpikes.assertNoWindowParametersEmptyPromptExist();
 
       await ml.testExecution.logTestStep('clicks the document count chart to start analysis');
-
       await aiops.explainLogRateSpikes.clickDocumentCountChart();
       await aiops.explainLogRateSpikes.assertAnalysisSectionExist();
 
       await ml.testExecution.logTestStep('displays the no results found prompt');
-
       await aiops.explainLogRateSpikes.assertNoResultsFoundEmptyPromptExist();
 
       await ml.testExecution.logTestStep('adjusts the brushes to get analysis results');
-
       await aiops.explainLogRateSpikes.assertRerunAnalysisButton(false);
 
       // Get the current width of the deviation brush for later comparison.

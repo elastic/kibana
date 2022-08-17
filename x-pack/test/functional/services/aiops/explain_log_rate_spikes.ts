@@ -67,6 +67,8 @@ export function ExplainLogRateSpikesProvider({ getService }: FtrProviderContext)
       const el = await elasticChart.getCanvas();
 
       await browser.getActions().move({ x: 0, y: 0, origin: el._webElement }).click().perform();
+
+      await this.assertHistogramBrushesExist();
     },
 
     async clickRerunAnalysisButton(shouldRerun: boolean) {
@@ -78,6 +80,14 @@ export function ExplainLogRateSpikesProvider({ getService }: FtrProviderContext)
         await testSubjects.existOrFail(
           `aiopsRerunAnalysisButton${!shouldRerun ? ' shouldRerun' : ''}`
         );
+      });
+    },
+
+    async assertHistogramBrushesExist() {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.existOrFail(`aiopsHistogramBrushes`);
+        // As part of the interface for the histogram brushes, the button to clear the selection should be present
+        await testSubjects.existOrFail(`aiopsClearSelectionBadge`);
       });
     },
 

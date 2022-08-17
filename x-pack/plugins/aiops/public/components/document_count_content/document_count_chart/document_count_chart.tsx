@@ -280,7 +280,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
   return (
     <>
       {isBrushVisible && (
-        <div className="aiopsHistogramBrushes">
+        <div className="aiopsHistogramBrushes" data-test-subj="aiopsHistogramBrushes">
           <div css={{ height: BADGE_HEIGHT }}>
             <BrushBadge
               label={i18n.translate('xpack.aiops.documentCountChart.baselineBadgeLabel', {
