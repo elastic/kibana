@@ -1,7 +1,7 @@
 # Click the run button of each step to enable the module
 # Upload scripts
 # 1. Script to assign risk level based on risk score
-PUT _scripts/ml_userriskscore_levels_script_{{space_name}}
+PUT _scripts/ml_userriskscore_levels_script
 {
   "script": {
     "lang": "painless",
@@ -10,7 +10,7 @@ PUT _scripts/ml_userriskscore_levels_script_{{space_name}}
 }
 
 # 2. Map script for the User Risk Score transform
-PUT _scripts/ml_userriskscore_map_script_{{space_name}}
+PUT _scripts/ml_userriskscore_map_script
 {
   "script": {
     "lang": "painless", "source": "// Get running sum of risk score per rule name per shard\\\\\nString rule_name = doc[\"signal.rule.name\"].value;\ndef stats = state.rule_risk_stats.getOrDefault(rule_name, 0.0);\nstats = doc[\"signal.rule.risk_score\"].value;\nstate.rule_risk_stats.put(rule_name, stats);"
@@ -18,7 +18,7 @@ PUT _scripts/ml_userriskscore_map_script_{{space_name}}
 }
 
 # 3. Reduce script for the User Risk Score transform
-PUT _scripts/ml_userriskscore_reduce_script_{{space_name}}
+PUT _scripts/ml_userriskscore_reduce_script
 {
   "script": {
     "lang": "painless",
@@ -28,7 +28,7 @@ PUT _scripts/ml_userriskscore_reduce_script_{{space_name}}
 
 # 4. Upload ingest pipeline
 # Ingest pipeline to add ingest timestamp and risk level to documents
-PUT _ingest/pipeline/ml_userriskscore_ingest_pipeline_{{space_name}}
+PUT _ingest/pipeline/ml_userriskscore_ingest_pipeline
 {
   "processors": [
     {
@@ -49,7 +49,7 @@ PUT _ingest/pipeline/ml_userriskscore_ingest_pipeline_{{space_name}}
     },
     {
       "script": {
-        "id": "ml_userriskscore_levels_script_{{space_name}}",
+        "id": "ml_userriskscore_levels_script",
         "params": {
           "risk_score": "risk_stats.risk_score"
         }
@@ -97,7 +97,7 @@ PUT _transform/ml_userriskscore_pivot_transform_{{space_name}}
 {
   "dest": {
     "index": "ml_user_risk_score_{{space_name}}",
-    "pipeline": "ml_userriskscore_ingest_pipeline_{{space_name}}"
+    "pipeline": "ml_userriskscore_ingest_pipeline"
   },
   "frequency": "1h",
   "pivot": {
@@ -112,7 +112,7 @@ PUT _transform/ml_userriskscore_pivot_transform_{{space_name}}
           "combine_script": "return state",
           "init_script": "state.rule_risk_stats = new HashMap();",
           "map_script": {
-            "id": "ml_userriskscore_map_script_{{space_name}}"
+            "id": "ml_userriskscore_map_script"
           },
           "params": {
             "max_risk": 100,
@@ -120,7 +120,7 @@ PUT _transform/ml_userriskscore_pivot_transform_{{space_name}}
             "zeta_constant": 2.612
           },
           "reduce_script": {
-            "id": "ml_userriskscore_reduce_script_{{space_name}}"
+            "id": "ml_userriskscore_reduce_script"
           }
         }
       }
@@ -135,7 +135,7 @@ PUT _transform/ml_userriskscore_pivot_transform_{{space_name}}
   },
   "source": {
     "index": [
-      ".siem-signals-{{space_name}}"
+      ".alerts-security.alerts-{{space_name}}"
     ],
     "query": {
       "bool": {
