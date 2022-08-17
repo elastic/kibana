@@ -172,7 +172,11 @@ describe('fetchNodesFromClusterStats', () => {
                   should: [
                     { term: { type: 'cluster_stats' } },
                     { term: { 'metricset.name': 'cluster_stats' } },
-                    { term: { 'data_stream.dataset': 'elasticsearch.stack_monitoring.cluster_stats' } },
+                    {
+                      term: {
+                        'data_stream.dataset': 'elasticsearch.stack_monitoring.cluster_stats',
+                      },
+                    },
                   ],
                   minimum_should_match: 1,
                 },

@@ -137,7 +137,8 @@ export function getNewIndexPatterns({
   return `${legacyIndexPattern},${dsIndexPattern}`;
 }
 
-const getDataset = (product: string) => (metricset: string) => `${product}.stack_monitoring.${metricset}`;
+const getDataset = (product: string) => (metricset: string) =>
+  `${product}.stack_monitoring.${metricset}`;
 
 export const getElasticsearchDataset = getDataset('elasticsearch');
 export const getKibanaDataset = getDataset('kibana');
