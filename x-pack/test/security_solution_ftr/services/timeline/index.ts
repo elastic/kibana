@@ -15,6 +15,7 @@ import { FtrService } from '../../../functional/ftr_provider_context';
 
 export class TimelineTestService extends FtrService {
   private readonly supertest = this.ctx.getService('supertest');
+  private readonly log = this.ctx.getService('log');
 
   /**
    * Returns an error handler for `supertest` request that will dump out more useful information
@@ -45,32 +46,44 @@ export class TimelineTestService extends FtrService {
 
   /** Creates a new timeline */
   async createTimeline(title: string): Promise<TimelineResponse> {
-    const {
-      savedObjectId: timelineId,
-      version,
-    } = // Create a new timeline draft
-      (
-        await this.supertest
-          .post(TIMELINE_DRAFT_URL)
-          .set('kbn-xsrf', 'true')
-          .send({ timelineType: 'default' })
-          .then(this.getHttpResponseFailureHandler())
-          .then((response) => response.body as TimelineResponse)
-      ).data.persistTimeline.timeline;
+    // Create a new timeline draft
+    const createdTimeline = (
+      await this.supertest
+        .post(TIMELINE_DRAFT_URL)
+        .set('kbn-xsrf', 'true')
+        .send({ timelineType: 'default' })
+        .then(this.getHttpResponseFailureHandler())
+        .then((response) => response.body as TimelineResponse)
+    ).data.persistTimeline.timeline;
 
-    const titleUpdate: TimelineInput = {
+    this.log.info('Draft timeline:');
+    this.log.indent(4, () => {
+      this.log.info(JSON.stringify(createdTimeline));
+    });
+
+    const { savedObjectId: timelineId, version, ...timelineDoc } = createdTimeline;
+
+    const timelineUpdate: TimelineInput = {
+      ...(timelineDoc as TimelineInput),
       title,
       // Set date range to the last 24 hours
       dateRange: {
-        start: moment().subtract(1, 'days').toISOString(),
+        start: moment().subtract(1, 'year').toISOString(),
         end: moment().toISOString(),
         // Not sure why `start`/`end` are defined as numbers in the type, but looking at the
         // UI's use of it, I can see they are being set to strings, so I'm forcing a cast here
       } as unknown as TimelineInput['dateRange'],
     };
 
-    // Update the title
-    return this.updateTimeline(timelineId, titleUpdate, version);
+    // Update the timeline
+    const updatedTimelineResponse = await this.updateTimeline(timelineId, timelineUpdate, version);
+
+    this.log.info('Created timeline:');
+    this.log.indent(4, () => {
+      this.log.info(JSON.stringify(updatedTimelineResponse));
+    });
+
+    return updatedTimelineResponse;
   }
 
   async updateTimeline(
@@ -79,6 +92,9 @@ export class TimelineTestService extends FtrService {
     version: string
   ): Promise<TimelineResponse> {
     return await this.supertest
+      // DEV NOTE/FYI:
+      // Although this API is a `patch`, it does not seem that it actually does a patch,
+      // so `updates` should always be the full timeline record
       .patch(TIMELINE_URL)
       .set('kbn-xsrf', 'true')
       .send({
