@@ -25,8 +25,8 @@ import {
   IContainer,
   AttributeService,
 } from '@kbn/embeddable-plugin/public';
-import { checkForDuplicateTitle } from '@kbn/saved-objects-plugin/public';
 import type { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import { checkForDuplicateTitle } from '../utils/saved_objects_utils/check_for_duplicate_title';
 import type { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import type {
   VisualizeByReferenceInput,
@@ -271,17 +271,18 @@ export class VisualizeEmbeddableFactory
     }
   }
 
-  public async checkTitle(props: OnSaveProps): Promise<true> {
+  public async checkTitle(props: OnSaveProps): Promise<boolean> {
     const savedObjectsClient = await this.deps.start().core.savedObjects.client;
     const overlays = await this.deps.start().core.overlays;
+
     return checkForDuplicateTitle(
       {
         title: props.newTitle,
-        copyOnSave: false,
         lastSavedTitle: '',
         getEsType: () => this.type,
         getDisplayName: this.getDisplayName || (() => this.type),
       },
+      false,
       props.isTitleDuplicateConfirmed,
       props.onTitleDuplicate,
       {
