@@ -108,7 +108,7 @@ export const PRIVATE_AVAILABLE_LABEL = i18n.translate(
 export const TEST_NOW_ARIA_LABEL = i18n.translate(
   'xpack.synthetics.monitorList.testNow.AriaLabel',
   {
-    defaultMessage: 'CLick to run test now',
+    defaultMessage: 'Click to run test now',
   }
 );
 

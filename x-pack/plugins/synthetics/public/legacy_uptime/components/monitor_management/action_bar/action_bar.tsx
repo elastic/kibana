@@ -14,7 +14,6 @@ import {
   EuiButtonEmpty,
   EuiText,
   EuiPopover,
-  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -146,15 +145,6 @@ export const ActionBar = ({
             <EuiFlexItem grow={false}>
               <WarningText>{!isValid && hasBeenSubmitted && VALIDATION_ERROR_LABEL}</WarningText>
             </EuiFlexItem>
-
-            <EuiToolTip
-              position="top"
-              content={<p>Works on any kind of element &mdash; buttons, inputs, you name it!</p>}
-            >
-              <EuiButton disabled={true} onClick={() => {}}>
-                Hover me
-              </EuiButton>
-            </EuiToolTip>
 
             {onTestNow && (
               <EuiFlexItem grow={false}>
