@@ -27,7 +27,7 @@ const nodeServiceInfraPageHref = url.format({
   query: { rangeFrom: start, rangeTo: end },
 });
 
-describe('Infrastructure page', () => {
+describe.skip('Infrastructure page', () => {
   before(async () => {
     await synthtrace.index(
       generateData({
