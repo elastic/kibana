@@ -21,8 +21,8 @@ const tableProps: IndicatorsTableProps = {
   indicators: [],
   pagination: { pageSize: 10, pageIndex: 0, pageSizeOptions: [10] },
   indicatorCount: 0,
-  firstLoad: false,
   loading: false,
+  indexPatterns: [],
 };
 
 const indicatorsFixture: Indicator[] = [
@@ -41,11 +41,11 @@ const indicatorsFixture: Indicator[] = [
 ];
 
 describe('<IndicatorsTable />', () => {
-  it('should render loading spinner on first load', async () => {
+  it('should render loading spinner when loading', async () => {
     await act(async () => {
       render(
         <TestProvidersComponent>
-          <IndicatorsTable {...tableProps} firstLoad={true} />
+          <IndicatorsTable {...tableProps} loading={true} />
         </TestProvidersComponent>
       );
     });
@@ -53,13 +53,13 @@ describe('<IndicatorsTable />', () => {
     expect(screen.queryByRole('progressbar')).toBeInTheDocument();
   });
 
-  it('should render datagrid when first load is done', async () => {
+  it('should render datagrid when loading is done', async () => {
     await act(async () => {
       render(
         <TestProvidersComponent>
           <IndicatorsTable
             {...tableProps}
-            firstLoad={false}
+            loading={false}
             indicatorCount={indicatorsFixture.length}
             indicators={indicatorsFixture}
           />
