@@ -42,6 +42,9 @@ export {
   OptionsListEmbeddableFactory,
   OptionsListEmbeddable,
   type OptionsListEmbeddableInput,
+} from './options_list';
+
+export {
   RangeSliderEmbeddableFactory,
   RangeSliderEmbeddable,
   type RangeSliderEmbeddableInput,

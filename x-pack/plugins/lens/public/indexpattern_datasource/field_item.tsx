@@ -453,7 +453,12 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
   let title = <></>;
 
   if (props.isLoading) {
-    return <EuiLoadingSpinner />;
+    return (
+      <>
+        <EuiPopoverTitle>{panelHeader}</EuiPopoverTitle>
+        <EuiLoadingSpinner />
+      </>
+    );
   } else if (field.type.includes('range')) {
     return (
       <>
