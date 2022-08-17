@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
@@ -34,6 +34,7 @@ import type { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/commo
 import { CUSTOM_PALETTE } from '@kbn/coloring';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { useResizeObserver } from '@elastic/eui';
 import { VisParams } from '../../common';
 import {
   getPaletteService,
@@ -307,6 +308,20 @@ export const MetricVis = ({
     pixelWidth = grid[0]?.length * maxTileSideLength;
   }
 
+  const [scrollChildHeight, setScrollChildHeight] = useState<string>('100%');
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const scrollDimensions = useResizeObserver(scrollContainerRef.current);
+
+  useEffect(() => {
+    const minTileHeight = 64; // TODO - magic number from the @elastic/charts side. would be nice to deduplicate
+    const minimumRequiredVerticalSpace = minTileHeight * grid.length;
+    setScrollChildHeight(
+      (scrollDimensions.height ?? -Infinity) > minimumRequiredVerticalSpace
+        ? '100%'
+        : `${minimumRequiredVerticalSpace}px`
+    );
+  }, [grid.length, scrollDimensions.height]);
+
   // force chart to re-render to circumvent a charts bug
   const magicKey = useRef(0);
   useEffect(() => {
@@ -315,45 +330,53 @@ export const MetricVis = ({
 
   return (
     <div
+      ref={scrollContainerRef}
       css={css`
         height: ${pixelHeight ? `${pixelHeight}px` : '100%'};
         width: ${pixelWidth ? `${pixelWidth}px` : '100%'};
         max-height: 100%;
         max-width: 100%;
+        overflow-y: auto;
       `}
     >
-      <Chart key={magicKey.current}>
-        <Settings
-          theme={[
-            {
-              background: { color: 'transparent' },
-              metric: {
-                background: defaultColor,
-                barBackground: euiThemeVars.euiColorLightShade,
+      <div
+        css={css`
+          height: ${scrollChildHeight};
+        `}
+      >
+        <Chart key={magicKey.current}>
+          <Settings
+            theme={[
+              {
+                background: { color: 'transparent' },
+                metric: {
+                  background: defaultColor,
+                  barBackground: euiThemeVars.euiColorLightShade,
+                },
               },
-            },
-            chartTheme,
-          ]}
-          onRenderChange={onRenderChange}
-          onElementClick={(events) => {
-            if (!filterable) {
-              return;
-            }
-            events.forEach((event) => {
-              if (isMetricElementEvent(event)) {
-                const colIdx = breakdownByColumn
-                  ? data.columns.findIndex((col) => col === breakdownByColumn)
-                  : data.columns.findIndex((col) => col === primaryMetricColumn);
-                const rowLength = grid[0].length;
-                fireEvent(
-                  buildFilterEvent(event.rowIndex * rowLength + event.columnIndex, colIdx, data)
-                );
+              chartTheme,
+            ]}
+            onRenderChange={onRenderChange}
+            onElementClick={(events) => {
+              if (!filterable) {
+                return;
               }
-            });
-          }}
-        />
-        <Metric id="metric" data={grid} />
-      </Chart>
+              events.forEach((event) => {
+                if (isMetricElementEvent(event)) {
+                  const colIdx = breakdownByColumn
+                    ? data.columns.findIndex((col) => col === breakdownByColumn)
+                    : data.columns.findIndex((col) => col === primaryMetricColumn);
+                  const rowLength = grid[0].length;
+                  fireEvent(
+                    buildFilterEvent(event.rowIndex * rowLength + event.columnIndex, colIdx, data)
+                  );
+                }
+              });
+            }}
+          />
+          <Metric id="metric" data={grid} />
+        </Chart>
+      </div>
     </div>
   );
 };

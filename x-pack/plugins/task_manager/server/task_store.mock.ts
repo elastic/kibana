@@ -18,6 +18,7 @@ export const taskStoreMock = {
       update: jest.fn(),
       remove: jest.fn(),
       schedule: jest.fn(),
+      bulkSchedule: jest.fn(),
       bulkUpdate: jest.fn(),
       get: jest.fn(),
       getLifecycle: jest.fn(),
