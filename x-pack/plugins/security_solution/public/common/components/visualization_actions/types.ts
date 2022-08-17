@@ -31,6 +31,7 @@ export interface LensEmbeddableComponentProps {
   height?: string;
   id: string;
   inputsModelId?: InputsModelId;
+  inspectTitle?: string;
   lensAttributes: LensAttributes;
   stackByField?: string;
   timerange: { from: string; to: string };
