@@ -15,6 +15,7 @@ export class DiscoverPageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly flyout = this.ctx.getService('flyout');
   private readonly header = this.ctx.getPageObject('header');
+  private readonly unifiedSearch = this.ctx.getPageObject('unifiedSearch');
   private readonly browser = this.ctx.getService('browser');
   private readonly globalNav = this.ctx.getService('globalNav');
   private readonly elasticChart = this.ctx.getService('elasticChart');
@@ -393,6 +394,11 @@ export class DiscoverPageObject extends FtrService {
       }
     );
     await (await this.find.byClassName('indexPatternEditor__form')).click();
+  }
+
+  async createAdHocDataView(name: string, hasTimeField = false) {
+    await this.testSubjects.click('discover-dataView-switch-link');
+    await this.unifiedSearch.createNewDataView(name, true, hasTimeField);
   }
 
   public async hasNoResults() {
