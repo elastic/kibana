@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+import { CoreStart } from '@kbn/core/public';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
-
+import { DataView } from '@kbn/data-views-plugin/common';
+import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_FORMAT_TZ } from '../../../../../common/constants';
 import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
 import { IndicatorsTable } from './indicators_table';
 
@@ -16,23 +19,77 @@ export default {
 };
 
 const indicatorsFixture: Indicator[] = Array(10).fill(generateMockIndicator());
+const mockIndexPattern: DataView[] = [];
 
 const stub = () => void 0;
 
+const coreMock = {
+  uiSettings: {
+    get: (key: string) => {
+      const settings = {
+        [DEFAULT_DATE_FORMAT]: '',
+        [DEFAULT_DATE_FORMAT_TZ]: 'UTC',
+      };
+      // @ts-expect-error
+      return settings[key];
+    },
+  },
+} as unknown as CoreStart;
+
+const KibanaReactContext = createKibanaReactContext(coreMock);
+
 export function WithIndicators() {
   return (
+    <KibanaReactContext.Provider>
+      <IndicatorsTable
+        loading={false}
+        pagination={{
+          pageSize: 10,
+          pageIndex: 0,
+          pageSizeOptions: [10, 25, 50],
+        }}
+        indicators={indicatorsFixture}
+        onChangePage={stub}
+        onChangeItemsPerPage={stub}
+        indicatorCount={indicatorsFixture.length * 2}
+        indexPatterns={mockIndexPattern}
+      />
+    </KibanaReactContext.Provider>
+  );
+}
+
+export function WithNoIndicators() {
+  return (
     <IndicatorsTable
-      loadData={stub}
-      firstLoad={false}
       pagination={{
         pageSize: 10,
         pageIndex: 0,
         pageSizeOptions: [10, 25, 50],
       }}
-      indicators={indicatorsFixture}
+      indicators={[]}
       onChangePage={stub}
       onChangeItemsPerPage={stub}
-      indicatorCount={indicatorsFixture.length * 2}
+      indicatorCount={0}
+      loading={false}
+      indexPatterns={[]}
+    />
+  );
+}
+
+export function Loading() {
+  return (
+    <IndicatorsTable
+      pagination={{
+        pageSize: 10,
+        pageIndex: 0,
+        pageSizeOptions: [10, 25, 50],
+      }}
+      indicators={[]}
+      onChangePage={stub}
+      onChangeItemsPerPage={stub}
+      indicatorCount={0}
+      loading={true}
+      indexPatterns={[]}
     />
   );
 }

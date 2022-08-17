@@ -8,12 +8,14 @@
 
 import { mockCreateOriginQuery } from './check_reference_origins.test.mock';
 
-import type { SavedObjectsFindResult } from '../../service';
-import type { SavedObjectsClientContract } from '../../types';
+import type {
+  SavedObjectsFindResult,
+  SavedObjectsClientContract,
+} from '@kbn/core-saved-objects-api-server';
+import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import { checkReferenceOrigins, CheckReferenceOriginsParams } from './check_reference_origins';
 import { savedObjectsClientMock } from '../../../mocks';
 import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
-import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import type { ImportStateMap } from './types';
 
 const MULTI_NS_TYPE = 'multi';

@@ -13,6 +13,9 @@ import { ErrorCode } from '../../../common/types/error_codes';
 import { setupConnectorsIndices } from '../../index_management/setup_indices';
 import { isIndexNotFoundException } from '../../utils/identify_exceptions';
 
+import { fetchCrawlerByIndexName } from '../crawler/fetch_crawlers';
+import { textAnalysisSettings } from '../indices/text_analysis';
+
 import { deleteConnectorById } from './delete_connector';
 
 import { fetchConnectorByIndexName } from './fetch_connectors';
@@ -39,11 +42,20 @@ const createConnector = async (
       throw new Error(ErrorCode.CONNECTOR_DOCUMENT_ALREADY_EXISTS);
     }
   }
+  const crawler = await fetchCrawlerByIndexName(client, index);
+
+  if (crawler) {
+    throw new Error(ErrorCode.CRAWLER_ALREADY_EXISTS);
+  }
+
   const result = await client.asCurrentUser.index({
     document,
     index: CONNECTORS_INDEX,
   });
-  await client.asCurrentUser.indices.create({ index });
+  await client.asCurrentUser.indices.create({
+    index,
+    settings: textAnalysisSettings(language ?? undefined),
+  });
   await client.asCurrentUser.indices.refresh({ index: CONNECTORS_INDEX });
 
   return { id: result._id, index_name: document.index_name };

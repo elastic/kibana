@@ -10,18 +10,10 @@ import React, { FC, useCallback, useMemo } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { debounce } from 'lodash';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
-import { useStateObservable } from '../../hooks/use_state_observable';
-import { TimeSliderControlEmbeddableInput } from '../../../common/control_types/time_slider/types';
+
 import { timeSliderReducers } from './time_slider_reducers';
 import { TimeSlider as Component } from './time_slider.component';
-
-export interface TimeSliderSubjectState {
-  range?: {
-    min?: number;
-    max?: number;
-  };
-  loading: boolean;
-}
+import { TimeSliderReduxState, TimeSliderSubjectState } from './types';
 
 interface TimeSliderProps {
   componentStateSubject: BehaviorSubject<TimeSliderSubjectState>;
@@ -40,15 +32,14 @@ export const TimeSlider: FC<TimeSliderProps> = ({
 }) => {
   const {
     useEmbeddableDispatch,
-    useEmbeddableSelector,
+    useEmbeddableSelector: select,
     actions: { selectRange },
-  } = useReduxEmbeddableContext<TimeSliderControlEmbeddableInput, typeof timeSliderReducers>();
+  } = useReduxEmbeddableContext<TimeSliderReduxState, typeof timeSliderReducers>();
   const dispatch = useEmbeddableDispatch();
 
-  const { range: availableRange } = useStateObservable<TimeSliderSubjectState>(
-    componentStateSubject,
-    componentStateSubject.getValue()
-  );
+  const availableRange = select((state) => state.componentState.range);
+  const value = select((state) => state.explicitInput.value);
+  const id = select((state) => state.explicitInput.id);
 
   const { min, max } = availableRange
     ? availableRange
@@ -56,8 +47,6 @@ export const TimeSlider: FC<TimeSliderProps> = ({
         min?: number;
         max?: number;
       });
-
-  const { value, id } = useEmbeddableSelector((state) => state);
 
   const dispatchChange = useCallback(
     (range: [number | null, number | null]) => {

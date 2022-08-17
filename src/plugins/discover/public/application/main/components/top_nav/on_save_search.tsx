@@ -10,7 +10,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { SavedObjectSaveModal, showSaveModal, OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { SavedSearch, SaveSavedSearchOptions } from '../../../../services/saved_searches';
+import { SavedSearch, SaveSavedSearchOptions } from '@kbn/saved-search-plugin/public';
 import { DiscoverServices } from '../../../../build_services';
 import { GetStateReturn } from '../../services/discover_state';
 import { setBreadcrumbsTitle } from '../../../../utils/breadcrumbs';
@@ -18,19 +18,21 @@ import { persistSavedSearch } from '../../utils/persist_saved_search';
 import { DOC_TABLE_LEGACY } from '../../../../../common';
 
 async function saveDataSource({
-  indexPattern,
+  dataView,
   navigateTo,
   savedSearch,
   saveOptions,
   services,
   state,
+  navigateOrReloadSavedSearch,
 }: {
-  indexPattern: DataView;
+  dataView: DataView;
   navigateTo: (url: string) => void;
   savedSearch: SavedSearch;
   saveOptions: SaveSavedSearchOptions;
   services: DiscoverServices;
   state: GetStateReturn;
+  navigateOrReloadSavedSearch: boolean;
 }) {
   const prevSavedSearchId = savedSearch.id;
   function onSuccess(id: string) {
@@ -44,20 +46,22 @@ async function saveDataSource({
         }),
         'data-test-subj': 'saveSearchSuccess',
       });
-      if (id !== prevSavedSearchId) {
-        navigateTo(`/view/${encodeURIComponent(id)}`);
-      } else {
-        // Update defaults so that "reload saved query" functions correctly
-        state.resetAppState();
-        services.chrome.docTitle.change(savedSearch.title!);
+      if (navigateOrReloadSavedSearch) {
+        if (id !== prevSavedSearchId) {
+          navigateTo(`/view/${encodeURIComponent(id)}`);
+        } else {
+          // Update defaults so that "reload saved query" functions correctly
+          state.resetAppState();
+          services.chrome.docTitle.change(savedSearch.title!);
 
-        setBreadcrumbsTitle(
-          {
-            ...savedSearch,
-            id: prevSavedSearchId ?? id,
-          },
-          services.chrome
-        );
+          setBreadcrumbsTitle(
+            {
+              ...savedSearch,
+              id: prevSavedSearchId ?? id,
+            },
+            services.chrome
+          );
+        }
       }
     }
   }
@@ -74,7 +78,7 @@ async function saveDataSource({
     });
   }
   return persistSavedSearch(savedSearch, {
-    indexPattern,
+    dataView,
     onError,
     onSuccess,
     saveOptions,
@@ -84,19 +88,21 @@ async function saveDataSource({
 }
 
 export async function onSaveSearch({
-  indexPattern,
+  dataView,
   navigateTo,
   savedSearch,
   services,
   state,
   onClose,
+  onSaveCb,
 }: {
-  indexPattern: DataView;
+  dataView: DataView;
   navigateTo: (path: string) => void;
   savedSearch: SavedSearch;
   services: DiscoverServices;
   state: GetStateReturn;
   onClose?: () => void;
+  onSaveCb?: () => void;
 }) {
   const { uiSettings } = services;
   const onSave = async ({
@@ -124,13 +130,15 @@ export async function onSaveSearch({
       copyOnSave: newCopyOnSave,
       isTitleDuplicateConfirmed,
     };
+    const navigateOrReloadSavedSearch = !Boolean(onSaveCb);
     const response = await saveDataSource({
-      indexPattern,
+      dataView,
       saveOptions,
       services,
       navigateTo,
       savedSearch,
       state,
+      navigateOrReloadSavedSearch,
     });
     // If the save wasn't successful, put the original values back.
     if (!response.id || response.error) {
@@ -139,6 +147,7 @@ export async function onSaveSearch({
     } else {
       state.resetInitialAppState();
     }
+    onSaveCb?.();
     return response;
   };
 

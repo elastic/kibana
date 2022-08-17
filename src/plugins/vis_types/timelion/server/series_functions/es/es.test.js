@@ -16,7 +16,7 @@ import esResponse from '../fixtures/es_response';
 
 import _ from 'lodash';
 import sinon from 'sinon';
-import invoke from '../helpers/invoke_series_fn';
+import invoke from '../test_helpers/invoke_series_fn';
 import { UI_SETTINGS } from '@kbn/data-plugin/server';
 
 describe('es', () => {

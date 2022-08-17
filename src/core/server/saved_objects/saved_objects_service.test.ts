@@ -25,13 +25,13 @@ import { getEnvOptions } from '@kbn/config-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
+import type { SavedObjectsClientFactoryProvider } from '@kbn/core-saved-objects-server';
 
 import { SavedObjectsService } from './saved_objects_service';
 import { configServiceMock } from '../mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { coreUsageDataServiceMock } from '../core_usage_data/core_usage_data_service.mock';
 import { deprecationsServiceMock } from '../deprecations/deprecations_service.mock';
-import { SavedObjectsClientFactoryProvider } from './service/lib';
 import type { NodesVersionCompatibility } from '@kbn/core-elasticsearch-server-internal';
 import { SavedObjectsRepository } from './service/lib/repository';
 import { registerCoreObjectTypes } from './object_types';

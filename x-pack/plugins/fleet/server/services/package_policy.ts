@@ -9,8 +9,9 @@ import { omit, partition, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import semverLt from 'semver/functions/lt';
 import { getFlattenedObject } from '@kbn/std';
-import type { KibanaRequest } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type {
+  KibanaRequest,
   ElasticsearchClient,
   RequestHandlerContext,
   SavedObjectsClientContract,
@@ -487,7 +488,7 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
         const agentPolicy = await agentPolicyService
           .get(soClient, packagePolicy.policy_id)
           .catch((err) => {
-            if (soClient.errors.isNotFoundError(err)) {
+            if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
               appContextService
                 .getLogger()
                 .warn(`Agent policy ${packagePolicy.policy_id} not found`);
@@ -1343,6 +1344,7 @@ export interface PackagePolicyServiceInterface {
     id: string
   ): Promise<{ packagePolicy: PackagePolicy; packageInfo: PackageInfo }>;
 }
+
 export const packagePolicyService: PackagePolicyServiceInterface = new PackagePolicyService();
 
 export type { PackagePolicyService };

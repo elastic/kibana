@@ -8,17 +8,16 @@
 import React, { useMemo } from 'react';
 import { EuiFlexItem } from '@elastic/eui';
 import { toMetricOpt } from '../../../snapshot_metric_i18n';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { WaffleSortControls } from '../../../../public/pages/metrics/inventory_view/components/waffle/waffle_sort_controls';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ToolbarProps } from '../../../../public/pages/metrics/inventory_view/components/toolbars/toolbar';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { ToolbarProps } from '../../../../public/pages/metrics/inventory_view/components/toolbars/toolbar';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { WaffleMetricControls } from '../../../../public/pages/metrics/inventory_view/components/waffle/metric_control';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { WaffleGroupByControls } from '../../../../public/pages/metrics/inventory_view/components/waffle/waffle_group_by_controls';
 import {
   toGroupByOpt,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+  // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 } from '../../../../public/pages/metrics/inventory_view/components/toolbars/toolbar_wrapper';
 import { SnapshotMetricType } from '../../types';
 

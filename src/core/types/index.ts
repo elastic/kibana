@@ -11,8 +11,17 @@
  * types are stripped.
  */
 export * from './app_category';
-export * from './saved_objects';
 export type { Capabilities } from '@kbn/core-capabilities-common';
+export type {
+  SavedObject,
+  SavedObjectsNamespaceType,
+  SavedObjectAttributeSingle,
+  SavedObjectAttribute,
+  SavedObjectAttributes,
+  SavedObjectError,
+  SavedObjectReference,
+  SavedObjectsMigrationVersion,
+} from '@kbn/core-saved-objects-common';
 export type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 export type {
   UiSettingsType,

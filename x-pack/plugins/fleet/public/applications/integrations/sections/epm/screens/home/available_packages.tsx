@@ -326,16 +326,19 @@ export const AvailablePackages: React.FC<{
     <>
       <EuiFlexGrid columns={3}>
         <EuiFlexItem>
-          <TrackApplicationView viewId="integration-card:epr:app_search_web_crawler:featured">
+          <TrackApplicationView viewId="integration-card:epr:web_crawler:featured">
             <EuiCard
-              data-test-subj="integration-card:epr:app_search_web_crawler:featured"
-              icon={<EuiIcon type="logoAppSearch" size="xxl" />}
-              href={addBasePath('/app/enterprise_search/app_search/engines/new?method=crawler')}
+              data-test-subj="integration-card:epr:web_crawler:featured"
+              icon={<EuiIcon type="logoEnterpriseSearch" size="xxl" />}
+              href={addBasePath(
+                '/app/enterprise_search/content/search_indices/new_index?method=crawler'
+              )}
               title={i18n.translate('xpack.fleet.featuredSearchTitle', {
-                defaultMessage: 'Web site crawler',
+                defaultMessage: 'Web crawler',
               })}
               description={i18n.translate('xpack.fleet.featuredSearchDesc', {
-                defaultMessage: 'Add search to your website with the App Search web crawler.',
+                defaultMessage:
+                  'Add search to your website with the Enterprise Search web crawler.',
               })}
             />
           </TrackApplicationView>

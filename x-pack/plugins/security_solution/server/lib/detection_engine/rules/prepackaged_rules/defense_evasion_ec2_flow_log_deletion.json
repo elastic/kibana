@@ -14,15 +14,45 @@
   "interval": "10m",
   "language": "kuery",
   "license": "Elastic License v2",
-  "name": "AWS EC2 Flow Log Deletion",
-  "note": "## Config\n\nThe AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "name": "AWS VPC Flow Logs Deletion",
+  "note": "## Triage and analysis\n\n### Investigating AWS VPC Flow Logs Deletion\n\nVPC Flow Logs is an AWS feature that enables you to capture information about the IP traffic going to and from network\ninterfaces in your virtual private cloud (VPC). Flow log data can be published to Amazon CloudWatch Logs or Amazon S3.\n\nThis rule identifies the deletion of VPC flow logs using the API `DeleteFlowLogs` action. Attackers can do this to cover\ntheir tracks and impact security monitoring that relies on this source.\n\n#### Possible investigation steps\n\n- Identify the user account that performed the action and whether it should perform this kind of action.\n- Investigate other alerts associated with the user account during the past 48 hours.\n- Contact the account and resource owners and confirm whether they are aware of this activity.\n- Check if this operation was approved and performed according to the organization's change management policy.\n- Considering the source IP address and geolocation of the user who issued the command:\n    - Do they look normal for the user?\n    - If the source is an EC2 IP address, is it associated with an EC2 instance in one of your accounts or is the source\n    IP from an EC2 instance that's not under your control?\n    - If it is an authorized EC2 instance, is the activity associated with normal behavior for the instance role or roles?\n    Are there any other alerts or signs of suspicious activity involving this instance?\n- If you suspect the account has been compromised, scope potentially compromised assets by tracking servers, services,\nand data accessed by the account in the last 24 hours.\n\n### False positive analysis\n\n- If this rule is noisy in your environment due to expected activity, consider adding exceptions \u2014 preferably with a\ncombination of user and IP address conditions.\n- Administrators may rotate these logs after a certain period as part of their retention policy or after importing them\nto a SIEM.\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Disable or limit the account during the investigation and response.\n- Identify the possible impact of the incident and prioritize accordingly; the following actions can help you gain context:\n    - Identify the account role in the cloud environment.\n    - Assess the criticality of affected services and servers.\n    - Work with your IT team to identify and minimize the impact on users.\n    - Identify if the attacker is moving laterally and compromising other accounts, servers, or services.\n    - Identify any regulatory or legal ramifications related to this activity.\n- Investigate credential exposure on systems compromised or used by the attacker to ensure all compromised accounts are\nidentified. Reset passwords or delete API keys as needed to revoke the attacker's access to the environment. Work with\nyour IT teams to minimize the impact on business operations during these actions.\n- Check if unauthorized new users were created, remove unauthorized new accounts, and request password resets for other IAM users.\n- Consider enabling multi-factor authentication for users.\n- Review the permissions assigned to the implicated user to ensure that the least privilege principle is being followed.\n- Implement security best practices [outlined](https://aws.amazon.com/premiumsupport/knowledge-center/security-best-practices/) by AWS.\n- Take the actions needed to return affected systems, data, or services to their normal operational levels.\n- Identify the initial vector abused by the attacker and take action to prevent reinfection via the same vector.\n- Using the incident response data, update logging and audit policies to improve the mean time to detect (MTTD) and the\nmean time to respond (MTTR).",
   "query": "event.dataset:aws.cloudtrail and event.provider:ec2.amazonaws.com and event.action:DeleteFlowLogs and event.outcome:success\n",
   "references": [
     "https://awscli.amazonaws.com/v2/documentation/api/latest/reference/ec2/delete-flow-logs.html",
     "https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DeleteFlowLogs.html"
   ],
+  "related_integrations": [
+    {
+      "integration": "cloudtrail",
+      "package": "aws",
+      "version": "1.10.2"
+    }
+  ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.action",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.dataset",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.outcome",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.provider",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 73,
   "rule_id": "9395fd2c-9947-4472-86ef-4aceb2f7e872",
+  "setup": "The AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
   "severity": "high",
   "tags": [
     "Elastic",
@@ -58,5 +88,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 7
+  "version": 9
 }

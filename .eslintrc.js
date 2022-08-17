@@ -178,6 +178,7 @@ const DEV_PATTERNS = [
   'src/dev/**/*',
   'x-pack/{dev-tools,tasks,scripts,test,build_chromium}/**/*',
   'x-pack/plugins/*/server/scripts/**/*',
+  'x-pack/plugins/fleet/cypress',
 ];
 
 /** Restricted imports with suggested alternatives */
@@ -579,109 +580,6 @@ module.exports = {
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
               KBN_HANDLEBARS_HEADER,
               KBN_HANDLEBARS_HANDLEBARS_HEADER,
-            ],
-          },
-        ],
-      },
-    },
-
-    /**
-     * Restricted paths
-     */
-    {
-      files: ['**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        '@kbn/eslint/no-restricted-paths': [
-          'error',
-          {
-            basePath: __dirname,
-            zones: [
-              {
-                target: ['(src|x-pack)/**/*', '!src/core/**/*'],
-                from: ['src/core/utils/**/*'],
-                errorMessage: `Plugins may only import from src/core/server and src/core/public.`,
-              },
-              {
-                target: ['(src|x-pack)/plugins/*/server/**/*'],
-                from: ['(src|x-pack)/plugins/*/public/**/*'],
-                errorMessage: `Server code can not import from public, use a common directory.`,
-              },
-              {
-                target: ['(src|x-pack)/plugins/*/common/**/*'],
-                from: ['(src|x-pack)/plugins/*/(server|public)/**/*'],
-                errorMessage: `Common code can not import from server or public, use a common directory.`,
-              },
-              {
-                target: ['(src|x-pack)/plugins/**/(public|server)/**/*', 'examples/**/*'],
-                from: [
-                  'src/core/public/**/*',
-                  '!src/core/public/index.ts', // relative import
-                  '!src/core/public/mocks{,.ts}',
-                  '!src/core/server/types{,.ts}',
-                  '!src/core/public/utils/**/*',
-                  '!src/core/public/*.test.mocks{,.ts}',
-
-                  'src/core/server/**/*',
-                  '!src/core/server/index.ts', // relative import
-                  '!src/core/server/mocks{,.ts}',
-                  '!src/core/server/types{,.ts}',
-                  '!src/core/server/test_utils{,.ts}',
-                  // for absolute imports until fixed in
-                  // https://github.com/elastic/kibana/issues/36096
-                  '!src/core/server/*.test.mocks{,.ts}',
-
-                  'target/types/**',
-                ],
-                allowSameFolder: true,
-                errorMessage:
-                  'Plugins may only import from top-level public and server modules in core.',
-              },
-              {
-                target: [
-                  '(src|x-pack)/plugins/**/(public|server)/**/*',
-                  'examples/**/*',
-                  '!(src|x-pack)/**/*.test.*',
-                  '!(x-pack/)?test/**/*',
-                ],
-                from: [
-                  '(src|x-pack)/plugins/**/(public|server)/**/*',
-                  '!(src|x-pack)/plugins/**/(public|server)/mocks/index.{js,mjs,ts}',
-                  '!(src|x-pack)/plugins/**/(public|server)/(index|mocks).{js,mjs,ts,tsx}',
-                  '!(src|x-pack)/plugins/**/__stories__/index.{js,mjs,ts,tsx}',
-                  '!(src|x-pack)/plugins/**/__fixtures__/index.{js,mjs,ts,tsx}',
-                ],
-                allowSameFolder: true,
-                errorMessage: 'Plugins may only import from top-level public and server modules.',
-              },
-              {
-                target: [
-                  '(src|x-pack)/plugins/**/*',
-                  '!(src|x-pack)/plugins/**/server/**/*',
-
-                  'examples/**/*',
-                  '!examples/**/server/**/*',
-                ],
-                from: [
-                  'src/core/server',
-                  'src/core/server/**/*',
-                  '(src|x-pack)/plugins/*/server/**/*',
-                  'examples/**/server/**/*',
-                  // TODO: Remove the 'joi' eslint rule once IE11 support is dropped
-                  'joi',
-                ],
-                errorMessage:
-                  'Server modules cannot be imported into client modules or shared modules.',
-              },
-              {
-                target: ['src/core/**/*'],
-                from: ['plugins/**/*', 'src/plugins/**/*'],
-                errorMessage: 'The core cannot depend on any plugins.',
-              },
-              {
-                target: ['(src|x-pack)/plugins/*/public/**/*'],
-                from: ['ui/**/*'],
-                errorMessage: 'Plugins cannot import legacy UI code.',
-              },
             ],
           },
         ],
@@ -1444,7 +1342,7 @@ module.exports = {
      * Discover overrides
      */
     {
-      files: ['src/plugins/discover/**/*.{ts,tsx}'],
+      files: ['src/plugins/discover/**/*.{ts,tsx}', 'src/plugins/saved_search/**/*.{ts,tsx}'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
         '@typescript-eslint/ban-ts-comment': [

@@ -16,16 +16,27 @@ import {
   EuiFlyoutHeader,
   IconType,
   EuiSpacer,
+  EuiBetaBadge,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getConnectorFeatureName } from '@kbn/actions-plugin/common';
+import { betaBadgeProps } from '../beta_badge_props';
 
-const FlyoutHeaderComponent: React.FC<{
+interface Props {
   icon?: IconType | null;
   actionTypeName?: string | null;
   actionTypeMessage?: string | null;
   featureIds?: string[] | null;
-}> = ({ icon, actionTypeName, actionTypeMessage, featureIds }) => {
+  isExperimental?: boolean;
+}
+
+const FlyoutHeaderComponent: React.FC<Props> = ({
+  icon,
+  actionTypeName,
+  actionTypeMessage,
+  featureIds,
+  isExperimental,
+}) => {
   return (
     <EuiFlyoutHeader hasBorder data-test-subj="create-connector-flyout-header">
       <EuiFlexGroup gutterSize="m" alignItems="center">
@@ -34,20 +45,32 @@ const FlyoutHeaderComponent: React.FC<{
             <EuiIcon type={icon} size="xl" />
           </EuiFlexItem>
         ) : null}
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           {actionTypeName && actionTypeMessage ? (
             <>
-              <EuiTitle size="s">
-                <h3 id="flyoutTitle">
-                  <FormattedMessage
-                    defaultMessage="{actionTypeName} connector"
-                    id="xpack.triggersActionsUI.sections.addConnectorForm.flyoutTitle"
-                    values={{
-                      actionTypeName,
-                    }}
-                  />
-                </h3>
-              </EuiTitle>
+              <EuiFlexGroup gutterSize="s" justifyContent="center" alignItems="center">
+                <EuiFlexItem>
+                  <EuiTitle size="s">
+                    <h3 id="flyoutTitle">
+                      <FormattedMessage
+                        defaultMessage="{actionTypeName} connector"
+                        id="xpack.triggersActionsUI.sections.addConnectorForm.flyoutTitle"
+                        values={{
+                          actionTypeName,
+                        }}
+                      />
+                    </h3>
+                  </EuiTitle>
+                </EuiFlexItem>
+                {actionTypeName && isExperimental && (
+                  <EuiFlexItem grow={false}>
+                    <EuiBetaBadge
+                      label={betaBadgeProps.label}
+                      tooltipContent={betaBadgeProps.tooltipContent}
+                    />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
               <EuiText size="s" color="subdued">
                 {actionTypeMessage}
               </EuiText>
@@ -90,4 +113,4 @@ const FlyoutHeaderComponent: React.FC<{
   );
 };
 
-export const FlyoutHeader = memo(FlyoutHeaderComponent);
+export const FlyoutHeader: React.NamedExoticComponent<Props> = memo(FlyoutHeaderComponent);

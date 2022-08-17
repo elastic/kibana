@@ -15,16 +15,17 @@ export const allowedExperimentalValues = Object.freeze({
   tGridEnabled: true,
   tGridEventRenderedViewEnabled: true,
   excludePoliciesInFilterEnabled: false,
-  kubernetesEnabled: false,
+  kubernetesEnabled: true,
   disableIsolationUIPendingStatuses: false,
   riskyHostsEnabled: false,
   riskyUsersEnabled: false,
   pendingActionResponsesWithAck: true,
   policyListEnabled: true,
   policyResponseInFleetEnabled: true,
+  threatIntelligenceEnabled: false,
 
   /**
-   * This is used for enabling the end to end tests for the security_solution telemetry.
+   * This is used for enabling the end-to-end tests for the security_solution telemetry.
    * We disable the telemetry since we don't have specific roles or permissions around it and
    * we don't want people to be able to violate security by getting access to whole documents
    * around telemetry they should not.
@@ -37,11 +38,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the Endpoint response actions console in various areas of the app
    */
   responseActionsConsoleEnabled: true,
-
-  /**
-   * Enables the cloud security posture navigation inside the security solution
-   */
-  cloudSecurityPostureNavigation: false,
 
   /**
    * Enables the insights module for related alerts by process ancestry

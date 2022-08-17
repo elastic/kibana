@@ -10,13 +10,14 @@ import uuid from 'uuid';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { useKibana } from '../../../../common/lib/kibana';
-
+import { ActionGroup, ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { EuiSuperDatePicker, EuiDataGrid } from '@elastic/eui';
 import { RuleEventLogListStatusFilter } from './rule_event_log_list_status_filter';
 import { RuleEventLogList } from './rule_event_log_list';
 import { RefineSearchPrompt } from '../refine_search_prompt';
 import { RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS } from '../../../constants';
-import { Rule } from '../../../../types';
+import { mockRule, mockRuleType, mockRuleSummary } from './test_helpers';
+import { RuleType } from '../../../../types';
 import { loadActionErrorLog } from '../../../lib/rule_api/load_action_error_log';
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
@@ -107,30 +108,23 @@ const mockLogResponse: any = {
   total: 4,
 };
 
-const mockRule: Rule = {
-  id: uuid.v4(),
-  enabled: true,
-  name: `rule-${uuid.v4()}`,
-  tags: [],
-  ruleTypeId: '.noop',
-  consumer: 'consumer',
-  schedule: { interval: '1m' },
-  actions: [],
-  params: {},
-  createdBy: null,
-  updatedBy: null,
-  createdAt: new Date(),
-  updatedAt: new Date(),
-  apiKeyOwner: null,
-  throttle: null,
-  notifyWhen: null,
-  muteAll: false,
-  mutedInstanceIds: [],
-  executionStatus: {
-    status: 'unknown',
-    lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
-  },
+const loadExecutionLogAggregationsMock = jest.fn();
+
+const onChangeDurationMock = jest.fn();
+
+const ruleMock = mockRule();
+
+const authorizedConsumers = {
+  [ALERTS_FEATURE_ID]: { read: true, all: true },
 };
+
+const recoveryActionGroup: ActionGroup<'recovered'> = { id: 'recovered', name: 'Recovered' };
+
+const ruleType: RuleType = mockRuleType({
+  producer: ALERTS_FEATURE_ID,
+  authorizedConsumers,
+  recoveryActionGroup,
+});
 
 const mockErrorLogResponse = {
   totalErrors: 1,
@@ -144,8 +138,6 @@ const mockErrorLogResponse = {
     },
   ],
 };
-
-const loadExecutionLogAggregationsMock = jest.fn();
 
 describe('rule_event_log_list', () => {
   beforeEach(() => {
@@ -168,7 +160,11 @@ describe('rule_event_log_list', () => {
   it('renders correctly', async () => {
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={mockRule}
+        rule={ruleMock}
+        ruleType={ruleType}
+        ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
+        numberOfExecutions={60}
+        onChangeDuration={onChangeDurationMock}
         loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
       />
     );
@@ -178,7 +174,7 @@ describe('rule_event_log_list', () => {
 
     expect(loadExecutionLogAggregationsMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        id: mockRule.id,
+        id: ruleMock.id,
         sort: [],
         outcomeFilter: [],
         page: 0,
@@ -210,7 +206,11 @@ describe('rule_event_log_list', () => {
   it('can sort by single and/or multiple column(s)', async () => {
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={mockRule}
+        rule={ruleMock}
+        ruleType={ruleType}
+        ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
+        numberOfExecutions={60}
+        onChangeDuration={onChangeDurationMock}
         loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
       />
     );
@@ -238,7 +238,7 @@ describe('rule_event_log_list', () => {
 
     expect(loadExecutionLogAggregationsMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        id: mockRule.id,
+        id: ruleMock.id,
         message: '',
         outcomeFilter: [],
         page: 0,
@@ -262,7 +262,7 @@ describe('rule_event_log_list', () => {
 
     expect(loadExecutionLogAggregationsMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        id: mockRule.id,
+        id: ruleMock.id,
         sort: [{ timestamp: { order: 'desc' } }],
         outcomeFilter: [],
         page: 0,
@@ -292,7 +292,7 @@ describe('rule_event_log_list', () => {
 
     expect(loadExecutionLogAggregationsMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        id: mockRule.id,
+        id: ruleMock.id,
         sort: [
           {
             timestamp: { order: 'desc' },
@@ -311,7 +311,11 @@ describe('rule_event_log_list', () => {
   it('can filter by execution log outcome status', async () => {
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={mockRule}
+        rule={ruleMock}
+        ruleType={ruleType}
+        ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
+        numberOfExecutions={60}
+        onChangeDuration={onChangeDurationMock}
         loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
       />
     );
@@ -333,7 +337,7 @@ describe('rule_event_log_list', () => {
 
     expect(loadExecutionLogAggregationsMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        id: mockRule.id,
+        id: ruleMock.id,
         sort: [],
         outcomeFilter: ['success'],
         page: 0,
@@ -353,7 +357,7 @@ describe('rule_event_log_list', () => {
 
     expect(loadExecutionLogAggregationsMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        id: mockRule.id,
+        id: ruleMock.id,
         sort: [],
         outcomeFilter: ['success', 'failure'],
         page: 0,
@@ -370,7 +374,11 @@ describe('rule_event_log_list', () => {
 
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={mockRule}
+        rule={ruleMock}
+        ruleType={ruleType}
+        ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
+        numberOfExecutions={60}
+        onChangeDuration={onChangeDurationMock}
         loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
       />
     );
@@ -392,7 +400,7 @@ describe('rule_event_log_list', () => {
 
     expect(loadExecutionLogAggregationsMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        id: mockRule.id,
+        id: ruleMock.id,
         sort: [],
         outcomeFilter: [],
         page: 1,
@@ -412,7 +420,7 @@ describe('rule_event_log_list', () => {
 
     expect(loadExecutionLogAggregationsMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        id: mockRule.id,
+        id: ruleMock.id,
         sort: [],
         outcomeFilter: [],
         page: 0,
@@ -426,7 +434,11 @@ describe('rule_event_log_list', () => {
 
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={mockRule}
+        rule={ruleMock}
+        ruleType={ruleType}
+        ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
+        numberOfExecutions={60}
+        onChangeDuration={onChangeDurationMock}
         loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
       />
     );
@@ -438,7 +450,7 @@ describe('rule_event_log_list', () => {
 
     expect(loadExecutionLogAggregationsMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        id: mockRule.id,
+        id: ruleMock.id,
         sort: [],
         outcomeFilter: [],
         page: 0,
@@ -463,7 +475,7 @@ describe('rule_event_log_list', () => {
 
     expect(loadExecutionLogAggregationsMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        id: mockRule.id,
+        id: ruleMock.id,
         sort: [],
         outcomeFilter: [],
         page: 0,
@@ -479,7 +491,11 @@ describe('rule_event_log_list', () => {
   it('can save display columns to localStorage', async () => {
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={mockRule}
+        rule={ruleMock}
+        ruleType={ruleType}
+        ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
+        numberOfExecutions={60}
+        onChangeDuration={onChangeDurationMock}
         loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
       />
     );
@@ -518,7 +534,11 @@ describe('rule_event_log_list', () => {
   it('does not show the refine search prompt normally', async () => {
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={mockRule}
+        rule={ruleMock}
+        ruleType={ruleType}
+        ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
+        numberOfExecutions={60}
+        onChangeDuration={onChangeDurationMock}
         loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
       />
     );
@@ -539,7 +559,11 @@ describe('rule_event_log_list', () => {
 
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={mockRule}
+        rule={ruleMock}
+        ruleType={ruleType}
+        ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
+        numberOfExecutions={60}
+        onChangeDuration={onChangeDurationMock}
         loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
       />
     );
@@ -585,7 +609,11 @@ describe('rule_event_log_list', () => {
 
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={mockRule}
+        rule={ruleMock}
+        ruleType={ruleType}
+        ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
+        numberOfExecutions={60}
+        onChangeDuration={onChangeDurationMock}
         loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
       />
     );
@@ -608,7 +636,11 @@ describe('rule_event_log_list', () => {
 
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={mockRule}
+        rule={ruleMock}
+        ruleType={ruleType}
+        ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
+        numberOfExecutions={60}
+        onChangeDuration={onChangeDurationMock}
         loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
       />
     );
@@ -631,7 +663,11 @@ describe('rule_event_log_list', () => {
 
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={mockRule}
+        rule={ruleMock}
+        ruleType={ruleType}
+        ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
+        numberOfExecutions={60}
+        onChangeDuration={onChangeDurationMock}
         loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
       />
     );
@@ -695,7 +731,11 @@ describe('rule_event_log_list', () => {
 
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={mockRule}
+        rule={ruleMock}
+        ruleType={ruleType}
+        ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
+        numberOfExecutions={60}
+        onChangeDuration={onChangeDurationMock}
         loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
       />
     );
@@ -713,5 +753,117 @@ describe('rule_event_log_list', () => {
       .first()
       .simulate('click');
     expect(wrapper.find('[data-test-subj="ruleActionErrorLogFlyout"]').exists()).toBeTruthy();
+  });
+
+  it('shows rule summary and execution duration chart', async () => {
+    loadExecutionLogAggregationsMock.mockResolvedValue({
+      ...mockLogResponse,
+      total: 85,
+    });
+
+    const wrapper = mountWithIntl(
+      <RuleEventLogList
+        fetchRuleSummary={false}
+        rule={ruleMock}
+        ruleType={ruleType}
+        ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
+        numberOfExecutions={60}
+        onChangeDuration={onChangeDurationMock}
+        loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
+      />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    const avgExecutionDurationPanel = wrapper.find('[data-test-subj="avgExecutionDurationPanel"]');
+    expect(avgExecutionDurationPanel.exists()).toBeTruthy();
+    expect(avgExecutionDurationPanel.first().prop('color')).toEqual('subdued');
+    expect(wrapper.find('EuiStat[data-test-subj="avgExecutionDurationStat"]').text()).toEqual(
+      'Average duration00:00:00.100'
+    );
+    expect(wrapper.find('[data-test-subj="ruleDurationWarning"]').exists()).toBeFalsy();
+
+    expect(wrapper.find('[data-test-subj="executionDurationChartPanel"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="avgExecutionDurationPanel"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="ruleEventLogListAvgDuration"]').first().text()).toEqual(
+      '00:00:00.100'
+    );
+  });
+
+  it('renders average execution duration', async () => {
+    const ruleTypeCustom = mockRuleType({ ruleTaskTimeout: '10m' });
+    const ruleSummary = mockRuleSummary({
+      executionDuration: { average: 60284, valuesWithTimestamp: {} },
+      ruleTypeId: ruleMock.ruleTypeId,
+    });
+
+    const wrapper = mountWithIntl(
+      <RuleEventLogList
+        fetchRuleSummary={false}
+        rule={ruleMock}
+        ruleType={ruleTypeCustom}
+        ruleSummary={ruleSummary}
+        numberOfExecutions={60}
+        onChangeDuration={onChangeDurationMock}
+        loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
+      />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    const avgExecutionDurationPanel = wrapper.find('[data-test-subj="avgExecutionDurationPanel"]');
+    expect(avgExecutionDurationPanel.exists()).toBeTruthy();
+    expect(avgExecutionDurationPanel.first().prop('color')).toEqual('subdued');
+    expect(wrapper.find('EuiStat[data-test-subj="avgExecutionDurationStat"]').text()).toEqual(
+      'Average duration00:01:00.284'
+    );
+    expect(wrapper.find('[data-test-subj="ruleDurationWarning"]').exists()).toBeFalsy();
+  });
+
+  it('renders warning when average execution duration exceeds rule timeout', async () => {
+    const ruleTypeCustom = mockRuleType({ ruleTaskTimeout: '10m' });
+    const ruleSummary = mockRuleSummary({
+      executionDuration: { average: 60284345, valuesWithTimestamp: {} },
+      ruleTypeId: ruleMock.ruleTypeId,
+    });
+
+    loadExecutionLogAggregationsMock.mockResolvedValue({
+      ...mockLogResponse,
+      total: 85,
+    });
+
+    const wrapper = mountWithIntl(
+      <RuleEventLogList
+        fetchRuleSummary={false}
+        rule={ruleMock}
+        ruleType={ruleTypeCustom}
+        ruleSummary={ruleSummary}
+        numberOfExecutions={60}
+        onChangeDuration={onChangeDurationMock}
+        loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
+      />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    const avgExecutionDurationPanel = wrapper.find('[data-test-subj="avgExecutionDurationPanel"]');
+    expect(avgExecutionDurationPanel.exists()).toBeTruthy();
+    expect(avgExecutionDurationPanel.first().prop('color')).toEqual('warning');
+
+    const avgExecutionDurationStat = wrapper
+      .find('EuiStat[data-test-subj="avgExecutionDurationStat"]')
+      .text()
+      .replaceAll('Info', '');
+    expect(avgExecutionDurationStat).toEqual('Average duration16:44:44.345');
+    expect(wrapper.find('[data-test-subj="ruleDurationWarning"]').exists()).toBeTruthy();
   });
 });

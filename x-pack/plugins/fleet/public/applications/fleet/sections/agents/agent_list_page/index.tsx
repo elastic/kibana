@@ -250,7 +250,10 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             sendGetAgentStatus({
               kuery: kuery && kuery !== '' ? kuery : undefined,
             }),
-            sendGetAgentTags(),
+            sendGetAgentTags({
+              kuery: kuery && kuery !== '' ? kuery : undefined,
+              showInactive,
+            }),
           ]);
           isLoadingVar.current = false;
           // Return if a newer request has been triggered
@@ -446,7 +449,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
 
         return (
           <EuiFlexGroup gutterSize="none" style={{ minWidth: 0 }} direction="column">
-            {agentPolicy && <AgentPolicySummaryLine policy={agentPolicy} />}
+            {agentPolicy && <AgentPolicySummaryLine policy={agentPolicy} agent={agent} />}
             {showWarning && (
               <EuiFlexItem grow={false}>
                 <EuiText color="subdued" size="xs" className="eui-textNoWrap">

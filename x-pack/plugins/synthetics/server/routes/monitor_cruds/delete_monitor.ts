@@ -5,7 +5,11 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import { SavedObjectsClientContract, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import {
+  SavedObjectsClientContract,
+  SavedObjectsErrorHelpers,
+  KibanaRequest,
+} from '@kbn/core/server';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import {
   ConfigKey,
@@ -50,6 +54,7 @@ export const deleteSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =>
         server,
         monitorId,
         syntheticsMonitorClient,
+        request,
       });
 
       if (errors && errors.length > 0) {
@@ -74,11 +79,13 @@ export const deleteMonitor = async ({
   server,
   monitorId,
   syntheticsMonitorClient,
+  request,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   server: UptimeServerSetup;
   monitorId: string;
   syntheticsMonitorClient: SyntheticsMonitorClient;
+  request: KibanaRequest;
 }) => {
   const { logger, telemetry, kibanaVersion, encryptedSavedObjects } = server;
   const encryptedSavedObjectsClient = encryptedSavedObjects.getClient();
@@ -99,12 +106,17 @@ export const deleteMonitor = async ({
 
     const normalizedMonitor = normalizeSecrets(monitor);
 
+    const errors = await syntheticsMonitorClient.deleteMonitor(
+      {
+        ...normalizedMonitor.attributes,
+        id:
+          (normalizedMonitor.attributes as MonitorFields)[ConfigKey.CUSTOM_HEARTBEAT_ID] ||
+          monitorId,
+      },
+      request,
+      savedObjectsClient
+    );
     await savedObjectsClient.delete(syntheticsMonitorType, monitorId);
-    const errors = await syntheticsMonitorClient.deleteMonitor({
-      ...normalizedMonitor.attributes,
-      id:
-        (normalizedMonitor.attributes as MonitorFields)[ConfigKey.CUSTOM_HEARTBEAT_ID] || monitorId,
-    });
 
     sendTelemetryEvents(
       logger,

@@ -6,18 +6,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { INTERNAL_FEATURE_FLAGS } from '../../../common/constants';
 import type { CspPage, CspPageNavigationItem } from './types';
 
 const NAV_ITEMS_NAMES = {
   DASHBOARD: i18n.translate('xpack.csp.navigation.dashboardNavItemLabel', {
-    defaultMessage: 'Dashboard',
+    defaultMessage: 'Cloud Posture',
   }),
   FINDINGS: i18n.translate('xpack.csp.navigation.findingsNavItemLabel', {
     defaultMessage: 'Findings',
   }),
   BENCHMARKS: i18n.translate('xpack.csp.navigation.myBenchmarksNavItemLabel', {
-    defaultMessage: 'My Benchmarks',
+    defaultMessage: 'CSP Benchmarks',
   }),
   RULES: i18n.translate('xpack.csp.navigation.rulesNavItemLabel', {
     defaultMessage: 'Rules',
@@ -41,14 +40,12 @@ export const cloudPosturePages: Record<CspPage, CspPageNavigationItem> = {
   rules: {
     name: NAV_ITEMS_NAMES.RULES,
     path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/benchmarks/:packagePolicyId/:policyId/rules`,
-    disabled: !INTERNAL_FEATURE_FLAGS.showBenchmarks,
     id: 'cloud_security_posture-rules',
   },
   benchmarks: {
     name: NAV_ITEMS_NAMES.BENCHMARKS,
     path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/benchmarks`,
     exact: true,
-    disabled: !INTERNAL_FEATURE_FLAGS.showBenchmarks,
     id: 'cloud_security_posture-benchmarks',
   },
 };

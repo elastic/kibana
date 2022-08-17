@@ -16,6 +16,8 @@ import type { ChartSeriesConfigs } from '../../../../common/components/charts/co
 import { getQueryFilter } from '../../../../../common/detection_engine/get_query_filter';
 import type { FieldValueQueryBar } from '../query_bar';
 import type { ESQuery } from '../../../../../common/typed_json';
+import { DataSourceType } from '../../../pages/detection_engine/rules/types';
+
 /**
  * Determines whether or not to display noise warning.
  * Is considered noisy if alerts/hour rate > 1
@@ -165,23 +167,32 @@ export const getIsRulePreviewDisabled = ({
   isThreatQueryBarValid,
   index,
   dataViewId,
+  dataSourceType,
   threatIndex,
   threatMapping,
   machineLearningJobId,
   queryBar,
+  newTermsFields,
 }: {
   ruleType: Type;
   isQueryBarValid: boolean;
   isThreatQueryBarValid: boolean;
   index: string[];
   dataViewId: string | undefined;
+  dataSourceType: DataSourceType;
   threatIndex: string[];
   threatMapping: ThreatMapping;
   machineLearningJobId: string[];
   queryBar: FieldValueQueryBar;
+  newTermsFields: string[];
 }) => {
-  if (!isQueryBarValid || ((index == null || index.length === 0) && dataViewId == null))
+  if (
+    !isQueryBarValid ||
+    (dataSourceType === DataSourceType.DataView && !dataViewId) ||
+    (dataSourceType === DataSourceType.IndexPatterns && index.length === 0)
+  ) {
     return true;
+  }
   if (ruleType === 'threat_match') {
     if (!isThreatQueryBarValid || !threatIndex.length || !threatMapping) return true;
     if (
@@ -197,6 +208,9 @@ export const getIsRulePreviewDisabled = ({
   }
   if (ruleType === 'eql' || ruleType === 'query' || ruleType === 'threshold') {
     return queryBar.query.query.length === 0;
+  }
+  if (ruleType === 'new_terms') {
+    return newTermsFields.length === 0;
   }
   return false;
 };

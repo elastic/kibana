@@ -14,18 +14,21 @@ import {
   LazyControlsCallout,
 } from '@kbn/controls-plugin/public';
 import { ViewMode } from '../../../services/embeddable';
-import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
+import {
+  DashboardContainer,
+  DashboardReactContextValue,
+  DashboardLoadedInfo,
+} from '../dashboard_container';
 import { DashboardGrid } from '../grid';
 import { context } from '../../../services/kibana_react';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
 import { withSuspense } from '../../../services/presentation_util';
-import { DashboardLoadedEvent } from '../types';
 
 export interface DashboardViewportProps {
   container: DashboardContainer;
   controlGroup?: ControlGroupContainer;
   controlsEnabled?: boolean;
-  onDataLoaded?: (data: DashboardLoadedEvent) => void;
+  onDataLoaded?: (data: DashboardLoadedInfo) => void;
 }
 
 interface State {

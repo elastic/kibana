@@ -5,23 +5,22 @@
  * 2.0.
  */
 
-/**
- * TODO:
- * - Need to add documentation URLs (search for `#`s)
- * - Port over Connector views from App Search to the panel below.
- */
-
 import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiConfirmModal, EuiSteps, EuiText } from '@elastic/eui';
+import { EuiConfirmModal, EuiLink, EuiSteps, EuiText } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
+
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { HttpError, Status } from '../../../../../../common/types/api';
 import { ErrorCode } from '../../../../../../common/types/error_codes';
+import { docLinks } from '../../../../shared/doc_links';
 import { AddConnectorPackageApiLogic } from '../../../api/connector_package/add_connector_package_api_logic';
 
+import { CREATE_ELASTICSEARCH_INDEX_STEP, BUILD_SEARCH_EXPERIENCE_STEP } from '../method_steps';
 import { NewSearchIndexLogic } from '../new_search_index_logic';
 import { NewSearchIndexTemplate } from '../new_search_index_template';
 
@@ -70,51 +69,9 @@ export const MethodConnector: React.FC = () => {
   const { setIsModalVisible } = useActions(AddConnectorPackageLogic);
   const { fullIndexName, language } = useValues(NewSearchIndexLogic);
 
-  const confirmModal = isModalVisible && (
-    <EuiConfirmModal
-      title={i18n.translate(
-        'xpack.enterpriseSearch.content.newIndex.steps.buildConnector.confirmModal.title',
-        {
-          defaultMessage: 'Replace existing connector',
-        }
-      )}
-      onCancel={(event) => {
-        event?.preventDefault();
-        setIsModalVisible(false);
-      }}
-      onConfirm={(event) => {
-        event.preventDefault();
-        makeRequest({ deleteExistingConnector: true, indexName: fullIndexName, language });
-      }}
-      cancelButtonText={i18n.translate(
-        'xpack.enterpriseSearch.content.newIndex.steps.buildConnector.confirmModal.cancelButton.label',
-        {
-          defaultMessage: 'Cancel',
-        }
-      )}
-      confirmButtonText={i18n.translate(
-        'xpack.enterpriseSearch.content.newIndex.steps.buildConnector.confirmModal.confirmButton.label',
-        {
-          defaultMessage: 'Replace configuration',
-        }
-      )}
-      defaultFocusedButton="confirm"
-    >
-      {i18n.translate(
-        'xpack.enterpriseSearch.content..newIndex.steps.buildConnector.confirmModal.description',
-        {
-          defaultMessage:
-            'A deleted index named {indexName} was originally tied to an existing connector configuration. Would you like to replace the existing connector configuration with a new one?',
-          values: {
-            indexName: fullIndexName,
-          },
-        }
-      )}
-    </EuiConfirmModal>
-  );
-
   return (
     <NewSearchIndexTemplate
+      docsUrl="https://github.com/elastic/connectors-ruby/blob/main/README.md"
       error={errorToMessage(error)}
       title={i18n.translate('xpack.enterpriseSearch.content.newIndex.steps.buildConnector.title', {
         defaultMessage: 'Build a connector',
@@ -128,79 +85,82 @@ export const MethodConnector: React.FC = () => {
     >
       <EuiSteps
         steps={[
+          CREATE_ELASTICSEARCH_INDEX_STEP,
           {
             children: (
               <EuiText size="s">
                 <p>
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.content.newIndex.steps.createIndex.content',
-                    {
-                      defaultMessage:
-                        'Provide a unique name for your index and select an optional index language.',
-                    }
-                  )}
+                  <FormattedMessage
+                    id="xpack.enterpriseSearch.content.newIndex.steps.buildConnector.content"
+                    defaultMessage="Using our connector framework and connector client examples, you’ll be able to accelerate ingestion to the Elasticsearch {bulkApiDocLink} for any data source. After creating your index, you will be guided through the steps to access the connector framework and connect your first connector client."
+                    values={{
+                      bulkApiDocLink: (
+                        <EuiLink href={docLinks.bulkApi} target="_blank" external>
+                          {i18n.translate(
+                            'xpack.enterpriseSearch.content.newIndex.methodConnector.steps.buildConnector.bulkAPILink',
+                            { defaultMessage: 'Bulk API' }
+                          )}
+                        </EuiLink>
+                      ),
+                    }}
+                  />
                 </p>
               </EuiText>
             ),
             status: 'incomplete',
             title: i18n.translate(
-              'xpack.enterpriseSearch.content.newIndex.steps.createIndex.title',
+              'xpack.enterpriseSearch.content.newIndex.methodConnector.steps.buildConnector.title',
               {
-                defaultMessage: 'Create an Elasticsearch index',
-              }
-            ),
-
-            titleSize: 'xs',
-          },
-          {
-            children: (
-              <EuiText size="s">
-                <p>
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.content.newIndex.methodConnector.steps.configureIngestion.content',
-                    {
-                      defaultMessage:
-                        'TODO TODO TODO Clone the connector package repository on GitHub and build a custom connector that suits your needs.',
-                    }
-                  )}
-                </p>
-              </EuiText>
-            ),
-            status: 'incomplete',
-            title: i18n.translate(
-              'xpack.enterpriseSearch.content.newIndex.steps.configureIngestion.title',
-              {
-                defaultMessage: 'Configure ingestion settings',
+                defaultMessage: 'Build and configure a connector',
               }
             ),
             titleSize: 'xs',
           },
-          {
-            children: (
-              <EuiText size="s">
-                <p>
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.content.newIndex.steps.buildSearchExperience.content',
-                    {
-                      defaultMessage:
-                        'Connect your newly created Elasticsearch index to an App Search engine to build a cusomtizable search experience.',
-                    }
-                  )}
-                </p>
-              </EuiText>
-            ),
-            status: 'incomplete',
-            title: i18n.translate(
-              'xpack.enterpriseSearch.content.newIndex.steps.buildSearchExperience.title',
-              {
-                defaultMessage: 'Build a search experience',
-              }
-            ),
-            titleSize: 'xs',
-          },
+          BUILD_SEARCH_EXPERIENCE_STEP,
         ]}
       />
-      {confirmModal}
+      {isModalVisible && (
+        <EuiConfirmModal
+          title={i18n.translate(
+            'xpack.enterpriseSearch.content.newIndex.steps.buildConnector.confirmModal.title',
+            {
+              defaultMessage: 'Replace existing connector',
+            }
+          )}
+          onCancel={(event) => {
+            event?.preventDefault();
+            setIsModalVisible(false);
+          }}
+          onConfirm={(event) => {
+            event.preventDefault();
+            makeRequest({ deleteExistingConnector: true, indexName: fullIndexName, language });
+          }}
+          cancelButtonText={i18n.translate(
+            'xpack.enterpriseSearch.content.newIndex.steps.buildConnector.confirmModal.cancelButton.label',
+            {
+              defaultMessage: 'Cancel',
+            }
+          )}
+          confirmButtonText={i18n.translate(
+            'xpack.enterpriseSearch.content.newIndex.steps.buildConnector.confirmModal.confirmButton.label',
+            {
+              defaultMessage: 'Replace configuration',
+            }
+          )}
+          defaultFocusedButton="confirm"
+        >
+          {i18n.translate(
+            'xpack.enterpriseSearch.content..newIndex.steps.buildConnector.confirmModal.description',
+            {
+              defaultMessage:
+                'A deleted index named {indexName} was originally tied to an existing connector configuration. Would you like to replace the existing connector configuration with a new one?',
+              values: {
+                indexName: fullIndexName,
+              },
+            }
+          )}
+        </EuiConfirmModal>
+      )}
     </NewSearchIndexTemplate>
   );
 };

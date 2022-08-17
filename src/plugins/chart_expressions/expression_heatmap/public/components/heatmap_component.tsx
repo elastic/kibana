@@ -35,6 +35,7 @@ import {
   LegendSizeToPixels,
 } from '@kbn/visualizations-plugin/common/constants';
 import { DatatableColumn } from '@kbn/expressions-plugin/public';
+import { IconChartHeatmap } from '@kbn/chart-icons';
 import type { HeatmapRenderProps, FilterEvent, BrushEvent } from '../../common';
 import {
   applyPaletteParams,
@@ -47,7 +48,6 @@ import {
   LegendColorPickerWrapper,
 } from '../utils/get_color_picker';
 import { defaultPaletteParams } from '../constants';
-import { HeatmapIcon } from './heatmap_icon';
 import './index.scss';
 
 declare global {
@@ -366,7 +366,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     );
 
     if (!chartData || !chartData.length) {
-      return <EmptyPlaceholder icon={HeatmapIcon} renderComplete={onRenderChange} />;
+      return <EmptyPlaceholder icon={IconChartHeatmap} renderComplete={onRenderChange} />;
     }
 
     if (!yAxisColumn) {
@@ -567,7 +567,9 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
           <Chart>
             <Settings
               onRenderChange={onRenderChange}
-              noResults={<EmptyPlaceholder icon={HeatmapIcon} renderComplete={onRenderChange} />}
+              noResults={
+                <EmptyPlaceholder icon={IconChartHeatmap} renderComplete={onRenderChange} />
+              }
               onElementClick={interactive ? (onElementClick as ElementClickListener) : undefined}
               showLegend={showLegend ?? args.legend.isVisible}
               legendPosition={args.legend.position}

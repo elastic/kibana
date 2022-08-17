@@ -202,7 +202,14 @@
           "MapByValueInput",
           ", ",
           "MapByReferenceInput",
-          ">"
+          ">,",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.FilterableEmbeddable",
+            "text": "FilterableEmbeddable"
+          }
         ],
         "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
         "deprecated": false,
@@ -447,6 +454,40 @@
             "description": [],
             "signature": [
               "() => string | undefined"
+            ],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.MapEmbeddable.getFilters",
+            "type": "Function",
+            "tags": [],
+            "label": "getFilters",
+            "description": [],
+            "signature": [
+              "() => Promise<",
+              "Filter",
+              "[]>"
+            ],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.MapEmbeddable.getQuery",
+            "type": "Function",
+            "tags": [],
+            "label": "getQuery",
+            "description": [],
+            "signature": [
+              "() => Promise<",
+              "Query",
+              " | undefined>"
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
@@ -1305,6 +1346,23 @@
           },
           {
             "parentPluginId": "maps",
+            "id": "def-public.BoundsRequestMeta.embeddableSearchContext",
+            "type": "Object",
+            "tags": [],
+            "label": "embeddableSearchContext",
+            "description": [],
+            "signature": [
+              "{ query?: ",
+              "Query",
+              " | undefined; filters: ",
+              "Filter",
+              "[]; } | undefined"
+            ],
+            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "maps",
             "id": "def-public.BoundsRequestMeta.sourceQuery",
             "type": "Object",
             "tags": [],
@@ -1991,6 +2049,62 @@
             "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
             "deprecated": false,
             "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-public.ITMSSource",
+        "type": "Interface",
+        "tags": [],
+        "label": "ITMSSource",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "maps",
+            "scope": "public",
+            "docId": "kibMapsPluginApi",
+            "section": "def-public.ITMSSource",
+            "text": "ITMSSource"
+          },
+          " extends ",
+          "ISource"
+        ],
+        "path": "x-pack/plugins/maps/public/classes/sources/tms_source/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.ITMSSource.getUrlTemplate",
+            "type": "Function",
+            "tags": [],
+            "label": "getUrlTemplate",
+            "description": [],
+            "signature": [
+              "(dataFilters: ",
+              "DataFilters",
+              ") => Promise<string>"
+            ],
+            "path": "x-pack/plugins/maps/public/classes/sources/tms_source/index.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "maps",
+                "id": "def-public.ITMSSource.getUrlTemplate.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "dataFilters",
+                "description": [],
+                "signature": [
+                  "DataFilters"
+                ],
+                "path": "x-pack/plugins/maps/public/classes/sources/tms_source/index.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           }
         ],

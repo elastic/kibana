@@ -10,7 +10,6 @@ import { parse } from 'url';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const find = getService('find');
   const browser = getService('browser');
   const deployment = getService('deployment');
@@ -25,12 +24,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         .post('/_security/role_mapping/saml1')
         .send({ roles: ['superuser'], enabled: true, rules: { field: { 'realm.name': 'saml1' } } })
         .expect(200);
-
-      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
-    });
-
-    after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
     });
 
     afterEach(async () => {

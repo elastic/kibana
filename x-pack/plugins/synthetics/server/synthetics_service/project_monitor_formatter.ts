@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { Subject } from 'rxjs';
 import { isEqual } from 'lodash';
 import { KibanaRequest } from '@kbn/core/server';
 import {
@@ -63,6 +64,7 @@ export class ProjectMonitorFormatter {
   private projectFilter: string;
   private syntheticsMonitorClient: SyntheticsMonitorClient;
   private request: KibanaRequest;
+  private subject?: Subject<unknown>;
 
   constructor({
     locations,
@@ -76,6 +78,7 @@ export class ProjectMonitorFormatter {
     server,
     syntheticsMonitorClient,
     request,
+    subject,
   }: {
     locations: Locations;
     privateLocations: Locations;
@@ -88,6 +91,7 @@ export class ProjectMonitorFormatter {
     server: UptimeServerSetup;
     syntheticsMonitorClient: SyntheticsMonitorClient;
     request: KibanaRequest;
+    subject?: Subject<unknown>;
   }) {
     this.projectId = projectId;
     this.spaceId = spaceId;
@@ -101,6 +105,7 @@ export class ProjectMonitorFormatter {
     this.server = server;
     this.projectFilter = `${syntheticsMonitorType}.attributes.${ConfigKey.PROJECT_ID}: "${this.projectId}"`;
     this.request = request;
+    this.subject = subject;
   }
 
   public configureAllProjectMonitors = async () => {
@@ -158,21 +163,11 @@ export class ProjectMonitorFormatter {
         if (this.staleMonitorsMap[monitor.id]) {
           this.staleMonitorsMap[monitor.id].stale = false;
         }
+        this.handleStreamingMessage({ message: `${monitor.id}: monitor updated successfully` });
       } else {
-        const newMonitor = await this.savedObjectsClient.create<EncryptedSyntheticsMonitor>(
-          syntheticsMonitorType,
-          formatSecrets({
-            ...normalizedMonitor,
-            revision: 1,
-          })
-        );
-        await syncNewMonitor({
-          server: this.server,
-          monitor: normalizedMonitor,
-          monitorSavedObject: newMonitor,
-          syntheticsMonitorClient: this.syntheticsMonitorClient,
-        });
+        await this.createMonitor(normalizedMonitor);
         this.createdMonitors.push(monitor.id);
+        this.handleStreamingMessage({ message: `${monitor.id}: monitor created successfully` });
       }
     } catch (e) {
       this.server.logger.error(e);
@@ -182,6 +177,10 @@ export class ProjectMonitorFormatter {
         details: e.message,
         payload: monitor,
       });
+      this.handleStreamingMessage({ message: `${monitor.id}: failed to create or update monitor` });
+      if (this.staleMonitorsMap[monitor.id]) {
+        this.staleMonitorsMap[monitor.id].stale = false;
+      }
     }
   };
 
@@ -230,6 +229,24 @@ export class ProjectMonitorFormatter {
     return savedObjects?.[0];
   };
 
+  private createMonitor = async (normalizedMonitor: BrowserFields) => {
+    const newMonitor = await this.savedObjectsClient.create<EncryptedSyntheticsMonitor>(
+      syntheticsMonitorType,
+      formatSecrets({
+        ...normalizedMonitor,
+        revision: 1,
+      })
+    );
+    await syncNewMonitor({
+      server: this.server,
+      monitor: normalizedMonitor,
+      monitorSavedObject: newMonitor,
+      syntheticsMonitorClient: this.syntheticsMonitorClient,
+      savedObjectsClient: this.savedObjectsClient,
+      request: this.request,
+    });
+  };
+
   private updateMonitor = async (
     previousMonitor: SavedObjectsFindResult<EncryptedSyntheticsMonitor>,
     normalizedMonitor: BrowserFields
@@ -271,8 +288,11 @@ export class ProjectMonitorFormatter {
         editedMonitor: normalizedMonitor,
         editedMonitorSavedObject: editedMonitor,
         previousMonitor,
+        decryptedPreviousMonitor,
         server: this.server,
         syntheticsMonitorClient: this.syntheticsMonitorClient,
+        savedObjectsClient: this.savedObjectsClient,
+        request: this.request,
       });
     }
 
@@ -314,14 +334,23 @@ export class ProjectMonitorFormatter {
         server: this.server,
         monitorId,
         syntheticsMonitorClient: this.syntheticsMonitorClient,
+        request: this.request,
       });
       this.deletedMonitors.push(journeyId);
+      this.handleStreamingMessage({ message: `Monitor ${journeyId} deleted successfully` });
     } catch (e) {
+      this.handleStreamingMessage({ message: `Monitor ${journeyId} could not be deleted` });
       this.failedStaleMonitors.push({
         id: monitorId,
         reason: 'Failed to delete stale monitor',
         details: e.message,
       });
+    }
+  };
+
+  private handleStreamingMessage = async ({ message }: { message: string }) => {
+    if (this.subject) {
+      this.subject?.next(message);
     }
   };
 }

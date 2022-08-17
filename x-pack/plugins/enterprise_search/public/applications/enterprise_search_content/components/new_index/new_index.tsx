@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-/**
- * TODO:
- * - Need to add logic to take a query param to select the correct method when applicable.
- *   This is needed for the use case where a user clicks on an integration method from the
- *   Kibana intgegrations page
- */
-
 import React, { useState } from 'react';
+
+import { useLocation } from 'react-router-dom';
 
 import {
   EuiBadge,
@@ -25,6 +20,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { parseQueryParams } from '../../../shared/query_params';
+import { EuiLinkTo } from '../../../shared/react_router_helpers';
+
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 import { baseBreadcrumbs } from '../search_indices';
 
@@ -33,6 +31,12 @@ import { SearchIndexEmptyState } from './empty_state';
 import { MethodApi } from './method_api/method_api';
 import { MethodConnector } from './method_connector/method_connector';
 import { MethodCrawler } from './method_crawler/method_crawler';
+
+export const enum IngestionMethodId {
+  connector = 'connector',
+  crawler = 'crawler',
+  api = 'api',
+}
 
 const METHOD_BUTTON_GROUP_OPTIONS: ButtonGroupOption[] = [
   {
@@ -46,7 +50,7 @@ const METHOD_BUTTON_GROUP_OPTIONS: ButtonGroupOption[] = [
       defaultMessage: 'No development required',
     }),
     icon: 'globe',
-    id: 'crawler',
+    id: IngestionMethodId.crawler,
     label: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.crawler.label', {
       defaultMessage: 'Use the web crawler',
     }),
@@ -62,7 +66,7 @@ const METHOD_BUTTON_GROUP_OPTIONS: ButtonGroupOption[] = [
       defaultMessage: 'Some development required',
     }),
     icon: 'visVega',
-    id: 'api',
+    id: IngestionMethodId.api,
     label: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.api.label', {
       defaultMessage: 'Use the API',
     }),
@@ -84,7 +88,7 @@ const METHOD_BUTTON_GROUP_OPTIONS: ButtonGroupOption[] = [
       defaultMessage: 'Development required',
     }),
     icon: 'package',
-    id: 'connector',
+    id: IngestionMethodId.connector,
     label: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.connector.label', {
       defaultMessage: 'Build a connector',
     }),
@@ -92,9 +96,14 @@ const METHOD_BUTTON_GROUP_OPTIONS: ButtonGroupOption[] = [
 ];
 
 export const NewIndex: React.FC = () => {
-  const [selectedMethod, setSelectedMethod] = useState<ButtonGroupOption>(
-    METHOD_BUTTON_GROUP_OPTIONS[0]
-  );
+  const { search } = useLocation();
+  const { method: methodParam } = parseQueryParams(search);
+
+  const initialSelectedMethod =
+    METHOD_BUTTON_GROUP_OPTIONS.find((option) => option.id === methodParam) ??
+    METHOD_BUTTON_GROUP_OPTIONS[0];
+
+  const [selectedMethod, setSelectedMethod] = useState<ButtonGroupOption>(initialSelectedMethod);
 
   return (
     <EnterpriseSearchContentPageTemplate
@@ -140,14 +149,20 @@ export const NewIndex: React.FC = () => {
               selected={selectedMethod}
               onChange={setSelectedMethod}
             />
+            <EuiSpacer size="xxl" />
+            <EuiLinkTo to="/app/integrations" shouldNotCreateHref>
+              {i18n.translate('xpack.enterpriseSearch.content.newIndex.viewIntegrationsLink', {
+                defaultMessage: 'View additional integrations',
+              })}
+            </EuiLinkTo>
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem>
           {selectedMethod ? (
             <>
-              {selectedMethod.id === 'crawler' && <MethodCrawler />}
-              {selectedMethod.id === 'api' && <MethodApi />}
-              {selectedMethod.id === 'connector' && <MethodConnector />}
+              {selectedMethod.id === IngestionMethodId.crawler && <MethodCrawler />}
+              {selectedMethod.id === IngestionMethodId.api && <MethodApi />}
+              {selectedMethod.id === IngestionMethodId.connector && <MethodConnector />}
             </>
           ) : (
             <SearchIndexEmptyState />

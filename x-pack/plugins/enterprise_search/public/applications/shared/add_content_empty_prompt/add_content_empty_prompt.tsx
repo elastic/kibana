@@ -28,6 +28,7 @@ import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../common/constants';
 import welcomeGraphicDark from '../../../assets/images/welcome_dark.svg';
 import welcomeGraphicLight from '../../../assets/images/welcome_light.svg';
 import { NEW_INDEX_PATH } from '../../enterprise_search_content/routes';
+import { docLinks } from '../doc_links';
 import { EuiLinkTo } from '../react_router_helpers';
 
 import './add_content_empty_prompt.scss';
@@ -59,7 +60,7 @@ export const AddContentEmptyPrompt: React.FC<EmptyPromptProps> = ({ title, butto
                 <p>
                   {i18n.translate('xpack.enterpriseSearch.emptyState.description', {
                     defaultMessage:
-                      'You can now easily create and add content to Elasticsearch indices with Enterprise Search - including website content with the Elastic Web Crawler or third-party data sources with Custom Connectors.',
+                      'An Elasticsearch index is where your content gets stored. Get started by creating an Elasticsearch index and selecting an ingestion method. Options include the Elastic web crawler, third party data integrations, or using Elasticsearch API endpoints.',
                   })}
                 </p>
                 <p>
@@ -86,8 +87,7 @@ export const AddContentEmptyPrompt: React.FC<EmptyPromptProps> = ({ title, butto
                   </EuiLinkTo>
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  {/* TODO need link for Learn More link*/}
-                  <EuiLink href="#" target="_blank">
+                  <EuiLink href={docLinks.start} target="_blank">
                     {i18n.translate('xpack.enterpriseSearch.overview.emptyState.footerLinkTitle', {
                       defaultMessage: 'Learn more',
                     })}

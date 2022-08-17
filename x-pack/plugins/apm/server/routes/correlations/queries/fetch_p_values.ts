@@ -9,34 +9,43 @@ import { ERROR_CORRELATION_THRESHOLD } from '../../../../common/correlations/con
 import type { FailedTransactionsCorrelation } from '../../../../common/correlations/failed_transactions_correlations/types';
 
 import { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
-import { ProcessorEvent } from '../../../../common/processor_event';
+import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
 import { Setup } from '../../../lib/helpers/setup_request';
-import { splitAllSettledPromises } from '../utils';
+import { splitAllSettledPromises, getEventType } from '../utils';
 import { fetchDurationHistogramRangeSteps } from './fetch_duration_histogram_range_steps';
 import { fetchFailedEventsCorrelationPValues } from './fetch_failed_events_correlation_p_values';
 
 export const fetchPValues = async ({
   setup,
-  eventType,
   start,
   end,
   environment,
   kuery,
   query,
+  durationMin,
+  durationMax,
   fieldCandidates,
 }: CommonCorrelationsQueryParams & {
   setup: Setup;
-  eventType: ProcessorEvent;
+  durationMin?: number;
+  durationMax?: number;
   fieldCandidates: string[];
 }) => {
-  const rangeSteps = await fetchDurationHistogramRangeSteps({
+  const chartType = LatencyDistributionChartType.failedTransactionsCorrelations;
+  const searchMetrics = false; // failed transactions correlations does not search metrics documents
+  const eventType = getEventType(chartType, searchMetrics);
+
+  const { rangeSteps } = await fetchDurationHistogramRangeSteps({
     setup,
-    eventType,
+    chartType,
     start,
     end,
     environment,
     kuery,
     query,
+    searchMetrics,
+    durationMinOverride: durationMin,
+    durationMaxOverride: durationMax,
   });
 
   const { fulfilled, rejected } = splitAllSettledPromises(
@@ -44,7 +53,6 @@ export const fetchPValues = async ({
       fieldCandidates.map((fieldName) =>
         fetchFailedEventsCorrelationPValues({
           setup,
-          eventType,
           start,
           end,
           environment,

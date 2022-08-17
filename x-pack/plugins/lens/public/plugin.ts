@@ -12,6 +12,7 @@ import type {
   UsageCollectionSetup,
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
@@ -54,20 +55,21 @@ import type {
 import type {
   XyVisualization as XyVisualizationType,
   XyVisualizationPluginSetupPlugins,
-} from './xy_visualization';
+} from './visualizations/xy';
 import type {
-  MetricVisualization as MetricVisualizationType,
-  MetricVisualizationPluginSetupPlugins,
-} from './metric_visualization';
+  LegacyMetricVisualization as LegacyMetricVisualizationType,
+  LegacyMetricVisualizationPluginSetupPlugins,
+} from './visualizations/legacy_metric';
+import type { MetricVisualization as MetricVisualizationType } from './visualizations/metric';
 import type {
   DatatableVisualization as DatatableVisualizationType,
   DatatableVisualizationPluginSetupPlugins,
-} from './datatable_visualization';
+} from './visualizations/datatable';
 import type {
   PieVisualization as PieVisualizationType,
   PieVisualizationPluginSetupPlugins,
-} from './pie_visualization';
-import type { HeatmapVisualization as HeatmapVisualizationType } from './heatmap_visualization';
+} from './visualizations/partition';
+import type { HeatmapVisualization as HeatmapVisualizationType } from './visualizations/heatmap';
 import type { GaugeVisualization as GaugeVisualizationType } from './visualizations/gauge';
 
 import { APP_ID, getEditPath, NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common/constants';
@@ -223,6 +225,7 @@ export class LensPlugin {
   private queuedVisualizations: Array<Visualization | (() => Promise<Visualization>)> = [];
   private indexpatternDatasource: IndexPatternDatasourceType | undefined;
   private xyVisualization: XyVisualizationType | undefined;
+  private legacyMetricVisualization: LegacyMetricVisualizationType | undefined;
   private metricVisualization: MetricVisualizationType | undefined;
   private pieVisualization: PieVisualizationType | undefined;
   private heatmapVisualization: HeatmapVisualizationType | undefined;
@@ -251,7 +254,8 @@ export class LensPlugin {
     const startServices = createStartServicesGetter(core.getStartServices);
 
     const getStartServices = async (): Promise<LensEmbeddableStartServices> => {
-      const { getLensAttributeService, setUsageCollectionStart } = await import('./async_services');
+      const { getLensAttributeService, setUsageCollectionStart, initMemoizedErrorNotification } =
+        await import('./async_services');
       const { core: coreStart, plugins } = startServices();
 
       await this.initParts(
@@ -270,6 +274,8 @@ export class LensPlugin {
         setUsageCollectionStart(plugins.usageCollection);
       }
 
+      initMemoizedErrorNotification(coreStart);
+
       return {
         attributeService: getLensAttributeService(coreStart, plugins),
         capabilities: coreStart.application.capabilities,
@@ -277,11 +283,16 @@ export class LensPlugin {
         data: plugins.data,
         timefilter: plugins.data.query.timefilter.timefilter,
         expressionRenderer: plugins.expressions.ReactExpressionRenderer,
-        documentToExpression: this.editorFrameService!.documentToExpression,
+        documentToExpression: (doc) =>
+          this.editorFrameService!.documentToExpression(doc, {
+            dataViews: plugins.dataViews,
+            storage: new Storage(localStorage),
+            uiSettings: core.uiSettings,
+          }),
         injectFilterReferences: data.query.filterManager.inject.bind(data.query.filterManager),
         visualizationMap,
         datasourceMap,
-        indexPatternService: plugins.dataViews,
+        dataViews: plugins.dataViews,
         uiActions: plugins.uiActions,
         usageCollection,
         inspector: plugins.inspector,
@@ -337,13 +348,17 @@ export class LensPlugin {
           eventAnnotation
         );
 
-        const { mountApp, getLensAttributeService, setUsageCollectionStart } = await import(
-          './async_services'
-        );
+        const {
+          mountApp,
+          getLensAttributeService,
+          setUsageCollectionStart,
+          initMemoizedErrorNotification,
+        } = await import('./async_services');
 
         if (deps.usageCollection) {
           setUsageCollectionStart(deps.usageCollection);
         }
+        initMemoizedErrorNotification(coreStart);
 
         const frameStart = this.editorFrameService!.start(coreStart, deps);
         return mountApp(core, params, {
@@ -400,6 +415,7 @@ export class LensPlugin {
       EditorFrameService,
       IndexPatternDatasource,
       XyVisualization,
+      LegacyMetricVisualization,
       MetricVisualization,
       PieVisualization,
       HeatmapVisualization,
@@ -409,6 +425,7 @@ export class LensPlugin {
     this.editorFrameService = new EditorFrameService();
     this.indexpatternDatasource = new IndexPatternDatasource();
     this.xyVisualization = new XyVisualization();
+    this.legacyMetricVisualization = new LegacyMetricVisualization();
     this.metricVisualization = new MetricVisualization();
     this.pieVisualization = new PieVisualization();
     this.heatmapVisualization = new HeatmapVisualization();
@@ -419,7 +436,7 @@ export class LensPlugin {
     const dependencies: IndexPatternDatasourceSetupPlugins &
       XyVisualizationPluginSetupPlugins &
       DatatableVisualizationPluginSetupPlugins &
-      MetricVisualizationPluginSetupPlugins &
+      LegacyMetricVisualizationPluginSetupPlugins &
       PieVisualizationPluginSetupPlugins = {
       expressions,
       data,
@@ -432,6 +449,7 @@ export class LensPlugin {
     this.indexpatternDatasource.setup(core, dependencies);
     this.xyVisualization.setup(core, dependencies);
     this.datatableVisualization.setup(core, dependencies);
+    this.legacyMetricVisualization.setup(core, dependencies);
     this.metricVisualization.setup(core, dependencies);
     this.pieVisualization.setup(core, dependencies);
     this.heatmapVisualization.setup(core, dependencies);
@@ -499,7 +517,7 @@ export class LensPlugin {
         return Boolean(core.application.capabilities.visualize?.show);
       },
       getXyVisTypes: async () => {
-        const { visualizationTypes } = await import('./xy_visualization/types');
+        const { visualizationTypes } = await import('./visualizations/xy/types');
         return visualizationTypes;
       },
 

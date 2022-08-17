@@ -236,12 +236,10 @@ export const update = async (
 ): Promise<CasesResponse> => {
   const {
     unsecuredSavedObjectsClient,
-    caseService,
-    userActionService,
+    services: { caseService, userActionService, alertsService },
     user,
     logger,
     authorization,
-    alertsService,
   } = clientArgs;
   const query = pipe(
     excess(CasesPatchRequestRt).decode(cases),

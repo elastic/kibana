@@ -365,6 +365,22 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
             ],
             fieldsToValidateOnChange: rolloverFormPaths,
           },
+          max_primary_shard_docs: {
+            label: i18nTexts.editPolicy.maxPrimaryShardDocsLabel,
+            validations: [
+              {
+                validator: rolloverThresholdsValidator,
+              },
+              {
+                validator: ifExistsNumberGreaterThanZero,
+              },
+              {
+                validator: integerValidator,
+              },
+            ],
+            serializer: serializers.stringToNumber,
+            fieldsToValidateOnChange: rolloverFormPaths,
+          },
           max_size: {
             label: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.maximumIndexSizeLabel', {
               defaultMessage: 'Maximum index size',

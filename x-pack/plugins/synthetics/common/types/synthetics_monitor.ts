@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SimpleSavedObject } from '@kbn/core/public';
+import type { SimpleSavedObject } from '@kbn/core/public';
 import { EncryptedSyntheticsMonitor, SyntheticsMonitor } from '../runtime_types';
 
 export interface MonitorIdParam {

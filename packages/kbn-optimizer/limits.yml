@@ -32,7 +32,7 @@ pageLoadAssetSize:
   inputControlVis: 172675
   inspector: 148711
   kibanaOverview: 56279
-  lens: 35000
+  lens: 36000
   licenseManagement: 41817
   licensing: 29004
   lists: 22900
@@ -120,6 +120,7 @@ pageLoadAssetSize:
   controls: 40000
   expressionPartitionVis: 26338
   sharedUX: 16225
+  savedSearch: 16225
   ux: 20784
   sessionView: 77750
   cloudSecurityPosture: 19109
@@ -133,3 +134,4 @@ pageLoadAssetSize:
   kibanaUsageCollection: 16463
   kubernetesSecurity: 77234
   threatIntelligence: 29195
+  files: 22673

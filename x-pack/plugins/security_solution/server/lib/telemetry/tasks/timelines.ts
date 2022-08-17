@@ -104,9 +104,11 @@ export function createTelemetryTimelineTaskConfig() {
         );
 
         const nodeIds = [] as string[];
-        for (const node of tree) {
-          const nodeId = node?.id.toString();
-          nodeIds.push(nodeId);
+        if (Array.isArray(tree)) {
+          for (const node of tree) {
+            const nodeId = node?.id.toString();
+            nodeIds.push(nodeId);
+          }
         }
 
         sender.getTelemetryUsageCluster()?.incrementCounter({
@@ -138,16 +140,18 @@ export function createTelemetryTimelineTaskConfig() {
         // Create telemetry record
 
         const telemetryTimeline: TimelineTelemetryEvent[] = [];
-        for (const node of tree) {
-          const id = node.id.toString();
-          const event = eventsStore.get(id);
+        if (Array.isArray(tree)) {
+          for (const node of tree) {
+            const id = node.id.toString();
+            const event = eventsStore.get(id);
 
-          const timelineTelemetryEvent: TimelineTelemetryEvent = {
-            ...node,
-            event,
-          };
+            const timelineTelemetryEvent: TimelineTelemetryEvent = {
+              ...node,
+              event,
+            };
 
-          telemetryTimeline.push(timelineTelemetryEvent);
+            telemetryTimeline.push(timelineTelemetryEvent);
+          }
         }
 
         if (telemetryTimeline.length >= 1) {

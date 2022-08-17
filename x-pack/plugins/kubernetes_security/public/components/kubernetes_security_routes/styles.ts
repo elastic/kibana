@@ -13,10 +13,15 @@ export const useStyles = () => {
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
-    const { size, font, border } = euiTheme;
+    const { size, font } = euiTheme;
 
     const titleSection: CSSObject = {
       marginBottom: size.l,
+    };
+
+    const titleText: CSSObject = {
+      display: 'flex',
+      alignItems: 'center',
     };
 
     const titleActions: CSSObject = {
@@ -80,24 +85,19 @@ export const useStyles = () => {
       fontWeight: font.weight.bold,
     };
 
-    const widgetHolder: CSSObject = {
-      position: 'relative',
-      width: '332px',
-      height: '235px',
-      borderRadius: border.radius.medium,
-      fontWeight: font.weight.bold,
-      fontSize: size.m,
-      lineHeight: size.base,
-    };
-
     const widgetsGroup: CSSObject = {
       [`@media (max-width:${euiTheme.breakpoint.xl}px)`]: {
         flexDirection: 'column',
       },
     };
 
+    const betaBadge: CSSObject = {
+      marginLeft: size.m,
+    };
+
     return {
       titleSection,
+      titleText,
       titleActions,
       updatedAt,
       widgetBadge,
@@ -107,8 +107,8 @@ export const useStyles = () => {
       rightWidgetsGroup,
       widgetsBottomSpacing,
       percentageChartTitle,
-      widgetHolder,
       widgetsGroup,
+      betaBadge,
     };
   }, [euiTheme]);
 

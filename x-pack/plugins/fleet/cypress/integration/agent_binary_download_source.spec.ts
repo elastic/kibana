@@ -26,7 +26,7 @@ describe('Agent binary download source section', () => {
 
     cy.getBySel(AGENT_BINARY_SOURCES_TABLE).find('tr').should('have.length', '2');
     cy.getBySel(AGENT_BINARY_SOURCES_TABLE_ACTIONS.HOST).contains(
-      'https://artifacts.elastic.co/downloads/beats/elastic-agent'
+      'https://artifacts.elastic.co/downloads/'
     );
     cy.getBySel(AGENT_BINARY_SOURCES_TABLE_ACTIONS.DEFAULT_VALUE).should('exist');
     cy.getBySel(AGENT_BINARY_SOURCES_TABLE_ACTIONS.EDIT).click();
