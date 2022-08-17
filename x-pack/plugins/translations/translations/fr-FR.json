@@ -30591,7 +30591,6 @@
     "xpack.synthetics.charts.mlAnnotation.severity": "Sévérité : {severity}",
     "xpack.synthetics.controls.selectSeverity.scoreDetailsDescription": "score {value} et supérieur",
     "xpack.synthetics.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.throttling_exceeded.message": "Vous avez dépassé la limite de { throttlingField } pour les nœuds synthétiques. La valeur de { throttlingField } ne peut pas être supérieure à { limit } Mbits/s.",
-    "xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorType.browser.warning.description": "Pour créer un moniteur \"Navigateur\", veuillez vous assurer que vous utilisez le conteneur Docker elastic-agent-complete, qui inclut les dépendances permettant d'exécuter ces moniteurs. Pour en savoir plus, visitez notre {link}.",
     "xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.params.helpText": "Utilisez le JSON pour définir les paramètres qui peuvent être référencés dans votre script avec {code}",
     "xpack.synthetics.durationChart.emptyPrompt.description": "Ce moniteur n'a jamais été {emphasizedText} au cours de la plage temporelle sélectionnée.",
     "xpack.synthetics.editMonitorRoute.title": "Modifier le moniteur | {baseTitle}",
