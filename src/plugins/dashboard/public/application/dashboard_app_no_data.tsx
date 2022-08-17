@@ -24,9 +24,8 @@ export const DashboardAppNoDataPage = ({
   const {
     services: { core, dataViewEditor },
   } = useKibana<DashboardAppServices>();
-  const {
-    data: { dataViews },
-  } = pluginServices.getServices();
+  const { data } = pluginServices.getHooks();
+  const { dataViews } = data.useService();
 
   const analyticsServices = {
     coreStart: core as unknown as React.ComponentProps<
@@ -46,7 +45,6 @@ export const isDashboardAppInNoDataState = async () => {
   const {
     data: { dataViews },
   } = pluginServices.getServices();
-
   const hasUserDataView = await dataViews.hasData.hasUserDataView().catch(() => false);
   return !hasUserDataView;
 };

@@ -33,9 +33,8 @@ export function DashboardEmptyScreen({
   uiSettings,
   isReadonlyMode,
 }: DashboardEmptyScreenProps) {
-  const {
-    http: { basePath },
-  } = pluginServices.getServices();
+  const { http } = pluginServices.getHooks();
+  const { basePath } = http.useService();
 
   const IS_DARK_THEME = uiSettings.get('theme:darkMode');
   const emptyStateGraphicURL = IS_DARK_THEME

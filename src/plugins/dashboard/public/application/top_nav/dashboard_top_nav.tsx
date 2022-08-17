@@ -112,9 +112,8 @@ export function DashboardTopNav({
     allowByValueEmbeddables,
   } = useKibana<DashboardAppServices>().services;
 
-  const {
-    data: { query, search },
-  } = pluginServices.getServices();
+  const { data } = pluginServices.getHooks();
+  const { query, search } = data.useService();
 
   const { version: kibanaVersion } = initializerContext.env.packageInfo;
   const timefilter = query.timefilter.timefilter;

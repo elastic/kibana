@@ -43,11 +43,9 @@ export function DashboardApp({
   const { core, chrome, embeddable, onAppLeave, uiSettings, spacesService, screenshotModeService } =
     useKibana<DashboardAppServices>().services;
 
-  const {
-    data: {
-      search: { session },
-    },
-  } = pluginServices.getServices();
+  const { data } = pluginServices.getHooks();
+  const { search } = data.useService();
+  const { session } = search;
 
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
   const dashboardTitleRef = useRef<HTMLHeadingElement>(null);

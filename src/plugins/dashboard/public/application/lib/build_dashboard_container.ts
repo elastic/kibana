@@ -55,7 +55,6 @@ export const buildDashboardContainer = async ({
 
   // set up search session
   enableDashboardSearchSessions({
-    data,
     kibanaVersion,
     savedDashboard,
     initialDashboardState,
