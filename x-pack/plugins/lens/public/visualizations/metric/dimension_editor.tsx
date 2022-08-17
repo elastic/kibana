@@ -187,7 +187,7 @@ function SecondaryMetricEditor({ accessor, idPrefix, frame, layerId, setState, s
           defaultMessage: 'Prefix',
         })}
       >
-        <div>
+        <>
           <EuiButtonGroup
             isFullWidth
             buttonSize="compressed"
@@ -235,7 +235,7 @@ function SecondaryMetricEditor({ accessor, idPrefix, frame, layerId, setState, s
               });
             }}
           />
-          <EuiSpacer size="s" />
+          <EuiSpacer size="xs" />
           {state.secondaryPrefix && (
             <DebouncedInput
               compressed
@@ -248,7 +248,7 @@ function SecondaryMetricEditor({ accessor, idPrefix, frame, layerId, setState, s
               }}
             />
           )}
-        </div>
+        </>
       </EuiFormRow>
     </div>
   );
