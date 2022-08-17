@@ -26,12 +26,33 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
       const instance = apm.service('lambda-python', ENVIRONMENT, 'python').instance('instance');
 
       const traceEventsSetups = [
-        { functionName: 'lambda-python-1', coldStart: true },
-        { functionName: 'lambda-python-2', coldStart: false },
+        {
+          functionName: 'lambda-python-1',
+          coldStart: true,
+          billedDuration: 4000,
+          timeout: 2000,
+          coldStartDuration: 1000,
+          faasDuration: 3000,
+        },
+        {
+          functionName: 'lambda-python-2',
+          coldStart: false,
+          billedDuration: 4000,
+          timeout: 2000,
+          coldStartDuration: 0,
+          faasDuration: 3000,
+        },
       ];
 
-      const traceEvents = ({ functionName, coldStart }: typeof traceEventsSetups[0]) => {
-        return timestamps.generator((timestamp) =>
+      const traceEvents = ({
+        functionName,
+        coldStart,
+        billedDuration,
+        coldStartDuration,
+        faasDuration,
+        timeout,
+      }: typeof traceEventsSetups[0]) => {
+        const awsLambdaEvents = timestamps.generator((timestamp) =>
           instance
             .transaction('GET /order/{id}')
             .defaults({
@@ -39,14 +60,34 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
               'cloud.provider': 'aws',
               'cloud.service.name': 'lambda',
               'cloud.region': 'us-east-1',
-              'faas.id': `arn:aws:lambda:us-west-2:123456789012:function:${functionName}`,
-              'faas.coldstart': coldStart,
-              'faas.trigger.type': 'other',
             })
             .timestamp(timestamp)
             .duration(1000)
             .success()
         );
+
+        const metricsets = range
+          .interval('30s')
+          .rate(1)
+          .generator((timestamp) =>
+            instance
+              .appMetrics({
+                'system.memory.actual.free': 800,
+                'system.memory.total': 1000,
+                'system.cpu.total.norm.pct': 0.6,
+                'system.process.cpu.total.norm.pct': 0.7,
+                'faas.id': `arn:aws:lambda:us-west-2:123456789012:function:${functionName}`,
+                'faas.coldstart': coldStart,
+                'faas.trigger.type': 'other',
+                'faas.billed_duration': billedDuration,
+                'faas.timeout': faasDuration,
+                'faas.coldstart_duration': coldStartDuration,
+                'faas.duration': faasDuration,
+              })
+              .timestamp(timestamp)
+          );
+
+        return awsLambdaEvents.merge(metricsets);
       };
 
       return traceEventsSetups

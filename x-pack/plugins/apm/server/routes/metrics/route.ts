@@ -23,6 +23,7 @@ const metricsChartsRoute = createApmServerRoute({
       }),
       t.partial({
         serviceNodeName: t.string,
+        serviceRuntimeName: t.string,
       }),
       environmentRt,
       kueryRt,
@@ -50,8 +51,15 @@ const metricsChartsRoute = createApmServerRoute({
     const { params } = resources;
     const setup = await setupRequest(resources);
     const { serviceName } = params.path;
-    const { agentName, environment, kuery, serviceNodeName, start, end } =
-      params.query;
+    const {
+      agentName,
+      environment,
+      kuery,
+      serviceNodeName,
+      start,
+      end,
+      serviceRuntimeName,
+    } = params.query;
 
     const charts = await getMetricsChartDataByAgent({
       environment,
@@ -62,6 +70,7 @@ const metricsChartsRoute = createApmServerRoute({
       serviceNodeName,
       start,
       end,
+      serviceRuntimeName,
     });
 
     return { charts };

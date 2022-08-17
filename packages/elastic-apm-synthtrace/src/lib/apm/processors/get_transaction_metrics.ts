@@ -66,6 +66,10 @@ export function getTransactionMetrics(events: ApmFields[]) {
     'faas.id',
     'faas.coldstart',
     'faas.trigger.type',
+    'faas.billed_duration',
+    'faas.timeout',
+    'faas.coldstart_duration',
+    'faas.duration',
   ]);
 
   return metricsets.map((metricset) => {
