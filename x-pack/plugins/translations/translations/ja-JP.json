@@ -30569,7 +30569,6 @@
     "xpack.synthetics.charts.mlAnnotation.severity": "深刻度：{severity}",
     "xpack.synthetics.controls.selectSeverity.scoreDetailsDescription": "スコア{value}以上",
     "xpack.synthetics.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.throttling_exceeded.message": "Syntheticsノードの{ throttlingField }上限を超えました。{ throttlingField }値は{ limit }Mbps以下でなければなりません。",
-    "xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorType.browser.warning.description": "「Browser」モニターを作成するには、elastic-agent-complete Dockerコンテナーを使用していることを確認します。これには、これらのモニターを実行するための依存関係が含まれています。詳細については、{link}をご覧ください。",
     "xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.params.helpText": "JSONを使用して、{code}のスクリプトで参照できるパラメーターを定義します",
     "xpack.synthetics.durationChart.emptyPrompt.description": "このモニターは選択された時間範囲で一度も{emphasizedText}していません。",
     "xpack.synthetics.editMonitorRoute.title": "モニターを編集 | {baseTitle}",
