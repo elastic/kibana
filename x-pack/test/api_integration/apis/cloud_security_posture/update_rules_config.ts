@@ -52,7 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it(`should return 200 for existing package policy id`, async () => {
-      const { body: response } = await supertest
+      const { body: postPackageResponse } = await supertest
         .post(`/api/fleet/package_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
@@ -72,13 +72,15 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      await supertest
+      const { body: res } = await supertest
         .post(`/internal/cloud_security_posture/update_rules_config`)
         .set('kbn-xsrf', 'xxxx')
         .send({
-          package_policy_id: response.item.id,
+          package_policy_id: postPackageResponse.item.id,
         })
         .expect(200);
+
+      expect(res.name).to.be('cloud_security_posture-1');
     });
   });
 }
