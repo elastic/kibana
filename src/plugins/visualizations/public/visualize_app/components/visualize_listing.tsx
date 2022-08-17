@@ -34,6 +34,7 @@ import { getTableColumns, getNoItemsMessage } from '../utils';
 export const VisualizeListing = () => {
   const {
     services: {
+      core,
       application,
       executionContext,
       chrome,
@@ -108,8 +109,8 @@ export const VisualizeListing = () => {
 
   const noItemsFragment = useMemo(() => getNoItemsMessage(createNewVis), [createNewVis]);
   const tableColumns = useMemo(
-    () => getTableColumns(application, kbnUrlStateStorage, savedObjectsTagging),
-    [application, kbnUrlStateStorage, savedObjectsTagging]
+    () => getTableColumns(core, kbnUrlStateStorage, savedObjectsTagging),
+    [core, kbnUrlStateStorage, savedObjectsTagging]
   );
 
   const fetchItems = useCallback(
