@@ -116,9 +116,9 @@ export function ExplainLogRateSpikesProvider({ getService }: FtrProviderContext)
 
     async getBrushSelectionWidth(selector: string) {
       const brush = await testSubjects.find(selector);
-      const brushSelectionBefore = (await brush.findAllByClassName('selection'))[0];
-      const brushSelectionRectBefore = await brushSelectionBefore._webElement.getRect();
-      return brushSelectionRectBefore.width;
+      const brushSelection = (await brush.findAllByClassName('selection'))[0];
+      const brushSelectionRect = await brushSelection._webElement.getRect();
+      return brushSelectionRect.width;
     },
 
     async getPxForTimestamp(timestamp: number) {
