@@ -7,15 +7,15 @@
 
 /* eslint-disable max-classes-per-file */
 
-import React, { ChangeEvent, FormEvent } from 'react';
+import React, { FormEvent } from 'react';
 import { VisualizationDimensionEditorProps } from '../../types';
 import { CustomPaletteParams, PaletteOutput, PaletteRegistry } from '@kbn/coloring';
 
 import { MetricVisualizationState } from './visualization';
 import { DimensionEditor } from './dimension_editor';
-import { HTMLAttributes, ReactWrapper, shallow } from 'enzyme';
+import { HTMLAttributes, mount, ReactWrapper, shallow } from 'enzyme';
 import { CollapseSetting } from '../../shared_components/collapse_setting';
-import { EuiButtonGroup, EuiColorPicker, EuiFieldText } from '@elastic/eui';
+import { EuiButtonGroup, EuiColorPicker } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { LayoutDirection } from '@elastic/charts';
 import { act } from 'react-dom/test-utils';
@@ -23,6 +23,7 @@ import { EuiColorPickerOutput } from '@elastic/eui/src/components/color_picker/c
 import { createMockFramePublicAPI } from '../../mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { euiLightVars } from '@kbn/ui-theme';
+import { DebouncedInput } from '../../shared_components/debounced_input';
 
 jest.mock('lodash', () => {
   const original = jest.requireActual('lodash');
@@ -64,39 +65,43 @@ describe('dimension editor', () => {
     palette,
   };
 
-  const mockedFrame = createMockFramePublicAPI();
-
-  const props: VisualizationDimensionEditorProps<MetricVisualizationState> & {
+  let props: VisualizationDimensionEditorProps<MetricVisualizationState> & {
     paletteService: PaletteRegistry;
-  } = {
-    layerId: 'first',
-    groupId: 'some-group',
-    accessor: 'some-accessor',
-    state: fullState,
-    frame: mockedFrame,
-    setState: jest.fn(),
-    panelRef: {} as React.MutableRefObject<HTMLDivElement | null>,
-    paletteService: chartPluginMock.createPaletteRegistry(),
   };
+
+  beforeEach(() => {
+    props = {
+      layerId: 'first',
+      groupId: 'some-group',
+      accessor: 'some-accessor',
+      state: fullState,
+      frame: createMockFramePublicAPI(),
+      setState: jest.fn(),
+      panelRef: {} as React.MutableRefObject<HTMLDivElement | null>,
+      paletteService: chartPluginMock.createPaletteRegistry(),
+    };
+  });
 
   describe('primary metric dimension', () => {
     const accessor = 'primary-metric-col-id';
 
-    props.frame.activeData = {
-      first: {
-        type: 'datatable',
-        columns: [
-          {
-            id: accessor,
-            name: 'foo',
-            meta: {
-              type: 'number',
+    beforeEach(() => {
+      props.frame.activeData = {
+        first: {
+          type: 'datatable',
+          columns: [
+            {
+              id: accessor,
+              name: 'foo',
+              meta: {
+                type: 'number',
+              },
             },
-          },
-        ],
-        rows: [],
-      },
-    };
+          ],
+          rows: [],
+        },
+      };
+    });
 
     class Harness {
       public _wrapper;
@@ -200,6 +205,24 @@ describe('dimension editor', () => {
   describe('secondary metric dimension', () => {
     const accessor = 'secondary-metric-col-id';
 
+    beforeEach(() => {
+      props.frame.activeData = {
+        first: {
+          type: 'datatable',
+          columns: [
+            {
+              id: accessor,
+              name: 'foo',
+              meta: {
+                type: 'number',
+              },
+            },
+          ],
+          rows: [],
+        },
+      };
+    });
+
     it('renders when the accessor matches', () => {
       const component = shallow(
         <DimensionEditor
@@ -214,18 +237,82 @@ describe('dimension editor', () => {
       expect(component.exists(SELECTORS.PRIMARY_METRIC_EDITOR)).toBeFalsy();
     });
 
-    it('sets metric prefix', () => {
-      const setState = jest.fn();
-      const localState = { ...fullState, secondaryMetricAccessor: accessor };
-      const component = shallow(
-        <DimensionEditor {...props} state={localState} setState={setState} accessor={accessor} />
-      );
+    describe('metric prefix', () => {
+      const NONE_PREFIX = '';
+      const AUTO_PREFIX = undefined;
 
-      const newVal = 'Metric explanation';
-      component.find(EuiFieldText).props().onChange!({
-        target: { value: newVal },
-      } as ChangeEvent<HTMLInputElement>);
-      expect(setState).toHaveBeenCalledWith({ ...localState, secondaryPrefix: newVal });
+      it('activates the correct buttons', () => {
+        const setState = jest.fn();
+        const localState = {
+          ...fullState,
+          secondaryPrefix: AUTO_PREFIX,
+          secondaryMetricAccessor: accessor,
+        };
+        const component = mount(
+          <DimensionEditor {...props} state={localState} setState={setState} accessor={accessor} />
+        );
+
+        expect(component.find(EuiButtonGroup).props().idSelected).toContain('auto');
+
+        component.setProps({
+          state: {
+            ...localState,
+            secondaryPrefix: NONE_PREFIX,
+          },
+        });
+
+        expect(component.find(EuiButtonGroup).props().idSelected).toContain('none');
+
+        component.setProps({
+          state: {
+            ...localState,
+            secondaryPrefix: 'some custom prefix',
+          },
+        });
+
+        expect(component.find(EuiButtonGroup).props().idSelected).toContain('custom');
+      });
+
+      it('clicking a button sets the prefix value', () => {
+        const setState = jest.fn();
+        const localState = {
+          ...fullState,
+          secondaryPrefix: AUTO_PREFIX,
+          secondaryMetricAccessor: accessor,
+        };
+        const component = mount(
+          <DimensionEditor {...props} state={localState} setState={setState} accessor={accessor} />
+        );
+
+        const newVal = 'Metric explanation';
+
+        component.find(EuiButtonGroup).props().onChange('some-id', newVal);
+
+        expect(setState).toHaveBeenCalledWith({ ...localState, secondaryPrefix: newVal });
+      });
+
+      it('sets a custom prefix value', () => {
+        const setState = jest.fn();
+        const localState = {
+          ...fullState,
+          secondaryPrefix: 'foo',
+          secondaryMetricAccessor: accessor,
+        };
+        const component = mount(
+          <DimensionEditor {...props} state={localState} setState={setState} accessor={accessor} />
+        );
+
+        const buttonGroup = component.find(EuiButtonGroup);
+
+        // make sure that if the user was to select the "custom" option, they would get the default value
+        expect(buttonGroup.props().options[1].value).toBe('foo');
+
+        const newVal = 'bar';
+
+        component.find(DebouncedInput).props().onChange(newVal);
+
+        expect(setState).toHaveBeenCalledWith({ ...localState, secondaryPrefix: newVal });
+      });
     });
   });
 
