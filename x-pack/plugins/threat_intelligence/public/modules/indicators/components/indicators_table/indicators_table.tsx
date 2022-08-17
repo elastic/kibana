@@ -6,10 +6,18 @@
  */
 
 import React, { VFC, useState, useMemo } from 'react';
-import { EuiDataGrid, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import {
+  EuiDataGrid,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiPanel,
+  EuiText,
+} from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
 import { UseIndicatorsValue } from '../../hooks/use_indicators';
 import { cellRendererFactory, ComputedIndicatorFieldId } from './cell_renderer';
@@ -67,7 +75,9 @@ const columns: Column[] = [
   },
 ];
 
-export type IndicatorsTableProps = Omit<UseIndicatorsValue, 'handleRefresh'>;
+export type IndicatorsTableProps = Omit<UseIndicatorsValue, 'handleRefresh'> & {
+  indexPatterns: DataView[];
+};
 
 export const TABLE_TEST_ID = 'tiIndicatorsTable';
 
@@ -77,8 +87,8 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
   onChangePage,
   onChangeItemsPerPage,
   pagination,
-  firstLoad,
   loading,
+  indexPatterns,
 }) => {
   const [visibleColumns, setVisibleColumns] = useState<Array<Column['id']>>(
     columns.map((column) => column.id)
@@ -91,9 +101,18 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
     [pagination.pageIndex, pagination.pageSize]
   );
 
+  // field name to field type map to allow the cell_renderer to format dates
+  const fieldTypesMap: { [id: string]: string } = useMemo(() => {
+    if (!indexPatterns || indexPatterns.length === 0) return {};
+
+    const res: { [id: string]: string } = {};
+    indexPatterns[0].fields.map((field) => (res[field.name] = field.type));
+    return res;
+  }, [indexPatterns]);
+
   const indicatorTableContextValue = useMemo<IndicatorsTableContextValue>(
-    () => ({ expanded, setExpanded, indicators }),
-    [expanded, indicators]
+    () => ({ expanded, setExpanded, indicators, fieldTypesMap }),
+    [expanded, indicators, fieldTypesMap]
   );
 
   const start = pagination.pageIndex * pagination.pageSize;
@@ -102,9 +121,13 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
   const flyoutFragment = useMemo(
     () =>
       expanded ? (
-        <IndicatorsFlyout indicator={expanded} closeFlyout={() => setExpanded(undefined)} />
+        <IndicatorsFlyout
+          indicator={expanded}
+          fieldTypesMap={fieldTypesMap}
+          closeFlyout={() => setExpanded(undefined)}
+        />
       ) : null,
-    [expanded]
+    [expanded, fieldTypesMap]
   );
 
   const leadingControlColumns = useMemo(
@@ -124,11 +147,19 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
     [renderCellValue]
   );
 
-  if (firstLoad) {
-    return <EuiLoadingSpinner size="m" />;
+  if (loading) {
+    return (
+      <EuiFlexGroup justifyContent="spaceAround">
+        <EuiFlexItem grow={false}>
+          <EuiPanel hasShadow={false} hasBorder={false} paddingSize="xl">
+            <EuiLoadingSpinner size="xl" />
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
   }
 
-  if (!loading && !indicatorCount) {
+  if (!indicatorCount) {
     return <EmptyState />;
   }
 
@@ -172,9 +203,8 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
           }}
           data-test-subj={TABLE_TEST_ID}
         />
+        {flyoutFragment}
       </IndicatorsTableContext.Provider>
-
-      {flyoutFragment}
     </div>
   );
 };
