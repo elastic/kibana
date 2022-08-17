@@ -71,7 +71,7 @@ export function getComputeUsage({
     end,
     chartBase,
     aggs: {
-      computeUsage: { sum: { script: computeUsageScript } },
+      computeUsage: { avg: { script: computeUsageScript } },
     },
     additionalFilters: [{ exists: { field: FAAS_COLDSTART_DURATION } }],
     operationName: 'get_compute_usage',

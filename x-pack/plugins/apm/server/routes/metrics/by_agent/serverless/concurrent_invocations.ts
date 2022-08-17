@@ -10,6 +10,7 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { euiLightVars as theme } from '@kbn/ui-theme';
 import {
+  METRICSET_NAME,
   SERVICE_NAME,
   SERVICE_NODE_NAME,
 } from '../../../../../common/elasticsearch_fieldnames';
@@ -49,6 +50,7 @@ export async function getConcurrentInvocations({
             ...rangeQuery(start, end),
             ...environmentQuery(environment),
             ...kqlQuery(kuery),
+            { term: { [METRICSET_NAME]: 'transaction' } },
           ],
         },
       },
@@ -76,6 +78,7 @@ export async function getConcurrentInvocations({
     'get_concurrent_invocattions',
     params
   );
+
   return {
     title: i18n.translate(
       'xpack.apm.agentMetrics.serverless.concurrentInvocations',
