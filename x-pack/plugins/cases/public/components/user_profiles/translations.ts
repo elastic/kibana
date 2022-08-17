@@ -31,3 +31,22 @@ export const SEARCH_USERS = i18n.translate('xpack.cases.userProfile.selectableSe
 export const EDIT_ASSIGNEES = i18n.translate('xpack.cases.userProfile.editAssignees', {
   defaultMessage: 'Edit assignees',
 });
+
+export const REMOVE_ASSIGNEES = i18n.translate(
+  'xpack.cases.userProfile.suggestUsers.removeAssignees',
+  {
+    defaultMessage: 'Remove all assignees',
+  }
+);
+
+export const TOTAL_USERS = (total: number) =>
+  i18n.translate('xpack.cases.userProfile.totalUsers', {
+    defaultMessage: '{total, plural, one {# user} other {# users}}',
+    values: { total },
+  });
+
+export const TOTAL_USERS_ASSIGNED = (total: number) =>
+  i18n.translate('xpack.cases.userProfile.totalUsersAssigned', {
+    defaultMessage: '{total} assigned',
+    values: { total },
+  });

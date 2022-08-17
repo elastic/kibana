@@ -257,7 +257,12 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
           <EuiPanel hasShadow={false} paddingSize="s">
             {search}
             <EuiSpacer size="s" />
-            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+            <EuiFlexGroup
+              alignItems="center"
+              justifyContent="spaceBetween"
+              responsive={false}
+              gutterSize="none"
+            >
               <EuiFlexItem grow={false}>
                 <EuiText size="xs" color="subdued">
                   {selectedStatusMessage ? (

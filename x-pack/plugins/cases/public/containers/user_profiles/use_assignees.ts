@@ -6,8 +6,10 @@
  */
 
 import { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { sortBy } from 'lodash';
 import { useMemo } from 'react';
 import { CaseAssignees } from '../../../common/api';
+import { getSortField } from '../../components/user_profiles/sort';
 import { Assignee, AssigneeWithProfile } from '../../components/user_profiles/types';
 
 export const useAssignees = ({
@@ -19,15 +21,17 @@ export const useAssignees = ({
 }) => {
   const assigneesWithProfiles = useMemo(
     () =>
-      caseAssignees.reduce<AssigneeWithProfile[]>((acc, assignee) => {
-        const profile = userProfiles.get(assignee.uid);
+      sortProfiles(
+        caseAssignees.reduce<AssigneeWithProfile[]>((acc, assignee) => {
+          const profile = userProfiles.get(assignee.uid);
 
-        if (profile) {
-          acc.push({ uid: assignee.uid, profile });
-        }
+          if (profile) {
+            acc.push({ uid: assignee.uid, profile });
+          }
 
-        return acc;
-      }, []),
+          return acc;
+        }, [])
+      ),
     [caseAssignees, userProfiles]
   );
 
@@ -55,4 +59,8 @@ export const useAssignees = ({
     assigneesWithoutProfiles,
     allAssignees,
   };
+};
+
+const sortProfiles = (assignees: AssigneeWithProfile[]) => {
+  return sortBy(assignees, (assignee) => getSortField(assignee.profile));
 };
