@@ -25,6 +25,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
 import useObservable from 'react-use/lib/useObservable';
+import { useTimeRangeUpdates } from '../contexts/kibana/use_timefilter';
+import { AnomalySwimlaneEmbeddableCustomInput } from '../../embeddables';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../..';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { OVERALL_LABEL, SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from './explorer_constants';
 import { AddSwimlaneToDashboardControl } from './dashboard_controls/add_swimlane_to_dashboard_controls';
@@ -66,6 +69,8 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
       },
     } = useMlKibana();
 
+    const globalTimeRange = useTimeRangeUpdates();
+
     const createCaseFlyout = cases?.hooks.getUseCasesAddToNewCaseFlyout();
     const selectCaseModal = cases?.hooks.getUseCasesAddToExistingCaseModal();
 
@@ -92,7 +97,10 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
 
     const swimlaneLimit = useObservable(anomalyTimelineStateService.getSwimLaneCardinality$());
 
-    const selectedJobs = useObservable(anomalyExplorerCommonStateService.getSelectedJobs$());
+    const selectedJobs = useObservable(
+      anomalyExplorerCommonStateService.getSelectedJobs$(),
+      anomalyExplorerCommonStateService.getSelectedJobs()
+    );
 
     const loading = useObservable(anomalyTimelineStateService.isOverallSwimLaneLoading$(), true);
 
@@ -150,14 +158,20 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
       [severityUpdate, swimLaneSeverity]
     );
 
-    const attachments = [
-      {
-        type: 'persistableState' as const,
-        persistableStateAttachmentTypeId: '.test',
-        persistableStateAttachmentState: {},
-        owner: PLUGIN_ID,
-      },
-    ];
+    const attachments = useMemo(() => {
+      return [
+        {
+          type: 'persistableState' as const,
+          persistableStateAttachmentTypeId: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+          persistableStateAttachmentState: {
+            swimlaneType: 'overall',
+            jobIds: selectedJobs?.map((v) => v.id),
+            timeRange: globalTimeRange,
+          } as AnomalySwimlaneEmbeddableCustomInput,
+          owner: PLUGIN_ID,
+        },
+      ];
+    }, [selectedJobs, globalTimeRange]);
 
     const annotations = useMemo(() => overallAnnotations.annotationsData, [overallAnnotations]);
 
@@ -182,7 +196,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
         items.push(
           <EuiContextMenuItem
             key="addToCase"
-            onClick={() => createCaseFlyout.open({ attachments })}
+            onClick={createCaseFlyout.open.bind(createCaseFlyout, { attachments })}
             data-test-subj="mlAnomalyTimelinePanelAttachToNewCaseButton"
           >
             <FormattedMessage

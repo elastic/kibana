@@ -155,7 +155,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
     const licensing = pluginsSetup.licensing.license$.pipe(take(1));
     licensing.subscribe(async (license) => {
-      const [coreStart] = await core.getStartServices();
+      const [coreStart, pluginStart] = await core.getStartServices();
       const { capabilities } = coreStart.application;
 
       if (isMlEnabled(license)) {
@@ -199,7 +199,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
           registerMlUiActions(pluginsSetup.uiActions, core);
 
           if (pluginsSetup.cases) {
-            registerCasesAttachment(pluginsSetup.cases);
+            registerCasesAttachment(pluginsSetup.cases, coreStart, pluginStart);
           }
 
           const canUseMlAlerts = capabilities.ml?.canUseMlAlerts;

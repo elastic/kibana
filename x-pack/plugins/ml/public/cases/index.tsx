@@ -8,9 +8,12 @@
 import type { CasesUiSetup } from '@kbn/cases-plugin/public/types';
 import React from 'react';
 import { EuiButtonIcon } from '@elastic/eui';
+import type { PersistableStateAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
+import type { CoreStart } from '@kbn/core/public';
+import { getAnomalySwimLaneEmbeddableComponent } from '../embeddables/anomaly_swimlane';
+import type { MlStartDependencies } from '../plugin';
 import { PLUGIN_ICON } from '../../common/constants/app';
-import { EmbeddableSwimLaneContainer } from '../embeddables/anomaly_swimlane/embeddable_swim_lane_container_lazy';
-import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../embeddables';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE, AnomalySwimlaneEmbeddableInput } from '../embeddables';
 
 const AttachmentActions: React.FC = () => {
   return (
@@ -23,17 +26,35 @@ const AttachmentActions: React.FC = () => {
   );
 };
 
-export function registerCasesAttachment(cases: CasesUiSetup) {
+export function registerCasesAttachment(
+  cases: CasesUiSetup,
+  coreStart: CoreStart,
+  pluginStart: MlStartDependencies
+) {
   cases.attachmentFramework.registerPersistableState({
     id: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
     icon: PLUGIN_ICON,
     displayName: 'Test',
     getAttachmentViewObject: () => ({
-      type: 'regular',
       event: 'added an embeddable',
-      timelineIcon: 'machineLearningApp',
+      timelineIcon: PLUGIN_ICON,
       actions: <AttachmentActions />,
-      children: <EmbeddableSwimLaneContainer />,
+      children: React.lazy(() => {
+        return Promise.resolve().then(() => {
+          const EmbeddableComponent = getAnomalySwimLaneEmbeddableComponent(coreStart, pluginStart);
+
+          return {
+            default: React.memo((props: PersistableStateAttachmentViewProps) => {
+              const { persistableStateAttachmentState } = props;
+
+              const inputProps =
+                persistableStateAttachmentState as unknown as AnomalySwimlaneEmbeddableInput;
+
+              return <EmbeddableComponent {...inputProps} />;
+            }),
+          };
+        });
+      }),
     }),
   });
 }
