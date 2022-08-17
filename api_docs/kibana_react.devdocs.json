@@ -1821,30 +1821,6 @@
             "path": "x-pack/plugins/fleet/public/components/custom_assets_accordion.tsx"
           },
           {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/visualize_app/utils/get_table_columns.tsx"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/visualize_app/utils/get_table_columns.tsx"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/visualize_app/utils/get_table_columns.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/editor_frame_service/editor_frame/workspace_panel/workspace_panel.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/editor_frame_service/editor_frame/workspace_panel/workspace_panel.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/editor_frame_service/editor_frame/workspace_panel/workspace_panel.tsx"
-          },
-          {
             "plugin": "observability",
             "path": "x-pack/plugins/observability/public/application/index.tsx"
           },
