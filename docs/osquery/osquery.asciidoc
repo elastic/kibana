@@ -75,9 +75,9 @@ image::images/live-query-check-results.png[Results of OSquery]
 [[osquery-schedule-query]]
 == Schedule queries with packs
 
-Packs, sometimes referred to as query packs, are queries that have been grouped together because they perform a similar function or address a common problem. You can create your own custom packs or download and use <<osquery-prebuilt-packs, Prebuilt Elastic packs>>. For example, when creating custom packs, you might create one pack that checks for IT compliance-type issues, and another pack that monitors for evidence of malware.
+A pack is a set of grouped queries that perform similar functions or address common use cases. You can create a custom pack with one or more queries. For example, when creating custom packs, you might create one pack that checks for IT compliance-type issues, and another pack that monitors for evidence of malware. <<osquery-prebuilt-packs, Prebuilt Elastic packs>> are also available to download and can help you get started using the Osquery integration.
 
-After creating packs, you can run them as live queries or schedule them. When you schedule a pack, queries in the pack will run on one or more agent policies and at the set intervals for agents in those policies. Scheduling packs is optional.
+You can run packs as live queries or schedule packs to run for one or more agent policies. When scheduled, queries in the pack are run at the set intervals for all agents in those policies. Scheduling packs is optional.
 
 . Click the **Packs** tab.
 . Click **Add pack** to create a new pack, or click the name of an existing pack, then **Edit** to add queries to an existing pack.
@@ -88,7 +88,7 @@ After creating packs, you can run them as live queries or schedule them. When yo
 
 * A short description of the pack.
 
-* The agent policies where this pack should run. If no agent policies are set, then the pack is not scheduled.
+* The agent policies where this pack should run. If no agent policies are set, the pack is not scheduled.
 
 . Add queries to schedule:
 
