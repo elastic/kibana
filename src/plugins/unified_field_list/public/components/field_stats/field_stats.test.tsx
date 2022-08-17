@@ -329,10 +329,10 @@ describe('UnifiedFieldList <FieldStats />', () => {
 
     expect(stats).toHaveLength(1);
     expect(
-      firstValue.find('[data-test-subj="testing-topValues-formattedLabel"]').first().text()
+      firstValue.find('[data-test-subj="testing-topValues-formattedFieldValue"]').first().text()
     ).toBe('"success"');
     expect(
-      firstValue.find('[data-test-subj="testing-topValues-formattedValue"]').first().text()
+      firstValue.find('[data-test-subj="testing-topValues-formattedPercentage"]').first().text()
     ).toBe('41.5%');
 
     expect(wrapper.find('[data-test-subj="testing-statsFooter"]').first().text()).toBe(

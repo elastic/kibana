@@ -54,8 +54,8 @@ export const FieldTopValues: React.FC<FieldTopValuesProps> = ({
             <FieldTopValuesBucket
               field={field}
               fieldValue={fieldValue}
-              formattedLabel={formatted}
-              formattedValue={getFormattedPercentageValue(
+              formattedFieldValue={formatted}
+              formattedPercentage={getFormattedPercentageValue(
                 topValue.count,
                 sampledValuesCount,
                 digitsRequired
@@ -75,7 +75,7 @@ export const FieldTopValues: React.FC<FieldTopValuesProps> = ({
             type="other"
             field={field}
             fieldValue={undefined}
-            formattedValue={getFormattedPercentageValue(
+            formattedPercentage={getFormattedPercentageValue(
               otherCount,
               sampledValuesCount,
               digitsRequired

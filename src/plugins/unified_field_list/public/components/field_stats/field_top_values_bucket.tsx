@@ -24,8 +24,8 @@ export interface FieldTopValuesBucketProps {
   type?: 'normal' | 'other';
   field: DataViewField;
   fieldValue: unknown;
-  formattedLabel?: string;
-  formattedValue: string;
+  formattedFieldValue?: string;
+  formattedPercentage: string;
   progressValue: number;
   color: string;
   testSubject: string;
@@ -36,8 +36,8 @@ export const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
   type = 'normal',
   field,
   fieldValue,
-  formattedLabel,
-  formattedValue,
+  formattedFieldValue,
+  formattedPercentage,
   progressValue,
   color,
   testSubject,
@@ -57,12 +57,12 @@ export const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
           <EuiFlexItem
             grow={true}
             className="eui-textTruncate"
-            data-test-subj={`${testSubject}-topValues-formattedLabel`}
+            data-test-subj={`${testSubject}-topValues-formattedFieldValue`}
           >
-            {(formattedLabel?.length ?? 0) > 0 ? (
-              <EuiToolTip content={formattedLabel} delay="long">
+            {(formattedFieldValue?.length ?? 0) > 0 ? (
+              <EuiToolTip content={formattedFieldValue} delay="long">
                 <EuiText size="xs" className="eui-textTruncate" color="subdued">
-                  {formattedLabel}
+                  {formattedFieldValue}
                 </EuiText>
               </EuiToolTip>
             ) : (
@@ -81,9 +81,9 @@ export const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
               </EuiText>
             )}
           </EuiFlexItem>
-          <EuiFlexItem grow={false} data-test-subj={`${testSubject}-topValues-formattedValue`}>
+          <EuiFlexItem grow={false} data-test-subj={`${testSubject}-topValues-formattedPercentage`}>
             <EuiText size="xs" textAlign="left" color={color}>
-              {formattedValue}
+              {formattedPercentage}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -92,7 +92,7 @@ export const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
           max={1}
           size="s"
           color={type === 'other' ? 'subdued' : color}
-          aria-label={`${formattedLabel} (${formattedValue})`}
+          aria-label={`${formattedFieldValue} (${formattedPercentage})`}
         />
       </EuiFlexItem>
       {onAddFilter && field.filterable && (
@@ -105,7 +105,7 @@ export const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
               onClick={() => onAddFilter(field, fieldValue, '+')}
               aria-label={i18n.translate('unifiedFieldList.fieldStats.filterValueButtonAriaLabel', {
                 defaultMessage: 'Filter for {field}: "{value}"',
-                values: { value: formattedLabel, field: field.name },
+                values: { value: formattedFieldValue, field: field.name },
               })}
               data-test-subj={`plus-${field.name}-${fieldValue}`}
               style={{
@@ -126,7 +126,7 @@ export const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
                 'unifiedFieldList.fieldStats.filterOutValueButtonAriaLabel',
                 {
                   defaultMessage: 'Filter out {field}: "{value}"',
-                  values: { value: formattedLabel, field: field.name },
+                  values: { value: formattedFieldValue, field: field.name },
                 }
               )}
               data-test-subj={`minus-${field.name}-${fieldValue}`}
