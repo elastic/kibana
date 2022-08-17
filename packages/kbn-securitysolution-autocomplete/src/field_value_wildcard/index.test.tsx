@@ -430,8 +430,6 @@ describe('AutocompleteFieldWildcardComponent', () => {
     wrapper.update();
     expect(mockOnChange).toHaveBeenCalledWith(' value 1 ');
 
-    expect(wrapper).toMatchSnapshot();
-
     const euiFormHelptext = wrapper.find(EuiFormHelpText);
     expect(euiFormHelptext.length).toBeTruthy();
   });
@@ -465,8 +463,6 @@ describe('AutocompleteFieldWildcardComponent', () => {
     });
 
     wrapper.update();
-    expect(wrapper).toMatchSnapshot();
-
     const euiFormHelptext = wrapper.find(EuiFormHelpText);
     expect(euiFormHelptext.length).toBeTruthy();
     expect(euiFormHelptext.text()).toEqual('Warning: there is a space');
