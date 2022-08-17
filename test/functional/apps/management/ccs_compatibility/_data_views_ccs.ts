@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['settings', 'common', 'header']);
   const security = getService('security');
 
-  describe.only('data views ccs', function () {
+  describe('data views ccs', function () {
     before(async function () {
       await security.testUser.setRoles(['kibana_admin']);
     });
