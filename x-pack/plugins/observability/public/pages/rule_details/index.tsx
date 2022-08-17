@@ -185,7 +185,7 @@ export function RuleDetailsPage() {
       }),
       'data-test-subj': 'eventLogListTab',
       content: getRuleEventLogList<'default'>({
-        rule,
+        ruleId: rule?.id,
         ruleType,
       } as RuleEventLogListProps),
     },
