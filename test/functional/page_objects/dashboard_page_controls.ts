@@ -405,8 +405,8 @@ export class DashboardPageControls extends FtrService {
   public async controlsEditorSetDataView(dataViewTitle: string) {
     this.log.debug(`Setting control data view to ${dataViewTitle}`);
     await this.testSubjects.click('open-data-view-picker');
-    await this.retry.try(async () => {
-      await this.testSubjects.existOrFail('data-view-picker-title');
+    await this.retry.waitFor('data view picker to exist', async () => {
+      return await this.testSubjects.exists('data-view-picker-title');
     });
     await this.testSubjects.click(`data-view-picker-${dataViewTitle}`);
   }
@@ -420,8 +420,8 @@ export class DashboardPageControls extends FtrService {
     if (shouldSearch) {
       await this.testSubjects.setValue('field-search-input', fieldName);
     }
-    await this.retry.try(async () => {
-      await this.testSubjects.existOrFail(`field-picker-select-${fieldName}`);
+    await this.retry.waitFor('specific field to exist in field picker', async () => {
+      return await this.testSubjects.exists(`field-picker-select-${fieldName}`);
     });
     await this.testSubjects.click(`field-picker-select-${fieldName}`);
     if (expectedType) await this.controlEditorVerifyType(expectedType);
