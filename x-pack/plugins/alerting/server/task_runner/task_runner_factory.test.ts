@@ -98,6 +98,7 @@ describe('Task Runner Factory', () => {
     kibanaBaseUrl: 'https://localhost:5601',
     supportsEphemeralTasks: true,
     maxEphemeralActionsPerRule: 10,
+    maxAlerts: 1000,
     cancelAlertsOnRuleTimeout: true,
     executionContext,
     usageCounter: mockUsageCounter,
