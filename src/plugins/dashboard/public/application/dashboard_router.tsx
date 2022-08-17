@@ -85,7 +85,6 @@ export async function mountApp({
     savedObjectsTaggingOss,
     presentationUtil,
     screenshotMode,
-    dataViewEditor,
   } = pluginsStart;
 
   const activeSpaceId =
@@ -98,7 +97,6 @@ export async function mountApp({
     onAppLeave,
     savedObjects,
     urlForwarding,
-    dataViewEditor,
     usageCollection,
     core: coreStart,
     share: shareStart,

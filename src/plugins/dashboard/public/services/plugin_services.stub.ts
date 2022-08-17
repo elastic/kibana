@@ -17,10 +17,11 @@ import { DashboardServices } from './types';
 import { httpServiceFactory } from './http/http.stub';
 import { dataServiceFactory } from './data/data.stub';
 import { visualizationsServiceFactory } from './visualizations/visualizations.stub';
+import { dataViewEditorServiceFactory } from './data_view_editor/data_view_editor.stub';
 
-const providers: PluginServiceProviders<DashboardServices> = {
+export const providers: PluginServiceProviders<DashboardServices> = {
   data: new PluginServiceProvider(dataServiceFactory),
-  // dataViewEditor: new PluginServiceProvider(dataViewEditorServiceFactory),
+  dataViewEditor: new PluginServiceProvider(dataViewEditorServiceFactory),
   http: new PluginServiceProvider(httpServiceFactory),
   visualizations: new PluginServiceProvider(visualizationsServiceFactory),
 };

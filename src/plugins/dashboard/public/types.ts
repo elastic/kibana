@@ -23,7 +23,6 @@ import type {
 import type { Filter } from '@kbn/es-query';
 import { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
-import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { EmbeddableInput, ViewMode } from '@kbn/embeddable-plugin/common';
 import { ContainerInput, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 
@@ -208,7 +207,6 @@ export interface DashboardAppServices {
   urlForwarding: UrlForwardingStart;
   savedDashboards: SavedObjectLoader;
   scopedHistory: () => ScopedHistory;
-  dataViewEditor: DataViewEditorStart;
   usageCollection?: UsageCollectionSetup;
   navigation: NavigationPublicPluginStart;
   dashboardCapabilities: DashboardAppCapabilities;

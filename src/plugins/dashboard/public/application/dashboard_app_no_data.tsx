@@ -22,11 +22,12 @@ export const DashboardAppNoDataPage = ({
   onDataViewCreated: () => void;
 }) => {
   const {
-    services: { core, dataViewEditor },
+    services: { core },
   } = useKibana<DashboardAppServices>();
 
   const {
     data: { dataViews },
+    dataViewEditor,
   } = pluginServices.getServices();
 
   const analyticsServices = {
