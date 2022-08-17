@@ -17,6 +17,7 @@ import {
   waitForRulesTableToBeLoaded,
   selectAllRules,
   openRefreshSettingsPopover,
+  closeRefreshSettingsPopover,
   clearAllRuleSelection,
   selectNumberOfRules,
   mockGlobalClock,
@@ -96,6 +97,7 @@ describe('Alerts detection rules table auto-refresh', () => {
       REFRESH_SETTINGS_SELECTION_NOTE,
       'Note: Refresh is disabled while there is an active selection.'
     );
+    closeRefreshSettingsPopover();
 
     clearAllRuleSelection();
 
@@ -116,6 +118,7 @@ describe('Alerts detection rules table auto-refresh', () => {
 
     openRefreshSettingsPopover();
     checkAutoRefreshIsDisabled();
+    closeRefreshSettingsPopover();
 
     clearAllRuleSelection();
 
