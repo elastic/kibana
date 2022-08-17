@@ -6,12 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { defaultConfig } from '@kbn/storybook';
-
-module.exports = {
-  ...defaultConfig,
-  stories: ['../**/*.stories.+(tsx|mdx)'],
-  reactOptions: {
-    strictMode: true,
-  },
-};
+import jest from 'jest-mock';
+/* @ts-expect-error TS doesn't see jest as a property of window, and I don't want to edit our global config. */
+window.jest = jest;

@@ -19,7 +19,7 @@ import mdx from '../README.mdx';
 const mock = new NoDataConfigPageStorybookMock();
 
 export default {
-  title: 'No Data/Config Page',
+  title: 'No Data/Page/No Data Config Page',
   description: 'A component to display when there is no data available',
   parameters: {
     docs: {
@@ -28,7 +28,7 @@ export default {
   },
 };
 
-export const ConfigPage = (params: NoDataConfigPageStorybookParams) => {
+export const NoDataConfigPage = (params: NoDataConfigPageStorybookParams) => {
   return (
     <NoDataConfigPageProvider {...mock.getServices(params)}>
       <Component {...mock.getProps(params)} />
@@ -36,4 +36,4 @@ export const ConfigPage = (params: NoDataConfigPageStorybookParams) => {
   );
 };
 
-ConfigPage.argTypes = mock.getArgumentTypes();
+NoDataConfigPage.argTypes = mock.getArgumentTypes();

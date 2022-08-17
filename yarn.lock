@@ -3833,6 +3833,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/shared-ux-page-kibana-template-mocks@link:bazel-bin/packages/shared-ux/page/kibana_template/mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-page-kibana-template-types@link:bazel-bin/packages/shared-ux/page/kibana_template/types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-page-kibana-template@link:bazel-bin/packages/shared-ux/page/kibana_template/impl":
+  version "0.0.0"
+  uid ""
+
 "@kbn/shared-ux-page-no-data-config-mocks@link:bazel-bin/packages/shared-ux/page/no_data_config/mocks":
   version "0.0.0"
   uid ""
@@ -3861,18 +3873,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-kibana-template-mocks@link:bazel-bin/packages/shared-ux/page/kibana_template/mocks":
-  version "0.0.0"
-  uid ""
-
-"@kbn/shared-ux-page-kibana-template-types@link:bazel-bin/packages/shared-ux/page/kibana_template/types":
-  version "0.0.0"
-  uid ""
-
-"@kbn/shared-ux-page-kibana-template@link:bazel-bin/packages/shared-ux/page/kibana_template/impl":
-  version "0.0.0"
-  uid ""
-
 "@kbn/shared-ux-prompt-no-data-views-mocks@link:bazel-bin/packages/shared-ux/prompt/no_data_views/mocks":
   version "0.0.0"
   uid ""
@@ -3882,6 +3882,10 @@
   uid ""
 
 "@kbn/shared-ux-prompt-no-data-views@link:bazel-bin/packages/shared-ux/prompt/no_data_views/impl":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-storybook-config@link:bazel-bin/packages/shared-ux/storybook/config":
   version "0.0.0"
   uid ""
 
@@ -7773,6 +7777,18 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__shared-ux-page-kibana-template-mocks@link:bazel-bin/packages/shared-ux/page/kibana_template/mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-page-kibana-template-types@link:bazel-bin/packages/shared-ux/page/kibana_template/types/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-page-kibana-template@link:bazel-bin/packages/shared-ux/page/kibana_template/impl/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__shared-ux-page-no-data-config-mocks@link:bazel-bin/packages/shared-ux/page/no_data_config/mocks/npm_module_types":
   version "0.0.0"
   uid ""
@@ -7801,18 +7817,6 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__shared-ux-page-kibana-template-mocks@link:bazel-bin/packages/shared-ux/page/kibana_template/mocks/npm_module_types":
-  version "0.0.0"
-  uid ""
-
-"@types/kbn__shared-ux-page-kibana-template-types@link:bazel-bin/packages/shared-ux/page/kibana_template/types/npm_module_types":
-  version "0.0.0"
-  uid ""
-
-"@types/kbn__shared-ux-page-kibana-template@link:bazel-bin/packages/shared-ux/page/kibana_template/impl/npm_module_types":
-  version "0.0.0"
-  uid ""
-
 "@types/kbn__shared-ux-prompt-no-data-views-mocks@link:bazel-bin/packages/shared-ux/prompt/no_data_views/mocks/npm_module_types":
   version "0.0.0"
   uid ""
@@ -7822,6 +7826,10 @@
   uid ""
 
 "@types/kbn__shared-ux-prompt-no-data-views@link:bazel-bin/packages/shared-ux/prompt/no_data_views/impl/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-storybook-config@link:bazel-bin/packages/shared-ux/storybook/config/npm_module_types":
   version "0.0.0"
   uid ""
 

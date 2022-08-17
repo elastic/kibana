@@ -8,14 +8,16 @@
 
 import { addons } from '@storybook/addons';
 import { create } from '@storybook/theming';
-import { PANEL_ID } from '@storybook/addon-actions';
+import { PANEL_ID as selectedPanel } from '@storybook/addon-actions';
+
+import { TITLE as brandTitle, URL as brandUrl } from './constants';
 
 addons.setConfig({
   theme: create({
     base: 'light',
-    brandTitle: 'Shared UX Storybook',
-    brandUrl: 'https://github.com/elastic/kibana/tree/main/packages/shared_ux',
+    brandTitle,
+    brandUrl,
   }),
+  selectedPanel,
   showPanel: true.valueOf,
-  selectedPanel: PANEL_ID,
 });
