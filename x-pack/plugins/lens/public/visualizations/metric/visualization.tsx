@@ -16,9 +16,9 @@ import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { LayoutDirection } from '@elastic/charts';
 import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { IconChartMetric } from '@kbn/chart-icons';
 import { LayerType } from '../../../common';
 import { getSuggestions } from './suggestions';
-import { LensIconChartMetric } from '../../assets/chart_metric';
 import { Visualization, OperationMetadata, DatasourceLayers, AccessorConfig } from '../../types';
 import { layerTypes } from '../../../common';
 import { GROUP_ID, LENS_METRIC_ID } from './constants';
@@ -78,7 +78,7 @@ const toExpression = (
   const maxPossibleTiles =
     // if there's a collapse function, no need to calculate since we're dealing with a single tile
     state.breakdownByAccessor && !state.collapseFn
-      ? datasource.getMaxPossibleNumValues(state.breakdownByAccessor)
+      ? datasource?.getMaxPossibleNumValues(state.breakdownByAccessor)
       : null;
 
   const getCollapseFnArguments = () => {
@@ -91,7 +91,7 @@ const toExpression = (
         return state.collapseFn;
       } else {
         const isMaxStatic = Boolean(
-          datasource.getOperationForColumnId(state.maxAccessor!)?.isStaticValue
+          datasource?.getOperationForColumnId(state.maxAccessor!)?.isStaticValue
         );
         // we do this because the user expects the static value they set to be the same
         // even if they define a collapse on the breakdown by
@@ -166,7 +166,7 @@ export const getMetricVisualization = ({
   visualizationTypes: [
     {
       id: LENS_METRIC_ID,
-      icon: LensIconChartMetric,
+      icon: IconChartMetric,
       label: metricLabel,
       groupLabel: metricGroupLabel,
       showExperimentalBadge: true,
@@ -197,7 +197,7 @@ export const getMetricVisualization = ({
 
   getDescription() {
     return {
-      icon: LensIconChartMetric,
+      icon: IconChartMetric,
       label: metricLabel,
     };
   },

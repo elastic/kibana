@@ -349,15 +349,15 @@
               "\nSearch sessions SO CRUD\n{@link ISessionsClient}"
             ],
             "signature": [
-              "{ create: ({ name, appId, locatorId, initialState, restoreState, sessionId, }: { name: string; appId: string; locatorId: string; initialState: Record<string, unknown>; restoreState: Record<string, unknown>; sessionId: string; }) => Promise<",
+              "{ get: (sessionId: string) => Promise<",
+              "SearchSessionSavedObject",
+              ">; delete: (sessionId: string) => Promise<void>; create: ({ name, appId, locatorId, initialState, restoreState, sessionId, }: { name: string; appId: string; locatorId: string; initialState: Record<string, unknown>; restoreState: Record<string, unknown>; sessionId: string; }) => Promise<",
               "SearchSessionSavedObject",
               ">; find: (options: Omit<",
               "SavedObjectsFindOptions",
               ", \"type\">) => Promise<",
               "SavedObjectsFindResponse",
-              "<unknown, unknown>>; get: (sessionId: string) => Promise<",
-              "SearchSessionSavedObject",
-              ">; update: (sessionId: string, attributes: unknown) => Promise<",
+              "<unknown, unknown>>; update: (sessionId: string, attributes: unknown) => Promise<",
               "SavedObjectsUpdateResponse",
               "<",
               {
@@ -387,7 +387,7 @@
                 "section": "def-common.SearchSessionSavedObjectAttributes",
                 "text": "SearchSessionSavedObjectAttributes"
               },
-              ", unknown>>; delete: (sessionId: string) => Promise<void>; }"
+              ", unknown>>; }"
             ],
             "path": "src/plugins/data/public/search/types.ts",
             "deprecated": false
@@ -697,15 +697,15 @@
               "\nSearch sessions SO CRUD\n{@link ISessionsClient}"
             ],
             "signature": [
-              "{ create: ({ name, appId, locatorId, initialState, restoreState, sessionId, }: { name: string; appId: string; locatorId: string; initialState: Record<string, unknown>; restoreState: Record<string, unknown>; sessionId: string; }) => Promise<",
+              "{ get: (sessionId: string) => Promise<",
+              "SearchSessionSavedObject",
+              ">; delete: (sessionId: string) => Promise<void>; create: ({ name, appId, locatorId, initialState, restoreState, sessionId, }: { name: string; appId: string; locatorId: string; initialState: Record<string, unknown>; restoreState: Record<string, unknown>; sessionId: string; }) => Promise<",
               "SearchSessionSavedObject",
               ">; find: (options: Omit<",
               "SavedObjectsFindOptions",
               ", \"type\">) => Promise<",
               "SavedObjectsFindResponse",
-              "<unknown, unknown>>; get: (sessionId: string) => Promise<",
-              "SearchSessionSavedObject",
-              ">; update: (sessionId: string, attributes: unknown) => Promise<",
+              "<unknown, unknown>>; update: (sessionId: string, attributes: unknown) => Promise<",
               "SavedObjectsUpdateResponse",
               "<",
               {
@@ -735,7 +735,7 @@
                 "section": "def-common.SearchSessionSavedObjectAttributes",
                 "text": "SearchSessionSavedObjectAttributes"
               },
-              ", unknown>>; delete: (sessionId: string) => Promise<void>; }"
+              ", unknown>>; }"
             ],
             "path": "src/plugins/data/public/search/types.ts",
             "deprecated": false
@@ -1212,15 +1212,15 @@
         "label": "ISessionsClient",
         "description": [],
         "signature": [
-          "{ create: ({ name, appId, locatorId, initialState, restoreState, sessionId, }: { name: string; appId: string; locatorId: string; initialState: Record<string, unknown>; restoreState: Record<string, unknown>; sessionId: string; }) => Promise<",
+          "{ get: (sessionId: string) => Promise<",
+          "SearchSessionSavedObject",
+          ">; delete: (sessionId: string) => Promise<void>; create: ({ name, appId, locatorId, initialState, restoreState, sessionId, }: { name: string; appId: string; locatorId: string; initialState: Record<string, unknown>; restoreState: Record<string, unknown>; sessionId: string; }) => Promise<",
           "SearchSessionSavedObject",
           ">; find: (options: Omit<",
           "SavedObjectsFindOptions",
           ", \"type\">) => Promise<",
           "SavedObjectsFindResponse",
-          "<unknown, unknown>>; get: (sessionId: string) => Promise<",
-          "SearchSessionSavedObject",
-          ">; update: (sessionId: string, attributes: unknown) => Promise<",
+          "<unknown, unknown>>; update: (sessionId: string, attributes: unknown) => Promise<",
           "SavedObjectsUpdateResponse",
           "<",
           {
@@ -1250,7 +1250,7 @@
             "section": "def-common.SearchSessionSavedObjectAttributes",
             "text": "SearchSessionSavedObjectAttributes"
           },
-          ", unknown>>; delete: (sessionId: string) => Promise<void>; }"
+          ", unknown>>; }"
         ],
         "path": "src/plugins/data/public/search/session/sessions_client.ts",
         "deprecated": false,
@@ -11308,7 +11308,7 @@
           "\nChecks whether a given Elasticsearch interval is a calendar or fixed interval\nand returns an object containing the appropriate date_histogram property for that\ninterval. So it will return either an object containing the fixed_interval key for\nthat interval or a calendar_interval. If the specified interval was not a valid Elasticsearch\ninterval this method will throw an error.\n\nYou can simply spread the returned value of this method into your date_histogram."
         ],
         "signature": [
-          "(interval: string) => Interval"
+          "(interval: string, shouldForceFixed: boolean | undefined) => Interval"
         ],
         "path": "src/plugins/data/common/search/aggs/utils/date_interval_utils/date_histogram_interval.ts",
         "deprecated": false,
@@ -11328,6 +11328,20 @@
             "path": "src/plugins/data/common/search/aggs/utils/date_interval_utils/date_histogram_interval.ts",
             "deprecated": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.dateHistogramInterval.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "shouldForceFixed",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/utils/date_interval_utils/date_histogram_interval.ts",
+            "deprecated": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -20375,7 +20389,7 @@
             "label": "exclude",
             "description": [],
             "signature": [
-              "number[] | string[] | undefined"
+              "string[] | number[] | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
             "deprecated": false
@@ -20388,7 +20402,7 @@
             "label": "include",
             "description": [],
             "signature": [
-              "number[] | string[] | undefined"
+              "string[] | number[] | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
             "deprecated": false
@@ -26174,9 +26188,9 @@
             "section": "def-common.IAggType",
             "text": "IAggType"
           },
-          "; id?: string | undefined; enabled?: boolean | undefined; params?: {} | ",
+          "; params?: {} | ",
           "SerializableRecord",
-          " | undefined; schema?: string | undefined; }"
+          " | undefined; id?: string | undefined; enabled?: boolean | undefined; schema?: string | undefined; }"
         ],
         "path": "src/plugins/data/common/search/aggs/agg_config.ts",
         "deprecated": false,
@@ -26990,9 +27004,9 @@
             "section": "def-common.IAggType",
             "text": "IAggType"
           },
-          "; id?: string | undefined; enabled?: boolean | undefined; params?: {} | ",
+          "; params?: {} | ",
           "SerializableRecord",
-          " | undefined; schema?: string | undefined; }"
+          " | undefined; id?: string | undefined; enabled?: boolean | undefined; schema?: string | undefined; }"
         ],
         "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
         "deprecated": false,
@@ -29633,7 +29647,7 @@
         "label": "SearchTypes",
         "description": [],
         "signature": [
-          "string | number | boolean | object | number[] | string[] | boolean[] | object[] | undefined"
+          "string | number | boolean | object | string[] | number[] | boolean[] | object[] | undefined"
         ],
         "path": "src/plugins/data/common/search/expressions/eql_raw_response.ts",
         "deprecated": false,
