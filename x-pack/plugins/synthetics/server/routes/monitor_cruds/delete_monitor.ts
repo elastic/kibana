@@ -28,7 +28,7 @@ import {
   sendTelemetryEvents,
   formatTelemetryDeleteEvent,
 } from '../telemetry/monitor_upgrade_sender';
-import { normalizeSecrets } from '../../synthetics_service/utils/secrets';
+import { formatSecrets, normalizeSecrets } from '../../synthetics_service/utils/secrets';
 import type { UptimeServerSetup } from '../../legacy_uptime/lib/adapters/framework';
 
 export const deleteSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
@@ -89,6 +89,7 @@ export const deleteMonitor = async ({
 }) => {
   const { logger, telemetry, kibanaVersion, encryptedSavedObjects } = server;
   const encryptedSavedObjectsClient = encryptedSavedObjects.getClient();
+  let normalizedMonitor;
   try {
     const encryptedMonitor = await savedObjectsClient.get<EncryptedSyntheticsMonitor>(
       syntheticsMonitorType,
@@ -104,7 +105,7 @@ export const deleteMonitor = async ({
         }
       );
 
-    const normalizedMonitor = normalizeSecrets(monitor);
+    normalizedMonitor = normalizeSecrets(monitor);
 
     const deleteSyncPromise = syntheticsMonitorClient.deleteMonitor(
       {
@@ -134,6 +135,36 @@ export const deleteMonitor = async ({
 
     return errors;
   } catch (e) {
+    if (normalizedMonitor) {
+      await restoreDeletedMonitor({
+        monitorId,
+        normalizedMonitor: formatSecrets({
+          ...normalizedMonitor.attributes,
+        }),
+        savedObjectsClient,
+      });
+    }
     throw e;
+  }
+};
+
+const restoreDeletedMonitor = async ({
+  monitorId,
+  savedObjectsClient,
+  normalizedMonitor,
+}: {
+  monitorId: string;
+  normalizedMonitor: SyntheticsMonitorWithSecrets;
+  savedObjectsClient: SavedObjectsClientContract;
+}) => {
+  try {
+    await savedObjectsClient.get<EncryptedSyntheticsMonitor>(syntheticsMonitorType, monitorId);
+  } catch (e) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+      await savedObjectsClient.create(syntheticsMonitorType, normalizedMonitor, {
+        id: monitorId,
+        overwrite: true,
+      });
+    }
   }
 };
