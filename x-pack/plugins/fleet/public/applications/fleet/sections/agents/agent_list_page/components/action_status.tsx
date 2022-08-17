@@ -26,12 +26,14 @@ export const ActionStatusCallout: React.FunctionComponent = ({}) => {
     POLICY_REASSIGN: 'Reassign',
     UPGRADE: 'Upgrade',
     UNENROLL: 'Unenroll',
+    CANCEL: 'Cancel',
+    ACTION: 'Action',
   };
 
   const calloutTitle = (currentAction: CurrentAction) => (
     <FormattedMessage
       id="xpack.fleet.currentAction.calloutTitle"
-      defaultMessage="{type} {status}, {nbAgentsAck} of {nbAgents} done, actionId: {actionId}"
+      defaultMessage="{type} {status}, {nbAgentsAck} of {nbAgents} acknowledged, actionId: {actionId}"
       values={{
         // TODO failed status
         status: currentAction.complete
@@ -39,7 +41,7 @@ export const ActionStatusCallout: React.FunctionComponent = ({}) => {
           : currentAction.timedOut
           ? 'timed out'
           : 'in progress',
-        type: actionNames[currentAction.type ?? 'UPGRADE'],
+        type: actionNames[currentAction.type ?? 'ACTION'],
         nbAgents: currentAction.nbAgents,
         nbAgentsAck: currentAction.nbAgentsAck,
         version: currentAction.version,
@@ -49,7 +51,7 @@ export const ActionStatusCallout: React.FunctionComponent = ({}) => {
   );
   return (
     <>
-      {currentActions.map((currentAction) => (
+      {currentActions.slice(0, 3).map((currentAction) => (
         <React.Fragment key={currentAction.actionId}>
           <EuiCallOut
             color={
@@ -69,7 +71,7 @@ export const ActionStatusCallout: React.FunctionComponent = ({}) => {
                   ) : currentAction.complete ? (
                     <EuiIcon type="check" />
                   ) : (
-                    <EuiIcon type="cross" />
+                    <EuiIcon type="alert" />
                   )}
                   &nbsp;&nbsp;
                   {calloutTitle(currentAction)}

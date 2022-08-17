@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { CoreSetup } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
@@ -17,16 +17,22 @@ import moment from 'moment';
 
 import { appContextService } from '../app_context';
 
-import { reassignRetryTask } from './reassign_retry_task';
+import type { Agent } from '../../types';
+
+import { runActionAsyncWithRetry } from './crud';
+
+import { reassignBatch } from './reassign';
 
 export enum BulkActionTaskType {
   REASSIGN_RETRY = 'fleet:reassign_action:retry',
+  UNENROLL_RETRY = 'fleet:unenroll_action:retry',
+  UPGRADE_RETRY = 'fleet:upgrade_action:retry',
 }
 
 export class BulkActionsResolver {
   private taskManager?: TaskManagerStartContract;
 
-  reassignTaskRunner(core: CoreSetup) {
+  createTaskRunner(core: CoreSetup, taskType: BulkActionTaskType) {
     return ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
       const getDeps = async () => {
         const [coreStart] = await core.getStartServices();
@@ -36,7 +42,40 @@ export class BulkActionsResolver {
         };
       };
 
-      return reassignRetryTask(taskInstance, getDeps);
+      switch (taskType) {
+        case BulkActionTaskType.REASSIGN_RETRY:
+          return createRetryTask(
+            taskInstance,
+            getDeps,
+            async (esClient: ElasticsearchClient, soClient: SavedObjectsClient, options: any) =>
+              await runActionAsyncWithRetry(
+                esClient,
+                options,
+                async (
+                  agents: Agent[],
+                  actionId: string,
+                  total?: number,
+                  newAgentPolicyId?: string
+                ) =>
+                  await reassignBatch(
+                    soClient,
+                    esClient,
+                    { newAgentPolicyId: newAgentPolicyId!, actionId },
+                    agents,
+                    {},
+                    undefined,
+                    true,
+                    total
+                  )
+              )
+          );
+        case BulkActionTaskType.UNENROLL_RETRY:
+
+        case BulkActionTaskType.UPGRADE_RETRY:
+
+        default:
+          throw new Error('Unknown task type: ' + taskType);
+      }
     };
   }
 
@@ -46,7 +85,19 @@ export class BulkActionsResolver {
         title: 'Bulk Reassign Retry',
         timeout: '1m',
         maxAttempts: 1,
-        createTaskRunner: this.reassignTaskRunner(core),
+        createTaskRunner: this.createTaskRunner(core, BulkActionTaskType.REASSIGN_RETRY),
+      },
+      [BulkActionTaskType.UNENROLL_RETRY]: {
+        title: 'Bulk Unenroll Retry',
+        timeout: '1m',
+        maxAttempts: 1,
+        createTaskRunner: this.createTaskRunner(core, BulkActionTaskType.UNENROLL_RETRY),
+      },
+      [BulkActionTaskType.UPGRADE_RETRY]: {
+        title: 'Bulk Unenroll Retry',
+        timeout: '1m',
+        maxAttempts: 1,
+        createTaskRunner: this.createTaskRunner(core, BulkActionTaskType.UPGRADE_RETRY),
       },
     });
   }
@@ -64,7 +115,6 @@ export class BulkActionsResolver {
       kuery: string;
       showInactive?: boolean;
       batchSize?: number;
-      newAgentPolicyId: string;
       pitId: string;
       actionId: string;
       searchAfter?: SortResults;
@@ -85,4 +135,39 @@ export class BulkActionsResolver {
     appContextService.getLogger().info('Running task ' + taskId);
     return taskId;
   }
+}
+
+export function createRetryTask(
+  taskInstance: ConcreteTaskInstance,
+  getDeps: () => Promise<{ esClient: ElasticsearchClient; soClient: SavedObjectsClient }>,
+  doRetry: (esClient: ElasticsearchClient, soClient: SavedObjectsClient, options: any) => void
+) {
+  return {
+    async run() {
+      appContextService.getLogger().info('Running bulk action retry task');
+
+      const { esClient, soClient } = await getDeps();
+
+      const options = taskInstance.params.options;
+
+      appContextService
+        .getLogger()
+        .debug(`Retry #${options.retryCount} of task ${taskInstance.id}`);
+
+      if (options.searchAfter) {
+        appContextService.getLogger().info('Continuing task from batch ' + options.searchAfter);
+      }
+
+      doRetry(esClient, soClient, {
+        ...options,
+        taskId: taskInstance.id,
+      });
+
+      appContextService.getLogger().info('Completed bulk action retry task');
+    },
+
+    async cancel() {
+      // appContextService.getLogger().debug('Cancel bulk action retry task');
+    },
+  };
 }

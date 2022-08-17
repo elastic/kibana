@@ -189,7 +189,6 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
               setIsReassignFlyoutOpen(false);
               refreshAgents();
             }}
-            totalAgents={totalAgents}
           />
         </EuiPortal>
       )}

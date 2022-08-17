@@ -125,7 +125,7 @@ export interface PostBulkAgentReassignRequest {
   body: {
     policy_id: string;
     agents: string[] | string;
-    totalAgents: number;
+    batchSize?: number;
   };
 }
 

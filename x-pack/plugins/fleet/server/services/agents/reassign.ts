@@ -7,35 +7,29 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 import Boom from '@hapi/boom';
-import { withSpan } from '@kbn/apm-utils';
-
-import uuid from 'uuid';
-
-import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 
 import type { Agent, BulkActionResult } from '../../types';
-import { appContextService } from '..';
 import { agentPolicyService } from '../agent_policy';
 import { AgentReassignmentError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 
 import { SO_SEARCH_LIMIT } from '../../constants';
 
+import { appContextService } from '../app_context';
+
 import {
   getAgentDocuments,
   getAgentPolicyForAgent,
   updateAgent,
-  bulkUpdateAgents,
-  processAgentsInBatches,
-  errorsToResults,
-  openPointInTime,
   getAgentsByKuery,
+  runActionAsyncWithRetry,
+  errorsToResults,
+  bulkUpdateAgents,
 } from './crud';
 import type { GetAgentsOptions } from '.';
-import { createAgentAction, getAgentActions } from './actions';
+import { createAgentAction } from './actions';
 import { searchHitToAgent } from './helpers';
-import { getHostedPolicies, isHostedAgent } from './hosted_agent';
-
 import { BulkActionTaskType } from './bulk_actions_resolver';
+import { getHostedPolicies, isHostedAgent } from './hosted_agent';
 
 export async function reassignAgent(
   soClient: SavedObjectsClientContract,
@@ -94,7 +88,6 @@ export async function reassignAgents(
   options: ({ agents: Agent[] } | GetAgentsOptions) & {
     force?: boolean;
     batchSize?: number;
-    totalAgents?: number;
   },
   newAgentPolicyId: string
 ): Promise<{ items: BulkActionResult[]; taskId?: string }> {
@@ -124,28 +117,35 @@ export async function reassignAgents(
       }
     }
   } else if ('kuery' in options) {
-    if ((options.totalAgents ?? 0) > (options.batchSize ?? SO_SEARCH_LIMIT)) {
-      const pitId = await openPointInTime(esClient);
-      const actionId = uuid();
-      appContextService
-        .getLogger()
-        .info(
-          `Running reassign asynchronously, actionId: ${actionId}, total agents: ${options.totalAgents}`
-        );
-      return runReassignAsync(soClient, esClient, {
-        ...options,
-        pitId,
-        actionId,
-        newAgentPolicyId,
-      });
-    } else {
-      const res = await getAgentsByKuery(esClient, {
-        kuery: options.kuery,
-        showInactive: options.showInactive ?? false,
-        page: 1,
-        perPage: options.batchSize,
-      });
+    const res = await getAgentsByKuery(esClient, {
+      kuery: options.kuery,
+      showInactive: options.showInactive ?? false,
+      page: 1,
+      perPage: options.batchSize ?? SO_SEARCH_LIMIT,
+    });
+    if (res.total <= (options.batchSize ?? SO_SEARCH_LIMIT)) {
       givenAgents = res.agents;
+    } else {
+      return await runActionAsyncWithRetry(
+        esClient,
+        {
+          ...options,
+          newAgentPolicyId,
+          totalAgents: res.total,
+          actionType: BulkActionTaskType.REASSIGN_RETRY,
+        },
+        async (agents: Agent[], actionId: string, total?: number, policyId?: string) =>
+          await reassignBatch(
+            soClient,
+            esClient,
+            { newAgentPolicyId: policyId!, actionId },
+            agents,
+            {},
+            undefined,
+            true,
+            total
+          )
+      );
     }
   }
 
@@ -157,97 +157,6 @@ export async function reassignAgents(
     outgoingErrors,
     'agentIds' in options ? options.agentIds : undefined
   );
-}
-
-export function runReassignAsync(
-  soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient,
-  options: {
-    kuery: string;
-    showInactive?: boolean;
-    force?: boolean;
-    batchSize?: number;
-    totalAgents?: number;
-    pitId: string;
-    actionId: string;
-    searchAfter?: SortResults;
-    newAgentPolicyId: string;
-    retryCount?: number;
-    taskId?: string;
-  }
-) {
-  let lastSearchAfter: SortResults | undefined;
-
-  const outgoingErrors: Record<Agent['id'], Error> = {};
-  withSpan({ name: 'Bulk reassign', type: 'action' }, () =>
-    processAgentsInBatches(
-      esClient,
-      {
-        kuery: options.kuery,
-        showInactive: options.showInactive ?? false,
-        batchSize: options.batchSize,
-        pitId: options.pitId,
-        searchAfter: options.searchAfter,
-      },
-      async (agents: Agent[], skipSuccess: boolean, searchAfter?: SortResults, total?: number) => {
-        lastSearchAfter = searchAfter;
-
-        if (options.retryCount) {
-          try {
-            const actions = await getAgentActions(esClient, options.actionId);
-
-            // skipping batch if there is already an action document present with last agent ids
-            for (const action of actions) {
-              if (action.agents?.[0] === agents[0].id) {
-                return { items: [] };
-              }
-            }
-          } catch (error) {
-            appContextService.getLogger().debug(error.message); // if action not found, swallow
-          }
-        }
-
-        return await reassignBatch(
-          soClient,
-          esClient,
-          { newAgentPolicyId: options.newAgentPolicyId, actionId: options.actionId },
-          agents,
-          outgoingErrors,
-          undefined,
-          skipSuccess,
-          total
-        );
-      }
-    ).catch(async (error) => {
-      if (options.retryCount) {
-        appContextService
-          .getLogger()
-          .error(`Retry #${options.retryCount} of task ${options.taskId} failed: ${error.message}`);
-
-        if (options.retryCount === 3) {
-          appContextService.getLogger().debug('Stopping after 3rd retry');
-          return {
-            error: { message: 'Failed after 3rd retry' },
-            state: {},
-          };
-        }
-      } else {
-        appContextService.getLogger().error(`Reassign in batches failed: ${error.message}`);
-      }
-      const taskId = await appContextService.getBulkActionsResolver()!.run(
-        {
-          ...options,
-          searchAfter: lastSearchAfter,
-          retryCount: (options.retryCount ?? 0) + 1,
-        },
-        BulkActionTaskType.REASSIGN_RETRY
-      );
-
-      appContextService.getLogger().info(`Retrying in task: ${taskId}`);
-    })
-  );
-
-  return { items: [] };
 }
 
 export async function reassignBatch(

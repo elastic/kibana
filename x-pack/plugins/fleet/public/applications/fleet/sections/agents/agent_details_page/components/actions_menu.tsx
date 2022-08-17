@@ -48,7 +48,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
     <>
       {isReassignFlyoutOpen && (
         <EuiPortal>
-          <AgentReassignAgentPolicyModal agents={[agent]} onClose={onClose} totalAgents={1} />
+          <AgentReassignAgentPolicyModal agents={[agent]} onClose={onClose} />
         </EuiPortal>
       )}
       {isUnenrollModalOpen && (

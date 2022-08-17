@@ -88,8 +88,8 @@ export async function unenrollAgents(
       showInactive: options.showInactive ?? false,
       batchSize: options.batchSize,
     },
-    async (agents: Agent[], skipSuccess?: boolean) =>
-      await unenrollBatch(soClient, esClient, agents, { ...options, actionId }, skipSuccess)
+    async (agents: Agent[]) =>
+      await unenrollBatch(soClient, esClient, agents, { ...options, actionId })
   );
 }
 

@@ -30,13 +30,11 @@ import { SO_SEARCH_LIMIT } from '../../../../constants';
 interface Props {
   onClose: () => void;
   agents: Agent[] | string;
-  totalAgents: number;
 }
 
 export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
   onClose,
   agents,
-  totalAgents,
 }) => {
   const { notifications } = useStartServices();
   const isSingleAgent = Array.isArray(agents) && agents.length === 1;
@@ -79,19 +77,26 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
         : await sendPostBulkAgentReassign({
             policy_id: selectedAgentPolicyId,
             agents: Array.isArray(agents) ? agents.map((agent) => agent.id) : agents,
-            totalAgents,
+            // batchSize: 4000,
           });
       if (res.error) {
         throw res.error;
       }
       setIsSubmitting(false);
+      const hasCompleted = Object.keys(res.data ?? {}).length > 0;
       const successMessage = i18n.translate(
         'xpack.fleet.agentReassignPolicy.successSingleNotificationTitle',
         {
           defaultMessage: 'Agent policy reassigned',
         }
       );
-      notifications.toasts.addSuccess(successMessage);
+      const submittedMessage = i18n.translate(
+        'xpack.fleet.agentReassignPolicy.successSingleNotificationTitle',
+        {
+          defaultMessage: 'Agent policy reassign submitted',
+        }
+      );
+      notifications.toasts.addSuccess(hasCompleted ? successMessage : submittedMessage);
       onClose();
     } catch (error) {
       setIsSubmitting(false);

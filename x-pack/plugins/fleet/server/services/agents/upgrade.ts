@@ -109,15 +109,8 @@ export async function sendUpgradeAgentsActions(
         showInactive: options.showInactive ?? false,
         batchSize: options.batchSize,
       },
-      async (agents: Agent[], skipSuccess: boolean) =>
-        await upgradeBatch(
-          soClient,
-          esClient,
-          agents,
-          outgoingErrors,
-          { ...options, actionId },
-          skipSuccess
-        )
+      async (agents: Agent[]) =>
+        await upgradeBatch(soClient, esClient, agents, {}, { ...options, actionId })
     );
   }
 

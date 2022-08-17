@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import uuid from 'uuid';
 import Boom from '@hapi/boom';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
-
+import { withSpan } from '@kbn/apm-utils';
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
@@ -23,6 +23,7 @@ import { escapeSearchQueryPhrase, normalizeKuery } from '../saved_object';
 import { IngestManagerError, isESClientError, AgentNotFoundError } from '../../errors';
 
 import { searchHitToAgent, agentSOAttributesToFleetServerAgentDoc } from './helpers';
+import { getAgentActions } from './actions';
 
 const ACTIVE_AGENT_CONDITION = 'active:true';
 const INACTIVE_AGENT_CONDITION = `NOT (${ACTIVE_AGENT_CONDITION})`;
@@ -254,6 +255,104 @@ export async function getAgentsByKuery(
   };
 }
 
+export async function runActionAsyncWithRetry(
+  esClient: ElasticsearchClient,
+  options: {
+    kuery: string;
+    showInactive?: boolean;
+    force?: boolean;
+    batchSize?: number;
+    totalAgents?: number;
+    pitId?: string;
+    actionId?: string;
+    searchAfter?: SortResults;
+    retryCount?: number;
+    taskId?: string;
+    actionType: string;
+    newAgentPolicyId?: string;
+  },
+  processAgents: (
+    agents: Agent[],
+    actionId: string,
+    total?: number,
+    newAgentPolicyId?: string
+  ) => Promise<{ items: BulkActionResult[] }>
+) {
+  const pitId = options.pitId ?? (await openPointInTime(esClient));
+  const actionId = options.actionId ?? uuid();
+  appContextService
+    .getLogger()
+    .info(
+      `Running action asynchronously, actionId: ${actionId}, total agents: ${options.totalAgents}`
+    );
+
+  let lastSearchAfter: SortResults | undefined;
+
+  // const outgoingErrors: Record<Agent['id'], Error> = {};
+  withSpan({ name: options.actionType, type: 'action' }, () =>
+    processAgentsInBatches(
+      esClient,
+      {
+        kuery: options.kuery,
+        showInactive: options.showInactive ?? false,
+        batchSize: options.batchSize,
+        pitId,
+        searchAfter: options.searchAfter,
+      },
+      async (agents: Agent[], searchAfter?: SortResults, total?: number) => {
+        lastSearchAfter = searchAfter;
+
+        if (options.retryCount) {
+          try {
+            const actions = await getAgentActions(esClient, actionId);
+
+            // skipping batch if there is already an action document present with last agent ids
+            for (const action of actions) {
+              if (action.agents?.[0] === agents[0].id) {
+                return { items: [] };
+              }
+            }
+          } catch (error) {
+            appContextService.getLogger().debug(error.message); // if action not found, swallow
+          }
+        }
+
+        return await processAgents(agents, actionId, total, options.newAgentPolicyId);
+      }
+    ).catch(async (error) => {
+      if (options.retryCount) {
+        appContextService
+          .getLogger()
+          .error(`Retry #${options.retryCount} of task ${options.taskId} failed: ${error.message}`);
+
+        if (options.retryCount === 3) {
+          appContextService.getLogger().debug('Stopping after 3rd retry');
+          return {
+            error: { message: 'Failed after 3rd retry' },
+            state: {},
+          };
+        }
+      } else {
+        appContextService.getLogger().error(`Action failed: ${error.message}`);
+      }
+      const taskId = await appContextService.getBulkActionsResolver()!.run(
+        {
+          ...options,
+          pitId,
+          searchAfter: lastSearchAfter,
+          actionId,
+          retryCount: (options.retryCount ?? 0) + 1,
+        },
+        options.actionType
+      );
+
+      appContextService.getLogger().info(`Retrying in task: ${taskId}`);
+    })
+  );
+
+  return { items: [] };
+}
+
 export async function processAgentsInBatches(
   esClient: ElasticsearchClient,
   options: Omit<ListWithKuery, 'page' | 'perPage'> & {
@@ -264,7 +363,6 @@ export async function processAgentsInBatches(
   },
   processAgents: (
     agents: Agent[],
-    includeSuccess: boolean,
     searchAfter?: SortResults,
     total?: number
   ) => Promise<{ items: BulkActionResult[] }>
@@ -289,10 +387,8 @@ export async function processAgentsInBatches(
       .debug('currentAgents returned 0 hits, returning from bulk action query');
     return { items: [] }; // stop executing if there are no more results
   }
-  // include successful agents if total agents does not exceed 10k
-  const skipSuccess = res.total > SO_SEARCH_LIMIT;
 
-  let results = await processAgents(currentAgents, skipSuccess, options.searchAfter, res.total);
+  let results = await processAgents(currentAgents, options.searchAfter, res.total);
   let allAgentsProcessed = currentAgents.length;
 
   while (allAgentsProcessed < res.total) {
@@ -312,7 +408,7 @@ export async function processAgentsInBatches(
         .debug('currentAgents returned 0 hits, returning from bulk action query');
       break; // stop executing if there are no more results
     }
-    const currentResults = await processAgents(currentAgents, skipSuccess, searchAfter, res.total);
+    const currentResults = await processAgents(currentAgents, searchAfter, res.total);
     results = { items: results.items.concat(currentResults.items) };
     allAgentsProcessed += currentAgents.length;
     // if (allAgentsProcessed > 10) throw new Error('simulating error after batch processed ' + searchAfter);

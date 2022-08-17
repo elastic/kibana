@@ -565,7 +565,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
               setAgentToReassign(undefined);
               fetchData();
             }}
-            totalAgents={1}
           />
         </EuiPortal>
       )}
