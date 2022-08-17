@@ -449,7 +449,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
 
         return (
           <EuiFlexGroup gutterSize="none" style={{ minWidth: 0 }} direction="column">
-            {agentPolicy && <AgentPolicySummaryLine policy={agentPolicy} />}
+            {agentPolicy && <AgentPolicySummaryLine policy={agentPolicy} agent={agent} />}
             {showWarning && (
               <EuiFlexItem grow={false}>
                 <EuiText color="subdued" size="xs" className="eui-textNoWrap">
