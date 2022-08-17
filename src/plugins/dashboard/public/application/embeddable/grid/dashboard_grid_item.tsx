@@ -10,7 +10,12 @@ import React, { useState, useRef, useEffect, FC } from 'react';
 import { EuiLoadingChart } from '@elastic/eui';
 import classNames from 'classnames';
 
-import { EmbeddableChildPanel, EmbeddablePhaseEvent, ViewMode } from '../../../services/embeddable';
+import {
+  EmbeddableChildPanel,
+  EmbeddablePhaseEvent,
+  ViewMode,
+} from '@kbn/embeddable-plugin/public';
+
 import { useLabs } from '../../../services/presentation_util';
 import { DashboardPanelState } from '../types';
 import { DashboardContainer } from '..';

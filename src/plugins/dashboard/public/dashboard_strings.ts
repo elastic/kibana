@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ViewMode } from './services/embeddable';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 /**
  * @param title {string} the current title of the dashboard

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { DashboardContainerInput } from '../..';
-import { IEmbeddable } from '../../services/embeddable';
 import { dashboardExpandPanelAction } from '../../dashboard_strings';
 import { Action, IncompatibleActionError } from '../../services/ui_actions';
 import { DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '../embeddable';

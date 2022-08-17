@@ -15,7 +15,7 @@ import {
   isErrorEmbeddable,
   ReferenceOrValueEmbeddable,
   SavedObjectEmbeddableInput,
-} from '../../services/embeddable';
+} from '@kbn/embeddable-plugin/public';
 import { UnlinkFromLibraryAction } from '.';
 import { getSampleDashboardInput } from '../test_helpers';
 import { DashboardContainer } from '../embeddable/dashboard_container';
@@ -28,7 +28,7 @@ import {
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
   CONTACT_CARD_EMBEDDABLE,
-} from '../../services/embeddable_test_samples';
+} from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
 import { getStubPluginServices } from '@kbn/presentation-util-plugin/public';
 import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 

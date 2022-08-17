@@ -7,8 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { TopNavMenuData } from '@kbn/navigation-plugin/public';
-import { ViewMode } from '../../services/embeddable';
 import { TopNavIds } from './top_nav_ids';
 import { NavAction } from '../../types';
 

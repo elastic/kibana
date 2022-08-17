@@ -7,7 +7,7 @@
  */
 
 import _ from 'lodash';
-import { PanelNotFoundError } from '../../../services/embeddable';
+import { PanelNotFoundError } from '@kbn/embeddable-plugin/public';
 import { GridData } from '../../../../common';
 import { DashboardPanelState, DASHBOARD_GRID_COLUMN_COUNT } from '..';
 

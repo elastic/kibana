@@ -20,20 +20,24 @@ import type {
   KibanaExecutionContext,
   SavedObjectsClientContract,
 } from '@kbn/core/public';
+import {
+  EmbeddableStart,
+  ContainerInput,
+  EmbeddableInput,
+  ViewMode,
+} from '@kbn/embeddable-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import { DataView } from '@kbn/data-views-plugin/common';
 
 import { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 import { SharePluginStart } from './services/share';
-import { EmbeddableStart } from './services/embeddable';
 import { DashboardSessionStorage } from './application/lib';
 import { UsageCollectionSetup } from './services/usage_collection';
 import { NavigationPublicPluginStart } from './services/navigation';
 import { Query, RefreshInterval, TimeRange } from './services/data/types';
 import { DashboardPanelState, SavedDashboardPanel } from '../common/types';
 import { SavedObjectsTaggingApi } from './services/saved_objects_tagging_oss';
-import { ContainerInput, EmbeddableInput, ViewMode } from './services/embeddable';
 import { SavedObjectLoader, SavedObjectsStart } from './services/saved_objects';
 import type { ScreenshotModePluginStart } from './services/screenshot_mode';
 import { IKbnUrlStateStorage } from './services/kibana_utils';

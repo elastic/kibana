@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { Action, IncompatibleActionError } from '../../services/ui_actions';
 import {
   ViewMode,
   PanelState,
@@ -15,7 +14,8 @@ import {
   EmbeddableInput,
   isReferenceOrValueEmbeddable,
   isErrorEmbeddable,
-} from '../../services/embeddable';
+} from '@kbn/embeddable-plugin/public';
+import { Action, IncompatibleActionError } from '../../services/ui_actions';
 import { ApplicationStart, NotificationsStart } from '../../services/core';
 import { dashboardAddToLibraryAction } from '../../dashboard_strings';
 import { DashboardPanelState, DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '..';

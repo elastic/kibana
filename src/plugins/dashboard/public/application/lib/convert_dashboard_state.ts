@@ -16,9 +16,10 @@ import {
   COMPARE_ALL_OPTIONS,
   type Filter,
 } from '@kbn/es-query';
+import { EmbeddablePackageState, ViewMode } from '@kbn/embeddable-plugin/public';
+
 import { DashboardSavedObject } from '../../saved_dashboards';
 import { getTagsFromSavedDashboard, migrateAppState } from '.';
-import { EmbeddablePackageState, ViewMode } from '../../services/embeddable';
 import { TimeRange } from '../../services/data/types';
 import { convertPanelStateToSavedDashboardPanel } from '../../../common/embeddable/embeddable_saved_object_converters';
 import {

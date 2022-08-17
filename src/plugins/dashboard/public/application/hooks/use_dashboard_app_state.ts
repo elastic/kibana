@@ -11,8 +11,9 @@ import { debounceTime, switchMap } from 'rxjs/operators';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
 
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+
 import { DashboardConstants } from '../..';
-import { ViewMode } from '../../services/embeddable';
 import { useKibana } from '../../services/kibana_react';
 import { getNewDashboardTitle } from '../../dashboard_strings';
 import { IKbnUrlStateStorage } from '../../services/kibana_utils';

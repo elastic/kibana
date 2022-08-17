@@ -18,6 +18,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { renderHook, act, RenderHookResult } from '@testing-library/react-hooks';
 import { createKbnUrlStateStorage, defer } from '@kbn/kibana-utils-plugin/public';
+import { EmbeddableFactory, ViewMode } from '@kbn/embeddable-plugin/public';
 
 import {
   getSampleDashboardInput,
@@ -29,7 +30,6 @@ import { DashboardConstants } from '../../dashboard_constants';
 import { SavedObjectLoader } from '../../services/saved_objects';
 import { DashboardAppServices, DashboardAppState } from '../../types';
 import { DashboardContainer } from '../embeddable/dashboard_container';
-import { EmbeddableFactory, ViewMode } from '../../services/embeddable';
 import { dashboardStateStore, setDescription, setViewMode } from '../state';
 import { DashboardContainerServices } from '../embeddable/dashboard_container';
 import { useDashboardAppState, UseDashboardStateProps } from './use_dashboard_app_state';

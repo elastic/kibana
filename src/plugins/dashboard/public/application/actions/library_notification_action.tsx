@@ -9,18 +9,18 @@
 import React from 'react';
 
 import { CoreStart } from '@kbn/core/public';
-import { Action, IncompatibleActionError } from '../../services/ui_actions';
-import { KibanaThemeProvider, reactToUiComponent } from '../../services/kibana_react';
 import {
   IEmbeddable,
   ViewMode,
   isReferenceOrValueEmbeddable,
   isErrorEmbeddable,
-} from '../../services/embeddable';
+} from '@kbn/embeddable-plugin/public';
 
 import { UnlinkFromLibraryAction } from '.';
 import { LibraryNotificationPopover } from './library_notification_popover';
 import { dashboardLibraryNotification } from '../../dashboard_strings';
+import { Action, IncompatibleActionError } from '../../services/ui_actions';
+import { KibanaThemeProvider, reactToUiComponent } from '../../services/kibana_react';
 
 export const ACTION_LIBRARY_NOTIFICATION = 'ACTION_LIBRARY_NOTIFICATION';
 

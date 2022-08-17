@@ -14,20 +14,20 @@ import { CoreStart } from '@kbn/core/public';
 import { FiltersNotificationBadge } from '.';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { type Query, type AggregateQuery, Filter } from '@kbn/es-query';
-
 import {
   ErrorEmbeddable,
   FilterableEmbeddable,
   IContainer,
   isErrorEmbeddable,
-} from '../../services/embeddable';
+} from '@kbn/embeddable-plugin/public';
+
 import {
   ContactCardEmbeddable,
   ContactCardEmbeddableFactory,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
   CONTACT_CARD_EMBEDDABLE,
-} from '../../services/embeddable_test_samples';
+} from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
 import { getStubPluginServices } from '@kbn/presentation-util-plugin/public';
 import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 

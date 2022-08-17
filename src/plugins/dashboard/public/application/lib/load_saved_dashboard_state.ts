@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { getDashboard60Warning, dashboardLoadingErrorStrings } from '../../dashboard_strings';
 import { savedObjectToDashboardState } from './convert_dashboard_state';
 import { DashboardState, DashboardBuildContext } from '../../types';
 import { DashboardConstants, DashboardSavedObject } from '../..';
 import { migrateLegacyQuery } from './migrate_legacy_query';
 import { cleanFiltersForSerialize } from './filter_utils';
-import { ViewMode } from '../../services/embeddable';
 import { pluginServices } from '../../services/plugin_services';
 
 interface LoadSavedDashboardStateReturn {

@@ -17,9 +17,6 @@ import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import { Filter, TimeRange } from '@kbn/es-query';
 import { DataView } from '@kbn/data-views-plugin/public';
-
-import { UiActionsStart } from '../../services/ui_actions';
-import { RefreshInterval, Query } from '../../services/data/types';
 import {
   ViewMode,
   Container,
@@ -31,7 +28,10 @@ import {
   EmbeddableFactory,
   ErrorEmbeddable,
   isErrorEmbeddable,
-} from '../../services/embeddable';
+} from '@kbn/embeddable-plugin/public';
+
+import { UiActionsStart } from '../../services/ui_actions';
+import { RefreshInterval, Query } from '../../services/data/types';
 import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
 import { createPanelState } from './panel';
 import { DashboardPanelState } from './types';

@@ -7,9 +7,9 @@
  */
 
 import * as React from 'react';
+import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { DashboardContainerInput } from '../..';
 import { DashboardContainerFactory } from './dashboard_container_factory';
-import { EmbeddableRenderer } from '../../services/embeddable';
 
 interface Props {
   input: DashboardContainerInput;

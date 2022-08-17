@@ -7,11 +7,11 @@
  */
 
 import { set } from '@elastic/safer-lodash-set';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { Storage } from '../../services/kibana_utils';
 import { NotificationsStart } from '../../services/core';
 import { panelStorageErrorStrings } from '../../dashboard_strings';
 import { DashboardState } from '../../types';
-import { ViewMode } from '../../services/embeddable';
 
 export const DASHBOARD_PANELS_UNSAVED_ID = 'unsavedDashboard';
 const DASHBOARD_PANELS_SESSION_KEY = 'dashboardStateManagerPanels';

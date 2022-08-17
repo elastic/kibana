@@ -7,7 +7,6 @@
  */
 
 import { NotificationsStart } from '@kbn/core/public';
-import { Action, IncompatibleActionError } from '../../services/ui_actions';
 import {
   ViewMode,
   PanelState,
@@ -16,7 +15,8 @@ import {
   EmbeddableInput,
   isReferenceOrValueEmbeddable,
   isErrorEmbeddable,
-} from '../../services/embeddable';
+} from '@kbn/embeddable-plugin/public';
+import { Action, IncompatibleActionError } from '../../services/ui_actions';
 import { dashboardUnlinkFromLibraryAction } from '../../dashboard_strings';
 import { DashboardPanelState, DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '..';
 

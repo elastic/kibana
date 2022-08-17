@@ -10,8 +10,6 @@ import _ from 'lodash';
 import uuid from 'uuid';
 
 import { CoreStart } from '@kbn/core/public';
-import { Action, IncompatibleActionError } from '../../services/ui_actions';
-import { SavedObject } from '../../services/saved_objects';
 import {
   ViewMode,
   PanelState,
@@ -21,7 +19,10 @@ import {
   SavedObjectEmbeddableInput,
   isErrorEmbeddable,
   isReferenceOrValueEmbeddable,
-} from '../../services/embeddable';
+} from '@kbn/embeddable-plugin/public';
+
+import { Action, IncompatibleActionError } from '../../services/ui_actions';
+import { SavedObject } from '../../services/saved_objects';
 import {
   placePanelBeside,
   IPanelPlacementBesideArgs,

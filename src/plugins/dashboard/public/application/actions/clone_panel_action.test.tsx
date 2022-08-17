@@ -20,8 +20,8 @@ import {
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
   CONTACT_CARD_EMBEDDABLE,
-} from '../../services/embeddable_test_samples';
-import { ErrorEmbeddable, IContainer, isErrorEmbeddable } from '../../services/embeddable';
+} from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
+import { ErrorEmbeddable, IContainer, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import { getStubPluginServices } from '@kbn/presentation-util-plugin/public';
 import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 
