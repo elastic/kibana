@@ -93,7 +93,7 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
             <EuiButtonEmpty
               onClick={clearSelection}
               size="xs"
-              data-test-sub="aiopsClearSelectionBadge"
+              data-test-subj="aiopsClearSelectionBadge"
             >
               {clearSelectionLabel}
             </EuiButtonEmpty>

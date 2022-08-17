@@ -11,7 +11,17 @@ export const farequoteDataViewTestData: TestData = {
   suiteTitle: 'farequote index pattern',
   isSavedSearch: false,
   sourceIndexOrSavedSearch: 'ft_farequote',
+  brushTargetTimestamp: 1455033600000,
   expected: {
     totalDocCountFormatted: '86,274',
+    analysisTable: [
+      {
+        fieldName: 'airline',
+        fieldValue: 'AAL',
+        logRate: 'Chart type:bar chart',
+        pValue: '4.63e-14',
+        impact: 'High',
+      },
+    ],
   },
 };
