@@ -14,7 +14,15 @@ import {
   Settings,
   timeFormatter,
 } from '@elastic/charts';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, useEuiTheme } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiSpacer,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import React from 'react';
 import { getFieldNameForTopNType, TopNType } from '../../common/stack_traces';
 import { CountPerTime } from '../../common/topn';
@@ -64,9 +72,14 @@ export const SubChart: React.FC<SubChartProps> = ({
   const { chartsTheme, chartsBaseTheme } = useProfilingChartsTheme();
 
   return (
-    <EuiFlexGroup direction="column">
+    <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem>
-        <EuiFlexGroup direction="row" gutterSize="m" alignItems="flexStart">
+        <EuiFlexGroup
+          direction="row"
+          gutterSize="m"
+          alignItems="flexStart"
+          style={{ overflowWrap: 'anywhere' }}
+        >
           <EuiFlexItem grow={false}>
             <EuiBadge color={color}>
               <EuiText color={theme.euiTheme.colors.lightestShade} size="xs">
@@ -84,6 +97,7 @@ export const SubChart: React.FC<SubChartProps> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
+      <EuiSpacer />
       <EuiFlexItem>
         <Chart size={{ height, width }}>
           <Settings
