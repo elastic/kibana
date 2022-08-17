@@ -6,6 +6,7 @@
  */
 
 import type { GetRenderCellValue } from '@kbn/triggers-actions-ui-plugin/public';
+import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { casesFeatureId, observabilityFeatureId } from '../../common';
 import { useBulkAddToCaseActions } from '../hooks/use_alert_bulk_case_actions';
 import { TopAlert, useToGetInternalFlyout } from '../pages/alerts';
@@ -21,15 +22,22 @@ const getO11yAlertsTableConfiguration = (
   id: observabilityFeatureId,
   casesFeatureId,
   columns: alertO11yColumns.map(addDisplayNames),
+  getRenderCellValue: (({ setFlyoutAlert }: { setFlyoutAlert: (data: TopAlert) => void }) => {
+    return getRenderCellValue({ observabilityRuleTypeRegistry, setFlyoutAlert });
+  }) as unknown as GetRenderCellValue,
+  sort: [
+    {
+      [TIMESTAMP]: {
+        order: 'asc',
+      },
+    },
+  ],
+  useActionsColumn: getRowActions(observabilityRuleTypeRegistry),
+  useBulkActions: useBulkAddToCaseActions,
   useInternalFlyout: () => {
     const { header, body, footer } = useToGetInternalFlyout(observabilityRuleTypeRegistry);
     return { header, body, footer };
   },
-  useActionsColumn: getRowActions(observabilityRuleTypeRegistry),
-  getRenderCellValue: (({ setFlyoutAlert }: { setFlyoutAlert: (data: TopAlert) => void }) => {
-    return getRenderCellValue({ observabilityRuleTypeRegistry, setFlyoutAlert });
-  }) as unknown as GetRenderCellValue,
-  useBulkActions: useBulkAddToCaseActions,
 });
 
 export { getO11yAlertsTableConfiguration };
