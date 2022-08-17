@@ -160,7 +160,7 @@ describe('rule_event_log_list', () => {
   it('renders correctly', async () => {
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={ruleMock}
+        ruleId={ruleMock.id}
         ruleType={ruleType}
         ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
         numberOfExecutions={60}
@@ -206,7 +206,7 @@ describe('rule_event_log_list', () => {
   it('can sort by single and/or multiple column(s)', async () => {
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={ruleMock}
+        ruleId={ruleMock.id}
         ruleType={ruleType}
         ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
         numberOfExecutions={60}
@@ -311,7 +311,7 @@ describe('rule_event_log_list', () => {
   it('can filter by execution log outcome status', async () => {
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={ruleMock}
+        ruleId={ruleMock.id}
         ruleType={ruleType}
         ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
         numberOfExecutions={60}
@@ -374,7 +374,7 @@ describe('rule_event_log_list', () => {
 
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={ruleMock}
+        ruleId={ruleMock.id}
         ruleType={ruleType}
         ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
         numberOfExecutions={60}
@@ -434,7 +434,7 @@ describe('rule_event_log_list', () => {
 
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={ruleMock}
+        ruleId={ruleMock.id}
         ruleType={ruleType}
         ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
         numberOfExecutions={60}
@@ -491,7 +491,7 @@ describe('rule_event_log_list', () => {
   it('can save display columns to localStorage', async () => {
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={ruleMock}
+        ruleId={ruleMock.id}
         ruleType={ruleType}
         ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
         numberOfExecutions={60}
@@ -534,7 +534,7 @@ describe('rule_event_log_list', () => {
   it('does not show the refine search prompt normally', async () => {
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={ruleMock}
+        ruleId={ruleMock.id}
         ruleType={ruleType}
         ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
         numberOfExecutions={60}
@@ -559,7 +559,7 @@ describe('rule_event_log_list', () => {
 
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={ruleMock}
+        ruleId={ruleMock.id}
         ruleType={ruleType}
         ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
         numberOfExecutions={60}
@@ -609,7 +609,7 @@ describe('rule_event_log_list', () => {
 
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={ruleMock}
+        ruleId={ruleMock.id}
         ruleType={ruleType}
         ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
         numberOfExecutions={60}
@@ -636,7 +636,7 @@ describe('rule_event_log_list', () => {
 
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={ruleMock}
+        ruleId={ruleMock.id}
         ruleType={ruleType}
         ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
         numberOfExecutions={60}
@@ -663,7 +663,7 @@ describe('rule_event_log_list', () => {
 
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={ruleMock}
+        ruleId={ruleMock.id}
         ruleType={ruleType}
         ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
         numberOfExecutions={60}
@@ -731,7 +731,7 @@ describe('rule_event_log_list', () => {
 
     const wrapper = mountWithIntl(
       <RuleEventLogList
-        rule={ruleMock}
+        ruleId={ruleMock.id}
         ruleType={ruleType}
         ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
         numberOfExecutions={60}
@@ -764,7 +764,7 @@ describe('rule_event_log_list', () => {
     const wrapper = mountWithIntl(
       <RuleEventLogList
         fetchRuleSummary={false}
-        rule={ruleMock}
+        ruleId={ruleMock.id}
         ruleType={ruleType}
         ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
         numberOfExecutions={60}
@@ -803,7 +803,7 @@ describe('rule_event_log_list', () => {
     const wrapper = mountWithIntl(
       <RuleEventLogList
         fetchRuleSummary={false}
-        rule={ruleMock}
+        ruleId={ruleMock.id}
         ruleType={ruleTypeCustom}
         ruleSummary={ruleSummary}
         numberOfExecutions={60}
@@ -841,7 +841,7 @@ describe('rule_event_log_list', () => {
     const wrapper = mountWithIntl(
       <RuleEventLogList
         fetchRuleSummary={false}
-        rule={ruleMock}
+        ruleId={ruleMock.id}
         ruleType={ruleTypeCustom}
         ruleSummary={ruleSummary}
         numberOfExecutions={60}
