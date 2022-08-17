@@ -39,7 +39,7 @@ export async function scheduleActionsForAlerts<
   } = params;
   // execute alerts with executable actions
   for (const [alertId, alert] of Object.entries(activeAlerts)) {
-    const executeAction: boolean = await shouldExecuteAction(
+    const executeAction: boolean = shouldExecuteAction(
       alertId,
       alert,
       mutedAlertIdsSet,
@@ -109,7 +109,7 @@ async function executeAlert<
   });
 }
 
-async function shouldExecuteAction<
+function shouldExecuteAction<
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext,
   ActionGroupIds extends string
