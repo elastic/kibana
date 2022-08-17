@@ -16,13 +16,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['settings', 'common', 'header']);
   const security = getService('security');
 
-  describe('"Create Index Pattern" wizard', function () {
+  describe.only('data views ccs', function () {
     before(async function () {
       await security.testUser.setRoles(['kibana_admin']);
     });
 
-    describe.only('data views ccs', () => {
-      describe('remote es only', async () => {
+    describe('index pattern wizard ccs', () => {
+      describe('remote cluster only', async () => {
         this.beforeEach(async function () {
           // delete .kibana index and then wait for Kibana to re-create it
           await kibanaServer.uiSettings.replace({});
@@ -31,41 +31,65 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         it('create index pattern using remote name', async () => {
           await PageObjects.settings.createIndexPattern('ftr-remote:logstash*', null);
+          await PageObjects.settings.clickKibanaIndexPatterns();
           const indexPatternList = await PageObjects.settings.getIndexPatternList();
           expect(indexPatternList.length).to.eql(1);
         });
         it('create index pattern with wildcards in remote name', async () => {
           await PageObjects.settings.createIndexPattern('*t*-remo*:log*', null);
+          await PageObjects.settings.clickKibanaIndexPatterns();
           const indexPatternList = await PageObjects.settings.getIndexPatternList();
           expect(indexPatternList.length).to.eql(1);
         });
 
-        this.afterAll(async () => {
+        this.afterEach(async () => {
+          await PageObjects.header.waitUntilLoadingHasFinished();
+          await testSubjects.exists('indexPatternTable');
+          await kibanaServer.savedObjects.cleanStandardList();
+        });
+      });
+      describe('remote and local clusters', async () => {
+        before(async () => {
+          await es.transport.request({
+            path: '/blogs/_doc',
+            method: 'POST',
+            body: { user: 'cuffs', message: 20 },
+          });
+        });
+
+        this.beforeEach(async function () {
+          // delete .kibana index and then wait for Kibana to re-create it
+          await kibanaServer.uiSettings.replace({});
+          await PageObjects.settings.navigateTo();
+          await PageObjects.settings.clickKibanaIndexPatterns();
+        });
+        it('combined remote cluster and local cluster data view without wildcards', async () => {
+
+          await PageObjects.settings.createIndexPattern('blog*, ftr-remote:log*', null);
+          await PageObjects.settings.clickKibanaIndexPatterns();
+          const indexPatternList = await PageObjects.settings.getIndexPatternList();
+          expect(indexPatternList.length).to.eql(1);
+        });
+        it('combined remote cluster and local cluster data view with wildcards', async () => {
+
+          await PageObjects.settings.createIndexPattern('blog*, *t*-remo*:lo*', null);
+          await PageObjects.settings.clickKibanaIndexPatterns();
+          const indexPatternList = await PageObjects.settings.getIndexPatternList();
+          expect(indexPatternList.length).to.eql(1);
+        });
+
+        this.afterEach(async () => {
+          await PageObjects.header.waitUntilLoadingHasFinished();
+          await testSubjects.exists('indexPatternTable');
+          await kibanaServer.savedObjects.cleanStandardList();
+        });
+        after(async () => {
           await es.transport.request({
             path: '/blogs',
             method: 'DELETE',
           });
-          await PageObjects.settings.removeIndexPattern();
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          await testSubjects.exists('indexPatternTable');
         });
       });
-      // before(async () => {
-      //   await es.transport.request({
-      //     path: '/blogs/_doc',
-      //     method: 'POST',
-      //     body: { user: 'cuffs', message: 20 },
-      //   });
-      // });
-      // it('combined remote cluster and local cluster data view with wildcards', async () => {
-
-      //   await PageObjects.settings.createIndexPattern('blog*, *t*-remo*:lo*', null);
-      // });
-
-      // it('can delete an index pattern', async () => {
-
-      // });
-
       after(async () => {
         await security.testUser.restoreDefaults();
       });
