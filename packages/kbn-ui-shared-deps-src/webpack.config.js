@@ -9,7 +9,11 @@
 const Path = require('path');
 
 const webpack = require('webpack');
+const { RawSource } = require('webpack-sources');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
+const CompressionPlugin = require('compression-webpack-plugin');
+
 const UiSharedDepsNpm = require('@kbn/ui-shared-deps-npm');
 
 const { distDir: UiSharedDepsSrcDistDir } = require('./src/definitions');
@@ -31,7 +35,7 @@ module.exports = {
     'kbn-ui-shared-deps-src': './src/entry.js',
   },
   context: __dirname,
-  devtool: 'cheap-source-map',
+  devtool: 'source-map',
   output: {
     path: UiSharedDepsSrcDistDir,
     filename: '[name].js',
@@ -58,7 +62,24 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        use: [MiniCssExtractPlugin.loader, 'css-loader'],
+        use: [
+          MiniCssExtractPlugin.loader,
+          'css-loader',
+          {
+            loader: 'postcss-loader',
+            options: {
+              sourceMap: true,
+              postcssOptions: {
+                plugins: [
+                  require('autoprefixer')(),
+                  require('cssnano')({
+                    preset: require('cssnano-preset-default')({ discardComments: false }),
+                  }),
+                ],
+              },
+            },
+          },
+        ],
       },
       {
         test: /\.(ttf)(\?|$)/,
@@ -84,7 +105,18 @@ module.exports = {
   },
 
   optimization: {
-    minimize: false,
+    minimizer: [
+      new TerserPlugin({
+        extractComments: false,
+        cache: true,
+        parallel: true,
+        sourceMap: true,
+        terserOptions: {
+          compress: true,
+          mangle: true,
+        },
+      }),
+    ],
     noEmitOnErrors: true,
   },
 
@@ -99,10 +131,45 @@ module.exports = {
     new MiniCssExtractPlugin({
       filename: '[name].css',
     }),
-
     new webpack.DllReferencePlugin({
       context: REPO_ROOT,
       manifest: require(UiSharedDepsNpm.dllManifestPath), // eslint-disable-line import/no-dynamic-require
     }),
+    new CompressionPlugin({
+      algorithm: 'brotliCompress',
+      filename: '[path].br',
+      test: /\.(js|css)$/,
+      cache: false,
+      compressionOptions: {
+        level: 11,
+      },
+    }),
+    new (class BundleMetricsPlugin {
+      apply(compiler) {
+        compiler.hooks.emit.tap('BundleMetricsPlugin', (compilation) => {
+          const entries = Object.entries(compilation.assets).map(([id]) => id);
+          const fonts = entries.filter((entry) => /\.ttf$/.test(entry));
+
+          const metrics = [
+            {
+              group: 'page load bundle size',
+              id: 'kbnUiSharedDeps-srcJs',
+              value: compilation.assets['kbn-ui-shared-deps-src.js'].size(),
+            },
+            {
+              group: 'page load bundle size',
+              id: 'kbnUiSharedDeps-srcCss',
+              value: compilation.assets['kbn-ui-shared-deps-src.css'].size(),
+            },
+            {
+              group: 'page load bundle size',
+              id: 'kbnUiSharedDeps-srcFonts',
+              value: fonts.reduce((acc, entry) => acc + compilation.assets[entry].size(), 0),
+            },
+          ];
+          compilation.emitAsset('metrics.json', new RawSource(JSON.stringify(metrics, null, 2)));
+        });
+      }
+    })(),
   ],
 };

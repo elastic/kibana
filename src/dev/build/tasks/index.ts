@@ -20,7 +20,6 @@ export * from './create_empty_dirs_and_files_task';
 export * from './create_readme_task';
 export * from './download_cloud_dependencies';
 export * from './fleet_download_elastic_gpg_key';
-export * from './generate_packages_optimized_assets';
 export * from './install_dependencies_task';
 export * from './license_file_task';
 export * from './nodejs';

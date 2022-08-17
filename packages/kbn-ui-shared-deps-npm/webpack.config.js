@@ -8,8 +8,11 @@
 
 const Path = require('path');
 const webpack = require('webpack');
+const { RawSource } = require('webpack-sources');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
+const CompressionPlugin = require('compression-webpack-plugin');
 
 const UiSharedDepsNpm = require('./src');
 
@@ -108,7 +111,7 @@ module.exports = (_, argv) => {
       'kbn-ui-shared-deps-npm.v8.light': ['@elastic/eui/dist/eui_theme_light.css'],
     },
     context: __dirname,
-    devtool: 'cheap-source-map',
+    devtool: 'source-map',
     output: {
       path: outputPath,
       filename: '[name].dll.js',
@@ -135,7 +138,24 @@ module.exports = (_, argv) => {
         },
         {
           test: /\.css$/,
-          use: [MiniCssExtractPlugin.loader, 'css-loader'],
+          use: [
+            MiniCssExtractPlugin.loader,
+            'css-loader',
+            {
+              loader: 'postcss-loader',
+              options: {
+                sourceMap: true,
+                postcssOptions: {
+                  plugins: [
+                    require('autoprefixer')(),
+                    require('cssnano')({
+                      preset: require('cssnano-preset-default')({ discardComments: false }),
+                    }),
+                  ],
+                },
+              },
+            },
+          ],
         },
       ],
     },
@@ -154,7 +174,18 @@ module.exports = (_, argv) => {
     },
 
     optimization: {
-      minimize: false,
+      minimizer: [
+        new TerserPlugin({
+          extractComments: false,
+          cache: true,
+          parallel: true,
+          sourceMap: true,
+          terserOptions: {
+            compress: true,
+            mangle: true,
+          },
+        }),
+      ],
       noEmitOnErrors: true,
     },
 
@@ -181,6 +212,57 @@ module.exports = (_, argv) => {
         path: Path.resolve(outputPath, '[name]-manifest.json'),
         name: '__kbnSharedDeps_npm__',
       }),
+      new CompressionPlugin({
+        algorithm: 'brotliCompress',
+        filename: '[path].br',
+        test: /\.(js|css)$/,
+        cache: false,
+        compressionOptions: {
+          level: 11,
+        },
+      }),
+      new (class BundleMetricsPlugin {
+        apply(compiler) {
+          compiler.hooks.emit.tap('BundleMetricsPlugin', (compilation) => {
+            const entries = Object.entries(compilation.assets).map(([id]) => id);
+            const fonts = entries.filter((entry) => /\.ttf$/.test(entry));
+            const dllAsyncChunks = entries.filter((entry) =>
+              /^kbn-ui-shared-deps-npm.chunk.\d*.js$/.test(entry)
+            );
+            const metrics = [
+              {
+                group: 'page load bundle size',
+                id: 'kbnUiSharedDeps-npmDll',
+                value: compilation.assets['kbn-ui-shared-deps-npm.dll.js'].size(),
+              },
+              {
+                group: 'async chunks size',
+                id: 'kbnUiSharedDeps-npmDll',
+                value: dllAsyncChunks.reduce(
+                  (acc, entry) => acc + compilation.assets[entry].size(),
+                  0
+                ),
+              },
+              {
+                group: 'async chunk count',
+                id: 'kbnUiSharedDeps-npmDll',
+                value: dllAsyncChunks.length,
+              },
+              {
+                group: 'page load bundle size',
+                id: 'kbnUiSharedDeps-npmFonts',
+                value: fonts.reduce((acc, entry) => acc + compilation.assets[entry].size(), 0),
+              },
+              {
+                group: 'page load bundle size',
+                id: 'kbnUiSharedDeps-npmCss',
+                value: compilation.assets['kbn-ui-shared-deps-npm.v8.light.css'].size(),
+              },
+            ];
+            compilation.emitAsset('metrics.json', new RawSource(JSON.stringify(metrics, null, 2)));
+          });
+        }
+      })(),
     ],
   };
 };
