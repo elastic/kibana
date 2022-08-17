@@ -174,10 +174,20 @@ export const moveFilter = (
   const newFilters = cloneDeep(filters);
   const movingFilter = getFilterByPath(newFilters, from);
 
-  if (getPathInArray(to).length >= getPathInArray(from).length) {
+  const pathInArrayTo = getPathInArray(to).length;
+  const PathInArrayFrom = getPathInArray(from).length;
+
+  if (pathInArrayTo === PathInArrayFrom) {
+    const newFiltersWithoutFilter = removeFilter(newFilters, from);
+    return addFilter(newFiltersWithoutFilter, movingFilter, to, conditionalType);
+  }
+
+  if (pathInArrayTo > PathInArrayFrom) {
     const newFilterWithFilter = addFilter(newFilters, movingFilter, to, conditionalType);
     return removeFilter(newFilterWithFilter, from);
-  } else {
+  }
+
+  if (pathInArrayTo < PathInArrayFrom) {
     const newFiltersWithoutFilter = removeFilter(newFilters, from);
     return addFilter(newFiltersWithoutFilter, movingFilter, to, conditionalType);
   }
