@@ -64,14 +64,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.settings.clickKibanaIndexPatterns();
         });
         it('combined remote cluster and local cluster data view without wildcards', async () => {
-
           await PageObjects.settings.createIndexPattern('blog*, ftr-remote:log*', null);
           await PageObjects.settings.clickKibanaIndexPatterns();
           const indexPatternList = await PageObjects.settings.getIndexPatternList();
           expect(indexPatternList.length).to.eql(1);
         });
         it('combined remote cluster and local cluster data view with wildcards', async () => {
-
           await PageObjects.settings.createIndexPattern('blog*, *t*-remo*:lo*', null);
           await PageObjects.settings.clickKibanaIndexPatterns();
           const indexPatternList = await PageObjects.settings.getIndexPatternList();
