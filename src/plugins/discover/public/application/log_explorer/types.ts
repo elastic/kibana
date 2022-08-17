@@ -83,3 +83,12 @@ export type LogExplorerChunk =
   | {
       status: 'uninitialized';
     };
+
+export interface LogExplorerHistogramDataPoint {
+  startTime: Timestamp;
+  countByBreakdownCriterion: Record<string, number>;
+}
+
+export type LogExplorerHistogramData = LogExplorerHistogramDataPoint[];
+
+export type LogExplorerBreakdownField = string;

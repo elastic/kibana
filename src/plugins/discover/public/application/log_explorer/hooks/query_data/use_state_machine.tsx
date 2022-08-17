@@ -20,6 +20,7 @@ import {
   loadBefore,
 } from '../../state_machines/data_access_state_machine';
 import { loadTail } from '../../state_machines/data_access_state_machine/load_tail_service';
+import { loadHistogram } from '../../state_machines/data_access_state_machine/load_histogram_service';
 import { useSubscription } from '../use_observable';
 import { useDiscoverStateContext } from '../discover_state/use_discover_state';
 
@@ -62,6 +63,9 @@ export const useStateMachineService = ({
         bottomChunk: {
           status: 'uninitialized',
         },
+        histogram: {
+          data: [],
+        },
       });
     },
     {
@@ -83,6 +87,11 @@ export const useStateMachineService = ({
           searchSource,
         }),
         loadTail: loadTail({
+          dataView,
+          query,
+          searchSource,
+        }),
+        loadHistogram: loadHistogram({
           dataView,
           query,
           searchSource,

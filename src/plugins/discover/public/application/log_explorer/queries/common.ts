@@ -18,12 +18,12 @@ import {
 
 export const copyWithCommonParameters =
   ({
-    chunkSize,
+    size,
     filters,
     query,
     timeRangeFilter,
   }: {
-    chunkSize: number;
+    size?: number;
     filters: Filter[];
     query: Query | AggregateQuery | undefined;
     timeRangeFilter: RangeFilter | ScriptedRangeFilter | MatchAllRangeFilter | undefined;
@@ -32,6 +32,6 @@ export const copyWithCommonParameters =
     searchSource
       .createCopy()
       .setField('filter', [...(timeRangeFilter != null ? [timeRangeFilter] : []), ...filters])
-      .setField('size', chunkSize)
+      .setField('size', size)
       .setField('fields', ['*']) // NOTE: Requests all fields to help assist with populating "Available fields". This can likely be changed after the Lens / Discover field list consolidation efforts.
       .setField('query', query);

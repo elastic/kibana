@@ -49,7 +49,7 @@ export const fetchEntriesBefore =
 
     // TODO: create and use point-in-time, not currently possible from client?
     const fetchBeforeSearchSource = pipe(
-      copyWithCommonParameters({ chunkSize, filters, query, timeRangeFilter }),
+      copyWithCommonParameters({ size: chunkSize, filters, query, timeRangeFilter }),
       applyBeforeParameters({ dataView, beforeEndPosition, sortCriteria })
     )(searchSource);
 

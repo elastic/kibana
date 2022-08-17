@@ -57,7 +57,7 @@ export function LogExplorerGrid({ fieldFormats }: { fieldFormats: FieldFormatsSt
 
   // In place editing of fields
   const onFieldEdited = useCallback(() => {
-    stateMachine.send({ type: 'startedReload' });
+    stateMachine.send({ type: 'columnsChanged' });
   }, [stateMachine]);
 
   const { editField } = useFieldEditor({ dataView, onFieldEdited });

@@ -49,7 +49,7 @@ export const fetchEntriesAfter =
 
     // TODO: create and use point-in-time, not currently possible from client?
     const fetchAfterSearchSource = pipe(
-      copyWithCommonParameters({ chunkSize, filters, query, timeRangeFilter }),
+      copyWithCommonParameters({ size: chunkSize, filters, query, timeRangeFilter }),
       applyAfterParameters({
         dataView,
         afterStartPosition,

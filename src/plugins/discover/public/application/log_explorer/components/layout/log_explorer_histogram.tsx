@@ -50,9 +50,7 @@ export function LogExplorerHistogram({
   const { timeDomain } = useLogExplorerHistogramDomains(dataAccessService);
   const { countSeries } = useLogExplorerHistogramSeries(dataAccessService);
   const { visibleRangeAnnotation } = useLogExplorerHistogramAnnotations(dataAccessService);
-
   const histogramEventHandlers = useLogExplorerHistogramEventHandlers(dataAccessService);
-
   // TODO: handle state machine states that don't have data
   return (
     <div css={styles.outerWrapper}>

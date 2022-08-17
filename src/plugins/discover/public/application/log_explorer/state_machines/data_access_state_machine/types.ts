@@ -8,10 +8,11 @@
 
 import { DataView } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import { LogExplorerChunk, LogExplorerPosition } from '../../types';
+import { LogExplorerChunk, LogExplorerPosition, LogExplorerHistogramData } from '../../types';
 import { LoadAfterEvent } from './load_after_service';
 import { LoadAroundEvent } from './load_around_service';
 import { LoadBeforeEvent } from './load_before_service';
+import { LoadHistogramEvent } from './load_histogram_service';
 import { LoadTailEvent } from './load_tail_service';
 
 export interface LogExplorerContext {
@@ -27,6 +28,10 @@ export interface LogExplorerContext {
 
   topChunk: LogExplorerChunk;
   bottomChunk: LogExplorerChunk;
+
+  histogram: {
+    data: LogExplorerHistogramData;
+  };
 }
 
 export type LogExplorerQuery = Query | AggregateQuery;
@@ -52,7 +57,6 @@ export interface LogExplorerState {
 export type LogExplorerExternalEvent =
   | {
       type: 'columnsChanged';
-      columns: string[];
     }
   | {
       type: 'timeRangeChanged';
@@ -75,9 +79,6 @@ export type LogExplorerExternalEvent =
       type: 'visibleEntriesChanged';
       visibleStartRowIndex: number;
       visibleEndRowIndex: number;
-    }
-  | {
-      type: 'startedReload';
     };
 
 export type LogExplorerInternalEvent =
@@ -97,6 +98,7 @@ export type LogExplorerInternalEvent =
   | LoadBeforeEvent
   | LoadAfterEvent
   | LoadTailEvent
+  | LoadHistogramEvent
   | {
       // the following event types will be moved to their respective services
       // once these exist

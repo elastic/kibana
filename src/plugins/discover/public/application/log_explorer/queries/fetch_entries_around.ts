@@ -53,7 +53,7 @@ export const fetchEntriesAround =
     const timeRangeFilter = timefilter.createFilter(dataView, timeRange);
 
     const commonSearchSource = copyWithCommonParameters({
-      chunkSize,
+      size: chunkSize,
       filters,
       query,
       timeRangeFilter,
