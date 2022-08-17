@@ -80,7 +80,7 @@ export function coreWebVitalsQuery(
   uiFilters?: UxUIFilters,
   percentile = PERCENTILE_DEFAULT
 ) {
-  const setup: SetupUX = { uiFilters: uiFilters ? uiFilters : {} };
+  const setup: SetupUX = { uiFilters: uiFilters ?? {} };
 
   const projection = getRumPageLoadTransactionsProjection({
     setup,

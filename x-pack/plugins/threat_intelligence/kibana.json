@@ -8,5 +8,18 @@
     "githubTeam": "protections-experience"
   },
   "description": "Elastic threat intelligence helps you see if you are open to or have been subject to current or historical known threats",
-  "requiredPlugins": ["data", "kibanaReact"]
+  "requiredPlugins": [
+    "data",
+    "dataViews",
+    "unifiedSearch",
+    "kibanaUtils",
+    "navigation",
+    "kibanaReact"
+  ],
+  "requiredBundles": [
+    "data",
+    "unifiedSearch",
+    "kibanaUtils",
+    "kibanaReact"
+  ]
 }

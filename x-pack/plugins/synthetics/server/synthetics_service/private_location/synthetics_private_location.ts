@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { KibanaRequest } from '@kbn/core/server';
+import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { formatSyntheticsPolicy } from '../../../common/formatters/format_synthetics_policy';
 import { getSyntheticsPrivateLocations } from '../../legacy_uptime/lib/saved_objects/private_locations';
@@ -24,35 +24,33 @@ export class SyntheticsPrivateLocation {
     this.server = _server;
   }
 
-  getSpaceId() {
-    if (!this.server.currentRequest) {
-      return '';
-    }
-
-    return this.server.spaces.spacesService.getSpaceId(this.server.currentRequest);
+  getSpaceId(request: KibanaRequest) {
+    return this.server.spaces.spacesService.getSpaceId(request);
   }
 
-  getPolicyId(config: HeartbeatConfig, { id: locId }: PrivateLocation) {
+  getPolicyId(config: HeartbeatConfig, { id: locId }: PrivateLocation, request: KibanaRequest) {
     if (config[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT) {
       return `${config.id}-${locId}`;
     }
-    return `${config.id}-${locId}-${this.getSpaceId()}`;
+    return `${config.id}-${locId}-${this.getSpaceId(request)}`;
   }
 
   async generateNewPolicy(
     config: HeartbeatConfig,
-    privateLocation: PrivateLocation
+    privateLocation: PrivateLocation,
+    request: KibanaRequest,
+    savedObjectsClient: SavedObjectsClientContract
   ): Promise<NewPackagePolicy | null> {
-    if (!this.server.authSavedObjectsClient) {
-      throw new Error('Could not find authSavedObjectsClient');
+    if (!savedObjectsClient) {
+      throw new Error('Could not find savedObjectsClient');
     }
 
     const { label: locName } = privateLocation;
-    const spaceId = this.getSpaceId();
+    const spaceId = this.getSpaceId(request);
 
     try {
       const newPolicy = await this.server.fleet.packagePolicyService.buildPackagePolicyFromPackage(
-        this.server.authSavedObjectsClient,
+        savedObjectsClient,
         'synthetics',
         this.server.logger
       );
@@ -99,7 +97,11 @@ export class SyntheticsPrivateLocation {
     }
   }
 
-  async createMonitor(config: HeartbeatConfig, request: KibanaRequest) {
+  async createMonitor(
+    config: HeartbeatConfig,
+    request: KibanaRequest,
+    savedObjectsClient: SavedObjectsClientContract
+  ) {
     const { locations } = config;
 
     await this.checkPermissions(
@@ -110,7 +112,7 @@ export class SyntheticsPrivateLocation {
     );
 
     const privateLocations: PrivateLocation[] = await getSyntheticsPrivateLocations(
-      this.server.authSavedObjectsClient!
+      savedObjectsClient
     );
 
     const fleetManagedLocations = locations.filter((loc) => !loc.isServiceManaged);
@@ -124,7 +126,7 @@ export class SyntheticsPrivateLocation {
         );
       }
 
-      const newPolicy = await this.generateNewPolicy(config, location);
+      const newPolicy = await this.generateNewPolicy(config, location, request, savedObjectsClient);
 
       if (!newPolicy) {
         throw new Error(
@@ -135,7 +137,11 @@ export class SyntheticsPrivateLocation {
       }
 
       try {
-        await this.createPolicy(newPolicy, this.getPolicyId(config, location));
+        await this.createPolicy(
+          newPolicy,
+          this.getPolicyId(config, location, request),
+          savedObjectsClient
+        );
       } catch (e) {
         this.server.logger.error(e);
         throw new Error(
@@ -147,7 +153,11 @@ export class SyntheticsPrivateLocation {
     }
   }
 
-  async editMonitor(config: HeartbeatConfig, request: KibanaRequest) {
+  async editMonitor(
+    config: HeartbeatConfig,
+    request: KibanaRequest,
+    savedObjectsClient: SavedObjectsClientContract
+  ) {
     await this.checkPermissions(
       request,
       `Unable to update Synthetics package policy for monitor ${
@@ -157,19 +167,22 @@ export class SyntheticsPrivateLocation {
 
     const { locations } = config;
 
-    const allPrivateLocations = await getSyntheticsPrivateLocations(
-      this.server.authSavedObjectsClient!
-    );
+    const allPrivateLocations = await getSyntheticsPrivateLocations(savedObjectsClient);
 
     const monitorPrivateLocations = locations.filter((loc) => !loc.isServiceManaged);
 
     for (const privateLocation of allPrivateLocations) {
       const hasLocation = monitorPrivateLocations?.some((loc) => loc.id === privateLocation.id);
-      const currId = this.getPolicyId(config, privateLocation);
-      const hasPolicy = await this.getMonitor(currId);
+      const currId = this.getPolicyId(config, privateLocation, request);
+      const hasPolicy = await this.getMonitor(currId, savedObjectsClient);
       try {
         if (hasLocation) {
-          const newPolicy = await this.generateNewPolicy(config, privateLocation);
+          const newPolicy = await this.generateNewPolicy(
+            config,
+            privateLocation,
+            request,
+            savedObjectsClient
+          );
 
           if (!newPolicy) {
             throw new Error(
@@ -180,12 +193,12 @@ export class SyntheticsPrivateLocation {
           }
 
           if (hasPolicy) {
-            await this.updatePolicy(newPolicy, currId);
+            await this.updatePolicy(newPolicy, currId, savedObjectsClient);
           } else {
-            await this.createPolicy(newPolicy, currId);
+            await this.createPolicy(newPolicy, currId, savedObjectsClient);
           }
         } else if (hasPolicy) {
-          const soClient = this.server.authSavedObjectsClient!;
+          const soClient = savedObjectsClient;
           const esClient = this.server.uptimeEsClient.baseESClient;
           try {
             await this.server.fleet.packagePolicyService.delete(soClient, esClient, [currId], {
@@ -211,8 +224,12 @@ export class SyntheticsPrivateLocation {
     }
   }
 
-  async createPolicy(newPolicy: NewPackagePolicy, id: string) {
-    const soClient = this.server.authSavedObjectsClient;
+  async createPolicy(
+    newPolicy: NewPackagePolicy,
+    id: string,
+    savedObjectsClient: SavedObjectsClientContract
+  ) {
+    const soClient = savedObjectsClient;
     const esClient = this.server.uptimeEsClient.baseESClient;
     if (soClient && esClient) {
       return await this.server.fleet.packagePolicyService.create(soClient, esClient, newPolicy, {
@@ -222,8 +239,12 @@ export class SyntheticsPrivateLocation {
     }
   }
 
-  async updatePolicy(updatedPolicy: NewPackagePolicy, id: string) {
-    const soClient = this.server.authSavedObjectsClient;
+  async updatePolicy(
+    updatedPolicy: NewPackagePolicy,
+    id: string,
+    savedObjectsClient: SavedObjectsClientContract
+  ) {
+    const soClient = savedObjectsClient;
     const esClient = this.server.uptimeEsClient.baseESClient;
     if (soClient && esClient) {
       return await this.server.fleet.packagePolicyService.update(
@@ -238,9 +259,9 @@ export class SyntheticsPrivateLocation {
     }
   }
 
-  async getMonitor(id: string) {
+  async getMonitor(id: string, savedObjectsClient: SavedObjectsClientContract) {
     try {
-      const soClient = this.server.authSavedObjectsClient;
+      const soClient = savedObjectsClient;
       return await this.server.fleet.packagePolicyService.get(soClient!, id);
     } catch (e) {
       this.server.logger.debug(e);
@@ -248,8 +269,12 @@ export class SyntheticsPrivateLocation {
     }
   }
 
-  async deleteMonitor(config: HeartbeatConfig, request: KibanaRequest) {
-    const soClient = this.server.authSavedObjectsClient;
+  async deleteMonitor(
+    config: HeartbeatConfig,
+    request: KibanaRequest,
+    savedObjectsClient: SavedObjectsClientContract
+  ) {
+    const soClient = savedObjectsClient;
     const esClient = this.server.uptimeEsClient.baseESClient;
 
     if (soClient && esClient) {
@@ -273,7 +298,7 @@ export class SyntheticsPrivateLocation {
             await this.server.fleet.packagePolicyService.delete(
               soClient,
               esClient,
-              [this.getPolicyId(config, location)],
+              [this.getPolicyId(config, location, request)],
               {
                 force: true,
               }

@@ -17,6 +17,10 @@ import type {
   ESLicense,
   ListTemplate,
   TelemetryEvent,
+  ValueListResponseAggregation,
+  ValueListExceptionListResponseAggregation,
+  ValueListItemsResponseAggregation,
+  ValueListIndicatorMatchResponseAggregation,
 } from './types';
 import {
   LIST_DETECTION_RULE_EXCEPTION,
@@ -234,3 +238,31 @@ export const extractEndpointPolicyConfig = (policyData: PolicyData | null) => {
 export const addDefaultAdvancedPolicyConfigSettings = (policyConfig: PolicyConfig) => {
   return merge(DEFAULT_ADVANCED_POLICY_CONFIG_SETTINGS, policyConfig);
 };
+
+export const metricsResponseToValueListMetaData = ({
+  listMetricsResponse,
+  itemMetricsResponse,
+  exceptionListMetricsResponse,
+  indicatorMatchMetricsResponse,
+}: {
+  listMetricsResponse: ValueListResponseAggregation;
+  itemMetricsResponse: ValueListItemsResponseAggregation;
+  exceptionListMetricsResponse: ValueListExceptionListResponseAggregation;
+  indicatorMatchMetricsResponse: ValueListIndicatorMatchResponseAggregation;
+}) => ({
+  total_list_count: listMetricsResponse?.aggregations?.total_value_list_count ?? 0,
+  types:
+    listMetricsResponse?.aggregations?.type_breakdown?.buckets.map((breakdown) => ({
+      type: breakdown.key,
+      count: breakdown.doc_count,
+    })) ?? [],
+  lists:
+    itemMetricsResponse?.aggregations?.value_list_item_count?.buckets.map((itemCount) => ({
+      id: itemCount.key,
+      count: itemCount.doc_count,
+    })) ?? [],
+  included_in_exception_lists_count:
+    exceptionListMetricsResponse?.aggregations?.vl_included_in_exception_lists_count?.value ?? 0,
+  used_in_indicator_match_rule_count:
+    indicatorMatchMetricsResponse?.aggregations?.vl_used_in_indicator_match_rule_count?.value ?? 0,
+});
