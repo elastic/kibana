@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface FilesExamplePluginSetup {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface FilesExamplePluginStart {}
+import type { FilesSetup, FilesStart } from '@kbn/files-plugin/server';
+
+export interface FilesExamplePluginsSetup {
+  files: FilesSetup;
+}
+
+export interface FilesExamplePluginsStart {
+  files: FilesStart;
+}

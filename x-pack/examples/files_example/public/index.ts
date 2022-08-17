@@ -14,4 +14,3 @@ import { FilesExamplePlugin } from './plugin';
 export function plugin() {
   return new FilesExamplePlugin();
 }
-export { FilesExamplePluginSetup, FilesExamplePluginStart } from './types';

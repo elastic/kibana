@@ -9,6 +9,6 @@
   "description": "Example plugin integrating with files plugin",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["navigation"],
+  "requiredPlugins": ["files"],
   "optionalPlugins": []
 }

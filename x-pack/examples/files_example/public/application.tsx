@@ -7,17 +7,27 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { QueryClient, QueryClientProvider } from 'react-query';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { AppPluginStartDependencies } from './types';
 import { FilesExampleApp } from './components/app';
 
+const queryClient = new QueryClient();
+
 export const renderApp = (
   { notifications, http }: CoreStart,
-  {}: AppPluginStartDependencies,
-  { appBasePath, element }: AppMountParameters
+  { files }: AppPluginStartDependencies,
+  { element, appBasePath }: AppMountParameters
 ) => {
   ReactDOM.render(
-    <FilesExampleApp basename={appBasePath} notifications={notifications} http={http} />,
+    <QueryClientProvider client={queryClient}>
+      <FilesExampleApp
+        basename={appBasePath}
+        files={files}
+        notifications={notifications}
+        http={http}
+      />
+    </QueryClientProvider>,
     element
   );
 

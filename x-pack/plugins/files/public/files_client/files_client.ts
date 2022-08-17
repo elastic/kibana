@@ -93,8 +93,8 @@ export const createFilesClient = ({ http, fileKind }: Args): FilesClient => {
     getById: (args) => {
       return http.get(apiRoutes.getByIdRoute(fileKind, args.id));
     },
-    list: ({ page, perPage }) => {
-      return http.get(apiRoutes.getListRoute(fileKind, page, perPage));
+    list(args = {}) {
+      return http.get(apiRoutes.getListRoute(fileKind, args.page, args.perPage));
     },
     update: ({ id, ...body }) => {
       return http.patch(apiRoutes.getUpdateRoute(fileKind, id), {
@@ -105,9 +105,9 @@ export const createFilesClient = ({ http, fileKind }: Args): FilesClient => {
     upload: (args) => {
       return http.put(apiRoutes.getUploadRoute(fileKind, args.id), {
         headers: {
-          'content-type': 'application/octet-stream',
+          'Content-Type': 'application/octet-stream',
         },
-        body: args.body,
+        body: args.body as BodyInit,
       });
     },
     share: ({ fileId, name, validUntil }) => {

@@ -6,12 +6,11 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
-
-import { FilesExamplePluginSetup, FilesExamplePluginStart } from './types';
-import { defineRoutes } from './routes';
+import { exampleFileKind } from '../common';
+import type { FilesExamplePluginsSetup, FilesExamplePluginsStart } from './types';
 
 export class FilesExamplePlugin
-  implements Plugin<FilesExamplePluginSetup, FilesExamplePluginStart>
+  implements Plugin<unknown, unknown, FilesExamplePluginsSetup, FilesExamplePluginsStart>
 {
   private readonly logger: Logger;
 
@@ -19,12 +18,10 @@ export class FilesExamplePlugin
     this.logger = initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup, { files }: FilesExamplePluginsSetup) {
     this.logger.debug('filesExample: Setup');
-    const router = core.http.createRouter();
 
-    // Register server side APIs
-    defineRoutes(router);
+    files.registerFileKind(exampleFileKind);
 
     return {};
   }

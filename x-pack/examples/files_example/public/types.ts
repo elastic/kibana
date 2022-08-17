@@ -5,10 +5,16 @@
  * 2.0.
  */
 
-export interface FilesExamplePluginSetup {
-  getGreeting: () => string;
+import type { FilesSetup, FilesStart, FilesClient } from '@kbn/files-plugin/public';
+
+export interface FilesExamplePluginsSetup {
+  files: FilesSetup;
 }
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface FilesExamplePluginStart {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AppPluginStartDependencies {}
+
+export interface FilesExamplePluginsStart {
+  files: FilesStart;
+}
+
+export interface AppPluginStartDependencies {
+  files: FilesClient;
+}

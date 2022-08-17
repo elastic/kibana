@@ -30,6 +30,10 @@ type ClientMethodFrom<E extends HttpApiInterfaceEntryDefinition> = (
   args: E['inputs']['body'] & E['inputs']['params'] & E['inputs']['query']
 ) => Promise<E['output']>;
 
+type ClientMethodOptionalArgsFrom<E extends HttpApiInterfaceEntryDefinition> = (
+  args?: E['inputs']['body'] & E['inputs']['params'] & E['inputs']['query']
+) => Promise<E['output']>;
+
 /**
  * A client that can be used to manage a specific {@link FileKind}.
  */
@@ -57,7 +61,7 @@ export interface FilesClient {
    *
    * @param args - list files args
    */
-  list: ClientMethodFrom<ListFileKindHttpEndpoint>;
+  list: ClientMethodOptionalArgsFrom<ListFileKindHttpEndpoint>;
   /**
    * Find a set of files given some filters.
    *
@@ -124,6 +128,10 @@ export interface FilesClient {
    */
   publicDownload: ClientMethodFrom<FilePublicDownloadHttpEndpoint>;
 }
+
+export type FilesClientResponses = {
+  [K in keyof FilesClient]: Awaited<ReturnType<FilesClient[K]>>;
+};
 
 /**
  * A factory for creating a {@link FilesClient}

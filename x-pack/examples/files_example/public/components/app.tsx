@@ -6,106 +6,117 @@
  */
 
 import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
-import { BrowserRouter as Router } from 'react-router-dom';
+import { useQuery } from 'react-query';
+import type { FileJSON } from '@kbn/files-plugin/common';
+import type { FilesClient, FilesClientResponses } from '@kbn/files-plugin/public';
+
+const names = ['foo', 'bar', 'baz'];
 
 import {
+  EuiPageTemplate,
+  EuiInMemoryTable,
+  EuiInMemoryTableProps,
   EuiButton,
-  EuiHorizontalRule,
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent,
-  EuiPageContentBody,
-  EuiPageContentHeader,
-  EuiPageHeader,
-  EuiTitle,
-  EuiText,
+  EuiIcon,
+  EuiButtonIcon,
 } from '@elastic/eui';
 
 import { CoreStart } from '@kbn/core/public';
-
-import { PLUGIN_NAME } from '../../common';
+// @ts-ignore
+import imageBase64 from '!!raw-loader!../assets/image.png.base64';
 
 interface FilesExampleAppDeps {
   basename: string;
+  files: FilesClient;
   notifications: CoreStart['notifications'];
   http: CoreStart['http'];
 }
 
-export const FilesExampleApp = ({ basename, notifications, http }: FilesExampleAppDeps) => {
-  // Use React hooks to manage state.
-  const [timestamp, setTimestamp] = useState<string | undefined>();
+const columns: EuiInMemoryTableProps<FileJSON>['columns'] = [
+  {
+    field: 'name',
+    name: 'Name',
+  },
+  {
+    field: 'status',
+    name: 'Status',
+    render: (status: FileJSON['status']) =>
+      status === 'READY' ? (
+        <EuiIcon type="check" />
+      ) : status === 'AWAITING_UPLOAD' ? (
+        <EuiIcon type="clock" />
+      ) : (
+        <EuiIcon type="alert" />
+      ),
+  },
+];
 
-  const onClickHandler = () => {
-    // Use the core http service to make a response to the server API.
-    http.get('/api/files_example/example').then((res: any) => {
-      setTimestamp(res.time);
-      // Use the core notifications service to display a success message.
-      notifications.toasts.addSuccess(
-        i18n.translate('filesExample.dataUpdated', {
-          defaultMessage: 'Data updated',
-        })
-      );
-    });
+type ListResponse = FilesClientResponses['list'];
+
+export const FilesExampleApp = ({ basename, notifications, http, files }: FilesExampleAppDeps) => {
+  const { data, isLoading, error, refetch } = useQuery<ListResponse>(['files'], () => files.list());
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<undefined | FileJSON>();
+
+  const uploadImage = async () => {
+    try {
+      setIsUploadingImage(true);
+      const { file } = await files.create({
+        name: names[Math.floor(Math.random() * names.length)],
+        alt: 'My image',
+        meta: { myValue: 'test' },
+        mimeType: 'image/png',
+      });
+      const blob = new Blob([imageBase64], { type: 'image/png' });
+      await files.upload({ id: file.id, body: blob.stream() });
+      refetch();
+    } finally {
+      setIsUploadingImage(false);
+    }
   };
 
-  // Render the application DOM.
-  // Note that `navigation.ui.TopNavMenu` is a stateful component exported on the `navigation` plugin's start contract.
+  const renderToolsRight = () => {
+    return [
+      <EuiButton
+        onClick={uploadImage}
+        isDisabled={isUploadingImage || isLoading}
+        isLoading={isUploadingImage}
+        iconType="exportAction"
+      >
+        Upload image
+      </EuiButton>,
+    ];
+  };
+
+  const items = data?.files ?? [];
   return (
-    <Router basename={basename}>
-      <I18nProvider>
-        <>
-          <EuiPage restrictWidth="1000px">
-            <EuiPageBody>
-              <EuiPageHeader>
-                <EuiTitle size="l">
-                  <h1>
-                    <FormattedMessage
-                      id="filesExample.helloWorldText"
-                      defaultMessage="{name}"
-                      values={{ name: PLUGIN_NAME }}
-                    />
-                  </h1>
-                </EuiTitle>
-              </EuiPageHeader>
-              <EuiPageContent>
-                <EuiPageContentHeader>
-                  <EuiTitle>
-                    <h2>
-                      <FormattedMessage
-                        id="filesExample.congratulationsTitle"
-                        defaultMessage="Congratulations, you have successfully created a new Kibana Plugin!"
-                      />
-                    </h2>
-                  </EuiTitle>
-                </EuiPageContentHeader>
-                <EuiPageContentBody>
-                  <EuiText>
-                    <p>
-                      <FormattedMessage
-                        id="filesExample.content"
-                        defaultMessage="Look through the generated code and check out the plugin development documentation."
-                      />
-                    </p>
-                    <EuiHorizontalRule />
-                    <p>
-                      <FormattedMessage
-                        id="filesExample.timestampText"
-                        defaultMessage="Last timestamp: {time}"
-                        values={{ time: timestamp ? timestamp : 'Unknown' }}
-                      />
-                    </p>
-                    <EuiButton type="primary" size="s" onClick={onClickHandler}>
-                      <FormattedMessage id="filesExample.buttonText" defaultMessage="Get data" />
-                    </EuiButton>
-                  </EuiText>
-                </EuiPageContentBody>
-              </EuiPageContent>
-            </EuiPageBody>
-          </EuiPage>
-        </>
-      </I18nProvider>
-    </Router>
+    <EuiPageTemplate
+      pageHeader={{
+        pageTitle: 'Files example',
+      }}
+    >
+      <EuiInMemoryTable
+        columns={columns.concat({
+          name: 'Actions',
+          actions: [
+            {
+              name: 'View',
+              description: 'View file',
+              render: (item) => (
+                <EuiButtonIcon iconType="eye" onClick={() => setSelectedItem(item)} />
+              ),
+            },
+          ],
+        })}
+        items={items}
+        itemId="id"
+        loading={isLoading}
+        error={error ? JSON.stringify(error) : undefined}
+        sorting
+        search={{
+          toolsRight: renderToolsRight(),
+        }}
+      />
+    </EuiPageTemplate>
   );
 };

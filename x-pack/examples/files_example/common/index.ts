@@ -5,5 +5,24 @@
  * 2.0.
  */
 
+import { FileKind } from '@kbn/files-plugin/common';
+
 export const PLUGIN_ID = 'filesExample';
 export const PLUGIN_NAME = 'filesExample';
+
+const httpTags = {
+  tags: [`access:${PLUGIN_ID}`],
+};
+
+export const exampleFileKind: FileKind = {
+  id: 'filesExample',
+  http: {
+    create: httpTags,
+    delete: httpTags,
+    download: httpTags,
+    getById: httpTags,
+    list: httpTags,
+    share: httpTags,
+    update: httpTags,
+  },
+};
