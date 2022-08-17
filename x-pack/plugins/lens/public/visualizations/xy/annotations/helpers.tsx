@@ -10,7 +10,7 @@ import moment from 'moment';
 import {
   defaultAnnotationColor,
   defaultAnnotationRangeColor,
-  isRangeAnnotation,
+  isRangeAnnotationConfig,
 } from '@kbn/event-annotation-plugin/public';
 import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
 import { IconChartBarAnnotations } from '@kbn/chart-icons';
@@ -359,7 +359,7 @@ export const getSingleColorAnnotationConfig = (annotation: EventAnnotationConfig
   triggerIcon: annotation.isHidden ? ('invisible' as const) : ('color' as const),
   color:
     annotation?.color ||
-    (isRangeAnnotation(annotation) ? defaultAnnotationRangeColor : defaultAnnotationColor),
+    (isRangeAnnotationConfig(annotation) ? defaultAnnotationRangeColor : defaultAnnotationColor),
 });
 
 export const getAnnotationsAccessorColorConfig = (layer: XYAnnotationLayerConfig) =>

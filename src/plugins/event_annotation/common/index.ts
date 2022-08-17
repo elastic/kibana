@@ -7,20 +7,25 @@
  */
 
 export type {
-  EventAnnotationArgs,
-  EventAnnotationOutput,
   ManualPointEventAnnotationArgs,
   ManualPointEventAnnotationOutput,
   ManualRangeEventAnnotationArgs,
   ManualRangeEventAnnotationOutput,
 } from './manual_event_annotation/types';
+export type {
+  QueryEventAnnotationArgs,
+  QueryEventAnnotationOutput,
+} from './query_event_annotation/types';
+export type { EventAnnotationArgs, EventAnnotationOutput } from './types';
 export { manualPointEventAnnotation, manualRangeEventAnnotation } from './manual_event_annotation';
+export { queryEventAnnotation } from './query_event_annotation';
 export { eventAnnotationGroup } from './event_annotation_group';
 export type { EventAnnotationGroupArgs } from './event_annotation_group';
-export { fetchEventAnnotations } from './fetch_event_annotations';
-export type { FetchEventAnnotationsArgs } from './fetch_event_annotations';
+
+export type { FetchEventAnnotationsArgs } from './fetch_event_annotations/types';
 export type {
   EventAnnotationConfig,
   RangeEventAnnotationConfig,
+  PointInTimeEventAnnotationConfig,
   AvailableAnnotationIcon,
 } from './types';

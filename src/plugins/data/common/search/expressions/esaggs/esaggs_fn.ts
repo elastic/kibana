@@ -98,3 +98,4 @@ export const getEsaggsMeta: () => Omit<EsaggsExpressionFunctionDefinition, 'fn'>
 });
 
 export { handleRequest as handleEsaggsRequest };
+export type { RequestHandlerParams } from './request_handler';

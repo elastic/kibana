@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { queryToAst } from '@kbn/data-plugin/common';
 import { EventAnnotationServiceType } from './types';
 import {
   defaultAnnotationColor,
@@ -44,6 +45,40 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
                 color: [color || defaultAnnotationRangeColor],
                 outside: [Boolean(outside)],
                 isHidden: [Boolean(isHidden)],
+              },
+            },
+          ],
+        };
+      } else if ('filter' in annotation) {
+        const {
+          fields,
+          label,
+          isHidden,
+          color,
+          lineStyle,
+          lineWidth,
+          icon,
+          filter,
+          textVisibility,
+          timeField,
+        } = annotation;
+        return {
+          type: 'expression',
+          chain: [
+            {
+              type: 'function',
+              function: 'query_event_annotation',
+              arguments: {
+                filter: filter ? [queryToAst(filter)] : [],
+                timeField: [timeField],
+                label: [label || defaultAnnotationLabel],
+                color: [color || defaultAnnotationColor],
+                lineWidth: [lineWidth || 1],
+                lineStyle: [lineStyle || 'solid'],
+                icon: hasIcon(icon) ? [icon] : ['triangle'],
+                textVisibility: [textVisibility || false],
+                isHidden: [Boolean(isHidden)],
+                fields: fields ? [...fields] : [],
               },
             },
           ],

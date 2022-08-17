@@ -6,8 +6,19 @@
  * Side Public License, v 1.
  */
 
+import { KibanaQueryOutput } from '@kbn/data-plugin/common';
+import { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { $Values } from '@kbn/utility-types';
 import { AvailableAnnotationIcons } from './constants';
+import {
+  ManualEventAnnotationOutput,
+  ManualPointEventAnnotationArgs,
+  ManualRangeEventAnnotationArgs,
+} from './manual_event_annotation/types';
+import {
+  QueryEventAnnotationArgs,
+  QueryEventAnnotationOutput,
+} from './query_event_annotation/types';
 
 export type LineStyle = 'solid' | 'dashed' | 'dotted';
 export type Fill = 'inside' | 'outside' | 'none';
@@ -50,4 +61,41 @@ export type RangeEventAnnotationConfig = {
 
 export type StyleProps = PointStyleProps & RangeStyleProps;
 
-export type EventAnnotationConfig = PointInTimeEventAnnotationConfig | RangeEventAnnotationConfig;
+export type QueryEventAnnotationConfig = {
+  id: string;
+  filter: KibanaQueryOutput;
+  timeField: string;
+  fields?: string[];
+  key: {
+    type: 'point_in_time';
+  };
+} & PointStyleProps;
+
+export type EventAnnotationConfig =
+  | PointInTimeEventAnnotationConfig
+  | RangeEventAnnotationConfig
+  | QueryEventAnnotationConfig;
+
+export type EventAnnotationArgs =
+  | ManualPointEventAnnotationArgs
+  | ManualRangeEventAnnotationArgs
+  | QueryEventAnnotationArgs;
+
+export type EventAnnotationOutput = ManualEventAnnotationOutput | QueryEventAnnotationOutput;
+
+export const annotationColumns: DatatableColumn[] = [
+  { id: 'id', name: 'id', meta: { type: 'string' } },
+  { id: 'time', name: 'time', meta: { type: 'string' } },
+  { id: 'endTime', name: 'endTime', meta: { type: 'string' } },
+  { id: 'timebucket', name: 'timebucket', meta: { type: 'string' } },
+  { id: 'type', name: 'type', meta: { type: 'string' } },
+  { id: 'label', name: 'label', meta: { type: 'string' } },
+  { id: 'color', name: 'color', meta: { type: 'string' } },
+  { id: 'lineStyle', name: 'lineStyle', meta: { type: 'string' } },
+  { id: 'lineWidth', name: 'lineWidth', meta: { type: 'number' } },
+  { id: 'icon', name: 'icon', meta: { type: 'string' } },
+  { id: 'textVisibility', name: 'textVisibility', meta: { type: 'boolean' } },
+  { id: 'outside', name: 'outside', meta: { type: 'number' } },
+  { id: 'type', name: 'type', meta: { type: 'string' } },
+  { id: 'skippedCount', name: 'skippedCount', meta: { type: 'number' } },
+];
