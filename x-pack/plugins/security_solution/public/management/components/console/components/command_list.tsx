@@ -290,6 +290,11 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
       {commandsByGroups.map((commandsByGroup) => {
         const groupLabel = commandsByGroup[0].helpGroupLabel;
         const filteredCommands = getFilteredCommands(commandsByGroup);
+
+        if (filteredCommands.length === 0) {
+          return null;
+        }
+
         return (
           <StyledEuiFlexGrid
             columns={3}
