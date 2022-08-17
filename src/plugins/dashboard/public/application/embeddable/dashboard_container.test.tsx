@@ -51,7 +51,6 @@ const options: DashboardContainerServices = {
   ExitFullScreenButton: () => null,
   uiActions: {} as any,
   uiSettings: uiSettingsServiceMock.createStartContract(),
-  http: coreMock.createStart().http,
   theme,
   presentationUtil,
 };

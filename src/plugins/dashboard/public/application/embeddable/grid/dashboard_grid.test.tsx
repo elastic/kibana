@@ -70,7 +70,6 @@ function prepare(props?: Partial<DashboardGridProps>) {
       getTriggerCompatibleActions: (() => []) as any,
     } as any,
     uiSettings: uiSettingsServiceMock.createStartContract(),
-    http: coreMock.createStart().http,
     theme: coreMock.createStart().theme,
     presentationUtil,
     screenshotMode: screenshotModePluginMock.createSetupContract(),

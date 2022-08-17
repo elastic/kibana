@@ -15,7 +15,6 @@ describe('createSessionRestorationDataProvider', () => {
   const version = '8.0.0';
   const searchSessionInfoProvider = createSessionRestorationDataProvider({
     kibanaVersion: version,
-    data: mockDataPlugin,
     getAppState: () =>
       savedObjectToDashboardState({
         version,

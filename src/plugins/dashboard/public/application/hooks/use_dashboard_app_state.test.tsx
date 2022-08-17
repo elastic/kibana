@@ -253,7 +253,7 @@ describe.skip('Dashboard initial state', () => {
       )
     );
     const partialServices: Partial<DashboardAppServices> = { savedDashboards };
-    const { renderHookResult, embeddableFactoryResult, services } = renderDashboardAppStateHook({
+    const { renderHookResult, embeddableFactoryResult } = renderDashboardAppStateHook({
       partialServices,
     });
     const getResult = () => renderHookResult.result.current;
