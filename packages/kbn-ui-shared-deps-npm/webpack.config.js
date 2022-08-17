@@ -10,16 +10,23 @@ const Path = require('path');
 const webpack = require('webpack');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const globby = require('globby');
 
 const UiSharedDepsNpm = require('./src');
 
+const REPO_ROOT = Path.resolve(__dirname, '..', '..');
+
 const MOMENT_SRC = require.resolve('moment/min/moment-with-locales.js');
 const WEBPACK_SRC = require.resolve('webpack');
-
-const REPO_ROOT = Path.resolve(__dirname, '..', '..');
+const EUI_ICON_ASSETS = Path.resolve(
+  REPO_ROOT,
+  'node_modules/@elastic/eui',
+  'optimize/es/components/icon/assets'
+);
 
 module.exports = (_, argv) => {
   const outputPath = argv.outputPath ? Path.resolve(argv.outputPath) : UiSharedDepsNpm.distDir;
+  const euiIconEntries = globby.sync(`${EUI_ICON_ASSETS}/**`);
 
   return {
     node: {
@@ -103,6 +110,7 @@ module.exports = (_, argv) => {
         'rxjs/operators',
         'styled-components',
         'tslib',
+        ...euiIconEntries,
       ],
       'kbn-ui-shared-deps-npm.v8.dark': ['@elastic/eui/dist/eui_theme_dark.css'],
       'kbn-ui-shared-deps-npm.v8.light': ['@elastic/eui/dist/eui_theme_light.css'],

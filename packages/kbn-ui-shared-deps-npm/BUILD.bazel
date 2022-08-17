@@ -37,6 +37,7 @@ RUNTIME_DEPS = [
   "@npm//core-js",
   "@npm//css-loader",
   "@npm//fflate",
+  "@npm//globby",
   "@npm//jquery",
   "@npm//loader-utils",
   "@npm//mini-css-extract-plugin",
