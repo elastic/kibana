@@ -172,6 +172,6 @@ npm_install_global() {
 # Download an artifact using the buildkite-agent, takes the same arguments as https://buildkite.com/docs/agent/v3/cli-artifact#downloading-artifacts-usage
 # times-out after 60 seconds and retries up to 3 times
 download_artifact() {
-  retry 3 1 timeout 60s buildkite-agent artifact download "$@"
+  retry 3 1 timeout 3m buildkite-agent artifact download "$@"
   return $?
 }
