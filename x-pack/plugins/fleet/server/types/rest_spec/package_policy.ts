@@ -18,6 +18,13 @@ export const GetPackagePoliciesRequestSchema = {
   query: ListWithKuerySchema,
 };
 
+export const BulkGetPackagePoliciesRequestSchema = {
+  body: schema.object({
+    ids: schema.arrayOf(schema.string(), { minSize: 1 }),
+    ignoreMissing: schema.maybe(schema.boolean()),
+  }),
+};
+
 export const GetOnePackagePolicyRequestSchema = {
   params: schema.object({
     packagePolicyId: schema.string(),

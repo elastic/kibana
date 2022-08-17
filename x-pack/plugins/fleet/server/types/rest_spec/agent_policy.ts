@@ -17,6 +17,14 @@ export const GetAgentPoliciesRequestSchema = {
   }),
 };
 
+export const BulkGetAgentPoliciesRequestSchema = {
+  body: ListWithKuerySchema.extends({
+    ids: schema.arrayOf(schema.string(), { minSize: 1 }),
+    full: schema.maybe(schema.boolean()),
+    ignoreMissing: schema.maybe(schema.boolean()),
+  }),
+};
+
 export const GetOneAgentPolicyRequestSchema = {
   params: schema.object({
     agentPolicyId: schema.string(),
