@@ -7,7 +7,7 @@
 
 import { isRuleType, ruleTypeMappings } from '@kbn/securitysolution-rules';
 import { isString } from 'lodash/fp';
-import { omit } from 'lodash';
+import { omit, pick } from 'lodash';
 import moment from 'moment-timezone';
 import { gte } from 'semver';
 import {
@@ -169,6 +169,12 @@ export function getMigrations(
     pipeMigrations(addSearchType, removeInternalTags, convertSnoozes)
   );
 
+  const migrationRules850 = createEsoMigration(
+    encryptedSavedObjects,
+    (doc): doc is SavedObjectUnsanitizedDoc<RawRule> => isEsQueryRuleType(doc),
+    pipeMigrations(stripOutRuntimeFieldsInOldESQuery)
+  );
+
   return mergeSavedObjectMigrationMaps(
     {
       '7.10.0': executeMigrationWithErrorHandling(migrationWhenRBACWasIntroduced, '7.10.0'),
@@ -182,6 +188,7 @@ export function getMigrations(
       '8.0.1': executeMigrationWithErrorHandling(migrationRules801, '8.0.1'),
       '8.2.0': executeMigrationWithErrorHandling(migrationRules820, '8.2.0'),
       '8.3.0': executeMigrationWithErrorHandling(migrationRules830, '8.3.0'),
+      '8.5.0': executeMigrationWithErrorHandling(migrationRules850, '8.5.0'),
     },
     getSearchSourceMigrations(encryptedSavedObjects, searchSourceMigrations)
   );
@@ -748,6 +755,39 @@ function addSecuritySolutionAADRuleTypeTags(
         },
       }
     : doc;
+}
+
+function stripOutRuntimeFieldsInOldESQuery(
+  doc: SavedObjectUnsanitizedDoc<RawRule>
+): SavedObjectUnsanitizedDoc<RawRule> {
+  const isESDSLrule =
+    isEsQueryRuleType(doc) && !isSerializedSearchSource(doc.attributes.params.searchConfiguration);
+
+  if (isESDSLrule) {
+    try {
+      const parsedQuery = JSON.parse(doc.attributes.params.esQuery as string);
+      // parsing and restringifying will cause us to lose the formatting so we only do so if this rule has
+      // fields other than `query` which is the only valid field at this stage
+      const hasFieldsOtherThanQuery = Object.keys(parsedQuery).some((key) => key !== 'query');
+      return hasFieldsOtherThanQuery
+        ? {
+            ...doc,
+            attributes: {
+              ...doc.attributes,
+              params: {
+                ...doc.attributes.params,
+                esQuery: JSON.stringify(pick(parsedQuery, 'query'), null, 4),
+              },
+            },
+          }
+        : doc;
+    } catch (err) {
+      throw new Error(
+        `unable to migrate invalid query: "${doc.attributes.params.esQuery}" - query must be JSON`
+      );
+    }
+  }
+  return doc;
 }
 
 function addThreatIndicatorPathToThreatMatchRules(
