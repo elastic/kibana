@@ -18,7 +18,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { UserProfileWithAvatar, USER_PROFILES_SELECTABLE_NAME } from '@kbn/user-profile-components';
 import { useAssignees } from '../../../containers/user_profiles/use_assignees';
 import { CaseAssignees } from '../../../../common/api/cases/assignee';
 import * as i18n from '../translations';
@@ -48,12 +48,12 @@ const AssigneesList: React.FC<AssigneesListProps> = ({
       {assignees.length === 0 ? (
         <EuiFlexGroup direction="column" gutterSize="none">
           <EuiFlexItem grow={false}>
-            <EuiText size="s">
+            <EuiText size="s" color="subdued">
               <p>{i18n.NO_ASSIGNEES}</p>
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiText size="s">
+            <EuiText size="s" color="subdued">
               <EuiLink data-test-subj="case-view-assign-users-link" onClick={togglePopOver}>
                 {i18n.ASSIGN_A_USER}
               </EuiLink>
@@ -195,6 +195,8 @@ const AssignUsersComponent: React.FC<AssignUsersProps> = ({
               panelStyle={{
                 minWidth: 520,
               }}
+              panelPaddingSize="none"
+              initialFocus={`[name=${USER_PROFILES_SELECTABLE_NAME}]`}
             >
               <SuggestUsers
                 isLoading={isLoading}

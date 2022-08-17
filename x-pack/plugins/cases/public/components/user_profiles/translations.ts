@@ -23,3 +23,30 @@ export const REMOVE_ASSIGNEE_ARIA_LABEL = i18n.translate(
 export const MISSING_PROFILE = i18n.translate('xpack.cases.userProfile.missingProfile', {
   defaultMessage: 'Unable to find user profile',
 });
+
+export const SEARCH_USERS = i18n.translate('xpack.cases.userProfile.selectableSearchPlaceholder', {
+  defaultMessage: 'Search users',
+});
+
+export const EDIT_ASSIGNEES = i18n.translate('xpack.cases.userProfile.editAssignees', {
+  defaultMessage: 'Edit assignees',
+});
+
+export const REMOVE_ASSIGNEES = i18n.translate(
+  'xpack.cases.userProfile.suggestUsers.removeAssignees',
+  {
+    defaultMessage: 'Remove all assignees',
+  }
+);
+
+export const TOTAL_USERS = (total: number) =>
+  i18n.translate('xpack.cases.userProfile.totalUsers', {
+    defaultMessage: '{total, plural, one {# user} other {# users}}',
+    values: { total },
+  });
+
+export const TOTAL_USERS_ASSIGNED = (total: number) =>
+  i18n.translate('xpack.cases.userProfile.totalUsersAssigned', {
+    defaultMessage: '{total} assigned',
+    values: { total },
+  });
