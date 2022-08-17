@@ -72,7 +72,8 @@ export const mapFiltersToKueryNode = ({
     if (ruleStatusesFilter.includes('snoozed')) {
       ruleStatusesFilterKueryNode.push(snoozedFilter);
     }
-    filterKueryNode.push(nodeBuilder.and(ruleStatusesFilterKueryNode));
+
+    filterKueryNode.push(nodeBuilder.or(ruleStatusesFilterKueryNode));
   }
 
   if (tagsFilter && tagsFilter.length) {
