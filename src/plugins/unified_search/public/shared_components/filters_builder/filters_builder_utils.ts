@@ -174,7 +174,7 @@ export const moveFilter = (
   const newFilters = cloneDeep(filters);
   const movingFilter = getFilterByPath(newFilters, from);
 
-  if (getPathInArray(to).length > getPathInArray(from).length) {
+  if (getPathInArray(to).length >= getPathInArray(from).length) {
     const newFilterWithFilter = addFilter(newFilters, movingFilter, to, conditionalType);
     return removeFilter(newFilterWithFilter, from);
   } else {

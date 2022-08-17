@@ -59,12 +59,12 @@ export function FiltersBuilder({
   );
 
   const onDragEnd: DragDropContextProps['onDragEnd'] = ({ combine, source, destination }) => {
-    if (source && destination) {
-      handleMoveFilter(source?.droppableId, destination!.droppableId, ConditionTypes.AND);
+    if (source && destination && source.droppableId !== destination.droppableId) {
+      handleMoveFilter(source.droppableId, destination.droppableId, ConditionTypes.AND);
     }
 
-    if (source && combine) {
-      handleMoveFilter(source?.droppableId, combine.droppableId, ConditionTypes.OR);
+    if (source && combine && source.droppableId !== combine.droppableId) {
+      handleMoveFilter(source.droppableId, combine.droppableId, ConditionTypes.OR);
     }
     setDropTarget('');
   };
