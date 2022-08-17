@@ -98,6 +98,7 @@ export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummary
   if (errorRuleAlertsAggs)
     return (
       <EuiEmptyPrompt
+        data-test-subj="alertsRuleSummaryErrorPrompt"
         iconType="alert"
         color="danger"
         title={
@@ -155,7 +156,7 @@ export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummary
                         defaultMessage="All alerts"
                       />
                     </EuiText>
-                    <EuiText>
+                    <EuiText data-test-subj="totalAlertCount">
                       <h4>{active + recovered}</h4>
                     </EuiText>
                   </EuiFlexItem>
@@ -168,7 +169,10 @@ export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummary
                         defaultMessage="Active"
                       />
                     </EuiText>
-                    <EuiText color={LIGHT_THEME.colors.vizColors[2]}>
+                    <EuiText
+                      data-test-subj="activeAlertsCount"
+                      color={LIGHT_THEME.colors.vizColors[2]}
+                    >
                       <h4>{active}</h4>
                     </EuiText>
                   </EuiFlexItem>
@@ -182,7 +186,10 @@ export const RuleAlertsSummary = ({ rule, filteredRuleTypes }: RuleAlertsSummary
                       />
                     </EuiText>
                     <EuiFlexItem>
-                      <EuiText color={LIGHT_THEME.colors.vizColors[1]}>
+                      <EuiText
+                        data-test-subj="recoveredAlertsCount"
+                        color={LIGHT_THEME.colors.vizColors[1]}
+                      >
                         <h4>{recovered}</h4>
                       </EuiText>
                     </EuiFlexItem>
