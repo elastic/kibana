@@ -185,6 +185,7 @@ export const postDataView = (dataSource: string) => {
     url: `/api/index_patterns/index_pattern`,
     body: {
       index_pattern: {
+        id: dataSource,
         fieldAttrs: '{}',
         title: dataSource,
         timeFieldName: '@timestamp',

@@ -12,7 +12,7 @@ import { inputsSelectors } from '../../store';
 import { inputsActions } from '../../store/actions';
 import type { InputsModelId } from '../../store/inputs/constants';
 
-interface UseInspectModalProps {
+export interface UseInspectModalProps {
   inputId?: InputsModelId;
   inspectIndex?: number;
   isDisabled?: boolean;
