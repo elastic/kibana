@@ -125,16 +125,24 @@ export function ExplainLogRateSpikesProvider({ getService }: FtrProviderContext)
       await elasticChart.waitForRenderComplete('aiopsDocumentCountChart');
       const chartDebugData = await elasticChart.getChartDebugData('aiopsDocumentCountChart');
 
+      // Select the wrapper element to access its 'width' later one for the calculations.
       const dualBrushWrapper = await testSubjects.find('aiopsDualBrush');
       const dualBrushWrapperRect = await dualBrushWrapper._webElement.getRect();
 
+      // Get the total count of bars and index of a bar for a given timestamp in the charts debug data.
       const bars = chartDebugData?.bars?.[0].bars ?? [];
       const barsCount = bars.length;
       const targetDeviationBarIndex = bars.findIndex((b) => b.x === timestamp);
 
+      // The pixel location based on the given timestamp, calculated by taking the share of the index value
+      // over the total count of bars, normalized by the wrapping element's width.
       const targetPx = Math.round(
         (targetDeviationBarIndex / barsCount) * dualBrushWrapperRect.width
       );
+
+      // The pixel width of the interval of an individual bar of the histogram.
+      // Can be used as a helper to calculate the offset from the target pixel location
+      // to the next histogram bar.
       const intervalPx = Math.round((1 / barsCount) * dualBrushWrapperRect.width);
 
       return { targetPx, intervalPx };
