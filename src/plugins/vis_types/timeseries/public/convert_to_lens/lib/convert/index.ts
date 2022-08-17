@@ -7,3 +7,4 @@
  */
 
 export { convertToPercentileColumns } from './percentile';
+export { convertToPercentileRankColumns } from './percentile_rank';

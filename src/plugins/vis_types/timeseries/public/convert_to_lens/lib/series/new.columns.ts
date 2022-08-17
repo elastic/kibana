@@ -11,7 +11,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Series } from '../../../../common/types';
 import { getSeriesAgg } from './get_series_agg';
 import { SUPPORTED_METRICS } from '../metrics';
-import { convertToPercentileColumns } from '../convert';
+import { convertToPercentileColumns, convertToPercentileRankColumns } from '../convert';
 import { convertMetricsToColumns } from '../convert/column';
 
 export const getColumns = (series: Series, dataView: DataView): Column[] | null => {
@@ -26,6 +26,9 @@ export const getColumns = (series: Series, dataView: DataView): Column[] | null 
   switch (aggregation) {
     case 'percentile': {
       return convertMetricsToColumns(series, metrics, dataView, convertToPercentileColumns);
+    }
+    case 'percentile_rank': {
+      return convertMetricsToColumns(series, metrics, dataView, convertToPercentileRankColumns);
     }
   }
 
