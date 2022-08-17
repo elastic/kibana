@@ -23,7 +23,7 @@ interface LiveQueryProps {
   onSuccess?: () => void;
   query?: string;
   savedQueryId?: string;
-  ecs_mapping?: unknown;
+  ecs_mapping?: Record<string, unknown>;
   agentsField?: boolean;
   queryField?: boolean;
   ecsMappingField?: boolean;
