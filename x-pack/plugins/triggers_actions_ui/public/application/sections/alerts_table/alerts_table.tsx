@@ -15,6 +15,7 @@ import {
   EuiToolTip,
   EuiButtonIcon,
   EuiDataGridStyle,
+  EuiDataGridColumn,
 } from '@elastic/eui';
 import { useSorting, usePagination, useBulkActions } from './hooks';
 import { AlertsTableProps } from '../../../types';
@@ -109,9 +110,13 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
         currentIndex >= 0
           ? [...visibleColumns.slice(0, currentIndex), ...visibleColumns.slice(currentIndex + 1)]
           : [...visibleColumns, columnId].sort();
-      onChangeVisibleColumns(newColumnIds);
+      console.log('newColumnIds', newColumnIds);
+      onColumnsChange(
+        newColumnIds.map((id) => ({ id })),
+        newColumnIds
+      );
     },
-    [onChangeVisibleColumns, visibleColumns]
+    [onColumnsChange, visibleColumns]
   );
 
   const onResetColumns = useCallback(() => {
@@ -130,6 +135,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       columnIds: visibleColumns,
       onToggleColumn,
       onResetColumns,
+      browserFields: props.browserFields,
     });
   }, [
     bulkActionsState,
@@ -137,6 +143,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     alertsCount,
     alertsData.alerts,
     props.updatedAt,
+    props.browserFields,
     isLoading,
     visibleColumns,
     onToggleColumn,

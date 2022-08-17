@@ -11,7 +11,6 @@ import React, { lazy, Suspense } from 'react';
 import { BulkActionsConfig } from '../../../../types';
 import { LastUpdatedAt } from './components/last_updated_at';
 import { FieldBrowser, FieldBrowserProps } from '../../field_browser';
-import browserFields from './browserFields';
 
 const BulkActionsToolbar = lazy(() => import('../bulk_actions/components/toolbar'));
 
@@ -19,7 +18,8 @@ const getDefaultVisibility = (
   updatedAt: number,
   columnIds: string[],
   onToggleColumn: (columnId: string) => void,
-  onResetColumns: () => void
+  onResetColumns: () => void,
+  browserFields: any
 ): EuiDataGridToolBarVisibilityOptions => {
   const fieldBrowserProps: FieldBrowserProps = {
     columnIds,
@@ -51,6 +51,7 @@ export const getToolbarVisibility = ({
   columnIds,
   onToggleColumn,
   onResetColumns,
+  browserFields,
 }: {
   bulkActions: BulkActionsConfig[];
   alertsCount: number;
@@ -61,13 +62,15 @@ export const getToolbarVisibility = ({
   columnIds: string[];
   onToggleColumn: (columnId: string) => void;
   onResetColumns: () => void;
+  browserFields: any;
 }): EuiDataGridToolBarVisibilityOptions => {
   const selectedRowsCount = rowSelection.size;
   const defaultVisibility = getDefaultVisibility(
     updatedAt,
     columnIds,
     onToggleColumn,
-    onResetColumns
+    onResetColumns,
+    browserFields
   );
   const isBulkActionsActive =
     selectedRowsCount === 0 || selectedRowsCount === undefined || bulkActions.length === 0;

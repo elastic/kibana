@@ -35,6 +35,7 @@ import { ALERTS_TABLE_CONF_ERROR_MESSAGE, ALERTS_TABLE_CONF_ERROR_TITLE } from '
 import { TypeRegistry } from '../../type_registry';
 import { bulkActionsReducer } from './bulk_actions/reducer';
 import { useGetUserCasesPermissions } from './hooks/use_get_user_cases_permissions';
+import browserFields from './browserFields';
 
 const DefaultPagination = {
   pageSize: 10,
@@ -93,6 +94,31 @@ const AlertsTableWithBulkActionsContextComponent: React.FunctionComponent<{
 
 const AlertsTableWithBulkActionsContext = React.memo(AlertsTableWithBulkActionsContextComponent);
 
+const populateColumns = (columns: EuiDataGridColumn[]) => {
+  const findColumnInBrowserFields = (columnId: string) => {
+    const key = Object.keys(browserFields).find((_key) =>
+      Boolean(browserFields[_key].fields[columnId])
+    );
+
+    return key ? browserFields[key].fields[columnId] : {};
+  };
+
+  const FieldTypeToDataGridTypeMapper = (fieldType: string) => {
+    if (fieldType === 'date') return 'datetime';
+    if (fieldType === 'number') return 'numeric';
+    return fieldType;
+  };
+
+  return columns.map((column) => {
+    const browserFieldsProps = findColumnInBrowserFields(column.id);
+    return {
+      ...column,
+      ...browserFieldsProps,
+      schema: FieldTypeToDataGridTypeMapper(browserFieldsProps.type),
+    };
+  });
+};
+
 const AlertsTableState = ({
   alertsTableConfigurationRegistry,
   configurationId,
@@ -113,12 +139,16 @@ const AlertsTableState = ({
   const storage = useRef(new Storage(window.localStorage));
   const localAlertsTableConfig = storage.current.get(id) as Partial<AlertsTableStorage>;
 
-  const columnsLocal =
-    localAlertsTableConfig &&
-    localAlertsTableConfig.columns &&
-    !isEmpty(localAlertsTableConfig?.columns)
-      ? localAlertsTableConfig?.columns ?? []
-      : alertsTableConfiguration?.columns ?? [];
+  const columnsLocal = useMemo(() => {
+    const columnsInConfig =
+      localAlertsTableConfig &&
+      localAlertsTableConfig.columns &&
+      !isEmpty(localAlertsTableConfig?.columns)
+        ? localAlertsTableConfig?.columns ?? []
+        : alertsTableConfiguration?.columns ?? [];
+
+    return populateColumns(columnsInConfig);
+  }, [alertsTableConfiguration?.columns, localAlertsTableConfig]);
 
   const storageAlertsTable = useRef<AlertsTableStorage>({
     columns: columnsLocal,
@@ -142,7 +172,7 @@ const AlertsTableState = ({
     pageSize: pageSize ?? DefaultPagination.pageSize,
   });
   const [columns, setColumns] = useState<EuiDataGridColumn[]>(storageAlertsTable.current.columns);
-
+  console.log(columns);
   const [
     isLoading,
     {
@@ -254,6 +284,7 @@ const AlertsTableState = ({
       visibleColumns: storageAlertsTable.current.visibleColumns ?? [],
       'data-test-subj': 'internalAlertsState',
       updatedAt,
+      browserFields,
     }),
     [
       alertsTableConfiguration,

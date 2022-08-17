@@ -520,6 +520,8 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       ]
     );
 
+    console.log(browserFields);
+
     const toolbarVisibility: EuiDataGridToolBarVisibilityOptions = useMemo(
       () => ({
         additionalControls: (
@@ -867,6 +869,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       enableHostDetailsFlyout: true,
       enableIpDetailsFlyout: true,
     });
+    console.log(columnsWithCellActions);
     return (
       <>
         <StatefulEventContext.Provider value={activeStatefulEventContext}>
