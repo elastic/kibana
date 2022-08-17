@@ -108,7 +108,7 @@ describe('fetchLogstashVersions', () => {
                   should: [
                     { term: { type: 'logstash_stats' } },
                     { term: { 'metricset.name': 'node_stats' } },
-                    { term: { 'data_stream.dataset': 'logstash.node_stats' } },
+                    { term: { 'data_stream.dataset': 'logstash.stack_monitoring.node_stats' } },
                   ],
                   minimum_should_match: 1,
                 },

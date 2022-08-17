@@ -14,7 +14,7 @@ import { ElasticsearchMetric } from '../../metrics';
 import { calculateIndicesTotals } from './calculate_shard_stat_indices_totals';
 import { LegacyRequest } from '../../../types';
 import { ElasticsearchModifiedSource } from '../../../../common/types/es';
-import { getNewIndexPatterns } from '../../cluster/get_index_patterns';
+import { getNewIndexPatterns, getElasticsearchDataset } from '../../cluster/get_index_patterns';
 import { Globals } from '../../../static_globals';
 
 async function getUnassignedShardData(req: LegacyRequest, cluster: ElasticsearchModifiedSource) {
@@ -52,7 +52,7 @@ async function getUnassignedShardData(req: LegacyRequest, cluster: Elasticsearch
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       query: createQuery({
         type,
-        dsDataset: `${moduleType}.${dataset}`,
+        dsDataset: getElasticsearchDataset(dataset),
         metricset: dataset,
         clusterUuid: cluster.cluster_uuid ?? cluster.elasticsearch?.cluster?.id,
         metric,

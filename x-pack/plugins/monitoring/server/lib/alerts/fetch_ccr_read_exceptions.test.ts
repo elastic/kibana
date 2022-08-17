@@ -79,7 +79,7 @@ describe('fetchCCReadExceptions', () => {
                   should: [
                     { term: { type: 'ccr_stats' } },
                     { term: { 'metricset.name': 'ccr' } },
-                    { term: { 'data_stream.dataset': 'elasticsearch.ccr' } },
+                    { term: { 'data_stream.dataset': 'elasticsearch.stack_monitoring.ccr' } },
                   ],
                   minimum_should_match: 1,
                 },

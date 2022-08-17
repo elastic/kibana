@@ -130,7 +130,7 @@ describe('fetchMemoryUsageNodeStats', () => {
                   should: [
                     { term: { type: 'node_stats' } },
                     { term: { 'metricset.name': 'node_stats' } },
-                    { term: { 'data_stream.dataset': 'elasticsearch.node_stats' } },
+                    { term: { 'data_stream.dataset': 'elasticsearch.stack_monitoring.node_stats' } },
                   ],
                   minimum_should_match: 1,
                 },

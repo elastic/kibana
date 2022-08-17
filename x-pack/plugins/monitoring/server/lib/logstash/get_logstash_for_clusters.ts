@@ -10,7 +10,7 @@ import { LegacyRequest, Cluster, Bucket } from '../../types';
 import { LOGSTASH } from '../../../common/constants';
 import { createQuery } from '../create_query';
 import { LogstashClusterMetric } from '../metrics';
-import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { getNewIndexPatterns, getLogstashDataset } from '../cluster/get_index_patterns';
 import { Globals } from '../../static_globals';
 
 const { MEMORY, PERSISTED } = LOGSTASH.QUEUE_TYPES;
@@ -67,7 +67,7 @@ export function getLogstashForClusters(
         body: {
           query: createQuery({
             type,
-            dsDataset: `${moduleType}.${dataset}`,
+            dsDataset: getLogstashDataset(dataset),
             metricset: dataset,
             start,
             end,

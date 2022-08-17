@@ -103,7 +103,7 @@ describe('fetchKibanaVersions', () => {
                   should: [
                     { term: { type: 'kibana_stats' } },
                     { term: { 'metricset.name': 'stats' } },
-                    { term: { 'data_stream.dataset': 'kibana.stats' } },
+                    { term: { 'data_stream.dataset': 'kibana.stack_monitoring.stats' } },
                   ],
                   minimum_should_match: 1,
                 },

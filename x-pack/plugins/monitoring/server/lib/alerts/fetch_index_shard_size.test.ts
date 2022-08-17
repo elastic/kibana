@@ -162,7 +162,7 @@ describe('fetchIndexShardSize', () => {
                   should: [
                     { term: { type: 'index_stats' } },
                     { term: { 'metricset.name': 'index' } },
-                    { term: { 'data_stream.dataset': 'elasticsearch.index' } },
+                    { term: { 'data_stream.dataset': 'elasticsearch.stack_monitoring.index' } },
                   ],
                   minimum_should_match: 1,
                 },
