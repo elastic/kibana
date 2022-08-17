@@ -9,6 +9,7 @@ import React, { useEffect } from 'react';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../../hooks/use_profiling_route_path';
+import { useTimeRange } from '../../hooks/use_time_range';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 import { ProfilingSearchBar } from './profiling_search_bar';
 
@@ -25,6 +26,8 @@ export function PrimaryProfilingSearchBar({ showSubmitButton }: { showSubmitButt
     query,
     query: { rangeFrom, rangeTo, kuery },
   } = useProfilingParams('/*');
+
+  const { refresh } = useTimeRange({ rangeFrom, rangeTo });
 
   useEffect(() => {
     // set time if both to and from are given in the url
@@ -62,6 +65,9 @@ export function PrimaryProfilingSearchBar({ showSubmitButton }: { showSubmitButt
             rangeTo: nextDateRange.dateRange.to,
           },
         });
+      }}
+      onRefreshClick={() => {
+        refresh();
       }}
       showSubmitButton={showSubmitButton}
     />

@@ -5,9 +5,15 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { useContext, useMemo } from 'react';
 import { TimeRange } from '../../common/types';
 import { getNextTimeRange } from '../utils/get_next_time_range';
+import { TimeRangeContext } from '../components/contexts/time_range_context';
+
+interface TimeRangeAPI {
+  timeRangeId: string;
+  refresh: () => void;
+}
 
 type PartialTimeRange = Pick<Partial<TimeRange>, 'start' | 'end'>;
 
@@ -15,9 +21,12 @@ export function useTimeRange(range: {
   rangeFrom?: string;
   rangeTo?: string;
   optional: true;
-}): PartialTimeRange;
+}): TimeRangeAPI & PartialTimeRange;
 
-export function useTimeRange(range: { rangeFrom: string; rangeTo: string }): TimeRange;
+export function useTimeRange(range: {
+  rangeFrom: string;
+  rangeTo: string;
+}): TimeRangeAPI & TimeRange;
 
 export function useTimeRange({
   rangeFrom,
@@ -27,14 +36,21 @@ export function useTimeRange({
   rangeFrom?: string;
   rangeTo?: string;
   optional?: boolean;
-}): TimeRange | PartialTimeRange {
+}): TimeRangeAPI & (TimeRange | PartialTimeRange) {
+  const timeRangeApi = useContext(TimeRangeContext);
+
+  if (!timeRangeApi) {
+    throw new Error('TimeRangeContext has not been provided');
+  }
+
   const { start, end } = useMemo(() => {
     return getNextTimeRange({
       state: {},
       rangeFrom,
       rangeTo,
     });
-  }, [rangeFrom, rangeTo]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rangeFrom, rangeTo, timeRangeApi.timeRangeId]);
 
   if ((!start || !end) && !optional) {
     throw new Error('start and/or end were unexpectedly not set');
@@ -43,5 +59,6 @@ export function useTimeRange({
   return {
     start,
     end,
+    ...timeRangeApi,
   };
 }

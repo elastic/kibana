@@ -13,6 +13,7 @@ import { useAnyOfProfilingParams } from '../hooks/use_profiling_params';
 import { useProfilingRouter } from '../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../hooks/use_profiling_route_path';
 import { ProfilingRoutes } from '../routing';
+import { useTimeRange } from '../hooks/use_time_range';
 
 export function PrimaryAndComparisonSearchBar() {
   const {
@@ -20,6 +21,8 @@ export function PrimaryAndComparisonSearchBar() {
     query,
     query: { comparisonKuery, comparisonRangeFrom, comparisonRangeTo },
   } = useAnyOfProfilingParams('/flamegraphs/differential', '/functions/differential');
+
+  const { refresh } = useTimeRange({ rangeFrom: comparisonRangeFrom, rangeTo: comparisonRangeTo });
 
   const profilingRouter = useProfilingRouter();
   const routePath = useProfilingRoutePath() as
@@ -72,6 +75,9 @@ export function PrimaryAndComparisonSearchBar() {
               rangeFrom: nextDateRange.dateRange.from,
               rangeTo: nextDateRange.dateRange.to,
             });
+          }}
+          onRefreshClick={() => {
+            refresh();
           }}
         />
       </EuiFlexItem>
