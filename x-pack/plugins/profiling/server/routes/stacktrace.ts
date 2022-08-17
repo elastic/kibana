@@ -340,7 +340,13 @@ export async function mgetStackFrames({
     const docs = getDocs(resStackFrames);
     for (const frame of docs) {
       if (frame.found) {
-        stackFrames.set(frame._id, frame._source);
+        stackFrames.set(frame._id, {
+          FileName: frame._source!.Stackframe.file?.name,
+          FunctionName: frame._source!.Stackframe.function?.name,
+          FunctionOffset: frame._source!.Stackframe.function?.offset,
+          LineNumber: frame._source!.Stackframe.line?.number,
+          SourceType: frame._source!.Stackframe.source?.type,
+        });
         framesFound++;
       } else {
         stackFrames.set(frame._id, {

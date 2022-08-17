@@ -7,31 +7,31 @@
 
 export interface ProfilingESEvent {
   '@timestamp': string;
-  ContainerName: string;
-  ThreadName: string;
-  Count: number;
-  HostID: string;
-  PodName: string;
-  ProjectID: string;
-  StackTraceID: string;
+  'container.name': string;
+  'process.thread.name': string;
+  'Stacktrace.count': number;
+  'host.id': string;
+  'orchestrator.resource.name': string;
+  'service.name': string;
+  'Stacktrace.id': string;
 }
 
 export interface ProfilingStackTrace {
-  FrameIDs: string[];
-  LastSeen: number;
-  Types: number;
+  '@timestamp': number;
+  'Stacktrace.frame.ids': string[];
+  'Stacktrace.frame.types': number;
 }
 
 export interface ProfilingStackFrame {
-  FileName: string;
-  FunctionName: string;
-  LineNumber: number;
-  FunctionOffset: number;
-  SourceType: number;
+  'Stackframe.file.name': string;
+  'Stackframe.function.name': string;
+  'Stackframe.line.number': number;
+  'Stackframe.function.offset': number;
+  'Stackframe.source.type': number;
 }
 
 export interface ProfilingExecutable {
-  BuildID: string;
-  FileName: string;
-  LastSeen: string;
+  'Executable.build.id': string;
+  'Executable.file.name': string;
+  '@timestamp': string;
 }
