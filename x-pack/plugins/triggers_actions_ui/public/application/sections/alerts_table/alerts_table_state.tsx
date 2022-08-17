@@ -35,7 +35,7 @@ import { ALERTS_TABLE_CONF_ERROR_MESSAGE, ALERTS_TABLE_CONF_ERROR_TITLE } from '
 import { TypeRegistry } from '../../type_registry';
 import { bulkActionsReducer } from './bulk_actions/reducer';
 import { useGetUserCasesPermissions } from './hooks/use_get_user_cases_permissions';
-import browserFields from './browserFields';
+import { useFetchBrowserFieldCapabilities } from './hooks/use_fetch_browser_fields_capabilities';
 
 const DefaultPagination = {
   pageSize: 10,
@@ -94,7 +94,7 @@ const AlertsTableWithBulkActionsContextComponent: React.FunctionComponent<{
 
 const AlertsTableWithBulkActionsContext = React.memo(AlertsTableWithBulkActionsContextComponent);
 
-const populateColumns = (columns: EuiDataGridColumn[]) => {
+const populateColumns = (columns: EuiDataGridColumn[], browserFields) => {
   const findColumnInBrowserFields = (columnId: string) => {
     const key = Object.keys(browserFields).find((_key) =>
       Boolean(browserFields[_key].fields[columnId])
@@ -130,6 +130,13 @@ const AlertsTableState = ({
   showExpandToDetails,
 }: AlertsTableStateProps) => {
   const { cases } = useKibana<{ cases: CaseUi }>().services;
+
+  const [isBrowserFieldDataLoading, browserFields] = useFetchBrowserFieldCapabilities({
+    featureIds,
+  });
+
+  console.log(browserFields);
+
   const hasAlertsTableConfiguration =
     alertsTableConfigurationRegistry?.has(configurationId) ?? false;
   const alertsTableConfiguration = hasAlertsTableConfiguration
@@ -147,8 +154,8 @@ const AlertsTableState = ({
         ? localAlertsTableConfig?.columns ?? []
         : alertsTableConfiguration?.columns ?? [];
 
-    return populateColumns(columnsInConfig);
-  }, [alertsTableConfiguration?.columns, localAlertsTableConfig]);
+    return populateColumns(columnsInConfig, browserFields);
+  }, [alertsTableConfiguration?.columns, browserFields, localAlertsTableConfig]);
 
   const storageAlertsTable = useRef<AlertsTableStorage>({
     columns: columnsLocal,
@@ -295,6 +302,7 @@ const AlertsTableState = ({
       showExpandToDetails,
       useFetchAlertsData,
       updatedAt,
+      browserFields,
     ]
   );
 
@@ -304,7 +312,7 @@ const AlertsTableState = ({
   return hasAlertsTableConfiguration ? (
     <>
       {!isLoading && alertsCount === 0 && <EmptyState />}
-      {isLoading && (
+      {(isLoading || isBrowserFieldDataLoading) && (
         <EuiProgress size="xs" color="accent" data-test-subj="internalAlertsPageLoading" />
       )}
       {alertsCount !== 0 && CasesContext && cases && (
