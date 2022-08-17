@@ -5,26 +5,9 @@
  * 2.0.
  */
 
-import { ProvidedType } from '@kbn/test';
-
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-type ExpectedSectionTableEntries = Record<string, string>;
-export interface ExpectedSectionTable {
-  section: string;
-  expectedEntries: ExpectedSectionTableEntries;
-}
-
-export type AnalyticsTableRowDetails = Record<'jobDetails', ExpectedSectionTable[]>;
-
-export type ExplainLogRateSpikesAnalysisTable = ProvidedType<
-  typeof ExplainLogRateSpikesAnalysisTableProvider
->;
-
-export function ExplainLogRateSpikesAnalysisTableProvider({
-  getPageObject,
-  getService,
-}: FtrProviderContext) {
+export function ExplainLogRateSpikesAnalysisTableProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   return new (class AnalysisTable {
