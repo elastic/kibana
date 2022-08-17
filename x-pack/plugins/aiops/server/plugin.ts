@@ -20,7 +20,7 @@ import {
   AiopsPluginSetupDeps,
   AiopsPluginStartDeps,
 } from './types';
-import { defineExplainLogRateSpikesRoute } from './routes';
+import { defineExplainLogRateSpikesRoute, defineLogCategorizationRoute } from './routes';
 
 export class AiopsPlugin
   implements Plugin<AiopsPluginSetup, AiopsPluginStart, AiopsPluginSetupDeps, AiopsPluginStartDeps>
@@ -49,6 +49,7 @@ export class AiopsPlugin
     if (AIOPS_ENABLED) {
       core.getStartServices().then(([_, depsStart]) => {
         defineExplainLogRateSpikesRoute(router, aiopsLicense, this.logger);
+        defineLogCategorizationRoute(router, aiopsLicense, this.logger);
       });
     }
 

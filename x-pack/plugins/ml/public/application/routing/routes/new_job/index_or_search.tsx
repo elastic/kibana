@@ -60,6 +60,16 @@ const getExplainLogRateSpikesBreadcrumbs = (navigateToPath: NavigateToPath, base
   },
 ];
 
+const getLogCategorizationBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string) => [
+  getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
+  getBreadcrumbWithUrlForApp('AIOPS_BREADCRUMB', navigateToPath, basePath),
+  {
+    text: i18n.translate('xpack.ml.aiopsBreadcrumbs.selectDateViewLabel', {
+      defaultMessage: 'Data View',
+    }),
+  },
+];
+
 export const indexOrSearchRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
@@ -114,6 +124,26 @@ export const explainLogRateSpikesIndexOrSearchRouteFactory = (
     />
   ),
   breadcrumbs: getExplainLogRateSpikesBreadcrumbs(navigateToPath, basePath),
+});
+
+export const logCategorizationIndexOrSearchRouteFactory = (
+  navigateToPath: NavigateToPath,
+  basePath: string
+): MlRoute => ({
+  id: 'data_view_log_categorization',
+  path: '/aiops/log_categorization_index_select',
+  title: i18n.translate('xpack.ml.selectDataViewLabel', {
+    defaultMessage: 'Select Data View',
+  }),
+  render: (props, deps) => (
+    <PageWrapper
+      {...props}
+      nextStepPath="aiops/log_categorization"
+      deps={deps}
+      mode={MODE.DATAVISUALIZER}
+    />
+  ),
+  breadcrumbs: getLogCategorizationBreadcrumbs(navigateToPath, basePath),
 });
 
 const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, deps, mode }) => {

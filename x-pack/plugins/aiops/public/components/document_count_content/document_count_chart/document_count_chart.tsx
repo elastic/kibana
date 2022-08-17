@@ -39,7 +39,7 @@ export interface DocumentCountChartPoint {
 }
 
 interface DocumentCountChartProps {
-  brushSelectionUpdateHandler: (d: WindowParameters, force: boolean) => void;
+  brushSelectionUpdateHandler?: (d: WindowParameters, force: boolean) => void;
   width?: number;
   chartPoints: DocumentCountChartPoint[];
   chartPointsSplit?: DocumentCountChartPoint[];
@@ -192,6 +192,9 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
   };
 
   const onElementClick: ElementClickListener = ([elementData]) => {
+    if (brushSelectionUpdateHandler === undefined) {
+      return;
+    }
     const startRange = (elementData as XYChartElementEvent)[0].x;
 
     const range = {
@@ -239,6 +242,9 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
   }, [isBrushCleared, originalWindowParameters]);
 
   function onWindowParametersChange(wp: WindowParameters, wpPx: WindowParameters) {
+    if (brushSelectionUpdateHandler === undefined) {
+      return;
+    }
     setWindowParameters(wp);
     setWindowParametersAsPixels(wpPx);
     brushSelectionUpdateHandler(wp, false);

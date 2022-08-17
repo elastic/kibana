@@ -238,6 +238,15 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             disabled: disableLinks,
             testSubj: 'mlMainTab explainLogRateSpikes',
           },
+          {
+            id: 'logCategorization',
+            pathId: ML_PAGES.AIOPS_LOG_CATEGORIZATION_INDEX_SELECT,
+            name: i18n.translate('xpack.ml.navMenu.logCategorizationLinkText', {
+              defaultMessage: 'Log categorization',
+            }),
+            disabled: disableLinks,
+            testSubj: 'mlMainTab logCategorization',
+          },
         ],
       });
     }
