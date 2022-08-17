@@ -165,7 +165,7 @@ export const ActionBar = ({
                       onClick={() => onTestNow()}
                       onMouseOver={() => {
                         // We need this custom logic to display a popover even when button is disabled.
-                        clearInterval(mouseMoveTimeoutIds.current[1]);
+                        clearTimeout(mouseMoveTimeoutIds.current[1]);
                         if (mouseMoveTimeoutIds.current[0] === 0) {
                           mouseMoveTimeoutIds.current[0] = setTimeout(() => {
                             clearTimeout(mouseMoveTimeoutIds.current[1]);
