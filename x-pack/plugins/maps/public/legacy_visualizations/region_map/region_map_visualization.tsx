@@ -21,7 +21,6 @@ interface Props {
 }
 
 function RegionMapVisualization(props: Props) {
-  console.log(props);
   const mapCenter = {
     lat: props.visConfig.mapCenter[0],
     lon: props.visConfig.mapCenter[1],
@@ -37,6 +36,7 @@ function RegionMapVisualization(props: Props) {
   }
   return (
     <MapComponent
+      title={props.visConfig.layerDescriptorParams.label}
       filters={props.filters}
       query={props.query}
       timeRange={props.timeRange}

@@ -21,7 +21,6 @@ function getEmsLayerId(id: string | number, layerId: string) {
 }
 
 export function extractLayerDescriptorParams(vis: Vis<RegionMapVisParams>) {
-  console.log(vis);
   const params: { [key: string]: any } = {
     label: vis.title ? vis.title : title,
     emsLayerId: vis.params.selectedLayer.isEMS
