@@ -170,29 +170,20 @@ export const moveFilter = (
   from: string,
   to: string,
   conditionalType: ConditionTypes
-): Filter[] => {
+) => {
   const newFilters = cloneDeep(filters);
   const movingFilter = getFilterByPath(newFilters, from);
 
   const pathInArrayTo = getPathInArray(to).length;
-  const PathInArrayFrom = getPathInArray(from).length;
+  const pathInArrayFrom = getPathInArray(from).length;
 
-  if (pathInArrayTo === PathInArrayFrom) {
-    const newFiltersWithoutFilter = removeFilter(newFilters, from);
-    return addFilter(newFiltersWithoutFilter, movingFilter, to, conditionalType);
-  }
-
-  if (pathInArrayTo > PathInArrayFrom) {
+  if (pathInArrayTo >= pathInArrayFrom) {
     const newFilterWithFilter = addFilter(newFilters, movingFilter, to, conditionalType);
     return removeFilter(newFilterWithFilter, from);
-  }
-
-  if (pathInArrayTo < PathInArrayFrom) {
+  } else {
     const newFiltersWithoutFilter = removeFilter(newFilters, from);
     return addFilter(newFiltersWithoutFilter, movingFilter, to, conditionalType);
   }
-
-  return filters;
 };
 
 export const updateFilter = (
