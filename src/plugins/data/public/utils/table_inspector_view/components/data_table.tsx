@@ -137,7 +137,9 @@ export class DataTableFormat extends Component<DataTableFormatProps, DataTableFo
                 </EuiToolTip>
               </EuiFlexItem>
             )}
-            <EuiFlexItem grow={false}>
+            {
+              console.log('custom actions')
+              /* <EuiFlexItem grow={false}>
               <EuiToolTip
                 position="bottom"
                 content={
@@ -167,7 +169,8 @@ export class DataTableFormat extends Component<DataTableFormatProps, DataTableFo
                   }}
                 />
               </EuiToolTip>
-            </EuiFlexItem>
+            </EuiFlexItem> */
+            }
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -7,18 +7,21 @@
 
 import deepEqual from 'fast-deep-equal';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useDispatch } from 'react-redux';
 
+import { get } from 'lodash';
 import type { inputsModel, State } from '../../../common/store';
 import { createFilter } from '../../../common/containers/helpers';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import type { hostsModel } from '../../store';
-import { hostsSelectors } from '../../store';
+import { hostsActions, hostsSelectors } from '../../store';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
 import type {
   HostsEdges,
   PageInfoPaginated,
   DocValueFields,
   HostsRequestOptions,
+  RiskSeverity,
 } from '../../../../common/search_strategy';
 import { HostsQueries } from '../../../../common/search_strategy';
 import type { ESTermQuery } from '../../../../common/typed_json';
@@ -26,6 +29,11 @@ import type { ESTermQuery } from '../../../../common/typed_json';
 import * as i18n from './translations';
 import type { InspectResponse } from '../../../types';
 import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
+import { getHostsColumns } from '../../components/hosts_table/columns';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { SecurityPageName } from '../../../../common/constants';
+import { HostsTableType } from '../../store/model';
+import { useNavigateTo } from '../../../common/lib/kibana';
 
 export const ID = 'hostsAllQuery';
 
@@ -68,7 +76,25 @@ export const useAllHost = ({
     getHostsSelector(state, type)
   );
   const [hostsRequest, setHostRequest] = useState<HostsRequestOptions | null>(null);
+  const dispatch = useDispatch();
+  const { navigateTo } = useNavigateTo();
 
+  const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
+  const dispatchSeverityUpdate = useCallback(
+    (s: RiskSeverity) => {
+      dispatch(
+        hostsActions.updateHostRiskScoreSeverityFilter({
+          severitySelection: [s],
+          hostsType: type,
+        })
+      );
+      navigateTo({
+        deepLinkId: SecurityPageName.hosts,
+        path: HostsTableType.risk,
+      });
+    },
+    [dispatch, navigateTo, type]
+  );
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
       setHostRequest((prevRequest) => {
@@ -105,6 +131,31 @@ export const useAllHost = ({
     errorMessage: i18n.FAIL_ALL_HOST,
     abort: skip,
   });
+
+  useEffect(() => {
+    if (!loading) {
+      const columns = getHostsColumns(riskyHostsFeatureEnabled, dispatchSeverityUpdate).map(
+        (c) => ({
+          id: c?.field,
+          name: c?.name,
+          meta: '',
+        })
+      );
+      adapters.tables.logDatatable('default', {
+        type: 'test table',
+        columns,
+        // rows: [{ id: '@timestamp', value: 'my test value' }],
+        rows: response.edges?.map((edge) => {
+          return columns.reduce((acc, curr) => {
+            if (curr.id) {
+              acc[curr.id] = (get(edge, curr.id) ?? []).join(', ');
+            }
+            return acc;
+          }, {});
+        }),
+      });
+    }
+  }, [adapters.tables, response.edges, loading, riskyHostsFeatureEnabled, dispatchSeverityUpdate]);
 
   const hostsResponse = useMemo(
     () => ({

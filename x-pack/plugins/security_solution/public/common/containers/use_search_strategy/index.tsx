@@ -119,26 +119,7 @@ const searchComplete = <ResponseType extends IKibanaSearchResponse>(
           .json(JSON.parse(inspect?.dsl[0] ?? {})?.body)
           .ok({ json: rawResponse });
 
-        inspectorAdapters.tables.logDatatable('default', {
-          type: 'test table',
-          columns: [
-            {
-              id: 'host.name',
-              name: 'Host name',
-              meta: 'source field',
-            },
-            {
-              id: 'lastseen',
-              name: 'Last seen',
-              meta: '',
-            },
-          ],
-          // rows: [{ id: '@timestamp', value: 'my test value' }],
-          rows: rawResponse?.aggregations?.host_data?.buckets?.map((bucket) => ({
-            'host.name': bucket?.key ?? '',
-            lastseen: bucket?.lastSeen.value_as_string ?? '',
-          })),
-        });
+
       },
       error(error) {
         logInspectorRequest(inspectorAdapters, startTime).error({ json: error });
