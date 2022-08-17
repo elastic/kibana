@@ -32,7 +32,6 @@ export * from './assert_file_time';
 export * from './assert_no_uuid';
 export * from './assert_path_length';
 export * from './replace_favicon';
-export * from './transpile_babel_task';
 export * from './verify_env_task';
 export * from './write_sha_sums_task';
 export * from './fetch_agent_versions_list';
