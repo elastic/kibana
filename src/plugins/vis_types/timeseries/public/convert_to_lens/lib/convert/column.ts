@@ -10,6 +10,7 @@ import { BaseColumn, Operation, DataType, Column } from '@kbn/visualizations-plu
 import uuid from 'uuid';
 import type { Metric, Series } from '../../../../common/types';
 import { ConvertToColumnsFn } from '../../types';
+import { getTimeScale } from '../metrics';
 
 export const createColumn = (
   series: Series,
@@ -23,6 +24,7 @@ export const createColumn = (
   isBucketed,
   window: metric.window?.toString(),
   filter: series.filter,
+  timeScale: getTimeScale(metric),
 });
 
 export const convertMetricsToColumns = <C extends Column>(

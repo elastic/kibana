@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { TimeScaleUnit } from '@kbn/visualizations-plugin/common';
 import type { Metric } from '../../../../common/types';
 import { SUPPORTED_METRICS } from './supported_metrics';
 import { getFilterRatioFormula } from './filter_ratio_formula';
@@ -40,11 +41,17 @@ export const getPercentileRankSeries = (
   });
 };
 
-export const getTimeScale = (metric: Metric) => {
-  const supportedTimeScales = ['1s', '1m', '1h', '1d'];
-  let timeScale;
-  if (metric.unit && supportedTimeScales.includes(metric.unit)) {
-    timeScale = metric.unit.replace('1', '');
+type TimeScaleValue = `1${TimeScaleUnit}`;
+
+const isTimeScaleValue = (unit: string): unit is TimeScaleValue => {
+  const supportedTimeScales: TimeScaleValue[] = ['1s', '1m', '1h', '1d'];
+  return supportedTimeScales.includes(unit as TimeScaleValue);
+};
+
+export const getTimeScale = (metric: Metric): TimeScaleUnit | undefined => {
+  let timeScale: TimeScaleUnit | undefined;
+  if (metric.unit && isTimeScaleValue(metric.unit)) {
+    timeScale = metric.unit.replace('1', '') as TimeScaleUnit;
   }
   return timeScale;
 };
