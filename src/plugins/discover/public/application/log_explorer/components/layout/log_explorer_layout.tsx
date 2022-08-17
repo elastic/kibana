@@ -42,6 +42,7 @@ import { LogExplorerHistogram } from './log_explorer_histogram';
 
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
+const LogExplorerHistogramMemoized = React.memo(LogExplorerHistogram);
 
 export function LogExplorerLayout({
   dataViewList,
@@ -249,7 +250,7 @@ export function LogExplorerLayout({
             </EuiPageContent>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <LogExplorerHistogram dataAccessService={stateMachine} />
+            <LogExplorerHistogramMemoized dataAccessService={stateMachine} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPageBody>

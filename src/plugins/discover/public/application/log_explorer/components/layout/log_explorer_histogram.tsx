@@ -16,6 +16,7 @@ import {
   Position,
   RectAnnotation,
   RectAnnotationDatum,
+  RectAnnotationStyle,
   ScaleType,
   Settings,
 } from '@elastic/charts';
@@ -65,7 +66,11 @@ export function LogExplorerHistogram({
             yAccessors={[2]}
             yScaleType={ScaleType.Linear}
           />
-          <RectAnnotation dataValues={visibleRangeAnnotation} id="visible-entries-range" />
+          <RectAnnotation
+            dataValues={visibleRangeAnnotation}
+            id="visible-entries-range"
+            style={styles.visibleRangeRectAnnotation}
+          />
         </Chart>
       </EuiPanel>
     </div>
@@ -99,9 +104,9 @@ const useLogExplorerHistogramThemes = () => {
   };
 };
 
-const useLogExplorerHistogramStyles = (): Record<string, CSSObject> => {
+const useLogExplorerHistogramStyles = () => {
   const {
-    euiTheme: { size },
+    euiTheme: { colors, size },
   } = useEuiTheme();
 
   return useMemo(
@@ -110,12 +115,17 @@ const useLogExplorerHistogramStyles = (): Record<string, CSSObject> => {
         padding: `${size.s} ${size.s} ${size.s} 0`,
         flexGrow: 1,
         display: 'flex',
-      },
+      } as CSSObject,
       panel: {
         width: 150,
-      },
+      } as CSSObject,
+      visibleRangeRectAnnotation: {
+        fill: colors.primary,
+        stroke: colors.primary,
+        strokeWidth: 1,
+      } as RectAnnotationStyle,
     }),
-    [size.s]
+    [colors.primary, size.s]
   );
 };
 
@@ -161,8 +171,8 @@ const useLogExplorerHistogramAnnotations = (dataAccessService: DataAccessService
       return [
         {
           coordinates: {
-            x0: startTimestamp,
-            x1: startTimestamp,
+            x0: moment.utc(startTimestamp).valueOf(),
+            x1: moment.utc(endTimestamp).valueOf(),
           },
         },
       ];
