@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import 'core-js/proposals/reflect-metadata';
+import '@abraham/reflection';
 export {
   BackgroundRepeat,
   BackgroundSize,

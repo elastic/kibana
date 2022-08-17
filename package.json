@@ -95,6 +95,7 @@
     "puppeteer/node-fetch": "^2.6.7"
   },
   "dependencies": {
+    "@abraham/reflection": "^0.10.0",
     "@appland/sql-parser": "^1.5.1",
     "@babel/runtime": "^7.18.9",
     "@dnd-kit/core": "^3.1.1",
