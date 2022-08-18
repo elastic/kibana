@@ -70,7 +70,7 @@ export class TimelinePageObject extends FtrService {
    * From a visible timeline, clicks the "view details" for an event on the list
    * @param index
    */
-  async showEventDetails(index: number = 0) {
+  async showEventDetails(index: number = 0): Promise<void> {
     await this.ensureTimelineIsOpen();
 
     const event = (await this.testSubjects.findAll('event'))[index];
@@ -110,7 +110,7 @@ export class TimelinePageObject extends FtrService {
    * Waits for events to be displayed in the timeline. It will click on the "Refresh" button to trigger a data fetch
    * @param timeoutMs
    */
-  async waitForEvents(timeoutMs?: number) {
+  async waitForEvents(timeoutMs?: number): Promise<void> {
     const timeline = await this.testSubjects.find(TIMELINE_MODAL_PAGE_TEST_SUBJ);
 
     await this.retry.waitForWithTimeout(
