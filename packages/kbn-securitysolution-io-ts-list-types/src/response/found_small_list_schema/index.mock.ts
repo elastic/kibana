@@ -7,9 +7,9 @@
  */
 
 import { FoundSmallListSchema } from '.';
-import { getListItemResponseMock } from '../list_item_schema/index.mock';
+import { getListResponseMock } from '../list_schema/index.mock';
 
 export const getFoundSmallListSchemaMock = (): FoundSmallListSchema => ({
-  smallLists: [getListItemResponseMock()],
-  largeLists: [getListItemResponseMock()],
+  smallLists: [getListResponseMock()],
+  largeLists: [getListResponseMock()],
 });

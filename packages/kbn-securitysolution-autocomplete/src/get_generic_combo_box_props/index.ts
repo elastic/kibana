@@ -24,7 +24,7 @@ export const getGenericComboBoxProps = <T>({
   getLabel,
   options,
   selectedOptions,
-  disabledOptions,
+  disabledOptions = [],
 }: {
   getLabel: (value: T) => string;
   options: T[];

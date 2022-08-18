@@ -34,6 +34,7 @@ describe('ml_executor', () => {
     to: dateMath.parse(params.to)!,
     maxSignals: params.maxSignals,
   };
+  const listClient = getListClientMock();
 
   beforeEach(() => {
     jobsSummaryMock = jest.fn();
@@ -72,7 +73,7 @@ describe('ml_executor', () => {
         exceptionItems,
         services: alertServices,
         ruleExecutionLogger,
-        listClient: getListClientMock(),
+        listClient,
         bulkCreate: jest.fn(),
         wrapHits: jest.fn(),
       })
@@ -88,7 +89,7 @@ describe('ml_executor', () => {
       exceptionItems,
       services: alertServices,
       ruleExecutionLogger,
-      listClient: getListClientMock(),
+      listClient,
       bulkCreate: jest.fn(),
       wrapHits: jest.fn(),
     });
@@ -115,7 +116,7 @@ describe('ml_executor', () => {
       exceptionItems,
       services: alertServices,
       ruleExecutionLogger,
-      listClient: getListClientMock(),
+      listClient,
       bulkCreate: jest.fn(),
       wrapHits: jest.fn(),
     });

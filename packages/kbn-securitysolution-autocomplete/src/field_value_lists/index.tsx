@@ -51,7 +51,7 @@ export const AutocompleteFieldListsComponent: React.FC<AutocompleteFieldListsPro
   rowLabel,
   selectedField,
   selectedValue,
-  allowLargeValueLists,
+  allowLargeValueLists = false,
 }): JSX.Element => {
   const [error, setError] = useState<string | undefined>(undefined);
   const [listData, setListData] = useState<AutocompleteListsData>({
@@ -80,7 +80,7 @@ export const AutocompleteFieldListsComponent: React.FC<AutocompleteFieldListsPro
         getLabel,
         options: [...optionsMemo.smallLists, ...optionsMemo.largeLists],
         selectedOptions: selectedOptionsMemo,
-        disabledOptions: !allowLargeValueLists ? optionsMemo.largeLists : [], // Disable large lists if the rule type doesn't allow it
+        disabledOptions: allowLargeValueLists ? [] : optionsMemo.largeLists, // Disable large lists if the rule type doesn't allow it
       }),
     [optionsMemo, selectedOptionsMemo, getLabel, allowLargeValueLists]
   );
