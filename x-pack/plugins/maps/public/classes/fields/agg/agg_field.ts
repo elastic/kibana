@@ -83,7 +83,7 @@ export class AggField extends CountAggField {
   async getLabel(): Promise<string> {
     return this._label
       ? this._label
-      : this._source.getAggLabel(
+      : await this._source.getAggLabel(
           this._aggType,
           this._esDocField ? await this._esDocField.getLabel() : ''
         );
