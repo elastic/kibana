@@ -107,6 +107,9 @@ Alerting::
 * Adds the Alerting stack-monitoring PoC {kibana-pull}135365[#135365]
 * Adds custom inline/row actions for alerts table {kibana-pull}134015[#134015]
 
+Cases::
+Adds the ability to customize permissions to prevent users from deleting Cases entities, such as Cases themselves, attachments, and comments {kibana-pull}135487[#135487]
+
 Discover::
 Adds the ability to add a custom number of rows in the results and save the specified number with a Saved Search {kibana-pull}135726[#135726]
 
@@ -143,7 +146,6 @@ Observability::
 * Adds Beta label to Infrastructure tab {kibana-pull}136710[#136710]
 * Creates and adds Rule Alerts Summary as a sharable component to the O11y Rule Details {kibana-pull}135805[#135805]
 * Rule Details Page - Use RuleStatusPanel from triggersActionsUI {kibana-pull}135643[#135643]
-* Cases permissions can be customized to prevent a user from deleting Cases entities (cases themselves, and attachments/comments) {kibana-pull}135487[#135487]
 * Adds Top erroneous transactions to errors details page {kibana-pull}134929[#134929]
 * Introduces Alerts tab on service overview page {kibana-pull}134350[#134350]
 * Adds single metric report type {kibana-pull}132446[#132446]
@@ -224,7 +226,6 @@ Lens & Visualizations::
 * Adds the ability to rank top values by custom metric in *Lens* {kibana-pull}134811[#134811]
 * Adds the ability to convert TSVB series agg to *Lens* configuration {kibana-pull}134681[#134681]
 * Adds the ability to allow multiple split accessors {kibana-pull}134566[#134566]
-* Adds xExtent validation within expression {kibana-pull}134546[#134546]
 * Adds the ability to render newlines in data table in *Lens* {kibana-pull}134441[#134441]
 * Extends Axis bounds for XY chart when using Interval operation in *Lens* {kibana-pull}134020[#134020]
 * Adds the ability to use pick_max instead of clamp for positive only {kibana-pull}133460[#133460]
@@ -232,7 +233,6 @@ Lens & Visualizations::
 * Adds support for percentile_ranks aggregation in *Lens* {kibana-pull}132430[#132430]
 * Implements the ability to drag and drop between layers in *Lens* {kibana-pull}132018[#132018]
 * Adds optimization for percentiles fetching in *Lens* {kibana-pull}131875[#131875]
-* Adds `axes` support {kibana-pull}129476[#129476]
 
 Machine Learning::
 * Adds tooltips for disabled actions in the Trained Models list {kibana-pull}137176[#137176]
@@ -246,19 +246,19 @@ Machine Learning::
 * Limit Use full data button in anomaly detection job wizards to past data only {kibana-pull}135449[#135449]
 * Replace a fixed Y-axis width with a max width setting for Anomaly Swim Lane Embeddable {kibana-pull}135436[#135436]
 * Adds support for setting threading params when starting a trained model deployment {kibana-pull}135134[#135134]
-* Management page refactor {kibana-pull}134893[#134893]
+* Refactors Management page to focus on space management tasks {kibana-pull}134893[#134893]
 * Disable the Single Metric Viewer button for not viewable jobs {kibana-pull}134048[#134048]
 * Anomaly Detection: allow snapshot to be reverted from the view datafeed flyout {kibana-pull}133842[#133842]
 
 Management::
 * Transforms: Adds per-transform setting for num_failure_retries to creation wizard and edit flyout and authorization info {kibana-pull}135486[#135486]
-* Adds sorting to Transform's Audit Messages {kibana-pull}135047[#135047]
+* Transforms: Adds sorting to audit messages tab {kibana-pull}135047[#135047]
 * Console now supports saving the state of folding/unfolding of commands {kibana-pull}134810[#134810]
 * Render most severe response status code from Console response pane {kibana-pull}134627[#134627]
 * You can now create variables in Console {kibana-pull}134215[#134215]
 * Make index template previews copyable {kibana-pull}134060[#134060]
 * Console now supports adding comments in the body of a request by using `//` for a single line and `/*....*/` for multiline comments {kibana-pull}133852[#133852]
-* Improve UX around handling multiple requests {kibana-pull}132494[#132494]
+* Surface HTTP status badges next to each response in Console {kibana-pull}132494[#132494]
 * Adds updated `essql` expression function {kibana-pull}132332[#132332]
 * Adds a "get all" REST API for data views: `GET /api/data_views` {kibana-pull}131683[#131683]
 
@@ -371,6 +371,10 @@ Machine Learning::
 * Fixes globally pinned filters in Data visualizer and query search bar not clearing properly for saved searches {kibana-pull}136897[#136897]
 * Fixes overflow in start datafeed modal {kibana-pull}136292[#136292]
 * Fixes error in categorization wizard summary step {kibana-pull}134228[#134228]
+* Fixes flaky job selection on the Anomaly Explorer page {kibana-pull}137596[#137596]
+* Fixes query in the Anomaly Explorer when viewing a job with no influencers {kibana-pull}137670[#137670]
+* Fixes the Dashboard saving indicator with Anomaly Swim Lane embeddable {kibana-pull}137989[#137989]
+* Anomaly detection job wizards now use data view names {kibana-pull}138255[#138255]
 
 Management::
 * The ILM UI now supports configuring policies with rollover based on `max_primary_shard_docs` {kibana-pull}137364[#137364]
@@ -378,6 +382,10 @@ Management::
 * Fixes a bug where the autocomplete popup remains open when navigating away from Console {kibana-pull}136268[#136268]
 * Fixes a bug in Index Management where the number of documents for an index could appear wrong {kibana-pull}135748[#135748]
 * Fixes a bug in the Painless code editor that was incorrectly handling expressions with multiple division operators {kibana-pull}135423[#135423]
+* Transforms: Fixes unsupported boolean filter when cloning {kibana-pull}137773[#137773]
+* Transforms: Fixes restoring a field name with the exists filter aggregation {kibana-pull}138630[#138630]
+* Transforms: Fixes data view error on cloning due to missing indices {kibana-pull}138756[#138756]
+* Fixes Watcher stuck firing state {kibana-pull}138563[#138563]
 
 Maps::
 * Fixes "other" is always shown in legend for category styling rules {kibana-pull}137008[#137008]
@@ -410,6 +418,7 @@ Observability::
 * Fixes Metrics Table Pod link to Details Page {kibana-pull}134354[#134354]
 * Adds last updated at label and fix started at label {kibana-pull}134254[#134254]
 * Adds event module filter to metrics table {kibana-pull}133872[#133872]
+* APM Correlations: Fixes chart errors caused by inconsistent histogram range steps {kibana-pull}138259[#138259]
 
 Platform::
 * Migrations wait for index status green if create index returns acknowledged=false or shardsAcknowledged=false {kibana-pull}136605[#136605]
