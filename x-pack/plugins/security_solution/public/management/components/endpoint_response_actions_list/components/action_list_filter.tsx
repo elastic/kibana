@@ -78,7 +78,7 @@ export const ActionListFilter = memo(
           options={items}
           searchable
           searchProps={{
-            placeholder: `Filter ${translatedFilterName}`,
+            placeholder: `Search ${translatedFilterName.toLowerCase()}`,
             compressed: true,
           }}
         >
