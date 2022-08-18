@@ -9,8 +9,6 @@
 import React, { useCallback } from 'react';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { EuiFormRow } from '@elastic/eui';
-
-// @todo: {start} should be refactored cause shared component cannot be linked with non-shared components
 import type { Operator } from '../../../filter_bar/filter_editor';
 import {
   PhraseValueInput,
@@ -18,7 +16,6 @@ import {
   RangeValueInput,
   isRangeParams,
 } from '../../../filter_bar/filter_editor';
-// @todo: {end}
 
 interface ParamsEditorProps<TParams = unknown> {
   dataView: DataView;

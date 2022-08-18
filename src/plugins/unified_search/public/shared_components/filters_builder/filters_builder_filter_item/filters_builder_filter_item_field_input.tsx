@@ -10,10 +10,7 @@ import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { useGeneratedHtmlId } from '@elastic/eui';
-
-// todo: {start} should be refactored cause shared component cannot be linked with non-shared components
 import { getFilterableFields, GenericComboBox } from '../../../filter_bar/filter_editor';
-// todo: {end}
 
 interface FieldInputProps {
   dataView: DataView;
