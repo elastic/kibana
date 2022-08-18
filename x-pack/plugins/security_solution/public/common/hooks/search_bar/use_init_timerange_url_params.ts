@@ -51,17 +51,24 @@ const initializeTimerangeFromUrlParam = (
     const socTrendsLinkTo: LinkTo = { linkTo: get('socTrends.linkTo', initialState) };
     const socTrendsType: TimeRangeKinds = get('socTrends.timerange.kind', initialState);
 
-    // TODO: socTrendsLinkTo
-    if (isEmpty(globalLinkTo.linkTo)) {
-      dispatch(inputsActions.removeGlobalLinkTo());
+    if (isEmpty(socTrendsLinkTo.linkTo)) {
+      dispatch(inputsActions.removeLinkTo(['global', 'socTrends']));
     } else {
-      dispatch(inputsActions.addGlobalLinkTo({ linkToId: 'timeline' }));
+      dispatch(inputsActions.addLinkTo(['global', 'socTrends']));
+    }
+
+    if (isEmpty(globalLinkTo.linkTo)) {
+      dispatch(inputsActions.removeLinkTo(['global', 'timeline']));
+      dispatch(inputsActions.removeLinkTo(['global', 'socTrends']));
+    } else {
+      dispatch(inputsActions.addLinkTo(['global', 'timeline']));
+      dispatch(inputsActions.addLinkTo(['global', 'socTrends']));
     }
 
     if (isEmpty(timelineLinkTo.linkTo)) {
-      dispatch(inputsActions.removeTimelineLinkTo());
+      dispatch(inputsActions.removeLinkTo(['global', 'timeline']));
     } else {
-      dispatch(inputsActions.addTimelineLinkTo({ linkToId: 'global' }));
+      dispatch(inputsActions.addLinkTo(['global', 'timeline']));
     }
 
     if (timelineType) {

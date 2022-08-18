@@ -28,10 +28,10 @@ export const updateInputFullScreen = (
 });
 
 const getTimeRange = (timerange: TimeRange, inputId: InputsModelId, linkToId: InputsModelId) => {
-  if (inputId === 'global' && linkToId === 'socTrends') {
+  if ((inputId === 'global' || inputId === 'timeline') && linkToId === 'socTrends') {
     return getPreviousTimeRange(timerange);
   }
-  if (inputId === 'socTrends' && linkToId === 'global') {
+  if (inputId === 'socTrends' && (linkToId === 'global' || linkToId === 'timeline')) {
     return getFutureTimeRange(timerange);
   }
   return timerange;
@@ -44,7 +44,6 @@ export const updateInputTimerange = (
 ): InputsModel => {
   const input = get(inputId, state);
   if (input != null) {
-    // TODO: need socTrends to update timeline if socTrends.linkTo === ['global'] && global.linkTo === ['socTrends', 'timeline']
     return {
       ...[inputId, ...input.linkTo].reduce<InputsModel>(
         (acc: InputsModel, linkToId: InputsModelId) => ({
@@ -61,26 +60,11 @@ export const updateInputTimerange = (
   return state;
 };
 
-export const toggleLockTimeline = (linkToId: InputsModelId, state: InputsModel): InputsModel => {
-  const linkToIdAlreadyExist = state.global.linkTo.indexOf(linkToId);
-  return {
-    ...state,
-    global: {
-      ...state.global,
-      timerange: linkToIdAlreadyExist > -1 ? state.global.timerange : state.timeline.timerange,
-      linkTo:
-        linkToIdAlreadyExist > -1
-          ? [
-              ...state.global.linkTo.slice(0, linkToIdAlreadyExist),
-              ...state.global.linkTo.slice(linkToIdAlreadyExist + 1),
-            ]
-          : [...state.global.linkTo, linkToId],
-    },
-    timeline: {
-      ...state.timeline,
-      linkTo: linkToIdAlreadyExist > -1 ? [] : ['global'],
-    },
-  };
+export const toggleLockTimeline = (state: InputsModel): InputsModel => {
+  const linkToIdAlreadyExist = state.global.linkTo.indexOf('timeline');
+  return linkToIdAlreadyExist > -1
+    ? removeInputLink(['global', 'timeline'], state)
+    : addInputLink(['global', 'timeline'], state);
 };
 
 export interface UpdateQueryParams {
@@ -168,37 +152,137 @@ export const setIsInspected = ({
   };
 };
 
-export const removeGlobalLink = (state: InputsModel): InputsModel => ({
-  ...state,
-  global: {
-    ...state.global,
-    linkTo: [],
-  },
-});
+export const addInputLink = (linkToIds: InputsModelId[], state: InputsModel): InputsModel => {
+  const socTrendsVal: InputsModelId = 'socTrends';
+  const timelineVal: InputsModelId = 'timeline';
+  const globalVal: InputsModelId = 'global';
 
-export const addGlobalLink = (linkToId: InputsModelId, state: InputsModel): InputsModel => ({
-  ...state,
-  global: {
-    ...state.global,
-    linkTo: [linkToId],
-  },
-});
+  if (linkToIds.length !== 2) {
+    throw new Error('Only link 2 input states at a time');
+  }
+  if (linkToIds.includes(socTrendsVal) && linkToIds.includes(timelineVal)) {
+    throw new Error('Do not link socTrends to timeline. Only link socTrends to global');
+  }
+  if (Array.from(new Set(linkToIds)).length === 1) {
+    throw new Error('Input linkTo cannot link to itself');
+  }
+  if (linkToIds.includes(timelineVal) && linkToIds.includes(globalVal)) {
+    const socTrends =
+      state.timeline.linkTo.includes(socTrendsVal) || state.global.linkTo.includes(socTrendsVal)
+        ? [socTrendsVal]
+        : [];
+    return {
+      ...state,
+      timeline: {
+        ...state.timeline,
+        linkTo: [...socTrends, globalVal],
+      },
+      global: {
+        ...state.global,
+        linkTo: [...socTrends, timelineVal],
+      },
+      ...(socTrends.length
+        ? {
+            socTrends: {
+              ...state.socTrends,
+              linkTo: [globalVal, timelineVal],
+            },
+          }
+        : {}),
+    };
+  }
 
-export const removeTimelineLink = (state: InputsModel): InputsModel => ({
-  ...state,
-  timeline: {
-    ...state.timeline,
-    linkTo: [],
-  },
-});
+  if (linkToIds.includes(socTrendsVal) && linkToIds.includes(globalVal)) {
+    const timeline = state.global.linkTo.includes(timelineVal) ? [timelineVal] : [];
+    return {
+      ...state,
+      socTrends: {
+        ...state.socTrends,
+        linkTo: [...timeline, globalVal],
+      },
+      global: {
+        ...state.global,
+        linkTo: [...timeline, socTrendsVal],
+      },
+      ...(timeline.length
+        ? {
+            timeline: {
+              ...state.timeline,
+              linkTo: [globalVal, socTrendsVal],
+            },
+          }
+        : {}),
+    };
+  }
+  return state;
+};
 
-export const addTimelineLink = (linkToId: InputsModelId, state: InputsModel): InputsModel => ({
-  ...state,
-  timeline: {
-    ...state.timeline,
-    linkTo: [linkToId],
-  },
-});
+export const removeInputLink = (linkToIds: InputsModelId[], state: InputsModel): InputsModel => {
+  const socTrendsVal: InputsModelId = 'socTrends';
+  const timelineVal: InputsModelId = 'timeline';
+  const globalVal: InputsModelId = 'global';
+
+  if (linkToIds.length !== 2) {
+    throw new Error('Only remove linkTo from 2 input states at a time');
+  }
+  if (linkToIds.includes(socTrendsVal) && linkToIds.includes(timelineVal)) {
+    throw new Error(
+      'Do not remove link socTrends to timeline. Only remove link socTrends to global'
+    );
+  }
+  if (Array.from(new Set(linkToIds)).length === 1) {
+    throw new Error('Input linkTo cannot remove link to itself');
+  }
+  if (linkToIds.includes(timelineVal) && linkToIds.includes(globalVal)) {
+    const socTrends =
+      state.timeline.linkTo.includes(socTrendsVal) || state.global.linkTo.includes(socTrendsVal)
+        ? [socTrendsVal]
+        : [];
+    return {
+      ...state,
+      timeline: {
+        ...state.timeline,
+        linkTo: [],
+      },
+      global: {
+        ...state.global,
+        linkTo: socTrends,
+      },
+      ...(socTrends.length
+        ? {
+            socTrends: {
+              ...state.socTrends,
+              linkTo: [globalVal],
+            },
+          }
+        : {}),
+    };
+  }
+
+  if (linkToIds.includes(socTrendsVal) && linkToIds.includes(globalVal)) {
+    const timeline = state.global.linkTo.includes(timelineVal) ? [timelineVal] : [];
+    return {
+      ...state,
+      socTrends: {
+        ...state.socTrends,
+        linkTo: [],
+      },
+      global: {
+        ...state.global,
+        linkTo: timeline,
+      },
+      ...(timeline.length
+        ? {
+            timeline: {
+              ...state.timeline,
+              linkTo: [globalVal],
+            },
+          }
+        : {}),
+    };
+  }
+  return state;
+};
 
 export interface DeleteOneQueryParams {
   id: string;

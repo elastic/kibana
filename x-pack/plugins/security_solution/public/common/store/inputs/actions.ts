@@ -68,15 +68,10 @@ export const setInspectionParameter = actionCreator<{
 
 export const deleteAllQuery = actionCreator<{ id: InputsModelId }>('DELETE_ALL_QUERY');
 
-export const toggleTimelineLinkTo = actionCreator<{ linkToId: InputsModelId }>(
-  'TOGGLE_TIMELINE_LINK_TO'
-);
+export const toggleTimelineLinkTo = actionCreator('TOGGLE_TIMELINE_LINK_TO');
 
-export const removeTimelineLinkTo = actionCreator('REMOVE_TIMELINE_LINK_TO');
-export const addTimelineLinkTo = actionCreator<{ linkToId: InputsModelId }>('ADD_TIMELINE_LINK_TO');
-
-export const removeGlobalLinkTo = actionCreator('REMOVE_GLOBAL_LINK_TO');
-export const addGlobalLinkTo = actionCreator<{ linkToId: InputsModelId }>('ADD_GLOBAL_LINK_TO');
+export const removeLinkTo = actionCreator<InputsModelId[]>('REMOVE_LINK_TO');
+export const addLinkTo = actionCreator<InputsModelId[]>('ADD_LINK_TO');
 
 export const setFilterQuery = actionCreator<{
   id: InputsModelId;

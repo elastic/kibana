@@ -21,24 +21,20 @@ import {
   startAutoReload,
   stopAutoReload,
   toggleTimelineLinkTo,
-  removeTimelineLinkTo,
-  removeGlobalLinkTo,
-  addGlobalLinkTo,
-  addTimelineLinkTo,
   deleteOneQuery,
   setFilterQuery,
   setSavedQuery,
   setSearchBarFilter,
+  removeLinkTo,
+  addLinkTo,
 } from './actions';
 import {
   setIsInspected,
   toggleLockTimeline,
   updateInputTimerange,
   upsertQuery,
-  removeGlobalLink,
-  addGlobalLink,
-  removeTimelineLink,
-  addTimelineLink,
+  addInputLink,
+  removeInputLink,
   deleteOneQuery as helperDeleteOneQuery,
   updateInputFullScreen,
 } from './helpers';
@@ -253,14 +249,12 @@ export const inputsReducer = reducerWithInitialState(initialInputsState)
       },
     },
   }))
-  .case(toggleTimelineLinkTo, (state, { linkToId }) => toggleLockTimeline(linkToId, state))
+  .case(toggleTimelineLinkTo, (state) => toggleLockTimeline(state))
   .case(setInspectionParameter, (state, { id, inputId, isInspected, selectedInspectIndex }) =>
     setIsInspected({ id, inputId, isInspected, selectedInspectIndex, state })
   )
-  .case(removeGlobalLinkTo, (state) => removeGlobalLink(state))
-  .case(addGlobalLinkTo, (state, { linkToId }) => addGlobalLink(linkToId, state))
-  .case(removeTimelineLinkTo, (state) => removeTimelineLink(state))
-  .case(addTimelineLinkTo, (state, { linkToId }) => addTimelineLink(linkToId, state))
+  .case(removeLinkTo, (state, linkToIds) => removeInputLink(linkToIds, state))
+  .case(addLinkTo, (state, linkToIds) => addInputLink(linkToIds, state))
   .case(setFilterQuery, (state, { id, query, language }) => ({
     ...state,
     [id]: {

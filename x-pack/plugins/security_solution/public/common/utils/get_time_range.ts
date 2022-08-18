@@ -6,7 +6,6 @@
  */
 
 import moment from 'moment';
-import { normalizeTimeRange } from './normalize_time_range';
 import type { AbsoluteTimeRange, URLTimeRange } from '../store/inputs/model';
 
 export const getPreviousTimeRange = <
@@ -15,7 +14,7 @@ export const getPreviousTimeRange = <
   dateRange: T,
   uiSettings = true
 ): AbsoluteTimeRange => {
-  const { from, to } = normalizeTimeRange(dateRange, uiSettings);
+  const { from, to } = dateRange; // normalizeTimeRange(dateRange, uiSettings);
   const duration = moment(to).diff(moment(from));
   const previousStart = moment(from).subtract(duration).toISOString();
   const previousEnd = moment(to).subtract(duration).toISOString();
@@ -34,7 +33,7 @@ export const getFutureTimeRange = <
   dateRange: T,
   uiSettings = true
 ): AbsoluteTimeRange => {
-  const { from, to } = normalizeTimeRange(dateRange, uiSettings);
+  const { from, to } = dateRange; // normalizeTimeRange(dateRange, uiSettings);
   const duration = moment(to).diff(moment(from));
   const previousStart = moment(from).add(duration).toISOString();
   const previousEnd = moment(to).add(duration).toISOString();

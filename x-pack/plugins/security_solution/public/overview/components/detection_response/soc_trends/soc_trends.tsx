@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 import prettyMilliseconds from 'pretty-ms';
+import { SocTrendsDatePickerLock } from './date_picker_lock';
 import { SuperDatePicker } from '../../../../common/components/super_date_picker';
 import { LastUpdatedAt } from '../utils';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
@@ -54,7 +55,14 @@ const SocTrendsComponent: React.FC = () => {
         subtitle={<LastUpdatedAt updatedAt={updatedAt} isUpdating={isLoading} />}
         showInspectButton={false}
       >
-        <SuperDatePicker id="socTrends" showUpdateButton="iconOnly" />
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem>
+            <SuperDatePicker id="socTrends" showUpdateButton="iconOnly" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <SocTrendsDatePickerLock />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </HeaderSection>
       {!isLoading && toggleStatus && (
         <EuiFlexGroup direction="column" gutterSize="s">
