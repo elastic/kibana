@@ -216,8 +216,6 @@ export const AutocompleteFieldWildcardComponent: React.FC<AutocompleteFieldWildc
 
     useEffect((): void => {
       setError(undefined);
-      setShowSpacesWarning(false);
-
       if (onError != null) {
         onError(false);
       }
