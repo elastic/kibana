@@ -23255,8 +23255,6 @@
     "xpack.observability.emptySection.apps.ux.title": "ユーザーエクスペリエンス",
     "xpack.observability.enableComparisonByDefault": "比較機能",
     "xpack.observability.enableComparisonByDefaultDescription": "APMアプリで比較機能を有効にする",
-    "xpack.observability.enableInfrastructureView": "インフラストラクチャ機能",
-    "xpack.observability.enableInfrastructureViewDescription": "APMアプリでインフラストラクチャビュー機能を有効にする",
     "xpack.observability.enableInspectEsQueriesExperimentDescription": "API応答でElasticsearchクエリを調査します。",
     "xpack.observability.enableInspectEsQueriesExperimentName": "ESクエリを調査",
     "xpack.observability.enableNewSyntheticsViewExperimentDescription": "オブザーバビリティで新しい合成監視アプリケーションを有効にします。設定を適用するにはページを更新してください。",
