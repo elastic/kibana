@@ -8,11 +8,11 @@ import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiPageHeaderContentProps } 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FlameGraphComparisonMode } from '../../../common/flamegraph';
-import { useAsync } from '../../hooks/use_async';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../../hooks/use_profiling_route_path';
 import { useTimeRange } from '../../hooks/use_time_range';
+import { useTimeRangeAsync } from '../../hooks/use_time_range_async';
 import { AsyncComponent } from '../async_component';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 import { FlameGraph } from '../flamegraph';
@@ -43,7 +43,7 @@ export function FlameGraphsView({ children }: { children: React.ReactElement }) 
     services: { fetchElasticFlamechart },
   } = useProfilingDependencies();
 
-  const state = useAsync(() => {
+  const state = useTimeRangeAsync(() => {
     return Promise.all([
       fetchElasticFlamechart({
         timeFrom: new Date(timeRange.start).getTime() / 1000,
