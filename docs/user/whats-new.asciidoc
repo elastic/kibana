@@ -17,7 +17,11 @@ coming::[8.4.0]
 [discrete]
 [[highlights-8.4-release-docs]]
 === Elastic release docs now in one place
-With the new https://www.elastic.co/guide/en/welcome-to-elastic/current/new.html[Check out the latest from Elastic] page, you can now easily find all the latest information about Elastic features and updates. From release highlights, to breaking changes, to bug fixes, and more, you can now easily access all of this information in a single location.
+With the new
+https://www.elastic.co/guide/en/welcome-to-elastic/current/new.html[Check out the latest from Elastic] page,
+you can easily find all the latest information about Elastic features and updates
+in a single location.
+This includes release highlights, breaking changes, bug fixes, and more.
 
 [role="screenshot"]
 image:images/highlights-release-docs.png[New release docs page on elastic.co, width=75%]
@@ -33,7 +37,7 @@ them easier to find and manage.
 [role="screenshot"]
 image:images/highlights-edit-data-view.png[UI where you can edit the data view name, width=75%]
 
-The pattern is still easily visible via a tooltip.
+The pattern is still visible via a tooltip.
 
 [role="screenshot"]
 image::images/highlights-data-views.png[New release docs page on elastic.co]
@@ -62,7 +66,7 @@ The new Rank by option in *Lens* allows you to rank your top values
 by an additional custom metric.
 
 [role="screenshot"]
-image:images/highlights-rank-by.png[Metric visualization in Lens, , width=75%]
+image:images/highlights-rank-by.png[Rank by custom metrics in Lens, width=75%]
 
 [discrete]
 ==== Standard deviation quick function
@@ -71,12 +75,12 @@ more about how your metrics behave in *Lens*.
 
 [discrete]
 ==== Drag and drop between layers
-It’s now easier than ever to work with multiple layers in *Lens*.
+It’s now easier to work with multiple layers in *Lens*.
 Drag and drop fields between your layers when they are coming from the same data view.
 
 [discrete]
 ==== Custom ranges in number histograms
-In *Lens*, create custom ranges for your number histograms.
+In *Lens*, you can now create custom ranges for your number histograms.
 This helps you understand the domain of your data for when you want to
 have a fixed set of histogram buckets.
 
@@ -88,7 +92,7 @@ image:images/highlights-histogram.png[Custom ranges in histogram in Lens, width=
 You can customize the *Lens* Top values function
 to include or exclude specific terms. To filter for fields with multiple values,
 you can choose to use this functionality over the global search.
-This can stop you from accidentally filtering out too much data.
+This can help prevent you from accidentally filtering out too much data.
 
 [discrete]
 [[highlights-8.4-maps]]
@@ -96,17 +100,17 @@ This can stop you from accidentally filtering out too much data.
 
 [discrete]
 ==== Synchronize maps in dashboards
-You can now synchronize the maps on a dashboard,
+You can synchronize the maps on a dashboard,
 so when you zoom or move in one map, all maps move together.
 This enables you to see the same geo location for different data, accelerating
 time-to-insights.
 
 [role="screenshot"]
-image::images/highlights-maps-synchronize.png[Synchronize maps in a dashboard]
+image::images/highlights-maps-synchronize.png[Synchronize maps in a dashboard, width=75%]
 
 [discrete]
 ==== Keyboard controls for zoom
-Zoom in and out of maps using shift+scroll instead of clicking the map options.
+Zoom in and out of maps using Shift+scroll instead of clicking the map options.
 This makes maps more usable in dashboards, while also saving you time.
 
 [role="screenshot"]
@@ -143,7 +147,7 @@ throughput of all requests. In turn, threads per allocation sets the number of
 threads used by each model allocation during inference,
 so increasing this parameter improves the latency for each request.
 
-From 8.4, you can now set these two parameters in the UI when starting
+From 8.4, you can set these two parameters in the UI when starting
 a trained model deployment.
 
 [role="screenshot"]
@@ -198,7 +202,7 @@ web service. You can use this connector with cases in **{observability}**,
 ==== Schedules for snoozing notifications
 
 Starting in 8.2, you could suppress the notifications and actions for your rules
-for a specific duration. Now you can also schedule these single or recurring
+for a specific duration. In 8.4, you can also schedule these single or recurring
 downtimes to start and end at specific dates and times.
 
 [role="screenshot"]
@@ -239,7 +243,7 @@ image::images/highlights-console-variables.png[What it looks like to define vari
 [discrete]
 ==== HTTP status badges
 
-We added HTTP status badges next to each response. This makes it easier
+Each response now includes an HTTP status badge. This makes it easier
 to tell which request failed and which succeeded. The most severe status is
 at the top of the UI, so you can quickly get a sense of whether any of
 your requests had trouble.
