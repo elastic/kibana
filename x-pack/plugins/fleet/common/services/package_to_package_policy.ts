@@ -18,7 +18,11 @@ import type {
 } from '../types';
 
 import { doesPackageHaveIntegrations } from '.';
-import { isInputOnlyPolicyTemplate } from './policy_template';
+import {
+  getNormalizedDataStreams,
+  getNormalizedInputs,
+  isIntegrationPolicyTemplate,
+} from './policy_template';
 
 export const getStreamsForInputType = (
   inputType: string,
@@ -26,11 +30,10 @@ export const getStreamsForInputType = (
   dataStreamPaths: string[] = []
 ): Array<RegistryStream & { data_stream: { type: string; dataset: string } }> => {
   const streams: Array<RegistryStream & { data_stream: { type: string; dataset: string } }> = [];
-  const dataStreams = packageInfo.data_streams || [];
+  const dataStreams = getNormalizedDataStreams(packageInfo);
   const dataStreamsToSearch = dataStreamPaths.length
     ? dataStreams.filter((dataStream) => dataStreamPaths.includes(dataStream.path))
     : dataStreams;
-
   dataStreamsToSearch.forEach((dataStream) => {
     (dataStream.streams || []).forEach((stream) => {
       if (stream.input === inputType) {
@@ -77,12 +80,12 @@ export const packageToPackagePolicyInputs = (
   } = {};
 
   packageInfo.policy_templates?.forEach((packagePolicyTemplate) => {
-    if (isInputOnlyPolicyTemplate(packagePolicyTemplate)) return;
-    packagePolicyTemplate.inputs?.forEach((packageInput) => {
+    const normalizedInputs = getNormalizedInputs(packagePolicyTemplate);
+    normalizedInputs?.forEach((packageInput) => {
       const inputKey = `${packagePolicyTemplate.name}-${packageInput.type}`;
       const input = {
         ...packageInput,
-        ...(packagePolicyTemplate.data_streams
+        ...(isIntegrationPolicyTemplate(packagePolicyTemplate) && packagePolicyTemplate.data_streams
           ? { data_streams: packagePolicyTemplate.data_streams }
           : {}),
         policy_template: packagePolicyTemplate.name,

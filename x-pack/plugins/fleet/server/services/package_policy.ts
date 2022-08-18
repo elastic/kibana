@@ -32,6 +32,7 @@ import {
   validatePackagePolicy,
   validationHasErrors,
   isInputOnlyPolicyTemplate,
+  getNormalizedDataStreams,
 } from '../../common/services';
 import { SO_SEARCH_LIMIT, FLEET_APM_PACKAGE, outputType } from '../../common/constants';
 import type {
@@ -1162,7 +1163,7 @@ async function _compilePackageStream(
     return { ...stream, compiled_stream: undefined };
   }
 
-  const packageDataStreams = pkgInfo.data_streams;
+  const packageDataStreams = getNormalizedDataStreams(pkgInfo);
   if (!packageDataStreams) {
     throw new Error('Stream template not found, no data streams');
   }

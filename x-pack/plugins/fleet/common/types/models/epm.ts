@@ -178,20 +178,20 @@ interface BaseTemplate {
   [RegistryPolicyTemplateKeys.description]: string;
   [RegistryPolicyTemplateKeys.icons]?: RegistryImage[];
   [RegistryPolicyTemplateKeys.screenshots]?: RegistryImage[];
+  [RegistryPolicyTemplateKeys.multiple]?: boolean;
 }
 export interface RegistryPolicyIntegrationTemplate extends BaseTemplate {
   [RegistryPolicyTemplateKeys.categories]?: Array<PackageSpecCategory | undefined>;
   [RegistryPolicyTemplateKeys.data_streams]?: string[];
   [RegistryPolicyTemplateKeys.inputs]?: RegistryInput[];
   [RegistryPolicyTemplateKeys.readme]?: string;
-  [RegistryPolicyTemplateKeys.multiple]?: boolean;
 }
 
 export interface RegistryPolicyInputOnlyTemplate extends BaseTemplate {
   [RegistryPolicyTemplateKeys.type]: string;
   [RegistryPolicyTemplateKeys.input]: string;
+  [RegistryPolicyTemplateKeys.template_path]: string;
   [RegistryPolicyTemplateKeys.vars]?: RegistryVarsEntry[];
-  [RegistryPolicyTemplateKeys.template_path]?: string;
 }
 
 export type RegistryPolicyTemplate =
