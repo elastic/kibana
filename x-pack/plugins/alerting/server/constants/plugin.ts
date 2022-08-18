@@ -6,7 +6,6 @@
  */
 
 import { LicenseType } from '@kbn/licensing-plugin/server';
-import { i18n } from '@kbn/i18n';
 
 export const PLUGIN = {
   ID: 'alerting',

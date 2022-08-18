@@ -81,9 +81,10 @@ export class RulesClientFactory {
     const spaceId = this.getSpaceId(request);
 
     if (!this.authorization) {
-      throw new Error(i18n.translate('xpack.alerting.alertingForClientFactoryIsUndefined',
-         { defaultMessage: 'AlertingAuthorizationClientFactory is not defined' }
-        )
+      throw new Error(
+        i18n.translate('xpack.alerting.alertingForClientFactoryIsUndefined', {
+          defaultMessage: 'AlertingAuthorizationClientFactory is not defined',
+        })
       );
     }
 

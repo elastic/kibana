@@ -14,8 +14,8 @@ export const validateSnoozeSchedule = (schedule: RuleSnoozeSchedule) => {
   const intervalIsDaily = schedule.rRule.freq === Frequency.DAILY;
   const durationInDays = moment.duration(schedule.duration, 'milliseconds').asDays();
   if (intervalIsDaily && schedule.rRule.interval && durationInDays >= schedule.rRule.interval) {
-    return i18n.translate('xpack.alerting.lib.recurrenceInterval',
-      { defaultMessage: 'Recurrence interval must be longer than the snooze duration'}
-   );
+    return i18n.translate('xpack.alerting.lib.recurrenceInterval', {
+      defaultMessage: 'Recurrence interval must be longer than the snooze duration',
+    });
   }
 };

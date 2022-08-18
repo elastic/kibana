@@ -6,8 +6,8 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { validateDurationSchema, parseDuration } from './lib';
 import { i18n } from '@kbn/i18n';
+import { validateDurationSchema, parseDuration } from './lib';
 
 const ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
 const ruleTypeSchema = schema.object({
@@ -31,9 +31,9 @@ const rulesSchema = schema.object({
 
         const parsedDurationMs = parseDuration(duration);
         if (parsedDurationMs > ONE_DAY_IN_MS) {
-          return i18n.translate('xpack.alerting.durationExceed' ,
-            { defaultMessage:'duration cannot exceed one day' }
-          );
+          return i18n.translate('xpack.alerting.durationExceed', {
+            defaultMessage: 'duration cannot exceed one day',
+          });
         }
       },
       defaultValue: '1m',

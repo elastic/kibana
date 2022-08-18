@@ -6,9 +6,9 @@
  */
 
 import { RequestHandler } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 import { ILicenseState, isErrorThatHandlesItsOwnResponse, verifyApiAccess } from '../../lib';
 import { AlertingRequestHandlerContext } from '../../types';
-import { i18n } from '@kbn/i18n';
 
 type AlertingRequestHandlerWrapper = <P, Q, B>(
   licenseState: ILicenseState,
@@ -20,8 +20,10 @@ export const verifyAccessAndContext: AlertingRequestHandlerWrapper = (licenseSta
     verifyApiAccess(licenseState);
 
     if (!context.alerting) {
-      return response.badRequest({ body: i18n.translate('xpack.alerting.routes.routerHandlerNotRegistered',
-        { defaultMessage:'RouteHandlerContext is not registered for alerting' })
+      return response.badRequest({
+        body: i18n.translate('xpack.alerting.routes.routerHandlerNotRegistered', {
+          defaultMessage: 'RouteHandlerContext is not registered for alerting',
+        }),
       });
     }
 

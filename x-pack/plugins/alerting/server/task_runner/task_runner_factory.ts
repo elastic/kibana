@@ -94,9 +94,10 @@ export class TaskRunnerFactory {
     inMemoryMetrics: InMemoryMetrics
   ) {
     if (!this.isInitialized) {
-      throw new Error(i18n.translate('xpack.alerting.taskrunner.taskRunnerNotInitialized',
-        { defaultMessage:'TaskRunnerFactory not initialized'}
-        )
+      throw new Error(
+        i18n.translate('xpack.alerting.taskrunner.taskRunnerNotInitialized', {
+          defaultMessage: 'TaskRunnerFactory not initialized',
+        })
       );
     }
 

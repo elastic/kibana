@@ -48,9 +48,10 @@ export async function loadRule<Params extends RuleTypeParams>(params: LoadRulePa
   if (!enabled) {
     throw new ErrorWithReason(
       RuleExecutionStatusErrorReasons.Disabled,
-      new Error(i18n.translate('xpack.alerting.taskrunner.failedToRunRuleAfterItwasDisabled',
-        { defaultMessage:`Rule failed to execute because rule ran after it was disabled.` }
-        )
+      new Error(
+        i18n.translate('xpack.alerting.taskrunner.failedToRunRuleAfterItwasDisabled', {
+          defaultMessage: `Rule failed to execute because rule ran after it was disabled.`,
+        })
       )
     );
   }

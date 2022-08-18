@@ -53,17 +53,19 @@ export function createAlertFactory<
   return {
     create: (id: string): PublicAlert<State, Context, ActionGroupIds> => {
       if (isDone) {
-        throw new Error(i18n.translate('xpack.alerting.alert.CannotCreateNewAlert',
-        { defaultMessage:`Can't create new alerts after calling done() in AlertsFactory.`}
-          )
+        throw new Error(
+          i18n.translate('xpack.alerting.alert.CannotCreateNewAlert', {
+            defaultMessage: `Can't create new alerts after calling done() in AlertsFactory.`,
+          })
         );
       }
 
       if (numAlertsCreated++ >= maxAlerts) {
         hasReachedAlertLimit = true;
-        throw new Error(i18n.translate( 'xpack.alerting.alert.MaxAlert',
-          { defaultMessage:`Rule reported more than ${maxAlerts} alerts.`}
-          )
+        throw new Error(
+          i18n.translate('xpack.alerting.alert.MaxAlert', {
+            defaultMessage: `Rule reported more than ${maxAlerts} alerts.`,
+          })
         );
       }
 

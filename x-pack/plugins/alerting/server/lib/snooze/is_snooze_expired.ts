@@ -31,9 +31,10 @@ export function isSnoozeExpired(snooze: RuleSnoozeSchedule) {
     const nextOccurrence = recurrenceRule.after(new Date(now), true);
     return !nextOccurrence;
   } catch (e) {
-    throw new Error(i18n.translate('xpack.alerting.lib.snoozExpired',
-      { defaultMessage:`Failed to process RRule ${rRule}: ${e}` }
-      )
+    throw new Error(
+      i18n.translate('xpack.alerting.lib.snoozExpired', {
+        defaultMessage: `Failed to process RRule ${rRule}: ${e}`,
+      })
     );
   }
 }

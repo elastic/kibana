@@ -272,9 +272,10 @@ export class AlertingAuthorization {
       );
 
       if (!authorizedRuleTypes.size) {
-        throw Boom.forbidden(i18n.translate('xpack.alerting.authorization.NotAuthorized',
-        { defaultMessage:`Unauthorized to find ${authorizationEntity}s for any rule types`}
-          )
+        throw Boom.forbidden(
+          i18n.translate('xpack.alerting.authorization.NotAuthorized', {
+            defaultMessage: `Unauthorized to find ${authorizationEntity}s for any rule types`,
+          })
         );
       }
 

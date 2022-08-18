@@ -32,8 +32,10 @@ export class AlertingAuthorizationClientFactory {
 
   public initialize(options: AlertingAuthorizationClientFactoryOpts) {
     if (this.isInitialized) {
-      throw new Error(i18n.translate('xpack.alerting.clientFactoryAlertingInitialized',
-        { defaultMessage:'AlertingAuthorizationClientFactory already initialized' })
+      throw new Error(
+        i18n.translate('xpack.alerting.clientFactoryAlertingInitialized', {
+          defaultMessage: 'AlertingAuthorizationClientFactory already initialized',
+        })
       );
     }
     this.isInitialized = true;

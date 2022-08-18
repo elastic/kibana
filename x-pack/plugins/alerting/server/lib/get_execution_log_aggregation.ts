@@ -110,28 +110,31 @@ export function getExecutionLogAggregation({
   const sortFields = flatMap(sort as estypes.SortCombinations[], (s) => Object.keys(s));
   for (const field of sortFields) {
     if (!Object.keys(ExecutionLogSortFields).includes(field)) {
-      throw Boom.badRequest(i18n.translate('xpack.alerting.lib.invalidSortField',
-        { defaultMessage:`Invalid sort field "${field}" - must be one of [${Object.keys(ExecutionLogSortFields).join(
-          ','
-        )}]` }
-        )
+      throw Boom.badRequest(
+        i18n.translate('xpack.alerting.lib.invalidSortField', {
+          defaultMessage: `Invalid sort field "${field}" - must be one of [${Object.keys(
+            ExecutionLogSortFields
+          ).join(',')}]`,
+        })
       );
     }
   }
 
   // Check if valid page value
   if (page <= 0) {
-    throw Boom.badRequest(i18n.translate('xpack.alerting.lib.invalidPageField',
-      { defaultMessage:`Invalid page field "${page}" - must be greater than 0` }
-      )
+    throw Boom.badRequest(
+      i18n.translate('xpack.alerting.lib.invalidPageField', {
+        defaultMessage: `Invalid page field "${page}" - must be greater than 0`,
+      })
     );
   }
 
   // Check if valid page value
   if (perPage <= 0) {
-    throw Boom.badRequest(i18n.translate('xpack.alerting.lib.invalidPerPageField',
-      { defaultMessage:`Invalid perPage field "${perPage}" - must be greater than 0` }
-      )
+    throw Boom.badRequest(
+      i18n.translate('xpack.alerting.lib.invalidPerPageField', {
+        defaultMessage: `Invalid perPage field "${perPage}" - must be greater than 0`,
+      })
     );
   }
 
@@ -139,9 +142,10 @@ export function getExecutionLogAggregation({
   try {
     dslFilterQuery = filter ? toElasticsearchQuery(fromKueryExpression(filter)) : undefined;
   } catch (err) {
-    throw Boom.badRequest(i18n.translate('xpack.alerting.lib.invalidKuerySyntax',
-      { defaultMessage:`Invalid kuery syntax for filter ${filter}` }
-      )
+    throw Boom.badRequest(
+      i18n.translate('xpack.alerting.lib.invalidKuerySyntax', {
+        defaultMessage: `Invalid kuery syntax for filter ${filter}`,
+      })
     );
   }
 

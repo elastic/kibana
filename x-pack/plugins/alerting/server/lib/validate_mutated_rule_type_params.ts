@@ -24,9 +24,10 @@ export function validateMutatedRuleTypeParams<Params extends RuleTypeParams>(
     }
     return mutatedParams;
   } catch (err) {
-    throw Boom.badRequest(i18n.translate('xpack.alerting.lib.invalidParams',
-      { defaultMessage:`Mutated params invalid: ${err.message}`}
-      )
+    throw Boom.badRequest(
+      i18n.translate('xpack.alerting.lib.invalidParams', {
+        defaultMessage: `Mutated params invalid: ${err.message}`,
+      })
     );
   }
 }

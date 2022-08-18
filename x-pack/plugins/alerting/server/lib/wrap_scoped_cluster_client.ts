@@ -162,9 +162,10 @@ function getWrappedSearchFn(opts: WrapEsClientOpts) {
       return result;
     } catch (e) {
       if (opts.abortController.signal.aborted) {
-        throw new Error(i18n.translate('xpack.alerting.lib.abortedSearch',
-          {defaultMessage:'Search has been aborted due to cancelled execution'}
-          )
+        throw new Error(
+          i18n.translate('xpack.alerting.lib.abortedSearch', {
+            defaultMessage: 'Search has been aborted due to cancelled execution',
+          })
         );
       }
       throw e;

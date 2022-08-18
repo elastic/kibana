@@ -192,9 +192,11 @@ export class Alert<
 
   private ensureHasNoScheduledActions() {
     if (this.hasScheduledActions()) {
-      throw new Error(i18n.translate('xpack.alerting.alert.instanceExecutionAlreadyScheduled',
-      { defaultMessage:'Alert instance execution has already been scheduled, cannot schedule twice' }
-       )
+      throw new Error(
+        i18n.translate('xpack.alerting.alert.instanceExecutionAlreadyScheduled', {
+          defaultMessage:
+            'Alert instance execution has already been scheduled, cannot schedule twice',
+        })
       );
     }
   }
