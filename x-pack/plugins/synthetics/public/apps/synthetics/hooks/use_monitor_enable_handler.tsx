@@ -86,5 +86,5 @@ export function useMonitorEnableHandler({
     savedObjEnabledState,
   ]);
 
-  return { isEnabled, setIsEnabled, updateMonitorEnabledState, status };
+  return { isEnabled, updateMonitorEnabledState, status };
 }

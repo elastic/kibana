@@ -93,26 +93,35 @@ describe('ActionsPopover', () => {
   });
 
   it('sets the enabled state', async () => {
-    const setIsEnabled = jest.fn();
+    const updateMonitorEnabledState = jest.fn();
     jest.spyOn(monitorEnableHandlerModule, 'useMonitorEnableHandler').mockReturnValue({
       status: FETCH_STATUS.SUCCESS,
       isEnabled: true,
-      setIsEnabled,
+      updateMonitorEnabledState,
     });
     const { getByText } = render(
       <ActionsPopover isPopoverOpen={true} setIsPopoverOpen={jest.fn()} monitor={testMonitor} />
     );
     const enableButton = getByText('Disable monitor');
     fireEvent.click(enableButton);
-    expect(setIsEnabled).toHaveBeenCalledWith(false);
+    expect(updateMonitorEnabledState).toHaveBeenCalledTimes(1);
+    expect(updateMonitorEnabledState.mock.calls[0]).toEqual([
+      {
+        id: 'somelongstring',
+        isEnabled: true,
+        location: { id: 'us_central', isServiceManaged: true },
+        name: 'Monitor 1',
+      },
+      false,
+    ]);
   });
 
   it('sets enabled state to true', async () => {
-    const setIsEnabled = jest.fn();
+    const updateMonitorEnabledState = jest.fn();
     jest.spyOn(monitorEnableHandlerModule, 'useMonitorEnableHandler').mockReturnValue({
       status: FETCH_STATUS.PENDING,
       isEnabled: null,
-      setIsEnabled,
+      updateMonitorEnabledState,
     });
     const { getByText } = render(
       <ActionsPopover
@@ -123,6 +132,15 @@ describe('ActionsPopover', () => {
     );
     const enableButton = getByText('Enable monitor');
     fireEvent.click(enableButton);
-    expect(setIsEnabled).toHaveBeenCalledWith(true);
+    expect(updateMonitorEnabledState).toHaveBeenCalledTimes(1);
+    expect(updateMonitorEnabledState.mock.calls[0]).toEqual([
+      {
+        id: 'somelongstring',
+        isEnabled: false,
+        location: { id: 'us_central', isServiceManaged: true },
+        name: 'Monitor 1',
+      },
+      true,
+    ]);
   });
 });
