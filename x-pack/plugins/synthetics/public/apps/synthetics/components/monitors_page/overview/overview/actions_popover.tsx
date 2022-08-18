@@ -20,7 +20,6 @@ import { useEditMonitorLocator } from '../../hooks/use_edit_monitor_locator';
 import { useMonitorDetailLocator } from '../../hooks/use_monitor_detail_locator';
 
 interface ActionContainerProps {
-  borderRadius: string;
   boxShadow: string;
 }
 
@@ -33,7 +32,7 @@ const ActionContainer = styled.div<ActionContainerProps>`
   z-index: 1;
 
   // style
-  border-radius: ${({ borderRadius }) => borderRadius};
+  border-radius: ${({ theme }) => theme.eui.euiBorderRadius};
   ${({ boxShadow }) => boxShadow}
 `;
 
@@ -50,14 +49,13 @@ export function ActionsPopover({
   const euiShadow = useEuiShadow('l');
   const dispatch = useDispatch();
   const { pageState } = useSelector(selectOverviewState);
-  const forceRefreshOnEnabledChange = useCallback(() => {
-    dispatch(quietFetchOverviewAction.get(pageState));
-  }, [dispatch, pageState]);
+
   const detailUrl = useMonitorDetailLocator({
     monitorId: monitor.id,
     locationId: monitor.location.id,
   });
   const editUrl = useEditMonitorLocator({ monitorId: monitor.id });
+
   const labels = useMemo(
     () => ({
       enabledSuccessLabel: enabledSuccessLabel(monitor.name),
@@ -68,15 +66,17 @@ export function ActionsPopover({
   );
   const { status, isEnabled, updateMonitorEnabledState } = useMonitorEnableHandler({
     id: monitor.id,
-    reloadPage: () => {
-      forceRefreshOnEnabledChange();
+    reloadPage: useCallback(() => {
+      dispatch(quietFetchOverviewAction.get(pageState));
       setIsPopoverOpen(false);
-    },
+    }, [dispatch, pageState, setIsPopoverOpen]),
     labels,
   });
+
   const [enableLabel, setEnableLabel] = useState(
     monitor.isEnabled ? enableLabelDisableMonitor : enableLabelEnableMonitor
   );
+
   useEffect(() => {
     if (status === FETCH_STATUS.LOADING) {
       setEnableLabel(enableLabelLoading);
@@ -84,8 +84,9 @@ export function ActionsPopover({
       setEnableLabel(isEnabled ? enableLabelDisableMonitor : enableLabelEnableMonitor);
     }
   }, [setEnableLabel, status, isEnabled, monitor.isEnabled]);
+
   return (
-    <ActionContainer boxShadow={euiShadow} borderRadius={theme.eui.euiBorderRadius}>
+    <ActionContainer boxShadow={euiShadow}>
       <EuiPopover
         button={
           <EuiButtonIcon
