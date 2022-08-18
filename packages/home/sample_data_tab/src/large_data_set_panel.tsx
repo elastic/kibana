@@ -79,6 +79,7 @@ export const LargeDatasetPanel = ({ install, checkInstalled }: Props) => {
 
   const onClick = async () => {
     await install({ indexName, nrOfDocuments });
+    setInstalled(true);
   };
 
   const onChange = async () => {
