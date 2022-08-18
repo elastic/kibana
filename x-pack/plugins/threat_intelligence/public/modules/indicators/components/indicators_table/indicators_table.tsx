@@ -32,6 +32,12 @@ interface Column {
 
 const columns: Column[] = [
   {
+    id: RawIndicatorFieldId.TimeStamp,
+    displayAsText: i18n.translate('xpack.threatIntelligence.indicator.table.timestampColumnTitle', {
+      defaultMessage: '@timestamp',
+    }),
+  },
+  {
     id: ComputedIndicatorFieldId.DisplayValue,
     displayAsText: i18n.translate('xpack.threatIntelligence.indicator.table.indicatorColumTitle', {
       defaultMessage: 'Indicator',
@@ -63,15 +69,6 @@ const columns: Column[] = [
     displayAsText: i18n.translate('xpack.threatIntelligence.indicator.table.lastSeenColumTitle', {
       defaultMessage: 'Last seen',
     }),
-  },
-  {
-    id: RawIndicatorFieldId.MarkingTLP,
-    displayAsText: i18n.translate(
-      'xpack.threatIntelligence.indicator.table.tlpMarketingColumTitle',
-      {
-        defaultMessage: 'TLP Marking',
-      }
-    ),
   },
 ];
 

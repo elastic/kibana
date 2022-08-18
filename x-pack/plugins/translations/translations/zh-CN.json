@@ -31540,7 +31540,6 @@
     "xpack.threatIntelligence.indicator.table.indicatorColumTitle": "指标",
     "xpack.threatIntelligence.indicator.table.indicatorTypeColumTitle": "指标类型",
     "xpack.threatIntelligence.indicator.table.lastSeenColumTitle": "最后看到时间",
-    "xpack.threatIntelligence.indicator.table.tlpMarketingColumTitle": "TLP 标记",
     "xpack.threatIntelligence.indicator.table.viewDetailsButton": "查看详情",
     "xpack.timelines.clipboard.copy.successToastTitle": "已将字段 {field} 复制到剪贴板",
     "xpack.timelines.footer.autoRefreshActiveTooltip": "自动刷新已启用时，时间线将显示匹配查询的最近 {numberOfItems} 个事件。",

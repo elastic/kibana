@@ -31530,7 +31530,6 @@
     "xpack.threatIntelligence.indicator.table.indicatorColumTitle": "Indicateur",
     "xpack.threatIntelligence.indicator.table.indicatorTypeColumTitle": "Type d’indicateur",
     "xpack.threatIntelligence.indicator.table.lastSeenColumTitle": "Vu en dernier",
-    "xpack.threatIntelligence.indicator.table.tlpMarketingColumTitle": "Marquage TLP",
     "xpack.threatIntelligence.indicator.table.viewDetailsButton": "Afficher les détails",
     "xpack.timelines.clipboard.copy.successToastTitle": "Champ {field} copié dans le presse-papiers",
     "xpack.timelines.footer.autoRefreshActiveTooltip": "Lorsque l'actualisation automatique est activée, la chronologie vous montrera les {numberOfItems} derniers événements correspondant à votre recherche.",

@@ -31508,7 +31508,6 @@
     "xpack.threatIntelligence.indicator.table.indicatorColumTitle": "インジケーター",
     "xpack.threatIntelligence.indicator.table.indicatorTypeColumTitle": "インジケータータイプ",
     "xpack.threatIntelligence.indicator.table.lastSeenColumTitle": "前回の認識",
-    "xpack.threatIntelligence.indicator.table.tlpMarketingColumTitle": "TLPマーキング",
     "xpack.threatIntelligence.indicator.table.viewDetailsButton": "詳細を表示",
     "xpack.timelines.clipboard.copy.successToastTitle": "フィールド{field}をクリップボードにコピーしました",
     "xpack.timelines.footer.autoRefreshActiveTooltip": "自動更新が有効な間、タイムラインはクエリに一致する最新の {numberOfItems} 件のイベントを表示します。",
