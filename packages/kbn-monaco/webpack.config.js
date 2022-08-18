@@ -32,11 +32,10 @@ const createLangWorkerConfig = (lang) => {
             compress: { passes: 2 },
             keep_classnames: true,
             mangle: true,
+            sourceMap: false,
           },
-          minify: async (file, sourceMap, minimizerOptions) => {
-            const swc = require('@swc/core');
-            const { map, code } = await swc.minify(file, minimizerOptions.terserOptions);
-            return { map, code, extractedComments: [] };
+          minify: async (file, _sourceMap, minimizerOptions) => {
+            return require('@swc/core').minify(file, minimizerOptions.terserOptions);
           },
         }),
       ],
