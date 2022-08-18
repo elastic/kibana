@@ -92,7 +92,7 @@ you make the necessary updates after you upgrade to 8.4.0.
 The ability to authenticate interactive users with ApiKey via a web browser has been deprecated, and will be removed in a future version. For more information, refer to {kibana-pull}136422[#136422].
 
 *Impact* +
-To authenticate interactive users, use <<kibana-authentication,another authentication method>>. 
+To authenticate interactive users via a web browser, use <<kibana-authentication,another authentication method>>. Use API keys only for programmatic access to {kib} and {es}.
 ====
       
 [float]
