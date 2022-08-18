@@ -8,6 +8,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import uuid from 'uuid';
 import { pick } from 'lodash/fp';
+import prettyMilliseconds from 'pretty-ms';
 import { getPercChange } from './helpers';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { inputsSelectors } from '../../../../common/store';
@@ -16,11 +17,14 @@ import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { APP_ID } from '../../../../../common/constants';
 
 interface UseSocTrends {
-  casesMttr: number | null;
+  casesMttr: string;
   isLoading: boolean;
   percentage: { percent: string | null; color: 'success' | 'danger' | 'hollow'; note: string };
   updatedAt: number;
 }
+
+const makePrettyNumber = (mttr: number): string =>
+  prettyMilliseconds(mttr * 1000, { compact: true, verbose: false });
 
 export const useSocTrends = ({ skip = false }): UseSocTrends => {
   const {
@@ -34,7 +38,7 @@ export const useSocTrends = ({ skip = false }): UseSocTrends => {
   const uniqueQueryId = useMemo(() => `useSocTrends-${uuid.v4()}`, []);
   const [updatedAt, setUpdatedAt] = useState(Date.now());
   const [isLoading, setIsLoading] = useState(true);
-  const [casesMttr, setCasesMttr] = useState<UseSocTrends['casesMttr']>(null);
+  const [casesMttr, setCasesMttr] = useState<UseSocTrends['casesMttr']>('-');
   const [percentage, setPercentage] = useState<UseSocTrends['percentage']>({
     percent: null,
     color: 'hollow',
@@ -70,13 +74,17 @@ export const useSocTrends = ({ skip = false }): UseSocTrends => {
 
         const percentageChange = getPercChange(responseCurrent.mttr, responseCompare.mttr);
 
-        if (isSubscribed && responseCurrent.mttr !== undefined) {
-          setCasesMttr(responseCurrent.mttr);
+        if (isSubscribed && responseCurrent.mttr != null) {
+          setCasesMttr(makePrettyNumber(responseCurrent.mttr));
         } else if (isSubscribed) {
-          setCasesMttr(null);
+          setCasesMttr('-');
         }
 
-        if (percentageChange !== null) {
+        if (
+          responseCurrent.mttr != null &&
+          responseCompare.mttr != null &&
+          percentageChange != null
+        ) {
           const isNegative = percentageChange.charAt(0) === '-';
           const isZero = percentageChange === '0.0%';
           setPercentage({
@@ -90,7 +98,7 @@ export const useSocTrends = ({ skip = false }): UseSocTrends => {
               ? 'Your case resolution time is unchanged'
               : `Your case resolution time is ${isNegative ? 'down' : 'up'} by ${
                   isNegative ? percentageChange.substring(1) : percentageChange
-                }`,
+                } from ${makePrettyNumber(responseCompare.mttr)}`,
           });
         } else {
           const badCurrent = responseCurrent.mttr == null;

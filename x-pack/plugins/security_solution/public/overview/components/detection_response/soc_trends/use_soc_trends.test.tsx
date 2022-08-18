@@ -50,7 +50,7 @@ describe('useSocTrends', () => {
       });
       await waitForNextUpdate();
       expect(result.current).toEqual({
-        casesMttr: null,
+        casesMttr: '-',
         isLoading: true,
         percentage: {
           percent: null,
@@ -72,12 +72,12 @@ describe('useSocTrends', () => {
       await waitForNextUpdate();
       await waitForNextUpdate();
       expect(result.current).toEqual({
-        casesMttr: 10000,
+        casesMttr: '2h',
         isLoading: false,
         percentage: {
           percent: '100.0%',
           color: 'danger',
-          note: 'Your case resolution time is up by 100.0%',
+          note: 'Your case resolution time is up by 100.0% from 1h',
         },
         updatedAt: dateNow,
       });
@@ -94,12 +94,12 @@ describe('useSocTrends', () => {
       await waitForNextUpdate();
       await waitForNextUpdate();
       expect(result.current).toEqual({
-        casesMttr: 5000,
+        casesMttr: '1h',
         isLoading: false,
         percentage: {
           percent: '-50.0%',
           color: 'success',
-          note: 'Your case resolution time is down by 50.0%',
+          note: 'Your case resolution time is down by 50.0% from 2h',
         },
         updatedAt: dateNow,
       });
@@ -116,7 +116,7 @@ describe('useSocTrends', () => {
       await waitForNextUpdate();
       await waitForNextUpdate();
       expect(result.current).toEqual({
-        casesMttr: 10000,
+        casesMttr: '2h',
         isLoading: false,
         percentage: {
           percent: '0.0%',
@@ -138,7 +138,7 @@ describe('useSocTrends', () => {
       await waitForNextUpdate();
       await waitForNextUpdate();
       expect(result.current).toEqual({
-        casesMttr: null,
+        casesMttr: '-',
         isLoading: false,
         percentage: {
           percent: null,
@@ -160,7 +160,7 @@ describe('useSocTrends', () => {
       await waitForNextUpdate();
       await waitForNextUpdate();
       expect(result.current).toEqual({
-        casesMttr: 10000,
+        casesMttr: '2h',
         isLoading: false,
         percentage: {
           percent: null,
@@ -188,7 +188,7 @@ describe('useSocTrends', () => {
       await waitForNextUpdate();
       await waitForNextUpdate();
       expect(result.current).toEqual({
-        casesMttr: 10000,
+        casesMttr: '2h',
         isLoading: false,
         percentage: {
           percent: '0.0%',
@@ -206,7 +206,7 @@ describe('useSocTrends', () => {
       rerender();
       await waitForNextUpdate();
       expect(result.current).toEqual({
-        casesMttr: null,
+        casesMttr: '-',
         isLoading: false,
         percentage: {
           percent: null,
@@ -234,7 +234,7 @@ describe('useSocTrends', () => {
       await waitForNextUpdate();
       await waitForNextUpdate();
       expect(result.current).toEqual({
-        casesMttr: 10000,
+        casesMttr: '2h',
         isLoading: false,
         percentage: {
           percent: '0.0%',
@@ -252,7 +252,7 @@ describe('useSocTrends', () => {
       rerender();
       await waitForNextUpdate();
       expect(result.current).toEqual({
-        casesMttr: null,
+        casesMttr: '-',
         isLoading: false,
         percentage: {
           percent: null,

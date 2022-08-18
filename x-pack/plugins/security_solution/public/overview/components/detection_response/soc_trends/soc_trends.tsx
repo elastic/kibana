@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
   EuiBadge,
   EuiDescriptionList,
@@ -17,7 +17,6 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import styled from 'styled-components';
-import prettyMilliseconds from 'pretty-ms';
 import { SocTrendsDatePickerLock } from './date_picker_lock';
 import { SuperDatePicker } from '../../../../common/components/super_date_picker';
 import { LastUpdatedAt } from '../utils';
@@ -40,13 +39,6 @@ const SocTrendsComponent: React.FC = () => {
   const { casesMttr, percentage, isLoading, updatedAt } = useSocTrends({
     skip: !toggleStatus,
   });
-  const casesMttrValue = useMemo(
-    () =>
-      casesMttr != null
-        ? prettyMilliseconds(casesMttr * 1000, { compact: true, verbose: false })
-        : '-',
-    [casesMttr]
-  );
 
   return (
     <StyledEuiPanel hasBorder>
@@ -88,7 +80,7 @@ const SocTrendsComponent: React.FC = () => {
                     <EuiLoadingSpinner data-test-subj={`mttr-stat-loading-spinner`} />
                   ) : (
                     <>
-                      {casesMttrValue}{' '}
+                      {casesMttr}{' '}
                       <EuiToolTip content={percentage.note}>
                         <EuiBadge color={percentage.color}>
                           {percentage.percent != null ? percentage.percent : '-'}
