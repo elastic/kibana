@@ -660,7 +660,7 @@
         "label": "EcsEventType",
         "description": [],
         "signature": [
-          "\"start\" | \"error\" | \"connection\" | \"end\" | \"group\" | \"user\" | \"info\" | \"admin\" | \"protocol\" | \"access\" | \"allowed\" | \"change\" | \"creation\" | \"deletion\" | \"denied\" | \"installation\""
+          "\"start\" | \"error\" | \"connection\" | \"user\" | \"info\" | \"group\" | \"end\" | \"admin\" | \"protocol\" | \"access\" | \"allowed\" | \"change\" | \"creation\" | \"deletion\" | \"denied\" | \"installation\""
         ],
         "path": "packages/kbn-logging/src/ecs/event.ts",
         "deprecated": false,
