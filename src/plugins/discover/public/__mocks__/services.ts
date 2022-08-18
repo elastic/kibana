@@ -112,6 +112,7 @@ export const discoverServiceMock = {
     addInfo: jest.fn(),
     addWarning: jest.fn(),
     addDanger: jest.fn(),
+    addSuccess: jest.fn(),
   },
   expressions: expressionsPlugin,
   dataViews: dataPlugin.dataViews,

@@ -19,11 +19,12 @@ jest.mock('./show_confirm_panel', () => {
   };
 });
 
-let mockDataView = {
+const mockDataView = {
   id: 'mock-id',
   title: 'mock-title',
   timeFieldName: 'mock-time-field-name',
   isPersisted: () => false,
+  getName: () => 'mock-data-view',
 } as DataView;
 
 describe('usePersistedDataView', () => {
@@ -66,9 +67,8 @@ describe('usePersistedDataView', () => {
   });
 
   it('should return true when data view persisted', async () => {
-    mockDataView = { ...mockDataView, isPersisted: () => true } as DataView;
     const hook = renderHook((d: DataView) => usePersistedDataView(d), {
-      initialProps: mockDataView,
+      initialProps: { ...mockDataView, isPersisted: () => true } as DataView,
       wrapper: ({ children }) => (
         <KibanaContextProvider services={mockDiscoverServices}>{children}</KibanaContextProvider>
       ),
