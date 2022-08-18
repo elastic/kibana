@@ -13,11 +13,11 @@ import { assign } from 'xstate';
 import {
   fetchEntriesAround,
   FetchEntriesAroundParameters,
-} from '../../../queries/fetch_entries_around';
-import { getPredecessorPosition } from '../../../utils/cursor';
-import { createBottomChunkFromResponse } from './load_after_service';
-import { createTopChunkFromResponse } from './load_before_service';
-import { LogExplorerContext, LogExplorerEvent } from '../../data_access_state_machine/_types';
+} from '../../queries/fetch_entries_around';
+import { getPredecessorPosition } from '../../utils/cursor';
+import { createBottomChunkFromResponse } from './services/load_after_service';
+import { createTopChunkFromResponse } from './services/load_before_service';
+import { LogExplorerContext, LogExplorerEvent } from '../data_access_state_machine/_types';
 
 export type LoadAroundParameters = FetchEntriesAroundParameters & {
   topEndRowIndex: number;

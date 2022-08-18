@@ -7,7 +7,7 @@
  */
 
 import { assign } from 'xstate';
-import { LogExplorerContext, LogExplorerEvent } from '../types';
+import { LogExplorerContext, LogExplorerEvent } from '../_types';
 
 export const updatePosition = assign((context: LogExplorerContext, event: LogExplorerEvent) => {
   if (event.type !== 'positionChanged') {

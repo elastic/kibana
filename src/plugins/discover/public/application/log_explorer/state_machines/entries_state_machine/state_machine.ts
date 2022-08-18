@@ -25,7 +25,7 @@ import {
   LogExplorerContext,
   LogExplorerEvent,
   LogExplorerState,
-} from '../data_access_state_machine/types';
+} from '../data_access_state_machine/_types';
 import {
   areVisibleEntriesNearEnd,
   areVisibleEntriesNearStart,

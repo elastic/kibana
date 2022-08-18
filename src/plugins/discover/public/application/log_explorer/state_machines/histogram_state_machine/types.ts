@@ -5,3 +5,28 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { LoadHistogramEvent } from './services/load_histogram_service';
+import { SharedContext, SharedExternalEvent } from '../data_access_state_machine';
+import { LogExplorerHistogramData } from '../../types';
+
+interface Context {
+  histogram: LogExplorerHistogramData;
+}
+
+export type HistogramMachineContext = SharedContext & Context;
+
+// the value union is not ideal, but the closest we can get without typegen
+export interface HistogramMachineStateValue {
+  value:
+    | 'uninitialized' // not used yet, but there's a setting that disables automatic initial search
+    | 'loading'
+    | 'loaded';
+  context: HistogramMachineContext;
+}
+
+export type LogExplorerExternalEvent = SharedExternalEvent;
+
+export type LogExplorerInternalEvent = LoadHistogramEvent;
+
+export type LogExplorerEvent = LogExplorerExternalEvent | LogExplorerInternalEvent;

@@ -6,6 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './entries_state_machine';
-export * from './histogram_state_machine';
-export * from './data_access_state_machine';
+export * from './selectors/histogram_selectors';
