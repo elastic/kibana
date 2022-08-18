@@ -134,7 +134,7 @@ export function MonitorDetailFlyout(props: {
               <h3>{DURATION_HEADER_TEXT}</h3>
             </EuiTitle>
             <ExploratoryViewEmbeddable
-              customHeight={'200px'}
+              customHeight="200px"
               reportType="kpi-over-time"
               axisTitlesVisibility={{ x: false, yRight: false, yLeft: false }}
               legendIsVisible={true}
@@ -233,7 +233,6 @@ export function MonitorDetailFlyout(props: {
                 <EuiButtonEmpty>{CLOSE_FLYOUT_TEXT}</EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                {/* TODO: Link to monitor */}
                 <EuiButton fill href="" iconType="sortRight" iconSide="right">
                   {GO_TO_MONITOR_LINK_TEXT}
                 </EuiButton>
