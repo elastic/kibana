@@ -1307,19 +1307,27 @@ describe('IndexPatternDimensionEditorPanel', () => {
       };
       wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
       findTestSubject(wrapper, 'indexPattern-advanced-accordion').simulate('click');
-      expect(wrapper.find('[data-test-subj="indexPattern-dimension-reducedTimeRange-row"]')).toHaveLength(0);
+      expect(
+        wrapper.find('[data-test-subj="indexPattern-dimension-reducedTimeRange-row"]')
+      ).toHaveLength(0);
     });
 
     it('should show current reduced time range if set', () => {
-      wrapper = mount(<IndexPatternDimensionEditorComponent {...getProps({ reducedTimeRange: '5m' })} />);
-      expect(wrapper.find(ReducedTimeRange).find(EuiComboBox).prop('selectedOptions')[0].value).toEqual('5m');
+      wrapper = mount(
+        <IndexPatternDimensionEditorComponent {...getProps({ reducedTimeRange: '5m' })} />
+      );
+      expect(
+        wrapper.find(ReducedTimeRange).find(EuiComboBox).prop('selectedOptions')[0].value
+      ).toEqual('5m');
     });
 
     it('should allow to set reduced time range initially', () => {
       const props = getProps({});
       wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
       findTestSubject(wrapper, 'indexPattern-advanced-accordion').simulate('click');
-      wrapper.find(ReducedTimeRange).find(EuiComboBox).prop('onChange')!([{ value: '1h', label: '' }]);
+      wrapper.find(ReducedTimeRange).find(EuiComboBox).prop('onChange')!([
+        { value: '1h', label: '' },
+      ]);
       expect((props.setState as jest.Mock).mock.calls[0][0](props.state)).toEqual({
         ...props.state,
         layers: {

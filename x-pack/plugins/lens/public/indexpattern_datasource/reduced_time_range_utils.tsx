@@ -42,7 +42,9 @@ export const reducedTimeRangeOptions = [
   },
 ];
 
-export const reducedTimeRangeOptionOrder = reducedTimeRangeOptions.reduce<{ [key: string]: number }>(
+export const reducedTimeRangeOptionOrder = reducedTimeRangeOptions.reduce<{
+  [key: string]: number;
+}>(
   (optionMap, { value }, index) => ({
     ...optionMap,
     [value]: index,
