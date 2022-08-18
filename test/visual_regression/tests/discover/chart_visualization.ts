@@ -27,7 +27,7 @@ export default function ({
 
   describe('discover', function describeIndexTests() {
     before(async function () {
-      updateBaselines = true; //TODO: Remove this.  It's only used to get all the screenshots from Buildkite
+      updateBaselines = true; // TODO: Remove this.  It's only used to get all the screenshots from Buildkite
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/discover/visual_regression'
@@ -43,6 +43,7 @@ export default function ({
     after(async function unloadMakelogs() {
       await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.uiSettings.replace({});
     });
 
     async function refreshDiscover() {
@@ -96,8 +97,8 @@ export default function ({
       it('browser back button should show previous interval Day', async function () {
         await browser.goBack();
         await retry.try(async function tryingForTime() {
-          const actualInterval = await PageObjects.discover.getChartInterval();
-          expect(actualInterval).to.be('Day');
+          const actualInterval = await PageObjects.discover.getChartTimespan();
+          expect(actualInterval).to.contain('day');
         });
         const percentDifference = await screenshot.compareAgainstBaseline(
           'discover_previous_day',
