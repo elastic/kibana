@@ -64,7 +64,8 @@ export type DataViewFieldBase = {
 export type DataViewBase = {
   fields: DataViewFieldBase[];
   id?: string;
-  title: string;
+  title?: string;
+  indexPattern?: string;
 };
 
 export interface BoolQuery {

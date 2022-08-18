@@ -36,6 +36,7 @@ const savedObject = {
   version: 'version',
   attributes: {
     indexPattern: 'kibana-*',
+    title: 'kibana-*',
     name: 'Kibana *',
     timeFieldName: '@timestamp',
     fields: '[]',
@@ -176,7 +177,7 @@ describe('IndexPatterns', () => {
     expect(await indexPatterns.getIds()).toEqual(['id']);
     expect(savedObjectsClient.find).toHaveBeenCalledWith({
       type: 'index-pattern',
-      fields: ['title', 'type', 'typeMeta', 'name'],
+      fields: ['indexPattern', 'title', 'type', 'typeMeta', 'name'],
       perPage: 10000,
     });
   });
@@ -285,9 +286,9 @@ describe('IndexPatterns', () => {
 
     expect(savedObjectsClient.find).lastCalledWith({
       type: 'index-pattern',
-      fields: ['title'],
+      fields: ['title', 'indexPattern'],
       search,
-      searchFields: ['title'],
+      searchFields: ['title', 'indexPattern'],
       perPage: size,
     });
   });

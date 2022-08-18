@@ -19,9 +19,10 @@ export async function getTitle(
     indexPatternId
   );
 
-  if (savedObject.error) {
-    throw new Error(`Unable to get index-pattern title: ${savedObject.error.message}`);
+  const { error, attributes } = savedObject;
+  if (error) {
+    throw new Error(`Unable to get index-pattern title: ${error.message}`);
   }
 
-  return savedObject.attributes.indexPattern ?? savedObject.attributes.title;
+  return attributes.indexPattern ?? attributes.title;
 }
