@@ -37,7 +37,7 @@ const EditIndexPatternCont: React.FC<RouteComponentProps<{ id: string }>> = ({ .
     return <EditIndexPattern indexPattern={indexPattern} />;
   } else if (error) {
     const errorTitle = i18n.translate('indexPatternManagement.editIndexPattern.couldNotLoad', {
-      defaultMessage: 'Could not load that data view',
+      defaultMessage: 'Cannot load data view',
     });
     notifications.toasts.addError(error ?? new Error(errorTitle), { title: errorTitle });
     props.history.push('/');
