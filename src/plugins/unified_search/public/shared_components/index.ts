@@ -21,16 +21,3 @@ export const FiltersBuilderLazy = React.lazy(() => import('./filters_builder'));
  * a predefined fallback and error boundary.
  */
 export const FiltersBuilder = withSuspense(FiltersBuilderLazy);
-
-/**
- * The Lazily-loaded `FilterEditor` component.  Consumers should use `React.Suspense` or
- * the withSuspense` HOC to load this component.
- */
-export const FilterEditorLazy = React.lazy(() => import('../filter_bar/filter_editor'));
-
-/**
- * A `FilterEditor` component that is wrapped by the `withSuspense` HOC. This component can
- * be used directly by consumers and will load the `FilterEditor` component lazily with
- * a predefined fallback and error boundary.
- */
-export const FilterEditor = withSuspense(FilterEditorLazy);
