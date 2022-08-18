@@ -147,7 +147,7 @@
           "OnPreResponseHandler",
           "]>; } & Omit<",
           "HttpServiceSetup",
-          "<ContextType>, \"basePath\" | \"createRouter\"> & { basePath: BasePathMocked; createRouter: jest.MockedFunction<() => ",
+          "<ContextType>, \"createRouter\" | \"basePath\"> & { basePath: BasePathMocked; createRouter: jest.MockedFunction<() => ",
           "RouterMock",
           ">; }"
         ],
@@ -255,7 +255,7 @@
           "RequestHandlerContextBase",
           ">) => void]>; } & Omit<",
           "InternalHttpServiceSetup",
-          ", \"basePath\" | \"auth\" | \"createRouter\" | \"authRequestHeaders\"> & { auth: AuthMocked; basePath: BasePathMocked; createRouter: jest.MockedFunction<(path: string) => ",
+          ", \"createRouter\" | \"basePath\" | \"auth\" | \"authRequestHeaders\"> & { auth: AuthMocked; basePath: BasePathMocked; createRouter: jest.MockedFunction<(path: string) => ",
           "RouterMock",
           ">; authRequestHeaders: jest.Mocked<",
           "IAuthHeadersStorage",

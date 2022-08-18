@@ -123,9 +123,10 @@ export const strings = {
 export const errors = {
   moreThanNBucketsAreNotSupportedError: (maxLength: number) =>
     i18n.translate('expressionPartitionVis.reusable.function.errors.moreThenNumberBuckets', {
-      defaultMessage: 'More than {maxLength} buckets are not supported',
+      defaultMessage: 'More than {maxLength} buckets are not supported.',
       values: { maxLength },
     }),
+
   splitRowAndSplitColumnAreSpecifiedError: () =>
     i18n.translate('expressionPartitionVis.reusable.function.errors.splitRowAndColumnSpecified', {
       defaultMessage:
