@@ -40,7 +40,6 @@ import {
 } from '../../../../../containers/detection_engine/rules/use_find_rules_query';
 import { BULK_RULE_ACTIONS } from '../../../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../../../common/lib/apm/use_start_transaction';
-import { useKibana } from '../../../../../../common/lib/kibana';
 import { useInvalidatePrePackagedRulesStatus } from '../../../../../containers/detection_engine/rules/use_pre_packaged_rules_status';
 
 import type { DryRunResult, BulkActionForConfirmation } from './types';
@@ -77,9 +76,6 @@ export const useBulkActions = ({
   const getIsMounted = useIsMounted();
   const filterQuery = convertRulesFilterToKQL(filterOptions);
   const { startTransaction } = useStartTransaction();
-  const { services } = useKibana();
-
-  const hasUserAccessToActions = services.application.capabilities.actions.show;
 
   // refetch tags if edit action is related to tags: add_tags/delete_tags/set_tags
   const resolveTagsRefetch = useCallback(
@@ -368,7 +364,7 @@ export const useBulkActions = ({
               key: i18n.BULK_ACTION_ADD_RULE_ACTIONS,
               name: i18n.BULK_ACTION_ADD_RULE_ACTIONS,
               'data-test-subj': 'addRuleActionsBulk',
-              disabled: !hasUserAccessToActions || isEditDisabled,
+              disabled: isEditDisabled,
               onClick: handleBulkEdit(BulkActionEditType.add_rule_actions),
               toolTipContent: missingActionPrivileges ? i18n.EDIT_RULE_SETTINGS_TOOLTIP : undefined,
               toolTipPosition: 'right',
@@ -495,7 +491,6 @@ export const useBulkActions = ({
       completeBulkEditForm,
       getIsMounted,
       resolveTagsRefetch,
-      hasUserAccessToActions,
     ]
   );
 
