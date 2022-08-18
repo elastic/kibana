@@ -10,6 +10,7 @@ const { writeFileSync, readFileSync, copyFileSync, mkdirSync } = require('fs');
 const { resolve, extname, dirname } = require('path');
 
 const { optimize } = require('svgo');
+const sharp = require('sharp');
 const { transformFileSync } = require('@babel/core');
 
 const presets = require('@kbn/babel-preset/node_preset');
@@ -29,7 +30,7 @@ const svgOptions = {
   removeComments: false,
 };
 
-module.exports = ({ source }) => {
+module.exports = async ({ source }) => {
   const absoluteSource = resolve(REPO_ROOT, source);
   const absoluteDest = resolve(BUILD_ROOT, source);
 
@@ -58,6 +59,34 @@ module.exports = ({ source }) => {
         writeFileSync(absoluteDest, output);
       }
       break;
+    case '.png':
+      await sharp(absoluteSource, {
+        concurrency: 1,
+      })
+        .png({
+          quality: 20,
+          compressionLevel: 9,
+        })
+        .toFile(absoluteDest);
+      break;
+    case '.jpg':
+    case '.jpeg':
+      await sharp(absoluteSource, {
+        concurrency: 1,
+      })
+        .jpeg({
+          mozjpeg: true,
+        })
+        .toFile(absoluteDest);
+      break;
+    case '.gif':
+      await sharp(absoluteSource, {
+        concurrency: 1,
+      })
+        .gif({
+          colors: 64,
+        })
+        .toFile(absoluteDest);
     default:
       copyFileSync(absoluteSource, absoluteDest);
   }
