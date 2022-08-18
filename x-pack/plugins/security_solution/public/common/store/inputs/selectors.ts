@@ -18,6 +18,8 @@ const selectGlobal = (state: State): InputsRange => state.inputs.global;
 
 const selectTimeline = (state: State): InputsRange => state.inputs.timeline;
 
+const selectSocTrends = (state: State): InputsRange => state.inputs.socTrends;
+
 const selectGlobalQuery = (state: State, id: string): GlobalQuery =>
   state.inputs.global.queries.find((q) => q.id === id) || {
     id: '',
@@ -44,6 +46,11 @@ export const inputsSelector = () => createSelector(selectInputs, (inputs) => inp
 export const timelineTimeRangeSelector = createSelector(
   selectTimeline,
   (timeline) => timeline.timerange
+);
+
+export const socTrendsTimeRangeSelector = createSelector(
+  selectSocTrends,
+  (socTrends) => socTrends.timerange
 );
 
 export const globalFullScreenSelector = createSelector(selectGlobal, (global) => global.fullScreen);

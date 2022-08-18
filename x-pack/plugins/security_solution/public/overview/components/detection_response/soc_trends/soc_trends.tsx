@@ -7,6 +7,7 @@
 
 import React, { useMemo } from 'react';
 import {
+  EuiBadge,
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
@@ -36,7 +37,7 @@ const StyledEuiFlexGroup = styled(EuiFlexGroup)`
 
 const SocTrendsComponent: React.FC = () => {
   const { toggleStatus, setToggleStatus } = useQueryToggle(SOC_TRENDS_ID);
-  const { casesMttr, isLoading, updatedAt } = useSocTrends({
+  const { casesMttr, percentage, isLoading, updatedAt } = useSocTrends({
     skip: !toggleStatus,
   });
   const casesMttrValue = useMemo(
@@ -86,7 +87,14 @@ const SocTrendsComponent: React.FC = () => {
                   description: isLoading ? (
                     <EuiLoadingSpinner data-test-subj={`mttr-stat-loading-spinner`} />
                   ) : (
-                    casesMttrValue
+                    <>
+                      {casesMttrValue}{' '}
+                      <EuiToolTip content={percentage.note}>
+                        <EuiBadge color={percentage.color}>
+                          {percentage.percent != null ? percentage.percent : '-'}
+                        </EuiBadge>
+                      </EuiToolTip>
+                    </>
                   ),
                 },
               ]}
