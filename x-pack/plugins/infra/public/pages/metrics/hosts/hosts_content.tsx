@@ -46,12 +46,12 @@ export const HostsContent: React.FunctionComponent<Props> = ({ sourceMetricAlias
           title: 'Lens visualization',
           references: [
             {
-              id: '305688db-9e02-4046-acc1-5d0d8dd73ef6',
+              id: metricsDataView.id,
               name: 'indexpattern-datasource-current-indexpattern',
               type: 'index-pattern',
             },
             {
-              id: '305688db-9e02-4046-acc1-5d0d8dd73ef6',
+              id: metricsDataView.id,
               name: 'indexpattern-datasource-layer-cbe5d8a0-381d-49bf-b8ac-f8f312ec7129',
               type: 'index-pattern',
             },
