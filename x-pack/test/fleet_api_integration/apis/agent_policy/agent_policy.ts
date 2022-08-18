@@ -730,6 +730,9 @@ export default function (providerContext: FtrProviderContext) {
       let policyId: string;
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      });
+      setupFleetAndAgents(providerContext);
+      before(async () => {
         const getPkRes = await supertest
           .get(`/api/fleet/epm/packages/system`)
           .set('kbn-xsrf', 'xxxx')
