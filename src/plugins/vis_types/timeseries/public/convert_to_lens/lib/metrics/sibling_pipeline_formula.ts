@@ -24,6 +24,9 @@ export const getSiblingPipelineSeriesFormula = (
     return null;
   }
   const aggregationMap = SUPPORTED_METRICS[aggregation];
+  if (!aggregationMap) {
+    return null;
+  }
   const subMetricField = subFunctionMetric.type !== 'count' ? subFunctionMetric.field : '';
   // support nested aggs with formula
   const additionalSubFunction = metrics.find((metric) => metric.id === subMetricField);

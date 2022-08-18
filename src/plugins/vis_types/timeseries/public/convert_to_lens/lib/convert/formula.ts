@@ -16,7 +16,7 @@ const convertToFormulaParams = (formula: string): FormulaParams | null => ({
   formula,
 });
 
-const createFormulaColumn = (
+export const createFormulaColumn = (
   mathScript: string,
   series: Series,
   metric: Metric,

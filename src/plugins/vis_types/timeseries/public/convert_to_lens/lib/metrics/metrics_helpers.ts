@@ -7,7 +7,7 @@
  */
 
 import { TimeScaleUnit } from '@kbn/visualizations-plugin/common';
-import type { Metric } from '../../../../common/types';
+import type { Metric, MetricType } from '../../../../common/types';
 import { SUPPORTED_METRICS } from './supported_metrics';
 import { getFilterRatioFormula } from './filter_ratio_formula';
 import { getParentPipelineSeriesFormula } from './parent_pipeline_formula';
@@ -67,12 +67,12 @@ export const getFormulaSeries = (script: string) => {
   ];
 };
 
-export const getPipelineAgg = (subFunctionMetric: Metric) => {
-  const pipelineAggMap = SUPPORTED_METRICS[subFunctionMetric.type];
+export const getPipelineAgg = (agg: MetricType) => {
+  const pipelineAggMap = SUPPORTED_METRICS[agg];
   if (!pipelineAggMap) {
     return null;
   }
-  return pipelineAggMap.name;
+  return pipelineAggMap;
 };
 
 export const getFormulaEquivalent = (
@@ -108,14 +108,14 @@ export const getFormulaEquivalent = (
       if (!subFunctionMetric) {
         return null;
       }
-      const pipelineAgg = getPipelineAgg(subFunctionMetric);
+      const pipelineAgg = getPipelineAgg(subFunctionMetric.type);
       if (!pipelineAgg) {
         return null;
       }
       return getParentPipelineSeriesFormula(
         metrics,
         subFunctionMetric,
-        pipelineAgg,
+        pipelineAgg.name,
         currentMetric.type,
         metaValue
       );

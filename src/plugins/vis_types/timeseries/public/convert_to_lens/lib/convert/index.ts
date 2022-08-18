@@ -10,3 +10,4 @@ export { convertMetricsToColumns } from './column';
 export { convertToPercentileColumns } from './percentile';
 export { convertToPercentileRankColumns } from './percentile_rank';
 export { convertMathToFormulaColumn } from './formula';
+export { convertParentPipelineAggToColumns } from './parent_pipeline';

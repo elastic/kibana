@@ -19,6 +19,10 @@ export const getParentPipelineSeriesFormula = (
 ) => {
   let formula = '';
   const aggregationMap = SUPPORTED_METRICS[aggregation];
+  if (!aggregationMap) {
+    return null;
+  }
+
   const subMetricField = subFunctionMetric.field;
   const [nestedFieldId, nestedMeta] = subMetricField?.split('[') ?? [];
   // support nested aggs
@@ -30,7 +34,6 @@ export const getParentPipelineSeriesFormula = (
       return null;
     }
     const nestedMetaValue = Number(nestedMeta?.replace(']', ''));
-    const aggMap = SUPPORTED_METRICS[aggregation];
     let additionalFunctionArgs;
     if (additionalPipelineAggMap.name === 'percentile' && nestedMetaValue) {
       additionalFunctionArgs = `, percentile=${nestedMetaValue}`;
@@ -38,7 +41,7 @@ export const getParentPipelineSeriesFormula = (
     if (additionalPipelineAggMap.name === 'percentile_rank' && nestedMetaValue) {
       additionalFunctionArgs = `, value=${nestedMetaValue}`;
     }
-    formula = `${aggMap.name}(${pipelineAgg}(${additionalPipelineAggMap.name}(${
+    formula = `${aggregationMap.name}(${pipelineAgg}(${additionalPipelineAggMap.name}(${
       additionalSubFunction.field ?? ''
     }${additionalFunctionArgs ?? ''})))`;
   } else {

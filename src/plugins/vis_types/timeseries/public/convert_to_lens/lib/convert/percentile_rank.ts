@@ -11,7 +11,7 @@ import { PercentileRanksColumn, PercentileRanksParams } from '@kbn/visualization
 import type { Metric, Series } from '../../../../common/types';
 import { createColumn } from './column';
 
-const convertToPercentileRankParams = (value: string): PercentileRanksParams | null =>
+export const convertToPercentileRankParams = (value: string): PercentileRanksParams | null =>
   value !== undefined && !isNaN(Number(value))
     ? {
         value: Number(value),

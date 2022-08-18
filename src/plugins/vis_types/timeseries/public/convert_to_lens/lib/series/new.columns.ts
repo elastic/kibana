@@ -16,7 +16,10 @@ import {
   convertToPercentileColumns,
   convertToPercentileRankColumns,
   convertMathToFormulaColumn,
+  convertParentPipelineAggToColumns,
 } from '../convert';
+
+type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 
 export const getColumns = (series: Series, dataView: DataView): Column[] | null => {
   const { metrics } = getSeriesAgg(series.metrics);
@@ -37,6 +40,22 @@ export const getColumns = (series: Series, dataView: DataView): Column[] | null 
     case 'math':
       const formulaColumn = convertMathToFormulaColumn(series, metrics, dataView);
       return formulaColumn ? [formulaColumn] : null;
+
+    case 'moving_average':
+      const result = convertParentPipelineAggToColumns(series, metrics, dataView);
+      if (result && Array.isArray(result)) {
+        const nonNullColumns = result.filter(
+          (c): c is Exclude<UnwrapArray<typeof result>, null> => c !== null
+        );
+
+        if (nonNullColumns.length !== result.length) {
+          return null;
+        }
+
+        return nonNullColumns;
+      }
+
+      return result ? [result] : null;
   }
 
   return [];

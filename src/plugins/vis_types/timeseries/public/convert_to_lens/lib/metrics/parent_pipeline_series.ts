@@ -25,14 +25,14 @@ export const computeParentSeries = (
     if (!script) {
       return null;
     }
-    const formula = `${aggregationMap.name}(${script})`;
+    const formula = `${aggregationMap!.name}(${script})`;
     return getFormulaSeries(formula);
   }
   const timeScale = getTimeScale(currentMetric);
   return [
     {
-      agg: aggregationMap.name,
-      isFullReference: aggregationMap.isFullReference,
+      agg: aggregationMap!.name,
+      isFullReference: aggregationMap!.isFullReference,
       pipelineAggType: pipelineAgg,
       fieldName:
         subFunctionMetric?.field && pipelineAgg !== 'count' ? subFunctionMetric?.field : 'document',
@@ -55,10 +55,11 @@ export const getParentPipelineSeries = (
   //  percentile value is derived from the field Id. It has the format xxx-xxx-xxx-xxx[percentile]
   const [fieldId, meta] = currentMetric?.field?.split('[') ?? [];
   const subFunctionMetric = metrics.find((metric) => metric.id === fieldId);
+
   if (!subFunctionMetric || subFunctionMetric.type === 'static') {
     return null;
   }
-  const pipelineAgg = getPipelineAgg(subFunctionMetric);
+  const pipelineAgg = getPipelineAgg(subFunctionMetric.type);
   if (!pipelineAgg) {
     return null;
   }
@@ -67,11 +68,12 @@ export const getParentPipelineSeries = (
   const [nestedFieldId, _] = subMetricField?.split('[') ?? [];
   // support nested aggs with formula
   const additionalSubFunction = metrics.find((metric) => metric.id === nestedFieldId);
+
   if (additionalSubFunction) {
     const formula = getParentPipelineSeriesFormula(
       metrics,
       subFunctionMetric,
-      pipelineAgg,
+      pipelineAgg.name,
       aggregation,
       metaValue
     );
@@ -84,7 +86,7 @@ export const getParentPipelineSeries = (
       aggregation,
       currentMetric,
       subFunctionMetric,
-      pipelineAgg,
+      pipelineAgg.name,
       metaValue
     );
   }

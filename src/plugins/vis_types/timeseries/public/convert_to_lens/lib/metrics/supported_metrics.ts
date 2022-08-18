@@ -6,16 +6,59 @@
  * Side Public License, v 1.
  */
 
-interface AggOptions {
-  name: string;
+import { METRIC_TYPES } from '@kbn/data-plugin/public';
+import { Operation, Operations } from '@kbn/visualizations-plugin/common';
+import { MetricType } from '../../../../common/types';
+import { TSVB_METRIC_TYPES } from '../../../../common/enums';
+
+export type AggOptions<T> = {
   isFullReference: boolean;
-}
+} & (T extends Exclude<Operation, 'formula'>
+  ? {
+      isFormula?: false;
+    }
+  : {
+      isFormula: true;
+      formula: string;
+    });
 
 // list of supported TSVB aggregation types in Lens
 // some of them are supported on the quick functions tab and some of them
 // are supported with formulas
 
-export const SUPPORTED_METRICS: { [key: string]: AggOptions } = {
+export type SupportedMetric<T extends Operation | string> = { name: T } & AggOptions<T>;
+interface LocalSupportedMetrics {
+  [METRIC_TYPES.AVG]: SupportedMetric<typeof Operations.AVERAGE>;
+  [METRIC_TYPES.CARDINALITY]: SupportedMetric<typeof Operations.UNIQUE_COUNT>;
+  [METRIC_TYPES.COUNT]: SupportedMetric<typeof Operations.COUNT>;
+  [METRIC_TYPES.DERIVATIVE]: SupportedMetric<typeof Operations.DIFFERENCES>;
+  [METRIC_TYPES.CUMULATIVE_SUM]: SupportedMetric<typeof Operations.CUMULATIVE_SUM>;
+  [METRIC_TYPES.AVG_BUCKET]: SupportedMetric<typeof Operations.FORMULA>;
+  [METRIC_TYPES.MAX_BUCKET]: SupportedMetric<typeof Operations.FORMULA>;
+  [METRIC_TYPES.MIN_BUCKET]: SupportedMetric<typeof Operations.FORMULA>;
+  [METRIC_TYPES.SUM_BUCKET]: SupportedMetric<typeof Operations.FORMULA>;
+  [METRIC_TYPES.MAX]: SupportedMetric<typeof Operations.MAX>;
+  [METRIC_TYPES.MIN]: SupportedMetric<typeof Operations.MIN>;
+  [METRIC_TYPES.SUM]: SupportedMetric<typeof Operations.SUM>;
+  [TSVB_METRIC_TYPES.PERCENTILE]: SupportedMetric<typeof Operations.PERCENTILE>;
+  [TSVB_METRIC_TYPES.PERCENTILE_RANK]: SupportedMetric<typeof Operations.PERCENTILE_RANK>;
+  [TSVB_METRIC_TYPES.PERCENTILE_RANK]: SupportedMetric<typeof Operations.PERCENTILE_RANK>;
+  [TSVB_METRIC_TYPES.FILTER_RATIO]: SupportedMetric<typeof Operations.FORMULA>;
+  [TSVB_METRIC_TYPES.TOP_HIT]: SupportedMetric<typeof Operations.LAST_VALUE>;
+  [TSVB_METRIC_TYPES.MATH]: SupportedMetric<typeof Operations.FORMULA>;
+  [TSVB_METRIC_TYPES.POSITIVE_ONLY]: SupportedMetric<typeof Operations.FORMULA>;
+  [TSVB_METRIC_TYPES.STATIC]: SupportedMetric<typeof Operations.STATIC_VALUE>;
+
+  [TSVB_METRIC_TYPES.POSITIVE_RATE]: SupportedMetric<typeof Operations.COUNTER_RATE>;
+  [TSVB_METRIC_TYPES.MOVING_AVERAGE]: SupportedMetric<typeof Operations.MOVING_AVERAGE>;
+}
+
+type UnsupportedSupportedMetrics = Exclude<MetricType, keyof LocalSupportedMetrics>;
+export type SupportedMetrics = LocalSupportedMetrics & {
+  [Key in UnsupportedSupportedMetrics]?: null;
+};
+
+export const SUPPORTED_METRICS: SupportedMetrics = {
   avg: {
     name: 'average',
     isFullReference: false,
@@ -45,20 +88,28 @@ export const SUPPORTED_METRICS: { [key: string]: AggOptions } = {
     isFullReference: true,
   },
   avg_bucket: {
-    name: 'overall_average',
+    name: 'formula',
     isFullReference: true,
+    isFormula: true,
+    formula: 'overall_average',
   },
   max_bucket: {
-    name: 'overall_max',
+    name: 'formula',
     isFullReference: true,
+    isFormula: true,
+    formula: 'overall_max',
   },
   min_bucket: {
-    name: 'overall_min',
+    name: 'formula',
     isFullReference: true,
+    isFormula: true,
+    formula: 'overall_min',
   },
   sum_bucket: {
-    name: 'overall_sum',
+    name: 'formula',
     isFullReference: true,
+    isFormula: true,
+    formula: 'overall_sum',
   },
   max: {
     name: 'max',
@@ -81,8 +132,10 @@ export const SUPPORTED_METRICS: { [key: string]: AggOptions } = {
     isFullReference: false,
   },
   filter_ratio: {
-    name: 'filter_ratio',
+    name: 'formula',
     isFullReference: false,
+    isFormula: true,
+    formula: 'filter_ratio',
   },
   top_hit: {
     name: 'last_value',
@@ -91,10 +144,14 @@ export const SUPPORTED_METRICS: { [key: string]: AggOptions } = {
   math: {
     name: 'formula',
     isFullReference: true,
+    isFormula: true,
+    formula: 'math',
   },
   positive_only: {
-    name: 'pick_max',
+    name: 'formula',
     isFullReference: true,
+    isFormula: true,
+    formula: 'pick_max',
   },
   static: {
     name: 'static_value',

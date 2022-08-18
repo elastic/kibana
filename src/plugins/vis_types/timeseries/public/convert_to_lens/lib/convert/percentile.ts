@@ -11,7 +11,7 @@ import { PercentileColumn, PercentileParams } from '@kbn/visualizations-plugin/c
 import type { Metric, Percentile, Series } from '../../../../common/types';
 import { createColumn } from './column';
 
-const convertToPercentileParams = ({ value }: Percentile): PercentileParams | null =>
+export const convertToPercentileParams = (value?: string | number): PercentileParams | null =>
   value !== undefined && !isNaN(Number(value))
     ? {
         percentile: Number(value),
@@ -24,7 +24,7 @@ const convertToPercentileColumn = (
   metric: Metric,
   dataView: DataView
 ): PercentileColumn | null => {
-  const params = convertToPercentileParams(percentile);
+  const params = convertToPercentileParams(percentile.value);
   if (!params) {
     return null;
   }

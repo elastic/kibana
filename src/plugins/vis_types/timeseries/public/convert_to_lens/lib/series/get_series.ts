@@ -124,18 +124,18 @@ export const getSeries = (initialMetrics: Metric[], totalSeriesNum: number): Vis
       if (!subFunctionMetric || subFunctionMetric.type === 'static') {
         return null;
       }
-      const pipelineAgg = getPipelineAgg(subFunctionMetric);
+      const pipelineAgg = getPipelineAgg(subFunctionMetric.type);
       if (!pipelineAgg) {
         return null;
       }
       // lens supports cumulative sum for count and sum as quick function
       // and everything else as formula
-      if (pipelineAgg !== 'count' && pipelineAgg !== 'sum') {
+      if (pipelineAgg.name !== 'count' && pipelineAgg.name !== 'sum') {
         const metaValue = Number(meta?.replace(']', ''));
         const formula = getParentPipelineSeriesFormula(
           metrics,
           subFunctionMetric,
-          pipelineAgg,
+          pipelineAgg.name,
           aggregation,
           metaValue
         );
@@ -146,7 +146,7 @@ export const getSeries = (initialMetrics: Metric[], totalSeriesNum: number): Vis
           aggregation,
           metrics[metricIdx],
           subFunctionMetric,
-          pipelineAgg
+          pipelineAgg.name
         );
         if (!series) return null;
         metricsArray = series;
@@ -235,5 +235,6 @@ export const getSeries = (initialMetrics: Metric[], totalSeriesNum: number): Vis
       ];
     }
   }
+
   return { metrics: metricsArray, seriesAgg };
 };
