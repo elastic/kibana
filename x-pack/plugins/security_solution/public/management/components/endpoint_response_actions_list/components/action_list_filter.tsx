@@ -7,16 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { memo, useCallback } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSelectable,
-  EuiPopoverTitle,
-  EuiButtonEmpty,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSelectable, EuiPopoverTitle } from '@elastic/eui';
 import { ActionListFilterPopover } from './action_list_filter_popover';
 import { type FilterItems, type FilterName, useActionListFilter } from './hooks';
-import { UX_MESSAGES } from '../translations';
+import { ClearAllButton } from './clear_all_button';
 
 const getFilterName = (name: string) =>
   i18n.translate('xpack.securitySolution.responseActionsList.list.filterName', {
@@ -88,15 +82,11 @@ export const ActionListFilter = memo(
               {list}
               <EuiFlexGroup>
                 <EuiFlexItem>
-                  <EuiButtonEmpty
+                  <ClearAllButton
+                    data-test-subj={`${dataTestSubj}-clearAllButton`}
                     isDisabled={!hasActiveFilters}
-                    style={{ borderTop: '1px solid #D3DAE6' }}
-                    iconType="crossInACircleFilled"
-                    color="danger"
                     onClick={onClearAll}
-                  >
-                    {UX_MESSAGES.filterClearAll}
-                  </EuiButtonEmpty>
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </div>
