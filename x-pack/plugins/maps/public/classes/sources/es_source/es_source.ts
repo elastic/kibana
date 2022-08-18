@@ -262,12 +262,27 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       searchSource.setField('query', searchFilters.query);
     }
 
+    const parents = [];
     if (searchFilters.sourceQuery && !isFeatureEditorOpenForLayer) {
       const layerSearchSource = searchService.searchSource.createEmpty();
-
       layerSearchSource.setField('index', indexPattern);
       layerSearchSource.setField('query', searchFilters.sourceQuery);
-      searchSource.setParent(layerSearchSource);
+      parents.push(layerSearchSource);
+    }
+
+    if (searchFilters.embeddableSearchContext && !isFeatureEditorOpenForLayer) {
+      const embeddableSearchSource = searchService.searchSource.createEmpty();
+      embeddableSearchSource.setField('index', indexPattern);
+      embeddableSearchSource.setField('query', searchFilters.embeddableSearchContext.query);
+      embeddableSearchSource.setField('filter', searchFilters.embeddableSearchContext.filters);
+      parents.push(embeddableSearchSource);
+    }
+
+    if (parents.length === 1) {
+      searchSource.setParent(parents[0]);
+    } else if (parents.length === 2) {
+      parents[1].setParent(parents[0]);
+      searchSource.setParent(parents[1]);
     }
 
     return searchSource;
@@ -389,8 +404,8 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     if (!geoField) {
       throw new Error(
         i18n.translate('xpack.maps.source.esSource.noGeoFieldErrorMessage', {
-          defaultMessage: `Data view {indexPatternTitle} no longer contains the geo field {geoField}`,
-          values: { indexPatternTitle: indexPattern.title, geoField: this.getGeoFieldName() },
+          defaultMessage: `Data view "{indexPatternLabel}"" no longer contains the geo field "{geoField}"`,
+          values: { indexPatternLabel: indexPattern.getName(), geoField: this.getGeoFieldName() },
         })
       );
     }
@@ -400,7 +415,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
   async getDisplayName(): Promise<string> {
     try {
       const indexPattern = await this.getIndexPattern();
-      return indexPattern.title;
+      return indexPattern.getName();
     } catch (error) {
       // Unable to load index pattern, just return id as display name
       return this.getIndexPatternId();
