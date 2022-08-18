@@ -1471,10 +1471,6 @@
   dependencies:
     "@elastic/apm-rum-core" "^5.17.0"
 
-"@elastic/apm-synthtrace@link:bazel-bin/packages/elastic-apm-synthtrace":
-  version "0.0.0"
-  uid ""
-
 "@elastic/app-search-javascript@^8.1.2":
   version "8.1.2"
   resolved "https://registry.yarnpkg.com/@elastic/app-search-javascript/-/app-search-javascript-8.1.2.tgz#8b60d74deab05b6e8603078c013d75cbd41c2f80"
@@ -1674,10 +1670,6 @@
     "@elastic/node-crypto" "1.1.1"
     "@types/node-jose" "1.1.10"
     node-jose "2.1.0"
-
-"@elastic/safer-lodash-set@link:bazel-bin/packages/elastic-safer-lodash-set":
-  version "0.0.0"
-  uid ""
 
 "@elastic/search-ui-app-search-connector@^1.14.0":
   version "1.14.0"
@@ -3006,6 +2998,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/apm-synthtrace@link:bazel-bin/packages/kbn-apm-synthtrace":
+  version "0.0.0"
+  uid ""
+
 "@kbn/apm-utils@link:bazel-bin/packages/kbn-apm-utils":
   version "0.0.0"
   uid ""
@@ -3707,6 +3703,10 @@
   uid ""
 
 "@kbn/rule-data-utils@link:bazel-bin/packages/kbn-rule-data-utils":
+  version "0.0.0"
+  uid ""
+
+"@kbn/safer-lodash-set@link:bazel-bin/packages/kbn-safer-lodash-set":
   version "0.0.0"
   uid ""
 
@@ -6484,10 +6484,6 @@
   resolved "https://registry.yarnpkg.com/@types/ejs/-/ejs-3.0.6.tgz#aca442289df623bfa8e47c23961f0357847b83fe"
   integrity sha512-fj1hi+ZSW0xPLrJJD+YNwIh9GZbyaIepG26E/gXvp8nCa2pYokxUYO1sK9qjGxp2g8ryZYuon7wmjpwE2cyASQ==
 
-"@types/elastic__apm-synthtrace@link:bazel-bin/packages/elastic-apm-synthtrace/npm_module_types":
-  version "0.0.0"
-  uid ""
-
 "@types/enzyme@^3.10.8":
   version "3.10.8"
   resolved "https://registry.yarnpkg.com/@types/enzyme/-/enzyme-3.10.8.tgz#ad7ac9d3af3de6fd0673773123fafbc63db50d42"
@@ -6927,6 +6923,10 @@
   uid ""
 
 "@types/kbn__apm-config-loader@link:bazel-bin/packages/kbn-apm-config-loader/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__apm-synthtrace@link:bazel-bin/packages/kbn-apm-synthtrace/npm_module_types":
   version "0.0.0"
   uid ""
 

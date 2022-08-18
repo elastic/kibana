@@ -6,7 +6,7 @@
  */
 
 import { Geometry, Position } from 'geojson';
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import {
   CHECK_IS_DRAWING_INDEX,
   GET_MATCHING_INDEXES_PATH,
