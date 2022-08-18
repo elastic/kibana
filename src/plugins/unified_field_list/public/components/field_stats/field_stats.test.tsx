@@ -108,7 +108,7 @@ describe('UnifiedFieldList <FieldStats />', () => {
       toDate: 'now',
       query: { query: '', language: 'lucene' },
       filters: [],
-      testSubject: 'testing',
+      'data-test-subj': 'testing',
     };
 
     (mockedServices.dataViews.get as jest.Mock).mockImplementation(() => {

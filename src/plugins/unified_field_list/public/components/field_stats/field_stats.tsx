@@ -73,7 +73,7 @@ export interface FieldStatsProps {
   toDate: string;
   dataViewOrDataViewId: DataView | string;
   field: DataViewField;
-  testSubject: string;
+  'data-test-subj'?: string;
   overrideMissingContent?: (params?: { noDataFound?: boolean }) => JSX.Element | null;
   overrideFooter?: (params: {
     element: JSX.Element;
@@ -90,7 +90,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   toDate,
   dataViewOrDataViewId,
   field,
-  testSubject,
+  'data-test-subj': dataTestSubject = 'fieldStats',
   overrideMissingContent,
   overrideFooter,
 }) => {
@@ -326,7 +326,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
 
   function combineWithTitleAndFooter(el: React.ReactElement) {
     const countsElement = totalDocuments ? (
-      <EuiText color="subdued" size="xs" data-test-subj={`${testSubject}-statsFooter`}>
+      <EuiText color="subdued" size="xs" data-test-subj={`${dataTestSubject}-statsFooter`}>
         {sampledDocuments && (
           <>
             {i18n.translate('unifiedFieldList.fieldStats.percentageOfLabel', {
@@ -377,7 +377,10 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
 
     if (field.type === 'date') {
       return combineWithTitleAndFooter(
-        <Chart data-test-subj={`${testSubject}-histogram`} size={{ height: 200, width: 300 - 32 }}>
+        <Chart
+          data-test-subj={`${dataTestSubject}-histogram`}
+          size={{ height: 200, width: 300 - 32 }}
+        >
           <Settings
             tooltip={{ type: TooltipType.None }}
             theme={chartTheme}
@@ -421,7 +424,10 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
 
     if (showingHistogram || !topValues || !topValues.buckets.length) {
       return combineWithTitleAndFooter(
-        <Chart data-test-subj={`${testSubject}-histogram`} size={{ height: 200, width: '100%' }}>
+        <Chart
+          data-test-subj={`${dataTestSubject}-histogram`}
+          size={{ height: 200, width: '100%' }}
+        >
           <Settings
             rotation={90}
             tooltip={{ type: TooltipType.None }}
@@ -454,7 +460,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
       (topValue) => !Number.isInteger(topValue.count / sampledValues!)
     );
     return combineWithTitleAndFooter(
-      <div data-test-subj={`${testSubject}-topValues`}>
+      <div data-test-subj={`${dataTestSubject}-topValues`}>
         {topValues.buckets.map((topValue) => {
           const formatted = formatter.convert(topValue.key);
           return (
@@ -468,7 +474,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
                 <EuiFlexItem
                   grow={true}
                   className="eui-textTruncate"
-                  data-test-subj={`${testSubject}-topValues-value`}
+                  data-test-subj={`${dataTestSubject}-topValues-value`}
                 >
                   {formatted === '' ? (
                     <EuiText size="xs" color="subdued">
@@ -486,7 +492,10 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
                     </EuiToolTip>
                   )}
                 </EuiFlexItem>
-                <EuiFlexItem grow={false} data-test-subj={`${testSubject}-topValues-valueCount`}>
+                <EuiFlexItem
+                  grow={false}
+                  data-test-subj={`${dataTestSubject}-topValues-valueCount`}
+                >
                   <EuiText size="xs" textAlign="left" color="accent">
                     {(Math.round((topValue.count / sampledValues!) * 1000) / 10).toFixed(
                       digitsRequired ? 1 : 0
