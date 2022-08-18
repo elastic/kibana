@@ -7,17 +7,20 @@
 
 import { EuiErrorBoundary } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useContext } from 'react';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import React from 'react';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
+import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 
 import { DocumentTitle } from '../../../components/document_title';
 
 import { SourceErrorPage } from '../../../components/source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
-import { Source } from '../../../containers/metrics_source';
+import { useSourceContext } from '../../../containers/metrics_source';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { MetricsPageTemplate } from '../page_template';
 import { hostsTitle } from '../../../translations';
+import { HostsContent } from './hosts_content';
 
 export const HostsPage = () => {
   const {
@@ -27,7 +30,7 @@ export const HostsPage = () => {
     loadSource,
     source,
     metricIndicesExist,
-  } = useContext(Source.Context);
+  } = useSourceContext();
   useTrackPageview({ app: 'infra_metrics', path: 'hosts' });
   useTrackPageview({ app: 'infra_metrics', path: 'hosts', delay: 15000 });
 
@@ -36,7 +39,6 @@ export const HostsPage = () => {
       text: hostsTitle,
     },
   ]);
-
   return (
     <EuiErrorBoundary>
       <DocumentTitle
@@ -51,19 +53,21 @@ export const HostsPage = () => {
       />
       {isLoading && !source ? (
         <SourceLoadingPage />
-      ) : metricIndicesExist ? (
+      ) : metricIndicesExist && source ? (
         <>
-          <MetricsPageTemplate
-            hasData={metricIndicesExist}
-            pageHeader={{
-              pageTitle: hostsTitle,
-            }}
-            pageBodyProps={{
-              paddingSize: 'none',
-            }}
-          >
-            hosts page
-          </MetricsPageTemplate>
+          <HostsPageWrapper className={APP_WRAPPER_CLASS}>
+            <MetricsPageTemplate
+              hasData={metricIndicesExist}
+              pageHeader={{
+                pageTitle: hostsTitle,
+              }}
+              pageBodyProps={{
+                paddingSize: 'none',
+              }}
+            >
+              <HostsContent sourceMetricAlias={source.configuration.metricAlias} />
+            </MetricsPageTemplate>
+          </HostsPageWrapper>
         </>
       ) : hasFailedLoadingSource ? (
         <SourceErrorPage errorMessage={loadSourceFailureMessage || ''} retry={loadSource} />
@@ -73,3 +77,16 @@ export const HostsPage = () => {
     </EuiErrorBoundary>
   );
 };
+
+// This is added to facilitate a full height layout whereby the
+// inner container will set it's own height and be scrollable.
+// The "fullHeight" prop won't help us as it only applies to certain breakpoints.
+export const HostsPageWrapper = euiStyled.div`
+  .euiPage .euiPageContentBody {
+    display: flex;
+    flex-direction: column;
+    flex: 1 0 auto;
+    width: 100%;
+    height: 100%;
+  }
+`;
