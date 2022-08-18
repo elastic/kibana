@@ -34,8 +34,7 @@ export const isValidMetrics = (metrics: Metric[], panelType: string, timeRangeMo
   return metrics.every((metric) => {
     const isMetricAggValid =
       metric.type !== 'filter_ratio' ||
-      (metric.metric_agg &&
-        isMetricValid(metric.metric_agg, panelType, metric.field, timeRangeMode));
+      isMetricValid(metric.metric_agg || 'count', panelType, metric.field, timeRangeMode);
     return (
       metric.type === 'series_agg' ||
       (isMetricValid(metric.type, panelType, metric.field, timeRangeMode) && isMetricAggValid)
