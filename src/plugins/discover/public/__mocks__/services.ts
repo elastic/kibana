@@ -111,9 +111,8 @@ export const discoverServiceMock = {
   toastNotifications: {
     addInfo: jest.fn(),
     addWarning: jest.fn(),
+    addDanger: jest.fn(),
   },
   expressions: expressionsPlugin,
-  dataViews: {
-    getIdsWithTitle: () => [],
-  },
+  dataViews: dataPlugin.dataViews,
 } as unknown as DiscoverServices;

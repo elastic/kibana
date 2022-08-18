@@ -6,14 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback } from 'react';
-import ReactDOM from 'react-dom';
-import { EuiConfirmModal } from '@elastic/eui';
+import { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { useDiscoverServices } from './use_discover_services';
-
-let isOpenConfirmPanel = false;
+import { showConfirmPanel } from './show_confirm_panel';
 
 export const usePersistedDataView = (dataView: DataView) => {
   const services = useDiscoverServices();
@@ -60,50 +57,3 @@ export const usePersistedDataView = (dataView: DataView) => {
 
   return dataViewPersisted;
 };
-
-function showConfirmPanel({
-  onConfirm,
-  onCancel,
-}: {
-  onConfirm: () => void;
-  onCancel: () => void;
-}) {
-  if (isOpenConfirmPanel) {
-    return;
-  }
-
-  isOpenConfirmPanel = true;
-  const container = document.createElement('div');
-  const onClose = () => {
-    ReactDOM.unmountComponentAtNode(container);
-    document.body.removeChild(container);
-    isOpenConfirmPanel = false;
-  };
-
-  document.body.appendChild(container);
-  const element = (
-    <EuiConfirmModal
-      title={i18n.translate('discover.confirmDataViewPersist.title', {
-        defaultMessage: 'Persist data view',
-      })}
-      onCancel={() => {
-        onClose();
-        onCancel();
-      }}
-      onConfirm={() => {
-        onClose();
-        onConfirm();
-      }}
-      cancelButtonText="Cancel"
-      confirmButtonText="Confirm"
-      defaultFocusedButton="confirm"
-    >
-      <p>
-        {i18n.translate('discover.confirmDataViewPersist.message', {
-          defaultMessage: 'Persist data view, then proceed.',
-        })}
-      </p>
-    </EuiConfirmModal>
-  );
-  ReactDOM.render(element, container);
-}

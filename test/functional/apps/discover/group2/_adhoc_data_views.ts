@@ -74,6 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await filterBar.removeFilter('nestedField.child');
 
       await queryBar.setQuery('test');
+      await queryBar.submitQuery();
       await retry.try(async () => expect(await PageObjects.discover.getHitCount()).to.be('22'));
 
       await queryBar.clearQuery();

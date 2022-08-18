@@ -86,6 +86,14 @@ describe('discover sidebar', function () {
 
   beforeAll(() => {
     props = getCompProps();
+    mockDiscoverServices.data.dataViews.getIdsWithTitle = jest
+      .fn()
+      .mockReturnValue(props.dataViewList);
+    mockDiscoverServices.data.dataViews.get = jest.fn().mockImplementation((id) => {
+      const dataView = props.dataViewList.find((d) => d.id === id);
+      return { ...dataView, isPersisted: () => true };
+    });
+
     comp = mountWithIntl(
       <KibanaContextProvider services={mockDiscoverServices}>
         <DiscoverSidebar {...props} />
