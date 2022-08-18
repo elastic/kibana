@@ -20,6 +20,8 @@ import {
   EuiButtonIcon,
   EuiScreenReaderOnly,
   RIGHT_ALIGNMENT,
+  EuiToolTip,
+  EuiIcon,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -166,26 +168,67 @@ export function StorageExplorer() {
       ),
       sortable: true,
     },
+
     {
-      field: 'size',
-      name: i18n.translate(
-        'xpack.apm.settings.storageExplorer.table.sizeColumnName',
-        {
-          defaultMessage: 'Size',
-        }
+      field: 'sampling',
+      name: (
+        <EuiToolTip
+          content={i18n.translate(
+            'xpack.apm.settings.storageExplorer.table.samplingColumnDescription',
+            {
+              defaultMessage:
+                'The ratio of sampled transactions to the total number of transactions.',
+            }
+          )}
+        >
+          <>
+            {i18n.translate(
+              'xpack.apm.settings.storageExplorer.table.samplingColumnName',
+              {
+                defaultMessage: 'Sampling',
+              }
+            )}{' '}
+            <EuiIcon
+              size="s"
+              color="subdued"
+              type="questionInCircle"
+              className="eui-alignTop"
+            />
+          </>
+        </EuiToolTip>
       ),
-      render: (_, { size }) => asDynamicBytes(size) || NOT_AVAILABLE_LABEL,
+      render: (value: string) => asPercent(parseFloat(value), 1),
       sortable: true,
     },
     {
-      field: 'sampling',
-      name: i18n.translate(
-        'xpack.apm.settings.storageExplorer.table.samplingColumnName',
-        {
-          defaultMessage: 'Sampling',
-        }
+      field: 'size',
+      name: (
+        <EuiToolTip
+          content={i18n.translate(
+            'xpack.apm.settings.storageExplorer.table.sizeColumnDescription',
+            {
+              defaultMessage:
+                'Estimated size for both primary and replica shards calculated by prorating the total size of the indices by the number of documents returned.',
+            }
+          )}
+        >
+          <>
+            {i18n.translate(
+              'xpack.apm.settings.storageExplorer.table.sizeColumnName',
+              {
+                defaultMessage: 'Size',
+              }
+            )}{' '}
+            <EuiIcon
+              size="s"
+              color="subdued"
+              type="questionInCircle"
+              className="eui-alignTop"
+            />
+          </>
+        </EuiToolTip>
       ),
-      render: (value: string) => asPercent(parseFloat(value), 1),
+      render: (_, { size }) => asDynamicBytes(size) || NOT_AVAILABLE_LABEL,
       sortable: true,
     },
     {
