@@ -99,7 +99,7 @@ export function createStore<E extends IEmbeddable = IEmbeddable, S extends State
       distinctUntilChanged(),
       map((value) => diff(embeddable.getInput(), value)),
       filter((patch) => !isEmpty(patch)),
-      debounceTime(0),
+      debounceTime(0)
     )
     .subscribe((patch) => embeddable.updateInput(patch));
 
@@ -110,21 +110,21 @@ export function createStore<E extends IEmbeddable = IEmbeddable, S extends State
       distinctUntilChanged(),
       map((value) => diff(embeddable.getOutput(), value)),
       filter((patch) => !isEmpty(patch)),
-      debounceTime(0),
+      debounceTime(0)
     )
     .subscribe((patch) => embeddable.updateOutput(patch));
 
   input$
     .pipe(
       map((value) => diff(store.getState().input, value)),
-      filter((patch) => !isEmpty(patch)),
+      filter((patch) => !isEmpty(patch))
     )
     .subscribe((patch) => store.dispatch(input.actions.update(patch)));
 
   output$
     .pipe(
       map((value) => diff(store.getState().output, value)),
-      filter((patch) => !isEmpty(patch)),
+      filter((patch) => !isEmpty(patch))
     )
     .subscribe((patch) => store.dispatch(output.actions.update(patch)));
 
