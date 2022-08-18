@@ -44,16 +44,17 @@ export const sendGetPackagePolicy = (
  * @param packagePolicyIds
  * @param options
  */
-export const sendGetPackagePolicies = (
+export const sendBulkGetPackagePolicies = (
   http: HttpStart,
   packagePolicyIds: string[],
   options?: HttpFetchOptions
 ) => {
-  return http.get<GetPackagePoliciesResponse>(`${INGEST_API_PACKAGE_POLICIES}`, {
+  return http.post<GetPackagePoliciesResponse>(`${INGEST_API_PACKAGE_POLICIES}/_bulk_get`, {
     ...options,
-    query: {
+    body: JSON.stringify({
       ids: packagePolicyIds,
-    },
+      ignoreMissing: true,
+    }),
   });
 };
 

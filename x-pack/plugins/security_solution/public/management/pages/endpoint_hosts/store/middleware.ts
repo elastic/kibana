@@ -40,7 +40,7 @@ import {
   createLoadingResourceState,
 } from '../../../state';
 import {
-  sendGetPackagePolicies,
+  sendBulkGetPackagePolicies,
   sendGetEndpointSecurityPackage,
   sendGetFleetAgentsWithEndpoint,
 } from '../../../services/policies/ingest';
@@ -172,7 +172,7 @@ const getAgentAndPoliciesForEndpointsList = async (
   // Package Ids that it uses, thus if a reference exists there, then the package policy (policy)
   // exists.
   const policiesFound = (
-    await sendGetPackagePolicies(http, policyIdsToCheck)
+    await sendBulkGetPackagePolicies(http, policyIdsToCheck)
   ).items.reduce<PolicyIds>(
     (list, packagePolicy) => {
       list.packagePolicy[packagePolicy.id as string] = true;
