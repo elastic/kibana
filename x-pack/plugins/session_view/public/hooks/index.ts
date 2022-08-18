@@ -7,4 +7,3 @@
 
 export { useEuiTheme } from './use_eui_theme';
 export { useDateFormat } from './use_date_format';
-export { useElementSize } from './use_element_size';

@@ -154,13 +154,6 @@ export const useXtermPlayer = ({
     }
   }, [terminal, ref]);
 
-  useEffect(() => {
-    if (isFullscreen !== undefined && tty?.columns && tty?.rows) {
-      terminal.resize(tty.columns, tty.rows);
-      terminal.clear();
-    }
-  }, [terminal, tty, isFullscreen]);
-
   const render = useCallback(
     (lineNumber: number, clear: boolean) => {
       if (lines.length === 0) {
@@ -171,7 +164,9 @@ export const useXtermPlayer = ({
 
       if (clear) {
         linesToPrint = lines.slice(0, lineNumber);
+        terminal.reset();
         terminal.clear();
+        console.log('clearing');
       } else {
         linesToPrint = [lines[lineNumber]];
       }
@@ -186,11 +181,22 @@ export const useXtermPlayer = ({
   );
 
   useEffect(() => {
-    if (terminal.getOption('fontSize') !== fontSize) {
+    const fontChanged = terminal.getOption('fontSize') !== fontSize;
+    const ttyChanged = tty && (terminal.rows !== tty?.rows || terminal.cols !== tty?.columns);
+
+    if (fontChanged) {
       terminal.setOption('fontSize', fontSize);
+    }
+
+    if (tty?.rows && tty?.columns && ttyChanged) {
+      terminal.resize(tty.columns, tty.rows);
+    }
+
+    if (fontChanged || ttyChanged) {
+      // clear and rerender
       render(currentLine, true);
     }
-  }, [currentLine, fontSize, terminal, render]);
+  }, [currentLine, fontSize, terminal, render, tty]);
 
   useEffect(() => {
     if (isPlaying) {
@@ -199,7 +205,7 @@ export const useXtermPlayer = ({
           return;
         }
 
-        if (currentLine < lines.length) {
+        if (currentLine < lines.length - 1) {
           setCurrentLine(currentLine + 1);
         }
 
@@ -211,7 +217,7 @@ export const useXtermPlayer = ({
       }, playSpeed);
 
       return () => {
-        clearInterval(timer);
+        clearTimeout(timer);
       };
     }
   }, [lines, currentLine, isPlaying, playSpeed, render, hasNextPage, fetchNextPage]);

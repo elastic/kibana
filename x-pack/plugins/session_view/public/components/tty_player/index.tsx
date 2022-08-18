@@ -100,7 +100,7 @@ export const TTYPlayer = ({ sessionEntityId, onClose, isFullscreen }: TTYPlayerD
             <EuiRange
               value={currentLine}
               min={0}
-              max={lines.length}
+              max={Math.max(0, lines.length - 1)}
               onChange={onLineChange}
               fullWidth
               showInput

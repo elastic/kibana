@@ -7,14 +7,12 @@
 
 import { useMemo } from 'react';
 import { CSSObject, css } from '@emotion/react';
-import { transparentize, useEuiScrollBar } from '@elastic/eui';
+import { transparentize } from '@elastic/eui';
 import { useEuiTheme } from '../../hooks';
 import { Teletype } from '../../../common/types/process_tree';
 
 export const useStyles = (tty?: Teletype) => {
   const { euiTheme } = useEuiTheme();
-  const euiScrollBar = useEuiScrollBar();
-
   const cached = useMemo(() => {
     const { size, font, colors, border } = euiTheme;
 
@@ -24,6 +22,7 @@ export const useStyles = (tty?: Teletype) => {
       width: '100%',
       height: '100%',
       overflow: 'hidden',
+      zIndex: 10,
       borderRadius: size.s,
       backgroundColor: colors.ink,
       '.euiRangeLevel--warning': {
@@ -40,6 +39,7 @@ export const useStyles = (tty?: Teletype) => {
     const windowBoundsColor = transparentize(colors.ghost, 0.6);
 
     const terminal: CSSObject = {
+      minHeight: '100%',
       '.xterm': css`
         display: inline-block;
       `,
@@ -76,7 +76,7 @@ export const useStyles = (tty?: Teletype) => {
       terminal,
       scrollPane,
     };
-  }, [tty, euiScrollBar, euiTheme]);
+  }, [tty, euiTheme]);
 
   return cached;
 };
