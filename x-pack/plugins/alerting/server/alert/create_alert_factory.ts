@@ -6,6 +6,7 @@
  */
 
 import { Logger } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 import { cloneDeep } from 'lodash';
 import { AlertInstanceContext, AlertInstanceState } from '../types';
 import { Alert, PublicAlert } from './alert';
@@ -52,12 +53,18 @@ export function createAlertFactory<
   return {
     create: (id: string): PublicAlert<State, Context, ActionGroupIds> => {
       if (isDone) {
-        throw new Error(`Can't create new alerts after calling done() in AlertsFactory.`);
+        throw new Error(i18n.translate('xpack.alerting.alert.CannotCreateNewAlert',
+        { defaultMessage:`Can't create new alerts after calling done() in AlertsFactory.`}
+          )
+        );
       }
 
       if (numAlertsCreated++ >= maxAlerts) {
         hasReachedAlertLimit = true;
-        throw new Error(`Rule reported more than ${maxAlerts} alerts.`);
+        throw new Error(i18n.translate( 'xpack.alerting.alert.MaxAlert',
+          { defaultMessage:`Rule reported more than ${maxAlerts} alerts.`}
+          )
+        );
       }
 
       if (!alerts[id]) {

@@ -8,12 +8,16 @@
 export const validateSnoozeEndDate = (date: string) => {
   const parsedValue = Date.parse(date);
   if (isNaN(parsedValue)) return `Invalid date: ${date}`;
-  if (parsedValue <= Date.now()) return `Invalid snooze date as it is in the past: ${date}`;
+  if (parsedValue <= Date.now()) return i18n.translate('xpack.alerting.lib.invalidSnoozeDate',
+    { defaultMessage:`Invalid snooze date as it is in the past: ${date}` }
+    );
   return;
 };
 
 export const validateSnoozeStartDate = (date: string) => {
   const parsedValue = Date.parse(date);
-  if (isNaN(parsedValue)) return `Invalid date: ${date}`;
+  if (isNaN(parsedValue)) return i18n.translate('xpack.alerting.lib.invalidDate',
+    { defaultMessage:  `Invalid date: ${date}`}
+    );
   return;
 };

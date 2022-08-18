@@ -21,6 +21,7 @@ import type {
   AggregationsAggregate,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IScopedClusterClient, ElasticsearchClient, Logger } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 import { SearchMetrics, RuleInfo } from './types';
 
 interface WrapScopedClusterClientFactoryOpts {
@@ -161,7 +162,10 @@ function getWrappedSearchFn(opts: WrapEsClientOpts) {
       return result;
     } catch (e) {
       if (opts.abortController.signal.aborted) {
-        throw new Error('Search has been aborted due to cancelled execution');
+        throw new Error(i18n.translate('xpack.alerting.lib.abortedSearch',
+          {defaultMessage:'Search has been aborted due to cancelled execution'}
+          )
+        );
       }
       throw e;
     }

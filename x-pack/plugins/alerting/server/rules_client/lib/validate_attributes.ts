@@ -6,6 +6,7 @@
  */
 
 import { KueryNode } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import { get, isEmpty } from 'lodash';
 import { alertMappings } from '../../saved_objects/mappings';
 
@@ -38,7 +39,10 @@ export const validateOperationOnAttributes = (
 
 export const validateSortField = (sortField: string, excludedFieldNames: string[]) => {
   if (excludedFieldNames.filter((efn) => sortField.split('.')[0].includes(efn)).length > 0) {
-    throw new Error(`Sort is not supported on this field ${sortField}`);
+    throw new Error(i18n.translate('xpack.alerting.rulesclient.upsupportedSort',
+      { defaultMessage:`Sort is not supported on this field ${sortField}`}
+      )
+    );
   }
 };
 
@@ -47,7 +51,10 @@ export const validateSearchFields = (searchFields: string[], excludedFieldNames:
     (sf) => excludedFieldNames.filter((efn) => sf.split('.')[0].includes(efn)).length > 0
   );
   if (excludedSearchFields.length > 0) {
-    throw new Error(`Search field ${excludedSearchFields.join()} not supported`);
+    throw new Error(i18n.translate('xpack.alerting.rulesclient.unsupportedSearchField',
+      { defaultMessage:`Search field ${excludedSearchFields.join()} not supported` }
+      )
+    );
   }
 };
 
@@ -139,7 +146,10 @@ export const validateFilterKueryNode = ({
     if (index === 0) {
       const firstAttribute = getFieldNameAttribute(fieldName, ['alert', 'attributes']);
       if (excludedFieldNames.includes(firstAttribute)) {
-        throw new Error(`Filter is not supported on this field ${fieldName}`);
+        throw new Error(i18n.translate('xpack.alerting.rulesclient.unsupportedFieldName',
+          { defaultMessage:`Filter is not supported on this field ${fieldName}` }
+          )
+        );
       }
     }
   };

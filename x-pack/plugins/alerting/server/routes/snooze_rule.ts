@@ -7,6 +7,7 @@
 
 import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
 import { ILicenseState, RuleMutedError } from '../lib';
 import { verifyAccessAndContext } from './lib';
 import { SnoozeOptions } from '../rules_client';
@@ -33,7 +34,9 @@ const bodySchema = schema.object({
         interval: schema.maybe(
           schema.number({
             validate: (interval: number) => {
-              if (interval < 1) return 'rRule interval must be > 0';
+              if (interval < 1) return i18n.translate('xpack.alerting.routes.rRuleIntervalCount',
+                {defaultMessage:'rRule interval must be > 0'}
+              );
             },
           })
         ),
@@ -41,7 +44,9 @@ const bodySchema = schema.object({
         count: schema.maybe(
           schema.number({
             validate: (count: number) => {
-              if (count < 1) return 'rRule count must be > 0';
+              if (count < 1) return i18n.translate('xpack.alerting.routes.rRuleCount',
+                {defaultMessage: 'rRule count must be > 0'}
+              );
             },
           })
         ),

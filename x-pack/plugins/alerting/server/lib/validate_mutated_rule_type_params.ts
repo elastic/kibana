@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { i18n } from '@kbn/i18n';
 import { RuleTypeParams, RuleTypeParamsValidator } from '../types';
 
 export function validateMutatedRuleTypeParams<Params extends RuleTypeParams>(
@@ -23,6 +24,9 @@ export function validateMutatedRuleTypeParams<Params extends RuleTypeParams>(
     }
     return mutatedParams;
   } catch (err) {
-    throw Boom.badRequest(`Mutated params invalid: ${err.message}`);
+    throw Boom.badRequest(i18n.translate('xpack.alerting.lib.invalidParams',
+      { defaultMessage:`Mutated params invalid: ${err.message}`}
+      )
+    );
   }
 }

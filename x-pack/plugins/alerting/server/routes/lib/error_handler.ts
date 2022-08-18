@@ -28,9 +28,11 @@ export const handleDisabledApiKeysError: RequestHandlerWrapper = (handler) => {
 };
 
 export function isApiKeyDisabledError(e: Error) {
-  return e?.message?.includes('api keys are not enabled') ?? false;
+  return e?.message?.includes(i18n.translate('xpack.alerting.api.error.notEnabledApiKeys',
+    {defaultMessage:'api keys are not enabled'})) ?? false;
 }
 
 export function isSecurityPluginDisabledError(e: Error) {
-  return e?.message?.includes('no handler found') ?? false;
+  return e?.message?.includes(i18n.translate('xpack.alerting.api.error.NohandlerFound',
+    {defaultMessage:'no handler found'})) ?? false;
 }

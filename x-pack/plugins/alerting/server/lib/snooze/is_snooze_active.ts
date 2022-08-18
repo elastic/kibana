@@ -7,6 +7,7 @@
 
 import { RRule, ByWeekday, Weekday, rrulestr } from 'rrule';
 import { RuleSnoozeSchedule } from '../../types';
+import { i18n } from '@kbn/i18n';
 
 const MAX_TIMESTAMP = 8640000000000000;
 
@@ -48,7 +49,10 @@ export function isSnoozeActive(snooze: RuleSnoozeSchedule) {
     if (now < lastOccurrenceEndTime)
       return { lastOccurrence, snoozeEndTime: new Date(lastOccurrenceEndTime), id };
   } catch (e) {
-    throw new Error(`Failed to process RRule ${rRule}: ${e}`);
+    throw new Error(i18n.translate('xpack.alerting.lib.snoozeFailedToProcess',
+      { defaultMessage: `Failed to process RRule ${rRule}: ${e}`}
+      )
+    );
   }
 
   return null;

@@ -19,6 +19,9 @@ export function validateRuleTypeParams<Params extends RuleTypeParams>(
   try {
     return validator.validate(params);
   } catch (err) {
-    throw Boom.badRequest(`params invalid: ${err.message}`);
+    throw Boom.badRequest(i18n.translate('xpack.alerting.lib.badParam',
+      { defaultMessage:`params invalid: ${err.message}` }
+      )
+    );
   }
 }

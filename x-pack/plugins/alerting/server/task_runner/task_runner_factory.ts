@@ -16,6 +16,7 @@ import type {
   ElasticsearchServiceStart,
   UiSettingsServiceStart,
 } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 import { RunContext } from '@kbn/task-manager-plugin/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
@@ -93,7 +94,10 @@ export class TaskRunnerFactory {
     inMemoryMetrics: InMemoryMetrics
   ) {
     if (!this.isInitialized) {
-      throw new Error('TaskRunnerFactory not initialized');
+      throw new Error(i18n.translate('xpack.alerting.taskrunner.taskRunnerNotInitialized',
+        { defaultMessage:'TaskRunnerFactory not initialized'}
+        )
+      );
     }
 
     return new TaskRunner<

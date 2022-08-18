@@ -7,6 +7,7 @@
 
 import { PublicMethodsOf } from '@kbn/utility-types';
 import type { Request } from '@hapi/hapi';
+import { i18n } from '@kbn/i18n';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 import { CoreKibanaRequest } from '@kbn/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
@@ -47,7 +48,10 @@ export async function loadRule<Params extends RuleTypeParams>(params: LoadRulePa
   if (!enabled) {
     throw new ErrorWithReason(
       RuleExecutionStatusErrorReasons.Disabled,
-      new Error(`Rule failed to execute because rule ran after it was disabled.`)
+      new Error(i18n.translate('xpack.alerting.taskrunner.failedToRunRuleAfterItwasDisabled',
+        { defaultMessage:`Rule failed to execute because rule ran after it was disabled.` }
+        )
+      )
     );
   }
 

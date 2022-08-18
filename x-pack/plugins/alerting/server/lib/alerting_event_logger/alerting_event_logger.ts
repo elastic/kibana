@@ -7,6 +7,7 @@
 
 import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { EVENT_LOG_ACTIONS } from '../../plugin';
+import { i18n } from '@kbn/i18n';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { AlertInstanceState, RuleExecutionStatus } from '../../types';
 import { createAlertEventLogRecordObject } from '../create_alert_event_log_record_object';
@@ -72,7 +73,10 @@ export class AlertingEventLogger {
 
   public initialize(context: RuleContextOpts) {
     if (this.isInitialized) {
-      throw new Error('AlertingEventLogger already initialized');
+      throw new Error(i18n.translate('xpack.alerting.lib.alertingEventLoggerInitialized',
+      { defaultMessage:'AlertingEventLogger already initialized' }
+        )
+      );
     }
     this.isInitialized = true;
     this.ruleContext = context;
@@ -80,7 +84,10 @@ export class AlertingEventLogger {
 
   public start() {
     if (!this.isInitialized || !this.ruleContext) {
-      throw new Error('AlertingEventLogger not initialized');
+      throw new Error(i18n.translate('xpack.alerting.lib.alertingEventLoggerNotInitialized',
+      { defaultMessage:'AlertingEventLogger not initialized'}
+        )
+      );
     }
 
     this.startTime = new Date();
@@ -105,7 +112,10 @@ export class AlertingEventLogger {
 
   public setRuleName(ruleName: string) {
     if (!this.isInitialized || !this.event || !this.ruleContext) {
-      throw new Error('AlertingEventLogger not initialized');
+      throw new Error(i18n.translate('xpack.alerting.lib.ruleNameAlertingEventLoggerNotInitialized',
+        { defaultMessage: 'AlertingEventLogger not initialized' }
+        )
+      );
     }
 
     this.ruleContext.ruleName = ruleName;
@@ -114,7 +124,10 @@ export class AlertingEventLogger {
 
   public setExecutionSucceeded(message: string) {
     if (!this.isInitialized || !this.event) {
-      throw new Error('AlertingEventLogger not initialized');
+      throw new Error(i18n.translate('xpack.alerting.lib.executionSucceededAlertingEventLoggerNotInitialized',
+      { defaultMessage:'AlertingEventLogger not initialized' }
+       )
+      );
     }
 
     updateEvent(this.event, { message, outcome: 'success' });
@@ -122,7 +135,10 @@ export class AlertingEventLogger {
 
   public setExecutionFailed(message: string, errorMessage: string) {
     if (!this.isInitialized || !this.event) {
-      throw new Error('AlertingEventLogger not initialized');
+      throw new Error(i18n.translate('xpack.alerting.lib.executionFailedAlertingEventLoggerNotInitialized',
+        { defaultMessage:'AlertingEventLogger not initialized'}
+        )
+      );
     }
 
     updateEvent(this.event, { message, outcome: 'failure', error: errorMessage });
@@ -130,7 +146,10 @@ export class AlertingEventLogger {
 
   public logTimeout() {
     if (!this.isInitialized || !this.ruleContext) {
-      throw new Error('AlertingEventLogger not initialized');
+      throw new Error(i18n.translate('xpack.alerting.lib.timeOutLogEventLoggerNotInitialized',
+      { defaultMessage:'AlertingEventLogger not initialized'}
+       )
+      );
     }
 
     this.eventLogger.logEvent(createExecuteTimeoutRecord(this.ruleContext));
@@ -138,7 +157,10 @@ export class AlertingEventLogger {
 
   public logAlert(alert: AlertOpts) {
     if (!this.isInitialized || !this.ruleContext) {
-      throw new Error('AlertingEventLogger not initialized');
+      throw new Error(i18n.translate('xpack.alerting.lib.alertLogEventLoggerNotInitialized',
+        { defaultMessage: 'AlertingEventLogger not initialized'}
+       )
+      );
     }
 
     this.eventLogger.logEvent(createAlertRecord(this.ruleContext, alert));
@@ -146,7 +168,10 @@ export class AlertingEventLogger {
 
   public logAction(action: ActionOpts) {
     if (!this.isInitialized || !this.ruleContext) {
-      throw new Error('AlertingEventLogger not initialized');
+      throw new Error(i18n.translate('xpack.alerting.lib.actionLogEventLoggerNotInitialized',
+      { defaultMessage: 'AlertingEventLogger not initialized'}
+        )
+      );
     }
 
     this.eventLogger.logEvent(createActionExecuteRecord(this.ruleContext, action));
@@ -154,7 +179,10 @@ export class AlertingEventLogger {
 
   public done({ status, metrics }: DoneOpts) {
     if (!this.isInitialized || !this.event || !this.ruleContext) {
-      throw new Error('AlertingEventLogger not initialized');
+      throw new Error(i18n.translate('xpack.alerting.lib.statusDoneEventLoggerNotInitialized',
+      { defaultMessage:'AlertingEventLogger not initialized' }
+        )
+      );
     }
 
     this.eventLogger.stopTiming(this.event);
@@ -328,7 +356,10 @@ interface UpdateEventOpts {
 export function updateEvent(event: IEvent, opts: UpdateEventOpts) {
   const { message, outcome, error, ruleName, status, reason, metrics } = opts;
   if (!event) {
-    throw new Error('Cannot update event because it is not initialized.');
+    throw new Error(i18n.translate('xpack.alerting.lib.eventUpdateEventLoggerNotInitialized',
+      { defaultMessage:'Cannot update event because it is not initialized.' }
+      )
+    );
   }
   if (message) {
     event.message = message;

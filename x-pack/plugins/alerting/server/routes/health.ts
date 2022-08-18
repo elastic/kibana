@@ -8,6 +8,7 @@
 import { IRouter } from '@kbn/core/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { ILicenseState } from '../lib';
+import { i18n } from '@kbn/i18n';
 import { RewriteResponseCase, verifyAccessAndContext } from './lib';
 import {
   AlertingRequestHandlerContext,
@@ -74,7 +75,10 @@ export const healthRoute = (
             });
           } else {
             return res.forbidden({
-              body: { message: `Unauthorized to access alerting framework health` },
+              body: {i18n.translate( 'xpack.alerting.routes.unauthorizedForAlertingHealthFramework',
+                { defaultMessage: `Unauthorized to access alerting framework health` }
+                )
+              },
             });
           }
         } catch (error) {

@@ -8,6 +8,7 @@
 import Semver from 'semver';
 import pMap from 'p-map';
 import Boom from '@hapi/boom';
+import { i18n } from '@kbn/i18n';
 import {
   omit,
   isEqual,
@@ -500,7 +501,10 @@ export class RulesClient {
         ? await this.createAPIKey(this.generateAPIKeyName(ruleType.id, data.name))
         : null;
     } catch (error) {
-      throw Boom.badRequest(`Error creating rule: could not create API key - ${error.message}`);
+      throw Boom.badRequest(i18n.translate('xpack.alerting.rulesclient.unableToCreateApi',
+        {defaultMessage:`Error creating rule: could not create API key - ${error.message}`}
+        )
+      );
     }
 
     await this.validateActions(ruleType, data.actions);
@@ -508,8 +512,9 @@ export class RulesClient {
     // Throw error if schedule interval is less than the minimum and we are enforcing it
     const intervalInMs = parseDuration(data.schedule.interval);
     if (intervalInMs < this.minimumScheduleIntervalInMs && this.minimumScheduleInterval.enforce) {
-      throw Boom.badRequest(
-        `Error creating rule: the interval is less than the allowed minimum interval of ${this.minimumScheduleInterval.value}`
+      throw Boom.badRequest(i18n.translate('xpack.alerting.rulesclient.intervalLimitError',
+         { defaultMessage:`Error creating rule: the interval is less than the allowed minimum interval of ${this.minimumScheduleInterval.value}`}
+        ) 
       );
     }
 
@@ -983,7 +988,10 @@ export class RulesClient {
           this.fieldsToExcludeFromPublicApi
         );
       } catch (error) {
-        throw Boom.badRequest(`Error find rules: ${error.message}`);
+        throw Boom.badRequest(i18n.translate('xpack.alerting.rulesclient.cannotFindRules',
+            { defaultMessage:`Error find rules: ${error.message}` }
+          )
+        );
       }
     }
 
@@ -1376,8 +1384,9 @@ export class RulesClient {
     // Throw error if schedule interval is less than the minimum and we are enforcing it
     const intervalInMs = parseDuration(data.schedule.interval);
     if (intervalInMs < this.minimumScheduleIntervalInMs && this.minimumScheduleInterval.enforce) {
-      throw Boom.badRequest(
-        `Error updating rule: the interval is less than the allowed minimum interval of ${this.minimumScheduleInterval.value}`
+      throw Boom.badRequest(i18n.translate('xpack.alerting.rulesclient.minimumIntervalLimit' ,
+        {defaultMessage:`Error updating rule: the interval is less than the allowed minimum interval of ${this.minimumScheduleInterval.value}`}
+        )
       );
     }
 
@@ -1396,7 +1405,10 @@ export class RulesClient {
         ? await this.createAPIKey(this.generateAPIKeyName(ruleType.id, data.name))
         : null;
     } catch (error) {
-      throw Boom.badRequest(`Error updating rule: could not create API key - ${error.message}`);
+      throw Boom.badRequest(i18n.translate('xpack.alerting.rulesclient.couldNotCreateApi',
+      { defaultMessage: `Error updating rule: could not create API key - ${error.message}`}
+      )
+     );
     }
 
     const apiKeyAttributes = this.apiKeyAsAlertAttributes(createdAPIKey, username);
@@ -1470,8 +1482,9 @@ export class RulesClient {
     const ids = (options as BulkEditOptionsIds<Params>).ids;
 
     if (ids && queryFilter) {
-      throw Boom.badRequest(
-        "Both 'filter' and 'ids' are supplied. Define either 'ids' or 'filter' properties in method arguments"
+      throw Boom.badRequest(i18n.translate('xpack.alerting.rulesclient.undefinedIdAndFilter',
+          { defaultMessage:"Both 'filter' and 'ids' are supplied. Define either 'ids' or 'filter' properties in method arguments"}
+        )
       );
     }
 
@@ -1527,14 +1540,18 @@ export class RulesClient {
     });
 
     if (total > MAX_RULES_NUMBER_FOR_BULK_EDIT) {
-      throw Boom.badRequest(
-        `More than ${MAX_RULES_NUMBER_FOR_BULK_EDIT} rules matched for bulk edit`
+      throw Boom.badRequest(i18n.translate('xpack.alerting.rulesclient.bulkEditMaxLimit' ,
+          { defaultMessage:`More than ${MAX_RULES_NUMBER_FOR_BULK_EDIT} rules matched for bulk edit`}
+        )
       );
     }
     const buckets = aggregations?.alertTypeId.buckets;
 
     if (buckets === undefined) {
-      throw Error('No rules found for bulk edit');
+      throw Error(i18n.translate('xpack.alerting.rulesclient.noRulesForBulkEdit',
+          { defaultMessage:'No rules found for bulk edit'}
+        )
+      );
     }
 
     await pMap(
@@ -1691,8 +1708,9 @@ export class RulesClient {
                 parseDuration(attributes.schedule.interval as string) <
                 this.minimumScheduleIntervalInMs;
               if (isIntervalInvalid && this.minimumScheduleInterval.enforce) {
-                throw Error(
-                  `Error updating rule: the interval is less than the allowed minimum interval of ${this.minimumScheduleInterval.value}`
+                throw Error(i18n.translate('xpack.alerting.rulesclient.minimunIntervalUpdateError' ,
+                    { defaultMessage:`Error updating rule: the interval is less than the allowed minimum interval of ${this.minimumScheduleInterval.value}`}
+                  )
                 );
               } else if (isIntervalInvalid && !this.minimumScheduleInterval.enforce) {
                 this.logger.warn(
@@ -1733,7 +1751,10 @@ export class RulesClient {
                 ? await this.createAPIKey(this.generateAPIKeyName(ruleType.id, attributes.name))
                 : null;
             } catch (error) {
-              throw Error(`Error updating rule: could not create API key - ${error.message}`);
+              throw Error(i18n.translate('xpack.alerting.rulesclient.unableToCreateTheApi',
+                 { defaultMessage:`Error updating rule: could not create API key - ${error.message}`}
+                )
+              );
             }
 
             const apiKeyAttributes = this.apiKeyAsAlertAttributes(createdAPIKey, username);
@@ -1908,8 +1929,9 @@ export class RulesClient {
         this.generateAPIKeyName(attributes.alertTypeId, attributes.name)
       );
     } catch (error) {
-      throw Boom.badRequest(
-        `Error updating API key for rule: could not create API key - ${error.message}`
+      throw Boom.badRequest(i18n.translate('xpack.alerting.rulesclient.unableToCreatAndUpdateApi' ,
+         { defaultMessage: `Error updating API key for rule: could not create API key - ${error.message}`}
+        )
       );
     }
 
@@ -2061,7 +2083,10 @@ export class RulesClient {
         this.generateAPIKeyName(attributes.alertTypeId, attributes.name)
       );
     } catch (error) {
-      throw Boom.badRequest(`Error creating API key for rule: ${error.message}`);
+      throw Boom.badRequest(i18n.translate('xpack.alerting.rulesclient.apiCannotBeCreated',
+           { defaultMessage: `Error creating API key for rule: ${error.message}`}
+         )
+      );
     }
 
     return this.apiKeyAsAlertAttributes(createdAPIKey, username);
@@ -2707,7 +2732,10 @@ export class RulesClient {
 
       const reference = references.find((ref) => ref.name === action.actionRef);
       if (!reference) {
-        throw new Error(`Action reference "${action.actionRef}" not found in alert id: ${alertId}`);
+        throw new Error(i18n.translate('xpack.alerting.rulesclient.actionReferenceNotFound',
+          {defaultMessage:`Action reference "${action.actionRef}" not found in alert id: ${alertId}`}
+           )
+        );
       }
       return {
         ...omit(action, 'actionRef'),
@@ -2925,8 +2953,9 @@ export class RulesClient {
           ) as Params)
         : (ruleParams as Params);
     } catch (err) {
-      throw Boom.badRequest(
-        `Error injecting reference into rule params for rule id ${ruleId} - ${err.message}`
+      throw Boom.badRequest(i18n.translate('xpack.alerting.rulesclient.injectingReferenceError' ,
+         { defaultMessage:`Error injecting reference into rule params for rule id ${ruleId} - ${err.message}`}
+        )
       );
     }
   }

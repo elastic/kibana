@@ -6,6 +6,7 @@
  */
 
 import { memoize } from 'lodash';
+import { i18n } from '@kbn/i18n';
 
 export enum TimeUnit {
   Minute = 'm',
@@ -33,8 +34,9 @@ export const parseIntervalAsMillisecond = memoize((value: string): number => {
     numeric <= 0 ||
     !isNumeric(numericAsStr)
   ) {
-    throw new Error(
-      `Invalid time value "${value}". Time must be of the form {number}m. Example: 5m.`
+    throw new Error(i18n.translate('xpack.alerting.lib.invalidTimeVlue',
+      { defaultMessage: `Invalid time value "${value}". Time must be of the form {number}m. Example: 5m.` }
+      )
     );
   }
   return numeric * CADENCE_IN_MS[cadence as TimeUnit];

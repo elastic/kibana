@@ -6,6 +6,7 @@
  */
 
 import { Logger } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 import {
   ISearchOptions,
   ISearchSource,
@@ -157,7 +158,10 @@ function wrapFetch$({
         catchError((error) => {
           if (abortController.signal.aborted) {
             return throwError(
-              () => new Error('Search has been aborted due to cancelled execution')
+              () => new Error(i18n.translate.('xpack.alerting.lib.abortedSearchController',
+                {defaultMessage:'Search has been aborted due to cancelled execution'}
+                )
+              )
             );
           }
           return throwError(() => error);

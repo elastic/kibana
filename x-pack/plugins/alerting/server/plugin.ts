@@ -7,6 +7,7 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { BehaviorSubject } from 'rxjs';
+import { i18n } from '@kbn/i18n';
 import { pick } from 'lodash';
 import { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -412,8 +413,9 @@ export class AlertingPlugin {
 
     const getRulesClientWithRequest = (request: KibanaRequest) => {
       if (isESOCanEncrypt !== true) {
-        throw new Error(
-          `Unable to create alerts client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
+        throw new Error(i18n.translate('xpack.alerting.missingEncryptionForClientAlerts' ,
+            { defaultMessage:`Unable to create alerts client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`}
+          )
         );
       }
       return rulesClientFactory!.create(request, core.savedObjects);

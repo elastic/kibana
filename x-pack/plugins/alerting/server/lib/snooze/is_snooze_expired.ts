@@ -6,6 +6,7 @@
  */
 
 import { RRule, Weekday } from 'rrule';
+import { i18n } from '@kbn/i18n';
 import { RuleSnoozeSchedule } from '../../types';
 import { isSnoozeActive, parseByWeekday } from './is_snooze_active';
 
@@ -30,6 +31,9 @@ export function isSnoozeExpired(snooze: RuleSnoozeSchedule) {
     const nextOccurrence = recurrenceRule.after(new Date(now), true);
     return !nextOccurrence;
   } catch (e) {
-    throw new Error(`Failed to process RRule ${rRule}: ${e}`);
+    throw new Error(i18n.translate('xpack.alerting.lib.snoozExpired',
+      { defaultMessage:`Failed to process RRule ${rRule}: ${e}` }
+      )
+    );
   }
 }

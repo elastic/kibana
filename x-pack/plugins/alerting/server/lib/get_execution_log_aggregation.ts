@@ -7,6 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import Boom from '@hapi/boom';
+import { i18n } from '@kbn/i18n';
 import { flatMap, get } from 'lodash';
 import { AggregateEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
@@ -109,29 +110,39 @@ export function getExecutionLogAggregation({
   const sortFields = flatMap(sort as estypes.SortCombinations[], (s) => Object.keys(s));
   for (const field of sortFields) {
     if (!Object.keys(ExecutionLogSortFields).includes(field)) {
-      throw Boom.badRequest(
-        `Invalid sort field "${field}" - must be one of [${Object.keys(ExecutionLogSortFields).join(
+      throw Boom.badRequest(i18n.translate('xpack.alerting.lib.invalidSortField',
+        { defaultMessage:`Invalid sort field "${field}" - must be one of [${Object.keys(ExecutionLogSortFields).join(
           ','
-        )}]`
+        )}]` }
+        )
       );
     }
   }
 
   // Check if valid page value
   if (page <= 0) {
-    throw Boom.badRequest(`Invalid page field "${page}" - must be greater than 0`);
+    throw Boom.badRequest(i18n.translate('xpack.alerting.lib.invalidPageField',
+      { defaultMessage:`Invalid page field "${page}" - must be greater than 0` }
+      )
+    );
   }
 
   // Check if valid page value
   if (perPage <= 0) {
-    throw Boom.badRequest(`Invalid perPage field "${perPage}" - must be greater than 0`);
+    throw Boom.badRequest(i18n.translate('xpack.alerting.lib.invalidPerPageField',
+      { defaultMessage:`Invalid perPage field "${perPage}" - must be greater than 0` }
+      )
+    );
   }
 
   let dslFilterQuery: estypes.QueryDslBoolQuery['filter'];
   try {
     dslFilterQuery = filter ? toElasticsearchQuery(fromKueryExpression(filter)) : undefined;
   } catch (err) {
-    throw Boom.badRequest(`Invalid kuery syntax for filter ${filter}`);
+    throw Boom.badRequest(i18n.translate('xpack.alerting.lib.invalidKuerySyntax',
+      { defaultMessage:`Invalid kuery syntax for filter ${filter}` }
+      )
+    );
   }
 
   return {

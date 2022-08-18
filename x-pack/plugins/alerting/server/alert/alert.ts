@@ -6,6 +6,7 @@
  */
 
 import { isEmpty } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import {
   AlertInstanceMeta,
   AlertInstanceState,
@@ -191,7 +192,10 @@ export class Alert<
 
   private ensureHasNoScheduledActions() {
     if (this.hasScheduledActions()) {
-      throw new Error('Alert instance execution has already been scheduled, cannot schedule twice');
+      throw new Error(i18n.translate('xpack.alerting.alert.instanceExecutionAlreadyScheduled',
+      { defaultMessage:'Alert instance execution has already been scheduled, cannot schedule twice' }
+       )
+      );
     }
   }
 

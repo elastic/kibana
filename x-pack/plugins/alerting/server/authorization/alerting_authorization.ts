@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { map, mapValues, fromPairs, has } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { KibanaRequest } from '@kbn/core/server';
 import { JsonObject } from '@kbn/utility-types';
 import { KueryNode } from '@kbn/es-query';
@@ -271,7 +272,10 @@ export class AlertingAuthorization {
       );
 
       if (!authorizedRuleTypes.size) {
-        throw Boom.forbidden(`Unauthorized to find ${authorizationEntity}s for any rule types`);
+        throw Boom.forbidden(i18n.translate('xpack.alerting.authorization.NotAuthorized',
+        { defaultMessage:`Unauthorized to find ${authorizationEntity}s for any rule types`}
+          )
+        );
       }
 
       const authorizedRuleTypeIdsToConsumers = new Set<string>(

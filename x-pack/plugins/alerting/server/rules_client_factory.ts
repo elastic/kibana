@@ -11,6 +11,7 @@ import {
   SavedObjectsServiceStart,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
@@ -80,7 +81,10 @@ export class RulesClientFactory {
     const spaceId = this.getSpaceId(request);
 
     if (!this.authorization) {
-      throw new Error('AlertingAuthorizationClientFactory is not defined');
+      throw new Error(i18n.translate('xpack.alerting.alertingForClientFactoryIsUndefined',
+         { defaultMessage: 'AlertingAuthorizationClientFactory is not defined' }
+        )
+      );
     }
 
     return new RulesClient({

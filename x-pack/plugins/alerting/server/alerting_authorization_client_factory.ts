@@ -6,6 +6,7 @@
  */
 
 import { KibanaRequest } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
 import { Space } from '@kbn/spaces-plugin/server';
@@ -31,7 +32,9 @@ export class AlertingAuthorizationClientFactory {
 
   public initialize(options: AlertingAuthorizationClientFactoryOpts) {
     if (this.isInitialized) {
-      throw new Error('AlertingAuthorizationClientFactory already initialized');
+      throw new Error(i18n.translate('xpack.alerting.clientFactoryAlertingInitialized',
+        { defaultMessage:'AlertingAuthorizationClientFactory already initialized' })
+      );
     }
     this.isInitialized = true;
     this.getSpace = options.getSpace;
