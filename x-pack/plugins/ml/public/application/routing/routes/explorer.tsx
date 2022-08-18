@@ -251,15 +251,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
 
   const CasesContext = cases?.ui.getCasesContext() ?? React.Fragment;
 
-  // TODO retrieve permissions
-  const casesPermissions = {
-    all: true,
-    create: true,
-    read: true,
-    update: true,
-    delete: true,
-    push: true,
-  };
+  const casesPermissions = cases?.helpers.canUseCases();
 
   return (
     <div className="ml-explorer">
@@ -277,7 +269,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
         </EuiFlexGroup>
       </MlPageHeader>
       <StyledComponentsThemeProvider>
-        <CasesContext owner={[]} permissions={casesPermissions}>
+        <CasesContext owner={[]} permissions={casesPermissions!}>
           <AnomalyExplorerContext.Provider value={anomalyExplorerContext}>
             {jobsWithTimeRange.length === 0 ? (
               <AnomalyDetectionEmptyState />
