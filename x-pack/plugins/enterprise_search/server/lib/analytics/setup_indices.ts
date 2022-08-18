@@ -11,15 +11,16 @@ import {
   MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+
 import { ANALYTICS_COLLECTIONS_INDEX, ANALYTICS_VERSION } from '../..';
 import { isResourceAlreadyExistsException } from '../../utils/identify_exceptions';
 
 const analyticsCollectionMappingsProperties: Record<string, MappingProperty> = {
+  event_retention_day_length: {
+    type: 'long',
+  },
   name: {
     type: 'keyword',
-  },
-  event_retention_day_length: {
-    type: 'integer',
   },
 };
 
@@ -36,19 +37,19 @@ interface IndexDefinition {
   settings: IndicesIndexSettings;
 }
 
-const indexConfiguration: IndexDefinition = {
-  aliases: [ANALYTICS_COLLECTIONS_INDEX],
-  mappings: {
-    _meta: {
-      version: ANALYTICS_VERSION,
-    },
-    properties: analyticsCollectionMappingsProperties,
-  },
-  name: `${ANALYTICS_COLLECTIONS_INDEX}-v${ANALYTICS_VERSION}`,
-  settings: defaultSettings,
-};
-
 export const setupAnalyticsCollectionIndex = async (client: ElasticsearchClient) => {
+  const indexConfiguration: IndexDefinition = {
+    aliases: [ANALYTICS_COLLECTIONS_INDEX],
+    mappings: {
+      _meta: {
+        version: ANALYTICS_VERSION,
+      },
+      properties: analyticsCollectionMappingsProperties,
+    },
+    name: `${ANALYTICS_COLLECTIONS_INDEX}-v${ANALYTICS_VERSION}`,
+    settings: defaultSettings,
+  };
+
   try {
     const { mappings, aliases, name: index, settings } = indexConfiguration;
     await client.indices.create({

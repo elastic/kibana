@@ -36,6 +36,7 @@ describe('add analytics collection lib function', () => {
 
   it('should add analytics collection', async () => {
     mockClient.asCurrentUser.index.mockImplementation(() => ({ _id: 'fakeId' }));
+    mockClient.asCurrentUser.indices.exists.mockImplementation(() => false);
 
     await expect(
       addAnalyticsCollection(mockClient as unknown as IScopedClusterClient, {
@@ -65,15 +66,10 @@ describe('add analytics collection lib function', () => {
   });
 
   it('should create index if no analytics collection index exists', async () => {
-    mockClient.asCurrentUser.index.mockImplementationOnce(() => {
-      return Promise.reject({
-        meta: { body: { error: { type: 'index_not_found_exception' } } },
-        statusCode: 404,
-      });
-    });
+    mockClient.asCurrentUser.indices.exists.mockImplementation(() => false);
+
     (fetchAnalyticsCollectionByName as jest.Mock).mockImplementation(() => undefined);
 
-    mockClient.asCurrentUser.indices.exists.mockImplementation(() => false);
     mockClient.asCurrentUser.index.mockImplementation(() => ({ _id: 'fakeId' }));
 
     await expect(
@@ -90,14 +86,6 @@ describe('add analytics collection lib function', () => {
       index: ANALYTICS_COLLECTIONS_INDEX,
     });
 
-    expect(mockClient.asCurrentUser.index).toHaveBeenCalledWith({
-      document: {
-        event_retention_day_length: 180,
-        name: 'example',
-      },
-      index: ANALYTICS_COLLECTIONS_INDEX,
-    });
-
     expect(setupAnalyticsCollectionIndex).toHaveBeenCalledWith(mockClient.asCurrentUser);
   });
 
@@ -105,7 +93,7 @@ describe('add analytics collection lib function', () => {
     mockClient.asCurrentUser.index.mockImplementationOnce(() => {
       return Promise.reject({ statusCode: 500 });
     });
-    mockClient.asCurrentUser.indices.exists.mockImplementation(() => false);
+    mockClient.asCurrentUser.indices.exists.mockImplementation(() => true);
     (fetchAnalyticsCollectionByName as jest.Mock).mockImplementation(() => false);
     await expect(
       addAnalyticsCollection(mockClient as unknown as IScopedClusterClient, {

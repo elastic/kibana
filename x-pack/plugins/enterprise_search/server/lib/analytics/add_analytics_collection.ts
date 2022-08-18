@@ -5,11 +5,12 @@
  * 2.0.
  */
 import { IScopedClusterClient } from '@kbn/core/server';
+
 import { ANALYTICS_COLLECTIONS_INDEX } from '../..';
 import { AnalyticsCollectionDocument, AnalyticsCollection } from '../../../common/types/analytics';
 
 import { ErrorCode } from '../../../common/types/error_codes';
-import { isIndexNotFoundException } from '../../utils/identify_exceptions';
+
 import { fetchAnalyticsCollectionByName } from './fetch_analytics_collection';
 import { setupAnalyticsCollectionIndex } from './setup_indices';
 
@@ -46,14 +47,13 @@ export const addAnalyticsCollection = async (
     name: input.name,
   };
 
-  try {
-    return await createAnalyticsCollection(client, document);
-  } catch (error) {
-    if (isIndexNotFoundException(error)) {
-      await setupAnalyticsCollectionIndex(client.asCurrentUser);
-      return await createAnalyticsCollection(client, document);
-    } else {
-      throw error;
-    }
+  const analyticsCollectionIndexExists = await client.asCurrentUser.indices.exists({
+    index: ANALYTICS_COLLECTIONS_INDEX,
+  });
+
+  if (!analyticsCollectionIndexExists) {
+    await setupAnalyticsCollectionIndex(client.asCurrentUser);
   }
+
+  return await createAnalyticsCollection(client, document);
 };

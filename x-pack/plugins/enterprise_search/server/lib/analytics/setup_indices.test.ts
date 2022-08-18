@@ -32,7 +32,7 @@ describe('setup analytics collection index', () => {
       },
       properties: {
         event_retention_day_length: {
-          type: 'integer',
+          type: 'long',
         },
         name: {
           type: 'keyword',
@@ -62,5 +62,16 @@ describe('setup analytics collection index', () => {
         },
       ],
     });
+  });
+
+  it('should do nothing if it hits that resource already exists', async () => {
+    mockClient.asCurrentUser.indices.create.mockImplementation(() =>
+      Promise.reject({ meta: { body: { error: { type: 'resource_already_exists_exception' } } } })
+    );
+    await expect(setupAnalyticsCollectionIndex(mockClient.asCurrentUser as any)).resolves.toEqual(
+      undefined
+    );
+    expect(mockClient.asCurrentUser.indices.updateAliases).not.toHaveBeenCalled();
+    expect(mockClient.asCurrentUser.indices.create).toHaveBeenCalled();
   });
 });
