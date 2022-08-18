@@ -91,7 +91,10 @@ export const AutocompleteFieldWildcardComponent: React.FC<AutocompleteFieldWildc
     }, [selectedValue]);
 
     const handleSpacesWarning = useCallback(
-      (param: string) => setShowSpacesWarning(!!paramContainsSpace(param)),
+      (param: string | undefined) => {
+        if (!param) return setShowSpacesWarning(false);
+        setShowSpacesWarning(!!paramContainsSpace(param));
+      },
       [setShowSpacesWarning]
     );
     const handleError = useCallback(
@@ -213,13 +216,13 @@ export const AutocompleteFieldWildcardComponent: React.FC<AutocompleteFieldWildc
 
     useEffect((): void => {
       setError(undefined);
-      setShowSpacesWarning(false);
-
       if (onError != null) {
         onError(false);
       }
+      handleSpacesWarning(selectedValue);
+
       onWarning(false);
-    }, [selectedField, onError, onWarning]);
+    }, [selectedField, selectedValue, onError, onWarning, handleSpacesWarning]);
 
     const defaultInput = useMemo((): JSX.Element => {
       return (

@@ -351,4 +351,53 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
     expect(euiFormHelptext.length).toBeTruthy();
     expect(euiFormHelptext.text()).toEqual('Warning: there is a space');
   });
+  test('should show the warning helper text if selectedValue contains spaces when editing', () => {
+    wrapper = mount(
+      <AutocompleteFieldMatchAnyComponent
+        autocompleteService={{
+          ...autocompleteStartMock,
+        }}
+        indexPattern={{
+          fields,
+          id: '1234',
+          title: 'logstash-*',
+        }}
+        isClearable={false}
+        isDisabled={false}
+        isLoading={false}
+        onChange={jest.fn()}
+        placeholder="Placeholder text"
+        rowLabel={'Row Label'}
+        selectedField={getField('machine.os.raw')}
+        selectedValue={['value with trailing space ', 'value 1']}
+      />
+    );
+    const euiFormHelptext = wrapper.find(EuiFormHelpText);
+    expect(euiFormHelptext.length).toBeTruthy();
+    expect(euiFormHelptext.text()).toEqual('Warning: there is a space');
+  });
+  test('should not show the warning helper text if selectedValue is falsy', () => {
+    wrapper = mount(
+      <AutocompleteFieldMatchAnyComponent
+        autocompleteService={{
+          ...autocompleteStartMock,
+        }}
+        indexPattern={{
+          fields,
+          id: '1234',
+          title: 'logstash-*',
+        }}
+        isClearable={false}
+        isDisabled={false}
+        isLoading={false}
+        onChange={jest.fn()}
+        placeholder="Placeholder text"
+        rowLabel={'Row Label'}
+        selectedField={getField('machine.os.raw')}
+        selectedValue={[]}
+      />
+    );
+    const euiFormHelptext = wrapper.find(EuiFormHelpText);
+    expect(euiFormHelptext.length).toBeFalsy();
+  });
 });

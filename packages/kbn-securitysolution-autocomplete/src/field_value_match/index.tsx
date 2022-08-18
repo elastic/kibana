@@ -98,7 +98,10 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
   }, [selectedValue]);
 
   const handleSpacesWarning = useCallback(
-    (param: string) => setShowSpacesWarning(!!paramContainsSpace(param)),
+    (param: string | undefined) => {
+      if (!param) return setShowSpacesWarning(false);
+      setShowSpacesWarning(!!paramContainsSpace(param));
+    },
     [setShowSpacesWarning]
   );
 
@@ -208,10 +211,10 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
 
   useEffect((): void => {
     setError(undefined);
-    setShowSpacesWarning(false);
-
     if (onError != null) onError(false);
-  }, [selectedField, onError]);
+
+    handleSpacesWarning(selectedValue);
+  }, [selectedField, selectedValue, handleSpacesWarning, onError]);
 
   const defaultInput = useMemo((): JSX.Element => {
     return (

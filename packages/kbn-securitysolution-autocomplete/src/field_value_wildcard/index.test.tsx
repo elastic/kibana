@@ -467,4 +467,53 @@ describe('AutocompleteFieldWildcardComponent', () => {
     expect(euiFormHelptext.length).toBeTruthy();
     expect(euiFormHelptext.text()).toEqual('Warning: there is a space');
   });
+  test('should show the warning helper text if selectedValue contains spaces when editing', () => {
+    wrapper = mount(
+      <AutocompleteFieldWildcardComponent
+        autocompleteService={autocompleteStartMock}
+        indexPattern={{
+          fields,
+          id: '1234',
+          title: 'logs-endpoint.events.*',
+        }}
+        isClearable={false}
+        isDisabled={false}
+        isLoading={false}
+        onChange={jest.fn()}
+        onError={jest.fn()}
+        onWarning={jest.fn()}
+        placeholder="Placeholder text"
+        selectedField={getField('file.path.text')}
+        selectedValue=" leading space"
+        warning={''}
+      />
+    );
+    const euiFormHelptext = wrapper.find(EuiFormHelpText);
+    expect(euiFormHelptext.length).toBeTruthy();
+    expect(euiFormHelptext.text()).toEqual('Warning: there is a space');
+  });
+  test('should not show the warning helper text if selectedValue is falsy', () => {
+    wrapper = mount(
+      <AutocompleteFieldWildcardComponent
+        autocompleteService={autocompleteStartMock}
+        indexPattern={{
+          fields,
+          id: '1234',
+          title: 'logs-endpoint.events.*',
+        }}
+        isClearable={false}
+        isDisabled={false}
+        isLoading={false}
+        onChange={jest.fn()}
+        onError={jest.fn()}
+        onWarning={jest.fn()}
+        placeholder="Placeholder text"
+        selectedField={getField('file.path.text')}
+        selectedValue=""
+        warning={''}
+      />
+    );
+    const euiFormHelptext = wrapper.find(EuiFormHelpText);
+    expect(euiFormHelptext.length).toBeFalsy();
+  });
 });

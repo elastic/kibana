@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { uniq } from 'lodash';
 import { ListOperatorTypeEnum as OperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
@@ -160,6 +160,9 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
     (): boolean => isLoading || isLoadingSuggestions,
     [isLoading, isLoadingSuggestions]
   );
+  useEffect((): void => {
+    handleSpacesWarning(selectedValue);
+  }, [selectedField, selectedValue, handleSpacesWarning]);
 
   const defaultInput = useMemo((): JSX.Element => {
     return (
