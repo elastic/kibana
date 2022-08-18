@@ -133,11 +133,15 @@ export const SubChart: React.FC<SubChartProps> = ({
             position="left"
             showGridLines
             tickFormat={(d) => (showAxes ? Number(d).toFixed(0) : '')}
-            style={{
-              tickLine: { visible: false },
-              tickLabel: { visible: false },
-              axisTitle: { visible: false },
-            }}
+            style={
+              showAxes
+                ? {}
+                : {
+                    tickLine: { visible: false },
+                    tickLabel: { visible: false },
+                    axisTitle: { visible: false },
+                  }
+            }
           />
         </Chart>
         {!showAxes ? (
