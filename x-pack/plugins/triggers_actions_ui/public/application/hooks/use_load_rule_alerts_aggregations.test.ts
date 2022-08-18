@@ -20,7 +20,7 @@ describe('useLoadRuleAlertsAggs', () => {
     useKibanaMock().services.http.get = jest.fn().mockResolvedValue({ index_name: ['mock_index'] });
   });
 
-  it('should return the expected payload structure even when there is an error', async () => {
+  it('should return the expected chart data from the Elasticsearch Aggs. query', async () => {
     const { result, waitForNextUpdate } = renderHook(() =>
       useLoadRuleAlertsAggs({
         features: ALERTS_FEATURE_ID,
