@@ -36,7 +36,7 @@ interface SavedQueryFormProps {
   viewMode?: boolean;
   hasPlayground?: boolean;
   isValid?: boolean;
-  idSet?: any;
+  idSet?: Set<string>;
 }
 
 const SavedQueryFormComponent: React.FC<SavedQueryFormProps> = ({
@@ -91,7 +91,7 @@ const SavedQueryFormComponent: React.FC<SavedQueryFormProps> = ({
           defaultMessage: 'ID',
         })}
         euiFieldProps={euiFieldProps}
-        rules={createFormIdFieldValidations(idSet)}
+        rules={idSet && createFormIdFieldValidations(idSet)}
       />
       <EuiSpacer />
       <TextField

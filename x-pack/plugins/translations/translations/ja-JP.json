@@ -23750,6 +23750,7 @@
     "xpack.osquery.pack.queriesTable.deleteActionAriaLabel": "{queryName}を削除",
     "xpack.osquery.pack.queriesTable.editActionAriaLabel": "{queryName}を編集",
     "xpack.osquery.pack.queryFlyoutForm.intervalFieldMaxNumberError": "間隔値は{than}よりも小さくなければなりません",
+    "xpack.osquery.pack.queryFlyoutForm.osqueryResultFieldRequiredErrorMessage": "値が必要です。",
     "xpack.osquery.pack.queryFlyoutForm.osqueryResultFieldValueMissingErrorMessage": "現在のクエリは{columnName}フィールドを返しません",
     "xpack.osquery.pack.table.activatedSuccessToastMessageText": "\"{packName}\"が正常にアクティブ化されました",
     "xpack.osquery.pack.table.deactivatedSuccessToastMessageText": "\"{packName}\"が正常に非アクティブ化されました",

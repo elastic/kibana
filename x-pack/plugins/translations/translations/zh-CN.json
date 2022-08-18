@@ -23778,6 +23778,7 @@
     "xpack.osquery.pack.queriesTable.deleteActionAriaLabel": "删除 {queryName}",
     "xpack.osquery.pack.queriesTable.editActionAriaLabel": "编辑 {queryName}",
     "xpack.osquery.pack.queryFlyoutForm.intervalFieldMaxNumberError": "间隔值必须小于 {than}",
+    "xpack.osquery.pack.queryFlyoutForm.osqueryResultFieldRequiredErrorMessage": "“值”必填。",
     "xpack.osquery.pack.queryFlyoutForm.osqueryResultFieldValueMissingErrorMessage": "当前查询不返回 {columnName} 字段",
     "xpack.osquery.pack.table.activatedSuccessToastMessageText": "已成功激活“{packName}”包",
     "xpack.osquery.pack.table.deactivatedSuccessToastMessageText": "已成功停用“{packName}”包",

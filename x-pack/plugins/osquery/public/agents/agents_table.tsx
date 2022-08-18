@@ -186,12 +186,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
 
   return (
     <div>
-      <EuiFormRow
-        label={AGENT_SELECTION_LABEL}
-        fullWidth
-        isInvalid={typeof error === 'string'}
-        error={error}
-      >
+      <EuiFormRow label={AGENT_SELECTION_LABEL} fullWidth isInvalid={!!error} error={error}>
         <EuiComboBox
           data-test-subj="agentSelection"
           placeholder={SELECT_AGENT_LABEL}

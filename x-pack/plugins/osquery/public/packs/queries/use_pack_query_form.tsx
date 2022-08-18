@@ -8,6 +8,7 @@
 import { isArray, isEmpty, map, xor } from 'lodash';
 
 import { useForm as useHookForm } from 'react-hook-form';
+import type { Draft } from 'immer';
 import { produce } from 'immer';
 import { useMemo } from 'react';
 import { convertECSMappingToObject } from '../../../common/schemas/common/utils';
@@ -25,7 +26,7 @@ export interface PackSOQueryFormData {
   interval: string;
   platform?: string | undefined;
   version?: string | undefined;
-  ecs_mapping: PackQuerySOECSMapping[] | undefined;
+  ecs_mapping?: PackQuerySOECSMapping[];
 }
 
 export type PackQuerySOECSMapping = Array<{ field: string; value: string }>;
@@ -36,7 +37,7 @@ export interface PackQueryFormData {
   query: string;
   interval: number;
   platform?: string | undefined;
-  version?: string | undefined;
+  version?: string[] | undefined;
   ecs_mapping: EcsMappingFormField[];
 }
 
@@ -54,15 +55,13 @@ const deserializer = (payload: PackSOQueryFormData): PackQueryFormData =>
     query: payload.query,
     interval: payload.interval ? parseInt(payload.interval, 10) : 3600,
     platform: payload.platform,
-    version: (payload.version ? [payload.version] : []) as unknown, // TODO NEED TO FIX THIS BEFORE MERGE
+    version: payload.version ? [payload.version] : [],
     ecs_mapping: !isEmpty(payload.ecs_mapping)
       ? !isArray(payload.ecs_mapping)
-        ? map(payload.ecs_mapping, (value, key) => ({
+        ? map(payload.ecs_mapping as unknown as PackQuerySOECSMapping, (value, key) => ({
             key,
             result: {
-              // @ts-expect-error update types
               type: Object.keys(value)[0],
-              // @ts-expect-error update types
               value: Object.values(value)[0],
             },
           }))
@@ -72,7 +71,7 @@ const deserializer = (payload: PackSOQueryFormData): PackQueryFormData =>
 
 const serializer = (payload: PackQueryFormData): PackSOQueryFormData =>
   // @ts-expect-error update types
-  produce(payload, (draft) => {
+  produce<PackQueryFormData>(payload, (draft: Draft<PackSOQueryFormData>) => {
     if (isArray(draft.platform)) {
       if (draft.platform.length) {
         draft.platform.join(',');
@@ -89,11 +88,9 @@ const serializer = (payload: PackQueryFormData): PackSOQueryFormData =>
       }
     }
 
-    // @ts-expect-error update types
     draft.interval = draft.interval + '';
 
     if (isEmpty(draft.ecs_mapping)) {
-      // @ts-expect-error update types
       delete draft.ecs_mapping;
     } else {
       // @ts-expect-error update types

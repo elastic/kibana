@@ -153,8 +153,6 @@ const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = (props) => {
   const [selectedOptions, setSelected] = useState<Array<EuiComboBoxOptionOption<ECSSchemaOption>>>(
     []
   );
-  const isInvalid = typeof error === 'string';
-  const errorMessage = error;
   const describedByIds = useMemo(() => (idAria ? [idAria] : []), [idAria]);
   const { ecs_mapping: watchedEcsMapping } = useWatch() as unknown as {
     ecs_mapping: EcsMappingFormField[];
@@ -255,8 +253,8 @@ const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = (props) => {
   return (
     <EuiFormRow
       helpText={helpText}
-      error={errorMessage}
-      isInvalid={isInvalid}
+      error={error}
+      isInvalid={!!error}
       fullWidth
       describedByIds={describedByIds}
       isDisabled={euiFieldProps.isDisabled}
@@ -346,9 +344,12 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
     const currentMapping = ecsMappingFormData[index];
 
     if (!value.length && currentMapping.key.length) {
-      return i18n.translate('xpack.osquery.pack.queryFlyoutForm.osqueryFieldRequiredErrorMessage', {
-        defaultMessage: 'Value field is required.',
-      });
+      return i18n.translate(
+        'xpack.osquery.pack.queryFlyoutForm.osqueryResultFieldRequiredErrorMessage',
+        {
+          defaultMessage: 'Value field is required.',
+        }
+      );
     }
 
     if (!value.length || currentMapping.result.type !== 'field') return;

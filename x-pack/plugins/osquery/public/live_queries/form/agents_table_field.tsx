@@ -18,15 +18,23 @@ interface IProps {
 
 const checkAgentsLength = (agentsSelection: AgentSelection) => {
   if (!isEmpty(agentsSelection)) {
-    return !!(
+    const isValid = !!(
       agentsSelection.allAgentsSelected ||
       agentsSelection.agents?.length ||
       agentsSelection.platformsSelected?.length ||
       agentsSelection.policiesSelected?.length
     );
+
+    return !isValid
+      ? i18n.translate('xpack.osquery.pack.queryFlyoutForm.osqueryAgentsMissingErrorMessage', {
+          defaultMessage: 'Agents is a required field',
+        })
+      : undefined;
   }
 
-  return false;
+  return i18n.translate('xpack.osquery.pack.queryFlyoutForm.osqueryAgentsMissingErrorMessage', {
+    defaultMessage: 'Agents is a required field',
+  });
 };
 
 const AgentsTableFieldComponent: React.FC<IProps> = ({ name }) => {
@@ -40,14 +48,7 @@ const AgentsTableFieldComponent: React.FC<IProps> = ({ name }) => {
   const { onChange, value } = field;
   const { error } = fieldState;
 
-  const errorMessage =
-    error?.message || error?.type === 'validate'
-      ? i18n.translate('xpack.osquery.pack.queryFlyoutForm.osqueryAgentsMissingErrorMessage', {
-          defaultMessage: 'Agents is a required field',
-        })
-      : undefined;
-
-  return <AgentsTable agentSelection={value} onChange={onChange} error={errorMessage} />;
+  return <AgentsTable agentSelection={value} onChange={onChange} error={error?.message} />;
 };
 
 export const AgentsTableField = React.memo(AgentsTableFieldComponent);

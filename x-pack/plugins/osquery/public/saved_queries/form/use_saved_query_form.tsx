@@ -7,6 +7,7 @@
 
 import { useForm as useHookForm } from 'react-hook-form';
 import { isArray, isEmpty, map } from 'lodash';
+import type { Draft } from 'immer';
 import produce from 'immer';
 import { useMemo } from 'react';
 import type { ECSMapping } from '../../../common/schemas/common';
@@ -59,13 +60,11 @@ const deserializer = (payload: SavedQuerySOFormData): SavedQueryFormData => ({
 
 export const savedQueryDataSerializer = (payload: SavedQueryFormData): SavedQuerySOFormData =>
   // @ts-expect-error update types
-  produce(payload, (draft) => {
+  produce<SavedQueryFormData>(payload, (draft: Draft<SavedQuerySOFormData>) => {
     if (isArray(draft.version)) {
       if (!draft.version.length) {
-        // @ts-expect-error this is a STRING!
         draft.version = '';
       } else {
-        // @ts-expect-error this is a STRING!
         draft.version = draft.version[0];
       }
     }
@@ -74,10 +73,8 @@ export const savedQueryDataSerializer = (payload: SavedQueryFormData): SavedQuer
       delete draft.platform;
     }
 
-    // @ts-expect-error update types
     draft.ecs_mapping = convertECSMappingToObject(payload.ecs_mapping);
 
-    // @ts-expect-error update types
     draft.interval = draft.interval + '';
 
     return draft;
