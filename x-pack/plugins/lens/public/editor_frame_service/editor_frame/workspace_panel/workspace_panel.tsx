@@ -35,6 +35,7 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { Datatable } from '@kbn/expressions-plugin/public';
+import { DropIllustration } from '@kbn/chart-icons';
 import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
 import {
   FramePublicAPI,
@@ -51,7 +52,6 @@ import { DragDrop, DragContext, DragDropIdentifier } from '../../../drag_drop';
 import { switchToSuggestion } from '../suggestion_helpers';
 import { buildExpression } from '../expression_helpers';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
-import { DropIllustration } from '../../../assets/drop_illustration';
 import applyChangesIllustrationDark from '../../../assets/render_dark@2x.png';
 import applyChangesIllustrationLight from '../../../assets/render_light@2x.png';
 import {
