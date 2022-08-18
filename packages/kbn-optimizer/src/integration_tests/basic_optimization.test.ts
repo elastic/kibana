@@ -261,9 +261,4 @@ const expectFileMatchesSnapshotWithCompression = (filePath: string, snapshotLabe
       Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, `${filePath}.br`))
     ).toString()
   ).toEqual(raw);
-
-  // Verify the gzip variant matches
-  expect(
-    Zlib.gunzipSync(Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, `${filePath}.gz`))).toString()
-  ).toEqual(raw);
 };

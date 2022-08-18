@@ -34,7 +34,6 @@ module.exports = (_, argv) => {
       'kbn-ui-shared-deps-npm': [
         // polyfill code
         'core-js/stable',
-        'regenerator-runtime/runtime',
         'whatwg-fetch',
         'symbol-observable',
         // Parts of node-libs-browser that are used in many places across Kibana
@@ -50,23 +49,28 @@ module.exports = (_, argv) => {
          *  node scripts/find_babel_runtime_helpers_in_use.js
          */
         '@babel/runtime/helpers/assertThisInitialized',
+        '@babel/runtime/helpers/asyncToGenerator',
         '@babel/runtime/helpers/classCallCheck',
         '@babel/runtime/helpers/classPrivateFieldGet',
         '@babel/runtime/helpers/classPrivateFieldSet',
+        '@babel/runtime/helpers/createClass',
+        '@babel/runtime/helpers/createForOfIteratorHelper',
         '@babel/runtime/helpers/createSuper',
         '@babel/runtime/helpers/defineProperty',
         '@babel/runtime/helpers/extends',
         '@babel/runtime/helpers/inherits',
+        '@babel/runtime/helpers/inheritsLoose',
         '@babel/runtime/helpers/interopRequireDefault',
         '@babel/runtime/helpers/interopRequireWildcard',
         '@babel/runtime/helpers/objectSpread2',
         '@babel/runtime/helpers/objectWithoutProperties',
         '@babel/runtime/helpers/objectWithoutPropertiesLoose',
         '@babel/runtime/helpers/slicedToArray',
-        '@babel/runtime/helpers/toArray',
+        '@babel/runtime/helpers/taggedTemplateLiteralLoose',
         '@babel/runtime/helpers/toConsumableArray',
         '@babel/runtime/helpers/typeof',
         '@babel/runtime/helpers/wrapNativeSuper',
+        '@babel/runtime/regenerator',
 
         // modules from npm
         '@elastic/charts',
