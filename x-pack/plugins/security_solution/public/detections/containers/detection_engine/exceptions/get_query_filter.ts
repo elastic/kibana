@@ -41,7 +41,7 @@ export const getQueryFilter = async (
   // Discussion at https://issues.apache.org/jira/browse/LUCENE-4835 indicates that 1024 is a
   // very conservative value.
   const { filter } = await getExceptionFilterFromExceptions({
-    exceptions: lists, // TODO fix this type
+    exceptions: lists,
     excludeExceptions,
     chunkSize: 1024,
   });

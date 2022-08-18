@@ -24,7 +24,7 @@ export const getGenericComboBoxProps = <T>({
   getLabel,
   options,
   selectedOptions,
-  disabledOptions = [],
+  disabledOptions,
 }: {
   getLabel: (value: T) => string;
   options: T[];
@@ -35,7 +35,7 @@ export const getGenericComboBoxProps = <T>({
   const disabledLabels = disabledOptions?.map(getLabel);
   const newComboOptions: EuiComboBoxOptionOption[] = newLabels.map((label) => ({
     label,
-    disabled: disabledLabels && disabledLabels.includes(label),
+    disabled: disabledLabels && disabledLabels.length !== 0 && disabledLabels.includes(label),
   }));
   const newSelectedComboOptions = selectedOptions
     .map(getLabel)

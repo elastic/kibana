@@ -17,8 +17,8 @@ describe('getEventCount', () => {
     jest.clearAllMocks();
   });
 
-  it('can respect tuple', () => {
-    getEventCount({
+  it('can respect tuple', async () => {
+    await getEventCount({
       esClient,
       query: '*:*',
       language: 'kuery',
@@ -55,8 +55,8 @@ describe('getEventCount', () => {
     });
   });
 
-  it('can override timestamp', () => {
-    getEventCount({
+  it('can override timestamp', async () => {
+    await getEventCount({
       esClient,
       query: '*:*',
       language: 'kuery',
@@ -117,8 +117,8 @@ describe('getEventCount', () => {
     });
   });
 
-  it('can override timestamp without fallback to @timestamp', () => {
-    getEventCount({
+  it('can override timestamp without fallback to @timestamp', async () => {
+    await getEventCount({
       esClient,
       query: '*:*',
       language: 'kuery',

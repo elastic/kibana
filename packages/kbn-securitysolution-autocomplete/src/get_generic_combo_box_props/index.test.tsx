@@ -30,15 +30,12 @@ describe('get_generic_combo_box_props', () => {
       comboOptions: [
         {
           label: 'option1',
-          disabled: false,
         },
         {
           label: 'option2',
-          disabled: false,
         },
         {
           label: 'option3',
-          disabled: false,
         },
       ],
       labels: ['option1', 'option2', 'option3'],
@@ -57,15 +54,12 @@ describe('get_generic_combo_box_props', () => {
       comboOptions: [
         {
           label: 'option1',
-          disabled: false,
         },
         {
           label: 'option2',
-          disabled: false,
         },
         {
           label: 'option3',
-          disabled: false,
         },
       ],
       labels: ['option1', 'option2', 'option3'],
@@ -84,22 +78,18 @@ describe('get_generic_combo_box_props', () => {
       comboOptions: [
         {
           label: 'option1',
-          disabled: false,
         },
         {
           label: 'option2',
-          disabled: false,
         },
         {
           label: 'option3',
-          disabled: false,
         },
       ],
       labels: ['option1', 'option2', 'option3'],
       selectedComboOptions: [
         {
           label: 'option2',
-          disabled: false,
         },
       ],
     });
