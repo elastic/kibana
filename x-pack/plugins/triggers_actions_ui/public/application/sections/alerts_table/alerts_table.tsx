@@ -15,7 +15,6 @@ import {
   EuiToolTip,
   EuiButtonIcon,
   EuiDataGridStyle,
-  EuiDataGridColumn,
 } from '@elastic/eui';
 import { useSorting, usePagination, useBulkActions } from './hooks';
 import { AlertsTableProps } from '../../../types';
@@ -44,7 +43,6 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     alerts,
     alertsCount,
     isLoading,
-    onColumnsChange,
     onPageChange,
     onSortChange,
     sort: sortingFields,
@@ -79,7 +77,14 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     pageSize: props.pageSize,
   });
 
-  const [visibleColumns, setVisibleColumns] = useState(props.visibleColumns);
+  const {
+    visibleColumns,
+    onToggleColumn,
+    onResetColumns,
+    updatedAt,
+    browserFields,
+    onChangeVisibleColumns,
+  } = props;
 
   // TODO when every solution is using this table, we will be able to simplify it by just passing the alert index
   const handleFlyoutAlert = useCallback(
@@ -92,37 +97,6 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     [alerts, setFlyoutAlertIndex]
   );
 
-  const onChangeVisibleColumns = useCallback(
-    (newColumns: string[]) => {
-      setVisibleColumns(newColumns);
-      onColumnsChange(
-        props.columns.sort((a, b) => newColumns.indexOf(a.id) - newColumns.indexOf(b.id)),
-        newColumns
-      );
-    },
-    [onColumnsChange, props.columns]
-  );
-
-  const onToggleColumn = useCallback(
-    (columnId: string): void => {
-      const currentIndex = visibleColumns.indexOf(columnId);
-      const newColumnIds =
-        currentIndex >= 0
-          ? [...visibleColumns.slice(0, currentIndex), ...visibleColumns.slice(currentIndex + 1)]
-          : [...visibleColumns, columnId].sort();
-      console.log('newColumnIds', newColumnIds);
-      onColumnsChange(
-        newColumnIds.map((id) => ({ id })),
-        newColumnIds
-      );
-    },
-    [onColumnsChange, visibleColumns]
-  );
-
-  const onResetColumns = useCallback(() => {
-    return onChangeVisibleColumns(props.columns.map((column) => column.id));
-  }, [onChangeVisibleColumns, props.columns]);
-
   const toolbarVisibility = useCallback(() => {
     const { rowSelection } = bulkActionsState;
     return getToolbarVisibility({
@@ -130,20 +104,20 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       alertsCount,
       rowSelection,
       alerts: alertsData.alerts,
-      updatedAt: props.updatedAt,
+      updatedAt,
       isLoading,
       columnIds: visibleColumns,
       onToggleColumn,
       onResetColumns,
-      browserFields: props.browserFields,
+      browserFields,
     });
   }, [
     bulkActionsState,
     bulkActions,
     alertsCount,
     alertsData.alerts,
-    props.updatedAt,
-    props.browserFields,
+    updatedAt,
+    browserFields,
     isLoading,
     visibleColumns,
     onToggleColumn,

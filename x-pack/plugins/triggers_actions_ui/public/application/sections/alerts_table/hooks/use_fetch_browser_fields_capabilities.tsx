@@ -10,6 +10,8 @@ import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useCallback, useEffect, useState } from 'react';
+import { RuntimeField } from '@kbn/data-views-plugin/common';
+import { IFieldSubType } from '@kbn/es-query';
 
 export interface FetchAlertsArgs {
   featureIds: ValidFeatureId[];
@@ -19,16 +21,40 @@ export interface FetchAlertResp {
   alerts: EcsFieldsResponse[];
 }
 
+interface BrowserField {
+  aggregatable: boolean;
+  category: string;
+  description: string | null;
+  example: string | number | null;
+  fields: Readonly<Record<string, Partial<BrowserField>>>;
+  format: string;
+  indexes?: string[];
+  name: string;
+  searchable: boolean;
+  type: string;
+  esTypes?: string[];
+  subType?: IFieldSubType;
+  readFromDocValues: boolean;
+  runtimeField?: RuntimeField;
+}
+
+export type BrowserFields = {
+  [category in string]: { fields: { [fieldName in string]: BrowserField } };
+};
+
 export type UseFetchAlerts = ({ featureIds }: FetchAlertsArgs) => [boolean, FetchAlertResp];
 
-export const useFetchBrowserFieldCapabilities = ({ featureIds }: FetchAlertsArgs) => {
+export const useFetchBrowserFieldCapabilities = ({
+  featureIds,
+}: FetchAlertsArgs): [boolean, BrowserFields] => {
   const { http } = useKibana().services;
-  const [state, setState] = useState(() => [true, {}]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [browserFields, setBrowserFields] = useState<BrowserFields>(() => ({}));
 
   const getBrowserFieldInfo = useCallback(async () => {
     if (!http) return Promise.resolve({});
 
-    return await http.get<ValidFeatureId[]>(`${BASE_RAC_ALERTS_API_PATH}/browser_fields`, {
+    return await http.get<BrowserFields>(`${BASE_RAC_ALERTS_API_PATH}/browser_fields`, {
       query: { featureIds: featureIds.toString() },
     });
   }, [featureIds, http]);
@@ -36,11 +62,12 @@ export const useFetchBrowserFieldCapabilities = ({ featureIds }: FetchAlertsArgs
   useEffect(() => {
     const callApi = async () => {
       const browserFieldsInfo = await getBrowserFieldInfo();
-      setState([false, browserFieldsInfo]);
+      setIsLoading(false);
+      setBrowserFields(browserFieldsInfo);
     };
 
     callApi();
   }, [getBrowserFieldInfo]);
 
-  return state;
+  return [isLoading, browserFields];
 };
