@@ -13,7 +13,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
   const PageObjects = getPageObjects([
     'tagManagement',
     'common',
