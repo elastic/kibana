@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { shallow } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 import React from 'react';
 
 import { UserProfilesPopover } from './user_profiles_popover';
@@ -102,6 +102,7 @@ describe('UserProfilesPopover', () => {
                 },
               ]
             }
+            inputRef={[Function]}
             selectedOptions={
               Array [
                 Object {
@@ -120,5 +121,23 @@ describe('UserProfilesPopover', () => {
         </EuiContextMenuPanel>
       </EuiPopover>
     `);
+  });
+
+  it('gives focus to the input box', async () => {
+    const [firstOption, secondOption] = userProfiles;
+    const wrapper = mount(
+      <UserProfilesPopover
+        title="Title"
+        button={<button>Toggle</button>}
+        closePopover={jest.fn()}
+        isOpen
+        selectableProps={{
+          selectedOptions: [firstOption],
+          defaultOptions: [secondOption],
+        }}
+      />
+    );
+
+    expect(wrapper.find('input[type="search"]').is(':focus')).toBe(true);
   });
 });

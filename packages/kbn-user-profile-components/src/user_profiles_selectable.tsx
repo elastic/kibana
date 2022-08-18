@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { EuiSelectableOption, EuiSelectableProps } from '@elastic/eui';
+import type {
+  EuiSelectableOption,
+  EuiSelectableProps,
+  EuiSelectableSearchProps,
+} from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -33,14 +37,15 @@ import { UserAvatar } from './user_avatar';
  */
 export interface UserProfilesSelectableProps
   extends Pick<
-    EuiSelectableProps,
-    | 'height'
-    | 'singleSelection'
-    | 'loadingMessage'
-    | 'noMatchesMessage'
-    | 'emptyMessage'
-    | 'errorMessage'
-  > {
+      EuiSelectableProps,
+      | 'height'
+      | 'singleSelection'
+      | 'loadingMessage'
+      | 'noMatchesMessage'
+      | 'emptyMessage'
+      | 'errorMessage'
+    >,
+    Pick<EuiSelectableSearchProps<{}>, 'inputRef'> {
   /**
    * List of users to be rendered as suggestions.
    */
@@ -109,6 +114,7 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
   searchPlaceholder,
   selectedStatusMessage,
   clearButtonLabel,
+  inputRef,
 }) => {
   const [displayedOptions, setDisplayedOptions] = useState<SelectableOption[]>([]);
 
@@ -243,6 +249,7 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
         onChange: onSearchChange,
         isLoading,
         isClearable: !isLoading,
+        inputRef,
       }}
       isPreFiltered
       listProps={{ onFocusBadge: false }}

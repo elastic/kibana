@@ -7,7 +7,7 @@
  */
 
 import type { EuiPopoverProps, EuiContextMenuPanelProps } from '@elastic/eui';
-import type { FunctionComponent } from 'react';
+import { FunctionComponent, useCallback, useEffect, useState } from 'react';
 import React from 'react';
 import { EuiPopover, EuiContextMenuPanel } from '@elastic/eui';
 
@@ -38,10 +38,22 @@ export const UserProfilesPopover: FunctionComponent<UserProfilesPopoverProps> = 
   selectableProps,
   ...popoverProps
 }) => {
+  const [inputElement, setInputElement] = useState<HTMLInputElement | null>(null);
+
+  const setInputRef = useCallback((node: HTMLInputElement | null) => {
+    setInputElement(node);
+  }, []);
+
+  useEffect(() => {
+    inputElement?.focus();
+  }, [inputElement]);
+
+  const initialFocus = inputElement ? inputElement : undefined;
+
   return (
-    <EuiPopover panelPaddingSize="none" {...popoverProps}>
+    <EuiPopover panelPaddingSize="none" initialFocus={initialFocus} {...popoverProps}>
       <EuiContextMenuPanel title={title}>
-        <UserProfilesSelectable {...selectableProps} />
+        <UserProfilesSelectable inputRef={setInputRef} {...selectableProps} />
       </EuiContextMenuPanel>
     </EuiPopover>
   );
