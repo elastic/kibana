@@ -135,7 +135,7 @@ export const getSeries = (initialMetrics: Metric[], totalSeriesNum: number): Vis
         const formula = getParentPipelineSeriesFormula(
           metrics,
           subFunctionMetric,
-          pipelineAgg.name,
+          pipelineAgg,
           aggregation,
           metaValue
         );
@@ -223,13 +223,16 @@ export const getSeries = (initialMetrics: Metric[], totalSeriesNum: number): Vis
     }
     default: {
       const timeScale = getTimeScale(metrics[metricIdx]);
+
+      const field = aggregation !== 'count' && fieldName ? fieldName : 'document';
       metricsArray = [
         {
           agg: aggregationMap.name,
           isFullReference: aggregationMap.isFullReference,
-          fieldName: aggregation !== 'count' && fieldName ? fieldName : 'document',
+          fieldName: field,
           params: {
             ...(timeScale && { timeScale }),
+            ...(aggregationMap.isFormula ? { formula: `${aggregationMap.formula}(${field})` } : {}),
           },
         },
       ];

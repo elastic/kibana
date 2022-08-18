@@ -8,7 +8,7 @@
 
 import type { Query } from '@kbn/es-query';
 import type { Metric, MetricType } from '../../../../common/types';
-import { SupportedMetric, SUPPORTED_METRICS } from './supported_metrics';
+import { getFormulaFromMetric, SupportedMetric, SUPPORTED_METRICS } from './supported_metrics';
 
 const escapeQuotes = (str: string) => {
   return str?.replace(/'/g, "\\'");
@@ -25,23 +25,24 @@ const constructFilterRationFormula = (operation: string, metric?: Query) => {
 export const getFilterRatioFormula = (currentMetric: Metric) => {
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { numerator, denominator, metric_agg, field } = currentMetric;
-  let aggregation: SupportedMetric<any> | null | undefined = SUPPORTED_METRICS.count;
+  let aggregation: SupportedMetric | null | undefined = SUPPORTED_METRICS.count;
   if (metric_agg) {
     aggregation = SUPPORTED_METRICS[metric_agg as MetricType];
     if (!aggregation) {
       return null;
     }
   }
-  const operation =
-    metric_agg && metric_agg !== 'count' ? `${aggregation.name}('${field}',` : 'count(';
+  const aggFormula = getFormulaFromMetric(aggregation);
+
+  const operation = metric_agg && metric_agg !== 'count' ? `${aggFormula}('${field}',` : 'count(';
 
   if (aggregation.name === 'counter_rate') {
     const numeratorFormula = constructFilterRationFormula(
-      `${aggregation.name}(max('${field}',`,
+      `${aggFormula}(max('${field}',`,
       numerator
     );
     const denominatorFormula = constructFilterRationFormula(
-      `${aggregation.name}(max('${field}',`,
+      `${aggFormula}(max('${field}',`,
       denominator
     );
     return `${numeratorFormula}) / ${denominatorFormula})`;

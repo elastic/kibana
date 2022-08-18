@@ -11,46 +11,48 @@ import { Operation, Operations } from '@kbn/visualizations-plugin/common';
 import { MetricType } from '../../../../common/types';
 import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 
+interface Agg {
+  isFormula?: false;
+};
+
+interface AggWithFormula {
+  isFormula: true;
+  formula: string;
+}
+
 export type AggOptions<T> = {
   isFullReference: boolean;
-} & (T extends Exclude<Operation, 'formula'>
-  ? {
-      isFormula?: false;
-    }
-  : {
-      isFormula: true;
-      formula: string;
-    });
+} & (T extends Exclude<Operation, 'formula'> ? Agg : AggWithFormula);
 
 // list of supported TSVB aggregation types in Lens
 // some of them are supported on the quick functions tab and some of them
 // are supported with formulas
 
-export type SupportedMetric<T extends Operation | string> = { name: T } & AggOptions<T>;
+export type Metric<T extends Operation | string> = { name: T } & AggOptions<T>;
 interface LocalSupportedMetrics {
-  [METRIC_TYPES.AVG]: SupportedMetric<typeof Operations.AVERAGE>;
-  [METRIC_TYPES.CARDINALITY]: SupportedMetric<typeof Operations.UNIQUE_COUNT>;
-  [METRIC_TYPES.COUNT]: SupportedMetric<typeof Operations.COUNT>;
-  [METRIC_TYPES.DERIVATIVE]: SupportedMetric<typeof Operations.DIFFERENCES>;
-  [METRIC_TYPES.CUMULATIVE_SUM]: SupportedMetric<typeof Operations.CUMULATIVE_SUM>;
-  [METRIC_TYPES.AVG_BUCKET]: SupportedMetric<typeof Operations.FORMULA>;
-  [METRIC_TYPES.MAX_BUCKET]: SupportedMetric<typeof Operations.FORMULA>;
-  [METRIC_TYPES.MIN_BUCKET]: SupportedMetric<typeof Operations.FORMULA>;
-  [METRIC_TYPES.SUM_BUCKET]: SupportedMetric<typeof Operations.FORMULA>;
-  [METRIC_TYPES.MAX]: SupportedMetric<typeof Operations.MAX>;
-  [METRIC_TYPES.MIN]: SupportedMetric<typeof Operations.MIN>;
-  [METRIC_TYPES.SUM]: SupportedMetric<typeof Operations.SUM>;
-  [TSVB_METRIC_TYPES.PERCENTILE]: SupportedMetric<typeof Operations.PERCENTILE>;
-  [TSVB_METRIC_TYPES.PERCENTILE_RANK]: SupportedMetric<typeof Operations.PERCENTILE_RANK>;
-  [TSVB_METRIC_TYPES.PERCENTILE_RANK]: SupportedMetric<typeof Operations.PERCENTILE_RANK>;
-  [TSVB_METRIC_TYPES.FILTER_RATIO]: SupportedMetric<typeof Operations.FORMULA>;
-  [TSVB_METRIC_TYPES.TOP_HIT]: SupportedMetric<typeof Operations.LAST_VALUE>;
-  [TSVB_METRIC_TYPES.MATH]: SupportedMetric<typeof Operations.FORMULA>;
-  [TSVB_METRIC_TYPES.POSITIVE_ONLY]: SupportedMetric<typeof Operations.FORMULA>;
-  [TSVB_METRIC_TYPES.STATIC]: SupportedMetric<typeof Operations.STATIC_VALUE>;
+  [METRIC_TYPES.AVG]: Metric<typeof Operations.AVERAGE>;
+  [METRIC_TYPES.CARDINALITY]: Metric<typeof Operations.UNIQUE_COUNT>;
+  [METRIC_TYPES.COUNT]: Metric<typeof Operations.COUNT>;
+  [METRIC_TYPES.DERIVATIVE]: Metric<typeof Operations.DIFFERENCES>;
+  [METRIC_TYPES.CUMULATIVE_SUM]: Metric<typeof Operations.CUMULATIVE_SUM>;
+  [METRIC_TYPES.AVG_BUCKET]: Metric<typeof Operations.FORMULA>;
+  [METRIC_TYPES.MAX_BUCKET]: Metric<typeof Operations.FORMULA>;
+  [METRIC_TYPES.MIN_BUCKET]: Metric<typeof Operations.FORMULA>;
+  [METRIC_TYPES.SUM_BUCKET]: Metric<typeof Operations.FORMULA>;
+  [METRIC_TYPES.MAX]: Metric<typeof Operations.MAX>;
+  [METRIC_TYPES.MIN]: Metric<typeof Operations.MIN>;
+  [METRIC_TYPES.SUM]: Metric<typeof Operations.SUM>;
+  [TSVB_METRIC_TYPES.PERCENTILE]: Metric<typeof Operations.PERCENTILE>;
+  [TSVB_METRIC_TYPES.PERCENTILE_RANK]: Metric<typeof Operations.PERCENTILE_RANK>;
+  [TSVB_METRIC_TYPES.PERCENTILE_RANK]: Metric<typeof Operations.PERCENTILE_RANK>;
+  [TSVB_METRIC_TYPES.FILTER_RATIO]: Metric<typeof Operations.FORMULA>;
+  [TSVB_METRIC_TYPES.TOP_HIT]: Metric<typeof Operations.LAST_VALUE>;
+  [TSVB_METRIC_TYPES.MATH]: Metric<typeof Operations.FORMULA>;
+  [TSVB_METRIC_TYPES.POSITIVE_ONLY]: Metric<typeof Operations.FORMULA>;
+  [TSVB_METRIC_TYPES.STATIC]: Metric<typeof Operations.STATIC_VALUE>;
 
-  [TSVB_METRIC_TYPES.POSITIVE_RATE]: SupportedMetric<typeof Operations.COUNTER_RATE>;
-  [TSVB_METRIC_TYPES.MOVING_AVERAGE]: SupportedMetric<typeof Operations.MOVING_AVERAGE>;
+  [TSVB_METRIC_TYPES.POSITIVE_RATE]: Metric<typeof Operations.COUNTER_RATE>;
+  [TSVB_METRIC_TYPES.MOVING_AVERAGE]: Metric<typeof Operations.MOVING_AVERAGE>;
 }
 
 type UnsupportedSupportedMetrics = Exclude<MetricType, keyof LocalSupportedMetrics>;
@@ -157,4 +159,15 @@ export const SUPPORTED_METRICS: SupportedMetrics = {
     name: 'static_value',
     isFullReference: true,
   },
+} as const;
+
+type SupportedMetricsKeys = keyof LocalSupportedMetrics;
+
+export type SupportedMetric = typeof SUPPORTED_METRICS[SupportedMetricsKeys];
+
+export const getFormulaFromMetric = (metric: SupportedMetric) => {
+  if (metric.isFormula) {
+    return metric.formula;
+  }
+  return metric.name;
 };

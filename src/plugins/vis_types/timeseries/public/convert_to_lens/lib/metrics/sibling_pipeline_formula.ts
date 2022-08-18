@@ -7,7 +7,7 @@
  */
 
 import type { Metric, MetricType } from '../../../../common/types';
-import { SUPPORTED_METRICS } from './supported_metrics';
+import { getFormulaFromMetric, SUPPORTED_METRICS } from './supported_metrics';
 
 export const getSiblingPipelineSeriesFormula = (
   aggregation: MetricType,
@@ -23,14 +23,18 @@ export const getSiblingPipelineSeriesFormula = (
   if (!pipelineAggMap) {
     return null;
   }
+  const pipelineAggFormula = getFormulaFromMetric(pipelineAggMap);
+
   const aggregationMap = SUPPORTED_METRICS[aggregation];
   if (!aggregationMap) {
     return null;
   }
+  const aggFormula = getFormulaFromMetric(aggregationMap);
+
   const subMetricField = subFunctionMetric.type !== 'count' ? subFunctionMetric.field : '';
   // support nested aggs with formula
   const additionalSubFunction = metrics.find((metric) => metric.id === subMetricField);
-  let formula = `${aggregationMap.name}(`;
+  let formula = `${aggFormula}(`;
   let minimumValue = '';
   if (currentMetric.type === 'positive_only') {
     minimumValue = `, 0`;
@@ -40,9 +44,11 @@ export const getSiblingPipelineSeriesFormula = (
     if (!additionalPipelineAggMap) {
       return null;
     }
+    const additionalPipelineAggFormula = getFormulaFromMetric(additionalPipelineAggMap);
+
     const additionalSubFunctionField =
       additionalSubFunction.type !== 'count' ? additionalSubFunction.field : '';
-    formula += `${pipelineAggMap.name}(${additionalPipelineAggMap.name}(${
+    formula += `${pipelineAggFormula}(${additionalPipelineAggFormula}(${
       additionalSubFunctionField ?? ''
     }))${minimumValue})`;
   } else {
@@ -55,7 +61,7 @@ export const getSiblingPipelineSeriesFormula = (
     if (pipelineAggMap.name === 'percentile_rank' && nestedMetaValue) {
       additionalFunctionArgs = `, value=${nestedMetaValue}`;
     }
-    formula += `${pipelineAggMap.name}(${subMetricField ?? ''}${
+    formula += `${pipelineAggFormula}(${subMetricField ?? ''}${
       additionalFunctionArgs ? `${additionalFunctionArgs}` : ''
     })${minimumValue})`;
   }

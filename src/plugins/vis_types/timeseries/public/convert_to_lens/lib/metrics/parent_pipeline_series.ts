@@ -7,7 +7,7 @@
  */
 
 import type { Metric, MetricType } from '../../../../common/types';
-import { SUPPORTED_METRICS } from './supported_metrics';
+import { getFormulaFromMetric, SUPPORTED_METRICS } from './supported_metrics';
 import { getParentPipelineSeriesFormula } from './parent_pipeline_formula';
 import { getFilterRatioFormula } from './filter_ratio_formula';
 import { getFormulaSeries, getTimeScale, getPipelineAgg } from './metrics_helpers';
@@ -20,18 +20,24 @@ export const computeParentSeries = (
   meta?: number
 ) => {
   const aggregationMap = SUPPORTED_METRICS[aggregation];
+  if (!aggregationMap) {
+    return null;
+  }
+
   if (subFunctionMetric.type === 'filter_ratio') {
     const script = getFilterRatioFormula(subFunctionMetric);
     if (!script) {
       return null;
     }
-    const formula = `${aggregationMap!.name}(${script})`;
+
+    const aggFormula = getFormulaFromMetric(aggregationMap);
+    const formula = `${aggFormula}(${script})`;
     return getFormulaSeries(formula);
   }
   const timeScale = getTimeScale(currentMetric);
   return [
     {
-      agg: aggregationMap!.name,
+      agg: aggregationMap.name,
       isFullReference: aggregationMap!.isFullReference,
       pipelineAggType: pipelineAgg,
       fieldName:
@@ -73,7 +79,7 @@ export const getParentPipelineSeries = (
     const formula = getParentPipelineSeriesFormula(
       metrics,
       subFunctionMetric,
-      pipelineAgg.name,
+      pipelineAgg,
       aggregation,
       metaValue
     );

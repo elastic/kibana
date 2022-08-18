@@ -7,13 +7,13 @@
  */
 
 import type { Metric, MetricType } from '../../../../common/types';
-import { SUPPORTED_METRICS } from './supported_metrics';
+import { SUPPORTED_METRICS, getFormulaFromMetric, SupportedMetric } from './supported_metrics';
 import { getFilterRatioFormula } from './filter_ratio_formula';
 
 export const getParentPipelineSeriesFormula = (
   metrics: Metric[],
   subFunctionMetric: Metric,
-  pipelineAgg: string,
+  pipelineAgg: SupportedMetric,
   aggregation: MetricType,
   percentileValue?: number
 ) => {
@@ -22,6 +22,8 @@ export const getParentPipelineSeriesFormula = (
   if (!aggregationMap) {
     return null;
   }
+  const aggFormula = getFormulaFromMetric(aggregationMap);
+  const pipelineFormula = getFormulaFromMetric(pipelineAgg);
 
   const subMetricField = subFunctionMetric.field;
   const [nestedFieldId, nestedMeta] = subMetricField?.split('[') ?? [];
@@ -33,6 +35,8 @@ export const getParentPipelineSeriesFormula = (
     if (!additionalPipelineAggMap) {
       return null;
     }
+    const additionalPipelineAggFormula = getFormulaFromMetric(additionalPipelineAggMap);
+
     const nestedMetaValue = Number(nestedMeta?.replace(']', ''));
     let additionalFunctionArgs;
     if (additionalPipelineAggMap.name === 'percentile' && nestedMetaValue) {
@@ -41,29 +45,29 @@ export const getParentPipelineSeriesFormula = (
     if (additionalPipelineAggMap.name === 'percentile_rank' && nestedMetaValue) {
       additionalFunctionArgs = `, value=${nestedMetaValue}`;
     }
-    formula = `${aggregationMap.name}(${pipelineAgg}(${additionalPipelineAggMap.name}(${
+    formula = `${aggFormula}(${pipelineFormula}(${additionalPipelineAggFormula}(${
       additionalSubFunction.field ?? ''
     }${additionalFunctionArgs ?? ''})))`;
   } else {
     let additionalFunctionArgs;
-    if (pipelineAgg === 'percentile' && percentileValue) {
+    if (pipelineAgg.name === 'percentile' && percentileValue) {
       additionalFunctionArgs = `, percentile=${percentileValue}`;
     }
-    if (pipelineAgg === 'percentile_rank' && percentileValue) {
+    if (pipelineAgg.name === 'percentile_rank' && percentileValue) {
       additionalFunctionArgs = `, value=${percentileValue}`;
     }
-    if (pipelineAgg === 'filter_ratio') {
+    if (pipelineAgg.isFormula && pipelineAgg.formula === 'filter_ratio') {
       const script = getFilterRatioFormula(subFunctionMetric);
       if (!script) {
         return null;
       }
-      formula = `${aggregationMap.name}(${script}${additionalFunctionArgs ?? ''})`;
-    } else if (pipelineAgg === 'counter_rate') {
-      formula = `${aggregationMap.name}(${pipelineAgg}(max(${subFunctionMetric.field}${
+      formula = `${aggFormula}(${script}${additionalFunctionArgs ?? ''})`;
+    } else if (pipelineAgg.name === 'counter_rate') {
+      formula = `${aggFormula}(${pipelineFormula}(max(${subFunctionMetric.field}${
         additionalFunctionArgs ? `${additionalFunctionArgs}` : ''
       })))`;
     } else {
-      formula = `${aggregationMap.name}(${pipelineAgg}(${subFunctionMetric.field}${
+      formula = `${aggFormula}(${pipelineFormula}(${subFunctionMetric.field}${
         additionalFunctionArgs ? `${additionalFunctionArgs}` : ''
       }))`;
     }

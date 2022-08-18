@@ -27,8 +27,9 @@ export const createMovingAverageOrDerivativeColumn = (
   dataView: DataView,
   references: string[] = []
 ) => {
-  const params = convertToMovingAverageParams(metric);
-  if (!params) {
+  const params =
+    aggregation === 'moving_average' ? convertToMovingAverageParams(metric) : undefined;
+  if (params === null) {
     return null;
   }
 

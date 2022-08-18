@@ -8,7 +8,7 @@
 
 import { TimeScaleUnit } from '@kbn/visualizations-plugin/common';
 import type { Metric, MetricType } from '../../../../common/types';
-import { SUPPORTED_METRICS } from './supported_metrics';
+import { getFormulaFromMetric, SUPPORTED_METRICS } from './supported_metrics';
 import { getFilterRatioFormula } from './filter_ratio_formula';
 import { getParentPipelineSeriesFormula } from './parent_pipeline_formula';
 import { getSiblingPipelineSeriesFormula } from './sibling_pipeline_formula';
@@ -80,7 +80,13 @@ export const getFormulaEquivalent = (
   metrics: Metric[],
   metaValue?: number
 ) => {
-  const aggregation = SUPPORTED_METRICS[currentMetric.type]?.name;
+  const aggregation = SUPPORTED_METRICS[currentMetric.type];
+  if (!aggregation) {
+    return null;
+  }
+
+  const aggFormula = getFormulaFromMetric(aggregation);
+
   switch (currentMetric.type) {
     case 'avg_bucket':
     case 'max_bucket':
@@ -90,15 +96,13 @@ export const getFormulaEquivalent = (
       return getSiblingPipelineSeriesFormula(currentMetric.type, currentMetric, metrics);
     }
     case 'count': {
-      return `${aggregation}()`;
+      return `${aggFormula}()`;
     }
     case 'percentile': {
-      return `${aggregation}(${currentMetric.field}${
-        metaValue ? `, percentile=${metaValue}` : ''
-      })`;
+      return `${aggFormula}(${currentMetric.field}${metaValue ? `, percentile=${metaValue}` : ''})`;
     }
     case 'percentile_rank': {
-      return `${aggregation}(${currentMetric.field}${metaValue ? `, value=${metaValue}` : ''})`;
+      return `${aggFormula}(${currentMetric.field}${metaValue ? `, value=${metaValue}` : ''})`;
     }
     case 'cumulative_sum':
     case 'derivative':
@@ -115,13 +119,13 @@ export const getFormulaEquivalent = (
       return getParentPipelineSeriesFormula(
         metrics,
         subFunctionMetric,
-        pipelineAgg.name,
+        pipelineAgg,
         currentMetric.type,
         metaValue
       );
     }
     case 'positive_rate': {
-      return `${aggregation}(max(${currentMetric.field}))`;
+      return `${aggFormula}(max(${currentMetric.field}))`;
     }
     case 'filter_ratio': {
       return getFilterRatioFormula(currentMetric);
@@ -130,7 +134,7 @@ export const getFormulaEquivalent = (
       return `${currentMetric.value}`;
     }
     default: {
-      return `${aggregation}(${currentMetric.field})`;
+      return `${aggFormula}(${currentMetric.field})`;
     }
   }
 };
