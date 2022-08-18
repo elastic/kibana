@@ -6,42 +6,9 @@
  * Side Public License, v 1.
  */
 
-import {
-  DerivativeColumn,
-  MovingAverageColumn,
-  MovingAverageParams,
-  Operations,
-} from '@kbn/visualizations-plugin/common';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import { Metric, Series } from '../../../../common/types';
-import { createColumn } from './column';
+import { MovingAverageParams } from '@kbn/visualizations-plugin/common';
+import { Metric } from '../../../../common/types';
 
-const convertToMovingAverageParams = ({ window }: Metric): MovingAverageParams => ({
+export const convertToMovingAverageParams = ({ window }: Metric): MovingAverageParams => ({
   window: window ?? 0,
 });
-
-export const createMovingAverageOrDerivativeColumn = (
-  aggregation: typeof Operations.DIFFERENCES | typeof Operations.MOVING_AVERAGE,
-  series: Series,
-  metric: Metric,
-  dataView: DataView,
-  references: string[] = []
-) => {
-  const params =
-    aggregation === 'moving_average' ? convertToMovingAverageParams(metric) : undefined;
-  if (params === null) {
-    return null;
-  }
-
-  const field = dataView.getFieldByName(metric.field ?? 'document');
-  if (!field) {
-    return null;
-  }
-
-  return {
-    operationType: aggregation,
-    references,
-    ...createColumn(series, metric, field),
-    params,
-  } as MovingAverageColumn | DerivativeColumn;
-};

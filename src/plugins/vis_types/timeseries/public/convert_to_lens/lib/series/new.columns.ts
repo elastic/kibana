@@ -17,9 +17,26 @@ import {
   convertToPercentileRankColumns,
   convertMathToFormulaColumn,
   convertParentPipelineAggToColumns,
+  convertToCumulativeSumColumns,
 } from '../convert';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
+
+const getValidColumns = (columns: Array<Column | null> | Column | null | undefined) => {
+  if (columns && Array.isArray(columns)) {
+    const nonNullColumns = columns.filter(
+      (c): c is Exclude<UnwrapArray<typeof columns>, null> => c !== null
+    );
+
+    if (nonNullColumns.length !== columns.length) {
+      return null;
+    }
+
+    return nonNullColumns;
+  }
+
+  return columns ? [columns] : null;
+};
 
 export const getColumns = (series: Series, dataView: DataView): Column[] | null => {
   const { metrics } = getSeriesAgg(series.metrics);
@@ -42,20 +59,12 @@ export const getColumns = (series: Series, dataView: DataView): Column[] | null 
       return formulaColumn ? [formulaColumn] : null;
 
     case 'moving_average':
-      const result = convertParentPipelineAggToColumns(series, metrics, dataView);
-      if (result && Array.isArray(result)) {
-        const nonNullColumns = result.filter(
-          (c): c is Exclude<UnwrapArray<typeof result>, null> => c !== null
-        );
+      const movingAverageColumns = convertParentPipelineAggToColumns(series, metrics, dataView);
+      return getValidColumns(movingAverageColumns);
 
-        if (nonNullColumns.length !== result.length) {
-          return null;
-        }
-
-        return nonNullColumns;
-      }
-
-      return result ? [result] : null;
+    case 'cumulative_sum':
+      const cumulativeSumColumns = convertToCumulativeSumColumns(series, metrics, dataView);
+      return getValidColumns(cumulativeSumColumns);
   }
 
   return [];

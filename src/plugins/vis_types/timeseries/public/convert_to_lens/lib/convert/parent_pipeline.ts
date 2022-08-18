@@ -13,9 +13,12 @@ import {
   CardinalityColumn,
   CountColumn,
   CounterRateColumn,
+  CumulativeSumColumn,
+  DerivativeColumn,
   LastValueColumn,
   MaxColumn,
   MinColumn,
+  MovingAverageColumn,
   Operations,
   PercentileColumn,
   PercentileRanksColumn,
@@ -33,11 +36,11 @@ import {
 } from '../metrics';
 import { createColumn } from './column';
 import { createFormulaColumn } from './formula';
-import { createMovingAverageOrDerivativeColumn } from './moving_average';
+import { convertToMovingAverageParams } from './moving_average';
 import { convertToPercentileParams } from './percentile';
 import { convertToPercentileRankParams } from './percentile_rank';
 
-type ParentPipelineAggregation =
+type PipelineAggregation =
   | typeof Operations.AVERAGE
   | typeof Operations.COUNT
   | typeof Operations.UNIQUE_COUNT
@@ -49,12 +52,12 @@ type ParentPipelineAggregation =
   | typeof Operations.PERCENTILE
   | typeof Operations.PERCENTILE_RANK;
 
-type ParentPipelineAggregationColumnWithParams =
+type PipelineAggregationColumnWithParams =
   | PercentileColumn
   | PercentileRanksColumn
   | LastValueColumn;
 
-type ParentPipelineAggregationColumnWithoutParams =
+type PipelineAggregationColumnWithoutParams =
   | AvgColumn
   | CountColumn
   | CardinalityColumn
@@ -63,11 +66,18 @@ type ParentPipelineAggregationColumnWithoutParams =
   | MinColumn
   | SumColumn;
 
-type ParentPipelineAggregationColumn =
-  | ParentPipelineAggregationColumnWithoutParams
-  | ParentPipelineAggregationColumnWithParams;
+type PipelineAggregationColumn =
+  | PipelineAggregationColumnWithoutParams
+  | PipelineAggregationColumnWithParams;
 
-const SUPPORTED_PARENT_PIPELINE_AGGS: ParentPipelineAggregation[] = [
+type ParentPipelineAggregation =
+  | typeof Operations.MOVING_AVERAGE
+  | typeof Operations.DIFFERENCES
+  | typeof Operations.CUMULATIVE_SUM;
+
+type ParentPipelineAggColumn = MovingAverageColumn | DerivativeColumn | CumulativeSumColumn;
+
+const SUPPORTED_PARENT_PIPELINE_AGGS: PipelineAggregation[] = [
   Operations.AVERAGE,
   Operations.COUNT,
   Operations.UNIQUE_COUNT,
@@ -80,17 +90,17 @@ const SUPPORTED_PARENT_PIPELINE_AGGS: ParentPipelineAggregation[] = [
   Operations.PERCENTILE_RANK,
 ];
 
-const isSupportedAggregation = (agg: string): agg is ParentPipelineAggregation => {
+const isSupportedAggregation = (agg: string): agg is PipelineAggregation => {
   return (SUPPORTED_PARENT_PIPELINE_AGGS as string[]).includes(agg);
 };
 
-export const convertParentPipelineAggToColumn = (
+export const convertPipelineAggToColumn = (
   aggregation: SupportedMetric,
   series: Series,
   parentPipelineMetric: Metric,
   dataView: DataView,
   meta?: number
-): ParentPipelineAggregationColumn | null => {
+): PipelineAggregationColumn | null => {
   if (!isSupportedAggregation(aggregation.name)) {
     return null;
   }
@@ -133,11 +143,11 @@ export const convertParentPipelineAggToColumn = (
     sourceField: field.name,
     ...createColumn(series, parentPipelineMetric, field),
     params: {},
-  } as ParentPipelineAggregationColumnWithoutParams;
+  } as PipelineAggregationColumnWithoutParams;
 };
 
 export const computeParentPipelineColumns = (
-  aggregation: typeof Operations.MOVING_AVERAGE | typeof Operations.DIFFERENCES,
+  aggregation: ParentPipelineAggregation,
   series: Series,
   currentMetric: Metric,
   dataView: DataView,
@@ -161,7 +171,7 @@ export const computeParentPipelineColumns = (
     return createFormulaColumn(formula, series, currentMetric, dataView);
   }
 
-  const parentPipelineAggColumn = convertParentPipelineAggToColumn(
+  const pipelineAggColumn = convertPipelineAggToColumn(
     pipelineAgg,
     series,
     subFunctionMetric,
@@ -169,14 +179,14 @@ export const computeParentPipelineColumns = (
     meta
   );
 
-  if (!parentPipelineAggColumn) {
+  if (!pipelineAggColumn) {
     return null;
   }
 
   return [
-    parentPipelineAggColumn,
-    createMovingAverageOrDerivativeColumn(aggregation, series, currentMetric, dataView, [
-      parentPipelineAggColumn.columnId,
+    pipelineAggColumn,
+    createPipelineAggregationColumn(aggregation, series, currentMetric, dataView, [
+      pipelineAggColumn.columnId,
     ]),
   ];
 };
@@ -251,4 +261,30 @@ export const convertParentPipelineAggToColumns = (
       dataView
     );
   }
+};
+
+export const createPipelineAggregationColumn = (
+  aggregation: ParentPipelineAggregation,
+  series: Series,
+  metric: Metric,
+  dataView: DataView,
+  references: string[] = []
+) => {
+  const params =
+    aggregation === 'moving_average' ? convertToMovingAverageParams(metric) : undefined;
+  if (params === null) {
+    return null;
+  }
+
+  const field = dataView.getFieldByName(metric.field ?? 'document');
+  if (!field) {
+    return null;
+  }
+
+  return {
+    operationType: aggregation,
+    references,
+    ...createColumn(series, metric, field),
+    params,
+  } as ParentPipelineAggColumn;
 };
