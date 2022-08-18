@@ -38,13 +38,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(solutionCards.length >= 2).to.be(true);
 
       const imageSrcs = [];
-      const re = /.*(\/(solutions_observability|solutions_security_solution)\.svg)/;
+      const re = /.*(\/solutions_(observability|security_solution)\.svg)/;
       const myRegexp = new RegExp(re, 'g');
       for (let i = 0; i < solutionCards.length; i++) {
         const solutionCard = solutionCards[i];
         const image = await solutionCard.findByCssSelector('img');
         const imageSrc = await image.getAttribute('src');
         const match = myRegexp.exec(imageSrc);
+        myRegexp.lastIndex = 0;
         if (match && match.length > 1) {
           imageSrcs.push(match[1]);
         }
