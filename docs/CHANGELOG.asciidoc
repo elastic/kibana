@@ -169,7 +169,7 @@ For detailed information about the 8.4.0 release, review the enhancements and bu
 === Enhancements
 Alerting::
 * Adds snooze state UI to Rule Details page {kibana-pull}135146[#135146]
-* {REDO} Add Snooze Scheduling UI and API {kibana-pull}134512[#134512]
+* Adds Snooze Scheduling UI and API {kibana-pull}134512[#134512]
 * Adds recovery context for ES query rule type {kibana-pull}132839[#132839]
 * Visualize alerting metrics in Stack Monitoring {kibana-pull}123726[#123726]
 
