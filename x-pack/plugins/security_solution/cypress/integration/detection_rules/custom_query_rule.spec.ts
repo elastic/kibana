@@ -218,7 +218,7 @@ describe('Custom query rules', () => {
             const initialNumberOfRules = rules.length;
             const expectedNumberOfRulesAfterDeletion = initialNumberOfRules - 1;
 
-            cy.get(SHOWING_RULES_TEXT).should('have.text', `Showing ${initialNumberOfRules} rules`);
+            cy.get(SHOWING_RULES_TEXT).should('have.text', `Showing 1-${initialNumberOfRules} of ${initialNumberOfRules} rules`);
 
             deleteFirstRule();
             waitForRulesTableToBeRefreshed();
@@ -228,7 +228,7 @@ describe('Custom query rules', () => {
               .should('have.length', expectedNumberOfRulesAfterDeletion);
             cy.get(SHOWING_RULES_TEXT).should(
               'have.text',
-              `Showing ${expectedNumberOfRulesAfterDeletion} rules`
+              `Showing 1-${expectedNumberOfRulesAfterDeletion} of ${expectedNumberOfRulesAfterDeletion} rules`
             );
             cy.get(CUSTOM_RULES_BTN).should(
               'have.text',
@@ -255,7 +255,7 @@ describe('Custom query rules', () => {
               .should('have.length', expectedNumberOfRulesAfterDeletion);
             cy.get(SHOWING_RULES_TEXT).should(
               'have.text',
-              `Showing ${expectedNumberOfRulesAfterDeletion} rule`
+              `Showing 1-${expectedNumberOfRulesAfterDeletion} of ${expectedNumberOfRulesAfterDeletion} rule`
             );
             cy.get(CUSTOM_RULES_BTN).should(
               'have.text',
@@ -283,7 +283,7 @@ describe('Custom query rules', () => {
                 .should('have.length', expectedNumberOfRulesAfterDeletion);
               cy.get(SHOWING_RULES_TEXT).should(
                 'have.text',
-                `Showing ${expectedNumberOfRulesAfterDeletion} rules`
+                `Showing 1-${expectedNumberOfRulesAfterDeletion} of ${expectedNumberOfRulesAfterDeletion} rules`
               );
               cy.get(CUSTOM_RULES_BTN).should(
                 'have.text',
