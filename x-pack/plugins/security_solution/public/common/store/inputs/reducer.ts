@@ -27,6 +27,7 @@ import {
   setSearchBarFilter,
   removeLinkTo,
   addLinkTo,
+  toggleSocTrendsLinkTo,
 } from './actions';
 import {
   setIsInspected,
@@ -37,6 +38,7 @@ import {
   removeInputLink,
   deleteOneQuery as helperDeleteOneQuery,
   updateInputFullScreen,
+  toggleLockSocTrends,
 } from './helpers';
 import type { InputsModel, TimeRange } from './model';
 
@@ -250,6 +252,7 @@ export const inputsReducer = reducerWithInitialState(initialInputsState)
     },
   }))
   .case(toggleTimelineLinkTo, (state) => toggleLockTimeline(state))
+  .case(toggleSocTrendsLinkTo, (state) => toggleLockSocTrends(state))
   .case(setInspectionParameter, (state, { id, inputId, isInspected, selectedInspectIndex }) =>
     setIsInspected({ id, inputId, isInspected, selectedInspectIndex, state })
   )

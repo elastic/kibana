@@ -67,6 +67,13 @@ export const toggleLockTimeline = (state: InputsModel): InputsModel => {
     : addInputLink(['global', 'timeline'], state);
 };
 
+export const toggleLockSocTrends = (state: InputsModel): InputsModel => {
+  const linkToIdAlreadyExist = state.global.linkTo.indexOf('socTrends');
+  return linkToIdAlreadyExist > -1
+    ? removeInputLink(['global', 'socTrends'], state)
+    : addInputLink(['global', 'socTrends'], state);
+};
+
 export interface UpdateQueryParams {
   id: string;
   inputId: InputsModelId;

@@ -11,6 +11,7 @@ import type {
   EuiSuperDatePickerRecentRange,
   OnRefreshProps,
   OnTimeChangeProps,
+  EuiSuperDatePickerProps,
 } from '@elastic/eui';
 import { EuiSuperDatePicker } from '@elastic/eui';
 import { getOr, take, isEmpty } from 'lodash/fp';
@@ -72,6 +73,8 @@ interface OwnProps {
   id: InputsModelId;
   showUpdateButton?: boolean | 'iconOnly';
   timelineId?: string;
+  width?: EuiSuperDatePickerProps['width'];
+  compressed?: EuiSuperDatePickerProps['compressed'];
 }
 
 export type SuperDatePickerProps = OwnProps & PropsFromRedux;
@@ -95,6 +98,8 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
     toStr,
     updateReduxTime,
     disabled,
+    width = 'restricted',
+    compressed = false,
   }) => {
     const [recentlyUsedRanges, setRecentlyUsedRanges] = useState<EuiSuperDatePickerRecentRange[]>(
       []
@@ -206,6 +211,8 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
         showUpdateButton={showUpdateButton}
         start={startDate}
         isDisabled={disabled}
+        width={width}
+        compressed={compressed}
       />
     );
   },

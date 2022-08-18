@@ -21,7 +21,7 @@ const TimelineDatePickerLockComponent = () => {
   );
 
   const onToggleLock = useCallback(
-    () => dispatch(inputsActions.toggleTimelineLinkTo({ linkToId: 'timeline' })),
+    () => dispatch(inputsActions.toggleTimelineLinkTo()),
     [dispatch]
   );
 

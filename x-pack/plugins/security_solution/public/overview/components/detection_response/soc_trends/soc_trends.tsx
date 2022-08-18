@@ -30,6 +30,9 @@ const SOC_TRENDS_ID = 'socTrends';
 const StyledEuiPanel = styled(EuiPanel)`
   min-width: 300px;
 `;
+const StyledEuiFlexGroup = styled(EuiFlexGroup)`
+  max-width: 300px;
+`;
 
 const SocTrendsComponent: React.FC = () => {
   const { toggleStatus, setToggleStatus } = useQueryToggle(SOC_TRENDS_ID);
@@ -48,21 +51,22 @@ const SocTrendsComponent: React.FC = () => {
     <StyledEuiPanel hasBorder>
       <HeaderSection
         id={SOC_TRENDS_ID}
+        showInspectButton={false}
+        stackHeader={true}
+        subtitle={<LastUpdatedAt updatedAt={updatedAt} isUpdating={isLoading} />}
         title={SOC_TRENDS}
         titleSize="s"
-        toggleStatus={toggleStatus}
         toggleQuery={setToggleStatus}
-        subtitle={<LastUpdatedAt updatedAt={updatedAt} isUpdating={isLoading} />}
-        showInspectButton={false}
+        toggleStatus={toggleStatus}
       >
-        <EuiFlexGroup gutterSize="s">
+        <StyledEuiFlexGroup gutterSize="s">
           <EuiFlexItem>
-            <SuperDatePicker id="socTrends" showUpdateButton="iconOnly" />
+            <SuperDatePicker id="socTrends" showUpdateButton="iconOnly" width="auto" compressed />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <SocTrendsDatePickerLock />
           </EuiFlexItem>
-        </EuiFlexGroup>
+        </StyledEuiFlexGroup>
       </HeaderSection>
       {!isLoading && toggleStatus && (
         <EuiFlexGroup direction="column" gutterSize="s">

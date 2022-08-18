@@ -21,7 +21,7 @@ const SocTrendsDatePickerLockComponent = () => {
   );
 
   const onToggleLock = useCallback(
-    () => dispatch(inputsActions.toggleTimelineLinkTo({ linkToId: 'socTrends' })),
+    () => dispatch(inputsActions.toggleSocTrendsLinkTo()),
     [dispatch]
   );
 
