@@ -59,7 +59,7 @@ describe('Prebuilt rules', () => {
 
       changeRowsPerPageTo(rowsPerPage);
 
-      cy.get(SHOWING_RULES_TEXT).should('have.text', `Showing ${expectedNumberOfRules} rules`);
+      cy.get(SHOWING_RULES_TEXT).should('have.text', `Showing 1-${rowsPerPage} of ${expectedNumberOfRules} rules`);
       cy.get(pageSelector(expectedNumberOfPages)).should('exist');
     });
 
