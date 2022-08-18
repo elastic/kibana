@@ -14,5 +14,3 @@ import { FilesExamplePlugin } from './plugin';
 export function plugin(initializerContext: PluginInitializerContext) {
   return new FilesExamplePlugin(initializerContext);
 }
-
-export { FilesExamplePluginSetup, FilesExamplePluginStart } from './types';

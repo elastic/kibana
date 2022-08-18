@@ -22,11 +22,11 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import type { FileJSON } from '@kbn/files-plugin/common';
-import { FilesClient } from '@kbn/files-plugin/public';
+import { FileClients } from '../types';
 
 interface Props {
   file: FileJSON;
-  files: FilesClient;
+  files: FileClients;
   onDismiss: () => void;
 }
 
@@ -74,13 +74,17 @@ export const DetailsFlyout: FunctionComponent<Props> = ({ files, file, onDismiss
             height: 400px;
           `}
           alt={file.alt ?? 'unknown'}
-          src={files.downloadSrc(file)}
+          src={files.example.downloadSrc(file)}
         />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiButton iconType="download" href={files.downloadSrc(file)} download={file.name}>
+            <EuiButton
+              iconType="download"
+              href={files.example.downloadSrc(file)}
+              download={file.name}
+            >
               Download
             </EuiButton>
           </EuiFlexItem>

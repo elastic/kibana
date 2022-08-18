@@ -15,6 +15,11 @@ export interface FilesExamplePluginsStart {
   files: FilesStart;
 }
 
+export interface FileClients {
+  // Example file kind
+  example: FilesClient;
+}
+
 export interface AppPluginStartDependencies {
-  files: FilesClient;
+  files: FileClients;
 }

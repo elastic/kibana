@@ -21,11 +21,15 @@ export class FilesExamplePlugin
         // Load application bundle
         const { renderApp } = await import('./application');
         // Get start services as specified in kibana.json
-        const [coreStart, depsStart] = await core.getStartServices();
+        const [coreStart, { files }] = await core.getStartServices();
         // Render the application
         return renderApp(
           coreStart,
-          { files: depsStart.files.filesClientFactory.asScoped(exampleFileKind.id) },
+          {
+            files: {
+              example: files.filesClientFactory.asScoped(exampleFileKind.id),
+            },
+          },
           params
         );
       },
