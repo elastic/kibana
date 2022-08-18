@@ -25,7 +25,7 @@ describe('setup analytics collection index', () => {
   });
 
   it("should create the analytics collection index when it doesn't exist", async () => {
-    const indexName = '.analytics-collections';
+    const indexName = '.elastic-analytics-collections';
     const analyticCollectionsMappings = {
       _meta: {
         version: ANALYTICS_VERSION,
