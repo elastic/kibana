@@ -6,5 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+
+export interface DashboardDataService {
+  query: DataPublicPluginStart['query'];
+  search: DataPublicPluginStart['search'];
+  dataViews: DataPublicPluginStart['dataViews'];
+}
+
+export type { RefreshInterval } from '@kbn/data-plugin/public';
 export type { Query, TimeRange, Filter } from '@kbn/es-query';
-export * from '@kbn/data-plugin/public';

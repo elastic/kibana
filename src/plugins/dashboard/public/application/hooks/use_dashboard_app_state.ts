@@ -39,6 +39,7 @@ import {
   areRefreshIntervalsEqual,
 } from '../lib';
 import { isDashboardAppInNoDataState } from '../dashboard_app_no_data';
+import { pluginServices } from '../../services/plugin_services';
 
 export interface UseDashboardStateProps {
   history: History;
@@ -81,11 +82,11 @@ export const useDashboardAppState = ({
    */
   const services = useKibana<DashboardAppServices>().services;
   const {
-    data,
+    // data,
     core,
     chrome,
     embeddable,
-    dataViews,
+    // dataViews,
     usageCollection,
     savedDashboards,
     initializerContext,
@@ -98,7 +99,9 @@ export const useDashboardAppState = ({
   } = services;
   const { docTitle } = chrome;
   const { notifications } = core;
-  const { query, search } = data;
+
+  const { data } = pluginServices.getServices();
+  const { query, search, dataViews } = data;
   const { getStateTransfer } = embeddable;
   const { version: kibanaVersion } = initializerContext.env.packageInfo;
 
@@ -253,7 +256,7 @@ export const useDashboardAppState = ({
        */
       const dataViewsSubscription = syncDashboardDataViews({
         dashboardContainer,
-        dataViews: dashboardBuildContext.dataViews,
+        // dataViews: dashboardBuildContext.dataViews,
         onUpdateDataViews: async (newDataViewIds: string[]) => {
           if (newDataViewIds?.[0]) {
             dashboardContainer.controlGroup?.setRelevantDataViewId(newDataViewIds[0]);

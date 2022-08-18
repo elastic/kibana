@@ -31,10 +31,9 @@ import { EmbeddableStart } from './services/embeddable';
 import { DashboardSessionStorage } from './application/lib';
 import { UsageCollectionSetup } from './services/usage_collection';
 import { NavigationPublicPluginStart } from './services/navigation';
-import { Query, RefreshInterval, TimeRange } from './services/data';
+import { Query, RefreshInterval, TimeRange } from './services/data/types';
 import { DashboardPanelState, SavedDashboardPanel } from '../common/types';
 import { SavedObjectsTaggingApi } from './services/saved_objects_tagging_oss';
-import { DataPublicPluginStart, DataViewsContract } from './services/data';
 import { ContainerInput, EmbeddableInput, ViewMode } from './services/embeddable';
 import { SavedObjectLoader, SavedObjectsStart } from './services/saved_objects';
 import type { ScreenshotModePluginStart } from './services/screenshot_mode';
@@ -42,6 +41,7 @@ import { IKbnUrlStateStorage } from './services/kibana_utils';
 import type { DashboardContainer, DashboardSavedObject } from '.';
 import { DashboardAppLocatorParams } from './locator';
 import { SpacesPluginStart } from './services/spaces';
+import { DashboardServices } from './services/types';
 
 export type { SavedDashboardPanel };
 
@@ -128,15 +128,17 @@ export interface DashboardAppState {
 export type DashboardBuildContext = Pick<
   DashboardAppServices,
   | 'embeddable'
-  | 'dataViews'
+  // | 'dataViews'
   | 'savedDashboards'
   | 'usageCollection'
   | 'initializerContext'
   | 'savedObjectsTagging'
   | 'dashboardCapabilities'
 > & {
-  query: DashboardAppServices['data']['query'];
-  search: DashboardAppServices['data']['search'];
+  query: DashboardServices['data']['query'];
+  search: DashboardServices['data']['search'];
+  dataViews: DashboardServices['data']['dataViews'];
+
   notifications: DashboardAppServices['core']['notifications'];
 
   locatorState?: DashboardAppLocatorParams;
@@ -199,7 +201,7 @@ export interface DashboardAppServices {
   chrome: ChromeStart;
   share?: SharePluginStart;
   embeddable: EmbeddableStart;
-  data: DataPublicPluginStart;
+  // data: DataPublicPluginStart;
   uiSettings: IUiSettingsClient;
   restorePreviousUrl: () => void;
   savedObjects: SavedObjectsStart;
@@ -209,7 +211,7 @@ export interface DashboardAppServices {
   scopedHistory: () => ScopedHistory;
   visualizations: VisualizationsStart;
   dataViewEditor: DataViewEditorStart;
-  dataViews: DataViewsContract;
+  // dataViews: DataViewsContract;
   usageCollection?: UsageCollectionSetup;
   navigation: NavigationPublicPluginStart;
   dashboardCapabilities: DashboardAppCapabilities;

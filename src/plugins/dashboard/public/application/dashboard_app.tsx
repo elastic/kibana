@@ -25,6 +25,7 @@ import { DashboardTopNav, isCompleteDashboardAppState } from './top_nav/dashboar
 import { DashboardAppServices, DashboardEmbedSettings, DashboardRedirect } from '../types';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '../services/kibana_utils';
 import { DashboardAppNoDataPage } from './dashboard_app_no_data';
+import { pluginServices } from '../services/plugin_services';
 export interface DashboardAppProps {
   history: History;
   savedDashboardId?: string;
@@ -44,10 +45,11 @@ export function DashboardApp({
     embeddable,
     onAppLeave,
     uiSettings,
-    data,
+    // data,
     spacesService,
     screenshotModeService,
   } = useKibana<DashboardAppServices>().services;
+  const { data } = pluginServices.getServices();
 
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
   const dashboardTitleRef = useRef<HTMLHeadingElement>(null);

@@ -9,7 +9,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 
-import { Filter, Query, TimeRange } from '../../services/data';
+import { Filter, Query, TimeRange } from '../../services/data/types';
 import { ViewMode } from '../../services/embeddable';
 import { DashboardOptions, DashboardPanelMap, DashboardState } from '../../types';
 

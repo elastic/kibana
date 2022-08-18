@@ -24,11 +24,11 @@ import {
   SolutionToolbar,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
+import { SavedQuery } from '@kbn/data-plugin/common';
 import { saveDashboard } from '../lib';
 import { TopNavIds } from './top_nav_ids';
 import { EditorMenu } from './editor_menu';
 import { UI_SETTINGS } from '../../../common';
-import { SavedQuery } from '../../services/data';
 import { DashboardSaveModal } from './save_modal';
 import { showCloneModal } from './show_clone_modal';
 import { ShowShareModal } from './show_share_modal';
@@ -54,6 +54,7 @@ import {
   useDashboardDispatch,
   useDashboardSelector,
 } from '../state';
+import { pluginServices } from '../../services/plugin_services';
 
 export interface DashboardTopNavState {
   chromeIsVisible: boolean;
@@ -95,7 +96,7 @@ export function DashboardTopNav({
 }: DashboardTopNavProps) {
   const {
     core,
-    data,
+    // data,
     share,
     chrome,
     embeddable,
@@ -110,6 +111,8 @@ export function DashboardTopNav({
     dashboardSessionStorage,
     allowByValueEmbeddables,
   } = useKibana<DashboardAppServices>().services;
+  const { data } = pluginServices.getServices();
+
   const { version: kibanaVersion } = initializerContext.env.packageInfo;
   const timefilter = data.query.timefilter.timefilter;
   const { notifications, theme } = core;

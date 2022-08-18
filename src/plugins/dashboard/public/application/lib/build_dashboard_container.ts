@@ -28,9 +28,10 @@ import {
   ErrorEmbeddable,
   isErrorEmbeddable,
 } from '../../services/embeddable';
+import { pluginServices } from '../../services/plugin_services';
 
 type BuildDashboardContainerProps = DashboardBuildContext & {
-  data: DashboardAppServices['data']; // the whole data service is required here because it is required by getLocatorParams
+  // data: DashboardAppServices['data']; // the whole data service is required here because it is required by getLocatorParams
   savedDashboard: DashboardSavedObject;
   initialDashboardState: DashboardState;
   incomingEmbeddable?: EmbeddablePackageState;
@@ -50,16 +51,17 @@ export const buildDashboardContainer = async ({
   kibanaVersion,
   embeddable,
   history,
-  data,
+  // data,
   executionContext,
 }: BuildDashboardContainerProps) => {
+  const { data } = pluginServices.getServices();
   const {
     search: { session },
   } = data;
 
   // set up search session
   enableDashboardSearchSessions({
-    data,
+    // data,
     kibanaVersion,
     savedDashboard,
     initialDashboardState,

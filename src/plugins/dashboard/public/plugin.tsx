@@ -29,6 +29,7 @@ import { VisualizationsStart } from '@kbn/visualizations-plugin/public';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 import { createKbnUrlTracker } from './services/kibana_utils';
 import { UsageCollectionSetup } from './services/usage_collection';
@@ -36,7 +37,6 @@ import { UiActionsSetup, UiActionsStart } from './services/ui_actions';
 import { PresentationUtilPluginStart } from './services/presentation_util';
 import type { HomePublicPluginSetup } from './services/home';
 import { NavigationPublicPluginStart as NavigationStart } from './services/navigation';
-import { DataPublicPluginSetup, DataPublicPluginStart } from './services/data';
 import { SharePluginSetup, SharePluginStart } from './services/share';
 import type { SavedObjectTaggingOssPluginStart } from './services/saved_objects_tagging_oss';
 import type {
@@ -142,6 +142,14 @@ export class DashboardPlugin
   private currentHistory: ScopedHistory | undefined = undefined;
   private dashboardFeatureFlagConfig?: DashboardFeatureFlagConfig;
   private locator?: DashboardAppLocator;
+
+  private async startDashboardKibanaServices(
+    coreStart: CoreStart,
+    startPlugins: DashboardStartDependencies
+  ) {
+    const { registry, pluginServices } = await import('./services/plugin_services');
+    pluginServices.setRegistry(registry.start({ coreStart, startPlugins }));
+  }
 
   public setup(
     core: CoreSetup<DashboardStartDependencies, DashboardStart>,
@@ -343,6 +351,7 @@ export class DashboardPlugin
   public start(core: CoreStart, plugins: DashboardStartDependencies): DashboardStart {
     const { notifications, overlays, application, theme, uiSettings } = core;
     const { uiActions, data, share, presentationUtil, embeddable } = plugins;
+    this.startDashboardKibanaServices(core, plugins);
 
     const dashboardCapabilities: Readonly<DashboardCapabilities> = application.capabilities
       .dashboard as DashboardCapabilities;

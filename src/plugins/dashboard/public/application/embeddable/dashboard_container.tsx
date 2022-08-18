@@ -20,7 +20,7 @@ import { Filter, TimeRange } from '@kbn/es-query';
 import { DataView } from '@kbn/data-views-plugin/public';
 
 import { UiActionsStart } from '../../services/ui_actions';
-import { RefreshInterval, Query } from '../../services/data';
+import { RefreshInterval, Query } from '../../services/data/types';
 import {
   ViewMode,
   Container,

@@ -15,7 +15,7 @@ import { SerializableControlGroupInput } from '@kbn/controls-plugin/common';
 import { DashboardSavedObject } from '../..';
 import { shareModalStrings } from '../../dashboard_strings';
 import { DashboardAppLocatorParams, DASHBOARD_APP_LOCATOR } from '../../locator';
-import { TimeRange } from '../../services/data';
+import { TimeRange } from '../../services/data/types';
 import { ViewMode } from '../../services/embeddable';
 import { setStateToKbnUrl, unhashUrl } from '../../services/kibana_utils';
 import { SharePluginStart } from '../../services/share';

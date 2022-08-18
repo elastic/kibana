@@ -7,7 +7,7 @@
  */
 
 import { has } from 'lodash';
-import { Query } from '../../services/data';
+import { Query } from '../../services/data/types';
 
 /**
  * Creates a standardized query object from old queries that were either strings or pure ES query DSL

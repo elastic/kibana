@@ -9,18 +9,17 @@
 import _ from 'lodash';
 import { merge } from 'rxjs';
 import { debounceTime, finalize, map, switchMap, tap } from 'rxjs/operators';
+import {
+  connectToQueryState,
+  GlobalQueryStateFromUrl,
+  syncQueryStateWithUrl,
+  waitUntilNextSessionCompletes$,
+} from '@kbn/data-plugin/public';
 import { setQuery } from '../state';
 import { DashboardBuildContext, DashboardState } from '../../types';
 import { DashboardSavedObject } from '../../saved_dashboards';
 import { setFiltersAndQuery } from '../state/dashboard_state_slice';
-import {
-  syncQueryStateWithUrl,
-  connectToQueryState,
-  Filter,
-  Query,
-  waitUntilNextSessionCompletes$,
-  GlobalQueryStateFromUrl,
-} from '../../services/data';
+import { Filter, Query } from '../../services/data/types';
 import { cleanFiltersForSerialize } from '.';
 
 type SyncDashboardFilterStateProps = DashboardBuildContext & {

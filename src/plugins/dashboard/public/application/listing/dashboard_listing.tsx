@@ -18,8 +18,9 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ApplicationStart, SavedObjectsFindOptionsReference } from '@kbn/core/public';
-import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import useMount from 'react-use/lib/useMount';
+import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
+import { syncQueryStateWithUrl } from '@kbn/data-plugin/public';
 import { attemptLoadDashboardByTitle } from '../lib';
 import { DashboardAppServices, DashboardRedirect } from '../../types';
 import {
@@ -29,7 +30,6 @@ import {
   dashboardUnsavedListingStrings,
   getNewDashboardTitle,
 } from '../../dashboard_strings';
-import { syncQueryStateWithUrl } from '../../services/data';
 import { IKbnUrlStateStorage } from '../../services/kibana_utils';
 import { TableListView, useKibana } from '../../services/kibana_react';
 import { SavedObjectsTaggingApi } from '../../services/saved_objects_tagging_oss';
@@ -38,6 +38,7 @@ import { confirmCreateWithUnsaved, confirmDiscardUnsavedChanges } from './confir
 import { getDashboardListItemLink } from './get_dashboard_list_item_link';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_session_storage';
 import { DashboardAppNoDataPage, isDashboardAppInNoDataState } from '../dashboard_app_no_data';
+import { pluginServices } from '../../services/plugin_services';
 
 const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
 const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
@@ -58,8 +59,8 @@ export const DashboardListing = ({
   const {
     services: {
       core,
-      data,
-      dataViews,
+      // data,
+      // dataViews,
       savedDashboards,
       savedObjectsClient,
       savedObjectsTagging,
@@ -68,6 +69,9 @@ export const DashboardListing = ({
       chrome: { setBreadcrumbs },
     },
   } = useKibana<DashboardAppServices>();
+
+  const { data } = pluginServices.getServices();
+  const { dataViews } = data;
 
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
   useMount(() => {
