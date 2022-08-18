@@ -14,7 +14,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
 import React from 'react';
-import { enableInfrastructureView } from '@kbn/observability-plugin/public';
 import {
   isMobileAgentName,
   isJavaAgentName,
@@ -177,8 +176,6 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
     capabilities
   );
 
-  const showInfraTab = core.uiSettings.get<boolean>(enableInfrastructureView);
-
   const router = useApmRouter();
 
   const {
@@ -269,8 +266,6 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.home.infraTabLabel', {
         defaultMessage: 'Infrastructure',
       }),
-
-      hidden: !showInfraTab,
     },
     {
       key: 'service-map',
