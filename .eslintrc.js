@@ -178,6 +178,7 @@ const DEV_PATTERNS = [
   'src/dev/**/*',
   'x-pack/{dev-tools,tasks,scripts,test,build_chromium}/**/*',
   'x-pack/plugins/*/server/scripts/**/*',
+  'x-pack/plugins/fleet/cypress',
 ];
 
 /** Restricted imports with suggested alternatives */
@@ -1341,7 +1342,7 @@ module.exports = {
      * Discover overrides
      */
     {
-      files: ['src/plugins/discover/**/*.{ts,tsx}'],
+      files: ['src/plugins/discover/**/*.{ts,tsx}', 'src/plugins/saved_search/**/*.{ts,tsx}'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
         '@typescript-eslint/ban-ts-comment': [

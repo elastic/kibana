@@ -10,7 +10,7 @@ import expect from '@kbn/expect';
 import { Spaces } from '../../../../scenarios';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME, getUrlPrefix } from '../../../../../common/lib';
-import { createEsDocuments } from './create_test_data';
+import { createEsDocumentsWithGroups } from '../lib/create_test_data';
 import { createDataStream, deleteDataStream } from '../lib/create_test_data';
 
 const API_URI = 'api/triggers_actions_ui/data/_indices';
@@ -27,7 +27,7 @@ export default function indicesEndpointTests({ getService }: FtrProviderContext)
     before(async () => {
       await esTestIndexTool.destroy();
       await esTestIndexTool.setup();
-      await createEsDocuments(es, esTestIndexTool);
+      await createEsDocumentsWithGroups({ es, esTestIndexTool });
       await createDataStream(es, ES_TEST_DATA_STREAM_NAME);
     });
 

@@ -112,7 +112,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   const showSpikeAnalysisTable = data?.changePoints.length > 0;
 
   return (
-    <>
+    <div data-test-subj="aiopsExplainLogRateSpikesAnalysis">
       <ProgressControls
         progress={data.loaded}
         progressMessage={data.loadingState ?? ''}
@@ -124,6 +124,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
       <EuiSpacer size="xs" />
       {!isRunning && !showSpikeAnalysisTable && (
         <EuiEmptyPrompt
+          data-test-subj="aiopsNoResultsFoundEmptyPrompt"
           title={
             <h2>
               <FormattedMessage
@@ -179,6 +180,6 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
           selectedChangePoint={selectedChangePoint}
         />
       )}
-    </>
+    </div>
   );
 };
