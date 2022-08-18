@@ -15,7 +15,10 @@ import { EuiSuperDatePicker, EuiDataGrid } from '@elastic/eui';
 import { RuleEventLogListStatusFilter } from './rule_event_log_list_status_filter';
 import { RuleEventLogList } from './rule_event_log_list';
 import { RefineSearchPrompt } from '../refine_search_prompt';
-import { RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS } from '../../../constants';
+import {
+  RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS,
+  GLOBAL_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS,
+} from '../../../constants';
 import { mockRule, mockRuleType, mockRuleSummary } from './test_helpers';
 import { RuleType } from '../../../../types';
 import { loadActionErrorLog } from '../../../lib/rule_api/load_action_error_log';
@@ -509,7 +512,7 @@ describe('rule_event_log_list', () => {
       JSON.parse(
         localStorage.getItem('xpack.triggersActionsUI.ruleEventLogList.initialColumns') ?? 'null'
       )
-    ).toEqual(RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS);
+    ).toEqual(GLOBAL_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS);
 
     wrapper.find('[data-test-subj="dataGridColumnSelectorButton"] button').simulate('click');
 
@@ -528,14 +531,7 @@ describe('rule_event_log_list', () => {
       JSON.parse(
         localStorage.getItem('xpack.triggersActionsUI.ruleEventLogList.initialColumns') ?? 'null'
       )
-    ).toEqual([
-      'rule_name',
-      'timestamp',
-      'execution_duration',
-      'status',
-      'message',
-      'num_errored_actions',
-    ]);
+    ).toEqual(['timestamp', 'execution_duration', 'status', 'message', 'num_errored_actions']);
   });
 
   it('does not show the refine search prompt normally', async () => {
