@@ -21,13 +21,26 @@ import { i18n } from '@kbn/i18n';
 
 import { APP_SEARCH_PLUGIN } from '../../../../../../../common/constants';
 import { ENGINE_CREATION_PATH } from '../../../../../app_search/routes';
+import { ESINDEX_QUERY_PARAMETER } from '../../../../../shared/constants';
 import { KibanaLogic } from '../../../../../shared/kibana';
+import { addQueryParameter } from '../../../../../shared/query_params';
 
 import { SearchEnginesPopoverLogic } from './search_engines_popover_logic';
 
-export const SearchEnginesPopover: React.FC = () => {
+export interface SearchEnginesPopoverProps {
+  indexName?: string;
+}
+
+export const SearchEnginesPopover: React.FC<SearchEnginesPopoverProps> = ({ indexName }) => {
   const { isSearchEnginesPopoverOpen } = useValues(SearchEnginesPopoverLogic);
   const { toggleSearchEnginesPopover } = useActions(SearchEnginesPopoverLogic);
+  const engineCreationURL = () => {
+    const url = `${APP_SEARCH_PLUGIN.URL}${ENGINE_CREATION_PATH}`;
+    if (!indexName) {
+      return url;
+    }
+    return addQueryParameter(url, ESINDEX_QUERY_PARAMETER, indexName);
+  };
 
   return (
     <EuiPopover
@@ -63,7 +76,7 @@ export const SearchEnginesPopover: React.FC = () => {
           <EuiContextMenuItem
             icon="plusInCircle"
             onClick={() => {
-              KibanaLogic.values.navigateToUrl(APP_SEARCH_PLUGIN.URL + ENGINE_CREATION_PATH, {
+              KibanaLogic.values.navigateToUrl(engineCreationURL(), {
                 shouldNotCreateHref: true,
               });
             }}

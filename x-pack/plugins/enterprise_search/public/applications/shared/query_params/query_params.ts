@@ -7,5 +7,17 @@
 
 import queryString from 'query-string';
 
-export const parseQueryParams = (search: string) =>
-  queryString.parse(search, { arrayFormat: 'bracket' });
+const PARSE_OPTIONS: queryString.ParseOptions = { arrayFormat: 'bracket' };
+const STRINGIFY_OPTIONS: queryString.StringifyOptions = {
+  arrayFormat: 'bracket',
+  encode: true,
+  strict: true,
+};
+
+export const parseQueryParams = (search: string) => queryString.parse(search, PARSE_OPTIONS);
+
+export const addQueryParameter = (url: string, key: string, value: string) => {
+  const { url: baseUrl, query } = queryString.parseUrl(url, PARSE_OPTIONS);
+  query[key] = value;
+  return `${baseUrl}?${queryString.stringify(query, STRINGIFY_OPTIONS)}`;
+};

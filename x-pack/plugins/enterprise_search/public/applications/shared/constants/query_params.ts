@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { parseQueryParams, addQueryParameter } from './query_params';
+export const ESINDEX_QUERY_PARAMETER = 'esindex';
