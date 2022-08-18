@@ -505,6 +505,15 @@ export class DiscoverPageObject extends FtrService {
     await this.header.waitUntilLoadingHasFinished();
   }
 
+  public async getIndexPatterns() {
+    await this.testSubjects.click('discover-dataView-switch-link');
+    const indexPatternSwitcher = await this.testSubjects.find('indexPattern-switcher');
+    const li = await indexPatternSwitcher.findAllByTagName('li');
+    const items = await Promise.all(li.map((lis) => lis.getVisibleText()));
+    await this.testSubjects.click('discover-dataView-switch-link');
+    return items;
+  }
+
   public async selectTextBaseLang(lang: 'SQL') {
     await this.testSubjects.click('discover-dataView-switch-link');
     await this.find.clickByCssSelector(
