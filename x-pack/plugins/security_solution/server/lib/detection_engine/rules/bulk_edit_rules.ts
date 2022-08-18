@@ -6,19 +6,21 @@
  */
 
 import pMap from 'p-map';
-import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { RulesClient, BulkEditError } from '@kbn/alerting-plugin/server';
 import type {
   BulkActionEditPayload,
   bulkActionEditPayloadRuleActions,
 } from '../../../../common/detection_engine/schemas/common';
 import { enrichFilterWithRuleTypeMapping } from './enrich_filter_with_rule_type_mappings';
 import type { MlAuthz } from '../../machine_learning/authz';
-
 import { ruleParamsModifier } from './bulk_actions/rule_params_modifier';
 import { splitBulkEditActions } from './bulk_actions/split_bulk_edit_actions';
 import { validateBulkEditRule } from './bulk_actions/validations';
 import { bulkEditActionToRulesClientOperation } from './bulk_actions/action_to_rules_client_operation';
-import { NOTIFICATION_THROTTLE_NO_ACTIONS } from '../../../../common/constants';
+import {
+  NOTIFICATION_THROTTLE_NO_ACTIONS,
+  MAX_RULES_TO_UPDATE_IN_PARALLEL,
+} from '../../../../common/constants';
 import { BulkActionEditType } from '../../../../common/detection_engine/schemas/common/schemas';
 import { readRules } from './read_rules';
 
@@ -63,7 +65,8 @@ export const bulkEditRules = async ({
   });
 
   // rulesClient bulkEdit currently doesn't support bulk mute/unmute.
-  // this is a workaround to mitigate this
+  // this is a workaround to mitigate this,
+  // until https://github.com/elastic/kibana/pull/138900 is resolved
   // if rule actions has been applied:
   // - we go through each rule
   // - mute/unmute if needed, refetch rule
@@ -73,27 +76,45 @@ export const bulkEditRules = async ({
   const rulesAction = attributesActions.find(({ type }) =>
     [BulkActionEditType.set_rule_actions, BulkActionEditType.add_rule_actions].includes(type)
   ) as bulkActionEditPayloadRuleActions;
+
   if (rulesAction) {
+    const errors: BulkEditError[] = [];
     const rules = await pMap(
       result.rules,
       async (rule) => {
-        if (rule.muteAll && rulesAction.value.throttle !== NOTIFICATION_THROTTLE_NO_ACTIONS) {
-          await rulesClient.unmuteAll({ id: rule.id });
-          return (await readRules({ rulesClient, id: rule.id, ruleId: undefined })) ?? rule;
-        } else if (
-          !rule.muteAll &&
-          rulesAction.value.throttle === NOTIFICATION_THROTTLE_NO_ACTIONS
-        ) {
-          await rulesClient.muteAll({ id: rule.id });
-          return (await readRules({ rulesClient, id: rule.id, ruleId: undefined })) ?? rule;
-        }
+        try {
+          if (rule.muteAll && rulesAction.value.throttle !== NOTIFICATION_THROTTLE_NO_ACTIONS) {
+            await rulesClient.unmuteAll({ id: rule.id });
+            return (await readRules({ rulesClient, id: rule.id, ruleId: undefined })) ?? rule;
+          } else if (
+            !rule.muteAll &&
+            rulesAction.value.throttle === NOTIFICATION_THROTTLE_NO_ACTIONS
+          ) {
+            await rulesClient.muteAll({ id: rule.id });
+            return (await readRules({ rulesClient, id: rule.id, ruleId: undefined })) ?? rule;
+          }
 
-        return rule;
+          return rule;
+        } catch (err) {
+          errors.push({
+            message: err.message,
+            rule: {
+              id: rule.id,
+              name: rule.name,
+            },
+          });
+
+          return null;
+        }
       },
-      { concurrency: 50 }
+      { concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL }
     );
 
-    return { ...result, rules };
+    return {
+      ...result,
+      rules: rules.filter((rule): rule is RuleAlertType => rule != null),
+      errors: [...result.errors, ...errors],
+    };
   }
 
   return result;
