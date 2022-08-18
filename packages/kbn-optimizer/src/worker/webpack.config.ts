@@ -287,14 +287,17 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
     optimization: {
       minimizer: [
         new TerserPlugin({
-          cache: false,
-          sourceMap: false,
-          extractComments: false,
-          parallel: false,
           terserOptions: {
             compress: { passes: 2 },
             keep_classnames: true,
             mangle: true,
+          },
+          // @ts-expect-error
+          minify: async (file, sourceMap, minimizerOptions) => {
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
+            const swc = require('@swc/core');
+            const { map, code } = await swc.minify(file, minimizerOptions.terserOptions);
+            return { map, code, extractedComments: [] };
           },
         }),
       ],
