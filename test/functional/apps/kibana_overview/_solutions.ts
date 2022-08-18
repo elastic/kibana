@@ -33,20 +33,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
-    it('contains the appropriate solutions', async () => {
+    it('contains Security and Observability solutions', async () => {
       const solutionCards = await find.allByCssSelector('.kbnOverviewMore__item');
-      expect(solutionCards.length).to.be(2);
+      expect(solutionCards.length >= 2).to.be(true);
 
-      const observabilityImage = await solutionCards[0].findByCssSelector('img');
-      const observabilityImageUrl = await observabilityImage.getAttribute('src');
-      expect(observabilityImageUrl.includes('/solutions_observability.svg')).to.be(true);
-
-      const securityImage = await solutionCards[1].findByCssSelector('img');
-      const securityImageUrl = await securityImage.getAttribute('src');
-      expect(securityImageUrl.includes('/solutions_security_solution.svg')).to.be(true);
+      const imageSrcs = [];
+      // Note: please restart the page if syntax highlighting works bad.
+      const re = /.*(\/(solutions_observability|solutions_security_solution)\.svg)/;
+      const myRegexp = new RegExp(re, 'g');
+      for (let i = 0; i < solutionCards.length; i++) {
+        const solutionCard = solutionCards[i];
+        const image = await solutionCard.findByCssSelector('img');
+        const imageSrc = await image.getAttribute('src');
+        const match = myRegexp.exec(imageSrc);
+        if (match && match.length > 1) {
+          imageSrcs.push(match[1]);
+        }
+      }
+      expect(imageSrcs.includes('/solutions_observability.svg')).to.be(true);
+      expect(imageSrcs.includes('/solutions_security_solution.svg')).to.be(true);
     });
 
-    it('click on Observability card leads to Observability', async () => {
+    // skipped as on Cloud it's a different setup than locally
+    xit('click on Observability card leads to Observability', async () => {
       let solutionCards: string | any[] = [];
       await retry.waitForWithTimeout('all solutions to be present', 5000, async () => {
         solutionCards = await find.allByCssSelector('.kbnOverviewMore__item');
@@ -56,7 +65,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.waitUntilUrlIncludes('app/observability');
     });
 
-    it('click on Security card leads to Security', async () => {
+    // skipped as on Cloud it's a different setup than locally
+    xit('click on Security card leads to Security', async () => {
       await PageObjects.common.navigateToUrl('kibana_overview', '', { useActualUrl: true });
       await PageObjects.header.waitUntilLoadingHasFinished();
 
