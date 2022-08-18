@@ -100,15 +100,16 @@ const RuleActionsFormComponent = ({ rulesCount, onClose, onConfirm }: RuleAction
       return;
     }
 
-    const editAction = data.overwrite
+    const { actions = [], throttle: throttleToSubmit, overwrite: overwriteValue } = data;
+    const editAction = overwriteValue
       ? BulkActionEditType.set_rule_actions
       : BulkActionEditType.add_rule_actions;
 
     onConfirm({
       type: editAction,
       value: {
-        actions: data.actions.map(({ actionTypeId, ...action }) => action),
-        throttle: data.throttle,
+        actions: actions.map(({ actionTypeId, ...action }) => action),
+        throttle: throttleToSubmit,
       },
     });
   }, [form, onConfirm]);
@@ -116,7 +117,6 @@ const RuleActionsFormComponent = ({ rulesCount, onClose, onConfirm }: RuleAction
   const throttleFieldComponentProps = useMemo(
     () => ({
       idAria: 'bulkEditRulesRuleActionThrottle',
-      isLoading: true,
       dataTestSubj: 'bulkEditRulesRuleActionThrottle',
       hasNoInitialSelection: false,
       euiFieldProps: {
@@ -126,7 +126,7 @@ const RuleActionsFormComponent = ({ rulesCount, onClose, onConfirm }: RuleAction
     []
   );
 
-  const showActionsSelect = throttle !== defaultFormData.throttle;
+  const showActionsSelect = throttle !== NOTIFICATION_THROTTLE_NO_ACTIONS;
 
   return (
     <BulkEditFormWrapper
