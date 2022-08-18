@@ -96,7 +96,7 @@ export function ActionsPopover({
             size="s"
             display="base"
             style={{ backgroundColor: theme.eui.euiColorLightestShade }}
-            onClick={() => setIsPopoverOpen((b) => !b)}
+            onClick={() => setIsPopoverOpen((b: boolean) => !b)}
           />
         }
         color="lightestShade"
