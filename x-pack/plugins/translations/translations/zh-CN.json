@@ -18268,7 +18268,6 @@
     "xpack.maps.source.esSearch.convertToGeoJsonErrorMsg": "无法将搜索响应转换成 geoJson 功能集合，错误：{errorMsg}",
     "xpack.maps.source.esSearch.limitScalingLabel": "将结果数限制到 {maxResultWindow}",
     "xpack.maps.source.esSearch.loadTooltipPropertiesErrorMsg": "找不到文档，_id：{docId}",
-    "xpack.maps.source.esSearch.mvtDisableReason": "矢量磁帖 API 不支持运行时 {type} 字段",
     "xpack.maps.source.esSearch.mvtScalingJoinMsg": "矢量磁贴支持一个词联接。您的图层具有 {numberOfJoins} 个词联接。切换到矢量磁贴会保留第一个词联接，并从图层配置中移除所有其他词联接。",
     "xpack.maps.source.esSource.requestFailedErrorMessage": "Elasticsearch 搜索请求失败，错误：{message}",
     "xpack.maps.source.esSource.stylePropsMetaRequestName": "{layerName} - 元数据",
