@@ -75,7 +75,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
       },
     } = useMlKibana();
 
-    const globalTimeRange = useTimeRangeUpdates();
+    const globalTimeRange = useTimeRangeUpdates(true);
 
     const selectCaseModal = cases?.hooks.getUseCasesAddToExistingCaseModal();
 
