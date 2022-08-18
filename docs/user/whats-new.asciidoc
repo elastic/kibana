@@ -18,7 +18,6 @@ coming::[8.4.0]
 [[highlights-8.4-release-docs]]
 === Elastic release docs now in one place
 With the new https://www.elastic.co/guide/en/welcome-to-elastic/current/new.html[Check out the latest from Elastic] page, you can now easily find all the latest information about Elastic features and updates. From release highlights, to breaking changes, to bug fixes, and more, you can now easily access all of this information in a single location.
-We’ve made it easy for you to find everything you need to know with
 the new
 https://www.elastic.co/guide/en/welcome-to-elastic/current/new.html[Check out the latest from Elastic] page.
 Now you can access all release information you need in a single location.
