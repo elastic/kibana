@@ -18,7 +18,6 @@ import {
   IconType,
   EuiIcon,
   EuiToolTip,
-  CriteriaWithPagination,
   EuiSearchBarProps,
   SearchFilterConfig,
   Query,
@@ -66,8 +65,6 @@ interface SavedObjectFinderState {
   items: SavedObjectFinderItem[];
   query: Query;
   isFetchingItems: boolean;
-  page: number;
-  perPage: number;
   sort?: PropertySort;
 }
 
@@ -189,7 +186,6 @@ class SavedObjectFinderUi extends React.Component<
     if (query.text === this.state.query.text) {
       this.setState({
         isFetchingItems: false,
-        page: 0,
         items: savedObjects,
       });
     }
@@ -201,8 +197,6 @@ class SavedObjectFinderUi extends React.Component<
     this.state = {
       items: [],
       isFetchingItems: false,
-      page: 0,
-      perPage: props.initialPageSize || props.fixedPageSize || 10,
       query: Query.parse(''),
     };
   }
@@ -249,6 +243,7 @@ class SavedObjectFinderUi extends React.Component<
             typeof originalTagColumn.sortable === 'function'
               ? originalTagColumn.sortable(item) ?? ''
               : '',
+          ['data-test-subj']: 'savedObjectFinderTags',
         }
       : undefined;
     const typeColumn: EuiTableFieldDataColumnType<SavedObjectFinderItem> | undefined =
@@ -337,11 +332,15 @@ class SavedObjectFinderUi extends React.Component<
       ...(tagColumn ? [tagColumn] : []),
     ];
     const pagination = {
-      pageIndex: this.state.page,
-      pageSize: this.state.perPage,
-      totalItemCount: this.state.items.length,
+      initialPageSize: this.props.initialPageSize || this.props.fixedPageSize || 10,
       pageSizeOptions: [5, 10, 15, 25],
       showPerPageOptions: !this.props.fixedPageSize,
+    };
+    const sorting = {
+      sort: this.state.sort ?? {
+        field: this.state.query?.text ? '' : 'title',
+        direction: 'asc',
+      },
     };
     const typeFilter: SearchFilterConfig = {
       type: 'field_value_selection',
@@ -361,6 +360,7 @@ class SavedObjectFinderUi extends React.Component<
       },
       box: {
         incremental: true,
+        'data-test-subj': 'savedObjectFinderSearchInput',
       },
       filters: this.props.showFilter
         ? [
@@ -369,7 +369,6 @@ class SavedObjectFinderUi extends React.Component<
           ]
         : undefined,
       toolsRight: this.props.children ? <>{this.props.children}</> : undefined,
-      'data-test-subj': 'savedObjectFinderSearchInput',
     };
 
     return (
@@ -381,15 +380,9 @@ class SavedObjectFinderUi extends React.Component<
         message={this.props.noItemsMessage}
         search={search}
         pagination={pagination}
-        sorting={this.state.sort ? { sort: this.state.sort } : true}
-        onChange={(table: CriteriaWithPagination<SavedObjectFinderItem>) => {
-          const { index: page, size: perPage } = table.page || {};
-
-          this.setState({
-            page,
-            perPage,
-            sort: table.sort,
-          });
+        sorting={sorting}
+        onTableChange={({ sort }) => {
+          this.setState({ sort });
         }}
       />
     );

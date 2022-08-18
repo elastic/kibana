@@ -12,7 +12,7 @@ jest.mock('lodash', () => ({
 
 const nextTick = () => new Promise((res) => process.nextTick(res));
 
-import { EuiInMemoryTable, EuiLink, EuiSearchBarProps, Pagination, Query } from '@elastic/eui';
+import { EuiInMemoryTable, EuiLink, EuiSearchBarProps, Query } from '@elastic/eui';
 import { IconType } from '@elastic/eui';
 import { mount, shallow } from 'enzyme';
 import React from 'react';
@@ -274,8 +274,8 @@ describe('SavedObjectsFinder', () => {
       await nextTick();
       wrapper.update();
       const titleLinks = wrapper.find(EuiLink);
-      expect(titleLinks.at(0).text()).toEqual(doc.attributes.title);
-      expect(titleLinks.at(1).text()).toEqual(doc2.attributes.title);
+      expect(titleLinks.at(0).text()).toEqual(doc2.attributes.title);
+      expect(titleLinks.at(1).text()).toEqual(doc.attributes.title);
     });
 
     it('should list items by title descending', async () => {
@@ -302,8 +302,8 @@ describe('SavedObjectsFinder', () => {
         'tableHeaderSortButton'
       ).simulate('click');
       const titleLinks = wrapper.find(EuiLink);
-      expect(titleLinks.at(0).text()).toEqual(doc2.attributes.title);
-      expect(titleLinks.at(1).text()).toEqual(doc.attributes.title);
+      expect(titleLinks.at(0).text()).toEqual(doc.attributes.title);
+      expect(titleLinks.at(1).text()).toEqual(doc2.attributes.title);
     });
 
     it('should list items by tag ascending', async () => {
@@ -806,9 +806,9 @@ describe('SavedObjectsFinder', () => {
       wrapper.instance().componentDidMount!();
       await nextTick();
       wrapper.update();
-      const pagination = wrapper.find(EuiInMemoryTable).prop('pagination') as Pagination;
+      const pagination = wrapper.find(EuiInMemoryTable).prop('pagination') as any;
       expect(pagination.showPerPageOptions).toBe(true);
-      expect(pagination.pageSize).toEqual(15);
+      expect(pagination.initialPageSize).toEqual(15);
       expect(wrapper.find(EuiInMemoryTable).find('tbody tr')).toHaveLength(15);
     });
 
@@ -833,11 +833,10 @@ describe('SavedObjectsFinder', () => {
       wrapper.instance().componentDidMount!();
       await nextTick();
       const table = wrapper.find<EuiInMemoryTable<any>>(EuiInMemoryTable);
-      const pagination = table.prop('pagination') as Pagination;
       const sort = table.prop('sorting');
-      table.prop('onChange')!({
+      table.instance().onTableChange({
         page: {
-          index: pagination.pageIndex,
+          index: 0,
           size: 5,
         },
         sort: typeof sort === 'object' ? sort?.sort : undefined,
@@ -869,12 +868,12 @@ describe('SavedObjectsFinder', () => {
       wrapper.update();
       expect(wrapper.find(EuiInMemoryTable).find('tbody tr')).toHaveLength(15);
       const table = wrapper.find<EuiInMemoryTable<any>>(EuiInMemoryTable);
-      const pagination = table.prop('pagination') as Pagination;
+      const pagination = table.prop('pagination') as any;
       const sort = table.prop('sorting');
-      table.prop('onChange')!({
+      table.instance().onTableChange({
         page: {
           index: 3,
-          size: pagination.pageSize,
+          size: pagination.initialPageSize,
         },
         sort: typeof sort === 'object' ? sort?.sort : undefined,
       });
@@ -903,9 +902,9 @@ describe('SavedObjectsFinder', () => {
       wrapper.instance().componentDidMount!();
       await nextTick();
       wrapper.update();
-      const pagination = wrapper.find(EuiInMemoryTable).prop('pagination') as Pagination;
+      const pagination = wrapper.find(EuiInMemoryTable).prop('pagination') as any;
       expect(pagination.showPerPageOptions).toBe(false);
-      expect(pagination.pageSize).toEqual(33);
+      expect(pagination.initialPageSize).toEqual(33);
       expect(wrapper.find(EuiInMemoryTable).find('tbody tr')).toHaveLength(33);
     });
 
@@ -932,12 +931,12 @@ describe('SavedObjectsFinder', () => {
       wrapper.update();
       expect(wrapper.find(EuiInMemoryTable).find('tbody tr')).toHaveLength(33);
       const table = wrapper.find<EuiInMemoryTable<any>>(EuiInMemoryTable);
-      const pagination = table.prop('pagination') as Pagination;
+      const pagination = table.prop('pagination') as any;
       const sort = table.prop('sorting');
-      table.prop('onChange')!({
+      table.instance().onTableChange({
         page: {
           index: 1,
-          size: pagination.pageSize,
+          size: pagination.initialPageSize,
         },
         sort: typeof sort === 'object' ? sort?.sort : undefined,
       });
