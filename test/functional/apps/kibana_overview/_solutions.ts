@@ -38,7 +38,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(solutionCards.length >= 2).to.be(true);
 
       const imageSrcs = [];
-      // Note: please restart the page if syntax highlighting works bad.
       const re = /.*(\/(solutions_observability|solutions_security_solution)\.svg)/;
       const myRegexp = new RegExp(re, 'g');
       for (let i = 0; i < solutionCards.length; i++) {
