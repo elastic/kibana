@@ -68,16 +68,16 @@ const getMode = (
   return (isLast ? checkIsMaxContinuity : checkIsMinContinuity)(continuity) ? 'auto' : 'edit';
 };
 
-const getPlaceholderForAutoMode = (isLast: boolean) =>
+const getPlaceholderForAutoMode = (isLast: boolean, displayInfinity: boolean) =>
   isLast
-    ? true
+    ? displayInfinity
       ? i18n.translate('coloring.dynamicColoring.customPalette.extentPlaceholderInfinity', {
           defaultMessage: 'Infinity',
         })
       : i18n.translate('coloring.dynamicColoring.customPalette.maxValuePlaceholder', {
           defaultMessage: 'Max. value',
         })
-    : true
+    : displayInfinity
     ? i18n.translate('coloring.dynamicColoring.customPalette.extentPlaceholderInfinity', {
         defaultMessage: '-Infinity',
       })
@@ -230,7 +230,7 @@ export function ColorRangeItem({
           }
           disabled={isDisabled}
           onChange={onValueChange}
-          placeholder={mode === 'auto' ? getPlaceholderForAutoMode(isLast) : ''}
+          placeholder={mode === 'auto' ? getPlaceholderForAutoMode(isLast, displayInfinity) : ''}
           append={getAppend(rangeType, mode)}
           onBlur={onLeaveFocus}
           data-test-subj={`lnsPalettePanel_dynamicColoring_range_value_${index}`}
