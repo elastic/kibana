@@ -173,5 +173,4 @@ npm_install_global() {
 # times-out after 60 seconds and retries up to 3 times
 download_artifact() {
   retry 3 1 timeout 3m buildkite-agent artifact download "$@"
-  return $?
 }
