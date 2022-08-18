@@ -16,42 +16,27 @@ import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
 import { getFoundExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/found_exception_list_item_schema.mock';
 import { TestProviders } from '../../../mock';
+import type { Rule } from '../../../../detections/containers/detection_engine/rules/types';
+import { mockRule } from '../../../../detections/pages/detection_engine/rules/all/__mocks__/mock';
+import { useFindExceptionListReferences } from '../use_find_references';
 
 jest.mock('../../../lib/kibana');
 jest.mock('@kbn/securitysolution-list-hooks');
 jest.mock('../use_find_references');
 
-const mockRule = {
-  id: 'myfakeruleid',
-  author: [],
-  severity_mapping: [],
-  risk_score_mapping: [],
-  rule_id: 'rule-1',
-  risk_score: 50,
-  description: 'some description',
-  from: 'now-5m',
-  to: 'now',
-  name: 'some-name',
-  severity: 'low',
-  type: 'query',
-  query: 'some query',
-  index: ['index-1'],
-  interval: '5m',
-  references: [],
-  actions: [],
-  enabled: false,
-  false_positives: [],
-  max_signals: 100,
-  tags: [],
-  threat: [],
-  throttle: null,
-  version: 1,
-  exceptions_list: [],
-};
+const getMockRule = (): Rule => ({
+  ...mockRule('123'),
+  exceptions_list: [
+    {
+      id: '5b543420',
+      list_id: 'list_id',
+      type: 'endpoint',
+      namespace_type: 'single',
+    },
+  ],
+});
 
 describe('ExceptionsViewer', () => {
-  const ruleName = 'test rule';
-
   beforeEach(() => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {
@@ -78,6 +63,8 @@ describe('ExceptionsViewer', () => {
       },
       jest.fn(),
     ]);
+
+    (useFindExceptionListReferences as jest.Mock).mockReturnValue([false, null]);
   });
 
   it('it renders loader if "loadingList" is true', () => {
@@ -95,9 +82,7 @@ describe('ExceptionsViewer', () => {
     const wrapper = mount(
       <TestProviders>
         <ExceptionsViewer
-          ruleId={'123'}
-          ruleIndices={['filebeat-*']}
-          ruleName={ruleName}
+          rule={getMockRule()}
           exceptionListsMeta={[
             {
               id: '5b543420',
@@ -106,8 +91,7 @@ describe('ExceptionsViewer', () => {
               namespaceType: 'single',
             },
           ]}
-          availableListTypes={[ExceptionListTypeEnum.DETECTION]}
-          commentsAccordionId="commentsAccordion"
+          listType={ExceptionListTypeEnum.DETECTION}
         />
       </TestProviders>
     );
@@ -119,12 +103,9 @@ describe('ExceptionsViewer', () => {
     const wrapper = mount(
       <TestProviders>
         <ExceptionsViewer
-          ruleIndices={['filebeat-*']}
-          ruleId={'123'}
-          ruleName={ruleName}
+          rule={getMockRule()}
           exceptionListsMeta={[]}
-          availableListTypes={[ExceptionListTypeEnum.DETECTION]}
-          commentsAccordionId="commentsAccordion"
+          listType={ExceptionListTypeEnum.DETECTION}
         />
       </TestProviders>
     );
@@ -148,9 +129,7 @@ describe('ExceptionsViewer', () => {
     const wrapper = mount(
       <TestProviders>
         <ExceptionsViewer
-          ruleIndices={['filebeat-*']}
-          ruleId={'123'}
-          ruleName={ruleName}
+          rule={getMockRule()}
           exceptionListsMeta={[
             {
               id: '5b543420',
@@ -159,8 +138,7 @@ describe('ExceptionsViewer', () => {
               namespaceType: 'single',
             },
           ]}
-          availableListTypes={[ExceptionListTypeEnum.DETECTION]}
-          commentsAccordionId="commentsAccordion"
+          listType={ExceptionListTypeEnum.DETECTION}
         />
       </TestProviders>
     );

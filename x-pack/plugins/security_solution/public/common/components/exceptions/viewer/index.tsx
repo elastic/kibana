@@ -7,24 +7,25 @@
 
 import React, { useCallback, useEffect, useReducer, useState } from 'react';
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
-import uuid from 'uuid';
 
 import type {
   ExceptionListItemSchema,
-  ExceptionListIdentifiers,
   UseExceptionListItemsSuccess,
+  Pagination,
+  ExceptionListTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import { useApi, useExceptionListItems } from '@kbn/securitysolution-list-hooks';
+import { transformInput } from '@kbn/securitysolution-list-hooks';
 
+import {
+  deleteExceptionListItemById,
+  fetchExceptionListsItemsByListIds,
+} from '@kbn/securitysolution-list-api';
 import { DEFAULT_INDEX_PATTERN } from '../../../../../common/constants';
-import { useStateToaster } from '../../toasters';
 import { useUserData } from '../../../../detections/components/user_info';
-import { useKibana } from '../../../lib/kibana';
-import { Loader } from '../../loader';
+import { useKibana, useToasts } from '../../../lib/kibana';
 import { ExceptionsViewerHeader } from './exceptions_viewer_header';
-import type { ExceptionListItemIdentifiers, Filter } from '../types';
-import type { State, ViewerFlyoutName } from './reducer';
+import type { ExceptionListItemIdentifiers } from '../types';
+import type { State, ViewerFlyoutName, ViewerState } from './reducer';
 import { allExceptionItemsReducer } from './reducer';
 
 import { ExceptionsViewerPagination } from './exceptions_pagination';
@@ -32,250 +33,101 @@ import { ExceptionsViewerUtility } from './exceptions_utility';
 import { ExceptionsViewerItems } from './exceptions_viewer_items';
 import { EditExceptionFlyout } from '../edit_exception_flyout';
 import { AddExceptionFlyout } from '../add_exception_flyout';
-import * as i18n from '../translations';
+import * as i18n from './translations';
 import { useFindExceptionListReferences } from '../use_find_references';
 import type { Rule } from '../../../../detections/containers/detection_engine/rules/types';
+import { ExeptionItemsViewerEmptyPrompts } from './empty_viewer_state';
 
 const initialState: State = {
-  filterOptions: { filter: '', tags: [] },
   pagination: {
     pageIndex: 0,
-    pageSize: 20,
+    pageSize: 25,
     totalItemCount: 0,
-    pageSizeOptions: [5, 10, 20, 50, 100, 200, 300],
+    pageSizeOptions: [1, 5, 10, 25, 50, 100, 200, 300],
   },
   exceptions: [],
   exceptionToEdit: null,
   loadingItemIds: [],
-  isInitLoading: true,
   currentModal: null,
   exceptionListTypeToEdit: null,
-  totalEndpointItems: 0,
-  totalDetectionsItems: 0,
+  viewerState: 'loading',
+  exceptionLists: [],
 };
 
 interface ExceptionsViewerProps {
   rule: Rule;
-  exceptionListsMeta: ExceptionListIdentifiers[];
   listType: ExceptionListTypeEnum;
   onRuleChange?: () => void;
 }
 
 const ExceptionsViewerComponent = ({
   rule,
-  exceptionListsMeta,
   listType,
   onRuleChange,
 }: ExceptionsViewerProps): JSX.Element => {
   const { services } = useKibana();
-  const [, dispatchToaster] = useStateToaster();
-  const onDispatchToaster = useCallback(
-    ({ title, color, iconType }) =>
-      (): void => {
-        dispatchToaster({
-          type: 'addToaster',
-          toast: {
-            id: uuid.v4(),
-            title,
-            color,
-            iconType,
-          },
-        });
-      },
-    [dispatchToaster]
-  );
+  const toasts = useToasts();
+  const [{ canUserCRUD, hasIndexWrite }] = useUserData();
+  const [isReadOnly, setReadOnly] = useState(true);
+  const [lastUpdated, setLastUpdated] = useState<null | string | number>(null);
+
+  // Reducer state
   const [
     {
       exceptions,
-      filterOptions,
       pagination,
       loadingItemIds,
-      isInitLoading,
       currentModal,
       exceptionToEdit,
       exceptionListTypeToEdit,
-      totalEndpointItems,
-      totalDetectionsItems,
+      viewerState,
+      exceptionLists,
     },
     dispatch,
-  ] = useReducer(allExceptionItemsReducer(), { ...initialState });
-  const { deleteExceptionItem, getExceptionListsItems } = useApi(services.http);
-  const [isReadOnly, setReadOnly] = useState(true);
-  const [lastUpdated, setLastUpdated] = useState<null | string | number>(null);
-  const [isLoadingReferences, allReferences] = useFindExceptionListReferences(
-    rule.exceptions_list ?? []
-  );
+  ] = useReducer(allExceptionItemsReducer(), {
+    ...initialState,
+    exceptionLists:
+      rule != null && rule.exceptions_list != null
+        ? rule.exceptions_list.filter((list) => list.type === listType)
+        : [],
+  });
 
-  const [{ canUserCRUD, hasIndexWrite }] = useUserData();
-
-  useEffect((): void => {
-    if (!canUserCRUD || !hasIndexWrite) {
-      setReadOnly(true);
-    } else {
-      setReadOnly(false);
-    }
-  }, [setReadOnly, canUserCRUD, hasIndexWrite]);
-
+  // Reducer actions
   const setExceptions = useCallback(
     ({
       exceptions: newExceptions,
       pagination: newPagination,
     }: UseExceptionListItemsSuccess): void => {
+      setLastUpdated(Date.now());
+
       dispatch({
         type: 'setExceptions',
-        lists: exceptionListsMeta,
         exceptions: newExceptions,
         pagination: newPagination,
       });
     },
-    [dispatch, exceptionListsMeta]
+    [dispatch]
   );
-  const [loadingList, , , fetchListItems] = useExceptionListItems({
-    http: services.http,
-    lists: exceptionListsMeta,
-    filterOptions:
-      filterOptions.filter !== '' || filterOptions.tags.length > 0 ? [filterOptions] : [],
-    pagination: {
-      page: pagination.pageIndex + 1,
-      perPage: pagination.pageSize,
-      total: pagination.totalItemCount,
-    },
-    showDetectionsListsOnly: listType !== ExceptionListTypeEnum.ENDPOINT,
-    showEndpointListsOnly: listType === ExceptionListTypeEnum.ENDPOINT,
-    matchFilters: true,
-    onSuccess: setExceptions,
-    onError: onDispatchToaster({
-      color: 'danger',
-      title: i18n.FETCH_LIST_ERROR,
-      iconType: 'alert',
-    }),
-  });
 
-  const setCurrentModal = useCallback(
-    (modalName: ViewerFlyoutName): void => {
+  const setViewerState = useCallback(
+    (state: ViewerState): void => {
       dispatch({
-        type: 'updateModalOpen',
-        modalName,
+        type: 'setViewerState',
+        state,
       });
     },
     [dispatch]
   );
 
-  const setExceptionItemTotals = useCallback(
-    (endpointItemTotals: number | null, detectionItemTotals: number | null): void => {
+  const setFlyoutType = useCallback(
+    (flyoutType: ViewerFlyoutName): void => {
       dispatch({
-        type: 'setExceptionItemTotals',
-        totalEndpointItems: endpointItemTotals,
-        totalDetectionsItems: detectionItemTotals,
+        type: 'updateFlyoutOpen',
+        flyoutType,
       });
     },
     [dispatch]
   );
-
-  const handleGetTotals = useCallback(async (): Promise<void> => {
-    if (listType !== ExceptionListTypeEnum.ENDPOINT) {
-      await getExceptionListsItems({
-        lists: exceptionListsMeta,
-        filterOptions: [],
-        pagination: {
-          page: 0,
-          perPage: 1,
-          total: 0,
-        },
-        showDetectionsListsOnly: true,
-        showEndpointListsOnly: false,
-        onSuccess: ({ pagination: detectionPagination }) => {
-          setExceptionItemTotals(null, detectionPagination.total ?? 0);
-        },
-        onError: () => {
-          const dispatchToasterError = onDispatchToaster({
-            color: 'danger',
-            title: i18n.TOTAL_ITEMS_FETCH_ERROR,
-            iconType: 'alert',
-          });
-
-          dispatchToasterError();
-        },
-      });
-    } else if (listType === ExceptionListTypeEnum.ENDPOINT) {
-      await getExceptionListsItems({
-        lists: exceptionListsMeta,
-        filterOptions: [],
-        pagination: {
-          page: 0,
-          perPage: 1,
-          total: 0,
-        },
-        showDetectionsListsOnly: false,
-        showEndpointListsOnly: true,
-        onSuccess: ({ pagination: endpointPagination }) => {
-          setExceptionItemTotals(endpointPagination.total ?? 0, null);
-        },
-        onError: () => {
-          const dispatchToasterError = onDispatchToaster({
-            color: 'danger',
-            title: i18n.TOTAL_ITEMS_FETCH_ERROR,
-            iconType: 'alert',
-          });
-
-          dispatchToasterError();
-        },
-      });
-    }
-  }, [
-    listType,
-    getExceptionListsItems,
-    exceptionListsMeta,
-    setExceptionItemTotals,
-    onDispatchToaster,
-  ]);
-
-  const handleFetchList = useCallback((): void => {
-    if (fetchListItems != null) {
-      fetchListItems();
-      handleGetTotals();
-    }
-  }, [fetchListItems, handleGetTotals]);
-
-  const handleFilterChange = useCallback(
-    (filters: Partial<Filter>): void => {
-      dispatch({
-        type: 'updateFilterOptions',
-        filters,
-      });
-    },
-    [dispatch]
-  );
-
-  const handleAddException = useCallback((): void => {
-    dispatch({
-      type: 'updateExceptionListTypeToEdit',
-      exceptionListType: listType,
-    });
-    setCurrentModal('addException');
-  }, [listType, setCurrentModal]);
-
-  const handleEditException = useCallback(
-    (exception: ExceptionListItemSchema): void => {
-      dispatch({
-        type: 'updateExceptionToEdit',
-        lists: exceptionListsMeta,
-        exception,
-      });
-      setCurrentModal('editException');
-    },
-    [setCurrentModal, exceptionListsMeta]
-  );
-
-  const handleOnCancelExceptionModal = useCallback((): void => {
-    setCurrentModal(null);
-    handleFetchList();
-  }, [setCurrentModal, handleFetchList]);
-
-  const handleOnConfirmExceptionModal = useCallback((): void => {
-    setCurrentModal(null);
-    handleFetchList();
-  }, [setCurrentModal, handleFetchList]);
 
   const setLoadingItemIds = useCallback(
     (items: ExceptionListItemIdentifiers[]): void => {
@@ -287,54 +139,196 @@ const ExceptionsViewerComponent = ({
     [dispatch]
   );
 
-  const handleDeleteException = useCallback(
-    ({ id: itemId, namespaceType }: ExceptionListItemIdentifiers) => {
-      setLoadingItemIds([{ id: itemId, namespaceType }]);
-
-      deleteExceptionItem({
-        id: itemId,
-        namespaceType,
-        onSuccess: () => {
-          setLoadingItemIds(loadingItemIds.filter(({ id }) => id !== itemId));
-          handleFetchList();
-        },
-        onError: () => {
-          const dispatchToasterError = onDispatchToaster({
-            color: 'danger',
-            title: i18n.DELETE_EXCEPTION_ERROR,
-            iconType: 'alert',
-          });
-
-          dispatchToasterError();
-          setLoadingItemIds(loadingItemIds.filter(({ id }) => id !== itemId));
-        },
-      });
-    },
-    [setLoadingItemIds, deleteExceptionItem, loadingItemIds, handleFetchList, onDispatchToaster]
+  const [_, allReferences] = useFindExceptionListReferences(
+    rule != null ? rule.exceptions_list ?? [] : []
   );
 
-  // Logic for initial render
-  useEffect((): void => {
-    if (
-      isInitLoading &&
-      !isLoadingReferences &&
-      !loadingList &&
-      (exceptions.length === 0 || exceptions != null)
-    ) {
-      handleGetTotals();
-      dispatch({
-        type: 'updateIsInitLoading',
-        loading: false,
+  const handleFetchItems = useCallback(
+    async (options?: { pagination?: Partial<Pagination>; search?: string; filters?: string }) => {
+      const abortCtrl = new AbortController();
+
+      const newPagination =
+        options?.pagination != null
+          ? {
+              page: options.pagination.page + 1,
+              perPage: options.pagination.perPage,
+            }
+          : {
+              page: pagination.pageIndex + 1,
+              perPage: pagination.pageSize,
+            };
+
+      const {
+        page: pageIndex,
+        per_page: itemsPerPage,
+        total,
+        data,
+      } = await fetchExceptionListsItemsByListIds({
+        filters: undefined,
+        http: services.http,
+        listIds: exceptionLists.map((list) => list.list_id),
+        namespaceTypes: exceptionLists.map((list) => list.namespace_type),
+        search: options?.search,
+        pagination: newPagination,
+        signal: abortCtrl.signal,
       });
 
-      setLastUpdated(Date.now());
+      // Please see `x-pack/plugins/lists/public/exceptions/transforms.ts` doc notes
+      // for context around the temporary `id`
+      const transformedData = data.map((item) => transformInput(item));
+
+      return {
+        data: transformedData,
+        pageIndex,
+        itemsPerPage,
+        total,
+      };
+    },
+    [pagination.pageIndex, pagination.pageSize, exceptionLists, services.http]
+  );
+
+  const handleGetExceptionListItems = useCallback(
+    async (options?: { page: number; perPage: number }) => {
+      try {
+        setViewerState('loading');
+
+        const { pageIndex, itemsPerPage, total, data } = await handleFetchItems({
+          pagination: {
+            page: options?.page ?? pagination.pageIndex,
+            perPage: options?.perPage ?? pagination.pageSize,
+          },
+        });
+
+        setViewerState(total > 0 ? null : 'empty');
+
+        setExceptions({
+          exceptions: data,
+          pagination: {
+            page: pageIndex,
+            perPage: itemsPerPage,
+            total,
+          },
+        });
+      } catch (e) {
+        setViewerState('error');
+
+        toasts.addError(e, {
+          title: i18n.EXCEPTION_ERROR_TITLE,
+          toastMessage: i18n.EXCEPTION_ERROR_DESCRIPTION,
+        });
+      }
+    },
+    [
+      handleFetchItems,
+      setExceptions,
+      setViewerState,
+      pagination.pageSize,
+      pagination.pageIndex,
+      toasts,
+    ]
+  );
+
+  const handleSearch = useCallback(
+    async (search: string) => {
+      try {
+        setViewerState('searching');
+
+        const { pageIndex, itemsPerPage, total, data } = await handleFetchItems({ search });
+
+        setViewerState(total > 0 ? null : 'empty_search');
+
+        setExceptions({
+          exceptions: data,
+          pagination: {
+            page: pageIndex,
+            perPage: itemsPerPage,
+            total,
+          },
+        });
+      } catch (e) {
+        toasts.addError(e, {
+          title: i18n.EXCEPTION_SEARCH_ERROR_TITLE,
+          toastMessage: i18n.EXCEPTION_SEARCH_ERROR_BODY,
+        });
+      }
+    },
+    [handleFetchItems, setExceptions, setViewerState, toasts]
+  );
+
+  const handleAddException = useCallback((): void => {
+    dispatch({
+      type: 'updateExceptionListTypeToEdit',
+      exceptionListType: listType,
+    });
+    setFlyoutType('addException');
+  }, [listType, setFlyoutType]);
+
+  const handleEditException = useCallback(
+    (exception: ExceptionListItemSchema): void => {
+      dispatch({
+        type: 'updateExceptionToEdit',
+        lists: exceptionLists,
+        exception,
+      });
+      setFlyoutType('editException');
+    },
+    [setFlyoutType, exceptionLists]
+  );
+
+  const handleCancelExceptionItemFlyout = useCallback((): void => {
+    setFlyoutType(null);
+    handleGetExceptionListItems();
+  }, [setFlyoutType, handleGetExceptionListItems]);
+
+  const handleConfirmExceptionFlyout = useCallback((): void => {
+    setFlyoutType(null);
+    handleGetExceptionListItems();
+  }, [setFlyoutType, handleGetExceptionListItems]);
+
+  const handleDeleteException = useCallback(
+    async ({ id: itemId, namespaceType }: ExceptionListItemIdentifiers) => {
+      const abortCtrl = new AbortController();
+
+      try {
+        setLoadingItemIds([{ id: itemId, namespaceType }]);
+
+        await deleteExceptionListItemById({
+          http: services.http,
+          id: itemId,
+          namespaceType,
+          signal: abortCtrl.signal,
+        });
+
+        setLoadingItemIds(loadingItemIds.filter(({ id }) => id !== itemId));
+      } catch (e) {
+        setLoadingItemIds(loadingItemIds.filter(({ id }) => id !== itemId));
+
+        setViewerState('error');
+
+        toasts.addError(e, {
+          title: i18n.EXCEPTION_DELETE_ERROR_TITLE,
+        });
+      }
+    },
+    [setLoadingItemIds, services.http, loadingItemIds, setViewerState, toasts]
+  );
+
+  // User privileges checks
+  useEffect((): void => {
+    if (!canUserCRUD || !hasIndexWrite) {
+      setReadOnly(true);
+    } else {
+      setReadOnly(false);
     }
-  }, [handleGetTotals, isInitLoading, exceptions, loadingList, dispatch, isLoadingReferences]);
+  }, [setReadOnly, canUserCRUD, hasIndexWrite]);
 
-  const showEmpty: boolean = !isInitLoading && !loadingList && exceptions.length === 0;
-
-  const showNoResults: boolean =
-    exceptions.length === 0 && (totalEndpointItems > 0 || totalDetectionsItems > 0);
+  useEffect(() => {
+    if (exceptionLists.length > 0) {
+      handleGetExceptionListItems();
+    } else {
+      setViewerState('loading');
+    }
+  }, [exceptionLists, handleGetExceptionListItems, setViewerState]);
 
   return (
     <>
@@ -348,8 +342,8 @@ const ExceptionsViewerComponent = ({
             dataViewId={rule.data_view_id}
             exceptionListType={exceptionListTypeToEdit}
             exceptionItem={exceptionToEdit}
-            onCancel={handleOnCancelExceptionModal}
-            onConfirm={handleOnConfirmExceptionModal}
+            onCancel={handleCancelExceptionItemFlyout}
+            onConfirm={handleConfirmExceptionFlyout}
             onRuleChange={onRuleChange}
           />
         )}
@@ -361,53 +355,46 @@ const ExceptionsViewerComponent = ({
           dataViewId={rule.data_view_id}
           ruleId={rule.id}
           exceptionListType={exceptionListTypeToEdit}
-          onCancel={handleOnCancelExceptionModal}
-          onConfirm={handleOnConfirmExceptionModal}
+          onCancel={handleCancelExceptionItemFlyout}
+          onConfirm={handleConfirmExceptionFlyout}
           onRuleChange={onRuleChange}
         />
       )}
 
       <EuiPanel hasBorder={false} hasShadow={false}>
-        {isInitLoading || loadingList || isLoadingReferences ? (
-          <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
+        {viewerState != null ? (
+          <ExeptionItemsViewerEmptyPrompts
+            listType={listType}
+            currentState={viewerState}
+            onCreateExceptionListItem={handleAddException}
+          />
         ) : (
           <>
-            {!showEmpty && (
-              <>
-                <ExceptionsViewerHeader
-                  isReadOnly={isReadOnly}
-                  isInitLoading={isInitLoading}
-                  listType={listType}
-                  onFilterChange={handleFilterChange}
-                  onAddExceptionClick={handleAddException}
-                />
+            <ExceptionsViewerHeader
+              isReadOnly={isReadOnly}
+              listType={listType}
+              onSearch={handleSearch}
+              onAddExceptionClick={handleAddException}
+            />
 
-                <EuiSpacer size="l" />
+            <EuiSpacer size="l" />
 
-                <ExceptionsViewerUtility pagination={pagination} lastUpdated={lastUpdated} />
-              </>
-            )}
+            <ExceptionsViewerUtility pagination={pagination} lastUpdated={lastUpdated} />
 
             <ExceptionsViewerItems
               disableActions={isReadOnly}
-              showEmpty={showEmpty}
-              showNoResults={showNoResults}
-              isInitLoading={isInitLoading}
               exceptions={exceptions}
               loadingItemIds={loadingItemIds}
               onDeleteException={handleDeleteException}
               onEditExceptionItem={handleEditException}
               listType={listType}
-              onCreateExceptionListItem={handleAddException}
               ruleReferences={allReferences}
             />
 
-            {!showEmpty && (
-              <ExceptionsViewerPagination
-                onPaginationChange={handleFilterChange}
-                pagination={pagination}
-              />
-            )}
+            <ExceptionsViewerPagination
+              onPaginationChange={handleGetExceptionListItems}
+              pagination={pagination}
+            />
           </>
         )}
       </EuiPanel>

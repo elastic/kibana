@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-describe('useExceptionListItems', () => {
-  test('Tests should be ported', () => {
-    // TODO: Port all the tests from: x-pack/plugins/lists/public/exceptions/hooks/use_exception_list_items.test.ts here once mocks are figured out and kbn package mocks are figured out
-    expect(true).toBe(true);
-  });
-});
+import * as t from 'io-ts';
+
+export const search = t.string;
+export const searchFieldOrUndefined = t.union([search, t.undefined]);
+export type SearchFieldOrUndefined = t.TypeOf<typeof searchFieldOrUndefined>;

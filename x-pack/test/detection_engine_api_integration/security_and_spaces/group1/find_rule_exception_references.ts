@@ -29,7 +29,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
 
-  describe.only('find_rule_exception_references', () => {
+  describe('find_rule_exception_references', () => {
     before(async () => {
       await createSignalsIndex(supertest, log);
     });

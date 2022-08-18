@@ -10,53 +10,41 @@ import type {
   ExceptionListItemSchema,
   ExceptionListIdentifiers,
   Pagination,
+  ListArray,
 } from '@kbn/securitysolution-io-ts-list-types';
-import type {
-  FilterOptions,
-  ExceptionsPagination,
-  ExceptionListItemIdentifiers,
-  Filter,
-} from '../types';
+import type { ExceptionsPagination, ExceptionListItemIdentifiers } from '../types';
 
 export type ViewerFlyoutName = 'addException' | 'editException' | null;
+export type ViewerState = 'error' | 'empty' | 'empty_search' | 'loading' | 'searching' | null;
 
 export interface State {
-  filterOptions: FilterOptions;
   pagination: ExceptionsPagination;
   exceptions: ExceptionListItemSchema[];
   exceptionToEdit: ExceptionListItemSchema | null;
   loadingItemIds: ExceptionListItemIdentifiers[];
-  isInitLoading: boolean;
   currentModal: ViewerFlyoutName;
   exceptionListTypeToEdit: ExceptionListType | null;
-  totalEndpointItems: number;
-  totalDetectionsItems: number;
+  viewerState: ViewerState;
+  exceptionLists: ListArray;
 }
 
 export type Action =
   | {
       type: 'setExceptions';
-      lists: ExceptionListIdentifiers[];
       exceptions: ExceptionListItemSchema[];
       pagination: Pagination;
     }
-  | {
-      type: 'updateFilterOptions';
-      filters: Partial<Filter>;
-    }
-  | { type: 'updateIsInitLoading'; loading: boolean }
-  | { type: 'updateModalOpen'; modalName: ViewerFlyoutName }
+  | { type: 'updateFlyoutOpen'; flyoutType: ViewerFlyoutName }
   | {
       type: 'updateExceptionToEdit';
-      lists: ExceptionListIdentifiers[];
+      lists: ListArray;
       exception: ExceptionListItemSchema;
     }
   | { type: 'updateLoadingItemIds'; items: ExceptionListItemIdentifiers[] }
   | { type: 'updateExceptionListTypeToEdit'; exceptionListType: ExceptionListType | null }
   | {
-      type: 'setExceptionItemTotals';
-      totalEndpointItems: number | null;
-      totalDetectionsItems: number | null;
+      type: 'setViewerState';
+      state: ViewerState;
     };
 
 export const allExceptionItemsReducer =
@@ -77,39 +65,6 @@ export const allExceptionItemsReducer =
           exceptions,
         };
       }
-      case 'updateFilterOptions': {
-        const { filter, pagination } = action.filters;
-        return {
-          ...state,
-          filterOptions: {
-            ...state.filterOptions,
-            ...filter,
-          },
-          pagination: {
-            ...state.pagination,
-            ...pagination,
-          },
-        };
-      }
-      case 'setExceptionItemTotals': {
-        return {
-          ...state,
-          totalEndpointItems:
-            action.totalEndpointItems == null
-              ? state.totalEndpointItems
-              : action.totalEndpointItems,
-          totalDetectionsItems:
-            action.totalDetectionsItems == null
-              ? state.totalDetectionsItems
-              : action.totalDetectionsItems,
-        };
-      }
-      case 'updateIsInitLoading': {
-        return {
-          ...state,
-          isInitLoading: action.loading,
-        };
-      }
       case 'updateLoadingItemIds': {
         return {
           ...state,
@@ -119,7 +74,7 @@ export const allExceptionItemsReducer =
       case 'updateExceptionToEdit': {
         const { exception, lists } = action;
         const exceptionListToEdit = lists.find((list) => {
-          return list !== null && exception.list_id === list.listId;
+          return list !== null && exception.list_id === list.list_id;
         });
         return {
           ...state,
@@ -127,16 +82,22 @@ export const allExceptionItemsReducer =
           exceptionListTypeToEdit: exceptionListToEdit ? exceptionListToEdit.type : null,
         };
       }
-      case 'updateModalOpen': {
+      case 'updateFlyoutOpen': {
         return {
           ...state,
-          currentModal: action.modalName,
+          currentModal: action.flyoutType,
         };
       }
       case 'updateExceptionListTypeToEdit': {
         return {
           ...state,
           exceptionListTypeToEdit: action.exceptionListType,
+        };
+      }
+      case 'setViewerState': {
+        return {
+          ...state,
+          viewerState: action.state,
         };
       }
       default:

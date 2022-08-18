@@ -388,12 +388,15 @@ export const findRuleExceptionReferences = async ({
   http,
   signal,
 }: FindRulesReferencedByExceptionsProps): Promise<RulesReferencedByExceptionListsSchema> =>
-  http.fetch<Rule>(`${DETECTION_ENGINE_RULES_URL}/exceptions/_find_references`, {
-    method: 'GET',
-    query: {
-      ids: lists.map(({ id }) => id).join(','),
-      list_ids: lists.map(({ listId }) => listId).join(','),
-      namespace_types: lists.map(({ namespaceType }) => namespaceType).join(','),
-    },
-    signal,
-  });
+  http.fetch<RulesReferencedByExceptionListsSchema>(
+    `${DETECTION_ENGINE_RULES_URL}/exceptions/_find_references`,
+    {
+      method: 'GET',
+      query: {
+        ids: lists.map(({ id }) => id).join(','),
+        list_ids: lists.map(({ listId }) => listId).join(','),
+        namespace_types: lists.map(({ namespaceType }) => namespaceType).join(','),
+      },
+      signal,
+    }
+  );

@@ -5,116 +5,50 @@
  * 2.0.
  */
 
-import type { ReactElement } from 'react';
-import React, { useCallback, useState, useMemo } from 'react';
-import {
-  EuiContextMenuItem,
-  EuiButtonEmpty,
-  EuiPagination,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiPopover,
-  EuiContextMenuPanel,
-} from '@elastic/eui';
+import React, { useCallback } from 'react';
+import { EuiTablePagination } from '@elastic/eui';
 
-import * as i18n from '../translations';
-import type { ExceptionsPagination, Filter } from '../types';
+import type { ExceptionsPagination } from '../types';
 
 interface ExceptionsViewerPaginationProps {
   pagination: ExceptionsPagination;
-  onPaginationChange: (arg: Partial<Filter>) => void;
+  onPaginationChange: (arg: { page: number; perPage: number }) => void;
 }
 
 const ExceptionsViewerPaginationComponent = ({
   pagination,
   onPaginationChange,
 }: ExceptionsViewerPaginationProps): JSX.Element => {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const handleClosePerPageMenu = useCallback((): void => setIsOpen(false), [setIsOpen]);
-
-  const handlePerPageMenuClick = useCallback(
-    (): void => setIsOpen((isPopoverOpen) => !isPopoverOpen),
-    [setIsOpen]
-  );
-
-  const handlePageClick = useCallback(
-    (pageIndex: number): void => {
+  const handleItemsPerPageChange = useCallback(
+    (pageSize: number) => {
       onPaginationChange({
-        pagination: {
-          pageIndex,
-          pageSize: pagination.pageSize,
-          totalItemCount: pagination.totalItemCount,
-        },
+        page: pagination.pageIndex,
+        perPage: pageSize,
       });
     },
-    [pagination, onPaginationChange]
+    [onPaginationChange, pagination.pageIndex]
   );
 
-  const items = useMemo((): ReactElement[] => {
-    return pagination.pageSizeOptions.map((rows) => (
-      <EuiContextMenuItem
-        icon={rows === pagination.pageSize ? 'check' : 'empty'}
-        key={rows}
-        onClick={() => {
-          onPaginationChange({
-            pagination: {
-              pageIndex: 0,
-              pageSize: rows,
-              totalItemCount: pagination.totalItemCount,
-            },
-          });
-          handleClosePerPageMenu();
-        }}
-        data-test-subj="exceptionsPerPageItem"
-      >
-        {i18n.NUMBER_OF_ITEMS(rows)}
-      </EuiContextMenuItem>
-    ));
-  }, [pagination, onPaginationChange, handleClosePerPageMenu]);
-
-  const totalPages = useMemo((): number => {
-    if (pagination.totalItemCount > 0) {
-      return Math.ceil(pagination.totalItemCount / pagination.pageSize);
-    } else {
-      return 1;
-    }
-  }, [pagination]);
+  const handlePageIndexChange = useCallback(
+    (pageIndex: number) => {
+      onPaginationChange({
+        page: pageIndex,
+        perPage: pagination.pageSize,
+      });
+    },
+    [onPaginationChange, pagination.pageSize]
+  );
 
   return (
-    <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-      <EuiFlexItem grow={false}>
-        <EuiPopover
-          button={
-            <EuiButtonEmpty
-              size="s"
-              color="text"
-              iconType="arrowDown"
-              iconSide="right"
-              onClick={handlePerPageMenuClick}
-              data-test-subj="exceptionsPerPageBtn"
-            >
-              {i18n.ITEMS_PER_PAGE(pagination.pageSize)}
-            </EuiButtonEmpty>
-          }
-          isOpen={isOpen}
-          closePopover={handleClosePerPageMenu}
-          panelPaddingSize="none"
-          repositionOnScroll
-        >
-          <EuiContextMenuPanel items={items} />
-        </EuiPopover>
-      </EuiFlexItem>
-
-      <EuiFlexItem grow={false}>
-        <EuiPagination
-          pageCount={totalPages}
-          activePage={pagination.pageIndex}
-          onPageClick={handlePageClick}
-          data-test-subj="exceptionsPagination"
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiTablePagination
+      aria-label="Exception item table pagination"
+      pageCount={Math.ceil(pagination.totalItemCount / pagination.pageSize)}
+      activePage={pagination.pageIndex}
+      onChangePage={handlePageIndexChange}
+      itemsPerPage={pagination.pageSize}
+      onChangeItemsPerPage={handleItemsPerPageChange}
+      itemsPerPageOptions={pagination.pageSizeOptions}
+    />
   );
 };
 

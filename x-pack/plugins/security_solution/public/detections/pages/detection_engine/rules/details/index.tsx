@@ -28,7 +28,6 @@ import { useParams } from 'react-router-dom';
 import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
 import styled from 'styled-components';
-import type { ExceptionListIdentifiers } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 import type { Dispatch } from 'redux';
@@ -224,31 +223,19 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const [rule, setRule] = useState<Rule | null>(null);
   const isLoading = ruleLoading && rule == null;
 
-  const exceptionLists = useMemo((): {
-    lists: ExceptionListIdentifiers[];
-    allowedExceptionListTypes: ExceptionListTypeEnum[];
-  } => {
+  const allowedExceptionListTypes = useMemo((): ExceptionListTypeEnum[] => {
     if (rule != null && rule.exceptions_list != null) {
-      return rule.exceptions_list.reduce<{
-        lists: ExceptionListIdentifiers[];
-        allowedExceptionListTypes: ExceptionListTypeEnum[];
-      }>(
-        (acc, { id, list_id: listId, namespace_type: namespaceType, type }) => {
-          const { allowedExceptionListTypes, lists } = acc;
+      return rule.exceptions_list.reduce<ExceptionListTypeEnum[]>(
+        (acc, { type }) => {
           const shouldAddEndpoint =
             type === ExceptionListTypeEnum.ENDPOINT &&
-            !allowedExceptionListTypes.includes(ExceptionListTypeEnum.ENDPOINT);
-          return {
-            lists: [...lists, { id, listId, namespaceType, type }],
-            allowedExceptionListTypes: shouldAddEndpoint
-              ? [...allowedExceptionListTypes, ExceptionListTypeEnum.ENDPOINT]
-              : allowedExceptionListTypes,
-          };
+            !acc.includes(ExceptionListTypeEnum.ENDPOINT);
+          return shouldAddEndpoint ? [...acc, ExceptionListTypeEnum.ENDPOINT] : acc;
         },
-        { lists: [], allowedExceptionListTypes: [ExceptionListTypeEnum.DETECTION] }
+        [ExceptionListTypeEnum.DETECTION]
       );
     } else {
-      return { lists: [], allowedExceptionListTypes: [ExceptionListTypeEnum.DETECTION] };
+      return [ExceptionListTypeEnum.DETECTION];
     }
   }, [rule]);
 
@@ -283,7 +270,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   );
 
   const ruleDetailTabs = useMemo(() => {
-    return exceptionLists.allowedExceptionListTypes.includes(ExceptionListTypeEnum.ENDPOINT)
+    return allowedExceptionListTypes.includes(ExceptionListTypeEnum.ENDPOINT)
       ? [
           ...ruleDetailTabsDefault,
           {
@@ -294,7 +281,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
           },
         ]
       : ruleDetailTabsDefault;
-  }, [ruleDetailTabsDefault, exceptionLists]);
+  }, [ruleDetailTabsDefault, allowedExceptionListTypes]);
 
   const [ruleDetailTab, setRuleDetailTab] = useState(RuleDetailTabs.alerts);
   const [pageTabs, setTabs] = useState(ruleDetailTabs);
@@ -884,7 +871,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                 <ExceptionsViewer
                   rule={rule}
                   listType={ExceptionListTypeEnum.DETECTION}
-                  exceptionListsMeta={exceptionLists.lists}
                   onRuleChange={refreshRule}
                   data-test-subj="exceptionTab"
                 />
@@ -893,7 +879,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                 <ExceptionsViewer
                   rule={rule}
                   listType={ExceptionListTypeEnum.ENDPOINT}
-                  exceptionListsMeta={exceptionLists.lists}
                   onRuleChange={refreshRule}
                   data-test-subj="endpointExceptionsTab"
                 />

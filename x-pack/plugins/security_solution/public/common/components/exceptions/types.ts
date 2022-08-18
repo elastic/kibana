@@ -14,18 +14,6 @@ export interface ExceptionListItemIdentifiers {
   namespaceType: NamespaceType;
 }
 
-export interface FilterOptions {
-  filter: string;
-  tags: string[];
-}
-
-export interface Filter {
-  filter: Partial<FilterOptions>;
-  pagination: Partial<ExceptionsPagination>;
-  showDetectionsListsOnly: boolean;
-  showEndpointListsOnly: boolean;
-}
-
 export interface ExceptionsPagination {
   pageIndex: number;
   pageSize: number;

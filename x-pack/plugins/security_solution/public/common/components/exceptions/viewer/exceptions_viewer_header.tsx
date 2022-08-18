@@ -5,18 +5,46 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiSearchBar } from '@elastic/eui';
 
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import * as i18n from '../translations';
-import type { Filter } from '../types';
+
+const ITEMS_SCHEMA = {
+  strict: true,
+  fields: {
+    created_by: {
+      type: 'string',
+    },
+    description: {
+      type: 'string',
+    },
+    id: {
+      type: 'string',
+    },
+    item_id: {
+      type: 'string',
+    },
+    list_id: {
+      type: 'string',
+    },
+    name: {
+      type: 'string',
+    },
+    os_types: {
+      type: 'string',
+    },
+    tags: {
+      type: 'string',
+    },
+  },
+};
 
 interface ExceptionsViewerHeaderProps {
   isReadOnly: boolean;
-  isInitLoading: boolean;
   listType: ExceptionListTypeEnum;
-  onFilterChange: (arg: Partial<Filter>) => void;
+  onSearch: (arg: string) => void;
   onAddExceptionClick: (type: ExceptionListTypeEnum) => void;
 }
 
@@ -25,39 +53,15 @@ interface ExceptionsViewerHeaderProps {
  */
 const ExceptionsViewerHeaderComponent = ({
   isReadOnly,
-  isInitLoading,
   listType,
-  onFilterChange,
+  onSearch,
   onAddExceptionClick,
 }: ExceptionsViewerHeaderProps): JSX.Element => {
-  const [filter, setFilter] = useState<string>('');
-  const [tags, setTags] = useState<string[]>([]);
-
-  useEffect((): void => {
-    onFilterChange({
-      filter: { filter, tags },
-      pagination: {
-        pageIndex: 0,
-      },
-      showDetectionsListsOnly: listType !== ExceptionListTypeEnum.ENDPOINT,
-      showEndpointListsOnly: listType === ExceptionListTypeEnum.ENDPOINT,
-    });
-  }, [filter, tags, onFilterChange, listType]);
-
   const handleOnSearch = useCallback(
-    (searchValue: string): void => {
-      const tagsRegex = /(tags:[^\s]*)/i;
-      const tagsMatch = searchValue.match(tagsRegex);
-      const foundTags: string = tagsMatch != null ? tagsMatch[0].split(':')[1] : '';
-      const filterString = tagsMatch != null ? searchValue.replace(tagsRegex, '') : searchValue;
-
-      if (foundTags.length > 0) {
-        setTags(foundTags.split(','));
-      }
-
-      setFilter(filterString.trim());
+    ({ queryText }): void => {
+      onSearch(queryText);
     },
-    [setTags, setFilter]
+    [onSearch]
   );
 
   const handleAddException = useCallback(() => {
@@ -73,14 +77,14 @@ const ExceptionsViewerHeaderComponent = ({
   return (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem grow={true}>
-        <EuiFieldSearch
-          data-test-subj="exceptionsHeaderSearch"
-          aria-label={i18n.SEARCH_DEFAULT}
-          placeholder={i18n.SEARCH_DEFAULT}
-          onSearch={handleOnSearch}
-          disabled={isInitLoading}
-          incremental={false}
-          fullWidth
+        <EuiSearchBar
+          box={{
+            placeholder: 'Search on the fields below: e.g. name:"my list"',
+            incremental: false,
+            schema: ITEMS_SCHEMA,
+          }}
+          filters={[]}
+          onChange={handleOnSearch}
         />
       </EuiFlexItem>
       {!isReadOnly && (
@@ -88,7 +92,6 @@ const ExceptionsViewerHeaderComponent = ({
           <EuiButton
             data-test-subj="exceptionsHeaderAddExceptionBtn"
             onClick={handleAddException}
-            isDisabled={isInitLoading}
             fill
           >
             {addExceptionButtonText}
