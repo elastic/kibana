@@ -291,13 +291,12 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
             compress: { passes: 2 },
             keep_classnames: true,
             mangle: true,
+            sourceMap: false,
           },
           // @ts-expect-error
-          minify: async (file, sourceMap, minimizerOptions) => {
+          minify: async (file, _sourceMap, minimizerOptions) => {
             // eslint-disable-next-line @typescript-eslint/no-var-requires
-            const swc = require('@swc/core');
-            const { map, code } = await swc.minify(file, minimizerOptions.terserOptions);
-            return { map, code, extractedComments: [] };
+            return require('@swc/core').minify(file, minimizerOptions.terserOptions);
           },
         }),
       ],
