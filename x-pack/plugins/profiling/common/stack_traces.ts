@@ -20,10 +20,10 @@ export enum TopNType {
 
 export function getFieldNameForTopNType(type: TopNType): string {
   return {
-    [TopNType.Containers]: 'ContainerName',
-    [TopNType.Deployments]: 'PodName',
-    [TopNType.Threads]: 'ThreadName',
-    [TopNType.Hosts]: 'HostID',
-    [TopNType.Traces]: 'StackTraceID',
+    [TopNType.Containers]: 'container.name',
+    [TopNType.Deployments]: 'orchestrator.resource.name',
+    [TopNType.Threads]: 'process.thread.name',
+    [TopNType.Hosts]: 'host.id',
+    [TopNType.Traces]: 'Stacktrace.id',
   }[type];
 }

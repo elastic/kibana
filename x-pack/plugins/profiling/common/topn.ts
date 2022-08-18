@@ -69,14 +69,14 @@ export function getTopNAggregationRequest({
           aggs: {
             count: {
               sum: {
-                field: 'Count',
+                field: 'Stacktrace.count',
               },
             },
           },
         },
         count: {
           sum: {
-            field: 'Count',
+            field: 'Stacktrace.count',
           },
         },
       },
@@ -89,7 +89,7 @@ export function getTopNAggregationRequest({
       aggs: {
         count: {
           sum: {
-            field: 'Count',
+            field: 'Stacktrace.count',
           },
         },
       },
