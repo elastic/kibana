@@ -218,7 +218,10 @@ describe('Custom query rules', () => {
             const initialNumberOfRules = rules.length;
             const expectedNumberOfRulesAfterDeletion = initialNumberOfRules - 1;
 
-            cy.get(SHOWING_RULES_TEXT).should('have.text', `Showing 1-${initialNumberOfRules} of ${initialNumberOfRules} rules`);
+            cy.get(SHOWING_RULES_TEXT).should(
+              'have.text',
+              `Showing 1-${initialNumberOfRules} of ${initialNumberOfRules} rules`
+            );
 
             deleteFirstRule();
             waitForRulesTableToBeRefreshed();
