@@ -597,10 +597,10 @@ x-pack/plugins/security_solution/cypress/README.md @elastic/security-engineering
 x-pack/test/security_solution_cypress @elastic/security-engineering-productivity
 
 ## Security Solution sub teams - adaptive-workload-protection
-x-pack/plugins/kubernetes_security @elastic/awp-platform
-x-pack/plugins/session_view @elastic/awp-platform
-x-pack/plugins/security_solution/public/common/components/sessions_viewer @elastic/awp-platform
-x-pack/plugins/security_solution/public/kubernetes @elastic/awp-platform
+x-pack/plugins/kubernetes_security @elastic/awp-viz
+x-pack/plugins/session_view @elastic/awp-viz
+x-pack/plugins/security_solution/public/common/components/sessions_viewer @elastic/awp-viz
+x-pack/plugins/security_solution/public/kubernetes @elastic/awp-viz
 
 ## Security Solution sub teams - Protections Experience
 x-pack/plugins/threat_intelligence @elastic/protections-experience
