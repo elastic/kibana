@@ -721,7 +721,7 @@
             "label": "xScaleType",
             "description": [],
             "signature": [
-              "\"time\" | \"linear\" | \"ordinal\""
+              "\"linear\" | \"time\" | \"ordinal\""
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false
@@ -788,7 +788,13 @@
             "label": "decorations",
             "description": [],
             "signature": [
-              "DataDecorationConfigResult",
+              {
+                "pluginId": "expressionXY",
+                "scope": "common",
+                "docId": "kibExpressionXYPluginApi",
+                "section": "def-common.DataDecorationConfigResult",
+                "text": "DataDecorationConfigResult"
+              },
               "[] | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
@@ -1807,7 +1813,7 @@
         "label": "AvailableReferenceLineIcon",
         "description": [],
         "signature": [
-          "\"alert\" | \"circle\" | \"asterisk\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"flag\" | \"heart\" | \"mapMarker\" | \"pinFilled\" | \"starEmpty\" | \"tag\" | \"triangle\" | \"empty\""
+          "\"circle\" | \"asterisk\" | \"alert\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"flag\" | \"heart\" | \"mapMarker\" | \"pinFilled\" | \"starEmpty\" | \"tag\" | \"triangle\" | \"empty\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
@@ -2003,6 +2009,27 @@
             "section": "def-common.ReferenceLineLayerConfigResult",
             "text": "ReferenceLineLayerConfigResult"
           }
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionXY",
+        "id": "def-common.DataDecorationConfigResult",
+        "type": "Type",
+        "tags": [],
+        "label": "DataDecorationConfigResult",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressionXY",
+            "scope": "common",
+            "docId": "kibExpressionXYPluginApi",
+            "section": "def-common.DataDecorationConfig",
+            "text": "DataDecorationConfig"
+          },
+          " & { type: \"dataDecorationConfig\"; }"
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
@@ -2369,7 +2396,7 @@
         "label": "XScaleType",
         "description": [],
         "signature": [
-          "\"time\" | \"linear\" | \"ordinal\""
+          "\"linear\" | \"time\" | \"ordinal\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
@@ -2480,7 +2507,7 @@
         "label": "YScaleType",
         "description": [],
         "signature": [
-          "\"log\" | \"time\" | \"linear\" | \"sqrt\""
+          "\"linear\" | \"log\" | \"time\" | \"sqrt\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
