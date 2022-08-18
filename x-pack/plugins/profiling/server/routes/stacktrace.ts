@@ -357,11 +357,11 @@ export async function mgetStackFrames({
       }
       if (frame.found) {
         stackFrames.set(frame._id, {
-          FileName: frame._source!.Stackframe.file.name,
-          FunctionName: frame._source!.Stackframe.function.name,
-          FunctionOffset: frame._source!.Stackframe.function.offset,
-          LineNumber: frame._source!.Stackframe.line.number,
-          SourceType: frame._source!.Stackframe.source.type,
+          FileName: frame._source!.Stackframe.file?.name,
+          FunctionName: frame._source!.Stackframe.function?.name,
+          FunctionOffset: frame._source!.Stackframe.function?.offset,
+          LineNumber: frame._source!.Stackframe.line?.number,
+          SourceType: frame._source!.Stackframe.source?.type,
         });
         framesFound++;
       } else {
