@@ -28,7 +28,7 @@ export const CreateArchives: Task = {
       const destination = build.getPlatformArchivePath(platform);
 
       log.info('archiving', source, 'to', destination);
-      const compressionLevel = config.isRelease ? 9 : 6;
+      const compressionLevel = config.isRelease ? 9 : 3;
       await mkdirp(Path.dirname(destination));
 
       switch (Path.extname(destination)) {
