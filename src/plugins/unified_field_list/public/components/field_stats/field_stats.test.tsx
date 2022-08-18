@@ -198,7 +198,7 @@ describe('UnifiedFieldList <FieldStats />', () => {
   });
 
   it('should not request field stats for range fields', async () => {
-    mountWithIntl(
+    const wrapper = await mountWithIntl(
       <FieldStats
         {...defaultProps}
         field={
@@ -211,11 +211,13 @@ describe('UnifiedFieldList <FieldStats />', () => {
       />
     );
 
+    await wrapper.update();
+
     expect(loadFieldStats).not.toHaveBeenCalled();
   });
 
   it('should not request field stats for geo fields', async () => {
-    mountWithIntl(
+    const wrapper = await mountWithIntl(
       <FieldStats
         {...defaultProps}
         field={
@@ -227,6 +229,8 @@ describe('UnifiedFieldList <FieldStats />', () => {
         }
       />
     );
+
+    await wrapper.update();
 
     expect(loadFieldStats).not.toHaveBeenCalled();
   });
