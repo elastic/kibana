@@ -16,6 +16,13 @@ import {
   UUID,
   LimitedSizeArray,
 } from '@kbn/securitysolution-io-ts-types';
+import {
+  throttle,
+  action_group as actionGroup,
+  action_params as actionParams,
+  action_id as actionId,
+} from '@kbn/securitysolution-io-ts-alerting-types';
+
 import * as t from 'io-ts';
 
 export const author = t.array(t.string);
@@ -426,13 +433,13 @@ const bulkActionEditPayloadRuleActions = t.type({
     t.literal(BulkActionEditType.set_rule_actions),
   ]),
   value: t.type({
-    throttle: t.string,
+    throttle,
     actions: t.array(
       t.exact(
         t.type({
-          group: t.string,
-          id: t.string,
-          params: t.UnknownRecord,
+          group: actionGroup,
+          id: actionId,
+          params: actionParams,
         })
       )
     ),
