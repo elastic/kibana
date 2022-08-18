@@ -9,13 +9,13 @@
 import React, { useCallback } from 'react';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { EuiFormRow } from '@elastic/eui';
-import type { Operator } from '../../../filter_bar/filter_editor';
+import type { Operator } from '../../filter_bar/filter_editor';
 import {
   PhraseValueInput,
   PhrasesValuesInput,
   RangeValueInput,
   isRangeParams,
-} from '../../../filter_bar/filter_editor';
+} from '../../filter_bar/filter_editor';
 
 interface ParamsEditorProps<TParams = unknown> {
   dataView: DataView;

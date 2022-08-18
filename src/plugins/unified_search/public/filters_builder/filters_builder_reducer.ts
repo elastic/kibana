@@ -12,7 +12,7 @@ import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { Path } from './filters_builder_types';
 import type { ConditionTypes } from './filters_builder_condition_types';
 import { addFilter, moveFilter, removeFilter, updateFilter } from './filters_builder_utils';
-import type { Operator } from '../../filter_bar/filter_editor';
+import type { Operator } from '../filter_bar/filter_editor';
 
 /** @internal **/
 export interface FiltersBuilderState {

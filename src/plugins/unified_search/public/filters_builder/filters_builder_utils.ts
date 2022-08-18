@@ -10,7 +10,7 @@ import { DataViewField } from '@kbn/data-views-plugin/common';
 import { buildEmptyFilter, Filter } from '@kbn/es-query';
 import { cloneDeep } from 'lodash';
 import { ConditionTypes } from './filters_builder_condition_types';
-import type { Operator } from '../../filter_bar/filter_editor';
+import type { Operator } from '../filter_bar/filter_editor';
 
 const PATH_SEPARATOR = '.';
 

@@ -9,8 +9,8 @@
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import type { Operator } from '../../../filter_bar/filter_editor';
-import { getOperatorOptions, GenericComboBox } from '../../../filter_bar/filter_editor';
+import type { Operator } from '../../filter_bar/filter_editor';
+import { getOperatorOptions, GenericComboBox } from '../../filter_bar/filter_editor';
 
 interface OperatorInputProps<TParams = unknown> {
   field: DataViewField | undefined;
