@@ -46,7 +46,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { buildEsQuery, Query, Filter, AggregateQuery } from '@kbn/es-query';
 import type { BucketedAggregation } from '../../../common/types';
-import { loadFieldStats, canProvideStatsForField } from '../../services';
+import { canProvideStatsForField } from '../../../common/utils/field_stats_utils';
+import { loadFieldStats } from '../../services/field_stats';
 
 interface State {
   isLoading: boolean;

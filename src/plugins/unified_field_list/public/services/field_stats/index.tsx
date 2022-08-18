@@ -6,5 +6,9 @@
  * Side Public License, v 1.
  */
 
-export { loadFieldStats } from './field_stats';
-export { canProvideStatsForField } from '../../common/utils/field_stats_utils';
+import type { LoadFieldStatsHandler } from './load_field_stats';
+
+export const loadFieldStats: LoadFieldStatsHandler = async (params) => {
+  const { loadFieldStats: loadFieldStatsHandler } = await import('./load_field_stats');
+  return await loadFieldStatsHandler(params);
+};

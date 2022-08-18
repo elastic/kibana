@@ -10,12 +10,12 @@ import { lastValueFrom } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewFieldBase } from '@kbn/es-query';
-import type { FieldStatsResponse } from '../../common/types';
+import type { FieldStatsResponse } from '../../../common/types';
 import {
   fetchAndCalculateFieldStats,
   SearchHandler,
   buildSearchParams,
-} from '../../common/utils/field_stats_utils';
+} from '../../../common/utils/field_stats_utils';
 
 interface FetchFieldStatsParams {
   services: {
@@ -30,6 +30,10 @@ interface FetchFieldStatsParams {
   abortController?: AbortController;
 }
 
+export type LoadFieldStatsHandler = (
+  params: FetchFieldStatsParams
+) => Promise<FieldStatsResponse<string | number>>;
+
 /**
  * Loads and aggregates stats data for a data view field
  * @param services
@@ -41,7 +45,7 @@ interface FetchFieldStatsParams {
  * @param size
  * @param abortController
  */
-export const loadFieldStats = async ({
+export const loadFieldStats: LoadFieldStatsHandler = async ({
   services,
   dataView,
   field,
@@ -50,7 +54,7 @@ export const loadFieldStats = async ({
   dslQuery,
   size,
   abortController,
-}: FetchFieldStatsParams): Promise<FieldStatsResponse<string | number>> => {
+}) => {
   const { data } = services;
 
   try {
