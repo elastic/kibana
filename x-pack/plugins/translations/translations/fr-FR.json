@@ -18261,7 +18261,6 @@
     "xpack.maps.source.esSearch.convertToGeoJsonErrorMsg": "Impossible de convertir la réponse de la recherche à la collecte de fonctionnalités geoJson, erreur : {errorMsg}",
     "xpack.maps.source.esSearch.limitScalingLabel": "Limiter les résultats à {maxResultWindow}",
     "xpack.maps.source.esSearch.loadTooltipPropertiesErrorMsg": "Document introuvable, _id : {docId}",
-    "xpack.maps.source.esSearch.mvtDisableReason": "L'API de tuile vectorielle ne prend pas en charge le champ de runtime {type}",
     "xpack.maps.source.esSearch.mvtScalingJoinMsg": "Les tuiles vectorielles prennent en charge une seule liaison de terme. Votre calque comporte {numberOfJoins} liaisons de terme. Le passage aux tuiles vectorielles conservera la première liaison de terme et supprimera toutes les autres liaisons de terme de votre configuration de calque.",
     "xpack.maps.source.esSource.requestFailedErrorMessage": "Échec de la demande de recherche Elasticsearch, erreur : {message}",
     "xpack.maps.source.esSource.stylePropsMetaRequestName": "{layerName} - métadonnées",
