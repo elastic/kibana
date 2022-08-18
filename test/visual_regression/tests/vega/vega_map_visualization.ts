@@ -21,6 +21,7 @@ export default function ({
 
   describe('vega chart in visualize app', () => {
     before(async () => {
+      updateBaselines = true; //TODO: Remove this.  It's only used to get all the screenshots from Buildkite
       await esArchiver.loadIfNeeded(
         'test/functional/fixtures/es_archiver/kibana_sample_data_flights'
       );

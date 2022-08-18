@@ -27,6 +27,7 @@ export default function ({
 
   describe('discover', function describeIndexTests() {
     before(async function () {
+      updateBaselines = true; //TODO: Remove this.  It's only used to get all the screenshots from Buildkite
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/discover/visual_regression'
