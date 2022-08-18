@@ -55,7 +55,9 @@ Before you upgrade to 8.4.0, review the breaking changes, then mitigate the impa
 [%collapsible]
 ====
 *Details* +
-When you configure `setxpack.fleet.agents.fleet_server.hosts` and `xpack.fleet.agents.elasticsearch.hosts` in kibana.yml, you are unable to update the fields on the Fleet UI. For more information, refer to {kibana-pull}135669[#135669].
+When you configure `setxpack.fleet.agents.fleet_server.hosts` and `xpack.fleet.agents.elasticsearch.hosts` in kibana.yml, you are unable to update the fields on the Fleet UI. 
+
+For more information, refer to {kibana-pull}135669[#135669].
 
 *Impact* +
 To configure `setxpack.fleet.agents.fleet_server.hosts` and `xpack.fleet.agents.elasticsearch.hosts` on the Fleet UI, avoid configuring the settings in kibana.yml.
@@ -67,7 +69,9 @@ To configure `setxpack.fleet.agents.fleet_server.hosts` and `xpack.fleet.agents.
 [%collapsible]
 ====
 *Details* +
-The legacy implementation of the *Timelion* visualization charts library has been removed. All *Timelion* visualizations now use the elastic-charts library, which was introduced in 7.15.0. For more information, refer to {kibana-pull}134336[#134336].
+The legacy implementation of the *Timelion* visualization charts library has been removed. All *Timelion* visualizations now use the elastic-charts library, which was introduced in 7.15.0. 
+
+For more information, refer to {kibana-pull}134336[#134336].
 
 *Impact* +
 In 8.4.0 and later, you are unable to configure the *Timelion* legacy charts library advanced setting. For information about visualization Advanced Settings, check link:https://www.elastic.co/guide/en/kibana/8.4/advanced-options.html#kibana-visualization-settings[Visualization].
@@ -89,7 +93,9 @@ you make the necessary updates after you upgrade to 8.4.0.
 [%collapsible]
 ====
 *Details* +
-The ability to authenticate interactive users with ApiKey via a web browser has been deprecated, and will be removed in a future version. For more information, refer to {kibana-pull}136422[#136422].
+The ability to authenticate interactive users with ApiKey via a web browser has been deprecated, and will be removed in a future version. 
+
+For more information, refer to {kibana-pull}136422[#136422].
 
 *Impact* +
 To authenticate interactive users via a web browser, use <<kibana-authentication,another authentication method>>. Use API keys only for programmatic access to {kib} and {es}.
@@ -315,7 +321,7 @@ Canvas::
 
 Connectors::
 * Fixing ES index connector so that it can index into data streams as well as indices {kibana-pull}136011[#136011]
-* Verify emails when creating an email connector, even if allowedDomain… {kibana-pull}133859[#133859]
+* Verify emails when creating an email connector, even if allowedDomain {kibana-pull}133859[#133859]
 
 Dashboard::
 Fixes Copy to dashboard includes filters {kibana-pull}136275[#136275]
@@ -360,7 +366,7 @@ Lens & Visualizations::
 * Always show palette on first dimension for mosaic in *Lens* {kibana-pull}135198[#135198]
 * Wrong `visType` for `horizontal_bar` visualization {kibana-pull}135013[#135013]
 * Unlinking Some Agg Based Visualizations Results in Unsaved Changes in *Visualize* {kibana-pull}134229[#134229]
-* [Datatable] Ellipsis truncation is not visible in cells. Letters are just cut off. in *Lens* {kibana-pull}134065[#134065]
+* Fixes an issue where ellipsis truncation is not visible in table visualization cells, and letters are cut off in *Lens* {kibana-pull}134065[#134065]
 * Switching dashboard mode doesn't update missing data view prompt in *Visualize* {kibana-pull}133873[#133873]
 * Fixes application of suffix formats in *Lens* {kibana-pull}133780[#133780]
 * Error messages not centered in *TSVB* {kibana-pull}133288[#133288]
