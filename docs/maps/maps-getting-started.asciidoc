@@ -107,7 +107,7 @@ The layer is only visible when users zoom in.
 . Add a tooltip field and select **agent**, **bytes**, **clientip**, **host**,
 **machine.os**, **request**, **response**, and **timestamp**.
 
-. In **Scaling**, enablesm *Limit results to 10,000.*
+. In **Scaling**, enable *Limit results to 10,000.*
 
 . In **Layer style**, set **Fill color** to **#2200FF**.
 
