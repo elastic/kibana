@@ -11,6 +11,7 @@ import {
   CoreQueryParamsSchemaProperties,
   TimeSeriesQuery,
 } from '@kbn/triggers-actions-ui-plugin/server';
+import { ALERT_ACTION_GROUP, ALERT_INSTANCE_ID } from '@kbn/rule-data-utils';
 import { RuleType, RuleExecutorOptions, StackAlertsStartDeps } from '../../types';
 import { Params, ParamsSchema } from './alert_type_params';
 import { ActionContext, BaseActionContext, addMessages } from './action_context';
@@ -129,13 +130,14 @@ export function getAlertType(
     executor,
     producer: STACK_ALERTS_FEATURE_ID,
     doesSetRecoveryContext: true,
+    useLegacyAlerts: false,
   };
 
   async function executor(
     options: RuleExecutorOptions<Params, {}, {}, ActionContext, typeof ActionGroupId>
   ) {
     const { alertId: ruleId, name, services, params } = options;
-    const { alertsClient, alertFactory, scopedClusterClient } = services;
+    const { alertsClient, scopedClusterClient } = services;
 
     const compareFn = ComparatorFns.get(params.thresholdComparator);
     if (compareFn == null) {
@@ -214,21 +216,19 @@ export function getAlertType(
         conditions: humanFn,
       };
       const actionContext = addMessages(options, baseContext, params);
-      const alert = alertFactory.create(alertId);
-      alert.scheduleActions(ActionGroupId, actionContext);
 
       alertsClient.create({
-        id: alertId,
-        actionGroup: ActionGroupId,
+        [ALERT_INSTANCE_ID]: alertId,
+        [ALERT_ACTION_GROUP]: ActionGroupId,
         ...actionContext,
       });
 
       logger.debug(`scheduled actionGroup: ${JSON.stringify(actionContext)}`);
     }
 
-    const recovered = alertsClient.getRecoveredAlerts();
-    for (const r of recovered) {
-      const alertId = r.id;
+    const recoveredAlerts = alertsClient.getRecoveredAlerts();
+    for (const alert of recoveredAlerts) {
+      const alertId = alert[ALERT_INSTANCE_ID];
       const baseContext: BaseActionContext = {
         date,
         value: unmetGroupValues[alertId] ?? 'unknown',
@@ -241,22 +241,6 @@ export function getAlertType(
       alertsClient.update(alertId, {
         ...recoveryContext,
       });
-    }
-
-    const { getRecoveredAlerts } = services.alertFactory.done();
-    for (const recoveredAlert of getRecoveredAlerts()) {
-      const alertId = recoveredAlert.getId();
-      logger.debug(`setting context for recovered alert ${alertId}`);
-      const baseContext: BaseActionContext = {
-        date,
-        value: unmetGroupValues[alertId] ?? 'unknown',
-        group: alertId,
-        conditions: `${agg} is NOT ${getHumanReadableComparator(
-          params.thresholdComparator
-        )} ${params.threshold.join(' and ')}`,
-      };
-      const recoveryContext = addMessages(options, baseContext, params, true);
-      recoveredAlert.setContext(recoveryContext);
     }
   }
 }

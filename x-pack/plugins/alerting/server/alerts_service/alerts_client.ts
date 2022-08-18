@@ -60,6 +60,8 @@ export class AlertsClient implements IAlertsClient {
   private hasCalledGetRecoveredAlerts: boolean = false;
   private reachedAlertLimit: boolean = false;
 
+  private alertIdsWithActionGroupChanges: string[] = [];
+
   // Alerts from the previous rule execution
   // TODO - Alerts can be large, should we strip these down to the bare minimum
   // required by the framework? But since they now contain state values previously
@@ -73,7 +75,6 @@ export class AlertsClient implements IAlertsClient {
   private preparedAlerts: AlertSchema[] = [];
 
   // Alerts with partial updates during the current rule execution
-  //
   private updatedAlerts: Array<Partial<AlertSchema>> = [];
 
   constructor(private readonly options: AlertsClientParams) {}
@@ -331,12 +332,23 @@ export class AlertsClient implements IAlertsClient {
           new Date(currentTime).valueOf() -
           new Date(existingAlert[ALERT_START] as string).valueOf();
         const duration = existingAlert[ALERT_START] ? millisToNanos(durationInMs) : undefined;
+
         this.preparedAlerts.push({
           ...alert,
           ...(existingAlert[ALERT_START] ? { [ALERT_START]: existingAlert[ALERT_START] } : {}),
           ...(duration !== undefined ? { [ALERT_DURATION]: duration } : {}),
+          ...(existingAlert[ALERT_UUID] ? { [ALERT_UUID]: existingAlert[ALERT_UUID] } : {}),
+          [ALERT_WORKFLOW_STATUS]: existingAlert[ALERT_WORKFLOW_STATUS] ?? 'open',
           [EVENT_ACTION]: 'active',
         });
+
+        // If action group action subgroup has changed, may want to schedule actions
+        if (
+          existingAlert[ALERT_ACTION_GROUP] !== alert[ALERT_ACTION_GROUP] ||
+          existingAlert[ALERT_ACTION_SUBGROUP] !== alert[ALERT_ACTION_SUBGROUP]
+        ) {
+          this.alertIdsWithActionGroupChanges.push(alert[ALERT_INSTANCE_ID]);
+        }
       } else {
         // Add current time as start time, seed duration with '0' and generate uuid
         this.preparedAlerts.push({
@@ -349,6 +361,7 @@ export class AlertsClient implements IAlertsClient {
           [ALERT_WORKFLOW_STATUS]: 'open',
           [EVENT_ACTION]: 'new',
         });
+        this.alertIdsWithActionGroupChanges.push(alert[ALERT_INSTANCE_ID]);
       }
     }
 
@@ -431,7 +444,6 @@ export class AlertsClient implements IAlertsClient {
   }
 
   private logAlerts(eventLogger: AlertingEventLogger, metricsStore: RuleRunMetricsStore) {
-    this.options.logger.info(`logging alerts to event log`);
     const activeAlerts = this.preparedAlerts.filter(
       ({ [ALERT_STATUS]: status }) => status === 'active'
     );
@@ -448,38 +460,45 @@ export class AlertsClient implements IAlertsClient {
     metricsStore.setNumberOfRecoveredAlerts(recoveredAlerts.length);
 
     for (const alert of this.preparedAlerts) {
-      let message: string = '';
-      let action: string = '';
+      const eventLogMessagesAndActions: Array<{ message: string; action: string }> = [];
 
       if (alert[ALERT_STATUS] === 'recovered') {
-        action = EVENT_LOG_ACTIONS.recoveredInstance;
-        message = `${this.ruleLogPrefix} alert '${alert[ALERT_INSTANCE_ID]}' has recovered`;
+        eventLogMessagesAndActions.push({
+          action: EVENT_LOG_ACTIONS.recoveredInstance,
+          message: `${this.ruleLogPrefix} alert '${alert[ALERT_INSTANCE_ID]}' has recovered`,
+        });
       } else if (alert[ALERT_STATUS] === 'active') {
         if (alert[ALERT_DURATION] === '0') {
-          action = EVENT_LOG_ACTIONS.newInstance;
-          message = `${this.ruleLogPrefix} created new alert: '${alert[ALERT_INSTANCE_ID]}'`;
-        } else {
-          action = EVENT_LOG_ACTIONS.activeInstance;
-          message = `${this.ruleLogPrefix} active alert: '${alert[ALERT_INSTANCE_ID]}' in ${
+          eventLogMessagesAndActions.push({
+            action: EVENT_LOG_ACTIONS.newInstance,
+            message: `${this.ruleLogPrefix} created new alert: '${alert[ALERT_INSTANCE_ID]}'`,
+          });
+        }
+
+        eventLogMessagesAndActions.push({
+          action: EVENT_LOG_ACTIONS.activeInstance,
+          message: `${this.ruleLogPrefix} active alert: '${alert[ALERT_INSTANCE_ID]}' in ${
             alert[ALERT_ACTION_SUBGROUP]
               ? `actionGroup(subgroup): '${alert[ALERT_ACTION_GROUP]}(${alert[ALERT_ACTION_SUBGROUP]})'`
               : `actionGroup: '${alert[ALERT_ACTION_GROUP]}'`
-          }`;
-        }
+          }`,
+        });
       }
 
-      eventLogger.logAlert({
-        action,
-        id: alert[ALERT_INSTANCE_ID],
-        group: alert[ALERT_ACTION_GROUP],
-        subgroup: alert[ALERT_ACTION_SUBGROUP],
-        message,
-        state: {
-          start: alert[ALERT_START],
-          end: alert[ALERT_END],
-          duration: alert[ALERT_DURATION],
-        },
-      });
+      for (const { action, message } of eventLogMessagesAndActions) {
+        eventLogger.logAlert({
+          action,
+          id: alert[ALERT_INSTANCE_ID],
+          group: alert[ALERT_ACTION_GROUP],
+          subgroup: alert[ALERT_ACTION_SUBGROUP],
+          message,
+          state: {
+            start: alert[ALERT_START],
+            end: alert[ALERT_END],
+            duration: alert[ALERT_DURATION],
+          },
+        });
+      }
     }
   }
 }

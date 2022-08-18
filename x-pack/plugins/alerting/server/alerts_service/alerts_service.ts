@@ -64,7 +64,7 @@ export class AlertsService implements IAlertsService {
       this.createOrUpdateIndexTemplate(esClient);
 
       // TODO - check if it exists first
-      // this.createConcreteWriteIndex(esClient);
+      this.createConcreteWriteIndex(esClient);
     });
   }
 
