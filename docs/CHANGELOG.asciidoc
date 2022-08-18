@@ -38,7 +38,7 @@ Review important information about the {kib} 8.4.x releases.
 
 coming::[8.4.0]
 
-For information about the {kib} 8.4.0 release, review the following information.
+Review the following information about the {kib} 8.4.0 release.
 
 [float]
 [[breaking-changes-8.4.0]]
