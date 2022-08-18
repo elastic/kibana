@@ -190,8 +190,6 @@ function parseUserProfile<D extends UserProfileData>(
       email: rawUserProfile.user.email ?? undefined,
       // @elastic/elasticsearch types support `null` values for the `full_name`, but we don't.
       full_name: rawUserProfile.user.full_name ?? undefined,
-      // @ts-expect-error @elastic/elasticsearch SecurityUserProfileUser.display_name?: string
-      display_name: rawUserProfile.user.display_name ?? undefined,
     },
   };
 }

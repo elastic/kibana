@@ -72,7 +72,6 @@ describe('UserProfileService', () => {
         uid: 'UID',
         user: {
           username: 'user-1',
-          display_name: 'display-name-1',
           full_name: 'full-name-1',
           realm_name: 'some-realm',
           realm_domain: 'some-domain',
@@ -201,7 +200,6 @@ describe('UserProfileService', () => {
                 "labels": Object {},
                 "uid": "UID",
                 "user": Object {
-                  "display_name": "display-name-1",
                   "email": undefined,
                   "full_name": "full-name-1",
                   "realm_domain": "some-domain",
@@ -252,7 +250,6 @@ describe('UserProfileService', () => {
                 "labels": Object {},
                 "uid": "UID",
                 "user": Object {
-                  "display_name": "display-name-1",
                   "email": undefined,
                   "full_name": "full-name-1",
                   "realm_domain": "some-domain",
@@ -334,7 +331,6 @@ describe('UserProfileService', () => {
                 "labels": Object {},
                 "uid": "some-profile-uid",
                 "user": Object {
-                  "display_name": undefined,
                   "email": "some@email",
                   "full_name": undefined,
                   "realm_domain": "some-realm-domain",
@@ -366,7 +362,6 @@ describe('UserProfileService', () => {
                 "labels": Object {},
                 "uid": "some-profile-uid",
                 "user": Object {
-                  "display_name": undefined,
                   "email": "some@email",
                   "full_name": undefined,
                   "realm_domain": "some-realm-domain",
@@ -431,7 +426,6 @@ describe('UserProfileService', () => {
                 "labels": Object {},
                 "uid": "some-profile-uid",
                 "user": Object {
-                  "display_name": undefined,
                   "email": "some@email",
                   "full_name": undefined,
                   "realm_domain": "some-realm-domain",
@@ -495,7 +489,6 @@ describe('UserProfileService', () => {
             uid: 'UID-1',
             user: {
               username: 'user-1',
-              display_name: 'display-name-1',
               full_name: 'full-name-1',
               realm_name: 'some-realm',
               realm_domain: 'some-domain',
@@ -506,7 +499,6 @@ describe('UserProfileService', () => {
             uid: 'UID-2',
             user: {
               username: 'user-2',
-              display_name: 'display-name-2',
               full_name: 'full-name-2',
               realm_name: 'some-realm',
               realm_domain: 'some-domain',
@@ -525,7 +517,6 @@ describe('UserProfileService', () => {
                             "enabled": true,
                             "uid": "UID-1",
                             "user": Object {
-                              "display_name": "display-name-1",
                               "email": undefined,
                               "full_name": "full-name-1",
                               "username": "user-1",
@@ -536,7 +527,6 @@ describe('UserProfileService', () => {
                             "enabled": true,
                             "uid": "UID-2",
                             "user": Object {
-                              "display_name": "display-name-2",
                               "email": undefined,
                               "full_name": "full-name-2",
                               "username": "user-2",
@@ -575,7 +565,6 @@ describe('UserProfileService', () => {
                   "enabled": true,
                   "uid": "UID-1",
                   "user": Object {
-                    "display_name": undefined,
                     "email": "some@email",
                     "full_name": undefined,
                     "username": "some-username",
@@ -625,7 +614,6 @@ describe('UserProfileService', () => {
             uid: 'UID-1',
             user: {
               username: 'user-1',
-              display_name: 'display-name-1',
               full_name: 'full-name-1',
               realm_name: 'some-realm',
               realm_domain: 'some-domain',
@@ -636,7 +624,6 @@ describe('UserProfileService', () => {
             uid: 'UID-2',
             user: {
               username: 'user-2',
-              display_name: 'display-name-2',
               full_name: 'full-name-2',
               realm_name: 'some-realm',
               realm_domain: 'some-domain',
@@ -655,7 +642,6 @@ describe('UserProfileService', () => {
                   "enabled": true,
                   "uid": "UID-1",
                   "user": Object {
-                    "display_name": "display-name-1",
                     "email": undefined,
                     "full_name": "full-name-1",
                     "username": "user-1",
@@ -666,7 +652,6 @@ describe('UserProfileService', () => {
                   "enabled": true,
                   "uid": "UID-2",
                   "user": Object {
-                    "display_name": "display-name-2",
                     "email": undefined,
                     "full_name": "full-name-2",
                     "username": "user-2",
@@ -707,7 +692,6 @@ describe('UserProfileService', () => {
                   "enabled": true,
                   "uid": "UID-1",
                   "user": Object {
-                    "display_name": undefined,
                     "email": "some@email",
                     "full_name": undefined,
                     "username": "some-username",
@@ -801,7 +785,6 @@ describe('UserProfileService', () => {
                   "enabled": true,
                   "uid": "UID-0",
                   "user": Object {
-                    "display_name": undefined,
                     "email": "some@email",
                     "full_name": undefined,
                     "username": "some-username",
@@ -814,7 +797,6 @@ describe('UserProfileService', () => {
                   "enabled": true,
                   "uid": "UID-1",
                   "user": Object {
-                    "display_name": undefined,
                     "email": "some@email",
                     "full_name": undefined,
                     "username": "some-username",
@@ -827,7 +809,6 @@ describe('UserProfileService', () => {
                   "enabled": true,
                   "uid": "UID-8",
                   "user": Object {
-                    "display_name": undefined,
                     "email": "some@email",
                     "full_name": undefined,
                     "username": "some-username",
@@ -907,7 +888,6 @@ describe('UserProfileService', () => {
                   "enabled": true,
                   "uid": "UID-0",
                   "user": Object {
-                    "display_name": undefined,
                     "email": "some@email",
                     "full_name": undefined,
                     "username": "some-username",
@@ -920,7 +900,6 @@ describe('UserProfileService', () => {
                   "enabled": true,
                   "uid": "UID-20",
                   "user": Object {
-                    "display_name": undefined,
                     "email": "some@email",
                     "full_name": undefined,
                     "username": "some-username",
@@ -1010,7 +989,6 @@ describe('UserProfileService', () => {
                   "enabled": true,
                   "uid": "UID-0",
                   "user": Object {
-                    "display_name": undefined,
                     "email": "some@email",
                     "full_name": undefined,
                     "username": "some-username",
@@ -1023,7 +1001,6 @@ describe('UserProfileService', () => {
                   "enabled": true,
                   "uid": "UID-1",
                   "user": Object {
-                    "display_name": undefined,
                     "email": "some@email",
                     "full_name": undefined,
                     "username": "some-username",
