@@ -82,7 +82,7 @@ export { reactToUiComponent, uiToReactComponent } from './adapters';
 export { toMountPoint, MountPointPortal } from './util';
 export type { ToMountPointOptions } from './util';
 
-/** @deprecated Use `RedirectAppLinks` from `@kbn/shared-ux-components */
+/** @deprecated Use `RedirectAppLinks` from `@kbn/shared-ux-link-redirect-app` */
 export { RedirectAppLinks } from './app_links';
 
 export { wrapWithTheme, KibanaThemeProvider } from './theme';

@@ -10,9 +10,11 @@
     "types": [
       "jest",
       "node",
+      "react"
     ]
   },
   "include": [
-    "src/**/*"
+    "**/*.ts",
+    "**/*.tsx",
   ]
 }

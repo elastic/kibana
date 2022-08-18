@@ -10,7 +10,7 @@ import styled from 'styled-components';
 import { EuiPanel, EuiThemeProvider, useEuiTheme } from '@elastic/eui';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import type { AppLeaveHandler } from '@kbn/core/public';
-import { KibanaPageTemplate } from '@kbn/shared-ux-components';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useSecuritySolutionNavigation } from '../../../common/components/navigation/use_security_solution_navigation';
 import { TimelineId } from '../../../../common/types/timeline';
 import { getTimelineShowStatusByIdSelector } from '../../../timelines/components/flyout/selectors';

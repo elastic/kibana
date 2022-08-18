@@ -21,7 +21,7 @@ import {
 import { css } from '@emotion/react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import { KibanaPageTemplate } from '@kbn/shared-ux-components';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { getServices } from '../../kibana_services';
 import { KEY_ENABLE_WELCOME } from '../home';

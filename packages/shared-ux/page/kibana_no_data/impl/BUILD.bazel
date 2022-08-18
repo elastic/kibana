@@ -44,9 +44,8 @@ RUNTIME_DEPS = [
   "@npm//@emotion/react",
   "@npm//react",
   "//packages/kbn-i18n",
-  "//packages/kbn-shared-ux-components",
-  "//packages/kbn-shared-ux-services",
   "//packages/shared-ux/prompt/no_data_views/impl",
+  "//packages/shared-ux/page/no_data_config/impl",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -67,10 +66,10 @@ TYPES_DEPS = [
   "@npm//@types/react",
   "//packages/kbn-ambient-ui-types",
   "//packages/kbn-i18n:npm_module_types",
-  "//packages/kbn-shared-ux-components:npm_module_types",
-  "//packages/kbn-shared-ux-services:npm_module_types",
   "//packages/shared-ux/prompt/no_data_views/impl:npm_module_types",
-  "//packages/shared-ux/page/kibana_no_data/types:npm_module_types",
+  "//packages/shared-ux/page/no_data_config/impl:npm_module_types",
+  "//packages/shared-ux/page/no_data_config/types",
+  "//packages/shared-ux/page/kibana_no_data/types",
 ]
 
 jsts_transpiler(

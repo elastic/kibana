@@ -25,7 +25,7 @@ import {
   overviewPageActions,
   OverviewPageFooter,
 } from '@kbn/kibana-react-plugin/public';
-import { KibanaPageTemplate } from '@kbn/shared-ux-components';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { KibanaSolutionAvatar } from '@kbn/shared-ux-avatar-solution';
 import {
   AnalyticsNoDataPageKibanaProvider,

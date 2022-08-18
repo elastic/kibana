@@ -3810,10 +3810,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-components@link:bazel-bin/packages/kbn-shared-ux-components":
-  version "0.0.0"
-  uid ""
-
 "@kbn/shared-ux-link-redirect-app-mocks@link:bazel-bin/packages/shared-ux/link/redirect_app/mocks":
   version "0.0.0"
   uid ""
@@ -3850,6 +3846,42 @@
   version "0.0.0"
   uid ""
 
+"@kbn/shared-ux-page-kibana-template-mocks@link:bazel-bin/packages/shared-ux/page/kibana_template/mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-page-kibana-template-types@link:bazel-bin/packages/shared-ux/page/kibana_template/types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-page-kibana-template@link:bazel-bin/packages/shared-ux/page/kibana_template/impl":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-page-no-data-config-mocks@link:bazel-bin/packages/shared-ux/page/no_data_config/mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-page-no-data-config-types@link:bazel-bin/packages/shared-ux/page/no_data_config/types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-page-no-data-config@link:bazel-bin/packages/shared-ux/page/no_data_config/impl":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-page-no-data-mocks@link:bazel-bin/packages/shared-ux/page/no_data/mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-page-no-data-types@link:bazel-bin/packages/shared-ux/page/no_data/types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-page-no-data@link:bazel-bin/packages/shared-ux/page/no_data/impl":
+  version "0.0.0"
+  uid ""
+
 "@kbn/shared-ux-page-solution-nav@link:bazel-bin/packages/shared-ux/page/solution_nav":
   version "0.0.0"
   uid ""
@@ -3866,15 +3898,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-services@link:bazel-bin/packages/kbn-shared-ux-services":
+"@kbn/shared-ux-storybook-config@link:bazel-bin/packages/shared-ux/storybook/config":
   version "0.0.0"
   uid ""
 
 "@kbn/shared-ux-storybook-mock@link:bazel-bin/packages/shared-ux/storybook/mock":
-  version "0.0.0"
-  uid ""
-
-"@kbn/shared-ux-storybook@link:bazel-bin/packages/kbn-shared-ux-storybook":
   version "0.0.0"
   uid ""
 
@@ -7730,10 +7758,6 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__shared-ux-components@link:bazel-bin/packages/kbn-shared-ux-components/npm_module_types":
-  version "0.0.0"
-  uid ""
-
 "@types/kbn__shared-ux-link-redirect-app-mocks@link:bazel-bin/packages/shared-ux/link/redirect_app/mocks/npm_module_types":
   version "0.0.0"
   uid ""
@@ -7770,6 +7794,42 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__shared-ux-page-kibana-template-mocks@link:bazel-bin/packages/shared-ux/page/kibana_template/mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-page-kibana-template-types@link:bazel-bin/packages/shared-ux/page/kibana_template/types/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-page-kibana-template@link:bazel-bin/packages/shared-ux/page/kibana_template/impl/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-page-no-data-config-mocks@link:bazel-bin/packages/shared-ux/page/no_data_config/mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-page-no-data-config-types@link:bazel-bin/packages/shared-ux/page/no_data_config/types/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-page-no-data-config@link:bazel-bin/packages/shared-ux/page/no_data_config/impl/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-page-no-data-mocks@link:bazel-bin/packages/shared-ux/page/no_data/mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-page-no-data-types@link:bazel-bin/packages/shared-ux/page/no_data/types/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-page-no-data@link:bazel-bin/packages/shared-ux/page/no_data/impl/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__shared-ux-page-solution-nav@link:bazel-bin/packages/shared-ux/page/solution_nav/npm_module_types":
   version "0.0.0"
   uid ""
@@ -7786,15 +7846,11 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__shared-ux-services@link:bazel-bin/packages/kbn-shared-ux-services/npm_module_types":
+"@types/kbn__shared-ux-storybook-config@link:bazel-bin/packages/shared-ux/storybook/config/npm_module_types":
   version "0.0.0"
   uid ""
 
 "@types/kbn__shared-ux-storybook-mock@link:bazel-bin/packages/shared-ux/storybook/mock/npm_module_types":
-  version "0.0.0"
-  uid ""
-
-"@types/kbn__shared-ux-storybook@link:bazel-bin/packages/kbn-shared-ux-storybook/npm_module_types":
   version "0.0.0"
   uid ""
 

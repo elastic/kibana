@@ -10,10 +10,14 @@
 import React, { MouseEvent } from 'react';
 import { mount as enzymeMount, ReactWrapper } from 'enzyme';
 
+import {
+  getRedirectAppLinksKibanaDependenciesMock,
+  getRedirectAppLinksServicesMock,
+} from '@kbn/shared-ux-link-redirect-app-mocks';
+
 import { RedirectAppLinksKibanaProvider, RedirectAppLinksProvider } from './services';
 import { RedirectAppLinks } from './redirect_app_links.container';
 import { RedirectAppLinks as ComposedWrapper } from './redirect_app_links';
-import { Observable } from 'rxjs';
 
 export type UnmountCallback = () => void;
 export type MountPoint<T extends HTMLElement = HTMLElement> = (element: T) => UnmountCallback;
@@ -251,21 +255,8 @@ describe('RedirectAppLinks', () => {
     navigateToUrl.mockReset();
   });
 
-  const kibana = {
-    coreStart: {
-      application: {
-        currentAppId$: new Observable<string>((subscriber) => {
-          subscriber.next('123');
-        }),
-        navigateToUrl,
-      },
-    },
-  };
-
-  const services = {
-    currentAppId: 'abc123',
-    navigateToUrl,
-  };
+  const kibana = getRedirectAppLinksKibanaDependenciesMock({ navigateToUrl });
+  const services = getRedirectAppLinksServicesMock({ navigateToUrl });
 
   const provider = (node: React.ReactElement) =>
     enzymeMount(<RedirectAppLinksProvider {...services}>{node}</RedirectAppLinksProvider>);

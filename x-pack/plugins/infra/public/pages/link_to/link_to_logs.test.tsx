@@ -11,7 +11,7 @@ import React from 'react';
 import { Route, Router, Switch } from 'react-router-dom';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { KibanaPageTemplate } from '@kbn/shared-ux-components';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useLogView } from '../../hooks/use_log_view';
 import {
   createLoadedUseLogViewMock,

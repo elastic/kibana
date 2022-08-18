@@ -21,7 +21,7 @@ import { KibanaPageTemplateInner, KibanaPageTemplateWithSolutionNav } from './pa
 
 /**
  * A thin wrapper around EuiPageTemplate with a few Kibana specific additions
- * @deprecated Use `KibanaPageTemplateProps` from `kbn-shared-ux-components`.
+ * @deprecated Use `KibanaPageTemplateProps` from `@kbn/shared-ux-page-kibana-template-types`.
  */
 export type KibanaPageTemplateProps = EuiPageTemplateProps & {
   /**
@@ -42,7 +42,7 @@ export type KibanaPageTemplateProps = EuiPageTemplateProps & {
   noDataConfig?: NoDataPageProps;
 };
 
-/** @deprecated Use `KibanaPageTemplate` from `kbn-shared-ux-components`. */
+/** @deprecated Use `KibanaPageTemplate` from `@kbn/shared-ux-page-kibana-template`. */
 export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
   template,
   className,

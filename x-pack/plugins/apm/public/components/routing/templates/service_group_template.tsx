@@ -16,7 +16,7 @@ import {
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { KibanaPageTemplateProps } from '@kbn/shared-ux-components';
+import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import { enableServiceGroups } from '@kbn/observability-plugin/public';
 import { useFetcher, FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { ApmPluginStartDeps } from '../../../plugin';

@@ -669,7 +669,6 @@ x-pack/test/threat_intelligence_cypress @elastic/protections-experience
 # Application Experience
 
 ## Shared UX Team
-/src/plugins/shared_ux/ @elastic/shared-ux
 /packages/shared-ux/ @elastic/shared-ux
 /packages/shared-ux-*/ @elastic/shared-ux
 
