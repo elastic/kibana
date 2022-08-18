@@ -35,21 +35,25 @@ export const computeParentSeries = (
     return getFormulaSeries(formula);
   }
   const timeScale = getTimeScale(currentMetric);
+  const fieldName =
+    subFunctionMetric?.field && pipelineAgg.name !== 'count'
+      ? subFunctionMetric?.field
+      : 'document';
+
   return [
     {
       agg: aggregationMap.name,
       isFullReference: aggregationMap!.isFullReference,
       pipelineAggType: pipelineAgg.name,
-      fieldName:
-        subFunctionMetric?.field && pipelineAgg.name !== 'count'
-          ? subFunctionMetric?.field
-          : 'document',
+      fieldName,
       params: {
         ...(currentMetric.window && { window: currentMetric.window }),
         ...(timeScale && { timeScale }),
         ...(pipelineAgg.name === 'percentile' && meta && { percentile: meta }),
         ...(pipelineAgg.name === 'percentile_rank' && meta && { value: meta }),
-        ...(pipelineAgg.name === 'formula' ? { formula: pipelineAgg.formula } : {}),
+        ...(pipelineAgg.name === 'formula'
+          ? { formula: `${pipelineAgg.formula}(${fieldName})` }
+          : {}),
       },
     },
   ];
