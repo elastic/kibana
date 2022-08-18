@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { apm, timerange } from '@elastic/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace';
 import expect from '@kbn/expect';
 import { range } from 'lodash';
 import { AlertType } from '@kbn/apm-plugin/common/alert_types';

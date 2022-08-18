@@ -27,7 +27,7 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 RUNTIME_DEPS = [
-  "//packages/elastic-safer-lodash-set",
+  "//packages/kbn-safer-lodash-set",
   "//packages/kbn-analytics",
   "//packages/kbn-babel-preset",
   "//packages/kbn-datemath",
@@ -41,7 +41,7 @@ RUNTIME_DEPS = [
 ]
 
 TYPES_DEPS = [
-  "//packages/elastic-safer-lodash-set:npm_module_types",
+  "//packages/kbn-safer-lodash-set:npm_module_types",
   "//packages/kbn-analytics:npm_module_types",
   "//packages/kbn-datemath:npm_module_types",
   "//packages/kbn-i18n:npm_module_types",

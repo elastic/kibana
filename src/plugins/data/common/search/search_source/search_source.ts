@@ -58,7 +58,7 @@
  *    `appSearchSource`.
  */
 
-import { setWith } from '@elastic/safer-lodash-set';
+import { setWith } from '@kbn/safer-lodash-set';
 import { difference, isEqual, isFunction, isObject, keyBy, pick, uniqueId, uniqWith } from 'lodash';
 import {
   catchError,

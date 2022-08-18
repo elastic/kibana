@@ -191,9 +191,9 @@ A `BUILD.bazel` file will be added to the root of each package defining a `build
 
 The `@kbn/pm` package was updated in https://github.com/elastic/kibana/pull/89961 to run the new packages build target, invoked by calling `bazel build //packages:build`, before executing the existing legacy package builds.
 
-The build targets will no longer reside within the package themselves and instead will be within the `bazel/bin` directory. To account for this, any defined dependency will need to be updated to reference the new directory (example: `link:bazel/bin/packages/elastic-datemath`). While also in this transition period, the build will need to copy over the packages from `bazel/bin` into the `node_modules` of the build target.
+The build targets will no longer reside within the package themselves and instead will be within the `bazel/bin` directory. To account for this, any defined dependency will need to be updated to reference the new directory (example: `link:bazel/bin/packages/kbn-datemath`). While also in this transition period, the build will need to copy over the packages from `bazel/bin` into the `node_modules` of the build target.
 
-Example package BUILD.bazel for `packages/elastic-datemath`:
+Example package BUILD.bazel for `packages/kbn-datemath`:
 
 ```python
 load("@build_bazel_rules_nodejs//:index.bzl", "pkg_npm")

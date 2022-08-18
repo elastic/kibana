@@ -8,7 +8,7 @@
 
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { get, mergeWith } from 'lodash';
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 
 import { FormHook, FieldHook, FormData, FieldsMap, FormConfig } from '../types';
 import {

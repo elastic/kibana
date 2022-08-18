@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import { pipe } from 'lodash/fp';
 
 import { mockGlobalState } from '../../../mock';

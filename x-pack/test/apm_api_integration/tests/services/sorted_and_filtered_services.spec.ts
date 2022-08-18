@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { ValuesType } from 'utility-types';
-import { apm, timerange } from '@elastic/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createAndRunApmMlJob } from '../../common/utils/create_and_run_apm_ml_job';

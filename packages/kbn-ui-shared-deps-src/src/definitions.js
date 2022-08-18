@@ -75,7 +75,7 @@ const externals = {
   tslib: '__kbnSharedDeps__.TsLib',
   '@kbn/analytics': '__kbnSharedDeps__.KbnAnalytics',
   '@kbn/std': '__kbnSharedDeps__.KbnStd',
-  '@elastic/safer-lodash-set': '__kbnSharedDeps__.SaferLodashSet',
+  '@kbn/safer-lodash-set': '__kbnSharedDeps__.SaferLodashSet',
   'rison-node': '__kbnSharedDeps__.RisonNode',
   history: '__kbnSharedDeps__.History',
   classnames: '__kbnSharedDeps__.Classnames',

@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import type { ConfigDeprecationProvider, ConfigDeprecationContext } from '@kbn/config';
 import { configDeprecationFactory, applyDeprecations } from '@kbn/config';
 import { configDeprecationsMock } from '@kbn/config-mocks';
