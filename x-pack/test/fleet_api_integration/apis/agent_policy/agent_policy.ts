@@ -730,11 +730,26 @@ export default function (providerContext: FtrProviderContext) {
       let policyId: string;
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+        const getPkRes = await supertest
+          .get(`/api/fleet/epm/packages/system`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        // we must first force install the system package to override package verification error on policy create
+        await supertest
+          .post(`/api/fleet/epm/packages/system-${getPkRes.body.item.version}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ force: true })
+          .expect(200);
+
         const {
           body: { item: createdPolicy },
         } = await supertest
           .post(`/api/fleet/agent_policies`)
           .set('kbn-xsrf', 'xxxx')
+          .query({
+            sys_monitoring: true,
+          })
           .send({
             name: 'Bulk GET test policy',
             namespace: 'default',
@@ -763,6 +778,24 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         expect(items.length).equal(1);
+      });
+
+      it('should populate package_policies if called with ?full=true', async () => {
+        const {
+          body: { items },
+        } = await supertest
+          .post(`/api/fleet/agent_policies/_bulk_get`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            ids: [policyId],
+            full: true,
+          })
+          .expect(200);
+
+        expect(items.length).equal(1);
+        expect(items[0].package_policies.length).equal(1);
+        expect(items[0].package_policies[0]).to.have.property('package');
+        expect(items[0].package_policies[0].package.name).equal('system');
       });
 
       it('should return a 404 with invalid ids', async () => {

@@ -44,7 +44,10 @@ import type {
 import { defaultIngestErrorHandler, AgentPolicyNotFoundError } from '../../errors';
 import { createAgentPolicyWithPackages } from '../../services/agent_policy_create';
 
-async function assignAgents(esClient: ElasticsearchClient, agentPolicies: AgentPolicy[]) {
+async function populateAssignedAgentsCount(
+  esClient: ElasticsearchClient,
+  agentPolicies: AgentPolicy[]
+) {
   await pMap(
     agentPolicies,
     (agentPolicy: GetAgentPoliciesResponseItem) =>
@@ -79,7 +82,7 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
       perPage,
     };
 
-    await assignAgents(esClient, items);
+    await populateAssignedAgentsCount(esClient, items);
 
     return response.ok({ body });
   } catch (error) {
@@ -106,7 +109,7 @@ export const bulkGetAgentPoliciesHandler: FleetRequestHandler<
       items,
     };
 
-    await assignAgents(esClient, items);
+    await populateAssignedAgentsCount(esClient, items);
 
     return response.ok({ body });
   } catch (error) {

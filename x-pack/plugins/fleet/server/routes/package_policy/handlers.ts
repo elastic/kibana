@@ -75,11 +75,7 @@ export const bulkGetPackagePoliciesHandler: RequestHandler<
       ignoreMissing,
     });
 
-    if (!items) {
-      throw new Error('Invalid results from packagePolicyService.getByIDs');
-    }
-
-    const body: BulkGetPackagePoliciesResponse = { items };
+    const body: BulkGetPackagePoliciesResponse = { items: items ?? [] };
 
     return response.ok({
       body,
