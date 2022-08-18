@@ -13,6 +13,7 @@ import { UsersTableType } from '../store/model';
 import { Users } from './users';
 import { UsersDetails } from './details';
 import { usersDetailsPagePath, usersDetailsTabPath, usersTabPath } from './constants';
+import { SecuritySolutionRedirect } from '../../common/components/security_solution_redirect';
 
 export const UsersContainer = React.memo(() => {
   return (
@@ -58,14 +59,10 @@ export const UsersContainer = React.memo(() => {
             params: { detailName, tabName = UsersTableType.authentications },
           },
           location: { search = '' },
-        }) => (
-          <Redirect
-            to={{
-              pathname: `${USERS_PATH}/name/${detailName}/${tabName}`,
-              search,
-            }}
-          />
-        )}
+        }) => {
+          console.log({ search });
+          return <SecuritySolutionRedirect path={`${USERS_PATH}/name/${detailName}/${tabName}`} />;
+        }}
       />
       <Route // Redirect to the first tab when tabName is not present.
         path={USERS_PATH}

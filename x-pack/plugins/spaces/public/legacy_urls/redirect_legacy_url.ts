@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { first } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
 
 import type { StartServicesAccessor } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
@@ -20,14 +20,15 @@ export function createRedirectLegacyUrl(
 ): SpacesApiUi['redirectLegacyUrl'] {
   return async function ({
     path,
+    useToast,
     aliasPurpose,
     objectNoun = DEFAULT_OBJECT_NOUN,
   }: RedirectLegacyUrlParams) {
     const [{ notifications, application }] = await getStartServices();
     const { currentAppId$, navigateToApp } = application;
-    const appId = await currentAppId$.pipe(first()).toPromise(); // retrieve the most recent value from the BehaviorSubject
+    const appId = await firstValueFrom(currentAppId$); // retrieve the most recent value from the BehaviorSubject
 
-    if (aliasPurpose === 'savedObjectConversion') {
+    if (aliasPurpose === 'savedObjectConversion' || useToast) {
       const title = i18n.translate('xpack.spaces.redirectLegacyUrlToast.title', {
         defaultMessage: `We redirected you to a new URL`,
       });
@@ -37,7 +38,6 @@ export function createRedirectLegacyUrl(
       });
       notifications.toasts.addInfo({ title, text });
     }
-
     await navigateToApp(appId!, { replace: true, path });
   };
 }

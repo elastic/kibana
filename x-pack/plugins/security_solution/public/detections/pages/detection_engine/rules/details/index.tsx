@@ -320,7 +320,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
         const path = `rules/id/${rule.id}${window.location.search}${window.location.hash}`;
         spacesApi.ui.redirectLegacyUrl({
           path,
-          aliasPurpose: rule.alias_purpose,
+          useToast: rule.alias_purpose === 'savedObjectConversion',
           objectNoun: i18nTranslate.translate(
             'xpack.triggersActionsUI.sections.ruleDetails.redirectObjectNoun',
             { defaultMessage: 'rule' }

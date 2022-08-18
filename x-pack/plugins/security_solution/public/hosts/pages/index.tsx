@@ -15,6 +15,7 @@ import { HostsTableType } from '../store/model';
 import { MlHostConditionalContainer } from '../../common/components/ml/conditional_links/ml_host_conditional_container';
 import { Hosts } from './hosts';
 import { hostDetailsPagePath } from './types';
+import { SecuritySolutionRedirect } from '../../common/components/security_solution_redirect';
 
 const getHostsTabPath = () =>
   `${HOSTS_PATH}/:tabName(` +
@@ -78,14 +79,7 @@ export const HostsContainer = React.memo(() => (
           params: { detailName, tabName = HostsTableType.authentications },
         },
         location: { search = '' },
-      }) => (
-        <Redirect
-          to={{
-            pathname: `${HOSTS_PATH}/name/${detailName}/${tabName}`,
-            search,
-          }}
-        />
-      )}
+      }) => <SecuritySolutionRedirect path={`${HOSTS_PATH}/name/${detailName}/${tabName}`} />}
     />
     <Route // Redirect to the first tab when tabName is not present.
       path={HOSTS_PATH}
