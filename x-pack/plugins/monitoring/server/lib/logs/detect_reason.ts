@@ -24,7 +24,14 @@ async function doesFilebeatIndexExist(
   const metric = { timestampField: '@timestamp' };
   const filter = [createTimeFilter({ start, end, metric })];
 
-  const typeFilter = { term: { 'service.type': 'elasticsearch' } };
+  const typeFilter = {
+    bool: {
+      should: [
+        { term: { 'service.type': 'elasticsearch' } },
+        { term: { 'data_stream.type': 'logs' } },
+      ],
+    },
+  };
   const structuredLogsFilter = { exists: { field: 'elasticsearch.cluster' } };
   const clusterFilter = { term: { 'elasticsearch.cluster.uuid': clusterUuid } };
   const nodeFilter = { term: { 'elasticsearch.node.id': nodeUuid } };

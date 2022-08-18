@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import { checkParam } from '../error_missing_required';
-import { createTimeFilter } from '../create_query';
+import { createTimeFilter, TimerangeFilter } from '../create_query';
 import { detectReason, FilebeatIndexCheckOpts } from './detect_reason';
 import { formatUTCTimestampForTimezone } from '../format_timezone';
 import { getTimezone } from '../get_timezone';
@@ -29,7 +29,7 @@ interface Log {
 async function handleResponse(
   response: FilebeatResponse,
   req: LegacyRequest,
-  filebeatIndexPattern: string,
+  logsIndexPattern: string,
   opts: FilebeatIndexCheckOpts
 ) {
   const result: { enabled: boolean; logs: Log[]; reason?: any } = {
@@ -57,7 +57,7 @@ async function handleResponse(
       };
     });
   } else {
-    result.reason = await detectReason(req, filebeatIndexPattern, opts);
+    result.reason = await detectReason(req, logsIndexPattern, opts);
   }
 
   return result;
@@ -66,16 +66,29 @@ async function handleResponse(
 export async function getLogs(
   config: MonitoringConfig,
   req: LegacyRequest,
-  filebeatIndexPattern: string,
+  logsIndexPattern: string,
   { clusterUuid, nodeUuid, indexUuid, start, end }: FilebeatIndexCheckOpts
 ) {
-  checkParam(filebeatIndexPattern, 'filebeatIndexPattern in logs/getLogs');
+  checkParam(logsIndexPattern, 'logsIndexPattern in logs/getLogs');
 
   const metric = { timestampField: '@timestamp' };
-  const filter: any[] = [
-    { term: { 'service.type': 'elasticsearch' } },
+  const typeFilter = {
+    bool: {
+      // The point here is to make the query work for `filebeat-*` index and with logs-* index pattern.
+      // `service.type` is not assigned by the filebeat in the agents.
+      // The filter by `data_stream.type` is hack to use `should` filter.
+      // 'data_stream.type' will always be 'logs' for `logs-*` indices.
+      should: [
+        { term: { 'service.type': 'elasticsearch' } },
+        { term: { 'data_stream.type': 'logs' } },
+      ],
+    },
+  };
+
+  const filter: Array<{ term: { [x: string]: string } } | TimerangeFilter | null> = [
     createTimeFilter({ start, end, metric }),
   ];
+
   if (clusterUuid) {
     filter.push({ term: { 'elasticsearch.cluster.uuid': clusterUuid } });
   }
@@ -87,7 +100,7 @@ export async function getLogs(
   }
 
   const params = {
-    index: filebeatIndexPattern,
+    index: logsIndexPattern,
     size: Math.min(50, config.ui.elasticsearch.logFetchCount),
     filter_path: [
       'hits.hits._source.message',
@@ -103,7 +116,7 @@ export async function getLogs(
       sort: { '@timestamp': { order: 'desc', unmapped_type: 'long' } },
       query: {
         bool: {
-          filter,
+          filter: [typeFilter, ...filter],
         },
       },
     },
@@ -117,7 +130,7 @@ export async function getLogs(
   };
   try {
     const response: FilebeatResponse = await callWithRequest(req, 'search', params);
-    result = await handleResponse(response, req, filebeatIndexPattern, {
+    result = await handleResponse(response, req, logsIndexPattern, {
       clusterUuid,
       nodeUuid,
       indexUuid,

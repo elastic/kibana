@@ -51,7 +51,7 @@ async function handleResponse(
 
 export async function getLogTypes(
   req: LegacyRequest,
-  filebeatIndexPattern: string,
+  logsIndexPattern: string,
   {
     clusterUuid,
     nodeUuid,
@@ -60,13 +60,28 @@ export async function getLogTypes(
     end,
   }: { clusterUuid?: string; nodeUuid?: string; indexUuid?: string; start: number; end: number }
 ) {
-  checkParam(filebeatIndexPattern, 'filebeatIndexPattern in logs/getLogTypes');
+  checkParam(logsIndexPattern, 'logsIndexPattern in logs/getLogTypes');
 
   const metric = { timestampField: '@timestamp' };
+
+  const typeFilter = {
+    bool: {
+      // The point here is to make the query work for `filebeat-*` index and with logs-* index pattern.
+      // `service.type` is not assigned by the filebeat in the agents.
+      // The filter by `data_stream.type` is hack to use `should` filter.
+      // 'data_stream.type' will always be 'logs' for `logs-*` indices.
+      should: [
+        { term: { 'service.type': 'elasticsearch' } },
+        { term: { 'data_stream.type': 'logs' } },
+      ],
+    },
+  };
+
   const filter: Array<{ term: { [x: string]: string } } | TimerangeFilter | null> = [
     { term: { 'service.type': 'elasticsearch' } },
     createTimeFilter({ start, end, metric }),
   ];
+
   if (clusterUuid) {
     filter.push({ term: { 'elasticsearch.cluster.uuid': clusterUuid } });
   }
@@ -78,7 +93,7 @@ export async function getLogTypes(
   }
 
   const params = {
-    index: filebeatIndexPattern,
+    index: logsIndexPattern,
     size: 0,
     filter_path: ['aggregations.levels.buckets', 'aggregations.types.buckets'],
     ignore_unavailable: true,
@@ -86,7 +101,7 @@ export async function getLogTypes(
       sort: { '@timestamp': { order: 'desc', unmapped_type: 'long' } },
       query: {
         bool: {
-          filter,
+          filter: [typeFilter, ...filter],
         },
       },
       aggs: {
@@ -113,7 +128,7 @@ export async function getLogTypes(
   };
   try {
     const response = await callWithRequest(req, 'search', params);
-    result = await handleResponse(response, req, filebeatIndexPattern, {
+    result = await handleResponse(response, req, logsIndexPattern, {
       clusterUuid,
       nodeUuid,
       indexUuid,
