@@ -259,7 +259,7 @@ export async function mgetStackTraces({
           {
             index: INDEX_TRACES,
             ids,
-            realtime: false,
+            realtime: true,
             _source_includes: ['FrameIDs', 'Types'],
           }
         );
@@ -331,7 +331,7 @@ export async function mgetStackFrames({
   const resStackFrames = await client.mget<ProfilingStackFrame>('mget_stackframes', {
     index: INDEX_FRAMES,
     ids: [...stackFrameIDs],
-    realtime: false,
+    realtime: true,
   });
 
   // Create a lookup map StackFrameID -> StackFrame.
