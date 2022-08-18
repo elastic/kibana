@@ -89,6 +89,6 @@ export const loadFieldStats = async ({
     });
   } catch (error) {
     // console.error(error);
-    throw new Error('Could not provide field stats');
+    throw new Error('Could not provide field stats', { cause: error });
   }
 };
