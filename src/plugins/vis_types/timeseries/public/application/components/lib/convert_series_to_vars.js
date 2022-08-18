@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import { startsWith, snakeCase } from 'lodash';
 import { BUCKET_TYPES, DATA_FORMATTERS } from '../../../../common/enums';
 import { getLastValue } from '../../../../common/last_value_utils';
