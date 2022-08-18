@@ -11,7 +11,7 @@ import { buildGroupByFieldAggregation } from './build_group_by_field_aggregation
 
 describe('build_group_by_field_aggregation', () => {
   it('Build Group-by-field aggregation', () => {
-    const groupByFields = ['host,name'];
+    const groupByFields = ['host.name'];
     const maxSignals = 100;
     const sort: estypes.Sort = [
       {

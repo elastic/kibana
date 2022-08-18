@@ -295,15 +295,17 @@ export const schema: FormSchema<AboutStepRule> = {
     ),
     labelAppend: OptionalFieldLabel,
   },
-  groupBy: {
-    type: FIELD_TYPES.TEXT,
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.groupBy',
-      {
-        defaultMessage: 'Group by field',
-      }
-    ),
-    labelAppend: OptionalFieldLabel,
+  alertGrouping: {
+    groupBy: {
+      type: FIELD_TYPES.TEXT,
+      label: i18n.translate(
+        'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.groupBy',
+        {
+          defaultMessage: 'Group by field',
+        }
+      ),
+      labelAppend: OptionalFieldLabel,
+    },
   },
 };
 

@@ -38,7 +38,7 @@ import {
   license,
   rule_name_override,
   data_view_id,
-  groupBy,
+  alertGrouping,
   timestamp_override,
   timestamp_override_fallback_disabled,
   timestamp_field,
@@ -173,7 +173,7 @@ export const RuleSchema = t.intersection([
     uuid: t.string,
     version: t.number,
     execution_summary: RuleExecutionSummary,
-    groupBy,
+    alertGrouping,
   }),
 ]);
 
