@@ -81,19 +81,21 @@ const getContainerMetaByPath = (filters: FilterItem[], pathInArray: number[]) =>
 const getParentFilterPath = (pathInArray: number[]) =>
   pathInArray.slice(0, -1).join(PATH_SEPARATOR);
 
-const normalizeFilters = (filters: FilterItem[]) => {
-  const doRecursive = (f: FilterItem) => {
+// @todo - please add tests for that function
+export const normalizeFilters = (filters: FilterItem[]) => {
+  const doRecursive = (f: FilterItem, parent: FilterItem) => {
     if (Array.isArray(f)) {
-      return normalizeArray(f);
+      return normalizeArray(f, parent);
     } else if (isOrFilter(f)) {
       return normalizeOr(f);
     }
     return f;
   };
-  const normalizeArray = (filtersArray: FilterItem[]): FilterItem[] =>
-    filtersArray
+
+  const normalizeArray = (filtersArray: FilterItem[], parent: FilterItem): FilterItem[] => {
+    const partiallyNormalized = filtersArray
       .map((item) => {
-        const normalized = doRecursive(item);
+        const normalized = doRecursive(item, filtersArray);
 
         if (Array.isArray(normalized)) {
           if (normalized.length === 1) {
@@ -106,21 +108,26 @@ const normalizeFilters = (filters: FilterItem[]) => {
         return normalized;
       }, [])
       .filter(Boolean) as FilterItem[];
+
+    return Array.isArray(parent) ? partiallyNormalized.flat() : partiallyNormalized;
+  };
+
   const normalizeOr = (orFilter: Filter): FilterItem => {
     const orFilters = getGroupedFilters(orFilter);
     if (orFilters.length < 2) {
       return orFilters[0];
     }
+
     return {
       ...orFilter,
       meta: {
         ...orFilter.meta,
-        params: normalizeArray(orFilters),
+        params: doRecursive(orFilters, orFilter),
       },
     };
   };
 
-  return normalizeArray(filters) as Filter[];
+  return normalizeArray(filters, filters) as Filter[];
 };
 
 export const getFilterByPath = (filters: FilterItem[], path: string) =>
