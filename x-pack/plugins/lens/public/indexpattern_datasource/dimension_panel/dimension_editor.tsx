@@ -979,8 +979,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
           <>
             {!incompleteInfo && selectedColumn && temporaryState === 'none' && (
               <NameInput
-                // re-render the input from scratch to obtain new "initial value" if the underlying default label changes
-                key={defaultLabel}
                 value={selectedColumn.label}
                 defaultValue={defaultLabel}
                 onChange={(value) => {
