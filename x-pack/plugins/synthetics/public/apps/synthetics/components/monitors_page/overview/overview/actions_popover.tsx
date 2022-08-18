@@ -66,10 +66,12 @@ export function ActionsPopover({
     }),
     [monitor.name]
   );
-  const { status, isEnabled, setIsEnabled } = useMonitorEnableHandler({
+  const { status, isEnabled, updateMonitorEnabledState } = useMonitorEnableHandler({
     id: monitor.id,
-    monitor,
-    reloadPage: forceRefreshOnEnabledChange,
+    reloadPage: () => {
+      forceRefreshOnEnabledChange();
+      setIsPopoverOpen(false);
+    },
     labels,
   });
   const [enableLabel, setEnableLabel] = useState(
@@ -78,8 +80,8 @@ export function ActionsPopover({
   useEffect(() => {
     if (status === FETCH_STATUS.LOADING) {
       setEnableLabel(enableLabelLoading);
-    } else if (status === FETCH_STATUS.SUCCESS && isEnabled === monitor.isEnabled) {
-      setEnableLabel(monitor.isEnabled ? enableLabelDisableMonitor : enableLabelEnableMonitor);
+    } else if (status === FETCH_STATUS.SUCCESS) {
+      setEnableLabel(isEnabled ? enableLabelDisableMonitor : enableLabelEnableMonitor);
     }
   }, [setEnableLabel, status, isEnabled, monitor.isEnabled]);
   return (
@@ -137,7 +139,8 @@ export function ActionsPopover({
                   name: enableLabel,
                   icon: 'invert',
                   onClick: () => {
-                    if (status !== FETCH_STATUS.LOADING) setIsEnabled(!monitor.isEnabled);
+                    if (status !== FETCH_STATUS.LOADING)
+                      updateMonitorEnabledState(monitor, !monitor.isEnabled);
                   },
                 },
               ],
