@@ -36,6 +36,7 @@ function TileMapVisualization(props: Props) {
   }
   return (
     <MapComponent
+      title={props.visConfig.layerDescriptorParams.label}
       filters={props.filters}
       query={props.query}
       timeRange={props.timeRange}
