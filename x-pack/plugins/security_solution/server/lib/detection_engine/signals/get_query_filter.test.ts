@@ -8,13 +8,22 @@
 import { getQueryFilter, getAllFilters } from './get_query_filter';
 import type { Filter } from '@kbn/es-query';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
+import { getListClientMock } from '@kbn/lists-plugin/server/services/lists/list_client.mock';
 
+const listClient = getListClientMock();
 describe('get_filter', () => {
   describe('getQueryFilter', () => {
     describe('kuery', () => {
       test('it should work with an empty filter as kuery', async () => {
-        const esQuery = await getQueryFilter('host.name: linux', 'kuery', [], ['auditbeat-*'], []);
-        expect(esQuery).toEqual({
+        const { queryFilter } = await getQueryFilter({
+          query: 'host.name: linux',
+          language: 'kuery',
+          filters: [],
+          index: ['auditbeat-*'],
+          lists: [],
+          listClient,
+        });
+        expect(queryFilter).toEqual({
           bool: {
             must: [],
             filter: [
@@ -38,10 +47,10 @@ describe('get_filter', () => {
       });
 
       test('it should work with a simple filter as a kuery', async () => {
-        const esQuery = await getQueryFilter(
-          'host.name: windows',
-          'kuery',
-          [
+        const { queryFilter } = await getQueryFilter({
+          query: 'host.name: windows',
+          language: 'kuery',
+          filters: [
             {
               meta: {
                 alias: 'custom label here',
@@ -60,10 +69,11 @@ describe('get_filter', () => {
               },
             },
           ],
-          ['auditbeat-*'],
-          []
-        );
-        expect(esQuery).toEqual({
+          index: ['auditbeat-*'],
+          lists: [],
+          listClient,
+        });
+        expect(queryFilter).toEqual({
           bool: {
             must: [],
             filter: [
@@ -92,10 +102,10 @@ describe('get_filter', () => {
       });
 
       test('it should ignore disabled filters as a kuery', async () => {
-        const esQuery = await getQueryFilter(
-          'host.name: windows',
-          'kuery',
-          [
+        const { queryFilter } = await getQueryFilter({
+          query: 'host.name: windows',
+          language: 'kuery',
+          filters: [
             {
               meta: {
                 alias: 'custom label here',
@@ -131,10 +141,11 @@ describe('get_filter', () => {
               },
             },
           ],
-          ['auditbeat-*'],
-          []
-        );
-        expect(esQuery).toEqual({
+          index: ['auditbeat-*'],
+          lists: [],
+          listClient,
+        });
+        expect(queryFilter).toEqual({
           bool: {
             must: [],
             filter: [
@@ -163,10 +174,10 @@ describe('get_filter', () => {
       });
 
       test('it should work with a simple filter as a kuery without meta information', async () => {
-        const esQuery = await getQueryFilter(
-          'host.name: windows',
-          'kuery',
-          [
+        const { queryFilter } = await getQueryFilter({
+          query: 'host.name: windows',
+          language: 'kuery',
+          filters: [
             {
               query: {
                 match_phrase: {
@@ -175,10 +186,11 @@ describe('get_filter', () => {
               },
             },
           ],
-          ['auditbeat-*'],
-          []
-        );
-        expect(esQuery).toEqual({
+          index: ['auditbeat-*'],
+          lists: [],
+          listClient,
+        });
+        expect(queryFilter).toEqual({
           bool: {
             must: [],
             filter: [
@@ -223,14 +235,15 @@ describe('get_filter', () => {
           },
         } as Partial<Filter>;
 
-        const esQuery = await getQueryFilter(
-          'host.name: windows',
-          'kuery',
-          [query, exists],
-          ['auditbeat-*'],
-          []
-        );
-        expect(esQuery).toEqual({
+        const { queryFilter } = await getQueryFilter({
+          query: 'host.name: windows',
+          language: 'kuery',
+          filters: [query, exists],
+          index: ['auditbeat-*'],
+          lists: [],
+          listClient,
+        });
+        expect(queryFilter).toEqual({
           bool: {
             must: [],
             filter: [
@@ -264,10 +277,10 @@ describe('get_filter', () => {
       });
 
       test('it should work with a simple filter that is disabled as a kuery', async () => {
-        const esQuery = await getQueryFilter(
-          'host.name: windows',
-          'kuery',
-          [
+        const { queryFilter } = await getQueryFilter({
+          query: 'host.name: windows',
+          language: 'kuery',
+          filters: [
             {
               meta: {
                 alias: 'custom label here',
@@ -286,10 +299,11 @@ describe('get_filter', () => {
               },
             },
           ],
-          ['auditbeat-*'],
-          []
-        );
-        expect(esQuery).toEqual({
+          index: ['auditbeat-*'],
+          lists: [],
+          listClient,
+        });
+        expect(queryFilter).toEqual({
           bool: {
             must: [],
             filter: [
@@ -315,8 +329,15 @@ describe('get_filter', () => {
 
     describe('lucene', () => {
       test('it should work with an empty filter as lucene', async () => {
-        const esQuery = await getQueryFilter('host.name: linux', 'lucene', [], ['auditbeat-*'], []);
-        expect(esQuery).toEqual({
+        const { queryFilter } = await getQueryFilter({
+          query: 'host.name: linux',
+          language: 'lucene',
+          filters: [],
+          index: ['auditbeat-*'],
+          lists: [],
+          listClient,
+        });
+        expect(queryFilter).toEqual({
           bool: {
             must: [
               {
@@ -335,10 +356,10 @@ describe('get_filter', () => {
       });
 
       test('it should work with a simple filter as a lucene', async () => {
-        const esQuery = await getQueryFilter(
-          'host.name: windows',
-          'lucene',
-          [
+        const { queryFilter } = await getQueryFilter({
+          query: 'host.name: windows',
+          language: 'lucene',
+          filters: [
             {
               meta: {
                 alias: 'custom label here',
@@ -357,10 +378,11 @@ describe('get_filter', () => {
               },
             },
           ],
-          ['auditbeat-*'],
-          []
-        );
-        expect(esQuery).toEqual({
+          index: ['auditbeat-*'],
+          lists: [],
+          listClient,
+        });
+        expect(queryFilter).toEqual({
           bool: {
             must: [
               {
@@ -385,10 +407,10 @@ describe('get_filter', () => {
       });
 
       test('it should ignore disabled lucene filters', async () => {
-        const esQuery = await getQueryFilter(
-          'host.name: windows',
-          'lucene',
-          [
+        const { queryFilter } = await getQueryFilter({
+          query: 'host.name: windows',
+          language: 'lucene',
+          filters: [
             {
               meta: {
                 alias: 'custom label here',
@@ -424,10 +446,11 @@ describe('get_filter', () => {
               },
             },
           ],
-          ['auditbeat-*'],
-          []
-        );
-        expect(esQuery).toEqual({
+          index: ['auditbeat-*'],
+          lists: [],
+          listClient,
+        });
+        expect(queryFilter).toEqual({
           bool: {
             must: [
               {
@@ -452,10 +475,10 @@ describe('get_filter', () => {
       });
 
       test('it should work with a simple filter that is disabled as a lucene', async () => {
-        const esQuery = await getQueryFilter(
-          'host.name: windows',
-          'lucene',
-          [
+        const { queryFilter } = await getQueryFilter({
+          query: 'host.name: windows',
+          language: 'lucene',
+          filters: [
             {
               meta: {
                 alias: 'custom label here',
@@ -474,10 +497,11 @@ describe('get_filter', () => {
               },
             },
           ],
-          ['auditbeat-*'],
-          []
-        );
-        expect(esQuery).toEqual({
+          index: ['auditbeat-*'],
+          lists: [],
+          listClient,
+        });
+        expect(queryFilter).toEqual({
           bool: {
             must: [
               {
@@ -496,14 +520,15 @@ describe('get_filter', () => {
       });
 
       test('it should work with a list', async () => {
-        const esQuery = await getQueryFilter(
-          'host.name: linux',
-          'kuery',
-          [],
-          ['auditbeat-*'],
-          [getExceptionListItemSchemaMock()]
-        );
-        expect(esQuery).toEqual({
+        const { queryFilter } = await getQueryFilter({
+          query: 'host.name: linux',
+          language: 'kuery',
+          filters: [],
+          index: ['auditbeat-*'],
+          lists: [getExceptionListItemSchemaMock()],
+          listClient,
+        });
+        expect(queryFilter).toEqual({
           bool: {
             filter: [
               { bool: { minimum_should_match: 1, should: [{ match: { 'host.name': 'linux' } }] } },
@@ -560,14 +585,15 @@ describe('get_filter', () => {
     });
 
     test('it should work with a list with multiple items', async () => {
-      const esQuery = await getQueryFilter(
-        'host.name: linux',
-        'kuery',
-        [],
-        ['auditbeat-*'],
-        [getExceptionListItemSchemaMock(), getExceptionListItemSchemaMock()]
-      );
-      expect(esQuery).toEqual({
+      const { queryFilter } = await getQueryFilter({
+        query: 'host.name: linux',
+        language: 'kuery',
+        filters: [],
+        index: ['auditbeat-*'],
+        lists: [getExceptionListItemSchemaMock(), getExceptionListItemSchemaMock()],
+        listClient,
+      });
+      expect(queryFilter).toEqual({
         bool: {
           filter: [
             { bool: { minimum_should_match: 1, should: [{ match: { 'host.name': 'linux' } }] } },
@@ -659,15 +685,16 @@ describe('get_filter', () => {
     });
 
     test('it should work with an exception list that includes a nested typ', async () => {
-      const esQuery = await getQueryFilter(
-        'host.name: linux',
-        'kuery',
-        [],
-        ['auditbeat-*'],
-        [getExceptionListItemSchemaMock()]
-      );
+      const { queryFilter } = await getQueryFilter({
+        query: 'host.name: linux',
+        language: 'kuery',
+        filters: [],
+        index: ['auditbeat-*'],
+        lists: [getExceptionListItemSchemaMock()],
+        listClient,
+      });
 
-      expect(esQuery).toEqual({
+      expect(queryFilter).toEqual({
         bool: {
           must: [],
           filter: [
@@ -715,8 +742,15 @@ describe('get_filter', () => {
     });
 
     test('it should work with an empty list', async () => {
-      const esQuery = await getQueryFilter('host.name: linux', 'kuery', [], ['auditbeat-*'], []);
-      expect(esQuery).toEqual({
+      const { queryFilter } = await getQueryFilter({
+        query: 'host.name: linux',
+        language: 'kuery',
+        filters: [],
+        index: ['auditbeat-*'],
+        lists: [],
+        listClient,
+      });
+      expect(queryFilter).toEqual({
         bool: {
           filter: [
             { bool: { minimum_should_match: 1, should: [{ match: { 'host.name': 'linux' } }] } },
@@ -729,8 +763,15 @@ describe('get_filter', () => {
     });
 
     test('it should work when lists has value undefined', async () => {
-      const esQuery = await getQueryFilter('host.name: linux', 'kuery', [], ['auditbeat-*'], []);
-      expect(esQuery).toEqual({
+      const { queryFilter } = await getQueryFilter({
+        query: 'host.name: linux',
+        language: 'kuery',
+        filters: [],
+        index: ['auditbeat-*'],
+        lists: [],
+        listClient,
+      });
+      expect(queryFilter).toEqual({
         bool: {
           filter: [
             { bool: { minimum_should_match: 1, should: [{ match: { 'host.name': 'linux' } }] } },
@@ -744,15 +785,16 @@ describe('get_filter', () => {
 
     describe('when "excludeExceptions" is false', () => {
       test('it should work with a list', async () => {
-        const esQuery = await getQueryFilter(
-          'host.name: linux',
-          'kuery',
-          [],
-          ['auditbeat-*'],
-          [getExceptionListItemSchemaMock()],
-          false
-        );
-        expect(esQuery).toEqual({
+        const { queryFilter } = await getQueryFilter({
+          query: 'host.name: linux',
+          language: 'kuery',
+          filters: [],
+          index: ['auditbeat-*'],
+          lists: [getExceptionListItemSchemaMock()],
+          listClient,
+          excludeExceptions: false,
+        });
+        expect(queryFilter).toEqual({
           bool: {
             filter: [
               { bool: { minimum_should_match: 1, should: [{ match: { 'host.name': 'linux' } }] } },
@@ -807,15 +849,16 @@ describe('get_filter', () => {
       });
 
       test('it should work with a list with multiple items', async () => {
-        const esQuery = await getQueryFilter(
-          'host.name: linux',
-          'kuery',
-          [],
-          ['auditbeat-*'],
-          [getExceptionListItemSchemaMock(), getExceptionListItemSchemaMock()],
-          false
-        );
-        expect(esQuery).toEqual({
+        const { queryFilter } = await getQueryFilter({
+          query: 'host.name: linux',
+          language: 'kuery',
+          filters: [],
+          index: ['auditbeat-*'],
+          lists: [getExceptionListItemSchemaMock(), getExceptionListItemSchemaMock()],
+          listClient,
+          excludeExceptions: false,
+        });
+        expect(queryFilter).toEqual({
           bool: {
             filter: [
               { bool: { minimum_should_match: 1, should: [{ match: { 'host.name': 'linux' } }] } },
@@ -906,15 +949,16 @@ describe('get_filter', () => {
       });
 
       test('it should work with an empty list', async () => {
-        const esQuery = await getQueryFilter(
-          'host.name: linux',
-          'kuery',
-          [],
-          ['auditbeat-*'],
-          [],
-          false
-        );
-        expect(esQuery).toEqual({
+        const { queryFilter } = await getQueryFilter({
+          query: 'host.name: linux',
+          language: 'kuery',
+          filters: [],
+          index: ['auditbeat-*'],
+          lists: [],
+          listClient,
+          excludeExceptions: false,
+        });
+        expect(queryFilter).toEqual({
           bool: {
             filter: [
               { bool: { minimum_should_match: 1, should: [{ match: { 'host.name': 'linux' } }] } },
@@ -928,14 +972,15 @@ describe('get_filter', () => {
     });
 
     test('it should work with a nested object queries', async () => {
-      const esQuery = await getQueryFilter(
-        'category:{ name:Frank and trusted:true }',
-        'kuery',
-        [],
-        ['auditbeat-*'],
-        []
-      );
-      expect(esQuery).toEqual({
+      const { queryFilter } = await getQueryFilter({
+        query: 'category:{ name:Frank and trusted:true }',
+        language: 'kuery',
+        filters: [],
+        index: ['auditbeat-*'],
+        lists: [],
+        listClient,
+      });
+      expect(queryFilter).toEqual({
         bool: {
           must: [],
           filter: [
@@ -983,14 +1028,16 @@ describe('get_filter', () => {
     });
 
     test('it works with references and does not add indexes', async () => {
-      const esQuery = await getQueryFilter(
-        '(event.module:suricata and event.kind:alert) and suricata.eve.alert.signature_id: (2610182 or 2610183 or 2610184 or 2610185 or 2610186 or 2610187)',
-        'kuery',
-        [],
-        ['my custom index'],
-        []
-      );
-      expect(esQuery).toMatchInlineSnapshot(`
+      const { queryFilter } = await getQueryFilter({
+        query:
+          '(event.module:suricata and event.kind:alert) and suricata.eve.alert.signature_id: (2610182 or 2610183 or 2610184 or 2610185 or 2610186 or 2610187)',
+        language: 'kuery',
+        filters: [],
+        index: ['my custom index'],
+        lists: [],
+        listClient,
+      });
+      expect(queryFilter).toMatchInlineSnapshot(`
         Object {
           "bool": Object {
             "filter": Array [

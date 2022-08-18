@@ -6,7 +6,10 @@
  */
 
 import type { Filter } from '@kbn/es-query';
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  CreateExceptionListItemSchema,
+  ExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 
 export interface GetExceptionFilterOptionalProps {
   signal?: AbortSignal;
@@ -21,7 +24,7 @@ export interface GetExceptionFilterFromExceptionListIdProps
 }
 
 export interface GetExceptionFilterFromExceptionsProps extends GetExceptionFilterOptionalProps {
-  exceptions: ExceptionListItemSchema[];
+  exceptions: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>;
 }
 
 export interface ExceptionFilterResponse {

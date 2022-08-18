@@ -555,8 +555,8 @@ describe('create_signals', () => {
   });
 
   describe('buildEqlSearchRequest', () => {
-    test('should build a basic request with time range', () => {
-      const request = buildEqlSearchRequest({
+    test('should build a basic request with time range', async () => {
+      const request = await buildEqlSearchRequest({
         query: 'process where true',
         index: ['testindex1', 'testindex2'],
         from: 'now-5m',
@@ -607,8 +607,8 @@ describe('create_signals', () => {
       });
     });
 
-    test('should build a request with timestamp and event category overrides', () => {
-      const request = buildEqlSearchRequest({
+    test('should build a request with timestamp and event category overrides', async () => {
+      const request = await buildEqlSearchRequest({
         query: 'process where true',
         index: ['testindex1', 'testindex2'],
         from: 'now-5m',
@@ -696,8 +696,8 @@ describe('create_signals', () => {
       });
     });
 
-    test('should build a request without @timestamp fallback if secondaryTimestamp is not specified', () => {
-      const request = buildEqlSearchRequest({
+    test('should build a request without @timestamp fallback if secondaryTimestamp is not specified', async () => {
+      const request = await buildEqlSearchRequest({
         query: 'process where true',
         index: ['testindex1', 'testindex2'],
         from: 'now-5m',
@@ -750,8 +750,8 @@ describe('create_signals', () => {
       });
     });
 
-    test('should build a request with exceptions', () => {
-      const request = buildEqlSearchRequest({
+    test('should build a request with exceptions', async () => {
+      const request = await buildEqlSearchRequest({
         query: 'process where true',
         index: ['testindex1', 'testindex2'],
         from: 'now-5m',
@@ -852,7 +852,7 @@ describe('create_signals', () => {
       });
     });
 
-    test('should build a request with filters', () => {
+    test('should build a request with filters', async () => {
       const filters = [
         {
           meta: {
@@ -887,7 +887,7 @@ describe('create_signals', () => {
           },
         },
       ];
-      const request = buildEqlSearchRequest({
+      const request = await buildEqlSearchRequest({
         query: 'process where true',
         index: ['testindex1', 'testindex2'],
         from: 'now-5m',
