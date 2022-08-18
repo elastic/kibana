@@ -19,14 +19,7 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
-    });
 
-    after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
-      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
-    });
-
-    before(async function () {
       const { body: agentPolicyResponse } = await supertest
         .post(`/api/fleet/agent_policies`)
         .set('kbn-xsrf', 'xxxx')
@@ -37,7 +30,12 @@ export default function ({ getService }: FtrProviderContext) {
       agentPolicyId = agentPolicyResponse.item.id;
     });
 
-    it(`should return 500 when package policy id not exist`, async () => {
+    after(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
+      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+    });
+
+    it(`Should return 500 when package policy id does not exist`, async () => {
       const packagePolicyId = chance.guid();
 
       const { body: response } = await supertest
@@ -48,10 +46,10 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(500);
       expect(response.error).to.be('Internal Server Error');
-      expect(response.message).to.be(`package policy Id '${packagePolicyId}' is not exist`);
+      expect(response.message).to.be(`Package policy Id '${packagePolicyId}' does not exist`);
     });
 
-    it(`should return 200 for existing package policy id`, async () => {
+    it(`Should return 200 for existing package policy id`, async () => {
       const { body: postPackageResponse } = await supertest
         .post(`/api/fleet/package_policies`)
         .set('kbn-xsrf', 'xxxx')
