@@ -404,8 +404,8 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     if (!geoField) {
       throw new Error(
         i18n.translate('xpack.maps.source.esSource.noGeoFieldErrorMessage', {
-          defaultMessage: `Data view {indexPatternTitle} no longer contains the geo field {geoField}`,
-          values: { indexPatternTitle: indexPattern.title, geoField: this.getGeoFieldName() },
+          defaultMessage: `Data view "{indexPatternLabel}"" no longer contains the geo field "{geoField}"`,
+          values: { indexPatternLabel: indexPattern.getName(), geoField: this.getGeoFieldName() },
         })
       );
     }
@@ -415,7 +415,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
   async getDisplayName(): Promise<string> {
     try {
       const indexPattern = await this.getIndexPattern();
-      return indexPattern.title;
+      return indexPattern.getName();
     } catch (error) {
       // Unable to load index pattern, just return id as display name
       return this.getIndexPatternId();
