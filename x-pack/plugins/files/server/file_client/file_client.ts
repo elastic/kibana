@@ -4,165 +4,170 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import moment from 'moment';
 import { Readable } from 'stream';
+import mimeType from 'mime';
 import cuid from 'cuid';
-import { FileKind, FileMetadata } from '../../common/types';
+import type { Logger } from '@kbn/core/server';
+import type { AuditLogger } from '@kbn/security-plugin/server';
+import type {
+  File,
+  FileJSON,
+  FileKind,
+  FileMetadata,
+  FileShareJSONWithToken,
+  UpdatableFileMetadata,
+} from '../../common/types';
 import type { FileMetadataClient } from './file_metadata_client';
 import type {
   BlobStorageClient,
   UploadOptions as BlobUploadOptions,
 } from '../blob_storage_service';
+import { File as FileImpl } from '../file';
+import { FileShareServiceStart, InternalFileShareService } from '../file_share_service';
 import { enforceMaxByteSizeTransform } from './stream_transforms';
-
-export interface DeleteArgs {
-  /** ID of the file to delete */
-  id: string;
-  /**
-   * If `true`, the file will be deleted from the blob storage.
-   *
-   * @default true
-   */
-  hasContent?: boolean;
-}
-
-/**
- * Args to create a file
- */
-export interface CreateArgs {
-  /**
-   * Unique file ID
-   */
-  id?: string;
-  /**
-   * The file's metadata
-   */
-  metadata: Omit<FileMetadata, 'FileKind'> & { FileKind?: string };
-}
+import { createAuditEvent } from '../audit_events';
+import type { FileClient, CreateArgs, DeleteArgs, P1, ShareArgs } from './types';
+import { serializeJSON, toJSON } from '../file/to_json';
+import { createDefaultFileAttributes } from './utils';
 
 export type UploadOptions = Omit<BlobUploadOptions, 'id'>;
 
-/**
- * Wraps the {@link FileMetadataClient} and {@link BlobStorageClient} client
- * to provide basic file CRUD functionality.
- *
- * For now this is just a shallow type of the implementation for export purposes.
- */
-export interface FileClient {
-  /** See {@link FileMetadata.FileKind}.  */
-  fileKind: string;
-
-  /**
-   * See {@link FileMetadataClient.create}.
-   *
-   * @param arg - Arg to create a file.
-   * */
-  create(arg: CreateArgs): ReturnType<FileMetadataClient['create']>;
-
-  /**
-   * See {@link FileMetadataClient.get}
-   *
-   * @param arg - Argument to get a file
-   */
-  get: FileMetadataClient['get'];
-
-  /**
-   * {@link FileMetadataClient.update}
-   *
-   * @param arg - Argument to get a file
-   */
-  update: FileMetadataClient['update'];
-
-  /**
-   * Delete a file.
-   * @param arg - Argument to delete a file
-   */
-  delete(arg: DeleteArgs): Promise<void>;
-
-  /**
-   * See {@link BlobStorageClient.delete}
-   *
-   * @param id - Argument to delete a file
-   */
-  deleteContent: BlobStorageClient['delete'];
-
-  /**
-   * See {@link FileMetadataClient.list}
-   *
-   * @param arg - Argument to list files
-   */
-  list: FileMetadataClient['list'];
-
-  /**
-   * See {@link FileMetadataClient.find}.
-   *
-   * @param arg - Argument to find files
-   */
-  find: FileMetadataClient['find'];
-
-  /**
-   * See {@link BlobStorageClient.upload}
-   *
-   * @param id - Readable stream to upload
-   * @param rs - Readable stream to upload
-   * @param opts - Argument for uploads
-   */
-  upload(id: string, rs: Readable, opts?: UploadOptions): ReturnType<BlobStorageClient['upload']>;
-
-  /**
-   * See {@link BlobStorageClient.download}
-   *
-   * @param args - to download a file
-   */
-  download: BlobStorageClient['download'];
+export function createFileClient({
+  fileKindDescriptor,
+  auditLogger,
+  blobStorageClient,
+  internalFileShareService,
+  logger,
+  metadataClient,
+}: {
+  fileKindDescriptor: FileKind;
+  metadataClient: FileMetadataClient;
+  blobStorageClient: BlobStorageClient;
+  internalFileShareService: undefined | InternalFileShareService;
+  auditLogger: undefined | AuditLogger;
+  logger: Logger;
+}) {
+  return new FileClientImpl(
+    fileKindDescriptor,
+    metadataClient,
+    blobStorageClient,
+    internalFileShareService,
+    auditLogger,
+    logger
+  );
 }
+
 export class FileClientImpl implements FileClient {
+  private readonly logAuditEvent: AuditLogger['log'];
+
   constructor(
     private fileKindDescriptor: FileKind,
     private readonly metadataClient: FileMetadataClient,
-    private readonly blobStorageClient: BlobStorageClient
-  ) {}
+    private readonly blobStorageClient: BlobStorageClient,
+    private readonly internalFileShareService: undefined | InternalFileShareService,
+    auditLogger: undefined | AuditLogger,
+    private readonly logger: Logger
+  ) {
+    this.logAuditEvent = (e) => {
+      if (auditLogger) {
+        auditLogger.log(e);
+      } else if (e) {
+        this.logger.info(JSON.stringify(e.event, null, 2));
+      }
+    };
+  }
+
+  private instantiateFile<M = unknown>(id: string, metadata: FileMetadata<M>): File<M> {
+    return new FileImpl(
+      id,
+      toJSON(id, {
+        ...createDefaultFileAttributes(),
+        ...metadata,
+      }),
+      this,
+      this.logger
+    );
+  }
 
   public get fileKind(): string {
     return this.fileKindDescriptor.id;
   }
 
-  public create = async ({
-    id,
-    metadata,
-  }: CreateArgs): ReturnType<FileMetadataClient['create']> => {
-    return this.metadataClient.create({
+  public async create<M = unknown>({ id, metadata }: CreateArgs): Promise<File<M>> {
+    const serializedMetadata = serializeJSON({ ...metadata, mimeType: metadata.mime });
+    const result = await this.metadataClient.create({
       id: id || cuid(),
       metadata: {
+        ...createDefaultFileAttributes(),
+        ...serializedMetadata,
+        name: serializedMetadata.name!,
+        extension:
+          (serializedMetadata.mime_type && mimeType.getExtension(serializedMetadata.mime_type)) ??
+          undefined,
         FileKind: this.fileKind,
-        ...metadata,
       },
     });
-  };
+    this.logAuditEvent(
+      createAuditEvent({
+        action: 'create',
+        message: `Created file "${result.metadata.name}" of kind "${this.fileKind}" and id "${result.id}"`,
+      })
+    );
+    return this.instantiateFile(result.id, {
+      ...result.metadata,
+      FileKind: this.fileKind,
+    }) as File<M>;
+  }
 
-  public get: FileMetadataClient['get'] = async (arg) => {
-    return this.metadataClient.get(arg);
-  };
+  public async get<M = unknown>(arg: P1<FileMetadataClient['get']>): Promise<File<M>> {
+    const { id, metadata } = await this.metadataClient.get(arg);
+    return this.instantiateFile(id, metadata as FileMetadata<M>);
+  }
 
-  public update: FileMetadataClient['update'] = (arg) => {
-    return this.metadataClient.update(arg);
-  };
+  public async internalUpdate(id: string, metadata: Partial<FileJSON>): Promise<void> {
+    await this.metadataClient.update({ id, metadata: serializeJSON(metadata) });
+  }
 
-  public find: FileMetadataClient['find'] = (arg) => {
-    return this.metadataClient.find(arg);
-  };
+  public async update<M = unknown>(id: string, metadata: UpdatableFileMetadata<M>): Promise<void> {
+    const { alt, meta, name } = metadata;
+    const payload = { name, alt, meta, updated: moment().toISOString() };
+    await this.internalUpdate(id, payload);
+  }
+
+  public async find<M = unknown>(arg: P1<FileMetadataClient['find']>): Promise<Array<File<M>>> {
+    return this.metadataClient
+      .find(arg)
+      .then((r) =>
+        r.map(({ id, metadata }) => this.instantiateFile(id, metadata as FileMetadata<M>))
+      );
+  }
 
   public async delete({ id, hasContent = true }: DeleteArgs) {
+    if (this.internalFileShareService) {
+      // Stop sharing this file
+      await this.internalFileShareService.deleteForFile({ id });
+    }
     if (hasContent) await this.blobStorageClient.delete(id);
-    return this.metadataClient.delete({ id });
+    await this.metadataClient.delete({ id });
+    this.logAuditEvent(
+      createAuditEvent({
+        action: 'delete',
+        outcome: 'success',
+        message: `Deleted file with "${id}"`,
+      })
+    );
   }
 
   public deleteContent: BlobStorageClient['delete'] = (arg) => {
     return this.blobStorageClient.delete(arg);
   };
 
-  public list: FileMetadataClient['list'] = (arg) => {
-    return this.metadataClient.list(arg);
-  };
+  public async list(arg?: P1<FileMetadataClient['list']>): Promise<File[]> {
+    return this.metadataClient
+      .list(arg)
+      .then((r) => r.map(({ id, metadata }) => this.instantiateFile(id, metadata)));
+  }
 
   /**
    * Upload a blob
@@ -187,5 +192,46 @@ export class FileClientImpl implements FileClient {
 
   public download: BlobStorageClient['download'] = (args) => {
     return this.blobStorageClient.download(args);
+  };
+
+  async share({ file, name, validUntil }: ShareArgs): Promise<FileShareJSONWithToken> {
+    if (!this.internalFileShareService) {
+      throw new Error('#share not implemented');
+    }
+    const shareObject = await this.internalFileShareService.share({
+      file,
+      name,
+      validUntil,
+    });
+    this.logAuditEvent(
+      createAuditEvent({
+        action: 'create',
+        message: `Shared file "${file.data.name}" with id "${file.data.id}"`,
+      })
+    );
+    return shareObject;
+  }
+
+  unshare: FileShareServiceStart['delete'] = async (arg) => {
+    if (!this.internalFileShareService) {
+      throw new Error('#delete shares is not implemented');
+    }
+    const result = await this.internalFileShareService.delete(arg);
+
+    this.logAuditEvent(
+      createAuditEvent({
+        action: 'delete',
+        message: `Removed share with id "${arg.id}"`,
+      })
+    );
+
+    return result;
+  };
+
+  listShares: FileShareServiceStart['list'] = (args) => {
+    if (!this.internalFileShareService) {
+      throw new Error('#list shares not implemented');
+    }
+    return this.internalFileShareService.list(args);
   };
 }
