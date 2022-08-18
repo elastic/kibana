@@ -41,7 +41,6 @@ export interface UsageStats {
   'observability:enableNewSyntheticsView': boolean;
   'observability:maxSuggestions': number;
   'observability:enableComparisonByDefault': boolean;
-  'observability:enableInfrastructureView': boolean;
   'observability:enableServiceGroups': boolean;
   'visualize:enableLabs': boolean;
   'visualization:heatmap:maxBuckets': number;
