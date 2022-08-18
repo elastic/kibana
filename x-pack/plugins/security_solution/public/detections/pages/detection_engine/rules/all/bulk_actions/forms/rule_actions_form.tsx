@@ -36,7 +36,7 @@ import {
 import { allActionMessageParams } from '../../../helpers';
 
 import { RuleActionsField } from '../../../../../../components/rules/rule_actions_field';
-import { validateRuleActionsField } from '../../../../../../components/rules/step_rule_actions/schema';
+import { validateRuleActionsField } from '../../../../../../containers/detection_engine/rules/validate_rule_actions_field';
 
 const CommonUseField = getUseField({ component: Field });
 

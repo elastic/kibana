@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { validateSingleAction, validateRuleActionsField } from './schema';
+import { validateSingleAction, validateRuleActionsField } from './validate_rule_actions_field';
 import { getActionTypeName, validateMustache, validateActionParams } from './utils';
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
-import type { FormHook } from '../../../../shared_imports';
+import type { FormHook } from '../../../../../shared_imports';
 jest.mock('./utils');
 
-describe('stepRuleActions schema', () => {
+describe('validate_rule_actions_field', () => {
   const actionTypeRegistry = actionTypeRegistryMock.create();
 
   describe('validateSingleAction', () => {

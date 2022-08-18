@@ -7,19 +7,11 @@
 
 /* istanbul ignore file */
 
-import { i18n } from '@kbn/i18n';
-
 import type {
   RuleAction,
   ActionTypeRegistryContract,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import type {
-  FormSchema,
-  ValidationFunc,
-  ERROR_CODE,
-  ValidationError,
-} from '../../../../shared_imports';
-import type { ActionsStepRule } from '../../../pages/detection_engine/rules/types';
+import type { ValidationFunc, ERROR_CODE, ValidationError } from '../../../../../shared_imports';
 import { getActionTypeName, validateMustache, validateActionParams } from './utils';
 
 export const validateSingleAction = async (
@@ -59,34 +51,3 @@ export const validateRuleActionsField =
       };
     }
   };
-
-export const getSchema = ({
-  actionTypeRegistry,
-}: {
-  actionTypeRegistry: ActionTypeRegistryContract;
-}): FormSchema<ActionsStepRule> => ({
-  actions: {
-    validations: [
-      {
-        validator: validateRuleActionsField(actionTypeRegistry),
-      },
-    ],
-  },
-  enabled: {},
-  kibanaSiemAppUrl: {},
-  throttle: {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepRuleActions.fieldThrottleLabel',
-      {
-        defaultMessage: 'Actions frequency',
-      }
-    ),
-    helpText: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepRuleActions.fieldThrottleHelpText',
-      {
-        defaultMessage:
-          'Select when automated actions should be performed if a rule evaluates as true.',
-      }
-    ),
-  },
-});
