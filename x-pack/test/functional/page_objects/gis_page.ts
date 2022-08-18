@@ -296,10 +296,28 @@ export class GisPageObject extends FtrService {
     };
   }
 
+  // This method is also used by upgrade testing which is not part of PR testing
+  // Please keep in mind when udpating, removing or adding to this method
+  // upgrade needs to be tested too
+  async clearLegendTooltip() {
+    const isTooltipOpen = await this.testSubjects.exists(`layerTocTooltip`, { timeout: 5000 });
+    if (isTooltipOpen) {
+      await this.testSubjects.click(`layerTocTooltip`);
+      // Wait for tooltip to go away
+      await this.common.sleep(1000);
+    }
+  }
+
+  // This method is also used by upgrade testing which is not part of PR testing
+  // Please keep in mind when udpating, removing or adding to this method
+  // upgrade needs to be tested too
   async toggleLayerVisibility(layerName: string) {
-    this.log.debug(`Toggle layer visibility, layer: ${layerName}`);
+    this.log.debug('Inside toggleLayerVisibility');
+    await this.clearLegendTooltip();
     await this.openLayerTocActionsPanel(layerName);
     await this.testSubjects.click('layerVisibilityToggleButton');
+    await this.waitForLayersToLoad();
+    await this.clearLegendTooltip();
   }
 
   // In 8.4, EMS basemap layers no longer use EMS tile service name, instead using "Basemap"
