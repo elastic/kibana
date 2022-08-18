@@ -16,7 +16,7 @@ describe('getDownloadHeadersForFile', () => {
     };
   }
 
-  const file = { name: 'test', mimeType: undefined } as unknown as File;
+  const file = { data: { name: 'test', mimeType: undefined } } as unknown as File;
   test('no mime type and name from file object', () => {
     expect(getDownloadHeadersForFile(file, undefined)).toEqual(
       t({ ct: 'application/octet-stream', cd: 'test' })
@@ -34,13 +34,13 @@ describe('getDownloadHeadersForFile', () => {
     );
   });
   test('mime type and no name', () => {
-    const fileWithMime = { ...file, mimeType: 'application/pdf' } as File;
+    const fileWithMime = { data: { ...file.data, mimeType: 'application/pdf' } } as File;
     expect(getDownloadHeadersForFile(fileWithMime, undefined)).toEqual(
       t({ ct: 'application/pdf', cd: 'test' })
     );
   });
   test('mime type and name', () => {
-    const fileWithMime = { ...file, mimeType: 'application/pdf' } as File;
+    const fileWithMime = { data: { ...file.data, mimeType: 'application/pdf' } } as File;
     expect(getDownloadHeadersForFile(fileWithMime, 'a cool file.pdf')).toEqual(
       t({ ct: 'application/pdf', cd: 'a cool file.pdf' })
     );
