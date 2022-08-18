@@ -9,11 +9,11 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { StackTracesDisplayOption } from '../../../common/stack_traces';
 import { groupSamplesByCategory, TopNResponse, TopNSubchart } from '../../../common/topn';
-import { useAsync } from '../../hooks/use_async';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../../hooks/use_profiling_route_path';
 import { useTimeRange } from '../../hooks/use_time_range';
+import { useTimeRangeAsync } from '../../hooks/use_time_range_async';
 import { AsyncComponent } from '../async_component';
 import { ChartGrid } from '../chart_grid';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
@@ -50,7 +50,7 @@ export function StackTracesView() {
     rangeTo,
   });
 
-  const state = useAsync(() => {
+  const state = useTimeRangeAsync(() => {
     if (!topNType) {
       return Promise.resolve({ charts: [] });
     }

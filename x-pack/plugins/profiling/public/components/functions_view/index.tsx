@@ -8,11 +8,11 @@ import { EuiFlexGroup, EuiFlexItem, EuiPageHeaderContentProps } from '@elastic/e
 import { i18n } from '@kbn/i18n';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import React from 'react';
-import { useAsync } from '../../hooks/use_async';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../../hooks/use_profiling_route_path';
 import { useTimeRange } from '../../hooks/use_time_range';
+import { useTimeRangeAsync } from '../../hooks/use_time_range_async';
 import { ProfilingRoutes } from '../../routing';
 import { AsyncComponent } from '../async_component';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
@@ -42,7 +42,7 @@ export function FunctionsView({ children }: { children: React.ReactElement }) {
     services: { fetchTopNFunctions },
   } = useProfilingDependencies();
 
-  const state = useAsync(() => {
+  const state = useTimeRangeAsync(() => {
     return fetchTopNFunctions({
       timeFrom: new Date(timeRange.start).getTime() / 1000,
       timeTo: new Date(timeRange.end).getTime() / 1000,
@@ -52,7 +52,7 @@ export function FunctionsView({ children }: { children: React.ReactElement }) {
     });
   }, [timeRange.start, timeRange.end, kuery, fetchTopNFunctions]);
 
-  const comparisonState = useAsync(() => {
+  const comparisonState = useTimeRangeAsync(() => {
     if (!comparisonTimeRange.start || !comparisonTimeRange.end) {
       return undefined;
     }

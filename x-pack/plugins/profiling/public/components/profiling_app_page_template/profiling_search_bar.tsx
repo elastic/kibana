@@ -18,6 +18,7 @@ export function ProfilingSearchBar({
   rangeTo,
   onQuerySubmit,
   onRefresh,
+  onRefreshClick,
   showSubmitButton = true,
 }: {
   kuery: string;
@@ -31,6 +32,7 @@ export function ProfilingSearchBar({
     isUpdate?: boolean
   ) => void;
   onRefresh: Required<React.ComponentProps<typeof SearchBar>>['onRefresh'];
+  onRefreshClick: () => void;
   showSubmitButton?: boolean;
 }) {
   const {
@@ -54,7 +56,14 @@ export function ProfilingSearchBar({
 
   return (
     <SearchBar<Query>
-      onQuerySubmit={onQuerySubmit}
+      onQuerySubmit={({ dateRange, query }) => {
+        if (dateRange.from === rangeFrom && dateRange.to === rangeTo && query?.query === kuery) {
+          onRefreshClick();
+          return;
+        }
+
+        onQuerySubmit({ dateRange, query });
+      }}
       showQueryBar
       showQueryInput
       showDatePicker

@@ -20,16 +20,18 @@ export interface AsyncState<T> {
   status: AsyncStatus;
 }
 
-export function useAsync<T>(
+export type UseAsync = <T>(
   fn: ({ http }: { http: HttpStart }) => Promise<T> | undefined,
   dependencies: any[]
-): AsyncState<T> {
+) => AsyncState<T>;
+
+export const useAsync: UseAsync = (fn, dependencies) => {
   const {
     start: {
       core: { http },
     },
   } = useProfilingDependencies();
-  const [asyncState, setAsyncState] = useState<AsyncState<T>>({
+  const [asyncState, setAsyncState] = useState<AsyncState<any>>({
     status: AsyncStatus.Init,
   });
 
@@ -70,4 +72,4 @@ export function useAsync<T>(
   }, [http, ...dependencies]);
 
   return asyncState;
-}
+};
