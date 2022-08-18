@@ -1,0 +1,72 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Detects the use of the insmod binary to load a Linux kernel object file. Threat actors can use this binary, given they have root privileges, to load a rootkit on a system providing them with complete control and the ability to hide from security products. Manually loading a kernel module in this manner should not be at all common and can indicate suspcious or malicious behavior.",
+  "from": "now-9m",
+  "index": [
+    "logs-*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Kernel module load via insmod",
+  "query": "process where event.type == \"start\" and process.executable : \"/usr/sbin/insmod\" and process.args : \"*.ko\"\n",
+  "references": [
+    "https://decoded.avast.io/davidalvarez/linux-threat-hunting-syslogk-a-kernel-rootkit-found-under-development-in-the-wild/"
+  ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.args",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.executable",
+      "type": "keyword"
+    }
+  ],
+  "risk_score": 85,
+  "rule_id": "2339f03c-f53f-40fa-834b-40c5983fc41f",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Linux",
+    "Threat Detection",
+    "Persistence",
+    "Rootkit"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1547",
+          "name": "Boot or Logon Autostart Execution",
+          "reference": "https://attack.mitre.org/techniques/T1547/",
+          "subtechnique": [
+            {
+              "id": "T1547.006",
+              "name": "Kernel Modules and Extensions",
+              "reference": "https://attack.mitre.org/techniques/T1547/006/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 2
+}

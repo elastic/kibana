@@ -16,6 +16,23 @@
     "https://adsecurity.org/?p=1906",
     "https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-c--protected-accounts-and-groups-in-active-directory#adminsdholder"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.action",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.code",
+      "type": "keyword"
+    },
+    {
+      "ecs": false,
+      "name": "winlog.event_data.ObjectDN",
+      "type": "unknown"
+    }
+  ],
   "risk_score": 73,
   "rule_id": "6e9130a5-9be6-48e5-943a-9628bfc74b18",
   "severity": "high",
@@ -40,5 +57,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 2
+  "version": 3
 }

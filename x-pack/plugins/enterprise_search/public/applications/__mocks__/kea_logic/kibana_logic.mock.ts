@@ -20,6 +20,10 @@ export const mockKibanaValues = {
   },
   history: mockHistory,
   navigateToUrl: jest.fn(),
+  productAccess: {
+    hasAppSearchAccess: true,
+    hasWorkplaceSearchAccess: true,
+  },
   security: securityMock.createStart(),
   setBreadcrumbs: jest.fn(),
   setChromeIsVisible: jest.fn(),
