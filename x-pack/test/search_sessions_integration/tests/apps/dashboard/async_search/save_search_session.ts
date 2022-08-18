@@ -104,7 +104,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.switchToEditMode();
       await searchSessions.expectState('restored');
 
-      const xyChartSelector = 'visTypeXyChart';
+      const xyChartSelector = 'xyVisChart';
       await enableNewChartLibraryDebug();
       const data = await PageObjects.visChart.getBarChartData(xyChartSelector, 'Sum of bytes');
       expect(data.length).to.be(5);

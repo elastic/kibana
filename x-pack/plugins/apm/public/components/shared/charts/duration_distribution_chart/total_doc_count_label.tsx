@@ -9,7 +9,7 @@ import { useEuiTheme } from '@elastic/eui';
 import { EuiText } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { ProcessorEvent } from '../../../../../common/processor_event';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 
 interface Props {
   eventType: ProcessorEvent.transaction | ProcessorEvent.span;

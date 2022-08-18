@@ -13,16 +13,18 @@ export const createClusterDataCheck = () => {
   return async function doesClusterHaveUserData(esClient: ElasticsearchClient, log: Logger) {
     if (!clusterHasUserData) {
       try {
-        const { indices = {} } = await esClient.indices.stats();
-        const indexIds = indices ? Object.keys(indices) : [];
+        const { indices = {} } = await esClient.indices.stats({
+          filter_path: 'indices.*.total.docs.count',
+        });
 
-        clusterHasUserData = indexIds.some((indexName: string) => {
+        const indexIds = Object.keys(indices);
+
+        clusterHasUserData = indexIds.some((indexId: string) => {
           // Check index to see if it starts with known internal prefixes
-          const isInternalIndex =
-            indexName.startsWith('.') || indexName.startsWith('kibana_sample_');
+          const isInternalIndex = indexId.startsWith('.') || indexId.startsWith('kibana_sample_');
 
           // Check index to see if it has any docs
-          const hasDocs = (indices[indexName].primaries?.docs?.count || 0) > 0;
+          const hasDocs = (indices[indexId].total?.docs?.count || 0) > 0;
 
           return !isInternalIndex && hasDocs;
         });

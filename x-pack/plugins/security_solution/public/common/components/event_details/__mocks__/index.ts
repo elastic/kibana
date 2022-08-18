@@ -653,6 +653,12 @@ export const generateAlertDetailsDataMock = () => [
     values: ['dummy.exe'],
     originalValue: ['dummy.exe'],
   },
+  {
+    category: 'rule',
+    field: 'rule.name',
+    values: ['Test Rule Name'],
+    originalValue: ['Test Rule Name'],
+  },
 ];
 
 export const mockAlertDetailsData = generateAlertDetailsDataMock();

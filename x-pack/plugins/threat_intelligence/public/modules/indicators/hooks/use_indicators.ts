@@ -16,7 +16,7 @@ import type { Subscription } from 'rxjs';
 import { buildEsQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { Indicator } from '../../../../common/types/indicator';
 import { useKibana } from '../../../hooks/use_kibana';
-import { DEFAULT_THREAT_INDEX_KEY } from '../../../../common/constants';
+import { DEFAULT_THREAT_INDEX_KEY, THREAT_QUERY_BASE } from '../../../../common/constants';
 
 const PAGE_SIZES = [10, 25, 50];
 
@@ -35,7 +35,6 @@ export interface UseIndicatorsValue {
   pagination: Pagination;
   onChangeItemsPerPage: (value: number) => void;
   onChangePage: (value: number) => void;
-  firstLoad: boolean;
   loading: boolean;
 }
 
@@ -51,8 +50,6 @@ interface Pagination {
   pageIndex: number;
   pageSizeOptions: number[];
 }
-
-const THREAT_QUERY_BASE = 'event.type: indicator and event.category : threat';
 
 export const useIndicators = ({
   filters,
@@ -75,7 +72,6 @@ export const useIndicators = ({
 
   const [indicators, setIndicators] = useState<Indicator[]>([]);
   const [indicatorCount, setIndicatorCount] = useState<number>(0);
-  const [firstLoad, setFirstLoad] = useState(true);
   const [loading, setLoading] = useState(true);
 
   const [pagination, setPagination] = useState({
@@ -150,14 +146,12 @@ export const useIndicators = ({
               searchSubscription$.current?.unsubscribe();
             }
 
-            setFirstLoad(false);
             setLoading(false);
           },
           error: (msg) => {
             searchService.showError(msg);
             searchSubscription$.current?.unsubscribe();
 
-            setFirstLoad(false);
             setLoading(false);
           },
         });
@@ -203,7 +197,6 @@ export const useIndicators = ({
     pagination,
     onChangePage,
     onChangeItemsPerPage,
-    firstLoad,
     loading,
     handleRefresh,
   };

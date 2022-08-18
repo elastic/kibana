@@ -22,16 +22,20 @@ export const fetchPValues = async ({
   environment,
   kuery,
   query,
+  durationMin,
+  durationMax,
   fieldCandidates,
 }: CommonCorrelationsQueryParams & {
   setup: Setup;
+  durationMin?: number;
+  durationMax?: number;
   fieldCandidates: string[];
 }) => {
   const chartType = LatencyDistributionChartType.failedTransactionsCorrelations;
   const searchMetrics = false; // failed transactions correlations does not search metrics documents
   const eventType = getEventType(chartType, searchMetrics);
 
-  const rangeSteps = await fetchDurationHistogramRangeSteps({
+  const { rangeSteps } = await fetchDurationHistogramRangeSteps({
     setup,
     chartType,
     start,
@@ -40,6 +44,8 @@ export const fetchPValues = async ({
     kuery,
     query,
     searchMetrics,
+    durationMinOverride: durationMin,
+    durationMaxOverride: durationMax,
   });
 
   const { fulfilled, rejected } = splitAllSettledPromises(

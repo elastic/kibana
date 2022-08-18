@@ -41,7 +41,7 @@ const BulkEditRuleErrorItem = ({
         <li key={message}>
           <FormattedMessage
             id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.machineLearningRulesIndexEditDescription"
-            defaultMessage="{rulesCount, plural, =1 {# custom Machine Learning rule} other {# custom Machine Learning rules}} (these rules don't have index patterns)"
+            defaultMessage="{rulesCount, plural, =1 {# custom machine learning rule} other {# custom machine learning rules}} (these rules don't have index patterns)"
             values={{ rulesCount }}
           />
         </li>
@@ -51,7 +51,7 @@ const BulkEditRuleErrorItem = ({
         <li key={message}>
           <FormattedMessage
             id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.machineLearningRulesAuthDescription"
-            defaultMessage="{rulesCount, plural, =1 {# Machine Learning rule} other {# Machine Learning rules}} can't be edited ({message})"
+            defaultMessage="{rulesCount, plural, =1 {# machine learning rule} other {# machine learning rules}} can't be edited ({message})"
             values={{ rulesCount, message }}
           />
         </li>
@@ -115,7 +115,7 @@ const BulkActionRuleErrorsListComponent = ({
     <>
       <FormattedMessage
         id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.actionRejectionDescription"
-        defaultMessage="This action can't be applied to the following rules:"
+        defaultMessage="This action can't be applied to the following rules in your selection:"
       />
       <EuiSpacer />
       <ul>
