@@ -296,7 +296,7 @@ Querying & Filtering::
 Hides the tour component when the hideAnnouncements uiSetting is on {kibana-pull}135990[#135990]
 
 Security::
-Adds the ability to navigate to a profile without full page reload {kibana-pull}135543[#135543]
+Eliminates the need for a full page reload when navigating to a user profile page {kibana-pull}135543[#135543]
 
 [float]
 [[fixes-v8.4.0]]
