@@ -67,5 +67,8 @@ export async function getFieldCapabilities(params: FieldCapabilitiesParams) {
     )
     .map(mergeOverrides);
 
-  return { fields: sortBy(allFieldsUnsorted, 'name'), indices: esFieldCaps.body.indices as string[] };
+  return {
+    fields: sortBy(allFieldsUnsorted, 'name'),
+    indices: esFieldCaps.body.indices as string[],
+  };
 }
