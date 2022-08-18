@@ -3084,7 +3084,7 @@
             "label": "getDisplayName",
             "description": [],
             "signature": [
-              "(() => string) | undefined"
+              "() => string"
             ],
             "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false,
@@ -5125,7 +5125,7 @@
         "label": "VisualizeEmbeddableContract",
         "description": [],
         "signature": [
-          "{ readonly type: \"visualization\"; readonly id: string; render: (domNode: HTMLElement) => Promise<void>; getExplicitInput: () => ",
+          "{ readonly type: \"visualization\"; render: (domNode: HTMLElement) => Promise<void>; readonly id: string; getExplicitInput: () => ",
           {
             "pluginId": "visualizations",
             "scope": "public",
@@ -5505,7 +5505,7 @@
             "section": "def-public.OnSaveProps",
             "text": "OnSaveProps"
           },
-          ") => Promise<true>; }"
+          ") => Promise<boolean>; }"
         ],
         "path": "src/plugins/visualizations/public/index.ts",
         "deprecated": false,

@@ -1508,7 +1508,7 @@
         "label": "suspendedComponentWithProps",
         "description": [],
         "signature": [
-          "(ComponentToSuspend: React.ComponentType<T>, size: \"s\" | \"m\" | \"l\" | \"xl\" | \"xxl\" | undefined) => (props: T) => JSX.Element"
+          "(ComponentToSuspend: React.ComponentType<T>, size: \"m\" | \"s\" | \"l\" | \"xl\" | \"xxl\" | undefined) => (props: T) => JSX.Element"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
         "deprecated": false,
@@ -1535,7 +1535,7 @@
             "label": "size",
             "description": [],
             "signature": [
-              "\"s\" | \"m\" | \"l\" | \"xl\" | \"xxl\" | undefined"
+              "\"m\" | \"s\" | \"l\" | \"xl\" | \"xxl\" | undefined"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
             "deprecated": false,
@@ -2071,7 +2071,7 @@
             "label": "flyoutSize",
             "description": [],
             "signature": [
-              "\"s\" | \"m\" | \"l\" | undefined"
+              "\"m\" | \"s\" | \"l\" | undefined"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false
@@ -3596,7 +3596,7 @@
             "label": "setRuleProperty",
             "description": [],
             "signature": [
-              "<Prop extends \"params\" | \"tags\" | \"id\" | \"name\" | \"monitoring\" | \"enabled\" | \"actions\" | \"throttle\" | \"consumer\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"ruleTypeId\">(key: Prop, value: ",
+              "<Prop extends \"params\" | \"tags\" | \"id\" | \"monitoring\" | \"name\" | \"enabled\" | \"actions\" | \"throttle\" | \"consumer\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"ruleTypeId\">(key: Prop, value: ",
               "SanitizedRule",
               "<Params>[Prop] | null) => void"
             ],
