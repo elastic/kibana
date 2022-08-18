@@ -21,6 +21,7 @@ import {
   getParentPipelineSeriesFormula,
   getFilterRatioFormula,
   getTimeScale,
+  getFormulaFromMetric,
 } from '../metrics';
 
 export interface VisSeries {
@@ -146,7 +147,7 @@ export const getSeries = (initialMetrics: Metric[], totalSeriesNum: number): Vis
           aggregation,
           metrics[metricIdx],
           subFunctionMetric,
-          pipelineAgg.name
+          getFormulaFromMetric(pipelineAgg)
         );
         if (!series) return null;
         metricsArray = series;
