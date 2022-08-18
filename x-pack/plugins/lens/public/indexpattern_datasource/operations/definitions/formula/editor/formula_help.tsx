@@ -164,11 +164,11 @@ sum(products.base_price) / overall_sum(sum(products.base_price))
               {
                 defaultMessage: `### Recent change
 
-Use \`timeRange='30m'\` to add an additional filter on the time range of a metric aligned with the end of the global time range. This can be used to calculate how much a value changed recently.
+Use \`reducedTimeRange='30m'\` to add an additional filter on the time range of a metric aligned with the end of the global time range. This can be used to calculate how much a value changed recently.
 
 \`\`\`
-max(system.network.in.bytes, timeRange="30m")
- - min(system.network.in.bytes, timeRange="30m")
+max(system.network.in.bytes, reducedTimeRange="30m")
+ - min(system.network.in.bytes, reducedTimeRange="30m")
 \`\`\`
         `,
 
@@ -523,8 +523,8 @@ export function getFunctionSignatureLabel(
       });
     }
     if (def.windowable) {
-      extraArgs += i18n.translate('xpack.lens.formula.windowExtraArguments', {
-        defaultMessage: '[timeRange]?: string',
+      extraArgs += i18n.translate('xpack.lens.formula.reducedTimeRangeExtraArguments', {
+        defaultMessage: '[reducedTimeRange]?: string',
       });
     }
     return `${name}(${def.documentation?.signature}${extraArgs})`;

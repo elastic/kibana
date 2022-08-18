@@ -46,7 +46,7 @@ import { FormatSelector } from './format_selector';
 import { ReferenceEditor } from './reference_editor';
 import { TimeScaling } from './time_scaling';
 import { Filtering } from './filtering';
-import { Window } from './window';
+import { ReducedTimeRange } from './reduced_time_range';
 import { AdvancedOptions } from './advanced_options';
 import { TimeShift } from './time_shift';
 import type { LayerType } from '../../../common';
@@ -921,9 +921,9 @@ export function DimensionEditor(props: DimensionEditorProps) {
               ) : null,
             },
             {
-              dataTestSubj: 'indexPattern-window-enable',
+              dataTestSubj: 'indexPattern-reducedTimeRange-enable',
               inlineElement: selectedOperationDefinition.windowable ? (
-                <Window
+                <ReducedTimeRange
                   selectedColumn={selectedColumn}
                   columnId={columnId}
                   indexPattern={currentIndexPattern}

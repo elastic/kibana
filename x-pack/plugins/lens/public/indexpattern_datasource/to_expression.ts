@@ -127,7 +127,7 @@ function getExpressionForLayer(
 
         const wrapInFilter = Boolean(def.filterable && col.filter);
         const wrapInTimeFilter =
-          def.windowable && !hasDateHistogram && col.window && indexPattern.timeFieldName;
+          def.windowable && !hasDateHistogram && col.reducedTimeRange && indexPattern.timeFieldName;
         let aggAst = def.toEsAggsFn(
           col,
           wrapInFilter ? `${aggId}-metric` : aggId,
@@ -150,7 +150,7 @@ function getExpressionForLayer(
                   enabled: true,
                   schema: 'bucket',
                   filter: col.filter && queryToAst(col.filter),
-                  timeWindow: wrapInTimeFilter ? col.window : undefined,
+                  timeWindow: wrapInTimeFilter ? col.reducedTimeRange : undefined,
                   timeShift: col.timeShift,
                 }),
               ]),

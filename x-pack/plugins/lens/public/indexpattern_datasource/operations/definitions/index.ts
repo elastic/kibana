@@ -348,7 +348,7 @@ interface BaseOperationDefinitionProps<
    */
   filterable?: boolean | { helpMessage: string };
   /**
-   * Windowable operations can have a time window defined at the dimension level - under the hood this will be translated into a filter on the defined time field
+   * Windowable operations can have a reduced time range defined at the dimension level - under the hood this will be translated into a filter on the defined time field
    */
   windowable?: boolean;
   shiftable?: boolean;
@@ -499,7 +499,7 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn, P = {}
       kql?: string;
       lucene?: string;
       shift?: string;
-      window?: string;
+      reducedTimeRange?: string;
       usedInMath?: boolean;
     }
   ) => C;
