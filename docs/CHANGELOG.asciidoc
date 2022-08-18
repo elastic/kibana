@@ -134,9 +134,6 @@ Fleet::
 * Promote Logstash output support to GA {kibana-pull}135028[#135028]
 * Create new API to manage download_source setting {kibana-pull}134889[#134889]
 
-Lens & Visualizations::
-* Adds supports for include and exclude terms in *Lens* {kibana-pull}136179[#136179]
-
 Machine Learning::
 * Adds random sampler to Data visualizer document count chart {kibana-pull}136150[#136150]
 * Adds explain log rate spikes feature to the ML plugin {kibana-pull}135948[#135948]
@@ -225,6 +222,7 @@ Kibana Home & Add Data::
 Adds AnalyticsNoDataPage {kibana-pull}134172[#134172]
 
 Lens & Visualizations::
+* Adds supports for include and exclude terms in *Lens* {kibana-pull}136179[#136179]
 * Adds the ability to set top values limit to 10,000 in *Lens* {kibana-pull}136399[#136399]
 * Addss value count to *Lens* {kibana-pull}136385[#136385]
 * Adds standard deviation function in *Lens* {kibana-pull}136323[#136323]
