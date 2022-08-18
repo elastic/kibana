@@ -107,7 +107,7 @@ The layer is only visible when users zoom in.
 . Add a tooltip field and select **agent**, **bytes**, **clientip**, **host**,
 **machine.os**, **request**, **response**, and **timestamp**.
 
-. In **Scaling**, set *Limit results to 10,000.*
+. In **Scaling**, enablesm *Limit results to 10,000.*
 
 . In **Layer style**, set **Fill color** to **#2200FF**.
 
@@ -181,12 +181,11 @@ image::maps/images/gs_dashboard_with_map.png[Map in a dashboard with 2 other pan
 +
 [role="screenshot"]
 image::maps/images/gs_tooltip_filter.png[Tooltip on map, width=75%]
-
-
++
 Your filtered map should look similar to this:
-
++
 [role="screenshot"]
-image::maps/images/gs_dashboard_with_map.png[Map showing filtered data]
+image::maps/images/gs_map_filtered.png[Map showing filtered data]
 
 [float]
 === What's next?
