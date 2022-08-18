@@ -36,7 +36,7 @@ const chartBase: ChartBase = {
   }),
   key: 'avg_duration',
   type: 'linemark',
-  yUnit: 'number',
+  yUnit: 'time',
   series: {},
 };
 

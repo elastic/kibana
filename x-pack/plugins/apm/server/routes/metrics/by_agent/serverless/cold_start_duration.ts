@@ -17,7 +17,7 @@ const chartBase: ChartBase = {
   }),
   key: 'cold_start_duration',
   type: 'linemark',
-  yUnit: 'number',
+  yUnit: 'time',
   series: {
     coldStart: {
       title: i18n.translate(
