@@ -145,6 +145,8 @@ export const WithHoverActions = React.memo<Props>(
     }, [closePopOverTrigger]); // NOTE: the `closePopOverTrigger` dependency here will close the hover menu whenever `closePopOverTrigger` changes
 
     useEffect(() => {
+      // in case of dynamic content i.e when the value of hoverContent changes,
+      // we will try to reposition the popover so that the content does not collide with screen edge.
       if (isOpen) popoverRef?.current?.positionPopoverFluid();
     }, [hoverContent, isOpen]);
 
