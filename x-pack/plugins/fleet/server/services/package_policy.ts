@@ -54,6 +54,7 @@ import {
   PackagePolicyIneligibleForUpgradeError,
   PackagePolicyValidationError,
   PackagePolicyRestrictionRelatedError,
+  PackagePolicyNotFoundError,
 } from '../errors';
 import { NewPackagePolicySchema, PackagePolicySchema, UpdatePackagePolicySchema } from '../types';
 import type {
@@ -313,7 +314,8 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
 
   public async getByIDs(
     soClient: SavedObjectsClientContract,
-    ids: string[]
+    ids: string[],
+    options: { ignoreMissing?: boolean } = {}
   ): Promise<PackagePolicy[] | null> {
     const packagePolicySO = await soClient.bulkGet<PackagePolicySOAttributes>(
       ids.map((id) => ({
@@ -325,11 +327,25 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
       return null;
     }
 
-    return packagePolicySO.saved_objects.map((so) => ({
-      id: so.id,
-      version: so.version,
-      ...so.attributes,
-    }));
+    return packagePolicySO.saved_objects
+      .map((so): PackagePolicy | null => {
+        if (so.error) {
+          if (options.ignoreMissing && so.error.statusCode === 404) {
+            return null;
+          } else if (so.error.statusCode === 404) {
+            throw new PackagePolicyNotFoundError(`Package policy ${so.id} not found`);
+          } else {
+            throw new Error(so.error.message);
+          }
+        }
+
+        return {
+          id: so.id,
+          version: so.version,
+          ...so.attributes,
+        };
+      })
+      .filter((packagePolicy): packagePolicy is PackagePolicy => packagePolicy !== null);
   }
 
   public async list(
@@ -1285,11 +1301,16 @@ export interface PackagePolicyServiceInterface {
 
   get(soClient: SavedObjectsClientContract, id: string): Promise<PackagePolicy | null>;
 
-  getByIDs(soClient: SavedObjectsClientContract, ids: string[]): Promise<PackagePolicy[] | null>;
   findAllForPolicy(
     soClient: SavedObjectsClientContract,
     agentPolicyId: string
   ): Promise<PackagePolicy[]>;
+
+  getByIDs(
+    soClient: SavedObjectsClientContract,
+    ids: string[],
+    options?: { ignoreMissing?: boolean }
+  ): Promise<PackagePolicy[] | null>;
 
   list(
     soClient: SavedObjectsClientContract,

@@ -12,6 +12,7 @@ import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { SessionView } from '.';
 import userEvent from '@testing-library/user-event';
 import { useDateFormat } from '../../hooks';
+import { GET_TOTAL_IO_BYTES_ROUTE, PROCESS_EVENTS_ROUTE } from '../../../common/constants';
 
 jest.mock('../../hooks/use_date_format');
 const mockUseDateFormat = useDateFormat as jest.Mock;
@@ -133,6 +134,46 @@ describe('SessionView component', () => {
         await waitForApiCall();
 
         expect(renderResult.getAllByTestId('sessionView:sessionViewRefreshButton')).toBeTruthy();
+      });
+    });
+
+    describe('TTYPlayer button', () => {
+      it('should show tty player button, if session has output', async () => {
+        mockedApi.mockImplementation(async (path: any) => {
+          if (path === PROCESS_EVENTS_ROUTE) {
+            return sessionViewProcessEventsMock;
+          } else if (path === GET_TOTAL_IO_BYTES_ROUTE) {
+            return 1024;
+          }
+
+          return 0;
+        });
+
+        render();
+        await waitForApiCall();
+
+        expect(renderResult.queryByTestId('sessionView:TTYPlayerToggle')).toBeTruthy();
+      });
+
+      it('should NOT show tty player button, if session has no output', async () => {
+        mockedApi.mockImplementation(async (options) => {
+          // for some reason the typescript interface for options says its an object with a field called path.
+          // in reality options is a string (which equals the path...)
+          const path = String(options);
+
+          if (path === PROCESS_EVENTS_ROUTE) {
+            return sessionViewProcessEventsMock;
+          } else if (path === GET_TOTAL_IO_BYTES_ROUTE) {
+            return 0;
+          }
+
+          return 0;
+        });
+
+        render();
+        await waitForApiCall();
+
+        expect(renderResult.queryByTestId('sessionView:TTYPlayerToggle')).toBeFalsy();
       });
     });
   });
