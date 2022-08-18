@@ -16,9 +16,9 @@ import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { LayoutDirection } from '@elastic/charts';
 import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { IconChartMetric } from '@kbn/chart-icons';
 import { LayerType } from '../../../common';
 import { getSuggestions } from './suggestions';
-import { LensIconChartMetric } from '../../assets/chart_metric';
 import { Visualization, OperationMetadata, DatasourceLayers, AccessorConfig } from '../../types';
 import { layerTypes } from '../../../common';
 import { GROUP_ID, LENS_METRIC_ID } from './constants';
@@ -125,7 +125,8 @@ const toExpression = (
         arguments: {
           metric: state.metricAccessor ? [state.metricAccessor] : [],
           secondaryMetric: state.secondaryMetricAccessor ? [state.secondaryMetricAccessor] : [],
-          secondaryPrefix: state.secondaryPrefix ? [state.secondaryPrefix] : [],
+          secondaryPrefix:
+            typeof state.secondaryPrefix !== 'undefined' ? [state.secondaryPrefix] : [],
           max: state.maxAccessor ? [state.maxAccessor] : [],
           breakdownBy:
             state.breakdownByAccessor && !state.collapseFn ? [state.breakdownByAccessor] : [],
@@ -166,7 +167,7 @@ export const getMetricVisualization = ({
   visualizationTypes: [
     {
       id: LENS_METRIC_ID,
-      icon: LensIconChartMetric,
+      icon: IconChartMetric,
       label: metricLabel,
       groupLabel: metricGroupLabel,
       showExperimentalBadge: true,
@@ -197,7 +198,7 @@ export const getMetricVisualization = ({
 
   getDescription() {
     return {
-      icon: LensIconChartMetric,
+      icon: IconChartMetric,
       label: metricLabel,
     };
   },
