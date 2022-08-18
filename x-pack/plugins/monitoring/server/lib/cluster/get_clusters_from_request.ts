@@ -7,7 +7,7 @@
 
 import { notFound } from '@hapi/boom';
 import { get, omit } from 'lodash';
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import { i18n } from '@kbn/i18n';
 import { getClustersStats } from './get_clusters_stats';
 import { flagSupportedClusters } from './flag_supported_clusters';

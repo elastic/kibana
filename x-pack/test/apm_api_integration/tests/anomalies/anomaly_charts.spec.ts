@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { range, omit } from 'lodash';
-import { apm, timerange } from '@elastic/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace';
 import { ServiceAnomalyTimeseries } from '@kbn/apm-plugin/common/anomaly_detection/service_anomaly_timeseries';
 import { ApmMlDetectorType } from '@kbn/apm-plugin/common/anomaly_detection/apm_ml_detectors';
 import { Environment } from '@kbn/apm-plugin/common/environment_rt';

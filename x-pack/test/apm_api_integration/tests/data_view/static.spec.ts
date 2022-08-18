@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { apm, ApmSynthtraceEsClient, timerange } from '@elastic/apm-synthtrace';
+import { apm, ApmSynthtraceEsClient, timerange } from '@kbn/apm-synthtrace';
 import expect from '@kbn/expect';
 import { APM_STATIC_DATA_VIEW_ID } from '@kbn/apm-plugin/common/data_view_constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import React, { useContext, useMemo } from 'react';
 import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
 import { UrlStateContainer } from '../../utils/url_state';

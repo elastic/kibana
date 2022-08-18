@@ -9,7 +9,7 @@ import {
   createLogger,
   EntityArrayIterable,
   LogLevel,
-} from '@elastic/apm-synthtrace';
+} from '@kbn/apm-synthtrace';
 import { createEsClientForTesting } from '@kbn/test';
 
 // ***********************************************************
