@@ -7,7 +7,7 @@
  */
 
 import type { Metric, MetricType } from '../../../../common/types';
-import { getFormulaFromMetric, SUPPORTED_METRICS } from './supported_metrics';
+import { getFormulaFromMetric, SupportedMetric, SUPPORTED_METRICS } from './supported_metrics';
 import { getParentPipelineSeriesFormula } from './parent_pipeline_formula';
 import { getFilterRatioFormula } from './filter_ratio_formula';
 import { getFormulaSeries, getTimeScale, getPipelineAgg } from './metrics_helpers';
@@ -16,7 +16,7 @@ export const computeParentSeries = (
   aggregation: MetricType,
   currentMetric: Metric,
   subFunctionMetric: Metric,
-  pipelineAgg: string,
+  pipelineAgg: SupportedMetric,
   meta?: number
 ) => {
   const aggregationMap = SUPPORTED_METRICS[aggregation];
@@ -39,14 +39,17 @@ export const computeParentSeries = (
     {
       agg: aggregationMap.name,
       isFullReference: aggregationMap!.isFullReference,
-      pipelineAggType: pipelineAgg,
+      pipelineAggType: pipelineAgg.name,
       fieldName:
-        subFunctionMetric?.field && pipelineAgg !== 'count' ? subFunctionMetric?.field : 'document',
+        subFunctionMetric?.field && pipelineAgg.name !== 'count'
+          ? subFunctionMetric?.field
+          : 'document',
       params: {
         ...(currentMetric.window && { window: currentMetric.window }),
         ...(timeScale && { timeScale }),
-        ...(pipelineAgg === 'percentile' && meta && { percentile: meta }),
-        ...(pipelineAgg === 'percentile_rank' && meta && { value: meta }),
+        ...(pipelineAgg.name === 'percentile' && meta && { percentile: meta }),
+        ...(pipelineAgg.name === 'percentile_rank' && meta && { value: meta }),
+        ...(pipelineAgg.name === 'formula' ? { formula: pipelineAgg.formula } : {}),
       },
     },
   ];
@@ -92,7 +95,7 @@ export const getParentPipelineSeries = (
       aggregation,
       currentMetric,
       subFunctionMetric,
-      pipelineAgg.name,
+      pipelineAgg,
       metaValue
     );
   }
