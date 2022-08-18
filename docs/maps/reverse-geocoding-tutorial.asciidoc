@@ -65,7 +65,7 @@ To get the CSA boundary data:
 Looking at the map, you get a sense of what constitutes a metro area in the eyes of the Census Bureau.
 
 [role="screenshot"]
-image::maps/images/reverse-geocoding-tutorial/csa_regions.jpeg[Map showing metro area]
+image::maps/images/reverse-geocoding-tutorial/csa_regions.png[Map showing metro area]
 
 [float]
 === Step 3: Reverse geocoding
@@ -80,7 +80,7 @@ PUT /_enrich/policy/csa_lookup
 {
   "geo_match": {
     "indices": "csa",
-    "match_field": "coordinates",
+    "match_field": "geometry",
     "enrich_fields": [ "GEOID", "NAME"]
   }
 }
@@ -113,7 +113,7 @@ PUT _ingest/pipeline/lonlat-to-csa
     },
     {
       "remove": {
-        "field": "csa.coordinates",
+        "field": "csa.geometry",
         "ignore_missing": true,
         "ignore_failure": true,
         "description": "Remove the shape field"
