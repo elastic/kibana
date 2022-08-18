@@ -53,7 +53,9 @@ export const RefreshControl = () => {
   );
 };
 
-RefreshControl.propTypes = {
-  doRefresh: PropTypes.func.isRequired,
-  inFlight: PropTypes.bool,
-};
+// Omitting because of type conflicts caused by different versions of @types/prop-types in codebase
+
+// RefreshControl.propTypes = {
+//   doRefresh: PropTypes.func.isRequired,
+//   inFlight: PropTypes.bool,
+// };
