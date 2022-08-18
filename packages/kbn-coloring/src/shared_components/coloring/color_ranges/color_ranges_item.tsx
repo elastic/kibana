@@ -78,7 +78,7 @@ const getPlaceholderForAutoMode = (isLast: boolean, displayInfinity: boolean) =>
           defaultMessage: 'Max. value',
         })
     : displayInfinity
-    ? i18n.translate('coloring.dynamicColoring.customPalette.extentPlaceholderInfinity', {
+    ? i18n.translate('coloring.dynamicColoring.customPalette.extentPlaceholderNegativeInfinity', {
         defaultMessage: '-Infinity',
       })
     : i18n.translate('coloring.dynamicColoring.customPalette.minValuePlaceholder', {
