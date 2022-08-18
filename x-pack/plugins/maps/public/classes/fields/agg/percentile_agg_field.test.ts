@@ -32,7 +32,7 @@ const mockEsAggSource = {
   getAggKey: (aggType: AGG_TYPE, fieldName: string) => {
     return 'agg_key';
   },
-  getAggLabel: (aggType: AGG_TYPE, fieldName: string) => {
+  getAggLabel: async (aggType: AGG_TYPE, fieldName: string) => {
     return 'agg_label';
   },
   getIndexPattern: async () => {
