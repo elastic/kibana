@@ -16,8 +16,7 @@ Object {
       "enableFormatSelector": true,
       "filterOperations": [Function],
       "formatSelectorOptions": Object {
-        "disableSuffix": true,
-        "maxDecimals": 2,
+        "disableExtraOptions": true,
       },
       "groupId": "metric",
       "groupLabel": "Primary metric",
@@ -39,8 +38,7 @@ Object {
       "enableFormatSelector": true,
       "filterOperations": [Function],
       "formatSelectorOptions": Object {
-        "disableSuffix": true,
-        "maxDecimals": 2,
+        "disableExtraOptions": true,
       },
       "groupId": "secondaryMetric",
       "groupLabel": "Secondary metric",
@@ -62,8 +60,7 @@ Object {
       "enableFormatSelector": true,
       "filterOperations": [Function],
       "formatSelectorOptions": Object {
-        "disableSuffix": true,
-        "maxDecimals": 2,
+        "disableExtraOptions": true,
       },
       "groupId": "max",
       "groupLabel": "Maximum value",
@@ -88,8 +85,7 @@ Object {
       "enableFormatSelector": true,
       "filterOperations": [Function],
       "formatSelectorOptions": Object {
-        "disableSuffix": true,
-        "maxDecimals": 2,
+        "disableExtraOptions": true,
       },
       "groupId": "breakdownBy",
       "groupLabel": "Break down by",
