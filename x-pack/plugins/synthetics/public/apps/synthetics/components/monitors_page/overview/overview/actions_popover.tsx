@@ -74,14 +74,14 @@ export function ActionsPopover({
   });
 
   const [enableLabel, setEnableLabel] = useState(
-    monitor.isEnabled ? enableLabelDisableMonitor : enableLabelEnableMonitor
+    monitor.isEnabled ? disableMonitorLabel : enableMonitorLabel
   );
 
   useEffect(() => {
     if (status === FETCH_STATUS.LOADING) {
       setEnableLabel(enableLabelLoading);
     } else if (status === FETCH_STATUS.SUCCESS) {
-      setEnableLabel(isEnabled ? enableLabelDisableMonitor : enableLabelEnableMonitor);
+      setEnableLabel(isEnabled ? disableMonitorLabel : enableMonitorLabel);
     }
   }, [setEnableLabel, status, isEnabled, monitor.isEnabled]);
 
@@ -166,7 +166,7 @@ const actionsMenuTitle = i18n.translate('xpack.synthetics.overview.actions.menu.
 });
 
 const actionsMenuGoToMonitorName = i18n.translate(
-  'xpack.syntietcs.overview.actions.goToMonitor.name',
+  'xpack.synthetics.overview.actions.goToMonitor.name',
   {
     defaultMessage: 'Go to monitor',
     description:
@@ -187,14 +187,14 @@ const enableLabelLoading = i18n.translate('xpack.synthetics.overview.actions.ena
   defaultMessage: 'Loading...',
 });
 
-const enableLabelEnableMonitor = i18n.translate(
-  'xpack.synthetics.overview.actions.enableLabeleEnableMonitor',
+const enableMonitorLabel = i18n.translate(
+  'xpack.synthetics.overview.actions.enableLabelEnableMonitor',
   {
     defaultMessage: 'Enable monitor',
   }
 );
 
-const enableLabelDisableMonitor = i18n.translate(
+const disableMonitorLabel = i18n.translate(
   'xpack.synthetics.overview.actions.enableLabelDisableMonitor',
   {
     defaultMessage: 'Disable monitor',
