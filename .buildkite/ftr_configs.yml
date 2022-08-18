@@ -45,7 +45,6 @@ disabled:
   - x-pack/plugins/observability/e2e/synthetics_run.ts
 
   # Configs that exist but weren't running in CI when this file was introduced
-  - test/visual_regression/config.ts
   - x-pack/test/visual_regression/config.ts
   - x-pack/test/alerting_api_integration/security_and_spaces/group2/tests/actions/config.ts
   - x-pack/test/alerting_api_integration/security_and_spaces/group2/tests/telemetry/config.ts
@@ -113,6 +112,7 @@ enabled:
   - test/server_integration/http/ssl_with_p12/config.js
   - test/server_integration/http/ssl/config.js
   - test/ui_capabilities/newsfeed_err/config.ts
+  - test/visual_regression/config.ts
   - x-pack/test/accessibility/config.ts
   - x-pack/test/alerting_api_integration/basic/config.ts
   - x-pack/test/alerting_api_integration/security_and_spaces/group1/config.ts

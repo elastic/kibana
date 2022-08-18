@@ -6,13 +6,18 @@
  * Side Public License, v 1.
  */
 
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({
+  getService,
+  getPageObjects,
+  updateBaselines,
+}: FtrProviderContext & { updateBaselines: boolean }) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'visualize', 'visChart', 'visEditor', 'vegaChart']);
-  const visualTesting = getService('visualTesting');
+  const screenshot = getService('screenshots');
 
   describe('vega chart in visualize app', () => {
     before(async () => {
@@ -33,7 +38,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await PageObjects.visualize.openSavedVisualization('VegaMap');
       await PageObjects.visChart.waitForVisualizationRenderingStabilized();
-      await visualTesting.snapshot();
+      const percentDifference = await screenshot.compareAgainstBaseline(
+        'vega_layer',
+        updateBaselines
+      );
+      expect(percentDifference).to.be.lessThan(0.001);
     });
   });
 }

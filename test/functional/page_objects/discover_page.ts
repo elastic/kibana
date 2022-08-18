@@ -208,7 +208,9 @@ export class DiscoverPageObject extends FtrService {
     await this.testSubjects.click('discoverChartOptionsToggle');
     await this.testSubjects.click('discoverTimeIntervalPanel');
     const selectedOption = await this.find.byCssSelector(`.discoverIntervalSelected`);
-    return selectedOption.getVisibleText();
+    const chartInterval = selectedOption.getVisibleText();
+    await this.testSubjects.click('discoverChartOptionsToggle');
+    return chartInterval;
   }
 
   public async getChartIntervalWarningIcon() {
@@ -218,6 +220,8 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async setChartInterval(interval: string) {
+    // this first click is just to move focus away from the refresh button otherwise the "refresh" tooltip is in the way of the next click
+    await this.testSubjects.click('queryInput');
     await this.testSubjects.click('discoverChartOptionsToggle');
     await this.testSubjects.click('discoverTimeIntervalPanel');
     await this.testSubjects.click(`discoverTimeInterval-${interval}`);

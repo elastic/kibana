@@ -7,16 +7,19 @@
  */
 
 import expect from '@kbn/expect';
-
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({
+  getService,
+  getPageObjects,
+  updateBaselines,
+}: FtrProviderContext & { updateBaselines: boolean }) {
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
-  const visualTesting = getService('visualTesting');
+  const screenshot = getService('screenshots');
   const defaultSettings = {
     defaultIndex: 'logstash-*',
     'discover:sampleSize': 1,
@@ -49,35 +52,44 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.waitForChartLoadingComplete(1);
     }
 
-    async function takeSnapshot() {
-      await refreshDiscover();
-      await visualTesting.snapshot({
-        show: ['discoverChart'],
-      });
-    }
-
     describe('query', function () {
       this.tags(['skipFirefox']);
 
       it('should show bars in the correct time zone', async function () {
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        await takeSnapshot();
+        const percentDifference = await screenshot.compareAgainstBaseline(
+          'discover_tz',
+          updateBaselines
+        );
+        expect(percentDifference).to.be.lessThan(0.001);
       });
 
       it('should show correct data for chart interval Hour', async function () {
         await PageObjects.discover.setChartInterval('Hour');
-        await takeSnapshot();
+        const percentDifference = await screenshot.compareAgainstBaseline(
+          'discover_hour',
+          updateBaselines
+        );
+        expect(percentDifference).to.be.lessThan(0.001);
       });
 
       it('should show correct data for chart interval Day', async function () {
         await PageObjects.discover.setChartInterval('Day');
-        await takeSnapshot();
+        const percentDifference = await screenshot.compareAgainstBaseline(
+          'discover_day',
+          updateBaselines
+        );
+        expect(percentDifference).to.be.lessThan(0.001);
       });
 
       it('should show correct data for chart interval Week', async function () {
         await PageObjects.discover.setChartInterval('Week');
-        await takeSnapshot();
+        const percentDifference = await screenshot.compareAgainstBaseline(
+          'discover_week',
+          updateBaselines
+        );
+        expect(percentDifference).to.be.lessThan(0.001);
       });
 
       it('browser back button should show previous interval Day', async function () {
@@ -86,22 +98,38 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const actualInterval = await PageObjects.discover.getChartInterval();
           expect(actualInterval).to.be('Day');
         });
-        await takeSnapshot();
+        const percentDifference = await screenshot.compareAgainstBaseline(
+          'discover_previous_day',
+          updateBaselines
+        );
+        expect(percentDifference).to.be.lessThan(0.001);
       });
 
       it('should show correct data for chart interval Month', async function () {
         await PageObjects.discover.setChartInterval('Month');
-        await takeSnapshot();
+        const percentDifference = await screenshot.compareAgainstBaseline(
+          'discover_month',
+          updateBaselines
+        );
+        expect(percentDifference).to.be.lessThan(0.001);
       });
 
       it('should show correct data for chart interval Year', async function () {
         await PageObjects.discover.setChartInterval('Year');
-        await takeSnapshot();
+        const percentDifference = await screenshot.compareAgainstBaseline(
+          'discover_year',
+          updateBaselines
+        );
+        expect(percentDifference).to.be.lessThan(0.001);
       });
 
       it('should show correct data for chart interval Auto', async function () {
         await PageObjects.discover.setChartInterval('Auto');
-        await takeSnapshot();
+        const percentDifference = await screenshot.compareAgainstBaseline(
+          'discover_auto',
+          updateBaselines
+        );
+        expect(percentDifference).to.be.lessThan(0.001);
       });
     });
 
@@ -110,7 +138,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'America/Phoenix' });
         await refreshDiscover();
         await PageObjects.timePicker.setDefaultAbsoluteRange();
-        await takeSnapshot();
+        const percentDifference = await screenshot.compareAgainstBaseline(
+          'discover_switch_tz',
+          updateBaselines
+        );
+        expect(percentDifference).to.be.lessThan(0.001);
       });
     });
   });
