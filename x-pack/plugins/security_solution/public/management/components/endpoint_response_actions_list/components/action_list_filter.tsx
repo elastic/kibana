@@ -20,9 +20,11 @@ const getFilterName = (name: string) =>
 
 export const ActionListFilter = memo(
   ({
+    'data-test-subj': dataTestSubj,
     filterName,
     onChangeCommandsFilter,
   }: {
+    'data-test-subj'?: string;
     filterName: FilterName;
     onChangeCommandsFilter: (selectedCommands: string[]) => void;
   }) => {
@@ -61,6 +63,7 @@ export const ActionListFilter = memo(
 
     return (
       <ActionListFilterPopover
+        data-test-subj={`${dataTestSubj}-popoverButton`}
         filterName={translatedFilterName}
         hasActiveFilters={hasActiveFilters}
         numActiveFilters={numActiveFilters}
@@ -77,8 +80,10 @@ export const ActionListFilter = memo(
           }}
         >
           {(list, search) => (
-            <div style={{ width: 300 }}>
-              <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
+            <div style={{ width: 300 }} data-test-subj={`${dataTestSubj}-popoverList`}>
+              <EuiPopoverTitle data-test-subj={`${dataTestSubj}-search`} paddingSize="s">
+                {search}
+              </EuiPopoverTitle>
               {list}
               <EuiFlexGroup>
                 <EuiFlexItem>

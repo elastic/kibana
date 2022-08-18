@@ -95,7 +95,7 @@ export type FilterItems = Array<{
 
 // get a normalized command
 // e.g. kill-process -> Kill process
-const getActionFilterLabel = (value: string): string => {
+export const getActionFilterLabel = (value: string): string => {
   if (value === 'unisolate') {
     return 'Release';
   }

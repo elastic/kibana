@@ -11,12 +11,14 @@ import { EuiPopover, EuiFilterButton, useGeneratedHtmlId } from '@elastic/eui';
 export const ActionListFilterPopover = memo(
   ({
     children,
+    'data-test-subj': dataTestSubj,
     filterName,
     hasActiveFilters,
     numActiveFilters,
     numFilters,
   }: {
     children: React.ReactNode;
+    'data-test-subj'?: string;
     filterName: string;
     hasActiveFilters: boolean;
     numActiveFilters: number;
@@ -36,6 +38,7 @@ export const ActionListFilterPopover = memo(
     const button = useMemo(
       () => (
         <EuiFilterButton
+          data-test-subj={dataTestSubj}
           iconType="arrowDown"
           onClick={onButtonClick}
           isSelected={isPopoverOpen}
@@ -46,7 +49,15 @@ export const ActionListFilterPopover = memo(
           {filterName}
         </EuiFilterButton>
       ),
-      [filterName, hasActiveFilters, isPopoverOpen, numActiveFilters, numFilters, onButtonClick]
+      [
+        dataTestSubj,
+        filterName,
+        hasActiveFilters,
+        isPopoverOpen,
+        numActiveFilters,
+        numFilters,
+        onButtonClick,
+      ]
     );
 
     return (

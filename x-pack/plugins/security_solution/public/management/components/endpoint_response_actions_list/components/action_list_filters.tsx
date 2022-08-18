@@ -42,11 +42,12 @@ export const ActionListFilters = memo(
       return filterNames.map((filterName) => (
         <ActionListFilter
           key={filterName}
+          data-test-subj={getTestId(`${filterName}-filter`)}
           filterName={filterName}
           onChangeCommandsFilter={onChangeCommandsFilter}
         />
       ));
-    }, [onChangeCommandsFilter]);
+    }, [getTestId, onChangeCommandsFilter]);
 
     const onClickRefreshButton = useCallback(() => onClick(), [onClick]);
 

@@ -152,6 +152,11 @@ describe('Response Actions List', () => {
       expect(renderResult.getByTestId(`${testPrefix}-super-date-picker`)).toBeTruthy();
     });
 
+    it('should show actions filter', () => {
+      render();
+      expect(renderResult.getByTestId(`${testPrefix}-Actions-filter-popoverButton`)).toBeTruthy();
+    });
+
     it('should show empty state when there is no data', async () => {
       mockUseGetEndpointActionList = {
         ...baseMockedActionList,
@@ -410,6 +415,40 @@ describe('Response Actions List', () => {
           .slice(0, 6)
           .map((col) => col.textContent)
       ).toEqual(['Time', 'Command', 'User', 'Host', 'Comments', 'Status']);
+    });
+  });
+
+  describe('Actions filter', () => {
+    const filterPrefix = '-Actions-filter';
+
+    it('should have a search bar', () => {
+      render();
+      userEvent.click(renderResult.getByTestId(`${testPrefix}${filterPrefix}-popoverButton`));
+      const searchBar = renderResult.getByTestId(`${testPrefix}${filterPrefix}-search`);
+      expect(searchBar).toBeTruthy();
+      expect(searchBar.querySelector('input')?.getAttribute('placeholder')).toEqual(
+        'Search actions'
+      );
+    });
+
+    it('should show a list of actions when opened', () => {
+      render();
+      userEvent.click(renderResult.getByTestId(`${testPrefix}${filterPrefix}-popoverButton`));
+      const filterList = renderResult.getByTestId(`${testPrefix}${filterPrefix}-popoverList`);
+      expect(filterList).toBeTruthy();
+      expect(filterList.querySelectorAll('ul>li').length).toEqual(5);
+      expect(
+        Array.from(filterList.querySelectorAll('ul>li')).map((option) => option.textContent)
+      ).toEqual(['Isolate', 'Release', 'Kill process', 'Suspend process', 'Running processes']);
+    });
+
+    it('should have `clear all` button `disabled` when no selected values', () => {
+      render();
+      userEvent.click(renderResult.getByTestId(`${testPrefix}${filterPrefix}-popoverButton`));
+      const clearAllButton = renderResult.getByTestId(
+        `${testPrefix}${filterPrefix}-clearAllButton`
+      );
+      expect(clearAllButton.hasAttribute('disabled')).toBeTruthy();
     });
   });
 });
