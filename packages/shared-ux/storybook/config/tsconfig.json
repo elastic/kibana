@@ -7,9 +7,13 @@
     "outDir": "target_types",
     "rootDir": ".",
     "stripInternal": false,
-    "types": []
+    "types": [
+      "jest",
+      "node",
+      "@kbn/ambient-storybook-types",
+    ]
   },
   "include": [
-    "**/*.ts",
+    "*.ts"
   ]
 }
