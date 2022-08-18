@@ -528,7 +528,14 @@ describe('rule_event_log_list', () => {
       JSON.parse(
         localStorage.getItem('xpack.triggersActionsUI.ruleEventLogList.initialColumns') ?? 'null'
       )
-    ).toEqual(['timestamp', 'execution_duration', 'status', 'message', 'num_errored_actions']);
+    ).toEqual([
+      'rule_name',
+      'timestamp',
+      'execution_duration',
+      'status',
+      'message',
+      'num_errored_actions',
+    ]);
   });
 
   it('does not show the refine search prompt normally', async () => {

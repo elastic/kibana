@@ -33,7 +33,6 @@ import { RuleActionErrorLogFlyout } from './rule_action_error_log_flyout';
 
 import { RefineSearchPrompt } from '../refine_search_prompt';
 import { LoadExecutionLogAggregationsProps } from '../../../lib/rule_api';
-import { RuleSummary } from '../../../../types';
 import {
   ComponentOpts as RuleApis,
   withBulkRuleOperations,
@@ -76,27 +75,20 @@ const MAX_RESULTS = 1000;
 
 export type RuleEventLogListOptions = 'stackManagement' | 'default';
 
-export interface RuleEventLogListCommonProps {
+export type RuleEventLogListCommonProps = {
   ruleId: string;
   localStorageKey?: string;
   refreshToken?: number;
   initialPageSize?: number;
-  loadExecutionLogAggregations?: RuleApis['loadExecutionLogAggregations'];
+  overrideLoadExecutionLogAggregations?: RuleApis['loadExecutionLogAggregations'];
   hasRuleNames?: boolean;
-}
-
-export interface RuleEventLogListStackManagementProps {
-  ruleSummary: RuleSummary;
-  onChangeDuration: (duration: number) => void;
-  numberOfExecutions: number;
-  isLoadingRuleSummary?: boolean;
-}
+} & Pick<RuleApis, 'loadExecutionLogAggregations'>;
 
 export type RuleEventLogListTableProps<T extends RuleEventLogListOptions = 'default'> =
   T extends 'default'
     ? RuleEventLogListCommonProps
     : T extends 'stackManagement'
-    ? RuleEventLogListStackManagementProps & RuleEventLogListCommonProps
+    ? RuleEventLogListCommonProps
     : never;
 
 export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
@@ -107,6 +99,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
     localStorageKey = RULE_EVENT_LOG_LIST_STORAGE_KEY,
     refreshToken,
     loadExecutionLogAggregations,
+    overrideLoadExecutionLogAggregations,
     initialPageSize = 10,
     hasRuleNames = false,
   } = props;
@@ -170,12 +163,13 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
   }, [sortingColumns]);
 
   const loadEventLogs = async () => {
-    if (!loadExecutionLogAggregations) {
+    // Duplicating this property is extremely silly but it's the only way to get Jest to cooperate with the way this component is structured
+    if (!loadExecutionLogAggregations && !overrideLoadExecutionLogAggregations) {
       return;
     }
     setIsLoading(true);
     try {
-      const result = await loadExecutionLogAggregations({
+      const result = await (overrideLoadExecutionLogAggregations ?? loadExecutionLogAggregations)({
         id: ruleId,
         sort: formattedSort as LoadExecutionLogAggregationsProps['sort'],
         outcomeFilter: filter,
@@ -194,7 +188,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
     } catch (e) {
       notifications.toasts.addDanger({
         title: API_FAILED_MESSAGE,
-        text: e.body.message,
+        text: e.body?.message ?? e,
       });
     }
     setIsLoading(false);

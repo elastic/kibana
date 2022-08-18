@@ -63,7 +63,6 @@ export const RuleEventLogList = <T extends RuleEventLogListOptions>(
     onChangeDuration,
     isLoadingRuleSummary = false,
   } = props as RuleEventLogListStackManagementProps;
-
   return (
     <div style={ruleEventListContainerStyle} data-test-subj="ruleEventLogListContainer">
       <EuiSpacer />
@@ -82,7 +81,7 @@ export const RuleEventLogList = <T extends RuleEventLogListOptions>(
         localStorageKey={localStorageKey}
         ruleId={ruleId}
         refreshToken={refreshToken}
-        loadExecutionLogAggregations={loadExecutionLogAggregations}
+        overrideLoadExecutionLogAggregations={loadExecutionLogAggregations}
       />
     </div>
   );
