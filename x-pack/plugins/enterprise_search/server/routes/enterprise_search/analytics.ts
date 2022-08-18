@@ -15,7 +15,7 @@ import { RouteDependencies } from '../../plugin';
 import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 
-export function registerConnectorRoutes({ router, log }: RouteDependencies) {
+export function registerAnalyticsRoutes({ router, log }: RouteDependencies) {
   router.post(
     {
       path: '/internal/enterprise_search/analytics/collections',
