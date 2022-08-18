@@ -6,7 +6,9 @@
  */
 
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+
 import { ANALYTICS_COLLECTIONS_INDEX } from '../..';
+
 import { fetchAnalyticsCollectionByName } from './fetch_analytics_collection';
 import { setupAnalyticsCollectionIndex } from './setup_indices';
 
