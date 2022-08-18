@@ -1355,6 +1355,45 @@ paths:
               required:
                 - name
         description: ''
+  /agent_policies/_bulk_get:
+    post:
+      summary: Agent policies - Bulk Get
+      tags: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  type: array
+                  items:
+                    type: string
+                  description: list of agent policy ids
+                full:
+                  type: boolean
+                  description: get full policies with package policies populated
+                ignoreMissing:
+                  type: boolean
+              required:
+                - ids
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/agent_policy'
+                required:
+                  - items
+      operationId: bulk-get-agent-policies
+      security: []
+      parameters: []
   /agent_policies/delete:
     post:
       summary: Agent policy - Delete
@@ -1662,6 +1701,42 @@ paths:
                       type: boolean
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
+  /package_policies/_bulk_get:
+    post:
+      summary: Package policies - Bulk Get
+      tags: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  type: array
+                  items:
+                    type: string
+                  description: list of package policy ids
+                ignoreMissing:
+                  type: boolean
+              required:
+                - ids
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/package_policy'
+                required:
+                  - items
+      operationId: bulk-get-package-policies
+      security: []
+      parameters: []
   /package_policies/delete:
     post:
       summary: Package policy - Delete

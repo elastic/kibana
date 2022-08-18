@@ -53,7 +53,11 @@ import type {
   Output,
   DeletePackagePoliciesResponse,
 } from '../../common/types';
-import { AgentPolicyNameExistsError, HostedAgentPolicyRestrictionRelatedError } from '../errors';
+import {
+  AgentPolicyNameExistsError,
+  HostedAgentPolicyRestrictionRelatedError,
+  AgentPolicyNotFoundError,
+} from '../errors';
 
 import type { FullAgentConfigMap } from '../../common/types/models/agent_cm';
 
@@ -259,7 +263,10 @@ class AgentPolicyService {
       agentPolicy.package_policies =
         (await packagePolicyService.getByIDs(
           soClient,
-          (agentPolicySO.attributes.package_policies as string[]) || []
+          (agentPolicySO.attributes.package_policies as string[]) || [],
+          {
+            ignoreMissing: true,
+          }
         )) || [];
     }
 
@@ -269,16 +276,44 @@ class AgentPolicyService {
   public async getByIDs(
     soClient: SavedObjectsClientContract,
     ids: string[],
-    options: { fields?: string[] } = {}
+    options: { fields?: string[]; withPackagePolicies?: boolean; ignoreMissing?: boolean } = {}
   ): Promise<AgentPolicy[]> {
     const objects = ids.map((id) => ({ ...options, id, type: SAVED_OBJECT_TYPE }));
-    const agentPolicySO = await soClient.bulkGet<AgentPolicySOAttributes>(objects);
+    const bulkGetResponse = await soClient.bulkGet<AgentPolicySOAttributes>(objects);
 
-    return agentPolicySO.saved_objects.map((so) => ({
-      id: so.id,
-      version: so.version,
-      ...so.attributes,
-    }));
+    const agentPolicies = await pMap(
+      bulkGetResponse.saved_objects,
+      async (agentPolicySO) => {
+        if (agentPolicySO.error) {
+          if (options.ignoreMissing && agentPolicySO.error.statusCode === 404) {
+            return null;
+          } else if (agentPolicySO.error.statusCode === 404) {
+            throw new AgentPolicyNotFoundError(`Agent policy ${agentPolicySO.id} not found`);
+          } else {
+            throw new Error(agentPolicySO.error.message);
+          }
+        }
+
+        const agentPolicy = {
+          id: agentPolicySO.id,
+          ...agentPolicySO.attributes,
+        };
+        if (options.withPackagePolicies) {
+          const agentPolicyWithPackagePolicies = await this.get(
+            soClient,
+            agentPolicySO.id,
+            options.withPackagePolicies
+          );
+          if (agentPolicyWithPackagePolicies) {
+            agentPolicy.package_policies = agentPolicyWithPackagePolicies.package_policies;
+          }
+        }
+        return agentPolicy;
+      },
+      { concurrency: 50 }
+    );
+
+    return agentPolicies.filter((agentPolicy): agentPolicy is AgentPolicy => agentPolicy !== null);
   }
 
   public async list(

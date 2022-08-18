@@ -25,8 +25,10 @@ import type {
   FleetRequestHandler,
   PackagePolicy,
   DeleteOnePackagePolicyRequestSchema,
+  BulkGetPackagePoliciesRequestSchema,
 } from '../../types';
 import type {
+  BulkGetPackagePoliciesResponse,
   CreatePackagePolicyResponse,
   DeletePackagePoliciesResponse,
   NewPackagePolicy,
@@ -34,7 +36,7 @@ import type {
   UpgradePackagePolicyResponse,
 } from '../../../common/types';
 import { installationStatuses } from '../../../common/constants';
-import { defaultIngestErrorHandler } from '../../errors';
+import { defaultIngestErrorHandler, PackagePolicyNotFoundError } from '../../errors';
 import { getInstallations } from '../../services/epm/packages';
 import { PACKAGES_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../constants';
 
@@ -57,6 +59,34 @@ export const getPackagePoliciesHandler: RequestHandler<
       },
     });
   } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
+  }
+};
+
+export const bulkGetPackagePoliciesHandler: RequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof BulkGetPackagePoliciesRequestSchema.body>
+> = async (context, request, response) => {
+  const soClient = (await context.core).savedObjects.client;
+  const { ids, ignoreMissing } = request.body;
+  try {
+    const items = await packagePolicyService.getByIDs(soClient, ids, {
+      ignoreMissing,
+    });
+
+    const body: BulkGetPackagePoliciesResponse = { items: items ?? [] };
+
+    return response.ok({
+      body,
+    });
+  } catch (error) {
+    if (error instanceof PackagePolicyNotFoundError) {
+      return response.notFound({
+        body: { message: error.message },
+      });
+    }
+
     return defaultIngestErrorHandler({ error, response });
   }
 };
