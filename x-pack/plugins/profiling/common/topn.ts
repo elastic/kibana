@@ -9,6 +9,7 @@ import { euiPaletteColorBlind } from '@elastic/eui';
 import { InferSearchResponseOf } from '@kbn/core/types/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
+import { ProfilingESField } from './elasticsearch';
 
 export const OTHER_BUCKET_LABEL = i18n.translate('xpack.profiling.topn.otherBucketLabel', {
   defaultMessage: 'Other',
@@ -63,33 +64,33 @@ export function getTopNAggregationRequest({
       aggs: {
         over_time: {
           date_histogram: {
-            field: '@timestamp',
+            field: ProfilingESField.Timestamp,
             fixed_interval: fixedInterval,
           },
           aggs: {
             count: {
               sum: {
-                field: 'Stacktrace.count',
+                field: ProfilingESField.StacktraceCount,
               },
             },
           },
         },
         count: {
           sum: {
-            field: 'Stacktrace.count',
+            field: ProfilingESField.StacktraceCount,
           },
         },
       },
     },
     over_time: {
       date_histogram: {
-        field: '@timestamp',
+        field: ProfilingESField.Timestamp,
         fixed_interval: fixedInterval,
       },
       aggs: {
         count: {
           sum: {
-            field: 'Stacktrace.count',
+            field: ProfilingESField.StacktraceCount,
           },
         },
       },
