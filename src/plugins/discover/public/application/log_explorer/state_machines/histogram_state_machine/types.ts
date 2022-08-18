@@ -17,7 +17,7 @@ interface Context {
 export type HistogramMachineContext = SharedContext & Context;
 
 // the value union is not ideal, but the closest we can get without typegen
-export interface HistogramMachineStateValue {
+export interface HistogramMachineState {
   value:
     | 'uninitialized' // not used yet, but there's a setting that disables automatic initial search
     | 'loading'
@@ -25,8 +25,12 @@ export interface HistogramMachineStateValue {
   context: HistogramMachineContext;
 }
 
-export type LogExplorerExternalEvent = SharedExternalEvent;
+export type HistogramMachineExternalEvent = SharedExternalEvent;
 
-export type LogExplorerInternalEvent = LoadHistogramEvent;
+export type HistogramMachineInternalEvent =
+  | {
+      type: 'load';
+    }
+  | LoadHistogramEvent;
 
-export type LogExplorerEvent = LogExplorerExternalEvent | LogExplorerInternalEvent;
+export type HistogramMachineEvent = HistogramMachineExternalEvent | HistogramMachineInternalEvent;

@@ -22,15 +22,10 @@ import { updateChunksFromLoadTail } from './services/load_tail_service';
 import { updatePosition } from '../data_access_state_machine/actions/position_actions';
 import { updateTimeRange } from '../data_access_state_machine/actions/time_range_actions';
 import {
-  LogExplorerContext,
-  LogExplorerEvent,
-  LogExplorerState,
-} from '../data_access_state_machine/_types';
-import {
   areVisibleEntriesNearEnd,
   areVisibleEntriesNearStart,
 } from './guards/visible_entry_guards';
-import { updateHistogram } from '../histogram_state_machine/services/load_histogram_service';
+import { EntriesMachineContext, EntriesMachineEvent, EntriesMachineState } from './types';
 
 // for stubbing guards until all are implemented
 const constantGuard =
@@ -38,410 +33,360 @@ const constantGuard =
   () =>
     value;
 
-export const dataAccessStateMachine = createMachine<
-  LogExplorerContext,
-  LogExplorerEvent,
-  LogExplorerState
+export const entriesStateMachine = createMachine<
+  EntriesMachineContext,
+  EntriesMachineEvent,
+  EntriesMachineState
 >(
   {
-    id: 'logExplorerData',
-    type: 'parallel',
+    id: 'logExplorerEntries',
+    initial: 'uninitialized',
     states: {
-      documents: {
-        id: 'logExplorerDocuments',
-        initial: 'uninitialized',
+      loadingAround: {
+        entry: 'resetChunks',
+        invoke: {
+          src: 'loadAround',
+          id: 'loadAround',
+        },
+        on: {
+          loadAroundSucceeded: {
+            actions: 'updateChunksFromLoadAround',
+            target: 'loaded',
+          },
+          positionChanged: {
+            actions: 'updatePosition',
+            target: 'loadingAround',
+            internal: false,
+          },
+          loadAroundFailed: {
+            target: 'failedNoData',
+          },
+          timeRangeChanged: {
+            actions: 'updateTimeRange',
+          },
+          columnsChanged: {},
+        },
+      },
+      loaded: {
+        type: 'parallel',
         states: {
-          loadingAround: {
-            entry: 'resetChunks',
-            invoke: {
-              src: 'loadAround',
-              id: 'loadAround',
-            },
-            on: {
-              loadAroundSucceeded: {
-                actions: 'updateChunksFromLoadAround',
-                target: 'loaded',
-              },
-              positionChanged: {
-                actions: 'updatePosition',
-                target: 'loadingAround',
-                internal: false,
-              },
-              loadAroundFailed: {
-                target: 'failedNoData',
-              },
-              timeRangeChanged: {
-                actions: 'updateTimeRange',
-              },
-              columnsChanged: {},
-            },
-          },
-          loaded: {
-            type: 'parallel',
+          top: {
+            initial: 'start',
             states: {
-              top: {
-                initial: 'start',
-                states: {
-                  start: {
-                    always: [
-                      {
-                        cond: 'hasLoadedTopChunk',
-                        target: 'loaded',
-                      },
-                      {
-                        cond: 'hasEmptyTopChunk',
-                        target: 'empty',
-                      },
-                      {
-                        target: 'failed',
-                      },
-                    ],
+              start: {
+                always: [
+                  {
+                    cond: 'hasLoadedTopChunk',
+                    target: 'loaded',
                   },
-                  failed: {
-                    on: {
-                      retryTop: {
-                        target: '#logExplorerDocuments.extendingTop',
-                      },
-                    },
+                  {
+                    cond: 'hasEmptyTopChunk',
+                    target: 'empty',
                   },
-                  loaded: {
-                    on: {
-                      visibleEntriesChanged: {
-                        cond: 'areVisibleEntriesNearStart',
-                        target: '#logExplorerDocuments.loadingTop',
-                      },
-                    },
+                  {
+                    target: 'failed',
                   },
-                  empty: {},
+                ],
+              },
+              failed: {
+                on: {
+                  retryTop: {
+                    target: '#logExplorerEntries.extendingTop',
+                  },
                 },
               },
-              bottom: {
-                initial: 'start',
-                states: {
-                  start: {
-                    always: [
-                      {
-                        cond: 'hasLoadedBottomChunk',
-                        target: 'loaded',
-                      },
-                      {
-                        cond: 'hasEmptyBottomChunk',
-                        target: 'empty',
-                      },
-                      {
-                        target: 'failed',
-                      },
-                    ],
+              loaded: {
+                on: {
+                  visibleEntriesChanged: {
+                    cond: 'areVisibleEntriesNearStart',
+                    target: '#logExplorerEntries.loadingTop',
                   },
-                  failed: {
-                    on: {
-                      retryBottom: {
-                        target: '#logExplorerDocuments.extendingBottom',
-                      },
-                    },
-                  },
-                  loaded: {
-                    on: {
-                      visibleEntriesChanged: {
-                        cond: 'areVisibleEntriesNearEnd',
-                        target: '#logExplorerDocuments.loadingBottom',
-                      },
-                    },
-                  },
-                  empty: {},
                 },
               },
-            },
-            on: {
-              positionChanged: [
-                {
-                  actions: 'updatePosition',
-                  cond: 'isWithinLoadedChunks',
-                  target: undefined,
-                },
-                {
-                  actions: 'updatePosition',
-                  target: 'loadingAround',
-                },
-              ],
-              timeRangeChanged: [
-                {
-                  actions: 'updateTimeRange',
-                  cond: 'startTimestampExtendsLoadedTop',
-                  target: 'extendingTop',
-                },
-                {
-                  actions: 'updateTimeRange',
-                  cond: 'startTimestampReducesLoadedTop',
-                },
-                {
-                  actions: 'updateTimeRange',
-                  cond: 'endTimestampExtendsLoadedBottom',
-                  target: 'extendingBottom',
-                },
-                {
-                  actions: 'updateTimeRange',
-                  cond: 'endTimestampReducesLoadedBottom',
-                },
-                {
-                  actions: ['updateTimeRange', 'resetPosition'],
-                  target: 'loadingAround',
-                },
-              ],
-              columnsChanged: {
-                target: 'reloading',
-              },
+              empty: {},
             },
           },
-          failedNoData: {
-            on: {
-              positionChanged: {
-                actions: 'updatePosition',
-                target: 'loadingAround',
-              },
-              retry: {
-                target: 'loadingAround',
-              },
-              filtersChanged: {
-                actions: 'updateFilters',
-                target: 'loadingAround',
-              },
-              timeRangeChanged: {
-                actions: 'updateTimeRange',
-                target: 'loadingAround',
-              },
-            },
-          },
-          loadingTop: {
-            entry: 'prependNewTopChunk',
-            invoke: {
-              src: 'loadBefore',
-              id: 'loadBefore',
-            },
-            on: {
-              loadBeforeSucceeded: {
-                actions: 'updateChunksFromLoadBefore',
-                target: '#logExplorerDocuments.loaded.top.loaded',
-              },
-              loadBeforeFailed: {
-                actions: 'updateChunksFromLoadBefore',
-                target: '#logExplorerDocuments.loaded.top.failed',
-              },
-              columnsChanged: {
-                target: 'reloading',
-              },
-            },
-          },
-          loadingBottom: {
-            entry: 'appendNewBottomChunk',
-            invoke: {
-              src: 'loadAfter',
-              id: 'loadAfter',
-            },
-            on: {
-              loadAfterSucceeded: {
-                actions: 'updateChunksFromLoadAfter',
-                target: '#logExplorerDocuments.loaded.bottom.loaded',
-              },
-              loadAfterFailed: {
-                actions: 'updateChunksFromLoadAfter',
-                target: '#logExplorerDocuments.loaded.bottom.failed',
-              },
-              columnsChanged: {
-                target: 'reloading',
-              },
-            },
-          },
-          extendingTop: {
-            invoke: {
-              src: 'extendTop',
-              id: 'extendTop',
-            },
-            on: {
-              extendTopSucceeded: {
-                actions: 'updateChunksFromExtendTop',
-                target: '#logExplorerDocuments.loaded.top.loaded',
-              },
-              extendTopFailed: {
-                actions: 'updateChunksFromExtendTop',
-                target: '#logExplorerDocuments.loaded.top.failed',
-              },
-              columnsChanged: {
-                target: 'reloading',
-              },
-            },
-          },
-          extendingBottom: {
-            invoke: {
-              src: 'extendBottom',
-              id: 'extendBottom',
-            },
-            on: {
-              extendBottomSucceeded: {
-                actions: 'updateChunksFromExtendBottom',
-                target: '#logExplorerDocuments.loaded.bottom.loaded',
-              },
-              extendBottomFailed: {
-                actions: 'updateChunksFromExtendBottom',
-                target: '#logExplorerDocuments.loaded.bottom.failed',
-              },
-              columnsChanged: {
-                target: 'reloading',
-              },
-            },
-          },
-          reloading: {
-            type: 'parallel',
+          bottom: {
+            initial: 'start',
             states: {
-              top: {
-                initial: 'loading',
-                states: {
-                  loading: {
-                    invoke: {
-                      src: 'loadBefore',
-                    },
-                    on: {
-                      loadBeforeSucceeded: {
-                        actions: 'updateChunksFromLoadBefore',
-                        target: 'loaded',
-                      },
-                      loadBeforeFailed: {
-                        target: 'loaded',
-                      },
-                    },
+              start: {
+                always: [
+                  {
+                    cond: 'hasLoadedBottomChunk',
+                    target: 'loaded',
                   },
-                  loaded: {
-                    type: 'final',
+                  {
+                    cond: 'hasEmptyBottomChunk',
+                    target: 'empty',
                   },
-                },
+                  {
+                    target: 'failed',
+                  },
+                ],
               },
-              bottom: {
-                initial: 'loading',
-                states: {
-                  loading: {
-                    invoke: {
-                      src: 'loadAfter',
-                    },
-                    on: {
-                      loadAfterSucceeded: {
-                        actions: 'updateChunksFromLoadAfter',
-                        target: 'loaded',
-                      },
-                      loadAfterFailed: {
-                        target: 'loaded',
-                      },
-                    },
-                  },
-                  loaded: {
-                    type: 'final',
+              failed: {
+                on: {
+                  retryBottom: {
+                    target: '#logExplorerEntries.extendingBottom',
                   },
                 },
               },
-            },
-            onDone: [
-              {
-                cond: 'hasLoadedTopChunk',
-                target: '#logExplorerDocuments.loaded',
+              loaded: {
+                on: {
+                  visibleEntriesChanged: {
+                    cond: 'areVisibleEntriesNearEnd',
+                    target: '#logExplorerEntries.loadingBottom',
+                  },
+                },
               },
-              {
-                cond: 'hasLoadedBottomChunk',
-                target: '#logExplorerDocuments.loaded',
-              },
-              {
-                target: 'failedNoData',
-              },
-            ],
-          },
-          uninitialized: {
-            on: {
-              positionChanged: {
-                actions: 'updatePosition',
-                target: 'loadingAround',
-              },
-              timeRangeChanged: {
-                actions: 'updateTimeRange',
-                target: 'loadingAround',
-              },
-              columnsChanged: {
-                target: 'loadingAround',
-              },
-              load: {
-                target: 'loadingAround',
-              },
+              empty: {},
             },
           },
-          tailing: {
+        },
+        on: {
+          positionChanged: [
+            {
+              actions: 'updatePosition',
+              cond: 'isWithinLoadedChunks',
+              target: undefined,
+            },
+            {
+              actions: 'updatePosition',
+              target: 'loadingAround',
+            },
+          ],
+          timeRangeChanged: [
+            {
+              actions: 'updateTimeRange',
+              cond: 'startTimestampExtendsLoadedTop',
+              target: 'extendingTop',
+            },
+            {
+              actions: 'updateTimeRange',
+              cond: 'startTimestampReducesLoadedTop',
+            },
+            {
+              actions: 'updateTimeRange',
+              cond: 'endTimestampExtendsLoadedBottom',
+              target: 'extendingBottom',
+            },
+            {
+              actions: 'updateTimeRange',
+              cond: 'endTimestampReducesLoadedBottom',
+            },
+            {
+              actions: ['updateTimeRange', 'resetPosition'],
+              target: 'loadingAround',
+            },
+          ],
+          columnsChanged: {
+            target: 'reloading',
+          },
+        },
+      },
+      failedNoData: {
+        on: {
+          positionChanged: {
+            actions: 'updatePosition',
+            target: 'loadingAround',
+          },
+          retry: {
+            target: 'loadingAround',
+          },
+          filtersChanged: {
+            actions: 'updateFilters',
+            target: 'loadingAround',
+          },
+          timeRangeChanged: {
+            actions: 'updateTimeRange',
+            target: 'loadingAround',
+          },
+        },
+      },
+      loadingTop: {
+        entry: 'prependNewTopChunk',
+        invoke: {
+          src: 'loadBefore',
+          id: 'loadBefore',
+        },
+        on: {
+          loadBeforeSucceeded: {
+            actions: 'updateChunksFromLoadBefore',
+            target: '#logExplorerEntries.loaded.top.loaded',
+          },
+          loadBeforeFailed: {
+            actions: 'updateChunksFromLoadBefore',
+            target: '#logExplorerEntries.loaded.top.failed',
+          },
+          columnsChanged: {
+            target: 'reloading',
+          },
+        },
+      },
+      loadingBottom: {
+        entry: 'appendNewBottomChunk',
+        invoke: {
+          src: 'loadAfter',
+          id: 'loadAfter',
+        },
+        on: {
+          loadAfterSucceeded: {
+            actions: 'updateChunksFromLoadAfter',
+            target: '#logExplorerEntries.loaded.bottom.loaded',
+          },
+          loadAfterFailed: {
+            actions: 'updateChunksFromLoadAfter',
+            target: '#logExplorerEntries.loaded.bottom.failed',
+          },
+          columnsChanged: {
+            target: 'reloading',
+          },
+        },
+      },
+      extendingTop: {
+        invoke: {
+          src: 'extendTop',
+          id: 'extendTop',
+        },
+        on: {
+          extendTopSucceeded: {
+            actions: 'updateChunksFromExtendTop',
+            target: '#logExplorerEntries.loaded.top.loaded',
+          },
+          extendTopFailed: {
+            actions: 'updateChunksFromExtendTop',
+            target: '#logExplorerEntries.loaded.top.failed',
+          },
+          columnsChanged: {
+            target: 'reloading',
+          },
+        },
+      },
+      extendingBottom: {
+        invoke: {
+          src: 'extendBottom',
+          id: 'extendBottom',
+        },
+        on: {
+          extendBottomSucceeded: {
+            actions: 'updateChunksFromExtendBottom',
+            target: '#logExplorerEntries.loaded.bottom.loaded',
+          },
+          extendBottomFailed: {
+            actions: 'updateChunksFromExtendBottom',
+            target: '#logExplorerEntries.loaded.bottom.failed',
+          },
+          columnsChanged: {
+            target: 'reloading',
+          },
+        },
+      },
+      reloading: {
+        type: 'parallel',
+        states: {
+          top: {
             initial: 'loading',
             states: {
               loading: {
-                entry: 'updateTimeRange',
                 invoke: {
-                  src: 'loadTail',
+                  src: 'loadBefore',
                 },
                 on: {
-                  loadTailSucceeded: {
-                    actions: 'updateChunksFromLoadTail',
+                  loadBeforeSucceeded: {
+                    actions: 'updateChunksFromLoadBefore',
+                    target: 'loaded',
+                  },
+                  loadBeforeFailed: {
                     target: 'loaded',
                   },
                 },
               },
               loaded: {
-                after: {
-                  loadTailDelay: {
-                    target: 'loading',
+                type: 'final',
+              },
+            },
+          },
+          bottom: {
+            initial: 'loading',
+            states: {
+              loading: {
+                invoke: {
+                  src: 'loadAfter',
+                },
+                on: {
+                  loadAfterSucceeded: {
+                    actions: 'updateChunksFromLoadAfter',
+                    target: 'loaded',
+                  },
+                  loadAfterFailed: {
+                    target: 'loaded',
                   },
                 },
               },
-            },
-            on: {
-              stopTailing: {
-                target: 'loaded',
+              loaded: {
+                type: 'final',
               },
             },
           },
         },
-      },
-      histogram: {
-        id: 'logExplorerHistogram',
-        initial: 'uninitialized',
-        states: {
-          uninitialized: {
-            on: {
-              timeRangeChanged: {
-                actions: 'updateTimeRange',
-                target: 'loading',
-              },
-              columnsChanged: {
-                target: 'loading',
-              },
-              load: {
-                target: 'loading',
-              },
-            },
+        onDone: [
+          {
+            cond: 'hasLoadedTopChunk',
+            target: '#logExplorerEntries.loaded',
           },
+          {
+            cond: 'hasLoadedBottomChunk',
+            target: '#logExplorerEntries.loaded',
+          },
+          {
+            target: 'failedNoData',
+          },
+        ],
+      },
+      uninitialized: {
+        on: {
+          positionChanged: {
+            actions: 'updatePosition',
+            target: 'loadingAround',
+          },
+          timeRangeChanged: {
+            actions: 'updateTimeRange',
+            target: 'loadingAround',
+          },
+          columnsChanged: {
+            target: 'loadingAround',
+          },
+          load: {
+            target: 'loadingAround',
+          },
+        },
+      },
+      tailing: {
+        initial: 'loading',
+        states: {
           loading: {
+            entry: 'updateTimeRange',
             invoke: {
-              src: 'loadHistogram',
-              id: 'loadHistogram',
+              src: 'loadTail',
             },
             on: {
-              loadHistogramSucceeded: {
-                actions: 'updateHistogram',
+              loadTailSucceeded: {
+                actions: 'updateChunksFromLoadTail',
                 target: 'loaded',
               },
-              loadHistogramFailed: {},
             },
           },
           loaded: {
-            on: {
-              timeRangeChanged: {
-                actions: 'updateTimeRange',
-                target: 'loading',
-              },
-              columnsChanged: {
+            after: {
+              loadTailDelay: {
                 target: 'loading',
               },
             },
+          },
+        },
+        on: {
+          stopTailing: {
+            target: 'loaded',
           },
         },
       },
@@ -449,15 +394,15 @@ export const dataAccessStateMachine = createMachine<
     on: {
       filtersChanged: {
         actions: 'updateFilters',
-        target: ['#logExplorerDocuments.loadingAround', '#logExplorerHistogram.loading'],
+        target: 'loadingAround',
         internal: false,
       },
       dataViewChanged: {
-        target: ['#logExplorerDocuments.loadingAround', '#logExplorerHistogram.loading'],
+        target: 'loadingAround',
         internal: false,
       },
       startTailing: {
-        target: ['#logExplorerDocuments.tailing', '#logExplorerHistogram.loading'], // TODO: histogram tailing
+        target: 'tailing',
         internal: false,
       },
     },
@@ -482,7 +427,6 @@ export const dataAccessStateMachine = createMachine<
       updateTimeRange,
       prependNewTopChunk,
       appendNewBottomChunk,
-      updateHistogram,
     },
     guards: {
       areVisibleEntriesNearStart,
@@ -500,5 +444,5 @@ export const dataAccessStateMachine = createMachine<
   }
 );
 
-export type DataAccessStateMachine = typeof dataAccessStateMachine;
-export type DataAccessService = InterpreterFrom<DataAccessStateMachine>;
+export type EntriesStateMachine = typeof entriesStateMachine;
+export type EntriesService = InterpreterFrom<EntriesStateMachine>;

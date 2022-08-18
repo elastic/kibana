@@ -7,12 +7,12 @@
  */
 
 import memoizeOne from 'memoize-one';
-import { LogExplorerChunk } from '../types';
-import { DataAccessService } from '../state_machine';
+import { LogExplorerChunk } from '../../../types';
+import { EntriesService } from '../state_machine';
 
 export type FieldCounts = Record<string, number>;
 
-export const selectFieldCounts = (state: DataAccessService['state']) => {
+export const selectFieldCounts = (state: EntriesService['state']) => {
   const { topChunk, bottomChunk } = state.context;
 
   return memoizedGetFieldCounts(topChunk, bottomChunk);

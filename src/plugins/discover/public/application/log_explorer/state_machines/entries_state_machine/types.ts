@@ -42,7 +42,7 @@ export type EntriesMachineStateValue =
   | { tailing: 'loading' | 'loaded' };
 
 // the value union is not ideal, but the closest we can get without typegen
-export interface LogExplorerState {
+export interface EntriesMachineState {
   value: EntriesMachineStateValue;
   context: EntriesMachineContext;
 }
@@ -125,4 +125,4 @@ export type EntriesInternalEvent =
       visibleEndRowIndex: number;
     };
 
-export type EntriesEvent = EntriesExternalEvent | EntriesInternalEvent;
+export type EntriesMachineEvent = EntriesExternalEvent | EntriesInternalEvent;

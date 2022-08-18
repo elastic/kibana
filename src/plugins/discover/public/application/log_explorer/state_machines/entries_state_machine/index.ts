@@ -16,6 +16,6 @@ export * from './services/load_before_service';
 export * from '../data_access_state_machine/actions/position_actions';
 export * from './state_machine';
 export * from './selectors/status_selectors';
-export * from '../data_access_state_machine/_types';
+export * from './types';
 export * from '../data_access_state_machine/selectors/time_range_selectors';
 export * from './guards/visible_entry_guards';

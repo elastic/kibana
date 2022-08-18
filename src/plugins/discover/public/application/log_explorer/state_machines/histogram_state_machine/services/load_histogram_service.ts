@@ -10,7 +10,7 @@ import { assign } from 'xstate';
 import { IEsSearchResponse, ISearchSource, QueryStart } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { catchError, last, map, Observable, of } from 'rxjs';
-import { LogExplorerContext, LogExplorerEvent } from '../types';
+import { HistogramMachineContext, HistogramMachineEvent } from '../types';
 import { fetchHistogram, FetchHistogramParameters } from '../../../queries/fetch_histogram';
 
 export type LoadHistogramEvent =
@@ -39,7 +39,7 @@ export const loadHistogram = ({
     searchSource,
   });
 
-  return (context: LogExplorerContext): Observable<LoadHistogramEvent> => {
+  return (context: HistogramMachineContext): Observable<LoadHistogramEvent> => {
     const { filters, query, timeRange } = context;
 
     const fetchHistogramRequestParameters: FetchHistogramParameters = {
@@ -73,36 +73,36 @@ export const loadHistogram = ({
   };
 };
 
-export const updateHistogram = assign((context: LogExplorerContext, event: LogExplorerEvent) => {
-  if (event.type !== 'loadHistogramSucceeded') {
-    return context;
+export const updateHistogram = assign(
+  (context: HistogramMachineContext, event: HistogramMachineEvent) => {
+    if (event.type !== 'loadHistogramSucceeded') {
+      return context;
+    }
+
+    const { histogramResponse } = event;
+
+    const breakdownBuckets =
+      histogramResponse.rawResponse?.aggregations?.breakdown_histogram?.buckets;
+
+    if (!breakdownBuckets) {
+      return { ...context, histogram: { data: [] } };
+    }
+
+    const histogramData = breakdownBuckets.reduce((acc, bucket) => {
+      const termsBuckets = bucket.breakdown_terms.buckets;
+      acc.push({
+        startTime: bucket.key_as_string,
+        countByBreakdownCriterion: termsBuckets.reduce((termsAcc, termsBucket) => {
+          termsAcc[termsBucket.key] = termsBucket.doc_count;
+          return termsAcc;
+        }, {}),
+      });
+      return acc;
+    }, []);
+
+    return {
+      ...context,
+      histogram: histogramData,
+    };
   }
-
-  const { histogramResponse } = event;
-
-  const breakdownBuckets =
-    histogramResponse.rawResponse?.aggregations?.breakdown_histogram?.buckets;
-
-  if (!breakdownBuckets) {
-    return { ...context, histogram: { data: [] } };
-  }
-
-  const histogramData = breakdownBuckets.reduce((acc, bucket) => {
-    const termsBuckets = bucket.breakdown_terms.buckets;
-    acc.push({
-      startTime: bucket.key_as_string,
-      countByBreakdownCriterion: termsBuckets.reduce((termsAcc, termsBucket) => {
-        termsAcc[termsBucket.key] = termsBucket.doc_count;
-        return termsAcc;
-      }, {}),
-    });
-    return acc;
-  }, []);
-
-  return {
-    ...context,
-    histogram: {
-      data: histogramData,
-    },
-  };
-});
+);

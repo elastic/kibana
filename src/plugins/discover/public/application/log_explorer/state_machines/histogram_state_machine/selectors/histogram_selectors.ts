@@ -7,10 +7,10 @@
  */
 
 import { LogExplorerHistogramData } from '../../../types';
-import { DataAccessService } from '../../entries_state_machine/state_machine';
+import { HistogramService } from '../state_machine';
 
 export const selectHistogramDataPoints = (
-  state: DataAccessService['state']
+  state: HistogramService['state']
 ): LogExplorerHistogramData => {
-  return state.context.histogram.data;
+  return state.context.histogram;
 };

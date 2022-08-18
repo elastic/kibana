@@ -17,7 +17,7 @@ import {
 import { getPredecessorPosition } from '../../utils/cursor';
 import { createBottomChunkFromResponse } from './services/load_after_service';
 import { createTopChunkFromResponse } from './services/load_before_service';
-import { LogExplorerContext, LogExplorerEvent } from '../data_access_state_machine/_types';
+import { EntriesMachineContext, EntriesMachineEvent } from './types';
 
 export type LoadAroundParameters = FetchEntriesAroundParameters & {
   topEndRowIndex: number;
@@ -54,7 +54,7 @@ export const loadAround = ({
     searchSource,
   });
 
-  return (context: LogExplorerContext): Observable<LoadAroundEvent> => {
+  return (context: EntriesMachineContext): Observable<LoadAroundEvent> => {
     // console.log(searchSource.getSearchRequestBody());
     const {
       configuration: { chunkSize },
@@ -106,7 +106,7 @@ export const loadAround = ({
 };
 
 export const updateChunksFromLoadAround = assign(
-  (context: LogExplorerContext, event: LogExplorerEvent) => {
+  (context: EntriesMachineContext, event: EntriesMachineEvent) => {
     if (event.type !== 'loadAroundSucceeded') {
       return context;
     }

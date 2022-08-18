@@ -9,6 +9,8 @@
 import { DataView } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { LogExplorerPosition } from '../../types';
+import { EntriesStateMachine } from '../entries_state_machine';
+import { HistogramStateMachine } from '../histogram_state_machine';
 
 export interface SharedContext {
   dataView: DataView;
@@ -42,8 +44,8 @@ export type SharedExternalEvent =
 
 export type DataAccessMachineContext = SharedContext & {
   // Sub state machines
-  entries: any;
-  histogram: any;
+  entries: EntriesStateMachine;
+  histogram: HistogramStateMachine;
 };
 
 export type LogExplorerQuery = Query | AggregateQuery;
@@ -75,3 +77,5 @@ export type DataAccessMachineExternalEvent =
       type: 'positionChanged';
       position: LogExplorerPosition;
     };
+
+export type DataAccessMachineEvent = DataAccessMachineExternalEvent;
