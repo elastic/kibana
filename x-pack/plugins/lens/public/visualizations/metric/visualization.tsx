@@ -246,8 +246,7 @@ export const getMetricVisualization = ({
     const isBucketed = (op: OperationMetadata) => op.isBucketed;
 
     const formatterOptions: FormatSelectorOptions = {
-      maxDecimals: 2,
-      disableSuffix: true,
+      disableExtraOptions: true,
     };
 
     return {

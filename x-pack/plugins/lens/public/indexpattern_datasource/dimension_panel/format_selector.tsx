@@ -52,8 +52,7 @@ const suffixLabel = i18n.translate('xpack.lens.indexPattern.suffixLabel', {
 });
 
 export interface FormatSelectorOptions {
-  disableSuffix?: boolean;
-  maxDecimals?: number;
+  disableExtraOptions?: boolean;
 }
 
 interface FormatSelectorProps {
@@ -155,14 +154,14 @@ export function FormatSelector(props: FormatSelectorProps) {
             selectedOptions={currentOption}
             onChange={onChangeWrapped}
           />
-          {currentFormat ? (
+          {currentFormat && !props.options?.disableExtraOptions ? (
             <>
               <EuiSpacer size="s" />
               <EuiRange
                 showInput="inputWithPopover"
                 value={decimals}
                 min={RANGE_MIN}
-                max={props.options?.maxDecimals ?? RANGE_MAX}
+                max={RANGE_MAX}
                 onChange={(e) => {
                   const value = Number(e.currentTarget.value);
                   setDecimals(value);
@@ -181,22 +180,19 @@ export function FormatSelector(props: FormatSelectorProps) {
                 prepend={decimalsLabel}
                 aria-label={decimalsLabel}
               />
-              {!props.options?.disableSuffix && (
-                <>
-                  <EuiSpacer size="s" />
-                  <EuiFieldText
-                    value={suffix}
-                    onChange={(e) => {
-                      setSuffix(e.currentTarget.value);
-                    }}
-                    data-test-subj="indexPattern-dimension-formatSuffix"
-                    compressed
-                    fullWidth
-                    prepend={suffixLabel}
-                    aria-label={suffixLabel}
-                  />
-                </>
-              )}
+
+              <EuiSpacer size="s" />
+              <EuiFieldText
+                value={suffix}
+                onChange={(e) => {
+                  setSuffix(e.currentTarget.value);
+                }}
+                data-test-subj="indexPattern-dimension-formatSuffix"
+                compressed
+                fullWidth
+                prepend={suffixLabel}
+                aria-label={suffixLabel}
+              />
             </>
           ) : null}
         </div>
