@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
+import moment from 'moment';
 import type { Unit } from '@kbn/datemath';
 import type { Type, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { FieldValueQueryBar } from '../query_bar';
@@ -60,8 +61,23 @@ export const usePreviewRoute = ({
 }: PreviewRouteParams) => {
   const [isRequestTriggered, setIsRequestTriggered] = useState(false);
 
+  const [timeframeEnd, setTimeframeEnd] = useState(moment());
+  useEffect(() => {
+    if (isRequestTriggered) {
+      setTimeframeEnd(moment());
+    }
+  }, [isRequestTriggered, setTimeframeEnd]);
+
+  const quickQueryOptions = useMemo(
+    () => ({
+      timeframe: timeFrame,
+      timeframeEnd,
+    }),
+    [timeFrame, timeframeEnd]
+  );
+
   const { isLoading, showInvocationCountWarning, response, rule, setRule } = usePreviewRule({
-    timeframe: timeFrame,
+    quickQueryOptions,
     advancedOptions,
   });
   const [logs, setLogs] = useState<RulePreviewLogs[]>(response.logs ?? []);
