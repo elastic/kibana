@@ -112,7 +112,8 @@ export function LogExplorerLayout({
   }, []);
 
   const contentCentered =
-    dataAccessState.matches('uninitialized') || dataAccessState.matches('failedNoData');
+    dataAccessState.matches({ documents: 'uninitialized' }) ||
+    dataAccessState.matches({ documents: 'failedNoData' });
 
   const savedSearchTitle = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
@@ -210,10 +211,12 @@ export function LogExplorerLayout({
               hasShadow={false}
               className={classNames('dscPageContent', {
                 'dscPageContent--centered': contentCentered,
-                'dscPageContent--emptyPrompt': dataAccessState.matches('failedNoData'),
+                'dscPageContent--emptyPrompt': dataAccessState.matches({
+                  documents: 'failedNoData',
+                }),
               })}
             >
-              {dataAccessState.matches('failedNoData') ? (
+              {dataAccessState.matches({ documents: 'failedNoData' }) ? (
                 <DiscoverNoResults
                   isTimeBased={true}
                   data={data}
@@ -222,9 +225,9 @@ export function LogExplorerLayout({
                   hasFilters={hasActiveFilter(state.filters)}
                   onDisableFilters={onDisableFilters}
                 />
-              ) : dataAccessState.matches('uninitialized') ? (
+              ) : dataAccessState.matches({ documents: 'uninitialized' }) ? (
                 <DiscoverUninitialized onRefresh={loadData} />
-              ) : dataAccessState.matches('loadingAround') ? (
+              ) : dataAccessState.matches({ documents: 'loadingAround' }) ? (
                 <LoadingSpinner />
               ) : (
                 <EuiFlexGroup

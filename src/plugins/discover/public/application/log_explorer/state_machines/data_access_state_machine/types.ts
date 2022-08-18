@@ -36,21 +36,36 @@ export interface LogExplorerContext {
 
 export type LogExplorerQuery = Query | AggregateQuery;
 
-export type LogExplorerLoadedChunkState = 'empty' | 'loaded' | 'failed';
+export type LogExplorerLoadedChunkStateValue = 'empty' | 'loaded' | 'failed';
 
+export type LogExplorerDocumentsStateValue =
+  | 'uninitialized' // not used yet, but there's a setting that disables automatic initial search
+  | 'loadingAround'
+  | 'failedNoData'
+  | 'loaded'
+  | { loaded: { top: LogExplorerLoadedChunkStateValue; bottom: LogExplorerLoadedChunkStateValue } }
+  | 'loadingTop'
+  | 'loadingBottom'
+  | 'extendingTop'
+  | 'extendingBottom'
+  | 'tailing'
+  | { tailing: 'loading' | 'loaded' };
+
+export type LogExplorerHistogramStateValue = 'uninitialized' | 'loading' | 'loaded';
+
+// the value union is not ideal, but the closest we can get without typegen
 export interface LogExplorerState {
   value:
-    | 'uninitialized' // not used yet, but there's a setting that disables automatic initial search
-    | 'loadingAround'
-    | 'failedNoData'
-    | 'loaded'
-    | { loaded: { top: LogExplorerLoadedChunkState; bottom: LogExplorerLoadedChunkState } }
-    | 'loadingTop'
-    | 'loadingBottom'
-    | 'extendingTop'
-    | 'extendingBottom'
-    | 'tailing'
-    | { tailing: 'loading' | 'loaded' };
+    | {
+        documents: LogExplorerDocumentsStateValue;
+        histogram: LogExplorerHistogramStateValue;
+      }
+    | {
+        documents: LogExplorerDocumentsStateValue;
+      }
+    | {
+        histogram: LogExplorerHistogramStateValue;
+      };
   context: LogExplorerContext;
 }
 

@@ -19,15 +19,32 @@ export const useScrollInteractions = ({
   const stateMachine = useStateMachineContext();
 
   useEffect(() => {
-    stateMachine.subscribe((state) => {
-      // scroll to bottom when tailing starts or loading finishes
-      if (state.matches('tailing') && state.changed) {
+    const transitionListener: Parameters<typeof stateMachine['onTransition']>[0] = (
+      state,
+      event
+    ) => {
+      if (state.matches({ documents: 'tailing' }) && state.changed) {
+        // scroll to bottom when tailing starts or loading finishes
         const { endRowIndex } = memoizedSelectRows(state);
 
         if (endRowIndex != null) {
           imperativeGridRef.current?.scrollToItem?.({ rowIndex: endRowIndex, align: 'end' });
         }
+      } else if (event.type === 'loadAroundSucceeded') {
+        // scroll to middle when finished complete reload
+        const { chunkBoundaryRowIndex } = memoizedSelectRows(state);
+
+        imperativeGridRef.current?.scrollToItem?.({
+          rowIndex: chunkBoundaryRowIndex,
+          align: 'start',
+        });
       }
-    });
+    };
+
+    stateMachine.onTransition(transitionListener);
+
+    return () => {
+      stateMachine.off(transitionListener);
+    };
   }, [imperativeGridRef, stateMachine]);
 };

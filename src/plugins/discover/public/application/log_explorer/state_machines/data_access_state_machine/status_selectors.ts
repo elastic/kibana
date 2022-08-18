@@ -12,10 +12,10 @@ export const selectIsLoading = (state: DataAccessService['state']) =>
   selectIsReloading(state) || selectIsUpdating(state);
 
 export const selectIsReloading = (state: DataAccessService['state']) =>
-  state.matches('loadingAround');
+  state.matches({ documents: 'loadingAround' });
 
 export const selectIsUpdating = (state: DataAccessService['state']) =>
-  state.matches('loadingTop') ||
-  state.matches('loadingBottom') ||
-  state.matches('extendingTop') ||
-  state.matches('extendingBottom');
+  state.matches({ documents: 'loadingTop' }) ||
+  state.matches({ documents: 'loadingBottom' }) ||
+  state.matches({ documents: 'extendingTop' }) ||
+  state.matches({ documents: 'extendingBottom' });

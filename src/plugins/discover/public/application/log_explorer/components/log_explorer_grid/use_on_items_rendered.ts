@@ -26,10 +26,7 @@ export const useOnItemsRendered = ({
 }) => {
   const stateMachine = useStateMachineContext();
 
-  const { startRowIndex, endRowIndex, chunkBoundaryRowIndex } = useSelector(
-    stateMachine,
-    memoizedSelectRows
-  );
+  const { startRowIndex, endRowIndex } = useSelector(stateMachine, memoizedSelectRows);
 
   const throttledSend = useThrottled(stateMachine.send, SEND_THROTTLE_DELAY);
 
@@ -45,14 +42,7 @@ export const useOnItemsRendered = ({
         visibleEndRowIndex: visibleRowStopIndex,
       });
 
-      // TODO: trigger position update in state machine
-      if (visibleRowStartIndex === 0 && visibleRowStartIndex < startRowIndex) {
-        // scroll to initial position
-        imperativeGridRef.current?.scrollToItem?.({
-          rowIndex: chunkBoundaryRowIndex,
-          align: 'start',
-        });
-      } else if (visibleRowStartIndex < startRowIndex) {
+      if (visibleRowStartIndex < startRowIndex) {
         // block scrolling outside of loaded area
         imperativeGridRef.current?.scrollToItem?.({
           rowIndex: startRowIndex,
@@ -66,6 +56,6 @@ export const useOnItemsRendered = ({
         });
       }
     },
-    [chunkBoundaryRowIndex, endRowIndex, imperativeGridRef, startRowIndex, throttledSend]
+    [endRowIndex, imperativeGridRef, startRowIndex, throttledSend]
   );
 };
