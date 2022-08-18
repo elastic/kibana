@@ -64,8 +64,14 @@ export type DataViewFieldBase = {
 export type DataViewBase = {
   fields: DataViewFieldBase[];
   id?: string;
-  title?: string;
+  /**
+   * Contains the string of ES indices to match when searching against the data view
+   */
   indexPattern?: string;
+  /**
+   * @deprecated use {@link indexPattern} instead
+   */
+  title: string;
 };
 
 export interface BoolQuery {
