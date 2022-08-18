@@ -23,7 +23,7 @@ tags: ['kibana', 'onboarding', 'dev', 'architecture']
 #### Get list of data view titles and ids
 
 ```
-const idsAndTitles = await data.indexPatterns.getIdsWithTitle();
+const idsAndTitles = await data.indexPatterns.getIdsWithIndexPattern();
 idsAndTitles.forEach(({id, title}) => console.log(`Data view id: ${id} title: ${title}`));
 ```
 

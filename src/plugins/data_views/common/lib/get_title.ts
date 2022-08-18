@@ -23,5 +23,5 @@ export async function getTitle(
     throw new Error(`Unable to get index-pattern title: ${savedObject.error.message}`);
   }
 
-  return savedObject.attributes.title;
+  return savedObject.attributes.indexPattern ?? savedObject.attributes.title;
 }

@@ -36,7 +36,7 @@ describe('hasUserDataView', () => {
           references: [],
           type: 'index-pattern',
           score: 99,
-          attributes: { title: 'my-pattern-*' },
+          attributes: { indexPattern: 'my-pattern-*', title: 'my-pattern-*' },
         },
       ],
     });
@@ -54,7 +54,7 @@ describe('hasUserDataView', () => {
           references: [],
           type: 'index-pattern',
           score: 99,
-          attributes: { title: 'my-pattern-*' },
+          attributes: { indexPattern: 'my-pattern-*', title: 'my-pattern-*' },
         },
       ],
     };

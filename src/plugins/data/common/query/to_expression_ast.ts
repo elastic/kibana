@@ -58,7 +58,7 @@ export async function queryStateToExpressionAst({
     // sql query
     if (mode === 'sql' && 'sql' in query) {
       const idxPattern = getIndexPatternFromSQLQuery(query.sql);
-      const idsTitles = await dataViewsService.getIdsWithTitle();
+      const idsTitles = await dataViewsService.getIdsWithIndexPattern();
       const dataViewIdTitle = idsTitles.find(({ title }) => title === idxPattern);
       if (dataViewIdTitle) {
         const dataView = await dataViewsService.get(dataViewIdTitle.id);

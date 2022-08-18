@@ -35,7 +35,7 @@ const savedObject = {
   id: 'id',
   version: 'version',
   attributes: {
-    title: 'kibana-*',
+    indexPattern: 'kibana-*',
     name: 'Kibana *',
     timeFieldName: '@timestamp',
     fields: '[]',
@@ -183,13 +183,13 @@ describe('IndexPatterns', () => {
 
   test('caches saved objects', async () => {
     await indexPatterns.getIds();
-    await indexPatterns.getTitles();
+    await indexPatterns.getIndexPatterns();
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
   });
 
   test('can refresh the saved objects caches', async () => {
     await indexPatterns.getIds();
-    await indexPatterns.getTitles(true);
+    await indexPatterns.getIndexPatterns(true);
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(2);
   });
 

@@ -217,7 +217,7 @@ describe('IndexPattern', () => {
       const oldCount = scriptedFields.length;
       const scriptedField = last(scriptedFields)!;
 
-      await indexPattern.removeScriptedField(scriptedField.name);
+      indexPattern.removeScriptedField(scriptedField.name);
 
       expect(indexPattern.getScriptedFields().length).toEqual(oldCount - 1);
       expect(indexPattern.fields.getByName(scriptedField.name)).toEqual(undefined);

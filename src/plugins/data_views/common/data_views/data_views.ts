@@ -44,12 +44,12 @@ const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
  */
 export type DataViewSavedObjectAttrs = Pick<
   DataViewAttributes,
-  'title' | 'type' | 'typeMeta' | 'name'
+  'indexPattern' | 'title' | 'type' | 'typeMeta' | 'name'
 >;
 
 export type IndexPatternListSavedObjectAttrs = Pick<
   DataViewAttributes,
-  'title' | 'type' | 'typeMeta' | 'name'
+  'indexPattern' | 'title' | 'type' | 'typeMeta' | 'name'
 >;
 
 /**
@@ -65,7 +65,7 @@ export interface DataViewListItem {
    */
   namespaces?: string[];
   /**
-   * Data view title
+   * Data view index pattern
    */
   title: string;
   /**
@@ -223,15 +223,23 @@ export interface DataViewsServicePublicMethods {
    */
   getIds: (refresh?: boolean) => Promise<string[]>;
   /**
-   * Get list of data view ids and title (and more) for each data view.
-   * @param refresh - clear cache and fetch from server
+   * @deprecated use {@link getIdsWithIndexPattern} instead
    */
   getIdsWithTitle: (refresh?: boolean) => Promise<DataViewListItem[]>;
   /**
    * Get list of data view ids and title (and more) for each data view.
    * @param refresh - clear cache and fetch from server
    */
+  getIdsWithIndexPattern: (refresh?: boolean) => Promise<DataViewListItem[]>;
+  /**
+   * @deprecated use {@link getIndexPatterns} instead
+   */
   getTitles: (refresh?: boolean) => Promise<string[]>;
+  /**
+   * Get list of data view ids and title (and more) for each data view.
+   * @param refresh - clear cache and fetch from server
+   */
+  getIndexPatterns: (refresh?: boolean) => Promise<string[]>;
   /**
    * Returns true if user has access to view a data view.
    */
@@ -329,7 +337,7 @@ export class DataViewsService {
   private async refreshSavedObjectsCache() {
     const so = await this.savedObjectsClient.find<DataViewSavedObjectAttrs>({
       type: DATA_VIEW_SAVED_OBJECT_TYPE,
-      fields: ['title', 'type', 'typeMeta', 'name'],
+      fields: ['indexPattern', 'title', 'type', 'typeMeta', 'name'],
       perPage: 10000,
     });
     this.savedObjectsCache = so;
@@ -353,14 +361,23 @@ export class DataViewsService {
    * Gets list of index pattern titles.
    * @param refresh Force refresh of index pattern list
    */
-  getTitles = async (refresh: boolean = false): Promise<string[]> => {
+  getIndexPatterns = async (refresh: boolean = false): Promise<string[]> => {
     if (!this.savedObjectsCache || refresh) {
       await this.refreshSavedObjectsCache();
     }
     if (!this.savedObjectsCache) {
       return [];
     }
-    return this.savedObjectsCache.map((obj) => obj?.attributes?.title);
+    return this.savedObjectsCache.map(
+      (obj) => obj?.attributes?.indexPattern ?? obj?.attributes?.title
+    );
+  };
+
+  /**
+   * @deprecated use getIndexPatterns instead
+   */
+  getTitles = (refresh: boolean = false): Promise<string[]> => {
+    return this.getIndexPatterns(refresh);
   };
 
   /**
@@ -372,9 +389,9 @@ export class DataViewsService {
   find = async (search: string, size: number = 10): Promise<DataView[]> => {
     const savedObjects = await this.savedObjectsClient.find<DataViewSavedObjectAttrs>({
       type: DATA_VIEW_SAVED_OBJECT_TYPE,
-      fields: ['title'],
+      fields: ['title', 'indexPattern'],
       search,
-      searchFields: ['title'],
+      searchFields: ['title', 'indexPattern'],
       perPage: size,
     });
     const getIndexPatternPromises = savedObjects.map(async (savedObject) => {
@@ -387,7 +404,7 @@ export class DataViewsService {
    * Gets list of index pattern ids with titles.
    * @param refresh Force refresh of index pattern list
    */
-  getIdsWithTitle = async (refresh: boolean = false): Promise<DataViewListItem[]> => {
+  getIdsWithIndexPattern = async (refresh: boolean = false): Promise<DataViewListItem[]> => {
     if (!this.savedObjectsCache || refresh) {
       await this.refreshSavedObjectsCache();
     }
@@ -397,11 +414,19 @@ export class DataViewsService {
     return this.savedObjectsCache.map((obj) => ({
       id: obj?.id,
       namespaces: obj?.namespaces,
-      title: obj?.attributes?.title,
+      title: obj?.attributes?.indexPattern ?? obj?.attributes?.title,
+      indexPattern: obj?.attributes?.indexPattern ?? obj?.attributes?.title,
       type: obj?.attributes?.type,
       typeMeta: obj?.attributes?.typeMeta && JSON.parse(obj?.attributes?.typeMeta),
       name: obj?.attributes?.name,
     }));
+  };
+
+  /**
+   * @deprecated use {@link getIdsWithIndexPattern} instead
+   */
+  getIdsWithTitle = (refresh: boolean = false): Promise<DataViewListItem[]> => {
+    return this.getIdsWithIndexPattern(refresh);
   };
 
   /**
@@ -528,10 +553,11 @@ export class DataViewsService {
       );
       indexPattern.fields.replaceAll([...runtimeFieldsArray, ...fieldsWithSavedAttrs]);
     } catch (err) {
+      const objectId = indexPattern.indexPattern ?? indexPattern.title;
       if (err instanceof DataViewMissingIndices) {
         this.onNotification(
           { title: err.message, color: 'danger', iconType: 'alert' },
-          `refreshFields:${indexPattern.title}`
+          `refreshFields:${objectId}`
         );
       }
 
@@ -540,10 +566,10 @@ export class DataViewsService {
         {
           title: i18n.translate('dataViews.fetchFieldErrorTitle', {
             defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
-            values: { id: indexPattern.id, title: indexPattern.title },
+            values: { id: indexPattern.id, title: objectId },
           }),
         },
-        indexPattern.title
+        objectId
       );
     }
   };
@@ -630,7 +656,7 @@ export class DataViewsService {
       version,
       namespaces,
       attributes: {
-        title,
+        indexPattern,
         timeFieldName,
         fields,
         sourceFilters,
@@ -641,6 +667,7 @@ export class DataViewsService {
         fieldAttrs,
         allowNoIndex,
         name,
+        title,
       },
     } = savedObject;
 
@@ -657,7 +684,7 @@ export class DataViewsService {
       id,
       version,
       namespaces,
-      title,
+      indexPattern,
       timeFieldName,
       sourceFilters: parsedSourceFilters,
       fields: this.fieldArrayToMap(parsedFields, parsedFieldAttrs),
@@ -668,6 +695,7 @@ export class DataViewsService {
       allowNoIndex,
       runtimeFieldMap: parsedRuntimeFieldMap,
       name,
+      title,
     };
   };
 
@@ -688,18 +716,19 @@ export class DataViewsService {
     savedObject: SavedObject<DataViewAttributes>
   ): Promise<DataView> => {
     const spec = this.savedObjectToSpec(savedObject);
-    const { title, type, typeMeta, runtimeFieldMap } = spec;
+    const { type, typeMeta, runtimeFieldMap } = spec;
     spec.fieldAttrs = savedObject.attributes.fieldAttrs
       ? JSON.parse(savedObject.attributes.fieldAttrs)
       : {};
+    const indexPattern = spec.indexPattern ?? spec.title;
 
     try {
       spec.fields = await this.refreshFieldSpecMap(
         spec.fields || {},
         savedObject.id,
-        spec.title as string,
+        indexPattern!,
         {
-          pattern: title as string,
+          pattern: indexPattern!,
           metaFields: await this.config.get(META_FIELDS),
           type,
           rollupIndex: typeMeta?.params?.rollup_index,
@@ -719,7 +748,7 @@ export class DataViewsService {
             color: 'danger',
             iconType: 'alert',
           },
-          `initFromSavedObject:${title}`
+          `initFromSavedObject:${indexPattern}`
         );
       } else {
         this.onError(
@@ -727,10 +756,10 @@ export class DataViewsService {
           {
             title: i18n.translate('dataViews.fetchFieldErrorTitle', {
               defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
-              values: { id: savedObject.id, title },
+              values: { id: savedObject.id, title: indexPattern },
             }),
           },
-          title || ''
+          indexPattern || ''
         );
       }
     }
@@ -739,9 +768,9 @@ export class DataViewsService {
       ? JSON.parse(savedObject.attributes.fieldFormatMap)
       : {};
 
-    const indexPattern = await this.create(spec, true);
-    indexPattern.resetOriginalSavedObjectBody();
-    return indexPattern;
+    const newIndexPattern = await this.create(spec, true);
+    newIndexPattern.resetOriginalSavedObjectBody();
+    return newIndexPattern;
   };
 
   private getRuntimeFields = (
@@ -805,34 +834,33 @@ export class DataViewsService {
    * @param skipFetchFields if true, will not fetch fields
    * @returns DataView
    */
-  async create(
-    { id, name, title, ...restOfSpec }: DataViewSpec,
-    skipFetchFields = false
-  ): Promise<DataView> {
+  async create({ id, name, ...spec }: DataViewSpec, skipFetchFields = false): Promise<DataView> {
     const shortDotsEnable = await this.config.get<boolean>(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE);
     const metaFields = await this.config.get<string[] | undefined>(META_FIELDS);
 
-    const spec = {
+    const title = spec.indexPattern ?? spec.title;
+    const newSpec = {
       id: id ?? uuid.v4(),
+      indexPattern: title,
       title,
       name: name || title,
-      ...restOfSpec,
+      ...spec,
     };
 
-    const indexPattern = new DataView({
-      spec,
+    const newIndexPattern = new DataView({
+      spec: newSpec,
       fieldFormats: this.fieldFormats,
       shortDotsEnable,
       metaFields,
     });
 
     if (!skipFetchFields) {
-      await this.refreshFields(indexPattern);
+      await this.refreshFields(newIndexPattern);
     }
 
-    this.dataViewCache.set(indexPattern.id!, Promise.resolve(indexPattern));
+    this.dataViewCache.set(newIndexPattern.id!, Promise.resolve(newIndexPattern));
 
-    return indexPattern;
+    return newIndexPattern;
   }
 
   /**
@@ -843,8 +871,8 @@ export class DataViewsService {
    */
 
   async createAndSave(spec: DataViewSpec, override = false, skipFetchFields = false) {
-    const indexPattern = await this.create(spec, skipFetchFields);
-    const createdIndexPattern = await this.createSavedObject(indexPattern, override);
+    const newIndexPattern = await this.create(spec, skipFetchFields);
+    const createdIndexPattern = await this.createSavedObject(newIndexPattern, override);
     await this.setDefault(createdIndexPattern.id!);
     return createdIndexPattern!;
   }
@@ -962,10 +990,8 @@ export class DataViewsService {
                 'Unable to write data view! Refresh the page to get the most up to date changes for this data view.',
             });
 
-            this.onNotification(
-              { title, color: 'danger' },
-              `updateSavedObject:${indexPattern.title}`
-            );
+            const objectId = indexPattern.indexPattern ?? indexPattern.title;
+            this.onNotification({ title, color: 'danger' }, `updateSavedObject:${objectId}`);
             throw err;
           }
 
@@ -1007,7 +1033,7 @@ export class DataViewsService {
    * @returns default data view
    */
   async getDefaultDataView(): Promise<DataView | null> {
-    const patterns = await this.getIdsWithTitle();
+    const patterns = await this.getIdsWithIndexPattern();
     let defaultId: string | undefined = await this.config.get('defaultIndex');
     const exists = defaultId ? patterns.some((pattern) => pattern.id === defaultId) : false;
 

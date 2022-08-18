@@ -33,7 +33,7 @@ const isRollup = (indexPatternType: string = '') => {
 };
 
 export async function getIndexPatterns(defaultIndex: string, dataViewsService: DataViewsContract) {
-  const existingIndexPatterns = await dataViewsService.getIdsWithTitle(true);
+  const existingIndexPatterns = await dataViewsService.getIdsWithIndexPattern(true);
   const indexPatternsListItems = existingIndexPatterns.map((idxPattern) => {
     const { id, title, namespaces, name } = idxPattern;
     const isDefault = defaultIndex === id;

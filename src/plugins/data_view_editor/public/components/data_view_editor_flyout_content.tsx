@@ -94,7 +94,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
       isAdHoc: false,
       ...(editData
         ? {
-            title: editData.title,
+            title: editData.indexPattern,
             id: editData.id,
             name: editData.name,
             ...(editData.timeFieldName
@@ -112,7 +112,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
       }
 
       const indexPatternStub: DataViewSpec = {
-        title: removeSpaces(formData.title),
+        indexPattern: removeSpaces(formData.title),
         timeFieldName: formData.timestampField?.value,
         id: formData.id,
         name: formData.name,
@@ -128,16 +128,16 @@ const IndexPatternEditorFlyoutContentComponent = ({
         };
       }
 
-      if (editData && editData.title !== formData.title) {
+      if (editData && editData.indexPattern !== formData.title) {
         editDataViewModal({
           dataViewName: formData.name || formData.title,
           overlays,
           onEdit: async () => {
-            await onSave(indexPatternStub, !formData.isAdHoc);
+            onSave(indexPatternStub, !formData.isAdHoc);
           },
         });
       } else {
-        await onSave(indexPatternStub, !formData.isAdHoc);
+        onSave(indexPatternStub, !formData.isAdHoc);
       }
     },
   });
@@ -193,7 +193,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   useEffect(() => {
     loadSources();
     const getTitles = async () => {
-      const dataViewListItems = await dataViews.getIdsWithTitle(editData ? true : false);
+      const dataViewListItems = await dataViews.getIdsWithIndexPattern(editData ? true : false);
       const indexPatternNames = dataViewListItems.map((item) => item.name || item.title);
 
       setExistingIndexPatterns(
@@ -309,14 +309,14 @@ const IndexPatternEditorFlyoutContentComponent = ({
   useEffect(() => {
     if (editData) {
       loadSources();
-      reloadMatchedIndices(removeSpaces(editData.title));
+      reloadMatchedIndices(removeSpaces(editData.indexPattern));
     }
     // We use the below eslint-disable as adding 'loadSources' and 'reloadMatchedIndices' as a dependency creates an infinite loop
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editData]);
 
   useEffect(() => {
-    const timeFieldQuery = editData ? editData.title : title;
+    const timeFieldQuery = editData ? editData.indexPattern ?? editData.indexPattern : title;
     loadTimestampFieldOptions(removeSpaces(timeFieldQuery));
     if (!editData) getFields().timestampField?.setValue('');
     // We use the below eslint-disable as adding editData as a dependency create an infinite loop

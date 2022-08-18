@@ -52,6 +52,7 @@ export function stubbedSavedObjectDataView(
     attributes: {
       timeFieldName: 'time',
       fields: JSON.stringify(stubLogstashFieldSpecMap),
+      indexPattern: 'index-pattern',
       title: 'title',
       name: 'Name',
     },

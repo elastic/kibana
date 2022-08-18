@@ -42,13 +42,17 @@ interface DataViewDeps {
 
 interface SavedObjectBody {
   fieldAttrs?: string;
-  title?: string;
+  indexPattern?: string;
   timeFieldName?: string;
   fields?: string;
   sourceFilters?: string;
   fieldFormatMap?: string;
   typeMeta?: string;
   type?: string;
+  /**
+   * @deprecated
+   */
+  title?: string;
 }
 
 /**
@@ -74,7 +78,13 @@ export class DataView implements DataViewBase {
    */
   public id?: string;
   /**
+   * Index pattern of data view
+   * Contains the string of ES indices to match when searching against the data view
+   */
+  public indexPattern: string = '';
+  /**
    * Title of data view
+   * @deprecated use {@link indexPattern} instead
    */
   public title: string = '';
   /**
@@ -170,7 +180,9 @@ export class DataView implements DataViewBase {
 
     this.version = spec.version;
 
-    this.title = spec.title || '';
+    const title = (spec.indexPattern ?? spec.title) || '';
+    this.title = title;
+    this.indexPattern = title;
     this.timeFieldName = spec.timeFieldName;
     this.sourceFilters = [...(spec.sourceFilters || [])];
     this.fields.replaceAll(Object.values(spec.fields || {}));
@@ -186,7 +198,7 @@ export class DataView implements DataViewBase {
   /**
    * Get name of Data View
    */
-  getName = () => (this.name ? this.name : this.title);
+  getName = () => (this.name ? this.name : this.indexPattern ?? this.title);
 
   /**
    * Get last saved saved object fields
@@ -289,11 +301,13 @@ export class DataView implements DataViewBase {
       includeFields && this.fields
         ? this.fields.toSpec({ getFormatterForField: this.getFormatterForField.bind(this) })
         : undefined;
+    const title = this.indexPattern ?? this.title;
 
     const spec: DataViewSpec = {
       id: this.id,
       version: this.version,
-      title: this.title,
+      indexPattern: title,
+      title,
       timeFieldName: this.timeFieldName,
       sourceFilters: [...(this.sourceFilters || [])],
       fields,
@@ -407,10 +421,12 @@ export class DataView implements DataViewBase {
       : JSON.stringify(this.fieldFormatMap);
     const fieldAttrs = this.getFieldAttrs();
     const runtimeFieldMap = this.runtimeFieldMap;
+    const title = this.indexPattern ?? this.title;
 
     return {
       fieldAttrs: fieldAttrs ? JSON.stringify(fieldAttrs) : undefined,
-      title: this.title,
+      indexPattern: title,
+      title,
       timeFieldName: this.timeFieldName,
       sourceFilters: this.sourceFilters ? JSON.stringify(this.sourceFilters) : undefined,
       fields: JSON.stringify(this.fields?.filter((field) => field.scripted) ?? []),

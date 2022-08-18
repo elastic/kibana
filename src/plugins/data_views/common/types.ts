@@ -123,8 +123,15 @@ export interface DataViewAttributes {
   fields: string;
   /**
    * Data view title
+   * Contains the string of ES indices to match when searching against the data view
+   * @deprecated use indexPattern instead
    */
-  title: string;
+  title?: string;
+  /**
+   * Data view index pattern
+   * Contains the string of ES indices to match when searching against the data view
+   */
+  indexPattern: string;
   /**
    * Data view type, default or rollup
    */
@@ -460,8 +467,17 @@ export type DataViewSpec = {
   version?: string;
   /**
    * Data view title
+   * Contains the string of ES indices to match when searching against the data view
+   * @deprecated use indexPattern instead
+   *
    */
   title?: string;
+  /**
+   * Data view index pattern
+   * Contains the string of ES indices to match when searching against the data view
+   *
+   */
+  indexPattern?: string;
   /**
    * Name of timestamp field
    */

@@ -25,7 +25,7 @@ export const getDataViews = async ({
   counterName,
 }: GetDataViewsArgs) => {
   usageCollection?.incrementCounter({ counterName });
-  return dataViewsService.getIdsWithTitle();
+  return dataViewsService.getIdsWithIndexPattern();
 };
 
 const getDataViewsRouteFactory =

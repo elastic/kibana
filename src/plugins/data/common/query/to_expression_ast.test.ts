@@ -34,7 +34,7 @@ describe('queryStateToExpressionAst', () => {
 
   it('returns an object with the correct structure for an SQL query', async () => {
     const dataViewsService = {
-      getIdsWithTitle: jest.fn(() => {
+      getIdsWithIndexPattern: jest.fn(() => {
         return [
           {
             title: 'foo',
