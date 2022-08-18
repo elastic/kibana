@@ -13,7 +13,7 @@ VERSION="$(jq -r '.version' package.json)-SNAPSHOT"
 echo "--- Download kibana distribution"
 
 mkdir -p ./target
-buildkite-agent artifact download "kibana-$VERSION-linux-x86_64.tar.gz" ./target --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
+download_artifact "kibana-$VERSION-linux-x86_64.tar.gz" ./target --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
 
 echo "--- Build and push Kibana Cloud Distribution"
 

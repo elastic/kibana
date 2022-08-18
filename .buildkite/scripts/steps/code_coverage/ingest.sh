@@ -19,10 +19,10 @@ echo "--- Upload new git sha"
 .buildkite/scripts/steps/code_coverage/reporting/uploadPrevSha.sh
 
 .buildkite/scripts/bootstrap.sh
- 
+
 echo "--- Download coverage arctifacts"
-buildkite-agent artifact download target/kibana-coverage/jest/* .
-buildkite-agent artifact download target/kibana-coverage/functional/* .
+download_artifact target/kibana-coverage/jest/* .
+download_artifact target/kibana-coverage/functional/* .
 
 echo "--- process HTML Links"
 .buildkite/scripts/steps/code_coverage/reporting/prokLinks.sh
