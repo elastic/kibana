@@ -84,7 +84,7 @@ describe('esaggs expression function - server', () => {
     expect(getStartDependencies).toHaveBeenCalledWith({ id: 'hi' });
   });
 
-  test('calls indexPatterns.create with the values provided by the subexpression arg', async () => {
+  test('calls indexPatterns.get with the values provided by the subexpression arg', async () => {
     await definition().fn(null, args, mockHandlers).toPromise();
 
     expect(startDependencies.indexPatterns.create).toHaveBeenCalledWith(args.index.value, true);
