@@ -23,7 +23,7 @@ import { MonitoringConfig } from '../../config';
 
 interface CommonIndexPatternArgs {
   config: MonitoringConfig;
-  moduleType?: Exclude<INDEX_PATTERN_TYPES, 'filebeat'>;
+  moduleType?: INDEX_PATTERN_TYPES;
   dataset?: string;
   namespace?: string;
   ccs?: string;
@@ -33,7 +33,7 @@ interface CommonIndexPatternArgs {
 // moduleType is mandatory when type is not informed or when type=metrics
 interface MetricIndexPatternArgs extends CommonIndexPatternArgs {
   type?: typeof DS_INDEX_PATTERN_METRICS;
-  moduleType: Exclude<INDEX_PATTERN_TYPES, 'filebeat'>;
+  moduleType: INDEX_PATTERN_TYPES;
 }
 
 // moduleType is optional when type=logs
@@ -83,7 +83,7 @@ export function getLegacyIndexPattern({
   config,
   ccs,
 }: {
-  moduleType: INDEX_PATTERN_TYPES;
+  moduleType: INDEX_PATTERN_TYPES | 'filebeat';
   ecsLegacyOnly?: boolean;
   config: MonitoringConfig;
   ccs?: string;

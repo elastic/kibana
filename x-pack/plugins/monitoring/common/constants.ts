@@ -596,7 +596,6 @@ export type INDEX_PATTERN_TYPES =
   | 'kibana'
   | 'logstash'
   | 'beats'
-  | 'enterprisesearch'
-  | 'filebeat';
+  | 'enterprisesearch';
 
 export type DS_INDEX_PATTERN_TYPES = typeof DS_INDEX_PATTERN_METRICS | typeof DS_INDEX_PATTERN_LOGS;

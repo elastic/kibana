@@ -78,7 +78,6 @@ export async function getLogTypes(
   };
 
   const filter: Array<{ term: { [x: string]: string } } | TimerangeFilter | null> = [
-    { term: { 'service.type': 'elasticsearch' } },
     createTimeFilter({ start, end, metric }),
   ];
 
