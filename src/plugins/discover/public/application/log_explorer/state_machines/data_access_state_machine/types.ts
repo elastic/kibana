@@ -10,7 +10,7 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { LogExplorerChunk, LogExplorerPosition, LogExplorerHistogramData } from '../../types';
 import { LoadAfterEvent } from './load_after_service';
-import { LoadAroundEvent } from './load_around_service';
+import { LoadAroundEvent } from '../entries_state_machine/services/load_around_service';
 import { LoadBeforeEvent } from './load_before_service';
 import { LoadHistogramEvent } from './load_histogram_service';
 import { LoadTailEvent } from './load_tail_service';

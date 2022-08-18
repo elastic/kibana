@@ -5,12 +5,3 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { LogExplorerHistogramData } from '../../types';
-import { DataAccessService } from './state_machine';
-
-export const selectHistogramDataPoints = (
-  state: DataAccessService['state']
-): LogExplorerHistogramData => {
-  return state.context.histogram.data;
-};

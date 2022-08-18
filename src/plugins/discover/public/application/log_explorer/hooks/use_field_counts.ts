@@ -11,7 +11,7 @@ import isDeepEqual from 'fast-deep-equal';
 import {
   DataAccessService,
   memoizedSelectFieldCounts,
-} from '../state_machines/data_access_state_machine';
+} from '../state_machines/entries_state_machine';
 
 export const useFieldCounts = (stateMachine: DataAccessService) =>
   useSelector(stateMachine, memoizedSelectFieldCounts, isDeepEqual);

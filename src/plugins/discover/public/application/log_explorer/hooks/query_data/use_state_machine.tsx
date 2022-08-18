@@ -18,7 +18,7 @@ import {
   loadAfter,
   loadAround,
   loadBefore,
-} from '../../state_machines/data_access_state_machine';
+} from '../../state_machines/entries_state_machine';
 import { loadTail } from '../../state_machines/data_access_state_machine/load_tail_service';
 import { loadHistogram } from '../../state_machines/data_access_state_machine/load_histogram_service';
 import { useSubscription } from '../use_observable';

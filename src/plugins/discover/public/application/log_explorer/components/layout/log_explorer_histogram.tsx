@@ -36,7 +36,7 @@ import { DataAccessService, selectVisibleTimeRange } from '../../state_machines'
 import {
   selectHistogramDataPoints,
   selectTimeRange,
-} from '../../state_machines/data_access_state_machine';
+} from '../../state_machines/entries_state_machine';
 import { getPositionFromMsEpoch } from '../../utils/cursor';
 
 export function LogExplorerHistogram({

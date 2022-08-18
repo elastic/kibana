@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DataAccessService } from './state_machine';
+import { DataAccessService } from '../state_machine';
 
 export const selectIsLoading = (state: DataAccessService['state']) =>
   selectIsReloading(state) || selectIsUpdating(state);

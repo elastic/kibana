@@ -11,7 +11,7 @@ import { useSelector } from '@xstate/react';
 import { MutableRefObject, useCallback } from 'react';
 import { useStateMachineContext } from '../../hooks/query_data/use_state_machine';
 import { useThrottled } from '../../hooks/use_throttled';
-import { memoizedSelectRows } from '../../state_machines/data_access_state_machine';
+import { memoizedSelectRows } from '../../state_machines/entries_state_machine';
 
 type GridOnItemsRenderedProps = Parameters<
   NonNullable<NonNullable<EuiDataGridProps['virtualizationOptions']>['onItemsRendered']>

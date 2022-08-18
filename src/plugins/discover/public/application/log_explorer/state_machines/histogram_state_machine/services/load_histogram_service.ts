@@ -11,7 +11,7 @@ import { IEsSearchResponse, ISearchSource, QueryStart } from '@kbn/data-plugin/p
 import { DataView } from '@kbn/data-views-plugin/public';
 import { catchError, last, map, Observable, of } from 'rxjs';
 import { LogExplorerContext, LogExplorerEvent } from './types';
-import { fetchHistogram, FetchHistogramParameters } from '../../queries/fetch_histogram';
+import { fetchHistogram, FetchHistogramParameters } from '../../../queries/fetch_histogram';
 
 export type LoadHistogramEvent =
   | {

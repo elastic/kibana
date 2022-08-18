@@ -7,8 +7,8 @@
  */
 
 import memoizeOne from 'memoize-one';
-import { LogExplorerChunk } from '../../types';
-import { DataAccessService } from './state_machine';
+import { LogExplorerChunk } from '../types';
+import { DataAccessService } from '../state_machine';
 
 export type FieldCounts = Record<string, number>;
 

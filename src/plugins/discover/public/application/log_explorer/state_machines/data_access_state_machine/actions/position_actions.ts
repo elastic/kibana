@@ -6,6 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { DataAccessService } from './state_machine';
+import { assign } from 'xstate';
+import { LogExplorerContext, LogExplorerEvent } from '../types';
 
-export const selectTimeRange = (state: DataAccessService['state']) => state.context.timeRange;
+export const updatePosition = assign((context: LogExplorerContext, event: LogExplorerEvent) => {
+  if (event.type !== 'positionChanged') {
+    return context;
+  }
+
+  const { position } = event;
+
+  return {
+    ...context,
+    position,
+  };
+});

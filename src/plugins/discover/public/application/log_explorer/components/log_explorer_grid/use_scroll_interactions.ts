@@ -9,7 +9,7 @@
 import { EuiDataGridRefProps } from '@elastic/eui';
 import { MutableRefObject, useEffect } from 'react';
 import { useStateMachineContext } from '../../hooks/query_data/use_state_machine';
-import { memoizedSelectRows } from '../../state_machines/data_access_state_machine';
+import { memoizedSelectRows } from '../../state_machines/entries_state_machine';
 
 export const useScrollInteractions = ({
   imperativeGridRef,

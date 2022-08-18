@@ -13,8 +13,8 @@ import React, { useContext } from 'react';
 import { CELL_CLASS } from '../../../../components/discover_grid/get_render_cell_value';
 import { formatFieldValue } from '../../../../utils/format_value';
 import { useStateMachineContext } from '../../hooks/query_data/use_state_machine';
-import { memoizedSelectRows } from '../../state_machines/data_access_state_machine';
-import { selectDataView } from '../../state_machines/data_access_state_machine';
+import { memoizedSelectRows } from '../../state_machines/entries_state_machine';
+import { selectDataView } from '../../state_machines/entries_state_machine';
 
 export function LogExplorerCell({ rowIndex, columnId }: EuiDataGridCellValueElementProps) {
   const stateMachine = useStateMachineContext();

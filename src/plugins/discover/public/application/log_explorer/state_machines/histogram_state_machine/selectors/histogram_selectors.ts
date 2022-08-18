@@ -6,4 +6,11 @@
  * Side Public License, v 1.
  */
 
-export * from './entries_state_machine';
+import { LogExplorerHistogramData } from '../../types';
+import { DataAccessService } from '../entries_state_machine/state_machine';
+
+export const selectHistogramDataPoints = (
+  state: DataAccessService['state']
+): LogExplorerHistogramData => {
+  return state.context.histogram.data;
+};

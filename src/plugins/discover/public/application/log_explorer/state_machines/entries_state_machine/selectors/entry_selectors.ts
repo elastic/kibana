@@ -7,15 +7,15 @@
  */
 
 import memoizeOne from 'memoize-one';
-import { LogExplorerChunk, LogExplorerRow, Timestamp } from '../../types';
+import { LogExplorerChunk, LogExplorerRow, Timestamp } from '../../../types';
 import {
   getEndRowIndex,
   getEndRowTimestamp,
   getRowsFromChunk,
   getStartRowIndex,
   getStartRowTimestamp,
-} from '../../utils/row';
-import { DataAccessService } from './state_machine';
+} from '../../../utils/row';
+import { DataAccessService } from '../state_machine';
 import { selectIsReloading } from './status_selectors';
 
 export const selectRows = (

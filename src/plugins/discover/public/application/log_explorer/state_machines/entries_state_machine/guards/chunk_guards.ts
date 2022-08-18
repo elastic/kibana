@@ -8,8 +8,8 @@
 
 import moment from 'moment';
 import { ConditionPredicate } from 'xstate';
-import { getTimestampFromPosition } from '../../utils/cursor';
-import { getEndRowTimestamp, getStartRowTimestamp } from '../../utils/row';
+import { getTimestampFromPosition } from '../../../utils/cursor';
+import { getEndRowTimestamp, getStartRowTimestamp } from '../../../utils/row';
 import { LogExplorerContext, LogExplorerEvent } from './types';
 
 export const hasLoadedTopChunk: ConditionPredicate<LogExplorerContext, LogExplorerEvent> = (

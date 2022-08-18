@@ -14,11 +14,11 @@ import { assign } from 'xstate';
 import {
   fetchEntriesBefore,
   FetchEntriesBeforeParameters,
-} from '../../queries/fetch_entries_before';
-import { LogExplorerChunk, LogExplorerEntry } from '../../types';
-import { getPositionFromTimestamp, getPredecessorPosition } from '../../utils/cursor';
-import { getEntriesFromChunk, getEntryFromHit, countAddedEntries } from '../../utils/entry';
-import { getEndRowIndex, getStartRowIndex } from '../../utils/row';
+} from '../../../queries/fetch_entries_before';
+import { LogExplorerChunk, LogExplorerEntry } from '../../../types';
+import { getPositionFromTimestamp, getPredecessorPosition } from '../../../utils/cursor';
+import { getEntriesFromChunk, getEntryFromHit, countAddedEntries } from '../../../utils/entry';
+import { getEndRowIndex, getStartRowIndex } from '../../../utils/row';
 import { LogExplorerContext, LogExplorerEvent } from './types';
 
 export type LoadTailParameters = FetchEntriesBeforeParameters;

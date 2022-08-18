@@ -6,4 +6,6 @@
  * Side Public License, v 1.
  */
 
-export * from './entries_state_machine';
+import { DataAccessService } from '../../entries_state_machine/state_machine';
+
+export const selectDataView = (state: DataAccessService['state']) => state.context.dataView;

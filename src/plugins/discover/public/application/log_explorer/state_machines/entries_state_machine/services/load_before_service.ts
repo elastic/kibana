@@ -10,34 +10,37 @@ import { IEsSearchResponse, ISearchSource, QueryStart } from '@kbn/data-plugin/p
 import { DataView } from '@kbn/data-views-plugin/public';
 import { catchError, last, map, Observable, of, throwError } from 'rxjs';
 import { assign } from 'xstate';
-import { fetchEntriesAfter, FetchEntriesAfterParameters } from '../../queries/fetch_entries_after';
-import { LogExplorerChunk } from '../../types';
+import {
+  fetchEntriesBefore,
+  FetchEntriesBeforeParameters,
+} from '../../../queries/fetch_entries_before';
+import { LogExplorerChunk } from '../../../types';
 import {
   getCursorFromHitSort,
   getPositionFromCursor,
   getPositionFromTimestamp,
-  getSuccessorPosition,
-} from '../../utils/cursor';
-import { getEntryFromHit } from '../../utils/entry';
+  getPredecessorPosition,
+} from '../../../utils/cursor';
+import { getEntryFromHit } from '../../../utils/entry';
 import { LogExplorerContext, LogExplorerEvent } from './types';
 
-export type LoadAfterParameters = FetchEntriesAfterParameters & {
-  bottomStartRowIndex: number;
+export type LoadBeforeParameters = FetchEntriesBeforeParameters & {
+  topEndRowIndex: number;
 };
 
-export type LoadAfterEvent =
+export type LoadBeforeEvent =
   | {
-      type: 'loadAfterSucceeded';
-      requestParameters: LoadAfterParameters;
+      type: 'loadBeforeSucceeded';
+      requestParameters: LoadBeforeParameters;
       response: IEsSearchResponse;
     }
   | {
-      type: 'loadAfterFailed';
-      requestParameters: LoadAfterParameters;
+      type: 'loadBeforeFailed';
+      requestParameters: LoadBeforeParameters;
       error: unknown;
     };
 
-export const loadAfter = ({
+export const loadBefore = ({
   dataView,
   query: queryService,
   searchSource,
@@ -46,29 +49,33 @@ export const loadAfter = ({
   query: QueryStart;
   searchSource: ISearchSource;
 }) => {
-  const boundFetchEntriesAfter = fetchEntriesAfter({ dataView, query: queryService, searchSource });
+  const boundFetchEntriesBefore = fetchEntriesBefore({
+    dataView,
+    query: queryService,
+    searchSource,
+  });
 
-  return (context: LogExplorerContext): Observable<LoadAfterEvent> => {
+  return (context: LogExplorerContext): Observable<LoadBeforeEvent> => {
     const {
-      bottomChunk,
       configuration: { chunkSize },
       filters,
       query,
       timeRange,
+      topChunk,
     } = context;
 
-    if (bottomChunk.status !== 'loading-bottom' && bottomChunk.status !== 'loaded') {
+    if (topChunk.status !== 'loading-top' && topChunk.status !== 'loaded') {
       return throwError(
         () =>
           new Error(
-            `Expected bottom chunk to have status "loading-bottom" or "loaded", but found "${bottomChunk.status}"`
+            `Expected top chunk to have status "loading-top" or "loaded, but found "${topChunk.status}"`
           )
       );
     }
 
-    const fetchAfterRequestParamters: FetchEntriesAfterParameters = {
+    const fetchBeforeRequestParamters: FetchEntriesBeforeParameters = {
       chunkSize,
-      afterStartPosition: bottomChunk.startPosition,
+      beforeEndPosition: topChunk.endPosition,
       sortCriteria: [
         // TODO: don't hard-code this
         [dataView.timeFieldName!, 'asc'],
@@ -79,23 +86,23 @@ export const loadAfter = ({
       query,
     };
 
-    const eventRequestParameters: LoadAfterParameters = {
-      ...fetchAfterRequestParamters,
-      bottomStartRowIndex: bottomChunk.startRowIndex,
+    const eventRequestParameters: LoadBeforeParameters = {
+      ...fetchBeforeRequestParamters,
+      topEndRowIndex: topChunk.endRowIndex,
     };
 
-    return boundFetchEntriesAfter(fetchAfterRequestParamters).pipe(
+    return boundFetchEntriesBefore(fetchBeforeRequestParamters).pipe(
       last(),
       map((response) => {
         return {
-          type: 'loadAfterSucceeded' as const,
+          type: 'loadBeforeSucceeded' as const,
           requestParameters: eventRequestParameters,
           response,
         };
       }),
       catchError((err) => {
         return of({
-          type: 'loadAfterFailed' as const,
+          type: 'loadBeforeFailed' as const,
           requestParameters: eventRequestParameters,
           error: err,
         });
@@ -104,57 +111,57 @@ export const loadAfter = ({
   };
 };
 
-export const updateChunksFromLoadAfter = assign(
+export const updateChunksFromLoadBefore = assign(
   (context: LogExplorerContext, event: LogExplorerEvent) => {
-    if (event.type !== 'loadAfterSucceeded') {
+    if (event.type !== 'loadBeforeSucceeded') {
       return context;
     }
 
-    const bottomChunk = createBottomChunkFromResponse(event.requestParameters, event.response);
+    const topChunk = createTopChunkFromResponse(event.requestParameters, event.response);
 
     return {
       ...context,
-      bottomChunk,
+      topChunk,
     };
   }
 );
 
-export const createBottomChunkFromResponse = (
-  requestParameters: LoadAfterParameters,
+export const createTopChunkFromResponse = (
+  requestParameters: LoadBeforeParameters,
   response: IEsSearchResponse
 ): LogExplorerChunk => {
   const {
-    bottomStartRowIndex,
     chunkSize,
-    afterStartPosition: startPosition,
+    beforeEndPosition: endPosition,
     timeRange,
+    topEndRowIndex,
   } = requestParameters;
-  const hits = response.rawResponse.hits.hits;
+  const hits = [...response.rawResponse.hits.hits].reverse();
 
   if (hits.length <= 0) {
     return {
       status: 'empty',
-      startPosition,
-      endPosition: getPositionFromTimestamp(timeRange.to),
+      startPosition: getPositionFromTimestamp(timeRange.from),
+      endPosition,
       chunkSize,
-      rowIndex: bottomStartRowIndex,
+      rowIndex: topEndRowIndex,
     };
   }
 
-  const lastHit = hits[hits.length - 1];
+  const firstHit = hits[0];
 
   return {
     status: 'loaded',
-    startPosition,
-    endPosition: getPositionFromCursor(getCursorFromHitSort(lastHit.sort)),
+    startPosition: getPositionFromCursor(getCursorFromHitSort(firstHit.sort)),
+    endPosition,
     entries: hits.map(getEntryFromHit),
     chunkSize,
-    startRowIndex: bottomStartRowIndex,
-    endRowIndex: bottomStartRowIndex + (hits.length - 1),
+    startRowIndex: topEndRowIndex - (hits.length - 1),
+    endRowIndex: topEndRowIndex,
   };
 };
 
-export const appendNewBottomChunk = assign(
+export const prependNewTopChunk = assign(
   (context: LogExplorerContext, _event: LogExplorerEvent) => {
     const { topChunk, bottomChunk } = context;
 
@@ -164,18 +171,18 @@ export const appendNewBottomChunk = assign(
       );
     }
 
-    const newBottomChunk: LogExplorerChunk = {
-      status: 'loading-bottom',
+    const newTopChunk: LogExplorerChunk = {
+      status: 'loading-top',
       chunkSize: context.configuration.chunkSize,
-      startPosition: getSuccessorPosition(bottomChunk.endPosition),
-      startRowIndex: bottomChunk.endRowIndex + 1,
-      endRowIndex: bottomChunk.endRowIndex + 1,
+      endPosition: getPredecessorPosition(topChunk.startPosition),
+      startRowIndex: topChunk.startRowIndex - 1,
+      endRowIndex: topChunk.startRowIndex - 1,
     };
 
     return {
       ...context,
-      topChunk: bottomChunk,
-      bottomChunk: newBottomChunk,
+      topChunk: newTopChunk,
+      bottomChunk: topChunk,
     };
   }
 );

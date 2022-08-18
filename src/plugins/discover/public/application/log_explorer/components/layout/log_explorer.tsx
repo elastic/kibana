@@ -28,7 +28,7 @@ import {
   DataAccessService,
   selectIsLoading,
   selectIsReloading,
-} from '../../state_machines/data_access_state_machine';
+} from '../../state_machines/entries_state_machine';
 import { LogExplorerGrid } from '../log_explorer_grid';
 
 const DataGridMemoized = React.memo(DiscoverGrid);
