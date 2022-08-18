@@ -601,6 +601,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
                     <PackQueriesStatusTable
                       actionId={actionId}
                       agentIds={agentIds}
+                      // @ts-expect-error version string !+ string[]
                       data={liveQueryDetails?.queries ?? selectedPackData?.attributes?.queries}
                       addToTimeline={addToTimeline}
                     />
