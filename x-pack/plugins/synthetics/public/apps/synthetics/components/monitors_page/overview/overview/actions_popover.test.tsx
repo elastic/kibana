@@ -13,20 +13,26 @@ import * as editMonitorLocatorModule from '../../hooks/use_edit_monitor_locator'
 import * as monitorDetailLocatorModule from '../../hooks/use_monitor_detail_locator';
 import * as monitorEnableHandlerModule from '../../../../hooks/use_monitor_enable_handler';
 import { FETCH_STATUS } from '@kbn/observability-plugin/public';
+import { MonitorOverviewItem } from '../types';
 
 describe('ActionsPopover', () => {
+  let testMonitor: MonitorOverviewItem;
+
+  beforeEach(() => {
+    testMonitor = {
+      location: {
+        id: 'us_central',
+        isServiceManaged: true,
+      },
+      isEnabled: true,
+      name: 'Monitor 1',
+      id: 'somelongstring',
+    };
+  });
+
   afterEach(() => {
     jest.restoreAllMocks();
   });
-  const testMonitor = {
-    location: {
-      id: 'us_central',
-      isServiceManaged: true,
-    },
-    isEnabled: true,
-    name: 'Monitor 1',
-    id: 'somelongstring',
-  };
 
   it('renders the popover button', () => {
     const { queryByText, getByLabelText } = render(
