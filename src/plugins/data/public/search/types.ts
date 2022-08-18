@@ -9,11 +9,11 @@
 import type { PackageInfo } from '@kbn/core/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { DataViewsContract } from '@kbn/data-views-plugin/common';
+import { estypes } from '@elastic/elasticsearch';
 import { SearchUsageCollector } from './collectors';
 import { AggsSetup, AggsSetupDependencies, AggsStartDependencies, AggsStart } from './aggs';
 import { IInspectorInfo, ISearchGeneric, ISearchStartSearchSource } from '../../common/search';
 import { ISessionsClient, ISessionService } from './session';
-import { estypes } from '@elastic/elasticsearch';
 
 export type { ISearchStartSearchSource, SearchUsageCollector };
 
