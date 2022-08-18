@@ -18246,7 +18246,6 @@
     "xpack.maps.source.esSearch.convertToGeoJsonErrorMsg": "検索への応答を geoJson 機能コレクションに変換できません。エラー：{errorMsg}",
     "xpack.maps.source.esSearch.limitScalingLabel": "結果を{maxResultWindow}に限定",
     "xpack.maps.source.esSearch.loadTooltipPropertiesErrorMsg": "ドキュメントが見つかりません。_id：{docId}",
-    "xpack.maps.source.esSearch.mvtDisableReason": "ベクトルタイルAPIは、ランタイム{type}フィールドをサポートしません",
     "xpack.maps.source.esSearch.mvtScalingJoinMsg": "ベクトルタイルは1つの用語結合をサポートします。レイヤーには{numberOfJoins}個の用語結合があります。ベクトルタイルに切り替えると、最初の用語結合が保持され、すべての他の用語結合がレイヤー構成から削除されます。",
     "xpack.maps.source.esSource.requestFailedErrorMessage": "Elasticsearch 検索リクエストに失敗。エラー：{message}",
     "xpack.maps.source.esSource.stylePropsMetaRequestName": "{layerName} - メタデータ",
